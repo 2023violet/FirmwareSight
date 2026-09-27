@@ -60,6 +60,12 @@ pub struct Analysis {
     pub map_evidence: Option<MapEvidence>,
     pub capabilities: Capabilities,
     pub memory: MemoryFootprint,
+    /// Wall-clock stage timings for `P0_PERFORMANCE_REPORT.md`.
+    ///
+    /// They live here and never in the DTO: a benchmark number must not leak into the
+    /// deterministic payload, whose whole value is being reproducible.
+    pub parse_ms: u128,
+    pub normalize_ms: u128,
 }
 
 impl Analysis {
@@ -90,6 +96,7 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
         });
     }
 
+    let parse_start = std::time::Instant::now();
     let mut facts = elf::parse(&input.bytes, &input.sha256)?;
 
     let mut map_input = None;
@@ -106,7 +113,9 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
         map_input = Some(candidate);
         map_evidence = Some(evidence);
     }
+    let parse_ms = parse_start.elapsed().as_millis();
 
+    let normalize_start = std::time::Instant::now();
     let layout = map_evidence.as_ref().map_or_else(
         firmwaresight_core::domain::memory::MemoryLayout::empty,
         MapEvidence::layout,
@@ -154,6 +163,8 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
         map_evidence,
         capabilities,
         memory,
+        parse_ms,
+        normalize_ms: normalize_start.elapsed().as_millis(),
     })
 }
 

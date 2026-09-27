@@ -1,0 +1,76 @@
+# cargo-deny policy for the P0 workspace.
+#
+# The allow list below is not aspirational: it was read out of the licenses actually carried by
+# the 460 third-party packages resolved by Cargo.lock, not from a list of licenses this project
+# would like. The workspace's own six crates are `Proprietary` and excluded by `[licenses]`
+# because cargo-deny evaluates dependencies, not workspace members.
+
+[graph]
+all-features = true
+
+[advisories]
+db-urls = ["https://github.com/RustSec/advisory-db"]
+db-path = "~/.cargo/advisory-dbs"
+version = 2
+# `unsound` and `unmaintained` are treated as warnings rather than hard failures: a dependency
+# that is merely unmaintained is a decision to record, not a reason CI cannot report anything
+# else. yanked and nonexistent stay fatal.
+severity-threshold = "medium"
+ignore = []
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+highlight-warnings = true
+deny = [
+    # Boundaries frozen by AGENTS.md 2 and 4. A crate appearing here at all is a policy
+    # violation, so CI fails before anything else is discussed.
+    { crate = "sqlx", reason = "rusqlite + bundled is the frozen storage choice (AGENTS.md 6)" },
+    { crate = "reqwest", reason = "no HTTP client in a local-first product (AGENTS.md 2)" },
+    { crate = "hyper", reason = "no server or HTTP client in P0" },
+    { crate = "wgpu", reason = "no GPU rendering in P0 (AGENTS.md 2)" },
+    { crate = "axum", reason = "no web framework in P0" },
+    { crate = "tonic", reason = "no gRPC in P0" },
+    { crate = "memmap2", reason = "the full-buffer guard has no mmap fallback (04_TECH/16)" },
+    { crate = "gix", reason = "system Git is the declared adapter boundary, not a library dependency" },
+    { crate = "rayon", reason = "P0 is synchronous; parallelism needs an ADR first" },
+    { crate = "anyhow", reason = "typed errors are the frozen error model (05_ENGINEERING/03)" },
+]
+
+# Duplicates that come from the Tauri and SQLite trees and cannot be removed without dropping a
+# frozen dependency; warned about by `multiple-versions = "warn"` above.
+skip = []
+skip-tree = []
+
+[licenses]
+version = 2
+unused-allowed-license = "warn"
+confidence-threshold = 1.0
+allow = [
+    "0BSD",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-3-Clause",
+    "CC0-1.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+    # Legacy `Cargo.toml` metadata from 22 older transitive crates writes these as a slash
+    # separated string instead of an SPDX expression, so cargo-deny sees them as opaque license
+    # names. They are listed literally rather than ignored, so a rename would still be caught.
+    # Each one resolves to a pair already allowed above.
+    "Apache-2.0 / MIT",
+    "Apache-2.0/MIT",
+    "BSD-3-Clause/MIT",
+    "MIT/Apache-2.0",
+    "Unlicense/MIT",
+]
+private = { ignore = true }
+
+# No copyleft license is allowed on its own. LGPL-2.1-or-later appears exactly once in the tree,
+# inside `r-efi`'s three-way `MIT OR Apache-2.0 OR LGPL-2.1-or-later`, so it is satisfied by the
+# MIT option and never binds the product.

@@ -130,3 +130,23 @@ fn without_region_evidence_the_same_source_is_reported_as_weaker_evidence() {
     assert_eq!(with_map["memory"]["layoutSource"], "map");
     assert_eq!(without_map["memory"]["layoutSource"], "none");
 }
+
+#[test]
+fn memory_accounting_golden_passes_on_both_fixtures() {
+    // The focused memory golden is the gate item "memory accounting golden passes". It is a
+    // projection of the same payload the CLI golden asserts, kept separate so a reviewer can see
+    // the two budgets and their evidence basis without reading a whole artifact dump.
+    for (fixture, elf, map) in [
+        ("p0-basic", "fixtures/elf/p0-basic/firmware.elf", None),
+        (
+            "p0-dual-region",
+            "fixtures/elf/p0-dual-region/firmware.elf",
+            Some("fixtures/elf/p0-dual-region/firmware.map"),
+        ),
+    ] {
+        let actual = analyze(elf, map);
+        let document: serde_json::Value = serde_json::from_str(&actual).expect("output is JSON");
+        let memory = serde_json::to_string_pretty(&document["memory"]).expect("memory serializes");
+        check(&format!("golden/core/{fixture}-memory.json"), &memory);
+    }
+}

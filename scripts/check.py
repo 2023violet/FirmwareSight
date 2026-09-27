@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""Run the whole P0 verification gate, locally and in CI, from one definition.
+
+CI and a developer machine must not disagree about what "green" means, so the workflow calls
+this script instead of carrying its own copy of the command list.
+
+Usage:
+    python scripts/check.py              # everything
+    python scripts/check.py --only rust  # one group: rust | frontend | drift | deny
+    python scripts/check.py --list
+
+Exit code is non-zero on the first failing step; every step's command line is printed before it
+runs so a failure can be reproduced by hand.
+"""
+
+from __future__ import annotations
+
+import argparse
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def resolve(name: str) -> str:
+    """Find the real executable behind a command name.
+
+    Python's `subprocess` does not apply PATHEXT the way a shell does, so on Windows `cargo`
+    has to be resolved to `cargo.exe` (or the npm `.cmd` shims) before it can be run.
+    """
+    for candidate in (name, f"{name}.exe", f"{name}.cmd", f"{name}.bat"):
+        found = shutil.which(candidate)
+        if found is not None:
+            return found
+    return name
+
+
+def cargo() -> str:
+    """Cargo's launcher filename differs on Windows even inside the same shell."""
+    return resolve("cargo")
+
+
+def pnpm_command() -> list[str]:
+    """Corepack rather than an assumed global pnpm: the version pinned in package.json's
+    `packageManager` field is the one that wrote the lockfile."""
+    return [resolve("corepack"), "pnpm"]
+
+
+class Gate:
+    def __init__(self) -> None:
+        self.results: list[tuple[str, str, int]] = []
+
+    def run(self, group: str, name: str, argv: list[str], cwd: Path | None = None) -> bool:
+        printable = " ".join(argv)
+        print(f"\n=== [{group}] {name}\n$ {printable}", flush=True)
+        completed = subprocess.run(argv, cwd=cwd or ROOT, check=False)
+        self.results.append((group, name, completed.returncode))
+        if completed.returncode != 0:
+            print(f"FAILED: {name} (exit {completed.returncode})", file=sys.stderr, flush=True)
+        return completed.returncode == 0
+
+
+def rust_steps(gate: Gate) -> None:
+    exe = cargo()
+    steps = (
+        ("fmt", [exe, "fmt", "--all", "--", "--check"]),
+        ("clippy", [exe, "clippy", "--workspace", "--all-targets", "--all-features", "--", "-D", "warnings"]),
+        ("test", [exe, "test", "--workspace"]),
+    )
+    for name, argv in steps:
+        if not gate.run("rust", name, argv):
+            return
+
+
+def drift_steps(gate: Gate) -> None:
+    py = sys.executable
+    checks = (
+        ("design tokens", [py, "scripts/generate_design_tokens.py", "--check"]),
+        ("desktop icons", [py, "scripts/gen_desktop_icons.py", "--check"]),
+    )
+    for name, argv in checks:
+        if not gate.run("drift", name, argv):
+            return
+
+    # ts-rs writes the bindings during `cargo test`, so regeneration is the check: any diff after
+    # running it means the committed `.ts` files no longer match the Rust DTOs.
+    if not gate.run("drift", "ipc bindings", [cargo(), "test", "-p", "firmwaresight-desktop"]):
+        return
+    if not gate.run(
+        "drift",
+        "ipc bindings unchanged",
+        [resolve("git"), "diff", "--exit-code", "--", "apps/desktop/ui/src/ipc/generated"],
+    ):
+        return
+    gate.run("drift", "goldens unchanged", [resolve("git"), "diff", "--exit-code", "--", "golden"])
+
+
+def frontend_steps(gate: Gate) -> None:
+    ui = ROOT / "apps" / "desktop" / "ui"
+    pnpm = pnpm_command()
+    for name in ("install", "typecheck", "lint", "test", "build"):
+        argv = pnpm + (["install", "--frozen-lockfile"] if name == "install" else [name])
+        if not gate.run("frontend", name, argv, cwd=ui):
+            return
+
+
+def deny_steps(gate: Gate) -> None:
+    # cargo-deny is an optional local tool. A machine without it must not report a license
+    # failure it never checked, so the step is recorded as SKIPPED rather than passed.
+    probe = subprocess.run([cargo(), "deny", "--version"], cwd=ROOT, capture_output=True, check=False)
+    if probe.returncode != 0:
+        print(
+            "\n=== [deny] cargo-deny\n"
+            "SKIPPED: `cargo deny` is not installed on this machine. CI installs it, so the\n"
+            "         license and ban result comes from the CI run rather than from here.",
+            flush=True,
+        )
+        gate.results.append(("deny", "cargo-deny (skipped)", 0))
+        return
+    gate.run("deny", "cargo-deny", [cargo(), "deny", "check", "licenses", "bans", "sources", "advisories"])
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only",
+        choices=("rust", "frontend", "drift", "deny"),
+        help="run a single group instead of the whole gate",
+    )
+    parser.add_argument("--list", action="store_true", help="print the groups and exit")
+    args = parser.parse_args(argv[1:])
+
+    if args.list:
+        print("rust\nfrontend\ndrift\ndeny")
+        return 0
+
+    gate = Gate()
+    groups = [args.only] if args.only else ["rust", "frontend", "drift", "deny"]
+    dispatch = {
+        "rust": rust_steps,
+        "frontend": frontend_steps,
+        "drift": drift_steps,
+        "deny": deny_steps,
+    }
+    for group in groups:
+        dispatch[group](gate)
+
+    print("\n=== summary ===")
+    for group, name, code in gate.results:
+        mark = "PASS" if code == 0 else f"FAIL({code})"
+        print(f"{mark:<10} {group}/{name}")
+    failed = [r for r in gate.results if r[2] != 0]
+    print(f"\n{len(gate.results) - len(failed)}/{len(gate.results)} steps passed")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))

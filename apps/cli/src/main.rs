@@ -116,8 +116,11 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
                 };
                 eprintln!("diagnostics: map {map_state}");
                 eprintln!(
-                    "diagnostics: hash {} ms, read {} ms, operation {operation_id}",
-                    analysis.input.hash_ms, analysis.input.read_ms
+                    "diagnostics: hash {} ms, read {} ms, parse {} ms, normalize {} ms, operation {operation_id}",
+                    analysis.input.hash_ms,
+                    analysis.input.read_ms,
+                    analysis.parse_ms,
+                    analysis.normalize_ms
                 );
             }
             ExitCode::from(EXIT_OK)

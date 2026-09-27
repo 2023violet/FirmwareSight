@@ -1,0 +1,12 @@
+# Python packages used by the repository scripts. Pinned exactly, because CI installs these and a
+# drifting generator must not be able to rewrite a committed file.
+#
+#   generate_design_tokens.py - standard library only
+#   update_goldens.py         - standard library only
+#   gen_p0_workload.py        - standard library only
+#   measure_workloads.py      - standard library only
+#   check.py                  - standard library only
+#   gen_desktop_icons.py      - Pillow (writes the .ico and .png the Tauri build requires)
+#   gen_p0_fixtures.py        - requires arm-none-eabi-gcc; run by hand when fixtures change,
+#                               never in CI
+Pillow==12.3.0

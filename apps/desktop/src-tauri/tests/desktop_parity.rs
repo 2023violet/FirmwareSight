@@ -323,3 +323,31 @@ fn a_missing_analyze_still_produces_a_typed_error_not_a_panic() {
         }
     }
 }
+
+#[test]
+fn analysis_runs_entirely_off_the_calling_thread() {
+    // The command's only added behavior is the hop onto a blocking thread. That hop is only
+    // possible because the session can be moved there, so this is the compile-time and
+    // runtime evidence behind "the WebView event loop is never held by a parse".
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<Session>();
+
+    let db = TempDb::new("thread");
+    let path = db.path().to_path_buf();
+    let worker = std::thread::spawn(move || {
+        let session = Session::open(FixtureCatalog::from_environment(), &path)
+            .expect("a session opens on a worker thread");
+        session
+            .analyze_and_store(FixtureKey::P0DualRegion, "op-thread")
+            .expect("analysis completes off the main thread")
+    });
+
+    let summary = worker.join().expect("the worker thread must not panic");
+    let cli = golden("golden/cli/p0-dual-region-analyze.json");
+    assert_eq!(
+        summary.artifact.sha256,
+        cli["artifact"]["sha256"].as_str().expect("sha"),
+        "a summary built on another thread must carry the identical facts"
+    );
+    assert_eq!(summary.section_count, 17);
+}
