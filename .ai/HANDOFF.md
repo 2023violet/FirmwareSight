@@ -5,14 +5,15 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-27"
+last_updated: "2026-09-28"
 ---
 
-# Handoff — FirmwareSight v0.5.1 / P0 in progress
+# Handoff — FirmwareSight v0.5.1 / P0 executed, CONDITIONAL_PASS (LOCAL)
 
 ## Purpose
 
-Execute the P0 Technical Vertical Slice to its stop condition, then stop.
+Execute the P0 Technical Vertical Slice to its stop condition, then stop. The slice has reached that
+stop condition; nothing further in P0 is open except the two items listed below.
 
 ## Read first
 
@@ -35,7 +36,23 @@ V0 status summary only (do not re-run V0 from this handoff):
 
 ## Current state
 
-P0 final status: not yet determined.
+P0 final status: **`EXECUTED — CONDITIONAL_PASS (LOCAL)`**. Baseline stays at `0.5.1`; `v0.6.0` is
+reserved for an unconditional `PASS`, and `P0_EXIT_CHECKLIST.md` names the conditions.
+
+What is proven locally: 102 Rust tests and 18 UI tests, a single 14-step gate
+(`python scripts/check.py`) that CI calls unchanged, real ARM ELF/MAP fixtures with recorded
+provenance, deterministic CLI JSON, memory accounting reproduced by hand from `readelf`, a typed
+ts-rs IPC boundary, SQLite migrations with transactional import, a 512 MiB guard measured from both
+sides of the boundary, and Core/CLI/Desktop parity on the same bytes.
+
+What is not proven, and why nobody here could prove it:
+
+| Open | Closes when |
+| --- | --- |
+| CI has never run | someone with push authorization runs `.github/workflows/p0-check.yml` |
+| `cargo deny` never ran | the same run, or `cargo install cargo-deny@0.20.2 --locked` locally |
+| Peak RSS not measured | a measurement tool is authorized; see `P0_PERFORMANCE_REPORT.md` |
+| The window was never opened | a human runs the desktop app on a real display |
 
 V0:
 
@@ -59,3 +76,6 @@ real participants. Deferral is not completion.
 - Reports cite real commands and real output. Unmeasured stays `NOT MEASURED` with a reason.
 - Do not weaken or delete a test to reach green.
 - Do not edit V0 evidence, and do not turn the V0 gate recommendation into a PASS.
+- Measure before describing a build. Two claims in this pack were false until re-measured: the
+  fixture `fixture.toml` linker invocation, and the desktop binary "embedding the built UI"
+  (it did not, without `custom-protocol`). Write what the command printed, not what it should print.

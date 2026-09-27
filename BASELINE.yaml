@@ -5,8 +5,8 @@ product:
   tagline: "Know exactly what ships."
   cli: fwsight
   baseline_version: 0.5.1
-  date: 2026-09-27
-  status: P0_EXECUTION_IN_PROGRESS_V0_DEFERRED_UNVALIDATED
+  date: 2026-09-28
+  status: P0_EXECUTED_CONDITIONAL_PASS_LOCAL_V0_DEFERRED_UNVALIDATED
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_DEFERRED_P0_ACTIVE
+  current_gate: G0_PASS_V0_DEFERRED_P0_CONDITIONAL_PASS_LOCAL
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
     - P0_technical_vertical_slice
@@ -93,7 +93,10 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-active_task: P0_TECHNICAL_VERTICAL_SLICE
+# Set to NONE when the P0 track closed on 2026-09-28. The slice reached its stop condition; the
+# two open items are external to this environment (see p0_execution.open_conditions), and P1 needs
+# its own authorization prompt. AGENTS.md 1: with no active task, do not invent product work.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -123,9 +126,25 @@ p0_execution:
   provenance: P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md
   start_local_head: e086e9880e00900e305a3cd88b4d899f73aa5711
   start_remote_head: e086e9880e00900e305a3cd88b4d899f73aa5711
-  status: IN_PROGRESS_FINAL_STATUS_UNDETERMINED
+  status: EXECUTED_CONDITIONAL_PASS_LOCAL
+  closed: 2026-09-28
   allowed_final_statuses: [PASS, CONDITIONAL_PASS, FAIL, BLOCKED]
   library_crate_budget: 4
+  library_crates_built: 4
+  gate_command: python scripts/check.py
+  gate_result: 14/14 steps passed locally, one of them an explicit cargo-deny SKIPPED
+  tests: { rust: 102, ui: 18 }
+  # CONDITIONAL, not PASS: these are outside what this environment can observe. They are not
+  # unfinished code, and closing them is an authorization question, not an engineering one.
+  open_conditions:
+    - CI has never run; .github/workflows/p0-check.yml has no execution history
+    - cargo deny has never run; the tool is not installed and installing it was not authorized
+    - peak RSS is NOT MEASURED, reason recorded in P0_PERFORMANCE_REPORT.md
+    - the desktop window was never opened on a real display
+  push_authorized: false
+  remote_state_changed: false
+  baseline_version_after_p0: 0.5.1
   target_baseline_on_pass: 0.6.0
+  v0_6_0_released: false
   p1_authorized: false
   g1_claimed_by_p0_pass: false

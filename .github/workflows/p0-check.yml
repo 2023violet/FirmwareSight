@@ -30,6 +30,14 @@ jobs:
           python-version: "3.13"
       # rust-toolchain.toml pins 1.98.1 with rustfmt and clippy, so no toolchain step is needed
       # here; rustup honours the file before the first cargo invocation.
+      # Node is required because `clippy --all-features` compiles the desktop crate in its
+      # shipping configuration, whose codegen embeds apps/desktop/ui/dist/ - a directory a fresh
+      # checkout does not have. scripts/check.py builds it when it is missing.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Enable the pinned pnpm
+        run: corepack enable
       - name: Verification gate (fmt, clippy, test)
         run: python scripts/check.py --only rust
 

@@ -50,11 +50,23 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 - The app analyzes two closed fixture keys. There is no file picker: `analyze(path)` would be
   "read arbitrary file" with extra steps, so the user-authorized selection path arrives with a
   dialog capability and its own ADR.
-- **The windowed application was never launched.** The release binary builds and links, the UI
-  production build succeeds and the rendering logic is tested under jsdom, but nobody opened the
-  actual WebView on a desktop. Layout on a real display, WebView2 availability and CSP behaviour
-  in the shipped shell are therefore unverified. Start it with
-  `cargo run --release -p firmwaresight-desktop` after `pnpm -C apps/desktop/ui build`.
+- **The windowed application was never launched.** In the shipping configuration
+  (`cargo build --release -p firmwaresight-desktop --features custom-protocol`) the binary is
+  10,398,208 bytes and does embed the built UI, but nobody opened the actual WebView on a desktop.
+  Layout on a real display, WebView2 availability and CSP behaviour in the shipped shell are
+  therefore unverified. Without `custom-protocol` the same command produces a dev-mode binary
+  (10,330,112 bytes) that expects `pnpm dev` to be serving the frontend; starting it alone would
+  show an empty window, which is why the start instruction below names the feature. Start it with
+  `pnpm -C apps/desktop/ui build` then
+  `cargo run --release -p firmwaresight-desktop --features custom-protocol`.
+- **`cargo` will not tell you the embedded frontend is stale.** `tauri-build` registers
+  `cargo:rerun-if-changed` for `dist/` only when that directory already exists at build time
+  (`tauri-build-2.7.0/src/codegen/context.rs:92-97`), and a missing `dist/` is not an error in the
+  default-feature build. Observed on this machine: after a release link made with `dist/` absent,
+  rebuilding the UI and re-running the same cargo command finished in 0.62s without recompiling -
+  a binary with no frontend, and no diagnostic. Only the `custom-protocol` link fails loudly, inside
+  the macro. P0 neither bundles nor launches anything, so nothing shipped is affected; whoever
+  packages the app must build the UI before the Rust link.
 - `style-src 'unsafe-inline'` is present in the CSP because Vite injects inline styles in dev mode.
 - The application-data database path is resolved from Tauri's platform directory; it has only been
   exercised on Windows.

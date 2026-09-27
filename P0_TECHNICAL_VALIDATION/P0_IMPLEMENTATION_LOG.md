@@ -245,3 +245,39 @@ it. Refactors that changed no boundary are not here.
 - **Test evidence.** `memory_accounting_golden_passes_on_both_fixtures` now consumes
   `golden/core/`, and `scripts/check.py --only drift` fails on any further divergence.
 - **Note.** This is the only place P0 removed a file; it is recoverable from git history.
+
+---
+
+## 18. The gate lints the configuration that ships
+
+- **Problem.** The desktop crate had no `custom-protocol` feature, so `cargo build --release`
+  produced a dev-mode binary. `tauri`'s build script sets `dev = !custom_protocol`
+  (`tauri-2.12.0/build.rs:253`), and dev-mode codegen embeds no frontend
+  (`tauri-codegen-2.7.0/src/context.rs:178`). Measured: the release binary was 10,330,112 bytes and
+  did not contain the built asset name `index-BdwhVhyx.js`, although this pack had described it as
+  "the built UI embedded".
+- **Existing authority.** The upstream Tauri 2 template declares exactly this feature, and
+  `tauri build` passes it. Nothing new was invented; the template line was simply missing here.
+- **Chosen implementation.** `[features] custom-protocol = ["tauri/custom-protocol"]` in
+  `apps/desktop/src-tauri/Cargo.toml`. The gate's `clippy --all-targets --all-features` now compiles
+  the shipping configuration, which is also the configuration that requires `apps/desktop/ui/dist/`
+  to exist - with `dist/` removed it fails inside the macro with `The `frontendDist` configuration is
+  set to "../ui/dist" but this path doesn't exist`. `scripts/check.py` therefore builds the UI when
+  `dist/index.html` is missing, and the CI `rust` job gained a Node step for that reason alone.
+- **Alternatives considered.** (a) Leave the feature out and keep the gate dist-free - rejected: the
+  gate would then never compile the configuration that ships, and the prompt's "minimal Tauri summary
+  builds" would describe a binary that cannot display without a dev server. (b) Drop `--all-features`
+  from clippy to avoid the dependency - rejected: that weakens a check to dodge a build-order fact.
+  (c) Commit `dist/` - rejected: it is generated output, and `pnpm build` already reproduces it
+  byte-for-byte (`diff -r` on two builds was empty).
+- **Scope impact.** None outward-facing; P0 still does not bundle or launch a window.
+- **Dependency impact.** Zero new crates: `custom-protocol` is a feature of the `tauri` dependency
+  already in the tree.
+- **Test evidence.** `cargo build --release -p firmwaresight-desktop --features custom-protocol` ->
+  10,398,208 bytes, contains `index-BdwhVhyx.js`; the same command without the feature ->
+  10,330,112 bytes, no such string. `python scripts/check.py --only rust` after `rm -rf
+  apps/desktop/ui/dist` -> `PASS rust/frontend assets (install)`, `PASS rust/frontend assets (build)`,
+  `PASS rust/fmt`, `PASS rust/clippy`, `PASS rust/test` (102 tests). When `dist/` exists the guard
+  records no steps, so the documented 14-step gate is unchanged on a warm tree.
+- **ADR required?** No - no boundary, dependency, schema or security surface changed. Recorded here
+  because it corrected a claim already written into this pack.

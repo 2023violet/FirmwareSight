@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-27"
+last_updated: "2026-09-28"
 ---
 
 # Decisions — v0.5.1
@@ -78,3 +78,41 @@ Observed environment facts that shaped the plan:
   ELF fixtures come from `arm-none-eabi-gcc` instead of a host build.
 - Installed pnpm is 11.21.0, below the baseline pnpm 12 line; corepack can resolve 12.7.0, so the
   baseline major line is kept rather than lowering it.
+
+---
+
+# P0 delivery record — added 2026-09-28, corrects one fact above
+
+Corrections to the start-of-track observations:
+
+- Corepack resolved **pnpm 12.6.0**, not 12.7.0. `apps/desktop/ui/package.json` now pins
+  `packageManager: "pnpm@12.6.0"`, and every gate step runs it through `corepack pnpm`, so the
+  lockfile is only ever resolved by the version that wrote it. The baseline's `pnpm 12` major line
+  still holds; the assumption that 12.7.0 was available was wrong and is corrected here rather than
+  silently rewritten above.
+
+Decisions taken while executing, none of which moved a frozen baseline:
+
+- `arm-none-eabi-gcc` supplies the ELF fixtures because the Windows host compiler emits PE/COFF. The
+  binaries are committed with provenance, and tests are hash-first, so no test needs the toolchain.
+- `firmwaresight-desktop` declares Tauri's template `custom-protocol` feature. Without it the
+  release binary embeds no frontend, and the gate's `clippy --all-features` was the only step that
+  made that visible. Recorded in `P0_IMPLEMENTATION_LOG.md` 18.
+- TypeScript is pinned to 6.0.3 because typescript-eslint requires `<6.1.0`; 7.0.2 was available and
+  deliberately not taken.
+- One golden file was deleted (`golden/reports/p0-basic-summary.json`) and one first-party unused
+  dependency set was removed. Both are in the implementation log.
+
+Final status and what it does not mean:
+
+- P0 closes as `EXECUTED — CONDITIONAL_PASS (LOCAL)`. The conditions are external to this
+  environment, not unfinished code: CI has never run and `cargo deny` has never run, both because
+  there is no push authorization and the tool was not installed here.
+- Baseline stays `0.5.1`. `v0.6.0` is reserved for an unconditional `PASS`, and `g1_claimed` stays
+  `false`; P0 passing alone would not open G1 while V0 is unvalidated (ADR-0020).
+- `sha256sum -c SHA256SUMS` fails on exactly six entries, all governance or execution records that
+  P0 was authorized to change (`.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`,
+  `.ai/HANDOFF.md`, `10_AUDIT/SOURCE_PROMPTS/README.md`, `BASELINE.yaml`). `SHA256SUMS` is left as
+  the v0.5.1 manifest; regenerating it would overwrite the frozen baseline's own integrity record,
+  which is not P0's to do.
+- P1 is not authorized and was not started.

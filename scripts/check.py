@@ -22,6 +22,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+UI = ROOT / "apps" / "desktop" / "ui"
+# Tauri's production codegen embeds this directory at compile time.
+UI_MARKER = UI / "dist" / "index.html"
 
 
 def resolve(name: str) -> str:
@@ -62,7 +65,33 @@ class Gate:
         return completed.returncode == 0
 
 
+def ensure_frontend_assets(gate: Gate) -> bool:
+    """The clippy step passes `--all-features`, which enables the desktop crate's
+    `custom-protocol` feature; that is the configuration that ships, and its codegen embeds
+    `apps/desktop/ui/dist/`. With the directory absent the build fails inside the macro:
+    `The `frontendDist` configuration is set to "../ui/dist" but this path doesn't exist`. `dist/`
+    is gitignored, so a fresh clone needs the UI built before that lint can run. Without
+    `custom-protocol` the same commands pass with no `dist/` at all, because tauri's dev-mode
+    codegen embeds nothing.
+    """
+    if UI_MARKER.exists():
+        return True
+    print(
+        "\napps/desktop/ui/dist/index.html is missing, so `clippy --all-features` cannot compile the\n"
+        "desktop crate in its shipping configuration. Building the UI first.",
+        flush=True,
+    )
+    pnpm = pnpm_command()
+    if not gate.run("rust", "frontend assets (install)", pnpm + ["install", "--frozen-lockfile"], cwd=UI):
+        return False
+    if not gate.run("rust", "frontend assets (build)", pnpm + ["build"], cwd=UI):
+        return False
+    return UI_MARKER.exists()
+
+
 def rust_steps(gate: Gate) -> None:
+    if not ensure_frontend_assets(gate):
+        return
     exe = cargo()
     steps = (
         ("fmt", [exe, "fmt", "--all", "--", "--check"]),
@@ -98,11 +127,10 @@ def drift_steps(gate: Gate) -> None:
 
 
 def frontend_steps(gate: Gate) -> None:
-    ui = ROOT / "apps" / "desktop" / "ui"
     pnpm = pnpm_command()
     for name in ("install", "typecheck", "lint", "test", "build"):
         argv = pnpm + (["install", "--frozen-lockfile"] if name == "install" else [name])
-        if not gate.run("frontend", name, argv, cwd=ui):
+        if not gate.run("frontend", name, argv, cwd=UI):
             return
 
 

@@ -5,10 +5,64 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-27"
+last_updated: "2026-09-28"
 ---
 
 # Changelog
+
+## Unreleased — P0 Technical Vertical Slice executed (2026-09-28)
+
+No version is claimed here on purpose: `0.5.1` stays the only baseline, and `v0.6.0` is reserved for
+an unconditional P0 `PASS`. This entry records work on the working tree.
+
+### P0 source (first production code in this repository)
+
+- Rust workspace, pinned toolchain 1.98.1, exactly four Phase-0 library crates:
+  `firmwaresight-core` (declares zero dependencies), `-artifact`, `-report`, `-storage`;
+- `fwsight` CLI: synchronous, deterministic JSON, exit codes 0 / 2 / 3 exercised, 4 / 5 / 6 not
+  registered because no code path returns them;
+- untrusted-input intake order `stat -> size guard -> streaming SHA-256 -> magic detect -> single
+  read -> parse`, with the 512 MiB guard measured from both sides of the boundary;
+- ELF parsing plus a memory-accounting model whose evidence ladder limits what a verdict may claim;
+- GNU ld MAP adapter producing a real verified region fact, and refusing foreign-toolchain maps
+  instead of approximating them;
+- minimal SQLite persistence via `rusqlite + bundled`, one migration, transactional import,
+  content-addressed dedupe;
+- thin Tauri 2 desktop shell with a use-case-oriented command surface (`FixtureKey`, never a path),
+  ts-rs-generated TypeScript bindings, and analysis off the calling thread;
+- React 19.3 + TypeScript 6.0.3 summary screen, token-driven, five-state badges;
+- real ARM ELF fixtures with recorded provenance and a regeneration script, four malformed inputs,
+  goldens, and generated 100 / 256 / 512 MiB workloads (gitignored);
+- one verification gate, `scripts/check.py`, that CI calls unchanged (14 steps, four job groups);
+- `deny.toml` encoding the AGENTS.md dependency red lines as a ban list.
+
+### P0 status
+
+- `EXECUTED — CONDITIONAL_PASS (LOCAL)`; 102 Rust tests and 18 UI tests pass locally.
+- Conditions, all outside this environment: CI has never run, `cargo deny` has never run, peak RSS is
+  `NOT MEASURED`, and the desktop window was never opened.
+- `P0_TECHNICAL_VALIDATION/` holds the evidence pack: the 17 documents the prompt names plus
+  `P0_EXECUTION_PROVENANCE.md`, each citing executed commands.
+- G1 is not claimed; V0 remains deferred with `0 / 8` external sessions; P1 is not authorized.
+
+### Corrections made to this pack's own claims during P0
+
+- `fixture.toml` recorded the linker invocation as `-p0-dual-region.ld`; the toolchain was called with
+  `-T p0-dual-region.ld`. Regenerating proved both ELF files byte-identical, so the record was wrong
+  and the artifacts were not.
+- The release desktop binary was described as embedding the built UI. It did not: without Tauri's
+  `custom-protocol` feature the dev-mode codegen embeds nothing. The feature was added and the
+  production link re-measured (10,398,208 bytes against 10,330,112).
+- The Rust test total was recorded as 101 before a ninth storage test landed; it is 102.
+- The pnpm fact written at track start assumed corepack would resolve 12.7.0; it resolved 12.6.0,
+  which is now pinned in `apps/desktop/ui/package.json`.
+
+### Unchanged
+
+- `BASELINE.yaml` still reports `baseline_version: 0.5.1`; `SHA256SUMS` still describes the frozen
+  v0.5.1 package and was deliberately not regenerated; `DIRECTORY_TREE.txt` still lists that package,
+  not this working tree. Six manifest entries now differ — all governance or execution records P0 was
+  authorized to change, listed in `.ai/DECISIONS.md`.
 
 ## 0.5.1 — 2026-09-27
 

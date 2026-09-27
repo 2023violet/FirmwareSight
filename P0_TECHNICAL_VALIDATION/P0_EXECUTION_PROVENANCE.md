@@ -70,8 +70,8 @@ Host fact used for planning, recorded so fixture provenance is auditable.
 | rustup host | `x86_64-pc-windows-msvc` | VS 2022 BuildTools present; `cargo build` links successfully |
 | git | 2.55.0.windows.4 | |
 | node | v24.19.0 | Node 24 LTS line |
-| pnpm (installed) | 11.21.0 | below baseline pnpm 12 line |
-| pnpm (via corepack 0.35.0) | 12.7.0 | resolvable; used to satisfy the baseline major line |
+| pnpm (installed) | 11.21.0 | below baseline pnpm 12 line; never used by the gate |
+| pnpm (via corepack 0.35.0) | 12.6.0 | corrected at delivery: corepack resolves the version pinned in `apps/desktop/ui/package.json` (`packageManager: "pnpm@12.6.0"`), which is 12.6.0. The 12.7.0 first recorded here was what corepack would fetch with no pin, and no gate step ever used it |
 | gcc (host, MinGW-W64) | 16.2.0 | produces PE/COFF on Windows, not ELF |
 | GNU ld (host) | 2.47.20260726 | |
 | arm-none-eabi-gcc | 14.3.1 (Arm GNU Toolchain 14.3.Rel1) | produces the real ELF fixtures |

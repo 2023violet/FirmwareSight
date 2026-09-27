@@ -38,7 +38,7 @@ only way it becomes runnable on a laptop.
 
 | Job | Runner | Runs |
 | --- | --- | --- |
-| `rust` | ubuntu-latest, windows-latest | fmt, clippy (`-D warnings`, all targets, all features), `cargo test --workspace` |
+| `rust` | ubuntu-latest, windows-latest | builds the UI if `dist/` is missing, then fmt, clippy (`-D warnings`, all targets, all features), `cargo test --workspace` |
 | `frontend` | ubuntu-latest, windows-latest | `pnpm install --frozen-lockfile`, typecheck, lint, test, build |
 | `drift` | ubuntu-latest | tokens.css, desktop icons, ts-rs bindings and goldens must be unchanged after regeneration |
 | `deny` | ubuntu-latest | `cargo install cargo-deny@0.20.2 --locked`, then `cargo deny check licenses bans sources advisories` |
@@ -56,6 +56,26 @@ Notes on choices:
   considered and dropped: `cargo install cargo-deny` costs a few minutes of CI time, and a smaller
   set of third-party code executed on every push is the better trade for a repository whose
   current job is verification.
+- **`clippy --all-features` is the one gate step that needs the built UI, and that was measured.**
+  An earlier draft of this document attributed a `dist/` requirement to `generate_context!` in every
+  build. It does not. With `apps/desktop/ui/dist/` moved out of the tree,
+  `cargo check -p firmwaresight-desktop` (5.41s),
+  `cargo test -p firmwaresight-desktop --no-run` (15.13s) and
+  `cargo build --release -p firmwaresight-desktop` (2m 49s) all succeeded: `tauri`'s build script
+  sets `dev = !custom_protocol` (`tauri-2.12.0/build.rs:253`), and dev-mode codegen embeds nothing
+  (`tauri-codegen-2.7.0/src/context.rs:178`). The desktop crate now declares the template's
+  `custom-protocol` feature, and the same commands with `--all-features` and no `dist/` fail inside
+  the macro: `The `frontendDist` configuration is set to "../ui/dist" but this path doesn't exist`.
+  The gate lints the configuration that ships rather than the dev one, so `scripts/check.py` builds
+  the UI when `dist/index.html` is missing and the `rust` job installs Node and enables Corepack.
+  `drift` needs neither, because its `cargo test -p firmwaresight-desktop` runs default features.
+- **The production link was measured locally, in both configurations.**
+  `cargo build --release -p firmwaresight-desktop --features custom-protocol` produced a
+  10,398,208-byte `firmwaresight-desktop.exe` in 3m 11s, and the built asset name
+  `index-BdwhVhyx.js` appears in the binary - the frontend really is embedded. The same command
+  without the feature produced 10,330,112 bytes with no such string. An earlier sentence in this
+  pack described the second, dev-mode binary as "the built UI embedded"; that claim was wrong and is
+  corrected here and in `P0_EXIT_CHECKLIST.md` 16 and `P0_KNOWN_LIMITATIONS.md`.
 - `permissions: contents: read` at workflow level; nothing writes or uploads.
 - Triggers: push to `main`, pull requests, and `workflow_dispatch`.
 
@@ -66,11 +86,11 @@ $ python scripts/check.py
 === summary ===
 PASS  rust/fmt
 PASS  rust/clippy
-PASS  rust/test                (101 tests across 6 workspace members)
+PASS  rust/test                (102 tests across 6 workspace members)
 PASS  frontend/install
 PASS  frontend/typecheck
 PASS  frontend/lint
-PASS  frontend/test            (18 tests)
+PASS  frontend/test            (18 tests, 3 files)
 PASS  frontend/build
 PASS  drift/design tokens
 PASS  drift/desktop icons
@@ -78,11 +98,18 @@ PASS  drift/ipc bindings
 PASS  drift/ipc bindings unchanged
 PASS  drift/goldens unchanged
 PASS  deny/cargo-deny (skipped)
+
+14/14 steps passed
 ```
 
-The `deny` line is recorded as skipped rather than passed. `cargo deny` is not installed on this
-machine and installing it was not authorized, so there is no local license or advisory result to
-report.
+`deny/cargo-deny (skipped)` is recorded as skipped rather than passed. `cargo deny` is not installed
+on this machine and installing it was not authorized, so there is no local license or advisory result
+to report.
+
+The two `frontend assets` steps the `rust` group can emit are absent from that list because
+`apps/desktop/ui/dist/` already existed. Their behaviour was verified separately: with `dist/`
+deleted, `python scripts/check.py --only rust` printed the reason, rebuilt the UI and went on to pass
+`fmt`, `clippy` and `test` - 5/5 steps, exit 0.
 
 `drift/goldens unchanged` failed on its first run and passed after the refresh described in
 `P0_IMPLEMENTATION_LOG.md` 17 was committed. That is the check behaving correctly: it caught a
@@ -100,6 +127,12 @@ working tree where a generated file had been rewritten but not yet committed.
    environment-specific failure.
 4. **Runtime.** A two-OS matrix building the Tauri dependency tree without caching is minutes per
    job. Accepted deliberately for P0.
+5. **The `rust` job now depends on the UI build it used to be independent of.** `clippy --all-features`
+   compiles the desktop crate with `custom-protocol`, whose codegen needs `dist/`, so the job runs
+   `pnpm install --frozen-lockfile` on a checkout that has no `dist/`. That is one more network
+   fetch and roughly a minute of CI time per OS, and it makes a Core-only pull request sensitive to
+   a broken frontend lockfile. The alternative - narrowing `--all-features` so the gate stops seeing
+   the shipping configuration - was rejected in `P0_IMPLEMENTATION_LOG.md` 18.
 
 ## Exit criterion mapping
 

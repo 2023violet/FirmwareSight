@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-09-27"
+last_updated: "2026-09-28"
 ---
 
 # Execution Prompt Register
@@ -33,3 +33,7 @@ delivered rather than a retranscription.
 - Size: 94802 bytes / 5064 lines
 - Authority: execution instruction for the P0 engineering slice against the unique v0.5.1 baseline. Consistent with `09_ADR/ADR-0020-validation-sequence.md`, which already authorizes V0 and P0 as parallel tracks. It overrides only the execution state recorded by the Batch A prompt (`V0` blocking, `P0` not authorized); it does not override any frozen product, architecture, evidence, gate or design baseline, and it does not authorize P1.
 - Provenance record: `P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md`
+- Outcome, 2026-09-28: executed to its stop condition as `EXECUTED — CONDITIONAL_PASS (LOCAL)`.
+  Baseline stays `v0.5.1`, `v0.6.0` withheld, G1 not claimed, P1 still unauthorized. The conditions
+  are that CI and `cargo deny` have never run, which needs a push this environment is not
+  authorized to make.

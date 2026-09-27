@@ -41,7 +41,7 @@ produced it, and a status of `LOCAL PASS` is kept visibly separate from `CI PASS
 
 ## Verified totals
 
-- Rust: 101 tests passing across 6 workspace members.
+- Rust: 102 tests passing across 6 workspace members.
 - TypeScript: 18 tests, plus strict typecheck, ESLint and a production Vite build.
 - Gate: `python scripts/check.py` - 14 steps, of which cargo-deny is `SKIPPED` locally (the tool
   is not installed on this machine) and runs in CI.

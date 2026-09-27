@@ -3,41 +3,50 @@ title: "Active Task"
 doc_id: "FS-AI-005"
 product: "FirmwareSight"
 version: "0.5.1"
-status: "ACTIVE"
+status: "EXECUTION_RECORD"
 owner: "Engineering"
-last_updated: "2026-09-27"
+last_updated: "2026-09-28"
 ---
 
 # ACTIVE TASK
 
-## P0 — Technical Vertical Slice
+```text
+NONE
+```
 
-Status:
+The P0 Technical Vertical Slice - the task this file carried - reached its stop condition on
+2026-09-28 with final status `CONDITIONAL_PASS (LOCAL)`. No new business function may be created
+from here; `AGENTS.md` 1 forbids inventing work while this file reads `NONE`.
 
-# ACTIVE — TECHNICAL VERTICAL SLICE
+## Awaiting authorization (not tasks until authorized)
 
-Authorized by `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt`
-(SHA-256 `60a59196708a53592be4d828a0c1275cf74b3bfad0bdc6455f863ab38d32929b`), consistent with
-`09_ADR/ADR-0020-validation-sequence.md`.
+| Ref | Action | Why it is not being done here |
+| --- | --- | --- |
+| C1 | Let `.github/workflows/p0-check.yml` run on `main` | requires a push, and none was authorized |
+| C2 | Let the `deny` job execute `cargo deny` | same push, or explicit permission to install the tool locally |
+| C3 | Launch `firmwaresight-desktop` once and confirm the summary screen on a real display | starting a GUI in the user's session needs a yes |
+| - | Promote P0 from `CONDITIONAL_PASS` to `PASS` and cut `v0.6.0` | only valid after C1-C3 close |
+| - | P1 | requires its own execution prompt |
 
-Goal: prove the core technical skeleton, and prove the same real Core facts reach CLI and Desktop.
+## What P0 proved
 
-In scope: Rust workspace, the four Phase-0 library crates, `fwsight` CLI, minimal Tauri 2 shell,
-minimal React/TypeScript summary, real ELF fixtures, golden tests, deterministic JSON,
-memory accounting proven on fixtures, typed IPC via ts-rs, minimal SQLite foundation,
-large-file guard, CI.
+- One headless Core produces the same facts for the CLI and the Desktop, asserted field by field
+  against a committed golden.
+- ADR-0021's two budgets are demonstrable on real linker output, and the evidence ladder changes
+  the *strength* of the claim when the MAP is withheld while the numbers stay the same.
+- The 512 MiB guard refuses an oversized artifact before allocating for it (measured: 7.7 ms, no
+  hash time), and the whole slice stays within the frozen architecture with no ADR required.
 
-## V0
+Evidence: `P0_TECHNICAL_VALIDATION/` - the 17 documents the prompt names, plus
+`P0_EXECUTION_PROVENANCE.md`.
 
-Status:
+## Durable facts preserved by this change
 
-`DEFERRED / NOT YET EVIDENCE-VALIDATED — NON-BLOCKING RESEARCH TRACK`
+V0 remains `DEFERRED / NOT YET EVIDENCE-VALIDATED — NON-BLOCKING RESEARCH TRACK`.
 
-Durable fact, not deleted by this change:
-
-Formal eligible external participants completed `0 / 8 minimum`; Batch A target `0 / 4–5`.
-The V0 blocker is the absence of real human participants, not a technical failure.
-`V0_VALIDATION/` and every Batch A recruitment artifact remain intact and unmodified.
+Formal eligible external participants completed `0 / 8 minimum`; Batch A target `0 / 4–5`. The V0
+blocker is the absence of real human participants, not a technical failure. `V0_VALIDATION/` and
+every Batch A recruitment artifact remain intact and unmodified; P0 did not touch them.
 
 ## Gate status
 
@@ -48,9 +57,9 @@ P1:        NOT AUTHORIZED
 
 ## Version gate
 
-Do not generate `FirmwareSight_Project_Baseline_v0.6.0` unless P0 final status is `PASS`
-with real engineering evidence. `CONDITIONAL_PASS`, `FAIL` and `BLOCKED` must not be
-renamed into a PASS baseline.
+Do not generate `FirmwareSight_Project_Baseline_v0.6.0` unless P0 final status is `PASS` with real
+engineering evidence. It is `CONDITIONAL_PASS`, so `baseline_version` stays `0.5.1`.
+`CONDITIONAL_PASS`, `FAIL` and `BLOCKED` must not be renamed into a PASS baseline.
 
 ## Not authorized
 

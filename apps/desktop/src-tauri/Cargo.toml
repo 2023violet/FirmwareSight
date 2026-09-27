@@ -7,6 +7,13 @@ publish.workspace = true
 license.workspace = true
 description = "Thin Tauri 2 shell exposing FirmwareSight core facts to the desktop UI."
 
+# Upstream Tauri template's production switch. `tauri`'s build script sets `dev = !custom_protocol`
+# (tauri-2.12.0/build.rs:253), and tauri-codegen embeds nothing when `dev` is true
+# (tauri-codegen-2.7.0/src/context.rs:178). Without this feature a `--release` binary still loads the
+# Vite dev server, so the embedded-frontend path is only real when it is enabled.
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
 # Desktop only in P0, so a plain rlib is enough. The `staticlib`/`cdylib` forms the Tauri
 # mobile template adds would arrive with an authorized mobile target, not before it.
 [lib]

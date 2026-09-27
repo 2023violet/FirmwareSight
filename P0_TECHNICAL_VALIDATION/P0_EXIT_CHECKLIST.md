@@ -54,7 +54,7 @@ it ran on this machine and produced the quoted result. Nothing here says `CI PAS
 | 13 | SQLite snapshot transaction/roundtrip passes | LOCAL PASS | `a_snapshot_survives_a_full_round_trip_with_identical_facts`, `a_failed_import_leaves_no_build_visible_as_complete` |
 | 14 | ts-rs generation works | LOCAL PASS | 10 export tests + `drift/ipc bindings unchanged` |
 | 15 | TypeScript strict build passes | LOCAL PASS | `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `useUnknownInCatchVariables`; `tsc --noEmit` clean |
-| 16 | minimal Tauri summary builds | see note | `cargo check --all-targets` and the release link of `firmwaresight-desktop`; `vite build` produces `dist/`. **The windowed app was never launched** |
+| 16 | minimal Tauri summary builds | LOCAL PASS for build and link; see note | `cargo check -p firmwaresight-desktop --all-targets` clean. In the shipping configuration, `cargo build --release -p firmwaresight-desktop --features custom-protocol` produced a 10,398,208-byte `firmwaresight-desktop.exe` whose embedded asset set contains the built `index-BdwhVhyx.js`. **The windowed app was never launched** |
 | 17 | blocking parse not on the WebView event loop | LOCAL PASS | off-thread test + `Session: Send + Sync` assertion |
 | 18 | Core/CLI/Desktop parity passes | LOCAL PASS | 7 parity tests |
 | 19 | 512 MiB guard works before allocation | LOCAL PASS | accepted at 512 MiB, rejected at +1 KiB with no hash/read time |
@@ -62,19 +62,29 @@ it ran on this machine and produced the quoted result. Nothing here says `CI PAS
 | 21 | golden tests pass | LOCAL PASS | 5 CLI golden tests |
 | 22 | fmt passes | LOCAL PASS | `cargo fmt --all -- --check` |
 | 23 | clippy passes | LOCAL PASS | `cargo clippy --workspace --all-targets --all-features -- -D warnings`, silent |
-| 24 | cargo test passes | LOCAL PASS | 101 tests, 0 failures |
+| 24 | cargo test passes | LOCAL PASS | 102 tests, 0 failures |
 | 25 | frontend typecheck/build passes | LOCAL PASS | typecheck, lint, 18 tests, `vite build` |
 | 26 | no forbidden dependency or boundary violation | LOCAL PASS for first-party code; **cargo-deny NOT RUN** | the `cargo tree --workspace` graph (345 nodes) contains no `reqwest`/`hyper`/`rustls`/`memmap2`/`sqlx`/`gix`/`rayon`/`wgpu`/`axum`/`tonic`; `tokio` and `anyhow` appear only inside Tauri, with zero first-party references. `deny.toml` is written but never executed |
-| 27 | P0 reports complete | LOCAL PASS | 17 documents in this directory |
+| 27 | P0 reports complete | LOCAL PASS | All 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names are present, plus `P0_EXECUTION_PROVENANCE.md` added at takeover - 18 files, each citing a command that was actually run |
 | 28 | known limitations explicit | LOCAL PASS | `P0_KNOWN_LIMITATIONS.md` |
 
 ## Item 16, stated precisely
 
 `minimal Tauri summary builds` is met in the narrow sense the phrase allows: the desktop crate
-compiles and links, `tauri::generate_context!` resolves the built frontend, and the UI production
-bundle is produced. It is **not** met in the sense a reader might assume: nobody has opened the
-window, so on-screen layout, WebView2 availability and CSP behaviour in the shipped shell are
-unverified. That gap is carried in `P0_KNOWN_LIMITATIONS.md` rather than being closed by wording.
+compiles and links, and in the configuration that actually ships - `--features custom-protocol`,
+which is what `tauri build` passes - `tauri::generate_context!` resolves and embeds the built
+frontend (`dist/`, 231.12 kB JS + 7.62 kB CSS). The embedding is not taken on trust: that binary is
+10,398,208 bytes and contains the asset name `index-BdwhVhyx.js`, while the same command without the
+feature is 10,330,112 bytes and contains no such string, because tauri's dev-mode codegen embeds
+nothing (`tauri-2.12.0/build.rs:253`, `tauri-codegen-2.7.0/src/context.rs:178`).
+
+Timings for the release link were taken against a populated `target/`: 3m 11s for the
+`custom-protocol` link, 2m 49s without it, and 5m 46s for the first cold link earlier in this
+track. They are single-machine numbers and are quoted as such.
+
+It is **not** met in the sense a reader might assume: nobody has opened the window, so on-screen
+layout, WebView2 availability and CSP behaviour in the shipped shell are unverified. That gap is
+carried in `P0_KNOWN_LIMITATIONS.md` rather than being closed by wording.
 
 ## Not met, in one place
 

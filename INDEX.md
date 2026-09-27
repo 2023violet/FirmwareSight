@@ -5,25 +5,31 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-27"
+last_updated: "2026-09-28"
 ---
 
 
 # Document Index
 
 Baseline: `0.5.1`  
-Execution state: `Batch A Recruitment Ready`
+Execution state: `P0 executed — CONDITIONAL_PASS (LOCAL); V0 Batch A still waiting on real participants`
 
 ## Primary reading path
 
 1. `README.md`
 2. `PRODUCT_BASELINE.md`
-3. `V0_VALIDATION/batch_a/BATCH_A_TAKEOVER_REPORT.md`
-4. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
-5. `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_RECRUITMENT_PLAN.md`
-6. `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_MODERATOR_PACK.md`
-7. `V0_VALIDATION/batch_a/BATCH_A_EVIDENCE_INDEX.md`
-8. `.ai/ACTIVE_TASK.md`
+3. `.ai/ACTIVE_TASK.md`
+4. `P0_TECHNICAL_VALIDATION/README.md`
+5. `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`
+6. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
+7. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
+8. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
+
+`DIRECTORY_TREE.txt` and `SHA256SUMS` still describe the frozen
+`FirmwareSight_Project_Baseline_v0.5.1` package, not the P0 working tree; the P0 source layout is
+recorded in `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md`. The six manifest entries that now
+differ are governance and execution records P0 was authorized to change, listed in
+`.ai/DECISIONS.md`.
 
 
 ## All Markdown documents
@@ -187,6 +193,24 @@ Execution state: `Batch A Recruitment Ready`
 | `DESIGN.md` | FirmwareSight DESIGN.md |
 | `PRODUCT_BASELINE.md` | FirmwareSight Product Baseline v0.5.0 |
 | `README.md` | FirmwareSight v0.5.1 |
+| `P0_TECHNICAL_VALIDATION/README.md` | P0 Technical Validation |
+| `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md` | P0 Architecture Check |
+| `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` | P0 CI Report |
+| `P0_TECHNICAL_VALIDATION/P0_CLI_PARITY_REPORT.md` | P0 CLI Report and Determinism |
+| `P0_TECHNICAL_VALIDATION/P0_DEPENDENCY_REPORT.md` | P0 Dependency Report |
+| `P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md` | P0 Execution Provenance |
+| `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` | P0 Exit Checklist |
+| `P0_TECHNICAL_VALIDATION/P0_FIXTURE_REGISTER.md` | P0 Fixture Register |
+| `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` | P0 Implementation Log |
+| `P0_TECHNICAL_VALIDATION/P0_IPC_PARITY_REPORT.md` | P0 IPC and Core/CLI/Desktop Parity |
+| `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md` | P0 Known Limitations |
+| `P0_TECHNICAL_VALIDATION/P0_MEMORY_ACCOUNTING_REPORT.md` | P0 Memory Accounting Report |
+| `P0_TECHNICAL_VALIDATION/P0_PARSER_RESULTS.md` | P0 Parser Results |
+| `P0_TECHNICAL_VALIDATION/P0_PERFORMANCE_REPORT.md` | P0 Performance Report |
+| `P0_TECHNICAL_VALIDATION/P0_PLAN.md` | P0 Plan |
+| `P0_TECHNICAL_VALIDATION/P0_SECURITY_INPUT_REPORT.md` | P0 Security and Untrusted Input Report |
+| `P0_TECHNICAL_VALIDATION/P0_STORAGE_REPORT.md` | P0 Storage Report |
+| `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md` | P0 Technical Validation Report |
 | `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
 | `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
 | `V0_VALIDATION/V0_PLAN.md` | V0 Plan |
@@ -202,6 +226,7 @@ Execution state: `Batch A Recruitment Ready`
 | `V0_VALIDATION/batch_a/BATCH_A_EXECUTION_PROVENANCE.md` | Batch A Execution Provenance |
 | `V0_VALIDATION/batch_a/BATCH_A_STATUS.md` | Batch A Status |
 | `V0_VALIDATION/batch_a/BATCH_A_TAKEOVER_REPORT.md` | FirmwareSight V0 Batch A 接手报告 |
+| `V0_VALIDATION/batch_a/V0.5.2_RELEASE_BLOCK.md` | v0.5.2 Release Block |
 | `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_EVIDENCE_INTEGRITY_CHECKLIST.md` | Batch A Evidence Integrity Checklist |
 | `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_MODERATOR_PACK.md` | Batch A Moderator Pack |
 | `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_RECRUITMENT_PLAN.md` | Batch A Recruitment Plan |
@@ -226,6 +251,8 @@ Execution state: `Batch A Recruitment Ready`
 | `V0_VALIDATION/sessions/README.md` | Session Register |
 | `V0_VALIDATION/sessions/TEMPLATE.md` | V0 Session — Participant [ID] |
 | `assets/ui-mockups/README.md` | UI Mockup Asset Register |
+| `fixtures/malformed/README.md` | Malformed Fixtures |
+| `golden/reports/README.md` | Report Goldens |
 | `templates/ADR_TEMPLATE.md` | ADR-XXXX — Title |
 | `templates/BUG_REPORT_TEMPLATE.md` | Bug |
 | `templates/DESIGN_CHECKLIST_TEMPLATE.md` | FirmwareSight 设计评审 Checklist（Do's & Don'ts） |
