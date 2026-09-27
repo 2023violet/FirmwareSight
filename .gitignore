@@ -1,0 +1,25 @@
+/target
+**/target/
+node_modules/
+dist/
+
+# Generated performance workloads are never committed.
+/fixtures/generated/
+
+# Local runtime state: SQLite databases, caches, logs, exported bundles.
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-wal
+*.db-shm
+.firmwaresight/
+/fwsight-out/
+
+/fuzz/target/
+/fuzz/corpus/
+coverage/
+
+.DS_Store
+Thumbs.db
+desktop.ini

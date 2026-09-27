@@ -4,40 +4,60 @@ doc_id: "FS-AI-005"
 product: "FirmwareSight"
 version: "0.5.1"
 status: "ACTIVE"
-owner: "Product / Research"
+owner: "Engineering"
 last_updated: "2026-09-27"
 ---
 
 # ACTIVE TASK
 
-## V0 — Workflow Prototype Validation / Batch A
+## P0 — Technical Vertical Slice
 
 Status:
 
-# ACTIVE — WAITING FOR REAL PARTICIPANTS
+# ACTIVE — TECHNICAL VERTICAL SLICE
 
-Completed:
-- prototype and internal dry run;
-- Batch A Recruitment Ready Pack.
+Authorized by `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt`
+(SHA-256 `60a59196708a53592be4d828a0c1275cf74b3bfad0bdc6455f863ab38d32929b`), consistent with
+`09_ADR/ADR-0020-validation-sequence.md`.
 
-Pending:
-- recruit PA-001…PA-004/005;
-- run real moderated sessions;
-- capture evidence;
-- complete Batch A Interim Review.
+Goal: prove the core technical skeleton, and prove the same real Core facts reach CLI and Desktop.
 
-Formal N:
-`0`
+In scope: Rust workspace, the four Phase-0 library crates, `fwsight` CLI, minimal Tauri 2 shell,
+minimal React/TypeScript summary, real ELF fixtures, golden tests, deterministic JSON,
+memory accounting proven on fixtures, typed IPC via ts-rs, minimal SQLite foundation,
+large-file guard, CI.
+
+## V0
+
+Status:
+
+`DEFERRED / NOT YET EVIDENCE-VALIDATED — NON-BLOCKING RESEARCH TRACK`
+
+Durable fact, not deleted by this change:
+
+Formal eligible external participants completed `0 / 8 minimum`; Batch A target `0 / 4–5`.
+The V0 blocker is the absence of real human participants, not a technical failure.
+`V0_VALIDATION/` and every Batch A recruitment artifact remain intact and unmodified.
+
+## Gate status
+
+```text
+Formal G1: NOT CLAIMED  (g1_requires V0_PASS + P0_PASS; V0 still unvalidated)
+P1:        NOT AUTHORIZED
+```
 
 ## Version gate
 
-Do not generate `FirmwareSight_Project_Baseline_v0.5.2` until:
-- Batch A has 4–5 real eligible external participants;
-- real session evidence is written into the project.
+Do not generate `FirmwareSight_Project_Baseline_v0.6.0` unless P0 final status is `PASS`
+with real engineering evidence. `CONDITIONAL_PASS`, `FAIL` and `BLOCKED` must not be
+renamed into a PASS baseline.
 
 ## Not authorized
 
-- synthetic Persona substitution
-- P0
-- P1–P4
-- E1/E2/E3/GX
+- P1–P4 Product MVP implementation
+- E1 / E2 / E3 / GX candidates
+- Cloud / account / auth / telemetry / AI
+- SBOM / CVE / OTA / flashing / HIL / updater / wgpu / SQLx
+- A fifth Phase-0 library crate without architecture review plus ADR
+- Synthetic Persona substitution for V0 evidence
+- Claiming V0 PASS, G1 PASS, or that product value has been user-validated

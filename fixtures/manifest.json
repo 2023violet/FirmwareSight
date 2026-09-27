@@ -1,0 +1,67 @@
+{
+  "schema": "firmwaresight-fixtures-1",
+  "generated_by": "scripts/gen_p0_fixtures.py",
+  "note": "Tests verify these hashes before trusting any golden.",
+  "files": [
+    {
+      "path": "fixtures/elf/p0-basic/firmware.elf",
+      "sha256": "1c0ae94e611497c1635c117834132f23b36799ad651852ba878be421ba20557f",
+      "fixture": "p0-basic",
+      "purpose": "elf-binary"
+    },
+    {
+      "path": "fixtures/elf/p0-basic/fixture.toml",
+      "sha256": "7a7c665548fb19cfd71a605e95b12046805c51403ef2898f0c368b01592943aa",
+      "fixture": "p0-basic",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/p0-dual-region/firmware.elf",
+      "sha256": "c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62",
+      "fixture": "p0-dual-region",
+      "purpose": "elf-binary"
+    },
+    {
+      "path": "fixtures/elf/p0-dual-region/firmware.map",
+      "sha256": "b2be5f190d46091296f240439a69cef470624d0e84a2c178eb8c65cf60dc4fbe",
+      "fixture": "p0-dual-region",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/p0-dual-region/fixture.toml",
+      "sha256": "0bec62fc957da34fbe168613b17a60bd9229b4600cc01afa65e41d6130bd8583",
+      "fixture": "p0-dual-region",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/p0-dual-region/p0-dual-region.ld",
+      "sha256": "f4bf022bb856294251776f60a3a5ab8f0c02e478a3e12baf580db8672ba17cc1",
+      "fixture": "p0-dual-region",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/malformed/empty.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixture": "malformed",
+      "purpose": "negative-input-regression"
+    },
+    {
+      "path": "fixtures/malformed/oversize-sparse.bin",
+      "sha256": "1c3519444924ee1f065d443da2e599275bfca893e942f29c0684ddad9e91de23",
+      "fixture": "malformed",
+      "purpose": "negative-input-regression"
+    },
+    {
+      "path": "fixtures/malformed/truncated-elf.bin",
+      "sha256": "1b4b87df42f0d9ca59c54275dea6cbedb6902601b7fbf031373a0345ce76e15f",
+      "fixture": "malformed",
+      "purpose": "negative-input-regression"
+    },
+    {
+      "path": "fixtures/malformed/wrong-magic.bin",
+      "sha256": "2db5643ac2e87e7788ec4f2d90576a8d6eb952f709addf487f03eb7a41e162c7",
+      "fixture": "malformed",
+      "purpose": "negative-input-regression"
+    }
+  ]
+}

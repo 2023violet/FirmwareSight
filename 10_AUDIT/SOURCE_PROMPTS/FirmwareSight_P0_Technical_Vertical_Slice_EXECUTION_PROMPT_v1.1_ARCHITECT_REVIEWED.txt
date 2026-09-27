@@ -1,0 +1,5064 @@
+FirmwareSight P0 — Technical Vertical Slice
+完整工程执行 Prompt v1.1 — Chief Architect Reviewed
+
+Unique Baseline:
+FirmwareSight_Project_Baseline_v0.5.1
+
+Execution Intent:
+先把 FirmwareSight 的工程地基打牢。
+V0 真人验证暂时保留为未完成研究项，但不再阻塞 P0 基础工程建设。
+
+Target milestone:
+P0 — Technical Vertical Slice
+
+Target deliverable if and only if P0 exit criteria are actually satisfied:
+FirmwareSight_Project_Baseline_v0.6.0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0. v1.1 总架构师审查补丁与优先级
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本文件是 v1.0 的审查后正式执行版。
+
+若本节与后续继承自 v1.0 的任何条款存在冲突：
+
+# 本 PRE-0 节优先。
+
+本次总架构师只读评审时的远端仓库快照：
+
+Repository:
+`2023violet/FirmwareSight`
+
+Default branch:
+`main`
+
+Reviewed remote HEAD:
+`e086e9880e00900e305a3cd88b4d899f73aa5711`
+
+Commit subject:
+`v0.5.1`
+
+注意：
+
+上述 SHA 只是“本 Prompt 生成时”的审查快照，
+不是未来执行时可以跳过 Git 同步的理由。
+
+Coding Agent 每次执行本 Prompt 时，必须先重新同步并确认远端实时状态。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.1 强制 Read-only Git / Worktree Preflight
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+在：
+
+- 修改任何文件；
+- 创建 Cargo.toml；
+- 创建 package.json；
+- 创建任何 Rust/TS/React/Tauri 文件；
+- 更新 `.ai`；
+- 安装依赖；
+- 生成 lockfile；
+
+之前，必须先完成本地仓库只读体检。
+
+至少执行并记录：
+
+```bash
+git rev-parse --show-toplevel
+git status --short
+git branch --show-current
+git rev-parse HEAD
+git log -1 --oneline
+git diff --stat
+git diff
+git diff --cached
+git worktree list
+git remote -v
+```
+
+必须明确报告：
+
+- repository root
+- current branch
+- local HEAD
+- tracked modifications
+- staged modifications
+- untracked files
+- existing worktrees
+- upstream/remotes
+- 当前是否存在用户已有工作
+
+禁止为了“得到干净工作树”执行：
+
+```text
+git reset --hard
+git clean -fd
+git checkout -- .
+git restore .
+git stash
+```
+
+或任何等价的自动丢弃/隐藏用户工作操作。
+
+如果存在用户已有修改：
+
+- 先识别；
+- 保护；
+- 不覆盖；
+- 不擅自清理；
+- 不把用户修改混入 P0 变更；
+- 若无法安全隔离，则标记 Blocking Issue 并停止写入。
+
+用户工作完整性高于“工作树整洁”。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.2 强制实时 Remote Sync
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+完成本地只读体检后：
+
+```bash
+git fetch --prune origin
+```
+
+然后记录：
+
+```bash
+git rev-parse HEAD
+git rev-parse origin/main
+git rev-list --left-right --count HEAD...origin/main
+```
+
+规则：
+
+### Case A — local == origin/main
+
+继续。
+
+### Case B — local behind origin/main，且工作树干净、无 divergence
+
+允许：
+
+```bash
+git pull --ff-only
+```
+
+随后重新记录 HEAD。
+
+### Case C — local dirty
+
+不得自动 pull/reset/stash。
+先保护用户工作；若不能无风险继续，则停止并报告。
+
+### Case D — local 与 origin/main divergence
+
+不得自动 rebase、merge、reset、force。
+停止并报告，需要人工决定。
+
+### Case E — remote HEAD 已晚于本 Prompt 的 reviewed SHA
+
+必须比较：
+
+```bash
+git diff --name-status e086e9880e00900e305a3cd88b4d899f73aa5711..origin/main
+```
+
+如果远端新增提交修改了以下 authority：
+
+- AGENTS.md
+- README.md
+- PRODUCT_BASELINE.md
+- BASELINE.yaml
+- DESIGN.md
+- `.ai/*`
+- `00_GOVERNANCE/*`
+- `01_PRODUCT/*`
+- `03_DESIGN/*`
+- `04_TECH/*`
+- `05_ENGINEERING/*`
+- `06_DELIVERY/*`
+- `09_ADR/*`
+
+则必须重新读取受影响 authority，
+并以实时仓库中的更新内容为准。
+
+若新 authority 与本 Prompt 的工程执行授权发生真正冲突：
+
+# STOP / ARCHITECTURE AUTHORITY CONFLICT
+
+不要自行选择一边继续。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.3 P0 开工后的治理状态必须先自洽
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+当前 v0.5.1 仓库仍记录：
+
+```text
+V0 = ACTIVE / WAITING FOR REAL PARTICIPANTS
+P0 = NOT AUTHORIZED
+```
+
+这是旧执行状态，不是本轮新授权后的最终状态。
+
+完成：
+
+1. Git preflight
+2. remote sync
+3. authority read
+4. P0 接手报告
+
+且 Blocking Issues = NONE 后，
+第一批正式变更必须先让治理状态与本 Prompt 自洽。
+
+至少更新：
+
+- `.ai/ACTIVE_TASK.md`
+- `.ai/CURRENT_STATE.md`
+- `.ai/DECISIONS.md`（只记录本轮授权/状态变化，不重写旧事实）
+- `.ai/HANDOFF.md`
+- `BASELINE.yaml`
+
+正确状态：
+
+```text
+V0:
+DEFERRED / NOT YET EVIDENCE-VALIDATED
+NON-BLOCKING RESEARCH TRACK
+
+P0:
+ACTIVE — TECHNICAL VERTICAL SLICE
+
+Formal G1:
+NOT CLAIMED
+
+P1:
+NOT AUTHORIZED
+```
+
+注意：
+
+- 不得把 baseline_version 提前改成 0.6.0；
+- 不得删除 V0 的 0/8 真实样本事实；
+- 不得伪造 V0 PASS；
+- 不得伪造 G1 PASS；
+- 不得把“P0 已授权”写成“产品已验证”。
+
+只有 P0 最终 PASS 后，
+才允许生成 `FirmwareSight_Project_Baseline_v0.6.0`。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.4 P0 Source Prompt Provenance
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本 v1.1 Prompt 属于本轮执行 authority。
+
+如果执行环境提供了本文件本体：
+
+必须把其精确副本纳入：
+
+`10_AUDIT/SOURCE_PROMPTS/`
+
+并建立 P0 execution provenance，记录：
+
+- prompt filename
+- SHA-256
+- byte size
+- line count
+- execution start remote HEAD
+- execution start local HEAD
+- final validated HEAD
+
+不得重新手抄一个“差不多的 Prompt”冒充来源文件。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.5 Memory Accounting Fixture Hardening — Mandatory
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 的 memory accounting 不允许只靠普通 host ELF + section-name heuristic 宣布通过。
+
+必须区分两个真实 fixture 角色：
+
+## Fixture A — Parser Infrastructure Fixture
+
+用途：
+
+- format detection
+- object parser
+- architecture
+- bitness
+- endianness
+- entry
+- sections
+- symbols
+- SHA-256
+- malformed/no-panic
+- deterministic snapshot
+
+可以是当前 host 编译得到的真实 ELF。
+
+## Fixture B — Memory Accounting Proof Fixture
+
+用途：
+
+证明：
+
+```text
+nonvolatile/load image footprint
+!=
+runtime RAM footprint
+```
+
+并真实证明：
+
+```text
+.data
+可以同时贡献：
+- load/nonvolatile bytes
+- runtime RAM bytes
+```
+
+Fixture B 必须具有显式、可重复的 load/runtime evidence。
+
+优先采用：
+
+```text
+main.c
++
+controlled linker script
++
+GNU ld / compatible real linker
+```
+
+至少构造：
+
+```text
+ROM region
+RAM region
+
+.text     -> ROM
+.rodata   -> ROM
+.data VMA -> RAM
+.data LMA -> ROM
+.bss      -> RAM
+custom alloc section -> explicit region/evidence
+```
+
+可以使用 host ELF + 自定义 linker script，
+只要 ELF program/load evidence 与 linker layout 能够确定性验证。
+
+如果环境存在：
+
+`arm-none-eabi-gcc`
+
+可以额外增加 embedded ARM fixture，
+但 P0 不得依赖本机必须安装 ARM GCC 才能完成 parser infrastructure。
+
+### Memory PASS 禁止条件
+
+如果 `.data` 双重计算只是因为：
+
+```text
+section.name == ".data"
+```
+
+则：
+
+# Memory Accounting NOT PROVEN
+
+即使数值“碰巧正确”，也不能判 P0 memory PASS。
+
+Section-name heuristic 只能：
+
+```text
+Derived / low-confidence
+```
+
+不得作为：
+
+```text
+Observed
+```
+
+不得作为 Hard Gate foundation。
+
+Golden 必须同时验证：
+
+- numeric totals
+- source locator
+- evidence classification
+- accounting rule/source
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.6 GNU ld MAP Acceptance Hardening — Mandatory
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 的 GNU ld MAP adapter 不能只做到：
+
+```text
+detect == GNU ld
+capability == Supported/Partial
+```
+
+就宣布 MAP path 已证明。
+
+P0 至少必须从一个真实生成的 GNU ld MAP 中完成：
+
+```text
+detect
+→ parse
+→ normalize
+→ one deterministic real fact
+→ test/golden assertion
+```
+
+至少一个真实事实可选：
+
+- memory region
+- symbol contribution
+- object contribution
+- section placement/contribution
+
+要求：
+
+- 有明确 adapter ID；
+- 有 typed error；
+- 非 GNU ld 不得 fallback 到 GNU parser；
+- unsupported toolchain 返回 Unsupported/Unknown capability；
+- 不得“部分解析一些东西”后静默输出假数据。
+
+只有 interface skeleton，没有 real fact：
+
+不能计入 P0 MAP validation PASS。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.7 P0 Final Status Taxonomy — 唯一口径
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本 v1.1 统一 P0 最终状态，只允许：
+
+```text
+PASS
+CONDITIONAL_PASS
+FAIL
+BLOCKED
+```
+
+禁止再使用模糊的：
+
+```text
+PARTIAL
+```
+
+作为最终状态。
+
+定义：
+
+## PASS
+
+全部 mandatory P0 Exit Criteria 有真实工程证据通过。
+
+只有 PASS 才允许生成：
+
+`FirmwareSight_Project_Baseline_v0.6.0`
+
+## CONDITIONAL_PASS
+
+核心技术链已证明正确，
+但存在明确允许缺失的非核心/环境性验证项，
+且这些缺失不会掩盖核心正确性。
+
+例如：
+
+- headless 环境无法做真实窗口交互 smoke，
+  但 Tauri backend/frontend/IPC/command contract 全部可编译可测试；
+- peak RSS 在当前环境无法可靠测得，且原因已记录。
+
+CONDITIONAL_PASS：
+
+- 不得伪装成 PASS；
+- 不得生成 `v0.6.0 PASS baseline`；
+- 必须列出未完成项与补证据条件。
+
+## FAIL
+
+得到真实技术否定证据，例如：
+
+- memory accounting 语义错误；
+- parser 对 malformed input panic；
+- deterministic JSON 不稳定；
+- Core/CLI/Desktop facts mismatch；
+- typed IPC contract 漂移；
+- storage transaction 产生 half-complete visible state。
+
+## BLOCKED
+
+当前环境/authority/工具链使 mandatory 验证无法完成，
+但尚不能得出技术错误结论。
+
+例如：
+
+- 冻结 Rust toolchain 无法获取；
+- repository authority 真冲突；
+- 必须新增第 5 个 library crate 才能继续；
+- local/remote Git divergence 无法安全自动处理。
+
+任何报告、`.ai`、README、Exit Checklist、最终总结必须使用同一状态。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.8 Performance Workload 与 PR CI 分离
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 仍必须记录：
+
+- ~100 MiB
+- ~256 MiB
+- ~512 MiB
+- >512 MiB guard
+
+但禁止把高成本 512 MiB full-read benchmark 机械放进每一个 PR 的 required CI path。
+
+划分：
+
+## Required PR CI
+
+必须验证：
+
+- size guard logic
+- pre-allocation rejection
+- normal real fixture
+- malformed fixtures
+- deterministic output
+- fixture/golden
+- representative synthetic workload
+
+## P0 Technical Validation / Dedicated benchmark
+
+记录：
+
+- ~100 MiB
+- ~256 MiB
+- ~512 MiB
+- timing
+- profile
+- environment
+- peak RSS when reliable
+
+`>512 MiB`：
+
+优先使用 sparse/synthetic generated workload 验证 guard，
+禁止把巨大文件提交进 Git。
+
+如果 peak RSS 无法可靠测量：
+
+必须写：
+
+```text
+NOT MEASURED
+reason: ...
+```
+
+不得估算或编数字。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.9 Dependency / Tauri Exact Version Rule
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Baseline docs 拥有：
+
+- technology family
+- major policy
+- compatibility boundary
+
+Lockfiles 拥有：
+
+- exact dependency versions
+
+因此：
+
+不得因为执行当日“latest”就自动追最新 patch/minor。
+
+尤其 Tauri：
+
+先完成最小 compatibility spike：
+
+```text
+Rust 1.98.1
++
+Tauri 2 stable compatible set
++
+Node 24 LTS
++
+React 19.3
++
+Vite 8
++
+TypeScript strict
+```
+
+验证：
+
+- Cargo resolution
+- Tauri backend compile
+- frontend typecheck/build
+- minimal IPC command
+- current host build
+
+然后由：
+
+- Cargo.lock
+- pnpm-lock.yaml
+- packageManager exact pin
+
+锁定实际兼容版本。
+
+禁止仅因为“新版本刚发布”自动升级整个兼容集合。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.10 每轮 Git 同步与交付闭环
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+用户的工作方式是：
+
+# 每一轮 Coding AI 实施结果都会进入 Git；
+# 总架构师下一轮将基于实时远端仓库重新审查。
+
+因此本轮 Coding Agent 必须让 Git 状态可审计。
+
+执行开始记录：
+
+```text
+START_REMOTE_HEAD
+START_LOCAL_HEAD
+START_BRANCH
+START_WORKTREE_STATUS
+```
+
+执行结束、准备提交/交付前再次：
+
+```bash
+git status --short
+git diff --stat
+git diff --check
+git fetch --prune origin
+git rev-parse HEAD
+git rev-parse origin/main
+```
+
+如果实施期间 remote 已经前进：
+
+- 不得 force push；
+- 不得 reset remote；
+- 不得自动 rebase/merge 覆盖别人工作；
+- 先比较新远端变化；
+- 若同区修改或 authority 变化，停止提交并报告 reconciliation requirement。
+
+如果环境/用户工作流明确授权普通 Git 提交上传：
+
+允许：
+
+- normal commit
+- normal push
+
+但禁止：
+
+- `--force`
+- `--force-with-lease`
+- history rewrite
+- delete branch
+- destructive reset
+
+若没有明确 push 权限：
+
+只形成可验证本地工作树/commit，
+报告 exact commit SHA / diff / tests，
+不得擅自改变远端共享状态。
+
+最终交付报告必须包含：
+
+```text
+START_REMOTE_HEAD
+FINAL_LOCAL_HEAD
+FINAL_REMOTE_HEAD (if pushed/fetched)
+branch
+working tree clean/dirty
+commit(s) created
+push status
+```
+
+这样下一轮总架构师才能以真实 Git 状态继续审查，而不是依赖对话摘要。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.11 本轮第一次回复的额外必含项
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+后续正文要求第一次回复输出：
+
+# FirmwareSight P0 接手报告
+
+v1.1 在此基础上新增必须包含：
+
+20. Git preflight result
+21. START_REMOTE_HEAD / START_LOCAL_HEAD
+22. Working tree preservation result
+23. Remote divergence result
+24. Authority files changed since reviewed SHA?
+25. Memory Fixture A/B plan
+26. GNU ld MAP real-fact acceptance plan
+27. P0 final status taxonomy acknowledgement
+
+如果：
+
+```text
+Blocking Issues = NONE
+```
+
+则：
+
+无需再次等待用户“继续”，
+直接执行 P0。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-0.12 v1.1 Stop Rule
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本轮执行到：
+
+- P0 validation complete；
+- final status determined；
+- PASS 时生成 v0.6.0；
+- 非 PASS 时输出真实 working/failure evidence；
+- Git 状态可审计；
+
+然后：
+
+# STOP
+
+不得自动进入：
+
+P1 Analyzer。
+
+P1 必须等待下一份由总架构师审查并输出的明确 Prompt。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. 本 Prompt 的新授权与优先级
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+用户已明确给出新的推进原则：
+
+> 不再让真人测试阻塞项目。
+> 当前任务是继续往下，把产品与技术地基打好。
+
+因此，本 Prompt 对 v0.5.1 当前 `.ai/ACTIVE_TASK.md` 中：
+
+“P0 Not authorized”
+
+这一项形成新的、明确的执行授权。
+
+本轮：
+
+✅ 授权执行 P0 — Technical Vertical Slice
+✅ 授权创建正式 Rust Workspace
+✅ 授权创建 Phase-0 的 4 个 library crates
+✅ 授权创建 `fwsight` CLI
+✅ 授权创建最小 Tauri 2 Desktop shell
+✅ 授权创建最小 React/TypeScript UI
+✅ 授权引入已经冻结的 P0 依赖
+✅ 授权建立 fixtures / golden / tests / CI
+✅ 授权实现真实 ELF parse → normalize → memory → BuildSnapshot
+✅ 授权实现 deterministic JSON
+✅ 授权实现 CLI/Desktop Core parity
+✅ 授权建立最小 SQLite 基础设施
+✅ 授权建立 Rust→TypeScript DTO generation
+✅ 授权执行 P0 性能/大文件 guard 验证
+✅ 授权更新 `.ai` 与项目状态，使 P0 成为当前工程任务
+
+但：
+
+❌ 不得伪造 V0 PASS
+❌ 不得伪造 G1 PASS
+❌ 不得删除 V0 未验证事实
+❌ 不得声称商业价值已经被用户验证
+❌ 不得因此自动进入 P1 Analyzer
+❌ 不得实现完整 Compare
+❌ 不得实现完整 Release Gate 产品功能
+❌ 不得实现真实 Release Bundle 产品工作流
+❌ 不得实现 E1 / E2 / E3 / GX Candidate
+❌ 不得加入 Cloud / Account / Auth / AI
+❌ 不得加入 SBOM/CVE
+❌ 不得加入 OTA / flashing / HIL
+❌ 不得加入 updater
+❌ 不得加入 wgpu
+❌ 不得加入 SQLx
+❌ 不得引入第五个 library crate，除非先触发架构评审并得到明确授权
+
+本 Prompt 的治理解释：
+
+- v0.5.1 的产品、架构、Evidence、Gate、Design 等冻结规则继续有效；
+- 本 Prompt 只覆盖“P0 尚未授权 / V0 必须先阻塞工程”的执行状态；
+- V0 现在标记为：
+  `DEFERRED / NOT YET EVIDENCE-VALIDATED`
+- P0 现在标记为：
+  `ACTIVE`
+- 形式上的 G1 条件仍然是 V0 + P0；
+- 但当前允许在 G1 之前继续做“确定性高、无论产品验证如何都需要”的 P0 基础设施；
+- 不得把这种工程推进偷换成“产品验证已通过”。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 第一原则：先接手，不要直接写代码
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+在创建：
+
+Cargo.toml
+package.json
+任何 `.rs`
+任何 Tauri 文件
+任何 React 文件
+
+之前，必须先读取唯一基线：
+
+# FirmwareSight_Project_Baseline_v0.5.1
+
+必读顺序：
+
+根目录：
+
+1. README.md
+2. PRODUCT_BASELINE.md
+3. BASELINE.yaml
+4. DESIGN.md
+5. AGENTS.md
+6. INDEX.md
+
+治理：
+
+00_GOVERNANCE/
+- 00_DOCUMENT_CONTROL.md
+- 01_PROJECT_CHARTER.md
+- 02_GLOSSARY.md
+- 03_DECISION_POLICY.md
+
+产品：
+
+01_PRODUCT/
+- 00_PRODUCT_VISION.md
+- 01_PRD_MVP.md
+- 03_SCOPE_NON_GOALS.md
+- 04_USER_STORIES_ACCEPTANCE.md
+- 07_MVP_COHORT_AND_CLI_POLICY.md
+- 08_PRODUCT_MODULE_MAP.md
+- 09_CAPABILITY_PORTFOLIO.md
+
+设计：
+
+03_DESIGN/
+- 00_DESIGN_PHILOSOPHY.md
+- 01_INFORMATION_ARCHITECTURE.md
+- 03_VISUAL_SYSTEM.md
+- 04_COMPONENT_RULES.md
+- 05_ACCESSIBILITY.md
+- 06_UI_REFERENCE_SCREENS.md
+- 07_DESIGN_TOKEN_VALIDATION.md
+- 08_POST_MVP_PRESENTATION_RULES.md
+
+以及：
+
+assets/design-tokens.json
+
+技术：
+
+04_TECH/
+- 00_TECH_STACK.md
+- 01_SYSTEM_ARCHITECTURE.md
+- 02_DOMAIN_MODEL.md
+- 03_FORMAT_SUPPORT.md
+- 04_STORAGE_WORKSPACE.md
+- 05_SECURITY_PRIVACY.md
+- 06_PERFORMANCE_BUDGETS.md
+- 07_CLI_SPEC.md
+- 08_CONFIG_SPEC.md
+- 09_TECH_DECISION_MATRIX.md
+- 10_TOOLCHAIN_BASELINE.md
+- 11_DEPENDENCY_BASELINE.md
+- 12_ASYNC_EXECUTION_MODEL.md
+- 13_FRONTEND_ARCHITECTURE.md
+- 14_IPC_DATA_CONTRACTS.md
+- 15_STORAGE_DATABASE_BASELINE.md
+- 16_ARTIFACT_ANALYSIS_PIPELINE.md
+- 17_RELEASE_PACKAGING_UPDATE.md
+- 18_CI_SUPPLY_CHAIN.md
+- 20_PLATFORM_SUPPORT.md
+- 21_OBSERVABILITY_DIAGNOSTICS.md
+- 22_GIT_PROVENANCE_ADAPTER.md
+- 23_MEMORY_ACCOUNTING_MODEL.md
+- 24_BUILD_IDENTITY_EVIDENCE.md
+- 25_TYPED_IPC_BINDINGS.md
+- 26_PORTABLE_SCHEMA_POLICY.md
+- 27_GATE_STATE_SEMANTICS.md
+
+工程：
+
+05_ENGINEERING/
+- 00_REPO_STRUCTURE.md
+- 02_TEST_STRATEGY.md
+- 06_CI_CD_BASELINE.md
+- 08_CODE_AREA_PLAN.md
+
+交付：
+
+06_DELIVERY/
+- 00_ROADMAP.md
+- 01_MVP_EXIT_CRITERIA.md
+- 02_BACKLOG_SEED.md
+- 04_EXTERNAL_VALIDATION_PLAN.md
+- 05_MVP_TO_PRODUCT_DEVELOPMENT_LIFECYCLE.md
+- 06_STAGE_GATES.md
+- 08_MILESTONE_DELIVERABLE_MATRIX.md
+
+ADR：
+
+09_ADR/
+至少读取：
+- ADR-0003-rust-core.md
+- ADR-0009-storage-rusqlite.md
+- ADR-0010-artifact-parser.md
+- ADR-0012-tracing.md
+- ADR-0018-ui-baseline-tokens-governance.md
+- ADR-0019-typed-ipc-bindings.md
+- ADR-0020-validation-sequence.md
+- ADR-0021-memory-accounting.md
+- ADR-0022-portable-schema-strictness.md
+- ADR-0023-gate-five-state-semantics.md
+- ADR-0024-post-mvp-candidate-governance.md
+
+AI handoff：
+
+.ai/
+- CURRENT_STATE.md
+- DECISIONS.md
+- HANDOFF.md
+- ACTIVE_TASK.md
+
+V0 只需读取状态摘要：
+
+V0_VALIDATION/
+- README.md
+- V0_EXECUTION_PROVENANCE.md
+- deliverables/V0_GATE_RECOMMENDATION.md
+
+目的：
+
+确认 V0 仍是：
+未完成 / 未验证，
+但本轮明确不阻塞 P0。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. 第一次回复：P0 接手报告
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+读完以后，第一次回复只输出：
+
+# FirmwareSight P0 接手报告
+
+必须包含：
+
+1. 唯一 Baseline
+2. 当前产品定位
+3. P0 的目标
+4. P0 不做什么
+5. 当前架构约束
+6. 4-crate ownership
+7. CLI/Desktop/Core 数据路径
+8. Evidence 模型
+9. Memory Accounting 模型
+10. Build Identity 模型
+11. IPC DTO 模型
+12. Storage/Report 在 P0 的最小职责
+13. Fixtures / Golden 策略
+14. P0 Exit Criteria
+15. 本 Prompt 对 V0/P0 状态的执行覆盖说明
+16. 发现的新冲突/疑点
+17. 实施计划
+18. Risk list
+19. Blocking Issues
+
+如果：
+
+Blocking Issues = NONE
+
+不要再次等待确认。
+
+本 Prompt 已授权 P0。
+
+直接继续执行。
+
+如果发现：
+
+- 架构 authority 真正冲突；
+- 依赖版本无法满足冻结要求；
+- 当前环境根本不能建立 Rust/Tauri toolchain；
+- 必须新增第 5 个 library crate 才能继续；
+- 必须改动产品领域语义才可实现；
+
+才暂停并上报。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. P0 的唯一目标
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 不是产品 MVP。
+
+P0 的目标是：
+
+# 证明 FirmwareSight 的核心技术骨架可以成立，
+# 并让同一份真实 Core Facts 同时可靠地到达 CLI 和 Desktop。
+
+必须打通：
+
+```text
+Real ELF fixture
+    ↓
+stat + size guard
+    ↓
+streaming SHA-256
+    ↓
+magic / format detection
+    ↓
+immutable bytes
+    ↓
+object parser
+    ↓
+NormalizedArtifact
+    ↓
+Evidence classification
+    ↓
+Memory accounting
+    ↓
+BuildSnapshot
+    ↓
+deterministic JSON
+    ↓
+fwsight CLI
+    ↓
+typed IPC DTO
+    ↓
+minimal Tauri/React Summary
+```
+
+并额外证明：
+
+```text
+BuildSnapshot
+    ↓
+minimal SQLite transaction / round-trip smoke
+```
+
+最终 P0 应回答：
+
+1. Core 是否纯净？
+2. Parser 是否可靠？
+3. 数据是否 normalize 后才进入业务层？
+4. Memory model 是否不是错误的 section-name 求和？
+5. CLI 和 Desktop 是否来自同一事实？
+6. Rust/TS contract 是否不会漂移？
+7. malformed input 是否 typed error 而不是 panic？
+8. 大文件是否在 allocation 前被 guard？
+9. Storage boundary 是否正确？
+10. 这套架构是否值得继续进入 P1？
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. P0 非目标
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+禁止把 P0 做成“顺便把整个软件写完”。
+
+本轮不要做：
+
+- 完整 Analyze Workspace
+- 全量 search/filter/sort UX
+- 100k Symbol 产品 UI
+- Compare 产品页
+- Diff engine 完整产品化
+- Release Gate 完整 policy editor
+- Bundle & History 完整产品 UI
+- full Report export suite
+- `.su`
+- component drift
+- SBOM
+- CVE
+- watch
+- XLSX
+- DOCX
+- GitHub Action
+- GitLab integration
+- Team
+- Cloud
+- Login
+- Telemetry
+- Plugin system
+- updater
+- wgpu
+- dark theme
+
+P0 Minimal Desktop Summary：
+
+不是最终七屏 UI。
+
+只需要：
+
+- Artifact Identity
+- Capabilities
+- Memory summary
+- Section count
+- Symbol count
+- Evidence summary
+- typed error state
+- operation/busy state
+
+目的是：
+
+# 技术闭环和 parity
+
+不是：
+
+# 完成 P1 UI
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. 正式代码目录
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须遵守：
+
+05_ENGINEERING/08_CODE_AREA_PLAN.md
+
+最终代码区：
+
+```text
+FirmwareSight/
+├── 00_GOVERNANCE/ ... 10_AUDIT/
+├── assets/
+├── examples/
+├── schemas/
+├── templates/
+│
+├── Cargo.toml
+├── Cargo.lock
+├── rust-toolchain.toml
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── .node-version
+│
+├── crates/
+│   ├── firmwaresight-core/
+│   ├── firmwaresight-artifact/
+│   ├── firmwaresight-storage/
+│   └── firmwaresight-report/
+│
+├── apps/
+│   ├── cli/
+│   └── desktop/
+│       ├── src-tauri/
+│       └── ui/
+│
+├── fixtures/
+├── golden/
+├── scripts/
+└── .github/
+```
+
+重要：
+
+当前 numbered root folders：
+
+继续作为文档 authority。
+
+不要新建一个空的：
+
+docs/
+
+去复制现有文档。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. Rust Workspace
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+根：
+
+Cargo.toml
+
+Workspace：
+
+- resolver = "3"
+- members 仅包含本轮真正需要的 Rust package
+- release/dev profile 必须清晰
+- 禁止提前引入大量 feature/dependency
+
+Rust toolchain：
+
+# 1.98.1
+
+Edition：
+
+# 2024
+
+rust-toolchain.toml：
+
+必须 pin：
+
+1.98.1
+
+components：
+
+- rustfmt
+- clippy
+
+不要使用：
+
+channel = "stable"
+
+作为唯一 release pin。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. Phase-0 四个 Library Crates
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只允许：
+
+# 1
+crates/firmwaresight-core
+
+# 2
+crates/firmwaresight-artifact
+
+# 3
+crates/firmwaresight-storage
+
+# 4
+crates/firmwaresight-report
+
+这是 Phase-0 library crate budget。
+
+禁止：
+
+firmwaresight-app
+firmwaresight-common
+firmwaresight-types
+firmwaresight-db
+firmwaresight-elf
+firmwaresight-gate
+firmwaresight-utils
+
+等“为了整洁”提前拆 crate。
+
+如果共享代码只出现一次：
+
+放到拥有它的 crate。
+
+如果 CLI/Desktop Application orchestration 轻微重复：
+
+允许暂时少量重复，
+或者通过 Artifact/Core 的稳定函数消除重复。
+
+不要因为 DRY 焦虑创建第 5 个 crate。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. `firmwaresight-core`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+职责：
+
+- Domain models
+- stable normalized facts
+- Evidence classification
+- memory accounting model
+- BuildSnapshot construction
+- pure validation
+- future Diff/Gate/Release model foundations
+
+禁止依赖：
+
+- Tauri
+- rusqlite
+- Tokio types
+- React/TS
+- `object` crate public types
+- OS shell/process types
+
+至少建立：
+
+```text
+core/src/
+├── lib.rs
+├── domain/
+│   ├── artifact.rs
+│   ├── build_snapshot.rs
+│   ├── identity.rs
+│   ├── memory.rs
+│   ├── section.rs
+│   ├── symbol.rs
+│   ├── evidence.rs
+│   └── capability.rs
+├── normalize/
+├── error.rs
+└── ids.rs
+```
+
+目录可根据实际代码简化。
+
+禁止：
+
+为了对齐树而创建空 module。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. P0 Domain Minimum
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少实现：
+
+## ArtifactIdentity
+
+- sha256
+- byte_size
+- kind
+- parser_id
+- architecture
+- bitness
+- endianness
+- entry_point
+- build_id optional
+
+## EvidenceItem
+
+classification：
+
+- Observed
+- Derived
+- Declared
+- Unknown
+
+至少：
+
+- field
+- source_type
+- source_locator
+- parser/rule
+- value representation
+- notes optional
+
+规则：
+
+Declared 不能覆盖 Observed。
+
+Unknown：
+
+必须是显式数据，
+不能使用：
+
+None
+
+在所有语义上代替 Unknown。
+
+可以：
+
+Option<T>
+
+表达“field 本身不存在”，
+
+但领域层的：
+
+“我们不知道这个事实”
+
+必须能表达为：
+
+Evidence/Capability Unknown。
+
+## BuildIdentity
+
+区分：
+
+Artifact evidence
+和
+Workspace Git context。
+
+禁止：
+
+Git HEAD == Artifact build commit
+
+这种隐式假设。
+
+## BuildSnapshot
+
+至少包含：
+
+- stable id strategy
+- artifacts
+- identity
+- memory
+- sections
+- symbols
+- evidence
+- capabilities
+- created_by_fwsight_version
+
+P0 中 Snapshot 必须：
+
+# immutable after creation
+
+Diff / Gate 后续只读它。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. `firmwaresight-artifact`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+职责：
+
+- untrusted-file intake
+- stat
+- full-buffer guard
+- streaming SHA-256
+- magic/format detection
+- ELF parse through `object`
+- GNU ld MAP adapter foundation
+- normalized parser result mapping
+- typed diagnostics
+
+依赖：
+
+# object
+
+DWARF：
+
+`gimli`
+
+仅 optional / feature-scoped。
+
+如果 P0 slice 不需要 DWARF：
+
+不要为了“以后可能”把它接进关键路径。
+
+禁止：
+
+把：
+
+object::Symbol
+object::Section
+
+直接暴露到：
+
+Core
+CLI DTO
+Tauri DTO
+React
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. 输入文件是 Untrusted
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+所有：
+
+ELF
+MAP
+HEX
+BIN
+
+都视为不可信输入。
+
+P0 必须遵守：
+
+- user input parser panic = bug
+- bounds checked
+- no project-authored unsafe parser unless absolutely unavoidable and reviewed
+- typed errors
+- malformed fixture
+- truncate fixture
+- wrong magic fixture
+- empty fixture
+- oversize fixture
+- no path traversal assumptions
+
+如果第三方 crate panic：
+
+捕获/隔离策略必须评估。
+
+不要用：
+
+unwrap()
+expect()
+
+处理用户输入路径上的可失败数据。
+
+单元测试内部对固定 invariant 的 expect 可以存在，
+但必须受控。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. Artifact Pipeline
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+严格：
+
+```text
+Path
+ ↓
+metadata/stat
+ ↓
+size guard
+ ↓
+streaming SHA-256
+ ↓
+magic detect
+ ↓
+read immutable buffer
+ ↓
+object parse
+ ↓
+adapter facts
+ ↓
+normalize
+ ↓
+evidence classify
+ ↓
+BuildSnapshot
+```
+
+重要：
+
+# guard before allocation
+
+默认：
+
+max_full_buffer_bytes
+=
+512 MiB
+
+规则：
+
+- `size > 512 MiB`
+  → typed ArtifactTooLarge
+- 不进行 full allocation
+- 不自动 fallback mmap
+- 不自动修改 limit
+
+limit 后续可配置，
+
+但 P0 使用 baseline default。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. SHA-256
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Artifact Identity 必须包含：
+
+SHA-256
+
+要求：
+
+- streaming
+- 固定 chunk
+- 不先 full-read 为了 hash
+- lowercase hex stable representation
+- CLI/Desktop 同结果
+
+不要：
+
+SHA-1
+MD5
+
+作为 identity。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. ELF P0 必须解析的事实
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用：
+
+object crate
+
+至少：
+
+- architecture
+- bitness
+- endianness
+- entry point
+- sections
+- section size
+- section address where available
+- section flags/kind
+- symbols where present
+- symbol address
+- symbol size
+- symbol section relation
+- build-id when reliably available
+
+不能假设：
+
+- symbol table 一定有
+- debug info 一定有
+- `.text` 一定叫 `.text`
+- 所有 ELF 都是 ARM
+- 所有 firmware 都是 little-endian
+- section naming 跨 toolchain 相同
+
+能力不足：
+
+必须进入 capability/evidence，
+
+不能导致：
+
+整个 BuildSnapshot 假失败。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. GNU ld MAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 不需要完成所有 MAP 能力。
+
+但必须建立：
+
+```text
+MapAdapter
+```
+
+边界。
+
+至少有：
+
+- adapter ID
+- detect
+- parse
+- typed error
+- normalized result type
+
+P0 优先验证：
+
+GNU ld
+
+如果 P0 fixture 同时可以生成：
+
+`firmware.map`
+
+则至少实现：
+
+- recognized as GNU ld MAP
+- symbol/object contribution 中的一个最小可验证事实
+或
+- 能够明确产出 Supported/Partial capability
+
+禁止：
+
+一个大正则“尽可能解析所有 MAP”。
+
+禁止：
+
+ArmClang/IAR fallback 到 GNU parser。
+
+如果不是 GNU ld：
+
+返回：
+
+Unsupported / Unknown capability
+
+不是：
+
+“部分成功”后静默给假数据。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. P0 Real Fixture
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 必须至少有：
+
+# 1 个真实编译得到的 ELF fixture
+
+不是：
+
+手工伪造 JSON。
+
+优先方案：
+
+使用当前可用：
+
+GCC / Clang
+
+编译一个极小、确定性的 C fixture。
+
+可以：
+
+- host ELF 作为 parser-infrastructure fixture
+- 带一个简单 GNU ld MAP
+- 自定义几个 section/symbol 用于测试
+
+必须在：
+
+fixture.toml
+
+记录：
+
+- fixture id
+- purpose
+- compiler/tool version
+- source
+- generated command
+- architecture
+- expected capability
+- license/provenance
+- known limitations
+
+如果环境有：
+
+arm-none-eabi-gcc
+
+可以增加 embedded ARM fixture。
+
+但：
+
+不要让 P0 成败依赖本机必须有 ARM GCC。
+
+如果仓库提交 binary fixture：
+
+必须说明来源和可重建方法。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. 推荐 P0 Fixture Source
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+建议建立：
+
+```text
+fixtures/elf/p0-basic/
+├── README.md
+├── fixture.toml
+├── source/
+│   └── main.c
+├── firmware.elf
+└── firmware.map
+```
+
+main.c 可以构造：
+
+- code
+- const rodata
+- initialized data
+- bss
+- custom `.ota_staging`
+- a few named functions
+
+例如：
+
+mqtt_task
+tls_handshake
+sensor_fifo
+
+但：
+
+这些只是技术 fixture，
+
+不是产品 Demo 必须完全复制 V0 数据。
+
+P0 的目标是：
+
+可重复的技术事实。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. Malformed Fixtures
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少：
+
+```text
+fixtures/malformed/
+├── empty.bin
+├── wrong-magic.bin
+├── truncated-elf.bin
+└── oversize-generator metadata/script
+```
+
+不要把：
+
+>512 MiB
+
+大文件直接提交进 Git。
+
+使用脚本：
+
+动态生成。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. Memory Accounting — 这是 P0 关键验证
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+禁止：
+
+“section 名字是 .data，所以只算 RAM”
+
+这类错误模型。
+
+必须遵守：
+
+ADR-0021
++
+04_TECH/23_MEMORY_ACCOUNTING_MODEL.md
+
+核心：
+
+# Nonvolatile / Load Image Footprint
+
+和：
+
+# Runtime RAM Footprint
+
+是两个不同预算。
+
+典型：
+
+`.data`
+
+可能：
+
+同时占：
+
+- nonvolatile load bytes
+- runtime RAM bytes
+
+`.bss`
+
+典型：
+
+- runtime RAM
+- file payload ≈ 0
+
+Debug：
+
+默认不算 device budget。
+
+Custom section：
+
+不能仅靠名字猜。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. Memory Evidence Precedence
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+从强到弱：
+
+1.
+explicit project memory-region config
++
+ELF program/load evidence
+
+2.
+supported MAP memory-region evidence
+
+3.
+ELF segment/section address + flags deterministic mapping
+
+4.
+section-name heuristic
+
+第 4 级：
+
+只能：
+
+Derived
+low-confidence
+
+不能：
+
+Observed
+
+不能：
+
+Hard BLOCK foundation。
+
+P0 fixture 必须设计成：
+
+可以对 memory result 写 deterministic expected result。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. Memory Model P0 Acceptance
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少测试：
+
+- code contributes nonvolatile
+- rodata contributes nonvolatile
+- initialized data has correct dual-accounting when fixture/evidence supports it
+- bss contributes runtime RAM
+- debug sections excluded
+- custom alloc section accounted from real evidence
+- Unknown/Partial when region evidence insufficient
+
+必须建立 golden：
+
+golden/core/p0-basic-memory.json
+
+Golden 中：
+
+除了数值，
+
+还必须能看：
+
+Evidence Source / Classification
+
+避免以后：
+
+数值对了，
+来源错了。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. Build Identity
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+实现：
+
+04_TECH/24_BUILD_IDENTITY_EVIDENCE.md
+
+必须区分：
+
+## Artifact observed identity
+
+- SHA-256
+- byte size
+- build-id
+- architecture
+
+## Version
+
+可以来自：
+
+- embedded version
+- user declaration
+- Git exact tag context
+- Unknown
+
+必须保存来源。
+
+## Git
+
+系统 Git facts：
+
+- repo root
+- HEAD
+- tag
+- dirty
+
+只能叫：
+
+Workspace provenance/context
+
+不能默认叫：
+
+Artifact build provenance。
+
+如果没有 Git：
+
+Artifact analysis：
+
+继续。
+
+Git evidence：
+
+Unknown。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. Git Adapter 在 P0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+系统 Git CLI：
+
+允许。
+
+禁止：
+
+shell string：
+
+`sh -c "git ..."`
+
+应该：
+
+直接 spawn：
+
+git
+arg1
+arg2
+
+必须：
+
+- timeout
+- capture status
+- capture stdout/stderr
+- sanitize log path
+- machine-readable format where possible
+
+P0 可以做：
+
+minimal optional Git context。
+
+但：
+
+如果它影响主 slice 进度，
+
+可以作为：
+
+P0 secondary item。
+
+不能让：
+
+“电脑没 Git”
+
+导致：
+
+ELF analyze 失败。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. Error Model
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少建立 stable error taxonomy。
+
+例如：
+
+- ArtifactNotFound
+- ArtifactPermissionDenied
+- ArtifactTooLarge
+- UnsupportedFormat
+- InvalidElf
+- MalformedArtifact
+- MapUnsupported
+- MapParseFailed
+- Io
+- Storage
+- InternalInvariant
+
+这些名字可以根据现有 Glossary/工程命名调整。
+
+但必须满足：
+
+Application/UI 能映射到稳定：
+
+code
+message
+operation_id
+details?
+remediation?
+
+Stack trace：
+
+不跨 IPC 正常返回。
+
+User path：
+
+日志默认不要直接全量记录。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. Tracing
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 就启用：
+
+tracing
++
+tracing-subscriber
+
+至少 spans：
+
+artifact.hash
+artifact.detect
+artifact.parse
+artifact.normalize
+memory.account
+storage.import
+ipc.command
+
+字段：
+
+operation_id
+adapter_id
+artifact_kind
+byte_size
+elapsed_ms
+result_class
+
+禁止默认 log：
+
+- firmware bytes
+- symbol 全名列表
+- private source path
+- source code
+- secret
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. `firmwaresight-storage`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用：
+
+# rusqlite
+# bundled
+
+P0 不是要把全部 History 产品写完。
+
+但必须验证 storage boundary 可成立。
+
+至少：
+
+SQLite init：
+
+- foreign_keys = ON
+- busy timeout
+- migration version
+
+WAL：
+
+在当前平台/模式支持时开启。
+
+不要盲目硬断言所有场景都必须 WAL。
+
+建立 migration：
+
+建议：
+
+0001_initial.sql
+
+最小逻辑可包含：
+
+projects
+builds
+artifacts
+sections
+symbols
+evidence
+schema_migrations
+
+如果为了 P0 round-trip 可以进一步精简，
+
+必须保证：
+
+和 15_STORAGE_DATABASE_BASELINE.md 的未来模型兼容，
+
+不要设计一个未来必须推翻的 schema。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. Storage P0 Test
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少一个 integration test：
+
+```text
+BuildSnapshot
+ ↓
+begin transaction
+ ↓
+save
+ ↓
+commit
+ ↓
+read back summary
+ ↓
+semantic equality
+```
+
+再测试：
+
+模拟失败：
+
+transaction rollback
+
+保证：
+
+不会出现：
+
+half-import visible as COMPLETE。
+
+P0 不要求：
+
+完整 History UI。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. `firmwaresight-report`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 只做：
+
+# deterministic JSON path
+
+如果容易：
+
+可以有 minimal HTML smoke，
+
+但不是 P0 Exit 核心。
+
+CLI：
+
+`--json`
+
+必须通过：
+
+report crate
+
+或共享 stable serializer path，
+
+避免 CLI 自己重新定义 DTO。
+
+不要：
+
+serde_json::to_string(BuildSnapshot)
+
+直接当作永远公开 schema，
+
+除非明确：
+
+P0 Internal Contract。
+
+要区分：
+
+- Core Domain
+- CLI DTO
+- Portable Public Schema
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. CLI — `fwsight`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用：
+
+Clap
+
+P0 必须真实可执行：
+
+```bash
+fwsight analyze fixtures/elf/p0-basic/firmware.elf
+
+fwsight analyze \
+  fixtures/elf/p0-basic/firmware.elf \
+  --map fixtures/elf/p0-basic/firmware.map \
+  --json
+```
+
+P0 不要求：
+
+完整 diff/gate/release。
+
+可以：
+
+只实现 analyze。
+
+如果 Clap 帮助中预留未来命令：
+
+必须明确：
+
+not implemented
+
+或干脆不注册。
+
+不要让用户以为：
+
+diff
+gate
+release
+
+已经可用。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. CLI stdout / stderr
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+stdout：
+
+结果。
+
+stderr：
+
+- diagnostics
+- progress
+- errors
+
+`--json`：
+
+stdout 必须只有：
+
+machine-readable JSON
+
+不能混：
+
+“Analyzing…”
+
+这种文本。
+
+diagnostics：
+
+stderr。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. CLI Exit Codes — P0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+遵循 baseline：
+
+0:
+success
+
+2:
+usage/config
+
+3:
+parse/import
+
+后续：
+
+4 review
+5 block
+6 export
+
+P0 尚未实现 Gate/Export 时：
+
+不要制造假的 4/5/6 流程。
+
+至少测试：
+
+- valid ELF → 0
+- wrong magic → 3
+- missing path → 3 或按已冻结 error mapping
+- invalid option → 2
+- oversize → parse/import class 3
+
+CI 不允许通过：
+
+解析自然语言
+
+判断结果。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. Deterministic JSON
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 CLI JSON：
+
+必须：
+
+- stable field ordering where renderer can control
+- no unnecessary wall-clock
+- no random UUID each run unless normalized/excluded from golden
+- no absolute machine path unless required
+- project/fixture-relative path preferred
+- stable evidence classifications
+- stable capability representation
+
+同一个 fixture：
+
+连续执行两次：
+
+semantic JSON：
+
+必须相同。
+
+如果 operation_id：
+
+属于 diagnostics，
+
+不要放进 deterministic core output。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. Golden Tests
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少：
+
+```text
+golden/
+├── core/
+│   ├── p0-basic-snapshot.json
+│   └── p0-basic-memory.json
+├── cli/
+│   └── p0-basic-analyze.json
+└── reports/
+    └── p0-basic-summary.json
+```
+
+更新 Golden：
+
+必须：
+
+人工查看 semantic diff。
+
+禁止：
+
+“测试失败 → 一键 update golden → 通过”。
+
+脚本如果支持：
+
+UPDATE_GOLDEN=1
+
+必须默认 Off。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. CLI / Core / Desktop Parity
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+这是 P0 最重要退出条件之一。
+
+同一个：
+
+firmware.elf
+firmware.map
+
+Core：
+
+产生：
+
+BuildSnapshot S
+
+CLI：
+
+读取 S-derived DTO
+
+Desktop：
+
+读取 S-derived DTO
+
+必须证明：
+
+以下字段一致：
+
+sha256
+byte_size
+architecture
+bitness
+endianness
+entry
+memory totals
+section count
+symbol count
+capabilities
+
+不能：
+
+CLI 自己算一遍。
+
+React 自己算一遍。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. Typed IPC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+遵循 ADR-0019：
+
+# ts-rs
+
+只用于：
+
+Desktop/Application IPC DTO boundary。
+
+结构：
+
+```text
+Core domain
+ ↓ explicit mapping
+IPC DTO
+  + serde
+  + ts-rs
+ ↓ generated TypeScript
+```
+
+禁止：
+
+Core Domain struct 为了前端方便塞：
+
+Tauri
+ts-rs
+UI formatting logic
+
+如果可以：
+
+ts-rs derive 放在：
+
+Desktop/Application DTO module
+
+或合适 boundary。
+
+Generated TS：
+
+放：
+
+apps/desktop/ui/src/ipc/generated/
+
+禁止手改。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. IPC DTO Minimum
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 至少：
+
+AnalysisSummaryDto
+
+包含：
+
+- artifact
+- identity
+- memory summary
+- section_count
+- symbol_count
+- capabilities
+- evidence_summary
+
+ErrorEnvelope：
+
+- code
+- message
+- operation_id
+- details?
+- remediation?
+
+DTO：
+
+bounded。
+
+不要通过 IPC：
+
+整个 100k Symbols。
+
+P0 Desktop 不需要 Symbol table。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. Tauri 2 Shell
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 创建：
+
+apps/desktop/src-tauri/
+
+使用：
+
+Tauri 2 stable compatible set。
+
+Tauri command：
+
+用 user-use-case 语义。
+
+P0 可以只有：
+
+`analyze_artifact`
+
+或：
+
+`get_analysis_summary`
+
+不要：
+
+read_file
+run_sql
+execute_shell
+get_any_path
+
+Tauri：
+
+必须是薄壳。
+
+业务逻辑：
+
+不能写在：
+
+#[tauri::command]
+
+里。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. UI Thread / Blocking
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ELF parse
+hash
+SQLite
+Git
+
+都是：
+
+CPU/blocking IO。
+
+不能：
+
+直接卡 WebView event loop。
+
+Desktop：
+
+在 blocking/background task 执行。
+
+Core API：
+
+仍然同步。
+
+不要：
+
+为了 Tauri async
+
+把：
+
+Core
+
+改成 async domain。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. Minimal React UI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Stack：
+
+- React 19.3
+- TypeScript strict
+- Vite 8
+- CSS custom properties
+- CSS Modules
+
+不要：
+
+Redux
+Zustand
+full UI framework
+chart library
+
+P0 UI 只需要：
+
+```text
+P0 Technical Summary
+
+[Choose ELF / fixture]
+
+Artifact
+- SHA
+- size
+- architecture
+- endian
+- entry
+
+Capabilities
+- ELF
+- Symbols
+- MAP
+- Git
+
+Memory
+- Nonvolatile / Load
+- Runtime RAM
+- evidence quality
+
+Counts
+- Sections
+- Symbols
+
+[typed error state]
+```
+
+不要：
+
+复制七屏完整 V0 Prototype。
+
+P0 不是 P1。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. Design
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+虽然是 minimal UI，
+
+仍要遵守：
+
+DESIGN.md
++
+assets/design-tokens.json
+
+特别：
+
+- Light
+- no gradient
+- no glass
+- no neon
+- no purple branding
+- no decorative card shadows
+- icon + label state
+- mono technical values
+- 1px borders
+- focused hierarchy
+- keyboard basics
+- prefers-reduced-motion
+
+但是：
+
+不要花大量时间做 final polish。
+
+P0 UI 的目标：
+
+credible enough to validate architecture.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. Token Generation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Root：
+
+assets/design-tokens.json
+
+是 authority。
+
+可以建立：
+
+scripts/generate-design-tokens.*
+
+生成：
+
+apps/desktop/ui/src/styles/tokens.css
+
+要求：
+
+- deterministic
+- CI drift check
+- generated file 不手改
+- 不重写 root token values
+
+如果这个生成器超出 P0 时间：
+
+至少建立：
+
+validated minimal import/generation path
+
+不要在 UI 手写一套完全不同 token。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. TypeScript Strict
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少：
+
+strict
+noUncheckedIndexedAccess
+exactOptionalPropertyTypes
+useUnknownInCatchVariables
+
+IPC：
+
+禁止：
+
+any
+
+catch：
+
+处理 unknown。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. Node / pnpm
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Node：
+
+24 LTS
+
+`.node-version`
+
+pin baseline supported line / validated exact version strategy。
+
+pnpm：
+
+12
+
+package.json：
+
+`packageManager`
+
+pin exact validated version。
+
+不要：
+
+npm
+yarn
+bun
+
+混用 lockfile。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. Dependency Discipline
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只引入 P0 真需要的 dependency。
+
+Rust 可能包括：
+
+- serde
+- serde_json
+- thiserror or baseline approved error library
+- sha2
+- hex
+- object
+- tracing
+- tracing-subscriber
+- rusqlite bundled
+- clap
+- ts-rs
+- Tauri stable compatible set
+
+根据现有 Dependency Baseline 校正。
+
+禁止看到“方便”就加入：
+
+anyhow everywhere
+tokio everywhere
+rayon
+memmap2
+sqlx
+gix
+wgpu
+reqwest
+tauri plugin zoo
+large UI framework
+
+如果 Dependency Baseline 已经冻结某 crate：
+
+使用冻结选择。
+
+如果没有：
+
+先小 spike，
+
+再写 decision note。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. Git Provenance
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 optional secondary slice：
+
+可以实现 system Git adapter：
+
+- HEAD
+- exact tag
+- dirty
+
+但必须：
+
+不影响 ELF main slice。
+
+No Git：
+
+→ capability degraded / Unknown
+
+不是：
+
+analyze failure。
+
+如果本轮时间/复杂度影响核心 P0：
+
+可以延迟到 P1，
+
+只要：
+
+Build Identity 模型已经正确保留来源边界。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. 512 MiB Guard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 必须实现：
+
+stat before allocation。
+
+默认：
+
+512 MiB。
+
+测试：
+
+## under
+
+small fixture
+
+## near
+
+synthetic:
+~100 MiB
+~256 MiB
+~512 MiB
+
+## over
+
+>512 MiB
+
+要求：
+
+Over：
+
+必须在 full-buffer allocation 前：
+
+ArtifactTooLarge
+
+不要把：
+
+100/256/512 MiB 文件
+
+提交进 repo。
+
+使用：
+
+scripts/
+
+动态生成。
+
+可以：
+
+复制合法 ELF 前缀，
+然后扩展 trailing bytes，
+
+用于：
+
+I/O / full-buffer guard workload。
+
+必须标：
+
+Synthetic Performance Workload
+
+不是：
+
+真实 firmware claim。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+47. P0 Benchmark
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须记录：
+
+- fixture/workload
+- file size
+- hash time
+- read time
+- parse time
+- normalize time
+- total wall time
+- peak RSS when environment permits
+- result
+- environment
+- build profile
+
+输出：
+
+P0_TECHNICAL_VALIDATION/
+P0_PERFORMANCE_REPORT.md
+
+如果环境不能可靠测 peak RSS：
+
+写：
+
+NOT MEASURED
++
+reason
+
+禁止编数字。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+48. Panic Discipline
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+运行：
+
+malformed fixtures
+
+必须：
+
+typed Result
+
+而不是：
+
+panic。
+
+建议：
+
+cargo test
+
++
+parser-boundary fuzz harness scaffold。
+
+P0 Exit 要求：
+
+“parser 不因用户输入 panic”。
+
+不一定要求完成大规模 fuzz campaign，
+
+但至少：
+
+- no-panic regression tests
+- fuzz target/scaffold if baseline tool policy permits
+
+如果增加 cargo-fuzz：
+
+先确认 Dependency/Tool policy。
+
+不要为了“看起来完整”引入不必要工具。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+49. Storage Schema Migration
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+初始 migration 必须有：
+
+schema_migrations
+
+或可靠 migration mechanism。
+
+禁止：
+
+数据库 schema 不匹配时：
+
+delete DB
+recreate silently
+
+测试：
+
+fresh database
+
++
+repeat open
+
++
+migration idempotence / version recognition
+
+P0 不需要：
+
+legacy production migration
+
+因为还没 GA。
+
+但地基必须：
+
+可演进。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+50. Security / Privacy
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 Desktop：
+
+不需要：
+
+network。
+
+不要：
+
+自动 telemetry。
+
+不要：
+
+上传 artifact。
+
+Tauri capability：
+
+最小权限。
+
+Frontend：
+
+不能：
+
+直接随意 filesystem。
+
+文件输入：
+
+显式 path / dialog / fixture。
+
+HTML/report future rendering：
+
+P0 如果涉及：
+
+escape all untrusted text。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+51. Platform Priority
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tier 1：
+
+Windows 11 x64
+
+兼容：
+
+Windows 10 x64
+如果当前 Tauri/WebView 支持验证。
+
+Tier 2：
+
+macOS Apple Silicon
+macOS Intel
+Ubuntu LTS x64
+
+P0 本地开发环境：
+
+先完成当前 host。
+
+但 CI/工程结构必须：
+
+避免 Windows-only hack。
+
+Path：
+
+Path / PathBuf
+
+禁止手拼：
+
+"C:\\foo\\bar"
+
+到 Core。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+52. CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+建立：
+
+.github/workflows/
+
+P0 至少：
+
+Rust：
+- fmt --check
+- clippy --all-targets --all-features
+- test workspace
+- fixture/golden tests
+
+Frontend：
+- frozen pnpm install
+- typecheck
+- lint if configured
+- build
+- generated TS clean
+- generated tokens clean
+
+PR：
+
+Windows + Linux required
+
+macOS：
+
+遵循现有 CI event matrix：
+
+PR 可 cost-controlled
+
+main：
+
+core smoke required
+
+release：
+
+所有声明 release target
+
+不要为了 P0：
+
+先写完整签名/notarization release pipeline。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+53. Supply Chain
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果 baseline 已要求：
+
+cargo-deny
+
+建立：
+
+deny.toml
+
+至少准备：
+
+license/source/advisory
+
+但：
+
+不要因为 advisories transient issue：
+
+自动大版本升级 dependency。
+
+所有 lockfile：
+
+提交。
+
+禁止：
+
+未经 review 的 major auto-upgrade。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+54. P0 Test Matrix
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须至少有：
+
+## Artifact
+
+- valid ELF
+- valid ELF + MAP
+- no MAP
+- missing symbol table
+- wrong magic
+- truncated ELF
+- empty
+- oversize
+
+## Domain
+
+- Evidence classification
+- Unknown explicit
+- Declared cannot overwrite Observed
+- snapshot immutability by API
+- memory dual accounting
+
+## CLI
+
+- human success
+- JSON success
+- invalid path
+- invalid format
+- oversize
+- stdout/stderr separation
+- deterministic JSON
+
+## Storage
+
+- migration
+- snapshot roundtrip
+- transaction rollback
+
+## IPC
+
+- DTO generation
+- generated TS compile
+- ErrorEnvelope
+- summary parity
+
+## Desktop
+
+- success state
+- loading/busy
+- typed error
+- capability degraded
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+55. Core / CLI / Desktop Parity Test
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须有自动测试或 golden comparison：
+
+同 fixture：
+
+Core facts：
+
+X
+
+CLI JSON：
+
+X-derived
+
+Desktop DTO：
+
+X-derived
+
+断言：
+
+Artifact SHA
+Byte size
+Architecture
+Bitness
+Endianness
+Entry
+Memory totals
+Section count
+Symbol count
+Capabilities
+
+全部一致。
+
+这不是：
+
+手工截图“看起来差不多”。
+
+要自动断言。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+56. P0 Technical Validation Artifacts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+建立：
+
+```text
+P0_TECHNICAL_VALIDATION/
+├── README.md
+├── P0_PLAN.md
+├── P0_IMPLEMENTATION_LOG.md
+├── P0_ARCHITECTURE_CHECK.md
+├── P0_FIXTURE_REGISTER.md
+├── P0_PARSER_RESULTS.md
+├── P0_MEMORY_ACCOUNTING_REPORT.md
+├── P0_CLI_PARITY_REPORT.md
+├── P0_IPC_PARITY_REPORT.md
+├── P0_STORAGE_REPORT.md
+├── P0_PERFORMANCE_REPORT.md
+├── P0_SECURITY_INPUT_REPORT.md
+├── P0_DEPENDENCY_REPORT.md
+├── P0_CI_REPORT.md
+├── P0_KNOWN_LIMITATIONS.md
+├── P0_EXIT_CHECKLIST.md
+└── P0_TECHNICAL_VALIDATION_REPORT.md
+```
+
+不要用文档替代测试。
+
+报告必须引用：
+
+实际命令
+实际 test result
+actual fixture
+actual JSON/golden
+actual benchmark
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+57. P0 Implementation Log
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每一个关键工程决策：
+
+记录：
+
+- Problem
+- Existing authority
+- Chosen implementation
+- Alternatives considered
+- Scope impact
+- Dependency impact
+- Test evidence
+- ADR required?
+
+如果只是：
+
+函数名重构
+
+不要写 ADR。
+
+如果：
+
+改变 architecture boundary
+
+必须暂停并 ADR。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+58. P0 Exit Criteria — Authority Minimum
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+基线要求进入 Product MVP 前至少：
+
+- real ELF fixture 可重复解析
+- normalized BuildSnapshot 稳定
+- CLI JSON 与 Desktop 核心结果一致
+- parser 不因用户输入 panic
+- Tauri UI 不被解析任务阻塞
+- golden fixture 通过
+
+另外 v0.5 P0 Track：
+
+- deterministic facts
+- Core/CLI/Desktop parity
+- no parser panic
+- memory accounting proven on fixtures
+- typed IPC path proven
+- large-file guard benchmark
+
+全部都必须进入：
+
+P0_EXIT_CHECKLIST.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+59. 本 Prompt 的 P0 PASS 条件
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只有以下全部有真实工程证据：
+
+□ Rust workspace builds
+□ exactly 4 Phase-0 library crates
+□ real ELF fixture parse repeatable
+□ malformed inputs return typed errors/no panic
+□ SHA-256 stable
+□ BuildSnapshot normalized/stable
+□ Evidence model preserved
+□ memory accounting golden passes
+□ CLI analyze works
+□ CLI deterministic JSON passes
+□ CLI exit-code tests pass
+□ SQLite migration smoke passes
+□ SQLite snapshot transaction/roundtrip passes
+□ ts-rs generation works
+□ TypeScript strict build passes
+□ minimal Tauri summary builds
+□ blocking parse not on WebView event loop
+□ Core/CLI/Desktop parity passes
+□ 512 MiB guard works before allocation
+□ ~100/256/512 MiB performance workloads recorded
+□ golden tests pass
+□ fmt passes
+□ clippy passes
+□ cargo test passes
+□ frontend typecheck/build passes
+□ no forbidden dependency/boundary violation
+□ P0 reports complete
+□ known limitations explicit
+
+才允许：
+
+# P0 TECHNICAL VALIDATION PASS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+60. V0 与 P0 的最终状态
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+即使 P0 PASS：
+
+不要写：
+
+G1 PASS
+
+因为 V0：
+
+仍然没有真实人类验证。
+
+正确状态：
+
+```text
+V0:
+DEFERRED / NOT YET EVIDENCE-VALIDATED
+
+P0:
+PASS
+
+Foundation Engineering:
+AUTHORIZED TO CONTINUE ONLY WHEN USER EXPLICITLY AUTHORIZES NEXT PHASE
+
+Formal G1:
+NOT CLAIMED
+```
+
+用户当前战略：
+
+允许技术基础继续往下推进。
+
+但：
+
+下一阶段 P1：
+
+仍需下一条明确授权 Prompt。
+
+不要自己继续。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+61. 若 P0 未完全通过
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+不要为了交付版本：
+
+伪造 PASS。
+
+输出唯一最终状态：
+
+P0 CONDITIONAL_PASS / FAIL / BLOCKED
+
+并列：
+
+- Passed
+- Failed
+- Environment blocked
+- Missing
+- Risk
+- Next fix
+
+不要：
+
+隐藏 failing tests。
+
+不要：
+
+删 test。
+
+不要：
+
+降低 assertion
+
+为了绿色。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+62. 版本交付规则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果：
+
+P0 全部 Exit Criteria 通过
+
+则输出完整：
+
+# FirmwareSight_Project_Baseline_v0.6.0
+
+定位：
+
+# P0 Technical Foundation Baseline
+
+它必须继承：
+
+v0.5.1 全部产品/设计/治理 authority
+
+并加入：
+
+- 正式 source tree
+- Cargo.lock
+- pnpm-lock
+- fixtures
+- golden
+- P0 reports
+- CI
+- current-state updates
+- changelog
+- manifest
+- SHA256SUMS
+- directory tree
+
+如果：
+
+P0 未通过
+
+不要把版本叫：
+
+v0.6.0 PASS baseline。
+
+可以输出：
+
+working package / failure evidence
+
+但版本升级必须避免误导。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+63. v0.6.0 README 必须说清楚
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果 P0 PASS：
+
+README 必须明确：
+
+## What v0.6.0 proves
+
+- Technical foundation works
+- real ELF to Core/CLI/Desktop slice works
+- architecture boundaries tested
+- memory accounting fixture-proven
+- IPC generation proven
+- storage foundation proven
+- large-file guard proven
+
+## What it does NOT prove
+
+- product-market fit
+- user comprehension
+- willingness to pay
+- V0 PASS
+- G1 PASS
+- P1 Analyze complete
+- Compare complete
+- Gate complete
+- Bundle complete
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+64. `.ai` 状态更新
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 开始后：
+
+`.ai/ACTIVE_TASK.md`
+
+应变为：
+
+# P0 — Technical Vertical Slice
+
+并注明：
+
+V0:
+deferred / non-blocking research track
+
+P0 完成后：
+
+如果 PASS：
+
+Active Task：
+NONE
+
+Next suggested:
+P1 Analyzer
+
+但：
+
+P1 not authorized.
+
+如果 P0 incomplete：
+
+Active Task：
+P0 remaining blockers.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+65. 禁止的“聪明优化”
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+不要：
+
+因为 Rust 强类型，
+
+一次设计 200 个类型。
+
+不要：
+
+因为 Hexagonal，
+
+创建 30 个 trait。
+
+不要：
+
+因为 Future CI，
+
+现在做 service abstraction。
+
+不要：
+
+因为未来 Cloud，
+
+先做 network layer。
+
+不要：
+
+因为 future SBOM，
+
+先做 Component repository。
+
+不要：
+
+因为 future plugin，
+
+做 plugin API。
+
+不要：
+
+因为 future async，
+
+Tokio 化整个 Core。
+
+不要：
+
+因为 future performance，
+
+一开始 mmap / Rayon / unsafe SIMD。
+
+不要：
+
+因为 future UI，
+
+上完整 UI Framework。
+
+# Simplicity first.
+
+但不是：
+
+偷工减料。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+66. Trait 使用纪律
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只有真实替换边界：
+
+Artifact adapter
+Storage port
+Provenance
+Report
+
+才需要 trait。
+
+如果只有一个实现，
+且没有测试替换/架构价值：
+
+优先具体类型。
+
+不要：
+
+“所有 service 都 trait”。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+67. Unsafe Policy
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 Core / Artifact：
+
+原则：
+
+# no project-authored unsafe
+
+除非第三方 crate 内部。
+
+如果必须写 unsafe：
+
+立即：
+
+暂停
+
+说明：
+
+Why
+Invariant
+Alternatives
+Test
+Security impact
+
+没有明确授权：
+
+不要引入。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+68. Error / Unknown 区分
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须严格区分：
+
+# Error
+
+操作本身无法可靠完成。
+
+例如：
+
+InvalidElf
+
+和：
+
+# Unknown
+
+某个事实缺 evidence。
+
+例如：
+
+Git build provenance Unknown。
+
+不要：
+
+缺 Git → error
+
+不要：
+
+无 MAP → import fail
+
+不要：
+
+无 symbols → invalid ELF
+
+Capabilities：
+
+用于表达 degraded analysis。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+69. P0 Capability Example
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No MAP：
+
+```text
+ELF:
+Supported
+
+Sections:
+Available
+
+Symbols:
+Available from ELF symbol table if present
+
+MAP:
+Not provided
+
+Object attribution:
+Unavailable / Partial
+
+Git provenance:
+Unknown / not linked
+```
+
+如果 ELF 本身无 symbols：
+
+Symbols：
+
+Unavailable
+
+不是：
+
+Parse Failure。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+70. Desktop Error State
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 Desktop typed error：
+
+至少像：
+
+Code:
+ERR-PARSE-...
+
+Message:
+Could not parse artifact as ELF.
+
+Details:
+safe fact
+
+Remediation:
+Choose linker ELF output.
+
+Operation ID:
+...
+
+不能：
+
+把 Rust debug：
+
+`Err(Object("..."))`
+
+直接给用户。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+71. Diagnostics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Stable diagnostic ID：
+
+由 application mapping 生成。
+
+测试：
+
+同类 error：
+
+稳定 code。
+
+具体 operation_id：
+
+可以每次不同，
+
+但：
+
+不进入 deterministic core golden。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+72. Performance 不得过早优化
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 benchmark 目的是：
+
+发现事实。
+
+不是：
+
+必须让 512 MiB 解析 <1 秒。
+
+先记录：
+
+wall time
+peak RSS
+breakdown
+
+如果 memory 高：
+
+记录。
+
+不要立刻：
+
+mmap
+parallel
+unsafe
+
+除非证据显示：
+
+当前模型不能接受。
+
+如果决定改变 baseline：
+
+需要 ADR。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+73. Code Quality
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+要求：
+
+- readable modules
+- minimal public API
+- explicit Result
+- no giant god module
+- no premature abstraction
+- tests beside domain where appropriate
+- integration tests for cross-crate
+- comments explain why, not restate code
+
+Rust：
+
+clippy clean
+
+不要：
+
+`#[allow(clippy::all)]`
+
+这种逃避。
+
+允许局部 allow：
+
+必须有原因。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+74. Frontend Quality
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TypeScript：
+
+无：
+
+`any`
+
+无：
+
+`// @ts-ignore`
+
+除非：
+
+极少数第三方 typing blocker
+
+且有：
+
+issue/reference/reason。
+
+React：
+
+不要在 render 中做 parse/business computation。
+
+IPC response：
+
+映射到 view model。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+75. README / Developer Experience
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 后必须做到：
+
+新 Agent / 新开发者可以按照：
+
+README
+
+在干净机器上知道：
+
+- required toolchain
+- install dependencies
+- build Rust
+- test Rust
+- install frontend
+- build frontend
+- run CLI fixture
+- run Desktop
+- run golden tests
+- run P0 checks
+
+不要让知识只存在：
+
+聊天记录。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+76. 一键检查脚本
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+建议：
+
+scripts/check.*
+
+跨平台优先：
+
+可以：
+
+Python script
+
+或：
+
+Node script
+
+不要只写：
+
+bash
+
+如果 Windows Tier 1。
+
+该脚本至少编排：
+
+- cargo fmt --check
+- cargo clippy
+- cargo test
+- pnpm typecheck
+- pnpm build
+- generated file drift
+- golden checks
+
+如果环境差异：
+
+提供：
+
+PowerShell
++
+portable script
+
+也可。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+77. P0 Commands 记录
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md
+
+必须记录实际运行命令：
+
+例：
+
+rustc --version
+cargo --version
+node --version
+pnpm --version
+
+cargo fmt --check
+cargo clippy ...
+cargo test ...
+
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm build
+
+cargo run -p fwsight -- analyze ...
+
+不要伪造：
+
+“CI passed”
+
+如果只是本地运行。
+
+区分：
+
+LOCAL PASS
+CI PASS
+NOT RUN
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+78. P0 Exit Checklist 证据格式
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每项：
+
+Requirement:
+Status:
+Evidence:
+Command:
+Artifact:
+Notes:
+
+例如：
+
+Requirement:
+CLI JSON deterministic
+
+Status:
+PASS
+
+Evidence:
+same fixture analyzed twice, canonical JSON semantic hash equal
+
+Command:
+...
+
+Artifact:
+golden/cli/p0-basic-analyze.json
+
+Notes:
+wall-clock excluded
+```
+
+不要只：
+
+✅
+
+没有 evidence。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+79. Source Control Hygiene
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+不要提交：
+
+target/
+node_modules/
+generated 512 MiB workload
+private local path
+secrets
+OS junk
+temporary DB
+
+提交：
+
+Cargo.lock
+pnpm-lock.yaml
+fixture binaries if provenance accepted
+golden
+migrations
+generated TS if governance chooses checked-in generation
+generated tokens if current repo governance requires it
+
+.gitignore：
+
+明确。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+80. Fixture Binary 可重建性
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果 commit：
+
+firmware.elf
+
+必须同时有：
+
+source
+build command
+tool version
+SHA-256
+fixture metadata
+
+未来 fixture 更新：
+
+不能默默替换 binary。
+
+必须：
+
+hash change visible。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+81. Golden 与 Fixture Hash
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+建议：
+
+fixtures/manifest.json
+
+记录：
+
+path
+sha256
+purpose
+expected adapter
+expected capability
+
+P0 test：
+
+先验证 fixture hash，
+
+再跑 golden。
+
+避免：
+
+fixture 被改了，
+
+golden 还“碰巧通过”。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+82. P0 JSON Contract
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 CLI JSON 可以标：
+
+schema_version:
+0 / p0-internal
+
+如果还不是 Public Schema。
+
+不要错误使用：
+
+release-manifest v1
+
+来承载 Analyze Snapshot。
+
+如果决定创建：
+
+analyze-result.schema.json
+
+必须判断：
+
+它是否 public stable contract。
+
+如果只是内部：
+
+不要过早承诺 v1 compatibility。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+83. Portable Schemas
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+现有：
+
+release-manifest
+gate-results
+accepted-reviews
+
+不能因为 P0 还没实现 Release：
+
+去修改它们迎合 P0。
+
+P0 Snapshot/IPC：
+
+使用自己的 internal DTO。
+
+Portable Schema：
+
+只在真正对应 Bundle 时使用。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+84. Gate Domain Model
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 可以：
+
+保留/测试：
+
+GateFinding model
+
+五态：
+
+PASS
+REVIEW
+BLOCK
+UNKNOWN
+N/A
+
+但：
+
+不要实现完整 P3 Gate policy engine。
+
+可以有：
+
+domain enum + invariants tests。
+
+目的：
+
+防止以后 model drift。
+
+不要：
+
+把 P0 Parse Result
+
+变成：
+
+Gate verdict。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+85. Review Acceptance
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 不需要完整 acceptance UI。
+
+但 domain model 如果存在：
+
+必须保持：
+
+Finding 原 state
++
+Acceptance record
+
+不能：
+
+mutate finding to PASS。
+
+测试这一 invariant。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+86. V0 Prototype
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+保留：
+
+V0_VALIDATION/
+
+不删除。
+
+P0 Desktop：
+
+不要 import V0 static prototype code
+
+作为 Production Frontend。
+
+可以：
+
+参考视觉
+参考交互
+参考 fixture narrative
+
+但正式代码：
+
+独立构建。
+
+这避免：
+
+prototype tech debt
+直接进入生产。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+87. P0 与 V0 数据
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 fixture：
+
+不必强行复制：
+
+relay-controller v0.3.0-rc2
+
+所有 demo 数字。
+
+技术 fixture：
+
+以：
+
+真实可重复编译
+
+优先。
+
+但：
+
+如果容易，
+
+可以使用同名符号：
+
+mqtt_task
+tls_handshake
+
+帮助以后 Demo/fixture 联动。
+
+不要：
+
+为了 UI 数字一致
+
+伪造 ELF。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+88. P0 Known Limitations
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须坦率记录：
+
+例如：
+
+- only GNU ld MAP adapter proven
+- DWARF not enabled
+- Git provenance secondary/not implemented
+- only one real ELF architecture fixture
+- memory model proven on controlled fixture, not all toolchains
+- desktop only summary
+- no full History
+- no Compare/Gate/Bundle product workflow
+
+Known Limitations：
+
+不是失败。
+
+隐藏 limitation：
+
+才是失败。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+89. P0 Architecture Check
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0_ARCHITECTURE_CHECK.md
+
+至少检查：
+
+Core dependency graph：
+
+无：
+- tauri
+- rusqlite
+- tokio
+- object public leak
+
+Artifact：
+
+可以 depend core/object
+
+Storage：
+
+depend core/rusqlite
+
+Report：
+
+depend core/serde-related
+
+CLI：
+
+depend core/artifact/report/storage as needed
+
+Desktop backend：
+
+depend core/artifact/storage/report as needed
+
+Frontend：
+
+只 IPC
+
+禁止：
+
+frontend → filesystem/sqlite
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+90. Cargo Dependency Graph
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+运行：
+
+cargo tree
+
+保存摘要。
+
+检查：
+
+- 是否意外带入网络 client
+- 是否意外带入 async runtime beyond Tauri
+- 是否意外带入 OpenSSL when rustls/no network expected
+- 是否 dependency explosion
+
+不要因为 transitive dependency：
+
+立刻删合理 crate。
+
+但记录。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+91. Licenses
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 dependency report：
+
+记录：
+
+direct dependencies
+license
+purpose
+why needed
+
+不需要手工列出所有 transitive 1000 个 crate，
+
+可以通过 tool 生成。
+
+但要：
+
+识别：
+
+GPL/unknown/source risk
+
+遵守 baseline supply-chain policy。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+92. Tauri Capabilities
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用：
+
+minimum capabilities。
+
+P0 不需要：
+
+shell execute plugin
+global filesystem scope
+network plugin
+updater
+
+如果文件选择：
+
+可以通过：
+
+Tauri dialog path
+
+或最小 fixture input。
+
+不要给 frontend：
+
+任意 FS authority。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+93. No Telemetry
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+禁止：
+
+Sentry
+PostHog
+Analytics
+Remote logs
+
+P0 performance：
+
+本地。
+
+tracing：
+
+本地。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+94. P0 Technical Report 最终结构
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0_TECHNICAL_VALIDATION_REPORT.md：
+
+必须有：
+
+# 1 Executive Summary
+
+P0 PASS/PARTIAL/BLOCKED
+
+# 2 Environment
+
+OS
+CPU
+RAM
+Rust
+Node
+pnpm
+compiler fixture tool
+
+# 3 Architecture implemented
+
+4 crates
+apps
+dependency direction
+
+# 4 Real fixture
+
+source
+hash
+compiler
+facts
+
+# 5 Parser
+
+success
+malformed
+capabilities
+
+# 6 Memory accounting
+
+model
+golden
+limitations
+
+# 7 BuildSnapshot
+
+stability
+evidence
+
+# 8 CLI
+
+human
+JSON
+exit codes
+determinism
+
+# 9 Storage
+
+migration
+transaction
+roundtrip
+
+# 10 IPC
+
+ts-rs
+generated TS
+error envelope
+
+# 11 Desktop
+
+same facts
+responsive execution
+error state
+
+# 12 Parity
+
+Core/CLI/Desktop
+
+# 13 Large-file guard
+
+100/256/512
+over limit
+
+# 14 Tests
+
+actual commands/results
+
+# 15 CI
+
+actual vs configured
+
+# 16 Dependencies
+
+# 17 Security/privacy
+
+# 18 Known limitations
+
+# 19 Exit checklist
+
+# 20 Recommendation
+
+Proceed to P1?
+Technically yes/no
+
+注意：
+
+“Technically ready for P1”
+
+不等于：
+
+“V0 validated”。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+95. P0 Recommendation 类型
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只能：
+
+# P0 PASS
+
+# P0 CONDITIONAL PASS
+
+# P0 FAIL
+
+Conditional：
+
+只能用于：
+
+非核心环境限制/次要项，
+
+不能用于掩盖：
+
+- parser panic
+- wrong memory
+- CLI/Desktop mismatch
+- build fails
+- guard fails
+- snapshot unstable
+
+这些：
+
+必须 FAIL / blocked。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+96. 完整回归
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+结束前：
+
+自主审查
+→
+自主评审
+→
+自主排序
+→
+自主修改
+→
+完整回归
+→
+独立交付验证
+
+至少两轮：
+
+## Round A
+Developer self-check
+
+## Round B
+Fresh-process / clean-worktree style validation
+
+尽量：
+
+删除 target/cache 不必要状态
+重新构建
+
+验证：
+
+不是因为旧产物才通过。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+97. 不要修改原 V0 Evidence
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P0 不应：
+
+编辑 PA session
+
+因为没有。
+
+也不应：
+
+把 V0 Gate recommendation 改为 PASS。
+
+只可以更新：
+
+Project current state
+
+写：
+
+V0 deferred / still unvalidated。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+98. v0.6.0 交付包
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+若 P0 PASS：
+
+输出：
+
+FirmwareSight_Project_Baseline_v0.6.0.zip
+
+必须包括：
+
+- 全部 v0.5.1 authority
+- V0_VALIDATION 保留
+- 正式代码
+- locks
+- fixtures
+- goldens
+- migrations
+- P0 reports
+- scripts
+- CI
+- updated README
+- updated BASELINE.yaml
+- updated CHANGELOG.md
+- updated INDEX.md
+- updated DIRECTORY_TREE.txt
+- manifest.txt
+- SHA256SUMS
+- `.ai` handoff/current/decisions/task
+- ZIP integrity verification
+
+并报告：
+
+File count
+Markdown count
+Rust source count
+TS/TSX source count
+Fixture count
+Test count
+ZIP bytes
+SHA-256
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+99. 版本更新规则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+v0.6.0：
+
+代表：
+
+# P0 Technical Foundation Baseline
+
+不是：
+
+MVP 0.6
+
+不是：
+
+用户验证版本。
+
+README 必须写：
+
+V0:
+DEFERRED / UNVALIDATED
+
+P0:
+PASS
+
+G1:
+NOT CLAIMED
+
+P1:
+NOT AUTHORIZED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+100. 如果环境不能运行 Tauri GUI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果 CI/headless 环境无法真的打开 GUI：
+
+仍必须：
+
+- compile Tauri backend
+- build frontend
+- test DTO/command function
+- run IPC contract tests
+
+可以：
+
+记录：
+
+GUI interactive smoke NOT RUN — headless environment
+
+但不能：
+
+写 GUI smoke PASS。
+
+如果可以正常启动：
+
+执行真实 smoke。
+
+不要用截图伪造运行成功。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+101. 如果 Rust 1.98.1 无法获取
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+先检查：
+
+baseline pin。
+
+如果当前环境没有：
+
+可以安装/使用工具链，
+
+如果执行环境允许。
+
+如果因为网络/权限不能：
+
+记录：
+
+Environment Blocker。
+
+不要：
+
+悄悄使用另一个 Rust
+
+然后写：
+
+P0 validated under 1.98.1。
+
+可以：
+
+额外测试较新版本，
+
+但 baseline test：
+
+仍要注明没跑。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+102. Dependency Exact Version
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Baseline docs：
+
+拥有 major/family policy。
+
+Lockfiles：
+
+拥有 exact versions。
+
+因此：
+
+不要把所有 exact crate version
+
+重复写到 20 个文档。
+
+P0 report：
+
+可以记录：
+
+Cargo.lock actual.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+103. 代码来源
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+不要复制：
+
+未知 license 代码片段。
+
+Fixture/source：
+
+自己写
+或
+明确许可证。
+
+如果从官方 example 修改：
+
+记录来源/license。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+104. User-visible Product Copy
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+即使 P0 minimal Desktop：
+
+避免：
+
+“Safe to ship”
+“Certified”
+“Secure”
+“Compliant”
+
+可以：
+
+“Analysis complete”
+“Evidence unavailable”
+“MAP not provided”
+“Artifact parsed”
+“Configured policy not evaluated in P0”
+
+P0 不要伪造 Release Gate。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+105. 交付前必须回答的 10 个问题
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. 真 ELF 到 BuildSnapshot 真跑通了吗？
+2. JSON 是同一 Core Facts 吗？
+3. Desktop 是同一 Core Facts 吗？
+4. `.data` Accounting 有证据吗？
+5. malformed ELF 会 panic 吗？
+6. 513 MiB 会先 guard 吗？
+7. Core 是否被 Tauri/SQLite污染？
+8. TS 类型是从 Rust boundary 生成的吗？
+9. Storage transaction 会留下 half-complete 吗？
+10. 当前哪些东西仍然 Unknown/Unvalidated？
+
+任何一个：
+
+不能回答
+
+就：
+
+不要轻率 P0 PASS。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+106. 第一次执行后的自动继续
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+第一次回复 P0 接手报告后，
+
+如果没有真正阻断：
+
+不要等用户说：
+
+“继续”
+
+直接：
+
+开始实施。
+
+按照：
+
+Plan
+→ Workspace
+→ Core
+→ Artifact
+→ Fixture
+→ Memory
+→ CLI
+→ Storage
+→ IPC
+→ Desktop
+→ Tests
+→ Bench
+→ CI
+→ Audit
+→ Regression
+→ Deliver
+
+完成到：
+
+P0 stop condition。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+107. P0 Stop Condition
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+完成：
+
+P0_TECHNICAL_VALIDATION_REPORT.md
+
+并确定：
+
+P0 PASS / CONDITIONAL_PASS / FAIL / BLOCKED
+
+如果 PASS：
+
+生成 v0.6.0。
+
+然后：
+
+# STOP
+
+不要自行进入：
+
+P1 Analyzer。
+
+等待下一条：
+
+P1 Prompt / 授权。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+108. 最终纪律
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+这一阶段不是继续讨论产品。
+
+这一阶段是把过去已经确定的原则变成：
+
+# 可编译
+# 可测试
+# 可重复
+# 可审计
+# 可扩展
+# 不自欺
+
+的工程基础。
+
+不要为了：
+
+“架构漂亮”
+
+牺牲：
+
+实际闭环。
+
+不要为了：
+
+“赶版本”
+
+牺牲：
+
+测试与事实。
+
+不要因为：
+
+V0 没真人
+
+继续停工。
+
+也不要因为：
+
+现在允许工程推进
+
+就假装 V0 已经验证。
+
+最终状态必须能够同时真实表达：
+
+> 我们还不知道用户会不会买，
+> 但我们已经知道这个技术地基是真的、可运行的、可测试的。
+
+FirmwareSight 的工程原则仍然是：
+
+# Evidence First
+
+因此 P0 的每一个“完成”，都必须有：
+
+# Engineering Evidence。

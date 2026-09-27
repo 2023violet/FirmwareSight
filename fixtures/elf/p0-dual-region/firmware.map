@@ -1,0 +1,100 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ROM              0x08000000         0x00100000         xr
+RAM              0x20000000         0x00040000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD build/main.o
+
+.text           0x08000000       0x3c
+ *(.text*)
+ .text          0x08000000       0x38 build/main.o
+                0x08000000                mqtt_task
+                0x08000020                tls_handshake
+                0x0800002c                sensor_fifo
+ .text.startup  0x08000038        0x4 build/main.o
+                0x08000038                main
+
+.glue_7         0x0800003c        0x0
+ .glue_7        0x0800003c        0x0 linker stubs
+
+.glue_7t        0x0800003c        0x0
+ .glue_7t       0x0800003c        0x0 linker stubs
+
+.vfp11_veneer   0x0800003c        0x0
+ .vfp11_veneer  0x0800003c        0x0 linker stubs
+
+.v4_bx          0x0800003c        0x0
+ .v4_bx         0x0800003c        0x0 linker stubs
+
+.iplt           0x0800003c        0x0
+ .iplt          0x0800003c        0x0 build/main.o
+
+.rodata         0x0800003c       0x20
+ *(.rodata*)
+ .rodata        0x0800003c       0x20 build/main.o
+                0x0800003c                cfg_table
+                0x0800005c                        _sidata = LOADADDR (.data)
+
+.rel.dyn        0x0800005c        0x0
+ .rel.iplt      0x0800005c        0x0 build/main.o
+
+.data           0x20000000        0x4 load address 0x0800005c
+ *(.data*)
+ .data          0x20000000        0x4 build/main.o
+                0x20000000                g_threshold
+
+.igot.plt       0x20000004        0x0 load address 0x08000060
+ .igot.plt      0x20000004        0x0 build/main.o
+
+.bss            0x20000004        0x4 load address 0x08000060
+ *(.bss*)
+ .bss           0x20000004        0x4 build/main.o
+                0x20000004                g_scratch
+ *(COMMON)
+
+.ota            0x20000008       0x40 load address 0x08000060
+ *(.ota_staging*)
+ .ota_staging   0x20000008       0x40 build/main.o
+                0x20000008                staging_area
+OUTPUT(firmware.elf elf32-littlearm)
+LOAD linker stubs
+
+.debug_info     0x00000000      0x126
+ .debug_info    0x00000000      0x126 build/main.o
+
+.debug_abbrev   0x00000000       0xa6
+ .debug_abbrev  0x00000000       0xa6 build/main.o
+
+.debug_aranges  0x00000000       0x28
+ .debug_aranges
+                0x00000000       0x28 build/main.o
+
+.debug_rnglists
+                0x00000000       0x19
+ .debug_rnglists
+                0x00000000       0x19 build/main.o
+
+.debug_line     0x00000000       0x98
+ .debug_line    0x00000000       0x98 build/main.o
+
+.debug_str      0x00000000      0x113
+ .debug_str     0x00000000      0x113 build/main.o
+
+.comment        0x00000000       0x46
+ .comment       0x00000000       0x46 build/main.o
+                                 0x47 (size before relaxing)
+
+.ARM.attributes
+                0x00000000       0x2e
+ .ARM.attributes
+                0x00000000       0x2e build/main.o
+
+.debug_frame    0x00000000       0x60
+ .debug_frame   0x00000000       0x60 build/main.o

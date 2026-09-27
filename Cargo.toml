@@ -1,0 +1,35 @@
+[workspace]
+resolver = "3"
+members = [
+  "apps/cli",
+  "apps/desktop/src-tauri",
+  "crates/firmwaresight-core",
+  "crates/firmwaresight-artifact",
+  "crates/firmwaresight-storage",
+  "crates/firmwaresight-report",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+publish = false
+license = "Proprietary"
+repository = "https://github.com/2023violet/FirmwareSight"
+
+# Exact versions are owned by Cargo.lock. This table names the crate family and the
+# boundary that is allowed to use it, per 04_TECH/11_DEPENDENCY_BASELINE.md.
+[workspace.dependencies]
+firmwaresight-core = { path = "crates/firmwaresight-core" }
+firmwaresight-artifact = { path = "crates/firmwaresight-artifact" }
+firmwaresight-storage = { path = "crates/firmwaresight-storage" }
+firmwaresight-report = { path = "crates/firmwaresight-report" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = 1

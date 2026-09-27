@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.5.1
   date: 2026-09-27
-  status: V0_EXECUTION_IN_PROGRESS_EXTERNAL_SAMPLE_PENDING
+  status: P0_EXECUTION_IN_PROGRESS_V0_DEFERRED_UNVALIDATED
 
 principles:
   - evidence_first
@@ -27,11 +27,12 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_ACTIVE
+  current_gate: G0_PASS_V0_DEFERRED_P0_ACTIVE
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
     - P0_technical_vertical_slice
   g1_requires: [V0_PASS, P0_PASS]
+  g1_claimed: false
   product_mvp_phases: [P1_analyzer, P2_compare, P3_gate, P4_bundle]
   own_artifact_validation: V1
 
@@ -92,9 +93,11 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-active_task: V0_WORKFLOW_PROTOTYPE_VALIDATION
+active_task: P0_TECHNICAL_VERTICAL_SLICE
 
 
+# Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
+# workflow-prototype prompt authorized; P0 was authorized separately, see `p0_execution` below.
 v0_execution:
   authorized: true
   prompt: FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
@@ -106,3 +109,23 @@ v0_execution:
   external_participants_target: "12-15"
   status: INCOMPLETE_INSUFFICIENT_EXTERNAL_SAMPLE
   p0_authorized: false
+
+# V0 is deferred as a non-blocking research track. Deferred is not passed: the 0 / 8
+# external-sample fact above stays in force and ADR-0020 still gates P1 on both V0 and P0.
+v0_track:
+  disposition: DEFERRED_NOT_YET_EVIDENCE_VALIDATED
+  blocks_p0_engineering: false
+
+p0_execution:
+  authorized: true
+  prompt: FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
+  prompt_sha256: 60a59196708a53592be4d828a0c1275cf74b3bfad0bdc6455f863ab38d32929b
+  provenance: P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md
+  start_local_head: e086e9880e00900e305a3cd88b4d899f73aa5711
+  start_remote_head: e086e9880e00900e305a3cd88b4d899f73aa5711
+  status: IN_PROGRESS_FINAL_STATUS_UNDETERMINED
+  allowed_final_statuses: [PASS, CONDITIONAL_PASS, FAIL, BLOCKED]
+  library_crate_budget: 4
+  target_baseline_on_pass: 0.6.0
+  p1_authorized: false
+  g1_claimed_by_p0_pass: false

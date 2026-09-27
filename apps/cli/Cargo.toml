@@ -1,0 +1,20 @@
+[package]
+name = "fwsight"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+description = "FirmwareSight command line interface."
+
+[[bin]]
+name = "fwsight"
+path = "src/main.rs"
+
+[dependencies]
+firmwaresight-core = { workspace = true }
+firmwaresight-artifact = { workspace = true }
+firmwaresight-report = { workspace = true }
+firmwaresight-storage = { workspace = true }
+clap = { version = "4.6.7", features = ["derive"] }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }

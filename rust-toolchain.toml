@@ -1,0 +1,6 @@
+# Pinned to the frozen toolchain baseline (04_TECH/10_TOOLCHAIN_BASELINE.md).
+# Deliberately not `channel = "stable"`: a floating channel would let the release
+# toolchain drift without an ADR.
+[toolchain]
+channel = "1.98.1"
+components = ["rustfmt", "clippy"]

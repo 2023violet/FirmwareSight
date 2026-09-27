@@ -1,0 +1,23 @@
+[package]
+name = "firmwaresight-artifact"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+description = "Untrusted artifact intake, size guard, streaming hash, ELF parsing and MAP adapters."
+
+[dependencies]
+firmwaresight-core = { workspace = true }
+object = "0.40.0"
+sha2 = "0.11.0"
+thiserror = "2.0.21"
+tracing = "0.1.44"
+
+[features]
+default = []
+# DWARF via gimli stays off the P0 critical path (04_TECH/16_ARTIFACT_ANALYSIS_PIPELINE.md).
+dwarf = []
+
+[dev-dependencies]
+serde_json = "1.0.151"
