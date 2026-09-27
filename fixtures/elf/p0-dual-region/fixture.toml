@@ -3,7 +3,7 @@
 fixture_id = "p0-dual-region"
 purpose = "Memory accounting proof fixture: ROM/RAM regions with .data and .ota VMA-resident in RAM and LMA-stored in ROM."
 license = "Written for this project; no third-party code copied"
-generated_on = "2026-09-27"
+generated_on = "2026-09-28"
 
 [toolchain]
 name = "arm-none-eabi-gcc"
@@ -11,7 +11,7 @@ version = "arm-none-eabi-gcc.EXE (Arm GNU Toolchain 14.3.Rel1 (Build arm-14.174)
 linker = "GNU ld (Arm GNU Toolchain 14.3.Rel1 (Build arm-14.174)) 2.44.0.20250616"
 
 [build]
-command = '''arm-none-eabi-gcc -g -Os -mcpu=cortex-m4 -mthumb -c source/main.c -o build/main.o && arm-none-eabi-gcc -g -Os -mcpu=cortex-m4 -mthumb -nostdlib -nostartfiles -e main build/main.o -p0-dual-region.ld  -Wl,-Map=firmware.map  -o firmware.elf'''
+command = '''arm-none-eabi-gcc -g -Os -mcpu=cortex-m4 -mthumb -c source/main.c -o build/main.o && arm-none-eabi-gcc -g -Os -mcpu=cortex-m4 -mthumb -nostdlib -nostartfiles -e main build/main.o -T p0-dual-region.ld -Wl,-Map=firmware.map -o firmware.elf'''
 rebuild_script = "scripts/gen_p0_fixtures.py"
 
 [expectations]

@@ -355,3 +355,42 @@ fn the_same_snapshot_is_never_stored_twice() {
         .expect("count builds");
     assert_eq!(builds, 1);
 }
+
+#[test]
+fn the_connection_carries_the_pragmas_the_schema_assumes() {
+    // Foreign keys and a busy timeout are set at open time, and the whole concurrency story
+    // depends on them. Asserting them here means a future change to `establish()` fails a test
+    // instead of quietly weakening the database.
+    let db_file = TempDb::new("pragmas");
+    let db = Database::open(db_file.path()).expect("open");
+
+    let foreign_keys: i64 = db
+        .connection()
+        .query_row("PRAGMA foreign_keys", [], |row| row.get(0))
+        .expect("read foreign_keys pragma");
+    assert_eq!(
+        foreign_keys, 1,
+        "cascade rules are meaningless with FK enforcement off"
+    );
+
+    let journal_mode: String = db
+        .connection()
+        .query_row("PRAGMA journal_mode", [], |row| row.get(0))
+        .expect("read journal mode");
+    assert!(
+        matches!(
+            journal_mode.as_str(),
+            "wal" | "delete" | "memory" | "truncate"
+        ),
+        "an unexpected journal mode means the open path changed: got {journal_mode}"
+    );
+
+    let timeout: i64 = db
+        .connection()
+        .query_row("PRAGMA busy_timeout", [], |row| row.get(0))
+        .expect("read busy timeout");
+    assert!(
+        timeout > 0,
+        "a zero busy timeout turns contention into an immediate error"
+    );
+}

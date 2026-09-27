@@ -22,7 +22,6 @@ path = "src/main.rs"
 tauri-build = { version = "2.7.0", features = [] }
 
 [dependencies]
-firmwaresight-core = { workspace = true }
 firmwaresight-artifact = { workspace = true }
 firmwaresight-report = { workspace = true }
 firmwaresight-storage = { workspace = true }

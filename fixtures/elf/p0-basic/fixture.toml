@@ -3,7 +3,7 @@
 fixture_id = "p0-basic"
 purpose = "Parser infrastructure fixture: format detection, sections, symbols, SHA-256, debug-section presence and capability reporting."
 license = "Written for this project; no third-party code copied"
-generated_on = "2026-09-27"
+generated_on = "2026-09-28"
 
 [toolchain]
 name = "arm-none-eabi-gcc"

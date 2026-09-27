@@ -923,7 +923,6 @@ dependencies = [
  "serde_json",
  "sha2 0.11.0",
  "thiserror 2.0.21",
- "tracing",
 ]
 
 [[package]]
@@ -935,7 +934,6 @@ name = "firmwaresight-desktop"
 version = "0.1.0"
 dependencies = [
  "firmwaresight-artifact",
- "firmwaresight-core",
  "firmwaresight-report",
  "firmwaresight-storage",
  "serde",
@@ -1102,9 +1100,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "firmwaresight-artifact",
- "firmwaresight-core",
  "firmwaresight-report",
- "firmwaresight-storage",
  "serde_json",
  "tracing",
  "tracing-subscriber",

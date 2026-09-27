@@ -334,7 +334,7 @@ fn malformed_inputs_return_typed_errors_and_never_panic() {
         "fixtures/malformed/empty.bin",
         "fixtures/malformed/wrong-magic.bin",
         "fixtures/malformed/truncated-elf.bin",
-        "fixtures/malformed/oversize-sparse.bin",
+        "fixtures/malformed/sparse-elf-header.bin",
     ];
 
     for case in cases {

@@ -289,8 +289,8 @@ def main() -> int:
                 "-c source/main.c -o build/main.o",
                 "&& arm-none-eabi-gcc -g -Os -mcpu=cortex-m4 -mthumb -nostdlib -nostartfiles",
                 "-e main build/main.o",
-                ("-p0-dual-region.ld " if target["flags"] else ""),
-                (f"-Wl,-Map=firmware.map " if target["map"] else ""),
+                ("-T p0-dual-region.ld" if target["flags"] else ""),
+                (f"-Wl,-Map=firmware.map" if target["map"] else ""),
                 "-o firmware.elf",
             ]
         )
@@ -326,16 +326,18 @@ def main() -> int:
     source_elf = fixtures / "elf" / "p0-basic" / "firmware.elf"
     prefix = source_elf.read_bytes()[:64]
     (malformed / "truncated-elf.bin").write_bytes(prefix)
-    (malformed / "oversize-sparse.bin").write_bytes(b"\x7fELF" + (b"\x00" * 16))
-    (malformed / "oversize-sparse.bin").with_name("README.md").write_text(
+    (malformed / "sparse-elf-header.bin").write_bytes(b"\x7fELF" + (b"\x00" * 16))
+    (malformed / "sparse-elf-header.bin").with_name("README.md").write_text(
         "# Malformed fixtures\n\n"
-        "Each file here is a regression input for the untrusted-intake path.\n\n"
+        "Each file here is a regression input for the untrusted-intake path. None of them is\n"
+        "large; they are named for what they claim, not for what they are.\n\n"
         "- `empty.bin` - zero bytes: rejected as malformed, no panic.\n"
-        "- `wrong-magic.bin` - valid-looking prefix, wrong overall format.\n"
+        "- `wrong-magic.bin` - ELF magic followed by prose: rejected as an unsupported format.\n"
         "- `truncated-elf.bin` - a real ELF header cut short, so table offsets point past EOF.\n"
-        "- `oversize-sparse.bin` - a generator seed, not the oversize workload itself.\n\n"
-        "The >512 MiB guard workload is never committed. Generate it with\n"
-        "`python scripts/gen_perf_workloads.py`.\n",
+        "- `sparse-elf-header.bin` - ELF magic plus a zero-filled header, so every declared\n"
+        "  size and offset reads as zero: rejected rather than trusted.\n\n"
+        "The >512 MiB guard workload is never committed; generate it with\n"
+        "`python scripts/gen_p0_workload.py`.\n",
         encoding="utf-8",
         newline="\n",
     )

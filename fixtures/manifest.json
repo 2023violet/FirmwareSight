@@ -11,7 +11,7 @@
     },
     {
       "path": "fixtures/elf/p0-basic/fixture.toml",
-      "sha256": "7a7c665548fb19cfd71a605e95b12046805c51403ef2898f0c368b01592943aa",
+      "sha256": "650aca4084a1af12dbfff350ce9cbb700935d8f7f7d96acb35666a52073d6f88",
       "fixture": "p0-basic",
       "purpose": "fixture-support"
     },
@@ -29,7 +29,7 @@
     },
     {
       "path": "fixtures/elf/p0-dual-region/fixture.toml",
-      "sha256": "0bec62fc957da34fbe168613b17a60bd9229b4600cc01afa65e41d6130bd8583",
+      "sha256": "fab423144229ff0cfcf7cb0bef8fb39f7398abedeeecc0628bb2662300828977",
       "fixture": "p0-dual-region",
       "purpose": "fixture-support"
     },
@@ -46,7 +46,7 @@
       "purpose": "negative-input-regression"
     },
     {
-      "path": "fixtures/malformed/oversize-sparse.bin",
+      "path": "fixtures/malformed/sparse-elf-header.bin",
       "sha256": "1c3519444924ee1f065d443da2e599275bfca893e942f29c0684ddad9e91de23",
       "fixture": "malformed",
       "purpose": "negative-input-regression"
