@@ -129,7 +129,7 @@ p0_execution:
   # The tree the delivered gate result belongs to. The commit that records this field is its child
   # and changes documentation only; see P0_EXECUTION_PROVENANCE.md "Final validated HEAD".
   final_validated_head: 65cb2dc
-  commits_local: 6
+  commits_to_validated_tree: 6
   remote_state: origin/main unchanged at e086e98; no push authorized, none performed
   status: EXECUTED_CONDITIONAL_PASS_LOCAL
   closed: 2026-09-28

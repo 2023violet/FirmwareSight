@@ -37,8 +37,8 @@ from here; `AGENTS.md` 1 forbids inventing work while this file reads `NONE`.
 - The 512 MiB guard refuses an oversized artifact before allocating for it (measured: 7.7 ms, no
   hash time), and the whole slice stays within the frozen architecture with no ADR required.
 
-Evidence: `P0_TECHNICAL_VALIDATION/` - the 17 documents the prompt names, plus
-`P0_EXECUTION_PROVENANCE.md` and `P0_DESIGN_CHECKLIST.md`.
+Evidence: `P0_TECHNICAL_VALIDATION/` - 19 files: the 17 documents the prompt names, plus
+`P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by AGENTS.md 11.
 
 ## Durable facts preserved by this change
 
