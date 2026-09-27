@@ -1,0 +1,47 @@
+{
+  "block": {
+    "id": "f-signed",
+    "rule_id": "signed_image.required",
+    "state": "BLOCK",
+    "summary": "Signature header not found"
+  },
+  "reviews": [
+    {
+      "id": "f-flash-soft",
+      "rule_id": "flash_budget.soft",
+      "state": "REVIEW",
+      "accepted": true,
+      "reason": "Known budget review accepted for demo history"
+    },
+    {
+      "id": "f-ota-section",
+      "rule_id": "ota_staging.new_section",
+      "state": "REVIEW",
+      "accepted": false,
+      "reason": null
+    }
+  ],
+  "map_rules": [
+    {
+      "id": "f-map-parity",
+      "rule_id": "map_parity",
+      "state_a": "UNKNOWN",
+      "state_b": "PASS"
+    },
+    {
+      "id": "f-symbol-audit",
+      "rule_id": "symbol_audit",
+      "state_a": "UNKNOWN",
+      "state_b": "PASS"
+    }
+  ],
+  "passes": [
+    "entry_point.valid",
+    "size_budget.hard",
+    "elf.structure",
+    "version.match"
+  ],
+  "na": [
+    "sbom.present"
+  ]
+}

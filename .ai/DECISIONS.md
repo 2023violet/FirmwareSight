@@ -2,42 +2,30 @@
 title: "Decision Summary"
 doc_id: "FS-AI-003"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-27"
 ---
 
-# Decisions — v0.5.0
+# Decisions — v0.5.1
 
-## Existing core
-- Evidence First
-- Deterministic trusted core
-- Local First
-- Explicit Unknown
-- Core-first / Adapter-driven / Product-specific Shell
-- Rust Core + shared CLI
-- Tauri 2 + React/TS shell
-- SQLite/rusqlite bundled
-- five-state Gate
-- dual firmware memory accounting
-- strict portable schemas
-- IBM/Carbon-inspired temperament + FirmwareSight overrides
+All v0.5.0 architecture/product/design decisions remain in force.
 
-## New v0.5 decisions
-- UI-07 source accepted; seven-screen set complete.
-- Repository code-area plan frozen as `FS-ENG-009`.
-- ADR-0024: expert exploration uses E1/E2/E3/GX candidate namespace; current P0–P4 MVP lifecycle is unchanged.
-- Expert round directional decisions are retained only as candidates.
-- Market claims carry explicit verification class; negative-search claims never become universal facts.
-- Enhanced export/integration/evidence features do not enter current MVP.
-- `.su` stack evidence is a strong E2 candidate requiring a future ADR; full call graph excluded.
-- ESP-IDF `dependencies.lock` is the first evidence-backed component-drift source candidate.
-- SBOM evidence completeness precedes adding more SBOM formats.
-- generic changelog, native PDF, LSP, OTA, binary reverse diff and AI verdicts are not adopted.
+## V0 execution decisions
 
-## Current next work
-After explicit authorization only:
-- V0 workflow prototype;
-- P0 technical vertical slice;
-in parallel.
+- The v1.1 execution prompt is authorized and preserved by SHA-256.
+- V0 prototype is physically isolated under `V0_VALIDATION/`.
+- No Cargo/Rust/Tauri/SQLite production implementation is created.
+- MAP availability follows explicit STATE A→B timing.
+- Parse failure is STATE C and preserves Last Good Artifact.
+- Export controls are prototype-disabled; no E1 exporter is implemented.
+- Review acceptance preserves original REVIEW and records disposition metadata.
+- No mathematical V0 PASS threshold is invented.
+- Formal V0 completion requires minimum N=8 eligible external sessions.
+
+## Current Gate status
+
+`V0 INCOMPLETE — insufficient external sample`
+
+This is an evidence status, not a product-quality verdict.

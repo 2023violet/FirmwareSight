@@ -2,7 +2,7 @@
 title: "Coding Agent Operating Rules"
 doc_id: "FS-GOV-AGENTS"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Engineering"
 last_updated: "2026-09-26"

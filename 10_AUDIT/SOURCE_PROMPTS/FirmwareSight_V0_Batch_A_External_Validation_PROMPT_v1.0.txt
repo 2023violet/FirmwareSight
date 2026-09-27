@@ -1,0 +1,2017 @@
+FirmwareSight V0 — Batch A External Validation
+完整执行 Prompt v1.0
+
+Unique Baseline:
+FirmwareSight_Project_Baseline_v0.5.1
+
+Current Active Task:
+V0 — Workflow Prototype Validation
+Status:
+ACTIVE / EXTERNAL SESSIONS PENDING
+
+Purpose:
+执行 V0 第一批真实外部用户验证（Batch A），收集可追溯的人类行为证据，
+而不是继续主观优化 UI，也不是开始 P0/P1 开发。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. 本 Prompt 的授权边界
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本 Prompt 即代表：
+
+✅ 授权继续执行已经开始的 V0
+✅ 授权执行 Batch A 外部真实用户验证
+✅ 授权筛选/招募/安排 4–5 名真实目标参与者
+✅ 授权使用 v0.5.1 中既有 prototype / protocol / session template
+✅ 授权记录真实 participant behavior / quotes / task results
+✅ 授权完成 Batch A Interim Review
+✅ 授权在 Batch A 后提出 Prototype Change Recommendation
+✅ 授权修复“Critical / obvious usability blocker”，但必须先形成证据记录
+✅ 授权在证据支持下将 prototype 从 v0.1.x 迭代到 v0.2.x
+✅ 授权输出 Batch A evidence package
+
+但是：
+
+❌ 不授权伪造任何参与者
+❌ 不授权 AI 自己扮演 4–5 个“工程师 Persona”
+❌ 不授权用 LLM 模拟用户反应替代真实人类 Session
+❌ 不授权把内部团队成员当作正式外部 participant
+❌ 不授权把没有做完的 Session 写成 Completed
+❌ 不授权 P0 — Technical Vertical Slice
+❌ 不授权创建 Cargo Workspace
+❌ 不授权 Rust/Tauri/SQLite/object/gimli/ts-rs 正式实现
+❌ 不授权 P1–P4 Product MVP Implementation
+❌ 不授权 E1 / E2 / E3 / GX 功能实现
+❌ 不授权擅自更改 FirmwareSight 的产品定位
+❌ 不授权擅自改变五态 Gate 语义
+❌ 不授权发明新的 V0 PASS 数学阈值
+❌ 不授权因为 1 位用户的个人偏好直接重设计产品
+❌ 不授权在没有证据的情况下把 v0.5.1 升级为“V0 PASS”
+
+如果你无法接触真实参与者、真实 Session 录音/转录/观察记录：
+
+# 不得继续假装执行 Batch A。
+
+此时你只能完成：
+- Recruitment Pack
+- Screening Pack
+- Session Scheduling Pack
+- Moderator Pack
+- Evidence Capture Pack
+
+然后状态必须写：
+
+# BATCH A WAITING FOR REAL PARTICIPANTS
+
+并停止。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 唯一 Authority 与接手顺序
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+唯一基线：
+
+# FirmwareSight_Project_Baseline_v0.5.1
+
+禁止使用：
+- v0.5.0 旧包替代当前执行状态；
+- v0.4.x；
+- 外部群聊摘要；
+- 自己记忆的旧规则。
+
+先读取：
+
+1. README.md
+2. PRODUCT_BASELINE.md
+3. BASELINE.yaml
+4. DESIGN.md
+5. AGENTS.md
+
+然后必须读取：
+
+.ai/
+- CURRENT_STATE.md
+- DECISIONS.md
+- HANDOFF.md
+- ACTIVE_TASK.md
+
+V0_VALIDATION/
+- README.md
+- V0_EXECUTION_PROVENANCE.md
+- V0_TAKEOVER_REPORT.md
+- V0_PLAN.md
+
+Prototype：
+- prototype/README.md
+- prototype/FIXTURE_NARRATIVE.md
+- prototype/PROTOTYPE_CHANGELOG.md
+- prototype/index.html
+- prototype/src/state.js
+- prototype/src/app.js
+- prototype/src/styles.css
+- prototype/fixtures/*.json
+
+Protocol：
+- protocol/MODERATOR_GUIDE.md
+- protocol/PARTICIPANT_SCREENING.md
+- protocol/TASK_SCRIPT.md
+- protocol/INTERVIEW_SCRIPT.md
+- protocol/CONSENT_PRIVACY.md
+
+Sessions：
+- sessions/TEMPLATE.md
+- sessions/README.md
+
+Analysis：
+- analysis/METRICS.md
+- analysis/MISUNDERSTANDING_LOG.md
+- analysis/QUOTES.md
+- analysis/TOOLCHAIN_REQUESTS.md
+- analysis/PAYMENT_SIGNALS.md
+- analysis/STATE_TRANSITION_FINDINGS.md
+- analysis/PROTOTYPE_CHANGE_LOG.md
+
+Deliverables：
+- deliverables/V0_FINDINGS.md
+- deliverables/V0_UI_CHANGE_RECOMMENDATIONS.md
+- deliverables/V0_PRODUCT_RISK_UPDATE.md
+- deliverables/V0_GATE_RECOMMENDATION.md
+- deliverables/V0_VALIDATION_REPORT.md
+
+另外读取：
+
+06_DELIVERY/
+- 04_EXTERNAL_VALIDATION_PLAN.md
+- 09_USER_INTERVIEW_QUESTION_BANK.md
+
+09_ADR/
+- ADR-0020-validation-sequence.md
+- ADR-0023-gate-five-state-semantics.md
+- ADR-0024-post-mvp-candidate-governance.md
+
+03_DESIGN/
+- 06_UI_REFERENCE_SCREENS.md
+- 08_POST_MVP_PRESENTATION_RULES.md
+
+完成阅读后：
+
+输出：
+
+# FirmwareSight V0 Batch A 接手报告
+
+包含：
+
+1. 当前 V0 状态
+2. Batch A 目标
+3. 当前 Prototype 版本
+4. Batch A 计划招募人数
+5. Participant eligibility
+6. Primary cohort / Discovery cohort
+7. 必测的 10 个 Task
+8. 五个危险误解
+9. MAP A→B→C→D 状态理解
+10. 当前还缺什么才能启动 Session
+11. 是否具备真实参与者/Session 输入
+12. Blocking Issues
+
+如果有真实参与者渠道：
+
+继续执行。
+
+如果没有：
+
+进入“Recruitment Ready”模式，
+不得模拟 Session。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. Batch A 的真正目标
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A 不是证明 FirmwareSight 很好。
+
+Batch A 只回答：
+
+# 我们设计的核心心智模型，
+# 在真实嵌入式工程师第一次接触时，
+# 哪些部分成立，哪些部分不成立？
+
+本批次重点验证：
+
+A. 第一眼是否理解 FirmwareSight 做什么
+
+B. 是否理解：
+
+Analyze
+→ Compare
+→ Gate
+→ Release
+
+C. 是否自然发现：
+
+MAP missing
+→ Symbols unavailable
+→ Add MAP
+→ analysis capability expands
+
+D. 是否理解：
+
+Unknown
+≠ Error
+≠ Pass
+≠ N/A
+
+E. 是否理解：
+
+Declared
+≠ Observed
+
+F. 是否理解：
+
+Review
+≠ Block
+
+G. 是否理解：
+
+Accept Review
+≠ finding becomes PASS
+
+H. 是否理解：
+
+Bundle
+= Release Evidence Package
+而不只是 ZIP
+
+I. 是否把：
+
+Can we ship now?
+
+误解为：
+
+- 法律合规
+- CRA compliant
+- 产品安全认证
+- 无漏洞
+- 可以上市的最终裁决
+
+J. 是否看到真实工作价值和重复使用价值
+
+K. 是否出现：
+
+- price-anchored willingness
+- buyer/approval path
+- Team Pilot willingness
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. Batch A 样本要求
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A：
+
+# 4–5 名真实外部参与者
+
+Batch A 是整个 V0 minimum N=8 的第一批。
+
+推荐：
+
+4 或 5 人。
+
+优先：
+
+真实：
+- Firmware Engineer
+- Senior Firmware Engineer
+- Firmware Lead
+- Embedded Software Engineer
+- Embedded Team Lead
+
+需要真实参与过：
+
+- firmware build
+- release
+- artifact review
+- memory/size analysis
+- version/release management
+
+优先工具链：
+
+- GCC
+- Clang
+- GNU ld
+- ESP-IDF
+- Zephyr
+
+允许纳入：
+
+- Keil
+- ArmClang
+- IAR
+
+但：
+
+如果当前使用的是 Keil/IAR，
+必须记录为：
+
+# Discovery cohort
+
+不得暗示 FirmwareSight 当前已正式支持其 toolchain。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. 不得计入正式 N 的人
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+以下不得计入正式 usability numerator/denominator：
+
+- FirmwareSight 项目团队成员
+- 设计过七屏 UI 的人
+- 写过 V0 Prompt 的人
+- 参与过原型实现的人
+- 已经提前被完整讲解 Gate/Evidence/Unknown 的人
+- AI Agent
+- LLM 模拟 Persona
+- 用户本人如果已经深度参与产品定义和 UI 设计
+- 同一个参与者重复测试后的第二次 Session
+- Moderator 主动教会流程后才完成的 Session
+
+可以用这些人做：
+
+# Internal Dry Run
+
+但不得计入：
+
+# Formal External N
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. Participant ID 与隐私
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+正式 participant 使用：
+
+PA-001
+PA-002
+PA-003
+PA-004
+PA-005
+
+不要在研究文件名里直接使用真实姓名。
+
+Session 文件：
+
+sessions/
+├── PA-001.md
+├── PA-002.md
+├── PA-003.md
+├── PA-004.md
+└── PA-005.md
+
+如需要独立保存联系方式：
+
+必须与 usability evidence 分离。
+
+例如：
+
+private_recruitment/
+contacts.local.csv
+
+这个文件：
+
+- 默认不入项目交付包；
+- 不进入 Git；
+- 不进入共享 Audit；
+- 不包含在最终公开研究报告。
+
+正式研究包只保留：
+
+Participant ID
+Role
+Experience
+Toolchain
+Ecosystem
+Team size
+Release frequency
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. Recruitment Script
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果需要招募文案，使用中性表达。
+
+推荐：
+
+────────────────────
+
+我们正在测试一个面向嵌入式固件工程师的桌面工具原型，
+主要围绕固件发布前的：
+
+- Build 分析
+- 版本差异
+- Release 检查
+- 发布证据留存
+
+本次不是产品销售，也不是技术考试。
+
+希望邀请有实际 Firmware 开发/发布经验的工程师参加一次约 30–45 分钟的远程/现场原型测试。
+
+测试内容主要是：
+
+“第一次看到这个工具时，你会如何理解和操作它？”
+
+我们不会要求你提供：
+
+- 公司源码
+- 私有 Firmware
+- ELF/MAP
+- 私有仓库
+- 客户数据
+
+如需要录屏/录音，会提前单独征得同意。
+
+────────────────────
+
+禁止招募文案提前解释：
+
+Observed
+Declared
+Unknown
+Gate
+Review
+Bundle
+
+否则污染 Comprehension 测试。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. Screening Questions
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+正式开始前确认：
+
+Q1.
+你的当前角色？
+
+Q2.
+嵌入式/Firmware 开发经验多少年？
+
+Q3.
+主要工具链？
+
+Q4.
+常用 MCU / RTOS / Framework？
+
+Q5.
+你是否真实参与过 Firmware Release？
+
+Q6.
+一次 Release 前通常会检查什么？
+
+Q7.
+多长时间 Release 一次？
+
+Q8.
+团队大约多少人？
+
+Q9.
+是否使用过：
+- MAP
+- ELF
+- size
+- objdump
+- nm
+- IDE memory analyzer
+- CI Gate
+- SBOM
+中的任意工具？
+
+注意：
+
+Q9 只用于背景。
+
+不要用它筛掉：
+
+“没用过 MAP”
+
+的参与者。
+
+因为：
+
+是否能理解 FirmwareSight 的 MAP 提示，
+本身就是测试内容。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. Session 前状态复位
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每个 Participant Session 开始之前：
+
+必须把 prototype reset 到：
+
+# STATE A
+
+验证：
+
+ELF:
+✓ firmware.elf
+
+MAP:
+○ Not provided
+
+Git:
+○ Not linked
+
+Symbols:
+Unavailable
+
+Dependencies:
+restricted / MAP required
+
+Gate:
+
+signed_image.required
+= BLOCK
+
+ota_staging.new_section
+= REVIEW pending
+
+map_parity
+= UNKNOWN
+
+symbol_audit
+= UNKNOWN
+
+Bundle:
+disabled
+
+mbedTLS:
+UNKNOWN
+
+Current:
+v0.3.0-rc2
+
+Baseline:
+v0.2.1
+
+禁止：
+
+PA-002 继承 PA-001 的：
+
+- MAP loaded
+- declaration
+- accepted review
+- signature fixed
+- built bundle
+
+否则 Batch 数据失效。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. Session 开场话术
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只说：
+
+────────────────────
+
+这是一个用于 Firmware Release 前分析、对比、检查和留证的本地桌面工具原型。
+
+请像第一次拿到一个新工具一样操作。
+
+过程中请尽量说出你正在想什么。
+
+这里没有标准答案，我们测试的是产品，不是测试你。
+
+────────────────────
+
+不要解释：
+
+- FirmwareSight 详细定位
+- Analyze/Compare/Gate/Release
+- MAP 用途
+- Unknown
+- Declared
+- Observed
+- Review
+- N/A
+- Bundle
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. Session 主任务
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+严格使用 v0.5.1：
+
+protocol/TASK_SCRIPT.md
+
+不得改写成更有提示性的表达。
+
+顺序：
+
+T1
+Readiness / STATE A
+
+T2
+Obtain Symbol Evidence
+→ 应触发 MAP A→B
+
+T3
+Compare
+
+T4
+OTA Review
+
+T5
+Accept Review
+
+T6
+Bundle Eligibility
+
+T7
+Unknown Dependency
+
+T8
+Declare mbedTLS version
+
+T9
+Invalid ELF / Parse Failure
+
+T10
+Historical Evidence / Bundle & History
+
+每个 Task 开始时：
+
+记录：
+
+Fixture State before
+
+结束后：
+
+记录：
+
+Fixture State after
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. Moderator 禁止行为
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+禁止：
+
+“你点 Analyze 看看。”
+
+禁止：
+
+“这里要先加 MAP。”
+
+禁止：
+
+“UNKNOWN 就是我们不知道。”
+
+禁止：
+
+“Review 是允许人工接受的。”
+
+禁止：
+
+“Bundle 在左边。”
+
+禁止：
+
+“这个按钮就是你要找的。”
+
+禁止：
+
+“这是正确答案。”
+
+禁止：
+
+“很好，你理解对了。”
+
+这些都会污染任务。
+
+如果 Participant 卡住：
+
+先等待。
+
+需要介入时：
+
+使用最低强度非定向提示，例如：
+
+Level 1：
+“你现在在想什么？”
+
+Level 2：
+“如果这是你平时用的软件，你接下来会找什么？”
+
+Level 3：
+“你可以继续探索页面中的操作。”
+
+只有最后才允许：
+
+Directional Intervention
+
+任何定向提示：
+
+必须记录：
+
+Moderator Intervention = Yes
+
+并且该 Task 不得当作“无帮助成功”。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. Success 记录规则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用：
+
+Success
+Success with hesitation
+Failure
+
+不要只记录：
+
+Pass / Fail
+
+建议：
+
+Success：
+- 自行找到路径；
+- 无定向提示；
+- 正确理解结果。
+
+Success with hesitation：
+- 最终独立完成；
+- 有明显绕路/停顿/误读；
+- 无定向答案提示。
+
+Failure：
+- 无法完成；
+- 完成但核心语义理解错误；
+- Moderator 需要定向指导；
+- 给出错误最终结论。
+
+注意：
+
+这是 Session 编码规则。
+
+不是：
+
+V0 Gate PASS Threshold。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. 必须捕获的行为数据
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每个 Task：
+
+Task ID
+Prototype version
+Fixture State before
+Fixture State after
+
+记录：
+
+- Completion outcome
+- Completion time
+- First click
+- Wrong turn count
+- Backtrack count
+- Questions asked
+- Moderator interventions
+- Hesitation
+- Exact quote
+- Interpretation
+
+特别是：
+
+# First Click
+
+这是 Discoverability 非常重要的 Evidence。
+
+例如：
+
+T2：
+
+用户第一次点击：
+
+Symbols
+还是
+Add MAP
+还是
+Compare
+还是
+Settings
+
+都必须记录。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. Exact Quote 原则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Quotes 必须是：
+
+真实参与者原话。
+
+禁止：
+
+根据行为总结成：
+
+“用户觉得 Unknown 很清晰。”
+
+这是 interpretation，
+不是 quote。
+
+正确：
+
+Quote:
+“这里 UNKNOWN 是不是代表没有检测到问题？”
+
+Interpretation:
+Participant may be interpreting UNKNOWN as a clean result.
+
+两者严格分离。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. Misunderstanding 编码
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用：
+
+M01 Product positioning
+M02 Navigation
+M03 Analyze
+M04 Compare
+M05 Gate
+M06 Evidence
+M07 Unknown
+M08 Review
+M09 N/A
+M10 Bundle
+M11 History
+M12 Error recovery
+M13 Compliance misunderstanding
+M14 Pricing/value
+M15 Toolchain expectation
+M16 Evidence state transition
+M17 MAP/capability misunderstanding
+
+任何新类型：
+
+先判断是否真的不能归入 M01–M17。
+
+只有无法归类时：
+
+新增：
+
+M18+
+
+并在 Batch A Interim Review 中说明：
+
+为什么需要扩展 taxonomy。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. 五个 Critical Watch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须特别关注：
+
+# C1 — Can we ship now?
+
+如果 Participant 认为：
+
+“FirmwareSight 说可以发布，
+就代表符合法律/法规/安全要求。”
+
+记录：
+
+M13
+Severity = Critical
+
+即使只有一人出现：
+
+也必须进入 Interim Review。
+
+但：
+
+一次观察 ≠ 自动证明所有人都会误解。
+
+保持事实：
+
+1 / N observed
+
+不要写：
+
+“用户普遍误解。”
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# C2 — UNKNOWN
+
+危险理解：
+
+“没问题”
+“没检测到风险”
+“检测失败”
+“可以忽略”
+“相当于 Pass”
+
+记录：
+
+M07
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# C3 — Accepted Review
+
+危险理解：
+
+“接受后就变成 PASS”
+“FirmwareSight 证明这个变化安全了”
+
+记录：
+
+M08
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# C4 — Declared
+
+危险理解：
+
+“软件检测出 mbedTLS 3.5.2”
+
+而实际上：
+
+版本由用户输入。
+
+记录：
+
+M06 / M16
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# C5 — Bundle
+
+危险理解：
+
+“就是把几个文件压成 ZIP”
+“导出备份”
+
+而没有理解：
+
+Release Evidence Package
+
+记录：
+
+M10
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. MAP State Transition 是 Batch A 核心任务
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+T2 必须重点观察：
+
+STATE A：
+
+Symbols unavailable
+
+Participant：
+
+是否理解：
+
+“缺 Evidence → 某些分析能力不可用”
+
+是否找到：
+
+Add .map file
+
+执行后：
+
+STATE B
+
+Symbols:
+1,284 resolved
+
+Gate：
+map-dependent UNKNOWN → re-evaluated
+
+必须记录：
+
+- Participant 是否注意到 Capability Banner 变化
+- 是否理解不是“解锁付费功能”
+- 是否理解不是软件重新猜测
+- 是否理解 Gate 变化来自新增 Evidence
+
+这部分进入：
+
+analysis/STATE_TRANSITION_FINDINGS.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. Commercial Discovery
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+完成 Tasks 后才进入。
+
+禁止在 Task 前问价格，
+避免用户先形成“这是收费软件”的评价框架。
+
+必须基于：
+
+protocol/INTERVIEW_SCRIPT.md
++
+06_DELIVERY/09_USER_INTERVIEW_QUESTION_BANK.md
+
+记录：
+
+Current workflow
+Export/handoff
+Repeated analysis
+CI
+Stack evidence
+Symbol retention
+Component evidence
+External/CRA pressure
+Return intent
+Payment
+Pilot
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. Price Anchor 原则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+不要问：
+
+“如果便宜你愿不愿意买？”
+
+必须使用：
+
+具体 price anchor。
+
+但：
+
+当前 FirmwareSight 没有冻结正式售价。
+
+所以：
+
+本轮价格只是：
+
+# Research Anchor
+
+必须在 Session 中记录：
+
+Price anchor shown:
+Currency:
+Billing period:
+Participant response:
+Self-pay / Company-pay:
+Approval needed:
+Reason:
+Objection:
+
+不要在最终报告中：
+
+把研究价写成正式定价。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. Price Anchor 设置方法
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果 Product Lead 已经给定：
+
+直接使用。
+
+如果没有：
+
+在 Batch A 开始前建立：
+
+BATCH_A_RESEARCH_PRICE_ANCHORS.md
+
+允许设置：
+
+2–3 个离散研究锚点。
+
+目的：
+
+观察：
+
+- 个人支付边界
+- 公司报销边界
+- Team Pilot 边界
+
+不是：
+
+通过 Van Westendorp 等方法假装已经完成定价研究。
+
+如果没有任何价格授权/研究锚点：
+
+不要自己声称这些价格合理。
+
+标注：
+
+Exploratory anchor only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. Session 文件写入规范
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每完成一个真实 Session：
+
+立即生成：
+
+sessions/PA-00X.md
+
+不要等 Batch 结束凭记忆补写。
+
+同时更新：
+
+analysis/QUOTES.md
+analysis/MISUNDERSTANDING_LOG.md
+analysis/TOOLCHAIN_REQUESTS.md
+analysis/PAYMENT_SIGNALS.md
+analysis/STATE_TRANSITION_FINDINGS.md
+
+Session 文件必须标：
+
+Evidence Source：
+
+- live moderated notes
+- transcript
+- recording
+- participant-submitted notes
+
+如果是录音转录：
+
+要注明：
+
+Transcript generated from consented recording.
+
+如果 AI 只拿到摘要：
+
+标：
+
+Secondary session summary
+
+并降低 quote confidence：
+
+不得把摘要改写成“verbatim quote”。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. Batch A 期间禁止改 Prototype
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PA-001 完成后：
+
+不要改。
+
+PA-002 完成后：
+
+不要改。
+
+保持：
+
+# Same Prototype Version
+
+至少整批 Batch A 使用同一个：
+
+v0.1.x
+
+除非发生：
+
+# Critical Execution Blocker
+
+例如：
+
+- 按钮完全点不了
+- state machine bug
+- Task 无法继续
+- demo 数据自己矛盾
+- 浏览器兼容导致无法测试
+
+这种修复：
+
+必须记录：
+
+Prototype Hotfix
+Reason
+Before
+After
+Affected participants
+
+如果改了：
+
+后续 Session 必须记录新的：
+
+Prototype version
+
+并在 Interim Review 说明数据可比性影响。
+
+普通：
+
+“这个颜色我不喜欢”
+
+不能成为 Batch 中途改版理由。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. Batch A 完成条件
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A 完成：
+
+4–5 名：
+
+真实
+外部
+符合 eligibility
+
+全部完成正式 Session。
+
+如果只有：
+
+1–3 人：
+
+不能写：
+
+Batch A Complete
+
+只能写：
+
+# BATCH A PARTIAL
+
+并继续招募。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. Batch A Metrics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+完成 4–5 人后：
+
+更新：
+
+analysis/METRICS.md
+
+必须报告：
+
+每项：
+
+n/N
+
+不只百分比。
+
+至少：
+
+T1 readiness
+T2 MAP transition
+Analyze
+Compare
+Review vs Block
+Review Acceptance
+Unknown
+Declared vs Observed
+Bundle
+Parse Recovery
+History
+
+并记录：
+
+first-click correctness
+median completion time
+wrong turns
+backtracks
+moderator intervention count
+
+因为 Batch A 很小：
+
+禁止使用：
+
+“显著”
+“统计证明”
+“绝大多数用户”
+
+除非陈述只是：
+
+4/5 participants
+
+不要装成总体市场统计。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. Batch A Cohort Segmentation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A Interim Review 必须显示：
+
+Primary cohort：
+
+例如：
+
+GCC/Clang/GNU ld
+N = ?
+
+Discovery cohort：
+
+例如：
+
+Keil/IAR
+N = ?
+
+并说明：
+
+不同 cohort 的误解是否明显不同。
+
+但：
+
+Batch A 只有 4–5 人，
+
+不要做虚假的统计显著性比较。
+
+只做：
+
+Observed Pattern
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. Batch A Interim Review
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A 结束后：
+
+创建：
+
+V0_VALIDATION/batch_a/
+
+建议：
+
+batch_a/
+├── BATCH_A_EXECUTIVE_SUMMARY.md
+├── BATCH_A_PARTICIPANT_REGISTER.md
+├── BATCH_A_TASK_METRICS.md
+├── BATCH_A_MENTAL_MODEL_FINDINGS.md
+├── BATCH_A_STATE_TRANSITION_FINDINGS.md
+├── BATCH_A_MISUNDERSTANDING_REPORT.md
+├── BATCH_A_COMMERCIAL_SIGNALS.md
+├── BATCH_A_TOOLCHAIN_SIGNALS.md
+├── BATCH_A_CHANGE_RECOMMENDATIONS.md
+├── BATCH_A_INTERIM_REVIEW.md
+└── BATCH_A_EVIDENCE_INDEX.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. BATCH_A_EXECUTIVE_SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只能回答：
+
+- N
+- cohort
+- prototype version(s)
+- 3 个最明显工作良好的点
+- 3 个最严重的问题
+- 是否出现 Critical misunderstanding
+- return intent
+- price-anchored signal
+- Pilot signal
+- 是否需要 Prototype revision
+
+禁止：
+
+直接宣布：
+
+V0 PASS
+
+因为：
+
+Batch A 只有 4–5 人，
+而 V0 minimum 是 8。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. Misunderstanding Severity
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+建议：
+
+Critical：
+- 会导致法律/安全/Release 意义严重误判
+- 会导致用户认为错误数据是事实
+- 会导致 Evidence classification 被颠倒
+- 核心 workflow 无法继续
+
+High：
+- 核心概念显著误解
+- 关键 Task 多人失败
+- 明显导致错误决策
+
+Medium：
+- 可完成但有明显绕路
+- wording/层级问题
+- 需要较长 hesitation
+
+Low：
+- polish
+- minor wording
+- individual preference
+
+Severity：
+
+和 Frequency 分开。
+
+例如：
+
+M13：
+Critical
+1/5
+
+不能写成：
+
+“低优先级，因为只有一个人。”
+
+Critical 单次也应该进入 review。
+
+但不等于：
+
+自动修改产品。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. Change Recommendation 规则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每个建议：
+
+ID:
+Problem:
+Evidence:
+Participants:
+Frequency:
+Severity:
+Affected Task:
+Affected Screen:
+Root cause hypothesis:
+Proposed change:
+Baseline semantic change?:
+Design-only?:
+Copy-only?:
+Interaction-only?:
+Requires ADR?:
+Retest needed?:
+Recommended before Batch B?:
+
+结论只能是：
+
+CHANGE BEFORE BATCH B
+DEFER
+NO CHANGE
+NEEDS PRODUCT LEAD DECISION
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. 什么可以在 Batch A 后直接修
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+允许：
+
+- 明显 copy ambiguity
+- focus/navigation bug
+- action hierarchy bug
+- disabled state bug
+- Prototype state bug
+- critical wording that violates existing baseline semantics
+- obvious discoverability blocker
+- reference-screen implementation bug
+
+前提：
+
+不改变：
+
+产品定义
+Gate semantics
+Evidence model
+MVP scope
+四动词模型
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. 什么不能擅自修
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果用户反馈导致建议：
+
+“去掉 Unknown”
+
+“把 Review 直接做成 Pass”
+
+“让 AI 自动判断”
+
+“加 Cloud”
+
+“直接支持所有 Keil/IAR”
+
+“加 OTA”
+
+“做 SBOM”
+
+“加 Excel”
+
+“加 Watch”
+
+“改成 IDE 插件”
+
+这些属于：
+
+产品/范围决策。
+
+只能进入：
+
+Recommendation / Candidate Signal
+
+不能在 Batch A 后直接实现。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. Batch A 后是否升级 Prototype
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果存在：
+
+Critical
+或
+明显重复出现的 usability blocker
+
+允许：
+
+prototype v0.1.x
+→
+prototype v0.2.0
+
+必须：
+
+更新：
+
+prototype/PROTOTYPE_CHANGELOG.md
+analysis/PROTOTYPE_CHANGE_LOG.md
+
+每条：
+
+Before
+After
+Evidence
+Reason
+Expected effect
+Retest target
+
+Batch B：
+
+使用：
+
+v0.2.0
+
+并明确：
+
+Batch A 和 Batch B Prototype 不同。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. Batch A 不能修改 Baseline Authority 的情况
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A 观察本身：
+
+不能直接覆写：
+
+PRODUCT_BASELINE.md
+DESIGN.md
+ADR
+Gate Semantics
+MVP Scope
+
+如果发现：
+
+Baseline 本身可能错误，
+
+创建：
+
+BATCH_A_BASELINE_CHANGE_PROPOSAL.md
+
+内容：
+
+Current authority
+Observed evidence
+Conflict
+Proposed change
+Impact
+Need Product Lead decision
+Need ADR?
+Need Batch B retest?
+
+然后：
+
+等待决策。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. V0 总 Metrics 更新方式
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A 完成后：
+
+可以更新：
+
+V0_VALIDATION/analysis/METRICS.md
+
+例如：
+
+External sessions:
+5 / 8 minimum
+
+T1:
+4 / 5
+
+T2:
+3 / 5
+
+但：
+
+V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md
+
+仍必须是：
+
+# V0 INCOMPLETE — insufficient external sample
+
+因为：
+
+N < 8。
+
+只有 Batch B 后达到：
+
+N ≥ 8
+
+才允许进入：
+
+PASS recommendation
+CONDITIONAL PASS recommendation
+FAIL recommendation
+
+而且仍然：
+
+没有预设数学阈值。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. Commercial Signal 纪律
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+不要把：
+
+“挺好用的”
+
+写成：
+
+Payment Signal。
+
+Payment Signal 必须是类似：
+
+- 愿意为具体价格购买
+- 愿意提交公司采购
+- 愿意接受 Team Pilot
+- 愿意用下一次真实 Release 试用
+- 主动问正式版本/价格/采购方式
+
+分级建议：
+
+S0:
+No signal
+
+S1:
+Positive reaction only
+
+S2:
+Return intent
+
+S3:
+Price-anchored willingness
+
+S4:
+Pilot / procurement action
+
+这个等级只用于：
+
+Research Coding。
+
+不是正式 Pricing Model。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. External Evidence 真实性审查
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A 完成前：
+
+必须检查：
+
+每个 PA-xxx：
+
+是否有真实来源？
+
+至少之一：
+
+- live session notes
+- transcript
+- consented recording
+- moderator notes
+- user-supplied session record
+
+如果文件内容看起来像：
+
+AI 自动生成完整答案
+
+必须标记：
+
+# SUSPECTED SYNTHETIC
+
+不得纳入正式 N，
+除非能证明对应真实 Session 存在。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. 如果用户直接把 Session 转录发给你
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+执行：
+
+1. 不先总结。
+2. 先解析 Participant metadata。
+3. 按 T1–T10 定位证据。
+4. 区分：
+   - verbatim quote
+   - behavior
+   - moderator intervention
+   - interpretation
+5. 写 PA-xxx Session。
+6. 更新 Misunderstanding Log。
+7. 更新 Metrics。
+8. 更新 Commercial Signal。
+9. 再做 cross-session synthesis。
+
+不要：
+
+只读结尾的 participant 总结。
+
+任务行为优先于：
+
+“我觉得这个软件不错。”
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. Batch A Interim Review 的最终结论类型
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只能输出：
+
+A.
+# READY FOR BATCH B — NO MATERIAL CHANGE
+
+B.
+# READY FOR BATCH B — PROTOTYPE REVISION REQUIRED
+
+C.
+# BATCH A PARTIAL — MORE PARTICIPANTS NEEDED
+
+D.
+# BATCH A BLOCKED — CRITICAL PROTOCOL/PROTOTYPE ISSUE
+
+不得输出：
+
+V0 PASS
+
+因为：
+
+Batch A alone < V0 minimum。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. v0.5.2 版本规则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+只有在：
+
+Batch A 真正完成 4–5 名正式外部参与者
+
+并且：
+
+真实 Session evidence 已经写入项目
+
+才允许生成：
+
+# FirmwareSight_Project_Baseline_v0.5.2
+
+v0.5.2 的性质：
+
+# V0 Batch A Evidence Patch
+
+它不是：
+
+V0 PASS baseline。
+
+必须写：
+
+External participants:
+4–5 / 8 minimum
+
+V0:
+IN PROGRESS
+
+如果 Batch A 未完成：
+
+禁止为了版本推进而生成 v0.5.2。
+
+保持：
+
+v0.5.1
++
+Recruitment/Session preparation artifacts
+
+即可。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. v0.5.2 必须包含
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+若满足 Batch A 完成条件：
+
+完整包必须包含：
+
+- v0.5.1 全部 authority
+- PA-001…PA-004/005 session evidence
+- Batch A metrics
+- misunderstanding log
+- quote register
+- payment signal register
+- toolchain signal
+- state transition findings
+- Batch A interim review
+- Prototype changelog
+- 如果有 v0.2.0 Prototype，完整包含
+- Updated README
+- Updated BASELINE.yaml
+- Updated .ai/CURRENT_STATE.md
+- Updated .ai/ACTIVE_TASK.md
+- Updated INDEX
+- Updated manifest
+- Updated SHA256SUMS
+- ZIP integrity validation
+
+`.ai/ACTIVE_TASK.md`：
+
+仍然必须是：
+
+V0 ACTIVE
+
+Pending：
+
+Batch B
++
+V0 minimum N
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. 如果没有真实参与者
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+这是最重要的停止规则。
+
+如果当前系统：
+
+没有真实人类 Participant，
+也没有用户提供真实 Session 转录/记录，
+
+你必须：
+
+完成：
+
+Recruitment Plan
+Screening Register
+Moderator Pack
+Scheduling Template
+
+然后明确：
+
+# BATCH A WAITING FOR REAL PARTICIPANTS
+
+禁止：
+
+PA-001 = “模拟资深嵌入式工程师”
+PA-002 = “模拟初级工程师”
+
+禁止：
+
+LLM Persona Testing
+
+替代正式用户研究。
+
+可以用 AI Persona 做：
+
+内部认知预演。
+
+但必须标：
+
+SYNTHETIC INTERNAL REVIEW
+
+不得计入：
+
+Formal External N。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. 下一步停止条件
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本 Prompt 执行结束点：
+
+如果真实 Batch A 完成：
+
+输出：
+
+BATCH_A_INTERIM_REVIEW.md
+
++
+如满足版本条件：
+
+FirmwareSight_Project_Baseline_v0.5.2
+
+然后：
+
+# STOP
+
+不得自动进入 Batch B。
+
+Batch B 需要：
+
+检查 Batch A Interim Review
++
+确认是否使用 Prototype v0.1.x / v0.2.0
+
+后再执行。
+
+如果没有真实参与者：
+
+输出：
+
+Recruitment Ready Pack
+
+然后：
+
+# STOP
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. 第一次回复格式
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+第一次回复只输出：
+
+# FirmwareSight V0 Batch A 接手报告
+
+1. 唯一 Baseline 确认
+2. 当前 V0 状态
+3. 当前 Prototype 版本
+4. Batch A 目标
+5. Participant eligibility
+6. 计划 N
+7. 已有 participant/source 情况
+8. Session protocol 准备状态
+9. 数据记录方案
+10. 隐私/录制状态
+11. Price anchor 是否已有授权
+12. Blocking Issues
+
+如果：
+
+真实 participant/source 已存在，
+
+继续 Session 执行。
+
+如果：
+
+不存在，
+
+不要提问“是否可以模拟”。
+
+直接进入：
+
+Recruitment Ready Pack
+
+并停止在：
+
+WAITING FOR REAL PARTICIPANTS。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. 最终纪律
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Batch A 的产出不是：
+
+“我们认为 UI 很好。”
+
+而是：
+
+真实的人：
+
+在哪里点错
+在哪里停住
+怎么解释 Unknown
+怎么解释 Review
+是否找到 MAP
+是否理解 Bundle
+是否愿意回来
+是否愿意付钱
+是否愿意 Pilot
+
+FirmwareSight 的产品原则：
+
+# Evidence First
+
+因此：
+
+真实用户验证同样必须：
+
+# Human Evidence First
+
+没有真实人类证据：
+
+就没有 Batch A。

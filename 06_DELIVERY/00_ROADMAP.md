@@ -2,7 +2,7 @@
 title: "Product Roadmap v0.3"
 doc_id: "FS-DEL-001"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Delivery"
 last_updated: "2026-09-26"

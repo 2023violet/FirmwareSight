@@ -2,7 +2,7 @@
 title: "ADR-0004 Local-first"
 doc_id: "ADR-0004"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Security"
 last_updated: "2026-09-26"

@@ -2,7 +2,7 @@
 title: "Technical Reference Register"
 doc_id: "FS-RSCH-003"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Research"
 last_updated: "2026-09-26"

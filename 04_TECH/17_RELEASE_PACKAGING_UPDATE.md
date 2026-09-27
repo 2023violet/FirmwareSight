@@ -2,7 +2,7 @@
 title: "Build, Packaging, Signing and Update Baseline"
 doc_id: "FS-TECH-018"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Architecture"
 last_updated: "2026-09-26"

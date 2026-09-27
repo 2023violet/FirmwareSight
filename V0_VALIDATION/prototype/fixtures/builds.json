@@ -1,0 +1,115 @@
+{
+  "baseline": {
+    "version": "v0.2.1",
+    "flash_kb": 474.8,
+    "artifact": "77c1d9b0"
+  },
+  "current": {
+    "version": "v0.3.0-rc2",
+    "flash_kb": 486.2,
+    "artifact": "a3f9c1e2"
+  },
+  "sections": [
+    {
+      "name": ".ota_staging",
+      "old": null,
+      "new": 24.0,
+      "delta": 24.0,
+      "change": "Added"
+    },
+    {
+      "name": ".text",
+      "old": 260.5,
+      "new": 262.4,
+      "delta": 1.9,
+      "change": "Changed"
+    },
+    {
+      "name": ".rodata",
+      "old": 174.1,
+      "new": 175.3,
+      "delta": 1.2,
+      "change": "Changed"
+    },
+    {
+      "name": ".data",
+      "old": 12.4,
+      "new": 2.9,
+      "delta": -9.5,
+      "change": "Changed"
+    },
+    {
+      "name": ".legacy_log",
+      "old": 6.2,
+      "new": null,
+      "delta": -6.2,
+      "change": "Removed"
+    },
+    {
+      "name": ".ARM.exidx",
+      "old": 12.6,
+      "new": 12.6,
+      "delta": 0.0,
+      "change": "Unchanged"
+    },
+    {
+      "name": ".init",
+      "old": 6.1,
+      "new": 6.1,
+      "delta": 0.0,
+      "change": "Unchanged"
+    },
+    {
+      "name": ".init_array",
+      "old": 2.4,
+      "new": 2.4,
+      "delta": 0.0,
+      "change": "Unchanged"
+    },
+    {
+      "name": ".isr_vector",
+      "old": 0.5,
+      "new": 0.5,
+      "delta": 0.0,
+      "change": "Unchanged"
+    }
+  ],
+  "symbols": [
+    {
+      "symbol": "mqtt_task",
+      "section": ".text",
+      "size": 18.2,
+      "delta": 2.4
+    },
+    {
+      "symbol": "tls_handshake",
+      "section": ".text",
+      "size": 12.9,
+      "delta": 0.0
+    },
+    {
+      "symbol": "shell_cmd_table",
+      "section": ".text",
+      "size": 8.7,
+      "delta": 0.3
+    },
+    {
+      "symbol": "sensor_fifo",
+      "section": ".text",
+      "size": 6.2,
+      "delta": -1.1
+    },
+    {
+      "symbol": "http_client",
+      "section": ".text",
+      "size": 5.8,
+      "delta": -0.4
+    },
+    {
+      "symbol": "uart_driver",
+      "section": ".text",
+      "size": 4.1,
+      "delta": 0.0
+    }
+  ]
+}

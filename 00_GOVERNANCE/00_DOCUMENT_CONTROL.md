@@ -2,7 +2,7 @@
 title: "Document Control Standard"
 doc_id: "FS-GOV-001"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-26"

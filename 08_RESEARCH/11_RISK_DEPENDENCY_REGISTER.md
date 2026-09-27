@@ -2,7 +2,7 @@
 title: "Risk and Dependency Register v0.5"
 doc_id: "FS-RSCH-012"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Research"
 last_updated: "2026-09-27"

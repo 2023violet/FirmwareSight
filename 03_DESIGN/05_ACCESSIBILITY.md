@@ -2,7 +2,7 @@
 title: "Accessibility Baseline"
 doc_id: "FS-DESIGN-006"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Project"
 last_updated: "2026-09-26"

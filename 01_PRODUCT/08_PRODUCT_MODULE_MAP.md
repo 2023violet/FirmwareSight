@@ -2,7 +2,7 @@
 title: "Product Module Map"
 doc_id: "FS-PRD-009"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Product"
 last_updated: "2026-09-27"

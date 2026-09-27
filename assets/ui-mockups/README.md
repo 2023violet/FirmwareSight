@@ -2,7 +2,7 @@
 title: "UI Mockup Asset Register"
 doc_id: "FS-DESIGN-ASSET-001"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Design"
 last_updated: "2026-09-27"

@@ -2,7 +2,7 @@
 title: "CI/CD Baseline v0.4"
 doc_id: "FS-ENG-007"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Engineering"
 last_updated: "2026-09-27"

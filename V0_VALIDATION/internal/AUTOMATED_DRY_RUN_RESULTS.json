@@ -1,0 +1,48 @@
+{
+  "node_check_state": {
+    "rc": 0,
+    "out": "",
+    "err": ""
+  },
+  "node_check_app": {
+    "rc": 0,
+    "out": "",
+    "err": ""
+  },
+  "state_machine_test": {
+    "rc": 0,
+    "out": "state-machine dry run: PASS",
+    "err": ""
+  },
+  "scope_scan": {
+    "Cargo.toml": [],
+    "src-tauri": [],
+    "rust_source": []
+  },
+  "css_redlines": {
+    "gradient_count": 0,
+    "backdrop_filter_count": 0,
+    "prefers_reduced_motion": true,
+    "focus_visible": true
+  },
+  "export_scan": {
+    "export_label_count": 6,
+    "has_disabled_export_controls": true,
+    "blob_api": false,
+    "download_api": false
+  },
+  "chromium_screenshot": {
+    "rc": -6,
+    "exists": false,
+    "bytes": 0,
+    "stderr_tail": "rror_code=1002\n[1746:1746:0927/082527.023886:FATAL:content/browser/gpu/gpu_data_manager_impl_private.cc:415] GPU process isn't usable. Goodbye.\n[0927/082527.029758:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: No such file or directory (2)\n[0927/082527.029885:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: No such file or directory (2)\n"
+  },
+  "chromium_dom": {
+    "rc": -6,
+    "has_overview": false,
+    "has_add_map": false,
+    "has_map_not_provided": false,
+    "dom_chars": 0,
+    "stderr_tail": "util/file/file_io_posix.cc:145] open /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: No such file or directory (2)\n[0927/082527.286912:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: No such file or directory (2)\n"
+  }
+}

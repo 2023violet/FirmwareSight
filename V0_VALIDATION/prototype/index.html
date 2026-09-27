@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>FirmwareSight V0 Prototype</title>
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">FS</span><strong>FirmwareSight</strong><span class="project-chip"><code>relay-controller · v0.3.0-rc2</code></span></div>
+    <div class="top-meta">Local workspace — prototype data only <span class="separator">|</span> V0</div>
+  </header>
+  <div class="shell">
+    <nav class="sidebar" aria-label="Primary">
+      <div class="nav-group">
+        <button data-nav="overview" class="nav-item">▦ <span>Overview</span></button>
+        <button data-nav="analyze" class="nav-item">☷ <span>Analyze</span></button>
+        <button data-nav="compare" class="nav-item">⇄ <span>Compare</span></button>
+        <button data-nav="gate" class="nav-item">◇ <span>Release Gate</span></button>
+        <button data-nav="history" class="nav-item">▣ <span>Bundle &amp; History</span></button>
+      </div>
+      <div class="nav-label">WORKSPACE</div>
+      <button data-nav="activity" class="nav-item">◷ <span>Recent activity</span></button>
+      <div class="sidebar-foot">
+        <div>FirmwareSight V0 prototype</div>
+        <div>All data is simulated.</div>
+      </div>
+    </nav>
+    <main id="main" tabindex="-1">
+      <div id="screen"></div>
+    </main>
+  </div>
+</div>
+<div id="modal-root"></div>
+<div id="live" class="sr-only" aria-live="polite"></div>
+<script src="src/fixtures.js"></script>
+<script src="src/state.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 title: "Validation Interview Question Bank"
 doc_id: "FS-DEL-010"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Research / Product"
 last_updated: "2026-09-27"

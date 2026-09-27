@@ -1,4 +1,4 @@
-FirmwareSight_Project_Baseline_v0.5.0/
+FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
 ├── .ai/
 │   ├── ACTIVE_TASK.md
 │   ├── CURRENT_STATE.md
@@ -134,6 +134,10 @@ FirmwareSight_Project_Baseline_v0.5.0/
 │   ├── ADR-0023-gate-five-state-semantics.md
 │   └── ADR-0024-post-mvp-candidate-governance.md
 ├── 10_AUDIT/
+│   ├── SOURCE_PROMPTS/
+│   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
+│   │   ├── FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
+│   │   └── README.md
 │   ├── SOURCE_REVIEWS/
 │   │   ├── ADR-0018-ui-baseline-tokens-governance.md
 │   │   ├── DESIGN_CHECKLIST_TEMPLATE.md
@@ -201,6 +205,69 @@ FirmwareSight_Project_Baseline_v0.5.0/
 │   ├── DESIGN_CHECKLIST_TEMPLATE.md
 │   ├── FEATURE_SPEC_TEMPLATE.md
 │   └── RELEASE_CHECKLIST_TEMPLATE.md
+├── V0_VALIDATION/
+│   ├── analysis/
+│   │   ├── METRICS.md
+│   │   ├── MISUNDERSTANDING_LOG.md
+│   │   ├── PAYMENT_SIGNALS.md
+│   │   ├── PROTOTYPE_CHANGE_LOG.md
+│   │   ├── QUOTES.md
+│   │   ├── STATE_TRANSITION_FINDINGS.md
+│   │   └── TOOLCHAIN_REQUESTS.md
+│   ├── batch_a/
+│   │   ├── recruitment_ready/
+│   │   │   ├── BATCH_A_EVIDENCE_INTEGRITY_CHECKLIST.md
+│   │   │   ├── BATCH_A_MODERATOR_PACK.md
+│   │   │   ├── BATCH_A_RECRUITMENT_PLAN.md
+│   │   │   ├── BATCH_A_RESEARCH_PRICE_ANCHORS.md
+│   │   │   ├── BATCH_A_SCHEDULING_REGISTER.csv
+│   │   │   ├── BATCH_A_SCHEDULING_TEMPLATE.md
+│   │   │   ├── BATCH_A_SCREENING_REGISTER.csv
+│   │   │   └── BATCH_A_SESSION_SOURCE_INTAKE.md
+│   │   ├── BATCH_A_EVIDENCE_INDEX.md
+│   │   ├── BATCH_A_EXECUTION_PROVENANCE.md
+│   │   ├── BATCH_A_STATUS.md
+│   │   └── BATCH_A_TAKEOVER_REPORT.md
+│   ├── deliverables/
+│   │   ├── V0_FINDINGS.md
+│   │   ├── V0_GATE_RECOMMENDATION.md
+│   │   ├── V0_PRODUCT_RISK_UPDATE.md
+│   │   ├── V0_UI_CHANGE_RECOMMENDATIONS.md
+│   │   └── V0_VALIDATION_REPORT.md
+│   ├── internal/
+│   │   ├── AUTOMATED_DRY_RUN_RESULTS.json
+│   │   ├── DESIGN_SCOPE_CHECKLIST.md
+│   │   ├── DRY_RUN_REPORT.md
+│   │   ├── state_machine_test.js
+│   │   └── STATIC_HTML_AUDIT.json
+│   ├── protocol/
+│   │   ├── CONSENT_PRIVACY.md
+│   │   ├── INTERVIEW_SCRIPT.md
+│   │   ├── MODERATOR_GUIDE.md
+│   │   ├── PARTICIPANT_SCREENING.md
+│   │   └── TASK_SCRIPT.md
+│   ├── prototype/
+│   │   ├── fixtures/
+│   │   │   ├── builds.json
+│   │   │   ├── dependencies.json
+│   │   │   ├── gate-results.json
+│   │   │   └── workspace-state.json
+│   │   ├── src/
+│   │   │   ├── app.js
+│   │   │   ├── fixtures.js
+│   │   │   ├── state.js
+│   │   │   └── styles.css
+│   │   ├── FIXTURE_NARRATIVE.md
+│   │   ├── index.html
+│   │   ├── PROTOTYPE_CHANGELOG.md
+│   │   └── README.md
+│   ├── sessions/
+│   │   ├── README.md
+│   │   └── TEMPLATE.md
+│   ├── README.md
+│   ├── V0_EXECUTION_PROVENANCE.md
+│   ├── V0_PLAN.md
+│   └── V0_TAKEOVER_REPORT.md
 ├── AGENTS.md
 ├── BASELINE.yaml
 ├── CHANGELOG.md

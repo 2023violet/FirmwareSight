@@ -2,7 +2,7 @@
 title: "Baseline Changelog"
 doc_id: "FS-ROOT-CHANGELOG"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-27"
@@ -10,45 +10,34 @@ last_updated: "2026-09-27"
 
 # Changelog
 
+## 0.5.1 — 2026-09-27
+
+### V0 execution
+- executed the authorized V0 Prompt v1.1 against the unique v0.5.0 baseline;
+- created the `V0_VALIDATION/` execution workspace;
+- implemented the seven-screen clickable static prototype;
+- encoded MAP STATE A→B and parse-failure recovery states;
+- implemented demo review acceptance and conditional Bundle flow;
+- added moderator, screening, task, interview and privacy protocols;
+- added session template and analysis registers;
+- ran internal Node/state-machine/scope/design dry-run checks.
+
+### Evidence limitation
+- external participant sessions completed: 0;
+- minimum required: 8;
+- V0 status: `INCOMPLETE — insufficient external sample`;
+- no V0 PASS/G1 claim.
+
+### Scope
+- no Cargo/Rust/Tauri/SQLite production implementation;
+- P0 remains unauthorized in this V0 execution;
+- no E1/E2/E3/GX feature implementation.
+
 ## 0.5.0 — 2026-09-27
-
-### Expert review verification
-- reviewed three Post-MVP exploration rounds and 27 adjudicated questions;
-- independently verified the strongest current market claims;
-- downgraded overbroad/negative-search claims;
-- removed stale/unverified vendor pricing from baseline facts;
-- corrected stage-name conflict against v0.4.
-
-### Whole-product consolidation
-- added `PRODUCT_BASELINE.md`;
-- added Product Module Map and Capability Portfolio;
-- froze reconstructed Code Area Plan (`FS-ENG-009`);
-- added Post-MVP candidate roadmap using E1/E2/E3/GX namespace;
-- added milestone/deliverable matrix and interview question bank;
-- added risk/dependency register.
-
-### UI
-- integrated `FS-UI-07-Unknown-Dependency.png`;
-- seven-screen source set is now complete;
-- added future presentation rules without authorizing future features.
-
-### Research decisions
-- visualization: category need supported; exact reinvention count downgraded;
-- XLSX/DOCX: `UNVALIDATED`, not “fake demand”;
-- native PDF: rejected in favor of HTML print;
-- component drift: ESP-IDF lockfile first candidate;
-- `.su`: strong evidence-depth candidate, future ADR required;
-- symbol archive: accepted candidate;
-- CI/history integration: real market pattern, Growth candidate;
-- generic changelog generator: not adopted as product pillar.
-
-### Governance
-- ADR-0024 establishes candidate namespace and prevents MVP expansion.
-- Active Task remains NONE.
-- v0.4 V0 + P0 parallel next-step decision is preserved.
+Expert-review verification + whole-product consolidation baseline; complete seven-screen UI source set; Post-MVP candidate governance.
 
 ## 0.4.0 — 2026-09-27
-Audit resolution + UI baseline freeze; Gate semantics, memory accounting, typed IPC, strict schemas, six source UI screens.
+Audit resolution + UI baseline freeze.
 
 ## 0.3.0 — 2026-09-26
 Lifecycle baseline.

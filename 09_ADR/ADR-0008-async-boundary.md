@@ -2,7 +2,7 @@
 title: "ADR-0008 Async Boundary"
 doc_id: "ADR-0008"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Architecture"
 last_updated: "2026-09-26"

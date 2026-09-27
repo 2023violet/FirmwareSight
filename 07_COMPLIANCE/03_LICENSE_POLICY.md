@@ -2,7 +2,7 @@
 title: "Licensing Policy"
 doc_id: "FS-COMP-004"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Legal/Engineering"
 last_updated: "2026-09-26"

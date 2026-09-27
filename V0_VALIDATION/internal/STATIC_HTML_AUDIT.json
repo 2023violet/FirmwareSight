@@ -1,0 +1,19 @@
+{
+  "script_refs": [
+    "src/fixtures.js",
+    "src/state.js",
+    "src/app.js"
+  ],
+  "style_refs": [
+    "src/styles.css"
+  ],
+  "all_refs_exist": true,
+  "required_ids": {
+    "app": true,
+    "main": true,
+    "screen": true,
+    "modal-root": true,
+    "live": true
+  },
+  "shell_button_count": 6
+}

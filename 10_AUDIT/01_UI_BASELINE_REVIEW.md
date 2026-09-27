@@ -2,7 +2,7 @@
 title: "UI Baseline Review"
 doc_id: "FS-AUDIT-002"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Audit"
 last_updated: "2026-09-27"

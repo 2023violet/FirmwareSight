@@ -2,121 +2,132 @@
 title: "FirmwareSight Project Baseline"
 doc_id: "FS-ROOT-README"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-27"
 ---
 
-# FirmwareSight v0.5.0
+# FirmwareSight v0.5.1
 
 **Embedded Firmware Release Workbench**  
 **Know exactly what ships.**
 
-v0.5.0 is the **Expert Review Verification + Whole-Product Consolidation Baseline**.
+v0.5.1 is a **V0 Workflow Prototype Validation execution patch** built only on the unique `FirmwareSight_Project_Baseline_v0.5.0`.
 
-It inherits v0.4.0 architecture, product scope, Gate semantics and UI authority, then integrates the new expert round without allowing research ideas to silently become MVP requirements.
+It does not redefine the product or architecture.
 
-## What v0.5.0 changes
+## What is newly executed
 
-### 1. Complete UI reference
-The seventh source screen `FS-UI-07-Unknown-Dependency.png` is now included.
-The accepted reference set is complete: 7 × 1440×900.
+- V0 authority takeover;
+- seven-screen clickable high-fidelity static prototype;
+- coherent single fixture narrative;
+- explicit MAP STATE A→B transition;
+- Unknown Dependency declaration flow;
+- Review acceptance audit flow;
+- simulated signature-block recovery;
+- conditional Bundle creation;
+- parse-failure recovery with Last Good Artifact preservation;
+- moderator/screening/task/interview/privacy protocol;
+- session/metrics/misunderstanding/payment/toolchain records;
+- automated internal state-machine and scope dry run.
 
-### 2. Whole-product baseline
-`PRODUCT_BASELINE.md` now provides one authoritative cross-domain reading of:
-- positioning/users;
-- modules;
-- scope;
-- architecture;
-- UI;
-- lifecycle;
-- commercial/compliance posture.
+## Current V0 status
 
-### 3. Expert recommendations normalized
-Three exploration rounds are retained, but:
-- current MVP remains unchanged;
-- stale future `P1/P2/P4` labels are translated to `E1/E2/E3/GX`;
-- candidate ≠ commitment;
-- Active Task remains NONE.
+# INCOMPLETE — insufficient external sample
 
-### 4. Research verification
-The strongest conclusions are supported:
-- embedded memory/stack visualization is a long-running real workflow;
-- CI/history/PR integration is a real product pattern;
-- ESP-IDF lockfiles are a sound first component-drift source;
-- release symbol retention solves real downstream debugging needs;
-- CRA reporting obligations are current context.
+Formal eligible external participants completed:
 
-The following are deliberately **not** frozen as facts:
-- exact “7 tools over 17 years” metric;
-- ranked lists being quantitatively “most popular”;
-- XLSX/DOCX being fake demand;
-- universal absence of export monetization;
-- stale exact MemBrowse price/unit claims;
-- “cloud cannot export self-contained artifacts”;
-- “no open-source CLI+Action precedent”.
+`0 / 8 minimum`
 
-### 5. Code area is planned before code exists
-See:
-`05_ENGINEERING/08_CODE_AREA_PLAN.md`
+No participant data is fabricated.
 
-The plan preserves:
-- four library-crate Phase-0 budget;
-- pure Rust Core;
-- thin Tauri shell;
-- single frontend IPC boundary;
-- fixture/golden discipline;
-- root tokens/schema authority.
+Therefore v0.5.1 does **not** claim:
+- V0 PASS;
+- V0 Conditional PASS;
+- V0 FAIL based on users;
+- G1;
+- Product MVP authorization.
 
-## Current scope
+## Prototype
 
-Current MVP still centers:
+Open:
+
+`V0_VALIDATION/prototype/index.html`
+
+No dependency installation is required.
+
+## State model
 
 ```text
-Analyze → Compare → Gate → Release
+STATE A
+ELF ✓
+MAP not provided
+Git not linked
+Sections available
+Symbols unavailable
+MAP-dependent Gate findings UNKNOWN
+
+      ↓ explicit Add MAP
+
+STATE B
+ELF ✓
+MAP ✓ firmware.map
+1,284 symbols
+Dependencies enabled
+MAP-dependent Gate findings re-evaluated
+
+      ↓ invalid candidate replacement
+
+STATE C
+Parse Failure
+Last Good Artifact preserved
+
+      ↓ recover
+
+STATE D
+Bundle & History
 ```
 
-Current next authorizable validation:
+## Next work
 
-```text
-V0 Workflow Prototype
-        +
-P0 Technical Vertical Slice
-        ↓
-       G1
-```
+Continue **V0 only**:
+- recruit real eligible participants;
+- Batch A 4–5;
+- interim review;
+- Batch B 4–5;
+- optional Batch C to 12–15;
+- record actual n/N;
+- issue V0 Gate recommendation.
 
-Nothing in E1/E2/E3/GX is automatically authorized.
-
-## Post-MVP candidate horizons
-
-### E1
-low-cost workflow depth:
-enhanced HTML, CSV/MD, recipes/schemas, narrow component drift, fixture-driven toolchain expansion.
-
-### E2
-evidence depth:
-`.su` stack evidence, SBOM completeness, symbol archive, retention/toolchain evidence.
-
-### E3
-conditional advanced experience:
-watch, trends/treemap, XLSX, deeper adapters/ABI details.
-
-### GX
-Growth/ecosystem:
-official CI integrations, team policy, editor extension, full ABI Gate, DOCX if proven.
+P0 was not authorized by this V0 execution.
 
 ## Read order
 
 1. `README.md`
 2. `PRODUCT_BASELINE.md`
-3. `DESIGN.md`
-4. `BASELINE.yaml`
-5. `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md`
-6. `10_AUDIT/03_ADOPTION_DECISION_REGISTER.md`
-7. `05_ENGINEERING/08_CODE_AREA_PLAN.md`
-8. `06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md`
-9. `08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md`
-10. `09_ADR/ADR-0024-post-mvp-candidate-governance.md`
-11. `.ai/ACTIVE_TASK.md`
+3. `V0_VALIDATION/README.md`
+4. `V0_VALIDATION/V0_TAKEOVER_REPORT.md`
+5. `V0_VALIDATION/V0_PLAN.md`
+6. `V0_VALIDATION/prototype/FIXTURE_NARRATIVE.md`
+7. `V0_VALIDATION/internal/DRY_RUN_REPORT.md`
+8. `V0_VALIDATION/deliverables/V0_VALIDATION_REPORT.md`
+9. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
+10. `.ai/ACTIVE_TASK.md`
+
+
+## Batch A recruitment-ready status
+
+Current V0 Batch A status:
+
+`WAITING FOR REAL PARTICIPANTS`
+
+The recruitment/screening/moderator/scheduling package is located at:
+
+`V0_VALIDATION/batch_a/recruitment_ready/`
+
+Formal external sessions remain:
+
+`0 / 4–5 Batch A target`
+
+Per the authorized Batch A Prompt, v0.5.2 is intentionally withheld until real Batch A evidence exists.

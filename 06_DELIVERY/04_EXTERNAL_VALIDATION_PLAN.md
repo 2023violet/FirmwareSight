@@ -2,7 +2,7 @@
 title: "External Validation Plan"
 doc_id: "FS-DEL-005"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Research"
 last_updated: "2026-09-27"
@@ -87,3 +87,24 @@ P1–P4 MVP Candidate 后：
 - ≥1 team pilot
 
 这些是 go/no-go evidence，不是市场规模统计。
+
+
+## v0.5.1 Execution Status
+
+V0 has been explicitly authorized and entered execution.
+
+Completed:
+- V0 authority takeover;
+- clickable prototype;
+- coherent MAP/evidence state machine;
+- protocol and session templates;
+- internal functional dry run.
+
+Pending:
+- formal external sessions, currently `0 / 8 minimum`.
+
+Therefore:
+- V0 status = `INCOMPLETE — insufficient external sample`;
+- G1 is not reached;
+- P1 is not authorized by this execution;
+- P0 is not included in the V0 authorization.

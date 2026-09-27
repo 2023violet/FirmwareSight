@@ -1,0 +1,2226 @@
+FirmwareSight V0 — Workflow Prototype Validation
+完整执行 Prompt v1.1
+Baseline: FirmwareSight_Project_Baseline_v0.5.0
+Purpose: V0 Workflow Prototype Validation only
+
+本版本是在 v1.0 Prompt 经三维度交叉评审后修订。
+已修复的关键问题：
+1. 增加 MAP 跨屏状态时间线，消除 Overview/Gate 与 Analyze/Dependencies 的状态矛盾。
+2. 补齐动效纪律、按钮三层、键盘可达、图表优先级。
+3. 明确参考图中的 Export 控件在 V0 一律 disabled / non-functional，避免把 E1 候选误带入 MVP。
+4. 商业访谈必须引用 06_DELIVERY/09_USER_INTERVIEW_QUESTION_BANK.md。
+5. Review Acceptance Record 补齐 finding_id / original_state。
+6. 明确禁止创建 Cargo/Tauri/Rust 正式工程文件。
+7. 修正 lwIP 拼写。
+8. 明确 UI reference screenshots 是构图/信息架构参考，跨屏状态必须服从本 Prompt 的 Fixture State Timeline。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. 授权边界
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+你现在正式接手 FirmwareSight 项目的第一阶段产品验证任务：
+
+# V0 — Workflow Prototype Validation
+# FirmwareSight v0.5.0
+
+这是一个正式执行任务，不是头脑风暴，不是重新设计产品，也不是开始正式业务代码开发。
+
+本 Prompt 即代表：
+
+✅ 授权执行 V0 — Workflow Prototype Validation
+✅ 授权创建仅用于 V0 的 clickable prototype、fixture data、研究协议、session 记录与验证报告
+
+❌ 不授权 P0 — Technical Vertical Slice
+❌ 不授权 P1–P4 Product MVP Implementation
+❌ 不授权任何 E1 / E2 / E3 / GX Post-MVP Candidate
+❌ 不授权重新定义 FirmwareSight 产品方向
+❌ 不授权擅自扩展 MVP
+❌ 不授权创建 Rust Cargo Workspace
+❌ 不授权创建 crates/
+❌ 不授权创建正式 Tauri shell / src-tauri/
+❌ 不授权引入 object / gimli / rusqlite / ts-rs / Tokio 等正式产品依赖
+❌ 不授权把 V0 prototype 代码直接视为生产代码
+
+你的任务不是“把界面做得更漂亮”。
+
+你的任务是：
+
+> 使用已经冻结的 FirmwareSight v0.5.0 产品定义、UI 基调和 7 张高保真参考图，
+> 构造一个真实可点击、跨屏状态一致的工作流原型，
+> 并用真实目标用户验证：
+>
+> “FirmwareSight 的核心工作流和价值主张，在真实嵌入式工程师面前是否成立？”
+
+最终要回答四类问题：
+
+1. 用户是否理解 FirmwareSight？
+2. 用户能否自然完成 Analyze → Compare → Gate → Release？
+3. Evidence / Unknown / Review / Declared 等核心语义是否被正确理解？
+4. 用户是否表现出重复使用、Pilot 或真实付费信号？
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 第一原则：先接手，禁止直接开始制作
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+在进行任何原型制作、HTML/React 编写、页面调整、测试脚本制作之前，必须完整读取项目 authority。
+
+第一层：
+
+1. README.md
+2. PRODUCT_BASELINE.md
+3. BASELINE.yaml
+4. DESIGN.md
+5. AGENTS.md
+
+然后读取：
+
+00_GOVERNANCE/
+- 00_DOCUMENT_CONTROL.md
+- 01_PROJECT_CHARTER.md
+- 02_GLOSSARY.md
+- 03_DECISION_POLICY.md
+
+01_PRODUCT/
+- 00_PRODUCT_VISION.md
+- 01_PRD_MVP.md
+- 02_PERSONAS_JTBD.md
+- 03_SCOPE_NON_GOALS.md
+- 04_USER_STORIES_ACCEPTANCE.md
+- 05_BUSINESS_MODEL.md
+- 06_COMPETITIVE_POSITIONING.md
+- 07_MVP_COHORT_AND_CLI_POLICY.md
+- 08_PRODUCT_MODULE_MAP.md
+- 09_CAPABILITY_PORTFOLIO.md
+
+02_BRAND/
+- 00_NAMING_DECISION.md
+- 01_BRAND_FOUNDATION.md
+- 02_VOICE_MESSAGING.md
+
+03_DESIGN/
+- 00_DESIGN_PHILOSOPHY.md
+- 01_INFORMATION_ARCHITECTURE.md
+- 02_UX_FLOWS.md
+- 03_VISUAL_SYSTEM.md
+- 04_COMPONENT_RULES.md
+- 05_ACCESSIBILITY.md
+- 06_UI_REFERENCE_SCREENS.md
+- 07_DESIGN_TOKEN_VALIDATION.md
+- 08_POST_MVP_PRESENTATION_RULES.md
+
+必须读取：
+- assets/design-tokens.json
+
+必须逐张查看：
+- assets/ui-mockups/FS-UI-01-Overview.png
+- assets/ui-mockups/FS-UI-02-Analyze.png
+- assets/ui-mockups/FS-UI-03-Compare.png
+- assets/ui-mockups/FS-UI-04-Release-Gate.png
+- assets/ui-mockups/FS-UI-05-Bundle-History.png
+- assets/ui-mockups/FS-UI-06-Parse-Failure.png
+- assets/ui-mockups/FS-UI-07-Unknown-Dependency.png
+
+06_DELIVERY/
+- 04_EXTERNAL_VALIDATION_PLAN.md
+- 05_MVP_TO_PRODUCT_DEVELOPMENT_LIFECYCLE.md
+- 06_STAGE_GATES.md
+- 08_MILESTONE_DELIVERABLE_MATRIX.md
+- 09_USER_INTERVIEW_QUESTION_BANK.md
+
+其中：
+# 06_DELIVERY/09_USER_INTERVIEW_QUESTION_BANK.md
+是访谈问题的权威来源。
+本 Prompt 中列出的商业问题是任务化补充。
+若两者发生表述冲突，以基线文件为准。
+
+09_ADR/
+重点读取：
+- ADR-0018-ui-baseline-tokens-governance.md
+- ADR-0020-validation-sequence.md
+- ADR-0023-gate-five-state-semantics.md
+- ADR-0024-post-mvp-candidate-governance.md
+
+10_AUDIT/
+- 02_V0.5_EXPERT_REVIEW_RESOLUTION.md
+- 03_ADOPTION_DECISION_REGISTER.md
+
+.ai/
+- CURRENT_STATE.md
+- DECISIONS.md
+- HANDOFF.md
+- ACTIVE_TASK.md
+
+完成阅读后，先输出：
+
+# FirmwareSight V0 接手理解摘要
+
+必须包含：
+
+1. FirmwareSight 是什么；
+2. FirmwareSight 不是什么；
+3. 四个核心动词是什么；
+4. V0 验证什么；
+5. V0 不验证什么；
+6. 七张 UI 各自承担什么任务；
+7. 当前 MVP 与 E1/E2/E3/GX Candidate 的边界；
+8. V0 与 P0 的关系；
+9. MAP 状态时间线如何保证七屏一致；
+10. 当前最大的 5 个验证风险；
+11. 是否发现 authority 间新的冲突。
+
+重要：
+
+本 Prompt 本身已授权 V0。
+输出接手报告后，如果没有真正阻断执行的问题，不要额外等待“确认”。
+直接继续执行 V0。
+
+只有出现以下情况才暂停：
+- authority 文件缺失；
+- authority 明显互相冲突且没有裁决顺序；
+- 需要新增产品语义；
+- 需要扩大 V0 授权范围；
+- 涉及真实用户隐私/录音/敏感资料而缺少授权。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. FirmwareSight 产品本质
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FirmwareSight 的正式定位：
+
+# Local-first Embedded Firmware Release Workbench
+
+核心主张：
+
+# Know exactly what ships.
+
+它解决的不是：
+
+“ELF 文件怎么看？”
+
+而是：
+
+> “当我要发布一个 Firmware 时，
+> 我到底知不知道自己准备发布了什么，
+> 它和上一版发生了什么变化，
+> 当前 Evidence 是否满足我们自己的 Release Policy，
+> 以及我能否把这一次发布的事实留下来？”
+
+核心心智模型只有：
+
+Analyze
+↓
+Compare
+↓
+Gate
+↓
+Release
+
+任何 V0 交互都必须服务于这四个动词。
+
+禁止创造第五个顶级动词。
+
+尤其禁止把以下内容做成新产品中心：
+
+Dependencies
+Visualization
+SBOM
+History
+AI
+Reports
+CI
+Watch
+ABI
+
+这些只能作为现有四个动词中的证据、视图、输出或未来 Candidate。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. V0 的真正目标
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+V0 不负责证明：
+
+- ELF parser 正确；
+- MAP parser 正确；
+- Rust Core 可行；
+- Tauri 是否稳定；
+- SQLite 是否合适；
+- 100k Symbols 是否性能达标；
+- 512 MiB artifact 是否可以处理；
+- ts-rs 是否可落地；
+- Report renderer 是否可生产。
+
+这些属于：
+
+# P0 — Technical Vertical Slice
+或后续阶段。
+
+V0 只验证：
+
+## 3.1 Comprehension
+用户是否理解 FirmwareSight 在做什么？
+
+## 3.2 Discoverability
+不给教程，用户是否知道下一步点击哪里？
+
+## 3.3 Workflow
+用户能否完成：
+
+Analyze
+→ Compare
+→ Gate
+→ Release
+
+## 3.4 Evidence Model
+用户能否正确区分：
+
+Observed
+Derived
+Declared
+Unknown
+
+特别验证：
+
+Unknown ≠ Error
+Unknown ≠ Pass
+Unknown ≠ N/A
+Declared ≠ Observed
+
+## 3.5 Gate Model
+用户是否理解：
+
+PASS
+REVIEW
+BLOCK
+UNKNOWN
+N/A
+
+特别验证：
+
+REVIEW 与 BLOCK 是否容易混淆；
+UNKNOWN 是否被理解成“软件出错”；
+N/A 是否被理解成“已经通过”；
+Accepted Review 是否被错误理解成 PASS。
+
+## 3.6 Value
+用户是否认为这些信息真的改善 Firmware Release 工作？
+
+## 3.7 Trust
+用户是否因为 FirmwareSight 主动显示：
+
+Unknown
+Evidence
+Why
+Source
+Diagnostics
+
+而提高信任，而不是觉得“不够智能”。
+
+## 3.8 Commercial Signal
+观察：
+
+- 下一次 Release 是否愿意再次使用；
+- 是否愿意团队 Pilot；
+- 是否愿意进入采购讨论；
+- 是否存在价格锚定后的付费意愿。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. 原型形式
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本阶段需要：
+
+# Clickable High-Fidelity Workflow Prototype
+
+不是：
+
+静态图片合集。
+
+必须允许测试用户真正完成核心任务。
+
+允许实现：
+
+- 轻量本地 HTML/CSS/TypeScript prototype
+- 轻量 React prototype
+- Figma clickable prototype
+- 其他稳定、离线、便于观察用户操作的原型工具
+
+若当前项目环境允许，优先：
+
+# 一个轻量的本地 HTML/React Prototype
+
+但严格注意：
+
+# V0 Prototype ≠ Production Frontend
+
+禁止：
+
+- 创建正式 Cargo.toml workspace
+- 创建 crates/
+- 创建正式 apps/desktop/src-tauri/
+- 创建 Tauri 工程
+- 创建 Rust command
+- 创建真实 parser
+- 创建 SQLite schema
+- 创建 ts-rs binding
+
+Prototype 数据必须来自：
+
+fixture JSON
+或
+local static demo data
+
+所有数据必须明确属于：
+
+DEMO / SIMULATED WORKFLOW DATA
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. V0 Fixture Narrative
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+整个原型必须讲同一个故事。
+
+项目：
+
+relay-controller
+
+Baseline：
+
+v0.2.1
+
+Current：
+
+v0.3.0-rc2
+
+核心事实：
+
+- Current Flash image footprint: 486.2 KB
+- Baseline Flash: 474.8 KB
+- Net delta: +11.4 KB
+- Budget: 512.0 KB
+- `.ota_staging`: +24.0 KB
+- `.text`: +1.9 KB
+- `.rodata`: +1.2 KB
+- `.data`: -9.5 KB
+- `.legacy_log`: removed
+- signature missing
+- flash budget soft review
+- new OTA section review
+- Git not linked
+- mbedTLS detected but version Unknown
+- lwIP 2.1.3 Observed
+- FreeRTOS 10.4.0 Declared
+- CMSIS 5.6.0 Observed
+
+所有页面必须共享同一个 Fixture Store。
+
+禁止每页写一套独立假数据。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. 【关键修复】MAP 跨屏状态时间线
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+这是 V0 的强制状态机。
+
+所有参考图中的 MAP 状态差异必须通过时间线解释。
+
+不能让同一个时间点同时出现：
+
+Overview:
+MAP not provided
+
+和
+
+Analyze:
+MAP firmware.map ✓
+1,284 symbols resolved
+
+必须使用以下 Timeline。
+
+────────────────────
+STATE A — Initial / No MAP
+────────────────────
+
+原型刚打开时：
+
+ELF:
+✓ firmware.elf
+Loaded & parsed
+
+MAP:
+○ Not provided
+
+Git:
+○ Not linked
+
+此时：
+
+Overview：
+- MAP Not provided
+- Symbol-level analysis unavailable
+- map-dependent Gate rules = UNKNOWN
+- 允许看到 Section-level facts
+
+Release Gate：
+至少有：
+- signed_image.required = BLOCK
+- flash_budget.soft = REVIEW
+- ota_staging.new_section = REVIEW
+- map_parity = UNKNOWN
+- symbol_audit = UNKNOWN 或对应 map-dependent UNKNOWN
+
+Analyze：
+Sections 可用；
+Symbols 不能显示已解析 1,284 symbols；
+需要显示：
+“MAP required for symbol-level analysis”
+并提供：
+
+[ Add .map file... ]
+
+TASK 1 在 STATE A 执行。
+
+────────────────────
+TRANSITION A→B — Add MAP
+────────────────────
+
+用户需要更深入分析时，必须发生一个显式操作：
+
+[ Add .map file... ]
+
+或：
+
+[ Provide firmware.map ]
+
+Prototype 模拟选择：
+
+firmware.map
+
+然后显示：
+
+MAP loaded
+Re-analyzing…
+Analysis updated
+
+不得无提示自动出现 MAP。
+
+记录：
+MAP source = firmware.map
+
+────────────────────
+STATE B — MAP Loaded
+────────────────────
+
+Capability：
+
+ELF:
+✓ firmware.elf
+
+MAP:
+✓ firmware.map
+
+Git:
+○ Not linked
+
+此时：
+
+Analyze：
+Sections
+Symbols
+Dependencies
+
+全部生效。
+
+Symbols：
+1,284 resolved
+
+Dependencies：
+可以使用 symbol fingerprint + version strings 等 demo evidence。
+
+Release Gate 重跑后：
+
+原先因 MAP 缺失产生的：
+
+map_parity = UNKNOWN
+symbol_audit = UNKNOWN
+
+必须重新求值。
+
+例如：
+
+map_parity → PASS
+symbol_audit → PASS
+
+或其他明确的 fixture result。
+
+不得继续显示“MAP not provided”。
+
+TASK 2–8 默认在 STATE B 执行。
+
+────────────────────
+STATE C — Failed ELF Replacement Attempt
+────────────────────
+
+Parse Failure 是一个独立恢复场景。
+
+用户从 STATE B 或已存在 Last Good Artifact 的状态尝试：
+
+Replace file…
+
+选择：
+
+invalid-firmware.elf
+
+新 candidate 解析失败。
+
+重要：
+
+失败 candidate 不覆盖 Last Good Artifact。
+
+Last Good Artifact 仍然是：
+
+v0.3.0-rc2
+firmware.elf
+
+以及此前已经加载的项目 evidence。
+
+Parse Failure 页可以显示：
+
+Candidate ELF invalid
+
+但项目已有 MAP / Last Good Artifact 状态不能被悄悄清空。
+
+参考图 FS-UI-06 的构图和错误信息结构是 authority，
+其中旧 demo chip 的 MAP 状态不是跨屏时间线 authority。
+
+跨屏状态以本节 Timeline 为准。
+
+TASK 9 在 STATE C 执行。
+
+────────────────────
+STATE D — History / Bundle
+────────────────────
+
+恢复到 Last Good Artifact / current workspace 后，
+
+进入 Bundle & History。
+
+TASK 10 在 STATE D 执行。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. 七个核心界面
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+7 张 PNG 是：
+
+- 构图参考
+- 信息层级参考
+- 密度参考
+- 组件表达参考
+
+但：
+
+# 跨屏数据状态必须服从 Fixture State Timeline。
+
+────────────────────
+07.1 Overview
+────────────────────
+
+必须回答：
+
+# Can we ship now?
+
+准确含义只能是：
+
+> 根据当前可用 Evidence，
+> 当前 Artifact 是否满足配置的 FirmwareSight Release Policy？
+
+绝不能暗示：
+
+- 法律合规；
+- CRA compliant；
+- 安全认证；
+- 无漏洞；
+- Firmware 绝对安全。
+
+STATE A：
+
+Capability Banner：
+
+ELF
+✓ Loaded & parsed
+
+MAP
+○ Not provided
+
+Git
+○ Not linked
+
+当前 Gate：
+
+BLOCK
+
+必须能看见：
+
+- Block reason
+- Review pending
+- MAP-dependent Unknown
+- Next Steps
+
+测试重点：
+
+第一眼是否知道：
+
+“现在还不能 Release。”
+
+和：
+
+“为什么不能。”
+
+────────────────────
+07.2 Analyze
+────────────────────
+
+STATE A：
+
+Sections 可用；
+Symbols 显示 MAP required；
+提供 Add .map file。
+
+STATE B：
+
+Tabs：
+
+Sections
+Symbols
+Dependencies
+
+Sections：
+
+- section
+- size
+- share
+- delta
+- ranked bar
+
+Symbols：
+
+- symbol
+- section
+- size
+- delta
+- ranked bar
+
+Evidence Inspector：
+
+点击 `.text` / symbol / dependency 后显示：
+
+- fact
+- value
+- source
+- delta
+- contributors
+- evidence classification
+
+必须明确：
+
+Observed
+Derived
+Declared
+Unknown
+
+测试：
+
+“主要 Flash 占用来自哪里？”
+
+────────────────────
+07.3 Compare
+────────────────────
+
+展示：
+
+Build A
+vs
+Build B
+
+必须有：
+
+old
+new
+delta
+change type
+
+Added / Removed：
+
+使用：
+
+—
+
+表示不存在。
+
+禁止：
+
+0
+
+表示不存在。
+
+展示：
+
+Biggest Growth Contributors
+
+用户应该能回答：
+
+为什么 Current 比 v0.2.1 大 11.4 KB？
+
+并找到：
+
+.ota_staging +24.0
+.text +1.9
+.rodata +1.2
+.data -9.5
+.legacy_log removed
+
+────────────────────
+07.4 Release Gate
+────────────────────
+
+Canonical states：
+
+BLOCK
+REVIEW
+UNKNOWN
+PASS
+N/A
+
+推荐视觉排序：
+
+BLOCK
+↓
+REVIEW
+↓
+UNKNOWN
+↓
+PASS
+↓
+N/A
+
+至少出现：
+
+BLOCK:
+signed_image.required
+
+REVIEW:
+flash_budget.soft
+
+REVIEW:
+ota_staging.new_section
+
+STATE A:
+map_parity = UNKNOWN
+symbol_audit = UNKNOWN
+
+STATE B 重跑后：
+map-dependent rule 必须得到明确新结果。
+
+Review：
+
+[ Accept review... ]
+
+Acceptance Record 必须包含：
+
+finding_id
+original_state = REVIEW
+actor
+timestamp
+reason
+
+接受后：
+
+原 Finding 仍然是 REVIEW。
+
+禁止：
+
+REVIEW → PASS
+
+Bundle Preview：
+
+仍有 effective BLOCK：
+
+Build Bundle disabled。
+
+────────────────────
+07.5 Bundle & History
+────────────────────
+
+展示：
+
+Gate Run
+Bundle
+Artifact
+Verdict
+Time
+Hash
+Flash delta
+
+Bundle demo 至少包含：
+
+firmware.elf
+manifest.json
+gate_results.json
+accepted_reviews.json
+environment.txt
+
+必须传达：
+
+Bundle 是：
+
+# Release Evidence Package
+
+而不仅仅是：
+
+ZIP Export。
+
+────────────────────
+07.6 Parse Failure
+────────────────────
+
+必须包含错误四要素：
+
+What happened
+Why we know
+What to do
+Diagnostics ID
+
+例如：
+
+Could not parse invalid-firmware.elf as an ELF image.
+
+ELF magic mismatch
+
+并明确：
+
+Nothing was overwritten.
+
+Last Good Artifact preserved.
+
+────────────────────
+07.7 Unknown Dependency
+────────────────────
+
+STATE B：
+
+Dependencies：
+
+lwIP
+2.1.3
+Observed
+
+FreeRTOS
+10.4.0
+Declared
+
+mbedTLS
+—
+UNKNOWN
+
+vendor_blob_*
+—
+UNKNOWN
+
+CMSIS
+5.6.0
+Observed
+
+点击 mbedTLS：
+
+右侧显示：
+
+WHAT WE DETECTED
+
+TLS symbols in .text
+14
+
+Version strings found
+0
+
+Match type
+fingerprint
+
+WHAT WE DO NOT KNOW
+
+Version
+License
+Build provenance
+
+操作：
+
+Declare version...
+
+用户输入：
+
+3.5.2
+
+确认后：
+
+mbedTLS
+3.5.2
+Declared
+
+必须明确：
+
+Declared entries are labeled “Declared” — never mixed with Observed facts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. 必要可点击交互
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少实现：
+
+FLOW A
+Overview STATE A
+→ Analyze
+
+FLOW B
+Analyze Sections
+→ Add MAP
+→ STATE B
+→ Symbols enabled
+
+FLOW C
+Analyze
+→ Select Section/Symbol
+→ Evidence Inspector
+
+FLOW D
+Analyze
+→ Dependencies
+→ mbedTLS UNKNOWN
+→ Declare Version
+→ Declared
+
+FLOW E
+Analyze
+→ Compare
+
+FLOW F
+Compare
+→ Release Gate
+
+FLOW G
+Gate
+→ Review
+→ Accept Review
+→ immutable Acceptance Record
+
+FLOW H
+Gate
+→ BLOCK remains
+→ Bundle disabled
+
+FLOW I
+Simulate fixing blocking condition
+→ Re-run Gate
+→ acceptable Gate
+→ Build Bundle
+
+FLOW J
+Bundle
+→ History
+→ open previous run
+
+FLOW K
+Replace ELF
+→ invalid-firmware.elf
+→ Parse Failure
+→ Last Good Artifact preserved
+→ Recover
+
+这些必须是一个有状态 prototype。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. UI / Design 红线
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+基调：
+
+# Instrument-grade clarity
+
+上游气质参考：
+
+IBM / Carbon-inspired
+
+但数值 authority：
+
+DESIGN.md
++
+assets/design-tokens.json
+
+必须遵守：
+
+- Light Theme only
+- 无 gradient
+- 无 glassmorphism
+- 无 neon/glow
+- 无 purple branding
+- 无营销 Dashboard 炫技
+- panel/card/table row 不使用装饰阴影
+- overlay 可使用规范 shadow token
+- 1px border 建立层级
+- 单一 accent
+- 状态色只承担语义
+- 状态必须 icon + label
+- mono 用于 number/hash/version/timestamp/path
+- dense not crowded
+- 一屏一个 primary focus
+- 1024×720 可操作
+- 1440×900 reference target
+- Evidence Inspector 自适应
+- focus-visible 必须存在
+- hover / pressed / disabled 完整
+
+新增强制条款：
+
+## 9.1 Motion Discipline
+
+只允许 productive motion：
+
+- panel open/close
+- row expand
+- state transition feedback
+- loading/re-analyze feedback
+
+必须 respect：
+
+prefers-reduced-motion
+
+禁止：
+
+- decorative floating
+- glow
+- gradient animation
+- excessive easing
+- marketing transitions
+
+动效使用 token timing。
+
+## 9.2 Button Hierarchy
+
+按钮层级：
+
+Primary
+Secondary
+Ghost
+
+一个局部 action region 默认最多：
+
+# 1 个 Primary
+
+不能把：
+
+Open Compare
+Export
+Re-run Gate
+Add MAP
+
+同时全部画成主按钮。
+
+## 9.3 Keyboard Accessibility
+
+Prototype 必须至少支持：
+
+- logical Tab order
+- visible focus ring
+- Enter/Space activation
+- Escape closes overlay/dialog where appropriate
+- dialog/overlay focus trap
+- closing dialog returns focus to trigger
+- 不用 hover-only 暴露核心信息
+
+## 9.4 Chart Priority
+
+严格顺序：
+
+table
+>
+ranked bars
+>
+compact stacked bar
+>
+conditional treemap
+
+V0 默认只使用：
+
+table
++
+ranked bars
+
+禁止为了“看起来专业”添加额外 Dashboard Chart。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. Export 控件处理
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+部分高保真参考图存在：
+
+Export CSV
+Export diff (.json)
+Export…
+
+这些与当前 E1 Candidate 有潜在范围冲突。
+
+V0 规则：
+
+# 这些控件可以保留视觉位置，用来测试 IA。
+# 但不得真正实现导出功能。
+
+处理方式二选一：
+
+A.
+Disabled，并给 tooltip：
+
+“Not available in this prototype.”
+
+或
+
+B.
+点击后显示明确 prototype-only 提示：
+
+“Export is not part of this V0 workflow.”
+
+禁止：
+
+- 实现真实 CSV
+- 实现真实 JSON exporter
+- 实现文件下载
+- 把 Export completion 纳入 V0 核心 task
+
+测试主持人也不得把这些控件作为任务目标。
+
+避免：
+
+用户点了无反应，
+造成错误的 usability noise。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. 正式用户验证
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+采用：
+
+# Moderated Workflow / Product Validation
+
+Participant：
+
+minimum:
+8
+
+target:
+12–15
+
+优先：
+
+真实嵌入式 Firmware Engineer / Lead
+GCC / Clang / GNU ld cohort
+
+可以包含：
+
+Keil
+IAR
+
+但只能标：
+
+Discovery participant
+
+不能暗示：
+
+FirmwareSight 已经完整支持 Keil / IAR。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. 主持规则
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+开场只允许：
+
+“这是一个用于 Firmware Release 前分析、对比、检查和留证的本地桌面工具原型。
+
+请像第一次拿到一个新工具一样操作。
+
+过程中请尽量说出你正在想什么。”
+
+禁止先解释：
+
+- Observed
+- Derived
+- Declared
+- Unknown
+- Gate
+- Compare
+- Bundle
+
+这些是否能自然理解，正是测试内容。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. 正式测试任务
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TASK 1 — Initial readiness / STATE A
+
+“这是准备发布的 relay-controller 固件。
+
+请告诉我：
+它现在是否已经可以进入发布流程？”
+
+观察：
+
+- 是否先看 Overview
+- 是否理解 BLOCK
+- 是否发现 MAP 缺失造成 Unknown
+- 是否能说出下一步
+
+────────────────────
+TASK 2 — Add evidence and analyze
+
+“现在你想进一步查看函数/符号级占用。
+请尝试获得这些信息。”
+
+不要告诉用户必须 Add MAP。
+
+正确路径：
+
+Analyze
+→ 发现 Symbols unavailable
+→ Add .map file
+→ firmware.map
+→ STATE B
+→ Symbols enabled
+
+观察：
+
+- 是否理解为什么需要 MAP
+- 是否发现 Add MAP action
+- MAP 加载后是否理解 capability 发生变化
+
+然后继续：
+
+“请告诉我这版固件主要 Flash 占用来自哪里。”
+
+────────────────────
+TASK 3 — Compare
+
+“和 v0.2.1 相比，这一版为什么大了？”
+
+观察：
+
+- Compare discoverability
+- old/new/delta
+- Added/Removed
+- contributors
+
+────────────────────
+TASK 4 — New OTA section
+
+“有一个新 OTA section。
+请确认 FirmwareSight 对它是什么态度。”
+
+观察：
+
+- REVIEW 理解
+- 与 BLOCK 的区别
+
+────────────────────
+TASK 5 — Accept Review
+
+“如果你确认这个 OTA section 是合理变化，请处理这个 Review。”
+
+观察：
+
+用户是否理解：
+
+Acceptance ≠ PASS
+
+并验证 Acceptance Record：
+
+finding_id
+original_state
+actor
+timestamp
+reason
+
+────────────────────
+TASK 6 — Bundle eligibility
+
+“现在能不能 Build Bundle？”
+
+如果仍有 BLOCK：
+
+正确理解：
+
+不能。
+
+────────────────────
+TASK 7 — Unknown Dependency
+
+“FirmwareSight 发现了 mbedTLS。
+请告诉我它是什么版本。”
+
+正确结果：
+
+FirmwareSight 不知道。
+
+观察：
+
+用户是否接受 Unknown，
+是否会主动找 Declare action。
+
+────────────────────
+TASK 8 — Declare known version
+
+“假设你确认项目使用的是 mbedTLS 3.5.2，
+请把这个信息记录下来。”
+
+观察：
+
+是否理解：
+
+Declared ≠ Observed
+
+────────────────────
+TASK 9 — Invalid ELF / STATE C
+
+“现在你准备替换当前 ELF，
+但选中的文件是错误的。
+请处理这个问题。”
+
+观察：
+
+- error structure
+- recovery
+- Last Good Artifact safety
+
+────────────────────
+TASK 10 — Historical evidence / STATE D
+
+“三个月后你要证明某个版本当时为什么被允许发布。
+你会去哪里找？”
+
+观察：
+
+Bundle & History
+Gate run
+Acceptance
+Hash
+Evidence
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. 五个危险误解
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须特别记录：
+
+A.
+“Can we ship now?”
+
+是否被理解成：
+法律上可上市 / CRA compliance / safety certification。
+
+出现则：
+Critical。
+
+B.
+UNKNOWN
+
+是否被理解为：
+Error / clean / Pass。
+
+C.
+Accepted Review
+
+是否被理解为：
+FirmwareSight 已经自动证明“没问题”。
+
+D.
+Declared
+
+是否被理解为：
+FirmwareSight 实际检测到了版本。
+
+E.
+Bundle
+
+是否被理解为：
+普通 ZIP，
+而不是 Release Evidence Package。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. Session 数据记录
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每个 Session：
+
+Participant ID:
+Role:
+Years embedded experience:
+Primary toolchain:
+MCU ecosystem:
+Company/team size:
+Release frequency:
+Current release process:
+
+每个 Task：
+
+Task ID:
+Prototype version:
+Fixture State before:
+Fixture State after:
+Success:
+Success with hesitation:
+Failure:
+Completion time:
+First click:
+Wrong turns:
+Backtracks:
+Questions:
+Moderator intervention:
+Critical quote:
+Observed hesitation:
+Interpretation:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. Misunderstanding Log
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+分类：
+
+M01 Product positioning
+M02 Navigation
+M03 Analyze
+M04 Compare
+M05 Gate
+M06 Evidence
+M07 Unknown
+M08 Review
+M09 N/A
+M10 Bundle
+M11 History
+M12 Error recovery
+M13 Compliance misunderstanding
+M14 Pricing/value
+M15 Toolchain expectation
+M16 Evidence state transition
+M17 MAP/capability misunderstanding
+
+每条：
+
+participant
+prototype version
+screen
+fixture state
+exact quote/behavior
+severity
+frequency
+probable cause
+possible correction
+retest required
+
+先累计证据。
+
+禁止：
+
+Participant #1 一困惑就立即改 UI。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. 商业与 Discovery 访谈
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+正式问题优先从：
+
+# 06_DELIVERY/09_USER_INTERVIEW_QUESTION_BANK.md
+
+抽取并保持其 discovery 结构。
+
+必须至少覆盖：
+
+## Export / handoff
+- 结果还需要给谁看？
+- 对方实际会打开什么格式？
+- 是否需要 self-contained artifact？
+
+## Repeated analysis / History
+- 一周/一次 Release 会重复几次？
+- 什么事件触发重新检查？
+
+## CI
+- CI 中 Gate fail 是价值还是干扰？
+- 谁拥有 policy？
+
+## Stack evidence
+- 是否真的使用 .su？
+- 最近一次 stack sizing/overflow 事故是什么？
+
+## Release symbols
+- 是否有过几个月后重新找 ELF/AXF/MAP 的场景？
+
+## Component evidence
+- 项目中哪一个来源才是 dependency version authority？
+
+## CRA / review pressure
+- 客户/法规是否已经真实要求 SBOM / provenance / release evidence？
+- 有没有真实截止时间？
+
+禁止问：
+
+“你需要 FirmwareSight 帮你 CRA 合规吗？”
+
+因为这会诱导答案并越过合规边界。
+
+商业问题还必须覆盖：
+
+1.
+“你现在 Release 前怎么做这些检查？”
+
+2.
+“哪一步最浪费时间？”
+
+3.
+“FirmwareSight 真正替代了哪一步？”
+
+4.
+“没有它你会回到什么方法？”
+
+5.
+“下一次 Release 你会主动再打开吗？为什么？”
+
+6.
+“哪些只是方便，哪些真的降低 Release 风险？”
+
+7.
+“假设个人版每年是一个具体价格，你会自己买吗，还是需要公司报销？”
+
+使用多个合理 price anchor，
+但不暗示存在已冻结定价。
+
+8.
+“谁批准购买？”
+
+9.
+“愿不愿意拿一次真实 Release 做 Team Pilot？”
+
+10.
+“如果不会买，最主要原因是什么？”
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. 不得发明 V0 PASS 阈值
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+当前 authority 规定：
+
+minimum participants:
+8
+
+target:
+12–15
+
+但没有冻结：
+
+“80% = PASS”
+
+这样的数学阈值。
+
+禁止自行创建。
+
+必须报告真实：
+
+n / N
+
+例如：
+
+Overview readiness:
+10 / 12
+
+Unknown comprehension:
+7 / 12
+
+Review vs Block:
+8 / 12
+
+Bundle purpose:
+9 / 12
+
+Workflow completion:
+10 / 12
+
+并提供：
+
+Observed Evidence
+
+最后只能输出：
+
+PASS recommendation
+CONDITIONAL PASS recommendation
+FAIL recommendation
+
+这是建议，
+
+不是自动改变：
+
+G1。
+
+G1 仍需要：
+
+V0 PASS
++
+P0 PASS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. 必须统计的指标
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+至少：
+
+- task completion n/N
+- first-click correctness
+- median completion time
+- wrong-turn count
+- backtrack count
+- moderator intervention count
+- critical misunderstanding count
+- Gate comprehension
+- Unknown comprehension
+- Declared vs Observed comprehension
+- MAP capability transition comprehension
+- Bundle purpose comprehension
+- return intent n/N
+- price-anchored willingness n/N
+- team Pilot willingness n/N
+- requested toolchain frequency
+
+必须区分：
+
+Observed metric
+
+和：
+
+Research interpretation。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. Batch Iteration
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+采用：
+
+Batch A
+4–5 participants
+
+↓
+Interim Review
+
+只允许修：
+
+Critical
+或
+明显 usability blocker
+
+然后：
+
+Prototype v0.1
+→
+v0.2
+
+再进行：
+
+Batch B
+4–5 participants
+
+若继续到 12–15：
+
+Batch C
+
+每次变更记录：
+
+before
+after
+reason
+evidence count
+affected sessions
+expected impact
+retest result
+
+输出：
+
+PROTOTYPE_CHANGELOG.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. 技术越界禁令
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+V0 禁止：
+
+- Cargo workspace
+- Cargo.toml 正式工程
+- Rust crates
+- Tauri shell
+- src-tauri/
+- Tauri IPC
+- object
+- gimli
+- MAP parser
+- rusqlite
+- SQLite migration
+- Git CLI provenance implementation
+- ts-rs
+- real Release Bundle writer
+- parser fuzz
+- parser golden
+- 512 MiB benchmark
+- updater
+- network
+- production filesystem integration
+
+若 prototype 需要模拟：
+
+使用 local fixture JSON / static state machine。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. Post-MVP 越界禁令
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+禁止实现：
+
+E1:
+- Enhanced export
+- real CSV
+- real Markdown export
+- component drift parser
+
+E2:
+- `.su`
+- SBOM completeness
+- symbol archive
+
+E3:
+- watch
+- History trend engine
+- treemap feature
+- XLSX
+- ABI
+
+GX:
+- GitHub Action
+- GitLab integration
+- Team policy distribution
+- Cloud
+- Editor Extension
+- DOCX
+
+允许：
+
+在访谈中问需求。
+
+禁止：
+
+在 V0 中实现需求。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. V0 Workspace
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+建立：
+
+V0_VALIDATION/
+
+建议结构：
+
+V0_VALIDATION/
+├── README.md
+├── V0_PLAN.md
+│
+├── prototype/
+│   ├── README.md
+│   ├── fixtures/
+│   │   ├── workspace-state.json
+│   │   ├── builds.json
+│   │   ├── gate-results.json
+│   │   └── dependencies.json
+│   ├── src/
+│   └── PROTOTYPE_CHANGELOG.md
+│
+├── protocol/
+│   ├── MODERATOR_GUIDE.md
+│   ├── PARTICIPANT_SCREENING.md
+│   ├── TASK_SCRIPT.md
+│   ├── INTERVIEW_SCRIPT.md
+│   └── CONSENT_PRIVACY.md
+│
+├── sessions/
+│   ├── TEMPLATE.md
+│   └── ...
+│
+├── analysis/
+│   ├── METRICS.md
+│   ├── MISUNDERSTANDING_LOG.md
+│   ├── QUOTES.md
+│   ├── TOOLCHAIN_REQUESTS.md
+│   ├── PAYMENT_SIGNALS.md
+│   ├── STATE_TRANSITION_FINDINGS.md
+│   └── PROTOTYPE_CHANGE_LOG.md
+│
+└── deliverables/
+    ├── V0_VALIDATION_REPORT.md
+    ├── V0_FINDINGS.md
+    ├── V0_UI_CHANGE_RECOMMENDATIONS.md
+    ├── V0_PRODUCT_RISK_UPDATE.md
+    └── V0_GATE_RECOMMENDATION.md
+
+禁止把 V0 prototype 放入：
+
+apps/desktop/
+crates/
+
+从目录层级上物理隔离：
+
+Prototype
+和
+Production。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. Privacy / Research Discipline
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Session 默认不得保存：
+
+- 公司私有 Firmware
+- ELF/MAP
+- 私有 Git repo
+- source code
+- credentials
+- internal customer identifiers
+
+除非：
+
+明确获得授权。
+
+如果使用录屏/录音：
+
+必须在 session 前取得 participant 同意。
+
+报告默认：
+
+Participant ID 匿名化。
+
+Critical Quote：
+
+不得泄露可识别公司机密。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. V0 Final Report
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+最终必须包含：
+
+## 25.1 Executive Summary
+
+- N
+- cohort
+- 是否理解产品
+- 最大 misunderstanding
+- 核心 value
+- commercial signal
+
+## 25.2 Cohort
+
+role
+toolchain
+experience
+team size
+release frequency
+
+## 25.3 Workflow
+
+Analyze
+Compare
+Gate
+Release
+
+逐项 n/N。
+
+## 25.4 Screen Findings
+
+Overview
+Analyze
+Compare
+Release Gate
+Bundle & History
+Parse Failure
+Unknown Dependency
+
+每屏：
+
+Works
+Confusing
+Failed
+Quotes
+Recommendation
+
+## 25.5 State Transition Findings
+
+重点报告：
+
+STATE A No MAP
+→
+Add MAP
+→
+STATE B MAP Loaded
+
+用户是否理解：
+
+Evidence availability 改变了可分析能力和 Gate evaluation。
+
+这是 v1.1 必须新增的独立报告项。
+
+## 25.6 Mental Model
+
+Evidence
+Observed
+Derived
+Declared
+Unknown
+Review
+Block
+N/A
+Bundle
+
+## 25.7 Compliance Wording Risk
+
+“Can we ship now?”
+
+是否产生：
+
+法律/安全/CRA 误解。
+
+## 25.8 Value
+
+不要凭团队喜好排序：
+
+Analyzer
+Diff
+Gate
+Bundle
+History
+Evidence
+
+必须用 session evidence。
+
+## 25.9 Commercial
+
+- return intent n/N
+- price-anchored willingness n/N
+- Pilot willingness n/N
+- buyer role
+- objections
+
+## 25.10 Toolchain
+
+真实统计：
+
+GCC
+Keil
+IAR
+ESP-IDF
+Zephyr
+Other
+
+不自动改变 Supported Matrix。
+
+## 25.11 Misunderstanding Ranking
+
+Critical
+High
+Medium
+Low
+
+## 25.12 Recommended Changes
+
+每条：
+
+Problem
+Evidence
+Frequency
+Root cause hypothesis
+Recommended change
+Affected screen
+Baseline change?
+ADR required?
+Retest required?
+
+## 25.13 V0 Decision Recommendation
+
+仅：
+
+PASS recommendation
+CONDITIONAL PASS recommendation
+FAIL recommendation
+
+如果 participant < 8：
+
+只能：
+
+V0 INCOMPLETE — insufficient external sample
+
+禁止写 PASS。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. Definition of Done
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+V0 执行完成必须具备：
+
+□ 7-screen clickable workflow
+□ coherent single Fixture Narrative
+□ MAP State A→B timeline implemented
+□ Parse Failure recovery state implemented
+□ UI design checklist passed
+□ keyboard accessibility basic path
+□ prefers-reduced-motion honored
+□ export controls explicitly prototype-disabled/non-functional
+□ moderator guide
+□ participant screening
+□ task script
+□ discovery/interview/payment script
+□ session template
+□ internal dry run
+□ minimum 8 external target users，或明确记录招募未达成
+□ actual n/N
+□ misunderstanding log
+□ state-transition finding log
+□ quotes
+□ payment/return/Pilot signal
+□ toolchain demand register
+□ prototype changelog
+□ final validation report
+□ V0 gate recommendation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. 执行顺序
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 0
+读取所有 authority。
+
+STEP 1
+输出《FirmwareSight V0 接手报告》。
+
+STEP 2
+建立 V0 Plan。
+
+STEP 3
+建立统一 Fixture Narrative + State Machine。
+
+STEP 4
+完成 clickable prototype v0.1。
+
+STEP 5
+执行内部自审：
+- Design Checklist
+- State consistency
+- Workflow
+- Evidence semantics
+- Accessibility
+- Scope boundary
+
+STEP 6
+建立 Moderator Guide / Task / Interview / Consent。
+
+STEP 7
+内部 Dry Run。
+
+STEP 8
+修复明显 blocker。
+
+STEP 9
+Batch A。
+
+STEP 10
+Interim Review。
+
+STEP 11
+必要的小范围 Prototype revision。
+
+STEP 12
+Batch B。
+
+STEP 13
+必要时 Batch C。
+
+STEP 14
+Metrics + Misunderstanding + Quote + Commercial synthesis。
+
+STEP 15
+V0 Validation Report。
+
+STEP 16
+V0_GATE_RECOMMENDATION.md
+
+然后：
+
+# STOP
+
+禁止自行开始：
+
+P0
+P1
+或 E1/E2/E3/GX。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. 第一次回复格式
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+第一次回复只输出：
+
+# FirmwareSight V0 接手报告
+
+必须包含：
+
+1. 已读取 authority 文件
+2. 产品理解
+3. V0 验证目标
+4. V0 / P0 边界
+5. 七屏工作流理解
+6. MAP State A→B→C→D 时间线理解
+7. 新发现的冲突/疑点
+8. 拟创建的 V0_VALIDATION 目录
+9. 执行计划
+10. Top risks
+11. Blocking issues（若无则写 NONE）
+
+如果 Blocking issues = NONE：
+
+不要额外等待用户确认。
+
+直接继续执行已经授权的 V0。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. 最终纪律
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+不要为了“完成任务”证明 FirmwareSight 是好产品。
+
+V0 的任务不是证明我们对。
+
+V0 的任务是尽可能早地发现：
+
+我们哪里错了。
+
+因此：
+
+用户不理解 → 记录不理解
+没人愿意付钱 → 记录 No payment signal
+Unknown 被误解 → 记录 failure
+MAP 状态变化没人理解 → 记录 failure
+Bundle 被认为只是 ZIP → 记录 failure
+
+FirmwareSight 自己的产品原则是：
+
+# Evidence First
+
+所以：
+
+# FirmwareSight 的产品验证，也必须 Evidence First。

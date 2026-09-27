@@ -2,7 +2,7 @@
 title: "FirmwareSight Product Baseline v0.5.0"
 doc_id: "FS-PRODUCT-BASELINE"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Architecture"
 last_updated: "2026-09-27"

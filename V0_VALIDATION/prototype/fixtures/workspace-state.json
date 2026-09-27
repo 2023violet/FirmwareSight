@@ -1,0 +1,21 @@
+{
+  "project": "relay-controller",
+  "app_version": "prototype-v0.1.0",
+  "baseline_version": "v0.2.1",
+  "current_version": "v0.3.0-rc2",
+  "elf": {
+    "file": "firmware.elf",
+    "valid": true,
+    "size_kb": 486.2,
+    "sha256_short": "a3f9c1e2"
+  },
+  "map": {
+    "file": "firmware.map",
+    "initially_loaded": false,
+    "symbols_resolved": 1284
+  },
+  "git": {
+    "linked": false
+  },
+  "flash_budget_kb": 512.0
+}

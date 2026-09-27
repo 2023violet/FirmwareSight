@@ -2,7 +2,7 @@
 title: "Design Token Validation"
 doc_id: "FS-DESIGN-008"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Design"
 last_updated: "2026-09-27"

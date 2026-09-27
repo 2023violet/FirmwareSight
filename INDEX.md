@@ -2,7 +2,7 @@
 title: "Document Index"
 doc_id: "FS-ROOT-INDEX"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-27"
@@ -11,21 +11,19 @@ last_updated: "2026-09-27"
 
 # Document Index
 
-Baseline: `0.5.0`  
-Date: `2026-09-27`
+Baseline: `0.5.1`  
+Execution state: `Batch A Recruitment Ready`
 
 ## Primary reading path
 
 1. `README.md`
 2. `PRODUCT_BASELINE.md`
-3. `DESIGN.md`
-4. `BASELINE.yaml`
-5. `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md`
-6. `10_AUDIT/03_ADOPTION_DECISION_REGISTER.md`
-7. `05_ENGINEERING/08_CODE_AREA_PLAN.md`
-8. `06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md`
-9. `08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md`
-10. `.ai/CURRENT_STATE.md`
+3. `V0_VALIDATION/batch_a/BATCH_A_TAKEOVER_REPORT.md`
+4. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
+5. `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_RECRUITMENT_PLAN.md`
+6. `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_MODERATOR_PACK.md`
+7. `V0_VALIDATION/batch_a/BATCH_A_EVIDENCE_INDEX.md`
+8. `.ai/ACTIVE_TASK.md`
 
 
 ## All Markdown documents
@@ -34,8 +32,8 @@ Date: `2026-09-27`
 |---|---|
 | `.ai/ACTIVE_TASK.md` | ACTIVE TASK |
 | `.ai/CURRENT_STATE.md` | Current State |
-| `.ai/DECISIONS.md` | Decisions — v0.5.0 |
-| `.ai/HANDOFF.md` | Handoff — FirmwareSight v0.5.0 |
+| `.ai/DECISIONS.md` | Decisions — v0.5.1 |
+| `.ai/HANDOFF.md` | Handoff — FirmwareSight v0.5.1 |
 | `.ai/README.md` | AI Entry Point |
 | `00_GOVERNANCE/00_DOCUMENT_CONTROL.md` | 文档控制规范 |
 | `00_GOVERNANCE/01_PROJECT_CHARTER.md` | 项目章程 |
@@ -155,6 +153,7 @@ Date: `2026-09-27`
 | `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
 | `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |
 | `10_AUDIT/03_ADOPTION_DECISION_REGISTER.md` | v0.5.0 Adoption Decision Register |
+| `10_AUDIT/SOURCE_PROMPTS/README.md` | Execution Prompt Register |
 | `10_AUDIT/SOURCE_REVIEWS/ADR-0018-ui-baseline-tokens-governance.md` | ADR-0018 — UI 基准与 design tokens 治理 |
 | `10_AUDIT/SOURCE_REVIEWS/DESIGN_CHECKLIST_TEMPLATE.md` | FirmwareSight 设计评审 Checklist（Do's & Don'ts） |
 | `10_AUDIT/SOURCE_REVIEWS/FS-AGENTS-UI-Rules增补节-通用助手.md` | AGENTS.md 增补节：UI Rules（入仓准备件） |
@@ -187,7 +186,45 @@ Date: `2026-09-27`
 | `CHANGELOG.md` | Changelog |
 | `DESIGN.md` | FirmwareSight DESIGN.md |
 | `PRODUCT_BASELINE.md` | FirmwareSight Product Baseline v0.5.0 |
-| `README.md` | FirmwareSight v0.5.0 |
+| `README.md` | FirmwareSight v0.5.1 |
+| `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
+| `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
+| `V0_VALIDATION/V0_PLAN.md` | V0 Plan |
+| `V0_VALIDATION/V0_TAKEOVER_REPORT.md` | FirmwareSight V0 接手报告 |
+| `V0_VALIDATION/analysis/METRICS.md` | Metrics |
+| `V0_VALIDATION/analysis/MISUNDERSTANDING_LOG.md` | Misunderstanding Log |
+| `V0_VALIDATION/analysis/PAYMENT_SIGNALS.md` | Payment Signals |
+| `V0_VALIDATION/analysis/PROTOTYPE_CHANGE_LOG.md` | Prototype Change Log |
+| `V0_VALIDATION/analysis/QUOTES.md` | Quote Register |
+| `V0_VALIDATION/analysis/STATE_TRANSITION_FINDINGS.md` | State Transition Findings |
+| `V0_VALIDATION/analysis/TOOLCHAIN_REQUESTS.md` | Toolchain Requests |
+| `V0_VALIDATION/batch_a/BATCH_A_EVIDENCE_INDEX.md` | Batch A Evidence Index |
+| `V0_VALIDATION/batch_a/BATCH_A_EXECUTION_PROVENANCE.md` | Batch A Execution Provenance |
+| `V0_VALIDATION/batch_a/BATCH_A_STATUS.md` | Batch A Status |
+| `V0_VALIDATION/batch_a/BATCH_A_TAKEOVER_REPORT.md` | FirmwareSight V0 Batch A 接手报告 |
+| `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_EVIDENCE_INTEGRITY_CHECKLIST.md` | Batch A Evidence Integrity Checklist |
+| `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_MODERATOR_PACK.md` | Batch A Moderator Pack |
+| `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_RECRUITMENT_PLAN.md` | Batch A Recruitment Plan |
+| `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_RESEARCH_PRICE_ANCHORS.md` | Batch A Research Price Anchors |
+| `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_SCHEDULING_TEMPLATE.md` | Batch A Scheduling Template |
+| `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_SESSION_SOURCE_INTAKE.md` | Batch A Session Source Intake |
+| `V0_VALIDATION/deliverables/V0_FINDINGS.md` | V0 Findings |
+| `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md` | V0 Gate Recommendation |
+| `V0_VALIDATION/deliverables/V0_PRODUCT_RISK_UPDATE.md` | Product Risk Update |
+| `V0_VALIDATION/deliverables/V0_UI_CHANGE_RECOMMENDATIONS.md` | UI Change Recommendations |
+| `V0_VALIDATION/deliverables/V0_VALIDATION_REPORT.md` | FirmwareSight V0 Validation Report |
+| `V0_VALIDATION/internal/DESIGN_SCOPE_CHECKLIST.md` | Internal Design / Scope Checklist |
+| `V0_VALIDATION/internal/DRY_RUN_REPORT.md` | Internal Dry Run Report |
+| `V0_VALIDATION/protocol/CONSENT_PRIVACY.md` | Consent & Privacy |
+| `V0_VALIDATION/protocol/INTERVIEW_SCRIPT.md` | Interview / Commercial Discovery |
+| `V0_VALIDATION/protocol/MODERATOR_GUIDE.md` | Moderator Guide |
+| `V0_VALIDATION/protocol/PARTICIPANT_SCREENING.md` | Participant Screening |
+| `V0_VALIDATION/protocol/TASK_SCRIPT.md` | Task Script |
+| `V0_VALIDATION/prototype/FIXTURE_NARRATIVE.md` | Fixture Narrative |
+| `V0_VALIDATION/prototype/PROTOTYPE_CHANGELOG.md` | Prototype Changelog |
+| `V0_VALIDATION/prototype/README.md` | V0 Clickable Prototype |
+| `V0_VALIDATION/sessions/README.md` | Session Register |
+| `V0_VALIDATION/sessions/TEMPLATE.md` | V0 Session — Participant [ID] |
 | `assets/ui-mockups/README.md` | UI Mockup Asset Register |
 | `templates/ADR_TEMPLATE.md` | ADR-XXXX — Title |
 | `templates/BUG_REPORT_TEMPLATE.md` | Bug |

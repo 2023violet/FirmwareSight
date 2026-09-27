@@ -2,7 +2,7 @@
 title: "ADR-0023 Gate Five-State Semantics"
 doc_id: "ADR-0023"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Architecture"
 last_updated: "2026-09-27"

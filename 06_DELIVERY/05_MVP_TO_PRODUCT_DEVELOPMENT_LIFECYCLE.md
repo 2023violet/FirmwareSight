@@ -2,7 +2,7 @@
 title: "FirmwareSight MVP to Complete Product Development Lifecycle"
 doc_id: "FS-DEL-005"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Design / Engineering"
 last_updated: "2026-09-26"
@@ -19,7 +19,7 @@ last_updated: "2026-09-26"
 
 本文件不是某个 Sprint 的任务清单，而是整个产品从“技术可行”到“商业可用”的**阶段路线图与决策框架**。
 
-它与 `FirmwareSight_Project_Baseline_v0.5.0` 配套使用。
+它与 `FirmwareSight_Project_Baseline_v0.5.1` 配套使用。
 
 ---
 
@@ -1284,7 +1284,7 @@ Build System
 
 # 30. FirmwareSight 当前所处的位置
 
-截至 `FirmwareSight_Project_Baseline_v0.5.0`：
+截至 `FirmwareSight_Project_Baseline_v0.5.1`：
 
 ```text
 Problem Validation      ✅ 基本完成

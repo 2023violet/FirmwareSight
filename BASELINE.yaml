@@ -4,9 +4,9 @@ product:
   descriptor: Embedded Firmware Release Workbench
   tagline: "Know exactly what ships."
   cli: fwsight
-  baseline_version: 0.5.0
+  baseline_version: 0.5.1
   date: 2026-09-27
-  status: PRE_IMPLEMENTATION_RESEARCH_NORMALIZED_UI_COMPLETE
+  status: V0_EXECUTION_IN_PROGRESS_EXTERNAL_SAMPLE_PENDING
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS
+  current_gate: G0_PASS_V0_ACTIVE
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
     - P0_technical_vertical_slice
@@ -92,4 +92,17 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-active_task: NONE
+active_task: V0_WORKFLOW_PROTOTYPE_VALIDATION
+
+
+v0_execution:
+  authorized: true
+  prompt: FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
+  prototype_complete: true
+  protocol_complete: true
+  internal_functional_dry_run: passed
+  external_participants_completed: 0
+  external_participants_minimum: 8
+  external_participants_target: "12-15"
+  status: INCOMPLETE_INSUFFICIENT_EXTERNAL_SAMPLE
+  p0_authorized: false

@@ -2,7 +2,7 @@
 title: "UI Reference Screens"
 doc_id: "FS-DESIGN-007"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Design"
 last_updated: "2026-09-27"
@@ -79,10 +79,9 @@ Inspector 默认宽度取 token，但必须允许在真实数据下自适应；3
 - Project/Artifact Version
 - Release Candidate Version
 
-## Missing 07
+## 07 Source Completion
 
-Unknown Dependency 的图像未随本轮上传，规范见：
-`assets/ui-mockups/FS-UI-07-Unknown-Dependency_SPEC.md`
+Unknown Dependency source PNG is present in the accepted seven-screen set as `assets/ui-mockups/FS-UI-07-Unknown-Dependency.png`.
 
 
 ### 07 Unknown Dependency

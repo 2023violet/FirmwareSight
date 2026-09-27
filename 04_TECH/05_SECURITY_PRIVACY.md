@@ -2,7 +2,7 @@
 title: "Security and Privacy Model"
 doc_id: "FS-TECH-006"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Security"
 last_updated: "2026-09-26"

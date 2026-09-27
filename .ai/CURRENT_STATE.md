@@ -2,46 +2,48 @@
 title: "Current Project State"
 doc_id: "FS-AI-002"
 product: "FirmwareSight"
-version: "0.5.0"
-status: "BASELINE"
-owner: "Project Lead"
+version: "0.5.1"
+status: "EXECUTION_RECORD"
+owner: "Product / Research"
 last_updated: "2026-09-27"
 ---
 
 # Current State
 
 Date: 2026-09-27  
-Baseline: v0.5.0
+Baseline: v0.5.1
 
-## Baseline accomplishments
+## Product/architecture baseline
 
-- v0.3 architecture/product baseline audited in v0.4;
-- UI temperament/tokens/five-state semantics frozen;
-- complete seven-screen UI source set now present;
-- v0.5 expert Post-MVP exploration verified and normalized;
-- code-area plan frozen before implementation;
-- Post-MVP candidate namespace prevents MVP scope contamination;
-- market overclaims/disputes explicitly recorded;
-- risk/dependency register updated.
+v0.5.0 product/architecture/design decisions remain inherited.
+v0.5.1 is the active V0 execution baseline.
 
-## Current lifecycle
+## V0
 
-```text
-G0 PASS
+Status:
 
-V0 Workflow Prototype Validation   NEXT / requires explicit authorization
-P0 Technical Vertical Slice        NEXT / requires explicit authorization
+`ACTIVE — BATCH A WAITING FOR REAL PARTICIPANTS`
 
-G1 requires V0 + P0
-P1–P4 Product MVP implementation pending
-V1 own-artifact validation pending
-P5/B1/RC1/GA1 pending
+Completed:
+- clickable prototype;
+- fixture/state machine;
+- protocol/session templates;
+- internal functional dry run;
+- Batch A takeover;
+- Batch A recruitment-ready package.
 
-E1/E2/E3/GX are candidate horizons, not active stages.
-```
+Formal external sessions:
+`0 / 4–5 Batch A target`
+`0 / 8 V0 minimum`
 
-## Active Task
+## Version rule
 
-NONE.
+v0.5.2 is not created until 4–5 real eligible external Batch A sessions and evidence exist.
 
-v0.5.0 authorizes no implementation by itself.
+## P0
+
+Not authorized in this Batch A execution.
+
+## Next work
+
+Recruit real external participants and begin PA-001 only when a real eligible participant/session source exists.

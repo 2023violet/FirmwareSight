@@ -2,7 +2,7 @@
 title: "MVP Exit Criteria v0.3"
 doc_id: "FS-DEL-002"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Product / QA"
 last_updated: "2026-09-26"

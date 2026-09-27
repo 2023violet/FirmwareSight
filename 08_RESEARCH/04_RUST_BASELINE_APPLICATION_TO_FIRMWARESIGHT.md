@@ -2,7 +2,7 @@
 title: "Applying the 2026 Rust Product Census to FirmwareSight"
 doc_id: "FS-RSCH-005"
 product: "FirmwareSight"
-version: "0.5.0"
+version: "0.5.1"
 status: "BASELINE"
 owner: "Research"
 last_updated: "2026-09-26"
