@@ -81,15 +81,18 @@ Observed environment facts that shaped the plan:
 
 ---
 
-# P0 delivery record — added 2026-09-28, corrects one fact above
+# P0 delivery record — added 2026-09-28
 
 Corrections to the start-of-track observations:
 
-- Corepack resolved **pnpm 12.6.0**, not 12.7.0. `apps/desktop/ui/package.json` now pins
-  `packageManager: "pnpm@12.6.0"`, and every gate step runs it through `corepack pnpm`, so the
-  lockfile is only ever resolved by the version that wrote it. The baseline's `pnpm 12` major line
-  still holds; the assumption that 12.7.0 was available was wrong and is corrected here rather than
-  silently rewritten above.
+- Corepack resolves **pnpm 12.7.0**, and `apps/desktop/ui/package.json` pins exactly that. The
+  `packageManager` field briefly read `pnpm@12.6.0` — one patch below the frozen
+  `examples/package.baseline.json` and `04_TECH/10_TOOLCHAIN_BASELINE.md`, both of which name
+  12.7.0. Caught by cross-checking the delivered pin against the frozen assets before delivery, not
+  by a failing test: 12.6.0 built and ran everything fine, which is exactly why a baseline drift of
+  this kind needs a deliberate check. `pnpm install` at 12.7.0 initially refused
+  `--frozen-lockfile` because the lockfile recorded the writing version; the only change was that
+  metadata and the toolchain's own `@pnpm/exe` entries — no application dependency moved.
 
 Decisions taken while executing, none of which moved a frozen baseline:
 

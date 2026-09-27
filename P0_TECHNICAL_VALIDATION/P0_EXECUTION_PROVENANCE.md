@@ -71,7 +71,7 @@ Host fact used for planning, recorded so fixture provenance is auditable.
 | git | 2.55.0.windows.4 | |
 | node | v24.19.0 | Node 24 LTS line |
 | pnpm (installed) | 11.21.0 | below baseline pnpm 12 line; never used by the gate |
-| pnpm (via corepack 0.35.0) | 12.6.0 | corrected at delivery: corepack resolves the version pinned in `apps/desktop/ui/package.json` (`packageManager: "pnpm@12.6.0"`), which is 12.6.0. The 12.7.0 first recorded here was what corepack would fetch with no pin, and no gate step ever used it |
+| pnpm (via corepack 0.35.0) | 12.7.0 | the version the frozen `examples/package.baseline.json` names, and what `apps/desktop/ui/package.json` pins at delivery. It briefly read 12.6.0 mid-track; see `P0_DEPENDENCY_REPORT.md` |
 | gcc (host, MinGW-W64) | 16.2.0 | produces PE/COFF on Windows, not ELF |
 | GNU ld (host) | 2.47.20260726 | |
 | arm-none-eabi-gcc | 14.3.1 (Arm GNU Toolchain 14.3.Rel1) | produces the real ELF fixtures |

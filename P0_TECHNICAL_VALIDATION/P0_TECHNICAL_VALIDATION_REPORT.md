@@ -62,7 +62,7 @@ given leave to take.
 
 ```
 $ cargo test --workspace                 102 passed / 0 failed  (6 members)
-$ pnpm test                               18 passed / 0 failed
+$ pnpm test                               19 passed / 0 failed  (3 files)
 $ cargo fmt --all -- --check              clean
 $ cargo clippy --workspace --all-targets --all-features -- -D warnings   clean
 $ python scripts/check.py                 14/14 steps, one of them an explicit cargo-deny SKIPPED
@@ -77,7 +77,7 @@ planned, and the places where the baseline was silent (`SnapshotId` derivation, 
 discriminator, `p0-internal` naming, TypeScript 6.0.3) were decided and recorded rather than
 quietly invented.
 
-Three findings worth naming because they are the kind that usually hide:
+Four findings worth naming because they are the kind that usually hide:
 
 1. **Declared-but-unused dependencies.** The CLI declared two crates no source file referenced,
    and the artifact crate declared `tracing`. A grep for forbidden crates would not have caught
@@ -86,7 +86,16 @@ Three findings worth naming because they are the kind that usually hide:
    invocation as `-p0-dual-region.ld` where the toolchain was actually called with
    `-T p0-dual-region.ld`. The artifacts were right and the record was wrong. Regenerating with
    `--force` showed both ELF files byte-identical, which is also the reproducibility proof.
-3. **A claim in this pack about its own binary that was false until measured.** The release desktop
+3. **A required review that had not been performed.** `AGENTS.md` 11 makes
+   `templates/DESIGN_CHECKLIST_TEMPLATE.md` a gate for any UI change, and the P0 screen shipped
+   without a filled copy. Writing it found four things rather than confirming the work: a border width
+   the design contract requires (`DESIGN.md` 4's hairline separators) but never tokenised
+   (`DESIGN.md` 3's list omits it), no live region for the screen's one asynchronous action, a `select`
+   with two of four interaction states, and capability labels that display Core's enum words. The two
+   accessibility findings were fixed and are asserted by
+   `it('announces the in-flight state and locks both controls until it resolves')`; the other two are
+   open by decision, not by oversight. See `P0_DESIGN_CHECKLIST.md` for the box-by-box result.
+4. **A claim in this pack about its own binary that was false until measured.** The release desktop
    was recorded as embedding the built UI. It did not: without Tauri's `custom-protocol` feature the
    codegen embeds nothing, and the size of the binary was unchanged whether or not `dist/` existed.
    Adding the feature and re-linking gave a binary 68,096 bytes larger that contains the built asset

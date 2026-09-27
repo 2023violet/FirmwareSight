@@ -225,4 +225,32 @@ describe('P0 summary screen', () => {
     });
     expect(JSON.stringify(analyzeMock.mock.lastCall)).not.toContain('fixtures/');
   });
+
+  it('announces the in-flight state and locks both controls until it resolves', async () => {
+    // A deferred the test controls, so the loading state can be observed instead of raced past.
+    let settle: ((outcome: IpcOutcome<AnalysisSummaryDto>) => void) | undefined;
+    analyzeMock.mockImplementationOnce(
+      () =>
+        new Promise<IpcOutcome<AnalysisSummaryDto>>((resolve) => {
+          settle = resolve;
+        }),
+    );
+
+    render(<App />);
+    const select = (await screen.findByLabelText('Fixture')) as HTMLSelectElement;
+    fireEvent.click(screen.getByRole('button', { name: 'Analyze' }));
+
+    // role="status" is the whole point: without it the text changes and nothing announces it.
+    const status = await screen.findByRole('status');
+    expect(status.textContent).toContain('Analyzing');
+    expect(select.disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Analyze' }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+
+    settle?.(ok(summary()));
+    await screen.findByText('5,432 bytes');
+    expect(select.disabled).toBe(false);
+    expect(screen.queryByRole('status')).toBeNull();
+  });
 });

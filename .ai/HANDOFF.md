@@ -26,7 +26,8 @@ stop condition; nothing further in P0 is open except the two items listed below.
 7. `P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md` — start HEADs and environment
 8. `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` — decisions already taken
 9. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` — what is proven, and how
-10. `.ai/ACTIVE_TASK.md`
+10. `P0_TECHNICAL_VALIDATION/P0_DESIGN_CHECKLIST.md` — the AGENTS.md 11 review for the UI, with four open findings
+11. `.ai/ACTIVE_TASK.md`
 
 V0 status summary only (do not re-run V0 from this handoff):
 
@@ -39,11 +40,12 @@ V0 status summary only (do not re-run V0 from this handoff):
 P0 final status: **`EXECUTED — CONDITIONAL_PASS (LOCAL)`**. Baseline stays at `0.5.1`; `v0.6.0` is
 reserved for an unconditional `PASS`, and `P0_EXIT_CHECKLIST.md` names the conditions.
 
-What is proven locally: 102 Rust tests and 18 UI tests, a single 14-step gate
-(`python scripts/check.py`) that CI calls unchanged, real ARM ELF/MAP fixtures with recorded
-provenance, deterministic CLI JSON, memory accounting reproduced by hand from `readelf`, a typed
-ts-rs IPC boundary, SQLite migrations with transactional import, a 512 MiB guard measured from both
-sides of the boundary, and Core/CLI/Desktop parity on the same bytes.
+What is proven locally: 102 Rust tests and 19 UI tests, a single gate
+(`python scripts/check.py`) that CI calls unchanged - 14 steps on a tree that already has the built
+frontend, 16 when it has to build that too, and 16/16 green from `cargo clean` - real ARM ELF/MAP
+fixtures with recorded provenance, deterministic CLI JSON, memory accounting reproduced by hand from
+`readelf`, a typed ts-rs IPC boundary, SQLite migrations with transactional import, a 512 MiB guard
+measured from both sides of the boundary, and Core/CLI/Desktop parity on the same bytes.
 
 What is not proven, and why nobody here could prove it:
 
@@ -53,6 +55,7 @@ What is not proven, and why nobody here could prove it:
 | `cargo deny` never ran | the same run, or `cargo install cargo-deny@0.20.2 --locked` locally |
 | Peak RSS not measured | a measurement tool is authorized; see `P0_PERFORMANCE_REPORT.md` |
 | The window was never opened | a human runs the desktop app on a real display |
+| Two design-checklist findings are open: capability labels show Core's enum words, and eight `1px` borders have no token | the first is a boundary decision about who owns user-facing wording; the second needs a `design-tokens.json` version bump, a frozen-asset change P0 may not make. Two others the same pass found - no live region, and a `select` with only hover and focus - were fixed and are covered by a test. `P0_DESIGN_CHECKLIST.md` records all four with the commands that found them |
 
 V0:
 

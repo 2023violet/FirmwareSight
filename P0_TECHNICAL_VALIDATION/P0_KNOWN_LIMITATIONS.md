@@ -67,6 +67,18 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
   a binary with no frontend, and no diagnostic. Only the `custom-protocol` link fails loudly, inside
   the macro. P0 neither bundles nor launches anything, so nothing shipped is affected; whoever
   packages the app must build the UI before the Rust link.
+- Two design-checklist findings stay open, in `P0_DESIGN_CHECKLIST.md`. Capability badges display
+  Core's serialized enum words ("supported", "available", "not-provided"), which is API vocabulary
+  rather than product copy - and the CLI prints the same strings, so a copy layer in the view is
+  precisely where the two surfaces could start to disagree. That is a boundary decision, not a styling
+  one. And the eight `1px` borders have no token: `DESIGN.md` 3 does not list border width among the
+  value classes that must be tokenised while `DESIGN.md` 4 requires hairline separators, so closing it
+  properly means a `design-tokens.json` version bump - a change to a frozen design asset that P0 is
+  not authorized to make. Two other findings from the same pass (no live region for the asynchronous
+  state; a `select` with only hover and focus) were fixed in the source and are covered by a test.
+- The UI's two interactive controls are a fixture `select` and one button. There is no keyboard
+  shortcut, no command palette and no focus management beyond the browser's own order, because P0's
+  screen has nothing to navigate between.
 - `style-src 'unsafe-inline'` is present in the CSP because Vite injects inline styles in dev mode.
 - The application-data database path is resolved from Tauri's platform directory; it has only been
   exercised on Windows.
@@ -80,6 +92,16 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 - `foreign_keys = ON` and a 5 s busy timeout are asserted at open, but multi-process concurrency
   is untested - nothing in P0 runs two FirmwareSight processes against one database.
 - No legacy migration exists or is needed: there is no GA database to upgrade.
+
+## Repository layout
+
+- `apps/desktop/ui/package.json` is the only `package.json` in the tree.
+  `05_ENGINEERING/00_REPO_STRUCTURE.md` sketches a root `package.json`, `pnpm-workspace.yaml` and
+  `.node-version` alongside it. With one frontend package, `pnpm -r typecheck|test|build` from a root
+  adds nothing over running those scripts in the package, and the Node floor is expressed as
+  `engines: ">=24.0.0 <25.0.0"` plus CI's `setup-node: "24"` rather than a `.node-version` file. The
+  structure doc's own rule - "Frontend is one workspace package at MVP" - is met; the plumbing around
+  it is not. It arrives with the second package, when there is something to hoist.
 
 ## Verification gaps
 

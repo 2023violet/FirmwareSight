@@ -90,7 +90,7 @@ PASS  rust/test                (102 tests across 6 workspace members)
 PASS  frontend/install
 PASS  frontend/typecheck
 PASS  frontend/lint
-PASS  frontend/test            (18 tests, 3 files)
+PASS  frontend/test            (19 tests, 3 files)
 PASS  frontend/build
 PASS  drift/design tokens
 PASS  drift/desktop icons
@@ -110,6 +110,20 @@ The two `frontend assets` steps the `rust` group can emit are absent from that l
 `apps/desktop/ui/dist/` already existed. Their behaviour was verified separately: with `dist/`
 deleted, `python scripts/check.py --only rust` printed the reason, rebuilt the UI and went on to pass
 `fmt`, `clippy` and `test` - 5/5 steps, exit 0.
+
+Both runs were repeated from a cold tree - `cargo clean`, then `node_modules/` and `dist/` removed -
+because a gate that has only ever run against an existing `target/` proves less than it looks like it
+proves. That run reported **16/16 steps**, the extra two being the frontend install and build, with
+102 Rust tests and 18 UI tests, exit 0. The `pnpm install` inside it downloaded nothing
+(185 packages, all reused from the store), so the CI risk is the fetch of the pnpm binary itself, not
+the dependency tree.
+
+That cold run measured 18 UI tests because it predates the accessibility fix described in
+`P0_DESIGN_CHECKLIST.md`, which added a nineteenth. The fix touched no Rust file, so the cold Rust
+result carries to the delivered tree; the delivered tree then re-ran the whole gate warm at **14/14**,
+102 Rust and 19 UI tests. A second `cargo clean` after a documentation-and-UI-only change was judged
+not to re-prove anything about the Rust half - stated here so the reader knows exactly which tree each
+number belongs to.
 
 `drift/goldens unchanged` failed on its first run and passed after the refresh described in
 `P0_IMPLEMENTATION_LOG.md` 17 was committed. That is the check behaving correctly: it caught a

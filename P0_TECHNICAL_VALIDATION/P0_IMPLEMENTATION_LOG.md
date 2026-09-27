@@ -281,3 +281,70 @@ it. Refactors that changed no boundary are not here.
   records no steps, so the documented 14-step gate is unchanged on a warm tree.
 - **ADR required?** No - no boundary, dependency, schema or security surface changed. Recorded here
   because it corrected a claim already written into this pack.
+
+---
+
+## 19. The design checklist was run at delivery, and it found four things
+
+- **Problem.** `AGENTS.md` 11 requires every UI change to pass
+  `templates/DESIGN_CHECKLIST_TEMPLATE.md`, but no filled copy existed for the P0 screen. Writing one
+  after the fact is either theatre or a surprise; this time it was a surprise.
+- **Chosen implementation.** Filled it against the tree with the deciding command next to each ⚙
+  box: `P0_DESIGN_CHECKLIST.md`. 10 of 11 Don'ts and 24 of 25 Do's are ticked; two findings were
+  repaired in source and two are recorded open with the reason beside each.
+- **Findings.** (a) `DESIGN.md` 3 enumerates the value classes that must be tokenised and border width
+  is not among them, while `DESIGN.md` 4 requires hairline borders - so `1px` × 8 is a gap in the
+  design contract, not a component that ignored a token. (b) No live region: the "Analyzing…" line was
+  a plain `<p>`, so a screen reader never heard the request start or finish. (c) The `select` styled
+  only `:hover` and stayed usable mid-request, which let the fixture change under an in-flight
+  analysis. (d) Capability badges display Core's serialized enum words ("supported", "available",
+  "not-provided"), which is API vocabulary rather than product copy.
+- **Chosen response.** (b) and (c) were fixed: the line is now
+  `role="status" aria-live="polite"`, the `select` is disabled while loading and styled for it, and a
+  test holds the IPC promise open to assert both controls' `disabled` and the status role. (a) is left
+  open because the only correct fix is a `design-tokens.json` version bump, which changes a frozen
+  design asset. (d) is left open as a boundary question.
+- **Alternatives considered.** Ticking all boxes and moving on (rejected: two of the four are visible
+  to a user who cannot see the screen). Filing (b) and (c) as P1 work without fixing them (rejected for
+  the accessibility half: an unannounced asynchronous state is not a polish item, and it was a
+  four-markup-line change with a test). Doing (d) by adding a copy layer in the view (rejected:
+  `AGENTS.md` 11 and the parity tests forbid the UI from renaming facts, and the CLI prints the same
+  strings, so a copy layer is precisely where the two surfaces would start to disagree). Deferring
+  everything because the gate was already green (rejected: a green gate says nothing about markup it
+  never inspects).
+- **Scope impact.** Two small UI behaviour changes, both inside the already-authorized summary screen:
+  one live region, one disabled control. No contract, DTO, schema or boundary changed; the Rust side is
+  byte-for-byte untouched, which `git diff --name-only` over the delivery commits confirms.
+- **Dependency impact.** None.
+- **Test evidence.** Every claim in the checklist names the grep or test that decided it.
+  `it('announces the in-flight state and locks both controls until it resolves')` covers (b) and (c);
+  `grep -rnoE "#[0-9a-fA-F]{6}" src/ | grep -v tokens.css` and
+  `grep -rn "box-shadow|text-shadow|filter:|drop-shadow" src/` both return nothing; `tokens.css` is
+  generated from the frozen asset and drift-checked by the gate. After the change the whole gate ran
+  again: 14/14 steps, 102 Rust tests, 19 UI tests.
+- **ADR required?** No. The border-width token bump would need a design-asset change request, which is
+  why it is left open rather than performed here.
+
+---
+
+## 20. The pnpm pin was one patch below the frozen baseline
+
+- **Problem.** `apps/desktop/ui/package.json` read `packageManager: "pnpm@12.6.0"`. The frozen
+  `examples/package.baseline.json` names `pnpm@12.7.0`, and `04_TECH/10_TOOLCHAIN_BASELINE.md` records
+  12.7.0 as the research-date current of the pinned 12 line.
+- **Existing authority.** The baseline states the exact version; a `packageManager` field is the
+  repository's own pin, so it must match unless an ADR says otherwise.
+- **Chosen implementation.** Pin 12.7.0 and re-verify. `corepack pnpm install --frozen-lockfile`
+  refused first - `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE` - because pnpm records the version
+  that wrote the lockfile. A single `corepack pnpm install` updated that metadata, and the resulting
+  lockfile diff is the `pnpm`/`@pnpm/exe` platform entries only: no application dependency moved.
+- **Alternatives considered.** Leaving 12.6.0 because it builds and tests identically (rejected: that
+  is how a silent baseline drift becomes permanent - nothing would ever fail loudly enough to force the
+  question). Adding a root `package.json` and `pnpm-workspace.yaml` to match the repo-structure sketch
+  (rejected for P0 and recorded as a named simplification: with one frontend package, `pnpm -r` adds
+  nothing, and the structure doc's own rule - "Frontend is one workspace package at MVP" - is met).
+- **Scope impact.** None outward-facing.
+- **Dependency impact.** One toolchain patch version, from the frozen asset rather than from choice.
+- **Test evidence.** `corepack pnpm --version` -> 12.7.0; frozen install exit 0; the whole
+  `frontend` group re-run green afterwards.
+- **ADR required?** No - it restores the frozen value rather than changing it.

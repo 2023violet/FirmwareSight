@@ -62,10 +62,13 @@ C compiler on the build host, which both CI images provide.
 
 ## Node and pnpm
 
-`apps/desktop/ui/package.json` pins `packageManager: "pnpm@12.6.0"` and exact versions;
-`.npmrc` sets `save-exact=true` and `engine-strict=true`. Installs run through Corepack so the
-version that wrote `pnpm-lock.yaml` is the version that resolves it - the global pnpm on this
-machine is 11.21.0 and was not used.
+`apps/desktop/ui/package.json` pins `packageManager: "pnpm@12.7.0"` — the version the frozen
+`examples/package.baseline.json` names — and exact dependency versions; `.npmrc` sets
+`save-exact=true` and `engine-strict=true`. Installs run through Corepack so the version that wrote
+`pnpm-lock.yaml` is the version that resolves it - the global pnpm on this machine is 11.21.0 and was
+never used. Mid-track the pin read 12.6.0, one patch below the frozen asset; nothing failed because
+of it, and it was found by comparing the delivered pin against `04_TECH/10_TOOLCHAIN_BASELINE.md`
+before delivery.
 
 Runtime: `react 19.3.0`, `react-dom 19.3.0`, `@tauri-apps/api 2.12.0`.
 Toolchain: `typescript 6.0.3`, `vite 8.3.1`, `@vitejs/plugin-react 6.1.1`, `eslint 10.11.0`,

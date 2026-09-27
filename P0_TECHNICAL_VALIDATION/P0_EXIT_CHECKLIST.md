@@ -32,7 +32,7 @@ it ran on this machine and produced the quoted result. Nothing here says `CI PAS
 | Core/CLI/Desktop parity | LOCAL PASS | 7 parity tests against the committed golden |
 | no parser panic | LOCAL PASS | as above |
 | memory accounting proven on fixtures | LOCAL PASS | nonvolatile 160 / runtime 72 with `.data` and `.ota` dual-accounted at `MapRegionAndElfLoad`; cross-checked against `readelf` arithmetic |
-| typed IPC path proven | LOCAL PASS | 10 generated `.ts` files, drift gate green, 18 UI tests over the same shapes |
+| typed IPC path proven | LOCAL PASS | 10 generated `.ts` files, drift gate green, 19 UI tests over the same shapes |
 | large-file guard benchmark | LOCAL PASS | 100/256/512 MiB measured; 512 MiB + 1 KiB rejected in 7.7 ms with zero hash time |
 
 ## Prompt §59, item by item
@@ -63,9 +63,9 @@ it ran on this machine and produced the quoted result. Nothing here says `CI PAS
 | 22 | fmt passes | LOCAL PASS | `cargo fmt --all -- --check` |
 | 23 | clippy passes | LOCAL PASS | `cargo clippy --workspace --all-targets --all-features -- -D warnings`, silent |
 | 24 | cargo test passes | LOCAL PASS | 102 tests, 0 failures |
-| 25 | frontend typecheck/build passes | LOCAL PASS | typecheck, lint, 18 tests, `vite build` |
+| 25 | frontend typecheck/build passes | LOCAL PASS | typecheck, lint, 19 tests, `vite build` |
 | 26 | no forbidden dependency or boundary violation | LOCAL PASS for first-party code; **cargo-deny NOT RUN** | the `cargo tree --workspace` graph (345 nodes) contains no `reqwest`/`hyper`/`rustls`/`memmap2`/`sqlx`/`gix`/`rayon`/`wgpu`/`axum`/`tonic`; `tokio` and `anyhow` appear only inside Tauri, with zero first-party references. `deny.toml` is written but never executed |
-| 27 | P0 reports complete | LOCAL PASS | All 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names are present, plus `P0_EXECUTION_PROVENANCE.md` added at takeover - 18 files, each citing a command that was actually run |
+| 27 | P0 reports complete | LOCAL PASS | All 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names are present, plus `P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by AGENTS.md 11 - 19 files, each citing a command that was actually run |
 | 28 | known limitations explicit | LOCAL PASS | `P0_KNOWN_LIMITATIONS.md` |
 
 ## Item 16, stated precisely

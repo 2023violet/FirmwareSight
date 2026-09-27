@@ -35,6 +35,7 @@ produced it, and a status of `LOCAL PASS` is kept visibly separate from `CI PASS
 | `P0_SECURITY_INPUT_REPORT.md` | Untrusted input, capability surface, privacy boundary. |
 | `P0_DEPENDENCY_REPORT.md` | What was added, why, and what was refused. |
 | `P0_CI_REPORT.md` | What the gate runs, and what has only run locally. |
+| `P0_DESIGN_CHECKLIST.md` | Did the UI pass the checklist AGENTS.md 11 requires, box by box. |
 | `P0_KNOWN_LIMITATIONS.md` | What P0 does not do, said plainly. |
 | `P0_EXIT_CHECKLIST.md` | Every exit item, with its evidence line. |
 | `P0_TECHNICAL_VALIDATION_REPORT.md` | The status decision and its reasoning. |
@@ -42,7 +43,14 @@ produced it, and a status of `LOCAL PASS` is kept visibly separate from `CI PASS
 ## Verified totals
 
 - Rust: 102 tests passing across 6 workspace members.
-- TypeScript: 18 tests, plus strict typecheck, ESLint and a production Vite build.
-- Gate: `python scripts/check.py` - 14 steps, of which cargo-deny is `SKIPPED` locally (the tool
-  is not installed on this machine) and runs in CI.
+- TypeScript: 19 tests across 3 files, plus strict typecheck, ESLint and a production Vite build.
+- Gate: `python scripts/check.py` - 14 steps on a tree that already has `apps/desktop/ui/dist/`, 16
+  when the group has to build the frontend first. cargo-deny is `SKIPPED` locally (the tool is not
+  installed on this machine) and runs in CI.
+- Cold rebuild: `cargo clean` plus removing `node_modules/` and `dist/`, then the whole gate -> 16/16
+  steps, 102 Rust tests and 18 UI tests, exit 0; the delivered tree then re-ran 14/14 with 19
+  UI tests after an accessibility fix that touched no Rust file.
 - Baseline under validation: `FirmwareSight_Project_Baseline_v0.5.1`.
+- This pack: the 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names, plus
+  `P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by
+  `AGENTS.md` 11 - 19 files.

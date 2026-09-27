@@ -38,11 +38,12 @@ an unconditional P0 `PASS`. This entry records work on the working tree.
 
 ### P0 status
 
-- `EXECUTED — CONDITIONAL_PASS (LOCAL)`; 102 Rust tests and 18 UI tests pass locally.
+- `EXECUTED — CONDITIONAL_PASS (LOCAL)`; 102 Rust tests and 19 UI tests pass locally.
 - Conditions, all outside this environment: CI has never run, `cargo deny` has never run, peak RSS is
   `NOT MEASURED`, and the desktop window was never opened.
-- `P0_TECHNICAL_VALIDATION/` holds the evidence pack: the 17 documents the prompt names plus
-  `P0_EXECUTION_PROVENANCE.md`, each citing executed commands.
+- `P0_TECHNICAL_VALIDATION/` holds the evidence pack: the 17 documents the prompt names, plus
+  `P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by
+  `AGENTS.md` 11 - 19 files, each citing executed commands.
 - G1 is not claimed; V0 remains deferred with `0 / 8` external sessions; P1 is not authorized.
 
 ### Corrections made to this pack's own claims during P0
@@ -54,8 +55,26 @@ an unconditional P0 `PASS`. This entry records work on the working tree.
   `custom-protocol` feature the dev-mode codegen embeds nothing. The feature was added and the
   production link re-measured (10,398,208 bytes against 10,330,112).
 - The Rust test total was recorded as 101 before a ninth storage test landed; it is 102.
-- The pnpm fact written at track start assumed corepack would resolve 12.7.0; it resolved 12.6.0,
-  which is now pinned in `apps/desktop/ui/package.json`.
+- `AGENTS.md` 11 requires every UI change to pass `templates/DESIGN_CHECKLIST_TEMPLATE.md`, and no
+  filled copy existed. Running it found four things instead of confirming the work: `DESIGN.md` 3
+  never tokenised border width while `DESIGN.md` 4 requires hairline borders, so the eight `1px`
+  borders are a gap in the design contract that needs a frozen-asset version bump to close; the
+  summary screen has **no live region**, so a screen reader is never told that an analysis started or
+  finished; the fixture `select` styles only hover and focus; and capability badges display Core's enum
+  words ("supported", "not-provided") rather than product copy. All four are recorded in
+  `P0_KNOWN_LIMITATIONS.md`. The two accessibility findings were fixed in source and covered by a
+  new test rather than filed for later; the other two stay open, one because it needs a frozen design
+  asset to change and one because it is a boundary decision about who owns user-facing wording.
+- The UI's `packageManager` pin drifted one patch below the frozen baseline: it read
+  `pnpm@12.6.0` where `examples/package.baseline.json` and `04_TECH/10_TOOLCHAIN_BASELINE.md` both
+  name 12.7.0. Nothing failed — which is why it is recorded as a catch of the baseline cross-check
+  rather than of the gate. It is now pinned at 12.7.0, and the only lockfile change was that
+  metadata plus the toolchain's own `@pnpm/exe` entries; no application dependency moved.
+- `apps/desktop/ui/package.json` is the only package.json in the tree. The repo-structure baseline
+  sketches a root `package.json`, `pnpm-workspace.yaml` and `.node-version`; P0 ships one frontend
+  package with the node floor expressed as `engines: ">=24.0.0 <25.0.0"`, which meets that sketch's
+  stated intent ("Frontend is one workspace package at MVP") without the root plumbing. Recorded as
+  a named simplification in `P0_KNOWN_LIMITATIONS.md` rather than left implicit.
 
 ### Unchanged
 

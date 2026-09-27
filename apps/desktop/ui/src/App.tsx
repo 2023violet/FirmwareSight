@@ -105,6 +105,7 @@ export function App() {
           <select
             className={styles['select']}
             value={selected}
+            disabled={phase.kind === 'loading'}
             onChange={(event) => {
               const next = toFixtureKey(event.target.value);
               if (next !== null) {
@@ -131,7 +132,14 @@ export function App() {
         </button>
       </section>
 
-      {phase.kind === 'loading' ? <p className={styles['status']}>Analyzing…</p> : null}
+      {phase.kind === 'loading' ? (
+        // The only asynchronous fact on the screen. Without a live region it is visible to sighted
+        // users and silent for everyone else, because the button's own disabled state says nothing
+        // about when the work finished.
+        <p className={styles['status']} role="status" aria-live="polite">
+          Analyzing…
+        </p>
+      ) : null}
       {phase.kind === 'failed' ? <ErrorPanel envelope={phase.envelope} /> : null}
       {phase.kind === 'idle' ? (
         <p className={styles['status']}>

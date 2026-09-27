@@ -38,7 +38,7 @@ from here; `AGENTS.md` 1 forbids inventing work while this file reads `NONE`.
   hash time), and the whole slice stays within the frozen architecture with no ADR required.
 
 Evidence: `P0_TECHNICAL_VALIDATION/` - the 17 documents the prompt names, plus
-`P0_EXECUTION_PROVENANCE.md`.
+`P0_EXECUTION_PROVENANCE.md` and `P0_DESIGN_CHECKLIST.md`.
 
 ## Durable facts preserved by this change
 

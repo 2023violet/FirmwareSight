@@ -198,6 +198,7 @@ differ are governance and execution records P0 was authorized to change, listed 
 | `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` | P0 CI Report |
 | `P0_TECHNICAL_VALIDATION/P0_CLI_PARITY_REPORT.md` | P0 CLI Report and Determinism |
 | `P0_TECHNICAL_VALIDATION/P0_DEPENDENCY_REPORT.md` | P0 Dependency Report |
+| `P0_TECHNICAL_VALIDATION/P0_DESIGN_CHECKLIST.md` | P0 Design Review Checklist |
 | `P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md` | P0 Execution Provenance |
 | `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` | P0 Exit Checklist |
 | `P0_TECHNICAL_VALIDATION/P0_FIXTURE_REGISTER.md` | P0 Fixture Register |

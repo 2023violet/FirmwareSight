@@ -49,6 +49,15 @@
   border-color: var(--fs-color-text-disabled);
 }
 
+/* The selector is disabled while a request is in flight, so the disabled look has to exist.
+   Text and surface tokens only: a faded border would read as an unavailable option rather than
+   as "wait for the current one". */
+.select:disabled {
+  color: var(--fs-color-text-disabled);
+  background: var(--fs-color-bg-subtle);
+  cursor: default;
+}
+
 /* One Primary per region (DESIGN.md 5); accent comes from tokens, not from a local colour. */
 .primary {
   padding: var(--fs-space-2) var(--fs-space-4);
