@@ -89,5 +89,24 @@ so parsing and golden tests do not require an ARM toolchain at test time; only r
 
 ## Final validated HEAD
 
-`PENDING — not yet determined. This field is filled only when the P0 final status is decided,
-and must never be back-filled speculatively.`
+The tree the delivered gate result belongs to:
+
+| Field | Value |
+| --- | --- |
+| Final validated HEAD | `65cb2dc` |
+| Commits in this track | `b618900`, `ff35bb2`, `2749cbf`, `725e7cd`, `a014328`, `65cb2dc` |
+| Start HEAD to final | `e086e98..65cb2dc`, 6 commits, all local |
+| Remote state | unchanged - `origin/main` stayed at `e086e98`; no push was authorized and none happened |
+| Gate against that tree | `python scripts/check.py` -> 14/14 steps, 102 Rust tests, 19 UI tests, exit 0 |
+| Cold rebuild against the Rust tree | `cargo clean` plus removing `node_modules/` and `dist/` -> 16/16 steps, exit 0, measured at `a014328`; no Rust file changed afterwards |
+
+`65cb2dc` is named as the validated tree because the gate ran against exactly its contents with no
+file edits in flight. One earlier gate run was discarded rather than reported: it started before a
+test file was saved and finished after, so its output described a tree that never existed as a commit.
+
+The commit that records this table is its child and changes documentation only - this table, the
+matching `final_validated_head` field in `BASELINE.yaml`, and the `18 UI tests` count in
+`.ai/CURRENT_STATE.md` / `.ai/DECISIONS.md` / `CHANGELOG.md` / `INDEX.md` that the accessibility fix
+made stale. Naming a SHA here would otherwise require editing the commit it names, which cannot be
+done honestly, so the distinction between the validated tree and the commit that notes it is stated
+instead of hidden.

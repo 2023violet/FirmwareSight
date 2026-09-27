@@ -126,6 +126,11 @@ p0_execution:
   provenance: P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md
   start_local_head: e086e9880e00900e305a3cd88b4d899f73aa5711
   start_remote_head: e086e9880e00900e305a3cd88b4d899f73aa5711
+  # The tree the delivered gate result belongs to. The commit that records this field is its child
+  # and changes documentation only; see P0_EXECUTION_PROVENANCE.md "Final validated HEAD".
+  final_validated_head: 65cb2dc
+  commits_local: 6
+  remote_state: origin/main unchanged at e086e98; no push authorized, none performed
   status: EXECUTED_CONDITIONAL_PASS_LOCAL
   closed: 2026-09-28
   allowed_final_statuses: [PASS, CONDITIONAL_PASS, FAIL, BLOCKED]
@@ -133,7 +138,7 @@ p0_execution:
   library_crates_built: 4
   gate_command: python scripts/check.py
   gate_result: 14/14 steps passed locally, one of them an explicit cargo-deny SKIPPED
-  tests: { rust: 102, ui: 18 }
+  tests: { rust: 102, ui: 19 }
   # CONDITIONAL, not PASS: these are outside what this environment can observe. They are not
   # unfinished code, and closing them is an authorization question, not an engineering one.
   open_conditions:

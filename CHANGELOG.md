@@ -59,12 +59,13 @@ an unconditional P0 `PASS`. This entry records work on the working tree.
   filled copy existed. Running it found four things instead of confirming the work: `DESIGN.md` 3
   never tokenised border width while `DESIGN.md` 4 requires hairline borders, so the eight `1px`
   borders are a gap in the design contract that needs a frozen-asset version bump to close; the
-  summary screen has **no live region**, so a screen reader is never told that an analysis started or
-  finished; the fixture `select` styles only hover and focus; and capability badges display Core's enum
-  words ("supported", "not-provided") rather than product copy. All four are recorded in
-  `P0_KNOWN_LIMITATIONS.md`. The two accessibility findings were fixed in source and covered by a
-  new test rather than filed for later; the other two stay open, one because it needs a frozen design
-  asset to change and one because it is a boundary decision about who owns user-facing wording.
+  summary screen had **no live region**, so a screen reader was never told that an analysis started or
+  finished; the fixture `select` styled only hover and focus and stayed usable mid-request; and
+  capability badges display Core's enum words ("supported", "not-provided") rather than product copy.
+  The two accessibility findings were fixed in source and are covered by a new test rather than filed
+  for later. The other two stay open, recorded in `P0_DESIGN_CHECKLIST.md` and
+  `P0_KNOWN_LIMITATIONS.md`: one needs a frozen design asset to change, which P0 may not do, and the
+  other is a boundary decision about who owns user-facing wording.
 - The UI's `packageManager` pin drifted one patch below the frozen baseline: it read
   `pnpm@12.6.0` where `examples/package.baseline.json` and `04_TECH/10_TOOLCHAIN_BASELINE.md` both
   name 12.7.0. Nothing failed — which is why it is recorded as a catch of the baseline cross-check

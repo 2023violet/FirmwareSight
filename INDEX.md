@@ -27,9 +27,9 @@ Execution state: `P0 executed — CONDITIONAL_PASS (LOCAL); V0 Batch A still wai
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` still describe the frozen
 `FirmwareSight_Project_Baseline_v0.5.1` package, not the P0 working tree; the P0 source layout is
-recorded in `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md`. The six manifest entries that now
-differ are governance and execution records P0 was authorized to change, listed in
-`.ai/DECISIONS.md`.
+recorded in `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md`. Nine manifest entries now differ;
+all nine are governance and execution records P0 was authorized to change, and they are listed by name
+in `.ai/DECISIONS.md`.
 
 
 ## All Markdown documents

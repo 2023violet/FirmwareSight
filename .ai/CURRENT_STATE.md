@@ -22,7 +22,7 @@ The P0 slice created the first production code; nothing in the baseline was rene
 
 Status: `EXECUTED — CONDITIONAL_PASS (LOCAL)`
 
-The source tree exists and the slice's claim is proven by executed tests: 102 Rust tests, 18 UI
+The source tree exists and the slice's claim is proven by executed tests: 102 Rust tests, 19 UI
 tests, one shared gate script, real ELF/MAP fixtures with recorded provenance, deterministic CLI
 JSON, memory accounting reproduced by hand from `readelf`, a typed IPC boundary with generated
 TypeScript, SQLite migrations and transactional import, and a 512 MiB guard measured from both

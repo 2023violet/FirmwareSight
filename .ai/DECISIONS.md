@@ -113,9 +113,10 @@ Final status and what it does not mean:
   there is no push authorization and the tool was not installed here.
 - Baseline stays `0.5.1`. `v0.6.0` is reserved for an unconditional `PASS`, and `g1_claimed` stays
   `false`; P0 passing alone would not open G1 while V0 is unvalidated (ADR-0020).
-- `sha256sum -c SHA256SUMS` fails on exactly six entries, all governance or execution records that
-  P0 was authorized to change (`.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`,
-  `.ai/HANDOFF.md`, `10_AUDIT/SOURCE_PROMPTS/README.md`, `BASELINE.yaml`). `SHA256SUMS` is left as
-  the v0.5.1 manifest; regenerating it would overwrite the frozen baseline's own integrity record,
-  which is not P0's to do.
+- `sha256sum -c SHA256SUMS` fails on exactly nine entries, all governance or execution records that
+  P0 was authorized to change: `.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`,
+  `.ai/HANDOFF.md`, `10_AUDIT/SOURCE_PROMPTS/README.md`, `BASELINE.yaml`, `README.md`,
+  `CHANGELOG.md`, `INDEX.md`. `SHA256SUMS` itself is left as the v0.5.1 manifest: regenerating it
+  would overwrite the frozen baseline's own integrity record, which is not P0's to do. The drift is
+  therefore listed by name here rather than erased.
 - P1 is not authorized and was not started.
