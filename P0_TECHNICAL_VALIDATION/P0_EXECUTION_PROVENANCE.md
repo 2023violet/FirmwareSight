@@ -95,7 +95,8 @@ The tree the delivered gate result belongs to:
 | --- | --- |
 | Final validated HEAD | `65cb2dc` |
 | Commits in this track | `b618900`, `ff35bb2`, `2749cbf`, `725e7cd`, `a014328`, `65cb2dc` |
-| Start HEAD to final | `e086e98..65cb2dc`, 6 commits, all local |
+| Start HEAD to validated tree | `e086e98..65cb2dc`, 6 commits, all local |
+| Commits after the validated tree | documentation only - run `git log --oneline 65cb2dc..HEAD` for the list, which is why no count is written here |
 | Remote state | unchanged - `origin/main` stayed at `e086e98`; no push was authorized and none happened |
 | Gate against that tree | `python scripts/check.py` -> 14/14 steps, 102 Rust tests, 19 UI tests, exit 0 |
 | Cold rebuild against the Rust tree | `cargo clean` plus removing `node_modules/` and `dist/` -> 16/16 steps, exit 0, measured at `a014328`; no Rust file changed afterwards |
@@ -104,9 +105,9 @@ The tree the delivered gate result belongs to:
 file edits in flight. One earlier gate run was discarded rather than reported: it started before a
 test file was saved and finished after, so its output described a tree that never existed as a commit.
 
-The commit that records this table is its child and changes documentation only - this table, the
-matching `final_validated_head` field in `BASELINE.yaml`, and the `18 UI tests` count in
-`.ai/CURRENT_STATE.md` / `.ai/DECISIONS.md` / `CHANGELOG.md` / `INDEX.md` that the accessibility fix
-made stale. Naming a SHA here would otherwise require editing the commit it names, which cannot be
-done honestly, so the distinction between the validated tree and the commit that notes it is stated
-instead of hidden.
+The commits after it change documentation only: they record this table and the `final_validated_head`
+field in `BASELINE.yaml`, correct the `18 UI tests` figure that the accessibility fix made stale in
+`.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`, `CHANGELOG.md` and `INDEX.md`, name the SHA256SUMS drift
+entry by entry, and restate the source census to include the design checklist. Naming a SHA here would
+otherwise require editing the commit it names, which cannot be done honestly, so the distinction
+between the validated tree and the records that follow it is stated instead of hidden.
