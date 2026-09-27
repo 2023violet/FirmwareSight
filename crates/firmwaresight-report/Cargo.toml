@@ -12,3 +12,6 @@ firmwaresight-core = { workspace = true }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 thiserror = "2.0.21"
+
+# No TypeScript or Tauri type appears here: 04_TECH/25 and ADR-0019 put the ts-rs boundary in
+# the Desktop/Application DTO module, which keeps the portable report path free of UI concerns.

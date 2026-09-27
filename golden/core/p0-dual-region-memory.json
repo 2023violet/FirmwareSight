@@ -1,0 +1,79 @@
+{
+  "accountingRule": "adr-0021-dual-budget",
+  "admissibleForHardBlock": true,
+  "contributions": [
+    {
+      "accountingRule": "map-memory-configuration+elf-load",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "map-memory-configuration+elf-load",
+      "nonvolatileBytes": 60,
+      "runtimeRamBytes": 0,
+      "sectionLocator": "elf.section_header[1]",
+      "sectionName": ".text"
+    },
+    {
+      "accountingRule": "map-memory-configuration+elf-load",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "map-memory-configuration+elf-load",
+      "nonvolatileBytes": 32,
+      "runtimeRamBytes": 0,
+      "sectionLocator": "elf.section_header[2]",
+      "sectionName": ".rodata"
+    },
+    {
+      "accountingRule": "map-memory-configuration+elf-load",
+      "classification": "observed",
+      "dualAccounted": true,
+      "evidenceBasis": "map-memory-configuration+elf-load",
+      "nonvolatileBytes": 4,
+      "runtimeRamBytes": 4,
+      "sectionLocator": "elf.section_header[3]",
+      "sectionName": ".data"
+    },
+    {
+      "accountingRule": "map-memory-configuration+elf-load",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "map-memory-configuration+elf-load",
+      "nonvolatileBytes": 0,
+      "runtimeRamBytes": 4,
+      "sectionLocator": "elf.section_header[4]",
+      "sectionName": ".bss"
+    },
+    {
+      "accountingRule": "map-memory-configuration+elf-load",
+      "classification": "observed",
+      "dualAccounted": true,
+      "evidenceBasis": "map-memory-configuration+elf-load",
+      "nonvolatileBytes": 64,
+      "runtimeRamBytes": 64,
+      "sectionLocator": "elf.section_header[5]",
+      "sectionName": ".ota"
+    }
+  ],
+  "dualAccountedSections": [
+    "elf.section_header[3]",
+    "elf.section_header[5]"
+  ],
+  "excludedMetadataBytes": 1975,
+  "fixture": "firmware.elf",
+  "layoutSource": "map",
+  "nonvolatileImageFootprint": {
+    "bytes": 160,
+    "classification": "observed",
+    "reason": null,
+    "state": "exact",
+    "unattributed": []
+  },
+  "runtimeRamFootprint": {
+    "bytes": 72,
+    "classification": "observed",
+    "reason": null,
+    "state": "exact",
+    "unattributed": []
+  },
+  "sha256": "c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62",
+  "weakestEvidenceBasis": "map-memory-configuration+elf-load"
+}

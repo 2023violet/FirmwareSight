@@ -1,0 +1,8 @@
+# Cargo configuration for the whole workspace.
+
+[env]
+# ts-rs writes the Desktop IPC bindings here when `cargo test -p firmwaresight-desktop` runs.
+# `relative = true` anchors the value to this file's directory, so the output location does not
+# depend on which subdirectory the test was launched from. The UI imports from this directory
+# only; the files in it are generated and never hand-edited (ADR-0019).
+TS_RS_EXPORT_DIR = { value = "apps/desktop/ui/src/ipc/generated", relative = true, force = false }

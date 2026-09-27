@@ -1,4 +1,6 @@
+// Prevents an extra console window on Windows release builds.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 fn main() {
-    // Replaced by the Tauri shell once the compatibility spike lands.
-    println!("firmwaresight-desktop: P0 skeleton");
+    firmwaresight_desktop::run()
 }

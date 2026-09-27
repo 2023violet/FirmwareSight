@@ -1,0 +1,184 @@
+.page {
+  max-width: var(--fs-layout-design-target-width);
+  margin: 0 auto;
+  padding: var(--fs-space-8) var(--fs-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.subhead {
+  color: var(--fs-color-text-secondary);
+  max-width: 60ch;
+}
+
+/* A plain hairline separates the control row; no card, no shadow (DESIGN.md 4). */
+.controls {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--fs-space-3);
+  padding-bottom: var(--fs-space-4);
+  border-bottom: 1px solid var(--fs-color-border-default);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  font-size: var(--fs-font-size-metadata);
+  color: var(--fs-color-text-secondary);
+}
+
+.select {
+  min-width: var(--fs-layout-evidence-inspector-min);
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font: inherit;
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border: 1px solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.select:hover {
+  border-color: var(--fs-color-text-disabled);
+}
+
+/* One Primary per region (DESIGN.md 5); accent comes from tokens, not from a local colour. */
+.primary {
+  padding: var(--fs-space-2) var(--fs-space-4);
+  font: inherit;
+  font-weight: bold;
+  color: var(--fs-color-text-on-accent);
+  background: var(--fs-color-accent-primary);
+  border: 1px solid var(--fs-color-accent-primary);
+  border-radius: var(--fs-radius-control);
+  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--fs-color-accent-hover);
+}
+
+.primary:active:not(:disabled) {
+  background: var(--fs-color-accent-pressed);
+}
+
+.primary:disabled {
+  color: var(--fs-color-text-disabled);
+  background: var(--fs-color-accent-disabled);
+  border-color: var(--fs-color-accent-disabled);
+}
+
+.status {
+  color: var(--fs-color-text-secondary);
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+}
+
+.rows {
+  border-top: 1px solid var(--fs-color-border-default);
+}
+
+.row {
+  display: grid;
+  /* The label column reuses the inspector minimum rather than inventing a width. */
+  grid-template-columns: var(--fs-layout-evidence-inspector-min) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--fs-space-4);
+  min-height: var(--fs-row-default);
+  padding: var(--fs-space-2) 0;
+  border-bottom: 1px solid var(--fs-color-border-default);
+}
+
+.term {
+  color: var(--fs-color-text-secondary);
+}
+
+.value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.count {
+  font-family: var(--fs-font-mono);
+  color: var(--fs-color-text-secondary);
+}
+
+.note {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+/* Errors keep their shape without decoration: one hairline, one subtle fill, no shadow. */
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding: var(--fs-space-4);
+  background: var(--fs-color-bg-subtle);
+  border: 1px solid var(--fs-color-border-default);
+  border-left: 1px solid var(--fs-color-status-block);
+  border-radius: var(--fs-radius-panel);
+}
+
+.errorList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  margin: 0;
+}
+
+.errorList div {
+  display: grid;
+  grid-template-columns: var(--fs-layout-evidence-inspector-min) minmax(0, 1fr);
+  gap: var(--fs-space-4);
+}
+
+.errorList dt {
+  color: var(--fs-color-text-secondary);
+}
+
+.errorList dd {
+  margin: 0;
+}
+
+.monoSmall {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  padding-top: var(--fs-space-4);
+  border-top: 1px solid var(--fs-color-border-default);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}

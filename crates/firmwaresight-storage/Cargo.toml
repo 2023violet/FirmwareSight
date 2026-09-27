@@ -12,3 +12,6 @@ firmwaresight-core = { workspace = true }
 rusqlite = { version = "0.40.2", features = ["bundled"] }
 thiserror = "2.0.21"
 tracing = "0.1.44"
+
+[dev-dependencies]
+firmwaresight-artifact.workspace = true

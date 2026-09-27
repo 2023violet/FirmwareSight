@@ -4,7 +4,7 @@
 //! callers is core domain types plus this crate's own evidence, never `object` or MAP parser
 //! types.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::elf;
 use crate::error::ArtifactError;
@@ -206,6 +206,16 @@ fn build_capabilities(facts: &elf::ElfFacts, map_evidence: Option<&MapEvidence>)
         )
 }
 
+/// A locator fragment that survives being run from a different directory or machine.
+///
+/// Deterministic output must not embed an absolute host path; the full path still reaches the
+/// human renderer and the local database, where it is genuinely useful.
+fn stable_path_token(path: &Path) -> String {
+    path.file_name()
+        .map(|name| name.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "unnamed-artifact".to_owned())
+}
+
 /// Record how each headline fact became known, so a golden can be checked for provenance and
 /// not only for arithmetic.
 fn build_evidence(
@@ -220,7 +230,7 @@ fn build_evidence(
         "ev-sha256",
         EvidenceClass::Observed,
         SourceType::FileSystem,
-        format!("file:{}", crate::error::display_path(&input.path)),
+        format!("file:{}", stable_path_token(&input.path)),
         "sha256",
         input.sha256.hex().to_owned(),
         "streaming-sha256/64KiB",
@@ -230,7 +240,7 @@ fn build_evidence(
         "ev-byte-size",
         EvidenceClass::Observed,
         SourceType::FileSystem,
-        format!("stat:{}", crate::error::display_path(&input.path)),
+        format!("stat:{}", stable_path_token(&input.path)),
         "byte_size",
         input.byte_size.to_string(),
         "fs::metadata.len",

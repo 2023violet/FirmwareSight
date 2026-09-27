@@ -1,0 +1,70 @@
+/* FirmwareSight P0 desktop UI. Light theme only (DESIGN.md 4).
+   Every length, colour and duration here comes from tokens.css, which is generated from
+   assets/design-tokens.json. A number that is not in that file does not belong here. */
+
+:root {
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--fs-color-bg-canvas);
+  color: var(--fs-color-text-primary);
+  font-family: var(--fs-font-ui);
+  font-size: var(--fs-font-size-body);
+  line-height: var(--fs-line-height-body);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--fs-font-size-page);
+  line-height: var(--fs-line-height-page);
+  /* Keyword weights, not numeric: the frozen token file defines no weight scale, so inventing
+     550 vs 600 here would be an untracked value. */
+  font-weight: bold;
+}
+
+h2 {
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+  font-weight: bold;
+}
+
+:focus-visible {
+  outline: var(--fs-focus-ring-width) solid var(--fs-focus-ring-color);
+  outline-offset: var(--fs-focus-ring-offset);
+}
+
+code,
+.mono {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms;
+    animation-duration: 0ms;
+  }
+}

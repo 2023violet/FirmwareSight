@@ -1,0 +1,24 @@
+# Binary evidence must never be line-ending converted. The fixture ELF files and the MAP files
+# they were generated with are hashed by the tests, so a silently rewritten byte would change a
+# SHA-256 and break the parity claim.
+*.elf   binary
+*.bin   binary
+*.o     binary
+*.a     binary
+*.sqlite binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
+
+# Golden JSON is compared after parsing, but keeping it byte-stable makes a semantic diff review
+# able to be read as a diff.
+golden/** text eol=lf
+*.json    text eol=lf
+*.ts      text eol=lf
+*.tsx     text eol=lf
+*.rs      text eol=lf
+*.toml    text eol=lf
+*.md      text eol=lf
+*.sql     text eol=lf
+*.css     text eol=lf
+*.py      text eol=lf

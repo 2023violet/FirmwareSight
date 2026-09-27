@@ -1,0 +1,53 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+  font-size: var(--fs-font-size-body);
+  line-height: var(--fs-line-height-body);
+}
+
+.solid,
+.hollow {
+  flex: none;
+  display: block;
+}
+
+.pass {
+  color: var(--fs-color-status-pass);
+}
+
+.review {
+  /* The text token is darker than the fill token, which is exactly what it is for. */
+  color: var(--fs-color-status-review-strong);
+}
+
+.review .label {
+  color: var(--fs-color-status-review-strong);
+}
+
+.block {
+  color: var(--fs-color-status-block);
+}
+
+.unknown {
+  color: var(--fs-color-status-unknown);
+}
+
+.na {
+  color: var(--fs-color-text-disabled);
+}
+
+.label {
+  color: inherit;
+}
+
+.count {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fs-color-text-secondary);
+}
+
+.note {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}

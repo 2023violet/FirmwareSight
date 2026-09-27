@@ -1,0 +1,102 @@
+{
+  "accountingRule": "adr-0021-dual-budget",
+  "admissibleForHardBlock": false,
+  "contributions": [
+    {
+      "accountingRule": "elf-address-and-flags",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "elf-address-and-flags",
+      "nonvolatileBytes": 60,
+      "runtimeRamBytes": 0,
+      "sectionLocator": "elf.section_header[1]",
+      "sectionName": ".text"
+    },
+    {
+      "accountingRule": "elf-address-and-flags",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "elf-address-and-flags",
+      "nonvolatileBytes": 32,
+      "runtimeRamBytes": 0,
+      "sectionLocator": "elf.section_header[2]",
+      "sectionName": ".rodata"
+    },
+    {
+      "accountingRule": "elf-address-and-flags",
+      "classification": "observed",
+      "dualAccounted": true,
+      "evidenceBasis": "elf-address-and-flags",
+      "nonvolatileBytes": 4,
+      "runtimeRamBytes": 4,
+      "sectionLocator": "elf.section_header[3]",
+      "sectionName": ".data"
+    },
+    {
+      "accountingRule": "elf-address-and-flags",
+      "classification": "observed",
+      "dualAccounted": true,
+      "evidenceBasis": "elf-address-and-flags",
+      "nonvolatileBytes": 64,
+      "runtimeRamBytes": 64,
+      "sectionLocator": "elf.section_header[4]",
+      "sectionName": ".ota_staging"
+    },
+    {
+      "accountingRule": "elf-address-and-flags",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "elf-address-and-flags",
+      "nonvolatileBytes": 0,
+      "runtimeRamBytes": null,
+      "sectionLocator": "elf.section_header[5]",
+      "sectionName": ".persistent"
+    },
+    {
+      "accountingRule": "elf-address-and-flags",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "elf-address-and-flags",
+      "nonvolatileBytes": 0,
+      "runtimeRamBytes": 4,
+      "sectionLocator": "elf.section_header[6]",
+      "sectionName": ".bss"
+    },
+    {
+      "accountingRule": "elf-address-and-flags",
+      "classification": "observed",
+      "dualAccounted": false,
+      "evidenceBasis": "elf-address-and-flags",
+      "nonvolatileBytes": 0,
+      "runtimeRamBytes": null,
+      "sectionLocator": "elf.section_header[7]",
+      "sectionName": ".noinit"
+    }
+  ],
+  "dualAccountedSections": [
+    "elf.section_header[3]",
+    "elf.section_header[4]"
+  ],
+  "excludedMetadataBytes": 2227,
+  "fixture": "firmware.elf",
+  "layoutSource": "none",
+  "nonvolatileImageFootprint": {
+    "bytes": 160,
+    "classification": "observed",
+    "reason": null,
+    "state": "exact",
+    "unattributed": []
+  },
+  "runtimeRamFootprint": {
+    "bytes": 72,
+    "classification": "derived",
+    "reason": "elf.section_header[5]: the section declares no size and carries no payload; elf.section_header[7]: the section declares no size and carries no payload",
+    "state": "partial",
+    "unattributed": [
+      "elf.section_header[5]",
+      "elf.section_header[7]"
+    ]
+  },
+  "sha256": "1c0ae94e611497c1635c117834132f23b36799ad651852ba878be421ba20557f",
+  "weakestEvidenceBasis": "elf-address-and-flags"
+}

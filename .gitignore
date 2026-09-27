@@ -6,6 +6,10 @@ dist/
 # Generated performance workloads are never committed.
 /fixtures/generated/
 
+# Tauri regenerates these ACL schemas on every build; only ~300 KB of derived JSON, and the
+# capability source of truth is capabilities/main.json, which is committed.
+apps/desktop/src-tauri/gen/schemas/
+
 # Local runtime state: SQLite databases, caches, logs, exported bundles.
 *.sqlite
 *.sqlite-wal
@@ -23,3 +27,7 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Python bytecode from the repo scripts.
+__pycache__/
+*.pyc

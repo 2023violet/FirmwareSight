@@ -98,6 +98,36 @@ impl ArtifactError {
         }
     }
 
+    /// The one human-facing sentence for this error, shared by the CLI and the desktop.
+    ///
+    /// Both surfaces must show the *same* wording for the same code: a second copy of this table
+    /// in the UI is how a parse failure starts meaning two different things.
+    #[must_use]
+    pub fn user_message(&self) -> String {
+        match self {
+            Self::InputNotFound { .. } => "No artifact was found at that path.".to_owned(),
+            Self::ArtifactTooLarge {
+                byte_size,
+                limit_bytes,
+                ..
+            } => format!(
+                "Artifact is {byte_size} bytes, above the {limit_bytes} byte full-buffer limit."
+            ),
+            Self::UnsupportedFormat { .. } => {
+                "That file is not a format FirmwareSight can analyze yet.".to_owned()
+            }
+            Self::MalformedArtifact { .. } | Self::InvalidElf { .. } => {
+                "Could not parse artifact as ELF.".to_owned()
+            }
+            Self::MapUnsupported { .. } => {
+                "That MAP file is not from a supported linker.".to_owned()
+            }
+            Self::MapParseFailed { .. } => "Could not parse the MAP file.".to_owned(),
+            Self::InputUnreadable { .. } => "Could not read the artifact.".to_owned(),
+            Self::InternalBug { .. } => "FirmwareSight hit an internal error.".to_owned(),
+        }
+    }
+
     /// Exit-code class per `04_TECH/07_CLI_SPEC.md`: parse/import problems are 3.
     #[must_use]
     pub fn is_parse_or_import(&self) -> bool {

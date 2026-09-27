@@ -1,0 +1,225 @@
+{
+  "artifact": {
+    "architecture": "Arm",
+    "bitness": "32",
+    "buildId": null,
+    "buildIdUnknownReason": "no .note.gnu.build-id section is present",
+    "byteSize": 10960,
+    "endianness": "little",
+    "entryPoint": "0x08000039",
+    "entryPointUnknownReason": null,
+    "fileName": "firmware.elf",
+    "kind": "elf",
+    "parserId": "object-elf/0.40",
+    "sha256": "c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62"
+  },
+  "capabilities": {
+    "debugInfo": "available",
+    "elf": "supported",
+    "git": "unknown",
+    "map": "provided",
+    "objectAttribution": "available",
+    "sections": "available",
+    "symbols": "available"
+  },
+  "counts": {
+    "artifacts": 1,
+    "evidence": 11,
+    "sections": 17,
+    "symbols": 32
+  },
+  "createdByFwsightVersion": "0.1.0",
+  "evidence": [
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "sha256",
+      "id": "ev-sha256",
+      "rule": "streaming-sha256/64KiB",
+      "sourceLocator": "file:firmware.elf",
+      "sourceType": "filesystem",
+      "value": "c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "byte_size",
+      "id": "ev-byte-size",
+      "rule": "fs::metadata.len",
+      "sourceLocator": "stat:firmware.elf",
+      "sourceType": "filesystem",
+      "value": "10960"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "architecture",
+      "id": "ev-architecture",
+      "rule": "object-elf/0.40",
+      "sourceLocator": "elf.e_machine",
+      "sourceType": "elf.file-header",
+      "value": "Arm"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "bitness",
+      "id": "ev-bitness",
+      "rule": "object-elf/0.40",
+      "sourceLocator": "elf.e_ident[EI_CLASS]",
+      "sourceType": "elf.file-header",
+      "value": "Bits32"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "endianness",
+      "id": "ev-endianness",
+      "rule": "object-elf/0.40",
+      "sourceLocator": "elf.e_ident[EI_DATA]",
+      "sourceType": "elf.file-header",
+      "value": "Little"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "entry_point",
+      "id": "ev-entry",
+      "rule": "object-elf/0.40",
+      "sourceLocator": "elf.e_entry",
+      "sourceType": "elf.file-header",
+      "value": "0x08000039"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "nonvolatile_image_footprint_bytes",
+      "id": "ev-memory-nonvolatile_image_footprint_bytes",
+      "rule": "map-memory-configuration+elf-load",
+      "sourceLocator": "memory-accounting/totals",
+      "sourceType": "elf.program-header",
+      "value": "160"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "runtime_ram_footprint_bytes",
+      "id": "ev-memory-runtime_ram_footprint_bytes",
+      "rule": "map-memory-configuration+elf-load",
+      "sourceLocator": "memory-accounting/totals",
+      "sourceType": "elf.program-header",
+      "value": "72"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "dual_accounted",
+      "id": "ev-dual-3",
+      "rule": "map-memory-configuration+elf-load",
+      "sourceLocator": "elf.section_header[3] + map:load-address",
+      "sourceType": "map",
+      "value": "nonvolatile=4 runtime=4"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "dual_accounted",
+      "id": "ev-dual-5",
+      "rule": "map-memory-configuration+elf-load",
+      "sourceLocator": "elf.section_header[5] + map:load-address",
+      "sourceType": "map",
+      "value": "nonvolatile=64 runtime=64"
+    },
+    {
+      "classification": "observed",
+      "confidence": null,
+      "field": "memory_regions",
+      "id": "ev-map-regions",
+      "rule": "gnu_ld",
+      "sourceLocator": "map:Memory Configuration",
+      "sourceType": "map",
+      "value": "ROM@0x8000000+0x100000,RAM@0x20000000+0x40000,*default*@0x0+0xffffffff"
+    }
+  ],
+  "memory": {
+    "accountingRule": "adr-0021-dual-budget",
+    "admissibleForHardBlock": true,
+    "contributions": [
+      {
+        "accountingRule": "map-memory-configuration+elf-load",
+        "classification": "observed",
+        "dualAccounted": false,
+        "evidenceBasis": "map-memory-configuration+elf-load",
+        "nonvolatileBytes": 60,
+        "runtimeRamBytes": 0,
+        "sectionLocator": "elf.section_header[1]",
+        "sectionName": ".text"
+      },
+      {
+        "accountingRule": "map-memory-configuration+elf-load",
+        "classification": "observed",
+        "dualAccounted": false,
+        "evidenceBasis": "map-memory-configuration+elf-load",
+        "nonvolatileBytes": 32,
+        "runtimeRamBytes": 0,
+        "sectionLocator": "elf.section_header[2]",
+        "sectionName": ".rodata"
+      },
+      {
+        "accountingRule": "map-memory-configuration+elf-load",
+        "classification": "observed",
+        "dualAccounted": true,
+        "evidenceBasis": "map-memory-configuration+elf-load",
+        "nonvolatileBytes": 4,
+        "runtimeRamBytes": 4,
+        "sectionLocator": "elf.section_header[3]",
+        "sectionName": ".data"
+      },
+      {
+        "accountingRule": "map-memory-configuration+elf-load",
+        "classification": "observed",
+        "dualAccounted": false,
+        "evidenceBasis": "map-memory-configuration+elf-load",
+        "nonvolatileBytes": 0,
+        "runtimeRamBytes": 4,
+        "sectionLocator": "elf.section_header[4]",
+        "sectionName": ".bss"
+      },
+      {
+        "accountingRule": "map-memory-configuration+elf-load",
+        "classification": "observed",
+        "dualAccounted": true,
+        "evidenceBasis": "map-memory-configuration+elf-load",
+        "nonvolatileBytes": 64,
+        "runtimeRamBytes": 64,
+        "sectionLocator": "elf.section_header[5]",
+        "sectionName": ".ota"
+      }
+    ],
+    "dualAccountedSections": [
+      "elf.section_header[3]",
+      "elf.section_header[5]"
+    ],
+    "excludedMetadataBytes": 1975,
+    "layoutSource": "map",
+    "nonvolatileImageFootprint": {
+      "bytes": 160,
+      "classification": "observed",
+      "reason": null,
+      "state": "exact",
+      "unattributed": []
+    },
+    "runtimeRamFootprint": {
+      "bytes": 72,
+      "classification": "observed",
+      "reason": null,
+      "state": "exact",
+      "unattributed": []
+    },
+    "weakestEvidenceBasis": "map-memory-configuration+elf-load"
+  },
+  "normalizationVersion": "p0-normalize-1",
+  "schema": "firmwaresight.analyze/p0-internal-1",
+  "schemaStability": "p0-internal",
+  "snapshotId": "snap-c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62-p0-normalize-1"
+}
