@@ -1,0 +1,196 @@
+---
+title: "Document Index"
+doc_id: "FS-ROOT-INDEX"
+product: "FirmwareSight"
+version: "0.5.0"
+status: "BASELINE"
+owner: "Project Lead"
+last_updated: "2026-09-27"
+---
+
+
+# Document Index
+
+Baseline: `0.5.0`  
+Date: `2026-09-27`
+
+## Primary reading path
+
+1. `README.md`
+2. `PRODUCT_BASELINE.md`
+3. `DESIGN.md`
+4. `BASELINE.yaml`
+5. `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md`
+6. `10_AUDIT/03_ADOPTION_DECISION_REGISTER.md`
+7. `05_ENGINEERING/08_CODE_AREA_PLAN.md`
+8. `06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md`
+9. `08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md`
+10. `.ai/CURRENT_STATE.md`
+
+
+## All Markdown documents
+
+| Path | Title |
+|---|---|
+| `.ai/ACTIVE_TASK.md` | ACTIVE TASK |
+| `.ai/CURRENT_STATE.md` | Current State |
+| `.ai/DECISIONS.md` | Decisions — v0.5.0 |
+| `.ai/HANDOFF.md` | Handoff — FirmwareSight v0.5.0 |
+| `.ai/README.md` | AI Entry Point |
+| `00_GOVERNANCE/00_DOCUMENT_CONTROL.md` | 文档控制规范 |
+| `00_GOVERNANCE/01_PROJECT_CHARTER.md` | 项目章程 |
+| `00_GOVERNANCE/02_GLOSSARY.md` | 术语表 |
+| `00_GOVERNANCE/03_DECISION_POLICY.md` | 决策与 ADR 规范 |
+| `01_PRODUCT/00_PRODUCT_VISION.md` | 产品愿景 |
+| `01_PRODUCT/01_PRD_MVP.md` | MVP PRD |
+| `01_PRODUCT/02_PERSONAS_JTBD.md` | Personas & JTBD |
+| `01_PRODUCT/03_SCOPE_NON_GOALS.md` | Scope / Non-goals |
+| `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` | User Stories |
+| `01_PRODUCT/05_BUSINESS_MODEL.md` | 商业模式假设 |
+| `01_PRODUCT/06_COMPETITIVE_POSITIONING.md` | Competitive Positioning |
+| `01_PRODUCT/07_MVP_COHORT_AND_CLI_POLICY.md` | MVP Cohort & CLI Policy |
+| `01_PRODUCT/08_PRODUCT_MODULE_MAP.md` | Product Module Map |
+| `01_PRODUCT/09_CAPABILITY_PORTFOLIO.md` | Capability Portfolio |
+| `02_BRAND/00_NAMING_DECISION.md` | 命名决策 |
+| `02_BRAND/01_BRAND_FOUNDATION.md` | Brand Foundation |
+| `02_BRAND/02_VOICE_MESSAGING.md` | Voice & Messaging |
+| `03_DESIGN/00_DESIGN_PHILOSOPHY.md` | Design Philosophy |
+| `03_DESIGN/01_INFORMATION_ARCHITECTURE.md` | Information Architecture |
+| `03_DESIGN/02_UX_FLOWS.md` | UX Flows |
+| `03_DESIGN/03_VISUAL_SYSTEM.md` | Visual System |
+| `03_DESIGN/04_COMPONENT_RULES.md` | Component Rules |
+| `03_DESIGN/05_ACCESSIBILITY.md` | Accessibility |
+| `03_DESIGN/06_UI_REFERENCE_SCREENS.md` | UI Reference Screens |
+| `03_DESIGN/07_DESIGN_TOKEN_VALIDATION.md` | Design Token Validation |
+| `03_DESIGN/08_POST_MVP_PRESENTATION_RULES.md` | Post-MVP Presentation Rules |
+| `04_TECH/00_TECH_STACK.md` | Technology Stack |
+| `04_TECH/01_SYSTEM_ARCHITECTURE.md` | System Architecture |
+| `04_TECH/02_DOMAIN_MODEL.md` | Domain Model |
+| `04_TECH/03_FORMAT_SUPPORT.md` | Format Support Strategy |
+| `04_TECH/04_STORAGE_WORKSPACE.md` | Local Storage |
+| `04_TECH/05_SECURITY_PRIVACY.md` | Security & Privacy |
+| `04_TECH/06_PERFORMANCE_BUDGETS.md` | Performance Budgets |
+| `04_TECH/07_CLI_SPEC.md` | CLI Specification |
+| `04_TECH/08_CONFIG_SPEC.md` | `firmwaresight.toml` |
+| `04_TECH/09_TECH_DECISION_MATRIX.md` | Technical Decision Matrix |
+| `04_TECH/10_TOOLCHAIN_BASELINE.md` | Toolchain Baseline |
+| `04_TECH/11_DEPENDENCY_BASELINE.md` | Dependency Baseline |
+| `04_TECH/12_ASYNC_EXECUTION_MODEL.md` | Async & Execution Model |
+| `04_TECH/13_FRONTEND_ARCHITECTURE.md` | Frontend Architecture |
+| `04_TECH/14_IPC_DATA_CONTRACTS.md` | IPC / Data Contracts |
+| `04_TECH/15_STORAGE_DATABASE_BASELINE.md` | SQLite Storage Baseline |
+| `04_TECH/16_ARTIFACT_ANALYSIS_PIPELINE.md` | Artifact Analysis Pipeline |
+| `04_TECH/17_RELEASE_PACKAGING_UPDATE.md` | Build / Package / Sign / Update |
+| `04_TECH/18_CI_SUPPLY_CHAIN.md` | CI / Supply Chain |
+| `04_TECH/19_NATIVE_GPU_ISLAND_POLICY.md` | Native / GPU Island Policy |
+| `04_TECH/20_PLATFORM_SUPPORT.md` | Platform Support Matrix |
+| `04_TECH/21_OBSERVABILITY_DIAGNOSTICS.md` | Observability / Diagnostics |
+| `04_TECH/22_GIT_PROVENANCE_ADAPTER.md` | Git Provenance Adapter |
+| `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` | Firmware Memory Accounting Model |
+| `04_TECH/24_BUILD_IDENTITY_EVIDENCE.md` | Build Identity Evidence Model |
+| `04_TECH/25_TYPED_IPC_BINDINGS.md` | Typed IPC Bindings |
+| `04_TECH/26_PORTABLE_SCHEMA_POLICY.md` | Portable Schema Policy |
+| `04_TECH/27_GATE_STATE_SEMANTICS.md` | Release Gate State Semantics |
+| `05_ENGINEERING/00_REPO_STRUCTURE.md` | Repository Structure |
+| `05_ENGINEERING/01_CODING_STANDARDS.md` | Coding Standards |
+| `05_ENGINEERING/02_TEST_STRATEGY.md` | Test Strategy |
+| `05_ENGINEERING/03_ERROR_MODEL.md` | Error Model |
+| `05_ENGINEERING/04_RELEASE_ENGINEERING.md` | FirmwareSight App Release |
+| `05_ENGINEERING/05_DEPENDENCY_POLICY.md` | Dependency Policy |
+| `05_ENGINEERING/06_CI_CD_BASELINE.md` | CI/CD Baseline |
+| `05_ENGINEERING/07_TEST_FIXTURE_STRATEGY.md` | Artifact Fixture Strategy |
+| `05_ENGINEERING/08_CODE_AREA_PLAN.md` | FirmwareSight Code Area Plan |
+| `06_DELIVERY/00_ROADMAP.md` | Product Roadmap |
+| `06_DELIVERY/01_MVP_EXIT_CRITERIA.md` | MVP Exit Criteria |
+| `06_DELIVERY/02_BACKLOG_SEED.md` | Seed Backlog |
+| `06_DELIVERY/03_QA_CHECKLIST.md` | QA Checklist |
+| `06_DELIVERY/04_EXTERNAL_VALIDATION_PLAN.md` | External Validation Plan |
+| `06_DELIVERY/05_MVP_TO_PRODUCT_DEVELOPMENT_LIFECYCLE.md` | FirmwareSight MVP → Complete Product Development Lifecycle |
+| `06_DELIVERY/06_STAGE_GATES.md` | Stage Gates |
+| `06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md` | Post-MVP Candidate Roadmap |
+| `06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md` | Milestone and Deliverable Matrix |
+| `06_DELIVERY/09_USER_INTERVIEW_QUESTION_BANK.md` | Validation Interview Question Bank |
+| `07_COMPLIANCE/00_COMPLIANCE_BOUNDARY.md` | Compliance Boundary |
+| `07_COMPLIANCE/01_SBOM_STRATEGY.md` | SBOM Strategy |
+| `07_COMPLIANCE/02_CRA_CONTEXT.md` | CRA Context |
+| `07_COMPLIANCE/03_LICENSE_POLICY.md` | Licensing Policy |
+| `08_RESEARCH/00_MARKET_EVIDENCE.md` | Market Evidence Summary |
+| `08_RESEARCH/01_NAMING_SCREEN.md` | Naming Collision Screen |
+| `08_RESEARCH/02_TECH_REFERENCES.md` | Technical References |
+| `08_RESEARCH/03_RISKS_ASSUMPTIONS.md` | Risks & Assumptions |
+| `08_RESEARCH/04_RUST_BASELINE_APPLICATION_TO_FIRMWARESIGHT.md` | Applying the Rust Product Census to FirmwareSight |
+| `08_RESEARCH/05_EXTERNAL_TECH_VERIFICATION_2026-09-26.md` | External Technology Verification — 2026-09-26 |
+| `08_RESEARCH/06_MARKET_SOURCE_REGISTER.md` | Market Source Register |
+| `08_RESEARCH/07_AWESOME_DESIGN_MD_REFERENCE.md` | awesome-design-md Reference |
+| `08_RESEARCH/08_COMPETITOR_UPDATE_2026-09-27.md` | Competitor Update — AssureLoop |
+| `08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md` | Expert Round Market Verification — 2026-09-27 |
+| `08_RESEARCH/10_POST_MVP_SIGNAL_REGISTER.md` | Post-MVP Signal Register |
+| `08_RESEARCH/11_RISK_DEPENDENCY_REGISTER.md` | Risk and Dependency Register |
+| `08_RESEARCH/SOURCE_REPORTS/README.md` | Source Reports |
+| `09_ADR/ADR-0001-product-name.md` | Context |
+| `09_ADR/ADR-0002-desktop-stack.md` | Status |
+| `09_ADR/ADR-0003-rust-core.md` | Status |
+| `09_ADR/ADR-0004-local-first.md` | Context |
+| `09_ADR/ADR-0005-no-ai-trusted-core.md` | Context |
+| `09_ADR/ADR-0006-mvp-format-scope.md` | Context |
+| `09_ADR/ADR-0007-core-first-adapter-driven.md` | Status |
+| `09_ADR/ADR-0008-async-boundary.md` | Status |
+| `09_ADR/ADR-0009-storage-rusqlite.md` | Status |
+| `09_ADR/ADR-0010-artifact-parser.md` | Status |
+| `09_ADR/ADR-0011-frontend-baseline.md` | Status |
+| `09_ADR/ADR-0012-tracing.md` | Status |
+| `09_ADR/ADR-0013-network-deferred.md` | Status |
+| `09_ADR/ADR-0014-gpu-deferred.md` | Status |
+| `09_ADR/ADR-0015-release-update-lifecycle.md` | Status |
+| `09_ADR/ADR-0016-toolchain-pinning.md` | Status |
+| `09_ADR/ADR-0017-git-cli-provenance.md` | Status |
+| `09_ADR/ADR-0018-ui-baseline-tokens-governance.md` | ADR-0018 — UI 基准与 Design Tokens 治理 |
+| `09_ADR/ADR-0019-typed-ipc-bindings.md` | ADR-0019 — Typed IPC Bindings |
+| `09_ADR/ADR-0020-validation-sequence.md` | ADR-0020 — V0 Prototype + P0 Vertical Slice Parallel Validation |
+| `09_ADR/ADR-0021-memory-accounting.md` | ADR-0021 — Firmware Memory Accounting |
+| `09_ADR/ADR-0022-portable-schema-strictness.md` | ADR-0022 — Portable Schema Strictness |
+| `09_ADR/ADR-0023-gate-five-state-semantics.md` | ADR-0023 — Gate Five-State Semantics |
+| `09_ADR/ADR-0024-post-mvp-candidate-governance.md` | ADR-0024 — Post-MVP Candidate Governance and Namespace |
+| `10_AUDIT/00_V0.3_AUDIT_RESOLUTION.md` | v0.3.0 Audit Resolution |
+| `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
+| `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |
+| `10_AUDIT/03_ADOPTION_DECISION_REGISTER.md` | v0.5.0 Adoption Decision Register |
+| `10_AUDIT/SOURCE_REVIEWS/ADR-0018-ui-baseline-tokens-governance.md` | ADR-0018 — UI 基准与 design tokens 治理 |
+| `10_AUDIT/SOURCE_REVIEWS/DESIGN_CHECKLIST_TEMPLATE.md` | FirmwareSight 设计评审 Checklist（Do's & Don'ts） |
+| `10_AUDIT/SOURCE_REVIEWS/FS-AGENTS-UI-Rules增补节-通用助手.md` | AGENTS.md 增补节：UI Rules（入仓准备件） |
+| `10_AUDIT/SOURCE_REVIEWS/FS-UI基调定案提案-设计匠人.md` | FirmwareSight UI 基调定案提案 |
+| `10_AUDIT/SOURCE_REVIEWS/FS-v0.3.0-Baseline理解摘要-治理工程生命周期-通用助手.md` | FirmwareSight Baseline v0.3.0 理解摘要（治理 / 工程 / 生命周期门禁） |
+| `10_AUDIT/SOURCE_REVIEWS/FS-立项过程与产品演变理解摘要-通用助手.md` | FirmwareSight 立项过程与产品演变理解摘要 |
+| `10_AUDIT/SOURCE_REVIEWS/FirmwareSight v0.3.md` | FirmwareSight v0.3.0 基线 · 技术理解摘要 |
+| `10_AUDIT/SOURCE_REVIEWS/FirmwareSight-设计风格调研-awesome-design-md.md` | 情报报告：VoltAgent/awesome-design-md 仓库调研 & FirmwareSight 设计风格选型 |
+| `10_AUDIT/SOURCE_REVIEWS/README.md` | Audit Source Reviews |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-PostMVP-开放问题裁决记录-通用助手.md` | FirmwareSight Post-MVP 探索开放问题裁决记录 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-可视化与文档导出-设计视角备忘-设计匠人.md` | FirmwareSight 可视化与文档导出 · 设计视角备忘 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-正式产品功能探索-分析结果可视化与文档导出-专业写手.md` | FirmwareSight 正式产品功能探索：分析结果可视化与文档导出（Post-MVP） |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-正式产品功能探索-真需求功能全景扫描-专业写手.md` | FirmwareSight 正式产品功能探索：真需求功能全景扫描（Post-MVP） |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-正式产品功能探索-端口扩展与深度体验-专业写手.md` | FirmwareSight 正式产品功能探索：端口扩展与深度体验（Post-MVP） |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-真需求全景扫描-外部信号报告-信息哨兵.md` | 真需求全景扫描·外部信号报告 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-真需求全景扫描-技术可行性简报-鲁班七号(1).md` | 真需求全景扫描·技术可行性简报 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-真需求全景扫描-技术可行性简报-鲁班七号.md` | 真需求全景扫描·技术可行性简报 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-真需求全景扫描-设计视角备忘-设计匠人(1).md` | FirmwareSight 真需求全景扫描 · 设计视角备忘 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-真需求全景扫描-设计视角备忘-设计匠人.md` | FirmwareSight 真需求全景扫描 · 设计视角备忘 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-端口扩展与深度体验-技术可行性简报-鲁班七号.md` | 端口扩展与深度体验·技术可行性简报 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-端口扩展与深度体验-设计视角备忘-设计匠人.md` | FirmwareSight 端口扩展与深度体验 · 设计视角备忘 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/FS-端口扩展与用户粘性-外部调研报告-信息哨兵.md` | 端口扩展与用户粘性·外部调研报告 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/README.md` | v0.5 Expert Source Reviews |
+| `10_AUDIT/SOURCE_REVIEWS_V05/可视化与文档导出·外部调研报告.md` | 《可视化与文档导出·外部调研报告》 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/可视化与文档导出·技术可行性简报.md` | 《可视化与文档导出 · 技术可行性简报》 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/背景回顾-已覆盖面与本轮扫描边界清单-通用助手.md` | 背景回顾：已覆盖面与本轮扫描边界清单 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/背景回顾：可视化与文档导出的基线事实清单.md` | 背景回顾：可视化与文档导出的基线事实清单 |
+| `10_AUDIT/SOURCE_REVIEWS_V05/背景回顾：端口扩展与深度体验的基线事实清单.md` | 背景回顾：端口扩展与深度体验的基线事实清单 |
+| `AGENTS.md` | AGENTS.md |
+| `CHANGELOG.md` | Changelog |
+| `DESIGN.md` | FirmwareSight DESIGN.md |
+| `PRODUCT_BASELINE.md` | FirmwareSight Product Baseline v0.5.0 |
+| `README.md` | FirmwareSight v0.5.0 |
+| `assets/ui-mockups/README.md` | UI Mockup Asset Register |
+| `templates/ADR_TEMPLATE.md` | ADR-XXXX — Title |
+| `templates/BUG_REPORT_TEMPLATE.md` | Bug |
+| `templates/DESIGN_CHECKLIST_TEMPLATE.md` | FirmwareSight 设计评审 Checklist（Do's & Don'ts） |
+| `templates/FEATURE_SPEC_TEMPLATE.md` | Feature: <name> |
+| `templates/RELEASE_CHECKLIST_TEMPLATE.md` | FirmwareSight App Release Checklist |

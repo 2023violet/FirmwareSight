@@ -1,0 +1,26 @@
+schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+required = ["elf", "bin", "map"]
+
+[memory]
+flash_budget = 262144
+ram_budget = 131072
+
+[version]
+source = "git_tag"
+pattern = "^v(?P<version>\\d+\\.\\d+\\.\\d+)$"
+
+[release]
+require_clean_git = true
+require_release_notes = true
+
+[diff]
+flash_growth_review_bytes = 4096
+ram_growth_review_bytes = 2048
+
+[sbom]
+enabled = false

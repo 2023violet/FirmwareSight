@@ -1,0 +1,95 @@
+schema_version: 5
+product:
+  name: FirmwareSight
+  descriptor: Embedded Firmware Release Workbench
+  tagline: "Know exactly what ships."
+  cli: fwsight
+  baseline_version: 0.5.0
+  date: 2026-09-27
+  status: PRE_IMPLEMENTATION_RESEARCH_NORMALIZED_UI_COMPLETE
+
+principles:
+  - evidence_first
+  - deterministic_core
+  - local_first
+  - explicit_unknown
+  - zero_workflow_migration
+  - core_first_adapter_driven
+  - four_product_verbs_only
+  - stage_gated_delivery
+  - candidate_not_commitment
+
+users:
+  primary:
+    - firmware_engineer
+    - firmware_lead
+    - qa_compliance_reviewer
+    - small_hardware_founder_team
+
+validation:
+  current_gate: G0_PASS
+  next_authorizable_tracks:
+    - V0_workflow_prototype_validation
+    - P0_technical_vertical_slice
+  g1_requires: [V0_PASS, P0_PASS]
+  product_mvp_phases: [P1_analyzer, P2_compare, P3_gate, P4_bundle]
+  own_artifact_validation: V1
+
+post_mvp_candidates:
+  namespaces: [E1, E2, E3, GX]
+  active: false
+  registry: 06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md
+
+architecture:
+  principle: "Core-first, Adapter-driven, Product-specific Shell"
+  core:
+    language: Rust
+    rust_version: "1.98.1"
+    edition: "2024"
+    library_crate_budget_phase0: 4
+  desktop:
+    shell: Tauri 2
+    frontend: React 19.3
+    typescript: strict
+    build: Vite 8
+    node: "24 LTS"
+    package_manager: "pnpm 12"
+    ipc_type_generation: ts-rs
+  storage:
+    engine: SQLite
+    binding: rusqlite
+    bundled: true
+  parsing:
+    object: true
+    gimli: optional
+    map_adapters: fixture_gated
+    full_buffer_default_limit_mib: 512
+  provenance:
+    git_cli: true
+    missing_git: UNKNOWN
+  report:
+    current: [JSON, self_contained_HTML]
+    future_candidates: [CSV, Markdown]
+    interview_gated: [XLSX, DOCX]
+    native_pdf: rejected
+  network:
+    mvp: none
+  gpu:
+    mvp: none
+
+gate:
+  finding_states: [PASS, REVIEW, BLOCK, UNKNOWN, N/A]
+  effective_severity: [PASS, REVIEW, BLOCK]
+
+design:
+  tokens_version: "0.2.0"
+  accepted_ui_png_count: 7
+  theme: light_only_mvp
+  authority: "governance > frozen_assets_and_adrs > DESIGN.md > accepted_mockups > upstream_reference"
+
+research:
+  expert_round_resolution: 10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md
+  market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
+  disputed_claims_must_not_be_promoted: true
+
+active_task: NONE

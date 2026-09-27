@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "baseline": "0.5.0",
+  "authority": "reference-below-design-and-tokens",
+  "assets": [
+    {
+      "file": "FS-UI-01-Overview.png",
+      "sha256": "564f34c2566202e9d163c83b4a97694de5aa4d7c6bcd04c323f3849c50c784be",
+      "width": 1440,
+      "height": 900,
+      "role": "accepted-reference"
+    },
+    {
+      "file": "FS-UI-02-Analyze.png",
+      "sha256": "a133ec9e4ec291d10dc7cb43df51850a421efa1a0b6d2215aef5c2bb30c222a6",
+      "width": 1440,
+      "height": 900,
+      "role": "accepted-reference"
+    },
+    {
+      "file": "FS-UI-03-Compare.png",
+      "sha256": "a38dabc51676b3a054a0ce12f94a1881f1bf48055bff2acb2a9be8f28064064f",
+      "width": 1440,
+      "height": 900,
+      "role": "accepted-reference"
+    },
+    {
+      "file": "FS-UI-04-Release-Gate.png",
+      "sha256": "86a08240bfbc117faf2de0072ce86f5d71dd39e3a79634fb1be736d9e66e498d",
+      "width": 1440,
+      "height": 900,
+      "role": "accepted-reference"
+    },
+    {
+      "file": "FS-UI-05-Bundle-History.png",
+      "sha256": "af33ffd1b7fbda2a9808b4baf0cc5c3907e1fcdbca01aff91679be19745ccde6",
+      "width": 1440,
+      "height": 900,
+      "role": "accepted-reference"
+    },
+    {
+      "file": "FS-UI-06-Parse-Failure.png",
+      "sha256": "0b0dd1eb3e3b9262100151cdea2be1b56845a914f287871f0bd281142d369706",
+      "width": 1440,
+      "height": 900,
+      "role": "accepted-reference"
+    },
+    {
+      "file": "FS-UI-07-Unknown-Dependency.png",
+      "sha256": "3a84f0fc3d5dada84a34722de0799c0dc40f7fe864928017095daa7639f6f7bb",
+      "width": 1440,
+      "height": 900,
+      "role": "accepted-reference"
+    }
+  ],
+  "missing_declared_asset": null
+}

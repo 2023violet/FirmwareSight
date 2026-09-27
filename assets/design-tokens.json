@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "meta": {
+    "product": "FirmwareSight",
+    "version": "0.2.0",
+    "status": "baseline-authoritative",
+    "baseline": "0.5.0",
+    "governed_by": "ADR-0018",
+    "upstream_reference": {
+      "repository": "VoltAgent/awesome-design-md",
+      "path": "design-md/ibm/DESIGN.md",
+      "blob_sha": "dbef1c5b20357a8953e6832e5d383a866a66f11a",
+      "role": "temperament-and-pattern-reference-only"
+    }
+  },
+  "spacing": {
+    "1": 4,
+    "2": 8,
+    "3": 12,
+    "4": 16,
+    "6": 24,
+    "8": 32,
+    "12": 48,
+    "16": 64
+  },
+  "radius": {
+    "control": 6,
+    "panel": 8,
+    "modal": 10,
+    "pill": 999
+  },
+  "typography": {
+    "ui": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Arial, sans-serif",
+    "mono": "ui-monospace, \"SFMono-Regular\", Consolas, \"Liberation Mono\", monospace",
+    "size": {
+      "metadata": 12,
+      "body": 13,
+      "section": 15,
+      "page": 20
+    },
+    "line_height": {
+      "metadata": 18,
+      "body": 20,
+      "section": 22,
+      "page": 28
+    }
+  },
+  "layout": {
+    "nav_rail": 224,
+    "evidence_inspector": {
+      "min": 320,
+      "default": 340,
+      "max": 420
+    },
+    "desktop_min": {
+      "width": 1024,
+      "height": 720
+    },
+    "design_target": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "table": {
+    "row": {
+      "compact": 28,
+      "default": 36,
+      "max": 40
+    }
+  },
+  "motion": {
+    "duration": {
+      "micro": 120,
+      "standard": 150,
+      "panel": 180
+    },
+    "ease": "cubic-bezier(0, 0, 0.2, 1)"
+  },
+  "focus": {
+    "ring": {
+      "color": "{color.light.accent.primary}",
+      "width": 2,
+      "offset": 2
+    }
+  },
+  "shadow": {
+    "overlay-sm": "0 1px 2px rgba(23,26,31,0.08), 0 4px 10px rgba(23,26,31,0.06)",
+    "overlay-lg": "0 8px 24px rgba(23,26,31,0.12), 0 2px 6px rgba(23,26,31,0.08)"
+  },
+  "color": {
+    "light": {
+      "bg.canvas": "#F7F8FA",
+      "bg.surface": "#FFFFFF",
+      "bg.subtle": "#F1F3F5",
+      "text.primary": "#171A1F",
+      "text.secondary": "#5D6673",
+      "text.disabled": "#98A2B3",
+      "text.on-accent": "#FFFFFF",
+      "text.on-status": "#FFFFFF",
+      "border.default": "#D9DEE5",
+      "accent.primary": "#2563EB",
+      "accent.hover": "#1D4ED8",
+      "accent.pressed": "#1E40AF",
+      "accent.disabled": "#98A2B3",
+      "status.pass": "#18794E",
+      "status.review": "#9A6700",
+      "status.review.strong": "#7A5200",
+      "status.block": "#C9372C",
+      "status.unknown": "#667085",
+      "diff.added": "#18794E",
+      "diff.added.bg": "#E7F3EC",
+      "diff.removed": "#C9372C",
+      "diff.removed.bg": "#FBECEA",
+      "diff.changed": "#2563EB",
+      "diff.changed.bg": "#E9F0FD",
+      "chart.blue.1": "#DCE7FB",
+      "chart.blue.2": "#B8CDF7",
+      "chart.blue.3": "#84A9F3",
+      "chart.blue.4": "#4F7BE8",
+      "chart.blue.5": "#1D4ED8",
+      "chart.other": "#F1F3F5"
+    }
+  },
+  "changelog": [
+    {
+      "from": "0.1.0",
+      "to": "0.2.0",
+      "date": "2026-09-27",
+      "change": "ADR-0018 freeze: preserve original semantic colors; add interaction, focus, diff backgrounds, overlay, density, motion, chart sequence and disabled-state tokens."
+    }
+  ]
+}

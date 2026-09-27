@@ -1,0 +1,210 @@
+FirmwareSight_Project_Baseline_v0.5.0/
+├── .ai/
+│   ├── ACTIVE_TASK.md
+│   ├── CURRENT_STATE.md
+│   ├── DECISIONS.md
+│   ├── HANDOFF.md
+│   └── README.md
+├── 00_GOVERNANCE/
+│   ├── 00_DOCUMENT_CONTROL.md
+│   ├── 01_PROJECT_CHARTER.md
+│   ├── 02_GLOSSARY.md
+│   └── 03_DECISION_POLICY.md
+├── 01_PRODUCT/
+│   ├── 00_PRODUCT_VISION.md
+│   ├── 01_PRD_MVP.md
+│   ├── 02_PERSONAS_JTBD.md
+│   ├── 03_SCOPE_NON_GOALS.md
+│   ├── 04_USER_STORIES_ACCEPTANCE.md
+│   ├── 05_BUSINESS_MODEL.md
+│   ├── 06_COMPETITIVE_POSITIONING.md
+│   ├── 07_MVP_COHORT_AND_CLI_POLICY.md
+│   ├── 08_PRODUCT_MODULE_MAP.md
+│   └── 09_CAPABILITY_PORTFOLIO.md
+├── 02_BRAND/
+│   ├── 00_NAMING_DECISION.md
+│   ├── 01_BRAND_FOUNDATION.md
+│   └── 02_VOICE_MESSAGING.md
+├── 03_DESIGN/
+│   ├── 00_DESIGN_PHILOSOPHY.md
+│   ├── 01_INFORMATION_ARCHITECTURE.md
+│   ├── 02_UX_FLOWS.md
+│   ├── 03_VISUAL_SYSTEM.md
+│   ├── 04_COMPONENT_RULES.md
+│   ├── 05_ACCESSIBILITY.md
+│   ├── 06_UI_REFERENCE_SCREENS.md
+│   ├── 07_DESIGN_TOKEN_VALIDATION.md
+│   └── 08_POST_MVP_PRESENTATION_RULES.md
+├── 04_TECH/
+│   ├── 00_TECH_STACK.md
+│   ├── 01_SYSTEM_ARCHITECTURE.md
+│   ├── 02_DOMAIN_MODEL.md
+│   ├── 03_FORMAT_SUPPORT.md
+│   ├── 04_STORAGE_WORKSPACE.md
+│   ├── 05_SECURITY_PRIVACY.md
+│   ├── 06_PERFORMANCE_BUDGETS.md
+│   ├── 07_CLI_SPEC.md
+│   ├── 08_CONFIG_SPEC.md
+│   ├── 09_TECH_DECISION_MATRIX.md
+│   ├── 10_TOOLCHAIN_BASELINE.md
+│   ├── 11_DEPENDENCY_BASELINE.md
+│   ├── 12_ASYNC_EXECUTION_MODEL.md
+│   ├── 13_FRONTEND_ARCHITECTURE.md
+│   ├── 14_IPC_DATA_CONTRACTS.md
+│   ├── 15_STORAGE_DATABASE_BASELINE.md
+│   ├── 16_ARTIFACT_ANALYSIS_PIPELINE.md
+│   ├── 17_RELEASE_PACKAGING_UPDATE.md
+│   ├── 18_CI_SUPPLY_CHAIN.md
+│   ├── 19_NATIVE_GPU_ISLAND_POLICY.md
+│   ├── 20_PLATFORM_SUPPORT.md
+│   ├── 21_OBSERVABILITY_DIAGNOSTICS.md
+│   ├── 22_GIT_PROVENANCE_ADAPTER.md
+│   ├── 23_MEMORY_ACCOUNTING_MODEL.md
+│   ├── 24_BUILD_IDENTITY_EVIDENCE.md
+│   ├── 25_TYPED_IPC_BINDINGS.md
+│   ├── 26_PORTABLE_SCHEMA_POLICY.md
+│   └── 27_GATE_STATE_SEMANTICS.md
+├── 05_ENGINEERING/
+│   ├── 00_REPO_STRUCTURE.md
+│   ├── 01_CODING_STANDARDS.md
+│   ├── 02_TEST_STRATEGY.md
+│   ├── 03_ERROR_MODEL.md
+│   ├── 04_RELEASE_ENGINEERING.md
+│   ├── 05_DEPENDENCY_POLICY.md
+│   ├── 06_CI_CD_BASELINE.md
+│   ├── 07_TEST_FIXTURE_STRATEGY.md
+│   └── 08_CODE_AREA_PLAN.md
+├── 06_DELIVERY/
+│   ├── 00_ROADMAP.md
+│   ├── 01_MVP_EXIT_CRITERIA.md
+│   ├── 02_BACKLOG_SEED.md
+│   ├── 03_QA_CHECKLIST.md
+│   ├── 04_EXTERNAL_VALIDATION_PLAN.md
+│   ├── 05_MVP_TO_PRODUCT_DEVELOPMENT_LIFECYCLE.md
+│   ├── 06_STAGE_GATES.md
+│   ├── 07_POST_MVP_CANDIDATE_ROADMAP.md
+│   ├── 08_MILESTONE_DELIVERABLE_MATRIX.md
+│   └── 09_USER_INTERVIEW_QUESTION_BANK.md
+├── 07_COMPLIANCE/
+│   ├── 00_COMPLIANCE_BOUNDARY.md
+│   ├── 01_SBOM_STRATEGY.md
+│   ├── 02_CRA_CONTEXT.md
+│   └── 03_LICENSE_POLICY.md
+├── 08_RESEARCH/
+│   ├── SOURCE_REPORTS/
+│   │   ├── 01_RUST_PRODUCT_DESKTOP_STACK_INVESTIGATION.txt
+│   │   ├── 02_RUST_PRODUCT_ENGINEERING_DEEP_DIVE.txt
+│   │   ├── 03_2026_GITHUB_10K_PLUS_RUST_PRODUCT_TECH_CENSUS_v1.0.txt
+│   │   └── README.md
+│   ├── 00_MARKET_EVIDENCE.md
+│   ├── 01_NAMING_SCREEN.md
+│   ├── 02_TECH_REFERENCES.md
+│   ├── 03_RISKS_ASSUMPTIONS.md
+│   ├── 04_RUST_BASELINE_APPLICATION_TO_FIRMWARESIGHT.md
+│   ├── 05_EXTERNAL_TECH_VERIFICATION_2026-09-26.md
+│   ├── 06_MARKET_SOURCE_REGISTER.md
+│   ├── 07_AWESOME_DESIGN_MD_REFERENCE.md
+│   ├── 08_COMPETITOR_UPDATE_2026-09-27.md
+│   ├── 09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
+│   ├── 10_POST_MVP_SIGNAL_REGISTER.md
+│   └── 11_RISK_DEPENDENCY_REGISTER.md
+├── 09_ADR/
+│   ├── ADR-0001-product-name.md
+│   ├── ADR-0002-desktop-stack.md
+│   ├── ADR-0003-rust-core.md
+│   ├── ADR-0004-local-first.md
+│   ├── ADR-0005-no-ai-trusted-core.md
+│   ├── ADR-0006-mvp-format-scope.md
+│   ├── ADR-0007-core-first-adapter-driven.md
+│   ├── ADR-0008-async-boundary.md
+│   ├── ADR-0009-storage-rusqlite.md
+│   ├── ADR-0010-artifact-parser.md
+│   ├── ADR-0011-frontend-baseline.md
+│   ├── ADR-0012-tracing.md
+│   ├── ADR-0013-network-deferred.md
+│   ├── ADR-0014-gpu-deferred.md
+│   ├── ADR-0015-release-update-lifecycle.md
+│   ├── ADR-0016-toolchain-pinning.md
+│   ├── ADR-0017-git-cli-provenance.md
+│   ├── ADR-0018-ui-baseline-tokens-governance.md
+│   ├── ADR-0019-typed-ipc-bindings.md
+│   ├── ADR-0020-validation-sequence.md
+│   ├── ADR-0021-memory-accounting.md
+│   ├── ADR-0022-portable-schema-strictness.md
+│   ├── ADR-0023-gate-five-state-semantics.md
+│   └── ADR-0024-post-mvp-candidate-governance.md
+├── 10_AUDIT/
+│   ├── SOURCE_REVIEWS/
+│   │   ├── ADR-0018-ui-baseline-tokens-governance.md
+│   │   ├── DESIGN_CHECKLIST_TEMPLATE.md
+│   │   ├── FirmwareSight v0.3.md
+│   │   ├── FirmwareSight-设计风格调研-awesome-design-md.md
+│   │   ├── FS-AGENTS-UI-Rules增补节-通用助手.md
+│   │   ├── FS-UI基调定案提案-设计匠人.md
+│   │   ├── FS-v0.3.0-Baseline理解摘要-治理工程生命周期-通用助手.md
+│   │   ├── FS-立项过程与产品演变理解摘要-通用助手.md
+│   │   ├── README.md
+│   │   └── 粘贴的文本 (1)(7).txt
+│   ├── SOURCE_REVIEWS_V05/
+│   │   ├── DUPLICATE_MANIFEST.json
+│   │   ├── FS-PostMVP-开放问题裁决记录-通用助手.md
+│   │   ├── FS-可视化与文档导出-设计视角备忘-设计匠人.md
+│   │   ├── FS-正式产品功能探索-分析结果可视化与文档导出-专业写手.md
+│   │   ├── FS-正式产品功能探索-真需求功能全景扫描-专业写手.md
+│   │   ├── FS-正式产品功能探索-端口扩展与深度体验-专业写手.md
+│   │   ├── FS-真需求全景扫描-外部信号报告-信息哨兵.md
+│   │   ├── FS-真需求全景扫描-技术可行性简报-鲁班七号(1).md
+│   │   ├── FS-真需求全景扫描-技术可行性简报-鲁班七号.md
+│   │   ├── FS-真需求全景扫描-设计视角备忘-设计匠人(1).md
+│   │   ├── FS-真需求全景扫描-设计视角备忘-设计匠人.md
+│   │   ├── FS-端口扩展与深度体验-技术可行性简报-鲁班七号.md
+│   │   ├── FS-端口扩展与深度体验-设计视角备忘-设计匠人.md
+│   │   ├── FS-端口扩展与用户粘性-外部调研报告-信息哨兵.md
+│   │   ├── README.md
+│   │   ├── 可视化与文档导出·外部调研报告.md
+│   │   ├── 可视化与文档导出·技术可行性简报.md
+│   │   ├── 粘贴的文本 (1)(8).txt
+│   │   ├── 背景回顾-已覆盖面与本轮扫描边界清单-通用助手.md
+│   │   ├── 背景回顾：可视化与文档导出的基线事实清单.md
+│   │   └── 背景回顾：端口扩展与深度体验的基线事实清单.md
+│   ├── 00_V0.3_AUDIT_RESOLUTION.md
+│   ├── 01_UI_BASELINE_REVIEW.md
+│   ├── 02_V0.5_EXPERT_REVIEW_RESOLUTION.md
+│   └── 03_ADOPTION_DECISION_REGISTER.md
+├── assets/
+│   ├── ui-mockups/
+│   │   ├── ASSET_MANIFEST.json
+│   │   ├── FS-UI-01-Overview.png
+│   │   ├── FS-UI-02-Analyze.png
+│   │   ├── FS-UI-03-Compare.png
+│   │   ├── FS-UI-04-Release-Gate.png
+│   │   ├── FS-UI-05-Bundle-History.png
+│   │   ├── FS-UI-06-Parse-Failure.png
+│   │   ├── FS-UI-07-Unknown-Dependency.png
+│   │   └── README.md
+│   └── design-tokens.json
+├── examples/
+│   ├── Cargo.workspace.baseline.toml
+│   ├── firmwaresight.example.toml
+│   ├── package.baseline.json
+│   ├── pnpm-workspace.baseline.yaml
+│   ├── release-manifest.example.json
+│   ├── rust-toolchain.baseline.toml
+│   └── tauri-capability.baseline.json
+├── schemas/
+│   ├── accepted-reviews.schema.json
+│   ├── gate-results.schema.json
+│   └── release-manifest.schema.json
+├── templates/
+│   ├── ADR_TEMPLATE.md
+│   ├── BUG_REPORT_TEMPLATE.md
+│   ├── DESIGN_CHECKLIST_TEMPLATE.md
+│   ├── FEATURE_SPEC_TEMPLATE.md
+│   └── RELEASE_CHECKLIST_TEMPLATE.md
+├── AGENTS.md
+├── BASELINE.yaml
+├── CHANGELOG.md
+├── DESIGN.md
+├── INDEX.md
+├── PRODUCT_BASELINE.md
+└── README.md

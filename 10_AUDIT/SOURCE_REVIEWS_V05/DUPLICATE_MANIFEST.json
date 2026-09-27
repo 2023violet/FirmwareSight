@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "duplicate_groups": [
+    {
+      "sha256": "628db142473ffaca813f4665ace682bfb85dbe66520abc8ec7a34331d55f6f2b",
+      "files": [
+        "FS-真需求全景扫描-设计视角备忘-设计匠人.md",
+        "FS-真需求全景扫描-设计视角备忘-设计匠人(1).md"
+      ]
+    },
+    {
+      "sha256": "5ee1547e8b92ae32a0cf99ba2b79f867a114ab4f0dce84e5a5f0ae868a4c9e0b",
+      "files": [
+        "FS-真需求全景扫描-技术可行性简报-鲁班七号.md",
+        "FS-真需求全景扫描-技术可行性简报-鲁班七号(1).md"
+      ]
+    }
+  ]
+}

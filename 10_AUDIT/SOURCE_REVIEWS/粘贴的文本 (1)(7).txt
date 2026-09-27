@@ -1,0 +1,176 @@
+群管理员
+@群管理员
+项目经理
+23:46
+
+@通用助手: 项目基线已解压在 /home/z/my-project/firmwaresight/FirmwareSight_Project_Baseline_v0.3.0/（FirmwareSight：嵌入式固件发布工作台，Rust Core + Tauri 2 + React，本地优先）。请先读根目录 README.md 与 BASELINE.yaml 建立全局认知，然后精读 00_GOVERNANCE/、05_ENGINEERING/、06_DELIVERY/ 三个目录全部文档，以及 AGENTS.md、CHANGELOG.md、templates/。你的专属理解范围：治理规则、工程规范、生命周期与阶段门禁。完成后在群里发一份结构化理解摘要（核心理念、关键决策、与你领域相关的执行要点、发现的疑点/风险），发完再向我汇报完成。
+
+@专业写手: 项目基线已解压在 /home/z/my-project/firmwaresight/FirmwareSight_Project_Baseline_v0.3.0/（FirmwareSight：嵌入式固件发布工作台，Rust Core + Tauri 2 + React，本地优先）。请先读根目录 README.md 建立全局认知，然后精读 01_PRODUCT/ 全部 7 份文档（产品愿景、MVP PRD、Personas & JTBD、Scope/Non-goals、User Stories、商业模式、竞争定位）。你的专属理解范围：产品理念与需求全貌。完成后在群里发一份结构化理解摘要（产品要解决的核心问题、目标用户与场景、MVP 范围与明确的 Non-goals、验收标准要点、商业模式假设、发现的疑点/风险），发完再向我汇报完成。
+
+@设计匠人: 项目基线已解压在 /home/z/my-project/firmwaresight/FirmwareSight_Project_Baseline_v0.3.0/（FirmwareSight：嵌入式固件发布工作台，Rust Core + Tauri 2 + React，本地优先）。请先读根目录 README.md 建立全局认知，然后精读 02_BRAND/ 全部文档与 03_DESIGN/ 全部 6 份文档，并结合 assets/design-tokens.json。你的专属理解范围：品牌基础与设计理念体系。完成后在群里发一份结构化理解摘要（品牌定位与语调、设计哲学核心主张、信息架构与关键 UX 流程、视觉系统与组件规则要点、可访问性要求、发现的疑点/风险），发完再向我汇报完成。
+
+@鲁班七号: 项目基线已解压在 /home/z/my-project/firmwaresight/FirmwareSight_Project_Baseline_v0.3.0/（FirmwareSight：嵌入式固件发布工作台，Rust Core + Tauri 2 + React，本地优先）。请先读根目录 README.md 建立全局认知，然后精读 04_TECH/ 全部 23 份文档与 09_ADR/ 全部 17 份 ADR，并结合 examples/ 与 schemas/ 的基线配置样例。你的专属理解范围：技术战略、架构与所有技术决策记录。完成后在群里发一份结构化理解摘要（技术战略 Core-first/Adapter-driven 的内涵、分层架构与数据流、已冻结技术栈与明确推迟项、关键 ADR 决策及其理由、IPC 与数据契约要点、发现的疑点/风险），发完再向我汇报完成。
+
+@信息哨兵: 项目基线已解压在 /home/z/my-project/firmwaresight/FirmwareSight_Project_Baseline_v0.3.0/（FirmwareSight：嵌入式固件发布工作台，Rust Core + Tauri 2 + React，本地优先）。请先读根目录 README.md 建立全局认知，然后精读 08_RESEARCH/ 全部文档（含 SOURCE_REPORTS 概览）与 07_COMPLIANCE/ 全部 4 份文档。你的专属理解范围：市场证据、风险假设与合规边界。完成后在群里发一份结构化理解摘要（市场证据与竞争格局、命名筛选结论、主要风险与假设、合规边界与 SBOM/CRA 策略、许可证政策要点、发现的疑点/风险），发完再向我汇报完成。
+专业写手
+@专业写手
+23:49
+
+@群管理员 README + 01_PRODUCT 全部 7 份文档已精读，结构化理解摘要如下：
+
+【1. 核心问题】小型嵌入式团队发固件时靠手工拼接 Git 状态、ELF/MAP、hash、版本号、memory 报告与三方组件清单——易遗漏、不可复核、难交接。FirmwareSight 定位"本地优先的固件发布工作台"，四段心智模型：Analyze 看清 build → Compare 看清变化 → Gate 看清风险 → Release 固化证据。主张 Know exactly what ships，不改造构建系统、不上云、不做"理解一切"。
+
+【2. 目标用户与场景】四类 Persona：A 固件工程师（交付前确认内存/版本/二进制/Git 一致，防发错版本）；B 固件 Lead（要可复核的 diff 与证据，而非口头"应该没问题"）；C QA/合规（拿结构化证据包替代截图+Excel）；D 小硬件创始人（无专职 DevOps 也要专业发布）。明确不优先：大型 HIL 汽车团队、纯 Linux/容器供应链团队、逆向安全实验室、OTA fleet 平台。
+
+【3. MVP 范围与 Non-goals】P0 六能力：① Artifact Import（ELF/GNU ld MAP/BIN·HEX 基础信息+可选 Git，原文件只读、记 SHA-256、fail closed）；② Build Analysis（arch/endian/entry/sections/FLASH·RAM 占用/symbols/top contributors/build-id）；③ Build Diff（FLASH/RAM/section/symbol 级 delta，可 drill down，禁止只给"+8KB"）；④ Build Identity（hash/commit/tag/dirty/toolchain/version/timestamp 可信类型）；⑤ Release Gate（10 条 deterministic 规则，结果仅 PASS/REVIEW/BLOCK/NOT_APPLICABLE）；⑥ Release Bundle（SHA256SUMS/manifest.json/report.html 等，不签名不上传）。
+Non-goals（写死）：不做 IDE、不做 Debugger/JTAG、不做 Flasher、不做 HIL、不做逆向套件、不做云 SBOM、不用 AI 判断能否发布；不承诺所有 ELF 等价（必须展示 evidence availability）；Scope Creep 四问判定，命中即默认推迟。
+
+【4. 验收标准要点】首次有效分析 <60s；≤500MB 工作集 UI 不卡死；fixture 解析成功率 100%、受支持格式不允许 crash；不支持文件明确报错原因；缺 debug info 不崩；结果必含 artifact hash；Diff 明确 old/new、正负号、added/removed/changed 分列、可导出 JSON/HTML；Gate 每项含 rule/state/evidence/remediation，Review 与 Block 视觉区分，Unknown 不得自动 Pass，policy 可存 project config；Bundle 脱离 FirmwareSight 可独立阅读、含全量 hash、不覆盖已有目录除非用户确认；CLI 非交互、JSON 输出、稳定 exit codes。NFR：离线可用、输出可复现、Windows 首要平台。
+
+【5. 商业模式假设】PLG 三层：Free（单 build 分析/基础 memory/单次 diff，目标工程师主动安装）→ Pro 个人（无限历史/Gate/Bundle/CLI/policy/组件证据/SBOM）→ Team（共享 policy/CI/审计/企业打包）。明确不按文件大小/扫描次数/symbol 数/MCU 型号计费。真正可收费的是 release risk reduction、repeatability、evidence、team policy、CI、合规准备，而非 treemap。付费验证门槛：≥20 用户访谈、≥8 真实 artifact 试用、≥3 明确付费意愿、≥1 团队试点；MVP 前不冻结价格。
+
+【6. 发现的疑点/风险】
+① CLI 归属口径不一：PRD 把"CI/headless CLI"列 P1，Scope 的 In-Scope MVP 又写"CLI 与 Desktop 共用 Rust Core"，US-005（CI 用 CLI）也未标阶段——MVP 是否含 CLI 建议冻结口径；
+② Persona A 覆盖 Keil/IAR 用户，但 Keil/ArmClang MAP adapter 是 P1，MVP 实际主打 GCC/Clang，早期可服务人群窄于 persona 描述；
+③ FLASH/RAM 分类规则未在产品文档定义（如 .data 同时占 RAM 与 FLASH load image，跨工具链归属是解析高风险点）；
+④ "project version（声明或解析）"与"timestamp 来源/可信类型"在 P0 层面仍含糊，需指定解析来源与降级行为；
+⑤ 无 Git 仓库时 Gate 前 3 条规则的行为未见明文（推测 NOT_APPLICABLE，需确认）；
+⑥ 商业张力：Free 档只覆盖 Analyze/单次 diff，差异化最强的 Gate/Bundle 全在付费层——免费漏斗验证不到核心价值，且"单次 diff vs richer diff"的边界偏模糊。
+
+以上为我的专属理解范围（产品理念与需求全貌），随时可基于此承接后续内容/文档类任务。
+
+@群管理员 汇报：01_PRODUCT 7 份文档（00_VISION / 01_PRD / 02_PERSONAS_JTBD / 03_SCOPE_NON_GOALS / 04_USER_STORIES / 05_BUSINESS_MODEL / 06_COMPETITIVE_POSITIONING）+ 根目录 README 已全部精读完毕，结构化理解摘要已发至群内，任务完成。
+信息哨兵
+@信息哨兵
+23:50
+
+@群管理员 已完成 README 全局认知 + 08_RESEARCH 全部文档（含 SOURCE_REPORTS 概览及原始报告交叉核验）+ 07_COMPLIANCE 全部 4 份的精读。以下为我专属范围（市场证据/风险假设/合规边界）的结构化理解摘要：
+
+【一、市场证据与竞争格局】
+
+    证据性质：全部为定性社区信号（Reddit r/embedded、GitHub issues、V2EX/Bilibili），文档明确自declared"不等同于市场规模统计"，无量化 TAM/定价数据。
+    痛点信号：固件团队靠 Git tag+CI+手工 metadata 管发布；MCU 做 SBOM 需手工追 FreeRTOS/STM32Cube/mbedTLS；ELF/MAP visualizer 被反复重复开发（真需求，但单独不构成商业壁垒）。
+    产品推断：机会不在"又一个 ELF viewer"，而是把 viewer 作为进入 Analyze→Compare→Gate→Release Evidence 链条的免费入口。
+    法规顺风：EU CRA 报告义务 2026-09-11 起适用、主要义务 2027-12-11 全面适用；文档明确"不应成为唯一定位"。
+    竞争格局五类：ELF/MAP Visualizer（强二进制分析、弱发布流程与 evidence）｜IDE/Toolchain（弱跨项目 release evidence）｜SBOM 平台（重供应链安全、MCU artifact 体验偏重）｜CI/CD（不懂嵌入式 artifact 语义）｜Excel/Python 脚本（灵活但不可维护）。差异化=本地优先 release workbench：Build artifact first、deterministic、显式 Unknown、不做合规表演；早期卖点不是"格式最多"而是"少量输入→高可信输出"。
+
+【二、命名筛选结论】
+
+    排除 9 个冲突名（FirmwareLens/BuildLens/FirmScope/ReleaseLedger/ReleaseProof/FirmwareForge/BuildProof/BinScope/FWTrace），选定 FirmwareSight（CLI: fwsight）。
+    明确保留意见：本轮仅为公开搜索，非商标检索/公司注册/域名保证；ADR-0001 记录上一轮 FirmwareLens 撞名教训，约定品牌可替换、domain model 不绑定品牌名。
+    公开发布前硬门槛：USPTO/EUIPO/CNIPA 检索 + GitHub/npm/crates/PyPI/App Store 搜索 + 域名/社交 handle 检查；正式商业化需专业商标检索。
+
+【三、主要风险与假设 R1–R7】
+
+    R1 付费意愿：唯一标记 Unvalidated，最关键假设。缓解=免费 Analyzer+原型访谈+“ask for payment, not compliments”。
+    R2 工具链碎片化：支持矩阵+适配器+绝不承诺 universal parser，fixture 驱动扩展。
+    R3 ELF 数据≠依赖真相：evidence 分级+显式 Unknown+多源融合+手动声明。
+    R4 合规定位致责：只做工程证据，不出法律结论。
+    R5 WebView 跨平台差异：保守 CSS+Windows-first QA+截图/e2e。
+    R6 功能堆砌：四动词纪律+roadmap 闸门+扩围须 ADR。R7 命名未做法律级 clearance。
+    附：GitHub 10K+ 普查被明确定位为"工程先验"，非商业成功证明（不覆盖收入/闭源/B2B 采购行为）。
+
+【四、合规边界与 SBOM/CRA 策略】
+
+    可以做：工程证据、artifact inventory、provenance、SBOM 导出、缺失证据提示、发布记录留存。
+    禁止宣称：CRA compliant / Certified / Audit passed / No vulnerabilities / SBOM complete。
+    措辞白名单：Evidence available/missing、Review required、Component detected、Version unverified。
+    SBOM：是 Release Evidence 的输出之一而非产品全部；P1/P2 首选 CycloneDX 1.7 JSON（SPDX 3.0 作后续导出格式）；组件必须带证据链（state: detected/declared + evidence + confidence），证据源 5 级优先（链接对象+权威版本头→build 元数据→manifest→路径指纹→手动声明）；不承诺 100% coverage；CycloneDX 2.0 追新须 ADR。
+    CRA（Regulation (EU) 2024/2847）：FirmwareSight 支持 provenance/组件证据/SBOM 导出/证据留存；不直接完成法律适用性判断、conformity assessment、ENISA/CSIRT 上报、风险评估结论。设计红线：CRA 不能是产品存在的唯一理由，四动词必须有独立工程价值。
+
+【五、许可证政策要点】
+
+    产品代码默认 Private/proprietary，商业模型未定前不得提前添加 LICENSE 文件到主仓库。
+    第三方依赖逐个记录 name/version/license/source/再分发义务；优先 MIT/Apache-2.0/BSD-2/3/ISC；MPL-2.0 按场景审查；GPL/AGPL 进入商业桌面分发前专项评估。
+    免费≠开源：两个独立决策；未来开源 parser/core 必须走 ADR。
+
+【六、发现的疑点/风险（我的观察）】
+
+    社区证据零溯源：00_MARKET_EVIDENCE 的 URL 清单只有站点首页，无具体帖子/存档链接，痛点结论（如 MCU SBOM 手工追踪）不可回查复核。建议补一份 evidence register。
+    命名筛选缺信源清单：01_NAMING_SCREEN 有结论和日期，但未列出实际检索的平台与关键词，可审计性弱于其他文档。
+    R1 与生命周期张力：付费验证后置于免费 Analyzer，而 P0→GA 路线很长，收入信号可能来得极晚；建议把付费意愿访谈前置到 MVP 验证阶段。
+    文档小瑕疵：05_EXTERNAL_TECH_VERIFICATION 正文写"freezing v0.2.0"，与本 v0.3.0 基线版本归属略有出入（文档控制层面小不一致，不影响结论）。
+    CRA 空窗竞争期：报告义务已于基线日期前两周生效、2027-12-11 前是合规营销窗口，但 R4 责任边界要求营销话术提前经法务审校。
+    SBOM 预期管理：R3 决定 binary-only 场景大量组件会是 version unknown，导出 SBOM 必然带缺口，需在早期对客户设定预期。
+
+以上理解供全队对齐使用。
+通用助手
+@通用助手
+23:51
+
+已完成 FirmwareSight v0.3.0 基线全部指定文档的精读（README/BASELINE.yaml + 00_GOVERNANCE 4 篇 + 05_ENGINEERING 8 篇 + 06_DELIVERY 6 篇 + AGENTS/CHANGELOG/templates），结构化理解摘要整理在下方文件中，要点：
+
+①核心理念：Evidence-first（Observed/Derived/Declared/Unknown 四类事实）+ 确定性核心 + Local-first + “Product MVP 必须有 Minimum Credible UI”；
+②关键执行红线：Active Task=NONE 时不得自行创建业务功能、技术基线变更必须走 ADR、Phase 0 library crate 上限 4 个、UI 不得复刻 parser/diff/gate 逻辑、golden 测试严禁机械批量更新；
+③门禁：G0 已 PASS，当前唯一合法下一步是授权创建 P0 Technical Vertical Slice，新功能一律先过"三问"，否则默认不做；
+④发现 6 处疑点（macOS CI 两文档口径不一致、06_DELIVERY 缺 04 号、FS-DEL-005 仍引用 v0.2.0 等），详见文末，建议后续澄清。 @群管理员
+FS-v0.3.0-Baseline理解摘要-治理工程生命周期-通用助手.md
+md·13.98KB
+设计匠人
+@设计匠人
+23:51
+
+【FirmwareSight 品牌与设计基线 · 结构化理解摘要】
+范围：README + 02_BRAND 全部 3 篇 + 03_DESIGN 全部 6 篇 + assets/design-tokens.json
+
+■ 1. 品牌定位与语调
+· FirmwareSight = “Embedded Firmware Release Workbench”，tagline “Know exactly what ships.”（中文主张：每一次固件发布，都知道自己到底发布了什么）。衍生规范：CLI fwsight、firmwaresight.toml、.firmwaresight/；书写禁用 “Firmware Sight” / “Firmware-Sight”，FWSight 仅限 CLI/内部缩写。
+· 品牌内核 “Clarity before release”：像一台可靠的工程仪器（precise / calm / inspectable / technical / restrained / trustworthy），明确拒绝赛博朋克、霓虹、“AI 魔法”、“one click compliance” 人设。
+· 四大信息支柱：See the build / See the change / Verify the release / Keep the evidence。隐喻 = inspection bench / 光学仪器（工程放大镜），不是"扫描雷达"。
+· 语调三律：说事实不做判决（“Git tree has 2 modified files” 而非 “Your release is unsafe”）；说未知不填空（unknown 版本不得编造）；给下一步。禁用词：guaranteed / fully compliant / zero risk / intelligent detection（若实为规则）等。
+
+■ 2. 设计哲学核心主张
+· 总纲 “Instrument-grade clarity”：UI 是仪器不是营销 Dashboard——帮用户判断，不替用户判断。
+· 五原则：P1 Evidence 一键可达；P2 数字必须带上下文（相对谁/占比/最大贡献者/是否超预算）；P3 Unknown 是一等状态，不得藏成灰色空白；P4 一屏一个主焦点；P5 Dense not crowded（靠分组/对齐/排版，不靠卡片+阴影+颜色堆砌）。
+· 反模式黑名单：玻璃拟态、紫蓝渐变科技感、一数据一卡、胶囊滥用、装饰动画、纯颜色编码状态、KPI 塞满首屏。主题策略：MVP 仅 Light（可读性/可打印/省双主题 QA），Dark 进 P1。
+
+■ 3. 信息架构与关键 UX 流程
+· 一级导航 6 项：Overview / Analyze / Compare / Release / History(P1) / Project Settings；未实现的功能不显示空壳导航。Overview 回答"这个项目现在能发吗"；Settings 只放项目级 policy，不与 app 级偏好混放。
+· 五条关键流：A 首次分析（不设账号/配置墙，用能力 banner “ELF ✓ · MAP 未提供 · Git 未链接” + 推荐下一步）；B Compare（A/B 选择 → diff 摘要 → 点击最大增长贡献者 → 下钻 symbol → Evidence）；C Release Gate（Block/Review/Pass 分组 → 用户显式接受 Review → Bundle 预览 → 导出）；D 未知依赖（状态 “Detected / version unknown”，用户 Declare 后标 Declared，永不冒充 Observed）；E 解析失败（必须展示 magic bytes / 尝试的 adapter / 原因 / 支持格式 / Copy diagnostics，禁止只报 “Import failed”）。
+
+■ 4. 视觉系统与组件规则要点
+· 4px 网格八档间距（4–64）；圆角 6/8/10（pill 仅限紧凑状态标签）；1px 边框为主，阴影只给浮层（菜单/对话框/拖拽层）。
+· 字体：系统 UI 栈 + mono 栈；层级 Page 20/28 · Section 15/22 · Body 13/20 · 表格 12–13/18 · 元数据 12/18，数字一律 mono。
+· 颜色 = 14 个语义角色（bg×3 / text×2 / border / accent / status×4 / diff×3），色值以 design-tokens.json 为权威草案；状态必须 icon+text，不许只靠颜色。
+· 布局：最低 1024×720，主设计 1280×800 / 1440×900；nav rail 220–240px；Evidence inspector 320–380px；表格优先用满宽度。
+· 图表优先级：table > ranked bars > compact stacked bar > treemap（仅 size 构成）；禁 3D、滥用 donut、无基线 sparkline。动效 120–180ms，仅限面板开合/行展开/状态迁移/拖放反馈。
+· 组件铁律：按钮仅 3 级（Primary/Secondary/Ghost，Destructive 是语义修饰非第四体系），一区最多一个 Primary；状态 5 态 PASS/REVIEW/BLOCK/UNKNOWN/N/A = icon+label+count；表格必须可聚焦/排序/mono 数字/空态/长路径截断+copy；Diff Row 必须同时给 old/new/delta，added/removed 禁用 0 冒充；Dialog 仅用于真正中断，Toast 只做瞬时确认，错误必须保留在可恢复位置。
+
+■ 5. 可访问性要求
+· 以 WCAG 2.2 AA 可操作原则为设计参考（桌面应用同样适用）：键盘可达、可见焦点、对比充足、不只靠颜色、语义化表头、icon button 有 accessible name、dialog focus trap、主要状态对读屏可理解。
+· 快捷键：Ctrl/Cmd+O 打开、Ctrl/Cmd+K 命令面板(P1)、/ 过滤、Esc 关浮层；Tab 顺序=视觉顺序；尊重 prefers-reduced-motion；主工作信息字号 ≥12px（禁 11px 以下）。
+
+■ 6. 疑点/风险（我的发现）
+① tokens 版本错位：design-tokens.json 自标 v0.1.0 “draft”，却被 v0.3.0 基线指定为"权威"——建议升版或在 BASELINE 注记豁免。
+② tokens 覆盖缺口：14 个角色只有单色值，缺 hover/pressed/disabled/focus ring、diff 浅底色、状态反白文字色；Visual System 提到的 shadow 与 pill 半径均未 token 化——组件库落地前必须补齐，否则必然出现私自造色。
+③ 文档微冲突：Voice 定义 4 个状态，Component Rules 定义 5 个（多 N/A），N/A 的视觉/语义需补一页说明。
+④ 对比度初算：浅色 14 色对白/浅底作正文均 ≥4.5:1（最紧的是 review 琥珀 #9A6700 ≈4.9:1，偏紧）；Dark 主题落地时需全量重验；diff 三色若未来兼作填充底色，需另备浅底变体。
+⑤ Evidence Inspector 320px 要容纳 8 类字段（含 raw value/hash），实操偏挤，建议 P0 用真实数据验证后再定宽度。
+⑥ 命名仅做过公开网络级初筛，商标/域名/商店上架前必须专业复检（文档已自我声明，属已知项）。
+
+以上为品牌基础与设计理念体系的完整理解，随时可承接品牌/设计侧产出任务。
+鲁班七号
+@鲁班七号
+23:52
+
+已完成 FirmwareSight v0.3.0 基线的专属理解任务：README + 04_TECH 全部 23 份 + 09_ADR 全部 17 份 + examples/schemas 样例均已精读。结构化理解摘要（技术战略内涵、四层架构与数据流、冻结栈与推迟项、17 份 ADR 决策及理由、IPC/数据契约要点、9 条疑点与风险）已整理成文档发出，@群管理员 请审阅。
+FirmwareSight v0.3.md
+md·12.91KB
+群管理员
+@群管理员
+项目经理
+23:53
+
+@无敌可爱宣 团队已完成 FirmwareSight v0.3.0 基线的全量精读与内化（README + BASELINE.yaml + 全部 10 个文档域 70+ 份文档 + 17 份 ADR + 示例配置），全员理解摘要均已发到群里，可随时翻阅：
+
+· 专业写手 → 产品理念与需求（01_PRODUCT）：四段心智模型 Analyze→Compare→Gate→Release、四类 Persona、P0 六能力与写死的 Non-goals、PLG 三层商业模式
+· 设计匠人 → 品牌与设计（02_BRAND + 03_DESIGN + design-tokens.json）：“Instrument-grade clarity”、UI 是仪器不是营销 Dashboard、Unknown 是一等状态
+· 鲁班七号 → 技术与架构（04_TECH + 09_ADR + examples/schemas，摘要见群内文件）：Core-first / Adapter-driven、冻结栈与明确推迟项、17 份 ADR 决策链
+· 通用助手 → 治理/工程/生命周期（00_GOVERNANCE + 05_ENGINEERING + 06_DELIVERY，摘要见群内文件）：Evidence-first 四类事实、阶段门禁 G0 已 PASS、当前唯一合法下一步是 P0 Technical Vertical Slice
+· 信息哨兵 → 市场与合规（08_RESEARCH + 07_COMPLIANCE）：竞争格局五类对手、R1–R7 风险、SBOM/CRA 措辞红线、许可证政策
+
+一句话共识：这是一个"本地优先、确定性、证据分级（Observed/Derived/Declared/Unknown）、四动词纪律"的嵌入式固件发布工作台，产品 MVP 必须有 Minimum Credible UI，一切扩展默认不做、必须走 ADR。
+
+⚠️ 全队交叉审查发现的待澄清点（详见各摘要）：CLI 在 MVP 中的归属口径不一；design-tokens.json v0.1.0 与基线 v0.3.0 版本错位且缺状态/交互色 token；状态语义 4 态 vs 5 态不一致；市场证据缺可回查信源；Keil/IAR 支持后置于 P1 与早期 Persona 覆盖存在张力；多处文档仍引用 v0.2.0；06_DELIVERY 缺 04 号文档。
+
+下一步如需推进（如启动 P0 Vertical Slice、修复上述文档缺口、或输出汇总型项目简报），随时安排。

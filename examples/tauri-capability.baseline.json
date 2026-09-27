@@ -1,0 +1,10 @@
+{
+  "identifier": "main-capability",
+  "description": "Minimal main window capability baseline. Exact permissions are finalized during implementation.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default"
+  ]
+}

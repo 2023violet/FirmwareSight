@@ -1,0 +1,1602 @@
+我把统计口径重新收紧了：**这份普查不再围绕 MonoOLED，也不以某个 GUI 框架为中心，而是回答“2026 年如果把 Rust 作为产品核心语言，成熟开源项目实际上形成了哪些可复用技术路线”**。
+
+下面是本轮完整报告。数据快照截至 **2026-09-26**；主查询口径是 `language:Rust stars:>10000`，而不是直接沿用你给的 URL 里的额外关键词 `rust`，因为后者会偏向仓库名或描述中恰好出现 “rust” 的项目。
+
+# 《2026 GitHub 10K+ Rust 产品技术栈普查》
+
+**版本：v1.0**  
+**数据快照：2026-09-26**  
+**研究对象：GitHub 主语言为 Rust、Star > 10,000 的公开仓库**  
+**核心目标：建立一套不依赖具体产品、可复用的 Rust 产品技术路线基线**
+
+---
+
+# Executive Summary
+
+本次全量检索得到 **253 个 `language:Rust stars:>10000` 仓库**；加入 `archived:false` 后仍有 **247 个**，即约 **97.6%** 未被 GitHub 标记为归档。因此，这个样本并不主要由已经死亡的历史项目构成。
+
+经过逐仓库用途分类：
+
+| 主类别 | 仓库数 | 占全部 253 |
+|---|---:|---:|
+| CLI / TUI 产品 | 73 | **28.9%** |
+| Framework / Library / SDK | 47 | **18.6%** |
+| GUI / Desktop 产品 | 40 | **15.8%** |
+| Server / Data / Infrastructure | 28 | **11.1%** |
+| Compiler / Runtime / Build / Language | 28 | **11.1%** |
+| Learning / Reference | 13 | **5.1%** |
+| System / Network / OS 产品 | 11 | **4.3%** |
+| Distributed / Blockchain Protocol | 8 | **3.2%** |
+| AI / Agent 产品 | 5 | **2.0%** |
+| **总计** | **253** | **100%** |
+
+如果剔除纯 Framework/Library/SDK 和 Learning/Reference，得到 **193 个可执行、可部署、面向用户或生产环境的“产品型仓库”**，占全部样本 **76.3%**。
+
+其中：
+
+| 产品形态 | 数量 | 占 193 个产品型仓库 |
+|---|---:|---:|
+| CLI / TUI | 73 | **37.8%** |
+| GUI / Desktop | 40 | **20.7%** |
+| Server / Data / Infra | 28 | **14.5%** |
+| Compiler / Runtime / Build | 28 | **14.5%** |
+| System / Network / OS | 11 | **5.7%** |
+| Distributed Protocol | 8 | **4.1%** |
+| AI / Agent | 5 | **2.6%** |
+
+第一个重要结论因此不是“Tauri 最流行”或者“Tokio 最流行”，而是：
+
+> **Rust 的成功产品形态高度分化。不存在一个技术栈能够合理覆盖所有 Rust 产品。真正应该统一的是 Rust Core 的工程结构，而不是 GUI、HTTP Framework 或渲染框架。**
+
+第二个结论是，在跨类别的产品基础设施上已经形成明显收敛：
+
+> **Serde → Clap → Tokio → Tracing → Reqwest → Rustls**  
+> 构成了 2026 年 Rust 产品最值得默认考虑的一组基础设施。
+
+第三个结论是：
+
+> **“Rust 产品”并不意味着“所有东西都必须 Rust”。**
+
+高星产品大量采用：
+
+**Rust Core + Web UI**、  
+**Rust Core + Flutter**、  
+**Rust Core + Native GPU UI**、  
+**Rust Core + HTTP/gRPC**。
+
+成熟项目更关心“Rust 应该放在哪里最有价值”，而不是语言纯度。
+
+---
+
+# 一、研究方法
+
+## 1.1 GitHub 查询口径
+
+主查询：
+
+`language:Rust stars:>10000`
+
+快照结果：
+
+**253 repositories**
+
+活跃口径：
+
+`language:Rust stars:>10000 archived:false`
+
+结果：
+
+**247 repositories**
+
+因此仅 **6/253 ≈ 2.4%** 被 GitHub 标记为 archived。
+
+Rust 2024 Edition 已随 Rust 1.85 在 2025-02-20 正式稳定，因此对于 2026 年新的 Rust 产品，Edition 2024 已经可以作为正常基线，而不是实验性选择。:chatgpt-content-reference{index="0"}
+
+## 1.2 为什么不用用户原始搜索 URL 的裸关键词 `rust`
+
+用户原 URL 实际相当于：
+
+`rust language:Rust`
+
+这意味着仓库除了主语言必须是 Rust，还需要 GitHub 搜索认为其名称、描述或相关文本与 `rust` 匹配。
+
+这种条件不适合做生态普查，因为会引入关键词偏差。
+
+因此本研究统一为：
+
+`language:Rust stars:>10000`
+
+Star 排序只影响阅读顺序，不影响进入总体的资格。
+
+## 1.3 分类原则
+
+253 个仓库采用**单一主类别编码**。
+
+例如：
+
+- Zed 同时是桌面软件、编辑器、开发工具，但计入 `GUI/Desktop`；
+- OpenFang 同时提供 CLI、Web Dashboard 和后台服务，但主产品是 Agent OS，因此计入 `AI/Agent`；
+- Deno 同时包含 CLI、Runtime 和开发工具，但主属性计入 `Compiler/Runtime`；
+- Tauri 本身不是终端用户产品，因此计入 `Framework/Library`。
+
+这样可以避免一个仓库被重复计算。
+
+---
+
+# 二、技术依赖统计方法
+
+仅统计 253 个仓库的类别并不足以回答“技术路线”。
+
+因此从 193 个产品型仓库中设置了一个**分层抽样**：
+
+| 类别 | 总体 N | 原计划样本 | 成功解析主 Manifest | 有效覆盖率 |
+|---|---:|---:|---:|---:|
+| CLI/TUI | 73 | 25 | 23 | 31.5% |
+| GUI/Desktop | 40 | 20 | 14 | 35.0% |
+| Server/Data | 28 | 12 | 9 | 32.1% |
+| Compiler/Runtime | 28 | 10 | 10 | 35.7% |
+| System/Network | 11 | 5 | 5 | 45.5% |
+| Distributed | 8 | 4 | 4 | 50.0% |
+| AI/Agent | 5 | 4 | 4 | 80.0% |
+| **合计** | **193** | **80** | **69** | **35.8%** |
+
+随机种子固定：
+
+`20260926`
+
+11 个未进入统一 Manifest 统计的仓库主要是 monorepo、混合语言工程或主应用 `Cargo.toml` 位于深层目录。因此没有把它们错误地记为“该依赖不存在”。
+
+技术栈总体比例使用各产品类别在 193 个总体中的权重进行重新加权，而不是直接使用 69 个样本的简单平均。
+
+---
+
+# 三、Rust 产品基础设施已经出现明显收敛
+
+分层加权后的 Manifest-level 估计如下。
+
+| 组件 | 加权估计 | 约 95% 区间 | 判断 |
+|---|---:|---:|---|
+| **Serde** | **87.3%** | 80.7–93.9% | 接近事实标准 |
+| **Clap** | **64.5%** | 55.4–73.6% | CLI/入口参数事实标准 |
+| **Tokio** | **57.6%** | 48.8–66.5% | Async 产品核心标准 |
+| **Tracing** | **45.5%** | 36.2–54.8% | 复杂/生产产品强势 |
+| **Reqwest** | **43.6%** | 35.9–51.4% | HTTP Client 主流 |
+| **Rustls** | **41.2%** | 32.2–50.1% | TLS 主流路线 |
+| **SQLite** | **20.3%** | 12.6–27.9% | 本地状态产品的重要标准 |
+
+这些数字必须按产品形态理解。
+
+例如 Tokio 总体只有约 58%，并不意味着 Tokio 不重要。
+
+因为简单 CLI 根本不需要 Async。
+
+真正进入 GUI、Server、网络和 AI Agent 后，情况完全不同。
+
+---
+
+# 四、Serde 是目前最接近“Rust 产品默认依赖”的组件
+
+有效 Manifest 样本中，Serde 的分层加权估计达到：
+
+**87.3%**
+
+而且不同类别都非常高：
+
+| 产品类型 | Serde |
+|---|---:|
+| CLI/TUI | 87.0% |
+| GUI | 92.9% |
+| Server/Data | 88.9% |
+| Compiler/Runtime | 80.0% |
+| System/Network | 80.0% |
+| Distributed | 100% |
+| AI/Agent | 75% |
+
+因此对于新的 Rust 产品：
+
+```text
+serde
+serde_json
+```
+
+已经可以视为默认边界层。
+
+需要 TOML 时增加：
+
+```text
+toml
+```
+
+需要 CBOR、MessagePack、protobuf 等协议时，再在 Serde 或独立协议层之上增加。
+
+**设计结论：**
+
+业务领域模型不应直接等同于网络 JSON Model，但绝大多数跨边界的数据结构都值得支持 Serde。
+
+---
+
+# 五、Tokio 不是“所有 Rust 项目的默认”，而是“所有 Async 产品的默认”
+
+Tokio 总体加权约：
+
+**57.6%**
+
+但分类型：
+
+| 产品类型 | Tokio |
+|---|---:|
+| CLI/TUI | **34.8%** |
+| GUI/Desktop | **78.6%** |
+| Server/Data | **88.9%** |
+| Compiler/Runtime | 40.0% |
+| System/Network | 60.0% |
+| Distributed | **100%** |
+| AI/Agent | **75%** |
+
+这个结果非常重要。
+
+它意味着：
+
+> **不要在一个简单 `bat` / `ripgrep` 式 CLI 里为了“现代架构”强行引入 Tokio。**
+
+但是当产品存在：
+
+- 网络；
+- IPC；
+- 大量并发 I/O；
+- WebSocket；
+- Server；
+- AI provider；
+- 长任务；
+- 设备连接；
+- 后台服务；
+
+Tokio 就迅速成为默认答案。
+
+Tokio 官方也明确将自己定位为 Rust 的异步 Runtime，并指出其是目前使用最广泛的 Rust async runtime。:chatgpt-content-reference{index="1"}
+
+因此真正合理的通用原则不是：
+
+`所有项目 = Tokio`
+
+而是：
+
+```text
+同步 Domain Core
+       │
+       ▼
+Application Layer
+       │
+需要 async？
+ ┌─────┴─────┐
+ No          Yes
+ │            │
+std         Tokio
+```
+
+也就是说：
+
+> **Tokio 应位于 Application / IO 层，而不应无必要地污染纯 Domain Core。**
+
+---
+
+# 六、CLI/TUI 是 Rust 当前最成熟的产品路线
+
+193 个产品型仓库中：
+
+**73 个是 CLI/TUI，占 37.8%。**
+
+典型：
+
+ripgrep  
+bat  
+fd  
+uv  
+ruff  
+starship  
+zoxide  
+Yazi  
+Zellij  
+Nushell  
+mise  
+fnm  
+hyperfine  
+delta  
+difftastic  
+ast-grep  
+broot  
+bottom  
+oha  
+jcode  
+RTK
+
+这并不是偶然。
+
+Rust 在：
+
+- 单文件部署；
+- 启动速度；
+- 内存；
+- 跨平台；
+- 系统 API；
+- 并发；
+- 文件处理；
+- 文本解析；
+
+这些维度天然适合 CLI 产品。
+
+CLI/TUI 样本中：
+
+- Serde：87.0%
+- Clap：60.9%
+- Tokio：34.8%
+- Crossterm：26.1%
+- Ratatui：17.4%
+
+因此形成非常稳定的默认路线：
+
+```text
+Rust 2024
+   │
+   ├── clap
+   ├── serde
+   ├── tracing（复杂产品）
+   │
+   ├── tokio（只有需要 async 时）
+   │
+   └── ratatui + crossterm（只有需要 TUI 时）
+```
+
+**通用 CLI 基线：**
+
+```text
+Rust
+Clap
+Serde
+thiserror / anyhow
+tracing
+```
+
+其中 Tokio 是条件性依赖，而不是必需依赖。
+
+---
+
+# 七、Server / Data / Infrastructure 是 Rust 最稳定的生产路线之一
+
+Server/Data 样本虽然只有 9 个成功统一解析，但信号非常强：
+
+| 组件 | Server/Data 样本 |
+|---|---:|
+| Serde | 88.9% |
+| Tokio | **88.9%** |
+| Clap | 88.9% |
+| Tracing | **77.8%** |
+| Reqwest | **88.9%** |
+| Rustls | **77.8%** |
+| Axum | 77.8% |
+| Hyper | 55.6% |
+| Tonic | 55.6% |
+
+典型产品包括：
+
+Qdrant、TiKV、Neon、Vector、Tabby、RustFS 等。
+
+Qdrant 当前实际组合就是 Tokio + Actix Web + Tonic + Reqwest + Rustls + Serde + Tracing 一类架构。
+
+但需要特别避免一个错误结论：
+
+> **这并不能证明 Axum“击败了”Actix。**
+
+因为完整 10K+ 总体中同时存在：
+
+- Qdrant → Actix；
+- Lemmy → Actix；
+- Vaultwarden → Rocket；
+- Komodo → Axum；
+- InfluxDB → Hyper；
+- SurrealDB → Hyper/Axum integration。
+
+真正已经高度收敛的是：
+
+```text
+Tokio
+Serde
+Tracing
+Reqwest
+Rustls
+Tower ecosystem
+```
+
+而不是某一个 HTTP Router。
+
+因此 2026 新的普通 Rust API 产品，我会把通用基线定为：
+
+```text
+Tokio
+  │
+  ├── Axum
+  │    └── Tower
+  │
+  ├── Serde
+  ├── Tracing
+  ├── Reqwest
+  ├── Rustls
+  └── SQLx
+```
+
+但：
+
+- 极低层 HTTP → Hyper；
+- 已有 Actix 团队 → 没有迁移必要；
+- gRPC → Tonic；
+- Library → 不应强迫调用方使用 Tokio。
+
+---
+
+# 八、GUI 产品没有统一为“全 Rust GUI”
+
+40 个 GUI/Desktop 主类别仓库，是本次普查非常关键的一组。
+
+对其中 22 个当前技术结构较清晰的项目进行了进一步架构核查：
+
+| GUI 架构 | 数量 | 占 22 个深审样本 |
+|---|---:|---:|
+| **Tauri + Web UI + Rust** | **13** | **59.1%** |
+| **Native / Near-native Rust GUI** | **8** | **36.4%** |
+| **Flutter UI + Rust Core** | **1** | **4.5%** |
+
+### Tauri/Web 型代表
+
+Clash Verge Rev  
+CC Switch  
+Pake  
+ChatGPT Desktop  
+Jan  
+Spacedrive  
+Cap  
+GitButler  
+Screenpipe  
+Seelen UI  
+Clash Nyanpasu  
+Handy  
+Meetily
+
+其共同结构大致是：
+
+```text
+React / Svelte / Web UI
+           │
+        Tauri IPC
+           │
+        Rust App
+           │
+  ┌────────┼─────────┐
+ Tokio   Storage   Native API
+```
+
+Tauri 官方架构本身就是 Rust 工具链 + 系统 WebView 中运行的 HTML，通过 message passing 连接 WebView 与 Rust backend；它使用 OS WebView，因此与捆绑完整浏览器 Runtime 的模式不同。:chatgpt-content-reference{index="2"}
+
+### Native Rust 型代表
+
+| 产品 | GUI/Rendering |
+|---|---|
+| Zed | GPUI |
+| Lapce | Floem + wgpu |
+| Rerun | egui + wgpu |
+| Sniffnet | iced |
+| Universal Android Debloater | iced/wgpu |
+| Neovide | winit + Skia |
+| Rnote | GTK4 |
+| Alacritty | custom/native renderer |
+
+这说明：
+
+> **Tauri 和 Native Rust GUI 并不是替代关系，而是针对不同产品约束的两条路线。**
+
+---
+
+# 九、什么时候应该 Tauri，什么时候应该 Native Rust
+
+从这些高星产品得到的路线非常明确。
+
+## 普通桌面产品
+
+如果 UI 主要由：
+
+- 设置；
+- 表格；
+- 菜单；
+- Dashboard；
+- 配置；
+- 列表；
+- Form；
+- Markdown；
+- Web 内容；
+- CRUD；
+
+构成，优先：
+
+```text
+Rust Core
++
+Tauri 2
++
+React / Svelte
++
+TypeScript
++
+Vite
+```
+
+这是当前观察到的最成熟通用组合。
+
+在已核验的 Tauri 项目中，React 明显是第一选择，Svelte 是另一个稳定选择。
+
+## 工程/调试/数据工具
+
+如果软件是：
+
+- Inspector；
+- Debugger；
+- Visualization；
+- Internal Engineering Tool；
+- 数据查看器；
+
+`egui` 很有竞争力。
+
+## 更传统的 Native Application
+
+如果希望：
+
+- Pure Rust；
+- declarative GUI；
+- native render；
+- 跨平台；
+
+`iced` 比“直接自己写 wgpu UI”更合理。
+
+## 工业/嵌入式 GUI
+
+Slint 值得单独进入候选。
+
+其工程中已经存在：
+
+- winit backend；
+- Qt backend；
+- Linux KMS；
+- Android；
+- Skia；
+- software renderer；
+- wgpu backend。
+
+因此它与 egui/GPUI 的产品定位实际上不同。
+
+## UI/Rendering 本身就是核心竞争力
+
+才考虑：
+
+GPUI / Floem / 大规模自定义 wgpu renderer。
+
+Zed 和 Lapce 能这样做，是因为：
+
+> **编辑器 UI 本身就是它们的产品核心。**
+
+普通 SaaS Client、设备控制器、管理工具没有必要复制这种成本结构。
+
+---
+
+# 十、wgpu 已经成为 Rust GPU 层的重要汇聚点，但不是默认 UI 技术
+
+这次普查涉及：
+
+Zed  
+Lapce  
+Rerun  
+Iced  
+egui  
+Graphite  
+Cap  
+Dioxus  
+Slint
+
+等项目时不断遇到 wgpu。
+
+wgpu 官方定义本身就是跨平台、安全、纯 Rust 的 graphics API，Native 可以落到 Vulkan、Metal、D3D12、OpenGL，并支持 WebGPU/WebGL 路线。:chatgpt-content-reference{index="3"}
+
+所以对于：
+
+- 实时图形；
+- GPU Canvas；
+- 大规模 2D；
+- 3D；
+- 视频；
+- 可视化；
+- compute；
+
+通用底层路线可以是：
+
+```text
+wgpu
+```
+
+但 Manifest 统计中它远没有 Serde/Tokio 普遍。
+
+这反而说明成熟项目遵循的是：
+
+> **GPU where GPU matters.**
+
+而不是：
+
+> **既然 Rust 有 wgpu，就让整个软件全部 GPU 化。**
+
+因此推荐：
+
+```text
+普通 UI
+    │
+Tauri / iced / egui
+    │
+只有真正的 GPU workload
+    ▼
+wgpu island
+```
+
+这种 “Native Island” 架构比“整个 App 从 renderer 开始造”更通用。
+
+---
+
+# 十一、SQLite 已经是 Local-first Rust 产品的重要基础设施
+
+跨全部产品总体，SQLite 的加权 Manifest incidence 约：
+
+**20.3%**
+
+这个数字看起来不高，是因为总体里存在大量：
+
+- CLI；
+- Runtime；
+- Network；
+- Server；
+- Compiler；
+
+它们根本不需要 SQLite。
+
+但对 storage-heavy desktop 产品单独检查：
+
+CC Switch  
+Jan  
+Handy  
+Spacedrive  
+GitButler  
+Screenpipe
+
+六个项目全部可以找到 SQLite 方案，主要通过：
+
+```text
+rusqlite
+SQLx + sqlite
+bundled sqlite
+```
+
+其中 GitButler 与 Screenpipe 甚至明确控制 bundled SQLite，以保持跨平台数据库版本一致。
+
+所以 Local-first 桌面软件应该形成清晰的数据层级：
+
+```text
+少量配置
+    │
+TOML / JSON
+    │
+──────────────
+结构化长期状态
+    │
+SQLite
+    │
+──────────────
+服务器共享数据
+    │
+Postgres / 专用 DB
+```
+
+不要把大量项目数据、历史数据、关系数据长期塞入 JSON 文件。
+
+---
+
+# 十二、rusqlite 和 SQLx 应该按产品模型选择
+
+不建议定义一个“全公司统一答案”。
+
+### rusqlite
+
+适合：
+
+- Local desktop；
+- 单机；
+- 同步访问；
+- 明确 SQLite-only；
+- 希望依赖简单。
+
+### SQLx
+
+适合：
+
+- Async；
+- Server；
+- Tokio；
+- SQLite/Postgres/MySQL；
+- 数据访问与后台任务并行。
+
+因此通用决策：
+
+```text
+Local-only SQLite
+       │
+   rusqlite
+
+Async / Server / 多 DB
+       │
+      SQLx
+```
+
+---
+
+# 十三、Reqwest + Rustls 已经形成非常强的网络客户端组合
+
+分层加权估计：
+
+- Reqwest：**43.6%**
+- Rustls：**41.2%**
+
+但分类型差别巨大。
+
+CLI/TUI 中 Reqwest 只有约：
+
+**8.7%**
+
+因为很多工具完全离线。
+
+而 Server/Data：
+
+**Reqwest 88.9%**
+
+AI Agent：
+
+**Reqwest 75%**
+
+Distributed：
+
+**Reqwest 100%**
+
+这说明正确的标准不是：
+
+> 每个 Rust 项目都加 Reqwest。
+
+而是：
+
+> **一旦产品需要 HTTP Client，Reqwest 应成为第一默认候选。**
+
+同时 Rustls 已经成为 Rust-native TLS 的核心方案之一。
+
+所以网络产品默认路线：
+
+```text
+Reqwest
+   │
+Rustls
+   │
+Tokio
+```
+
+是非常合理的起点。
+
+---
+
+# 十四、Tracing 应从项目初期进入“复杂产品”基线
+
+Tracing 总体加权约：
+
+**45.5%**
+
+但：
+
+Server/Data：
+
+**77.8%**
+
+Distributed：
+
+**75%**
+
+GUI：
+
+**50%**
+
+AI/Agent：
+
+**50%**
+
+简单 CLI 则只有约：
+
+**26.1%**
+
+这个分布非常符合工程逻辑。
+
+因此建议：
+
+简单 500 行工具不必为了规范上完整 tracing。
+
+但只要进入：
+
+- 后台任务；
+- IPC；
+- 设备；
+- 网络；
+- Server；
+- AI Agent；
+- 多线程；
+- async；
+- 可诊断桌面软件；
+
+就应该直接：
+
+```text
+tracing
+tracing-subscriber
+```
+
+而不是长期依靠：
+
+```text
+println!
+```
+
+---
+
+# 十五、2026 年值得形成的“通用 Rust 产品架构”
+
+综合 253 个仓库的分类和产品样本，最值得统一的不是具体 Framework，而是这一层：
+
+```text
+┌──────────────────────────────────┐
+│          Interface Layer         │
+│                                  │
+│ CLI │ TUI │ Desktop │ Web │ API │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│        Application Layer         │
+│                                  │
+│ Commands / Use Cases / Jobs      │
+│ Orchestration / State Machine    │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│            Rust Core             │
+│                                  │
+│ Domain Model                     │
+│ Business Logic                   │
+│ Algorithms                       │
+│ Protocol                         │
+│ Validation                       │
+│ Transformations                  │
+└────────────────┬─────────────────┘
+                 │
+          Ports / Traits
+                 │
+       ┌─────────┼─────────┐
+       ▼         ▼         ▼
+   Storage    Network    Platform
+       │         │         │
+       ▼         ▼         ▼
+    SQLite    Reqwest    OS API
+    SQLx      Rustls     Serial
+    Postgres   Tokio     USB
+                         wgpu
+```
+
+最核心的一条规则：
+
+> **Rust Core 必须尽可能 Headless、UI-independent、Platform-independent。**
+
+这会让：
+
+Tauri → iced
+
+React → Svelte
+
+Desktop → CLI
+
+Local → Server
+
+都不需要重新实现领域逻辑。
+
+---
+
+# 十六、推荐的通用 Workspace 结构
+
+不是所有项目都需要大型 Workspace。
+
+但产品复杂度达到中等以后，推荐：
+
+```text
+product/
+│
+├── Cargo.toml
+│
+├── crates/
+│   │
+│   ├── product-core/
+│   ├── product-storage/
+│   ├── product-network/
+│   └── product-platform/
+│
+└── apps/
+    │
+    ├── cli/
+    ├── desktop/
+    └── server/
+```
+
+其中：
+
+### `product-core`
+
+原则：
+
+- 尽量同步；
+- 尽量不依赖 UI；
+- 不依赖 Tauri；
+- 不依赖 Axum；
+- 不直接绑定 SQLite；
+- 不直接绑定 WebView；
+- 核心算法和领域逻辑在这里。
+
+### `product-storage`
+
+实现：
+
+- SQLite；
+- Postgres；
+- 文件；
+- Cache。
+
+### `product-network`
+
+实现：
+
+- HTTP；
+- WebSocket；
+- Remote API。
+
+### `apps/*`
+
+决定最终产品形态。
+
+这是比“全公司统一 Tauri”更有价值的架构标准。
+
+---
+
+# 十七、按产品形态形成 7 条标准路线
+
+## Route A — CLI
+
+```text
+Rust 2024
+Clap
+Serde
+thiserror / anyhow
+Tracing（按复杂度）
+Tokio（需要 Async 才加）
+```
+
+适合：
+
+开发工具、文件处理、系统工具、自动化工具。
+
+---
+
+## Route B — TUI
+
+```text
+Route A
++
+Ratatui
++
+Crossterm
+```
+
+适合：
+
+服务器管理、Agent、文件管理、Developer Tool。
+
+---
+
+## Route C — 普通跨平台 Desktop
+
+默认：
+
+```text
+React / Svelte
+TypeScript
+Vite
+       │
+    Tauri 2
+       │
+    Rust Core
+       │
+ ┌─────┼──────┐
+Tokio SQLite Native APIs
+```
+
+这是目前最值得定义为：
+
+> **Rust Cross-platform Desktop Default**
+
+的路线。
+
+---
+
+## Route D — Native / Engineering Desktop
+
+```text
+Rust Core
+   │
+   ├── iced
+   ├── egui
+   └── Slint
+```
+
+如果存在重 GPU workload：
+
+```text
++ wgpu
+```
+
+GPUI/Floem 不作为通用默认，而作为高性能/高度定制路线。
+
+---
+
+## Route E — Server / SaaS / API
+
+```text
+Rust 2024
+Tokio
+Axum
+Tower
+Serde
+Tracing
+Reqwest
+Rustls
+SQLx
+Postgres
+Tonic（需要 gRPC）
+```
+
+Axum 是新的默认起点，而不是要求历史 Actix/Rocket 项目迁移。
+
+---
+
+## Route F — Data / Database / Search Engine
+
+```text
+Rust Core
++
+Tokio at IO edge
++
+Serde
++
+Tracing
++
+HTTP / gRPC
++
+专用 Storage Engine
+```
+
+数据引擎不要为了“统一技术栈”强迫使用 ORM。
+
+Qdrant、TiKV、Neon、SurrealDB 等项目证明这一类产品的核心竞争力恰恰经常在自定义 storage/index/query engine。
+
+---
+
+## Route G — AI / Agent Runtime
+
+2026 新出现的高星 Rust Agent 产品非常有意思。
+
+ZeroClaw、OpenFang、IronClaw、OpenHuman 等表现出一种正在形成的新结构：
+
+```text
+Single Rust Runtime
+       │
+       ├── Tokio
+       ├── Serde
+       ├── Reqwest
+       ├── Rustls
+       ├── SQLite
+       │
+       ├── CLI / TUI
+       ├── Web API
+       └── Web / Desktop UI
+```
+
+例如 ZeroClaw 明确把自己定义为一个 single Rust binary Agent runtime；OpenFang 同样强调单二进制 Agent OS。
+
+这说明：
+
+> **Rust 非常适合作为 Agent Runtime / Tool Runtime / Local-first AI Infrastructure 的核心层。**
+
+但模型推理本身不一定必须 Rust。
+
+---
+
+# 十八、交付层：成功 Rust 产品不是止步于 cargo build
+
+对 Tauri 产品进一步核查：
+
+Clash Verge Rev  
+CC Switch  
+Jan  
+Handy  
+SwitchHosts  
+Vibe Kanban  
+Seelen UI  
+Omniget  
+GitButler  
+Clash Nyanpasu
+
+这些项目普遍存在：
+
+- updater plugin；
+- updater config；
+- release/update script；
+- updater artifacts；
+
+等机制。
+
+这说明桌面产品标准生命周期应该是：
+
+```text
+Build
+  ↓
+Bundle
+  ↓
+Code Sign
+  ↓
+Installer
+  ↓
+Release
+  ↓
+Update Metadata
+  ↓
+Auto Update
+```
+
+而不是：
+
+```text
+cargo build --release
+```
+
+CLI 产品则表现出另一种模式：
+
+```text
+Single Binary
+  │
+GitHub Releases
+  │
+├── Homebrew
+├── Scoop
+├── Cargo
+├── npm wrapper
+├── install.sh
+└── package repositories
+```
+
+RTK、Codewhale、jcode、herdr 等 2026 年的新项目尤其明显。
+
+---
+
+# 十九、2026 Rust Greenfield 产品推荐基线
+
+对于“我们还不知道最终是什么产品，但决定以 Rust 为核心”的新项目，我建议先锁定下面这些，而不是先锁 UI：
+
+```text
+Language
+────────────────────
+Stable Rust
+Edition 2024
+
+Core
+────────────────────
+Serde
+thiserror
+
+Application
+────────────────────
+Tokio     ← 仅需要 async 的应用
+Tracing   ← 中大型应用
+
+Networking
+────────────────────
+Reqwest
+Rustls
+
+CLI
+────────────────────
+Clap
+
+Local Storage
+────────────────────
+SQLite
+rusqlite OR SQLx
+
+Server
+────────────────────
+Axum
+Tower
+Tonic when needed
+
+Desktop
+────────────────────
+Tauri 2 + Web UI   ← 默认
+iced / egui / Slint ← Native 分支
+
+GPU
+────────────────────
+wgpu ← 只有需求证明后加入
+```
+
+Rust Edition 2024 已稳定，因此绿色项目没有继续默认 2021 Edition 的技术理由，除非依赖/MSRV 存在明确约束。:chatgpt-content-reference{index="4"}
+
+---
+
+# 二十、哪些东西不应该被统一
+
+这是整个普查最重要的工程结论之一。
+
+不要制定如下规则：
+
+```text
+所有产品必须 Tokio
+所有产品必须 Tauri
+所有 GUI 必须 Pure Rust
+所有 Server 必须 Axum
+所有数据库必须 SQLx
+所有 Canvas 必须 wgpu
+```
+
+更合理的是统一：
+
+```text
+代码边界
+错误模型
+序列化
+日志规范
+测试规范
+Workspace 规范
+Domain Core
+Adapter 规则
+CI
+Release
+```
+
+然后产品形态决定外层技术。
+
+---
+
+# 二十一、技术选择的推荐优先级
+
+## 高置信度通用基线
+
+### Serde
+
+几乎所有产品类别都高度出现。
+
+**默认 YES。**
+
+### Clap
+
+只要产品存在 CLI surface：
+
+**默认 YES。**
+
+### Tokio
+
+只要存在实际 Async I/O：
+
+**默认 YES。**
+
+纯同步 CLI：
+
+**默认 NO。**
+
+### Tracing
+
+中大型产品：
+
+**默认 YES。**
+
+### Reqwest + Rustls
+
+需要 HTTP Client：
+
+**默认 YES。**
+
+---
+
+# 二十二、中等条件型基线
+
+### SQLite
+
+Local-first 且有结构化持久状态：
+
+**YES。**
+
+无状态工具：
+
+**NO。**
+
+### Axum
+
+新的普通 Rust Web/API 服务：
+
+**优先起点。**
+
+但不是生态唯一答案。
+
+### Tonic
+
+真正需要：
+
+gRPC / protobuf / internal RPC
+
+才加入。
+
+---
+
+# 二十三、产品形态决定的技术
+
+### Tauri
+
+普通跨平台 Desktop：
+
+**首选候选。**
+
+### egui
+
+工程工具、Inspector、Visualizer：
+
+**非常强。**
+
+### iced
+
+希望 Pure Rust、传统 Application GUI：
+
+**重点候选。**
+
+### Slint
+
+工业/设备/嵌入式 UI：
+
+**重点候选。**
+
+### wgpu
+
+GPU 本身是明确需求：
+
+**加入。**
+
+否则：
+
+**不要提前加入。**
+
+### GPUI / Floem
+
+UI 性能和高度定制本身是产品核心：
+
+**可研究。**
+
+普通产品：
+
+**不作为默认基线。**
+
+---
+
+# 二十四、最终形成的“Rust Product Stack 2026”
+
+可以把整个路线压缩成下面这一张图：
+
+```text
+                    Rust Product 2026
+                           │
+                    ┌──────┴──────┐
+                    │  Rust Core  │
+                    │   Serde     │
+                    │  Errors     │
+                    │ Domain/API  │
+                    └──────┬──────┘
+                           │
+                  Application Layer
+                           │
+             ┌─────────────┼──────────────┐
+             │             │              │
+           Tokio       Tracing         Storage
+             │                            │
+       ┌─────┼─────┐                ┌─────┴─────┐
+       │           │                │           │
+    Reqwest       IPC            SQLite      Postgres
+    Rustls
+       │
+       └──────────────────────────────┐
+                                      │
+                       Interface / Product Shell
+                                      │
+       ┌───────────┬──────────┬───────┼──────────────┐
+       │           │          │       │              │
+      CLI         TUI       Desktop  Server         GPU
+       │           │          │       │              │
+     Clap       Ratatui     Tauri   Axum/Tower     wgpu
+                 │            │       │
+             Crossterm    React /   Tonic
+                          Svelte
+```
+
+其中最重要的是中间的：
+
+**Rust Core。**
+
+产品 Shell 是可以变化的。
+
+---
+
+# 二十五、普查给出的最终技术路线
+
+如果要为未来所有“Rust 为核心”的产品建立一份团队级工程原则，我会正式定义为：
+
+> **Core-first, Adapter-driven, Product-specific Shell。**
+
+中文可以理解为：
+
+> **Rust 核心统一，外围能力适配，产品外壳按场景选择。**
+
+具体规则：
+
+1. **领域逻辑优先放入纯 Rust Core。**
+2. **Core 不绑定 GUI Framework。**
+3. **Core 不绑定 Web Framework。**
+4. **Core 不无必要绑定 Async Runtime。**
+5. **边界数据使用 Serde。**
+6. **Async 产品优先 Tokio。**
+7. **复杂产品从早期建立 Tracing。**
+8. **HTTP Client 优先 Reqwest + Rustls。**
+9. **Local structured state 优先 SQLite。**
+10. **CLI 优先 Clap。**
+11. **普通跨平台 Desktop 优先 Tauri + Web frontend。**
+12. **Native GUI 只在产品约束证明其价值时选择。**
+13. **GPU 只做局部能力，而不是默认架构。**
+14. **Server 默认从 Tokio + Axum/Tower 开始评估。**
+15. **产品从一开始设计 Release、Installer、Update，而不只是 Build。**
+16. **大型产品使用 Cargo Workspace，但不要过度拆 crate。**
+
+---
+
+# 二十六、可信度与局限
+
+这份普查比“看几个热门项目”可靠得多，但仍然不能把 GitHub Star 当成商业成功指标。
+
+必须注意：
+
+### 1. 10K Star 是 Open-source popularity，不是 Revenue
+
+Closed-source Rust 商业软件完全不进入样本。
+
+因此这份报告回答的是：
+
+> “成功开源 Rust 工程如何做产品”
+
+而不是：
+
+> “全世界商业软件市场用了什么”。
+
+### 2. GitHub 对主语言的判定不等同于架构语言
+
+RustDesk 有 Flutter。
+
+Tauri 产品有大量 TypeScript。
+
+pnpm 等项目也可能是混合语言仓库。
+
+这恰恰支持一个结论：
+
+> **Rust Core 并不要求整个 repository 100% Rust。**
+
+### 3. Star >10K 会严重偏向 Developer Tools
+
+CLI、Runtime、Database、Framework 在 GitHub 天生比很多普通 B2B 产品容易获得 Star。
+
+所以“CLI 占 28.9%”不能解释为市场上 28.9% 的软件应该是 CLI。
+
+### 4. Manifest 抽样并非完整 Dependency Graph
+
+统一统计读取主要/root manifests。
+
+Monorepo 中深层依赖可能不会进入 root manifest，因此技术依赖数字应该理解为：
+
+> **conservative manifest-level incidence**
+
+而不是完整 `cargo metadata` 后的 transitive usage。
+
+### 5. GUI 架构统计采用单独深审
+
+因此：
+
+`13/22 Tauri`
+
+不能直接写成：
+
+> “全体 Rust GUI 59.1% 使用 Tauri”。
+
+它证明的是：
+
+> 在本研究覆盖的高星、产品型 GUI 深审样本中，Tauri/Web 是出现最多的单一路线。
+
+---
+
+# 结论
+
+截至 2026 年，Rust 已经不再只是：
+
+“系统编程语言”。
+
+10K+ GitHub 生态证明，它已经稳定覆盖：
+
+```text
+CLI
+TUI
+Desktop
+Server
+Database
+Search
+Runtime
+Compiler
+AI Agent
+Networking
+Operating System
+Distributed Infrastructure
+GPU Application
+```
+
+但 Rust 生态真正形成的最佳实践并不是：
+
+> “所有东西都 Rust”。
+
+而是：
+
+> **把需要性能、可靠性、并发、系统能力、跨平台和长期维护的核心放在 Rust。**
+
+外层则根据产品选择：
+
+```text
+CLI       → Clap
+TUI       → Ratatui
+Desktop   → Tauri / Native Rust
+Server    → Tokio + Axum/Tower
+Storage   → SQLite / SQLx
+Network   → Reqwest + Rustls
+GPU       → wgpu
+```
+
+因此，从这次 253 个 10K+ Rust 仓库普查中可以确定的团队级默认战略是：
+
+# Rust Core First
+
+而不是：
+
+# Rust Everywhere
+
+这两个概念的区别，就是 2026 年成熟 Rust 产品工程与“为了 Rust 而 Rust”的分界线。
+
+这版已经可以作为我们后续讨论所有 Rust 产品的**总技术基线 v1.0**。其中最值得固定下来的不是“Tauri 第一”这种单点结论，而是 **Core-first + Adapter-driven + Product-specific Shell** 这套原则；以后无论我们研究桌面软件、AI Agent、CLI、服务器还是嵌入式工具，都应该从这套基线往下分叉，而不是每次重新争论整套技术栈。
+
+几个关键的原始入口也给你保留：[GitHub Rust 仓库搜索](https://github.com/search?q=language%3ARust+stars%3A%3E10000&type=repositories&s=stars&o=desc)、[Clash Verge Rev Cargo 配置](https://github.com/clash-verge-rev/clash-verge-rev/blob/dev/src-tauri/Cargo.toml)、[Zed Cargo Workspace](https://github.com/zed-industries/zed/blob/main/Cargo.toml)、[Rerun Cargo Workspace](https://github.com/rerun-io/rerun/blob/main/Cargo.toml)、[OpenLogi README](https://github.com/AprilNEA/OpenLogi/blob/master/README.md)、[OpenFang README](https://github.com/RightNow-AI/openfang/blob/main/README.md)、[RTK README](https://github.com/rtk-ai/rtk/blob/develop/README.md)、[Qdrant Cargo Workspace](https://github.com/qdrant/qdrant/blob/master/Cargo.toml)。

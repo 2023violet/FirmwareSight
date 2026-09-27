@@ -1,0 +1,327 @@
+可以。我们这次不是只看几个“著名 Rust 项目”，而是直接按你给的 GitHub 条件做了一轮实时筛选，并进一步打开项目的 Cargo.toml、package.json、README 等去看它们到底怎么做产品。
+截至 2026 年 9 月 26 日，我通过 GitHub 查询：
+language:Rust stars:>10000
+当前得到 253 个仓库。我进一步对其中 36 个具有代表性的产品型项目做了依赖/架构抽样核查，重点看桌面软件、CLI/TUI、服务器/数据库，而不是把 Rust 编译器、教学仓库、纯库全部混在一起。GitHub 本身也支持用 stars:>10000 这样的条件筛选高星仓库。[GitHub](https://github.com/orgs/community/discussions/159014?utm_source=chatgpt.com)
+先看对我们实际“做 Rust 产品”最有意义的桌面软件。
+注意：这是我从 253 个 >10K Star 仓库中挑出的 22 个明确以桌面 GUI 为核心的产品样本，不是说全 GitHub 59% 的 Rust 项目都使用 Tauri。
+但它已经非常说明问题：
+普通跨平台桌面产品，目前高星 Rust 项目里最常见的工程路线不是“全 Rust UI”，而是 Rust 做核心 + Tauri + React/Svelte/TypeScript 做 UI。
+Tauri 官方本身的架构就是 Rust 后端 + HTML/WebView 前端，通过 IPC/message passing 连接；Windows 使用 WebView2、macOS 使用 WKWebView、Linux 使用 WebKitGTK。[GitHub](https://github.com/tauri-apps/tauri/blob/dev/ARCHITECTURE.md?utm_source=chatgpt.com)
+我实际检查到的项目中：
+比如 Clash Verge Rev 当前 workspace 直接包含 src-tauri，依赖 tauri 2.x 和 Tokio；它是很标准的这种架构。[GitHub](https://github.com/clash-verge-rev/clash-verge-rev/blob/dev/Cargo.toml?utm_source=chatgpt.com)
+在这 13 个 Tauri 项目里，我能够直接从依赖文件确认：
+React：至少 8 个，约 62%
+Svelte：至少 2 个，约 15%
+剩下的是 monorepo / TypeScript / 其他 Web UI 组织方式。
+所以如果单纯问：
+“2026 年做一个普通跨平台 Rust 桌面产品，大家实际上怎么做？”
+答案已经非常清晰：
+Rust Core + Tauri 2 + React + TypeScript + Vite
+是目前非常主流的一条路线。
+这是这次调研里一个非常重要的发现。
+你不能简单得出：
+Rust 桌面 = Tauri。
+真正对 UI 性能、GPU 渲染、编辑器体验要求极高的项目，反而大量选择 Native Rust。
+例如：
+这恰好形成第二条非常清楚的产品路线：
+不是 WebView 套壳，而是 Rust → Window → GPU Renderer → 自己的 UI Tree。
+Zed 没有使用 React，也没有 Tauri。
+它自己发展出了：
+GPUI
+现在的 GPUI 是一个：
+hybrid immediate + retained mode、GPU accelerated Rust UI framework。
+Zed 当前已经有 gpui_wgpu，直接建立在 wgpu 上。[GitHub](https://github.com/zed-industries/zed/blob/main/crates/gpui_web/src/platform.rs?utm_source=chatgpt.com)
+大致可以理解为：
+```
+Zed
+
+Rust
+ │
+ ├─ App Logic
+ ├─ Editor Core
+ ├─ Async Runtime
+ │
+ └─ GPUI
+      │
+      ├─ Layout
+      ├─ Components
+      ├─ Input
+      ├─ Text
+      └─ GPU Rendering
+           │
+           └─ wgpu
+```
+这是：
+Rust All-in
+路线。
+优点是：
+极致性能、低内存、UI 完全可控、GPU pipeline 完全可控。
+代价也非常明显：
+你实际上开始承担一个 GUI framework 团队应该承担的工作。
+GPUI 自己目前也仍然明确处于持续开发中，并且 pre-1.0。[GitHub](https://github.com/zed-industries/zed/blob/main/crates/gpui/README.md?utm_source=chatgpt.com)
+Lapce：
+Rust + Floem + wgpu
+官方 README 明确写着：
+UI in Floem，并使用 wgpu rendering。[GitHub](https://github.com/lapce/lapce/blob/master/README.md?utm_source=chatgpt.com)
+Floem 自己也是 Native Rust GUI：
+```
+Rust
+ │
+ └─ Floem
+     ├─ Reactive Signals
+     ├─ Flexbox / Grid
+     ├─ UI Tree
+     │
+     └─ Renderer
+         ├─ wgpu
+         ├─ vello
+         ├─ Skia
+         └─ tiny-skia fallback
+```
+Floem 官方现在明确支持 Windows/macOS/Linux，GPU renderer 可用 wgpu。[GitHub](https://github.com/lapce/floem?utm_source=chatgpt.com)
+也就是说：
+Floem / GPUI
+实际上代表的是 Rust 社区正在尝试建立“类似 Flutter/SwiftUI/Compose，但全部 Rust”的方向。
+Rerun 是一个很典型的例子：
+```
+Rust
+ │
+ ├─ Data / Arrow
+ ├─ Storage
+ ├─ Networking
+ │
+ └─ Viewer
+     ├─ egui
+     └─ wgpu
+```
+Rerun 官方架构文档明确：
+GUI = egui
+Renderer = wgpu
+而且同一套 rendering code 可以 native/Web 使用。[GitHub](https://github.com/rerun-io/rerun/blob/main/ARCHITECTURE.md?utm_source=chatgpt.com)
+所以 egui 很适合：
+工程工具、数据工具、调试器、Inspector、可视化软件、仪器软件、内部工具。
+这一点其实与你们现在在做的 MonoOLED-Studio / 嵌入式上位机特别相关。
+例如 Sniffnet。
+它不是 Demo，是实际的跨平台网络监控软件，而且已经 >10K Star。
+官方 README 直接说明：
+GUI 使用 iced。[GitHub](https://github.com/GyulyVGC/sniffnet?utm_source=chatgpt.com)
+其 Cargo 中则是：
+```
+iced
+tokio
+clap
+```
+另一款 Universal Android Debloater 也是：
+```
+iced
+wgpu
+clap
+tokio
+```
+它默认使用 wgpu renderer。[GitHub](https://github.com/0x192/Universal-Android-Debloater/wiki?utm_source=chatgpt.com)
+所以 iced 的真实定位越来越清楚：
+比 egui 更接近“正常 App GUI”，但又保持 Native Rust。
+RustDesk 很有意思。
+它不是：
+Tauri。
+也不是：
+egui / iced。
+它是：
+```
+Flutter
+   │
+Dart UI
+   │
+flutter_rust_bridge
+   │
+Rust Core
+```
+它的仓库里面明确存在 Flutter 工程，并通过 flutter_rust_bridge_codegen 把 Rust 与 Flutter 连接。[GitHub](https://github.com/rustdesk/rustdesk/blob/master/flutter/README.md?utm_source=chatgpt.com)
+也就是说：
+UI 不一定非得 Rust。
+这对于同时需要：
+Windows + Linux + macOS + Android + iOS
+的产品，其实是非常现实的路线。
+RustDesk 本身就是跨桌面 + 移动平台的证明。
+我又抽查了：
+Qdrant
+SurrealDB
+Vaultwarden
+Lemmy
+DUFS
+Komodo
+这里有一个非常明显的现象：
+例如 Qdrant 现在直接使用：
+```
+tokio
+actix-web
+tonic
+tower
+serde
+reqwest
+```
+即：
+```
+                    ┌─ REST / Actix
+Rust Core → Tokio ──┤
+                    └─ gRPC / Tonic
+```
+Qdrant 当前 Cargo manifest 可以直接看到 tokio + actix-web + tonic。[GitHub](https://github.com/qdrant/qdrant/blob/master/Cargo.toml?utm_source=chatgpt.com)
+但 HTTP Framework 并没有形成一家独大的局面。
+实际看到的是：
+所以服务器开发真正稳定的是：
+```
+Tokio
+Serde
+Tracing
+Reqwest
+Rustls
+```
+而不是：
+“必须选 Axum”或者“必须选 Actix”。
+这一点从 >10K Star 列表里非常明显：
+ripgrep
+bat
+fd
+starship
+uv
+ruff
+zoxide
+hyperfine
+just
+mise
+fnm
+dust
+bottom
+broot
+tokei
+delta
+difftastic
+ast-grep
+gitoxide
+onefetch
+oha……
+这才是 Rust 真正非常恐怖的产品领域。
+我专门抽查了：
+bat
+fd
+starship
+Yazi
+Zellij
+Nushell
+结果：
+然后复杂 TUI 产品通常变成：
+```
+Rust
+ │
+ ├─ clap
+ ├─ tokio
+ │
+ └─ terminal UI
+     ├─ ratatui
+     └─ crossterm
+```
+例如 Yazi 当前直接使用：
+clap + ratatui + tokio。[GitHub](https://github.com/sxyazi/yazi/blob/main/Cargo.toml?utm_source=chatgpt.com)
+Nushell、Zellij 也大量使用 Crossterm / Ratatui / Tokio。
+所以：
+CLI：Clap 几乎已经是事实标准。
+TUI：Ratatui + Crossterm 是非常强势的一套组合。
+Rust 生态里有：
+Yew
+Dioxus
+Leptos
+而且这几个框架本身都能超过 10K Star。
+但是我们看真正的高 Star 终端用户产品时，却大量出现：
+```
+Rust backend
++
+React / Svelte frontend
+```
+而不是：
+```
+Rust backend
++
+Rust WASM frontend
+```
+这非常重要。
+所以不要因为：
+“我们决定使用 Rust。”
+就强迫：
+“UI 也必须 Rust。”
+高星项目给出的答案恰好不是这样。
+大致形成这样的格局：
+这里的“成熟度”是技术生态成熟度归纳，不是 GitHub 项目排名。
+这次调查其实会让我修正之前“Rust 重构就应该优先纯 Rust GUI”的倾向。
+你们的 MonoOLED-Studio 本质是：
+```
+设备通信
+串口 / USB
+协议解析
+图像处理
+OLED 编辑
+字库
+数据转换
+文件管理
+设备调试
+设置
+跨平台 GUI
+```
+它不是：
+Zed。
+也不是：
+游戏引擎。
+也不是：
+CAD。
+所以没有很充分的理由为了“纯 Rust”去承担 GPUI/Floem 这类 Native UI 的生态风险。
+从这些 >10K Star 真正产品的选择来看，我现在会把你们的候选路线重新排成：
+```
+方案 A
+
+React + TypeScript
+        │
+      Tauri 2
+        │
+       Rust
+   ┌────┼─────┐
+ Serial USB  Image
+   │     │     │
+Device Protocol
+```
+对于普通产品 UI，这是高星 Rust 桌面项目中最常见的路线。
+Tauri 本身就是为了这种结构设计的，而且使用系统 WebView，不需要像 Electron 一样把完整 Chromium runtime 打进程序。[GitHub](https://github.com/tauri-apps/tauri/blob/dev/ARCHITECTURE.md?utm_source=chatgpt.com)
+而如果你们以后发现 Pixel Studio 画布性能真的成为瓶颈：
+也完全没必要重写整个 GUI。
+可以做：
+```
+Tauri
+│
+├─ React
+│   ├─ Settings
+│   ├─ Device
+│   ├─ Font
+│   ├─ Project
+│   └─ Inspector
+│
+└─ Rust
+    ├─ Device
+    ├─ Protocol
+    ├─ Image
+    ├─ Font Engine
+    │
+    └─ Native/GPU Canvas
+        └─ wgpu
+```
+这其实和 Cap 这样的项目思路很接近：
+Tauri 负责 App Shell，Rust/wgpu 负责真正重的东西。
+而是三个规律：
+1. Rust 最常被放在“核心”而不是强行覆盖所有层。
+UI 用 React/Svelte/Flutter 完全正常。
+2. 只有 UI 本身就是核心竞争力时，才值得做 Native Rust GUI。
+Zed、Lapce、Rerun 都符合这个条件。Zed 自己做 GPUI，Lapce 用 Floem+wgpu，Rerun 用 egui+wgpu。[GitHub](https://github.com/zed-industries/zed/blob/main/crates/gpui/README.md?utm_source=chatgpt.com)
+3. 真正成熟的 Rust 产品架构往往是混合式。
+Rust 做性能、安全、系统能力；成熟的 UI 技术负责表现层。
+所以，单纯从这次 253 个 10K+ Rust 仓库 + 36 个产品级仓库的实际技术栈核查来看：
+对我们这种希望做 Windows / Linux / macOS 软件，又希望 UI 做得漂亮、开发效率高、依赖比 Python 小很多的团队，Tauri 2 + React + TypeScript + Rust Core 已经不只是“一个可选方案”，而是非常值得作为默认基线的方案。
+而 GPUI / Floem / iced / egui 应该根据具体产品性质选择，而不是因为“我们用了 Rust”就默认使用。
+如果继续沿着这次调查往下挖，下一轮最有价值的是把这 253 个 10K+ Rust 项目做成完整的「Rust 产品技术栈数据库」：每个项目记录 Star、产品类型、GUI、Web、Async Runtime、数据库、IPC、渲染、跨平台、安装包、自动更新、商业模式。这样我们就能进一步得到一个真正数据化的 “2026 Rust 产品技术选型地图”，而不是凭框架口碑做决定。

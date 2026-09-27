@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "generated_by": {
+    "product": "FirmwareSight",
+    "version": "0.4.0"
+  },
+  "release": {
+    "id": "rel_example_001",
+    "version": "v0.3.0-rc2",
+    "notes": "Example only"
+  },
+  "build": {
+    "snapshot_id": "snap_example",
+    "artifact_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "git_commit": null,
+    "git_tag": null,
+    "git_dirty": null
+  },
+  "files": [
+    {
+      "path": "firmware.elf",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 497869
+    }
+  ],
+  "extensions": {}
+}

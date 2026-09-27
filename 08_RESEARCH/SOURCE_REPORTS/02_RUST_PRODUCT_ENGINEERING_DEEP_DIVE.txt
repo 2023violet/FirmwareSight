@@ -1,0 +1,1213 @@
+继续往下挖之后，结论比上一轮更清晰了，而且已经开始从“框架 popularity”变成了“**成熟 Rust 产品实际上怎样组织工程**”。
+
+截至 **2026 年 9 月 26 日**，我重新沿着你给出的 GitHub 条件检查了 `language:Rust stars:>10000`。当前查询池是 **253 个仓库**，分页结果正好是 `100 + 100 + 53`。在这个池子里，我目前已经进一步打开并核查了 **50+ 个代表性仓库**的 `Cargo.toml`、`package.json`、Tauri 配置等；下面的统计不是根据 README 猜技术栈，而是尽量从实际依赖文件里确认。
+
+## 1. 先看这一轮最有价值的数据
+
+我从这些项目里另外取了 **24 个实际产品仓库**，直接扫描顶层或主要 Rust crate 的依赖。
+
+| 基础组件 | 24 个产品中出现 | 比例 | 我的判断 |
+|---|---:|---:|---|
+| **Serde** | 24/24 | **100%** | 几乎是 Rust 产品默认基础设施 |
+| **Tokio** | 22/24 | **91.7%** | 异步产品事实标准 |
+| **Reqwest** | 19/24 | **79.2%** | HTTP Client 基本形成共识 |
+| **Clap** | 18/24 | **75.0%** | CLI/启动参数事实标准 |
+| **Tracing** | 17/24 | **70.8%** | 生产级日志/Tracing 主流 |
+| **Rustls** | 17/24 | **70.8%** | TLS 大量倾向 Rust-native |
+| **SQLite** | 9/24 | **37.5%** | 本地产品非常重要 |
+| **wgpu 直接依赖** | 3/24 | **12.5%** | 仅在真正需要 GPU 的产品里出现 |
+
+这里有一个统计细节必须说明：`wgpu 12.5%` 是**直接依赖**，实际上会低估。例如 Sniffnet 使用 Iced，而 Iced 默认就可以经过 wgpu renderer；所以这张表不能解释成“只有 12.5% 用 GPU”。
+
+反过来，**Serde 24/24、Tokio 22/24** 就非常有意义。
+
+换句话说，如果今天要定义一个“现代 Rust 产品默认 Core Stack”，它已经相当接近：
+
+```text
+Rust Product Core
+
+serde
+  │
+tokio
+  │
+  ├── reqwest
+  │     └── rustls
+  │
+  ├── tracing
+  │
+  ├── storage
+  │     └── SQLite / SQLx / rusqlite
+  │
+  └── interface
+        ├── clap
+        ├── Tauri
+        ├── HTTP
+        └── native GUI
+```
+
+这几个东西远比“Axum 还是 Actix”“egui 还是 iced”更接近真正的生态共识。
+
+---
+
+# 2. Serde 基本已经不是“选型”了
+
+24/24。
+
+包括：
+
+Zed、RustDesk、Spacedrive、Cap、GitButler、Screenpipe、Rerun、Sniffnet、Neovide、Atuin、Anki、Qdrant、SurrealDB、Vaultwarden、Lemmy、Komodo、InfluxDB、Yazi、Zellij、Nushell、bat、Starship、DUFS、Clash Verge Rev。
+
+全部都能在实际 Rust manifest 中找到 Serde。
+
+这说明以后我们做 Rust 产品时，实际上没有必要再讨论：
+
+> “JSON / config / IPC serialization 用什么？”
+
+默认就应该首先考虑：
+
+```rust
+serde
+serde_json
+```
+
+需要 TOML 再加：
+
+```rust
+toml
+```
+
+需要二进制协议，再根据场景加 MessagePack / CBOR / protobuf。
+
+这和 Python 世界完全不一样：Rust 社区在 serialization 这一层已经高度收敛。
+
+---
+
+# 3. Tokio 也几乎已经成为产品默认 Runtime
+
+24 个样本里 **22 个使用 Tokio**。
+
+没有使用的两个：
+
+- `bat`
+- `Starship`
+
+原因其实非常合理：它们主要是同步 CLI 工具，不需要大量网络、IPC、设备通信或异步任务。
+
+一旦进入：
+
+桌面应用、服务器、网络工具、数据库、设备软件、AI 应用、复杂 TUI……
+
+Tokio 几乎就出现了。
+
+例如 Screenpipe：
+
+[screenpipe/Cargo.toml](https://github.com/screenpipe/screenpipe/blob/main/Cargo.toml)
+
+同时包含：
+
+```text
+tokio
+sqlx
+rusqlite
+serde
+...
+```
+
+Qdrant：
+
+[qdrant/Cargo.toml](https://github.com/qdrant/qdrant/blob/master/Cargo.toml)
+
+是：
+
+```text
+Tokio
+Actix Web
+Tonic
+Reqwest
+Rustls
+Serde
+Tracing
+Clap
+```
+
+InfluxDB：
+
+[influxdb/Cargo.toml](https://github.com/influxdata/influxdb/blob/main/Cargo.toml)
+
+也是：
+
+```text
+Tokio
+Hyper
+Tonic
+Reqwest
+Rustls
+Tracing
+SQLx
+Clap
+Serde
+```
+
+所以如果我们自己的产品需要：
+
+```text
+串口
+USB
+TCP
+HTTP
+后台设备任务
+文件 I/O
+超时
+任务取消
+并发
+```
+
+那么：
+
+> **Tokio 应该直接作为默认基础设施。**
+
+不需要为了“代码简单”自己做线程池。
+
+---
+
+# 4. 一个越来越明显的 2026 Rust 产品模板出现了
+
+尤其在桌面产品中，我现在看到非常强的模式：
+
+```text
+┌────────────────────────────┐
+│       React / Svelte       │
+│    TypeScript + Vite       │
+└─────────────┬──────────────┘
+              │
+          Tauri IPC
+              │
+┌─────────────▼──────────────┐
+│          Rust Core         │
+│                            │
+│ Tokio                      │
+│ Serde                      │
+│ Tracing                    │
+│ Reqwest / Rustls           │
+│ SQLite                     │
+│ Native OS API              │
+└─────────────┬──────────────┘
+              │
+       Native capability
+              │
+     USB / Serial / GPU /
+      Filesystem / FFmpeg
+```
+
+而不是：
+
+```text
+所有东西都 Rust
+```
+
+这次越往下查，这一点越明显。
+
+---
+
+# 5. Tauri 已经不仅是“WebView 套壳”
+
+这一轮我特别检查了多个高星 Tauri 产品的实际 Rust backend。
+
+比如 Clash Verge Rev 的：
+
+[Cargo.toml](https://github.com/clash-verge-rev/clash-verge-rev/blob/dev/src-tauri/Cargo.toml)
+
+现在直接用了：
+
+```text
+tauri-plugin-shell
+tauri-plugin-opener
+tauri-plugin-dialog
+tauri-plugin-fs
+tauri-plugin-process
+tauri-plugin-deep-link
+tauri-plugin-window-state
+tauri-plugin-notification
+tauri-plugin-http
+tauri-plugin-autostart
+tauri-plugin-global-shortcut
+tauri-plugin-updater
+```
+
+注意这意味着什么。
+
+Tauri 在成熟项目里已经实际上承担：
+
+```text
+App Runtime
+ ├── Window
+ ├── System Tray
+ ├── Filesystem
+ ├── Dialog
+ ├── Notification
+ ├── Deep Link
+ ├── Autostart
+ ├── Global Shortcut
+ ├── Process
+ ├── Updater
+ └── IPC
+```
+
+而不只是：
+
+> “网页外面放一个窗口。”
+
+这很关键。
+
+---
+
+# 6. 我检查的 6 个成熟 Tauri 产品，6/6 都考虑了 Updater
+
+这一轮专门打开了：
+
+Clash Verge Rev  
+CC Switch  
+Jan  
+Handy  
+SwitchHosts  
+Vibe Kanban
+
+结果全部存在 updater 相关配置或插件。
+
+例如 CC Switch：
+
+[CC Switch `tauri.conf.json`](https://github.com/farion1231/cc-switch/blob/main/src-tauri/tauri.conf.json)
+
+明确：
+
+```text
+targets: all
+createUpdaterArtifacts: true
+```
+
+Handy：
+
+[Handy `tauri.conf.json`](https://github.com/cjpais/Handy/blob/main/src-tauri/tauri.conf.json)
+
+不仅有 updater，还有：
+
+```text
+Linux:
+  deb
+  rpm
+  AppImage
+
+Windows:
+  NSIS
+
+macOS:
+  signing
+```
+
+甚至 Windows 代码签名命令都直接进入了 production config。
+
+这说明成熟桌面产品的工程边界实际上不是：
+
+```text
+cargo build
+```
+
+而是：
+
+```text
+Build
+ ↓
+Bundle
+ ↓
+Code Signing
+ ↓
+Installer
+ ↓
+Release
+ ↓
+Updater metadata
+ ↓
+Auto Update
+```
+
+所以我们以后评估 GUI 框架时，必须把这一整条链算进去。
+
+这也是为什么我现在比以前更倾向 Tauri。
+
+---
+
+# 7. SQLite 的出现频率比我原先预期还高
+
+24 个混合产品样本里面，直接找到 SQLite 的有 **9 个，37.5%**。
+
+而且样本还包含 Qdrant、SurrealDB 这类根本不以 SQLite 为主要数据库的服务产品，所以如果只统计“桌面/本地产品”，比例会明显更高。
+
+很典型的是：
+
+### CC Switch
+
+[src-tauri/Cargo.toml](https://github.com/farion1231/cc-switch/blob/main/src-tauri/Cargo.toml)
+
+直接：
+
+```text
+rusqlite
+bundled
+backup
+hooks
+```
+
+### GitButler
+
+[Cargo.toml](https://github.com/gitbutlerapp/gitbutler/blob/master/Cargo.toml)
+
+明确写：
+
+```text
+rusqlite
+features = ["bundled"]
+```
+
+并且项目本身还有：
+
+```text
+but-db
+but-settings
+but-secret
+```
+
+也就是说它甚至很明确地区分：
+
+```text
+Database
+Settings
+Secrets
+```
+
+### Screenpipe
+
+更典型：
+
+```text
+SQLx
+SQLite
+rusqlite
+bundled SQLite
+```
+
+而且专门控制 SQLite C library 的版本统一。
+
+这告诉我们一个非常实用的产品设计原则：
+
+> **桌面应用不要把 JSON 配置文件当数据库用。**
+
+简单配置：
+
+```text
+TOML / JSON
+```
+
+真正有：
+
+历史记录、项目数据、索引、版本、关系、缓存、搜索
+
+的时候：
+
+```text
+SQLite
+```
+
+非常自然。
+
+---
+
+# 8. Rust 桌面项目开始形成一种“Native Island”架构
+
+这轮我认为这是最重要的新发现之一。
+
+不再是二选一：
+
+```text
+Tauri
+
+VS
+
+Native Rust GUI
+```
+
+而是：
+
+```text
+Web UI
++
+Tauri App Shell
++
+Native Rust Core
++
+Native GPU / Media Island
+```
+
+最典型就是 **Cap**。
+
+它的 Cargo：
+
+[Cap/Cargo.toml](https://github.com/CapSoftware/Cap/blob/main/Cargo.toml)
+
+同时存在：
+
+```text
+Tauri
+Tokio
+wgpu
+FFmpeg
+```
+
+前端又是：
+
+```text
+React
+TypeScript
+```
+
+也就是说：
+
+```text
+普通 UI
+    ↓
+React
+
+系统接口
+    ↓
+Tauri
+
+核心业务
+    ↓
+Rust
+
+视频处理
+    ↓
+FFmpeg
+
+GPU workload
+    ↓
+wgpu
+```
+
+这其实是非常成熟的架构思想。
+
+不是因为 GPU 很酷就：
+
+> “全 App 用 wgpu。”
+
+而是只有真正需要 GPU 的部分才用。
+
+---
+
+# 9. 这对 MonoOLED-Studio 非常重要
+
+比如 Pixel Studio。
+
+以前我们可能会想：
+
+> Pixel Studio 要实时绘制，所以是不是整个软件都应该 egui / GPUI / Floem？
+
+现在从这些产品看，我反而认为没有必要。
+
+可以这样：
+
+```text
+MonoOLED Studio
+│
+├── React UI
+│
+│   ├── Settings
+│   ├── Project
+│   ├── Device
+│   ├── Font
+│   ├── Inspector
+│   ├── Dialog
+│   └── Toolbar
+│
+├── Canvas
+│   │
+│   ├── Web Canvas
+│   └── GPU Island   ← 真有性能需求才加
+│
+└── Rust
+    │
+    ├── Serial
+    ├── USB
+    ├── Protocol
+    ├── Image Processing
+    ├── Font Engine
+    ├── OLED Encoding
+    ├── SQLite
+    └── Project Model
+```
+
+第一阶段甚至可以：
+
+```text
+Canvas 2D
+```
+
+先做。
+
+如果真实 profiling 显示瓶颈，再：
+
+```text
+wgpu
+```
+
+这比一开始全盘 GPUI，要稳健得多。
+
+---
+
+# 10. Native Rust GUI 其实已经分成了几个不同哲学
+
+继续检查之后，这几个框架不能再简单放一张排行榜。
+
+### egui
+
+技术结构：
+
+```text
+egui
+ ├── egui-winit
+ ├── egui-wgpu
+ └── egui-glow
+```
+
+官方 workspace 里现在同时支持：
+
+`wgpu + winit + glow + wasm`
+
+[egui/Cargo.toml](https://github.com/emilk/egui/blob/main/Cargo.toml)
+
+它非常适合：
+
+```text
+Inspector
+debugger
+engineering tool
+visualizer
+internal tool
+data UI
+```
+
+它的核心优势是：
+
+> 开发速度。
+
+---
+
+### iced
+
+Iced 当前默认 features 里面直接存在：
+
+```text
+wgpu
+tiny-skia
+```
+
+而且其说明中明确：
+
+```text
+wgpu renderer:
+Vulkan
+Metal
+DX12
+OpenGL
+WebGPU
+```
+
+[iced/Cargo.toml](https://github.com/iced-rs/iced/blob/master/Cargo.toml)
+
+这意味着 iced 更接近：
+
+> 正常 declarative application framework。
+
+所以如果一定坚持：
+
+**Pure Rust Desktop**
+
+那么我现在会优先认真考察：
+
+**Iced**
+
+而不是 GPUI。
+
+---
+
+### GPUI
+
+GPUI 最大优势还是：
+
+Zed。
+
+但问题也是：
+
+Zed。
+
+它的生态、组件、文档、使用场景仍然非常围绕 Zed 自身。
+
+GPUI 更像：
+
+```text
+一个优秀产品孵化出来的框架
+```
+
+而不是目前已经像 React/Tauri 那样的：
+
+```text
+通用应用平台
+```
+
+所以我现在不会建议 MonoOLED 默认押 GPUI。
+
+---
+
+### Floem
+
+Lapce 使用 Floem + wgpu。
+
+它也证明：
+
+> 纯 Rust 做复杂 IDE 完全可行。
+
+但它目前面临和 GPUI 类似的问题：
+
+生态规模。
+
+如果产品本身不是 GUI framework research project，就需要谨慎。
+
+---
+
+# 11. Slint 是一个我们之前低估了的方向
+
+这次把 Slint 的 workspace 也拆开看了一下。
+
+它已经拥有：
+
+```text
+Winit backend
+Qt backend
+Linux KMS
+Android
+Skia renderer
+FemtoVG renderer
+Software renderer
+wgpu
+```
+
+[Slint/Cargo.toml](https://github.com/slint-ui/slint/blob/master/Cargo.toml)
+
+这与 egui/iced 最大不同是：
+
+Slint 本身明显是按照：
+
+> **产品 GUI / embedded GUI**
+
+去设计的。
+
+它甚至有软件 renderer。
+
+所以对于：
+
+嵌入式设备 UI、工业软件、硬件控制软件
+
+Slint 应该被单独放进候选。
+
+不过它的 licensing 模型也必须认真研究，不能只看技术。
+
+所以对我们这种嵌入式工程背景，后面我会专门把：
+
+**Tauri / Iced / Slint**
+
+三者放在一起做一次工程对照。
+
+---
+
+# 12. 一个非常有意思的现象：wgpu 已经逐渐成为 Rust GPU 抽象层
+
+现在看到：
+
+Zed → wgpu  
+Lapce → wgpu  
+Rerun → wgpu  
+Iced → wgpu  
+egui → wgpu backend  
+Graphite → wgpu  
+Cap → wgpu  
+Dioxus → 可接 wgpu  
+Slint → wgpu backend
+
+所以如果我们的产品未来需要：
+
+```text
+GPU Canvas
+图像
+实时曲线
+大量像素
+2D/3D
+视频
+Visualization
+```
+
+现在相对合理的底层选择已经非常明显：
+
+> **wgpu**
+
+而不是直接分别写：
+
+```text
+DirectX
+Metal
+Vulkan
+OpenGL
+```
+
+这也是 Rust 跨平台图形生态里非常重要的收敛。
+
+---
+
+# 13. 但是不要因此到处用 wgpu
+
+这也是高星项目教给我们的另一件事。
+
+24 个产品样本：
+
+直接依赖 wgpu 的只有 3 个。
+
+也就是说真正成熟的工程并不会因为：
+
+> “wgpu 很快”
+
+就把 UI 全部迁过去。
+
+这是典型的：
+
+```text
+Use GPU where GPU matters.
+```
+
+而不是：
+
+```text
+Use GPU because GPU exists.
+```
+
+对 MonoOLED 这种 128×64、128×128、256×64 一类 OLED 编辑场景尤其如此。
+
+几十万甚至几百万像素实时 Canvas，Web Canvas 本身可能都绰绰有余。
+
+所以不要提前优化。
+
+---
+
+# 14. Backend 技术栈实际上比 GUI 更收敛
+
+继续看 Qdrant / InfluxDB / Lemmy / Vaultwarden / SurrealDB / Komodo。
+
+真正形成共识的是：
+
+```text
+Tokio
+Serde
+Tracing
+Reqwest
+Rustls
+```
+
+但 HTTP server framework 并没有形成绝对赢家。
+
+我实际看到：
+
+| 产品 | HTTP |
+|---|---|
+| Qdrant | Actix Web |
+| Lemmy | Actix Web |
+| Komodo | Axum |
+| Vaultwarden | Rocket |
+| InfluxDB | Hyper |
+| SurrealDB | Hyper / Axum integration |
+
+所以：
+
+> “Axum 是不是最好的？”
+
+本身不是特别重要的问题。
+
+真正重要的是整个：
+
+```text
+Tower / Tokio ecosystem
+```
+
+以及：
+
+```text
+Serde
+Tracing
+Rustls
+Reqwest
+```
+
+---
+
+# 15. Reqwest 19/24 这个数字其实很值得注意
+
+**79.2%**。
+
+这说明 Rust 产品的 HTTP Client 已经非常高度集中。
+
+以后我们如果要做：
+
+```text
+云同步
+版本检查
+API
+模型下载
+插件下载
+Telemetry
+License
+Remote Device
+```
+
+默认可以先：
+
+```rust
+reqwest
+```
+
+而不是重新研究五六个 HTTP Client。
+
+同理 TLS：
+
+```text
+rustls
+```
+
+已经非常常见。
+
+---
+
+# 16. Tracing 也已经成为生产代码的标配之一
+
+24 个样本：
+
+**17/24 = 70.8%**
+
+而没有的项目里面又有很多是简单 CLI。
+
+对于复杂产品：
+
+Zed  
+Spacedrive  
+Cap  
+GitButler  
+Screenpipe  
+Rerun  
+Neovide  
+Atuin  
+Anki  
+Qdrant  
+SurrealDB  
+Vaultwarden  
+Lemmy  
+Komodo  
+InfluxDB  
+Yazi  
+Clash Verge
+
+都能看到 tracing。
+
+所以我们重构 MonoOLED 时，不应该再：
+
+```rust
+println!("xxx");
+```
+
+而应该从第一天：
+
+```text
+tracing
+tracing-subscriber
+```
+
+并给模块化 span：
+
+```text
+device
+serial
+protocol
+font
+image
+project
+storage
+ui-command
+```
+
+这比以后再补日志体系健康得多。
+
+---
+
+# 17. Rust 产品还有一个越来越明显的趋势：Workspace 化
+
+Zed、Jan、Spacedrive、Cap、GitButler、Screenpipe、Qdrant、SurrealDB……
+
+几乎所有稍复杂产品最后都会进入：
+
+```text
+Cargo Workspace
+```
+
+而不是：
+
+```text
+src/
+ └── main.rs
+```
+
+原因非常现实。
+
+一个真正的软件很快就会出现：
+
+```text
+app
+core
+protocol
+database
+platform
+api
+cli
+ui bridge
+tests
+```
+
+所以对于 MonoOLED V2，我会建议一开始就保持“小而清晰的 workspace”，但不要过度拆。
+
+类似：
+
+```text
+monooled-studio/
+│
+├── Cargo.toml
+│
+├── crates/
+│   │
+│   ├── monooled-core
+│   ├── monooled-device
+│   ├── monooled-image
+│   └── monooled-storage
+│
+└── apps/
+    └── desktop
+        ├── src/
+        └── src-tauri/
+```
+
+注意：
+
+不是 20 个 crate。
+
+先 4 个左右。
+
+---
+
+# 18. 我现在基本能画出“2026 Rust 产品选型树”了
+
+```text
+我要做 Rust 产品
+│
+├── CLI
+│   │
+│   └── Clap
+│       + Serde
+│       + Tokio（需要 async 才加）
+│
+├── TUI
+│   │
+│   └── Ratatui
+│       + Crossterm
+│       + Clap
+│       + Tokio
+│
+├── Backend
+│   │
+│   └── Tokio
+│       + Axum / Actix / Hyper
+│       + Serde
+│       + Tracing
+│       + Reqwest
+│       + Rustls
+│
+├── 普通桌面软件
+│   │
+│   └── Tauri 2
+│       + React / Svelte
+│       + TypeScript
+│       + Vite
+│       + Rust Core
+│       + SQLite
+│
+├── 工程/数据工具
+│   │
+│   ├── egui
+│   └── iced
+│
+├── 高性能自绘 GUI
+│   │
+│   ├── iced
+│   ├── Floem
+│   ├── GPUI
+│   └── wgpu
+│
+├── 嵌入式 / 工业 GUI
+│   │
+│   └── Slint
+│
+└── Desktop + Mobile
+    │
+    ├── Tauri 2
+    │
+    └── Flutter + Rust Core
+```
+
+现在已经不是简单的“Rust GUI 框架排行”。
+
+而是：
+
+**产品类型 → 合适的 Rust 架构。**
+
+---
+
+# 19. 对我们自己的 Rust 产品，我会把候选正式收敛成三个层级
+
+结合我们现在正在做的 **MonoOLED-Studio V2**，以及这一轮实际高星项目数据，我已经不建议平行研究十几个 GUI 框架。
+
+我认为只需要保留：
+
+| 路线 | 定位 | 对 MonoOLED |
+|---|---|---|
+| **Tauri 2 + React + Rust** | 产品优先 | **主方案** |
+| **Iced + Rust** | Pure Rust GUI | 备选验证 |
+| **Slint + Rust** | 工业/嵌入式 GUI | 特殊备选 |
+| egui | 工程工具 UI | 可参考，不作为主产品 UI |
+| GPUI | 高性能 Native | 暂不押注 |
+| Floem | Native Rust | 暂不押注 |
+| GTK | Linux/传统 Native | 不适合作为跨平台主方案 |
+
+这里不是给这些框架打“好坏分”，而是针对 **MonoOLED 的需求匹配关系**。
+
+---
+
+# 20. 我现在对 MonoOLED 的 V2 技术基线会定成这样
+
+```text
+MonoOLED Studio V2
+
+Frontend
+────────────────────────
+React
+TypeScript
+Vite
+CSS / component system
+
+Desktop Runtime
+────────────────────────
+Tauri 2
+
+Rust Core
+────────────────────────
+Tokio
+Serde
+Tracing
+thiserror / anyhow
+
+Device
+────────────────────────
+serialport / tokio-serial
+USB abstraction
+
+Storage
+────────────────────────
+SQLite
+rusqlite or SQLx
+
+Networking
+────────────────────────
+Reqwest
+Rustls
+
+Image
+────────────────────────
+image crate
+
+Heavy Rendering
+────────────────────────
+暂不使用 wgpu
+
+如果 profiling 证明 Canvas 是瓶颈
+        ↓
+再局部加入 wgpu
+```
+
+这里最关键的是：
+
+> **不要把 UI 框架决定和 Rust 核心架构绑死。**
+
+我们的真正资产应该是：
+
+```text
+monooled-core
+monooled-device
+monooled-image
+monooled-storage
+```
+
+UI 可以换。
+
+这样以后即便：
+
+React → Svelte
+
+甚至：
+
+Tauri → Iced
+
+核心层也不需要重写。
+
+这才是我从 Zed、Cap、GitButler、Jan、Spacedrive 这些复杂 Rust 产品里看到的真正值得学习的地方。
+
+---
+
+## 这一轮调研后的最大变化
+
+上一轮我们主要得到：
+
+> Tauri 是高星 Rust 桌面产品非常常见的方案。
+
+这一轮进一步得到的是：
+
+> **真正成熟的 Rust 产品并不追求“尽可能 Rust”，而是追求“Rust 放在最有价值的地方”。**
+
+UI 有成熟 Web 技术，就用 Web。
+
+业务核心需要可靠性，就 Rust。
+
+设备通信需要 native，就 Rust。
+
+需要 GPU，才 wgpu。
+
+需要本地数据库，就 SQLite。
+
+需要 async，就 Tokio。
+
+需要网络，就 Reqwest + Rustls。
+
+需要结构化日志，就 Tracing。
+
+这已经是一套相当稳定的产品工程哲学。
+
+下一阶段最值得继续往下做的，不是再随机翻仓库，而是把这 **253 个 `>10K Star` Rust 仓库正式做“分层分类”**：区分「最终用户产品 / 开发者工具 / Server / Database / Framework / Library / Language / 教程」，然后只针对真正的产品仓库统计 GUI、Tokio、存储、IPC、更新、安装包、测试、CI、商业模式。这样我们最终可以得到一份真正有统计意义的 **《2026 GitHub 10K+ Rust 产品技术栈普查》**，也能进一步回答“Rust 最适合拿来做什么产品，而不只是用什么框架”。
