@@ -97,13 +97,13 @@ crates/firmwaresight-artifact: 28    crates/firmwaresight-report: 17    crates/f
 `DIRECTORY_TREE.txt` and `SHA256SUMS` still describe the frozen v0.5.1 package, so the source layout
 P0 created is recorded here instead of being written over a baseline artifact.
 
-133 files added since start HEAD `e086e98`, by top-level area:
+134 files added since start HEAD `e086e98`, by top-level area:
 
 | Area | Files | What is in it |
 | --- | --- | --- |
 | `apps/` | 49 | `cli/` (`fwsight`), `desktop/src-tauri/` (shell, IPC DTOs, capability, icons, parity tests), `desktop/ui/` (React summary, generated bindings, tests) |
 | `crates/` | 30 | the four Phase-0 libraries and their test suites |
-| `P0_TECHNICAL_VALIDATION/` | 18 | this evidence pack: the 17 the prompt names plus the takeover provenance doc |
+| `P0_TECHNICAL_VALIDATION/` | 19 | this evidence pack: the 17 the prompt names, plus the takeover provenance doc and the AGENTS.md 11 design checklist |
 | `fixtures/` | 14 | two real ELF fixtures with sources and `fixture.toml`, four malformed inputs, manifest |
 | `scripts/` | 8 | the gate, fixture and workload generators, golden updater, token and icon generators |
 | `golden/` | 5 | CLI and Core goldens, plus `reports/README.md` explaining what may live there |
