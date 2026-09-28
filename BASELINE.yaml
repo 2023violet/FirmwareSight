@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.5.1
   date: 2026-09-28
-  status: P0_EXECUTED_CONDITIONAL_PASS_LOCAL_V0_DEFERRED_UNVALIDATED
+  status: P0_FAIL_REMOTE_CI_RUN_1_REMEDIATION_ACTIVE_V0_DEFERRED_UNVALIDATED
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_DEFERRED_P0_CONDITIONAL_PASS_LOCAL
+  current_gate: G0_PASS_V0_DEFERRED_P0_FAIL_REMOTE_CI_RUN_1
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
     - P0_technical_vertical_slice
@@ -93,10 +93,10 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# Set to NONE when the P0 track closed on 2026-09-28. The slice reached its stop condition; the
-# two open items are external to this environment (see p0_execution.open_conditions), and P1 needs
-# its own authorization prompt. AGENTS.md 1: with no active task, do not invent product work.
-active_task: NONE
+# Open again on 2026-09-28: remote CI Run #1 failed four jobs on the tree P0 delivered, so the
+# active work is the architect-issued CI closure remediation, not new product scope.
+# AGENTS.md 1 still forbids inventing business functions beyond that prompt.
+active_task: P0_CI_CLOSURE_REMEDIATION
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -130,24 +130,43 @@ p0_execution:
   # and changes documentation only; see P0_EXECUTION_PROVENANCE.md "Final validated HEAD".
   final_validated_head: 65cb2dc
   commits_to_validated_tree: 6
-  remote_state: origin/main unchanged at e086e98; no push authorized, none performed
-  status: EXECUTED_CONDITIONAL_PASS_LOCAL
+  # Superseded on 2026-09-28 by the first real remote run: the push happened, and the gate that
+  # passed here failed there. See `last_remote_ci` and P0_CI_REPORT.md.
+  remote_state: pushed as f9b8ccb; Remote CI Run #1 executed and concluded failure
+  # FAIL, not CONDITIONAL_PASS: four of six CI jobs failed on the tree this file describes. A red
+  # remote run is a measured result, so the local-only qualifier no longer applies.
+  status: FAIL
+  evidence_status: FAIL
+  remediation_state: ACTIVE
+  remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
+  last_remote_ci:
+    run_id: 36360310447
+    head: f9b8ccba7d9326ac397675602beb3a7e9c3bcd02
+    event: push
+    conclusion: failure
+    passed_jobs: ["Desktop UI (windows-latest)", "Desktop UI (ubuntu-latest)"]
+    failed_jobs: ["Rust (windows-latest)", "Rust (ubuntu-latest)", "Generated output drift", "Dependency policy"]
+    log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
   closed: 2026-09-28
   allowed_final_statuses: [PASS, CONDITIONAL_PASS, FAIL, BLOCKED]
   library_crate_budget: 4
   library_crates_built: 4
   gate_command: python scripts/check.py
-  gate_result: 14/14 steps passed locally, one of them an explicit cargo-deny SKIPPED
+  gate_result: 14/14 locally on 65cb2dc (cargo-deny reported SKIPPED there); 2 of 6 CI jobs green on f9b8ccb
   tests: { rust: 102, ui: 19 }
-  # CONDITIONAL, not PASS: these are outside what this environment can observe. They are not
-  # unfinished code, and closing them is an authorization question, not an engineering one.
-  open_conditions:
-    - CI has never run; .github/workflows/p0-check.yml has no execution history
-    - cargo deny has never run; the tool is not installed and installing it was not authorized
-    - peak RSS is NOT MEASURED, reason recorded in P0_PERFORMANCE_REPORT.md
-    - the desktop window was never opened on a real display
+  # What still separates this tree from a P0 PASS. Each is an observable outcome, not an
+  # authorization question: remote CI Run #1 answered the first two by failing them.
+  promotion_conditions:
+    - Remote CI green on the remediation HEAD (Rust windows + ubuntu, Desktop UI, drift, deny, macOS core smoke)
+    - cargo-deny executing as part of CI with a real PASS, not a skipped or deserialized-failure step
+    - The desktop window opening once on a real display in its shipping configuration
+  # Recorded separately because the P0 prompt accepted an unmeasured number with a stated reason.
+  # This is a measurement gap, not a promotion blocker.
+  non_blocking_measurement_gaps:
+    - peak RSS is NOT MEASURED; reason and the measurements that do exist are in P0_PERFORMANCE_REPORT.md
   push_authorized: false
-  remote_state_changed: false
+  push_performed_by: repository owner, who pushed f9b8ccb and triggered Run #1
+  remote_state_changed: true
   baseline_version_after_p0: 0.5.1
   target_baseline_on_pass: 0.6.0
   v0_6_0_released: false

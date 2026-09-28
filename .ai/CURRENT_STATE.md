@@ -20,24 +20,29 @@ The P0 slice created the first production code; nothing in the baseline was rene
 
 ## P0 — Technical Vertical Slice
 
-Status: `EXECUTED — CONDITIONAL_PASS (LOCAL)`
+Status: `FAIL — REMOTE CI RUN #1` · Remediation: `ACTIVE`
 
-The source tree exists and the slice's claim is proven by executed tests: 102 Rust tests, 19 UI
-tests, one shared gate script, real ELF/MAP fixtures with recorded provenance, deterministic CLI
-JSON, memory accounting reproduced by hand from `readelf`, a typed IPC boundary with generated
-TypeScript, SQLite migrations and transactional import, and a 512 MiB guard measured from both
-sides of the boundary.
+The source tree exists and its claims are proven by executed tests: 102 Rust tests, 19 UI tests,
+one shared gate script, real ELF/MAP fixtures with recorded provenance, deterministic CLI JSON,
+memory accounting reproduced by hand from `readelf`, a typed IPC boundary with generated TypeScript,
+SQLite migrations and transactional import, and a 512 MiB guard measured from both sides of the
+boundary. None of that is in question.
 
-Three conditions stay open, and all three are authorizations rather than engineering unknowns:
+What is in question is that the same tree fails on the platforms that were not measured locally.
+`origin/main` at `f9b8ccb` ran `.github/workflows/p0-check.yml` as run `36360310447`; it concluded
+`failure` with two jobs green and four red:
 
-| # | Condition | Blocked by |
-| --- | --- | --- |
-| C1 | The CI workflow has never executed | no push authorization in this task |
-| C2 | `cargo deny` has never run | installing the tool was not authorized |
-| C3 | The desktop window has never been opened | starting a GUI in the user's session was not authorized |
+| Job | Observed cause |
+| --- | --- |
+| Rust (windows-latest) | `committed_fixtures_match_their_recorded_hashes` — Git smudged `p0-dual-region.ld` from LF to CRLF at checkout, so the bytes no longer match the recorded hash |
+| Rust (ubuntu-latest) | `glib-sys` build script: `pkg-config cannot find glib-2.0` — the runner has none of the Tauri Linux system prerequisites |
+| Generated output drift | `scripts/gen_desktop_icons.py --check` compares raw encoder bytes; Pillow's zlib output differs between OSes while the pixels do not |
+| Dependency policy | `deny.toml` is not parseable by `cargo-deny 0.20.2`: `[bans] highlight-warnings` is not a supported key and five `licenses.allow` entries are slash strings, not SPDX |
 
-Full reasoning: `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`; per-item evidence:
-`P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`.
+A fifth gap came from the frozen baseline rather than from a red job: `05_ENGINEERING/06_CI_CD_BASELINE.md`
+requires a macOS core smoke on `main` push, and the workflow has no macOS job at all.
+
+Per-run evidence, retained as failed history rather than rewritten: `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md`.
 
 ## V0
 
@@ -67,30 +72,39 @@ does not close this gap. P0 changed no V0 artifact and no V0 recommendation.
 ```text
 G0: PASS
 V0: DEFERRED / UNVALIDATED (0 of 8 eligible external sessions)
-P0: EXECUTED — CONDITIONAL_PASS (LOCAL); C1 CI run, C2 cargo-deny run, C3 desktop launch open
+P0: FAIL — REMOTE CI RUN #1 (2 of 6 jobs green); remediation ACTIVE
 Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS)
 P1: NOT AUTHORIZED
 ```
 
+Full reasoning: `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`; per-item evidence:
+`P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`; run log: `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md`.
+
 ## Version rule
 
-`v0.6.0` is not created unless P0 reaches `PASS` with real engineering evidence. P0's final status
-is `CONDITIONAL_PASS`, so `baseline_version` stays `0.5.1`. A conditional result must not be
-relabeled into a PASS baseline.
+`v0.6.0` is not created unless P0 reaches `PASS` with real engineering evidence. P0's current
+status is `FAIL`, so `baseline_version` stays `0.5.1`. A failed run must not be relabeled into a
+PASS baseline, and a locally green gate must not be relabeled into a CI PASS.
 
 ## Next work
 
-Nothing may be started without authorization. The three open conditions are closed by actions, not
-by edits:
+`active_task` is the CI closure remediation authorized by the architect prompt, and its scope ends
+where that prompt ends. The five things it must fix, all measured rather than assumed:
 
-1. authorize a push so `p0-check.yml` runs on `main`;
-2. let the `deny` job execute `cargo-deny@0.20.2`;
-3. launch `cargo run --release -p firmwaresight-desktop --features custom-protocol` once, after
-   `pnpm -C apps/desktop/ui build`, and confirm the summary screen. Without that feature the binary
-   is a dev-mode build that expects the Vite dev server, so the launch would prove nothing about the
-   shipped configuration.
+1. the Git text policy that lets a checkout change fixture bytes;
+2. the Ubuntu runner's missing Tauri system prerequisites, fixed by installing them rather than by
+   narrowing `clippy` coverage;
+3. an icon drift check that compares pixels instead of third-party encoder output;
+4. a `deny.toml` that `cargo-deny 0.20.2` can actually parse, then a real license/ban/advisory run;
+5. the macOS core smoke the CI baseline requires and the workflow omits.
 
-If all three come back clean, P0 may be re-statused to `PASS` and v0.6.0 delivered. If any fails,
-the status becomes `FAIL` or `BLOCKED` and the baseline stays at v0.5.1.
+Then the desktop window launch, which is now an explicit part of this round:
+`pnpm -C apps/desktop/ui build` followed by
+`cargo run --release -p firmwaresight-desktop --features custom-protocol`. Without that feature the
+binary is a dev-mode build that expects the Vite dev server, so the launch would prove nothing about
+the shipped configuration.
+
+Pushing the remediation is the owner's action. Only a new Actions run on the new HEAD can turn P0
+into `PASS`, and only then may `v0.6.0` be considered.
 
 V0 resumes only when a real eligible participant/session source exists.

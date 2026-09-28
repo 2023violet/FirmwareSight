@@ -8,12 +8,12 @@ owner: "Engineering"
 last_updated: "2026-09-28"
 ---
 
-# Handoff — FirmwareSight v0.5.1 / P0 executed, CONDITIONAL_PASS (LOCAL)
+# Handoff — FirmwareSight v0.5.1 / P0 FAIL on remote CI Run #1, remediation ACTIVE
 
 ## Purpose
 
-Execute the P0 Technical Vertical Slice to its stop condition, then stop. The slice has reached that
-stop condition; nothing further in P0 is open except the two items listed below.
+Remediate what the first real CI run exposed, then stop before promotion. The P0 slice reached its
+own stop condition and was pushed; remote CI then measured it, and four of six jobs failed.
 
 ## Read first
 
@@ -37,25 +37,35 @@ V0 status summary only (do not re-run V0 from this handoff):
 
 ## Current state
 
-P0 final status: **`EXECUTED — CONDITIONAL_PASS (LOCAL)`**. Baseline stays at `0.5.1`; `v0.6.0` is
-reserved for an unconditional `PASS`, and `P0_EXIT_CHECKLIST.md` names the conditions.
+P0 status: **`FAIL — REMOTE CI RUN #1`**, remediation **`ACTIVE`**. Baseline stays at `0.5.1`;
+`v0.6.0` is reserved for an unconditional `PASS` on a *new* all-green Actions run.
 
-What is proven locally: 102 Rust tests and 19 UI tests, a single gate
+What is proven and stays proven: 102 Rust tests and 19 UI tests, a single gate
 (`python scripts/check.py`) that CI calls unchanged - 14 steps on a tree that already has the built
-frontend, 16 when it has to build that too, and 16/16 green from `cargo clean` - real ARM ELF/MAP
-fixtures with recorded provenance, deterministic CLI JSON, memory accounting reproduced by hand from
-`readelf`, a typed ts-rs IPC boundary, SQLite migrations with transactional import, a 512 MiB guard
-measured from both sides of the boundary, and Core/CLI/Desktop parity on the same bytes.
+frontend, 16 when it has to build that too - real ARM ELF/MAP fixtures with recorded provenance,
+deterministic CLI JSON, memory accounting reproduced by hand from `readelf`, a typed ts-rs IPC
+boundary, SQLite migrations with transactional import, a 512 MiB guard measured from both sides of
+the boundary, and Core/CLI/Desktop parity on the same bytes.
 
-What is not proven, and why nobody here could prove it:
+What the first remote run falsified, with the cause measured rather than guessed:
 
-| Open | Closes when |
-| --- | --- |
-| CI has never run | someone with push authorization runs `.github/workflows/p0-check.yml` |
-| `cargo deny` never ran | the same run, or `cargo install cargo-deny@0.20.2 --locked` locally |
-| Peak RSS not measured | a measurement tool is authorized; see `P0_PERFORMANCE_REPORT.md` |
-| The window was never opened | a human runs the desktop app on a real display |
-| Two design-checklist findings are open: capability labels show Core's enum words, and eight `1px` borders have no token | the first is a boundary decision about who owns user-facing wording; the second needs a `design-tokens.json` version bump, a frozen-asset change P0 may not make. Two others the same pass found - no live region, and a `select` with only hover and focus - were fixed and are covered by a test. `P0_DESIGN_CHECKLIST.md` records all four with the commands that found them |
+| Failed job | Cause | Status |
+| --- | --- | --- |
+| Rust (windows-latest) | `*.ld` is absent from `.gitattributes`, so `core.autocrlf=true` rewrote the checkout from the recorded LF bytes to CRLF | under repair |
+| Rust (ubuntu-latest) | `glib-sys`: `pkg-config cannot find glib-2.0` - the runner lacks the Tauri Linux prerequisites | under repair |
+| Generated output drift | the icon check compares Pillow's compressed bytes, which move with encoder settings across OSes while pixels do not | under repair |
+| Dependency policy | `cargo-deny 0.20.2` cannot parse `deny.toml`: unsupported `highlight-warnings`, five non-SPDX `allow` entries | under repair |
+| (missing job) | `05_ENGINEERING/06_CI_CD_BASELINE.md` requires a macOS core smoke on `main` push | being added |
+
+Peak RSS is `NOT MEASURED`, with the reason in `P0_PERFORMANCE_REPORT.md`. That is a measurement gap
+the original P0 prompt accepted, not a promotion blocker; the promotion blockers are the five rows
+above plus one real desktop window launch.
+
+Two design-checklist findings stay open and are not CI failures: capability labels show Core's enum
+words, a boundary decision about who owns user-facing wording; and eight `1px` borders have no
+token, which needs a frozen-asset `design-tokens.json` bump P0 may not make. Two others the same
+pass found - no live region, and a `select` with only hover and focus - were fixed and are covered by
+a test. `P0_DESIGN_CHECKLIST.md` records all four with the commands that found them.
 
 V0:
 
@@ -69,6 +79,10 @@ real participants. Deferral is not completion.
 - Core stays headless and synchronous: no Tauri, rusqlite, Tokio types or `object::*` leakage.
 - No Compare/Gate/Bundle product workflow, no cloud/auth/telemetry/updater/wgpu/SQLx, no E1/E2/E3/GX.
 - `v0.6.0` only on a real P0 `PASS`.
+- This round ends at a local commit. Pushing belongs to the owner, and no `REMOTE CI PASS` may be
+  written before an all-green run exists on the HEAD that was pushed.
+- Fixing a CI failure never means editing the assertion: no expected fixture hash moves to absorb a
+  checkout conversion, no dependency check becomes optional, no Ubuntu desktop coverage is dropped.
 - P1 requires a separate authorization prompt. Do not enter it.
 
 ## Continuation rules

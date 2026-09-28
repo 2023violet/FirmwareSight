@@ -3,7 +3,7 @@ title: "Active Task"
 doc_id: "FS-AI-005"
 product: "FirmwareSight"
 version: "0.5.1"
-status: "EXECUTION_RECORD"
+status: "ACTIVE_TASK"
 owner: "Engineering"
 last_updated: "2026-09-28"
 ---
@@ -11,62 +11,67 @@ last_updated: "2026-09-28"
 # ACTIVE TASK
 
 ```text
-NONE
+P0_CI_CLOSURE_REMEDIATION
 ```
 
-The P0 Technical Vertical Slice - the task this file carried - reached its stop condition on
-2026-09-28 with final status `CONDITIONAL_PASS (LOCAL)`. No new business function may be created
-from here; `AGENTS.md` 1 forbids inventing work while this file reads `NONE`.
+`FirmwareSight P0 — CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect
+Reviewed)`. Target: `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE CI RERUN`. Not P1, not `v0.6.0`,
+not a P0 `PASS` claim.
 
-## Awaiting authorization (not tasks until authorized)
+## Why this task exists
 
-| Ref | Action | Why it is not being done here |
-| --- | --- | --- |
-| C1 | Let `.github/workflows/p0-check.yml` run on `main` | requires a push, and none was authorized |
-| C2 | Let the `deny` job execute `cargo deny` | same push, or explicit permission to install the tool locally |
-| C3 | Launch `firmwaresight-desktop` once and confirm the summary screen on a real display | starting a GUI in the user's session needs a yes |
-| - | Promote P0 from `CONDITIONAL_PASS` to `PASS` and cut `v0.6.0` | only valid after C1-C3 close |
-| - | P1 | requires its own execution prompt |
+The P0 slice reported `CONDITIONAL_PASS (LOCAL)` because its three open conditions were outside the
+authoring environment. The repository owner pushed `f9b8ccb`, remote Actions run `36360310447`
+executed, and it concluded `failure` with two of six jobs green. Two of those conditions were then
+tested and failed, so the honest status is `FAIL — REMOTE CI RUN #1`.
 
-## What P0 proved
+| Failure | Root cause, measured |
+| --- | --- |
+| Rust (windows-latest) | `.gitattributes` has no rule for `*.ld`, so `core.autocrlf=true` smudged the checkout from the recorded LF bytes to CRLF and the fixture hash test compared different bytes |
+| Rust (ubuntu-latest) | No Tauri Linux system prerequisites on the runner; `glib-sys` fails at `pkg-config cannot find glib-2.0` before the tests run |
+| Generated output drift | `scripts/gen_desktop_icons.py --check` asserts byte equality against Pillow's compressed output, which is encoder-state dependent across OSes |
+| Dependency policy | `deny.toml` does not parse under `cargo-deny 0.20.2`: unsupported `[bans] highlight-warnings` key, and five `licenses.allow` entries are slash strings instead of SPDX |
+| (no job) | `05_ENGINEERING/06_CI_CD_BASELINE.md` requires a macOS core smoke on `main` push; the workflow has none |
 
-- One headless Core produces the same facts for the CLI and the Desktop, asserted field by field
-  against a committed golden.
-- ADR-0021's two budgets are demonstrable on real linker output, and the evidence ladder changes
-  the *strength* of the claim when the MAP is withheld while the numbers stay the same.
-- The 512 MiB guard refuses an oversized artifact before allocating for it (measured: 7.7 ms, no
-  hash time), and the whole slice stays within the frozen architecture with no ADR required.
+## Scope
 
-Evidence: `P0_TECHNICAL_VALIDATION/` - 19 files: the 17 documents the prompt names, plus
-`P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by AGENTS.md 11.
+Ten ordered phases: governance truth sync; fixture text policy; pixel-based icon drift check;
+cargo-deny schema and real license run; Ubuntu prerequisites; macOS core smoke; full local
+regression; one real desktop window launch; evidence refresh; small local commits, then stop.
 
-## Durable facts preserved by this change
+Authorized within this task: installing `cargo-deny@0.20.2`, running the four `cargo deny` checks,
+and starting the desktop app once in the current user session with `--features custom-protocol`.
 
-V0 remains `DEFERRED / NOT YET EVIDENCE-VALIDATED — NON-BLOCKING RESEARCH TRACK`.
+## Explicitly out of scope
 
-Formal eligible external participants completed `0 / 8 minimum`; Batch A target `0 / 4–5`. The V0
-blocker is the absence of real human participants, not a technical failure. `V0_VALIDATION/` and
-every Batch A recruitment artifact remain intact and unmodified; P0 did not touch them.
+- Pushing. The owner pushes; the coding side reports the HEAD and waits.
+- `v0.6.0`, `P0 PASS`, `G1 PASS`, `REMOTE CI PASS` written before a new run exists.
+- P1 analyzer, Compare, full Gate, Release Bundle, new artifact formats, cloud, accounts, AI,
+  telemetry, updater, SBOM/CVE, SQLx, wgpu, a fifth Phase-0 library crate, UI redesign.
+- `SHA256SUMS` (frozen v0.5.1 package integrity record), `V0_VALIDATION/**`, `ADR-0020`, design
+  tokens and the icon design, and the fixture hash assertion itself.
+- Deleting a failing test, lowering an assertion, batch-regenerating goldens, or turning a `FAIL`
+  into a `SKIPPED` by editing `scripts/check.py`.
 
 ## Gate status
 
 ```text
 Formal G1: NOT CLAIMED  (g1_requires V0_PASS + P0_PASS; V0 still unvalidated)
 P1:        NOT AUTHORIZED
+P0:        FAIL — REMOTE CI RUN #1; remediation ACTIVE
 ```
 
 ## Version gate
 
-Do not generate `FirmwareSight_Project_Baseline_v0.6.0` unless P0 final status is `PASS` with real
-engineering evidence. It is `CONDITIONAL_PASS`, so `baseline_version` stays `0.5.1`.
-`CONDITIONAL_PASS`, `FAIL` and `BLOCKED` must not be renamed into a PASS baseline.
+`baseline_version` stays `0.5.1`. `v0.6.0` requires a real P0 `PASS`, which requires an all-green
+Actions run on a HEAD that does not exist yet. A `FAIL` must not be relabeled into a PASS baseline.
 
-## Not authorized
+## Durable facts preserved by this change
 
-- P1–P4 Product MVP implementation
-- E1 / E2 / E3 / GX candidates
-- Cloud / account / auth / telemetry / AI
-- SBOM / CVE / OTA / flashing / HIL / updater / wgpu / SQLx
-- A fifth Phase-0 library crate without architecture review plus ADR
-- Synthetic Persona substitution for V0 evidence
-- Claiming V0 PASS, G1 PASS, or that product value has been user-validated
+V0 remains `DEFERRED / NOT YET EVIDENCE-VALIDATED — NON-BLOCKING RESEARCH TRACK`. Formal eligible
+external participants completed `0 / 8 minimum`; Batch A target `0 / 4–5`. The V0 blocker is the
+absence of real human participants, not a technical failure. `V0_VALIDATION/` and every Batch A
+recruitment artifact stay intact and unmodified.
+
+Peak RSS stays `NOT MEASURED` with its reason in `P0_PERFORMANCE_REPORT.md`; it is recorded as a
+measurement gap, not a promotion blocker.

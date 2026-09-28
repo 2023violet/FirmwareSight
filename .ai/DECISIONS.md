@@ -108,9 +108,9 @@ Decisions taken while executing, none of which moved a frozen baseline:
 
 Final status and what it does not mean:
 
-- P0 closes as `EXECUTED — CONDITIONAL_PASS (LOCAL)`. The conditions are external to this
-  environment, not unfinished code: CI has never run and `cargo deny` has never run, both because
-  there is no push authorization and the tool was not installed here.
+- P0 was delivered as `EXECUTED — CONDITIONAL_PASS (LOCAL)` on the strength of a locally green gate.
+  That label is retired: see the remediation record below, which replaces it with measured remote
+  results.
 - Baseline stays `0.5.1`. `v0.6.0` is reserved for an unconditional `PASS`, and `g1_claimed` stays
   `false`; P0 passing alone would not open G1 while V0 is unvalidated (ADR-0020).
 - `sha256sum -c SHA256SUMS` fails on exactly nine entries, all governance or execution records that
@@ -120,3 +120,48 @@ Final status and what it does not mean:
   would overwrite the frozen baseline's own integrity record, which is not P0's to do. The drift is
   therefore listed by name here rather than erased.
 - P1 is not authorized and was not started.
+
+---
+
+# P0 CI closure remediation — added 2026-09-28
+
+Authorization:
+
+- The architect prompt *FirmwareSight P0 — CI Closure / Cross-Platform Reproducibility
+  Remediation v1.0 (Architect Reviewed)* is active. It was supplied inline rather than as a file,
+  so unlike the V0 and P0 prompts there is no stored source file whose SHA-256 can be recorded; the
+  repository's copy of its terms is this section plus `P0_CI_REPORT.md`.
+- It authorizes local remediation, one `cargo-deny@0.20.2` installation and one real desktop window
+  launch. It does not authorize a push, and the coding side does not write `REMOTE CI PASS`.
+
+Status decision, taken from measured results rather than from the previous round's wording:
+
+- P0 is now `FAIL — REMOTE CI RUN #1` with remediation `ACTIVE`. `CONDITIONAL_PASS (LOCAL)` is not
+  kept: the conditions that made it conditional were tested, and two of them failed. "CI has never
+  run" and "cargo deny has never run" are no longer true statements about this repository.
+- The distinction this preserves is between what was proven (Core facts, memory accounting, the
+  typed IPC boundary, storage migrations, determinism — 102 Rust and 19 UI tests) and what the
+  first cross-platform run exposed (checkout text policy, runner provisioning, encoder-byte
+  assertions, an unparseable supply-chain config, a missing macOS job).
+
+What was deliberately not done:
+
+- No expected fixture hash was edited to absorb a line-ending conversion, no hash assertion was
+  weakened, and no newline normalization was added before hashing; the fix belongs in the Git text
+  policy that decides what a checkout contains.
+- The Ubuntu `clippy` failure is being closed by installing the Tauri Linux prerequisites, not by
+  excluding `firmwaresight-desktop` — the desktop shell's cross-platform compile boundary is part
+  of what the baseline validates.
+- The icon drift check is being changed to compare decoded pixels rather than compressed bytes,
+  after a local experiment showed the bytes move with encoder settings while the pixel content does
+  not. A Linux-regenerated icon set was not simply committed in its place.
+- `deny.toml` is being repaired against the keys `cargo-deny 0.20.2` actually accepts, and the
+  license findings it then produces are handled with real SPDX, crate-specific exceptions or a fully
+  specified `licenses.clarify` — not with a broader allow list.
+- Baseline stays `0.5.1`, `v0.6.0` is not generated, G1 is not claimed, P1 is not started, and no
+  `ADR-0020` term was changed.
+
+Unchanged facts that this round must not quietly drop: peak RSS stays `NOT MEASURED` with its
+recorded reason, and it is recorded as a measurement gap rather than a promotion blocker, because
+the original P0 prompt accepted an unmeasured number when the reason was stated. `SHA256SUMS` stays
+the frozen v0.5.1 package integrity record; the working source tree is not that package.
