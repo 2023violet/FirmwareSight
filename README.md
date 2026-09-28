@@ -19,10 +19,11 @@ and does **not** redefine the product, the architecture, the gate definitions or
 
 ```text
 G0      PASS
-V0      INCOMPLETE — 0 / 8 eligible external sessions (deferred research track, non-blocking)
-P0      PASS — remote CI Runs #3, #4 and #5, 7 of 7 jobs green on each
+V0      ACTIVE EXTERNAL VALIDATION — 0 / 8 eligible external sessions, waiting for real participants
+P0      PASS — remote CI Runs #3, #4, #5 and #6, 7 of 7 jobs green on each; frozen at v0.6.0
 G1      NOT CLAIMED — requires V0 PASS + P0 PASS; only the P0 half exists
-P1      NOT AUTHORIZED
+Pre-G1  P1-A0 Real Artifact Intake — authorized by ADR-0025 (bounded, stops at P1-A0)
+P1      NOT PASS / NOT CLOSED; P1-A1, P2, P3 and P4 are NOT AUTHORIZED
 ```
 
 `v0.6.0` does not mean: V0 passed, G1 passed, the product MVP is complete, Compare / Gate / Bundle
@@ -61,7 +62,8 @@ Formal eligible external participants completed:
 `0 / 8 minimum`
 
 No participant data is fabricated. V0 was re-sequenced as a non-blocking research track when P0 was
-authorized; deferral is not completion, and P0's `PASS` does not move V0 by one session.
+authorized, and it is now recorded as an active external-validation track waiting for real participants;
+neither deferral nor resumption is completion, and P0's `PASS` does not move V0 by one session.
 
 Therefore this baseline does **not** claim:
 - V0 PASS;
@@ -116,16 +118,19 @@ The slice reached `PASS` on evidence, not on a wording change. Remote CI Run #3 
 the engineering-validated HEAD `1cd6309` and concluded `success` with **7 of 7 jobs green**; Run #4
 (`36402637251`) executed the architect-reviewed HEAD `5e58f77` — documentation only, no source moved —
 and concluded `success` with **7 of 7 jobs green**; Run #5 (`36416146281`) executed the promotion commit
-itself, `738ae78`, and concluded `success` with **7 of 7 jobs green** again, which is what makes the
-baseline record green on its own commit. All three were read back with `gh run view`, not from this file:
+itself, `738ae78`, and concluded `success` with **7 of 7 jobs green** again, which is what makes the baseline record green
+on its own commit; Run #6 (`36419864513`) executed its consistency-closure successor `7d2f38a` and
+concluded `success` with **7 of 7 jobs green**, verifying that the baseline's own duplicate-key and
+stale-field fix did not break the gate. All four were read back with `gh run view`, not from this file:
 
 ```
 gh run view 36399805005 --repo 2023violet/FirmwareSight
 gh run view 36402637251 --repo 2023violet/FirmwareSight
 gh run view 36416146281 --repo 2023violet/FirmwareSight
+gh run view 36419864513 --repo 2023violet/FirmwareSight
 ```
 
-It took five runs to get there and the two failures are kept as history in
+It took six runs to get there and the two failures are kept as history in
 `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md`. Run #1 (`36360310447`, `f9b8ccb`) had four jobs red; each
 cause was reproduced with a command before being fixed — a `.gitattributes` text policy so a checkout
 cannot change a fixture's bytes, icon drift judged by decoded pixels rather than by encoder bytes, a
@@ -157,7 +162,7 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `NONE`
+12. `.ai/ACTIVE_TASK.md` — currently `P1A0_REAL_ARTIFACT_INTAKE`
 
 ## Batch A recruitment-ready status
 
@@ -192,7 +197,11 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: NONE`. The only legitimate next moves are a real V0 participant source resuming the
-research track — recruit eligible participants, Batch A 4–5, interim review, Batch B 4–5, optional Batch
-C to 12–15, record actual n/N, issue the V0 Gate recommendation — or an explicit architect-issued P1
-sequencing prompt. Neither is in this repository's queue.
+`active_task: P1A0_REAL_ARTIFACT_INTAKE`, authorized by `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md`.
+That ADR supersedes one clause of ADR-0020: after `P0 PASS`, the architect may authorize a limited,
+reversible, low-coupling Pre-G1 Analyze slice instead of waiting for V0. The authorized slice is real
+artifact intake through a native dialog plus the already-validated Analyze summary — and it stops there.
+`G1 = V0 PASS + P0 PASS` is unchanged, `P1` is not closed, `P1-A1` needs V0 Batch A `>= 4` eligible
+external sessions plus an interim architect review and a new prompt, and `P2`/`P3`/`P4` remain
+unauthorized. V0 still needs the human half: recruit eligible participants, Batch A 4–5, interim review,
+Batch B 4–5, optional Batch C to 12–15, record actual n/N, issue the V0 Gate recommendation.

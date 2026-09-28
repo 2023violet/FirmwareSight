@@ -13,7 +13,7 @@ last_updated: "2026-09-28"
 
 Baseline: `0.6.0` — the P0 Technical Foundation Baseline.
 
-Execution state: `P0: PASS (remote CI Run #3 and Run #4, 7 of 7 jobs green on each) · G1 NOT CLAIMED · V0 INCOMPLETE 0/8, Batch A still waiting on real participants · P1 NOT AUTHORIZED · active_task: NONE`
+Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · G1 NOT CLAIMED · V0 ACTIVE EXTERNAL VALIDATION 0/8, Batch A still waiting on real participants · Pre-G1 P1-A0 AUTHORIZED by ADR-0025 · P1 NOT PASS / NOT CLOSED · active_task: P1A0_REAL_ARTIFACT_INTAKE`
 
 ## Primary reading path
 
@@ -21,7 +21,7 @@ Execution state: `P0: PASS (remote CI Run #3 and Run #4, 7 of 7 jobs green on ea
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — `NONE`
+5. `.ai/ACTIVE_TASK.md` — `P1A0_REAL_ARTIFACT_INTAKE`
 6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`
 7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
 8. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
@@ -159,6 +159,7 @@ history, and the nine-entry drift that `0.6.0` closed is described in `.ai/DECIS
 | `09_ADR/ADR-0022-portable-schema-strictness.md` | ADR-0022 — Portable Schema Strictness |
 | `09_ADR/ADR-0023-gate-five-state-semantics.md` | ADR-0023 — Gate Five-State Semantics |
 | `09_ADR/ADR-0024-post-mvp-candidate-governance.md` | ADR-0024 — Post-MVP Candidate Governance and Namespace |
+| `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md` | ADR-0025 — Conditional Pre-G1 Analyze Implementation |
 | `10_AUDIT/00_V0.3_AUDIT_RESOLUTION.md` | v0.3.0 Audit Resolution |
 | `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
 | `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |

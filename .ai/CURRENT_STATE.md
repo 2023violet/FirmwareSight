@@ -10,8 +10,9 @@ last_updated: "2026-09-28"
 
 # Current State
 
-Date: 2026-09-28  
-Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
+- Date: 2026-09-28
+- Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
+- Active task: **`P1A0_REAL_ARTIFACT_INTAKE`** — one bounded pre-G1 slice authorized by ADR-0025
 
 ## Product/architecture baseline
 
@@ -20,10 +21,20 @@ validated P0 technical foundation; it does not redefine the product, does not ad
 verb, and does not change MVP scope. Nothing in the frozen baseline was renegotiated to build the
 slice, and nothing was renegotiated to promote it.
 
+Two governance changes are in force now, both decided by the architect rather than by the coding side:
+
+- **ADR-0025** supersedes exactly one clause of ADR-0020 (`P1 Product MVP implementation 只有两者都 PASS
+  后开始`). After `P0 PASS` the architect may authorize a bounded, reversible Pre-G1 Analyze slice.
+  `G1 = V0 PASS + P0 PASS` is unchanged, `P1-A0` is not a stage gate and does not close P1.
+- **Design tokens `0.2.0 → 0.2.1`**, adding one numeric semantic (`border.width.hairline = 1`) to close
+  the documented P0 gap. No color, spacing, radius, typography, layout, motion, shadow or status value
+  changed, and the focus ring keeps its own 2px token.
+
 ## P0 — Technical Vertical Slice
 
 Status: **`PASS`** · promoted to v0.6.0 by the architect-signed
-*P0 Final Promotion / v0.6.0 Baseline Closure v1.0* · Active task: **NONE**
+*P0 Final Promotion / v0.6.0 Baseline Closure v1.0* · Task at promotion time: **NONE** (recorded as
+`active_task: NONE` in `BASELINE.yaml`; the live task is now `P1A0_REAL_ARTIFACT_INTAKE`)
 
 The chain P0 claimed is proven by executed commands, on this machine and on GitHub's runners:
 
@@ -47,16 +58,18 @@ shipping configuration.
 | #2 `36378384225` | `ebda52d` | `failure` | 6 of 7 green — only `Generated output drift` red (Ubuntu provisioning in a second job) |
 | #3 `36399805005` | `1cd6309` | **`success`** | 7 of 7 — engineering closure |
 | #4 `36402637251` | `5e58f77` | **`success`** | 7 of 7 — pre-promotion revalidation of the governance-only successor |
-| #5 `36416146281` | `738ae78` | **`success`** | 7 of 7 — revalidation of the v0.6.0 promotion commit itself; current `last_remote_ci` |
+| #5 `36416146281` | `738ae78` | **`success`** | 7 of 7 — revalidation of the v0.6.0 promotion commit itself |
+| #6 `36419864513` | `7d2f38a` | **`success`** | 7 of 7 — revalidation of the baseline consistency-closure commit; current `last_remote_ci` |
 
-Read with `gh run view 36416146281 --repo 2023violet/FirmwareSight`, not from this file. Run #5's
+Read with `gh run view 36419864513 --repo 2023violet/FirmwareSight`, not from this file. Run #6's
 matrix: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`,
 `Desktop UI (ubuntu-latest)`, `Generated output drift`, `Dependency policy`, `macOS Core Smoke` —
-all `success`. The promotion commit is on `origin/main`, so the baseline record is green on its own
-commit, not only on the commit the architect read.
+all `success`. The consistency-closure commit is on `origin/main`, so the baseline record is green on
+its own commit, not only on the commit the architect read.
 
-The two failures are kept as history rather than edited. They are the reason the two successes mean
-anything: Run #1 exposed a checkout that could rewrite committed evidence bytes, a runner with no
+The two failures are kept as history rather than edited. They are the reason the four successes that
+followed mean anything: Run #1 exposed a checkout that could rewrite committed evidence bytes,
+a runner with no
 Tauri Linux prerequisites, a drift assertion that compared third-party encoder output instead of
 pixels, and a supply-chain policy the pinned tool could not parse; Run #2 then exposed that a second
 job compiled the desktop crate without the prerequisites its sibling had been given.
@@ -79,32 +92,40 @@ written before the fix; the upgrade was replayed against the real user-profile d
 
 ## V0
 
-Status: **`DEFERRED / NOT YET EVIDENCE-VALIDATED — NON-BLOCKING RESEARCH TRACK`**
+Status: **`ACTIVE EXTERNAL VALIDATION — WAITING FOR REAL PARTICIPANTS`** (resumed, not validated)
 
 Formal eligible external sessions: `0 / 8 minimum`, `0 / 4–5 Batch A target`.
 
 Completed: clickable prototype, fixture/state machine, protocol/session templates, internal
 functional dry run, Batch A takeover, Batch A recruitment-ready package.
 
-P0 passing does not move this number. The V0 blocker is the absence of real human participants, which
-no CI run, no green gate and no promotion signature can supply. Deferred is not passed, and
-`V0_VALIDATION/**` was not modified by any P0 round.
+P0 passing does not move this number, and neither does P1-A0. The V0 blocker is the absence of real
+human participants, which no CI run, no green gate and no promotion signature can supply. Resumed is
+not passed: the count stays `0`, the wording change is a governance statement about the track, and the
+coding side authors no transcript, session or metric. `V0_VALIDATION/**` is not modified by any P0 or
+P1-A0 round. Under ADR-0025, **V0 Batch A `>= 4` eligible sessions plus an interim architect review is
+the precondition for authorizing any pre-G1 slice after P1-A0**.
 
 ## Gates
 
 ```text
 G0: PASS
-V0: DEFERRED / UNVALIDATED (0 of 8 eligible external sessions)
-P0: PASS — promoted to the v0.6.0 Technical Foundation Baseline
+V0: ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS (0 of 8; Batch A 0 of 4-5)
+P0: PASS — promoted to the v0.6.0 Technical Foundation Baseline; frozen, no further P0 closure prompts
 Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS; V0 is 0/8)
-P1: NOT AUTHORIZED
-Active task: NONE
+Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED
+P1: NOT PASS / NOT CLOSED
+P1-A1: NOT AUTHORIZED (needs V0 Batch A >= 4 sessions + interim review + a new prompt)
+P2 / P3 / P4: NOT AUTHORIZED
+Active task: P1A0_REAL_ARTIFACT_INTAKE
+Design tokens: v0.2.1
 ```
 
 `06_DELIVERY/06_STAGE_GATES.md` defines `G1 = V0 PASS + P0 PASS`. With V0 unvalidated, a P0 `PASS`
-alone does not open G1, and this round claims nothing beyond P0. `ADR-0020` was not modified; if the
-project ever wants P1 to start while V0 stays deferred, that is a separate sequencing decision the
-architect must issue.
+alone does not open G1, and this round claims nothing beyond P0. ADR-0020's own text is unchanged except
+for a status note recording that ADR-0025 supersedes one clause of it: the sequencing question that used
+to read "the architect must issue a decision if P1 is ever to start while V0 is deferred" has now been
+answered — narrowly, for one slice, and documented as `P1-A0` rather than as P1.
 
 Full reasoning: `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`; the promotion act:
 `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`; per-item evidence:
@@ -152,17 +173,17 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: NONE`.** P0 is closed. There is no authorized engineering work to continue, and
-`AGENTS.md` 1 forbids an agent from inventing one from the roadmap.
+**`active_task: P1A0_REAL_ARTIFACT_INTAKE`.** P0 is closed and frozen; the work in progress is the one
+bounded pre-G1 slice ADR-0025 authorizes, and its stop condition is P1-A0 itself. `AGENTS.md` 1 still
+forbids inventing anything beyond it.
 
-The only track that can be authorized without a new governance decision is V0, and it needs real
-participants. Before that, the natural next actions belong to the owner and the architect:
+What belongs to the owner and the architect rather than to this round:
 
-1. push the baseline-consistency commit once it exists (the owner's act) — the promotion commit
-   `738ae78` is already on `origin/main` and Run #5 measured it;
-2. decide whether V0 is executed next or whether P1 may start while V0 remains deferred — the second
-   option requires an explicit sequencing prompt, because G1 still means `V0 PASS + P0 PASS`;
-3. re-open the two accepted advisories only on one of their recorded triggers.
+1. pushing the commits this round produces (the owner's act — Run #6 `36419864513` on `7d2f38a` is the
+   last measured remote fact, read with `gh run view`);
+2. the next engineering authorization, which requires V0 Batch A `>= 4` eligible external sessions, an
+   interim architect review of that evidence, and a new prompt;
+3. re-opening the two accepted advisories only on one of their recorded triggers.
 
 Do not start P1, Compare, Gate, Bundle, installer, signing, updater, SBOM, cloud, accounts, AI or
 telemetry from this file.

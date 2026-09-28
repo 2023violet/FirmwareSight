@@ -11,68 +11,69 @@ last_updated: "2026-09-28"
 # ACTIVE TASK
 
 ```text
-NONE
+P1A0_REAL_ARTIFACT_INTAKE  — authorized as a bounded pre-G1 slice by ADR-0025.
+                              It is NOT P1, it does not close P1, and it stops at P1-A0.
 ```
 
-P0 Technical Vertical Slice is closed `PASS` and promoted to the
-`FirmwareSight_Project_Baseline_v0.6.0` P0 Technical Foundation Baseline by the architect-signed
-*P0 Final Promotion / v0.6.0 Baseline Closure v1.0* prompt. There is no active engineering task, and
-no work may be started from this file.
+Authorization: *FirmwareSight — Pre-G1 Sequencing Revision + P1-A0 Real Artifact Intake, Execution
+Prompt v1.0 — Architect Reviewed*, with the *P1-A0 Design Contract Closure Addendum v1.0* applied first
+(it authorized design-tokens v0.2.1 and nothing else). Both were supplied inline, so
+`10_AUDIT/SOURCE_PROMPTS/README.md` records them without a SHA-256 rather than inventing one.
 
-## What is true now
+## The user outcome
+
+A person can choose a real ELF file from their own machine through a native dialog, optionally attach a
+GNU ld MAP, and have FirmwareSight analyze it with the pipeline P0 already validated. Today the desktop
+can only analyze two committed fixtures, which is the limitation this slice removes.
 
 ```text
-Baseline:      v0.6.0 — P0 Technical Foundation Baseline
-G0:            PASS
-V0:            DEFERRED / NOT YET EVIDENCE-VALIDATED — 0 / 8 eligible external sessions
-P0:            PASS — remote CI Run #3 36399805005 (7/7) and Run #4 36402637251 (7/7)
-Formal G1:     NOT CLAIMED — g1_requires V0_PASS + P0_PASS; V0 is the missing half
-P1:            NOT AUTHORIZED
+Launch → Analyze → choose firmware artifact → (optional) Add MAP → Analyze → real summary
 ```
 
-What P0 passed with: 104 Rust tests, 19 UI tests, one shared gate (`python scripts/check.py`) that CI
-calls unchanged, real ARM ELF/MAP fixtures with recorded provenance, deterministic CLI JSON, a typed
-ts-rs IPC boundary, SQLite migrations at schema version 2, a 512 MiB guard measured from both sides of
-the boundary, and a desktop window opened and driven on the shipping configuration.
+## Hard boundaries of this task
 
-## What promotion did not do
+- **One slice.** P1-A1, P2 Compare, P3 Gate and P4 Bundle are not authorized. Completing P1-A0 is the
+  stop condition, not a licence to continue.
+- **`P1` is not PASS and not closed.** `G1 = V0 PASS + P0 PASS` is unchanged and G1 stays NOT CLAIMED.
+- **No new baseline.** `baseline_version` stays `0.6.0`; `v0.7.0` is not created by a development slice.
+- **Security shape is fixed.** Native dialog, explicit user selection, opaque session-local
+  `SelectionId` held on the Rust side, no generic filesystem/shell/network permission, no
+  `read_file(path)` or `get_any_path` command, no full path in normal IPC or UI. No new `rand`
+  dependency for the selection id.
+- **No schema change.** Real artifacts use an explicit local/default project identity instead of the
+  P0 demo one; schema version 2 keeps working, migrations are not authorized, raw bytes are not copied
+  into SQLite.
+- **Fixtures stay engineering evidence.** `fixtures/**` and the P0 parity/golden tests remain green;
+  the product UI stops offering a fixture selector.
+- **Design contract.** Existing tokens plus the new `border.width.hairline` only: no drop-zone, no
+  dashed border, no decorative upload card, no new visual semantic. If one is genuinely needed, stop.
+- **A real Windows desktop smoke with a really opened native dialog is part of the definition of
+  done.** Without it, P1-A0 is not complete.
 
-`v0.6.0` names the validated *technical foundation* only. It does not mean V0 passed, G1 passed, the
-product MVP is complete, P1 is authorized, Compare/Gate/Bundle exist, an installer or signed build is
-ready, user value is validated, or the tree is free of vulnerabilities. The durable gaps survive the
-signature unchanged:
+## State this task runs against
 
 ```text
-Peak RSS:      NOT MEASURED — measurement gap the P0 prompt accepted with a stated reason
-Fuzz:          NOT RUN
-RustSec:       RUSTSEC-2024-0429 (glib 0.18.5, unsound) and RUSTSEC-2024-0370
-               (proc-macro-error 1.0.4, unmaintained) — ACCEPTED AS EXPLICIT P0 TRANSITIVE RISK,
-               not resolved, not suppressed silently; five revisit triggers
-V0:            0 / 8 formal external sessions
-Two design-checklist findings remain open: capability labels show Core's enum words, and eight 1px
-borders have no token, which needs a frozen-asset design-tokens.json bump.
+P0                  PASS — frozen at v0.6.0; no further P0 closure or promotion prompt will be written
+Baseline            v0.6.0
+Design tokens       v0.2.1 (border.width.hairline added by the addendum)
+V0                  ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS — 0 / 8, Batch A 0 / 4-5
+Formal G1           NOT CLAIMED
+Run #6              36419864513 on 7d2f38a — success, 7 of 7 jobs (the fact before this task started)
+Peak RSS            NOT MEASURED      Fuzz: NOT RUN
+RustSec             two accepted transitive advisories, unchanged by this slice
 ```
 
-## If you are resuming this repository
+## What the coding side may not do here
 
-Read `README.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`, `BASELINE.yaml` and `.ai/HANDOFF.md`
-before writing anything, in the AGENTS.md §1 order. Then:
+Fabricate V0 evidence of any kind — no synthetic transcripts, sessions or metrics. The governance
+wording may move to "resumed, waiting for real participants", and `external_participants_completed`
+stays `0`. `V0_VALIDATION/**` is not edited.
 
-- The only legitimate next moves are a real V0 participant source resuming the research track, or an
-  explicit architect-issued P1 sequencing prompt. Neither exists.
-- `ACTIVE_TASK: NONE` means do not invent work. If asked to continue, report the empty task and the
-  unauthorized items above rather than picking a task.
-- Nothing in `V0_VALIDATION/` may be edited to make the deferred track look validated.
+Do not treat a green P1-A0 as P1 progress: `06_DELIVERY/06_STAGE_GATES.md` registers `P1-A0` as
+neither a stage gate nor a step toward closing P1.
 
-## Technical items that remain unauthorized, not deferred-by-accident
+## Next gate after this task
 
-```text
-P1 slice                       needs its own authorization prompt
-installer / NSIS / MSI         outside the P0 baseline promotion
-signing / notarization         requires an ADR before any key work
-updater                        requires the signing/key-management ADR (AGENTS.md §7)
-fuzzing                        not run; not part of the P0 gate
-peak RSS on large workloads    not measured; see P0_PERFORMANCE_REPORT.md
-dependency-architecture ADR    not needed for the two accepted advisories; needed before changing
-                               the Tauri/gtk-rs line
-```
+The next engineering authorization requires **V0 Batch A ≥ 4 eligible external sessions with real
+participants, an interim architect review of that evidence, and a new architect prompt**. Until then the
+correct state of this file after P1-A0 ships is `NONE`, not an inferred follow-on task.

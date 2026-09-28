@@ -41,6 +41,14 @@ v0.2.0 只补齐组件实现所需的治理缺口。
 - motion timing/ease
 - chart single-blue sequence
 
+## v0.2.1 (2026-09-28)
+
+One numeric semantic was added by the architect-authorized design-contract closure:
+`border.width.hairline = 1`, the standard 1px structural border `03_DESIGN/03_VISUAL_SYSTEM.md` already
+requires and the P0 UI already used without a token behind it. Nothing else moved — no color, spacing,
+radius, typography, layout, motion, shadow or status value changed, and `focus.ring.width` keeps its own
+2px token. The `border` entry in the preserved list above is a **color** role and is not the same thing.
+
 ## Contrast notes
 
 Validated pair examples:

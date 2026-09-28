@@ -16,6 +16,7 @@ last_updated: "2026-09-27"
 | V0 | workflow desirability | clickable 7-screen flow, moderated sessions, misunderstanding log, payment questions | V0 report |
 | P0 | feasibility | real ELF slice, parse→normalize→snapshot→CLI→minimal Tauri, benchmarks | P0 technical report |
 | G1 | allow Product MVP build | V0 PASS + P0 PASS | gate record |
+| P1-A0 | bounded pre-G1 Analyze slice (ADR-0025; not a gate, not P1 completion) | real artifact intake through a native dialog, optional GNU ld MAP, reuse of the validated Analyze summary, opaque selection id, no full path in IPC/UI | P1_A0 execution report + exit checklist + real-window smoke + Rust/UI tests |
 | P1 | Analyze | Intake/Analyze implementation + fixtures + evidence UI | acceptance/golden tests |
 | P2 | Compare | build diff, contributors, evidence-aware change UI | deterministic diff tests |
 | P3 | Gate | 5-state rules, unknown policy, review audit | rule matrix + contract tests |

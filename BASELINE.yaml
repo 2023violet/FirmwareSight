@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_V0_DEFERRED_UNVALIDATED_G1_NOT_CLAIMED
+  status: P0_PASS_V0_ACTIVE_WAITING_PARTICIPANTS_G1_NOT_CLAIMED
 
 principles:
   - evidence_first
@@ -27,15 +27,22 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_DEFERRED_P0_PASS_G1_NOT_CLAIMED
-  # P0 is closed. V0 is the only track that can be authorized next without a new governance prompt;
-  # P1 stays out of this list because G1 still requires V0_PASS, which is 0/8 and unbuyable by CI.
+  current_gate: G0_PASS_V0_ACTIVE_WAITING_PARTICIPANTS_P0_PASS_G1_NOT_CLAIMED
+  # P0 is closed. V0 is resumed as an active external-validation track that is still waiting on real
+  # participants; G1 still requires V0_PASS + P0_PASS, so only the P0 half exists.
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
   g1_requires: [V0_PASS, P0_PASS]
   g1_claimed: false
   product_mvp_phases: [P1_analyzer, P2_compare, P3_gate, P4_bundle]
   own_artifact_validation: V1
+  # ADR-0025 registers a bounded pre-G1 identifier so that "implementation may start" is documented
+  # rather than inferred. It is not a stage gate and it does not move g1_requires.
+  pre_g1:
+    identifier: P1_A0
+    registered_by: 09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md
+    is_stage_gate: false
+    closes_p1: false
 
 post_mvp_candidates:
   namespaces: [E1, E2, E3, GX]
@@ -94,10 +101,10 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# P0 is closed at v0.6.0 by the architect-signed promotion prompt. There is no active task, and
-# AGENTS.md 1 forbids any agent from inventing one: the next authorized track is V0 (needs real
-# participants), and P1 needs its own sequencing decision because G1 still requires V0_PASS.
-active_task: NONE
+# P0 is closed at v0.6.0. The active task is the one bounded pre-G1 slice ADR-0025 authorizes
+# (P1-A0); it is not P1, it does not close P1, and nothing beyond it is authorized. AGENTS.md 1 still
+# forbids inventing work: the next engineering gate is real V0 Batch A evidence plus a new prompt.
+active_task: P1A0_REAL_ARTIFACT_INTAKE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -112,13 +119,45 @@ v0_execution:
   external_participants_minimum: 8
   external_participants_target: "12-15"
   status: INCOMPLETE_INSUFFICIENT_EXTERNAL_SAMPLE
+  external_validation_state: ACTIVE_WAITING_FOR_REAL_PARTICIPANTS
+  batch_a_target: "0 / 4-5 eligible external sessions completed"
   p0_authorized: false
 
-# V0 is deferred as a non-blocking research track. Deferred is not passed: the 0 / 8
-# external-sample fact above stays in force and ADR-0020 still gates P1 on both V0 and P0.
+# V0 is resumed as an active external-validation track. Resumed is not passed: the participant count
+# stays 0 / 8 because real people are the missing input, and the coding side authors none. V0 still
+# gates G1 and, under ADR-0025, still gates every pre-G1 slice after P1-A0.
 v0_track:
-  disposition: DEFERRED_NOT_YET_EVIDENCE_VALIDATED
+  disposition: ACTIVE_EXTERNAL_VALIDATION_WAITING_FOR_REAL_PARTICIPANTS
   blocks_p0_engineering: false
+  blocks_pre_g1_slices_after_p1_a0: true
+  blocks_g1: true
+
+# The slice this round runs. Registered by ADR-0025, which supersedes one ADR-0020 clause and nothing
+# else. `p0_execution` below keeps its frozen verdict - `status: PASS`, the promotion records and the
+# remediation history are not re-opened; what this round adds there is the remote run it measured, so
+# the file holds one current remote fact rather than two competing ones.
+pre_g1_execution:
+  authorized: true
+  slice: P1A0_REAL_ARTIFACT_INTAKE
+  adr: 09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md
+  parent_prompt: "FirmwareSight Pre-G1 Sequencing Revision + P1-A0 Real Artifact Intake v1.0 (Architect Reviewed, supplied inline)"
+  addendum_prompt: "FirmwareSight P1-A0 Design Contract Closure Addendum v1.0 (Architect Reviewed, supplied inline)"
+  supersedes: "the ADR-0020 clause P1 Product MVP implementation 只有两者都 PASS 后开始"
+  scope: "real artifact intake through a native dialog, optional GNU ld MAP, reuse of the validated Analyze summary"
+  stop_condition: P1_A0_ONLY
+  p1_stage_status: NOT_PASS_NOT_CLOSED
+  p1_a1_authorized: false
+  p2_authorized: false
+  p3_authorized: false
+  p4_authorized: false
+  next_engineering_gate:
+    - "V0 Batch A at least 4 eligible external sessions with real participants"
+    - "interim architect review of that evidence"
+    - "a new architect prompt for each additional pre-G1 slice"
+  creates_new_baseline: false
+  baseline_version_stays: 0.6.0
+  g1_claimed: false
+  design_tokens_version_bump_authorized_by_addendum: "0.2.0 -> 0.2.1 (border.width.hairline only)"
 
 p0_execution:
   authorized: true
@@ -131,9 +170,10 @@ p0_execution:
   # and changes documentation only; see P0_EXECUTION_PROVENANCE.md "Final validated HEAD".
   final_validated_head: 65cb2dc
   commits_to_validated_tree: 6
-  # Five remote runs are recorded below and in `remote_ci_runs`: two failures, then three successes on
-  # the engineering HEAD, the architect-reviewed HEAD and the promotion commit itself. Run #5 verified
-  # that the promotion commit did not break the gate; it is the current remote fact.
+  # Six remote runs are recorded below and in `remote_ci_runs`: two failures, then four successes on
+  # the engineering HEAD, the architect-reviewed HEAD, the promotion commit and the baseline
+  # consistency-closure commit. Run #6 verified that the consistency fix did not break the gate; it is
+  # the current remote fact.
   # PASS now: the engineering evidence was already measured in Runs #3 and #4, and the missing
   # element was the architect's signature, which the promotion prompt supplied.
   status: PASS
@@ -155,8 +195,9 @@ p0_execution:
   promotion_run_result: success
   promotion_run_jobs: 7/7
   promotion_commit_contains: "baseline, governance, audit, P0 evidence reports, integrity manifest and directory tree only - no production source"
-  # One current remote fact, stated once: the promotion commit is on origin/main and Run #5 measured it.
-  remote_state: "v0.6.0 promotion commit 738ae78 is on origin/main; Run #5 (36416146281) completed with conclusion success, 7 of 7 jobs"
+  # One current remote fact, stated once: the consistency-closure commit is on origin/main and Run #6
+  # measured it. The P0 verdict fields above are unchanged by that record.
+  remote_state: "v0.6.0 baseline commit 738ae78 and its consistency-closure successor 7d2f38a are both on origin/main; Run #6 (36419864513) completed with conclusion success on 7d2f38a, 7 of 7 jobs"
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
   run_2_closure_prompt: "FirmwareSight P0 Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed, supplied inline)"
   remediation:
@@ -185,27 +226,30 @@ p0_execution:
     architecture_conflicts:
       - RUSTSEC-2024-0429 glib 0.18.5 unsound: reached through the gtk-rs 0.18 line Tauri 2.12.0 requires; cargo update -p glib --precise 0.20.0 fails against gtk = "^0.18"; accepted with five revisit triggers, and no ADR because this round changes no architecture choice
       - RUSTSEC-2024-0370 proc-macro-error 1.0.4 unmaintained: host-only build dependency behind the same pin; the advisory itself states no safe upgrade exists; accepted on the same basis
-  # Five runs, in order, none rewritten. Two failures are the reason the three successes exist.
+  # Six runs, in order, none rewritten. Two failures are the reason the four successes exist.
   remote_ci_runs:
     - "Run #1 36360310447 on f9b8ccb: failure - Rust windows, Rust ubuntu, Generated output drift, Dependency policy red; Desktop UI both green (2 of 6)"
     - "Run #2 36378384225 on ebda52d: failure - 6 of 7 green, only Generated output drift red (Ubuntu provisioning in a second job)"
     - "Run #3 36399805005 on 1cd6309: success - 7 of 7 green. Engineering closure."
     - "Run #4 36402637251 on 5e58f77: success - 7 of 7 green. Pre-promotion revalidation of the governance-only successor."
     - "Run #5 36416146281 on 738ae78: success - 7 of 7 green. v0.6.0 promotion commit revalidation: the promotion act changed documentation and integrity artifacts only, and the gate stayed green on the committed baseline."
+    - "Run #6 36419864513 on 7d2f38a: success - 7 of 7 green. Revalidation of the baseline consistency-closure commit, which corrected BASELINE.yaml duplicate and stale current-state fields and touched no production source."
   last_remote_ci:
-    run_id: 36416146281
-    head: 738ae78e00e682a5f82f679ea167304a558af864
+    run_id: 36419864513
+    head: 7d2f38a046ea7e036f95adf7ea8c5d0c9be5c9ae
     event: push
     conclusion: success
     passed_jobs: ["Rust (windows-latest)", "Rust (ubuntu-latest)", "Desktop UI (windows-latest)", "Desktop UI (ubuntu-latest)", "Generated output drift", "Dependency policy", "macOS Core Smoke"]
     failed_jobs: []
-    read_with: gh run view 36416146281 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
-    note: "Rust (windows-latest) reports exactly one skipped step in Run #5, measured with gh run view --json jobs: Install Linux prerequisites for the Tauri shell, guarded by if matrix.os == ubuntu-latest. The job itself is success."
+    read_with: gh run view 36419864513 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
+    note: "Rust (windows-latest) reports exactly one skipped step in Run #6, measured with gh run view --json jobs: Install Linux prerequisites for the Tauri shell, guarded by if matrix.os == ubuntu-latest. The job itself is success. Every other job reports zero skipped steps."
+    revalidated_by_run_5: "36416146281 on 738ae78, success, 7 of 7 - kept so the promotion-commit measurement stays visible"
     log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
   role_of_each_green_run:
     run_3: "engineering closure on the validated source HEAD 1cd6309"
     run_4: "revalidation of the architect-reviewed governance HEAD 5e58f77"
-    run_5: "revalidation of the v0.6.0 promotion commit 738ae78, and the current last_remote_ci"
+    run_5: "revalidation of the v0.6.0 promotion commit 738ae78"
+    run_6: "revalidation of the consistency-closure commit 7d2f38a, and the current last_remote_ci"
   previous_remote_ci:
     run_id: 36378384225
     head: ebda52d63f22ff9f25786c1d80e53f5193cff183
@@ -227,7 +271,7 @@ p0_execution:
   library_crate_budget: 4
   library_crates_built: 4
   gate_command: python scripts/check.py
-  gate_result: "local 14/14 with 0 skipped mandatory steps, plus 3/3 --only core-smoke; remote 7/7 jobs green on 1cd6309 (Run #3), 5e58f77 (Run #4) and 738ae78 (Run #5)"
+  gate_result: "local 14/14 with 0 skipped mandatory steps, plus 3/3 --only core-smoke; remote 7/7 jobs green on 1cd6309 (Run #3), 5e58f77 (Run #4), 738ae78 (Run #5) and 7d2f38a (Run #6)"
   tests: { rust: 104, ui: 19 }
   # Every promotion condition is met and cited; none was satisfied by wording.
   promotion_conditions:
@@ -237,7 +281,8 @@ p0_execution:
   promotion_scope_limits:
     - "The signature covers P0 only: V0, G1, P1, P2, P3 and P4 are not signed"
     - "G1 remains NOT CLAIMED: 06_DELIVERY/06_STAGE_GATES.md requires V0_PASS + P0_PASS and V0 is 0/8"
-    - "ADR-0020 is unmodified; entering P1 while V0 is deferred would need its own sequencing prompt"
+    - "ADR-0020's conclusion was unmodified by the P0 signature; ADR-0025 later supersedes exactly one of its clauses and adds no P1 authorization"
+    - "Entering P1 as a stage still needs real V0 evidence and its own sequencing prompt: P0 PASS alone authorizes nothing beyond what ADR-0025 states"
     - "No GitHub Release, installer, signing, notarization or updater work: this is a project baseline promotion, not a product release"
     - "No tag was created: git tag -l is empty in this repository, so there is no baseline-tag convention to follow and none was invented"
   # Answered by Run #2 on the real runners. Kept visible so a later reader does not re-ask them,
@@ -257,12 +302,12 @@ p0_execution:
   non_blocking_measurement_gaps:
     - peak RSS is NOT MEASURED; reason and the measurements that do exist are in P0_PERFORMANCE_REPORT.md
   push_authorized: true_by_owner_instruction
-  push_performed_by: "repository owner pushed the v0.6.0 promotion commit 738ae78 to origin/main; Run #5 is that push"
+  push_performed_by: "repository owner pushed the v0.6.0 promotion commit 738ae78 and its consistency-closure successor 7d2f38a to origin/main; Run #5 measured the first, Run #6 the second"
   historical_engineering_push: "the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force); recorded as history, not as the current remote state"
-  remote_state_changed: true # origin/main == 738ae78 at this round's preflight; this round commits locally and the owner pushes
+  remote_state_changed: true # origin/main == ecd1c87 (the design-token commit) at this round's preflight; this round commits locally and the owner pushes
   baseline_version_after_p0: 0.6.0
   v0_6_0_released: true
   v0_6_0_meaning: "P0 Technical Foundation Baseline - the vertical slice chain is validated. Not product MVP, not G1, not user value, not a stable commercial release."
   v0_6_0_does_not_claim: [V0_PASS, G1_PASS, product_mvp_complete, P1_authorized, compare_gate_bundle_complete, commercial_stable_release, installer_signing_updater_ready, user_value_validated, willingness_to_pay_validated, zero_vulnerabilities, CRA_compliance]
-  p1_authorized: false
+  p1_authorized: false # scoped to what the P0 prompt authorized; the live bounded slice is `pre_g1_execution`
   g1_claimed_by_p0_pass: false

@@ -8,17 +8,19 @@ owner: "Engineering"
 last_updated: "2026-09-28"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS. No active task. Do not invent one.
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / active task P1-A0 (bounded pre-G1 slice)
 
 ## Purpose
 
-P0 is finished and promoted. The architect-signed *P0 Final Promotion / v0.6.0 Baseline Closure v1.0*
-prompt turned the measured evidence into a baseline: `P0 = PASS`, `baseline_version = 0.6.0`, and
-`.ai/ACTIVE_TASK.md` now reads `NONE`. This file's job is to stop the next agent from starting work
-that nobody authorized, and to hand over the facts it would otherwise have to rediscover.
+P0 is finished, promoted and **frozen**: `P0 = PASS`, `baseline_version = 0.6.0`, and no further P0
+closure or promotion prompt will be written. What is live now is **one** architect-authorized Pre-G1
+slice, `P1-A0 Real Artifact Intake`, permitted by ADR-0025, which supersedes a single clause of
+ADR-0020 and nothing else. This file's job is to state that boundary precisely: P1-A0 ends at P1-A0.
 
-There is no pending engineering action and no failing check. If you were sent here to "continue P0",
-the correct reply is that P0 is closed.
+If you were sent here to "continue P0", the correct reply is that P0 is closed. If you were sent here
+to continue past P1-A0 - P1-A1, Compare, Gate, Bundle - the correct reply is that no such work is
+authorized: V0 Batch A `>= 4` eligible external sessions plus an interim architect review, then a new
+prompt, is the precondition.
 
 ## Baseline and HEADs
 
@@ -27,10 +29,14 @@ Baseline                       v0.6.0 — FirmwareSight_Project_Baseline_v0.6.0 
 Engineering-validated HEAD     1cd6309a09313a0a900a83cb12e054e1a3d7c5e3 — the tree the gate measured
 Architect-reviewed HEAD        5e58f778aad35f33188b96d0b8873401a31ccc3c — governance/audit/evidence docs only
 Promotion commit               738ae78e00e682a5f82f679ea167304a558af864 — on origin/main; 23 files, no production source
+Consistency commit             7d2f38a046ea7e036f95adf7ea8c5d0c9be5c9ae — on origin/main; BASELINE.yaml duplicate-key and stale-field closure
 Remote CI Run #3               36399805005  on 1cd6309  success, 7 of 7 jobs — engineering closure
 Remote CI Run #4               36402637251  on 5e58f77  success, 7 of 7 jobs — reviewed-HEAD revalidation
 Remote CI Run #5               36416146281  on 738ae78  success, 7 of 7 jobs — promotion-commit revalidation
-Remote CI at this round's preflight  local HEAD == origin/main == 738ae78
+Remote CI Run #6               36419864513  on 7d2f38a  success, 7 of 7 jobs — the remote fact recorded before P1-A0 began
+Design-token commit              ecd1c878a6efebd93338ee7777a600b49a9baf84 — on origin/main; tokens v0.2.1, generator, tokens.css, App.module.css, BASELINE.yaml
+Design tokens                  v0.2.1 (border.width.hairline added; P0's documented 1px gap closed)
+HEAD at this round's preflight local == origin/main == ecd1c87; Run #6 on 7d2f38a is the last measured remote fact
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -41,10 +47,13 @@ published as history in `P0_CI_REPORT.md`. Read any run with
 
 ```text
 G0      PASS
-V0      DEFERRED / NOT YET EVIDENCE-VALIDATED — 0 / 8 eligible external sessions (Batch A 0 / 4–5)
-P0      PASS
-Formal G1   NOT CLAIMED — ADR-0020 requires V0 PASS + P0 PASS; only one half exists
-P1      NOT AUTHORIZED — needs its own architect prompt
+V0      ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS — 0 / 8 (Batch A 0 / 4–5)
+P0      PASS — frozen at v0.6.0
+Formal G1   NOT CLAIMED — still V0 PASS + P0 PASS; ADR-0025 did not move the gate
+Pre-G1  P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED (ADR-0025)
+P1      NOT PASS / NOT CLOSED
+P1-A1   NOT AUTHORIZED — V0 Batch A >= 4 sessions + interim review + a new prompt
+P2 / P3 / P4   NOT AUTHORIZED
 ```
 
 ## What the code does and how it is proven
@@ -100,9 +109,22 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 
 ## Boundaries still in force
 
-- `ACTIVE_TASK: NONE`. Do not invent work; report the empty task and the unauthorized list instead.
-- The two legitimate next moves are a real V0 participant source, or an explicit architect-issued P1
-  sequencing prompt. Neither exists.
+- The task is `P1-A0` and nothing wider. Its own stop condition is completion of that slice: real
+  artifact intake through a **native dialog**, optional GNU ld MAP, reuse of the validated Analyze
+  summary. A green P1-A0 is not P1 progress and must not be written as such.
+- Intake security shape is fixed by ADR-0025 and `AGENTS.md` 7: dialogs open Rust-side, the selection
+  is held behind an opaque session-local id, no generic filesystem/shell/network capability, no
+  `read_file(path)` or `get_any_path` command, no full path in normal IPC or UI.
+- No schema change and no migration: real artifacts get an explicit local/default project identity,
+  schema version 2 keeps working, raw artifact bytes stay out of SQLite.
+- Design: existing tokens plus `border.width.hairline` only. No drop zone, no dashed border, no
+  decorative upload card, no new visual semantic — if one seems necessary, stop and report it.
+- V0 evidence stays untouched and its count stays `0`; the resumed wording is a governance statement,
+  not a result.
+- After P1-A0 ships, the only legitimate next moves are real V0 participants, or a new architect
+  prompt for a further pre-G1 slice — and that prompt requires V0 Batch A `>= 4` eligible sessions plus
+  an interim review first. Neither exists at the moment P1-A0 closes, so `.ai/ACTIVE_TASK.md` should
+  then read `NONE` again until one does.
 - Four Phase-0 library crates; a fifth needs architecture review plus an ADR.
 - AGENTS.md §2: no silent baseline change — async-first Core, framework swaps, SQLx, HTTP client,
   wgpu, cloud/auth/telemetry, evidence classes, schema semantics, updater/signing model all need an

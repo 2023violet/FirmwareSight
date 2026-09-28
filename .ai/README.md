@@ -10,9 +10,10 @@ last_updated: "2026-09-28"
 
 # AI Entry Point
 
-Baseline `0.6.0` · `P0: PASS` · `active_task: NONE` · `V0: 0 / 8` · `G1: NOT CLAIMED` ·
-`P1: NOT AUTHORIZED`. With the task queue empty, item 6 below is the whole instruction: there is
-nothing to execute until a prompt exists.
+Baseline `0.6.0` · `P0: PASS` (frozen) · `active_task: P1A0_REAL_ARTIFACT_INTAKE` · `V0: 0 / 8` ·
+`G1: NOT CLAIMED` · `P1: NOT PASS / NOT CLOSED` · `P1-A1 / P2 / P3 / P4: NOT AUTHORIZED`. The active
+task exists because ADR-0025 authorized exactly one bounded pre-G1 slice; item 6 below still governs —
+execute that task and nothing inferred from the roadmap.
 
 任何 AI 接手本项目时：
 

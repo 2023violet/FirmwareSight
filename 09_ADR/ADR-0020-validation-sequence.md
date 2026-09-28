@@ -13,6 +13,13 @@ last_updated: "2026-09-27"
 ## Status
 Accepted.
 
+One clause of this ADR is superseded by `ADR-0025-conditional-pre-g1-analyze-implementation.md`
+(2026-09-28): `P1 Product MVP implementation 只有两者都 PASS 后开始。` After P0 `PASS`, the architect may
+authorize a bounded, reversible Pre-G1 Analyze slice without waiting for V0. The parallel-validation
+decision itself, `G1 = V0 PASS + P0 PASS`, and every consequence recorded below are unchanged, and the
+superseded sentence is left in place rather than rewritten, because it is what this ADR decided at the
+time it decided it.
+
 ## Context
 立项过程原先要求先 UI prototype 真人验证，v0.3.0 又要求先 technical slice。两者未解释，造成流程冲突。
 

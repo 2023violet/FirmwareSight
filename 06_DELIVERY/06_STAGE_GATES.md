@@ -237,4 +237,18 @@ GA1 General Availability
 自然语言 `Problem Validation / Technical Validation / Product MVP / Productization / Beta / RC / GA`
 只作描述；自动化、任务、交付和 Agent 必须使用上述 identifier。
 
+### Pre-G1 条件实现（ADR-0025，2026-09-28 登记）
+
+`G1 = V0 PASS + P0 PASS` 不变，且 G1 当前为 **NOT CLAIMED**（V0 为 `0 / 8` eligible external sessions）。
+`ADR-0025-conditional-pre-g1-analyze-implementation.md` 在 `P0 PASS` 之后登记一个受限、可回退的
+**Pre-G1 Analyze 切片**，identifier 为 **`P1-A0`**，用途是 Real Artifact Intake + Analyze Summary。它的
+边界是文档级的硬规则，不是描述：
+
+- `P1-A0` 不是 stage gate，不等于 `P1 PASS`，也不关闭 `P1`；
+- `P1-A1` 及之后任何切片，前置条件是 V0 Batch A `>=4` eligible external sessions 加 interim architect
+  review，并且仍需 architect 另行签发 prompt；
+- `P2` / `P3` / `P4` 保持 NOT AUTHORIZED；
+- 每个额外 Pre-G1 切片都需要新的 architect prompt；本文件不授权任何后续工作；
+- Pre-G1 切片是 development slice，不创建新 baseline：`baseline_version` 保持 `0.6.0`。
+
 V1 比例指标必须报告实际 numerator/denominator；Return intent 阈值统一为 `>=62.5% 且至少 5 人`，不再写死成只适用于 n=8 的 `5/8`。

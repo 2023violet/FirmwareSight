@@ -341,3 +341,61 @@ published as failed history; peak RSS stays `NOT MEASURED`; fuzzing stays `NOT R
 advisories stay recorded as **accepted explicit P0 transitive risk** with their five revisit triggers;
 `SHA256SUMS` and `DIRECTORY_TREE.txt` are regenerated as the v0.6.0 baseline record, which is the one
 integrity act the previous rounds declined to take on their own authority.
+
+---
+
+# Pre-G1 sequencing revision and P1-A0 — added 2026-09-28
+
+Authorization:
+
+- *FirmwareSight — Pre-G1 Sequencing Revision + P1-A0 Real Artifact Intake v1.0 (Architect Reviewed)*,
+  plus the *P1-A0 Design Contract Closure Addendum v1.0*. Both were supplied inline, so this repository
+  records that fact instead of claiming a hash for bytes it never received
+  (`10_AUDIT/SOURCE_PROMPTS/README.md`).
+- The architect's decision is recorded as **ADR-0025**, and ADR-0025 supersedes exactly one clause of
+  ADR-0020 — `P1 Product MVP implementation 只有两者都 PASS 后开始` — leaving the parallel-validation
+  decision, `G1 = V0 PASS + P0 PASS` and every other ADR-0020 consequence intact.
+
+```text
+Decision            After P0 PASS, the architect may authorize one bounded, reversible, low-coupling
+                    Pre-G1 Analyze slice without waiting for V0 PASS
+Authorized slice    P1-A0 — real artifact intake + Analyze summary
+Stop                P1-A0 only. P1-A1, P2, P3 and P4 remain unauthorized.
+P1                  NOT PASS, NOT CLOSED
+G1                  NOT CLAIMED (V0 still 0 / 8 eligible external sessions)
+Baseline            stays v0.6.0 — a development slice does not create a version
+Next gate           V0 Batch A >= 4 eligible sessions + interim architect review + a new prompt
+```
+
+The reasoning recorded in the ADR, in short: waiting entirely on V0 binds engineering speed to
+recruitment speed, while opening P1-P4 immediately accumulates sunk cost in workflow depth nobody has
+validated with a real user. Bounded parallelism takes the middle, and the bound is written into
+`06_DELIVERY/06_STAGE_GATES.md` rather than left as a reading of prose.
+
+Decisions taken inside the authorized scope:
+
+- **The dialog plugin is decided here, not assumed.** `00_GOVERNANCE/03_DECISION_POLICY.md` lists
+  插件系统 as ADR-requiring, so adopting `tauri-plugin-dialog` is written into ADR-0025's Decision
+  section rather than slipped in as a dependency detail. `04_TECH/11_DEPENDENCY_BASELINE.md` already
+  permits a dialog plugin for explicit user file selection, and the consequence is fixed: dialogs open
+  from Rust-side use-case commands, the WebView gains no filesystem, shell or network surface, and no
+  generic path-taking command exists.
+- **No ADR for the token bump.** The addendum's test was whether repository authority explicitly
+  requires one. Policy line 24 covers plugin systems, not design tokens; the no-ADR list covers UI
+  changes that do not alter semantics; and the checklist rule for a token gap is a version bump. So
+  `assets/design-tokens.json` moves `0.2.0 -> 0.2.1` with exactly one added semantic
+  (`border.width.hairline = 1`) and no new ADR. Focus keeps its dedicated 2px token.
+- **`active_task` now names the slice.** `BASELINE.yaml` carries a `pre_g1_execution` block so the
+  authorization, its stop condition and its next gate are readable rather than inferred from this file.
+  `p0_execution` keeps its frozen verdict — `status: PASS`, the promotion records and the remediation
+  history are untouched; what was added there is the remote run this round measured, so the file states
+  one current remote fact instead of two competing ones.
+- **V0 wording moves, V0 numbers do not.** The track is described as
+  `ACTIVE_EXTERNAL_VALIDATION_WAITING_FOR_REAL_PARTICIPANTS`; `external_participants_completed` stays
+  `0`, Batch A stays `0 / 4-5`, and nothing in `V0_VALIDATION/**` is authored or edited by the coding
+  side to make that wording true.
+
+Historical finding now closed: `P0_DESIGN_CHECKLIST.md` and `P0_KNOWN_LIMITATIONS.md` recorded eight
+authored structural `1px` borders with no token behind them. That gap was real when it was found and it
+stays written down that way; design-tokens v0.2.1 closes it, and the P1-A0 checklist cites the
+resolution rather than the P0 documents being rewritten to pretend the gap never existed.
