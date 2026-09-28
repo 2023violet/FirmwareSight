@@ -6,6 +6,14 @@ import type { IdentityDto } from "./IdentityDto";
 import type { MemorySummaryDto } from "./MemorySummaryDto";
 
 /**
- * Everything the P0 summary screen shows.
+ * Everything the Analyze screen shows.
+ *
+ * `source` says how the payload arrived: `fixture` is the P0 engineering path, a committed file the
+ * shell itself chose; `artifact` is the P1-A0 product path, a file the user selected in a native
+ * dialog. Provenance is a fact, so it crosses the boundary instead of being inferred from a label.
  */
-export type AnalysisSummaryDto = { fixture: string, artifact: ArtifactDto, identity: IdentityDto, memory: MemorySummaryDto, sectionCount: number, symbolCount: number, capabilities: CapabilitiesDto, evidenceSummary: EvidenceSummaryDto, };
+export type AnalysisSummaryDto = { 
+/**
+ * `fixture` or `artifact`.
+ */
+source: string, artifact: ArtifactDto, identity: IdentityDto, memory: MemorySummaryDto, sectionCount: number, symbolCount: number, capabilities: CapabilitiesDto, evidenceSummary: EvidenceSummaryDto, };

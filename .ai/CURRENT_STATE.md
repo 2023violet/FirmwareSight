@@ -113,7 +113,7 @@ G0: PASS
 V0: ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS (0 of 8; Batch A 0 of 4-5)
 P0: PASS — promoted to the v0.6.0 Technical Foundation Baseline; frozen, no further P0 closure prompts
 Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS; V0 is 0/8)
-Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED
+Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED, IMPLEMENTED LOCALLY (unpushed; its own remote CI is NOT RUN)
 P1: NOT PASS / NOT CLOSED
 P1-A1: NOT AUTHORIZED (needs V0 Batch A >= 4 sessions + interim review + a new prompt)
 P2 / P3 / P4: NOT AUTHORIZED
@@ -173,9 +173,11 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: P1A0_REAL_ARTIFACT_INTAKE`.** P0 is closed and frozen; the work in progress is the one
-bounded pre-G1 slice ADR-0025 authorizes, and its stop condition is P1-A0 itself. `AGENTS.md` 1 still
-forbids inventing anything beyond it.
+**`active_task: P1A0_REAL_ARTIFACT_INTAKE`, and that task is now finished.** P0 is closed and frozen;
+the one bounded pre-G1 slice ADR-0025 authorized was implemented, tested in a real window, and
+recorded in `P1_A0_VALIDATION/`. Its stop condition was P1-A0 itself, so the pointer names work that is
+complete rather than work to resume: **nothing further is authorized to code from this file**, and
+`AGENTS.md` 1 still forbids inventing anything beyond it.
 
 What belongs to the owner and the architect rather than to this round:
 

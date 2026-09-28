@@ -1,138 +1,177 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 
 import { StateBadge, type StateName } from './components/StateBadge';
 import { formatBytes, formatOptional, truncateMiddle } from './format';
-import { getAnalysisSummary, listFixtures } from './ipc/bridge';
+import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
   BudgetDto,
   ErrorEnvelopeDto,
-  FixtureKey,
-  FixtureOptionDto,
+  SelectionDto,
 } from './ipc/types';
 import styles from './App.module.css';
 import { cx } from './styles/classnames';
 
-type Phase =
-  | { readonly kind: 'loading' }
-  | { readonly kind: 'idle' }
-  | { readonly kind: 'ready'; readonly summary: AnalysisSummaryDto }
-  | { readonly kind: 'failed'; readonly envelope: ErrorEnvelopeDto };
-
-/** The closed set, taken from the generated union rather than a second hand-written list. */
-const FIXTURE_KEYS: readonly FixtureKey[] = ['p0_basic', 'p0_dual_region'];
-
-function toFixtureKey(value: string): FixtureKey | null {
-  return FIXTURE_KEYS.find((key) => key === value) ?? null;
-}
-
-/**
- * The shell owns the fixture labels, so nothing here repeats them. Before the first reply there
- * is nothing to name, and the only honest option is the loading placeholder - keyed to the
- * current selection so the control never holds a value it did not offer.
- */
-function fixtureOptions(
-  fixtures: readonly FixtureOptionDto[],
-  selected: FixtureKey,
-): readonly FixtureOptionDto[] {
-  return fixtures.length === 0
-    ? [{ key: selected, label: 'Loading fixtures...' }]
-    : fixtures;
-}
-
 export function App() {
-  const [fixtures, setFixtures] = useState<readonly FixtureOptionDto[]>([]);
-  const [selected, setSelected] = useState<FixtureKey>('p0_dual_region');
-  const [phase, setPhase] = useState<Phase>({ kind: 'idle' });
+  const [selection, setSelection] = useState<SelectionDto | null>(null);
+  const [lastGood, setLastGood] = useState<AnalysisSummaryDto | null>(null);
+  const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    void listFixtures().then((outcome) => {
-      if (cancelled) {
-        return;
-      }
-      if (!outcome.ok) {
-        setPhase({ kind: 'failed', envelope: outcome.envelope });
-        return;
-      }
-      const unknown = outcome.value.filter((option) => toFixtureKey(option.key) === null);
-      if (unknown.length > 0) {
-        // The Rust enum and the generated union are meant to be the same contract. If the shell
-        // offers a key the types do not name, that is drift, and saying so beats quietly
-        // dropping an option the user could have picked.
-        setPhase({
-          kind: 'failed',
-          envelope: internalError(
-            'The shell offered a fixture this build does not know.',
-            unknown.map((option) => option.key).join(', '),
-            'Rebuild after running cargo test -p firmwaresight-desktop to refresh the generated IPC types.',
-          ),
-        });
-        return;
-      }
-      setFixtures(outcome.value);
-    });
-    return () => {
-      cancelled = true;
-    };
+  /**
+   * Every dialog is the shell's, so the UI only ever learns the name and the handle. A cancelled
+   * dialog answers `null`, which leaves the screen exactly as it was: refusing to choose is a
+   * normal thing to do, not a failure to report.
+   */
+  const chooseArtifact = useCallback(async () => {
+    const outcome = await selectArtifact();
+    if (!outcome.ok) {
+      setError(outcome.envelope);
+      return;
+    }
+    if (outcome.value === null) {
+      return;
+    }
+    setSelection(outcome.value);
+    setError(null);
   }, []);
 
-  const analyze = useCallback(async () => {
-    setPhase({ kind: 'loading' });
-    const outcome = await getAnalysisSummary(selected);
-    setPhase(
-      outcome.ok
-        ? { kind: 'ready', summary: outcome.value }
-        : { kind: 'failed', envelope: outcome.envelope },
-    );
-  }, [selected]);
+  const addMap = useCallback(async () => {
+    if (selection === null) {
+      return;
+    }
+    const outcome = await attachMap(selection.selectionId);
+    if (!outcome.ok) {
+      setError(outcome.envelope);
+      return;
+    }
+    if (outcome.value !== null) {
+      setSelection(outcome.value);
+    }
+  }, [selection]);
 
-  const summary = phase.kind === 'ready' ? phase.summary : null;
+  const removeMap = useCallback(async () => {
+    if (selection === null) {
+      return;
+    }
+    const outcome = await clearMap(selection.selectionId);
+    if (!outcome.ok) {
+      setError(outcome.envelope);
+      return;
+    }
+    setSelection(outcome.value);
+  }, [selection]);
+
+  /**
+   * Analyze, and keep the previous result on the failure path.
+   *
+   * A failed analysis is not a snapshot: `lastGood` only ever moves when the shell returns a
+   * summary. What changes on failure is the error, plus the label on the surviving report - a
+   * reader must not mistake the previous artifact's numbers for the candidate that just failed.
+   */
+  const analyze = useCallback(async () => {
+    if (selection === null) {
+      return;
+    }
+    setAnalyzing(true);
+    const outcome = await analyzeSelection(selection.selectionId);
+    setAnalyzing(false);
+
+    if (outcome.ok) {
+      setLastGood(outcome.value);
+      setError(null);
+      return;
+    }
+    setError(outcome.envelope);
+  }, [selection]);
+
+  const summary = lastGood;
 
   return (
     <main className={styles['page']}>
       <header className={styles['header']}>
-        <h1>P0 Technical Summary</h1>
+        <h1>Analyze</h1>
         <p className={styles['subhead']}>
-          Same Core facts the CLI prints, read through the Desktop IPC boundary. No diff, no gate,
-          no release action exists in this build.
+          Choose a firmware artifact and FirmwareSight reports the Core facts it can prove. No diff,
+          no gate, no release action exists in this build.
         </p>
       </header>
 
       <section className={styles['controls']} aria-label="Artifact selection">
-        <label className={styles['field']}>
-          <span>Fixture</span>
-          <select
-            className={styles['select']}
-            value={selected}
-            disabled={phase.kind === 'loading'}
-            onChange={(event) => {
-              const next = toFixtureKey(event.target.value);
-              if (next !== null) {
-                setSelected(next);
-              }
-            }}
-          >
-            {fixtureOptions(fixtures, selected).map((option) => (
-              <option key={option.key} value={option.key}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <button
+          type="button"
+          className={styles['control']}
+          onClick={() => {
+            void chooseArtifact();
+          }}
+          disabled={analyzing}
+        >
+          Choose firmware artifact
+        </button>
+
+        {selection === null ? null : (
+          <>
+            <p className={styles['selected']} title={selection.fileName}>
+              {selection.fileName}
+            </p>
+            <p className={styles['meta']}>
+              {selection.mapAttached
+                ? `MAP: ${selection.mapFileName ?? 'attached'}`
+                : 'MAP: Not provided'}
+            </p>
+            <div className={styles['actions']}>
+              {selection.mapAttached ? (
+                <button
+                  type="button"
+                  className={styles['control']}
+                  onClick={() => {
+                    void addMap();
+                  }}
+                  disabled={analyzing}
+                >
+                  Replace MAP
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles['control']}
+                  onClick={() => {
+                    void addMap();
+                  }}
+                  disabled={analyzing}
+                >
+                  Add MAP
+                </button>
+              )}
+              {selection.mapAttached ? (
+                <button
+                  type="button"
+                  className={styles['control']}
+                  onClick={() => {
+                    void removeMap();
+                  }}
+                  disabled={analyzing}
+                >
+                  Remove MAP
+                </button>
+              ) : null}
+            </div>
+          </>
+        )}
+
         <button
           type="button"
           className={styles['primary']}
           onClick={() => {
             void analyze();
           }}
-          disabled={phase.kind === 'loading'}
+          disabled={analyzing || selection === null}
         >
           Analyze
         </button>
       </section>
 
-      {phase.kind === 'loading' ? (
+      {analyzing ? (
         // The only asynchronous fact on the screen. Without a live region it is visible to sighted
         // users and silent for everyone else, because the button's own disabled state says nothing
         // about when the work finished.
@@ -140,38 +179,58 @@ export function App() {
           Analyzing…
         </p>
       ) : null}
-      {phase.kind === 'failed' ? <ErrorPanel envelope={phase.envelope} /> : null}
-      {phase.kind === 'idle' ? (
-        <p className={styles['status']}>
-          Nothing has been analyzed in this session yet. Choose a fixture and run Analyze.
-        </p>
+      {error === null ? null : <ErrorPanel envelope={error} />}
+      {summary === null && !analyzing && error === null ? (
+        <section className={styles['status']} aria-label="No analysis yet">
+          <p>Nothing has been analyzed in this session yet. Choose an artifact and run Analyze.</p>
+        </section>
       ) : null}
 
-      {summary === null ? null : <Report summary={summary} />}
+      {summary === null ? null : (
+        <Report
+          summary={summary}
+          stale={error !== null}
+          candidateName={selection?.fileName ?? null}
+        />
+      )}
     </main>
   );
 }
 
 /**
- * An error the UI found for itself rather than one the shell reported. It carries the internal
- * code because that is what it is; the shell's own codes never pass through here.
+ * The report, and the honesty flag that comes with it.
+ *
+ * `stale` is set when a later analysis failed: the numbers below are the last ones FirmwareSight
+ * could prove, not a result for the file now sitting in the selector. Naming the candidate it does
+ * not describe is what keeps a preserved result from being read as a fresh verdict.
  */
-function internalError(message: string, details: string, remediation: string): ErrorEnvelopeDto {
-  return {
-    code: 'ERR-INTERNAL-9001',
-    message,
-    operationId: 'unavailable',
-    details,
-    remediation,
-  };
-}
-
-function Report({ summary }: { readonly summary: AnalysisSummaryDto }) {
+function Report({
+  summary,
+  stale,
+  candidateName,
+}: {
+  readonly summary: AnalysisSummaryDto;
+  readonly stale: boolean;
+  readonly candidateName: string | null;
+}) {
   const { artifact, memory, capabilities, evidenceSummary } = summary;
 
   return (
-    <div className={styles['report']}>
+    <section
+      className={styles['report']}
+      aria-label={stale ? 'Last good analysis' : 'Analysis summary'}
+    >
+      {stale ? (
+        <p className={styles['stale']} role="note">
+          Previous analysis of {artifact.fileName}.
+          {candidateName === null || candidateName === artifact.fileName
+            ? ' The failed attempt above produced no result, so nothing here was replaced.'
+            : ` It is not an analysis of ${candidateName}.`}
+        </p>
+      ) : null}
+
       <Section title="Artifact">
+        <Row term="File" value={artifact.fileName} title={artifact.fileName} />
         <Row term="SHA-256" value={artifact.sha256} mono title={artifact.sha256} />
         <Row term="Size" value={formatBytes(artifact.byteSize)} mono />
         <Row
@@ -248,10 +307,11 @@ function Report({ summary }: { readonly summary: AnalysisSummaryDto }) {
         <span className={styles['monoSmall']}>{summary.identity.snapshotId}</span>
         <span>
           {summary.identity.schema} · {summary.identity.schemaStability} · normalization{' '}
-          {summary.identity.normalizationVersion} · fwsight {summary.identity.createdByFwsightVersion}
+          {summary.identity.normalizationVersion} · fwsight{' '}
+          {summary.identity.createdByFwsightVersion}
         </span>
       </footer>
-    </div>
+    </section>
   );
 }
 

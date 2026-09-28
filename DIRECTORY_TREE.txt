@@ -137,7 +137,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0021-memory-accounting.md
 │   ├── ADR-0022-portable-schema-strictness.md
 │   ├── ADR-0023-gate-five-state-semantics.md
-│   └── ADR-0024-post-mvp-candidate-governance.md
+│   ├── ADR-0024-post-mvp-candidate-governance.md
+│   └── ADR-0025-conditional-pre-g1-analyze-implementation.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
@@ -199,12 +200,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── icon.ico
 │       │   │   └── icon.png
 │       │   ├── src/
+│       │   │   ├── intake.rs
 │       │   │   ├── ipc.rs
 │       │   │   ├── lib.rs
 │       │   │   ├── main.rs
 │       │   │   └── service.rs
 │       │   ├── tests/
-│       │   │   └── desktop_parity.rs
+│       │   │   ├── desktop_parity.rs
+│       │   │   └── real_artifact_intake.rs
 │       │   ├── build.rs
 │       │   ├── Cargo.toml
 │       │   └── tauri.conf.json
@@ -224,7 +227,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── FixtureKey.ts
 │           │   │   │   ├── FixtureOptionDto.ts
 │           │   │   │   ├── IdentityDto.ts
-│           │   │   │   └── MemorySummaryDto.ts
+│           │   │   │   ├── MemorySummaryDto.ts
+│           │   │   │   └── SelectionDto.ts
 │           │   │   ├── bridge.test.ts
 │           │   │   ├── bridge.ts
 │           │   │   └── types.ts
@@ -235,10 +239,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── test/
 │           │   │   └── setup.ts
 │           │   ├── App.module.css
-│           │   ├── App.test.tsx
 │           │   ├── App.tsx
 │           │   ├── format.test.ts
 │           │   ├── format.ts
+│           │   ├── intake.test.tsx
 │           │   └── main.tsx
 │           ├── .npmrc
 │           ├── eslint.config.js
@@ -365,6 +369,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P0_STORAGE_REPORT.md
 │   ├── P0_TECHNICAL_VALIDATION_REPORT.md
 │   └── README.md
+├── P1_A0_VALIDATION/
+│   ├── P1_A0_DESIGN_CHECKLIST.md
+│   ├── P1_A0_DESKTOP_SMOKE_REPORT.md
+│   ├── P1_A0_EXECUTION_REPORT.md
+│   └── P1_A0_EXIT_CHECKLIST.md
 ├── schemas/
 │   ├── accepted-reviews.schema.json
 │   ├── gate-results.schema.json

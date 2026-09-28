@@ -10,7 +10,7 @@
 # excludes because cargo-deny evaluates dependencies rather than members. ISC was in the list and
 # the run showed no crate carries it, so it was removed rather than kept as a hope.
 #
-# Cargo.lock resolves 466 packages in total, 460 of them third-party; the checked graph is smaller
+# Cargo.lock resolves 480 packages in total, 474 of them third-party; the checked graph is smaller
 # than that because it follows only the shipping targets.
 
 [graph]
@@ -90,7 +90,13 @@ deny = [
     # whether or not P0 wants it. Listing those three as wrappers means a *first-party* crate
     # depending on anyhow still fails the gate, which is the boundary AGENTS.md 3 actually draws:
     # our error model is typed enums, and that claim is about our code.
-    { crate = "anyhow", reason = "typed errors are the frozen error model (05_ENGINEERING/03)", wrappers = ["tauri", "tauri-build", "tauri-utils"] },
+    #
+    # `tauri-plugin` and `tauri-plugin-fs` were added on 2026-09-28 when P1-A0 adopted the official
+    # dialog plugin (ADR-0025). They are the same Tauri 2.x line, they are the only other direct
+    # parents of anyhow in this graph, and the ban keeps its teeth: the wrappers list says "anyhow
+    # may only arrive through upstream Tauri code", so any first-party crate that depends on it -
+    # including firmwaresight-desktop itself - is still an error[banned].
+    { crate = "anyhow", reason = "typed errors are the frozen error model (05_ENGINEERING/03)", wrappers = ["tauri", "tauri-build", "tauri-utils", "tauri-plugin", "tauri-plugin-fs"] },
 ]
 
 # Duplicates that come from the Tauri and SQLite trees and cannot be removed without dropping a

@@ -1,12 +1,15 @@
-//! The desktop application service: fixture selection, analysis, projection and persistence.
+//! The desktop application service: selection, analysis, projection and persistence.
 //!
 //! Nothing in this module knows about Tauri. That is what makes the parity claim testable — the
 //! desktop's own tests call the same functions its commands do, and the `#[tauri::command]`
 //! bodies stay thin wrappers that move work onto a blocking thread.
 //!
-//! The UI never supplies a path. It supplies one of two closed fixture keys, and the path is
-//! resolved from the application's own fixture root (`05_ENGINEERING/03`, Tauri security rules:
-//! no `read_file`/`get_any_path` surface).
+//! Two ways to arrive at an analysis exist, and they differ only in who chose the file: the P0
+//! fixture path resolves a closed key inside the application's own fixture root, while the P1-A0
+//! artifact path takes a path the Rust-side native dialog returned.
+//!
+//! Either way the UI never supplies a path (`05_ENGINEERING/03`, Tauri security rules: no
+//! `read_file`/`get_any_path` surface), and both paths run the same pipeline and the same projection.
 
 use std::path::{Path, PathBuf};
 
@@ -18,6 +21,36 @@ use crate::ipc::{
     AnalysisSummaryDto, ArtifactDto, BudgetDto, CapabilitiesDto, EvidenceSummaryDto, FixtureKey,
     IdentityDto, MemorySummaryDto,
 };
+
+/// The summary came from a committed fixture the shell chose.
+pub const SOURCE_FIXTURE: &str = "fixture";
+/// The summary came from a file the user selected in a native dialog.
+pub const SOURCE_ARTIFACT: &str = "artifact";
+
+/// Analyze a path the Rust side obtained itself, with an optional MAP.
+///
+/// This is the whole P1-A0 addition: the same `pipeline::analyze` the CLI and the fixture path
+/// call, reached with a user-chosen file instead of a catalog key. Nothing here re-implements a
+/// fact - format detection, size guarding, parsing and accounting all stay in the pipeline.
+///
+/// # Errors
+///
+/// Any [`ArtifactError`] from intake or parsing, unchanged.
+pub fn analyze_paths(artifact: &Path, map: Option<&Path>) -> Result<Analysis, ArtifactError> {
+    let mut request = AnalysisRequest::new(artifact);
+    if let Some(map_path) = map {
+        request = request.with_map(map_path);
+    }
+    pipeline::analyze(&request)
+}
+
+/// The name the user sees for a path: the file name, never a parent directory.
+#[must_use]
+pub fn display_name(path: &Path) -> String {
+    path.file_name()
+        .map(|name| name.to_string_lossy().into_owned())
+        .unwrap_or_else(|| path.display().to_string())
+}
 
 /// Resolves closed fixture keys onto real paths inside the application's fixture root.
 #[derive(Debug, Clone)]
@@ -98,7 +131,7 @@ impl FixtureCatalog {
 /// The projection reads only from `AnalyzeResultDto`, which is the very same type the CLI
 /// renders. No arithmetic is repeated here, so the two surfaces cannot drift by construction.
 #[must_use]
-pub fn summarize(dto: &AnalyzeResultDto, fixture: FixtureKey) -> AnalysisSummaryDto {
+pub fn summarize(dto: &AnalyzeResultDto, source: &str) -> AnalysisSummaryDto {
     let mut counts = EvidenceSummaryDto {
         total: dto.evidence.len(),
         observed: 0,
@@ -122,7 +155,7 @@ pub fn summarize(dto: &AnalyzeResultDto, fixture: FixtureKey) -> AnalysisSummary
     }
 
     AnalysisSummaryDto {
-        fixture: fixture.as_key_str().to_owned(),
+        source: source.to_owned(),
         artifact: ArtifactDto {
             file_name: dto.artifact.file_name.clone(),
             kind: dto.artifact.kind.clone(),
@@ -179,7 +212,17 @@ fn budget(source: &firmwaresight_report::dto::BudgetDto) -> BudgetDto {
     }
 }
 
-/// Project a completed analysis into the bounded IPC summary.
+/// Project a user-selected artifact into the same bounded summary.
+///
+/// `file_name` is the name of the file the dialog returned, taken by the Rust side. The projection
+/// is identical apart from the source label, which is the point: choosing your own file changes
+/// where the bytes came from, not what FirmwareSight says about them.
+#[must_use]
+pub fn project_artifact(file_name: &str, analysis: &Analysis) -> AnalysisSummaryDto {
+    let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, file_name);
+    summarize(&dto, SOURCE_ARTIFACT)
+}
+/// Project a completed fixture analysis into the bounded IPC summary.
 ///
 /// Takes the analysis rather than the snapshot alone: the DTO is built by the same
 /// `AnalyzeResultDto::from_snapshot` the CLI uses, so this is the single projection point for
@@ -191,5 +234,5 @@ pub fn project(
     analysis: &Analysis,
 ) -> AnalysisSummaryDto {
     let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, &catalog.file_name(key));
-    summarize(&dto, key)
+    summarize(&dto, SOURCE_FIXTURE)
 }

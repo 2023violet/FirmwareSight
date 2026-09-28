@@ -14,3 +14,4 @@ export type { FixtureKey } from './generated/FixtureKey';
 export type { FixtureOptionDto } from './generated/FixtureOptionDto';
 export type { IdentityDto } from './generated/IdentityDto';
 export type { MemorySummaryDto } from './generated/MemorySummaryDto';
+export type { SelectionDto } from './generated/SelectionDto';

@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "FirmwareSight - P0 Technical Summary",
+        "title": "FirmwareSight - Analyze",
         "width": 1040,
         "height": 760,
         "minWidth": 720,

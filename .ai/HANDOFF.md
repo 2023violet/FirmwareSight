@@ -36,7 +36,7 @@ Remote CI Run #5               36416146281  on 738ae78  success, 7 of 7 jobs —
 Remote CI Run #6               36419864513  on 7d2f38a  success, 7 of 7 jobs — the remote fact recorded before P1-A0 began
 Design-token commit              ecd1c878a6efebd93338ee7777a600b49a9baf84 — on origin/main; tokens v0.2.1, generator, tokens.css, App.module.css, BASELINE.yaml
 Design tokens                  v0.2.1 (border.width.hairline added; P0's documented 1px gap closed)
-HEAD at this round's preflight local == origin/main == ecd1c87; Run #6 on 7d2f38a is the last measured remote fact
+HEAD at this round's preflight was ecd1c87; this round added the governance commit 311f9fc (now on origin/main) and the P1-A0 implementation commit (local). Run #6 on 7d2f38a is the last remote run this file records — prompt §28 keeps this task's own CI results as external evidence rather than writing them back into its commits
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -50,7 +50,7 @@ G0      PASS
 V0      ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS — 0 / 8 (Batch A 0 / 4–5)
 P0      PASS — frozen at v0.6.0
 Formal G1   NOT CLAIMED — still V0 PASS + P0 PASS; ADR-0025 did not move the gate
-Pre-G1  P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED (ADR-0025)
+Pre-G1  P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED (ADR-0025) AND IMPLEMENTED LOCALLY, UNPUSHED
 P1      NOT PASS / NOT CLOSED
 P1-A1   NOT AUTHORIZED — V0 Batch A >= 4 sessions + interim review + a new prompt
 P2 / P3 / P4   NOT AUTHORIZED

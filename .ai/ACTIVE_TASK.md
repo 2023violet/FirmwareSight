@@ -15,6 +15,18 @@ P1A0_REAL_ARTIFACT_INTAKE  — authorized as a bounded pre-G1 slice by ADR-0025.
                               It is NOT P1, it does not close P1, and it stops at P1-A0.
 ```
 
+```text
+STATUS 2026-09-29: P1-A0 IS COMPLETE ON THIS MACHINE AND UNPUSHED.
+Do not resume it. Remote CI for these commits is NOT RUN, so no CI PASS may be claimed for them.
+The next engineering gate is V0 Batch A >= 4 eligible external sessions + interim architect
+review + a new prompt. Nothing else is authorized from this file.
+```
+
+Evidence: `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md`,
+`P1_A0_VALIDATION/P1_A0_DESKTOP_SMOKE_REPORT.md`,
+`P1_A0_VALIDATION/P1_A0_EXIT_CHECKLIST.md`,
+`P1_A0_VALIDATION/P1_A0_DESIGN_CHECKLIST.md`.
+
 Authorization: *FirmwareSight — Pre-G1 Sequencing Revision + P1-A0 Real Artifact Intake, Execution
 Prompt v1.0 — Architect Reviewed*, with the *P1-A0 Design Contract Closure Addendum v1.0* applied first
 (it authorized design-tokens v0.2.1 and nothing else). Both were supplied inline, so

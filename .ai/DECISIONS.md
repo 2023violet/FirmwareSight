@@ -399,3 +399,36 @@ Historical finding now closed: `P0_DESIGN_CHECKLIST.md` and `P0_KNOWN_LIMITATION
 authored structural `1px` borders with no token behind them. That gap was real when it was found and it
 stays written down that way; design-tokens v0.2.1 closes it, and the P1-A0 checklist cites the
 resolution rather than the P0 documents being rewritten to pretend the gap never existed.
+
+---
+
+# P1-A0 implementation — added 2026-09-29
+
+The authorized slice landed as two commits: `governance: authorize bounded pre-G1 P1-A0` (this section's
+predecessor) and `P1-A0: add real artifact intake and Analyze summary`. Evidence:
+`P1_A0_VALIDATION/`. Decisions taken while implementing, all inside the authorized scope:
+
+- **The summary DTO names its source instead of a fixture.** `AnalysisSummaryDto.fixture` became
+  `source` (`"fixture"` | `"artifact"`) because a user-chosen file has no fixture key to carry. This is
+  a field rename on an internal, `p0-internal` contract, regenerated through ts-rs rather than
+  hand-edited; the portable schema and its strictness rules were not touched.
+- **A selection is a session fact, never a persisted one.** `SelectionId` is `sel-<pid>-<n>`, held in a
+  `Mutex<SelectionStore>`, absent from the snapshot identity and from the database, and issued without
+  a randomness dependency. The alternative — storing selections — would have needed a migration, and
+  §12 authorizes none.
+- **User-chosen analyses belong to `local-desktop`, not to the P0 demo identity.** The fixture path
+  keeps `p0-desktop` so the committed P0 evidence stays reproducible; the new path writes
+  `local-desktop` / `Local analyses`. Proven in the shipping binary against an empty database.
+- **Two findings were reported rather than fixed, because fixing them needs authority this slice does
+  not have.** (1) Snapshot identity comes from the artifact bytes only, so re-analyzing the same bytes
+  with a MAP dedupes onto the existing build and the strengthened evidence never reaches storage.
+  Closing it changes snapshot semantics or the schema. (2) `evidence_summary.from_map` is a locator
+  kind inherited from the frozen P0 goldens, not a report that a MAP file was supplied; it is now
+  characterized by a test instead of being redefined.
+- **The last-good rule is a rendering rule, not a state merge.** A failed analysis shows its own error
+  and leaves the previous successful report visible with a sentence naming the file it came from. A
+  failure never becomes a snapshot, and the surviving report is never relabelled as the new candidate.
+- **One CSS defect of the round's own making was fixed with tokens only.** `text.disabled` and
+  `accent.disabled` are the same value, so disabled buttons lost their labels; both rules now use
+  `text.secondary` on `bg.subtle` (2.32:1 → 5.22:1). No token was added, so §21's STOP condition was
+  never reached.

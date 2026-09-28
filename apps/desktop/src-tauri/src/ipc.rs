@@ -61,12 +61,32 @@ pub struct FixtureOptionDto {
     pub label: String,
 }
 
-/// Everything the P0 summary screen shows.
+/// A selection the shell is holding on behalf of the WebView.
+///
+/// `selection_id` is an opaque, session-local handle. It is not a security token, it is not written
+/// to the deterministic payload or the portable schema, and the paths it stands for stay on the Rust
+/// side: the UI can neither read them back nor write them.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SelectionDto {
+    pub selection_id: String,
+    pub file_name: String,
+    pub map_file_name: Option<String>,
+    pub map_attached: bool,
+}
+
+/// Everything the Analyze screen shows.
+///
+/// `source` says how the payload arrived: `fixture` is the P0 engineering path, a committed file the
+/// shell itself chose; `artifact` is the P1-A0 product path, a file the user selected in a native
+/// dialog. Provenance is a fact, so it crosses the boundary instead of being inferred from a label.
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 #[ts(export)]
 pub struct AnalysisSummaryDto {
-    pub fixture: String,
+    /// `fixture` or `artifact`.
+    pub source: String,
     pub artifact: ArtifactDto,
     pub identity: IdentityDto,
     pub memory: MemorySummaryDto,

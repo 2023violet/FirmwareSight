@@ -1,7 +1,14 @@
 import { invoke } from '@tauri-apps/api/core';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { getAnalysisSummary, isErrorEnvelope, listFixtures, toEnvelope } from './bridge';
+import {
+  analyzeSelection,
+  attachMap,
+  clearMap,
+  isErrorEnvelope,
+  selectArtifact,
+  toEnvelope,
+} from './bridge';
 import type { ErrorEnvelopeDto } from './types';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
@@ -57,29 +64,51 @@ describe('error envelope narrowing', () => {
 });
 
 describe('ipc calls', () => {
-  it('returns the payload the shell sent', async () => {
-    invokeMock.mockResolvedValue([{ key: 'p0_basic', label: 'P0 basic' }]);
+  it('opens the dialog with no argument at all', async () => {
+    invokeMock.mockResolvedValue({
+      selectionId: 'sel-1',
+      fileName: 'app.elf',
+      mapFileName: null,
+      mapAttached: false,
+    });
 
-    const outcome = await listFixtures();
+    const outcome = await selectArtifact();
+    expect(outcome.ok).toBe(true);
+    expect(invokeMock).toHaveBeenCalledWith('select_artifact', undefined);
+  });
+
+  it('reports a cancelled dialog as a successful call with no selection', async () => {
+    invokeMock.mockResolvedValue(null);
+
+    const outcome = await selectArtifact();
     expect(outcome.ok).toBe(true);
     if (outcome.ok) {
-      expect(outcome.value).toHaveLength(1);
+      expect(outcome.value).toBeNull();
     }
   });
 
-  it('sends a fixture key, never a path', async () => {
+  it('sends a selection id to every selection command, never a path', async () => {
     invokeMock.mockResolvedValue({});
 
-    await getAnalysisSummary('p0_dual_region');
-    expect(invokeMock).toHaveBeenCalledWith('get_analysis_summary', {
-      fixture: 'p0_dual_region',
-    });
+    await attachMap('sel-1');
+    await clearMap('sel-1');
+    await analyzeSelection('sel-1');
+
+    expect(invokeMock).toHaveBeenCalledWith('attach_map', { selectionId: 'sel-1' });
+    expect(invokeMock).toHaveBeenCalledWith('clear_map', { selectionId: 'sel-1' });
+    expect(invokeMock).toHaveBeenCalledWith('analyze_selection', { selectionId: 'sel-1' });
+    const sent = JSON.stringify(invokeMock.mock.calls);
+    expect(sent).not.toContain('path');
+    // A drive-letter or POSIX absolute path in the payload would mean the WebView named a
+    // location, which is exactly the boundary ADR-0025 draws.
+    expect(sent).not.toMatch(/[a-zA-Z]:[\\/]/);
+    expect(sent).not.toMatch(/"[^"]*\/[^"]*"/);
   });
 
   it('turns a rejected envelope into a typed failure', async () => {
     invokeMock.mockRejectedValue(ENVELOPE);
 
-    const outcome = await listFixtures();
+    const outcome = await analyzeSelection('sel-1');
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) {
       expect(outcome.envelope).toEqual(ENVELOPE);

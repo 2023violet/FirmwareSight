@@ -12,26 +12,55 @@ import { invoke } from '@tauri-apps/api/core';
 import type {
   AnalysisSummaryDto,
   ErrorEnvelopeDto,
-  FixtureKey,
-  FixtureOptionDto,
+  SelectionDto,
 } from './types';
 
 /** The commands the shell actually registers. A typo here is a compile error, not a surprise. */
-const LIST_FIXTURES = 'list_fixtures';
-const GET_ANALYSIS_SUMMARY = 'get_analysis_summary';
+const SELECT_ARTIFACT = 'select_artifact';
+const ATTACH_MAP = 'attach_map';
+const CLEAR_MAP = 'clear_map';
+const ANALYZE_SELECTION = 'analyze_selection';
 
 export type IpcOutcome<T> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly envelope: ErrorEnvelopeDto };
 
-export async function listFixtures(): Promise<IpcOutcome<readonly FixtureOptionDto[]>> {
-  return await call<readonly FixtureOptionDto[]>(LIST_FIXTURES);
+/**
+ * Ask the shell to open the native artifact dialog.
+ *
+ * `null` means the user cancelled. It is a successful call with no selection, not a failure, so
+ * the screen keeps whatever it was showing.
+ */
+export async function selectArtifact(): Promise<IpcOutcome<SelectionDto | null>> {
+  return await call<SelectionDto | null>(SELECT_ARTIFACT);
 }
 
-export async function getAnalysisSummary(
-  fixture: FixtureKey,
+/**
+ * Ask the shell to open the native MAP dialog for the given selection.
+ *
+ * `null` means the user cancelled and the selection keeps whatever MAP it had.
+ */
+export async function attachMap(
+  selectionId: string,
+): Promise<IpcOutcome<SelectionDto | null>> {
+  return await call<SelectionDto | null>(ATTACH_MAP, { selectionId });
+}
+
+/** Detach the MAP from a selection. The artifact itself stays selected. */
+export async function clearMap(selectionId: string): Promise<IpcOutcome<SelectionDto>> {
+  return await call<SelectionDto>(CLEAR_MAP, { selectionId });
+}
+
+/**
+ * Analyze the staged selection.
+ *
+ * The only argument is the opaque handle the shell issued. A path is never sent, because the
+ * WebView has no business naming one (`AGENTS.md` 7).
+ */
+export async function analyzeSelection(
+  selectionId: string,
 ): Promise<IpcOutcome<AnalysisSummaryDto>> {
-  return await call<AnalysisSummaryDto>(GET_ANALYSIS_SUMMARY, { fixture });
+  return await call<AnalysisSummaryDto>(ANALYZE_SELECTION, { selectionId });
 }
 
 async function call<T>(

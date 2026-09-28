@@ -158,6 +158,9 @@ pre_g1_execution:
   baseline_version_stays: 0.6.0
   g1_claimed: false
   design_tokens_version_bump_authorized_by_addendum: "0.2.0 -> 0.2.1 (border.width.hairline only)"
+  implemented: true # 2026-09-29. Local and unpushed while this commit is written, so its own remote CI is NOT RUN.
+  evidence: P1_A0_VALIDATION/
+  tests_after_p1_a0: { rust: 123, ui: 31 } # whole-workspace counts on this tree; p0_execution.tests keeps P0's own closure measurement
 
 p0_execution:
   authorized: true
@@ -197,7 +200,7 @@ p0_execution:
   promotion_commit_contains: "baseline, governance, audit, P0 evidence reports, integrity manifest and directory tree only - no production source"
   # One current remote fact, stated once: the consistency-closure commit is on origin/main and Run #6
   # measured it. The P0 verdict fields above are unchanged by that record.
-  remote_state: "v0.6.0 baseline commit 738ae78 and its consistency-closure successor 7d2f38a are both on origin/main; Run #6 (36419864513) completed with conclusion success on 7d2f38a, 7 of 7 jobs"
+  remote_state: "v0.6.0 baseline commit 738ae78 and its consistency-closure successor 7d2f38a are on origin/main and were both revalidated green (Run #5, Run #6). origin/main has advanced further with this task's own commits; see last_remote_ci.newer_runs_unrecorded for why their run ids are not transcribed here."
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
   run_2_closure_prompt: "FirmwareSight P0 Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed, supplied inline)"
   remediation:
@@ -244,6 +247,7 @@ p0_execution:
     read_with: gh run view 36419864513 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
     note: "Rust (windows-latest) reports exactly one skipped step in Run #6, measured with gh run view --json jobs: Install Linux prerequisites for the Tauri shell, guarded by if matrix.os == ubuntu-latest. The job itself is success. Every other job reports zero skipped steps."
     revalidated_by_run_5: "36416146281 on 738ae78, success, 7 of 7 - kept so the promotion-commit measurement stays visible"
+    newer_runs_unrecorded: "origin/main has since advanced with this task's own commits (the design-token commit and the P1-A0 governance commit), and CI has executed on them. Their outcomes are external evidence: prompt §28 forbids writing this task's run numbers back into its own commits, so no run id for them is transcribed here. Read them with gh run list --repo 2023violet/FirmwareSight --branch main."
     log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
   role_of_each_green_run:
     run_3: "engineering closure on the validated source HEAD 1cd6309"
@@ -304,7 +308,7 @@ p0_execution:
   push_authorized: true_by_owner_instruction
   push_performed_by: "repository owner pushed the v0.6.0 promotion commit 738ae78 and its consistency-closure successor 7d2f38a to origin/main; Run #5 measured the first, Run #6 the second"
   historical_engineering_push: "the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force); recorded as history, not as the current remote state"
-  remote_state_changed: true # origin/main == ecd1c87 (the design-token commit) at this round's preflight; this round commits locally and the owner pushes
+  remote_state_changed: true # origin/main now carries this task's design-token commit (ecd1c87) and its P1-A0 governance commit (311f9fc); the P1-A0 implementation commit is local and unpushed as this commit is written
   baseline_version_after_p0: 0.6.0
   v0_6_0_released: true
   v0_6_0_meaning: "P0 Technical Foundation Baseline - the vertical slice chain is validated. Not product MVP, not G1, not user value, not a stable commercial release."
