@@ -234,3 +234,12 @@ That is the same missing system-library class as Run #1's `Rust (ubuntu-latest)`
 different job - and the reproduction of it is a CI provisioning omission, not a product defect, not a
 ts-rs contract defect and not generated drift. The fix, the classification and the copy-versus-script
 decision belong to `P0_CI_RUN_2_CLOSURE_REPORT.md`.
+
+## Final disposition — P0 PASS, v0.6.0 (2026-09-28)
+
+Round 1 closed all four Run #1 failures and the missing macOS job, and Run #2 confirmed each of them on
+GitHub's runners; the residue that round left became round 2, and Runs #3 and #4 came back 7 of 7 green.
+P0 was promoted to `PASS` at `v0.6.0` by the architect's signed prompt
+(`P0_FINAL_PROMOTION_REPORT.md`). Two statements this file made about its own limits still hold after
+promotion: the Linux provisioning was not locally executable on this host, and the two RustSec advisories
+are an accepted architecture-level risk rather than a fixed defect.

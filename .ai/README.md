@@ -2,13 +2,17 @@
 title: "AI Handoff Entry"
 doc_id: "FS-AI-001"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-26"
+last_updated: "2026-09-28"
 ---
 
 # AI Entry Point
+
+Baseline `0.6.0` · `P0: PASS` · `active_task: NONE` · `V0: 0 / 8` · `G1: NOT CLAIMED` ·
+`P1: NOT AUTHORIZED`. With the task queue empty, item 6 below is the whole instruction: there is
+nothing to execute until a prompt exists.
 
 任何 AI 接手本项目时：
 

@@ -2,7 +2,7 @@
 title: "Baseline Changelog"
 doc_id: "FS-ROOT-CHANGELOG"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-28"
@@ -10,7 +10,88 @@ last_updated: "2026-09-28"
 
 # Changelog
 
-## Unreleased — P0 remote CI Run #3 green; awaiting promotion sign-off (2026-09-28)
+## 0.6.0 — 2026-09-28
+
+`FirmwareSight_Project_Baseline_v0.6.0` — the **P0 Technical Foundation Baseline**. Promoted by the
+architect-signed *P0 Final Promotion / v0.6.0 Baseline Closure v1.0* prompt. Product scope is
+inherited unchanged from v0.5.0; what is new is verified source.
+
+### P0 Technical Foundation
+
+- Rust workspace, toolchain pinned 1.98.1, four Phase-0 library crates: `firmwaresight-core` (zero
+  dependencies), `-artifact`, `-report`, `-storage`; plus the `fwsight` CLI and a thin Tauri 2 desktop
+  shell with a React 19.3 / TypeScript 6.0.3 summary screen.
+- Untrusted-input intake in the order `stat -> size guard -> streaming SHA-256 -> magic detect ->
+  single read -> parse`, with a 512 MiB guard measured from both sides of the boundary.
+- ELF parsing with a memory-accounting model whose evidence ladder limits what a verdict may claim;
+  GNU ld MAP adapter that yields a real verified region fact and refuses foreign-toolchain maps.
+- Typed IPC: ts-rs bindings generated from Rust, checked for drift by regeneration plus
+  `git diff --exit-code`.
+- SQLite via `rusqlite + bundled`, migrations, transactional import, content-addressed dedupe.
+  **Schema version 2** at promotion.
+- Deterministic CLI JSON; Core/CLI/Desktop parity proven on the same fixture bytes.
+- One verification gate, `python scripts/check.py`, that CI calls unchanged.
+
+### Verification
+
+- 104 Rust tests, 19 UI tests; local gate 14/14 default steps with 0 skipped mandatory steps, plus 3/3
+  under `--only core-smoke`.
+- Real ARM ELF/MAP fixtures with recorded provenance and hash-first tests, so no test needs
+  `arm-none-eabi-gcc`; four malformed inputs; goldens; generated 100/256/512 MiB workloads gitignored.
+- `cargo deny check licenses bans sources advisories` on cargo-deny 0.20.2 exits 0 with all four
+  categories ok.
+- The desktop window opened and was driven on the shipping configuration (one Windows 10 host, 100%
+  scaling) — `P0_DESKTOP_SMOKE_REPORT.md`.
+- **Remote CI Run #3** `36399805005` on `1cd6309a09313a0a900a83cb12e054e1a3d7c5e3`: `success`,
+  **7 of 7 jobs green**.
+- **Remote CI Run #4** `36402637251` on `5e58f778aad35f33188b96d0b8873401a31ccc3c`: `success`,
+  **7 of 7 jobs green**. That HEAD differs from `1cd6309` by governance, audit and evidence
+  documentation only.
+
+### Remediation history
+
+Promotion did not erase how the workflow got green; the failed runs stay published in
+`P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md`.
+
+- **Run #1** `36360310447` on `f9b8ccb`: `failure`, two of six jobs green. Causes: Git smudged a linker
+  script's line endings so a committed fixture no longer matched its recorded hash; the Ubuntu runner had
+  none of the Tauri Linux prerequisites; the icon drift check compared Pillow's encoder bytes;
+  `deny.toml` was unparseable by cargo-deny 0.20.2; and the macOS core smoke the CI baseline requires did
+  not exist as a job.
+- **Run #2** `36378384225` on `ebda52d`: `failure`, six of seven green. The remaining red job, `Generated
+  output drift`, regenerates ts-rs bindings by compiling the desktop crate and had not been given the
+  apt step its sibling job had — a CI provisioning duplication defect, fixed by 21 lines in the workflow.
+- Each cause was reproduced with a command before being changed. No assertion was weakened, no fixture
+  hash moved, no check made optional, no job relocated to dodge a missing system library.
+- The authorized desktop launch found a defect no test had reached: `evidence` was keyed on `id` alone
+  while `04_TECH/15` §4 declares `Build 1─N Evidence`. Migration `0002` rebuilds the table on
+  `(build_id, id)`; the failing tests were written first and the upgrade was replayed against the real
+  database the launch left behind.
+
+### Governance
+
+- `P0 = PASS`; `current_gate: G0_PASS_V0_DEFERRED_P0_PASS_G1_NOT_CLAIMED`; `active_task: NONE`.
+- **V0 unchanged**: `DEFERRED / NOT YET EVIDENCE-VALIDATED`, `0 / 8` eligible external sessions
+  (`0 / 4–5` Batch A). CI cannot recruit participants and no `V0_VALIDATION/**` artifact was touched.
+- **G1 not claimed** — ADR-0020 requires V0 PASS + P0 PASS.
+- **P1 not authorized** — it needs its own prompt, which has not been issued.
+- Two RustSec advisories (`RUSTSEC-2024-0429` `glib 0.18.5` unsound, `RUSTSEC-2024-0370`
+  `proc-macro-error 1.0.4` unmaintained) are **accepted as explicit P0 transitive risk with five revisit
+  triggers**, not resolved and not silently suppressed; both enter through the gtk-rs `0.18` line Tauri
+  `2.12.0` requires. No architecture ADR, because no architecture choice changed.
+- Known gaps that survive promotion: peak RSS `NOT MEASURED`, fuzzing `NOT RUN`, one Windows host and one
+  WebView in the smoke, two linker layouts, two open design-checklist findings.
+- `DIRECTORY_TREE.txt` and `SHA256SUMS` are regenerated as the v0.6.0 baseline record — the integrity act
+  earlier rounds declined to take on their own authority.
+- This is a **project baseline promotion, not a stable release**: no GitHub Release, tag, installer,
+  signing, notarization or updater metadata, and no tag convention was invented (the repository has none).
+
+The four entries below are the pre-promotion working-tree records. They are kept as written, including
+their then-current `0.5.1` framing, and are superseded by this one.
+
+## Pre-promotion record — P0 remote CI Run #3 green; awaiting promotion sign-off (2026-09-28)
+
+> Superseded by the `0.6.0` entry above. Kept as written, including its then-current `0.5.1` framing.
 
 The round-2 HEAD `1cd6309` was pushed to `origin/main` (`git push origin main`, no force) and GitHub
 Actions run `36399805005` concluded **`success` — 7 of 7 jobs green**. This entry records the measured
@@ -40,7 +121,9 @@ fact and deliberately does not promote anything.
 - The next prompt is the architect's *P0 Final Promotion / v0.6.0 Baseline Closure*, and it is not
   anticipated here.
 
-## Unreleased — P0 remote CI Run #2 and its final drift closure (2026-09-28)
+## Pre-promotion record — P0 remote CI Run #2 and its final drift closure (2026-09-28)
+
+> Superseded by the `0.6.0` entry above. Kept as written, including its then-current `0.5.1` framing.
 
 Authorization: *FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0*. Target
 `LOCAL FIX COMPLETE / READY FOR REMOTE CI RUN #3`. Baseline stays `0.5.1`.
@@ -83,10 +166,13 @@ provisioning duplication defect**.
   parsed values were re-read to confirm.
 - New document: `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md`; the pack is now 22 files.
 - Status as this round closed: `FAIL — REMOTE CI RUN #2`, remediation round 2 `LOCAL FIX COMPLETE`,
-  `RUN #3 REQUIRED`. The entry above records what Run #3 then measured.
-  is not claimed, V0 remains `0 / 8`, P1 is not authorized, `v0.6.0` is not generated.
+  `RUN #3 REQUIRED`. The entry above records what Run #3 then measured. At that point G1 was not
+  claimed, V0 remained `0 / 8`, P1 was not authorized, and `v0.6.0` was not generated — the first three
+  are still true, and the fourth stopped being true when this file's `0.6.0` entry was written.
 
-## Unreleased — P0 CI closure remediation (2026-09-28)
+## Pre-promotion record — P0 CI closure remediation (2026-09-28)
+
+> Superseded by the `0.6.0` entry above. Kept as written, including its then-current `0.5.1` framing.
 
 Authorization: the architect prompt *FirmwareSight P0 — CI Closure / Cross-Platform Reproducibility
 Remediation v1.0*. Target `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE CI RERUN`. No version is
@@ -132,7 +218,9 @@ rather than rewritten.
 - Status as that round closed: the remediation HEAD was still unpushed, so nothing was green in CI
   yet, and `REMOTE CI PASS` was not written. The entry above this one records what the push measured. G1 is still not claimed, V0 still `0 / 8`, P1 still not authorized.
 
-## Unreleased — P0 Technical Vertical Slice executed (2026-09-28)
+## Pre-promotion record — P0 Technical Vertical Slice executed (2026-09-28)
+
+> Superseded by the `0.6.0` entry above. Kept as written, including its then-current `0.5.1` framing.
 
 No version is claimed here on purpose: `0.5.1` stays the only baseline, and `v0.6.0` is reserved for
 an unconditional P0 `PASS`. This entry records work on the working tree.

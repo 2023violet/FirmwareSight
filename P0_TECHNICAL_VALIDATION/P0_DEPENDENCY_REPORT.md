@@ -213,3 +213,12 @@ What remains unproven by this file is narrower than it used to be: the policy is
 four targets in `[graph] targets`, so a future mobile or embedded target reopens the boundary check -
 `tauri 2.12.0` declares a non-optional `reqwest` for Android and iOS, and it is the target filter, not
 the absence of a ban, that keeps it out of the shipping graph.
+
+## Final disposition — P0 PASS, v0.6.0 (2026-09-28)
+
+`RUSTSEC-2024-0429` and `RUSTSEC-2024-0370` were carried into the promotion as the architect's
+**accepted explicit P0 transitive risk**, with their five revisit triggers, and promotion did not resolve
+them: no dependency moved, no severity threshold was raised, and the ignores in `deny.toml` still carry
+their reasons. `advisories ok, bans ok, licenses ok, sources ok` means the policy is satisfied, not that
+the advisories are gone. The `[graph] targets` scope limit recorded above also still applies, and no
+wording in `P0_FINAL_PROMOTION_REPORT.md` may be read as a "zero vulnerabilities" or security-clean claim.

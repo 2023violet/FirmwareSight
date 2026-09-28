@@ -4,9 +4,9 @@ product:
   descriptor: Embedded Firmware Release Workbench
   tagline: "Know exactly what ships."
   cli: fwsight
-  baseline_version: 0.5.1
+  baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_CONDITIONAL_PASS_REMOTE_CI_RUN_3_GREEN_7_OF_7_AWAITING_ARCHITECT_PROMOTION_SIGNOFF_V0_DEFERRED_UNVALIDATED
+  status: P0_PASS_V0_DEFERRED_UNVALIDATED_G1_NOT_CLAIMED
 
 principles:
   - evidence_first
@@ -27,10 +27,11 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_DEFERRED_P0_REMOTE_CI_GREEN_RUN_3_AWAITING_ARCHITECT_SIGNOFF
+  current_gate: G0_PASS_V0_DEFERRED_P0_PASS_G1_NOT_CLAIMED
+  # P0 is closed. V0 is the only track that can be authorized next without a new governance prompt;
+  # P1 stays out of this list because G1 still requires V0_PASS, which is 0/8 and unbuyable by CI.
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
-    - P0_technical_vertical_slice
   g1_requires: [V0_PASS, P0_PASS]
   g1_claimed: false
   product_mvp_phases: [P1_analyzer, P2_compare, P3_gate, P4_bundle]
@@ -93,10 +94,10 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# Still open on 2026-09-28: Run #2 on the remediation HEAD left one failing job, and the
-# architect issued a second closure round for it. The work is that prompt, not new product scope;
-# AGENTS.md 1 still forbids inventing business functions beyond it.
-active_task: P0_CI_RUN_2_FINAL_DRIFT_CLOSURE
+# P0 is closed at v0.6.0 by the architect-signed promotion prompt. There is no active task, and
+# AGENTS.md 1 forbids any agent from inventing one: the next authorized track is V0 (needs real
+# participants), and P1 needs its own sequencing decision because G1 still requires V0_PASS.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -134,12 +135,24 @@ p0_execution:
   # Run #3 on the round-2 HEAD is green across all seven. What remains is the architect's promotion
   # sign-off, which is a governance act and not an engineering gap; nothing here writes P0 PASS.
   remote_state: "pushed as 1cd6309; Remote CI Run #3 executed and concluded success (7 of 7 jobs)"
-  status: CONDITIONAL_PASS
-  # The condition is spelled out so it cannot be read as an engineering unknown: remote CI is green,
-  # and the outstanding item is the architect's signed promotion prompt.
-  condition: "Architect promotion sign-off: P0 PASS, baseline v0.6.0 and the new SHA256SUMS are the architect's to issue, not this round's to claim"
-  evidence_status: REMOTE_CI_GREEN_RUN_3_7_OF_7_JOBS
-  remediation_state: REMOTE_CI_CLOSED_AWAITING_PROMOTION_SIGNOFF
+  # PASS now: the engineering evidence was already measured in Runs #3 and #4, and the missing
+  # element was the architect's signature, which this promotion prompt supplies.
+  status: PASS
+  evidence_status: PASS
+  promotion_signed_by: "FirmwareSight P0 Final Promotion / v0.6.0 Baseline Closure v1.0 - Architect Signed"
+  remediation_state: CLOSED_PROMOTED
+  # The two HEADs answer different questions and are recorded separately on purpose: the first is
+  # where the technical claim was validated, the second is what the architect read before signing.
+  engineering_validated_head: 1cd6309a09313a0a900a83cb12e054e1a3d7c5e3
+  engineering_validation_run: 36399805005
+  engineering_validation_result: success
+  engineering_validation_jobs: 7/7
+  architect_reviewed_head: 5e58f778aad35f33188b96d0b8873401a31ccc3c
+  architect_review_run: 36402637251
+  architect_review_run_result: success
+  architect_review_jobs: 7/7
+  promotion_commit_contains: "baseline, governance, audit, P0 evidence reports, integrity manifest and directory tree only - no production source"
+  remote_state: "promoted at 5e58f77; Runs #3 (1cd6309) and #4 (5e58f77) both success 7 of 7; the promotion commit is documentation and integrity only"
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
   run_2_closure_prompt: "FirmwareSight P0 Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed, supplied inline)"
   remediation:
@@ -168,9 +181,15 @@ p0_execution:
     architecture_conflicts:
       - RUSTSEC-2024-0429 glib 0.18.5 unsound: reached through the gtk-rs 0.18 line Tauri 2.12.0 requires; cargo update -p glib --precise 0.20.0 fails against gtk = "^0.18"; accepted with five revisit triggers, and no ADR because this round changes no architecture choice
       - RUSTSEC-2024-0370 proc-macro-error 1.0.4 unmaintained: host-only build dependency behind the same pin; the advisory itself states no safe upgrade exists; accepted on the same basis
+  # Four runs, in order, none rewritten. Two failures are the reason the two successes exist.
+  remote_ci_runs:
+    - "Run #1 36360310447 on f9b8ccb: failure - Rust windows, Rust ubuntu, Generated output drift, Dependency policy red; Desktop UI both green (2 of 6)"
+    - "Run #2 36378384225 on ebda52d: failure - 6 of 7 green, only Generated output drift red (Ubuntu provisioning in a second job)"
+    - "Run #3 36399805005 on 1cd6309: success - 7 of 7 green. Engineering closure."
+    - "Run #4 36402637251 on 5e58f77: success - 7 of 7 green. Pre-promotion revalidation of the governance-only successor."
   last_remote_ci:
-    run_id: 36399805005
-    head: 1cd6309a09313a0a900a83cb12e054e1a3d7c5e3
+    run_id: 36402637251
+    head: 5e58f778aad35f33188b96d0b8873401a31ccc3c
     event: push
     conclusion: success
     passed_jobs: ["Rust (windows-latest)", "Rust (ubuntu-latest)", "Desktop UI (windows-latest)", "Desktop UI (ubuntu-latest)", "Generated output drift", "Dependency policy", "macOS Core Smoke"]
@@ -199,18 +218,23 @@ p0_execution:
   library_crate_budget: 4
   library_crates_built: 4
   gate_command: python scripts/check.py
-  gate_result: 14/14 locally with cargo-deny executing (no SKIPPED mandatory step), plus 3/3 --only core-smoke; remotely 6 of 7 jobs green on ebda52d
+  gate_result: "local 14/14 with 0 skipped mandatory steps, plus 3/3 --only core-smoke; remote 7/7 jobs green on both 1cd6309 (Run #3) and 5e58f77 (Run #4)"
   tests: { rust: 104, ui: 19 }
-  # The engineering condition is now met and cited; what is outstanding is the architect's signature.
+  # Every promotion condition is met and cited; none was satisfied by wording.
   promotion_conditions:
     - "Remote CI green on the remediation HEAD - MET by Run #3 (36399805005) on 1cd6309: 7 of 7 jobs success"
-  outstanding_governance_steps:
-    - Architect issues and signs the P0 Final Promotion / v0.6.0 Baseline Closure prompt
-    - That round, not this one, writes P0 PASS, baseline_version 0.6.0, the new SHA256SUMS, DIRECTORY_TREE and the archived P0 validation state
+    - "Architect review of the pre-promotion HEAD - MET by Run #4 (36402637251) on 5e58f77: 7 of 7 jobs success"
+    - "Architect promotion sign-off - MET by this signed prompt; the scope of the signature is P0 only"
+  promotion_scope_limits:
+    - "The signature covers P0 only: V0, G1, P1, P2, P3 and P4 are not signed"
+    - "G1 remains NOT CLAIMED: 06_DELIVERY/06_STAGE_GATES.md requires V0_PASS + P0_PASS and V0 is 0/8"
+    - "ADR-0020 is unmodified; entering P1 while V0 is deferred would need its own sequencing prompt"
+    - "No GitHub Release, installer, signing, notarization or updater work: this is a project baseline promotion, not a product release"
+    - "No tag was created: git tag -l is empty in this repository, so there is no baseline-tag convention to follow and none was invented"
   # Answered by Run #2 on the real runners. Kept visible so a later reader does not re-ask them,
   # and listed per job rather than as a single "CI improved" claim.
   satisfied_conditions:
-    - cargo-deny remote PASS, advisories / bans / licenses / sources all ok
+    - "cargo-deny remote PASS, advisories / bans / licenses / sources all ok"
     - desktop real-window smoke PASS (P0_DESKTOP_SMOKE_REPORT.md)
     - Rust (windows-latest) remote PASS, 104 tests
     - Rust (ubuntu-latest) remote PASS, 104 tests with firmwaresight-desktop compiling
@@ -218,7 +242,7 @@ p0_execution:
     - Desktop UI (ubuntu-latest) remote PASS, 19 UI tests
     - macOS Core Smoke remote PASS, 87 tests, first execution of the job
     - Generated output drift: design tokens and desktop icons remote PASS, including on Linux
-    - Remote CI Run #3 on 1cd6309: workflow overall success, 7 of 7 jobs, the drift job green after installing the same proven prerequisites
+    - "Remote CI Run #3 on 1cd6309: workflow overall success, 7 of 7 jobs, the drift job green after installing the same proven prerequisites"
   # Recorded separately because the P0 prompt accepted an unmeasured number with a stated reason.
   # This is a measurement gap, not a promotion blocker.
   non_blocking_measurement_gaps:
@@ -226,8 +250,9 @@ p0_execution:
   push_authorized: true_by_owner_instruction
   push_performed_by: "repository owner; the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force)"
   remote_state_changed: true # origin/main == 1cd6309, local and remote in sync
-  baseline_version_after_p0: 0.5.1
-  target_baseline_on_pass: 0.6.0
-  v0_6_0_released: false
+  baseline_version_after_p0: 0.6.0
+  v0_6_0_released: true
+  v0_6_0_meaning: "P0 Technical Foundation Baseline - the vertical slice chain is validated. Not product MVP, not G1, not user value, not a stable commercial release."
+  v0_6_0_does_not_claim: [V0_PASS, G1_PASS, product_mvp_complete, P1_authorized, compare_gate_bundle_complete, commercial_stable_release, installer_signing_updater_ready, user_value_validated, willingness_to_pay_validated, zero_vulnerabilities, CRA_compliance]
   p1_authorized: false
   g1_claimed_by_p0_pass: false

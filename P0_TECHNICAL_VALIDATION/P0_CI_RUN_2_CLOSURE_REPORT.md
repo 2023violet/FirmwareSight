@@ -182,6 +182,15 @@ itself, and a promotion claimed without one would be a fabrication.
 ## Historical record
 
 Run `36360310447` (Run #1, head `f9b8ccb`, 2 of 6 green) stays in `P0_CI_REPORT.md` as executed
-history. Run #2 is now `latest_remote_ci`; the two are not merged, relabeled or cleaned up, because
+history. Run #2 was `latest_remote_ci` when this round filed it, and `last_remote_ci` has since moved to
+Run #3 and then Run #4; none of the four is merged, relabeled or cleaned up, because
 the pair - one run that failed four ways and one that failed one way - is the actual evidence that the
 first remediation worked.
+
+## Final disposition — P0 PASS, v0.6.0 (2026-09-28)
+
+This round's target - `READY FOR REMOTE CI RUN #3` - was met: Run `36399805005` on `1cd6309` concluded
+`success` with 7 of 7 jobs green, and Run `36402637251` on the architect-reviewed `5e58f77` repeated it.
+The drift job's provisioning step is therefore confirmed remotely, which is the claim this file
+deliberately withheld. P0 was promoted to `PASS` at `v0.6.0` by the architect's signed prompt; see
+`P0_FINAL_PROMOTION_REPORT.md`.

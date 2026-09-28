@@ -122,12 +122,13 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 
 ## Verification gaps
 
-- **CI has run three times: two failures, then green.** Run `36360310447` (`f9b8ccb`) had four red
+- **CI has run four times: two failures, then green twice.** Run `36360310447` (`f9b8ccb`) had four red
   jobs; Run `36378384225` (`ebda52d`) had one; Run `36399805005` (`1cd6309`) concluded `success` with
-  **7 of 7 jobs green**, including `Generated output drift` after the provisioning step round 2 added.
-  Remote CI is therefore a measured fact with a `gh` command behind it. What is *not* done is the
-  promotion: `P0 = PASS`, `v0.6.0` and a new `SHA256SUMS` belong to the architect's signed prompt, so
-  this pack says `CONDITIONAL_PASS` and names that condition.
+  **7 of 7 jobs green**, including `Generated output drift` after the provisioning step round 2 added;
+  Run `36402637251` (`5e58f77`) repeated it on the architect-reviewed HEAD. Remote CI is a measured fact
+  with a `gh` command behind it, and the promotion the bullet above deferred to the architect has since
+  been signed: `P0 = PASS` at `v0.6.0`. None of that closes any limitation in this file - a green
+  workflow is not a performance measurement, a fuzzer or a participant session.
 - **`cargo deny` runs and passes both places it can be run** - locally (0.20.2, exit 0 over `licenses
   bans sources advisories`) and in CI (Run #2's `Dependency policy` job, four categories ok). What it
   still does not prove: it evaluates only the four targets in `[graph] targets`, so a mobile or
@@ -191,3 +192,11 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
   TypeScript 6.0.3. Each is in `P0_IMPLEMENTATION_LOG.md`.
 - One file was deleted during P0 (`golden/reports/p0-basic-summary.json`), because it carried
   wrong values under a right-looking name and no test read it. It is recoverable from git.
+
+## Final disposition — P0 PASS, v0.6.0 (2026-09-28)
+
+P0 closed `PASS` and `FirmwareSight_Project_Baseline_v0.6.0` was frozen. **Every limitation listed in
+this file survives that promotion unchanged**, and the promotion prompt forbids describing them as
+resolved: peak RSS is `NOT MEASURED`, fuzzing is `NOT RUN`, Compare / Gate / Bundle are unimplemented,
+the desktop evidence is one Windows host and one WebView2 runtime, the two RustSec advisories are
+accepted rather than fixed, and V0's external sessions remain `0 / 8`.

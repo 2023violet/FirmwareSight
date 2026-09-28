@@ -2,7 +2,7 @@
 title: "Document Index"
 doc_id: "FS-ROOT-INDEX"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-28"
@@ -11,27 +11,29 @@ last_updated: "2026-09-28"
 
 # Document Index
 
-Baseline: `0.5.1`  
-Execution state: `P0: CONDITIONAL_PASS — remote CI Run #3 success, 7 of 7 jobs green; condition = architect promotion sign-off; V0 Batch A still waiting on real participants`
+Baseline: `0.6.0` — the P0 Technical Foundation Baseline.
+
+Execution state: `P0: PASS (remote CI Run #3 and Run #4, 7 of 7 jobs green on each) · G1 NOT CLAIMED · V0 INCOMPLETE 0/8, Batch A still waiting on real participants · P1 NOT AUTHORIZED · active_task: NONE`
 
 ## Primary reading path
 
 1. `README.md`
 2. `PRODUCT_BASELINE.md`
-3. `.ai/ACTIVE_TASK.md`
-4. `P0_TECHNICAL_VALIDATION/README.md`
-5. `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md`
-6. `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md`
-7. `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`
-8. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
-9. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
-10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
+3. `BASELINE.yaml`
+4. `.ai/CURRENT_STATE.md`
+5. `.ai/ACTIVE_TASK.md` — `NONE`
+6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`
+7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
+8. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
+9. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — all four runs, the two failures included
+10. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
+11. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 
-`DIRECTORY_TREE.txt` and `SHA256SUMS` still describe the frozen
-`FirmwareSight_Project_Baseline_v0.5.1` package, not the P0 working tree; the P0 source layout is
-recorded in `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md`. Nine manifest entries now differ;
-all nine are governance and execution records P0 was authorized to change, and they are listed by name
-in `.ai/DECISIONS.md`.
+`DIRECTORY_TREE.txt` and `SHA256SUMS` are the regenerated **v0.6.0** baseline record: the tree lists
+this repository's tracked layout and `SHA256SUMS` covers the baseline-controlled files in it. They were
+produced by the promotion round, in that order, and verified with `sha256sum -c` plus an independent
+checker; `P0_FINAL_PROMOTION_REPORT.md` records the commands. The v0.5.1 manifest these replaced is
+history, and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 
 
 ## All Markdown documents
@@ -40,8 +42,8 @@ in `.ai/DECISIONS.md`.
 |---|---|
 | `.ai/ACTIVE_TASK.md` | ACTIVE TASK |
 | `.ai/CURRENT_STATE.md` | Current State |
-| `.ai/DECISIONS.md` | Decisions — v0.5.1 |
-| `.ai/HANDOFF.md` | Handoff — FirmwareSight v0.5.1 |
+| `.ai/DECISIONS.md` | Decisions — v0.6.0 |
+| `.ai/HANDOFF.md` | Handoff — FirmwareSight v0.6.0 / P0 closed PASS. No active task. Do not invent one. |
 | `.ai/README.md` | AI Entry Point |
 | `00_GOVERNANCE/00_DOCUMENT_CONTROL.md` | 文档控制规范 |
 | `00_GOVERNANCE/01_PROJECT_CHARTER.md` | 项目章程 |
@@ -194,7 +196,7 @@ in `.ai/DECISIONS.md`.
 | `CHANGELOG.md` | Changelog |
 | `DESIGN.md` | FirmwareSight DESIGN.md |
 | `PRODUCT_BASELINE.md` | FirmwareSight Product Baseline v0.5.0 |
-| `README.md` | FirmwareSight v0.5.1 |
+| `README.md` | FirmwareSight v0.6.0 |
 | `P0_TECHNICAL_VALIDATION/README.md` | P0 Technical Validation |
 | `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md` | P0 Architecture Check |
 | `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` | P0 CI Remediation Report |
@@ -206,6 +208,7 @@ in `.ai/DECISIONS.md`.
 | `P0_TECHNICAL_VALIDATION/P0_DESKTOP_SMOKE_REPORT.md` | P0 Desktop Real-Window Smoke Report |
 | `P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md` | P0 Execution Provenance |
 | `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` | P0 Exit Checklist |
+| `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md` | P0 Final Promotion Report — v0.6.0 Baseline Closure |
 | `P0_TECHNICAL_VALIDATION/P0_FIXTURE_REGISTER.md` | P0 Fixture Register |
 | `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` | P0 Implementation Log |
 | `P0_TECHNICAL_VALIDATION/P0_IPC_PARITY_REPORT.md` | P0 IPC and Core/CLI/Desktop Parity |

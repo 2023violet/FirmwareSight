@@ -2,15 +2,17 @@
 title: "Decision Summary"
 doc_id: "FS-AI-003"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
 last_updated: "2026-09-28"
 ---
 
-# Decisions — v0.5.1
+# Decisions — v0.6.0
 
-All v0.5.0 architecture/product/design decisions remain in force.
+All v0.5.0 architecture/product/design decisions remain in force. Sections below are dated records:
+the earlier ones keep their v0.5.1 provenance and are not restated, and the promotion section at the
+end is what the current baseline stands on.
 
 ## V0 execution decisions
 
@@ -292,3 +294,50 @@ Measured, then decided:
 - Unchanged by the green run: G1 (still requires V0, and V0 is `0 / 8` eligible external sessions),
   P1 (still requires its own authorization prompt), `ADR-0020`, V0 evidence, design tokens, and the
   two RustSec advisories under the architect's recorded acceptance with their five revisit triggers.
+
+---
+
+# P0 Final Promotion Decision — 2026-09-28
+
+Authorization:
+
+- *FirmwareSight P0 — Final Promotion / v0.6.0 Baseline Closure v1.0 — Architect Signed.* Supplied
+  inline to the execution environment, so there is no stored source file whose SHA-256 this
+  repository can record; the copy of its terms kept here is this section plus
+  `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`, and the prompt audit index says so rather
+  than implying a byte-exact archive exists.
+- It authorizes one act: promote P0 to `PASS` and freeze the v0.6.0 baseline record. Everything
+  outside that - P1, G1, releases, signing, tags - remains unauthorized by it.
+
+```text
+Decision            P0 = PASS
+Baseline            v0.6.0 — FirmwareSight_Project_Baseline_v0.6.0, the P0 Technical Foundation Baseline
+Basis               Remote CI Run #3 (36399805005) on 1cd6309 — success, 7 of 7 jobs
+                    Remote CI Run #4 (36402637251) on 5e58f77 — success, 7 of 7 jobs
+                    A desktop window opened and driven on the shipping configuration
+                    Local gate 14/14 with 0 skipped mandatory steps, plus 3/3 under --only core-smoke
+Architecture change none
+ADR required        no
+V0                  unchanged: DEFERRED / NOT YET EVIDENCE-VALIDATED, 0 / 8 eligible external sessions
+G1                  NOT CLAIMED
+P1                  NOT AUTHORIZED
+```
+
+What the two HEADs mean, recorded separately on purpose: `1cd6309` is the **engineering-validated**
+tree - the last commit that contains the source the gate measured. `5e58f77` is the
+**architect-reviewed** tree, differing from it by governance, audit and evidence documentation only,
+and it is the HEAD Run #4 executed. The promotion commit is a third, distinct HEAD, and it changes
+documentation and integrity artifacts only; had it needed a production source change this round would
+have stopped with `PROMOTION BLOCKED BY NEW ENGINEERING DEFECT` instead of signing the `PASS`.
+
+What `v0.6.0` does not assert: V0 validation, a G1 pass, a complete product MVP, Compare / Gate /
+Bundle workflows, an installer, signing, notarization or an updater, commercial stability, zero
+vulnerabilities, or CRA compliance. Product scope is unchanged from v0.5 - the version records a
+validated technical foundation, not a new product verb, and `PRODUCT_BASELINE.md` carries a dated note
+saying exactly that.
+
+What the promotion deliberately did not clean up: Run #1's four red jobs and Run #2's one red job stay
+published as failed history; peak RSS stays `NOT MEASURED`; fuzzing stays `NOT RUN`; the two RustSec
+advisories stay recorded as **accepted explicit P0 transitive risk** with their five revisit triggers;
+`SHA256SUMS` and `DIRECTORY_TREE.txt` are regenerated as the v0.6.0 baseline record, which is the one
+integrity act the previous rounds declined to take on their own authority.

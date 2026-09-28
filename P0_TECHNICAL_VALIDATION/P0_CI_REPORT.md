@@ -13,9 +13,9 @@ last_updated: "2026-09-28"
 Requirement: a gate that runs the same checks a developer runs, so "CI is green" and "my machine
 is green" cannot mean different things.
 
-Status: **REMOTE CI RUN #3: SUCCESS — 7 OF 7 JOBS GREEN — AWAITING THE ARCHITECT'S PROMOTION SIGN-OFF**
+Status: **REMOTE CI RUN #3 AND RUN #4: SUCCESS — 7 OF 7 JOBS GREEN — P0 PROMOTED TO `PASS` AT v0.6.0**
 
-The workflow has executed three times, and every conclusion below is read from GitHub with
+The workflow has executed four times, and every conclusion below is read from GitHub with
 `gh run view`, not from this repository's own reports.
 
 - Run #1 (`36360310447`, head `f9b8ccb`): `failure`, 2 of 6 green. Kept as historical evidence.
@@ -24,10 +24,15 @@ The workflow has executed three times, and every conclusion below is read from G
   prerequisites the first one was given.
 - Run #3 (`36399805005`, head `1cd6309`): **`success`, 7 of 7 green**, including the job Run #2
   could not pass.
+- Run #4 (`36402637251`, head `5e58f77`): **`success`, 7 of 7 green** — the same workflow on the
+  architect-reviewed HEAD, which differs from `1cd6309` by documentation only. It is the second green
+  run, and it is the one that ran on the tree the architect read before signing.
 
-P0's engineering evidence is therefore complete on real runners. What has not happened is the
-promotion act: `P0 = PASS`, `baseline_version: 0.6.0` and a new `SHA256SUMS` belong to the architect's
-next signed prompt, and no document here claims them. The first round's reasoning is in
+P0's engineering evidence was complete on real runners at Run #3, and the promotion act that the line
+above deferred to "the architect's next signed prompt" has now happened: Run #4 repeated the result on
+the reviewed HEAD and the architect signed *P0 Final Promotion / v0.6.0 Baseline Closure v1.0*, which is
+what wrote `P0 = PASS`, `baseline_version: 0.6.0` and the regenerated `SHA256SUMS`. This report claims
+none of that on its own authority; it records what the runners measured. The first round's reasoning is in
 `P0_CI_REMEDIATION_REPORT.md` and the second round's in `P0_CI_RUN_2_CLOSURE_REPORT.md`.
 
 ## Remote CI Run #1 — retained as failed evidence
@@ -142,6 +147,33 @@ both `git diff --exit-code` assertions are intact.
 One honest qualification stays in the record: the Windows Rust job's skipped step means that job never
 exercises the apt block (correctly - it is Linux-only), so "no step failed" and "every step ran" are
 different statements. The `skipped` one is reported as skipped rather than counted as a pass.
+
+## Remote CI Run #4 — the reviewed HEAD, green again
+
+| Field | Value |
+| --- | --- |
+| Run | `36402637251`, event `push` |
+| Head | `5e58f778aad35f33188b96d0b8873401a31ccc3c` — the architect-reviewed HEAD |
+| Conclusion | **`success`** |
+| Jobs | 7 of 7 success |
+| Read with | `gh run view 36402637251 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs` |
+
+| Job | Conclusion |
+| --- | --- |
+| Rust (windows-latest) | success |
+| Rust (ubuntu-latest) | success |
+| Desktop UI (windows-latest) | success |
+| Desktop UI (ubuntu-latest) | success |
+| Generated output drift | success |
+| Dependency policy | success |
+| macOS Core Smoke | success |
+
+Run #4 adds no new engineering fact and claims none. Its value is procedural: it executed the tree the
+architect actually reviewed, which is `1cd6309` plus fifteen documentation files, so the signature rests
+on a run of the reviewed bytes rather than on a diff between two runs. `git diff --name-only
+1cd6309..5e58f77` lists those fifteen and contains no `crates/`, `apps/`, `fixtures/`, `golden/`,
+`migrations/`, lockfile, `deny.toml`, `scripts/check.py` or workflow path — the check is quoted in
+`P0_FINAL_PROMOTION_REPORT.md` §3.
 
 ## One definition, two callers
 
@@ -370,3 +402,11 @@ this tree as well - it was re-run after the workflow edit and reported the same 
 | core works on the third platform | `macos-core` job (`--only core-smoke`) |
 | golden tests pass | `rust/test` plus `drift/goldens unchanged` |
 | the shipping window really opens | not a CI job: `P0_DESKTOP_SMOKE_REPORT.md`, manual, with the defect it found |
+
+## Final disposition — P0 PASS, v0.6.0 (2026-09-28)
+
+All four runs are in this file, and the two failures are still at the top of it in the order they
+happened. The workflow is green, twice, on the two HEADs that mattered: `1cd6309` (engineering) and
+`5e58f77` (architect-reviewed). The architect signed the promotion on that basis, which is the act this
+report spent two rounds declining to perform for itself. `P0_FINAL_PROMOTION_REPORT.md` holds the
+decision; this file holds what the runners measured.

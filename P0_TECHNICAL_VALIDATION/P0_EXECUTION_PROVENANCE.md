@@ -158,3 +158,29 @@ there is no stored file to hash; its terms are in `.ai/DECISIONS.md` and
 
 `fe37847` is named as the validated source tree in the same sense as `65cb2dc` and `ff9b34a`: the gate
 ran against contents equal to it. The documentation commits that follow change no file the gate reads.
+
+## Final promotion round (2026-09-28)
+
+Authorization: *FirmwareSight P0 — Final Promotion / v0.6.0 Baseline Closure v1.0 — Architect Signed*,
+supplied inline to this environment. There is no original prompt file to archive, so this round records
+`original file unavailable / supplied inline` rather than a SHA-256 it does not possess, and
+`10_AUDIT/SOURCE_PROMPTS/README.md` says the same.
+
+| Field | Value |
+| --- | --- |
+| Start HEAD, local | `5e58f778aad35f33188b96d0b8873401a31ccc3c` |
+| origin/main at preflight | the same SHA — local and remote in sync, no delta to absorb |
+| Working tree at preflight | the five documents already being edited for this round; no user work at risk, nothing cleaned, reset or stashed |
+| Runs relied on | `36399805005` (`1cd6309`, success, 7/7) and `36402637251` (`5e58f77`, success, 7/7), both read with `gh run view` |
+| Environment change | none. No tool installed, no dependency added, no lockfile touched |
+| Production source changed | none. `crates/`, `apps/`, `fixtures/`, `golden/`, `migrations/`, `Cargo.lock`, `pnpm-lock.yaml`, `deny.toml`, `scripts/`, `.github/workflows/` and `assets/design-tokens.json` are all untouched |
+| Gate this round | `python scripts/check.py` -> 14/14, exit 0, 0 `SKIPPED`; `--only core-smoke` -> 3/3; `cargo test --workspace` -> 104 passed / 0 failed; UI `Tests 19 passed (19)`; `git diff --check` clean |
+| `git diff --check` note | dirty on its first execution — trailing whitespace on one `BASELINE.yaml` value and the `INDEX.md` baseline line, both written by this round. Fixed, then re-run |
+| Desktop launch | not repeated. No runtime source changed, so `P0_DESKTOP_SMOKE_REPORT.md` is carried forward |
+| Integrity artifacts | `DIRECTORY_TREE.txt` then `SHA256SUMS`, regenerated from the tracked file set and verified twice |
+| Tag | none created. `git tag -l` returns nothing, so there was no convention to follow and none was invented |
+| Push | not performed by this round. The owner pushes |
+
+The promotion commit is the child of `5e58f77` that carries `P0_FINAL_PROMOTION_REPORT.md`; a file
+cannot contain its own commit hash, so it is named by relationship, and `git log -1 --format=%H` on the
+delivered tree gives the value.

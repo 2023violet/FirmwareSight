@@ -1,10 +1,15 @@
-FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
+FirmwareSight_Project_Baseline_v0.6.0/
 ├── .ai/
 │   ├── ACTIVE_TASK.md
 │   ├── CURRENT_STATE.md
 │   ├── DECISIONS.md
 │   ├── HANDOFF.md
 │   └── README.md
+├── .cargo/
+│   └── config.toml
+├── .github/
+│   └── workflows/
+│       └── p0-check.yml
 ├── 00_GOVERNANCE/
 │   ├── 00_DOCUMENT_CONTROL.md
 │   ├── 01_PROJECT_CHARTER.md
@@ -135,6 +140,7 @@ FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
 │   └── ADR-0024-post-mvp-candidate-governance.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
+│   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
 │   │   ├── FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
 │   │   └── README.md
@@ -175,6 +181,72 @@ FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
 │   ├── 01_UI_BASELINE_REVIEW.md
 │   ├── 02_V0.5_EXPERT_REVIEW_RESOLUTION.md
 │   └── 03_ADOPTION_DECISION_REGISTER.md
+├── apps/
+│   ├── cli/
+│   │   ├── src/
+│   │   │   └── main.rs
+│   │   ├── tests/
+│   │   │   └── golden.rs
+│   │   └── Cargo.toml
+│   └── desktop/
+│       ├── src-tauri/
+│       │   ├── capabilities/
+│       │   │   └── main.json
+│       │   ├── icons/
+│       │   │   ├── 128x128.png
+│       │   │   ├── 128x128@2x.png
+│       │   │   ├── 32x32.png
+│       │   │   ├── icon.ico
+│       │   │   └── icon.png
+│       │   ├── src/
+│       │   │   ├── ipc.rs
+│       │   │   ├── lib.rs
+│       │   │   ├── main.rs
+│       │   │   └── service.rs
+│       │   ├── tests/
+│       │   │   └── desktop_parity.rs
+│       │   ├── build.rs
+│       │   ├── Cargo.toml
+│       │   └── tauri.conf.json
+│       └── ui/
+│           ├── src/
+│           │   ├── components/
+│           │   │   ├── StateBadge.module.css
+│           │   │   └── StateBadge.tsx
+│           │   ├── ipc/
+│           │   │   ├── generated/
+│           │   │   │   ├── AnalysisSummaryDto.ts
+│           │   │   │   ├── ArtifactDto.ts
+│           │   │   │   ├── BudgetDto.ts
+│           │   │   │   ├── CapabilitiesDto.ts
+│           │   │   │   ├── ErrorEnvelopeDto.ts
+│           │   │   │   ├── EvidenceSummaryDto.ts
+│           │   │   │   ├── FixtureKey.ts
+│           │   │   │   ├── FixtureOptionDto.ts
+│           │   │   │   ├── IdentityDto.ts
+│           │   │   │   └── MemorySummaryDto.ts
+│           │   │   ├── bridge.test.ts
+│           │   │   ├── bridge.ts
+│           │   │   └── types.ts
+│           │   ├── styles/
+│           │   │   ├── classnames.ts
+│           │   │   ├── global.css
+│           │   │   └── tokens.css
+│           │   ├── test/
+│           │   │   └── setup.ts
+│           │   ├── App.module.css
+│           │   ├── App.test.tsx
+│           │   ├── App.tsx
+│           │   ├── format.test.ts
+│           │   ├── format.ts
+│           │   └── main.tsx
+│           ├── .npmrc
+│           ├── eslint.config.js
+│           ├── index.html
+│           ├── package.json
+│           ├── pnpm-lock.yaml
+│           ├── tsconfig.json
+│           └── vite.config.ts
 ├── assets/
 │   ├── ui-mockups/
 │   │   ├── ASSET_MANIFEST.json
@@ -187,6 +259,50 @@ FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
 │   │   ├── FS-UI-07-Unknown-Dependency.png
 │   │   └── README.md
 │   └── design-tokens.json
+├── crates/
+│   ├── firmwaresight-artifact/
+│   │   ├── src/
+│   │   │   ├── elf.rs
+│   │   │   ├── error.rs
+│   │   │   ├── intake.rs
+│   │   │   ├── lib.rs
+│   │   │   ├── map.rs
+│   │   │   └── pipeline.rs
+│   │   ├── tests/
+│   │   │   └── p0_acceptance.rs
+│   │   └── Cargo.toml
+│   ├── firmwaresight-core/
+│   │   ├── src/
+│   │   │   ├── domain/
+│   │   │   │   ├── artifact.rs
+│   │   │   │   ├── build_snapshot.rs
+│   │   │   │   ├── capability.rs
+│   │   │   │   ├── evidence.rs
+│   │   │   │   ├── identity.rs
+│   │   │   │   ├── memory.rs
+│   │   │   │   ├── mod.rs
+│   │   │   │   ├── section.rs
+│   │   │   │   └── symbol.rs
+│   │   │   ├── error.rs
+│   │   │   └── lib.rs
+│   │   └── Cargo.toml
+│   ├── firmwaresight-report/
+│   │   ├── src/
+│   │   │   ├── dto.rs
+│   │   │   ├── lib.rs
+│   │   │   └── render.rs
+│   │   └── Cargo.toml
+│   └── firmwaresight-storage/
+│       ├── migrations/
+│       │   ├── 0001_initial.sql
+│       │   └── 0002_evidence_keyed_by_build.sql
+│       ├── src/
+│       │   ├── db.rs
+│       │   ├── error.rs
+│       │   └── lib.rs
+│       ├── tests/
+│       │   └── storage.rs
+│       └── Cargo.toml
 ├── examples/
 │   ├── Cargo.workspace.baseline.toml
 │   ├── firmwaresight.example.toml
@@ -195,10 +311,73 @@ FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
 │   ├── release-manifest.example.json
 │   ├── rust-toolchain.baseline.toml
 │   └── tauri-capability.baseline.json
+├── fixtures/
+│   ├── elf/
+│   │   ├── p0-basic/
+│   │   │   ├── source/
+│   │   │   │   └── main.c
+│   │   │   ├── firmware.elf
+│   │   │   └── fixture.toml
+│   │   └── p0-dual-region/
+│   │       ├── source/
+│   │       │   └── main.c
+│   │       ├── firmware.elf
+│   │       ├── firmware.map
+│   │       ├── fixture.toml
+│   │       └── p0-dual-region.ld
+│   ├── malformed/
+│   │   ├── empty.bin
+│   │   ├── README.md
+│   │   ├── sparse-elf-header.bin
+│   │   ├── truncated-elf.bin
+│   │   └── wrong-magic.bin
+│   └── manifest.json
+├── golden/
+│   ├── cli/
+│   │   ├── p0-basic-analyze.json
+│   │   └── p0-dual-region-analyze.json
+│   ├── core/
+│   │   ├── p0-basic-memory.json
+│   │   └── p0-dual-region-memory.json
+│   └── reports/
+│       └── README.md
+├── P0_TECHNICAL_VALIDATION/
+│   ├── P0_ARCHITECTURE_CHECK.md
+│   ├── P0_CI_REMEDIATION_REPORT.md
+│   ├── P0_CI_REPORT.md
+│   ├── P0_CI_RUN_2_CLOSURE_REPORT.md
+│   ├── P0_CLI_PARITY_REPORT.md
+│   ├── P0_DEPENDENCY_REPORT.md
+│   ├── P0_DESIGN_CHECKLIST.md
+│   ├── P0_DESKTOP_SMOKE_REPORT.md
+│   ├── P0_EXECUTION_PROVENANCE.md
+│   ├── P0_EXIT_CHECKLIST.md
+│   ├── P0_FINAL_PROMOTION_REPORT.md
+│   ├── P0_FIXTURE_REGISTER.md
+│   ├── P0_IMPLEMENTATION_LOG.md
+│   ├── P0_IPC_PARITY_REPORT.md
+│   ├── P0_KNOWN_LIMITATIONS.md
+│   ├── P0_MEMORY_ACCOUNTING_REPORT.md
+│   ├── P0_PARSER_RESULTS.md
+│   ├── P0_PERFORMANCE_REPORT.md
+│   ├── P0_PLAN.md
+│   ├── P0_SECURITY_INPUT_REPORT.md
+│   ├── P0_STORAGE_REPORT.md
+│   ├── P0_TECHNICAL_VALIDATION_REPORT.md
+│   └── README.md
 ├── schemas/
 │   ├── accepted-reviews.schema.json
 │   ├── gate-results.schema.json
 │   └── release-manifest.schema.json
+├── scripts/
+│   ├── check.py
+│   ├── gen_desktop_icons.py
+│   ├── gen_p0_fixtures.py
+│   ├── gen_p0_workload.py
+│   ├── generate_design_tokens.py
+│   ├── measure_workloads.py
+│   ├── requirements.txt
+│   └── update_goldens.py
 ├── templates/
 │   ├── ADR_TEMPLATE.md
 │   ├── BUG_REPORT_TEMPLATE.md
@@ -227,7 +406,8 @@ FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
 │   │   ├── BATCH_A_EVIDENCE_INDEX.md
 │   │   ├── BATCH_A_EXECUTION_PROVENANCE.md
 │   │   ├── BATCH_A_STATUS.md
-│   │   └── BATCH_A_TAKEOVER_REPORT.md
+│   │   ├── BATCH_A_TAKEOVER_REPORT.md
+│   │   └── V0.5.2_RELEASE_BLOCK.md
 │   ├── deliverables/
 │   │   ├── V0_FINDINGS.md
 │   │   ├── V0_GATE_RECOMMENDATION.md
@@ -268,10 +448,19 @@ FirmwareSight_Project_Baseline_v0.5.1_Batch_A_Recruitment_Ready/
 │   ├── V0_EXECUTION_PROVENANCE.md
 │   ├── V0_PLAN.md
 │   └── V0_TAKEOVER_REPORT.md
+├── .gitattributes
+├── .gitignore
 ├── AGENTS.md
 ├── BASELINE.yaml
+├── Cargo.lock
+├── Cargo.toml
 ├── CHANGELOG.md
+├── deny.toml
 ├── DESIGN.md
+├── DIRECTORY_TREE.txt
 ├── INDEX.md
+├── manifest.txt
 ├── PRODUCT_BASELINE.md
-└── README.md
+├── README.md
+├── rust-toolchain.toml
+└── SHA256SUMS

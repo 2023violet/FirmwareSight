@@ -13,14 +13,15 @@ last_updated: "2026-09-28"
 Every item from the prompt's P0 PASS list, with the evidence that closed it. `LOCAL PASS` means
 it ran on this machine and produced the quoted result. Nothing here says `CI PASS`.
 
-Status of the track changed three times after this list was first written. Run #1 failed four jobs;
-the remediation fixed them and Run #2 measured six of seven green; the second round added the one
-missing provisioning step, and Run #3 (`36399805005`, head `1cd6309`) concluded **`success`, 7 of 7
-jobs green**. P0 is therefore `CONDITIONAL_PASS`, the condition being the architect's promotion
-sign-off rather than any untested check. The counts below are this tree's, and where an item is
-confirmed by a runner rather than only by this machine, the evidence column says which.
-`P0_CI_REPORT.md` keeps all three runs; `P0_CI_REMEDIATION_REPORT.md` and
-`P0_CI_RUN_2_CLOSURE_REPORT.md` explain the two rounds.
+Status of the track changed three times after this list was first written, and a fourth time when the
+architect signed the promotion. Run #1 failed four jobs; the first remediation fixed them and Run #2
+measured six of seven green; the second round added the one missing provisioning step, Run #3
+(`36399805005`, head `1cd6309`) concluded **`success`, 7 of 7 jobs green**, and Run #4
+(`36402637251`, head `5e58f77`) repeated it on the documentation-only reviewed HEAD. **P0 is therefore
+`PASS`**, promoted into `FirmwareSight_Project_Baseline_v0.6.0` - see `P0_FINAL_PROMOTION_REPORT.md`.
+The counts below are this tree's, and where an item is confirmed by a runner rather than only by this
+machine, the evidence column says which. `P0_CI_REPORT.md` keeps all four runs, the two failures
+included; `P0_CI_REMEDIATION_REPORT.md` and `P0_CI_RUN_2_CLOSURE_REPORT.md` explain the two rounds.
 
 ## Baseline authority minimum (prompt §58)
 
@@ -110,8 +111,16 @@ of what remains open.
 | --- | --- |
 | CI green | **MET** — Run #3 on `1cd6309`: `success`, 7 of 7 jobs. Runs #1 and #2 stay in the record as the two failures that got there |
 | Generated output drift on Ubuntu | **MET REMOTELY** — the drift job now runs `Install Linux prerequisites for the Tauri shell` (`Setting up libwebkit2gtk-4.1-dev` in its log) and reports `5/5 steps passed`. It was NOT LOCALLY EXECUTED before Run #3; Run #3 is that execution |
-| P0 promotion | NOT CLAIMED — `P0 = PASS`, `v0.6.0` and a regenerated `SHA256SUMS` are the architect's signed act. This pack says `CONDITIONAL_PASS` with the condition named |
+| P0 promotion | MET — signed by the architect's *P0 Final Promotion / v0.6.0 Baseline Closure v1.0* prompt on 2026-09-28, after Runs #3 and #4. Record: `P0_FINAL_PROMOTION_REPORT.md`. It was written by that authority, not by this pack deciding it had earned it |
 | cargo-deny licenses/bans/advisories | MET locally and remotely — exit 0 here, and Run #2's `Dependency policy` job green |
 | Peak RSS | NOT MEASURED - reason documented in `P0_PERFORMANCE_REPORT.md`; a measurement gap, not a promotion blocker |
 | Fuzz campaign | NOT RUN - tool policy did not authorize `cargo-fuzz` for P0. Unchanged by Run #3: a green CI is not a fuzzer |
-| `v0.6.0` | NOT GENERATED — the all-green remote run now exists (Run #3), but the promotion act that would justify the version belongs to the architect's next prompt, so nothing was generated here |
+| `v0.6.0` | GENERATED — `FirmwareSight_Project_Baseline_v0.6.0` with `DIRECTORY_TREE.txt` and `SHA256SUMS` regenerated in that order by the promotion round and independently verified. The all-green runs existed first (Run #3, then Run #4); the version came from the signed act, in that order |
+
+## Final disposition — P0 PASS, v0.6.0 (2026-09-28)
+
+Every exit item above is now closed by measurement, by the architect's acceptance, or by being recorded
+as a limitation the P0 prompt accepted. The status decision it awaited was signed on 2026-09-28:
+`P0 = PASS`, `FirmwareSight_Project_Baseline_v0.6.0` frozen, `active_task: NONE`. Two items were not
+"closed" by that act and must not be read as such: peak RSS stays `NOT MEASURED`, and the fuzz campaign
+stays `NOT RUN`.

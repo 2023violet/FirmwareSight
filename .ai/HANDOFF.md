@@ -2,153 +2,127 @@
 title: "Project Handoff"
 doc_id: "FS-AI-004"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
 last_updated: "2026-09-28"
 ---
 
-# Handoff — FirmwareSight v0.5.1 / P0 remote CI green (Run #3, 7 of 7), awaiting the architect's promotion sign-off
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS. No active task. Do not invent one.
 
 ## Purpose
 
-Close the last remote failure, then stop before promotion. That is done: Run #1 failed four jobs, the
-first round fixed them, Run #2 left one (`drift` missing the Linux prerequisites its sibling job had),
-the second round added that step, and **Run #3 (`36399805005`, head `1cd6309`) concluded `success`
-with 7 of 7 jobs green.** The HEAD is pushed and local/remote are in sync.
+P0 is finished and promoted. The architect-signed *P0 Final Promotion / v0.6.0 Baseline Closure v1.0*
+prompt turned the measured evidence into a baseline: `P0 = PASS`, `baseline_version = 0.6.0`, and
+`.ai/ACTIVE_TASK.md` now reads `NONE`. This file's job is to stop the next agent from starting work
+that nobody authorized, and to hand over the facts it would otherwise have to rediscover.
 
-The next action is the architect's, not a coding agent's: issue and sign the *P0 Final Promotion /
-v0.6.0 Baseline Closure* prompt. That prompt - not this one - is where `P0 = PASS`,
-`baseline_version: 0.6.0`, a regenerated `SHA256SUMS`/`DIRECTORY_TREE` and `active_task` are written.
-Whoever resumes must read Run #3 from GitHub (`gh run view 36399805005 --repo
-2023violet/FirmwareSight`) rather than trusting this file, and must not start P1 or promote V0: G1
-still requires V0's `0 / 8` external sessions, which no CI run can supply.
+There is no pending engineering action, no failing check, and no unpushed commit that this record
+knows about. If you were sent here to "continue P0", the correct reply is that P0 is closed.
+
+## Baseline and HEADs
+
+```text
+Baseline            v0.6.0 — FirmwareSight_Project_Baseline_v0.6.0 (P0 Technical Foundation Baseline)
+Engineering-validated HEAD   1cd6309a09313a0a900a83cb12e054e1a3d7c5e3 — the tree the gate measured
+Architect-reviewed HEAD      5e58f778aad35f33188b96d0b8873401a31ccc3c — governance/audit/evidence docs only
+Promotion commit             recorded in P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md
+Remote CI Run #3             36399805005  on 1cd6309  success, 7 of 7 jobs
+Remote CI Run #4             36402637251  on 5e58f77  success, 7 of 7 jobs
+```
+
+Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
+published as history in `P0_CI_REPORT.md`. Read any run with
+`gh run view <id> --repo 2023violet/FirmwareSight`, not from this repository's reports.
+
+## Gate state as promoted
+
+```text
+G0      PASS
+V0      DEFERRED / NOT YET EVIDENCE-VALIDATED — 0 / 8 eligible external sessions (Batch A 0 / 4–5)
+P0      PASS
+Formal G1   NOT CLAIMED — ADR-0020 requires V0 PASS + P0 PASS; only one half exists
+P1      NOT AUTHORIZED — needs its own architect prompt
+```
+
+## What the code does and how it is proven
+
+- 104 Rust tests, 19 UI tests, one gate: `python scripts/check.py`, which CI calls unchanged —
+  14 steps on a tree that already has the built frontend, 16 when it builds that too, plus 3 under
+  `--only core-smoke`.
+- Four Phase-0 library crates plus CLI and desktop apps. Core is headless and synchronous; no Tauri,
+  rusqlite, Tokio or `object::*` type crosses out of it.
+- Real ARM ELF/MAP fixtures with recorded provenance and hash-first tests, so no test needs
+  `arm-none-eabi-gcc`.
+- Deterministic CLI JSON, memory accounting reproduced by hand from `readelf`, a typed ts-rs IPC
+  boundary whose drift is checked by regeneration plus `git diff --exit-code`.
+- SQLite via `rusqlite + bundled`, migrations, transactional import, **schema version 2** — migration
+  `0002` rebuilds `evidence` on `(build_id, id)` because version 1 contradicted `04_TECH/15` §4.
+- A 512 MiB input guard measured from both sides of the boundary; Core/CLI/Desktop parity on the same
+  bytes; the desktop window opened and driven for real on the shipping configuration.
+
+## Known gaps that promotion did not remove
+
+```text
+Peak RSS          NOT MEASURED — reason in P0_PERFORMANCE_REPORT.md; the P0 prompt accepted the gap
+Fuzzing           NOT RUN
+RustSec           RUSTSEC-2024-0429 (glib 0.18.5, unsound), RUSTSEC-2024-0370
+                  (proc-macro-error 1.0.4, unmaintained) — ACCEPTED AS EXPLICIT P0 TRANSITIVE RISK,
+                  five revisit triggers, no ADR because no architecture choice changed
+Desktop smoke     one Windows 10 host, one WebView, at 100% scaling
+Linker layouts    GNU ld MAP plus one dual-region ELF layout
+Open design items capability labels show Core's enum words; eight 1px borders have no token, which
+                  needs a frozen-asset assets/design-tokens.json bump
+CI duplication    two jobs install the same ten apt lines on purpose
+```
+
+Never describe this tree as "zero vulnerabilities" or "security clean"; the two advisories above are
+accepted, not fixed, and they are reachable only through the gtk-rs `0.18` line Tauri `2.12.0`
+requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`).
 
 ## Read first
 
-1. README.md
-2. PRODUCT_BASELINE.md
-3. BASELINE.yaml
-4. AGENTS.md
-5. DESIGN.md + assets/design-tokens.json (for the Desktop UI step)
-6. `10_AUDIT/SOURCE_PROMPTS/README.md` — which prompt authorizes what
-7. `P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md` — start HEADs and environment
+1. `README.md`
+2. `PRODUCT_BASELINE.md` and `BASELINE.yaml`
+3. `AGENTS.md`
+4. `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`, `.ai/ACTIVE_TASK.md`
+5. `10_AUDIT/SOURCE_PROMPTS/README.md` — which prompt authorizes what
+6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md` — the promotion record
+7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` — what is proven, and how
 8. `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` — decisions already taken
-9. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` — what is proven, and how
-10. `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md` — the latest remote run, read with `gh`
-11. `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` — Run #1's four failures, each with its reproducer and fix
-12. `P0_TECHNICAL_VALIDATION/P0_DESKTOP_SMOKE_REPORT.md` — the shipped window, driven for real
-13. `P0_TECHNICAL_VALIDATION/P0_DESIGN_CHECKLIST.md` — the AGENTS.md 11 review for the UI, with four open findings
-14. `.ai/ACTIVE_TASK.md`
+9. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — all four runs, including the two failures
+10. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
+11. `DESIGN.md` + `assets/design-tokens.json` (any UI work)
+12. V0 summary only, never to be re-run from here: `V0_VALIDATION/README.md`,
+    `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md`, `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 
-V0 status summary only (do not re-run V0 from this handoff):
+## Boundaries still in force
 
-- `V0_VALIDATION/README.md`
-- `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md`
-- `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
-
-## Current state
-
-P0 status: **`CONDITIONAL_PASS`** — Run #3 (`36399805005`, head `1cd6309`) is `success` with 7 of 7
-jobs green, and the pushed HEAD is in sync with `origin/main`. The condition is the architect's
-promotion sign-off, not an engineering gap. Baseline stays at `0.5.1` and the coding side writes no
-`P0 PASS`, because the promotion act is issued in its own signed prompt.
-
-What is proven and stays proven: 104 Rust tests and 19 UI tests, a single gate
-(`python scripts/check.py`) that CI calls unchanged - 14 steps on a tree that already has the built
-frontend, 16 when it has to build that too, plus 3 more under `--only core-smoke` - real ARM
-ELF/MAP fixtures with recorded provenance, deterministic CLI JSON, memory accounting reproduced by
-hand from `readelf`, a typed ts-rs IPC boundary, SQLite migrations with transactional import, a
-512 MiB guard measured from both sides of the boundary, and Core/CLI/Desktop parity on the same bytes.
-
-### Run #2, `36378384225`, on `ebda52d` — read with `gh run view`, not from a report
-
-| Job | Result | Evidence in its own log |
-| --- | --- | --- |
-| Rust (windows-latest) | PASS | `5/5 steps passed`, `test result: ok.` summing to 104 |
-| Rust (ubuntu-latest) | PASS | `5/5 steps passed`, 104, `firmwaresight-desktop` compiling |
-| Desktop UI (windows-latest) | PASS | `5/5 steps passed` |
-| Desktop UI (ubuntu-latest) | PASS | `5/5 steps passed`, `Tests 19 passed (19)` |
-| macOS Core Smoke | PASS | `3/3 steps passed`, 87 tests, first execution |
-| Dependency policy | PASS | `advisories ok, bans ok, licenses ok, sources ok` |
-| Generated output drift | **FAIL** | tokens PASS, icons PASS (`pixel-identical to this build`), then `drift/ipc bindings` fails |
-
-That closes Run #1's four causes remotely. The remaining cause is one job missing a step its sibling
-has: `drift` runs `cargo test -p firmwaresight-desktop` to regenerate the ts-rs bindings, and the
-`Install Linux prerequisites for the Tauri shell` block was added only to the `rust` job. The log
-line is `Package gobject-2.0 was not found in the pkg-config search path` - the same missing `.pc`
-class as Run #1's `glib-sys` failure, reached from a second job.
-
-### Run #1, `36360310447`, on `f9b8ccb` — retained history
-
-| Failed job | Cause | Now |
-| --- | --- | --- |
-| Rust (windows-latest) | `*.ld` absent from `.gitattributes`, so `core.autocrlf=true` rewrote the checkout to CRLF | closed remotely by Run #2 |
-| Rust (ubuntu-latest) | `glib-sys`: `pkg-config cannot find glib-2.0` | closed remotely by Run #2 |
-| Generated output drift | the icon check compared Pillow's compressed bytes | closed remotely by Run #2 |
-| Dependency policy | `cargo-deny 0.20.2` could not parse `deny.toml` | closed remotely by Run #2 |
-| (missing job) | no macOS core smoke | added; closed remotely by Run #2 |
-
-The desktop window launch the first round authorized found a sixth defect on its own: analyzing a
-second artifact raised `UNIQUE constraint failed: evidence.id`, because `evidence` had a whole-table
-primary key on `id` while `04_TECH/15` §4 declares `Build 1─N Evidence`. Migration `0002` rebuilds the
-table on `(build_id, id)`; schema version is 2; the two failing tests were written before the fix and
-the upgrade was replayed against the real database the earlier launch left in `%APPDATA%`.
-
-The two RustSec advisories are **no longer an open question handed up**: the architect accepted
-`RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
-unmaintained) as **explicit P0 transitive risk that does not block promotion**, with five revisit
-triggers and no architecture ADR - because no architecture choice changed. They stay documented in
-`deny.toml`'s reasons, `P0_DEPENDENCY_REPORT.md` and `P0_KNOWN_LIMITATIONS.md`. Replacing Tauri,
-forking dependencies or moving the frozen desktop dependency family would need an ADR.
-
-Peak RSS is `NOT MEASURED`, with the reason in `P0_PERFORMANCE_REPORT.md`. That is a measurement gap
-the original P0 prompt accepted, not a promotion blocker; the promotion blocker is Run #3.
-
-Two design-checklist findings stay open and are not CI failures: capability labels show Core's enum
-words, a boundary decision about who owns user-facing wording; and eight `1px` borders have no
-token, which needs a frozen-asset `design-tokens.json` bump P0 may not make. Two others the same
-pass found - no live region, and a `select` with only hover and focus - were fixed and are covered by
-a test. `P0_DESIGN_CHECKLIST.md` records all four with the commands that found them.
-
-V0:
-
-`DEFERRED / NOT YET EVIDENCE-VALIDATED` — formal external sessions `0 / 8 minimum`.
-The prototype, protocol and internal functional dry run are complete; the missing input is
-real participants. Deferral is not completion.
-
-## Boundaries
-
-- Four Phase-0 library crates only; a fifth requires architecture review plus an ADR.
-- Core stays headless and synchronous: no Tauri, rusqlite, Tokio types or `object::*` leakage.
-- No Compare/Gate/Bundle product workflow, no cloud/auth/telemetry/updater/wgpu/SQLx, no E1/E2/E3/GX.
-- `v0.6.0` only on a real P0 `PASS`.
-- This round ends at a local commit. Pushing belongs to the owner, and no `REMOTE CI PASS` may be
-  written before an all-green run exists on the HEAD that was pushed.
-- Fixing a CI failure never means editing the assertion: no expected fixture hash moves to absorb a
-  checkout conversion, no dependency check becomes optional, no Ubuntu desktop coverage is dropped,
-  and no drift step is deleted or moved to another OS to dodge a missing system library.
-- Two jobs needing the same ten apt lines is accepted duplication for now. Abstracting it into a
-  script is not automatically better: it adds a portability and testing surface. Revisit if a third
-  job needs the same list.
-- The advisory disposition is the architect's, not the coding agent's. Do not "fix" it by upgrading
-  Tauri or gtk-rs, and do not re-report it as an open blocker.
-- P1 requires a separate authorization prompt. Do not enter it.
+- `ACTIVE_TASK: NONE`. Do not invent work; report the empty task and the unauthorized list instead.
+- The two legitimate next moves are a real V0 participant source, or an explicit architect-issued P1
+  sequencing prompt. Neither exists.
+- Four Phase-0 library crates; a fifth needs architecture review plus an ADR.
+- AGENTS.md §2: no silent baseline change — async-first Core, framework swaps, SQLx, HTTP client,
+  wgpu, cloud/auth/telemetry, evidence classes, schema semantics, updater/signing model all need an
+  ADR first.
+- No Compare / Gate / Bundle product workflow. No installer, NSIS/MSI, AppImage/deb, notarization,
+  Authenticode, GitHub Release, tag, or updater metadata: v0.6.0 is a baseline promotion, not a
+  stable release. The repository has no tag convention and none was invented.
+- `V0_VALIDATION/**` is research evidence and stays unmodified.
 
 ## Continuation rules
 
-- Re-run the read-only Git preflight before writing, and report start HEADs again; do not trust
-  the HEAD recorded in this file.
-- Never clean, reset, stash or restore to get a tidy tree. User work outranks tree cleanliness.
-- Reports cite real commands and real output. Unmeasured stays `NOT MEASURED` with a reason.
-- Do not weaken or delete a test to reach green.
-- Do not edit V0 evidence, and do not turn the V0 gate recommendation into a PASS.
-- Measure before describing a build. Two claims in this pack were false until re-measured: the
-  fixture `fixture.toml` linker invocation, and the desktop binary "embedding the built UI"
-  (it did not, without `custom-protocol`). Write what the command printed, not what it should print.
-- Read remote CI with `gh run view`, not from this repository's own reports. A run's ID, head SHA and
-  per-job conclusion are external facts, and a report that describes them is a claim about a moment
-  that has already moved.
-- Quote any `BASELINE.yaml` value containing ` #`. An unquoted `Run #2` silently truncates the scalar
-  at the comment, and the file still parses - which is how `remote_state` shipped one round describing
-  a run by half its name. Check with `python -c "import yaml; …"` after editing, not by eye.
+- Re-run the read-only Git preflight before writing, and report start HEADs again; do not trust the
+  HEADs recorded in this file.
+- Never clean, reset, stash, restore or delete to get a tidy tree. User work outranks cleanliness.
+- Reports cite real commands and real output. Unmeasured stays `NOT MEASURED`; unrun stays `NOT RUN`.
+- Do not weaken or delete a test to reach green, and do not edit a baseline document to make a
+  historical failure read as a pass.
+- Do not globally replace `version: 0.5.1` in historical evidence; only current baseline authority
+  documents carry v0.6.0.
+- Quote any `BASELINE.yaml` value containing ` #`: an unquoted `Run #2` truncates at the comment and
+  the file still parses. Verify with `python -c "import yaml, …; yaml.safe_load(...)"` after editing.
+- Read remote CI with `gh run view`. A run's ID, head SHA and per-job conclusion are external facts,
+  and a report that describes them is a claim about a moment that has already moved.
+- After any commit that touches baseline-controlled files, `SHA256SUMS` and `DIRECTORY_TREE.txt` are
+  stale: regenerate both, in that order, and verify with `sha256sum -c` plus an independent checker.

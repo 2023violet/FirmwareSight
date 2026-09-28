@@ -2,13 +2,17 @@
 title: "FirmwareSight Product Baseline v0.5.0"
 doc_id: "FS-PRODUCT-BASELINE"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Product / Architecture"
-last_updated: "2026-09-27"
+last_updated: "2026-09-28"
 ---
 
 # FirmwareSight Product Baseline v0.5.0
+
+> **Product scope: v0.5.0 — unchanged.** The *project* baseline is now **v0.6.0**, and that version
+> records the P0 Technical Vertical Slice closing `PASS`, not a product decision. See §12.
+> Everything below is the v0.5.0 product scope that v0.6.0 inherits verbatim.
 
 ## 1. Product position
 
@@ -222,3 +226,30 @@ The expert round materially strengthens one conclusion:
 > The most promising expansion direction is **evidence completeness + workflow continuity**, not adding a fifth product verb.
 
 The candidate roadmap therefore deepens Analyze / Compare / Gate / Release rather than turning FirmwareSight into an IDE, cloud portal, OTA service or generalized dashboard.
+
+## 12. v0.6.0 — technical foundation, product scope unchanged
+
+Added 2026-09-28 when P0 closed `PASS`. Read together with §6 and §11; it does not amend them.
+
+`v0.6.0` is the first project baseline that contains production source. What it asserts is that the
+**foundation** under this product scope is built and verified: the Core-first architecture of §5 (four
+Phase-0 library crates, a headless synchronous Core, the CLI and Desktop surfaces of §3.F sharing it),
+the intake facts of §3.A, the analysis facts of §3.B on real ARM ELF and GNU ld MAP fixtures, a local
+SQLite index per §5's storage constraint, and a typed IPC boundary. The evidence for each is in
+`P0_TECHNICAL_VALIDATION/`.
+
+What it does **not** assert, and no wording here may upgrade it:
+
+- §3.C Compare, §3.D the deterministic Release Gate verdict surface, and §3.E Release Bundle & History
+  remain **unimplemented product scope**, ahead of this baseline in `06_DELIVERY/00_ROADMAP.md`;
+- optional Git provenance is not part of what P0 validated;
+- the MVP cohort promise in §2 stays fixture-proven only — Keil/ArmClang/IAR are still not `Supported`;
+- the commercial posture of §9 is untouched: willingness to pay is still the unvalidated assumption, and
+  V0's `0 / 8` external sessions are the reason;
+- §10's compliance boundary is unchanged and gains force from this baseline rather than losing any: P0's
+  two accepted RustSec advisories are recorded, not resolved, so "no vulnerabilities" remains a claim
+  this project must never make.
+
+No product verb was added, no artifact class was reclassified, and no gate semantic moved. If a later
+reader needs to know whether v0.6.0 changed the product: it changed what is proven, not what is
+promised.

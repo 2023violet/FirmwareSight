@@ -2,7 +2,7 @@
 title: "Active Task"
 doc_id: "FS-AI-005"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
 last_updated: "2026-09-28"
@@ -11,118 +11,68 @@ last_updated: "2026-09-28"
 # ACTIVE TASK
 
 ```text
-P0_CI_RUN_2_FINAL_DRIFT_CLOSURE  — engineering complete, remote green; awaiting the architect's
-                                    promotion prompt. Do not start P1 or v0.6.0 from this file.
+NONE
 ```
 
-`FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed)`. Target:
-`LOCAL FIX COMPLETE / READY FOR REMOTE CI RUN #3`. Not P1, not `v0.6.0`, not a P0 `PASS` claim, not an
-architecture redesign.
+P0 Technical Vertical Slice is closed `PASS` and promoted to the
+`FirmwareSight_Project_Baseline_v0.6.0` P0 Technical Foundation Baseline by the architect-signed
+*P0 Final Promotion / v0.6.0 Baseline Closure v1.0* prompt. There is no active engineering task, and
+no work may be started from this file.
 
-## Why this task exists
-
-The first remediation round fixed four CI failures and the missing macOS job. The owner pushed its
-HEAD `ebda52d`, GitHub Actions run `36378384225` executed, and it concluded `failure` with **six of
-seven jobs green** - so that round's work is confirmed remotely, and one job is left.
-
-| Run #2 job | Result |
-| --- | --- |
-| `Rust (windows-latest)` | PASS - 104 tests |
-| `Rust (ubuntu-latest)` | PASS - 104 tests, desktop crate compiling |
-| `Desktop UI (windows-latest)` | PASS |
-| `Desktop UI (ubuntu-latest)` | PASS - 19 UI tests |
-| `macOS Core Smoke` | PASS - 87 tests, first execution |
-| `Dependency policy` | PASS - advisories / bans / licenses / sources ok |
-| `Generated output drift` | **FAIL** |
-
-The failing step is `drift/ipc bindings`. `scripts/check.py --only drift` regenerates the ts-rs
-bindings by running `cargo test -p firmwaresight-desktop`, which links the GTK stack, and the `drift`
-job - unlike the `rust` job - had no step installing the Tauri Linux prerequisites. Its log says
-`Package gobject-2.0 was not found in the pkg-config search path`, the same missing `.pc` class that
-killed `Rust (ubuntu-latest)` in Run #1 at `glib-sys`.
-
-**This is a CI job provisioning duplication defect.** Not a Core defect, not a ts-rs contract defect,
-not generated drift, not a Tauri source defect.
-
-## Scope
-
-One workflow file, plus the governance and evidence record of Run #2. Minimal change, no abstraction:
-the already-remotely-proven apt block is copied into the `drift` job rather than extracted into a new
-script, because only two jobs need it.
-
-## Explicitly out of scope
-
-- Pushing. The owner pushes; the coding side reports the HEAD and waits.
-- Writing `REMOTE CI PASS`, `P0 PASS`, `G1 PASS`, or generating `v0.6.0`.
-- Any product source: `crates/**`, `apps/cli/**`, `apps/desktop/**`, `fixtures/**`, `golden/**`,
-  `schemas/**`, `scripts/check.py`, `deny.toml`, `Cargo.lock`, `pnpm-lock.yaml`,
-  `assets/design-tokens.json`, `V0_VALIDATION/**`, `SHA256SUMS`.
-- A fifth Phase-0 library crate, moving IPC DTOs into Core, changing the Tauri version, the gtk-rs
-  line or Cargo features, or a dependency-architecture migration.
-- Weakening the drift check: deleting the desktop test command, dropping the IPC bindings step,
-  marking it optional, moving the job to Windows, `continue-on-error`, `if: false`, or turning the
-  failure into a warning.
-- Removing the macOS job, the Linux CI or the cargo-deny job; changing workflow triggers or
-  `permissions: contents: read`.
-- Chasing the 23 duplicate-version warnings or upgrading dependencies to reduce noise.
-- Re-running the desktop smoke for a third observation when no runtime source changed.
-
-## Where this task stands
+## What is true now
 
 ```text
-Remote CI run #1:    FAILURE at f9b8ccb — retained as history
-Remote CI run #2:    FAILURE at ebda52d — 6 of 7 jobs green; retained as history
-Remote CI run #3:    SUCCESS at 1cd6309 — 7 of 7 jobs green; latest_remote_ci
-Round 1 remediation: CONFIRMED REMOTELY (fixture bytes, Ubuntu Rust, icon semantics, deny, macOS)
-Round 2 fix:         drift job installs the proven prerequisites; workflow-only, 21 added lines
-Local gate:          PASS, 14/14 default steps, 0 SKIPPED mandatory steps
-Desktop smoke:       PASS, carried forward — round 2 changed no runtime source
-P0:                  CONDITIONAL_PASS; the condition is the architect's promotion sign-off
-Push:               performed — 1cd6309 on origin/main, local and remote in sync
+Baseline:      v0.6.0 — P0 Technical Foundation Baseline
+G0:            PASS
+V0:            DEFERRED / NOT YET EVIDENCE-VALIDATED — 0 / 8 eligible external sessions
+P0:            PASS — remote CI Run #3 36399805005 (7/7) and Run #4 36402637251 (7/7)
+Formal G1:     NOT CLAIMED — g1_requires V0_PASS + P0_PASS; V0 is the missing half
+P1:            NOT AUTHORIZED
 ```
 
-Two facts recorded honestly rather than smoothed over. The Linux provisioning step is **NOT LOCALLY
-EXECUTED** - this host has no Ubuntu; the evidence chain is the same runner family, the same package
-list already proven remotely, and the same compile requirement. And while writing this round's
-records, four values in `BASELINE.yaml` were found to be silently truncated by YAML's inline-comment
-rule (an unquoted `Run #2` ends the scalar at the `#`) - a documentation defect introduced by the
-previous round's commit, fixed by quoting them in this one.
+What P0 passed with: 104 Rust tests, 19 UI tests, one shared gate (`python scripts/check.py`) that CI
+calls unchanged, real ARM ELF/MAP fixtures with recorded provenance, deterministic CLI JSON, a typed
+ts-rs IPC boundary, SQLite migrations at schema version 2, a 512 MiB guard measured from both sides of
+the boundary, and a desktop window opened and driven on the shipping configuration.
 
-## Advisory disposition from the architect
+## What promotion did not do
 
-`RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
-unmaintained) are **accepted as explicit P0 transitive risk, not silent suppression, and do not block
-P0 promotion** on current evidence. They stay recorded in `P0_DEPENDENCY_REPORT.md`,
-`P0_KNOWN_LIMITATIONS.md` and `deny.toml`'s reasons, with five revisit triggers. No architecture ADR is
-required, because no architecture choice changed; an ADR becomes necessary if Tauri is replaced,
-dependencies are forked, or the frozen desktop dependency family changes.
-
-## Gate status
+`v0.6.0` names the validated *technical foundation* only. It does not mean V0 passed, G1 passed, the
+product MVP is complete, P1 is authorized, Compare/Gate/Bundle exist, an installer or signed build is
+ready, user value is validated, or the tree is free of vulnerabilities. The durable gaps survive the
+signature unchanged:
 
 ```text
-Formal G1: NOT CLAIMED  (g1_requires V0_PASS + P0_PASS; V0 still unvalidated at 0 / 8)
-P1:        NOT AUTHORIZED
-P0:        CONDITIONAL_PASS — Run #3 green 7 / 7; condition = architect promotion sign-off
+Peak RSS:      NOT MEASURED — measurement gap the P0 prompt accepted with a stated reason
+Fuzz:          NOT RUN
+RustSec:       RUSTSEC-2024-0429 (glib 0.18.5, unsound) and RUSTSEC-2024-0370
+               (proc-macro-error 1.0.4, unmaintained) — ACCEPTED AS EXPLICIT P0 TRANSITIVE RISK,
+               not resolved, not suppressed silently; five revisit triggers
+V0:            0 / 8 formal external sessions
+Two design-checklist findings remain open: capability labels show Core's enum words, and eight 1px
+borders have no token, which needs a frozen-asset design-tokens.json bump.
 ```
 
-## Version gate
+## If you are resuming this repository
 
-`baseline_version` stays `0.5.1`. `v0.6.0` requires a real P0 `PASS`, which requires an all-green
-Actions run on a HEAD that does not exist yet. A `FAIL` must not be relabeled into a PASS baseline.
+Read `README.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`, `BASELINE.yaml` and `.ai/HANDOFF.md`
+before writing anything, in the AGENTS.md §1 order. Then:
 
-## Durable facts preserved by this change
+- The only legitimate next moves are a real V0 participant source resuming the research track, or an
+  explicit architect-issued P1 sequencing prompt. Neither exists.
+- `ACTIVE_TASK: NONE` means do not invent work. If asked to continue, report the empty task and the
+  unauthorized items above rather than picking a task.
+- Nothing in `V0_VALIDATION/` may be edited to make the deferred track look validated.
 
-V0 remains `DEFERRED / NOT YET EVIDENCE-VALIDATED — NON-BLOCKING RESEARCH TRACK`. Formal eligible
-external participants completed `0 / 8 minimum`; Batch A target `0 / 4–5`. The V0 blocker is the
-absence of real human participants, not a technical failure. `V0_VALIDATION/` and every Batch A
-recruitment artifact stay intact and unmodified.
+## Technical items that remain unauthorized, not deferred-by-accident
 
-The first remediation round's own findings stay standing: the storage evidence key that needed
-migration `0002` (schema version 2, Rust 102 -> 104) was found by the authorized window launch, and
-`P0_DESKTOP_SMOKE_REPORT.md` remains its record, including the item it did not observe.
-
-Peak RSS stays `NOT MEASURED` with its reason in `P0_PERFORMANCE_REPORT.md`; it is recorded as a
-measurement gap, not a promotion blocker.
-
-Run #1's four red jobs stay published as failed history in `P0_CI_REPORT.md`; Run #2 does not erase
-them, and neither run's numbers are restated as better than they were.
+```text
+P1 slice                       needs its own authorization prompt
+installer / NSIS / MSI         outside the P0 baseline promotion
+signing / notarization         requires an ADR before any key work
+updater                        requires the signing/key-management ADR (AGENTS.md §7)
+fuzzing                        not run; not part of the P0 gate
+peak RSS on large workloads    not measured; see P0_PERFORMANCE_REPORT.md
+dependency-architecture ADR    not needed for the two accepted advisories; needed before changing
+                               the Tauri/gtk-rs line
+```
