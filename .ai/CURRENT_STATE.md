@@ -20,7 +20,7 @@ The P0 slice created the first production code; nothing in the baseline was rene
 
 ## P0 — Technical Vertical Slice
 
-Status: `FAIL — REMOTE CI RUN #2` (6 of 7 jobs green) · Remediation round 2: `LOCAL FIX COMPLETE` · Remote: `RUN #3 REQUIRED AFTER USER PUSH`
+Status: `CONDITIONAL_PASS` · Remote CI Run #3 (`36399805005`, head `1cd6309`): **`success`, 7 of 7 jobs green** · Outstanding condition: the architect's promotion sign-off
 
 The source tree exists and its claims are proven by executed tests: 104 Rust tests, 19 UI tests,
 one shared gate script, real ELF/MAP fixtures with recorded provenance, deterministic CLI JSON,
@@ -122,8 +122,8 @@ does not close this gap. P0 changed no V0 artifact and no V0 recommendation.
 ```text
 G0: PASS
 V0: DEFERRED / UNVALIDATED (0 of 8 eligible external sessions)
-P0: FAIL — REMOTE CI RUN #2 (6 of 7 jobs green); remediation round 2 LOCAL FIX COMPLETE, RUN #3 REQUIRED
-Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS)
+P0: CONDITIONAL_PASS — remote CI Run #3 success, 7 of 7 jobs green; condition = architect promotion sign-off
+Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS; V0 still unvalidated)
 P1: NOT AUTHORIZED
 ```
 
@@ -142,21 +142,22 @@ PASS baseline, and a locally green gate must not be relabeled into a CI PASS.
 
 ## Next work
 
-Run #2 answered the first remediation round's five causes remotely. One job is still red, and the
-cause is a CI step that installs nothing where a second job already does. The fix is in the tree. One
-action remains and it is not the coding agent's:
+Both remediation rounds are now confirmed remotely. Run #3 on the pushed HEAD `1cd6309` concluded
+`success` with all seven jobs green, `Generated output drift` included - the provisioning step whose
+absence Run #2 measured executed (`Setting up libwebkit2gtk-4.1-dev`), and the drift gate passed 5/5.
+Read it with `gh run view 36399805005 --repo 2023violet/FirmwareSight`, not from this file.
 
-**Push the reported final local HEAD to `origin/main` and read GitHub Actions Run #3.** The architect
-verifies that run; the coding side does not write `REMOTE CI PASS`.
+One action remains, and it is not a coding action:
 
-What Run #3 must show, job by job: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, both
-`Desktop UI` jobs, `Generated output drift`, `Dependency policy` and `macOS Core Smoke` all green, on
-the HEAD that was pushed. The only new thing it tests is the drift job's provisioning step, so its
-`Verification gate (drift)` log should show the same `Install Linux prerequisites for the Tauri
-shell` block the Rust job already proved, then all five drift steps pass. The Linux apt execution
-itself is **NOT LOCALLY EXECUTED** - this host has no Ubuntu - and the evidence chain is: same runner
-family, same package list already proven remotely, same desktop crate compile requirement, new
-placement.
+**The architect issues and signs the *P0 Final Promotion / v0.6.0 Baseline Closure* prompt.** That is
+where `P0 = PASS`, `baseline_version: 0.6.0`, a regenerated `SHA256SUMS` and `DIRECTORY_TREE`, and
+`active_task` are written - not here. Until that prompt exists this track reads `CONDITIONAL_PASS`
+with the condition named, and `v0.6.0` stays undelivered even though the engineering evidence is
+complete.
+
+What a green CI does not change: G1 still requires V0 (`0 / 8` eligible external sessions); P1 still
+requires its own authorization prompt; peak RSS is still `NOT MEASURED`; and the two RustSec advisories
+stay recorded under the architect's acceptance with their five revisit triggers.
 
 `v0.6.0` is generated only after a real CI `PASS`; G1 requires V0 as well; P1 requires its own
 authorization prompt, which has not been issued. If Run #3 is green, the next prompt is the

@@ -8,18 +8,21 @@ owner: "Engineering"
 last_updated: "2026-09-28"
 ---
 
-# Handoff — FirmwareSight v0.5.1 / P0 FAIL on remote CI Run #2 (6 of 7 green), one CI provisioning gap left
+# Handoff — FirmwareSight v0.5.1 / P0 remote CI green (Run #3, 7 of 7), awaiting the architect's promotion sign-off
 
 ## Purpose
 
-Close the last remote failure, then stop before promotion. Run #1 failed four jobs; the first
-remediation round fixed them and Run #2 on that HEAD (`ebda52d`) passed six of seven. One job stays
-red for a reason that is not in the product: the `drift` job compiles the desktop crate to regenerate
-ts-rs bindings and was never given the Linux prerequisites its sibling job has. The fix is local and
-workflow-only; the remaining action is the owner's - push, then read Run #3.
+Close the last remote failure, then stop before promotion. That is done: Run #1 failed four jobs, the
+first round fixed them, Run #2 left one (`drift` missing the Linux prerequisites its sibling job had),
+the second round added that step, and **Run #3 (`36399805005`, head `1cd6309`) concluded `success`
+with 7 of 7 jobs green.** The HEAD is pushed and local/remote are in sync.
 
-Whoever resumes should read Run #3's result before changing anything. It is the only execution that
-can confirm the drift job's provisioning step, because this host has no Ubuntu.
+The next action is the architect's, not a coding agent's: issue and sign the *P0 Final Promotion /
+v0.6.0 Baseline Closure* prompt. That prompt - not this one - is where `P0 = PASS`,
+`baseline_version: 0.6.0`, a regenerated `SHA256SUMS`/`DIRECTORY_TREE` and `active_task` are written.
+Whoever resumes must read Run #3 from GitHub (`gh run view 36399805005 --repo
+2023violet/FirmwareSight`) rather than trusting this file, and must not start P1 or promote V0: G1
+still requires V0's `0 / 8` external sessions, which no CI run can supply.
 
 ## Read first
 
@@ -46,10 +49,10 @@ V0 status summary only (do not re-run V0 from this handoff):
 
 ## Current state
 
-P0 status: **`FAIL — REMOTE CI RUN #2`**, remediation round 2 **`LOCAL FIX COMPLETE`**, remote
-**`RUN #3 REQUIRED AFTER USER PUSH`**. Baseline stays at `0.5.1`; `v0.6.0` is reserved for an
-unconditional `PASS` on a *new* all-green Actions run, and the coding side does not write
-`REMOTE CI PASS`.
+P0 status: **`CONDITIONAL_PASS`** — Run #3 (`36399805005`, head `1cd6309`) is `success` with 7 of 7
+jobs green, and the pushed HEAD is in sync with `origin/main`. The condition is the architect's
+promotion sign-off, not an engineering gap. Baseline stays at `0.5.1` and the coding side writes no
+`P0 PASS`, because the promotion act is issued in its own signed prompt.
 
 What is proven and stays proven: 104 Rust tests and 19 UI tests, a single gate
 (`python scripts/check.py`) that CI calls unchanged - 14 steps on a tree that already has the built

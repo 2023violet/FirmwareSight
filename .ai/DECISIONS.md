@@ -200,7 +200,7 @@ Decisions the remediation itself had to make:
 
 ---
 
-# Remote CI Run #2 and its final drift closure — added 2026-09-28
+# Remote CI Run #2 and its final drift closure — added 2026-09-28 (superseded the same day by the Run #3 section below)
 
 Authorization:
 
@@ -213,7 +213,7 @@ Authorization:
 
 Status decision, from the run rather than from the previous round's report:
 
-- P0 is now `FAIL — REMOTE CI RUN #2`. Run `36378384225` on head `ebda52d` concluded `failure` with
+- P0 became `FAIL — REMOTE CI RUN #2`. Run `36378384225` on head `ebda52d` concluded `failure` with
   **six of seven jobs green**. `last_remote_ci` points at it; `previous_remote_ci` keeps Run #1 as
   historical failure evidence instead of overwriting it.
 - The first remediation round is **confirmed remotely**: fixture byte identity, Ubuntu Rust
@@ -266,3 +266,29 @@ invented here:
 Unchanged: baseline stays `0.5.1`, `v0.6.0` is not generated, G1 is not claimed, V0 remains
 `DEFERRED / NOT YET EVIDENCE-VALIDATED` at `0 / 8`, `ADR-0020` is untouched, P1 is not started, peak
 RSS stays `NOT MEASURED` with its reason, and `SHA256SUMS` stays the frozen v0.5.1 package record.
+
+---
+
+# Remote CI Run #3 — governance consequence, recorded 2026-09-28
+
+Measured, then decided:
+
+- The round-2 HEAD `1cd6309` was pushed with the owner's explicit instruction (`git push origin main`,
+  no force, no history rewrite). Run `36399805005` concluded `success` with **7 of 7 jobs green**,
+  including the previously failing `Generated output drift`. Both remediation rounds are therefore
+  confirmed by GitHub's runners rather than by this machine.
+- P0 becomes `CONDITIONAL_PASS`, not `PASS`. This is not hedging: `PASS`, `baseline_version: 0.6.0`, a
+  regenerated `SHA256SUMS` and `DIRECTORY_TREE`, and the archiving of P0 validation state are the
+  promotion act the architect issues in its own signed prompt. A coding agent writing them after a
+  green run would be doing what Run #1's `CONDITIONAL_PASS (LOCAL)` did in reverse - letting a
+  convenient state substitute for the authority that decides it.
+- The distinction this pack has kept since the beginning survives the good news: `LOCAL PASS`,
+  `CI PASS`, `NOT RUN` and `NOT MEASURED` remain different claims. One Windows step reports `skipped`
+  (the apt block guarded to Linux) and is recorded as skipped, not counted as a pass; peak RSS stays
+  `NOT MEASURED`; fuzzing stays `NOT RUN`.
+- Runs #1 and #2 are kept as failed history. `last_remote_ci` moves to Run #3 and the two earlier runs
+  are re-listed as `previous_remote_ci` and `first_remote_ci`, so the sequence that produced green -
+  four red jobs, then one, then none - stays legible instead of being replaced by its own conclusion.
+- Unchanged by the green run: G1 (still requires V0, and V0 is `0 / 8` eligible external sessions),
+  P1 (still requires its own authorization prompt), `ADR-0020`, V0 evidence, design tokens, and the
+  two RustSec advisories under the architect's recorded acceptance with their five revisit triggers.

@@ -10,6 +10,36 @@ last_updated: "2026-09-28"
 
 # Changelog
 
+## Unreleased — P0 remote CI Run #3 green; awaiting promotion sign-off (2026-09-28)
+
+The round-2 HEAD `1cd6309` was pushed to `origin/main` (`git push origin main`, no force) and GitHub
+Actions run `36399805005` concluded **`success` — 7 of 7 jobs green**. This entry records the measured
+fact and deliberately does not promote anything.
+
+| Run #3 job | Conclusion | Evidence |
+| --- | --- | --- |
+| Rust (windows-latest) | success | gate green; the Linux apt step is `skipped` there by its `if: matrix.os == 'ubuntu-latest'` guard |
+| Rust (ubuntu-latest) | success | 11/11 steps, prerequisites installed |
+| Desktop UI (windows-latest) | success | 10/10 steps |
+| Desktop UI (ubuntu-latest) | success | 10/10 steps |
+| Generated output drift | success | `Install Linux prerequisites for the Tauri shell` ran (`Setting up libwebkit2gtk-4.1-dev`), then `5/5 steps passed`, with `desktop icons are current (pixel-identical to this build).` |
+| Dependency policy | success | `advisories ok, bans ok, licenses ok, sources ok` |
+| macOS Core Smoke | success | 7/7 steps |
+
+- P0 moves to `CONDITIONAL_PASS`. The condition is named explicitly: the architect's promotion
+  sign-off. No document in this repository writes `P0 = PASS` from the coding side.
+- `baseline_version` stays `0.5.1`; `FirmwareSight_Project_Baseline_v0.6.0` is **not** generated.
+  `SHA256SUMS` still differs on the same nine governance/execution documents and is not regenerated —
+  regenerating it would overwrite the frozen v0.5.1 integrity record, which is not this round's to do.
+- Runs #1 and #2 stay in `P0_CI_REPORT.md` as failed history. A third green run does not edit the two
+  red ones into something they were not; `last_remote_ci` now points at Run #3 and the two earlier
+  runs move to `previous_remote_ci` / `first_remote_ci`.
+- What a green CI does not buy: G1 still requires V0 (`0 / 8` eligible external sessions — CI cannot
+  recruit participants), P1 still requires its own authorization prompt, peak RSS is still
+  `NOT MEASURED`, and the fuzz campaign is still `NOT RUN`.
+- The next prompt is the architect's *P0 Final Promotion / v0.6.0 Baseline Closure*, and it is not
+  anticipated here.
+
 ## Unreleased — P0 remote CI Run #2 and its final drift closure (2026-09-28)
 
 Authorization: *FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0*. Target
@@ -52,7 +82,8 @@ provisioning duplication defect**.
   were being silently truncated at the `#` by YAML's inline-comment rule. They are quoted now and the
   parsed values were re-read to confirm.
 - New document: `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md`; the pack is now 22 files.
-- Status: `FAIL — REMOTE CI RUN #2`, remediation round 2 `LOCAL FIX COMPLETE`, `RUN #3 REQUIRED`. G1
+- Status as this round closed: `FAIL — REMOTE CI RUN #2`, remediation round 2 `LOCAL FIX COMPLETE`,
+  `RUN #3 REQUIRED`. The entry above records what Run #3 then measured.
   is not claimed, V0 remains `0 / 8`, P1 is not authorized, `v0.6.0` is not generated.
 
 ## Unreleased — P0 CI closure remediation (2026-09-28)

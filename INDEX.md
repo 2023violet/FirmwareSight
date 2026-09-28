@@ -12,7 +12,7 @@ last_updated: "2026-09-28"
 # Document Index
 
 Baseline: `0.5.1`  
-Execution state: `P0: FAIL — REMOTE CI RUN #2 (6 of 7 jobs green); round 2 fix complete locally, Run #3 required; V0 Batch A still waiting on real participants`
+Execution state: `P0: CONDITIONAL_PASS — remote CI Run #3 success, 7 of 7 jobs green; condition = architect promotion sign-off; V0 Batch A still waiting on real participants`
 
 ## Primary reading path
 

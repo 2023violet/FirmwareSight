@@ -12,12 +12,16 @@ last_updated: "2026-09-28"
 
 ## Status
 
-**P0 TECHNICAL VALIDATION: FAIL — REMOTE CI RUN #2 (6 of 7 jobs green). Remediation round 2: LOCAL
-FIX COMPLETE. Remote: RUN #3 REQUIRED AFTER USER PUSH.**
+**P0 TECHNICAL VALIDATION: `CONDITIONAL_PASS`. Remote CI Run #3 (`36399805005`, head `1cd6309`)
+concluded `success` with 7 of 7 jobs green. The single remaining condition is the architect's
+promotion sign-off - a governance act, not an engineering unknown.**
 
-Not PASS, and therefore **`FirmwareSight_Project_Baseline_v0.6.0` is not delivered**. The unique
-baseline remains `v0.5.1`; `BASELINE.yaml` records the P0 track as `FAIL` with
-`remediation_state: ROUND_2_LOCAL_FIX_COMPLETE`.
+`CONDITIONAL_PASS` rather than `PASS`, on purpose and with the condition named: the engineering
+evidence is complete and measured on real runners, while `P0 = PASS`,
+`FirmwareSight_Project_Baseline_v0.6.0` and a regenerated `SHA256SUMS` are a promotion act the
+architect signs in a separate prompt. The unique baseline remains `v0.5.1`; `BASELINE.yaml` records
+`status: CONDITIONAL_PASS`, `evidence_status: REMOTE_CI_GREEN_RUN_3_7_OF_7_JOBS` and the condition in
+words.
 
 The technical claim - that one headless Core produces the same facts for a CLI and a desktop
 through a typed IPC boundary, on real linker output, with the memory rule demonstrable and the
@@ -41,14 +45,16 @@ is in question at this point.
 
 | # | Item | Outcome |
 | --- | --- | --- |
-| C1 | The CI workflow executes | Run #1 (`36360310447`, `f9b8ccb`): 2 of 6 green. Run #2 (`36378384225`, `ebda52d`): **6 of 7 green**. The four root causes are closed remotely; the residue is a second job missing the same provisioning step |
+| C1 | The CI workflow executes | Run #1: 2 of 6 green. Run #2: 6 of 7 green. **Run #3 (`36399805005`, `1cd6309`): `success`, 7 of 7 green** - including `Generated output drift`, whose job now installs the same proven Linux prerequisites and passes all five gate steps |
 | C2 | `cargo deny` executes | Ran in CI and failed on `deny.toml` itself in Run #1. **`Dependency policy` PASSED in Run #2**: `advisories ok, bans ok, licenses ok, sources ok`. The two advisories that cannot be resolved inside the frozen Tauri tree are now the architect's recorded acceptance, not an open conflict |
 | C3 | The desktop window opens | Opened twice on Windows 10 with WebView2 153.0.4234.48. The first pass failed on a second analysis; the defect is fixed, regression-tested and re-verified in the window. Carried forward - round 2 changes no runtime source |
 | C4 | (not a condition - a gap) macOS core smoke | Added as `--only core-smoke`. **`macOS Core Smoke` PASSED in Run #2**, 3/3 steps, 87 of the 104 Rust tests, first execution of the job |
 | C5 | Peak RSS | Still `NOT MEASURED`, with its reason. A measurement gap, not a promotion blocker |
 
-C1 is the only item still open, and it is open because a runner has to execute the new step - not
-because a check is failing in this tree.
+C1 through C4 are closed by measurement rather than by wording. What is open is the promotion
+signature: the architect issues the P0 Final Promotion / v0.6.0 Baseline Closure prompt, and until
+that exists this pack says `CONDITIONAL_PASS`, not `PASS`. C5 stays `NOT MEASURED`, and never was a
+blocker.
 
 ## What was proven
 
@@ -145,10 +151,11 @@ step missing. What is outstanding is no longer "who ran the check" - the checks 
 three platforms - and it is not the architecture either. It is one remote job that has not yet executed
 the step that closes its own failure.
 
-To convert this to PASS, in order: the owner pushes the round-2 HEAD; Run #3 on that head shows
-`Rust (windows-latest)`, `Rust (ubuntu-latest)`, both `Desktop UI` jobs, `Generated output drift`,
-`Dependency policy` and `macOS Core Smoke` all green; and the architect signs the promotion. A green
-rerun of `ebda52d` would prove nothing, because the fix is in the commits that follow it.
+What was needed to convert this, and what still is: the round-2 HEAD was pushed as `1cd6309` and
+Run #3 returned `success` across all seven jobs - that step is done and cited, on exactly the checks
+listed above. What remains is the architect's signed promotion prompt, the only document allowed to
+write `P0 = PASS`, move `baseline_version` to `0.6.0`, regenerate `SHA256SUMS` and `DIRECTORY_TREE`,
+and clear `active_task`. G1 still requires V0 too, and V0 is still `0 / 8`.
 
 ## Boundary kept with V0
 

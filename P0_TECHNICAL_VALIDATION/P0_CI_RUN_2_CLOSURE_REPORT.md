@@ -163,19 +163,21 @@ named, are recorded in `P0_DEPENDENCY_REPORT.md` and `P0_KNOWN_LIMITATIONS.md`. 
 required, because this round changes no architecture choice; an ADR becomes necessary if Tauri is
 replaced, dependencies are forked, or the frozen desktop dependency family changes.
 
-## State this round produces
+## State this round produced, and what Run #3 then measured
 
 ```text
-P0:                    FAIL — REMOTE CI RUN #2  (6 of 7 jobs PASS)
-Remaining defect:      Generated output drift — Ubuntu provisioning
-Remediation round #2:  LOCAL FIX COMPLETE
-Local gate:            PASS, 14/14, 0 SKIPPED
-Remote CI:             RUN #3 REQUIRED AFTER USER PUSH
+At delivery:   P0 FAIL — REMOTE CI RUN #2 (6 of 7); remediation round 2 LOCAL FIX COMPLETE;
+               Run #3 required after a push.
+After the push 1cd6309 went to origin/main and Run 36399805005 concluded success, 7 of 7 jobs green,
+               including Generated output drift: the job installed the same apt block
+               (`Setting up libwebkit2gtk-4.1-dev`) and passed all five gate steps.
 ```
 
-Run #3 must be green on the HEAD the user pushes - `Rust (windows)` and `(ubuntu)`, both `Desktop UI`
-jobs, `Generated output drift`, `Dependency policy` and `macOS Core Smoke`. Until that run exists, no
-document in this pack may say `REMOTE CI PASS`, and this round's author writes no such line.
+Run #3's log lines are quoted in `P0_CI_REPORT.md`, the file that keeps per-run history. The remote CI
+result is now a measured fact with a command behind it. This round's author still writes no
+`P0 = PASS`: that promotion act, `baseline_version: 0.6.0` and a regenerated `SHA256SUMS` belong to
+the architect's next signed prompt. The distinction cuts both ways - a green run does not sign
+itself, and a promotion claimed without one would be a fabrication.
 
 ## Historical record
 

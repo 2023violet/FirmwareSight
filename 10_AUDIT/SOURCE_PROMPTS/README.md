@@ -58,6 +58,10 @@ delivered rather than a retranscription.
   concluded `failure` with **six of seven jobs green**. The first round's five fixes are therefore
   confirmed remotely; the residue is a second job needing the same Linux prerequisites, which is what
   *Remote CI Run #2 Final Drift Closure v1.0* below closes.
+- Outcome, final: the round-2 HEAD `1cd6309` was pushed and Run `36399805005` concluded `success`
+  with **7 of 7 jobs green**, including `Generated output drift`. Remote CI is therefore closed by
+  measurement; P0 promotion is not, because `P0 = PASS`, `v0.6.0` and a regenerated `SHA256SUMS` are
+  the architect's signed act. The track reads `CONDITIONAL_PASS` with that condition named.
 - Outcome, 2026-09-28: `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE CI RERUN`. All five causes
   reproduced with a command before being changed, a sixth defect found by the authorized window launch
   and fixed with tests first, local gate 14/14 with zero skipped mandatory steps, desktop smoke `PASS`,

@@ -50,10 +50,11 @@ produced it, and a status of `LOCAL PASS` is kept visibly separate from `CI PASS
 - Gate: `python scripts/check.py` - 14 steps on a tree that already has `apps/desktop/ui/dist/`, 16
   when the group has to build the frontend first, plus 3 under `--only core-smoke` for the macOS job
   the CI baseline requires. cargo-deny now runs here (`0.20.2`, exit 0) rather than being `SKIPPED`.
-- Remote CI: two runs, both `failure`. `36360310447` on `f9b8ccb` was 2 of 6 green; `36378384225` on
-  the remediation HEAD `ebda52d` was **6 of 7 green**, with 104 Rust tests passing on Windows and
-  Ubuntu and 87 on macOS. One job is still red - `Generated output drift`, for a missing Linux
-  provisioning step - and the round-2 fix is unpushed, so Run #3 is what closes it.
+- Remote CI: three runs. `36360310447` was 2 of 6 green; `36378384225` was 6 of 7; and
+  `36399805005` on `1cd6309` concluded **`success`, 7 of 7 green**, with 104 Rust tests on Windows and
+  Ubuntu, 19 UI tests on both, 87 core tests on macOS and all four cargo-deny categories ok. Remote CI
+  is closed; P0 promotion is not - it is the architect's signed act, so the track reads
+  `CONDITIONAL_PASS` with that condition named.
 - Cold rebuild: `cargo clean` plus removing `node_modules/` and `dist/`, then the whole gate -> 16/16
   steps, 102 Rust tests and 18 UI tests, exit 0; the delivered tree then re-ran 14/14 with 19
   UI tests after an accessibility fix that touched no Rust file. That run belongs to the pre-remediation

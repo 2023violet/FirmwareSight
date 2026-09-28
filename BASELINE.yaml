@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.5.1
   date: 2026-09-28
-  status: P0_FAIL_REMOTE_CI_RUN_2_ROUND_2_LOCAL_FIX_COMPLETE_RUN_3_REQUIRED_V0_DEFERRED_UNVALIDATED
+  status: P0_CONDITIONAL_PASS_REMOTE_CI_RUN_3_GREEN_7_OF_7_AWAITING_ARCHITECT_PROMOTION_SIGNOFF_V0_DEFERRED_UNVALIDATED
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_DEFERRED_P0_FAIL_REMOTE_CI_RUN_2
+  current_gate: G0_PASS_V0_DEFERRED_P0_REMOTE_CI_GREEN_RUN_3_AWAITING_ARCHITECT_SIGNOFF
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
     - P0_technical_vertical_slice
@@ -130,15 +130,16 @@ p0_execution:
   # and changes documentation only; see P0_EXECUTION_PROVENANCE.md "Final validated HEAD".
   final_validated_head: 65cb2dc
   commits_to_validated_tree: 6
-  # Run #1's four failures were fixed and the fixes were then measured remotely: Run #2 on the
-  # remediation HEAD passed six of seven jobs. The one remaining failure is CI provisioning in a
-  # second job, not product source. See `last_remote_ci` and P0_CI_RUN_2_CLOSURE_REPORT.md.
-  remote_state: "pushed as ebda52d; Remote CI Run #2 executed and concluded failure (6 of 7 jobs green)"
-  # FAIL, not CONDITIONAL_PASS: a red remote run is a measured result. The qualifier that would make
-  # it conditional is that the cause is now a workflow provisioning omission, not a product defect.
-  status: FAIL
-  evidence_status: FAIL
-  remediation_state: ROUND_2_LOCAL_FIX_COMPLETE
+  # Three remote runs, all read with `gh run view`. Run #1 failed four jobs, Run #2 failed one, and
+  # Run #3 on the round-2 HEAD is green across all seven. What remains is the architect's promotion
+  # sign-off, which is a governance act and not an engineering gap; nothing here writes P0 PASS.
+  remote_state: "pushed as 1cd6309; Remote CI Run #3 executed and concluded success (7 of 7 jobs)"
+  status: CONDITIONAL_PASS
+  # The condition is spelled out so it cannot be read as an engineering unknown: remote CI is green,
+  # and the outstanding item is the architect's signed promotion prompt.
+  condition: "Architect promotion sign-off: P0 PASS, baseline v0.6.0 and the new SHA256SUMS are the architect's to issue, not this round's to claim"
+  evidence_status: REMOTE_CI_GREEN_RUN_3_7_OF_7_JOBS
+  remediation_state: REMOTE_CI_CLOSED_AWAITING_PROMOTION_SIGNOFF
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
   run_2_closure_prompt: "FirmwareSight P0 Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed, supplied inline)"
   remediation:
@@ -168,21 +169,31 @@ p0_execution:
       - RUSTSEC-2024-0429 glib 0.18.5 unsound: reached through the gtk-rs 0.18 line Tauri 2.12.0 requires; cargo update -p glib --precise 0.20.0 fails against gtk = "^0.18"; accepted with five revisit triggers, and no ADR because this round changes no architecture choice
       - RUSTSEC-2024-0370 proc-macro-error 1.0.4 unmaintained: host-only build dependency behind the same pin; the advisory itself states no safe upgrade exists; accepted on the same basis
   last_remote_ci:
+    run_id: 36399805005
+    head: 1cd6309a09313a0a900a83cb12e054e1a3d7c5e3
+    event: push
+    conclusion: success
+    passed_jobs: ["Rust (windows-latest)", "Rust (ubuntu-latest)", "Desktop UI (windows-latest)", "Desktop UI (ubuntu-latest)", "Generated output drift", "Dependency policy", "macOS Core Smoke"]
+    failed_jobs: []
+    read_with: gh run view 36399805005 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
+    note: "Rust (windows-latest) reports one skipped step: the apt block guarded by if matrix.os == ubuntu-latest. The job itself is success."
+    log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
+  previous_remote_ci:
     run_id: 36378384225
     head: ebda52d63f22ff9f25786c1d80e53f5193cff183
     event: push
     conclusion: failure
     passed_jobs: ["Desktop UI (windows-latest)", "Rust (windows-latest)", "macOS Core Smoke", "Dependency policy", "Desktop UI (ubuntu-latest)", "Rust (ubuntu-latest)"]
     failed_jobs: ["Generated output drift"]
-    log: P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md
-  previous_remote_ci:
+    retained_as: historical failure evidence in P0_CI_REPORT.md and P0_CI_RUN_2_CLOSURE_REPORT.md
+  first_remote_ci:
     run_id: 36360310447
     head: f9b8ccba7d9326ac397675602beb3a7e9c3bcd02
     event: push
     conclusion: failure
     passed_jobs: ["Desktop UI (windows-latest)", "Desktop UI (ubuntu-latest)"]
     failed_jobs: ["Rust (windows-latest)", "Rust (ubuntu-latest)", "Generated output drift", "Dependency policy"]
-    retained_as: historical failure evidence in P0_CI_REPORT.md, not relabeled or removed
+    retained_as: historical failure evidence, not relabeled or removed
   closed: 2026-09-28
   allowed_final_statuses: [PASS, CONDITIONAL_PASS, FAIL, BLOCKED]
   library_crate_budget: 4
@@ -190,9 +201,12 @@ p0_execution:
   gate_command: python scripts/check.py
   gate_result: 14/14 locally with cargo-deny executing (no SKIPPED mandatory step), plus 3/3 --only core-smoke; remotely 6 of 7 jobs green on ebda52d
   tests: { rust: 104, ui: 19 }
-  # One condition left, and it is remote by definition: a run on a HEAD that does not exist yet.
+  # The engineering condition is now met and cited; what is outstanding is the architect's signature.
   promotion_conditions:
-    - Remote CI green on the next remediation HEAD (Rust windows + ubuntu, both Desktop UI jobs, Generated output drift, Dependency policy, macOS core smoke)
+    - "Remote CI green on the remediation HEAD - MET by Run #3 (36399805005) on 1cd6309: 7 of 7 jobs success"
+  outstanding_governance_steps:
+    - Architect issues and signs the P0 Final Promotion / v0.6.0 Baseline Closure prompt
+    - That round, not this one, writes P0 PASS, baseline_version 0.6.0, the new SHA256SUMS, DIRECTORY_TREE and the archived P0 validation state
   # Answered by Run #2 on the real runners. Kept visible so a later reader does not re-ask them,
   # and listed per job rather than as a single "CI improved" claim.
   satisfied_conditions:
@@ -204,13 +218,14 @@ p0_execution:
     - Desktop UI (ubuntu-latest) remote PASS, 19 UI tests
     - macOS Core Smoke remote PASS, 87 tests, first execution of the job
     - Generated output drift: design tokens and desktop icons remote PASS, including on Linux
+    - Remote CI Run #3 on 1cd6309: workflow overall success, 7 of 7 jobs, the drift job green after installing the same proven prerequisites
   # Recorded separately because the P0 prompt accepted an unmeasured number with a stated reason.
   # This is a measurement gap, not a promotion blocker.
   non_blocking_measurement_gaps:
     - peak RSS is NOT MEASURED; reason and the measurements that do exist are in P0_PERFORMANCE_REPORT.md
-  push_authorized: false
-  push_performed_by: "repository owner, who pushed f9b8ccb (Run #1) and ebda52d (Run #2)"
-  remote_state_changed: true
+  push_authorized: true_by_owner_instruction
+  push_performed_by: "repository owner; the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force)"
+  remote_state_changed: true # origin/main == 1cd6309, local and remote in sync
   baseline_version_after_p0: 0.5.1
   target_baseline_on_pass: 0.6.0
   v0_6_0_released: false

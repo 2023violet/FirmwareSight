@@ -122,22 +122,24 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 
 ## Verification gaps
 
-- **CI has run twice, and both runs failed - the second only once.** Run `36360310447` at `f9b8ccb`
-  reported four red jobs. Run `36378384225` at the remediation HEAD `ebda52d` reported **six of seven
-  green**: Rust on both OSes (104 tests each), both Desktop UI jobs, the macOS core smoke and the
-  dependency policy all passed, leaving `Generated output drift`. That residue is a CI provisioning
-  omission - the drift job compiles `firmwaresight-desktop` for ts-rs but had no Linux prerequisites
-  step - fixed in round 2 by giving it the same block Run #2 proved. `CI PASS` is still claimed
-  nowhere, and Run #3 is what would close it.
+- **CI has run three times: two failures, then green.** Run `36360310447` (`f9b8ccb`) had four red
+  jobs; Run `36378384225` (`ebda52d`) had one; Run `36399805005` (`1cd6309`) concluded `success` with
+  **7 of 7 jobs green**, including `Generated output drift` after the provisioning step round 2 added.
+  Remote CI is therefore a measured fact with a `gh` command behind it. What is *not* done is the
+  promotion: `P0 = PASS`, `v0.6.0` and a new `SHA256SUMS` belong to the architect's signed prompt, so
+  this pack says `CONDITIONAL_PASS` and names that condition.
 - **`cargo deny` runs and passes both places it can be run** - locally (0.20.2, exit 0 over `licenses
   bans sources advisories`) and in CI (Run #2's `Dependency policy` job, four categories ok). What it
   still does not prove: it evaluates only the four targets in `[graph] targets`, so a mobile or
   embedded target later reopens the boundary check - `tauri` declares a non-optional `reqwest` for
   Android and iOS, and the filter is what keeps it out of the product's graph.
-- **The drift job's provisioning step has never executed.** Run #2 proved the identical apt block on
-  the `rust` job, so the evidence chain for the copy is: same runner family, same package list, same
-  `firmwaresight-desktop` compile requirement, new placement. The step itself is NOT LOCALLY EXECUTED
-  - this host has no Ubuntu - and only Run #3 can show it working.
+- **The drift job's provisioning step is copied, not shared.** Run #3 executed the copy and it worked
+  (`Setting up libwebkit2gtk-4.1-dev`, then `5/5 steps passed`), so the remote failure is closed. What
+  remains as a limitation is the shape of the fix: two jobs carry the same ten-package apt block, so a
+  future job that compiles `firmwaresight-desktop` on Linux must remember to copy it too, and a
+  package rename in the runner image would break both at once. Extracting a script was rejected for a
+  two-job duplication; a third instance is the trigger to revisit it. The step was NEVER LOCALLY
+  EXECUTED - this host has no Ubuntu - and Run #3 is the only place it has run.
 - **Two advisories cannot be closed without changing the frozen dependency architecture.**
   `RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
   unmaintained, host-only) both arrive through the gtk-rs 0.18 line that Tauri 2.12.0 requires;

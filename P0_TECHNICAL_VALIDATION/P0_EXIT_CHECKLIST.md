@@ -13,13 +13,14 @@ last_updated: "2026-09-28"
 Every item from the prompt's P0 PASS list, with the evidence that closed it. `LOCAL PASS` means
 it ran on this machine and produced the quoted result. Nothing here says `CI PASS`.
 
-Status of the track changed twice after this list was first written. Remote CI Run #1 executed and
-failed four jobs; the remediation fixed them and Run #2 measured that HEAD as **six of seven jobs
-green**. So P0 is `FAIL — REMOTE CI RUN #2`, round 2 is `LOCAL FIX COMPLETE`, and Run #3 is required.
-The counts below are this tree's. Where an item is now confirmed by a runner rather than only by this
-machine, the evidence column says which. `P0_CI_REPORT.md` keeps both failed runs,
-`P0_CI_REMEDIATION_REPORT.md` explains the first round's fixes, and
-`P0_CI_RUN_2_CLOSURE_REPORT.md` the remaining one.
+Status of the track changed three times after this list was first written. Run #1 failed four jobs;
+the remediation fixed them and Run #2 measured six of seven green; the second round added the one
+missing provisioning step, and Run #3 (`36399805005`, head `1cd6309`) concluded **`success`, 7 of 7
+jobs green**. P0 is therefore `CONDITIONAL_PASS`, the condition being the architect's promotion
+sign-off rather than any untested check. The counts below are this tree's, and where an item is
+confirmed by a runner rather than only by this machine, the evidence column says which.
+`P0_CI_REPORT.md` keeps all three runs; `P0_CI_REMEDIATION_REPORT.md` and
+`P0_CI_RUN_2_CLOSURE_REPORT.md` explain the two rounds.
 
 ## Baseline authority minimum (prompt §58)
 
@@ -107,9 +108,10 @@ of what remains open.
 
 | Item | Status |
 | --- | --- |
-| CI green | NOT MET — Run #1 failed four jobs on `f9b8ccb`; Run #2 failed one job on `ebda52d`. Both fixes are local; the verdict is owed by Run #3 after a push |
-| Generated output drift on Ubuntu | NOT MET REMOTELY, MET LOCALLY — Run #2's own log names the cause (`gobject-sys`: `Package gobject-2.0 was not found in the pkg-config search path`); the drift job now installs the prerequisites the rust job proved. `Linux provisioning itself = NOT LOCALLY EXECUTED`, no Ubuntu on this host |
+| CI green | **MET** — Run #3 on `1cd6309`: `success`, 7 of 7 jobs. Runs #1 and #2 stay in the record as the two failures that got there |
+| Generated output drift on Ubuntu | **MET REMOTELY** — the drift job now runs `Install Linux prerequisites for the Tauri shell` (`Setting up libwebkit2gtk-4.1-dev` in its log) and reports `5/5 steps passed`. It was NOT LOCALLY EXECUTED before Run #3; Run #3 is that execution |
+| P0 promotion | NOT CLAIMED — `P0 = PASS`, `v0.6.0` and a regenerated `SHA256SUMS` are the architect's signed act. This pack says `CONDITIONAL_PASS` with the condition named |
 | cargo-deny licenses/bans/advisories | MET locally and remotely — exit 0 here, and Run #2's `Dependency policy` job green |
 | Peak RSS | NOT MEASURED - reason documented in `P0_PERFORMANCE_REPORT.md`; a measurement gap, not a promotion blocker |
-| Fuzz campaign | NOT RUN - tool policy did not authorize `cargo-fuzz` for P0 |
-| `v0.6.0` | NOT GENERATED - requires a real P0 `PASS`, which requires an all-green run on a new head |
+| Fuzz campaign | NOT RUN - tool policy did not authorize `cargo-fuzz` for P0. Unchanged by Run #3: a green CI is not a fuzzer |
+| `v0.6.0` | NOT GENERATED — the all-green remote run now exists (Run #3), but the promotion act that would justify the version belongs to the architect's next prompt, so nothing was generated here |

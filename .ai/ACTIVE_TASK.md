@@ -11,7 +11,8 @@ last_updated: "2026-09-28"
 # ACTIVE TASK
 
 ```text
-P0_CI_RUN_2_FINAL_DRIFT_CLOSURE
+P0_CI_RUN_2_FINAL_DRIFT_CLOSURE  — engineering complete, remote green; awaiting the architect's
+                                    promotion prompt. Do not start P1 or v0.6.0 from this file.
 ```
 
 `FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed)`. Target:
@@ -70,12 +71,14 @@ script, because only two jobs need it.
 
 ```text
 Remote CI run #1:    FAILURE at f9b8ccb — retained as history
-Remote CI run #2:    FAILURE at ebda52d — 6 of 7 jobs PASS; latest_remote_ci
+Remote CI run #2:    FAILURE at ebda52d — 6 of 7 jobs green; retained as history
+Remote CI run #3:    SUCCESS at 1cd6309 — 7 of 7 jobs green; latest_remote_ci
 Round 1 remediation: CONFIRMED REMOTELY (fixture bytes, Ubuntu Rust, icon semantics, deny, macOS)
 Round 2 fix:         drift job installs the proven prerequisites; workflow-only, 21 added lines
 Local gate:          PASS, 14/14 default steps, 0 SKIPPED mandatory steps
-Desktop smoke:       PASS, carried forward — this round changes no runtime source
-Remote CI:           RUN #3 REQUIRED AFTER USER PUSH
+Desktop smoke:       PASS, carried forward — round 2 changed no runtime source
+P0:                  CONDITIONAL_PASS; the condition is the architect's promotion sign-off
+Push:               performed — 1cd6309 on origin/main, local and remote in sync
 ```
 
 Two facts recorded honestly rather than smoothed over. The Linux provisioning step is **NOT LOCALLY
@@ -97,9 +100,9 @@ dependencies are forked, or the frozen desktop dependency family changes.
 ## Gate status
 
 ```text
-Formal G1: NOT CLAIMED  (g1_requires V0_PASS + P0_PASS; V0 still unvalidated)
+Formal G1: NOT CLAIMED  (g1_requires V0_PASS + P0_PASS; V0 still unvalidated at 0 / 8)
 P1:        NOT AUTHORIZED
-P0:        FAIL — REMOTE CI RUN #2; remediation round 2 LOCAL FIX COMPLETE; RUN #3 REQUIRED
+P0:        CONDITIONAL_PASS — Run #3 green 7 / 7; condition = architect promotion sign-off
 ```
 
 ## Version gate

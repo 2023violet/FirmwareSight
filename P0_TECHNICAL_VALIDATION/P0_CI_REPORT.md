@@ -13,15 +13,22 @@ last_updated: "2026-09-28"
 Requirement: a gate that runs the same checks a developer runs, so "CI is green" and "my machine
 is green" cannot mean different things.
 
-Status: **REMOTE CI RUN #2: FAILURE — 6 OF 7 JOBS GREEN — RUN #3 REQUIRED AFTER USER PUSH**
+Status: **REMOTE CI RUN #3: SUCCESS — 7 OF 7 JOBS GREEN — AWAITING THE ARCHITECT'S PROMOTION SIGN-OFF**
 
-The workflow has executed twice. Run #1 (`36360310447`, head `f9b8ccb`) concluded `failure` with two
-jobs green and four red; that result is kept below as historical evidence rather than rewritten. Run
-#2 (`36378384225`, head `ebda52d` - the remediation HEAD) concluded `failure` with **six of seven jobs
-green**: Run #1's four causes are closed remotely, and one job remains red because a second CI job
-compiles the desktop crate without the Linux prerequisites the first one was given. Both runs are
-external facts read with `gh run view`, and the round-2 detail is in
-`P0_CI_RUN_2_CLOSURE_REPORT.md`; the first round's reasoning is in `P0_CI_REMEDIATION_REPORT.md`.
+The workflow has executed three times, and every conclusion below is read from GitHub with
+`gh run view`, not from this repository's own reports.
+
+- Run #1 (`36360310447`, head `f9b8ccb`): `failure`, 2 of 6 green. Kept as historical evidence.
+- Run #2 (`36378384225`, head `ebda52d`): `failure`, 6 of 7 green. Run #1's four causes closed
+  remotely; one job left red because a second CI job compiles the desktop crate without the Linux
+  prerequisites the first one was given.
+- Run #3 (`36399805005`, head `1cd6309`): **`success`, 7 of 7 green**, including the job Run #2
+  could not pass.
+
+P0's engineering evidence is therefore complete on real runners. What has not happened is the
+promotion act: `P0 = PASS`, `baseline_version: 0.6.0` and a new `SHA256SUMS` belong to the architect's
+next signed prompt, and no document here claims them. The first round's reasoning is in
+`P0_CI_REMEDIATION_REPORT.md` and the second round's in `P0_CI_RUN_2_CLOSURE_REPORT.md`.
 
 ## Remote CI Run #1 — retained as failed evidence
 
@@ -51,7 +58,7 @@ locally — the run had stopped at the first deserialization error list.
 
 Nothing in the two tables above is inferred: the messages are quoted from the job logs.
 
-## Remote CI Run #2 — the latest remote fact
+## Remote CI Run #2 — retained as failed evidence (6 of 7 green)
 
 | Field | Value |
 | --- | --- |
@@ -105,6 +112,36 @@ one job, in the same class as Run #1's, and fixed by giving the second job the s
 `P0_CI_RUN_2_CLOSURE_REPORT.md` carries the round: the classification, the copy-not-abstract decision,
 what Run #2 confirmed, the advisory disposition from the architect, and the local verification that
 did run here.
+
+## Remote CI Run #3 — the workflow is green
+
+| Field | Value |
+| --- | --- |
+| Run | `36399805005`, event `push` |
+| Head | `1cd6309a09313a0a900a83cb12e054e1a3d7c5e3` - the round-2 HEAD, pushed by the coding side on the owner's explicit instruction (`git push origin main`, no force) |
+| Conclusion | **`success`** |
+| Jobs | 7 of 7 success |
+| Read with | `gh run view 36399805005 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs` |
+
+| Job | Conclusion | Per-step evidence |
+| --- | --- | --- |
+| Rust (windows-latest) | success | `Verification gate (fmt, clippy, test)` green; one step `skipped` - the apt block guarded by `if: matrix.os == 'ubuntu-latest'` - which is the guard working, not a gap |
+| Rust (ubuntu-latest) | success | 11/11 steps, including `Install Linux prerequisites for the Tauri shell` |
+| Desktop UI (windows-latest) | success | 10/10 steps |
+| Desktop UI (ubuntu-latest) | success | 10/10 steps |
+| Generated output drift | success | **`5/5 steps passed`** after `Install Linux prerequisites for the Tauri shell` ran (`Setting up libwebkit2gtk-4.1-dev`), with `desktop icons are current (pixel-identical to this build).` |
+| Dependency policy | success | 6/6 steps; `advisories ok, bans ok, licenses ok, sources ok` |
+| macOS Core Smoke | success | 7/7 steps |
+
+The drift job is the whole of what round 2 changed, and it is the line that proves the round's
+classification was right: the same apt block, the same package list the `rust` job had already proven
+remotely, placed in the second job that compiles `firmwaresight-desktop`. No check was weakened to get
+there - `drift` still runs all five gate steps, `cargo test -p firmwaresight-desktop` included, and
+both `git diff --exit-code` assertions are intact.
+
+One honest qualification stays in the record: the Windows Rust job's skipped step means that job never
+exercises the apt block (correctly - it is Linux-only), so "no step failed" and "every step ran" are
+different statements. The `skipped` one is reported as skipped rather than counted as a pass.
 
 ## One definition, two callers
 
@@ -230,7 +267,7 @@ number belongs to.
 `P0_IMPLEMENTATION_LOG.md` 17 was committed. That is the check behaving correctly: it caught a
 working tree where a generated file had been rewritten but not yet committed.
 
-### After the remediation (this tree)
+### After the remediation (the Run #2 and Run #3 tree)
 
 ```
 $ python scripts/check.py
@@ -313,8 +350,9 @@ this tree as well - it was re-run after the workflow edit and reported the same 
    what Run #2 measured. Two jobs compile `firmwaresight-desktop` on Linux (`rust` through
    `clippy --all-features`, `drift` through `cargo test` for ts-rs), and the first round attached the
    prerequisites to the job that had failed rather than to the requirement. The structural fix is to
-   read the graph and ask which jobs build the shell, not which jobs reported red; the local fix is
-   the copy that round 2 adds. A third job that compiles the desktop crate on Linux would make the
+   read the graph and ask which jobs build the shell, not which jobs reported red; the copy that
+   round 2 added is now measured - Run #3's drift job installed the same block and passed all five
+   steps. A third job that compiles the desktop crate on Linux would make the
    duplication worth extracting into a script - and that argument should be made by a third instance,
    not in anticipation of one.
 
