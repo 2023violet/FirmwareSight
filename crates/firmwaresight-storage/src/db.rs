@@ -11,9 +11,17 @@ use firmwaresight_core::domain::identity::Fact;
 use firmwaresight_core::domain::memory::ByteTotal;
 
 /// The schema version this build writes.
-pub const SCHEMA_VERSION: i64 = 1;
+pub const SCHEMA_VERSION: i64 = 2;
 
 const MIGRATION_0001: &str = include_str!("../migrations/0001_initial.sql");
+const MIGRATION_0002: &str = include_str!("../migrations/0002_evidence_keyed_by_build.sql");
+
+/// Applied in version order, each in its own transaction, so a failed upgrade leaves the previous
+/// schema and every row in it exactly as they were.
+const MIGRATIONS: &[(i64, &str, &str)] = &[
+    (1, "0001_initial", MIGRATION_0001),
+    (2, "0002_evidence_keyed_by_build", MIGRATION_0002),
+];
 
 /// Everything the P0 round-trip test compares against the in-memory snapshot.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -122,20 +130,34 @@ impl Database {
             });
         }
 
-        if current < 1 {
+        for (version, name, sql) in MIGRATIONS {
+            if current >= *version {
+                continue;
+            }
             let tx = self
                 .conn
                 .transaction()
-                .map_err(|source| StorageError::Migration { version: 1, source })?;
-            tx.execute_batch(MIGRATION_0001)
-                .map_err(|source| StorageError::Migration { version: 1, source })?;
+                .map_err(|source| StorageError::Migration {
+                    version: *version,
+                    source,
+                })?;
+            tx.execute_batch(sql)
+                .map_err(|source| StorageError::Migration {
+                    version: *version,
+                    source,
+                })?;
             tx.execute(
                 "INSERT INTO schema_migrations (version, name) VALUES (?1, ?2)",
-                params![1_i64, "0001_initial"],
+                params![*version, *name],
             )
-            .map_err(|source| StorageError::Migration { version: 1, source })?;
-            tx.commit()
-                .map_err(|source| StorageError::Migration { version: 1, source })?;
+            .map_err(|source| StorageError::Migration {
+                version: *version,
+                source,
+            })?;
+            tx.commit().map_err(|source| StorageError::Migration {
+                version: *version,
+                source,
+            })?;
         }
 
         Ok(())

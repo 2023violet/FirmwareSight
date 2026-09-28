@@ -25,6 +25,17 @@ fn real_snapshot() -> BuildSnapshot {
     analysis.snapshot.clone()
 }
 
+/// The other committed fixture: a different build, and therefore a different set of facts recorded
+/// under the same evidence identifiers.
+fn second_snapshot() -> BuildSnapshot {
+    let root = repo_root();
+    let analysis = pipeline::analyze(&AnalysisRequest::new(
+        root.join("fixtures/elf/p0-basic/firmware.elf"),
+    ))
+    .expect("the second committed fixture must analyze");
+    analysis.snapshot.clone()
+}
+
 struct TempDb(PathBuf);
 
 impl TempDb {
@@ -106,7 +117,10 @@ fn reopening_an_existing_database_is_idempotent() {
         .connection()
         .query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r.get(0))
         .expect("schema_migrations exists");
-    assert_eq!(migrations, 1, "migration must not be recorded twice");
+    assert_eq!(
+        migrations, SCHEMA_VERSION,
+        "every migration is present exactly once; reopening must not record one twice"
+    );
 }
 
 #[test]
@@ -393,4 +407,126 @@ fn the_connection_carries_the_pragmas_the_schema_assumes() {
         timeout > 0,
         "a zero busy timeout turns contention into an immediate error"
     );
+}
+
+#[test]
+fn two_builds_may_record_the_same_evidence_identifier() {
+    // `04_TECH/15` 4 makes evidence a child of a build, and the analyzer names its evidence within
+    // one analysis: `ev-sha256` is the sha256 fact of whatever artifact was read, so every build
+    // has one. Keying that identifier globally - which `0001_initial.sql` did - means the second
+    // artifact a user analyzes cannot be stored at all. The desktop shipped that way: analyzing
+    // fixture B and then fixture A failed with `UNIQUE constraint failed: evidence.id` and the
+    // window showed ERR-STORAGE-4006, while 102 Rust tests stayed green because no test had ever
+    // put two builds in one database.
+    let db_file = TempDb::new("two-builds");
+    let mut db = Database::open(db_file.path()).expect("open");
+
+    let first = db
+        .import_snapshot("proj-1", "P0 project", &real_snapshot())
+        .expect("the first build imports");
+    let second = db
+        .import_snapshot("proj-1", "P0 project", &second_snapshot())
+        .expect("a second build may reuse an identifier the first one used");
+    assert_ne!(first, second, "two artifacts are two builds");
+
+    for (build, expected) in [(&first, 11_usize), (&second, 10_usize)] {
+        let stored: i64 = db
+            .connection()
+            .query_row(
+                "SELECT COUNT(*) FROM evidence WHERE build_id = ?1",
+                [build],
+                |r| r.get(0),
+            )
+            .expect("count");
+        assert_eq!(
+            stored as usize, expected,
+            "each build keeps its own full evidence set"
+        );
+
+        let shared: i64 = db
+            .connection()
+            .query_row(
+                "SELECT COUNT(*) FROM evidence WHERE build_id = ?1 AND id = 'ev-sha256'",
+                [build],
+                |r| r.get(0),
+            )
+            .expect("count");
+        assert_eq!(shared, 1, "one sha256 fact per build, resolved by build");
+    }
+
+    // The two builds must still disagree with each other, which is the point of storing both.
+    let sha_of = |build: &str| {
+        db.connection()
+            .query_row(
+                "SELECT raw_value FROM evidence WHERE build_id = ?1 AND id = 'ev-sha256'",
+                [build],
+                |r| r.get::<_, String>(0),
+            )
+            .expect("each build stores its own sha256 fact")
+    };
+    let first_hash = sha_of(&first);
+    let second_hash = sha_of(&second);
+    assert_ne!(
+        first_hash, second_hash,
+        "the shared identifier must not make the two builds share a value"
+    );
+}
+
+#[test]
+fn a_version_one_database_is_upgraded_without_losing_its_evidence() {
+    // The upgrade rebuilds the evidence table, so the rows already in it are the risk. This builds
+    // the version-1 shape by hand - schema, recorded migration, and one evidence row - and requires
+    // `open` to bring it forward with the history intact and the new key in place.
+    let db_file = TempDb::new("upgrade-0002");
+    {
+        let conn = rusqlite::Connection::open(db_file.path()).expect("raw create");
+        conn.execute_batch(include_str!("../migrations/0001_initial.sql"))
+            .expect("version 1 schema");
+        conn.execute_batch(
+            "CREATE TABLE schema_migrations (
+                 version    INTEGER PRIMARY KEY NOT NULL,
+                 name       TEXT NOT NULL,
+                 applied_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+             );
+             INSERT INTO schema_migrations (version, name) VALUES (1, '0001_initial');
+             INSERT INTO projects (id, name) VALUES ('proj-1', 'P0 project');
+             INSERT INTO builds (id, project_id, snapshot_id, normalization_version,
+                                 created_by_fwsight, state)
+                  VALUES ('build-old', 'proj-1', 'snap-old', 'p0-normalize-1', '0.1.0', 'COMPLETE');
+             INSERT INTO evidence (id, build_id, field, classification, source_type,
+                                   source_locator, raw_value, rule, confidence)
+                  VALUES ('ev-sha256', 'build-old', 'sha256', 'observed', 'filesystem',
+                          'file:firmware.elf', 'old-hash', 'streaming-sha256/64KiB', NULL);",
+        )
+        .expect("version 1 contents");
+    }
+
+    let mut db = Database::open(db_file.path()).expect("open must upgrade in place");
+
+    let version: i64 = db
+        .connection()
+        .query_row("SELECT MAX(version) FROM schema_migrations", [], |r| {
+            r.get(0)
+        })
+        .expect("version");
+    assert_eq!(version, SCHEMA_VERSION);
+
+    let kept: String = db
+        .connection()
+        .query_row(
+            "SELECT raw_value FROM evidence WHERE build_id = 'build-old' AND id = 'ev-sha256'",
+            [],
+            |r| r.get(0),
+        )
+        .expect("the pre-upgrade row survives");
+    assert_eq!(kept, "old-hash", "an upgrade must not rewrite history");
+
+    let recorded: i64 = db
+        .connection()
+        .query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r.get(0))
+        .expect("count");
+    assert_eq!(recorded, 2, "both migrations are recorded, once each");
+
+    db.import_snapshot("proj-1", "P0 project", &real_snapshot())
+        .expect("the upgraded database accepts a build reusing the old identifier");
 }
