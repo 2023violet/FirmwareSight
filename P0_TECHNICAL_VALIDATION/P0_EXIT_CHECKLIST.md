@@ -13,10 +13,13 @@ last_updated: "2026-09-28"
 Every item from the prompt's P0 PASS list, with the evidence that closed it. `LOCAL PASS` means
 it ran on this machine and produced the quoted result. Nothing here says `CI PASS`.
 
-Status of the track as a whole changed after this list was first written: remote CI Run #1 executed
-and failed four jobs, so P0 is `FAIL — REMOTE CI RUN #1` with remediation active. The counts below
-are the remediated tree's. `P0_CI_REPORT.md` keeps the failed run, and
-`P0_CI_REMEDIATION_REPORT.md` explains each fix.
+Status of the track changed twice after this list was first written. Remote CI Run #1 executed and
+failed four jobs; the remediation fixed them and Run #2 measured that HEAD as **six of seven jobs
+green**. So P0 is `FAIL — REMOTE CI RUN #2`, round 2 is `LOCAL FIX COMPLETE`, and Run #3 is required.
+The counts below are this tree's. Where an item is now confirmed by a runner rather than only by this
+machine, the evidence column says which. `P0_CI_REPORT.md` keeps both failed runs,
+`P0_CI_REMEDIATION_REPORT.md` explains the first round's fixes, and
+`P0_CI_RUN_2_CLOSURE_REPORT.md` the remaining one.
 
 ## Baseline authority minimum (prompt §58)
 
@@ -55,7 +58,7 @@ are the remediated tree's. `P0_CI_REPORT.md` keeps the failed run, and
 | 9 | CLI analyze works | LOCAL PASS | exit 0 on both fixtures, human and `--json` output |
 | 10 | CLI deterministic JSON passes | LOCAL PASS | byte comparison across runs |
 | 11 | CLI exit-code tests pass | LOCAL PASS | 5 CLI unit tests; measured 0 / 2 / 3 |
-| 12 | SQLite migration smoke passes | LOCAL PASS | 11 storage tests, two ordered migrations, `schema_migrations`, refusal of a newer schema, and an in-place upgrade of a hand-built version-1 database |
+| 12 | SQLite migration smoke passes | LOCAL PASS + REMOTE PASS | 11 storage tests, all green in Run #2 on Windows and Ubuntu, two ordered migrations, `schema_migrations`, refusal of a newer schema, and an in-place upgrade of a hand-built version-1 database |
 | 13 | SQLite snapshot transaction/roundtrip passes | LOCAL PASS | `a_snapshot_survives_a_full_round_trip_with_identical_facts`, `a_failed_import_leaves_no_build_visible_as_complete` |
 | 14 | ts-rs generation works | LOCAL PASS | 10 export tests + `drift/ipc bindings unchanged` |
 | 15 | TypeScript strict build passes | LOCAL PASS | `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `useUnknownInCatchVariables`; `tsc --noEmit` clean |
@@ -66,11 +69,11 @@ are the remediated tree's. `P0_CI_REPORT.md` keeps the failed run, and
 | 20 | ~100/256/512 MiB workloads recorded | LOCAL PASS | `P0_PERFORMANCE_REPORT.md` measured table |
 | 21 | golden tests pass | LOCAL PASS | 5 CLI golden tests |
 | 22 | fmt passes | LOCAL PASS | `cargo fmt --all -- --check` |
-| 23 | clippy passes | LOCAL PASS | `cargo clippy --workspace --all-targets --all-features -- -D warnings`, silent |
-| 24 | cargo test passes | LOCAL PASS | 104 tests, 0 failures |
-| 25 | frontend typecheck/build passes | LOCAL PASS | typecheck, lint, 19 tests, `vite build` |
-| 26 | no forbidden dependency or boundary violation | LOCAL PASS, executed | `cargo deny check licenses bans sources advisories` → exit 0, `advisories ok, bans ok, licenses ok, sources ok` with `cargo-deny 0.20.2` installed. The `[bans] deny` list is evaluated over the four shipping targets, so `reqwest`/`hyper` (an Android/iOS-only dependency of `tauri 2.12.0`) stay banned rather than exempted; `anyhow` is banned with `wrappers` limited to the Tauri tree, so a first-party use still fails. Two informational advisories are recorded with reasons - see `P0_CI_REMEDIATION_REPORT.md` |
-| 27 | P0 reports complete | LOCAL PASS | All 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names are present, plus `P0_EXECUTION_PROVENANCE.md` from the takeover, `P0_DESIGN_CHECKLIST.md` required by AGENTS.md 11, and the two the remediation prompt adds: `P0_CI_REMEDIATION_REPORT.md` and `P0_DESKTOP_SMOKE_REPORT.md` - 21 files, each citing a command that was actually run |
+| 23 | clippy passes | LOCAL PASS + REMOTE PASS | `cargo clippy --workspace --all-targets --all-features -- -D warnings`, silent here; Run #2's `Rust (windows-latest)` and `Rust (ubuntu-latest)` both passed 5/5 steps |
+| 24 | cargo test passes | LOCAL PASS + REMOTE PASS | 104 tests, 0 failures here; Run #2's two Rust job logs each sum their `test result: ok.` lines to 104 |
+| 25 | frontend typecheck/build passes | LOCAL PASS + REMOTE PASS | typecheck, lint, 19 tests, `vite build`; Run #2's `Desktop UI (ubuntu-latest)` logs `Tests 19 passed (19)` |
+| 26 | no forbidden dependency or boundary violation | LOCAL PASS + REMOTE PASS | `cargo deny check licenses bans sources advisories` → exit 0, `advisories ok, bans ok, licenses ok, sources ok` with `cargo-deny 0.20.2` installed. The `[bans] deny` list is evaluated over the four shipping targets, so `reqwest`/`hyper` (an Android/iOS-only dependency of `tauri 2.12.0`) stay banned rather than exempted; `anyhow` is banned with `wrappers` limited to the Tauri tree, so a first-party use still fails. The same command passed remotely: Run #2's `Dependency policy` job is green. Two informational advisories are recorded with reasons and now carry the architect's acceptance - see `P0_CI_REMEDIATION_REPORT.md` and `P0_DEPENDENCY_REPORT.md` |
+| 27 | P0 reports complete | LOCAL PASS | All 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names are present, plus `P0_EXECUTION_PROVENANCE.md` from the takeover, `P0_DESIGN_CHECKLIST.md` required by AGENTS.md 11, and the three the CI track adds: `P0_CI_REMEDIATION_REPORT.md`, `P0_DESKTOP_SMOKE_REPORT.md` and `P0_CI_RUN_2_CLOSURE_REPORT.md` - 22 files, each citing a command or a run that actually happened |
 | 28 | known limitations explicit | LOCAL PASS | `P0_KNOWN_LIMITATIONS.md` |
 
 ## Item 16, stated precisely
@@ -91,14 +94,22 @@ The gap this item used to carry - "nobody has opened the window" - is closed: `P
 records two launches in a real session, the on-screen facts compared field by field against the CLI,
 the WebView2 runtime version, the CSP that governed them, a clean close, and the defect the second
 launch was built to find. One sub-item stayed not-observed (the loading state, too fast to capture by
-hand) and is reported that way rather than as a pass.
+hand) and is reported that way rather than as a pass. It is carried forward rather than repeated in
+round 2, because that round changes no runtime source - one workflow step.
 
-## Not met, in one place
+"Compiles and links" is no longer a single-machine claim. Run #2 built `firmwaresight-desktop` on
+`ubuntu-latest` as part of `clippy --workspace --all-targets --all-features` and passed, after the apt
+step installed the GTK stack; the same crate's 17 tests are inside the 104 both Rust jobs report. The
+`drift` job's failure is the same compile on a job that never got those libraries, which is the whole
+of what remains open.
+
+## Not met, and where each one stands
 
 | Item | Status |
 | --- | --- |
-| CI green | NOT MET — Run #1 failed four jobs on `f9b8ccb`; the fixes are local and the rerun is owed by a push |
-| cargo-deny licenses/bans/advisories | MET locally, exit 0 with the tool installed; the CI job's own result is still pending |
+| CI green | NOT MET — Run #1 failed four jobs on `f9b8ccb`; Run #2 failed one job on `ebda52d`. Both fixes are local; the verdict is owed by Run #3 after a push |
+| Generated output drift on Ubuntu | NOT MET REMOTELY, MET LOCALLY — Run #2's own log names the cause (`gobject-sys`: `Package gobject-2.0 was not found in the pkg-config search path`); the drift job now installs the prerequisites the rust job proved. `Linux provisioning itself = NOT LOCALLY EXECUTED`, no Ubuntu on this host |
+| cargo-deny licenses/bans/advisories | MET locally and remotely — exit 0 here, and Run #2's `Dependency policy` job green |
 | Peak RSS | NOT MEASURED - reason documented in `P0_PERFORMANCE_REPORT.md`; a measurement gap, not a promotion blocker |
 | Fuzz campaign | NOT RUN - tool policy did not authorize `cargo-fuzz` for P0 |
 | `v0.6.0` | NOT GENERATED - requires a real P0 `PASS`, which requires an all-green run on a new head |

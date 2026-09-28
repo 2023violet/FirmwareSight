@@ -16,8 +16,10 @@ Remediation v1.0*. Target state: `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE 
 
 Result: **all five failures reproduced with a command before any of them was changed; four fixed at
 the cause; one fifth found during the desktop smoke and fixed too; the local gate is 14/14 with zero
-`SKIPPED` mandatory steps.** Remote CI has not run against this tree — that requires the owner to
-push, and the verdict belongs to the new run, not to this document.
+`SKIPPED` mandatory steps.** Run `36378384225` on the pushed HEAD then confirmed all five remotely -
+six of seven jobs green - and left one failure this report did not anticipate, because it attached the
+Linux prerequisites to the job that had failed rather than to the requirement. See the postscript at
+the end of this file and `P0_CI_RUN_2_CLOSURE_REPORT.md` for the round that closes it.
 
 ## Remote CI Run #1, the thing being remediated
 
@@ -206,3 +208,29 @@ area is the new `core-smoke` group.
 
 Nothing here may be read as `REMOTE CI PASS`. The next run must be green on a head equal to the pushed
 remediation tip; a green rerun of `f9b8ccb` would prove nothing about this tree.
+
+## Postscript: Run #2 measured this round, and one line of it was wrong
+
+Run `36378384225` executed on the pushed HEAD `ebda52d` and concluded `failure` with **six of seven
+jobs green**. Read against the table above:
+
+| Claim in this report | Run #2 |
+| --- | --- |
+| Ubuntu clippy needs the apt block | **CLOSED** - `Rust (ubuntu-latest)` passed, 5/5 steps, 104 tests, desktop crate compiling |
+| macOS core smoke is unproven | **CLOSED** - `macOS Core Smoke` passed, 3/3 steps, 87 tests |
+| Icon drift on Linux may fail | **CLOSED** - `drift/desktop icons` passed on the Linux runner printing `desktop icons are current (pixel-identical to this build).` |
+| cargo-deny on a clean runner | **CLOSED** - `Dependency policy` passed, `advisories ok, bans ok, licenses ok, sources ok` |
+| Fixture byte identity off Windows is unproven | **CLOSED** - `Rust (windows-latest)` and `(ubuntu-latest)` both ran the hash assertion green at 104 tests |
+| Peak RSS | still `NOT MEASURED`, and still not a promotion blocker |
+
+The one thing this round got wrong is stated in the report's own terms rather than smoothed over: it
+attached the Linux prerequisites to **the job that had failed**, not to **the requirement**. Two jobs
+compile `firmwaresight-desktop` on Linux - `rust` via `clippy --all-features`, `drift` via
+`cargo test -p firmwaresight-desktop` for ts-rs binding regeneration - and the second one had no apt
+step. Run #2's `Generated output drift` job passed its first two steps and then died in `gobject-sys`'
+build script with `Package gobject-2.0 was not found in the pkg-config search path`.
+
+That is the same missing system-library class as Run #1's `Rust (ubuntu-latest)`, reached from a
+different job - and the reproduction of it is a CI provisioning omission, not a product defect, not a
+ts-rs contract defect and not generated drift. The fix, the classification and the copy-versus-script
+decision belong to `P0_CI_RUN_2_CLOSURE_REPORT.md`.

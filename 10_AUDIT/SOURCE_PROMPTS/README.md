@@ -54,6 +54,10 @@ delivered rather than a retranscription.
   real desktop window launch in the shipping configuration. It does not authorize a push, does not
   permit `REMOTE CI PASS` to be written by the executing side, stops before P0 promotion, and does not
   change `ADR-0020`.
+- Outcome, superseded by measurement: the owner pushed `ebda52d`, run `36378384225` executed and
+  concluded `failure` with **six of seven jobs green**. The first round's five fixes are therefore
+  confirmed remotely; the residue is a second job needing the same Linux prerequisites, which is what
+  *Remote CI Run #2 Final Drift Closure v1.0* below closes.
 - Outcome, 2026-09-28: `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE CI RERUN`. All five causes
   reproduced with a command before being changed, a sixth defect found by the authorized window launch
   and fixed with tests first, local gate 14/14 with zero skipped mandatory steps, desktop smoke `PASS`,

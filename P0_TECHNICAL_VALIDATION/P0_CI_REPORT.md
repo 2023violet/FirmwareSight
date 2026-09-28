@@ -13,12 +13,15 @@ last_updated: "2026-09-28"
 Requirement: a gate that runs the same checks a developer runs, so "CI is green" and "my machine
 is green" cannot mean different things.
 
-Status: **REMOTE CI RUN #1: FAILURE — LOCAL REMEDIATION COMPLETE — REMOTE RERUN REQUIRED**
+Status: **REMOTE CI RUN #2: FAILURE — 6 OF 7 JOBS GREEN — RUN #3 REQUIRED AFTER USER PUSH**
 
-The workflow has executed. `origin/main` at `f9b8ccb` ran it as run `36360310447` on 2026-09-28 and
-concluded `failure`: two jobs green, four red. This file keeps that result as historical evidence
-rather than rewriting it, and records what was changed in response. The remediation's own reasoning
-is in `P0_CI_REMEDIATION_REPORT.md`.
+The workflow has executed twice. Run #1 (`36360310447`, head `f9b8ccb`) concluded `failure` with two
+jobs green and four red; that result is kept below as historical evidence rather than rewritten. Run
+#2 (`36378384225`, head `ebda52d` - the remediation HEAD) concluded `failure` with **six of seven jobs
+green**: Run #1's four causes are closed remotely, and one job remains red because a second CI job
+compiles the desktop crate without the Linux prerequisites the first one was given. Both runs are
+external facts read with `gh run view`, and the round-2 detail is in
+`P0_CI_RUN_2_CLOSURE_REPORT.md`; the first round's reasoning is in `P0_CI_REMEDIATION_REPORT.md`.
 
 ## Remote CI Run #1 — retained as failed evidence
 
@@ -48,6 +51,61 @@ locally — the run had stopped at the first deserialization error list.
 
 Nothing in the two tables above is inferred: the messages are quoted from the job logs.
 
+## Remote CI Run #2 — the latest remote fact
+
+| Field | Value |
+| --- | --- |
+| Run | `36378384225`, event `push` |
+| Head | `ebda52d63f22ff9f25786c1d80e53f5193cff183` — the first remediation HEAD, pushed by the owner |
+| Conclusion | `failure` |
+| Jobs | 7 — **6 pass, 1 fail** |
+| Read with | `gh run view 36378384225 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,event,jobs` |
+
+| Job | Conclusion | Step-level evidence from the job's own log |
+| --- | --- | --- |
+| Rust (windows-latest) | pass | `5/5 steps passed`; `test result: ok.` lines summing to **104** |
+| Rust (ubuntu-latest) | pass | `5/5 steps passed`; **104**; `firmwaresight-desktop` compiles, which Run #1 never reached |
+| Desktop UI (windows-latest) | pass | `5/5 steps passed` |
+| Desktop UI (ubuntu-latest) | pass | `5/5 steps passed`; `Test Files 3 passed (3)`, `Tests 19 passed (19)` |
+| macOS Core Smoke | pass | `3/3 steps passed`; **87** tests. First execution of this job in the repository's history |
+| Dependency policy | pass | `1/1 steps passed`; `advisories ok, bans ok, licenses ok, sources ok` |
+| Generated output drift | **fail** | `PASS drift/design tokens`, `PASS drift/desktop icons`, then `error: failed to run custom build command for gobject-sys v0.18.0` |
+
+The `5/5` against the local `3/3` on the two Rust jobs is the `frontend assets` pair firing: a clean
+runner has no `apps/desktop/ui/dist/`, so the gate builds the UI before `clippy --all-features`
+compiles the desktop crate. That is the shipped configuration being exercised rather than the warm
+local one.
+
+Run #1's four causes are therefore closed **remotely**, not just locally - including
+`desktop icons are current (pixel-identical to this build).` printed on a Linux runner, which is the
+evidence the encoder-byte assertion could never produce.
+
+### The one failure, exactly
+
+Job `108788787601`, step `Verification gate (drift)`, third gate step:
+
+```text
+=== [drift] ipc bindings
+$ cargo test -p firmwaresight-desktop
+error: failed to run custom build command for `gobject-sys v0.18.0`
+> PKG_CONFIG_PATH=/opt/hostedtoolcache/Python/3.13.15/x64/lib/pkgconfig \
+  PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags gobject-2.0 'gobject-2.0 >= 2.70'
+  Package gobject-2.0 was not found in the pkg-config search path.
+The system library `gobject-2.0` required by crate `gobject-sys` was not found.
+error: failed to run custom build command for `glib-sys v0.18.1`   (same cause)
+```
+
+`scripts/check.py --only drift` regenerates the ts-rs bindings by running `cargo test -p
+firmwaresight-desktop` - the only way to prove the committed `.ts` files still match the Rust DTOs -
+and that command links the GTK stack. The `rust` job was given `Install Linux prerequisites for the
+Tauri shell` in the first remediation round; the `drift` job was not, because the round was reasoning
+from which jobs had failed rather than from which jobs compile the shell. A provisioning omission in
+one job, in the same class as Run #1's, and fixed by giving the second job the same step.
+
+`P0_CI_RUN_2_CLOSURE_REPORT.md` carries the round: the classification, the copy-not-abstract decision,
+what Run #2 confirmed, the advisory disposition from the architect, and the local verification that
+did run here.
+
 ## One definition, two callers
 
 `.github/workflows/p0-check.yml` contains no test commands. It installs the toolchain and calls:
@@ -70,7 +128,7 @@ only way it becomes runnable on a laptop.
 | --- | --- | --- |
 | `rust` | ubuntu-latest, windows-latest | on Ubuntu only: install Tauri's Linux prerequisites first. Then builds the UI if `dist/` is missing, fmt, clippy (`-D warnings`, all targets, all features), `cargo test --workspace` |
 | `frontend` | ubuntu-latest, windows-latest | `pnpm install --frozen-lockfile`, typecheck, lint, test, build |
-| `drift` | ubuntu-latest | tokens.css, desktop icons (compared by pixels), ts-rs bindings and goldens must be unchanged after regeneration |
+| `drift` | ubuntu-latest | install Tauri's Linux prerequisites first (added after Run #2 - this job compiles the desktop crate too), then tokens.css, desktop icons (compared by pixels), ts-rs bindings and goldens must be unchanged after regeneration |
 | `deny` | ubuntu-latest | `cargo install cargo-deny@0.20.2 --locked`, then `cargo deny check licenses bans sources advisories` |
 | `macos-core` | macos-latest | `--only core-smoke`: the four library crates and the CLI, selected by package name. Skipped on pull requests for cost; runs on a push to `main` and on `workflow_dispatch` |
 
@@ -105,7 +163,10 @@ Notes on choices:
   the macro: `The `frontendDist` configuration is set to "../ui/dist" but this path doesn't exist`.
   The gate lints the configuration that ships rather than the dev one, so `scripts/check.py` builds
   the UI when `dist/index.html` is missing and the `rust` job installs Node and enables Corepack.
-  `drift` needs neither, because its `cargo test -p firmwaresight-desktop` runs default features.
+  `drift` needs neither for `dist/`, because its `cargo test -p firmwaresight-desktop` runs default
+  features - but it does need the GTK system libraries, which Run #2 is the first evidence of. The
+  requirement is a property of compiling the shell on Linux, so it attaches to every job that does
+  that, not to the job that happened to fail first.
 - **The production link was measured locally, in both configurations.**
   `cargo build --release -p firmwaresight-desktop --features custom-protocol` produced a
   10,398,208-byte `firmwaresight-desktop.exe` in 3m 11s, and the built asset name
@@ -203,16 +264,22 @@ moved 102 → 104 with a source change, not a documentation change. Separately:
 $ python scripts/check.py --only core-smoke
 PASS  core-smoke/fmt
 PASS  core-smoke/clippy
-PASS  core-smoke/test          (85 of the 104 Rust tests, no desktop crate in the selection)
+PASS  core-smoke/test          (87 of the 104 Rust tests, no desktop crate in the selection)
 3/3 steps passed
 ```
+
+The 87 and 104 are not just local figures: Run #2's `Rust (windows-latest)` and
+`Rust (ubuntu-latest)` logs each sum their `test result: ok.` lines to 104, and
+`macOS Core Smoke` to 87. The round-2 change is one workflow step, so this gate result stands for
+this tree as well - it was re-run after the workflow edit and reported the same 14/14 with exit 0.
 
 ## Known risks in the CI definition
 
 1. **Windows clippy over the Tauri tree** is the least certain step. Locally it is clean with
    `-D warnings`, but a different MSVC point release could surface a lint nobody has seen. If it
-   fails, the honest fix is in the code, not by relaxing `-D warnings`. Run #1 did not hit this: the
-   Windows Rust job failed on a fixture hash, not on a lint.
+   fails, the honest fix is in the code, not by relaxing `-D warnings`. Neither run hit it: Run #1's
+   Windows Rust job failed on a fixture hash and Run #2's passed, so the lint surface has been clean
+   on `windows-latest` twice.
 2. **`cargo deny check advisories` depends on the live RustSec database**, so an advisory published
    against a Tauri transitive dependency can fail CI for reasons unrelated to any change. This risk
    materialized: `RUSTSEC-2024-0429` (glib, unsound) and `RUSTSEC-2024-0370` (proc-macro-error,
@@ -223,7 +290,8 @@ PASS  core-smoke/test          (85 of the 104 Rust tests, no desktop crate in th
    `unused-ignored-advisory`'s default warning telling us the day either stops matching. A genuinely
    new advisory will still fail the job, and that is the intended behaviour.
 3. **`jsdom` on Windows CI** has been reliable locally on Node 24 but is the likeliest place for an
-   environment-specific failure. Run #1 did not hit it: both UI jobs were green.
+   environment-specific failure. Neither run hit it: both UI jobs were green in Run #1 and again in
+   Run #2, with `Tests 19 passed (19)` recorded on the Ubuntu job.
 4. **Runtime.** A three-platform matrix building the Tauri dependency tree without caching is minutes
    per job, and the Ubuntu job now spends time in `apt-get` first. Accepted deliberately for P0; the
    macOS job is the cheap one, because it excludes the shell.
@@ -238,6 +306,17 @@ PASS  core-smoke/test          (85 of the 104 Rust tests, no desktop crate in th
    was checked against a crate in this graph, but the resolution can only be confirmed by the runner:
    a package rename in the image, or a `.pc` file that arrives through a dependency this repo does not
    control, would bring Failure B back. `libdbus-1-dev` is listed explicitly for exactly that reason.
+   Run #2 reduced this risk rather than eliminating it: the same list installed and resolved on
+   `ubuntu-latest` in the `rust` job, and both Rust jobs went green. What remains unconfirmed is the
+   copy in the `drift` job, which no runner has executed yet.
+7. **Provisioning is per job, so it can be half-applied.** This is not a hypothetical risk - it is
+   what Run #2 measured. Two jobs compile `firmwaresight-desktop` on Linux (`rust` through
+   `clippy --all-features`, `drift` through `cargo test` for ts-rs), and the first round attached the
+   prerequisites to the job that had failed rather than to the requirement. The structural fix is to
+   read the graph and ask which jobs build the shell, not which jobs reported red; the local fix is
+   the copy that round 2 adds. A third job that compiles the desktop crate on Linux would make the
+   duplication worth extracting into a script - and that argument should be made by a third instance,
+   not in anticipation of one.
 
 ## Exit criterion mapping
 

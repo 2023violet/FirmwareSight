@@ -20,7 +20,7 @@ The P0 slice created the first production code; nothing in the baseline was rene
 
 ## P0 — Technical Vertical Slice
 
-Status: `FAIL — REMOTE CI RUN #1` · Remediation: `LOCAL FIX COMPLETE` · Remote rerun: `REQUIRED`
+Status: `FAIL — REMOTE CI RUN #2` (6 of 7 jobs green) · Remediation round 2: `LOCAL FIX COMPLETE` · Remote: `RUN #3 REQUIRED AFTER USER PUSH`
 
 The source tree exists and its claims are proven by executed tests: 104 Rust tests, 19 UI tests,
 one shared gate script, real ELF/MAP fixtures with recorded provenance, deterministic CLI JSON,
@@ -44,18 +44,41 @@ requires a macOS core smoke on `main` push, and the workflow has no macOS job at
 
 Per-run evidence, retained as failed history rather than rewritten: `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md`.
 
+### Remote Run #2, read from GitHub with `gh run view 36378384225`
+
+The remediation HEAD `ebda52d` was pushed and ran. It concluded `failure` with **six of seven jobs
+green**, which closes Run #1's four causes remotely:
+
+| Job | Run #2 |
+| --- | --- |
+| Rust (windows-latest) | PASS - 5/5 steps, 104 tests |
+| Rust (ubuntu-latest) | PASS - 5/5 steps, 104 tests, with `firmwaresight-desktop` compiling |
+| Desktop UI (windows-latest / ubuntu-latest) | PASS - 19 UI tests |
+| macOS Core Smoke | PASS - 3/3 steps, 87 tests, first execution of the job |
+| Dependency policy | PASS - `advisories ok, bans ok, licenses ok, sources ok` |
+| Generated output drift | **FAIL** - tokens and icons pass, then `drift/ipc bindings` dies in `gobject-sys`' build script |
+
+The remaining failure is CI provisioning, not product source: `scripts/check.py --only drift`
+regenerates the ts-rs bindings by running `cargo test -p firmwaresight-desktop`, which needs the same
+GTK system libraries the `rust` job now installs - and the `drift` job was never given that step.
+Run #1's `Rust (ubuntu-latest)` died the same way at `glib-sys`; this is the same missing
+`.pc` files, reached from a second job. The fix is 21 added lines in
+`.github/workflows/p0-check.yml`: the already-remotely-proven apt block, copied, with no package
+added and no step, skip or permission changed. No Rust, TypeScript, fixture, golden or policy file
+moved. `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md` is the round's record.
+
 ### What the remediation changed, and what it did not
 
-All five causes were reproduced with a command before anything was edited, and each fix is a local
-`PASS` on the same command that failed in CI:
+All five causes were reproduced with a command before anything was edited. Each fix was a local
+`PASS` on the same command that failed in CI, and **Run #2 then confirmed all five remotely**:
 
-| Cause | Fix | Local proof |
+| Cause | Fix | Proof |
 | --- | --- | --- |
-| Checkout changed fixture bytes | `.gitattributes` text policy (`*.ld text eol=lf`, `*.map -text`, binaries unchanged) | fresh `git clone` → recorded hashes match; `cargo test` green |
-| Ubuntu runner lacked Tauri prerequisites | apt step installing the nine documented packages plus `libdbus-1-dev`, `if: matrix.os == 'ubuntu-latest'` | coverage unchanged — `clippy --all-features` still compiles the desktop crate |
-| Icon check compared encoder bytes | decode and compare: PNG dimensions + RGBA, ICO required size set + per-frame pixels, missing frame fails | `gen_desktop_icons.py --check` passes on this host |
-| `deny.toml` unparseable by 0.20.2 | rewritten against the keys the tool accepts; allow list rebuilt from `cargo deny list` | `cargo deny check licenses bans sources advisories` exits 0 |
-| No macOS job | `macos-core` job running `check.py --only core-smoke` on `main` pushes | 3/3 steps green locally |
+| Checkout changed fixture bytes | `.gitattributes` text policy (`*.ld text eol=lf`, `*.map -text`, binaries unchanged) | local fresh `git clone` → recorded hashes match; **remote `Rust (windows-latest)` PASS at 104 tests** |
+| Ubuntu runner lacked Tauri prerequisites | apt step installing the nine documented packages plus `libdbus-1-dev`, `if: matrix.os == 'ubuntu-latest'` | coverage unchanged — `clippy --all-features` still compiles the desktop crate; **remote `Rust (ubuntu-latest)` PASS** |
+| Icon check compared encoder bytes | decode and compare: PNG dimensions + RGBA, ICO required size set + per-frame pixels, missing frame fails | `gen_desktop_icons.py --check` green here; **remote `drift/desktop icons` PASS on Linux** with `pixel-identical to this build` |
+| `deny.toml` unparseable by 0.20.2 | rewritten against the keys the tool accepts; allow list rebuilt from `cargo deny list` | exits 0 here; **remote `Dependency policy` PASS**, four categories ok |
+| No macOS job | `macos-core` job running `check.py --only core-smoke` on `main` pushes | 3/3 locally; **remote `macOS Core Smoke` PASS at 87 tests** |
 
 The authorized desktop window launch then found a **sixth problem that no test had reached**: the
 second artifact failed with `UNIQUE constraint failed: evidence.id`, because `evidence` had a
@@ -66,8 +89,10 @@ the upgrade was run against the real database the earlier launch had left behind
 
 Two advisories (`RUSTSEC-2024-0429`, `RUSTSEC-2024-0370`) are **not resolvable inside the frozen
 Tauri 2.12.0 dependency architecture** — `cargo update -p glib --precise 0.20.0` fails against
-`gtk = "^0.18"`. They are ignored with recorded evidence and reported to the architect as an
-architecture conflict needing an ADR, not closed by a CI change.
+`gtk = "^0.18"`. They were reported to the architect as an architecture conflict; the architect's
+disposition is now recorded: **accepted as explicit, documented P0 transitive risk that does not block
+P0 promotion**, with five revisit triggers, and **no architecture ADR**, because no architecture choice
+changed. See `.ai/DECISIONS.md` and `P0_DEPENDENCY_REPORT.md`.
 
 ## V0
 
@@ -97,15 +122,16 @@ does not close this gap. P0 changed no V0 artifact and no V0 recommendation.
 ```text
 G0: PASS
 V0: DEFERRED / UNVALIDATED (0 of 8 eligible external sessions)
-P0: FAIL — REMOTE CI RUN #1 (2 of 6 jobs green); remediation LOCAL FIX COMPLETE, rerun REQUIRED
+P0: FAIL — REMOTE CI RUN #2 (6 of 7 jobs green); remediation round 2 LOCAL FIX COMPLETE, RUN #3 REQUIRED
 Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS)
 P1: NOT AUTHORIZED
 ```
 
 Full reasoning: `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`; per-item evidence:
-`P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`; run log and the four fixes:
+`P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`; Run #1 log and its four fixes:
 `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` and
-`P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md`; the shipped-window result:
+`P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md`; Run #2 and the drift provisioning closure:
+`P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md`; the shipped-window result:
 `P0_TECHNICAL_VALIDATION/P0_DESKTOP_SMOKE_REPORT.md`.
 
 ## Version rule
@@ -116,21 +142,24 @@ PASS baseline, and a locally green gate must not be relabeled into a CI PASS.
 
 ## Next work
 
-The remediation's scope is complete locally: the five CI causes are fixed, the gate runs with zero
-skipped mandatory steps, and the desktop window has been launched and driven for real. One action
-remains and it is not the coding agent's:
+Run #2 answered the first remediation round's five causes remotely. One job is still red, and the
+cause is a CI step that installs nothing where a second job already does. The fix is in the tree. One
+action remains and it is not the coding agent's:
 
-**Push the reported remediation HEAD to `origin/main` and read the new
-`P0 verification gate` run.** That run is what turns `LOCAL FIX COMPLETE` into a remote result, and
-it is verified by the architect — the coding side does not write `REMOTE CI PASS`.
+**Push the reported final local HEAD to `origin/main` and read GitHub Actions Run #3.** The architect
+verifies that run; the coding side does not write `REMOTE CI PASS`.
 
-What the push will test that this machine cannot: a Linux checkout of the `.gitattributes` policy, an
-Ubuntu runner installing the Tauri prerequisites from apt, the pixel-based icon check under a
-different Pillow build, the pinned `cargo-deny 0.20.2` against the rewritten policy, and the macOS
-core smoke for the first time. If any of them fails, the status stays `FAIL` and `v0.6.0` stays
-withheld.
+What Run #3 must show, job by job: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, both
+`Desktop UI` jobs, `Generated output drift`, `Dependency policy` and `macOS Core Smoke` all green, on
+the HEAD that was pushed. The only new thing it tests is the drift job's provisioning step, so its
+`Verification gate (drift)` log should show the same `Install Linux prerequisites for the Tauri
+shell` block the Rust job already proved, then all five drift steps pass. The Linux apt execution
+itself is **NOT LOCALLY EXECUTED** - this host has no Ubuntu - and the evidence chain is: same runner
+family, same package list already proven remotely, same desktop crate compile requirement, new
+placement.
 
 `v0.6.0` is generated only after a real CI `PASS`; G1 requires V0 as well; P1 requires its own
-authorization prompt, which has not been issued.
+authorization prompt, which has not been issued. If Run #3 is green, the next prompt is the
+architect's P0 Final Promotion / v0.6.0 Baseline Closure, and it is not this round's to anticipate.
 
 V0 resumes only when a real eligible participant/session source exists.

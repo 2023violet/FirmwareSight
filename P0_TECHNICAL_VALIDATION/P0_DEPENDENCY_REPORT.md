@@ -14,10 +14,10 @@ Requirement (AGENTS.md 4): every dependency must name the need it serves, say wh
 library or an existing dependency was insufficient, and state its license, maintenance and build
 impact. Nothing enters because it is common in the ecosystem.
 
-Status: **LOCAL PASS on all four checks, including cargo-deny itself.** The policy file is no
-longer "written but not executed": `cargo deny 0.20.2` runs here and exits 0. What is still missing
-is a CI run that says the same thing - Run #1's `deny` job failed on a schema error, and the HEAD
-that fixes it has not been pushed.
+Status: **LOCAL PASS and REMOTE PASS.** `cargo deny 0.20.2` runs here and exits 0, and Run #2's
+`Dependency policy` job passed on `ubuntu-latest` with the same four categories ok. The two
+advisories that cannot be resolved inside the frozen Tauri tree are recorded below with the
+architect's disposition and its revisit triggers.
 
 ## Scale
 
@@ -161,9 +161,9 @@ precisely:
   notice.
 - **The glib upgrade is not available inside the frozen architecture.** `cargo update -p glib
   --precise 0.20.0` fails: `gtk v0.18.2`, required by Tauri 2.12.0's Linux stack, depends on
-  `glib = "^0.18"`. Moving glib means moving gtk-rs, muda, tao and webkit2gtk, which is an ADR, not a
-  CI fix. Reported to the architect as an architecture conflict rather than resolved by moving a
-  dependency; see `P0_CI_REMEDIATION_REPORT.md`.
+  `glib = "^0.18"`. Moving glib means moving gtk-rs, muda, tao and webkit2gtk. This was reported to
+  the architect as an architecture conflict rather than resolved by moving a dependency, and the
+  architect's disposition is recorded below.
 - **23 `warning[duplicate]` results** from `multiple-versions = "warn"`, all in the `syn`, `toml`,
   `thiserror`, `windows-sys`, `base64`, `sha2` and `png` families, produced by the Tauri and SQLite
   trees rather than by a choice of ours. They are warnings because the alternatives are dropping a
@@ -176,8 +176,40 @@ precisely:
   that declared it would still fail. This is the boundary `AGENTS.md` 3 draws in our own error model,
   checked rather than asserted.
 
-What this does **not** claim: CI has not seen this file. Run #1's dependency job failed on the
-schema errors (an unsupported `severity-threshold`, five slash strings cargo-deny rejected) and was
-fixed here; the remediation HEAD is unpushed, so the CI result for the dependency boundary is
-`FAIL` at Run #1 and `NOT RUN` since. Both `P0_CI_REPORT.md` and `P0_EXIT_CHECKLIST.md` carry the
-same split.
+## Architect disposition on the two advisories
+
+The first remediation round escalated these as an architecture conflict it was not authorized to
+resolve. The architect has now decided them, and the decision is recorded here rather than inferred:
+
+- `RUSTSEC-2024-0429` (`glib 0.18.5`, `unsound`) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
+  `unmaintained`) are **accepted as explicit P0 transitive risk - not silent suppression - and they do
+  not block P0 Technical Foundation promotion** on the current evidence.
+- The grounds are the seven the architect listed: both are recorded with reasons rather than hidden;
+  each `ignore` entry in `deny.toml` carries its own; the fix version for the first requires
+  `glib >= 0.20`, which the `gtk-rs 0.18` / Tauri 2.12 line cannot select; no first-party code calls
+  `GVariant` APIs; the second is a host-only build-time proc macro whose own advisory states no safe
+  upgrade exists; Run #2 shows all four cargo-deny categories passing on the real runner; and this
+  phase is a technical foundation, not a GA security certification.
+- **Revisit triggers.** Re-open this decision when any of these becomes true: a Tauri 2.x release
+  ships a compatible fixed gtk-rs line; either advisory's classification or severity materially
+  changes; first-party code begins exercising the affected API; the P5 Productization dependency and
+  security review runs; or a Linux commercial release candidate gets its security review.
+- **No architecture ADR is required by this decision, because no architecture choice changed.** One
+  becomes required if Tauri is replaced, dependencies are forked, or the frozen desktop dependency
+  family moves - which is the same boundary `AGENTS.md` 2 already draws.
+- The safety net stays: `unused-ignored-advisory` is at its default `warn`, so the day either entry
+  stops matching the graph, cargo-deny reports the stale ignore instead of the policy quietly
+  widening.
+
+## What this does not claim
+
+Run #1's dependency job failed on the schema errors (an unsupported `severity-threshold`, five slash
+strings cargo-deny rejected). That was fixed, and **Run #2's `Dependency policy` job passed**:
+`advisories ok, bans ok, licenses ok, sources ok` on `ubuntu-latest` with the pinned 0.20.2. The
+`deny` boundary is therefore `LOCAL PASS + REMOTE PASS`, and the license census above is what the tool
+printed on both.
+
+What remains unproven by this file is narrower than it used to be: the policy is evaluated over the
+four targets in `[graph] targets`, so a future mobile or embedded target reopens the boundary check -
+`tauri 2.12.0` declares a non-optional `reqwest` for Android and iOS, and it is the target filter, not
+the absence of a ban, that keeps it out of the shipping graph.

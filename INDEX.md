@@ -12,7 +12,7 @@ last_updated: "2026-09-28"
 # Document Index
 
 Baseline: `0.5.1`  
-Execution state: `P0: FAIL — REMOTE CI RUN #1; local remediation complete, remote rerun required; V0 Batch A still waiting on real participants`
+Execution state: `P0: FAIL — REMOTE CI RUN #2 (6 of 7 jobs green); round 2 fix complete locally, Run #3 required; V0 Batch A still waiting on real participants`
 
 ## Primary reading path
 
@@ -20,11 +20,12 @@ Execution state: `P0: FAIL — REMOTE CI RUN #1; local remediation complete, rem
 2. `PRODUCT_BASELINE.md`
 3. `.ai/ACTIVE_TASK.md`
 4. `P0_TECHNICAL_VALIDATION/README.md`
-5. `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md`
-6. `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`
-7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
-8. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
-9. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
+5. `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md`
+6. `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md`
+7. `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`
+8. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
+9. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
+10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` still describe the frozen
 `FirmwareSight_Project_Baseline_v0.5.1` package, not the P0 working tree; the P0 source layout is
@@ -198,6 +199,7 @@ in `.ai/DECISIONS.md`.
 | `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md` | P0 Architecture Check |
 | `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` | P0 CI Remediation Report |
 | `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` | P0 CI Report |
+| `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md` | P0 CI Run #2 Closure Report |
 | `P0_TECHNICAL_VALIDATION/P0_CLI_PARITY_REPORT.md` | P0 CLI Report and Determinism |
 | `P0_TECHNICAL_VALIDATION/P0_DEPENDENCY_REPORT.md` | P0 Dependency Report |
 | `P0_TECHNICAL_VALIDATION/P0_DESIGN_CHECKLIST.md` | P0 Design Review Checklist |

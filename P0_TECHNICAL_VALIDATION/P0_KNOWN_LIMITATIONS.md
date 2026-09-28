@@ -122,26 +122,34 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 
 ## Verification gaps
 
-- **CI has run once, and it failed.** Run `36360310447` at head `f9b8ccb` reported
-  `failure`: `Rust (windows)`, `Rust (ubuntu)`, `Generated output drift` and `Dependency policy`
-  failed; `Desktop UI (windows)` and `Desktop UI (ubuntu)` passed. All four causes were reproduced
-  locally and fixed locally (`P0_CI_REMEDIATION_REPORT.md`), but the remediation HEAD is unpushed,
-  so **no job has ever been green on the files that are now in the tree**. `CI PASS` is claimed
-  nowhere in this pack, and the coding agent cannot claim it - the rerun is verified by the architect.
-- **`cargo deny` now runs, and passes, on this machine** (0.20.2, exit 0 over `licenses bans sources
-  advisories`). Two things it does not therefore prove: it has not been seen green in CI, and it
-  evaluates only the four targets in `[graph] targets`. Add a mobile or embedded target later and the
-  boundary check reopens - `tauri` declares a non-optional `reqwest` for Android and iOS, which the
-  filter is what keeps out of the product's graph.
+- **CI has run twice, and both runs failed - the second only once.** Run `36360310447` at `f9b8ccb`
+  reported four red jobs. Run `36378384225` at the remediation HEAD `ebda52d` reported **six of seven
+  green**: Rust on both OSes (104 tests each), both Desktop UI jobs, the macOS core smoke and the
+  dependency policy all passed, leaving `Generated output drift`. That residue is a CI provisioning
+  omission - the drift job compiles `firmwaresight-desktop` for ts-rs but had no Linux prerequisites
+  step - fixed in round 2 by giving it the same block Run #2 proved. `CI PASS` is still claimed
+  nowhere, and Run #3 is what would close it.
+- **`cargo deny` runs and passes both places it can be run** - locally (0.20.2, exit 0 over `licenses
+  bans sources advisories`) and in CI (Run #2's `Dependency policy` job, four categories ok). What it
+  still does not prove: it evaluates only the four targets in `[graph] targets`, so a mobile or
+  embedded target later reopens the boundary check - `tauri` declares a non-optional `reqwest` for
+  Android and iOS, and the filter is what keeps it out of the product's graph.
+- **The drift job's provisioning step has never executed.** Run #2 proved the identical apt block on
+  the `rust` job, so the evidence chain for the copy is: same runner family, same package list, same
+  `firmwaresight-desktop` compile requirement, new placement. The step itself is NOT LOCALLY EXECUTED
+  - this host has no Ubuntu - and only Run #3 can show it working.
 - **Two advisories cannot be closed without changing the frozen dependency architecture.**
   `RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
   unmaintained, host-only) both arrive through the gtk-rs 0.18 line that Tauri 2.12.0 requires;
   `cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`. They are ignored with
-  recorded evidence rather than upgraded, and the conflict is reported to the architect as a decision
-  that needs an ADR, not a CI fix. `unused-ignored-advisory` stays at `warn`, so an ignore entry that
-  stops matching becomes visible by itself.
-- **The Ubuntu system packages and the macOS core smoke have never executed.** Both live only in CI,
-  and this round cannot prove them without a push. The package list is Tauri 2's documented Linux
+  recorded evidence rather than upgraded. **The architect has since accepted both as explicit P0
+  transitive risk that does not block promotion**, with five revisit triggers recorded in
+  `P0_DEPENDENCY_REPORT.md` - a decision, not a silence, and `unused-ignored-advisory` stays at `warn`
+  so an ignore entry that stops matching becomes visible by itself. Replacing Tauri, forking
+  dependencies or moving the frozen desktop dependency family would still require an ADR.
+- **The Ubuntu system packages and the macOS core smoke have each executed once, successfully.** Run
+  #2's `Rust (ubuntu-latest)` passed with the apt block installed, and `macOS Core Smoke` passed with
+  87 tests on its first execution. The package list is Tauri 2's documented Linux
   prerequisite set plus `libdbus-1-dev` named explicitly because `libdbus-sys` asks for `dbus-1`;
   `pkg-config` itself is not installed, since the failure log shows it ran and returned 1 while the
   `.pc` files were missing. `macos-core` is `python scripts/check.py --only core-smoke` - the same
@@ -160,7 +168,9 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
   script to CRLF. The text policy is what makes "blob hash" and "file on disk" the same statement on
   every platform, so a contributor who deletes that file, or a later target that adds a `*.map`
   pattern, breaks a test with no product defect behind it. Verified here by fresh `git clone` into a
-  temporary directory on Windows; the Linux and macOS clones are what the next run measures.
+  temporary directory on Windows, and by Run #2 checking out the same tree on `ubuntu-latest` and
+  `windows-latest` with the hash assertion green in both Rust jobs. What no clone has yet proved is a
+  macOS checkout, because the macOS job runs the core smoke rather than the artifact tests.
 - **No fuzzing.** `cargo-fuzz` needs a nightly toolchain and a separate crate, which the tool
   policy did not authorize. The no-panic claim rests on regression tests over four malformed
   fixtures plus a truncated-ELF and foreign-MAP case.

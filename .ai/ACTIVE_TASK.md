@@ -11,79 +11,95 @@ last_updated: "2026-09-28"
 # ACTIVE TASK
 
 ```text
-P0_CI_CLOSURE_REMEDIATION
+P0_CI_RUN_2_FINAL_DRIFT_CLOSURE
 ```
 
-`FirmwareSight P0 — CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect
-Reviewed)`. Target: `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE CI RERUN`. Not P1, not `v0.6.0`,
-not a P0 `PASS` claim.
+`FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed)`. Target:
+`LOCAL FIX COMPLETE / READY FOR REMOTE CI RUN #3`. Not P1, not `v0.6.0`, not a P0 `PASS` claim, not an
+architecture redesign.
 
 ## Why this task exists
 
-The P0 slice reported `CONDITIONAL_PASS (LOCAL)` because its three open conditions were outside the
-authoring environment. The repository owner pushed `f9b8ccb`, remote Actions run `36360310447`
-executed, and it concluded `failure` with two of six jobs green. Two of those conditions were then
-tested and failed, so the honest status is `FAIL — REMOTE CI RUN #1`.
+The first remediation round fixed four CI failures and the missing macOS job. The owner pushed its
+HEAD `ebda52d`, GitHub Actions run `36378384225` executed, and it concluded `failure` with **six of
+seven jobs green** - so that round's work is confirmed remotely, and one job is left.
 
-| Failure | Root cause, measured |
+| Run #2 job | Result |
 | --- | --- |
-| Rust (windows-latest) | `.gitattributes` has no rule for `*.ld`, so `core.autocrlf=true` smudged the checkout from the recorded LF bytes to CRLF and the fixture hash test compared different bytes |
-| Rust (ubuntu-latest) | No Tauri Linux system prerequisites on the runner; `glib-sys` fails at `pkg-config cannot find glib-2.0` before the tests run |
-| Generated output drift | `scripts/gen_desktop_icons.py --check` asserts byte equality against Pillow's compressed output, which is encoder-state dependent across OSes |
-| Dependency policy | `deny.toml` does not parse under `cargo-deny 0.20.2`: unsupported `[bans] highlight-warnings` key, and five `licenses.allow` entries are slash strings instead of SPDX |
-| (no job) | `05_ENGINEERING/06_CI_CD_BASELINE.md` requires a macOS core smoke on `main` push; the workflow has none |
+| `Rust (windows-latest)` | PASS - 104 tests |
+| `Rust (ubuntu-latest)` | PASS - 104 tests, desktop crate compiling |
+| `Desktop UI (windows-latest)` | PASS |
+| `Desktop UI (ubuntu-latest)` | PASS - 19 UI tests |
+| `macOS Core Smoke` | PASS - 87 tests, first execution |
+| `Dependency policy` | PASS - advisories / bans / licenses / sources ok |
+| `Generated output drift` | **FAIL** |
+
+The failing step is `drift/ipc bindings`. `scripts/check.py --only drift` regenerates the ts-rs
+bindings by running `cargo test -p firmwaresight-desktop`, which links the GTK stack, and the `drift`
+job - unlike the `rust` job - had no step installing the Tauri Linux prerequisites. Its log says
+`Package gobject-2.0 was not found in the pkg-config search path`, the same missing `.pc` class that
+killed `Rust (ubuntu-latest)` in Run #1 at `glib-sys`.
+
+**This is a CI job provisioning duplication defect.** Not a Core defect, not a ts-rs contract defect,
+not generated drift, not a Tauri source defect.
 
 ## Scope
 
-Ten ordered phases: governance truth sync; fixture text policy; pixel-based icon drift check;
-cargo-deny schema and real license run; Ubuntu prerequisites; macOS core smoke; full local
-regression; one real desktop window launch; evidence refresh; small local commits, then stop.
-
-Authorized within this task: installing `cargo-deny@0.20.2`, running the four `cargo deny` checks,
-and starting the desktop app once in the current user session with `--features custom-protocol`.
+One workflow file, plus the governance and evidence record of Run #2. Minimal change, no abstraction:
+the already-remotely-proven apt block is copied into the `drift` job rather than extracted into a new
+script, because only two jobs need it.
 
 ## Explicitly out of scope
 
 - Pushing. The owner pushes; the coding side reports the HEAD and waits.
-- `v0.6.0`, `P0 PASS`, `G1 PASS`, `REMOTE CI PASS` written before a new run exists.
-- P1 analyzer, Compare, full Gate, Release Bundle, new artifact formats, cloud, accounts, AI,
-  telemetry, updater, SBOM/CVE, SQLx, wgpu, a fifth Phase-0 library crate, UI redesign.
-- `SHA256SUMS` (frozen v0.5.1 package integrity record), `V0_VALIDATION/**`, `ADR-0020`, design
-  tokens and the icon design, and the fixture hash assertion itself.
-- Deleting a failing test, lowering an assertion, batch-regenerating goldens, or turning a `FAIL`
-  into a `SKIPPED` by editing `scripts/check.py`.
+- Writing `REMOTE CI PASS`, `P0 PASS`, `G1 PASS`, or generating `v0.6.0`.
+- Any product source: `crates/**`, `apps/cli/**`, `apps/desktop/**`, `fixtures/**`, `golden/**`,
+  `schemas/**`, `scripts/check.py`, `deny.toml`, `Cargo.lock`, `pnpm-lock.yaml`,
+  `assets/design-tokens.json`, `V0_VALIDATION/**`, `SHA256SUMS`.
+- A fifth Phase-0 library crate, moving IPC DTOs into Core, changing the Tauri version, the gtk-rs
+  line or Cargo features, or a dependency-architecture migration.
+- Weakening the drift check: deleting the desktop test command, dropping the IPC bindings step,
+  marking it optional, moving the job to Windows, `continue-on-error`, `if: false`, or turning the
+  failure into a warning.
+- Removing the macOS job, the Linux CI or the cargo-deny job; changing workflow triggers or
+  `permissions: contents: read`.
+- Chasing the 23 duplicate-version warnings or upgrading dependencies to reduce noise.
+- Re-running the desktop smoke for a third observation when no runtime source changed.
 
 ## Where this task stands
 
-Phases 1–9 are complete locally; phase 10 (small commits, then stop) ends here.
-
 ```text
 Remote CI run #1:    FAILURE at f9b8ccb — retained as history
-Remediation:         LOCAL FIX COMPLETE (five CI causes + one defect the window found)
+Remote CI run #2:    FAILURE at ebda52d — 6 of 7 jobs PASS; latest_remote_ci
+Round 1 remediation: CONFIRMED REMOTELY (fixture bytes, Ubuntu Rust, icon semantics, deny, macOS)
+Round 2 fix:         drift job installs the proven prerequisites; workflow-only, 21 added lines
 Local gate:          PASS, 14/14 default steps, 0 SKIPPED mandatory steps
-Desktop smoke:       PASS on the shipped configuration, one Windows host
-Remote rerun:        REQUIRED AFTER THE OWNER PUSHES
+Desktop smoke:       PASS, carried forward — this round changes no runtime source
+Remote CI:           RUN #3 REQUIRED AFTER USER PUSH
 ```
 
-A sixth problem was found by the authorized desktop launch rather than by CI: the second artifact
-failed with `UNIQUE constraint failed: evidence.id`, because `evidence` carried a whole-table primary
-key while `04_TECH/15` §4 declares `Build 1─N Evidence`. Migration `0002` rebuilds that table on
-`(build_id, id)`, schema version is now 2, and the Rust test count moved from 102 to 104. The defect,
-its failing tests and the real-database upgrade are in
-`P0_TECHNICAL_VALIDATION/P0_DESKTOP_SMOKE_REPORT.md`.
+Two facts recorded honestly rather than smoothed over. The Linux provisioning step is **NOT LOCALLY
+EXECUTED** - this host has no Ubuntu; the evidence chain is the same runner family, the same package
+list already proven remotely, and the same compile requirement. And while writing this round's
+records, four values in `BASELINE.yaml` were found to be silently truncated by YAML's inline-comment
+rule (an unquoted `Run #2` ends the scalar at the `#`) - a documentation defect introduced by the
+previous round's commit, fixed by quoting them in this one.
 
-Two advisories are reported as an **architecture conflict for the architect**, not as work this task
-can finish: `RUSTSEC-2024-0429` (`glib 0.18.5`) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`)
-arrive through the gtk-rs `0.18` line that Tauri `2.12.0` requires, and `cargo update -p glib
---precise 0.20.0` fails against `gtk = "^0.18"`. Closing them means changing the frozen desktop
-dependency architecture, which is an ADR.
+## Advisory disposition from the architect
+
+`RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
+unmaintained) are **accepted as explicit P0 transitive risk, not silent suppression, and do not block
+P0 promotion** on current evidence. They stay recorded in `P0_DEPENDENCY_REPORT.md`,
+`P0_KNOWN_LIMITATIONS.md` and `deny.toml`'s reasons, with five revisit triggers. No architecture ADR is
+required, because no architecture choice changed; an ADR becomes necessary if Tauri is replaced,
+dependencies are forked, or the frozen desktop dependency family changes.
 
 ## Gate status
 
 ```text
 Formal G1: NOT CLAIMED  (g1_requires V0_PASS + P0_PASS; V0 still unvalidated)
 P1:        NOT AUTHORIZED
-P0:        FAIL — REMOTE CI RUN #1; remediation LOCAL FIX COMPLETE; rerun REQUIRED
+P0:        FAIL — REMOTE CI RUN #2; remediation round 2 LOCAL FIX COMPLETE; RUN #3 REQUIRED
 ```
 
 ## Version gate
@@ -98,5 +114,12 @@ external participants completed `0 / 8 minimum`; Batch A target `0 / 4–5`. The
 absence of real human participants, not a technical failure. `V0_VALIDATION/` and every Batch A
 recruitment artifact stay intact and unmodified.
 
+The first remediation round's own findings stay standing: the storage evidence key that needed
+migration `0002` (schema version 2, Rust 102 -> 104) was found by the authorized window launch, and
+`P0_DESKTOP_SMOKE_REPORT.md` remains its record, including the item it did not observe.
+
 Peak RSS stays `NOT MEASURED` with its reason in `P0_PERFORMANCE_REPORT.md`; it is recorded as a
 measurement gap, not a promotion blocker.
+
+Run #1's four red jobs stay published as failed history in `P0_CI_REPORT.md`; Run #2 does not erase
+them, and neither run's numbers are restated as better than they were.

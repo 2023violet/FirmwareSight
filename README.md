@@ -103,7 +103,7 @@ Continue **V0 only**:
 P0 was not authorized by this V0 execution. P0 was authorized separately, by the prompt preserved in
 `10_AUDIT/SOURCE_PROMPTS/README.md`, and has since been executed — see the P0 section below.
 
-## P0 Technical Vertical Slice — executed; remote CI run #1 failed; local remediation complete
+## P0 Technical Vertical Slice — executed; remote CI run #2 failed one job of seven
 
 The slice exists as source, not as a plan: a Rust workspace with exactly four Phase-0 library crates
 (`core`, `artifact`, `report`, `storage`), the `fwsight` CLI, a thin Tauri 2 desktop shell with a
@@ -125,18 +125,27 @@ Proof and limits live in `P0_TECHNICAL_VALIDATION/`:
 - `P0_IMPLEMENTATION_LOG.md` — every non-trivial engineering decision with its evidence;
 - `P0_EXECUTION_PROVENANCE.md` — start HEADs, environment, prompt SHA-256.
 
-Status is **`P0: FAIL — REMOTE CI RUN #1`, with `Remediation: LOCAL FIX COMPLETE` and
-`Remote rerun: REQUIRED`**. GitHub Actions run `36360310447` executed against `f9b8ccb` and reported
-`failure`: four jobs red (Rust on Windows and Ubuntu, Generated output drift, Dependency policy), two
-green (Desktop UI on both OSes). Each cause was reproduced with a command before being fixed, and the
-fixes are in the tree: a `.gitattributes` text policy so a checkout cannot change a fixture's bytes,
-icon drift judged by decoded pixels rather than by encoder bytes, a `deny.toml` that cargo-deny 0.20.2
-actually parses, Linux prerequisites on the Ubuntu job, and the macOS core smoke the CI baseline
-requires. The desktop window has also been opened and driven for real, which is what found a storage
-defect the tests had missed. Read `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` first.
+Status is **`P0: FAIL — REMOTE CI RUN #2` (6 of 7 jobs green), `Remediation round 2: LOCAL FIX
+COMPLETE`, `Remote: RUN #3 REQUIRED AFTER USER PUSH`**. Run `36360310447` on `f9b8ccb` had four jobs
+red (Rust on Windows and Ubuntu, Generated output drift, Dependency policy); the first remediation
+round fixed them and Run `36378384225` on that HEAD (`ebda52d`) came back **six of seven green** -
+Rust on Windows and Ubuntu at 104 tests each, both Desktop UI jobs, the macOS core smoke on its first
+execution, and the dependency policy with all four categories ok. Each original cause had been
+reproduced with a command before being changed: a `.gitattributes` text policy so a checkout cannot
+change a fixture's bytes, icon drift judged by decoded pixels rather than by encoder bytes, a
+`deny.toml` that cargo-deny 0.20.2 actually parses, Linux prerequisites on the Ubuntu job, and the
+macOS core smoke the CI baseline requires. The desktop window was also opened and driven for real,
+which is what found a storage defect the tests had missed.
 
-`LOCAL PASS` and `CI PASS` are kept as different claims throughout the pack: the remediation HEAD is
-unpushed, so nothing has been green in CI yet.
+The one failure left is not in the product. `Generated output drift` compiles `firmwaresight-desktop`
+to regenerate the ts-rs bindings, and only the `rust` job had been given the Tauri Linux
+prerequisites; the second round adds that step to the other job - 21 lines in one workflow file, no
+product source touched. Read `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md` first, and
+`P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` for the round before it.
+
+`LOCAL PASS` and `CI PASS` are kept as different claims throughout the pack, and CI has now answered
+some of them: the dependency policy, both Rust jobs, both frontend jobs and the macOS smoke are
+`REMOTE PASS`; the drift job is not green anywhere yet, and the round that fixes it is unpushed.
 
 The baseline therefore stays **v0.5.1**. `v0.6.0` is reserved for an unconditional P0 `PASS`, G1 is
 not claimed (V0 still has `0 / 8` external sessions), and P1 requires its own authorization prompt,

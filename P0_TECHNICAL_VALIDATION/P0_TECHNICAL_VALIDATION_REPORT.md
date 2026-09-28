@@ -12,36 +12,43 @@ last_updated: "2026-09-28"
 
 ## Status
 
-**P0 TECHNICAL VALIDATION: FAIL — REMOTE CI RUN #1. Remediation: LOCAL FIX COMPLETE. Remote rerun:
-REQUIRED.**
+**P0 TECHNICAL VALIDATION: FAIL — REMOTE CI RUN #2 (6 of 7 jobs green). Remediation round 2: LOCAL
+FIX COMPLETE. Remote: RUN #3 REQUIRED AFTER USER PUSH.**
 
 Not PASS, and therefore **`FirmwareSight_Project_Baseline_v0.6.0` is not delivered**. The unique
 baseline remains `v0.5.1`; `BASELINE.yaml` records the P0 track as `FAIL` with
-`remediation_state: ACTIVE`.
+`remediation_state: ROUND_2_LOCAL_FIX_COMPLETE`.
 
 The technical claim - that one headless Core produces the same facts for a CLI and a desktop
 through a typed IPC boundary, on real linker output, with the memory rule demonstrable and the
-size guard holding - is still proven by executed tests, and now proven on a physical display as
-well. What changed is that this report previously called three items "authorizations, not
+size guard holding - is still proven by executed tests, is now proven on a physical display as
+well, and is now proven on two operating systems plus a macOS core smoke by GitHub's own runners.
+What changed is that this report previously called three items "authorizations, not
 engineering unknowns". Two of them were then tested, and both failed: the checkout on Windows
 rewrote fixture bytes, and the dependency policy could not be parsed by the tool CI installs. The
 third - opening the window - found a real storage defect. Treating an untested assumption as a
 process formality was the error; the failures were in the code and the configuration, not in the
 authorization.
 
-## What the first remote run and the desktop launch exposed
+Run #2 narrowed the remainder to one thing, and it is not a product claim. Six of seven jobs are
+green, including all four the first round fixed. The seventh fails because a second CI job compiles
+the desktop crate on Linux without the system libraries the first job installs - a provisioning
+omission in the workflow, reproduced from Run #2's own log and fixed by giving that job the same
+step. Nothing about Core, the IPC contract, the parser, storage, the guard or the dependency policy
+is in question at this point.
+
+## What the two remote runs and the desktop launch exposed
 
 | # | Item | Outcome |
 | --- | --- | --- |
-| C1 | The CI workflow executes | Ran as `36360310447` on `f9b8ccb`: 2 of 6 jobs green. Four root causes reproduced and fixed locally; the rerun is owed |
-| C2 | `cargo deny` executes | Ran in CI and failed on `deny.toml` itself. Now parses under 0.20.2 and passes locally with all four checks; two advisories remain that cannot be resolved inside the frozen Tauri tree, and that conflict is reported rather than fixed by moving a dependency |
-| C3 | The desktop window opens | Opened twice on Windows 10 with WebView2 153.0.4234.48. The first pass failed on a second analysis; the defect is fixed, regression-tested and re-verified in the window |
-| C4 | (not a condition - a gap) macOS core smoke | The CI baseline requires it and the workflow had none. Added as `--only core-smoke`, runnable locally, 3/3 with 87 of the 104 Rust tests (the other 17 belong to the desktop crate, which needs a platform's WebView stack to build) |
+| C1 | The CI workflow executes | Run #1 (`36360310447`, `f9b8ccb`): 2 of 6 green. Run #2 (`36378384225`, `ebda52d`): **6 of 7 green**. The four root causes are closed remotely; the residue is a second job missing the same provisioning step |
+| C2 | `cargo deny` executes | Ran in CI and failed on `deny.toml` itself in Run #1. **`Dependency policy` PASSED in Run #2**: `advisories ok, bans ok, licenses ok, sources ok`. The two advisories that cannot be resolved inside the frozen Tauri tree are now the architect's recorded acceptance, not an open conflict |
+| C3 | The desktop window opens | Opened twice on Windows 10 with WebView2 153.0.4234.48. The first pass failed on a second analysis; the defect is fixed, regression-tested and re-verified in the window. Carried forward - round 2 changes no runtime source |
+| C4 | (not a condition - a gap) macOS core smoke | Added as `--only core-smoke`. **`macOS Core Smoke` PASSED in Run #2**, 3/3 steps, 87 of the 104 Rust tests, first execution of the job |
 | C5 | Peak RSS | Still `NOT MEASURED`, with its reason. A measurement gap, not a promotion blocker |
 
-Each of C1-C4 is now closed by a change plus a command, and each is documented in
-`P0_CI_REMEDIATION_REPORT.md` and `P0_DESKTOP_SMOKE_REPORT.md`. None of them is closed by wording:
-the remote verdict belongs to a run that has not happened yet.
+C1 is the only item still open, and it is open because a runner has to execute the new step - not
+because a check is failing in this tree.
 
 ## What was proven
 
@@ -132,14 +139,16 @@ Four findings worth naming because they are the kind that usually hide:
 Do not open G1. Do not start P1.
 
 P0's own claim is "the architecture can carry the product", and on the evidence above it can. But the
-status is `FAIL`, not `CONDITIONAL_PASS`: the first remote run measured four red jobs, and the desktop
-launch measured a storage defect, so what is outstanding is no longer "who ran the check" - it is a
-rerun that has not happened yet.
+status is `FAIL`, not `CONDITIONAL_PASS` and not `PASS`: Run #1 measured four red jobs, the desktop
+launch measured a storage defect, and Run #2 then measured six of seven green with one CI provisioning
+step missing. What is outstanding is no longer "who ran the check" - the checks have run, twice, on
+three platforms - and it is not the architecture either. It is one remote job that has not yet executed
+the step that closes its own failure.
 
-To convert this to PASS, in order: the owner pushes the remediation commits; a new Actions run on that
-head shows Rust on Windows and Linux, Desktop UI on both, generated-output drift, dependency policy and
-the macOS core smoke all green; and the architect signs the promotion. A green rerun of `f9b8ccb` would
-prove nothing, because the fixes are in the new commits.
+To convert this to PASS, in order: the owner pushes the round-2 HEAD; Run #3 on that head shows
+`Rust (windows-latest)`, `Rust (ubuntu-latest)`, both `Desktop UI` jobs, `Generated output drift`,
+`Dependency policy` and `macOS Core Smoke` all green; and the architect signs the promotion. A green
+rerun of `ebda52d` would prove nothing, because the fix is in the commits that follow it.
 
 ## Boundary kept with V0
 
@@ -153,4 +162,6 @@ prototype screens were re-examined.
 `P0_ARCHITECTURE_CHECK.md`, `P0_FIXTURE_REGISTER.md`, `P0_PARSER_RESULTS.md`,
 `P0_MEMORY_ACCOUNTING_REPORT.md`, `P0_CLI_PARITY_REPORT.md`, `P0_IPC_PARITY_REPORT.md`,
 `P0_STORAGE_REPORT.md`, `P0_PERFORMANCE_REPORT.md`, `P0_SECURITY_INPUT_REPORT.md`,
-`P0_DEPENDENCY_REPORT.md`, `P0_CI_REPORT.md`, `P0_KNOWN_LIMITATIONS.md`, `P0_EXIT_CHECKLIST.md`.
+`P0_DEPENDENCY_REPORT.md`, `P0_CI_REPORT.md`, `P0_KNOWN_LIMITATIONS.md`, `P0_EXIT_CHECKLIST.md`,
+plus the four this track added: `P0_DESIGN_CHECKLIST.md`, `P0_CI_REMEDIATION_REPORT.md`,
+`P0_DESKTOP_SMOKE_REPORT.md` and `P0_CI_RUN_2_CLOSURE_REPORT.md`.

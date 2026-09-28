@@ -123,7 +123,7 @@ Final status and what it does not mean:
 
 ---
 
-# P0 CI closure remediation — added 2026-09-28
+# P0 CI closure remediation — added 2026-09-28 (superseded on the same date by the Run #2 section below)
 
 Authorization:
 
@@ -136,10 +136,10 @@ Authorization:
 
 Status decision, taken from measured results rather than from the previous round's wording:
 
-- P0 is now `FAIL — REMOTE CI RUN #1` with remediation `LOCAL FIX COMPLETE`.
-  `CONDITIONAL_PASS (LOCAL)` is not kept: the conditions that made it conditional were tested, and two
-  of them failed. "CI has never run" and "cargo deny has never run" are no longer true statements about
-  this repository.
+- P0 became `FAIL — REMOTE CI RUN #1` with remediation `LOCAL FIX COMPLETE`, a state this section
+  records and the next section supersedes. `CONDITIONAL_PASS (LOCAL)` was not kept: the conditions
+  that made it conditional were tested, and two of them failed. "CI has never run" and "cargo deny has
+  never run" stopped being true statements about this repository at that point.
 - The distinction this preserves is between what was proven (Core facts, memory accounting, the
   typed IPC boundary, storage migrations, determinism — 104 Rust and 19 UI tests) and what the
   first cross-platform run exposed (checkout text policy, runner provisioning, encoder-byte
@@ -197,3 +197,72 @@ Decisions the remediation itself had to make:
   rather than a fifth crate or a copy of the test list. It is locally usable and locally green
   (3/3), and it runs on `main` pushes but not on pull requests, which is what
   `05_ENGINEERING/06_CI_CD_BASELINE.md` requires.
+
+---
+
+# Remote CI Run #2 and its final drift closure — added 2026-09-28
+
+Authorization:
+
+- The architect prompt *FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0 (Architect
+  Reviewed)*. Supplied inline, so there is no stored file to hash; the repository's copy of its terms
+  is this section plus `P0_CI_RUN_2_CLOSURE_REPORT.md`.
+- It authorizes a workflow-scoped fix and the governance record of Run #2. It does not authorize a
+  push, does not permit `REMOTE CI PASS` from the coding side, and is explicitly not an architecture
+  redesign, not P0 promotion and not P1.
+
+Status decision, from the run rather than from the previous round's report:
+
+- P0 is now `FAIL — REMOTE CI RUN #2`. Run `36378384225` on head `ebda52d` concluded `failure` with
+  **six of seven jobs green**. `last_remote_ci` points at it; `previous_remote_ci` keeps Run #1 as
+  historical failure evidence instead of overwriting it.
+- The first remediation round is **confirmed remotely**: fixture byte identity, Ubuntu Rust
+  prerequisites, the pixel-based icon check (its Linux log line reads
+  `desktop icons are current (pixel-identical to this build).`), the cargo-deny policy, the macOS core
+  smoke and both frontend matrix jobs. 104 Rust tests ran green on both Windows and Ubuntu, and 19 UI
+  tests on Ubuntu.
+- The one red job is classified as a **CI job provisioning duplication defect**, not a product
+  defect: `drift` regenerates ts-rs bindings with `cargo test -p firmwaresight-desktop` and so needs
+  the same GTK system libraries the `rust` job installs, but only the `rust` job was given the step.
+  `gobject-sys` failed at `pkg-config` exactly where Run #1's `glib-sys` did.
+
+Decisions taken:
+
+- **Copy the proven apt block rather than abstracting it.** Two jobs need ten lines. A shared
+  `scripts/*.sh` would add a portability surface and a testing obligation, and the round's target is
+  the smallest reversible change that closes a measured failure. The duplication is a known cost,
+  stated here, not hidden; if a third job needs it the argument changes.
+- **The drift check was not weakened.** It still runs all five steps, still invokes
+  `cargo test -p firmwaresight-desktop`, and still asserts with `git diff --exit-code`. The
+  alternatives the prompt forbids - dropping the IPC step, moving the job to Windows,
+  `continue-on-error`, `if: false`, reclassifying the failure as a warning - were not used, and none
+  of them would have produced the evidence the baseline asks for.
+- **No product source changed.** The diff is 21 added lines in one workflow file. Fixtures, goldens,
+  schemas, `deny.toml`, both lockfiles, `scripts/check.py` and the design tokens are untouched, so the
+  desktop smoke evidence is carried forward instead of re-performed for noise.
+- **`BASELINE.yaml` quoting fixed.** Four values containing `Run #2` / `Run #1` were being silently
+  truncated when the file is parsed, because an unquoted ` #` starts a YAML comment; the earlier
+  `remote_state` line had the same defect. They are quoted now and re-read with `yaml.safe_load` to
+  confirm the parsed value equals the intended one.
+
+Architect disposition on the two RustSec advisories, recorded as the architect's decision rather than
+invented here:
+
+- `RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
+  unmaintained) are **accepted as explicit P0 transitive risk, not silent suppression**, and **do not
+  block P0 Technical Foundation promotion** on current evidence: both are recorded with reasons in
+  `deny.toml`, Run #2 shows all four cargo-deny categories passing, no compatible upgrade exists
+  inside the `gtk-rs 0.18` / Tauri 2.12 line, no first-party code calls the affected API, and this
+  phase is a technical foundation rather than a GA security certification.
+- Revisit triggers: a compatible fixed Tauri 2.x / gtk-rs line becomes available; the advisory's
+  classification or severity materially changes; first-party code begins exercising the affected API;
+  the P5 Productization dependency/security review; a Linux commercial release-candidate security
+  review.
+- **No architecture ADR is required by this decision, because no architecture choice changed.** An ADR
+  becomes necessary if Tauri is replaced, dependencies are forked, or the frozen desktop dependency
+  family changes. `unused-ignored-advisory` stays at its default `warn`, so an ignore entry that stops
+  matching reports itself.
+
+Unchanged: baseline stays `0.5.1`, `v0.6.0` is not generated, G1 is not claimed, V0 remains
+`DEFERRED / NOT YET EVIDENCE-VALIDATED` at `0 / 8`, `ADR-0020` is untouched, P1 is not started, peak
+RSS stays `NOT MEASURED` with its reason, and `SHA256SUMS` stays the frozen v0.5.1 package record.

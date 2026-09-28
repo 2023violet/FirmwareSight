@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.5.1
   date: 2026-09-28
-  status: P0_FAIL_REMOTE_CI_RUN_1_REMEDIATION_LOCAL_FIX_COMPLETE_REMOTE_RERUN_REQUIRED_V0_DEFERRED_UNVALIDATED
+  status: P0_FAIL_REMOTE_CI_RUN_2_ROUND_2_LOCAL_FIX_COMPLETE_RUN_3_REQUIRED_V0_DEFERRED_UNVALIDATED
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_DEFERRED_P0_FAIL_REMOTE_CI_RUN_1
+  current_gate: G0_PASS_V0_DEFERRED_P0_FAIL_REMOTE_CI_RUN_2
   next_authorizable_tracks:
     - V0_workflow_prototype_validation
     - P0_technical_vertical_slice
@@ -93,10 +93,10 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# Open again on 2026-09-28: remote CI Run #1 failed four jobs on the tree P0 delivered, so the
-# active work is the architect-issued CI closure remediation, not new product scope.
-# AGENTS.md 1 still forbids inventing business functions beyond that prompt.
-active_task: P0_CI_CLOSURE_REMEDIATION
+# Still open on 2026-09-28: Run #2 on the remediation HEAD left one failing job, and the
+# architect issued a second closure round for it. The work is that prompt, not new product scope;
+# AGENTS.md 1 still forbids inventing business functions beyond it.
+active_task: P0_CI_RUN_2_FINAL_DRIFT_CLOSURE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -130,58 +130,86 @@ p0_execution:
   # and changes documentation only; see P0_EXECUTION_PROVENANCE.md "Final validated HEAD".
   final_validated_head: 65cb2dc
   commits_to_validated_tree: 6
-  # Superseded on 2026-09-28 by the first real remote run: the push happened, and the gate that
-  # passed here failed there. See `last_remote_ci` and P0_CI_REPORT.md.
-  remote_state: pushed as f9b8ccb; Remote CI Run #1 executed and concluded failure
-  # FAIL, not CONDITIONAL_PASS: four of six CI jobs failed on the tree this file describes. A red
-  # remote run is a measured result, so the local-only qualifier no longer applies.
+  # Run #1's four failures were fixed and the fixes were then measured remotely: Run #2 on the
+  # remediation HEAD passed six of seven jobs. The one remaining failure is CI provisioning in a
+  # second job, not product source. See `last_remote_ci` and P0_CI_RUN_2_CLOSURE_REPORT.md.
+  remote_state: "pushed as ebda52d; Remote CI Run #2 executed and concluded failure (6 of 7 jobs green)"
+  # FAIL, not CONDITIONAL_PASS: a red remote run is a measured result. The qualifier that would make
+  # it conditional is that the cause is now a workflow provisioning omission, not a product defect.
   status: FAIL
   evidence_status: FAIL
-  remediation_state: LOCAL_FIX_COMPLETE
+  remediation_state: ROUND_2_LOCAL_FIX_COMPLETE
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
+  run_2_closure_prompt: "FirmwareSight P0 Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed, supplied inline)"
   remediation:
     # Fixes live in the local commit range that starts after this base head; the range is named by
     # the delivered report, because the commit that records the range is itself inside it.
     base_head: f9b8ccb
-    remote_rerun: REQUIRED_AFTER_USER_PUSH
+    round_1_confirmed_remotely:
+      - fixture text policy, so a checkout cannot change committed evidence bytes
+      - Ubuntu Rust Tauri system prerequisites, with clippy coverage kept
+      - pixel-based desktop icon drift check, passing on Linux
+      - cargo-deny policy executing with all four categories ok
+      - macOS core smoke job, green on its first execution
+      - both frontend matrix jobs
+    round_1_found_locally:
+      - storage evidence key: Build 1-N Evidence required migration 0002, schema version 2
+      - the desktop window opened and driven on the shipping configuration
+    round_2_remaining_defect: Generated output drift - the drift job compiles firmwaresight-desktop to regenerate ts-rs bindings but had no Linux prerequisites step
+    round_2_fix: "the apt block Run #2 already proved on the rust job, copied into the drift job; 21 added lines in .github/workflows/p0-check.yml and no other file"
+    remote_rerun: RUN_3_REQUIRED_AFTER_USER_PUSH
     ci_pass_claim_written_by_coding_agent: false
     local_gate: 14/14 default steps with 0 skipped mandatory steps, plus 3/3 under --only core-smoke
-    desktop_smoke: PASS in the shipping configuration, one Windows 10 host at 100% scaling
+    desktop_smoke: PASS carried forward; round 2 changes no runtime source, so the window was not reopened for noise
     schema_version_after_remediation: 2
+    # The architect's risk acceptance, recorded rather than inferred.
+    advisory_disposition: ACCEPTED_AS_EXPLICIT_P0_TRANSITIVE_RISK_NOT_A_PROMOTION_BLOCKER
     architecture_conflicts:
-      - RUSTSEC-2024-0429 glib 0.18.5 unsound: reached through the gtk-rs 0.18 line Tauri 2.12.0 requires; cargo update -p glib --precise 0.20.0 fails against gtk = "^0.18"; needs an ADR, not a CI fix
-      - RUSTSEC-2024-0370 proc-macro-error 1.0.4 unmaintained: host-only build dependency behind the same pin; advisory states no safe upgrade exists
+      - RUSTSEC-2024-0429 glib 0.18.5 unsound: reached through the gtk-rs 0.18 line Tauri 2.12.0 requires; cargo update -p glib --precise 0.20.0 fails against gtk = "^0.18"; accepted with five revisit triggers, and no ADR because this round changes no architecture choice
+      - RUSTSEC-2024-0370 proc-macro-error 1.0.4 unmaintained: host-only build dependency behind the same pin; the advisory itself states no safe upgrade exists; accepted on the same basis
   last_remote_ci:
+    run_id: 36378384225
+    head: ebda52d63f22ff9f25786c1d80e53f5193cff183
+    event: push
+    conclusion: failure
+    passed_jobs: ["Desktop UI (windows-latest)", "Rust (windows-latest)", "macOS Core Smoke", "Dependency policy", "Desktop UI (ubuntu-latest)", "Rust (ubuntu-latest)"]
+    failed_jobs: ["Generated output drift"]
+    log: P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md
+  previous_remote_ci:
     run_id: 36360310447
     head: f9b8ccba7d9326ac397675602beb3a7e9c3bcd02
     event: push
     conclusion: failure
     passed_jobs: ["Desktop UI (windows-latest)", "Desktop UI (ubuntu-latest)"]
     failed_jobs: ["Rust (windows-latest)", "Rust (ubuntu-latest)", "Generated output drift", "Dependency policy"]
-    log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
+    retained_as: historical failure evidence in P0_CI_REPORT.md, not relabeled or removed
   closed: 2026-09-28
   allowed_final_statuses: [PASS, CONDITIONAL_PASS, FAIL, BLOCKED]
   library_crate_budget: 4
   library_crates_built: 4
   gate_command: python scripts/check.py
-  gate_result: 14/14 locally with cargo-deny executing (no SKIPPED mandatory step), plus 3/3 --only core-smoke; 2 of 6 CI jobs green on f9b8ccb, remediation HEAD unpushed
+  gate_result: 14/14 locally with cargo-deny executing (no SKIPPED mandatory step), plus 3/3 --only core-smoke; remotely 6 of 7 jobs green on ebda52d
   tests: { rust: 104, ui: 19 }
-  # What still separates this tree from a P0 PASS. The window launch and the cargo-deny execution
-  # were blockers and are now local facts; the only one left is a remote run on these files.
+  # One condition left, and it is remote by definition: a run on a HEAD that does not exist yet.
   promotion_conditions:
-    - Remote CI green on the remediation HEAD (Rust windows + ubuntu, Desktop UI, drift, deny, macOS core smoke)
-  # Satisfied locally during the remediation round, kept visible so a later reader does not re-ask
-  # them as open questions: the desktop window opened once on a real display in the shipping
-  # configuration, and cargo-deny executes as a real gate step rather than a skipped one.
-  promotion_conditions_met_locally:
-    - Desktop window opened and driven on the shipping configuration (P0_DESKTOP_SMOKE_REPORT.md)
-    - cargo-deny 0.20.2 executed with exit 0 over licenses, bans, sources and advisories
+    - Remote CI green on the next remediation HEAD (Rust windows + ubuntu, both Desktop UI jobs, Generated output drift, Dependency policy, macOS core smoke)
+  # Answered by Run #2 on the real runners. Kept visible so a later reader does not re-ask them,
+  # and listed per job rather than as a single "CI improved" claim.
+  satisfied_conditions:
+    - cargo-deny remote PASS, advisories / bans / licenses / sources all ok
+    - desktop real-window smoke PASS (P0_DESKTOP_SMOKE_REPORT.md)
+    - Rust (windows-latest) remote PASS, 104 tests
+    - Rust (ubuntu-latest) remote PASS, 104 tests with firmwaresight-desktop compiling
+    - Desktop UI (windows-latest) remote PASS
+    - Desktop UI (ubuntu-latest) remote PASS, 19 UI tests
+    - macOS Core Smoke remote PASS, 87 tests, first execution of the job
+    - Generated output drift: design tokens and desktop icons remote PASS, including on Linux
   # Recorded separately because the P0 prompt accepted an unmeasured number with a stated reason.
   # This is a measurement gap, not a promotion blocker.
   non_blocking_measurement_gaps:
     - peak RSS is NOT MEASURED; reason and the measurements that do exist are in P0_PERFORMANCE_REPORT.md
   push_authorized: false
-  push_performed_by: repository owner, who pushed f9b8ccb and triggered Run #1
+  push_performed_by: "repository owner, who pushed f9b8ccb (Run #1) and ebda52d (Run #2)"
   remote_state_changed: true
   baseline_version_after_p0: 0.5.1
   target_baseline_on_pass: 0.6.0

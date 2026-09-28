@@ -135,3 +135,26 @@ against contents no different from its own. The documentation commits that follo
 the gate reads - the drift group regenerates bindings, tokens and icons, and every one of those is
 committed at or before `ff9b34a` - and the two reports they add cite the commands executed above, not
 a rerun.
+
+## Run #2 closure round (2026-09-28)
+
+Authorization: *FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0*, supplied inline, so
+there is no stored file to hash; its terms are in `.ai/DECISIONS.md` and
+`P0_CI_RUN_2_CLOSURE_REPORT.md`.
+
+| Field | Value |
+| --- | --- |
+| Start HEAD, local | `ebda52d63f22ff9f25786c1d80e53f5193cff183` |
+| origin/main at preflight | the same SHA, after `git fetch --prune` - no delta to absorb |
+| Working tree at preflight | `git status --short` empty; one worktree; no user modifications at risk |
+| Run being remediated | `36378384225`, event `push`, head `ebda52d`, conclusion `failure`, 6 of 7 jobs green |
+| How the run was read | `gh run view 36378384225 --repo 2023violet/FirmwareSight --json …,jobs` and `gh run view --job 108788787601 --log`, not from a report in this repository |
+| Environment change | none. No tool installed, no dependency added, no manifest touched |
+| Files changed | `.github/workflows/p0-check.yml` (21 added lines) plus governance and evidence documents |
+| Validated source tree | `fe37847` - the commit carrying the workflow fix. `python scripts/check.py` -> 14/14, exit 0, zero `SKIPPED`; `--only core-smoke` -> 3/3; `cargo test --workspace` -> 104 passed / 0 failed; UI `Tests 19 passed (19)` |
+| Not executed locally | the apt block itself - this host has no Ubuntu. The proven remotely-identical package list is the reason the change is expected to work, and Run #3 is the reason it would be known |
+| Desktop launch | not repeated. No runtime source changed, so the previous round's evidence is carried forward |
+| Push | not performed. The owner pushes; this round writes no `REMOTE CI PASS` |
+
+`fe37847` is named as the validated source tree in the same sense as `65cb2dc` and `ff9b34a`: the gate
+ran against contents equal to it. The documentation commits that follow change no file the gate reads.

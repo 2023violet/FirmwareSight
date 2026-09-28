@@ -10,6 +10,51 @@ last_updated: "2026-09-28"
 
 # Changelog
 
+## Unreleased — P0 remote CI Run #2 and its final drift closure (2026-09-28)
+
+Authorization: *FirmwareSight P0 — Remote CI Run #2 Final Drift Closure v1.0*. Target
+`LOCAL FIX COMPLETE / READY FOR REMOTE CI RUN #3`. Baseline stays `0.5.1`.
+
+The first remediation round's HEAD `ebda52d` was pushed and ran as `36378384225`. It concluded
+`failure` with **six of seven jobs green**, which closes Run #1's four causes remotely:
+
+- `Rust (windows-latest)` and `Rust (ubuntu-latest)` both passed 5/5 steps at **104 tests**, the
+  Ubuntu one compiling `firmwaresight-desktop` — the fixture text policy and the Linux prerequisites
+  are therefore proven on GitHub's runners, not only on this machine.
+- `Desktop UI (ubuntu-latest)` passed with `Tests 19 passed (19)`.
+- `macOS Core Smoke` passed 3/3 at **87 tests**, its first execution ever.
+- `Dependency policy` passed: `advisories ok, bans ok, licenses ok, sources ok`.
+- `drift/desktop icons` passed on Linux printing
+  `desktop icons are current (pixel-identical to this build).` — the evidence an encoder-byte
+  assertion could never produce.
+
+One job stayed red, and the cause is this repository's own omission rather than the product's: the
+`drift` gate regenerates ts-rs bindings with `cargo test -p firmwaresight-desktop`, which links the
+GTK stack, and only the `rust` job had been given the prerequisites. Its log reads
+`Package gobject-2.0 was not found in the pkg-config search path`. Classified as a **CI job
+provisioning duplication defect**.
+
+- Fix: the already-remotely-proven apt block, copied into the `drift` job. 21 added lines in
+  `.github/workflows/p0-check.yml`, and nothing else. No product source, fixture, golden, schema,
+  `deny.toml`, lockfile or `scripts/check.py` change; no `continue-on-error`, skip, trigger or
+  permission change; the drift job still runs all five of its steps.
+- Abstracting the ten apt lines into a script was considered and rejected: two jobs need it, and a
+  shell portability plus testing surface is not a smaller change.
+- The desktop smoke was not repeated. Round 2 changes no runtime source, so
+  `P0_DESKTOP_SMOKE_REPORT.md` is carried forward.
+- `Linux provisioning itself = NOT LOCALLY EXECUTED`: this host has no Ubuntu. The evidence chain is
+  the same runner family, the same package list already proven remotely and the same compile
+  requirement; Run #3 gives the verdict.
+- **Architect disposition recorded:** `RUSTSEC-2024-0429` and `RUSTSEC-2024-0370` are accepted as
+  explicit P0 transitive risk, not silent suppression, and do not block P0 promotion, with five
+  revisit triggers. No architecture ADR is required because no architecture choice changed.
+- Fixed while writing this round's record: four `BASELINE.yaml` values containing `Run #1` / `Run #2`
+  were being silently truncated at the `#` by YAML's inline-comment rule. They are quoted now and the
+  parsed values were re-read to confirm.
+- New document: `P0_TECHNICAL_VALIDATION/P0_CI_RUN_2_CLOSURE_REPORT.md`; the pack is now 22 files.
+- Status: `FAIL — REMOTE CI RUN #2`, remediation round 2 `LOCAL FIX COMPLETE`, `RUN #3 REQUIRED`. G1
+  is not claimed, V0 remains `0 / 8`, P1 is not authorized, `v0.6.0` is not generated.
+
 ## Unreleased — P0 CI closure remediation (2026-09-28)
 
 Authorization: the architect prompt *FirmwareSight P0 — CI Closure / Cross-Platform Reproducibility
@@ -53,9 +98,8 @@ rather than rewritten.
   would change the frozen desktop dependency architecture, which needs an ADR.
 - New documents: `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` and
   `P0_TECHNICAL_VALIDATION/P0_DESKTOP_SMOKE_REPORT.md`; the pack is now 21 files.
-- **P0 status after this round: `FAIL — REMOTE CI RUN #1` with remediation `LOCAL FIX COMPLETE`.**
-  The remediation HEAD is unpushed, so nothing is green in CI yet; `REMOTE CI PASS` is not written
-  here. G1 is still not claimed, V0 still `0 / 8`, P1 still not authorized.
+- Status as that round closed: the remediation HEAD was still unpushed, so nothing was green in CI
+  yet, and `REMOTE CI PASS` was not written. The entry above this one records what the push measured. G1 is still not claimed, V0 still `0 / 8`, P1 still not authorized.
 
 ## Unreleased — P0 Technical Vertical Slice executed (2026-09-28)
 
