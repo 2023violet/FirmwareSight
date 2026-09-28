@@ -11,6 +11,15 @@ Usage:
     python scripts/gen_desktop_icons.py            # write the set
     python scripts/gen_desktop_icons.py --check    # verify it exists and is current (CI)
 
+`--check` compares decoded pixels, not file bytes. A PNG or ICO is a container whose contents
+depend on the encoder that wrote it: zlib version, filter heuristics and `optimize` all change the
+bytes while the picture stays the same. Measured on this mark, across `optimize=True`,
+`optimize=False` and `compress_level=1`, every size produced a different SHA-256 while the decoded
+RGBA content produced exactly one value per size. Asserting byte equality therefore asks every
+platform to reproduce one specific encoder's internal decisions, which is why CI Run #1 reported
+`128x128.png`, `128x128@2x.png` and `icon.ico` as stale on Linux while the pixels were identical -
+and why the two files it did not flag were only accidentally in agreement.
+
 Deterministic: fixed geometry, no text rendering, no timestamps in the PNG bytes.
 """
 
@@ -100,26 +109,89 @@ def to_ico(images: list[Image.Image]) -> bytes:
     return buffer.getvalue()
 
 
+def read_frames(data: bytes) -> dict[tuple[int, int], bytes] | None:
+    """Decode an image file into raw RGBA frames keyed by pixel size.
+
+    Returns None when the bytes are not a readable image. An ICO is a container of frames, so it
+    decodes to several entries; every other format here decodes to one.
+    """
+    from io import BytesIO
+
+    try:
+        image = Image.open(BytesIO(data))
+    except Exception as exc:  # unreadable asset is a drift failure, not a traceback
+        print(f"  cannot decode an icon file ({exc})", file=sys.stderr)
+        return None
+
+    frames: dict[tuple[int, int], bytes] = {}
+    ico = getattr(image, "ico", None)
+    if ico is not None:
+        for size in sorted(ico.sizes()):
+            frames[size] = ico.getimage(size).convert("RGBA").tobytes()
+    else:
+        frames[(image.width, image.height)] = image.convert("RGBA").tobytes()
+    return frames
+
+
+def drift_reasons(committed: bytes, generated: bytes, required: set[tuple[int, int]]) -> list[str]:
+    """Semantic differences between a committed asset and the one this build renders."""
+    left = read_frames(committed)
+    right = read_frames(generated)
+    if left is None or right is None:
+        return ["undecodable"]
+
+    reasons: list[str] = []
+    missing = required - set(right)
+    if missing:
+        reasons.append("generated set is missing frame(s): " + frame_names(missing))
+    for size in sorted(set(right) - set(left)):
+        reasons.append(f"missing frame {frame_names({size})}")
+    for size in sorted(set(left) - set(right)):
+        reasons.append(f"unexpected frame {frame_names({size})}")
+    for size in sorted(set(left) & set(right)):
+        if left[size] != right[size]:
+            reasons.append(f"pixel content differs at {size[0]}x{size[1]}")
+    return reasons
+
+
+def frame_names(sizes: set[tuple[int, int]]) -> str:
+    return ", ".join(f"{w}x{h}" for w, h in sorted(sizes)) or "none"
+
+
+def png_size(data: bytes) -> tuple[int, int]:
+    from io import BytesIO
+
+    with Image.open(BytesIO(data)) as image:
+        return image.size
+
+
 def main(argv: list[str]) -> int:
     check = "--check" in argv[1:]
     files = build()
+    required_frames = {(size, size) for size in SIZES}
 
-    missing = [name for name, data in files.items() if not (OUT / name).exists()]
-    stale = [
-        name
-        for name, data in files.items()
-        if (OUT / name).exists() and (OUT / name).read_bytes() != data
-    ]
     if check:
-        if missing or stale:
+        problems: list[str] = []
+        for name, data in sorted(files.items()):
+            path = OUT / name
+            if not path.exists():
+                problems.append(f"{name}: missing")
+                continue
+            committed = path.read_bytes()
+            # An ICO must carry every frame the shell asks for; a PNG is identified by its size.
+            required = required_frames if name.endswith(".ico") else {png_size(data)}
+            reasons = drift_reasons(committed, data, required)
+            if reasons:
+                problems.append(f"{name}: " + "; ".join(reasons))
+        if problems:
             print(
-                "desktop icons are missing or stale:\n  "
-                + "\n  ".join(missing + stale)
+                "desktop icons are missing or drifted from this build:\n  "
+                + "\n  ".join(problems)
                 + "\nRun: python scripts/gen_desktop_icons.py",
                 file=sys.stderr,
             )
             return 1
-        print("desktop icons are current.")
+        print("desktop icons are current (pixel-identical to this build).")
         return 0
 
     OUT.mkdir(parents=True, exist_ok=True)
