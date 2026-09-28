@@ -47,6 +47,10 @@ inherited unchanged from v0.5.0; what is new is verified source.
 - **Remote CI Run #4** `36402637251` on `5e58f778aad35f33188b96d0b8873401a31ccc3c`: `success`,
   **7 of 7 jobs green**. That HEAD differs from `1cd6309` by governance, audit and evidence
   documentation only.
+- **Remote CI Run #5** `36416146281` on `738ae78e00e682a5f82f679ea167304a558af864`: `success`,
+  **7 of 7 jobs green** — the promotion commit pushed by the owner and re-measured, so the v0.6.0
+  baseline record is green on its own commit. `BASELINE.yaml` carries it as `last_remote_ci`; Run #3
+  keeps its engineering role and Run #4 its review role.
 
 ### Remediation history
 
@@ -85,6 +89,12 @@ Promotion did not erase how the workflow got green; the failed runs stay publish
   earlier rounds declined to take on their own authority.
 - This is a **project baseline promotion, not a stable release**: no GitHub Release, tag, installer,
   signing, notarization or updater metadata, and no tag convention was invented (the repository has none).
+- Post-promotion consistency closure, same day: `BASELINE.yaml` carried a duplicated
+  `remote_state` mapping key, a comment still awaiting the promotion sign-off, a
+  `remote_rerun: RUN_3_REQUIRED_AFTER_USER_PUSH` transition field, a `last_remote_ci` on Run #4 whose
+  own `read_with` named Run #3, and push/origin fields still describing `1cd6309` as the remote state.
+  Those were corrected against Run #5, validated with a duplicate-key-rejecting YAML loader, and the
+  manifest regenerated. No engineering conclusion moved, and no run history was rewritten.
 
 The four entries below are the pre-promotion working-tree records. They are kept as written, including
 their then-current `0.5.1` framing, and are superseded by this one.

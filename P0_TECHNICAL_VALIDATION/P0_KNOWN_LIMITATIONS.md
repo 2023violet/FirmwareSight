@@ -122,10 +122,11 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 
 ## Verification gaps
 
-- **CI has run four times: two failures, then green twice.** Run `36360310447` (`f9b8ccb`) had four red
+- **CI has run five times: two failures, then green three times.** Run `36360310447` (`f9b8ccb`) had four red
   jobs; Run `36378384225` (`ebda52d`) had one; Run `36399805005` (`1cd6309`) concluded `success` with
   **7 of 7 jobs green**, including `Generated output drift` after the provisioning step round 2 added;
-  Run `36402637251` (`5e58f77`) repeated it on the architect-reviewed HEAD. Remote CI is a measured fact
+  Run `36402637251` (`5e58f77`) repeated it on the architect-reviewed HEAD, and Run `36416146281`
+  (`738ae78`) repeated it once more on the promotion commit itself. Remote CI is a measured fact
   with a `gh` command behind it, and the promotion the bullet above deferred to the architect has since
   been signed: `P0 = PASS` at `v0.6.0`. None of that closes any limitation in this file - a green
   workflow is not a performance measurement, a fuzzer or a participant session.

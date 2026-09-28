@@ -68,7 +68,7 @@ $ gh run view 36402637251 --repo 2023violet/FirmwareSight --json databaseId,head
 | --- | --- | --- |
 | Engineering-validated | `1cd6309a09313a0a900a83cb12e054e1a3d7c5e3` | The last commit carrying the source the gate measured. Run #3 executed it. |
 | Architect-reviewed | `5e58f778aad35f33188b96d0b8873401a31ccc3c` | `1cd6309` plus governance, audit and evidence documentation only. Run #4 executed it. |
-| Promotion | the child of `5e58f77` created by this round | Baseline, governance, audit, P0 evidence, `DIRECTORY_TREE.txt` and `SHA256SUMS`. No production source. Find it with `git log -1 --format=%H` on the tree this file ships in; a file cannot contain its own commit's hash, so it is named by relationship rather than by value. |
+| Promotion | `738ae78e00e682a5f82f679ea167304a558af864` | Baseline, governance, audit, P0 evidence, `DIRECTORY_TREE.txt` and `SHA256SUMS` - 23 files, no production source. Written as "the child of `5e58f77`" above, because a file cannot carry its own commit hash; the addendum names it now that the commit exists and has been pushed and revalidated by Run #5. |
 
 The `1cd6309 → 5e58f77` diff was machine-checked rather than eyeballed:
 
@@ -80,18 +80,20 @@ $ git diff --name-only 1cd6309..5e58f77 | wc -l
 
 ## 4. Run history, including the failures
 
-Four runs produced the green. None of the red ones is edited, deleted or relabeled.
+Five runs produced this record; the table above carried four until the addendum below measured the
+fifth. None of the red ones is edited, deleted or relabeled.
 
 | Run | ID | HEAD | Conclusion | Detail |
 | --- | --- | --- | --- | --- |
 | #1 | `36360310447` | `f9b8ccb` | **failure** | 2 of 6 green — Rust (windows), Rust (ubuntu), Generated output drift, Dependency policy red |
 | #2 | `36378384225` | `ebda52d` | **failure** | 6 of 7 green — only `Generated output drift` red, at `drift/ipc bindings` |
-| #3 | `36399805005` | `1cd6309` | success | 7 of 7 green |
-| #4 | `36402637251` | `5e58f77` | success | 7 of 7 green |
+| #3 | `36399805005` | `1cd6309` | success | 7 of 7 green — engineering closure |
+| #4 | `36402637251` | `5e58f77` | success | 7 of 7 green — revalidation of the architect-reviewed HEAD |
+| #5 | `36416146281` | `738ae78` | success | 7 of 7 green — revalidation of this promotion commit |
 
-`BASELINE.yaml` keeps all four under `remote_ci_runs`, with `last_remote_ci` on Run #4 and Runs #1–#2
-reachable as `previous_remote_ci` / `first_remote_ci`. Full per-job evidence:
-`P0_CI_REPORT.md`.
+`BASELINE.yaml` keeps all five under `remote_ci_runs`, with `last_remote_ci` on Run #5 and Runs #1–#2
+reachable as `previous_remote_ci` / `first_remote_ci`; `role_of_each_green_run` names what #3, #4 and #5
+each prove. Full per-job evidence: `P0_CI_REPORT.md`.
 
 ## 5. What the tree is
 
@@ -242,4 +244,39 @@ sequencing prompt from the architect. Read `.ai/HANDOFF.md` first: it lists the 
 schema version, the accepted advisories and the measurement gaps, and it says plainly that an empty task
 queue is not an invitation to invent work.
 
-Pushing this commit belongs to the repository owner.
+Pushing this commit belongs to the repository owner — and it did: see the addendum.
+
+## Addendum — the promotion commit was pushed, and Run #5 measured it (2026-09-28)
+
+The report above was written before `738ae78` existed as a value, so it named the promotion commit by
+relationship and left the push ahead of it. Both facts are now measured, and they are added here rather
+than edited into the sections that were true when written:
+
+```text
+Promotion commit   738ae78e00e682a5f82f679ea167304a558af864  (parent 5e58f77; 23 files, no production source)
+Push              repository owner pushed it to origin/main; local HEAD == origin/main afterwards
+Run #5            36416146281, event push, head 738ae78, status completed, conclusion success, 7 of 7 jobs
+What it proves    the promotion act did not break the gate: the baseline record is green on its own commit
+What it does not  Run #5 does not replace Run #3's engineering role or Run #4's review role; it is the
+                  current `last_remote_ci`, and the three green runs answer three different questions
+```
+
+Read it with:
+
+```
+$ gh run view 36416146281 --repo 2023violet/FirmwareSight --json databaseId,headSha,status,conclusion,jobs
+```
+
+`Rust (windows-latest)` still reports exactly one skipped step in Run #5 — `Install Linux prerequisites
+for the Tauri shell`, guarded to Linux — verified from the run's own step list rather than inherited
+from Run #3's description. "No step failed" and "every step ran" remain different statements.
+
+The same revalidation round corrected five current-state defects in `BASELINE.yaml` that the promotion
+had left behind, none of which changes an engineering conclusion: a duplicated `remote_state` mapping key
+whose earlier value said "Run #3 executed and concluded success" while a later one said something else, a
+comment still asking for the promotion sign-off that had already been given, a
+`remote_rerun: RUN_3_REQUIRED_AFTER_USER_PUSH` transition field, a `last_remote_ci` pointing at Run #4
+while its own `read_with` named Run #3, and push/origin fields that still described `1cd6309` as the
+remote state. `BASELINE.yaml` now carries one `remote_state`, `promotion_head`, `promotion_run` and Run #5
+as `last_remote_ci`, and was reloaded with a duplicate-key-rejecting parser to prove zero repeated keys.
+`SHA256SUMS` was regenerated after those corrections.

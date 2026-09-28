@@ -17,18 +17,20 @@ prompt turned the measured evidence into a baseline: `P0 = PASS`, `baseline_vers
 `.ai/ACTIVE_TASK.md` now reads `NONE`. This file's job is to stop the next agent from starting work
 that nobody authorized, and to hand over the facts it would otherwise have to rediscover.
 
-There is no pending engineering action, no failing check, and no unpushed commit that this record
-knows about. If you were sent here to "continue P0", the correct reply is that P0 is closed.
+There is no pending engineering action and no failing check. If you were sent here to "continue P0",
+the correct reply is that P0 is closed.
 
 ## Baseline and HEADs
 
 ```text
-Baseline            v0.6.0 — FirmwareSight_Project_Baseline_v0.6.0 (P0 Technical Foundation Baseline)
-Engineering-validated HEAD   1cd6309a09313a0a900a83cb12e054e1a3d7c5e3 — the tree the gate measured
-Architect-reviewed HEAD      5e58f778aad35f33188b96d0b8873401a31ccc3c — governance/audit/evidence docs only
-Promotion commit             recorded in P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md
-Remote CI Run #3             36399805005  on 1cd6309  success, 7 of 7 jobs
-Remote CI Run #4             36402637251  on 5e58f77  success, 7 of 7 jobs
+Baseline                       v0.6.0 — FirmwareSight_Project_Baseline_v0.6.0 (P0 Technical Foundation Baseline)
+Engineering-validated HEAD     1cd6309a09313a0a900a83cb12e054e1a3d7c5e3 — the tree the gate measured
+Architect-reviewed HEAD        5e58f778aad35f33188b96d0b8873401a31ccc3c — governance/audit/evidence docs only
+Promotion commit               738ae78e00e682a5f82f679ea167304a558af864 — on origin/main; 23 files, no production source
+Remote CI Run #3               36399805005  on 1cd6309  success, 7 of 7 jobs — engineering closure
+Remote CI Run #4               36402637251  on 5e58f77  success, 7 of 7 jobs — reviewed-HEAD revalidation
+Remote CI Run #5               36416146281  on 738ae78  success, 7 of 7 jobs — promotion-commit revalidation
+Remote CI at this round's preflight  local HEAD == origin/main == 738ae78
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -90,7 +92,7 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md` — the promotion record
 7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` — what is proven, and how
 8. `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` — decisions already taken
-9. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — all four runs, including the two failures
+9. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — all five runs, including the two failures
 10. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
 11. `DESIGN.md` + `assets/design-tokens.json` (any UI work)
 12. V0 summary only, never to be re-run from here: `V0_VALIDATION/README.md`,

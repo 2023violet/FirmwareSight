@@ -13,9 +13,9 @@ last_updated: "2026-09-28"
 Requirement: a gate that runs the same checks a developer runs, so "CI is green" and "my machine
 is green" cannot mean different things.
 
-Status: **REMOTE CI RUN #3 AND RUN #4: SUCCESS — 7 OF 7 JOBS GREEN — P0 PROMOTED TO `PASS` AT v0.6.0**
+Status: **REMOTE CI RUNS #3, #4 AND #5: SUCCESS — 7 OF 7 JOBS GREEN EACH — P0 PROMOTED TO `PASS` AT v0.6.0**
 
-The workflow has executed four times, and every conclusion below is read from GitHub with
+The workflow has executed five times, and every conclusion below is read from GitHub with
 `gh run view`, not from this repository's own reports.
 
 - Run #1 (`36360310447`, head `f9b8ccb`): `failure`, 2 of 6 green. Kept as historical evidence.
@@ -27,6 +27,9 @@ The workflow has executed four times, and every conclusion below is read from Gi
 - Run #4 (`36402637251`, head `5e58f77`): **`success`, 7 of 7 green** — the same workflow on the
   architect-reviewed HEAD, which differs from `1cd6309` by documentation only. It is the second green
   run, and it is the one that ran on the tree the architect read before signing.
+- Run #5 (`36416146281`, head `738ae78`): **`success`, 7 of 7 green** — the v0.6.0 promotion commit
+  itself, pushed by the owner. This is the current `last_remote_ci`: the baseline record is green on the
+  commit that declares it, not only on the commit that preceded the declaration.
 
 P0's engineering evidence was complete on real runners at Run #3, and the promotion act that the line
 above deferred to "the architect's next signed prompt" has now happened: Run #4 repeated the result on
@@ -174,6 +177,34 @@ on a run of the reviewed bytes rather than on a diff between two runs. `git diff
 1cd6309..5e58f77` lists those fifteen and contains no `crates/`, `apps/`, `fixtures/`, `golden/`,
 `migrations/`, lockfile, `deny.toml`, `scripts/check.py` or workflow path — the check is quoted in
 `P0_FINAL_PROMOTION_REPORT.md` §3.
+
+## Remote CI Run #5 — the promotion commit, green on its own bytes
+
+| Field | Value |
+| --- | --- |
+| Run | `36416146281`, event `push` |
+| Head | `738ae78e00e682a5f82f679ea167304a558af864` — the v0.6.0 promotion commit, pushed by the repository owner |
+| Conclusion | **`success`** |
+| Jobs | 7 of 7 success |
+| Read with | `gh run view 36416146281 --repo 2023violet/FirmwareSight --json databaseId,headSha,status,conclusion,jobs` |
+
+| Job | Conclusion | Steps, counted from the run's own step list |
+| --- | --- | --- |
+| Rust (windows-latest) | success | 11 total — 10 success, **1 skipped**: `Install Linux prerequisites for the Tauri shell`, guarded to Linux |
+| Rust (ubuntu-latest) | success | 11 total — 11 success |
+| Desktop UI (windows-latest) | success | 10 total — 10 success |
+| Desktop UI (ubuntu-latest) | success | 10 total — 10 success |
+| Generated output drift | success | 9 total — 9 success |
+| Dependency policy | success | 6 total — 6 success |
+| macOS Core Smoke | success | 7 total — 7 success |
+
+What Run #5 adds is not a new engineering claim. Runs #3 and #4 already measured the source and the
+reviewed governance HEAD; #5 answers a narrower question that a promotion ought to answer about itself:
+does the commit that writes `P0 = PASS` and regenerates the integrity artifacts still pass the gate? The
+promotion changed 23 documentation and integrity files and no build input, so a green run here is the
+expected result — and it is the kind of expectation this pack does not record without measuring it.
+
+The skipped Windows step is reported as skipped rather than counted as a pass, exactly as in Run #3.
 
 ## One definition, two callers
 
@@ -405,8 +436,8 @@ this tree as well - it was re-run after the workflow edit and reported the same 
 
 ## Final disposition — P0 PASS, v0.6.0 (2026-09-28)
 
-All four runs are in this file, and the two failures are still at the top of it in the order they
-happened. The workflow is green, twice, on the two HEADs that mattered: `1cd6309` (engineering) and
-`5e58f77` (architect-reviewed). The architect signed the promotion on that basis, which is the act this
-report spent two rounds declining to perform for itself. `P0_FINAL_PROMOTION_REPORT.md` holds the
-decision; this file holds what the runners measured.
+All five runs are in this file, and the two failures are still at the top of it in the order they
+happened. The workflow is green three times, on the three HEADs that each answer a different question:
+`1cd6309` (engineering), `5e58f77` (architect-reviewed) and `738ae78` (the promotion commit itself).
+The architect signed the promotion on the first two, and the third proves the signed act did not break
+the gate. `P0_FINAL_PROMOTION_REPORT.md` holds the decision; this file holds what the runners measured.

@@ -47,11 +47,13 @@ shipping configuration.
 | #2 `36378384225` | `ebda52d` | `failure` | 6 of 7 green — only `Generated output drift` red (Ubuntu provisioning in a second job) |
 | #3 `36399805005` | `1cd6309` | **`success`** | 7 of 7 — engineering closure |
 | #4 `36402637251` | `5e58f77` | **`success`** | 7 of 7 — pre-promotion revalidation of the governance-only successor |
+| #5 `36416146281` | `738ae78` | **`success`** | 7 of 7 — revalidation of the v0.6.0 promotion commit itself; current `last_remote_ci` |
 
-Read with `gh run view 36402637251 --repo 2023violet/FirmwareSight`, not from this file. Run #4's
+Read with `gh run view 36416146281 --repo 2023violet/FirmwareSight`, not from this file. Run #5's
 matrix: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`,
 `Desktop UI (ubuntu-latest)`, `Generated output drift`, `Dependency policy`, `macOS Core Smoke` —
-all `success`.
+all `success`. The promotion commit is on `origin/main`, so the baseline record is green on its own
+commit, not only on the commit the architect read.
 
 The two failures are kept as history rather than edited. They are the reason the two successes mean
 anything: Run #1 exposed a checkout that could rewrite committed evidence bytes, a runner with no
@@ -156,7 +158,8 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 The only track that can be authorized without a new governance decision is V0, and it needs real
 participants. Before that, the natural next actions belong to the owner and the architect:
 
-1. push the v0.6.0 promotion commit (the owner's act);
+1. push the baseline-consistency commit once it exists (the owner's act) — the promotion commit
+   `738ae78` is already on `origin/main` and Run #5 measured it;
 2. decide whether V0 is executed next or whether P1 may start while V0 remains deferred — the second
    option requires an explicit sequencing prompt, because G1 still means `V0 PASS + P0 PASS`;
 3. re-open the two accepted advisories only on one of their recorded triggers.

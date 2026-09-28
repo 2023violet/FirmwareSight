@@ -51,9 +51,11 @@ produced it, and a status of `LOCAL PASS` is kept visibly separate from `CI PASS
 - Gate: `python scripts/check.py` - 14 steps on a tree that already has `apps/desktop/ui/dist/`, 16
   when the group has to build the frontend first, plus 3 under `--only core-smoke` for the macOS job
   the CI baseline requires. cargo-deny now runs here (`0.20.2`, exit 0) rather than being `SKIPPED`.
-- Remote CI: four runs. `36360310447` was 2 of 6 green; `36378384225` was 6 of 7; `36399805005` on
-  `1cd6309` and `36402637251` on `5e58f77` each concluded **`success`, 7 of 7 green** - 104 Rust tests on
-  Windows and Ubuntu, 19 UI tests on both, 87 core tests on macOS, all four cargo-deny categories ok.
+- Remote CI: five runs. `36360310447` was 2 of 6 green; `36378384225` was 6 of 7; `36399805005` on
+  `1cd6309`, `36402637251` on `5e58f77` and `36416146281` on the promotion commit `738ae78` each concluded
+  **`success`, 7 of 7 green** - 104 Rust tests on Windows and Ubuntu, 19 UI tests on both, 87 core tests
+  on macOS, all four cargo-deny categories ok. The three green runs play three different roles:
+  engineering closure, reviewed-HEAD revalidation, and promotion-commit revalidation.
 - Status: **`P0 = PASS`**, promoted by the architect-signed *P0 Final Promotion / v0.6.0 Baseline Closure
   v1.0* prompt on 2026-09-28. See `P0_FINAL_PROMOTION_REPORT.md`.
 - Cold rebuild: `cargo clean` plus removing `node_modules/` and `dist/`, then the whole gate -> 16/16

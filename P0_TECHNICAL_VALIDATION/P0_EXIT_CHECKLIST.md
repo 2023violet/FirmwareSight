@@ -20,7 +20,7 @@ measured six of seven green; the second round added the one missing provisioning
 (`36402637251`, head `5e58f77`) repeated it on the documentation-only reviewed HEAD. **P0 is therefore
 `PASS`**, promoted into `FirmwareSight_Project_Baseline_v0.6.0` - see `P0_FINAL_PROMOTION_REPORT.md`.
 The counts below are this tree's, and where an item is confirmed by a runner rather than only by this
-machine, the evidence column says which. `P0_CI_REPORT.md` keeps all four runs, the two failures
+machine, the evidence column says which. `P0_CI_REPORT.md` keeps all five runs, the two failures
 included; `P0_CI_REMEDIATION_REPORT.md` and `P0_CI_RUN_2_CLOSURE_REPORT.md` explain the two rounds.
 
 ## Baseline authority minimum (prompt §58)

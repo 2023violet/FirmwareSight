@@ -131,12 +131,11 @@ p0_execution:
   # and changes documentation only; see P0_EXECUTION_PROVENANCE.md "Final validated HEAD".
   final_validated_head: 65cb2dc
   commits_to_validated_tree: 6
-  # Three remote runs, all read with `gh run view`. Run #1 failed four jobs, Run #2 failed one, and
-  # Run #3 on the round-2 HEAD is green across all seven. What remains is the architect's promotion
-  # sign-off, which is a governance act and not an engineering gap; nothing here writes P0 PASS.
-  remote_state: "pushed as 1cd6309; Remote CI Run #3 executed and concluded success (7 of 7 jobs)"
+  # Five remote runs are recorded below and in `remote_ci_runs`: two failures, then three successes on
+  # the engineering HEAD, the architect-reviewed HEAD and the promotion commit itself. Run #5 verified
+  # that the promotion commit did not break the gate; it is the current remote fact.
   # PASS now: the engineering evidence was already measured in Runs #3 and #4, and the missing
-  # element was the architect's signature, which this promotion prompt supplies.
+  # element was the architect's signature, which the promotion prompt supplied.
   status: PASS
   evidence_status: PASS
   promotion_signed_by: "FirmwareSight P0 Final Promotion / v0.6.0 Baseline Closure v1.0 - Architect Signed"
@@ -151,8 +150,13 @@ p0_execution:
   architect_review_run: 36402637251
   architect_review_run_result: success
   architect_review_jobs: 7/7
+  promotion_head: 738ae78e00e682a5f82f679ea167304a558af864
+  promotion_run: 36416146281
+  promotion_run_result: success
+  promotion_run_jobs: 7/7
   promotion_commit_contains: "baseline, governance, audit, P0 evidence reports, integrity manifest and directory tree only - no production source"
-  remote_state: "promoted at 5e58f77; Runs #3 (1cd6309) and #4 (5e58f77) both success 7 of 7; the promotion commit is documentation and integrity only"
+  # One current remote fact, stated once: the promotion commit is on origin/main and Run #5 measured it.
+  remote_state: "v0.6.0 promotion commit 738ae78 is on origin/main; Run #5 (36416146281) completed with conclusion success, 7 of 7 jobs"
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
   run_2_closure_prompt: "FirmwareSight P0 Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed, supplied inline)"
   remediation:
@@ -171,7 +175,7 @@ p0_execution:
       - the desktop window opened and driven on the shipping configuration
     round_2_remaining_defect: Generated output drift - the drift job compiles firmwaresight-desktop to regenerate ts-rs bindings but had no Linux prerequisites step
     round_2_fix: "the apt block Run #2 already proved on the rust job, copied into the drift job; 21 added lines in .github/workflows/p0-check.yml and no other file"
-    remote_rerun: RUN_3_REQUIRED_AFTER_USER_PUSH
+    remote_rerun: CLOSED_BY_RUN_3_AND_REVALIDATED_BY_RUNS_4_AND_5
     ci_pass_claim_written_by_coding_agent: false
     local_gate: 14/14 default steps with 0 skipped mandatory steps, plus 3/3 under --only core-smoke
     desktop_smoke: PASS carried forward; round 2 changes no runtime source, so the window was not reopened for noise
@@ -181,22 +185,27 @@ p0_execution:
     architecture_conflicts:
       - RUSTSEC-2024-0429 glib 0.18.5 unsound: reached through the gtk-rs 0.18 line Tauri 2.12.0 requires; cargo update -p glib --precise 0.20.0 fails against gtk = "^0.18"; accepted with five revisit triggers, and no ADR because this round changes no architecture choice
       - RUSTSEC-2024-0370 proc-macro-error 1.0.4 unmaintained: host-only build dependency behind the same pin; the advisory itself states no safe upgrade exists; accepted on the same basis
-  # Four runs, in order, none rewritten. Two failures are the reason the two successes exist.
+  # Five runs, in order, none rewritten. Two failures are the reason the three successes exist.
   remote_ci_runs:
     - "Run #1 36360310447 on f9b8ccb: failure - Rust windows, Rust ubuntu, Generated output drift, Dependency policy red; Desktop UI both green (2 of 6)"
     - "Run #2 36378384225 on ebda52d: failure - 6 of 7 green, only Generated output drift red (Ubuntu provisioning in a second job)"
     - "Run #3 36399805005 on 1cd6309: success - 7 of 7 green. Engineering closure."
     - "Run #4 36402637251 on 5e58f77: success - 7 of 7 green. Pre-promotion revalidation of the governance-only successor."
+    - "Run #5 36416146281 on 738ae78: success - 7 of 7 green. v0.6.0 promotion commit revalidation: the promotion act changed documentation and integrity artifacts only, and the gate stayed green on the committed baseline."
   last_remote_ci:
-    run_id: 36402637251
-    head: 5e58f778aad35f33188b96d0b8873401a31ccc3c
+    run_id: 36416146281
+    head: 738ae78e00e682a5f82f679ea167304a558af864
     event: push
     conclusion: success
     passed_jobs: ["Rust (windows-latest)", "Rust (ubuntu-latest)", "Desktop UI (windows-latest)", "Desktop UI (ubuntu-latest)", "Generated output drift", "Dependency policy", "macOS Core Smoke"]
     failed_jobs: []
-    read_with: gh run view 36399805005 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
-    note: "Rust (windows-latest) reports one skipped step: the apt block guarded by if matrix.os == ubuntu-latest. The job itself is success."
+    read_with: gh run view 36416146281 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
+    note: "Rust (windows-latest) reports exactly one skipped step in Run #5, measured with gh run view --json jobs: Install Linux prerequisites for the Tauri shell, guarded by if matrix.os == ubuntu-latest. The job itself is success."
     log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
+  role_of_each_green_run:
+    run_3: "engineering closure on the validated source HEAD 1cd6309"
+    run_4: "revalidation of the architect-reviewed governance HEAD 5e58f77"
+    run_5: "revalidation of the v0.6.0 promotion commit 738ae78, and the current last_remote_ci"
   previous_remote_ci:
     run_id: 36378384225
     head: ebda52d63f22ff9f25786c1d80e53f5193cff183
@@ -218,7 +227,7 @@ p0_execution:
   library_crate_budget: 4
   library_crates_built: 4
   gate_command: python scripts/check.py
-  gate_result: "local 14/14 with 0 skipped mandatory steps, plus 3/3 --only core-smoke; remote 7/7 jobs green on both 1cd6309 (Run #3) and 5e58f77 (Run #4)"
+  gate_result: "local 14/14 with 0 skipped mandatory steps, plus 3/3 --only core-smoke; remote 7/7 jobs green on 1cd6309 (Run #3), 5e58f77 (Run #4) and 738ae78 (Run #5)"
   tests: { rust: 104, ui: 19 }
   # Every promotion condition is met and cited; none was satisfied by wording.
   promotion_conditions:
@@ -248,8 +257,9 @@ p0_execution:
   non_blocking_measurement_gaps:
     - peak RSS is NOT MEASURED; reason and the measurements that do exist are in P0_PERFORMANCE_REPORT.md
   push_authorized: true_by_owner_instruction
-  push_performed_by: "repository owner; the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force)"
-  remote_state_changed: true # origin/main == 1cd6309, local and remote in sync
+  push_performed_by: "repository owner pushed the v0.6.0 promotion commit 738ae78 to origin/main; Run #5 is that push"
+  historical_engineering_push: "the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force); recorded as history, not as the current remote state"
+  remote_state_changed: true # origin/main == 738ae78 at this round's preflight; this round commits locally and the owner pushes
   baseline_version_after_p0: 0.6.0
   v0_6_0_released: true
   v0_6_0_meaning: "P0 Technical Foundation Baseline - the vertical slice chain is validated. Not product MVP, not G1, not user value, not a stable commercial release."

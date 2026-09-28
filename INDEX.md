@@ -25,7 +25,7 @@ Execution state: `P0: PASS (remote CI Run #3 and Run #4, 7 of 7 jobs green on ea
 6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`
 7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
 8. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
-9. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — all four runs, the two failures included
+9. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — all five runs, the two failures included
 10. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
 11. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 

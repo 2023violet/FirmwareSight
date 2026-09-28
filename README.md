@@ -20,7 +20,7 @@ and does **not** redefine the product, the architecture, the gate definitions or
 ```text
 G0      PASS
 V0      INCOMPLETE — 0 / 8 eligible external sessions (deferred research track, non-blocking)
-P0      PASS — remote CI Run #3 and Run #4, 7 of 7 jobs green on each
+P0      PASS — remote CI Runs #3, #4 and #5, 7 of 7 jobs green on each
 G1      NOT CLAIMED — requires V0 PASS + P0 PASS; only the P0 half exists
 P1      NOT AUTHORIZED
 ```
@@ -115,15 +115,17 @@ Bundle & History
 The slice reached `PASS` on evidence, not on a wording change. Remote CI Run #3 (`36399805005`) executed
 the engineering-validated HEAD `1cd6309` and concluded `success` with **7 of 7 jobs green**; Run #4
 (`36402637251`) executed the architect-reviewed HEAD `5e58f77` — documentation only, no source moved —
-and concluded `success` with **7 of 7 jobs green** again. Both were read back with `gh run view`, not
-from this file:
+and concluded `success` with **7 of 7 jobs green**; Run #5 (`36416146281`) executed the promotion commit
+itself, `738ae78`, and concluded `success` with **7 of 7 jobs green** again, which is what makes the
+baseline record green on its own commit. All three were read back with `gh run view`, not from this file:
 
 ```
 gh run view 36399805005 --repo 2023violet/FirmwareSight
 gh run view 36402637251 --repo 2023violet/FirmwareSight
+gh run view 36416146281 --repo 2023violet/FirmwareSight
 ```
 
-It took four runs to get there and the two failures are kept as history in
+It took five runs to get there and the two failures are kept as history in
 `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md`. Run #1 (`36360310447`, `f9b8ccb`) had four jobs red; each
 cause was reproduced with a command before being fixed — a `.gitattributes` text policy so a checkout
 cannot change a fixture's bytes, icon drift judged by decoded pixels rather than by encoder bytes, a
