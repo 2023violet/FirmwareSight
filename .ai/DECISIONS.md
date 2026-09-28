@@ -136,11 +136,12 @@ Authorization:
 
 Status decision, taken from measured results rather than from the previous round's wording:
 
-- P0 is now `FAIL — REMOTE CI RUN #1` with remediation `ACTIVE`. `CONDITIONAL_PASS (LOCAL)` is not
-  kept: the conditions that made it conditional were tested, and two of them failed. "CI has never
-  run" and "cargo deny has never run" are no longer true statements about this repository.
+- P0 is now `FAIL — REMOTE CI RUN #1` with remediation `LOCAL FIX COMPLETE`.
+  `CONDITIONAL_PASS (LOCAL)` is not kept: the conditions that made it conditional were tested, and two
+  of them failed. "CI has never run" and "cargo deny has never run" are no longer true statements about
+  this repository.
 - The distinction this preserves is between what was proven (Core facts, memory accounting, the
-  typed IPC boundary, storage migrations, determinism — 102 Rust and 19 UI tests) and what the
+  typed IPC boundary, storage migrations, determinism — 104 Rust and 19 UI tests) and what the
   first cross-platform run exposed (checkout text policy, runner provisioning, encoder-byte
   assertions, an unparseable supply-chain config, a missing macOS job).
 
@@ -165,3 +166,34 @@ Unchanged facts that this round must not quietly drop: peak RSS stays `NOT MEASU
 recorded reason, and it is recorded as a measurement gap rather than a promotion blocker, because
 the original P0 prompt accepted an unmeasured number when the reason was stated. `SHA256SUMS` stays
 the frozen v0.5.1 package integrity record; the working source tree is not that package.
+
+Decisions the remediation itself had to make:
+
+- **Schema version 2, because version 1 contradicted the frozen data model.** The authorized desktop
+  launch failed on the second artifact with `UNIQUE constraint failed: evidence.id`
+  (`ERR-STORAGE-4006`). `evidence` carried a whole-table primary key on `id`, while
+  `04_TECH/15` §4 states `Build 1─N Evidence`: the key was wrong, not the design. Migration `0002`
+  rebuilds the table on `(build_id, id)`. `AGENTS.md` 2 forbids changing persistence schema
+  *semantics* without an ADR; this change makes the stored relation equal to the semantics the
+  baseline already froze, and it is recorded here for architect review rather than presented as a
+  settled new decision. Tests were written first and failed first: two artifacts recording the same
+  field identifier, and a version-1 database upgraded without losing its evidence.
+- **Two advisories are an architecture conflict, not a config error.** `RUSTSEC-2024-0429`
+  (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`, unmaintained,
+  host-only) reach the graph through the gtk-rs `0.18` line that Tauri `2.12.0` requires, and
+  `cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`. Resolving them means moving
+  gtk-rs, muda, tao and webkit2gtk, i.e. changing the frozen Tauri dependency architecture. They are
+  ignored in `deny.toml` with their evidence, and the conflict is reported to the architect as a
+  decision that needs an ADR — it was not resolved by upgrading a dependency, by raising a severity
+  threshold, or by dropping the advisories check.
+- **`ISC` and five slash-form SPDX strings left the allow list.** cargo-deny 0.20.2 parses
+  `MIT/Apache-2.0` as a disjunction and no crate in the four shipping targets declares `ISC`, so the
+  literal entries matched nothing; `licenses ok` after their removal is the check that says so.
+- **Icon drift is measured by pixels, deliberately losing byte-level assertions.** PNG and ICO bytes
+  depend on encoder state; `git status` will stay clean across a rebuild that changes only encoder
+  settings. A missing ICO frame still fails.
+- **The macOS job reuses the existing gate.** `macos-core` runs
+  `python scripts/check.py --only core-smoke` — fmt, clippy and test over the five Core-side crates —
+  rather than a fifth crate or a copy of the test list. It is locally usable and locally green
+  (3/3), and it runs on `main` pushes but not on pull requests, which is what
+  `05_ENGINEERING/06_CI_CD_BASELINE.md` requires.

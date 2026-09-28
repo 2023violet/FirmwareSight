@@ -53,12 +53,37 @@ and starting the desktop app once in the current user session with `--features c
 - Deleting a failing test, lowering an assertion, batch-regenerating goldens, or turning a `FAIL`
   into a `SKIPPED` by editing `scripts/check.py`.
 
+## Where this task stands
+
+Phases 1–9 are complete locally; phase 10 (small commits, then stop) ends here.
+
+```text
+Remote CI run #1:    FAILURE at f9b8ccb — retained as history
+Remediation:         LOCAL FIX COMPLETE (five CI causes + one defect the window found)
+Local gate:          PASS, 14/14 default steps, 0 SKIPPED mandatory steps
+Desktop smoke:       PASS on the shipped configuration, one Windows host
+Remote rerun:        REQUIRED AFTER THE OWNER PUSHES
+```
+
+A sixth problem was found by the authorized desktop launch rather than by CI: the second artifact
+failed with `UNIQUE constraint failed: evidence.id`, because `evidence` carried a whole-table primary
+key while `04_TECH/15` §4 declares `Build 1─N Evidence`. Migration `0002` rebuilds that table on
+`(build_id, id)`, schema version is now 2, and the Rust test count moved from 102 to 104. The defect,
+its failing tests and the real-database upgrade are in
+`P0_TECHNICAL_VALIDATION/P0_DESKTOP_SMOKE_REPORT.md`.
+
+Two advisories are reported as an **architecture conflict for the architect**, not as work this task
+can finish: `RUSTSEC-2024-0429` (`glib 0.18.5`) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`)
+arrive through the gtk-rs `0.18` line that Tauri `2.12.0` requires, and `cargo update -p glib
+--precise 0.20.0` fails against `gtk = "^0.18"`. Closing them means changing the frozen desktop
+dependency architecture, which is an ADR.
+
 ## Gate status
 
 ```text
 Formal G1: NOT CLAIMED  (g1_requires V0_PASS + P0_PASS; V0 still unvalidated)
 P1:        NOT AUTHORIZED
-P0:        FAIL — REMOTE CI RUN #1; remediation ACTIVE
+P0:        FAIL — REMOTE CI RUN #1; remediation LOCAL FIX COMPLETE; rerun REQUIRED
 ```
 
 ## Version gate

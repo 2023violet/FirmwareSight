@@ -10,6 +10,53 @@ last_updated: "2026-09-28"
 
 # Changelog
 
+## Unreleased — P0 CI closure remediation (2026-09-28)
+
+Authorization: the architect prompt *FirmwareSight P0 — CI Closure / Cross-Platform Reproducibility
+Remediation v1.0*. Target `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE CI RERUN`. No version is
+claimed here either: the baseline stays `0.5.1`.
+
+The P0 tree was pushed as `f9b8ccb` and GitHub Actions run `36360310447` measured it: **failure**, two
+of six jobs green. That replaced the pack's own `CONDITIONAL_PASS (LOCAL)`, and it is kept as history
+rather than rewritten.
+
+- **Fixture byte identity no longer depends on the checkout.** `*.ld` had no `.gitattributes` rule, so
+  `core.autocrlf=true` smudged a linker script from the recorded LF bytes to CRLF on Windows and the
+  hash test compared different bytes. Fixed in the Git text policy (`*.ld text eol=lf`, and `*.map`
+  given an explicit `-text`); no expected hash was moved to accommodate CRLF and no newline was
+  normalized before hashing - the manifest's job is to verify the byte identity of committed evidence.
+  Verified with a fresh clone.
+- **Desktop icon drift is now judged by pixels.** Pillow's PNG and ICO encoders emit different bytes
+  for identical RGBA data depending on encoder state, so the byte check tested the library. The check
+  decodes instead: PNG dimensions and pixels, and for the `.ico` the required size set with per-frame
+  pixels, where a missing frame fails. No icon design or token changed, and no Linux-regenerated set
+  was committed in place of the recorded one.
+- **`deny.toml` is executable under the version CI installs.** `severity-threshold` and
+  `highlight-warnings` are not keys of cargo-deny 0.20.2 and five `licenses.allow` entries were slash
+  strings; the file did not parse. Rewritten against the keys the tool accepts, with the allow list
+  rebuilt from `cargo deny list`, `[graph] targets` limited to the four shipping platforms, and
+  `anyhow` banned with its three Tauri wrappers named so first-party use still fails. `cargo deny
+  check licenses bans sources advisories` now exits 0 here instead of being `SKIPPED`.
+- **The Ubuntu job installs the Tauri Linux prerequisites** rather than excluding the desktop crate,
+  so `clippy --all-features` keeps its cross-platform compile coverage.
+- **A macOS core smoke job exists**, because `05_ENGINEERING/06_CI_CD_BASELINE.md` requires one on
+  `main` push and the workflow had none. It runs `python scripts/check.py --only core-smoke` - the
+  same script, not a fourth copy of the tests - and is locally green (3/3).
+- **The desktop window was launched for real**, and found a defect no test had reached: `evidence`
+  had a whole-table primary key on `id`, so a second artifact raised `UNIQUE constraint failed` while
+  `04_TECH/15` §4 declares `Build 1─N Evidence`. Migration `0002` rebuilds the table on
+  `(build_id, id)`; schema version is 2 and the Rust total moved 102 -> 104. The failing tests were
+  written first, and the upgrade was replayed against the real database the launch left behind.
+- **Reported as an architecture conflict, not fixed:** `RUSTSEC-2024-0429` (`glib 0.18.5`) and
+  `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`) enter through the gtk-rs `0.18` line Tauri `2.12.0`
+  requires, and `cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`. Closing them
+  would change the frozen desktop dependency architecture, which needs an ADR.
+- New documents: `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` and
+  `P0_TECHNICAL_VALIDATION/P0_DESKTOP_SMOKE_REPORT.md`; the pack is now 21 files.
+- **P0 status after this round: `FAIL — REMOTE CI RUN #1` with remediation `LOCAL FIX COMPLETE`.**
+  The remediation HEAD is unpushed, so nothing is green in CI yet; `REMOTE CI PASS` is not written
+  here. G1 is still not claimed, V0 still `0 / 8`, P1 still not authorized.
+
 ## Unreleased — P0 Technical Vertical Slice executed (2026-09-28)
 
 No version is claimed here on purpose: `0.5.1` stays the only baseline, and `v0.6.0` is reserved for
@@ -38,11 +85,14 @@ an unconditional P0 `PASS`. This entry records work on the working tree.
 
 ### P0 status
 
-- `EXECUTED — CONDITIONAL_PASS (LOCAL)`; 102 Rust tests and 19 UI tests pass locally.
-- Conditions, all outside this environment: CI has never run, `cargo deny` has never run, peak RSS is
-  `NOT MEASURED`, and the desktop window was never opened.
-- `P0_TECHNICAL_VALIDATION/` holds the evidence pack: the 17 documents the prompt names, plus
-  `P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by
+Status as recorded at delivery, superseded by the remediation entry above and retained as history:
+
+- `EXECUTED — CONDITIONAL_PASS (LOCAL)`; 102 Rust tests and 19 UI tests passed locally.
+- Conditions, all outside this environment: CI had never run, `cargo deny` had never run, peak RSS is
+  `NOT MEASURED`, and the desktop window had never been opened. Two of the first two then failed when
+  they were finally run, and the third was answered by a real launch.
+- `P0_TECHNICAL_VALIDATION/` holds the evidence pack: at delivery the 17 documents the prompt names,
+  plus `P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by
   `AGENTS.md` 11 - 19 files, each citing executed commands.
 - G1 is not claimed; V0 remains deferred with `0 / 8` external sessions; P1 is not authorized.
 

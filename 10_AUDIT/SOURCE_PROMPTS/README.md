@@ -34,6 +34,29 @@ delivered rather than a retranscription.
 - Authority: execution instruction for the P0 engineering slice against the unique v0.5.1 baseline. Consistent with `09_ADR/ADR-0020-validation-sequence.md`, which already authorizes V0 and P0 as parallel tracks. It overrides only the execution state recorded by the Batch A prompt (`V0` blocking, `P0` not authorized); it does not override any frozen product, architecture, evidence, gate or design baseline, and it does not authorize P1.
 - Provenance record: `P0_TECHNICAL_VALIDATION/P0_EXECUTION_PROVENANCE.md`
 - Outcome, 2026-09-28: executed to its stop condition as `EXECUTED — CONDITIONAL_PASS (LOCAL)`.
-  Baseline stays `v0.5.1`, `v0.6.0` withheld, G1 not claimed, P1 still unauthorized. The conditions
-  are that CI and `cargo deny` have never run, which needs a push this environment is not
+  Baseline stayed `v0.5.1`, `v0.6.0` withheld, G1 not claimed, P1 still unauthorized. The conditions
+  were that CI and `cargo deny` had never run, which needed a push this environment was not
   authorized to make.
+- Outcome, superseded the same day by measurement: the delivered tree was pushed as `f9b8ccb`, GitHub
+  Actions run `36360310447` concluded `failure` with 2 of 6 jobs green, and the status became
+  `FAIL — REMOTE CI RUN #1`. `CONDITIONAL_PASS (LOCAL)` is no longer the current label; the
+  `LOCAL PASS` / `CI PASS` distinction this pack kept is what made the failure legible rather than
+  surprising. Evidence: `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md`.
+
+## P0 CI Closure / Cross-Platform Reproducibility Remediation
+
+- File: none. The prompt was supplied inline to the executing agent, so unlike the records above
+  there is no stored copy whose SHA-256 can be recorded here. The repository's copy of its terms is
+  `.ai/DECISIONS.md` ("P0 CI closure remediation") and
+  `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md`.
+- Version: v1.0, architect reviewed.
+- Authority: local remediation of what Run #1 measured, one `cargo-deny@0.20.2` installation, and one
+  real desktop window launch in the shipping configuration. It does not authorize a push, does not
+  permit `REMOTE CI PASS` to be written by the executing side, stops before P0 promotion, and does not
+  change `ADR-0020`.
+- Outcome, 2026-09-28: `LOCAL REMEDIATION COMPLETE / READY FOR REMOTE CI RERUN`. All five causes
+  reproduced with a command before being changed, a sixth defect found by the authorized window launch
+  and fixed with tests first, local gate 14/14 with zero skipped mandatory steps, desktop smoke `PASS`,
+  and one architecture conflict (two advisories unreachable inside the frozen Tauri 2.12.0 dependency
+  tree) reported rather than resolved. Baseline stays `v0.5.1`, `v0.6.0` is not generated, G1 is not
+  claimed, P1 is not started, and the push that closes the round belongs to the owner.

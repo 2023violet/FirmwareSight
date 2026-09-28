@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.5.1
   date: 2026-09-28
-  status: P0_FAIL_REMOTE_CI_RUN_1_REMEDIATION_ACTIVE_V0_DEFERRED_UNVALIDATED
+  status: P0_FAIL_REMOTE_CI_RUN_1_REMEDIATION_LOCAL_FIX_COMPLETE_REMOTE_RERUN_REQUIRED_V0_DEFERRED_UNVALIDATED
 
 principles:
   - evidence_first
@@ -137,8 +137,20 @@ p0_execution:
   # remote run is a measured result, so the local-only qualifier no longer applies.
   status: FAIL
   evidence_status: FAIL
-  remediation_state: ACTIVE
+  remediation_state: LOCAL_FIX_COMPLETE
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
+  remediation:
+    # Fixes live in the local commit range that starts after this base head; the range is named by
+    # the delivered report, because the commit that records the range is itself inside it.
+    base_head: f9b8ccb
+    remote_rerun: REQUIRED_AFTER_USER_PUSH
+    ci_pass_claim_written_by_coding_agent: false
+    local_gate: 14/14 default steps with 0 skipped mandatory steps, plus 3/3 under --only core-smoke
+    desktop_smoke: PASS in the shipping configuration, one Windows 10 host at 100% scaling
+    schema_version_after_remediation: 2
+    architecture_conflicts:
+      - RUSTSEC-2024-0429 glib 0.18.5 unsound: reached through the gtk-rs 0.18 line Tauri 2.12.0 requires; cargo update -p glib --precise 0.20.0 fails against gtk = "^0.18"; needs an ADR, not a CI fix
+      - RUSTSEC-2024-0370 proc-macro-error 1.0.4 unmaintained: host-only build dependency behind the same pin; advisory states no safe upgrade exists
   last_remote_ci:
     run_id: 36360310447
     head: f9b8ccba7d9326ac397675602beb3a7e9c3bcd02
@@ -152,14 +164,18 @@ p0_execution:
   library_crate_budget: 4
   library_crates_built: 4
   gate_command: python scripts/check.py
-  gate_result: 14/14 locally on 65cb2dc (cargo-deny reported SKIPPED there); 2 of 6 CI jobs green on f9b8ccb
-  tests: { rust: 102, ui: 19 }
-  # What still separates this tree from a P0 PASS. Each is an observable outcome, not an
-  # authorization question: remote CI Run #1 answered the first two by failing them.
+  gate_result: 14/14 locally with cargo-deny executing (no SKIPPED mandatory step), plus 3/3 --only core-smoke; 2 of 6 CI jobs green on f9b8ccb, remediation HEAD unpushed
+  tests: { rust: 104, ui: 19 }
+  # What still separates this tree from a P0 PASS. The window launch and the cargo-deny execution
+  # were blockers and are now local facts; the only one left is a remote run on these files.
   promotion_conditions:
     - Remote CI green on the remediation HEAD (Rust windows + ubuntu, Desktop UI, drift, deny, macOS core smoke)
-    - cargo-deny executing as part of CI with a real PASS, not a skipped or deserialized-failure step
-    - The desktop window opening once on a real display in its shipping configuration
+  # Satisfied locally during the remediation round, kept visible so a later reader does not re-ask
+  # them as open questions: the desktop window opened once on a real display in the shipping
+  # configuration, and cargo-deny executes as a real gate step rather than a skipped one.
+  promotion_conditions_met_locally:
+    - Desktop window opened and driven on the shipping configuration (P0_DESKTOP_SMOKE_REPORT.md)
+    - cargo-deny 0.20.2 executed with exit 0 over licenses, bans, sources and advisories
   # Recorded separately because the P0 prompt accepted an unmeasured number with a stated reason.
   # This is a measurement gap, not a promotion blocker.
   non_blocking_measurement_gaps:

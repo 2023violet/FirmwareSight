@@ -103,7 +103,7 @@ Continue **V0 only**:
 P0 was not authorized by this V0 execution. P0 was authorized separately, by the prompt preserved in
 `10_AUDIT/SOURCE_PROMPTS/README.md`, and has since been executed — see the P0 section below.
 
-## P0 Technical Vertical Slice — executed, CONDITIONAL_PASS (LOCAL)
+## P0 Technical Vertical Slice — executed; remote CI run #1 failed; local remediation complete
 
 The slice exists as source, not as a plan: a Rust workspace with exactly four Phase-0 library crates
 (`core`, `artifact`, `report`, `storage`), the `fwsight` CLI, a thin Tauri 2 desktop shell with a
@@ -112,7 +112,8 @@ typed IPC, minimal SQLite, a 512 MiB input guard, and one verification gate that
 unchanged.
 
 ```
-python scripts/check.py        # 14 steps; the only step not run is cargo-deny, recorded as SKIPPED
+python scripts/check.py        # 14 steps across rust / frontend / drift / deny, all executed
+python scripts/check.py --only core-smoke   # the macOS-on-main core smoke CI runs separately
 cargo run -q --bin fwsight -- analyze fixtures/elf/p0-dual-region/firmware.elf \
   --map fixtures/elf/p0-dual-region/firmware.map --json
 ```
@@ -120,13 +121,22 @@ cargo run -q --bin fwsight -- analyze fixtures/elf/p0-dual-region/firmware.elf \
 Proof and limits live in `P0_TECHNICAL_VALIDATION/`:
 
 - `P0_EXIT_CHECKLIST.md` — each prompt criterion, the command that exercised it, and what it showed;
-- `P0_KNOWN_LIMITATIONS.md` — what is deliberately absent, including that no window was ever opened;
+- `P0_KNOWN_LIMITATIONS.md` — what is deliberately absent, and what one Windows launch does not prove;
 - `P0_IMPLEMENTATION_LOG.md` — every non-trivial engineering decision with its evidence;
 - `P0_EXECUTION_PROVENANCE.md` — start HEADs, environment, prompt SHA-256.
 
-Status is **`EXECUTED — CONDITIONAL_PASS (LOCAL)`**, and the conditions are outside this machine:
-CI has never run and `cargo deny` has never run, because there is no push authorization here and the
-tool was not installed. `LOCAL PASS` and `CI PASS` are kept as different claims throughout the pack.
+Status is **`P0: FAIL — REMOTE CI RUN #1`, with `Remediation: LOCAL FIX COMPLETE` and
+`Remote rerun: REQUIRED`**. GitHub Actions run `36360310447` executed against `f9b8ccb` and reported
+`failure`: four jobs red (Rust on Windows and Ubuntu, Generated output drift, Dependency policy), two
+green (Desktop UI on both OSes). Each cause was reproduced with a command before being fixed, and the
+fixes are in the tree: a `.gitattributes` text policy so a checkout cannot change a fixture's bytes,
+icon drift judged by decoded pixels rather than by encoder bytes, a `deny.toml` that cargo-deny 0.20.2
+actually parses, Linux prerequisites on the Ubuntu job, and the macOS core smoke the CI baseline
+requires. The desktop window has also been opened and driven for real, which is what found a storage
+defect the tests had missed. Read `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` first.
+
+`LOCAL PASS` and `CI PASS` are kept as different claims throughout the pack: the remediation HEAD is
+unpushed, so nothing has been green in CI yet.
 
 The baseline therefore stays **v0.5.1**. `v0.6.0` is reserved for an unconditional P0 `PASS`, G1 is
 not claimed (V0 still has `0 / 8` external sessions), and P1 requires its own authorization prompt,
