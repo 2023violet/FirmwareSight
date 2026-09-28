@@ -1,7 +1,7 @@
 {
   "schema": "firmwaresight-fixtures-1",
   "generated_by": "scripts/gen_p0_fixtures.py",
-  "note": "Tests verify these hashes before trusting any golden.",
+  "note": "Tests verify these hashes before trusting any golden. Each value is the SHA-256 of the committed blob, so it must also equal the bytes a fresh checkout yields on any platform; .gitattributes is what makes that true.",
   "files": [
     {
       "path": "fixtures/elf/p0-basic/firmware.elf",
@@ -23,7 +23,7 @@
     },
     {
       "path": "fixtures/elf/p0-dual-region/firmware.map",
-      "sha256": "b2be5f190d46091296f240439a69cef470624d0e84a2c178eb8c65cf60dc4fbe",
+      "sha256": "c4182c5bcc69b155e6a9ccc641990a6d6d8649ebb6b57e3ea63a3fd6f0ce2a61",
       "fixture": "p0-dual-region",
       "purpose": "fixture-support"
     },

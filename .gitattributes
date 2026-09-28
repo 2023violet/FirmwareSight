@@ -1,24 +1,54 @@
-# Binary evidence must never be line-ending converted. The fixture ELF files and the MAP files
-# they were generated with are hashed by the tests, so a silently rewritten byte would change a
-# SHA-256 and break the parity claim.
-*.elf   binary
-*.bin   binary
-*.o     binary
-*.a     binary
-*.sqlite binary
-*.png   binary
-*.jpg   binary
-*.ico   binary
+# Two different guarantees live in this file, and CI run 36360310447 proved both were missing.
+#
+# 1. Evidence whose identity is its raw bytes must never be line-ending converted. The fixture ELF
+#    files, the MAP they were generated with, and the linker script behind them are hashed by
+#    `fixtures/manifest.json`, and a test compares that hash to the bytes on disk. Git only
+#    converts a file it has classified as text, so every text classification is written down here
+#    rather than left to the machine's `core.autocrlf`.
+#
+# 2. A text file checked out on Windows must hold the same bytes it holds on Linux and macOS.
+#    With no rule, `core.autocrlf=true` smudged `p0-dual-region.ld` from the recorded LF bytes to
+#    CRLF, and the hash test failed on the checkout rather than on the fixture.
 
-# Golden JSON is compared after parsing, but keeping it byte-stable makes a semantic diff review
-# able to be read as a diff.
-golden/** text eol=lf
-*.json    text eol=lf
-*.ts      text eol=lf
-*.tsx     text eol=lf
-*.rs      text eol=lf
-*.toml    text eol=lf
-*.md      text eol=lf
-*.sql     text eol=lf
-*.css     text eol=lf
-*.py      text eol=lf
+# --- Byte-identical evidence: no conversion, on any platform -------------------------------
+*.elf    binary
+*.bin    binary
+*.o      binary
+*.a      binary
+*.sqlite binary
+*.png    binary
+*.jpg    binary
+*.ico    binary
+
+# A linker MAP is hashed as bytes by the fixture manifest and parsed as text by the MAP adapter.
+# `-text` keeps the committed bytes in every checkout and still lets `git diff` read it as lines.
+# It is deliberately not the `binary` macro, which would also disable delta packing.
+*.map    -text
+
+# --- Source and configuration text: LF on checkout, everywhere ------------------------------
+# Extension list follows what the repository actually tracks. Anything new that is hashed as
+# evidence belongs in the section above; anything new that is text belongs here.
+golden/**   text eol=lf
+*.c         text eol=lf
+*.css       text eol=lf
+*.csv       text eol=lf
+*.h         text eol=lf
+*.html      text eol=lf
+*.js        text eol=lf
+*.json      text eol=lf
+*.ld        text eol=lf
+*.lock      text eol=lf
+*.md        text eol=lf
+*.npmrc     text eol=lf
+*.py        text eol=lf
+*.rs        text eol=lf
+*.sql       text eol=lf
+*.toml      text eol=lf
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.txt       text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+.gitignore     text eol=lf
+.gitattributes text eol=lf
+SHA256SUMS     text eol=lf

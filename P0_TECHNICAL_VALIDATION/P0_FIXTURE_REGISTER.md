@@ -20,7 +20,7 @@ Status: **LOCAL PASS**
 | | Fixture A `p0-basic` | Fixture B `p0-dual-region` |
 | --- | --- | --- |
 | `firmware.elf` | 7,288 bytes, `1c0ae94e611497c1635c117834132f23b36799ad651852ba878be421ba20557f` | 10,960 bytes, `c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62` |
-| `firmware.map` | not provided (by design) | 3,249 bytes, `b2be5f190d46091296f240439a69cef470624d0e84a2c178eb8c65cf60dc4fbe` |
+| `firmware.map` | not provided (by design) | 3,149 bytes committed, `c4182c5bcc69b155e6a9ccc641990a6d6d8649ebb6b57e3ea63a3fd6f0ce2a61` |
 | Linker script | default single-region | `p0-dual-region.ld`, `f4bf022bb856294251776f60a3a5ab8f0c02e478a3e12baf580db8672ba17cc1` |
 | What it proves | detection, sections, symbols, identity, debug exclusion, capability degradation | ROM/RAM region table, LMA-in-ROM with VMA-in-RAM, dual accounting at `MapRegionAndElfLoad` |
 | Architecture | ARM cortex-m4, Thumb, 32-bit little-endian | same |
@@ -50,7 +50,9 @@ committed precisely so that CI tests the parser rather than the toolchain.
 `python scripts/gen_p0_fixtures.py --force` was run and then compared against git.
 
 - `firmware.elf` for both fixtures: **byte-identical**
-- `firmware.map`: **byte-identical**
+- `firmware.map`: **byte-identical to the working copy** - a weaker statement than it sounds, and
+  the reason the next section's defect survived. That working copy held CRLF, the regeneration
+  reproduced CRLF, so the comparison agreed while the committed blob was LF.
 - `fixture.toml` / `manifest.json`: changed, for two legitimate reasons - the recorded date rolled
   forward, and the recorded command line was corrected (it had been written as
   `-p0-dual-region.ld` where the toolchain was actually invoked with `-T p0-dual-region.ld`).
@@ -59,12 +61,48 @@ committed precisely so that CI tests the parser rather than the toolchain.
 So the same toolchain, source and linker script reproduce the same artifact bytes, and the only
 defect surfaced was in the record rather than in the artifact.
 
+## What a checkout is allowed to do to a fixture (added 2026-09-28)
+
+Remote CI Run #1 failed `committed_fixtures_match_their_recorded_hashes` on Windows for
+`p0-dual-region.ld`. The same class of failure was already latent for `firmware.map` on Linux, hidden
+behind the Ubuntu job that never reached the tests. One bug, two directions, and neither end is a
+fixture defect:
+
+| File | Committed blob | What a checkout produced | The recorded hash described |
+| --- | --- | --- | --- |
+| `p0-dual-region.ld` | LF `f4bf022b…` | CRLF `7b872afd…` on a Windows `core.autocrlf=true` checkout | the blob, so the checkout was wrong |
+| `firmware.map` | LF `c4182c5b…` | LF on Linux, CRLF `b2be5f19…` on Windows | the CRLF working copy, so the record was wrong |
+
+`.gitattributes` carried rules for `.elf` and `.bin` but none for `.ld`, `.map`, `.c` or `.h`, while
+its own header comment asserted the MAP files were covered. They were not. Git only abstains from
+line-ending conversion for files it has classified, so an unclassified text file is at the mercy of
+whoever cloned it.
+
+The repair is the text policy plus one record correction; the assertions did not move:
+
+- `*.map -text` and `*.ld text eol=lf`, plus `text eol=lf` for the other source and configuration
+  types the repository tracks, so a checkout yields the committed bytes on every platform;
+- `fixtures/manifest.json` records the `.map` as `c4182c5b…`, the SHA-256 of the committed blob,
+  confirmed by reading `HEAD:fixtures/elf/p0-dual-region/firmware.map` rather than by re-hashing a
+  working copy;
+- no newline normalization was added to the parse or test path, and the hash-first assertion still
+  compares raw bytes. The `oversize-sparse.bin` name in the section above was also wrong; the file
+  is `sparse-elf-header.bin`.
+
+Verified with fresh clones instead of argument:
+
+```text
+before the fix: clone with core.autocrlf=true  -> p0-dual-region.ld = 7b872afd…  (1 of 10 disagree)
+before the fix: clone with core.autocrlf=false -> firmware.map      = c4182c5b…  (1 of 10 disagree)
+after the fix:  both clones                                            10 of 10 agree
+```
+
 ## Malformed inputs
 
 `fixtures/malformed/` holds four deliberately broken files, each with a stated purpose in
 `README.md`: `empty.bin` (0 bytes), `wrong-magic.bin` (18 bytes), `truncated-elf.bin` (64 bytes
-of a real ELF header), `oversize-sparse.bin` (declares a size it does not have). They are inputs
-to the no-panic regression tests, not examples of supported formats.
+of a real ELF header), `sparse-elf-header.bin` (20 bytes of ELF magic over a zero-filled header).
+They are inputs to the no-panic regression tests, not examples of supported formats.
 
 ## Synthetic performance workloads - not firmware
 
