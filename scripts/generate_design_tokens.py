@@ -32,6 +32,7 @@ GROUPS = (
     ("color", "color", ""),
     ("spacing", "space", "px"),
     ("radius", "radius", "px"),
+    ("border", "border", "px"),
     ("layout", "layout", "px"),
     ("table", "row", "px"),
     ("motion", "motion", "ms"),
@@ -147,7 +148,8 @@ def render(tokens: dict, source_sha: str) -> str:
         ":root {",
     ]
     labels = {css: label.title() for (_s, css, _u), label in zip(GROUPS, (
-        "Color", "Spacing", "Radius", "Layout", "Table density", "Motion", "Focus", "Shadow",
+        "Color", "Spacing", "Radius", "Border", "Layout", "Table density", "Motion", "Focus",
+        "Shadow",
     ))}
     labels["font"] = TYPOGRAPHY_LABEL
 

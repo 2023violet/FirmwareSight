@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "meta": {
     "product": "FirmwareSight",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "status": "baseline-authoritative",
     "baseline": "0.5.0",
     "governed_by": "ADR-0018",
@@ -28,6 +28,11 @@
     "panel": 8,
     "modal": 10,
     "pill": 999
+  },
+  "border": {
+    "width": {
+      "hairline": 1
+    }
   },
   "typography": {
     "ui": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Arial, sans-serif",
@@ -127,6 +132,12 @@
       "to": "0.2.0",
       "date": "2026-09-27",
       "change": "ADR-0018 freeze: preserve original semantic colors; add interaction, focus, diff backgrounds, overlay, density, motion, chart sequence and disabled-state tokens."
+    },
+    {
+      "from": "0.2.0",
+      "to": "0.2.1",
+      "date": "2026-09-28",
+      "change": "Close the frozen design-contract gap by adding the semantic 1px hairline border width already required by 03_DESIGN/03_VISUAL_SYSTEM.md and already used by the P0 UI. No color, spacing, radius, typography, layout, motion, shadow or status semantics change."
     }
   ]
 }

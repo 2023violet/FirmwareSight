@@ -84,7 +84,7 @@ gate:
   effective_severity: [PASS, REVIEW, BLOCK]
 
 design:
-  tokens_version: "0.2.0"
+  tokens_version: "0.2.1"
   accepted_ui_png_count: 7
   theme: light_only_mvp
   authority: "governance > frozen_assets_and_adrs > DESIGN.md > accepted_mockups > upstream_reference"

@@ -24,7 +24,7 @@
   align-items: flex-end;
   gap: var(--fs-space-3);
   padding-bottom: var(--fs-space-4);
-  border-bottom: 1px solid var(--fs-color-border-default);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
 }
 
 .field {
@@ -41,7 +41,7 @@
   font: inherit;
   color: var(--fs-color-text-primary);
   background: var(--fs-color-bg-surface);
-  border: 1px solid var(--fs-color-border-default);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   border-radius: var(--fs-radius-control);
 }
 
@@ -65,7 +65,7 @@
   font-weight: bold;
   color: var(--fs-color-text-on-accent);
   background: var(--fs-color-accent-primary);
-  border: 1px solid var(--fs-color-accent-primary);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
   border-radius: var(--fs-radius-control);
   transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
 }
@@ -101,7 +101,7 @@
 }
 
 .rows {
-  border-top: 1px solid var(--fs-color-border-default);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
 }
 
 .row {
@@ -112,7 +112,7 @@
   gap: var(--fs-space-4);
   min-height: var(--fs-row-default);
   padding: var(--fs-space-2) 0;
-  border-bottom: 1px solid var(--fs-color-border-default);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
 }
 
 .term {
@@ -150,8 +150,8 @@
   gap: var(--fs-space-3);
   padding: var(--fs-space-4);
   background: var(--fs-color-bg-subtle);
-  border: 1px solid var(--fs-color-border-default);
-  border-left: 1px solid var(--fs-color-status-block);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-left: var(--fs-border-width-hairline) solid var(--fs-color-status-block);
   border-radius: var(--fs-radius-panel);
 }
 
@@ -187,7 +187,7 @@
   flex-direction: column;
   gap: var(--fs-space-1);
   padding-top: var(--fs-space-4);
-  border-top: 1px solid var(--fs-color-border-default);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
 }
