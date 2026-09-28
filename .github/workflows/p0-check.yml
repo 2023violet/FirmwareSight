@@ -101,6 +101,27 @@ jobs:
           python-version: "3.13"
       - name: Install script dependencies
         run: python -m pip install -r scripts/requirements.txt
+      # The same prerequisites the `rust` job installs, and for the same reason: the drift gate
+      # regenerates the ts-rs bindings by running `cargo test -p firmwaresight-desktop`, which links
+      # the GTK stack. Run #2 (36378384225) proved it - `drift/desktop icons` passed and
+      # `drift/ipc bindings` died in gobject-sys' build script with
+      # `Package gobject-2.0 was not found in the pkg-config search path`. Deliberately a copy
+      # rather than a shared script: two jobs need this list, and abstracting ten apt lines is a
+      # new portability and testing surface, not a smaller change.
+      - name: Install Linux prerequisites for the Tauri shell
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libdbus-1-dev
       # Regenerates tokens.css, the desktop icons and the ts-rs bindings, then requires that the
       # committed files did not move. `git diff --exit-code` is the assertion.
       - name: Verification gate (drift)
