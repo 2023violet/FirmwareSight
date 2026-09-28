@@ -1,27 +1,78 @@
-# cargo-deny policy for the P0 workspace.
+# cargo-deny policy for the P0 workspace, validated against cargo-deny 0.20.2 - the version CI
+# installs. The previous copy of this file was written against an older schema and never parsed:
+# `[advisories] severity-threshold` and `[bans] highlight-warnings` are not keys 0.20.2 accepts,
+# and `[licenses] allow` values are parsed as SPDX expressions.
 #
-# The allow list below is not aspirational: it was read out of the licenses actually carried by
-# the 460 third-party packages resolved by Cargo.lock, not from a list of licenses this project
-# would like. The workspace's own six crates are `Proprietary` and excluded by `[licenses]`
-# because cargo-deny evaluates dependencies, not workspace members.
+# The allow list below is not aspirational. It is the output of `cargo deny list -t 1.0 --layout
+# license` over the four shipping targets declared in `[graph]`: 0BSD, Apache-2.0,
+# Apache-2.0 WITH LLVM-exception, BSD-3-Clause, CC0-1.0, MIT, MIT-0, MPL-2.0, Unicode-3.0,
+# Unlicense and Zlib, plus `Unlicensed` for the six workspace crates, which `[licenses].private`
+# excludes because cargo-deny evaluates dependencies rather than members. ISC was in the list and
+# the run showed no crate carries it, so it was removed rather than kept as a hope.
+#
+# Cargo.lock resolves 466 packages in total, 460 of them third-party; the checked graph is smaller
+# than that because it follows only the shipping targets.
 
 [graph]
 all-features = true
+# Walk the graph for the platforms P0 actually ships (04_TECH/20: Windows x64, Ubuntu LTS x64,
+# macOS Intel and Apple Silicon). Without a target filter cargo-deny also follows edges that no
+# desktop build can reach - tauri 2.12.0 declares a non-optional `reqwest` for Android and iOS only
+# - and the policy then reports a mobile HTTP client as if it were in the product. The boundary is
+# checked on the targets where it could actually be broken.
+targets = [
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+]
 
 [advisories]
 db-urls = ["https://github.com/RustSec/advisory-db"]
 db-path = "~/.cargo/advisory-dbs"
 version = 2
-# `unsound` and `unmaintained` are treated as warnings rather than hard failures: a dependency
-# that is merely unmaintained is a decision to record, not a reason CI cannot report anything
-# else. yanked and nonexistent stay fatal.
-severity-threshold = "medium"
-ignore = []
+# 0.20.2 removed `severity-threshold` (PR#611, finalized in PR#681): a vulnerability advisory is an
+# error whatever its CVSS score is, and only the informational class - unmaintained, unsound - is
+# scope-controlled. The keys below are written out so the policy is visible instead of inherited:
+# a dependency that is merely unmaintained stays informational, not a reason CI cannot report
+# anything else, while a yanked version fails the gate.
+unmaintained = "all"
+unsound = "all"
+yanked = "deny"
+# Two advisories, both in the informational class (no vulnerability advisory applies to this tree:
+# `cargo deny check advisories` reports zero vulnerabilities). Neither can be resolved without
+# changing the frozen Tauri 2.12.0 dependency architecture, so each is recorded here with the
+# evidence rather than silenced by widening the scope. `unused-ignored-advisory` stays at its
+# default `warn`, so an entry that stops matching is itself reported.
+ignore = [
+    { id = "RUSTSEC-2024-0429", reason = """
+unsound in glib::VariantStrIter, glib 0.18.5, reached only through the Linux WebView chain
+gtk 0.18.2 <- tauri 2.12.0. The advisory's own solution is >=0.20.0, and `cargo update -p glib
+--precise 0.20.0` fails: gtk requires ^0.18. Moving glib means moving gtk-rs, muda, tao and
+webkit2gtk, i.e. changing the frozen Tauri dependency architecture, which needs an ADR rather than
+a CI fix. P0 never calls GVariant APIs, and glib is not compiled for the Windows or macOS targets.
+See P0_DEPENDENCY_REPORT.md and P0_KNOWN_LIMITATIONS.md."""
+    },
+    { id = "RUSTSEC-2024-0370", reason = """
+proc-macro-error 1.0.4 is unmaintained and the advisory states no safe upgrade exists. It arrives
+as a build-time dependency of glib-macros 0.18.5, which is again pinned by the gtk-rs 0.18 line the
+frozen Tauri 2.12.0 requires. It is a proc macro: it runs during `cargo build` on the host and is
+not linked into the shipped binary, and it is not in the graph for the Windows or macOS targets."""
+    },
+]
 
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
-highlight-warnings = true
+# `wildcards = "deny"` is about version requirements in a manifest, and workspace inheritance
+# writes none: `firmwaresight-core = { workspace = true }` carries its version from the root
+# [workspace.dependencies]. Path dependencies cannot be published as `*`, so exempting them keeps
+# the rule aimed at registry crates instead of at our own workspace layout.
+allow-wildcard-paths = true
+# cargo-deny 0.20.2 has no `highlight-warnings` key; the supported knob is `highlight`, which
+# chooses which duplicate-version paths get drawn into the graph. `all` shows both the lowest
+# version and the simplest path, so a warning in CI names the route that produced it.
+highlight = "all"
 deny = [
     # Boundaries frozen by AGENTS.md 2 and 4. A crate appearing here at all is a policy
     # violation, so CI fails before anything else is discussed.
@@ -34,7 +85,12 @@ deny = [
     { crate = "memmap2", reason = "the full-buffer guard has no mmap fallback (04_TECH/16)" },
     { crate = "gix", reason = "system Git is the declared adapter boundary, not a library dependency" },
     { crate = "rayon", reason = "P0 is synchronous; parallelism needs an ADR first" },
-    { crate = "anyhow", reason = "typed errors are the frozen error model (05_ENGINEERING/03)" },
+    # `wrappers` narrows the ban rather than removing it: anyhow is a non-optional dependency of the
+    # frozen Tauri 2.12.0 tree (tauri, tauri-build, tauri-utils), so it is in every desktop build
+    # whether or not P0 wants it. Listing those three as wrappers means a *first-party* crate
+    # depending on anyhow still fails the gate, which is the boundary AGENTS.md 3 actually draws:
+    # our error model is typed enums, and that claim is about our code.
+    { crate = "anyhow", reason = "typed errors are the frozen error model (05_ENGINEERING/03)", wrappers = ["tauri", "tauri-build", "tauri-utils"] },
 ]
 
 # Duplicates that come from the Tauri and SQLite trees and cannot be removed without dropping a
@@ -52,25 +108,23 @@ allow = [
     "Apache-2.0 WITH LLVM-exception",
     "BSD-3-Clause",
     "CC0-1.0",
-    "ISC",
     "MIT",
     "MIT-0",
     "MPL-2.0",
     "Unicode-3.0",
     "Unlicense",
     "Zlib",
-    # Legacy `Cargo.toml` metadata from 22 older transitive crates writes these as a slash
-    # separated string instead of an SPDX expression, so cargo-deny sees them as opaque license
-    # names. They are listed literally rather than ignored, so a rename would still be caught.
-    # Each one resolves to a pair already allowed above.
-    "Apache-2.0 / MIT",
-    "Apache-2.0/MIT",
-    "BSD-3-Clause/MIT",
-    "MIT/Apache-2.0",
-    "Unlicense/MIT",
 ]
 private = { ignore = true }
 
-# No copyleft license is allowed on its own. LGPL-2.1-or-later appears exactly once in the tree,
-# inside `r-efi`'s three-way `MIT OR Apache-2.0 OR LGPL-2.1-or-later`, so it is satisfied by the
-# MIT option and never binds the product.
+# Five entries were deleted from the list above, and this is the evidence that deleting them cost
+# nothing: `Apache-2.0 / MIT`, `Apache-2.0/MIT`, `BSD-3-Clause/MIT`, `MIT/Apache-2.0` and
+# `Unlicense/MIT` are legacy Cargo metadata strings, not SPDX, which is why 0.20.2 rejected them as
+# `invalid character(s)`. With them gone, `cargo deny check licenses` still reports ok and the
+# census above still lists no unlicensed third-party crate, so cargo-deny was already resolving
+# those packages from their license files. The five lines asserted nothing; they only made the
+# config unparseable.
+
+# No copyleft license is allowed on its own, and none is now reachable: the LGPL-2.1-or-later that
+# used to appear in this tree came from `r-efi`, which is a UEFI dependency and is not in the graph
+# for any of the four shipping targets.
