@@ -348,3 +348,107 @@ it. Refactors that changed no boundary are not here.
 - **Test evidence.** `corepack pnpm --version` -> 12.7.0; frozen install exit 0; the whole
   `frontend` group re-run green afterwards.
 - **ADR required?** No - it restores the frozen value rather than changing it.
+
+---
+
+# The CI closure round (entries 21-25)
+
+Remote CI Run `36360310447` on `f9b8ccb` failed four jobs and the frozen baseline required a fifth
+thing the workflow never had. Each cause is reproduced and fixed in
+`P0_CI_REMEDIATION_REPORT.md`; only the decisions that could be made wrongly are recorded here.
+
+## 21. Fixture byte identity was moved into the Git text policy, not into the test
+
+- **Problem.** `committed_fixtures_match_their_recorded_hashes` failed on `windows-latest`: the
+  checkout yielded CRLF where the manifest recorded the LF blob's hash.
+- **Existing authority.** `fixtures/manifest.json`'s own purpose is to verify the byte identity of
+  committed evidence; `AGENTS.md` 8 forbids weakening an evidence claim.
+- **Chosen implementation.** `.gitattributes` classifies every tracked text type explicitly
+  (`text eol=lf`), marks linker maps `-text` so Git never touches them, and leaves the binaries
+  `binary`. One manifest value moved to the blob's own SHA-256, because the previous value had
+  recorded a CRLF working copy.
+- **Alternatives considered.** Normalizing newlines before hashing (rejected: the manifest would then
+  verify "some bytes resembling the fixture"); deleting the `.ld` from the manifest (rejected: it is
+  the input that produces the linker's layout claim); changing the expected hash to the CRLF value
+  (rejected outright by the prompt - it would make the assertion platform-dependent).
+- **Test evidence.** Two fresh clones, `core.autocrlf=true` and `false`, both match 10/10;
+  `git check-attr` shows `text: set, eol: lf` for the `.ld` and `text: unset` for the `.map`.
+- **ADR required?** No - it makes a hash assertion mean what it already claimed.
+
+## 22. Icon drift compares decoded pixels instead of encoder bytes
+
+- **Problem.** `drift/desktop icons` failed on Linux with `Pillow==12.3.0` installed from the pinned
+  requirements, so this was not a version difference: the check compared bytes of a compressed stream.
+- **Existing authority.** `05_ENGINEERING` requires drift checks to detect a real change; `DESIGN.md`
+  and `assets/design-tokens.json` are frozen, so the icons themselves are not negotiable here.
+- **Chosen implementation.** Decode both sides: PNG dimensions plus RGBA buffer; ICO the required size
+  set plus per-frame RGBA, with a missing or unexpected frame failing.
+- **Alternatives considered.** Commit the Linux-regenerated set (rejected as the prompt's forbidden
+  default - it moves the artifact to satisfy the checker); a project-owned byte-deterministic encoder
+  (rejected: a heavy dependency or a hand-written container writer for a guarantee nobody asked for,
+  and cross-platform SHA equality cannot be proven from one machine).
+- **Test evidence.** Three conditions against the committed set: untouched -> exit 0; identical pixels
+  with all five files holding different bytes -> exit 0; one repainted pixel and one dropped ICO frame
+  -> exit 1 naming both.
+- **ADR required?** No. The lost guarantee - encoder-byte stability - is recorded in
+  `P0_KNOWN_LIMITATIONS.md` as a deliberate trade.
+
+## 23. `deny.toml` was rewritten to the schema the tool actually has
+
+- **Problem.** cargo-deny 0.20.2 refused to parse the file: `severity-threshold` and
+  `highlight-warnings` are not keys it accepts, and five `licenses.allow` values were slash strings in
+  a field parsed as SPDX.
+- **Existing authority.** `AGENTS.md` 2 and 4 freeze the dependency red lines; the prompt requires the
+  tool's real schema over an impression of it.
+- **Chosen implementation.** Keys confirmed from `cargo deny init` and from the vendored
+  `cargo-deny-0.20.2` `Config` deserializers. `[graph] targets` names the four shipping platforms from
+  `04_TECH/20`, so `tauri`'s Android/iOS-only `reqwest` edge is outside the evaluated graph and the ban
+  stays absolute rather than being exempted. `anyhow` keeps its ban with
+  `wrappers = ["tauri", "tauri-build", "tauri-utils"]`, so first-party use still fails.
+- **Alternatives considered.** Dropping the advisories check or diluting it to informational-only
+  (rejected); renaming crates out of `deny` (rejected); `skip`-ing the 23 duplicate-version warnings
+  (rejected - they are warnings, and silencing them deletes the evidence that the Tauri tree is the
+  reason they exist).
+- **Test evidence.** `cargo deny check licenses bans sources advisories` -> exit 0, four `ok`. The
+  allow list is the output of `cargo deny list -t 1.0 --layout license`, and removing `ISC` plus the
+  five slash strings left it `ok`, which is what proves those entries asserted nothing.
+- **ADR required?** For the two unresolvable advisories, yes - and it is not this round's to write.
+  Reported as an architecture conflict.
+
+## 24. The macOS core smoke calls the same gate script
+
+- **Problem.** `05_ENGINEERING/06_CI_CD_BASELINE.md` requires a core smoke on `main` push; no macOS job
+  existed, so six green jobs would still not have met the baseline.
+- **Chosen implementation.** A `core-smoke` group in `scripts/check.py` selecting the four library
+  crates and the CLI by package name, and a `macos-core` job that runs
+  `python scripts/check.py --only core-smoke`.
+- **Alternatives considered.** A fifth crate containing macOS-only tests (rejected by the prompt and by
+  the Phase-0 crate budget); a hand-written command list in the workflow (rejected: a second place for
+  the gate to disagree with itself); running the full workspace on macOS (rejected - the desktop crate
+  needs a platform's WebView stack, and its compile boundary is proven on the two OSes that ship it).
+- **Test evidence.** `--only core-smoke` -> 3/3, 87 of the 104 Rust tests; `--list` shows the group; it
+  is not in the default set, so `cargo test --workspace` is not run twice.
+- **ADR required?** No - it adds coverage the baseline already required.
+
+## 25. Evidence is keyed by build, because the window found the key was wrong
+
+- **Problem.** The second artifact in one session returned `ERR-STORAGE-4006` /
+  `UNIQUE constraint failed: evidence.id`. 102 Rust tests passed with the defect present because each
+  storage test uses a fresh database.
+- **Existing authority.** `04_TECH/15` §4 states `Build 1─N Evidence`; `AGENTS.md` 6 requires every
+  schema change to go through a migration.
+- **Chosen implementation.** Migration `0002_evidence_keyed_by_build.sql` rebuilds the table on
+  `PRIMARY KEY (build_id, id)`, copies the rows and recreates both indexes; `migrate()` applies an
+  ordered list, each migration in its own transaction; `SCHEMA_VERSION` is 2. A SQLite primary key
+  cannot be `ALTER`ed, so the copy-and-rename shape is not a style choice.
+- **Alternatives considered.** Making evidence identifiers globally unique by namespacing them per
+  build (rejected: it changes the meaning of a stored fact to dodge a constraint); deleting and
+  recreating the user's database (rejected: it is user data); no migration at all because "there is no
+  GA database to upgrade" (rejected - there was one on this machine, in `%APPDATA%`, with a build in
+  it).
+- **Test evidence.** `two_builds_may_record_the_same_evidence_identifier` and
+  `a_version_one_database_is_upgraded_without_losing_its_evidence` failed first with the window's own
+  message, then passed; storage is 9 -> 11 tests, workspace 104. The real user-profile database was
+  upgraded in place to version 2 with both builds and 21 evidence rows present.
+- **ADR required?** Not for the fix: it restores the relation the frozen data model already declares.
+  Flagged in `.ai/DECISIONS.md` so the architect confirms that reading rather than inheriting it.

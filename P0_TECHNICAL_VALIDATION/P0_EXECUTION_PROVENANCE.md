@@ -111,3 +111,27 @@ field in `BASELINE.yaml`, correct the `18 UI tests` figure that the accessibilit
 entry by entry, and restate the source census to include the design checklist. Naming a SHA here would
 otherwise require editing the commit it names, which cannot be done honestly, so the distinction
 between the validated tree and the records that follow it is stated instead of hidden.
+
+## Remediation round (2026-09-28)
+
+The P0 prompt closed above. This round runs under a different authorization - *FirmwareSight P0 —
+CI Closure / Cross-Platform Reproducibility Remediation v1.0*, supplied inline, so it has no stored
+file and no SHA-256 to record here; its terms are in `.ai/DECISIONS.md` and
+`P0_CI_REMEDIATION_REPORT.md`.
+
+| Field | Value |
+| --- | --- |
+| Start HEAD, local | `f9b8ccb` (equal to `origin/main` at preflight, so no unauthorized delta) |
+| Remote state that triggered it | Actions run `36360310447` on `f9b8ccb`: `failure`, 2 of 6 jobs green |
+| Tooling added during the round | `cargo-deny 0.20.2` (`cargo install --locked cargo-deny --version 0.20.2`), the version CI pins. No other tool, and no dependency in either manifest |
+| Frozen inputs that did not move | `Pillow==12.3.0`, Rust `1.98.1`, pnpm `12.7.0`, `assets/design-tokens.json`, the icon design, the fixture hash assertion |
+| Desktop launches | two, both in the current user session, both `--release --features custom-protocol`; the second after the storage fix |
+| Validated source tree | `ff9b34a` - the last commit that changes code or configuration. `python scripts/check.py` -> 14/14 with zero `SKIPPED`, and `--only core-smoke` -> 3/3. `cargo test --workspace` on the same tree reports 104 passed / 0 failed, and the UI group 19 |
+| Commits after it | documentation only; run `git log --oneline ff9b34a..HEAD` rather than trusting a count written here, because the commit that writes a count is itself one of them |
+| Push | not performed. The owner pushes; this round does not write `REMOTE CI PASS` |
+
+`ff9b34a` is named as the validated source tree for the same reason `65cb2dc` was: the gate ran
+against contents no different from its own. The documentation commits that follow it change no file
+the gate reads - the drift group regenerates bindings, tokens and icons, and every one of those is
+committed at or before `ff9b34a` - and the two reports they add cite the commands executed above, not
+a rerun.
