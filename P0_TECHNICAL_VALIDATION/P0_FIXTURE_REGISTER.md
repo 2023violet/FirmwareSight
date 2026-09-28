@@ -86,8 +86,13 @@ The repair is the text policy plus one record correction; the assertions did not
   confirmed by reading `HEAD:fixtures/elf/p0-dual-region/firmware.map` rather than by re-hashing a
   working copy;
 - no newline normalization was added to the parse or test path, and the hash-first assertion still
-  compares raw bytes. The `oversize-sparse.bin` name in the section above was also wrong; the file
-  is `sparse-elf-header.bin`.
+  compares raw bytes;
+- the committed `.map` bytes did not move at all: this commit changes the record and the checkout
+  policy, and `git diff` for `fixtures/elf/p0-dual-region/firmware.map` is empty. Only the local
+  working copy, smudged by an earlier checkout, was rewritten back to the blob it came from.
+
+While fixing the record, one more register defect surfaced: `fixtures/malformed/`'s fourth file is
+`sparse-elf-header.bin` (20 bytes), not the `oversize-sparse.bin` this document used to name.
 
 Verified with fresh clones instead of argument:
 

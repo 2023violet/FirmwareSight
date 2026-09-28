@@ -97,20 +97,20 @@ crates/firmwaresight-artifact: 28    crates/firmwaresight-report: 17    crates/f
 `DIRECTORY_TREE.txt` and `SHA256SUMS` still describe the frozen v0.5.1 package, so the source layout
 P0 created is recorded here instead of being written over a baseline artifact.
 
-134 files added since start HEAD `e086e98`, by top-level area:
+137 files added since start HEAD `e086e98`, by top-level area:
 
 | Area | Files | What is in it |
 | --- | --- | --- |
 | `apps/` | 49 | `cli/` (`fwsight`), `desktop/src-tauri/` (shell, IPC DTOs, capability, icons, parity tests), `desktop/ui/` (React summary, generated bindings, tests) |
-| `crates/` | 30 | the four Phase-0 libraries and their test suites |
-| `P0_TECHNICAL_VALIDATION/` | 19 | this evidence pack: the 17 the prompt names, plus the takeover provenance doc and the AGENTS.md 11 design checklist |
+| `crates/` | 31 | the four Phase-0 libraries, their test suites, and the two storage migrations |
+| `P0_TECHNICAL_VALIDATION/` | 21 | this evidence pack: the 17 the prompt names, plus the takeover provenance doc, the AGENTS.md 11 design checklist, and the two reports the CI remediation adds |
 | `fixtures/` | 14 | two real ELF fixtures with sources and `fixture.toml`, four malformed inputs, manifest |
 | `scripts/` | 8 | the gate, fixture and workload generators, golden updater, token and icon generators |
 | `golden/` | 5 | CLI and Core goldens, plus `reports/README.md` explaining what may live there |
 | root and config | 9 | workspace `Cargo.toml` and lock, `rust-toolchain.toml`, `deny.toml`, `.cargo/config.toml`, `.github/workflows/p0-check.yml`, `.gitignore`, `.gitattributes`, the prompt copy under `10_AUDIT/SOURCE_PROMPTS/` |
 
-Sizes, tracked files only: 33 Rust files / 7,239 lines (of which 1,366 lines live in `tests/`), and
-22 TypeScript files / 1,131 lines. Excluded by `.gitignore` and therefore absent from the
+Sizes, tracked files only: 33 Rust files / 7,397 lines (of which 1,502 lines live in the four
+`tests/` integration files), and 22 TypeScript files / 1,167 lines. Excluded by `.gitignore` and therefore absent from the
 repository: `target/`, `node_modules/`, `apps/desktop/ui/dist/`, and the generated
 100 / 256 / 512 MiB workloads in `fixtures/generated/`.
 
@@ -122,3 +122,9 @@ $ RUSTUP_TOOLCHAIN=stable cargo test --workspace
 $ RUSTUP_TOOLCHAIN=stable cargo clippy --workspace --all-targets --all-features -- -D warnings
 (no output; exit 0)
 ```
+
+That transcript is the architecture check's own run and is kept as executed. The CI remediation round
+added two storage tests and a migration, so the same command now reports **104 passed; 0 failed**,
+still with clippy silent under `-D warnings`. The boundary claims above do not move with the count:
+Core still declares zero dependencies, still has no `unsafe`, and no `object::*`, `tokio::*`,
+rusqlite or Tauri type crosses a boundary that should not carry it.

@@ -50,15 +50,23 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 - The app analyzes two closed fixture keys. There is no file picker: `analyze(path)` would be
   "read arbitrary file" with extra steps, so the user-authorized selection path arrives with a
   dialog capability and its own ADR.
-- **The windowed application was never launched.** In the shipping configuration
-  (`cargo build --release -p firmwaresight-desktop --features custom-protocol`) the binary is
-  10,398,208 bytes and does embed the built UI, but nobody opened the actual WebView on a desktop.
-  Layout on a real display, WebView2 availability and CSP behaviour in the shipped shell are
-  therefore unverified. Without `custom-protocol` the same command produces a dev-mode binary
-  (10,330,112 bytes) that expects `pnpm dev` to be serving the frontend; starting it alone would
-  show an empty window, which is why the start instruction below names the feature. Start it with
-  `pnpm -C apps/desktop/ui build` then
-  `cargo run --release -p firmwaresight-desktop --features custom-protocol`.
+- **The windowed application has been launched - once, on one machine.** The earlier claim in this
+  file ("never launched") is obsolete: the shipping configuration
+  (`cargo build --release -p firmwaresight-desktop --features custom-protocol`) was started under the
+  authorized smoke and the results, field by field, are in `P0_DESKTOP_SMOKE_REPORT.md`. What that
+  launch does not cover: one Windows 10 (19045) host at 100% scaling, one display, one WebView2
+  version (153.0.4234.48). No Windows 11, no DPI scaling above 100%, no Ubuntu or macOS window, and
+  no window-management behaviour (resize, minimise, restore, close-while-analyzing). The binary in
+  that run is 10,400,768 bytes and embeds `index-CGuVwhkk.js` + `index-DtRzKmrE.css`, the asset pair
+  the current `dist/` holds.
+- **The loading state has never been seen on screen.** Analysis of a 7 KiB fixture completes before
+  the browser paints the pending state, so the `aria-live` announcement and the disabled-control path
+  are verified by a jsdom test rather than by an eye. `P0_DESKTOP_SMOKE_REPORT.md` records that row as
+  NOT OBSERVED, not as a pass.
+- **One visual defect is open and unrepaired.** The capability value `Partial` breaks as
+  "Parti / al" inside the badge column at this width. It is a layout defect in a P0 screen, and
+  closing it means changing either a token-driven column width or the copy - both of which go through
+  `P0_DESIGN_CHECKLIST.md`, not through this file.
 - **`cargo` will not tell you the embedded frontend is stale.** `tauri-build` registers
   `cargo:rerun-if-changed` for `dist/` only when that directory already exists at build time
   (`tauri-build-2.7.0/src/codegen/context.rs:92-97`), and a missing `dist/` is not an error in the
@@ -87,11 +95,20 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 
 ## Storage
 
-- Schema version 1 covers only what P0 writes. Gate and release tables arrive with their own
+- Schema version 2 covers only what P0 writes. Gate and release tables arrive with their own
   migrations.
 - `foreign_keys = ON` and a 5 s busy timeout are asserted at open, but multi-process concurrency
   is untested - nothing in P0 runs two FirmwareSight processes against one database.
-- No legacy migration exists or is needed: there is no GA database to upgrade.
+- **Migration 0002 exists because version 1 was wrong, not because time passed.** `evidence` had a
+  whole-table primary key on `id`, so recording the same field identifier for a second build raised
+  `UNIQUE constraint failed: evidence.id` (`ERR-STORAGE-4006`) - the desktop could not analyze two
+  artifacts, which contradicts `04_TECH/15` §4's `Build 1─N Evidence`. It was found by the authorized
+  window smoke, reproduced by a failing test, and fixed by rebuilding the table on
+  `(build_id, id)` (`P0_DESKTOP_SMOKE_REPORT.md`, `P0_STORAGE_REPORT.md`). What is still limited:
+  a SQLite primary key cannot be `ALTER`ed, so the upgrade is copy-and-rename rather than in-place -
+  correct and cheap at P0 row counts, and it would want a different shape for a large history;
+  there is no down-migration, because a schema that cannot be verified in both directions is not
+  worth claiming; and the v1-to-v2 path has been run against a real v1 database on Windows only.
 
 ## Repository layout
 
@@ -105,18 +122,53 @@ Stated plainly, because a slice that hides its edges will be trusted where it sh
 
 ## Verification gaps
 
-- **CI has never run.** The workflow is committed and locally validated; `p0-check.yml` has no
-  execution history, so `CI PASS` is claimed nowhere.
-- **`cargo deny` has never run.** The policy file is written; licenses, duplicates and advisories
-  are NOT RUN.
+- **CI has run once, and it failed.** Run `36360310447` at head `f9b8ccb` reported
+  `failure`: `Rust (windows)`, `Rust (ubuntu)`, `Generated output drift` and `Dependency policy`
+  failed; `Desktop UI (windows)` and `Desktop UI (ubuntu)` passed. All four causes were reproduced
+  locally and fixed locally (`P0_CI_REMEDIATION_REPORT.md`), but the remediation HEAD is unpushed,
+  so **no job has ever been green on the files that are now in the tree**. `CI PASS` is claimed
+  nowhere in this pack, and the coding agent cannot claim it - the rerun is verified by the architect.
+- **`cargo deny` now runs, and passes, on this machine** (0.20.2, exit 0 over `licenses bans sources
+  advisories`). Two things it does not therefore prove: it has not been seen green in CI, and it
+  evaluates only the four targets in `[graph] targets`. Add a mobile or embedded target later and the
+  boundary check reopens - `tauri` declares a non-optional `reqwest` for Android and iOS, which the
+  filter is what keeps out of the product's graph.
+- **Two advisories cannot be closed without changing the frozen dependency architecture.**
+  `RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370` (`proc-macro-error 1.0.4`,
+  unmaintained, host-only) both arrive through the gtk-rs 0.18 line that Tauri 2.12.0 requires;
+  `cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`. They are ignored with
+  recorded evidence rather than upgraded, and the conflict is reported to the architect as a decision
+  that needs an ADR, not a CI fix. `unused-ignored-advisory` stays at `warn`, so an ignore entry that
+  stops matching becomes visible by itself.
+- **The Ubuntu system packages and the macOS core smoke have never executed.** Both live only in CI,
+  and this round cannot prove them without a push. The package list is Tauri 2's documented Linux
+  prerequisite set plus `libdbus-1-dev` named explicitly because `libdbus-sys` asks for `dbus-1`;
+  `pkg-config` itself is not installed, since the failure log shows it ran and returned 1 while the
+  `.pc` files were missing. `macos-core` is `python scripts/check.py --only core-smoke` - the same
+  script CI and contributors already run, not a fourth place tests are written - and it is wired to
+  run on `main` pushes, not on pull requests, per `05_ENGINEERING/06_CI_CD_BASELINE.md`.
+- **Desktop icon bytes are no longer asserted across platforms; their pixels are.** `Pillow`'s PNG
+  and ICO encoders emit different bytes for identical RGBA data depending on encoder state, so the
+  old byte comparison tested the library rather than the icon - it passed on Windows and failed on
+  Linux with nothing wrong on screen. The check now decodes: PNG dimensions and RGBA pixels, and for
+  the `.ico` the required size set with per-frame pixels, where a missing frame fails. The consequence
+  of choosing semantics over bytes is that `git status` will show the generated icons as unchanged
+  even when a rebuild would write different bytes, and a future regression that changes only the
+  encoder invocation is not a failure. That is intended; a regression that changes a pixel is.
+- **`.gitattributes` is now load-bearing for a hash assertion.** The fixture manifest records the
+  SHA-256 of the committed blobs, and Run #1 failed because a Windows checkout smudged a `.ld`
+  script to CRLF. The text policy is what makes "blob hash" and "file on disk" the same statement on
+  every platform, so a contributor who deletes that file, or a later target that adds a `*.map`
+  pattern, breaks a test with no product defect behind it. Verified here by fresh `git clone` into a
+  temporary directory on Windows; the Linux and macOS clones are what the next run measures.
 - **No fuzzing.** `cargo-fuzz` needs a nightly toolchain and a separate crate, which the tool
   policy did not authorize. The no-panic claim rests on regression tests over four malformed
   fixtures plus a truncated-ELF and foreign-MAP case.
 - **Fixture regeneration needs a toolchain most contributors lack.** `arm-none-eabi-gcc` is only
   required to rebuild fixtures, never to test them - but the ability to regenerate is therefore
   single-machine in practice.
-- **One host, one build.** All timings come from one Windows 10 machine with a release build;
-  they are not comparable to CI or to another platform.
+- **One host, one build.** All timings and the window smoke come from one Windows 10 machine with a
+  release build; they are not comparable to CI or to another platform.
 
 ## Process honesty
 

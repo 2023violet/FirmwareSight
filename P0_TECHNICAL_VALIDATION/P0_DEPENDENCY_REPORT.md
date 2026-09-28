@@ -14,7 +14,10 @@ Requirement (AGENTS.md 4): every dependency must name the need it serves, say wh
 library or an existing dependency was insufficient, and state its license, maintenance and build
 impact. Nothing enters because it is common in the ecosystem.
 
-Status: **LOCAL PASS**, with the license and advisory check reported as **NOT RUN locally**.
+Status: **LOCAL PASS on all four checks, including cargo-deny itself.** The policy file is no
+longer "written but not executed": `cargo deny 0.20.2` runs here and exits 0. What is still missing
+is a CI run that says the same thing - Run #1's `deny` job failed on a schema error, and the HEAD
+that fixes it has not been pushed.
 
 ## Scale
 
@@ -89,29 +92,92 @@ Only `Pillow==12.3.0` (`scripts/requirements.txt`), used by `gen_desktop_icons.p
 
 ## Licenses
 
-`deny.toml`'s allow list was derived from the licenses actually present in the resolved tree, read
-out of each `.crate` archive: 220 `MIT OR Apache-2.0`, 113 `MIT`, 32 `Apache-2.0 OR MIT`, 18
-`Unicode-3.0`, 17 `Zlib OR Apache-2.0 OR MIT`, 15 `MIT/Apache-2.0`, 10 `Unlicense OR MIT`, plus
-single digits of MPL-2.0, BSD-3-Clause, ISC, 0BSD, CC0-1.0, MIT-0 and
-`Apache-2.0 WITH LLVM-exception`.
+The allow list in `deny.toml` is now read out of the tool instead of out of the archives.
+`cargo deny list -t 1.0 --layout license` walks the graph for the four shipping targets named in
+`[graph] targets` - 293 packages resolve for `x86_64-pc-windows-msvc` alone, against the 466 lines in
+`Cargo.lock` - and lists a crate **once per alternative its declared expression offers**, so
+`sha2@0.11.0` (`MIT OR Apache-2.0`) appears under both `MIT` and `Apache-2.0`. The counts below are
+therefore crate-license pairs and sum to more than the number of packages. That is the correct shape
+for the question being asked, which is "is every license a user could be handed by this tree on a
+platform we ship allowed?"
 
-Two notes recorded rather than smoothed over:
+| License | Entries |
+| --- | --- |
+| `MIT` | 323 |
+| `Apache-2.0` | 224 |
+| `Unicode-3.0` | 19 |
+| `Zlib` | 11 |
+| `Unlicense` | 7 |
+| `MPL-2.0` | 5 |
+| `BSD-3-Clause` | 4 |
+| `0BSD`, `CC0-1.0`, `MIT-0`, `Apache-2.0 WITH LLVM-exception` | 1 each |
+| `Unlicensed` | 6 - the workspace's own crates, exempted by `private = { ignore = true }` because cargo-deny evaluates dependencies, not members |
 
-- 22 older transitive crates write their license as `MIT/Apache-2.0` style strings rather than an
-  SPDX expression, so cargo-deny sees an opaque name. They are listed literally in the allow list
-  instead of being ignored.
-- LGPL-2.1-or-later appears once, inside `r-efi`'s
-  `MIT OR Apache-2.0 OR LGPL-2.1-or-later`. A disjunction is satisfied by its MIT option, so
-  nothing here becomes copyleft-bound.
+Reading this from the tool rather than from `LICENSE` files corrected three things the earlier draft
+of this section asserted:
+
+- **The slash-form entries were never required.** 12 crates reachable on the Windows target still
+  write a legacy string instead of an SPDX expression (`bitflags@1.3.2` declares `MIT/Apache-2.0`).
+  The previous allow list carried `MIT/Apache-2.0` and four other slash forms literally on the
+  assumption that cargo-deny would treat them as opaque single tokens. It parses `/` as a
+  disjunction, so the literal names matched nothing that the parsed forms had not already covered:
+  deleting all five leaves `licenses ok`. A stale allow entry is not free - with
+  `unused-allowed-license = "warn"` it is a warning that outlives the reason it was added, and it
+  widens the policy for crates that no longer need the widening.
+- **`ISC` is not in this graph.** It came from the archive count. Removing it also leaves
+  `licenses ok`, which is the only check that distinguishes "absent" from "present and permitted".
+- **`r-efi`'s LGPL option is outside the graph cargo-deny evaluates.** `r-efi` appears twice in
+  `Cargo.lock` (5.3.0, 6.0.0) declaring `MIT OR Apache-2.0 OR LGPL-2.1-or-later`; `cargo deny list`
+  for the four shipping targets returns zero matches for it, because it is a UEFI-only crate no
+  desktop build reaches. The disjunction was always satisfied by its MIT option, so nothing here was
+  ever copyleft-bound; under the target filter the question is not asked at all. **No copyleft
+  license is permitted on its own anywhere in this policy.**
 
 ## Verification status
 
 ```
 $ python scripts/check.py --only deny
 === [deny] cargo-deny
-SKIPPED: `cargo deny` is not installed on this machine. CI installs it, ...
+$ cargo deny check licenses bans sources advisories      (cargo-deny 0.20.2)
+warning[duplicate]: found 3 duplicate entries for crate 'base64'
+   ...
+advisories ok, bans ok, licenses ok, sources ok
+
+=== summary ===
+PASS       deny/cargo-deny
+
+1/1 steps passed
 ```
 
-The policy file is therefore **written but not executed locally**, and CI has not run: there is no
-push authorization in this task. `cargo-deny@0.20.2` is pinned in the workflow. The license,
-duplicate and advisory results are **NOT RUN**, and no document in this pack claims they passed.
+`cargo deny 0.20.2` is installed on this machine and the check exits 0, so the license, ban, source
+and advisory results are **LOCAL PASS** rather than `NOT RUN`. The contents of that pass, stated
+precisely:
+
+- **Zero vulnerability advisories.** The informational class carries two entries, both in the frozen
+  Tauri 2.12.0 dependency architecture and both recorded in `deny.toml` with the reason rather than
+  silenced by widening scope: `RUSTSEC-2024-0429` (`glib 0.18.5`, unsound) and `RUSTSEC-2024-0370`
+  (`proc-macro-error 1.0.4`, unmaintained, host-only build dependency). Neither ignore entry has gone
+  stale - the check prints no `unused-ignored-advisory` warning, which is the mechanism that would
+  notice.
+- **The glib upgrade is not available inside the frozen architecture.** `cargo update -p glib
+  --precise 0.20.0` fails: `gtk v0.18.2`, required by Tauri 2.12.0's Linux stack, depends on
+  `glib = "^0.18"`. Moving glib means moving gtk-rs, muda, tao and webkit2gtk, which is an ADR, not a
+  CI fix. Reported to the architect as an architecture conflict rather than resolved by moving a
+  dependency; see `P0_CI_REMEDIATION_REPORT.md`.
+- **23 `warning[duplicate]` results** from `multiple-versions = "warn"`, all in the `syn`, `toml`,
+  `thiserror`, `windows-sys`, `base64`, `sha2` and `png` families, produced by the Tauri and SQLite
+  trees rather than by a choice of ours. They are warnings because the alternatives are dropping a
+  frozen dependency or `skip`-ing the evidence away; `highlight = "all"` makes each one print the
+  lowest version and the shortest path that reaches it.
+- **The ten `[bans] deny` entries were exercised on the graph, not just declared.** `reqwest`,
+  `hyper`, `rustls`, `memmap2`, `sqlx`, `gix`, `rayon`, `wgpu`, `axum` and `tonic` do not appear on
+  any shipping target. `anyhow` does - as a non-optional dependency of `tauri`, `tauri-build` and
+  `tauri-utils` - and the ban stays live for first-party code through `wrappers`, so a crate of ours
+  that declared it would still fail. This is the boundary `AGENTS.md` 3 draws in our own error model,
+  checked rather than asserted.
+
+What this does **not** claim: CI has not seen this file. Run #1's dependency job failed on the
+schema errors (an unsupported `severity-threshold`, five slash strings cargo-deny rejected) and was
+fixed here; the remediation HEAD is unpushed, so the CI result for the dependency boundary is
+`FAIL` at Run #1 and `NOT RUN` since. Both `P0_CI_REPORT.md` and `P0_EXIT_CHECKLIST.md` carry the
+same split.

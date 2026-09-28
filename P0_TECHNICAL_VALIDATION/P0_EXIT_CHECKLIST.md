@@ -13,6 +13,11 @@ last_updated: "2026-09-28"
 Every item from the prompt's P0 PASS list, with the evidence that closed it. `LOCAL PASS` means
 it ran on this machine and produced the quoted result. Nothing here says `CI PASS`.
 
+Status of the track as a whole changed after this list was first written: remote CI Run #1 executed
+and failed four jobs, so P0 is `FAIL — REMOTE CI RUN #1` with remediation active. The counts below
+are the remediated tree's. `P0_CI_REPORT.md` keeps the failed run, and
+`P0_CI_REMEDIATION_REPORT.md` explains each fix.
+
 ## Baseline authority minimum (prompt §58)
 
 | Item | Status | Evidence |
@@ -50,11 +55,11 @@ it ran on this machine and produced the quoted result. Nothing here says `CI PAS
 | 9 | CLI analyze works | LOCAL PASS | exit 0 on both fixtures, human and `--json` output |
 | 10 | CLI deterministic JSON passes | LOCAL PASS | byte comparison across runs |
 | 11 | CLI exit-code tests pass | LOCAL PASS | 5 CLI unit tests; measured 0 / 2 / 3 |
-| 12 | SQLite migration smoke passes | LOCAL PASS | 9 storage tests, `schema_migrations`, refusal of a newer schema |
+| 12 | SQLite migration smoke passes | LOCAL PASS | 11 storage tests, two ordered migrations, `schema_migrations`, refusal of a newer schema, and an in-place upgrade of a hand-built version-1 database |
 | 13 | SQLite snapshot transaction/roundtrip passes | LOCAL PASS | `a_snapshot_survives_a_full_round_trip_with_identical_facts`, `a_failed_import_leaves_no_build_visible_as_complete` |
 | 14 | ts-rs generation works | LOCAL PASS | 10 export tests + `drift/ipc bindings unchanged` |
 | 15 | TypeScript strict build passes | LOCAL PASS | `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `useUnknownInCatchVariables`; `tsc --noEmit` clean |
-| 16 | minimal Tauri summary builds | LOCAL PASS for build and link; see note | `cargo check -p firmwaresight-desktop --all-targets` clean. In the shipping configuration, `cargo build --release -p firmwaresight-desktop --features custom-protocol` produced a 10,398,208-byte `firmwaresight-desktop.exe` whose embedded asset set contains the built `index-BdwhVhyx.js`. **The windowed app was never launched** |
+| 16 | minimal Tauri summary builds | LOCAL PASS, and the window was opened | `cargo check -p firmwaresight-desktop --all-targets` clean. In the shipping configuration, `cargo build --release -p firmwaresight-desktop --features custom-protocol` produced a 10,400,768-byte `firmwaresight-desktop.exe` containing the current built asset names. The window was launched on a real display and both fixtures analyzed - see `P0_DESKTOP_SMOKE_REPORT.md`, which also records the storage defect that launch found |
 | 17 | blocking parse not on the WebView event loop | LOCAL PASS | off-thread test + `Session: Send + Sync` assertion |
 | 18 | Core/CLI/Desktop parity passes | LOCAL PASS | 7 parity tests |
 | 19 | 512 MiB guard works before allocation | LOCAL PASS | accepted at 512 MiB, rejected at +1 KiB with no hash/read time |
@@ -62,10 +67,10 @@ it ran on this machine and produced the quoted result. Nothing here says `CI PAS
 | 21 | golden tests pass | LOCAL PASS | 5 CLI golden tests |
 | 22 | fmt passes | LOCAL PASS | `cargo fmt --all -- --check` |
 | 23 | clippy passes | LOCAL PASS | `cargo clippy --workspace --all-targets --all-features -- -D warnings`, silent |
-| 24 | cargo test passes | LOCAL PASS | 102 tests, 0 failures |
+| 24 | cargo test passes | LOCAL PASS | 104 tests, 0 failures |
 | 25 | frontend typecheck/build passes | LOCAL PASS | typecheck, lint, 19 tests, `vite build` |
-| 26 | no forbidden dependency or boundary violation | LOCAL PASS for first-party code; **cargo-deny NOT RUN** | the `cargo tree --workspace` graph (345 nodes) contains no `reqwest`/`hyper`/`rustls`/`memmap2`/`sqlx`/`gix`/`rayon`/`wgpu`/`axum`/`tonic`; `tokio` and `anyhow` appear only inside Tauri, with zero first-party references. `deny.toml` is written but never executed |
-| 27 | P0 reports complete | LOCAL PASS | All 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names are present, plus `P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by AGENTS.md 11 - 19 files, each citing a command that was actually run |
+| 26 | no forbidden dependency or boundary violation | LOCAL PASS, executed | `cargo deny check licenses bans sources advisories` → exit 0, `advisories ok, bans ok, licenses ok, sources ok` with `cargo-deny 0.20.2` installed. The `[bans] deny` list is evaluated over the four shipping targets, so `reqwest`/`hyper` (an Android/iOS-only dependency of `tauri 2.12.0`) stay banned rather than exempted; `anyhow` is banned with `wrappers` limited to the Tauri tree, so a first-party use still fails. Two informational advisories are recorded with reasons - see `P0_CI_REMEDIATION_REPORT.md` |
+| 27 | P0 reports complete | LOCAL PASS | All 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names are present, plus `P0_EXECUTION_PROVENANCE.md` from the takeover, `P0_DESIGN_CHECKLIST.md` required by AGENTS.md 11, and the two the remediation prompt adds: `P0_CI_REMEDIATION_REPORT.md` and `P0_DESKTOP_SMOKE_REPORT.md` - 21 files, each citing a command that was actually run |
 | 28 | known limitations explicit | LOCAL PASS | `P0_KNOWN_LIMITATIONS.md` |
 
 ## Item 16, stated precisely
@@ -73,24 +78,27 @@ it ran on this machine and produced the quoted result. Nothing here says `CI PAS
 `minimal Tauri summary builds` is met in the narrow sense the phrase allows: the desktop crate
 compiles and links, and in the configuration that actually ships - `--features custom-protocol`,
 which is what `tauri build` passes - `tauri::generate_context!` resolves and embeds the built
-frontend (`dist/`, 231.12 kB JS + 7.62 kB CSS). The embedding is not taken on trust: that binary is
-10,398,208 bytes and contains the asset name `index-BdwhVhyx.js`, while the same command without the
-feature is 10,330,112 bytes and contains no such string, because tauri's dev-mode codegen embeds
-nothing (`tauri-2.12.0/build.rs:253`, `tauri-codegen-2.7.0/src/context.rs:178`).
+frontend (`dist/`, 231.19 kB JS + 7.62 kB CSS). The embedding is not taken on trust: the binary
+contains the current asset names, while the same command without the feature is 68 kB smaller and
+contains no such string, because tauri's dev-mode codegen embeds nothing
+(`tauri-2.12.0/build.rs:253`, `tauri-codegen-2.7.0/src/context.rs:178`).
 
-Timings for the release link were taken against a populated `target/`: 3m 11s for the
-`custom-protocol` link, 2m 49s without it, and 5m 46s for the first cold link earlier in this
-track. They are single-machine numbers and are quoted as such.
+Timings for the release link were taken against a populated `target/`: 6m 32s for the first
+`custom-protocol` link in this round, 2m 51s for the rebuild after the storage fix, and 5m 46s for
+the first cold link earlier in this track. They are single-machine numbers and are quoted as such.
 
-It is **not** met in the sense a reader might assume: nobody has opened the window, so on-screen
-layout, WebView2 availability and CSP behaviour in the shipped shell are unverified. That gap is
-carried in `P0_KNOWN_LIMITATIONS.md` rather than being closed by wording.
+The gap this item used to carry - "nobody has opened the window" - is closed: `P0_DESKTOP_SMOKE_REPORT.md`
+records two launches in a real session, the on-screen facts compared field by field against the CLI,
+the WebView2 runtime version, the CSP that governed them, a clean close, and the defect the second
+launch was built to find. One sub-item stayed not-observed (the loading state, too fast to capture by
+hand) and is reported that way rather than as a pass.
 
 ## Not met, in one place
 
 | Item | Status |
 | --- | --- |
-| CI green | NOT RUN - workflow committed, never executed (no push authorization) |
-| cargo-deny licenses/bans/advisories | NOT RUN - tool not installed locally |
-| Peak RSS | NOT MEASURED - reason documented in `P0_PERFORMANCE_REPORT.md` |
+| CI green | NOT MET — Run #1 failed four jobs on `f9b8ccb`; the fixes are local and the rerun is owed by a push |
+| cargo-deny licenses/bans/advisories | MET locally, exit 0 with the tool installed; the CI job's own result is still pending |
+| Peak RSS | NOT MEASURED - reason documented in `P0_PERFORMANCE_REPORT.md`; a measurement gap, not a promotion blocker |
 | Fuzz campaign | NOT RUN - tool policy did not authorize `cargo-fuzz` for P0 |
+| `v0.6.0` | NOT GENERATED - requires a real P0 `PASS`, which requires an all-green run on a new head |

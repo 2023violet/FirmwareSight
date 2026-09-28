@@ -34,7 +34,9 @@ produced it, and a status of `LOCAL PASS` is kept visibly separate from `CI PASS
 | `P0_PERFORMANCE_REPORT.md` | Measured cost, and the 512 MiB guard's behaviour at the boundary. |
 | `P0_SECURITY_INPUT_REPORT.md` | Untrusted input, capability surface, privacy boundary. |
 | `P0_DEPENDENCY_REPORT.md` | What was added, why, and what was refused. |
-| `P0_CI_REPORT.md` | What the gate runs, and what has only run locally. |
+| `P0_CI_REPORT.md` | What the gate runs, and what the remote runs measured. |
+| `P0_CI_REMEDIATION_REPORT.md` | Each failed CI job, its reproducer, its fix, and what remains unproven. |
+| `P0_DESKTOP_SMOKE_REPORT.md` | The shipped window opened for real, field by field. |
 | `P0_DESIGN_CHECKLIST.md` | Did the UI pass the checklist AGENTS.md 11 requires, box by box. |
 | `P0_KNOWN_LIMITATIONS.md` | What P0 does not do, said plainly. |
 | `P0_EXIT_CHECKLIST.md` | Every exit item, with its evidence line. |
@@ -42,15 +44,18 @@ produced it, and a status of `LOCAL PASS` is kept visibly separate from `CI PASS
 
 ## Verified totals
 
-- Rust: 102 tests passing across 6 workspace members.
+- Rust: 104 tests passing across 6 workspace members.
 - TypeScript: 19 tests across 3 files, plus strict typecheck, ESLint and a production Vite build.
 - Gate: `python scripts/check.py` - 14 steps on a tree that already has `apps/desktop/ui/dist/`, 16
-  when the group has to build the frontend first. cargo-deny is `SKIPPED` locally (the tool is not
-  installed on this machine) and runs in CI.
+  when the group has to build the frontend first, plus 3 under `--only core-smoke` for the macOS job
+  the CI baseline requires. cargo-deny now runs here (`0.20.2`, exit 0) rather than being `SKIPPED`.
+- Remote CI: run `36360310447` against `f9b8ccb` concluded `failure`, 2 of 6 jobs green. Its four
+  causes are fixed locally; the remediation HEAD is unpushed, so **no job is green on these files**.
 - Cold rebuild: `cargo clean` plus removing `node_modules/` and `dist/`, then the whole gate -> 16/16
   steps, 102 Rust tests and 18 UI tests, exit 0; the delivered tree then re-ran 14/14 with 19
-  UI tests after an accessibility fix that touched no Rust file.
+  UI tests after an accessibility fix that touched no Rust file. That run belongs to the pre-remediation
+  tree and its Rust count has since moved to 104.
 - Baseline under validation: `FirmwareSight_Project_Baseline_v0.5.1`.
 - This pack: the 17 documents the prompt's `P0_TECHNICAL_VALIDATION/` list names, plus
-  `P0_EXECUTION_PROVENANCE.md` from the takeover and `P0_DESIGN_CHECKLIST.md` required by
-  `AGENTS.md` 11 - 19 files.
+  `P0_EXECUTION_PROVENANCE.md` from the takeover, `P0_DESIGN_CHECKLIST.md` required by
+  `AGENTS.md` 11, and the two reports the CI remediation adds - 21 files.

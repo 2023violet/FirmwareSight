@@ -12,27 +12,36 @@ last_updated: "2026-09-28"
 
 ## Status
 
-**P0 TECHNICAL VALIDATION: CONDITIONAL_PASS**
+**P0 TECHNICAL VALIDATION: FAIL — REMOTE CI RUN #1. Remediation: LOCAL FIX COMPLETE. Remote rerun:
+REQUIRED.**
 
 Not PASS, and therefore **`FirmwareSight_Project_Baseline_v0.6.0` is not delivered**. The unique
-baseline remains `v0.5.1`; `BASELINE.yaml` records the P0 track as executed with three open
-conditions.
+baseline remains `v0.5.1`; `BASELINE.yaml` records the P0 track as `FAIL` with
+`remediation_state: ACTIVE`.
 
 The technical claim - that one headless Core produces the same facts for a CLI and a desktop
 through a typed IPC boundary, on real linker output, with the memory rule demonstrable and the
-size guard holding - is proven by executed tests. What is missing is three authorizations, not
-three engineering unknowns.
+size guard holding - is still proven by executed tests, and now proven on a physical display as
+well. What changed is that this report previously called three items "authorizations, not
+engineering unknowns". Two of them were then tested, and both failed: the checkout on Windows
+rewrote fixture bytes, and the dependency policy could not be parsed by the tool CI installs. The
+third - opening the window - found a real storage defect. Treating an untested assumption as a
+process formality was the error; the failures were in the code and the configuration, not in the
+authorization.
 
-## Open conditions
+## What the first remote run and the desktop launch exposed
 
-| # | Condition | Why it is open | Closes when |
-| --- | --- | --- | --- |
-| C1 | The CI workflow has never executed | This task carries no push authorization; `p0-check.yml` is committed but has no run history | `p0-check.yml` runs green on `main` (both OS matrices) |
-| C2 | `cargo deny` has never run | The tool is not installed locally and installing it was not authorized | the `deny` job reports licenses, bans, sources and advisories |
-| C3 | The desktop window has never been opened | Starting a GUI in the user's session was not authorized; compile, link and jsdom rendering are proven | one manual launch of `firmwaresight-desktop` with the summary screen confirmed on screen |
+| # | Item | Outcome |
+| --- | --- | --- |
+| C1 | The CI workflow executes | Ran as `36360310447` on `f9b8ccb`: 2 of 6 jobs green. Four root causes reproduced and fixed locally; the rerun is owed |
+| C2 | `cargo deny` executes | Ran in CI and failed on `deny.toml` itself. Now parses under 0.20.2 and passes locally with all four checks; two advisories remain that cannot be resolved inside the frozen Tauri tree, and that conflict is reported rather than fixed by moving a dependency |
+| C3 | The desktop window opens | Opened twice on Windows 10 with WebView2 153.0.4234.48. The first pass failed on a second analysis; the defect is fixed, regression-tested and re-verified in the window |
+| C4 | (not a condition - a gap) macOS core smoke | The CI baseline requires it and the workflow had none. Added as `--only core-smoke`, runnable locally, 3/3 with 87 of the 104 Rust tests (the other 17 belong to the desktop crate, which needs a platform's WebView stack to build) |
+| C5 | Peak RSS | Still `NOT MEASURED`, with its reason. A measurement gap, not a promotion blocker |
 
-None of the three can be closed by editing a document. Each needs an action this task was not
-given leave to take.
+Each of C1-C4 is now closed by a change plus a command, and each is documented in
+`P0_CI_REMEDIATION_REPORT.md` and `P0_DESKTOP_SMOKE_REPORT.md`. None of them is closed by wording:
+the remote verdict belongs to a run that has not happened yet.
 
 ## What was proven
 
@@ -51,9 +60,17 @@ given leave to take.
   read time, because the size check happens on the `stat` result before a buffer exists.
 - **No panic on hostile input.** Four malformed fixtures, a truncated ELF, a zero-filled header,
   a foreign MAP and a region-less MAP all return typed errors.
-- **Storage.** Nine tests over migrations, foreign-key enforcement, transactional import that
-  cannot leave a half-written build visible, content-addressed dedupe, and refusal to delete a
-  schema it does not understand.
+- **Storage.** Eleven tests over two ordered migrations, foreign-key enforcement, transactional
+  import that cannot leave a half-written build visible, content-addressed dedupe, an in-place
+  upgrade of a hand-built version-1 database, and refusal to delete a schema it does not understand.
+  The migration count is two because the first one was wrong: `evidence.id` was a whole-table key
+  while the analyzer reuses identifiers across builds, so a second artifact could never be stored.
+  The desktop smoke found it; two tests failed before migration `0002` and pass after it.
+- **The shipped window.** `P0_DESKTOP_SMOKE_REPORT.md`: two launches on a real display, the page
+  served from `http://tauri.localhost/` with nothing listening on the dev-server port, every
+  cross-checked field matching `fwsight analyze --json` for the same bytes, four distinct state
+  glyphs legible at their rendered size, a typed error panel with an operation id when storage
+  failed, and a clean exit code 0 on close.
 - **Boundaries.** `firmwaresight-core` still declares zero dependencies; `ts-rs` is declared in
   exactly one crate; the capability file is byte-identical to the frozen baseline; no network,
   subprocess or `unsafe` exists anywhere in first-party code.
@@ -61,7 +78,7 @@ given leave to take.
 ## Test and gate totals
 
 ```
-$ cargo test --workspace                 102 passed / 0 failed  (6 members)
+$ cargo test --workspace                 104 passed / 0 failed  (6 members)
 $ pnpm test                               19 passed / 0 failed  (3 files)
 $ cargo fmt --all -- --check              clean
 $ cargo clippy --workspace --all-targets --all-features -- -D warnings   clean
@@ -102,18 +119,27 @@ Four findings worth naming because they are the kind that usually hide:
    name. The same measurement also showed that only the feature-enabled build requires `dist/`, so
    the gate's `--all-features` clippy step is the one place the UI has to be built first. See
    `P0_IMPLEMENTATION_LOG.md` 18.
+5. **A schema that could store one build.** Found by opening the window, not by a test.
+   `evidence.id` was the whole-table primary key, while the analyzer names its facts within one
+   analysis, so the second fixture a user analyzed could not be stored at all and the shell reported
+   `ERR-STORAGE-4006`. All 102 Rust tests passed with that defect present, because every storage test
+   used a fresh database and the desktop's own dedupe guard hides the collision from a single-snapshot
+   test. The lesson is recorded in `P0_DESKTOP_SMOKE_REPORT.md`: a suite that never puts two builds in
+   one database has not tested the relation `Build 1─N Evidence` at all.
 
 ## Gate recommendation
 
 Do not open G1. Do not start P1.
 
-P0's own claim is "the architecture can carry the product", and on the evidence above it can. The
-conditions that keep this at `CONDITIONAL_PASS` are about who ran the check, not what the check
-found - which is precisely the distinction the baseline says to preserve.
+P0's own claim is "the architecture can carry the product", and on the evidence above it can. But the
+status is `FAIL`, not `CONDITIONAL_PASS`: the first remote run measured four red jobs, and the desktop
+launch measured a storage defect, so what is outstanding is no longer "who ran the check" - it is a
+rerun that has not happened yet.
 
-To convert this to PASS: authorize a push so C1 and C2 execute, then launch the desktop once for
-C3. If any of the three fails, the status drops to `FAIL` or `BLOCKED` as appropriate, and the
-v0.6.0 baseline stays withheld.
+To convert this to PASS, in order: the owner pushes the remediation commits; a new Actions run on that
+head shows Rust on Windows and Linux, Desktop UI on both, generated-output drift, dependency policy and
+the macOS core smoke all green; and the architect signs the promotion. A green rerun of `f9b8ccb` would
+prove nothing, because the fixes are in the new commits.
 
 ## Boundary kept with V0
 

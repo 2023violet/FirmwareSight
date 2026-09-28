@@ -14,13 +14,13 @@ Requirement: structured history lives in SQLite via `rusqlite + bundled`; schema
 through numbered migrations; a partial import is never observable as a finished one; and an
 unrecognized schema is never repaired by deleting data.
 
-Status: **LOCAL PASS**
+Status: **LOCAL PASS**, after one schema defect was found and repaired
 
 ## Result
 
 ```
-$ RUSTUP_TOOLCHAIN=stable cargo test -p firmwaresight-storage
-running 9 tests ... test result: ok. 9 passed; 0 failed
+$ cargo test -p firmwaresight-storage
+running 11 tests ... test result: ok. 11 passed; 0 failed
 ```
 
 | Test | What it forbids |
@@ -34,11 +34,20 @@ running 9 tests ... test result: ok. 9 passed; 0 failed
 | `a_failed_import_leaves_no_build_visible_as_complete` | a half-written import being visible as `COMPLETE` |
 | `the_same_snapshot_is_never_stored_twice` | one artifact producing N identical builds because the UI was clicked N times |
 | `an_unknown_newer_schema_is_refused_rather_than_reset` | an older binary deleting a newer database |
+| `two_builds_may_record_the_same_evidence_identifier` | a second artifact being unstashable because evidence ids repeat across builds |
+| `a_version_one_database_is_upgraded_without_losing_its_evidence` | an upgrade rebuilding a table and dropping the rows that were in it |
+
+The last two were written after the desktop smoke found the defect they describe, and they fail
+against the pre-fix schema - the first with the same `UNIQUE constraint failed: evidence.id` the
+window displayed.
 
 ## Schema
 
-`crates/firmwaresight-storage/migrations/0001_initial.sql`, applied inside one transaction and
-recorded in `schema_migrations (version, name, applied_at)`.
+Two migrations, applied in version order, each inside its own transaction and recorded in
+`schema_migrations (version, name, applied_at)`:
+
+- `migrations/0001_initial.sql` - the schema itself.
+- `migrations/0002_evidence_keyed_by_build.sql` - rebuilds `evidence` on `PRIMARY KEY (build_id, id)`.
 
 Tables: `projects`, `builds`, `artifacts`, `sections`, `symbols`, `evidence`,
 `memory_footprints`. Constraints that carry meaning rather than decoration:
@@ -46,8 +55,10 @@ Tables: `projects`, `builds`, `artifacts`, `sections`, `symbols`, `evidence`,
 - `builds.state CHECK (state IN ('IMPORTING','COMPLETE','FAILED'))`
 - `artifacts CHECK (length(sha256) = 64)`, with `entry_point` nullable alongside
   `entry_unknown` so an unknown stays distinguishable from a zero
-- `evidence.classification CHECK`, primary key on the evidence id, so one item cannot be
-  recorded twice under two different claims
+- `evidence.classification CHECK`, and since `0002` a key of `(build_id, id)`, so one item cannot be
+  recorded twice under two different claims *within a build* while different builds may each record
+  the same-named fact. Version 1 keyed `id` alone, which contradicted `04_TECH/15` 4
+  (`Build 1─N Evidence`) and made a second build impossible
 - `sections` and `symbols` keyed by `(build_id, ordinal)`, `memory_footprints` keyed by `build_id`
 - `ON DELETE CASCADE` from every child to `builds`
 
@@ -90,14 +101,28 @@ The desktop shell opens its database under the platform application-data directo
 build row, using `build_id_for_snapshot` to recognize a content-addressed snapshot that is
 already stored.
 
+That dedupe guard is also why the shell's own tests never reached the defect above: it prevents a
+*repeat of one snapshot*, which is the collision the key happened to catch, while a *second distinct
+snapshot* reusing an evidence identifier is the case the key made impossible. Only a run against a
+persistent, already-populated database - which is what a desktop app actually has - reaches it. The
+real file at `%APPDATA%\com.firmwaresight.desktop\firmwaresight-p0.sqlite` was left in place and
+upgraded by the rebuilt binary:
+
+```text
+schema_migrations: [(1, '0001_initial'), (2, '0002_evidence_keyed_by_build')]
+builds:            2, both COMPLETE       evidence rows: 21 (11 + 10)
+ev-sha256 rows:    2, one per build       primary key:   (build_id, id)
+```
+
 ## Boundaries held
 
 - `rusqlite` appears in exactly one crate; `firmwaresight-core` still has an empty
   `[dependencies]` table.
 - No SQL reaches the WebView: there is no `run_sql` command, and the storage crate is not
   exposed through IPC.
-- No migration is destructive, and none is required yet: P0 has no production database to
-  upgrade, which `04_TECH/15` anticipated rather than papered over.
+- No migration is destructive. `0002` rebuilds one table and copies every row unchanged - no
+  `DROP` of data, no re-import, no reset path - and the upgrade test asserts a pre-existing row's
+  value survives it. P0 does now have a database worth upgrading: the developer's own.
 
 ## Carried forward
 
