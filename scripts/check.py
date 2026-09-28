@@ -5,9 +5,15 @@ CI and a developer machine must not disagree about what "green" means, so the wo
 this script instead of carrying its own copy of the command list.
 
 Usage:
-    python scripts/check.py              # everything
-    python scripts/check.py --only rust  # one group: rust | frontend | drift | deny
+    python scripts/check.py                     # everything
+    python scripts/check.py --only rust         # one group
     python scripts/check.py --list
+
+Groups: rust, frontend, drift, deny, and core-smoke - the last being the headless subset without
+the Tauri shell, which is what the macOS job in 05_ENGINEERING/06_CI_CD_BASELINE.md asks for. It is
+a real local command, not a CI-only copy: run `python scripts/check.py --only core-smoke` on any
+host. The default full gate does not repeat it, because the `rust` group already covers every one
+of those packages plus the shell.
 
 Exit code is non-zero on the first failing step; every step's command line is printed before it
 runs so a failure can be reproduced by hand.
@@ -25,6 +31,14 @@ ROOT = Path(__file__).resolve().parent.parent
 UI = ROOT / "apps" / "desktop" / "ui"
 # Tauri's production codegen embeds this directory at compile time.
 UI_MARKER = UI / "dist" / "index.html"
+# The headless product: named so a platform that ships Core but not the shell can still be gated.
+CORE_PACKAGES = (
+    "firmwaresight-core",
+    "firmwaresight-artifact",
+    "firmwaresight-storage",
+    "firmwaresight-report",
+    "fwsight",
+)
 
 
 def resolve(name: str) -> str:
@@ -103,6 +117,30 @@ def rust_steps(gate: Gate) -> None:
             return
 
 
+def core_smoke_steps(gate: Gate) -> None:
+    """The headless product on its own: fixture parsing, memory accounting, storage, report and CLI
+    contracts, with no Tauri shell in the selection.
+
+    `firmwaresight-desktop` is excluded by package name rather than by a feature flag, so this
+    group needs no WebView system libraries, no built frontend and no `dist/` marker. That is what
+    lets a third platform carry a required smoke without the shell's compile coverage moving with
+    it - the shell stays covered by the `rust` group on the two platforms that build it.
+    """
+    exe = cargo()
+    select: list[str] = []
+    for package in CORE_PACKAGES:
+        select += ["-p", package]
+
+    steps = (
+        ("fmt", [exe, "fmt", "--all", "--", "--check"]),
+        ("clippy", [exe, "clippy", *select, "--all-targets", "--", "-D", "warnings"]),
+        ("test", [exe, "test", *select]),
+    )
+    for name, argv in steps:
+        if not gate.run("core-smoke", name, argv):
+            return
+
+
 def drift_steps(gate: Gate) -> None:
     py = sys.executable
     checks = (
@@ -154,23 +192,26 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--only",
-        choices=("rust", "frontend", "drift", "deny"),
+        choices=("rust", "frontend", "drift", "deny", "core-smoke"),
         help="run a single group instead of the whole gate",
     )
     parser.add_argument("--list", action="store_true", help="print the groups and exit")
     args = parser.parse_args(argv[1:])
 
     if args.list:
-        print("rust\nfrontend\ndrift\ndeny")
+        print("rust\nfrontend\ndrift\ndeny\ncore-smoke")
         return 0
 
     gate = Gate()
+    # `core-smoke` is deliberately not in the default set: every package it selects is already
+    # inside `cargo test --workspace`, so running both would re-lint the same code twice.
     groups = [args.only] if args.only else ["rust", "frontend", "drift", "deny"]
     dispatch = {
         "rust": rust_steps,
         "frontend": frontend_steps,
         "drift": drift_steps,
         "deny": deny_steps,
+        "core-smoke": core_smoke_steps,
     }
     for group in groups:
         dispatch[group](gate)

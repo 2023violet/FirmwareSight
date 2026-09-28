@@ -38,6 +38,32 @@ jobs:
           node-version: "24"
       - name: Enable the pinned pnpm
         run: corepack enable
+      # Run 36360310447 failed `clippy --all-features` on ubuntu-latest inside glib-sys' build
+      # script: `pkg-config cannot find glib-2.0`. That is runner provisioning, not a source
+      # defect - the same crate graph compiles on Windows, and the Ubuntu UI job was green. These
+      # are the prerequisites Tauri 2 documents for Linux. The graph that needs them:
+      # libwebkit2gtk-4.1-dev brings the whole pkg-config chain our -sys crates ask for (gtk+-3.0,
+      # glib-2.0/gobject-2.0/gio-2.0, gdk-pixbuf-2.0, atk, pango, cairo, javascriptcoregtk-4.1,
+      # libsoup-3.0, webkit2gtk-4.1), build-essential supplies the C compiler that builds
+      # libsqlite3-sys from source, and libdbus-1-dev is named because libdbus-sys (through tao)
+      # asks for dbus-1 - depending on another package to pull it in transitively is not worth a
+      # failed cycle. pkg-config itself is not installed because the same log shows it ran and
+      # returned status 1; it was the .pc files that were missing.
+      - name: Install Linux prerequisites for the Tauri shell
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libdbus-1-dev
       - name: Verification gate (fmt, clippy, test)
         run: python scripts/check.py --only rust
 
@@ -89,3 +115,21 @@ jobs:
         run: cargo install cargo-deny@0.20.2 --locked
       - name: Verification gate (deny)
         run: python scripts/check.py --only deny
+
+  # 05_ENGINEERING/06_CI_CD_BASELINE.md requires a macOS core smoke on a push to main; the four
+  # jobs above covered only Windows and Linux, so a fully green run of them still did not satisfy
+  # the frozen baseline. Core, artifact, storage, report and the CLI are what Tier 2 macOS support
+  # claims, and they need no WebView, so the desktop shell is excluded rather than the platform.
+  # Cost control per the same matrix: pull requests may skip it, a manual dispatch runs it.
+  macos-core:
+    name: macOS Core Smoke
+    if: github.event_name != 'pull_request'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Verification gate (core smoke)
+        run: python scripts/check.py --only core-smoke
