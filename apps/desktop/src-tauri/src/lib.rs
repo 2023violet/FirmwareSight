@@ -6,20 +6,27 @@
 //! selection id, or names a snapshot id it already received - and the file behind the second was
 //! chosen by a person in a native dialog the Rust side opened (`intake`), while the third only
 //! selects a bounded page from history (`details`).
+//!
+//! P2 adds the same discipline to Compare. The UI names two snapshot ids, receives a bounded summary
+//! and a session-local diff handle, then pages the changed rows with that handle. Export takes a diff
+//! id and nothing else: the save path comes from a dialog the Rust side opened and is not returned to
+//! the WebView (`compare`).
 
 #![forbid(unsafe_code)]
 
+pub mod compare;
 pub mod details;
 pub mod intake;
 pub mod ipc;
 pub mod service;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use firmwaresight_artifact::ArtifactError;
 use firmwaresight_artifact::pipeline::Analysis;
+use firmwaresight_core::domain::diff::DiffResult;
 use firmwaresight_storage::{Database, StorageError};
 use ipc::{AnalysisSummaryDto, ErrorEnvelopeDto, FixtureOptionDto, SelectionDto};
 use service::{FixtureCatalog, display_name};
@@ -77,11 +84,48 @@ impl SelectionStore {
     }
 }
 
+/// A diff the session computed, held so rows can be paged without recomputing the comparison.
+///
+/// The id is a per-process counter in the same shape as a selection id (`cmp-<pid>-<n>`). It is
+/// deliberately nothing more: not persisted, not portable, not part of the diff's content identity,
+/// and not stable across runs. After a restart the UI re-runs the comparison from the two snapshot
+/// ids, and Core's determinism means it gets the same diff back (prompt §20).
+#[derive(Debug, Default)]
+struct DiffStore {
+    next: u64,
+    order: VecDeque<String>,
+    results: HashMap<String, DiffResult>,
+}
+
+/// How many computed diffs to hold. The screen reads one at a time, so eviction is invisible in
+/// practice and it bounds memory that would otherwise grow with every click on Compare.
+const MAX_SESSION_DIFFS: usize = 8;
+
+impl DiffStore {
+    fn insert(&mut self, result: DiffResult) -> String {
+        self.next += 1;
+        let id = format!("cmp-{:x}-{:x}", std::process::id(), self.next);
+        self.order.push_back(id.clone());
+        self.results.insert(id.clone(), result);
+        while self.order.len() > MAX_SESSION_DIFFS {
+            if let Some(oldest) = self.order.pop_front() {
+                self.results.remove(&oldest);
+            }
+        }
+        id
+    }
+
+    fn get(&self, id: &str) -> Option<&DiffResult> {
+        self.results.get(id)
+    }
+}
+
 /// The shell's state: a fixture catalog, one SQLite handle, and the selections currently staged.
 pub struct Session {
     catalog: FixtureCatalog,
     db: Mutex<Database>,
     selections: Mutex<SelectionStore>,
+    diffs: Mutex<DiffStore>,
 }
 
 impl Session {
@@ -92,6 +136,7 @@ impl Session {
             catalog,
             db: Mutex::new(Database::open(db_path.as_ref())?),
             selections: Mutex::new(SelectionStore::default()),
+            diffs: Mutex::new(DiffStore::default()),
         })
     }
 
@@ -302,6 +347,54 @@ impl Session {
             remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
         })
     }
+
+    /// Hold a computed diff for the rest of this session and name it.
+    ///
+    /// # Errors
+    ///
+    /// An internal envelope if the diff lock was poisoned by an earlier panic.
+    pub(crate) fn remember_diff(
+        &self,
+        result: DiffResult,
+        operation_id: &str,
+    ) -> Result<String, ErrorEnvelopeDto> {
+        let mut store = self.lock_diffs(operation_id)?;
+        Ok(store.insert(result))
+    }
+
+    /// Read one page or projection out of a diff this session holds.
+    ///
+    /// The closure runs while the store is locked, so a page never reflects a diff that was evicted
+    /// between the lookup and the read.
+    ///
+    /// # Errors
+    ///
+    /// `ERR-DIFF-5002` when the id was never issued or has already been dropped.
+    pub(crate) fn with_diff<R>(
+        &self,
+        diff_id: &str,
+        operation_id: &str,
+        read: impl FnOnce(&DiffResult) -> R,
+    ) -> Result<R, ErrorEnvelopeDto> {
+        let store = self.lock_diffs(operation_id)?;
+        let result = store
+            .get(diff_id)
+            .ok_or_else(|| diff_missing(diff_id, operation_id))?;
+        Ok(read(result))
+    }
+
+    fn lock_diffs(
+        &self,
+        operation_id: &str,
+    ) -> Result<std::sync::MutexGuard<'_, DiffStore>, ErrorEnvelopeDto> {
+        self.diffs.lock().map_err(|_| ErrorEnvelopeDto {
+            code: "ERR-INTERNAL-9001".to_owned(),
+            message: "FirmwareSight hit an internal error.".to_owned(),
+            operation_id: operation_id.to_owned(),
+            details: Some("the diff lock was poisoned by an earlier panic".to_owned()),
+            remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
+        })
+    }
 }
 
 /// The names a selection exposes. Paths stay in [`StagedSelection`].
@@ -323,6 +416,24 @@ fn selection_missing(_selection_id: &str, operation_id: &str) -> ErrorEnvelopeDt
         operation_id: operation_id.to_owned(),
         details: Some("the shell holds paths for the current run only; this session never issued, or no longer holds, the handle given".to_owned()),
         remediation: Some("Choose the artifact in the file dialog again.".to_owned()),
+    }
+}
+
+/// A diff id this session never issued, or has already dropped.
+///
+/// The id is quoted back here, unlike a selection id, because a stale diff handle is something a
+/// person can act on: they re-run the comparison from the two builds they can still see.
+fn diff_missing(_diff_id: &str, operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: "ERR-DIFF-5002".to_owned(),
+        message: "That comparison is no longer available.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: Some(
+            "a computed diff is held for the current run only and is dropped after eight more \
+             comparisons"
+                .to_owned(),
+        ),
+        remediation: Some("Run the comparison again from the two builds.".to_owned()),
     }
 }
 
@@ -469,7 +580,13 @@ pub fn run() {
             intake::analyze_selection,
             details::query_sections,
             details::query_symbols,
-            details::query_evidence
+            details::query_evidence,
+            compare::list_compare_candidates,
+            compare::compare_snapshots,
+            compare::query_section_changes,
+            compare::query_symbol_changes,
+            compare::export_compare_json,
+            compare::export_compare_html
         ])
         .run(tauri::generate_context!())
         .expect("error while running the FirmwareSight desktop application");

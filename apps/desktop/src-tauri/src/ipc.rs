@@ -3,8 +3,10 @@
 //!
 //! Deliberately bounded. Nothing here carries a raw byte buffer, and no payload is a whole table:
 //! the detail shapes are one page of at most 500 rows, named by a snapshot id, and the full
-//! normalized record stays in Core and in SQLite, where it is inspectable. An IPC payload that
-//! grows with the artifact is how a desktop shell stops responding.
+//! normalized record stays in Core and in SQLite, where it is inspectable. The P2 compare summary is
+//! bounded the same way: it carries the two budget deltas, the counts and at most five top sections
+//! and ten top symbols, and every changed row is fetched by page through a session-local diff id.
+//! An IPC payload that grows with the artifact is how a desktop shell stops responding.
 //!
 //! Generated `.ts` files land in `apps/desktop/ui/src/ipc/generated/` (see `.cargo/config.toml`,
 //! which sets `TS_RS_EXPORT_DIR`) and are never hand-edited; CI regenerates them and fails on
@@ -417,4 +419,383 @@ pub struct EvidencePageDto {
     pub offset: usize,
     pub limit: usize,
     pub next_offset: Option<usize>,
+}
+
+// --------------------------------------------------------------------------- Compare (P2)
+
+/// One stored build the Compare selectors may offer.
+///
+/// A candidate exists only if the build was analyzed and persisted by this application: the list is
+/// read from SQLite, never from the filesystem, so it stays valid after the original ELF and MAP
+/// have moved or been deleted. Names only - the stored path is an intake fact and does not cross
+/// this boundary.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CompareCandidateDto {
+    pub build_id: String,
+    pub snapshot_id: String,
+    pub file_name: String,
+    pub sha256: String,
+    #[ts(type = "number")]
+    pub byte_size: u64,
+    pub architecture: String,
+    /// When the build entered history, exactly as stored. Presentation of a recorded fact, not a
+    /// value this run generated.
+    pub imported_at: String,
+    pub nonvolatile: StoredBudgetDto,
+    pub runtime_ram: StoredBudgetDto,
+}
+
+/// A recorded budget and how completely it was accounted for. `partial` is a floor.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct StoredBudgetDto {
+    /// `exact`, `partial` or `unknown`.
+    pub state: String,
+    #[ts(type = "number | null")]
+    pub bytes: Option<u64>,
+}
+
+/// A page request for the candidate list. The project scope is not askable: Rust fixes it, so the
+/// WebView cannot enumerate history that belongs to another project (`AGENTS.md` 7).
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CandidatePageRequestDto {
+    #[serde(default)]
+    pub offset: Option<usize>,
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CandidatePageDto {
+    pub rows: Vec<CompareCandidateDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+/// The two builds to compare, by snapshot id. Which one is old is stated, never inferred from order
+/// of appearance.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CompareRequestDto {
+    pub base_snapshot_id: String,
+    pub target_snapshot_id: String,
+}
+
+/// One side of a comparison, as far as the summary needs to name it.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiffSideDto {
+    pub snapshot_id: String,
+    pub file_name: String,
+    pub sha256: String,
+}
+
+/// One numeric comparison. `base`/`target` are `null` when that side holds no number, which for an
+/// added or removed row means *absent*: the UI renders `—`/`Not present`, never `0` (US-002).
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ByteDeltaDto {
+    #[ts(type = "number | null")]
+    pub base: Option<u64>,
+    #[ts(type = "number | null")]
+    pub target: Option<u64>,
+    /// `target - base`, signed. `null` when either side is absent, unknown, or the difference does
+    /// not fit.
+    #[ts(type = "number | null")]
+    pub delta: Option<i64>,
+    /// `exact`, `partial` or `unknown` - the strength of this particular comparison.
+    pub comparability: String,
+    pub reason: Option<String>,
+}
+
+/// One side's recorded memory totals with the evidence that produced them.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiffSideMemoryDto {
+    /// False when the build has no stored footprint row. Not the same claim as a row of zero bytes.
+    pub footprint_row_present: bool,
+    pub nonvolatile: StoredBudgetDto,
+    pub runtime_ram: StoredBudgetDto,
+    pub map_backed: bool,
+    pub layout_source: String,
+    pub weakest_evidence_basis: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiffMemoryDto {
+    pub nonvolatile: ByteDeltaDto,
+    pub runtime_ram: ByteDeltaDto,
+    /// The weaker side caps the pair, and the UI must not present a partial pair like an exact one.
+    pub comparability: String,
+    pub base: DiffSideMemoryDto,
+    pub target: DiffSideMemoryDto,
+    pub evidence_warning: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ChangeKindCountsDto {
+    pub added: usize,
+    pub removed: usize,
+    pub changed: usize,
+    /// Rows left unpaired because the name or key repeats, or because there is no name to match on.
+    pub ambiguous: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiffCountsDto {
+    pub sections: ChangeKindCountsDto,
+    pub symbols: ChangeKindCountsDto,
+    pub unchanged_sections: usize,
+    pub unchanged_symbols: usize,
+}
+
+/// Whether an object or module delta can be claimed at all.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectAttributionDto {
+    pub available: bool,
+    pub reason: String,
+}
+
+/// A ranked contributor. Navigation only: the paged change tables are the authoritative list
+/// (prompt §25).
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ContributorDto {
+    pub key: String,
+    /// `Added`, `Changed` or `Removed`. Diff vocabulary, never a Gate state.
+    pub change_kind: String,
+    #[ts(type = "number | null")]
+    pub delta: Option<i64>,
+    #[ts(type = "number | null")]
+    pub bytes: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiffWarningDto {
+    pub code: String,
+    pub message: String,
+}
+
+/// The bounded answer to `compare_snapshots`. It deliberately holds no full change table: a build
+/// can change thousands of symbols, and a payload that grows with the artifact is how a desktop
+/// shell stops responding. Rows are fetched one page at a time with `diffId`.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CompareSummaryDto {
+    /// Session-local handle for the computed diff. Not persisted, not portable, and not part of the
+    /// diff's content identity.
+    pub diff_id: String,
+    pub base: DiffSideDto,
+    pub target: DiffSideDto,
+    pub memory: DiffMemoryDto,
+    pub counts: DiffCountsDto,
+    pub object_changes: ObjectAttributionDto,
+    pub top_sections: Vec<ContributorDto>,
+    pub top_symbols: Vec<ContributorDto>,
+    pub warnings: Vec<DiffWarningDto>,
+}
+
+/// Which change kinds to show. Absent means all three.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum ChangeKindFilterDto {
+    Added,
+    Removed,
+    Changed,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum SectionChangeSortDto {
+    /// Section name, or the row position when there is no name. The default.
+    #[default]
+    Key,
+    /// File-size delta. Rows with no delta sort last, so an unknown never masquerades as small.
+    Delta,
+    ChangeKind,
+    FileSize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum SymbolChangeSortDto {
+    #[default]
+    Name,
+    SizeDelta,
+    ChangeKind,
+    Size,
+}
+
+/// One page of a stored diff's change table.
+///
+/// `diff_id` selects a computation this session already made; there is no table name, statement or
+/// path in this request, so it cannot be widened (`AGENTS.md` 7).
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionChangeQueryDto {
+    pub diff_id: String,
+    /// A literal substring of the row key.
+    #[serde(default)]
+    pub filter: Option<String>,
+    #[serde(default)]
+    pub change_kind: Option<ChangeKindFilterDto>,
+    #[serde(default)]
+    pub sort: SectionChangeSortDto,
+    #[serde(default)]
+    pub direction: SortDirDto,
+    #[serde(default)]
+    pub offset: usize,
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SymbolChangeQueryDto {
+    pub diff_id: String,
+    #[serde(default)]
+    pub filter: Option<String>,
+    #[serde(default)]
+    pub change_kind: Option<ChangeKindFilterDto>,
+    #[serde(default)]
+    pub sort: SymbolChangeSortDto,
+    #[serde(default)]
+    pub direction: SortDirDto,
+    #[serde(default)]
+    pub offset: usize,
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+/// One side of a changed section row. `None` means the section does not exist on that side, which
+/// the UI renders as absence, never as zero (prompt §23).
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionSideDto {
+    /// Row position within this build. Never an identity across builds.
+    pub index: usize,
+    pub role: String,
+    pub region: Option<String>,
+    pub virtual_address: Option<String>,
+    pub load_address: Option<String>,
+    pub file_offset: Option<String>,
+    #[ts(type = "number")]
+    pub file_size: u64,
+    #[ts(type = "number | null")]
+    pub memory_size: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionChangeRowDto {
+    /// `Added`, `Removed` or `Changed`.
+    pub change_kind: String,
+    pub key: String,
+    pub name_known: bool,
+    /// True when the name repeats on one or both sides and the rows were therefore left unpaired.
+    pub ambiguous: bool,
+    pub file_size: ByteDeltaDto,
+    pub memory_size: ByteDeltaDto,
+    pub base: Option<SectionSideDto>,
+    pub target: Option<SectionSideDto>,
+    pub differing_fields: Vec<String>,
+    pub indeterminate_fields: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SymbolSideDto {
+    pub ordinal: usize,
+    pub address: Option<String>,
+    #[ts(type = "number | null")]
+    pub size: Option<u64>,
+    pub section_ref: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SymbolChangeRowDto {
+    pub change_kind: String,
+    pub name: String,
+    pub kind: String,
+    pub binding: String,
+    pub ambiguous: bool,
+    pub size: ByteDeltaDto,
+    pub base: Option<SymbolSideDto>,
+    pub target: Option<SymbolSideDto>,
+    pub differing_fields: Vec<String>,
+    pub indeterminate_fields: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionChangePageDto {
+    pub rows: Vec<SectionChangeRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SymbolChangePageDto {
+    pub rows: Vec<SymbolChangeRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+/// What an export command actually did.
+///
+/// The save path is chosen by a person in a dialog the Rust side opened, and it is not returned:
+/// the UI gets the file name, the format and the outcome. `cancelled` and `kept-existing` are normal
+/// outcomes, not errors, because deciding not to overwrite a file is a decision rather than a
+/// failure (prompt §35, §36).
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ExportOutcomeDto {
+    /// `written`, `cancelled` or `kept-existing`.
+    pub status: String,
+    pub file_name: Option<String>,
+    /// `json` or `html`.
+    pub format: String,
 }

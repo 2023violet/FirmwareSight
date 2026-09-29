@@ -934,6 +934,7 @@ name = "firmwaresight-desktop"
 version = "0.1.0"
 dependencies = [
  "firmwaresight-artifact",
+ "firmwaresight-core",
  "firmwaresight-report",
  "firmwaresight-storage",
  "serde",
