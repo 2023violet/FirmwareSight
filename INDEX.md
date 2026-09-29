@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-28"
+last_updated: "2026-09-29"
 ---
 
 
@@ -13,7 +13,7 @@ last_updated: "2026-09-28"
 
 Baseline: `0.6.0` — the P0 Technical Foundation Baseline.
 
-Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · G1 NOT CLAIMED · V0 ACTIVE EXTERNAL VALIDATION 0/8, Batch A still waiting on real participants · Pre-G1 P1-A0 AUTHORIZED by ADR-0025 · P1 NOT PASS / NOT CLOSED · active_task: P1A0_REAL_ARTIFACT_INTAKE`
+Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 NOT CLAIMED · V0 ACTIVE EXTERNAL VALIDATION 0/8 · P1 NOT PASS / NOT CLOSED · active_task: V0_BATCH_A_EXTERNAL_VALIDATION — research execution, no product code writable under it`
 
 ## Primary reading path
 
@@ -21,7 +21,7 @@ Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — `P1A0_REAL_ARTIFACT_INTAKE`
+5. `.ai/ACTIVE_TASK.md` — `V0_BATCH_A_EXTERNAL_VALIDATION` (research; the live instructions and boundaries)
 6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`
 7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
 8. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`

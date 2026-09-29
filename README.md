@@ -20,6 +20,7 @@ and does **not** redefine the product, the architecture, the gate definitions or
 ```text
 G0      PASS
 V0      ACTIVE EXTERNAL VALIDATION — 0 / 8 eligible external sessions, waiting for real participants
+        Active task since 2026-09-29: V0 Batch A recruitment and moderation (research, no product code)
 P0      PASS — remote CI Runs #3, #4, #5 and #6, 7 of 7 jobs green on each; frozen at v0.6.0
 G1      NOT CLAIMED — requires V0 PASS + P0 PASS; only the P0 half exists
 Pre-G1  P1-A0 Real Artifact Intake — authorized by ADR-0025, green on Run #9, and CLOSED together with
@@ -64,8 +65,10 @@ Formal eligible external participants completed:
 `0 / 8 minimum`
 
 No participant data is fabricated. V0 was re-sequenced as a non-blocking research track when P0 was
-authorized, and it is now recorded as an active external-validation track waiting for real participants;
-neither deferral nor resumption is completion, and P0's `PASS` does not move V0 by one session.
+authorized, and it is now the **active task**: `V0_BATCH_A_EXTERNAL_VALIDATION`, activated 2026-09-29 to
+recruit and moderate 4-5 real eligible sessions on the frozen `v0.1.0` prototype and then write a Batch A
+interim review. Neither deferral nor resumption is completion, and P0's `PASS` does not move V0 by one
+session. Activation wrote no evidence, because no participant had been met.
 
 Therefore this baseline does **not** claim:
 - V0 PASS;
@@ -199,12 +202,21 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: P1A0_REAL_ARTIFACT_INTAKE`, authorized by `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md`,
-**is finished**, together with the narrow correctness closure that fixed the two defects its own
-desktop smoke reported. That ADR supersedes one clause of ADR-0020: after `P0 PASS`, the architect may
+`active_task: V0_BATCH_A_EXTERNAL_VALIDATION`, activated by architect prompt on 2026-09-29. It is a
+**research / evidence task, not a coding one**: recruit and screen 4-5 real eligible embedded
+participants, moderate the frozen T1-T10 script against the `v0.1.0` clickable prototype, write one
+session record per real person, then produce the Batch A interim review and stop for the architect.
+**No product code is writable under it** - `crates/**`, `apps/**`, `schemas/**`, `migrations/**`, either
+manifest or lockfile, `.github/**`, the design tokens, the product UI and the prototype are all out of
+scope, with no exception, and no participant, quote, outcome, timing or count may be invented.
+
+The previous task, `P1A0_REAL_ARTIFACT_INTAKE`, authorized by
+`09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md`, **is finished**, together with the narrow
+correctness closure that fixed the two defects its own desktop smoke reported. That ADR supersedes one
+clause of ADR-0020: after `P0 PASS`, the architect may
 authorize a limited, reversible, low-coupling Pre-G1 Analyze slice instead of waiting for V0. The
 authorized slice was real artifact intake through a native dialog plus the already-validated Analyze
-summary — and it stopped there. Nothing further is authorized to code from this file.
+summary — and it stopped there. No engineering task is authorized from this file.
 `G1 = V0 PASS + P0 PASS` is unchanged, `P1` is not closed, `P1-A1` needs V0 Batch A `>= 4` eligible
 external sessions plus an interim architect review and a new prompt, and `P2`/`P3`/`P4` remain
 unauthorized. V0 still needs the human half: recruit eligible participants, Batch A 4–5, interim review,

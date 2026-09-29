@@ -117,3 +117,55 @@ text with no source file; each says so in its own entry instead of standing for 
 - Outcome, 2026-09-28: executed. `P0 = PASS`, `baseline_version: 0.6.0`, `active_task: NONE`, V0 still
   `0 / 8`, G1 not claimed, P1 not authorized. `DIRECTORY_TREE.txt` and `SHA256SUMS` regenerated as the
   v0.6.0 record.
+
+## Pre-G1 Sequencing Revision + P1-A0 Real Artifact Intake
+
+- File: none — **original file unavailable, prompt supplied inline**, so there is no source file to hash.
+  The repository's copy of its terms is `.ai/DECISIONS.md` ("Bounded pre-G1 P1-A0 slice — 2026-09-29"),
+  `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md` and
+  `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md`.
+- Version: v1.0, architect reviewed.
+- Authority: `ADR-0025`, which supersedes exactly one clause of `ADR-0020`, plus one bounded, reversible
+  pre-G1 slice — real artifact intake through a native dialog, optional GNU ld MAP, reuse of the already
+  validated Analyze summary. `G1 = V0 PASS + P0 PASS` unchanged; P1-A0 is neither a stage gate nor P1
+  progress; P1-A1/P2/P3/P4 stay unauthorized.
+- Addendum applied first, also supplied inline and also without a source file to hash: the **P1-A0 Design
+  Contract Closure Addendum v1.0**, which authorized design tokens `0.2.0 → 0.2.1` (one numeric semantic,
+  `border.width.hairline`) and nothing else.
+- Outcome, 2026-09-29: executed and pushed by the owner as `2960173`; remote Run #9 `36499759371`
+  concluded `success` with 7 of 7 jobs.
+
+## P1-A0 Evidence Identity and Persistence Correctness Closure
+
+- File: none — **prompt supplied inline**, so no SHA-256 is recorded rather than inventing one. The
+  repository's copy of its terms is `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md` section 9,
+  `P1_A0_VALIDATION/P1_A0_CORRECTNESS_SMOKE_REPORT.md` and `.ai/DECISIONS.md`.
+- Version: v1.0, architect reviewed.
+- Authority: **narrow correctness closure inside the already authorized P1-A0 slice**, explicitly not
+  P1-A1 and not a new stage. It authorized fixing two defects the P1-A0 desktop smoke reported — a MAP
+  that strengthened evidence in memory but not in the persisted snapshot identity, and evidence items
+  claiming MAP provenance their rule did not earn — plus removing `EvidenceSummaryDto.from_map`. No new
+  ADR (`00_GOVERNANCE/03_DECISION_POLICY.md` files a bug fix outside the ADR requirement), no
+  `NORMALIZATION_VERSION` bump, no migration, `SCHEMA_VERSION` stays 2, and it forbade writing any
+  product-scope extension.
+- Outcome, 2026-09-29: executed as `ace6fbe`, pushed by the owner, measured `success` with 7 of 7 jobs on
+  Run #10 `36515470263`; the governance successor is `3b59585`, green on Run #11 `36516209283`.
+
+## V0 Batch A External Validation Activation and Interim Review
+
+- File: none — **prompt supplied inline**, so there is no source file to hash. This is the successor to
+  `FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt`, which authorized the earlier Batch A
+  takeover and withheld `v0.5.2`; that file and its SHA-256 above remain the record of the takeover.
+- Version: v1.0, architect reviewed.
+- Authority: a **research / evidence execution prompt, not a coding prompt**. It activates
+  `active_task: V0_BATCH_A_EXTERNAL_VALIDATION`, keeps the frozen clickable prototype `v0.1.0` and
+  `V0_VALIDATION/protocol/TASK_SCRIPT.md` as the formal instrument, and authorizes recruitment, screening,
+  moderation, session records, metrics at real n/N and a Batch A interim review at >= 4 eligible external
+  sessions. It forbids synthetic participants, AI personas and any fabricated quote, outcome, timing,
+  willingness-to-pay or count, and forbids writing product code: `crates/**`, `apps/**`, `schemas/**`,
+  `migrations/**`, both manifests and lockfiles, `.github/**`, the design tokens, product UI and the
+  prototype itself are all out of scope, with no exception. It does not authorize P1-A1 and does not
+  declare V0 or G1.
+- Outcome, first invocation 2026-09-29: activation, recruitment-pack verification and the stale `v0.5.2`
+  wording note only. **No real participant evidence existed, so none was written and no count moved**;
+  the round stopped at `BATCH A ACTIVE — WAITING FOR REAL PARTICIPANTS`.

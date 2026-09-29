@@ -8,20 +8,22 @@ owner: "Engineering"
 last_updated: "2026-09-29"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / P1-A0 complete including its correctness closure
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / P1-A0 closed / active task V0 Batch A external validation (research, no code)
 
 ## Purpose
 
 P0 is finished, promoted and **frozen**: `P0 = PASS`, `baseline_version = 0.6.0`, and no further P0
-closure or promotion prompt will be written. **One** architect-authorized Pre-G1 slice was built on
-top of it, `P1-A0 Real Artifact Intake`, permitted by ADR-0025, which supersedes a single clause of
-ADR-0020 and nothing else; it and its correctness closure are both finished. This file's job is to
-state that boundary precisely: P1-A0 ends at P1-A0, and the closure round stayed inside it.
+closure or promotion prompt will be written. The one architect-authorized Pre-G1 engineering slice,
+`P1-A0 Real Artifact Intake` (permitted by ADR-0025, which supersedes a single clause of ADR-0020 and
+nothing else), is complete together with its correctness closure. What is live now is **not** engineering:
+it is `V0_BATCH_A_EXTERNAL_VALIDATION`, the research track ADR-0025 makes the precondition for anything
+further. This file's job is to state that boundary precisely: P1-A0 ends at P1-A0, and the current task
+writes no product code at all.
 
-If you were sent here to "continue P0", the correct reply is that P0 is closed. If you were sent here
-to continue past P1-A0 - P1-A1, Compare, Gate, Bundle - the correct reply is that no such work is
-authorized: V0 Batch A `>= 4` eligible external sessions plus an interim architect review, then a new
-prompt, is the precondition.
+If you were sent here to "continue P0", the correct reply is that P0 is closed. If you were sent here to
+write code - P1-A1, Compare, Gate, Bundle - the correct reply is that no such work is authorized: V0 Batch
+A `>= 4` eligible external sessions plus an interim architect review, then a new prompt, is the
+precondition, and those sessions need real people.
 
 ## Baseline and HEADs
 
@@ -44,6 +46,9 @@ Remote CI Run #8               36439949352  on 311f9fc  success, 7 of 7 jobs —
 Remote CI Run #9               36499759371  on 2960173  success, 7 of 7 jobs — the intake commit, and this round's §1 gate fact
 Correctness-closure commit     ace6fbe12fe90d2886d8128aeda3879c52ad539c — on origin/main; MAP companion identity, basis-aware provenance, deterministic primary-artifact query, from_map removal
 Remote CI Run #10              36515470263  on ace6fbe  success, 7 of 7 jobs — the closure commit, recorded here after the owner pushed rather than inside its own commit (§23's anti-recursion rule)
+Governance successor           3b59585e3843336b8237449e72f147ed35cf672d — on origin/main; documentation and integrity only, no product source
+Remote CI Run #11              36516209283  on 3b59585  success, 7 of 7 jobs - the HEAD the V0 Batch A activation round started from, verified before any file was written
+V0 Batch A activation          2026-09-29 by architect prompt; `active_task` moved from P1A0_REAL_ARTIFACT_INTAKE to V0_BATCH_A_EXTERNAL_VALIDATION. Research execution: no product code writable, and zero participant evidence existed so zero was written
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -55,6 +60,8 @@ published as history in `P0_CI_REPORT.md`. Read any run with
 ```text
 G0      PASS
 V0      ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS — 0 / 8 (Batch A 0 / 4–5)
+V0 Batch A   ACTIVE TASK since 2026-09-29: research execution only. No product code is writable under
+        it, and zero participant evidence existed at activation, so zero was written and no count moved
 P0      PASS — frozen at v0.6.0
 Formal G1   NOT CLAIMED — still V0 PASS + P0 PASS; ADR-0025 did not move the gate
 Pre-G1  P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED (ADR-0025), ON origin/main, GREEN ON RUN #9.
@@ -122,8 +129,10 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 11. `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md`, `P1_A0_EXIT_CHECKLIST.md` and
     `P1_A0_CORRECTNESS_SMOKE_REPORT.md` — the slice this handoff leaves behind, and how it was proven
 12. `DESIGN.md` + `assets/design-tokens.json` (any UI work)
-13. V0 summary only, never to be re-run from here: `V0_VALIDATION/README.md`,
-    `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md`, `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
+13. The live track, read in full before any session: `V0_VALIDATION/README.md`, `V0_PLAN.md`,
+    `V0_VALIDATION/protocol/**`, `V0_VALIDATION/sessions/TEMPLATE.md`,
+    `V0_VALIDATION/batch_a/**` including `recruitment_ready/**`, and
+    `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 
 ## Boundaries still in force
 
@@ -141,13 +150,18 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
   bumped to hide the identity bug.
 - Design: existing tokens plus `border.width.hairline` only. No drop zone, no dashed border, no
   decorative upload card, no new visual semantic — if one seems necessary, stop and report it.
-- V0 evidence stays untouched and its count stays `0`; the resumed wording is a governance statement,
-  not a result.
-- P1-A0 and its correctness closure have both shipped from the coding side, so the only legitimate
-  next moves are real V0 participants, or a new architect prompt for a further pre-G1 slice — and that
-  prompt requires V0 Batch A `>= 4` eligible sessions plus an interim review first. Neither exists
-  now, so `.ai/ACTIVE_TASK.md` names finished work rather than work to resume, and nothing is
-  authorized to code from this file.
+- The V0 count stays `0` and no session file exists, because no real participant has been met. The
+  resumed wording is a governance statement, not a result. Under the active research task
+  `V0_VALIDATION/**` is the working area, so it is edited there - but only to record what a real person
+  actually did. Nothing is simulated.
+- **The active task writes no product code.** Forbidden under it, with no exception: `crates/**`,
+  `apps/**`, `schemas/**`, `migrations/**`, `Cargo.toml`, `Cargo.lock`, `package.json`, the pnpm
+  lockfile, `.github/**`, the design tokens, the product UI, and the V0 prototype itself. A blocker found
+  in the prototype is reported and stops Batch A; it is not fixed by the research operator.
+- P1-A0 and its correctness closure have both shipped from the coding side. The only legitimate next
+  moves are real V0 participants, or a new architect prompt for a further pre-G1 slice - and that prompt
+  requires V0 Batch A `>= 4` eligible sessions plus an interim review first. Until then `.ai/ACTIVE_TASK.md`
+  names the research track, and no engineering task is authorized from this file.
 - Four Phase-0 library crates; a fifth needs architecture review plus an ADR.
 - AGENTS.md §2: no silent baseline change — async-first Core, framework swaps, SQLx, HTTP client,
   wgpu, cloud/auth/telemetry, evidence classes, schema semantics, updater/signing model all need an
@@ -155,9 +169,19 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 - No Compare / Gate / Bundle product workflow. No installer, NSIS/MSI, AppImage/deb, notarization,
   Authenticode, GitHub Release, tag, or updater metadata: v0.6.0 is a baseline promotion, not a
   stable release. The repository has no tag convention and none was invented.
-- `V0_VALIDATION/**` is research evidence and stays unmodified.
+- `V0_VALIDATION/**` is research evidence. It stayed unmodified through every P0 and P1-A0 round, and
+  under the active research task it is the working area: session records, registers, analysis and the
+  interim review belong there. What must never happen is writing evidence for a session that did not occur.
 
 ## Continuation rules
+
+- Under the active research task: one real session at a time. A later invocation processes exactly the
+  participant evidence supplied to it, updates the session file, the registers and the metrics at real
+  n/N, commits, and stops. Do not run on waiting for humans, do not poll, and do not fill a gap.
+- Before any `PA-00X.md` counts in Formal N, the evidence-integrity checklist in
+  `V0_VALIDATION/batch_a/recruitment_ready/BATCH_A_EVIDENCE_INTEGRITY_CHECKLIST.md` must pass in full;
+  a session that fails a mandatory item is recorded `DISCOVERY_ONLY` or `EXCLUDED_FROM_FORMAL_N` with its
+  reason rather than counted silently.
 
 - Re-run the read-only Git preflight before writing, and report start HEADs again; do not trust the
   HEADs recorded in this file.

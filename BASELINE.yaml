@@ -101,10 +101,11 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# P0 is closed at v0.6.0. The active task is the one bounded pre-G1 slice ADR-0025 authorizes
-# (P1-A0); it is not P1, it does not close P1, and nothing beyond it is authorized. AGENTS.md 1 still
-# forbids inventing work: the next engineering gate is real V0 Batch A evidence plus a new prompt.
-active_task: P1A0_REAL_ARTIFACT_INTAKE
+# P0 is closed at v0.6.0 and P1-A0 plus its correctness closure are complete. The active task is now
+# the research track ADR-0025 makes the precondition for any further pre-G1 slice: V0 Batch A external
+# validation with real participants. AGENTS.md 1 still forbids inventing work, and under this task no
+# product code may be written at all - the missing input is human evidence, not implementation.
+active_task: V0_BATCH_A_EXTERNAL_VALIDATION
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -122,6 +123,24 @@ v0_execution:
   external_validation_state: ACTIVE_WAITING_FOR_REAL_PARTICIPANTS
   batch_a_target: "0 / 4-5 eligible external sessions completed"
   p0_authorized: false
+  # Registered by the V0 Batch A activation prompt. It changes which task is live, not any count: the
+  # eligible-session numbers above stay at zero until real participants exist, and this round wrote none.
+  batch_a_activation:
+    activated_by: "FirmwareSight V0 Batch A External Validation Activation & Interim Review Execution Prompt v1.0 - Architect Reviewed"
+    activated_on: "2026-09-29"
+    replaces_active_task: P1A0_REAL_ARTIFACT_INTAKE
+    prompt_is_research_only: true
+    product_code_writable: false
+    formal_instrument: V0_VALIDATION/prototype/
+    prototype_version: v0.1.0
+    formal_task_source: V0_VALIDATION/protocol/TASK_SCRIPT.md
+    session_template: V0_VALIDATION/sessions/TEMPLATE.md
+    first_invocation_state: "NO_REAL_PARTICIPANT_EVIDENCE - activation, recruitment-pack verification and stale-version wording only; no count incremented, no session written"
+    forbidden_evidence: [synthetic_participant, ai_persona, fabricated_quote, fabricated_task_outcome, fabricated_timing, fabricated_willingness_to_pay, fabricated_n_or_N, ineligible_participant_counted_into_formal_n]
+    p1_a0_production_desktop_used_for_formal_tasks: false
+    research_price_anchor_state: "no concrete anchor is decided; BATCH_A_RESEARCH_PRICE_ANCHORS.md says so and this round invented none"
+    open_owner_input: "recruitment of real participants, and 2-3 exploratory price anchors if the Product Lead wants them"
+    stop_condition: "4-5 eligible external sessions plus the Batch A interim review, then back to the architect"
 
 # V0 is resumed as an active external-validation track. Resumed is not passed: the participant count
 # stays 0 / 8 because real people are the missing input, and the coding side authors none. V0 still
@@ -132,10 +151,12 @@ v0_track:
   blocks_pre_g1_slices_after_p1_a0: true
   blocks_g1: true
 
-# The slice this round runs. Registered by ADR-0025, which supersedes one ADR-0020 clause and nothing
-# else. `p0_execution` below keeps its frozen verdict - `status: PASS`, the promotion records and the
-# remediation history are not re-opened; what this round adds there is the remote run it measured, so
-# the file holds one current remote fact rather than two competing ones.
+# The pre-G1 slice that was authorized and is now complete, recorded here rather than in `p0_execution`
+# because it is not P0. Registered by ADR-0025, which supersedes one ADR-0020 clause and nothing else.
+# `p0_execution` below keeps its frozen verdict - `status: PASS`, the promotion records and the
+# remediation history are not re-opened; what later rounds added there are the remote runs they
+# measured, so the file holds one current remote fact rather than two competing ones. The live task
+# after `ace6fbe` and `3b59585` is the research track above, not this slice.
 pre_g1_execution:
   authorized: true
   slice: P1A0_REAL_ARTIFACT_INTAKE

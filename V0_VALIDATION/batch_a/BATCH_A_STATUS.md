@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "EXECUTION_RECORD"
 owner: "Product / Research"
-last_updated: "2026-09-27"
+last_updated: "2026-09-29"
 ---
 
 # Batch A Status
@@ -50,3 +50,23 @@ Per the authorized Batch A Prompt:
 > v0.5.2 may only be created after 4–5 real eligible external sessions and their evidence are written into the project.
 
 Therefore this execution **does not create v0.5.2**.
+
+## Version consequence, corrected 2026-09-29
+
+The rule above was written before P0 was promoted, and it is kept as history. It no longer describes the
+project's version path:
+
+- `v0.5.2` was the **pre-P0 planned** Batch A evidence-patch version. The live baseline is
+  `FirmwareSight_Project_Baseline_v0.6.0`.
+- Batch A completion **does not generate `v0.5.2`**, and no older baseline is created after `v0.6.0`. The
+  project version is never decremented to match a research document.
+- Any version promotion after Batch A and its interim review is an **architect decision**, taken through
+  the normal promotion path - not an automatic consequence of reaching `4-5` sessions.
+- See `V0.5.2_RELEASE_BLOCK.md`, which carries the same note and stays named as it is.
+
+## Execution state, 2026-09-29
+
+`active_task` is now `V0_BATCH_A_EXTERNAL_VALIDATION`, activated by architect prompt. Nothing in this
+section changed by that activation: `0` real eligible external sessions, all five screening rows still
+`NOT_RECRUITED`, all five scheduling rows still `NOT_SCHEDULED`, and no `PA-00X.md` exists. Activation
+wrote no participant evidence, because no participant had been met.

@@ -12,8 +12,8 @@ last_updated: "2026-09-29"
 
 - Date: 2026-09-29
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`P1A0_REAL_ARTIFACT_INTAKE` — COMPLETE**, together with its evidence-identity and
-  persistence correctness closure. Nothing further is authorized to code from this file.
+- Active task: **`V0_BATCH_A_EXTERNAL_VALIDATION`** — a research / evidence execution track, activated by
+  architect prompt on 2026-09-29. It is not a coding task, and **no product code is writable under it**.
 
 ## Product/architecture baseline
 
@@ -104,15 +104,21 @@ functional dry run, Batch A takeover, Batch A recruitment-ready package.
 P0 passing does not move this number, and neither does P1-A0. The V0 blocker is the absence of real
 human participants, which no CI run, no green gate and no promotion signature can supply. Resumed is
 not passed: the count stays `0`, the wording change is a governance statement about the track, and the
-coding side authors no transcript, session or metric. `V0_VALIDATION/**` is not modified by any P0 or
+coding side authors no transcript, session or metric. `V0_VALIDATION/**` was not modified by any P0 or
 P1-A0 round. Under ADR-0025, **V0 Batch A `>= 4` eligible sessions plus an interim architect review is
 the precondition for authorizing any pre-G1 slice after P1-A0**.
+
+That track is now the live task rather than a pointer at a completed engineering slice. The activation
+round wrote **no participant evidence** — none existed to write — and changed only two things inside the
+pack: the stale `v0.5.2` version consequence wording, and nothing else. Counts, registers, session files
+and metrics are exactly as the Batch A takeover left them.
 
 ## Gates
 
 ```text
 G0: PASS
 V0: ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS (0 of 8; Batch A 0 of 4-5)
+V0 Batch A task: ACTIVATED 2026-09-29 — research execution only, no product code writable under it
 P0: PASS — promoted to the v0.6.0 Technical Foundation Baseline; frozen, no further P0 closure prompts
 Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS; V0 is 0/8)
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
@@ -175,22 +181,31 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: P1A0_REAL_ARTIFACT_INTAKE`, and that task is now finished.** P0 is closed and frozen;
-the one bounded pre-G1 slice ADR-0025 authorized was implemented, tested in a real window, and
-recorded in `P1_A0_VALIDATION/`. Its stop condition was P1-A0 itself, so the pointer names work that is
-complete rather than work to resume: **nothing further is authorized to code from this file**, and
-`AGENTS.md` 1 still forbids inventing anything beyond it.
+**`active_task: V0_BATCH_A_EXTERNAL_VALIDATION`.** P0 is closed and frozen, and the one bounded pre-G1
+engineering slice ADR-0025 authorized - P1-A0, plus its correctness closure - was implemented, tested in a
+real window and recorded in `P1_A0_VALIDATION/`. The live task is now the research track that gates
+anything further: recruit, screen and moderate **4-5 real eligible external sessions** against the frozen
+`v0.1.0` prototype, then write the Batch A interim review and stop.
 
-What belongs to the owner and the architect rather than to this round:
+**No product code is writable under this task.** The activation prompt forbids touching `crates/**`,
+`apps/**`, `schemas/**`, `migrations/**`, either manifest or lockfile, `.github/**`, the design tokens, the
+product UI and the prototype, with no exception; a Critical Execution Blocker in the prototype is reported,
+not fixed. `AGENTS.md` 1 still forbids inventing work, and this task forbids inventing people: no synthetic
+participant, no fabricated quote, outcome, timing, willingness-to-pay or count.
 
-1. pushing was the owner's act, and it happened: the correctness-closure commit `ace6fbe` is on
+What belongs to the owner, the research operator and the architect:
+
+1. pushing remains the owner's act, and it happened for the engineering rounds: `ace6fbe` is on
    `origin/main` and **Run #10 `36515470263` measured it `success`, 7 of 7 jobs** (read with
-   `gh run view`). Run #9 `36499759371` on `2960173` is the intake commit's own green run. The rule held
-   where it applied — neither commit carries the run number its own push produced; that is recorded in
-   the successor documentation instead;
-2. the next engineering authorization, which requires V0 Batch A `>= 4` eligible external sessions, an
+   `gh run view`), with Run #9 `36499759371` on `2960173` behind it and Run #11 `36516209283` on the
+   governance successor `3b59585`. No commit carries the run number its own push produced;
+2. **finding real participants** - the only input that can move `0 / 8`. The recruitment pack, screening
+   and scheduling registers are verified ready and still hold no recruited row;
+3. the 2-3 exploratory research **price anchors** `BATCH_A_RESEARCH_PRICE_ANCHORS.md` deliberately leaves
+   undefined - the Product Lead decides, and this round invented none;
+4. the next engineering authorization, which requires V0 Batch A `>= 4` eligible external sessions, an
    interim architect review of that evidence, and a new prompt;
-3. re-opening the two accepted advisories only on one of their recorded triggers.
+5. re-opening the two accepted advisories only on one of their recorded triggers.
 
 Four items the closure round surfaced and left alone, each with its reason in
 `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md` §9.7: the golden updater no longer reproduces the
