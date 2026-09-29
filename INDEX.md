@@ -225,6 +225,15 @@ history, and the nine-entry drift that `0.6.0` closed is described in `.ai/DECIS
 | `P0_TECHNICAL_VALIDATION/P0_SECURITY_INPUT_REPORT.md` | P0 Security and Untrusted Input Report |
 | `P0_TECHNICAL_VALIDATION/P0_STORAGE_REPORT.md` | P0 Storage Report |
 | `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md` | P0 Technical Validation Report |
+| `P1_A0_VALIDATION/P1_A0_CORRECTNESS_SMOKE_REPORT.md` | P1-A0 Correctness Closure Desktop Smoke Report |
+| `P1_A0_VALIDATION/P1_A0_DESIGN_CHECKLIST.md` | P1-A0 Design Review Checklist |
+| `P1_A0_VALIDATION/P1_A0_DESKTOP_SMOKE_REPORT.md` | P1-A0 Desktop Real-Window Smoke Report |
+| `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md` | P1-A0 Execution Report |
+| `P1_A0_VALIDATION/P1_A0_EXIT_CHECKLIST.md` | P1-A0 Exit Checklist |
+| `P1_VALIDATION/P1_ANALYZE_DESIGN_CHECKLIST.md` | P1 Analyze Design Review Checklist |
+| `P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md` | P1 Analyze Details Desktop Smoke |
+| `P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md` | P1 Analyze Execution Report |
+| `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` | P1 Analyze Exit Checklist |
 | `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
 | `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
 | `V0_VALIDATION/V0_PLAN.md` | V0 Plan |

@@ -172,8 +172,11 @@ v0_track:
 # because it is not P0. Registered by ADR-0025, which supersedes one ADR-0020 clause and nothing else.
 # `p0_execution` below keeps its frozen verdict - `status: PASS`, the promotion records and the
 # remediation history are not re-opened; what later rounds added there are the remote runs they
-# measured, so the file holds one current remote fact rather than two competing ones. The live task
-# after `ace6fbe` and `3b59585` is the research track above, not this slice.
+# measured, so the file holds one current remote fact per chain rather than two competing ones. What
+# this comment asserted when it was written - that the live task after `ace6fbe` and `3b59585` was the
+# research track above - has since been superseded twice: ADR-0026 re-sequenced V0 as a non-blocking
+# track on 2026-09-29, the P1 Analyze round ran under its own prompt the same day, and `active_task`
+# below now reads NONE. The sentence stays as dated history; `active_task` is the live field.
 pre_g1_execution:
   authorized: true
   slice: P1A0_REAL_ARTIFACT_INTAKE
@@ -355,7 +358,7 @@ p0_execution:
     read_with: gh run view 36419864513 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
     note: "Rust (windows-latest) reports exactly one skipped step in Run #6, measured with gh run view --json jobs: Install Linux prerequisites for the Tauri shell, guarded by if matrix.os == ubuntu-latest. The job itself is success. Every other job reports zero skipped steps."
     revalidated_by_run_5: "36416146281 on 738ae78, success, 7 of 7 - kept so the promotion-commit measurement stays visible"
-    newer_runs_unrecorded: "Four further push runs are green on origin/main: 36431884747 on ecd1c87, 36439949352 on 311f9fc, 36499759371 on the P1-A0 implementation commit 2960173, and 36515470263 on its correctness-closure commit ace6fbe. They sit outside the P0 closure chain, so they are not transcribed into this P0 block; the last two are recorded under pre_g1_execution, because the closure prompt names Run #9 as its gate. Read any run with gh run list --repo 2023violet/FirmwareSight --branch main."
+    newer_runs_unrecorded: "Green on origin/main at the time this block was written: 36431884747 on ecd1c87, 36439949352 on 311f9fc, 36499759371 on the P1-A0 implementation commit 2960173, and 36515470263 on its correctness-closure commit ace6fbe. They sit outside the P0 closure chain, so they are not transcribed into this P0 block; the last two are recorded under pre_g1_execution, because the closure prompt names Run #9 as its gate. This is not a census of the branch and was never meant to become one - later rounds record their own runs where they belong. Read any run with gh run list --repo 2023violet/FirmwareSight --branch main."
     log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
   role_of_each_green_run:
     run_3: "engineering closure on the validated source HEAD 1cd6309"
