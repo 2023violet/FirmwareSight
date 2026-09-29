@@ -32,9 +32,11 @@ P1      PASS / COMPLETE — the Analyze verb as one product verb: intake, summar
         Shipped as f649afd (storage + shell), ae7759a (UI) and e63afaf (evidence + governance) in one
         push; remote CI Run #13 36556735551 on e63afaf is success, 7 of 7 jobs, and no run exists for
         the individual commits because the gate fires per push
-P2      NOT STARTED — the next authorizable stage; it needs its own architect prompt, and no prompt has
-        been issued
-P3 / P4 NOT STARTED
+P2      IN_PROGRESS — Compare. Authorized on 2026-09-29 by its own architect prompt (supplied inline, so
+        no source file exists in this repository to hash); it starts from HEAD 7a13660, measured green on
+        remote Run #16 36576568426 (success, 7 of 7 jobs). No P2 verdict exists yet — US-002 is its
+        acceptance list and P2_VALIDATION/ is the pack that will carry the evidence
+P3 / P4 NOT STARTED — P3 becomes the next authorizable stage only when P2 closes, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -192,7 +194,7 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `P1A0_REAL_ARTIFACT_INTAKE`
+12. `.ai/ACTIVE_TASK.md` — currently `P2_COMPARE`
 
 ## Batch A recruitment-ready status
 
@@ -227,16 +229,18 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: NONE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
+`active_task: P2_COMPARE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
 product verb: bounded `Sections`, `Symbols` and `Evidence` queries over the SQLite snapshot that already
 existed, three use-case IPC commands, top contributors, an Evidence Inspector, and the `bytes / KiB`
 presentation switch `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Every mandatory US-001
 item is green with its evidence named per item in `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, and
 **P1 is `PASS / COMPLETE`**.
 
-**`P2 Compare` is the next authorizable stage, and nothing more than that.** `AGENTS.md` 1 with
-`active_task: NONE` forbids starting it from the roadmap: looser sequencing is not standing
-authorization, and each stage still needs its own architect prompt. If V0 is ever resumed for usability
+**`P2 Compare` is now the live stage, authorized the same day by its own architect prompt.** The rule that
+kept it unstarted until then still holds for everything after it: looser sequencing is not standing
+authorization, `ADR-0026` removed the research gate and no per-stage prompt requirement, so **P3 Release
+Gate becomes the next authorizable stage only when P2 closes, and it needs its own prompt** — P2's own
+prompt says stop after P2. If V0 is ever resumed for usability
 feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
 registers are still there, and no session, quote, timing or count may be invented.
 

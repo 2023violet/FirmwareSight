@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-09-29"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / active task NONE
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare IN_PROGRESS
 
 ## Purpose
 
@@ -20,15 +20,17 @@ The direction changed on 2026-09-29 by `ADR-0026-open-source-mvp-first-delivery.
 its local MVP first, `G1 = P0 PASS` for that delivery, and V0 is a **non-blocking** user-feedback track
 rather than a precondition. The engineering round that followed - **`P1_ANALYZE_DETAILS`** - finished the
 same day: bounded Sections, Symbols and Evidence queries, top contributors, the Evidence Inspector, and
-the `bytes / KiB` switch US-001 requires. **`active_task` is now `NONE`.**
+the `bytes / KiB` switch US-001 requires. Later that day the architect issued
+*FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect Reviewed*, so
+**`active_task` is now `P2_COMPARE`** and **`P2` is `IN_PROGRESS`** — a stage in flight, not a stage closed.
 
 Three wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here
 to continue P1, P1 is `PASS / COMPLETE` and its acceptance list is checked item by item in
 `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` - there is nothing left inside it to do. And if you were sent
-here to start Compare, Gate, Bundle, an installer or anything cloud-shaped: **`P2 Compare` is the next
-authorizable stage, not an authorized one.** ADR-0026 removed the *research* gate, not the requirement
-that each stage carry its own architect prompt, so "governance got easier" is not a licence to widen
-scope. `AGENTS.md` 1 with `active_task: NONE` means: read, report, and stop.
+here to start Gate, Bundle, an installer or anything cloud-shaped: **`P3 Release Gate` becomes the next
+authorizable stage only when P2 closes, and it is not authorized by P2's prompt.** ADR-0026 removed the
+*research* gate, not the requirement that each stage carry its own architect prompt, so "governance got
+easier" is not a licence to widen scope. The live prompt's own §65 says it plainly: **stop after P2.**
 
 ## Baseline and HEADs
 
@@ -62,6 +64,10 @@ P1 storage + shell commit      f649afd (f649afddd94d1144d0f23e7a35190f52b60b3808
 P1 UI commit                   ae7759a (ae7759a22a19d0d22a2c445a7fac484712a219d1) — on origin/main; 10 files: Details.tsx, Details.module.css and details.test.tsx new, plus App.tsx, format.ts, format.test.ts, intake.test.tsx, bridge.ts, bridge.test.ts and types.ts touched
 P1 evidence + governance       e63afaf (e63afaf80cd0cd230a544ef61254a5598145bb3f) — on origin/main; 16 files: P1_VALIDATION/ ×4, the .ai/ pack ×4, README.md, INDEX.md, BASELINE.yaml, two delivery docs, the prompt registry, DIRECTORY_TREE.txt and SHA256SUMS
 Remote CI Run #13              36556735551  on e63afaf  success, 7 of 7 jobs — one run for the whole four-commit push, so 872ad7e, f649afd and ae7759a have no run of their own and none is claimed for them
+Remote CI Run #14              36558893544  on 1e5880a  success, 7 of 7 jobs — the first successor record of that push, pushed on its own so it has its own run
+Remote CI Run #15              36559834259  on 653e313  success, 7 of 7 jobs — the handoff-row alignment successor
+Remote CI Run #16              36576568426  on 7a13660  success, 7 of 7 jobs — the P1-round index and stale-claim dating commit, and the verified start HEAD of P2 Compare
+P2 Compare start               7a13660db873439f66eedee850561e8dae1cb3cf — HEAD = origin/main, worktree clean, 184 Rust and 58 UI tests re-measured green before the first write
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -85,7 +91,10 @@ P1      PASS / COMPLETE — P1_ANALYZE_DETAILS closed 2026-09-29. PASS was earne
         frozen US-001 acceptance list, in P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md, and 14/14 local
         gate steps plus a real shipped-binary window run. Remote CI for those commits is a successor
         document's job; it was NOT RUN when this line was written
-P2 / P3 / P4   NOT STARTED — P2 is now the next authorizable stage, and authorizing it is the
+P2      IN_PROGRESS — Compare, authorized 2026-09-29 by its own architect prompt (supplied inline, so no
+        source file exists to hash). Start HEAD 7a13660, measured green on Run #16. No P2 verdict exists
+        yet: P2_VALIDATION/ is written by that round, and US-002 is its acceptance list
+P3 / P4 NOT STARTED — P3 becomes the next authorizable stage when P2 closes, and authorizing it is the
         architect's act. ADR-0026 removed the research gate, not the requirement of its own prompt
 Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was withdrawn unexecuted
 ```

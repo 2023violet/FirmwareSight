@@ -11,73 +11,93 @@ last_updated: "2026-09-29"
 # ACTIVE TASK
 
 ```text
-NONE — P1 Analyze reached PASS / COMPLETE on 2026-09-29. There is no live coding task.
+P2_COMPARE — the second MVP stage of the open-source MVP-first line ADR-0026 opened.
 
-AGENTS.md 1: with no active task, no agent may create business functionality or pick the next stage from
-the roadmap. P2 Compare is the next *authorizable* stage; it starts only when the architect issues a P2
-prompt. That sentence is a record of where the delivery stands, not permission to begin.
+Authorization: "FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect
+Reviewed", supplied inline on 2026-09-29. It is registered in 10_AUDIT/SOURCE_PROMPTS/README.md without
+a SHA-256, because no source file was delivered to this repository — recording a hash for bytes nobody
+received would be a fabricated provenance record.
+
+Status while this file is live: IN_PROGRESS. Nothing in this document claims P2 is complete.
 ```
 
-## What just closed
+## What the stage is
 
-`P1_ANALYZE_DETAILS` — capabilities 5 to 9 of the Analyze verb, authorized as the first MVP stage under
-ADR-0026 by the parent prompt *FirmwareSight Open-Source MVP-First Governance Reset + P1 Analyze
-Completion v1.0* and its *P1 Analyze Acceptance Closure v1.0* addendum.
+One product verb, `Compare`, taken from persisted snapshots to an inspectable, exportable diff:
 
 ```text
-intake → summary → top contributors → [Sections | Symbols | Evidence] → Evidence Inspector
+Analyze two builds → select Base / Target → Core diff → [Section | Symbol] changes → export JSON / HTML
 ```
 
-The acceptance list was the frozen **US-001 Analyze ELF** criteria in
-`01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md`, not a subset of them. Every mandatory item is green, with
-the evidence named per item:
+`firmwaresight-core` owns every diff semantic. Storage retrieves normalized facts, the shell projects
+them, and React paints them. No delta, match, ambiguity or comparability decision is computed in SQL,
+in a Tauri command handler or in the frontend (`AGENTS.md` 3, prompt §7).
 
-| Document | Holds |
+## Acceptance list
+
+The frozen **US-002 Compare Builds** criteria in `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md:23-31`, all
+five items, plus the PRD **P0-3 Build Diff** content list at `01_PRODUCT/01_PRD_MVP.md:44-53` including
+its rule that a bare `+8 KB` is not an answer. P2 is not `PASS` while any applicable item is open.
+
+| Source | What it binds |
 | --- | --- |
-| `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` | US-001 item by item, hard boundary by boundary, the verdict |
-| `P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md` | what was built, the seven defects found and fixed, the four findings reported rather than fixed, every gate command and its output |
-| `P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md` | the shipped release binary in a real window at the frozen 1024 px minimum, native dialogs, KiB arithmetic checked independently, the failed-analysis last-good path, a clean close |
-| `P1_VALIDATION/P1_ANALYZE_DESIGN_CHECKLIST.md` | `AGENTS.md` 11 / `DESIGN.md` review, with the greps run rather than asserted |
+| `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-002 | explicit old/new, signed delta on every numeric change, Added/Removed/Changed separate, ranking never hides a small important change, JSON and HTML export |
+| `01_PRODUCT/01_PRD_MVP.md` P0-3 | nonvolatile/FLASH delta, RAM delta, section delta, symbol delta, object/module delta **only when evidence is sufficient**, added/removed/changed symbols, drill-down |
+| `06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md:21` | deliverables are build diff + contributors + evidence-aware change UI; exit evidence is deterministic diff tests |
+| `DESIGN.md` §5 Diff Row, `03_DESIGN/04_COMPONENT_RULES.md` | every diff row shows old / new / delta, and absence is never `0` |
 
-Measured on this machine: `cargo test --workspace` **184 passed / 0 failed / 0 ignored**, UI **58 passed**
-with no stderr, `python scripts/check.py` **14/14**. Baseline stays **v0.6.0**; no migration
-(`SCHEMA_VERSION` 2), no new dependency, no new design token, no golden changed.
-
-`NOT MEASURED`: peak RSS. `NOT RUN`: fuzzing, a macOS or Linux window, keyboard-only traversal of the
-shipped binary. One dead `Apply filter` click stays `UNRESOLVED` and is reported as such.
-
-Remote CI ran on the pushed head and is measured: run #13 `36556735551` on `e63afaf`, `completed`,
-`success`, 7 of 7 jobs, read with `gh run view 36556735551 --repo 2023violet/FirmwareSight`. It is
-recorded by `e63afaf`'s successor commit rather than inside `e63afaf`, per the rule that held through P0
-and P1-A0, and the three earlier commits of the same push have no run each.
-
-## State this closure leaves behind
+## Boundaries this round works inside
 
 ```text
-P0                  PASS — frozen at v0.6.0
-G1                  PASS — basis P0 PASS, per ADR-0026 (2026-09-29)
-P1-A0               COMPLETE (+ correctness closure COMPLETE)
-P1                  PASS / COMPLETE — this task
-V0                  NON_BLOCKING_USER_FEEDBACK_TRACK — 0 / 8, gates nothing, nothing fabricated
-P2 / P3 / P4        NOT STARTED — each still needs its own architect prompt
-G2                  NOT REACHED
-Baseline            v0.6.0 — unchanged by this slice; no v0.7.0
-Design tokens       v0.2.1 — unchanged
-Pricing/commercial  DEFERRED_POST_MVP
-Run #12             36520562718 on be09c65 — success, 7 of 7 jobs (this round's start fact)
+Baseline            v0.6.0 — unchanged; no v0.7.0 without its own promotion prompt
+Schema              SCHEMA_VERSION stays 2. No migration 0003, no diff_runs or diff_changes table:
+                    a comparison is recomputable from stored snapshots
+Dependency          none new. std / serde / rusqlite / tauri-plugin-dialog / React / ts-rs only
+Design token        none new. diff.added / diff.removed / diff.changed exist at v0.2.1; a
+                    delta-direction token is forbidden by 03_DESIGN/08:31-33, not missing
+IPC               six use-case commands, bounded: list_compare_candidates, compare_snapshots,
+                    query_section_changes, query_symbol_changes, export_compare_json,
+                    export_compare_html. No run_sql / read_table / read_file / write_file / get_any_path
+Payload             summary is bounded by construction; detail pages default 100, hard max 500, clamped
+                    in Rust. The full diff never crosses IPC by default
+Diff session        opaque cmp-<pid>-<counter>, session-local, not persisted, not portable, not part of
+                    any deterministic diff identity
+Evidence            Unknown is never zero; Added is never 0 → N; partial evidence is labelled partial;
+                    missing MAP degrades the memory diff visibly instead of blocking it
+Attribution         object/module reports Unavailable with its real reason. No empty Object tab
+Time                builds.created_at is import time and is labelled Imported, never Build time
+Privacy             no host path in IPC or UI; the save dialog opens Rust-side and the chosen path does
+                    not come back
 ```
 
-Two findings are open on purpose, because closing them needs authority this round did not have:
-`sections.file_offset` and `symbols.address` are nullable columns with no reason column, so a reason is
-lost at write time (fixing that is a migration); and the `drift/ipc bindings unchanged` gate cannot see a
-binding file that is not yet tracked, which is why the regeneration was verified by hash instead. Both
-are in `P1_ANALYZE_EXECUTION_REPORT.md` §6 and in `.ai/CURRENT_STATE.md`'s known-gaps list.
+`AGENTS.md` 2 / 3 / 6 / 7 / 8 / 11 apply unchanged, and `ADR-0026` relaxed no technical boundary.
 
-## If a P2 prompt arrives
+## Start facts, measured before the first write
 
-Read first, in order: root `README.md`, `.ai/README.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`, this
-file, `04_TECH/09_TECH_DECISION_MATRIX.md`, and the ADRs the prompt names. `AGENTS.md` 2 / 3 / 6 / 7 / 8 /
-11 are unchanged and still bind: Core stays headless and synchronous, the technology baseline does not
-move silently, SQLite stays behind `rusqlite + bundled` with every schema change going through a
-migration, the WebView keeps no general shell or filesystem power, every fact keeps its evidence class,
-and UI work goes through `DESIGN.md` plus the frozen tokens.
+```text
+HEAD = origin/main      7a13660db873439f66eedee850561e8dae1cb3cf
+worktree                clean (git status --short empty; git diff and git diff --cached empty)
+Run #16                 36576568426 on 7a13660 — completed, success, 7 of 7 jobs
+                        read with gh run view 36576568426 --repo 2023violet/FirmwareSight
+Rust tests at start     184 passed / 0 failed / 0 ignored   (cargo test --workspace)
+UI tests at start       58 passed                            (corepack pnpm test)
+cargo-deny              0.20.2 installed, so deny/cargo-deny executes rather than taking the SKIPPED path
+Fixture toolchain       arm-none-eabi-gcc 14.3.Rel1 on PATH, needed only to build the new P2 pair
+```
+
+## Stop condition
+
+```text
+STOP AFTER P2.
+
+P3 Release Gate is the next authorizable stage and is NOT authorized by this file: it needs its own
+architect prompt. No Gate rule, no Release Bundle, no History, no Project Settings, no installer,
+signing, updater, SBOM, cloud, account, telemetry, AI, pricing or commercial work.
+```
+
+Three existing tests assert the absence of what this stage ships, and each is changed by name rather
+than quietly deleted: `apps/cli/src/main.rs` `unregistered_future_commands_are_not_accepted` (drops
+`diff`, keeps `gate` / `release` / `watch` / `doctor`), the same file's exit-code surface test (adds `6`
+for export failure, keeps `4` / `5` unreachable), and `apps/desktop/ui/src/intake.test.tsx`'s
+"no navigation, no Compare text" guard, which prompt §53 replaces with the Analyze + Compare
+navigation assertion.

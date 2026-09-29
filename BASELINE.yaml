@@ -27,14 +27,14 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_IN_PROGRESS_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
   # chain, fixture reproducibility, parser behaviour, non-blocking UI, a data model that can carry
   # Compare and Gate) is unchanged.
   next_authorizable_tracks:
-    - P2_compare
+    - P3_gate_after_P2_compare_closes
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
   g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
@@ -42,6 +42,9 @@ validation:
   g1_claimed_basis: "P0 PASS at v0.6.0, measured green cross-platform through remote Run #12; claimed under ADR-0026, not under the earlier V0+P0 formula"
   product_mvp_phases: [P1_analyzer, P2_compare, P3_gate, P4_bundle]
   p1_status: PASS
+  # The P2 prompt's own §5 requires this field to read IN_PROGRESS while the round runs, and to become
+  # PASS_COMPLETE only from the item-by-item US-002 verdict in P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md.
+  p2_status: IN_PROGRESS
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
@@ -109,13 +112,15 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# P0 is closed at v0.6.0, G1 is claimed on the P0 basis under ADR-0026, and P1 Analyze is now PASS /
+# P0 is closed at v0.6.0, G1 is claimed on the P0 basis under ADR-0026, and P1 Analyze is PASS /
 # COMPLETE: bounded Sections, Symbols and Evidence details, top contributors, the Evidence Inspector and
-# the US-001 bytes/KiB presentation switch all shipped in this round. There is no live coding task.
-# AGENTS.md 1 forbids inventing the next one from the roadmap, so `P2 Compare` is recorded as the next
-# *authorizable* stage in `p1_execution` and `validation.next_authorizable_tracks`, and nothing begins
-# until the architect issues a prompt for it.
-active_task: NONE
+# the US-001 bytes/KiB presentation switch shipped in that round.
+# What the paragraph above recorded as *authorizable but not begun* changed on 2026-09-29: the
+# architect issued "FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect
+# Reviewed", so P2 Compare is now the live task. AGENTS.md 1 still binds: this pointer names one stage,
+# and nothing beyond it. When this round closes, `active_task` returns to NONE and P3 becomes the next
+# authorizable stage only — P3 still needs its own prompt.
+active_task: P2_COMPARE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -176,7 +181,8 @@ v0_track:
 # this comment asserted when it was written - that the live task after `ace6fbe` and `3b59585` was the
 # research track above - has since been superseded twice: ADR-0026 re-sequenced V0 as a non-blocking
 # track on 2026-09-29, the P1 Analyze round ran under its own prompt the same day, and `active_task`
-# below now reads NONE. The sentence stays as dated history; `active_task` is the live field.
+# below now reads P2_COMPARE, because the architect issued the P2 prompt the same day. The sentence stays
+# as dated history; `active_task` is the live field.
 pre_g1_execution:
   authorized: true
   slice: P1A0_REAL_ARTIFACT_INTAKE
@@ -271,7 +277,35 @@ p1_execution:
     read_with: "gh run view 36556735551 --repo 2023violet/FirmwareSight"
     successor_of: e63afaf # this block is added by e63afaf's successor commit, never inside e63afaf
   evidence: P1_VALIDATION/
-  next_stage_after_this_one: P2_compare # NOT authorized by this prompt; it needs its own architect prompt
+  next_stage_after_this_one: P2_compare # written when P2 needed its own prompt; that prompt arrived on 2026-09-29 and `p2_execution` below is its record
+
+# The stage that followed: Compare. Recorded while the round is RUNNING, so the status fields read
+# IN_PROGRESS and every expected-NO field is a promise the prompt makes about its own scope, not a
+# measured result. The measured result lands here only when P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md
+# says so.
+p2_execution:
+  authorized: true
+  prompt: "FirmwareSight - P2 Compare MVP Implementation, Execution Prompt v1.0 - Architect Reviewed"
+  prompt_provenance: "supplied inline to the execution environment on 2026-09-29; no source file exists in this repository to hash, so 10_AUDIT/SOURCE_PROMPTS/README.md records the fact without a SHA-256 rather than inventing one"
+  adr: none # ADR-0026 already opened P1-P4 on engineering grounds; a stage prompt is not an architecture change
+  slice: P2_COMPARE
+  scope: "Core-owned deterministic build diff over persisted snapshots, bounded Compare IPC with a session-local diff registry, the second desktop page, fwsight diff, and portable Diff JSON v1 plus self-contained HTML"
+  acceptance_list: "01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md US-002 Compare Builds, item by item, plus 01_PRODUCT/01_PRD_MVP.md P0-3 Build Diff content and the drill-down rule"
+  explicitly_not_in_scope: [P3_gate, P4_bundle, history, project_settings, object_or_module_attribution_invention, installer, signing, updater, cloud, accounts, telemetry, ai, pricing, commercial_validation]
+  migration_expected: false # sections, symbols, evidence, memory_footprints and artifacts already store every fact Compare needs
+  new_dependency_expected: false # std, serde, serde_json, rusqlite, tauri-plugin-dialog, React and ts-rs already cover it
+  new_design_token_expected: false # diff.added / diff.removed / diff.changed already exist at design-tokens v0.2.1; a delta-direction token is forbidden, not missing
+  new_public_schema_expected: true # schemas/diff.schema.json, urn:firmwaresight:schema:diff:1, schema_version 1, with a mandatory contract test
+  no_new_baseline: true
+  baseline_version_stays: 0.6.0
+  start_head: 7a13660db873439f66eedee850561e8dae1cb3cf
+  start_run_id: 36576568426
+  start_run_conclusion: "success, 7 of 7 jobs"
+  tests_at_start: { rust: 184, ui: 58 } # re-measured on this machine before the first write: cargo test --workspace 184 passed / 0 failed / 0 ignored, corepack pnpm test 58 passed
+  stage_status: IN_PROGRESS
+  not_measured_at_start: { peak_rss: NOT_MEASURED, fuzz: NOT_RUN, macos_or_linux_window: NOT_RUN }
+  evidence: P2_VALIDATION/ # written by this round
+  next_stage_after_this_one: P3_gate # NOT authorized by this prompt; it needs its own architect prompt
 
 p0_execution:
   authorized: true

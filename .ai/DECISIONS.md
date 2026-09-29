@@ -598,3 +598,51 @@ SHA-256 rather than inventing one. The architect decided the direction; the codi
   new dependency, no new design token, default page 100 with a hard server-side maximum of 500, three
   use-case query commands and no generic table or SQL access, details bound to the last-good
   `snapshotId`, and a symbol's storage ordinal treated as a row position rather than identity.
+
+# P2 Compare — opened 2026-09-29
+
+Authorization: *FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect
+Reviewed*. Supplied inline, so `10_AUDIT/SOURCE_PROMPTS/README.md` records the fact of the prompt without
+a SHA-256 rather than inventing one for bytes this repository never received. No ADR is required and none
+was written: `ADR-0026` already made P1 → P2 → P3 → P4 a matter of engineering sequencing, and this stage
+moves no technology baseline, persistence semantics, capability surface or evidence class.
+
+Decisions taken at activation, before any product source changed:
+
+- **The pointer moved; nothing was concluded.** `active_task` reads `P2_COMPARE`, `validation.p2_status`
+  reads `IN_PROGRESS`, and `validation.next_authorizable_tracks` now names `P3_gate_after_P2_compare_closes`.
+  A stage that has started is not a stage that has passed, and the `p2_execution` block says so in its own
+  fields. Baseline stays `0.6.0`; no `v0.7.0`.
+- **The three successor runs of the P1 round are recorded here rather than left owed.** Runs #14
+  `36558893544` on `1e5880a`, #15 `36559834259` on `653e313` and #16 `36576568426` on `7a13660` are each
+  `success`, 7 of 7 jobs, read with `gh api repos/2023violet/FirmwareSight/actions/runs/<id>` and
+  `gh run view`. They were pushed separately, so unlike the four-commit P1 push each has its own run — and
+  none of the three ids appeared in any tracked file until now. Run #16 on `7a13660` is this round's
+  verified start fact.
+- **One stale pointer found at takeover is corrected, not rewritten.** `README.md`'s read-order list
+  still described `.ai/ACTIVE_TASK.md` as `P1A0_REAL_ARTIFACT_INTAKE` while `BASELINE.yaml` read `NONE`.
+  It now reads `P2_COMPARE`, which is the current truth; the dated governance records keep theirs.
+- **The start counts are measured, not inherited.** `cargo test --workspace` on `7a13660` before the first
+  write: **184 passed / 0 failed / 0 ignored**. `corepack pnpm test`: **58 passed**. `cargo-deny 0.20.2`
+  is installed, so the `deny` step executes rather than taking its SKIPPED-as-pass branch.
+  `arm-none-eabi-gcc 14.3.Rel1` is on PATH, which is needed only to build the new P2 fixture pair.
+- **Three tests that assert the absence of what P2 ships will change by name.** `apps/cli/src/main.rs`
+  `unregistered_future_commands_are_not_accepted` drops `diff` and keeps `gate` / `release` / `watch` /
+  `doctor`; the exit-code surface test in the same file adds `6` while keeping `4` and `5` unreachable;
+  `apps/desktop/ui/src/intake.test.tsx`'s "no navigation, no Compare text" guard becomes the Analyze +
+  Compare navigation assertion prompt §53 asks for. Each is a scope change the prompt orders, and each
+  stays a test — none is deleted to reach green.
+- **Two absences in the existing code are named instead of quietly filled.** No JSON-Schema validator
+  dependency is admissible (prompt §57), and the three existing `schemas/*.schema.json` are referenced by
+  no code today, so the diff contract test implements the schema subset actually used — `type`,
+  `required`, `properties`, `additionalProperties`, `const`, `enum`, `items` — over `serde_json`.
+  Likewise no HTML generator or escaping utility exists anywhere in `crates/` or `apps/`; the self-contained
+  HTML report is new std-only code in `firmwaresight-report`, not a template library.
+- **`Diff.identity_changes` is not silently dropped.** `04_TECH/02_DOMAIN_MODEL.md:64-71` lists identity
+  changes as part of `Diff`, while prompt §31's DTO does not, and git/build-identity facts are not
+  persisted per build today. P2 compares artifact identity (name, SHA-256, byte size) inside base/target
+  and reports deeper identity/provenance comparison as unavailable rather than inventing storage for it.
+
+Scope guard: this stage stops at Compare. P3 Gate, P4 Bundle, History, Project Settings, installer,
+signing, updater, cloud, accounts, telemetry, AI, pricing and commercial work remain outside it, and no
+prompt for any of them exists.

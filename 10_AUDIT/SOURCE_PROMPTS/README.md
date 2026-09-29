@@ -203,6 +203,30 @@ text with no source file; each says so in its own entry instead of standing for 
 - Remote CI for the commits this round produced is recorded by a successor document after the owner
   pushes, never inside their own commit - the same anti-recursion rule used for P0 and P1-A0.
 
+## P2 Compare MVP Implementation
+
+- Prompt: *FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect Reviewed.*
+  Supplied inline to the execution environment on 2026-09-29, so unlike the V0 and P0 prompts there is no
+  stored source file whose SHA-256 this repository can record. The registry convention holds: the fact of
+  the prompt is entered, no hash is invented for bytes this repository never received.
+- Authority: `ADR-0026` opened P1 → P2 → P3 → P4 on engineering grounds and each stage kept its own
+  prompt requirement. This is that P2 prompt; it authorizes no ADR-level change, and none was needed —
+  no technology baseline, persistence semantics, capability surface or evidence class moves.
+- Scope: `P2_COMPARE` — Core-owned deterministic build diff over persisted snapshots, bounded Compare IPC
+  with a session-local diff registry, the second desktop page (Analyze + Compare), `fwsight diff`, and
+  portable Diff JSON v1 plus self-contained HTML. Acceptance list: the frozen US-002 criteria in
+  `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md:23-31` with PRD P0-3 content and its drill-down rule.
+- Stop condition, stated by the prompt itself: **stop after P2.** P3 Release Gate, P4 Release Bundle,
+  History, Project Settings, installer, signing, updater, cloud, accounts, telemetry, AI, pricing and
+  commercial validation are all outside it.
+- Start state verified before the first write: `HEAD = origin/main = 7a13660db873439f66eedee850561e8dae1cb3cf`,
+  worktree clean, and Run #16 `36576568426` on that HEAD `completed` / `success` / 7 of 7 jobs, read with
+  `gh run view 36576568426 --repo 2023violet/FirmwareSight`.
+- Outcome: recorded by the round itself in `P2_VALIDATION/` when it closes. As of the entry above
+  ("Open-Source MVP-First Governance Reset + P1 Analyze Completion"), the sentence *"P2 Compare is the
+  next authorizable stage, unstarted and unauthorized"* was true at that round's close and is superseded
+  by this entry: the prompt arrived the same day.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

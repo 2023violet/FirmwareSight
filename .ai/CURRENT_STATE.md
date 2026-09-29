@@ -12,10 +12,13 @@ last_updated: "2026-09-29"
 
 - Date: 2026-09-29
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`NONE`** — `P1_ANALYZE_DETAILS` finished on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`
-  (Sections, Symbols, Evidence Inspector, top contributors, US-001 bytes/KiB switch), recorded in
-  `P1_VALIDATION/`. `AGENTS.md` 1 forbids starting the next stage from the roadmap: **P2 Compare is the
-  next authorizable stage and needs its own architect prompt.**
+- Active task: **`P2_COMPARE`** — authorized the same day by *FirmwareSight — P2 Compare MVP
+  Implementation, Execution Prompt v1.0 — Architect Reviewed*, supplied inline (registered in
+  `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source file reached this repository).
+  `P1_ANALYZE_DETAILS` finished on 2026-09-29 and P1 Analyze is `PASS / COMPLETE` (Sections, Symbols,
+  Evidence Inspector, top contributors, US-001 bytes/KiB switch), recorded in `P1_VALIDATION/`.
+  **`P2` is `IN_PROGRESS`, not `PASS`** — its verdict is decided item by item against US-002 in
+  `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` when the round closes, and `P3` still needs its own prompt.
 
 ## Product/architecture baseline
 
@@ -43,8 +46,9 @@ Three governance changes are in force now, all decided by the architect rather t
 
 Status: **`PASS`** · promoted to v0.6.0 by the architect-signed
 *P0 Final Promotion / v0.6.0 Baseline Closure v1.0* · Task at promotion time: **NONE** (recorded as
-`active_task: NONE` in `BASELINE.yaml`; the task live on 2026-09-29 was `P1_ANALYZE_DETAILS`, which is
-now closed, so the field reads `NONE` again)
+`active_task: NONE` in `BASELINE.yaml`; the task live on 2026-09-29 was `P1_ANALYZE_DETAILS`, then after it
+closed the field read `NONE` for a few hours until the P2 prompt arrived the same day — it reads
+`P2_COMPARE` now, which changes the pointer and not this frozen P0 verdict)
 
 The chain P0 claimed is proven by executed commands, on this machine and on GitHub's runners:
 
@@ -134,9 +138,10 @@ G1: PASS — basis is P0 PASS under ADR-0026 (2026-09-29). Before that date this
 V0: NON_BLOCKING_USER_FEEDBACK_TRACK — 0 of 8 eligible external sessions, an honest zero that gates no P-stage and no G1
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
 P1: PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors, bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB presentation switch. Evidence: P1_VALIDATION/
-P2 / P3 / P4: NOT STARTED — P2 Compare is the next authorizable stage; each still needs its own architect prompt
+P2: IN_PROGRESS — Compare, authorized 2026-09-29 by its own architect prompt; no verdict yet
+P3 / P4: NOT STARTED — P3 Gate becomes the next authorizable stage only when P2 closes, and still needs its own architect prompt
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: NONE
+Active task: P2_COMPARE
 Design tokens: v0.2.1
 ```
 
@@ -203,7 +208,7 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: NONE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
+**`active_task: P2_COMPARE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
 bounded `Sections`, `Symbols` and `Evidence` queries over the snapshot SQLite already stores, three
 use-case IPC commands, top contributors, the Evidence Inspector, and the `bytes / KiB` presentation
 switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Per-item evidence:
@@ -212,9 +217,11 @@ switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Per-item
 design review: `P1_ANALYZE_DESIGN_CHECKLIST.md`. Earlier slices keep their own packs: `P0_TECHNICAL_VALIDATION/`
 and `P1_A0_VALIDATION/`.
 
-**`P2 Compare` is the next authorizable stage, and this file does not start it.** `AGENTS.md` 1 forbids
-inventing work from the roadmap, so the work begins only when the architect issues a P2 prompt. The
-boundaries that held for P1 hold for whatever follows and were not relaxed here: no schema migration
+**`P2 Compare` is the live task, authorized by its own architect prompt on 2026-09-29.** That prompt
+changes the pointer, not the standards: `P2` reads `IN_PROGRESS` until `US-002` is green item by item,
+and `P3 Release Gate` becomes the next authorizable stage only when P2 closes — it still needs its own
+prompt, and this file authorizes nothing beyond the stage named in it. The
+boundaries that held for P1 hold for P2 and were not relaxed here: no schema migration
 without its own decision (`SCHEMA_VERSION` is 2), no new dependency, no new design token - a genuinely
 missing token stops a round rather than being written as a magic number - no whole-table payload across
 IPC (default limit 100, hard max 500, enforced in Rust), details always bound to the last-good
@@ -232,8 +239,9 @@ What belongs to the owner and the architect:
    before. No commit in either chain carries the run number its own push produced;
 2. whether and when to resume the V0 feedback track with real participants - now a choice rather than a
    gate, with the `v0.1.0` instrument still frozen and ready;
-3. a **separate architect prompt** for P2 Compare once P1 is verifiably complete; this round does not
-   authorize it;
+3. a **separate architect prompt** for P2 Compare once P1 is verifiably complete — issued on 2026-09-29,
+   which is why `active_task` now reads `P2_COMPARE`; the same rule still stands for P3, whose prompt has
+   not been issued;
 4. re-authorizing pricing, paid-tier or pilot work only after MVP, since `ADR-0026` defers it and the
    matching prompt was withdrawn before execution;
 5. re-opening the two accepted advisories only on one of their recorded triggers.
