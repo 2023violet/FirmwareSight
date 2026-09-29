@@ -346,7 +346,7 @@ fn partial(bytes: u64) -> DiffBudget {
 fn map() -> SideEvidence {
     SideEvidence {
         map_backed: true,
-        layout_source: "MapMemoryConfiguration".to_owned(),
+        layout_source: "map".to_owned(),
         weakest_basis: Some("MapRegionAndElfLoad".to_owned()),
     }
 }
@@ -354,7 +354,7 @@ fn map() -> SideEvidence {
 fn elf_only() -> SideEvidence {
     SideEvidence {
         map_backed: false,
-        layout_source: "None".to_owned(),
+        layout_source: "none".to_owned(),
         weakest_basis: Some("ElfAddressAndFlags".to_owned()),
     }
 }

@@ -123,6 +123,20 @@ pub enum LayoutSource {
     None,
 }
 
+impl LayoutSource {
+    /// The label this source is written down as. The database column, the analysis screen and the
+    /// portable diff document all carry this same string, so a reader never has to know the name of
+    /// a Rust enum to follow where a layout came from.
+    #[must_use]
+    pub const fn as_label(self) -> &'static str {
+        match self {
+            Self::ProjectConfig => "project-config",
+            Self::MapMemoryConfiguration => "map",
+            Self::None => "none",
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct MemoryLayout {
     pub regions: Vec<MemoryRegion>,

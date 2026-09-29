@@ -505,7 +505,7 @@ fn write_memory(
          VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",
         params![
             build_id,
-            db_layout(memory.layout_source),
+            memory.layout_source.as_label(),
             memory.weakest_basis.map(|b| format!("{b:?}")),
             memory.admissible_for_hard_block() as i64,
             nv_state,
@@ -531,14 +531,6 @@ fn budget_parts(total: &ByteTotal) -> (&'static str, Option<i64>, &'static str) 
         ByteTotal::Exact { bytes } => ("exact", Some(*bytes as i64), class),
         ByteTotal::Partial { bytes, .. } => ("partial", Some(*bytes as i64), class),
         ByteTotal::Unknown { .. } => ("unknown", None, class),
-    }
-}
-
-const fn db_layout(source: firmwaresight_core::domain::memory::LayoutSource) -> &'static str {
-    match source {
-        firmwaresight_core::domain::memory::LayoutSource::ProjectConfig => "project-config",
-        firmwaresight_core::domain::memory::LayoutSource::MapMemoryConfiguration => "map",
-        firmwaresight_core::domain::memory::LayoutSource::None => "none",
     }
 }
 

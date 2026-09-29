@@ -249,7 +249,7 @@ impl DiffBudget {
 pub struct SideEvidence {
     /// Whether a supported GNU ld MAP is stored as an artifact of this build.
     pub map_backed: bool,
-    /// The persisted layout source name, for example `MapMemoryConfiguration`.
+    /// The persisted layout source label, for example `map`.
     pub layout_source: String,
     /// The persisted weakest accounting basis, for example `MapRegionAndElfLoad`.
     pub weakest_basis: Option<String>,
@@ -401,7 +401,7 @@ impl DiffSnapshotInput {
                 excluded_metadata_bytes: footprint.excluded_metadata_bytes,
                 evidence: SideEvidence {
                     map_backed,
-                    layout_source: format!("{:?}", footprint.layout_source),
+                    layout_source: footprint.layout_source.as_label().to_owned(),
                     weakest_basis: footprint.weakest_basis.map(|basis| format!("{basis:?}")),
                 },
             }),

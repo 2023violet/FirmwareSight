@@ -181,6 +181,25 @@ fn object_attribution_is_unavailable_and_says_why() {
 }
 
 #[test]
+fn the_layout_label_is_the_one_the_storage_layer_persists() {
+    // The desktop reads `layoutSource` back out of the database and the CLI derives it from the
+    // snapshot it just parsed. When the CLI formatted the Rust enum instead, the two renderers of
+    // one portable document disagreed about where a layout came from, so this pins the document to
+    // Core's own label rather than to a copy of a string.
+    use firmwaresight_core::domain::memory::LayoutSource;
+    let document: serde_json::Value =
+        serde_json::from_str(&read("golden/core/p2-diff.json")).expect("the golden is JSON");
+    assert_eq!(
+        document["base"]["memory"]["evidence"]["layoutSource"],
+        LayoutSource::MapMemoryConfiguration.as_label()
+    );
+    assert_eq!(
+        document["target"]["memory"]["evidence"]["layoutSource"],
+        LayoutSource::MapMemoryConfiguration.as_label()
+    );
+}
+
+#[test]
 fn both_sides_are_named_with_their_own_identity() {
     let document: serde_json::Value =
         serde_json::from_str(&read("golden/core/p2-diff.json")).expect("the golden is JSON");

@@ -13,9 +13,7 @@ use firmwaresight_core::domain::build_snapshot::{BuildSnapshot, NORMALIZATION_VE
 use firmwaresight_core::domain::capability::Capabilities;
 use firmwaresight_core::domain::evidence::{Confidence, EvidenceClass, SourceType};
 use firmwaresight_core::domain::identity::{Bitness, Endianness, Fact};
-use firmwaresight_core::domain::memory::{
-    ByteTotal, LayoutSource, MemoryContribution, MemoryEvidenceBasis,
-};
+use firmwaresight_core::domain::memory::{ByteTotal, MemoryContribution, MemoryEvidenceBasis};
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -167,14 +165,6 @@ const fn basis_text(basis: MemoryEvidenceBasis) -> &'static str {
     }
 }
 
-const fn layout_text(source: LayoutSource) -> &'static str {
-    match source {
-        LayoutSource::ProjectConfig => "project-config",
-        LayoutSource::MapMemoryConfiguration => "map",
-        LayoutSource::None => "none",
-    }
-}
-
 const fn bitness_text(bitness: Bitness) -> &'static str {
     match bitness {
         Bitness::Bits32 => "32",
@@ -313,7 +303,7 @@ impl AnalyzeResultDto {
             },
             memory: MemoryDto {
                 accounting_rule: "adr-0021-dual-budget",
-                layout_source: layout_text(memory.layout_source),
+                layout_source: memory.layout_source.as_label(),
                 weakest_evidence_basis: memory.weakest_basis.map(basis_text),
                 admissible_for_hard_block: memory.admissible_for_hard_block(),
                 nonvolatile_image_footprint: budget(&memory.nonvolatile),
