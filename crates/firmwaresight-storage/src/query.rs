@@ -388,12 +388,15 @@ impl Database {
 /// A limit that is not a page size at all - zero or negative - is treated as "not asked", which is
 /// the default, rather than as a request for one row or for none.
 fn clamp_page(offset: i64, limit: i64) -> (i64, i64) {
+    clamp_page_with(offset, limit, DEFAULT_QUERY_LIMIT, MAX_QUERY_LIMIT)
+}
+
+/// The same clamping rule with a different pair of bounds, so a bounded read that is not a detail
+/// page (the candidate list, for instance) cannot reuse the detail ceiling by accident.
+#[must_use]
+pub(crate) fn clamp_page_with(offset: i64, limit: i64, default: i64, max: i64) -> (i64, i64) {
     let offset = offset.max(0);
-    let limit = if limit <= 0 {
-        DEFAULT_QUERY_LIMIT
-    } else {
-        limit.min(MAX_QUERY_LIMIT)
-    };
+    let limit = if limit <= 0 { default } else { limit.min(max) };
     (offset, limit)
 }
 
@@ -414,7 +417,7 @@ fn like_pattern(filter: Option<&str>) -> Option<String> {
     Some(escaped)
 }
 
-fn page<T>(rows: Vec<T>, total: i64, offset: i64, limit: i64) -> Page<T> {
+pub(crate) fn page<T>(rows: Vec<T>, total: i64, offset: i64, limit: i64) -> Page<T> {
     let read = offset + rows.len() as i64;
     Page {
         rows,
@@ -478,7 +481,7 @@ fn evidence_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<EvidenceRow> {
 
 /// A NULL with a recorded reason is `Unknown`; a NULL without one is still `Unknown`, because the
 /// alternative is a zero the artifact never said.
-fn known_or_unknown(value: Option<String>, reason: Option<String>) -> Fact<String> {
+pub(crate) fn known_or_unknown(value: Option<String>, reason: Option<String>) -> Fact<String> {
     match value {
         Some(value) => Fact::Known(value),
         None => Fact::Unknown {
@@ -487,7 +490,7 @@ fn known_or_unknown(value: Option<String>, reason: Option<String>) -> Fact<Strin
     }
 }
 
-fn bytes_or_unknown(value: Option<i64>, reason: Option<String>) -> Fact<u64> {
+pub(crate) fn bytes_or_unknown(value: Option<i64>, reason: Option<String>) -> Fact<u64> {
     match value {
         Some(value) => Fact::Known(value as u64),
         None => Fact::Unknown {

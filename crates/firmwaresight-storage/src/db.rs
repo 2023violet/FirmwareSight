@@ -325,7 +325,7 @@ fn write_err(source: rusqlite::Error) -> StorageError {
 ///
 /// The writer and the primary-artifact reader both derive the id from the build id, so they cannot
 /// disagree about which row is index 0.
-fn artifact_row_id(build_id: &str, index: usize) -> String {
+pub(crate) fn artifact_row_id(build_id: &str, index: usize) -> String {
     format!("{build_id}#{index}")
 }
 
