@@ -188,7 +188,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── src/
 │   │   │   └── main.rs
 │   │   ├── tests/
-│   │   │   └── golden.rs
+│   │   │   ├── diff_cli.rs
+│   │   │   ├── golden.rs
+│   │   │   └── p2_golden.rs
 │   │   └── Cargo.toml
 │   └── desktop/
 │       ├── src-tauri/
@@ -201,6 +203,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── icon.ico
 │       │   │   └── icon.png
 │       │   ├── src/
+│       │   │   ├── compare.rs
 │       │   │   ├── details.rs
 │       │   │   ├── intake.rs
 │       │   │   ├── ipc.rs
@@ -209,6 +212,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   └── service.rs
 │       │   ├── tests/
 │       │   │   ├── analyze_details.rs
+│       │   │   ├── compare_ipc.rs
 │       │   │   ├── desktop_parity.rs
 │       │   │   └── real_artifact_intake.rs
 │       │   ├── build.rs
@@ -217,14 +221,34 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       └── ui/
 │           ├── src/
 │           │   ├── components/
+│           │   │   ├── ErrorPanel.module.css
+│           │   │   ├── ErrorPanel.tsx
+│           │   │   ├── SizeUnitSwitch.module.css
+│           │   │   ├── SizeUnitSwitch.tsx
 │           │   │   ├── StateBadge.module.css
-│           │   │   └── StateBadge.tsx
+│           │   │   ├── StateBadge.tsx
+│           │   │   ├── table.module.css
+│           │   │   └── Table.tsx
 │           │   ├── ipc/
 │           │   │   ├── generated/
 │           │   │   │   ├── AnalysisSummaryDto.ts
 │           │   │   │   ├── ArtifactDto.ts
 │           │   │   │   ├── BudgetDto.ts
+│           │   │   │   ├── ByteDeltaDto.ts
+│           │   │   │   ├── CandidatePageDto.ts
+│           │   │   │   ├── CandidatePageRequestDto.ts
 │           │   │   │   ├── CapabilitiesDto.ts
+│           │   │   │   ├── ChangeKindCountsDto.ts
+│           │   │   │   ├── ChangeKindFilterDto.ts
+│           │   │   │   ├── CompareCandidateDto.ts
+│           │   │   │   ├── CompareRequestDto.ts
+│           │   │   │   ├── CompareSummaryDto.ts
+│           │   │   │   ├── ContributorDto.ts
+│           │   │   │   ├── DiffCountsDto.ts
+│           │   │   │   ├── DiffMemoryDto.ts
+│           │   │   │   ├── DiffSideDto.ts
+│           │   │   │   ├── DiffSideMemoryDto.ts
+│           │   │   │   ├── DiffWarningDto.ts
 │           │   │   │   ├── ErrorEnvelopeDto.ts
 │           │   │   │   ├── EvidenceClassDto.ts
 │           │   │   │   ├── EvidencePageDto.ts
@@ -232,19 +256,32 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── EvidenceRowDto.ts
 │           │   │   │   ├── EvidenceSortDto.ts
 │           │   │   │   ├── EvidenceSummaryDto.ts
+│           │   │   │   ├── ExportOutcomeDto.ts
 │           │   │   │   ├── FixtureKey.ts
 │           │   │   │   ├── FixtureOptionDto.ts
 │           │   │   │   ├── IdentityDto.ts
 │           │   │   │   ├── MemorySummaryDto.ts
+│           │   │   │   ├── ObjectAttributionDto.ts
+│           │   │   │   ├── SectionChangePageDto.ts
+│           │   │   │   ├── SectionChangeQueryDto.ts
+│           │   │   │   ├── SectionChangeRowDto.ts
+│           │   │   │   ├── SectionChangeSortDto.ts
 │           │   │   │   ├── SectionPageDto.ts
 │           │   │   │   ├── SectionRequestDto.ts
 │           │   │   │   ├── SectionRowDto.ts
+│           │   │   │   ├── SectionSideDto.ts
 │           │   │   │   ├── SectionSortDto.ts
 │           │   │   │   ├── SelectionDto.ts
 │           │   │   │   ├── SortDirDto.ts
+│           │   │   │   ├── StoredBudgetDto.ts
+│           │   │   │   ├── SymbolChangePageDto.ts
+│           │   │   │   ├── SymbolChangeQueryDto.ts
+│           │   │   │   ├── SymbolChangeRowDto.ts
+│           │   │   │   ├── SymbolChangeSortDto.ts
 │           │   │   │   ├── SymbolPageDto.ts
 │           │   │   │   ├── SymbolRequestDto.ts
 │           │   │   │   ├── SymbolRowDto.ts
+│           │   │   │   ├── SymbolSideDto.ts
 │           │   │   │   └── SymbolSortDto.ts
 │           │   │   ├── bridge.test.ts
 │           │   │   ├── bridge.ts
@@ -255,8 +292,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   └── tokens.css
 │           │   ├── test/
 │           │   │   └── setup.ts
+│           │   ├── Analyze.module.css
+│           │   ├── Analyze.tsx
 │           │   ├── App.module.css
 │           │   ├── App.tsx
+│           │   ├── Compare.module.css
+│           │   ├── compare.test.tsx
+│           │   ├── Compare.tsx
 │           │   ├── Details.module.css
 │           │   ├── details.test.tsx
 │           │   ├── Details.tsx
@@ -294,14 +336,18 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   └── pipeline.rs
 │   │   ├── tests/
 │   │   │   ├── map_companion_identity.rs
-│   │   │   └── p0_acceptance.rs
+│   │   │   ├── p0_acceptance.rs
+│   │   │   └── p2_fixture_pair.rs
 │   │   └── Cargo.toml
 │   ├── firmwaresight-core/
 │   │   ├── src/
 │   │   │   ├── domain/
+│   │   │   │   ├── diff/
+│   │   │   │   │   └── tests.rs
 │   │   │   │   ├── artifact.rs
 │   │   │   │   ├── build_snapshot.rs
 │   │   │   │   ├── capability.rs
+│   │   │   │   ├── diff.rs
 │   │   │   │   ├── evidence.rs
 │   │   │   │   ├── identity.rs
 │   │   │   │   ├── memory.rs
@@ -313,21 +359,27 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── Cargo.toml
 │   ├── firmwaresight-report/
 │   │   ├── src/
+│   │   │   ├── diff.rs
+│   │   │   ├── diff_render.rs
 │   │   │   ├── dto.rs
 │   │   │   ├── lib.rs
 │   │   │   └── render.rs
+│   │   ├── tests/
+│   │   │   └── diff_schema_contract.rs
 │   │   └── Cargo.toml
 │   └── firmwaresight-storage/
 │       ├── migrations/
 │       │   ├── 0001_initial.sql
 │       │   └── 0002_evidence_keyed_by_build.sql
 │       ├── src/
+│       │   ├── compare.rs
 │       │   ├── db.rs
 │       │   ├── error.rs
 │       │   ├── lib.rs
 │       │   └── query.rs
 │       ├── tests/
 │       │   ├── analyze_queries.rs
+│       │   ├── compare_candidates.rs
 │       │   ├── map_companion_persistence.rs
 │       │   └── storage.rs
 │       └── Cargo.toml
@@ -346,13 +398,30 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   │   └── main.c
 │   │   │   ├── firmware.elf
 │   │   │   └── fixture.toml
-│   │   └── p0-dual-region/
-│   │       ├── source/
-│   │       │   └── main.c
-│   │       ├── firmware.elf
-│   │       ├── firmware.map
-│   │       ├── fixture.toml
-│   │       └── p0-dual-region.ld
+│   │   ├── p0-dual-region/
+│   │   │   ├── source/
+│   │   │   │   └── main.c
+│   │   │   ├── firmware.elf
+│   │   │   ├── firmware.map
+│   │   │   ├── fixture.toml
+│   │   │   └── p0-dual-region.ld
+│   │   └── p2-diff/
+│   │       ├── base/
+│   │       │   ├── source/
+│   │       │   │   ├── common.c
+│   │       │   │   └── payload.c
+│   │       │   ├── firmware.elf
+│   │       │   ├── firmware.ld
+│   │       │   ├── firmware.map
+│   │       │   └── fixture.toml
+│   │       └── target/
+│   │           ├── source/
+│   │           │   ├── common.c
+│   │           │   └── payload.c
+│   │           ├── firmware.elf
+│   │           ├── firmware.ld
+│   │           ├── firmware.map
+│   │           └── fixture.toml
 │   ├── malformed/
 │   │   ├── empty.bin
 │   │   ├── README.md
@@ -366,8 +435,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── p0-dual-region-analyze.json
 │   ├── core/
 │   │   ├── p0-basic-memory.json
-│   │   └── p0-dual-region-memory.json
+│   │   ├── p0-dual-region-memory.json
+│   │   └── p2-diff.json
 │   └── reports/
+│       ├── p2-diff.html
 │       └── README.md
 ├── P0_TECHNICAL_VALIDATION/
 │   ├── P0_ARCHITECTURE_CHECK.md
@@ -404,8 +475,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P1_ANALYZE_DETAILS_SMOKE_REPORT.md
 │   ├── P1_ANALYZE_EXECUTION_REPORT.md
 │   └── P1_ANALYZE_EXIT_CHECKLIST.md
+├── P2_VALIDATION/
+│   ├── P2_COMPARE_DESIGN_CHECKLIST.md
+│   ├── P2_COMPARE_DESKTOP_SMOKE_REPORT.md
+│   ├── P2_COMPARE_EXECUTION_REPORT.md
+│   └── P2_COMPARE_EXIT_CHECKLIST.md
 ├── schemas/
 │   ├── accepted-reviews.schema.json
+│   ├── diff.schema.json
 │   ├── gate-results.schema.json
 │   └── release-manifest.schema.json
 ├── scripts/
@@ -413,6 +490,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── gen_desktop_icons.py
 │   ├── gen_p0_fixtures.py
 │   ├── gen_p0_workload.py
+│   ├── gen_p2_fixtures.py
 │   ├── generate_design_tokens.py
 │   ├── measure_workloads.py
 │   ├── requirements.txt
