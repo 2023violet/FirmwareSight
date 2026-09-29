@@ -183,9 +183,11 @@ complete rather than work to resume: **nothing further is authorized to code fro
 
 What belongs to the owner and the architect rather than to this round:
 
-1. pushing the commit this round produces (the owner's act — the last measured remote fact is Run #9
-   `36499759371` on `2960173`, `success`, 7 of 7 jobs, read with `gh run view`; the correctness-closure
-   commit written now is local and its own remote outcome is deliberately not transcribed into itself);
+1. pushing was the owner's act, and it happened: the correctness-closure commit `ace6fbe` is on
+   `origin/main` and **Run #10 `36515470263` measured it `success`, 7 of 7 jobs** (read with
+   `gh run view`). Run #9 `36499759371` on `2960173` is the intake commit's own green run. The rule held
+   where it applied — neither commit carries the run number its own push produced; that is recorded in
+   the successor documentation instead;
 2. the next engineering authorization, which requires V0 Batch A `>= 4` eligible external sessions, an
    interim architect review of that evidence, and a new prompt;
 3. re-opening the two accepted advisories only on one of their recorded triggers.

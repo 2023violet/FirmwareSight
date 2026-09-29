@@ -42,7 +42,8 @@ P1-A0 implementation commit    29601735a2eff2c9e3677ef1dfa88cf752484694 — on o
 Remote CI Run #7               36431884747  on ecd1c87  success, 7 of 7 jobs — design-token commit
 Remote CI Run #8               36439949352  on 311f9fc  success, 7 of 7 jobs — governance commit
 Remote CI Run #9               36499759371  on 2960173  success, 7 of 7 jobs — the intake commit, and this round's §1 gate fact
-Correctness-closure commit     local and unpushed as this file is written; the owner pushes, and prompt §23 keeps this task's own CI result as external evidence rather than writing a run number back into its own commit
+Correctness-closure commit     ace6fbe12fe90d2886d8128aeda3879c52ad539c — on origin/main; MAP companion identity, basis-aware provenance, deterministic primary-artifact query, from_map removal
+Remote CI Run #10              36515470263  on ace6fbe  success, 7 of 7 jobs — the closure commit, recorded here after the owner pushed rather than inside its own commit (§23's anti-recursion rule)
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -57,8 +58,8 @@ V0      ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS — 0 / 8 (Ba
 P0      PASS — frozen at v0.6.0
 Formal G1   NOT CLAIMED — still V0 PASS + P0 PASS; ADR-0025 did not move the gate
 Pre-G1  P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED (ADR-0025), ON origin/main, GREEN ON RUN #9.
-        ITS EVIDENCE-IDENTITY / PERSISTENCE CORRECTNESS CLOSURE IS IMPLEMENTED, TESTED AND COMMITTED
-        LOCALLY, AND WAITS ON THE OWNER'S PUSH FOR REMOTE CI
+        ITS EVIDENCE-IDENTITY / PERSISTENCE CORRECTNESS CLOSURE IS IMPLEMENTED, TESTED, AND ALSO ON
+        origin/main (`ace6fbe`), GREEN ON RUN #10
 P1      NOT PASS / NOT CLOSED
 P1-A1   NOT AUTHORIZED — V0 Batch A >= 4 sessions + interim review + a new prompt
 P2 / P3 / P4   NOT AUTHORIZED

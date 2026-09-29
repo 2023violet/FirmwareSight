@@ -182,7 +182,7 @@ pre_g1_execution:
       - "P1-A1, P2, P3 and P4 authorization, V0 participation and the G1 claim"
     goldens_changed: [golden/cli/p0-basic-analyze.json, golden/cli/p0-dual-region-analyze.json]
     evidence: P1_A0_VALIDATION/P1_A0_CORRECTNESS_SMOKE_REPORT.md
-    this_commit_remote_ci: NOT_RUN_AT_WRITE_TIME # prompt §23 forbids writing this commit's own run number back into it; the owner pushes and gh run list reports the outcome afterwards
+    this_commit_remote_ci: "36515470263 on ace6fbe - completed, success, 7 of 7 jobs. Prompt §23's anti-recursion rule held at write time: the closure commit carried no run of its own, because none existed yet. This line is that run's successor record, added after the owner pushed, and reads with gh run view 36515470263 --repo 2023violet/FirmwareSight"
 
 p0_execution:
   authorized: true
@@ -269,7 +269,7 @@ p0_execution:
     read_with: gh run view 36419864513 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
     note: "Rust (windows-latest) reports exactly one skipped step in Run #6, measured with gh run view --json jobs: Install Linux prerequisites for the Tauri shell, guarded by if matrix.os == ubuntu-latest. The job itself is success. Every other job reports zero skipped steps."
     revalidated_by_run_5: "36416146281 on 738ae78, success, 7 of 7 - kept so the promotion-commit measurement stays visible"
-    newer_runs_unrecorded: "Three further push runs are green on origin/main: 36431884747 on ecd1c87, 36439949352 on 311f9fc, and 36499759371 on the P1-A0 implementation commit 2960173. They sit outside the P0 closure chain, so they are not transcribed into this P0 block; the last of them is recorded under pre_g1_execution.correctness_closure, because the closure prompt names it as its own gate. Read any run with gh run list --repo 2023violet/FirmwareSight --branch main."
+    newer_runs_unrecorded: "Four further push runs are green on origin/main: 36431884747 on ecd1c87, 36439949352 on 311f9fc, 36499759371 on the P1-A0 implementation commit 2960173, and 36515470263 on its correctness-closure commit ace6fbe. They sit outside the P0 closure chain, so they are not transcribed into this P0 block; the last two are recorded under pre_g1_execution, because the closure prompt names Run #9 as its gate. Read any run with gh run list --repo 2023violet/FirmwareSight --branch main."
     log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
   role_of_each_green_run:
     run_3: "engineering closure on the validated source HEAD 1cd6309"
@@ -328,9 +328,9 @@ p0_execution:
   non_blocking_measurement_gaps:
     - peak RSS is NOT MEASURED; reason and the measurements that do exist are in P0_PERFORMANCE_REPORT.md
   push_authorized: true_by_owner_instruction
-  push_performed_by: "repository owner pushed the v0.6.0 promotion commit 738ae78 and its consistency-closure successor 7d2f38a to origin/main; Run #5 measured the first, Run #6 the second"
+  push_performed_by: "repository owner pushed the v0.6.0 promotion commit 738ae78 and its consistency-closure successor 7d2f38a to origin/main; Run #5 measured the first, Run #6 the second. The owner likewise pushed the P1-A0 intake commit 2960173 (Run #9) and, on 2026-09-29, the correctness-closure commit ace6fbe (Run #10)"
   historical_engineering_push: "the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force); recorded as history, not as the current remote state"
-  remote_state_changed: true # origin/main carries ecd1c87, 311f9fc and the P1-A0 implementation commit 2960173, each green on push; the correctness-closure commit this line is written in is local, and the owner pushes it
+  remote_state_changed: true # origin/main now carries ecd1c87, 311f9fc, 2960173 and the P1-A0 correctness-closure commit ace6fbe, each measured green on its own push: Runs #7, #8, #9 and #10
   baseline_version_after_p0: 0.6.0
   v0_6_0_released: true
   v0_6_0_meaning: "P0 Technical Foundation Baseline - the vertical slice chain is validated. Not product MVP, not G1, not user value, not a stable commercial release."

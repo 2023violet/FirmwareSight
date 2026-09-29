@@ -18,8 +18,9 @@ P1A0_REAL_ARTIFACT_INTAKE  — authorized as a bounded pre-G1 slice by ADR-0025.
 ```text
 STATUS 2026-09-29: P1-A0 IS COMPLETE, INCLUDING ITS EVIDENCE IDENTITY AND PERSISTENCE CORRECTNESS
 CLOSURE. Do not resume it, and do not open P1-A1. The intake commit 2960173 is on origin/main and
-remote Run #9 (36499759371) measured it success with 7 of 7 jobs. The closure commit written now is
-local, so its own remote CI is NOT RUN and no CI PASS may be claimed for it.
+remote Run #9 (36499759371) measured it success with 7 of 7 jobs. The closure commit ace6fbe is on
+origin/main too, and Run #10 (36515470263) measured it success with 7 of 7 jobs. No commit here carries
+the run number its own push produced; that outcome is recorded only in a successor document.
 The next engineering gate is V0 Batch A >= 4 eligible external sessions + interim architect
 review + a new prompt. Nothing else is authorized from this file.
 ```
@@ -77,6 +78,7 @@ V0                  ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS �
 Formal G1           NOT CLAIMED
 Run #6              36419864513 on 7d2f38a — success, 7 of 7 jobs (the last P0-chain remote fact)
 Run #9              36499759371 on 2960173 — success, 7 of 7 jobs (the fact before the closure round began)
+Run #10             36515470263 on ace6fbe — success, 7 of 7 jobs (the closure commit, measured after the owner pushed)
 Peak RSS            NOT MEASURED      Fuzz: NOT RUN
 RustSec             two accepted transitive advisories, unchanged by this slice
 ```
