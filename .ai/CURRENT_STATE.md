@@ -223,9 +223,13 @@ keep applying in full; `ADR-0026` relaxed research sequencing, not a single tech
 
 What belongs to the owner and the architect:
 
-1. pushing remains the owner's act, and it happened through `be09c65`, whose remote verification is
-   **Run #12 `36520562718`, `success`, 7 of 7 jobs** (read with `gh run view`). No commit carries the run
-   number its own push produced;
+1. pushing remains the owner's act. It last happened through `e63afaf`, the head of the four-commit push
+   that carried the P1 Analyze round, and its remote verification is
+   **Run #13 `36556735551`, `success`, 7 of 7 jobs** (read with
+   `gh run view 36556735551 --repo 2023violet/FirmwareSight`). The gate fires per push, so that one run
+   covers the push rather than each commit: `872ad7e`, `f649afd` and `ae7759a` have no run of their own
+   and none is claimed for them. `be09c65` and its **Run #12 `36520562718`** stay the record of the round
+   before. No commit in either chain carries the run number its own push produced;
 2. whether and when to resume the V0 feedback track with real participants - now a choice rather than a
    gate, with the `v0.1.0` instrument still frozen and ready;
 3. a **separate architect prompt** for P2 Compare once P1 is verifiably complete; this round does not

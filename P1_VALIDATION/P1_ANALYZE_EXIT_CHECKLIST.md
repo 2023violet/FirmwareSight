@@ -14,9 +14,10 @@ Every acceptance item from `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` **US-001 A
 frozen list the P1 Analyze Acceptance Closure addendum binds P1 `PASS` to - plus every hard boundary in
 `.ai/ACTIVE_TASK.md`, with the evidence that closed it.
 
-`LOCAL PASS` means it ran on this machine and produced the quoted result. Nothing here says `CI PASS`:
-remote CI for the commit that ships this pack had not run when it was written, and its result will be
-recorded in a successor document, never inside its own commit.
+`LOCAL PASS` means it ran on this machine and produced the quoted result. Nothing in the tables below
+says `CI PASS` on local evidence: remote CI for the pushed head is a separate fact, recorded in
+`P1_ANALYZE_EXECUTION_REPORT.md` §9 and in the row of the same name below, and added by the successor
+commit of the push rather than inside the commit it verifies.
 
 ## Acceptance list (US-001)
 
@@ -45,7 +46,7 @@ recorded in a successor document, never inside its own commit.
 | `rows`, total and next offset returned | LOCAL PASS | `Page<T> { rows, total, offset, limit, next_offset }`; `a_first_page_reports_the_next_offset_and_the_second_page_ends_the_table`, `a_details_page_names_the_next_offset_the_reader_would_ask_for`; the window's pager read `Showing 1 to 11 of 11` with both buttons disabled correctly |
 | Exactly three use-case commands | LOCAL PASS | `query_sections`, `query_symbols`, `query_evidence` registered in `lib.rs`; `no_general_purpose_query_surface_was_added_to_the_shell` scans four source files for `run_sql`, `read_table`, `query_any`, `get_database`, `execute_shell` → none |
 | No raw SQL or `rusqlite` type across IPC; no Tauri type in Core | LOCAL PASS | `details.rs` maps storage rows onto DTOs field by field; `firmwaresight-core` gained no dependency and no `tauri`/`rusqlite` reference; `desktop_parity.rs` still passes (7 tests) |
-| ts-rs stays the boundary, bindings committed | LOCAL PASS | 14 new `ipc::export_bindings_*` tests, 14 new `.ts` files under `ipc/generated`, and the regenerated directory hash identical before and after (`35e546ba…`); `drift/ipc bindings` PASS |
+| ts-rs stays the boundary, bindings committed | LOCAL PASS | 14 new `ipc::export_bindings_*` tests and 14 new `.ts` files under `ipc/generated`; over the 25 files there, `sha256sum -- * \| sha256sum` is `7fcc246a5a3b26aa…` before and after `cargo test -p firmwaresight-desktop`, and `git status --porcelain` on that directory is empty; `drift/ipc bindings` PASS |
 | No schema migration | LOCAL PASS | `SCHEMA_VERSION: i64 = 2` (`db.rs:14`); `migrations/` still `0001`, `0002` only; that directory is clean in `git status`. The two reason-less nullable columns are **reported** (execution report §6.1), not migrated |
 | No new dependency | LOCAL PASS | `git diff apps/desktop/src-tauri/Cargo.toml` empty; `Cargo.lock` unmodified; `deny/cargo-deny` PASS with `advisories ok, bans ok, licenses ok, sources ok` |
 | No new design token | LOCAL PASS | `assets/design-tokens.json` unmodified at `0.2.1`; `drift/design tokens` PASS; `Details.module.css` has zero numeric literals with units and consumes 23 existing tokens |
@@ -65,15 +66,16 @@ recorded in a successor document, never inside its own commit.
 | cargo-deny | LOCAL PASS | `deny/cargo-deny` PASS; installed locally, so this is an execution and not the SKIPPED path |
 | Whole gate | LOCAL PASS | `python scripts/check.py` → **14/14 steps passed** |
 | Real desktop smoke | LOCAL PASS | `P1_ANALYZE_DETAILS_SMOKE_REPORT.md`, against `82de3bbadebac5f8…`, the binary this commit ships |
-| Baseline stays v0.6.0 | LOCAL PASS | `BASELINE.yaml` unmodified; no `v0.7.0` tag; this slice changes no version field |
+| Baseline stays v0.6.0 | LOCAL PASS | `product.baseline_version` is `0.6.0` at both `872ad7e` and `HEAD`; of the 15 `BASELINE.yaml` key paths this round changed, none is a version field; `p1_execution.no_new_baseline: true`; no `v0.7.0` tag |
 | V0 untouched | LOCAL PASS | still `0 / 8`, `NON_BLOCKING_USER_FEEDBACK_TRACK`; no participant, transcript, quote, timing or willingness-to-pay figure appears anywhere in this pack |
 | P2 not implemented | LOCAL PASS | no Compare surface exists in the tree or on screen |
+| Remote CI, pushed head | **CI PASS** | Run #13 `36556735551` on `e63afaf` - `completed`, `success`, 7 of 7 jobs, read with `gh run view 36556735551 --repo 2023violet/FirmwareSight`. Added by the successor commit of `e63afaf`; the two intermediate commits and `872ad7e` had no run of their own, because the gate is per push - see execution report §9 |
 
 ## Not measured, not run
 
 | Item | State |
 | --- | --- |
-| Remote CI for this commit | `NOT RUN` at the time of writing - it cannot be, because a commit cannot carry its own run. It is recorded in a successor document after the push |
+| CI on the three commits that were not heads | `NOT RUN` - `872ad7e`, `f649afd` and `ae7759a` have no run of their own, because the gate fires per push and all four commits left together. Only the pushed head's run exists, and it is in the table above; nothing here claims a per-commit CI history |
 | Peak RSS | `NOT MEASURED`, unchanged from the state this task started against |
 | Fuzzing | `NOT RUN`, unchanged |
 | macOS / Linux desktop smoke | `NOT RUN` here; only the Windows window was driven on this machine |

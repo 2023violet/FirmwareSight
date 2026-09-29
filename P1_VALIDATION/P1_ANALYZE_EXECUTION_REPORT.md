@@ -16,9 +16,9 @@ MVP-First Governance Reset + P1 Analyze Completion v1.0*, and the *P1 Analyze Ac
 addendum, which binds P1 `PASS` to the frozen US-001 criteria in `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md`.
 Work started from `872ad7e` (on top of `be09c65`, whose remote run #12 `36520562718` is `success`, 7 of 7 jobs).
 
-Every claim below is `LOCAL PASS` unless it says otherwise: it ran on this machine and produced the
-quoted result. Nothing in this document says `CI PASS`; the CI status of the commit that ships it is
-recorded in the successor document named in §8, not here.
+Every claim in §1-§8 below is `LOCAL PASS` unless it says otherwise: it ran on this machine and produced
+the quoted result. Nothing in §1-§8 says `CI PASS`; the remote CI status of the pushed head is recorded
+once, in §9, which the successor commit added.
 
 ## 1. What the reader can now do
 
@@ -125,10 +125,15 @@ These are real and deliberately left alone, because fixing them needs an authori
    but hold `NULL` in both fields - it names the absence rather than inventing a cause.
 3. **The `drift/ipc bindings unchanged` step cannot see untracked files.** It is
    `git diff --exit-code`, so before the first commit of a new binding it passes trivially. For this
-   round the invariant was verified directly instead: `cargo test -p firmwaresight-desktop`
-   regenerated every binding and the directory hash was byte-identical before and after
-   (`35e546ba031bb71a395ed6a2e91f6aaabad5a420abe4c6149c65d866302c4d33`). After the commit that ships
-   these files, the gate is meaningful on its own.
+   round the invariant was verified directly instead: over the 25 files in
+   `apps/desktop/ui/src/ipc/generated/`, `sha256sum -- * | sha256sum` gives
+   `7fcc246a5a3b26aaf615692617bd7d1fead9a1604f415a6b746f0c48f3107943` before `cargo test
+   -p firmwaresight-desktop` and the same value after it, and `git status --porcelain` on that
+   directory reports nothing. An earlier revision of this row quoted
+   `35e546ba031bb71a395ed6a2e91f6aaabad5a420abe4c6149c65d866302c4d33`; that value was measured at the
+   time but the command that produced it was not recorded, so it could not be re-derived and has been
+   replaced by the command above rather than left as a number no one can check. After the commit that
+   ships these files, the gate is meaningful on its own.
 4. **An `Apply filter` click did nothing once during the first smoke pass.** Reported honestly as
    unresolved. The `Why`: the WebView2 accessibility tree carried a `状态 建议可用` ("suggestions
    available") autofill node in every capture of that session, and after dismissing it with `Escape`
@@ -167,13 +172,53 @@ at P1-A0, plus 21 in `details.test.tsx`, plus 3 in `bridge.test.ts`, plus 3 in `
 | No new dependency | `git diff apps/desktop/src-tauri/Cargo.toml` empty; `Cargo.lock` unmodified |
 | No new design token | `assets/design-tokens.json` unmodified, still `0.2.1`; `drift/design tokens` PASS |
 | No golden changed | `drift/goldens unchanged` PASS - the unit switch is presentation-only and the CLI is untouched |
-| Baseline stays v0.6.0 | `BASELINE.yaml` unmodified by this slice; no `v0.7.0` tag |
+| Baseline stays v0.6.0 | `product.baseline_version` reads `0.6.0` in both `872ad7e:BASELINE.yaml` and `HEAD:BASELINE.yaml`. `BASELINE.yaml` *was* edited this round - 15 key paths differ - and none of them is a version field: the edits are `active_task`, `product.status`, the three `validation` gate fields (`current_gate`, `next_authorizable_tracks`, `p1_status`) and the `p1_execution` results (`p1_stage_status`, `completed_on`, `implemented_from_head`, `desktop_smoke`, `tests_after_p1`, `open_findings`, `not_measured`, and the three `*_added: false` records). `p1_execution.no_new_baseline: true`, `baseline_version_stays: 0.6.0`; no `v0.7.0` tag |
 | P2 not implemented | no Compare, Gate or Bundle surface exists; `offers no way into a stage this build does not have` still passes |
 
 Not measured, unchanged from the state this task started with: peak RSS is `NOT MEASURED`, fuzzing is
 `NOT RUN`, and the external V0 sample is still `0 / 8` - this slice added no participant and no
-simulated one. Remote CI for the commit that ships this document is `NOT RUN` at the time of writing;
-it will be recorded in a successor document after the push, never inside this commit.
+simulated one. Remote CI for the commit that ships this document had not run when §1-§8 were written and
+is not claimed there; §9 records it after the push.
 
 `P1 = PASS / COMPLETE` is decided in `P1_ANALYZE_EXIT_CHECKLIST.md`. `P2 = NEXT_AUTHORIZABLE_STAGE`;
 this round does not implement it.
+
+## 9. Remote CI of the shipped commits
+
+The three commits left together in one push, so the gate ran once, on the head of that push. This
+section is that run's record, added by the successor commit of `e63afaf` after the owner pushed - the
+anti-recursion rule that held through P0 and P1-A0: no commit names a run of itself.
+
+| Fact | Value |
+| --- | --- |
+| Governance commit, unpushed until this round | `872ad7e` - the MVP-First reset, 20 files, no source, test, schema, dependency or design token among them |
+| Storage + shell commit | `f649afd` - 23 files: `query.rs`, `details.rs`, the two new Rust suites, 15 binding files |
+| UI commit | `ae7759a` - 10 files: `Details.tsx`, `Details.module.css`, the three touched test files, `format.ts`, `bridge.ts`, `App.tsx` |
+| Evidence + governance commit, the pushed head | `e63afaf` - 16 files: `P1_VALIDATION/`, the `.ai/` pack, `README.md`, `INDEX.md`, `BASELINE.yaml`, two delivery docs, the prompt registry, and both integrity artifacts |
+| Remote CI Run #13 | `36556735551` on `e63afaf` - `completed`, `success`, 7 of 7 jobs |
+| Jobs | Rust (windows-latest), Rust (ubuntu-latest), Desktop UI (windows-latest), Desktop UI (ubuntu-latest), Generated output drift, Dependency policy, macOS Core Smoke |
+| Read it with | `gh run view 36556735551 --repo 2023violet/FirmwareSight` |
+
+`872ad7e`, `f649afd` and `ae7759a` carried no run of their own, because the gate is per push and all four
+commits arrived in one. Say it plainly: "every commit in this round was CI-verified" is not a claim this
+record supports. What is supported is that the pushed head - which contains all of them - passed 7 of 7,
+and that the same tree measured 14/14 locally before it was written.
+
+Two claims in this pack did not survive re-checking while the run was being recorded, and both were
+corrected rather than left standing:
+
+- §8 said `BASELINE.yaml` was unmodified by this slice. It was modified: 15 key paths differ across the
+  round. What is true is that none of them is a version field and `product.baseline_version` reads
+  `0.6.0` at both ends, which is now what the row says.
+- §6 finding 3 quoted a bindings directory hash of `35e546ba…`. The value was measured, but the command
+  that produced it was never recorded, so nothing could re-derive it. It is replaced by the command and
+  the value that do reproduce - `sha256sum -- * | sha256sum` over the 25 files in
+  `apps/desktop/ui/src/ipc/generated/`, equal before and after `cargo test -p firmwaresight-desktop`.
+
+A number no one can re-run is not evidence. That is the reason this section carries commands.
+
+One more, so the rule is not just stated: the first draft of the `.ai/HANDOFF.md` rows above carried
+40-character hashes for `f649afd` and `ae7759a` that `git rev-parse` did not agree with - written from
+the short forms rather than read from the object store. They never reached a commit and are corrected
+here as well as in place. Treat `git rev-parse` and `gh run view` as authoritative over any hash or run
+id in this repository's prose, including this document's.

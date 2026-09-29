@@ -225,8 +225,14 @@ occasions the window was closed. No orphan process, no leftover WebView2 process
 ## 9. Not observed, not claimed
 
 - **No macOS or Linux window was driven.** This smoke is Windows-only, on the machine that built the
-  binary. The cross-platform claim stays with CI, and CI for the shipping commit is recorded in a
-  successor document, never inside this commit.
+  binary. The cross-platform claim stays with CI, whose run for the pushed head is recorded in
+  `P1_ANALYZE_EXECUTION_REPORT.md` §9.
+- **What this report does establish about the build:** re-running `corepack pnpm build` on the committed
+  UI reproduces exactly the two content-hashed assets §1 names - `index-CcxqINNK.css` at 13.48 kB and
+  `index-DAjTMXP2.js` at 246.50 kB - the on-disk `firmwaresight-desktop.exe` still hashes
+  `82de3bbadebac5f8…` at 11,207,168 bytes, and every `src-tauri` and storage source file carries an
+  mtime earlier than that 17:01 build. So the window above was driven against the source this commit
+  ships, not against a tree that moved afterwards.
 - **Keyboard-only traversal was not exercised in the real window.** The tab strip, radios, filter form
   and pager are native controls with correct roles, asserted in jsdom; that is not the same as having
   pressed Tab through the shipped binary.

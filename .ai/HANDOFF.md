@@ -57,7 +57,11 @@ V0 Batch A activation          2026-09-29 by architect prompt; `active_task` mov
 Batch A activation commit      be09c65f451dc1b625c6bf597929a7ce93f5c509 — on origin/main; Run #12 36520562718 success, 7 of 7 jobs — the verified starting point of the P1 round
 ADR-0026 governance reset      2026-09-29, same day: V0 becomes NON_BLOCKING_USER_FEEDBACK_TRACK, G1 is re-based on P0 PASS, `active_task` moves again to P1_ANALYZE_DETAILS. The Batch A activation above is real history and stands as a record; only its sequencing authority was superseded hours later
 Withdrawn prompt               FirmwareSight_V0_Batch_A_Price_Anchor_Authorization_Participant_Acquisition_Pack_EXECUTION_PROMPT_v1.0 — WITHDRAWN_BY_ARCHITECT, never executed, no price anchors written, no recruitment pack produced, V0 sample still 0/8
-P1 Analyze round             2026-09-29, started from 872ad7e (child of be09c65): bounded query layer in firmwaresight-storage, three use-case IPC commands, the detail UI and Evidence Inspector, the US-001 unit switch, and P1_VALIDATION/. Committed locally as three commits - storage plus shell, UI, then evidence and governance. Their hashes and remote CI results are recorded by a successor document after the owner pushes, following the rule that held for P0 and P1-A0: no commit names its own run
+P1 Analyze round             2026-09-29, started from 872ad7e (child of be09c65): bounded query layer in firmwaresight-storage, three use-case IPC commands, the detail UI and Evidence Inspector, the US-001 unit switch, and P1_VALIDATION/
+P1 storage + shell commit    f649afd (f649afddd94d1144d0f23e7a35190f52b60b3808) — on origin/main; 23 files: query.rs, details.rs, the two new Rust suites, 15 files under ipc/generated
+P1 UI commit                 ae7759a (ae7759a22a19d0d22a2c445a7fac484712a219d1) — on origin/main; 10 files: Details.tsx, Details.module.css and details.test.tsx new, plus App.tsx, format.ts, format.test.ts, intake.test.tsx, bridge.ts, bridge.test.ts and types.ts touched
+P1 evidence + governance     e63afaf (e63afaf80cd0cd230a544ef61254a5598145bb3f) — on origin/main; 16 files: P1_VALIDATION/ ×4, the .ai/ pack ×4, README.md, INDEX.md, BASELINE.yaml, two delivery docs, the prompt registry, DIRECTORY_TREE.txt and SHA256SUMS
+Remote CI Run #13            36556735551  on e63afaf  success, 7 of 7 jobs — one run for the whole four-commit push, so 872ad7e, f649afd and ae7759a have no run of their own and none is claimed for them
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay

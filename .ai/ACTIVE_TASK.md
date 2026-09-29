@@ -44,9 +44,12 @@ with no stderr, `python scripts/check.py` **14/14**. Baseline stays **v0.6.0**; 
 (`SCHEMA_VERSION` 2), no new dependency, no new design token, no golden changed.
 
 `NOT MEASURED`: peak RSS. `NOT RUN`: fuzzing, a macOS or Linux window, keyboard-only traversal of the
-shipped binary, and remote CI for the commit that ships this pack — which is recorded in a successor
-document after the owner pushes, never inside its own commit. One dead `Apply filter` click stays
-`UNRESOLVED` and is reported as such.
+shipped binary. One dead `Apply filter` click stays `UNRESOLVED` and is reported as such.
+
+Remote CI ran on the pushed head and is measured: run #13 `36556735551` on `e63afaf`, `completed`,
+`success`, 7 of 7 jobs, read with `gh run view 36556735551 --repo 2023violet/FirmwareSight`. It is
+recorded by `e63afaf`'s successor commit rather than inside `e63afaf`, per the rule that held through P0
+and P1-A0, and the three earlier commits of the same push have no run each.
 
 ## State this closure leaves behind
 

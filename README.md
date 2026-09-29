@@ -28,7 +28,10 @@ Pre-G1  P1-A0 Real Artifact Intake — authorized by ADR-0025, green on Run #9, 
         its evidence-identity / persistence correctness closure (bounded; it stopped at P1-A0)
 P1      PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors,
         bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB
-        presentation switch. Evidence: P1_VALIDATION/, item by item against the frozen US-001 list
+        presentation switch. Evidence: P1_VALIDATION/, item by item against the frozen US-001 list.
+        Shipped as f649afd (storage + shell), ae7759a (UI) and e63afaf (evidence + governance) in one
+        push; remote CI Run #13 36556735551 on e63afaf is success, 7 of 7 jobs, and no run exists for
+        the individual commits because the gate fires per push
 P2      NOT STARTED — the next authorizable stage; it needs its own architect prompt, and no prompt has
         been issued
 P3 / P4 NOT STARTED

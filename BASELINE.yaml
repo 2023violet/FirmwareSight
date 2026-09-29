@@ -255,7 +255,18 @@ p1_execution:
   tests_after_p1: { rust: 184, ui: 58 } # whole-workspace counts on this tree; 42 Rust and 27 UI of them are new in this slice
   desktop_smoke: "P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md - Windows window at the frozen 1024 px minimum, release binary 82de3bbadebac5f8"
   open_findings: "P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md section 6: two nullable columns carry no reason column, the bindings drift step cannot see an untracked file, one dead Apply-filter click is unresolved, and a long Unknown reason makes a tall row"
-  not_measured: { peak_rss: NOT_MEASURED, fuzz: NOT_RUN, macos_or_linux_window: NOT_RUN, this_commit_remote_ci: "NOT RUN AT WRITE TIME - recorded in a successor document after the owner pushes, per the anti-recursion rule that held for P0 and P1-A0" }
+  not_measured: { peak_rss: NOT_MEASURED, fuzz: NOT_RUN, macos_or_linux_window: NOT_RUN }
+  # Remote CI is no longer in not_measured: the push produced a run and it was read with gh run view.
+  # The anti-recursion rule still held - e63afaf carried no run of its own at write time, and this
+  # block is that run's successor record. One push of four commits gives one head commit run, so
+  # 872ad7e, f649afd and ae7759a have no run each and none is claimed for them.
+  remote_ci:
+    run_id: 36556735551
+    head: e63afaf
+    conclusion: "success, 7 of 7 jobs"
+    jobs: "Rust windows+ubuntu, Desktop UI windows+ubuntu, Generated output drift, Dependency policy, macOS Core Smoke"
+    read_with: "gh run view 36556735551 --repo 2023violet/FirmwareSight"
+    successor_of: e63afaf # this block is added by e63afaf's successor commit, never inside e63afaf
   evidence: P1_VALIDATION/
   next_stage_after_this_one: P2_compare # NOT authorized by this prompt; it needs its own architect prompt
 
