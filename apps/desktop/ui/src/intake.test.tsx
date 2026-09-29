@@ -8,11 +8,33 @@ import type { AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto } from './ipc/t
 
 // The bridge is the boundary; mocking it keeps these tests about what the screen shows rather than
 // about Tauri's invoke plumbing, which `ipc/bridge.test.ts` covers.
+//
+// The three detail commands are stubbed with an empty page: this file is about intake, and a screen
+// that shows a summary now also asks for its details. An empty page keeps that second surface quiet
+// without hiding anything this file claims.
 vi.mock('./ipc/bridge', () => ({
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
   analyzeSelection: vi.fn(),
+  querySections: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 100, nextOffset: null },
+    }),
+  ),
+  querySymbols: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 100, nextOffset: null },
+    }),
+  ),
+  queryEvidence: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 100, nextOffset: null },
+    }),
+  ),
 }));
 
 const selectMock = vi.mocked(selectArtifact);
@@ -328,7 +350,10 @@ describe('P1-A0 intake screen', () => {
 
     settle?.(ok(summary()));
     await screen.findByText('5,432 bytes');
-    expect(screen.queryByRole('status')).toBeNull();
+    // The in-flight announcement is gone. P1 added a second live region - the detail area reports
+    // its own page loads - so this asserts the text that was promised to disappear, which is the
+    // claim, instead of that no live region exists anywhere on the screen.
+    expect(screen.queryByText('Analyzing…')).toBeNull();
     expect((screen.getByRole('button', { name: 'Analyze' }) as HTMLButtonElement).disabled).toBe(
       false,
     );

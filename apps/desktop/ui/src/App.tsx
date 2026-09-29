@@ -1,7 +1,8 @@
 import { useCallback, useState, type ReactNode } from 'react';
 
+import { Details } from './Details';
 import { StateBadge, type StateName } from './components/StateBadge';
-import { formatBytes, formatOptional, truncateMiddle } from './format';
+import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
 import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
@@ -17,6 +18,9 @@ export function App() {
   const [lastGood, setLastGood] = useState<AnalysisSummaryDto | null>(null);
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  // US-001's unit switch. One piece of state for the whole screen, because a summary in bytes next
+  // to a table in KiB would be two answers to one question. It changes no query and no data.
+  const [unit, setUnit] = useState<SizeUnit>('bytes');
 
   /**
    * Every dialog is the shell's, so the UI only ever learns the name and the handle. A cancelled
@@ -191,7 +195,14 @@ export function App() {
           summary={summary}
           stale={error !== null}
           candidateName={selection?.fileName ?? null}
+          unit={unit}
         />
+      )}
+
+      {/* One snapshot id, the last one the shell proved. A later attempt that failed cannot repoint
+          these tables, because `lastGood` only moves on a summary. */}
+      {summary === null ? null : (
+        <Details snapshotId={summary.identity.snapshotId} unit={unit} onUnitChange={setUnit} />
       )}
     </main>
   );
@@ -208,10 +219,12 @@ function Report({
   summary,
   stale,
   candidateName,
+  unit,
 }: {
   readonly summary: AnalysisSummaryDto;
   readonly stale: boolean;
   readonly candidateName: string | null;
+  readonly unit: SizeUnit;
 }) {
   const { artifact, memory, capabilities, evidenceSummary } = summary;
 
@@ -232,7 +245,7 @@ function Report({
       <Section title="Artifact">
         <Row term="File" value={artifact.fileName} title={artifact.fileName} />
         <Row term="SHA-256" value={artifact.sha256} mono title={artifact.sha256} />
-        <Row term="Size" value={formatBytes(artifact.byteSize)} mono />
+        <Row term="Size" value={formatSize(artifact.byteSize, unit)} mono />
         <Row
           term="Format"
           value={`${artifact.architecture} ${artifact.bitness}-bit ${artifact.endianness}`}
@@ -254,8 +267,12 @@ function Report({
       </Section>
 
       <Section title="Memory">
-        <BudgetRow term="Nonvolatile / load image" budget={memory.nonvolatileImageFootprint} />
-        <BudgetRow term="Runtime RAM" budget={memory.runtimeRamFootprint} />
+        <BudgetRow
+          term="Nonvolatile / load image"
+          budget={memory.nonvolatileImageFootprint}
+          unit={unit}
+        />
+        <BudgetRow term="Runtime RAM" budget={memory.runtimeRamFootprint} unit={unit} />
         <div className={styles['row']}>
           <span className={styles['term']}>Load evidence</span>
           <EvidenceQuality memory={memory} />
@@ -275,7 +292,11 @@ function Report({
           mono
           count={memory.dualAccountedSections.length}
         />
-        <Row term="Device metadata excluded" value={formatBytes(memory.excludedMetadataBytes)} mono />
+        <Row
+          term="Device metadata excluded"
+          value={formatSize(memory.excludedMetadataBytes, unit)}
+          mono
+        />
       </Section>
 
       <Section title="Capabilities">
@@ -344,7 +365,15 @@ function EvidenceQuality({ memory }: { readonly memory: AnalysisSummaryDto['memo
   );
 }
 
-function BudgetRow({ term, budget }: { readonly term: string; readonly budget: BudgetDto }) {
+function BudgetRow({
+  term,
+  budget,
+  unit,
+}: {
+  readonly term: string;
+  readonly budget: BudgetDto;
+  readonly unit: SizeUnit;
+}) {
   const state: StateName =
     budget.state === 'exact' ? 'PASS' : budget.state === 'partial' ? 'REVIEW' : 'UNKNOWN';
   return (
@@ -359,7 +388,7 @@ function BudgetRow({ term, budget }: { readonly term: string; readonly budget: B
         />
         {/* The figure sits beside the state word rather than inside it: a bare number with no
             evidence label would be a number without context (DESIGN.md 9). */}
-        <span className={styles['mono']}>{formatBytes(budget.bytes)}</span>
+        <span className={styles['mono']}>{formatSize(budget.bytes, unit)}</span>
       </span>
     </div>
   );

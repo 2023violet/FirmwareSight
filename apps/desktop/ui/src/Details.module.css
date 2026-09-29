@@ -1,0 +1,280 @@
+/*
+ * The detail area: a tab strip, three dense tables, the evidence inspector and the unit switch.
+ *
+ * Every number here is a token (AGENTS.md 11). Tables carry hairline rules rather than shadows,
+ * rows are the frozen compact density so a screen full of sections stays a screen full, and
+ * numerics use the mono family with tabular figures so columns of addresses and byte counts align.
+ */
+
+.area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-4);
+  padding: var(--fs-space-2) 0;
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.switchLabel {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.contributors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+}
+
+.contributorList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contributor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--fs-space-4);
+  min-height: var(--fs-row-compact);
+  padding: 0 var(--fs-space-2);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--fs-space-2);
+  overflow-wrap: anywhere;
+}
+
+/* Each contributor row is its own grid, so the byte column is aligned on its right edge rather
+   than on a track every row shares. */
+.number {
+  text-align: right;
+}
+
+.role {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.hint {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}
+
+.tabs {
+  display: flex;
+  gap: var(--fs-space-1);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.tab {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  border: 0;
+  border-bottom: var(--fs-focus-ring-width) solid transparent;
+  background: none;
+  color: var(--fs-color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tabActive {
+  color: var(--fs-color-text-primary);
+  border-bottom-color: var(--fs-color-accent-primary);
+}
+
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--fs-space-3);
+}
+
+.filterLabel {
+  display: block;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.filterInput,
+.class select {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+}
+
+.apply,
+.page,
+.inspect,
+.sort {
+  padding: var(--fs-space-1) var(--fs-space-3);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.apply:disabled,
+.page:disabled,
+.inspect:disabled {
+  color: var(--fs-color-text-disabled);
+  cursor: default;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  /* The table is the widest thing on the screen and a dense read is the point, so it owns its own
+     scroll axis instead of pushing the page sideways. */
+  display: block;
+  overflow-x: auto;
+}
+
+.caption {
+  padding: var(--fs-space-2) 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.head {
+  color: var(--fs-color-text-secondary);
+  font-weight: normal;
+}
+
+/* A recorded value can be a whole memory-region list or a full hash. This is the one column whose
+   content has no bound, so it is the column that wraps rather than the one that pushes. */
+.value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.arrow {
+  color: var(--fs-color-accent-primary);
+}
+
+.unknown {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--fs-space-2);
+  color: var(--fs-color-status-unknown);
+}
+
+.note {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.monoSmall {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  color: var(--fs-color-text-secondary);
+}
+
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  min-width: var(--fs-layout-evidence-inspector-min);
+  max-width: var(--fs-layout-evidence-inspector-max);
+  padding: var(--fs-space-3);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  background: var(--fs-color-bg-subtle);
+}
+
+.inspectorList {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--fs-space-2) var(--fs-space-3);
+  margin: 0;
+}
+
+/* The pair is a grouping device, not a box: making its two columns grid items of the list is what
+   lines every value up on the same edge. */
+.inspectorList div {
+  display: contents;
+}
+
+.inspectorList dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.inspectorList dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+.status {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  padding: var(--fs-space-3);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-status-block);
+  border-radius: var(--fs-radius-panel);
+  background: var(--fs-color-bg-surface);
+}

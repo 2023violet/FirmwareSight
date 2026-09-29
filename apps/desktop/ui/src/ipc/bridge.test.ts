@@ -5,11 +5,18 @@ import {
   analyzeSelection,
   attachMap,
   clearMap,
-  isErrorEnvelope,
+  queryEvidence,
+  querySections,
+  querySymbols,
   selectArtifact,
   toEnvelope,
+  isErrorEnvelope,
 } from './bridge';
-import type { ErrorEnvelopeDto } from './types';
+import type {
+  ErrorEnvelopeDto,
+  SectionPageDto,
+  SectionRequestDto,
+} from './types';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
 
@@ -112,6 +119,104 @@ describe('ipc calls', () => {
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) {
       expect(outcome.envelope).toEqual(ENVELOPE);
+    }
+  });
+});
+
+describe('detail queries', () => {
+  /** One page of sections, spelled out the way the generated contract requires. */
+  function sectionPage(): SectionPageDto {
+    return {
+      rows: [
+        {
+          index: 3,
+          name: '.data',
+          nameUnknownReason: null,
+          role: 'InitializedData',
+          alloc: true,
+          write: true,
+          execute: false,
+          virtualAddress: '0x20000000',
+          virtualAddressUnknownReason: null,
+          loadAddress: '0x0800005c',
+          loadAddressUnknownReason: null,
+          fileOffset: '0x00002000',
+          fileSize: 4,
+          memorySize: 4,
+          memorySizeUnknownReason: null,
+          region: 'RAM',
+          regionUnknownReason: null,
+        },
+      ],
+      total: 17,
+      offset: 0,
+      limit: 100,
+      nextOffset: null,
+    };
+  }
+
+  it('sends one bounded request per command and no path in it', async () => {
+    invokeMock.mockResolvedValue(sectionPage());
+
+    const request: SectionRequestDto = {
+      snapshotId: 'snap-deadbeef-p0-normalize-1',
+      filter: null,
+      sort: 'index',
+      direction: 'asc',
+      offset: 0,
+      limit: null,
+    };
+    const outcome = await querySections(request);
+
+    expect(outcome.ok).toBe(true);
+    expect(invokeMock).toHaveBeenCalledWith('query_sections', { request });
+    const sent = JSON.stringify(invokeMock.mock.calls);
+    expect(sent).toContain('snap-deadbeef-p0-normalize-1');
+    // The request names a snapshot and a page. Anything that locates a file is a boundary breach.
+    expect(sent).not.toMatch(/[a-zA-Z]:[\\/]/);
+    expect(sent).not.toContain('path');
+  });
+
+  it('carries a filter, a sort and a direction through the same one request', async () => {
+    invokeMock.mockResolvedValue({ rows: [], total: 0, offset: 0, limit: 100, nextOffset: null });
+
+    await querySymbols({
+      snapshotId: 'snap-1',
+      filter: 'mqtt',
+      sort: 'size',
+      direction: 'desc',
+      offset: 10,
+      limit: 10,
+    });
+
+    expect(invokeMock).toHaveBeenCalledWith('query_symbols', {
+      request: {
+        snapshotId: 'snap-1',
+        filter: 'mqtt',
+        sort: 'size',
+        direction: 'desc',
+        offset: 10,
+        limit: 10,
+      },
+    });
+  });
+
+  it('reports a rejected detail query as the shell envelope rather than throwing', async () => {
+    invokeMock.mockRejectedValue({ ...ENVELOPE, code: 'ERR-STORAGE-4005' });
+
+    const outcome = await queryEvidence({
+      snapshotId: 'snap-gone',
+      filter: null,
+      classification: null,
+      sort: 'field',
+      direction: 'asc',
+      offset: 0,
+      limit: null,
+    });
+
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) {
+      expect(outcome.envelope.code).toBe('ERR-STORAGE-4005');
     }
   });
 });

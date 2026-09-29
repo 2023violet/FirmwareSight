@@ -12,7 +12,13 @@ import { invoke } from '@tauri-apps/api/core';
 import type {
   AnalysisSummaryDto,
   ErrorEnvelopeDto,
+  EvidencePageDto,
+  EvidenceRequestDto,
+  SectionPageDto,
+  SectionRequestDto,
   SelectionDto,
+  SymbolPageDto,
+  SymbolRequestDto,
 } from './types';
 
 /** The commands the shell actually registers. A typo here is a compile error, not a surprise. */
@@ -20,6 +26,9 @@ const SELECT_ARTIFACT = 'select_artifact';
 const ATTACH_MAP = 'attach_map';
 const CLEAR_MAP = 'clear_map';
 const ANALYZE_SELECTION = 'analyze_selection';
+const QUERY_SECTIONS = 'query_sections';
+const QUERY_SYMBOLS = 'query_symbols';
+const QUERY_EVIDENCE = 'query_evidence';
 
 export type IpcOutcome<T> =
   | { readonly ok: true; readonly value: T }
@@ -61,6 +70,30 @@ export async function analyzeSelection(
   selectionId: string,
 ): Promise<IpcOutcome<AnalysisSummaryDto>> {
   return await call<AnalysisSummaryDto>(ANALYZE_SELECTION, { selectionId });
+}
+
+/**
+ * Ask for one bounded page of sections of a snapshot already in history.
+ *
+ * The request names a snapshot id and a page: the shell owns the limit, so asking for more than it
+ * will produce is not a way to get more of it.
+ */
+export async function querySections(
+  request: SectionRequestDto,
+): Promise<IpcOutcome<SectionPageDto>> {
+  return await call<SectionPageDto>(QUERY_SECTIONS, { request });
+}
+
+/** Ask for one bounded page of symbols. */
+export async function querySymbols(request: SymbolRequestDto): Promise<IpcOutcome<SymbolPageDto>> {
+  return await call<SymbolPageDto>(QUERY_SYMBOLS, { request });
+}
+
+/** Ask for one bounded page of evidence items. */
+export async function queryEvidence(
+  request: EvidenceRequestDto,
+): Promise<IpcOutcome<EvidencePageDto>> {
+  return await call<EvidencePageDto>(QUERY_EVIDENCE, { request });
 }
 
 async function call<T>(
