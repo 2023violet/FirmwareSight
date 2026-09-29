@@ -47,3 +47,27 @@ export function truncateMiddle(value: string, keep = 12): string {
   }
   return `${value.slice(0, keep)}...${value.slice(-keep)}`;
 }
+
+/**
+ * What a side that holds no row says. `0` would contradict the diff: a section added in the target
+ * build did not exist in the base one. Absence and *unknown* are different claims too, which is why
+ * this is not the string `formatSize` uses for a missing number (prompt §23).
+ */
+export const ABSENT = 'Not present';
+
+/**
+ * A signed delta, keeping the sign the diff defines: `target - base`, so `+` is growth.
+ *
+ * `null` renders as `Unknown` and never as `+0`, because a delta that could not be computed is a
+ * different claim from a build that did not move (prompt §38). A measured zero keeps its zero and
+ * takes no sign, since there is no direction to point at.
+ */
+export function formatDelta(value: number | null, unit: SizeUnit): string {
+  if (value === null) {
+    return 'Unknown';
+  }
+  if (value === 0) {
+    return formatSize(0, unit);
+  }
+  return `${value > 0 ? '+' : '-'}${formatSize(Math.abs(value), unit)}`;
+}

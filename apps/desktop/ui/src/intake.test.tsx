@@ -12,6 +12,9 @@ import type { AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto } from './ipc/t
 // The three detail commands are stubbed with an empty page: this file is about intake, and a screen
 // that shows a summary now also asks for its details. An empty page keeps that second surface quiet
 // without hiding anything this file claims.
+//
+// The Compare commands are stubbed too, and the candidate list comes back empty: the navigation test
+// opens that page, and a build history this file does not describe must not appear there either.
 vi.mock('./ipc/bridge', () => ({
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
@@ -34,6 +37,31 @@ vi.mock('./ipc/bridge', () => ({
       ok: true,
       value: { rows: [], total: 0, offset: 0, limit: 100, nextOffset: null },
     }),
+  ),
+  listCompareCandidates: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 25, nextOffset: null },
+    }),
+  ),
+  compareSnapshots: vi.fn(() => Promise.resolve({ ok: true, value: {} })),
+  querySectionChanges: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 100, nextOffset: null },
+    }),
+  ),
+  querySymbolChanges: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 100, nextOffset: null },
+    }),
+  ),
+  exportCompareJson: vi.fn(() =>
+    Promise.resolve({ ok: true, value: { status: 'cancelled', fileName: null, format: 'json' } }),
+  ),
+  exportCompareHtml: vi.fn(() =>
+    Promise.resolve({ ok: true, value: { status: 'cancelled', fileName: null, format: 'html' } }),
   ),
 }));
 
@@ -464,12 +492,18 @@ describe('P1-A0 intake screen', () => {
     render(<App />);
     await screen.findByRole('button', { name: 'Choose firmware artifact' });
 
-    // P2 compare, the gate, the bundle and the history page would each have to be reachable to
-    // exist. A screen with no links and no navigation landmark cannot reach them, and the words
-    // naming them must not appear as if they were features.
-    expect(document.querySelectorAll('a, nav')).toHaveLength(0);
-    expect(document.body.textContent).not.toMatch(
-      /\b(Compare|Build Diff|Gate|Bundle|History|SBOM)\b/,
-    );
+    // P1 could claim there was nothing to navigate to. P2 makes Compare a real second page, so the
+    // claim is now narrower and stronger: the rail lists exactly the two stages that exist, and a
+    // stage that does not exist gets no entry, no link and none of its words.
+    const rail = await screen.findByRole('navigation', { name: 'Pages' });
+    expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Analyze',
+      'Compare',
+    ]);
+    expect(document.querySelectorAll('a')).toHaveLength(0);
+
+    fireEvent.click(within(rail).getByRole('button', { name: 'Compare page' }));
+    await screen.findByRole('heading', { level: 1, name: 'Compare' });
+    expect(document.body.textContent).not.toMatch(/\b(Gate|Bundle|History|SBOM|Release)\b/);
   });
 });

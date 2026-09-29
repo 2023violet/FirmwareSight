@@ -1,0 +1,42 @@
+/*
+ * The one shape an inspectable failure takes (DESIGN.md 9: what happened, why we know, what to do,
+ * diagnostics id). One hairline, one subtle fill, a status-coloured left rule, no shadow.
+ */
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding: var(--fs-space-4);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-left: var(--fs-border-width-hairline) solid var(--fs-color-status-block);
+  border-radius: var(--fs-radius-panel);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  margin: 0;
+}
+
+.list div {
+  display: grid;
+  grid-template-columns: var(--fs-layout-evidence-inspector-min) minmax(0, 1fr);
+  gap: var(--fs-space-4);
+}
+
+.list dt {
+  color: var(--fs-color-text-secondary);
+}
+
+.list dd {
+  margin: 0;
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
+}

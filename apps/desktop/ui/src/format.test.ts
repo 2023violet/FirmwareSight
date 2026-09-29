@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatOptional, formatSize, truncateMiddle } from './format';
+import { ABSENT, formatDelta, formatOptional, formatSize, truncateMiddle } from './format';
 
 describe('value formatting', () => {
   it('groups byte counts without inventing a unit', () => {
@@ -37,5 +37,30 @@ describe('value formatting', () => {
   it('shortens the middle so both ends of a hash stay visible', () => {
     expect(truncateMiddle('0123456789abcdef', 4)).toBe('0123...cdef');
     expect(truncateMiddle('short', 4)).toBe('short');
+  });
+});
+
+describe('a signed delta', () => {
+  it('keeps the sign the diff defines, so growth and shrinkage read apart', () => {
+    expect(formatDelta(256, 'bytes')).toBe('+256 bytes');
+    expect(formatDelta(-68, 'bytes')).toBe('-68 bytes');
+  });
+
+  it('divides by 1024 and keeps the sign in KiB', () => {
+    // The delta is still target - base whichever unit the reader chose (prompt §39).
+    expect(formatDelta(256, 'kib')).toBe('+0.250 KiB');
+    expect(formatDelta(-68, 'kib')).toBe('-0.0664 KiB');
+  });
+
+  it('says Unknown rather than inventing a zero for a difference it cannot compute', () => {
+    // A delta that does not exist is not a measurement of no change (prompt §38).
+    expect(formatDelta(null, 'bytes')).toBe('Unknown');
+    expect(formatDelta(null, 'kib')).toBe('Unknown');
+  });
+
+  it('gives a measured zero no sign, and keeps absence a separate word', () => {
+    expect(formatDelta(0, 'bytes')).toBe('0 bytes');
+    expect(formatDelta(0, 'kib')).toBe('0.00 KiB');
+    expect(ABSENT).toBe('Not present');
   });
 });

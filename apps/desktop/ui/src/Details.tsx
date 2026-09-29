@@ -19,6 +19,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './Details.module.css';
+import { Pager, SortHeader } from './components/Table';
+import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { formatSize, formatOptional, type SizeUnit } from './format';
 import { queryEvidence, querySections, querySymbols } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
@@ -192,16 +194,7 @@ export function Details({
     <section className={styles['area']} aria-label="Snapshot details">
       <Contributors rows={contributors} unit={unit} />
 
-      <div className={styles['switch']} role="group" aria-label="Size units">
-        <span className={styles['switchLabel']}>Size units</span>
-        <UnitRadio
-          unit="bytes"
-          label="Bytes"
-          checked={unit === 'bytes'}
-          onSelect={onUnitChange}
-        />
-        <UnitRadio unit="kib" label="KiB" checked={unit === 'kib'} onSelect={onUnitChange} />
-      </div>
+      <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
 
       <div role="tablist" aria-label="Analyze details" className={styles['tabs']}>
         {TABS.map((entry) => (
@@ -289,39 +282,12 @@ export function Details({
             offset={loaded.page.offset}
             shown={loaded.page.rows.length}
             nextOffset={loaded.page.nextOffset}
+            label={tab}
             onOffset={setOffset}
           />
         </div>
       )}
     </section>
-  );
-}
-
-function UnitRadio({
-  unit,
-  label,
-  checked,
-  onSelect,
-}: {
-  readonly unit: SizeUnit;
-  readonly label: string;
-  readonly checked: boolean;
-  readonly onSelect: (unit: SizeUnit) => void;
-}) {
-  const id = `fs-unit-${unit}`;
-  return (
-    <span className={styles['radio']}>
-      <input
-        id={id}
-        type="radio"
-        name="fs-size-unit"
-        checked={checked}
-        onChange={() => {
-          onSelect(unit);
-        }}
-      />
-      <label htmlFor={id}>{label}</label>
-    </span>
   );
 }
 
@@ -427,37 +393,6 @@ function FilterForm({
   );
 }
 
-function Header({
-  label,
-  sortable,
-  active,
-  direction,
-  onSort,
-}: {
-  readonly label: string;
-  readonly sortable: boolean;
-  readonly active: boolean;
-  readonly direction: SortDirDto;
-  readonly onSort: () => void;
-}) {
-  if (!sortable) {
-    return <th scope="col" className={styles['head']}>{label}</th>;
-  }
-  return (
-    <th scope="col" className={styles['head']} aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
-      <button
-        type="button"
-        className={styles['sort']}
-        aria-label={`Sort by ${label}`}
-        onClick={onSort}
-      >
-        {label}
-        {active ? <span className={styles['arrow']}>{direction === 'asc' ? '↑' : '↓'}</span> : null}
-      </button>
-    </th>
-  );
-}
-
 /** A fact that was stored unknown, rendered as the word and its reason - never as `0`. */
 function Unknown({ reason }: { readonly reason?: string | null }) {
   return (
@@ -490,16 +425,40 @@ function SectionTable({
       </caption>
       <thead>
         <tr>
-          <Header label="Index" sortable direction={direction} active={sort === 'index'} onSort={() => onSort('index')} />
-          <Header label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
-          <Header label="Role" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-          <Header label="Flags" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-          <Header label="Virtual address" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-          <Header label="Load address" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-          <Header label="File offset" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-          <Header label="File size" sortable direction={direction} active={sort === 'fileSize'} onSort={() => onSort('fileSize')} />
-          <Header label="Memory size" sortable direction={direction} active={sort === 'memorySize'} onSort={() => onSort('memorySize')} />
-          <Header label="Region" sortable={false} direction={direction} active={false} onSort={() => undefined} />
+          <SortHeader label="Index" sortable direction={direction} active={sort === 'index'} onSort={() => onSort('index')} />
+          <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
+          <SortHeader
+              label="Role"
+              sortable={false}
+              direction={direction}
+            />
+          <SortHeader
+              label="Flags"
+              sortable={false}
+              direction={direction}
+            />
+          <SortHeader
+              label="Virtual address"
+              sortable={false}
+              direction={direction}
+            />
+          <SortHeader
+              label="Load address"
+              sortable={false}
+              direction={direction}
+            />
+          <SortHeader
+              label="File offset"
+              sortable={false}
+              direction={direction}
+            />
+          <SortHeader label="File size" sortable direction={direction} active={sort === 'fileSize'} onSort={() => onSort('fileSize')} />
+          <SortHeader label="Memory size" sortable direction={direction} active={sort === 'memorySize'} onSort={() => onSort('memorySize')} />
+          <SortHeader
+              label="Region"
+              sortable={false}
+              direction={direction}
+            />
         </tr>
       </thead>
       <tbody>
@@ -560,13 +519,25 @@ function SymbolTable({
       </caption>
       <thead>
         <tr>
-          <Header label="Ordinal" sortable direction={direction} active={sort === 'ordinal'} onSort={() => onSort('ordinal')} />
-          <Header label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
-          <Header label="Address" sortable direction={direction} active={sort === 'address'} onSort={() => onSort('address')} />
-          <Header label="Size" sortable direction={direction} active={sort === 'size'} onSort={() => onSort('size')} />
-          <Header label="Kind" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-          <Header label="Binding" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-          <Header label="Section" sortable={false} direction={direction} active={false} onSort={() => undefined} />
+          <SortHeader label="Ordinal" sortable direction={direction} active={sort === 'ordinal'} onSort={() => onSort('ordinal')} />
+          <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
+          <SortHeader label="Address" sortable direction={direction} active={sort === 'address'} onSort={() => onSort('address')} />
+          <SortHeader label="Size" sortable direction={direction} active={sort === 'size'} onSort={() => onSort('size')} />
+          <SortHeader
+              label="Kind"
+              sortable={false}
+              direction={direction}
+            />
+          <SortHeader
+              label="Binding"
+              sortable={false}
+              direction={direction}
+            />
+          <SortHeader
+              label="Section"
+              sortable={false}
+              direction={direction}
+            />
         </tr>
       </thead>
       <tbody>
@@ -619,19 +590,29 @@ function EvidenceTable({
         </caption>
         <thead>
           <tr>
-            <th scope="col" className={styles['head']}>
-              Detail
-            </th>
-            <Header label="Field" sortable direction={direction} active={sort === 'field'} onSort={() => onSort('field')} />
-            <Header
+            <SortHeader
+              label="Detail"
+              sortable={false}
+              direction={direction}
+            />
+            <SortHeader label="Field" sortable direction={direction} active={sort === 'field'} onSort={() => onSort('field')} />
+            <SortHeader
               label="Classification"
               sortable
               direction={direction}
               active={sort === 'classification'}
               onSort={() => onSort('classification')}
             />
-            <Header label="Value" sortable={false} direction={direction} active={false} onSort={() => undefined} />
-            <Header label="Source" sortable={false} direction={direction} active={false} onSort={() => undefined} />
+            <SortHeader
+              label="Value"
+              sortable={false}
+              direction={direction}
+            />
+            <SortHeader
+              label="Source"
+              sortable={false}
+              direction={direction}
+            />
           </tr>
         </thead>
         <tbody>
@@ -703,50 +684,6 @@ function Inspector({ row }: { readonly row: EvidenceRowDto }) {
         </div>
       </dl>
     </section>
-  );
-}
-
-function Pager({
-  total,
-  offset,
-  shown,
-  nextOffset,
-  onOffset,
-}: {
-  readonly total: number;
-  readonly offset: number;
-  readonly shown: number;
-  readonly nextOffset: number | null;
-  readonly onOffset: (offset: number) => void;
-}) {
-  return (
-    <div className={styles['pager']}>
-      <p className={styles['status']} role="status" aria-live="polite">
-        {shown === 0
-          ? `No rows in this page of ${String(total)}`
-          : `Showing ${String(offset + 1)} to ${String(offset + shown)} of ${String(total)}`}
-      </p>
-      <button
-        type="button"
-        className={styles['page']}
-        disabled={offset === 0}
-        onClick={() => {
-          onOffset(0);
-        }}
-      >
-        Previous page
-      </button>
-      <button
-        type="button"
-        className={styles['page']}
-        disabled={nextOffset === null}
-        onClick={() => {
-          onOffset(nextOffset ?? offset);
-        }}
-      >
-        Next page
-      </button>
-    </div>
   );
 }
 

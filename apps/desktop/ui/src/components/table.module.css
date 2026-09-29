@@ -1,0 +1,52 @@
+/*
+ * The two table primitives the detail and comparison screens share: a sortable column header and a
+ * pager. Row heights, hairlines and the mono figure style all come from tokens (AGENTS.md 11).
+ */
+
+.head {
+  color: var(--fs-color-text-secondary);
+  font-weight: normal;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.arrow {
+  color: var(--fs-color-accent-primary);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+.page {
+  padding: var(--fs-space-1) var(--fs-space-3);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.page:disabled {
+  color: var(--fs-color-text-disabled);
+  cursor: default;
+}
+
+.status {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}

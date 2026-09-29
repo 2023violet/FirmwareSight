@@ -1,0 +1,455 @@
+/*
+ * The Compare page: a build selector, a bounded comparison of what was stored, and the two change
+ * tables behind their own filters.
+ *
+ * Every length, colour and duration is a token. The change kinds carry their own text and take their
+ * colour from the frozen diff roles, so a row never reads as a colour alone (DESIGN.md 5, 9;
+ * prompt §40).
+ */
+
+.page {
+  max-width: var(--fs-layout-design-target-width);
+  margin: 0 auto;
+  padding: var(--fs-space-8) var(--fs-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.subhead {
+  color: var(--fs-color-text-secondary);
+  max-width: 60ch;
+}
+
+/* Fewer than two builds is a fact about the session, not an error, so it gets a hairline note and
+   the way out - never a comparison made up from one build (prompt §19). */
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding: var(--fs-space-4);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  background: var(--fs-color-bg-subtle);
+}
+
+.selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--fs-space-4);
+  align-items: start;
+  padding-bottom: var(--fs-space-4);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  min-width: 0;
+}
+
+.pickerLabel {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.select,
+.filterInput {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  min-width: 0;
+}
+
+/* The recorded facts of each side, shown before any comparison runs: which file, which bytes, which
+   budget state. A reader choosing between two builds is choosing on these. */
+.sideFacts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  overflow-wrap: anywhere;
+}
+
+.control,
+.apply,
+.export {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font: inherit;
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.control:hover:not(:disabled),
+.apply:hover:not(:disabled),
+.export:hover:not(:disabled) {
+  border-color: var(--fs-color-text-disabled);
+}
+
+.control:disabled,
+.apply:disabled,
+.export:disabled,
+.primary:disabled {
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  cursor: default;
+}
+
+.primary {
+  padding: var(--fs-space-2) var(--fs-space-4);
+  font: inherit;
+  font-weight: bold;
+  color: var(--fs-color-text-on-accent);
+  background: var(--fs-color-accent-primary);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--fs-color-accent-hover);
+}
+
+.primary:active:not(:disabled) {
+  background: var(--fs-color-accent-pressed);
+}
+
+.pickerActions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--fs-space-2);
+}
+
+/* The same refusal the shell would return, stated before the reader tries: the button is disabled,
+   and the sentence says why (prompt §18). */
+.warning {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-left: var(--fs-border-width-hairline) solid var(--fs-color-status-review-strong);
+  border-radius: var(--fs-radius-control);
+}
+
+.stale {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.report,
+.section,
+.area,
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  min-width: 0;
+}
+
+.report {
+  gap: var(--fs-space-6);
+}
+
+/* A focusable region: a drill-down from the ranking lands the reader here, so the jump is visible
+   and the keyboard continues from where the filtered rows are. */
+.area:focus-visible {
+  outline: var(--fs-focus-ring-width) solid var(--fs-focus-ring-color);
+  outline-offset: var(--fs-focus-ring-offset);
+}
+
+.rows {
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--fs-layout-evidence-inspector-min) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--fs-space-4);
+  min-height: var(--fs-row-default);
+  padding: var(--fs-space-2) 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.term {
+  color: var(--fs-color-text-secondary);
+}
+
+.value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-2) var(--fs-space-4);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Old / New / Delta are one read, so they sit on one line with their axis words. */
+.figure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--fs-space-2);
+}
+
+.axis {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.monoSmall {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.caption {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.noticeList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.noticeItem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-2);
+  padding: var(--fs-space-2) 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+/* The change kind as text, with the diff roles as an aid. These words are diff vocabulary, never
+   Gate states, and no Gate icon is borrowed here (prompt §40). */
+.kind {
+  display: inline-block;
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  font-size: var(--fs-font-size-metadata);
+  white-space: nowrap;
+}
+
+.kindAdded {
+  color: var(--fs-color-diff-added);
+  background: var(--fs-color-diff-added-bg);
+  border-color: var(--fs-color-diff-added);
+}
+
+.kindRemoved {
+  color: var(--fs-color-diff-removed);
+  background: var(--fs-color-diff-removed-bg);
+  border-color: var(--fs-color-diff-removed);
+}
+
+.kindChanged {
+  color: var(--fs-color-diff-changed);
+  background: var(--fs-color-diff-changed-bg);
+  border-color: var(--fs-color-diff-changed);
+}
+
+.deltaPositive {
+  color: var(--fs-color-diff-added);
+}
+
+.deltaNegative {
+  color: var(--fs-color-diff-removed);
+}
+
+.absent {
+  color: var(--fs-color-text-secondary);
+}
+
+.unknown {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--fs-space-2);
+  color: var(--fs-color-status-unknown);
+}
+
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-2) var(--fs-space-4);
+  align-items: baseline;
+}
+
+.ranking {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--fs-space-6);
+  align-items: start;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  min-width: 0;
+}
+
+.hint {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}
+
+.contribGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.contribNoun {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.contribList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The whole row is the drill-down control, so the keyboard reaches it in the order it is read and
+   one click on a contributor names exactly one row of the table below. */
+.pick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--fs-space-4);
+  width: 100%;
+  min-height: var(--fs-row-compact);
+  padding: 0 var(--fs-space-2);
+  font: inherit;
+  text-align: left;
+  color: var(--fs-color-text-primary);
+  background: none;
+  border: 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  cursor: pointer;
+  transition: color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.pick:hover {
+  color: var(--fs-color-accent-primary);
+}
+
+.pickFigure {
+  text-align: right;
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--fs-space-3);
+}
+
+.radioGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+}
+
+.filterLabel {
+  display: block;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  /* The change tables are the widest thing on the screen and a dense read is the point, so each one
+     owns its scroll axis instead of pushing the page sideways. */
+  display: block;
+  overflow-x: auto;
+}
+
+.table th,
+.table td {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* A firmware or symbol name has no bound, so it is the cell that wraps rather than the one that
+   pushes the table sideways. It also carries a contributor's name inside its own row. */
+.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.exports {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-3);
+  padding-top: var(--fs-space-4);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.status {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  padding-top: var(--fs-space-4);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}

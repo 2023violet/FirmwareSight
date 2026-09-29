@@ -12,26 +12,6 @@
   gap: var(--fs-space-4);
 }
 
-.switch {
-  display: flex;
-  align-items: center;
-  gap: var(--fs-space-4);
-  padding: var(--fs-space-2) 0;
-  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
-
-.switchLabel {
-  color: var(--fs-color-text-secondary);
-  font-size: var(--fs-font-size-metadata);
-}
-
-.radio {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fs-space-2);
-}
-
 .contributors {
   display: flex;
   flex-direction: column;
@@ -127,9 +107,7 @@
 }
 
 .apply,
-.page,
-.inspect,
-.sort {
+.inspect {
   padding: var(--fs-space-1) var(--fs-space-3);
   border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   border-radius: var(--fs-radius-control);
@@ -140,7 +118,6 @@
 }
 
 .apply:disabled,
-.page:disabled,
 .inspect:disabled {
   color: var(--fs-color-text-disabled);
   cursor: default;
@@ -170,31 +147,11 @@
   white-space: nowrap;
 }
 
-.head {
-  color: var(--fs-color-text-secondary);
-  font-weight: normal;
-}
-
 /* A recorded value can be a whole memory-region list or a full hash. This is the one column whose
    content has no bound, so it is the column that wraps rather than the one that pushes. */
 .value {
   white-space: normal;
   overflow-wrap: anywhere;
-}
-
-.sort {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fs-space-1);
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-}
-
-.arrow {
-  color: var(--fs-color-accent-primary);
 }
 
 .unknown {
@@ -255,12 +212,6 @@
 .inspectorList dd {
   margin: 0;
   overflow-wrap: anywhere;
-}
-
-.pager {
-  display: flex;
-  align-items: center;
-  gap: var(--fs-space-3);
 }
 
 .status {

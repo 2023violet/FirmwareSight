@@ -11,12 +11,21 @@ import { invoke } from '@tauri-apps/api/core';
 
 import type {
   AnalysisSummaryDto,
+  CandidatePageDto,
+  CandidatePageRequestDto,
+  CompareRequestDto,
+  CompareSummaryDto,
   ErrorEnvelopeDto,
   EvidencePageDto,
   EvidenceRequestDto,
+  ExportOutcomeDto,
+  SectionChangePageDto,
+  SectionChangeQueryDto,
   SectionPageDto,
   SectionRequestDto,
   SelectionDto,
+  SymbolChangePageDto,
+  SymbolChangeQueryDto,
   SymbolPageDto,
   SymbolRequestDto,
 } from './types';
@@ -29,6 +38,12 @@ const ANALYZE_SELECTION = 'analyze_selection';
 const QUERY_SECTIONS = 'query_sections';
 const QUERY_SYMBOLS = 'query_symbols';
 const QUERY_EVIDENCE = 'query_evidence';
+const LIST_COMPARE_CANDIDATES = 'list_compare_candidates';
+const COMPARE_SNAPSHOTS = 'compare_snapshots';
+const QUERY_SECTION_CHANGES = 'query_section_changes';
+const QUERY_SYMBOL_CHANGES = 'query_symbol_changes';
+const EXPORT_COMPARE_JSON = 'export_compare_json';
+const EXPORT_COMPARE_HTML = 'export_compare_html';
 
 export type IpcOutcome<T> =
   | { readonly ok: true; readonly value: T }
@@ -94,6 +109,61 @@ export async function queryEvidence(
   request: EvidenceRequestDto,
 ): Promise<IpcOutcome<EvidencePageDto>> {
   return await call<EvidencePageDto>(QUERY_EVIDENCE, { request });
+}
+
+/**
+ * Ask for one bounded page of builds Compare may start from.
+ *
+ * Which project's history is in scope is not askable: Rust fixes it, so this cannot be widened into
+ * a listing of someone else's builds (prompt §17).
+ */
+export async function listCompareCandidates(
+  request: CandidatePageRequestDto,
+): Promise<IpcOutcome<CandidatePageDto>> {
+  return await call<CandidatePageDto>(LIST_COMPARE_CANDIDATES, { request });
+}
+
+/**
+ * Compare two stored builds and get the bounded summary.
+ *
+ * The whole diff stays in Rust and comes back as a session-local handle; the change tables are read
+ * one page at a time against that handle (prompt §20). The request names two snapshot ids and nothing
+ * else - no path, no table, no statement.
+ */
+export async function compareSnapshots(
+  request: CompareRequestDto,
+): Promise<IpcOutcome<CompareSummaryDto>> {
+  return await call<CompareSummaryDto>(COMPARE_SNAPSHOTS, { request });
+}
+
+/** Ask for one bounded page of section changes of a comparison this session computed. */
+export async function querySectionChanges(
+  request: SectionChangeQueryDto,
+): Promise<IpcOutcome<SectionChangePageDto>> {
+  return await call<SectionChangePageDto>(QUERY_SECTION_CHANGES, { request });
+}
+
+/** Ask for one bounded page of symbol changes. */
+export async function querySymbolChanges(
+  request: SymbolChangeQueryDto,
+): Promise<IpcOutcome<SymbolChangePageDto>> {
+  return await call<SymbolChangePageDto>(QUERY_SYMBOL_CHANGES, { request });
+}
+
+/**
+ * Export the comparison as JSON, asking the shell to open the save dialog.
+ *
+ * `cancelled` and `kept-existing` are statuses, not errors: the person chose a folder and then
+ * declined, which is a normal thing to do. The path they picked never comes back to this side of the
+ * boundary, and nothing here sends one out (prompt §35, §36).
+ */
+export async function exportCompareJson(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await call<ExportOutcomeDto>(EXPORT_COMPARE_JSON, { diffId });
+}
+
+/** Export the comparison as one self-contained HTML file. */
+export async function exportCompareHtml(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await call<ExportOutcomeDto>(EXPORT_COMPARE_HTML, { diffId });
 }
 
 async function call<T>(
