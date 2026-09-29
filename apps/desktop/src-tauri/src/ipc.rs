@@ -641,6 +641,10 @@ pub enum SectionChangeSortDto {
     Delta,
     ChangeKind,
     FileSize,
+    /// Memory size, taking whichever side carries a number. This is the quantity the diff ranks top
+    /// growth on, so the Compare screen's "largest additions" list and its growth list can be read
+    /// against each other.
+    MemorySize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]

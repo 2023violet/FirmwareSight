@@ -490,6 +490,47 @@ fn sorting_by_delta_leaves_rows_without_a_number_at_the_end() {
 }
 
 #[test]
+fn the_additions_page_ranks_on_the_quantity_the_growth_list_uses() {
+    let (session, _db, base, target) = session_with_pair("additions");
+    let summary = compare(&session, &base, &target);
+
+    // The Compare screen builds its "largest additions" list from this query, and its "top growth"
+    // list comes from Core's memory-size ranking. Two adjacent rankings of different quantities
+    // would invite a reader to compare them, so the ordering field here is the same one.
+    let page = session
+        .query_section_changes(
+            &SectionChangeQueryDto {
+                diff_id: summary.diff_id.clone(),
+                change_kind: Some(ChangeKindFilterDto::Added),
+                sort: SectionChangeSortDto::MemorySize,
+                direction: SortDirDto::Desc,
+                ..Default::default()
+            },
+            "op-added",
+        )
+        .expect("the added page reads");
+
+    assert!(page.total > 0, "the fixture pair adds sections");
+    let sizes: Vec<Option<u64>> = page
+        .rows
+        .iter()
+        .map(|row| row.memory_size.target.or(row.memory_size.base))
+        .collect();
+    let measured: Vec<u64> = sizes.iter().flatten().copied().collect();
+    let mut expected = measured.clone();
+    expected.sort_unstable_by(|a, b| b.cmp(a));
+    assert_eq!(measured, expected, "the largest addition leads");
+    assert!(
+        sizes.iter().rev().take_while(|size| size.is_none()).count()
+            == sizes.iter().filter(|size| size.is_none()).count(),
+        "a row with no number stays behind every row that has one"
+    );
+    for row in &page.rows {
+        assert_eq!(row.change_kind, "Added", "the filter is the filter");
+    }
+}
+
+#[test]
 fn the_same_query_twice_returns_the_same_page() {
     let (session, _db, base, target) = session_with_pair("stable");
     let summary = compare(&session, &base, &target);

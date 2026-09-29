@@ -155,6 +155,10 @@ impl Session {
                         first_known(row.file_size.target, row.file_size.base),
                         &row.key,
                     ),
+                    SectionChangeSortDto::MemorySize => RowKey::optional_u64(
+                        first_known(row.memory_size.target, row.memory_size.base),
+                        &row.key,
+                    ),
                 },
             );
 
