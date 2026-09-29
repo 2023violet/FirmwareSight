@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_IN_PROGRESS_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,21 +27,21 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_IN_PROGRESS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
   # chain, fixture reproducibility, parser behaviour, non-blocking UI, a data model that can carry
   # Compare and Gate) is unchanged.
   next_authorizable_tracks:
-    - P1_analyzer_completion
+    - P2_compare
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
   g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
   g1_claimed: true
   g1_claimed_basis: "P0 PASS at v0.6.0, measured green cross-platform through remote Run #12; claimed under ADR-0026, not under the earlier V0+P0 formula"
   product_mvp_phases: [P1_analyzer, P2_compare, P3_gate, P4_bundle]
-  p1_status: IN_PROGRESS
+  p1_status: PASS
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
@@ -109,12 +109,13 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# P0 is closed at v0.6.0, G1 is claimed on the P0 basis under ADR-0026, and P1-A0 plus its correctness
-# closure are complete. The active task is the rest of Analyze: bounded Sections, Symbols and Evidence
-# details, top contributors, and the US-001 bytes/KiB presentation switch. AGENTS.md 1 still forbids
-# inventing work: this pointer exists because the architect issued the parent prompt and its acceptance
-# addendum, not because the roadmap suggests a next feature.
-active_task: P1_ANALYZE_DETAILS
+# P0 is closed at v0.6.0, G1 is claimed on the P0 basis under ADR-0026, and P1 Analyze is now PASS /
+# COMPLETE: bounded Sections, Symbols and Evidence details, top contributors, the Evidence Inspector and
+# the US-001 bytes/KiB presentation switch all shipped in this round. There is no live coding task.
+# AGENTS.md 1 forbids inventing the next one from the roadmap, so `P2 Compare` is recorded as the next
+# *authorizable* stage in `p1_execution` and `validation.next_authorizable_tracks`, and nothing begins
+# until the architect issues a prompt for it.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -236,16 +237,25 @@ p1_execution:
   slice: P1_ANALYZE_DETAILS
   scope: "bounded Sections, Symbols and Evidence queries over the existing SQLite snapshot, three use-case IPC commands, top contributors, and a presentation-only bytes/KiB switch"
   explicitly_not_in_scope: [P2_compare, P3_gate, P4_bundle, history, object_or_module_attribution, treemap, chart_dependency, virtualization_dependency, settings_page, commercial_pricing, user_recruitment, cloud, accounts, telemetry]
-  p1_stage_status: IN_PROGRESS
+  p1_stage_status: PASS_COMPLETE # decided in P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md, item by item against US-001
   us_001_binding: "01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md US-001 Analyze ELF is the acceptance list; P1 is not PASS while any mandatory item is open"
   migration_expected: false # SCHEMA_VERSION stays 2; sections, symbols and evidence rows are already stored
+  migration_added: false # migrations/ still holds only 0001 and 0002; the two reason-less nullable columns are reported, not migrated
   new_dependency_expected: false
+  new_dependency_added: false # Cargo.lock and every Cargo.toml are unmodified by this slice
   new_design_token_expected: false # DESIGN.md and the frozen tokens asset outrank this slice; a needed value stops the round instead
+  new_design_token_added: false # assets/design-tokens.json is unmodified at 0.2.1; the detail sheet consumes 23 existing tokens
   no_new_baseline: true
   baseline_version_stays: 0.6.0
   start_head: be09c65f451dc1b625c6bf597929a7ce93f5c509
   start_run_id: 36520562718
   start_run_conclusion: "success, 7 of 7 jobs"
+  implemented_from_head: 872ad7e # the governance commit that adopted ADR-0026, child of start_head
+  completed_on: "2026-09-29"
+  tests_after_p1: { rust: 184, ui: 58 } # whole-workspace counts on this tree; 42 Rust and 27 UI of them are new in this slice
+  desktop_smoke: "P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md - Windows window at the frozen 1024 px minimum, release binary 82de3bbadebac5f8"
+  open_findings: "P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md section 6: two nullable columns carry no reason column, the bindings drift step cannot see an untracked file, one dead Apply-filter click is unresolved, and a long Unknown reason makes a tall row"
+  not_measured: { peak_rss: NOT_MEASURED, fuzz: NOT_RUN, macos_or_linux_window: NOT_RUN, this_commit_remote_ci: "NOT RUN AT WRITE TIME - recorded in a successor document after the owner pushes, per the anti-recursion rule that held for P0 and P1-A0" }
   evidence: P1_VALIDATION/
   next_stage_after_this_one: P2_compare # NOT authorized by this prompt; it needs its own architect prompt
 

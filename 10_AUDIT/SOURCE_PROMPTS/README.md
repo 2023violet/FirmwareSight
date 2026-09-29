@@ -183,6 +183,26 @@ text with no source file; each says so in its own entry instead of standing for 
   read `NOT_RECRUITED` / `NOT_SCHEDULED`, and the V0 sample remains `0 / 8`. Nothing in this repository may
   read as though any part of it ran.
 
+## Open-Source MVP-First Governance Reset + P1 Analyze Completion
+
+- Supplied inline, architect reviewed, 2026-09-29. No `.txt` file: the prompt text is the owner's message,
+  so this registry entry is its only in-repository record.
+- Governance half: `ADR-0026-open-source-mvp-first-delivery.md`, G1 re-based on `P0 PASS`, V0 moved to
+  `NON_BLOCKING_USER_FEEDBACK_TRACK`, and the withdrawal of the price-anchor prompt below recorded.
+  Committed as `872ad7e governance: adopt open-source MVP-first delivery`.
+- Engineering half: `P1_ANALYZE_DETAILS` - capabilities 5 to 9 of Analyze.
+- Accompanying **P1 Analyze Acceptance Closure v1.0** addendum, also supplied inline and architect
+  reviewed, which binds `P1 PASS` to the frozen US-001 criteria including the bytes/KiB presentation
+  switch, and fixes the stop condition at the end of P1.
+- Outcome, 2026-09-29: executed to its stop condition. `P1 = PASS / COMPLETE`, decided item by item in
+  `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, with `P1_ANALYZE_EXECUTION_REPORT.md`,
+  `P1_ANALYZE_DESIGN_CHECKLIST.md` and `P1_ANALYZE_DETAILS_SMOKE_REPORT.md` beside it. Measured locally:
+  184 Rust tests, 58 UI tests, `python scripts/check.py` 14/14, and a real shipped-binary window run.
+  Baseline stays `0.6.0`; no migration, no dependency and no design token was added. `active_task` is now
+  `NONE` and `P2 Compare` is the next authorizable stage, unstarted and unauthorized.
+- Remote CI for the commits this round produced is recorded by a successor document after the owner
+  pushes, never inside their own commit - the same anti-recursion rule used for P0 and P1-A0.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that
@@ -192,6 +212,7 @@ verified, no participant evidence was written, and the round stopped at
 
 What no longer stands is its sequencing authority. `ADR-0026` moved V0 to
 `NON_BLOCKING_USER_FEEDBACK_TRACK`, so `active_task` has since passed from `V0_BATCH_A_EXTERNAL_VALIDATION`
-to `P1_ANALYZE_DETAILS`, and no Batch A session count gates any engineering stage any more. The
+to `P1_ANALYZE_DETAILS` - which completed the same day, leaving `active_task: NONE` - and no Batch A
+session count gates any engineering stage any more. The
 recruitment-ready pack, the frozen `v0.1.0` prototype and the protocol files stay in place for a later,
 non-blocking feedback round.

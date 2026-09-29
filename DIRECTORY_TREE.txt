@@ -201,12 +201,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── icon.ico
 │       │   │   └── icon.png
 │       │   ├── src/
+│       │   │   ├── details.rs
 │       │   │   ├── intake.rs
 │       │   │   ├── ipc.rs
 │       │   │   ├── lib.rs
 │       │   │   ├── main.rs
 │       │   │   └── service.rs
 │       │   ├── tests/
+│       │   │   ├── analyze_details.rs
 │       │   │   ├── desktop_parity.rs
 │       │   │   └── real_artifact_intake.rs
 │       │   ├── build.rs
@@ -224,12 +226,26 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── BudgetDto.ts
 │           │   │   │   ├── CapabilitiesDto.ts
 │           │   │   │   ├── ErrorEnvelopeDto.ts
+│           │   │   │   ├── EvidenceClassDto.ts
+│           │   │   │   ├── EvidencePageDto.ts
+│           │   │   │   ├── EvidenceRequestDto.ts
+│           │   │   │   ├── EvidenceRowDto.ts
+│           │   │   │   ├── EvidenceSortDto.ts
 │           │   │   │   ├── EvidenceSummaryDto.ts
 │           │   │   │   ├── FixtureKey.ts
 │           │   │   │   ├── FixtureOptionDto.ts
 │           │   │   │   ├── IdentityDto.ts
 │           │   │   │   ├── MemorySummaryDto.ts
-│           │   │   │   └── SelectionDto.ts
+│           │   │   │   ├── SectionPageDto.ts
+│           │   │   │   ├── SectionRequestDto.ts
+│           │   │   │   ├── SectionRowDto.ts
+│           │   │   │   ├── SectionSortDto.ts
+│           │   │   │   ├── SelectionDto.ts
+│           │   │   │   ├── SortDirDto.ts
+│           │   │   │   ├── SymbolPageDto.ts
+│           │   │   │   ├── SymbolRequestDto.ts
+│           │   │   │   ├── SymbolRowDto.ts
+│           │   │   │   └── SymbolSortDto.ts
 │           │   │   ├── bridge.test.ts
 │           │   │   ├── bridge.ts
 │           │   │   └── types.ts
@@ -241,6 +257,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   └── setup.ts
 │           │   ├── App.module.css
 │           │   ├── App.tsx
+│           │   ├── Details.module.css
+│           │   ├── details.test.tsx
+│           │   ├── Details.tsx
 │           │   ├── format.test.ts
 │           │   ├── format.ts
 │           │   ├── intake.test.tsx
@@ -305,8 +324,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       ├── src/
 │       │   ├── db.rs
 │       │   ├── error.rs
-│       │   └── lib.rs
+│       │   ├── lib.rs
+│       │   └── query.rs
 │       ├── tests/
+│       │   ├── analyze_queries.rs
 │       │   ├── map_companion_persistence.rs
 │       │   └── storage.rs
 │       └── Cargo.toml
@@ -378,6 +399,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P1_A0_DESKTOP_SMOKE_REPORT.md
 │   ├── P1_A0_EXECUTION_REPORT.md
 │   └── P1_A0_EXIT_CHECKLIST.md
+├── P1_VALIDATION/
+│   ├── P1_ANALYZE_DESIGN_CHECKLIST.md
+│   ├── P1_ANALYZE_DETAILS_SMOKE_REPORT.md
+│   ├── P1_ANALYZE_EXECUTION_REPORT.md
+│   └── P1_ANALYZE_EXIT_CHECKLIST.md
 ├── schemas/
 │   ├── accepted-reviews.schema.json
 │   ├── gate-results.schema.json

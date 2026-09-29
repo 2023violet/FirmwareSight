@@ -13,7 +13,7 @@ last_updated: "2026-09-29"
 
 Baseline: `0.6.0` — the P0 Technical Foundation Baseline.
 
-Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 IN_PROGRESS · P2/P3/P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: P1_ANALYZE_DETAILS`
+Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 PASS/COMPLETE — the Analyze verb, evidence in P1_VALIDATION/ · P2/P3/P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: NONE`
 
 ## Primary reading path
 
@@ -21,13 +21,16 @@ Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — `P1_ANALYZE_DETAILS` (the live instructions, acceptance list and boundaries)
+5. `.ai/ACTIVE_TASK.md` — `NONE`; it records what closed and that no next stage may be inferred
 6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`
 7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
 8. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
 9. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — all five runs, the two failures included
 10. `V0_VALIDATION/batch_a/BATCH_A_STATUS.md`
 11. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
+12. `P1_A0_VALIDATION/` — the completed intake slice and its correctness closure
+13. `P1_VALIDATION/` — the completed P1 Analyze round: execution report, exit checklist (the US-001
+    verdict), design checklist, and the shipped-binary desktop smoke
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` are the regenerated **v0.6.0** baseline record: the tree lists
 this repository's tracked layout and `SHA256SUMS` covers the baseline-controlled files in it. They were

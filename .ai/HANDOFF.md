@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-09-29"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / active task P1 Analyze details
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / active task NONE
 
 ## Purpose
 
@@ -18,15 +18,17 @@ is complete together with its correctness closure.
 
 The direction changed on 2026-09-29 by `ADR-0026-open-source-mvp-first-delivery.md`: FirmwareSight builds
 its local MVP first, `G1 = P0 PASS` for that delivery, and V0 is a **non-blocking** user-feedback track
-rather than a precondition. The live task is therefore engineering again - **`P1_ANALYZE_DETAILS`**, the
-rest of the Analyze verb: bounded Sections, Symbols and Evidence queries, top contributors, the Evidence
-Inspector, and the `bytes / KiB` switch that US-001 requires. This file's job is to keep that boundary
-precise: P1 ends at P1, and P2 Compare needs its own architect prompt.
+rather than a precondition. The engineering round that followed - **`P1_ANALYZE_DETAILS`** - finished the
+same day: bounded Sections, Symbols and Evidence queries, top contributors, the Evidence Inspector, and
+the `bytes / KiB` switch US-001 requires. **`active_task` is now `NONE`.**
 
-Two wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here to
-continue past P1 into Compare, Gate, Bundle, an installer or anything cloud-shaped, no such work is
-authorized - and note that ADR-0026 removed the *research* gate, not the requirement that each stage be
-authorized, so "governance got easier" is not a licence to widen scope.
+Three wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here
+to continue P1, P1 is `PASS / COMPLETE` and its acceptance list is checked item by item in
+`P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` - there is nothing left inside it to do. And if you were sent
+here to start Compare, Gate, Bundle, an installer or anything cloud-shaped: **`P2 Compare` is the next
+authorizable stage, not an authorized one.** ADR-0026 removed the *research* gate, not the requirement
+that each stage carry its own architect prompt, so "governance got easier" is not a licence to widen
+scope. `AGENTS.md` 1 with `active_task: NONE` means: read, report, and stop.
 
 ## Baseline and HEADs
 
@@ -55,6 +57,7 @@ V0 Batch A activation          2026-09-29 by architect prompt; `active_task` mov
 Batch A activation commit      be09c65f451dc1b625c6bf597929a7ce93f5c509 — on origin/main; Run #12 36520562718 success, 7 of 7 jobs — the verified starting point of the P1 round
 ADR-0026 governance reset      2026-09-29, same day: V0 becomes NON_BLOCKING_USER_FEEDBACK_TRACK, G1 is re-based on P0 PASS, `active_task` moves again to P1_ANALYZE_DETAILS. The Batch A activation above is real history and stands as a record; only its sequencing authority was superseded hours later
 Withdrawn prompt               FirmwareSight_V0_Batch_A_Price_Anchor_Authorization_Participant_Acquisition_Pack_EXECUTION_PROMPT_v1.0 — WITHDRAWN_BY_ARCHITECT, never executed, no price anchors written, no recruitment pack produced, V0 sample still 0/8
+P1 Analyze round             2026-09-29, started from 872ad7e (child of be09c65): bounded query layer in firmwaresight-storage, three use-case IPC commands, the detail UI and Evidence Inspector, the US-001 unit switch, and P1_VALIDATION/. Committed locally as three commits - storage plus shell, UI, then evidence and governance. Their hashes and remote CI results are recorded by a successor document after the owner pushes, following the rule that held for P0 and P1-A0: no commit names its own run
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -74,18 +77,22 @@ V0      NON_BLOCKING_USER_FEEDBACK_TRACK — 0 / 8 eligible sessions, an honest 
 Pre-G1  P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED (ADR-0025), ON origin/main, GREEN ON RUN #9.
         ITS EVIDENCE-IDENTITY / PERSISTENCE CORRECTNESS CLOSURE IS IMPLEMENTED, TESTED, AND ALSO ON
         origin/main (`ace6fbe`), GREEN ON RUN #10
-P1      IN_PROGRESS — P1_ANALYZE_DETAILS. PASS is earned by the acceptance list, not declared in advance
-P2 / P3 / P4   NOT STARTED — P2 becomes the next authorizable stage when P1 is verifiably complete;
-        ADR-0026 removed the research gate, not the requirement of its own architect prompt
+P1      PASS / COMPLETE — P1_ANALYZE_DETAILS closed 2026-09-29. PASS was earned item by item against the
+        frozen US-001 acceptance list, in P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md, and 14/14 local
+        gate steps plus a real shipped-binary window run. Remote CI for those commits is a successor
+        document's job; it was NOT RUN when this line was written
+P2 / P3 / P4   NOT STARTED — P2 is now the next authorizable stage, and authorizing it is the
+        architect's act. ADR-0026 removed the research gate, not the requirement of its own prompt
 Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was withdrawn unexecuted
 ```
 
 ## What the code does and how it is proven
 
-- 142 Rust tests and 31 UI tests on one gate: `python scripts/check.py`, which CI calls unchanged —
+- 184 Rust tests and 58 UI tests on one gate: `python scripts/check.py`, which CI calls unchanged —
   14 steps on a tree that already has the built frontend, 16 when it builds that too, plus 3 under
-  `--only core-smoke`. The v0.6.0 promotion measured 104 / 19; the P1-A0 intake round and its
-  correctness closure account for every test after those.
+  `--only core-smoke`. The v0.6.0 promotion measured 104 / 19; P1-A0 and its correctness closure took
+  that to 142 / 31, and P1 Analyze added the remaining 42 Rust tests (19 storage query, 9 shell
+  boundary, 14 ts-rs export bindings) and 27 UI tests (21 detail screen, 3 bridge, 3 formatting).
 - Four Phase-0 library crates plus CLI and desktop apps. Core is headless and synchronous; no Tauri,
   rusqlite, Tokio or `object::*` type crosses out of it.
 - Real ARM ELF/MAP fixtures with recorded provenance and hash-first tests, so no test needs
@@ -102,6 +109,12 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   sealed as a companion `ArtifactKind::Map` artifact, which changes `SnapshotId` through the identity
   model's existing optional map component, and each memory evidence item names the source type and
   locator its own rule actually used.
+- P1 Analyze adds the inspect path: `query_sections`, `query_symbols` and `query_evidence` over the
+  snapshot SQLite already stores, each taking a typed request and returning one bounded page
+  (default 100, hard max 500, clamped in Rust) with its total and next offset. Filter, sort, class and
+  offset are executed in SQLite - the WebView never receives a whole table and never sorts one - and the
+  bytes/KiB switch is a presentation division that issues no command, changes no address and creates no
+  snapshot. The Evidence Inspector shows a fact's full source type, locator, rule and evidence id.
 
 ## Known gaps that promotion did not remove
 
@@ -113,6 +126,15 @@ RustSec           RUSTSEC-2024-0429 (glib 0.18.5, unsound), RUSTSEC-2024-0370
                   five revisit triggers, no ADR because no architecture choice changed
 Desktop smoke     one Windows 10 host, one WebView, at 100% scaling
 Linker layouts    GNU ld MAP plus one dual-region ELF layout
+Stored-reason gap sections.file_offset and symbols.address are nullable with NO *_unknown column, so a
+                  reason is lost at write time. P1 reports it instead of migrating: SCHEMA_VERSION stays
+                  2. P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md §6.1
+Unresolved UI     one Apply-filter click did nothing on an intermediate P1 build and could not be
+                  reproduced on the shipped binary or in the automated reproducer. Reported as
+                  UNRESOLVED, not as fixed: P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md §6
+Gate blind spot   `drift/ipc bindings unchanged` is `git diff --exit-code`, so it cannot see a binding
+                  file that is not yet tracked. For P1's 14 new bindings the invariant was checked by
+                  hashing the directory before and after regeneration instead
 Open design items capability labels show Core's enum words. The eight 1px borders that used to be
                   listed here are closed: `border.width.hairline` in design tokens v0.2.1
 Evidence model  UNTESTED with real users. V0 is now a non-blocking track at 0 / 8, so whether people
@@ -140,7 +162,7 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 6. `09_ADR/ADR-0026-open-source-mvp-first-delivery.md` — why G1 now rests on P0 and what it did NOT relax
 7. `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md` — the P1-A0 slice and its safety terms
 8. `04_TECH/14_IPC_DATA_CONTRACTS.md` and `04_TECH/15_STORAGE_DATABASE_BASELINE.md` — the bounded-query
-   and schema rules the current task is written against
+   and schema rules P1 was written against, and the rules any next stage inherits
 9. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md` — the promotion record
 10. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` — what is proven, and how
 11. `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` — decisions already taken
@@ -148,7 +170,9 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 13. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
 14. `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md`, `P1_A0_EXIT_CHECKLIST.md` and
     `P1_A0_CORRECTNESS_SMOKE_REPORT.md` — the completed slice, and how it was proven
-15. `P1_VALIDATION/` — this round's execution report, exit checklist, design checklist and smoke report
+15. `P1_VALIDATION/` — the completed P1 round: `P1_ANALYZE_EXECUTION_REPORT.md` (what was built, the
+    defects fixed, the findings reported), `P1_ANALYZE_EXIT_CHECKLIST.md` (US-001 item by item and the
+    verdict), `P1_ANALYZE_DESIGN_CHECKLIST.md`, `P1_ANALYZE_DETAILS_SMOKE_REPORT.md` (shipped binary)
 16. `DESIGN.md` + `assets/design-tokens.json` (any UI work)
 17. The V0 track, for a later non-blocking feedback round: `V0_VALIDATION/README.md`, `V0_PLAN.md`,
     `V0_VALIDATION/protocol/**`, `V0_VALIDATION/sessions/TEMPLATE.md`,

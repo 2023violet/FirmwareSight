@@ -11,102 +11,70 @@ last_updated: "2026-09-29"
 # ACTIVE TASK
 
 ```text
-P1_ANALYZE_DETAILS — the remainder of the Analyze verb, authorized as the first MVP stage under
-ADR-0026 (Open-Source MVP-First Delivery). It is a coding task with a fixed acceptance list.
-It does NOT authorize P2 Compare, P3 Gate or P4 Release Bundle.
+NONE — P1 Analyze reached PASS / COMPLETE on 2026-09-29. There is no live coding task.
+
+AGENTS.md 1: with no active task, no agent may create business functionality or pick the next stage from
+the roadmap. P2 Compare is the next *authorizable* stage; it starts only when the architect issues a P2
+prompt. That sentence is a record of where the delivery stands, not permission to begin.
 ```
+
+## What just closed
+
+`P1_ANALYZE_DETAILS` — capabilities 5 to 9 of the Analyze verb, authorized as the first MVP stage under
+ADR-0026 by the parent prompt *FirmwareSight Open-Source MVP-First Governance Reset + P1 Analyze
+Completion v1.0* and its *P1 Analyze Acceptance Closure v1.0* addendum.
 
 ```text
-STATUS 2026-09-29: IN PROGRESS. Started from be09c65 (Run #12 36520562718, success, 7 of 7 jobs).
-Parent prompt: FirmwareSight Open-Source MVP-First Governance Reset + P1 Analyze Completion v1.0.
-Acceptance addendum: FirmwareSight P1 Analyze Acceptance Closure v1.0, which binds P1 PASS to the
-frozen US-001 criteria, including the bytes/KiB presentation switch.
-
-Governance moved the same day: ADR-0026 re-based G1 on P0 PASS and turned V0 into
-NON_BLOCKING_USER_FEEDBACK_TRACK. V0's sample is still honestly 0 / 8 — no participant was invented,
-and the withdrawn price-anchor prompt was never executed.
+intake → summary → top contributors → [Sections | Symbols | Evidence] → Evidence Inspector
 ```
 
-Evidence (created as this task completes): `P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md`,
-`P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, `P1_VALIDATION/P1_ANALYZE_DESIGN_CHECKLIST.md`,
-`P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md`. Prior slice: `P1_A0_VALIDATION/`.
+The acceptance list was the frozen **US-001 Analyze ELF** criteria in
+`01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md`, not a subset of them. Every mandatory item is green, with
+the evidence named per item:
 
-## The user outcome
+| Document | Holds |
+| --- | --- |
+| `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` | US-001 item by item, hard boundary by boundary, the verdict |
+| `P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md` | what was built, the seven defects found and fixed, the four findings reported rather than fixed, every gate command and its output |
+| `P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md` | the shipped release binary in a real window at the frozen 1024 px minimum, native dialogs, KiB arithmetic checked independently, the failed-analysis last-good path, a clean close |
+| `P1_VALIDATION/P1_ANALYZE_DESIGN_CHECKLIST.md` | `AGENTS.md` 11 / `DESIGN.md` review, with the greps run rather than asserted |
 
-A person who can already load their own ELF (plus optional GNU ld MAP) and read a trustworthy summary
-can now also **inspect** what the analysis found:
+Measured on this machine: `cargo test --workspace` **184 passed / 0 failed / 0 ignored**, UI **58 passed**
+with no stderr, `python scripts/check.py` **14/14**. Baseline stays **v0.6.0**; no migration
+(`SCHEMA_VERSION` 2), no new dependency, no new design token, no golden changed.
 
-```text
-intake → summary → top contributors → [Sections | Symbols | Evidence]
-```
+`NOT MEASURED`: peak RSS. `NOT RUN`: fuzzing, a macOS or Linux window, keyboard-only traversal of the
+shipped binary, and remote CI for the commit that ships this pack — which is recorded in a successor
+document after the owner pushes, never inside its own commit. One dead `Apply filter` click stays
+`UNRESOLVED` and is reported as such.
 
-§8 of the parent prompt defines P1's ten capabilities; P1-A0 satisfies 1–4 and error recovery. This
-slice completes **5 inspect Sections, 6 inspect Symbols, 7 inspect Evidence, 8 identify largest
-contributors, 9 understand evidence quality**.
-
-## Acceptance list that decides P1 PASS
-
-The frozen criteria in `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` **US-001 Analyze ELF** are the
-acceptance list, not a suggestion. Every item below must be green or P1 stays `IN_PROGRESS`:
-
-- sections visible, symbols visible, memory summary present;
-- symbol list sortable **and** filterable, with the search executed in Rust/SQLite rather than by
-  shipping every row to React;
-- artifact hash shown; unsupported file shows a reason and does not crash when debug info is absent;
-- **numeric unit switch between bytes and KiB**: default `Bytes`, `1 KiB = 1024 bytes`, applied
-  consistently to artifact size, both footprints, excluded metadata, section file/memory sizes, top
-  contributor sizes and symbol sizes; never applied to addresses, file offsets, hashes, counts,
-  ordinals or snapshot ids; `Unknown` renders as `Unknown`, never as `0 B` or `0 KiB`;
-- `capabilities.debugInfo` row stays visible and renders from the Rust DTO, and its absence must not
-  crash Analyze (addendum §6: no second debug-info module);
-- switching units is presentation-only: it re-parses nothing, creates no snapshot, writes no SQLite
-  row, and changes no CLI or golden output.
-
-## Hard boundaries
-
-- **Bounded payloads.** Default `limit = 100`, maximum `limit <= 500`, both enforced server-side, with
-  `rows`, total count and the next offset returned. `04_TECH/14` forbids sending the whole symbol table;
-  `desktop_parity.rs` documents that invariant today.
-- **Three use-case commands only**: `query_sections`, `query_symbols`, `query_evidence`. No `run_sql`,
-  `read_table`, `query_any`, `get_database`. No raw SQL crosses the boundary, no `rusqlite` type crosses
-  IPC, no Tauri type enters Core. ts-rs stays the generation boundary and bindings are committed.
-- **No schema migration.** `SCHEMA_VERSION` stays 2; sections, symbols and evidence are already stored.
-  If a measured need for an index appears, stop and report before writing `0003`.
-- **No new dependency and no new design token.** `assets/design-tokens.json` is a frozen asset: a value
-  that genuinely has no token stops this round rather than being written as a magic number.
-- **Details are bound to the last-good snapshot id.** A failed later attempt must not repoint the
-  tables at the failed candidate, and a detail-query error belongs to the details area only: it never
-  wipes the summary.
-- **No invented data.** Unknown stays Unknown with its reason, addresses stay hexadecimal technical
-  presentation, a symbol's storage ordinal is a row position and not identity, and no object or module
-  attribution appears without real evidence.
-- **Out of scope**: Compare, Gate, Bundle, History, Component Evidence, SBOM, CI integration, Keil/IAR
-  adapter, project wizard, treemap, chart library, virtualization library, settings page, pricing,
-  user recruitment, cloud, accounts, telemetry.
-- UI rules of `AGENTS.md` 11 and `DESIGN.md` apply: dense not crowded, hairline borders rather than
-  shadows on tables and panels, mono numerics, status as icon + label and never colour alone,
-  keyboard-accessible selector with correct semantics, light theme only.
-
-## State this task runs against
+## State this closure leaves behind
 
 ```text
 P0                  PASS — frozen at v0.6.0
-G1                  PASS — basis P0 PASS, per ADR-0026 (2026-09-29); before that it was V0 PASS + P0 PASS and NOT CLAIMED
-Baseline            v0.6.0 — unchanged by this slice; no v0.7.0
-Design tokens       v0.2.1
+G1                  PASS — basis P0 PASS, per ADR-0026 (2026-09-29)
 P1-A0               COMPLETE (+ correctness closure COMPLETE)
-P1                  IN_PROGRESS — this task
+P1                  PASS / COMPLETE — this task
 V0                  NON_BLOCKING_USER_FEEDBACK_TRACK — 0 / 8, gates nothing, nothing fabricated
 P2 / P3 / P4        NOT STARTED — each still needs its own architect prompt
 G2                  NOT REACHED
+Baseline            v0.6.0 — unchanged by this slice; no v0.7.0
+Design tokens       v0.2.1 — unchanged
 Pricing/commercial  DEFERRED_POST_MVP
 Run #12             36520562718 on be09c65 — success, 7 of 7 jobs (this round's start fact)
-Peak RSS            NOT MEASURED      Fuzz: NOT RUN
-RustSec             two accepted transitive advisories, unchanged
 ```
 
-## Next gate after this task
+Two findings are open on purpose, because closing them needs authority this round did not have:
+`sections.file_offset` and `symbols.address` are nullable columns with no reason column, so a reason is
+lost at write time (fixing that is a migration); and the `drift/ipc bindings unchanged` gate cannot see a
+binding file that is not yet tracked, which is why the regeneration was verified by hash instead. Both
+are in `P1_ANALYZE_EXECUTION_REPORT.md` §6 and in `.ai/CURRENT_STATE.md`'s known-gaps list.
 
-When every item above is green and the validation and real desktop smoke in the parent prompt pass, P1
-may be marked `PASS / COMPLETE` and `P2 Compare` becomes the next authorizable stage. **This prompt does
-not implement P2.** `AGENTS.md` 1 still forbids inferring the next task from the roadmap.
+## If a P2 prompt arrives
+
+Read first, in order: root `README.md`, `.ai/README.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md`, this
+file, `04_TECH/09_TECH_DECISION_MATRIX.md`, and the ADRs the prompt names. `AGENTS.md` 2 / 3 / 6 / 7 / 8 /
+11 are unchanged and still bind: Core stays headless and synchronous, the technology baseline does not
+move silently, SQLite stays behind `rusqlite + bundled` with every schema change going through a
+migration, the WebView keeps no general shell or filesystem power, every fact keeps its evidence class,
+and UI work goes through `DESIGN.md` plus the frozen tokens.

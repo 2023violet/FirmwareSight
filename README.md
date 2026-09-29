@@ -26,9 +26,11 @@ V0      NON_BLOCKING_USER_FEEDBACK_TRACK — 0 / 8 eligible external sessions, a
         gates no stage. The v0.1.0 prototype and protocol stay frozen for a possible later feedback round
 Pre-G1  P1-A0 Real Artifact Intake — authorized by ADR-0025, green on Run #9, and CLOSED together with
         its evidence-identity / persistence correctness closure (bounded; it stopped at P1-A0)
-P1      IN_PROGRESS — P1_ANALYZE_DETAILS: Sections, Symbols, Evidence Inspector, top contributors,
-        and the US-001 bytes/KiB presentation switch
-P2      NOT STARTED — the next authorizable stage once P1 is verifiably complete; needs its own prompt
+P1      PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors,
+        bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB
+        presentation switch. Evidence: P1_VALIDATION/, item by item against the frozen US-001 list
+P2      NOT STARTED — the next authorizable stage; it needs its own architect prompt, and no prompt has
+        been issued
 P3 / P4 NOT STARTED
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
@@ -54,9 +56,10 @@ cargo run -q --bin fwsight -- analyze fixtures/elf/p0-dual-region/firmware.elf \
   --map fixtures/elf/p0-dual-region/firmware.map --json
 ```
 
-142 Rust tests and 31 UI tests — 104 and 19 of them at the v0.6.0 promotion. Measurement status of
-every claim is in `P0_TECHNICAL_VALIDATION/`, starting from `P0_EXIT_CHECKLIST.md`, and for the
-Pre-G1 slice in `P1_A0_VALIDATION/`.
+184 Rust tests and 58 UI tests — 104 and 19 of them at the v0.6.0 promotion, 142 and 31 after the P1-A0
+slice and its correctness closure. Measurement status of every claim is in `P0_TECHNICAL_VALIDATION/`,
+starting from `P0_EXIT_CHECKLIST.md`, in `P1_A0_VALIDATION/` for the intake slice, and in
+`P1_VALIDATION/` for the rest of Analyze.
 
 ## What v0.6.0 does not change
 
@@ -221,19 +224,31 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: P1_ANALYZE_DETAILS`, the first MVP stage under `ADR-0026-open-source-mvp-first-delivery.md`.
-It completes the Analyze verb on top of P1-A0's intake and summary: bounded `Sections`, `Symbols` and
-`Evidence` queries over the SQLite snapshot that already exists, three use-case IPC commands, top
-contributors, an Evidence Inspector, and the `bytes / KiB` presentation switch that
-`01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. **P1 is not `PASS` until every US-001
-mandatory item is green.**
+`active_task: NONE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
+product verb: bounded `Sections`, `Symbols` and `Evidence` queries over the SQLite snapshot that already
+existed, three use-case IPC commands, top contributors, an Evidence Inspector, and the `bytes / KiB`
+presentation switch `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Every mandatory US-001
+item is green with its evidence named per item in `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, and
+**P1 is `PASS / COMPLETE`**.
 
-Fixed boundaries of the stage: no schema migration (`SCHEMA_VERSION` stays 2), no new dependency, no new
-design token - a genuinely missing token stops the round rather than becoming a magic number - default page
-size 100 and hard maximum 500 enforced in Rust, no whole-table payload across IPC, details bound to the
-last-good `snapshotId`, `Unknown` never rendered as zero, and addresses never unit-converted. `ADR-0026`
-relaxed research **sequencing**; it relaxed no technical boundary, and `AGENTS.md` 2 / 7 / 11 still apply
-in full.
+**`P2 Compare` is the next authorizable stage, and nothing more than that.** `AGENTS.md` 1 with
+`active_task: NONE` forbids starting it from the roadmap: looser sequencing is not standing
+authorization, and each stage still needs its own architect prompt. If V0 is ever resumed for usability
+feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
+registers are still there, and no session, quote, timing or count may be invented.
+
+The boundaries P1 worked inside are inherited by whatever comes next, unchanged: no schema migration
+without its own decision (`SCHEMA_VERSION` is 2), no new dependency, no new design token - a genuinely
+missing token stops a round rather than becoming a magic number - default page size 100 and hard maximum
+500 enforced in Rust, no whole-table payload across IPC, details bound to the last-good `snapshotId`,
+`Unknown` never rendered as zero, and addresses never unit-converted. `ADR-0026` relaxed research
+**sequencing**; it relaxed no technical boundary, and `AGENTS.md` 2 / 7 / 11 still apply in full.
+
+What P1 left open on purpose, with the reason in each case: `sections.file_offset` and `symbols.address`
+are nullable columns with no reason column, so a reason is lost at write time and closing that needs a
+migration; one dead `Apply filter` click on an intermediate build was never reproduced and is reported
+unresolved; and `drift/ipc bindings unchanged` cannot see an untracked binding file, which is why this
+round verified regeneration by hash. See `P1_ANALYZE_EXECUTION_REPORT.md` §6.
 
 History of the pointer, so the older documents are readable: `P1A0_REAL_ARTIFACT_INTAKE` (authorized by
 ADR-0025) is **complete**, together with the narrow correctness closure that fixed the two defects its own
@@ -241,8 +256,3 @@ desktop smoke reported; and on the same day `V0_BATCH_A_EXTERNAL_VALIDATION` was
 a non-blocking track by ADR-0026 hours later. `G1 = V0 PASS + P0 PASS` no longer holds as a rule - it is
 `P0 PASS` now - but every document written before 2026-09-29 states the older formula because that is what
 those rounds believed.
-
-`P2 Compare` becomes the next authorizable stage when P1 is verifiably complete, and **needs its own
-architect prompt**: looser sequencing is not standing authorization. If V0 is ever resumed for usability
-feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
-registers are still there, and no session, quote, timing or count may be invented.

@@ -235,7 +235,7 @@ G0 Problem Baseline        — passed
 V0 Workflow Prototype     — NON_BLOCKING_USER_FEEDBACK_TRACK since 2026-09-29 (ADR-0026); sample 0/8 does not gate any P-stage
 P0 Technical Vertical Slice — PASS, frozen at baseline 0.6.0
 G1 = P0 PASS               — since ADR-0026 (2026-09-29); was `G1 = V0 PASS + P0 PASS` before that date
-P1 Analyzer                — IN PROGRESS
+P1 Analyzer                — PASS / COMPLETE (2026-09-29); evidence in P1_VALIDATION/, verdict item by item in P1_ANALYZE_EXIT_CHECKLIST.md
 P2 Compare
 P3 Release Gate
 P4 Release Bundle

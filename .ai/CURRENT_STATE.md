@@ -12,9 +12,10 @@ last_updated: "2026-09-29"
 
 - Date: 2026-09-29
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`P1_ANALYZE_DETAILS`** — completing the Analyze verb (Sections, Symbols, Evidence
-  Inspector, top contributors, US-001 bytes/KiB switch) as the first MVP stage under ADR-0026. It stops
-  before P2 Compare.
+- Active task: **`NONE`** — `P1_ANALYZE_DETAILS` finished on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`
+  (Sections, Symbols, Evidence Inspector, top contributors, US-001 bytes/KiB switch), recorded in
+  `P1_VALIDATION/`. `AGENTS.md` 1 forbids starting the next stage from the roadmap: **P2 Compare is the
+  next authorizable stage and needs its own architect prompt.**
 
 ## Product/architecture baseline
 
@@ -42,7 +43,8 @@ Three governance changes are in force now, all decided by the architect rather t
 
 Status: **`PASS`** · promoted to v0.6.0 by the architect-signed
 *P0 Final Promotion / v0.6.0 Baseline Closure v1.0* · Task at promotion time: **NONE** (recorded as
-`active_task: NONE` in `BASELINE.yaml`; the live task is now `P1A0_REAL_ARTIFACT_INTAKE`)
+`active_task: NONE` in `BASELINE.yaml`; the task live on 2026-09-29 was `P1_ANALYZE_DETAILS`, which is
+now closed, so the field reads `NONE` again)
 
 The chain P0 claimed is proven by executed commands, on this machine and on GitHub's runners:
 
@@ -131,10 +133,10 @@ P0: PASS — promoted to the v0.6.0 Technical Foundation Baseline; frozen, no fu
 G1: PASS — basis is P0 PASS under ADR-0026 (2026-09-29). Before that date this file read `NOT CLAIMED` against `G1 = V0 PASS + P0 PASS`, and the historical records still say so
 V0: NON_BLOCKING_USER_FEEDBACK_TRACK — 0 of 8 eligible external sessions, an honest zero that gates no P-stage and no G1
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
-P1: IN_PROGRESS — P1_ANALYZE_DETAILS: Sections, Symbols, Evidence Inspector, top contributors, and the US-001 bytes/KiB presentation switch
-P2 / P3 / P4: NOT STARTED — next authorizable stage after P1, each still needing its own architect prompt
+P1: PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors, bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB presentation switch. Evidence: P1_VALIDATION/
+P2 / P3 / P4: NOT STARTED — P2 Compare is the next authorizable stage; each still needs its own architect prompt
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: P1_ANALYZE_DETAILS
+Active task: NONE
 Design tokens: v0.2.1
 ```
 
@@ -169,6 +171,15 @@ shipped-window result: `P0_DESKTOP_SMOKE_REPORT.md`.
   OBSERVED).
 - **Two linker layouts tested.** Executable-in-RAM, external SRAM, DMA pools, overlays and
   MPU-aligned sections are unproven; DWARF is recognized but not consumed.
+- **Two stored facts carry no reason.** `sections.file_offset` and `symbols.address` are nullable with
+  no companion `*_unknown` column, so a reason cannot survive the write. The read layer types them as a
+  plain option and the UI says `Unknown` with no invented explanation. Closing this needs a migration,
+  which P1 deliberately did not write; found and reported in
+  `P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md` §6.
+- **One dead `Apply filter` click is unresolved.** It happened once on an intermediate build and could
+  not be reproduced on the shipped binary or in the automated reproducer. The leading hypothesis is the
+  WebView2 autofill popup, and `autoComplete="off"` removes that surface, but no cause is established.
+  Recorded as unresolved in `P1_ANALYZE_DETAILS_SMOKE_REPORT.md` §6 rather than written up as fixed.
 - **Icon provisioning duplication is a real cost.** Two jobs copy the same apt block; a third job that
   compiles the shell on Linux is the trigger to extract it.
 
@@ -192,19 +203,23 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: P1_ANALYZE_DETAILS`**, the first MVP stage under `ADR-0026`. P0 is closed and frozen;
-P1-A0 and its correctness closure are complete and recorded in `P1_A0_VALIDATION/`. What is in progress is
-the rest of Analyze: bounded `Sections`, `Symbols` and `Evidence` queries over the snapshot SQLite already
-stores, three use-case IPC commands, top contributors, the Evidence Inspector, and the
-`bytes / KiB` presentation switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. P1 may
-be marked `PASS` only when every US-001 mandatory item is green; the round stops before P2 Compare.
+**`active_task: NONE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
+bounded `Sections`, `Symbols` and `Evidence` queries over the snapshot SQLite already stores, three
+use-case IPC commands, top contributors, the Evidence Inspector, and the `bytes / KiB` presentation
+switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Per-item evidence:
+`P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`; what was built and what was found:
+`P1_ANALYZE_EXECUTION_REPORT.md`; the shipped-window result: `P1_ANALYZE_DETAILS_SMOKE_REPORT.md`;
+design review: `P1_ANALYZE_DESIGN_CHECKLIST.md`. Earlier slices keep their own packs: `P0_TECHNICAL_VALIDATION/`
+and `P1_A0_VALIDATION/`.
 
-Fixed boundaries of this stage: no schema migration (`SCHEMA_VERSION` stays 2), no new dependency, no new
-design token - a genuinely missing token stops the round rather than being written as a magic number - no
-whole-table payload across IPC (default limit 100, hard max 500, enforced in Rust), details always bound to
-the last-good `snapshotId`, `Unknown` never rendered as zero, and addresses never unit-converted.
-`AGENTS.md` 1 still forbids inventing work, and `AGENTS.md` 2 / 7 / 11 keep applying: `ADR-0026` relaxed
-research sequencing, not a single technical boundary.
+**`P2 Compare` is the next authorizable stage, and this file does not start it.** `AGENTS.md` 1 forbids
+inventing work from the roadmap, so the work begins only when the architect issues a P2 prompt. The
+boundaries that held for P1 hold for whatever follows and were not relaxed here: no schema migration
+without its own decision (`SCHEMA_VERSION` is 2), no new dependency, no new design token - a genuinely
+missing token stops a round rather than being written as a magic number - no whole-table payload across
+IPC (default limit 100, hard max 500, enforced in Rust), details always bound to the last-good
+`snapshotId`, `Unknown` never rendered as zero, addresses never unit-converted. `AGENTS.md` 2 / 7 / 11
+keep applying in full; `ADR-0026` relaxed research sequencing, not a single technical boundary.
 
 What belongs to the owner and the architect:
 
