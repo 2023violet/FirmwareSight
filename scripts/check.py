@@ -22,6 +22,7 @@ runs so a failure can be reproduced by hand.
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import subprocess
 import sys
@@ -77,6 +78,22 @@ class Gate:
         if completed.returncode != 0:
             print(f"FAILED: {name} (exit {completed.returncode})", file=sys.stderr, flush=True)
         return completed.returncode == 0
+
+    def inline(self, group: str, name: str, examined: str, evaluate) -> bool:
+        """A step whose check lives in this script instead of a subprocess.
+
+        The printed line still says what was examined, so a failure can be reproduced by hand exactly
+        the way a command failure can.
+        """
+        print(f"\n=== [{group}] {name}\n$ {examined}", flush=True)
+        problems = evaluate()
+        for line in problems:
+            print(f"  {line}", file=sys.stderr, flush=True)
+        self.results.append((group, name, 1 if problems else 0))
+        if problems:
+            print(f"FAILED: {name} ({len(problems)} problem(s))", file=sys.stderr, flush=True)
+            return False
+        return True
 
 
 def ensure_frontend_assets(gate: Gate) -> bool:
@@ -141,6 +158,29 @@ def core_smoke_steps(gate: Gate) -> None:
             return
 
 
+def untracked_fixture_paths(root: Path) -> list[str]:
+    """Manifest paths that git does not track.
+
+    `p0_acceptance.rs` reads `fixtures/manifest.json` and hashes whatever it finds in the working
+    tree, so a half-committed pair passes on the machine that generated it and fails on a clean
+    checkout. That is how `**/target/` in `.gitignore` ate `fixtures/elf/p2-diff/target/`: every local
+    run was green and CI panicked on the missing half. The manifest is the statement that a fixture
+    set is complete, so the check is that statement against the index.
+    """
+    manifest = json.loads((root / "fixtures" / "manifest.json").read_text(encoding="utf-8"))
+    listed = subprocess.run(
+        [resolve("git"), "ls-files", "-z"], cwd=root, capture_output=True, check=False
+    )
+    if listed.returncode != 0:
+        return [f"`git ls-files` exited {listed.returncode}; the index cannot be read"]
+    tracked = set(listed.stdout.decode("utf-8", "replace").split("\0")) - {""}
+    return [
+        f"{entry['path']} is recorded in fixtures/manifest.json but is not tracked by git"
+        for entry in manifest["files"]
+        if entry["path"] not in tracked
+    ]
+
+
 def drift_steps(gate: Gate) -> None:
     py = sys.executable
     checks = (
@@ -159,6 +199,15 @@ def drift_steps(gate: Gate) -> None:
         "drift",
         "ipc bindings unchanged",
         [resolve("git"), "diff", "--exit-code", "--", "apps/desktop/ui/src/ipc/generated"],
+    ):
+        return
+    # A fixture the repository does not carry is not a fixture: it reproduces nothing and its hash
+    # proves nothing. This is the only step that looks at the index rather than the working tree.
+    if not gate.inline(
+        "drift",
+        "fixtures tracked",
+        "every path recorded in fixtures/manifest.json appears in `git ls-files`",
+        lambda: untracked_fixture_paths(ROOT),
     ):
         return
     gate.run("drift", "goldens unchanged", [resolve("git"), "diff", "--exit-code", "--", "golden"])

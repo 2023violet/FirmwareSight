@@ -3,6 +3,14 @@
 node_modules/
 dist/
 
+# `**/target/` above is for Cargo build directories, but it matches any directory of that name, and
+# P2's fixture pair names its new side `target/` (prompt §28): fixtures/elf/p2-diff/target/. An
+# ignorable half of a fixture pair is worse than no pair at all - the manifest recorded both sides
+# while only one could be added, every local run passed on the files left on disk, and the clean
+# checkout in CI failed on the missing half. This un-ignores exactly that path; every other
+# `target/` stays a build directory. `drift/fixtures tracked` guards it from then on.
+!fixtures/elf/p2-diff/target/
+
 # Generated performance workloads are never committed.
 /fixtures/generated/
 
