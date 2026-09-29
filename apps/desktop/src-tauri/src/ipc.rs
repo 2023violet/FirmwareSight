@@ -184,8 +184,6 @@ pub struct EvidenceSummaryDto {
     pub derived: usize,
     pub declared: usize,
     pub unknown: usize,
-    /// Whether any part of this summary rests on MAP or region-config evidence.
-    pub from_map: bool,
 }
 
 /// The stable error shape, mirroring `firmwaresight_report::render::ErrorEnvelope` across the

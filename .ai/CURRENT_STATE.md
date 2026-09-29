@@ -5,14 +5,15 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-28"
+last_updated: "2026-09-29"
 ---
 
 # Current State
 
-- Date: 2026-09-28
+- Date: 2026-09-29
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`P1A0_REAL_ARTIFACT_INTAKE`** — one bounded pre-G1 slice authorized by ADR-0025
+- Active task: **`P1A0_REAL_ARTIFACT_INTAKE` — COMPLETE**, together with its evidence-identity and
+  persistence correctness closure. Nothing further is authorized to code from this file.
 
 ## Product/architecture baseline
 
@@ -44,7 +45,8 @@ Real ELF + GNU ld MAP → guarded intake → parse → normalize → evidence
 ```
 
 Exactly four Phase-0 library crates, with `firmwaresight-core` declaring zero dependencies. 104 Rust
-tests and 19 UI tests. SQLite schema version 2, including the v1→v2 migration. Deterministic CLI JSON
+tests and 19 UI tests as promoted; the tree now runs 142 and 31, and `P1_A0_VALIDATION/` accounts for
+every test after those. SQLite schema version 2, including the v1→v2 migration. Deterministic CLI JSON
 reproduced byte-identical. Memory accounting reproduced by hand from `readelf` and the MAP region
 table. A 512 MiB guard measured from both sides of the boundary. A typed ts-rs IPC boundary whose
 generated TypeScript is drift-checked. A real Windows desktop window opened and driven in the
@@ -59,7 +61,7 @@ shipping configuration.
 | #3 `36399805005` | `1cd6309` | **`success`** | 7 of 7 — engineering closure |
 | #4 `36402637251` | `5e58f77` | **`success`** | 7 of 7 — pre-promotion revalidation of the governance-only successor |
 | #5 `36416146281` | `738ae78` | **`success`** | 7 of 7 — revalidation of the v0.6.0 promotion commit itself |
-| #6 `36419864513` | `7d2f38a` | **`success`** | 7 of 7 — revalidation of the baseline consistency-closure commit; current `last_remote_ci` |
+| #6 `36419864513` | `7d2f38a` | **`success`** | 7 of 7 — revalidation of the baseline consistency-closure commit; the last remote fact of the P0 chain, and still `last_remote_ci` inside that block |
 
 Read with `gh run view 36419864513 --repo 2023violet/FirmwareSight`, not from this file. Run #6's
 matrix: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`,
@@ -113,7 +115,7 @@ G0: PASS
 V0: ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS (0 of 8; Batch A 0 of 4-5)
 P0: PASS — promoted to the v0.6.0 Technical Foundation Baseline; frozen, no further P0 closure prompts
 Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS; V0 is 0/8)
-Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — AUTHORIZED, IMPLEMENTED LOCALLY (unpushed; its own remote CI is NOT RUN)
+Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
 P1: NOT PASS / NOT CLOSED
 P1-A1: NOT AUTHORIZED (needs V0 Batch A >= 4 sessions + interim review + a new prompt)
 P2 / P3 / P4: NOT AUTHORIZED
@@ -181,11 +183,18 @@ complete rather than work to resume: **nothing further is authorized to code fro
 
 What belongs to the owner and the architect rather than to this round:
 
-1. pushing the commits this round produces (the owner's act — Run #6 `36419864513` on `7d2f38a` is the
-   last measured remote fact, read with `gh run view`);
+1. pushing the commit this round produces (the owner's act — the last measured remote fact is Run #9
+   `36499759371` on `2960173`, `success`, 7 of 7 jobs, read with `gh run view`; the correctness-closure
+   commit written now is local and its own remote outcome is deliberately not transcribed into itself);
 2. the next engineering authorization, which requires V0 Batch A `>= 4` eligible external sessions, an
    interim architect review of that evidence, and a new prompt;
 3. re-opening the two accepted advisories only on one of their recorded triggers.
+
+Four items the closure round surfaced and left alone, each with its reason in
+`P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md` §9.7: the golden updater no longer reproduces the
+committed goldens' key order; `ElfProgramHeader` names a source the ELF parser never reads; the frozen
+release-manifest schema describes one artifact per build; and a release build without
+`--features custom-protocol` shows a WebView network error instead of the product.
 
 Do not start P1, Compare, Gate, Bundle, installer, signing, updater, SBOM, cloud, accounts, AI or
 telemetry from this file.

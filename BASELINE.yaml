@@ -158,9 +158,31 @@ pre_g1_execution:
   baseline_version_stays: 0.6.0
   g1_claimed: false
   design_tokens_version_bump_authorized_by_addendum: "0.2.0 -> 0.2.1 (border.width.hairline only)"
-  implemented: true # 2026-09-29. Local and unpushed while this commit is written, so its own remote CI is NOT RUN.
+  implemented: true # 2026-09-29. Pushed by the owner as 2960173 and measured green on push; see correctness_closure below.
   evidence: P1_A0_VALIDATION/
-  tests_after_p1_a0: { rust: 123, ui: 31 } # whole-workspace counts on this tree; p0_execution.tests keeps P0's own closure measurement
+  tests_after_p1_a0: { rust: 142, ui: 31 } # whole-workspace counts on this tree after the correctness-closure round; p0_execution.tests keeps P0's own closure measurement
+  correctness_closure:
+    authorized_by: "FirmwareSight P1-A0 Evidence Identity & Persistence Correctness Closure Execution Prompt v1.0 (Architect Reviewed, supplied inline)"
+    is_new_slice: false # it closes defects inside P1-A0; it authorizes nothing beyond it
+    gate_run_id: 36499759371
+    gate_run_head: 29601735a2eff2c9e3677ef1dfa88cf752484694
+    gate_run_conclusion: success
+    gate_run_jobs: 7/7
+    adr_required: false # 00_GOVERNANCE/03_DECISION_POLICY.md lists "Bug 修复" as not needing one, and no new domain or storage semantic was introduced
+    fixed:
+      - "a supplied GNU ld MAP is sealed as the build's second artifact, so the optional MAP component SnapshotId::compose already defined is finally exercised"
+      - "ELF-only and ELF+MAP persist as two distinct immutable builds, and each dedupes against its own repeats"
+      - "BuildSummary selects the build's index-0 artifact explicitly instead of accepting whichever artifact row SQLite happens to visit first"
+      - "memory evidence names the source its own accounting basis supports, so an ELF analyzed with no MAP no longer claims map provenance"
+      - "the redundant and semantically wrong EvidenceSummaryDto.from_map is removed, with no replacement boolean"
+    not_changed:
+      - NORMALIZATION_VERSION, which stays p0-normalize-1
+      - SCHEMA_VERSION, which stays 2, and the migration list, which stays 0001 and 0002
+      - the public portable schema, the dependency set and the capability set
+      - "P1-A1, P2, P3 and P4 authorization, V0 participation and the G1 claim"
+    goldens_changed: [golden/cli/p0-basic-analyze.json, golden/cli/p0-dual-region-analyze.json]
+    evidence: P1_A0_VALIDATION/P1_A0_CORRECTNESS_SMOKE_REPORT.md
+    this_commit_remote_ci: NOT_RUN_AT_WRITE_TIME # prompt §23 forbids writing this commit's own run number back into it; the owner pushes and gh run list reports the outcome afterwards
 
 p0_execution:
   authorized: true
@@ -198,9 +220,9 @@ p0_execution:
   promotion_run_result: success
   promotion_run_jobs: 7/7
   promotion_commit_contains: "baseline, governance, audit, P0 evidence reports, integrity manifest and directory tree only - no production source"
-  # One current remote fact, stated once: the consistency-closure commit is on origin/main and Run #6
-  # measured it. The P0 verdict fields above are unchanged by that record.
-  remote_state: "v0.6.0 baseline commit 738ae78 and its consistency-closure successor 7d2f38a are on origin/main and were both revalidated green (Run #5, Run #6). origin/main has advanced further with this task's own commits; see last_remote_ci.newer_runs_unrecorded for why their run ids are not transcribed here."
+  # One current remote fact for the P0 chain, stated once: the consistency-closure commit is on
+  # origin/main and Run #6 measured it. The P0 verdict fields above are unchanged by that record.
+  remote_state: "v0.6.0 baseline commit 738ae78 and its consistency-closure successor 7d2f38a are on origin/main and were both revalidated green (Run #5, Run #6). origin/main has since advanced through the P1-A0 commits; Run #9 measured the P1-A0 implementation commit and is recorded under pre_g1_execution, not here, because it is not part of the P0 closure chain."
   remediation_prompt: FirmwareSight P0 CI Closure / Cross-Platform Reproducibility Remediation v1.0 (Architect Reviewed, supplied inline)
   run_2_closure_prompt: "FirmwareSight P0 Remote CI Run #2 Final Drift Closure v1.0 (Architect Reviewed, supplied inline)"
   remediation:
@@ -247,7 +269,7 @@ p0_execution:
     read_with: gh run view 36419864513 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs
     note: "Rust (windows-latest) reports exactly one skipped step in Run #6, measured with gh run view --json jobs: Install Linux prerequisites for the Tauri shell, guarded by if matrix.os == ubuntu-latest. The job itself is success. Every other job reports zero skipped steps."
     revalidated_by_run_5: "36416146281 on 738ae78, success, 7 of 7 - kept so the promotion-commit measurement stays visible"
-    newer_runs_unrecorded: "origin/main has since advanced with this task's own commits (the design-token commit and the P1-A0 governance commit), and CI has executed on them. Their outcomes are external evidence: prompt §28 forbids writing this task's run numbers back into its own commits, so no run id for them is transcribed here. Read them with gh run list --repo 2023violet/FirmwareSight --branch main."
+    newer_runs_unrecorded: "Three further push runs are green on origin/main: 36431884747 on ecd1c87, 36439949352 on 311f9fc, and 36499759371 on the P1-A0 implementation commit 2960173. They sit outside the P0 closure chain, so they are not transcribed into this P0 block; the last of them is recorded under pre_g1_execution.correctness_closure, because the closure prompt names it as its own gate. Read any run with gh run list --repo 2023violet/FirmwareSight --branch main."
     log: P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md
   role_of_each_green_run:
     run_3: "engineering closure on the validated source HEAD 1cd6309"
@@ -308,7 +330,7 @@ p0_execution:
   push_authorized: true_by_owner_instruction
   push_performed_by: "repository owner pushed the v0.6.0 promotion commit 738ae78 and its consistency-closure successor 7d2f38a to origin/main; Run #5 measured the first, Run #6 the second"
   historical_engineering_push: "the coding side pushed 1cd6309 on the owner's explicit instruction (git push origin main, no force); recorded as history, not as the current remote state"
-  remote_state_changed: true # origin/main now carries this task's design-token commit (ecd1c87) and its P1-A0 governance commit (311f9fc); the P1-A0 implementation commit is local and unpushed as this commit is written
+  remote_state_changed: true # origin/main carries ecd1c87, 311f9fc and the P1-A0 implementation commit 2960173, each green on push; the correctness-closure commit this line is written in is local, and the owner pushes it
   baseline_version_after_p0: 0.6.0
   v0_6_0_released: true
   v0_6_0_meaning: "P0 Technical Foundation Baseline - the vertical slice chain is validated. Not product MVP, not G1, not user value, not a stable commercial release."

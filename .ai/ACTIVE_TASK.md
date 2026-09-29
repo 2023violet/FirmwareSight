@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-09-28"
+last_updated: "2026-09-29"
 ---
 
 # ACTIVE TASK
@@ -16,20 +16,25 @@ P1A0_REAL_ARTIFACT_INTAKE  — authorized as a bounded pre-G1 slice by ADR-0025.
 ```
 
 ```text
-STATUS 2026-09-29: P1-A0 IS COMPLETE ON THIS MACHINE AND UNPUSHED.
-Do not resume it. Remote CI for these commits is NOT RUN, so no CI PASS may be claimed for them.
+STATUS 2026-09-29: P1-A0 IS COMPLETE, INCLUDING ITS EVIDENCE IDENTITY AND PERSISTENCE CORRECTNESS
+CLOSURE. Do not resume it, and do not open P1-A1. The intake commit 2960173 is on origin/main and
+remote Run #9 (36499759371) measured it success with 7 of 7 jobs. The closure commit written now is
+local, so its own remote CI is NOT RUN and no CI PASS may be claimed for it.
 The next engineering gate is V0 Batch A >= 4 eligible external sessions + interim architect
 review + a new prompt. Nothing else is authorized from this file.
 ```
 
-Evidence: `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md`,
+Evidence: `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md` (the closure round is section 9),
 `P1_A0_VALIDATION/P1_A0_DESKTOP_SMOKE_REPORT.md`,
+`P1_A0_VALIDATION/P1_A0_CORRECTNESS_SMOKE_REPORT.md`,
 `P1_A0_VALIDATION/P1_A0_EXIT_CHECKLIST.md`,
 `P1_A0_VALIDATION/P1_A0_DESIGN_CHECKLIST.md`.
 
 Authorization: *FirmwareSight — Pre-G1 Sequencing Revision + P1-A0 Real Artifact Intake, Execution
 Prompt v1.0 — Architect Reviewed*, with the *P1-A0 Design Contract Closure Addendum v1.0* applied first
-(it authorized design-tokens v0.2.1 and nothing else). Both were supplied inline, so
+(it authorized design-tokens v0.2.1 and nothing else), then the *P1-A0 Evidence Identity & Persistence
+Correctness Closure Execution Prompt v1.0 — Architect Reviewed*, which closed the two findings the first
+desktop smoke reported instead of leaving them open. All three were supplied inline, so
 `10_AUDIT/SOURCE_PROMPTS/README.md` records them without a SHA-256 rather than inventing one.
 
 ## The user outcome
@@ -70,7 +75,8 @@ Baseline            v0.6.0
 Design tokens       v0.2.1 (border.width.hairline added by the addendum)
 V0                  ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS — 0 / 8, Batch A 0 / 4-5
 Formal G1           NOT CLAIMED
-Run #6              36419864513 on 7d2f38a — success, 7 of 7 jobs (the fact before this task started)
+Run #6              36419864513 on 7d2f38a — success, 7 of 7 jobs (the last P0-chain remote fact)
+Run #9              36499759371 on 2960173 — success, 7 of 7 jobs (the fact before the closure round began)
 Peak RSS            NOT MEASURED      Fuzz: NOT RUN
 RustSec             two accepted transitive advisories, unchanged by this slice
 ```

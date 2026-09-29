@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-28"
+last_updated: "2026-09-29"
 ---
 
 # FirmwareSight v0.6.0
@@ -22,7 +22,8 @@ G0      PASS
 V0      ACTIVE EXTERNAL VALIDATION — 0 / 8 eligible external sessions, waiting for real participants
 P0      PASS — remote CI Runs #3, #4, #5 and #6, 7 of 7 jobs green on each; frozen at v0.6.0
 G1      NOT CLAIMED — requires V0 PASS + P0 PASS; only the P0 half exists
-Pre-G1  P1-A0 Real Artifact Intake — authorized by ADR-0025 (bounded, stops at P1-A0)
+Pre-G1  P1-A0 Real Artifact Intake — authorized by ADR-0025, green on Run #9, and CLOSED together with
+        its evidence-identity / persistence correctness closure (bounded; it stopped at P1-A0)
 P1      NOT PASS / NOT CLOSED; P1-A1, P2, P3 and P4 are NOT AUTHORIZED
 ```
 
@@ -44,8 +45,9 @@ cargo run -q --bin fwsight -- analyze fixtures/elf/p0-dual-region/firmware.elf \
   --map fixtures/elf/p0-dual-region/firmware.map --json
 ```
 
-104 Rust tests and 19 UI tests. Measurement status of every claim is in `P0_TECHNICAL_VALIDATION/`,
-starting from `P0_EXIT_CHECKLIST.md`.
+142 Rust tests and 31 UI tests — 104 and 19 of them at the v0.6.0 promotion. Measurement status of
+every claim is in `P0_TECHNICAL_VALIDATION/`, starting from `P0_EXIT_CHECKLIST.md`, and for the
+Pre-G1 slice in `P1_A0_VALIDATION/`.
 
 ## What v0.6.0 does not change
 
@@ -197,10 +199,12 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: P1A0_REAL_ARTIFACT_INTAKE`, authorized by `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md`.
-That ADR supersedes one clause of ADR-0020: after `P0 PASS`, the architect may authorize a limited,
-reversible, low-coupling Pre-G1 Analyze slice instead of waiting for V0. The authorized slice is real
-artifact intake through a native dialog plus the already-validated Analyze summary — and it stops there.
+`active_task: P1A0_REAL_ARTIFACT_INTAKE`, authorized by `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md`,
+**is finished**, together with the narrow correctness closure that fixed the two defects its own
+desktop smoke reported. That ADR supersedes one clause of ADR-0020: after `P0 PASS`, the architect may
+authorize a limited, reversible, low-coupling Pre-G1 Analyze slice instead of waiting for V0. The
+authorized slice was real artifact intake through a native dialog plus the already-validated Analyze
+summary — and it stopped there. Nothing further is authorized to code from this file.
 `G1 = V0 PASS + P0 PASS` is unchanged, `P1` is not closed, `P1-A1` needs V0 Batch A `>= 4` eligible
 external sessions plus an interim architect review and a new prompt, and `P2`/`P3`/`P4` remain
 unauthorized. V0 still needs the human half: recruit eligible participants, Batch A 4–5, interim review,

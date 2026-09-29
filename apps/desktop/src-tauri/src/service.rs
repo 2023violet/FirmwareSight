@@ -138,7 +138,6 @@ pub fn summarize(dto: &AnalyzeResultDto, source: &str) -> AnalysisSummaryDto {
         derived: 0,
         declared: 0,
         unknown: 0,
-        from_map: false,
     };
     for item in &dto.evidence {
         match item.classification {
@@ -148,9 +147,6 @@ pub fn summarize(dto: &AnalyzeResultDto, source: &str) -> AnalysisSummaryDto {
             // Any other label is unknown-provenance by definition; counting it elsewhere would
             // overstate what was actually observed.
             _ => counts.unknown += 1,
-        }
-        if item.source_type == "map" || item.source_type == "memory-region-config" {
-            counts.from_map = true;
         }
     }
 

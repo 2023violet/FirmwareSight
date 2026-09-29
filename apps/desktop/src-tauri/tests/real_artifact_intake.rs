@@ -279,15 +279,13 @@ fn an_elf_without_a_map_degrades_the_map_capability_instead_of_failing() {
 }
 
 #[test]
-fn from_map_reports_a_locator_kind_not_a_supplied_map_file() {
-    // Characterization, not approval. An ELF analyzed with no MAP at all still reports
-    // `evidenceSummary.fromMap == true`, because the pipeline labels the dual-accounting
-    // contributions it derives from the ELF program headers with source type `map`
-    // (`elf.section_header[N] + map:load-address`). Both committed CLI goldens carry that label, so
-    // P1-A0 leaves it alone: redefining it means changing evidence classification, which is an ADR
-    // decision rather than an intake slice. The unambiguous MAP facts are `capabilities.map`,
-    // `memory.layoutSource` and `memory.admissibleForHardBlock`, asserted in the tests above, and
-    // the UI reads those. `P1_A0_EXECUTION_REPORT.md` records this as a finding P1-A0 does not fix.
+fn an_elf_only_summary_claims_no_map_provenance_and_carries_no_from_map_flag() {
+    // Two halves of the same closure. `EvidenceSummaryDto.from_map` used to be true for an ELF that
+    // was never given a MAP, because the pipeline labelled ELF-derived charges with map provenance
+    // and the count simply followed the label. The label is now read off the accounting basis, and
+    // the redundant boolean is gone: the fields that mean MAP are `capabilities.map`,
+    // `memory.layout_source` and `memory.weakest_evidence_basis`, asserted here and in
+    // `an_elf_without_a_map_degrades_the_map_capability_instead_of_failing`.
     let dir = TempDir::new("frommap");
     let elf = basic_elf(&dir);
     let session = session(&dir);
@@ -298,10 +296,216 @@ fn from_map_reports_a_locator_kind_not_a_supplied_map_file() {
         .expect("analyzes");
 
     assert_eq!(summary.capabilities.map, "not-provided");
+    assert_eq!(summary.memory.layout_source, "none");
+    assert_eq!(
+        summary.memory.weakest_evidence_basis.as_deref(),
+        Some("elf-address-and-flags")
+    );
+
+    let counts = json(&summary.evidence_summary);
     assert!(
-        summary.evidence_summary.from_map,
-        "the label stopped meaning what the name says; if this flips, an evidence-classification \
-         decision was made and this test has to be re-read, not deleted"
+        !counts.contains("fromMap") && !counts.contains("map"),
+        "the redundant MAP boolean is still on the wire: {counts}"
+    );
+    assert!(
+        counts.contains("total"),
+        "the class counts are the part worth sending: {counts}"
+    );
+}
+
+#[test]
+fn the_generated_typescript_binding_carries_no_from_map_field() {
+    // The UI reads this file, so the boundary is only closed on both sides if the regenerated
+    // contract lost the field too. CI regenerates it from the Rust and fails on drift, which is
+    // what makes this a check of the committed artifact rather than of a hand edit.
+    let path = repo_root().join("apps/desktop/ui/src/ipc/generated/EvidenceSummaryDto.ts");
+    let ts = std::fs::read_to_string(&path)
+        .unwrap_or_else(|err| panic!("{} must be committed: {err}", path.display()));
+
+    assert!(
+        !ts.contains("fromMap"),
+        "the generated binding still promises a fromMap field:\n{ts}"
+    );
+    for field in ["total", "observed", "derived", "declared", "unknown"] {
+        assert!(
+            ts.contains(field),
+            "the class counts must stay in the contract, `{field}` is missing:\n{ts}"
+        );
+    }
+}
+
+#[test]
+fn attaching_a_map_changes_the_snapshot_id_and_removing_it_restores_it() {
+    // The identity gap: ELF-only and ELF+MAP used to compose the same snapshot id, so the stronger
+    // run looked like a duplicate of the weaker one.
+    let dir = TempDir::new("snapshotid");
+    let elf = dual_region_elf(&dir);
+    let map = dual_region_map(&dir);
+    let session = session(&dir);
+
+    let selection = session.stage_artifact(&elf, "op-i0").expect("stages");
+    let without = session
+        .analyze_selection(&selection.selection_id, "op-i1")
+        .expect("analyzes");
+
+    session
+        .stage_map(&selection.selection_id, &map, "op-i2")
+        .expect("attaches");
+    let with = session
+        .analyze_selection(&selection.selection_id, "op-i3")
+        .expect("analyzes");
+
+    assert_ne!(
+        without.identity.snapshot_id, with.identity.snapshot_id,
+        "different evidence input sets must not collide onto one snapshot"
+    );
+
+    let repeated = session
+        .analyze_selection(&selection.selection_id, "op-i4")
+        .expect("the same pair analyzes again");
+    assert_eq!(
+        repeated.identity.snapshot_id, with.identity.snapshot_id,
+        "one ELF + one MAP is one snapshot, however often it is analyzed"
+    );
+
+    session
+        .clear_map(&selection.selection_id, "op-i5")
+        .expect("detaches");
+    let detached = session
+        .analyze_selection(&selection.selection_id, "op-i6")
+        .expect("analyzes");
+    assert_eq!(
+        detached.identity.snapshot_id, without.identity.snapshot_id,
+        "removing the MAP returns to the ELF-only snapshot"
+    );
+    assert_eq!(
+        with.artifact.sha256, without.artifact.sha256,
+        "the artifact being reported on never changed, only the evidence about it"
+    );
+}
+
+#[test]
+fn a_map_after_an_elf_only_analysis_is_stored_as_a_second_build() {
+    // The persistence half of the gap, and the reason the identity changed: the UI was showing
+    // MAP-backed truth while SQLite kept the weaker ELF-only record of the same file.
+    let dir = TempDir::new("twostore");
+    let elf = dual_region_elf(&dir);
+    let map = dual_region_map(&dir);
+    let session = session(&dir);
+
+    let selection = session.stage_artifact(&elf, "op-p0").expect("stages");
+    let without = session
+        .analyze_selection(&selection.selection_id, "op-p1")
+        .expect("analyzes");
+    session
+        .stage_map(&selection.selection_id, &map, "op-p2")
+        .expect("attaches");
+    let with = session
+        .analyze_selection(&selection.selection_id, "op-p3")
+        .expect("analyzes");
+    // The user clicks Analyze a third time on the same pair.
+    let repeat = session
+        .analyze_selection(&selection.selection_id, "op-p4")
+        .expect("analyzes");
+    drop(session);
+
+    assert_eq!(repeat.identity.snapshot_id, with.identity.snapshot_id);
+
+    let probe = firmwaresight_storage::Database::open(&db_path(&dir)).expect("reopen");
+    let builds: i64 = probe
+        .connection()
+        .query_row("SELECT COUNT(*) FROM builds", [], |row| row.get(0))
+        .expect("count");
+    assert_eq!(
+        builds, 2,
+        "the weaker build stays as history beside the stronger one"
+    );
+
+    let rows = |snapshot_id: &str| -> Vec<String> {
+        let build_id: String = probe
+            .connection()
+            .query_row(
+                "SELECT id FROM builds WHERE snapshot_id = ?1",
+                (snapshot_id,),
+                |row| row.get(0),
+            )
+            .expect("the build is stored");
+        let mut stmt = probe
+            .connection()
+            .prepare("SELECT kind FROM artifacts WHERE build_id = ?1 ORDER BY id")
+            .expect("select kinds");
+        stmt.query_map((build_id,), |row| row.get::<_, String>(0))
+            .expect("kinds")
+            .map(|r| r.expect("row"))
+            .collect()
+    };
+
+    assert_eq!(rows(&without.identity.snapshot_id), vec!["Elf".to_owned()]);
+    assert_eq!(
+        rows(&with.identity.snapshot_id),
+        vec!["Elf".to_owned(), "Map".to_owned()],
+        "the companion artifact is persisted, not just displayed"
+    );
+
+    let layout: (String, String) = (
+        probe
+            .connection()
+            .query_row(
+                "SELECT m.layout_source FROM memory_footprints m JOIN builds b ON b.id = m.build_id
+                  WHERE b.snapshot_id = ?1",
+                (without.identity.snapshot_id.as_str(),),
+                |row| row.get(0),
+            )
+            .expect("weaker layout"),
+        probe
+            .connection()
+            .query_row(
+                "SELECT m.layout_source FROM memory_footprints m JOIN builds b ON b.id = m.build_id
+                  WHERE b.snapshot_id = ?1",
+                (with.identity.snapshot_id.as_str(),),
+                |row| row.get(0),
+            )
+            .expect("stronger layout"),
+    );
+    assert_eq!(
+        layout.0, "none",
+        "the ELF-only build kept its own weaker attribution"
+    );
+    assert_eq!(
+        layout.1, "map",
+        "the MAP-backed attribution is what SQLite now holds"
+    );
+
+    let stronger_evidence: i64 = probe
+        .connection()
+        .query_row(
+            "SELECT COUNT(*) FROM evidence e JOIN builds b ON b.id = e.build_id
+              WHERE b.snapshot_id = ?1",
+            (with.identity.snapshot_id.as_str(),),
+            |row| row.get(0),
+        )
+        .expect("count stronger evidence");
+    let weaker_evidence: i64 = probe
+        .connection()
+        .query_row(
+            "SELECT COUNT(*) FROM evidence e JOIN builds b ON b.id = e.build_id
+              WHERE b.snapshot_id = ?1",
+            (without.identity.snapshot_id.as_str(),),
+            |row| row.get(0),
+        )
+        .expect("count weaker evidence");
+    assert!(
+        stronger_evidence > weaker_evidence,
+        "the stronger record must hold more than the weaker one: {weaker_evidence} vs \
+         {stronger_evidence}"
+    );
+    assert_eq!(
+        with.evidence_summary.total as i64, stronger_evidence,
+        "what the UI counted is what storage kept"
+    );
+    assert_eq!(
+        without.evidence_summary.total as i64, weaker_evidence,
+        "the ELF-only summary matches its own build"
     );
 }
 

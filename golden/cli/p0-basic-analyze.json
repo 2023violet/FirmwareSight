@@ -116,8 +116,8 @@
       "field": "dual_accounted",
       "id": "ev-dual-3",
       "rule": "elf-address-and-flags",
-      "sourceLocator": "elf.section_header[3] + map:load-address",
-      "sourceType": "map",
+      "sourceLocator": "elf.section_header[3] + elf:sh_flags",
+      "sourceType": "elf.program-header",
       "value": "nonvolatile=4 runtime=4"
     },
     {
@@ -126,8 +126,8 @@
       "field": "dual_accounted",
       "id": "ev-dual-4",
       "rule": "elf-address-and-flags",
-      "sourceLocator": "elf.section_header[4] + map:load-address",
-      "sourceType": "map",
+      "sourceLocator": "elf.section_header[4] + elf:sh_flags",
+      "sourceType": "elf.program-header",
       "value": "nonvolatile=64 runtime=64"
     }
   ],

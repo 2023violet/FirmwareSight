@@ -5,15 +5,16 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-28"
+last_updated: "2026-09-29"
 ---
 
 # AI Entry Point
 
-Baseline `0.6.0` · `P0: PASS` (frozen) · `active_task: P1A0_REAL_ARTIFACT_INTAKE` · `V0: 0 / 8` ·
-`G1: NOT CLAIMED` · `P1: NOT PASS / NOT CLOSED` · `P1-A1 / P2 / P3 / P4: NOT AUTHORIZED`. The active
-task exists because ADR-0025 authorized exactly one bounded pre-G1 slice; item 6 below still governs —
-execute that task and nothing inferred from the roadmap.
+Baseline `0.6.0` · `P0: PASS` (frozen) · `active_task: P1A0_REAL_ARTIFACT_INTAKE`, **complete** with its
+correctness closure · `V0: 0 / 8` · `G1: NOT CLAIMED` · `P1: NOT PASS / NOT CLOSED` ·
+`P1-A1 / P2 / P3 / P4: NOT AUTHORIZED`. That task exists because ADR-0025 authorized exactly one bounded
+pre-G1 slice, and it is finished; item 6 still governs — there is no active task to execute, so infer
+none from the roadmap and wait for a new prompt.
 
 任何 AI 接手本项目时：
 

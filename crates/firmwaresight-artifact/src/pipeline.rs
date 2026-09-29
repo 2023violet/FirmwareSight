@@ -14,9 +14,9 @@ use firmwaresight_core::domain::artifact::{Artifact, ParserId};
 use firmwaresight_core::domain::capability::{Availability, Capabilities, Provision};
 use firmwaresight_core::domain::evidence::{EvidenceClass, EvidenceItem, SourceType};
 use firmwaresight_core::domain::identity::{
-    ArtifactKind, ArtifactTimes, BuildIdentity, Fact, Sha256,
+    Architecture, ArtifactKind, ArtifactTimes, Bitness, BuildIdentity, Endianness, Fact, Sha256,
 };
-use firmwaresight_core::domain::memory::MemoryFootprint;
+use firmwaresight_core::domain::memory::{MemoryEvidenceBasis, MemoryFootprint};
 use firmwaresight_core::domain::section::Section;
 
 pub const FWSIGHT_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -142,19 +142,49 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
         evidence: evidence.clone(),
     };
 
-    let snapshot =
+    let mut builder =
         firmwaresight_core::domain::build_snapshot::SnapshotBuilder::new(FWSIGHT_VERSION)
             .project_id("p0-technical-slice")
-            .artifact(artifact)
-            .memory(memory.clone())
-            .sections(facts.sections.clone())
-            .symbols(facts.symbols.clone())
-            .evidence(evidence)
-            .capabilities(capabilities.clone())
-            .seal()
-            .map_err(|err| ArtifactError::InternalBug {
-                detail: format!("{err:?}"),
-            })?;
+            .artifact(artifact);
+
+    // The MAP is an input the user supplied, so it is sealed as the build's second artifact.
+    // `SnapshotId::compose` already takes an optional MAP hash and `seal()` already looks for an
+    // artifact of kind `Map`; omitting this row was what left `map_sha256` = None and let an
+    // ELF+MAP build collide onto the ELF-only id, which in turn made storage dedupe skip the
+    // stronger import. Index 1 keeps the primary artifact at index 0.
+    if let Some(map) = &map_input {
+        builder = builder.artifact(Artifact {
+            id: format!("art-{}", map.sha256.hex()),
+            path: crate::error::display_path(&map.path),
+            kind: ArtifactKind::Map,
+            sha256: map.sha256.clone(),
+            byte_size: map.byte_size,
+            parser_id: ParserId::gnu_ld_map(),
+            // A linker MAP names no machine, no entry point and no build-id. Claiming the ELF's
+            // values here would attribute facts to a file that cannot carry them.
+            architecture: Architecture::Unknown,
+            bitness: Bitness::Unknown,
+            endianness: Endianness::Unknown,
+            entry_point: Fact::unknown("a linker MAP records addresses, not an entry point"),
+            build_id: Fact::unknown("a linker MAP carries no build-id"),
+            times: ArtifactTimes::default(),
+            identity: BuildIdentity::default(),
+            // The MAP's own observed facts are the `ev-map-*` items on the snapshot; repeating them
+            // per artifact would count one claim twice.
+            evidence: Vec::new(),
+        });
+    }
+
+    let snapshot = builder
+        .memory(memory.clone())
+        .sections(facts.sections.clone())
+        .symbols(facts.symbols.clone())
+        .evidence(evidence)
+        .capabilities(capabilities.clone())
+        .seal()
+        .map_err(|err| ArtifactError::InternalBug {
+            detail: format!("{err:?}"),
+        })?;
 
     Ok(Analysis {
         snapshot,
@@ -225,6 +255,52 @@ fn stable_path_token(path: &Path) -> String {
     path.file_name()
         .map(|name| name.to_string_lossy().into_owned())
         .unwrap_or_else(|| "unnamed-artifact".to_owned())
+}
+
+/// The rule, source, locator and evidence class an accounting basis genuinely supports.
+///
+/// One function returns all four because they describe the same thing: a record that named the
+/// right rule but the wrong source was exactly how the second P1-A0 defect happened. The
+/// dual-accounting rows used to print `SourceType::MapFile` and `+ map:load-address` whatever the
+/// basis turned out to be, so an ELF analyzed with no MAP at all claimed MAP provenance - both
+/// committed CLI goldens carried that label.
+fn basis_provenance(
+    basis: MemoryEvidenceBasis,
+    section_locator: &str,
+) -> (&'static str, SourceType, String, EvidenceClass) {
+    match basis {
+        MemoryEvidenceBasis::MapRegionAndElfLoad => (
+            "map-memory-configuration+elf-load",
+            SourceType::MapFile,
+            format!("{section_locator} + map:load-address"),
+            EvidenceClass::Observed,
+        ),
+        MemoryEvidenceBasis::RegionConfigAndElfLoad => (
+            "region-config+elf-load",
+            SourceType::MemoryRegionConfig,
+            format!("{section_locator} + region-config:load-address"),
+            EvidenceClass::Observed,
+        ),
+        MemoryEvidenceBasis::ElfAddressAndFlags => (
+            "elf-address-and-flags",
+            SourceType::ElfProgramHeader,
+            format!("{section_locator} + elf:sh_flags"),
+            EvidenceClass::Observed,
+        ),
+        MemoryEvidenceBasis::SectionNameHeuristic => (
+            "section-name-heuristic",
+            SourceType::ElfSectionHeader,
+            format!("{section_locator} + name-heuristic"),
+            EvidenceClass::Derived,
+        ),
+        // Nothing supported this charge, so no source is claimed for it beyond the rule itself.
+        MemoryEvidenceBasis::Insufficient => (
+            "unattributed",
+            SourceType::RuleEngine,
+            section_locator.to_owned(),
+            EvidenceClass::Unknown,
+        ),
+    }
 }
 
 /// Record how each headline fact became known, so a golden can be checked for provenance and
@@ -307,26 +383,35 @@ fn build_evidence(
         let value = total
             .bytes()
             .map_or_else(|| "unknown".to_owned(), |bytes| bytes.to_string());
+        // The totals inherit the weakest basis of the charges they sum, so their source is named
+        // from that same rung. `memory-accounting/totals` stays the locator: it names the aggregate,
+        // not a file, so it cannot claim a record this run did not read.
+        let (rule, source, _, _) = basis_provenance(
+            memory
+                .weakest_basis
+                .unwrap_or(MemoryEvidenceBasis::Insufficient),
+            "memory-accounting",
+        );
         items.push(EvidenceItem::new(
             format!("ev-memory-{field}"),
             total.classification(),
-            SourceType::ElfProgramHeader,
+            source,
             "memory-accounting/totals",
             field,
             value,
-            memory
-                .weakest_basis
-                .map_or("unattributed", |basis| basis_rule_name(basis)),
+            rule,
         ));
     }
 
     // The dual-accounted sections are the interesting provenance: name the exact lines.
     for contribution in memory.dual_accounted_sections() {
+        let (_, source, locator, class) =
+            basis_provenance(contribution.basis, &contribution.section_locator);
         let mut item = EvidenceItem::new(
             format!("ev-dual-{}", contribution.section_index),
-            EvidenceClass::Observed,
-            SourceType::MapFile,
-            format!("{} + map:load-address", contribution.section_locator),
+            class,
+            source,
+            locator,
             "dual_accounted",
             format!(
                 "nonvolatile={} runtime={}",
@@ -341,7 +426,7 @@ fn build_evidence(
             ),
             contribution.rule,
         );
-        if contribution.basis.classification() != EvidenceClass::Observed {
+        if class != EvidenceClass::Observed {
             item = item.with_confidence(firmwaresight_core::domain::evidence::Confidence::Low);
         }
         items.push(item);
@@ -365,24 +450,4 @@ fn build_evidence(
     }
 
     items
-}
-
-const fn basis_rule_name(
-    basis: firmwaresight_core::domain::memory::MemoryEvidenceBasis,
-) -> &'static str {
-    match basis {
-        firmwaresight_core::domain::memory::MemoryEvidenceBasis::RegionConfigAndElfLoad => {
-            "region-config+elf-load"
-        }
-        firmwaresight_core::domain::memory::MemoryEvidenceBasis::MapRegionAndElfLoad => {
-            "map-memory-configuration+elf-load"
-        }
-        firmwaresight_core::domain::memory::MemoryEvidenceBasis::ElfAddressAndFlags => {
-            "elf-address-and-flags"
-        }
-        firmwaresight_core::domain::memory::MemoryEvidenceBasis::SectionNameHeuristic => {
-            "section-name-heuristic"
-        }
-        firmwaresight_core::domain::memory::MemoryEvidenceBasis::Insufficient => "unattributed",
-    }
 }

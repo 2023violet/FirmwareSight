@@ -273,6 +273,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── map.rs
 │   │   │   └── pipeline.rs
 │   │   ├── tests/
+│   │   │   ├── map_companion_identity.rs
 │   │   │   └── p0_acceptance.rs
 │   │   └── Cargo.toml
 │   ├── firmwaresight-core/
@@ -305,6 +306,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── error.rs
 │       │   └── lib.rs
 │       ├── tests/
+│       │   ├── map_companion_persistence.rs
 │       │   └── storage.rs
 │       └── Cargo.toml
 ├── examples/
@@ -370,6 +372,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P0_TECHNICAL_VALIDATION_REPORT.md
 │   └── README.md
 ├── P1_A0_VALIDATION/
+│   ├── P1_A0_CORRECTNESS_SMOKE_REPORT.md
 │   ├── P1_A0_DESIGN_CHECKLIST.md
 │   ├── P1_A0_DESKTOP_SMOKE_REPORT.md
 │   ├── P1_A0_EXECUTION_REPORT.md

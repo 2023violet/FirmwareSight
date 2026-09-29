@@ -4,8 +4,4 @@
  * Counts by evidence class, so the UI can state how much of what it shows was observed. The
  * evidence items themselves stay in SQLite.
  */
-export type EvidenceSummaryDto = { total: number, observed: number, derived: number, declared: number, unknown: number, 
-/**
- * Whether any part of this summary rests on MAP or region-config evidence.
- */
-fromMap: boolean, };
+export type EvidenceSummaryDto = { total: number, observed: number, derived: number, declared: number, unknown: number, };

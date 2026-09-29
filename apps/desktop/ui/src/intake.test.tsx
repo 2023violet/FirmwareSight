@@ -123,7 +123,6 @@ function summary(overrides: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDt
       derived: 2,
       declared: 1,
       unknown: 0,
-      fromMap: true,
     },
   };
   return { ...base, ...overrides };

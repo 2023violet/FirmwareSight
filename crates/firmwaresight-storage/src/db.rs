@@ -238,6 +238,12 @@ impl Database {
     }
 
     pub fn summary(&self, build_id: &str) -> Result<BuildSummary, StorageError> {
+        // The primary artifact is index 0 of the build, the row `write_artifacts` stores it under.
+        // Naming it is what keeps this deterministic now that a build can carry a companion MAP
+        // artifact: the bare `JOIN artifacts a ON a.build_id = b.id` returned whichever row SQLite
+        // happened to visit first, and `query_row` keeps only that one.
+        let primary_artifact_id = artifact_row_id(build_id, 0);
+
         self.conn
             .query_row(
                 "SELECT b.id, b.snapshot_id, b.state, b.normalization_version,
@@ -249,10 +255,10 @@ impl Database {
                         m.runtime_state, m.runtime_bytes,
                         m.admissible_hard_block, m.layout_source
                    FROM builds b
-                   JOIN artifacts a ON a.build_id = b.id
+                   JOIN artifacts a ON a.build_id = b.id AND a.id = ?2
                    JOIN memory_footprints m ON m.build_id = b.id
                   WHERE b.id = ?1",
-                params![build_id],
+                params![build_id, primary_artifact_id],
                 |row| {
                     Ok(BuildSummary {
                         build_id: row.get(0)?,
@@ -310,6 +316,14 @@ fn write_err(source: rusqlite::Error) -> StorageError {
     }
 }
 
+/// The artifact row for one position of one build.
+///
+/// The writer and the primary-artifact reader both derive the id from the build id, so they cannot
+/// disagree about which row is index 0.
+fn artifact_row_id(build_id: &str, index: usize) -> String {
+    format!("{build_id}#{index}")
+}
+
 fn write_artifacts(
     tx: &rusqlite::Transaction<'_>,
     build_id: &str,
@@ -331,7 +345,7 @@ fn write_artifacts(
                   build_id_unknown)
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14)",
             params![
-                format!("{build_id}#{index}"),
+                artifact_row_id(build_id, index),
                 build_id,
                 artifact.path,
                 format!("{:?}", artifact.kind),

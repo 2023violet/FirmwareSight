@@ -23,7 +23,7 @@
     "symbols": "available"
   },
   "counts": {
-    "artifacts": 1,
+    "artifacts": 2,
     "evidence": 11,
     "sections": 17,
     "symbols": 32
@@ -97,7 +97,7 @@
       "id": "ev-memory-nonvolatile_image_footprint_bytes",
       "rule": "map-memory-configuration+elf-load",
       "sourceLocator": "memory-accounting/totals",
-      "sourceType": "elf.program-header",
+      "sourceType": "map",
       "value": "160"
     },
     {
@@ -107,7 +107,7 @@
       "id": "ev-memory-runtime_ram_footprint_bytes",
       "rule": "map-memory-configuration+elf-load",
       "sourceLocator": "memory-accounting/totals",
-      "sourceType": "elf.program-header",
+      "sourceType": "map",
       "value": "72"
     },
     {
@@ -221,5 +221,5 @@
   "normalizationVersion": "p0-normalize-1",
   "schema": "firmwaresight.analyze/p0-internal-1",
   "schemaStability": "p0-internal",
-  "snapshotId": "snap-c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62-p0-normalize-1"
+  "snapshotId": "snap-c6d0feed0a1e4153d80592519f0bfe1a11be67d756f2ecd811799b4f7def4e62-p0-normalize-1-c4182c5bcc69b155e6a9ccc641990a6d6d8649ebb6b57e3ea63a3fd6f0ce2a61"
 }

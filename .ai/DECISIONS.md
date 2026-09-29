@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-28"
+last_updated: "2026-09-29"
 ---
 
 # Decisions — v0.6.0
@@ -420,8 +420,10 @@ predecessor) and `P1-A0: add real artifact intake and Analyze summary`. Evidence
   keeps `p0-desktop` so the committed P0 evidence stays reproducible; the new path writes
   `local-desktop` / `Local analyses`. Proven in the shipping binary against an empty database.
 - **Two findings were reported rather than fixed, because fixing them needs authority this slice does
-  not have.** (1) Snapshot identity comes from the artifact bytes only, so re-analyzing the same bytes
-  with a MAP dedupes onto the existing build and the strengthened evidence never reaches storage.
+  not have.** *(Both were closed the same day by the correctness-closure round recorded in the next
+  section; the wording below is what was decided then and is kept as history.)* (1) Snapshot identity
+  comes from the artifact bytes only, so re-analyzing the same bytes with a MAP dedupes onto the
+  existing build and the strengthened evidence never reaches storage.
   Closing it changes snapshot semantics or the schema. (2) `evidence_summary.from_map` is a locator
   kind inherited from the frozen P0 goldens, not a report that a MAP file was supplied; it is now
   characterized by a test instead of being redefined.
@@ -432,3 +434,58 @@ predecessor) and `P1-A0: add real artifact intake and Analyze summary`. Evidence
   `accent.disabled` are the same value, so disabled buttons lost their labels; both rules now use
   `text.secondary` on `bg.subtle` (2.32:1 → 5.22:1). No token was added, so §21's STOP condition was
   never reached.
+
+# P1-A0 evidence identity and persistence closure — added 2026-09-29
+
+Authorization: *FirmwareSight — P1-A0 Evidence Identity & Persistence Correctness Closure, Execution
+Prompt v1.0 — Architect Reviewed*. Supplied inline, so `10_AUDIT/SOURCE_PROMPTS/README.md`'s
+convention applies: the fact of the prompt is recorded, no SHA-256 is invented for bytes this
+repository never received. It closes the two findings above inside P1-A0; it authorizes no new
+capability, and it is not P1-A1.
+
+- **No new ADR, and the decision policy is the reason.** `00_GOVERNANCE/03_DECISION_POLICY.md` lists
+  `Bug 修复` under 不需要 ADR, and prompt §5 establishes that the identity rule already exists rather
+  than being introduced here: `SnapshotId::compose` already takes an optional MAP hash, `seal()`
+  already looks for an artifact of kind `Map`, `ArtifactKind::Map` and `ParserId::gnu_ld_map()` already
+  exist, and `04_TECH/15_STORAGE_DATABASE_BASELINE.md` already says `Build 1─N Artifact`. The defect
+  was that `pipeline::analyze` never sealed the MAP, so the existing rule was bypassed. ADR-0025's
+  revisit trigger ("a slice that touches storage semantics needs its own ADR") was checked against the
+  implementation before proceeding and does not bite: no storage semantics changed, no schema changed,
+  and no new domain type or field appeared. Prompt §20's STOP condition - a truly new semantic being
+  required - was never reached, so no migration `0003` exists and `SCHEMA_VERSION` is still 2.
+- **A supplied MAP is now the build's second artifact.** `artifacts[0]` stays the ELF, `artifacts[1]`
+  is the MAP with its own SHA-256, byte size and `map-adapter/gnu_ld` parser id, and with architecture,
+  bitness, endianness, entry point and build-id left `Unknown` - a linker MAP cannot carry those, and
+  copying the ELF's values would attribute facts to a file that does not hold them. `NORMALIZATION_VERSION`
+  is deliberately **not** bumped: the id formula for an ELF-only run is byte-for-byte what it was, so
+  old ELF-only ids keep their meaning.
+- **Evidence provenance is now derived from the accounting basis, not written beside it.** One function
+  returns the rule, source type, locator and evidence class together for each `MemoryEvidenceBasis`, so
+  the four cannot disagree. `MapRegionAndElfLoad` keeps `map` + `map:load-address`;
+  `ElfAddressAndFlags` becomes `elf.program-header` + `+ elf:sh_flags`; `RegionConfigAndElfLoad` becomes
+  `memory-region-config`; `SectionNameHeuristic` is `Derived` with `Low` confidence rather than the
+  hardcoded `Observed` it used to claim; `Insufficient` claims no source beyond the rule. The dual
+  charge on an ELF-only run comes from section role and sizes, so `sh_flags` is the re-checkable locator;
+  the alternative `+ elf:load-address` would have been a second false claim, because the ELF-only
+  fixture has no load address at all (`unknown_load_address_stays_unknown_rather_than_defaulting_to_zero`).
+- **`EvidenceSummaryDto.from_map` is removed, not replaced.** It was desktop-only IPC, rendered nowhere,
+  and redundant against `capabilities.map`, `memory.layoutSource` and `memory.weakestEvidenceBasis`. The
+  test that characterized the old behavior was deleted with the field it characterized, and the generated
+  TypeScript was regenerated by ts-rs rather than hand-edited.
+- **`BuildSummary` names the primary artifact row instead of accepting any row.** The join was
+  `artifacts ON build_id` with `query_row`, which is a single-row bet on SQLite's visit order once a
+  build has two artifacts. It now selects the build's index-0 row, and the row id is built by one
+  helper shared with the writer so reader and writer cannot drift. A storage test reproduces the hazard
+  by moving the `#0` row to the highest rowid in a scratch database, which is what distinguishes a
+  passing-by-accident test from a passing one.
+- **Goldens were corrected in the committed style, not reformatted.** `scripts/update_goldens.py
+  --confirm` emits serde declaration order while the committed CLI goldens are key-sorted, so running it
+  rewrites ~350 lines per file. That is unrelated drift, which prompt §14 forbids, so the two affected
+  files were restored to HEAD and given only the four reviewed leaf changes (4 added / 4 removed lines
+  per file), then verified against the real binary by `cargo test -p fwsight --test golden` and
+  `drift/goldens unchanged`. The script-versus-committed-goldens mismatch is reported as an open
+  inconsistency, not silently repaired here.
+- **What this round is not.** No P1-A1, no Sections/Symbols table, no Evidence Inspector, no Compare,
+  Gate, Bundle or History surface, no new adapters, no new navigation, no portable schema change, and
+  no claim that V0 has any participant evidence. `baseline_version` stays 0.6.0 and G1 stays NOT
+  CLAIMED.
