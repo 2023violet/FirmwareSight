@@ -4,6 +4,7 @@
 pub mod artifact;
 pub mod build_snapshot;
 pub mod capability;
+pub mod diff;
 pub mod evidence;
 pub mod identity;
 pub mod memory;

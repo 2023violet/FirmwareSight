@@ -1,6 +1,10 @@
 {
   "schema": "firmwaresight-fixtures-1",
   "generated_by": "scripts/gen_p0_fixtures.py",
+  "generators": [
+    "scripts/gen_p0_fixtures.py",
+    "scripts/gen_p2_fixtures.py"
+  ],
   "note": "Tests verify these hashes before trusting any golden. Each value is the SHA-256 of the committed blob, so it must also equal the bytes a fresh checkout yields on any platform; .gitattributes is what makes that true.",
   "files": [
     {
@@ -38,6 +42,78 @@
       "sha256": "f4bf022bb856294251776f60a3a5ab8f0c02e478a3e12baf580db8672ba17cc1",
       "fixture": "p0-dual-region",
       "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/base/firmware.elf",
+      "sha256": "3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f",
+      "fixture": "p2-diff-base",
+      "purpose": "elf-binary"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/base/firmware.ld",
+      "sha256": "b89d6a6c7c7218a909cd3d566a90aa897610c2b5db5e4f86f80a75baa53f1e03",
+      "fixture": "p2-diff-base",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/base/firmware.map",
+      "sha256": "832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e",
+      "fixture": "p2-diff-base",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/base/fixture.toml",
+      "sha256": "d7608338a8a8349865b1078ece782b1ab7882fcf50cda2c1f6fec8e747edc798",
+      "fixture": "p2-diff-base",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/base/source/common.c",
+      "sha256": "b5dc26cbddc30d40f4ab269f8ed557e72850c4e0466bf0a086f25121bd87a769",
+      "fixture": "p2-diff-base",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/base/source/payload.c",
+      "sha256": "f48b0cd6ee43423966804d7426b05589773f1fa203202f032f6027dc206d638f",
+      "fixture": "p2-diff-base",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/target/firmware.elf",
+      "sha256": "4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374",
+      "fixture": "p2-diff-target",
+      "purpose": "elf-binary"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/target/firmware.ld",
+      "sha256": "17df856338504a7b1828b431f0edb3715c5608a21a86954707839d976b4adf8e",
+      "fixture": "p2-diff-target",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/target/firmware.map",
+      "sha256": "a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6",
+      "fixture": "p2-diff-target",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/target/fixture.toml",
+      "sha256": "39d3575a898e98e7149e4028c1b6628d91e75c7c6edbc9649b13c547909df979",
+      "fixture": "p2-diff-target",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/target/source/common.c",
+      "sha256": "b5dc26cbddc30d40f4ab269f8ed557e72850c4e0466bf0a086f25121bd87a769",
+      "fixture": "p2-diff-target",
+      "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p2-diff/target/source/payload.c",
+      "sha256": "96bdab3bb248eb5e2d30e66994ad2e1dfe855552e7face2ad98ee43a2dcfdba0",
+      "fixture": "p2-diff-target",
+      "purpose": "p2-diff-support"
     },
     {
       "path": "fixtures/malformed/empty.bin",
