@@ -138,6 +138,10 @@ fn budget_line(budget: &crate::dto::BudgetDto) -> String {
     }
 }
 
+/// Stable code for "the comparison is fine, the file the user asked for could not be written".
+/// Shared by the CLI export path and the desktop save path so one failure has one code.
+pub const EXPORT_FAILED_CODE: &str = "ERR-EXPORT-6001";
+
 /// The stable error shape the desktop and CLI both present.
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]

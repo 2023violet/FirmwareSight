@@ -1101,6 +1101,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "firmwaresight-artifact",
+ "firmwaresight-core",
  "firmwaresight-report",
  "serde_json",
  "tracing",

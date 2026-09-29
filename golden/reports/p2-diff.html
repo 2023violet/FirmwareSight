@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FirmwareSight build diff</title>
+<style>
+:root {
+  --fs-color-bg-canvas: #F7F8FA;
+  --fs-color-bg-surface: #FFFFFF;
+  --fs-color-bg-subtle: #F1F3F5;
+  --fs-color-text-primary: #171A1F;
+  --fs-color-text-secondary: #5D6673;
+  --fs-color-border-default: #D9DEE5;
+  --fs-color-diff-added: #18794E;
+  --fs-color-diff-added-bg: #E7F3EC;
+  --fs-color-diff-removed: #C9372C;
+  --fs-color-diff-removed-bg: #FBECEA;
+  --fs-color-diff-changed: #2563EB;
+  --fs-color-diff-changed-bg: #E9F0FD;
+  --fs-color-status-unknown: #667085;
+  --fs-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --fs-font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --fs-font-size-metadata: 12px;
+  --fs-font-size-body: 13px;
+  --fs-font-size-section: 15px;
+  --fs-font-size-page: 20px;
+  --fs-space-2: 8px;
+  --fs-space-3: 12px;
+  --fs-space-4: 16px;
+  --fs-space-6: 24px;
+  --fs-radius-control: 6px;
+  --fs-radius-panel: 8px;
+  --fs-radius-pill: 999px;
+  --fs-border-width-hairline: 1px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: var(--fs-space-6);
+  background: var(--fs-color-bg-canvas);
+  color: var(--fs-color-text-primary);
+  font-family: var(--fs-font-ui);
+  font-size: var(--fs-font-size-body);
+  line-height: 20px;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 var(--fs-space-2);
+  font-size: var(--fs-font-size-page);
+  line-height: 28px;
+  font-weight: 600;
+}
+
+h2 {
+  margin: var(--fs-space-6) 0 var(--fs-space-3);
+  font-size: var(--fs-font-size-section);
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.brand,
+.meta,
+.empty {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+  margin: 0;
+}
+
+.card {
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  padding: var(--fs-space-4);
+}
+
+.notice {
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  padding: var(--fs-space-3);
+  margin: 0 0 var(--fs-space-2);
+}
+
+.notice ul {
+  margin: var(--fs-space-2) 0 0;
+  padding-left: var(--fs-space-4);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+caption {
+  caption-side: top;
+  text-align: left;
+  padding: 0 0 var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+th,
+td {
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  padding: var(--fs-space-2) var(--fs-space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+  background: var(--fs-color-bg-subtle);
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-family: var(--fs-font-mono);
+  white-space: nowrap;
+}
+
+.mono,
+.sha,
+.locator {
+  font-family: var(--fs-font-mono);
+}
+
+.delta.positive::before {
+  content: "+";
+}
+
+.delta.negative {
+  color: var(--fs-color-diff-removed);
+}
+
+.added {
+  color: var(--fs-color-diff-added);
+  background: var(--fs-color-diff-added-bg);
+}
+
+.removed {
+  color: var(--fs-color-diff-removed);
+  background: var(--fs-color-diff-removed-bg);
+}
+
+.changed {
+  color: var(--fs-color-diff-changed);
+  background: var(--fs-color-diff-changed-bg);
+}
+
+.chip {
+  display: inline-block;
+  padding: 0 var(--fs-space-2);
+  border-radius: var(--fs-radius-pill);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.unknown {
+  color: var(--fs-color-status-unknown);
+}
+
+.side {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--fs-space-2) var(--fs-space-3);
+}
+
+.side dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+.side dd {
+  margin: 0;
+}
+
+footer {
+  margin-top: var(--fs-space-6);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Build diff</h1>
+<p class="brand">FirmwareSight 0.1.0 &middot; <span class="mono">urn:firmwaresight:schema:diff:1</span> schema version 1</p>
+<h2>Builds compared</h2>
+<div class="card">
+<h3>Base (old)</h3>
+<dl class="side">
+<dt>Artifact</dt><dd>firmware.elf</dd>
+<dt>SHA-256</dt><dd><span class="sha">3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f</span></dd>
+<dt>Size</dt><dd>16820 bytes</dd>
+<dt>Snapshot</dt><dd><span class="locator">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e</span></dd>
+<dt>Layout</dt><dd>MapMemoryConfiguration &middot; MapRegionAndElfLoad</dd>
+<dt>MAP</dt><dd>stored for this build</dd>
+</dl>
+<h3>Target (new)</h3>
+<dl class="side">
+<dt>Artifact</dt><dd>firmware.elf</dd>
+<dt>SHA-256</dt><dd><span class="sha">4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374</span></dd>
+<dt>Size</dt><dd>17464 bytes</dd>
+<dt>Snapshot</dt><dd><span class="locator">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></dd>
+<dt>Layout</dt><dd>MapMemoryConfiguration &middot; MapRegionAndElfLoad</dd>
+<dt>MAP</dt><dd>stored for this build</dd>
+</dl>
+</div>
+<h2>Memory totals</h2>
+<p class="meta">Comparability: exact &mdash; the weaker side caps both budgets.</p>
+<table>
+<caption>Delta = target &minus; base. A dash is an absence, not a zero.</caption>
+<thead><tr><th>Budget</th><th class="num">Base</th><th class="num">Target</th><th class="num">Delta</th><th>Reading</th></tr></thead>
+<tbody>
+<tr><th>Nonvolatile / load image</th><td class="num">256</td><td class="num">376</td><td class="num delta positive">120</td><td>exact on both sides</td></tr>
+<tr><th>Runtime RAM</th><td class="num">8</td><td class="num">76</td><td class="num delta positive">68</td><td>exact on both sides</td></tr>
+</tbody>
+</table>
+<p class="meta">Base side: nonvolatile 256 bytes (exact) &middot; runtime RAM 8 bytes (exact)</p>
+<p class="meta">Target side: nonvolatile 376 bytes (exact) &middot; runtime RAM 76 bytes (exact)</p>
+<div class="notice">
+<p><strong>Read this before the tables</strong></p>
+<ul>
+<li><span class="mono">SYMBOL-AMBIGUOUS</span> &mdash; 67 symbol row(s) repeat a name, kind and binding combination on one or both sides and were left unpaired; a row position is not an identity</li>
+</ul>
+</div>
+<h2>What moved</h2>
+<div class="card"><p class="meta">Sections: 1 added, 1 removed, 16 changed, 0 left unpaired because the name repeats. Symbols: 38 added, 33 removed, 5 changed, 67 left unpaired because the key repeats.</p><p class="meta">Found identical and left out of the tables: 2 section(s), 9 symbol(s).</p></div>
+<h2>Section changes</h2>
+<table>
+<caption>Every changed row, not a truncated top list.</caption>
+<thead><tr><th>Change</th><th>Section</th><th class="num">Base size</th><th class="num">Target size</th><th class="num">Delta</th><th>Fields</th><th>Where to check</th></tr></thead>
+<tbody>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.ARM.attributes</td><td class="num">46</td><td class="num">46</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 15 / target row 15</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.bss</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td>differs: memory_size</td><td class="locator">base row 5 / target row 5</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">.calib</td><td class="num">32</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 6</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.comment</td><td class="num">70</td><td class="num">70</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 14 / target row 14</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_abbrev</td><td class="num">470</td><td class="num">518</td><td class="num delta positive">48</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 8 / target row 8</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_aranges</td><td class="num">72</td><td class="num">72</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 10 / target row 10</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_frame</td><td class="num">156</td><td class="num">180</td><td class="num delta positive">24</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 16 / target row 16</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_info</td><td class="num">798</td><td class="num">910</td><td class="num delta positive">112</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 7 / target row 7</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_line</td><td class="num">314</td><td class="num">421</td><td class="num delta positive">107</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 12 / target row 12</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_loclists</td><td class="num">193</td><td class="num">414</td><td class="num delta positive">221</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 9 / target row 9</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_rnglists</td><td class="num">25</td><td class="num">25</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 11 / target row 11</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_str</td><td class="num">350</td><td class="num">389</td><td class="num delta positive">39</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 13 / target row 13</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">.ota</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">64</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 6</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.rodata</td><td class="num">32</td><td class="num">32</td><td class="num">0</td><td>differs: virtual_address, load_address, file_offset</td><td class="locator">base row 2 / target row 2</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.shstrtab</td><td class="num">203</td><td class="num">201</td><td class="num delta negative">-2</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 19 / target row 19</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.strtab</td><td class="num">163</td><td class="num">200</td><td class="num delta positive">37</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 18 / target row 18</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.symtab</td><td class="num">768</td><td class="num">848</td><td class="num delta positive">80</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 17 / target row 17</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.text</td><td class="num">124</td><td class="num">212</td><td class="num delta positive">88</td><td>differs: file_size, memory_size</td><td class="locator">base row 1 / target row 1</td></tr>
+</tbody>
+</table>
+<h2>Symbol changes</h2>
+<table>
+<caption>Every changed row. Growth ranking never replaces this list.</caption>
+<thead><tr><th>Change</th><th>Symbol</th><th class="num">Base size</th><th class="num">Target size</th><th class="num">Delta</th><th>Fields</th><th>Where to check</th></tr></thead>
+<tbody>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 18</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 20</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 22</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 23</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 24</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 25</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 28</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 30</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 32</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 34</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 35</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 36</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 18</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 20</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 22</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 23</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 24</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 25</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 28</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 30</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 32</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$d <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 33</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 17</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 19</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 21</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 27</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 29</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 31</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 33</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 17</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 19</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 21</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 27</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 29</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 31</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">calib</td><td class="num">32</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 34</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">calib_apply</td><td class="num">16</td><td class="num">2</td><td class="num delta negative">-14</td><td>differs: size</td><td class="locator">base row 39 / target row 43</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">cfg_table</td><td class="num">32</td><td class="num">32</td><td class="num">0</td><td>differs: address</td><td class="locator">base row 43 / target row 48</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">g_frame_counter</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">4</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 45</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">mqtt_task</td><td class="num">4</td><td class="num">46</td><td class="num delta positive">42</td><td>differs: address, size</td><td class="locator">base row 38 / target row 41</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">packet_router</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">44</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 42</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">payload_extra</td><td class="num">4</td><td class="num">20</td><td class="num delta positive">16</td><td>differs: address, size</td><td class="locator">base row 42 / target row 47</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">staging_area</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">64</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 37</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">tls_handshake</td><td class="num">16</td><td class="num">16</td><td class="num">0</td><td>differs: address</td><td class="locator">base row 35 / target row 38</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 0 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 0</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 0 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 0</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 1 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 1</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 1 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 1</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 10 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 10</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 10 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 10</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 11 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 11</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 11 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 11</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 12 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 12</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 12 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 12</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 13 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 13</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 13 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 13</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 14 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 14</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 14 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 14</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 15 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 15</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 15 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 15</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 2 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 2</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 2 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 2</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 3 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 3</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 3 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 3</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 4 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 4</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 4 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 4</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 5 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 5</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 5 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 5</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 6 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 6</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 6 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 6</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 7 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 7</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 7 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 7</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 8 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 8</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 8 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 8</td></tr>
+<tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 9 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 9</td></tr>
+<tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 9 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 9</td></tr>
+</tbody>
+</table>
+<h2>Object and module changes</h2>
+<p class="meta">Not claimable here: the persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build</p>
+<footer>Deterministic export: no timestamp, no scripts, no network requests. FirmwareSight 0.1.0.</footer>
+</main>
+</body>
+</html>

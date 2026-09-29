@@ -12,6 +12,7 @@ name = "fwsight"
 path = "src/main.rs"
 
 [dependencies]
+firmwaresight-core = { workspace = true }
 firmwaresight-artifact = { workspace = true }
 firmwaresight-report = { workspace = true }
 clap = { version = "4.6.7", features = ["derive"] }

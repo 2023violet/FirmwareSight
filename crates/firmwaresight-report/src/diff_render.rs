@@ -393,11 +393,14 @@ fn render_warnings(dto: &DiffResultDto, out: &mut String) {
 fn render_counts(dto: &DiffResultDto, out: &mut String) {
     out.push_str("<h2>What moved</h2>\n<div class=\"card\"><p class=\"meta\">");
     out.push_str(&format!(
-        "Sections: {} added, {} removed, {} changed, {} unmatched by name. Symbols: {} added, {} removed, {} changed, {} unmatched by name.",
+        "Sections: {} added, {} removed, {} changed, {} left unpaired because the name repeats.",
         dto.counts.sections_added,
         dto.counts.sections_removed,
         dto.counts.sections_changed,
         dto.counts.sections_ambiguous,
+    ));
+    out.push_str(&format!(
+        " Symbols: {} added, {} removed, {} changed, {} left unpaired because the key repeats.",
         dto.counts.symbols_added,
         dto.counts.symbols_removed,
         dto.counts.symbols_changed,
@@ -596,14 +599,14 @@ pub fn render_human(result: &DiffResult) -> String {
 
     out.push_str("Counts\n");
     out.push_str(&format!(
-        "  Sections  +{} -{} ~{} ({} not matched by name)\n",
+        "  Sections  +{} -{} ~{} ({} rows whose name repeats)\n",
         result.counts.sections_added,
         result.counts.sections_removed,
         result.counts.sections_changed,
         result.counts.sections_ambiguous
     ));
     out.push_str(&format!(
-        "  Symbols   +{} -{} ~{} ({} not matched by name)\n",
+        "  Symbols   +{} -{} ~{} ({} rows whose key repeats)\n",
         result.counts.symbols_added,
         result.counts.symbols_removed,
         result.counts.symbols_changed,

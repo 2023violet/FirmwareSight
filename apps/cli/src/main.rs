@@ -1,30 +1,33 @@
 //! `fwsight` — the FirmwareSight command line.
 //!
-//! P0 implements `analyze` only. `diff`, `gate` and `release prepare` are defined in
+//! P2 implements `analyze` and `diff`. `gate` and `release prepare` are defined in
 //! `04_TECH/07_CLI_SPEC.md` but are *not registered here*, so a user cannot mistake them for
-//! working features. Exit codes 4 (gate review) and 5 (gate block) and 6 (export error) are
-//! likewise unreachable until the Gate and Export phases exist; nothing pretends otherwise.
+//! working features. Exit codes 4 (gate review) and 5 (gate block) are likewise unreachable until
+//! the Gate phase exists; nothing pretends otherwise. Code 6 became reachable with the P2 export.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 use firmwaresight_artifact::ArtifactError;
 use firmwaresight_artifact::intake::GuardConfig;
 use firmwaresight_artifact::pipeline::{self, AnalysisRequest};
-use firmwaresight_report::{AnalyzeResultDto, render};
+use firmwaresight_core::domain::diff::{DiffError, DiffSnapshotInput, compare};
+use firmwaresight_report::{AnalyzeResultDto, DiffResultDto, diff_render, render};
 
 /// Exit codes frozen by 04_TECH/07_CLI_SPEC.md. `1` is intentionally not defined.
 const EXIT_OK: u8 = 0;
 const EXIT_USAGE: u8 = 2;
 const EXIT_PARSE_IMPORT: u8 = 3;
+/// The comparison succeeded but the requested export could not be written.
+const EXIT_EXPORT: u8 = 6;
 
 #[derive(Debug, Parser)]
 #[command(
     name = "fwsight",
     version,
     about = "Know exactly what ships.",
-    long_about = "FirmwareSight P0 technical slice.\n\nOnly `analyze` is implemented; Compare, \
+    long_about = "FirmwareSight P0/P1/P2 technical slice.\n\n`analyze` and `diff` are implemented; \
                   Release Gate and Release Bundle are later phases and are not available."
 )]
 struct Cli {
@@ -36,6 +39,8 @@ struct Cli {
 enum Commands {
     /// Analyze one artifact and report the facts that were observed.
     Analyze(AnalyzeArgs),
+    /// Compare two artifacts and report what changed between them.
+    Diff(DiffArgs),
 }
 
 #[derive(Debug, Parser)]
@@ -54,6 +59,31 @@ struct AnalyzeArgs {
     /// Full-buffer size ceiling in bytes. Defaults to the baseline 512 MiB.
     #[arg(long, value_name = "BYTES")]
     max_bytes: Option<u64>,
+}
+
+#[derive(Debug, Parser)]
+struct DiffArgs {
+    /// The older ELF artifact. Deltas are measured from this side.
+    old: PathBuf,
+
+    /// The newer ELF artifact. Deltas are measured to this side.
+    new: PathBuf,
+
+    /// GNU ld MAP file for the older artifact.
+    #[arg(long, value_name = "FILE")]
+    old_map: Option<PathBuf>,
+
+    /// GNU ld MAP file for the newer artifact.
+    #[arg(long, value_name = "FILE")]
+    new_map: Option<PathBuf>,
+
+    /// Emit exactly one machine-readable diff document on stdout.
+    #[arg(long)]
+    json: bool,
+
+    /// Write the deterministic self-contained HTML report to this file.
+    #[arg(long, value_name = "FILE")]
+    html: Option<PathBuf>,
 }
 
 fn main() -> ExitCode {
@@ -76,6 +106,7 @@ fn main() -> ExitCode {
 
     match cli.command {
         Commands::Analyze(args) => run_analyze(args, &operation_id),
+        Commands::Diff(args) => run_diff(args, &operation_id),
     }
 }
 
@@ -109,12 +140,7 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
                 print!("{}", render::render_json(&dto));
             } else {
                 print!("{}", render::render_human(&dto));
-                let map_state = match (&analysis.map_input, &analysis.map_evidence) {
-                    (Some(_), Some(_)) => "parsed with the gnu_ld adapter",
-                    (Some(_), None) => "supplied but not parsed",
-                    (None, _) => "not provided",
-                };
-                eprintln!("diagnostics: map {map_state}");
+                eprintln!("diagnostics: map {}", map_state(&analysis));
                 eprintln!(
                     "diagnostics: hash {} ms, read {} ms, parse {} ms, normalize {} ms, operation {operation_id}",
                     analysis.input.hash_ms,
@@ -144,12 +170,150 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
     }
 }
 
-/// Map an error onto the frozen exit-code table. Every error the CLI can surface in P0 is a
-/// parse/import failure, which is 3; there is no gate or export path yet to produce 4, 5 or 6.
+/// Compare two artifacts. Each side is analyzed with the same pipeline `analyze` uses, then handed
+/// to Core, which owns every diff rule.
+fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
+    let base = match analyze_side(&args.old, args.old_map, "old", args.json, operation_id) {
+        Ok(analysis) => analysis,
+        Err(code) => return ExitCode::from(code),
+    };
+    let target = match analyze_side(&args.new, args.new_map, "new", args.json, operation_id) {
+        Ok(analysis) => analysis,
+        Err(code) => return ExitCode::from(code),
+    };
+
+    let base_input = DiffSnapshotInput::from_snapshot(&base.snapshot);
+    let target_input = DiffSnapshotInput::from_snapshot(&target.snapshot);
+
+    let result = match compare(&base_input, &target_input) {
+        Ok(result) => result,
+        Err(err) => return report_diff_error(&err, args.json, operation_id),
+    };
+    let dto = DiffResultDto::from_diff(&result);
+
+    // The export is written before anything is printed: a run that cannot produce the file the user
+    // asked for must not already have announced success on stdout.
+    if let Some(path) = &args.html {
+        let html = diff_render::render_html(&dto);
+        if let Err(error) = std::fs::write(path, html) {
+            return report_export_error(path, &error, args.json, operation_id);
+        }
+    }
+
+    if args.json {
+        print!("{}", diff_render::render_json(&dto));
+    } else {
+        print!("{}", diff_render::render_human(&result));
+        eprintln!("diagnostics: old map {}", map_state(&base));
+        eprintln!("diagnostics: new map {}", map_state(&target));
+        if args.html.is_some() {
+            eprintln!("diagnostics: html written to the requested file");
+        }
+        eprintln!("diagnostics: operation {operation_id}");
+    }
+    ExitCode::from(EXIT_OK)
+}
+
+/// Analyze one side of a comparison. A failure here is an import failure, so no partial diff is
+/// printed and the process exits 3.
+fn analyze_side(
+    path: &Path,
+    map: Option<PathBuf>,
+    side: &str,
+    json: bool,
+    operation_id: &str,
+) -> Result<pipeline::Analysis, u8> {
+    let mut request = AnalysisRequest::new(path.to_path_buf()).with_guard(GuardConfig::default());
+    if let Some(map_path) = map {
+        request = request.with_map(map_path);
+    }
+
+    pipeline::analyze(&request).map_err(|err| {
+        let envelope =
+            render::ErrorEnvelope::new(err.stable_code(), err.user_message(), operation_id)
+                .with_details(format!("{side} side: {}", file_name(path)))
+                .with_remediation(err.remediation());
+        if json {
+            println!("{}", envelope.to_json());
+        }
+        eprintln!(
+            "error: {} (code {}, operation {operation_id})",
+            envelope.message, envelope.code
+        );
+        tracing::error!(
+            operation_id,
+            side,
+            code = err.stable_code(),
+            "diff input failed"
+        );
+        exit_code_for(&err)
+    })
+}
+
+/// Selecting the same build twice is a usage error, not an empty comparison. Answering with empty
+/// tables would read as "nothing changed" rather than "nothing compared".
+fn report_diff_error(err: &DiffError, json: bool, operation_id: &str) -> ExitCode {
+    let (message, remediation) = match err {
+        DiffError::SameSnapshot { snapshot_id } => (
+            format!(
+                "both sides resolve to the same snapshot ({snapshot_id}); there is nothing to compare"
+            ),
+            "Choose two different builds, or compare the same file against a rebuilt one.",
+        ),
+    };
+    let envelope =
+        render::ErrorEnvelope::new(err.code(), message, operation_id).with_remediation(remediation);
+    if json {
+        println!("{}", envelope.to_json());
+    }
+    eprintln!(
+        "error: {} (code {}, operation {operation_id})",
+        envelope.message, envelope.code
+    );
+    ExitCode::from(EXIT_USAGE)
+}
+
+/// The comparison succeeded; writing its export did not. Exit 6, and the host path stays in
+/// diagnostics rather than in the machine-readable envelope.
+fn report_export_error(
+    path: &Path,
+    error: &std::io::Error,
+    json: bool,
+    operation_id: &str,
+) -> ExitCode {
+    let envelope = render::ErrorEnvelope::new(
+        render::EXPORT_FAILED_CODE,
+        format!("could not write the HTML export: {error}"),
+        operation_id,
+    )
+    .with_remediation(
+        "Check that the target path exists and is writable, then run the command again.",
+    );
+    if json {
+        println!("{}", envelope.to_json());
+    }
+    eprintln!(
+        "error: could not write {} (code {}, operation {operation_id})",
+        path.display(),
+        envelope.code
+    );
+    tracing::error!(operation_id, "export failed");
+    ExitCode::from(EXIT_EXPORT)
+}
+
+fn map_state(analysis: &pipeline::Analysis) -> &'static str {
+    match (&analysis.map_input, &analysis.map_evidence) {
+        (Some(_), Some(_)) => "parsed with the gnu_ld adapter",
+        (Some(_), None) => "supplied but not parsed",
+        (None, _) => "not provided",
+    }
+}
+
+/// Map an error onto the frozen exit-code table. Everything the CLI can hit while reading a build is
+/// a parse/import failure, which is 3. Usage mistakes are rejected by the argument parser and exit 2
+/// beforehand; the export path reports 6 itself. There is no gate path yet to produce 4 or 5.
 #[must_use]
 pub fn exit_code_for(_err: &ArtifactError) -> u8 {
-    // There is no gate or export path in P0, so every failure that reaches here is import
-    // class. Usage mistakes are rejected by the argument parser and exit 2 beforehand.
     EXIT_PARSE_IMPORT
 }
 
@@ -198,14 +362,7 @@ mod tests {
     }
 
     #[test]
-    fn unregistered_future_commands_are_not_accepted() {
-        let diff: Vec<OsString> = ["fwsight", "diff", "a", "b"]
-            .iter()
-            .map(OsString::from)
-            .collect();
-        let err = parse_from(diff.clone()).expect_err("diff must not be accepted during P0");
-        assert_eq!(err, EXIT_USAGE);
-
+    fn unregistered_future_commands_are_still_not_accepted() {
         for command in ["gate", "release", "watch", "doctor"] {
             let args: Vec<OsString> = ["fwsight", command].iter().map(OsString::from).collect();
             assert!(
@@ -216,13 +373,79 @@ mod tests {
     }
 
     #[test]
-    fn analyze_is_the_only_route_that_parses() {
+    fn diff_is_now_a_registered_command() {
+        // P2 authorizes Compare. This replaces the P0 test that asserted `diff` must be rejected,
+        // so the change is recorded rather than silent.
+        let args: Vec<OsString> = ["fwsight", "diff", "a.elf", "b.elf"]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        let cli = parse_from(args).expect("diff parses");
+        let Commands::Diff(diff) = cli.command else {
+            panic!("diff must route to DiffArgs");
+        };
+        assert_eq!(diff.old, PathBuf::from("a.elf"));
+        assert_eq!(diff.new, PathBuf::from("b.elf"));
+        assert!(diff.old_map.is_none() && diff.new_map.is_none());
+        assert!(!diff.json);
+        assert!(diff.html.is_none());
+    }
+
+    #[test]
+    fn diff_options_parse_into_their_named_slots() {
+        let args: Vec<OsString> = [
+            "fwsight",
+            "diff",
+            "a.elf",
+            "b.elf",
+            "--old-map",
+            "a.map",
+            "--new-map",
+            "b.map",
+            "--json",
+            "--html",
+            "out.html",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        let cli = parse_from(args).expect("the full option set parses");
+        let Commands::Diff(diff) = cli.command else {
+            panic!("diff must route to DiffArgs");
+        };
+        assert_eq!(diff.old_map, Some(PathBuf::from("a.map")));
+        assert_eq!(diff.new_map, Some(PathBuf::from("b.map")));
+        assert!(diff.json);
+        assert_eq!(diff.html, Some(PathBuf::from("out.html")));
+    }
+
+    #[test]
+    fn a_diff_without_both_paths_is_a_usage_error() {
+        let args: Vec<OsString> = ["fwsight", "diff", "a.elf"]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        assert_eq!(
+            parse_from(args).expect_err("one path is not a comparison"),
+            EXIT_USAGE
+        );
+    }
+
+    #[test]
+    fn analyze_and_diff_are_the_two_registered_routes() {
         let args: Vec<OsString> = ["fwsight", "analyze", "x.elf"]
             .iter()
             .map(OsString::from)
             .collect();
         let cli = parse_from(args.clone()).expect("analyze parses");
         assert!(matches!(cli.command, Commands::Analyze(_)));
+
+        let args: Vec<OsString> = ["fwsight", "diff", "a.elf", "b.elf"]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        let cli = parse_from(args).expect("diff parses");
+        assert!(matches!(cli.command, Commands::Diff(_)));
     }
 
     #[test]
@@ -270,12 +493,13 @@ mod tests {
     #[test]
     fn exit_code_one_is_never_produced() {
         // `1` is not part of the frozen table, so nothing may return it.
-        let all = [EXIT_OK, EXIT_USAGE, EXIT_PARSE_IMPORT];
+        let all = [EXIT_OK, EXIT_USAGE, EXIT_PARSE_IMPORT, EXIT_EXPORT];
         assert!(!all.contains(&1));
         assert_eq!(
-            [EXIT_OK, EXIT_USAGE, EXIT_PARSE_IMPORT],
-            [0, 2, 3],
-            "the P0 exit-code surface is exactly 0, 2 and 3"
+            all,
+            [0, 2, 3, 6],
+            "the P2 exit-code surface is exactly 0, 2, 3 and 6; 4 and 5 belong to the Gate phase \
+             and stay unreachable until it exists"
         );
     }
 }

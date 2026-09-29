@@ -1,0 +1,3466 @@
+{
+  "base": {
+    "artifact": {
+      "byteSize": 16820,
+      "fileName": "firmware.elf",
+      "sha256": "3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f"
+    },
+    "memory": {
+      "evidence": {
+        "layoutSource": "MapMemoryConfiguration",
+        "mapBacked": true,
+        "weakestEvidenceBasis": "MapRegionAndElfLoad"
+      },
+      "excludedMetadataBytes": 3628,
+      "footprintRowPresent": true,
+      "nonvolatile": {
+        "bytes": 256,
+        "classification": "observed",
+        "state": "exact"
+      },
+      "runtimeRam": {
+        "bytes": 8,
+        "classification": "observed",
+        "state": "exact"
+      }
+    },
+    "snapshotId": "snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e"
+  },
+  "counts": {
+    "sectionsAdded": 1,
+    "sectionsAmbiguous": 0,
+    "sectionsChanged": 16,
+    "sectionsRemoved": 1,
+    "symbolsAdded": 38,
+    "symbolsAmbiguous": 67,
+    "symbolsChanged": 5,
+    "symbolsRemoved": 33
+  },
+  "memory": {
+    "comparability": "exact",
+    "nonvolatile": {
+      "base": 256,
+      "comparability": "exact",
+      "delta": 120,
+      "reason": null,
+      "target": 376
+    },
+    "runtimeRam": {
+      "base": 8,
+      "comparability": "exact",
+      "delta": 68,
+      "reason": null,
+      "target": 76
+    }
+  },
+  "objectChanges": {
+    "available": false,
+    "reason": "the persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build"
+  },
+  "schema": "urn:firmwaresight:schema:diff:1",
+  "schemaVersion": 1,
+  "sectionChanges": [
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14680,
+        "fileSize": 46,
+        "index": 15,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 46,
+        "memorySizeUnknownReason": null,
+        "name": ".ARM.attributes",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "ArmAttribute",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset"
+      ],
+      "fileSize": {
+        "base": 46,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 46
+      },
+      "indeterminateFields": [],
+      "key": ".ARM.attributes",
+      "memorySize": {
+        "base": 46,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 46
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 15183,
+        "fileSize": 46,
+        "index": 15,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 46,
+        "memorySizeUnknownReason": null,
+        "name": ".ARM.attributes",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "ArmAttribute",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": true,
+        "execute": false,
+        "fileOffset": null,
+        "fileSize": 0,
+        "index": 5,
+        "loadAddress": "0x8010044",
+        "loadAddressUnknownReason": null,
+        "memorySize": 4,
+        "memorySizeUnknownReason": null,
+        "name": ".bss",
+        "nameUnknownReason": null,
+        "region": "RAM",
+        "regionUnknownReason": null,
+        "role": "UninitializedData",
+        "virtualAddress": "0x20000004",
+        "virtualAddressUnknownReason": null,
+        "write": true
+      },
+      "change": "Changed",
+      "differingFields": [
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 0,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 0
+      },
+      "indeterminateFields": [],
+      "key": ".bss",
+      "memorySize": {
+        "base": 4,
+        "comparability": "exact",
+        "delta": 4,
+        "reason": null,
+        "target": 8
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": true,
+        "execute": false,
+        "fileOffset": null,
+        "fileSize": 0,
+        "index": 5,
+        "loadAddress": "0x8010044",
+        "loadAddressUnknownReason": null,
+        "memorySize": 8,
+        "memorySizeUnknownReason": null,
+        "name": ".bss",
+        "nameUnknownReason": null,
+        "region": "RAM",
+        "regionUnknownReason": null,
+        "role": "UninitializedData",
+        "virtualAddress": "0x20000004",
+        "virtualAddressUnknownReason": null,
+        "write": true
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": true,
+        "execute": false,
+        "fileOffset": 12356,
+        "fileSize": 32,
+        "index": 6,
+        "loadAddress": "0x8010044",
+        "loadAddressUnknownReason": null,
+        "memorySize": 32,
+        "memorySizeUnknownReason": null,
+        "name": ".calib",
+        "nameUnknownReason": null,
+        "region": "ROM",
+        "regionUnknownReason": null,
+        "role": "ReadOnlyData",
+        "virtualAddress": "0x8010044",
+        "virtualAddressUnknownReason": null,
+        "write": false
+      },
+      "change": "Removed",
+      "differingFields": [],
+      "fileSize": {
+        "base": 32,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "indeterminateFields": [],
+      "key": ".calib",
+      "memorySize": {
+        "base": 32,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "nameKnown": true,
+      "target": null
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14610,
+        "fileSize": 70,
+        "index": 14,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 70,
+        "memorySizeUnknownReason": null,
+        "name": ".comment",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Note",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset"
+      ],
+      "fileSize": {
+        "base": 70,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 70
+      },
+      "indeterminateFields": [],
+      "key": ".comment",
+      "memorySize": {
+        "base": 70,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 70
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 15113,
+        "fileSize": 70,
+        "index": 14,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 70,
+        "memorySizeUnknownReason": null,
+        "name": ".comment",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Note",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 13186,
+        "fileSize": 470,
+        "index": 8,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 470,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_abbrev",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 470,
+        "comparability": "exact",
+        "delta": 48,
+        "reason": null,
+        "target": 518
+      },
+      "indeterminateFields": [],
+      "key": ".debug_abbrev",
+      "memorySize": {
+        "base": 470,
+        "comparability": "exact",
+        "delta": 48,
+        "reason": null,
+        "target": 518
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 13274,
+        "fileSize": 518,
+        "index": 8,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 518,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_abbrev",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 13849,
+        "fileSize": 72,
+        "index": 10,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 72,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_aranges",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset"
+      ],
+      "fileSize": {
+        "base": 72,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 72
+      },
+      "indeterminateFields": [],
+      "key": ".debug_aranges",
+      "memorySize": {
+        "base": 72,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 72
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14206,
+        "fileSize": 72,
+        "index": 10,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 72,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_aranges",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14728,
+        "fileSize": 156,
+        "index": 16,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 156,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_frame",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 156,
+        "comparability": "exact",
+        "delta": 24,
+        "reason": null,
+        "target": 180
+      },
+      "indeterminateFields": [],
+      "key": ".debug_frame",
+      "memorySize": {
+        "base": 156,
+        "comparability": "exact",
+        "delta": 24,
+        "reason": null,
+        "target": 180
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 15232,
+        "fileSize": 180,
+        "index": 16,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 180,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_frame",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 12388,
+        "fileSize": 798,
+        "index": 7,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 798,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_info",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 798,
+        "comparability": "exact",
+        "delta": 112,
+        "reason": null,
+        "target": 910
+      },
+      "indeterminateFields": [],
+      "key": ".debug_info",
+      "memorySize": {
+        "base": 798,
+        "comparability": "exact",
+        "delta": 112,
+        "reason": null,
+        "target": 910
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 12364,
+        "fileSize": 910,
+        "index": 7,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 910,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_info",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 13946,
+        "fileSize": 314,
+        "index": 12,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 314,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_line",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 314,
+        "comparability": "exact",
+        "delta": 107,
+        "reason": null,
+        "target": 421
+      },
+      "indeterminateFields": [],
+      "key": ".debug_line",
+      "memorySize": {
+        "base": 314,
+        "comparability": "exact",
+        "delta": 107,
+        "reason": null,
+        "target": 421
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14303,
+        "fileSize": 421,
+        "index": 12,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 421,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_line",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 13656,
+        "fileSize": 193,
+        "index": 9,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 193,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_loclists",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 193,
+        "comparability": "exact",
+        "delta": 221,
+        "reason": null,
+        "target": 414
+      },
+      "indeterminateFields": [],
+      "key": ".debug_loclists",
+      "memorySize": {
+        "base": 193,
+        "comparability": "exact",
+        "delta": 221,
+        "reason": null,
+        "target": 414
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 13792,
+        "fileSize": 414,
+        "index": 9,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 414,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_loclists",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 13921,
+        "fileSize": 25,
+        "index": 11,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 25,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_rnglists",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset"
+      ],
+      "fileSize": {
+        "base": 25,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 25
+      },
+      "indeterminateFields": [],
+      "key": ".debug_rnglists",
+      "memorySize": {
+        "base": 25,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 25
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14278,
+        "fileSize": 25,
+        "index": 11,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 25,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_rnglists",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14260,
+        "fileSize": 350,
+        "index": 13,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 350,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_str",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 350,
+        "comparability": "exact",
+        "delta": 39,
+        "reason": null,
+        "target": 389
+      },
+      "indeterminateFields": [],
+      "key": ".debug_str",
+      "memorySize": {
+        "base": 350,
+        "comparability": "exact",
+        "delta": 39,
+        "reason": null,
+        "target": 389
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14724,
+        "fileSize": 389,
+        "index": 13,
+        "loadAddress": "0x0",
+        "loadAddressUnknownReason": null,
+        "memorySize": 389,
+        "memorySizeUnknownReason": null,
+        "name": ".debug_str",
+        "nameUnknownReason": null,
+        "region": "*default*",
+        "regionUnknownReason": null,
+        "role": "Debug",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": null,
+      "change": "Added",
+      "differingFields": [],
+      "fileSize": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": 64
+      },
+      "indeterminateFields": [],
+      "key": ".ota",
+      "memorySize": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": 64
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": true,
+        "execute": false,
+        "fileOffset": 12300,
+        "fileSize": 64,
+        "index": 6,
+        "loadAddress": "0x8010044",
+        "loadAddressUnknownReason": null,
+        "memorySize": 64,
+        "memorySizeUnknownReason": null,
+        "name": ".ota",
+        "nameUnknownReason": null,
+        "region": "RAM",
+        "regionUnknownReason": null,
+        "role": "InitializedData",
+        "virtualAddress": "0x2000000c",
+        "virtualAddressUnknownReason": null,
+        "write": true
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": true,
+        "execute": false,
+        "fileOffset": 4220,
+        "fileSize": 32,
+        "index": 2,
+        "loadAddress": "0x800007c",
+        "loadAddressUnknownReason": null,
+        "memorySize": 32,
+        "memorySizeUnknownReason": null,
+        "name": ".rodata",
+        "nameUnknownReason": null,
+        "region": "ROM",
+        "regionUnknownReason": null,
+        "role": "ReadOnlyData",
+        "virtualAddress": "0x800007c",
+        "virtualAddressUnknownReason": null,
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "virtual_address",
+        "load_address",
+        "file_offset"
+      ],
+      "fileSize": {
+        "base": 32,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 32
+      },
+      "indeterminateFields": [],
+      "key": ".rodata",
+      "memorySize": {
+        "base": 32,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 32
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": true,
+        "execute": false,
+        "fileOffset": 4308,
+        "fileSize": 32,
+        "index": 2,
+        "loadAddress": "0x80000d4",
+        "loadAddressUnknownReason": null,
+        "memorySize": 32,
+        "memorySizeUnknownReason": null,
+        "name": ".rodata",
+        "nameUnknownReason": null,
+        "region": "ROM",
+        "regionUnknownReason": null,
+        "role": "ReadOnlyData",
+        "virtualAddress": "0x80000d4",
+        "virtualAddressUnknownReason": null,
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 15815,
+        "fileSize": 203,
+        "index": 19,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 203,
+        "memorySizeUnknownReason": null,
+        "name": ".shstrtab",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "StringTable",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 203,
+        "comparability": "exact",
+        "delta": -2,
+        "reason": null,
+        "target": 201
+      },
+      "indeterminateFields": [],
+      "key": ".shstrtab",
+      "memorySize": {
+        "base": 203,
+        "comparability": "exact",
+        "delta": -2,
+        "reason": null,
+        "target": 201
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 16460,
+        "fileSize": 201,
+        "index": 19,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 201,
+        "memorySizeUnknownReason": null,
+        "name": ".shstrtab",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "StringTable",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 15652,
+        "fileSize": 163,
+        "index": 18,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 163,
+        "memorySizeUnknownReason": null,
+        "name": ".strtab",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "StringTable",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 163,
+        "comparability": "exact",
+        "delta": 37,
+        "reason": null,
+        "target": 200
+      },
+      "indeterminateFields": [],
+      "key": ".strtab",
+      "memorySize": {
+        "base": 163,
+        "comparability": "exact",
+        "delta": 37,
+        "reason": null,
+        "target": 200
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 16260,
+        "fileSize": 200,
+        "index": 18,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 200,
+        "memorySizeUnknownReason": null,
+        "name": ".strtab",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "StringTable",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 14884,
+        "fileSize": 768,
+        "index": 17,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 768,
+        "memorySizeUnknownReason": null,
+        "name": ".symtab",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "SymbolTable",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_offset",
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 768,
+        "comparability": "exact",
+        "delta": 80,
+        "reason": null,
+        "target": 848
+      },
+      "indeterminateFields": [],
+      "key": ".symtab",
+      "memorySize": {
+        "base": 768,
+        "comparability": "exact",
+        "delta": 80,
+        "reason": null,
+        "target": 848
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": false,
+        "execute": false,
+        "fileOffset": 15412,
+        "fileSize": 848,
+        "index": 17,
+        "loadAddress": null,
+        "loadAddressUnknownReason": "not present in the section header table",
+        "memorySize": 848,
+        "memorySizeUnknownReason": null,
+        "name": ".symtab",
+        "nameUnknownReason": null,
+        "region": null,
+        "regionUnknownReason": "no memory-region evidence was supplied",
+        "role": "SymbolTable",
+        "virtualAddress": null,
+        "virtualAddressUnknownReason": "this section is host metadata and is not loaded at runtime",
+        "write": false
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "alloc": true,
+        "execute": true,
+        "fileOffset": 4096,
+        "fileSize": 124,
+        "index": 1,
+        "loadAddress": "0x8000000",
+        "loadAddressUnknownReason": null,
+        "memorySize": 124,
+        "memorySizeUnknownReason": null,
+        "name": ".text",
+        "nameUnknownReason": null,
+        "region": "ROM",
+        "regionUnknownReason": null,
+        "role": "Code",
+        "virtualAddress": "0x8000000",
+        "virtualAddressUnknownReason": null,
+        "write": false
+      },
+      "change": "Changed",
+      "differingFields": [
+        "file_size",
+        "memory_size"
+      ],
+      "fileSize": {
+        "base": 124,
+        "comparability": "exact",
+        "delta": 88,
+        "reason": null,
+        "target": 212
+      },
+      "indeterminateFields": [],
+      "key": ".text",
+      "memorySize": {
+        "base": 124,
+        "comparability": "exact",
+        "delta": 88,
+        "reason": null,
+        "target": 212
+      },
+      "nameKnown": true,
+      "target": {
+        "alloc": true,
+        "execute": true,
+        "fileOffset": 4096,
+        "fileSize": 212,
+        "index": 1,
+        "loadAddress": "0x8000000",
+        "loadAddressUnknownReason": null,
+        "memorySize": 212,
+        "memorySizeUnknownReason": null,
+        "name": ".text",
+        "nameUnknownReason": null,
+        "region": "ROM",
+        "regionUnknownReason": null,
+        "role": "Code",
+        "virtualAddress": "0x8000000",
+        "virtualAddressUnknownReason": null,
+        "write": false
+      }
+    }
+  ],
+  "symbolChanges": [
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x800000c",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 18,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000044",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 20,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000050",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 22,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x80000d4",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 23,
+        "sectionRef": "Index(2)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x20000000",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 24,
+        "sectionRef": "Index(4)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x20000004",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 25,
+        "sectionRef": "Index(5)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x800007c",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 28,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000090",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 30,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x80000b4",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 32,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x20000008",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 34,
+        "sectionRef": "Index(5)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x2000002d",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 35,
+        "sectionRef": "Index(6)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8010000",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 36,
+        "sectionRef": "Index(3)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x800000c",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 18,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000044",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 20,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000050",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 22,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x800007c",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 23,
+        "sectionRef": "Index(2)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x20000000",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 24,
+        "sectionRef": "Index(4)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x20000004",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 25,
+        "sectionRef": "Index(5)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000060",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 28,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000074",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 30,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8010000",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 32,
+        "sectionRef": "Index(3)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8010044",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$d",
+        "nameUnknownReason": null,
+        "ordinal": 33,
+        "sectionRef": "Index(6)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$d",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000000",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 17,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000010",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 19,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000048",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 21,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000054",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 27,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000084",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 29,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000094",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 31,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x80000c0",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 33,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000000",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 17,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000010",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 19,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000048",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 21,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000054",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 27,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000064",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 29,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000078",
+        "binding": "Local",
+        "kind": "Unknown",
+        "name": "$t",
+        "nameUnknownReason": null,
+        "ordinal": 31,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Unknown",
+      "name": "$t",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "address": "0x8010044",
+        "binding": "Global",
+        "kind": "Object",
+        "name": "calib",
+        "nameUnknownReason": null,
+        "ordinal": 34,
+        "sectionRef": "Index(6)",
+        "size": 32,
+        "sizeUnknownReason": null
+      },
+      "binding": "Global",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Object",
+      "name": "calib",
+      "nameKnown": true,
+      "size": {
+        "base": 32,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "address": "0x8000055",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "calib_apply",
+        "nameUnknownReason": null,
+        "ordinal": 39,
+        "sectionRef": "Index(1)",
+        "size": 16,
+        "sizeUnknownReason": null
+      },
+      "binding": "Global",
+      "change": "Changed",
+      "differingFields": [
+        "size"
+      ],
+      "indeterminateFields": [],
+      "kind": "Function",
+      "name": "calib_apply",
+      "nameKnown": true,
+      "size": {
+        "base": 16,
+        "comparability": "exact",
+        "delta": -14,
+        "reason": null,
+        "target": 2
+      },
+      "target": {
+        "address": "0x8000055",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "calib_apply",
+        "nameUnknownReason": null,
+        "ordinal": 43,
+        "sectionRef": "Index(1)",
+        "size": 2,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "address": "0x800007c",
+        "binding": "Global",
+        "kind": "Object",
+        "name": "cfg_table",
+        "nameUnknownReason": null,
+        "ordinal": 43,
+        "sectionRef": "Index(2)",
+        "size": 32,
+        "sizeUnknownReason": null
+      },
+      "binding": "Global",
+      "change": "Changed",
+      "differingFields": [
+        "address"
+      ],
+      "indeterminateFields": [],
+      "kind": "Object",
+      "name": "cfg_table",
+      "nameKnown": true,
+      "size": {
+        "base": 32,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 32
+      },
+      "target": {
+        "address": "0x80000d4",
+        "binding": "Global",
+        "kind": "Object",
+        "name": "cfg_table",
+        "nameUnknownReason": null,
+        "ordinal": 48,
+        "sectionRef": "Index(2)",
+        "size": 32,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": null,
+      "binding": "Global",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Object",
+      "name": "g_frame_counter",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": 4
+      },
+      "target": {
+        "address": "0x20000008",
+        "binding": "Global",
+        "kind": "Object",
+        "name": "g_frame_counter",
+        "nameUnknownReason": null,
+        "ordinal": 45,
+        "sectionRef": "Index(5)",
+        "size": 4,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "address": "0x8000065",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "mqtt_task",
+        "nameUnknownReason": null,
+        "ordinal": 38,
+        "sectionRef": "Index(1)",
+        "size": 4,
+        "sizeUnknownReason": null
+      },
+      "binding": "Global",
+      "change": "Changed",
+      "differingFields": [
+        "address",
+        "size"
+      ],
+      "indeterminateFields": [],
+      "kind": "Function",
+      "name": "mqtt_task",
+      "nameKnown": true,
+      "size": {
+        "base": 4,
+        "comparability": "exact",
+        "delta": 42,
+        "reason": null,
+        "target": 46
+      },
+      "target": {
+        "address": "0x8000057",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "mqtt_task",
+        "nameUnknownReason": null,
+        "ordinal": 41,
+        "sectionRef": "Index(1)",
+        "size": 46,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": null,
+      "binding": "Global",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Function",
+      "name": "packet_router",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": 44
+      },
+      "target": {
+        "address": "0x8000095",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "packet_router",
+        "nameUnknownReason": null,
+        "ordinal": 42,
+        "sectionRef": "Index(1)",
+        "size": 44,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "address": "0x8000079",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "payload_extra",
+        "nameUnknownReason": null,
+        "ordinal": 42,
+        "sectionRef": "Index(1)",
+        "size": 4,
+        "sizeUnknownReason": null
+      },
+      "binding": "Global",
+      "change": "Changed",
+      "differingFields": [
+        "address",
+        "size"
+      ],
+      "indeterminateFields": [],
+      "kind": "Function",
+      "name": "payload_extra",
+      "nameKnown": true,
+      "size": {
+        "base": 4,
+        "comparability": "exact",
+        "delta": 16,
+        "reason": null,
+        "target": 20
+      },
+      "target": {
+        "address": "0x80000c1",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "payload_extra",
+        "nameUnknownReason": null,
+        "ordinal": 47,
+        "sectionRef": "Index(1)",
+        "size": 20,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": null,
+      "binding": "Global",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Object",
+      "name": "staging_area",
+      "nameKnown": true,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": 64
+      },
+      "target": {
+        "address": "0x2000000c",
+        "binding": "Global",
+        "kind": "Object",
+        "name": "staging_area",
+        "nameUnknownReason": null,
+        "ordinal": 37,
+        "sectionRef": "Index(6)",
+        "size": 64,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": false,
+      "base": {
+        "address": "0x8000069",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "tls_handshake",
+        "nameUnknownReason": null,
+        "ordinal": 35,
+        "sectionRef": "Index(1)",
+        "size": 16,
+        "sizeUnknownReason": null
+      },
+      "binding": "Global",
+      "change": "Changed",
+      "differingFields": [
+        "address"
+      ],
+      "indeterminateFields": [],
+      "kind": "Function",
+      "name": "tls_handshake",
+      "nameKnown": true,
+      "size": {
+        "base": 16,
+        "comparability": "exact",
+        "delta": 0,
+        "reason": null,
+        "target": 16
+      },
+      "target": {
+        "address": "0x8000085",
+        "binding": "Global",
+        "kind": "Function",
+        "name": "tls_handshake",
+        "nameUnknownReason": null,
+        "ordinal": 38,
+        "sectionRef": "Index(1)",
+        "size": 16,
+        "sizeUnknownReason": null
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 0",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8000000",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 0,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8000000",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 0,
+        "sectionRef": "Index(1)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 0",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 1",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x80000d4",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 1,
+        "sectionRef": "Index(2)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x800007c",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 1,
+        "sectionRef": "Index(2)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 1",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 10",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 10,
+        "sectionRef": "Index(11)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 10,
+        "sectionRef": "Index(11)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 10",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 11",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 11,
+        "sectionRef": "Index(12)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 11,
+        "sectionRef": "Index(12)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 11",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 12",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 12,
+        "sectionRef": "Index(13)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 12,
+        "sectionRef": "Index(13)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 12",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 13",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 13,
+        "sectionRef": "Index(14)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 13,
+        "sectionRef": "Index(14)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 13",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 14",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 14,
+        "sectionRef": "Index(15)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 14,
+        "sectionRef": "Index(15)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 14",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 15",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 15,
+        "sectionRef": "Index(16)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 15,
+        "sectionRef": "Index(16)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 15",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 2",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x8010000",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 2,
+        "sectionRef": "Index(3)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8010000",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 2,
+        "sectionRef": "Index(3)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 2",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 3",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x20000000",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 3,
+        "sectionRef": "Index(4)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x20000000",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 3,
+        "sectionRef": "Index(4)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 3",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 4",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x20000004",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 4,
+        "sectionRef": "Index(5)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x20000004",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 4,
+        "sectionRef": "Index(5)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 4",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 5",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x2000000c",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 5,
+        "sectionRef": "Index(6)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x8010044",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 5,
+        "sectionRef": "Index(6)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 5",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 6",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 6,
+        "sectionRef": "Index(7)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 6,
+        "sectionRef": "Index(7)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 6",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 7",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 7,
+        "sectionRef": "Index(8)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 7,
+        "sectionRef": "Index(8)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 7",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 8",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 8,
+        "sectionRef": "Index(9)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 8,
+        "sectionRef": "Index(9)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 8",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    },
+    {
+      "ambiguous": true,
+      "base": null,
+      "binding": "Local",
+      "change": "Added",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 9",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the target build: an addition is not a change from zero",
+        "target": null
+      },
+      "target": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 9,
+        "sectionRef": "Index(10)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      }
+    },
+    {
+      "ambiguous": true,
+      "base": {
+        "address": "0x0",
+        "binding": "Local",
+        "kind": "Section",
+        "name": null,
+        "nameUnknownReason": "the symbol entry has an empty name",
+        "ordinal": 9,
+        "sectionRef": "Index(10)",
+        "size": null,
+        "sizeUnknownReason": "the symbol entry records size 0"
+      },
+      "binding": "Local",
+      "change": "Removed",
+      "differingFields": [],
+      "indeterminateFields": [],
+      "kind": "Section",
+      "name": "unnamed symbol 9",
+      "nameKnown": false,
+      "size": {
+        "base": null,
+        "comparability": "unknown",
+        "delta": null,
+        "reason": "present only in the base build: a removal is not a change to zero",
+        "target": null
+      },
+      "target": null
+    }
+  ],
+  "target": {
+    "artifact": {
+      "byteSize": 17464,
+      "fileName": "firmware.elf",
+      "sha256": "4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374"
+    },
+    "memory": {
+      "evidence": {
+        "layoutSource": "MapMemoryConfiguration",
+        "mapBacked": true,
+        "weakestEvidenceBasis": "MapRegionAndElfLoad"
+      },
+      "excludedMetadataBytes": 4294,
+      "footprintRowPresent": true,
+      "nonvolatile": {
+        "bytes": 376,
+        "classification": "observed",
+        "state": "exact"
+      },
+      "runtimeRam": {
+        "bytes": 76,
+        "classification": "observed",
+        "state": "exact"
+      }
+    },
+    "snapshotId": "snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6"
+  },
+  "unchanged": {
+    "sections": 2,
+    "symbols": 9
+  },
+  "warnings": [
+    {
+      "code": "SYMBOL-AMBIGUOUS",
+      "message": "67 symbol row(s) repeat a name, kind and binding combination on one or both sides and were left unpaired; a row position is not an identity"
+    }
+  ]
+}
