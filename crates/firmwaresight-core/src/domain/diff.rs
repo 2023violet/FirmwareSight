@@ -264,6 +264,58 @@ pub struct DiffMemory {
     pub evidence: SideEvidence,
 }
 
+/// One side's memory totals as the diff reports them.
+///
+/// Prompt §14 requires each side to keep its own exact / partial / unknown state: a floor of 100
+/// bytes against an exact 100 must not read as exact against exact. A side with no stored footprint
+/// row is [`DiffSideMemory::absent`], which is still not the same claim as a row that says zero.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DiffSideMemory {
+    /// False when this build has no stored footprint row at all.
+    pub footprint_row_present: bool,
+    pub nonvolatile: DiffBudget,
+    pub runtime_ram: DiffBudget,
+    /// Device metadata excluded from both budgets on this side, absent when there is no row.
+    pub excluded_metadata_bytes: Option<u64>,
+    pub evidence: SideEvidence,
+}
+
+impl DiffSideMemory {
+    #[must_use]
+    pub fn from_memory(memory: &DiffMemory) -> Self {
+        Self {
+            footprint_row_present: true,
+            nonvolatile: memory.nonvolatile,
+            runtime_ram: memory.runtime_ram,
+            excluded_metadata_bytes: Some(memory.excluded_metadata_bytes),
+            evidence: memory.evidence.clone(),
+        }
+    }
+
+    /// The side that has no footprint row: unknown totals, and an evidence record that says so.
+    #[must_use]
+    pub fn absent() -> Self {
+        Self {
+            footprint_row_present: false,
+            nonvolatile: DiffBudget::unknown_total(),
+            runtime_ram: DiffBudget::unknown_total(),
+            excluded_metadata_bytes: None,
+            evidence: SideEvidence {
+                map_backed: false,
+                layout_source: "absent".to_owned(),
+                weakest_basis: None,
+            },
+        }
+    }
+
+    fn side(side: &DiffSnapshotInput) -> Self {
+        match &side.memory {
+            Some(memory) => Self::from_memory(memory),
+            None => Self::absent(),
+        }
+    }
+}
+
 /// One persisted section, with every undetermined field still undetermined.
 ///
 /// `file_offset` has no reason column in storage, so it stays an `Option` rather than a `Fact`:
@@ -313,6 +365,121 @@ pub struct DiffSnapshotInput {
     pub memory: Option<DiffMemory>,
     pub sections: Vec<DiffSection>,
     pub symbols: Vec<DiffSymbol>,
+}
+
+impl DiffSnapshotInput {
+    /// Project a freshly analyzed snapshot into a diff input.
+    ///
+    /// This is the CLI's path: `fwsight diff a.elf b.elf` compares what the parser just produced,
+    /// while the desktop compares what storage kept. Both must hand the matcher the same shape and
+    /// the same field labels, or the two surfaces would disagree about what changed. Role, kind,
+    /// binding and section-reference labels therefore use the same `Debug` text the storage writer
+    /// persists, and a footprint is read through the same three budget states.
+    #[must_use]
+    pub fn from_snapshot(snapshot: &crate::domain::build_snapshot::BuildSnapshot) -> Self {
+        let primary = snapshot.primary_artifact();
+        let map_backed = snapshot
+            .artifacts()
+            .iter()
+            .any(|artifact| artifact.kind == crate::domain::identity::ArtifactKind::Map);
+
+        Self {
+            snapshot_id: snapshot.id().as_str().to_owned(),
+            artifact: DiffArtifact {
+                file_name: primary.map_or_else(
+                    || "unknown".to_owned(),
+                    |artifact| display_file_name(&artifact.path),
+                ),
+                sha256: primary
+                    .map(|artifact| artifact.sha256.hex().to_owned())
+                    .unwrap_or_default(),
+                byte_size: primary.map_or(0, |artifact| artifact.byte_size),
+            },
+            memory: snapshot.memory().map(|footprint| DiffMemory {
+                nonvolatile: budget_from(&footprint.nonvolatile),
+                runtime_ram: budget_from(&footprint.runtime_ram),
+                excluded_metadata_bytes: footprint.excluded_metadata_bytes,
+                evidence: SideEvidence {
+                    map_backed,
+                    layout_source: format!("{:?}", footprint.layout_source),
+                    weakest_basis: footprint.weakest_basis.map(|basis| format!("{basis:?}")),
+                },
+            }),
+            sections: snapshot
+                .sections()
+                .iter()
+                .map(|section| diff_section(section, section.index as i64))
+                .collect(),
+            symbols: snapshot
+                .symbols()
+                .iter()
+                .enumerate()
+                .map(|(ordinal, symbol)| diff_symbol(symbol, ordinal as i64))
+                .collect(),
+        }
+    }
+}
+
+/// The last component of a stored or supplied path, on either separator.
+///
+/// A path is an intake fact; a diff, an export and a candidate row are content that must not carry
+/// a machine's directory layout (`AGENTS.md` 7). Storage and the CLI share this one rule so the two
+/// surfaces cannot disagree about what a build is called.
+#[must_use]
+pub fn display_file_name(path: &str) -> String {
+    path.rsplit(['/', '\\'])
+        .next()
+        .filter(|name| !name.is_empty())
+        .unwrap_or(path)
+        .to_owned()
+}
+
+fn budget_from(total: &crate::domain::memory::ByteTotal) -> DiffBudget {
+    use crate::domain::memory::ByteTotal;
+    let state = match total {
+        ByteTotal::Exact { .. } => BudgetState::Exact,
+        ByteTotal::Partial { .. } => BudgetState::Partial,
+        ByteTotal::Unknown { .. } => BudgetState::Unknown,
+    };
+    DiffBudget {
+        state,
+        bytes: if state == BudgetState::Unknown {
+            None
+        } else {
+            total.bytes()
+        },
+    }
+}
+
+fn diff_section(section: &crate::domain::section::Section, index: i64) -> DiffSection {
+    DiffSection {
+        index,
+        name: section.name.clone(),
+        role: format!("{:?}", section.role),
+        alloc: section.flags.alloc,
+        write: section.flags.write,
+        execute: section.flags.execute,
+        virtual_address: section.virtual_address.clone(),
+        load_address: section.load_address.clone(),
+        file_offset: section.file_offset.value().copied(),
+        file_size: section.file_size,
+        memory_size: section.memory_size.clone(),
+        region: section.region.clone(),
+    }
+}
+
+fn diff_symbol(symbol: &crate::domain::symbol::Symbol, ordinal: i64) -> DiffSymbol {
+    DiffSymbol {
+        // A snapshot keeps symbols in parser order, so this is that order's position: a row
+        // position used only for stable output ordering, never as an identity.
+        ordinal,
+        name: symbol.name.clone(),
+        address: symbol.address.value().copied(),
+        size: symbol.size.clone(),
+        kind: format!("{:?}", symbol.kind),
+        binding: format!("{:?}", symbol.binding),
+        section_ref: format!("{:?}", symbol.section),
+    }
 }
 
 /// Whether object or module attribution can be compared.
@@ -382,8 +549,9 @@ pub struct MemoryDiff {
     pub runtime_ram: ByteChange,
     /// The weaker side decides: partial against exact is never presented as exact against exact.
     pub comparability: Comparability,
-    pub base_evidence: SideEvidence,
-    pub target_evidence: SideEvidence,
+    /// Each side as it was recorded, state included, so the two floors stay visible.
+    pub base: DiffSideMemory,
+    pub target: DiffSideMemory,
     pub evidence_warning: Option<String>,
 }
 
@@ -462,9 +630,7 @@ pub fn compare(
     let (symbol_changes, symbols_unchanged) = diff_symbols(base, target);
     let counts = count_changes(&section_changes, &symbol_changes);
 
-    let base_evidence = side_evidence(base);
-    let target_evidence = side_evidence(target);
-    let memory = diff_memory(base, target, &base_evidence, &target_evidence);
+    let memory = diff_memory(base, target);
     let warnings = build_warnings(&memory, &counts, &section_changes);
 
     Ok(DiffResult {
@@ -961,45 +1127,19 @@ fn sort_symbols(rows: &mut [SymbolChange]) {
     });
 }
 
-fn side_evidence(side: &DiffSnapshotInput) -> SideEvidence {
-    match &side.memory {
-        Some(memory) => memory.evidence.clone(),
-        None => SideEvidence {
-            map_backed: false,
-            layout_source: "absent".to_owned(),
-            weakest_basis: None,
-        },
-    }
-}
+fn diff_memory(base: &DiffSnapshotInput, target: &DiffSnapshotInput) -> MemoryDiff {
+    let base_totals = DiffSideMemory::side(base);
+    let target_totals = DiffSideMemory::side(target);
 
-fn diff_memory(
-    base: &DiffSnapshotInput,
-    target: &DiffSnapshotInput,
-    base_evidence: &SideEvidence,
-    target_evidence: &SideEvidence,
-) -> MemoryDiff {
-    let budget = |side: &DiffSnapshotInput, pick: fn(&DiffMemory) -> DiffBudget| -> DiffBudget {
-        side.memory
-            .as_ref()
-            .map(pick)
-            .unwrap_or(DiffBudget::unknown_total())
-    };
-
-    let nonvolatile = budget_change(
-        budget(base, |m| m.nonvolatile),
-        budget(target, |m| m.nonvolatile),
-    );
-    let runtime_ram = budget_change(
-        budget(base, |m| m.runtime_ram),
-        budget(target, |m| m.runtime_ram),
-    );
+    let nonvolatile = budget_change(base_totals.nonvolatile, target_totals.nonvolatile);
+    let runtime_ram = budget_change(base_totals.runtime_ram, target_totals.runtime_ram);
 
     let comparability = weakest_of(nonvolatile.comparability, runtime_ram.comparability);
 
     MemoryDiff {
-        evidence_warning: evidence_warning(base_evidence, target_evidence),
-        base_evidence: base_evidence.clone(),
-        target_evidence: target_evidence.clone(),
+        evidence_warning: evidence_warning(&base_totals.evidence, &target_totals.evidence),
+        base: base_totals,
+        target: target_totals,
         comparability,
         nonvolatile,
         runtime_ram,

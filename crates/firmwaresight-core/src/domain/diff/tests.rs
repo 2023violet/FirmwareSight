@@ -428,7 +428,45 @@ fn a_side_with_no_stored_footprint_row_reads_as_unknown_not_as_an_empty_budget()
     let diff = compare(&base, &target).expect("comparable");
     assert_eq!(diff.memory.nonvolatile.base, None);
     assert_eq!(diff.memory.nonvolatile.delta, None);
-    assert_eq!(diff.memory.base_evidence.layout_source, "absent");
+    assert_eq!(diff.memory.base.evidence.layout_source, "absent");
+    assert!(!diff.memory.base.footprint_row_present);
+    assert!(diff.memory.target.footprint_row_present);
+    assert_eq!(diff.memory.base.excluded_metadata_bytes, None);
+    assert_eq!(diff.memory.target.excluded_metadata_bytes, Some(0));
+}
+
+#[test]
+fn each_side_keeps_its_own_budget_state_so_a_floor_stays_visible() {
+    // §14: a partial 1000 against an exact 1000 must not read as exact against exact, and the
+    // reader has to be able to see which side is the floor.
+    let base = snapshot(
+        "snap-a",
+        partial(1000),
+        budget(400),
+        elf_only(),
+        vec![],
+        vec![],
+    );
+    let target = snapshot(
+        "snap-b",
+        budget(1000),
+        budget(400),
+        map_backed(),
+        vec![],
+        vec![],
+    );
+
+    let diff = compare(&base, &target).expect("comparable");
+    assert_eq!(diff.memory.base.nonvolatile.state, BudgetState::Partial);
+    assert_eq!(diff.memory.target.nonvolatile.state, BudgetState::Exact);
+    assert!(!diff.memory.base.evidence.map_backed);
+    assert!(diff.memory.target.evidence.map_backed);
+    assert_eq!(diff.memory.nonvolatile.delta, Some(0));
+    assert_eq!(
+        diff.memory.comparability,
+        Comparability::Partial,
+        "the weaker side caps the pair"
+    );
 }
 
 #[test]

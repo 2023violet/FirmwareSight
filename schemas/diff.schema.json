@@ -1,0 +1,872 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:firmwaresight:schema:diff:1",
+  "title": "FirmwareSight Portable Build Diff v1",
+  "description": "The JSON document `fwsight diff --json` writes and `fwsight diff --html` is derived from. Produced by the Core diff engine and projected by the report layer; no consumer recomputes a delta. Keys are camelCase, matching the CLI/DTO convention of the document itself (`04_TECH/26_PORTABLE_SCHEMA_POLICY.md` fixes semantics and strictness, not key case). Absence is always `null`, never `0`: a row present on one side only has the other side as `null` with a reason. No field carries a wall-clock timestamp or a host path.",
+  "type": "object",
+  "required": [
+    "schema",
+    "schemaVersion",
+    "base",
+    "target",
+    "memory",
+    "counts",
+    "unchanged",
+    "sectionChanges",
+    "symbolChanges",
+    "objectChanges",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "urn:firmwaresight:schema:diff:1"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "base": {
+      "$ref": "#/$defs/side",
+      "description": "The old build. A diff is never symmetric: delta = target - base."
+    },
+    "target": {
+      "$ref": "#/$defs/side",
+      "description": "The new build."
+    },
+    "memory": {
+      "$ref": "#/$defs/memoryDiff"
+    },
+    "counts": {
+      "$ref": "#/$defs/changeCounts"
+    },
+    "unchanged": {
+      "$ref": "#/$defs/unchangedCounts"
+    },
+    "sectionChanges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sectionChange"
+      },
+      "description": "Every section row that moved, in Core's total order. Ranking never replaces this list."
+    },
+    "symbolChanges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/symbolChange"
+      }
+    },
+    "objectChanges": {
+      "$ref": "#/$defs/objectChanges"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/warning"
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Reserved extension point required by ADR-0022. Never emitted today."
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": [
+        "fileName",
+        "sha256",
+        "byteSize"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "fileName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Last path component only. A host path never enters this document."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "byteSize": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "side": {
+      "type": "object",
+      "required": [
+        "snapshotId",
+        "artifact",
+        "memory"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "snapshotId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact": {
+          "$ref": "#/$defs/artifact"
+        },
+        "memory": {
+          "$ref": "#/$defs/sideMemory"
+        }
+      }
+    },
+    "sideMemory": {
+      "type": "object",
+      "required": [
+        "footprintRowPresent",
+        "nonvolatile",
+        "runtimeRam",
+        "excludedMetadataBytes",
+        "evidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "footprintRowPresent": {
+          "type": "boolean",
+          "description": "False when this build has no stored footprint row. That is not a build of size zero."
+        },
+        "nonvolatile": {
+          "$ref": "#/$defs/sideBudget"
+        },
+        "runtimeRam": {
+          "$ref": "#/$defs/sideBudget"
+        },
+        "excludedMetadataBytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Device metadata held out of both budgets. Null when there is no footprint row."
+        },
+        "evidence": {
+          "$ref": "#/$defs/sideEvidence"
+        }
+      }
+    },
+    "sideBudget": {
+      "type": "object",
+      "required": [
+        "state",
+        "classification",
+        "bytes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "exact",
+            "partial",
+            "unknown"
+          ],
+          "description": "partial means bytes is a floor, not a total."
+        },
+        "classification": {
+          "enum": [
+            "observed",
+            "derived",
+            "unknown"
+          ],
+          "description": "Evidence class implied by state, spelled out so a reader never infers it."
+        },
+        "bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "sideEvidence": {
+      "type": "object",
+      "required": [
+        "mapBacked",
+        "layoutSource",
+        "weakestEvidenceBasis"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mapBacked": {
+          "type": "boolean",
+          "description": "Whether a supported GNU ld MAP is stored for this build. Never inferred."
+        },
+        "layoutSource": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Persisted layout source label, or `absent` when the side has no footprint row."
+        },
+        "weakestEvidenceBasis": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "memoryDiff": {
+      "type": "object",
+      "required": [
+        "nonvolatile",
+        "runtimeRam",
+        "comparability"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "nonvolatile": {
+          "$ref": "#/$defs/byteChange"
+        },
+        "runtimeRam": {
+          "$ref": "#/$defs/byteChange"
+        },
+        "comparability": {
+          "enum": [
+            "exact",
+            "partial",
+            "unknown"
+          ],
+          "description": "The weaker side caps the pair. partial-vs-exact is never presented as exact-vs-exact."
+        }
+      }
+    },
+    "byteChange": {
+      "type": "object",
+      "required": [
+        "base",
+        "target",
+        "delta",
+        "comparability",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Null for an addition: the base side held nothing, which is not zero."
+        },
+        "target": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Null for a removal."
+        },
+        "delta": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "target - base, signed. Null when either side has no number or the difference does not fit an i64."
+        },
+        "comparability": {
+          "enum": [
+            "exact",
+            "partial",
+            "unknown"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Why there is no delta, or why the delta is weaker than it looks. Null only when both sides are exact."
+        }
+      }
+    },
+    "changeCounts": {
+      "type": "object",
+      "required": [
+        "sectionsAdded",
+        "sectionsRemoved",
+        "sectionsChanged",
+        "sectionsAmbiguous",
+        "symbolsAdded",
+        "symbolsRemoved",
+        "symbolsChanged",
+        "symbolsAmbiguous"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sectionsAdded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sectionsRemoved": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sectionsChanged": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sectionsAmbiguous": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rows left unpaired because a name repeats on one or both sides."
+        },
+        "symbolsAdded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "symbolsRemoved": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "symbolsChanged": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "symbolsAmbiguous": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "unchangedCounts": {
+      "type": "object",
+      "required": [
+        "sections",
+        "symbols"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sections": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "symbols": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "description": "What was found identical, so that 'nothing changed' stays a measured claim."
+    },
+    "sectionChange": {
+      "type": "object",
+      "required": [
+        "change",
+        "key",
+        "nameKnown",
+        "ambiguous",
+        "base",
+        "target",
+        "fileSize",
+        "memorySize",
+        "differingFields",
+        "indeterminateFields"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "change": {
+          "enum": [
+            "Added",
+            "Changed",
+            "Removed"
+          ],
+          "description": "Diff vocabulary. These are not Gate states and are never rendered as PASS, REVIEW or BLOCK."
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nameKnown": {
+          "type": "boolean"
+        },
+        "ambiguous": {
+          "type": "boolean"
+        },
+        "base": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sectionRow"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sectionRow"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fileSize": {
+          "$ref": "#/$defs/byteChange"
+        },
+        "memorySize": {
+          "$ref": "#/$defs/byteChange"
+        },
+        "differingFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "indeterminateFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fields unknown on one side. Recorded separately so an unverifiable field is never claimed as a change."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "change": {
+                "const": "Added"
+              }
+            },
+            "required": [
+              "change"
+            ]
+          },
+          "then": {
+            "properties": {
+              "base": {
+                "type": "null"
+              },
+              "fileSize": {
+                "properties": {
+                  "base": {
+                    "type": "null"
+                  },
+                  "delta": {
+                    "type": "null"
+                  }
+                }
+              },
+              "memorySize": {
+                "properties": {
+                  "base": {
+                    "type": "null"
+                  },
+                  "delta": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "change": {
+                "const": "Removed"
+              }
+            },
+            "required": [
+              "change"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "type": "null"
+              },
+              "fileSize": {
+                "properties": {
+                  "target": {
+                    "type": "null"
+                  },
+                  "delta": {
+                    "type": "null"
+                  }
+                }
+              },
+              "memorySize": {
+                "properties": {
+                  "target": {
+                    "type": "null"
+                  },
+                  "delta": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Absence is part of the contract: an Added row must report base as null and carry no delta, a Removed row must report target as null and carry no delta. A fabricated 0 in place of an absence is rejected here, not by convention."
+    },
+    "sectionRow": {
+      "type": "object",
+      "required": [
+        "index",
+        "name",
+        "nameUnknownReason",
+        "role",
+        "alloc",
+        "write",
+        "execute",
+        "virtualAddress",
+        "virtualAddressUnknownReason",
+        "loadAddress",
+        "loadAddressUnknownReason",
+        "fileOffset",
+        "fileSize",
+        "memorySize",
+        "memorySizeUnknownReason",
+        "region",
+        "regionUnknownReason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "Row position within this build. Never an identity across builds."
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nameUnknownReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alloc": {
+          "type": "boolean"
+        },
+        "write": {
+          "type": "boolean"
+        },
+        "execute": {
+          "type": "boolean"
+        },
+        "virtualAddress": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^0x[0-9a-f]+$"
+        },
+        "virtualAddressUnknownReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "loadAddress": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^0x[0-9a-f]+$"
+        },
+        "loadAddressUnknownReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fileOffset": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Storage records no reason column for an absent offset, so this stays a plain nullable integer."
+        },
+        "fileSize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "memorySize": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "memorySizeUnknownReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "regionUnknownReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "symbolChange": {
+      "type": "object",
+      "required": [
+        "change",
+        "name",
+        "nameKnown",
+        "ambiguous",
+        "kind",
+        "binding",
+        "base",
+        "target",
+        "size",
+        "differingFields",
+        "indeterminateFields"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "change": {
+          "enum": [
+            "Added",
+            "Changed",
+            "Removed"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Match key is name + kind + binding. An address or row position is never an identity."
+        },
+        "nameKnown": {
+          "type": "boolean"
+        },
+        "ambiguous": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "binding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/symbolRow"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/symbolRow"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "size": {
+          "$ref": "#/$defs/byteChange"
+        },
+        "differingFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "indeterminateFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "change": {
+                "const": "Added"
+              }
+            },
+            "required": [
+              "change"
+            ]
+          },
+          "then": {
+            "properties": {
+              "base": {
+                "type": "null"
+              },
+              "size": {
+                "properties": {
+                  "base": {
+                    "type": "null"
+                  },
+                  "delta": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "change": {
+                "const": "Removed"
+              }
+            },
+            "required": [
+              "change"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "type": "null"
+              },
+              "size": {
+                "properties": {
+                  "target": {
+                    "type": "null"
+                  },
+                  "delta": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Same absence contract as a section row: a symbol that appears on one side only is an addition or a removal, never a change from or to zero bytes."
+    },
+    "symbolRow": {
+      "type": "object",
+      "required": [
+        "ordinal",
+        "name",
+        "nameUnknownReason",
+        "address",
+        "size",
+        "sizeUnknownReason",
+        "kind",
+        "binding",
+        "sectionRef"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ordinal": {
+          "type": "integer"
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nameUnknownReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "address": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^0x[0-9a-f]+$",
+          "description": "Null means no address was recorded; storage keeps no reason column for it."
+        },
+        "size": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "sizeUnknownReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "binding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sectionRef": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "objectChanges": {
+      "type": "object",
+      "required": [
+        "available",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "Object or module attribution. `01_PRODUCT/01_PRD_MVP.md` P0-3 asks for this delta only when evidence is sufficient; the persisted records carry no object-file field, so today available is false and the reason is the evidence statement."
+    },
+    "warning": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -6,14 +6,17 @@ use serde::Serialize;
 use crate::dto::AnalyzeResultDto;
 
 /// Compact machine-readable form.
-pub fn to_json(value: &AnalyzeResultDto) -> String {
+///
+/// Generic over the DTO on purpose: the analyze payload and the diff payload must go through the
+/// same serializer, or "deterministic" would have two definitions.
+pub fn to_json<T: Serialize + ?Sized>(value: &T) -> String {
     // Serializing a DTO cannot fail: every field is a plain serializable type and no path
     // collector or float is involved.
     serde_json::to_string(value).unwrap_or_else(infallible)
 }
 
 /// Human-readable JSON, used for goldens so a semantic diff stays reviewable by eye.
-pub fn to_json_pretty(value: &AnalyzeResultDto) -> String {
+pub fn to_json_pretty<T: Serialize + ?Sized>(value: &T) -> String {
     serde_json::to_string_pretty(value).unwrap_or_else(infallible)
 }
 
