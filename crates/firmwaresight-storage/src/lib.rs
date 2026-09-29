@@ -8,6 +8,16 @@
 
 pub mod db;
 pub mod error;
+pub mod query;
 
 pub use db::{BuildSummary, Database, SCHEMA_VERSION};
 pub use error::StorageError;
+// The query rows are defined in terms of these two Core types, so a caller that reads a page has to
+// be able to name them. Re-exported rather than made the caller take a second dependency: the
+// storage boundary already speaks them in its public signatures.
+pub use firmwaresight_core::domain::evidence::EvidenceClass;
+pub use firmwaresight_core::domain::identity::Fact;
+pub use query::{
+    DEFAULT_QUERY_LIMIT, EvidenceQuery, EvidenceRow, EvidenceSort, MAX_QUERY_LIMIT, Page,
+    SectionQuery, SectionRow, SectionSort, SortDir, SymbolQuery, SymbolRow, SymbolSort,
+};

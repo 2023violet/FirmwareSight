@@ -4,4 +4,11 @@ export type BudgetDto = {
 /**
  * `exact`, `partial` or `unknown`.
  */
-state: string, classification: string, bytes: number, unattributed: Array<string>, reason: string | null, };
+state: string, classification: string, 
+/**
+ * A `u64` is `number | bigint` to ts-rs, which would promise a precision the artifact crate
+ * never claims; `number` is exact at these magnitudes. An *optional* byte count still has to
+ * say it can be `null`, or the UI cannot render Unknown without the compiler refusing the
+ * check (US-001).
+ */
+bytes: number | null, unattributed: Array<string>, reason: string | null, };

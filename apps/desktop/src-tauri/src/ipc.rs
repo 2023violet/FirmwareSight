@@ -1,9 +1,10 @@
 //! The Desktop/Application IPC boundary: the only place in this workspace where a TypeScript
 //! shape is declared (`ADR-0019`, `04_TECH/25_INTERFACE_CONTRACT_BASELINE.md`).
 //!
-//! Deliberately bounded. Nothing here carries a symbol table, a section list, or a raw byte
-//! buffer: an IPC payload that grows with the artifact is how a desktop shell stops responding.
-//! The full normalized record stays in Core and in SQLite, where it is inspectable.
+//! Deliberately bounded. Nothing here carries a raw byte buffer, and no payload is a whole table:
+//! the detail shapes are one page of at most 500 rows, named by a snapshot id, and the full
+//! normalized record stays in Core and in SQLite, where it is inspectable. An IPC payload that
+//! grows with the artifact is how a desktop shell stops responding.
 //!
 //! Generated `.ts` files land in `apps/desktop/ui/src/ipc/generated/` (see `.cargo/config.toml`,
 //! which sets `TS_RS_EXPORT_DIR`) and are never hand-edited; CI regenerates them and fails on
@@ -154,7 +155,11 @@ pub struct BudgetDto {
     /// `exact`, `partial` or `unknown`.
     pub state: String,
     pub classification: String,
-    #[ts(type = "number")]
+    /// A `u64` is `number | bigint` to ts-rs, which would promise a precision the artifact crate
+    /// never claims; `number` is exact at these magnitudes. An *optional* byte count still has to
+    /// say it can be `null`, or the UI cannot render Unknown without the compiler refusing the
+    /// check (US-001).
+    #[ts(type = "number | null")]
     pub bytes: Option<u64>,
     pub unattributed: Vec<String>,
     pub reason: Option<String>,
@@ -197,4 +202,219 @@ pub struct ErrorEnvelopeDto {
     pub operation_id: String,
     pub details: Option<String>,
     pub remediation: Option<String>,
+}
+
+/// Which end of an ordering the reader asked for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum SortDirDto {
+    #[default]
+    Asc,
+    Desc,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum SectionSortDto {
+    /// The section header index: the locator inside one artifact, and the untouched default.
+    #[default]
+    Index,
+    Name,
+    FileSize,
+    MemorySize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum SymbolSortDto {
+    /// Storage position within this build.
+    #[default]
+    Ordinal,
+    Name,
+    Address,
+    Size,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum EvidenceSortDto {
+    #[default]
+    Field,
+    /// Evidence strength: observed, then derived, then declared, then unknown.
+    Classification,
+}
+
+/// One of the four evidence classes, named the way SQLite stores it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "lowercase")]
+#[ts(export)]
+pub enum EvidenceClassDto {
+    Observed,
+    Derived,
+    Declared,
+    Unknown,
+}
+
+/// A request for one page of sections.
+///
+/// A snapshot id and a page, and nothing else: no path, no table name, no SQL. The three detail
+/// requests share that shape on purpose - the surface is use-case oriented (`AGENTS.md` 7), so
+/// there is nothing here a caller could widen.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionRequestDto {
+    pub snapshot_id: String,
+    /// A literal substring of a section name. `%` and `_` are characters, not syntax.
+    #[serde(default)]
+    pub filter: Option<String>,
+    #[serde(default)]
+    pub sort: SectionSortDto,
+    #[serde(default)]
+    pub direction: SortDirDto,
+    #[serde(default)]
+    pub offset: usize,
+    /// `None` asks for the default page; Rust clamps any larger request to the hard maximum.
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SymbolRequestDto {
+    pub snapshot_id: String,
+    #[serde(default)]
+    pub filter: Option<String>,
+    #[serde(default)]
+    pub sort: SymbolSortDto,
+    #[serde(default)]
+    pub direction: SortDirDto,
+    #[serde(default)]
+    pub offset: usize,
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct EvidenceRequestDto {
+    pub snapshot_id: String,
+    /// A literal substring of the field an item is evidence about.
+    #[serde(default)]
+    pub filter: Option<String>,
+    #[serde(default)]
+    pub classification: Option<EvidenceClassDto>,
+    #[serde(default)]
+    pub sort: EvidenceSortDto,
+    #[serde(default)]
+    pub direction: SortDirDto,
+    #[serde(default)]
+    pub offset: usize,
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+/// One section, exactly as Core recorded it.
+///
+/// Every value that pairs with an unknown reason is `null` in the value slot and text in the reason
+/// slot; the UI renders `Unknown` from the reason and never a zero (US-001). Addresses and file
+/// offsets are hexadecimal text because they are locators, and byte counts are numbers because the
+/// bytes/KiB switch is presentation the UI applies to them.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionRowDto {
+    pub index: usize,
+    pub name: Option<String>,
+    pub name_unknown_reason: Option<String>,
+    pub role: String,
+    pub alloc: bool,
+    pub write: bool,
+    pub execute: bool,
+    pub virtual_address: Option<String>,
+    pub virtual_address_unknown_reason: Option<String>,
+    pub load_address: Option<String>,
+    pub load_address_unknown_reason: Option<String>,
+    /// The schema records no reason for an absent file offset, so only the absence crosses.
+    pub file_offset: Option<String>,
+    #[ts(type = "number")]
+    pub file_size: u64,
+    #[ts(type = "number | null")]
+    pub memory_size: Option<u64>,
+    pub memory_size_unknown_reason: Option<String>,
+    pub region: Option<String>,
+    pub region_unknown_reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SymbolRowDto {
+    /// A row position in this build, not an identity the UI can compare across builds.
+    pub ordinal: usize,
+    pub name: Option<String>,
+    pub name_unknown_reason: Option<String>,
+    pub address: Option<String>,
+    #[ts(type = "number | null")]
+    pub size: Option<u64>,
+    pub size_unknown_reason: Option<String>,
+    pub kind: String,
+    pub binding: String,
+    pub section_ref: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct EvidenceRowDto {
+    pub id: String,
+    pub field: String,
+    /// `observed`, `derived`, `declared` or `unknown`.
+    pub classification: String,
+    pub source_type: String,
+    /// A deterministic locator the reader can go back and re-check, never a host path.
+    pub source_locator: String,
+    pub raw_value: String,
+    pub rule: String,
+    pub confidence: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionPageDto {
+    pub rows: Vec<SectionRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    /// The page size Rust actually applied, after clamping.
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SymbolPageDto {
+    pub rows: Vec<SymbolRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct EvidencePageDto {
+    pub rows: Vec<EvidenceRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
 }

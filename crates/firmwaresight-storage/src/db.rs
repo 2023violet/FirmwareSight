@@ -296,11 +296,16 @@ impl Database {
     ///
     /// A snapshot id is derived from artifact bytes, so finding one here means the identical
     /// import is already in history. Callers use this to avoid writing the same build twice.
+    ///
+    /// `ORDER BY id` is what makes the answer reproducible. Build ids are derived from the snapshot
+    /// id, so one snapshot cannot have two builds through the application, but `LIMIT 1` without an
+    /// ordering returns whichever row SQLite visits first - and every detail query is resolved
+    /// through here.
     pub fn build_id_for_snapshot(&self, snapshot_id: &str) -> Result<Option<String>, StorageError> {
         let found: Option<String> = self
             .conn
             .query_row(
-                "SELECT id FROM builds WHERE snapshot_id = ?1 LIMIT 1",
+                "SELECT id FROM builds WHERE snapshot_id = ?1 ORDER BY id LIMIT 1",
                 params![snapshot_id],
                 |row| row.get(0),
             )

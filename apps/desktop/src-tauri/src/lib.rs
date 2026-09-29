@@ -1,13 +1,15 @@
 //! The Tauri 2 shell. Thin by design: every fact and every verdict comes from Core through the
 //! artifact pipeline, and the command bodies contain no business logic.
 //!
-//! Commands are use-case oriented. There is no path-taking, SQL-taking or shell-executing command
-//! (`AGENTS.md` §7): the WebView either names a closed fixture key or names a session-local
-//! selection id, and the file behind that id was chosen by a person in a native dialog the Rust
-//! side opened (`intake`).
+//! Commands are use-case oriented. There is no path-taking, statement-taking or shell-executing
+//! command (`AGENTS.md` §7): the WebView either names a closed fixture key, names a session-local
+//! selection id, or names a snapshot id it already received - and the file behind the second was
+//! chosen by a person in a native dialog the Rust side opened (`intake`), while the third only
+//! selects a bounded page from history (`details`).
 
 #![forbid(unsafe_code)]
 
+pub mod details;
 pub mod intake;
 pub mod ipc;
 pub mod service;
@@ -464,7 +466,10 @@ pub fn run() {
             intake::select_artifact,
             intake::attach_map,
             intake::clear_map,
-            intake::analyze_selection
+            intake::analyze_selection,
+            details::query_sections,
+            details::query_symbols,
+            details::query_evidence
         ])
         .run(tauri::generate_context!())
         .expect("error while running the FirmwareSight desktop application");
