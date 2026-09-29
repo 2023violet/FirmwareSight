@@ -39,26 +39,28 @@ export function App() {
   return (
     <div className={styles['shell']}>
       <div className={styles['rail']}>
-        <span className={styles['brand']}>FirmwareSight</span>
-        <nav className={styles['nav']} aria-label="Pages">
-          {PAGES.map((entry) => {
-            const active = page === entry.key;
-            return (
-              <button
-                key={entry.key}
-                type="button"
-                aria-label={`${entry.label} page`}
-                aria-current={active ? 'page' : undefined}
-                className={cx(styles['navItem'], active ? styles['navItemActive'] : undefined)}
-                onClick={() => {
-                  setPage(entry.key);
-                }}
-              >
-                {entry.label}
-              </button>
-            );
-          })}
-        </nav>
+        <div className={styles['railSticky']}>
+          <span className={styles['brand']}>FirmwareSight</span>
+          <nav className={styles['nav']} aria-label="Pages">
+            {PAGES.map((entry) => {
+              const active = page === entry.key;
+              return (
+                <button
+                  key={entry.key}
+                  type="button"
+                  aria-label={`${entry.label} page`}
+                  aria-current={active ? 'page' : undefined}
+                  className={cx(styles['navItem'], active ? styles['navItemActive'] : undefined)}
+                  onClick={() => {
+                    setPage(entry.key);
+                  }}
+                >
+                  {entry.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
       <div className={styles['workspace']}>

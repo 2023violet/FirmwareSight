@@ -614,7 +614,8 @@ describe('defaults and refusals', () => {
       true,
     );
     const note = await screen.findByRole('note');
-    expect(note.textContent).toContain('Both sides name app-old.elf');
+    expect(note.textContent).toContain('Both sides name the same build');
+    expect(note.textContent).toContain('app-old.elf · aaaaaaaaaaaa');
     expect(note.textContent).toContain('not the same as nothing having changed');
     expect(compareMock).not.toHaveBeenCalled();
   });
@@ -1020,27 +1021,31 @@ describe('a failed comparison', () => {
 
     const lastGood = await screen.findByRole('region', { name: 'Last good comparison' });
     expect(lastGood.textContent).toContain(
-      'Previous comparison of app-old.elf and app-new.elf.',
+      'Previous comparison of app-old.elf · aaaaaaaaaaaa and app-new.elf · bbbbbbbbbbbb.',
+    );
+    expect(lastGood.textContent).toContain(
+      'The attempt above produced no result, so nothing here was replaced.',
     );
     expect(within(lastGood).getByText('+256 bytes')).toBeDefined();
     expect(screen.queryByRole('region', { name: 'Build comparison' })).toBeNull();
   });
 
-  it('names the pair the surviving report does not describe', async () => {
+  it('says which pair a standing report describes once the selection has moved', async () => {
     candidatesMock.mockResolvedValue(ok(candidatePage([NEWER, candidate(), THIRD])));
     await openCompare();
     await runCompare();
 
-    // The reader now points the base at a third build, and the attempt fails.
+    // The reader repoints the base at a third build and does not press Compare again. Nothing has
+    // failed here, so the only signal that the screen is showing an earlier answer is this note.
     fireEvent.change(pair()[0], { target: { value: 'snap-third' } });
-    compareMock.mockResolvedValue(fail(PAIR_REFUSED));
-    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
 
-    await screen.findByRole('alert', { name: 'Comparison error' });
     const lastGood = await screen.findByRole('region', { name: 'Last good comparison' });
-    expect(lastGood.textContent).toContain('Previous comparison of app-old.elf and app-new.elf.');
-    expect(lastGood.textContent).toContain('It is not a comparison of app-third.elf and app-new.elf.');
-    // The tables still answer for the comparison that succeeded, not for the pair that failed.
+    expect(lastGood.textContent).toContain(
+      'This is the comparison of app-old.elf · aaaaaaaaaaaa and app-new.elf · bbbbbbbbbbbb that you asked for.',
+    );
+    expect(lastGood.textContent).toContain('The pair selected above is a different one');
+    expect(screen.queryByRole('alert')).toBeNull();
+    // The tables still answer for the comparison that succeeded, not for the pair now selected.
     const requests = sectionChangesMock.mock.calls.map(([request]) => request);
     expect(requests.every((request) => request.diffId === 'cmp-7f3a-1')).toBe(true);
   });

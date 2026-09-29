@@ -14,15 +14,21 @@
 }
 
 .rail {
-  position: sticky;
-  top: 0;
   align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-6);
   padding: var(--fs-space-6) var(--fs-space-3);
   background: var(--fs-color-bg-surface);
   border-right: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+/* The rail box is as tall as the page so its surface and hairline run the full height; the brand
+   and the page buttons are what must stay reachable while a long report scrolls, so they are the
+   sticky part. `top` equals the box's own padding, which is why sticking is not a jump. */
+.railSticky {
+  position: sticky;
+  top: var(--fs-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
 }
 
 .brand {

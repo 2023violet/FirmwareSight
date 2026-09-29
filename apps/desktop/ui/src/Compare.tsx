@@ -285,7 +285,14 @@ export function Compare({
   const bothChosen = base !== null && target !== null;
   const samePair = bothChosen && baseId === targetId;
   const hasTwoBuilds = (candidates?.total ?? 0) >= 2;
-  const stale = summary !== null && error !== null;
+  // The report answers for the pair it was computed from, not for the pair the selectors happen to
+  // name now. A swap or a failed attempt leaves the previous diff standing, so the screen says whose
+  // facts the reader is looking at (prompt §18).
+  const stale =
+    summary !== null &&
+    (error !== null ||
+      baseId !== summary.base.snapshotId ||
+      targetId !== summary.target.snapshotId);
 
   return (
     <main className={styles['page']}>
@@ -384,9 +391,10 @@ export function Compare({
         // Refusing is not a failure to report: the pair is named, and the action stays locked until
         // the reader changes it (prompt §18).
         <p className={styles['warning']} role="note">
-          Both sides name {base === null ? 'the same build' : base.fileName}. A build compared with
-          itself reports nothing, which is not the same as nothing having changed. Choose a different
-          Old / Base or New / Target.
+          Both sides name the same build
+          {base === null ? '.' : `: ${buildLabel(base)}.`} A build compared with itself reports
+          nothing, which is not the same as nothing having changed. Choose a different Old / Base or
+          New / Target.
         </p>
       ) : null}
 
@@ -409,13 +417,9 @@ export function Compare({
         >
           {stale ? (
             <p className={styles['stale']} role="note">
-              Previous comparison of {summary.base.fileName} and {summary.target.fileName}.
-              {base === null ||
-              target === null ||
-              (base.snapshotId === summary.base.snapshotId &&
-                target.snapshotId === summary.target.snapshotId)
-                ? ' The failed attempt above produced no result, so nothing here was replaced.'
-                : ` It is not a comparison of ${base.fileName} and ${target.fileName}.`}
+              {error === null
+                ? `This is the comparison of ${buildLabel(summary.base)} and ${buildLabel(summary.target)} that you asked for. The pair selected above is a different one; press Compare to move to it.`
+                : `Previous comparison of ${buildLabel(summary.base)} and ${buildLabel(summary.target)}. The attempt above produced no result, so nothing here was replaced.`}
             </p>
           ) : null}
 
@@ -475,6 +479,15 @@ export function Compare({
   );
 }
 
+/**
+ * Names one stored build the way the pickers do. Two builds of one artifact share a file name, so a
+ * name alone cannot tell the pair on screen from the pair just selected - which is exactly what the
+ * "this is not that comparison" note has to do (prompt §18).
+ */
+function buildLabel(row: { readonly fileName: string; readonly sha256: string }): string {
+  return `${row.fileName} · ${row.sha256.slice(0, 12)}`;
+}
+
 /** One selector, with the recorded facts of the build it currently names. */
 function SnapshotPicker({
   id,
@@ -518,7 +531,7 @@ function SnapshotPicker({
             value={row.snapshotId}
             title={`${row.fileName} · sha256 ${row.sha256} · imported ${row.importedAt}`}
           >
-            {row.fileName} · {row.sha256.slice(0, 12)}
+            {buildLabel(row)}
             {row.snapshotId === lastAnalyzedSnapshotId ? ' · last analyzed' : ''}
           </option>
         ))}

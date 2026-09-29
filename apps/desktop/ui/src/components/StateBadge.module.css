@@ -37,7 +37,11 @@
   color: var(--fs-color-text-disabled);
 }
 
+/* Icon + label is the state. A note beside it may wrap, but the label is never the thing that
+   gives way: shrinking it to a few characters per line makes the state unreadable, which is the
+   one job the badge has. */
 .label {
+  flex: none;
   color: inherit;
 }
 
