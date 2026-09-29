@@ -12,13 +12,15 @@ last_updated: "2026-09-29"
 
 - Date: 2026-09-29
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`P2_COMPARE`** — authorized the same day by *FirmwareSight — P2 Compare MVP
-  Implementation, Execution Prompt v1.0 — Architect Reviewed*, supplied inline (registered in
-  `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source file reached this repository).
-  `P1_ANALYZE_DETAILS` finished on 2026-09-29 and P1 Analyze is `PASS / COMPLETE` (Sections, Symbols,
-  Evidence Inspector, top contributors, US-001 bytes/KiB switch), recorded in `P1_VALIDATION/`.
-  **`P2` is `IN_PROGRESS`, not `PASS`** — its verdict is decided item by item against US-002 in
-  `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` when the round closes, and `P3` still needs its own prompt.
+- Active task: **`NONE`** — `P2_COMPARE` closed `PASS / COMPLETE` on 2026-09-29 under *FirmwareSight —
+  P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect Reviewed*, supplied inline (registered
+  in `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source file reached this
+  repository). Evidence: `P2_VALIDATION/` — four documents, and five defects found by running the
+  product rather than by testing it.
+  `P1_ANALYZE_DETAILS` finished earlier the same day and P1 Analyze is `PASS / COMPLETE` (Sections,
+  Symbols, Evidence Inspector, top contributors, US-001 bytes/KiB switch), recorded in `P1_VALIDATION/`.
+  **`P3` needs its own architect prompt before it starts**, and the remote branch is red at a mid-round
+  P2 commit — see `P2_COMPARE_EXECUTION_REPORT.md` §5.1 before treating any P2 number as CI-verified.
 
 ## Product/architecture baseline
 
@@ -48,7 +50,8 @@ Status: **`PASS`** · promoted to v0.6.0 by the architect-signed
 *P0 Final Promotion / v0.6.0 Baseline Closure v1.0* · Task at promotion time: **NONE** (recorded as
 `active_task: NONE` in `BASELINE.yaml`; the task live on 2026-09-29 was `P1_ANALYZE_DETAILS`, then after it
 closed the field read `NONE` for a few hours until the P2 prompt arrived the same day — it reads
-`P2_COMPARE` now, which changes the pointer and not this frozen P0 verdict)
+`P2_COMPARE` and returned to `NONE` when P2 closed the same day, which changes the pointer and not this
+frozen P0 verdict)
 
 The chain P0 claimed is proven by executed commands, on this machine and on GitHub's runners:
 
@@ -138,10 +141,10 @@ G1: PASS — basis is P0 PASS under ADR-0026 (2026-09-29). Before that date this
 V0: NON_BLOCKING_USER_FEEDBACK_TRACK — 0 of 8 eligible external sessions, an honest zero that gates no P-stage and no G1
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
 P1: PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors, bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB presentation switch. Evidence: P1_VALIDATION/
-P2: IN_PROGRESS — Compare, authorized 2026-09-29 by its own architect prompt; no verdict yet
-P3 / P4: NOT STARTED — P3 Gate becomes the next authorizable stage only when P2 closes, and still needs its own architect prompt
+P2: PASS / COMPLETE — Compare over persisted snapshots: Core-owned deterministic diff, bounded Compare IPC with a session-local registry, the second desktop page, `fwsight diff`, and portable Diff JSON v1 plus self-contained HTML. Evidence: P2_VALIDATION/. Open on purpose: desktop smoke step 27 not observed in the shipped window, and `origin/main` red at the mid-round commit `c7fc2a3` (defect E, fixed at `cfee1e5`, unpushed)
+P3 / P4: NOT STARTED — P3 Gate is now the next authorizable stage, and still needs its own architect prompt
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: P2_COMPARE
+Active task: NONE
 Design tokens: v0.2.1
 ```
 
@@ -187,6 +190,13 @@ shipped-window result: `P0_DESKTOP_SMOKE_REPORT.md`.
   Recorded as unresolved in `P1_ANALYZE_DETAILS_SMOKE_REPORT.md` §6 rather than written up as fixed.
 - **Icon provisioning duplication is a real cost.** Two jobs copy the same apt block; a third job that
   compiles the shell on Linux is the trigger to extract it.
+- **Every gate step except one reads the working tree, not the index.** That blind spot is how P2's
+  fixture pair survived eight commits with only half of it in the repository: `.gitignore`'s
+  `**/target/` matched `fixtures/elf/p2-diff/target/`, the manifest recorded all twelve paths, and the
+  hash test happily digested the files the generator had left on disk. CI caught it because CI clones.
+  `drift/fixtures tracked` now closes the case for anything a manifest lists; a source file ignored by
+  accident is still unchecked, because no manifest names it. Recorded in
+  `P2_VALIDATION/P2_COMPARE_EXECUTION_REPORT.md` §5.1.
 
 ## Version rule
 
@@ -208,7 +218,7 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: P2_COMPARE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
+**`active_task: NONE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
 bounded `Sections`, `Symbols` and `Evidence` queries over the snapshot SQLite already stores, three
 use-case IPC commands, top contributors, the Evidence Inspector, and the `bytes / KiB` presentation
 switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Per-item evidence:
@@ -217,31 +227,33 @@ switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Per-item
 design review: `P1_ANALYZE_DESIGN_CHECKLIST.md`. Earlier slices keep their own packs: `P0_TECHNICAL_VALIDATION/`
 and `P1_A0_VALIDATION/`.
 
-**`P2 Compare` is the live task, authorized by its own architect prompt on 2026-09-29.** That prompt
-changes the pointer, not the standards: `P2` reads `IN_PROGRESS` until `US-002` is green item by item,
-and `P3 Release Gate` becomes the next authorizable stage only when P2 closes — it still needs its own
-prompt, and this file authorizes nothing beyond the stage named in it. The
-boundaries that held for P1 hold for P2 and were not relaxed here: no schema migration
-without its own decision (`SCHEMA_VERSION` is 2), no new dependency, no new design token - a genuinely
-missing token stops a round rather than being written as a magic number - no whole-table payload across
-IPC (default limit 100, hard max 500, enforced in Rust), details always bound to the last-good
-`snapshotId`, `Unknown` never rendered as zero, addresses never unit-converted. `AGENTS.md` 2 / 7 / 11
-keep applying in full; `ADR-0026` relaxed research sequencing, not a single technical boundary.
+**`P2 Compare` closed `PASS / COMPLETE` on 2026-09-29, under its own architect prompt.** The prompt
+changed the pointer while the round ran, not the standards: `P2` was `IN_PROGRESS` until `US-002` was
+green item by item, and it is now — per-item evidence in `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md`,
+what was built and every gate number in `P2_COMPARE_EXECUTION_REPORT.md`, the shipped-window result in
+`P2_COMPARE_DESKTOP_SMOKE_REPORT.md`, design review in `P2_COMPARE_DESIGN_CHECKLIST.md`. The boundaries
+that held for P1 held for P2 and were not relaxed: no schema migration (`SCHEMA_VERSION` still 2, no
+0003), no new dependency (`Cargo.lock` gained no package), no new design token (still v0.2.1) - a
+genuinely missing token stops a round rather than being written as a magic number - no whole-table
+payload across IPC (default limit 100, hard max 500, enforced in Rust), details always bound to the
+last-good handle, `Unknown` never rendered as zero, addresses never unit-converted. `AGENTS.md` 2 / 7 /
+11 keep applying in full; `ADR-0026` relaxed research sequencing, not a single technical boundary.
 
 What belongs to the owner and the architect:
 
-1. pushing remains the owner's act. It last happened through `e63afaf`, the head of the four-commit push
-   that carried the P1 Analyze round, and its remote verification is
-   **Run #13 `36556735551`, `success`, 7 of 7 jobs** (read with
-   `gh run view 36556735551 --repo 2023violet/FirmwareSight`). The gate fires per push, so that one run
-   covers the push rather than each commit: `872ad7e`, `f649afd` and `ae7759a` have no run of their own
-   and none is claimed for them. `be09c65` and its **Run #12 `36520562718`** stay the record of the round
-   before. No commit in either chain carries the run number its own push produced;
+1. pushing remains the owner's act. It last happened through `c7fc2a3`, the second commit of the P2
+   round, and its remote verification is **Run #17 `36596452341`, `failure`, 3 of 7 jobs red** —
+   `Rust (windows-latest)`, `Rust (ubuntu-latest)` and `macOS Core Smoke`, all on
+   `committed_fixtures_match_their_recorded_hashes`, for the reason in the gap above. That is defect E:
+   fixed at `cfee1e5` and re-verified from a clean `git archive` checkout, but never re-pushed, so the
+   remote is red at a commit the fix already leaves behind. The previous green head was `e63afaf` with
+   **Run #13 `36556735551`, `success`, 7 of 7 jobs**. No commit in either chain carries the run number
+   its own push produced;
 2. whether and when to resume the V0 feedback track with real participants - now a choice rather than a
    gate, with the `v0.1.0` instrument still frozen and ready;
-3. a **separate architect prompt** for P2 Compare once P1 is verifiably complete — issued on 2026-09-29,
-   which is why `active_task` now reads `P2_COMPARE`; the same rule still stands for P3, whose prompt has
-   not been issued;
+3. a **separate architect prompt** for P3 Release Gate, which P2's closure makes authorizable and this
+   file does not authorize. P2's own prompt said STOP AFTER P2, and nothing in P3's scope - Gate rules,
+   a Release Bundle, History, Settings, an installer - exists or is implied by it;
 4. re-authorizing pricing, paid-tier or pilot work only after MVP, since `ADR-0026` defers it and the
    matching prompt was withdrawn before execution;
 5. re-opening the two accepted advisories only on one of their recorded triggers.

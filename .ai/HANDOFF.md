@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-09-29"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare IN_PROGRESS
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE
 
 ## Purpose
 
@@ -21,16 +21,29 @@ its local MVP first, `G1 = P0 PASS` for that delivery, and V0 is a **non-blockin
 rather than a precondition. The engineering round that followed - **`P1_ANALYZE_DETAILS`** - finished the
 same day: bounded Sections, Symbols and Evidence queries, top contributors, the Evidence Inspector, and
 the `bytes / KiB` switch US-001 requires. Later that day the architect issued
-*FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect Reviewed*, so
-**`active_task` is now `P2_COMPARE`** and **`P2` is `IN_PROGRESS`** — a stage in flight, not a stage closed.
+*FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect Reviewed*, and that
+round has finished the same day: **`P2` is `PASS / COMPLETE`** and **`active_task` is `NONE`**. Compare
+reads persisted snapshots, Core owns every diff semantic, and one portable document comes out of the CLI
+and out of the desktop byte-for-byte. `P2_VALIDATION/` holds the four documents and US-002 is checked item
+by item in `P2_COMPARE_EXIT_CHECKLIST.md`.
 
 Three wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here
-to continue P1, P1 is `PASS / COMPLETE` and its acceptance list is checked item by item in
-`P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` - there is nothing left inside it to do. And if you were sent
-here to start Gate, Bundle, an installer or anything cloud-shaped: **`P3 Release Gate` becomes the next
-authorizable stage only when P2 closes, and it is not authorized by P2's prompt.** ADR-0026 removed the
-*research* gate, not the requirement that each stage carry its own architect prompt, so "governance got
-easier" is not a licence to widen scope. The live prompt's own §65 says it plainly: **stop after P2.**
+to continue P1 or P2, both are `PASS / COMPLETE` and their acceptance lists are checked item by item in
+`P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` and `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` - there is
+nothing left inside either to do. And if you were sent here to start Gate, Bundle, an installer or anything
+cloud-shaped: **`P3 Release Gate` is the next authorizable stage now that P2 has closed, and it is NOT
+authorized by P2's prompt.** ADR-0026 removed the *research* gate, not the requirement that each stage carry
+its own architect prompt, so "governance got easier" is not a licence to widen scope. P2's own §65 said it
+plainly: **stop after P2.**
+
+A fourth thing to know before you trust any P2 number: **the remote is red and the fix is unpushed.**
+`origin/main` is at `c7fc2a3`, the second commit of the P2 round, whose Run #17 `36596452341` concluded
+`failure` on `committed_fixtures_match_their_recorded_hashes` - `.gitignore`'s `**/target/` had been hiding
+the whole `fixtures/elf/p2-diff/target/` half of the fixture pair, so a clean checkout could not load it
+while every local run passed on files left on disk. `cfee1e5` commits those six files, un-ignores that one
+path, and adds `drift/fixtures tracked` to the gate; it is verified from a `git archive` checkout, not from
+the authoring directory. Everything after `c7fc2a3` is local, so P2 is `LOCAL PASS` and no run covers its
+final tree. Read `P2_COMPARE_EXECUTION_REPORT.md` §5.1 before re-running or re-claiming anything.
 
 ## Baseline and HEADs
 
@@ -68,6 +81,10 @@ Remote CI Run #14              36558893544  on 1e5880a  success, 7 of 7 jobs —
 Remote CI Run #15              36559834259  on 653e313  success, 7 of 7 jobs — the handoff-row alignment successor
 Remote CI Run #16              36576568426  on 7a13660  success, 7 of 7 jobs — the P1-round index and stale-claim dating commit, and the verified start HEAD of P2 Compare
 P2 Compare start               7a13660db873439f66eedee850561e8dae1cb3cf — HEAD = origin/main, worktree clean, 184 Rust and 58 UI tests re-measured green before the first write
+P2 pushed commits              0ff77f3 + c7fc2a3 — the only P2 commits on origin/main; `origin/main` still sits at c7fc2a3
+Remote CI Run #17              36596452341  on c7fc2a3  **failure**, 3 of 7 jobs (Rust windows, Rust ubuntu, macOS Core Smoke) — committed_fixtures_match_their_recorded_hashes could not load the target half of the P2 pair; defect E, caused by `**/target/` in .gitignore
+P2 fixture + gate fix          cfee1e5 — commits fixtures/elf/p2-diff/target/ (6 files), un-ignores that path, adds `drift/fixtures tracked`; verified from a clean `git archive` checkout
+P2 local chain                 8e8705a … c4f4124, cfee1e5 and the closing commit — unpushed, so no remote run covers the final tree; every P2 gate number is LOCAL PASS
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -91,21 +108,26 @@ P1      PASS / COMPLETE — P1_ANALYZE_DETAILS closed 2026-09-29. PASS was earne
         frozen US-001 acceptance list, in P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md, and 14/14 local
         gate steps plus a real shipped-binary window run. Remote CI for those commits is a successor
         document's job; it was NOT RUN when this line was written
-P2      IN_PROGRESS — Compare, authorized 2026-09-29 by its own architect prompt (supplied inline, so no
-        source file exists to hash). Start HEAD 7a13660, measured green on Run #16. No P2 verdict exists
-        yet: P2_VALIDATION/ is written by that round, and US-002 is its acceptance list
-P3 / P4 NOT STARTED — P3 becomes the next authorizable stage when P2 closes, and authorizing it is the
-        architect's act. ADR-0026 removed the research gate, not the requirement of its own prompt
+P2      PASS / COMPLETE — P2_COMPARE closed 2026-09-29 item by item against the frozen US-002 acceptance
+        list, in P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md: 15/15 local gate steps, 345 Rust and 99 UI
+        tests, a real shipped-binary window run, and a clean-`git archive` check of the fixture pair. Two
+        things stay open and are stated, not smoothed: desktop smoke step 27 is NOT VERIFIED in the shipped
+        window, and the remote is red at the pushed commit c7fc2a3 (defect E, fixed unpushed at cfee1e5), so
+        every P2 number is LOCAL PASS and no run covers its final tree
+P3 / P4 NOT STARTED — P3 is now the next authorizable stage, and authorizing it is the architect's act.
+        ADR-0026 removed the research gate, not the requirement of its own prompt
 Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was withdrawn unexecuted
 ```
 
 ## What the code does and how it is proven
 
-- 184 Rust tests and 58 UI tests on one gate: `python scripts/check.py`, which CI calls unchanged —
-  14 steps on a tree that already has the built frontend, 16 when it builds that too, plus 3 under
+- 345 Rust tests and 99 UI tests on one gate: `python scripts/check.py`, which CI calls unchanged —
+  15 steps on a tree that already has the built frontend, 17 when it builds that too, plus 3 under
   `--only core-smoke`. The v0.6.0 promotion measured 104 / 19; P1-A0 and its correctness closure took
-  that to 142 / 31, and P1 Analyze added the remaining 42 Rust tests (19 storage query, 9 shell
-  boundary, 14 ts-rs export bindings) and 27 UI tests (21 detail screen, 3 bridge, 3 formatting).
+  that to 142 / 31, P1 Analyze added 42 Rust and 27 UI, and P2 Compare added 161 Rust and 41 UI — by
+  suite: Core's diff module 36, the P2 fixture pair 12, storage candidate queries 14, the portable-schema
+  contract 19, CLI diff 15 and its golden 11, desktop Compare IPC 24; `compare.test.tsx` 37 of the UI
+  tests.
 - Four Phase-0 library crates plus CLI and desktop apps. Core is headless and synchronous; no Tauri,
   rusqlite, Tokio or `object::*` type crosses out of it.
 - Real ARM ELF/MAP fixtures with recorded provenance and hash-first tests, so no test needs
@@ -128,6 +150,15 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   offset are executed in SQLite - the WebView never receives a whole table and never sorts one - and the
   bytes/KiB switch is a presentation division that issues no command, changes no address and creates no
   snapshot. The Evidence Inspector shows a fact's full source type, locator, rule and evidence id.
+- P2 Compare adds the diff: `firmwaresight-core`'s `domain::diff` pairs sections by name and symbols by
+  name + kind + binding, refuses to pair a duplicate by row position, keeps `Added` and `Removed` as
+  absence rather than `0 → N`, makes a delta `Unknown` when either side is, and inverts cleanly on a
+  reversed pair. Six use-case commands carry it across IPC behind an opaque `cmp-<pid>-<n>` session
+  handle, each detail query page-bound exactly like P1's, and the whole diff never crosses by default.
+  `fwsight diff old new` and the desktop's Export JSON write the *same* portable document
+  (`urn:firmwaresight:schema:diff:1`), byte-for-byte, with no host path and no timestamp in it; the HTML
+  export is self-contained and byte-identical to its golden. Diff truth is computed in Core — never in
+  SQL — and rehydrating a stored snapshot needs the files to be gone, which is the point.
 
 ## Known gaps that promotion did not remove
 
@@ -148,6 +179,20 @@ Unresolved UI     one Apply-filter click did nothing on an intermediate P1 build
 Gate blind spot   `drift/ipc bindings unchanged` is `git diff --exit-code`, so it cannot see a binding
                   file that is not yet tracked. For P1's 14 new bindings the invariant was checked by
                   hashing the directory before and after regeneration instead
+P2 smoke gap      desktop step 27, the same-pair lock, is NOT VERIFIED in the shipped window: a native
+                  <select> popup cannot be driven or captured through the available window path. Covered
+                  by compare.test.tsx and the IPC tests, recorded PARTIAL: P2_VALIDATION/
+                  P2_COMPARE_DESKTOP_SMOKE_REPORT.md
+Remote state      origin/main is at c7fc2a3 and its Run #17 is FAILURE (defect E: `**/target/` hid the
+                  target half of the P2 fixture pair). Fixed at cfee1e5 and re-verified from a clean
+                  `git archive` checkout, but nothing after c7fc2a3 was pushed, so P2 is LOCAL PASS with
+                  a red branch behind it and no run covers its final tree
+Attribution       object / module attribution is Unavailable by evidence, not by omission: ELF symbol
+                  values attribute nothing back to a source object, so P2 reports the gap with its reason
+                  and ships no Object tab (PRD P0-3 makes it conditional on sufficient evidence)
+Index coverage    `drift/fixtures tracked` now compares fixtures/manifest.json against `git ls-files`,
+                  which is the gate's only index-reading step. A source file ignored by accident is still
+                  unseen, because no manifest lists it
 Open design items capability labels show Core's enum words. The eight 1px borders that used to be
                   listed here are closed: `border.width.hairline` in design tokens v0.2.1
 Evidence model  UNTESTED with real users. V0 is now a non-blocking track at 0 / 8, so whether people
@@ -225,8 +270,9 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 - AGENTS.md §2: no silent baseline change — async-first Core, framework swaps, SQLx, HTTP client,
   wgpu, cloud/auth/telemetry, evidence classes, schema semantics, updater/signing model all need an
   ADR first.
-- No Compare / Gate / Bundle product workflow **yet**: they are the authorized shape of P2-P4, and this
-  round must not start them. Still out of scope entirely - installer, NSIS/MSI, AppImage/deb,
+- No Compare workflow existed when that boundary was written; P2 has since shipped it, and **Gate and
+  Bundle product workflows still do not exist** — they are the authorized shape of P3 and P4, and neither
+  is started here. Still out of scope entirely - installer, NSIS/MSI, AppImage/deb,
   notarization, Authenticode, GitHub Release, tag, updater metadata: v0.6.0 is a baseline promotion, not
   a stable release, and the repository has no tag convention and none was invented.
 - `V0_VALIDATION/**` is research evidence and stays where it is: not deleted by the reset, not edited to
@@ -240,7 +286,8 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
   `DISCOVERY_ONLY` or `EXCLUDED_FROM_FORMAL_N` with its reason rather than counted silently. No synthetic
   participant, no fabricated quote, outcome, timing or count - that rule does not expire with the gate.
 - Engineering rounds resume by finishing the authorized task and stopping; they do not continue into the
-  next stage because it is now sequenced more loosely. `P1` ending does not authorize `P2`.
+  next stage because it is now sequenced more loosely. `P1` ending did not authorize `P2`, and `P2` ending
+  does not authorize `P3` — each stage needs its own architect prompt.
 
 - Re-run the read-only Git preflight before writing, and report start HEADs again; do not trust the
   HEADs recorded in this file.

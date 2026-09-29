@@ -646,3 +646,50 @@ Decisions taken at activation, before any product source changed:
 Scope guard: this stage stops at Compare. P3 Gate, P4 Bundle, History, Project Settings, installer,
 signing, updater, cloud, accounts, telemetry, AI, pricing and commercial work remain outside it, and no
 prompt for any of them exists.
+
+# P2 Compare — closed 2026-09-29
+
+Verdict: **`PASS / COMPLETE`**, decided item by item against the frozen US-002 acceptance list in
+`P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md`, not by a summary. `active_task` returns to `NONE`,
+`validation.p2_status` returns to `PASS_COMPLETE`, `p2_execution` now carries measured results instead of
+promises, and baseline stays **`0.6.0`** — this closure creates no `v0.7.0` and claims no G2.
+
+Decisions taken at closure, each with the thing that forced it:
+
+- **The layout label is Core's vocabulary, not a Rust enum name.** One portable document was rendering
+  `MapMemoryConfiguration` from the CLI and `map` from the desktop for the same pair. The desktop was
+  correct because it reads the persisted column back, so `LayoutSource::as_label()` became the single
+  definition and the diff, the storage write and the report DTO all route through it - which also removed
+  two private copies of the same mapping that agreed only by care. Two P2 goldens moved by four lines.
+  They moved because the code was wrong, and the golden is not the authority that decides what correct is.
+- **A public schema is now a compatibility promise.** `schemas/diff.schema.json`
+  (`urn:firmwaresight:schema:diff:1`) became a shipped output format under prompt §59, which authorized it
+  without an ADR because versioned machine-readable output is already policy and Diff is already a defined
+  capability. That cuts both ways and is written down: no silent reinterpretation of any field, and a
+  breaking semantic change needs a future major version. Whoever authors P3's Gate output and P4's Bundle
+  inherits this constraint, not just their own schema.
+- **Object / module attribution stays `Unavailable`.** PRD P0-3 makes it conditional on sufficient
+  evidence, and nothing in an ELF's symbol values attributes bytes back to a source object. The stage
+  reports the gap with its real reason and ships no Object tab, rather than inventing a derivation to fill
+  a column.
+- **A gate blind spot is closed by adding a step, not by relabeling a result.** `.gitignore`'s
+  `**/target/` matched `fixtures/elf/p2-diff/target/`, so half of the P2 fixture pair never entered the
+  repository while `fixtures/manifest.json` recorded all twelve paths. Every local run passed on the bytes
+  the generator had left on disk; the pushed commit's CI run did not. The fix is three parts - commit the
+  six files, un-ignore that one path with its reason in the comment, and give the drift group a
+  `fixtures tracked` step that compares the manifest against `git ls-files`. It is the only step in the
+  gate that reads the index. Changing the gate is deliberately the smaller act here; leaving a red remote
+  and writing "green" would not be.
+- **The red remote is reported, not smoothed over.** `origin/main` is at `c7fc2a3`, whose Run #17
+  `36596452341` is `completed/failure` (3 of 7 jobs). The fix at `cfee1e5` is verified from a clean
+  `git archive` checkout, but nothing after `c7fc2a3` was pushed, so P2 closes as `LOCAL PASS` with a red
+  branch behind it. Pushing is the owner's act and no run number is claimed for a tree that has never run.
+- **One smoke step is `NOT VERIFIED` and stays that way.** Desktop step 27, the same-pair lock in the
+  shipped window, needs a native `<select>` popup that this environment cannot drive or capture. The
+  behaviour has tests; it does not have an observation, so the report writes PARTIAL and the completion
+  report lists it as an open item instead of folding it into "30/30".
+- **No arithmetic was performed on a fixture to make a claim true.** The four window defects and the label
+  defect were fixed in product and test code; the `--confirm` golden regeneration moved exactly the four
+  lines named above and the P0 goldens were untouched. `cargo test --workspace` went 184 → 345 and UI 58 →
+  99, all green, and no existing assertion was weakened to get there - the three tests that asserted P2's
+  own absence were rewritten by name, as the activation entry recorded.

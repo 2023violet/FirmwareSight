@@ -32,11 +32,15 @@ P1      PASS / COMPLETE — the Analyze verb as one product verb: intake, summar
         Shipped as f649afd (storage + shell), ae7759a (UI) and e63afaf (evidence + governance) in one
         push; remote CI Run #13 36556735551 on e63afaf is success, 7 of 7 jobs, and no run exists for
         the individual commits because the gate fires per push
-P2      IN_PROGRESS — Compare. Authorized on 2026-09-29 by its own architect prompt (supplied inline, so
-        no source file exists in this repository to hash); it starts from HEAD 7a13660, measured green on
-        remote Run #16 36576568426 (success, 7 of 7 jobs). No P2 verdict exists yet — US-002 is its
-        acceptance list and P2_VALIDATION/ is the pack that will carry the evidence
-P3 / P4 NOT STARTED — P3 becomes the next authorizable stage only when P2 closes, and still needs its own prompt
+P2      PASS / COMPLETE — Compare over persisted snapshots: Core-owned deterministic diff, bounded Compare
+        IPC behind an opaque session handle, the second desktop page, `fwsight diff`, and portable Diff
+        JSON v1 (urn:firmwaresight:schema:diff:1) plus self-contained HTML. Evidence: P2_VALIDATION/, item
+        by item against the frozen US-002 list. It started from HEAD 7a13660, measured green on remote Run
+        #16 36576568426. Two of its commits were pushed mid-round and Run #17 36596452341 on c7fc2a3 is
+        FAILURE — .gitignore's `**/target/` had hidden the target half of the P2 fixture pair from git, so
+        a clean checkout could not load it. Fixed at cfee1e5 and re-verified from a `git archive` checkout;
+        nothing after c7fc2a3 was pushed, so P2 is LOCAL PASS and no run covers its final tree
+P3 / P4 NOT STARTED — P3 is the next authorizable stage now that P2 has closed, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -194,7 +198,7 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `P2_COMPARE`
+12. `.ai/ACTIVE_TASK.md` — currently `NONE`
 
 ## Batch A recruitment-ready status
 
@@ -229,17 +233,25 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: P2_COMPARE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
+`active_task: NONE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
 product verb: bounded `Sections`, `Symbols` and `Evidence` queries over the SQLite snapshot that already
 existed, three use-case IPC commands, top contributors, an Evidence Inspector, and the `bytes / KiB`
 presentation switch `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Every mandatory US-001
 item is green with its evidence named per item in `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, and
 **P1 is `PASS / COMPLETE`**.
 
-**`P2 Compare` is now the live stage, authorized the same day by its own architect prompt.** The rule that
-kept it unstarted until then still holds for everything after it: looser sequencing is not standing
-authorization, `ADR-0026` removed the research gate and no per-stage prompt requirement, so **P3 Release
-Gate becomes the next authorizable stage only when P2 closes, and it needs its own prompt** — P2's own
+**`P2 Compare` closed `PASS / COMPLETE` the same day, under its own architect prompt.** Compare takes two
+snapshots that Analyze already stored and answers with old / new / signed delta, section and symbol
+changes paired conservatively, growth ranked from changed rows, unpaired rows counted instead of guessed,
+and object attribution reported unavailable with its real reason. `fwsight diff` and the desktop's Export
+JSON produce the same portable document byte-for-byte, and the HTML export is self-contained. US-002 is
+checked item by item in `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md`; the four defects the shipped window
+and the cross-renderer check found are in the pack beside it, with the fifth — the fixture half git was
+ignoring — in `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
+
+The rule that kept P2 unstarted until its prompt arrived still holds for everything after it: looser
+sequencing is not standing authorization, `ADR-0026` removed the research gate and no per-stage prompt
+requirement, so **P3 Release Gate is the next authorizable stage and needs its own prompt** — P2's own
 prompt says stop after P2. If V0 is ever resumed for usability
 feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
 registers are still there, and no session, quote, timing or count may be invented.

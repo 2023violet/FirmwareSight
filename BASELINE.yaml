@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_IN_PROGRESS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
@@ -44,7 +44,11 @@ validation:
   p1_status: PASS
   # The P2 prompt's own §5 requires this field to read IN_PROGRESS while the round runs, and to become
   # PASS_COMPLETE only from the item-by-item US-002 verdict in P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md.
-  p2_status: IN_PROGRESS
+  # That verdict exists: every §61 box is settled by a named test, a command or a line of a smoke report.
+  # One sub-item stays open and is written there rather than folded away - desktop smoke step 27 was not
+  # observable in the shipped window, so it is PARTIAL and covered only by tests. No CI run covers this
+  # round: nothing was pushed, so every gate result is LOCAL PASS.
+  p2_status: PASS_COMPLETE
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
@@ -120,7 +124,13 @@ research:
 # Reviewed", so P2 Compare is now the live task. AGENTS.md 1 still binds: this pointer names one stage,
 # and nothing beyond it. When this round closes, `active_task` returns to NONE and P3 becomes the next
 # authorizable stage only — P3 still needs its own prompt.
-active_task: P2_COMPARE
+# That round closed on 2026-09-29. Compare ships: Core owns every diff semantic, `fwsight diff` and the
+# desktop Compare page render the same portable document, and the measurements are in
+# P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md. So the pointer above returns to what it predicted:
+# NONE. P3 Release Gate is the next authorizable stage and is NOT authorized by this file — it needs
+# its own architect prompt, and no Gate rule, Release Bundle, History, Settings page, installer,
+# signing, updater, SBOM, cloud, account, telemetry, AI, pricing or commercial work exists yet.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -279,10 +289,11 @@ p1_execution:
   evidence: P1_VALIDATION/
   next_stage_after_this_one: P2_compare # written when P2 needed its own prompt; that prompt arrived on 2026-09-29 and `p2_execution` below is its record
 
-# The stage that followed: Compare. Recorded while the round is RUNNING, so the status fields read
-# IN_PROGRESS and every expected-NO field is a promise the prompt makes about its own scope, not a
-# measured result. The measured result lands here only when P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md
-# says so.
+# The stage that followed: Compare. It was recorded while the round was RUNNING, when the status fields
+# read IN_PROGRESS and every expected-NO field was a promise the prompt made about its own scope. The
+# round has now closed, so the fields below that promise is kept: each expected-NO is followed by the
+# measurement that settled it, and the measured result comes from
+# P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md and P2_COMPARE_EXECUTION_REPORT.md.
 p2_execution:
   authorized: true
   prompt: "FirmwareSight - P2 Compare MVP Implementation, Execution Prompt v1.0 - Architect Reviewed"
@@ -302,9 +313,22 @@ p2_execution:
   start_run_id: 36576568426
   start_run_conclusion: "success, 7 of 7 jobs"
   tests_at_start: { rust: 184, ui: 58 } # re-measured on this machine before the first write: cargo test --workspace 184 passed / 0 failed / 0 ignored, corepack pnpm test 58 passed
-  stage_status: IN_PROGRESS
+  stage_status: PASS_COMPLETE
+  closed_on: "2026-09-29"
   not_measured_at_start: { peak_rss: NOT_MEASURED, fuzz: NOT_RUN, macos_or_linux_window: NOT_RUN }
-  evidence: P2_VALIDATION/ # written by this round
+  # Measured result of the promises above. None of these four lines is a claim of intent.
+  boundaries_measured:
+    schema_version_at_close: 2 # migrations on disk are still 0001 and 0002; no 0003 was written
+    new_third_party_dependency: NONE # Cargo.lock gains no `+name = ` line; the only additions are two intra-workspace edges. pnpm-lock.yaml and package.json untouched
+    new_design_token: NONE # assets/design-tokens.json is still v0.2.1 and DESIGN.md is unchanged; 394 var(--fs-*) references all resolve
+    new_public_surface: "schemas/diff.schema.json, urn:firmwaresight:schema:diff:1 - authorized by §59, contract-tested, and now a compatibility promise: breaking its semantics requires a future major version"
+  tests_at_close: { rust: 345, ui: 99 } # cargo test --workspace 345 passed / 0 failed; corepack pnpm test 99 passed in 5 files
+  gates_at_close: "python scripts/check.py 15/15 PASS; fmt, clippy -D warnings, typecheck, lint, build clean; drift 6/6 (including the new fixtures-tracked step), deny real (advisories/bans/licenses/sources ok), core-smoke 3/3"
+  ci_coverage: "RED AT THE PUSHED COMMIT, UNCOVERED AT HEAD" # two P2 commits were pushed mid-round. Run 36596452341 (#17) on c7fc2a3 is completed/failure on committed_fixtures_match_their_recorded_hashes: .gitignore's `**/target/` had hidden the whole fixtures/elf/p2-diff/target/ half of the pair, so a clean checkout had six of twelve P2 paths while every local run passed on the bytes left on disk. Fixed by cfee1e5 (fixtures tracked, .gitignore un-ignored for that path, drift gains `fixtures tracked`) and re-verified from `git archive HEAD`. origin/main is still c7fc2a3 and nothing after it was pushed, so no remote run covers this tree: LOCAL PASS is the whole claim, and turning the red green is a push decision for the owner
+  defects_found_by_smoke: 4 # three visible only in a real window (label squeezed, rail not sticking, standing report unlabelled) and one only by cross-checking the CLI against the desktop export (layoutSource). All four fixed and re-verified; two P2 goldens moved by four lines because the code was wrong, not to clear a gate
+  defects_found_at_closure: 1 # defect E, above: the missing fixture half and the red run it caused. Found by reading the remote state back, not by any local check - no local check could have seen it, which is why the gate now has one
+  not_verified: "Desktop smoke step 27: the same-pair lock was not reached in the shipped window, because a native <select> popup cannot be driven or captured through the available window path. Covered by compare.test.tsx and the IPC tests, and recorded PARTIAL rather than as observed"
+  evidence: P2_VALIDATION/ # four documents, written by this round
   next_stage_after_this_one: P3_gate # NOT authorized by this prompt; it needs its own architect prompt
 
 p0_execution:

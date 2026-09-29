@@ -222,10 +222,23 @@ text with no source file; each says so in its own entry instead of standing for 
 - Start state verified before the first write: `HEAD = origin/main = 7a13660db873439f66eedee850561e8dae1cb3cf`,
   worktree clean, and Run #16 `36576568426` on that HEAD `completed` / `success` / 7 of 7 jobs, read with
   `gh run view 36576568426 --repo 2023violet/FirmwareSight`.
-- Outcome: recorded by the round itself in `P2_VALIDATION/` when it closes. As of the entry above
-  ("Open-Source MVP-First Governance Reset + P1 Analyze Completion"), the sentence *"P2 Compare is the
-  next authorizable stage, unstarted and unauthorized"* was true at that round's close and is superseded
-  by this entry: the prompt arrived the same day.
+- Outcome: **`P2 = PASS / COMPLETE` (LOCAL PASS), closed 2026-09-29** in `P2_VALIDATION/` — exit checklist
+  (US-002 item by item), execution report (every §62 command, the CLI smoke, the cross-renderer equality),
+  design checklist, and the shipped-binary desktop smoke. `cargo test --workspace` 184 → 345, UI 58 → 99,
+  `python scripts/check.py` 15/15, `SCHEMA_VERSION` still 2 with no `0003`, no new third-party dependency,
+  no new design token, and one new public surface: `schemas/diff.schema.json`
+  (`urn:firmwaresight:schema:diff:1`), contract-tested and now a compatibility promise.
+  Five defects were found by running the product rather than by testing it: three visible only in a real
+  window, one only by comparing the CLI export against the desktop export, and one only by reading the
+  remote back — `.gitignore`'s `**/target/` had hidden the whole `fixtures/elf/p2-diff/target/` half of the
+  fixture pair, so **remote Run #17 `36596452341` on the pushed commit `c7fc2a3` is `completed/failure`**.
+  `cfee1e5` fixes it and is verified from a clean `git archive` checkout, but nothing after `c7fc2a3` was
+  pushed, so this stage closes with a red remote branch and no run covering its final tree. Two things stay
+  open on purpose: desktop smoke step 27 was not observable in the shipped window (`PARTIAL`), and object /
+  module attribution remains `Unavailable` because no stored fact attributes bytes to a source object.
+  As of the entry above ("Open-Source MVP-First Governance Reset + P1 Analyze Completion"), the sentence
+  *"P2 Compare is the next authorizable stage, unstarted and unauthorized"* was true at that round's close
+  and is superseded by this entry: the prompt arrived the same day, and so did the closure.
 
 ## Supersession note on the V0 Batch A activation entry
 
