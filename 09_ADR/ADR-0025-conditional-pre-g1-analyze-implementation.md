@@ -17,6 +17,15 @@ Partially supersedes `ADR-0020-validation-sequence.md`. The superseded text is e
 `P1 Product MVP implementation 只有两者都 PASS 后开始。` — and nothing else in ADR-0020. Its
 parallel-validation decision, its consequences and its revisit note all stand.
 
+Superseded in turn, on sequencing, by `ADR-0026-open-source-mvp-first-delivery.md` (2026-09-29). Two
+things this ADR decided no longer hold: Decision 4's precondition ("V0 Batch A must have at least 4
+eligible external sessions completed and an interim architect review" before the next engineering
+authorization) and Decision 6's claim that `Formal G1 = V0 PASS + P0 PASS` is unchanged. Decision 1's
+bounded-parallelism mechanism is what ADR-0026 generalizes; Decisions 2, 3, 7 and 8 - the P1-A0 slice
+itself, its stop condition, the `0.6.0` baseline and the `tauri-plugin-dialog` admission with its security
+consequences - stand and are not reopened. The text below is left as decided, because P1-A0 was
+implemented under exactly these terms and its evidence pack reads against them.
+
 ## Context
 ADR-0020 put V0 (workflow prototype validation) and P0 (technical vertical slice) in parallel and
 gated P1 on both passing. P0 has since closed `PASS` at `v0.6.0` with real cross-platform evidence; the
@@ -106,3 +115,7 @@ it has to be rebuilt.
   reopen the intake architecture instead of granting it.
 - V0 reaches `PASS`, or P0 were ever to be reopened: the pre-G1 carve-out loses its reason to exist and
   ADR-0020's original ordering applies again.
+- Superseded position, 2026-09-29: the first and last bullets above described V0 as a gate on engineering.
+  `ADR-0026` makes V0 a non-blocking feedback track, so neither bullet operates as a precondition any
+  more; the second and third - evidence contradicting the Analyze-first workflow, and any slice touching
+  Compare / Gate / Bundle / schema / storage semantics needing its own ADR - still do.

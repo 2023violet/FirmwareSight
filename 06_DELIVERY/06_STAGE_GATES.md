@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Delivery"
-last_updated: "2026-09-26"
+last_updated: "2026-09-29"
 ---
 
 # Stage Gates
@@ -25,6 +25,12 @@ FirmwareSight：**PASS**
 ---
 
 ## G1 — Technical Validation
+
+> **Gate basis changed 2026-09-29 by `ADR-0026-open-source-mvp-first-delivery.md`.** G1 was defined here as
+> `V0 PASS + P0 PASS` (see the mapping and Pre-G1 sections below). For the current open-source MVP delivery
+> it is `P0 PASS`: the technical content of this section — 最小链、必须 清单、极简技术 UI、不进入 清单 —
+> is unchanged and still has to hold; only the V0 conjunct was removed. V0 is now
+> `NON_BLOCKING_USER_FEEDBACK_TRACK`.
 
 目标：
 证明核心技术链成立，而不是验证商业产品。
@@ -95,11 +101,18 @@ UI 深度：
 - Analyze→Compare completion >=60%
 - Gate meaning comprehension >80%
 - 至少 30% 用户发现真实新信息
-- 至少 5/8 用户有再次使用意愿
-- 至少 3 个明确付费意愿，或 1 个团队 Pilot
+- 至少 5/8 用户有再次使用意愿 `POST_MVP / NOT CURRENT GATE`
+- 至少 3 个明确付费意愿，或 1 个团队 Pilot `POST_MVP / NOT CURRENT GATE`
+
+前五条依赖真实用户样本，随 V0 反馈轨道一起在 MVP 之后采集，不再是 G2 的前置门槛
+（`ADR-0026`，2026-09-29）。当前 MVP 门槛是工程可自证的：本地工作流完整、确定性输出正确、支持的输入行为
+可靠、失败可恢复且不掩盖 Unknown、UI 可信、release 输出可移植、跨平台 CI 绿、支持的 fixture 不崩溃、
+真实 Windows desktop smoke 通过、测试可复现。
 
 退出：
-通过真实用户验证，而不是内部自评。
+~~通过真实用户验证，而不是内部自评。~~ 2026-09-29 起修改：G2 的当前退出条件以上是工程验收；真实用户验证
+改为 MVP 之后的反馈轨道，属于 `OPTIONAL / POST_MVP`，不阻塞 G2。原文保留在此，因为它记录了本文件此前的
+立场。
 
 ---
 
@@ -144,7 +157,7 @@ UI 深度：
 - beta support loop。
 
 开始验证：
-Free / Pro / Team 的真实付费边界。
+Free / Pro / Team 的真实付费边界。 `POST_MVP — 需另行授权，不属于当前 MVP 范围（ADR-0026，2026-09-29）`
 
 ---
 
@@ -219,14 +232,14 @@ GA 的意义是：
 
 ```text
 G0 Problem Baseline        — passed
-V0 Workflow Prototype     — next, parallel with P0 after authorization
-P0 Technical Vertical Slice — next, parallel with V0 after authorization
-G1 = V0 PASS + P0 PASS
-P1 Analyzer
+V0 Workflow Prototype     — NON_BLOCKING_USER_FEEDBACK_TRACK since 2026-09-29 (ADR-0026); sample 0/8 does not gate any P-stage
+P0 Technical Vertical Slice — PASS, frozen at baseline 0.6.0
+G1 = P0 PASS               — since ADR-0026 (2026-09-29); was `G1 = V0 PASS + P0 PASS` before that date
+P1 Analyzer                — IN PROGRESS
 P2 Compare
 P3 Release Gate
 P4 Release Bundle
-G2 Product MVP Candidate
+G2 Product MVP Candidate   — NOT REACHED
 V1 Own-artifact External Validation
 P5 Productization
 B1 Private Beta
@@ -237,18 +250,21 @@ GA1 General Availability
 自然语言 `Problem Validation / Technical Validation / Product MVP / Productization / Beta / RC / GA`
 只作描述；自动化、任务、交付和 Agent 必须使用上述 identifier。
 
-### Pre-G1 条件实现（ADR-0025，2026-09-28 登记）
+### Pre-G1 条件实现（ADR-0025，2026-09-28 登记；sequencing 已被 ADR-0026 取代）
 
-`G1 = V0 PASS + P0 PASS` 不变，且 G1 当前为 **NOT CLAIMED**（V0 为 `0 / 8` eligible external sessions）。
-`ADR-0025-conditional-pre-g1-analyze-implementation.md` 在 `P0 PASS` 之后登记一个受限、可回退的
-**Pre-G1 Analyze 切片**，identifier 为 **`P1-A0`**，用途是 Real Artifact Intake + Analyze Summary。它的
-边界是文档级的硬规则，不是描述：
+历史登记原文：`G1 = V0 PASS + P0 PASS` 不变，且 G1 当前为 **NOT CLAIMED**（V0 为 `0 / 8` eligible
+external sessions）。`ADR-0025` 在 `P0 PASS` 之后登记一个受限、可回退的 **Pre-G1 Analyze 切片**，
+identifier 为 **`P1-A0`**，用途是 Real Artifact Intake + Analyze Summary。它的边界当时是文档级硬规则：
 
 - `P1-A0` 不是 stage gate，不等于 `P1 PASS`，也不关闭 `P1`；
-- `P1-A1` 及之后任何切片，前置条件是 V0 Batch A `>=4` eligible external sessions 加 interim architect
-  review，并且仍需 architect 另行签发 prompt；
-- `P2` / `P3` / `P4` 保持 NOT AUTHORIZED；
-- 每个额外 Pre-G1 切片都需要新的 architect prompt；本文件不授权任何后续工作；
+- ~~`P1-A1` 及之后任何切片，前置条件是 V0 Batch A `>=4` eligible external sessions 加 interim architect
+  review，并且仍需 architect 另行签发 prompt；~~ **2026-09-29 起该前置条件失效（`ADR-0026`）**，逐阶段
+  仍需 architect 另行签发 prompt 这一点不变；
+- ~~`P2` / `P3` / `P4` 保持 NOT AUTHORIZED；~~ 现为 P1 完成后可依次成为下一授权阶段，仍需各自 prompt；
+- 每个额外切片都需要新的 architect prompt；本文件不授权任何后续工作；
 - Pre-G1 切片是 development slice，不创建新 baseline：`baseline_version` 保持 `0.6.0`。
+
+保留这条记录的理由：P1-A0 与其 correctness closure 正是在这套边界下实现并验证的，
+`P1_A0_VALIDATION/**` 的证据按这些条款解读。删除它们会让已交付的切片失去其授权上下文。
 
 V1 比例指标必须报告实际 numerator/denominator；Return intent 阈值统一为 `>=62.5% 且至少 5 人`，不再写死成只适用于 n=8 的 `5/8`。

@@ -4,120 +4,109 @@ doc_id: "FS-AI-005"
 product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
-owner: "Product / Research"
+owner: "Engineering"
 last_updated: "2026-09-29"
 ---
 
 # ACTIVE TASK
 
 ```text
-V0_BATCH_A_EXTERNAL_VALIDATION — the research track ADR-0025 makes the precondition for any further
-pre-G1 engineering slice. This is a RESEARCH / EVIDENCE task. It is not a coding prompt, not P1-A1,
-not a product development stage, and it does not authorize writing product code.
+P1_ANALYZE_DETAILS — the remainder of the Analyze verb, authorized as the first MVP stage under
+ADR-0026 (Open-Source MVP-First Delivery). It is a coding task with a fixed acceptance list.
+It does NOT authorize P2 Compare, P3 Gate or P4 Release Bundle.
 ```
 
 ```text
-STATUS 2026-09-29: ACTIVATED AT 3b59585 (Run #11 36516209283, success, 7 of 7 jobs).
-P1-A0 and its correctness closure are COMPLETE and are not re-opened by this task; see
-`pre_g1_execution` in `BASELINE.yaml`.
+STATUS 2026-09-29: IN PROGRESS. Started from be09c65 (Run #12 36520562718, success, 7 of 7 jobs).
+Parent prompt: FirmwareSight Open-Source MVP-First Governance Reset + P1 Analyze Completion v1.0.
+Acceptance addendum: FirmwareSight P1 Analyze Acceptance Closure v1.0, which binds P1 PASS to the
+frozen US-001 criteria, including the bytes/KiB presentation switch.
 
-BATCH A ACTIVE — WAITING FOR REAL PARTICIPANTS
-Formal V0: 0 / 8 eligible external sessions
-Batch A:   0 / 4-5 eligible external sessions
-
-The activation prompt is resumable and its first invocation had no participant evidence to process.
-Nothing was invented in its place: no PA-00X file, no quote, no timing, no metric, no count, no
-willingness-to-pay signal. The registers still read NOT_RECRUITED / NOT_SCHEDULED.
+Governance moved the same day: ADR-0026 re-based G1 on P0 PASS and turned V0 into
+NON_BLOCKING_USER_FEEDBACK_TRACK. V0's sample is still honestly 0 / 8 — no participant was invented,
+and the withdrawn price-anchor prompt was never executed.
 ```
 
-Authority: the *FirmwareSight V0 Batch A External Validation Activation & Interim Review Execution Prompt
-v1.0 — Architect Reviewed*, supplied inline, recorded in `10_AUDIT/SOURCE_PROMPTS/README.md` without a
-SHA-256 rather than inventing one. It succeeds
-`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt`, which authorized
-the earlier Batch A takeover and withheld `v0.5.2`.
+Evidence (created as this task completes): `P1_VALIDATION/P1_ANALYZE_EXECUTION_REPORT.md`,
+`P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, `P1_VALIDATION/P1_ANALYZE_DESIGN_CHECKLIST.md`,
+`P1_VALIDATION/P1_ANALYZE_DETAILS_SMOKE_REPORT.md`. Prior slice: `P1_A0_VALIDATION/`.
 
-## The research outcome
+## The user outcome
 
-Produce 4–5 real, eligible, externally moderated sessions against the frozen V0 workflow prototype, then a
-Batch A interim review that lets the architect decide whether any further pre-G1 engineering slice is
-worth authorizing. The deliverable is evidence about comprehension and commercial signal — not code.
+A person who can already load their own ELF (plus optional GNU ld MAP) and read a trustworthy summary
+can now also **inspect** what the analysis found:
 
 ```text
-Recruit → screen → consent → moderate T1–T10 on the frozen prototype → PA-00X.md → registers →
-metrics at real n/N → Batch A Interim Review → STOP for the architect
+intake → summary → top contributors → [Sections | Symbols | Evidence]
 ```
 
-## The formal instrument is frozen
+§8 of the parent prompt defines P1's ten capabilities; P1-A0 satisfies 1–4 and error recovery. This
+slice completes **5 inspect Sections, 6 inspect Symbols, 7 inspect Evidence, 8 identify largest
+contributors, 9 understand evidence quality**.
 
-- Prototype: `V0_VALIDATION/prototype/`, version **`v0.1.0`**. Open `index.html` directly or serve the
-  directory with `python -m http.server 8765`. Reset by reloading or `Alt + Shift + R`.
-- Tasks: the exact T1–T10 wording in `V0_VALIDATION/protocol/TASK_SCRIPT.md`. Paraphrasing a task to make
-  the product easier is prohibited; a hint is a moderator intervention and must be logged.
-- Session record: `V0_VALIDATION/sessions/PA-00X.md`, created from `V0_VALIDATION/sessions/TEMPLATE.md`
-  **only after a real session happens**.
-- Moderator conduct, screening and privacy: `protocol/MODERATOR_GUIDE.md`,
-  `protocol/PARTICIPANT_SCREENING.md`, `protocol/CONSENT_PRIVACY.md`, `protocol/INTERVIEW_SCRIPT.md`.
-- **The P1-A0 production desktop is not the formal instrument.** Formal V0 tests comprehension of
-  Analyze → Compare → Gate → Bundle → History; P1-A0 implements only real intake plus the Analyze summary,
-  so substituting it would change the instrument and make Batch A incomparable. If a moderator shows it at
-  all, it is after the full session, labelled `NON_FORMAL_APPENDIX`, and it enters no numerator, no
-  denominator, no Formal N and no V0 claim. Default: do not add that appendix.
+## Acceptance list that decides P1 PASS
 
-## Hard boundaries of this task
+The frozen criteria in `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` **US-001 Analyze ELF** are the
+acceptance list, not a suggestion. Every item below must be green or P1 stays `IN_PROGRESS`:
 
-- **No product code.** Under this task none of `crates/**`, `apps/**`, `schemas/**`, `migrations/**`,
-  `Cargo.toml`, `Cargo.lock`, `package.json`, the pnpm lockfile, `.github/**`, the design tokens, the
-  product UI or the prototype may be modified. There is no exception clause. A Critical Execution Blocker
-  in the prototype is reported and stops Batch A; it is not fixed here.
-- **No invented humans.** No synthetic participant, AI persona, fabricated quote, task outcome, timing,
-  willingness-to-pay, or n/N. An ineligible person is never counted into Formal N to reach a sample size.
-- **`V0` is not PASS after Batch A.** 4–5 sessions is a research milestone, not validation: formal V0 needs
-  a minimum N of 8, and no completion ratio is reported below it.
-- **No engineering authorization.** `P1-A1`, `P2`, `P3`, `P4` remain unauthorized; the interim review's
-  disposition is a research finding that goes back to the architect.
-- **`G1 = V0 PASS + P0 PASS` stays NOT CLAIMED**, `baseline_version` stays `0.6.0`, and completing Batch A
-  creates no new baseline version by itself.
-- **Privacy by default.** Anonymized participant id, role/experience/toolchain/ecosystem, observed task
-  behaviour, non-confidential quotes and purchase/pilot signals only. No real firmware binaries, MAP files,
-  source code, private repositories, credentials, customer or device identifiers, or confidential release
-  information. Audio/screen/video only with explicit recorded consent; otherwise moderated notes. Redact
-  employer and project detail from every quote. No phone numbers or e-mail addresses in this package.
-- **Discovery toolchains.** Keil / ArmClang / IAR people are useful to talk to, but must never be told those
-  toolchains are Supported.
+- sections visible, symbols visible, memory summary present;
+- symbol list sortable **and** filterable, with the search executed in Rust/SQLite rather than by
+  shipping every row to React;
+- artifact hash shown; unsupported file shows a reason and does not crash when debug info is absent;
+- **numeric unit switch between bytes and KiB**: default `Bytes`, `1 KiB = 1024 bytes`, applied
+  consistently to artifact size, both footprints, excluded metadata, section file/memory sizes, top
+  contributor sizes and symbol sizes; never applied to addresses, file offsets, hashes, counts,
+  ordinals or snapshot ids; `Unknown` renders as `Unknown`, never as `0 B` or `0 KiB`;
+- `capabilities.debugInfo` row stays visible and renders from the Rust DTO, and its absence must not
+  crash Analyze (addendum §6: no second debug-info module);
+- switching units is presentation-only: it re-parses nothing, creates no snapshot, writes no SQLite
+  row, and changes no CLI or golden output.
+
+## Hard boundaries
+
+- **Bounded payloads.** Default `limit = 100`, maximum `limit <= 500`, both enforced server-side, with
+  `rows`, total count and the next offset returned. `04_TECH/14` forbids sending the whole symbol table;
+  `desktop_parity.rs` documents that invariant today.
+- **Three use-case commands only**: `query_sections`, `query_symbols`, `query_evidence`. No `run_sql`,
+  `read_table`, `query_any`, `get_database`. No raw SQL crosses the boundary, no `rusqlite` type crosses
+  IPC, no Tauri type enters Core. ts-rs stays the generation boundary and bindings are committed.
+- **No schema migration.** `SCHEMA_VERSION` stays 2; sections, symbols and evidence are already stored.
+  If a measured need for an index appears, stop and report before writing `0003`.
+- **No new dependency and no new design token.** `assets/design-tokens.json` is a frozen asset: a value
+  that genuinely has no token stops this round rather than being written as a magic number.
+- **Details are bound to the last-good snapshot id.** A failed later attempt must not repoint the
+  tables at the failed candidate, and a detail-query error belongs to the details area only: it never
+  wipes the summary.
+- **No invented data.** Unknown stays Unknown with its reason, addresses stay hexadecimal technical
+  presentation, a symbol's storage ordinal is a row position and not identity, and no object or module
+  attribution appears without real evidence.
+- **Out of scope**: Compare, Gate, Bundle, History, Component Evidence, SBOM, CI integration, Keil/IAR
+  adapter, project wizard, treemap, chart library, virtualization library, settings page, pricing,
+  user recruitment, cloud, accounts, telemetry.
+- UI rules of `AGENTS.md` 11 and `DESIGN.md` apply: dense not crowded, hairline borders rather than
+  shadows on tables and panels, mono numerics, status as icon + label and never colour alone,
+  keyboard-accessible selector with correct semantics, light theme only.
 
 ## State this task runs against
 
 ```text
-P0                  PASS — frozen at v0.6.0; no further P0 closure or promotion prompt will be written
-P1-A0               COMPLETE — intake plus its evidence-identity and persistence correctness closure
-Baseline            v0.6.0
+P0                  PASS — frozen at v0.6.0
+G1                  PASS — basis P0 PASS, per ADR-0026 (2026-09-29); before that it was V0 PASS + P0 PASS and NOT CLAIMED
+Baseline            v0.6.0 — unchanged by this slice; no v0.7.0
 Design tokens       v0.2.1
-V0                  ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS — 0 / 8, Batch A 0 / 4-5
-Formal G1           NOT CLAIMED
-P1                  NOT PASS / NOT CLOSED        P1-A1 / P2 / P3 / P4   NOT AUTHORIZED
-Run #6              36419864513 on 7d2f38a — success, 7 of 7 jobs (the last P0-chain remote fact)
-Run #9              36499759371 on 2960173 — success, 7 of 7 jobs (the intake commit)
-Run #10             36515470263 on ace6fbe — success, 7 of 7 jobs (the closure commit)
-Run #11             36516209283 on 3b59585 — success, 7 of 7 jobs (the governance successor)
+P1-A0               COMPLETE (+ correctness closure COMPLETE)
+P1                  IN_PROGRESS — this task
+V0                  NON_BLOCKING_USER_FEEDBACK_TRACK — 0 / 8, gates nothing, nothing fabricated
+P2 / P3 / P4        NOT STARTED — each still needs its own architect prompt
+G2                  NOT REACHED
+Pricing/commercial  DEFERRED_POST_MVP
+Run #12             36520562718 on be09c65 — success, 7 of 7 jobs (this round's start fact)
 Peak RSS            NOT MEASURED      Fuzz: NOT RUN
-RustSec             two accepted transitive advisories, unchanged by this track
+RustSec             two accepted transitive advisories, unchanged
 ```
-
-## What may not be done here
-
-Fabricate V0 evidence of any kind. Counts move only when a real, eligible, externally moderated session
-exists and its evidence-integrity checklist passes; if any mandatory item fails, the session is recorded
-as `DISCOVERY_ONLY` or `EXCLUDED_FROM_FORMAL_N` with a reason rather than counted silently. No percentage
-is reported without its n/N, and no pass threshold is invented for the interim review — it uses evidence.
-
-`V0_VALIDATION/**` is this task's own working area, so it is edited here; that reverses nothing about the
-P0 and P1-A0 rounds, which were both forbidden from touching it.
 
 ## Next gate after this task
 
-At **>= 4 eligible external sessions** with intact evidence: write
-`V0_VALIDATION/batch_a/BATCH_A_INTERIM_REVIEW.md` (sample, task evidence at real n/N, mental-model
-failures, workflow evidence, commercial signal, toolchain demand, participant-by-participant inclusion
-status, one disposition, and the exact decisions the architect now owes), then stop.
-
-`STOP FOR ARCHITECT REVIEW. DO NOT START P1-A1.`
+When every item above is green and the validation and real desktop smoke in the parent prompt pass, P1
+may be marked `PASS / COMPLETE` and `P2 Compare` becomes the next authorizable stage. **This prompt does
+not implement P2.** `AGENTS.md` 1 still forbids inferring the next task from the roadmap.

@@ -19,18 +19,26 @@ and does **not** redefine the product, the architecture, the gate definitions or
 
 ```text
 G0      PASS
-V0      ACTIVE EXTERNAL VALIDATION — 0 / 8 eligible external sessions, waiting for real participants
-        Active task since 2026-09-29: V0 Batch A recruitment and moderation (research, no product code)
 P0      PASS — remote CI Runs #3, #4, #5 and #6, 7 of 7 jobs green on each; frozen at v0.6.0
-G1      NOT CLAIMED — requires V0 PASS + P0 PASS; only the P0 half exists
+G1      PASS — basis: P0 PASS, under ADR-0026 (2026-09-29). Before that date G1 required V0 PASS + P0 PASS
+        and was NOT CLAIMED; the P0 and P1-A0 evidence packs record the older formula as it stood then
+V0      NON_BLOCKING_USER_FEEDBACK_TRACK — 0 / 8 eligible external sessions, an honest zero that now
+        gates no stage. The v0.1.0 prototype and protocol stay frozen for a possible later feedback round
 Pre-G1  P1-A0 Real Artifact Intake — authorized by ADR-0025, green on Run #9, and CLOSED together with
         its evidence-identity / persistence correctness closure (bounded; it stopped at P1-A0)
-P1      NOT PASS / NOT CLOSED; P1-A1, P2, P3 and P4 are NOT AUTHORIZED
+P1      IN_PROGRESS — P1_ANALYZE_DETAILS: Sections, Symbols, Evidence Inspector, top contributors,
+        and the US-001 bytes/KiB presentation switch
+P2      NOT STARTED — the next authorizable stage once P1 is verifiably complete; needs its own prompt
+P3 / P4 NOT STARTED
+Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
-`v0.6.0` does not mean: V0 passed, G1 passed, the product MVP is complete, Compare / Gate / Bundle
+`v0.6.0` itself did not mean: V0 passed, G1 passed, the product MVP is complete, Compare / Gate / Bundle
 workflows exist, an installer or signed build is ready, user value is validated, or the tree is free of
-vulnerabilities. See `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`.
+vulnerabilities. That statement stays true of the promotion act; `ADR-0026` later re-based G1 on the P0
+evidence and opened MVP implementation on engineering grounds. See
+`P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md` and
+`09_ADR/ADR-0026-open-source-mvp-first-delivery.md`.
 
 ## What v0.6.0 adds
 
@@ -58,24 +66,35 @@ carries the dated note saying so.
 
 ## Current V0 status
 
-# INCOMPLETE — insufficient external sample
+# NON_BLOCKING_USER_FEEDBACK_TRACK — sample remains an honest zero
 
 Formal eligible external participants completed:
 
 `0 / 8 minimum`
 
-No participant data is fabricated. V0 was re-sequenced as a non-blocking research track when P0 was
-authorized, and it is now the **active task**: `V0_BATCH_A_EXTERNAL_VALIDATION`, activated 2026-09-29 to
-recruit and moderate 4-5 real eligible sessions on the frozen `v0.1.0` prototype and then write a Batch A
-interim review. Neither deferral nor resumption is completion, and P0's `PASS` does not move V0 by one
-session. Activation wrote no evidence, because no participant had been met.
+No participant data is fabricated, and none was ever going to be: the missing input is real people, which
+no engineering round can supply. On 2026-09-29 `ADR-0026` moved this track off the critical path, so the
+zero no longer blocks P1, P2, P3, P4 or the gate. A Batch A activation earlier that same day verified the
+recruitment pack and wrote nothing else, and the price-anchor prompt that would have followed it was
+withdrawn before execution.
+
+The instrument stays frozen and reusable - `V0_VALIDATION/prototype/` at `v0.1.0`,
+`protocol/TASK_SCRIPT.md`, `sessions/TEMPLATE.md`, both registers - so a later feedback round is still
+comparable with the protocol that exists. What V0 was meant to answer (does a real engineer read `Unknown`,
+`Review` and a MAP request correctly) is now unverified rather than deferred, and
+`ADR-0026` records that as an accepted risk.
 
 Therefore this baseline does **not** claim:
 - V0 PASS;
 - V0 Conditional PASS;
 - V0 FAIL based on users;
-- G1;
-- Product MVP authorization.
+- user value validated, willingness to pay, or a purchase signal;
+- product MVP complete, nor Compare / Gate / Bundle workflows existing;
+- an installer, signed build, updater or release-ready package;
+- zero vulnerabilities or a security-clean tree (`P0_KNOWN_LIMITATIONS.md` lists the accepted advisories);
+- CRA compliance.
+
+What it does claim, as of 2026-09-29: `P0 PASS`, and `G1 PASS` on that basis under `ADR-0026`.
 
 ## Prototype
 
@@ -202,22 +221,28 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: V0_BATCH_A_EXTERNAL_VALIDATION`, activated by architect prompt on 2026-09-29. It is a
-**research / evidence task, not a coding one**: recruit and screen 4-5 real eligible embedded
-participants, moderate the frozen T1-T10 script against the `v0.1.0` clickable prototype, write one
-session record per real person, then produce the Batch A interim review and stop for the architect.
-**No product code is writable under it** - `crates/**`, `apps/**`, `schemas/**`, `migrations/**`, either
-manifest or lockfile, `.github/**`, the design tokens, the product UI and the prototype are all out of
-scope, with no exception, and no participant, quote, outcome, timing or count may be invented.
+`active_task: P1_ANALYZE_DETAILS`, the first MVP stage under `ADR-0026-open-source-mvp-first-delivery.md`.
+It completes the Analyze verb on top of P1-A0's intake and summary: bounded `Sections`, `Symbols` and
+`Evidence` queries over the SQLite snapshot that already exists, three use-case IPC commands, top
+contributors, an Evidence Inspector, and the `bytes / KiB` presentation switch that
+`01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. **P1 is not `PASS` until every US-001
+mandatory item is green.**
 
-The previous task, `P1A0_REAL_ARTIFACT_INTAKE`, authorized by
-`09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md`, **is finished**, together with the narrow
-correctness closure that fixed the two defects its own desktop smoke reported. That ADR supersedes one
-clause of ADR-0020: after `P0 PASS`, the architect may
-authorize a limited, reversible, low-coupling Pre-G1 Analyze slice instead of waiting for V0. The
-authorized slice was real artifact intake through a native dialog plus the already-validated Analyze
-summary — and it stopped there. No engineering task is authorized from this file.
-`G1 = V0 PASS + P0 PASS` is unchanged, `P1` is not closed, `P1-A1` needs V0 Batch A `>= 4` eligible
-external sessions plus an interim architect review and a new prompt, and `P2`/`P3`/`P4` remain
-unauthorized. V0 still needs the human half: recruit eligible participants, Batch A 4–5, interim review,
-Batch B 4–5, optional Batch C to 12–15, record actual n/N, issue the V0 Gate recommendation.
+Fixed boundaries of the stage: no schema migration (`SCHEMA_VERSION` stays 2), no new dependency, no new
+design token - a genuinely missing token stops the round rather than becoming a magic number - default page
+size 100 and hard maximum 500 enforced in Rust, no whole-table payload across IPC, details bound to the
+last-good `snapshotId`, `Unknown` never rendered as zero, and addresses never unit-converted. `ADR-0026`
+relaxed research **sequencing**; it relaxed no technical boundary, and `AGENTS.md` 2 / 7 / 11 still apply
+in full.
+
+History of the pointer, so the older documents are readable: `P1A0_REAL_ARTIFACT_INTAKE` (authorized by
+ADR-0025) is **complete**, together with the narrow correctness closure that fixed the two defects its own
+desktop smoke reported; and on the same day `V0_BATCH_A_EXTERNAL_VALIDATION` was activated, then demoted to
+a non-blocking track by ADR-0026 hours later. `G1 = V0 PASS + P0 PASS` no longer holds as a rule - it is
+`P0 PASS` now - but every document written before 2026-09-29 states the older formula because that is what
+those rounds believed.
+
+`P2 Compare` becomes the next authorizable stage when P1 is verifiably complete, and **needs its own
+architect prompt**: looser sequencing is not standing authorization. If V0 is ever resumed for usability
+feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
+registers are still there, and no session, quote, timing or count may be invented.

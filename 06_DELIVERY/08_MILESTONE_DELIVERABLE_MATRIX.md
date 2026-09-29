@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Delivery"
-last_updated: "2026-09-27"
+last_updated: "2026-09-29"
 ---
 
 # Milestone and Deliverable Matrix
@@ -13,16 +13,16 @@ last_updated: "2026-09-27"
 | Stage | Purpose | Required deliverables | Exit evidence |
 |---|---|---|---|
 | G0 | Problem baseline | product/market/architecture baseline | PASS |
-| V0 | workflow desirability | clickable 7-screen flow, moderated sessions, misunderstanding log, payment questions | V0 report |
+| V0 | workflow desirability | clickable 7-screen flow, moderated sessions, misunderstanding log, payment questions `POST_MVP / NOT CURRENT GATE` | V0 report — **NON_BLOCKING track since ADR-0026 (2026-09-29)**; `0 / 8` gates nothing |
 | P0 | feasibility | real ELF slice, parse→normalize→snapshot→CLI→minimal Tauri, benchmarks | P0 technical report |
-| G1 | allow Product MVP build | V0 PASS + P0 PASS | gate record |
+| G1 | allow Product MVP build | **P0 PASS** under ADR-0026 (was V0 PASS + P0 PASS before 2026-09-29) | gate record |
 | P1-A0 | bounded pre-G1 Analyze slice (ADR-0025; not a gate, not P1 completion) | real artifact intake through a native dialog, optional GNU ld MAP, reuse of the validated Analyze summary, opaque selection id, no full path in IPC/UI | P1_A0 execution report + exit checklist + real-window smoke + Rust/UI tests |
-| P1 | Analyze | Intake/Analyze implementation + fixtures + evidence UI | acceptance/golden tests |
+| P1 | Analyze | Intake/Analyze implementation + fixtures + evidence UI: Sections, Symbols, Evidence Inspector, top contributors, bounded queries, US-001 acceptance incl. bytes/KiB presentation switch and sortable/filterable symbols | acceptance/golden tests + P1 execution report + exit checklist + real Desktop smoke |
 | P2 | Compare | build diff, contributors, evidence-aware change UI | deterministic diff tests |
 | P3 | Gate | 5-state rules, unknown policy, review audit | rule matrix + contract tests |
 | P4 | Bundle | manifest/gate/reviews/report/hash outputs | portable bundle verification |
-| G2 | MVP candidate | complete credible workflow | QA + UX gate |
-| V1 | own-artifact validation | real users/artifacts, actual n/N metrics, price/pilot signal | validation report |
+| G2 | MVP candidate | complete credible workflow | engineering acceptance (see `06_STAGE_GATES.md` G2, ADR-0026); user-panel metrics are `POST_MVP / OPTIONAL` |
+| V1 | own-artifact validation | real users/artifacts, actual n/N metrics, price/pilot signal `POST_MVP` | validation report |
 | P5 | productization | packaging, onboarding, reliability, supportability | release readiness |
 | B1 | private beta | pilot cohort | beta evidence |
 | RC1 | release candidate | signed release candidate | RC checklist |

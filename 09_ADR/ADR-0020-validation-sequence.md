@@ -20,6 +20,12 @@ decision itself, `G1 = V0 PASS + P0 PASS`, and every consequence recorded below 
 superseded sentence is left in place rather than rewritten, because it is what this ADR decided at the
 time it decided it.
 
+A second, later supersession is on record: `ADR-0026-open-source-mvp-first-delivery.md` (2026-09-29)
+removes V0 as a prerequisite for MVP implementation altogether and redefines the gate basis as
+`G1 = P0 PASS` for the current open-source MVP delivery. The parallel-validation decision and the
+consequences below still stand; only the sequencing and the G1 conjunct moved, and the text above is kept
+as the historical position it was.
+
 ## Context
 立项过程原先要求先 UI prototype 真人验证，v0.3.0 又要求先 technical slice。两者未解释，造成流程冲突。
 

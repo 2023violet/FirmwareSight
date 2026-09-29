@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Design / Engineering"
-last_updated: "2026-09-26"
+last_updated: "2026-09-29"
 ---
 
 # FirmwareSight MVP → Complete Product Development Lifecycle
@@ -1447,9 +1447,9 @@ Commercial Product
 
 ```text
 G0 Problem Baseline        — passed
-V0 Workflow Prototype     — next, parallel with P0 after authorization
-P0 Technical Vertical Slice — next, parallel with V0 after authorization
-G1 = V0 PASS + P0 PASS
+V0 Workflow Prototype     — NON_BLOCKING_USER_FEEDBACK_TRACK since ADR-0026 (2026-09-29); its 0/8 sample gates no P-stage
+P0 Technical Vertical Slice — PASS, frozen at baseline 0.6.0
+G1 = P0 PASS               — basis changed 2026-09-29 by ADR-0026; before that date this file read `G1 = V0 PASS + P0 PASS`
 P1 Analyzer
 P2 Compare
 P3 Release Gate

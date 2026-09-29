@@ -12,8 +12,9 @@ last_updated: "2026-09-29"
 
 - Date: 2026-09-29
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`V0_BATCH_A_EXTERNAL_VALIDATION`** — a research / evidence execution track, activated by
-  architect prompt on 2026-09-29. It is not a coding task, and **no product code is writable under it**.
+- Active task: **`P1_ANALYZE_DETAILS`** — completing the Analyze verb (Sections, Symbols, Evidence
+  Inspector, top contributors, US-001 bytes/KiB switch) as the first MVP stage under ADR-0026. It stops
+  before P2 Compare.
 
 ## Product/architecture baseline
 
@@ -22,11 +23,17 @@ validated P0 technical foundation; it does not redefine the product, does not ad
 verb, and does not change MVP scope. Nothing in the frozen baseline was renegotiated to build the
 slice, and nothing was renegotiated to promote it.
 
-Two governance changes are in force now, both decided by the architect rather than by the coding side:
+Three governance changes are in force now, all decided by the architect rather than by the coding side:
 
 - **ADR-0025** supersedes exactly one clause of ADR-0020 (`P1 Product MVP implementation 只有两者都 PASS
   后开始`). After `P0 PASS` the architect may authorize a bounded, reversible Pre-G1 Analyze slice.
-  `G1 = V0 PASS + P0 PASS` is unchanged, `P1-A0` is not a stage gate and does not close P1.
+  Its Batch A precondition on the *next* slice was superseded the same day by ADR-0026 below; the slice
+  it authorized, P1-A0, is complete and its record stands.
+- **ADR-0026** (2026-09-29) makes this an **open-source MVP-first delivery**: MVP proceeds
+  P1 → P2 → P3 → P4 → G2 on engineering grounds, `G1 = P0 PASS` for this delivery, V0 becomes
+  `NON_BLOCKING_USER_FEEDBACK_TRACK`, and pricing / willingness-to-pay / pilot signals leave the gates.
+  It supersedes sequencing only: no V0 artifact, P0 evidence, P1-A0 evidence or technical safety boundary
+  is relaxed, and it authorizes no cloud, account, telemetry, AI, updater or licensing work.
 - **Design tokens `0.2.0 → 0.2.1`**, adding one numeric semantic (`border.width.hairline = 1`) to close
   the documented P0 gap. No color, spacing, radius, typography, layout, motion, shadow or status value
   changed, and the focus ring keeps its own 2px token.
@@ -94,46 +101,50 @@ written before the fix; the upgrade was replayed against the real user-profile d
 
 ## V0
 
-Status: **`ACTIVE EXTERNAL VALIDATION — WAITING FOR REAL PARTICIPANTS`** (resumed, not validated)
+Status: **`NON_BLOCKING_USER_FEEDBACK_TRACK`** since ADR-0026 (2026-09-29). The sample state is
+unchanged and is still an honest zero.
 
 Formal eligible external sessions: `0 / 8 minimum`, `0 / 4–5 Batch A target`.
 
 Completed: clickable prototype, fixture/state machine, protocol/session templates, internal
-functional dry run, Batch A takeover, Batch A recruitment-ready package.
+functional dry run, Batch A takeover, Batch A recruitment-ready package, Batch A activation.
 
-P0 passing does not move this number, and neither does P1-A0. The V0 blocker is the absence of real
-human participants, which no CI run, no green gate and no promotion signature can supply. Resumed is
-not passed: the count stays `0`, the wording change is a governance statement about the track, and the
-coding side authors no transcript, session or metric. `V0_VALIDATION/**` was not modified by any P0 or
-P1-A0 round. Under ADR-0025, **V0 Batch A `>= 4` eligible sessions plus an interim architect review is
-the precondition for authorizing any pre-G1 slice after P1-A0**.
+No CI run, no green gate and no promotion signature can supply the missing input, which is real human
+participants; the coding side authors none, and none were authored. What changed on 2026-09-29 is the
+consequence of that zero: it no longer blocks P1, P2, P3, P4 or G1. The activation round earlier the same
+day had already verified the recruitment pack and written nothing else; `ADR-0026` then moved the track
+off the critical path, and the price-anchor prompt that would have followed it was
+**`WITHDRAWN_BY_ARCHITECT`, never executed**.
 
-That track is now the live task rather than a pointer at a completed engineering slice. The activation
-round wrote **no participant evidence** — none existed to write — and changed only two things inside the
-pack: the stale `v0.5.2` version consequence wording, and nothing else. Counts, registers, session files
-and metrics are exactly as the Batch A takeover left them.
+The instrument stays frozen and reusable on purpose: `V0_VALIDATION/prototype/` at `v0.1.0` with
+`protocol/TASK_SCRIPT.md`, `sessions/TEMPLATE.md` and both registers, so a later feedback round remains
+comparable with the protocol that already exists. What is now unverified rather than merely deferred is
+the thing V0 existed to check: whether a real firmware engineer distinguishes `Unknown` from `PASS`,
+understands why a MAP is requested, or reads a `Review` correctly. That risk is carried forward and
+recorded in `ADR-0026`'s Consequences, not argued away here.
 
 ## Gates
 
 ```text
 G0: PASS
-V0: ACTIVE EXTERNAL VALIDATION / WAITING FOR REAL PARTICIPANTS (0 of 8; Batch A 0 of 4-5)
-V0 Batch A task: ACTIVATED 2026-09-29 — research execution only, no product code writable under it
 P0: PASS — promoted to the v0.6.0 Technical Foundation Baseline; frozen, no further P0 closure prompts
-Formal G1: NOT CLAIMED (requires V0_PASS and P0_PASS; V0 is 0/8)
+G1: PASS — basis is P0 PASS under ADR-0026 (2026-09-29). Before that date this file read `NOT CLAIMED` against `G1 = V0 PASS + P0 PASS`, and the historical records still say so
+V0: NON_BLOCKING_USER_FEEDBACK_TRACK — 0 of 8 eligible external sessions, an honest zero that gates no P-stage and no G1
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
-P1: NOT PASS / NOT CLOSED
-P1-A1: NOT AUTHORIZED (needs V0 Batch A >= 4 sessions + interim review + a new prompt)
-P2 / P3 / P4: NOT AUTHORIZED
-Active task: P1A0_REAL_ARTIFACT_INTAKE
+P1: IN_PROGRESS — P1_ANALYZE_DETAILS: Sections, Symbols, Evidence Inspector, top contributors, and the US-001 bytes/KiB presentation switch
+P2 / P3 / P4: NOT STARTED — next authorizable stage after P1, each still needing its own architect prompt
+Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
+Active task: P1_ANALYZE_DETAILS
 Design tokens: v0.2.1
 ```
 
-`06_DELIVERY/06_STAGE_GATES.md` defines `G1 = V0 PASS + P0 PASS`. With V0 unvalidated, a P0 `PASS`
-alone does not open G1, and this round claims nothing beyond P0. ADR-0020's own text is unchanged except
-for a status note recording that ADR-0025 supersedes one clause of it: the sequencing question that used
-to read "the architect must issue a decision if P1 is ever to start while V0 is deferred" has now been
-answered — narrowly, for one slice, and documented as `P1-A0` rather than as P1.
+`ADR-0026-open-source-mvp-first-delivery.md` is what changed here. It re-bases G1 on `P0 PASS` for the
+current open-source MVP and moves V0 off the critical path, superseding the sequencing conclusions of
+ADR-0020 and ADR-0025 while leaving their decisions, evidence and safety boundaries in place. G1's
+technical content in `06_DELIVERY/06_STAGE_GATES.md` is unchanged and still has to hold; what was removed
+is the requirement that a moderated human panel exist before more of the product can be built. That is a
+real cost, recorded in the ADR's own Consequences section: whether users distinguish `Unknown` from
+`PASS`, or understand why a MAP is asked for, is now unverified rather than deferred.
 
 Full reasoning: `P0_TECHNICAL_VALIDATION/P0_TECHNICAL_VALIDATION_REPORT.md`; the promotion act:
 `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`; per-item evidence:
@@ -181,30 +192,31 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: V0_BATCH_A_EXTERNAL_VALIDATION`.** P0 is closed and frozen, and the one bounded pre-G1
-engineering slice ADR-0025 authorized - P1-A0, plus its correctness closure - was implemented, tested in a
-real window and recorded in `P1_A0_VALIDATION/`. The live task is now the research track that gates
-anything further: recruit, screen and moderate **4-5 real eligible external sessions** against the frozen
-`v0.1.0` prototype, then write the Batch A interim review and stop.
+**`active_task: P1_ANALYZE_DETAILS`**, the first MVP stage under `ADR-0026`. P0 is closed and frozen;
+P1-A0 and its correctness closure are complete and recorded in `P1_A0_VALIDATION/`. What is in progress is
+the rest of Analyze: bounded `Sections`, `Symbols` and `Evidence` queries over the snapshot SQLite already
+stores, three use-case IPC commands, top contributors, the Evidence Inspector, and the
+`bytes / KiB` presentation switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. P1 may
+be marked `PASS` only when every US-001 mandatory item is green; the round stops before P2 Compare.
 
-**No product code is writable under this task.** The activation prompt forbids touching `crates/**`,
-`apps/**`, `schemas/**`, `migrations/**`, either manifest or lockfile, `.github/**`, the design tokens, the
-product UI and the prototype, with no exception; a Critical Execution Blocker in the prototype is reported,
-not fixed. `AGENTS.md` 1 still forbids inventing work, and this task forbids inventing people: no synthetic
-participant, no fabricated quote, outcome, timing, willingness-to-pay or count.
+Fixed boundaries of this stage: no schema migration (`SCHEMA_VERSION` stays 2), no new dependency, no new
+design token - a genuinely missing token stops the round rather than being written as a magic number - no
+whole-table payload across IPC (default limit 100, hard max 500, enforced in Rust), details always bound to
+the last-good `snapshotId`, `Unknown` never rendered as zero, and addresses never unit-converted.
+`AGENTS.md` 1 still forbids inventing work, and `AGENTS.md` 2 / 7 / 11 keep applying: `ADR-0026` relaxed
+research sequencing, not a single technical boundary.
 
-What belongs to the owner, the research operator and the architect:
+What belongs to the owner and the architect:
 
-1. pushing remains the owner's act, and it happened for the engineering rounds: `ace6fbe` is on
-   `origin/main` and **Run #10 `36515470263` measured it `success`, 7 of 7 jobs** (read with
-   `gh run view`), with Run #9 `36499759371` on `2960173` behind it and Run #11 `36516209283` on the
-   governance successor `3b59585`. No commit carries the run number its own push produced;
-2. **finding real participants** - the only input that can move `0 / 8`. The recruitment pack, screening
-   and scheduling registers are verified ready and still hold no recruited row;
-3. the 2-3 exploratory research **price anchors** `BATCH_A_RESEARCH_PRICE_ANCHORS.md` deliberately leaves
-   undefined - the Product Lead decides, and this round invented none;
-4. the next engineering authorization, which requires V0 Batch A `>= 4` eligible external sessions, an
-   interim architect review of that evidence, and a new prompt;
+1. pushing remains the owner's act, and it happened through `be09c65`, whose remote verification is
+   **Run #12 `36520562718`, `success`, 7 of 7 jobs** (read with `gh run view`). No commit carries the run
+   number its own push produced;
+2. whether and when to resume the V0 feedback track with real participants - now a choice rather than a
+   gate, with the `v0.1.0` instrument still frozen and ready;
+3. a **separate architect prompt** for P2 Compare once P1 is verifiably complete; this round does not
+   authorize it;
+4. re-authorizing pricing, paid-tier or pilot work only after MVP, since `ADR-0026` defers it and the
+   matching prompt was withdrawn before execution;
 5. re-opening the two accepted advisories only on one of their recorded triggers.
 
 Four items the closure round surfaced and left alone, each with its reason in

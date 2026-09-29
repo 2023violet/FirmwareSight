@@ -169,3 +169,29 @@ text with no source file; each says so in its own entry instead of standing for 
 - Outcome, first invocation 2026-09-29: activation, recruitment-pack verification and the stale `v0.5.2`
   wording note only. **No real participant evidence existed, so none was written and no count moved**;
   the round stopped at `BATCH A ACTIVE — WAITING FOR REAL PARTICIPANTS`.
+
+## Withdrawn: V0 Batch A Price Anchor Authorization + Participant Acquisition Pack
+
+- File: none in this directory, and **no entry existed for it before this note** — the prompt was generated
+  and then withdrawn before execution, so there is nothing here to hash and nothing here that ever ran.
+- Version: v1.0, architect reviewed, **WITHDRAWN_BY_ARCHITECT** on 2026-09-29.
+- Reason recorded verbatim from the withdrawing prompt: *open-source MVP-first direction;
+  pricing/commercial validation is out of current scope.* See
+  `09_ADR/ADR-0026-open-source-mvp-first-delivery.md`.
+- Status: **NOT EXECUTED.** No price anchors were authored, no participant acquisition pack was produced,
+  `BATCH_A_RESEARCH_PRICE_ANCHORS.md` still states that no concrete anchor is decided, both registers still
+  read `NOT_RECRUITED` / `NOT_SCHEDULED`, and the V0 sample remains `0 / 8`. Nothing in this repository may
+  read as though any part of it ran.
+
+## Supersession note on the V0 Batch A activation entry
+
+The section "V0 Batch A External Validation Activation and Interim Review" above records a round that
+**was** executed on 2026-09-29 and whose outcome stands: activation happened, the recruitment pack was
+verified, no participant evidence was written, and the round stopped at
+`BATCH A ACTIVE — WAITING FOR REAL PARTICIPANTS`. Its factual content is unchanged.
+
+What no longer stands is its sequencing authority. `ADR-0026` moved V0 to
+`NON_BLOCKING_USER_FEEDBACK_TRACK`, so `active_task` has since passed from `V0_BATCH_A_EXTERNAL_VALIDATION`
+to `P1_ANALYZE_DETAILS`, and no Batch A session count gates any engineering stage any more. The
+recruitment-ready pack, the frozen `v0.1.0` prototype and the protocol files stay in place for a later,
+non-blocking feedback round.

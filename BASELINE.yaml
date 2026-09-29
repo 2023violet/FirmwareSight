@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_V0_ACTIVE_WAITING_PARTICIPANTS_G1_NOT_CLAIMED
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_IN_PROGRESS_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,22 +27,30 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_V0_ACTIVE_WAITING_PARTICIPANTS_P0_PASS_G1_NOT_CLAIMED
-  # P0 is closed. V0 is resumed as an active external-validation track that is still waiting on real
-  # participants; G1 still requires V0_PASS + P0_PASS, so only the P0 half exists.
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_IN_PROGRESS_V0_NON_BLOCKING
+  # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
+  # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
+  # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
+  # chain, fixture reproducibility, parser behaviour, non-blocking UI, a data model that can carry
+  # Compare and Gate) is unchanged.
   next_authorizable_tracks:
-    - V0_workflow_prototype_validation
-  g1_requires: [V0_PASS, P0_PASS]
-  g1_claimed: false
+    - P1_analyzer_completion
+    - V0_workflow_prototype_validation_as_non_blocking_feedback
+  g1_requires: [P0_PASS]
+  g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
+  g1_claimed: true
+  g1_claimed_basis: "P0 PASS at v0.6.0, measured green cross-platform through remote Run #12; claimed under ADR-0026, not under the earlier V0+P0 formula"
   product_mvp_phases: [P1_analyzer, P2_compare, P3_gate, P4_bundle]
+  p1_status: IN_PROGRESS
   own_artifact_validation: V1
-  # ADR-0025 registers a bounded pre-G1 identifier so that "implementation may start" is documented
-  # rather than inferred. It is not a stage gate and it does not move g1_requires.
+  # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
+  # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
   pre_g1:
     identifier: P1_A0
     registered_by: 09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md
     is_stage_gate: false
     closes_p1: false
+    sequencing_superseded_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
 
 post_mvp_candidates:
   namespaces: [E1, E2, E3, GX]
@@ -101,11 +109,12 @@ research:
   market_verification: 08_RESEARCH/09_EXPERT_ROUND_MARKET_VERIFICATION_2026-09-27.md
   disputed_claims_must_not_be_promoted: true
 
-# P0 is closed at v0.6.0 and P1-A0 plus its correctness closure are complete. The active task is now
-# the research track ADR-0025 makes the precondition for any further pre-G1 slice: V0 Batch A external
-# validation with real participants. AGENTS.md 1 still forbids inventing work, and under this task no
-# product code may be written at all - the missing input is human evidence, not implementation.
-active_task: V0_BATCH_A_EXTERNAL_VALIDATION
+# P0 is closed at v0.6.0, G1 is claimed on the P0 basis under ADR-0026, and P1-A0 plus its correctness
+# closure are complete. The active task is the rest of Analyze: bounded Sections, Symbols and Evidence
+# details, top contributors, and the US-001 bytes/KiB presentation switch. AGENTS.md 1 still forbids
+# inventing work: this pointer exists because the architect issued the parent prompt and its acceptance
+# addendum, not because the roadmap suggests a next feature.
+active_task: P1_ANALYZE_DETAILS
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -141,15 +150,22 @@ v0_execution:
     research_price_anchor_state: "no concrete anchor is decided; BATCH_A_RESEARCH_PRICE_ANCHORS.md says so and this round invented none"
     open_owner_input: "recruitment of real participants, and 2-3 exploratory price anchors if the Product Lead wants them"
     stop_condition: "4-5 eligible external sessions plus the Batch A interim review, then back to the architect"
+    # Same-day supersession of the sequencing above: ADR-0026 moved V0 off the critical path. The
+    # activation itself happened and its evidence state is real - zero sessions, nothing fabricated.
+    sequencing_superseded_on: "2026-09-29 by 09_ADR/ADR-0026-open-source-mvp-first-delivery.md; the price-anchor prompt that would have followed was withdrawn before execution"
 
-# V0 is resumed as an active external-validation track. Resumed is not passed: the participant count
-# stays 0 / 8 because real people are the missing input, and the coding side authors none. V0 still
-# gates G1 and, under ADR-0025, still gates every pre-G1 slice after P1-A0.
+# V0's own sample state is unchanged and honest: 0 of 8 eligible external sessions, because no real
+# participant has been met and the coding side authors none. What changed on 2026-09-29 is its position on
+# the critical path - ADR-0026 makes it a feedback track rather than a gate, so a zero count no longer
+# blocks any P-stage or the G1 claim. The instrument stays frozen and reusable.
 v0_track:
-  disposition: ACTIVE_EXTERNAL_VALIDATION_WAITING_FOR_REAL_PARTICIPANTS
+  disposition: NON_BLOCKING_USER_FEEDBACK_TRACK
+  sample_state: "0 / 8 eligible external sessions, unchanged and not fabricated"
   blocks_p0_engineering: false
-  blocks_pre_g1_slices_after_p1_a0: true
-  blocks_g1: true
+  blocks_pre_g1_slices_after_p1_a0: false
+  blocks_p1_p2_p3_p4: false
+  blocks_g1: false
+  instrument_remains_frozen: "V0_VALIDATION/prototype/ at v0.1.0 with protocol/TASK_SCRIPT.md, so a later feedback round is still comparable"
 
 # The pre-G1 slice that was authorized and is now complete, recorded here rather than in `p0_execution`
 # because it is not P0. Registered by ADR-0025, which supersedes one ADR-0020 clause and nothing else.
@@ -166,18 +182,22 @@ pre_g1_execution:
   supersedes: "the ADR-0020 clause P1 Product MVP implementation 只有两者都 PASS 后开始"
   scope: "real artifact intake through a native dialog, optional GNU ld MAP, reuse of the validated Analyze summary"
   stop_condition: P1_A0_ONLY
-  p1_stage_status: NOT_PASS_NOT_CLOSED
-  p1_a1_authorized: false
+  p1_stage_status: NOT_PASS_NOT_CLOSED # as recorded for this slice; P1's current status is in p1_execution below
+  p1_a1_authorized: false # true as at 2026-09-28; ADR-0026 moved the sequencing rule, see next_engineering_gate below
   p2_authorized: false
   p3_authorized: false
   p4_authorized: false
+  # Historical record of what ADR-0025 required, kept because P1-A0 was implemented under exactly these
+  # terms. ADR-0026 (2026-09-29) removed the first two bullets as a precondition and re-based G1, so the
+  # live authorization sequence now reads P1 -> P2 -> P3 -> P4, each still needing its own prompt.
+  sequencing_superseded_on: "2026-09-29 by 09_ADR/ADR-0026-open-source-mvp-first-delivery.md"
   next_engineering_gate:
     - "V0 Batch A at least 4 eligible external sessions with real participants"
     - "interim architect review of that evidence"
     - "a new architect prompt for each additional pre-G1 slice"
   creates_new_baseline: false
   baseline_version_stays: 0.6.0
-  g1_claimed: false
+  g1_claimed: false # the claim made on 2026-09-29 is recorded in validation.g1_claimed and p1_execution below
   design_tokens_version_bump_authorized_by_addendum: "0.2.0 -> 0.2.1 (border.width.hairline only)"
   implemented: true # 2026-09-29. Pushed by the owner as 2960173 and measured green on push; see correctness_closure below.
   evidence: P1_A0_VALIDATION/
@@ -204,6 +224,30 @@ pre_g1_execution:
     goldens_changed: [golden/cli/p0-basic-analyze.json, golden/cli/p0-dual-region-analyze.json]
     evidence: P1_A0_VALIDATION/P1_A0_CORRECTNESS_SMOKE_REPORT.md
     this_commit_remote_ci: "36515470263 on ace6fbe - completed, success, 7 of 7 jobs. Prompt §23's anti-recursion rule held at write time: the closure commit carried no run of its own, because none existed yet. This line is that run's successor record, added after the owner pushed, and reads with gh run view 36515470263 --repo 2023violet/FirmwareSight"
+
+# P1 Analyze, the first MVP stage under ADR-0026. The parent prompt authorizes the slice; its acceptance
+# addendum narrows what "complete" means by binding P1 PASS to the frozen US-001 criteria.
+p1_execution:
+  authorized: true
+  adr: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
+  parent_prompt: "FirmwareSight Open-Source MVP-First Governance Reset + P1 Analyze Completion v1.0 (Architect Reviewed, supplied inline)"
+  addendum_prompt: "FirmwareSight P1 Analyze Acceptance Closure Addendum v1.0 (Architect Reviewed, supplied inline)"
+  withdrawn_prompt: "FirmwareSight_V0_Batch_A_Price_Anchor_Authorization_Participant_Acquisition_Pack_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt - WITHDRAWN_BY_ARCHITECT, never executed, never registered"
+  slice: P1_ANALYZE_DETAILS
+  scope: "bounded Sections, Symbols and Evidence queries over the existing SQLite snapshot, three use-case IPC commands, top contributors, and a presentation-only bytes/KiB switch"
+  explicitly_not_in_scope: [P2_compare, P3_gate, P4_bundle, history, object_or_module_attribution, treemap, chart_dependency, virtualization_dependency, settings_page, commercial_pricing, user_recruitment, cloud, accounts, telemetry]
+  p1_stage_status: IN_PROGRESS
+  us_001_binding: "01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md US-001 Analyze ELF is the acceptance list; P1 is not PASS while any mandatory item is open"
+  migration_expected: false # SCHEMA_VERSION stays 2; sections, symbols and evidence rows are already stored
+  new_dependency_expected: false
+  new_design_token_expected: false # DESIGN.md and the frozen tokens asset outrank this slice; a needed value stops the round instead
+  no_new_baseline: true
+  baseline_version_stays: 0.6.0
+  start_head: be09c65f451dc1b625c6bf597929a7ce93f5c509
+  start_run_id: 36520562718
+  start_run_conclusion: "success, 7 of 7 jobs"
+  evidence: P1_VALIDATION/
+  next_stage_after_this_one: P2_compare # NOT authorized by this prompt; it needs its own architect prompt
 
 p0_execution:
   authorized: true
@@ -355,6 +399,10 @@ p0_execution:
   baseline_version_after_p0: 0.6.0
   v0_6_0_released: true
   v0_6_0_meaning: "P0 Technical Foundation Baseline - the vertical slice chain is validated. Not product MVP, not G1, not user value, not a stable commercial release."
+  # What v0.6.0 itself did not claim is still true on 2026-09-29. Two of those later moved for reasons
+  # outside the promotion act: G1 is now claimed on the P0 basis alone under ADR-0026 (2026-09-29), and
+  # P1 implementation was opened first by ADR-0025's P1-A0 carve-out and then by ADR-0026. This list
+  # records what the promotion asserted at the moment it happened, so it is annotated, not corrected.
   v0_6_0_does_not_claim: [V0_PASS, G1_PASS, product_mvp_complete, P1_authorized, compare_gate_bundle_complete, commercial_stable_release, installer_signing_updater_ready, user_value_validated, willingness_to_pay_validated, zero_vulnerabilities, CRA_compliance]
   p1_authorized: false # scoped to what the P0 prompt authorized; the live bounded slice is `pre_g1_execution`
   g1_claimed_by_p0_pass: false

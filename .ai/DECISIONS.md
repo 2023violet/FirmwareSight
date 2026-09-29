@@ -537,3 +537,64 @@ architect wrote into it that no product code may be produced under it.
   concrete research price anchor has been decided** and that the Product Lead may define two or three
   exploratory ones; this round invented none, so §19's commercial recording has anchors to capture only
   after that decision exists.
+
+> Superseded the same day, on sequencing only: the entry below
+> ("Open-source MVP-first delivery and P1 Analyze") and `ADR-0026` ended V0's role as a gate, so
+> "the precondition for anything further" and "nothing else is authorized from this file" no longer
+> describe the project. The rest of this entry stands as history: the activation did happen, the pack was
+> verified, and no participant evidence was written because none existed.
+
+# Open-source MVP-first delivery and P1 Analyze — added 2026-09-29
+
+Authorization: *FirmwareSight — Open-Source MVP-First Governance Reset + P1 Analyze Completion, Execution
+Prompt v1.0 — Architect Reviewed*, with the *P1 Analyze Acceptance Closure Addendum v1.0* attached to the
+same round. Both were supplied inline, so `10_AUDIT/SOURCE_PROMPTS/README.md` records them without a
+SHA-256 rather than inventing one. The architect decided the direction; the coding side proposed none of it.
+
+- **`ADR-0026-open-source-mvp-first-delivery.md` is the record**, and it is the only place the reasoning
+  lives. Summary of what it settles: MVP proceeds P1 → P2 → P3 → P4 → G2 on engineering grounds;
+  **`G1 = P0 PASS`** for this delivery, which is a re-definition of the gate's basis and not merely a
+  re-satisfaction of the old one; V0 becomes `NON_BLOCKING_USER_FEEDBACK_TRACK`; pricing,
+  willingness-to-pay, buyer path and pilot signals leave every MVP gate.
+- **What ADR-0026 did not touch is the part that matters for future rounds.** It supersedes sequencing
+  only. The evidence classes, the `UNKNOWN 不等于 PASS` rule, the Rust-side dialog with no generic
+  filesystem/shell/network capability, the no-host-path rule in IPC and UI, determinism, the portable
+  bundle rules and `AGENTS.md` 2 / 7 / 11 all stand unchanged, and the ADR says so in its own Status
+  section. "Governance got easier" is not an available reading.
+- **The superseded sentences stay where they are.** `ADR-0020:31` and ADR-0025's Decision 4 and 6 keep
+  their text with dated notes appended, because `00_GOVERNANCE/03_DECISION_POLICY.md` forbids editing an
+  Accepted ADR's conclusion and because P1-A0 was implemented under exactly those terms - rewriting them
+  would delete the authorization context of evidence already on disk.
+- **G1's formula appeared in 20 places across 16 files.** Current-authority documents were updated; the P0
+  promotion pack, the P1-A0 pack, `CHANGELOG.md` and the prompt register were left as written and are read
+  as history. Three delivery documents outside the prompt's own file list (`00_ROADMAP.md`,
+  `01_MVP_EXIT_CRITERIA.md`, `05_MVP_TO_PRODUCT_DEVELOPMENT_LIFECYCLE.md`) carried the old formula in
+  identical mapping blocks and were corrected too, because leaving them would have made `BASELINE.yaml`
+  contradict its own delivery docs.
+- **The withdrawn prompt is recorded as withdrawn, not as absent.**
+  `FirmwareSight_V0_Batch_A_Price_Anchor_Authorization_Participant_Acquisition_Pack_EXECUTION_PROMPT_v1.0`
+  never had a registry entry and was never executed. Rather than leave a silence that could later be read
+  as an omission, the register now carries a `WITHDRAWN_BY_ARCHITECT` entry stating no price anchors were
+  written, no acquisition pack was produced, and the V0 sample stayed `0 / 8`. The same-day Batch A
+  activation entry stays as written: it did happen, and its evidence state is accurate.
+- **`V0`'s zero is unchanged and remains honest.** Demoting V0 from gate to track removes its power to
+  block, not the requirement that any future session record describe a real person. The `v0.1.0`
+  prototype, `protocol/TASK_SCRIPT.md`, `sessions/TEMPLATE.md` and both registers stay frozen in place so a
+  later feedback round is still comparable. No V0 file was deleted.
+- **P1's acceptance list is borrowed, not invented.** The addendum corrected a scope reading in the
+  takeover report: `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` **US-001** already requires sortable and
+  filterable symbols, artifact hash, an unsupported-file reason, no crash without debug info, and a
+  **bytes / KiB numeric unit switch**. Those are therefore P1 exit criteria, and P1 may not be marked
+  `PASS` while any of them is open. The units switch is presentation-only: values stay integer bytes in
+  Core, SQLite and IPC, `1 KiB = 1024 bytes`, addresses, offsets, hashes, counts, ordinals and snapshot ids
+  never convert, `Unknown` never renders as zero, and the choice lives in UI state with no settings page
+  and no persistence.
+- **Debug info gets no new module.** `Analyze` already renders a `Debug info` row from
+  `capabilities.debugInfo`; the requirement is that it stays visible, renders from the Rust DTO, and
+  survives absent debug info without crashing. If that field ever proves unable to express the states Core
+  actually distinguishes, the mismatch is reported before any new semantic is invented.
+- **Boundaries carried into the implementation, stated up front so a reviewer can check them:** no schema
+  migration (`SCHEMA_VERSION` stays 2; `0003` would need a measured reason and a stop-and-report first), no
+  new dependency, no new design token, default page 100 with a hard server-side maximum of 500, three
+  use-case query commands and no generic table or SQL access, details bound to the last-good
+  `snapshotId`, and a symbol's storage ordinal treated as a row position rather than identity.

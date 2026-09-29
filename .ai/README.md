@@ -11,11 +11,14 @@ last_updated: "2026-09-29"
 # AI Entry Point
 
 Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctness closure ·
-`active_task: V0_BATCH_A_EXTERNAL_VALIDATION` · `V0: 0 / 8` · `G1: NOT CLAIMED` ·
-`P1: NOT PASS / NOT CLOSED` · `P1-A1 / P2 / P3 / P4: NOT AUTHORIZED`. The live task is **research, not
-engineering**: it recruits and moderates real external sessions on the frozen `v0.1.0` prototype and writes
-no product code at all. Item 6 below still governs — execute that task and nothing inferred from the
-roadmap, and never infer a participant.
+`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `active_task: P1_ANALYZE_DETAILS` ·
+`V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` · `P1: IN_PROGRESS` ·
+`P2 / P3 / P4: NOT STARTED — each needs its own architect prompt` ·
+`Pricing/commercial research: DEFERRED_POST_MVP`.
+
+ADR-0026 changed **sequencing, not standards**: MVP is built first on engineering grounds, V0 no longer
+gates it, and every technical boundary in `AGENTS.md` 2 / 7 / 11 still applies. Item 6 below still governs
+— execute the active task and nothing inferred from the roadmap.
 
 任何 AI 接手本项目时：
 
