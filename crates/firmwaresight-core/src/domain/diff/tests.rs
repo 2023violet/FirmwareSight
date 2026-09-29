@@ -559,6 +559,53 @@ fn a_section_name_known_on_only_one_side_is_added_or_removed() {
     assert_eq!(find_section(&diff, ".noinit").change, ChangeKind::Added);
     assert_eq!(diff.counts.sections_removed, 1);
     assert_eq!(diff.counts.sections_added, 1);
+    assert!(
+        !find_section(&diff, ".bss").ambiguous && !find_section(&diff, ".noinit").ambiguous,
+        "a name that occurs once is not a repeat, whichever side it occurs on"
+    );
+    assert_eq!(diff.counts.sections_ambiguous, 0);
+    assert!(
+        diff.warnings
+            .iter()
+            .all(|warning| warning.code != "SECTION-AMBIGUOUS"),
+        "a clean removal must not raise an ambiguity warning: {:?}",
+        diff.warnings
+    );
+}
+
+#[test]
+fn a_row_unique_to_one_side_is_clean_for_sections_and_symbols_alike() {
+    // The shipped fixture pair hit exactly this: `.calib` and `calib_apply` exist only in the base
+    // build. Calling them ambiguous would claim a repeated name that does not exist, and would
+    // inflate the ambiguity count the reader is told to watch.
+    let mut base = simple_side("snap-a");
+    base.sections
+        .push(section(90, known(".calib"), 32, size(32)));
+    base.symbols.push(symbol(
+        90,
+        known("calib_apply"),
+        Some(0x0800_1000),
+        size(16),
+        "Index(1)",
+    ));
+    let target = simple_side("snap-b");
+
+    let diff = compare(&base, &target).expect("comparable");
+    let section = find_section(&diff, ".calib");
+    assert_eq!(section.change, ChangeKind::Removed);
+    assert!(!section.ambiguous);
+    let symbol = find_symbol(&diff, "calib_apply");
+    assert_eq!(symbol.change, ChangeKind::Removed);
+    assert!(!symbol.ambiguous);
+    assert_eq!(diff.counts.sections_ambiguous, 0);
+    assert_eq!(diff.counts.symbols_ambiguous, 0);
+    assert!(
+        diff.warnings.iter().all(
+            |warning| warning.code != "SECTION-AMBIGUOUS" && warning.code != "SYMBOL-AMBIGUOUS"
+        ),
+        "no name repeats here: {:?}",
+        diff.warnings
+    );
 }
 
 #[test]

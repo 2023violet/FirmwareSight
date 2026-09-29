@@ -377,7 +377,12 @@ impl DiffSnapshotInput {
     /// persists, and a footprint is read through the same three budget states.
     #[must_use]
     pub fn from_snapshot(snapshot: &crate::domain::build_snapshot::BuildSnapshot) -> Self {
-        let primary = snapshot.primary_artifact();
+        // A sealed snapshot carries at least its own artifact; the analyze projection states the same
+        // invariant. Naming it here rather than falling back keeps an empty SHA-256 out of the
+        // portable document, where it would fail `schemas/diff.schema.json` instead of naming a side.
+        let primary = snapshot
+            .primary_artifact()
+            .expect("a sealed snapshot carries at least its own artifact");
         let map_backed = snapshot
             .artifacts()
             .iter()
@@ -386,14 +391,9 @@ impl DiffSnapshotInput {
         Self {
             snapshot_id: snapshot.id().as_str().to_owned(),
             artifact: DiffArtifact {
-                file_name: primary.map_or_else(
-                    || "unknown".to_owned(),
-                    |artifact| display_file_name(&artifact.path),
-                ),
-                sha256: primary
-                    .map(|artifact| artifact.sha256.hex().to_owned())
-                    .unwrap_or_default(),
-                byte_size: primary.map_or(0, |artifact| artifact.byte_size),
+                file_name: display_file_name(&primary.path),
+                sha256: primary.sha256.hex().to_owned(),
+                byte_size: primary.byte_size,
             },
             memory: snapshot.memory().map(|footprint| DiffMemory {
                 nonvolatile: budget_from(&footprint.nonvolatile),
@@ -756,6 +756,9 @@ fn diff_sections(
                     rows.push(row);
                 }
             }
+            // One name, one row, only on the base side: that is a clean removal (§10), and calling
+            // it ambiguous would tell the reader the name repeats when it does not.
+            (1, 0) => rows.push(removed_section(&base_rows[0], false)),
             _ => {
                 for section in base_rows {
                     rows.push(removed_section(section, true));
@@ -1007,6 +1010,9 @@ fn diff_symbols(
                     rows.push(row);
                 }
             }
+            // A key that occurs once, on one side only, is a clean removal (§11). Ambiguity is
+            // reserved for a key that repeats, because that is the case with no honest pairing.
+            (1, 0) => rows.push(unpaired_symbol(ChangeKind::Removed, &base_rows[0], false)),
             _ => {
                 for symbol in base_rows {
                     rows.push(unpaired_symbol(ChangeKind::Removed, symbol, true));
