@@ -122,11 +122,14 @@ checksum, plus `cssparser-macros`'s already-satisfied `syn >=2, <4` edge re-reso
 `2.0.119`. No `Cargo.toml` changed, no crate entered or left the graph, no license changed, and
 nothing in Core or in the project crate's declared dependencies moved. Re-measured on the fixed tree:
 `--only deny` 1/1, `cargo test --workspace` per-suite identical to the pre-fix run at 556, and
-`python scripts/check.py` **15/15** — the same fifteen steps, not a redefinition of them. What is *not*
-re-claimed here: the 40-step window smoke and the 18-step CLI smoke were walked on the release binary
-built from the pre-bump lockfile, and they are cited as evidence about that tree. A patch-level bump of a
-transitive proc-macro is not a reason to re-run a window walkthrough, but neither is it evidence that the
-new binary was walked — it was not built or opened again after the bump.
+`python scripts/check.py` **15/15** — the same fifteen steps, not a redefinition of them. The shipping
+configuration was rebuilt too: `cargo build --release -p firmwaresight-desktop --features
+custom-protocol` → `Finished release profile in 4m 18s`, binary sha256
+`02e7250b7b293ea7eaccd57c9826e1cd73dd0decc09bd33ea87850877b0dd9f7`. What is *not* re-claimed here: the
+40-step window smoke and the 18-step CLI smoke were walked on the release binary built from the pre-bump
+lockfile, and they are cited as evidence about that tree. That new binary was compiled, not opened — a
+patch-level bump of a transitive proc-macro is no reason to re-walk a window, and it is no evidence that
+one was walked either.
 
 ## 5. CLI Gate smoke (§62) — 18/18, re-run against the fixed binary
 
