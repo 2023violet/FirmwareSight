@@ -66,7 +66,7 @@ pub struct StoredBudget {
 }
 
 impl StoredBudget {
-    fn from_parts(state: String, bytes: Option<i64>) -> Self {
+    pub(crate) fn from_parts(state: String, bytes: Option<i64>) -> Self {
         Self {
             state,
             bytes: bytes.map(|value| value as u64),
@@ -393,7 +393,7 @@ fn budget(stored: &StoredBudget) -> DiffBudget {
     }
 }
 
-fn read_err(source: rusqlite::Error) -> StorageError {
+pub(crate) fn read_err(source: rusqlite::Error) -> StorageError {
     StorageError::Write {
         detail: format!("read: {source}"),
     }

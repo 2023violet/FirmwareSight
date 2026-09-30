@@ -11,6 +11,12 @@
 //! and a session-local diff handle, then pages the changed rows with that handle. Export takes a diff
 //! id and nothing else: the save path comes from a dialog the Rust side opened and is not returned to
 //! the WebView (`compare`).
+//!
+//! P3 adds the Release Gate. The UI names a stored build and an optional baseline, and Rust assembles
+//! the rest: the policy from the `firmwaresight.toml` a person chose in a dialog the WebView cannot
+//! see, the workspace Git facts read through the project adapter, and the build's own facts hydrated
+//! from SQLite. Core decides every state and the aggregate; the run is then stored, and a review
+//! acceptance is a separate immutable row beside it (`release`).
 
 #![forbid(unsafe_code)]
 
@@ -18,6 +24,7 @@ pub mod compare;
 pub mod details;
 pub mod intake;
 pub mod ipc;
+pub mod release;
 pub mod service;
 
 use std::collections::{HashMap, VecDeque};
@@ -27,6 +34,7 @@ use std::sync::{Arc, Mutex};
 use firmwaresight_artifact::ArtifactError;
 use firmwaresight_artifact::pipeline::Analysis;
 use firmwaresight_core::domain::diff::DiffResult;
+use firmwaresight_project::{LoadedProject, ProjectError};
 use firmwaresight_storage::{Database, StorageError};
 use ipc::{AnalysisSummaryDto, ErrorEnvelopeDto, FixtureOptionDto, SelectionDto};
 use service::{FixtureCatalog, display_name};
@@ -120,12 +128,14 @@ impl DiffStore {
     }
 }
 
-/// The shell's state: a fixture catalog, one SQLite handle, and the selections currently staged.
+/// The shell's state: a fixture catalog, one SQLite handle, the selections currently staged, and the
+/// project whose policy the Release page runs against.
 pub struct Session {
     catalog: FixtureCatalog,
     db: Mutex<Database>,
     selections: Mutex<SelectionStore>,
     diffs: Mutex<DiffStore>,
+    project: Mutex<Option<LoadedProject>>,
 }
 
 impl Session {
@@ -137,6 +147,7 @@ impl Session {
             db: Mutex::new(Database::open(db_path.as_ref())?),
             selections: Mutex::new(SelectionStore::default()),
             diffs: Mutex::new(DiffStore::default()),
+            project: Mutex::new(None),
         })
     }
 
@@ -260,6 +271,16 @@ impl Session {
         let store = self.selections.lock().ok()?;
         let staged = store.get(selection_id)?;
         Some(selection_dto(selection_id, staged))
+    }
+
+    /// Whether this session holds a project policy.
+    ///
+    /// Only the yes/no is exposed, because the answer decides which save path a command takes: an
+    /// existing file is written back to, and with no file the shell opens a dialog instead of inventing a
+    /// location. The path itself stays here (`AGENTS.md` 7).
+    #[must_use]
+    pub fn has_project(&self) -> bool {
+        self.project.lock().is_ok_and(|guard| guard.is_some())
     }
 
     /// Analyze a staged selection and persist it under the local project.
@@ -395,6 +416,21 @@ impl Session {
             remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
         })
     }
+
+    /// The project store. Held as one lock because a Gate run reads it while a dialog may be
+    /// replacing it, and a run that half-reads a policy would judge the wrong project.
+    fn lock_project(
+        &self,
+        operation_id: &str,
+    ) -> Result<std::sync::MutexGuard<'_, Option<LoadedProject>>, ErrorEnvelopeDto> {
+        self.project.lock().map_err(|_| ErrorEnvelopeDto {
+            code: "ERR-INTERNAL-9001".to_owned(),
+            message: "FirmwareSight hit an internal error.".to_owned(),
+            operation_id: operation_id.to_owned(),
+            details: Some("the project lock was poisoned by an earlier panic".to_owned()),
+            remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
+        })
+    }
 }
 
 /// The names a selection exposes. Paths stay in [`StagedSelection`].
@@ -503,6 +539,61 @@ fn envelope_from_storage(err: &StorageError, operation_id: &str) -> ErrorEnvelop
     }
 }
 
+/// A project-policy or provenance failure, put into the shape the CLI prints for the same error.
+///
+/// `hidden` is the config path and the project root. Both appear inside several `ProjectError`
+/// messages, because the CLI runs on the machine that owns those paths and a desktop payload does not
+/// go to a terminal — it goes to a WebView that has no business holding either (`AGENTS.md` 7).
+fn envelope_from_project(
+    err: &ProjectError,
+    operation_id: &str,
+    hidden: &[&Path],
+) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: err.code().to_owned(),
+        // The redacted text is the whole user-facing statement. `details` stays empty rather than
+        // repeating it, because the unreduced form of several of these messages is a host path.
+        message: redact(&format!("{err}"), hidden),
+        operation_id: operation_id.to_owned(),
+        details: None,
+        remediation: Some(project_remediation(err.code()).to_owned()),
+    }
+}
+
+fn project_remediation(code: &str) -> &'static str {
+    match code {
+        "ERR-CONFIG-7001" | "ERR-CONFIG-7002" => {
+            "Fix `firmwaresight.toml` and open it again. FirmwareSight refuses a policy it cannot \
+             read fully rather than filling the gap with a default."
+        }
+        "ERR-CONFIG-7003" => {
+            "This build reads schema_version 1. Upgrade the config with a FirmwareSight that \
+             understands it."
+        }
+        "ERR-CONFIG-7004" | "ERR-CONFIG-7006" => {
+            "Correct the value in the config. A policy word this build does not understand is never \
+             guessed at."
+        }
+        "ERR-CONFIG-7005" => {
+            "Keep configured paths inside the project folder, relative to it. An absolute path or a \
+             `..` escape is not read."
+        }
+        "ERR-CONFIG-7007" => {
+            "The save was refused so that the keys this build does not understand stayed in the file. \
+             Edit those keys by hand, or teach this build about them."
+        }
+        "ERR-CONFIG-7008" => {
+            "Check that the project folder is writable and not locked, then save again. A failed \
+             save leaves the previous config untouched."
+        }
+        "ERR-GIT-8001" => {
+            "Git facts degrade to Unknown; the run still happens. Install Git or point the release \
+             owner at why the workspace could not be read."
+        }
+        _ => "Report the operation id; no artifact data is needed.",
+    }
+}
+
 /// A per-run identifier for diagnostics only. It never enters a deterministic payload, which is
 /// the same rule the CLI follows.
 pub(crate) fn next_operation_id() -> String {
@@ -586,7 +677,12 @@ pub fn run() {
             compare::query_section_changes,
             compare::query_symbol_changes,
             compare::export_compare_json,
-            compare::export_compare_html
+            compare::export_compare_html,
+            release::open_project_config,
+            release::save_project_policy,
+            release::run_release_gate,
+            release::accept_review,
+            release::get_gate_run
         ])
         .run(tauri::generate_context!())
         .expect("error while running the FirmwareSight desktop application");

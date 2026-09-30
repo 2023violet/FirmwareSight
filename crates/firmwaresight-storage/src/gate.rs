@@ -1,5 +1,9 @@
 //! Persisting an immutable Gate run, and the review acceptances that dispose of a finding.
 //!
+//! The module has one read half as well: [`Database::load_gate_facts`] hydrates the five fact groups a
+//! Gate run needs out of the rows Analyze already wrote, so the desktop can gate a build it stored
+//! earlier without the original files being present. It returns rows, never verdicts.
+//!
 //! Storage keeps no Gate semantics: it writes the states Core produced, refuses a run whose recorded
 //! answer differs from the one already stored under that id, and hands back what it stored. The
 //! invariants that a UI or a CLI must not be able to violate — `UNKNOWN` is never a PASS, an accepted
@@ -17,11 +21,63 @@
 use rusqlite::{OptionalExtension, params};
 
 use crate::Database;
+use crate::compare::{StoredBudget, read_err};
 use crate::db::write_err;
 use crate::error::StorageError;
 use firmwaresight_core::domain::gate::{
     EffectiveSeverity, FindingState, GateEvaluation, GateRuleId,
 };
+
+/// How many `Unknown` evidence ids a read returns as a sample. The count below is always complete;
+/// the list is a bounded excerpt, so a snapshot with ten thousand gaps does not turn one Gate run into
+/// a ten-thousand-row read (`AGENTS.md` 10, prompt §25). Eight is the number a Gate finding quotes.
+const MAX_UNKNOWN_EVIDENCE_SAMPLE: usize = 8;
+
+/// One artifact row of a stored build, reduced to what the Gate reads. The stored `path` is dropped
+/// here, not redacted later: no caller of this API can receive a host path (`AGENTS.md` 7).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GateArtifactRow {
+    /// The stored kind spelling, `Elf`/`Map`/`Bin`/`IntelHex`/`Unknown`.
+    pub kind: String,
+    pub sha256: String,
+    pub byte_size: u64,
+}
+
+/// A stored footprint, with the two totals and the evidence strength they were recorded at.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GateFootprintRow {
+    pub layout_source: String,
+    pub weakest_basis: Option<String>,
+    /// Whether the accounting that produced these totals may support a hard verdict.
+    pub admissible_hard_block: bool,
+    pub nonvolatile: StoredBudget,
+    pub runtime_ram: StoredBudget,
+}
+
+/// How much of a stored snapshot's own evidence is classified `unknown`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GateEvidenceGaps {
+    /// Every `unknown` row for this build, which is why the count and the sample are separate.
+    pub count: usize,
+    /// Evidence ids, ordered by id, capped at eight.
+    pub sample_ids: Vec<String>,
+}
+
+/// Everything the Gate reads about one persisted build.
+///
+/// This is the stored counterpart of a fresh analysis: the same five fact groups, assembled from rows
+/// instead of from files. Nothing is decided here — no state, severity or threshold appears in this
+/// shape, because `firmwaresight-core` owns that and the desktop must get the same answer the CLI
+/// would (`AGENTS.md` 3).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GateSnapshotFacts {
+    pub build_id: String,
+    pub snapshot_id: String,
+    pub artifacts: Vec<GateArtifactRow>,
+    pub footprint: GateFootprintRow,
+    pub gaps: GateEvidenceGaps,
+}
+
 /// How a run arrived: written now, or already stored with exactly these semantics.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GateRunWrite {
@@ -355,6 +411,99 @@ impl Database {
             acceptances.push(acceptance_from_columns(columns, run_id)?);
         }
         Ok(acceptances)
+    }
+
+    /// Hydrate the facts one persisted build offers the Gate.
+    ///
+    /// Rows only: the artifact files are never opened, so a run stays possible after the ELF and MAP
+    /// have moved or been deleted, and the verdict a reviewer accepted yesterday is re-readable today.
+    /// The stored `path` of each artifact is dropped at the row boundary.
+    ///
+    /// # Errors
+    ///
+    /// - [`StorageError::NotFound`] when no build carries this snapshot id;
+    /// - [`StorageError::Write`] when a read fails;
+    /// - [`StorageError::Invariant`] when a build is missing its footprint row, which no supported
+    ///   import path can produce.
+    pub fn load_gate_facts(&self, snapshot_id: &str) -> Result<GateSnapshotFacts, StorageError> {
+        let build_id =
+            self.build_id_for_snapshot(snapshot_id)?
+                .ok_or_else(|| StorageError::NotFound {
+                    id: snapshot_id.to_owned(),
+                })?;
+
+        let mut statement = self
+            .conn
+            .prepare(
+                "SELECT kind, sha256, byte_size FROM artifacts WHERE build_id = ?1 ORDER BY id",
+            )
+            .map_err(read_err)?;
+        let artifacts = statement
+            .query_map(params![build_id], |row| {
+                Ok(GateArtifactRow {
+                    kind: row.get(0)?,
+                    sha256: row.get(1)?,
+                    byte_size: row.get::<_, i64>(2)? as u64,
+                })
+            })
+            .map_err(read_err)?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(read_err)?;
+
+        let footprint = self
+            .conn
+            .query_row(
+                "SELECT layout_source, weakest_basis, admissible_hard_block,
+                        nonvolatile_state, nonvolatile_bytes, runtime_state, runtime_bytes
+                   FROM memory_footprints WHERE build_id = ?1",
+                params![build_id],
+                |row| {
+                    Ok(GateFootprintRow {
+                        layout_source: row.get(0)?,
+                        weakest_basis: row.get(1)?,
+                        admissible_hard_block: row.get::<_, i64>(2)? == 1,
+                        nonvolatile: StoredBudget::from_parts(row.get(3)?, row.get(4)?),
+                        runtime_ram: StoredBudget::from_parts(row.get(5)?, row.get(6)?),
+                    })
+                },
+            )
+            .optional()
+            .map_err(read_err)?
+            .ok_or_else(|| StorageError::Invariant {
+                detail: format!("build {build_id} has no stored footprint row"),
+            })?;
+
+        let count = self
+            .conn
+            .query_row(
+                "SELECT COUNT(*) FROM evidence WHERE build_id = ?1 AND classification = 'unknown'",
+                params![build_id],
+                |row| row.get::<_, i64>(0),
+            )
+            .map_err(read_err)? as usize;
+        let mut statement = self
+            .conn
+            .prepare(
+                "SELECT id FROM evidence WHERE build_id = ?1 AND classification = 'unknown'
+                   ORDER BY id LIMIT ?2",
+            )
+            .map_err(read_err)?;
+        let sample_ids = statement
+            .query_map(
+                params![build_id, MAX_UNKNOWN_EVIDENCE_SAMPLE as i64],
+                |row| row.get::<_, String>(0),
+            )
+            .map_err(read_err)?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(read_err)?;
+
+        Ok(GateSnapshotFacts {
+            snapshot_id: snapshot_id.to_owned(),
+            build_id,
+            artifacts,
+            footprint,
+            gaps: GateEvidenceGaps { count, sample_ids },
+        })
     }
 
     fn accepted_review_for(

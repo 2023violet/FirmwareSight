@@ -10,6 +10,8 @@
 import { invoke } from '@tauri-apps/api/core';
 
 import type {
+  AcceptReviewOutcomeDto,
+  AcceptReviewRequestDto,
   AnalysisSummaryDto,
   CandidatePageDto,
   CandidatePageRequestDto,
@@ -19,6 +21,10 @@ import type {
   EvidencePageDto,
   EvidenceRequestDto,
   ExportOutcomeDto,
+  GateRunDto,
+  GateRunRequestDto,
+  ProjectContextDto,
+  ProjectPolicyDto,
   SectionChangePageDto,
   SectionChangeQueryDto,
   SectionPageDto,
@@ -44,6 +50,11 @@ const QUERY_SECTION_CHANGES = 'query_section_changes';
 const QUERY_SYMBOL_CHANGES = 'query_symbol_changes';
 const EXPORT_COMPARE_JSON = 'export_compare_json';
 const EXPORT_COMPARE_HTML = 'export_compare_html';
+const OPEN_PROJECT_CONFIG = 'open_project_config';
+const SAVE_PROJECT_POLICY = 'save_project_policy';
+const RUN_RELEASE_GATE = 'run_release_gate';
+const ACCEPT_REVIEW = 'accept_review';
+const GET_GATE_RUN = 'get_gate_run';
 
 export type IpcOutcome<T> =
   | { readonly ok: true; readonly value: T }
@@ -164,6 +175,64 @@ export async function exportCompareJson(diffId: string): Promise<IpcOutcome<Expo
 /** Export the comparison as one self-contained HTML file. */
 export async function exportCompareHtml(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
   return await call<ExportOutcomeDto>(EXPORT_COMPARE_HTML, { diffId });
+}
+
+/**
+ * Ask the shell to open the native dialog for a project's `firmwaresight.toml`.
+ *
+ * `null` means the person cancelled, which is a decision and not a failure: the page keeps the project
+ * it already had. What comes back is the policy and the file's name — never the folder the file lives
+ * in, which the WebView has no use for (prompt §40).
+ */
+export async function openProjectConfig(): Promise<IpcOutcome<ProjectContextDto | null>> {
+  return await call<ProjectContextDto | null>(OPEN_PROJECT_CONFIG);
+}
+
+/**
+ * Write the edited policy.
+ *
+ * With a project loaded the shell writes that project's own file; without one it opens a save dialog.
+ * Either way the front end sends a structured policy and no path, so there is no command here that
+ * could be widened into "write this arbitrary file" (`AGENTS.md` 7, prompt §41).
+ */
+export async function saveProjectPolicy(
+  policy: ProjectPolicyDto,
+): Promise<IpcOutcome<ProjectContextDto | null>> {
+  return await call<ProjectContextDto | null>(SAVE_PROJECT_POLICY, { policy });
+}
+
+/**
+ * Judge a stored build against the policy in force and store the run.
+ *
+ * The request names two snapshot ids and nothing else. The whole finding set crosses the boundary
+ * because the MVP has ten rules, which is a bounded number by construction (prompt §46).
+ */
+export async function runReleaseGate(
+  request: GateRunRequestDto,
+): Promise<IpcOutcome<GateRunDto>> {
+  return await call<GateRunDto>(RUN_RELEASE_GATE, { request });
+}
+
+/**
+ * Accept one REVIEW finding, naming the person and the reason.
+ *
+ * The row it returns still reads REVIEW. Only the aggregate moves, and only for the finding this
+ * acceptance names (prompt §48).
+ */
+export async function acceptReview(
+  request: AcceptReviewRequestDto,
+): Promise<IpcOutcome<AcceptReviewOutcomeDto>> {
+  return await call<AcceptReviewOutcomeDto>(ACCEPT_REVIEW, { request });
+}
+
+/**
+ * Read a stored run back.
+ *
+ * `null` means this database has no run with that id, which the screen labels as "not in history"
+ * rather than rendering as an error (prompt §49).
+ */
+export async function getGateRun(runId: string): Promise<IpcOutcome<GateRunDto | null>> {
+  return await call<GateRunDto | null>(GET_GATE_RUN, { runId });
 }
 
 async function call<T>(

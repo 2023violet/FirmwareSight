@@ -194,23 +194,41 @@ pub fn unknown_evidence(snapshot: &BuildSnapshot, limit: usize) -> GateUnknownEv
 /// The same count over any evidence list, so a caller hydrating from storage can pass its own rows.
 #[must_use]
 pub fn unknown_evidence_from(items: &[EvidenceItem], limit: usize) -> GateUnknownEvidence {
-    let mut ids: Vec<&str> = items
+    let ids: Vec<String> = items
         .iter()
         .filter(|item| item.classification == EvidenceClass::Unknown)
-        .map(|item| item.id.as_str())
+        .map(|item| item.id.clone())
         .collect();
-    ids.sort_unstable();
-    let count = ids.len();
-    let mut sample_refs: Vec<String> = ids
+    unknown_evidence_from_ids(&ids, ids.len(), limit)
+}
+
+/// The count and the quoted locators from ids alone, which is the shape a storage read returns.
+///
+/// `total` is separate from `ids` because the read is bounded: a build with nine hundred gaps hands
+/// back eight ids and the number nine hundred, and both have to survive into the finding. The
+/// `evidence:` locator scheme is written here and nowhere else, so a desktop run and a CLI run quote
+/// the same gap the same way.
+#[must_use]
+pub fn unknown_evidence_from_ids(
+    ids: &[String],
+    total: usize,
+    limit: usize,
+) -> GateUnknownEvidence {
+    let mut sorted: Vec<&str> = ids.iter().map(String::as_str).collect();
+    sorted.sort_unstable();
+    let mut sample_refs: Vec<String> = sorted
         .iter()
         .take(limit)
         .map(|id| format!("evidence:{id}"))
         .collect();
-    if count > sample_refs.len() {
+    if total > sample_refs.len() {
         // The sample is bounded; the total stays stated, so a reader knows how much was not shown.
-        sample_refs.push(format!("evidence:unknown-count={count}"));
+        sample_refs.push(format!("evidence:unknown-count={total}"));
     }
-    GateUnknownEvidence { count, sample_refs }
+    GateUnknownEvidence {
+        count: total,
+        sample_refs,
+    }
 }
 
 /// Project P2's diff result into the growth facts the Gate thresholds.
@@ -557,7 +575,7 @@ mod tests {
             None,
             GateUnknownEvidence::default(),
         );
-        let git = GitObservation::unknown("git is not installed");
+        let git = GitObservation::unavailable("git is not installed");
         let request = GateRunRequest::with_default_policy(&facts, &git);
         let context = build_context(&request);
         assert_eq!(context.snapshot_id, "snap-1");
@@ -588,7 +606,7 @@ mod tests {
             None,
             GateUnknownEvidence::default(),
         );
-        let mut git = GitObservation::unknown("placeholder");
+        let mut git = GitObservation::unavailable("placeholder");
         git.facts = firmwaresight_core::domain::gate::GateGitFacts {
             available: true,
             head_commit: Fact::known("0123456789abcdef0123456789abcdef01234567".to_owned()),

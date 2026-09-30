@@ -935,6 +935,7 @@ version = "0.1.0"
 dependencies = [
  "firmwaresight-artifact",
  "firmwaresight-core",
+ "firmwaresight-project",
  "firmwaresight-report",
  "firmwaresight-storage",
  "serde",

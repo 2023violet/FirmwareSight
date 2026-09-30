@@ -24,7 +24,8 @@ pub use compare::{
     CandidateQuery, CompareCandidate, DEFAULT_CANDIDATE_LIMIT, MAX_CANDIDATE_LIMIT, StoredBudget,
 };
 pub use gate::{
-    AcceptReviewError, AcceptedReview, GateRunDraft, GateRunWrite, StoredGateFinding, StoredGateRun,
+    AcceptReviewError, AcceptedReview, GateArtifactRow, GateEvidenceGaps, GateFootprintRow,
+    GateRunDraft, GateRunWrite, GateSnapshotFacts, StoredGateFinding, StoredGateRun,
 };
 pub use query::{
     DEFAULT_QUERY_LIMIT, EvidenceQuery, EvidenceRow, EvidenceSort, MAX_QUERY_LIMIT, Page,

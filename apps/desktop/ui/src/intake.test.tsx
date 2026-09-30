@@ -492,18 +492,25 @@ describe('P1-A0 intake screen', () => {
     render(<App />);
     await screen.findByRole('button', { name: 'Choose firmware artifact' });
 
-    // P1 could claim there was nothing to navigate to. P2 makes Compare a real second page, so the
-    // claim is now narrower and stronger: the rail lists exactly the two stages that exist, and a
-    // stage that does not exist gets no entry, no link and none of its words.
+    // P1 could claim there was nothing to navigate to. P2 made Compare a real page and P3 made Release
+    // one, so the claim is now exactly as wide as the build: the rail lists the three stages that
+    // exist, and a stage that does not exist gets no entry, no link and none of its words.
     const rail = await screen.findByRole('navigation', { name: 'Pages' });
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
       'Analyze',
       'Compare',
+      'Release',
     ]);
     expect(document.querySelectorAll('a')).toHaveLength(0);
 
     fireEvent.click(within(rail).getByRole('button', { name: 'Compare page' }));
     await screen.findByRole('heading', { level: 1, name: 'Compare' });
-    expect(document.body.textContent).not.toMatch(/\b(Gate|Bundle|History|SBOM|Release)\b/);
+    const body = document.body.textContent ?? '';
+    for (const stage of ['Bundle', 'History', 'Settings', 'SBOM', 'Pricing', 'Cloud']) {
+      expect(body).not.toMatch(new RegExp(`\\b${stage}\\b`));
+    }
+    // `Gate` is Release's word and appears on no other page: a rail entry names a stage, it does not
+    // advertise one that has not been built (prompt §43).
+    expect(body).not.toMatch(/\bGate\b/);
   });
 });

@@ -28,7 +28,7 @@ use crate::{Session, next_operation_id, task_join_error};
 ///
 /// `rfd` runs a modal dialog, so it never executes on the WebView event loop: every command hops
 /// through `spawn_blocking` before reaching this function.
-fn pick_path(app: &AppHandle, title: &str) -> Option<PathBuf> {
+pub(crate) fn pick_path(app: &AppHandle, title: &str) -> Option<PathBuf> {
     app.dialog()
         .file()
         .set_title(title)

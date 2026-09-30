@@ -31,6 +31,7 @@ tauri-build = { version = "2.7.0", features = [] }
 [dependencies]
 firmwaresight-core = { workspace = true }
 firmwaresight-artifact = { workspace = true }
+firmwaresight-project = { workspace = true }
 firmwaresight-report = { workspace = true }
 firmwaresight-storage = { workspace = true }
 serde = { version = "1.0.229", features = ["derive"] }

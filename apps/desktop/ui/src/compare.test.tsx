@@ -532,14 +532,17 @@ function rowOf(term: string): string {
   return node?.textContent ?? '';
 }
 
-describe('the rail and the two pages', () => {
-  it('lists Analyze and Compare, and marks the page the reader is on', async () => {
+describe('the rail and the pages it lists', () => {
+  it('lists the stages this build has, and marks the page the reader is on', async () => {
     render(<App />);
 
     const rail = await screen.findByRole('navigation', { name: 'Pages' });
+    // P3 added a third real page, so this list is the build's own inventory: an entry appears when the
+    // stage exists and nowhere else does its word appear (prompt §43).
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
       'Analyze',
       'Compare',
+      'Release',
     ]);
     expect(screen.getByRole('button', { name: 'Analyze page' }).getAttribute('aria-current')).toBe(
       'page',

@@ -1,0 +1,465 @@
+/*
+ * The Release page: one project policy, one stored build, the findings a Gate run produced, and the
+ * acceptance a reviewer left beside them.
+ *
+ * Every length, colour, radius and duration is a token: no magic number appears here (AGENTS.md 11,
+ * DESIGN.md 9). The five Gate states never rely on colour alone - they are icon + text, drawn by
+ * `StateBadge`, and UNKNOWN stays in the neutral grey the frozen tokens give it.
+ */
+
+.page {
+  max-width: var(--fs-layout-design-target-width);
+  margin: 0 auto;
+  padding: var(--fs-space-8) var(--fs-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.subhead {
+  color: var(--fs-color-text-secondary);
+  max-width: 68ch;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding-top: var(--fs-space-4);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  min-width: 0;
+}
+
+.rows {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--fs-layout-evidence-inspector-min) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--fs-space-4);
+  min-height: var(--fs-row-compact);
+  padding: var(--fs-space-1) 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.term {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-1) var(--fs-space-4);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.monoSmall {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.hint {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  max-width: 72ch;
+}
+
+.status {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+/* A config warning and a refused save are both statements about the file, not verdicts about the
+   build, so they take the neutral surface with the review hairline - the same treatment Compare uses
+   for a pair it will not compare (prompt §49). */
+.warning {
+  margin: 0;
+  padding: var(--fs-space-2) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-left: var(--fs-border-width-hairline) solid var(--fs-color-status-review-strong);
+  border-radius: var(--fs-radius-control);
+}
+
+.stale {
+  margin: 0;
+  padding: var(--fs-space-2) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--fs-space-4);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  background: var(--fs-color-bg-subtle);
+}
+
+.noticeList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.noticeItem {
+  padding: var(--fs-space-1) 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+.control,
+.link {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font: inherit;
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.link {
+  padding: 0 var(--fs-space-1);
+  background: none;
+  border: 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
+  border-radius: 0;
+  color: var(--fs-color-accent-primary);
+}
+
+.control:hover:not(:disabled),
+.primary:hover:not(:disabled) {
+  border-color: var(--fs-color-accent-hover);
+}
+
+.control:disabled,
+.primary:disabled {
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  cursor: default;
+}
+
+.primary {
+  padding: var(--fs-space-2) var(--fs-space-4);
+  font: inherit;
+  font-weight: bold;
+  color: var(--fs-color-text-on-accent);
+  background: var(--fs-color-accent-primary);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.primary:active:not(:disabled) {
+  background: var(--fs-color-accent-pressed);
+}
+
+.control:focus-visible,
+.primary:focus-visible,
+.link:focus-visible,
+.select:focus-visible,
+.input:focus-visible {
+  outline: var(--fs-focus-ring-width) solid var(--fs-focus-ring-color);
+  outline-offset: var(--fs-focus-ring-offset);
+}
+
+.selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--fs-space-4);
+  align-items: start;
+}
+
+.picker,
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  min-width: 0;
+}
+
+.pickerLabel {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.select,
+.input {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  min-width: 0;
+}
+
+.sideFacts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  overflow-wrap: anywhere;
+}
+
+.pickerActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-4);
+}
+
+.states,
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-2) var(--fs-space-6);
+  align-items: baseline;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  padding-top: var(--fs-space-3);
+}
+
+.groupHead {
+  margin: 0;
+  font-size: var(--fs-font-size-body);
+}
+
+.findings {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.finding {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  padding: var(--fs-space-3) 0;
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.findingHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-2) var(--fs-space-4);
+}
+
+.summary {
+  margin: 0;
+  max-width: 88ch;
+  overflow-wrap: anywhere;
+}
+
+.remediation {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  max-width: 88ch;
+}
+
+.axis {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.severity {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  font-family: var(--fs-font-mono);
+}
+
+.refs {
+  margin: 0;
+  padding-left: var(--fs-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  color: var(--fs-color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* The audit block is deliberately plain: it is a record of a decision, not a second verdict, and it
+   never carries a state colour of its own (prompt §48). */
+.accepted {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  padding: var(--fs-space-2) var(--fs-space-3);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.audit {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--fs-space-1) var(--fs-space-4);
+}
+
+.audit dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.audit dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.accept,
+.acceptForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  align-items: flex-start;
+}
+
+.acceptForm {
+  width: 100%;
+  max-width: var(--fs-layout-design-target-width);
+  padding: var(--fs-space-3);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.form,
+.fields,
+.nested {
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  padding: var(--fs-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  min-width: 0;
+}
+
+.form {
+  border: 0;
+  padding: 0;
+}
+
+.fields,
+.nested {
+  gap: var(--fs-space-2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--fs-layout-evidence-inspector-min), 1fr));
+  gap: var(--fs-space-3);
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.unknownRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--fs-space-3);
+  align-items: center;
+  padding: var(--fs-space-1) 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  /* These tables are the widest thing on the page and a dense read is the point, so each one owns its
+     scroll axis instead of pushing the page sideways. */
+  display: block;
+  overflow-x: auto;
+}
+
+.table th,
+.table td {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  text-align: left;
+  white-space: nowrap;
+  font-weight: normal;
+}
+
+.table thead th {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+/* A reason or an evidence basis has no bound, so the cell that carries it wraps rather than the one
+   that would push the table sideways. */
+.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: var(--fs-space-1);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  max-width: 88ch;
+}

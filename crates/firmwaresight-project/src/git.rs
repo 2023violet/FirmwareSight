@@ -100,7 +100,7 @@ impl GitProbe {
     pub fn observe(&self, root: &Path) -> GitObservation {
         let toplevel = self.git(root, &["rev-parse", "--show-toplevel"]);
         if !matches!(toplevel, RunOutcome::Success { .. }) {
-            return GitObservation::unknown(absent_reason(&toplevel, self.timeout));
+            return GitObservation::unavailable(absent_reason(&toplevel, self.timeout));
         }
         let head = self.git(root, &["rev-parse", "HEAD"]);
         let tags = self.git(root, &["tag", "--points-at", "HEAD"]);
@@ -135,7 +135,11 @@ pub struct GitObservation {
 }
 
 impl GitObservation {
-    pub(crate) fn unknown(reason: impl Into<String>) -> Self {
+    /// An observation with no facts in it, for a probe that could not run and for a caller that has no
+    /// workspace to point at. Every field is `Unknown` with the same reason, because the rule that reads
+    /// this gets to say *why* nothing was learned rather than only that nothing was learned.
+    #[must_use]
+    pub fn unavailable(reason: impl Into<String>) -> Self {
         let reason = reason.into();
         Self {
             facts: GateGitFacts::unavailable(&reason),
@@ -160,16 +164,16 @@ fn normalize(
     timeout: Duration,
 ) -> GitObservation {
     let Some(raw_head) = head.output().map(str::trim) else {
-        return GitObservation::unknown(command_reason("rev-parse HEAD", head, timeout));
+        return GitObservation::unavailable(command_reason("rev-parse HEAD", head, timeout));
     };
     if !looks_like_object_id(raw_head) {
-        return GitObservation::unknown(
+        return GitObservation::unavailable(
             "`git rev-parse HEAD` did not return a commit id, so workspace provenance is unknown",
         );
     }
 
     let Some(raw_tags) = tags.output() else {
-        return GitObservation::unknown(format!(
+        return GitObservation::unavailable(format!(
             "workspace HEAD is known but its tags are not: {}",
             command_reason("tag --points-at HEAD", tags, timeout)
         ));

@@ -4,6 +4,9 @@
 // here instead of reaching into that directory. When a type is added or renamed, this file is the
 // only hand-written place that has to change.
 
+export type { AcceptReviewOutcomeDto } from './generated/AcceptReviewOutcomeDto';
+export type { AcceptReviewRequestDto } from './generated/AcceptReviewRequestDto';
+export type { AcceptedReviewDto } from './generated/AcceptedReviewDto';
 export type { AnalysisSummaryDto } from './generated/AnalysisSummaryDto';
 export type { ArtifactDto } from './generated/ArtifactDto';
 export type { BudgetDto } from './generated/BudgetDto';
@@ -32,9 +35,21 @@ export type { EvidenceSummaryDto } from './generated/EvidenceSummaryDto';
 export type { ExportOutcomeDto } from './generated/ExportOutcomeDto';
 export type { FixtureKey } from './generated/FixtureKey';
 export type { FixtureOptionDto } from './generated/FixtureOptionDto';
+export type { GateArtifactRowDto } from './generated/GateArtifactRowDto';
+export type { GateBudgetRowDto } from './generated/GateBudgetRowDto';
+export type { GateCountsDto } from './generated/GateCountsDto';
+export type { GateFindingRowDto } from './generated/GateFindingRowDto';
+export type { GateGitDto } from './generated/GateGitDto';
+export type { GateGrowthRowDto } from './generated/GateGrowthRowDto';
+export type { GateNotesDto } from './generated/GateNotesDto';
+export type { GateRunDto } from './generated/GateRunDto';
+export type { GateRunRequestDto } from './generated/GateRunRequestDto';
+export type { GateTablesDto } from './generated/GateTablesDto';
 export type { IdentityDto } from './generated/IdentityDto';
 export type { MemorySummaryDto } from './generated/MemorySummaryDto';
 export type { ObjectAttributionDto } from './generated/ObjectAttributionDto';
+export type { ProjectContextDto } from './generated/ProjectContextDto';
+export type { ProjectPolicyDto } from './generated/ProjectPolicyDto';
 export type { SectionChangePageDto } from './generated/SectionChangePageDto';
 export type { SectionChangeQueryDto } from './generated/SectionChangeQueryDto';
 export type { SectionChangeRowDto } from './generated/SectionChangeRowDto';
@@ -56,3 +71,5 @@ export type { SymbolRequestDto } from './generated/SymbolRequestDto';
 export type { SymbolRowDto } from './generated/SymbolRowDto';
 export type { SymbolSideDto } from './generated/SymbolSideDto';
 export type { SymbolSortDto } from './generated/SymbolSortDto';
+export type { UnknownDispositionDto } from './generated/UnknownDispositionDto';
+export type { UnknownPolicyDto } from './generated/UnknownPolicyDto';

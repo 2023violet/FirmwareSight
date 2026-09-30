@@ -15,6 +15,11 @@
 //! Unlike the CLI's JSON document, an optional field here is serialized as `null` rather than
 //! omitted. ts-rs can only emit `foo: string | null`, and a payload that drops the key while the
 //! type promises it would make the generated contract lie about what the UI will read.
+//!
+//! P3's Gate payloads stay inside the same discipline. A run carries ten findings, which is a bounded
+//! set by construction, so the whole finding list may cross the boundary — but no config text, no
+//! project root and no artifact path does, and the numbers a table shows are the ones Rust read out of
+//! the stored build (prompt §46, §51–§53).
 
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
@@ -802,4 +807,340 @@ pub struct ExportOutcomeDto {
     pub file_name: Option<String>,
     /// `json` or `html`.
     pub format: String,
+}
+
+// --------------------------------------------------------------------------- Release Gate (P3)
+
+/// What may be done with an `UNKNOWN` rule, as the release owner's policy says (ADR-0023).
+///
+/// Two words, because "pass it anyway" is not one of them, and the UI must not be able to send it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "lowercase")]
+#[ts(export)]
+pub enum UnknownDispositionDto {
+    Review,
+    Block,
+}
+
+/// `[gate.on_unknown]`: one disposition per rule that can lose its evidence.
+///
+/// `null` on a field means the config said nothing about that rule, and `04_TECH/08:60-62`'s default is
+/// what applies — a budget answers to a block, everything else to a review.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct UnknownPolicyDto {
+    pub git_clean: Option<UnknownDispositionDto>,
+    pub commit_matches_release: Option<UnknownDispositionDto>,
+    pub version_match: Option<UnknownDispositionDto>,
+    pub flash_budget: Option<UnknownDispositionDto>,
+    pub ram_budget: Option<UnknownDispositionDto>,
+    pub baseline_growth: Option<UnknownDispositionDto>,
+    pub release_notes: Option<UnknownDispositionDto>,
+}
+
+/// The policy fields the Release page reads and edits (prompt §41).
+///
+/// This is a *policy*, not a config file: the raw TOML text, the keys this build does not understand
+/// and the project root all stay on the Rust side, so the front end can name a budget but cannot name
+/// a file (`AGENTS.md` 7, prompt §40, §46).
+/// Every field is optional in the same sense a `firmwaresight.toml` key is optional: `null` means
+/// "this page stated nothing", and the default the product documents is what applies. That is why no
+/// default lives in the front end — the shell resolves each unset field against `GatePolicy::default()`
+/// on the way in, so a screen and a config file cannot disagree about what an empty box means.
+///
+/// A policy that came *from* a loaded config arrives fully resolved, because what a run judged with is a
+/// fact the reader is entitled to see.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ProjectPolicyDto {
+    pub project_name: String,
+    /// The v1 vocabulary: `elf`, `map`, `bin`, `hex`. `null` keeps the documented default (`elf`).
+    pub required_artifact_kinds: Option<Vec<String>>,
+    #[ts(type = "number | null")]
+    pub flash_budget: Option<u64>,
+    #[ts(type = "number | null")]
+    pub ram_budget: Option<u64>,
+    pub require_clean_git: Option<bool>,
+    pub require_release_notes: Option<bool>,
+    /// Project-relative, never absolute (prompt §53). `null` keeps `RELEASE_NOTES.md`.
+    pub release_notes_path: Option<String>,
+    /// `git_tag`, or `null` when no `[version]` section applies to this project.
+    pub version_source: Option<String>,
+    pub version_pattern: Option<String>,
+    pub expected_version: Option<String>,
+    pub expected_commit: Option<String>,
+    #[ts(type = "number | null")]
+    pub flash_growth_review_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub ram_growth_review_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub unknown_evidence_review_count: Option<u64>,
+    pub on_unknown: UnknownPolicyDto,
+}
+
+/// The project this session loaded a policy from.
+///
+/// `warnings` and `unknown_keys` are facts about the file, not about the build: a warning never fails a
+/// Gate run (prompt §49), and an unknown key is listed here rather than silently kept or silently
+/// dropped (prompt §42).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ProjectContextDto {
+    pub project_name: String,
+    /// `firmwaresight.toml`. The file's name, never the directory holding it.
+    pub config_file_name: String,
+    /// The `schema_version` the config declared.
+    #[ts(type = "number")]
+    pub config_schema_version: i64,
+    pub policy: ProjectPolicyDto,
+    pub policy_sha256: String,
+    pub warnings: Vec<String>,
+    pub unknown_keys: Vec<String>,
+}
+
+/// The two builds one Gate run judges. Snapshot ids and nothing else — no path, no statement, and the
+/// project whose policy applies is the one this session loaded (`AGENTS.md` 7).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateRunRequestDto {
+    pub snapshot_id: String,
+    pub baseline_snapshot_id: Option<String>,
+}
+
+/// Accept that one `REVIEW` finding is disposed of, and by whom.
+///
+/// `actor` and `reason` are required text, not optional decoration: an acceptance without a name and a
+/// reason is not an audit record (prompt §48).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct AcceptReviewRequestDto {
+    pub run_id: String,
+    pub finding_id: String,
+    pub actor: String,
+    pub reason: String,
+}
+
+/// What an acceptance did to one run: the row it accepted, and the aggregate that now applies.
+///
+/// The finding itself is unchanged and stays `REVIEW` forever; the display patches two places from this,
+/// which is why it is not a whole `GateRunDto` (`04_TECH/27`, prompt §48).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct AcceptReviewOutcomeDto {
+    pub run_id: String,
+    pub finding_id: String,
+    /// The finding's state, which is still `REVIEW`. Carried so the screen cannot render an accepted
+    /// review as a pass.
+    pub state: String,
+    pub acceptance: AcceptedReviewDto,
+    pub disposition_effective_severity: String,
+}
+
+/// One accepted review, as stored.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct AcceptedReviewDto {
+    pub finding_id: String,
+    pub actor: String,
+    /// When SQLite recorded the decision. Not a build time and not the reviewer's clock.
+    pub accepted_at: String,
+    pub reason: String,
+    /// Always `REVIEW`: the state that was accepted (ADR-0023).
+    pub original_state: String,
+}
+
+/// How many findings landed in each factual state.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateCountsDto {
+    pub pass: usize,
+    pub review: usize,
+    pub block: usize,
+    pub unknown: usize,
+    pub not_applicable: usize,
+}
+
+/// One rule's answer, with the acceptance beside it if a person recorded one.
+///
+/// `acceptable` is Rust's decision, not a style choice: only a `REVIEW` finding can be accepted, so the
+/// screen renders no control for anything else (prompt §48).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateFindingRowDto {
+    pub id: String,
+    /// The stable rule identity, shown in mono: `git.clean`, `memory.flash_budget`, …
+    pub rule_id: String,
+    /// `PASS` / `REVIEW` / `BLOCK` / `UNKNOWN` / `N/A`.
+    pub state: String,
+    /// The separate ADR-0023 field. An `UNKNOWN` row can carry `BLOCK`.
+    pub effective_severity: String,
+    pub summary: String,
+    pub evidence_refs: Vec<String>,
+    pub remediation: Option<String>,
+    pub acceptable: bool,
+    pub acceptance: Option<AcceptedReviewDto>,
+}
+
+/// The workspace provenance this run read.
+///
+/// Wording matters here: these are facts about the *workspace*, never proof of how an artifact was
+/// built, so the summary names the workspace and no string in this payload says otherwise (prompt §50).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateGitDto {
+    pub available: bool,
+    pub head_commit: Option<String>,
+    pub exact_tag: Option<String>,
+    /// `None` means the probe did not learn whether the workspace is dirty — not that it is clean.
+    pub dirty: Option<bool>,
+    /// Rust's own sentence about what was observed, from a fixed set.
+    pub summary: String,
+    pub reason: Option<String>,
+}
+
+/// One artifact row of the policy-readiness tables: required, present, digested (prompt §51).
+///
+/// A required BIN or HEX is listed as required because the config says so. FirmwareSight does not
+/// analyze those formats in P3 and the screen must not imply that it does.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateArtifactRowDto {
+    /// `elf`, `map`, `bin`, `hex` or `unknown`.
+    pub kind: String,
+    pub required: bool,
+    pub present: bool,
+    pub sha256: Option<String>,
+    #[ts(type = "number | null")]
+    pub byte_size: Option<u64>,
+}
+
+/// One budget, with the number it was measured at and the evidence that number rests on (prompt §52).
+///
+/// `headroom_bytes` and `over_bytes` are filled in at most one of, and only for a rule that reached a
+/// deterministic verdict. An `UNKNOWN` row carries no invented number: both stay `null` and `reason`
+/// says what is missing (US-001).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateBudgetRowDto {
+    /// `flash` or `ram`.
+    pub side: String,
+    pub label: String,
+    pub rule_id: String,
+    pub state: String,
+    pub effective_severity: String,
+    #[ts(type = "number | null")]
+    pub budget_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub actual_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub headroom_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub over_bytes: Option<u64>,
+    /// Whether the total is a complete attribution rather than a floor.
+    pub exact: bool,
+    pub admissible: bool,
+    pub basis: Option<String>,
+    pub reason: Option<String>,
+}
+
+/// Growth against the baseline, moved here from P2's Core diff and never recomputed (prompt §52).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateGrowthRowDto {
+    pub side: String,
+    pub label: String,
+    pub rule_id: String,
+    /// The state of the single `diff.growth` rule, shared by both sides.
+    pub state: String,
+    pub effective_severity: String,
+    #[ts(type = "number | null")]
+    pub old_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub new_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub delta_bytes: Option<i64>,
+    #[ts(type = "number | null")]
+    pub threshold_bytes: Option<u64>,
+    /// `exact`, `partial` or `unknown` — P2's comparability of this delta.
+    pub comparability: String,
+    pub reason: Option<String>,
+}
+
+/// The Release Notes file the policy points at, by project-relative path only (prompt §53).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateNotesDto {
+    pub required: bool,
+    pub state: String,
+    pub effective_severity: String,
+    pub relative_path: Option<String>,
+    pub present: Option<bool>,
+    pub sha256: Option<String>,
+    pub reason: Option<String>,
+}
+
+/// The number-backed tables under the findings.
+///
+/// `null` in [`GateRunDto::tables`] for a run read back from history: the stored record keeps each
+/// finding's own text and evidence, but the policy that produced these numbers is not part of it, and
+/// a table rebuilt against a different policy would state a verdict the run never made.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateTablesDto {
+    pub artifacts: Vec<GateArtifactRowDto>,
+    pub budgets: Vec<GateBudgetRowDto>,
+    pub growth: Vec<GateGrowthRowDto>,
+    pub notes: GateNotesDto,
+}
+
+/// One Gate run: the aggregate, the findings, and the facts they were judged from.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct GateRunDto {
+    pub run_id: String,
+    pub snapshot_id: String,
+    pub baseline_snapshot_id: Option<String>,
+    /// The project whose policy produced this run, or `null` for a run read back from history whose
+    /// policy is not loaded. A default-policy run has no project name to state (§40, §46).
+    pub project_name: Option<String>,
+    /// Which policy produced this run: the loaded config's file name, or the stated FirmwareSight
+    /// default. A default-policy run is never labelled as a project's own policy (prompt §40).
+    pub policy_source: String,
+    pub policy_sha256: String,
+    /// When FirmwareSight stored this run. Not a build time (`04_TECH/24` Time).
+    pub created_at: String,
+    /// The aggregate with no acceptances counted.
+    pub overall_effective_severity: String,
+    /// The aggregate once this run's accepted reviews are counted. Core derives both; neither is
+    /// recomputed here.
+    pub disposition_effective_severity: String,
+    pub counts: GateCountsDto,
+    /// Findings in canonical rule order; the screen groups them by state.
+    pub findings: Vec<GateFindingRowDto>,
+    /// Config warnings. A warning is not a failure and never appears as a finding (prompt §49).
+    pub warnings: Vec<String>,
+    pub git: GateGitDto,
+    /// The policy this run judged with, resolved by Rust. `null` for a run read back from history whose
+    /// policy is not loaded: the fingerprint is stored, the values are not, and a policy invented for the
+    /// display would be a second claim about the run.
+    pub policy: Option<ProjectPolicyDto>,
+    pub tables: Option<GateTablesDto>,
+    /// Set only for a run read back from history, and says what such a record does and does not show.
+    pub record_note: Option<String>,
 }

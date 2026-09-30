@@ -242,7 +242,7 @@ impl Session {
 }
 
 /// Turn a Core refusal into the envelope the shell presents.
-fn envelope_from_diff(err: &DiffError, operation_id: &str) -> ErrorEnvelopeDto {
+pub(crate) fn envelope_from_diff(err: &DiffError, operation_id: &str) -> ErrorEnvelopeDto {
     let message = match err {
         DiffError::SameSnapshot { .. } => {
             "Both sides name the same build, so there is nothing to compare."
