@@ -71,6 +71,16 @@ is not evidence.
   P3 surface — but this round's gate is what caught it. The queries are now awaited with the assertions
   unchanged, ten consecutive runs of that file are green where one in five had failed, and the `15/15` in
   box 39 is the re-run after the fix rather than the earlier run restated.
+- **A second race of the same class surfaced only on CI, after that fix.** Run `36779715108` on `893a635`
+  failed `Desktop UI (windows-latest)` → `frontend/test` with `AssertionError: expected 2 to be +0` at
+  `compare.test.tsx:731`, while the ubuntu job passed the same file and eight local runs had passed it.
+  The KiB test sampled `querySectionChanges` call counts before the change tables' own first fetches had
+  landed, so the page's loading was charged to the radio click. Fixed by sampling after both tables
+  resolve — the guard `details.test.tsx:352` has carried since P1 — with the delta assertions unchanged,
+  and verified by mutation: a real `querySectionChanges` call on the unit toggle fails at exactly that
+  line (`expected 4 to be 3`), after which `Compare.tsx` was restored byte-identical. Defect J in
+  `P3_GATE_EXECUTION_REPORT.md` §7. That CI run is also the last P3 fact: its successor push has to say
+  whether the round is green on all seven jobs.
 - **The closure commits were first recorded as unpushed, then pushed, and CI now says something.** At
   the time box 39 was written, `origin/main` was still `32b23aa` and no CI run covered P3 code; §67
   forbids writing a future CI run into the commits that would trigger it, so nothing was predicted.
@@ -80,8 +90,10 @@ is not evidence.
   core smoke and the generated-output drift check all passed, and only `Dependency policy` failed on
   `error[yanked]` for `yoke-derive 0.8.3` — a crates.io yank published at 2026-09-30T13:19:39Z, after
   the local `deny` step had run against an older index. Nothing in this checklist's product evidence
-  depends on that crate's patch level, and the lockfile moved to `0.8.4` in a successor commit. See
-  §4.1 of the execution report for the measurement and the re-run.
+  depends on that crate's patch level, and the lockfile moved to `0.8.4` in a successor commit — which
+  run `36779321479` then verified at **7 of 7 jobs green**, Dependency policy included. The third push,
+  `893a635`, went red again on a different job: `Desktop UI (windows-latest)`, on the race two bullets
+  above. §4.1 of the execution report carries all three runs.
 
 ## Verdict
 

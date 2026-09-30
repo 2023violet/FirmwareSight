@@ -719,8 +719,18 @@ describe('the summary and its signs', () => {
   it('re-labels the same figures in KiB and asks the shell for nothing', async () => {
     await openCompare();
     await runCompare();
+    // Each change table owns its own IPC, so the page is still fetching when `Build comparison` first
+    // appears. Sampling here caught zero calls on a Windows runner and two on a Linux one, and the
+    // delta below then charged the page's own fetches to the KiB radio. Waiting for a row that only
+    // exists once the query has resolved puts the sample after the fetch; the guard proves it did.
+    const sections = await screen.findByRole('region', { name: 'Section Changes' });
+    await within(sections).findByText('.text');
+    const symbols = await screen.findByRole('region', { name: 'Symbol Changes' });
+    await within(symbols).findByText('g_threshold');
+
     const calls = compareMock.mock.calls.length;
     const changeCalls = sectionChangesMock.mock.calls.length;
+    expect(changeCalls).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole('radio', { name: 'KiB' }));
 

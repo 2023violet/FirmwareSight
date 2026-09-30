@@ -97,17 +97,15 @@ not 370.
 
 ## 4.1 CI after the push (successor fact, measured 2026-09-30)
 
-The closure commits were pushed after §4 was written, so `origin/main` moved to
-`219178af195569ec6b13728d84d992ef78df8c04` and GitHub Actions covered a P3 tree for the first time.
+The closure commits were pushed after §4 was written, so GitHub Actions covered P3 trees for the first
+time. Each push produced one run at its own head — the gate fires per push, so the intermediate commits
+have no runs of their own.
 
-| Fact | Measurement |
-| --- | --- |
-| Run | [`36774472141`](https://github.com/2023violet/FirmwareSight/actions/runs/36774472141), event `push` to `main`, started 2026-09-30T20:42:14Z |
-| Result | `completed` / `failure` |
-| Jobs | 6 success, 1 failure — `Dependency policy` |
-| Green remotely | Rust (windows-latest and ubuntu-latest), Desktop UI (windows-latest and ubuntu-latest), macOS Core Smoke, Generated output drift |
-| Red | `python scripts/check.py --only deny` → `advisories FAILED, bans ok, licenses ok, sources ok`, exit 1 |
-| Named cause | `error[yanked]: detected yanked crate (try \`cargo update -p yoke-derive\`)` against `yoke-derive 0.8.3` in `Cargo.lock` |
+| Run | Head | Result | What it said |
+| --- | --- | --- | --- |
+| [`36774472141`](https://github.com/2023violet/FirmwareSight/actions/runs/36774472141) | `219178a` | `completed` / `failure`, 6 of 7 jobs | Only `Dependency policy` red: `python scripts/check.py --only deny` → `advisories FAILED, bans ok, licenses ok, sources ok`, exit 1, on `error[yanked]: detected yanked crate (try \`cargo update -p yoke-derive\`)` against `yoke-derive 0.8.3` |
+| [`36779321479`](https://github.com/2023violet/FirmwareSight/actions/runs/36779321479) | `2d1bcea` | `completed` / **`success`, 7 of 7** | The yank fix verified remotely: Dependency policy, Rust (windows + ubuntu), Desktop UI (windows + ubuntu), macOS Core Smoke and Generated output drift all green |
+| [`36779715108`](https://github.com/2023violet/FirmwareSight/actions/runs/36779715108) | `893a635` | `completed` / `failure`, 6 of 7 jobs | A *different* red: `Desktop UI (windows-latest)` → `frontend/test`, 1 failed / 134 passed, `AssertionError: expected 2 to be +0` at `compare.test.tsx:731`, while `Desktop UI (ubuntu-latest)` passed the same file. That is defect J in §7, found by CI and not by the local gate |
 
 The yank is an external event on the day of closure: crates.io reports `yoke-derive 0.8.3` as `yanked`
 and `0.8.4` as created `2026-09-30T13:19:39Z`. FirmwareSight reaches that crate only transitively and
@@ -175,6 +173,8 @@ build and CLI/desktop run-id parity measured. Full table, inputs, tooling and da
 | H | blocking | One build produced two run ids: the CLI read facts off disk, the desktop read them from SQLite, and the footprint evidence pointer plus a `reason` string were inside the fingerprint | `FOOTPRINT_EVIDENCE_FIELDS` + `Database::evidence_id_for_field` hydrate the pointer; `canonical_memory` no longer carries `reason`; `a_stored_build_fingerprints_exactly_like_a_fresh_analysis`; measured again across surfaces in the smoke |
 | I | test-side race, found by this round's gate | `check.py` returned **13/14** with `frontend/test` failing on `compare.test.tsx > the change tables > keeps a size that was never recorded as Unknown with its reason` — `Unable to find an element with the text: g_threshold`. `Compare.tsx:1303` renders `Loading symbol changes…` inside the same region, so the awaited region lookup resolves while the table is empty and the synchronous `within(table).getByText(…)` loses the race with the second IPC call. The rows were never wrong: this is P2's test file, not product behaviour | The three row queries that follow a freshly loaded table are awaited instead (`.noinit`, `.oldboot`, `g_threshold`); the assertions are unchanged, so a row that genuinely never arrives still fails. 10 consecutive `compare.test.tsx` runs green after 1 failure in 5 before, then the full gate re-run |
 
+| J | test-side race, found by CI and not by the local gate | Run `36779715108` failed `frontend/test` on `Desktop UI (windows-latest)` only: `compare.test.tsx` → *"re-labels the same figures in KiB and asks the shell for nothing"* asserted `expected 2 to be +0`. The test sampled `querySectionChanges.mock.calls.length` immediately after `runCompare()`, but `runCompare()` awaits only the `Build comparison` region — the two change tables fetch their own pages afterwards (`Compare.tsx:225` and the `SectionChanges` effect at `Compare.tsx:1001`). On the Windows runner the sample caught zero calls and the page's own two fetches landed after it, so the delta charged the page's loading to the KiB radio. Eight local runs and the ubuntu job passed the same file, which is what a timing assumption looks like | The sample now happens after both tables have resolved, the way the P1 test already does it (`details.test.tsx:352` waits for `sectionsMock` before sampling); a `toBeGreaterThan(0)` guard proves the sample really is after the fetch. The two delta assertions are unchanged, and the fix was verified by mutation: adding a real `querySectionChanges` call on the unit toggle makes the file fail at that line with `expected 4 to be 3`, and the component was then restored byte-identical (`git diff --exit-code`) |
+
 ## 8. Known limits carried forward
 
 - Object/module attribution remains unavailable by evidence design (P0/P1 limit).
@@ -187,6 +187,12 @@ build and CLI/desktop run-id parity measured. Full table, inputs, tooling and da
   case in point: the step passed here and failed in CI one push later, on a yank published the same
   day. CI, not this host, is the authority on yanked and advisory state; `check.py` already says so
   when `cargo deny` is absent, and this limit is the mirror image of that.
+- A local green says nothing about another platform's timing. Defects I and J are the same class in the
+  same file — a synchronous assertion racing an async table load. I was caught by this round's local
+  gate on this machine; J was caught only by `Desktop UI (windows-latest)`, after eight clean local
+  runs of that file and with the ubuntu job green on the same commit. Two of the four jobs that cover
+  this UI run on a platform where this repository has never opened a window, so a UI test that depends
+  on ordering rather than on an awaited state stays invisible until CI says so.
 
 ## 9. Scope discipline
 

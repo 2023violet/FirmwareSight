@@ -52,7 +52,10 @@ P3      PASS / COMPLETE — Release Gate, authorized on 2026-09-29 by its own ar
         afterwards, and remote Run 36774472141 on 219178af completed failure with 6 of 7 jobs green —
         every build, UI, macOS-smoke and drift job passed, only Dependency policy failed, on a crate
         (`yoke-derive 0.8.3`) yanked on crates.io after the local deny step had gone green on a stale
-        index. Fixed by a patch bump to 0.8.4 in a successor commit, with the gate re-run 15/15
+        index. Fixed by a patch bump to 0.8.4, verified remotely by Run 36779321479 at 7 of 7 jobs green.
+        The next push (893a635) went red on Desktop UI (windows-latest) alone: a call-count race in
+        compare.test.tsx that the ubuntu job won on the same commit — defect J, fixed with its delta
+        assertions unchanged and the fix proved by mutation
 P4      NOT STARTED — the next authorizable stage now that P3 has closed, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```

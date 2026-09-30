@@ -870,6 +870,23 @@ Decisions taken at closure, each with the thing that forced it:
   round's dependency fix, so no test appeared, vanished or was weakened — only the arithmetic changed.
   `Core gate 55` was the same class of error; the counted `domain::gate` list is 32. P3 therefore took Rust
   from 345 to 556, and the UI figure was never double-counted at 135.
+- **CI went green on the dependency fix, then red again on a UI test that only Windows CI could lose.**
+  Run `36779321479` on `2d1bcea` concluded `success` with **7 of 7 jobs**, Dependency policy included,
+  which is the yank fix verified on a fresh index. Run `36779715108` on the next head, `893a635`,
+  concluded `failure` with 6 of 7: `Desktop UI (windows-latest)` → `frontend/test`, `AssertionError:
+  expected 2 to be +0` at `compare.test.tsx:731`, while `Desktop UI (ubuntu-latest)` passed the same file
+  on the same commit and eight local runs had passed it. The KiB test sampled `querySectionChanges` call
+  counts right after `runCompare()`, but `runCompare()` awaits only the `Build comparison` region — the
+  two change tables fetch their own pages afterwards (`Compare.tsx:225`, `Compare.tsx:1001`) — so on a
+  slower runner the page's own loading was charged to the radio click. Same class as defect I, in the
+  same file, and this time the local gate could not see it.
+- **That fix keeps the assertion and adds a guard, and it was proved by mutation rather than by green.**
+  The sample now happens after both tables have resolved, the way the P1 test has done it since
+  `details.test.tsx:352`, and `expect(changeCalls).toBeGreaterThan(0)` proves the sample is really after
+  the fetch instead of vacuously early. The two delta assertions were not touched. To check the test
+  still bites, a real `querySectionChanges` call was added to the unit toggle: the file failed at that
+  line with `expected 4 to be 3`. `Compare.tsx` was then restored and verified byte-identical to HEAD
+  with `git diff --exit-code`, and eight consecutive runs of the file pass.
 - **The license gap did not close with the stage.** `Cargo.toml` still reads `license = "Proprietary"`,
   there is still no root `LICENSE`, no workspace license metadata was touched and no license text was
   added. `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands, `AGENTS.md` 9 keeps a license

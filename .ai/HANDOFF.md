@@ -142,15 +142,18 @@ P3      PASS / COMPLETE — P3_RELEASE_GATE closed 2026-09-30, authorized 2026-0
         P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md: 556 Rust tests in 28 executable suites, 135 UI tests,
         15/15 local gate steps, an 18/18 CLI Gate smoke and all forty §61 desktop steps walked on the
         shipping binary. The stage closed as LOCAL PASS because the commits were still unpushed; they were
-        then pushed, `origin/main` became 219178af and Run 36774472141 completed failure with 6 of 7 jobs
-        green — every build, test, UI, macOS-smoke and drift job passed and only Dependency policy failed,
-        on `error[yanked]` for `yoke-derive 0.8.3`, a crate yanked on crates.io the same afternoon after
-        the local deny step had already gone green on a stale index. Fixed by `cargo update -p
-        yoke-derive --precise 0.8.4` in a successor commit; the full gate is 15/15 on that tree. Three
-        sub-items are stated rather than smoothed: desktop step 30's prior-run re-read was never observed
-        through the window, this round's first full gate came back 13/14 on a P2 test-side race (defect I)
-        that the round diagnosed and fixed before closing, and the closure report's own Rust test total
-        was a double count that is corrected in §4 of that report rather than replaced silently
+        then pushed and produced three runs. 36774472141 (219178af) FAILURE, 6 of 7 — only Dependency
+        policy, on `error[yanked]` for `yoke-derive 0.8.3`, a crate yanked on crates.io the same afternoon
+        after the local deny step had already gone green on a stale index; fixed by `cargo update -p
+        yoke-derive --precise 0.8.4`. 36779321479 (2d1bcea) SUCCESS, 7 of 7, which is that fix verified
+        remotely. 36779715108 (893a635) FAILURE, 6 of 7 — Desktop UI (windows-latest) lost a call-count
+        race in compare.test.tsx that the ubuntu job won on the same commit (defect J), fixed with the
+        delta assertions unchanged and the fix proved by mutation. Four sub-items are stated rather than
+        smoothed: desktop step 30's prior-run re-read was never observed through the window, this round's
+        first full gate came back 13/14 on a P2 test-side race (defect I) that the round diagnosed and
+        fixed before closing, the closure report's own Rust test total was a double count that is
+        corrected in §4 of that report rather than replaced silently, and two races in that one file were
+        each caught by a different mechanism — I locally, J only on Windows CI
 P4      NOT STARTED — the next authorizable stage now that P3 has closed, and authorizing it is the
         architect's act. ADR-0026 removed the research gate, not the requirement of each stage carrying
         its own prompt
@@ -232,13 +235,15 @@ P2 smoke gap      desktop step 27, the same-pair lock, is NOT VERIFIED in the sh
                   <select> popup cannot be driven or captured through the available window path. Covered
                   by compare.test.tsx and the IPC tests, recorded PARTIAL: P2_VALIDATION/
                   P2_COMPARE_DESKTOP_SMOKE_REPORT.md
-Remote state      Not green at the head, and the reason is a dependency yank, not a build. origin/main is
-                  219178af, P3's integrity-artifact successor, where Run 36774472141 concluded FAILURE with
-                  6 of 7 jobs green: Rust on windows and ubuntu, Desktop UI on windows and ubuntu, the
-                  macOS core smoke and the drift check all passed; only Dependency policy failed, on
-                  `error[yanked]` for `yoke-derive 0.8.3`, yanked on crates.io at 2026-09-30T13:19:39Z after
-                  the local deny step had passed on a stale index. `cargo update -p yoke-derive --precise
-                  0.8.4` follows in a successor commit, with the gate re-run 15/15. The previous head was
+Remote state      Three pushes, three runs, and the head was red on a Windows-only test race. origin/main
+                  moved 219178af -> 2d1bcea -> 893a635. Run 36774472141 (219178af) FAILURE, 6 of 7: only
+                  Dependency policy, on `error[yanked]` for yoke-derive 0.8.3, yanked on crates.io at
+                  2026-09-30T13:19:39Z after the local deny step had passed on a stale index. Run
+                  36779321479 (2d1bcea) SUCCESS, 7 of 7 - the lock moved to 0.8.4 and CI agreed on a fresh
+                  index. Run 36779715108 (893a635) FAILURE, 6 of 7: Desktop UI (windows-latest) lost a
+                  call-count race in compare.test.tsx that Desktop UI (ubuntu-latest) won on the same
+                  commit, and eight local runs had won; fixed as defect J with the delta assertions
+                  unchanged and the fix proved by mutation. The previous head was
                   32b23aa on Run #19 36665007523 (success, 7 of 7), the documentation-and-integrity
                   successor to 4a77ea1, which P2 closed green on Run #18 36648718199. The earlier Run #17 on
                   c7fc2a3 was FAILURE because `**/target/` hid the target half of the P2 fixture pair

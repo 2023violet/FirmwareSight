@@ -68,7 +68,11 @@ the assertions unchanged and the gate re-run green). That is recorded rather tha
 a transitive proc-macro under `url`, yanked on crates.io at 2026-09-30T13:19:39Z, i.e. after this
 machine's `deny` step had passed on an older index. Rust on both platforms, Desktop UI on both
 platforms, the macOS core smoke and the drift check all passed remotely. The lockfile moved to `0.8.4`
-in a successor commit and the gate was re-run 15/15. Before that push, `origin/main` was `32b23aa`,
+in a successor commit and the gate was re-run 15/15, and the push after that (Run `36779321479` on
+`2d1bcea`) came back **success, 7 of 7 jobs** — the yank fix verified on CI's fresh index. The head after
+that, `893a635`, went red a third time on a different job: `Desktop UI (windows-latest)` lost a
+call-count race in `compare.test.tsx` that the ubuntu job and eight local runs won, fixed as defect J
+with the assertion kept and proved by mutation. Before that first P3 push, `origin/main` was `32b23aa`,
 whose Run #19 `36665007523` is `completed / success` with 7 of 7 jobs, following Run #18
 `36648718199` on the P2 implementation tree `4a77ea1`. §67 forbade writing a future CI run into the
 commit that would trigger it, so nothing was predicted and this paragraph is a successor record.
