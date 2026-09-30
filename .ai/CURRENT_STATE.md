@@ -19,8 +19,9 @@ last_updated: "2026-09-29"
   product rather than by testing it.
   `P1_ANALYZE_DETAILS` finished earlier the same day and P1 Analyze is `PASS / COMPLETE` (Sections,
   Symbols, Evidence Inspector, top contributors, US-001 bytes/KiB switch), recorded in `P1_VALIDATION/`.
-  **`P3` needs its own architect prompt before it starts**, and the remote branch is red at a mid-round
-  P2 commit — see `P2_COMPARE_EXECUTION_REPORT.md` §5.1 before treating any P2 number as CI-verified.
+  **`P3` needs its own architect prompt before it starts.** The remote is green at the head: `origin/main`
+  is `4a77ea1` on Run #18 `36648718199`, success, 7 of 7 jobs, after Run #17 on the mid-round commit
+  `c7fc2a3` had gone red — the fixture-pair story in `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
 
 ## Product/architecture baseline
 
@@ -141,7 +142,7 @@ G1: PASS — basis is P0 PASS under ADR-0026 (2026-09-29). Before that date this
 V0: NON_BLOCKING_USER_FEEDBACK_TRACK — 0 of 8 eligible external sessions, an honest zero that gates no P-stage and no G1
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
 P1: PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors, bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB presentation switch. Evidence: P1_VALIDATION/
-P2: PASS / COMPLETE — Compare over persisted snapshots: Core-owned deterministic diff, bounded Compare IPC with a session-local registry, the second desktop page, `fwsight diff`, and portable Diff JSON v1 plus self-contained HTML. Evidence: P2_VALIDATION/. Open on purpose: desktop smoke step 27 not observed in the shipped window, and `origin/main` red at the mid-round commit `c7fc2a3` (defect E, fixed at `cfee1e5`, unpushed)
+P2: PASS / COMPLETE — Compare over persisted snapshots: Core-owned deterministic diff, bounded Compare IPC with a session-local registry, the second desktop page, `fwsight diff`, and portable Diff JSON v1 plus self-contained HTML. Evidence: P2_VALIDATION/. The round's own measurements are LOCAL PASS; the pushed head `4a77ea1` is green on Run #18 `36648718199` (7 of 7), which closes defect E — the fixture half `.gitignore` hid — on the remote too. Open on purpose: desktop smoke step 27 was not observed in the shipped window
 P3 / P4: NOT STARTED — P3 Gate is now the next authorizable stage, and still needs its own architect prompt
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
 Active task: NONE
@@ -241,14 +242,16 @@ last-good handle, `Unknown` never rendered as zero, addresses never unit-convert
 
 What belongs to the owner and the architect:
 
-1. pushing remains the owner's act. It last happened through `c7fc2a3`, the second commit of the P2
-   round, and its remote verification is **Run #17 `36596452341`, `failure`, 3 of 7 jobs red** —
-   `Rust (windows-latest)`, `Rust (ubuntu-latest)` and `macOS Core Smoke`, all on
-   `committed_fixtures_match_their_recorded_hashes`, for the reason in the gap above. That is defect E:
-   fixed at `cfee1e5` and re-verified from a clean `git archive` checkout, but never re-pushed, so the
-   remote is red at a commit the fix already leaves behind. The previous green head was `e63afaf` with
-   **Run #13 `36556735551`, `success`, 7 of 7 jobs**. No commit in either chain carries the run number
-   its own push produced;
+1. pushing remains the owner's act. The P2 round pushed twice. The first, mid-round at `c7fc2a3`, produced
+   **Run #17 `36596452341`, `failure`, 3 of 7 jobs red** — `Rust (windows-latest)`, `Rust (ubuntu-latest)`
+   and `macOS Core Smoke`, all on `committed_fixtures_match_their_recorded_hashes`, for the reason in the
+   gap above: `.gitignore`'s `**/target/` had kept the target half of the fixture pair out of the
+   repository while every local run digested the bytes the generator had left on disk. That is defect E,
+   fixed at `cfee1e5` and re-verified from a clean `git archive` checkout. The owner then pushed the head,
+   and **Run #18 `36648718199` on `4a77ea1` concluded `success`, 7 of 7 jobs** — the same seven that
+   carried P1's `e63afaf` on Run #13 `36556735551`. `origin/main` is now green again. No commit carries the
+   run its own push produced: #18 is recorded by the successor document that reports it, and the run this
+   document's own push starts belongs to a later one;
 2. whether and when to resume the V0 feedback track with real participants - now a choice rather than a
    gate, with the `v0.1.0` instrument still frozen and ready;
 3. a **separate architect prompt** for P3 Release Gate, which P2's closure makes authorizable and this

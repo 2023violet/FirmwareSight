@@ -12,8 +12,9 @@ last_updated: "2026-09-29"
 
 Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctness closure ·
 `P1: PASS / COMPLETE` (Analyze, evidence in `P1_VALIDATION/`) ·
-`P2: PASS / COMPLETE` (Compare, evidence in `P2_VALIDATION/` — LOCAL PASS: remote Run #17 is red at the
-mid-round commit `c7fc2a3` and the fix is unpushed) ·
+`P2: PASS / COMPLETE` (Compare, evidence in `P2_VALIDATION/`; the round's own gate results are LOCAL PASS,
+and the pushed head `4a77ea1` is green on remote Run #18 `36648718199`, 7 of 7 jobs — after Run #17 on the
+mid-round commit `c7fc2a3` had gone red and been fixed) ·
 `G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `active_task: NONE` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `P3 / P4: NOT STARTED — each needs its own architect prompt` ·

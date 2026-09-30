@@ -53,16 +53,26 @@ same-pair lock in the shipped window — a native `<select>` popup cannot be dri
 available window path, so it stays covered only by `compare.test.tsx` and the IPC tests and is recorded as
 PARTIAL.
 
-**The remote is red at the pushed commit and silent about the final tree.** Two P2 commits were pushed
-mid-round; run #17 `36596452341` on `c7fc2a3` is `completed/failure`, because `.gitignore`'s
+**The remote was red at the mid-round push and is green at the head.** Two P2 commits went up during the
+round; run #17 `36596452341` on `c7fc2a3` concluded `completed/failure`, because `.gitignore`'s
 `**/target/` had hidden the entire `fixtures/elf/p2-diff/target/` half of the fixture pair — a clean
 checkout carried six of the twelve P2 paths the manifest records, while every local run passed on the
 bytes the generator had left on disk. That is defect E in
-`P2_VALIDATION/P2_COMPARE_EXECUTION_REPORT.md` §5.1: the fixtures are now tracked, the path is
-un-ignored with its reason in the file, the drift group gained a `fixtures tracked` step, and the fix
-was re-verified from `git archive HEAD` rather than from the authoring directory. `origin/main` is still
-`c7fc2a3`; nothing after it was pushed, so no remote run covers this tree and `LOCAL PASS` is the whole
-claim. Turning the red into a green run is a push, and a push is the owner's decision.
+`P2_VALIDATION/P2_COMPARE_EXECUTION_REPORT.md` §5.1: the fixtures are tracked, the path is un-ignored with
+its reason in the file, the drift group gained a `fixtures tracked` step, and the fix was re-verified from
+`git archive HEAD` rather than from the authoring directory.
+
+The owner then pushed the head, and the remote agrees with what was measured locally: run #18
+`36648718199` on `4a77ea1` concluded `completed` / `success`, **7 of 7 jobs** — `Generated output drift`,
+`Dependency policy`, `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`,
+`Desktop UI (ubuntu-latest)`, `macOS Core Smoke` — read with
+`gh run view 36648718199 --repo 2023violet/FirmwareSight`. Defect E is therefore closed on the remote, not
+only on this machine.
+
+The distinction still holds and is the reason the run is written here rather than in its own commit: the
+P2 gate results were measured before any push, so the round's own verdict remains `LOCAL PASS`, and #18 is
+the successor verification of the tree that carries it. This commit's push will start a further run; its
+number belongs to a later document, not to this one.
 
 ## State this closure leaves behind
 
@@ -81,8 +91,9 @@ Design tokens       v0.2.1 — unchanged
 Public schemas      analysis v1, diff v1 (urn:firmwaresight:schema:diff:1) — both compatibility promises
 Pricing/commercial  DEFERRED_POST_MVP
 Run #16             36576568426 on 7a13660 — success, 7 of 7 jobs (this round's start fact)
-Run #17             36596452341 on c7fc2a3 — FAILURE, 3 of 7 jobs (the mid-round push; defect E, fixed at cfee1e5, never re-pushed)
-Remote              origin/main at c7fc2a3; everything after it is local
+Run #17             36596452341 on c7fc2a3 — FAILURE, 3 of 7 jobs (the mid-round push; defect E)
+Run #18             36648718199 on 4a77ea1 — success, 7 of 7 jobs (defect E closed on the remote)
+Remote              origin/main at 4a77ea1, green
 ```
 
 Three things are open on purpose, because closing them needs authority or a decision this round did not
@@ -96,11 +107,9 @@ have:
    be reinterpreted silently any more; a breaking semantic change needs a major version. That constraint
    belongs to whoever writes P3 and P4 exports, and is recorded in the completion report rather than only
    in the schema file.
-3. **The remote branch is red.** `origin/main` sits on `c7fc2a3`, whose run failed on the missing
-   fixture half; the fix is local at `cfee1e5` and verified from a clean tree. The next session that is
-   authorized to push should push P2's remaining commits, read the new run back, and record it in the
-   commit *after* the one it triggers — the rule that held through P0 and P1 — rather than claiming a
-   result before it exists. Until then P2 is `LOCAL PASS`, not `CI PASS`.
+3. **Desktop smoke step 27 was never observed in the shipped window**, and the P1 `Apply-filter` dead
+   click is still unresolved. Both are recorded as `NOT VERIFIED` / `UNRESOLVED` with what does cover them,
+   rather than counted as passes.
 
 Two carry-overs from P1 are unchanged and still open: `sections.file_offset` and `symbols.address` are
 nullable columns with no reason column, so a reason is lost at write time (a migration fix), and

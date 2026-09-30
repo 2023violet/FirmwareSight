@@ -110,7 +110,7 @@ never blocks (`a_missing_map_never_blocks_the_comparison_but_always_shows_the_do
 | `git diff --check` | LOCAL PASS | no whitespace errors |
 | Windows Desktop smoke | PARTIAL, honest | 30 steps in `P2_COMPARE_DESKTOP_SMOKE_REPORT.md`; **step 27 not verified in the shipped window** (native `<select>` popup cannot be driven or captured here) — covered only by tests |
 | Clean-checkout reproducibility | LOCAL PASS | `git archive HEAD` extracted to a fresh directory and the fixture tests run there (numbers in the Fixture table above). This is what defect E was missing |
-| Remote CI over the final tree | **NOT GREEN, NOT COVERED** | `origin/main` is at `c7fc2a3`, whose run `36596452341` (#17) is `completed/failure` on `committed_fixtures_match_their_recorded_hashes`. The cause is defect E and the fix is `cfee1e5`, but the fix is unpushed, so no run covers the final tree. Closing the red needs a push, which is a shared-state action left to the owner |
+| Remote CI over the final tree | GREEN, RECORDED AFTER CLOSURE | Mid-round: `origin/main` at `c7fc2a3`, Run `36596452341` (#17) `completed/failure` on `committed_fixtures_match_their_recorded_hashes` — defect E. After closure the owner pushed the head: **Run `36648718199` (#18) on `4a77ea1`, `success`, 7 of 7 jobs**, all three previously red jobs green. Recorded in `P2_COMPARE_EXECUTION_REPORT.md` §5.2, not in the commit that triggered it. The boxes above stay `LOCAL PASS`: they were measured before any push |
 
 ## Boundary conditions from the prompt
 
@@ -130,9 +130,9 @@ never blocks (`a_missing_map_never_blocks_the_comparison_but_always_shows_the_do
 **P2 = PASS / COMPLETE** on every §61 box, with two things stated rather than folded away:
 
 1. Desktop smoke step 27 is not observed in the shipped window, so that one sub-item stays `PARTIAL`.
-2. The remote branch is red at the mid-round commit `c7fc2a3` for defect E. The fix is committed
-   (`cfee1e5`) and verified from a clean checkout, but it is unpushed, so **no CI run covers this
-   tree** — every result above is `LOCAL PASS`, and turning the red into a green run is a push
-   decision for the owner, not a claim this checklist can make.
+2. The gate boxes above are `LOCAL PASS` because they were measured before any push. The mid-round push
+   `c7fc2a3` failed remote Run #17 on defect E; after closure the owner pushed the head and Run #18
+   `36648718199` on `4a77ea1` came back `success`, 7 of 7 — the remote now verifies the tree this
+   checklist describes, and the successor note is in `P2_COMPARE_EXECUTION_REPORT.md` §5.2.
 
 P3 = `NEXT_AUTHORIZABLE_STAGE`. Do not implement P3.

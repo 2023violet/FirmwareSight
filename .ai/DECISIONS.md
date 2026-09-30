@@ -693,3 +693,29 @@ Decisions taken at closure, each with the thing that forced it:
   lines named above and the P0 goldens were untouched. `cargo test --workspace` went 184 → 345 and UI 58 →
   99, all green, and no existing assertion was weakened to get there - the three tests that asserted P2's
   own absence were rewritten by name, as the activation entry recorded.
+
+# P2 Compare — remote verification, same day, after the closure entry above
+
+The closure entry says P2 closes with a red remote and no run covering its final tree. That was true when
+it was written and is not rewritten here; this entry records what the owner's push measured afterwards.
+
+- **The run is recorded by a successor document, never by the commit that triggered it.** That rule held
+  through P0 and both P1 rounds and it holds here: `4a77ea1` carries the integrity artifacts and says
+  nothing about the run its own push would produce. This document is the successor that reports it.
+- **Mid-round Run #17 `36596452341` on `c7fc2a3` stands as `failure`** - 3 of 7 jobs red
+  (`Rust (windows-latest)`, `Rust (ubuntu-latest)`, `macOS Core Smoke`) on
+  `committed_fixtures_match_their_recorded_hashes`. It is history, not a defect to be re-labeled: it is
+  precisely the measurement that made defect E visible, since no local run could see a fixture git had
+  never carried.
+- **Head Run #18 `36648718199` on `4a77ea1` concluded `success`, 7 of 7 jobs** (read with
+  `gh run view 36648718199 --repo 2023violet/FirmwareSight`): `Generated output drift`, `Dependency policy`,
+  `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`,
+  `Desktop UI (ubuntu-latest)`, `macOS Core Smoke`. The three that were red are green, so the fixture pair
+  now reproduces on a machine that never ran the generator - which is the claim the P2 pack could only make
+  locally before.
+- **The wording of the verdict does not change.** P2's gate numbers were measured before any push, so the
+  round still closes as `LOCAL PASS`, and #18 is the successor verification of the tree carrying them. A
+  green run after the fact does not convert a `LOCAL PASS` into `CI PASS` for the measurements that
+  preceded it, and the completion report is unchanged for that reason.
+- **This document's own push starts another run.** Its number belongs to a later record, not to this one,
+  and nothing here claims a result for a tree that has not yet run.

@@ -231,9 +231,12 @@ text with no source file; each says so in its own entry instead of standing for 
   Five defects were found by running the product rather than by testing it: three visible only in a real
   window, one only by comparing the CLI export against the desktop export, and one only by reading the
   remote back — `.gitignore`'s `**/target/` had hidden the whole `fixtures/elf/p2-diff/target/` half of the
-  fixture pair, so **remote Run #17 `36596452341` on the pushed commit `c7fc2a3` is `completed/failure`**.
-  `cfee1e5` fixes it and is verified from a clean `git archive` checkout, but nothing after `c7fc2a3` was
-  pushed, so this stage closes with a red remote branch and no run covering its final tree. Two things stay
+  fixture pair, so **remote Run #17 `36596452341` on the mid-round push `c7fc2a3` concluded
+  `completed/failure`** while every local run passed. `cfee1e5` committed the missing half, un-ignored that
+  path and added the `drift fixtures tracked` step; the owner then pushed the head and
+  **Run #18 `36648718199` on `4a77ea1` concluded `success`, 7 of 7 jobs**, which closes defect E on the
+  remote as well. The round's own verdict stays worded as `LOCAL PASS`, because its gate numbers were
+  measured before any push — #18 verifies the tree, it did not produce the verdict. Two things stay
   open on purpose: desktop smoke step 27 was not observable in the shipped window (`PARTIAL`), and object /
   module attribution remains `Unavailable` because no stored fact attributes bytes to a source object.
   As of the entry above ("Open-Source MVP-First Governance Reset + P1 Analyze Completion"), the sentence

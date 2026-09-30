@@ -13,7 +13,7 @@ last_updated: "2026-09-29"
 
 Baseline: `0.6.0` — the P0 Technical Foundation Baseline.
 
-Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 PASS/COMPLETE — the Analyze verb, evidence in P1_VALIDATION/, remote CI Run #13 `36556735551` on `e63afaf` 7 of 7 green · P2 PASS/COMPLETE (LOCAL PASS only) — Compare, evidence in P2_VALIDATION/; remote Run #17 `36596452341` on `c7fc2a3` is FAILURE because `.gitignore` hid half of the P2 fixture pair, fixed at `cfee1e5` and re-verified from a clean checkout, with nothing after `c7fc2a3` pushed · P3/P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: NONE`
+Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 PASS/COMPLETE — the Analyze verb, evidence in P1_VALIDATION/, remote CI Run #13 `36556735551` on `e63afaf` 7 of 7 green · P2 PASS/COMPLETE — Compare, evidence in P2_VALIDATION/; its mid-round push `c7fc2a3` failed remote Run #17 `36596452341` because `.gitignore` hid half of the P2 fixture pair, `cfee1e5` fixed it, and the head `4a77ea1` is green on Run #18 `36648718199` 7 of 7 · P3/P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: NONE`
 
 ## Primary reading path
 
@@ -33,7 +33,8 @@ Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of
     verdict), design checklist, and the shipped-binary desktop smoke
 14. `P2_VALIDATION/` — the completed P2 Compare round: execution report (every gate number and the CLI
     smoke), exit checklist (the US-002 verdict), design checklist, the shipped-binary desktop smoke, and
-    defect E — the fixture half `.gitignore` hid, which is why remote Run #17 is red
+    defect E — the fixture half `.gitignore` hid, which reddened remote Run #17 and is closed by Run #18
+    `36648718199` (success, 7 of 7) on the pushed head `4a77ea1`
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` are the regenerated **v0.6.0** baseline record: the tree lists
 this repository's tracked layout and `SHA256SUMS` covers the baseline-controlled files in it. They were

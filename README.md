@@ -36,10 +36,12 @@ P2      PASS / COMPLETE — Compare over persisted snapshots: Core-owned determi
         IPC behind an opaque session handle, the second desktop page, `fwsight diff`, and portable Diff
         JSON v1 (urn:firmwaresight:schema:diff:1) plus self-contained HTML. Evidence: P2_VALIDATION/, item
         by item against the frozen US-002 list. It started from HEAD 7a13660, measured green on remote Run
-        #16 36576568426. Two of its commits were pushed mid-round and Run #17 36596452341 on c7fc2a3 is
-        FAILURE — .gitignore's `**/target/` had hidden the target half of the P2 fixture pair from git, so
-        a clean checkout could not load it. Fixed at cfee1e5 and re-verified from a `git archive` checkout;
-        nothing after c7fc2a3 was pushed, so P2 is LOCAL PASS and no run covers its final tree
+        #16 36576568426. Its mid-round push c7fc2a3 went red on Run #17 36596452341 — .gitignore's
+        `**/target/` had hidden the target half of the P2 fixture pair from git, so a clean checkout could
+        not load it while every local run passed on bytes left on disk. cfee1e5 committed the missing half,
+        un-ignored that path and added a `drift fixtures tracked` gate step; the head 4a77ea1 was then
+        pushed and Run #18 36648718199 is success, 7 of 7 jobs. The round's own gate numbers stay LOCAL
+        PASS, because they were measured before any push
 P3 / P4 NOT STARTED — P3 is the next authorizable stage now that P2 has closed, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```

@@ -16,9 +16,9 @@ Reviewed*, registered in `BASELINE.yaml`. P2 starts from HEAD `7a13660` and is t
 implements Build Diff.
 
 Status: **LOCAL PASS on every §62 command, plus a CLI smoke and a desktop smoke against the release
-binaries.** Two P2 commits were pushed mid-round and their CI run is **red**; the cause was found, is
-fixed at HEAD, and is recorded as defect E in §5. No commit after `c7fc2a3` has a remote run, so the
-final tree is `LOCAL PASS` and the remote branch still shows the intermediate failure.
+binaries** — those numbers were measured before any push, and that is how the round's verdict is worded.
+What the remote then said is recorded in §5.1 and §5.2: the mid-round push went red on defect E, and the
+head `4a77ea1` was pushed after closure and came back **green on Run #18 `36648718199`, 7 of 7 jobs**.
 
 ## 1. What was built
 
@@ -255,6 +255,31 @@ cargo test -p firmwaresight-artifact --test p2_fixture_pair  → 12 passed; 0 fa
 python scripts/check.py --only drift          → 6/6 PASS, including drift/fixtures tracked
 ```
 
+### 5.2 After closure: the head push, and Run #18 green
+
+The owner pushed the closed head, so the tree that carries this pack now has a remote measurement of its
+own. Recorded here as a successor note rather than inside `4a77ea1`, because a commit may not name the run
+its own push produces — the rule that held through P0 and both P1 rounds.
+
+```text
+origin/main        4a77ea1 (was c7fc2a3)
+Run #18            36648718199  push  completed / success
+                                 gh run view 36648718199 --repo 2023violet/FirmwareSight
+  Generated output drift        success
+  Dependency policy             success
+  Rust (windows-latest)         success     ← red on #17
+  Rust (ubuntu-latest)          success     ← red on #17
+  macOS Core Smoke              success     ← red on #17
+  Desktop UI (windows-latest)   success
+  Desktop UI (ubuntu-latest)    success
+```
+
+What this changes: defect E is closed on the remote, not only on the machine that authored it — a clean
+GitHub runner can now load all twelve P2 fixture paths and reproduce both goldens. What it does not change:
+every number in §2 to §4 was measured before any push, so the round still reads `LOCAL PASS` and Run #18 is
+the verification of the tree carrying it, not the source of the verdict. Run #17 stays in the record as the
+failure it was.
+
 ## 6. Not verified
 
 - **Desktop smoke step 27** (inducing an invalid compare attempt in the shipped window) is `PARTIAL`,
@@ -267,11 +292,10 @@ python scripts/check.py --only drift          → 6/6 PASS, including drift/fixt
   smoke-tested `f6f9db40…` because of defect D. D cannot reach the desktop path — the desktop reads
   `layout_source` back out of the database, which is why its export in the smoke was already correct
   — so the rebuild was verified by the Rust gates and by §4.5, not by a new window session.
-- **The final tree has no remote run.** `origin/main` is still at `c7fc2a3`, whose run is red, and the
-  commits since it — including the fix — were never pushed. So this round closes with `LOCAL PASS` and
-  a red remote branch: the red belongs to an intermediate commit and is already fixed at HEAD, but only
-  a push turns that into a green run. Pushing is a shared-state action and is left to the owner's
-  decision rather than taken here.
+- **Nothing was unpushed at the moment this section was written; §5.2 supersedes it.** At closure the head
+  was local-only and `origin/main` sat on the red `c7fc2a3`, so no remote run covered the final tree. The
+  owner then pushed `4a77ea1` and Run #18 came back green, 7 of 7 — see §5.2. The gate measurements above
+  remain `LOCAL PASS` for the reason given there: they were taken before the push.
 - **What the red CI proves about the gate.** Before defect E, a locally green `check.py` did not mean a
   clonable repository. That gap is now covered for fixtures only. The same class still applies to any
   tracked-expected file that is not in a manifest — for instance a source file ignored by accident,

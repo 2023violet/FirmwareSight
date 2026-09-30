@@ -36,14 +36,16 @@ authorized by P2's prompt.** ADR-0026 removed the *research* gate, not the requi
 its own architect prompt, so "governance got easier" is not a licence to widen scope. P2's own §65 said it
 plainly: **stop after P2.**
 
-A fourth thing to know before you trust any P2 number: **the remote is red and the fix is unpushed.**
-`origin/main` is at `c7fc2a3`, the second commit of the P2 round, whose Run #17 `36596452341` concluded
-`failure` on `committed_fixtures_match_their_recorded_hashes` - `.gitignore`'s `**/target/` had been hiding
-the whole `fixtures/elf/p2-diff/target/` half of the fixture pair, so a clean checkout could not load it
-while every local run passed on files left on disk. `cfee1e5` commits those six files, un-ignores that one
-path, and adds `drift/fixtures tracked` to the gate; it is verified from a `git archive` checkout, not from
-the authoring directory. Everything after `c7fc2a3` is local, so P2 is `LOCAL PASS` and no run covers its
-final tree. Read `P2_COMPARE_EXECUTION_REPORT.md` §5.1 before re-running or re-claiming anything.
+A fourth thing to know about any P2 number: **the round measured itself `LOCAL PASS`, and the remote only
+agreed afterwards.** The mid-round push `c7fc2a3` produced Run #17 `36596452341`, `failure` on
+`committed_fixtures_match_their_recorded_hashes` - `.gitignore`'s `**/target/` had been hiding the whole
+`fixtures/elf/p2-diff/target/` half of the fixture pair, so a clean checkout could not load it while every
+local run passed on files left on disk. That is defect E. `cfee1e5` commits those six files, un-ignores
+that one path, and adds `drift/fixtures tracked` to the gate; the fix was verified from a `git archive`
+checkout, not from the authoring directory, and then confirmed on the remote: **Run #18 `36648718199` on
+`4a77ea1` is `success`, 7 of 7 jobs.** Keep the two claims straight anyway - the gate results were
+measured before any push, so the round's verdict is `LOCAL PASS` and #18 is the successor verification of
+the tree that carries it. Full story: `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
 
 ## Baseline and HEADs
 
@@ -81,10 +83,11 @@ Remote CI Run #14              36558893544  on 1e5880a  success, 7 of 7 jobs —
 Remote CI Run #15              36559834259  on 653e313  success, 7 of 7 jobs — the handoff-row alignment successor
 Remote CI Run #16              36576568426  on 7a13660  success, 7 of 7 jobs — the P1-round index and stale-claim dating commit, and the verified start HEAD of P2 Compare
 P2 Compare start               7a13660db873439f66eedee850561e8dae1cb3cf — HEAD = origin/main, worktree clean, 184 Rust and 58 UI tests re-measured green before the first write
-P2 pushed commits              0ff77f3 + c7fc2a3 — the only P2 commits on origin/main; `origin/main` still sits at c7fc2a3
+P2 pushed mid-round            0ff77f3 + c7fc2a3 — the first push of the round, and the commit the remote stayed on while the round finished
 Remote CI Run #17              36596452341  on c7fc2a3  **failure**, 3 of 7 jobs (Rust windows, Rust ubuntu, macOS Core Smoke) — committed_fixtures_match_their_recorded_hashes could not load the target half of the P2 pair; defect E, caused by `**/target/` in .gitignore
 P2 fixture + gate fix          cfee1e5 — commits fixtures/elf/p2-diff/target/ (6 files), un-ignores that path, adds `drift/fixtures tracked`; verified from a clean `git archive` checkout
-P2 local chain                 8e8705a … c4f4124, cfee1e5 and the closing commit — unpushed, so no remote run covers the final tree; every P2 gate number is LOCAL PASS
+P2 closing commits             78fd40e (three window defects) · c4f4124 (layout label + two goldens) · cfee1e5 (fixtures + gate) · 14c4f75 (validation + governance) · 4a77ea1 (integrity) — 14 commits from 7a13660
+Remote CI Run #18              36648718199  on 4a77ea1  **success**, 7 of 7 jobs — the head the owner pushed after the round closed; defect E closed on the remote too
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -110,10 +113,10 @@ P1      PASS / COMPLETE — P1_ANALYZE_DETAILS closed 2026-09-29. PASS was earne
         document's job; it was NOT RUN when this line was written
 P2      PASS / COMPLETE — P2_COMPARE closed 2026-09-29 item by item against the frozen US-002 acceptance
         list, in P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md: 15/15 local gate steps, 345 Rust and 99 UI
-        tests, a real shipped-binary window run, and a clean-`git archive` check of the fixture pair. Two
-        things stay open and are stated, not smoothed: desktop smoke step 27 is NOT VERIFIED in the shipped
-        window, and the remote is red at the pushed commit c7fc2a3 (defect E, fixed unpushed at cfee1e5), so
-        every P2 number is LOCAL PASS and no run covers its final tree
+        tests, a real shipped-binary window run, and a clean-`git archive` check of the fixture pair. The
+        gate results are LOCAL PASS as measured; the pushed head 4a77ea1 was then verified green by remote
+        Run #18 36648718199, 7 of 7 jobs, which closes defect E on the remote as well. One sub-item stays
+        open and is stated, not smoothed: desktop smoke step 27 is NOT VERIFIED in the shipped window
 P3 / P4 NOT STARTED — P3 is now the next authorizable stage, and authorizing it is the architect's act.
         ADR-0026 removed the research gate, not the requirement of its own prompt
 Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was withdrawn unexecuted
@@ -183,10 +186,11 @@ P2 smoke gap      desktop step 27, the same-pair lock, is NOT VERIFIED in the sh
                   <select> popup cannot be driven or captured through the available window path. Covered
                   by compare.test.tsx and the IPC tests, recorded PARTIAL: P2_VALIDATION/
                   P2_COMPARE_DESKTOP_SMOKE_REPORT.md
-Remote state      origin/main is at c7fc2a3 and its Run #17 is FAILURE (defect E: `**/target/` hid the
-                  target half of the P2 fixture pair). Fixed at cfee1e5 and re-verified from a clean
-                  `git archive` checkout, but nothing after c7fc2a3 was pushed, so P2 is LOCAL PASS with
-                  a red branch behind it and no run covers its final tree
+Remote state      Green at the head, after a red mid-round run. origin/main is 4a77ea1 on Run #18
+                  36648718199 (success, 7 of 7). The earlier Run #17 on c7fc2a3 was FAILURE because
+                  `**/target/` hid the target half of the P2 fixture pair (defect E); cfee1e5 fixed it and
+                  the head push confirmed it. The round's own gate numbers stay LOCAL PASS because they were
+                  measured before any push - the run verifies the tree, it did not produce the verdict
 Attribution       object / module attribution is Unavailable by evidence, not by omission: ELF symbol
                   values attribute nothing back to a source object, so P2 reports the gap with its reason
                   and ships no Object tab (PRD P0-3 makes it conditional on sufficient evidence)
