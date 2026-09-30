@@ -946,6 +946,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "firmwaresight-project"
+version = "0.1.0"
+dependencies = [
+ "firmwaresight-core",
+ "regex",
+ "serde",
+ "sha2 0.11.0",
+ "thiserror 2.0.21",
+ "toml 1.1.6+spec-1.1.0",
+]
+
+[[package]]
 name = "firmwaresight-report"
 version = "0.1.0"
 dependencies = [

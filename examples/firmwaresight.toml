@@ -1,0 +1,70 @@
+# FirmwareSight project configuration — schema_version 1, the shape P3 Release Gate froze.
+#
+# Copy this file to the root of the firmware project and edit the values. FirmwareSight reads
+# `<project>/firmwaresight.toml`, and the directory holding it becomes the project root: every path in
+# this file is relative to that root, and an absolute path or a `..` escape is a config error, not a
+# fallback.
+#
+# Nothing here is a secret and nothing here is a host path, so the file belongs in Git with the project.
+#
+# `examples/firmwaresight.example.toml` is the earlier P0-era sample, kept because the v0.5.1 package
+# record lists it; this file is the one the Gate implements.
+
+schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+# The v1 requirement vocabulary is elf | map | bin | hex. `elf` is required by config validation:
+# it is the build FirmwareSight analyzes. Requiring a kind the parser does not analyze does not make
+# that analysis exist — it makes the rule BLOCK when the file is absent.
+required = ["elf", "map"]
+
+[memory]
+# Bytes. Omit a budget and `memory.flash_budget` / `memory.ram_budget` report N/A instead of guessing.
+# A budget of 0 is refused: it would block every build, including an empty one.
+flash_budget = 262144
+ram_budget = 131072
+
+[version]
+# MVP has one source: the exact tag on the workspace HEAD.
+source = "git_tag"
+pattern = "^v(?P<version>\\d+\\.\\d+\\.\\d+)$"
+
+[release]
+require_clean_git = true
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"
+
+# Optional: pin the release to a commit and a version. Both describe the *workspace* FirmwareSight was
+# pointed at; neither proves the firmware binary was built from them, and the Gate never says it does.
+# expected_commit = "0123456789abcdef0123456789abcdef01234567"
+# expected_version = "1.2.3"
+
+[diff]
+# Bytes of growth over the baseline that a human has to look at. Negative growth is never a failure.
+# With no key here, `diff.growth` reports N/A; with a key and no baseline it reports UNKNOWN.
+flash_growth_review_bytes = 4096
+ram_growth_review_bytes = 2048
+
+[gate]
+# How many `Unknown` evidence items in the snapshot make a person review the release.
+unknown_evidence_review_count = 1
+
+# What each rule does when its evidence is missing. Only `review` and `block` are accepted: an absent
+# fact never becomes a PASS (ADR-0023). These are the documented defaults, written out so a team can
+# change one deliberately.
+[gate.on_unknown]
+git_clean = "review"
+commit_matches_release = "review"
+version_match = "review"
+flash_budget = "block"
+ram_budget = "block"
+baseline_growth = "review"
+release_notes = "review"
+
+# Recorded and warned about, never evaluated: SBOM is not an MVP Gate capability. Setting this to true
+# produces a config warning and no rule, and certainly no PASS.
+[sbom]
+enabled = false

@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:firmwaresight:schema:project-config:1",
+  "title": "FirmwareSight Project Configuration v1",
+  "description": "firmwaresight.toml at schema_version 1, the shape P3 Release Gate froze (04_TECH/08_CONFIG_SPEC.md, prompt section 9). This contract states the documented shape and value ranges. Two rules are enforced by the Rust loader rather than here, because a JSON Schema cannot express them: a path must be project-relative (absolute paths and '..' escapes are refused), and `[version] pattern` must compile with a usable `version` capture. Unknown keys are the other difference: this schema closes each object, while the loader treats an unknown key in major 1 as a warning so a newer config does not break an older build.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "project",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "required": [
+        "required"
+      ],
+      "properties": {
+        "required": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "elf",
+              "map",
+              "bin",
+              "hex"
+            ]
+          },
+          "contains": {
+            "const": "elf"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "flash_budget": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ram_budget": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "version": {
+      "type": "object",
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "const": "git_tag"
+        },
+        "pattern": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "require_clean_git": {
+          "type": "boolean"
+        },
+        "require_release_notes": {
+          "type": "boolean"
+        },
+        "release_notes_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_commit": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"
+        },
+        "expected_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "diff": {
+      "type": "object",
+      "properties": {
+        "flash_growth_review_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ram_growth_review_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "gate": {
+      "type": "object",
+      "properties": {
+        "unknown_evidence_review_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "on_unknown": {
+          "type": "object",
+          "properties": {
+            "git_clean": {
+              "enum": [
+                "review",
+                "block"
+              ]
+            },
+            "commit_matches_release": {
+              "enum": [
+                "review",
+                "block"
+              ]
+            },
+            "version_match": {
+              "enum": [
+                "review",
+                "block"
+              ]
+            },
+            "flash_budget": {
+              "enum": [
+                "review",
+                "block"
+              ]
+            },
+            "ram_budget": {
+              "enum": [
+                "review",
+                "block"
+              ]
+            },
+            "baseline_growth": {
+              "enum": [
+                "review",
+                "block"
+              ]
+            },
+            "release_notes": {
+              "enum": [
+                "review",
+                "block"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "sbom": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

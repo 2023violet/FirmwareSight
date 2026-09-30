@@ -6,6 +6,7 @@ pub mod build_snapshot;
 pub mod capability;
 pub mod diff;
 pub mod evidence;
+pub mod gate;
 pub mod identity;
 pub mod memory;
 pub mod section;

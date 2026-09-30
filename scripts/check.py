@@ -33,9 +33,12 @@ UI = ROOT / "apps" / "desktop" / "ui"
 # Tauri's production codegen embeds this directory at compile time.
 UI_MARKER = UI / "dist" / "index.html"
 # The headless product: named so a platform that ships Core but not the shell can still be gated.
+# A workspace member missing from this list is silently not covered by `--only core-smoke`, which is
+# why ADR-0027's new crate is added here in the same commit that creates it.
 CORE_PACKAGES = (
     "firmwaresight-core",
     "firmwaresight-artifact",
+    "firmwaresight-project",
     "firmwaresight-storage",
     "firmwaresight-report",
     "fwsight",

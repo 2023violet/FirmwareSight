@@ -1,0 +1,20 @@
+[package]
+name = "firmwaresight-project"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+description = "Project policy, read-only Git provenance and deterministic Gate fingerprints for FirmwareSight."
+
+# ADR-0027 admits exactly these dependencies and no others. No Tauri, no SQLite, no Tokio, no network:
+# this crate turns the outside world into facts for `firmwaresight-core`, which decides what they mean.
+[dependencies]
+firmwaresight-core = { workspace = true }
+regex = "1.13.1"
+serde = { version = "1.0.229", features = ["derive"] }
+sha2 = "0.11.0"
+thiserror = "2.0.21"
+toml = "1.1.6"
+
+[dev-dependencies]

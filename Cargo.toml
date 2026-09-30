@@ -5,6 +5,7 @@ members = [
   "apps/desktop/src-tauri",
   "crates/firmwaresight-core",
   "crates/firmwaresight-artifact",
+  "crates/firmwaresight-project",
   "crates/firmwaresight-storage",
   "crates/firmwaresight-report",
 ]
@@ -22,6 +23,9 @@ repository = "https://github.com/2023violet/FirmwareSight"
 [workspace.dependencies]
 firmwaresight-core = { path = "crates/firmwaresight-core" }
 firmwaresight-artifact = { path = "crates/firmwaresight-artifact" }
+# ADR-0027: project policy and read-only Git provenance, shared by CLI and Desktop so neither
+# re-implements canonicalization or run fingerprinting.
+firmwaresight-project = { path = "crates/firmwaresight-project" }
 firmwaresight-storage = { path = "crates/firmwaresight-storage" }
 firmwaresight-report = { path = "crates/firmwaresight-report" }
 
