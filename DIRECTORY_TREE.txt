@@ -139,7 +139,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0023-gate-five-state-semantics.md
 │   ├── ADR-0024-post-mvp-candidate-governance.md
 │   ├── ADR-0025-conditional-pre-g1-analyze-implementation.md
-│   └── ADR-0026-open-source-mvp-first-delivery.md
+│   ├── ADR-0026-open-source-mvp-first-delivery.md
+│   └── ADR-0027-project-policy-and-provenance-adapter.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
@@ -189,6 +190,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   └── main.rs
 │   │   ├── tests/
 │   │   │   ├── diff_cli.rs
+│   │   │   ├── gate_cli.rs
 │   │   │   ├── golden.rs
 │   │   │   └── p2_golden.rs
 │   │   └── Cargo.toml
@@ -209,12 +211,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── ipc.rs
 │       │   │   ├── lib.rs
 │       │   │   ├── main.rs
+│       │   │   ├── release.rs
 │       │   │   └── service.rs
 │       │   ├── tests/
 │       │   │   ├── analyze_details.rs
 │       │   │   ├── compare_ipc.rs
 │       │   │   ├── desktop_parity.rs
-│       │   │   └── real_artifact_intake.rs
+│       │   │   ├── real_artifact_intake.rs
+│       │   │   └── release_gate.rs
 │       │   ├── build.rs
 │       │   ├── Cargo.toml
 │       │   └── tauri.conf.json
@@ -231,6 +235,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   └── Table.tsx
 │           │   ├── ipc/
 │           │   │   ├── generated/
+│           │   │   │   ├── AcceptedReviewDto.ts
+│           │   │   │   ├── AcceptReviewOutcomeDto.ts
+│           │   │   │   ├── AcceptReviewRequestDto.ts
 │           │   │   │   ├── AnalysisSummaryDto.ts
 │           │   │   │   ├── ArtifactDto.ts
 │           │   │   │   ├── BudgetDto.ts
@@ -259,9 +266,21 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── ExportOutcomeDto.ts
 │           │   │   │   ├── FixtureKey.ts
 │           │   │   │   ├── FixtureOptionDto.ts
+│           │   │   │   ├── GateArtifactRowDto.ts
+│           │   │   │   ├── GateBudgetRowDto.ts
+│           │   │   │   ├── GateCountsDto.ts
+│           │   │   │   ├── GateFindingRowDto.ts
+│           │   │   │   ├── GateGitDto.ts
+│           │   │   │   ├── GateGrowthRowDto.ts
+│           │   │   │   ├── GateNotesDto.ts
+│           │   │   │   ├── GateRunDto.ts
+│           │   │   │   ├── GateRunRequestDto.ts
+│           │   │   │   ├── GateTablesDto.ts
 │           │   │   │   ├── IdentityDto.ts
 │           │   │   │   ├── MemorySummaryDto.ts
 │           │   │   │   ├── ObjectAttributionDto.ts
+│           │   │   │   ├── ProjectContextDto.ts
+│           │   │   │   ├── ProjectPolicyDto.ts
 │           │   │   │   ├── SectionChangePageDto.ts
 │           │   │   │   ├── SectionChangeQueryDto.ts
 │           │   │   │   ├── SectionChangeRowDto.ts
@@ -282,7 +301,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── SymbolRequestDto.ts
 │           │   │   │   ├── SymbolRowDto.ts
 │           │   │   │   ├── SymbolSideDto.ts
-│           │   │   │   └── SymbolSortDto.ts
+│           │   │   │   ├── SymbolSortDto.ts
+│           │   │   │   ├── UnknownDispositionDto.ts
+│           │   │   │   └── UnknownPolicyDto.ts
 │           │   │   ├── bridge.test.ts
 │           │   │   ├── bridge.ts
 │           │   │   └── types.ts
@@ -305,7 +326,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── format.test.ts
 │           │   ├── format.ts
 │           │   ├── intake.test.tsx
-│           │   └── main.tsx
+│           │   ├── main.tsx
+│           │   ├── Release.module.css
+│           │   ├── release.test.tsx
+│           │   └── Release.tsx
 │           ├── .npmrc
 │           ├── eslint.config.js
 │           ├── index.html
@@ -349,6 +373,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   │   ├── capability.rs
 │   │   │   │   ├── diff.rs
 │   │   │   │   ├── evidence.rs
+│   │   │   │   ├── gate.rs
 │   │   │   │   ├── identity.rs
 │   │   │   │   ├── memory.rs
 │   │   │   │   ├── mod.rs
@@ -357,35 +382,58 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── error.rs
 │   │   │   └── lib.rs
 │   │   └── Cargo.toml
+│   ├── firmwaresight-project/
+│   │   ├── src/
+│   │   │   ├── config/
+│   │   │   │   └── tests.rs
+│   │   │   ├── config.rs
+│   │   │   ├── error.rs
+│   │   │   ├── evidence.rs
+│   │   │   ├── fingerprint.rs
+│   │   │   ├── fixtures.rs
+│   │   │   ├── git.rs
+│   │   │   ├── lib.rs
+│   │   │   └── version.rs
+│   │   ├── tests/
+│   │   │   └── config_schema_contract.rs
+│   │   └── Cargo.toml
 │   ├── firmwaresight-report/
 │   │   ├── src/
 │   │   │   ├── diff.rs
 │   │   │   ├── diff_render.rs
 │   │   │   ├── dto.rs
+│   │   │   ├── gate.rs
+│   │   │   ├── gate_render.rs
 │   │   │   ├── lib.rs
-│   │   │   └── render.rs
+│   │   │   ├── render.rs
+│   │   │   └── schema_check.rs
 │   │   ├── tests/
-│   │   │   └── diff_schema_contract.rs
+│   │   │   ├── diff_schema_contract.rs
+│   │   │   └── gate_schema_contract.rs
 │   │   └── Cargo.toml
 │   └── firmwaresight-storage/
 │       ├── migrations/
 │       │   ├── 0001_initial.sql
-│       │   └── 0002_evidence_keyed_by_build.sql
+│       │   ├── 0002_evidence_keyed_by_build.sql
+│       │   └── 0003_gate_history.sql
 │       ├── src/
 │       │   ├── compare.rs
 │       │   ├── db.rs
 │       │   ├── error.rs
+│       │   ├── gate.rs
 │       │   ├── lib.rs
 │       │   └── query.rs
 │       ├── tests/
 │       │   ├── analyze_queries.rs
 │       │   ├── compare_candidates.rs
+│       │   ├── gate_history.rs
 │       │   ├── map_companion_persistence.rs
 │       │   └── storage.rs
 │       └── Cargo.toml
 ├── examples/
 │   ├── Cargo.workspace.baseline.toml
 │   ├── firmwaresight.example.toml
+│   ├── firmwaresight.toml
 │   ├── package.baseline.json
 │   ├── pnpm-workspace.baseline.yaml
 │   ├── release-manifest.example.json
@@ -480,10 +528,16 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P2_COMPARE_DESKTOP_SMOKE_REPORT.md
 │   ├── P2_COMPARE_EXECUTION_REPORT.md
 │   └── P2_COMPARE_EXIT_CHECKLIST.md
+├── P3_VALIDATION/
+│   ├── P3_GATE_DESIGN_CHECKLIST.md
+│   ├── P3_GATE_DESKTOP_SMOKE_REPORT.md
+│   ├── P3_GATE_EXECUTION_REPORT.md
+│   └── P3_GATE_EXIT_CHECKLIST.md
 ├── schemas/
 │   ├── accepted-reviews.schema.json
 │   ├── diff.schema.json
 │   ├── gate-results.schema.json
+│   ├── project-config.schema.json
 │   └── release-manifest.schema.json
 ├── scripts/
 │   ├── check.py
