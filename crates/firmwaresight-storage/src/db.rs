@@ -11,16 +11,18 @@ use firmwaresight_core::domain::identity::Fact;
 use firmwaresight_core::domain::memory::ByteTotal;
 
 /// The schema version this build writes.
-pub const SCHEMA_VERSION: i64 = 2;
+pub const SCHEMA_VERSION: i64 = 3;
 
 const MIGRATION_0001: &str = include_str!("../migrations/0001_initial.sql");
 const MIGRATION_0002: &str = include_str!("../migrations/0002_evidence_keyed_by_build.sql");
+const MIGRATION_0003: &str = include_str!("../migrations/0003_gate_history.sql");
 
 /// Applied in version order, each in its own transaction, so a failed upgrade leaves the previous
 /// schema and every row in it exactly as they were.
 const MIGRATIONS: &[(i64, &str, &str)] = &[
     (1, "0001_initial", MIGRATION_0001),
     (2, "0002_evidence_keyed_by_build", MIGRATION_0002),
+    (3, "0003_gate_history", MIGRATION_0003),
 ];
 
 /// Everything the P0 round-trip test compares against the in-memory snapshot.
@@ -47,7 +49,9 @@ pub struct BuildSummary {
 }
 
 pub struct Database {
-    conn: Connection,
+    /// Crate-internal so an atomic write in a sibling module (`gate.rs`) can begin a transaction
+    /// through `&mut self`, the same way `import_snapshot` does. Readers go through `connection()`.
+    pub(crate) conn: Connection,
 }
 
 impl Database {
@@ -110,18 +114,8 @@ impl Database {
 
     /// Create the schema bookkeeping and apply any unapplied migrations, in order.
     pub fn migrate(&mut self) -> Result<(), StorageError> {
-        self.conn
-            .execute_batch(
-                "CREATE TABLE IF NOT EXISTS schema_migrations (
-                     version    INTEGER PRIMARY KEY NOT NULL,
-                     name       TEXT NOT NULL,
-                     applied_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
-                 );",
-            )
-            .map_err(|source| StorageError::Migration { version: 0, source })?;
-
+        self.ensure_bookkeeping()?;
         let current = self.current_version()?;
-
         if current > SCHEMA_VERSION {
             // Never delete and recreate: that is how history gets destroyed by an older binary.
             return Err(StorageError::UnsupportedSchemaVersion {
@@ -129,8 +123,12 @@ impl Database {
                 supported: SCHEMA_VERSION,
             });
         }
+        self.apply(MIGRATIONS, current)
+    }
 
-        for (version, name, sql) in MIGRATIONS {
+    /// Apply every migration above `current`, one transaction each.
+    fn apply(&mut self, list: &[(i64, &str, &str)], current: i64) -> Result<(), StorageError> {
+        for (version, name, sql) in list {
             if current >= *version {
                 continue;
             }
@@ -159,8 +157,19 @@ impl Database {
                 source,
             })?;
         }
-
         Ok(())
+    }
+
+    fn ensure_bookkeeping(&mut self) -> Result<(), StorageError> {
+        self.conn
+            .execute_batch(
+                "CREATE TABLE IF NOT EXISTS schema_migrations (
+                     version    INTEGER PRIMARY KEY NOT NULL,
+                     name       TEXT NOT NULL,
+                     applied_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+                 );",
+            )
+            .map_err(|source| StorageError::Migration { version: 0, source })
     }
 
     fn current_version(&self) -> Result<i64, StorageError> {
@@ -315,7 +324,9 @@ impl Database {
     }
 }
 
-fn write_err(source: rusqlite::Error) -> StorageError {
+/// A SQLite failure on a write. `gate.rs` names the record it was writing through `describe_write`;
+/// this is for the begin/commit steps, where no record is at stake yet.
+pub(crate) fn write_err(source: rusqlite::Error) -> StorageError {
     StorageError::Write {
         detail: source.to_string(),
     }

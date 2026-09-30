@@ -9,6 +9,7 @@
 pub mod compare;
 pub mod db;
 pub mod error;
+pub mod gate;
 pub mod query;
 
 pub use db::{BuildSummary, Database, SCHEMA_VERSION};
@@ -21,6 +22,9 @@ pub use firmwaresight_core::domain::identity::Fact;
 // Compare reads persisted facts only; the diff itself is decided in `firmwaresight-core`.
 pub use compare::{
     CandidateQuery, CompareCandidate, DEFAULT_CANDIDATE_LIMIT, MAX_CANDIDATE_LIMIT, StoredBudget,
+};
+pub use gate::{
+    AcceptReviewError, AcceptedReview, GateRunDraft, GateRunWrite, StoredGateFinding, StoredGateRun,
 };
 pub use query::{
     DEFAULT_QUERY_LIMIT, EvidenceQuery, EvidenceRow, EvidenceSort, MAX_QUERY_LIMIT, Page,

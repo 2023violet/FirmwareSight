@@ -44,6 +44,21 @@ impl FindingState {
             Self::NotApplicable => "N/A",
         }
     }
+
+    /// Reads back [`Self::as_str`]. Returns `None` instead of guessing: a stored row that spells the
+    /// state neither way is a corruption the reader must surface, and mapping it to `UNKNOWN` would
+    /// invent the very state ADR-0023 says is only for missing evidence.
+    #[must_use]
+    pub fn parse(stored: &str) -> Option<Self> {
+        match stored {
+            "PASS" => Some(Self::Pass),
+            "REVIEW" => Some(Self::Review),
+            "BLOCK" => Some(Self::Block),
+            "UNKNOWN" => Some(Self::Unknown),
+            "N/A" => Some(Self::NotApplicable),
+            _ => None,
+        }
+    }
 }
 
 impl fmt::Display for FindingState {
@@ -71,6 +86,19 @@ impl EffectiveSeverity {
             Self::Pass => "PASS",
             Self::Review => "REVIEW",
             Self::Block => "BLOCK",
+        }
+    }
+
+    /// Reads back [`Self::as_str`], `None` for anything else. `UNKNOWN` is deliberately not accepted:
+    /// the factual state carries that word, and a severity that could be either would let a reader
+    /// confuse the two columns ADR-0023 keeps apart.
+    #[must_use]
+    pub fn parse(stored: &str) -> Option<Self> {
+        match stored {
+            "PASS" => Some(Self::Pass),
+            "REVIEW" => Some(Self::Review),
+            "BLOCK" => Some(Self::Block),
+            _ => None,
         }
     }
 }
@@ -152,6 +180,13 @@ impl GateRuleId {
             Self::ReleaseNotes => "release.notes",
             Self::UnknownEvidenceReview => "evidence.unknown_review",
         }
+    }
+
+    /// Reads back [`Self::as_str`]. `None` means "a rule this build does not know", which is how a row
+    /// written by a newer FirmwareSight stays readable instead of failing the whole query.
+    #[must_use]
+    pub fn parse(stored: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|rule| rule.as_str() == stored)
     }
 }
 

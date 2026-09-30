@@ -295,14 +295,17 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
     db.import_snapshot("local-desktop", "Local analyses", &snapshot(true))
         .expect("imports");
 
-    assert_eq!(SCHEMA_VERSION, 2);
+    assert_eq!(SCHEMA_VERSION, 3);
     let version: i64 = db
         .connection()
         .query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
             row.get(0)
         })
         .expect("schema version");
-    assert_eq!(version, 2, "the closure must not move the schema");
+    assert_eq!(
+        version, 3,
+        "the identity closure must not move the schema on its own"
+    );
 
     let applied: Vec<(i64, String)> = {
         let mut stmt = db
@@ -319,7 +322,9 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
         vec![
             (1, "0001_initial".to_owned()),
             (2, "0002_evidence_keyed_by_build".to_owned()),
+            // 0003 is P3's Gate history. The identity closure wrote none of the three.
+            (3, "0003_gate_history".to_owned()),
         ],
-        "the migration list is unchanged"
+        "every migration belongs to a named stage, and none of them is the identity closure's"
     );
 }

@@ -743,16 +743,19 @@ fn the_selection_path_adds_no_schema_migration() {
     assert_eq!(
         version,
         firmwaresight_storage::SCHEMA_VERSION,
-        "P1-A0 must not move the schema"
+        "P1-A0 must not move the schema on its own"
     );
-    assert_eq!(version, 2);
+    assert_eq!(version, 3);
     let migrations: i64 = probe
         .connection()
         .query_row("SELECT COUNT(*) FROM schema_migrations", [], |row| {
             row.get(0)
         })
         .expect("migration count");
-    assert_eq!(migrations, 2, "0001 and 0002 only");
+    assert_eq!(
+        migrations, 3,
+        "0001, 0002 and P3's 0003; none of them the selection path's"
+    );
 }
 
 #[test]

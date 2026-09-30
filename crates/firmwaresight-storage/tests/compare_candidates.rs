@@ -608,8 +608,9 @@ fn an_unknown_snapshot_id_is_a_typed_error_not_a_panic() {
 
 #[test]
 fn compare_added_no_schema_change() {
-    // The prompt's §44 promise, checked against the files rather than against this sentence.
-    assert_eq!(SCHEMA_VERSION, 2);
+    // The prompt's §44 promise, checked against the files rather than against this sentence. P3 added
+    // 0003 for the Gate, so the check is that none of the numbered steps belongs to Compare.
+    assert_eq!(SCHEMA_VERSION, 3);
     let migrations = repo_root().join("crates/firmwaresight-storage/migrations");
     let mut names: Vec<_> = std::fs::read_dir(migrations)
         .expect("migrations dir")
@@ -622,12 +623,18 @@ fn compare_added_no_schema_change() {
         .collect();
     names.sort();
     assert_eq!(
-        names.len(),
-        2,
-        "expected exactly the two frozen migrations, found {names:?}"
+        names,
+        vec![
+            "0001_initial.sql",
+            "0002_evidence_keyed_by_build.sql",
+            "0003_gate_history.sql",
+        ],
+        "every migration belongs to a named stage"
     );
     assert!(
-        names.iter().all(|name| !name.starts_with("0003")),
+        names
+            .iter()
+            .all(|name| !name.contains("diff") && !name.contains("compare")),
         "P2 wrote a migration: {names:?}"
     );
 }
