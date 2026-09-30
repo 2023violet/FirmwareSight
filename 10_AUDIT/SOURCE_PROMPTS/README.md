@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-09-28"
+last_updated: "2026-09-30"
 ---
 
 # Execution Prompt Register
@@ -289,8 +289,25 @@ text with no source file; each says so in its own entry instead of standing for 
   schema, migration or configuration file - so the newer HEAD is the same tree for engineering purposes.
   Start counts re-measured, not inherited: `cargo test --workspace` **345 passed / 0 failed / 0 ignored**,
   `corepack pnpm test` **99 passed**.
-- Outcome: **`IN_PROGRESS`** as of this entry. No Gate verdict is claimed here; US-003 will be settled
-  item by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` when the round closes.
+- Outcome: **`PASS / COMPLETE`, closed 2026-09-30.** US-003 and the PRD P0-5 ten checks are settled item
+  by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` — §69's forty boxes, each with the `gh` query,
+  command, named test or smoke step that decides it. Measured at closure: `cargo test --workspace` **715
+  passed / 0 failed / 0 ignored across 42 suites** (from 345 at the start), `corepack pnpm test` **135
+  passed in 6 files** (from 99), `python scripts/check.py` **15/15**, an 18/18 CLI Gate smoke, and all
+  forty §61 desktop steps walked on the shipping `custom-protocol` binary. The stop condition held: no
+  bundle, no History page, no pricing, cloud, account, telemetry, updater, signing, SBOM or AI judge
+  exists, and `release` / `watch` / `doctor` remain unregistered.
+  **The verdict is `LOCAL PASS` as worded, and deliberately so.** The five P3 commits were never pushed:
+  `origin/main` is still `32b23aa`, whose Run #19 is the last measured remote result, so no CI run covers
+  P3's tree and none is claimed. Three product defects were found by running the stage rather than by
+  testing it — a version pattern quoted into an evidence locator, which made a Gate run unpersistable for
+  any project using the only MVP version source; one build carrying two different run ids across the CLI
+  and the desktop; and a disabled primary button keeping its accent border — and each is fixed with a
+  named regression test. Two things stay open on purpose: desktop smoke step 30's prior-run re-read was
+  never observable through the window. The round's first full gate also came back **13/14** on
+  `frontend/test` — a `compare.test.tsx` row query racing the table's own `Loading symbol changes…`
+  render, which is a test-side race in P2's file rather than product behaviour; it was diagnosed, fixed
+  by awaiting the query with the assertion unchanged, and the gate re-run to 15/15.
 
 ## Supersession note on the V0 Batch A activation entry
 

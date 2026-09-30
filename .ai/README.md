@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 ---
 
 # AI Entry Point
@@ -15,10 +15,11 @@ Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctnes
 `P2: PASS / COMPLETE` (Compare, evidence in `P2_VALIDATION/`; the round's own gate results are LOCAL PASS,
 and the pushed head `4a77ea1` is green on remote Run #18 `36648718199`, 7 of 7 jobs — after Run #17 on the
 mid-round commit `c7fc2a3` had gone red and been fixed) ·
-`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `active_task: P3_RELEASE_GATE` ·
+`P3: PASS / COMPLETE` (Release Gate, evidence in `P3_VALIDATION/`; the round's gate numbers are LOCAL
+PASS — its five commits are not on `origin/main`, which is still `32b23aa` green on Run #19
+`36665007523`, so no CI result is claimed for them) ·
+`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `active_task: NONE` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
-`P3: IN_PROGRESS` (Release Gate, its own architect prompt arrived 2026-09-29, with ADR-0027 for the crate
-boundary it needs) ·
 `P4: NOT STARTED — needs its own architect prompt` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 

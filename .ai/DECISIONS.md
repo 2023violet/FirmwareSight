@@ -792,3 +792,73 @@ Scope guard: this stage stops at the Gate. P4 Bundle, `release prepare`, bundle 
 generation, bundle checksums, History page, Project Wizard, installer, signing, updater, SBOM, cloud,
 accounts, telemetry, AI, pricing and commercial work remain outside it, and no prompt for any of them
 exists.
+
+# P3 Release Gate — closed 2026-09-30
+
+Verdict: **`PASS / COMPLETE`**, decided item by item against the frozen US-003 acceptance list and the
+PRD P0-5 ten checks in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` — forty boxes, each with the command,
+test or smoke step that settles it. `active_task` returns to `NONE`, `validation.p3_status` returns to
+`PASS_COMPLETE`, and baseline stays **`0.6.0`**: this closure creates no `v0.7.0` and claims no G2.
+
+Decisions taken at closure, each with the thing that forced it:
+
+- **A locator is a pointer, never a quotation.** The first shipped-binary run at Gate died with
+  `ERR-STORAGE-4006 … instr(evidence_ref, char(92)) = 0`, because Core had put the project's
+  `[version] pattern` text — `\d` included — inside an evidence locator. Any project using the only
+  version source the MVP defines could not persist a Gate run at all. The locator is now
+  `policy:version.pattern`; the pattern itself stays where it belongs, quoted in the finding's summary
+  and inside the canonical input that identifies the run. `configured paths reject an interior
+  separator too`, so a Windows path cannot enter a `file:` locator either.
+- **One build, one fingerprint, whichever surface read it.** The CLI and the desktop produced two
+  different run ids for the same policy, builds, HEAD and workspace. The cause was that a desktop run
+  hydrates its footprint from SQLite, which stored the byte totals but not the `evidence:` row they
+  came from, and Core's canonical memory block also carried a `reason` string the database never
+  recorded. Both were inside the hash. The pointer is now read out of `evidence` beside the totals and
+  `reason` left the canonical form, and `a_stored_build_fingerprints_exactly_like_a_fresh_analysis`
+  holds the two assembly paths against each other. Measured again across surfaces in the smoke:
+  `gate-a64631b2…0ff152cc` from both.
+- **A Gate run's identity is content, so re-running it is a dedupe.** §33's rule was implemented as
+  `GateRunWrite::AlreadyStored` rather than an upsert, and the smoke observed it: a second Run Gate on
+  identical inputs left SQLite at one run, ten findings and the original `created_at`. A same id
+  carrying a different verdict is an `Invariant` refusal, not an update — immutability is the property
+  that makes an accepted review worth reading a week later.
+- **Removing a tracked file is an uncommitted change, and the Gate says so twice.** Setting the release
+  notes aside produced two BLOCKs in one run (`git.clean` and `release.notes`), not one. That is the
+  honest result and the report states it as such rather than presenting a clean single-finding case
+  that the workspace could not actually produce.
+- **The Git subject stays outside this repository.** Every Gate run in the smoke and in the tests was
+  judged against a throwaway repository under `%TEMP%`, because §61 forbids using the FirmwareSight
+  source tree as a Gate subject: this repo is dirty or tagged by the owner's acts, not by the release
+  being checked.
+- **`custom-protocol` is not optional in a smoke.** The first attempt at step 1 launched a
+  `cargo build --release` binary that loaded the dev URL and showed a WebView2 connection error. The
+  P2 pack already recorded this; it recurred and is recorded again, because a smoke of a dev build
+  proves nothing about shipping.
+- **What the window could not show is written as not shown.** Smoke step 30's prior-run re-read is
+  `PARTIAL`: `get_gate_run` accepts any run id and is tested, but the Release page has no run-id input,
+  so no older record was opened *on screen*. Surfacing history is P4's page and §64 forbids building it
+  here. Likewise the acceptance refusals (empty actor, empty reason, non-review, second opinion) are
+  command-layer behaviours covered by tests, not behaviours driven through the form.
+- **A gate that comes back 13/14 is reported as 13/14, and the flake it names is a bug.** The first full
+  gate of the closure round failed `frontend/test` on
+  `compare.test.tsx > the change tables > keeps a size that was never recorded as Unknown with its
+  reason`. The same test had failed once in twelve earlier runs with its name lost to a log filter, which
+  is how a real defect gets talked of as a flake. `Compare.tsx:1303` renders `Loading symbol changes…`
+  inside the very region the test waits for, so the awaited region resolves against an empty table and the
+  synchronous `getByText` that follows loses the race with the second IPC call. Three such queries are now
+  awaited, with every assertion unchanged — a row that genuinely never arrives still fails, just with a
+  legible message. Ten consecutive runs of the file pass where one in five had failed, and the `15/15`
+  recorded above is the re-run after the fix, not the earlier run restated. Nothing was weakened to reach
+  green, and no `--filter` skip was used.
+- **P3's code has no CI run, and nothing claims one.** `origin/main` is still `32b23aa` (Run #19 green);
+  the five P3 commits are local. §67 forbids writing a future CI result into the commit that would
+  trigger it, so every P3 number in this pack is labelled as locally measured. Pushing is the owner's act.
+- **The license gap did not close with the stage.** `Cargo.toml` still reads `license = "Proprietary"`,
+  there is still no root `LICENSE`, no workspace license metadata was touched and no license text was
+  added. `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands, `AGENTS.md` 9 keeps a license
+  change in front of a human, and the gap stays visible in the completion report.
+
+Scope guard held: no `release prepare`, no bundle, no manifest generation, no bundle checksums, no
+History page, no pricing, cloud, accounts, telemetry, updater, signing, SBOM, CVE, OTA, flashing or AI
+judge. `release`, `watch` and `doctor` remain unregistered CLI commands, and `intake.test.tsx` asserts
+that Bundle, History, Settings, SBOM, Pricing and Cloud appear nowhere.

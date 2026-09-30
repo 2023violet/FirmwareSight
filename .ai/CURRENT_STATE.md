@@ -5,25 +5,26 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 ---
 
 # Current State
 
-- Date: 2026-09-29
+- Date: 2026-09-30
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`P3_RELEASE_GATE`** — authorized on 2026-09-29 by *FirmwareSight — P3 Release Gate MVP
-  Implementation, Execution Prompt v1.1 — Architect Reviewed*, supplied inline (registered in
-  `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source file reached this repository),
-  and by `ADR-0027`, which keeps project policy and Git provenance out of Core. `P2_COMPARE` closed
-  `PASS / COMPLETE` the same day under its own prompt, recorded in `P2_VALIDATION/`; `P1_ANALYZE_DETAILS`
-  finished earlier still, recorded in `P1_VALIDATION/`.
-  **`P3` is `IN_PROGRESS`, not `PASS`** — its verdict is decided item by item against US-003 in
-  `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` when the round closes, and `P4` still needs its own prompt.
-  **The remote is green at the start HEAD:** `origin/main` is `32b23aa` on Run #19 `36665007523`,
-  success, 7 of 7 jobs, following Run #18 `36648718199` on the P2 implementation tree `4a77ea1` and the
-  mid-round failure Run #17 on `c7fc2a3` — the fixture-pair story in
-  `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
+- Active task: **`NONE`** — `P3_RELEASE_GATE` reached `PASS / COMPLETE` on 2026-09-30 under
+  *FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect Reviewed*,
+  supplied inline (registered in `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source
+  file reached this repository), and under `ADR-0027`, which keeps project policy and Git provenance out
+  of Core. Its verdict is item by item against US-003 and PRD P0-5 in
+  `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; `P2_COMPARE` and `P1_ANALYZE_DETAILS` closed earlier, in
+  `P2_VALIDATION/` and `P1_VALIDATION/`.
+  **`P4_RELEASE_BUNDLE` is the next authorizable stage and this file does not authorize it.**
+  **The remote is green at the P2 closure head, and P3's code is not on it:** `origin/main` is `32b23aa`
+  on Run #19 `36665007523`, success, 7 of 7 jobs, following Run #18 `36648718199` on the P2 implementation
+  tree `4a77ea1` and the mid-round failure Run #17 on `c7fc2a3` — the fixture-pair story in
+  `P2_COMPARE_EXECUTION_REPORT.md` §5.1. The five P3 commits are local, so every P3 number in this
+  baseline is a locally measured number and no CI result is claimed for them.
 
 ## Product/architecture baseline
 
@@ -233,7 +234,22 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: P3_RELEASE_GATE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
+**`active_task: NONE`.** P3 Release Gate closed on 2026-09-30, so there is no live coding task, and
+`AGENTS.md` 1 means what that says: no agent creates business functionality or lifts the next stage off
+the roadmap. **P4 Release Bundle is the next authorizable stage and needs its own architect prompt.**
+
+**`P3 Release Gate` closed `PASS / COMPLETE` on 2026-09-30, under its own architect prompt.** One product
+verb, `Gate`, over a stored build plus the workspace facts outside the artifact:
+`firmwaresight.toml` → project and Git evidence → `GatePolicy` → Core Gate → five factual states →
+immutable `GateRun` → immutable review acceptance → `fwsight gate` → the desktop `Release` page. Per-item
+evidence: `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; what was built, every gate number and the three
+defects this round found: `P3_GATE_EXECUTION_REPORT.md`; the shipped-window result over all forty §61
+steps: `P3_GATE_DESKTOP_SMOKE_REPORT.md`; design review: `P3_GATE_DESIGN_CHECKLIST.md`. The boundaries
+held and were not relaxed: Core stayed headless and dependency-free, the adapter owns the config and the
+read-only Git process, no rule is re-evaluated in SQL or React, no host path crossed IPC, the database or
+the portable output, and the stage stopped at the Gate.
+
+`P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
 bounded `Sections`, `Symbols` and `Evidence` queries over the snapshot SQLite already stores, three
 use-case IPC commands, top contributors, the Evidence Inspector, and the `bytes / KiB` presentation
 switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Per-item evidence:
@@ -254,19 +270,24 @@ payload across IPC (default limit 100, hard max 500, enforced in Rust), details 
 last-good handle, `Unknown` never rendered as zero, addresses never unit-converted. `AGENTS.md` 2 / 7 /
 11 keep applying in full; `ADR-0026` relaxed research sequencing, not a single technical boundary.
 
-**`P3 Release Gate` is `IN_PROGRESS` on 2026-09-29, under its own architect prompt.** The same prompt
-line that authorized the work authorized a structural change, so it is stated here rather than left to
-be discovered in a diff: P3 adds the fifth first-party library crate (`crates/firmwaresight-project`,
+**`P3 Release Gate` closed `PASS / COMPLETE` on 2026-09-30, under its own architect prompt.** The same
+prompt line that authorized the work authorized a structural change, so it is stated here rather than left
+to be discovered in a diff: P3 added the fifth first-party library crate (`crates/firmwaresight-project`,
 ADR-0027), the third migration (`0003_gate_history.sql`, `SCHEMA_VERSION` 2 → 3, additive only), the
-first direct dependencies outside the frozen five (`toml` and `regex`, both already in `Cargo.lock`), a
-third top-level desktop page (`Release`), and two CLI exit codes that were unreachable and are now not
-(`4` REVIEW / `5` BLOCK — the surface test asserted `[0, 2, 3, 6]`, and P3 is the stage that changes it
-by name rather than by deleting it), and a new portable contract file
-(`schemas/project-config.schema.json`). It does **not**
-add a design token, does not touch the license metadata, does not create a Bundle table, and does not
-start History. `P3` has no verdict until US-003 is green item by item in
-`P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; the start facts are `32b23aa` = `origin/main` on Run #19
-`36665007523`, success, 7 of 7.
+first direct dependencies outside the frozen five (`toml`, `regex`, `sha2`, `thiserror`, `serde` — all but
+`regex` already present in the graph or admitted by ADR-0027), a third top-level desktop page (`Release`),
+two CLI exit codes that were unreachable and are now not (`4` REVIEW / `5` BLOCK — the surface test
+asserted `[0, 2, 3, 6]`, and P3 changed it by name rather than by deleting it), and three new portable
+contracts (`gate-results`, `accepted-reviews`, `project-config` at v1). It added **no** design token, did
+not touch the license metadata, did not create a Bundle table and did not start History. The verdict is
+item by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; what the round found on the way is in the other
+three documents of that pack.
+
+Three product defects were found by P3's own validation and fixed in product code, each with a regression
+test: a version pattern quoted inside an evidence locator made a Gate run unpersistable for any project
+using the only MVP version source (`ERR-STORAGE-4006`); one build produced two different run ids on the
+two surfaces because the stored footprint carried no evidence pointer and Core hashed a `reason` the
+database never recorded; and a disabled primary button kept its accent border.
 
 What belongs to the owner and the architect:
 

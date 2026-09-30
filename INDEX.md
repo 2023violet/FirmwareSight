@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 ---
 
 
@@ -13,7 +13,7 @@ last_updated: "2026-09-29"
 
 Baseline: `0.6.0` — the P0 Technical Foundation Baseline.
 
-Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 PASS/COMPLETE — the Analyze verb, evidence in P1_VALIDATION/, remote CI Run #13 `36556735551` on `e63afaf` 7 of 7 green · P2 PASS/COMPLETE — Compare, evidence in P2_VALIDATION/; its mid-round push `c7fc2a3` failed remote Run #17 `36596452341` because `.gitignore` hid half of the P2 fixture pair, `cfee1e5` fixed it, and the head `4a77ea1` is green on Run #18 `36648718199` 7 of 7 · P3 IN_PROGRESS — Release Gate, authorized 2026-09-29 by execution prompt v1.1 plus ADR-0027, starting from `32b23aa` green on Run #19 `36665007523`; no verdict yet, evidence will be in P3_VALIDATION/ · P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: P3_RELEASE_GATE`
+Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 PASS/COMPLETE — the Analyze verb, evidence in P1_VALIDATION/, remote CI Run #13 `36556735551` on `e63afaf` 7 of 7 green · P2 PASS/COMPLETE — Compare, evidence in P2_VALIDATION/; its mid-round push `c7fc2a3` failed remote Run #17 `36596452341` because `.gitignore` hid half of the P2 fixture pair, `cfee1e5` fixed it, and the head `4a77ea1` is green on Run #18 `36648718199` 7 of 7 · P3 PASS/COMPLETE — Release Gate, authorized 2026-09-29 by execution prompt v1.1 plus ADR-0027 and closed 2026-09-30, evidence in P3_VALIDATION/; 715 Rust tests in 42 suites, 135 UI tests, 15/15 gate steps, an 18/18 CLI Gate smoke and all forty §61 desktop steps on the shipping binary — LOCAL PASS as measured, because the five P3 commits sit on top of `32b23aa` and were never pushed, so Run #19 `36665007523` covers P2's closure and not this stage · P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: NONE`
 
 ## Primary reading path
 
@@ -21,8 +21,8 @@ Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — `P3_RELEASE_GATE`; the live task, its acceptance list, its boundaries and its
-    stop condition. It authorizes P3 and nothing beyond it
+5. `.ai/ACTIVE_TASK.md` — `NONE`; P3 Release Gate closed on 2026-09-30, and with no live task `AGENTS.md` 1
+    means no agent may create business functionality or lift P4 off the roadmap. P4 needs its own prompt
 6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`
 7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
 8. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
@@ -36,6 +36,12 @@ Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of
     smoke), exit checklist (the US-002 verdict), design checklist, the shipped-binary desktop smoke, and
     defect E — the fixture half `.gitignore` hid, which reddened remote Run #17 and is closed by Run #18
     `36648718199` (success, 7 of 7) on the pushed head `4a77ea1`
+15. `P3_VALIDATION/` — the completed P3 Release Gate round: execution report (every §66 gate number and the
+    18-step CLI smoke), exit checklist (§69's forty boxes and the US-003 verdict), design checklist, and the
+    shipped-binary desktop smoke that walked all forty §61 steps and measured the CLI and the desktop
+    agreeing on one run id. Three product defects live there — a version pattern quoted into an evidence
+    locator that made a run unpersistable, one build carrying two run ids across the two surfaces, and a
+    disabled button keeping its accent border — each with the test that now pins it
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` are the regenerated **v0.6.0** baseline record: the tree lists
 this repository's tracked layout and `SHA256SUMS` covers the baseline-controlled files in it. They were

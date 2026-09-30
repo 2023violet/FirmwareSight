@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 ---
 
 # FirmwareSight v0.6.0
@@ -42,12 +42,15 @@ P2      PASS / COMPLETE — Compare over persisted snapshots: Core-owned determi
         un-ignored that path and added a `drift fixtures tracked` gate step; the head 4a77ea1 was then
         pushed and Run #18 36648718199 is success, 7 of 7 jobs. The round's own gate numbers stay LOCAL
         PASS, because they were measured before any push
-P3      IN_PROGRESS — Release Gate, authorized on 2026-09-29 by its own architect prompt (v1.1, supplied
+P3      PASS / COMPLETE — Release Gate, authorized on 2026-09-29 by its own architect prompt (v1.1, supplied
         inline) and by ADR-0027, which puts project policy and read-only Git provenance in a fifth crate
-        instead of in Core. It starts from HEAD 32b23aa, measured green on remote Run #19 36665007523
-        (success, 7 of 7 jobs). No P3 verdict exists yet — US-003 is its acceptance list and
-        P3_VALIDATION/ is the pack that will carry the evidence
-P4      NOT STARTED — becomes the next authorizable stage only when P3 closes, and still needs its own prompt
+        instead of in Core. It started from HEAD 32b23aa, measured green on remote Run #19 36665007523
+        (success, 7 of 7 jobs), and closed on 2026-09-30 item by item against US-003 and PRD P0-5 in
+        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md: 715 Rust tests in 42 suites, 135 UI tests, 15/15 gate
+        steps, an 18/18 CLI Gate smoke, and all forty §61 desktop steps walked on the shipping binary.
+        LOCAL PASS as measured — the five P3 commits sit on top of 32b23aa and were never pushed, so no CI
+        run covers them and none is claimed
+P4      NOT STARTED — the next authorizable stage now that P3 has closed, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -240,7 +243,7 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: P3_RELEASE_GATE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
+`active_task: NONE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
 product verb: bounded `Sections`, `Symbols` and `Evidence` queries over the SQLite snapshot that already
 existed, three use-case IPC commands, top contributors, an Evidence Inspector, and the `bytes / KiB`
 presentation switch `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Every mandatory US-001
@@ -256,12 +259,22 @@ checked item by item in `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md`; the four d
 and the cross-renderer check found are in the pack beside it, with the fifth — the fixture half git was
 ignoring — in `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
 
+**`P3 Release Gate` closed `PASS / COMPLETE` on 2026-09-30, under its own architect prompt.** One verb,
+`Gate`: `firmwaresight.toml` is read by the adapter ADR-0027 created, ten rules are judged in Core over
+the stored build plus workspace provenance, the run and any review acceptance are persisted immutably, and
+both surfaces show the same answer — measured, not asserted: the CLI and the desktop produced the identical
+run id `gate-a64631b287fcb33478e23ac6462dacc80e1a39cac1e321e047d02bb50ff152cc` for one project, one policy
+and one HEAD. US-003 and PRD P0-5 are checked item by item in
+`P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; the three defects the shipped window and the cross-surface check
+found — a version pattern quoted into an evidence locator, one build carrying two run ids, and a disabled
+button keeping its accent border — are in that pack with the test that pins each.
+
 The rule that kept P2 unstarted until its prompt arrived still holds for everything after it: looser
 sequencing is not standing authorization, `ADR-0026` removed the research gate, not the per-stage prompt
-requirement. So **`P3 Release Gate` is live because prompt v1.1 exists** — and **P4 Release Bundle is the
-next authorizable stage only once P3 closes, and needs its own prompt**: P3's own prompt says stop after
-P3, and it authorizes no bundle, History page, Project Wizard, installer, signing, updater, SBOM, cloud,
-account, telemetry, AI or pricing work. If V0 is ever resumed for usability
+requirement. So **`P4 Release Bundle` is the next authorizable stage and is not authorized by anything in
+this repository**: it needs its own architect prompt. P3's own prompt says stop after P3, and it authorized
+no bundle, History page, Project Wizard, installer, signing, updater, SBOM, cloud, account, telemetry, AI
+or pricing work. If V0 is ever resumed for usability
 feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
 registers are still there, and no session, quote, timing or count may be invented.
 
@@ -277,13 +290,12 @@ missing token stops a round rather than becoming a magic number - default page s
 `Unknown` never rendered as zero, and addresses never unit-converted. `ADR-0026` relaxed research
 **sequencing**; it relaxed no technical boundary, and `AGENTS.md` 2 / 7 / 11 still apply in full.
 
-P3 is authorized to move two of those boundaries, and does so **with** the decision that gates them rather
-than around it: `SCHEMA_VERSION` goes 2 → 3 through additive migration `0003_gate_history.sql`, and `toml`
-/ `regex` become direct dependencies of the new `firmwaresight-project` crate — both already resolved in
-`Cargo.lock`, admitted by `ADR-0027`, with `cargo-deny` executed for real and the measured lock delta
-recorded in `P3_VALIDATION/` rather than asserted here. What does not move: no new design token, no whole
-config file or host path across IPC, no generic file, shell or Git command, no `rusqlite` type outside
-storage, and no Gate semantic outside Core.
+P3 moved two of those boundaries, and did so **with** the decision that gates them rather than around it:
+`SCHEMA_VERSION` went 2 → 3 through additive migration `0003_gate_history.sql`, and `toml` / `regex` became
+direct dependencies of the new `firmwaresight-project` crate under `ADR-0027`, with `cargo-deny` executed
+for real and the measured lock delta recorded in `P3_VALIDATION/`. What did not move, and what binds the
+next round unchanged: no new design token, no whole config file or host path across IPC, no generic file,
+shell or Git command, no `rusqlite` type outside storage, and no Gate semantic outside Core.
 
 What P1 left open on purpose, with the reason in each case: `sections.file_offset` and `symbols.address`
 are nullable columns with no reason column, so a reason is lost at write time and closing that needs a

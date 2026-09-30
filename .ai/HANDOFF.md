@@ -5,10 +5,10 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate IN_PROGRESS
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / active task NONE
 
 ## Purpose
 
@@ -26,19 +26,22 @@ round finished the same day: **`P2` is `PASS / COMPLETE`**. Compare reads persis
 every diff semantic, and one portable document comes out of the CLI and out of the desktop byte-for-byte.
 `P2_VALIDATION/` holds the four documents and US-002 is checked item by item in
 `P2_COMPARE_EXIT_CHECKLIST.md`. The architect then issued
-*FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect Reviewed*, so
-**`active_task` is `P3_RELEASE_GATE` and `P3` is `IN_PROGRESS`** — started, not passed. Its verdict will be
-decided against US-003 in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`, and `ADR-0027` is the architecture
-record that authorizes the fifth crate this stage needs.
+*FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect Reviewed*, and that
+round finished on 2026-09-30: **`P3` is `PASS / COMPLETE` and `active_task` is `NONE`.** One verb, `Gate`,
+now runs end to end — `firmwaresight.toml` read by the adapter ADR-0027 created, ten rules judged in Core,
+an immutable run and an immutable review acceptance in SQLite, `fwsight gate`, and the desktop `Release`
+page. US-003 is checked item by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`.
 
-Three wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here
-to continue P1 or P2, both are `PASS / COMPLETE` and their acceptance lists are checked item by item in
-`P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` and `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` - there is
-nothing left inside either to do. And if you were sent here to start a **Bundle**, a History page, an
-installer or anything cloud-shaped: **P3 is the live task, and P4 Release Bundle is not authorized by
-P3's prompt.** ADR-0026 removed the *research* gate, not the requirement that each stage carry its own
-architect prompt, so "governance got easier" is not a licence to widen scope. P3's own §72 says it
-plainly: **stop after P3.**
+Four wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here to
+continue P1, P2 or P3, all three are `PASS / COMPLETE` and their acceptance lists are checked item by item
+in `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` and
+`P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` — there is nothing left inside any of them to do. And if you were
+sent here to start a **Bundle**, a History page, an installer or anything cloud-shaped: **`active_task` is
+`NONE`, and P4 Release Bundle is not authorized by anything in this repository.** ADR-0026 removed the
+*research* gate, not the requirement that each stage carry its own architect prompt, so "governance got
+easier" is not a licence to widen scope. P3's own §72 says it plainly: **stop after P3.** The fourth is
+specific to this round's state: P3's five commits are **local**, so nobody should describe a CI run over
+them as evidence — there is none, and the validation pack says so.
 
 A fourth thing to know about any P2 number: **the round measured itself `LOCAL PASS`, and the remote only
 agreed afterwards.** The mid-round push `c7fc2a3` produced Run #17 `36596452341`, `failure` on
@@ -131,32 +134,42 @@ P2      PASS / COMPLETE — P2_COMPARE closed 2026-09-29 item by item against th
         gate results are LOCAL PASS as measured; the pushed head 4a77ea1 was then verified green by remote
         Run #18 36648718199, 7 of 7 jobs, which closes defect E on the remote as well. One sub-item stays
         open and is stated, not smoothed: desktop smoke step 27 is NOT VERIFIED in the shipped window
-P3      IN_PROGRESS — P3_RELEASE_GATE authorized 2026-09-29 by its own architect prompt (v1.1) and by
-        ADR-0027. **No verdict yet**: US-003 is checked item by item in
-        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md when the round closes. Start HEAD 32b23aa = origin/main,
-        worktree clean, green on Run #19 36665007523
-P4      NOT STARTED — the next authorizable stage once P3 closes, and authorizing it is the architect's
-        act. ADR-0026 removed the research gate, not the requirement of each stage carrying its own prompt
+P3      PASS / COMPLETE — P3_RELEASE_GATE closed 2026-09-30, authorized 2026-09-29 by its own architect
+        prompt (v1.1) and by ADR-0027. Forty §69 boxes settled item by item against US-003 and PRD P0-5 in
+        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md: 715 Rust tests in 42 suites, 135 UI tests, 15/15 local
+        gate steps, an 18/18 CLI Gate smoke and all forty §61 desktop steps walked on the shipping binary.
+        LOCAL PASS as measured — the five P3 commits are not on origin/main, which is still 32b23aa, so no
+        CI result is claimed for them. Two sub-items are stated rather than smoothed: desktop step 30's
+        prior-run re-read was never observed through the window, and this round's first full gate came
+        back 13/14 on a P2 test-side race (defect I) that the round diagnosed and fixed before closing
+P4      NOT STARTED — the next authorizable stage now that P3 has closed, and authorizing it is the
+        architect's act. ADR-0026 removed the research gate, not the requirement of each stage carrying
+        its own prompt
 Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was withdrawn unexecuted
 ```
 
 ## What the code does and how it is proven
 
-- 345 Rust tests and 99 UI tests on one gate: `python scripts/check.py`, which CI calls unchanged —
-  15 steps on a tree that already has the built frontend, 17 when it builds that too, plus 3 under
-  `--only core-smoke`. The v0.6.0 promotion measured 104 / 19; P1-A0 and its correctness closure took
-  that to 142 / 31, P1 Analyze added 42 Rust and 27 UI, and P2 Compare added 161 Rust and 41 UI — by
-  suite: Core's diff module 36, the P2 fixture pair 12, storage candidate queries 14, the portable-schema
-  contract 19, CLI diff 15 and its golden 11, desktop Compare IPC 24; `compare.test.tsx` 37 of the UI
-  tests.
+- 715 Rust tests in 42 suites and 135 UI tests in 6 files on one gate: `python scripts/check.py`, which
+  CI calls unchanged — 15 steps on a tree that already has the built frontend, 17 when it builds that too,
+  plus 3 under `--only core-smoke`. The v0.6.0 promotion measured 104 / 19; P1-A0 and its correctness
+  closure took that to 142 / 31, P1 Analyze added 42 Rust and 27 UI, P2 Compare added 161 Rust and 41 UI,
+  and P3 Release Gate added 370 Rust and 36 UI — by suite: Core's diff module 36 and its Gate module 55,
+  the P2 fixture pair 12, storage candidate queries 14, storage Gate history 22, the project crate 68 plus
+  its 8 config-schema contract tests, the portable-schema contracts 19 plus 13 for Gate output, CLI diff
+  15 and its golden 11, CLI Gate 18, desktop Compare IPC 24 and desktop Release Gate 29; `compare.test.tsx`
+  37 and `release.test.tsx` 36 of the UI tests.
 - Four Phase-0 library crates plus CLI and desktop apps. Core is headless and synchronous; no Tauri,
   rusqlite, Tokio or `object::*` type crosses out of it.
 - Real ARM ELF/MAP fixtures with recorded provenance and hash-first tests, so no test needs
   `arm-none-eabi-gcc`.
 - Deterministic CLI JSON, memory accounting reproduced by hand from `readelf`, a typed ts-rs IPC
   boundary whose drift is checked by regeneration plus `git diff --exit-code`.
-- SQLite via `rusqlite + bundled`, migrations, transactional import, **schema version 2** — migration
-  `0002` rebuilds `evidence` on `(build_id, id)` because version 1 contradicted `04_TECH/15` §4.
+- SQLite via `rusqlite + bundled`, migrations, transactional import, **schema version 3** — migration
+  `0002` rebuilds `evidence` on `(build_id, id)` because version 1 contradicted `04_TECH/15` §4, and
+  `0003_gate_history.sql` adds `gate_runs`, `gate_findings`, `gate_finding_evidence` and
+  `accepted_reviews` additively, with the v1→v3 and v2→v3 upgrade paths tested rather than a constant
+  edited to make a test pass.
 - A 512 MiB input guard measured from both sides of the boundary; Core/CLI/Desktop parity on the same
   bytes; the desktop window opened and driven for real on the shipping configuration.
 - P1-A0 adds the intake path: a native dialog opens Rust-side, the selection is held behind an opaque

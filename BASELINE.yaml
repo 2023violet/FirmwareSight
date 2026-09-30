@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_IN_PROGRESS_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,15 +27,16 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_IN_PROGRESS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
   # chain, fixture reproducibility, parser behaviour, non-blocking UI, a data model that can carry
   # Compare and Gate) is unchanged.
   next_authorizable_tracks:
-    # P3 is no longer authorizable - it is running. The next stage that could be authorized is P4, and it
-    # still needs its own architect prompt; nothing in this file authorizes it.
+    # P3 closed PASS/COMPLETE on 2026-09-30, so it is no longer authorizable - it is done. The next stage
+    # that could be authorized is P4, and it still needs its own architect prompt; nothing in this file
+    # authorizes it, and active_task is NONE until one exists.
     - P4_bundle_after_P3_gate_closes
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
@@ -52,9 +53,12 @@ validation:
   p2_status: PASS_COMPLETE
   # The same rule the P2 round followed: this field reads IN_PROGRESS while the round runs and becomes
   # PASS_COMPLETE only from the item-by-item US-003 verdict in P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md.
-  # P2 closed PASS/COMPLETE with its remote closure measured green (Run #18 on the implementation tree
-  # 4a77ea1, Run #19 on the closure HEAD 32b23aa), and this round starts from 32b23aa.
-  p3_status: IN_PROGRESS
+  # That verdict exists: forty boxes, each settled by a gh query, a command, a named test or a line of a
+  # smoke report. One sub-item stays PARTIAL and is written there rather than folded away - the prior-run
+  # re-read was never observed through the window, because the Release page has no run-id input.
+  # P3's own commits have no CI run: origin/main is still 32b23aa (Run #19, 7 of 7) and the five P3
+  # commits are local, so this is a local PASS and the pack says so.
+  p3_status: PASS_COMPLETE
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
@@ -142,8 +146,14 @@ research:
 # ADR-0027 is this round's architecture decision: a fifth first-party crate, `firmwaresight-project`, holds
 # project config, release-notes evidence, the read-only system Git adapter and the deterministic
 # fingerprints, while Core keeps every Gate semantic and keeps its zero-dependency property.
-# When this round closes, `active_task` returns to NONE and P4 becomes the next authorizable stage only.
-active_task: P3_RELEASE_GATE
+# That round closed on 2026-09-30, so the pointer returns to what it predicted: NONE. The Gate runs -
+# `firmwaresight.toml` read by the adapter, ten rules judged in Core, an immutable run and an immutable
+# review acceptance persisted in SQLite, `fwsight gate` and the desktop Release page - with the item-by-item
+# US-003 verdict in P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md. P4 Release Bundle is the next authorizable
+# stage and is NOT authorized by this file: it needs its own architect prompt, and no bundle directory,
+# `release prepare`, manifest generation, bundle checksums, History page, Settings page, installer,
+# signing, updater, SBOM, cloud, account, telemetry, AI, pricing or commercial work exists yet.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
