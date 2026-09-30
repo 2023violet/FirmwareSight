@@ -73,7 +73,9 @@ in a successor commit and the gate was re-run 15/15, and the push after that (Ru
 that, `893a635`, went red a third time on a different job: `Desktop UI (windows-latest)` lost a
 call-count race in `compare.test.tsx` that the ubuntu job and eight local runs had passed, fixed as
 defect J with the assertion kept and proved by mutation; the push after that, Run `36783457030` on
-`02e8a81`, concluded **success with 7 of 7 jobs**, and is the current remote fact.
+`02e8a81`, concluded **success with 7 of 7 jobs**; its own documentation-only successor, Run
+`36784382005` on `f66a93d`, did too, and that is where this pack stops naming runs — a doc-only
+successor's own result is read with `gh run list`, not chased into itself.
 Before that first P3 push, `origin/main` was `32b23aa`,
 whose Run #19 `36665007523` is `completed / success` with 7 of 7 jobs, following Run #18
 `36648718199` on the P2 implementation tree `4a77ea1`. §67 forbade writing a future CI run into the

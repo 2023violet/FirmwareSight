@@ -56,7 +56,8 @@ P3      PASS / COMPLETE — Release Gate, authorized on 2026-09-29 by its own ar
         The next push (893a635) went red on Desktop UI (windows-latest) alone: a call-count race in
         compare.test.tsx that the ubuntu job won on the same commit — defect J, fixed with its delta
         assertions unchanged, the fix proved by mutation, and Run 36783457030 on 02e8a81 then green on
-        7 of 7 jobs
+        7 of 7 jobs — as was the documentation-only successor f66a93d on Run 36784382005, the last run
+        recorded here
 P4      NOT STARTED — the next authorizable stage now that P3 has closed, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```

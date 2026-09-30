@@ -236,8 +236,8 @@ P2 smoke gap      desktop step 27, the same-pair lock, is NOT VERIFIED in the sh
                   <select> popup cannot be driven or captured through the available window path. Covered
                   by compare.test.tsx and the IPC tests, recorded PARTIAL: P2_VALIDATION/
                   P2_COMPARE_DESKTOP_SMOKE_REPORT.md
-Remote state      Green at the head. Four pushes, four runs: origin/main moved 219178af -> 2d1bcea ->
-                  893a635 -> 02e8a81. Run 36774472141 (219178af) FAILURE, 6 of 7: only
+Remote state      Green at the head. Five pushes, five runs: origin/main moved 219178af -> 2d1bcea ->
+                  893a635 -> 02e8a81 -> f66a93d. Run 36774472141 (219178af) FAILURE, 6 of 7: only
                   Dependency policy, on `error[yanked]` for yoke-derive 0.8.3, yanked on crates.io at
                   2026-09-30T13:19:39Z after the local deny step had passed on a stale index. Run
                   36779321479 (2d1bcea) SUCCESS, 7 of 7 - the lock moved to 0.8.4 and CI agreed on a fresh
@@ -245,7 +245,10 @@ Remote state      Green at the head. Four pushes, four runs: origin/main moved 2
                   call-count race in compare.test.tsx that Desktop UI (ubuntu-latest) won on the same
                   commit, and eight local runs had won; fixed as defect J with the delta assertions
                   unchanged and the fix proved by mutation. Run 36783457030 (02e8a81) SUCCESS, 7 of 7 -
-                  the current remote fact, both Desktop UI jobs included. The previous head was
+                  defect J verified, both Desktop UI jobs included. Run 36784382005 (f66a93d, which moved
+                  documentation and SHA256SUMS only) SUCCESS, 7 of 7, and is the last head whose run this
+                  pack names: a documentation-only successor's own result is read with gh run list rather
+                  than chased into itself. The previous head was
                   32b23aa on Run #19 36665007523 (success, 7 of 7), the documentation-and-integrity
                   successor to 4a77ea1, which P2 closed green on Run #18 36648718199. The earlier Run #17 on
                   c7fc2a3 was FAILURE because `**/target/` hid the target half of the P2 fixture pair

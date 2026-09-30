@@ -107,6 +107,14 @@ have no runs of their own.
 | [`36779321479`](https://github.com/2023violet/FirmwareSight/actions/runs/36779321479) | `2d1bcea` | `completed` / **`success`, 7 of 7** | The yank fix verified remotely: Dependency policy, Rust (windows + ubuntu), Desktop UI (windows + ubuntu), macOS Core Smoke and Generated output drift all green |
 | [`36779715108`](https://github.com/2023violet/FirmwareSight/actions/runs/36779715108) | `893a635` | `completed` / `failure`, 6 of 7 jobs | A *different* red: `Desktop UI (windows-latest)` → `frontend/test`, 1 failed / 134 passed, `AssertionError: expected 2 to be +0` at `compare.test.tsx:731`, while `Desktop UI (ubuntu-latest)` passed the same file. That is defect J in §7, found by CI and not by the local gate |
 | [`36783457030`](https://github.com/2023violet/FirmwareSight/actions/runs/36783457030) | `02e8a81` | `completed` / **`success`, 7 of 7** | Defect J's fix verified, including `Desktop UI (windows-latest)` — the job that lost it. Both Dependency policy jobs are green now |
+| [`36784382005`](https://github.com/2023violet/FirmwareSight/actions/runs/36784382005) | `f66a93d` | `completed` / **`success`, 7 of 7** | The record commit above, verified like any other head. It is the last link this pack names |
+
+The chain stops here on purpose. `f66a93d` changed documentation and `SHA256SUMS` only, and the run that
+verified it is recorded in *this* commit rather than in the commit it describes — which is §67's rule and
+also its limit: recording the run of a documentation-only successor would need another successor, and one
+more after that. Anyone can read the current head's own result with
+`gh run list --branch main --repo 2023violet/FirmwareSight`; the pack stops at the last head whose run
+could be cited without a paradox.
 
 Two things this table does not claim. The first is that one green Windows run proves a timing race is
 gone: eight local runs had already passed the file that CI lost, so the evidence that matters is causal —

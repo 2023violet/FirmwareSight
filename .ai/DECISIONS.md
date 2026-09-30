@@ -888,7 +888,9 @@ Decisions taken at closure, each with the thing that forced it:
   line with `expected 4 to be 3`. `Compare.tsx` was then restored and verified byte-identical to HEAD
   with `git diff --exit-code`, and eight consecutive runs of the file pass. Run `36783457030` on the
   `02e8a81` head then concluded `completed / success` with **7 of 7 jobs**, `Desktop UI
-  (windows-latest)` included — the current remote fact for this stage. One green Windows run is not
+  (windows-latest)` included, and its documentation-only successor `f66a93d` came back the same on Run
+  `36784382005` — which is where this pack stops naming runs, since recording a doc-only successor's own
+  result needs another successor. One green Windows run is not
   proof that a timing race is dead; eight local runs had already passed the file that CI lost. What makes
   the fix credible is that the sample is now causally after the fetch, guarded so it cannot pass by
   being vacuously early.
