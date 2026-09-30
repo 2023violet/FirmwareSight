@@ -172,3 +172,20 @@ Two boundaries this admission does not move:
 Neither `toml` nor `regex` may be used by `firmwaresight-core`: Core keeps its empty `[dependencies]`
 (`AGENTS.md` 3), so config semantics and pattern matching are turned into plain facts by the project
 crate before Core ever sees them.
+
+### P3 exposure edges (2026-09-30)
+
+The CLI and Desktop work added **no third-party package**. What changed is which first-party crate is
+allowed to see which, and two test-only edges:
+
+- `fwsight` gains `firmwaresight-project` as a direct dependency: reading `firmwaresight.toml`, the
+  read-only Git probe and the run fingerprint are the project crate's job, and a second implementation
+  in the CLI is the failure mode ADR-0027 exists to prevent.
+- `fwsight` dev-dependency on `firmwaresight-report`, so `gate --json` output is validated against the
+  published `gate-results` v1 schema by the CLI's own tests rather than only by the report crate's.
+- `firmwaresight-project` dev-dependencies on `firmwaresight-report` and `serde_json`: prompt §55 asks
+  for the P2 contract-test helper to be reused rather than copied, and the helper lives in `report` as
+  `schema_check`. `serde_json` is there because a JSON Schema can only be checked against a JSON tree.
+
+Dev-dependencies do not enter the shipped graph, so the binary and the portable artifact set are
+unchanged. `cargo deny check licenses bans sources advisories` is re-run at stage close.

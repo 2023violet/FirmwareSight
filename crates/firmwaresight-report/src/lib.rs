@@ -18,10 +18,18 @@
 pub mod diff;
 pub mod diff_render;
 pub mod dto;
+pub mod gate;
+pub mod gate_render;
 pub mod render;
+pub mod schema_check;
 
 pub use diff::DiffResultDto;
 pub use dto::AnalyzeResultDto;
+pub use gate::{
+    ACCEPTANCE_ORIGINAL_STATE, ACCEPTED_REVIEWS_SCHEMA_ID, ACCEPTED_REVIEWS_SCHEMA_VERSION,
+    AcceptanceDto, AcceptedReviewsDto, GATE_SCHEMA_ID, GATE_SCHEMA_VERSION, GateFindingDto,
+    GateResultsDto,
+};
 pub use render::{to_json, to_json_pretty};
 
 /// The identity of this output shape. Bumping the trailing number is a breaking change.

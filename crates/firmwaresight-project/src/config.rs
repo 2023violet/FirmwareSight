@@ -143,6 +143,11 @@ impl LoadedProject {
 }
 
 /// The whole `firmwaresight.toml`, at `schema_version = 1`.
+///
+/// Every optional field carries `skip_serializing_if = "Option::is_none"`: an unset budget is a key the
+/// release owner did not write, not a key holding nothing. `schemas/project-config.schema.json` models
+/// it the same way, with no `null` in any type, so a saved config and the published contract cannot
+/// disagree about the difference between "absent" and "explicitly nothing".
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectConfig {
     pub schema_version: i64,
@@ -150,7 +155,7 @@ pub struct ProjectConfig {
     pub artifacts: ArtifactsSection,
     #[serde(default)]
     pub memory: MemorySection,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version: Option<VersionSection>,
     #[serde(default)]
     pub release: ReleaseSection,
@@ -174,16 +179,16 @@ pub struct ArtifactsSection {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct MemorySection {
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub flash_budget: Option<u64>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ram_budget: Option<u64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VersionSection {
     pub source: VersionSource,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pattern: Option<String>,
 }
 
@@ -197,29 +202,29 @@ pub enum VersionSource {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct ReleaseSection {
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub require_clean_git: Option<bool>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub require_release_notes: Option<bool>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub release_notes_path: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expected_commit: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expected_version: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct DiffSection {
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub flash_growth_review_bytes: Option<u64>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ram_growth_review_bytes: Option<u64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct GateSection {
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unknown_evidence_review_count: Option<u64>,
     #[serde(default)]
     pub on_unknown: OnUnknownSection,
@@ -247,19 +252,19 @@ impl UnknownWord {
 /// rather than one default for all seven.
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct OnUnknownSection {
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub git_clean: Option<UnknownWord>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub commit_matches_release: Option<UnknownWord>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version_match: Option<UnknownWord>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub flash_budget: Option<UnknownWord>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ram_budget: Option<UnknownWord>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub baseline_growth: Option<UnknownWord>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub release_notes: Option<UnknownWord>,
 }
 

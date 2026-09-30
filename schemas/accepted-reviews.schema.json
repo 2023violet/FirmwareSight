@@ -40,6 +40,11 @@
           "reason": {
             "type": "string",
             "minLength": 1
+          },
+          "original_state": {
+            "enum": [
+              "REVIEW"
+            ]
           }
         },
         "additionalProperties": false

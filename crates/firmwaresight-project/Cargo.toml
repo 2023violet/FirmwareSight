@@ -18,3 +18,9 @@ thiserror = "2.0.21"
 toml = "1.1.6"
 
 [dev-dependencies]
+# The contract test for `schemas/project-config.schema.json` validates a JSON tree, so it needs a JSON
+# serializer, and it reuses `firmwaresight-report`'s dependency-free schema subset rather than a third
+# copy of one (prompt §55). Both are test-only: neither appears in the shipped graph, and both were
+# already resolved in Cargo.lock. No new third-party package enters the lock.
+firmwaresight-report = { workspace = true }
+serde_json = "1.0.151"

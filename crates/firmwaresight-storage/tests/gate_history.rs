@@ -206,19 +206,22 @@ fn looks_utc(stamp: &str) -> bool {
             .all(|c| c.is_ascii_digit() || b"-T:Z".contains(&c))
 }
 
-/// The locator schemes Core is allowed to cite. A filesystem path matches none of them.
+/// The locator schemes Core is allowed to cite, and the two shapes a host path always has. A
+/// project-relative path is legal — `file:docs/RELEASE_NOTES.md` names a file inside the project — so
+/// what is refused is an absolute one, in either separator.
 fn is_stable_locator(reference: &str) -> bool {
     [
         "artifact:",
+        "diff:",
         "evidence:",
+        "file:",
         "git:",
         "policy:",
-        "snapshot:",
-        "diff:",
-        "memory:",
     ]
     .iter()
     .any(|scheme| reference.starts_with(scheme))
+        && !reference.contains('\\')
+        && !reference.starts_with('/')
 }
 
 #[test]
@@ -451,8 +454,8 @@ fn a_stored_run_reads_back_every_finding_and_ref_in_the_order_it_recorded_them()
         );
         for reference in &stored.evidence_refs {
             assert!(
-                is_stable_locator(reference) && !reference.contains(['/', '\\']),
-                "a stored locator names a fact, not a file: {reference}"
+                is_stable_locator(reference),
+                "a stored locator is a scheme-prefixed fact, never an absolute path: {reference}"
             );
         }
     }
@@ -681,8 +684,8 @@ fn a_host_path_can_never_be_stored_as_an_evidence_locator() {
     for finding in &stored.findings {
         for reference in &finding.evidence_refs {
             assert!(
-                !reference.contains('\\') && is_stable_locator(reference),
-                "a stored locator is a scheme-prefixed fact, not a path: {reference}"
+                is_stable_locator(reference),
+                "a stored locator is a scheme-prefixed fact, never an absolute path: {reference}"
             );
         }
     }

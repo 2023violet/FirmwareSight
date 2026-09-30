@@ -1,9 +1,15 @@
 //! `fwsight` — the FirmwareSight command line.
 //!
-//! P2 implements `analyze` and `diff`. `gate` and `release prepare` are defined in
-//! `04_TECH/07_CLI_SPEC.md` but are *not registered here*, so a user cannot mistake them for
-//! working features. Exit codes 4 (gate review) and 5 (gate block) are likewise unreachable until
-//! the Gate phase exists; nothing pretends otherwise. Code 6 became reachable with the P2 export.
+//! P3 implements `analyze`, `diff` and `gate`. `release prepare` is defined in
+//! `04_TECH/07_CLI_SPEC.md` but is *not registered here*, so a user cannot mistake it for a working
+//! feature. Exit codes 4 (gate review) and 5 (gate block) became reachable with `gate`; code 6 became
+//! reachable with the P2 export.
+//!
+//! `gate` is the whole CLI Gate path in one sentence: it reads `firmwaresight.toml` from the project
+//! directory, analyzes the artifact and an optional baseline in the same process, asks the workspace
+//! Git what it knows, and prints Core's answer. It creates no database and stores nothing — a Gate
+//! record becomes reviewable when the desktop persists it, and a command line that quietly left a
+//! project database behind would be a side effect nobody asked for (prompt §38).
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -13,12 +19,23 @@ use firmwaresight_artifact::ArtifactError;
 use firmwaresight_artifact::intake::GuardConfig;
 use firmwaresight_artifact::pipeline::{self, AnalysisRequest};
 use firmwaresight_core::domain::diff::{DiffError, DiffSnapshotInput, compare};
-use firmwaresight_report::{AnalyzeResultDto, DiffResultDto, diff_render, render};
+use firmwaresight_core::domain::gate::{EffectiveSeverity, GateGrowthFacts};
+use firmwaresight_project::evidence::{SnapshotFacts, growth_facts, observe_release_notes};
+use firmwaresight_project::{
+    GateRunRequest, GitObservation, GitProbe, LoadedProject, ProjectError, build_context, run_id,
+};
+use firmwaresight_report::{
+    AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, render,
+};
 
 /// Exit codes frozen by 04_TECH/07_CLI_SPEC.md. `1` is intentionally not defined.
 const EXIT_OK: u8 = 0;
 const EXIT_USAGE: u8 = 2;
 const EXIT_PARSE_IMPORT: u8 = 3;
+/// The Gate aggregate is REVIEW: the release may go out once a named person has accepted each review.
+const EXIT_GATE_REVIEW: u8 = 4;
+/// The Gate aggregate is BLOCK: something failed, or a budget lost the evidence a hard verdict needs.
+const EXIT_GATE_BLOCK: u8 = 5;
 /// The comparison succeeded but the requested export could not be written.
 const EXIT_EXPORT: u8 = 6;
 
@@ -27,8 +44,8 @@ const EXIT_EXPORT: u8 = 6;
     name = "fwsight",
     version,
     about = "Know exactly what ships.",
-    long_about = "FirmwareSight P0/P1/P2 technical slice.\n\n`analyze` and `diff` are implemented; \
-                  Release Gate and Release Bundle are later phases and are not available."
+    long_about = "FirmwareSight P0/P1/P2/P3 technical slice.\n\n`analyze`, `diff` and `gate` are \
+                  implemented; Release Bundle is a later phase and is not available."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -41,6 +58,8 @@ enum Commands {
     Analyze(AnalyzeArgs),
     /// Compare two artifacts and report what changed between them.
     Diff(DiffArgs),
+    /// Evaluate the release Gate for one artifact against a project's policy.
+    Gate(GateArgs),
 }
 
 #[derive(Debug, Parser)]
@@ -86,6 +105,33 @@ struct DiffArgs {
     html: Option<PathBuf>,
 }
 
+#[derive(Debug, Parser)]
+struct GateArgs {
+    /// Directory holding `firmwaresight.toml`. Its policy is what the Gate evaluates against.
+    #[arg(long, value_name = "DIR", default_value = ".")]
+    project: PathBuf,
+
+    /// The artifact this release ships.
+    #[arg(long, value_name = "FILE")]
+    artifact: PathBuf,
+
+    /// GNU ld MAP file for the shipped artifact.
+    #[arg(long, value_name = "FILE")]
+    map: Option<PathBuf>,
+
+    /// The baseline build to measure growth against, when `[diff]` names a threshold.
+    #[arg(long, value_name = "FILE")]
+    baseline: Option<PathBuf>,
+
+    /// GNU ld MAP file for the baseline artifact.
+    #[arg(long, value_name = "FILE")]
+    baseline_map: Option<PathBuf>,
+
+    /// Emit exactly one gate-results JSON document on stdout.
+    #[arg(long)]
+    json: bool,
+}
+
 fn main() -> ExitCode {
     // Diagnostics belong on stderr so that `--json` stdout stays a single clean document.
     tracing_subscriber::fmt()
@@ -107,6 +153,7 @@ fn main() -> ExitCode {
     match cli.command {
         Commands::Analyze(args) => run_analyze(args, &operation_id),
         Commands::Diff(args) => run_diff(args, &operation_id),
+        Commands::Gate(args) => run_gate(args, &operation_id),
     }
 }
 
@@ -214,6 +261,156 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
     ExitCode::from(EXIT_OK)
 }
 
+/// Evaluate the release Gate for one artifact against one project's policy.
+///
+/// The four fact sources are the ones prompt §38 names: `firmwaresight.toml` in the project directory,
+/// the artifact (and optional baseline) analyzed in this process, the workspace Git consulted read-only,
+/// and the project-relative Release Notes file. Core decides what each of them means; this function only
+/// assembles facts and prints the answer, and it stores nothing.
+fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
+    let project = match LoadedProject::load(&args.project) {
+        Ok(loaded) => loaded,
+        Err(err) => return report_config_error(&err, args.json, operation_id),
+    };
+
+    let target = match analyze_side(
+        &args.artifact,
+        args.map.clone(),
+        "artifact",
+        args.json,
+        operation_id,
+    ) {
+        Ok(analysis) => analysis,
+        Err(code) => return ExitCode::from(code),
+    };
+
+    // A baseline is compared with the same Core diff `fwsight diff` runs, so the growth a Gate blocks
+    // on and the growth a release owner reads in Compare are one calculation, not two (§23).
+    let growth = match &args.baseline {
+        None => GateGrowthFacts::without_baseline(),
+        Some(path) => {
+            let base = match analyze_side(
+                path,
+                args.baseline_map.clone(),
+                "baseline",
+                args.json,
+                operation_id,
+            ) {
+                Ok(analysis) => analysis,
+                Err(code) => return ExitCode::from(code),
+            };
+            let base_input = DiffSnapshotInput::from_snapshot(&base.snapshot);
+            let target_input = DiffSnapshotInput::from_snapshot(&target.snapshot);
+            match compare(&base_input, &target_input) {
+                Ok(diff) => growth_facts(&diff),
+                Err(err) => return report_diff_error(&err, args.json, operation_id),
+            }
+        }
+    };
+
+    let git = GitProbe::system().observe(&project.root);
+    let release_notes = project
+        .policy
+        .require_release_notes
+        .then(|| observe_release_notes(&project.root, &project.policy.release_notes_path));
+    let facts = SnapshotFacts::from_snapshot(&target.snapshot);
+    let context = build_context(&GateRunRequest {
+        target: &facts,
+        growth,
+        git: &git,
+        policy: project.policy.clone(),
+        release_notes,
+    });
+
+    let run = run_id(&context);
+    let evaluation = context.evaluate(&run);
+    let dto = GateResultsDto::from_evaluation(
+        &evaluation,
+        &project.policy_sha256,
+        project.config.schema_version,
+    );
+
+    if args.json {
+        // stdout carries nothing but the Gate document.
+        print!("{}", gate_render::render_json(&dto));
+    } else {
+        print!(
+            "{}",
+            gate_render::render_human(&evaluation, &project.policy_sha256)
+        );
+    }
+    // These four lines are diagnostics in both modes: they say what the run read and that the CLI
+    // stored nothing, which is exactly the stderr half of the `--json` contract (§39).
+    eprintln!("diagnostics: map {}", map_state(&target));
+    if let Some(baseline) = &args.baseline {
+        eprintln!("diagnostics: baseline {}", file_name(baseline));
+    }
+    eprintln!("diagnostics: git {}", git_state(&git));
+    eprintln!(
+        "diagnostics: this run is not stored; the desktop Release page writes the reviewable record"
+    );
+    for warning in &project.warnings {
+        eprintln!("warning: {warning}");
+    }
+    eprintln!("diagnostics: operation {operation_id}");
+
+    ExitCode::from(gate_exit_code(evaluation.overall_effective_severity))
+}
+
+/// Which process code a verdict produces. `UNKNOWN` never arrives as its own answer here: Core carried
+/// the rule's disposition into the aggregate's effective severity, so a gap mapped to review exits 4
+/// and a gap mapped to block exits 5 (prompt §39).
+#[must_use]
+pub const fn gate_exit_code(severity: EffectiveSeverity) -> u8 {
+    match severity {
+        EffectiveSeverity::Pass => EXIT_OK,
+        EffectiveSeverity::Review => EXIT_GATE_REVIEW,
+        EffectiveSeverity::Block => EXIT_GATE_BLOCK,
+    }
+}
+
+/// A config problem is a usage error (exit 2), never a Gate verdict: there is no run to score until the
+/// policy can be read.
+fn report_config_error(err: &ProjectError, json: bool, operation_id: &str) -> ExitCode {
+    let envelope =
+        render::ErrorEnvelope::new(err.code(), err.to_string(), operation_id).with_remediation(
+            "Correct `firmwaresight.toml` in the project directory. FirmwareSight refuses a policy it \
+             cannot read fully rather than filling the gap with a default.",
+        );
+    if json {
+        println!("{}", envelope.to_json());
+    }
+    eprintln!(
+        "error: {} (code {}, operation {operation_id})",
+        envelope.message, envelope.code
+    );
+    tracing::error!(operation_id, code = err.code(), "project config rejected");
+    ExitCode::from(EXIT_USAGE)
+}
+
+/// One line about what the workspace Git said. It describes the *directory the release owner pointed
+/// at*, and never claims the artifact was built from it (`04_TECH/24`, prompt §50).
+fn git_state(git: &GitObservation) -> String {
+    if !git.facts.available {
+        return "not consulted".to_owned();
+    }
+    let dirty = match git.facts.dirty.value() {
+        Some(true) => "dirty",
+        Some(false) => "clean",
+        None => "state unknown",
+    };
+    let tag = match git.facts.exact_tag.value() {
+        Some(tag) => format!("tag {tag}"),
+        None => "no exact tag".to_owned(),
+    };
+    let ambiguous = if git.ambiguous_tags() {
+        " (several tags on HEAD)"
+    } else {
+        ""
+    };
+    format!("{dirty}, {tag}{ambiguous}")
+}
+
 /// Analyze one side of a comparison. A failure here is an import failure, so no partial diff is
 /// printed and the process exits 3.
 fn analyze_side(
@@ -310,8 +507,9 @@ fn map_state(analysis: &pipeline::Analysis) -> &'static str {
 }
 
 /// Map an error onto the frozen exit-code table. Everything the CLI can hit while reading a build is
-/// a parse/import failure, which is 3. Usage mistakes are rejected by the argument parser and exit 2
-/// beforehand; the export path reports 6 itself. There is no gate path yet to produce 4 or 5.
+/// a parse/import failure, which is 3. Usage mistakes — including a `firmwaresight.toml` this build
+/// cannot read — are rejected before any verdict exists and exit 2; the export path reports 6 itself;
+/// a completed Gate reports 4 or 5 from its own aggregate through `gate_exit_code`.
 #[must_use]
 pub fn exit_code_for(_err: &ArtifactError) -> u8 {
     EXIT_PARSE_IMPORT
@@ -363,13 +561,90 @@ mod tests {
 
     #[test]
     fn unregistered_future_commands_are_still_not_accepted() {
-        for command in ["gate", "release", "watch", "doctor"] {
+        for command in ["release", "watch", "doctor"] {
             let args: Vec<OsString> = ["fwsight", command].iter().map(OsString::from).collect();
             assert!(
                 parse_from(args.clone()).is_err(),
                 "`{command}` is not implemented and must not be registered"
             );
         }
+    }
+
+    #[test]
+    fn gate_is_now_a_registered_command() {
+        // P3 authorizes the Release Gate. This replaces the P0 test that asserted `gate` must be
+        // rejected, so the change is recorded rather than silent; `release` stays rejected above.
+        let args: Vec<OsString> = ["fwsight", "gate", "--artifact", "firmware.elf"]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        let cli = parse_from(args).expect("gate parses");
+        let Commands::Gate(gate) = cli.command else {
+            panic!("gate must route to GateArgs");
+        };
+        assert_eq!(
+            gate.project,
+            PathBuf::from("."),
+            "--project defaults to here"
+        );
+        assert_eq!(gate.artifact, PathBuf::from("firmware.elf"));
+        assert!(gate.map.is_none());
+        assert!(gate.baseline.is_none() && gate.baseline_map.is_none());
+        assert!(!gate.json);
+    }
+
+    #[test]
+    fn gate_options_parse_into_their_named_slots() {
+        let args: Vec<OsString> = [
+            "fwsight",
+            "gate",
+            "--project",
+            "release/brake-node",
+            "--artifact",
+            "out/firmware.elf",
+            "--map",
+            "out/firmware.map",
+            "--baseline",
+            "out/previous.elf",
+            "--baseline-map",
+            "out/previous.map",
+            "--json",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        let cli = parse_from(args).expect("the full gate option set parses");
+        let Commands::Gate(gate) = cli.command else {
+            panic!("gate must route to GateArgs");
+        };
+        assert_eq!(gate.project, PathBuf::from("release/brake-node"));
+        assert_eq!(gate.artifact, PathBuf::from("out/firmware.elf"));
+        assert_eq!(gate.map, Some(PathBuf::from("out/firmware.map")));
+        assert_eq!(gate.baseline, Some(PathBuf::from("out/previous.elf")));
+        assert_eq!(gate.baseline_map, Some(PathBuf::from("out/previous.map")));
+        assert!(gate.json);
+    }
+
+    #[test]
+    fn a_gate_without_an_artifact_is_a_usage_error() {
+        // A Gate with no artifact has nothing to score. Answering with an all-N/A verdict would read
+        // as a release that passed ten rules.
+        let args: Vec<OsString> = ["fwsight", "gate", "--project", "."]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        assert_eq!(
+            parse_from(args).expect_err("no artifact is no gate"),
+            EXIT_USAGE
+        );
+    }
+
+    #[test]
+    fn every_aggregate_maps_to_its_own_exit_code_and_none_of_them_is_one() {
+        use firmwaresight_core::domain::gate::EffectiveSeverity;
+        assert_eq!(gate_exit_code(EffectiveSeverity::Pass), EXIT_OK);
+        assert_eq!(gate_exit_code(EffectiveSeverity::Review), EXIT_GATE_REVIEW);
+        assert_eq!(gate_exit_code(EffectiveSeverity::Block), EXIT_GATE_BLOCK);
     }
 
     #[test]
@@ -432,7 +707,7 @@ mod tests {
     }
 
     #[test]
-    fn analyze_and_diff_are_the_two_registered_routes() {
+    fn analyze_diff_and_gate_are_the_three_registered_routes() {
         let args: Vec<OsString> = ["fwsight", "analyze", "x.elf"]
             .iter()
             .map(OsString::from)
@@ -446,6 +721,13 @@ mod tests {
             .collect();
         let cli = parse_from(args).expect("diff parses");
         assert!(matches!(cli.command, Commands::Diff(_)));
+
+        let args: Vec<OsString> = ["fwsight", "gate", "--artifact", "x.elf"]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        let cli = parse_from(args).expect("gate parses");
+        assert!(matches!(cli.command, Commands::Gate(_)));
     }
 
     #[test]
@@ -493,13 +775,20 @@ mod tests {
     #[test]
     fn exit_code_one_is_never_produced() {
         // `1` is not part of the frozen table, so nothing may return it.
-        let all = [EXIT_OK, EXIT_USAGE, EXIT_PARSE_IMPORT, EXIT_EXPORT];
+        let all = [
+            EXIT_OK,
+            EXIT_USAGE,
+            EXIT_PARSE_IMPORT,
+            EXIT_GATE_REVIEW,
+            EXIT_GATE_BLOCK,
+            EXIT_EXPORT,
+        ];
         assert!(!all.contains(&1));
         assert_eq!(
             all,
-            [0, 2, 3, 6],
-            "the P2 exit-code surface is exactly 0, 2, 3 and 6; 4 and 5 belong to the Gate phase \
-             and stay unreachable until it exists"
+            [0, 2, 3, 4, 5, 6],
+            "the P3 exit-code surface is 0, 2, 3, 4, 5 and 6; 4 and 5 arrived with the Gate, and 1 \
+             stays undefined"
         );
     }
 }
