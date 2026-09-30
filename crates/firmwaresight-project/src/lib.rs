@@ -31,7 +31,10 @@ pub use config::{
     SUPPORTED_SCHEMA_VERSION, to_gate_policy,
 };
 pub use error::ProjectError;
-pub use evidence::{GateRunRequest, SnapshotFacts, build_context, observe_release_notes};
+pub use evidence::{
+    FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, SnapshotFacts, build_context, footprint_evidence_id,
+    observe_release_notes,
+};
 pub use fingerprint::{policy_sha256, run_id};
 pub use git::{GitObservation, GitProbe};
 

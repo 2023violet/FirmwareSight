@@ -753,7 +753,7 @@ describe('the change tables', () => {
     await runCompare();
 
     const table = await screen.findByRole('region', { name: 'Section Changes' });
-    const row = within(table).getByText('.noinit').closest('tr') as HTMLTableRowElement;
+    const row = (await within(table).findByText('.noinit')).closest('tr') as HTMLTableRowElement;
     expect(within(row).getByText('Added')).toBeDefined();
     expect(within(row).getAllByText('Not present').length).toBe(2);
     expect(row.textContent).not.toContain('Old 0 bytes');
@@ -764,7 +764,7 @@ describe('the change tables', () => {
     await runCompare();
 
     const table = await screen.findByRole('region', { name: 'Section Changes' });
-    const row = within(table).getByText('.oldboot').closest('tr') as HTMLTableRowElement;
+    const row = (await within(table).findByText('.oldboot')).closest('tr') as HTMLTableRowElement;
     expect(within(row).getByText('Removed')).toBeDefined();
     expect(within(row).getAllByText('Not present').length).toBeGreaterThan(0);
     expect(row.textContent).toContain('128 bytes');
@@ -775,7 +775,7 @@ describe('the change tables', () => {
     await runCompare();
 
     const table = await screen.findByRole('region', { name: 'Symbol Changes' });
-    const row = within(table).getByText('g_threshold').closest('tr') as HTMLTableRowElement;
+    const row = (await within(table).findByText('g_threshold')).closest('tr') as HTMLTableRowElement;
     expect(row.textContent).toContain('Unknown');
     expect(row.textContent).toContain('at least one side records no size for this symbol');
     expect(row.textContent).toContain('not decidable: size');

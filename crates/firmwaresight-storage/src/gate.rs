@@ -506,6 +506,30 @@ impl Database {
         })
     }
 
+    /// The id of one evidence item this build recorded under `field`, if it recorded one.
+    ///
+    /// A caller that hydrates Gate facts from storage needs the evidence pointers the analysis path
+    /// would have quoted, and asking by field keeps the answer bounded to one row. `None` is the
+    /// honest answer for a build that holds no such item: the locator is then absent, not invented.
+    ///
+    /// # Errors
+    ///
+    /// [`StorageError::Write`] when the read fails.
+    pub fn evidence_id_for_field(
+        &self,
+        build_id: &str,
+        field: &str,
+    ) -> Result<Option<String>, StorageError> {
+        self.conn
+            .query_row(
+                "SELECT id FROM evidence WHERE build_id = ?1 AND field = ?2 ORDER BY id LIMIT 1",
+                params![build_id, field],
+                |row| row.get::<_, String>(0),
+            )
+            .optional()
+            .map_err(read_err)
+    }
+
     fn accepted_review_for(
         &self,
         run_id: &str,

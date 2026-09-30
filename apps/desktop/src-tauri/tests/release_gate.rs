@@ -27,8 +27,13 @@ use firmwaresight_desktop::ipc::{
     AcceptReviewRequestDto, GateFindingRowDto, GateRunDto, GateRunRequestDto, ProjectContextDto,
     ProjectPolicyDto, UnknownPolicyDto,
 };
+use firmwaresight_desktop::release::snapshot_facts;
+use firmwaresight_desktop::service;
 use firmwaresight_desktop::{Session, service::FixtureCatalog};
+use firmwaresight_project::FOOTPRINT_EVIDENCE_FIELDS;
+use firmwaresight_project::SnapshotFacts;
 use firmwaresight_project::policy_sha256;
+use firmwaresight_storage::Database;
 use serde_json::Value;
 
 /// The evidence locator schemes Core is allowed to emit. Anything else in a ref is a fact nobody
@@ -257,6 +262,12 @@ impl TempProject {
         git(&["config", "user.name", "Release Owner"], &self.0);
         git(&["add", "-A"], &self.0);
         git(&["commit", "-q", "-m", "release candidate"], &self.0);
+        self
+    }
+
+    /// An exact `v1.2.3` tag on the HEAD `with_repository` just made, for the version rule to read.
+    fn tagged(self) -> Self {
+        git(&["tag", "v1.2.3"], &self.0);
         self
     }
 
@@ -934,6 +945,89 @@ fn a_project_that_is_not_a_repository_reports_unavailable_rather_than_clean() {
 }
 
 // --------------------------------------------------------------------------- acceptance
+
+#[test]
+fn a_version_pattern_that_carries_a_separator_still_persists_the_run() {
+    // The Windows smoke found this: `^v(?P<version>\d+\.\d+\.\d+)$` is the ordinary shape for
+    // `[version] pattern`, and a backslash is the one character a stored locator may never hold
+    // (`AGENTS.md` 7). Quoting the pattern inside the pointer made every run of such a project fail
+    // its own database write, so the pattern is stated in the finding's words and the locator names
+    // the field.
+    let config = "schema_version = 1\n\
+                  [project]\nname = \"regex-release\"\n\
+                  [artifacts]\nrequired = [\"elf\", \"map\"]\n\
+                  [version]\nsource = \"git_tag\"\n\
+                  pattern = '^v(?P<version>\\d+\\.\\d+\\.\\d+)$'\n\
+                  [release]\nrequire_clean_git = true\nrequire_release_notes = false\n\
+                  expected_version = \"1.2.3\"\n";
+    let project = TempProject::with_text("pattern", config)
+        .with_repository()
+        .tagged();
+    let (_db, session) = session("pattern");
+    let target = store(&session, "target");
+    load(&session, &project);
+
+    let gate = run(&session, &target, None);
+    let version = finding(&gate, "release.version_matches_policy");
+    assert_eq!(version.state, "PASS", "{}", version.summary);
+    assert!(
+        version
+            .evidence_refs
+            .contains(&"policy:version.pattern".to_owned()),
+        "the rule must still name the field it read: {:?}",
+        version.evidence_refs
+    );
+    for row in &gate.findings {
+        for reference in &row.evidence_refs {
+            assert!(
+                !reference.contains('\\'),
+                "{} quoted a separator in {reference}",
+                row.rule_id
+            );
+        }
+    }
+    // The point of the fix: the run is readable from SQLite afterwards.
+    let stored = session
+        .gate_run(&gate.run_id, "op-read")
+        .expect("the run was written")
+        .expect("and is in history");
+    assert_eq!(stored.findings.len(), 10);
+    assert_eq!(stored.run_id, gate.run_id);
+}
+
+#[test]
+fn a_stored_build_fingerprints_exactly_like_a_fresh_analysis() {
+    // A Gate run's id is the hash of the facts it read, so the CLI's `SnapshotFacts::from_snapshot`
+    // and the desktop's storage-hydrated ones have to be the same answer. The Windows smoke found
+    // they were not: the stored footprint carries no reason text and no evidence locator, and those
+    // were inside the fingerprint, so the same build under the same policy produced two run ids.
+    let (_db, session) = session("parity");
+    let target = store(&session, "target");
+    let (stored, footprint_evidence) = {
+        let db = Database::open(&_db.0).expect("the same database reopens");
+        let stored = db.load_gate_facts(&target).expect("the build is stored");
+        let evidence = FOOTPRINT_EVIDENCE_FIELDS.map(|field| {
+            db.evidence_id_for_field(&stored.build_id, field)
+                .expect("the footprint is readable")
+        });
+        let [nonvolatile, runtime_ram] = evidence;
+        (stored, [nonvolatile, runtime_ram])
+    };
+    for (field, id) in FOOTPRINT_EVIDENCE_FIELDS.iter().zip(&footprint_evidence) {
+        assert!(
+            id.is_some(),
+            "the stored build carries no {field} evidence row"
+        );
+    }
+    let (artifact, map) = fixture("target");
+    let analysis = service::analyze_paths(&artifact, Some(&map)).expect("the fixture analyzes");
+
+    assert_eq!(
+        SnapshotFacts::from_snapshot(&analysis.snapshot),
+        snapshot_facts(&stored, &footprint_evidence),
+        "one build must present one set of facts to the Gate, read from disk or from SQLite"
+    );
+}
 
 #[test]
 fn an_accepted_review_stays_review_and_moves_only_the_aggregate() {

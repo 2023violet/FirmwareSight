@@ -185,6 +185,9 @@
 .primary:disabled {
   color: var(--fs-color-text-secondary);
   background: var(--fs-color-bg-subtle);
+  /* The accent border is what makes an enabled primary control an accent one, so a disabled control
+     has to give it up too: grey text on a grey field inside a blue frame still reads as available. */
+  border-color: var(--fs-color-border-default);
   cursor: default;
 }
 

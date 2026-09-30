@@ -37,8 +37,8 @@ use firmwaresight_project::evidence::{
     SnapshotFacts, UNKNOWN_EVIDENCE_SAMPLE, budget_fact, growth_facts, unknown_evidence_from_ids,
 };
 use firmwaresight_project::{
-    CONFIG_FILE_NAME, GateRunRequest, GitObservation, GitProbe, build_context,
-    observe_release_notes, policy_sha256,
+    CONFIG_FILE_NAME, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, GitObservation, GitProbe,
+    build_context, observe_release_notes, policy_sha256,
 };
 use firmwaresight_storage::{
     AcceptReviewError, AcceptedReview, GateRunDraft, GateSnapshotFacts, StoredBudget,
@@ -169,10 +169,22 @@ impl Session {
         request: &GateRunRequestDto,
         operation_id: &str,
     ) -> Result<GateRunDto, ErrorEnvelopeDto> {
-        let stored = {
+        let (stored, footprint_evidence) = {
             let db = self.lock_db(operation_id)?;
-            db.load_gate_facts(&request.snapshot_id)
-                .map_err(|err| envelope_from_storage(&err, operation_id))?
+            let stored = db
+                .load_gate_facts(&request.snapshot_id)
+                .map_err(|err| envelope_from_storage(&err, operation_id))?;
+            // The two pointers a fresh analysis would have quoted for these totals, read from the same
+            // build. Without them the desktop and the CLI fingerprint the same judgement differently,
+            // and a run id is meant to name one answer, not one answer per surface.
+            let evidence = FOOTPRINT_EVIDENCE_FIELDS.map(|field| {
+                db.evidence_id_for_field(&stored.build_id, field)
+                    .map_err(|err| envelope_from_storage(&err, operation_id))
+            });
+            match evidence {
+                [Ok(nonvolatile), Ok(runtime_ram)] => (stored, [nonvolatile, runtime_ram]),
+                [Err(err), _] | [Ok(_), Err(err)] => return Err(err),
+            }
         };
         let baseline_build = match &request.baseline_snapshot_id {
             None => None,
@@ -186,7 +198,7 @@ impl Session {
         // The baseline is measured with the same Core diff Compare shows, so the growth a Gate asks a
         // person to review and the growth they read in the change tables are one calculation (§23).
         let growth = self.growth_for(request, operation_id)?;
-        let target = snapshot_facts(&stored);
+        let target = snapshot_facts(&stored, &footprint_evidence);
 
         let project = self.lock_project(operation_id)?.clone();
         let (policy, label) = match &project {
@@ -816,10 +828,21 @@ fn git_dto(git: &GateGitFacts) -> GateGitDto {
 
 /// A stored build, turned into the facts the Gate reads.
 ///
-/// The stored footprint keeps no reason text for a partial or unknown total and no evidence locator for its
-/// totals, so both arrive as `None`. Core's rules carry their own words for those cases, which name what is
-/// missing without inventing a reason the database never recorded.
-fn snapshot_facts(stored: &GateSnapshotFacts) -> SnapshotFacts {
+/// The stored footprint keeps no reason text for a partial or unknown total, so `reason` stays `None`:
+/// Core's rules carry their own words for those cases, which name what is missing without inventing a
+/// reason the database never recorded. The evidence pointer is different — it names a row the build
+/// really holds, so the caller reads it out of the database and hands it in beside the totals.
+///
+/// Public so the integration tests can hold it against [`SnapshotFacts::from_snapshot`], the CLI's
+/// path: a Gate run's identity is a hash of these facts, so the two ways of assembling them have to
+/// agree.
+///
+/// [`SnapshotFacts::from_snapshot`]: firmwaresight_project::evidence::SnapshotFacts::from_snapshot
+#[must_use]
+pub fn snapshot_facts(
+    stored: &GateSnapshotFacts,
+    footprint_evidence: &[Option<String>; 2],
+) -> SnapshotFacts {
     SnapshotFacts::from_stored(
         stored.snapshot_id.clone(),
         stored
@@ -836,11 +859,13 @@ fn snapshot_facts(stored: &GateSnapshotFacts) -> SnapshotFacts {
                 &stored.footprint.nonvolatile,
                 stored.footprint.admissible_hard_block,
                 stored.footprint.weakest_basis.clone(),
+                footprint_evidence[0].as_deref(),
             )),
             runtime_ram: Some(budget_of(
                 &stored.footprint.runtime_ram,
                 stored.footprint.admissible_hard_block,
                 stored.footprint.weakest_basis.clone(),
+                footprint_evidence[1].as_deref(),
             )),
         }),
         unknown_evidence_from_ids(
@@ -851,7 +876,12 @@ fn snapshot_facts(stored: &GateSnapshotFacts) -> SnapshotFacts {
     )
 }
 
-fn budget_of(row: &StoredBudget, admissible: bool, basis: Option<String>) -> GateBudgetFact {
+fn budget_of(
+    row: &StoredBudget,
+    admissible: bool,
+    basis: Option<String>,
+    evidence_id: Option<&str>,
+) -> GateBudgetFact {
     let state = match row.state.as_str() {
         "exact" => BudgetState::Exact,
         "partial" => BudgetState::Partial,
@@ -863,7 +893,14 @@ fn budget_of(row: &StoredBudget, admissible: bool, basis: Option<String>) -> Gat
     } else {
         row.bytes
     };
-    budget_fact(state, bytes, admissible, basis, None, None)
+    budget_fact(
+        state,
+        bytes,
+        admissible,
+        basis,
+        None,
+        evidence_id.map(|id| format!("evidence:{id}")),
+    )
 }
 
 fn kind_of(stored: &str) -> ArtifactKind {

@@ -545,6 +545,15 @@ pub fn require_project_relative(path: &str, field: &str) -> Result<(), ProjectEr
     if path.contains(':') {
         return reject("the path carries a drive or scheme prefix".to_owned());
     }
+    if path.contains('\\') {
+        // On Windows this is a separator, so the path is not the `/`-joined relative form the rest of
+        // the product quotes. A configured path also becomes a `file:` evidence locator, and a locator
+        // may never carry the one shape a host path always has (`04_TECH/27`, `AGENTS.md` 7).
+        return reject(
+            "a project-relative path is written with `/`; a backslash is a Windows separator"
+                .to_owned(),
+        );
+    }
     let mut depth = 0usize;
     for component in candidate.components() {
         match component {

@@ -840,7 +840,12 @@ impl GateContext {
         };
         let mut refs = vec![
             "policy:version.source".to_owned(),
-            format!("policy:version.pattern={}", policy.pattern),
+            // The pattern text is *not* part of this locator. It is the one policy value that is
+            // arbitrary user text, and a regex carries `\` — the separator that marks a host path,
+            // which no locator may contain (`04_TECH/27`, `AGENTS.md` 7). The pattern the rule was
+            // judged with is stated in full in the summary below, and the run fingerprint still
+            // covers it, so nothing is hidden: only the pointer changes shape.
+            "policy:version.pattern".to_owned(),
         ];
         if !self.git.available {
             refs.push("git:exact-tag".to_owned());
@@ -908,7 +913,10 @@ impl GateContext {
                 None,
             );
         };
-        refs.push(format!("policy:release.expected_version={expected}"));
+        // The declared version is quoted in the summaries below and never inside a locator, for the
+        // same reason the pattern is not: it is arbitrary text, and a locator may not carry the
+        // separator a host path always has.
+        refs.push("policy:release.expected_version".to_owned());
         match version_facts.captured_version.value() {
             Some(captured) if captured == expected => RawFinding::deterministic(
                 rule,
@@ -1542,15 +1550,19 @@ fn canonical_memory(memory: Option<&GateMemoryFacts>) -> String {
             ] {
                 match fact {
                     None => text.push_str(&format!("  {side}=-\n")),
+                    // The reason text is deliberately absent. It is prose that *explains* a gap, and
+                    // the deciding facts are already here: the figure, whether it is complete, whether
+                    // its basis may block, and what that basis was. A desktop run hydrates the same
+                    // totals from SQLite, which stores no reason, so carrying the words here would
+                    // give one judgement two run ids depending on which surface read it.
                     Some(fact) => text.push_str(&format!(
-                        "  {side} {} {} {} {} {} {}\n",
+                        "  {side} {} {} {} {} {}\n",
                         fact.bytes
                             .map(|b| b.to_string())
                             .unwrap_or_else(|| "-".to_owned()),
                         fact.exact,
                         fact.admissible,
                         fact.basis.as_deref().unwrap_or("-"),
-                        fact.reason.as_deref().unwrap_or("-"),
                         fact.evidence_ref.as_deref().unwrap_or("-"),
                     )),
                 }
@@ -1906,6 +1918,48 @@ mod tests {
         assert_eq!(
             rule_finding(&context, GateRuleId::VersionMatchesPolicy).state,
             FindingState::Pass
+        );
+    }
+
+    #[test]
+    fn a_version_pattern_never_puts_a_separator_into_an_evidence_locator() {
+        // A regex is the ordinary shape for `[version] pattern`, and `\` is the one character that
+        // marks a host path: the desktop persists every locator, and the storage layer refuses a ref
+        // carrying a separator. So the pattern is quoted in the words a reader sees, never in the
+        // pointer (prompt §46, `AGENTS.md` 7).
+        let mut context = context();
+        context.git.exact_tag = Fact::known("v1.2.3".to_owned());
+        context.version = Some(GateVersionFacts {
+            pattern_matches: Fact::known(true),
+            captured_version: Fact::known("1.2.3".to_owned()),
+        });
+        context.policy.version = Some(VersionPolicy {
+            pattern: r"^v(?P<version>\d+\.\d+\.\d+)$".to_owned(),
+            expected_version: Some("1.2.3".to_owned()),
+        });
+        let evaluation = context.evaluate("gate-locator-check");
+        for finding in &evaluation.findings {
+            for reference in &finding.evidence_refs {
+                assert!(
+                    !reference.contains('\\'),
+                    "a locator carried a Windows separator: {reference}"
+                );
+            }
+        }
+        let version = rule_finding(&context, GateRuleId::VersionMatchesPolicy);
+        assert_eq!(
+            version.evidence_refs,
+            vec![
+                "policy:version.source".to_owned(),
+                "policy:version.pattern".to_owned(),
+                "git:exact-tag=v1.2.3".to_owned(),
+                "policy:release.expected_version".to_owned(),
+            ],
+            "the version rule points at policy fields, not at their text"
+        );
+        assert!(
+            context.canonical_input().contains(r"(?P<version>\d+"),
+            "leaving the pattern out of the locator must not leave it out of the run fingerprint"
         );
     }
 

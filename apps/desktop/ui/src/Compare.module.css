@@ -107,6 +107,9 @@
 .primary:disabled {
   color: var(--fs-color-text-secondary);
   background: var(--fs-color-bg-subtle);
+  /* A disabled control has to give up the accent border too: grey text in a blue frame still reads
+     as available (the P3 smoke found this on the Release page, where the same rule lives). */
+  border-color: var(--fs-color-border-default);
   cursor: default;
 }
 

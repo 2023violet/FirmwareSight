@@ -267,6 +267,7 @@ fn paths_outside_the_project_are_refused() {
         "/etc/passwd",
         "\\shared\\notes.md",
         "C:\\Windows\\win.ini",
+        "docs\\notes.md",
         "../RELEASE_NOTES.md",
         "docs/../../escape.md",
         "",

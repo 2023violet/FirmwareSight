@@ -128,6 +128,23 @@ pub fn budget_fact(
     }
 }
 
+/// The evidence field each footprint total is recorded under, in side order.
+///
+/// A caller hydrating from SQLite needs the same names to look the items up with, because a budget's
+/// evidence locator is part of what a Gate run is judged from — and part of the fingerprint that
+/// identifies it. The artifact pipeline writes these fields beside the footprint row, so the two
+/// surfaces quote one pointer rather than two shapes of the same fact.
+pub const FOOTPRINT_EVIDENCE_FIELDS: [&str; 2] = [
+    "nonvolatile_image_footprint_bytes",
+    "runtime_ram_footprint_bytes",
+];
+
+/// The evidence id the pipeline gives one footprint field.
+#[must_use]
+pub fn footprint_evidence_id(field: &str) -> String {
+    format!("ev-memory-{field}")
+}
+
 /// The two footprint totals, with the evidence strength each one actually has.
 #[must_use]
 pub fn memory_facts(snapshot: &BuildSnapshot) -> Option<GateMemoryFacts> {
@@ -139,14 +156,14 @@ pub fn memory_facts(snapshot: &BuildSnapshot) -> Option<GateMemoryFacts> {
             &footprint.nonvolatile,
             admissible,
             basis.clone(),
-            "ev-memory-nonvolatile_image_footprint_bytes",
+            &footprint_evidence_id(FOOTPRINT_EVIDENCE_FIELDS[0]),
             snapshot,
         )),
         runtime_ram: Some(total_fact(
             &footprint.runtime_ram,
             admissible,
             basis,
-            "ev-memory-runtime_ram_footprint_bytes",
+            &footprint_evidence_id(FOOTPRINT_EVIDENCE_FIELDS[1]),
             snapshot,
         )),
     })
