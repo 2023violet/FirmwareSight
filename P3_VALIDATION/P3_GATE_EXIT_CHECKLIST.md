@@ -79,8 +79,8 @@ is not evidence.
   resolve — the guard `details.test.tsx:352` has carried since P1 — with the delta assertions unchanged,
   and verified by mutation: a real `querySectionChanges` call on the unit toggle fails at exactly that
   line (`expected 4 to be 3`), after which `Compare.tsx` was restored byte-identical. Defect J in
-  `P3_GATE_EXECUTION_REPORT.md` §7. That CI run is also the last P3 fact: its successor push has to say
-  whether the round is green on all seven jobs.
+  `P3_GATE_EXECUTION_REPORT.md` §7. Its successor push settled the question: Run `36783457030` on
+  `02e8a81` concluded `completed / success` with **7 of 7 jobs**, `Desktop UI (windows-latest)` included.
 - **The closure commits were first recorded as unpushed, then pushed, and CI now says something.** At
   the time box 39 was written, `origin/main` was still `32b23aa` and no CI run covered P3 code; §67
   forbids writing a future CI run into the commits that would trigger it, so nothing was predicted.

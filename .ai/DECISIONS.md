@@ -886,7 +886,12 @@ Decisions taken at closure, each with the thing that forced it:
   the fetch instead of vacuously early. The two delta assertions were not touched. To check the test
   still bites, a real `querySectionChanges` call was added to the unit toggle: the file failed at that
   line with `expected 4 to be 3`. `Compare.tsx` was then restored and verified byte-identical to HEAD
-  with `git diff --exit-code`, and eight consecutive runs of the file pass.
+  with `git diff --exit-code`, and eight consecutive runs of the file pass. Run `36783457030` on the
+  `02e8a81` head then concluded `completed / success` with **7 of 7 jobs**, `Desktop UI
+  (windows-latest)` included — the current remote fact for this stage. One green Windows run is not
+  proof that a timing race is dead; eight local runs had already passed the file that CI lost. What makes
+  the fix credible is that the sample is now causally after the fetch, guarded so it cannot pass by
+  being vacuously early.
 - **The license gap did not close with the stage.** `Cargo.toml` still reads `license = "Proprietary"`,
   there is still no root `LICENSE`, no workspace license metadata was touched and no license text was
   added. `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands, `AGENTS.md` 9 keeps a license

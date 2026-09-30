@@ -153,7 +153,8 @@ P3      PASS / COMPLETE — P3_RELEASE_GATE closed 2026-09-30, authorized 2026-0
         first full gate came back 13/14 on a P2 test-side race (defect I) that the round diagnosed and
         fixed before closing, the closure report's own Rust test total was a double count that is
         corrected in §4 of that report rather than replaced silently, and two races in that one file were
-        each caught by a different mechanism — I locally, J only on Windows CI
+        each caught by a different mechanism — I locally, J only on Windows CI — and J's fix verified by
+        Run 36783457030 on 02e8a81 at 7 of 7 jobs green
 P4      NOT STARTED — the next authorizable stage now that P3 has closed, and authorizing it is the
         architect's act. ADR-0026 removed the research gate, not the requirement of each stage carrying
         its own prompt
@@ -235,15 +236,16 @@ P2 smoke gap      desktop step 27, the same-pair lock, is NOT VERIFIED in the sh
                   <select> popup cannot be driven or captured through the available window path. Covered
                   by compare.test.tsx and the IPC tests, recorded PARTIAL: P2_VALIDATION/
                   P2_COMPARE_DESKTOP_SMOKE_REPORT.md
-Remote state      Three pushes, three runs, and the head was red on a Windows-only test race. origin/main
-                  moved 219178af -> 2d1bcea -> 893a635. Run 36774472141 (219178af) FAILURE, 6 of 7: only
+Remote state      Green at the head. Four pushes, four runs: origin/main moved 219178af -> 2d1bcea ->
+                  893a635 -> 02e8a81. Run 36774472141 (219178af) FAILURE, 6 of 7: only
                   Dependency policy, on `error[yanked]` for yoke-derive 0.8.3, yanked on crates.io at
                   2026-09-30T13:19:39Z after the local deny step had passed on a stale index. Run
                   36779321479 (2d1bcea) SUCCESS, 7 of 7 - the lock moved to 0.8.4 and CI agreed on a fresh
                   index. Run 36779715108 (893a635) FAILURE, 6 of 7: Desktop UI (windows-latest) lost a
                   call-count race in compare.test.tsx that Desktop UI (ubuntu-latest) won on the same
                   commit, and eight local runs had won; fixed as defect J with the delta assertions
-                  unchanged and the fix proved by mutation. The previous head was
+                  unchanged and the fix proved by mutation. Run 36783457030 (02e8a81) SUCCESS, 7 of 7 -
+                  the current remote fact, both Desktop UI jobs included. The previous head was
                   32b23aa on Run #19 36665007523 (success, 7 of 7), the documentation-and-integrity
                   successor to 4a77ea1, which P2 closed green on Run #18 36648718199. The earlier Run #17 on
                   c7fc2a3 was FAILURE because `**/target/` hid the target half of the P2 fixture pair

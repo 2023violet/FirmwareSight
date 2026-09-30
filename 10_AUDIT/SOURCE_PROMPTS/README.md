@@ -312,8 +312,9 @@ text with no source file; each says so in its own entry instead of standing for 
   CI's index, and `36779715108` on `893a635` concluded failure on one job, `Desktop UI (windows-latest)`,
   where a `compare.test.tsx` call-count sample lost a race the ubuntu job won on the same commit — defect
   J, fixed by sampling after both change tables resolve, with the delta assertions unchanged and the fix
-  proved by mutation rather than by a green run. Three product defects were found by running the
-  stage rather than by
+  proved by mutation rather than by a green run. That fix's own push, Run `36783457030` on `02e8a81`,
+  concluded **success with 7 of 7 jobs** — the current remote fact for this stage. Three product defects
+  were found by running the stage rather than by
   testing it — a version pattern quoted into an evidence locator, which made a Gate run unpersistable for
   any project using the only MVP version source; one build carrying two different run ids across the CLI
   and the desktop; and a disabled primary button keeping its accent border — and each is fixed with a

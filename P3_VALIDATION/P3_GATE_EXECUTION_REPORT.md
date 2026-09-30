@@ -106,6 +106,14 @@ have no runs of their own.
 | [`36774472141`](https://github.com/2023violet/FirmwareSight/actions/runs/36774472141) | `219178a` | `completed` / `failure`, 6 of 7 jobs | Only `Dependency policy` red: `python scripts/check.py --only deny` → `advisories FAILED, bans ok, licenses ok, sources ok`, exit 1, on `error[yanked]: detected yanked crate (try \`cargo update -p yoke-derive\`)` against `yoke-derive 0.8.3` |
 | [`36779321479`](https://github.com/2023violet/FirmwareSight/actions/runs/36779321479) | `2d1bcea` | `completed` / **`success`, 7 of 7** | The yank fix verified remotely: Dependency policy, Rust (windows + ubuntu), Desktop UI (windows + ubuntu), macOS Core Smoke and Generated output drift all green |
 | [`36779715108`](https://github.com/2023violet/FirmwareSight/actions/runs/36779715108) | `893a635` | `completed` / `failure`, 6 of 7 jobs | A *different* red: `Desktop UI (windows-latest)` → `frontend/test`, 1 failed / 134 passed, `AssertionError: expected 2 to be +0` at `compare.test.tsx:731`, while `Desktop UI (ubuntu-latest)` passed the same file. That is defect J in §7, found by CI and not by the local gate |
+| [`36783457030`](https://github.com/2023violet/FirmwareSight/actions/runs/36783457030) | `02e8a81` | `completed` / **`success`, 7 of 7** | Defect J's fix verified, including `Desktop UI (windows-latest)` — the job that lost it. Both Dependency policy jobs are green now |
+
+Two things this table does not claim. The first is that one green Windows run proves a timing race is
+gone: eight local runs had already passed the file that CI lost, so the evidence that matters is causal —
+the sample now happens after both tables resolve, `toBeGreaterThan(0)` proves it was not vacuously early,
+and the mutation made the assertion fail at that line. The second is that these four runs cover a P3
+window: they build and test it, and no job on any platform has ever opened this app in a window. The
+40-step walkthrough behind §6 remains a Windows-only, hand-driven act.
 
 The yank is an external event on the day of closure: crates.io reports `yoke-derive 0.8.3` as `yanked`
 and `0.8.4` as created `2026-09-30T13:19:39Z`. FirmwareSight reaches that crate only transitively and
