@@ -850,9 +850,26 @@ Decisions taken at closure, each with the thing that forced it:
   legible message. Ten consecutive runs of the file pass where one in five had failed, and the `15/15`
   recorded above is the re-run after the fix, not the earlier run restated. Nothing was weakened to reach
   green, and no `--filter` skip was used.
-- **P3's code has no CI run, and nothing claims one.** `origin/main` is still `32b23aa` (Run #19 green);
-  the five P3 commits are local. §67 forbids writing a future CI result into the commit that would
-  trigger it, so every P3 number in this pack is labelled as locally measured. Pushing is the owner's act.
+- **P3's code had no CI run at closure; it has one now, and it was 6 of 7.** At closure `origin/main` was
+  still `32b23aa` (Run #19 green) and the P3 commits were local, so every P3 number in this pack is
+  labelled as locally measured, and §67 forbade writing a future CI result into the commit that would
+  trigger it. Pushing is the owner's act, and the commits were then pushed. Run `36774472141` on
+  `219178af` concluded `failure`: Rust on both platforms, Desktop UI on both platforms, the macOS core
+  smoke and the generated-output drift check all passed, and `Dependency policy` alone failed on
+  `error[yanked]` for `yoke-derive 0.8.3`, a transitive proc-macro reached only through
+  `yoke` ← `icu_*` ← `idna` ← `url`, which crates.io yanked at 2026-09-30T13:19:39Z — after this machine's
+  `deny` step had gone green against an older index. `cargo update -p yoke-derive --precise 0.8.4` is the
+  fix: one version, one checksum, and `cssparser-macros`'s already-satisfied `syn >=2, <4` edge
+  re-resolving from `3.0.6` to `2.0.119`. No manifest changed, nothing entered or left the graph, no
+  license moved, and the full gate is 15/15 on the fixed tree.
+- **A closure count in this pack was a double count, and it is corrected rather than defended.** The Rust
+  total was recorded as **715 in 42 suites**. One `cargo test --workspace` is **556 in 28 executable
+  suites**: the 715 summed a gate log in which `check.py` runs the workspace once for tests and then runs
+  `cargo test -p firmwaresight-desktop` again as the drift group's binding-regeneration check, so the
+  desktop crate's 159 tests were counted twice. The per-suite counts are identical before and after this
+  round's dependency fix, so no test appeared, vanished or was weakened — only the arithmetic changed.
+  `Core gate 55` was the same class of error; the counted `domain::gate` list is 32. P3 therefore took Rust
+  from 345 to 556, and the UI figure was never double-counted at 135.
 - **The license gap did not close with the stage.** `Cargo.toml` still reads `license = "Proprietary"`,
   there is still no root `LICENSE`, no workspace license metadata was touched and no license text was
   added. `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands, `AGENTS.md` 9 keeps a license

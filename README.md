@@ -46,10 +46,13 @@ P3      PASS / COMPLETE — Release Gate, authorized on 2026-09-29 by its own ar
         inline) and by ADR-0027, which puts project policy and read-only Git provenance in a fifth crate
         instead of in Core. It started from HEAD 32b23aa, measured green on remote Run #19 36665007523
         (success, 7 of 7 jobs), and closed on 2026-09-30 item by item against US-003 and PRD P0-5 in
-        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md: 715 Rust tests in 42 suites, 135 UI tests, 15/15 gate
-        steps, an 18/18 CLI Gate smoke, and all forty §61 desktop steps walked on the shipping binary.
-        LOCAL PASS as measured — the five P3 commits sit on top of 32b23aa and were never pushed, so no CI
-        run covers them and none is claimed
+        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md: 556 Rust tests in 28 executable suites, 135 UI tests,
+        15/15 gate steps, an 18/18 CLI Gate smoke, and all forty §61 desktop steps walked on the shipping
+        binary. The stage closed as LOCAL PASS while its commits were still unpushed; they were pushed
+        afterwards, and remote Run 36774472141 on 219178af completed failure with 6 of 7 jobs green —
+        every build, UI, macOS-smoke and drift job passed, only Dependency policy failed, on a crate
+        (`yoke-derive 0.8.3`) yanked on crates.io after the local deny step had gone green on a stale
+        index. Fixed by a patch bump to 0.8.4 in a successor commit, with the gate re-run 15/15
 P4      NOT STARTED — the next authorizable stage now that P3 has closed, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```

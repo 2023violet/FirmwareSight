@@ -291,15 +291,24 @@ text with no source file; each says so in its own entry instead of standing for 
   `corepack pnpm test` **99 passed**.
 - Outcome: **`PASS / COMPLETE`, closed 2026-09-30.** US-003 and the PRD P0-5 ten checks are settled item
   by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` — §69's forty boxes, each with the `gh` query,
-  command, named test or smoke step that decides it. Measured at closure: `cargo test --workspace` **715
-  passed / 0 failed / 0 ignored across 42 suites** (from 345 at the start), `corepack pnpm test` **135
+  command, named test or smoke step that decides it. Measured at closure: `cargo test --workspace` **556
+  passed / 0 failed / 0 ignored across 28 executable suites** (from 345 at the start), `corepack pnpm test` **135
   passed in 6 files** (from 99), `python scripts/check.py` **15/15**, an 18/18 CLI Gate smoke, and all
   forty §61 desktop steps walked on the shipping `custom-protocol` binary. The stop condition held: no
   bundle, no History page, no pricing, cloud, account, telemetry, updater, signing, SBOM or AI judge
   exists, and `release` / `watch` / `doctor` remain unregistered.
-  **The verdict is `LOCAL PASS` as worded, and deliberately so.** The five P3 commits were never pushed:
-  `origin/main` is still `32b23aa`, whose Run #19 is the last measured remote result, so no CI run covers
-  P3's tree and none is claimed. Three product defects were found by running the stage rather than by
+  **The verdict was `LOCAL PASS` as worded at closure, and the wording has since been overtaken.** The
+  five P3 commits were unpushed when §69's boxes were settled, so no CI run covered P3's tree and none
+  was claimed. They were pushed afterwards: `origin/main` moved to `219178af195569ec6b13728d84d992ef78df8c04`
+  and Run `36774472141` completed `failure` with **6 of 7 jobs green** — Rust on both platforms, Desktop UI
+  on both platforms, the macOS core smoke and the drift check all passed, and only `Dependency policy`
+  failed, on `error[yanked]` for `yoke-derive 0.8.3`, a transitive proc-macro under `url` that crates.io
+  yanked at 2026-09-30T13:19:39Z, after the local deny step had passed against an older index. The fix is
+  a patch bump to `0.8.4` in a successor commit, with the gate re-run 15/15 and the per-suite test counts
+  unchanged. That closure entry first read **715 passed across 42 suites**; the figure summed one gate log
+  in which the `drift` group re-runs the desktop crate after `cargo test --workspace`, so it counted those
+  159 tests twice, and it is corrected above rather than replaced quietly. Three product defects were
+  found by running the stage rather than by
   testing it — a version pattern quoted into an evidence locator, which made a Gate run unpersistable for
   any project using the only MVP version source; one build carrying two different run ids across the CLI
   and the desktop; and a disabled primary button keeping its accent border — and each is fixed with a

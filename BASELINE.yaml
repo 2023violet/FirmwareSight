@@ -56,8 +56,10 @@ validation:
   # That verdict exists: forty boxes, each settled by a gh query, a command, a named test or a line of a
   # smoke report. One sub-item stays PARTIAL and is written there rather than folded away - the prior-run
   # re-read was never observed through the window, because the Release page has no run-id input.
-  # P3's own commits have no CI run: origin/main is still 32b23aa (Run #19, 7 of 7) and the five P3
-  # commits are local, so this is a local PASS and the pack says so.
+  # P3's commits were unpushed when that verdict was written and were pushed after it: origin/main is
+  # 219178af, where Run 36774472141 concluded failure on 6 of 7 jobs green - only Dependency policy, over
+  # a crate yanked on crates.io the day of closure, and now moved off in Cargo.lock. The pack's numbers
+  # stay locally measured; p3_execution.ci_coverage carries what the remote said.
   p3_status: PASS_COMPLETE
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
@@ -354,10 +356,9 @@ p2_execution:
   evidence: P2_VALIDATION/ # four documents, written by this round
   next_stage_after_this_one: P3_gate # NOT authorized by this prompt; it needs its own architect prompt
 
-# The stage that followed Compare: the Release Gate. Recorded while the round is RUNNING, so the status
-# fields read IN_PROGRESS and every expected-NO line is a promise this round's prompt makes about its own
-# scope, not a measured result. The measured result lands here only when
-# P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md says so.
+# The stage that followed Compare: the Release Gate. It was recorded while the round was RUNNING, so the
+# expected-NO lines below stay as the promises the prompt made about its own scope; the measured results
+# land under them now that P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md has settled forty boxes item by item.
 p3_execution:
   authorized: true
   prompt: "FirmwareSight - P3 Release Gate MVP Implementation, Execution Prompt v1.1 - Architect Reviewed"
@@ -379,8 +380,22 @@ p3_execution:
   start_run_id: 36665007523
   start_run_conclusion: "success, 7 of 7 jobs" # Run #19 on the closure HEAD; Run #18 36648718199 on 4a77ea1 is the P2 implementation tree the architect sealed
   tests_at_start: { rust: 345, ui: 99 } # re-measured on this machine before the first write: cargo test --workspace 345 passed / 0 failed / 0 ignored, corepack pnpm test 99 passed in 5 files
-  stage_status: IN_PROGRESS
-  evidence: P3_VALIDATION/ # written by this round
+  stage_status: PASS_COMPLETE # the verdict is P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md's forty boxes, not this line
+  closed_on: "2026-09-30"
+  not_measured_at_start: { peak_rss: NOT_MEASURED, fuzz: NOT_RUN, macos_or_linux_window: NOT_RUN }
+  # Measured result of the promises above. None of these four lines is a claim of intent.
+  boundaries_measured:
+    schema_version_at_close: 3 # crates/firmwaresight-storage/src/db.rs:14, through additive migrations/0003_gate_history.sql with v1->v3 and v2->v3 upgrade tests
+    new_third_party_dependency: NONE # the only `+name = ` line Cargo.lock gained since 32b23aa is the first-party firmwaresight-project; toml and regex were already resolved
+    new_design_token: NONE # `git diff 32b23aa..HEAD -- assets/design-tokens.json DESIGN.md` is empty
+    new_public_surface: "schemas/project-config.schema.json (urn:firmwaresight:schema:project-config:1), gate-results.schema.json v1 and accepted-reviews.schema.json v1 with an additive OPTIONAL original_state"
+  tests_at_close: { rust: 556, ui: 135 } # ONE `cargo test --workspace` invocation: 556 passed / 0 failed / 0 ignored across 28 executable suites plus 6 empty doc-test suites; `corepack pnpm test` 135 passed in 6 files. An earlier revision of this line read 715 in 42 suites: that summed a whole-gate log, where the `drift` group re-runs `cargo test -p firmwaresight-desktop` after the workspace run, so the desktop crate's 159 tests counted twice. Corrected by recount, not by removing a test - see P3_VALIDATION/P3_GATE_EXECUTION_REPORT.md §4
+  gates_at_close: "python scripts/check.py 15/15 PASS; fmt, clippy --workspace --all-targets --all-features -D warnings, typecheck, lint, build clean; drift 6/6; deny executed for real; core-smoke 3/3; git diff --check clean. CLI and desktop produced the same run id for one project, policy and HEAD: gate-a64631b287fcb33478e23ac6462dacc80e1a39cac1e321e047d02bb50ff152cc"
+  ci_coverage: "6 OF 7 JOBS GREEN ON THE PUSHED HEAD; THE ONE RED IS A CRATE YANKED THE SAME AFTERNOON" # The stage's own gate numbers stay locally measured - they were produced before any push, and §67 forbade writing a future run into the commit that triggers it. What the remote then said is this separate, later fact: the closure commits were pushed, origin/main became 219178af195569ec6b13728d84d992ef78df8c04, and `gh run view 36774472141 --repo 2023violet/FirmwareSight` reads completed/failure with Rust (windows + ubuntu), Desktop UI (windows + ubuntu), macOS Core Smoke and Generated output drift all successful and only Dependency policy red, on `error[yanked]` for yoke-derive 0.8.3 - yanked on crates.io at 2026-09-30T13:19:39Z, after the local deny step had passed against an older index. Reached only through yoke <- icu_* <- idna <- url, outside Core and outside the admitted set. Fixed by `cargo update -p yoke-derive --precise 0.8.4` in a successor commit; the gate is 15/15 on that tree and the per-suite counts are unchanged
+  defects_found_at_closure: 3 # E a disabled primary button kept its accent border; F a version pattern quoted into an evidence locator made a run unpersistable for any project using the only MVP version source (ERR-STORAGE-4006); H one build carried two run ids because the CLI read disk facts and the desktop read SQLite facts. Each fixed in product code with a named regression test and re-seen in the shipped window
+  defects_found_by_gate: 1 # I, a test-side race in P2's compare.test.tsx that made the round's first full gate 13/14; diagnosed and fixed by awaiting the row queries with every assertion unchanged
+  not_verified: "Desktop smoke step 30's prior-run re-read through the window: the Release page has no run-id input, so get_gate_run is tested and persists, but was never observed reopening an older record. Surfacing history is P4's page"
+  evidence: P3_VALIDATION/ # four documents, written by this round
   next_stage_after_this_one: P4_bundle # NOT authorized by this prompt; it needs its own architect prompt
 
 p0_execution:

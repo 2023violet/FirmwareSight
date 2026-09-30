@@ -15,9 +15,10 @@ Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctnes
 `P2: PASS / COMPLETE` (Compare, evidence in `P2_VALIDATION/`; the round's own gate results are LOCAL PASS,
 and the pushed head `4a77ea1` is green on remote Run #18 `36648718199`, 7 of 7 jobs — after Run #17 on the
 mid-round commit `c7fc2a3` had gone red and been fixed) ·
-`P3: PASS / COMPLETE` (Release Gate, evidence in `P3_VALIDATION/`; the round's gate numbers are LOCAL
-PASS — its five commits are not on `origin/main`, which is still `32b23aa` green on Run #19
-`36665007523`, so no CI result is claimed for them) ·
+`P3: PASS / COMPLETE` (Release Gate, evidence in `P3_VALIDATION/`; the round's gate numbers were measured
+locally and its closure commits were pushed afterwards — `origin/main` is `219178af`, where remote Run
+`36774472141` concluded `failure` on 6 of 7 jobs green, the single red being `Dependency policy` over a
+crate yanked on crates.io the day of closure and since moved off in `Cargo.lock`) ·
 `G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `active_task: NONE` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `P4: NOT STARTED — needs its own architect prompt` ·

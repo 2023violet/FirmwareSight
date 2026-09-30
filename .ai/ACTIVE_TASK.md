@@ -42,28 +42,36 @@ built-in checks at `01_PRODUCT/01_PRD_MVP.md:66-77`.
 | `P3_VALIDATION/P3_GATE_DESKTOP_SMOKE_REPORT.md` | the release binary in a real Windows window: all 40 §61 steps, the CLI/desktop run-id parity measurement, native dialogs, database handled reversibly |
 | `P3_VALIDATION/P3_GATE_DESIGN_CHECKLIST.md` | `AGENTS.md` 11 / `DESIGN.md` review with the greps and token counts run rather than asserted |
 
-Measured on this machine: `cargo test --workspace` **715 passed / 0 failed / 0 ignored across 42 suites**,
-UI **135 passed** in 6 files, `python scripts/check.py` **15/15**, `cargo fmt --all -- --check` and
+Measured on this machine: `cargo test --workspace` **556 passed / 0 failed / 0 ignored across 28
+executable suites** (an earlier revision of this line said 715 in 42, which summed a gate log where the
+`drift` group re-runs the desktop crate — corrected, not re-scoped), UI **135 passed** in 6 files,
+`python scripts/check.py` **15/15**, `cargo fmt --all -- --check` and
 `cargo clippy --workspace --all-targets --all-features -- -D warnings` clean, `git diff --check` clean,
-`drift` 6/6, `deny/cargo-deny` executed for real, `core-smoke` 3/3. The CLI and the desktop produced the
+`drift` 6/6, `deny/cargo-deny` executed for real — locally green on an index that was already stale, see
+the CI note below — `core-smoke` 3/3. The CLI and the desktop produced the
 same run id — `gate-a64631b287fcb33478e23ac6462dacc80e1a39cac1e321e047d02bb50ff152cc` — for one project,
 one policy and one HEAD. `fwsight gate` exits 0 / 4 / 5 as the policy decides. Baseline stays **v0.6.0**;
 `SCHEMA_VERSION` moved 2 → 3 through additive `0003_gate_history.sql` with v1→v3 and v2→v3 upgrade tests;
 no new third-party package entered the graph beyond what ADR-0027 admitted; no new design token.
 
 `NOT MEASURED`: peak RSS, and no Gate throughput or latency number is claimed anywhere. `NOT RUN`:
-fuzzing, a macOS or Linux window, keyboard-only traversal of the shipped binary, and any CI run over P3's
-own commits. `NOT VERIFIED`: desktop smoke step 30's prior-run re-read *through the window* — the Release
+fuzzing, a macOS or Linux window, keyboard-only traversal of the shipped binary. `NOT VERIFIED`: desktop smoke step 30's prior-run re-read *through the window* — the Release
 page has no run-id input, so `get_gate_run` is tested but was not observed reopening an older record; and
 the gate's own first pass was **13/14** — `frontend/test` failed on a `compare.test.tsx` row query racing
 the table's own `Loading symbol changes…` state (defect I, a test-side race in P2's file, now fixed with
 the assertions unchanged and the gate re-run green). That is recorded rather than smoothed over.
 
-**P3's code is not on the remote.** `origin/main` is still `32b23aa`, whose Run #19 `36665007523` is
-`completed / success` with 7 of 7 jobs, following Run #18 `36648718199` on the P2 implementation tree
-`4a77ea1`. The five P3 commits sit locally on top of it, so every number above is labelled as locally
-measured and no CI result is claimed for them. Pushing is the owner's act, and §67 forbids writing a
-future CI run into the commit that would trigger it.
+**P3's code is on the remote, and its first CI pass was 6 of 7.** The closure commits were pushed after
+§69 was settled: `origin/main` is `219178af195569ec6b13728d84d992ef78df8c04`, and Run
+[`36774472141`](https://github.com/2023violet/FirmwareSight/actions/runs/36774472141) completed
+`failure` with one red job, `Dependency policy`, which reported `error[yanked]` on `yoke-derive 0.8.3` —
+a transitive proc-macro under `url`, yanked on crates.io at 2026-09-30T13:19:39Z, i.e. after this
+machine's `deny` step had passed on an older index. Rust on both platforms, Desktop UI on both
+platforms, the macOS core smoke and the drift check all passed remotely. The lockfile moved to `0.8.4`
+in a successor commit and the gate was re-run 15/15. Before that push, `origin/main` was `32b23aa`,
+whose Run #19 `36665007523` is `completed / success` with 7 of 7 jobs, following Run #18
+`36648718199` on the P2 implementation tree `4a77ea1`. §67 forbade writing a future CI run into the
+commit that would trigger it, so nothing was predicted and this paragraph is a successor record.
 
 Three product defects were found by this round's own validation and fixed in product code: a version
 pattern embedded in an evidence locator made a Gate run unpersistable for any project using the only MVP

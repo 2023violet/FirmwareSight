@@ -40,8 +40,11 @@ sent here to start a **Bundle**, a History page, an installer or anything cloud-
 `NONE`, and P4 Release Bundle is not authorized by anything in this repository.** ADR-0026 removed the
 *research* gate, not the requirement that each stage carry its own architect prompt, so "governance got
 easier" is not a licence to widen scope. P3's own §72 says it plainly: **stop after P3.** The fourth is
-specific to this round's state: P3's five commits are **local**, so nobody should describe a CI run over
-them as evidence — there is none, and the validation pack says so.
+specific to this round's state: P3's commits were **local at closure and pushed after it**, so the pack's
+gate numbers stay locally measured and the remote is a separate, later fact — Run `36774472141` on
+`219178af`, 6 of 7 jobs green, the one red being `Dependency policy` over a crate that crates.io yanked
+the same afternoon. Do not read that red as a build failure and do not read the green six as if they had
+produced the verdict.
 
 A fourth thing to know about any P2 number: **the round measured itself `LOCAL PASS`, and the remote only
 agreed afterwards.** The mid-round push `c7fc2a3` produced Run #17 `36596452341`, `failure` on
@@ -136,12 +139,18 @@ P2      PASS / COMPLETE — P2_COMPARE closed 2026-09-29 item by item against th
         open and is stated, not smoothed: desktop smoke step 27 is NOT VERIFIED in the shipped window
 P3      PASS / COMPLETE — P3_RELEASE_GATE closed 2026-09-30, authorized 2026-09-29 by its own architect
         prompt (v1.1) and by ADR-0027. Forty §69 boxes settled item by item against US-003 and PRD P0-5 in
-        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md: 715 Rust tests in 42 suites, 135 UI tests, 15/15 local
-        gate steps, an 18/18 CLI Gate smoke and all forty §61 desktop steps walked on the shipping binary.
-        LOCAL PASS as measured — the five P3 commits are not on origin/main, which is still 32b23aa, so no
-        CI result is claimed for them. Two sub-items are stated rather than smoothed: desktop step 30's
-        prior-run re-read was never observed through the window, and this round's first full gate came
-        back 13/14 on a P2 test-side race (defect I) that the round diagnosed and fixed before closing
+        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md: 556 Rust tests in 28 executable suites, 135 UI tests,
+        15/15 local gate steps, an 18/18 CLI Gate smoke and all forty §61 desktop steps walked on the
+        shipping binary. The stage closed as LOCAL PASS because the commits were still unpushed; they were
+        then pushed, `origin/main` became 219178af and Run 36774472141 completed failure with 6 of 7 jobs
+        green — every build, test, UI, macOS-smoke and drift job passed and only Dependency policy failed,
+        on `error[yanked]` for `yoke-derive 0.8.3`, a crate yanked on crates.io the same afternoon after
+        the local deny step had already gone green on a stale index. Fixed by `cargo update -p
+        yoke-derive --precise 0.8.4` in a successor commit; the full gate is 15/15 on that tree. Three
+        sub-items are stated rather than smoothed: desktop step 30's prior-run re-read was never observed
+        through the window, this round's first full gate came back 13/14 on a P2 test-side race (defect I)
+        that the round diagnosed and fixed before closing, and the closure report's own Rust test total
+        was a double count that is corrected in §4 of that report rather than replaced silently
 P4      NOT STARTED — the next authorizable stage now that P3 has closed, and authorizing it is the
         architect's act. ADR-0026 removed the research gate, not the requirement of each stage carrying
         its own prompt
@@ -150,11 +159,17 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
 
 ## What the code does and how it is proven
 
-- 715 Rust tests in 42 suites and 135 UI tests in 6 files on one gate: `python scripts/check.py`, which
+- 556 Rust tests in 28 executable suites (plus 6 empty doc-test suites) and 135 UI tests in 6 files on
+  one gate: `python scripts/check.py`, which
   CI calls unchanged — 15 steps on a tree that already has the built frontend, 17 when it builds that too,
   plus 3 under `--only core-smoke`. The v0.6.0 promotion measured 104 / 19; P1-A0 and its correctness
   closure took that to 142 / 31, P1 Analyze added 42 Rust and 27 UI, P2 Compare added 161 Rust and 41 UI,
-  and P3 Release Gate added 370 Rust and 36 UI — by suite: Core's diff module 36 and its Gate module 55,
+  and P3 Release Gate took `cargo test --workspace` from 345 to **556** — 211 Rust and 36 UI. Both of
+  those endpoint figures are single `cargo test --workspace` invocations. P3's own first total was not: a
+  revision of this document said 715 in 42 suites, which is 556 plus the 159 desktop tests that the
+  `drift` group re-runs inside the same gate log. The pre-P3 figures in the chain come from their own
+  validation packs and were not re-derived here. Per-suite, counted once: Core's diff module 36 and its
+  `domain::gate` module 32,
   the P2 fixture pair 12, storage candidate queries 14, storage Gate history 22, the project crate 68 plus
   its 8 config-schema contract tests, the portable-schema contracts 19 plus 13 for Gate output, CLI diff
   15 and its golden 11, CLI Gate 18, desktop Compare IPC 24 and desktop Release Gate 29; `compare.test.tsx`
@@ -217,12 +232,18 @@ P2 smoke gap      desktop step 27, the same-pair lock, is NOT VERIFIED in the sh
                   <select> popup cannot be driven or captured through the available window path. Covered
                   by compare.test.tsx and the IPC tests, recorded PARTIAL: P2_VALIDATION/
                   P2_COMPARE_DESKTOP_SMOKE_REPORT.md
-Remote state      Green at the head. origin/main is 32b23aa on Run #19 36665007523 (success, 7 of 7),
-                  the documentation-and-integrity successor to 4a77ea1, which P2 closed green on Run #18
-                  36648718199. The earlier Run #17 on c7fc2a3 was FAILURE because `**/target/` hid the
-                  target half of the P2 fixture pair (defect E); cfee1e5 fixed it and the head pushes
-                  confirmed it. P1/P2's own gate numbers stay LOCAL PASS because they were measured before
-                  any push - the runs verify the trees, they did not produce the verdicts
+Remote state      Not green at the head, and the reason is a dependency yank, not a build. origin/main is
+                  219178af, P3's integrity-artifact successor, where Run 36774472141 concluded FAILURE with
+                  6 of 7 jobs green: Rust on windows and ubuntu, Desktop UI on windows and ubuntu, the
+                  macOS core smoke and the drift check all passed; only Dependency policy failed, on
+                  `error[yanked]` for `yoke-derive 0.8.3`, yanked on crates.io at 2026-09-30T13:19:39Z after
+                  the local deny step had passed on a stale index. `cargo update -p yoke-derive --precise
+                  0.8.4` follows in a successor commit, with the gate re-run 15/15. The previous head was
+                  32b23aa on Run #19 36665007523 (success, 7 of 7), the documentation-and-integrity
+                  successor to 4a77ea1, which P2 closed green on Run #18 36648718199. The earlier Run #17 on
+                  c7fc2a3 was FAILURE because `**/target/` hid the target half of the P2 fixture pair
+                  (defect E); cfee1e5 fixed it and the head pushes confirmed it. P1/P2/P3's own gate numbers
+                  stay locally measured - the runs verify the trees, they did not produce the verdicts
 Attribution       object / module attribution is Unavailable by evidence, not by omission: ELF symbol
                   values attribute nothing back to a source object, so P2 reports the gap with its reason
                   and ships no Object tab (PRD P0-3 makes it conditional on sufficient evidence)

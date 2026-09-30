@@ -20,11 +20,16 @@ last_updated: "2026-09-30"
   `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; `P2_COMPARE` and `P1_ANALYZE_DETAILS` closed earlier, in
   `P2_VALIDATION/` and `P1_VALIDATION/`.
   **`P4_RELEASE_BUNDLE` is the next authorizable stage and this file does not authorize it.**
-  **The remote is green at the P2 closure head, and P3's code is not on it:** `origin/main` is `32b23aa`
+  **The P3 commits were closed unpushed, then pushed, and CI is now mixed on them:** `origin/main` is
+  `219178af195569ec6b13728d84d992ef78df8c04`, where Run `36774472141` concluded `failure` on one job of
+  seven — `Dependency policy`, reporting `error[yanked]` for `yoke-derive 0.8.3`, a transitive proc-macro
+  that crates.io yanked the same afternoon, after the local `deny` step had passed against an older
+  index. Rust on both platforms, Desktop UI on both platforms, the macOS core smoke and the drift check
+  passed remotely, and the lockfile moved to `0.8.4` in a successor commit. The prior head was `32b23aa`
   on Run #19 `36665007523`, success, 7 of 7 jobs, following Run #18 `36648718199` on the P2 implementation
   tree `4a77ea1` and the mid-round failure Run #17 on `c7fc2a3` — the fixture-pair story in
-  `P2_COMPARE_EXECUTION_REPORT.md` §5.1. The five P3 commits are local, so every P3 number in this
-  baseline is a locally measured number and no CI result is claimed for them.
+  `P2_COMPARE_EXECUTION_REPORT.md` §5.1. Every P3 gate number in this baseline is still a locally measured
+  number; the remote result is recorded separately rather than folded into them.
 
 ## Product/architecture baseline
 

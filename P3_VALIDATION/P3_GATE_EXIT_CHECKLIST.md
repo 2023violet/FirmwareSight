@@ -53,9 +53,9 @@ is not evidence.
 | 34 | baseline growth | ✅ | Smoke step 18: `256 → 376, +120 over the 100 B threshold`, and the growth row's new side equals the budget row's actual bytes |
 | 35 | last-good | ✅ | `Release.tsx:470` — *"The record below is the last run that succeeded (…). It is not the result of the attempt that failed."* — plus `record_note` on a restored record; a refused acceptance leaves the run readable and unchanged |
 | 36 | no path leak | ✅ | Smoke step 39: 147 persisted text fields + 2 CLI documents, 0 hits for the temp root, the smoke marker, any backslash or any drive path; 0 locators outside the six schemes; `projects` stores no root column; storage's CHECK rejects a separator in a locator |
-| 37 | fmt / clippy / tests | ✅ | `cargo fmt --all -- --check` exit 0 · `cargo clippy --workspace --all-targets --all-features -- -D warnings` clean · `cargo test --workspace` **715 passed / 0 failed / 0 ignored, 42 suites** |
+| 37 | fmt / clippy / tests | ✅ | `cargo fmt --all -- --check` exit 0 · `cargo clippy --workspace --all-targets --all-features -- -D warnings` clean · `cargo test --workspace` **556 passed / 0 failed / 0 ignored, 28 executable suites** (+6 empty doc-test suites). An earlier revision of this row said 715 in 42: that summed the gate log, where the `drift` group re-runs the desktop crate, and double-counted its 159 tests. See `P3_GATE_EXECUTION_REPORT.md` §4 |
 | 38 | pnpm gates | ✅ | `install --frozen-lockfile`, `typecheck` (`tsc --noEmit`), `lint` (`eslint .`), `test` (**135 passed, 6 files**), `build` — run from `apps/desktop/ui`, where those scripts live, not from the repository root |
-| 39 | drift / deny / core-smoke / full gate | ✅ | `check.py --only drift` 6/6 · `--only deny` 1/1 · `--only core-smoke` 3/3 · `python scripts/check.py` **15/15** · `git diff --check` exit 0 |
+| 39 | drift / deny / core-smoke / full gate | ✅ | `check.py --only drift` 6/6 · `--only deny` 1/1 · `--only core-smoke` 3/3 · `python scripts/check.py` **15/15** · `git diff --check` exit 0. The `deny` row is a **local** green on a stale index: the first CI pass over the pushed tree (`36774472141`) failed that same step on a crate yanked the day of closure, and `Cargo.lock` moved to `yoke-derive 0.8.4` in response — §4.1 of the execution report |
 | 40 | Windows smoke | ✅ | §61's 40 steps walked on the shipping `custom-protocol` binary in Run 3 over a clean validation DB — `P3_GATE_DESKTOP_SMOKE_REPORT.md` |
 
 ## Where this checklist is not total
@@ -71,9 +71,17 @@ is not evidence.
   P3 surface — but this round's gate is what caught it. The queries are now awaited with the assertions
   unchanged, ten consecutive runs of that file are green where one in five had failed, and the `15/15` in
   box 39 is the re-run after the fix rather than the earlier run restated.
-- **No CI run exists for P3 code.** `origin/main` is still `32b23aa`; the five P3 commits are local.
-  Boxes 1 and 2 are the P2 closure evidence the prompt asks for, and §67 forbids writing a future CI
-  result into the commit that would trigger it.
+- **The closure commits were first recorded as unpushed, then pushed, and CI now says something.** At
+  the time box 39 was written, `origin/main` was still `32b23aa` and no CI run covered P3 code; §67
+  forbids writing a future CI run into the commits that would trigger it, so nothing was predicted.
+  The commits were pushed after closure, `origin/main` became `219178af195569ec6b13728d84d992ef78df8c04`,
+  and run [`36774472141`](https://github.com/2023violet/FirmwareSight/actions/runs/36774472141) completed
+  `failure` with **6 of 7 jobs green**: Rust on both platforms, Desktop UI on both platforms, the macOS
+  core smoke and the generated-output drift check all passed, and only `Dependency policy` failed on
+  `error[yanked]` for `yoke-derive 0.8.3` — a crates.io yank published at 2026-09-30T13:19:39Z, after
+  the local `deny` step had run against an older index. Nothing in this checklist's product evidence
+  depends on that crate's patch level, and the lockfile moved to `0.8.4` in a successor commit. See
+  §4.1 of the execution report for the measurement and the re-run.
 
 ## Verdict
 
