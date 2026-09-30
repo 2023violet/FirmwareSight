@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_IN_PROGRESS_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,14 +27,16 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_IN_PROGRESS_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
   # chain, fixture reproducibility, parser behaviour, non-blocking UI, a data model that can carry
   # Compare and Gate) is unchanged.
   next_authorizable_tracks:
-    - P3_gate_after_P2_compare_closes
+    # P3 is no longer authorizable - it is running. The next stage that could be authorized is P4, and it
+    # still needs its own architect prompt; nothing in this file authorizes it.
+    - P4_bundle_after_P3_gate_closes
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
   g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
@@ -48,6 +50,11 @@ validation:
   # One sub-item stays open and is written there rather than folded away - desktop smoke step 27 was not
   # observable in the shipped window, so it is PARTIAL and covered only by tests.
   p2_status: PASS_COMPLETE
+  # The same rule the P2 round followed: this field reads IN_PROGRESS while the round runs and becomes
+  # PASS_COMPLETE only from the item-by-item US-003 verdict in P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md.
+  # P2 closed PASS/COMPLETE with its remote closure measured green (Run #18 on the implementation tree
+  # 4a77ea1, Run #19 on the closure HEAD 32b23aa), and this round starts from 32b23aa.
+  p3_status: IN_PROGRESS
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
@@ -129,7 +136,14 @@ research:
 # NONE. P3 Release Gate is the next authorizable stage and is NOT authorized by this file — it needs
 # its own architect prompt, and no Gate rule, Release Bundle, History, Settings page, installer,
 # signing, updater, SBOM, cloud, account, telemetry, AI, pricing or commercial work exists yet.
-active_task: NONE
+# P3 then arrived, the same way P2 did: the architect issued "FirmwareSight — P3 Release Gate MVP
+# Implementation, Execution Prompt v1.1 — Architect Reviewed" on 2026-09-29, so the pointer moves again and
+# nothing else moves with it. AGENTS.md 1 still binds - one named stage, no inference from the roadmap.
+# ADR-0027 is this round's architecture decision: a fifth first-party crate, `firmwaresight-project`, holds
+# project config, release-notes evidence, the read-only system Git adapter and the deterministic
+# fingerprints, while Core keeps every Gate semantic and keeps its zero-dependency property.
+# When this round closes, `active_task` returns to NONE and P4 becomes the next authorizable stage only.
+active_task: P3_RELEASE_GATE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -329,6 +343,35 @@ p2_execution:
   not_verified: "Desktop smoke step 27: the same-pair lock was not reached in the shipped window, because a native <select> popup cannot be driven or captured through the available window path. Covered by compare.test.tsx and the IPC tests, and recorded PARTIAL rather than as observed"
   evidence: P2_VALIDATION/ # four documents, written by this round
   next_stage_after_this_one: P3_gate # NOT authorized by this prompt; it needs its own architect prompt
+
+# The stage that followed Compare: the Release Gate. Recorded while the round is RUNNING, so the status
+# fields read IN_PROGRESS and every expected-NO line is a promise this round's prompt makes about its own
+# scope, not a measured result. The measured result lands here only when
+# P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md says so.
+p3_execution:
+  authorized: true
+  prompt: "FirmwareSight - P3 Release Gate MVP Implementation, Execution Prompt v1.1 - Architect Reviewed"
+  prompt_provenance: "supplied inline to the execution environment on 2026-09-29; no source file exists in this repository to hash, so 10_AUDIT/SOURCE_PROMPTS/README.md records the fact without a SHA-256 rather than inventing one"
+  adr: 09_ADR/ADR-0027-project-policy-and-provenance-adapter.md # Accepted: authorizes firmwaresight-project and the read-only Git adapter boundary
+  slice: P3_RELEASE_GATE
+  scope: "firmwaresight.toml v1 with [gate] and [gate.on_unknown], the project-config JSON Schema, a read-only system Git adapter with a bounded timeout, Core Gate semantics over the five frozen states, the ten MVP rules, deterministic run id and policy hash, additive migration 0003 with immutable GateRun and review acceptance, portable gate-results v1 and accepted-reviews v1, fwsight gate, and the third desktop page"
+  acceptance_list: "01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md US-003 Prepare Release, item by item, plus 01_PRODUCT/01_PRD_MVP.md P0-5 Release Gate's ten built-in checks and 06_DELIVERY/08:22's exit evidence (rule matrix + contract tests)"
+  explicitly_not_in_scope: [P4_bundle, release_prepare_command, bundle_chooser, release_manifest_generation, bundle_sha256sums, bundle_release_report, history_page, project_wizard, installer, signing, updater, sbom, cve, ota, flashing, hil, cloud, accounts, telemetry, ai_judge, pricing, commercial_validation]
+  new_crate_expected: true # firmwaresight-project, authorized by ADR-0027; scripts/check.py CORE_PACKAGES must gain it or core-smoke silently stops covering it
+  migration_expected: true # additive 0003_gate_history.sql; SCHEMA_VERSION 2 -> 3; four tests pin version 2 and are updated by name, not deleted
+  new_dependency_expected: "toml 1.1.6+spec-1.1.0 and regex 1.13.1 as direct dependencies; both already resolved in Cargo.lock, so no new package enters the graph. sha2 0.11.0, thiserror 2.0.21, serde 1.0.229 reused at their locked versions. tracing 0.1.44 authorized but installed only if a diagnostic needs it. gix, anyhow and rayon stay banned."
+  new_design_token_expected: false # status.pass / review / review.strong / block / unknown exist at design-tokens v0.2.1; there is no status.na token and N/A is rendered from the existing neutral vocabulary without inventing one
+  new_public_schema_expected: true # schemas/project-config.schema.json (urn:firmwaresight:schema:project-config:1) plus an additive OPTIONAL original_state on accepted-reviews v1; gate-results stays v1, no v2
+  license_gap: OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION # Cargo.toml:17 license = "Proprietary", no LICENSE file at root; AGENTS.md 9 puts a license change in front of a human, and this round changes nothing
+  no_new_baseline: true
+  baseline_version_stays: 0.6.0
+  start_head: 32b23aa78323d315f6643f04c2343f75576d483f
+  start_run_id: 36665007523
+  start_run_conclusion: "success, 7 of 7 jobs" # Run #19 on the closure HEAD; Run #18 36648718199 on 4a77ea1 is the P2 implementation tree the architect sealed
+  tests_at_start: { rust: 345, ui: 99 } # re-measured on this machine before the first write: cargo test --workspace 345 passed / 0 failed / 0 ignored, corepack pnpm test 99 passed in 5 files
+  stage_status: IN_PROGRESS
+  evidence: P3_VALIDATION/ # written by this round
+  next_stage_after_this_one: P4_bundle # NOT authorized by this prompt; it needs its own architect prompt
 
 p0_execution:
   authorized: true

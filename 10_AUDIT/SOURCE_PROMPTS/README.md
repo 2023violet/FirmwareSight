@@ -243,6 +243,55 @@ text with no source file; each says so in its own entry instead of standing for 
   *"P2 Compare is the next authorizable stage, unstarted and unauthorized"* was true at that round's close
   and is superseded by this entry: the prompt arrived the same day, and so did the closure.
 
+## P3 Release Gate MVP Implementation
+
+- Prompt: *FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect
+  Reviewed.* Supplied inline to the execution environment on 2026-09-29, so as with the P1 and P2 prompts
+  there is no stored source file whose SHA-256 this repository can record. The registry convention holds:
+  the fact of the prompt is entered, no hash is invented for bytes this repository never received.
+  Version 1.1 rather than 1.0 because the architect reviewed and re-issued it after measuring the P2
+  remote closure: section 0 names Run #18 on the implementation tree and Run #19 on the successor HEAD as
+  the start gate, and section 1 adjudicates the five findings P1 and P2 left open as non-blocking rather
+  than silently inheriting or silently reopening them.
+- Authority: `ADR-0026` put P1 → P2 → P3 → P4 on engineering grounds while keeping the per-stage
+  prompt requirement. Unlike P1 and P2, **this stage needs an ADR and has one**: `ADR-0027` authorizes a
+  fifth first-party library crate, `crates/firmwaresight-project`, because Gate needs one shared
+  implementation of project-config loading, project-relative evidence reads, the read-only system Git
+  adapter and deterministic Gate input fingerprints - and `AGENTS.md` 2 / 3 forbid putting any of that in
+  Core, Artifact or Storage. The prompt specifies the boundary; the ADR records it with the dependency
+  table, the rejected alternatives and the measured locked versions.
+- Scope: `P3_RELEASE_GATE` - `firmwaresight.toml` v1 frozen at `schema_version = 1` with `[gate]` and
+  `[gate.on_unknown]`, `schemas/project-config.schema.json`, a read-only Git provenance adapter with a
+  bounded timeout, Core Gate semantics over the five states frozen by ADR-0023, the ten PRD P0-5 rules
+  under stable ids, deterministic `gate-<sha256>` run identity, additive migration `0003_gate_history.sql`
+  (`SCHEMA_VERSION` 2 → 3) with immutable GateRun and immutable Review acceptance, portable
+  `gate-results` v1 and backward-compatible `accepted-reviews` v1, `fwsight gate`, and the third desktop
+  page. Acceptance list: the frozen US-003 criteria in
+  `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md:33-40`, the PRD P0-5 ten built-in checks at
+  `01_PRODUCT/01_PRD_MVP.md:66-77`, and `06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md:22`'s exit
+  evidence - rule matrix plus contract tests.
+- What it deliberately does not resolve: the **open-source license gap**. The repository is delivered as
+  open source under ADR-0026 while `Cargo.toml:17` reads `license = "Proprietary"` and no root `LICENSE`
+  file exists; `AGENTS.md` 9 puts a license change in front of a human, and this prompt declines to choose
+  one. Recorded as `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`, non-blocking for engineering,
+  and visible in the completion report.
+- Stop condition, stated by the prompt itself: **stop after P3.** P4 Release Bundle, `release prepare`,
+  a bundle chooser, manifest generation, bundle checksums, a bundle release report, History page, Project
+  Wizard, installer, signing, updater, SBOM, CVE, OTA, flashing, HIL, cloud, accounts, telemetry, AI
+  judge, pricing and commercial validation are all outside it. P3 may produce Gate JSON and accepted
+  review audit records; P4 packages them later.
+- Start state verified before the first write: `HEAD = origin/main =
+  32b23aa78323d315f6643f04c2343f75576d483f`, worktree clean, and Run #19 `36665007523` on that HEAD
+  `completed` / `success` / 7 of 7 jobs, read with
+  `gh run view 36665007523 --repo 2023violet/FirmwareSight`. The sealed P2 implementation tree
+  `4a77ea1` is green on Run #18 `36648718199`, also 7 of 7. `git diff --name-only 4a77ea1 32b23aa` was
+  checked and lists twelve documentation, governance and integrity files - no production source, fixture,
+  schema, migration or configuration file - so the newer HEAD is the same tree for engineering purposes.
+  Start counts re-measured, not inherited: `cargo test --workspace` **345 passed / 0 failed / 0 ignored**,
+  `corepack pnpm test` **99 passed**.
+- Outcome: **`IN_PROGRESS`** as of this entry. No Gate verdict is claimed here; US-003 will be settled
+  item by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` when the round closes.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

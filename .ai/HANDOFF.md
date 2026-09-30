@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-09-29"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate IN_PROGRESS
 
 ## Purpose
 
@@ -22,19 +22,23 @@ rather than a precondition. The engineering round that followed - **`P1_ANALYZE_
 same day: bounded Sections, Symbols and Evidence queries, top contributors, the Evidence Inspector, and
 the `bytes / KiB` switch US-001 requires. Later that day the architect issued
 *FirmwareSight — P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect Reviewed*, and that
-round has finished the same day: **`P2` is `PASS / COMPLETE`** and **`active_task` is `NONE`**. Compare
-reads persisted snapshots, Core owns every diff semantic, and one portable document comes out of the CLI
-and out of the desktop byte-for-byte. `P2_VALIDATION/` holds the four documents and US-002 is checked item
-by item in `P2_COMPARE_EXIT_CHECKLIST.md`.
+round finished the same day: **`P2` is `PASS / COMPLETE`**. Compare reads persisted snapshots, Core owns
+every diff semantic, and one portable document comes out of the CLI and out of the desktop byte-for-byte.
+`P2_VALIDATION/` holds the four documents and US-002 is checked item by item in
+`P2_COMPARE_EXIT_CHECKLIST.md`. The architect then issued
+*FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect Reviewed*, so
+**`active_task` is `P3_RELEASE_GATE` and `P3` is `IN_PROGRESS`** — started, not passed. Its verdict will be
+decided against US-003 in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`, and `ADR-0027` is the architecture
+record that authorizes the fifth crate this stage needs.
 
 Three wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here
 to continue P1 or P2, both are `PASS / COMPLETE` and their acceptance lists are checked item by item in
 `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md` and `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` - there is
-nothing left inside either to do. And if you were sent here to start Gate, Bundle, an installer or anything
-cloud-shaped: **`P3 Release Gate` is the next authorizable stage now that P2 has closed, and it is NOT
-authorized by P2's prompt.** ADR-0026 removed the *research* gate, not the requirement that each stage carry
-its own architect prompt, so "governance got easier" is not a licence to widen scope. P2's own §65 said it
-plainly: **stop after P2.**
+nothing left inside either to do. And if you were sent here to start a **Bundle**, a History page, an
+installer or anything cloud-shaped: **P3 is the live task, and P4 Release Bundle is not authorized by
+P3's prompt.** ADR-0026 removed the *research* gate, not the requirement that each stage carry its own
+architect prompt, so "governance got easier" is not a licence to widen scope. P3's own §72 says it
+plainly: **stop after P3.**
 
 A fourth thing to know about any P2 number: **the round measured itself `LOCAL PASS`, and the remote only
 agreed afterwards.** The mid-round push `c7fc2a3` produced Run #17 `36596452341`, `failure` on
@@ -46,6 +50,13 @@ checkout, not from the authoring directory, and then confirmed on the remote: **
 `4a77ea1` is `success`, 7 of 7 jobs.** Keep the two claims straight anyway - the gate results were
 measured before any push, so the round's verdict is `LOCAL PASS` and #18 is the successor verification of
 the tree that carries it. Full story: `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
+
+A fifth number to know, because it is this round's start fact and it is not a P2 measurement: after the
+owner pushed the P2 closure record, **Run #19 `36665007523` on `32b23aa` concluded `success`, 7 of 7
+jobs** (`gh run view 36665007523 --repo 2023violet/FirmwareSight`). It verifies a documentation and
+integrity successor whose delta over `4a77ea1` touches no production Rust, TypeScript, fixture, schema,
+migration or product behaviour - which is why the architect could seal P2 on `4a77ea1` and still name
+`32b23aa` as the HEAD P3 starts from.
 
 ## Baseline and HEADs
 
@@ -88,6 +99,9 @@ Remote CI Run #17              36596452341  on c7fc2a3  **failure**, 3 of 7 jobs
 P2 fixture + gate fix          cfee1e5 — commits fixtures/elf/p2-diff/target/ (6 files), un-ignores that path, adds `drift/fixtures tracked`; verified from a clean `git archive` checkout
 P2 closing commits             78fd40e (three window defects) · c4f4124 (layout label + two goldens) · cfee1e5 (fixtures + gate) · 14c4f75 (validation + governance) · 4a77ea1 (integrity) — 14 commits from 7a13660
 Remote CI Run #18              36648718199  on 4a77ea1  **success**, 7 of 7 jobs — the head the owner pushed after the round closed; defect E closed on the remote too
+P2 closure record              32b23aa78323d315f6643f04c2343f75576d483f — on origin/main; 12 files, P2_VALIDATION/ + .ai/ + BASELINE.yaml + README/INDEX/prompt registry + SHA256SUMS. `git diff --name-only 4a77ea1 32b23aa` shows no production source, fixture, schema, migration or configuration file
+Remote CI Run #19              36665007523  on 32b23aa  **success**, 7 of 7 jobs — the successor verification, and P3's verified start HEAD
+P3 Release Gate start          32b23aa78323d315f6643f04c2343f75576d483f — HEAD = origin/main, worktree clean, 345 Rust and 99 UI tests re-measured green before the first write; authorized by prompt v1.1 + ADR-0027
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -117,8 +131,12 @@ P2      PASS / COMPLETE — P2_COMPARE closed 2026-09-29 item by item against th
         gate results are LOCAL PASS as measured; the pushed head 4a77ea1 was then verified green by remote
         Run #18 36648718199, 7 of 7 jobs, which closes defect E on the remote as well. One sub-item stays
         open and is stated, not smoothed: desktop smoke step 27 is NOT VERIFIED in the shipped window
-P3 / P4 NOT STARTED — P3 is now the next authorizable stage, and authorizing it is the architect's act.
-        ADR-0026 removed the research gate, not the requirement of its own prompt
+P3      IN_PROGRESS — P3_RELEASE_GATE authorized 2026-09-29 by its own architect prompt (v1.1) and by
+        ADR-0027. **No verdict yet**: US-003 is checked item by item in
+        P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md when the round closes. Start HEAD 32b23aa = origin/main,
+        worktree clean, green on Run #19 36665007523
+P4      NOT STARTED — the next authorizable stage once P3 closes, and authorizing it is the architect's
+        act. ADR-0026 removed the research gate, not the requirement of each stage carrying its own prompt
 Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was withdrawn unexecuted
 ```
 
@@ -186,11 +204,12 @@ P2 smoke gap      desktop step 27, the same-pair lock, is NOT VERIFIED in the sh
                   <select> popup cannot be driven or captured through the available window path. Covered
                   by compare.test.tsx and the IPC tests, recorded PARTIAL: P2_VALIDATION/
                   P2_COMPARE_DESKTOP_SMOKE_REPORT.md
-Remote state      Green at the head, after a red mid-round run. origin/main is 4a77ea1 on Run #18
-                  36648718199 (success, 7 of 7). The earlier Run #17 on c7fc2a3 was FAILURE because
-                  `**/target/` hid the target half of the P2 fixture pair (defect E); cfee1e5 fixed it and
-                  the head push confirmed it. The round's own gate numbers stay LOCAL PASS because they were
-                  measured before any push - the run verifies the tree, it did not produce the verdict
+Remote state      Green at the head. origin/main is 32b23aa on Run #19 36665007523 (success, 7 of 7),
+                  the documentation-and-integrity successor to 4a77ea1, which P2 closed green on Run #18
+                  36648718199. The earlier Run #17 on c7fc2a3 was FAILURE because `**/target/` hid the
+                  target half of the P2 fixture pair (defect E); cfee1e5 fixed it and the head pushes
+                  confirmed it. P1/P2's own gate numbers stay LOCAL PASS because they were measured before
+                  any push - the runs verify the trees, they did not produce the verdicts
 Attribution       object / module attribution is Unavailable by evidence, not by omission: ELF symbol
                   values attribute nothing back to a source object, so P2 reports the gap with its reason
                   and ships no Object tab (PRD P0-3 makes it conditional on sufficient evidence)
@@ -225,18 +244,25 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 7. `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md` — the P1-A0 slice and its safety terms
 8. `04_TECH/14_IPC_DATA_CONTRACTS.md` and `04_TECH/15_STORAGE_DATABASE_BASELINE.md` — the bounded-query
    and schema rules P1 was written against, and the rules any next stage inherits
-9. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md` — the promotion record
-10. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` — what is proven, and how
-11. `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` — decisions already taken
-12. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — the P0-chain runs, including the two failures
-13. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
-14. `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md`, `P1_A0_EXIT_CHECKLIST.md` and
+9. `09_ADR/ADR-0027-project-policy-and-provenance-adapter.md`, `04_TECH/27_GATE_STATE_SEMANTICS.md`,
+   `04_TECH/22_GIT_PROVENANCE_ADAPTER.md`, `04_TECH/08_CONFIG_SPEC.md` and
+   `09_ADR/ADR-0023-gate-five-state-semantics.md` — the shape of the live P3 stage: which crate owns
+   config and Git facts, the five frozen Gate states and their effective severity, the read-only Git
+   boundary, and the draft `firmwaresight.toml` P3 freezes
+10. `P2_VALIDATION/` — the completed P2 round, whose `urn:firmwaresight:schema:diff:1` is now a public
+    compatibility promise that P3's growth rule must reuse rather than recompute
+11. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md` — the promotion record
+12. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md` — what is proven, and how
+13. `P0_TECHNICAL_VALIDATION/P0_IMPLEMENTATION_LOG.md` — decisions already taken
+14. `P0_TECHNICAL_VALIDATION/P0_CI_REPORT.md` — the P0-chain runs, including the two failures
+15. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
+16. `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md`, `P1_A0_EXIT_CHECKLIST.md` and
     `P1_A0_CORRECTNESS_SMOKE_REPORT.md` — the completed slice, and how it was proven
-15. `P1_VALIDATION/` — the completed P1 round: `P1_ANALYZE_EXECUTION_REPORT.md` (what was built, the
+17. `P1_VALIDATION/` — the completed P1 round: `P1_ANALYZE_EXECUTION_REPORT.md` (what was built, the
     defects fixed, the findings reported), `P1_ANALYZE_EXIT_CHECKLIST.md` (US-001 item by item and the
     verdict), `P1_ANALYZE_DESIGN_CHECKLIST.md`, `P1_ANALYZE_DETAILS_SMOKE_REPORT.md` (shipped binary)
-16. `DESIGN.md` + `assets/design-tokens.json` (any UI work)
-17. The V0 track, for a later non-blocking feedback round: `V0_VALIDATION/README.md`, `V0_PLAN.md`,
+18. `DESIGN.md` + `assets/design-tokens.json` (any UI work)
+19. The V0 track, for a later non-blocking feedback round: `V0_VALIDATION/README.md`, `V0_PLAN.md`,
     `V0_VALIDATION/protocol/**`, `V0_VALIDATION/sessions/TEMPLATE.md`,
     `V0_VALIDATION/batch_a/**` including `recruitment_ready/**`, and
     `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
@@ -251,12 +277,20 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 - Intake security shape is fixed by ADR-0025 and `AGENTS.md` 7, and ADR-0026 did not relax it: dialogs
   open Rust-side, the selection is held behind an opaque session-local id, no generic
   filesystem/shell/network capability, no `read_file(path)` or `get_any_path` command, no full path in
-  normal IPC or UI. The same discipline governs the new query commands: three use-case commands, no
-  `run_sql` / `read_table` / `query_any` / `get_database`, no raw SQL and no `rusqlite` type across IPC.
-- No schema change and no migration: real artifacts get an explicit local/default project identity,
-  schema version 2 keeps working, raw artifact bytes stay out of SQLite, `NORMALIZATION_VERSION` stays
-  `p0-normalize-1`. The P1 details are read out of the tables that already exist; a measured need for an
-  index stops the round and comes back as a proposal rather than arriving as migration `0003`.
+  normal IPC or UI. The same discipline governs every command added since: P1's three detail queries,
+  P2's six Compare commands, and P3's five Gate commands (`open_project_config`, `save_project_policy`,
+  `run_release_gate`, `accept_review`, `get_gate_run`) are all use-case oriented, with no `run_sql` /
+  `read_table` / `query_any` / `get_database`, no `read_project_file` / `write_project_file`, no
+  `execute_git`, no raw SQL and no `rusqlite` type across IPC. System Git runs read-only inside
+  `firmwaresight-project` with a bounded timeout; the WebView never gets a shell and never gets the
+  repository root.
+- Schema discipline: P1 and P2 changed nothing (`SCHEMA_VERSION` stayed 2), and **P3 changes it by
+  authorization, not by convenience** — additive migration `0003_gate_history.sql`, version 2 → 3, four
+  new tables, `foreign_keys ON` kept, v1→v3 and v2→v3 upgrade paths tested with rows preserved, a future
+  version still a hard fail. No destructive migration, no Bundle table, no absolute path in any column.
+  Raw artifact bytes still stay out of SQLite and `NORMALIZATION_VERSION` stays `p0-normalize-1`. A
+  measured need for an index outside what the prompt names still stops a round and comes back as a
+  proposal.
 - Payload discipline is now part of the contract: default page size 100, hard maximum 500, enforced in
   Rust, with `rows` / total / next offset returned. The whole symbol table never crosses IPC.
 - Details follow the last-good snapshot. A failed later attempt keeps the summary and the details pointed
@@ -270,13 +304,20 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 - `ADR-0026` relaxed **sequencing**, nothing else. It removed the V0 precondition and re-based G1 on P0;
   it did not authorize cloud, accounts, telemetry, AI, updater, licensing work, or a stage beyond the one
   a prompt names. Each stage still needs its own architect prompt.
-- Four Phase-0 library crates; a fifth needs architecture review plus an ADR.
+- Four Phase-0 library crates were the P0 baseline; **`ADR-0027` adds the fifth**,
+  `crates/firmwaresight-project`, and the architecture review that boundary requires is that ADR. A sixth
+  still needs architecture review plus an ADR. The new crate may not depend on Tauri, SQLite or Tokio,
+  may not implement Gate rule semantics, may not parse firmware artifacts and may not make network calls;
+  `firmwaresight-core` stays the only owner of Gate state, severity and rule identity, and remains
+  headless, synchronous and dependency-free.
 - AGENTS.md §2: no silent baseline change — async-first Core, framework swaps, SQLx, HTTP client,
   wgpu, cloud/auth/telemetry, evidence classes, schema semantics, updater/signing model all need an
   ADR first.
-- No Compare workflow existed when that boundary was written; P2 has since shipped it, and **Gate and
-  Bundle product workflows still do not exist** — they are the authorized shape of P3 and P4, and neither
-  is started here. Still out of scope entirely - installer, NSIS/MSI, AppImage/deb,
+- No Compare workflow existed when that boundary was written; P2 has since shipped it, and **P3 is now
+  building the Gate workflow** — five states, unknown policy, review audit, `fwsight gate`, the third
+  desktop page. **Release Bundle still does not exist and is not started here**: no bundle directory, no
+  `release prepare`, no manifest generation, no bundle checksums, no History page. Still out of scope
+  entirely - installer, NSIS/MSI, AppImage/deb,
   notarization, Authenticode, GitHub Release, tag, updater metadata: v0.6.0 is a baseline promotion, not
   a stable release, and the repository has no tag convention and none was invented.
 - `V0_VALIDATION/**` is research evidence and stays where it is: not deleted by the reset, not edited to
@@ -290,8 +331,9 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
   `DISCOVERY_ONLY` or `EXCLUDED_FROM_FORMAL_N` with its reason rather than counted silently. No synthetic
   participant, no fabricated quote, outcome, timing or count - that rule does not expire with the gate.
 - Engineering rounds resume by finishing the authorized task and stopping; they do not continue into the
-  next stage because it is now sequenced more loosely. `P1` ending did not authorize `P2`, and `P2` ending
-  does not authorize `P3` — each stage needs its own architect prompt.
+  next stage because it is now sequenced more loosely. `P1` ending did not authorize `P2`, `P2` ending did
+  not authorize `P3` — each stage needed its own architect prompt, and it got one — and `P3` ending will
+  not authorize `P4`.
 
 - Re-run the read-only Git preflight before writing, and report start HEADs again; do not trust the
   HEADs recorded in this file.

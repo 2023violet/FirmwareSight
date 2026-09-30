@@ -12,16 +12,18 @@ last_updated: "2026-09-29"
 
 - Date: 2026-09-29
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`NONE`** — `P2_COMPARE` closed `PASS / COMPLETE` on 2026-09-29 under *FirmwareSight —
-  P2 Compare MVP Implementation, Execution Prompt v1.0 — Architect Reviewed*, supplied inline (registered
-  in `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source file reached this
-  repository). Evidence: `P2_VALIDATION/` — four documents, and five defects found by running the
-  product rather than by testing it.
-  `P1_ANALYZE_DETAILS` finished earlier the same day and P1 Analyze is `PASS / COMPLETE` (Sections,
-  Symbols, Evidence Inspector, top contributors, US-001 bytes/KiB switch), recorded in `P1_VALIDATION/`.
-  **`P3` needs its own architect prompt before it starts.** The remote is green at the head: `origin/main`
-  is `4a77ea1` on Run #18 `36648718199`, success, 7 of 7 jobs, after Run #17 on the mid-round commit
-  `c7fc2a3` had gone red — the fixture-pair story in `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
+- Active task: **`P3_RELEASE_GATE`** — authorized on 2026-09-29 by *FirmwareSight — P3 Release Gate MVP
+  Implementation, Execution Prompt v1.1 — Architect Reviewed*, supplied inline (registered in
+  `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source file reached this repository),
+  and by `ADR-0027`, which keeps project policy and Git provenance out of Core. `P2_COMPARE` closed
+  `PASS / COMPLETE` the same day under its own prompt, recorded in `P2_VALIDATION/`; `P1_ANALYZE_DETAILS`
+  finished earlier still, recorded in `P1_VALIDATION/`.
+  **`P3` is `IN_PROGRESS`, not `PASS`** — its verdict is decided item by item against US-003 in
+  `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` when the round closes, and `P4` still needs its own prompt.
+  **The remote is green at the start HEAD:** `origin/main` is `32b23aa` on Run #19 `36665007523`,
+  success, 7 of 7 jobs, following Run #18 `36648718199` on the P2 implementation tree `4a77ea1` and the
+  mid-round failure Run #17 on `c7fc2a3` — the fixture-pair story in
+  `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
 
 ## Product/architecture baseline
 
@@ -30,7 +32,7 @@ validated P0 technical foundation; it does not redefine the product, does not ad
 verb, and does not change MVP scope. Nothing in the frozen baseline was renegotiated to build the
 slice, and nothing was renegotiated to promote it.
 
-Three governance changes are in force now, all decided by the architect rather than by the coding side:
+Four governance changes are in force now, all decided by the architect rather than by the coding side:
 
 - **ADR-0025** supersedes exactly one clause of ADR-0020 (`P1 Product MVP implementation 只有两者都 PASS
   后开始`). After `P0 PASS` the architect may authorize a bounded, reversible Pre-G1 Analyze slice.
@@ -44,15 +46,24 @@ Three governance changes are in force now, all decided by the architect rather t
 - **Design tokens `0.2.0 → 0.2.1`**, adding one numeric semantic (`border.width.hairline = 1`) to close
   the documented P0 gap. No color, spacing, radius, typography, layout, motion, shadow or status value
   changed, and the focus ring keeps its own 2px token.
+- **ADR-0027** (2026-09-29) is P3 prompt §6 written down as an architecture record rather than
+  re-derived in code: a fifth first-party library crate, `firmwaresight-project`, owns
+  `firmwaresight.toml`, project-local release evidence, the read-only system Git adapter and the
+  deterministic Gate input fingerprints, because CLI and Desktop need one implementation of those
+  semantics and Core must stay filesystem-free, Git-process-free and dependency-free. The boundary,
+  the prohibited dependencies and the short admission list were specified by the architect in the
+  prompt; the coding side's role was to record them, measure the locked versions and licenses, and not
+  install anything the requirement does not need. It authorizes no Gate rule semantic outside Core, no
+  artifact parsing inside the adapter, and no network.
 
 ## P0 — Technical Vertical Slice
 
 Status: **`PASS`** · promoted to v0.6.0 by the architect-signed
 *P0 Final Promotion / v0.6.0 Baseline Closure v1.0* · Task at promotion time: **NONE** (recorded as
 `active_task: NONE` in `BASELINE.yaml`; the task live on 2026-09-29 was `P1_ANALYZE_DETAILS`, then after it
-closed the field read `NONE` for a few hours until the P2 prompt arrived the same day — it reads
-`P2_COMPARE` and returned to `NONE` when P2 closed the same day, which changes the pointer and not this
-frozen P0 verdict)
+closed the field read `NONE` for a few hours until the P2 prompt arrived the same day — it read
+`P2_COMPARE`, returned to `NONE` when P2 closed, and reads `P3_RELEASE_GATE` now. Each move changes the
+pointer and not this frozen P0 verdict)
 
 The chain P0 claimed is proven by executed commands, on this machine and on GitHub's runners:
 
@@ -143,9 +154,12 @@ V0: NON_BLOCKING_USER_FEEDBACK_TRACK — 0 of 8 eligible external sessions, an h
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
 P1: PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors, bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB presentation switch. Evidence: P1_VALIDATION/
 P2: PASS / COMPLETE — Compare over persisted snapshots: Core-owned deterministic diff, bounded Compare IPC with a session-local registry, the second desktop page, `fwsight diff`, and portable Diff JSON v1 plus self-contained HTML. Evidence: P2_VALIDATION/. The round's own measurements are LOCAL PASS; the pushed head `4a77ea1` is green on Run #18 `36648718199` (7 of 7), which closes defect E — the fixture half `.gitignore` hid — on the remote too. Open on purpose: desktop smoke step 27 was not observed in the shipped window
-P3 / P4: NOT STARTED — P3 Gate is now the next authorizable stage, and still needs its own architect prompt
+P3: IN_PROGRESS — Release Gate, authorized 2026-09-29 by *P3 Release Gate MVP Implementation, Execution
+Prompt v1.1* and by ADR-0027; no verdict yet
+P4: NOT STARTED — P4 Bundle becomes the next authorizable stage only when P3 closes, and still needs its
+own architect prompt
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: NONE
+Active task: P3_RELEASE_GATE
 Design tokens: v0.2.1
 ```
 
@@ -219,7 +233,7 @@ this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the
 
 ## Next work
 
-**`active_task: NONE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
+**`active_task: P3_RELEASE_GATE`.** `P1_ANALYZE_DETAILS` completed on 2026-09-29 and P1 Analyze is `PASS / COMPLETE`:
 bounded `Sections`, `Symbols` and `Evidence` queries over the snapshot SQLite already stores, three
 use-case IPC commands, top contributors, the Evidence Inspector, and the `bytes / KiB` presentation
 switch that `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Per-item evidence:
@@ -240,6 +254,20 @@ payload across IPC (default limit 100, hard max 500, enforced in Rust), details 
 last-good handle, `Unknown` never rendered as zero, addresses never unit-converted. `AGENTS.md` 2 / 7 /
 11 keep applying in full; `ADR-0026` relaxed research sequencing, not a single technical boundary.
 
+**`P3 Release Gate` is `IN_PROGRESS` on 2026-09-29, under its own architect prompt.** The same prompt
+line that authorized the work authorized a structural change, so it is stated here rather than left to
+be discovered in a diff: P3 adds the fifth first-party library crate (`crates/firmwaresight-project`,
+ADR-0027), the third migration (`0003_gate_history.sql`, `SCHEMA_VERSION` 2 → 3, additive only), the
+first direct dependencies outside the frozen five (`toml` and `regex`, both already in `Cargo.lock`), a
+third top-level desktop page (`Release`), and two CLI exit codes that were unreachable and are now not
+(`4` REVIEW / `5` BLOCK — the surface test asserted `[0, 2, 3, 6]`, and P3 is the stage that changes it
+by name rather than by deleting it), and a new portable contract file
+(`schemas/project-config.schema.json`). It does **not**
+add a design token, does not touch the license metadata, does not create a Bundle table, and does not
+start History. `P3` has no verdict until US-003 is green item by item in
+`P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; the start facts are `32b23aa` = `origin/main` on Run #19
+`36665007523`, success, 7 of 7.
+
 What belongs to the owner and the architect:
 
 1. pushing remains the owner's act. The P2 round pushed twice. The first, mid-round at `c7fc2a3`, produced
@@ -252,14 +280,20 @@ What belongs to the owner and the architect:
    carried P1's `e63afaf` on Run #13 `36556735551`. `origin/main` is now green again. No commit carries the
    run its own push produced: #18 is recorded by the successor document that reports it, and the run this
    document's own push starts belongs to a later one;
-2. whether and when to resume the V0 feedback track with real participants - now a choice rather than a
+3. the **open-source license decision**, which is not P3's to make. `Cargo.toml:17` still reads
+   `license = "Proprietary"` and the repository root still has no `LICENSE` file, while the project is
+   being delivered as open source under ADR-0026; `AGENTS.md` 9 places a license change in front of a
+   human, so the P3 prompt explicitly declines to choose one and the gap is recorded as
+   `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` rather than quietly resolved;
+4. a **separate architect prompt** for P4 Release Bundle, which P3's closure will make authorizable and
+   this file does not authorize. P3's own prompt says STOP AFTER P3, and nothing in P4's scope — a
+   bundle directory, `release prepare`, manifest generation, bundle checksums, a History page — exists
+   or is implied by it;
+5. whether and when to resume the V0 feedback track with real participants - now a choice rather than a
    gate, with the `v0.1.0` instrument still frozen and ready;
-3. a **separate architect prompt** for P3 Release Gate, which P2's closure makes authorizable and this
-   file does not authorize. P2's own prompt said STOP AFTER P2, and nothing in P3's scope - Gate rules,
-   a Release Bundle, History, Settings, an installer - exists or is implied by it;
-4. re-authorizing pricing, paid-tier or pilot work only after MVP, since `ADR-0026` defers it and the
+6. re-authorizing pricing, paid-tier or pilot work only after MVP, since `ADR-0026` defers it and the
    matching prompt was withdrawn before execution;
-5. re-opening the two accepted advisories only on one of their recorded triggers.
+7. re-opening the two accepted advisories only on one of their recorded triggers.
 
 Four items the closure round surfaced and left alone, each with its reason in
 `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md` §9.7: the golden updater no longer reproduces the

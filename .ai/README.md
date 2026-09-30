@@ -15,16 +15,20 @@ Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctnes
 `P2: PASS / COMPLETE` (Compare, evidence in `P2_VALIDATION/`; the round's own gate results are LOCAL PASS,
 and the pushed head `4a77ea1` is green on remote Run #18 `36648718199`, 7 of 7 jobs — after Run #17 on the
 mid-round commit `c7fc2a3` had gone red and been fixed) ·
-`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `active_task: NONE` ·
+`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `active_task: P3_RELEASE_GATE` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
-`P3 / P4: NOT STARTED — each needs its own architect prompt` ·
+`P3: IN_PROGRESS` (Release Gate, its own architect prompt arrived 2026-09-29, with ADR-0027 for the crate
+boundary it needs) ·
+`P4: NOT STARTED — needs its own architect prompt` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 
 ADR-0026 changed **sequencing, not standards**: MVP is built first on engineering grounds, V0 no longer
 gates it, and every technical boundary in `AGENTS.md` 2 / 7 / 11 still applies. Item 6 still binds
 absolutely — **execute only the task `ACTIVE_TASK.md` names, and stop there.** `P2 Compare` ran because
 the architect issued a prompt for it, not because the roadmap listed it next, and its own prompt said
-**stop after P2**; the same rule keeps `P3 Release Gate` unstarted until its own prompt exists.
+**stop after P2**; `P3 Release Gate` is live for exactly the same reason — prompt v1.1 plus `ADR-0027`,
+and nothing more. P3's own §72 says **stop after P3**, which keeps `P4 Release Bundle` unstarted until its
+own prompt exists.
 
 任何 AI 接手本项目时：
 

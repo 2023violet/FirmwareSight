@@ -42,7 +42,12 @@ P2      PASS / COMPLETE — Compare over persisted snapshots: Core-owned determi
         un-ignored that path and added a `drift fixtures tracked` gate step; the head 4a77ea1 was then
         pushed and Run #18 36648718199 is success, 7 of 7 jobs. The round's own gate numbers stay LOCAL
         PASS, because they were measured before any push
-P3 / P4 NOT STARTED — P3 is the next authorizable stage now that P2 has closed, and still needs its own prompt
+P3      IN_PROGRESS — Release Gate, authorized on 2026-09-29 by its own architect prompt (v1.1, supplied
+        inline) and by ADR-0027, which puts project policy and read-only Git provenance in a fifth crate
+        instead of in Core. It starts from HEAD 32b23aa, measured green on remote Run #19 36665007523
+        (success, 7 of 7 jobs). No P3 verdict exists yet — US-003 is its acceptance list and
+        P3_VALIDATION/ is the pack that will carry the evidence
+P4      NOT STARTED — becomes the next authorizable stage only when P3 closes, and still needs its own prompt
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -200,7 +205,7 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `NONE`
+12. `.ai/ACTIVE_TASK.md` — currently `P3_RELEASE_GATE`
 
 ## Batch A recruitment-ready status
 
@@ -235,7 +240,7 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: NONE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
+`active_task: P3_RELEASE_GATE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
 product verb: bounded `Sections`, `Symbols` and `Evidence` queries over the SQLite snapshot that already
 existed, three use-case IPC commands, top contributors, an Evidence Inspector, and the `bytes / KiB`
 presentation switch `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Every mandatory US-001
@@ -252,18 +257,33 @@ and the cross-renderer check found are in the pack beside it, with the fifth —
 ignoring — in `P2_COMPARE_EXECUTION_REPORT.md` §5.1.
 
 The rule that kept P2 unstarted until its prompt arrived still holds for everything after it: looser
-sequencing is not standing authorization, `ADR-0026` removed the research gate and no per-stage prompt
-requirement, so **P3 Release Gate is the next authorizable stage and needs its own prompt** — P2's own
-prompt says stop after P2. If V0 is ever resumed for usability
+sequencing is not standing authorization, `ADR-0026` removed the research gate, not the per-stage prompt
+requirement. So **`P3 Release Gate` is live because prompt v1.1 exists** — and **P4 Release Bundle is the
+next authorizable stage only once P3 closes, and needs its own prompt**: P3's own prompt says stop after
+P3, and it authorizes no bundle, History page, Project Wizard, installer, signing, updater, SBOM, cloud,
+account, telemetry, AI or pricing work. If V0 is ever resumed for usability
 feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
 registers are still there, and no session, quote, timing or count may be invented.
 
+One gap P3 does not close and has no authority to close: the project is delivered as open source under
+ADR-0026, while `Cargo.toml:17` still reads `license = "Proprietary"` and the repository root has no
+`LICENSE` file. `AGENTS.md` 9 places a license change in front of a human, so the round records
+`OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` and changes nothing.
+
 The boundaries P1 worked inside are inherited by whatever comes next, unchanged: no schema migration
-without its own decision (`SCHEMA_VERSION` is 2), no new dependency, no new design token - a genuinely
+without its own decision, no dependency without its own admission, no new design token - a genuinely
 missing token stops a round rather than becoming a magic number - default page size 100 and hard maximum
 500 enforced in Rust, no whole-table payload across IPC, details bound to the last-good `snapshotId`,
 `Unknown` never rendered as zero, and addresses never unit-converted. `ADR-0026` relaxed research
 **sequencing**; it relaxed no technical boundary, and `AGENTS.md` 2 / 7 / 11 still apply in full.
+
+P3 is authorized to move two of those boundaries, and does so **with** the decision that gates them rather
+than around it: `SCHEMA_VERSION` goes 2 → 3 through additive migration `0003_gate_history.sql`, and `toml`
+/ `regex` become direct dependencies of the new `firmwaresight-project` crate — both already resolved in
+`Cargo.lock`, admitted by `ADR-0027`, with `cargo-deny` executed for real and the measured lock delta
+recorded in `P3_VALIDATION/` rather than asserted here. What does not move: no new design token, no whole
+config file or host path across IPC, no generic file, shell or Git command, no `rusqlite` type outside
+storage, and no Gate semantic outside Core.
 
 What P1 left open on purpose, with the reason in each case: `sections.file_offset` and `symbols.address`
 are nullable columns with no reason column, so a reason is lost at write time and closing that needs a

@@ -13,7 +13,7 @@ last_updated: "2026-09-29"
 
 Baseline: `0.6.0` — the P0 Technical Foundation Baseline.
 
-Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 PASS/COMPLETE — the Analyze verb, evidence in P1_VALIDATION/, remote CI Run #13 `36556735551` on `e63afaf` 7 of 7 green · P2 PASS/COMPLETE — Compare, evidence in P2_VALIDATION/; its mid-round push `c7fc2a3` failed remote Run #17 `36596452341` because `.gitignore` hid half of the P2 fixture pair, `cfee1e5` fixed it, and the head `4a77ea1` is green on Run #18 `36648718199` 7 of 7 · P3/P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: NONE`
+Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of 7 green) · Pre-G1 P1-A0 COMPLETE, including its evidence-identity and persistence correctness closure (Runs #9, #10, #11 all 7 of 7 green) · G1 PASS on the P0 basis under ADR-0026 (2026-09-29) · V0 NON_BLOCKING_USER_FEEDBACK_TRACK 0/8, an honest zero that gates no stage · P1 PASS/COMPLETE — the Analyze verb, evidence in P1_VALIDATION/, remote CI Run #13 `36556735551` on `e63afaf` 7 of 7 green · P2 PASS/COMPLETE — Compare, evidence in P2_VALIDATION/; its mid-round push `c7fc2a3` failed remote Run #17 `36596452341` because `.gitignore` hid half of the P2 fixture pair, `cfee1e5` fixed it, and the head `4a77ea1` is green on Run #18 `36648718199` 7 of 7 · P3 IN_PROGRESS — Release Gate, authorized 2026-09-29 by execution prompt v1.1 plus ADR-0027, starting from `32b23aa` green on Run #19 `36665007523`; no verdict yet, evidence will be in P3_VALIDATION/ · P4 NOT STARTED · pricing and commercial research DEFERRED_POST_MVP · active_task: P3_RELEASE_GATE`
 
 ## Primary reading path
 
@@ -21,7 +21,8 @@ Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — `NONE`; it records what closed and that no next stage may be inferred
+5. `.ai/ACTIVE_TASK.md` — `P3_RELEASE_GATE`; the live task, its acceptance list, its boundaries and its
+    stop condition. It authorizes P3 and nothing beyond it
 6. `P0_TECHNICAL_VALIDATION/P0_FINAL_PROMOTION_REPORT.md`
 7. `P0_TECHNICAL_VALIDATION/P0_EXIT_CHECKLIST.md`
 8. `P0_TECHNICAL_VALIDATION/P0_KNOWN_LIMITATIONS.md`
@@ -168,6 +169,7 @@ history, and the nine-entry drift that `0.6.0` closed is described in `.ai/DECIS
 | `09_ADR/ADR-0024-post-mvp-candidate-governance.md` | ADR-0024 — Post-MVP Candidate Governance and Namespace |
 | `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md` | ADR-0025 — Conditional Pre-G1 Analyze Implementation (P1-A0; sequencing partly superseded by ADR-0026) |
 | `09_ADR/ADR-0026-open-source-mvp-first-delivery.md` | ADR-0026 — Open-Source MVP-First Delivery (G1 basis, V0 non-blocking) |
+| `09_ADR/ADR-0027-project-policy-and-provenance-adapter.md` | ADR-0027 — Project Policy and Provenance Adapter Boundary (P3; authorizes `firmwaresight-project`) |
 | `10_AUDIT/00_V0.3_AUDIT_RESOLUTION.md` | v0.3.0 Audit Resolution |
 | `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
 | `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |

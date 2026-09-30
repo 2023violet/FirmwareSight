@@ -719,3 +719,76 @@ it was written and is not rewritten here; this entry records what the owner's pu
   preceded it, and the completion report is unchanged for that reason.
 - **This document's own push starts another run.** Its number belongs to a later record, not to this one,
   and nothing here claims a result for a tree that has not yet run.
+
+# P3 Release Gate — opened 2026-09-29
+
+Authorization: *FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect
+Reviewed*. Supplied inline, so `10_AUDIT/SOURCE_PROMPTS/README.md` records the fact of the prompt without
+a SHA-256 rather than inventing one for bytes this repository never received. Unlike P1 and P2, this stage
+requires an ADR and has one: `ADR-0027`, which is prompt §6 transcribed into
+`09_ADR/ADR-0027-project-policy-and-provenance-adapter.md` with the dependency table measured from the
+lock file. The architect decided the crate boundary; the coding side measured versions, licenses and MSRV
+and installed nothing the requirement did not need.
+
+Decisions taken at activation, before any product source changed:
+
+- **The pointer moved; nothing was concluded.** `active_task` reads `P3_RELEASE_GATE`,
+  `validation.p3_status` reads `IN_PROGRESS`, and `next_authorizable_tracks` now names
+  `P4_bundle_after_P3_gate_closes`. Baseline stays `0.6.0`; no `v0.7.0`.
+- **Run #19 on the closure HEAD is the start fact, Run #18 stays the implementation proof.** Run #19
+  `36665007523` on `32b23aa` and Run #18 `36648718199` on `4a77ea1` are each `completed` / `success`,
+  7 of 7 jobs, read with `gh run view <id> --repo 2023violet/FirmwareSight`. #18 proves the tree the
+  architect sealed as P2 FINAL PASS; #19 proves the latest successor HEAD this round starts from. Run #17
+  remains in history as a real failure.
+- **The §0 delta check found nothing to reconcile.** `origin/main` was exactly `32b23aa` at fetch time,
+  the worktree was clean, and no owner-authored or third-party commit had landed after the P2 closure
+  record, so P3 starts on the sealed HEAD rather than on a newer one.
+- **P3 is the first stage since P0 to move three structural boundaries at once**, and each is named here
+  so a reviewer can find it without reading a diff: a fifth first-party crate (`firmwaresight-project`),
+  a third migration (`0003_gate_history.sql`, `SCHEMA_VERSION` 2 → 3, additive), and the first direct
+  dependencies outside the frozen set (`toml`, `regex`). A fourth is semantic rather than structural:
+  `4` REVIEW and `5` BLOCK become reachable CLI exit codes, where every previous stage ran with them
+  forbidden by an assertion.
+- **Where the new logic lives is the ADR's whole point.** Core owns Gate rule evaluation, five-state
+  semantics, aggregate precedence and rule identity. The new crate owns config loading, canonical policy
+  hashing, project-relative evidence reads, the read-only `git` process and the deterministic run
+  fingerprint. Neither CLI nor Desktop gets its own copy, and none of it goes into Core, Artifact or
+  Storage.
+- **Dependency admission was measured, not assumed.** `toml 1.1.6+spec-1.1.0` and `regex 1.13.1` are
+  already in `Cargo.lock` (read with `cargo tree -i toml@1.1.6` — `tauri-utils 2.10.0`,
+  `cargo_toml 1.0.1`, `embed-resource 3.0.11`), so the crate reuses resolved versions instead of
+  widening the graph. `sha2 0.11.0`, `thiserror 2.0.21` and `serde 1.0.229` are reused at their locked
+  versions. `tracing 0.1.44` is authorized but is not installed unless a real diagnostic needs it.
+  `gix`, `anyhow` and `rayon` stay in `deny.toml`'s ban list.
+- **`accepted-reviews` v1 gets an optional field, not a breaking one.** ADR-0023 requires
+  `original_state` and the shipped schema does not carry it; prompt §35 settles it by adding an OPTIONAL
+  `original_state` enum `["REVIEW"]` while keeping the required list and `additionalProperties: false`
+  intact, so a v1 document written before P3 still validates. `gate-results` stays v1 with no state
+  vocabulary change; `policy_sha256`, `baseline_snapshot_id` and `project_config_schema_version` go
+  through `extensions`.
+- **`run_id` is content, not a clock.** `gate-<SHA-256>` over snapshot ids, canonical policy hash,
+  normalized Git facts and Release Notes path/presence/digest. Absolute project root, `imported_at`,
+  wall clock, pid and UI state are excluded by construction, and the exclusion is tested rather than
+  promised.
+- **The license gap is reported, not fixed.** `Cargo.toml:17` reads `license = "Proprietary"` and there
+  is no root `LICENSE` file; `AGENTS.md` 9 puts a license change in front of a human and the prompt
+  declines to choose one. Recorded as `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`, visible
+  in the completion report, and not a P3 blocker.
+- **`scripts/check.py`'s `CORE_PACKAGES` must gain `firmwaresight-project`.** An omitted workspace member
+  is silently unexamined by the core-smoke group rather than loudly failed, which is the same class of
+  blind spot that let half of P2's fixture pair stay out of the repository.
+- **The Gate smoke subject is a temporary Git project built from the P2 fixture pair.** Prompt §61
+  forbids using the FirmwareSight source repository as a Gate subject: this repo is dirty or tagged by
+  the owner's acts, not by the release being checked, so its Git facts would be about the tool rather
+  than about the firmware.
+- **Five existing assertions will change by name, not by deletion**: `apps/cli/src/main.rs`
+  `unregistered_future_commands_are_still_not_accepted` (drops `gate`, keeps `release` / `watch` /
+  `doctor`) and `exit_code_one_is_never_produced` (gains `4` and `5`, keeps `1` impossible),
+  `apps/desktop/ui/src/intake.test.tsx`'s third-nav-entry and no-Gate-text guards (prompt §43/§60
+  replace them with the Analyze + Compare + Release assertion), and the four storage tests pinning
+  `SCHEMA_VERSION` 2.
+
+Scope guard: this stage stops at the Gate. P4 Bundle, `release prepare`, bundle chooser, manifest
+generation, bundle checksums, History page, Project Wizard, installer, signing, updater, SBOM, cloud,
+accounts, telemetry, AI, pricing and commercial work remain outside it, and no prompt for any of them
+exists.
