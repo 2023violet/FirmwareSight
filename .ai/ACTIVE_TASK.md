@@ -86,6 +86,7 @@ pattern embedded in an evidence locator made a Gate run unpersistable for any pr
 version source; one build produced two run ids across the two surfaces; and a disabled primary button kept
 its accent border. Each has a regression test named in the closure entry of `.ai/DECISIONS.md`.
 
-The license gap deliberately did not close with the stage: `license = "Proprietary"` stands at
-`Cargo.toml:17`, there is no root `LICENSE`, and `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`
+The license gap deliberately did not close with the stage: `license = "Proprietary"` stands in the
+`[workspace.package]` table of the root `Cargo.toml`, there is no root `LICENSE`, and
+`OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`
 remains. `AGENTS.md` 9 puts that decision in front of a human.

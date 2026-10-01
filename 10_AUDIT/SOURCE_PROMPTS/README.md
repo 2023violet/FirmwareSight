@@ -271,7 +271,8 @@ text with no source file; each says so in its own entry instead of standing for 
   `01_PRODUCT/01_PRD_MVP.md:66-77`, and `06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md:22`'s exit
   evidence - rule matrix plus contract tests.
 - What it deliberately does not resolve: the **open-source license gap**. The repository is delivered as
-  open source under ADR-0026 while `Cargo.toml:17` reads `license = "Proprietary"` and no root `LICENSE`
+  open source under ADR-0026 while the root `Cargo.toml`'s `[workspace.package]` table reads
+  `license = "Proprietary"` and no root `LICENSE`
   file exists; `AGENTS.md` 9 puts a license change in front of a human, and this prompt declines to choose
   one. Recorded as `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`, non-blocking for engineering,
   and visible in the completion report.

@@ -545,10 +545,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── gen_p0_fixtures.py
 │   ├── gen_p0_workload.py
 │   ├── gen_p2_fixtures.py
+│   ├── generate_baseline_artifacts.py
 │   ├── generate_design_tokens.py
 │   ├── measure_workloads.py
 │   ├── requirements.txt
-│   └── update_goldens.py
+│   ├── update_goldens.py
+│   └── verify_baseline_artifacts.py
 ├── templates/
 │   ├── ADR_TEMPLATE.md
 │   ├── BUG_REPORT_TEMPLATE.md

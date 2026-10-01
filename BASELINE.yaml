@@ -373,7 +373,7 @@ p3_execution:
   new_dependency_expected: "toml 1.1.6+spec-1.1.0 and regex 1.13.1 as direct dependencies; both already resolved in Cargo.lock, so no new package enters the graph. sha2 0.11.0, thiserror 2.0.21, serde 1.0.229 reused at their locked versions. tracing 0.1.44 authorized but installed only if a diagnostic needs it. gix, anyhow and rayon stay banned."
   new_design_token_expected: false # status.pass / review / review.strong / block / unknown exist at design-tokens v0.2.1; there is no status.na token and N/A is rendered from the existing neutral vocabulary without inventing one
   new_public_schema_expected: true # schemas/project-config.schema.json (urn:firmwaresight:schema:project-config:1) plus an additive OPTIONAL original_state on accepted-reviews v1; gate-results stays v1, no v2
-  license_gap: OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION # Cargo.toml:17 license = "Proprietary", no LICENSE file at root; AGENTS.md 9 puts a license change in front of a human, and this round changes nothing
+  license_gap: OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION # root Cargo.toml [workspace.package] license = "Proprietary", no LICENSE file at root; AGENTS.md 9 puts a license change in front of a human, and this round changes nothing. Cite the key, not a line number: adding firmwaresight-project to the workspace members shifted this value from line 17 to line 18 and every line-number citation written before it went stale
   no_new_baseline: true
   baseline_version_stays: 0.6.0
   start_head: 32b23aa78323d315f6643f04c2343f75576d483f

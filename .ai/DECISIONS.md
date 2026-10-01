@@ -770,7 +770,8 @@ Decisions taken at activation, before any product source changed:
   normalized Git facts and Release Notes path/presence/digest. Absolute project root, `imported_at`,
   wall clock, pid and UI state are excluded by construction, and the exclusion is tested rather than
   promised.
-- **The license gap is reported, not fixed.** `Cargo.toml:17` reads `license = "Proprietary"` and there
+- **The license gap is reported, not fixed.** The root `Cargo.toml`'s `[workspace.package]` table reads
+  `license = "Proprietary"` and there
   is no root `LICENSE` file; `AGENTS.md` 9 puts a license change in front of a human and the prompt
   declines to choose one. Recorded as `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`, visible
   in the completion report, and not a P3 blocker.

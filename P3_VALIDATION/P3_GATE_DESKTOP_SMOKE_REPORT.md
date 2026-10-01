@@ -51,11 +51,13 @@ notes at `docs/RELEASE_NOTES.md`).
 ## How the window was driven
 
 The Qoder browser/computer-use connector was unavailable for this smoke, so input and capture came
-from `target/p3win.ps1`: `PrintWindow(PW_RENDERFULLCONTENT)` for the WebView window,
-`CopyFromScreen` for native dialogs, and `SendInput` with `AttachThreadInput` for keyboard events.
-Click targets were computed from PNG pixels by `target/p3find.py` (colour boxes and measured crops),
-never guessed from prose. Every click was followed by a capture to confirm it landed, and several did not
-land the first time: `Add MAP`, `Accept review`, `Record acceptance`, `Open project config` and the `KiB`
+from a session-only PowerShell driver written under gitignored `target/` (`p3win.ps1`, plus `p3find.py`
+for pixel-derived click targets). **Neither file is part of the delivery and a fresh clone does not
+contain them** — what this record keeps is the technique, which is what makes the steps re-drivable:
+`PrintWindow(PW_RENDERFULLCONTENT)` for the WebView window, `CopyFromScreen` for native dialogs, and
+`SendInput` with `AttachThreadInput` for keyboard events. Click targets were computed from PNG pixels,
+never guessed from prose. Every click was followed by a capture to confirm it landed, and several did
+not land the first time: `Add MAP`, `Accept review`, `Record acceptance`, `Open project config` and the `KiB`
 radio each needed a corrected coordinate (the radio took four attempts before its label was hit), and one
 mis-click on `Choose firmware artifact` had actually registered late, so a second dialog opened on top of
 the first and both had to be dismissed with `Escape` before step 3 could be redone. The visible result, not

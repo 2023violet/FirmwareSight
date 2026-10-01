@@ -287,7 +287,8 @@ feedback, it resumes with real participants or not at all - the `v0.1.0` instrum
 registers are still there, and no session, quote, timing or count may be invented.
 
 One gap P3 does not close and has no authority to close: the project is delivered as open source under
-ADR-0026, while `Cargo.toml:17` still reads `license = "Proprietary"` and the repository root has no
+ADR-0026, while the root `Cargo.toml`'s `[workspace.package]` table still reads
+`license = "Proprietary"` and the repository root has no
 `LICENSE` file. `AGENTS.md` 9 places a license change in front of a human, so the round records
 `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` and changes nothing.
 
