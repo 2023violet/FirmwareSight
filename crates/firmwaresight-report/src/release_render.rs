@@ -106,9 +106,7 @@ h4 {
 /// The `--json` contract for `release-manifest.json`: exactly one JSON document, one trailing newline.
 #[must_use]
 pub fn render_json(manifest: &ReleaseManifestDto) -> String {
-    let mut out = crate::render::to_json(manifest);
-    out.push('\n');
-    out
+    crate::render::document_json(manifest)
 }
 
 /// The `SHA256SUMS` text (§21): `<64 hex><two spaces><relative/path>`, LF endings, sorted
@@ -144,6 +142,10 @@ pub struct CompareSummary<'a> {
     pub top_sections: &'a [Contributor],
     pub top_symbols: &'a [Contributor],
 }
+
+/// How many growth rows the report prints per side. The count is this crate's presentation bound; the
+/// *selection* is Core's, which is why [`CompareSummary`] carries rows rather than a `DiffResult` to sort.
+pub const REPORT_GROWTH_ROWS: usize = 5;
 
 /// Everything `release-report.html` renders, as the portable documents that ship beside it.
 ///

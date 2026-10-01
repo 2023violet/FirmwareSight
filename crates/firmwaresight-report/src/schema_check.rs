@@ -13,7 +13,8 @@
 //! (`firmwaresight-report` for diff, gate-results and accepted-reviews; `firmwaresight-project` for
 //! `firmwaresight.toml`) and integration tests cannot share source across crate boundaries. Prompt §55
 //! asks for this reuse explicitly instead of three copies. It reads nothing: a caller hands in the
-//! schema document it loaded, so this module stays free of the filesystem like the rest of the crate.
+//! schema document it loaded — from [`crate::schemas`], which compiles the authored copies in, or from a
+//! file a test chose to open — so this module stays free of the filesystem like the rest of the crate.
 
 use serde_json::Value;
 

@@ -143,15 +143,12 @@ pub struct ReleaseArtifact {
 
 impl ReleaseArtifact {
     /// The stable word the Gate and the manifest both use for a kind.
+    ///
+    /// [`ArtifactKind::word`] holds the vocabulary; this is the spelling the release documents have always
+    /// used, kept as the name callers know and as the one place the two could drift apart.
     #[must_use]
     pub fn kind_word(kind: ArtifactKind) -> &'static str {
-        match kind {
-            ArtifactKind::Elf => "elf",
-            ArtifactKind::Map => "map",
-            ArtifactKind::Bin => "bin",
-            ArtifactKind::IntelHex => "hex",
-            ArtifactKind::Unknown => "unknown",
-        }
+        kind.word()
     }
 
     #[must_use]

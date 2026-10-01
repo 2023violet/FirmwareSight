@@ -46,6 +46,16 @@ pub fn semantically_equal(left: &str, right: &str) -> bool {
 /// The `--json` contract: exactly one JSON document on stdout, nothing else.
 #[must_use]
 pub fn render_json(value: &AnalyzeResultDto) -> String {
+    document_json(value)
+}
+
+/// The one form a portable document takes on disk or on a stream: compact JSON, one trailing newline.
+///
+/// Every bundle file shares this spelling, because `SHA256SUMS` and the manifest hash these bytes and a
+/// second definition of "the document" would make a bundle half-verifiable. The newline is part of the
+/// payload, so it is written here rather than by whichever caller happens to add it.
+#[must_use]
+pub fn document_json<T: Serialize + ?Sized>(value: &T) -> String {
     let mut out = to_json(value);
     out.push('\n');
     out

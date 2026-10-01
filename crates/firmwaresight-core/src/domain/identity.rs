@@ -120,6 +120,35 @@ pub enum ArtifactKind {
     Unknown,
 }
 
+impl ArtifactKind {
+    /// The stable vocabulary word this kind is written under, in a portable document's `kind` field and in
+    /// a bundle's disambiguated file name.
+    #[must_use]
+    pub const fn word(self) -> &'static str {
+        match self {
+            Self::Elf => "elf",
+            Self::Map => "map",
+            Self::Bin => "bin",
+            Self::IntelHex => "hex",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    /// The kind one vocabulary word names. Reads [`Self::word`] back for the four kinds a release can ship;
+    /// `unknown` has no inverse because a bundle never ships a file whose kind it could not establish, so
+    /// accepting the word would let a reader resolve a claim nothing writes.
+    #[must_use]
+    pub fn from_word(word: &str) -> Option<Self> {
+        match word {
+            "elf" => Some(Self::Elf),
+            "map" => Some(Self::Map),
+            "bin" => Some(Self::Bin),
+            "hex" => Some(Self::IntelHex),
+            _ => None,
+        }
+    }
+}
+
 /// Architecture, kept as domain vocabulary so `object::Architecture` never escapes the
 /// artifact crate.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -227,6 +256,24 @@ mod tests {
         // Uppercase is not the stable representation.
         assert!(Sha256::parse(&"A".repeat(64)).is_err());
         assert!(Sha256::parse(&format!("{}z", "a".repeat(63))).is_err());
+    }
+
+    #[test]
+    fn the_kind_vocabulary_reads_back_for_every_kind_a_release_can_ship() {
+        for kind in [
+            ArtifactKind::Elf,
+            ArtifactKind::Map,
+            ArtifactKind::Bin,
+            ArtifactKind::IntelHex,
+        ] {
+            assert_eq!(ArtifactKind::from_word(kind.word()), Some(kind));
+        }
+        // `unknown` is what a kind-less row is written as, and no bundle ships one, so the word that
+        // would resolve it has to be refused rather than guessed at.
+        assert_eq!(ArtifactKind::Unknown.word(), "unknown");
+        assert_eq!(ArtifactKind::from_word("unknown"), None);
+        assert_eq!(ArtifactKind::from_word(""), None);
+        assert_eq!(ArtifactKind::from_word("ELF"), None);
     }
 
     #[test]

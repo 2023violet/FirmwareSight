@@ -1,5 +1,5 @@
-//! FirmwareSight project boundary: `firmwaresight.toml`, workspace provenance and the deterministic
-//! fingerprints a Gate run is identified by.
+//! FirmwareSight project boundary: `firmwaresight.toml`, workspace provenance, the deterministic
+//! fingerprints a Gate run is identified by, and the Release Bundle's publication engine.
 //!
 //! ADR-0027 authorizes this crate and fixes its edges. It reads the outside world — a config file, a
 //! release-notes file, a read-only `git` process — and hands `firmwaresight-core` plain facts. It never
@@ -10,7 +10,14 @@
 //! firmwaresight.toml ─┐
 //! project files      ─┤ firmwaresight-project      firmwaresight-core
 //! system git (ro)    ─┘ facts + fingerprints  ──▶  rule evaluation  ──▶  GateRun
+//!                            │
+//!                            └──▶ bundle staging ──▶ <bundle-root>/
 //! ```
+//!
+//! The bundle engine is the one part of this crate that writes rather than reads, and it is here for a
+//! reason: `firmwaresight-report` composes the portable bytes, while the CLI and the desktop have to stage,
+//! publish, swap and verify them through *one* engine (prompt §35). A crate that already opens files, runs
+//! Git and owns `sha2` is the only place that engine can live without a sixth crate (§65).
 //!
 //! What this crate must not do, stated because each one has a real temptation behind it: depend on
 //! Tauri, SQLite or Tokio; parse a firmware artifact; implement a Gate rule; build a UI; reach the
@@ -19,6 +26,7 @@
 #![forbid(unsafe_code)]
 #![deny(missing_debug_implementations)]
 
+pub mod bundle;
 pub mod config;
 pub mod error;
 pub mod evidence;
@@ -26,6 +34,10 @@ pub mod fingerprint;
 pub mod git;
 pub mod version;
 
+pub use bundle::{
+    BundleAcceptance, BundleError, BundleOutcome, BundlePlan, BundlePreview, BundleRequest,
+    BundleVerification, FileRole, PlannedFile, is_recognizable_bundle, prepare, verify_bundle,
+};
 pub use config::{
     CONFIG_FILE_NAME, LoadedProject, ProjectConfig, REQUIRED_ARTIFACT_VOCABULARY,
     SUPPORTED_SCHEMA_VERSION, to_gate_policy,

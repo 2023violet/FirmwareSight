@@ -9,18 +9,27 @@ description = "Project policy, read-only Git provenance and deterministic Gate f
 
 # ADR-0027 admits exactly these dependencies and no others. No Tauri, no SQLite, no Tokio, no network:
 # this crate turns the outside world into facts for `firmwaresight-core`, which decides what they mean.
+#
+# P4 adds one edge, and it is first-party: `firmwaresight-report`, whose portable documents this crate
+# stages. P4 prompt §36 places bundle *content* in report and bundle *publication* in the application
+# layer, but §35 also requires the CLI and the desktop to share one staging/swap engine, and a crate that
+# already reads files, runs Git and owns `sha2` is its only legal home — duplicating it in two apps would
+# be the sixth crate in all but name. Recorded in `.ai/DECISIONS.md` ("Two crates share the work"). No new
+# third-party package enters `Cargo.lock`; `report` was already resolved here as a dev-dependency, so the
+# lock moves only in the graph, not in the crates.
 [dependencies]
 firmwaresight-core = { workspace = true }
+firmwaresight-report = { workspace = true }
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive"] }
+# Prompt §44 makes the bundle verifier read `release-manifest.json` back from disk, and §45 verifies a
+# relocated bundle from its own bytes, so this crate needs a JSON reader. The standard library has none, and
+# every alternative (`serde_json::Value` by way of a new parser, a hand-written subset, `toml`'s reader,
+# which is not a JSON dialect) either duplicates `firmwaresight-report`'s existing dependency or re-derives
+# what a document says. Same version `report` already uses, so nothing new enters `Cargo.lock` and no new
+# license enters `deny.toml`; report, storage and both apps already compile this crate into the shipped
+# graph.
+serde_json = "1.0.151"
 sha2 = "0.11.0"
 thiserror = "2.0.21"
 toml = "1.1.6"
-
-[dev-dependencies]
-# The contract test for `schemas/project-config.schema.json` validates a JSON tree, so it needs a JSON
-# serializer, and it reuses `firmwaresight-report`'s dependency-free schema subset rather than a third
-# copy of one (prompt §55). Both are test-only: neither appears in the shipped graph, and both were
-# already resolved in Cargo.lock. No new third-party package enters the lock.
-firmwaresight-report = { workspace = true }
-serde_json = "1.0.151"

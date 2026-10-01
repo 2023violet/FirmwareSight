@@ -7,6 +7,11 @@
 //! - this crate's CLI/DTO projection — a bounded, stable-shaped view of those facts;
 //! - the portable public schemas under `schemas/` — Release Bundle contracts.
 //!
+//! The five portable contracts are compiled into this crate by [`schemas`], so the build that writes a
+//! bundle can verify one anywhere: prompt §44 asks the verifier to prove each document is valid against its
+//! schema, and §45 asks it to do that on a machine holding nothing but the bundle. The authored copies stay
+//! in `schemas/`, and a test compares the two so they cannot diverge.
+//!
 //! The shape emitted by `analyze` is marked `p0-internal`. It is deliberately *not* published as
 //! `release-manifest v1` or any other versioned public contract, because P0 has not earned that
 //! promise yet. The P2 diff export is a different case: it is declared, versioned and contract-
@@ -25,6 +30,7 @@ pub mod release;
 pub mod release_render;
 pub mod render;
 pub mod schema_check;
+pub mod schemas;
 
 pub use analysis::{
     ANALYSIS_SCHEMA_ID, ANALYSIS_SCHEMA_VERSION, AnalysisDocumentDto, PortableArtifactDto,
