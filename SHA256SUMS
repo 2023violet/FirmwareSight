@@ -412,7 +412,7 @@ cc0199aadefb13868715a5e511593920d38ac3626b47b51a3b06a8c7ff974cca  apps/desktop/u
 ed9a47fb1fc23f9b358d2863a079109f73fa73ff649d9ae666017f743c35dffb  apps/desktop/ui/src/ipc/generated/UnknownPolicyDto.ts
 b7e60d64943d99097591cd3658c1169b34b1bb93cc74eaa2205d1e24fecc18f3  apps/desktop/ui/src/ipc/types.ts
 015b1dfc00f7f7e302f5e867c50cec0cb3ccd0a0894e1a1170539494b94e9f7b  apps/desktop/ui/src/main.tsx
-ed64ca9b85074db0b26b39b926759d45d88e215a567583dc7de791056c7dba12  apps/desktop/ui/src/release.test.tsx
+e8b4543a2a4809132beb1c3a78387b4e68e4c9a764fdbb7a3aa32b8389bc70f8  apps/desktop/ui/src/release.test.tsx
 bf1cd350addd18d4cced383c06d8c04a61395beeb07de14025df61d0c01473da  apps/desktop/ui/src/styles/classnames.ts
 df9e9fdf27ccb7c1d8ea052db019e23fd42e1b50f2a90184195e67a74e655073  apps/desktop/ui/src/styles/global.css
 9e79c58b2a528cde3cfefc9618432165281c6a234ba0a99d8e927fe45f6bd39f  apps/desktop/ui/src/styles/tokens.css

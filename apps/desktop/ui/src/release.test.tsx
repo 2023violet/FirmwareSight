@@ -1400,7 +1400,10 @@ describe('Release bundle', () => {
     const replace = await screen.findByRole('button', {
       name: `Replace the existing bundle named ${BUNDLE_FOLDER}`,
     });
-    expect(document.activeElement).toBe(replace);
+    // The button is in the DOM before the effect that focuses it has run, so a synchronous read of
+    // activeElement could still see Export. Wait for the focus itself; it never arrives if the effect
+    // is gone, which is what this test exists to catch.
+    await waitFor(() => expect(document.activeElement).toBe(replace));
     fireEvent.click(screen.getByRole('button', { name: 'Keep it' }));
     await waitFor(() => expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull());
     expect(namedButton('Export bundle')).toBeDefined();
