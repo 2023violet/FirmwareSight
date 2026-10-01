@@ -11,11 +11,12 @@ use firmwaresight_core::domain::identity::Fact;
 use firmwaresight_core::domain::memory::ByteTotal;
 
 /// The schema version this build writes.
-pub const SCHEMA_VERSION: i64 = 3;
+pub const SCHEMA_VERSION: i64 = 4;
 
 const MIGRATION_0001: &str = include_str!("../migrations/0001_initial.sql");
 const MIGRATION_0002: &str = include_str!("../migrations/0002_evidence_keyed_by_build.sql");
 const MIGRATION_0003: &str = include_str!("../migrations/0003_gate_history.sql");
+const MIGRATION_0004: &str = include_str!("../migrations/0004_release_records.sql");
 
 /// Applied in version order, each in its own transaction, so a failed upgrade leaves the previous
 /// schema and every row in it exactly as they were.
@@ -23,6 +24,7 @@ const MIGRATIONS: &[(i64, &str, &str)] = &[
     (1, "0001_initial", MIGRATION_0001),
     (2, "0002_evidence_keyed_by_build", MIGRATION_0002),
     (3, "0003_gate_history", MIGRATION_0003),
+    (4, "0004_release_records", MIGRATION_0004),
 ];
 
 /// Everything the P0 round-trip test compares against the in-memory snapshot.

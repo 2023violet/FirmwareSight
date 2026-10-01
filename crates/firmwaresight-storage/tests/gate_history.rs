@@ -225,11 +225,12 @@ fn is_stable_locator(reference: &str) -> bool {
 }
 
 #[test]
-fn a_fresh_database_carries_the_gate_tables_at_version_three() {
+fn a_fresh_database_carries_the_gate_tables_it_was_migrated_for() {
     let file = TempDb::new("fresh");
     let db = Database::open(file.path()).expect("open applies every migration");
 
-    assert_eq!(SCHEMA_VERSION, 3, "P3 raises the schema to version 3");
+    // P3's promise about migration 0003, re-checked wherever the schema has since reached: the Gate tables
+    // exist and start empty. The version number itself is pinned by P4's own test.
     let version: i64 = db
         .connection()
         .query_row("SELECT MAX(version) FROM schema_migrations", [], |r| {
@@ -237,6 +238,10 @@ fn a_fresh_database_carries_the_gate_tables_at_version_three() {
         })
         .expect("version");
     assert_eq!(version, SCHEMA_VERSION);
+    assert!(
+        version >= 3,
+        "the Gate tables arrive with migration 0003, and this schema is at {version}"
+    );
 
     for table in [
         "gate_runs",
@@ -283,7 +288,10 @@ fn a_version_two_database_gains_the_gate_tables_and_keeps_its_history() {
         .connection()
         .query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r.get(0))
         .expect("count");
-    assert_eq!(recorded, 3, "all three migrations are recorded, once each");
+    assert_eq!(
+        recorded, SCHEMA_VERSION,
+        "every migration is recorded, once each, up to the version this build writes"
+    );
 
     let kept: String = db
         .connection()

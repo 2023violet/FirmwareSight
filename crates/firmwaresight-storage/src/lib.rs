@@ -11,6 +11,7 @@ pub mod db;
 pub mod error;
 pub mod gate;
 pub mod query;
+pub mod release;
 
 pub use db::{BuildSummary, Database, SCHEMA_VERSION};
 pub use error::StorageError;
@@ -31,3 +32,4 @@ pub use query::{
     DEFAULT_QUERY_LIMIT, EvidenceQuery, EvidenceRow, EvidenceSort, MAX_QUERY_LIMIT, Page,
     SectionQuery, SectionRow, SectionSort, SortDir, SymbolQuery, SymbolRow, SymbolSort,
 };
+pub use release::{ReleaseRecordDraft, ReleaseRecordWrite, StoredReleaseRecord};

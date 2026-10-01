@@ -745,16 +745,23 @@ fn the_selection_path_adds_no_schema_migration() {
         firmwaresight_storage::SCHEMA_VERSION,
         "P1-A0 must not move the schema on its own"
     );
-    assert_eq!(version, 3);
-    let migrations: i64 = probe
+    let names: Vec<String> = probe
         .connection()
-        .query_row("SELECT COUNT(*) FROM schema_migrations", [], |row| {
-            row.get(0)
-        })
-        .expect("migration count");
+        .prepare("SELECT name FROM schema_migrations ORDER BY version")
+        .expect("select")
+        .query_map([], |row| row.get(0))
+        .expect("migrations")
+        .map(|row| row.expect("name"))
+        .collect();
     assert_eq!(
-        migrations, 3,
-        "0001, 0002 and P3's 0003; none of them the selection path's"
+        names,
+        vec![
+            "0001_initial".to_owned(),
+            "0002_evidence_keyed_by_build".to_owned(),
+            "0003_gate_history".to_owned(),
+            "0004_release_records".to_owned(),
+        ],
+        "every migration belongs to a named stage, and none of them is the selection path's"
     );
 }
 

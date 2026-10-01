@@ -295,7 +295,6 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
     db.import_snapshot("local-desktop", "Local analyses", &snapshot(true))
         .expect("imports");
 
-    assert_eq!(SCHEMA_VERSION, 3);
     let version: i64 = db
         .connection()
         .query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
@@ -303,7 +302,7 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
         })
         .expect("schema version");
     assert_eq!(
-        version, 3,
+        version, SCHEMA_VERSION,
         "the identity closure must not move the schema on its own"
     );
 
@@ -322,8 +321,10 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
         vec![
             (1, "0001_initial".to_owned()),
             (2, "0002_evidence_keyed_by_build".to_owned()),
-            // 0003 is P3's Gate history. The identity closure wrote none of the three.
+            // 0003 is P3's Gate history and 0004 is P4's release record. The identity closure wrote
+            // neither, which is what this assertion is for: the list grows only when a stage says so.
             (3, "0003_gate_history".to_owned()),
+            (4, "0004_release_records".to_owned()),
         ],
         "every migration belongs to a named stage, and none of them is the identity closure's"
     );

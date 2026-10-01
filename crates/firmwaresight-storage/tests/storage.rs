@@ -525,7 +525,10 @@ fn a_version_one_database_is_upgraded_without_losing_its_evidence() {
         .connection()
         .query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r.get(0))
         .expect("count");
-    assert_eq!(recorded, 3, "all three migrations are recorded, once each");
+    assert_eq!(
+        recorded, SCHEMA_VERSION,
+        "every migration is recorded, once each, up to the version this build writes"
+    );
 
     db.import_snapshot("proj-1", "P0 project", &real_snapshot())
         .expect("the upgraded database accepts a build reusing the old identifier");

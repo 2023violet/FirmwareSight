@@ -191,11 +191,12 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   `arm-none-eabi-gcc`.
 - Deterministic CLI JSON, memory accounting reproduced by hand from `readelf`, a typed ts-rs IPC
   boundary whose drift is checked by regeneration plus `git diff --exit-code`.
-- SQLite via `rusqlite + bundled`, migrations, transactional import, **schema version 3** — migration
-  `0002` rebuilds `evidence` on `(build_id, id)` because version 1 contradicted `04_TECH/15` §4, and
+- SQLite via `rusqlite + bundled`, migrations, transactional import, **schema version 4** — migration
+  `0002` rebuilds `evidence` on `(build_id, id)` because version 1 contradicted `04_TECH/15` §4,
   `0003_gate_history.sql` adds `gate_runs`, `gate_findings`, `gate_finding_evidence` and
-  `accepted_reviews` additively, with the v1→v3 and v2→v3 upgrade paths tested rather than a constant
-  edited to make a test pass.
+  `accepted_reviews` additively, and `0004_release_records.sql` adds the immutable
+  `release_records` index additively, with the v1→v4, v2→v4 and v3→v4 upgrade paths tested rather than a
+  constant edited to make a test pass.
 - A 512 MiB input guard measured from both sides of the boundary; Core/CLI/Desktop parity on the same
   bytes; the desktop window opened and driven for real on the shipping configuration.
 - P1-A0 adds the intake path: a native dialog opens Rust-side, the selection is held behind an opaque
