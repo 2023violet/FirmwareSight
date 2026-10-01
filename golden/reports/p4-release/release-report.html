@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FirmwareSight Release Bundle</title>
+<style>
+:root {
+  --fs-color-bg-canvas: #F7F8FA;
+  --fs-color-bg-surface: #FFFFFF;
+  --fs-color-bg-subtle: #F1F3F5;
+  --fs-color-text-primary: #171A1F;
+  --fs-color-text-secondary: #5D6673;
+  --fs-color-border-default: #D9DEE5;
+  --fs-color-diff-added: #18794E;
+  --fs-color-diff-added-bg: #E7F3EC;
+  --fs-color-diff-removed: #C9372C;
+  --fs-color-diff-removed-bg: #FBECEA;
+  --fs-color-diff-changed: #2563EB;
+  --fs-color-diff-changed-bg: #E9F0FD;
+  --fs-color-status-unknown: #667085;
+  --fs-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --fs-font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --fs-font-size-metadata: 12px;
+  --fs-font-size-body: 13px;
+  --fs-font-size-section: 15px;
+  --fs-font-size-page: 20px;
+  --fs-space-2: 8px;
+  --fs-space-3: 12px;
+  --fs-space-4: 16px;
+  --fs-space-6: 24px;
+  --fs-radius-control: 6px;
+  --fs-radius-panel: 8px;
+  --fs-radius-pill: 999px;
+  --fs-border-width-hairline: 1px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: var(--fs-space-6);
+  background: var(--fs-color-bg-canvas);
+  color: var(--fs-color-text-primary);
+  font-family: var(--fs-font-ui);
+  font-size: var(--fs-font-size-body);
+  line-height: 20px;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 var(--fs-space-2);
+  font-size: var(--fs-font-size-page);
+  line-height: 28px;
+  font-weight: 600;
+}
+
+h2 {
+  margin: var(--fs-space-6) 0 var(--fs-space-3);
+  font-size: var(--fs-font-size-section);
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.brand,
+.meta,
+.empty {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+  margin: 0;
+}
+
+.card {
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  padding: var(--fs-space-4);
+}
+
+.notice {
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  padding: var(--fs-space-3);
+  margin: 0 0 var(--fs-space-2);
+}
+
+.notice ul {
+  margin: var(--fs-space-2) 0 0;
+  padding-left: var(--fs-space-4);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+caption {
+  caption-side: top;
+  text-align: left;
+  padding: 0 0 var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+th,
+td {
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  padding: var(--fs-space-2) var(--fs-space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+  background: var(--fs-color-bg-subtle);
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-family: var(--fs-font-mono);
+  white-space: nowrap;
+}
+
+.mono,
+.sha,
+.locator {
+  font-family: var(--fs-font-mono);
+}
+
+.delta.positive::before {
+  content: "+";
+}
+
+.delta.negative {
+  color: var(--fs-color-diff-removed);
+}
+
+.added {
+  color: var(--fs-color-diff-added);
+  background: var(--fs-color-diff-added-bg);
+}
+
+.removed {
+  color: var(--fs-color-diff-removed);
+  background: var(--fs-color-diff-removed-bg);
+}
+
+.changed {
+  color: var(--fs-color-diff-changed);
+  background: var(--fs-color-diff-changed-bg);
+}
+
+.chip {
+  display: inline-block;
+  padding: 0 var(--fs-space-2);
+  border-radius: var(--fs-radius-pill);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.unknown {
+  color: var(--fs-color-status-unknown);
+}
+
+.side {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--fs-space-2) var(--fs-space-3);
+}
+
+.side dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+.side dd {
+  margin: 0;
+}
+
+footer {
+  margin-top: var(--fs-space-6);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+:root {
+  --fs-color-status-pass: #18794E;
+  --fs-color-status-review: #9A6700;
+  --fs-color-status-block: #C9372C;
+}
+
+.state {
+  font-weight: 600;
+}
+
+.chip.pass {
+  color: var(--fs-color-status-pass);
+  background: var(--fs-color-diff-added-bg);
+}
+
+.chip.review {
+  color: var(--fs-color-status-review);
+  background: var(--fs-color-bg-subtle);
+}
+
+.chip.block {
+  color: var(--fs-color-status-block);
+  background: var(--fs-color-diff-removed-bg);
+}
+
+.chip.unknown {
+  color: var(--fs-color-status-unknown);
+  background: var(--fs-color-bg-subtle);
+}
+
+.chip.na {
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+}
+
+h3 {
+  margin: var(--fs-space-4) 0 var(--fs-space-2);
+  font-size: var(--fs-font-size-body);
+  line-height: 20px;
+  font-weight: 600;
+}
+
+h4 {
+  margin: var(--fs-space-3) 0 var(--fs-space-2);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--fs-color-text-secondary);
+}
+
+.steps {
+  margin: var(--fs-space-2) 0 0;
+  padding-left: var(--fs-space-4);
+}
+
+.steps li {
+  margin: 0 0 var(--fs-space-2);
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Release Bundle</h1>
+<p class="brand">FirmwareSight 0.1.0 &middot; release <span class="mono">release-974f661d3a6def9d7e7393e940e907a3c462710df2d071ad8140fe8894742ab0</span></p>
+<h2>1. Release identity</h2>
+<table>
+<caption>Four different identities, named separately on purpose.</caption>
+<tbody>
+<tr><th>Release id</th><td><span class="mono">release-974f661d3a6def9d7e7393e940e907a3c462710df2d071ad8140fe8894742ab0</span></td></tr>
+<tr><th>Project release version</th><td><span class="mono">1.2.3</span> &mdash; resolved from <span class="mono">release.expected_version</span></td></tr>
+<tr><th>FirmwareSight app version</th><td><span class="mono">0.1.0</span></td></tr>
+<tr><th>Snapshot analyzed</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
+<tr><th>Analysis normalization rule</th><td><span class="mono">p0-normalize-1</span></td></tr>
+<tr><th>Workspace HEAD observed by the Release Gate</th><td><span class="mono">585dafd3eb59592563923818cdfec4e9a370a83b</span></td></tr>
+<tr><th>Workspace tag observed by the Release Gate</th><td><span class="mono">v1.2.3</span></td></tr>
+<tr><th>Workspace dirty observed by the Release Gate</th><td>false</td></tr>
+<tr><td colspan="2" class="meta">These Git facts describe the workspace the Release Gate ran in. They are not evidence about how the shipped bytes were compiled, and no claim of that kind is made here.</td></tr>
+</tbody>
+</table>
+<h2>2. Shipped artifacts</h2>
+<p class="meta">2 file(s) under <span class="mono">artifacts/</span>. The baseline build is never shipped: it exists only to explain the comparison in section 4.</p>
+<table>
+<caption>The bytes this release consists of, in the order the release fingerprint lists them.</caption>
+<thead><tr><th>Bundle path</th><th>Kind</th><th>SHA-256</th><th class="num">Bytes</th></tr></thead>
+<tbody>
+<tr><td class="mono">artifacts/firmware.elf</td><td>elf</td><td class="mono">4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374</td><td class="num">17464</td></tr>
+<tr><td class="mono">artifacts/firmware.map</td><td>map</td><td class="mono">a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</td><td class="num">4664</td></tr>
+</tbody>
+</table>
+<h2>3. Analysis summary</h2>
+<table>
+<caption>What was read off the build, per input file.</caption>
+<thead><tr><th>File</th><th>Format</th><th>Entry point</th><th>Build id</th></tr></thead>
+<tbody>
+<tr><td class="mono">firmware.elf</td><td>Arm 32-bit little &middot; <span class="mono">elf</span></td><td><span class="mono">0x8000049</span></td><td><span class="unknown">no .note.gnu.build-id section is present</span></td></tr>
+<tr><td class="mono">firmware.map</td><td>Unknown unknown-bit unknown &middot; <span class="mono">map</span></td><td><span class="unknown">a linker MAP records addresses, not an entry point</span></td><td><span class="unknown">a linker MAP carries no build-id</span></td></tr>
+</tbody>
+</table>
+<h3>Memory budgets</h3>
+<table>
+<caption>Absence is printed as absence. A budget that is not a number was not measured, and is never shown as zero.</caption>
+<tbody>
+<tr><th>Nonvolatile / load image</th><td>376 bytes <span class="meta">(exact)</span></td></tr>
+<tr><th>Runtime RAM</th><td>76 bytes <span class="meta">(exact)</span></td></tr>
+<tr><th>Accounting rule</th><td><span class="mono">adr-0021-dual-budget</span></td></tr>
+<tr><th>Layout source</th><td><span class="mono">map</span></td></tr>
+<tr><th>Weakest evidence basis</th><td>map-memory-configuration+elf-load</td></tr>
+<tr><th>Admissible for a hard block</th><td>true</td></tr>
+<tr><th>Device metadata held out of both budgets</th><td>4294 bytes</td></tr>
+</tbody>
+</table>
+<h3>Coverage of this build</h3>
+<table>
+<tbody>
+<tr><th>Rows carried in the analysis document</th><td>19 section(s), 52 symbol(s), 11 evidence record(s)</td></tr>
+<tr><th>ELF support</th><td><span class="mono">supported</span></td></tr>
+<tr><th>Sections</th><td><span class="mono">available</span></td></tr>
+<tr><th>Symbols</th><td><span class="mono">available</span></td></tr>
+<tr><th>Debug info</th><td><span class="mono">available</span></td></tr>
+<tr><th>MAP companion</th><td><span class="mono">provided</span></td></tr>
+<tr><th>Object attribution</th><td><span class="mono">available</span></td></tr>
+<tr><th>Git facts</th><td><span class="mono">unknown</span></td></tr>
+</tbody>
+</table>
+<h2>4. Compare summary</h2>
+<table>
+<caption>Totals moved between the two builds. The full row-by-row comparison is in <span class="mono">diff.json</span>.</caption>
+<tbody>
+<tr><th>Base (old) snapshot</th><td><span class="mono">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e</span></td></tr>
+<tr><th>Target (new) snapshot</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
+<tr><th>Nonvolatile / load image</th><td>256 bytes → 376 bytes &middot; delta +120 <span class="meta">(exact)</span></td></tr>
+<tr><th>Runtime RAM</th><td>8 bytes → 76 bytes &middot; delta +68 <span class="meta">(exact)</span></td></tr>
+<tr><th>Comparability of the pair</th><td>exact</td></tr>
+<tr><th>Rows that differ</th><td>sections: 1 added, 1 removed, 16 changed, 0 unpaired &middot; symbols: 38 added, 33 removed, 5 changed, 67 unpaired</td></tr>
+<tr><th>Identical, so left out of the tables</th><td>2 section(s), 9 symbol(s)</td></tr>
+</tbody>
+</table>
+<h3>Top growth, as Core ranked it</h3>
+<h4>Top section growth</h4>
+<table>
+<thead><tr><th class="num">Delta</th><th>Row</th><th class="num">Bytes</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td class="num mono">+221</td><td class="mono">.debug_loclists</td><td class="num">414</td><td>Changed</td></tr>
+<tr><td class="num mono">+112</td><td class="mono">.debug_info</td><td class="num">910</td><td>Changed</td></tr>
+<tr><td class="num mono">+107</td><td class="mono">.debug_line</td><td class="num">421</td><td>Changed</td></tr>
+<tr><td class="num mono">+88</td><td class="mono">.text</td><td class="num">212</td><td>Changed</td></tr>
+<tr><td class="num mono">+80</td><td class="mono">.symtab</td><td class="num">848</td><td>Changed</td></tr>
+</tbody>
+</table>
+<h4>Top symbol growth</h4>
+<table>
+<thead><tr><th class="num">Delta</th><th>Row</th><th class="num">Bytes</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td class="num mono">+42</td><td class="mono">mqtt_task</td><td class="num">46</td><td>Changed</td></tr>
+<tr><td class="num mono">+16</td><td class="mono">payload_extra</td><td class="num">20</td><td>Changed</td></tr>
+</tbody>
+</table>
+<p class="meta">The complete comparison ships as <span class="mono">diff.json</span> under schema <span class="mono">urn:firmwaresight:schema:diff:1</span> version 1.</p>
+<h2>5. Release Gate</h2>
+<p class="meta"><span class="chip pass">✓ <span class="state">PASS</span></span> &mdash; the disposition that made this bundle possible. A bundle is written only for a <span class="state">PASS</span> after accepted reviews; a <span class="state">REVIEW</span> or a <span class="state">BLOCK</span> produces no release, and an evidence gap never becomes a review.</p>
+<table>
+<tbody>
+<tr><th>Run id</th><td><span class="mono">gate-a17e9861ce643da5e7061ac349793f80d1be87736ad52b2daf3433dc8cb8bc26</span></td></tr>
+<tr><th>Snapshot</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
+<tr><th>Baseline</th><td><span class="mono">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e</span></td></tr>
+<tr><th>Policy digest</th><td><span class="mono">b87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98</span></td></tr>
+<tr><th>Project config schema</th><td><span class="mono">1</span></td></tr>
+<tr><th>Severity before reviews</th><td><span class="chip pass">✓ <span class="state">PASS</span></span></td></tr>
+<tr><th>Severity after accepted reviews</th><td><span class="chip pass">✓ <span class="state">PASS</span></span></td></tr>
+</tbody>
+</table>
+<h3>Findings by state</h3>
+<table>
+<caption>Core's counts for this run, carried rather than recounted.</caption>
+<thead><tr><th>State</th><th class="num">Count</th></tr></thead>
+<tbody>
+<tr><td><span class="chip block">✕ <span class="state">BLOCK</span></span></td><td class="num">0</td></tr>
+<tr><td><span class="chip review">▲ <span class="state">REVIEW</span></span></td><td class="num">0</td></tr>
+<tr><td><span class="chip unknown">? <span class="state">UNKNOWN</span></span></td><td class="num">0</td></tr>
+<tr><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td class="num">8</td></tr>
+<tr><td><span class="chip na">– <span class="state">N/A</span></span></td><td class="num">2</td></tr>
+</tbody>
+</table>
+<h3>All findings</h3>
+<table>
+<caption>In the order a release owner reads them: what blocks, what needs a decision, what is unknown, what passed. Every finding of the run is listed, not a truncated top list.</caption>
+<thead><tr><th>Rule</th><th>State</th><th>Effective severity</th><th>Finding</th><th>Evidence</th><th>Next step</th></tr></thead>
+<tbody>
+<tr><td class="mono">git.clean</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Workspace has no uncommitted changes at Gate evaluation time.</td><td><span class="locator">git:status</span> &middot; <span class="locator">git:head</span></td><td>none recorded</td></tr>
+<tr><td class="mono">release.version_matches_policy</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Workspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared release version.</td><td><span class="locator">policy:version.source</span> &middot; <span class="locator">policy:version.pattern</span> &middot; <span class="locator">git:exact-tag=v1.2.3</span> &middot; <span class="locator">policy:release.expected_version</span></td><td>none recorded</td></tr>
+<tr><td class="mono">artifacts.required</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Every required artifact kind is present in the snapshot (elf, map).</td><td><span class="locator">policy:artifacts.required=elf,map</span> &middot; <span class="locator">artifact:elf:4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374</span> &middot; <span class="locator">artifact:map:a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td><td>none recorded</td></tr>
+<tr><td class="mono">artifacts.hashes</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>All 2 snapshot artifact(s) carry a SHA-256 digest.</td><td><span class="locator">artifact:elf:4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374</span> &middot; <span class="locator">artifact:map:a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span> &middot; <span class="locator">policy:artifacts.hashes</span></td><td>none recorded</td></tr>
+<tr><td class="mono">memory.flash_budget</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Nonvolatile footprint 376 B is within the 512 B budget (136 B headroom).</td><td><span class="locator">policy:memory.flash_budget=512</span> &middot; <span class="locator">evidence:ev-memory-nonvolatile_image_footprint_bytes</span></td><td>none recorded</td></tr>
+<tr><td class="mono">memory.ram_budget</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Runtime RAM footprint 76 B is within the 256 B budget (180 B headroom).</td><td><span class="locator">policy:memory.ram_budget=256</span> &middot; <span class="locator">evidence:ev-memory-runtime_ram_footprint_bytes</span></td><td>none recorded</td></tr>
+<tr><td class="mono">diff.growth</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Growth against the baseline stays within every configured threshold.</td><td><span class="locator">policy:diff.flash_growth_review_bytes=200</span> &middot; <span class="locator">diff:snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e:snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6:nonvolatile</span></td><td>none recorded</td></tr>
+<tr><td class="mono">release.notes</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Release Notes `docs/RELEASE_NOTES.md` is present.</td><td><span class="locator">policy:release.require_release_notes</span> &middot; <span class="locator">file:docs/RELEASE_NOTES.md</span> &middot; <span class="locator">file:docs/RELEASE_NOTES.md#sha256=d547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d</span></td><td>none recorded</td></tr>
+<tr><td class="mono">release.commit_matches_expected</td><td><span class="chip na">– <span class="state">N/A</span></span></td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td>No `release.expected_commit` is declared for this release.</td><td><span class="locator">policy:release.expected_commit</span></td><td>none recorded</td></tr>
+<tr><td class="mono">evidence.unknown_review</td><td><span class="chip na">– <span class="state">N/A</span></span></td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td>`gate.unknown_evidence_review_count` is not configured.</td><td><span class="locator">policy:gate.unknown_evidence_review_count</span></td><td>none recorded</td></tr>
+</tbody>
+</table>
+<h2>6. Accepted reviews</h2>
+<p class="empty">No review was accepted for this run, so the disposition in section 5 is the one Core computed with nothing set aside. An empty list is a fact, not a missing export.</p>
+<h2>7. Release notes</h2>
+<table>
+<tbody>
+<tr><th>Included</th><td>yes, as <span class="mono">release-notes.md</span></td></tr>
+<tr><th>SHA-256 of the shipped copy</th><td><span class="mono">d547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d</span></td></tr>
+<tr><th>Bytes</th><td>151</td></tr>
+<tr><td colspan="2" class="meta">The notes ship as their own file and are not reproduced inside this report. Markdown a reader wrote is never parsed, rewritten or embedded as raw HTML by the bundle, which is what keeps this document free of markup a note could carry.</td></tr>
+</tbody>
+</table>
+<h2>8. Bundle integrity</h2>
+<p class="meta">Two layers of SHA-256 lists cover this bundle. <span class="mono">SHA256SUMS</span> hashes every payload file except itself and the manifest. <span class="mono">release-manifest.json</span> hashes every file except itself, that list included.</p>
+<table>
+<caption>Every file a digest can be named for here. This report is payload: it is written before both index files, so it cannot print their digests, or its own.</caption>
+<thead><tr><th>Bundle path</th><th>SHA-256</th><th class="num">Bytes</th></tr></thead>
+<tbody>
+<tr><td class="mono">accepted-reviews.json</td><td class="mono">50afd7fab31bbd69f5fb91a5357f3128544e76696b5e3562081acd58e23e0076</td><td class="num">170</td></tr>
+<tr><td class="mono">analysis.json</td><td class="mono">1d80b90cf8ebb91c4f19efa64480726370919283c575deaded44470005f0977d</td><td class="num">26961</td></tr>
+<tr><td class="mono">artifacts/firmware.elf</td><td class="mono">4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374</td><td class="num">17464</td></tr>
+<tr><td class="mono">artifacts/firmware.map</td><td class="mono">a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</td><td class="num">4664</td></tr>
+<tr><td class="mono">diff.json</td><td class="mono">1930cdb6a098c67456297ec321910315d21aeb3ce79ef7264fcc4037e148242a</td><td class="num">64355</td></tr>
+<tr><td class="mono">gate-results.json</td><td class="mono">278a1a63c5cd81f86319f9393762a17de8ad69d374fa52649ab403738d86ba23</td><td class="num">4803</td></tr>
+<tr><td class="mono">release-notes.md</td><td class="mono">d547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d</td><td class="num">151</td></tr>
+<tr><td class="mono">release-report.html</td><td colspan="2" class="meta">indexed by <span class="mono">release-manifest.json</span>, which is written after this report</td></tr>
+<tr><td class="mono">SHA256SUMS</td><td colspan="2" class="meta">indexed by <span class="mono">release-manifest.json</span>, which is written after this report</td></tr>
+<tr><td class="mono">release-manifest.json</td><td colspan="2" class="meta">indexed by <span class="mono">release-manifest.json</span>, which is written after this report</td></tr>
+</tbody>
+</table>
+<h3>The self-reference rule</h3>
+<table>
+<tbody>
+<tr><th><span class="mono">SHA256SUMS</span> covers</th><td>every bundle file except itself and the manifest</td></tr>
+<tr><th><span class="mono">SHA256SUMS</span> excludes</th><td><span class="mono">SHA256SUMS</span>, <span class="mono">release-manifest.json</span></td></tr>
+<tr><th><span class="mono">release-manifest.json</span> covers</th><td>every bundle file except itself, SHA256SUMS included</td></tr>
+<tr><th><span class="mono">release-manifest.json</span> excludes</th><td><span class="mono">release-manifest.json</span></td></tr>
+<tr><td colspan="2" class="meta">A file cannot contain its own cryptographic hash without a fixed-point scheme, so no self-digest is faked: <span class="mono">self_digest_written</span> is false. no file carries its own digest; SHA256SUMS hashes the payload, release-manifest.json hashes the payload plus SHA256SUMS</td></tr>
+</tbody>
+</table>
+<h3>Verifying this bundle without FirmwareSight</h3>
+<p class="meta">Every file here is a plain file. Any SHA-256 tool and any text editor is enough. The check below proves that the bytes match the lists &mdash; an integrity and consistency statement about the bundle as written. It says nothing about who wrote it, and nothing in this bundle is a signature.</p>
+<ol class="steps">
+<li>List the directory. It must contain exactly the files <span class="mono">release-manifest.json</span> indexes, plus that manifest itself, and no temporary or hidden file.</li>
+<li>Recompute the SHA-256 of every file named in <span class="mono">SHA256SUMS</span> and compare it with the digest on that line. On a POSIX host one command does the whole list: <span class="mono">sha256sum -c SHA256SUMS</span>.</li>
+<li>On Windows, <span class="mono">Get-FileHash -Algorithm SHA256 &lt;path&gt;</span> prints the same digest in upper case; lower-case it before comparing, because both lists are written in lowercase hex.</li>
+<li>Compare every line of <span class="mono">SHA256SUMS</span> with the entry of the same path in the <span class="mono">files[]</span> array of <span class="mono">release-manifest.json</span>. Digests and sizes must agree, and the manifest must additionally carry an entry for <span class="mono">SHA256SUMS</span> itself.</li>
+<li>Confirm that neither list contains a blank digest, an all-zero digest, or the digest of the file it sits in. There should be none of those, and looking for them is what makes the rule in the table above checkable rather than a claim.</li>
+<li>Open <span class="mono">analysis.json</span>, <span class="mono">gate-results.json</span> and <span class="mono">accepted-reviews.json</span> as plain JSON. Each names the schema it is an instance of, and the manifest's <span class="mono">extensions</span> block states which schema majors this bundle was written against.</li>
+</ol>
+<h2>9. Known capability limits of this release</h2>
+<p class="meta">What the inputs of this build did not allow FirmwareSight to establish. A limit is stated as a limit instead of being left as an empty cell.</p>
+<table>
+<caption>Capability reporting, taken from the analysis document in this bundle.</caption>
+<thead><tr><th>Capability</th><th>Reported</th><th>What that means for this release</th></tr></thead>
+<tbody>
+<tr><td>Git facts</td><td class="mono">unknown</td><td>This capability is reported at less than full coverage by the analysis document in this bundle.</td></tr>
+</tbody>
+</table>
+<div class="notice"><p><strong>Object and module attribution</strong></p>
+<p class="meta">the persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build</p></div>
+<div class="notice"><p><strong>Comparison warnings</strong></p>
+<ul>
+<li><span class="mono">SYMBOL-AMBIGUOUS</span> &mdash; 67 symbol row(s) repeat a name, kind and binding combination on one or both sides and were left unpaired; a row position is not an identity</li>
+</ul>
+</div>
+<footer>Deterministic export: no timestamp, no scripts, no network requests. Written by FirmwareSight 0.1.0 over the documents in this bundle.</footer>
+</main>
+</body>
+</html>

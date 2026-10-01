@@ -1,0 +1,30 @@
+schema_version = 1
+
+# The release subject for P4's bundle tests, goldens and smokes. It is a policy for the committed
+# P2 fixture pair (`fixtures/elf/p2-diff/{base,target}`), whose measured figures are 376 B of
+# non-volatile image and 76 B of runtime RAM in the target build against 256 B and 8 B in the base.
+# The budgets and the growth threshold below are set around those numbers, so every memory rule and
+# the growth rule answers with a figure rather than declining to answer.
+
+[project]
+name = "brake-node"
+
+[artifacts]
+required = ["elf", "map"]
+
+[memory]
+flash_budget = 512
+ram_budget = 256
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = true
+require_release_notes = true
+release_notes_path = "docs/RELEASE_NOTES.md"
+expected_version = "1.2.3"
+
+[diff]
+flash_growth_review_bytes = 200

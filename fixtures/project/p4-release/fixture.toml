@@ -1,0 +1,43 @@
+# Provenance record for the committed P4 release-project fixture. Hand-authored, not generated:
+# nothing here is a build output, so there is no rebuild script to name.
+
+fixture_id = "p4-release"
+purpose = "Release Bundle fixture: one project folder a release owner could really ship - a policy, and the Release Notes the policy names. Used with the committed P2 Compare pair so a bundle holds a real analysis, a real diff and a Gate result that answers with figures."
+license = "Written for this project; no third-party code copied"
+authored_on = "2026-10-01"
+
+[pair]
+base = "fixtures/elf/p2-diff/base"
+target = "fixtures/elf/p2-diff/target"
+measured = "target 376 B non-volatile / 76 B runtime RAM against base 256 B / 8 B, both exact and MAP-backed"
+
+[expectations]
+# What the Gate answers for this folder and this pair. The disposition is the fixture's whole point:
+# a bundle is written only for PASS (prompt section 8), so a change to any figure below moves it.
+disposition = "PASS"
+memory_rules = "flash_budget and ram_budget both PASS with headroom"
+growth_rule = "diff.growth PASSes at a 200 B threshold because the non-volatile delta is 120 B"
+notes_rule = "release.notes PASSes on docs/RELEASE_NOTES.md"
+provenance_rules = "git.clean and release.version_matches_policy PASS in a pinned temporary workspace"
+unanswered = "release.commit_matches_expected and the RAM growth threshold are N/A: neither key is configured"
+
+[workspace]
+# A release subject is never this repository (prompt section 47): FirmwareSight's own tree is dirty
+# or clean for reasons that have nothing to do with a release. A test or a smoke copies these two
+# files into a throwaway folder, commits them, and tags the commit. The five facts below are pinned
+# so the commit hash - and therefore the release id and every digest in the bundle - is the same on
+# every machine, which is what lets the bundle be a golden.
+tag = "v1.2.3"
+commit_message = "release candidate"
+author_name = "Release Owner"
+author_email = "release@example.invalid"
+commit_date = "2026-09-30T07:00:00+00:00"
+
+[[known_limitations]]
+description = "the policy yields PASS with no accepted review, so this fixture alone cannot show accepted-reviews.json holding an entry; the REVIEW variant is made by lowering flash_growth_review_bytes below 120"
+
+[[files]]
+path = "firmwaresight.toml"
+
+[[files]]
+path = "docs/RELEASE_NOTES.md"

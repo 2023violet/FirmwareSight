@@ -138,6 +138,24 @@
       "sha256": "2db5643ac2e87e7788ec4f2d90576a8d6eb952f709addf487f03eb7a41e162c7",
       "fixture": "malformed",
       "purpose": "negative-input-regression"
+    },
+    {
+      "path": "fixtures/project/p4-release/docs/RELEASE_NOTES.md",
+      "sha256": "d547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d",
+      "fixture": "p4-release",
+      "purpose": "p4-release-project"
+    },
+    {
+      "path": "fixtures/project/p4-release/firmwaresight.toml",
+      "sha256": "a461fb4b08998d715d9042c4ffe6dab071a32485f4ad1b6efc43caa75acd0717",
+      "fixture": "p4-release",
+      "purpose": "p4-release-project"
+    },
+    {
+      "path": "fixtures/project/p4-release/fixture.toml",
+      "sha256": "ab0fe65f8036e0475eb775d1c63753bf18f3bd39b765f900eb915fdcbd54810c",
+      "fixture": "p4-release",
+      "purpose": "fixture-support"
     }
   ]
 }

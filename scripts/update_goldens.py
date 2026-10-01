@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -46,6 +47,31 @@ DIFF_PAIR = {
     "old_map": "fixtures/elf/p2-diff/base/firmware.map",
     "new": "fixtures/elf/p2-diff/target/firmware.elf",
     "new_map": "fixtures/elf/p2-diff/target/firmware.map",
+}
+
+# The P4 golden bundle (prompt section 46): one release subject built from the committed project fixture
+# and the P2 pair, published by the real `release prepare`. Every document the bundle holds is recorded
+# except the two artifact copies, whose bytes the fixture manifest already pins.
+P4_PROJECT_FIXTURE = "fixtures/project/p4-release"
+P4_BUNDLE_DOCS = (
+    "SHA256SUMS",
+    "accepted-reviews.json",
+    "analysis.json",
+    "diff.json",
+    "gate-results.json",
+    "release-manifest.json",
+    "release-notes.md",
+    "release-report.html",
+)
+# The commit is part of the release's identity, so it must be the same commit everywhere. Left to the
+# machine's clock and identity, the manifest's `git_commit` would move on every run and take the release
+# id, the digests and the golden with it.
+P4_COMMIT = {
+    "name": "Release Owner",
+    "email": "release@example.invalid",
+    "date": "2026-09-30T07:00:00+00:00",
+    "message": "release candidate",
+    "tag": "v1.2.3",
 }
 
 
@@ -130,6 +156,90 @@ def diff_html() -> str:
     if not scratch.exists():
         raise SystemExit("diff --html exited 0 without writing the requested file")
     return scratch.read_text(encoding="utf-8")
+
+
+def release_subject() -> Path:
+    """A throwaway release subject: the P4 project fixture, committed and tagged with pinned facts.
+
+    FirmwareSight's own repository is never the subject (prompt section 47); it is dirty or clean for
+    reasons that have nothing to do with a release. The two artifact sides are copied in as well, so the
+    subject's source paths point at this scratch folder and a portability check can remove them.
+    """
+    if shutil.which("git") is None:
+        raise SystemExit("git is not on PATH; the P4 bundle golden needs a real workspace to cut from")
+    scratch = ROOT / "target" / "update_goldens-p4"
+    if scratch.exists():
+        shutil.rmtree(scratch)
+    project = scratch / "project"
+    (project / "docs").mkdir(parents=True)
+    fixture = ROOT / P4_PROJECT_FIXTURE
+    for relative in ("firmwaresight.toml", "docs/RELEASE_NOTES.md"):
+        source = fixture / relative
+        # The fixture's bytes are its identity: the notes' digest reaches the manifest, so a checkout
+        # that turned LF into CRLF would silently change the release.
+        if b"\r" in source.read_bytes():
+            raise SystemExit(f"{relative} carries a CR byte, so its hash is not reproducible")
+        shutil.copyfile(source, project / relative)
+
+    environment = dict(
+        os.environ,
+        GIT_AUTHOR_DATE=P4_COMMIT["date"],
+        GIT_COMMITTER_DATE=P4_COMMIT["date"],
+    )
+    for arguments in (
+        ["init", "-q"],
+        ["add", "-A"],
+        ["-c", f"user.name={P4_COMMIT['name']}", "-c", f"user.email={P4_COMMIT['email']}",
+         "commit", "-q", "-m", P4_COMMIT["message"]],
+        ["tag", P4_COMMIT["tag"]],
+    ):
+        completed = subprocess.run(
+            ["git", *arguments], cwd=project, env=environment, capture_output=True, text=True, check=False
+        )
+        if completed.returncode != 0:
+            raise SystemExit(f"`git {' '.join(arguments)}` failed: {completed.stderr}")
+    return project
+
+
+def p4_bundle_documents() -> dict[str, str]:
+    """Every document the shipped `release prepare` writes, read back as the bytes it wrote."""
+    project = release_subject()
+    scratch = project.parent
+    # The leaf name is what the bundle ships the artifact under (§5), so the two sides keep their own
+    # directory rather than being flattened into one folder with a renamed file.
+    staged: dict[str, str] = {}
+    for role, relative in (
+        ("artifact", DIFF_PAIR["new"]),
+        ("artifact_map", DIFF_PAIR["new_map"]),
+        ("baseline", DIFF_PAIR["old"]),
+        ("baseline_map", DIFF_PAIR["old_map"]),
+    ):
+        source = ROOT / relative
+        folder = scratch / "source" / ("target" if role.startswith("artifact") else "base")
+        folder.mkdir(parents=True, exist_ok=True)
+        copy = folder / source.name
+        shutil.copyfile(source, copy)
+        staged[role] = str(copy)
+    out = scratch / "out"
+    argv = [
+        cargo(), "run", "-q", "-p", "fwsight", "--", "release", "prepare",
+        "--project", str(project),
+        "--artifact", staged["artifact"],
+        "--map", staged["artifact_map"],
+        "--baseline", staged["baseline"],
+        "--baseline-map", staged["baseline_map"],
+        "--out", str(out),
+    ]
+    completed = subprocess.run(argv, cwd=ROOT, capture_output=True, text=True, check=False)
+    if completed.returncode != 0:
+        raise SystemExit(
+            f"release prepare failed (exit {completed.returncode}):\n{completed.stdout}\n{completed.stderr}"
+        )
+    bundles = [entry for entry in out.iterdir() if entry.is_dir()]
+    if len(bundles) != 1:
+        raise SystemExit(f"one release writes one bundle directory, found {len(bundles)}")
+    bundle = bundles[0]
+    return {name: (bundle / name).read_text(encoding="utf-8") for name in P4_BUNDLE_DOCS}
 
 
 def pretty(document: dict[str, Any]) -> str:
@@ -236,10 +346,27 @@ def main(argv: list[str]) -> int:
         )
     )
 
+    # The P4 bundle: each document exactly as the shipped binary wrote it, because a digest was taken
+    # over those bytes. Nothing here is re-indented or re-ordered - a reformatted golden would no
+    # longer be the file `SHA256SUMS` records.
+    for name, text in p4_bundle_documents().items():
+        path = ROOT / "golden" / "reports" / "p4-release" / name
+        if not path.exists():
+            targets.append((path, text, ["(new file)"]))
+        elif path.suffix == ".json":
+            targets.append(
+                (path, text, describe(json.loads(path.read_text(encoding="utf-8")), json.loads(text)))
+            )
+        else:
+            targets.append((path, text, describe_text(path.read_text(encoding="utf-8"), text)))
+
     total = 0
     for path, text, diff in targets:
         previous = path.read_text(encoding="utf-8") if path.exists() else None
-        if previous is not None and matches(previous, text, path.suffix):
+        # A bundle document is compared byte for byte; the older goldens are compared by content,
+        # because their sorted-key layout is a convenience and not the property under test.
+        exact = path.is_relative_to(ROOT / "golden" / "reports" / "p4-release")
+        if previous is not None and (previous == text if exact else matches(previous, text, path.suffix)):
             print(f"unchanged  {path.relative_to(ROOT)}")
             continue
         total += 1
