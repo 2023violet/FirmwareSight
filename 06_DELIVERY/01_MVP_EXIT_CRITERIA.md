@@ -159,10 +159,11 @@ V0 Workflow Prototype     — NON_BLOCKING_USER_FEEDBACK_TRACK since ADR-0026 (2
 P0 Technical Vertical Slice — PASS, frozen at baseline 0.6.0
 G1 = P0 PASS               — basis changed 2026-09-29 by ADR-0026; before that date this file read `G1 = V0 PASS + P0 PASS`
 P1 Analyzer                — PASS / COMPLETE (2026-09-29); evidence in P1_VALIDATION/
-P2 Compare
-P3 Release Gate
-P4 Release Bundle
-G2 Product MVP Candidate
+P2 Compare                 — PASS / COMPLETE (2026-09-29); evidence in P2_VALIDATION/
+P3 Release Gate            — PASS / COMPLETE (2026-09-30); evidence in P3_VALIDATION/
+P4 Release Bundle          — PASS / COMPLETE (2026-10-01); evidence in P4_VALIDATION/
+G2 Product MVP Candidate   — READY_FOR_ENGINEERING_GATE_REVIEW since 2026-10-01; the closure audit is the
+                              architect's round
 V1 Own-artifact External Validation
 P5 Productization
 B1 Private Beta

@@ -377,6 +377,13 @@ text with no source file; each says so in its own entry instead of standing for 
   Start counts re-measured, not inherited: `cargo test --workspace` **556 passed / 0 failed / 0 ignored**,
   `corepack pnpm test` **135 passed in 6 files** — which matches the prompt's §0 figures, and confirms the
   retired `715` was not reintroduced.
+- Closure: **executed and closed `PASS / COMPLETE` on 2026-10-01.** The item-by-item US-004 verdict is
+  `P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md` (sixty-one boxes), the shipped-window result over all fifty
+  §59 steps is `P4_BUNDLE_DESKTOP_SMOKE_REPORT.md`, and `G2` was written only as
+  `READY_FOR_ENGINEERING_GATE_REVIEW`. Closing counts on the final tree: `cargo test --workspace`
+  **769 passed / 0 failed** in 41 executable suites, `corepack pnpm test` **155 passed in 6 files**; the
+  final implementation head `e799f2f` is green on Run `36872456446` at 7 of 7 jobs, and `active_task`
+  returned to `NONE` with baseline still `0.6.0`.
 
 ## Supersession note on the V0 Batch A activation entry
 

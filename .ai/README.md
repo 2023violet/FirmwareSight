@@ -20,9 +20,11 @@ measured locally and its closure commits were pushed afterwards — the first of
 `36774472141` on `219178af`, concluded `failure` on 6 of 7 jobs green, the single red being `Dependency
 policy` over a crate yanked on crates.io the day of closure and since moved off in `Cargo.lock`; later P3
 heads came back 7 of 7, and no further P3 documentation-only successor will be written) ·
-`P4: IN_PROGRESS` (Release Bundle, opened 2026-09-30) ·
-`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `G2: NOT_REACHED` ·
-`active_task: P4_RELEASE_BUNDLE` ·
+`P4: PASS / COMPLETE` (Release Bundle, opened 2026-09-30 and closed 2026-10-01, evidence in
+`P4_VALIDATION/`; the final implementation head `e799f2f` green on Run `36872456446` at 7 of 7, and the two
+closure heads green at 7 of 7 as read live) ·
+`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `G2: READY_FOR_ENGINEERING_GATE_REVIEW` ·
+`active_task: NONE` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 
@@ -31,11 +33,11 @@ gates it, and every technical boundary in `AGENTS.md` 2 / 7 / 11 still applies. 
 absolutely — **execute only the task `ACTIVE_TASK.md` names, and stop there.** `P2 Compare` ran because
 the architect issued a prompt for it, not because the roadmap listed it next, and its own prompt said
 **stop after P2**; `P3 Release Gate` ran for exactly the same reason — prompt v1.1 plus `ADR-0027`, and
-nothing more — and its prompt said **stop after P3**. `P4 Release Bundle` is live on the same rule and no
-further: prompt v1.0, delivered as a file and hashed into `10_AUDIT/SOURCE_PROMPTS/`, with no new ADR
-because no technology baseline moves. P4's own §78 says **stop after P4**, which keeps the G2 closure
-audit, every History / installer / signing / updater / SBOM / cloud / account / telemetry / AI / pricing
-idea and any `v0.7.0` unstarted until the architect issues something for them.
+nothing more — and its prompt said **stop after P3**. `P4 Release Bundle` ran on the same rule and no further: prompt v1.0, delivered as a file and hashed into
+`10_AUDIT/SOURCE_PROMPTS/`, with no new ADR because no technology baseline moves — and it closed
+`PASS / COMPLETE` on 2026-10-01, returning the pointer to `NONE`. P4's own §78 said **stop after P4**,
+which keeps the G2 closure audit, every History / installer / signing / updater / SBOM / cloud / account /
+telemetry / AI / pricing idea and any `v0.7.0` unstarted until the architect issues something for them.
 
 任何 AI 接手本项目时：
 

@@ -27,20 +27,21 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_IN_PROGRESS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_PASS_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
   # chain, fixture reproducibility, parser behaviour, non-blocking UI, a data model that can carry
   # Compare and Gate) is unchanged.
   next_authorizable_tracks:
-    # P4 became the live task on 2026-09-30 under its own architect prompt, so it is no longer
-    # "authorizable" - it is running. What is authorizable next is the G2 closure audit, and P4's own
-    # prompt forbids this round from claiming it: the only end state P4 may write is
-    # G2 = READY_FOR_ENGINEERING_GATE_REVIEW. Nothing in this file authorizes that audit, and no P5,
-    # V1, B1, RC1 or GA1 work, no History page, installer, signing, updater, SBOM, cloud, account,
-    # telemetry, AI or pricing exists or is implied by what is listed here.
-    - G2_engineering_closure_audit_after_P4_closes
+    # P4 ran from 2026-09-30 under its own architect prompt and closed PASS / COMPLETE on 2026-10-01,
+    # so the MVP product line is complete. What is authorizable next is the G2 closure audit, which
+    # P4's own prompt forbade that round from claiming - the only end state P4 wrote is
+    # G2 = READY_FOR_ENGINEERING_GATE_REVIEW - and which opens only by an architect prompt of its own.
+    # Nothing in this file authorizes it, and no P5, V1, B1, RC1 or GA1 work, no History page,
+    # installer, signing, updater, SBOM, cloud, account, telemetry, AI or pricing exists or is
+    # implied by what is listed here.
+    - G2_engineering_closure_audit
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
   g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
@@ -64,13 +65,13 @@ validation:
   # a crate yanked on crates.io the day of closure, and now moved off in Cargo.lock. The pack's numbers
   # stay locally measured; p3_execution.ci_coverage carries what the remote said.
   p3_status: PASS_COMPLETE
-  # The same rule again, from the P4 prompt §5: this field reads IN_PROGRESS while the round runs and
-  # becomes PASS_COMPLETE only from the item-by-item US-004 verdict in
-  # P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md, with G2 written as READY_FOR_ENGINEERING_GATE_REVIEW and
-  # never as PASS. It is IN_PROGRESS now, because the architect issued
-  # "FirmwareSight - P4 Release Bundle MVP Implementation, Execution Prompt v1.0 - Architect Reviewed"
-  # and no verdict has been measured yet.
-  p4_status: IN_PROGRESS
+  # The same rule again, from the P4 prompt §5: this field read IN_PROGRESS while the round ran and
+  # became PASS_COMPLETE only from the item-by-item US-004 verdict in
+  # P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md - sixty-one boxes, each settled by a command, a named
+  # test or a numbered smoke step - with G2 written as READY_FOR_ENGINEERING_GATE_REVIEW and never as
+  # PASS. That verdict exists as of 2026-10-01, so the field moves; the MVP product line is complete
+  # and the pointer in .ai/ACTIVE_TASK.md returns to NONE.
+  p4_status: PASS_COMPLETE
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.

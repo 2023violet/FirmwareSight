@@ -58,17 +58,18 @@ P3      PASS / COMPLETE — Release Gate, authorized on 2026-09-29 by its own ar
         assertions unchanged, the fix proved by mutation, and Run 36783457030 on 02e8a81 then green on
         7 of 7 jobs — as was the documentation-only successor f66a93d on Run 36784382005, the last run
         recorded here
-P4      IN_PROGRESS — Release Bundle, opened 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
-        Implementation, Execution Prompt v1.0 — Architect Reviewed*. It is the last core product-implementation
-        stage of the ADR-0026 line: assemble the trusted Analyze + Compare + Gate + accepted-Reviews result,
-        the selected current artifacts and the Release Notes into a portable, independently readable,
-        hash-verifiable, host-path-free directory that never overwrites without an explicit confirmation.
-        Start fact measured before the first write: HEAD = origin/main = 323afad, one commit ahead of the
-        ba5e59e the prompt's §0 names (the delta moves no product source, no fixture, no schema and no
-        migration), green on remote Run 36810689645 at 7 of 7 jobs; start counts 556 Rust and 135 UI,
-        re-measured rather than inherited. No verdict yet.
-G2      NOT_REACHED — the only statement P4 may write about it is READY_FOR_ENGINEERING_GATE_REVIEW; the
-        whole-MVP engineering closure audit is the architect's own round
+P4      PASS / COMPLETE — Release Bundle, opened 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
+        Implementation, Execution Prompt v1.0 — Architect Reviewed* and closed 2026-10-01, the last core
+        product-implementation stage of the ADR-0026 line: it assembles the trusted Analyze + Compare +
+        Gate + accepted-Reviews result, the selected current artifacts and the Release Notes into a
+        portable, independently readable, hash-verifiable, host-path-free directory that never
+        overwrites without an explicit confirmation. Start fact measured before the first write:
+        HEAD = origin/main = 323afad, green on remote Run 36810689645 at 7 of 7 jobs; start counts 556
+        Rust and 135 UI. Verdict item by item in P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md; the fifty
+        §59 steps of the shipped-window smoke in P4_BUNDLE_DESKTOP_SMOKE_REPORT.md; the final
+        implementation head e799f2f green on Run 36872456446, 7 of 7 jobs
+G2      READY_FOR_ENGINEERING_GATE_REVIEW — the only statement P4 was permitted to write about it; the
+        whole-MVP engineering closure audit is the architect's own round and no file here authorizes it
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -94,14 +95,17 @@ cargo run -q --bin fwsight -- analyze fixtures/elf/p0-dual-region/firmware.elf \
 ```
 
 **556 Rust tests and 135 UI tests on the tree P4 starts from**, re-measured on 2026-09-30 with one
-`cargo test --workspace` and one `corepack pnpm test` before the first write. The chain that produced them:
+`cargo test --workspace` and one `corepack pnpm test` before the first write; **769 Rust tests in 41
+executable suites and 155 UI tests in 6 files on the tree P4 closed on**, re-measured the same way on
+2026-10-01. The chain that produced them:
 104 and 19 at the v0.6.0 promotion, 142 and 31 after the P1-A0 slice and its correctness closure, 184 and 58
-when P1 Analyze closed, 345 and 99 when P2 Compare closed. A Rust total must come from ONE invocation: an
+when P1 Analyze closed, 345 and 99 when P2 Compare closed, 556 and 135 when P3 Release Gate closed, and
+769 and 155 when P4 Release Bundle closed. A Rust total must come from ONE invocation: an
 earlier P3 revision read 715 in 42 suites, because summing a whole-gate log counts the desktop crate twice
 (`drift` re-runs it after the workspace test step). Measurement status of every claim is in
 `P0_TECHNICAL_VALIDATION/`, starting from `P0_EXIT_CHECKLIST.md`, in `P1_A0_VALIDATION/` for the intake
-slice, in `P1_VALIDATION/` for the rest of Analyze, in `P2_VALIDATION/` for Compare and in
-`P3_VALIDATION/` for the Gate.
+slice, in `P1_VALIDATION/` for the rest of Analyze, in `P2_VALIDATION/` for Compare, in
+`P3_VALIDATION/` for the Gate and in `P4_VALIDATION/` for the Bundle.
 
 ## What v0.6.0 does not change
 
@@ -231,7 +235,8 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `P4_RELEASE_BUNDLE`
+12. `.ai/ACTIVE_TASK.md` — currently `NONE`; P4 closed on 2026-10-01 and the next authorizable act is the
+    G2 engineering closure audit, which nothing in this repository authorizes
 
 ## Batch A recruitment-ready status
 
@@ -266,8 +271,9 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: P4_RELEASE_BUNDLE`**, opened on 2026-09-30 by its own architect prompt. The paragraphs below
-are the running narrative of how the pointer got here, so each one keeps the words its own round wrote.
+**`active_task: NONE`** — P4 Release Bundle closed `PASS / COMPLETE` on 2026-10-01, so no stage is live
+and nothing may be started from this file. The paragraphs below are the running narrative of how the
+pointer got here and back to empty, so each one keeps the words its own round wrote.
 
 *(Recorded at the time as `active_task: NONE`.)* `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the
 Analyze verb is one whole
@@ -296,15 +302,28 @@ and one HEAD. US-003 and PRD P0-5 are checked item by item in
 found — a version pattern quoted into an evidence locator, one build carrying two run ids, and a disabled
 button keeping its accent border — are in that pack with the test that pins each.
 
+**`P4 Release Bundle` closed `PASS / COMPLETE` on 2026-10-01, under its own architect prompt.** One verb,
+`Bundle`, over results the earlier stages had already computed and stored: a release plan — id, version,
+ten-file list with digests — assembled before any byte is written; a staged copy verified against its own
+`SHA256SUMS` and manifest; publish by rename; replacement only under an explicit confirmation and only of a
+destination this engine wrote, with rollback if the swap fails; and a `release_records` row written after
+the bytes, never before. US-004 and PRD P0-6 are checked item by item in
+`P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md`; the fifty §59 steps of the shipped-window smoke, the 23-ok CLI
+smoke and the two independent readers (64/64 with schemas, 59/59 relocated with project, artifacts and
+database all unavailable) are in the pack beside it. The boundaries held: Core stayed headless and
+filesystem-free, no sixth crate and no new dependency entered, no host path crossed IPC or entered a
+composed document, and the only clock a bundle carries is the moment a named person accepted a review.
+
 The rule that kept P2 unstarted until its prompt arrived still holds for everything after it: looser
 sequencing is not standing authorization, `ADR-0026` removed the research gate, not the per-stage prompt
 requirement. That rule held for `P4 Release Bundle` exactly as it held for P2 and P3: P3's own prompt said
 **stop after P3** and authorized no bundle, History page, Project Wizard, installer, signing, updater,
 SBOM, cloud, account, telemetry, AI or pricing work, so P4 sat unstarted until the architect issued
 *FirmwareSight — P4 Release Bundle MVP Implementation, Execution Prompt v1.0 — Architect Reviewed* on
-2026-09-30. **That prompt is now the live task and it is the last core product-implementation stage of the
-MVP line** — and P4's own §78 says stop after P4, which keeps every one of those same items, plus the G2
-closure audit and any `v0.7.0`, unauthorized until something else arrives for them. If V0 is ever resumed
+2026-09-30. **That prompt ran, closed the last core product-implementation stage of the MVP line, and
+returned the pointer to `NONE`** — and P4's own §78 said stop after P4, which keeps every one of those same
+items, plus the G2 closure audit and any `v0.7.0`, unauthorized until something else arrives for them. If
+V0 is ever resumed
 for usability feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the
 protocol and both registers are still there, and no session, quote, timing or count may be invented.
 
