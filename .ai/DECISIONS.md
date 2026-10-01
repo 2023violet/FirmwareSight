@@ -995,3 +995,50 @@ Decisions taken at activation, before any product source changed:
 Scope guard: this stage stops at the Bundle. History page, Project Wizard, installer, code signing,
 notarization, updater, SBOM, CVE, OTA, flashing, HIL, cloud, accounts, telemetry, AI, pricing and commercial
 work remain outside it, as do `v0.7.0`, P5, V1, B1, RC1 and GA1, and the G2 closure audit itself.
+
+# P4 Release Bundle — closed 2026-10-01
+
+Verdict: **`PASS / COMPLETE`**, decided item by item against the frozen US-004 acceptance list and the
+sixty-one boxes of §72 in `P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md`. `active_task` returns to
+`NONE`, and baseline stays **`0.6.0`**: this closure creates no `v0.7.0` and claims no G2 — the only
+G2 sentence written anywhere is `READY_FOR_ENGINEERING_GATE_REVIEW`.
+
+Decisions taken at closure, each with the thing that forced it:
+
+- **The bundle's only clock is a recorded human act.** The independent reader first failed its own
+  bundle on two checks, because a blanket "no date-shaped value" rule cannot distinguish a generation
+  time from `accepted_at`, the moment a named person accepted a review, which the report is required
+  to print. The rule now names the one permitted clock and checks the report *against the review
+  record*, so it still catches an invented date. Fixed in `e799f2f`; the bundle was never wrong, the
+  checker was.
+- **A stale plan is consumed, not re-authorizable.** After `ERR-BUNDLE-6103` the UI drops the preview
+  and the destination, so a second Export with restored bytes is a no-op by design rather than a
+  silent retry; the error's own remedy — re-analyze or restore, then Prepare — is the only path back.
+  Recorded in the smoke report as an observation, because step 48 otherwise reads as if the same plan
+  should export again.
+- **The release record lands after the bytes, and a same-id export writes no second record.**
+  `the_release_record_lands_only_after_the_bytes_do` pins the order; the smoke observed the dedupe on
+  the shipped binary — the replacement export said "The release record was not written", and the
+  database's WAL still carried the first export's write time while the bundle files' creation times
+  had moved. One release, one record, whichever export wrote the folder.
+- **A golden bundle needs a pinned Git subject, and the pin is asserted.** The release id hashes Git
+  facts, so reproducibility requires author, committer, both dates and message to be fixed; the test
+  asserts the expected HEAD so a Git object-format change fails as a broken subject instead of as a
+  mysteriously different bundle.
+- **Shipping-binary equivalence is measured, not assumed.** §69 asks that the smoke walk the binary of
+  the final tested tree; rather than rebuild and re-walk, the closure records that the last commit
+  touching any shipped source path predates the build and that
+  `git diff --stat <build-commit> HEAD -- '*/src/*'` is empty. Had it not been, the affected behaviour
+  would have been re-walked and the report would name what was and was not.
+- **The successor's own CI run stays outside the successor.** §73 allows exactly one
+  documentation/governance closure commit after the implementation tree is green and requires that
+  commit to reach 7 of 7; writing its run id into itself is impossible and chasing it into a third
+  commit is forbidden. The run is read with `gh run list` and reported once, in the completion report.
+- **The license gap stays open on purpose.** §76 again: `license = "Proprietary"` in the root
+  `Cargo.toml`, no root `LICENSE`, `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`
+  unchanged. `AGENTS.md` 9 keeps that decision in front of a human, and it did not block technical MVP
+  completion.
+
+Scope guard: the closure added no product code. Four validation documents, three governance files and
+two regenerated integrity artifacts are the whole commit set after `e799f2f`; the MVP line stops here
+and returns to the architect for the G2 engineering closure audit.

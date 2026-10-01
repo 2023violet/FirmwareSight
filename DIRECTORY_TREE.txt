@@ -144,6 +144,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
+│   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
 │   │   ├── FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
 │   │   └── README.md
@@ -192,7 +193,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── diff_cli.rs
 │   │   │   ├── gate_cli.rs
 │   │   │   ├── golden.rs
-│   │   │   └── p2_golden.rs
+│   │   │   ├── p2_golden.rs
+│   │   │   ├── p4_golden.rs
+│   │   │   └── release_cli.rs
 │   │   └── Cargo.toml
 │   └── desktop/
 │       ├── src-tauri/
@@ -205,6 +208,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── icon.ico
 │       │   │   └── icon.png
 │       │   ├── src/
+│       │   │   ├── bundle.rs
 │       │   │   ├── compare.rs
 │       │   │   ├── details.rs
 │       │   │   ├── intake.rs
@@ -215,6 +219,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   └── service.rs
 │       │   ├── tests/
 │       │   │   ├── analyze_details.rs
+│       │   │   ├── bundle_ipc.rs
 │       │   │   ├── compare_ipc.rs
 │       │   │   ├── desktop_parity.rs
 │       │   │   ├── real_artifact_intake.rs
@@ -241,6 +246,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── AnalysisSummaryDto.ts
 │           │   │   │   ├── ArtifactDto.ts
 │           │   │   │   ├── BudgetDto.ts
+│           │   │   │   ├── BundleDestinationDto.ts
+│           │   │   │   ├── BundleExportDto.ts
+│           │   │   │   ├── BundleFileRowDto.ts
+│           │   │   │   ├── BundlePlanRequestDto.ts
+│           │   │   │   ├── BundlePreviewDto.ts
 │           │   │   │   ├── ByteDeltaDto.ts
 │           │   │   │   ├── CandidatePageDto.ts
 │           │   │   │   ├── CandidatePageRequestDto.ts
@@ -377,6 +387,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   │   ├── identity.rs
 │   │   │   │   ├── memory.rs
 │   │   │   │   ├── mod.rs
+│   │   │   │   ├── release.rs
 │   │   │   │   ├── section.rs
 │   │   │   │   └── symbol.rs
 │   │   │   ├── error.rs
@@ -384,8 +395,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── Cargo.toml
 │   ├── firmwaresight-project/
 │   │   ├── src/
+│   │   │   ├── bundle/
+│   │   │   │   └── tests.rs
 │   │   │   ├── config/
 │   │   │   │   └── tests.rs
+│   │   │   ├── bundle.rs
 │   │   │   ├── config.rs
 │   │   │   ├── error.rs
 │   │   │   ├── evidence.rs
@@ -395,39 +409,49 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── lib.rs
 │   │   │   └── version.rs
 │   │   ├── tests/
+│   │   │   ├── bundle_builder.rs
 │   │   │   └── config_schema_contract.rs
 │   │   └── Cargo.toml
 │   ├── firmwaresight-report/
 │   │   ├── src/
+│   │   │   ├── analysis.rs
 │   │   │   ├── diff.rs
 │   │   │   ├── diff_render.rs
 │   │   │   ├── dto.rs
 │   │   │   ├── gate.rs
 │   │   │   ├── gate_render.rs
 │   │   │   ├── lib.rs
+│   │   │   ├── release.rs
+│   │   │   ├── release_render.rs
 │   │   │   ├── render.rs
-│   │   │   └── schema_check.rs
+│   │   │   ├── schema_check.rs
+│   │   │   └── schemas.rs
 │   │   ├── tests/
+│   │   │   ├── analysis_schema_contract.rs
 │   │   │   ├── diff_schema_contract.rs
-│   │   │   └── gate_schema_contract.rs
+│   │   │   ├── gate_schema_contract.rs
+│   │   │   └── release_schema_contract.rs
 │   │   └── Cargo.toml
 │   └── firmwaresight-storage/
 │       ├── migrations/
 │       │   ├── 0001_initial.sql
 │       │   ├── 0002_evidence_keyed_by_build.sql
-│       │   └── 0003_gate_history.sql
+│       │   ├── 0003_gate_history.sql
+│       │   └── 0004_release_records.sql
 │       ├── src/
 │       │   ├── compare.rs
 │       │   ├── db.rs
 │       │   ├── error.rs
 │       │   ├── gate.rs
 │       │   ├── lib.rs
-│       │   └── query.rs
+│       │   ├── query.rs
+│       │   └── release.rs
 │       ├── tests/
 │       │   ├── analyze_queries.rs
 │       │   ├── compare_candidates.rs
 │       │   ├── gate_history.rs
 │       │   ├── map_companion_persistence.rs
+│       │   ├── release_records.rs
 │       │   └── storage.rs
 │       └── Cargo.toml
 ├── examples/
@@ -476,6 +500,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── sparse-elf-header.bin
 │   │   ├── truncated-elf.bin
 │   │   └── wrong-magic.bin
+│   ├── project/
+│   │   └── p4-release/
+│   │       ├── docs/
+│   │       │   └── RELEASE_NOTES.md
+│   │       ├── firmwaresight.toml
+│   │       └── fixture.toml
 │   └── manifest.json
 ├── golden/
 │   ├── cli/
@@ -486,6 +516,15 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── p0-dual-region-memory.json
 │   │   └── p2-diff.json
 │   └── reports/
+│       ├── p4-release/
+│       │   ├── accepted-reviews.json
+│       │   ├── analysis.json
+│       │   ├── diff.json
+│       │   ├── gate-results.json
+│       │   ├── release-manifest.json
+│       │   ├── release-notes.md
+│       │   ├── release-report.html
+│       │   └── SHA256SUMS
 │       ├── p2-diff.html
 │       └── README.md
 ├── P0_TECHNICAL_VALIDATION/
@@ -533,8 +572,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P3_GATE_DESKTOP_SMOKE_REPORT.md
 │   ├── P3_GATE_EXECUTION_REPORT.md
 │   └── P3_GATE_EXIT_CHECKLIST.md
+├── P4_VALIDATION/
+│   ├── P4_BUNDLE_DESIGN_CHECKLIST.md
+│   ├── P4_BUNDLE_DESKTOP_SMOKE_REPORT.md
+│   ├── P4_BUNDLE_EXECUTION_REPORT.md
+│   └── P4_BUNDLE_EXIT_CHECKLIST.md
 ├── schemas/
 │   ├── accepted-reviews.schema.json
+│   ├── analysis.schema.json
 │   ├── diff.schema.json
 │   ├── gate-results.schema.json
 │   ├── project-config.schema.json
@@ -550,7 +595,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── measure_workloads.py
 │   ├── requirements.txt
 │   ├── update_goldens.py
-│   └── verify_baseline_artifacts.py
+│   ├── verify_baseline_artifacts.py
+│   └── verify_bundle_portability.py
 ├── templates/
 │   ├── ADR_TEMPLATE.md
 │   ├── BUG_REPORT_TEMPLATE.md

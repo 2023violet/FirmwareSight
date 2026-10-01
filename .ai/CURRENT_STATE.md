@@ -10,16 +10,17 @@ last_updated: "2026-09-30"
 
 # Current State
 
-- Date: 2026-09-30
+- Date: 2026-10-01
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`P4_RELEASE_BUNDLE`** — opened on 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
+- Active task: **`NONE`** — `P4_RELEASE_BUNDLE` reached `PASS / COMPLETE` on 2026-10-01 and the pointer
+  returns to empty. P4 was opened on 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
   Implementation, Execution Prompt v1.0 — Architect Reviewed*, delivered as a file (the first stage prompt
   since P0 to arrive that way) and archived with its measured SHA-256
   `1baaec9204a1d2aa5aa53bd735b34d376ee56db7557a04d6abb79265c30840c5` under `10_AUDIT/SOURCE_PROMPTS/`.
-  Acceptance list: the frozen **US-004 Export Bundle** criteria at
+  Its acceptance list was the frozen **US-004 Export Bundle** criteria at
   `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md:42-49`, plus **PRD P0-6** at `01_PRODUCT/01_PRD_MVP.md:85-95`
-  and `01_PRODUCT/01_PRD_MVP.md:126`'s independent-readability requirement. No verdict yet: `P4` is
-  `IN_PROGRESS`, `G2` is `NOT_REACHED`, and the only G2 statement P4's §5 permits is
+  and `01_PRODUCT/01_PRD_MVP.md:126`'s independent-readability requirement. Evidence: `P4_VALIDATION/`.
+  The only G2 statement the stage was allowed to write is the one it wrote:
   `READY_FOR_ENGINEERING_GATE_REVIEW` — never `PASS`.
   `P3_RELEASE_GATE`, `P2_COMPARE` and `P1_ANALYZE_DETAILS` closed earlier, on 2026-09-30, 2026-09-29 and
   2026-09-29, in `P3_VALIDATION/`, `P2_VALIDATION/` and `P1_VALIDATION/`.
@@ -31,8 +32,8 @@ last_updated: "2026-09-30"
   --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs`). Start counts re-measured
   before the first write: one `cargo test --workspace` = **556 passed / 0 failed / 0 ignored**,
   `corepack pnpm test` = **135 passed in 6 files**.
-  **`G2_ENGINEERING_CLOSURE_AUDIT` is the next authorizable act after P4 closes and this file does not
-  authorize it**; neither does P4's own prompt, which stops at P4.
+  **`G2_ENGINEERING_CLOSURE_AUDIT` is the next authorizable act now that P4 has closed, and this file
+  does not authorize it**; P4's own prompt stopped at P4.
   Carried forward from P3, still true: `origin/main` sat at
   `219178af195569ec6b13728d84d992ef78df8c04`, where Run `36774472141` concluded `failure` on one job of
   seven — `Dependency policy`, reporting `error[yanked]` for `yoke-derive 0.8.3`, a transitive proc-macro
@@ -177,12 +178,17 @@ P3: PASS / COMPLETE — Release Gate, authorized 2026-09-29 by *P3 Release Gate 
 Prompt v1.1* and by ADR-0027, closed 2026-09-30. Evidence: P3_VALIDATION/. The round's own gate numbers are
 LOCALLY measured; what the remote then said is recorded separately in that pack, and P3 is SEALED — no
 further P3 documentation-only successor.
-P4: IN_PROGRESS — Release Bundle, opened 2026-09-30 by its own architect prompt (v1.0, delivered as a file
-and registered with its SHA-256); no verdict yet
-G2: NOT_REACHED — the only statement P4 may write about it is READY_FOR_ENGINEERING_GATE_REVIEW; the whole-MVP
-closure audit is the architect's, in a round of its own
+P4: PASS / COMPLETE — Release Bundle, opened 2026-09-30 by its own architect prompt (v1.0, delivered as
+a file and registered with its SHA-256), closed 2026-10-01. Evidence: P4_VALIDATION/. The round's own
+numbers are LOCALLY measured — one `cargo test --workspace` = 769 passed / 0 failed, UI 155 in 6 files,
+`check.py` 15/15, the fifty-step shipped-window smoke, the independent reader at 64/64 and 59/59 — and
+the remote result is recorded separately: the final implementation head `e799f2f` is green on run
+`36872456446`, 7 of 7 jobs. P4 is the last core product-implementation stage of the MVP line.
+G2: READY_FOR_ENGINEERING_GATE_REVIEW — the only statement P4 was permitted to write about it; the
+whole-MVP closure audit is the architect's, in a round of its own
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: P4_RELEASE_BUNDLE
+Active task: NONE — P4 closed 2026-10-01; the next authorizable act is the G2 closure audit, which no
+file in this repository authorizes
 Design tokens: v0.2.1
 ```
 
@@ -256,7 +262,10 @@ tracked set from `git ls-files` and hashes the files straight off disk, because 
 certify itself. `sha256sum -c SHA256SUMS` is the third, external pass. This tooling used to live under
 gitignored `target/`, which meant a fresh clone could not regenerate either artifact; it is tracked now.
 `manifest.txt` is left exactly as the v0.5.1 delivery wrote it - the frozen package list, not
-this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the counts.
+this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the counts. P4's closure
+regenerated both artifacts after the tracked path set grew by this stage's fixtures, golden bundle,
+tests, scripts and validation pack — `DIRECTORY_TREE.txt` first and `SHA256SUMS` last, as the order
+requires — and the closure commit records the checker's zero-mismatch result.
 
 **How to read a `file:line` citation in this repository.** A closed validation pack is evidence about the
 tree it measured, so its line numbers are as-of-writing, not live: `App.module.css` and `App.tsx` have
@@ -269,11 +278,27 @@ citation written before it. The current stage's pack is the one place a line poi
 
 ## Next work
 
-**`active_task: P4_RELEASE_BUNDLE`.** P3 Release Gate closed on 2026-09-30 and the architect then issued
-its own P4 prompt, so the live task is the Release Bundle and nothing else. `AGENTS.md` 1 means what it
-has meant in every round: the pointer names ONE stage, and no agent lifts the next one off the roadmap.
-When P4 closes, `active_task` returns to `NONE` and what becomes authorizable is the **G2 engineering
-closure audit**, which P4's own §5 explicitly forbids this round from performing or claiming.
+**`active_task: NONE`.** P4 Release Bundle closed `PASS / COMPLETE` on 2026-10-01, so no stage is live
+and nothing may be started from this file. `AGENTS.md` 1 means what it has meant in every round: the
+pointer names ONE stage, and no agent lifts the next one off the roadmap. What becomes authorizable
+now is the **G2 engineering closure audit**, which P4's own §5 explicitly forbade this round from
+performing or claiming, and which only an architect prompt can open.
+
+**`P4 Release Bundle` closed `PASS / COMPLETE` on 2026-10-01, under its own architect prompt.** One
+product verb, `Bundle`, over results the earlier stages had already computed and stored: a release
+plan — id, version, ten-file list with digests — assembled before any byte is written; a staged copy
+of the composed documents and the current artifacts; verification of the staged bytes against their
+own `SHA256SUMS` and manifest; publish by rename; replacement only under an explicit confirmation and
+only of a destination this engine wrote, with rollback if the swap fails; and a `release_records` row
+written after the bytes, never before. Per-item evidence:
+`P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md`; what was built, every gate number, the CLI smoke and the
+CI runs: `P4_BUNDLE_EXECUTION_REPORT.md`; the shipped-window result over all fifty §59 steps:
+`P4_BUNDLE_DESKTOP_SMOKE_REPORT.md`; design review: `P4_BUNDLE_DESIGN_CHECKLIST.md`. The boundaries
+held and were not relaxed: Core stayed headless and filesystem-free (`grep -rn "std::fs"
+crates/firmwaresight-core/src/` counts zero), assembly lives in the project crate, no sixth crate and
+no new third-party dependency entered, no host path crossed IPC or entered a composed document, the
+only clock a bundle carries is the moment a named person accepted a review, and the stage stopped at
+the Bundle — no History page, no installer, no signing, no updater.
 
 **`P3 Release Gate` closed `PASS / COMPLETE` on 2026-09-30, under its own architect prompt.** One product
 verb, `Gate`, over a stored build plus the workspace facts outside the artifact:
