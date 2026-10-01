@@ -878,8 +878,11 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
+    // The region mounts before its first page lands: the pager only renders once the shell has
+    // answered, so reading it synchronously lost that race on a Windows runner. Wait for the range
+    // itself - it exists only from a resolved page, and Next page is rendered beside it.
     const table = await screen.findByRole('region', { name: 'Symbol Changes' });
-    expect(within(table).getByText(/Showing 1 to 3 of 3 symbols/)).toBeDefined();
+    expect(await within(table).findByText(/Showing 1 to 3 of 3 symbols/)).toBeDefined();
 
     fireEvent.click(within(table).getByRole('button', { name: 'Next page' }));
     await waitFor(() => {
