@@ -58,7 +58,17 @@ P3      PASS / COMPLETE — Release Gate, authorized on 2026-09-29 by its own ar
         assertions unchanged, the fix proved by mutation, and Run 36783457030 on 02e8a81 then green on
         7 of 7 jobs — as was the documentation-only successor f66a93d on Run 36784382005, the last run
         recorded here
-P4      NOT STARTED — the next authorizable stage now that P3 has closed, and still needs its own prompt
+P4      IN_PROGRESS — Release Bundle, opened 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
+        Implementation, Execution Prompt v1.0 — Architect Reviewed*. It is the last core product-implementation
+        stage of the ADR-0026 line: assemble the trusted Analyze + Compare + Gate + accepted-Reviews result,
+        the selected current artifacts and the Release Notes into a portable, independently readable,
+        hash-verifiable, host-path-free directory that never overwrites without an explicit confirmation.
+        Start fact measured before the first write: HEAD = origin/main = 323afad, one commit ahead of the
+        ba5e59e the prompt's §0 names (the delta moves no product source, no fixture, no schema and no
+        migration), green on remote Run 36810689645 at 7 of 7 jobs; start counts 556 Rust and 135 UI,
+        re-measured rather than inherited. No verdict yet.
+G2      NOT_REACHED — the only statement P4 may write about it is READY_FOR_ENGINEERING_GATE_REVIEW; the
+        whole-MVP engineering closure audit is the architect's own round
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -77,16 +87,21 @@ with recorded provenance, goldens, ts-rs-generated typed IPC, minimal SQLite at 
 512 MiB input guard, and one verification gate that CI and a laptop run unchanged.
 
 ```
-python scripts/check.py                     # 14 steps across rust / frontend / drift / deny
+python scripts/check.py                     # 15 steps across rust / frontend / drift / deny
 python scripts/check.py --only core-smoke   # the macOS-on-main core smoke CI runs separately
 cargo run -q --bin fwsight -- analyze fixtures/elf/p0-dual-region/firmware.elf \
   --map fixtures/elf/p0-dual-region/firmware.map --json
 ```
 
-184 Rust tests and 58 UI tests — 104 and 19 of them at the v0.6.0 promotion, 142 and 31 after the P1-A0
-slice and its correctness closure. Measurement status of every claim is in `P0_TECHNICAL_VALIDATION/`,
-starting from `P0_EXIT_CHECKLIST.md`, in `P1_A0_VALIDATION/` for the intake slice, and in
-`P1_VALIDATION/` for the rest of Analyze.
+**556 Rust tests and 135 UI tests on the tree P4 starts from**, re-measured on 2026-09-30 with one
+`cargo test --workspace` and one `corepack pnpm test` before the first write. The chain that produced them:
+104 and 19 at the v0.6.0 promotion, 142 and 31 after the P1-A0 slice and its correctness closure, 184 and 58
+when P1 Analyze closed, 345 and 99 when P2 Compare closed. A Rust total must come from ONE invocation: an
+earlier P3 revision read 715 in 42 suites, because summing a whole-gate log counts the desktop crate twice
+(`drift` re-runs it after the workspace test step). Measurement status of every claim is in
+`P0_TECHNICAL_VALIDATION/`, starting from `P0_EXIT_CHECKLIST.md`, in `P1_A0_VALIDATION/` for the intake
+slice, in `P1_VALIDATION/` for the rest of Analyze, in `P2_VALIDATION/` for Compare and in
+`P3_VALIDATION/` for the Gate.
 
 ## What v0.6.0 does not change
 
@@ -216,7 +231,7 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `P3_RELEASE_GATE`
+12. `.ai/ACTIVE_TASK.md` — currently `P4_RELEASE_BUNDLE`
 
 ## Batch A recruitment-ready status
 
@@ -251,7 +266,11 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-`active_task: NONE`. `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the Analyze verb is one whole
+**`active_task: P4_RELEASE_BUNDLE`**, opened on 2026-09-30 by its own architect prompt. The paragraphs below
+are the running narrative of how the pointer got here, so each one keeps the words its own round wrote.
+
+*(Recorded at the time as `active_task: NONE`.)* `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the
+Analyze verb is one whole
 product verb: bounded `Sections`, `Symbols` and `Evidence` queries over the SQLite snapshot that already
 existed, three use-case IPC commands, top contributors, an Evidence Inspector, and the `bytes / KiB`
 presentation switch `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md` US-001 requires. Every mandatory US-001
@@ -279,12 +298,15 @@ button keeping its accent border — are in that pack with the test that pins ea
 
 The rule that kept P2 unstarted until its prompt arrived still holds for everything after it: looser
 sequencing is not standing authorization, `ADR-0026` removed the research gate, not the per-stage prompt
-requirement. So **`P4 Release Bundle` is the next authorizable stage and is not authorized by anything in
-this repository**: it needs its own architect prompt. P3's own prompt says stop after P3, and it authorized
-no bundle, History page, Project Wizard, installer, signing, updater, SBOM, cloud, account, telemetry, AI
-or pricing work. If V0 is ever resumed for usability
-feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the protocol and both
-registers are still there, and no session, quote, timing or count may be invented.
+requirement. That rule held for `P4 Release Bundle` exactly as it held for P2 and P3: P3's own prompt said
+**stop after P3** and authorized no bundle, History page, Project Wizard, installer, signing, updater,
+SBOM, cloud, account, telemetry, AI or pricing work, so P4 sat unstarted until the architect issued
+*FirmwareSight — P4 Release Bundle MVP Implementation, Execution Prompt v1.0 — Architect Reviewed* on
+2026-09-30. **That prompt is now the live task and it is the last core product-implementation stage of the
+MVP line** — and P4's own §78 says stop after P4, which keeps every one of those same items, plus the G2
+closure audit and any `v0.7.0`, unauthorized until something else arrives for them. If V0 is ever resumed
+for usability feedback, it resumes with real participants or not at all - the `v0.1.0` instrument, the
+protocol and both registers are still there, and no session, quote, timing or count may be invented.
 
 One gap P3 does not close and has no authority to close: the project is delivered as open source under
 ADR-0026, while the root `Cargo.toml`'s `[workspace.package]` table still reads

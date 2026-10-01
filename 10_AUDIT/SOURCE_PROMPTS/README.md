@@ -326,6 +326,58 @@ text with no source file; each says so in its own entry instead of standing for 
   render, which is a test-side race in P2's file rather than product behaviour; it was diagnosed, fixed
   by awaiting the query with the assertion unchanged, and the gate re-run to 15/15.
 
+## P4 Release Bundle
+
+- File: `FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt`
+- SHA-256: `1baaec9204a1d2aa5aa53bd735b34d376ee56db7557a04d6abb79265c30840c5`
+  (recomputed from the archived copy in this directory, and equal to the bytes as delivered: the file was
+  already LF-only, so no text conversion moved it. This is the first stage since P0 whose prompt arrived as
+  a real file rather than inline text, so unlike the P1, P2 and P3 entries this one records a hash instead
+  of recording that no hash can be recorded.)
+- Authority: `ADR-0026` put P1 → P2 → P3 → P4 on engineering grounds while keeping the per-stage prompt
+  requirement. This is that prompt for the last core product-implementation stage of the MVP. **No new ADR
+  is required and none was written**: P4 moves no technology baseline, adds no crate, and changes no
+  persistence semantic that `04_TECH/15` and `AGENTS.md` 6 did not already anticipate — `release_records`
+  is a table §3 of that document has listed since v0.5, and migration `0004` is additive. The one boundary
+  it moves with a decision behind it is `SCHEMA_VERSION` 3 → 4, the same way P3 moved 2 → 3.
+- Scope: `P4_RELEASE_BUNDLE` — assemble an already-trusted Analyze + Compare + Gate + accepted-Reviews
+  result plus the selected firmware artifacts and Release Notes into a directory bundle that is portable,
+  independently readable without FirmwareSight, hash-verifiable, host-path-free, and never overwrite-by-
+  default. Canonical layout `artifacts/*`, `analysis.json`, `diff.json` when a baseline exists,
+  `gate-results.json`, `accepted-reviews.json`, `release-notes.md` when observed, `release-report.html`,
+  `SHA256SUMS`, `release-manifest.json`. New: Core `domain/release.rs`, the public
+  `urn:firmwaresight:schema:analysis:1` projection, `ReleaseManifestDto` over the existing v1 schema,
+  additive `0004_release_records.sql`, `fwsight release prepare`, and a Bundle section under the existing
+  Release page. Reused unchanged: `gate-results:1`, `accepted-reviews:1`, `diff:1`,
+  `release-manifest:1`, `project-config:1`, and P3's Gate evaluation — §9 requires the bundle to
+  *recompute* the Gate and refuse when the run id no longer matches, and §8 requires disposition PASS.
+- Acceptance list: the frozen **US-004 Export Bundle** criteria in
+  `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md:42-49` (readable without FirmwareSight, manifest carries every
+  file hash, report names the FirmwareSight version, no existing directory overwritten without explicit
+  confirmation), plus **PRD P0-6 Release Bundle** at `01_PRODUCT/01_PRD_MVP.md:85-95` for the file set, and
+  `01_PRODUCT/01_PRD_MVP.md:126`'s "Release Bundle 可在另一台机器上独立阅读".
+- What it deliberately does not do: **declare G2.** The only permitted end state is
+  `G2 = READY_FOR_ENGINEERING_GATE_REVIEW`; the architect performs the whole-MVP G2 closure audit in a
+  later round. It also leaves the open-source license gap exactly where P3 left it (§76 forbids touching
+  `license = "Proprietary"` or adding a `LICENSE`), and it claims no signing: §62 forbids the words
+  *trusted*, *authentic*, *signed* and *tamper-proof*, because a SHA-256 proves byte consistency against an
+  included manifest and authenticates nobody.
+- Stop condition, stated by the prompt itself: **stop after P4.** History page, Project Wizard, installer,
+  signing, notarization, updater, SBOM, CVE, OTA, flashing, HIL, cloud, accounts, telemetry, AI, pricing and
+  commercial work are all outside it, as are `v0.7.0`, P5, V1, B1, RC1 and GA1.
+- Start state verified before the first write: the prompt's §0/§2 anchor is
+  `ba5e59e79208969a4687db11e69fdef2ababd8ab`, green on Run #25 `36785425648` (completed / success / 7 of 7).
+  `origin/main` had moved one commit further when this round started: `HEAD = origin/main =
+  323afad155348bd5b721fa2b7e2ed2388bdc2691`, worktree clean. `git diff --name-only ba5e59e 323afad` lists
+  eleven documentation, governance and integrity files plus the two newly tracked baseline-artifact
+  scripts, and **no** production source, fixture, schema, migration or configuration file — so the newer
+  HEAD is the same tree for engineering purposes and is the start fact this round records, the same way P3
+  recorded Run #19 on its successor HEAD. Run `36810689645` on `323afad` is `completed` / `success` / 7 of 7,
+  read with `gh run view 36810689645 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs`.
+  Start counts re-measured, not inherited: `cargo test --workspace` **556 passed / 0 failed / 0 ignored**,
+  `corepack pnpm test` **135 passed in 6 files** — which matches the prompt's §0 figures, and confirms the
+  retired `715` was not reintroduced.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

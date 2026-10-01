@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 ---
 
 # Decisions — v0.6.0
@@ -903,4 +903,95 @@ Decisions taken at closure, each with the thing that forced it:
 Scope guard held: no `release prepare`, no bundle, no manifest generation, no bundle checksums, no
 History page, no pricing, cloud, accounts, telemetry, updater, signing, SBOM, CVE, OTA, flashing or AI
 judge. `release`, `watch` and `doctor` remain unregistered CLI commands, and `intake.test.tsx` asserts
-that Bundle, History, Settings, SBOM, Pricing and Cloud appear nowhere.
+that Bundle, History, Settings, SBOM, Pricing and Cloud appear nowhere. *(That last sentence described the
+tree as of P3's closure; the P4 round below changes those two assertions by name, because §48 puts a Bundle
+section under Release while §58 keeps the navigation rail at three pages.)*
+
+# P4 Release Bundle — opened 2026-09-30
+
+Authorization: *FirmwareSight — P4 Release Bundle MVP Implementation, Execution Prompt v1.0 — Architect
+Reviewed*. Unlike P1, P2 and P3, this prompt reached the execution environment **as a file**, so it is
+archived in `10_AUDIT/SOURCE_PROMPTS/` and registered with its recomputed SHA-256
+`1baaec9204a1d2aa5aa53bd735b34d376ee56db7557a04d6abb79265c30840c5`; the file was already LF-only, so no text
+conversion moved a byte between the delivered copy and the archived one. No ADR is required and none was
+written: P4 moves no technology baseline and adds no crate, and `release_records` is a table
+`04_TECH/15_STORAGE_DATABASE_BASELINE.md` §3 has listed since v0.5 — `0004` makes it real, additively, the
+way `0003` made Gate history real.
+
+Decisions taken at activation, before any product source changed:
+
+- **The pointer moved; nothing was concluded.** `active_task` reads `P4_RELEASE_BUNDLE`,
+  `validation.p4_status` reads `IN_PROGRESS`, `g2_status` reads `NOT_REACHED`, and
+  `next_authorizable_tracks` now names the G2 engineering closure audit rather than P4 itself. Baseline
+  stays `0.6.0`; no `v0.7.0`. P4's §5 allows exactly one G2 statement —
+  `READY_FOR_ENGINEERING_GATE_REVIEW` — and forbids `PASS`, because a whole-MVP closure audit is not
+  something an implementation round can grade.
+- **The start fact is one commit ahead of the prompt's anchor, and that was inspected before writing.**
+  §0/§2 name `ba5e59e` (Run #25 `36785425648`, success, 7 of 7). `origin/main` was at `323afad` when the
+  round began: `git diff --name-only ba5e59e 323afad` is eleven documentation, governance and integrity
+  files plus the two newly tracked baseline-artifact scripts, with no product source, fixture, schema,
+  migration or configuration file, and Run `36810689645` on `323afad` is success at 7 of 7. Same tree for
+  engineering purposes, so the newer green HEAD is recorded as the start — the identical judgement P3 made
+  about Run #19 on its own successor HEAD.
+- **Start counts were measured, not inherited.** One `cargo test --workspace`: **556 passed / 0 failed /
+  0 ignored**. `corepack pnpm test`: **135 passed in 6 files**. Matching §0's numbers is the check that the
+  retired `715` double-count was not brought back.
+- **A bundle is a release verdict output, so it re-runs the Gate rather than trusting a stored one.** §9
+  settles the staleness problem: a stored `PASS` plus a dirty workspace, changed config or changed Release
+  Notes must not produce a bundle. Preparation re-observes the project through the P3 adapter, recomputes
+  the deterministic run id, and refuses with `GATE_CONTEXT_CHANGED` unless that id equals the selected
+  stored run. Gate semantics are reused, never re-derived (§9's own instruction), and disposition must be
+  `PASS` after the acceptance-aware aggregate — with `UNKNOWN` never acceptable as a Review, so an evidence
+  gap cannot be packaged as a release.
+- **Two crates share the work, and neither is new.** `firmwaresight-report` owns the portable *content*
+  (Analysis v1 projection, manifest DTO, report HTML, SHA256SUMS text, the file-bytes IR) and stays
+  filesystem-free like the rest of that crate; `firmwaresight-project`, which already reads config,
+  Release Notes and Git and already owns `sha2`, owns *staging, publish, swap and verification*. This is
+  the placement that keeps §65's "no sixth crate" and §35's "do not have separate CLI bundle semantics"
+  both true: one engine, called by the CLI and the desktop. Core keeps release *semantics* only — id
+  fingerprint inputs, ordering, and what belongs in the model — and reads, writes and hashes nothing.
+- **The manifest self-reference is documented, not faked.** §20: `SHA256SUMS` carries every payload file
+  except itself and the manifest; the manifest carries every bundle file except itself, `SHA256SUMS`
+  included. No empty or zeroed self-hash appears anywhere, and the rule is written into
+  `extensions.integrity_model` and into the report so a reader can verify without asking FirmwareSight.
+- **`release-manifest:1` is not reinterpreted.** Its `files[]` items are closed
+  (`additionalProperties: false`), so the §49 preview's file *role* stays in the internal `BundlePreviewDto`
+  and never enters the manifest; `build.artifact_sha256` names the primary shipped artifact and the MAP is
+  covered by `files[]`. Git fields stay labelled workspace provenance, never artifact build provenance (§19,
+  §43) — the honest sentence is "Workspace HEAD observed by the Release Gate", not "firmware built from
+  commit X".
+- **`analysis:1` is a new public contract, and the internal DTO is not it.** `AnalyzeResultDto` is
+  `p0-internal`; copying it into a bundle and calling it durable would have made an IPC shape a
+  compatibility promise by accident. A dedicated portable projection is authored instead, contract-tested
+  through the crate's own dependency-free `schema_check` subset — which reports an unimplemented keyword as
+  a failure, so the new schema may use only the keywords that subset actually evaluates. No JSON-Schema
+  dependency is admitted (§15, §64).
+- **The portable document may be large; the IPC payload may not.** A full symbol table in `analysis.json`
+  is legitimate file output, and the 500-row IPC ceiling is a boundary rule about crossing into React, not
+  about writing a file. The document is rendered Rust-side and never sent whole through IPC (§14).
+- **Filesystem safety is a feature requirement, not an implementation detail.** US-004's fourth item and
+  §30-§32 together mean: stage into a sibling, verify staged bytes, write `SHA256SUMS`, then the manifest
+  last; publish by rename; and if a directory is already there, return `CONFIRM_REPLACE_REQUIRED`, ask the
+  human, and replace only a destination recognizable as a FirmwareSight bundle — backing it up first and
+  rolling back if the swap fails. An arbitrary user directory is never recursively deleted, `overwrite=true`
+  notwithstanding.
+- **No signing claim.** §62 forbids *trusted*, *authentic*, *signed* and *tamper-proof*. A SHA-256 proves
+  byte consistency against an included manifest and authenticates nobody; the vocabulary is integrity
+  verification, hash verification, bundle consistency.
+- **The license gap stays open on purpose.** §76 names it: `license = "Proprietary"` in the root
+  `Cargo.toml`'s `[workspace.package]` table, no root `LICENSE`, `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`
+  unchanged, and no license text added silently. `AGENTS.md` 9 puts that decision in front of a human, and it
+  does not block technical MVP completion.
+- **The release subject is never this repository.** Every bundle test and smoke uses a throwaway project
+  and a throwaway Git repository, for the reason §47 and P3's §61 both give: this workspace is dirty or
+  tagged by the owner's acts, not by the firmware being released, so its Git facts would describe the tool.
+- **Five known assertion changes, taken by name.** Three storage tests pin `SCHEMA_VERSION` as the literal
+  `3` (`gate_history.rs:232`, `compare_candidates.rs:613`, `map_companion_persistence.rs:298`) and become
+  `4`; `apps/cli/src/main.rs`'s unregistered-command test drops `release` while keeping `watch` and
+  `doctor`; and the two whole-`document.body` "no Bundle text" guards (`intake.test.tsx:509-511`,
+  `release.test.tsx:446-458`) narrow to the navigation rail, because §48 requires a Bundle section under
+  Release while §58 requires the rail to stay three pages. None is deleted to reach green.
+
+Scope guard: this stage stops at the Bundle. History page, Project Wizard, installer, code signing,
+notarization, updater, SBOM, CVE, OTA, flashing, HIL, cloud, accounts, telemetry, AI, pricing and commercial
+work remain outside it, as do `v0.7.0`, P5, V1, B1, RC1 and GA1, and the G2 closure audit itself.

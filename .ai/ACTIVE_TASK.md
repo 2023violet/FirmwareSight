@@ -11,12 +11,44 @@ last_updated: "2026-09-30"
 # ACTIVE TASK
 
 ```text
-NONE — P3 Release Gate reached PASS / COMPLETE on 2026-09-30. There is no live coding task.
+P4_RELEASE_BUNDLE — opened 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP Implementation, Execution
+Prompt v1.0 — Architect Reviewed*, delivered as a file and archived with its SHA-256
+`1baaec9204a1d2aa5aa53bd735b34d376ee56db7557a04d6abb79265c30840c5` in
+`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt`.
 
-AGENTS.md 1: with no active task, no agent may create business functionality or pick the next stage from
-the roadmap. P4 Release Bundle is the next *authorizable* stage; it starts only when the architect issues
-a P4 prompt. That sentence is a record of where the delivery stands, not permission to begin.
+This is the last core product-implementation stage of the open-source MVP line ADR-0026 opened. One verb,
+`Bundle`: assemble the already-trusted Analyze + Compare + Gate + accepted-Reviews result, the selected
+current firmware artifacts and the Release Notes into a directory that is portable, independently readable
+without FirmwareSight, hash-verifiable and host-path-free, and that never overwrites an existing directory
+without an explicit confirmation.
+
+AGENTS.md 1 binds exactly as it did for P1, P2 and P3: this file names ONE stage. P4 does not authorize a
+History page, Project Wizard, installer, signing, notarization, updater, SBOM, CVE, OTA, flashing, HIL,
+cloud, accounts, telemetry, AI, pricing or commercial work, and it does not create `v0.7.0`, P5, V1, B1,
+RC1 or GA1. Its own §78 says STOP AFTER P4.
+
+What P4 may not do is declare the MVP finished. The only gate statement it may write is
+`G2 = READY_FOR_ENGINEERING_GATE_REVIEW`; the architect performs the whole-MVP G2 closure audit in a
+separate round.
 ```
+
+## Start facts measured before the first write
+
+The prompt's §0/§2 anchor is `ba5e59e79208969a4687db11e69fdef2ababd8ab`, green on Run #25 `36785425648` —
+true as written. `origin/main` had moved one commit further by the time this round started, so §2's
+"if remote is newer, inspect and reconcile before writing" ran first:
+
+- `HEAD = origin/main = 323afad155348bd5b721fa2b7e2ed2388bdc2691`, worktree clean, single worktree on `main`.
+- `git diff --name-only ba5e59e 323afad` is eleven documentation, governance and integrity files plus two
+  newly tracked baseline-artifact scripts. **No** production source, fixture, schema, migration or config
+  file moved, so the newer HEAD is the same tree for engineering purposes. It is therefore the start fact
+  this round records, the same way P3 recorded Run #19 on its own successor HEAD rather than on the sealed
+  P2 tree.
+- Run `36810689645` on `323afad`: `completed` / `success` / **7 of 7 jobs**, read with
+  `gh run view 36810689645 --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs`.
+- Start counts re-measured, not inherited from the prompt: one `cargo test --workspace` = **556 passed /
+  0 failed / 0 ignored**; `corepack pnpm test` = **135 passed in 6 files**. Both match §0's numbers, which
+  is the check that the retired `715` double-count was not reintroduced.
 
 ## What just closed
 

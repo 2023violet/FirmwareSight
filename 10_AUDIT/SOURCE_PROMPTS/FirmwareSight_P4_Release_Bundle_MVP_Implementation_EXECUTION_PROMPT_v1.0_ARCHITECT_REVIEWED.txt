@@ -1,0 +1,3224 @@
+FirmwareSight — P4 Release Bundle MVP Implementation
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight Coding AI。
+
+本轮是：
+
+P4_RELEASE_BUNDLE
+
+这是 Open-Source MVP-First 路线的最后一个核心产品实现阶段。
+
+已封口：
+
+P0 Technical Vertical Slice = PASS
+G1 = PASS
+P1 Analyze = PASS / COMPLETE
+P2 Compare = PASS / COMPLETE
+P3 Release Gate = FINAL REMOTE PASS / COMPLETE / SEALED
+
+当前唯一目标：
+
+把已经可信的：
+
+Analyze
++ Compare
++ Gate
++ Accepted Reviews
++ selected firmware artifacts
++ Release Notes
+
+组装成一个：
+
+可移交
+可独立阅读
+可验证哈希
+不依赖 FirmwareSight 才能查看
+不泄露宿主机路径
+不覆盖已有目录除非明确确认
+
+的 Release Bundle。
+
+P4 完成后：
+
+P4 = PASS / COMPLETE
+
+但不要在本轮自动宣布：
+
+G2 = PASS
+
+本轮最终只允许：
+
+G2 = READY_FOR_ENGINEERING_GATE_REVIEW
+
+由 Architect 下一轮做一次全 MVP 的 G2 closure audit。
+
+本轮不实现：
+
+History page
+Installer
+Signing
+Notarization
+Updater
+Cloud
+Accounts
+Telemetry
+AI
+SBOM
+CVE
+OTA
+Flashing
+HIL
+Commercial / Pricing
+
+完成 P4 后必须 STOP。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED REMOTE START STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live review verified:
+
+origin/main:
+
+ba5e59e79208969a4687db11e69fdef2ababd8ab
+
+Latest remote CI:
+
+Run #25
+
+ID:
+36785425648
+
+HEAD:
+ba5e59e79208969a4687db11e69fdef2ababd8ab
+
+status:
+completed
+
+conclusion:
+success
+
+jobs:
+7 / 7 success
+
+Jobs:
+
+- macOS Core Smoke
+- Rust (windows-latest)
+- Dependency policy
+- Desktop UI (ubuntu-latest)
+- Generated output drift
+- Rust (ubuntu-latest)
+- Desktop UI (windows-latest)
+
+P3 remote closure history is intentionally finite.
+
+Do NOT create another P3 documentation-only successor.
+
+P3 is SEALED.
+
+Known P3 remote history stays historical:
+
+Run #20:
+failure — yanked yoke-derive 0.8.3
+
+Run #21:
+success — lock moved to 0.8.4
+
+Run #22:
+failure — Windows Compare timing race
+
+Run #23:
+success — defect J fixed
+
+Run #24:
+success
+
+Run #25:
+success on latest P3 closure HEAD
+
+Current truthful Rust test count:
+
+cargo test --workspace:
+556 passed / 0 failed / 0 ignored
+
+28 executable suites
++ 6 empty doc-test suites
+
+UI:
+135 tests
+
+Do NOT reintroduce the incorrect historical number:
+715
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. AUTOMATIC-PUSH ENVIRONMENT RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Important environment fact:
+
+During P3, commits appeared on origin/main before the Agent's explicit `git push`.
+
+No repository Git hook or core.hooksPath explained it.
+
+Therefore from P4 onward:
+
+NEVER assume:
+
+"git commit succeeded, therefore the commit is still local."
+
+After EVERY commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+
+If origin/main moved:
+
+inspect the exact remote delta immediately.
+
+If a CI run has already started:
+
+record it as a real external fact.
+
+Do NOT:
+
+- duplicate-push blindly
+- force push
+- rewrite history to recreate a desired local/remote sequence
+- claim a commit was unpushed without checking origin/main
+
+This is a workflow fact, not a product feature.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run:
+
+git fetch --prune origin
+
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -15 --oneline --decorate
+
+Verify:
+
+HEAD =
+origin/main =
+ba5e59e79208969a4687db11e69fdef2ababd8ab
+
+worktree:
+clean
+
+Verify Run #25 directly:
+
+gh run view 36785425648 \
+  --repo 2023violet/FirmwareSight \
+  --json databaseId,headSha,status,conclusion,jobs
+
+Required:
+completed
+success
+7 / 7
+HEAD ba5e59e...
+
+If remote is newer:
+STOP and inspect/reconcile the delta before writing.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+amend pushed P0/P1/P2/P3 history
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. AUTHORITY READ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read:
+
+AGENTS.md
+README.md
+PRODUCT_BASELINE.md
+BASELINE.yaml
+
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+
+00_GOVERNANCE/03_DECISION_POLICY.md
+
+01_PRODUCT/01_PRD_MVP.md
+01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md
+01_PRODUCT/08_PRODUCT_MODULE_MAP.md
+
+03_DESIGN/01_INFORMATION_ARCHITECTURE.md
+03_DESIGN/02_UX_FLOWS.md
+03_DESIGN/03_VISUAL_SYSTEM.md
+03_DESIGN/04_COMPONENT_RULES.md
+03_DESIGN/05_ACCESSIBILITY.md
+03_DESIGN/06_UI_REFERENCE_SCREENS.md
+DESIGN.md
+assets/design-tokens.json
+
+04_TECH/02_DOMAIN_MODEL.md
+04_TECH/04_STORAGE_WORKSPACE.md
+04_TECH/05_SECURITY_PRIVACY.md
+04_TECH/07_CLI_SPEC.md
+04_TECH/08_CONFIG_SPEC.md
+04_TECH/14_IPC_DATA_CONTRACTS.md
+04_TECH/15_STORAGE_DATABASE_BASELINE.md
+04_TECH/17_RELEASE_PACKAGING_UPDATE.md
+04_TECH/18_CI_SUPPLY_CHAIN.md
+04_TECH/23_MEMORY_ACCOUNTING_MODEL.md
+04_TECH/24_BUILD_IDENTITY_EVIDENCE.md
+04_TECH/25_TYPED_IPC_BINDINGS.md
+04_TECH/26_PORTABLE_SCHEMA_POLICY.md
+04_TECH/27_GATE_STATE_SEMANTICS.md
+
+05_ENGINEERING/02_TEST_STRATEGY.md
+05_ENGINEERING/08_CODE_AREA_PLAN.md
+
+06_DELIVERY/06_STAGE_GATES.md
+06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md
+
+09_ADR/ADR-0023-gate-five-state-semantics.md
+09_ADR/ADR-0026-open-source-mvp-first-delivery.md
+09_ADR/ADR-0027-project-policy-and-provenance-adapter.md
+
+P1_VALIDATION/**
+P2_VALIDATION/**
+P3_VALIDATION/**
+
+schemas/release-manifest.schema.json
+schemas/gate-results.schema.json
+schemas/accepted-reviews.schema.json
+schemas/project-config.schema.json
+schemas/diff.schema.json
+
+Relevant implementation:
+
+crates/firmwaresight-core/**
+crates/firmwaresight-artifact/**
+crates/firmwaresight-project/**
+crates/firmwaresight-storage/**
+crates/firmwaresight-report/**
+apps/cli/**
+apps/desktop/src-tauri/**
+apps/desktop/ui/src/**
+scripts/**
+fixtures/**
+golden/**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. FIRST RESPONSE — P4 TAKEOVER REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before implementation output:
+
+# FirmwareSight P4 Release Bundle Takeover Report
+
+Include:
+
+- local HEAD
+- origin/main
+- Run #25
+- worktree
+- P3 verdict
+- active_task
+- existing ReleaseBundle Core model: YES/NO
+- existing release bundle builder: YES/NO
+- existing `release_records` table: YES/NO
+- existing `release prepare` CLI implementation: YES/NO
+- existing Desktop Bundle UI: YES/NO
+- existing public analysis schema: YES/NO
+- release-manifest v1 state
+- gate-results v1 state
+- accepted-reviews v1 state
+- diff v1 state
+- migration required? YES/NO
+- new public schema required? YES/NO
+- new dependency required? YES/NO
+- new design token required? YES/NO
+- exact bundle file plan
+- overwrite strategy
+- source-artifact verification strategy
+- Blocking Issues
+
+Expected architectural facts:
+
+ReleaseBundle implementation:
+NO
+
+release_records:
+NOT IMPLEMENTED / P4 DEFERRED
+
+CLI `release prepare`:
+specified, not implemented
+
+Desktop Bundle:
+not implemented
+
+Public analysis schema:
+NO
+
+Migration:
+YES — additive 0004 release records
+
+New public schema:
+YES — `analysis:1`
+
+New third-party dependency:
+NO expected
+
+New design token:
+NO expected
+
+If Blocking Issues = NONE:
+continue automatically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. GOVERNANCE ACTIVATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Set:
+
+active_task:
+P4_RELEASE_BUNDLE
+
+Update current-state docs only where required.
+
+During implementation:
+
+P0 = PASS
+G1 = PASS
+P1 = PASS / COMPLETE
+P2 = PASS / COMPLETE
+P3 = PASS / COMPLETE
+P4 = IN_PROGRESS
+G2 = NOT REACHED
+
+baseline_version =
+0.6.0
+
+No v0.7.0.
+
+V0 =
+NON_BLOCKING_USER_FEEDBACK_TRACK
+
+pricing/commercial =
+DEFERRED_POST_MVP
+
+Open-source license gap remains separate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. P4 PRODUCT DEFINITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frozen PRD P0-6 requires Release Bundle directory containing:
+
+- selected firmware artifacts
+- SHA256SUMS
+- release-manifest.json
+- release-report.html
+- release-notes.md if present
+- analysis.json
+- diff.json if baseline exists
+
+P4 also must include the evidence P3 made real:
+
+- gate-results.json
+- accepted-reviews.json
+
+US-004 acceptance:
+
+1. bundle can be read without FirmwareSight
+2. manifest carries hashes for bundle payload
+3. report names FirmwareSight version
+4. existing directory is never overwritten without explicit confirmation
+
+Milestone P4:
+
+manifest / gate / reviews / report / hash outputs
+
+MVP does NOT:
+
+sign
+upload
+archive to cloud
+publish
+notarize
+create installer
+create SBOM
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. BUNDLE CANONICAL LAYOUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use one canonical directory structure.
+
+Recommended exact layout:
+
+<bundle-root>/
+├── artifacts/
+│   ├── <sanitized-current-elf-name>
+│   └── <sanitized-current-map-name>        # if present
+├── analysis.json
+├── diff.json                               # only when baseline exists
+├── gate-results.json
+├── accepted-reviews.json
+├── release-notes.md                        # only when current Gate context observed notes
+├── release-report.html
+├── SHA256SUMS
+└── release-manifest.json
+
+No extra hidden files.
+
+Do not export:
+
+SQLite DB
+absolute path metadata
+temp files
+logs
+P3 validation docs
+source project config unless a later contract authorizes it
+
+Do not include baseline ELF/MAP as release artifacts.
+
+Baseline exists only to explain diff/growth.
+
+Current firmware artifacts are what ships.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. BUNDLE IS A RELEASE VERDICT OUTPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A Release Bundle is not just "export current screen."
+
+It represents a Gate-qualified release candidate.
+
+Therefore bundle generation requires:
+
+disposition effective severity =
+PASS
+
+after accepted Reviews are applied.
+
+Reject bundle preparation when disposition is:
+
+BLOCK
+REVIEW
+
+This includes:
+
+- unaccepted REVIEW
+- UNKNOWN mapped to REVIEW
+- UNKNOWN mapped to BLOCK
+- ordinary BLOCK
+
+UNKNOWN cannot be accepted as Review.
+
+Do NOT generate a bundle labeled as release-ready from unresolved UNKNOWN.
+
+If product later wants a diagnostic evidence archive for blocked runs,
+that is a different feature and not P4.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. REVALIDATE GATE CONTEXT AT BUNDLE TIME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A stored GateRun may become stale after:
+
+- Git HEAD changes
+- Git dirty state changes
+- config changes
+- Release Notes changes
+- snapshot/baseline selection changes
+
+Therefore:
+
+Prepare Bundle MUST NOT blindly trust an old run.
+
+Before creating a BundlePlan:
+
+re-observe the current project context using the same P3 adapter
+and recompute Gate with the same current snapshot + optional baseline.
+
+The newly computed deterministic run id must equal the selected stored GateRun id.
+
+If different:
+
+reject with typed error:
+
+GATE_CONTEXT_CHANGED
+
+Remediation:
+
+Run Gate again and review the new result.
+
+This prevents:
+
+old PASS
++
+new dirty Git/config/notes
+=
+false release bundle.
+
+Do not duplicate Gate semantics in P4.
+
+Reuse P3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. ACCEPTED REVIEWS AT BUNDLE TIME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After Gate context revalidation:
+
+load accepted reviews for that exact run id.
+
+Compute disposition using Core's existing acceptance-aware aggregate.
+
+Requirements:
+
+- acceptance finding exists
+- original state REVIEW
+- immutable audit data
+- actor/reason/time retained
+- UNKNOWN never accepted
+
+The exact `accepted-reviews.json` written to Bundle
+must represent the records that caused disposition PASS.
+
+Always include:
+
+accepted-reviews.json
+
+even when acceptances array is empty.
+
+This makes the Bundle shape predictable.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. RELEASE VERSION RESOLUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+release-manifest v1 requires:
+
+release.version
+
+Do NOT ask React to invent a version.
+
+Do NOT accept an arbitrary version string at export time that Gate never judged.
+
+Resolve release version only from the same project/Git context Gate evaluated.
+
+Precedence:
+
+1. `release.expected_version`, when configured and Gate version rule passed;
+2. otherwise the named `version` capture from the exact Git tag validated by `[version].pattern`.
+
+If neither yields a deterministic version:
+
+Bundle preparation fails.
+
+Remediation:
+
+Configure a version policy / expected version and run Gate again.
+
+Do not use:
+
+FirmwareSight app version
+artifact filename
+import timestamp
+
+as project release version.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. DETERMINISTIC RELEASE ID
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use:
+
+release-<sha256>
+
+No random UUID.
+No wall-clock.
+
+Release ID semantic fingerprint includes:
+
+- current snapshot id
+- optional baseline snapshot id
+- exact Gate run id
+- release version
+- accepted reviews canonical document bytes or semantic fingerprint
+- current artifact SHA-256 list
+- release-notes SHA-256 if present
+- FirmwareSight app version
+- relevant portable schema major versions
+
+Do NOT include:
+
+- output path
+- project absolute path
+- filesystem timestamp
+- process id
+- temporary directory
+- SQLite row id
+
+Same semantic release inputs under same FirmwareSight version:
+same release id.
+
+Review acceptance changes:
+release id changes.
+
+Gate context changes:
+run id changes
+therefore release id changes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. CORE RELEASE MODEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`firmwaresight-core` owns portable release semantics.
+
+Create/complete a release domain module such as:
+
+domain/release.rs
+
+Core types should represent:
+
+ReleaseId
+ReleaseVersion
+ReleaseArtifact
+ReleaseBundleFacts / ReleaseModel
+
+Core may decide:
+
+- deterministic semantic ordering
+- release id fingerprint input
+- which facts belong to the release model
+
+Core MUST NOT:
+
+- read files
+- copy files
+- write directories
+- hash filesystem bytes itself
+- use SQLite
+- use Tauri
+- render HTML
+- own overwrite behavior
+
+Filesystem assembly belongs outside Core.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. PUBLIC ANALYSIS SCHEMA V1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current `AnalyzeResultDto` is explicitly:
+
+p0-internal
+
+It must NOT be silently copied into a Release Bundle and presented as a durable public contract.
+
+P4 authorizes:
+
+schemas/analysis.schema.json
+
+$id:
+
+urn:firmwaresight:schema:analysis:1
+
+schema_version:
+1
+
+Create a dedicated public portable projection.
+
+Recommended:
+
+AnalysisDocumentDto
+
+It must carry enough normalized evidence to independently inspect the shipped build.
+
+At minimum:
+
+schema
+schemaVersion
+
+snapshot:
+- snapshot id
+- FirmwareSight version
+- normalization version
+
+artifacts:
+- file name only
+- kind
+- sha256
+- byte size
+- parser id
+- supported identity facts
+
+memory:
+- dual accounting rule
+- layout source
+- evidence basis
+- nonvolatile
+- runtime RAM
+- excluded metadata
+
+sections:
+full normalized section rows
+
+symbols:
+full normalized symbol rows
+
+capabilities
+
+evidence:
+full normalized Evidence rows
+
+No host paths.
+
+No imported_at requirement.
+
+No wall-clock generation time.
+
+Absence / Unknown remains explicit.
+
+This is a portable output, not an IPC payload.
+
+A large symbol table is allowed in a file export.
+The 500-row IPC cap does NOT apply to a deterministic portable document.
+
+But memory must remain bounded enough for the product's existing <512 MiB artifact guard.
+
+Do not send this full document through React.
+
+Render it Rust-side.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. ANALYSIS V1 CONTRACT REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Follow 04_TECH/26:
+
+- draft 2020-12
+- stable URN
+- schema_version required
+- additionalProperties false for stable objects
+- explicit nullability
+- explicit enums
+- unknown major hard error
+- contract tests
+- no host paths
+
+Add:
+
+analysis schema contract test
+
+Use shared `schema_check`.
+
+Do not add a JSON-schema dependency.
+
+Do not mutate `analyze --json` into this public schema in P4 unless required.
+
+Existing CLI Analyze compatibility stays unchanged.
+
+Bundle uses the new public AnalysisDocumentDto.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. DIFF DOCUMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If baseline exists:
+
+reuse exact P2:
+
+urn:firmwaresight:schema:diff:1
+
+Generate `diff.json` from Core Diff.
+
+Do not create Diff v2.
+
+Do not recompute change semantics.
+
+If no baseline:
+
+omit `diff.json`.
+
+Manifest/report must say:
+
+Baseline:
+None
+
+not:
+0
+Unknown
+or a fake empty diff.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. GATE DOCUMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reuse exact P3:
+
+urn:firmwaresight:schema:gate-results:1
+
+Write:
+
+gate-results.json
+
+from the revalidated Gate run.
+
+Do not create v2.
+
+The document's run id must equal:
+
+selected/persisted GateRun
+=
+freshly recomputed Gate run
+
+If not:
+Bundle preparation aborts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. ACCEPTED REVIEWS DOCUMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reuse:
+
+urn:firmwaresight:schema:accepted-reviews:1
+
+Always output:
+
+accepted-reviews.json
+
+Even zero acceptances.
+
+All P4-generated acceptance rows include:
+
+original_state = REVIEW
+
+Do not synthesize acceptance records.
+
+Do not change timestamps.
+
+Do not reorder nondeterministically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. RELEASE MANIFEST V1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reuse existing:
+
+urn:firmwaresight:schema:release-manifest:1
+
+Do NOT create v2 unless a real incompatible requirement appears.
+
+Use current fields:
+
+schema_version
+generated_by
+release
+build
+files
+extensions
+
+Required semantics:
+
+generated_by:
+product = FirmwareSight
+version = actual app/package version
+
+release:
+id = deterministic release-<sha256>
+version = resolved project release version
+notes = "release-notes.md" when included, otherwise null
+
+build:
+snapshot_id
+artifact_sha256 = primary current firmware artifact hash
+git_commit / tag / dirty:
+only if the revalidated Gate context actually observed these facts
+
+IMPORTANT:
+
+These Git fields remain workspace provenance.
+
+Do not label them artifact build provenance.
+
+extensions may include stable facts such as:
+
+gate_run_id
+baseline_snapshot_id
+policy_sha256
+analysis_schema_version
+diff_schema_version when present
+gate_schema_version
+accepted_reviews_schema_version
+integrity_model
+
+No host path.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. MANIFEST / SHA256SUMS SELF-REFERENCE RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A file cannot meaningfully contain its own cryptographic hash without a fixed-point scheme.
+
+Do NOT fake self-hashes.
+
+Use one explicit integrity model:
+
+A. `SHA256SUMS`
+
+Contains hashes for all payload files EXCEPT:
+
+- SHA256SUMS itself
+- release-manifest.json
+
+B. `release-manifest.json`
+
+Its `files` array contains:
+
+ALL bundle files except:
+
+- release-manifest.json itself
+
+Therefore manifest.files DOES include:
+
+- SHA256SUMS
+- artifacts/*
+- analysis.json
+- diff.json if present
+- gate-results.json
+- accepted-reviews.json
+- release-notes.md if present
+- release-report.html
+
+This removes the cycle.
+
+Document this exact rule in:
+
+release-manifest `extensions.integrity_model`
+
+and in release-report.html.
+
+US-004 "manifest has file hashes" is satisfied for every other bundle file;
+manifest self-hash is mathematically excluded and explicitly documented.
+
+Never insert:
+sha256 = ""
+or zeros
+for self.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. SHA256SUMS FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use standard text:
+
+<64 lowercase hex><two spaces><relative/path>
+
+LF endings.
+
+Paths:
+forward slash `/`
+
+Sort:
+case-insensitive lexicographic by normalized bundle-relative path,
+with deterministic tie-break.
+
+No:
+absolute path
+backslash
+`..`
+leading slash
+
+Exclude:
+SHA256SUMS
+release-manifest.json
+
+Verify using independent parser/test.
+
+Do not reuse repository-root SHA256SUMS generator blindly if its semantics differ.
+
+Bundle SHA256SUMS is a different artifact.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. FIRMWARE ARTIFACT COPY SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Raw artifact source files are not stored inside SQLite.
+
+Therefore Bundle export may need to re-read the current snapshot's source artifact paths internally.
+
+Before copying EACH current release artifact:
+
+1. stat
+2. regular-file check
+3. streaming SHA-256
+4. compare against immutable snapshot artifact hash
+5. compare byte size
+6. only then stage the copy
+
+If:
+missing
+changed
+unreadable
+not regular
+
+FAIL CLOSED.
+
+Do not export bytes under a hash that belongs to old content.
+
+Typed error example:
+
+ERR-BUNDLE-6103
+SOURCE_ARTIFACT_CHANGED
+
+Remediation:
+
+Re-analyze the intended artifact or restore the exact bytes.
+
+Do not automatically update snapshot hash.
+
+Snapshot stays immutable.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. WHICH ARTIFACTS SHIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bundle includes CURRENT snapshot artifacts selected as release artifacts.
+
+At MVP:
+
+include every current snapshot Artifact row whose kind is a supported release artifact and whose source bytes can be verified.
+
+Expected current supported set:
+
+ELF
+MAP when supplied
+
+If future BIN/HEX metadata exists and has source bytes + hash:
+only include when the current implementation genuinely supports the row.
+
+Do not include:
+
+baseline artifacts
+temporary files
+project DB
+Git repo files other than Release Notes
+
+Artifact filenames:
+
+sanitize to a safe leaf filename.
+
+Preserve recognizable original leaf name where safe.
+
+On collision:
+
+use deterministic disambiguation, e.g.
+
+<kind>-<sha8>-<sanitized-name>
+
+No path traversal.
+
+No reserved Windows names.
+
+No trailing dots/spaces.
+
+Test cross-platform filename normalization.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. RELEASE NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Revalidated Gate context owns the Release Notes observation.
+
+If notes were observed present:
+
+re-read exact project-relative source at bundle time
+hash bytes
+verify hash equals the Gate-context observation used in the recomputed run id
+copy bytes to canonical:
+
+release-notes.md
+
+Do not parse/rewrite Markdown.
+
+Byte-for-byte copy.
+
+If changed after Gate observation:
+
+Gate context recomputation should already change run id.
+
+If source changes during bundle staging after revalidation:
+
+second hash check must catch it.
+
+Fail closed.
+
+If notes not required/not present and Gate PASS legitimately allows that:
+
+omit release-notes.md
+manifest release.notes = null
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. RELEASE REPORT HTML
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create deterministic:
+
+release-report.html
+
+Self-contained:
+
+- embedded CSS
+- no remote JS
+- no CDN
+- no network
+- no telemetry
+- no external font
+- no wall-clock generated timestamp unless it is an audit fact already in the underlying records
+
+Report must be readable by double-click in a browser without FirmwareSight.
+
+Sections:
+
+1. Release identity
+   - release id
+   - project release version
+   - FirmwareSight version
+
+2. Shipped artifact(s)
+   - filenames
+   - SHA-256
+   - sizes
+
+3. Analysis summary
+   - architecture
+   - nonvolatile
+   - runtime RAM
+   - capability/evidence summary
+
+4. Compare summary if baseline
+   - old/new/delta
+   - top meaningful growth
+   - link/text pointing to diff.json
+
+5. Release Gate
+   - disposition
+   - findings counts
+   - all findings
+   - state
+   - effective severity
+   - evidence refs
+   - remediation
+
+6. Accepted Reviews
+   - actor
+   - accepted_at
+   - reason
+   - original state REVIEW
+
+7. Release Notes
+   - included / not included
+   - relative bundle path
+   - do not embed arbitrary Markdown as raw HTML
+
+8. Bundle integrity
+   - list files + hashes
+   - explain SHA256SUMS rule
+   - explain manifest self-hash exclusion
+   - independent verification instructions
+
+9. Known capability limits relevant to this release
+   - object attribution unavailable where applicable
+   - evidence warnings
+
+HTML escape every artifact-derived/user-derived value.
+
+Do not render Markdown unsafely.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. BUNDLE PLAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not let React assemble the Bundle.
+
+Create Rust-side use case:
+
+prepare_release_bundle
+
+Input:
+
+- current snapshot id
+- optional baseline snapshot id
+- selected Gate run id
+- project config session/token if needed
+
+Process:
+
+1. validate project context exists
+2. recompute Gate context
+3. require recomputed run id == selected run id
+4. load acceptances
+5. require disposition PASS
+6. resolve release version
+7. load persisted current analysis facts
+8. load/compute optional Diff
+9. verify source artifacts
+10. verify Release Notes if included
+11. build deterministic portable DTOs
+12. compute release id
+13. build ordered bundle file plan
+14. calculate content hashes
+15. return bounded BundlePreviewDto + opaque plan id
+
+Do NOT write destination yet.
+
+Plan id:
+
+session-local opaque
+not portable
+not persisted
+not release id
+
+Example:
+bundle-<pid>-<counter>
+
+No new rand dependency.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. PREVIEW DTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BundlePreviewDto bounded:
+
+planId
+releaseId
+releaseVersion
+snapshot
+baseline?
+gateRunId
+disposition = PASS
+files:
+- relative path
+- role/type
+- byte size
+- sha256 when known at planning
+warnings
+
+No full host path.
+
+No source path.
+
+No destination path.
+
+File list is small and may cross IPC.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. PREVIEW INVALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Between Preview and Export the world may change.
+
+At export:
+
+revalidate plan inputs.
+
+At minimum re-check:
+
+- current source artifact hash/size
+- Release Notes hash
+- loaded project config policy hash
+- Gate run id context
+- acceptance set fingerprint
+
+If any changed:
+
+invalidate plan
+do not write bundle
+
+Error:
+
+BUNDLE_PLAN_STALE
+
+Remediation:
+Prepare Bundle again.
+
+Do not export a stale preview.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. DESKTOP DESTINATION AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frontend must never receive arbitrary filesystem authority.
+
+Desktop flow:
+
+Prepare Bundle
+→ preview
+→ Choose destination
+
+Rust opens native directory chooser.
+
+User chooses a parent folder.
+
+Rust proposes deterministic child directory name such as:
+
+<sanitized-project>-<release-version>-<release-id-short>
+
+Frontend receives only:
+
+- destination token / opaque id
+- proposed bundle folder display name
+- whether a directory with that name already exists
+
+Do NOT return full path to WebView.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. OVERWRITE CONFIRMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+US-004:
+
+Do not overwrite existing directory unless user explicitly confirms.
+
+Desktop:
+
+If final bundle directory exists:
+
+first export attempt returns:
+
+CONFIRM_REPLACE_REQUIRED
+
+with safe display name only.
+
+UI must show explicit confirmation:
+
+"Replace the existing FirmwareSight bundle named X?"
+
+Only after user explicitly confirms:
+
+export_release_bundle(... overwrite=true)
+
+No implicit replace.
+
+No checkbox preselected.
+
+Cancel:
+normal non-error.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. SAFE DIRECTORY REPLACEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Never build directly into final directory.
+
+Always stage into a sibling temp directory.
+
+Process:
+
+1. create unique sibling staging directory
+2. write all payload files
+3. fsync/flush where appropriate/practical
+4. independently verify every staged file hash
+5. validate JSON schemas
+6. verify HTML contains no external dependency
+7. create SHA256SUMS
+8. create manifest last after payload/SHA256SUMS hashes are final
+9. validate manifest
+10. verify full bundle invariants
+11. only then publish final directory
+
+If destination absent:
+
+rename staging → destination
+
+If overwrite explicitly authorized:
+
+- ensure existing destination is a recognizable FirmwareSight Release Bundle before destructive replacement OR use reversible backup strategy
+- rename existing destination → sibling backup
+- rename staging → destination
+- only after success remove backup
+- if publish fails, rollback backup
+
+Do NOT recursively delete an arbitrary user directory merely because `overwrite=true`.
+
+If existing destination is not recognizable as FirmwareSight bundle:
+
+refuse replacement.
+
+Typed error:
+UNSAFE_DESTINATION
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. RECOGNIZABLE EXISTING BUNDLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Existing destination is eligible for explicit replacement only if it contains:
+
+release-manifest.json
+
+that:
+
+- parses
+- schema_version = 1
+- generated_by.product = FirmwareSight
+- release.id is valid/non-empty
+
+Optionally verify its internal file list before replacement.
+
+If not recognizable:
+
+do not overwrite.
+
+Tell user to choose another destination.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. CLI RELEASE PREPARE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement the frozen P4 command family.
+
+The old spec shows:
+
+fwsight release prepare --project . --out dist/release
+
+But current project config does NOT identify the firmware artifact.
+
+Therefore P4 resolves the underspecified old example with explicit artifact args.
+
+Implement:
+
+fwsight release prepare \
+  --project . \
+  --artifact firmware.elf \
+  [--map firmware.map] \
+  [--baseline old.elf] \
+  [--baseline-map old.map] \
+  --out dist/release \
+  [--force] \
+  [--json]
+
+Document this as implementation clarification, not a new product verb.
+
+CLI flow:
+
+- load config
+- analyze current
+- analyze baseline if supplied
+- run Gate using shared P3 logic
+- require disposition PASS
+
+P4 CLI does not have Desktop Review history.
+
+Therefore:
+
+if Gate returns REVIEW or UNKNOWN/Block:
+do not bundle.
+
+CLI cannot invent/accept a review interactively.
+
+This is acceptable for MVP:
+headless clean-pass releases are supported;
+review acceptance remains Desktop audit workflow.
+
+Do not prompt interactively.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. CLI RELEASE EXIT CODES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reuse stable CLI codes.
+
+0:
+bundle created
+
+2:
+usage/config/version resolution error
+
+3:
+artifact/MAP parse/import error
+
+4:
+Gate disposition REVIEW
+
+5:
+Gate disposition BLOCK
+
+6:
+bundle/export/source-file/destination error
+
+Never 1.
+
+If Gate state contains UNKNOWN:
+aggregate effective severity decides 4 or 5.
+
+--json on success:
+
+stdout exactly one release-manifest JSON document
+matching the file written into the bundle.
+
+stderr:
+diagnostics/progress/warnings.
+
+No host paths in JSON.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. CLI `--force`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Default:
+
+existing destination → exit 6
+
+`--force` is explicit overwrite authorization.
+
+But even with --force:
+
+only replace a recognizable FirmwareSight Release Bundle.
+
+Never delete an arbitrary directory.
+
+Use same staging/swap engine as Desktop.
+
+Do not have separate CLI bundle semantics.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. REPORT / BUNDLE ASSEMBLY OWNERSHIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Recommended ownership:
+
+firmwaresight-core:
+release semantics/model/id input
+
+firmwaresight-project:
+project context / release notes / config / Git observations
+
+firmwaresight-storage:
+persist/retrieve release record
+
+firmwaresight-report:
+portable Analysis v1
+manifest v1
+release HTML
+bundle file bytes/IR
+schema contract projections
+
+application layer:
+filesystem staging
+source-file streaming hash verification
+destination selection
+safe publish/swap
+
+Do not create a sixth first-party library crate.
+
+P4 does NOT justify another crate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. STORAGE MIGRATION 0004
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P4 is the phase where `release_records` becomes real.
+
+Create:
+
+crates/firmwaresight-storage/migrations/0004_release_records.sql
+
+Increment:
+
+SCHEMA_VERSION:
+3 → 4
+
+Add only the release record needed now.
+
+Recommended:
+
+release_records
+
+fields:
+
+id TEXT PRIMARY KEY                  # release-<sha256>
+build_id TEXT NOT NULL
+baseline_build_id TEXT NULL
+gate_run_id TEXT NOT NULL
+release_version TEXT NOT NULL
+manifest_sha256 TEXT NOT NULL
+created_at TEXT NOT NULL DEFAULT SQLite UTC
+
+FK:
+
+build_id → builds(id)
+baseline_build_id → builds(id)
+gate_run_id → gate_runs(id)
+
+Constraints:
+
+release id format
+manifest SHA-256 format
+baseline != build when non-null
+non-empty release_version
+
+Do NOT store:
+
+absolute bundle path
+source project root
+artifact source path
+whole manifest blob
+HTML blob
+
+Release record is audit/index,
+not the bundle itself.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. RELEASE RECORD IMMUTABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Release records are immutable.
+
+No UPDATE.
+
+No DELETE in MVP.
+
+Same release id + same semantics:
+AlreadyStored
+
+Same release id + conflicting semantics:
+Invariant error
+
+Do not create two records for the same deterministic release.
+
+Persist only AFTER the bundle has been fully staged, verified and published successfully.
+
+If filesystem export fails:
+
+no release_record.
+
+If DB record write fails after bundle publish:
+
+do not delete the valid user bundle.
+
+Return typed partial-success audit error:
+
+bundle exists
+release history record failed
+
+and explain remediation.
+
+Prefer transaction sequencing that minimizes this condition,
+but filesystem + SQLite cannot be one atomic transaction.
+
+Do not pretend otherwise.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. MIGRATION TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required:
+
+fresh DB → v4
+
+v1 → v4
+data preserved
+
+v2 → v4
+data preserved
+
+v3 → v4
+GateRun + acceptances preserved
+
+future schema:
+hard fail
+
+failed 0004:
+recoverable prior DB
+
+foreign keys enforced
+
+release record:
+insert
+dedupe
+collision mismatch
+immutability
+
+no path column
+no host path persistence
+
+No silent reset.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. RELEASE MANIFEST DTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add report-layer:
+
+ReleaseManifestDto
+
+matching existing schema v1 exactly.
+
+Do not use arbitrary serde_json Value for the canonical document.
+
+Typed fields.
+
+File entries:
+
+path
+sha256
+size
+
+Deterministic ordering.
+
+`extensions` may use a typed serializable struct flattened/serialized into the allowed extension object if current schema requires open map.
+
+Avoid HashMap iteration nondeterminism.
+
+If map required:
+use BTreeMap.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. BUNDLE FILE GENERATION ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Recommended staging order:
+
+1. artifacts/*
+2. analysis.json
+3. diff.json if baseline
+4. gate-results.json
+5. accepted-reviews.json
+6. release-notes.md if present
+7. release-report.html
+8. SHA256SUMS
+9. release-manifest.json
+
+Why manifest last:
+
+it hashes every other bundle file including SHA256SUMS.
+
+Never regenerate an earlier payload after manifest is written.
+
+After manifest:
+read back and verify all.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. BUNDLE DETERMINISM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For same semantic inputs + same FirmwareSight version:
+
+all generated non-source bytes must be byte-identical:
+
+analysis.json
+diff.json
+gate-results.json
+accepted-reviews.json
+release-report.html
+SHA256SUMS
+release-manifest.json
+
+Copied source artifacts/notes are byte-identical by definition after hash verification.
+
+Do not include:
+
+generation timestamp
+random order
+random id
+absolute destination
+OS path separator
+filesystem mtime
+
+SQLite release_records.created_at is an audit time
+and is NOT included in portable bundle bytes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. RELEASE REPORT VERSION WORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Report must visibly distinguish:
+
+FirmwareSight App Version
+
+Project Release Version
+
+Artifact identity/hash
+
+Workspace Git facts
+
+Do not conflate them.
+
+Never write:
+
+"Firmware built from commit X"
+
+unless artifact evidence proves it.
+
+Use:
+
+"Workspace HEAD observed by the Release Gate"
+
+for Git facts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. BUNDLE VERIFICATION ENGINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement one internal verifier used by tests and export finalization.
+
+Verify:
+
+- required files present
+- no unexpected temp file
+- no path escapes
+- no absolute paths
+- no duplicate normalized path
+- SHA256SUMS syntax
+- every SHA256SUMS entry matches bytes
+- manifest schema valid
+- manifest files unique
+- every manifest entry exists
+- every manifest hash/size matches
+- manifest covers all files except itself
+- SHA256SUMS included in manifest
+- SHA256SUMS excludes itself and manifest
+- analysis schema valid
+- diff schema valid when present
+- gate schema valid
+- accepted reviews schema valid
+- release id matches semantic input
+- report self-contained
+- no external URL resources
+- no host path leakage
+
+Do not require FirmwareSight to READ the report,
+but internal generation must verify what it writes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. INDEPENDENT PORTABILITY TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+US-004 requires another person/machine can review without FirmwareSight.
+
+Create a portability test/smoke that:
+
+1. generates a bundle
+2. copies/moves the complete bundle directory to a different temp root
+3. deletes or makes unavailable:
+   - source ELF path
+   - source MAP path
+   - project root
+   - SQLite validation DB if practical
+4. verifies bundle only from its own bytes
+5. parses JSON files
+6. validates schemas
+7. verifies SHA256SUMS
+8. opens/reads release-report.html without app resources/network
+9. confirms no source host path appears anywhere
+
+Do not call FirmwareSight DB to verify the relocated bundle.
+
+An internal standalone verifier function may be used on bundle bytes,
+but it may not rely on project state.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. GOLDEN BUNDLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create one deterministic P4 golden bundle representation.
+
+Do NOT commit a giant duplicate ELF if unnecessary.
+
+Recommended:
+
+golden/reports/p4-release/
+- analysis.json
+- diff.json
+- gate-results.json
+- accepted-reviews.json
+- release-report.html
+- SHA256SUMS
+- release-manifest.json
+
+Artifact copied bytes may be verified by fixture hashes rather than duplicated into golden/.
+
+Use P2 fixture pair
++
+deterministic P4 project config
++
+PASS-capable Gate scenario.
+
+Golden changes require semantic review.
+
+No blind update.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+47. P4 FIXTURE PROJECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create/extend a deterministic project fixture for Bundle tests.
+
+Use committed P2 base/target artifacts.
+
+Need:
+
+firmwaresight.toml
+Release Notes
+Git facts simulated/normalized in unit tests
+
+For real CLI/Desktop smoke:
+use temporary real Git repository.
+
+Do NOT use FirmwareSight repository itself as release subject.
+
+P4 project policy should yield:
+
+Gate disposition PASS
+
+Prefer one accepted REVIEW Desktop scenario additionally,
+so the Bundle proves accepted-reviews inclusion.
+
+For CLI bundle smoke:
+use pure PASS with zero acceptances.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+48. DESKTOP RELEASE UI — NO FIFTH VERB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Top-level navigation remains:
+
+Analyze
+Compare
+Release
+
+Do NOT add:
+
+Bundle
+History
+Settings
+
+as top-level items.
+
+Bundle attaches under Release.
+
+After a PASS disposition:
+
+show section:
+
+Prepare Release Bundle
+
+Flow:
+
+Gate
+→ Review resolved
+→ Prepare Bundle
+→ Preview
+→ Choose destination
+→ Export
+→ Verification result
+
+If Gate is not PASS:
+
+Prepare Bundle disabled/unavailable
+with factual reason.
+
+No marketing celebration screen.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+49. BUNDLE PREVIEW UI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preview shows:
+
+Release ID
+Project release version
+Current build
+Baseline or None
+Gate run
+Accepted review count
+File list
+Each file:
+- relative path
+- size
+- SHA-256 where finalized
+
+Warnings
+
+No host path.
+
+Buttons:
+
+Choose destination
+Export
+
+If preview stale:
+show error and require Prepare again.
+
+Do not let user edit manifest fields in React.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+50. EXPORT RESULT UI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After success show:
+
+Bundle created
+Release ID
+Folder display name
+Manifest SHA-256
+File count
+
+Actions allowed:
+
+Copy release id
+Copy manifest hash
+
+Do NOT expose absolute destination path if current IPC policy forbids it.
+
+If OS "Open folder" requires shell permission:
+do NOT add it in P4.
+
+No shell plugin.
+
+No generic filesystem plugin.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+51. ERROR MODEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use stable typed errors.
+
+Suggested new codes in 61xx family:
+
+ERR-BUNDLE-6101
+GATE_NOT_READY
+
+ERR-BUNDLE-6102
+GATE_CONTEXT_CHANGED
+
+ERR-BUNDLE-6103
+SOURCE_ARTIFACT_CHANGED
+
+ERR-BUNDLE-6104
+RELEASE_NOTES_CHANGED
+
+ERR-BUNDLE-6105
+PLAN_STALE
+
+ERR-BUNDLE-6106
+DESTINATION_EXISTS
+
+ERR-BUNDLE-6107
+UNSAFE_DESTINATION
+
+ERR-BUNDLE-6108
+WRITE_FAILED
+
+ERR-BUNDLE-6109
+VERIFY_FAILED
+
+ERR-BUNDLE-6110
+VERSION_UNAVAILABLE
+
+ERR-BUNDLE-6111
+RELEASE_RECORD_FAILED
+
+Use existing ERR-EXPORT-6001 only if semantics truly match generic single-file export.
+
+Do not overload codes ambiguously.
+
+No stack traces in UI.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+52. CORE TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At minimum:
+
+Release id:
+
+1. same semantic input same id
+2. snapshot change changes id
+3. baseline change changes id
+4. gate run change changes id
+5. release version change changes id
+6. acceptance content change changes id
+7. release notes hash change changes id
+8. output path does NOT change id
+9. wall-clock does NOT enter id
+10. deterministic ordering
+
+Release model:
+
+11. current artifact list ordered
+12. baseline not shipped
+13. no path field
+14. Git facts remain workspace facts
+15. PASS disposition required
+16. REVIEW rejected
+17. BLOCK rejected
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+53. REPORT TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Analysis v1:
+
+- schema validates
+- deterministic bytes
+- sections included
+- symbols included
+- evidence included
+- Unknown explicit
+- no host path
+
+Manifest v1:
+
+- schema validates
+- correct app version
+- correct release version
+- correct release id
+- all non-manifest files listed
+- SHA256SUMS listed
+- no duplicate file path
+- hashes/sizes correct
+- extensions integrity model correct
+
+HTML:
+
+- deterministic
+- self-contained
+- no http://
+- no https://
+- no `<script src=`
+- proper HTML escaping
+- FirmwareSight version visible
+- project release version visible
+- Gate state visible
+- reviews visible
+- verification instructions visible
+- no host path
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+54. STORAGE TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Migration:
+
+- fresh → v4
+- v1 → v4
+- v2 → v4
+- v3 → v4
+- Gate history preserved
+- accepted reviews preserved
+- future hard fail
+- failed migration recoverable
+
+release_records:
+
+- insert
+- read by id if API exists
+- dedupe
+- collision mismatch
+- UPDATE refused
+- DELETE refused if immutability chosen in schema
+- no path stored
+- manifest hash exact
+- FK GateRun
+- FK current build
+- baseline optional/distinct
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+55. BUNDLE BUILDER TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At minimum:
+
+- source ELF hash matches -> copy
+- source ELF changed -> fail 6103
+- source ELF missing -> fail
+- MAP changed -> fail
+- safe filename normalization
+- collision disambiguation
+- Windows reserved filename
+- no traversal
+- notes bytes exact
+- notes change after plan -> stale/fail
+- Gate run changed -> stale/fail
+- policy changed -> stale/fail
+- acceptance changed -> stale/fail
+- staging directory cleaned after failure
+- final destination absent -> atomic publish
+- existing arbitrary directory + overwrite -> refuse
+- existing recognized FirmwareSight bundle + explicit overwrite -> safe replace
+- failed replacement rolls back prior bundle
+- no partial final bundle
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+56. CLI TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At minimum:
+
+- `release prepare` registered
+- release subcommand help correct
+- `--artifact` required
+- `--out` required
+- map supported
+- baseline supported
+- baseline-map supported
+- Gate PASS -> bundle success exit 0
+- Gate REVIEW -> exit 4
+- Gate BLOCK -> exit 5
+- parse failure -> 3
+- config/version error -> 2
+- source changed/export failure -> 6
+- existing destination -> 6 without force
+- force rejects arbitrary directory
+- force replaces recognized bundle
+- --json exactly one manifest on stdout
+- stderr diagnostics only
+- no host path
+- repeated same input deterministic
+- CLI release does not write SQLite/project DB
+- `release` still does no signing/upload
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+57. DESKTOP IPC TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At minimum:
+
+Prepare:
+- Gate run required
+- context revalidated
+- changed Git/config/notes changes run -> 6102
+- disposition PASS required
+- accepted reviews loaded
+- version resolved
+- bounded preview
+- no host path
+- opaque plan id
+
+Destination:
+- native chooser cancel non-error
+- no path to frontend
+- existing bundle confirmation required
+- arbitrary directory cannot be replaced
+
+Export:
+- stale plan rejected
+- source hash rechecked
+- verified bundle written
+- release record persisted after success
+- write failure no release record
+- DB record failure does not delete valid exported bundle
+- no generic fs command
+
+ts-rs:
+bindings committed
+drift green
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+58. UI TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Navigation:
+
+Analyze
+Compare
+Release
+
+No fifth Bundle verb.
+
+Release Bundle section:
+
+- hidden/disabled until Gate disposition PASS
+- reason visible when not ready
+- Prepare Bundle
+- preview
+- release id
+- release version
+- current build
+- baseline
+- gate run
+- accepted reviews count
+- files
+- choose destination
+- overwrite confirmation
+- success summary
+- typed errors
+- stale preview
+
+Accessibility:
+
+- keyboard reachable
+- confirmation dialog labeled
+- focus managed
+- file preview table semantics
+- no color-only state
+- disabled action understandable
+
+No magic CSS values.
+No new token expected.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+59. REAL WINDOWS DESKTOP SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mandatory shipping custom-protocol smoke.
+
+Use:
+clean validation DB
+temporary Git project
+P2 base + target fixture
+temporary project config
+Release Notes
+
+Do NOT use FirmwareSight repo as release subject.
+
+Steps:
+
+1. launch shipping binary
+2. Analyze base + MAP
+3. Analyze target + MAP
+4. Release page
+5. load project config
+6. select target
+7. select baseline
+8. Run Gate
+9. produce PASS or REVIEW scenario
+10. if REVIEW, record valid acceptance
+11. confirm disposition PASS
+12. Prepare Bundle
+13. verify preview release id
+14. verify project release version
+15. verify current snapshot
+16. verify baseline
+17. verify Gate run id
+18. verify accepted review count
+19. verify expected file list
+20. verify no host path
+21. Choose destination
+22. export bundle
+23. verify success result
+24. inspect bundle directory independently
+25. artifact ELF hash matches snapshot
+26. MAP hash matches snapshot
+27. analysis.json validates
+28. diff.json validates
+29. gate-results.json validates
+30. accepted-reviews.json validates
+31. release-manifest.json validates
+32. SHA256SUMS verifies
+33. report opens by double click/browser without app resources
+34. report shows FirmwareSight version
+35. report shows project release version
+36. report shows Gate finding states
+37. report shows accepted Review audit
+38. report contains no host path
+39. move bundle to another temp root
+40. verify again with project/source/DB unavailable
+41. choose same destination again
+42. confirmation required
+43. cancel replace -> prior bundle byte-identical
+44. explicitly confirm replace
+45. safe replacement succeeds
+46. modify source ELF after plan
+47. export stale plan
+48. export rejected; no partial replacement
+49. restore exact source
+50. clean close
+
+Record:
+
+P4_VALIDATION/P4_BUNDLE_DESKTOP_SMOKE_REPORT.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+60. CLI RELEASE SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use temporary real Git project.
+
+Run:
+
+fwsight release prepare \
+  --project <temp-project> \
+  --artifact <target.elf> \
+  --map <target.map> \
+  --baseline <base.elf> \
+  --baseline-map <base.map> \
+  --out <temp-output>
+
+Use policy that produces pure PASS.
+
+Verify:
+
+- exit 0
+- expected bundle layout
+- schemas
+- hashes
+- report
+- --json manifest
+- no DB created in project
+- no host path
+- same input second output semantic bytes identical
+- existing destination without --force exit 6
+- --force only replaces recognized FirmwareSight bundle
+
+Record in:
+
+P4_VALIDATION/P4_BUNDLE_EXECUTION_REPORT.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+61. PORTABILITY / INDEPENDENT READER SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bundle must remain useful with:
+
+FirmwareSight closed
+source artifact absent
+project directory absent
+validation DB absent
+network unavailable
+
+Required reviewable content from bundle alone:
+
+what release is this?
+what firmware artifact ships?
+what are its hashes?
+what did analysis say?
+what changed from baseline?
+what did Gate say?
+which Reviews were accepted?
+what were Release Notes?
+how do I verify files?
+
+If any requires reopening FirmwareSight:
+US-004 is not complete.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+62. NO SIGNING CLAIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SHA-256 proves accidental/observable byte consistency against the included manifest.
+
+It does NOT authenticate who produced the Bundle.
+
+Without cryptographic signing:
+
+do not write:
+
+trusted
+authentic
+signed
+tamper-proof
+
+Use:
+
+integrity verification
+hash verification
+bundle consistency
+
+Signing is post-MVP/productization scope.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+63. DESIGN CONSTRAINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use frozen design.
+
+No new design token expected.
+
+No:
+
+gradient
+glass
+purple
+neon
+marketing hero
+confetti
+"Ready to ship!" celebration
+heavy shadow
+dark theme
+
+Bundle screen is an audit/export surface.
+
+Use:
+
+dense file list
+mono hash/id
+clear status
+quiet success state
+
+Remember:
+
+FirmwareSight policy readiness
+is not legal/safety certification.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+64. NO NEW THIRD-PARTY DEPENDENCY BY DEFAULT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expected:
+NO new third-party dependency.
+
+Use:
+
+std filesystem
+existing sha2
+existing serde/serde_json
+existing report schema checker
+existing Tauri dialog
+existing crates
+
+Do not add:
+
+zip
+tar
+walkdir
+handlebars
+tera
+HTML framework
+filesystem plugin
+shell plugin
+
+unless genuinely required.
+
+If a new dependency is truly necessary:
+STOP and report before adding.
+
+Directory bundle does not need archive dependency.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+65. NO NEW CRATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P4 does not authorize a sixth first-party library crate.
+
+Use existing boundaries:
+
+core
+artifact
+project
+storage
+report
+
+If responsibility genuinely cannot fit:
+STOP and request architecture review.
+
+Do not create:
+
+firmwaresight-bundle
+
+just because P4 is named Bundle.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+66. PUBLIC CONTRACTS AFTER P4
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expected portable contract set:
+
+analysis:1             NEW
+diff:1                 existing
+gate-results:1         existing
+accepted-reviews:1     existing
+release-manifest:1     existing
+project-config:1       existing
+
+Do NOT bump existing majors without evidence.
+
+Update 04_TECH/26 to record analysis:1.
+
+Contract tests mandatory.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+67. RELEASE RECORD VS PORTABLE BUNDLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not confuse:
+
+release_records SQLite row
+
+with:
+
+Release Bundle.
+
+SQLite:
+local implementation/audit index.
+
+Bundle:
+portable interchange.
+
+Deleting/moving the project DB must not break bundle.
+
+Moving bundle must not require DB.
+
+Do not export SQLite.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+68. FULL VALIDATION COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run separately and record exact results.
+
+Rust:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+IMPORTANT:
+
+Report ONLY the direct `cargo test --workspace` count.
+
+Do NOT sum tests from later drift/core-smoke reruns into this number.
+
+Frontend from UI package:
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+Drift/security:
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py
+
+git diff --check
+
+cargo-deny must execute against refreshed index/normal CI semantics.
+
+Do not use a stale cached advisory/index result as sole evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+69. RELEASE BUILD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build shipping configuration:
+
+cargo build --release \
+  -p firmwaresight-desktop \
+  --features custom-protocol
+
+Record:
+
+exit code
+binary SHA-256
+
+Do not claim the release build was manually walked unless it actually was.
+
+Desktop smoke must use the shipping binary produced from the final tested tree.
+
+If code changes after smoke:
+decide whether affected behavior requires re-walk;
+state exactly what was and was not re-smoked.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+70. INTEGRITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tracked path set will change.
+
+Regenerate repository:
+
+DIRECTORY_TREE.txt
+
+when tracked paths change.
+
+Regenerate repository:
+
+SHA256SUMS
+
+LAST.
+
+Verify:
+
+- full `git ls-files` coverage
+- manifest self-exclusion
+- 0 mismatch
+- 0 missing
+- 0 stale
+- no duplicate path
+- LF
+- no host path
+
+Repository SHA256SUMS and Bundle SHA256SUMS are separate concepts.
+
+Do not mix their generators/contracts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+71. P4 VALIDATION PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P4_VALIDATION/P4_BUNDLE_EXECUTION_REPORT.md
+
+P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md
+
+P4_VALIDATION/P4_BUNDLE_DESIGN_CHECKLIST.md
+
+P4_VALIDATION/P4_BUNDLE_DESKTOP_SMOKE_REPORT.md
+
+Keep concise but auditable.
+
+Record actual CI failures if remote catches any.
+
+Do not smooth them away.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+72. P4 EXIT CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P4 = PASS / COMPLETE only if:
+
+Architecture:
+□ no sixth crate
+□ no new third-party dependency unless separately admitted
+□ Core owns release semantics only
+□ filesystem assembly outside Core
+
+Gate binding:
+□ Bundle revalidates Gate context
+□ run id must still match
+□ disposition PASS required
+□ accepted Reviews exact
+□ UNKNOWN cannot be waived
+
+Version:
+□ deterministic project release version
+□ no arbitrary export-time version
+
+Source safety:
+□ ELF rehashed before copy
+□ MAP rehashed before copy
+□ source mutation fails closed
+□ notes mutation fails closed
+
+Portable:
+□ analysis:1
+□ diff:1 when baseline
+□ gate-results:1
+□ accepted-reviews:1
+□ release-manifest:1
+□ deterministic report HTML
+□ SHA256SUMS
+
+Integrity:
+□ no self-hash lie
+□ explicit self-reference model
+□ manifest covers every non-manifest bundle file
+□ hashes/sizes verify
+
+Filesystem:
+□ staged export
+□ no partial final bundle
+□ no implicit overwrite
+□ explicit replace confirmation
+□ arbitrary directory never deleted
+□ rollback path tested
+
+Storage:
+□ additive 0004
+□ SCHEMA_VERSION = 4
+□ old DB upgrades
+□ release_records immutable
+□ no path stored
+
+CLI:
+□ release prepare
+□ non-interactive
+□ stable exits
+□ --force safe
+□ --json manifest
+□ no project DB side effect
+
+Desktop:
+□ Bundle under Release, no fifth verb
+□ preview
+□ native destination
+□ no path leak
+□ overwrite confirmation
+□ stale plan rejection
+□ success summary
+
+Portability:
+□ relocated bundle independently readable
+□ source/project/DB not required
+□ HTML offline
+□ schemas valid
+□ SHA256SUMS valid
+
+Engineering:
+□ fmt
+□ clippy
+□ direct workspace tests correctly counted
+□ UI tests
+□ frontend build
+□ drift
+□ deny
+□ core-smoke
+□ full gate
+□ git diff --check
+□ shipping build
+□ real Windows smoke
+
+Then:
+
+P4 = PASS / COMPLETE
+
+G2 =
+READY_FOR_ENGINEERING_GATE_REVIEW
+
+Do NOT claim G2 PASS in this P4 implementation round.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+73. REMOTE CI CLOSURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P4 is not FINAL until a CI run covers the final product tree.
+
+Because environment may auto-push:
+
+after each commit:
+fetch origin and inspect runs.
+
+Once final P4 implementation HEAD is on origin/main:
+
+identify CI by exact headSha.
+
+Required:
+7 / 7 success.
+
+If red:
+fix actual defect inside P4.
+Do not start G2 review.
+
+After implementation CI green:
+
+one documentation/governance successor closure commit is allowed
+to record the measured implementation run.
+
+Then successor HEAD itself must get 7 / 7 green.
+
+Do NOT create an infinite CI→docs loop.
+
+The final successor run is external evidence and does not need to be written into another commit.
+
+P4 final remote verdict only after:
+
+implementation CI green
++
+successor closure CI green.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+74. AUTO-PUSH DURING P4
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If commit auto-pushes before explicit push:
+
+do not panic
+do not rewrite
+do not duplicate commit
+
+Record:
+
+commit SHA
+origin/main
+run id if created
+
+Continue from actual remote truth.
+
+If an intermediate commit triggers CI and fails:
+
+do not confuse that with final P4 verdict.
+
+But inspect the failure:
+it may expose a real defect.
+
+Final P4 closure must cite the run covering the actual final implementation tree.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+75. COMMIT STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Recommended logical commits:
+
+1.
+P4: add portable release model, analysis schema and bundle contracts
+
+2.
+P4: add release records and verified bundle assembly
+
+3.
+P4: expose release prepare in CLI and Desktop
+
+4.
+P4: close portability, overwrite and real-window defects
+
+5.
+P4: record Bundle validation and close stage
+
+6.
+P4: regenerate repository integrity artifacts
+
+Combine where dependency graph is cleaner.
+
+Do not create dozens of micro-commits.
+
+Do not amend P3.
+
+No force push.
+
+Remember automatic-push rule after every commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+76. OPEN-SOURCE LICENSE GAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Still open:
+
+Cargo.toml currently says:
+
+license = "Proprietary"
+
+Root LICENSE is absent.
+
+Do NOT change either in P4.
+
+Keep:
+
+OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION
+
+License selection is a separate owner decision.
+
+It does not block technical MVP completion.
+
+Do not add license text silently.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+77. GOVERNANCE FINAL STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After P4 local + remote closure succeeds:
+
+P0 = PASS
+G1 = PASS
+
+P1 = PASS / COMPLETE
+P2 = PASS / COMPLETE
+P3 = PASS / COMPLETE
+P4 = PASS / COMPLETE
+
+G2 =
+READY_FOR_ENGINEERING_GATE_REVIEW
+
+V0 =
+NON_BLOCKING_USER_FEEDBACK_TRACK
+
+Pricing/commercial =
+DEFERRED_POST_MVP
+
+active_task =
+NONE
+
+baseline_version =
+0.6.0
+
+Open-source license:
+PENDING OWNER CONFIRMATION
+
+Do NOT create:
+v0.7.0
+
+Do NOT enter:
+P5
+V1
+B1
+RC1
+GA1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+78. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight P4 Release Bundle Completion Report
+
+## 1. Start State
+HEAD
+origin/main
+Run #25
+P3 sealed status
+auto-push observation
+
+## 2. P4 Architecture
+Core
+Project
+Storage
+Report
+App boundaries
+
+## 3. Portable Analysis v1
+schema
+fields
+determinism
+contract tests
+
+## 4. Release Model
+release version
+release id
+Gate binding
+acceptance binding
+
+## 5. Bundle Layout
+exact file tree
+optional files
+
+## 6. Integrity Model
+manifest rule
+SHA256SUMS rule
+self-reference exclusion
+verification
+
+## 7. Artifact Safety
+source hash revalidation
+notes revalidation
+stale plan
+
+## 8. Filesystem Safety
+staging
+publish
+replace confirmation
+rollback
+unsafe destination
+
+## 9. Storage
+SCHEMA_VERSION
+0004
+release_records
+upgrade tests
+
+## 10. CLI
+release prepare syntax
+exit codes
+force
+JSON
+smoke
+
+## 11. Desktop
+Release Bundle flow
+preview
+destination
+confirmation
+result
+no path leak
+
+## 12. Portability
+relocated bundle
+source/project/DB unavailable
+offline HTML
+hash/schema verification
+
+## 13. Tests
+direct cargo test count
+UI count
+contract tests
+storage
+bundle
+CLI
+Desktop
+
+## 14. Gates
+fmt
+clippy
+cargo test
+pnpm
+drift
+deny
+core-smoke
+full gate
+git diff --check
+shipping build
+
+## 15. Windows Desktop Smoke
+50-step result
+what was re-walked
+what was not
+
+## 16. Remote CI
+intermediate runs
+final implementation run
+successor closure run
+
+## 17. Known Findings
+real unresolved/non-blocking only
+
+## 18. Open-Source License Gap
+still pending owner
+
+## 19. Governance
+
+P0 PASS
+G1 PASS
+P1 PASS
+P2 PASS
+P3 PASS
+P4 PASS / COMPLETE
+G2 READY_FOR_ENGINEERING_GATE_REVIEW
+Baseline 0.6.0
+
+## 20. Git
+start HEAD
+P4 commits
+final remote HEAD
+worktree
+
+## 21. Stop
+
+STOP AFTER P4.
+
+DO NOT CLAIM G2 PASS.
+
+DO NOT IMPLEMENT P5.
+
+Return to Architect for final G2 MVP engineering closure review.
+
+NO PRICING.
+NO COMMERCIAL VALIDATION.
+NO CLOUD.
+NO ACCOUNTS.
+NO TELEMETRY.
+NO AI.
+NO SIGNING.
+NO UPDATER.
+
+END OF PROMPT

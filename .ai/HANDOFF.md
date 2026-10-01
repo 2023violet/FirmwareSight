@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-09-30"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / active task NONE
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle IN PROGRESS
 
 ## Purpose
 
@@ -27,19 +27,26 @@ every diff semantic, and one portable document comes out of the CLI and out of t
 `P2_VALIDATION/` holds the four documents and US-002 is checked item by item in
 `P2_COMPARE_EXIT_CHECKLIST.md`. The architect then issued
 *FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect Reviewed*, and that
-round finished on 2026-09-30: **`P3` is `PASS / COMPLETE` and `active_task` is `NONE`.** One verb, `Gate`,
+round finished on 2026-09-30: **`P3` is `PASS / COMPLETE` and SEALED.** One verb, `Gate`,
 now runs end to end — `firmwaresight.toml` read by the adapter ADR-0027 created, ten rules judged in Core,
 an immutable run and an immutable review acceptance in SQLite, `fwsight gate`, and the desktop `Release`
-page. US-003 is checked item by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`.
+page. US-003 is checked item by item in `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`. The same day the
+architect issued P4's prompt, so **`active_task` is now `P4_RELEASE_BUNDLE`**: one verb, `Bundle`, that
+packages the Gate's answer together with Analyze, Compare, accepted Reviews, the shipped artifacts and the
+Release Notes into a directory another person can read and verify without FirmwareSight running.
 
 Four wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here to
 continue P1, P2 or P3, all three are `PASS / COMPLETE` and their acceptance lists are checked item by item
 in `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` and
 `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md` — there is nothing left inside any of them to do. And if you were
-sent here to start a **Bundle**, a History page, an installer or anything cloud-shaped: **`active_task` is
-`NONE`, and P4 Release Bundle is not authorized by anything in this repository.** ADR-0026 removed the
-*research* gate, not the requirement that each stage carry its own architect prompt, so "governance got
-easier" is not a licence to widen scope. P3's own §72 says it plainly: **stop after P3.** The fourth is
+sent here to start a **Bundle** without a prompt: that changed on 2026-09-30. P3 closed, `active_task`
+returned to `NONE`, and the architect then issued *FirmwareSight — P4 Release Bundle MVP Implementation,
+Execution Prompt v1.0 — Architect Reviewed*, which is the live task. ADR-0026 removed the *research* gate,
+not the requirement that each stage carry its own architect prompt, so "governance got
+easier" is not a licence to widen scope: **P4 is authorized, and only P4.** Its own §78 says stop after P4,
+and its §5 says the round may not claim `G2 = PASS` — the only G2 statement it may write is
+`READY_FOR_ENGINEERING_GATE_REVIEW`. Anything History-shaped, installer-shaped, signing-shaped,
+updater-shaped or cloud-shaped is still outside it, and so is the G2 audit itself. The fourth is
 specific to this round's state: P3's commits were **local at closure and pushed after it**, so the pack's
 gate numbers stay locally measured and the remote is a separate, later fact — Run `36774472141` on
 `219178af`, 6 of 7 jobs green, the one red being `Dependency policy` over a crate that crates.io yanked

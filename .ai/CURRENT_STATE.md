@@ -12,15 +12,28 @@ last_updated: "2026-09-30"
 
 - Date: 2026-09-30
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`NONE`** — `P3_RELEASE_GATE` reached `PASS / COMPLETE` on 2026-09-30 under
-  *FirmwareSight — P3 Release Gate MVP Implementation, Execution Prompt v1.1 — Architect Reviewed*,
-  supplied inline (registered in `10_AUDIT/SOURCE_PROMPTS/README.md` without a SHA-256, because no source
-  file reached this repository), and under `ADR-0027`, which keeps project policy and Git provenance out
-  of Core. Its verdict is item by item against US-003 and PRD P0-5 in
-  `P3_VALIDATION/P3_GATE_EXIT_CHECKLIST.md`; `P2_COMPARE` and `P1_ANALYZE_DETAILS` closed earlier, in
-  `P2_VALIDATION/` and `P1_VALIDATION/`.
-  **`P4_RELEASE_BUNDLE` is the next authorizable stage and this file does not authorize it.**
-  **The P3 commits were closed unpushed, then pushed, and CI is now mixed on them:** `origin/main` is
+- Active task: **`P4_RELEASE_BUNDLE`** — opened on 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
+  Implementation, Execution Prompt v1.0 — Architect Reviewed*, delivered as a file (the first stage prompt
+  since P0 to arrive that way) and archived with its measured SHA-256
+  `1baaec9204a1d2aa5aa53bd735b34d376ee56db7557a04d6abb79265c30840c5` under `10_AUDIT/SOURCE_PROMPTS/`.
+  Acceptance list: the frozen **US-004 Export Bundle** criteria at
+  `01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md:42-49`, plus **PRD P0-6** at `01_PRODUCT/01_PRD_MVP.md:85-95`
+  and `01_PRODUCT/01_PRD_MVP.md:126`'s independent-readability requirement. No verdict yet: `P4` is
+  `IN_PROGRESS`, `G2` is `NOT_REACHED`, and the only G2 statement P4's §5 permits is
+  `READY_FOR_ENGINEERING_GATE_REVIEW` — never `PASS`.
+  `P3_RELEASE_GATE`, `P2_COMPARE` and `P1_ANALYZE_DETAILS` closed earlier, on 2026-09-30, 2026-09-29 and
+  2026-09-29, in `P3_VALIDATION/`, `P2_VALIDATION/` and `P1_VALIDATION/`.
+  **The P4 start fact is `323afad`, one commit ahead of the `ba5e59e` the prompt's §0/§2 names.** §2's
+  "if remote is newer, inspect and reconcile before writing" was run: `git diff --name-only ba5e59e
+  323afad` moves eleven documentation, governance and integrity files plus two newly tracked
+  baseline-artifact scripts, and no product source, fixture, schema or migration, and Run `36810689645`
+  on `323afad` is `completed` / `success` / **7 of 7 jobs** (`gh run view 36810689645
+  --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs`). Start counts re-measured
+  before the first write: one `cargo test --workspace` = **556 passed / 0 failed / 0 ignored**,
+  `corepack pnpm test` = **135 passed in 6 files**.
+  **`G2_ENGINEERING_CLOSURE_AUDIT` is the next authorizable act after P4 closes and this file does not
+  authorize it**; neither does P4's own prompt, which stops at P4.
+  Carried forward from P3, still true: `origin/main` sat at
   `219178af195569ec6b13728d84d992ef78df8c04`, where Run `36774472141` concluded `failure` on one job of
   seven — `Dependency policy`, reporting `error[yanked]` for `yoke-derive 0.8.3`, a transitive proc-macro
   that crates.io yanked the same afternoon, after the local `deny` step had passed against an older
@@ -160,12 +173,16 @@ V0: NON_BLOCKING_USER_FEEDBACK_TRACK — 0 of 8 eligible external sessions, an h
 Pre-G1 (ADR-0025): P1-A0 REAL ARTIFACT INTAKE — COMPLETE, including its evidence-identity and persistence correctness closure
 P1: PASS / COMPLETE — the Analyze verb as one product verb: intake, summary, top contributors, bounded Sections / Symbols / Evidence details, the Evidence Inspector, and the US-001 bytes/KiB presentation switch. Evidence: P1_VALIDATION/
 P2: PASS / COMPLETE — Compare over persisted snapshots: Core-owned deterministic diff, bounded Compare IPC with a session-local registry, the second desktop page, `fwsight diff`, and portable Diff JSON v1 plus self-contained HTML. Evidence: P2_VALIDATION/. The round's own measurements are LOCAL PASS; the pushed head `4a77ea1` is green on Run #18 `36648718199` (7 of 7), which closes defect E — the fixture half `.gitignore` hid — on the remote too. Open on purpose: desktop smoke step 27 was not observed in the shipped window
-P3: IN_PROGRESS — Release Gate, authorized 2026-09-29 by *P3 Release Gate MVP Implementation, Execution
-Prompt v1.1* and by ADR-0027; no verdict yet
-P4: NOT STARTED — P4 Bundle becomes the next authorizable stage only when P3 closes, and still needs its
-own architect prompt
+P3: PASS / COMPLETE — Release Gate, authorized 2026-09-29 by *P3 Release Gate MVP Implementation, Execution
+Prompt v1.1* and by ADR-0027, closed 2026-09-30. Evidence: P3_VALIDATION/. The round's own gate numbers are
+LOCALLY measured; what the remote then said is recorded separately in that pack, and P3 is SEALED — no
+further P3 documentation-only successor.
+P4: IN_PROGRESS — Release Bundle, opened 2026-09-30 by its own architect prompt (v1.0, delivered as a file
+and registered with its SHA-256); no verdict yet
+G2: NOT_REACHED — the only statement P4 may write about it is READY_FOR_ENGINEERING_GATE_REVIEW; the whole-MVP
+closure audit is the architect's, in a round of its own
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: P3_RELEASE_GATE
+Active task: P4_RELEASE_BUNDLE
 Design tokens: v0.2.1
 ```
 
@@ -252,9 +269,11 @@ citation written before it. The current stage's pack is the one place a line poi
 
 ## Next work
 
-**`active_task: NONE`.** P3 Release Gate closed on 2026-09-30, so there is no live coding task, and
-`AGENTS.md` 1 means what that says: no agent creates business functionality or lifts the next stage off
-the roadmap. **P4 Release Bundle is the next authorizable stage and needs its own architect prompt.**
+**`active_task: P4_RELEASE_BUNDLE`.** P3 Release Gate closed on 2026-09-30 and the architect then issued
+its own P4 prompt, so the live task is the Release Bundle and nothing else. `AGENTS.md` 1 means what it
+has meant in every round: the pointer names ONE stage, and no agent lifts the next one off the roadmap.
+When P4 closes, `active_task` returns to `NONE` and what becomes authorizable is the **G2 engineering
+closure audit**, which P4's own §5 explicitly forbids this round from performing or claiming.
 
 **`P3 Release Gate` closed `PASS / COMPLETE` on 2026-09-30, under its own architect prompt.** One product
 verb, `Gate`, over a stored build plus the workspace facts outside the artifact:

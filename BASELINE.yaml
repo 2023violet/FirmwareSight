@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_IN_PROGRESS_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,17 +27,20 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_IN_PROGRESS_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
   # chain, fixture reproducibility, parser behaviour, non-blocking UI, a data model that can carry
   # Compare and Gate) is unchanged.
   next_authorizable_tracks:
-    # P3 closed PASS/COMPLETE on 2026-09-30, so it is no longer authorizable - it is done. The next stage
-    # that could be authorized is P4, and it still needs its own architect prompt; nothing in this file
-    # authorizes it, and active_task is NONE until one exists.
-    - P4_bundle_after_P3_gate_closes
+    # P4 became the live task on 2026-09-30 under its own architect prompt, so it is no longer
+    # "authorizable" - it is running. What is authorizable next is the G2 closure audit, and P4's own
+    # prompt forbids this round from claiming it: the only end state P4 may write is
+    # G2 = READY_FOR_ENGINEERING_GATE_REVIEW. Nothing in this file authorizes that audit, and no P5,
+    # V1, B1, RC1 or GA1 work, no History page, installer, signing, updater, SBOM, cloud, account,
+    # telemetry, AI or pricing exists or is implied by what is listed here.
+    - G2_engineering_closure_audit_after_P4_closes
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
   g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
@@ -61,6 +64,13 @@ validation:
   # a crate yanked on crates.io the day of closure, and now moved off in Cargo.lock. The pack's numbers
   # stay locally measured; p3_execution.ci_coverage carries what the remote said.
   p3_status: PASS_COMPLETE
+  # The same rule again, from the P4 prompt §5: this field reads IN_PROGRESS while the round runs and
+  # becomes PASS_COMPLETE only from the item-by-item US-004 verdict in
+  # P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md, with G2 written as READY_FOR_ENGINEERING_GATE_REVIEW and
+  # never as PASS. It is IN_PROGRESS now, because the architect issued
+  # "FirmwareSight - P4 Release Bundle MVP Implementation, Execution Prompt v1.0 - Architect Reviewed"
+  # and no verdict has been measured yet.
+  p4_status: IN_PROGRESS
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
@@ -155,7 +165,14 @@ research:
 # stage and is NOT authorized by this file: it needs its own architect prompt, and no bundle directory,
 # `release prepare`, manifest generation, bundle checksums, History page, Settings page, installer,
 # signing, updater, SBOM, cloud, account, telemetry, AI, pricing or commercial work exists yet.
-active_task: NONE
+# That prompt then arrived, the way the P2 and P3 prompts did: the architect issued
+# "FirmwareSight - P4 Release Bundle MVP Implementation, Execution Prompt v1.0 - Architect Reviewed",
+# delivered as a file and archived with its SHA-256 in 10_AUDIT/SOURCE_PROMPTS/, so the pointer moves and
+# nothing else moves with it. AGENTS.md 1 still binds - one named stage, no inference from the roadmap -
+# and P4's own §78 closes with STOP AFTER P4. What P4 may not do is declare the MVP finished: its only
+# permitted gate statement is G2 = READY_FOR_ENGINEERING_GATE_REVIEW, because the architect runs the
+# whole-MVP G2 closure audit in a round of its own.
+active_task: P4_RELEASE_BUNDLE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -398,6 +415,39 @@ p3_execution:
   not_verified: "Desktop smoke step 30's prior-run re-read through the window: the Release page has no run-id input, so get_gate_run is tested and persists, but was never observed reopening an older record. Surfacing history is P4's page"
   evidence: P3_VALIDATION/ # four documents, written by this round
   next_stage_after_this_one: P4_bundle # NOT authorized by this prompt; it needs its own architect prompt
+
+# The last core product-implementation stage of the MVP: the Release Bundle. It is opened by its own
+# architect prompt, delivered as a file rather than inline, which is why this is the first round since P0
+# that can register a real SHA-256. Recorded now, while the round is RUNNING: the expected-NO lines below
+# are promises this prompt makes about its own scope, and each must be replaced by a measurement before
+# P4 can read PASS_COMPLETE.
+p4_execution:
+  authorized: true
+  prompt: "FirmwareSight - P4 Release Bundle MVP Implementation, Execution Prompt v1.0 - Architect Reviewed"
+  prompt_provenance: "delivered as a file on 2026-09-30 and archived at 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt, SHA-256 1baaec9204a1d2aa5aa53bd735b34d376ee56db7557a04d6abb79265c30840c5"
+  adr: none # no technology baseline moves; release_records is the table 04_TECH/15 section 3 has listed since v0.5, and 0004 is additive
+  slice: P4_RELEASE_BUNDLE
+  scope: "portable Release Bundle over an already-trusted Analyze + Compare + Gate + accepted-Reviews result: Core release model and deterministic release id, public analysis:1 projection, release-manifest v1 DTO, self-contained release-report.html, bundle SHA256SUMS with an explicit self-reference rule, Gate-context revalidation at bundle time, source-artifact re-hash verification, staged publish with explicit overwrite confirmation, additive 0004_release_records, fwsight release prepare, and a Bundle section under the existing Release page"
+  acceptance_list: "01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md US-004 Export Bundle, item by item, plus 01_PRODUCT/01_PRD_MVP.md P0-6 Release Bundle's file set and 01_PRODUCT/01_PRD_MVP.md:126's independent-readability requirement"
+  explicitly_not_in_scope: [G2_pass_claim, history_page, project_wizard, installer, code_signing, notarization, updater, sbom, cve, ota, flashing, hil, cloud, accounts, telemetry, ai, pricing, commercial_validation, v0.7.0, P5, V1, B1, RC1, GA1, sixth_first_party_crate, license_metadata_change]
+  gate_binding: "the bundle is a release verdict output, not an export of whatever is on screen: it re-observes the project context through the P3 adapter, recomputes the Gate, and refuses unless the fresh run id equals the selected stored run id and the acceptance-aware aggregate is PASS. UNKNOWN is never acceptable as a Review, so a bundle is never labelled ready on an evidence gap"
+  self_reference_rule: "SHA256SUMS carries every payload file except itself and release-manifest.json; the manifest carries every bundle file except itself, SHA256SUMS included. No file ever carries its own hash, and no empty or zeroed self-hash is written. Documented in extensions.integrity_model and in the report"
+  migration_expected: true # additive 0004_release_records.sql; SCHEMA_VERSION 3 -> 4; three tests pin the literal 3 and are updated by name, not deleted
+  new_public_schema_expected: true # schemas/analysis.schema.json, urn:firmwaresight:schema:analysis:1 - a portable projection, deliberately not the p0-internal AnalyzeResultDto
+  existing_contracts_unchanged: "gate-results:1, accepted-reviews:1, diff:1, release-manifest:1 and project-config:1 all stay at major 1 with no field reinterpreted"
+  new_crate_expected: false # prompt section 65 forbids a sixth first-party crate; bundle content lives in report, filesystem staging in project, semantics in core
+  new_dependency_expected: false # std filesystem, existing sha2, serde/serde_json, the report crate's own schema_check subset validator and tauri-plugin-dialog already cover every need; no archive or template crate
+  new_design_token_expected: false # the dense file table, mono hash cells, quiet success line and hairline confirmation panel all exist at design-tokens 0.2.1; a genuinely missing value stops the round instead of becoming a magic number
+  license_gap: OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION # prompt section 76 forbids touching it; AGENTS.md 9 puts a license change in front of a human
+  no_new_baseline: true
+  baseline_version_stays: 0.6.0
+  start_head: 323afad155348bd5b721fa2b7e2ed2388bdc2691
+  start_head_note: "the prompt's own section 0/2 anchor is ba5e59e (green on Run #25 36785425648); origin/main had moved one documentation-and-tooling commit further, and git diff --name-only between them carries no product source, fixture, schema or migration, so the newer green HEAD is the start fact this round records"
+  start_run_id: 36810689645
+  start_run_conclusion: "success, 7 of 7 jobs"
+  tests_at_start: { rust: 556, ui: 135 } # re-measured on this machine before the first write: one cargo test --workspace = 556 passed / 0 failed / 0 ignored; corepack pnpm test = 135 passed in 6 files. The retired 715 double-count is not reintroduced
+  stage_status: IN_PROGRESS
+  g2_status: NOT_REACHED
 
 p0_execution:
   authorized: true
