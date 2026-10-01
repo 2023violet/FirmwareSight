@@ -22,8 +22,8 @@
 use firmwaresight_core::domain::diff::Contributor;
 use firmwaresight_core::domain::gate::{FindingState, GateStateCounts};
 use firmwaresight_core::domain::release::{
-    ACCEPTED_REVIEWS_DOC_NAME, ARTIFACTS_DIR, DIFF_DOC_NAME, MANIFEST_DOC_NAME, SHA256SUMS_NAME,
-    SUMS_EXCLUDED_NAMES, bundle_path_order,
+    ACCEPTED_REVIEWS_DOC_NAME, ARTIFACTS_DIR, DIFF_DOC_NAME, MANIFEST_DOC_NAME, REPORT_DOC_NAME,
+    ReleaseModel, SHA256SUMS_NAME, SUMS_EXCLUDED_NAMES, bundle_path_order,
 };
 
 use crate::analysis::AnalysisDocumentDto;
@@ -32,7 +32,7 @@ use crate::diff_render::{EMBEDDED_STYLE, escape_html};
 use crate::dto::{CapabilitiesDto, EvidenceDto};
 use crate::gate::{AcceptedReviewsDto, GateResultsDto};
 use crate::gate_render::STATE_ORDER;
-use crate::release::{ManifestFileDto, ReleaseManifestDto};
+use crate::release::{ManifestFileDto, ReleaseManifestDto, version_source_word};
 
 /// The additions the release report needs on top of the shared token block: the five Gate states, each
 /// with a word and a glyph as well as a colour (`AGENTS.md` 11 forbids a colour-only state), and the two
@@ -146,9 +146,22 @@ pub struct CompareSummary<'a> {
 }
 
 /// Everything `release-report.html` renders, as the portable documents that ship beside it.
+///
+/// There is no `manifest` field, and that is the self-reference rule at work rather than an oversight:
+/// the report is payload, so `SHA256SUMS` and `release-manifest.json` are both written *after* it (§41)
+/// and neither of their digests can be known while it is composed. The identity facts come from the
+/// validated `ReleaseModel` and the digest that names them, and `staged` carries the files already
+/// written — every one of which the report can honestly print a hash for.
 #[derive(Debug, Clone, Copy)]
 pub struct ReleaseBundleReport<'a> {
-    pub manifest: &'a ReleaseManifestDto,
+    /// The semantic inputs of this release, as Core validated them.
+    pub model: &'a ReleaseModel,
+    /// `release-<sha256>`: the digest of the canonical release input.
+    pub release_id: &'a str,
+    /// The semantic policy fingerprint the Gate run was identified by.
+    pub policy_sha256: &'a str,
+    /// Every bundle file written before this report, with the digest and size of the bytes as written.
+    pub staged: &'a [ManifestFileDto],
     pub analysis: &'a AnalysisDocumentDto,
     /// `None` when this release has no baseline: the report then says there is no comparison, which is a
     /// fact about the release rather than an empty table.
@@ -174,11 +187,9 @@ pub fn render_html(report: &ReleaseBundleReport<'_>) -> String {
 
     out.push_str("<h1>Release Bundle</h1>\n");
     out.push_str(&format!(
-        "<p class=\"brand\">FirmwareSight {} &middot; release <span class=\"mono\">{}</span> &middot; \
-         manifest schema version {}</p>\n",
-        escape_html(&report.manifest.generated_by.version),
-        escape_html(&report.manifest.release.id),
-        report.manifest.schema_version
+        "<p class=\"brand\">FirmwareSight {} &middot; release <span class=\"mono\">{}</span></p>\n",
+        escape_html(&report.model.fwsight_version),
+        escape_html(report.release_id)
     ));
 
     render_identity(report, &mut out);
@@ -194,7 +205,7 @@ pub fn render_html(report: &ReleaseBundleReport<'_>) -> String {
     out.push_str(&format!(
         "<footer>Deterministic export: no timestamp, no scripts, no network requests. \
 Written by FirmwareSight {} over the documents in this bundle.</footer>\n",
-        escape_html(&report.manifest.generated_by.version)
+        escape_html(&report.model.fwsight_version)
     ));
     out.push_str("</main>\n</body>\n</html>\n");
     out
@@ -203,37 +214,33 @@ Written by FirmwareSight {} over the documents in this bundle.</footer>\n",
 // --------------------------------------------------------------------------- 1. identity
 
 fn render_identity(report: &ReleaseBundleReport<'_>, out: &mut String) {
-    let manifest = report.manifest;
+    let model = report.model;
     out.push_str("<h2>1. Release identity</h2>\n<table>\n");
     out.push_str(
         "<caption>Four different identities, named separately on purpose.</caption>\n<tbody>\n",
     );
-    mono_row(out, "Release id", &manifest.release.id);
+    mono_row(out, "Release id", report.release_id);
     row(
         out,
         "Project release version",
         format!(
             "<span class=\"mono\">{}</span> &mdash; resolved from <span class=\"mono\">{}</span>",
-            escape_html(&manifest.release.version),
-            escape_html(manifest.extensions.release_version_source)
+            escape_html(model.version.as_str()),
+            escape_html(version_source_word(model.version_source))
         ),
     );
-    mono_row(
-        out,
-        "FirmwareSight app version",
-        &manifest.generated_by.version,
-    );
-    mono_row(out, "Snapshot analyzed", &manifest.build.snapshot_id);
+    mono_row(out, "FirmwareSight app version", &model.fwsight_version);
+    mono_row(out, "Snapshot analyzed", &model.snapshot_id);
     mono_row(
         out,
         "Analysis normalization rule",
         report.analysis.snapshot.normalization_version,
     );
-    let git = &manifest.build;
+    let git = &model.workspace_git;
     row(
         out,
         "Workspace HEAD observed by the Release Gate",
-        git.git_commit
+        git.head_commit
             .as_deref()
             .map(mono)
             .unwrap_or_else(not_observed),
@@ -241,7 +248,7 @@ fn render_identity(report: &ReleaseBundleReport<'_>, out: &mut String) {
     row(
         out,
         "Workspace tag observed by the Release Gate",
-        git.git_tag
+        git.exact_tag
             .as_deref()
             .map(mono)
             .unwrap_or_else(not_observed),
@@ -249,7 +256,7 @@ fn render_identity(report: &ReleaseBundleReport<'_>, out: &mut String) {
     row(
         out,
         "Workspace dirty observed by the Release Gate",
-        git.git_dirty
+        git.dirty
             .map_or_else(not_observed, |value| value.to_string()),
     );
     out.push_str(
@@ -264,33 +271,23 @@ fn render_identity(report: &ReleaseBundleReport<'_>, out: &mut String) {
 
 fn render_shipped(report: &ReleaseBundleReport<'_>, out: &mut String) {
     out.push_str("<h2>2. Shipped artifacts</h2>\n");
-    let shipped: Vec<&ManifestFileDto> = report
-        .manifest
-        .files
-        .iter()
-        .filter(|entry| entry.path.starts_with(&format!("{ARTIFACTS_DIR}/")))
-        .collect();
     out.push_str(&format!(
         "<p class=\"meta\">{} file(s) under <span class=\"mono\">{ARTIFACTS_DIR}/</span>. The baseline \
          build is never shipped: it exists only to explain the comparison in section 4.</p>\n",
-        shipped.len()
+        report.model.artifacts.len()
     ));
-    out.push_str("<table>\n<caption>The bytes this release consists of.</caption>\n");
+    out.push_str(
+        "<table>\n<caption>The bytes this release consists of, in the order the release fingerprint \
+         lists them.</caption>\n",
+    );
     out.push_str("<thead><tr><th>Bundle path</th><th>Kind</th><th>SHA-256</th><th class=\"num\">Bytes</th></tr></thead>\n<tbody>\n");
-    for entry in &shipped {
-        let leaf = entry.path.rsplit('/').next().unwrap_or(entry.path.as_str());
-        let kind = report
-            .analysis
-            .artifacts
-            .iter()
-            .find(|artifact| artifact.file_name == leaf)
-            .map_or("unknown", |artifact| artifact.kind);
+    for artifact in &report.model.artifacts {
         out.push_str(&format!(
             "<tr><td class=\"mono\">{}</td><td>{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td></tr>\n",
-            escape_html(&entry.path),
-            escape_html(kind),
-            escape_html(&entry.sha256),
-            entry.size
+            escape_html(&format!("{ARTIFACTS_DIR}/{}", artifact.file_name)),
+            escape_html(artifact.kind_word_for()),
+            escape_html(artifact.sha256.hex()),
+            artifact.byte_size
         ));
     }
     out.push_str("</tbody>\n</table>\n");
@@ -620,15 +617,18 @@ fn render_reviews(report: &ReleaseBundleReport<'_>, out: &mut String) {
 
 fn render_notes(report: &ReleaseBundleReport<'_>, out: &mut String) {
     out.push_str("<h2>7. Release notes</h2>\n<table>\n<tbody>\n");
-    match &report.manifest.release.notes {
-        Some(name) => {
+    match &report.model.release_notes {
+        Some(notes) => {
             row(
                 out,
                 "Included",
-                format!("yes, as <span class=\"mono\">{}</span>", escape_html(name)),
+                format!(
+                    "yes, as <span class=\"mono\">{}</span>",
+                    escape_html(&notes.bundle_name)
+                ),
             );
-            if let Some(entry) = bundle_entry(report.manifest, name) {
-                mono_row(out, "SHA-256 of the shipped copy", &entry.sha256);
+            mono_row(out, "SHA-256 of the shipped copy", notes.sha256.hex());
+            if let Some(entry) = staged_entry(report, &notes.bundle_name) {
                 row(out, "Bytes", entry.size.to_string());
             }
             out.push_str(
@@ -650,25 +650,36 @@ fn render_notes(report: &ReleaseBundleReport<'_>, out: &mut String) {
 // --------------------------------------------------------------------------- 8. integrity
 
 fn render_integrity(report: &ReleaseBundleReport<'_>, out: &mut String) {
-    let model = &report.manifest.extensions.integrity_model;
+    // The same statement of the rule the manifest will carry, built from the same code path, so the two
+    // documents cannot drift into describing the coverage differently (§20).
+    let model = crate::release::IntegrityModelDto::standard();
     out.push_str("<h2>8. Bundle integrity</h2>\n");
     out.push_str(&format!(
-        "<p class=\"meta\">{} file(s) are indexed. Two layers of SHA-256 lists cover them: \
-         <span class=\"mono\">{}</span> hashes every payload file, and <span class=\"mono\">{}</span> \
-         hashes every file including that list.</p>\n",
-        report.manifest.files.len(),
-        model.sums_file,
-        model.manifest_file
+        "<p class=\"meta\">Two layers of SHA-256 lists cover this bundle. \
+         <span class=\"mono\">{}</span> hashes every payload file except itself and the manifest. \
+         <span class=\"mono\">{}</span> hashes every file except itself, that list included.</p>\n",
+        model.sums_file, model.manifest_file
     ));
 
-    out.push_str("<table>\n<caption>The full index, in the order both lists use.</caption>\n");
+    out.push_str(
+        "<table>\n<caption>Every file a digest can be named for here. This report is payload: it is \
+         written before both index files, so it cannot print their digests, or its own.</caption>\n",
+    );
     out.push_str("<thead><tr><th>Bundle path</th><th>SHA-256</th><th class=\"num\">Bytes</th></tr></thead>\n<tbody>\n");
-    for entry in &report.manifest.files {
+    for entry in report.staged {
         out.push_str(&format!(
             "<tr><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td></tr>\n",
             escape_html(&entry.path),
             escape_html(&entry.sha256),
             entry.size
+        ));
+    }
+    for name in [REPORT_DOC_NAME, SHA256SUMS_NAME, MANIFEST_DOC_NAME] {
+        out.push_str(&format!(
+            "<tr><td class=\"mono\">{}</td><td colspan=\"2\" class=\"meta\">indexed by <span class=\"mono\">{}</span>, \
+             which is written after this report</td></tr>\n",
+            escape_html(name),
+            MANIFEST_DOC_NAME
         ));
     }
     out.push_str("</tbody>\n</table>\n");
@@ -961,6 +972,6 @@ fn known_or_reason(value: &Option<String>, reason: &Option<String>) -> String {
     }
 }
 
-fn bundle_entry<'a>(manifest: &'a ReleaseManifestDto, path: &str) -> Option<&'a ManifestFileDto> {
-    manifest.files.iter().find(|entry| entry.path == path)
+fn staged_entry<'a>(report: &ReleaseBundleReport<'a>, path: &str) -> Option<&'a ManifestFileDto> {
+    report.staged.iter().find(|entry| entry.path == path)
 }

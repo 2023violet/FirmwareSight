@@ -161,6 +161,18 @@ impl IntegrityModelDto {
     }
 }
 
+/// How a project release version was resolved, in the project's own words.
+///
+/// One spelling shared by the manifest's `extensions` block and the report's identity table, so the two
+/// cannot say different things about where the version came from.
+#[must_use]
+pub const fn version_source_word(source: ReleaseVersionSource) -> &'static str {
+    match source {
+        ReleaseVersionSource::ExpectedVersion => "release.expected_version",
+        ReleaseVersionSource::GitTagCapture => "git_tag.capture",
+    }
+}
+
 impl ReleaseManifestDto {
     /// Project a validated release model plus the bundle's real file list into the portable document.
     ///
@@ -218,10 +230,7 @@ impl ReleaseManifestDto {
                 gate_run_id: model.gate_run_id.clone(),
                 baseline_snapshot_id: model.baseline_snapshot_id.clone(),
                 policy_sha256: policy_sha256.to_owned(),
-                release_version_source: match model.version_source {
-                    ReleaseVersionSource::ExpectedVersion => "release.expected_version",
-                    ReleaseVersionSource::GitTagCapture => "git_tag.capture",
-                },
+                release_version_source: version_source_word(model.version_source),
                 analysis_schema_version: ANALYSIS_SCHEMA_VERSION,
                 diff_schema_version: model
                     .baseline_snapshot_id

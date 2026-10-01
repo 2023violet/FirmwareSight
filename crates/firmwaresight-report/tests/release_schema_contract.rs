@@ -121,8 +121,8 @@ fn model() -> ReleaseModel {
     .expect("the fixture is a release")
 }
 
-/// The staged file list a bundle builder would hand over: the fingerprint's artifacts plus every generated
-/// document, each with the digest of the bytes actually written.
+/// The complete file list a manifest indexes: the fingerprint's artifacts plus every generated document,
+/// each with the digest of the bytes actually written, including `release-report.html` and `SHA256SUMS`.
 fn staged(notes: bool, baseline: bool) -> Vec<ManifestFileDto> {
     let mut files = vec![
         ManifestFileDto::new(ANALYSIS_DOC_NAME, digest('a'), 40_112),
@@ -148,6 +148,15 @@ fn staged(notes: bool, baseline: bool) -> Vec<ManifestFileDto> {
 
 fn release_id() -> String {
     ReleaseModel::release_id_from(RELEASE_HEX)
+}
+
+/// The files that already exist while `release-report.html` is being composed (§41): everything except the
+/// report itself and the two index files written after it. The report may print a digest for these and
+/// only a name for the others.
+fn staged_before_report(notes: bool, baseline: bool) -> Vec<ManifestFileDto> {
+    let mut files = staged(notes, baseline);
+    files.retain(|entry| entry.path != REPORT_DOC_NAME && entry.path != SHA256SUMS_NAME);
+    files
 }
 
 fn manifest_for(model: &ReleaseModel, notes: bool, baseline: bool) -> ReleaseManifestDto {
@@ -423,8 +432,16 @@ fn growth() -> Vec<Contributor> {
 }
 
 /// The whole bundle's renderable content, owned so the report can borrow all of it at once.
+///
+/// Two file lists, because §41 gives a bundle two moments: the report is written before `SHA256SUMS` and
+/// `release-manifest.json`, so it can print a digest for `pre_report` and only a *name* for the rest. The
+/// manifest is derived rather than stored, for the same reason — a fixture that carried it as a field would
+/// let the report borrow a hash of bytes it is supposed to precede.
 struct Bundle {
-    manifest: ReleaseManifestDto,
+    model: ReleaseModel,
+    release_id: String,
+    files: Vec<ManifestFileDto>,
+    pre_report: Vec<ManifestFileDto>,
     analysis: AnalysisDocumentDto,
     diff: Option<DiffResultDto>,
     sections: Vec<Contributor>,
@@ -455,10 +472,12 @@ impl Bundle {
     }
 
     fn build(model: ReleaseModel, notes: bool, baseline: bool, accepted: bool) -> Self {
-        let manifest = manifest_for(&model, notes, baseline);
         let rows = growth();
         Self {
-            manifest,
+            model,
+            release_id: release_id(),
+            files: staged(notes, baseline),
+            pre_report: staged_before_report(notes, baseline),
             analysis: analysis(),
             diff: baseline.then(diff),
             sections: rows.clone(),
@@ -468,9 +487,18 @@ impl Bundle {
         }
     }
 
+    /// The manifest these staged files produce: written last, so it is derived here rather than held.
+    fn manifest(&self) -> ReleaseManifestDto {
+        ReleaseManifestDto::from_parts(&self.model, &self.release_id, &self.files, POLICY_HEX)
+            .expect("the fixture bundle assembles a manifest")
+    }
+
     fn report(&self) -> ReleaseBundleReport<'_> {
         ReleaseBundleReport {
-            manifest: &self.manifest,
+            model: &self.model,
+            release_id: &self.release_id,
+            policy_sha256: POLICY_HEX,
+            staged: &self.pre_report,
             analysis: &self.analysis,
             compare: self.diff.as_ref().map(|result| CompareSummary {
                 result,
@@ -1120,13 +1148,31 @@ fn the_report_carries_the_integrity_tables_and_the_verification_steps() {
         "the Windows reader is not left out"
     );
     assert!(html.contains("self_digest_written</span> is false"));
-    for entry in &bundle.manifest.files {
+    let manifest = bundle.manifest();
+    for entry in &manifest.files {
         assert!(
             html.contains(&entry.path),
             "{} missing from the report's own index",
             entry.path
         );
     }
+    for entry in &bundle.pre_report {
+        assert!(
+            html.contains(&entry.sha256),
+            "a file written before the report is printed without its digest"
+        );
+    }
+    // The cycle this shape exists to break: the report is payload, so the bytes of these two files do not
+    // exist yet while it is composed. Printing either digest would make SHA256SUMS hash a file that
+    // already hashes SHA256SUMS.
+    assert!(
+        !html.contains(&digest('d')),
+        "the report printed a digest of itself"
+    );
+    assert!(
+        !html.contains(&digest('e')),
+        "the report printed SHA256SUMS's digest"
+    );
 }
 
 #[test]
@@ -1193,8 +1239,8 @@ fn the_analysis_document_and_the_manifest_describe_the_same_shipped_bytes() {
     // the manifest names it under artifacts/. If those two ever disagreed, section 2 would print a kind for
     // a file that is not there.
     let bundle = Bundle::full();
-    let entry = bundle
-        .manifest
+    let manifest = bundle.manifest();
+    let entry = manifest
         .files
         .iter()
         .find(|file| file.path == format!("{ARTIFACTS_DIR}/firmware.elf"))
