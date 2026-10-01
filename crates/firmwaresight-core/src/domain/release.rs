@@ -234,6 +234,21 @@ pub struct ReleaseModel {
     pub fwsight_version: String,
 }
 
+/// §8 as one rule with two callers: a REVIEW is not "almost a PASS" and a BLOCK is not a warning, and neither
+/// may be packaged as a release.
+///
+/// [`ReleaseModel::validated`] applies it to the model that was built; the bundle engine applies it to the
+/// aggregate it computed one step earlier, because a verdict that has already refused a release must be the
+/// answer the release owner gets rather than whatever a file read says next. Two call sites, one statement of
+/// the rule, so the engine cannot develop a disposition of its own (`AGENTS.md` 3).
+pub fn require_packageable(disposition: EffectiveSeverity) -> Result<(), ReleaseError> {
+    if disposition == EffectiveSeverity::Pass {
+        Ok(())
+    } else {
+        Err(ReleaseError::GateNotReady { disposition })
+    }
+}
+
 impl ReleaseModel {
     /// Refuse anything that would make the bundle a claim the evidence does not support, then put the
     /// artifact list in canonical order.
@@ -241,13 +256,7 @@ impl ReleaseModel {
     /// Construction is separate from validation because the refusal rules *are* the product's core promise
     /// (§8), while a half-gathered set of facts is a normal intermediate state on the way to them.
     pub fn validated(mut self) -> Result<Self, ReleaseError> {
-        // A REVIEW is not "almost a PASS" and a BLOCK is not a warning, and both are refused before any work
-        // is spent on a bundle.
-        if self.disposition != EffectiveSeverity::Pass {
-            return Err(ReleaseError::GateNotReady {
-                disposition: self.disposition,
-            });
-        }
+        require_packageable(self.disposition)?;
 
         // §17: a bundle is bound to one Gate run, so the id it names must be shaped like one.
         if !self.gate_run_id.starts_with("gate-")
@@ -1036,6 +1045,32 @@ mod tests {
             EffectiveSeverity::Pass,
             "a PASS disposition over one artifact validates into a release"
         );
+    }
+
+    #[test]
+    fn the_early_refusal_and_the_model_refusal_are_one_rule() {
+        // The bundle engine asks §8 as soon as the aggregate exists, and the model asks it again when it is
+        // complete. Two call sites are only honest if they cannot disagree, so they call one function.
+        for severity in [
+            EffectiveSeverity::Pass,
+            EffectiveSeverity::Review,
+            EffectiveSeverity::Block,
+        ] {
+            let outcome = require_packageable(severity);
+            assert_eq!(
+                outcome.is_ok(),
+                severity == EffectiveSeverity::Pass,
+                "a {severity} disposition"
+            );
+            if severity != EffectiveSeverity::Pass {
+                assert_eq!(
+                    outcome.expect_err("a refused disposition"),
+                    ReleaseError::GateNotReady {
+                        disposition: severity
+                    }
+                );
+            }
+        }
     }
 
     #[test]

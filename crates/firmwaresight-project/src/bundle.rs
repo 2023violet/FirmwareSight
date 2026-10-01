@@ -49,7 +49,8 @@ use firmwaresight_core::domain::release::{
     GATE_RESULTS_DOC_NAME, MANIFEST_DOC_NAME, RELEASE_NOTES_NAME, REPORT_DOC_NAME, ReleaseArtifact,
     ReleaseError, ReleaseId, ReleaseModel, ReleaseNotesDigest, ReleaseVersion,
     ReleaseVersionSource, SHA256SUMS_NAME, SUMS_EXCLUDED_NAMES, SchemaMajors, WorkspaceGit,
-    bundle_path_order, disambiguated_name, is_safe_bundle_relative_path, sanitize_leaf_name,
+    bundle_path_order, disambiguated_name, is_safe_bundle_relative_path, require_packageable,
+    sanitize_leaf_name,
 };
 use firmwaresight_report::analysis::AnalysisDocumentDto;
 use firmwaresight_report::diff::DiffResultDto;
@@ -638,6 +639,10 @@ fn observe(request: &BundleRequest<'_>) -> Result<Observation, BundleError> {
         .map(|acceptance| acceptance.finding_id.clone())
         .collect();
     let disposition = evaluation.aggregate_with_acceptances(&accepted_ids);
+    // §8 answered before §22: a release that has not earned a bundle is refused on its verdict, so a BLOCK
+    // on missing Release Notes reads as the Gate blocking rather than as a file that could not be copied.
+    // Core owns the rule; this is the earlier of the two calls to it.
+    require_packageable(disposition)?;
 
     let (version, version_source) = resolve_version(&policy, &context, &evaluation)?;
 

@@ -1,15 +1,22 @@
 //! `fwsight` — the FirmwareSight command line.
 //!
-//! P3 implements `analyze`, `diff` and `gate`. `release prepare` is defined in
-//! `04_TECH/07_CLI_SPEC.md` but is *not registered here*, so a user cannot mistake it for a working
-//! feature. Exit codes 4 (gate review) and 5 (gate block) became reachable with `gate`; code 6 became
-//! reachable with the P2 export.
+//! P3 implemented `analyze`, `diff` and `gate`; P4 added `release prepare`, which assembles the portable
+//! Release Bundle. `project doctor` is still defined in `04_TECH/07_CLI_SPEC.md` and still *not registered
+//! here*, so a user cannot mistake it for a working feature. Exit codes 4 (gate review) and 5 (gate block)
+//! became reachable with `gate`; code 6 became reachable with the P2 export, and is what a bundle that could
+//! not be written or could not be verified reports.
 //!
 //! `gate` is the whole CLI Gate path in one sentence: it reads `firmwaresight.toml` from the project
 //! directory, analyzes the artifact and an optional baseline in the same process, asks the workspace
 //! Git what it knows, and prints Core's answer. It creates no database and stores nothing — a Gate
 //! record becomes reviewable when the desktop persists it, and a command line that quietly left a
 //! project database behind would be a side effect nobody asked for (prompt §38).
+//!
+//! `release prepare` reads the same four sources and then publishes through the same staging and swap engine
+//! the desktop exports with (§35: one bundle semantics, not two). It has no review history to draw on, so a
+//! Gate aggregating to REVIEW or BLOCK ends the run at 4 or 5 instead of bundling around a finding nobody
+//! accepted: headless releases are the clean-pass ones, and accepting a review stays a desktop audit action
+//! (§33). Like `gate`, it writes no database.
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -20,9 +27,11 @@ use firmwaresight_artifact::intake::GuardConfig;
 use firmwaresight_artifact::pipeline::{self, AnalysisRequest};
 use firmwaresight_core::domain::diff::{DiffError, DiffSnapshotInput, compare};
 use firmwaresight_core::domain::gate::{EffectiveSeverity, GateGrowthFacts};
+use firmwaresight_core::domain::release::ReleaseError;
 use firmwaresight_project::evidence::{SnapshotFacts, growth_facts, observe_release_notes};
 use firmwaresight_project::{
-    GateRunRequest, GitObservation, GitProbe, LoadedProject, ProjectError, build_context, run_id,
+    BundleError, BundleRequest, GateRunRequest, GitObservation, GitProbe, LoadedProject,
+    ProjectError, build_context, prepare, run_id,
 };
 use firmwaresight_report::{
     AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, render,
@@ -36,7 +45,8 @@ const EXIT_PARSE_IMPORT: u8 = 3;
 const EXIT_GATE_REVIEW: u8 = 4;
 /// The Gate aggregate is BLOCK: something failed, or a budget lost the evidence a hard verdict needs.
 const EXIT_GATE_BLOCK: u8 = 5;
-/// The comparison succeeded but the requested export could not be written.
+/// The requested export or bundle could not be written, or a bundle that was written did not verify against
+/// its own bytes. §34 puts every destination and source-file problem behind this one code.
 const EXIT_EXPORT: u8 = 6;
 
 #[derive(Debug, Parser)]
@@ -44,8 +54,9 @@ const EXIT_EXPORT: u8 = 6;
     name = "fwsight",
     version,
     about = "Know exactly what ships.",
-    long_about = "FirmwareSight P0/P1/P2/P3 technical slice.\n\n`analyze`, `diff` and `gate` are \
-                  implemented; Release Bundle is a later phase and is not available."
+    long_about = "FirmwareSight P0/P1/P2/P3/P4 technical slice.\n\n`analyze`, `diff`, `gate` and \
+                  `release prepare` are implemented; `project doctor` is a later phase and is not \
+                  available."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -60,6 +71,61 @@ enum Commands {
     Diff(DiffArgs),
     /// Evaluate the release Gate for one artifact against a project's policy.
     Gate(GateArgs),
+    /// Publish the portable Release Bundle for a Gate that passed.
+    Release(ReleaseArgs),
+}
+
+#[derive(Debug, Subcommand)]
+enum ReleaseCommands {
+    /// Assemble, verify and write one Release Bundle.
+    Prepare(ReleasePrepareArgs),
+}
+
+/// `fwsight release prepare` (§33).
+///
+/// The four artifact arguments are the frozen spec's `release prepare --project . --out dist/release`
+/// resolved with the paths the project config deliberately does not name: `firmwaresight.toml` describes a
+/// *policy*, not which build is being released, and only the release owner knows which bytes are shipping.
+/// This is an implementation clarification of that example, not a new product verb.
+#[derive(Debug, Parser)]
+struct ReleasePrepareArgs {
+    /// Directory holding `firmwaresight.toml`. Its policy is what the Gate was evaluated against.
+    #[arg(long, value_name = "DIR", default_value = ".")]
+    project: PathBuf,
+
+    /// The artifact this release ships.
+    #[arg(long, value_name = "FILE")]
+    artifact: PathBuf,
+
+    /// GNU ld MAP file for the shipped artifact.
+    #[arg(long, value_name = "FILE")]
+    map: Option<PathBuf>,
+
+    /// The baseline build the comparison ships with.
+    #[arg(long, value_name = "FILE")]
+    baseline: Option<PathBuf>,
+
+    /// GNU ld MAP file for the baseline artifact.
+    #[arg(long, value_name = "FILE")]
+    baseline_map: Option<PathBuf>,
+
+    /// The folder the bundle directory is created in.
+    #[arg(long, value_name = "DIR")]
+    out: PathBuf,
+
+    /// Authorize replacing an existing FirmwareSight bundle in that folder.
+    #[arg(long)]
+    force: bool,
+
+    /// Emit exactly the `release-manifest.json` document the bundle carries on stdout.
+    #[arg(long)]
+    json: bool,
+}
+
+#[derive(Debug, Parser)]
+struct ReleaseArgs {
+    #[command(subcommand)]
+    command: ReleaseCommands,
 }
 
 #[derive(Debug, Parser)]
@@ -154,6 +220,9 @@ fn main() -> ExitCode {
         Commands::Analyze(args) => run_analyze(args, &operation_id),
         Commands::Diff(args) => run_diff(args, &operation_id),
         Commands::Gate(args) => run_gate(args, &operation_id),
+        Commands::Release(args) => match args.command {
+            ReleaseCommands::Prepare(prepare) => run_release_prepare(prepare, &operation_id),
+        },
     }
 }
 
@@ -369,6 +438,174 @@ pub const fn gate_exit_code(severity: EffectiveSeverity) -> u8 {
     }
 }
 
+/// Publish one Release Bundle (§33) and report which code the run earns (§34).
+///
+/// The Gate is run by the same engine the desktop exports through — `prepare` recomputes the run from the
+/// project, Git and artifact facts and refuses anything that does not aggregate to `PASS` — so the command
+/// line neither re-derives a verdict nor keeps a second copy of the rule that requires one (§35). It has no
+/// review history and prompts for nothing, so a REVIEW here means a finding nobody accepted yet, which ends
+/// the run at 4 with nothing written rather than bundling around it (§33).
+fn run_release_prepare(args: ReleasePrepareArgs, operation_id: &str) -> ExitCode {
+    let project = match LoadedProject::load(&args.project) {
+        Ok(loaded) => loaded,
+        Err(err) => return report_config_error(&err, args.json, operation_id),
+    };
+
+    let target = match analyze_side(
+        &args.artifact,
+        args.map.clone(),
+        "artifact",
+        args.json,
+        operation_id,
+    ) {
+        Ok(analysis) => analysis,
+        Err(code) => return ExitCode::from(code),
+    };
+
+    // One comparison, shipped as `diff.json` and read by the Gate's growth rule from the same bytes: the
+    // delta a release owner counts in the bundle is the delta that was scored (§23).
+    let comparison = match &args.baseline {
+        None => None,
+        Some(path) => {
+            let base = match analyze_side(
+                path,
+                args.baseline_map.clone(),
+                "baseline",
+                args.json,
+                operation_id,
+            ) {
+                Ok(analysis) => analysis,
+                Err(code) => return ExitCode::from(code),
+            };
+            let base_input = DiffSnapshotInput::from_snapshot(&base.snapshot);
+            let target_input = DiffSnapshotInput::from_snapshot(&target.snapshot);
+            match compare(&base_input, &target_input) {
+                Ok(diff) => Some(diff),
+                Err(err) => return report_diff_error(&err, args.json, operation_id),
+            }
+        }
+    };
+
+    let git = GitProbe::system().observe(&project.root);
+    // `acceptances` is empty and `selected_run_id` is None because the command line holds neither: review
+    // acceptance is a Desktop audit action stored against a recorded run (§33).
+    let request = BundleRequest {
+        project: &project,
+        git: &git,
+        snapshot: &target.snapshot,
+        comparison: comparison.as_ref(),
+        selected_run_id: None,
+        acceptances: &[],
+        fwsight_version: pipeline::FWSIGHT_VERSION,
+    };
+
+    let plan = match prepare(&request) {
+        Ok(plan) => plan,
+        Err(error) => {
+            return report_bundle_error(&error, release_exit_code(&error), args.json, operation_id);
+        }
+    };
+    // §28 re-checks every input against what the preview was built from, so the second `publish` argument is
+    // not a formality: a file that moved between the two calls stops the write.
+    let outcome = match plan.publish(&request, &args.out, args.force) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            return report_bundle_error(&error, release_exit_code(&error), args.json, operation_id);
+        }
+    };
+
+    if args.json {
+        // The stdout copy is the bundle copy: one string, read from the plan that wrote those bytes (§34).
+        print!("{}", plan.manifest_document());
+    } else {
+        print!(
+            "Release bundle written\n\
+             \x20 directory   {}\n\
+             \x20 release     {}\n\
+             \x20 version     {}\n\
+             \x20 gate run    {}\n\
+             \x20 files       {} ({} bytes)\n\
+             \x20 artifacts   {}\n\
+             \x20 comparison  {}\n\
+             \x20 notes       {}\n",
+            outcome.directory_name,
+            outcome.release_id,
+            outcome.release_version,
+            outcome.gate_run_id,
+            outcome.verification.file_count,
+            outcome.verification.total_bytes,
+            outcome.verification.artifact_count,
+            yes_if(
+                outcome.verification.carries_comparison,
+                "shipped",
+                "not shipped"
+            ),
+            yes_if(
+                outcome.verification.carries_release_notes,
+                "shipped",
+                "not shipped"
+            ),
+        );
+        if outcome.replaced {
+            eprintln!("diagnostics: the recognized bundle that was there has been replaced");
+        }
+    }
+    eprintln!("diagnostics: map {}", map_state(&target));
+    if let Some(baseline) = &args.baseline {
+        eprintln!("diagnostics: baseline {}", file_name(baseline));
+    }
+    eprintln!("diagnostics: git {}", git_state(&git));
+    eprintln!("diagnostics: integrity verified against the bundle's own SHA256SUMS and manifest");
+    eprintln!(
+        "diagnostics: this run is not stored; the desktop Release page writes the release record"
+    );
+    for warning in &project.warnings {
+        eprintln!("warning: {warning}");
+    }
+    eprintln!("diagnostics: operation {operation_id}");
+    ExitCode::from(EXIT_OK)
+}
+
+/// One of two words, for the two lines of the human summary that report a conditional file.
+#[must_use]
+const fn yes_if(held: bool, present: &'static str, absent: &'static str) -> &'static str {
+    if held { present } else { absent }
+}
+
+/// Which of §34's codes one refusal earns.
+///
+/// Core's aggregate decides 4 against 5, and it does so in the refusal itself: `GateNotReady` carries the
+/// effective severity the aggregate produced, so the CLI reads the disposition rather than computing a second
+/// one. A version that cannot be resolved is the §34 "version resolution error" and exits 2; everything about
+/// the bundle — its sources, its destination, its own verification — is 6.
+#[must_use]
+fn release_exit_code(error: &BundleError) -> u8 {
+    match error {
+        BundleError::Release(ReleaseError::GateNotReady { disposition }) => {
+            gate_exit_code(*disposition)
+        }
+        BundleError::Release(ReleaseError::VersionUnavailable { .. }) => EXIT_USAGE,
+        _ => EXIT_EXPORT,
+    }
+}
+
+/// Report a bundle refusal with the engine's own code and remediation, rather than a CLI re-wording of a
+/// decision the engine made. Nothing was written, and the message carries no host path: every name in a
+/// `BundleError` is bundle-relative or a display name (§34).
+fn report_bundle_error(error: &BundleError, code: u8, json: bool, operation_id: &str) -> ExitCode {
+    let envelope = render::ErrorEnvelope::new(error.code(), error.to_string(), operation_id)
+        .with_remediation(error.remediation());
+    if json {
+        println!("{}", envelope.to_json());
+    }
+    eprintln!(
+        "error: {} (code {}, operation {operation_id})",
+        envelope.message, envelope.code
+    );
+    tracing::error!(operation_id, code = error.code(), "release bundle refused");
+    ExitCode::from(code)
+}
+
 /// A config problem is a usage error (exit 2), never a Gate verdict: there is no run to score until the
 /// policy can be read.
 fn report_config_error(err: &ProjectError, json: bool, operation_id: &str) -> ExitCode {
@@ -561,12 +798,174 @@ mod tests {
 
     #[test]
     fn unregistered_future_commands_are_still_not_accepted() {
-        for command in ["release", "watch", "doctor"] {
+        for command in ["watch", "doctor"] {
             let args: Vec<OsString> = ["fwsight", command].iter().map(OsString::from).collect();
             assert!(
                 parse_from(args.clone()).is_err(),
                 "`{command}` is not implemented and must not be registered"
             );
+        }
+    }
+
+    /// The one verb of the `release` family, unwrapped. A `let … else` would be an irrefutable pattern here,
+    /// because §33 froze exactly one verb, so the extraction is a match rather than a panic branch nobody can
+    /// reach — the closed family is asserted by the process-level test instead.
+    fn prepared(cli: Cli) -> ReleasePrepareArgs {
+        let Commands::Release(release) = cli.command else {
+            panic!("release must route to its own subcommand family");
+        };
+        match release.command {
+            ReleaseCommands::Prepare(prepare) => prepare,
+        }
+    }
+
+    #[test]
+    fn release_is_now_a_registered_command_family() {
+        // P4 authorizes the Release Bundle. This replaces the P0 test that asserted `release` must be
+        // rejected, so the change is recorded rather than silent. `project doctor` stays unregistered above.
+        let args: Vec<OsString> = ["fwsight", "release", "prepare"]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        // The two required paths are missing, which is a usage error — but the *route* exists, so clap
+        // complains about the arguments rather than about an unknown subcommand.
+        let err = parse_from(args).expect_err("prepare needs an artifact and a destination");
+        assert_eq!(err, EXIT_USAGE);
+
+        let args: Vec<OsString> = [
+            "fwsight",
+            "release",
+            "prepare",
+            "--artifact",
+            "firmware.elf",
+            "--out",
+            "dist/release",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        let prepare = prepared(parse_from(args).expect("release prepare parses"));
+        assert_eq!(
+            prepare.project,
+            PathBuf::from("."),
+            "--project defaults to here"
+        );
+        assert_eq!(prepare.artifact, PathBuf::from("firmware.elf"));
+        assert_eq!(prepare.out, PathBuf::from("dist/release"));
+        assert!(prepare.map.is_none());
+        assert!(prepare.baseline.is_none() && prepare.baseline_map.is_none());
+        assert!(!prepare.force, "overwriting is never the default (§30)");
+        assert!(!prepare.json);
+    }
+
+    #[test]
+    fn release_prepare_options_parse_into_their_named_slots() {
+        let args: Vec<OsString> = [
+            "fwsight",
+            "release",
+            "prepare",
+            "--project",
+            "release/brake-node",
+            "--artifact",
+            "out/firmware.elf",
+            "--map",
+            "out/firmware.map",
+            "--baseline",
+            "out/previous.elf",
+            "--baseline-map",
+            "out/previous.map",
+            "--out",
+            "dist/release",
+            "--force",
+            "--json",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        let prepare = prepared(parse_from(args).expect("the full release option set parses"));
+        assert_eq!(prepare.project, PathBuf::from("release/brake-node"));
+        assert_eq!(prepare.artifact, PathBuf::from("out/firmware.elf"));
+        assert_eq!(prepare.map, Some(PathBuf::from("out/firmware.map")));
+        assert_eq!(prepare.baseline, Some(PathBuf::from("out/previous.elf")));
+        assert_eq!(
+            prepare.baseline_map,
+            Some(PathBuf::from("out/previous.map"))
+        );
+        assert_eq!(prepare.out, PathBuf::from("dist/release"));
+        assert!(prepare.force);
+        assert!(prepare.json);
+    }
+
+    #[test]
+    fn a_release_without_an_artifact_or_a_destination_is_a_usage_error() {
+        // Neither of these has any answer to bundle. Writing a folder of documents about an unspecified
+        // build would read as a release of something the release owner never chose (§33).
+        let without_artifact: Vec<OsString> = ["fwsight", "release", "prepare", "--out", "dist"]
+            .iter()
+            .map(OsString::from)
+            .collect();
+        assert_eq!(
+            parse_from(without_artifact).expect_err("no artifact"),
+            EXIT_USAGE
+        );
+
+        let without_out: Vec<OsString> = [
+            "fwsight",
+            "release",
+            "prepare",
+            "--artifact",
+            "firmware.elf",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        assert_eq!(
+            parse_from(without_out).expect_err("no destination"),
+            EXIT_USAGE
+        );
+    }
+
+    #[test]
+    fn a_refusal_maps_to_the_code_its_own_words_describe() {
+        use firmwaresight_core::domain::gate::EffectiveSeverity::{Block, Review};
+        // §34's split: the Gate's verdict is 4 or 5, a version that cannot be resolved is a config error at
+        // 2, and anything about the bundle itself is 6.
+        for (error, expected) in [
+            (
+                BundleError::Release(ReleaseError::GateNotReady {
+                    disposition: Review,
+                }),
+                EXIT_GATE_REVIEW,
+            ),
+            (
+                BundleError::Release(ReleaseError::GateNotReady { disposition: Block }),
+                EXIT_GATE_BLOCK,
+            ),
+            (
+                BundleError::Release(ReleaseError::VersionUnavailable {
+                    reason: "no tag".to_owned(),
+                }),
+                EXIT_USAGE,
+            ),
+            (
+                BundleError::DestinationExists {
+                    display: "motor-controller-1.4.2-release-abc".to_owned(),
+                },
+                EXIT_EXPORT,
+            ),
+            (
+                BundleError::UnsafeDestination {
+                    display: "notes".to_owned(),
+                    detail: "it is not a bundle".to_owned(),
+                },
+                EXIT_EXPORT,
+            ),
+            (
+                BundleError::Release(ReleaseError::NoReleaseArtifacts),
+                EXIT_EXPORT,
+            ),
+        ] {
+            assert_eq!(release_exit_code(&error), expected, "{error}");
         }
     }
 
