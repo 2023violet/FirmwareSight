@@ -18,9 +18,13 @@
  * 5. **This is policy readiness, nothing more.** The page never says a build is safe to ship, legally
  *    compliant or certified: the Gate answers one policy, and the wording on the screen stops there
  *    (prompt §43).
+ * 6. **A bundle attaches under Release, and only after a PASS.** P4 added no fifth stage to the rail; the
+ *    Release Bundle is section 6 of this page, disabled with its reason while the disposition says otherwise,
+ *    and its preview, destination token and typed errors all come from the same engine the command line
+ *    drives (prompt §48, §35).
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './Release.module.css';
 import { ErrorPanel } from './components/ErrorPanel';
@@ -29,14 +33,20 @@ import { StateBadge, type StateName } from './components/StateBadge';
 import { formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
 import {
   acceptReview,
+  chooseBundleDestination,
+  exportReleaseBundle,
   getGateRun,
   listCompareCandidates,
   openProjectConfig,
+  prepareReleaseBundle,
   runReleaseGate,
   saveProjectPolicy,
 } from './ipc/bridge';
 import type {
   AcceptReviewRequestDto,
+  BundleDestinationDto,
+  BundleExportDto,
+  BundlePreviewDto,
   CandidatePageDto,
   CompareCandidateDto,
   ErrorEnvelopeDto,
@@ -474,6 +484,7 @@ export function Release({
           <Readiness run={run} restored={restored} onReload={() => void reload()} />
           <Findings run={run} onAccept={accept} />
           {run.tables === null ? null : <Evidence run={run} unit={unit} />}
+          <BundleSection run={run} unit={unit} />
         </>
       )}
     </div>
@@ -978,6 +989,375 @@ function BudgetRow({ row, unit }: { readonly row: GateBudgetRowDto; readonly uni
         {row.reason === null ? null : <span className={styles['note']}>{' · ' + row.reason}</span>}
       </td>
     </tr>
+  );
+}
+
+/**
+ * Which refusals mean the preview is no longer an authorization for anything (§28, §49).
+ *
+ * Each one says a fact moved after the plan was built — the workspace, the source bytes, the notes, or the
+ * plan itself expiring — so the screen clears the preview and the destination rather than letting a person
+ * press Export again over a stale authorization.
+ */
+const STALE_PLAN_CODES: readonly string[] = [
+  'ERR-BUNDLE-6102',
+  'ERR-BUNDLE-6103',
+  'ERR-BUNDLE-6104',
+  'ERR-BUNDLE-6105',
+];
+
+/**
+ * 6 · Release Bundle (prompt §48, §49, §50, §58).
+ *
+ * Three facts decide what this section can do, and none of them is computed here: the disposition is Core's
+ * aggregate, the plan's contents are the bundle engine's, and the destination is a folder a person chose in a
+ * dialog this page cannot see. The order is the flow §48 fixes — Prepare, preview, choose a destination,
+ * export, verification result — and a refusal is shown as the typed error the shell returned, with the code
+ * and the remediation the engine wrote for it.
+ *
+ * The plan is dropped whenever the run changes: a preview authorized against one run is not an authorization
+ * for the next (§28). Copying the release id or the manifest digest is deliberately not offered either — the
+ * shipped build grants no clipboard or shell surface (`AGENTS.md` 7), so the two values are rendered as
+ * selectable text instead of a button that would fail.
+ */
+function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit: SizeUnit }) {
+  const [preview, setPreview] = useState<BundlePreviewDto | null>(null);
+  const [destination, setDestination] = useState<BundleDestinationDto | null>(null);
+  const [outcome, setOutcome] = useState<BundleExportDto | null>(null);
+  const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
+  /** The bundle folder name awaiting an explicit replace decision (§30). */
+  const [confirm, setConfirm] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  const ready = run.dispositionEffectiveSeverity === 'PASS';
+
+  // §28: a new run invalidates whatever was prepared against the old one.
+  useEffect(() => {
+    setPreview(null);
+    setDestination(null);
+    setOutcome(null);
+    setConfirm(null);
+    setError(null);
+    setNote(null);
+  }, [run.runId]);
+
+  // Focus goes to the decision the screen just asked for, so the keyboard path matches the visual one.
+  useEffect(() => {
+    if (confirm !== null) {
+      confirmRef.current?.focus();
+    }
+  }, [confirm]);
+
+  const prepare = useCallback(async () => {
+    setBusy(true);
+    setError(null);
+    setNote(null);
+    const outcome = await prepareReleaseBundle({
+      snapshotId: run.snapshotId,
+      baselineSnapshotId: run.baselineSnapshotId,
+      gateRunId: run.runId,
+    });
+    setBusy(false);
+    if (outcome.ok) {
+      setPreview(outcome.value);
+      setDestination(null);
+      setOutcome(null);
+      setConfirm(null);
+      return;
+    }
+    setPreview(null);
+    setError(outcome.envelope);
+  }, [run.baselineSnapshotId, run.runId, run.snapshotId]);
+
+  const choose = useCallback(async () => {
+    if (preview === null) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const result = await chooseBundleDestination(preview.planId);
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.envelope);
+      return;
+    }
+    // Cancel is a decision, not a failure: the preview stays and the screen says what happened.
+    if (result.value === null) {
+      setNote('No folder was chosen. The bundle has not been written.');
+      return;
+    }
+    setNote(null);
+    setDestination(result.value);
+    setOutcome(null);
+    setConfirm(null);
+  }, [preview]);
+
+  const exportBundle = useCallback(
+    async (overwrite: boolean) => {
+      if (preview === null || destination === null) {
+        return;
+      }
+      setBusy(true);
+      const result = await exportReleaseBundle(preview.planId, destination.destinationToken, overwrite);
+      setBusy(false);
+      if (result.ok) {
+        setOutcome(result.value);
+        setError(null);
+        setConfirm(null);
+        return;
+      }
+      setError(result.envelope);
+      if (result.envelope.code === 'ERR-BUNDLE-6106') {
+        // §30: the first attempt against an occupied destination asks, and only asks. Nothing is replaced
+        // until the release owner presses Replace.
+        setConfirm(destination.bundleFolderName);
+        return;
+      }
+      if (STALE_PLAN_CODES.includes(result.envelope.code)) {
+        setPreview(null);
+        setDestination(null);
+        setConfirm(null);
+      }
+    },
+    [destination, preview],
+  );
+
+  return (
+    <section className={styles['section']} aria-labelledby="fs-bundle-heading">
+      <h2 id="fs-bundle-heading">6 · Release Bundle</h2>
+      {ready ? (
+        <p className={styles['hint']}>
+          This run&rsquo;s disposition is PASS, so the release can be packaged into a folder you choose.
+          The bundle is the analysis, the comparison, the Gate result, the accepted reviews, the Release
+          Notes and the current artifacts — readable without FirmwareSight and checkable against its own
+          SHA256SUMS.
+        </p>
+      ) : (
+        <p className={styles['stale']} role="status">
+          No bundle is prepared: the disposition is {run.dispositionEffectiveSeverity}. A release bundle is
+          written only for a PASS disposition, so resolve what the findings above report, accept what a
+          named reviewer accepts, and run the Gate again.
+        </p>
+      )}
+      <div className={styles['actions']}>
+        <button
+          type="button"
+          className={styles['primary']}
+          disabled={!ready || busy}
+          onClick={() => void prepare()}
+        >
+          {busy && preview === null ? 'Preparing…' : 'Prepare bundle'}
+        </button>
+        <button
+          type="button"
+          className={styles['control']}
+          disabled={preview === null || busy}
+          onClick={() => void choose()}
+        >
+          {busy && preview !== null && destination === null
+            ? 'Choosing…'
+            : 'Choose destination folder'}
+        </button>
+        <button
+          type="button"
+          className={styles['control']}
+          disabled={preview === null || destination === null || busy}
+          onClick={() => void exportBundle(false)}
+        >
+          {busy && outcome === null ? 'Writing…' : 'Export bundle'}
+        </button>
+      </div>
+      {!ready && !busy && preview === null ? (
+        <p className={styles['hint']}>
+          Prepare is disabled because of the disposition above, not because of anything this page decided.
+        </p>
+      ) : null}
+      {note === null ? null : (
+        <p className={styles['status']} role="status">
+          {note}
+        </p>
+      )}
+      {error === null ? null : (
+        <ErrorPanel envelope={error} label="Bundle step failed" heading="Release bundle error" />
+      )}
+      {confirm === null ? null : (
+        <div className={styles['block']} role="group" aria-labelledby="fs-bundle-confirm">
+          <h3 id="fs-bundle-confirm">Replace the existing bundle?</h3>
+          <p className={styles['hint']}>
+            <span className={styles['mono']}>{confirm}</span> already holds a FirmwareSight release bundle.
+            Replacing it moves that bundle aside and removes it only once the new one is written and
+            verified; keeping it writes nothing.
+          </p>
+          <div className={styles['actions']}>
+            <button
+              ref={confirmRef}
+              type="button"
+              className={styles['primary']}
+              disabled={busy}
+              onClick={() => void exportBundle(true)}
+            >
+              Replace the existing bundle named {confirm}
+            </button>
+            <button
+              type="button"
+              className={styles['control']}
+              onClick={() => {
+                setConfirm(null);
+                setError(null);
+                setNote('Kept the bundle that was there. Nothing was written.');
+              }}
+            >
+              Keep it
+            </button>
+          </div>
+        </div>
+      )}
+      {preview === null ? null : <BundlePreview preview={preview} unit={unit} />}
+      {destination === null || preview === null ? null : (
+        <p className={styles['status']} role="status">
+          Destination chosen for <span className={styles['mono']}>{destination.bundleFolderName}</span>.
+          {destination.exists
+            ? ` A folder of that name is already there${
+                destination.recognizableBundle
+                  ? ', and it reads as a FirmwareSight bundle.'
+                  : ', and it is not a bundle this engine wrote — it will not be replaced.'
+              }`
+            : ' Nothing of that name is there yet.'}
+        </p>
+      )}
+      {outcome === null ? null : <BundleResult outcome={outcome} />}
+    </section>
+  );
+}
+
+/**
+ * The preview a release owner authorizes (§49): what the release is, which two builds it stands on, and
+ * every file it will hold with the digest the engine computed for it.
+ *
+ * No field here is editable, and none is assembled by this page: the list is the plan&rsquo;s own, in the
+ * order Core&rsquo;s bundle-path rule sorts it, which is why a reader sees the same order the manifest
+ * records.
+ */
+function BundlePreview({
+  preview,
+  unit,
+}: {
+  readonly preview: BundlePreviewDto;
+  readonly unit: SizeUnit;
+}) {
+  return (
+    <div className={styles['block']}>
+      <h3>Bundle preview</h3>
+      <dl className={styles['rows']}>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Release</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{preview.releaseId}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Version</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{preview.releaseVersion}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Current build</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{preview.snapshotId}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Baseline</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>
+            {preview.baselineSnapshotId ?? 'None'}
+          </dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Gate run</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{preview.gateRunId}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Accepted reviews</dt>
+          <dd className={styles['value']}>{preview.acceptedReviewCount}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Proposed folder</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{preview.bundleFolderName}</dd>
+        </div>
+      </dl>
+      <table className={styles['table']}>
+        <caption className={styles['caption']}>
+          Every file the bundle will hold, named as it will appear inside it. The digests are the ones the
+          plan computed before anything was written, and SHA256SUMS and the manifest repeat them.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">File</th>
+            <th scope="col">Role</th>
+            <th scope="col">Size</th>
+            <th scope="col">SHA-256</th>
+          </tr>
+        </thead>
+        <tbody>
+          {preview.files.map((file) => (
+            <tr key={file.path}>
+              <th scope="row" className={styles['mono']}>
+                {file.path}
+              </th>
+              <td className={styles['mono']}>{file.role}</td>
+              <td className={styles['mono']}>{formatSize(file.byteSize, unit)}</td>
+              <td className={styles['monoSmall']}>{truncateMiddle(file.sha256, 8)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {preview.warnings.length === 0 ? null : (
+        <ul className={styles['noticeList']} aria-label="Plan warnings">
+          {preview.warnings.map((warning) => (
+            <li className={styles['noticeItem']} key={warning}>
+              Warning: {warning}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** What an export produced (§50): the bundle&rsquo;s own name and digest, and what is in it. */
+function BundleResult({ outcome }: { readonly outcome: BundleExportDto }) {
+  return (
+    <div className={styles['block']}>
+      <h3>Bundle created</h3>
+      <dl className={styles['rows']}>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Release</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{outcome.releaseId}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Folder</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{outcome.folderDisplayName}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Manifest SHA-256</dt>
+          <dd className={cx(styles['value'], styles['mono'])}>{outcome.manifestSha256}</dd>
+        </div>
+        <div className={styles['row']}>
+          <dt className={styles['term']}>Files</dt>
+          <dd className={styles['value']}>
+            {outcome.fileCount} ({outcome.artifactCount} artifact
+            {outcome.artifactCount === 1 ? '' : 's'})
+          </dd>
+        </div>
+      </dl>
+      <p className={styles['hint']} role="status">
+        {outcome.replaced
+          ? 'This export replaced the bundle that was there, under your confirmation. '
+          : ''}
+        The written folder was verified against its own SHA256SUMS and manifest before it was put in
+        place.{' '}
+        {outcome.recordWritten
+          ? 'The release is recorded in this database.'
+          : 'The release record was not written; the bundle itself is complete.'}
+      </p>
+    </div>
   );
 }
 

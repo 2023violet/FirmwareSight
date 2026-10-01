@@ -1144,3 +1144,105 @@ pub struct GateRunDto {
     /// Set only for a run read back from history, and says what such a record does and does not show.
     pub record_note: Option<String>,
 }
+
+// --------------------------------------------------------------------------- Release Bundle (P4)
+
+/// The three ids one bundle is assembled from, and nothing else (§26).
+///
+/// No path, no artifact bytes, no destination: the build and the baseline are named by the snapshot ids the
+/// screen already holds, and the Gate run by the id it was stored under. Which project policy applies is not
+/// in the request either — it is the config a person chose in a dialog the WebView cannot see, which is the
+/// only way a policy hash can be a fact rather than an assertion.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct BundlePlanRequestDto {
+    pub snapshot_id: String,
+    pub baseline_snapshot_id: Option<String>,
+    pub gate_run_id: String,
+}
+
+/// One file the bundle will hold (§27, §49).
+///
+/// `path` is bundle-relative with `/` separators — it is the name inside the folder, never where the folder
+/// is. `role` says what the file is for, so the screen can group without inferring it from a name.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct BundleFileRowDto {
+    pub path: String,
+    pub role: String,
+    /// Byte counts in a bundle are far below 2^53 — the whole bundle is a firmware image and its documents —
+    /// so `number` is exact and `bigint` would claim a precision the payload does not need (`ArtifactDto`).
+    #[ts(type = "number")]
+    pub byte_size: u64,
+    pub sha256: String,
+}
+
+/// What a plan would write, bounded to what a release owner can authorize (§27).
+///
+/// `plan_id` is session-local: it names this plan to this process, is not persisted, is not portable, and is
+/// not the release id. Nothing here carries a host path, a source path or a destination — the preview is what
+/// a person reads *before* choosing a folder, so a path in it would be an answer to a question nobody asked.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct BundlePreviewDto {
+    pub plan_id: String,
+    pub release_id: String,
+    pub release_version: String,
+    pub snapshot_id: String,
+    pub baseline_snapshot_id: Option<String>,
+    pub gate_run_id: String,
+    /// `PASS`, always: §8 refuses to plan anything else, so this states a promise rather than a status.
+    pub disposition: String,
+    /// How many of this run's REVIEW findings this session loaded acceptances for. Core's aggregate decided
+    /// the disposition; the count is shown so a person can see what the bundle is standing on (§49).
+    pub accepted_review_count: usize,
+    pub files: Vec<BundleFileRowDto>,
+    pub warnings: Vec<String>,
+    /// The directory name the bundle proposes inside the folder the release owner will choose (§29). A
+    /// display name, not a path.
+    pub bundle_folder_name: String,
+}
+
+/// A destination the release owner chose in the native dialog, as the WebView is allowed to know it (§29).
+///
+/// The chosen folder itself never crosses the boundary: the UI gets a token that names it to this process,
+/// the folder name the bundle will be created under, and whether something of that name is already there —
+/// which is the whole of what an overwrite confirmation needs to say.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct BundleDestinationDto {
+    pub destination_token: String,
+    pub bundle_folder_name: String,
+    pub exists: bool,
+    /// True when the folder that exists there is readable as a FirmwareSight bundle, which is the only kind
+    /// a replacement is allowed to touch (§32). Not a judgement about any other directory.
+    pub recognizable_bundle: bool,
+}
+
+/// What an export produced (§50).
+///
+/// `folder_display_name` is the bundle's own directory name, not where it is: a person who chose the parent
+/// already knows. `manifest_sha256` is the digest of `release-manifest.json` as written, which is the fact
+/// that ties the release record to the directory without naming it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct BundleExportDto {
+    pub release_id: String,
+    pub release_version: String,
+    pub folder_display_name: String,
+    pub manifest_sha256: String,
+    pub file_count: usize,
+    #[ts(type = "number")]
+    pub total_bytes: u64,
+    pub artifact_count: usize,
+    /// True when this export replaced a recognized bundle under explicit confirmation (§30).
+    pub replaced: bool,
+    /// True when the release record is now in the validation database. A record write that fails after a
+    /// successful export is reported, never quietly skipped (§57).
+    pub record_written: bool,
+}

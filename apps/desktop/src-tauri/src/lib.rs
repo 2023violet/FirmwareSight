@@ -17,9 +17,16 @@
 //! see, the workspace Git facts read through the project adapter, and the build's own facts hydrated
 //! from SQLite. Core decides every state and the aggregate; the run is then stored, and a review
 //! acceptance is a separate immutable row beside it (`release`).
+//!
+//! P4 adds the Release Bundle on the same discipline, one step further along the same page. The UI names a
+//! prepared plan id, a destination token and a yes/no on replacing an existing bundle — and nothing else.
+//! The folder comes from a directory dialog Rust opened and is never returned; the plan is held in memory
+//! because it carries every byte it would write; the build it packages is the one this session analyzed,
+//! since §22 has to re-read the source files where they are (`bundle`).
 
 #![forbid(unsafe_code)]
 
+pub mod bundle;
 pub mod compare;
 pub mod details;
 pub mod intake;
@@ -33,7 +40,9 @@ use std::sync::{Arc, Mutex};
 
 use firmwaresight_artifact::ArtifactError;
 use firmwaresight_artifact::pipeline::Analysis;
+use firmwaresight_core::domain::build_snapshot::BuildSnapshot;
 use firmwaresight_core::domain::diff::DiffResult;
+use firmwaresight_project::BundlePlan;
 use firmwaresight_project::{LoadedProject, ProjectError};
 use firmwaresight_storage::{Database, StorageError};
 use ipc::{AnalysisSummaryDto, ErrorEnvelopeDto, FixtureOptionDto, SelectionDto};
@@ -128,14 +137,128 @@ impl DiffStore {
     }
 }
 
-/// The shell's state: a fixture catalog, one SQLite handle, the selections currently staged, and the
-/// project whose policy the Release page runs against.
+/// A build this session analyzed, kept under the id its own content produced.
+///
+/// This is what makes a Release Bundle possible without a new persistence surface: the portable documents
+/// are composed from a `BuildSnapshot` — sections, symbols, capabilities and evidence locators — and SQLite
+/// holds those rows for reading, not for re-sealing a snapshot. The bundle engine therefore assembles from
+/// the analysis that ran in this session, exactly as Compare pages a diff this session computed. A build
+/// from an earlier session is still reviewable in history; packaging it means analyzing it again, which is
+/// also what §22 requires, because the source bytes have to be re-read where they are.
+#[derive(Debug, Default)]
+struct AnalysisStore {
+    order: VecDeque<String>,
+    builds: HashMap<String, BuildSnapshot>,
+}
+
+impl AnalysisStore {
+    /// Remember one analysis. Re-analyzing the same bytes is a no-op: the key is the snapshot id, which is a
+    /// digest of those bytes.
+    fn hold(&mut self, snapshot: &BuildSnapshot) {
+        let id = snapshot.id().as_str().to_owned();
+        if self.builds.contains_key(&id) {
+            return;
+        }
+        self.order.push_back(id.clone());
+        self.builds.insert(id, snapshot.clone());
+        while self.order.len() > MAX_SESSION_ANALYSES {
+            if let Some(oldest) = self.order.pop_front() {
+                self.builds.remove(&oldest);
+            }
+        }
+    }
+
+    fn get(&self, id: &str) -> Option<&BuildSnapshot> {
+        self.builds.get(id)
+    }
+}
+
+/// How many analyses to hold. Eight is the same bound the diff store uses, and it is a memory bound rather
+/// than a workflow one: a release owner analyzes a target and a baseline, and the screen reads one at a time.
+const MAX_SESSION_ANALYSES: usize = 8;
+
+/// One prepared bundle this session holds (§26, §28).
+///
+/// The plan carries every byte it would write, so the preview a person authorized and the bundle that
+/// appears in their folder cannot turn out to be two different documents. The three ids beside it are what an
+/// export re-gathers the same facts with (§28); the destination is *not* stored here, because one plan may be
+/// pointed at several folders in a session and the choice belongs to the token, not to the plan.
+#[derive(Debug)]
+struct HeldBundle {
+    plan: BundlePlan,
+    snapshot_id: String,
+    baseline_snapshot_id: Option<String>,
+    gate_run_id: String,
+}
+
+/// The session's bundle store, in the same shape as [`DiffStore`]: a per-process counter, bounded, never
+/// persisted, and never portable (§26).
+#[derive(Debug, Default)]
+struct BundleStore {
+    next: u64,
+    order: VecDeque<String>,
+    plans: HashMap<String, HeldBundle>,
+}
+
+impl BundleStore {
+    fn insert(&mut self, bundle: HeldBundle) -> String {
+        self.next += 1;
+        let id = format!("bundle-{:x}-{:x}", std::process::id(), self.next);
+        self.order.push_back(id.clone());
+        self.plans.insert(id.clone(), bundle);
+        while self.order.len() > MAX_SESSION_BUNDLES {
+            if let Some(oldest) = self.order.pop_front() {
+                self.plans.remove(&oldest);
+            }
+        }
+        id
+    }
+
+    fn get(&self, id: &str) -> Option<&HeldBundle> {
+        self.plans.get(id)
+    }
+}
+
+/// How many prepared bundles to hold. A person prepares one release at a time; the bound exists so a
+/// deliberate loop over Prepare cannot grow the process without limit.
+const MAX_SESSION_BUNDLES: usize = 4;
+
+/// The destinations a release owner chose in the native dialog, named by an opaque token (§29).
+///
+/// A token rather than the plan id, because one plan can be pointed at several folders in a session — the
+/// release owner changes their mind — and the UI must be able to say *which* choice it is confirming without
+/// ever learning what any of them is.
+#[derive(Debug, Default)]
+struct DestinationStore {
+    next: u64,
+    paths: HashMap<String, PathBuf>,
+}
+
+impl DestinationStore {
+    fn insert(&mut self, path: PathBuf) -> String {
+        self.next += 1;
+        let token = format!("dst-{:x}-{:x}", std::process::id(), self.next);
+        self.paths.insert(token.clone(), path);
+        token
+    }
+
+    fn get(&self, token: &str) -> Option<&PathBuf> {
+        self.paths.get(token)
+    }
+}
+
+/// The shell's state: a fixture catalog, one SQLite handle, the selections currently staged, the project
+/// whose policy the Release page runs against, and the session-local build, bundle and destination stores
+/// that make a Release Bundle possible without giving the WebView a path.
 pub struct Session {
     catalog: FixtureCatalog,
     db: Mutex<Database>,
     selections: Mutex<SelectionStore>,
     diffs: Mutex<DiffStore>,
     project: Mutex<Option<LoadedProject>>,
+    analyses: Mutex<AnalysisStore>,
+    bundles: Mutex<BundleStore>,
+    destinations: Mutex<DestinationStore>,
 }
 
 impl Session {
@@ -148,6 +271,9 @@ impl Session {
             selections: Mutex::new(SelectionStore::default()),
             diffs: Mutex::new(DiffStore::default()),
             project: Mutex::new(None),
+            analyses: Mutex::new(AnalysisStore::default()),
+            bundles: Mutex::new(BundleStore::default()),
+            destinations: Mutex::new(DestinationStore::default()),
         })
     }
 
@@ -323,6 +449,9 @@ impl Session {
 
     /// Import a snapshot unless its content is already in history. Shared by both source paths,
     /// because dedupe must not depend on who chose the file.
+    ///
+    /// Every analysis the shell runs passes through here, which is also where the session remembers the
+    /// sealed snapshot a Release Bundle is composed from (`bundle`).
     fn store(
         &self,
         analysis: &Analysis,
@@ -340,6 +469,7 @@ impl Session {
             db.import_snapshot(project_id, project_name, &analysis.snapshot)
                 .map_err(|err| envelope_from_storage(&err, operation_id))?;
         }
+        self.lock_analyses(operation_id)?.hold(&analysis.snapshot);
         Ok(())
     }
 
@@ -431,6 +561,101 @@ impl Session {
             remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
         })
     }
+
+    fn lock_analyses(
+        &self,
+        operation_id: &str,
+    ) -> Result<std::sync::MutexGuard<'_, AnalysisStore>, ErrorEnvelopeDto> {
+        self.analyses.lock().map_err(|_| ErrorEnvelopeDto {
+            code: "ERR-INTERNAL-9001".to_owned(),
+            message: "FirmwareSight hit an internal error.".to_owned(),
+            operation_id: operation_id.to_owned(),
+            details: Some("the analysis lock was poisoned by an earlier panic".to_owned()),
+            remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
+        })
+    }
+
+    fn lock_bundles(
+        &self,
+        operation_id: &str,
+    ) -> Result<std::sync::MutexGuard<'_, BundleStore>, ErrorEnvelopeDto> {
+        self.bundles.lock().map_err(|_| ErrorEnvelopeDto {
+            code: "ERR-INTERNAL-9001".to_owned(),
+            message: "FirmwareSight hit an internal error.".to_owned(),
+            operation_id: operation_id.to_owned(),
+            details: Some("the bundle lock was poisoned by an earlier panic".to_owned()),
+            remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
+        })
+    }
+
+    fn lock_destinations(
+        &self,
+        operation_id: &str,
+    ) -> Result<std::sync::MutexGuard<'_, DestinationStore>, ErrorEnvelopeDto> {
+        self.destinations.lock().map_err(|_| ErrorEnvelopeDto {
+            code: "ERR-INTERNAL-9001".to_owned(),
+            message: "FirmwareSight hit an internal error.".to_owned(),
+            operation_id: operation_id.to_owned(),
+            details: Some("the destination lock was poisoned by an earlier panic".to_owned()),
+            remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
+        })
+    }
+
+    /// The snapshot this session analyzed for one build, or `None` when it never analyzed that build.
+    pub(crate) fn held_snapshot(
+        &self,
+        snapshot_id: &str,
+        operation_id: &str,
+    ) -> Result<Option<BuildSnapshot>, ErrorEnvelopeDto> {
+        Ok(self.lock_analyses(operation_id)?.get(snapshot_id).cloned())
+    }
+
+    /// Read one prepared bundle this session holds.
+    ///
+    /// The closure runs under the store lock, so a bundle cannot be evicted between the lookup and the read —
+    /// the same discipline [`Session::with_diff`] keeps for a computed comparison.
+    pub(crate) fn with_bundle<R>(
+        &self,
+        plan_id: &str,
+        operation_id: &str,
+        read: impl FnOnce(&HeldBundle) -> R,
+    ) -> Result<R, ErrorEnvelopeDto> {
+        let store = self.lock_bundles(operation_id)?;
+        let held = store
+            .get(plan_id)
+            .ok_or_else(|| bundle_missing(plan_id, operation_id))?;
+        Ok(read(held))
+    }
+
+    /// Hold one prepared bundle for the rest of this session and name it.
+    pub(crate) fn remember_bundle(
+        &self,
+        bundle: HeldBundle,
+        operation_id: &str,
+    ) -> Result<String, ErrorEnvelopeDto> {
+        Ok(self.lock_bundles(operation_id)?.insert(bundle))
+    }
+
+    /// Remember a folder the native dialog produced and return the token that names it (§29).
+    pub(crate) fn remember_destination(
+        &self,
+        path: PathBuf,
+        operation_id: &str,
+    ) -> Result<String, ErrorEnvelopeDto> {
+        Ok(self.lock_destinations(operation_id)?.insert(path))
+    }
+
+    /// The folder one destination token names.
+    pub(crate) fn destination_of(
+        &self,
+        token: &str,
+        operation_id: &str,
+    ) -> Result<PathBuf, ErrorEnvelopeDto> {
+        self.lock_destinations(operation_id)?
+            .get(token)
+            .cloned()
+            .ok_or_else(|| destination_missing(token, operation_id))
+    }
 }
 
 /// The names a selection exposes. Paths stay in [`StagedSelection`].
@@ -470,6 +695,43 @@ fn diff_missing(_diff_id: &str, operation_id: &str) -> ErrorEnvelopeDto {
                 .to_owned(),
         ),
         remediation: Some("Run the comparison again from the two builds.".to_owned()),
+    }
+}
+
+/// A bundle plan this session never prepared, or has already dropped.
+///
+/// The id is quoted back because a person can act on it: Prepare again, from the run they can still see.
+/// The plan is session-local by design (§26), so an id from an earlier session was never going to resolve.
+fn bundle_missing(_plan_id: &str, operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: "ERR-BUNDLE-6105".to_owned(),
+        message: "That bundle plan is no longer available.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: Some(
+            "a prepared bundle is held for the current run only, and is dropped after four more \
+             preparations"
+                .to_owned(),
+        ),
+        remediation: Some("Prepare the bundle again.".to_owned()),
+    }
+}
+
+/// A destination token this session never issued.
+///
+/// The folder a person chose is held under one token and no path crosses the boundary (§29), so an unknown
+/// token is not a path that went missing — it is a choice this process never made, and it is refused rather
+/// than guessed at.
+fn destination_missing(_token: &str, operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: "ERR-BUNDLE-6113".to_owned(),
+        message: "That destination was not chosen in this session.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: Some(
+            "an export writes only to a folder a release owner picked in the native dialog this process \
+             opened, and the token for that choice is held in memory only"
+                .to_owned(),
+        ),
+        remediation: Some("Choose the destination folder again.".to_owned()),
     }
 }
 
@@ -682,7 +944,10 @@ pub fn run() {
             release::save_project_policy,
             release::run_release_gate,
             release::accept_review,
-            release::get_gate_run
+            release::get_gate_run,
+            bundle::prepare_release_bundle,
+            bundle::choose_bundle_destination,
+            bundle::export_release_bundle
         ])
         .run(tauri::generate_context!())
         .expect("error while running the FirmwareSight desktop application");

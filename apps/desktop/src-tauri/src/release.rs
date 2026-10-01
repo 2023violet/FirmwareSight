@@ -1092,7 +1092,7 @@ fn snapshot_missing(_snapshot_id: &str, operation_id: &str) -> ErrorEnvelopeDto 
     }
 }
 
-fn stored_run_missing(_run_id: &str, operation_id: &str) -> ErrorEnvelopeDto {
+pub(crate) fn stored_run_missing(_run_id: &str, operation_id: &str) -> ErrorEnvelopeDto {
     ErrorEnvelopeDto {
         code: "ERR-STORAGE-4005".to_owned(),
         message: "No Gate run with that id is stored.".to_owned(),

@@ -1,8 +1,8 @@
 /**
- * P3 Release: the screen a release owner uses to judge one stored build, read the findings, and sign a
- * review off.
+ * P3 Release and P4's section under it: the screen a release owner uses to judge one stored build, read the
+ * findings, sign a review off, and hand the result to a folder that does not need FirmwareSight to read.
  *
- * These tests protect seven claims, and every one is about what the screen is allowed to say:
+ * These tests protect eight claims, and every one is about what the screen is allowed to say:
  *
  * - the rail lists the three stages this build has, and no doorway to one it does not (prompt §43);
  * - a config dialog that was cancelled is not a failure, and a config that was refused keeps the project
@@ -13,7 +13,9 @@
  * - UNKNOWN stays neutral, and an `UNKNOWN` whose disposition is `BLOCK` says both (ADR-0023, §47);
  * - only a REVIEW can be accepted, an acceptance needs a name and a reason, the row stays REVIEW, and
  *   nothing offers to edit or delete the record (prompt §48);
- * - and a run that failed leaves the last good one on screen, labelled as previous (prompt §49).
+ * - and a run that failed leaves the last good one on screen, labelled as previous (prompt §49);
+ * - and the bundle section stays a section of this page: it opens only on a PASS disposition, asks before
+ *   it replaces anything, and shows the plan the engine rather than the page composed (prompt §48, §58).
  *
  * The bridge is mocked, the way the P1 and P2 files do it: the plumbing has its own test. No assertion
  * here checks a number the shell did not send, because the page computes none of them.
@@ -27,13 +29,16 @@ import {
   acceptReview,
   analyzeSelection,
   attachMap,
+  chooseBundleDestination,
   clearMap,
   compareSnapshots,
   exportCompareHtml,
   exportCompareJson,
+  exportReleaseBundle,
   getGateRun,
   listCompareCandidates,
   openProjectConfig,
+  prepareReleaseBundle,
   queryEvidence,
   querySectionChanges,
   querySections,
@@ -46,6 +51,10 @@ import {
 import type { IpcOutcome } from './ipc/bridge';
 import type {
   AcceptReviewOutcomeDto,
+  BundleDestinationDto,
+  BundleExportDto,
+  BundleFileRowDto,
+  BundlePreviewDto,
   CandidatePageDto,
   CompareCandidateDto,
   ErrorEnvelopeDto,
@@ -74,6 +83,9 @@ vi.mock('./ipc/bridge', () => ({
   runReleaseGate: vi.fn(),
   acceptReview: vi.fn(),
   getGateRun: vi.fn(),
+  prepareReleaseBundle: vi.fn(),
+  chooseBundleDestination: vi.fn(),
+  exportReleaseBundle: vi.fn(),
 }));
 
 const candidatesMock = vi.mocked(listCompareCandidates);
@@ -82,6 +94,9 @@ const savePolicyMock = vi.mocked(saveProjectPolicy);
 const runGateMock = vi.mocked(runReleaseGate);
 const acceptMock = vi.mocked(acceptReview);
 const getRunMock = vi.mocked(getGateRun);
+const prepareBundleMock = vi.mocked(prepareReleaseBundle);
+const chooseDestinationMock = vi.mocked(chooseBundleDestination);
+const exportBundleMock = vi.mocked(exportReleaseBundle);
 
 function ok<T>(value: T): IpcOutcome<T> {
   return { ok: true, value };
@@ -108,6 +123,18 @@ const STORAGE_MISS = ENVELOPE('ERR-STORAGE-4005', 'No stored build matches that 
 const NOT_A_REVIEW = ENVELOPE(
   'ERR-STORAGE-4008',
   'Only a REVIEW finding can be accepted; this finding is BLOCK.',
+);
+const STALE_CONTEXT = ENVELOPE(
+  'ERR-BUNDLE-6102',
+  'The release context changed after this plan was prepared, so the plan authorizes nothing.',
+);
+const DESTINATION_TAKEN = ENVELOPE(
+  'ERR-BUNDLE-6106',
+  'A folder of that name is already at the destination; replacing it needs an explicit confirmation.',
+);
+const NOT_A_BUNDLE = ENVELOPE(
+  'ERR-BUNDLE-6107',
+  'The folder at that destination is not a bundle this engine wrote, so it is not replaced.',
 );
 
 function emptyPage() {
@@ -367,6 +394,127 @@ function reviewOnlyRun(): GateRunDto {
   });
 }
 
+/**
+ * A run whose reviews are all accepted, so the disposition is PASS and the bundle section can act.
+ *
+ * The accepted row still reads REVIEW: a PASS disposition here is Core's aggregate counting an acceptance,
+ * not the finding changing state, which is exactly the distinction §48 makes the screen preserve.
+ */
+function passingRun(overrides: Partial<GateRunDto> = {}): GateRunDto {
+  return gateRun({
+    overallEffectiveSeverity: 'REVIEW',
+    dispositionEffectiveSeverity: 'PASS',
+    counts: { pass: 4, review: 1, block: 0, unknown: 0, notApplicable: 1 },
+    findings: [
+      finding(),
+      finding({
+        id: 'f-flash',
+        ruleId: 'memory.flash_budget',
+        state: 'PASS',
+        effectiveSeverity: 'PASS',
+        summary: 'FLASH footprint 3840 B is inside the 4096 B budget.',
+      }),
+      finding({
+        ...GROWTH_FINDING,
+        acceptable: false,
+        acceptance: {
+          findingId: 'f-growth',
+          actor: 'rosa',
+          acceptedAt: '2026-09-30T08:02:00Z',
+          reason: 'the growth is the new bootloader',
+          originalState: 'REVIEW',
+        },
+      }),
+      finding({
+        id: 'f-notes',
+        ruleId: 'release.notes',
+        state: 'PASS',
+        effectiveSeverity: 'PASS',
+        summary: 'Release Notes `docs/RELEASE_NOTES.md` is present.',
+        evidenceRefs: ['file:docs/RELEASE_NOTES.md'],
+      }),
+      finding({
+        id: 'f-commit',
+        ruleId: 'release.commit_matches_expected',
+        state: 'N/A',
+        effectiveSeverity: 'PASS',
+        summary: '`release.expected_commit` is not configured.',
+      }),
+    ],
+    ...overrides,
+  });
+}
+
+const BUNDLE_FOLDER = 'Controller-v2-2.1.0-7f3a91c2';
+
+function bundleFile(overrides: Partial<BundleFileRowDto> = {}): BundleFileRowDto {
+  const base: BundleFileRowDto = {
+    path: 'analysis.json',
+    role: 'analysis',
+    byteSize: 8192,
+    sha256: 'a'.repeat(64),
+  };
+  return { ...base, ...overrides };
+}
+
+/** The plan's own list, in the order the manifest records it, so a reader sees one order. */
+function bundleFiles(): BundleFileRowDto[] {
+  return [
+    bundleFile({ path: 'accepted-reviews.json', role: 'accepted-reviews', byteSize: 512, sha256: '1'.repeat(64) }),
+    bundleFile({ path: 'analysis.json', role: 'analysis', byteSize: 8192, sha256: '2'.repeat(64) }),
+    bundleFile({ path: 'artifacts/firmware.elf', role: 'artifact', byteSize: 65536, sha256: '3'.repeat(64) }),
+    bundleFile({ path: 'artifacts/firmware.map', role: 'artifact', byteSize: 4096, sha256: '4'.repeat(64) }),
+    bundleFile({ path: 'diff.json', role: 'comparison', byteSize: 2048, sha256: '5'.repeat(64) }),
+    bundleFile({ path: 'gate-results.json', role: 'gate-results', byteSize: 3072, sha256: '6'.repeat(64) }),
+    bundleFile({ path: 'release-manifest.json', role: 'manifest', byteSize: 1536, sha256: '7'.repeat(64) }),
+    bundleFile({ path: 'release-notes.md', role: 'release-notes', byteSize: 256, sha256: '8'.repeat(64) }),
+    bundleFile({ path: 'release-report.html', role: 'report', byteSize: 32768, sha256: '9'.repeat(64) }),
+    bundleFile({ path: 'SHA256SUMS', role: 'checksum-index', byteSize: 1024, sha256: '0'.repeat(64) }),
+  ];
+}
+
+function bundlePreview(overrides: Partial<BundlePreviewDto> = {}): BundlePreviewDto {
+  const base: BundlePreviewDto = {
+    planId: 'bundle-4021-1',
+    releaseId: `release-${'7'.repeat(64)}`,
+    releaseVersion: '2.1.0',
+    snapshotId: 'snap-target',
+    baselineSnapshotId: 'snap-base',
+    gateRunId: gateRun().runId,
+    disposition: 'PASS',
+    acceptedReviewCount: 1,
+    files: bundleFiles(),
+    warnings: [],
+    bundleFolderName: BUNDLE_FOLDER,
+  };
+  return { ...base, ...overrides };
+}
+
+function bundleDestination(overrides: Partial<BundleDestinationDto> = {}): BundleDestinationDto {
+  const base: BundleDestinationDto = {
+    destinationToken: 'dst-4021-1',
+    bundleFolderName: BUNDLE_FOLDER,
+    exists: false,
+    recognizableBundle: false,
+  };
+  return { ...base, ...overrides };
+}
+
+function bundleExport(overrides: Partial<BundleExportDto> = {}): BundleExportDto {
+  const base: BundleExportDto = {
+    releaseId: `release-${'7'.repeat(64)}`,
+    releaseVersion: '2.1.0',
+    folderDisplayName: BUNDLE_FOLDER,
+    manifestSha256: 'd'.repeat(64),
+    fileCount: 10,
+    totalBytes: 117504,
+    artifactCount: 2,
+    replaced: false,
+    recordWritten: true,
+  };
+  return { ...base, ...overrides };
+}
+
 async function openRelease(): Promise<void> {
   render(<App />);
   fireEvent.click(await screen.findByRole('button', { name: 'Release page' }));
@@ -440,6 +588,9 @@ beforeEach(() => {
   runGateMock.mockResolvedValue(ok(gateRun()));
   acceptMock.mockResolvedValue(fail(NOT_A_REVIEW));
   getRunMock.mockResolvedValue(ok(null));
+  prepareBundleMock.mockResolvedValue(ok(bundlePreview()));
+  chooseDestinationMock.mockResolvedValue(ok(bundleDestination()));
+  exportBundleMock.mockResolvedValue(ok(bundleExport()));
 });
 
 describe('Release navigation', () => {
@@ -452,7 +603,10 @@ describe('Release navigation', () => {
       'Release',
     ]);
     const words = document.body.textContent ?? '';
-    for (const stage of ['Bundle', 'History', 'Settings', 'Pricing', 'Cloud']) {
+    // P4 makes `Bundle` a word this build has earned, so it is no longer banned here: §48 attaches the
+    // bundle *under* Release, and what §58 forbids is a fifth navigation verb, which the rail assertion
+    // above is what pins. The stages still not built get none of their words.
+    for (const stage of ['History', 'Settings', 'Pricing', 'Cloud']) {
       expect(words).not.toMatch(new RegExp(`\\b${stage}\\b`));
     }
   });
@@ -930,6 +1084,339 @@ describe('Review acceptance', () => {
     expect(screen.queryByRole('heading', { level: 2, name: /What the findings were judged on/ })).toBeNull();
     expect(screen.getByText('memory.flash_budget')).toBeDefined();
     expect(getRunMock.mock.calls[0]?.[0]).toBe(gateRun().runId);
+  });
+});
+
+describe('Release bundle', () => {
+  /** A button as the element it is, because this suite has no jest-dom matchers. */
+  function namedButton(name: string | RegExp): HTMLButtonElement {
+    return screen.getByRole('button', { name }) as HTMLButtonElement;
+  }
+
+  /** The value beside a term in one of the preview blocks. */
+  function fact(container: HTMLElement, term: string): string {
+    const label = within(container).getByText(term);
+    const value = label.parentElement?.querySelector('dd');
+    if (value === null || value === undefined) {
+      throw new Error(`${term} has no value`);
+    }
+    return value.textContent ?? '';
+  }
+
+  /** Run the Gate to a PASS disposition and prepare the plan, so a test starts at the preview. */
+  async function prepared(): Promise<void> {
+    runGateMock.mockResolvedValue(ok(passingRun()));
+    await openRelease();
+    await runGate();
+    fireEvent.click(await screen.findByRole('button', { name: 'Prepare bundle' }));
+    await screen.findByRole('heading', { level: 3, name: 'Bundle preview' });
+  }
+
+  /** Choose a destination in the dialog this page cannot see, and wait for the screen to acknowledge it. */
+  async function chosen(): Promise<void> {
+    fireEvent.click(namedButton('Choose destination folder'));
+    await waitFor(() => expect(document.body.textContent).toContain('Destination chosen for'));
+  }
+
+  it('attaches the bundle under Release and adds no navigation verb', async () => {
+    await prepared();
+    const heading = screen.getByRole('heading', { level: 2, name: '6 · Release Bundle' });
+    // §58: the rail is still the three stages. A bundle is a section of Release, not a fourth doorway,
+    // so the only new verb this build has is the one inside this page.
+    const rail = screen.getByRole('navigation', { name: 'Pages' });
+    expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Analyze',
+      'Compare',
+      'Release',
+    ]);
+    expect(within(rail).queryByRole('button', { name: /bundle/i })).toBeNull();
+    expect(heading.closest('nav')).toBeNull();
+  });
+
+  it('keeps the bundle closed until the disposition says PASS, and says why', async () => {
+    await openRelease();
+    await runGate();
+    // The default run's disposition is BLOCK, so nothing here is offerable — and the reason is on the
+    // screen rather than inferred from a grey button (prompt §58).
+    await screen.findByRole('button', { name: 'Prepare bundle' });
+    expect(namedButton('Prepare bundle').disabled).toBe(true);
+    expect(
+      screen.getByText(
+        /^No bundle is prepared: the disposition is BLOCK\. A release bundle is written only for a PASS disposition/,
+      ),
+    ).toBeDefined();
+    expect(
+      screen.getByText('Prepare is disabled because of the disposition above, not because of anything this page decided.'),
+    ).toBeDefined();
+    expect(namedButton('Choose destination folder').disabled).toBe(true);
+    expect(namedButton('Export bundle').disabled).toBe(true);
+    expect(screen.queryByRole('heading', { level: 3, name: 'Bundle preview' })).toBeNull();
+    expect(prepareBundleMock).not.toHaveBeenCalled();
+  });
+
+  it('opens once the aggregate reaches PASS on the strength of an accepted review', async () => {
+    runGateMock.mockResolvedValue(ok(passingRun()));
+    await openRelease();
+    await runGate();
+    // The row still reads REVIEW with its acceptance beside it while the disposition reads PASS: the
+    // section opens on Core's aggregate, not on a rewritten finding (prompt §48).
+    expect(await screen.findByText('Disposition: PASS')).toBeDefined();
+    expect(findingRow('diff.growth').querySelector('div')?.textContent).toContain('REVIEW');
+    await waitFor(() => expect(namedButton('Prepare bundle').disabled).toBe(false));
+  });
+
+  it('shows the plan a release owner authorizes, and no path with it', async () => {
+    await prepared();
+    const preview = block('Bundle preview');
+    expect(fact(preview, 'Release')).toBe(`release-${'7'.repeat(64)}`);
+    expect(fact(preview, 'Version')).toBe('2.1.0');
+    expect(fact(preview, 'Current build')).toBe('snap-target');
+    expect(fact(preview, 'Baseline')).toBe('snap-base');
+    expect(fact(preview, 'Gate run')).toBe(gateRun().runId);
+    expect(fact(preview, 'Accepted reviews')).toBe('1');
+    expect(fact(preview, 'Proposed folder')).toBe(BUNDLE_FOLDER);
+    expect(preview.textContent).toContain('8,192 bytes');
+    const words = document.body.textContent ?? '';
+    expect(words).not.toMatch(/[A-Za-z]:[\\/]/);
+    expect(words).not.toContain('dst-');
+  });
+
+  it('sends Prepare three ids and nothing else', async () => {
+    await prepared();
+    expect(prepareBundleMock).toHaveBeenCalledWith({
+      snapshotId: 'snap-target',
+      baselineSnapshotId: 'snap-base',
+      gateRunId: gateRun().runId,
+    });
+  });
+
+  it('says which build the plan is standing on when there is no baseline', async () => {
+    prepareBundleMock.mockResolvedValue(ok(bundlePreview({ baselineSnapshotId: null })));
+    await prepared();
+    expect(fact(block('Bundle preview'), 'Baseline')).toBe('None');
+  });
+
+  it('reports a refused Prepare as the typed error the shell wrote', async () => {
+    runGateMock.mockResolvedValue(ok(passingRun()));
+    prepareBundleMock.mockResolvedValue(
+      fail(ENVELOPE('ERR-BUNDLE-6114', 'This session has not analyzed that build, so its bytes are not held.')),
+    );
+    await openRelease();
+    await runGate();
+    fireEvent.click(await screen.findByRole('button', { name: 'Prepare bundle' }));
+    const panel = await screen.findByRole('alert', { name: 'Bundle step failed' });
+    expect(within(panel).getByText('ERR-BUNDLE-6114')).toBeDefined();
+    expect(within(panel).getByText('This session has not analyzed that build, so its bytes are not held.'))
+      .toBeDefined();
+    expect(screen.getByRole('heading', { level: 2, name: 'Release bundle error' })).toBeDefined();
+    expect(screen.queryByRole('heading', { level: 3, name: 'Bundle preview' })).toBeNull();
+  });
+
+  it('lists the plan warnings instead of dropping them quietly', async () => {
+    prepareBundleMock.mockResolvedValue(
+      ok(bundlePreview({ warnings: ['the MAP leaf name was disambiguated for the bundle folder'] })),
+    );
+    await prepared();
+    const list = await screen.findByRole('list', { name: 'Plan warnings' });
+    expect(within(list).getByText(/disambiguated/)).toBeDefined();
+  });
+
+  it('treats a cancelled destination as a decision, not a failure', async () => {
+    chooseDestinationMock.mockResolvedValue(ok(null));
+    await prepared();
+    fireEvent.click(namedButton('Choose destination folder'));
+    await waitFor(() =>
+      expect(document.body.textContent).toContain('No folder was chosen. The bundle has not been written.'),
+    );
+    expect(screen.queryByRole('alert', { name: 'Bundle step failed' })).toBeNull();
+    expect(screen.getByRole('heading', { level: 3, name: 'Bundle preview' })).toBeDefined();
+    expect(namedButton('Export bundle').disabled).toBe(true);
+    expect(exportBundleMock).not.toHaveBeenCalled();
+  });
+
+  it('labels the chosen destination by name and says what is already there', async () => {
+    await prepared();
+    await chosen();
+    expect(document.body.textContent).toContain('Nothing of that name is there yet.');
+    expect(document.body.textContent).not.toMatch(/[A-Za-z]:[\\/]/);
+
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: true })));
+    fireEvent.click(namedButton('Choose destination folder'));
+    await waitFor(() =>
+      expect(document.body.textContent).toContain('it reads as a FirmwareSight bundle.'),
+    );
+
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: false })));
+    fireEvent.click(namedButton('Choose destination folder'));
+    await waitFor(() =>
+      expect(document.body.textContent).toContain('it will not be replaced.'),
+    );
+  });
+
+  it('asks before it replaces a bundle, and writes nothing until the answer is to replace', async () => {
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: true })));
+    exportBundleMock.mockResolvedValue(fail(DESTINATION_TAKEN));
+    await prepared();
+    await chosen();
+    fireEvent.click(namedButton('Export bundle'));
+
+    const group = await screen.findByRole('group', { name: 'Replace the existing bundle?' });
+    expect(within(group).getByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }))
+      .toBeDefined();
+    // The first press is unambiguous: overwrite false, and nothing on disk has changed.
+    expect(exportBundleMock.mock.calls).toEqual([['bundle-4021-1', 'dst-4021-1', false]]);
+
+    fireEvent.click(within(group).getByRole('button', { name: 'Keep it' }));
+    await waitFor(() =>
+      expect(document.body.textContent).toContain('Kept the bundle that was there. Nothing was written.'),
+    );
+    expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull();
+    expect(exportBundleMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('heading', { level: 3, name: 'Bundle created' })).toBeNull();
+  });
+
+  it('replaces only after the second, explicit press, and says that it did', async () => {
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: true })));
+    exportBundleMock
+      .mockResolvedValueOnce(fail(DESTINATION_TAKEN))
+      .mockResolvedValueOnce(ok(bundleExport({ replaced: true })));
+    await prepared();
+    await chosen();
+    fireEvent.click(namedButton('Export bundle'));
+    const group = await screen.findByRole('group', { name: 'Replace the existing bundle?' });
+    fireEvent.click(
+      within(group).getByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }),
+    );
+
+    const result = await screen.findByRole('heading', { level: 3, name: 'Bundle created' });
+    expect(exportBundleMock.mock.calls[1]).toEqual(['bundle-4021-1', 'dst-4021-1', true]);
+    expect(
+      (result.parentElement as HTMLElement).textContent,
+    ).toContain('This export replaced the bundle that was there, under your confirmation.');
+  });
+
+  it('refuses a folder that is not a bundle and offers no replace button for it', async () => {
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: false })));
+    exportBundleMock.mockResolvedValue(fail(NOT_A_BUNDLE));
+    await prepared();
+    await chosen();
+    fireEvent.click(namedButton('Export bundle'));
+
+    const panel = await screen.findByRole('alert', { name: 'Bundle step failed' });
+    expect(within(panel).getByText('ERR-BUNDLE-6107')).toBeDefined();
+    // §32: an arbitrary directory is never a replacement target, so there is nothing to confirm.
+    expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull();
+    expect(exportBundleMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops a stale plan instead of letting it authorize a write', async () => {
+    exportBundleMock.mockResolvedValue(fail(STALE_CONTEXT));
+    await prepared();
+    await chosen();
+    fireEvent.click(namedButton('Export bundle'));
+
+    const panel = await screen.findByRole('alert', { name: 'Bundle step failed' });
+    expect(within(panel).getByText('ERR-BUNDLE-6102')).toBeDefined();
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { level: 3, name: 'Bundle preview' })).toBeNull(),
+    );
+    expect(document.body.textContent).not.toContain('Destination chosen for');
+    expect(namedButton('Choose destination folder').disabled).toBe(true);
+    expect(exportBundleMock).toHaveBeenCalledTimes(1);
+    // The screen says what to do next, and it is to prepare again rather than to press the same button.
+    expect(namedButton('Prepare bundle').disabled).toBe(false);
+  });
+
+  it('clears the authorization when the plan itself has expired', async () => {
+    exportBundleMock.mockResolvedValue(
+      fail(ENVELOPE('ERR-BUNDLE-6105', 'No plan with that id is held by this session.')),
+    );
+    await prepared();
+    await chosen();
+    fireEvent.click(namedButton('Export bundle'));
+    const panel = await screen.findByRole('alert', { name: 'Bundle step failed' });
+    expect(within(panel).getByText('ERR-BUNDLE-6105')).toBeDefined();
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { level: 3, name: 'Bundle preview' })).toBeNull(),
+    );
+  });
+
+  it('summarizes what the export wrote and what it does not claim', async () => {
+    await prepared();
+    await chosen();
+    fireEvent.click(namedButton('Export bundle'));
+
+    const result = await screen.findByRole('heading', { level: 3, name: 'Bundle created' });
+    const summary = result.parentElement as HTMLElement;
+    expect(fact(summary, 'Folder')).toBe(BUNDLE_FOLDER);
+    expect(fact(summary, 'Manifest SHA-256')).toBe('d'.repeat(64));
+    expect(fact(summary, 'Files')).toBe('10 (2 artifacts)');
+    expect(summary.textContent).toContain('verified against its own SHA256SUMS and manifest');
+    expect(summary.textContent).toContain('The release is recorded in this database.');
+    expect(summary.textContent).not.toMatch(/[A-Za-z]:[\\/]/);
+    // §62: the bundle is integrity-checkable, and the screen never reaches past that.
+    const words = (document.body.textContent ?? '').toLowerCase();
+    for (const claim of ['trusted', 'authentic', 'signed', 'tamper-proof']) {
+      expect(words).not.toMatch(new RegExp(`\\b${claim}\\b`));
+    }
+  });
+
+  it('says plainly when the bytes landed but the record did not', async () => {
+    exportBundleMock.mockResolvedValue(ok(bundleExport({ recordWritten: false })));
+    await prepared();
+    await chosen();
+    fireEvent.click(namedButton('Export bundle'));
+    const result = await screen.findByRole('heading', { level: 3, name: 'Bundle created' });
+    const text = (result.parentElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('The release record was not written; the bundle itself is complete.');
+    expect(text).toContain('verified against its own SHA256SUMS and manifest');
+  });
+
+  it('keeps the file list a table a reader can navigate', async () => {
+    await prepared();
+    const table = within(block('Bundle preview')).getByRole('table');
+    expect(within(table).getByRole('caption')?.textContent).toContain('Every file the bundle will hold');
+    expect(within(table).getAllByRole('columnheader').map((item) => item.textContent)).toEqual([
+      'File',
+      'Role',
+      'Size',
+      'SHA-256',
+    ]);
+    expect(within(table).getAllByRole('row')).toHaveLength(11);
+    expect(within(table).getAllByRole('rowheader').map((item) => item.textContent)).toEqual(
+      bundleFiles().map((file) => file.path),
+    );
+  });
+
+  it('puts focus on the decision it just asked for', async () => {
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: true })));
+    exportBundleMock.mockResolvedValue(fail(DESTINATION_TAKEN));
+    await prepared();
+    await chosen();
+    const exportButton = namedButton('Export bundle');
+    exportButton.focus();
+    fireEvent.click(exportButton);
+
+    const replace = await screen.findByRole('button', {
+      name: `Replace the existing bundle named ${BUNDLE_FOLDER}`,
+    });
+    expect(document.activeElement).toBe(replace);
+    fireEvent.click(screen.getByRole('button', { name: 'Keep it' }));
+    await waitFor(() => expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull());
+    expect(namedButton('Export bundle')).toBeDefined();
+  });
+
+  it('drops the plan when the release owner moves to another run', async () => {
+    await prepared();
+    await chosen();
+    // A new run is a different release, so the preview that was authorized against the old one goes with it
+    // (§28). Changing the build selection re-runs the Gate and the shell hands back a different run id.
+    runGateMock.mockResolvedValue(
+      ok(passingRun({ runId: `gate-${'b'.repeat(64)}`, snapshotId: 'snap-other' })),
+    );
+    fireEvent.click(namedButton('Run Gate'));
+    await waitFor(() => expect(screen.queryByRole('heading', { level: 3, name: 'Bundle preview' })).toBeNull());
+    expect(document.body.textContent).not.toContain('Destination chosen for');
   });
 });
 
