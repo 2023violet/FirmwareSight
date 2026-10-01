@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_IN_PROGRESS_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_READY_FOR_ENGINEERING_GATE_REVIEW_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_PASS_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_READY_FOR_ENGINEERING_GATE_REVIEW_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
@@ -70,7 +70,9 @@ validation:
   # P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md - sixty-one boxes, each settled by a command, a named
   # test or a numbered smoke step - with G2 written as READY_FOR_ENGINEERING_GATE_REVIEW and never as
   # PASS. That verdict exists as of 2026-10-01, so the field moves; the MVP product line is complete
-  # and the pointer in .ai/ACTIVE_TASK.md returns to NONE.
+  # and the pointer in .ai/ACTIVE_TASK.md returns to NONE. P4 closed on 2026-10-01. G2 itself has been
+  # neither audited nor passed: READY_FOR_ENGINEERING_GATE_REVIEW is a statement that the audit may now
+  # be opened, not a judgement of whole-MVP coherence, and only an architect prompt opens it.
   p4_status: PASS_COMPLETE
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
@@ -173,7 +175,14 @@ research:
 # and P4's own §78 closes with STOP AFTER P4. What P4 may not do is declare the MVP finished: its only
 # permitted gate statement is G2 = READY_FOR_ENGINEERING_GATE_REVIEW, because the architect runs the
 # whole-MVP G2 closure audit in a round of its own.
-active_task: P4_RELEASE_BUNDLE
+# That round closed PASS / COMPLETE on 2026-10-01, item by item against US-004 in
+# P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md, so the pointer returns to what it predicted: NONE. The next
+# authorizable act is the G2 engineering closure audit, and no file in this repository authorizes it -
+# it starts only when the architect issues its prompt. G2 stays READY_FOR_ENGINEERING_GATE_REVIEW, never
+# PASS, until that audit has run. This value agrees with .ai/ACTIVE_TASK.md, .ai/CURRENT_STATE.md and
+# .ai/HANDOFF.md; it was left at P4_RELEASE_BUNDLE by the closure commits and aligned by the P4 Governance
+# Baseline Consistency Closure prompt, which changed governance text only.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -417,11 +426,11 @@ p3_execution:
   evidence: P3_VALIDATION/ # four documents, written by this round
   next_stage_after_this_one: P4_bundle # NOT authorized by this prompt; it needs its own architect prompt
 
-# The last core product-implementation stage of the MVP: the Release Bundle. It is opened by its own
+# The last core product-implementation stage of the MVP: the Release Bundle. It was opened by its own
 # architect prompt, delivered as a file rather than inline, which is why this is the first round since P0
-# that can register a real SHA-256. Recorded now, while the round is RUNNING: the expected-NO lines below
-# are promises this prompt makes about its own scope, and each must be replaced by a measurement before
-# P4 can read PASS_COMPLETE.
+# that can register a real SHA-256. It was recorded while the round was RUNNING, so the expected-NO lines
+# below stay as the promises the prompt made about its own scope; the measured results land under them now
+# that P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md has settled sixty-one boxes item by item (2026-10-01).
 p4_execution:
   authorized: true
   prompt: "FirmwareSight - P4 Release Bundle MVP Implementation, Execution Prompt v1.0 - Architect Reviewed"
@@ -447,8 +456,32 @@ p4_execution:
   start_run_id: 36810689645
   start_run_conclusion: "success, 7 of 7 jobs"
   tests_at_start: { rust: 556, ui: 135 } # re-measured on this machine before the first write: one cargo test --workspace = 556 passed / 0 failed / 0 ignored; corepack pnpm test = 135 passed in 6 files. The retired 715 double-count is not reintroduced
-  stage_status: IN_PROGRESS
-  g2_status: NOT_REACHED
+  stage_status: PASS_COMPLETE # the verdict is P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md's sixty-one boxes, not this line
+  closed_on: "2026-10-01"
+  g2_status: READY_FOR_ENGINEERING_GATE_REVIEW # the only G2 statement P4 was permitted to write; the G2 engineering closure audit has not run, and G2 is not PASS
+  not_measured_at_close: { peak_rss: NOT_MEASURED, bundle_throughput_or_latency: NOT_MEASURED, fuzz: NOT_RUN, macos_or_linux_window: NOT_RUN, keyboard_only_traversal: NOT_RUN, second_windows_host: NOT_RUN, dpi_other_than_100: NOT_RUN, explorer_double_click_on_report: NOT_OBSERVED } # as recorded in P4_VALIDATION/P4_BUNDLE_DESKTOP_SMOKE_REPORT.md "Not observed, not run" and .ai/ACTIVE_TASK.md
+  # Measured result of the promises above. None of these lines is a claim of intent; each is copied from
+  # the P4 pack, and nothing here was re-run by the governance round that wrote it into this file.
+  boundaries_measured:
+    schema_version_at_close: 4 # SCHEMA_VERSION in crates/firmwaresight-storage/src/db.rs, through additive migrations/0004_release_records.sql
+    migration: 0004_release_records.sql
+    new_sixth_first_party_crate: NONE # crates/ still holds five library crates: artifact, core, project, report, storage
+    new_third_party_dependency: NONE # `git diff 323afad 1b0ccbe -- Cargo.lock` adds no `+name = ` line; apps/desktop/ui/package.json and pnpm-lock.yaml unchanged (P4_BUNDLE_EXECUTION_REPORT.md section 1)
+    new_design_token: NONE # assets/design-tokens.json is still v0.2.1 and `git diff 323afad 1b0ccbe -- assets/design-tokens.json DESIGN.md` is empty
+    portable_analysis_schema: "urn:firmwaresight:schema:analysis:1" # schemas/analysis.schema.json, a new public contract and therefore a compatibility promise; gate-results, accepted-reviews, diff, release-manifest and project-config all stay at major 1
+  tests_at_close: { rust: 769, ui: 155 } # ONE `cargo test --workspace` invocation: 769 passed / 0 failed / 0 ignored across 41 executable suites; `corepack pnpm test` 155 passed in 6 files. Direct counts only - no drift or core-smoke rerun summed in, and the retired 715 is not a current count
+  gates_at_close: "python scripts/check.py 15/15 PASS; fmt, clippy --workspace --all-targets --all-features -D warnings, typecheck, lint, build clean; drift, deny (advisories/bans/licenses/sources ok on a refreshed index) and core-smoke each exit 0; git diff --check clean"
+  smoke_at_close:
+    cli: "23 / 23 ok, 0 failed" # target/release/fwsight.exe over a throwaway subject, P4_BUNDLE_EXECUTION_REPORT.md section 3
+    desktop: "50 / 50 prompt section 59 steps" # the release binary in one continuous Windows window session, P4_BUNDLE_DESKTOP_SMOKE_REPORT.md
+    independent_reader: "64 / 64" # scripts/verify_bundle_portability.py with --schemas schemas, over the desktop-exported bundle
+    relocated_independent_reader: "59 / 59" # the relocated copy with project, source artifacts and database all unavailable
+  ci_coverage: "IMPLEMENTATION GREEN; CLOSURE GREEN ON A RE-RUN AFTER A RUNNER TOOLCHAIN CONFLICT; BOTH LATER SUCCESSORS GREEN" # The stage's own gate numbers stay locally measured; what the remote said is this separate fact, read with gh by exact headSha. Implementation: e799f2f32f23958b0074d90af3afd108c87b9afc, Run 36872456446 completed/success, 7 of 7 jobs, and every earlier P4 implementation push was green as well (P4_BUNDLE_EXECUTION_REPORT.md section 7). First closure: 157f749160263b9f6d040f16409e4689c633e3a4, Run 36879477561 - attempt 1 concluded failure with 6 of 7 green, the one red being Generated output drift -> drift/ipc bindings, where rustup on the runner, syncing the pinned 1.98.1 toolchain as `cargo test -p firmwaresight-desktop` started, logged "recovering from a partially installed toolchain", then "failed to install component: 'clippy-preview-x86_64-unknown-linux-gnu', detected conflict: 'bin/cargo-clippy'", and rolled back before any crate compiled. That is runner provisioning, not a repository defect; attempt 2 on the same headSha concluded success, 7 of 7 jobs, with no file changed between the attempts. Handoff successor: 94f7bd9aece72795b862c4b19813381300cfed44, Run 36881101091 completed/success, 7 of 7 jobs. Owner closeout successor: 1b0ccbeacd912b3abb92da526719e702ba5843eb, Run 36884587886 completed/success, 7 of 7 jobs - the head this baseline alignment was written on. The run of the commit that carries this line is external evidence, read with `gh run list --branch main --repo 2023violet/FirmwareSight`, and is not written into a further commit
+  defects_found_by_smoke: 1 # the independent reader's clock rule flagged accepted_at, the one clock a bundle may carry - a checker defect, fixed in e799f2f; the bundle itself was never wrong
+  observations_by_design: 1 # a stale plan is consumed after ERR-BUNDLE-6103, so restoring the bytes re-enables Export only through a fresh Prepare, exactly as the error text says
+  evidence: P4_VALIDATION/ # four documents, written by the P4 round
+  governance_consistency_closure: "FirmwareSight - P4 Governance Baseline Consistency Closure, Execution Prompt v1.0 - Architect Reviewed, supplied inline; it aligned product.status, validation.current_gate, active_task and this block with the closed stage, changed BASELINE.yaml and SHA256SUMS only, and did not perform the G2 audit"
+  next_stage_after_this_one: G2_engineering_closure_audit # NOT authorized by this file; it needs its own architect prompt
 
 p0_execution:
   authorized: true
