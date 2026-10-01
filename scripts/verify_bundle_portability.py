@@ -173,7 +173,34 @@ def verify_no_host_leaks(bundle: Path, report: Report) -> None:
     for name in COMPOSED:
         text = (bundle / name).read_text(encoding="utf-8")
         report.check(not HOST_PATH.search(text), f"{name} names no path on this machine")
+
+    # The one clock a bundle may carry is the moment a named person accepted a review, which is a recorded
+    # human act rather than a generation time (`accepted_at`, written by SQLite when the decision landed).
+    # Everything else must be reproducible from the same inputs, so every other date-shaped value is a
+    # defect - and the report is allowed to print exactly the dates the review record holds, no more.
+    review_dates = _acceptance_dates(bundle)
+    for name in ("analysis.json", "diff.json", "gate-results.json", "release-manifest.json", SUMS):
+        text = (bundle / name).read_text(encoding="utf-8")
         report.check(not DATE_SHAPED.search(text), f"{name} carries no wall-clock value")
+    accepted = (bundle / "accepted-reviews.json").read_text(encoding="utf-8")
+    report.check(
+        set(DATE_SHAPED.findall(accepted)) == review_dates,
+        "accepted-reviews.json's only dates are the moments its reviews were accepted",
+    )
+    printed = set(DATE_SHAPED.findall((bundle / REPORT).read_text(encoding="utf-8")))
+    report.check(
+        printed <= review_dates,
+        f"{REPORT} prints no date beyond the acceptance record ({sorted(printed) or 'none'})",
+    )
+
+
+def _acceptance_dates(bundle: Path) -> set[str]:
+    document = json.loads((bundle / "accepted-reviews.json").read_text(encoding="utf-8"))
+    return {
+        match
+        for entry in document.get("acceptances", [])
+        for match in DATE_SHAPED.findall(str(entry.get("accepted_at", "")))
+    }
 
 
 def answer_the_nine_questions(bundle: Path, manifest: dict[str, Any], report: Report) -> None:
