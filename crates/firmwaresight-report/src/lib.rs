@@ -15,20 +15,31 @@
 
 #![forbid(unsafe_code)]
 
+pub mod analysis;
 pub mod diff;
 pub mod diff_render;
 pub mod dto;
 pub mod gate;
 pub mod gate_render;
+pub mod release;
+pub mod release_render;
 pub mod render;
 pub mod schema_check;
 
+pub use analysis::{
+    ANALYSIS_SCHEMA_ID, ANALYSIS_SCHEMA_VERSION, AnalysisDocumentDto, PortableArtifactDto,
+    SectionRowDto, SnapshotDto, SymbolRowDto,
+};
 pub use diff::DiffResultDto;
 pub use dto::AnalyzeResultDto;
 pub use gate::{
     ACCEPTANCE_ORIGINAL_STATE, ACCEPTED_REVIEWS_SCHEMA_ID, ACCEPTED_REVIEWS_SCHEMA_VERSION,
     AcceptanceDto, AcceptedReviewsDto, GATE_SCHEMA_ID, GATE_SCHEMA_VERSION, GateFindingDto,
     GateResultsDto,
+};
+pub use release::{
+    BuildFactsDto, GeneratedByDto, IntegrityModelDto, ManifestError, ManifestFileDto,
+    RELEASE_MANIFEST_SCHEMA_ID, RELEASE_MANIFEST_SCHEMA_VERSION, ReleaseManifestDto,
 };
 pub use render::{to_json, to_json_pretty};
 

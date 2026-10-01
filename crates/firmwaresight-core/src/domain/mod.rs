@@ -9,5 +9,6 @@ pub mod evidence;
 pub mod gate;
 pub mod identity;
 pub mod memory;
+pub mod release;
 pub mod section;
 pub mod symbol;

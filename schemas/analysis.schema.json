@@ -1,0 +1,655 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:firmwaresight:schema:analysis:1",
+  "title": "FirmwareSight Portable Analysis v1",
+  "description": "One build as FirmwareSight observed it, readable without FirmwareSight. Field casing follows the portable Diff document; the internal p0-internal IPC shape is deliberately not this contract. No field is a host path, no field is a generation timestamp, and every value that could not be established carries the reason it could not be.",
+  "type": "object",
+  "required": [
+    "schema",
+    "schemaVersion",
+    "snapshot",
+    "artifacts",
+    "memory",
+    "sections",
+    "symbols",
+    "capabilities",
+    "evidence"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:firmwaresight:schema:analysis:1"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "snapshot": {
+      "$ref": "#/$defs/snapshot"
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "memory": {
+      "$ref": "#/$defs/memory"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/section"
+      }
+    },
+    "symbols": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/symbol"
+      }
+    },
+    "capabilities": {
+      "$ref": "#/$defs/capabilities"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hex64": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]+$"
+    },
+    "optionalAddress": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^0x[0-9a-f]+$"
+    },
+    "optionalText": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "nonNegativeBytes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "snapshot": {
+      "type": "object",
+      "required": [
+        "snapshotId",
+        "fwsightVersion",
+        "normalizationVersion"
+      ],
+      "properties": {
+        "snapshotId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fwsightVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalizationVersion": {
+          "const": "p0-normalize-1"
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "fileName",
+        "kind",
+        "sha256",
+        "byteSize",
+        "parserId",
+        "architecture",
+        "bitness",
+        "endianness",
+        "entryPoint",
+        "entryPointUnknownReason",
+        "buildId",
+        "buildIdUnknownReason"
+      ],
+      "properties": {
+        "fileName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "elf",
+            "map",
+            "bin",
+            "hex",
+            "unknown"
+          ]
+        },
+        "sha256": {
+          "$ref": "#/$defs/hex64"
+        },
+        "byteSize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parserId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "architecture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bitness": {
+          "enum": [
+            "32",
+            "64",
+            "unknown"
+          ]
+        },
+        "endianness": {
+          "enum": [
+            "little",
+            "big",
+            "unknown"
+          ]
+        },
+        "entryPoint": {
+          "$ref": "#/$defs/optionalAddress"
+        },
+        "entryPointUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "buildId": {
+          "$ref": "#/$defs/optionalText"
+        },
+        "buildIdUnknownReason": {
+          "$ref": "#/$defs/reason"
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory": {
+      "type": "object",
+      "required": [
+        "accountingRule",
+        "layoutSource",
+        "weakestEvidenceBasis",
+        "admissibleForHardBlock",
+        "nonvolatileImageFootprint",
+        "runtimeRamFootprint",
+        "contributions",
+        "excludedMetadataBytes",
+        "dualAccountedSections"
+      ],
+      "properties": {
+        "accountingRule": {
+          "const": "adr-0021-dual-budget"
+        },
+        "layoutSource": {
+          "enum": [
+            "project-config",
+            "map",
+            "none"
+          ]
+        },
+        "weakestEvidenceBasis": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "region-config+elf-load",
+            "map-memory-configuration+elf-load",
+            "elf-address-and-flags",
+            "section-name-heuristic",
+            "unattributed",
+            null
+          ]
+        },
+        "admissibleForHardBlock": {
+          "type": "boolean"
+        },
+        "nonvolatileImageFootprint": {
+          "$ref": "#/$defs/budget"
+        },
+        "runtimeRamFootprint": {
+          "$ref": "#/$defs/budget"
+        },
+        "contributions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/contribution"
+          }
+        },
+        "excludedMetadataBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dualAccountedSections": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "required": [
+        "state",
+        "classification",
+        "bytes",
+        "unattributed",
+        "reason"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "exact",
+            "partial",
+            "unknown"
+          ]
+        },
+        "classification": {
+          "$ref": "#/$defs/evidenceClass"
+        },
+        "bytes": {
+          "$ref": "#/$defs/nonNegativeBytes"
+        },
+        "unattributed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reason": {
+          "$ref": "#/$defs/reason"
+        }
+      },
+      "additionalProperties": false
+    },
+    "contribution": {
+      "type": "object",
+      "required": [
+        "sectionLocator",
+        "sectionName",
+        "nonvolatileBytes",
+        "runtimeRamBytes",
+        "evidenceBasis",
+        "classification",
+        "accountingRule",
+        "dualAccounted"
+      ],
+      "properties": {
+        "sectionLocator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sectionName": {
+          "$ref": "#/$defs/optionalText"
+        },
+        "nonvolatileBytes": {
+          "$ref": "#/$defs/nonNegativeBytes"
+        },
+        "runtimeRamBytes": {
+          "$ref": "#/$defs/nonNegativeBytes"
+        },
+        "evidenceBasis": {
+          "enum": [
+            "region-config+elf-load",
+            "map-memory-configuration+elf-load",
+            "elf-address-and-flags",
+            "section-name-heuristic",
+            "unattributed"
+          ]
+        },
+        "classification": {
+          "$ref": "#/$defs/evidenceClass"
+        },
+        "accountingRule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dualAccounted": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "required": [
+        "index",
+        "name",
+        "nameUnknownReason",
+        "role",
+        "flags",
+        "virtualAddress",
+        "virtualAddressUnknownReason",
+        "loadAddress",
+        "loadAddressUnknownReason",
+        "fileOffset",
+        "fileOffsetUnknownReason",
+        "fileSize",
+        "memorySize",
+        "memorySizeUnknownReason",
+        "region",
+        "regionUnknownReason"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "name": {
+          "$ref": "#/$defs/optionalText"
+        },
+        "nameUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "role": {
+          "enum": [
+            "code",
+            "read-only-data",
+            "initialized-data",
+            "uninitialized-data",
+            "debug",
+            "note",
+            "symbol-table",
+            "string-table",
+            "arm-attribute",
+            "other",
+            "unknown"
+          ]
+        },
+        "flags": {
+          "$ref": "#/$defs/sectionFlags"
+        },
+        "virtualAddress": {
+          "$ref": "#/$defs/optionalAddress"
+        },
+        "virtualAddressUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "loadAddress": {
+          "$ref": "#/$defs/optionalAddress"
+        },
+        "loadAddressUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "fileOffset": {
+          "$ref": "#/$defs/optionalAddress"
+        },
+        "fileOffsetUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "fileSize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "memorySize": {
+          "$ref": "#/$defs/nonNegativeBytes"
+        },
+        "memorySizeUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "region": {
+          "$ref": "#/$defs/optionalText"
+        },
+        "regionUnknownReason": {
+          "$ref": "#/$defs/reason"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sectionFlags": {
+      "type": "object",
+      "required": [
+        "alloc",
+        "execute",
+        "write",
+        "merge",
+        "strings",
+        "tls",
+        "compressed"
+      ],
+      "properties": {
+        "alloc": {
+          "type": "boolean"
+        },
+        "execute": {
+          "type": "boolean"
+        },
+        "write": {
+          "type": "boolean"
+        },
+        "merge": {
+          "type": "boolean"
+        },
+        "strings": {
+          "type": "boolean"
+        },
+        "tls": {
+          "type": "boolean"
+        },
+        "compressed": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "symbol": {
+      "type": "object",
+      "required": [
+        "name",
+        "nameUnknownReason",
+        "address",
+        "addressUnknownReason",
+        "size",
+        "sizeUnknownReason",
+        "kind",
+        "binding",
+        "section"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/optionalText"
+        },
+        "nameUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "address": {
+          "$ref": "#/$defs/optionalAddress"
+        },
+        "addressUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "size": {
+          "$ref": "#/$defs/nonNegativeBytes"
+        },
+        "sizeUnknownReason": {
+          "$ref": "#/$defs/reason"
+        },
+        "kind": {
+          "enum": [
+            "notype",
+            "object",
+            "function",
+            "section",
+            "file",
+            "common",
+            "other",
+            "unknown"
+          ]
+        },
+        "binding": {
+          "enum": [
+            "local",
+            "global",
+            "weak",
+            "other",
+            "unknown"
+          ]
+        },
+        "section": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "object",
+      "required": [
+        "elf",
+        "sections",
+        "symbols",
+        "debugInfo",
+        "map",
+        "objectAttribution",
+        "git"
+      ],
+      "properties": {
+        "elf": {
+          "enum": [
+            "supported",
+            "partial",
+            "unsupported",
+            "unknown"
+          ]
+        },
+        "sections": {
+          "$ref": "#/$defs/availability"
+        },
+        "symbols": {
+          "$ref": "#/$defs/availability"
+        },
+        "debugInfo": {
+          "$ref": "#/$defs/availability"
+        },
+        "map": {
+          "enum": [
+            "provided",
+            "not-provided",
+            "unknown"
+          ]
+        },
+        "objectAttribution": {
+          "$ref": "#/$defs/availability"
+        },
+        "git": {
+          "$ref": "#/$defs/availability"
+        }
+      },
+      "additionalProperties": false
+    },
+    "availability": {
+      "enum": [
+        "available",
+        "partial",
+        "unavailable",
+        "unknown"
+      ]
+    },
+    "evidenceClass": {
+      "enum": [
+        "observed",
+        "derived",
+        "declared",
+        "unknown"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "id",
+        "field",
+        "classification",
+        "sourceType",
+        "sourceLocator",
+        "value",
+        "rule",
+        "confidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "$ref": "#/$defs/evidenceClass"
+        },
+        "sourceType": {
+          "enum": [
+            "elf.file-header",
+            "elf.section-header",
+            "elf.program-header",
+            "elf.symbol-table",
+            "elf.note",
+            "map",
+            "memory-region-config",
+            "user-declaration",
+            "embedded-version",
+            "git-cli",
+            "filesystem",
+            "rule-engine"
+          ]
+        },
+        "sourceLocator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string"
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            null
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

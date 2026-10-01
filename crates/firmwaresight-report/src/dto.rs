@@ -11,9 +11,11 @@ use serde::Serialize;
 
 use firmwaresight_core::domain::build_snapshot::{BuildSnapshot, NORMALIZATION_VERSION};
 use firmwaresight_core::domain::capability::Capabilities;
-use firmwaresight_core::domain::evidence::{Confidence, EvidenceClass, SourceType};
+use firmwaresight_core::domain::evidence::{Confidence, EvidenceClass, EvidenceItem, SourceType};
 use firmwaresight_core::domain::identity::{Bitness, Endianness, Fact};
-use firmwaresight_core::domain::memory::{ByteTotal, MemoryContribution, MemoryEvidenceBasis};
+use firmwaresight_core::domain::memory::{
+    ByteTotal, MemoryContribution, MemoryEvidenceBasis, MemoryFootprint,
+};
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -211,6 +213,43 @@ fn budget(total: &ByteTotal) -> BudgetDto {
     }
 }
 
+/// The memory block exactly as the CLI projects it.
+///
+/// Exposed for the portable `analysis:1` document rather than re-derived there: two projections of one
+/// footprint can disagree, and a disagreement inside a bundle a reader is supposed to trust is worse than
+/// a dependency between two modules of the same crate.
+pub(crate) fn memory_dto(memory: &MemoryFootprint) -> MemoryDto {
+    MemoryDto {
+        accounting_rule: "adr-0021-dual-budget",
+        layout_source: memory.layout_source.as_label(),
+        weakest_evidence_basis: memory.weakest_basis.map(basis_text),
+        admissible_for_hard_block: memory.admissible_for_hard_block(),
+        nonvolatile_image_footprint: budget(&memory.nonvolatile),
+        runtime_ram_footprint: budget(&memory.runtime_ram),
+        contributions: memory.contributions.iter().map(contribution).collect(),
+        excluded_metadata_bytes: memory.excluded_metadata_bytes,
+        dual_accounted_sections: memory
+            .dual_accounted_sections()
+            .into_iter()
+            .map(|c| c.section_locator.clone())
+            .collect(),
+    }
+}
+
+/// One evidence row, projected the same way for the internal and the portable document.
+pub(crate) fn evidence_dto(item: &EvidenceItem) -> EvidenceDto {
+    EvidenceDto {
+        id: item.id.clone(),
+        field: item.field.clone(),
+        classification: class_text(item.classification),
+        source_type: source_text(item.source_type),
+        source_locator: item.source_locator.clone(),
+        value: item.raw_value.clone(),
+        rule: item.rule.clone(),
+        confidence: item.confidence.map(confidence_text),
+    }
+}
+
 fn contribution(c: &MemoryContribution) -> ContributionDto {
     ContributionDto {
         section_locator: c.section_locator.clone(),
@@ -301,21 +340,7 @@ impl AnalyzeResultDto {
                 build_id,
                 build_id_unknown_reason: build_reason,
             },
-            memory: MemoryDto {
-                accounting_rule: "adr-0021-dual-budget",
-                layout_source: memory.layout_source.as_label(),
-                weakest_evidence_basis: memory.weakest_basis.map(basis_text),
-                admissible_for_hard_block: memory.admissible_for_hard_block(),
-                nonvolatile_image_footprint: budget(&memory.nonvolatile),
-                runtime_ram_footprint: budget(&memory.runtime_ram),
-                contributions: memory.contributions.iter().map(contribution).collect(),
-                excluded_metadata_bytes: memory.excluded_metadata_bytes,
-                dual_accounted_sections: memory
-                    .dual_accounted_sections()
-                    .into_iter()
-                    .map(|c| c.section_locator.clone())
-                    .collect(),
-            },
+            memory: memory_dto(memory),
             counts: CountsDto {
                 sections: snapshot.section_count(),
                 symbols: snapshot.symbol_count(),
@@ -323,20 +348,7 @@ impl AnalyzeResultDto {
                 evidence: snapshot.evidence().len(),
             },
             capabilities: CapabilitiesDto::from(snapshot.capabilities()),
-            evidence: snapshot
-                .evidence()
-                .iter()
-                .map(|item| EvidenceDto {
-                    id: item.id.clone(),
-                    field: item.field.clone(),
-                    classification: class_text(item.classification),
-                    source_type: source_text(item.source_type),
-                    source_locator: item.source_locator.clone(),
-                    value: item.raw_value.clone(),
-                    rule: item.rule.clone(),
-                    confidence: item.confidence.map(confidence_text),
-                })
-                .collect(),
+            evidence: snapshot.evidence().iter().map(evidence_dto).collect(),
         }
     }
 }

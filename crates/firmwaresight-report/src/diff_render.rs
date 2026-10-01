@@ -17,7 +17,7 @@ use crate::diff::{ByteChangeDto, DiffResultDto, ObjectChangesDto};
 /// theme), restated here because a standalone file cannot read the desktop's `tokens.css`.
 /// `html_export_colours_come_from_the_frozen_token_set` re-checks that against the token file, so
 /// this block cannot quietly drift into magic values.
-const EMBEDDED_STYLE: &str = r#":root {
+pub(crate) const EMBEDDED_STYLE: &str = r#":root {
   --fs-color-bg-canvas: #F7F8FA;
   --fs-color-bg-surface: #FFFFFF;
   --fs-color-bg-subtle: #F1F3F5;

@@ -33,7 +33,10 @@ pub fn render_reviews_json(dto: &AcceptedReviewsDto) -> String {
 }
 
 /// The state order a person reads, not the order the rules were evaluated in.
-const STATE_ORDER: [FindingState; 5] = [
+///
+/// Shared with the release report so one document type has one reading order; a second order would be a
+/// second definition of "what to look at first" (`AGENTS.md` 3).
+pub(crate) const STATE_ORDER: [FindingState; 5] = [
     FindingState::Block,
     FindingState::Review,
     FindingState::Unknown,
