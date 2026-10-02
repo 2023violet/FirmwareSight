@@ -143,8 +143,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── ADR-0027-project-policy-and-provenance-adapter.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
+│   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
+│   │   ├── FirmwareSight_Pre_G2_Compare_UI_Test_Reliability_Closure_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
 │   │   ├── FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
 │   │   └── README.md
@@ -507,6 +509,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │       ├── firmwaresight.toml
 │   │       └── fixture.toml
 │   └── manifest.json
+├── G2_VALIDATION/
+│   ├── G2_END_TO_END_SMOKE_REPORT.md
+│   ├── G2_ENGINEERING_CLOSURE_REPORT.md
+│   ├── G2_EVIDENCE_MATRIX.md
+│   ├── G2_EXIT_CHECKLIST.md
+│   └── G2_KNOWN_LIMITATIONS.md
 ├── golden/
 │   ├── cli/
 │   │   ├── p0-basic-analyze.json

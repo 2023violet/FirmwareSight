@@ -1042,3 +1042,53 @@ Decisions taken at closure, each with the thing that forced it:
 Scope guard: the closure added no product code. Four validation documents, three governance files and
 two regenerated integrity artifacts are the whole commit set after `e799f2f`; the MVP line stops here
 and returns to the architect for the G2 engineering closure audit.
+
+# Two pre-G2 closures — 2026-10-01
+
+- **P4 Governance Baseline Consistency Closure** (inline prompt). `BASELINE.yaml` still carried P4's
+  running-state live fields after every other surface recorded P4 closed; `fe420d1` aligned them and
+  touched nothing else. Its Run `36892307828` lost attempt 1 on a Compare test race this commit did not
+  touch, and passed 7 of 7 on attempt 2 of the same SHA. A green re-run was not taken as closing that race.
+- **Pre-G2 Compare UI Test Reliability Closure** (file prompt `dee5b8e4…`, archived in the G2 round).
+  `055b54e` made `compare.test.tsx` wait for the pager text it asserts. The prompt required the *first*
+  attempt on the repair head to be green, because the defect was non-determinism: Run `36899128645`
+  attempt 1 was 7 of 7, and two more Windows UI executions agreed.
+
+# G2 Product MVP Engineering Closure Audit — 2026-10-01
+
+Authorization: the G2 prompt v1.0 (file, `3c6ab83e…2bac9`, archived) and its Storage Path Semantics
+Clarification Addendum v1.0 (inline). Audit first; narrow repair only inside existing MVP contracts.
+
+- **An audit that only re-reads verdicts proves nothing new, so the gate was run before anything was
+  written — and it failed.** `release.test.tsx` "puts focus on the decision it just asked for" read focus
+  synchronously after `findByRole`; the product focuses in a passive effect. G2-F1 was reproduced with a
+  deferred-focus mutation, fixed with `waitFor`, guarded by a no-focus mutation, committed alone as
+  `e35cfe7` before any evidence commit (prompt §41), and green on its first CI attempt. It is the fourth
+  instance of one test shape in this suite (after P3's I and J and `055b54e`), recorded as L23.
+- **The audit object moved once and only by authorization.** Everything observed in the window was
+  observed on product source identical to `055b54e`; the addendum names `e35cfe7` as the audit head.
+- **A checklist sentence that contradicted a frozen baseline was escalated, not reinterpreted.** The prompt's
+  §13/§34 said "no host path persisted"; the smoke store's `artifacts.path` holds every source path, as
+  `04_TECH/15` §7 and P1-A0 always designed. Removing it would change schema semantics, which G2 may not.
+  The round stopped short of a verdict and asked; the architect's addendum adjudicated G2-F2 as expected
+  local-only persistence and replaced the sentence with a boundary, which was then proved in 17 checks
+  with a positive control (`G2_EVIDENCE_MATRIX.md` §7).
+- **The window was driven without a screen-control connector**, through the WebView2 DevTools Protocol
+  (real input events, a test-harness environment variable, no product change) and Win32 messages for the
+  native pickers. Every harness misstep is written down; none is a product event.
+- **Parity was measured as bytes where bytes were promised.** Diff JSON, Diff HTML and the whole bundle are
+  byte-identical across CLI and desktop; the Gate's ten findings agree field by field, the page grouping
+  them by state as a presentation choice.
+- **A restore must restore bytes.** Scenario A's first restore used `git checkout`, and the account's
+  `core.autocrlf=true` wrote CRLF back. It was caught by hashing, re-done from the LF source, and became
+  limitation L22: line endings can move a release id, and the Gate fails closed when they do.
+- **What stays unmeasured is written as unmeasured.** The 500 MB working set in the window and peak RSS
+  are NOT_MEASURED; per the prompt's §27 they do not block, and they are not claimed.
+- **One P4 sentence was found inaccurate and is reported, not edited.** `P4_BUNDLE_EXECUTION_REPORT.md` §1
+  says the shells own staging; the source puts it in `firmwaresight_project::bundle`. Closed packs are
+  records about the tree they measured.
+
+Local verdict: **G2 LOCAL PASS / READY FOR REMOTE CLOSURE.** `active_task` reads
+`G2_ENGINEERING_CLOSURE_AUDIT` until the one successor commit records this closure's remote run; that
+commit sets G2 PASS, Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE, and the pointer back to
+`NONE`. Baseline stays `0.6.0`; no tag, release, installer or `v0.7.0`.

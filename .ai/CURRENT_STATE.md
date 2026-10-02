@@ -12,8 +12,15 @@ last_updated: "2026-09-30"
 
 - Date: 2026-10-01
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`NONE`** — `P4_RELEASE_BUNDLE` reached `PASS / COMPLETE` on 2026-10-01 and the pointer
-  returns to empty. P4 was opened on 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
+- Active task: **`G2_ENGINEERING_CLOSURE_AUDIT`** — local verdict **G2 LOCAL PASS / READY FOR REMOTE
+  CLOSURE**, opened 2026-10-01 by *FirmwareSight — G2 Product MVP Engineering Closure Audit, Execution
+  Prompt v1.0 — Architect Reviewed* (file, SHA-256 `3c6ab83e…2bac9`, archived) and its inline *Storage Path
+  Semantics Clarification Addendum v1.0*. Audited tree `e35cfe7` (`055b54e` + the G2-F1 test-only fix,
+  Run `36906482900` attempt 1, 7 of 7); 769 Rust / 155 UI / `check.py` 15/15 / clean worktree 17/17; the
+  whole chain on both surfaces with byte-identical parity; evidence in `G2_VALIDATION/`. The pointer
+  returns to `NONE` and G2 becomes PASS only in the one successor commit the prompt allows.
+- Previous task, kept as history: `P4_RELEASE_BUNDLE` reached `PASS / COMPLETE` on 2026-10-01 and the
+  pointer returned to empty. P4 was opened on 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
   Implementation, Execution Prompt v1.0 — Architect Reviewed*, delivered as a file (the first stage prompt
   since P0 to arrive that way) and archived with its measured SHA-256
   `1baaec9204a1d2aa5aa53bd735b34d376ee56db7557a04d6abb79265c30840c5` under `10_AUDIT/SOURCE_PROMPTS/`.
@@ -184,11 +191,11 @@ numbers are LOCALLY measured — one `cargo test --workspace` = 769 passed / 0 f
 `check.py` 15/15, the fifty-step shipped-window smoke, the independent reader at 64/64 and 59/59 — and
 the remote result is recorded separately: the final implementation head `e799f2f` is green on run
 `36872456446`, 7 of 7 jobs. P4 is the last core product-implementation stage of the MVP line.
-G2: READY_FOR_ENGINEERING_GATE_REVIEW — the only statement P4 was permitted to write about it; the
-whole-MVP closure audit is the architect's, in a round of its own
+G2: LOCAL PASS / READY FOR REMOTE CLOSURE — the whole-MVP engineering closure audit ran on 2026-10-01
+under its own prompt and storage-path addendum; evidence G2_VALIDATION/. Not PASS until the one successor
+commit records this closure's remote run 7 of 7
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: NONE — P4 closed 2026-10-01; the next authorizable act is the G2 closure audit, which no
-file in this repository authorizes
+Active task: G2_ENGINEERING_CLOSURE_AUDIT — returns to NONE in the successor commit
 Design tokens: v0.2.1
 ```
 

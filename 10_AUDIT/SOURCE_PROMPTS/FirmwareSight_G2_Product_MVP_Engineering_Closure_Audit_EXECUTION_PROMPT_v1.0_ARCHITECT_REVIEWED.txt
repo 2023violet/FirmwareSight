@@ -1,0 +1,2105 @@
+FirmwareSight — G2 Product MVP Engineering Closure Audit
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight Coding / Audit Agent。
+
+本轮是：
+
+G2_ENGINEERING_CLOSURE_AUDIT
+
+这不是新的产品实现阶段。
+
+本轮唯一目标：
+
+独立审计当前最终树是否已经满足 FirmwareSight 当前 open-source MVP-first 路线下的
+G2 Product MVP engineering exit gate。
+
+如果全部满足：
+
+G2 = PASS
+Product MVP = ENGINEERING COMPLETE
+Product state = MVP CANDIDATE
+
+如果存在真实 blocker：
+
+G2 = NOT PASS
+
+只允许在现有 MVP 合同范围内做窄修复。
+
+绝对不要因为想通过 G2 而扩产品范围。
+
+本轮禁止自动进入：
+
+V1
+P5
+B1
+RC1
+GA1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live review verified current origin/main:
+
+055b54e9d6f0a9e53b8a5c65afe1f161bb5dcc95
+
+Commit:
+
+test: wait for Compare pagination data before asserting it
+
+Current governance state at this HEAD:
+
+P0 = PASS
+G1 = PASS
+
+P1 = PASS / COMPLETE
+P2 = PASS / COMPLETE
+P3 = PASS / COMPLETE
+P4 = PASS / COMPLETE / GOVERNANCE CONSISTENT
+
+G2 =
+READY_FOR_ENGINEERING_GATE_REVIEW
+
+active_task =
+NONE
+
+baseline_version =
+0.6.0
+
+V0 =
+NON_BLOCKING_USER_FEEDBACK_TRACK
+
+Open-source license decision =
+PENDING OWNER CONFIRMATION
+
+BASELINE.yaml at this HEAD has:
+
+product.status =
+...P4_PASS_G2_READY_FOR_ENGINEERING_GATE_REVIEW...
+
+validation.current_gate =
+...P4_PASS_G2_READY_FOR_ENGINEERING_GATE_REVIEW...
+
+validation.p4_status =
+PASS_COMPLETE
+
+active_task =
+NONE
+
+p4_execution.stage_status =
+PASS_COMPLETE
+
+p4_execution.g2_status =
+READY_FOR_ENGINEERING_GATE_REVIEW
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. PRE-G2 TEST RELIABILITY CLOSURE — VERIFIED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The final pre-G2 repair closed a real Windows CI test race.
+
+Repair HEAD:
+
+055b54e9d6f0a9e53b8a5c65afe1f161bb5dcc95
+
+Run:
+
+36899128645
+
+The FIRST attempt on the repair HEAD was verified by Architect:
+
+completed
+success
+7 / 7
+
+All jobs on attempt 1:
+
+- Rust (ubuntu-latest) — success
+- Rust (windows-latest) — success
+- Desktop UI (windows-latest) — success
+- Dependency policy — success
+- Desktop UI (ubuntu-latest) — success
+- Generated output drift — success
+- macOS Core Smoke — success
+
+Two additional Windows UI executions were also green on the same SHA.
+
+Local closure evidence reported:
+
+- exact target test: 30 / 30
+- complete compare.test.tsx: 10 / 10
+- UI: 155 passed / 6 files
+- cargo test --workspace: 769 passed / 0 failed
+- full check.py: 15 / 15
+- mutation proof demonstrated the repaired assertion still fails on broken behavior
+- no production source changed
+
+Therefore:
+
+TEST_RELIABILITY_CLOSURE = PASS
+
+Do NOT reopen this defect without new evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. G2 AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read and obey:
+
+06_DELIVERY/06_STAGE_GATES.md
+
+Current G2 engineering gate is:
+
+complete Firmware Release workflow:
+
+Start / Project
+→ Analyze
+→ Compare
+→ Release Gate
+→ Release Bundle
+
+Current G2 engineering acceptance, after ADR-0026:
+
+- local workflow complete
+- deterministic output correct
+- supported-input behavior reliable
+- failure recoverable
+- Unknown never hidden or silently converted to PASS
+- UI credible as a Minimum Credible Product
+- release output portable
+- cross-platform CI green
+- supported fixtures do not crash
+- real Windows desktop smoke passes
+- tests reproducible
+
+User-panel metrics are:
+
+POST_MVP / OPTIONAL
+
+They do NOT gate current G2.
+
+Do not fabricate:
+
+Import activation
+Time-to-value user-panel %
+Compare completion %
+Gate comprehension %
+discovery %
+return intent
+payment intent
+pilot intent
+
+V0 remains honestly:
+
+0 / 8 eligible external sessions
+
+and non-blocking.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. PRD / ACCEPTANCE AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit against:
+
+01_PRODUCT/01_PRD_MVP.md
+01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md
+
+Required MVP product verbs:
+
+Analyze
+Compare
+Release
+  ├─ Gate
+  └─ Bundle
+
+US-001:
+Analyze
+
+US-002:
+Compare
+
+US-003:
+Prepare Release / Gate
+
+US-004:
+Export Bundle
+
+US-005:
+CLI
+
+Do not invent a fifth top-level verb.
+
+Do not treat post-MVP features as missing MVP requirements.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -15 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+055b54e9d6f0a9e53b8a5c65afe1f161bb5dcc95
+
+worktree:
+clean
+
+Verify Run 36899128645 by exact headSha and attempt.
+
+If origin/main moved:
+STOP.
+
+Inspect the complete delta first.
+
+Do not run G2 against an assumed tree.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+
+User work outranks audit convenience.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. PROMPT PROVENANCE DECISION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect decision:
+
+YES — register the Pre-G2 reliability prompt and this G2 prompt in the execution-prompt audit trail.
+
+Reason:
+
+both are architect-authorized execution rounds
+and both materially affect the evidence chain leading to G2.
+
+Pre-G2 prompt delivered file:
+
+FirmwareSight_Pre_G2_Compare_UI_Test_Reliability_Closure_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
+
+Expected SHA-256:
+
+dee5b8e4417b96cf5b4089b8d609042151ed6be310fa86f42c72353abf45af9e
+
+If the exact delivered file is still accessible:
+
+- verify SHA-256 first
+- archive the exact bytes under:
+  10_AUDIT/SOURCE_PROMPTS/
+- do not retype or reconstruct it
+
+If the exact file is NOT accessible:
+
+- do NOT fabricate a verbatim copy
+- register only:
+  title
+  version
+  authority
+  expected SHA-256
+  outcome
+  "external delivered file not archived"
+
+For THIS G2 prompt:
+
+if the delivered .txt file is accessible byte-for-byte:
+
+archive exact bytes under:
+10_AUDIT/SOURCE_PROMPTS/
+
+Compute and register its actual SHA-256.
+
+If not accessible:
+record it as externally delivered with no invented byte copy.
+
+The prompt registry is provenance.
+It is not product code.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. AUTHORITY READ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read:
+
+AGENTS.md
+
+README.md
+PRODUCT_BASELINE.md
+BASELINE.yaml
+INDEX.md
+
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+
+00_GOVERNANCE/03_DECISION_POLICY.md
+
+01_PRODUCT/01_PRD_MVP.md
+01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md
+01_PRODUCT/08_PRODUCT_MODULE_MAP.md
+
+03_DESIGN/**
+DESIGN.md
+assets/design-tokens.json
+
+04_TECH/02_DOMAIN_MODEL.md
+04_TECH/05_SECURITY_PRIVACY.md
+04_TECH/07_CLI_SPEC.md
+04_TECH/08_CONFIG_SPEC.md
+04_TECH/14_IPC_DATA_CONTRACTS.md
+04_TECH/15_STORAGE_DATABASE_BASELINE.md
+04_TECH/17_RELEASE_PACKAGING_UPDATE.md
+04_TECH/18_CI_SUPPLY_CHAIN.md
+04_TECH/20_PLATFORM_SUPPORT.md
+04_TECH/22_GIT_PROVENANCE_ADAPTER.md
+04_TECH/23_MEMORY_ACCOUNTING_MODEL.md
+04_TECH/24_BUILD_IDENTITY_EVIDENCE.md
+04_TECH/25_TYPED_IPC_BINDINGS.md
+04_TECH/26_PORTABLE_SCHEMA_POLICY.md
+04_TECH/27_GATE_STATE_SEMANTICS.md
+
+05_ENGINEERING/02_TEST_STRATEGY.md
+05_ENGINEERING/08_CODE_AREA_PLAN.md
+
+06_DELIVERY/06_STAGE_GATES.md
+06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md
+
+09_ADR/ADR-0023-gate-five-state-semantics.md
+09_ADR/ADR-0026-open-source-mvp-first-delivery.md
+09_ADR/ADR-0027-project-policy-and-provenance-adapter.md
+
+P0_TECHNICAL_VALIDATION/**
+P1_A0_VALIDATION/**
+P1_VALIDATION/**
+P2_VALIDATION/**
+P3_VALIDATION/**
+P4_VALIDATION/**
+
+schemas/**
+migrations/**
+fixtures/manifest.json
+
+10_AUDIT/SOURCE_PROMPTS/README.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. FIRST RESPONSE — G2 TAKEOVER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before making G2 governance writes, output:
+
+# FirmwareSight G2 Engineering Closure Takeover Report
+
+Include:
+
+- local HEAD
+- origin/main
+- worktree
+- Run 36899128645 attempt-1 result
+- P0 state
+- P1 state
+- P2 state
+- P3 state
+- P4 state
+- active_task
+- baseline version
+- Rust direct test baseline
+- UI direct test baseline
+- storage schema version
+- public schema set
+- current known limitations count/categories
+- open RustSec accepted risks
+- open-source license mismatch
+- V0 real sample state
+- prompt provenance state
+- G2 blockers found before execution
+- whether product code change is currently required
+
+Expected initial product-code change requirement:
+
+NO
+
+If an existing source contradiction/blocker is discovered:
+report it before changing code.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. G2 GOVERNANCE ACTIVATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After clean preflight:
+
+set:
+
+active_task =
+G2_ENGINEERING_CLOSURE_AUDIT
+
+Do NOT write:
+
+G2 PASS
+
+at activation.
+
+During audit:
+
+G2 =
+IN_PROGRESS
+
+P1/P2/P3/P4 remain:
+PASS / COMPLETE
+
+baseline_version:
+0.6.0
+
+No v0.7.0.
+
+No tag.
+
+No GitHub Release.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. G2 IS AUDIT-FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not begin by modifying product code.
+
+First build an evidence matrix.
+
+Classify every G2 requirement:
+
+PROVEN
+PARTIAL
+NOT_MEASURED
+NOT_APPLICABLE
+BLOCKING_FAIL
+
+Each row must cite:
+
+- existing validation evidence
+and/or
+- a command run in this G2 round
+and/or
+- a numbered G2 smoke step
+
+Do not convert:
+
+PARTIAL
+or
+NOT_MEASURED
+
+into PASS by prose.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. G2 VALIDATION PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+G2_VALIDATION/G2_ENGINEERING_CLOSURE_REPORT.md
+
+G2_VALIDATION/G2_EXIT_CHECKLIST.md
+
+G2_VALIDATION/G2_END_TO_END_SMOKE_REPORT.md
+
+G2_VALIDATION/G2_EVIDENCE_MATRIX.md
+
+G2_VALIDATION/G2_KNOWN_LIMITATIONS.md
+
+Optional only if it materially improves clarity:
+
+G2_VALIDATION/G2_CROSS_SURFACE_PARITY_REPORT.md
+
+Do not create decorative documents.
+
+Every claim needs evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. STAGE-BY-STAGE EVIDENCE AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit:
+
+P1 Analyze
+P2 Compare
+P3 Gate
+P4 Bundle
+
+Do NOT rerun historical verdicts blindly.
+
+For each:
+
+- acceptance criteria complete?
+- validation pack exists?
+- known PARTIAL items explicit?
+- remote CI evidence exists?
+- later stage did not invalidate prior semantics?
+- portable/public contracts still compatible?
+- current final tree still includes the capability?
+
+Required output matrix:
+
+Stage
+Acceptance source
+Verdict
+Current-tree regression evidence
+Known gaps
+G2 blocking? YES/NO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. PUBLIC CONTRACT AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current expected portable contracts:
+
+project-config:1
+analysis:1
+diff:1
+gate-results:1
+accepted-reviews:1
+release-manifest:1
+
+Verify:
+
+- correct URNs
+- schema_version required
+- current outputs validate
+- no accidental major bump
+- no incompatible reinterpretation
+- no host path field
+- Unknown semantics preserved
+
+Do not create v2.
+
+If a public-contract incompatibility is found:
+G2 BLOCKED
+unless the fix is backward-compatible and narrow.
+
+A major schema change requires Architect review.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. STORAGE AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expected:
+
+SCHEMA_VERSION = 4
+
+Migrations:
+
+0001
+0002
+0003_gate_history
+0004_release_records
+
+Verify through current tests and direct inspection:
+
+fresh → v4
+
+v1 → v4
+
+v2 → v4
+
+v3 → v4
+
+data preserved
+
+future version fails closed
+
+failed migration recoverable
+
+foreign keys enabled
+
+GateRun immutable
+
+Accepted Review immutable
+
+Release record immutable
+
+no artifact raw bytes in DB
+
+no host path persisted
+
+Do not add migration 0005 in G2.
+
+If a G2 blocker requires schema semantics change:
+STOP for Architect review.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. ARCHITECTURE AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expected first-party library crates:
+
+firmwaresight-core
+firmwaresight-artifact
+firmwaresight-project
+firmwaresight-storage
+firmwaresight-report
+
+No sixth crate.
+
+Verify:
+
+Core remains:
+
+headless
+synchronous
+dependency-free or within its frozen zero-dependency contract
+no Tauri
+no SQLite
+no Tokio
+no filesystem assembly
+no product shell types
+
+Project owns:
+
+config
+Git/project evidence
+filesystem Bundle staging
+
+Storage owns SQLite
+
+Report owns portable projections/rendering
+
+Desktop/CLI are shells
+
+No architecture redesign in G2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. SECURITY / CAPABILITY AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Verify current MVP still has:
+
+- no network capability
+- no cloud
+- no account/auth
+- no telemetry
+- no generic shell IPC
+- no generic read_file(path) IPC
+- no arbitrary filesystem authority in WebView
+- no full project root path leaked in normal UI/IPC
+- native dialog authority remains Rust-side
+- Git adapter remains read-only and bounded
+
+Do not claim:
+
+security clean
+zero vulnerabilities
+
+Known accepted advisories remain exactly that:
+
+accepted transitive risks
+
+Audit current `cargo deny` result.
+
+If policy changed unexpectedly:
+report it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. FULL CURRENT-TREE LOCAL GATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run from current final tree.
+
+Rust:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+Expected direct test baseline:
+
+769 passed / 0 failed
+
+Report only the direct cargo test count.
+
+Frontend:
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+Expected direct UI baseline:
+
+155 passed / 6 files
+
+Engineering:
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py
+
+git diff --check
+
+Expected full gate:
+15 / 15
+
+If counts change:
+explain exactly why.
+
+Do not sum repeated groups.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. CLEAN TRACKED-TREE REPRODUCIBILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+G2 requires proof that the project does not depend on ignored/untracked local files.
+
+Create a TEMPORARY detached worktree from exact current HEAD:
+
+git worktree add --detach <temp-path> HEAD
+
+This temp worktree must be outside the main worktree.
+
+In the detached worktree:
+
+- verify `git status --short` clean
+- run frozen frontend install
+- run the full repository engineering gate
+- verify fixture tracking checks
+- verify goldens
+- verify schema contracts
+- verify Cargo lock
+
+Do NOT copy files from the main worktree into it.
+
+Do NOT reuse main-worktree node_modules/target by manual copying.
+
+Caches managed by toolchain are allowed.
+
+If clean worktree fails:
+G2 is blocked until the real dependency is understood.
+
+After verification:
+
+remove the temporary worktree only if:
+- it was created by this round
+- it is clean
+- removal is permitted by repository rules
+
+Otherwise leave it and report its location.
+
+Never clean user worktrees.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. SHIPPING BUILD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build from the current audited HEAD:
+
+cargo build --release \
+  -p firmwaresight-desktop \
+  --features custom-protocol
+
+Record:
+
+exit code
+binary path internally
+binary SHA-256
+build duration
+
+Do not expose host path in product output.
+
+The G2 Desktop smoke must use this shipping build.
+
+If any product source changes later:
+the shipping build and relevant smoke become stale.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. G2 END-TO-END SUBJECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use a fresh temporary real Git repository.
+
+Do NOT use the FirmwareSight repository as release subject.
+
+Use committed supported fixtures:
+
+P2 base ELF + MAP
+P2 target ELF + MAP
+
+Create a temporary project config whose policy yields:
+
+pure PASS
+
+for the main cross-surface parity scenario.
+
+Requirements:
+
+- exact tag/version policy
+- clean Git
+- Release Notes present
+- budgets large enough to PASS
+- growth threshold large enough to PASS
+- no accepted Review required
+
+Reason:
+
+CLI cannot accept Review interactively.
+
+A pure PASS subject lets CLI and Desktop be compared directly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. CLI WHOLE-MVP SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On the same G2 subject run:
+
+Analyze base
+
+Analyze target
+
+Diff base → target
+
+Gate target with baseline
+
+Release prepare
+
+Required:
+
+- Analyze succeeds
+- Diff succeeds
+- Gate disposition PASS
+- Release Bundle succeeds
+- no interactive input
+- stable exit 0
+- machine JSON available
+- no Desktop process required
+- no project DB side effect
+
+Capture:
+
+base snapshot id
+
+target snapshot id
+
+artifact hashes
+
+Diff portable JSON hash
+
+Gate run id
+
+Gate portable JSON hash
+
+release id
+
+release-manifest hash
+
+bundle file set
+
+Run the pure-PASS CLI chain twice to two different destination parents.
+
+Required:
+
+semantic/generated portable bytes are deterministic.
+
+Output destination must not affect:
+
+snapshot id
+diff document bytes
+Gate run id
+release id
+manifest bytes
+report bytes
+SHA256SUMS bytes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. DESKTOP WHOLE-MVP SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use:
+
+fresh/isolated validation DB
+
+same temporary Git project
+
+same base/target fixture bytes
+
+same project config
+
+same Release Notes
+
+shipping custom-protocol binary
+
+Drive the real Windows window.
+
+Minimum steps:
+
+1. launch
+2. confirm only Analyze / Compare / Release top-level navigation
+3. Analyze base + MAP
+4. verify base artifact hash
+5. Analyze target + MAP
+6. verify target artifact hash
+7. inspect Sections
+8. inspect Symbols
+9. inspect Evidence
+10. bytes/KiB switch
+11. Compare base → target
+12. verify old/new identity
+13. verify FLASH delta
+14. verify RAM delta
+15. verify section changes
+16. verify symbol changes
+17. verify added/removed/changed separation
+18. verify object attribution reports Unavailable when evidence lacks it
+19. export Diff JSON
+20. export Diff HTML
+21. Release page
+22. load project config
+23. select target
+24. select baseline
+25. Run Gate
+26. verify disposition PASS
+27. verify all ten rule rows
+28. verify UNKNOWN is not fabricated as PASS
+29. Prepare Bundle
+30. verify preview
+31. choose destination
+32. export
+33. verify success
+34. independently inspect bundle
+35. verify schemas
+36. verify SHA256SUMS
+37. open release-report.html offline
+38. verify no host path in generated documents
+39. relocate bundle
+40. make source/project/DB unavailable
+41. verify relocated bundle independently
+42. restore only what the smoke itself changed
+43. close cleanly
+
+If one existing known UI control cannot be physically driven:
+record PARTIAL
+and cite automated coverage.
+
+Do not fabricate observation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. CROSS-SURFACE PARITY — MANDATORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Using the exact same G2 subject:
+
+Compare CLI and Desktop facts.
+
+Required parity:
+
+artifact SHA-256:
+same
+
+base SnapshotId:
+same
+
+target SnapshotId:
+same
+
+memory accounting facts:
+same
+
+Diff JSON:
+byte-identical or explicitly documented canonical-equivalent
+(prefer byte-identical where current P2 contract promises it)
+
+Gate run id:
+same
+
+Gate findings:
+same rule order
+same factual state
+same effective severity
+same summary/remediation semantics
+
+Release version:
+same
+
+Release id:
+same
+
+release-manifest.json:
+byte-identical
+
+Bundle payload hashes:
+same for generated/copy-equivalent files
+
+If cross-surface facts diverge:
+G2 BLOCKED.
+
+Do not normalize away differences after the fact.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. FAILURE / RECOVERY SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use the same temp subject.
+
+Scenario A — dirty Git:
+
+modify one harmless project file after a PASS Gate.
+
+Run Gate again.
+
+Expected:
+
+not PASS
+according to configured policy.
+
+No Release Bundle from stale PASS context.
+
+Scenario B — no Git repository:
+
+copy the project config/artifacts to a non-Git temp directory.
+
+Expected:
+
+Git-dependent facts become UNKNOWN.
+
+UNKNOWN is not silently PASS.
+
+Effective severity follows configured policy.
+
+Scenario C — source artifact mutation after Bundle preview:
+
+change one source byte temporarily.
+
+Expected:
+
+bundle export fails closed
+no partial replacement
+snapshot hash is not rewritten
+
+Restore exact bytes after proof.
+
+Do not leave modified fixtures.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. PORTABILITY — CURRENT FINAL TREE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Take one G2-produced Bundle.
+
+Move/copy it to a second temp root.
+
+Make unavailable:
+
+source ELF
+source MAP
+project root
+validation DB
+FirmwareSight process
+
+Verify from Bundle bytes alone:
+
+- release identity
+- firmware artifact names/hashes
+- analysis
+- diff
+- Gate findings
+- accepted reviews document
+- Release Notes if included
+- manifest
+- SHA256SUMS
+- offline HTML report
+
+Run independent reader.
+
+No DB/project/source dependency permitted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. DETERMINISM AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For same input bytes, same project/Git facts, same policy, same FirmwareSight version:
+
+verify deterministic:
+
+SnapshotId
+
+Diff document
+
+Gate run id
+
+release id
+
+analysis.json
+
+diff.json
+
+gate-results.json
+
+accepted-reviews.json
+
+release-report.html
+
+SHA256SUMS
+
+release-manifest.json
+
+Allowed nondeterministic/audit time:
+
+SQLite created_at
+accepted_at when a human acceptance actually occurs
+
+The pure-PASS G2 parity subject uses zero acceptances,
+so portable Bundle bytes should not gain a clock from acceptance.
+
+Do not compare destination directory names if they are outside portable contract.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. SUPPORTED INPUT / FAIL-CLOSED AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Verify current Supported cohort:
+
+GCC/Clang ELF
+GNU ld MAP
+
+using committed fixtures.
+
+Also run:
+
+one malformed/truncated ELF
+
+one unsupported/non-ELF file
+
+Required:
+
+explicit failure reason
+
+no crash
+
+no corrupt snapshot
+
+no false PASS
+
+Do NOT promote:
+
+Keil
+IAR
+BIN
+HEX
+
+to fully supported analysis unless current implementation/evidence actually does.
+
+PRD wording about BIN/HEX basic metadata does not authorize pretending full analysis exists.
+
+Record exact current capability.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. PRD SUCCESS-METRIC ADJUDICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create a table for every MVP success metric.
+
+Required rows include:
+
+First useful analysis <60s
+
+500 MB below artifact working-set UI responsiveness
+
+supported fixture parse success
+
+supported format crash behavior
+
+Diff fixture exact verification
+
+Release Bundle independent readability
+
+For each:
+
+PROVEN
+PARTIAL
+NOT_MEASURED
+NOT_APPLICABLE
+FAIL
+
+Important:
+
+Existing known state says peak RSS is NOT MEASURED.
+
+Do NOT rewrite that as measured.
+
+Architect adjudication for current G2:
+
+The G2 authority in 06_DELIVERY/06_STAGE_GATES.md explicitly defines current exit on engineering self-evidence:
+complete workflow, deterministic output, supported behavior, recovery/Unknown honesty, credible UI,
+portable release output, cross-platform CI, supported fixture stability, real Windows smoke and reproducible tests.
+
+Therefore:
+
+a truthful NOT_MEASURED/PARTIAL on the broad 500 MB / peak-RSS metric
+does NOT automatically block G2
+if:
+- the 512 MiB guard is still enforced
+- supported G2 fixtures remain reliable
+- no observed UI hang/crash contradicts the requirement
+- the gap remains explicit as a Known Limitation
+
+Do not claim the 500 MB responsiveness metric is proven.
+
+If this G2 round actually measures it safely:
+record the method/result.
+
+Do not create a 500 MB committed fixture.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. KNOWN LIMITATIONS ADJUDICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build one canonical G2 Known Limitations list.
+
+At minimum review:
+
+- Peak RSS NOT MEASURED
+- fuzz NOT RUN
+- one Windows host / one WebView / 100% DPI scope
+- linker layout coverage limited
+- sections.file_offset nullable reason gap
+- symbols.address nullable reason gap
+- object/module attribution unavailable by evidence
+- P2 old smoke same-pair UI observation gap
+- P3 historical-run UI re-open gap / no History surface
+- open user comprehension evidence
+- accepted RustSec transitive advisories
+- open-source license mismatch
+- any `update_goldens.py` reproducibility gap still current
+- any source-label/model mismatch still current
+- custom-protocol build requirement
+- any new finding from G2
+
+For each:
+
+status
+evidence
+impact
+G2 blocking? YES/NO
+post-MVP owner/stage
+
+Do not erase inherited gaps merely because G2 passes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. OPEN-SOURCE LICENSE GAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current repository intent:
+
+open-source project
+
+Current legal metadata:
+
+Cargo.toml:
+license = "Proprietary"
+
+Root LICENSE:
+absent
+
+This means the public repository is NOT yet carrying a complete open-source license grant.
+
+However prior architecture governance explicitly made this:
+
+OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION
+
+and non-blocking for technical MVP completion.
+
+G2 may pass technically while this remains open.
+
+Do NOT:
+
+choose MIT
+choose Apache-2.0
+choose dual license
+edit Cargo license
+add LICENSE
+
+without explicit owner selection.
+
+G2 report must state:
+
+Technical MVP Candidate ≠ open-source licensing completed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. RUSTSEC / DEPENDENCY WORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run current deny gate.
+
+If accepted advisories remain under policy:
+
+record them exactly.
+
+Do NOT write:
+
+zero vulnerabilities
+security clean
+no security risk
+
+Use:
+
+dependency policy passes with documented accepted risks
+
+if that is what the current evidence supports.
+
+If a NEW unaccepted advisory breaks deny:
+G2 is blocked until adjudicated.
+
+Do not weaken deny policy to get green.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. MINIMUM CREDIBLE PRODUCT UI AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+G2 UI criterion:
+
+complete
+consistent
+clear
+credible
+no Demo feel
+
+but not final commercial visual.
+
+Audit current real Windows UI for:
+
+navigation consistency
+
+loading states
+
+empty states
+
+error states
+
+Unknown/Review/Block distinguishability
+
+keyboard reachability for primary actions where observable
+
+no color-only semantics
+
+no host path exposure
+
+hash/id readability
+
+Release Bundle preview clarity
+
+overwrite confirmation clarity
+
+responsive overflow at current supported desktop size
+
+No redesign.
+
+If a cosmetic issue does not block task completion:
+record it as post-MVP.
+
+Do not introduce new design tokens in G2 without architect review.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. G2 BLOCKER REMEDIATION POLICY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit first.
+
+If a blocker is found:
+
+ordinary narrow bug/test/doc fix inside existing MVP contracts is authorized in this G2 round ONLY if it does NOT require:
+
+- new product feature
+- new top-level verb
+- public schema major bump
+- SCHEMA_VERSION 5
+- new migration
+- new third-party dependency
+- sixth first-party crate
+- new design token
+- architecture boundary change
+- license selection
+- cloud/network/account/telemetry
+- P5 productization behavior
+
+For an allowed narrow fix:
+
+1. reproduce before fix
+2. write/retain regression test
+3. implement smallest fix
+4. mutation/negative proof when relevant
+5. rerun targeted tests
+6. rerun complete local gate
+7. rebuild shipping binary if product source changed
+8. rerun affected G2 smoke from the point necessary
+9. remote CI must cover final tree
+
+If fix requires any forbidden boundary change:
+
+STOP.
+
+Return:
+
+G2 BLOCKED — ARCHITECT DECISION REQUIRED
+
+with evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. CLEAN FAILURE POLICY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not turn red into green by:
+
+skip
+todo
+retry masking
+timeout inflation
+continue-on-error
+allowed failure
+test deletion
+assertion weakening
+golden blind update
+fixture hash blind update
+policy weakening
+
+Every failure is evidence until explained.
+
+Runner provisioning failure before repository code:
+record separately.
+
+Repository/test/product failure:
+investigate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. G2 EXIT CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+G2 can PASS only if:
+
+Workflow:
+□ Analyze works
+□ Compare works
+□ Gate works
+□ Bundle works
+□ CLI whole chain works
+□ Desktop whole chain works
+
+Cross-surface:
+□ artifact facts match
+□ SnapshotIds match
+□ memory facts match
+□ Diff semantics match
+□ Gate run id/facts match
+□ release id matches
+□ manifest matches
+
+Correctness:
+□ deterministic outputs
+□ supported fixtures parse
+□ malformed input fails closed
+□ unsupported input explicit
+□ Unknown never silently PASS
+
+Persistence:
+□ schema v4
+□ migration upgrade tests green
+□ immutable Gate/Review/Release records
+□ no host paths persisted
+
+Bundle:
+□ portable
+□ independent reader green
+□ hashes verify
+□ offline report
+□ source/project/DB unnecessary
+
+Reliability:
+□ direct Rust tests green
+□ direct UI tests green
+□ full check.py green
+□ clean detached worktree green
+□ shipping build green
+□ real Windows G2 smoke green
+□ current remote CI green
+
+UI:
+□ Minimum Credible Product
+□ no blocker
+□ no path leak
+□ states not color-only
+
+Governance:
+□ P1 PASS
+□ P2 PASS
+□ P3 PASS
+□ P4 PASS
+□ known limitations explicit
+□ user metrics not fabricated
+□ license gap explicit
+□ accepted security risks explicit
+
+Scope:
+□ no P5
+□ no installer
+□ no signing
+□ no updater
+□ no cloud
+□ no accounts
+□ no telemetry
+□ no AI
+□ no commercial/pricing work
+
+Only then:
+
+G2 = PASS
+Product MVP = ENGINEERING COMPLETE
+Product state = MVP CANDIDATE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. G2 PASS GOVERNANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If and only if §34 is fully satisfied:
+
+Update live governance to:
+
+P0 = PASS
+G1 = PASS
+
+P1 = PASS / COMPLETE
+P2 = PASS / COMPLETE
+P3 = PASS / COMPLETE
+P4 = PASS / COMPLETE
+
+G2 =
+PASS
+
+Product MVP =
+ENGINEERING COMPLETE
+
+Product state =
+MVP CANDIDATE
+
+active_task =
+NONE
+
+baseline_version =
+0.6.0
+
+V0 =
+NON_BLOCKING_USER_FEEDBACK_TRACK
+
+Open-source license =
+PENDING OWNER CONFIRMATION
+
+Do NOT create:
+
+v0.7.0
+tag
+GitHub Release
+installer
+signed binary
+P5 task
+
+G2 PASS does not mean:
+
+production ready
+GA
+beta
+signed
+installable
+security clean
+real-user validated
+commercially validated
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. BASELINE STATUS AFTER G2 PASS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use current vocabulary style.
+
+Expected semantics:
+
+product.status:
+
+...P4_PASS_G2_PASS_MVP_CANDIDATE_V0_NON_BLOCKING
+
+validation.current_gate:
+
+...P4_PASS_G2_PASS_MVP_CANDIDATE_V0_NON_BLOCKING
+
+Add or update:
+
+validation.g2_status:
+PASS
+
+Create:
+
+g2_execution:
+
+with at minimum:
+
+authorized: true
+
+prompt:
+FirmwareSight — G2 Product MVP Engineering Closure Audit v1.0
+
+start_head:
+055b54e...
+
+stage_status:
+PASS
+
+closed_on:
+actual date
+
+whole_workflow:
+PASS
+
+clean_tracked_tree:
+PASS
+
+cross_surface_parity:
+PASS
+
+portable_bundle:
+PASS
+
+windows_smoke:
+PASS
+
+tests_at_close:
+actual direct Rust/UI counts
+
+remote_ci:
+actual final run facts
+
+known_limitations:
+pointer to G2_VALIDATION/G2_KNOWN_LIMITATIONS.md
+
+Do not duplicate the entire report into YAML.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. NEXT-STAGE WORDING AFTER G2 PASS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not automatically authorize a next product stage.
+
+State only:
+
+MVP engineering candidate is complete.
+
+Future tracks require separate Architect decision.
+
+Potential future tracks remain:
+
+V1 own-artifact / real-user validation
+P5 productization
+
+but neither becomes active in this round.
+
+No claim that V1 is mandatory before P5 unless an authority file explicitly says so.
+
+Do not invent sequencing.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. SOURCE-PROMPT REGISTRY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update:
+
+10_AUDIT/SOURCE_PROMPTS/README.md
+
+Register:
+
+Pre-G2 Compare UI Test Reliability Closure
+
+and:
+
+G2 Product MVP Engineering Closure Audit
+
+If verbatim files are archived:
+record exact SHA-256 and size/line count where useful.
+
+If not:
+state exact provenance limitation.
+
+Do not fabricate a byte-exact file from remembered text.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. REPOSITORY INTEGRITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+G2 will add validation files and possibly prompt archive files.
+
+Therefore tracked path set changes.
+
+Regenerate:
+
+DIRECTORY_TREE.txt
+
+after all tracked paths are final.
+
+Regenerate:
+
+SHA256SUMS
+
+LAST.
+
+Verify independently:
+
+full git ls-files coverage
+
+0 mismatch
+0 missing
+0 stale
+0 duplicate
+no self-entry
+LF
+no host path
+
+Run:
+
+git diff --check
+
+Do not conflate repository SHA256SUMS with Bundle SHA256SUMS.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. G2 FINAL LOCAL REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before the first G2 closure commit, produce:
+
+# FirmwareSight G2 Engineering Closure Report
+
+Sections:
+
+1. Start State
+
+2. Authority
+
+3. P1–P4 Stage Audit
+
+4. Current Architecture
+
+5. Public Contracts
+
+6. Storage / Migrations
+
+7. Security / Capabilities
+
+8. Full Local Gate
+
+9. Clean Detached Worktree
+
+10. CLI Whole-MVP Smoke
+
+11. Desktop Whole-MVP Smoke
+
+12. Cross-Surface Parity
+
+13. Failure / Recovery
+
+14. Determinism
+
+15. Bundle Portability
+
+16. PRD Success Metrics
+
+17. Known Limitations
+
+18. License Gap
+
+19. Dependency / RustSec State
+
+20. G2 Exit Checklist Verdict
+
+21. Git / Integrity
+
+22. Remote CI — pending until pushed
+
+23. Final Local Verdict
+
+Use:
+
+G2 LOCAL PASS / READY FOR REMOTE CLOSURE
+
+until remote CI proves the final tree.
+
+Do NOT write final G2 PASS before remote evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. COMMIT STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Recommended:
+
+Commit 1:
+G2: add engineering closure evidence
+
+Contains:
+
+G2_VALIDATION/**
+prompt provenance updates
+live governance set to:
+G2 LOCAL PASS / REMOTE PENDING
+or equivalent non-final wording
+
+integrity artifacts
+
+If narrow remediation was required:
+its product/test fix must be a separate earlier commit.
+
+Do not mix a bug fix invisibly into a governance commit.
+
+After every commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+because prior environment behavior showed possible auto-push.
+
+Never force.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. REMOTE CI — G2 IMPLEMENTATION/AUDIT HEAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find CI by exact headSha.
+
+Required jobs:
+
+Rust Windows
+Rust Ubuntu
+Desktop UI Windows
+Desktop UI Ubuntu
+Generated output drift
+Dependency policy
+macOS Core Smoke
+
+Required:
+
+completed
+success
+7 / 7
+
+A rerun after a runner provisioning fault is acceptable only when the failure occurred before repository code.
+
+A product/test failure must be investigated.
+
+Because the known Compare flake was just closed,
+a recurrence of that exact pagination failure is a G2 blocker.
+
+Do not call it noise.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. G2 FINAL SUCCESSOR CLOSURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After the G2 audit/implementation HEAD is green 7/7:
+
+create exactly ONE documentation/governance successor that records:
+
+- exact final audit HEAD
+- exact run id
+- 7 job results
+- G2 final verdict
+
+Then set:
+
+G2 = PASS
+
+Product MVP = ENGINEERING COMPLETE
+
+Product state = MVP CANDIDATE
+
+active_task = NONE
+
+Regenerate SHA256SUMS last.
+
+Push normal fast-forward.
+
+Then the successor HEAD itself must get:
+
+completed
+success
+7 / 7
+
+Do NOT create another docs commit to record the successor's own run.
+
+That final run is external evidence.
+
+This ends the CI→docs loop.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. FINAL G2 REMOTE VERDICT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Only after:
+
+A. G2 audit/product tree remote CI = 7 / 7 success
+
+and
+
+B. final governance successor remote CI = 7 / 7 success
+
+may the round conclude:
+
+G2 = FINAL PASS
+
+FirmwareSight Product MVP =
+ENGINEERING COMPLETE
+
+FirmwareSight state =
+MVP CANDIDATE
+
+This is NOT:
+
+G3 Productization
+Private Beta
+Release Candidate
+GA
+production-ready release
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight G2 Product MVP Final Closure Report
+
+## 1. Start
+HEAD
+origin/main
+Run 36899128645
+pre-G2 reliability closure
+
+## 2. Stage Evidence
+P1
+P2
+P3
+P4
+
+## 3. Full Current-Tree Validation
+Rust
+UI
+check.py
+shipping build
+
+## 4. Clean Detached Worktree
+exact HEAD
+results
+untracked-dependency verdict
+
+## 5. CLI Whole Workflow
+Analyze
+Compare
+Gate
+Bundle
+
+## 6. Desktop Whole Workflow
+numbered smoke
+shipping binary
+
+## 7. Cross-Surface Parity
+snapshot
+diff
+gate
+release
+
+## 8. Determinism
+repeated outputs
+
+## 9. Failure Recovery
+dirty Git
+no Git
+stale artifact
+
+## 10. Portability
+relocated Bundle
+independent reader
+
+## 11. PRD Metrics
+PROVEN / PARTIAL / NOT_MEASURED
+
+## 12. Known Limitations
+blocking/non-blocking
+
+## 13. Security / Dependency
+deny result
+accepted advisories
+
+## 14. License Gap
+pending owner confirmation
+
+## 15. Prompt Provenance
+Pre-G2 prompt
+G2 prompt
+
+## 16. G2 Audit HEAD CI
+commit
+run
+7/7
+
+## 17. Final Governance Successor
+commit
+
+## 18. Final Successor CI
+run
+7/7
+
+## 19. Final Verdict
+
+G2 = FINAL PASS
+
+Product MVP = ENGINEERING COMPLETE
+
+Product state = MVP CANDIDATE
+
+baseline_version = 0.6.0
+
+active_task = NONE
+
+## 20. What This Does NOT Mean
+
+not Productization
+not Beta
+not RC
+not GA
+not production-ready
+not user-validated
+not commercially validated
+not security-clean
+not licensed open-source until owner selects license
+
+## 21. Stop
+
+STOP.
+
+DO NOT IMPLEMENT V1 OR P5.
+
+Return to Architect.
+
+END OF PROMPT

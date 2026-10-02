@@ -385,6 +385,58 @@ text with no source file; each says so in its own entry instead of standing for 
   final implementation head `e799f2f` is green on Run `36872456446` at 7 of 7 jobs, and `active_task`
   returned to `NONE` with baseline still `0.6.0`.
 
+## P4 Governance Baseline Consistency Closure
+
+- Title: *FirmwareSight — P4 Governance Baseline Consistency Closure, Execution Prompt v1.0 — Architect
+  Reviewed*. **Supplied inline**, so no source file exists in this repository to hash and none is
+  reconstructed here.
+- Scope: one governance defect — `BASELINE.yaml` kept P4's running-state live fields (`product.status`,
+  `active_task`, `p4_execution.stage_status` / `g2_status`) after every other surface had recorded P4
+  closed. No product code, schema, dependency or design change.
+- Outcome, 2026-10-01: `fe420d1` changed `BASELINE.yaml` and `SHA256SUMS` only. Run `36892307828`
+  attempt 1 failed on one job — a test-side race in `compare.test.tsx` that this commit did not touch —
+  and attempt 2 on the same SHA was 7 of 7. That race was closed by the next round.
+
+## Pre-G2 Compare UI Test Reliability Closure
+
+- File: `FirmwareSight_Pre_G2_Compare_UI_Test_Reliability_Closure_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt`
+- SHA-256: `dee5b8e4417b96cf5b4089b8d609042151ed6be310fa86f42c72353abf45af9e` — 18,306 bytes, 817 lines,
+  LF only. Archived byte-for-byte from the delivered file during the G2 round (the G2 prompt §5 asked for
+  it); `cmp` against the delivered copy is clean.
+- Scope: one test — `compare.test.tsx` "pages with the offset the shell reported…", which read the pager
+  synchronously after the region mounted and before its first page arrived.
+- Outcome, 2026-10-01: `055b54e` (test only, plus `SHA256SUMS`). Root cause reproduced with a 25 ms mock
+  latency, the repaired assertion proved by two mutations, target 30/30, file 10/10, UI 155, Rust 769,
+  `check.py` 15/15. Run `36899128645`: attempt 1 7 of 7, and two further Windows UI executions green on the
+  same SHA. `TEST_RELIABILITY_CLOSURE = PASS`.
+
+## G2 Product MVP Engineering Closure Audit
+
+- File: `FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt`
+- SHA-256: `3c6ab83e11ce6a4c91a609dd0a6bc318e700dc0cbbccd3d4493eaf65c3e2bac9` — 44,539 bytes, 2,105
+  lines, LF only, archived byte-for-byte; `cmp` against the delivered copy is clean.
+- Authority: `06_DELIVERY/06_STAGE_GATES.md` §G2 as amended by `ADR-0026`. The whole-MVP closure audit
+  that P4's own prompt forbade that round to perform or claim. Audit-first; narrow remediation only inside
+  existing MVP contracts; no new feature, verb, schema major, migration, dependency, crate, token,
+  licence choice, network or P5 behaviour.
+- Start: `055b54e`, green on Run `36899128645` attempt 1.
+- Outcome: see the addendum entry below and `G2_VALIDATION/`.
+
+## G2 Storage Path Semantics Clarification Addendum
+
+- Title: *FirmwareSight — G2 Storage Path Semantics Clarification Addendum, Addendum v1.0 — Architect
+  Reviewed*, applying to the G2 prompt above (`3c6ab83e…`). **Supplied inline**, so no source file exists
+  here to hash and none is reconstructed.
+- Scope: it overrides two things only. (1) The G2 prompt's §13 / §34 "no host path persisted" is
+  corrected to the boundary the product always had: SQLite's local-only `artifacts.path` is allowed
+  (`04_TECH/15` §7, P1-A0); IPC, UI, Gate locators, `release_records`, the five portable documents and the
+  bundle carry no host path. (2) The audit head moves to `e35cfe7`, the G2-F1 test-only fix. It authorizes
+  no migration, no schema change and no storage redesign.
+- Effect: G2-F2 adjudicated `EXPECTED_LOCAL_PRIVATE_PERSISTENCE`, non-blocking; the 17-point boundary proof
+  is `G2_VALIDATION/G2_EVIDENCE_MATRIX.md` §7.
+- Outcome, 2026-10-01: `G2 LOCAL PASS / READY FOR REMOTE CLOSURE` in `G2_VALIDATION/G2_EXIT_CHECKLIST.md`.
+  The closure commit's own run and the final verdict are recorded by the one successor the prompt allows.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

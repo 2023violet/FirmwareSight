@@ -23,8 +23,11 @@ heads came back 7 of 7, and no further P3 documentation-only successor will be w
 `P4: PASS / COMPLETE` (Release Bundle, opened 2026-09-30 and closed 2026-10-01, evidence in
 `P4_VALIDATION/`; the final implementation head `e799f2f` green on Run `36872456446` at 7 of 7, and the two
 closure heads green at 7 of 7 as read live) ·
-`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` · `G2: READY_FOR_ENGINEERING_GATE_REVIEW` ·
-`active_task: NONE` ·
+`G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` ·
+`G2: LOCAL PASS / READY FOR REMOTE CLOSURE` (the whole-MVP engineering closure audit, run 2026-10-01 under
+its own prompt and storage-path addendum; evidence in `G2_VALIDATION/`; PASS only after the one successor
+commit records the closure's remote run) ·
+`active_task: G2_ENGINEERING_CLOSURE_AUDIT` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 

@@ -1,0 +1,817 @@
+FirmwareSight — Pre-G2 Compare UI Test Reliability Closure
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight Coding AI。
+
+本轮不是 G2。
+本轮不是 P5。
+本轮不实现任何产品功能。
+
+本轮只关闭一个在 P4 governance closure 的真实 Windows CI 中暴露的已知测试竞态：
+
+apps/desktop/ui/src/compare.test.tsx
+
+test:
+
+"pages with the offset the shell reported and says which rows are on screen"
+
+current failing line around:
+
+compare.test.tsx:882
+
+The test obtains the Symbol Changes region asynchronously,
+then immediately performs a synchronous:
+
+getByText(/Showing 1 to 3 of 3 symbols/)
+
+On a fast run this passes.
+On Windows CI attempt 1 of Run 36892307828,
+the region had already mounted but the first symbol-change page had not arrived yet,
+so the synchronous assertion raced the async query.
+
+The exact same HEAD passed the rerun.
+
+This is a real test reliability defect.
+
+Goal:
+
+fix the race narrowly,
+prove the assertion still detects broken behavior,
+run repeated targeted tests,
+run the complete UI/full engineering gates,
+push,
+and require a clean remote CI first attempt before G2 starts.
+
+Do NOT modify product behavior merely to satisfy the test.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START FACTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live review verified current remote:
+
+origin/main:
+
+fe420d1f9699b522e6b85690aa146c0b74f21254
+
+Run:
+
+36892307828
+
+HEAD:
+
+fe420d1f9699b522e6b85690aa146c0b74f21254
+
+Current terminal result:
+
+completed / success
+
+run_attempt:
+2
+
+Attempt 1:
+
+6 / 7
+
+Only failing job:
+
+Desktop UI (windows-latest)
+
+Failure happened inside:
+
+Verification gate (install, typecheck, lint, test, build)
+
+Reported failing test:
+
+compare.test.tsx
+
+"pages with the offset the shell reported and says which rows are on screen"
+
+failing assertion:
+
+Unable to find:
+Showing 1 to 3 of 3 symbols
+
+Attempt 2:
+
+7 / 7 success
+
+Same HEAD.
+No source change between attempts.
+
+Therefore:
+
+P4 remains PASS / COMPLETE / GOVERNANCE CONSISTENT
+
+but:
+
+G2 must NOT begin while this known flaky assertion remains open.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. CURRENT CODE FACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect read the current test at exact HEAD fe420d1.
+
+Relevant current code:
+
+const table = await screen.findByRole('region', { name: 'Symbol Changes' });
+
+expect(
+  within(table).getByText(/Showing 1 to 3 of 3 symbols/)
+).toBeDefined();
+
+fireEvent.click(
+  within(table).getByRole('button', { name: 'Next page' })
+);
+
+The problem is not:
+
+region lookup
+
+The problem is:
+
+the region may mount before the async symbol query resolves.
+
+`getByText` is synchronous.
+
+The test is asserting asynchronous content synchronously.
+
+A neighboring pagination test in:
+
+apps/desktop/ui/src/details.test.tsx
+
+already uses the correct pattern:
+
+await screen.findByText(...)
+
+This is supporting evidence for the intended test style.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run:
+
+git fetch --prune origin
+
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git log -8 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+fe420d1f9699b522e6b85690aa146c0b74f21254
+
+worktree:
+clean
+
+If remote moved:
+STOP and inspect the delta first.
+
+If someone already fixed this exact race:
+do not duplicate it.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+amend P4 commits
+
+Remember:
+the environment may auto-push after commit.
+
+Always re-read origin/main after commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. FIRST RESPONSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Output:
+
+# FirmwareSight Pre-G2 Compare Test Reliability Takeover
+
+Include:
+
+- local HEAD
+- origin/main
+- worktree
+- Run 36892307828 attempt 1 result
+- attempt 2 result
+- exact failing test
+- exact current assertion style
+- product code change required? expected NO
+- test data change required? expected NO
+- production timing change required? expected NO
+- G2 authorized? NO
+- Blocking Issues
+
+If no blocking issue:
+continue.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. ALLOWED SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expected changed product/test file:
+
+apps/desktop/ui/src/compare.test.tsx
+
+Potential governance/integrity files only after validation:
+
+BASELINE.yaml
+.ai/CURRENT_STATE.md
+.ai/HANDOFF.md
+SHA256SUMS
+
+But do not change governance merely to create noise.
+
+If no live governance field needs this known finding recorded,
+prefer a focused test commit plus SHA256SUMS.
+
+Do NOT modify:
+
+Compare.tsx
+
+unless a real product bug is independently reproduced.
+
+Do NOT modify:
+
+Rust code
+schemas
+migrations
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+design tokens
+fixtures
+goldens
+workflow YAML
+
+unless evidence proves one is actually required.
+
+Expected:
+test-only fix.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. REQUIRED FIX SEMANTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The test must wait for the exact UI state it intends to prove.
+
+Preferred narrow repair:
+
+replace the synchronous assertion:
+
+within(table).getByText(...)
+
+with an asynchronous wait such as:
+
+await within(table).findByText(
+  /Showing 1 to 3 of 3 symbols/
+)
+
+or an equivalent `waitFor` that proves the same visible state.
+
+Do NOT:
+
+- add arbitrary sleep
+- add setTimeout
+- increase a global timeout merely to make it green
+- remove the pagination text assertion
+- weaken "1 to 3 of 3 symbols" to a vague "symbols"
+- bypass the UI and assert only the mock call
+- remove Next page behavior
+- catch/ignore the error
+- mark the test flaky/skip/todo
+- retry the test automatically until it passes
+
+The test must still prove:
+
+1. first page data actually rendered
+2. shell-reported visible row range is shown
+3. Next page action exists after the page is loaded
+4. clicking Next page results in a symbol query with offset 3
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. OPTIONAL STRONGER GUARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If the test still has a theoretical early-pass path after using findByText,
+add a narrow guard that observes the first symbol query completed.
+
+For example:
+
+- wait until symbolChangesMock has a request for offset 0
+- then await the exact visible status text
+
+Do not assert implementation order unnecessarily.
+
+Prefer visible user state as the primary proof.
+
+Do not make the test depend on timer duration.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. MUTATION PROOF — MANDATORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+We need proof that the repaired test is not vacuously green.
+
+Temporarily create one local mutation that breaks the behavior the assertion is supposed to detect.
+
+Acceptable mutation examples:
+
+A. make the symbol-page mock return total = 0 / no rows for the first query
+
+or
+
+B. temporarily alter the expected pagination text produced by the fixture/result
+
+or
+
+C. temporarily prevent the initial symbol query result from supplying the expected three rows
+
+Run ONLY the target test.
+
+Required:
+
+the repaired test FAILS at the intended visible-state assertion or directly related step.
+
+Then restore the mutation byte-for-byte.
+
+Confirm:
+
+git diff
+
+contains only the intended real test fix.
+
+Do NOT commit the mutation.
+
+Record the mutation command/result in the final report.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. TARGETED REPEAT TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run the exact target test repeatedly.
+
+Use the repository's existing pnpm/vitest toolchain.
+
+Run:
+
+at least 30 consecutive executions
+
+of the single test:
+
+"pages with the offset the shell reported and says which rows are on screen"
+
+All must pass:
+
+30 / 30 minimum.
+
+If any fail:
+
+do not proceed.
+
+Diagnose the remaining race.
+
+Do not hide it with retries.
+
+Also run the complete:
+
+compare.test.tsx
+
+at least 10 consecutive times.
+
+Required:
+
+10 / 10 full-file runs green.
+
+Record exact commands.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. FULL FRONTEND VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run from the UI package:
+
+corepack pnpm install --frozen-lockfile
+
+corepack pnpm typecheck
+
+corepack pnpm lint
+
+corepack pnpm test
+
+corepack pnpm build
+
+Report the direct UI test count once.
+
+Do not multiply it by repeated targeted runs.
+
+Current pre-fix baseline from P4:
+
+155 UI tests in 6 files
+
+If count changes:
+explain exactly why.
+
+Expected:
+same test count.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. FULL ENGINEERING VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because this is a test-only change,
+do not rerun the 50-step desktop smoke.
+
+But run the repository engineering gates expected before remote closure:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+python scripts/check.py --only drift
+
+python scripts/check.py --only deny
+
+python scripts/check.py --only core-smoke
+
+python scripts/check.py
+
+git diff --check
+
+Report direct cargo test count only once.
+
+Current P4 baseline:
+
+769 Rust tests
+
+Do not add repeated check.py/core-smoke test executions into that number.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. WINDOWS-RACE SPECIFIC REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before commit, inspect the repaired test and explicitly answer:
+
+- Is the exact pagination text still asserted?
+- Is that assertion now asynchronous?
+- Does the test still click Next page?
+- Does it still prove offset === 3?
+- Was any production source changed?
+- Was any timeout increased?
+- Was any retry introduced?
+- Was any assertion removed?
+- Was mock latency reduced to make the test easier?
+
+Required answers:
+
+YES
+YES
+YES
+YES
+NO
+NO
+NO
+NO
+NO
+
+If not:
+explain and stop.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. INTEGRITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tracked path set should not change.
+
+DIRECTORY_TREE.txt:
+must remain unchanged.
+
+Regenerate:
+
+SHA256SUMS
+
+LAST.
+
+Verify:
+
+sha256sum -c SHA256SUMS
+
+and the independent repository integrity checker.
+
+Required:
+
+0 mismatch
+0 missing
+0 stale
+0 duplicate
+no self-entry
+no host path
+LF
+
+Expected changed tracked files:
+
+apps/desktop/ui/src/compare.test.tsx
+SHA256SUMS
+
+Potentially one governance file only if genuinely required.
+
+No other product file expected.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Recommended commit message:
+
+test: wait for Compare pagination data before asserting it
+
+Before commit:
+
+git diff --stat
+
+git diff -- apps/desktop/ui/src/compare.test.tsx
+
+git diff --check
+
+Confirm:
+
+no production implementation changes.
+
+Commit.
+
+Immediately after commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+If auto-pushed:
+do not duplicate push.
+
+If not:
+normal fast-forward push.
+
+Never force.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. REMOTE CI — FIRST ATTEMPT MATTERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find the CI run by exact repair headSha.
+
+Do not guess run id.
+
+For this specific reliability closure:
+
+a green rerun is NOT enough to close the defect.
+
+The FIRST ATTEMPT on the repair HEAD must be:
+
+completed
+success
+7 / 7
+
+Reason:
+
+the defect being closed is nondeterministic CI behavior.
+
+If first attempt fails in:
+
+Desktop UI (windows-latest)
+
+on the same Compare pagination test,
+the fix is not accepted.
+
+Diagnose again.
+
+If first attempt fails due to an unrelated runner-provisioning failure before repository code:
+
+record it separately.
+
+A provisioning failure does not disprove the test fix,
+but the Windows UI job must still later execute the code successfully.
+
+If another product/test failure occurs:
+treat it as real evidence and investigate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. OPTIONAL REPEAT WINDOWS CI PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After one complete first-attempt 7/7 green run,
+obtain at least two additional executions of:
+
+Desktop UI (windows-latest)
+
+on the exact same repair HEAD,
+if GitHub Actions tooling permits rerunning that successful job cleanly.
+
+Required target:
+
+3 / 3 Windows UI executions green on the exact same SHA.
+
+Do not create code commits just to trigger repeats.
+
+If the tooling cannot rerun a successful job independently:
+
+record NOT AVAILABLE
+and rely on:
+
+30/30 targeted local
+10/10 compare-file local
+full UI suite
+first-attempt remote Windows green
+
+Do not fabricate extra proof.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. GOVERNANCE STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This closure does NOT change stage status.
+
+Keep:
+
+P4 = PASS / COMPLETE / GOVERNANCE CONSISTENT
+
+G2 =
+READY_FOR_ENGINEERING_GATE_REVIEW
+
+active_task =
+NONE
+
+baseline =
+0.6.0
+
+This task is a pre-G2 reliability closure,
+not a product stage.
+
+Do NOT write:
+
+G2 PASS
+P5
+v0.7.0
+
+If you record the defect closure in a governance file,
+make clear:
+
+- it was a test-harness race
+- production Compare behavior was not changed
+- original Run 36892307828 attempt 1 remains historical evidence
+- the exact repair HEAD and new CI run prove closure
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. LICENSE GAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT change:
+
+license = "Proprietary"
+
+Do NOT add LICENSE.
+
+Keep:
+
+OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION
+
+This task is unrelated.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. FINAL ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pre-G2 test reliability closure is PASS only if:
+
+□ exact race identified
+□ production source unchanged
+□ exact pagination assertion retained
+□ assertion waits for async page state
+□ Next page behavior retained
+□ offset 3 assertion retained
+□ no sleep
+□ no timeout inflation
+□ no retry masking
+□ mutation proof fails as expected
+□ mutation fully restored
+□ target test >=30/30
+□ compare.test.tsx >=10/10
+□ full UI suite green
+□ typecheck green
+□ lint green
+□ build green
+□ Rust gates green
+□ full check.py green
+□ integrity green
+□ remote repair HEAD first attempt 7/7 green
+□ Windows UI job executed and passed
+□ worktree clean
+□ HEAD == origin/main
+
+Then:
+
+TEST_RELIABILITY_CLOSURE = PASS
+
+P4 remains:
+PASS / COMPLETE
+
+G2 remains:
+READY_FOR_ENGINEERING_GATE_REVIEW
+
+Then STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight Pre-G2 Compare Test Reliability Closure Report
+
+## 1. Start
+HEAD
+origin/main
+Run 36892307828 attempt 1/2 facts
+
+## 2. Root Cause
+exact async race
+
+## 3. Fix
+before
+after
+why product code unchanged
+
+## 4. Assertion Strength
+pagination text
+Next page
+offset 3
+no weakened behavior
+
+## 5. Mutation Proof
+mutation
+expected failure
+restore proof
+
+## 6. Repetition
+target test N/N
+compare.test.tsx N/N
+
+## 7. Full Validation
+UI count
+Rust count
+typecheck/lint/build
+check.py
+integrity
+
+## 8. Git
+repair commit
+remote HEAD
+worktree
+
+## 9. Remote CI
+run id
+run attempt
+7 jobs
+first-attempt verdict
+Windows UI verdict
+optional repeat evidence
+
+## 10. Final Verdict
+
+TEST_RELIABILITY_CLOSURE = PASS
+
+P4 = PASS / COMPLETE / GOVERNANCE CONSISTENT
+
+G2 = READY_FOR_ENGINEERING_GATE_REVIEW
+
+## 11. License
+still pending owner confirmation
+
+## 12. Stop
+
+STOP.
+
+DO NOT EXECUTE G2.
+
+Return to Architect for the G2 Engineering Closure Audit prompt.
+
+END OF PROMPT
