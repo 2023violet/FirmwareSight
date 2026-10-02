@@ -12,13 +12,14 @@ last_updated: "2026-09-30"
 
 - Date: 2026-10-01
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`G2_ENGINEERING_CLOSURE_AUDIT`** — local verdict **G2 LOCAL PASS / READY FOR REMOTE
-  CLOSURE**, opened 2026-10-01 by *FirmwareSight — G2 Product MVP Engineering Closure Audit, Execution
-  Prompt v1.0 — Architect Reviewed* (file, SHA-256 `3c6ab83e…2bac9`, archived) and its inline *Storage Path
-  Semantics Clarification Addendum v1.0*. Audited tree `e35cfe7` (`055b54e` + the G2-F1 test-only fix,
-  Run `36906482900` attempt 1, 7 of 7); 769 Rust / 155 UI / `check.py` 15/15 / clean worktree 17/17; the
-  whole chain on both surfaces with byte-identical parity; evidence in `G2_VALIDATION/`. The pointer
-  returns to `NONE` and G2 becomes PASS only in the one successor commit the prompt allows.
+- Active task: **`NONE`** — the G2 Product MVP engineering closure audit reached **PASS** on 2026-10-01:
+  **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2 Product MVP
+  Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256 `3c6ab83e…2bac9`,
+  archived) and its inline *Storage Path Semantics Clarification Addendum v1.0*. Product tree `e35cfe7`
+  (`055b54e` + the G2-F1 test-only fix) on Run `36906482900`, evidence head `f75cbc5` on Run
+  `36948719972`, each 7 of 7 on the first attempt; 769 Rust / 155 UI / `check.py` 15/15 / clean worktree
+  17/17; the whole chain on both surfaces with byte-identical parity; evidence in `G2_VALIDATION/`. Next
+  tracks (V1, P5) need a separate architect decision; nothing here authorizes one.
 - Previous task, kept as history: `P4_RELEASE_BUNDLE` reached `PASS / COMPLETE` on 2026-10-01 and the
   pointer returned to empty. P4 was opened on 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
   Implementation, Execution Prompt v1.0 — Architect Reviewed*, delivered as a file (the first stage prompt
@@ -39,8 +40,8 @@ last_updated: "2026-09-30"
   --repo 2023violet/FirmwareSight --json databaseId,headSha,conclusion,jobs`). Start counts re-measured
   before the first write: one `cargo test --workspace` = **556 passed / 0 failed / 0 ignored**,
   `corepack pnpm test` = **135 passed in 6 files**.
-  **`G2_ENGINEERING_CLOSURE_AUDIT` is the next authorizable act now that P4 has closed, and this file
-  does not authorize it**; P4's own prompt stopped at P4.
+  At P4's closure the G2 engineering closure audit was the next authorizable act and P4's own prompt
+  stopped at P4; that audit has since run and closed `PASS` (above).
   Carried forward from P3, still true: `origin/main` sat at
   `219178af195569ec6b13728d84d992ef78df8c04`, where Run `36774472141` concluded `failure` on one job of
   seven — `Dependency policy`, reporting `error[yanked]` for `yoke-derive 0.8.3`, a transitive proc-macro
@@ -191,11 +192,12 @@ numbers are LOCALLY measured — one `cargo test --workspace` = 769 passed / 0 f
 `check.py` 15/15, the fifty-step shipped-window smoke, the independent reader at 64/64 and 59/59 — and
 the remote result is recorded separately: the final implementation head `e799f2f` is green on run
 `36872456446`, 7 of 7 jobs. P4 is the last core product-implementation stage of the MVP line.
-G2: LOCAL PASS / READY FOR REMOTE CLOSURE — the whole-MVP engineering closure audit ran on 2026-10-01
-under its own prompt and storage-path addendum; evidence G2_VALIDATION/. Not PASS until the one successor
-commit records this closure's remote run 7 of 7
+G2: PASS — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE (2026-10-01). The whole-MVP engineering
+closure audit, under its own prompt and storage-path addendum; evidence G2_VALIDATION/; product tree
+e35cfe7 and evidence head f75cbc5 each 7 of 7 on the first attempt. Not productization, beta, RC or GA
+Open-source licence: OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION — a technical MVP candidate is not a licensed open-source release
 Pricing / willingness-to-pay / team-pilot signal: DEFERRED_POST_MVP; the price-anchor prompt was WITHDRAWN_BY_ARCHITECT and never executed
-Active task: G2_ENGINEERING_CLOSURE_AUDIT — returns to NONE in the successor commit
+Active task: NONE — G2 closed 2026-10-01; V1 and P5 each need a separate architect decision
 Design tokens: v0.2.1
 ```
 
@@ -285,11 +287,19 @@ citation written before it. The current stage's pack is the one place a line poi
 
 ## Next work
 
-**`active_task: NONE`.** P4 Release Bundle closed `PASS / COMPLETE` on 2026-10-01, so no stage is live
-and nothing may be started from this file. `AGENTS.md` 1 means what it has meant in every round: the
-pointer names ONE stage, and no agent lifts the next one off the roadmap. What becomes authorizable
-now is the **G2 engineering closure audit**, which P4's own §5 explicitly forbade this round from
-performing or claiming, and which only an architect prompt can open.
+**`active_task: NONE`.** The G2 engineering closure audit closed `PASS` on 2026-10-01, so the MVP
+engineering candidate is complete, no stage is live and nothing may be started from this file.
+`AGENTS.md` 1 means what it has meant in every round: the pointer names ONE stage, and no agent lifts the
+next one off the roadmap. V1 own-artifact validation and P5 productization are the tracks the stage map
+names next; each needs a separate architect decision, and no authority file puts one before the other.
+
+**`G2` closed `PASS` on 2026-10-01, under its own architect prompt and addendum.** Audit-first: the gate
+ran before anything was written and found G2-F1, a test race fixed test-only in `e35cfe7`; then the whole
+MVP was driven through the CLI twice and the shipping window once, the clean tracked tree was proven in a
+detached worktree, the failure paths were forced, and the path boundary was proven in 17 checks after the
+architect adjudicated `artifacts.path` as expected local-only storage. Per-item verdict:
+`G2_VALIDATION/G2_EXIT_CHECKLIST.md`; the canonical known-limitations list:
+`G2_VALIDATION/G2_KNOWN_LIMITATIONS.md`.
 
 **`P4 Release Bundle` closed `PASS / COMPLETE` on 2026-10-01, under its own architect prompt.** One
 product verb, `Bundle`, over results the earlier stages had already computed and stored: a release

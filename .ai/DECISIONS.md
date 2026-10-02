@@ -1092,3 +1092,27 @@ Local verdict: **G2 LOCAL PASS / READY FOR REMOTE CLOSURE.** `active_task` reads
 `G2_ENGINEERING_CLOSURE_AUDIT` until the one successor commit records this closure's remote run; that
 commit sets G2 PASS, Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE, and the pointer back to
 `NONE`. Baseline stays `0.6.0`; no tag, release, installer or `v0.7.0`.
+
+# G2 Product MVP Engineering Closure Audit — closed 2026-10-01
+
+Verdict: **`G2 = PASS` — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE**, on the §34 checklist as
+the addendum corrected it (`G2_VALIDATION/G2_EXIT_CHECKLIST.md`). `active_task` returns to `NONE`; baseline
+stays `0.6.0`.
+
+- **Remote closure as §42–§44 define it.** The audit / product tree `e35cfe7` on Run `36906482900` and the
+  evidence head `f75cbc5` on Run `36948719972` are each `completed / success`, **7 of 7 on attempt 1**:
+  Rust (windows-latest), Rust (ubuntu-latest), Desktop UI (windows-latest), Desktop UI (ubuntu-latest),
+  Generated output drift, Dependency policy, macOS Core Smoke. No rerun was needed, and the Compare race
+  closed before G2 did not recur.
+- **This successor touches only live narrative surfaces and the G2 pack's remote sections**, so every
+  surface a newcomer reads first agrees on one state — the defect class the P4 consistency closure
+  existed to remove. No product source, schema, migration, dependency, fixture or golden moved.
+- **No next stage is implied.** V1 own-artifact / real-user validation and P5 productization remain
+  potential tracks, each needing its own architect decision; no authority file makes V1 a precondition
+  of P5 or the reverse, and none is written here.
+- **What PASS does not mean** is written beside it everywhere it appears: not productization, beta, RC or
+  GA; not production-ready, signed or installable; not real-user or commercially validated; not
+  security-clean; and not a licensed open-source release while
+  `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands.
+- **This commit's own run is external evidence.** Prompt §43 ends the CI→docs loop here: it is read with
+  `gh run list` and reported, never written into another commit.

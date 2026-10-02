@@ -68,8 +68,13 @@ P4      PASS / COMPLETE — Release Bundle, opened 2026-09-30 by *FirmwareSight 
         Rust and 135 UI. Verdict item by item in P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md; the fifty
         §59 steps of the shipped-window smoke in P4_BUNDLE_DESKTOP_SMOKE_REPORT.md; the final
         implementation head e799f2f green on Run 36872456446, 7 of 7 jobs
-G2      READY_FOR_ENGINEERING_GATE_REVIEW — the only statement P4 was permitted to write about it; the
-        whole-MVP engineering closure audit is the architect's own round and no file here authorizes it
+G2      PASS — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE (2026-10-01). The whole-MVP
+        engineering closure audit ran under its own architect prompt and storage-path addendum: the
+        complete workflow on the CLI and in the shipping window, byte-identical cross-surface parity, a
+        clean detached worktree, fail-closed failure paths, a relocated bundle read with project, source
+        and store absent. Evidence G2_VALIDATION/; product tree e35cfe7 (Run 36906482900), evidence head
+        f75cbc5 (Run 36948719972), both 7 of 7 on the first attempt. Not production-ready, beta, RC or
+        GA; not signed, installable, user-validated, security-clean or licensed open source
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -235,8 +240,10 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `NONE`; P4 closed on 2026-10-01 and the next authorizable act is the
-    G2 engineering closure audit, which nothing in this repository authorizes
+12. `.ai/ACTIVE_TASK.md` — currently `NONE`; G2 closed `PASS` on 2026-10-01, so the MVP engineering
+    candidate is complete and any next track (V1 own-artifact validation, P5 productization) needs its
+    own architect decision
+13. `G2_VALIDATION/G2_EXIT_CHECKLIST.md` — the whole-MVP verdict, box by box
 
 ## Batch A recruitment-ready status
 
@@ -271,9 +278,20 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: NONE`** — P4 Release Bundle closed `PASS / COMPLETE` on 2026-10-01, so no stage is live
-and nothing may be started from this file. The paragraphs below are the running narrative of how the
-pointer got here and back to empty, so each one keeps the words its own round wrote.
+**`active_task: NONE`** — the G2 engineering closure audit closed `PASS` on 2026-10-01: **FirmwareSight
+Product MVP is ENGINEERING COMPLETE and the product is an MVP CANDIDATE.** No stage is live and nothing may
+be started from this file. What could come next — V1 own-artifact / real-user validation, P5
+productization — needs a separate architect decision, and no authority file puts one before the other.
+The open-source licence is still `PENDING OWNER CONFIRMATION`: a technical MVP candidate is not a licensed
+open-source release. The paragraphs below are the running narrative of how the pointer got here and back
+to empty, so each one keeps the words its own round wrote.
+
+**`G2` closed `PASS` on 2026-10-01, under its own architect prompt and addendum.** The audit ran the gate
+first and found one test race (G2-F1, fixed test-only in `e35cfe7`); drove the whole MVP through the CLI
+twice and through the shipping window once, with Diff JSON, Diff HTML and the whole bundle byte-identical
+across the two; proved the tree needs no ignored file in a clean detached worktree; and proved the
+path boundary in 17 checks after the architect adjudicated `artifacts.path` as the local-only storage the
+baseline always had. Evidence and the canonical known-limitations list: `G2_VALIDATION/`.
 
 *(Recorded at the time as `active_task: NONE`.)* `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the
 Analyze verb is one whole

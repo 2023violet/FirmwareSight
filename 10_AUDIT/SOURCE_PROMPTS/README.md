@@ -434,8 +434,11 @@ text with no source file; each says so in its own entry instead of standing for 
   no migration, no schema change and no storage redesign.
 - Effect: G2-F2 adjudicated `EXPECTED_LOCAL_PRIVATE_PERSISTENCE`, non-blocking; the 17-point boundary proof
   is `G2_VALIDATION/G2_EVIDENCE_MATRIX.md` §7.
-- Outcome, 2026-10-01: `G2 LOCAL PASS / READY FOR REMOTE CLOSURE` in `G2_VALIDATION/G2_EXIT_CHECKLIST.md`.
-  The closure commit's own run and the final verdict are recorded by the one successor the prompt allows.
+- Outcome, 2026-10-01: `G2 LOCAL PASS / READY FOR REMOTE CLOSURE` in the evidence commit `f75cbc5`, whose
+  own Run `36948719972` was 7 of 7 on its first attempt (the product tree `e35cfe7` likewise, Run
+  `36906482900`). The one successor commit the prompt allows records that and closes **G2 = PASS —
+  Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE**, with `active_task` back to `NONE`. The
+  successor's own run is external evidence and is not recorded in a further commit.
 
 ## Supersession note on the V0 Batch A activation entry
 

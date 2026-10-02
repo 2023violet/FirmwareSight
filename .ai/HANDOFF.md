@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-10-01"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / active_task NONE
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / active_task NONE
 
 ## Purpose
 
@@ -35,8 +35,12 @@ architect issued P4's prompt, and that round finished on 2026-10-01: **`P4` is `
 **`active_task` is `NONE` again**. One verb, `Bundle`, packaged the Gate's answer together with Analyze,
 Compare, accepted Reviews, the shipped artifacts and the Release Notes into a directory another person
 can read and verify without FirmwareSight running; US-004 is checked item by item in
-`P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md`. The MVP product line is complete: what is authorizable now
-is the **G2 engineering closure audit**, and only an architect prompt can open it.
+`P4_VALIDATION/P4_BUNDLE_EXIT_CHECKLIST.md`. The MVP product line was then complete, and the architect
+opened the **G2 engineering closure audit** with its own prompt and a storage-path addendum. It closed
+on 2026-10-01: **`G2` is `PASS` — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE**, and
+`active_task` is `NONE` again. Evidence: `G2_VALIDATION/`, verdict box by box in
+`G2_EXIT_CHECKLIST.md`. If you were sent here to "continue G2", it is closed; V1 own-artifact validation
+and P5 productization each need a separate architect decision, and nothing here authorizes either.
 
 Four wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here to
 continue P1, P2 or P3, all three are `PASS / COMPLETE` and their acceptance lists are checked item by item
@@ -48,9 +52,9 @@ Architect Reviewed*, reached `PASS / COMPLETE`, and returned `active_task` to `N
 the *research* gate, not the requirement that each stage carry its own architect prompt, so "governance
 got easier" is not a licence to widen scope: **nothing is authorized now.** P4's own §78 said stop after
 P4, and its §5 said the round may not claim `G2 = PASS` — the only G2 statement it wrote is
-`READY_FOR_ENGINEERING_GATE_REVIEW`, which is where the delivery stands. Anything History-shaped,
-installer-shaped, signing-shaped, updater-shaped or cloud-shaped is still outside the MVP, and so is the
-G2 audit itself until the architect opens it. The fourth is
+`READY_FOR_ENGINEERING_GATE_REVIEW`. The G2 audit's own round, under its own prompt, then closed
+`G2 = PASS` (above). Anything History-shaped, installer-shaped, signing-shaped, updater-shaped or
+cloud-shaped is still outside the MVP, and V1 / P5 stay unstarted until the architect opens one. The fourth is
 specific to this round's state: P3's commits were **local at closure and pushed after it**, so the pack's
 gate numbers stay locally measured and the remote is a separate, later fact — Run `36774472141` on
 `219178af`, 6 of 7 jobs green, the one red being `Dependency policy` over a crate that crates.io yanked
@@ -119,6 +123,11 @@ Remote CI Run #18              36648718199  on 4a77ea1  **success**, 7 of 7 jobs
 P2 closure record              32b23aa78323d315f6643f04c2343f75576d483f — on origin/main; 12 files, P2_VALIDATION/ + .ai/ + BASELINE.yaml + README/INDEX/prompt registry + SHA256SUMS. `git diff --name-only 4a77ea1 32b23aa` shows no production source, fixture, schema, migration or configuration file
 Remote CI Run #19              36665007523  on 32b23aa  **success**, 7 of 7 jobs — the successor verification, and P3's verified start HEAD
 P3 Release Gate start          32b23aa78323d315f6643f04c2343f75576d483f — HEAD = origin/main, worktree clean, 345 Rust and 99 UI tests re-measured green before the first write; authorized by prompt v1.1 + ADR-0027
+P4 final implementation        e799f2f — Run 36872456446 success, 7 of 7; closure heads 157f749 (Run 36879477561, green on attempt 2 after a runner rustup conflict) and 94f7bd9 (Run 36881101091)
+Pre-G2 closures                fe420d1 BASELINE alignment (Run 36892307828, attempt 2 7 of 7) · 055b54e Compare test race (Run 36899128645, attempt 1 7 of 7)
+G2 product tree                e35cfe70aa0e8f273a75ac14b9dc62377483af36 — 055b54e + the G2-F1 test-only fix; Run 36906482900 attempt 1, 7 of 7
+G2 evidence head               f75cbc5f40fa823d17463855102dfaeca3fb8c43 — G2_VALIDATION/, prompt archives, governance; Run 36948719972 attempt 1, 7 of 7
+G2 closure                     the successor of f75cbc5 sets G2 PASS; its own run is external evidence, not recorded in a further commit
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -167,8 +176,13 @@ P3      PASS / COMPLETE — P3_RELEASE_GATE closed 2026-09-30, authorized 2026-0
         each caught by a different mechanism — I locally, J only on Windows CI — and J's fix verified by
         Run 36783457030 on 02e8a81 at 7 of 7 jobs green
 P4      PASS / COMPLETE, closed 2026-10-01 under its own architect prompt; `active_task` returned to
-        NONE. Evidence: P4_VALIDATION/. The next authorizable act is the G2 engineering closure audit,
-        which no file in this repository authorizes
+        NONE. Evidence: P4_VALIDATION/
+G2      PASS (2026-10-01) — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE. Audit-first under its
+        own prompt + storage-path addendum; one test race found and fixed test-only (G2-F1, e35cfe7);
+        artifacts.path adjudicated expected local-only storage (G2-F2); evidence G2_VALIDATION/. Not
+        productization, beta, RC or GA; not licensed open source until the owner chooses a licence —
+        root Cargo.toml still reads license = "Proprietary", no root LICENSE,
+        OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION
 Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was withdrawn unexecuted
 ```
 

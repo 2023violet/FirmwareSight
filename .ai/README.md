@@ -24,10 +24,10 @@ heads came back 7 of 7, and no further P3 documentation-only successor will be w
 `P4_VALIDATION/`; the final implementation head `e799f2f` green on Run `36872456446` at 7 of 7, and the two
 closure heads green at 7 of 7 as read live) ·
 `G1: PASS — basis P0 PASS, per ADR-0026 (2026-09-29)` ·
-`G2: LOCAL PASS / READY FOR REMOTE CLOSURE` (the whole-MVP engineering closure audit, run 2026-10-01 under
-its own prompt and storage-path addendum; evidence in `G2_VALIDATION/`; PASS only after the one successor
-commit records the closure's remote run) ·
-`active_task: G2_ENGINEERING_CLOSURE_AUDIT` ·
+`G2: PASS` — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE (the whole-MVP engineering closure
+audit, 2026-10-01, under its own prompt and storage-path addendum; evidence in `G2_VALIDATION/`; product
+tree `e35cfe7` and evidence head `f75cbc5` both 7 of 7 on the first attempt) ·
+`active_task: NONE` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 
@@ -38,9 +38,11 @@ the architect issued a prompt for it, not because the roadmap listed it next, an
 **stop after P2**; `P3 Release Gate` ran for exactly the same reason — prompt v1.1 plus `ADR-0027`, and
 nothing more — and its prompt said **stop after P3**. `P4 Release Bundle` ran on the same rule and no further: prompt v1.0, delivered as a file and hashed into
 `10_AUDIT/SOURCE_PROMPTS/`, with no new ADR because no technology baseline moves — and it closed
-`PASS / COMPLETE` on 2026-10-01, returning the pointer to `NONE`. P4's own §78 said **stop after P4**,
-which keeps the G2 closure audit, every History / installer / signing / updater / SBOM / cloud / account /
-telemetry / AI / pricing idea and any `v0.7.0` unstarted until the architect issues something for them.
+`PASS / COMPLETE` on 2026-10-01, returning the pointer to `NONE`. P4's own §78 said **stop after P4**.
+The G2 engineering closure audit then ran under its own prompt — audit-first, narrow test-only repair —
+and closed `PASS` the same day, returning the pointer to `NONE` again. Its prompt says **stop after G2**:
+V1, P5, every History / installer / signing / updater / SBOM / cloud / account / telemetry / AI / pricing
+idea and any `v0.7.0` stay unstarted until the architect issues something for them.
 
 任何 AI 接手本项目时：
 

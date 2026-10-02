@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_LOCAL_PASS_REMOTE_PENDING_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_PASS_MVP_CANDIDATE_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_LOCAL_PASS_REMOTE_PENDING_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_PASS_MVP_CANDIDATE_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
@@ -35,11 +35,10 @@ validation:
   # Compare and Gate) is unchanged.
   next_authorizable_tracks:
     # P4 ran from 2026-09-30 under its own architect prompt and closed PASS / COMPLETE on 2026-10-01,
-    # so the MVP product line is complete. The G2 closure audit that followed is the live task now
-    # (active_task below), so it is no longer "authorizable" - it is running. After it, the tracks the
-    # stage map names are V1 own-artifact / real-user validation and P5 productization; neither is
-    # authorized by this file, no authority file puts one before the other, and each needs its own
-    # architect decision. No B1, RC1 or GA1 work, no History page, installer, signing, updater, SBOM,
+    # so the MVP product line is complete. The G2 closure audit that followed closed PASS the same day,
+    # so the MVP engineering candidate is complete. The tracks the stage map names next are V1
+    # own-artifact / real-user validation and P5 productization; neither is authorized by this file,
+    # no authority file puts one before the other, and each needs its own architect decision. No B1, RC1 or GA1 work, no History page, installer, signing, updater, SBOM,
     # cloud, account, telemetry, AI or pricing exists or is implied by what is listed here.
     - V1_own_artifact_external_validation_after_G2
     - P5_productization_after_G2
@@ -75,9 +74,12 @@ validation:
   # neither audited nor passed: READY_FOR_ENGINEERING_GATE_REVIEW is a statement that the audit may now
   # be opened, not a judgement of whole-MVP coherence, and only an architect prompt opens it.
   p4_status: PASS_COMPLETE
-  # The G2 engineering closure audit ran under its own prompt on 2026-10-01. This field reads
-  # LOCAL_PASS_REMOTE_PENDING until the one successor commit records the closure's remote run.
-  g2_status: LOCAL_PASS_REMOTE_PENDING
+  # The G2 engineering closure audit ran under its own prompt on 2026-10-01. This field read
+  # LOCAL_PASS_REMOTE_PENDING in the evidence commit f75cbc5 and becomes PASS here, in the one successor
+  # the prompt allows, after f75cbc5's own Run 36948719972 came back 7 of 7 on its first attempt.
+  # Verdict source: G2_VALIDATION/G2_EXIT_CHECKLIST.md. PASS means Product MVP ENGINEERING COMPLETE,
+  # state MVP CANDIDATE - not production-ready, beta, RC or GA.
+  g2_status: PASS
   own_artifact_validation: V1
   # Registered historically by ADR-0025. The slice it names is complete; the sequencing rule that made
   # V0 Batch A a precondition for the next slice no longer holds - ADR-0026 supersedes it.
@@ -190,10 +192,12 @@ research:
 # v1.0 - Architect Reviewed" (delivered as a file, archived with its SHA-256) and, inline, its Storage
 # Path Semantics Clarification Addendum v1.0, so the pointer names that audit. It is an audit round, not a
 # product stage: no new feature, verb, schema major, migration, dependency, crate or token. Its local
-# verdict is G2 LOCAL PASS / READY FOR REMOTE CLOSURE (G2_VALIDATION/G2_EXIT_CHECKLIST.md); the pointer
-# returns to NONE, and G2 becomes PASS, only in the one successor commit that records this closure's
-# own remote run (prompt section 43).
-active_task: G2_ENGINEERING_CLOSURE_AUDIT
+# verdict was G2 LOCAL PASS / READY FOR REMOTE CLOSURE (G2_VALIDATION/G2_EXIT_CHECKLIST.md), written in
+# the evidence commit f75cbc5. That commit's own Run 36948719972 came back 7 of 7 on its first attempt,
+# so the one successor commit the prompt allows (section 43) records it, sets G2 = PASS - Product MVP
+# ENGINEERING COMPLETE, state MVP CANDIDATE - and returns the pointer to NONE. The G2 prompt says stop
+# after G2: V1, P5 and anything later need a separate architect decision, and no file here authorizes one.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -506,7 +510,12 @@ g2_execution:
   start_run: "36899128645, attempt 1, success, 7 of 7"
   audit_head: e35cfe70aa0e8f273a75ac14b9dc62377483af36 # 055b54e plus the G2-F1 test-only fix; no product source changed in this round
   audit_head_run: "36906482900, attempt 1, success, 7 of 7"
-  stage_status: LOCAL_PASS_REMOTE_PENDING # becomes PASS only in the one successor commit (prompt section 43)
+  stage_status: PASS # LOCAL_PASS_REMOTE_PENDING in f75cbc5; PASS in the one successor commit (prompt section 43)
+  closed_on: "2026-10-01"
+  evidence_head: f75cbc5f40fa823d17463855102dfaeca3fb8c43 # G2_VALIDATION/, prompt archives and governance; no product source
+  remote_ci: "product tree e35cfe7 on Run 36906482900 and evidence head f75cbc5 on Run 36948719972, each attempt 1, completed / success, 7 of 7: Rust (windows-latest), Rust (ubuntu-latest), Desktop UI (windows-latest), Desktop UI (ubuntu-latest), Generated output drift, Dependency policy, macOS Core Smoke. This successor's own run is external evidence and is not written into a further commit"
+  product_mvp: ENGINEERING_COMPLETE
+  product_state: MVP_CANDIDATE
   whole_workflow: PASS # CLI chain twice and desktop steps 1-43 on the custom-protocol build
   clean_tracked_tree: PASS # detached worktree at e35cfe7, check.py 17/17, no ignored or untracked dependency
   cross_surface_parity: PASS # snapshot, diff (byte-identical), Gate run id and findings, release id, manifest, whole bundle (diff -r)

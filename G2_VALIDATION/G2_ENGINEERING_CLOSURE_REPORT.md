@@ -160,15 +160,30 @@ fields to `G2_ENGINEERING_CLOSURE_AUDIT` / local pass, and regenerates `DIRECTOR
 
 ## 22. Remote CI
 
-Pending until pushed. The closure commit's run is recorded by its successor; the successor's own run is
-external evidence (prompt §43).
+| Head | What it is | Run | Attempt | Result |
+| --- | --- | --- | --- | --- |
+| `e35cfe70aa0e8f273a75ac14b9dc62377483af36` | product tree: `055b54e` + the G2-F1 test-only fix | `36906482900` | 1 | completed / success, 7 of 7 |
+| `f75cbc5f40fa823d17463855102dfaeca3fb8c43` | evidence head: this pack, the prompt archives, governance | `36948719972` | 1 | completed / success, 7 of 7 |
 
-## 23. Final local verdict
+The seven jobs on each: Rust (windows-latest), Rust (ubuntu-latest), Desktop UI (windows-latest), Desktop
+UI (ubuntu-latest), Generated output drift, Dependency policy, macOS Core Smoke. Read with
+`gh run view <id> --repo 2023violet/FirmwareSight`. The Compare pagination race closed before G2 did not
+recur. The successor commit that records this table is the one §43 allows; its own run is external
+evidence and is not written into a further commit.
+
+## 23. Verdict
+
+The local verdict, written in `f75cbc5`, was `G2 LOCAL PASS / READY FOR REMOTE CLOSURE`. Both heads above
+are green on their first attempt, so:
 
 ```text
-G2 LOCAL PASS / READY FOR REMOTE CLOSURE
+G2 = PASS
+FirmwareSight Product MVP = ENGINEERING COMPLETE
+FirmwareSight state       = MVP CANDIDATE
+baseline_version          = 0.6.0
+active_task               = NONE
 ```
 
-Not `G2 = PASS`: that needs the closure commit's own 7/7 and one successor's 7/7. Not production-ready,
-not beta, not a release candidate, not signed or installable, not user-validated, not commercially
-validated, not security-clean, and not licensed open source until the owner chooses a licence.
+Not G3 productization, private beta, release candidate or GA; not production-ready, signed or
+installable; not user-validated or commercially validated; not security-clean; and not licensed open
+source until the owner chooses a licence. V1 and P5 each need a separate architect decision.

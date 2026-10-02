@@ -97,10 +97,19 @@ of `G2_END_TO_END_SMOKE_REPORT.md`, `L<n>` a row of `G2_KNOWN_LIMITATIONS.md`. A
 
 ## Verdict
 
+Local verdict, as written in the evidence commit `f75cbc5`:
+
 ```text
 G2 LOCAL PASS / READY FOR REMOTE CLOSURE
 ```
 
-Every box above is settled. G2 is not written as PASS here: prompt §40–§44 require the closure commit's
-own CI and one successor's CI first. The 500 MB UI metric stays **NOT_MEASURED** (M§9) and is not counted
-as proven by this verdict.
+Remote closure: the product tree `e35cfe7` (Run `36906482900`) and the evidence head `f75cbc5` (Run
+`36948719972`) are each 7 of 7 on their first attempt. Therefore:
+
+```text
+G2 = PASS
+Product MVP = ENGINEERING COMPLETE
+Product state = MVP CANDIDATE
+```
+
+The 500 MB UI metric stays **NOT_MEASURED** (M§9) and is not counted as proven by this verdict.

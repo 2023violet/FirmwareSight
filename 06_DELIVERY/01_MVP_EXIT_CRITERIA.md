@@ -162,8 +162,8 @@ P1 Analyzer                — PASS / COMPLETE (2026-09-29); evidence in P1_VALI
 P2 Compare                 — PASS / COMPLETE (2026-09-29); evidence in P2_VALIDATION/
 P3 Release Gate            — PASS / COMPLETE (2026-09-30); evidence in P3_VALIDATION/
 P4 Release Bundle          — PASS / COMPLETE (2026-10-01); evidence in P4_VALIDATION/
-G2 Product MVP Candidate   — READY_FOR_ENGINEERING_GATE_REVIEW since 2026-10-01; the closure audit is the
-                              architect's round
+G2 Product MVP Candidate   — PASS (2026-10-01): Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE;
+                              evidence in G2_VALIDATION/
 V1 Own-artifact External Validation
 P5 Productization
 B1 Private Beta
