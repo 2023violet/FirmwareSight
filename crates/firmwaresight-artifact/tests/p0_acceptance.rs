@@ -424,6 +424,44 @@ fn foreign_toolchain_maps_are_rejected_without_falling_back() {
 }
 
 #[test]
+fn gnu_ld_map_is_detected_when_its_banner_sits_behind_a_long_preamble() {
+    // E2E-F003. GNU ld prints an "Archive member included to satisfy reference by file (symbol)"
+    // block, and a "Discarded input sections" block whenever --gc-sections is active, long before
+    // it reaches "Memory Configuration". Both grow with the number of objects and libraries, so an
+    // ordinary vendor-HAL build puts the banner far past any fixed head window: the owner's own
+    // project put it at character 1,162,310 and a 51 MB synthetic at 491,879, while the same linker
+    // with the banner at 745 was accepted.
+    let mut preamble =
+        String::from("Archive member included to satisfy reference by file (symbol)\n\n");
+    while preamble.len() < 500_000 {
+        preamble.push_str("libat32f4.a(gpio.c.o)           0x08000100        gpio_init\n");
+    }
+    assert!(
+        preamble.len() > 4096,
+        "the fixture has to cross the window this defect is about, got {} bytes",
+        preamble.len()
+    );
+    let map = format!(
+        "{preamble}Memory Configuration\n\nName             Origin             Length             Attributes\n\
+         FLASH            0x08000000         0x00020000         xr\n\
+         RAM              0x20000000         0x00008000         xrw\n\
+         *default*\n\nLinker script and memory map\n"
+    );
+
+    assert!(
+        map::detect(&map).expect("a GNU ld map must not be refused"),
+        "a GNU ld banner behind the preamble must still identify the file as GNU ld"
+    );
+
+    // The refusal this test replaces stated a cause that was false, so pin the shape of the
+    // negative too: a file with no banner at all is still a clean negative, never a guess.
+    assert!(
+        matches!(map::detect("notes about a build\n"), Ok(false)),
+        "unrelated text must stay a clean negative"
+    );
+}
+
+#[test]
 fn basic_fixture_reports_symbols_available_and_map_not_provided() {
     let analysis = pipeline::analyze(&AnalysisRequest::new(basic_elf())).expect("analyzes");
 

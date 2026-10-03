@@ -98,9 +98,15 @@ pub fn detect(text: &str) -> Result<bool, ArtifactError> {
     Ok(false)
 }
 
+/// Whether this text carries a GNU ld banner.
+///
+/// The whole text is searched, not a head window. GNU ld prints its banners behind a preamble whose
+/// length the project does not control — an `Archive member included to satisfy reference by file
+/// (symbol)` block for every symbol pulled from a static library, and a `Discarded input sections`
+/// block under `--gc-sections` — so a fixed window refuses ordinary vendor-HAL builds. This is the
+/// same ground [`detect`] already searches for the foreign-toolchain banners.
 fn is_gnu_ld(text: &str) -> bool {
-    let head: String = text.chars().take(4096).collect();
-    head.contains("Linker script and memory map") || head.contains("Memory Configuration")
+    text.contains("Linker script and memory map") || text.contains("Memory Configuration")
 }
 
 /// Parse a GNU ld MAP.
