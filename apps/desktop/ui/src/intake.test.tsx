@@ -400,6 +400,74 @@ describe('P1-A0 intake screen', () => {
     expect(alert.textContent).toContain('op-1a2b');
   });
 
+  it('marks the surviving report as previous when a new artifact is chosen but not analyzed', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+    expect(screen.getByRole('region', { name: 'Analysis summary' })).toBeDefined();
+
+    // E2E-F001: the selection alone changes nothing below the rule, so the screen has to say whose
+    // numbers they are before anyone presses Analyze.
+    selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
+    await screen.findByText('other.elf');
+
+    const previous = await screen.findByRole('region', { name: 'Last good analysis' });
+    expect(within(previous).getByText(/Previous analysis of app\.elf/)).toBeDefined();
+    expect(within(previous).getByText(/It is not an analysis of other\.elf/)).toBeDefined();
+    // The last-good facts survive untouched, and none of them is presented as the candidate's.
+    expect(within(previous).getByText('5,432 bytes')).toBeDefined();
+    expect(within(previous).getByText('app.elf')).toBeDefined();
+    // Choosing is not analyzing: no second snapshot is asked for.
+    expect(analyzeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks the previous analysis when both artifacts share one leaf name', async () => {
+    const base = summary();
+    analyzeMock.mockResolvedValue(
+      ok(
+        summary({
+          artifact: { ...base.artifact, fileName: 'firmware.elf', byteSize: 5432 },
+        }),
+      ),
+    );
+    selectMock.mockResolvedValue(ok(selection({ fileName: 'firmware.elf', selectionId: 'sel-a' })));
+    await chooseArtifact('firmware.elf');
+    await analyze();
+    await screen.findByText('5,432 bytes');
+
+    // The same file name from another directory. A name comparison cannot see this change, which is
+    // why the identity behind the marker is the selection handle.
+    selectMock.mockResolvedValue(ok(selection({ fileName: 'firmware.elf', selectionId: 'sel-b' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
+    await screen.findByRole('region', { name: 'Last good analysis' });
+
+    const previous = screen.getByRole('region', { name: 'Last good analysis' });
+    expect(within(previous).getByText(/Previous analysis of firmware\.elf/)).toBeDefined();
+    expect(
+      within(previous).getByText(/different file with the same name, and it has not been analyzed yet/),
+    ).toBeDefined();
+    // The copy the finding is about: with one leaf name, naming the candidate would say
+    // "not an analysis of firmware.elf" under "Previous analysis of firmware.elf" and explain nothing.
+    expect(within(previous).queryByText(/It is not an analysis of firmware\.elf/)).toBeNull();
+    expect(within(previous).getByText('5,432 bytes')).toBeDefined();
+
+    // Analyzing the candidate replaces the report and retires the marker.
+    analyzeMock.mockResolvedValue(
+      ok(
+        summary({
+          artifact: { ...base.artifact, fileName: 'firmware.elf', byteSize: 6789, sha256: 'c'.repeat(64) },
+          identity: { ...base.identity, snapshotId: 'snap-cafebabe-p0-normalize-1' },
+        }),
+      ),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Analyze' }));
+
+    const current = await screen.findByRole('region', { name: 'Analysis summary' });
+    expect(within(current).getByText('6,789 bytes')).toBeDefined();
+    expect(screen.queryByRole('region', { name: 'Last good analysis' })).toBeNull();
+  });
+
   it('keeps the last good analysis visible when the current candidate fails', async () => {
     await chooseArtifact();
     await analyze();

@@ -44,6 +44,8 @@ export function App() {
   const [unit, setUnit] = useState<SizeUnit>('bytes');
   const [selection, setSelection] = useState<SelectionDto | null>(null);
   const [lastGood, setLastGood] = useState<AnalysisSummaryDto | null>(null);
+  /** Which selection produced `lastGood`. It moves with the summary and never on its own. */
+  const [analyzedSelectionId, setAnalyzedSelectionId] = useState<string | null>(null);
   const [project, setProject] = useState<ProjectContextDto | null>(null);
   const [gateRun, setGateRun] = useState<GateRunDto | null>(null);
 
@@ -81,8 +83,12 @@ export function App() {
             onUnitChange={setUnit}
             selection={selection}
             onSelectionChange={setSelection}
+            analyzedSelectionId={analyzedSelectionId}
             lastGood={lastGood}
-            onLastGoodChange={setLastGood}
+            onLastGoodChange={(summary, selectionId) => {
+              setLastGood(summary);
+              setAnalyzedSelectionId(selectionId);
+            }}
           />
         ) : page === 'compare' ? (
           <Compare

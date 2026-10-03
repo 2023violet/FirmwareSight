@@ -1295,18 +1295,80 @@ describe('Release bundle', () => {
     ).toContain('This export replaced the bundle that was there, under your confirmation.');
   });
 
-  it('refuses a folder that is not a bundle and offers no replace button for it', async () => {
+  it('never offers a replace decision for an occupied folder this engine did not write', async () => {
+    // The engine's real order (`bundle.rs:382-393`): an existing destination answers 6106 whether or
+    // not it is a recognizable bundle, and only a confirmed overwrite meets 6107. So a foreign
+    // folder reaches this page as 6106 - the path the test above, which mocks 6107 on the first
+    // press, never exercised, and the path E2E-F002 found asserting a bundle that is not there.
     chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: false })));
-    exportBundleMock.mockResolvedValue(fail(NOT_A_BUNDLE));
+    exportBundleMock.mockResolvedValue(fail(DESTINATION_TAKEN));
+    await prepared();
+    await chosen();
+
+    // What is true: occupied, not written by this engine, not going to be replaced.
+    expect(document.body.textContent).toContain('it is not a bundle this engine wrote');
+    expect(document.body.textContent).toContain('it will not be replaced.');
+    // What must never be said about this folder, and what must never be offered.
+    expect(document.body.textContent).not.toContain('already holds a FirmwareSight release bundle');
+    expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }),
+    ).toBeNull();
+
+    // The guard is the disabled action, not a message that arrives after a doomed write attempt.
+    expect(namedButton('Export bundle').disabled).toBe(true);
+    fireEvent.click(namedButton('Export bundle'));
+    expect(exportBundleMock).not.toHaveBeenCalled();
+
+    // Recovery stays available: the destination is still this page's to change.
+    expect(namedButton('Choose destination folder').disabled).toBe(false);
+  });
+
+  it('exports normally once a destination that is not foreign-occupied is chosen', async () => {
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: false })));
+    exportBundleMock.mockResolvedValue(ok(bundleExport()));
+    await prepared();
+    await chosen();
+    expect(namedButton('Export bundle').disabled).toBe(true);
+
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: false })));
+    fireEvent.click(namedButton('Choose destination folder'));
+    await waitFor(() =>
+      expect(document.body.textContent).toContain('Nothing of that name is there yet.'),
+    );
+
+    expect(namedButton('Export bundle').disabled).toBe(false);
+    fireEvent.click(namedButton('Export bundle'));
+    await screen.findByRole('heading', { level: 3, name: 'Bundle created' });
+    expect(exportBundleMock).toHaveBeenCalledTimes(1);
+    expect(exportBundleMock.mock.calls[0]).toEqual(['bundle-4021-1', 'dst-4021-1', false]);
+  });
+
+  it('shows the engine refusal when a folder stops being a bundle between the choice and the replace', async () => {
+    // The engine answers 6106 for any occupied destination and only reaches 6107 once a replace has
+    // been authorized (`bundle.rs:382-393`), so this is how 6107 can actually arrive at this page:
+    // the folder read as a bundle when it was chosen, and the write re-checked it and refused. The
+    // refusal is shown, and the card that asked does not stay up repeating what was just denied.
+    chooseDestinationMock.mockResolvedValue(ok(bundleDestination({ exists: true, recognizableBundle: true })));
+    exportBundleMock
+      .mockResolvedValueOnce(fail(DESTINATION_TAKEN))
+      .mockResolvedValueOnce(fail(NOT_A_BUNDLE));
     await prepared();
     await chosen();
     fireEvent.click(namedButton('Export bundle'));
 
+    const group = await screen.findByRole('group', { name: 'Replace the existing bundle?' });
+    fireEvent.click(
+      within(group).getByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }),
+    );
+
     const panel = await screen.findByRole('alert', { name: 'Bundle step failed' });
     expect(within(panel).getByText('ERR-BUNDLE-6107')).toBeDefined();
-    // §32: an arbitrary directory is never a replacement target, so there is nothing to confirm.
     expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull();
-    expect(exportBundleMock).toHaveBeenCalledTimes(1);
+    expect(exportBundleMock.mock.calls).toEqual([
+      ['bundle-4021-1', 'dst-4021-1', false],
+      ['bundle-4021-1', 'dst-4021-1', true],
+    ]);
   });
 
   it('drops a stale plan instead of letting it authorize a write', async () => {

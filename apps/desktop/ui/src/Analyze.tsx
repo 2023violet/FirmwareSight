@@ -30,6 +30,7 @@ export function Analyze({
   onUnitChange,
   selection,
   onSelectionChange,
+  analyzedSelectionId,
   lastGood,
   onLastGoodChange,
 }: {
@@ -37,8 +38,9 @@ export function Analyze({
   readonly onUnitChange: (unit: SizeUnit) => void;
   readonly selection: SelectionDto | null;
   readonly onSelectionChange: (selection: SelectionDto | null) => void;
+  readonly analyzedSelectionId: string | null;
   readonly lastGood: AnalysisSummaryDto | null;
-  readonly onLastGoodChange: (summary: AnalysisSummaryDto | null) => void;
+  readonly onLastGoodChange: (summary: AnalysisSummaryDto, selectionId: string) => void;
 }) {
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -103,7 +105,7 @@ export function Analyze({
     setAnalyzing(false);
 
     if (outcome.ok) {
-      onLastGoodChange(outcome.value);
+      onLastGoodChange(outcome.value, selection.selectionId);
       setError(null);
       return;
     }
@@ -111,6 +113,15 @@ export function Analyze({
   }, [onLastGoodChange, selection]);
 
   const summary = lastGood;
+
+  /**
+   * The report on screen was produced by a different selection than the one now in the row.
+   *
+   * Identity is the shell's selection handle and never the file name: two artifacts chosen in one
+   * session can both be called `firmware.elf`, which is precisely the case that has to be caught.
+   * Attaching or removing a MAP answers with the same handle, so it cannot move this flag.
+   */
+  const pendingSelection = selection !== null && selection.selectionId !== analyzedSelectionId;
 
   return (
     <main className={styles['page']}>
@@ -217,8 +228,9 @@ export function Analyze({
       {summary === null ? null : (
         <Report
           summary={summary}
-          stale={error !== null}
+          stale={error !== null || pendingSelection}
           candidateName={selection?.fileName ?? null}
+          pending={pendingSelection}
           unit={unit}
         />
       )}
@@ -235,22 +247,40 @@ export function Analyze({
 /**
  * The report, and the honesty flag that comes with it.
  *
- * `stale` is set when a later analysis failed: the numbers below are the last ones FirmwareSight
- * could prove, not a result for the file now sitting in the selector. Naming the candidate it does
- * not describe is what keeps a preserved result from being read as a fresh verdict.
+ * `stale` is set when a later analysis failed **or** when the selection has moved on without one:
+ * either way the numbers below are the last ones FirmwareSight could prove, not a result for the
+ * file now sitting in the row. Naming the candidate it does not describe is what keeps a preserved
+ * result from being read as a fresh verdict.
  */
 function Report({
   summary,
   stale,
+  pending,
   candidateName,
   unit,
 }: {
   readonly summary: AnalysisSummaryDto;
   readonly stale: boolean;
+  readonly pending: boolean;
   readonly candidateName: string | null;
   readonly unit: SizeUnit;
 }) {
   const { artifact, memory, capabilities, evidenceSummary } = summary;
+
+  // The second half of the note. Two artifacts can share one leaf name, which is the case this
+  // screen exists for, so naming the candidate has to be skipped when the names are equal: it
+  // would otherwise read "not an analysis of firmware.elf" under "Previous analysis of
+  // firmware.elf" and say nothing.
+  const sameName = candidateName === null || candidateName === artifact.fileName;
+  const attribution = pending
+    ? candidateName === null
+      ? ' The selection now in this row has not been analyzed yet.'
+      : sameName
+        ? ' The selection now in this row is a different file with the same name, and it has not been analyzed yet.'
+        : ` It is not an analysis of ${candidateName}: that selection has not been analyzed yet.`
+    : sameName
+      ? ' The failed attempt above produced no result, so nothing here was replaced.'
+      : ` It is not an analysis of ${candidateName}.`;
 
   return (
     <section
@@ -260,9 +290,7 @@ function Report({
       {stale ? (
         <p className={styles['stale']} role="note">
           Previous analysis of {artifact.fileName}.
-          {candidateName === null || candidateName === artifact.fileName
-            ? ' The failed attempt above produced no result, so nothing here was replaced.'
-            : ` It is not an analysis of ${candidateName}.`}
+          {attribution}
         </p>
       ) : null}
 

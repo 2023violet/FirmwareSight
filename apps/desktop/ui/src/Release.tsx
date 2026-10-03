@@ -1033,6 +1033,17 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
 
   const ready = run.dispositionEffectiveSeverity === 'PASS';
 
+  /**
+   * A destination the engine has already told us is occupied by something it did not write.
+   *
+   * `recognizableBundle` comes from the same `is_recognizable_bundle` the write path consults before
+   * it replaces anything, so this page cannot disagree with the engine about what counts as a
+   * bundle. That makes the folder unreplaceable by rule, which means asking the release owner to
+   * authorize replacing it would be a question with no possible answer.
+   */
+  const foreignOccupied =
+    destination !== null && destination.exists && !destination.recognizableBundle;
+
   // §28: a new run invalidates whatever was prepared against the old one.
   useEffect(() => {
     setPreview(null);
@@ -1109,10 +1120,16 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
         return;
       }
       setError(result.envelope);
+      // A refusal retires the question the card was asking. Leaving it up would keep asserting a
+      // fact the engine just denied, which is what E2E-F002 recorded after `ERR-BUNDLE-6107`.
+      setConfirm(null);
       if (result.envelope.code === 'ERR-BUNDLE-6106') {
-        // §30: the first attempt against an occupied destination asks, and only asks. Nothing is replaced
-        // until the release owner presses Replace.
-        setConfirm(destination.bundleFolderName);
+        // §30: the first attempt against an occupied destination asks, and only asks. Nothing is
+        // replaced until the release owner presses Replace — and only a folder this engine wrote is
+        // ever offered that decision, because the engine refuses to replace any other kind.
+        if (destination.recognizableBundle) {
+          setConfirm(destination.bundleFolderName);
+        }
         return;
       }
       if (STALE_PLAN_CODES.includes(result.envelope.code)) {
@@ -1163,12 +1180,19 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
         <button
           type="button"
           className={styles['control']}
-          disabled={preview === null || destination === null || busy}
+          disabled={preview === null || destination === null || busy || foreignOccupied}
           onClick={() => void exportBundle(false)}
         >
           {busy && outcome === null ? 'Writing…' : 'Export bundle'}
         </button>
       </div>
+      {foreignOccupied && destination !== null ? (
+        <p className={styles['stale']} role="status">
+          <span className={styles['mono']}>{destination.bundleFolderName}</span> is already there, and
+          it is not a bundle this engine wrote, so nothing will be replaced and Export is disabled.
+          Choose another destination folder to export.
+        </p>
+      ) : null}
       {!ready && !busy && preview === null ? (
         <p className={styles['hint']}>
           Prepare is disabled because of the disposition above, not because of anything this page decided.
