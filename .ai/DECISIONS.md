@@ -1291,3 +1291,71 @@ unchanged: G2 `PASS`, **MVP CANDIDATE**, baseline `0.6.0`.
   analytics SDK, generic shell or filesystem permission; Diagnostics allowlist-only with positive-control
   leak tests; and the security sentence stays the permitted one — *dependency policy passes with documented
   accepted risks*, never "security clean".
+
+# P5 Commit C — onboarding, Help and local History — 2026-10-03
+
+Prompt §§13–18. One new product surface (History), one new auxiliary surface (Help), no new verb. The
+decisions below are the ones a later reader cannot recover from `git log`, each with the alternative that
+was rejected and what settled it.
+
+- **History was built on reads, and §18's order was obeyed rather than assumed.** The prompt says try the
+  existing persisted facts first and forbids a migration that merely makes History easier, so the work
+  started by enumerating what the schema already stores: everything a build, Gate-run or release row needs
+  is there. What did not exist was a *read path*, and that is what `crates/firmwaresight-storage/src/history.rs`
+  adds — three bounded queries over the existing tables, with the build table delegating to
+  `list_compare_candidates` instead of re-writing its SELECT. Migrations stay at five. The audit's own
+  forecast needed correcting in passing: section C expected "one index if the ordering must be cheap", and
+  `0005_unknown_reasons.sql:33` had already added `idx_builds_created`; measuring 100 builds / 100 runs / 50
+  releases at 467.9µs / 541.5µs / 248.8µs on the release profile said no further index has a reason.
+- **A page may not write its own title bar.** The frozen window title (L21) had two obvious fixes and both
+  were rejected: `getCurrentWindow().setTitle()` from the WebView needs
+  `core:window:allow-set-title`, which is a capability change `AGENTS.md` §9 reserves for a human *and* a
+  channel from a file name into a window property; and `tauri.conf.json` can only hold one static string for
+  a window that now has five pages. So `App.tsx` reports which page moved and Rust composes
+  `FirmwareSight - <Page>` from the closed five-variant `MainWindowPage` enum — the same reason `FixtureKey`
+  is an enum, it is the boundary. `the_title_fix_took_no_new_capability` reads `capabilities/main.json` and
+  asserts the permission list is still exactly `["core:default"]`, so the claim survives someone editing the
+  capability file later.
+- **A filter box is not allowed to become a directory oracle.** Matching the stored `artifacts.path` was the
+  natural thing for a search box to do, and §16 forbids the consequence: a field that answers "which folders
+  on this machine hold firmware" is a question History may not ask, and it would be asked in the clear by
+  anything that can type into the box. Filters therefore search identity columns only — build id, snapshot
+  id, SHA-256, architecture, run/release id, version, policy and manifest digests — each a closed list in
+  `history.rs`, with the text bound as a value through the existing `like_pattern` escape. The proof is the
+  negative one: `a_filter_searches_identity_columns_and_never_a_directory` seeds real builds into a real
+  temporary directory and asserts that filtering by that directory's own name returns zero rows.
+- **The front end holds no copy of any fact Help displays.** D1 made the workspace version the single source
+  of truth, so an About page with `0.6.0` written into JSX would be the first drift candidate in the tree.
+  `get_app_identity` answers from `package_info()` and `config()`, and until it answers all seven rows read
+  `not reported` — chosen over `-` because a dash reads as "this application has no version", which is a
+  different and untrue claim. The store is named by **file** (`firmwaresight-p0.sqlite`) and not by folder:
+  the path is a Diagnostics question with its own allowlist and positive-control tests, and Diagnostics is
+  Commit D.
+- **Guidance is one component with two readers.** `GettingStarted.tsx` exports the seven answers once;
+  Analyze wraps them in a dismissible panel and Help renders the list. A second copy would have been the
+  predictable failure — §13 and §14 ask for the same content in the same words — so `help.test.tsx` reads
+  the `term` nodes off both surfaces and compares them to one array rather than trusting the shared import.
+  Dismissal state lives in `App.tsx`, above the page switch, because hiding is the reader's act and a trip
+  to History is not a reason to contradict them. No `<dialog>`, no first-run sequence, nothing on Analyze
+  waits for it: the panel sits *below* the controls that answer it.
+- **A pointer a stranger cannot follow is not printed as though it worked.** `bundle.resources` is `None`, so
+  the installed package ships no markdown: Support Matrix, Known Limitations and Diagnostics each carry the
+  label `not carried inside the installed package` on the line that names their repository path, and Help
+  has zero `<a>` elements because this build has no URL worth giving and no network to open one with. The
+  alternative — quietly bundling three documents under §14 — was rejected as a packaging change with no
+  owner decision behind it, and the alternative of naming the paths plainly was rejected as a pointer that
+  fails. The test counts them: four rows, three flagged.
+- **Four workflow pages, and Help kept out of that sequence.** §15's canonical rail is Analyze / Compare /
+  Release / History and "do not add more top-level verbs", so Help is listed under its own
+  `aria-label="Help and about"` navigation rather than appended to the rail, where its position would read
+  as a fifth stage of a workflow it does not participate in. Three rail-guard tests were widened together
+  (`intake`, `compare`, `release`) and `History` left the banned-word lists while `Settings`, `Pricing`,
+  `Cloud`, `SBOM` and a Bundle navigation verb stay excluded — `Bundle` is still a section of Release, and
+  `release.test.tsx` still asserts the rail holds no `/bundle/i` button.
+- **`History` is a word this round earned, and only this round's evidence says so.** The UI tests that had to
+  change did so because the claim they pinned became false, not because a test was in the way: a rail that
+  lists a real page must not be asserted to list three. Each such edit is listed in
+  `P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md` §5 with the mutation that proves the new assertion bites,
+  and seven of them are recorded there — filter offset, request guard, disposition fallback, full digest on
+  open, filter payload, a write control on a read-only page, and the Help version default.
+

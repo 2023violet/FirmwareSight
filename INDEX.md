@@ -42,10 +42,15 @@ artifact sets back found a third defect in the index itself: a directory `.app` 
 makes `sha256sum -c` answer `FAILED open or read` on a correct build, so a bundle is now indexed file by file
 with the aggregate tree digest kept in metadata and each payload's digest recorded beside its container — and
 head `53578e9` went **10 of 10** on Run `37143046338`, whose downloaded darwin set verifies on all five lines
-with exit 0 (**775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI
-jobs**). The packaged installer has now been run on this host — §38 A–L and §39 measured with the owner's
-store parked, hashed and restored byte-identically, in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`, whose
-§38 item C (first-run onboarding) and the §64 journey stay open. **Still no P5 verdict exists** — the product is
+with exit 0. The packaged installer has then been run on this host — §38 A–L and §39 measured with the owner's
+store parked, hashed and restored byte-identically, in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md` — and
+**Commit C has since landed the guidance and the history that round found missing**: §13 first-run onboarding,
+§14 Help/About with the window title fixed in Rust over a closed page enum (closing L21, which that install
+round reproduced on the packaged build), and §15–§18 local History over three new bounded storage **read**
+APIs with **no new migration** — `P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md` plus its design checklist.
+The tree is now **812 Rust / 200 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**; what stays
+open is the *acceptance* of those screens in an installed binary (§38 C, §64) and this head's own CI run.
+**Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source
 licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task:

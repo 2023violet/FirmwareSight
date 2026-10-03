@@ -13,6 +13,7 @@ import { useCallback, useState, type ReactNode } from 'react';
 
 import styles from './Analyze.module.css';
 import { Details } from './Details';
+import { GettingStartedPanel } from './GettingStarted';
 import { ErrorPanel } from './components/ErrorPanel';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
@@ -32,6 +33,8 @@ export function Analyze({
   onSelectionChange,
   analyzedSelectionId,
   lastGood,
+  gettingStartedHidden,
+  onHideGettingStarted,
   onLastGoodChange,
 }: {
   readonly unit: SizeUnit;
@@ -40,6 +43,9 @@ export function Analyze({
   readonly onSelectionChange: (selection: SelectionDto | null) => void;
   readonly analyzedSelectionId: string | null;
   readonly lastGood: AnalysisSummaryDto | null;
+  /** Whether the reader has hidden the first-use panel for this session (prompt §13). */
+  readonly gettingStartedHidden: boolean;
+  readonly onHideGettingStarted: () => void;
   readonly onLastGoodChange: (summary: AnalysisSummaryDto, selectionId: string) => void;
 }) {
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
@@ -220,9 +226,15 @@ export function Analyze({
         <ErrorPanel envelope={error} label="Analysis error" heading="Analysis failed" />
       )}
       {summary === null && !analyzing && error === null ? (
-        <section className={styles['status']} aria-label="No analysis yet">
-          <p>Nothing has been analyzed in this session yet. Choose an artifact and run Analyze.</p>
-        </section>
+        <>
+          <section className={styles['status']} aria-label="No analysis yet">
+            <p>Nothing has been analyzed in this session yet. Choose an artifact and run Analyze.</p>
+          </section>
+          {/* §13's first-use guidance, above the empty state it explains and below the controls that
+              answer it. It is a panel, not a gate: every control on this page is reachable with it
+              showing, and hiding it is one click that hides nothing else. */}
+          {gettingStartedHidden ? null : <GettingStartedPanel onDismiss={onHideGettingStarted} />}
+        </>
       ) : null}
 
       {summary === null ? null : (

@@ -587,6 +587,23 @@ p5_execution:
     signed: false
     released: false
     updater: false
+  # What Commit C opened: the first-run guidance (section 13), Help/About (section 14) and the local
+  # History page (sections 15-18). The arguments, the measurements and the seven mutation proofs are in
+  # P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md and the design review in
+  # P5_VALIDATION/P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md; this block is the index, not the argument.
+  onboarding_history:
+    schema_version_stays: 5 # section 18 required History to be attempted from existing persisted facts first, and it was: three new read APIs, zero new migration. 0005's idx_builds_created already covers the recency sort
+    history_reads: [list_history_builds, list_history_gate_runs, list_history_releases] # bounded in firmwaresight-storage; default 25, ceiling 100, scope fixed by Rust to the local project
+    history_filter_columns: identity_only # build id, snapshot id, sha256, architecture, run/release id, version, policy and manifest digests. artifacts.path is deliberately not searchable: a filter that matched a stored directory would answer a question section 16 forbids
+    history_writes: none # the page issues three reads and offers no delete, edit, re-run or accept control; release_records and gate_runs additionally have immutability triggers
+    window_title_owner: rust # set_window_title(MainWindowPage) composes "FirmwareSight - <Page>" from a closed five-variant enum, closing L21
+    capability_change: none # capabilities/main.json still grants window `main` exactly ["core:default"]; allow-set-title was rejected as an AGENTS.md 9 decision and a file-name-to-window-property channel
+    help_identity_source: running_binary # package_info() and config(); the front end keeps no copy of the version, and every Help row reads "not reported" until the shell answers
+    help_external_links: 0 # bundle.resources is None, so three of Help's four document rows say "not carried inside the installed package" rather than pointing at a file a stranger cannot open
+    navigation: [Analyze, Compare, Release, History] # section 15's canonical four; Help is listed under its own "Help and about" navigation so it cannot read as a fifth stage
+    tests_moved: { rust: 775, ui: 160 } # before Commit C
+    tests_after: { rust: 812, ui: 200 } # one cargo test --workspace and one pnpm test; 19 storage + 11 desktop + 40 UI are new
+    accepted_in_installed_binary: false # the screens are gated locally; section 38 item C's walk through the package and the section 64 journey run after Commit D
   baseline_version_stays: 0.6.0
   no_tag_no_release_no_published_installer: true
   explicitly_not: [P5_PASS, beta, RC, GA, production_ready, signed, notarized, security_clean]

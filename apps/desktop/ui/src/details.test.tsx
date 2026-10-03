@@ -45,6 +45,11 @@ vi.mock('./ipc/bridge', () => ({
   querySections: vi.fn(),
   querySymbols: vi.fn(),
   queryEvidence: vi.fn(),
+  setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
+  getAppIdentity: vi.fn(() => Promise.resolve({ ok: true, value: {} })),
+  listHistoryBuilds: vi.fn(),
+  listHistoryGateRuns: vi.fn(),
+  listHistoryReleases: vi.fn(),
 }));
 
 const selectMock = vi.mocked(selectArtifact);

@@ -1,0 +1,103 @@
+/*
+ * The local Help and About surface.
+ *
+ * A reading page, so the same page rhythm as the other three: one column of text with a measure,
+ * hairline separators between sections, mono for every identifier, digest, version and file name.
+ * No accent fill anywhere - the accent is reserved for the actions of the workflow pages (DESIGN.md 5).
+ */
+
+.page {
+  max-width: var(--fs-layout-design-target-width);
+  margin: 0 auto;
+  padding: var(--fs-space-8) var(--fs-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.subhead {
+  color: var(--fs-color-text-secondary);
+  max-width: 80ch;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding-top: var(--fs-space-4);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.section h2 {
+  margin: 0;
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+}
+
+.section p {
+  margin: 0;
+  max-width: 80ch;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--fs-space-3) var(--fs-space-6);
+  margin: 0;
+}
+
+.facts dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-font-size-metadata);
+}
+
+.note {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.documents {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--fs-space-2);
+}
+
+.documents li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-3);
+  padding-bottom: var(--fs-space-2);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.documentName {
+  font-weight: bold;
+  min-width: var(--fs-layout-evidence-inspector-min);
+}
+
+/* A disposition, not a status: the neutral grey and the factual sentence say the document is not in
+   this package, without borrowing a state badge that would read as a Gate result (DESIGN.md 5). */
+.documentFlag {
+  color: var(--fs-color-status-unknown);
+  font-size: var(--fs-font-size-metadata);
+}

@@ -24,7 +24,9 @@ use rusqlite::{OptionalExtension, params};
 
 use crate::Database;
 use crate::error::StorageError;
-use crate::query::{Page, bytes_or_unknown, clamp_page_with, known_or_unknown, page};
+use crate::query::{
+    Page, bytes_or_unknown, clamp_page_with, known_or_unknown, like_pattern, page, search_clause,
+};
 use firmwaresight_core::domain::diff::{
     BudgetState, DiffArtifact, DiffBudget, DiffMemory, DiffSection, DiffSnapshotInput, DiffSymbol,
     SideEvidence, display_file_name,
@@ -45,6 +47,10 @@ pub struct CandidateQuery {
     pub project_ids: Vec<String>,
     pub offset: i64,
     pub limit: i64,
+    /// Text to narrow the read to, over the identity columns this crate stores. LIKE syntax is
+    /// escaped, so `%` and `_` typed by a person match themselves. A stored path is deliberately
+    /// not searchable: see `history`.
+    pub filter: Option<String>,
 }
 
 impl CandidateQuery {
@@ -54,8 +60,28 @@ impl CandidateQuery {
             project_ids: vec![project_id.into()],
             offset: 0,
             limit: DEFAULT_CANDIDATE_LIMIT,
+            filter: None,
         }
     }
+}
+
+/// The identity columns a candidate filter may search.
+const CANDIDATE_SEARCHABLE: &[&str] = &["b.id", "b.snapshot_id", "a.sha256", "a.architecture"];
+
+/// `?, ?, ...` for one `IN (...)` list, refusing a list SQLite cannot bind rather than truncating it.
+///
+/// # Errors
+///
+/// [`StorageError::Invariant`] when `count` exceeds [`SQLITE_MAX_VARIABLES`].
+pub(crate) fn in_placeholders(count: usize) -> Result<String, StorageError> {
+    if count > SQLITE_MAX_VARIABLES {
+        return Err(StorageError::Invariant {
+            detail: format!(
+                "a bounded read may name at most {SQLITE_MAX_VARIABLES} values at once, not {count}"
+            ),
+        });
+    }
+    Ok(vec!["?"; count].join(","))
 }
 
 /// A persisted budget: its recorded state and, when one was recorded, its bytes.
@@ -137,28 +163,16 @@ impl Database {
         if query.project_ids.is_empty() {
             return Ok(page(Vec::new(), 0, offset, limit));
         }
-        if query.project_ids.len() > SQLITE_MAX_VARIABLES {
-            return Err(StorageError::Invariant {
-                detail: format!(
-                    "a candidate query may name at most {SQLITE_MAX_VARIABLES} projects at once, \
-                     not {}",
-                    query.project_ids.len()
-                ),
-            });
-        }
+        let placeholders = in_placeholders(query.project_ids.len())?;
+        let pattern = like_pattern(query.filter.as_deref());
 
-        let placeholders = query
-            .project_ids
-            .iter()
-            .map(|_| "?")
-            .collect::<Vec<_>>()
-            .join(",");
-        let named = query
+        let mut scope: Vec<&dyn rusqlite::types::ToSql> = query
             .project_ids
             .iter()
             .map(|id| id as &dyn rusqlite::types::ToSql)
-            .collect::<Vec<_>>();
-        let scoped = format!("b.state = 'COMPLETE' AND b.project_id IN ({placeholders})");
+            .collect();
+        let filter = search_clause(CANDIDATE_SEARCHABLE, pattern.as_ref(), &mut scope);
+        let scoped = format!("b.state = 'COMPLETE' AND b.project_id IN ({placeholders}){filter}");
 
         let total = self
             .connection()
@@ -169,12 +183,12 @@ impl Database {
                        JOIN memory_footprints m ON m.build_id = b.id
                       WHERE {scoped}"
                 ),
-                rusqlite::params_from_iter(named.iter()),
+                rusqlite::params_from_iter(scope.iter()),
                 |row| row.get::<_, i64>(0),
             )
             .map_err(read_err)?;
 
-        let mut bound: Vec<&dyn rusqlite::types::ToSql> = named;
+        let mut bound = scope;
         bound.push(&limit);
         bound.push(&offset);
 
@@ -189,9 +203,7 @@ impl Database {
                    JOIN memory_footprints m ON m.build_id = b.id
                   WHERE {scoped}
                   ORDER BY b.created_at DESC, b.snapshot_id ASC
-                  LIMIT ?{} OFFSET ?{}",
-                query.project_ids.len() + 1,
-                query.project_ids.len() + 2,
+                  LIMIT ? OFFSET ?"
             ))
             .map_err(read_err)?;
 

@@ -68,6 +68,11 @@ vi.mock('./ipc/bridge', () => ({
   querySymbolChanges: vi.fn(),
   exportCompareJson: vi.fn(),
   exportCompareHtml: vi.fn(),
+  setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
+  getAppIdentity: vi.fn(() => Promise.resolve({ ok: true, value: {} })),
+  listHistoryBuilds: vi.fn(),
+  listHistoryGateRuns: vi.fn(),
+  listHistoryReleases: vi.fn(),
 }));
 
 const selectMock = vi.mocked(selectArtifact);
@@ -537,12 +542,13 @@ describe('the rail and the pages it lists', () => {
     render(<App />);
 
     const rail = await screen.findByRole('navigation', { name: 'Pages' });
-    // P3 added a third real page, so this list is the build's own inventory: an entry appears when the
-    // stage exists and nowhere else does its word appear (prompt §43).
+    // P3 added a third real page and P5 a fourth, so this list is the build's own inventory: an entry
+    // appears when the stage exists and nowhere else does its word appear (prompt §43).
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
       'Analyze',
       'Compare',
       'Release',
+      'History',
     ]);
     expect(screen.getByRole('button', { name: 'Analyze page' }).getAttribute('aria-current')).toBe(
       'page',

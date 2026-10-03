@@ -86,6 +86,11 @@ vi.mock('./ipc/bridge', () => ({
   prepareReleaseBundle: vi.fn(),
   chooseBundleDestination: vi.fn(),
   exportReleaseBundle: vi.fn(),
+  setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
+  getAppIdentity: vi.fn(() => Promise.resolve({ ok: true, value: {} })),
+  listHistoryBuilds: vi.fn(),
+  listHistoryGateRuns: vi.fn(),
+  listHistoryReleases: vi.fn(),
 }));
 
 const candidatesMock = vi.mocked(listCompareCandidates);
@@ -594,19 +599,21 @@ beforeEach(() => {
 });
 
 describe('Release navigation', () => {
-  it('lists the three stages this build has and no others', async () => {
+  it('lists the four stages this build has and no others', async () => {
     await openRelease();
     const rail = screen.getByRole('navigation', { name: 'Pages' });
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
       'Analyze',
       'Compare',
       'Release',
+      'History',
     ]);
     const words = document.body.textContent ?? '';
     // P4 makes `Bundle` a word this build has earned, so it is no longer banned here: §48 attaches the
     // bundle *under* Release, and what §58 forbids is a fifth navigation verb, which the rail assertion
-    // above is what pins. The stages still not built get none of their words.
-    for (const stage of ['History', 'Settings', 'Pricing', 'Cloud']) {
+    // above is what pins. P5 earns `History`, because the rows it lists were already being stored. What
+    // is still not built gets none of its words.
+    for (const stage of ['Settings', 'Pricing', 'Cloud']) {
       expect(words).not.toMatch(new RegExp(`\\b${stage}\\b`));
     }
   });
@@ -1121,13 +1128,14 @@ describe('Release bundle', () => {
   it('attaches the bundle under Release and adds no navigation verb', async () => {
     await prepared();
     const heading = screen.getByRole('heading', { level: 2, name: '6 · Release Bundle' });
-    // §58: the rail is still the three stages. A bundle is a section of Release, not a fourth doorway,
-    // so the only new verb this build has is the one inside this page.
+    // §58: the rail is still the workflow stages. A bundle is a section of Release, not a fifth
+    // doorway, so the only new verb this page has is the one inside it.
     const rail = screen.getByRole('navigation', { name: 'Pages' });
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
       'Analyze',
       'Compare',
       'Release',
+      'History',
     ]);
     expect(within(rail).queryByRole('button', { name: /bundle/i })).toBeNull();
     expect(heading.closest('nav')).toBeNull();

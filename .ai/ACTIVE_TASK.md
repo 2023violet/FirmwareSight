@@ -54,7 +54,8 @@ zero Clang-produced evidence despite the cohort claim.
 | `1055242` | the package group finds `cargo-tauri` through `cargo tauri`, a `SKIP` can no longer read as a pass, and the step runs from `apps/desktop` | `37138881977` | success, **10 of 10** — and the first run to attach a built package on all three platforms |
 | `53578e9` | a `.app` indexed file by file, so the index §41 asks for is readable by `sha256sum -c`, plus each payload's own digest in the metadata | `37143046338` | success, **10 of 10** — and its darwin set, downloaded and checked, closed the index row it was fixing |
 | the commit that lands this row | the read-back written into `P5_PACKAGING_REPORT.md` §5d/§5e and §9, `P5_CI_AUTHORITY.md`, the audit, and `04_TECH/17`'s stale sentence about the CLI companion corrected — the CI sets do archive it, and all three were listed | `37145302229` | success, **10 of 10** |
-| the commit that lands this row too | `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`: §38 A–L and §39 measured on this host with the owner's store parked, hashed and restored | follows this commit | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
+| the commit that lands this row too | `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`: §38 A–L and §39 measured on this host with the owner's store parked, hashed and restored | `37147434366`, `37147577288` | success, **10 of 10** each — and §38 C stayed unimplemented, because onboarding did not exist yet |
+| the commit that lands this row as its code | §13 first-run onboarding + §14 Help/About (with L21's window title fixed in Rust over a closed page enum) + §15–§18 local History over three new bounded storage **read** APIs and **no new migration**. 19 storage + 11 desktop + 40 UI tests, seven mutation proofs, `P5_ONBOARDING_HISTORY_REPORT.md` and its design checklist | follows this commit | see `P5_VALIDATION/P5_CI_AUTHORITY.md`; locally **16 of 16** and **812 Rust / 200 UI** |
 
 The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
 lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
@@ -87,8 +88,10 @@ the darwin index gave the `.app` one line naming a directory, so `sha256sum -c` 
 `37143046338` at head `53578e9`, **10 of 10**, five darwin index lines all `OK` with exit 0, and one flipped
 byte in a copied `Contents/Info.plist` making the index exit 1 and name the file. Built is now installed:
 §38 A–L and §39 ran on this host against the packaged installer, with the owner's store parked, hashed and
-restored byte-identically, and are transcribed in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`. What is
-still not built is §38 C — first-run onboarding — and with it the rest of §64's journey.
+restored byte-identically, and are transcribed in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`. §38 C —
+first-run onboarding — has since been **built** (Commit C, with L21's title fix that same round found on the
+packaged build), but not yet **operated in an installed binary**, so §64's full journey stays open until that
+walk runs after Commit D.
 
 ## What the owner decided at the checkpoint
 
@@ -157,10 +160,11 @@ Release, installer or `v0.7.0` was created.
 
 Those two rounds did not move the pointer: `active_task` stayed `NONE`, G2 stayed `PASS`, and the product
 stayed an MVP CANDIDATE. What moved was the tree, so the numbers in the section above are the history of a
-different commit rather than the present: the remediation round left **770 Rust / 159 UI**, and P5's own
-commits have moved it again to **775 Rust / 160 UI / `check.py` 16 steps** (migration `0005`'s five storage
-tests, the Details reason test, and the `version identity` drift step). The evidence directory that round
-added is `POST_G2_E2E_REMEDIATION/`.
+different commit rather than the present: the remediation round left **770 Rust / 159 UI**, P5's early
+commits moved it to **775 Rust / 160 UI / `check.py` 16 steps** (migration `0005`'s five storage tests, the
+Details reason test, and the `version identity` drift step), and **Commit C moved it again to 812 Rust /
+200 UI in 8 files** on those same 16 steps — 19 storage History reads, 11 desktop boundary tests, 40 UI
+tests over the two new screens. The evidence directory that round added is `POST_G2_E2E_REMEDIATION/`.
 
 On 2026-10-02 a real-desktop acceptance round drove the shipping binary through 283 black-box cases and
 closed `PASS_WITH_FINDINGS` — three product defects, no S0, no S1 — and a follow-on round fixed exactly

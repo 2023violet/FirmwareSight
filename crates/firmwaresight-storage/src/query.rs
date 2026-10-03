@@ -405,7 +405,7 @@ pub(crate) fn clamp_page_with(offset: i64, limit: i64, default: i64, max: i64) -
 
 /// `%` and `_` are LIKE syntax, not text. A filter is what the user typed, so both are escaped and
 /// an empty filter is treated as no filter.
-fn like_pattern(filter: Option<&str>) -> Option<String> {
+pub(crate) fn like_pattern(filter: Option<&str>) -> Option<String> {
     let text = filter?;
     if text.is_empty() {
         return None;
@@ -418,6 +418,32 @@ fn like_pattern(filter: Option<&str>) -> Option<String> {
         escaped.push(character);
     }
     Some(escaped)
+}
+
+/// The `AND (col LIKE '%' || ? || '%' ESCAPE '\')` tail a filtered read needs, with one bound
+/// pattern per searchable column, in the order the placeholders appear.
+///
+/// The wildcards live in the SQL and the typed text travels as a bound value, the same split
+/// `query_sections` uses: the pattern is what the person typed, never a fragment of the statement.
+/// An unfiltered read gets an empty string, so a caller can append it unconditionally. Column names
+/// come from closed `const` lists in this crate, never from a caller.
+pub(crate) fn search_clause<'a>(
+    columns: &[&str],
+    pattern: Option<&'a String>,
+    bound: &mut Vec<&'a dyn rusqlite::types::ToSql>,
+) -> String {
+    let Some(text) = pattern else {
+        return String::new();
+    };
+    let clauses = columns
+        .iter()
+        .map(|column| {
+            bound.push(text);
+            format!("{column} LIKE '%' || ? || '%' ESCAPE '\\'")
+        })
+        .collect::<Vec<_>>()
+        .join(" OR ");
+    format!(" AND ({clauses})")
 }
 
 pub(crate) fn page<T>(rows: Vec<T>, total: i64, offset: i64, limit: i64) -> Page<T> {

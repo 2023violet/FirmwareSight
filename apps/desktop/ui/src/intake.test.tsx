@@ -63,6 +63,28 @@ vi.mock('./ipc/bridge', () => ({
   exportCompareHtml: vi.fn(() =>
     Promise.resolve({ ok: true, value: { status: 'cancelled', fileName: null, format: 'html' } }),
   ),
+  // The shell names the window, so mounting <App/> at all calls this one. An outcome-shaped promise
+  // keeps the title fix out of what this file claims without pretending the page asked for nothing.
+  setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
+  getAppIdentity: vi.fn(() => Promise.resolve({ ok: true, value: {} })),
+  listHistoryBuilds: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 25, nextOffset: null },
+    }),
+  ),
+  listHistoryGateRuns: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 25, nextOffset: null },
+    }),
+  ),
+  listHistoryReleases: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { rows: [], total: 0, offset: 0, limit: 25, nextOffset: null },
+    }),
+  ),
 }));
 
 const selectMock = vi.mocked(selectArtifact);
@@ -560,21 +582,27 @@ describe('P1-A0 intake screen', () => {
     render(<App />);
     await screen.findByRole('button', { name: 'Choose firmware artifact' });
 
-    // P1 could claim there was nothing to navigate to. P2 made Compare a real page and P3 made Release
-    // one, so the claim is now exactly as wide as the build: the rail lists the three stages that
-    // exist, and a stage that does not exist gets no entry, no link and none of its words.
+    // P1 could claim there was nothing to navigate to. P2 made Compare a real page, P3 made Release
+    // one, and P5 makes History one because the rows it shows were already being stored. The claim is
+    // still exactly as wide as the build: the rail lists the stages that exist, and a stage that does
+    // not exist gets no entry, no link and none of its words.
     const rail = await screen.findByRole('navigation', { name: 'Pages' });
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
       'Analyze',
       'Compare',
       'Release',
+      'History',
     ]);
+    // Help is a description of the product and not a stage of the workflow, so it is listed under its
+    // own heading instead of after Release, where it would read as a fifth step (prompt §14).
+    const about = screen.getByRole('navigation', { name: 'Help and about' });
+    expect(within(about).getAllByRole('button').map((item) => item.textContent)).toEqual(['Help']);
     expect(document.querySelectorAll('a')).toHaveLength(0);
 
     fireEvent.click(within(rail).getByRole('button', { name: 'Compare page' }));
     await screen.findByRole('heading', { level: 1, name: 'Compare' });
     const body = document.body.textContent ?? '';
-    for (const stage of ['Bundle', 'History', 'Settings', 'SBOM', 'Pricing', 'Cloud']) {
+    for (const stage of ['Bundle', 'Settings', 'SBOM', 'Pricing', 'Cloud']) {
       expect(body).not.toMatch(new RegExp(`\\b${stage}\\b`));
     }
     // `Gate` is Release's word and appears on no other page: a rail entry names a stage, it does not

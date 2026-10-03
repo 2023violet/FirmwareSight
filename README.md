@@ -95,6 +95,16 @@ P5 real Windows install acceptance: IN_PROGRESS (2026-10-03). The packaged insta
         the data-retention check, with the owner's store parked, hashed and restored byte-identically; §38 C
         (first-run onboarding) and the §64 journey are not built yet, so this line is not a verdict.
         Evidence P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md
+P5 onboarding, Help and local History: BUILT, NOT YET ACCEPTED IN THE PACKAGE (2026-10-03). §13 guidance is
+        one component read by Analyze's empty state and by Help; §14 Help reports the running binary's own
+        identity and ships zero links; §15–§18 History is a fourth rail page over three new bounded storage
+        read APIs with no new migration, and the L21 window title the install round reproduced is fixed in
+        Rust over a closed page enum with no capability change. check.py 16/16, 812 Rust / 200 UI, seven
+        mutation proofs, page reads 467.9µs / 541.5µs / 248.8µs at 100 builds / 100 runs / 50 releases.
+        That §38 C line above is now about the code, not the package: walking the new screens in an installed
+        binary is still open.
+        Evidence P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md and
+        P5_VALIDATION/P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -337,8 +347,23 @@ All three repairs, the artifact sets with their checksums, and the limits of wha
 and §39 with the owner's live store parked, hashed and restored to three identical digests — and
 `P5_INSTALL_RECOVERY_REPORT.md` records what that found: the window title still reads
 `FirmwareSight - Analyze` on the Compare page, a reopened app shows an empty session while its store keeps
-the whole build, and the uninstaller neither asks about user data nor deletes any. §38 C (first-run
-onboarding) is not built, so the §64 journey and this stage's verdict stay open.
+the whole build, and the uninstaller neither asks about user data nor deletes any.
+
+**Commit C answered the first two of those.** §13 first-run guidance is one component read by two surfaces
+(`GettingStarted.tsx`: the seven answers, shown as a dismissible panel in Analyze's empty state and repeated
+on Help), §14 Help/About reports the identity of the running binary rather than a version the front end kept,
+and the frozen title — L21 — is fixed on the Rust side over a closed five-variant page enum, so no new window
+permission was needed and `capabilities/main.json` still grants the WebView exactly `core:default`. §15–§18
+local History is now a fourth rail page over three new bounded storage **read** APIs with **no new
+migration**: `crates/firmwaresight-storage/src/history.rs` pages builds, Gate runs and release records with
+Rust owning the ceiling, the sort and which columns a filter may search — identity columns only, never the
+stored intake directory, because a search box that answered "which folders hold firmware" would be a
+question §16 forbids. Measured locally: `check.py` **16 of 16**, **812 Rust / 200 UI tests**, seven mutation
+proofs, and page reads of 467.9µs / 541.5µs / 248.8µs over 100 builds / 100 runs / 50 releases
+(`P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md`, design review in
+`P5_VALIDATION/P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md`). What that leaves open is the acceptance of these
+screens rather than their code: §38 C has never been walked in an installed binary, and this head has no CI
+run behind it yet, so the §64 journey and this stage's verdict stay open.
 
 **No P5 verdict
 exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt

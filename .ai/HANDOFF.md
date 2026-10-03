@@ -87,16 +87,26 @@ still was not the proof — the job verifies the bundle before it writes the ind
 set has to be downloaded. **The real Windows install has since run on this host** — §38 A–L and §39 with the
 owner's store parked, hashed and restored byte-identically, transcribed in
 `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md` — and it produced three things worth carrying: the window title
-still says `FirmwareSight - Analyze` while the page is Compare (L21, now observed on the packaged build); a
-reopened app shows "Nothing has been analyzed in this session yet" while its store keeps the whole build
-(1 build, 19 sections, 42 symbols, 10 evidence rows), which is the concrete case for History; and the
-uninstaller asks nothing about user data and deletes none, which is a documentation obligation for Commit F,
-not a bug to fix. Next is Commit C — §13 onboarding, §14 Help/About with the window-title fix, §15–§17 the
-local History page over new bounded storage **read** APIs — then Commit D's diagnostics and recovery, then
-Commit E's fixture cohort, then Commit F's documentation and closure. The full §64 journey (install →
-onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen → reinstall →
-uninstall → reinstall → documented data behaviour) runs once after C and D land, on a disposable firmware
-project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. **Do not start a
+still said `FirmwareSight - Analyze` while the page is Compare (L21, observed on the packaged build, and
+**closed by Commit C** below); a reopened app shows "Nothing has been analyzed in this session yet" while its
+store keeps the whole build (1 build, 19 sections, 42 symbols, 10 evidence rows), which was the concrete case
+for History; and the uninstaller asks nothing about user data and deletes none, which is a documentation
+obligation for Commit F, not a bug to fix.
+
+**Commit C has since landed** (§13 onboarding, §14 Help/About, §15–§18 local History):
+`P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md` and its design checklist are the record, and they answer the
+two findings above — History is a fourth rail page over three new bounded storage **read** APIs with **no new
+migration**, and the title is now Rust's, composed from a closed `MainWindowPage` enum, with
+`the_title_fix_took_no_new_capability` proving `capabilities/main.json` still holds exactly
+`["core:default"]`. Locally: `check.py` **16 of 16**, **812 Rust / 200 UI in 8 files**, seven mutation proofs.
+The remaining workstream order is unchanged: Commit D's diagnostics and recovery, Commit E's fixture cohort,
+Commit F's documentation and closure. **What Commit C does not close is the acceptance of Commit C**: the
+onboarding panel and the History page have never been operated in the installed binary, so the full §64
+journey (install → onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen →
+reinstall → uninstall → reinstall → documented data behaviour) still runs once after D lands, on a
+disposable firmware project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. And this
+head has no CI run behind it yet — `P5_VALIDATION/P5_CI_AUTHORITY.md` is where that gets written, and the
+repository's rule is 10 of 10 on the first attempt. **Do not start a
 workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and
 §5's list of forbidden verdicts still applies to every sentence you write.
 
@@ -112,8 +122,9 @@ got easier" is not a licence to widen scope: **nothing was authorized by that cl
 stood until P5 arrived with a prompt of its own, which is the only way a stage opens here. P4's own §78 said stop after
 P4, and its §5 said the round may not claim `G2 = PASS` — the only G2 statement it wrote is
 `READY_FOR_ENGINEERING_GATE_REVIEW`. The G2 audit's own round, under its own prompt, then closed
-`G2 = PASS` (above). Anything History-shaped, installer-shaped, signing-shaped, updater-shaped or
-cloud-shaped is still outside the MVP, and V1 / P5 stay unstarted until the architect opens one. The fourth is
+`G2 = PASS` (above). Installer-shaped and History-shaped have since become P5's own authorized scope (§8 and
+§§15–18 of its prompt), and Commit C has built the History page; signing-shaped, updater-shaped and anything
+cloud-shaped are still outside the MVP, and V1 stays unstarted until the architect opens it. The fourth is
 specific to this round's state: P3's commits were **local at closure and pushed after it**, so the pack's
 gate numbers stay locally measured and the remote is a separate, later fact — Run `36774472141` on
 `219178af`, 6 of 7 jobs green, the one red being `Dependency policy` over a crate that crates.io yanked
@@ -442,13 +453,14 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 - AGENTS.md §2: no silent baseline change — async-first Core, framework swaps, SQLx, HTTP client,
   wgpu, cloud/auth/telemetry, evidence classes, schema semantics, updater/signing model all need an
   ADR first.
-- No Compare workflow existed when that boundary was written; P2 has since shipped it, and **P3 is now
-  building the Gate workflow** — five states, unknown policy, review audit, `fwsight gate`, the third
-  desktop page. **Release Bundle still does not exist and is not started here**: no bundle directory, no
-  `release prepare`, no manifest generation, no bundle checksums, no History page. Still out of scope
-  entirely - installer, NSIS/MSI, AppImage/deb,
-  notarization, Authenticode, GitHub Release, tag, updater metadata: v0.6.0 is a baseline promotion, not
-  a stable release, and the repository has no tag convention and none was invented.
+- The workflow list above is the P3-era boundary, and four stages have moved it since: P2 shipped Compare,
+  P3 shipped the Gate, P4 shipped the **Release Bundle**, and P5's Commit C shipped **local History** plus
+  Help. Packaging is now enabled and an installer exists on this host and on three runners (§8, §41), which
+  P3 could only have called out of scope. What has *not* moved is the harder list, and it still binds:
+  signing and notarization stay `READY_NOT_EXECUTED`, the updater stays `UPDATE_READY_MANUAL` — no
+  updater, no endpoint, no certificate, no committed private key — and there is still no tag, no GitHub
+  Release, no published installer and no cloud, telemetry or account surface. v0.6.0 is a baseline
+  promotion, not a stable release, and this repository has no tag convention; none has been invented.
 - `V0_VALIDATION/**` is research evidence and stays where it is: not deleted by the reset, not edited to
   imply a session that did not happen, and not a gate any more. Its `0 / 8` is an honest zero.
 

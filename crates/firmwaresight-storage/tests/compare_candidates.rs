@@ -133,6 +133,7 @@ fn candidates(db: &Database, projects: &[&str]) -> Vec<CompareCandidate> {
         project_ids: projects.iter().map(|id| (*id).to_owned()).collect(),
         offset: 0,
         limit: DEFAULT_CANDIDATE_LIMIT,
+        filter: None,
     };
     db.list_compare_candidates(&query)
         .expect("candidate list")
@@ -338,6 +339,7 @@ fn the_candidate_page_is_bounded_at_one_hundred_rows() {
             project_ids: vec![LOCAL.to_owned()],
             offset: 0,
             limit: 100_000,
+            filter: None,
         })
         .expect("a request above the ceiling is clamped, not refused");
     assert_eq!(
@@ -350,6 +352,7 @@ fn the_candidate_page_is_bounded_at_one_hundred_rows() {
             project_ids: vec![LOCAL.to_owned()],
             offset: 0,
             limit: 0,
+            filter: None,
         })
         .expect("a limit that is not a page size is treated as not asked");
     assert_eq!(defaulted.limit, DEFAULT_CANDIDATE_LIMIT);

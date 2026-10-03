@@ -10,6 +10,7 @@ pub mod compare;
 pub mod db;
 pub mod error;
 pub mod gate;
+pub mod history;
 pub mod query;
 pub mod release;
 
@@ -27,6 +28,10 @@ pub use compare::{
 pub use gate::{
     AcceptReviewError, AcceptedReview, GateArtifactRow, GateEvidenceGaps, GateFootprintRow,
     GateRunDraft, GateRunWrite, GateSnapshotFacts, StoredGateFinding, StoredGateRun,
+};
+// History reads persisted facts only; it adds no table and decides no verdict.
+pub use history::{
+    DEFAULT_HISTORY_LIMIT, HistoryGateRun, HistoryQuery, HistoryReleaseRecord, MAX_HISTORY_LIMIT,
 };
 pub use query::{
     DEFAULT_QUERY_LIMIT, EvidenceQuery, EvidenceRow, EvidenceSort, MAX_QUERY_LIMIT, Page,

@@ -81,6 +81,10 @@ impl Session {
                 limit: request.limit.map_or(DEFAULT_CANDIDATE_LIMIT, |value| {
                     i64::try_from(value).unwrap_or(MAX_CANDIDATE_LIMIT)
                 }),
+                // Compare offers no text filter: it lists a project's builds to pick two of, and a
+                // person picking two builds reads them by eye. History's filter is a different
+                // surface and asks for one explicitly (`prompt §17`).
+                filter: None,
             })
             .map_err(|err| envelope_from_storage(&err, operation_id))?;
 
@@ -531,7 +535,11 @@ pub(crate) async fn export_compare_html(
 }
 
 /// The stored builds, as the selector shows them.
-fn candidate_row(row: CompareCandidate) -> CompareCandidateDto {
+/// Project one stored build onto the wire shape.
+///
+/// History lists the same stored builds, so it shares this projection rather than keeping a second
+/// copy of the field list that could drift from Compare's (`AGENTS.md` 3).
+pub(crate) fn candidate_row(row: CompareCandidate) -> CompareCandidateDto {
     CompareCandidateDto {
         build_id: row.build_id,
         snapshot_id: row.snapshot_id,
@@ -545,7 +553,7 @@ fn candidate_row(row: CompareCandidate) -> CompareCandidateDto {
     }
 }
 
-fn stored_budget(budget: StoredBudget) -> StoredBudgetDto {
+pub(crate) fn stored_budget(budget: StoredBudget) -> StoredBudgetDto {
     StoredBudgetDto {
         state: budget.state,
         bytes: budget.bytes,

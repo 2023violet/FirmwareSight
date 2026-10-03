@@ -1,0 +1,209 @@
+/*
+ * The History page: three stored-fact tables on one screen.
+ *
+ * Same language as the detail and comparison tables (AGENTS.md 11): hairlines rather than cards, the
+ * frozen compact row height, mono with tabular figures for ids, digests and times, and one accent
+ * that belongs to the primary action of the page - which History does not have, because a read-only
+ * viewer has no primary action. So nothing here is accent-filled.
+ */
+
+.page {
+  max-width: var(--fs-layout-design-target-width);
+  margin: 0 auto;
+  padding: var(--fs-space-8) var(--fs-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.subhead {
+  color: var(--fs-color-text-secondary);
+  max-width: 80ch;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding-top: var(--fs-space-4);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.table h2 {
+  margin: 0;
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+}
+
+/* A table that owns its own scroll axis, so a long digest column never pushes the page sideways. */
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+
+.caption {
+  padding: var(--fs-space-2) 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  text-align: left;
+}
+
+.grid th,
+.grid td {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  height: var(--fs-row-compact);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.grid th {
+  color: var(--fs-color-text-secondary);
+  font-weight: normal;
+  font-size: var(--fs-font-size-metadata);
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-font-size-metadata);
+}
+
+/* The opened row is a read of the same stored facts, so it is set on the subtle surface with no
+   shadow and no border of its own beyond the hairline that already separates rows. */
+.detail td {
+  background: var(--fs-color-bg-subtle);
+  white-space: normal;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--fs-space-2) var(--fs-space-6);
+  margin: var(--fs-space-2) 0;
+}
+
+.facts dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detailNote {
+  margin: var(--fs-space-2) 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  max-width: 80ch;
+}
+
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--fs-space-2);
+}
+
+.filterLabel {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.filterInput {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  min-width: 0;
+}
+
+.filterApply {
+  padding: var(--fs-space-1) var(--fs-space-3);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.filterApply:hover:not(:disabled) {
+  border-color: var(--fs-color-text-disabled);
+}
+
+.filterHint {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+/* An action on one row, in the same secondary-control shape the rest of the app uses. It opens a
+   read of facts already on this side of the boundary, so it is not a primary action. */
+.action {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.action:hover:not(:disabled) {
+  border-color: var(--fs-color-text-disabled);
+}
+
+.budget {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.counts {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+  flex-wrap: wrap;
+}
+
+.status {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.empty {
+  padding: var(--fs-space-3) var(--fs-space-4);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  background: var(--fs-color-bg-subtle);
+  color: var(--fs-color-text-secondary);
+}
+
+/* A column header that names an action column for a screen reader without painting a fourth word
+   into a dense header row (DESIGN.md 9: no decorative text, no colour-only meaning). */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

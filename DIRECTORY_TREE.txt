@@ -219,17 +219,20 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── bundle.rs
 │       │   │   ├── compare.rs
 │       │   │   ├── details.rs
+│       │   │   ├── history.rs
 │       │   │   ├── intake.rs
 │       │   │   ├── ipc.rs
 │       │   │   ├── lib.rs
 │       │   │   ├── main.rs
 │       │   │   ├── release.rs
-│       │   │   └── service.rs
+│       │   │   ├── service.rs
+│       │   │   └── support.rs
 │       │   ├── tests/
 │       │   │   ├── analyze_details.rs
 │       │   │   ├── bundle_ipc.rs
 │       │   │   ├── compare_ipc.rs
 │       │   │   ├── desktop_parity.rs
+│       │   │   ├── history_reads.rs
 │       │   │   ├── real_artifact_intake.rs
 │       │   │   └── release_gate.rs
 │       │   ├── build.rs
@@ -252,6 +255,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── AcceptReviewOutcomeDto.ts
 │           │   │   │   ├── AcceptReviewRequestDto.ts
 │           │   │   │   ├── AnalysisSummaryDto.ts
+│           │   │   │   ├── AppIdentityDto.ts
 │           │   │   │   ├── ArtifactDto.ts
 │           │   │   │   ├── BudgetDto.ts
 │           │   │   │   ├── BundleDestinationDto.ts
@@ -294,7 +298,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── GateRunDto.ts
 │           │   │   │   ├── GateRunRequestDto.ts
 │           │   │   │   ├── GateTablesDto.ts
+│           │   │   │   ├── HistoryGateRunPageDto.ts
+│           │   │   │   ├── HistoryGateRunRowDto.ts
+│           │   │   │   ├── HistoryPageRequestDto.ts
+│           │   │   │   ├── HistoryReleasePageDto.ts
+│           │   │   │   ├── HistoryReleaseRowDto.ts
 │           │   │   │   ├── IdentityDto.ts
+│           │   │   │   ├── MainWindowPage.ts
 │           │   │   │   ├── MemorySummaryDto.ts
 │           │   │   │   ├── ObjectAttributionDto.ts
 │           │   │   │   ├── ProjectContextDto.ts
@@ -343,6 +353,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── Details.tsx
 │           │   ├── format.test.ts
 │           │   ├── format.ts
+│           │   ├── GettingStarted.module.css
+│           │   ├── GettingStarted.tsx
+│           │   ├── Help.module.css
+│           │   ├── help.test.tsx
+│           │   ├── Help.tsx
+│           │   ├── History.module.css
+│           │   ├── history.test.tsx
+│           │   ├── History.tsx
 │           │   ├── intake.test.tsx
 │           │   ├── main.tsx
 │           │   ├── Release.module.css
@@ -452,6 +470,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── db.rs
 │       │   ├── error.rs
 │       │   ├── gate.rs
+│       │   ├── history.rs
 │       │   ├── lib.rs
 │       │   ├── query.rs
 │       │   └── release.rs
@@ -459,6 +478,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── analyze_queries.rs
 │       │   ├── compare_candidates.rs
 │       │   ├── gate_history.rs
+│       │   ├── history_reads.rs
 │       │   ├── map_companion_persistence.rs
 │       │   ├── release_records.rs
 │       │   ├── storage.rs
@@ -597,6 +617,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P5_CI_AUTHORITY.md
 │   ├── P5_INSTALL_RECOVERY_REPORT.md
 │   ├── P5_MIGRATION_DECISION.md
+│   ├── P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md
+│   ├── P5_ONBOARDING_HISTORY_REPORT.md
 │   ├── P5_PACKAGING_REPORT.md
 │   └── P5_PRODUCTIZATION_AUDIT.md
 ├── POST_G2_E2E_REMEDIATION/

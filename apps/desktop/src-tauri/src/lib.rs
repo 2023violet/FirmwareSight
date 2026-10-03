@@ -29,10 +29,12 @@
 pub mod bundle;
 pub mod compare;
 pub mod details;
+pub mod history;
 pub mod intake;
 pub mod ipc;
 pub mod release;
 pub mod service;
+pub mod support;
 
 use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
@@ -947,7 +949,12 @@ pub fn run() {
             release::get_gate_run,
             bundle::prepare_release_bundle,
             bundle::choose_bundle_destination,
-            bundle::export_release_bundle
+            bundle::export_release_bundle,
+            history::list_history_builds,
+            history::list_history_gate_runs,
+            history::list_history_releases,
+            support::get_app_identity,
+            support::set_window_title
         ])
         .run(tauri::generate_context!())
         .expect("error while running the FirmwareSight desktop application");

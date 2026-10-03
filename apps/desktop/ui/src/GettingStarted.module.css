@@ -1,0 +1,99 @@
+/*
+ * The first-use guidance, shown twice: as a dismissible panel above Analyze's empty state, and as a
+ * section of Help.
+ *
+ * No card shadow, no accent fill (DESIGN.md 4, AGENTS.md 11). The panel is a hairline box on the
+ * subtle surface because it is a note about the page rather than the page's own content, and the only
+ * control in it is the way to hide it.
+ */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding: var(--fs-space-4);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  background: var(--fs-color-bg-subtle);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fs-space-3);
+}
+
+.head h2 {
+  margin: 0;
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+}
+
+.dismiss {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  background: var(--fs-color-bg-surface);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.dismiss:hover {
+  border-color: var(--fs-color-text-disabled);
+}
+
+.lede {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  max-width: 80ch;
+}
+
+/* The seven answers as a definition list: one question per term, one plain sentence per answer. */
+.list {
+  display: grid;
+  gap: var(--fs-space-3);
+  margin: 0;
+}
+
+.list dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.list dd {
+  margin: 0;
+  max-width: 80ch;
+}
+
+.list code {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.flow,
+.states {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-2) var(--fs-space-3);
+}
+
+.states {
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.states li {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.arrow {
+  color: var(--fs-color-text-secondary);
+}

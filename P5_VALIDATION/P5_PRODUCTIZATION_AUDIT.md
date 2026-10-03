@@ -177,6 +177,37 @@ records with its reason: this repository has never had a scheduled workflow, so 
 gives packaging a home — "nightly → optional package smoke" — has never run and could not have produced
 this stage's evidence.
 
+### 0c. What Commit C changed in sections B and C
+
+Sections B and C below are the audit as it was written, and both said *not implemented*. Commit C has
+since implemented them, so the two sections are now the plan rather than the present; what shipped is in
+`P5_ONBOARDING_HISTORY_REPORT.md`. In one paragraph each:
+
+- **B (onboarding, §13/§14).** `GettingStarted.tsx` holds the seven answers once and exports both the
+  panel Analyze shows in its empty state and the list Help repeats, so the two surfaces cannot drift;
+  dismissal is one control and belongs to the session, held in `App.tsx` above the page switch. Help's
+  identity block is read from the running binary (`support::get_app_identity`) and every row says
+  `not reported` until the answer arrives — the front end keeps no copy of a version. The frozen window
+  title (L21) is fixed by a Rust command over a closed five-variant `MainWindowPage` enum, which is why
+  `capabilities/main.json` still lists exactly `["core:default"]`: a `set_title` permission would have
+  been an `AGENTS.md` 9 decision.
+- **C (History, §15–§18).** The answer section C reached — "implementable with new read APIs and no new
+  table" — is exactly what was built: three bounded reads in `firmwaresight-storage`
+  (`list_history_builds` delegating to the existing candidate query, plus `…_gate_runs` and
+  `…_releases`), three use-case-oriented commands over `spawn_blocking`, and a fourth rail page. No
+  migration was added, so §18's "first attempt from existing persisted facts" holds and
+  `P5_MIGRATION_DECISION.md` remains about `0005`'s numeric-Unknown columns only. One audit assumption
+  turned out to need correcting: section C anticipated "for recency, one index", and measurement says
+  otherwise — the `builds.created_at` index `0005` already added is sufficient, and 100 builds / 100 runs
+  / 50 release records page in 467.9µs / 541.5µs / 248.8µs on the release profile with no further index.
+  The filter question section C raised was settled toward privacy: identity columns only, never
+  `artifacts.path`, because a search box that matched a stored directory would answer a question §16
+  forbids; the test that proves it filters to zero over a real temporary directory's own name is
+  `a_filter_searches_identity_columns_and_never_a_directory`.
+- **Rows closed by this commit**, in §G's terms: **L10** (no History surface) and **L21** (fixed window
+  title). Neither is written as `CLOSED` in the canonical list yet, because `P5_KNOWN_LIMITATIONS.md` is
+  this round's closing deliverable; the evidence for both is in the report above.
+
 ## A. Packaging and version identity
 
 

@@ -13,6 +13,7 @@ import type {
   AcceptReviewOutcomeDto,
   AcceptReviewRequestDto,
   AnalysisSummaryDto,
+  AppIdentityDto,
   BundleDestinationDto,
   BundleExportDto,
   BundlePlanRequestDto,
@@ -27,6 +28,10 @@ import type {
   ExportOutcomeDto,
   GateRunDto,
   GateRunRequestDto,
+  HistoryGateRunPageDto,
+  HistoryPageRequestDto,
+  HistoryReleasePageDto,
+  MainWindowPage,
   ProjectContextDto,
   ProjectPolicyDto,
   SectionChangePageDto,
@@ -62,6 +67,11 @@ const GET_GATE_RUN = 'get_gate_run';
 const PREPARE_RELEASE_BUNDLE = 'prepare_release_bundle';
 const CHOOSE_BUNDLE_DESTINATION = 'choose_bundle_destination';
 const EXPORT_RELEASE_BUNDLE = 'export_release_bundle';
+const LIST_HISTORY_BUILDS = 'list_history_builds';
+const LIST_HISTORY_GATE_RUNS = 'list_history_gate_runs';
+const LIST_HISTORY_RELEASES = 'list_history_releases';
+const GET_APP_IDENTITY = 'get_app_identity';
+const SET_WINDOW_TITLE = 'set_window_title';
 
 export type IpcOutcome<T> =
   | { readonly ok: true; readonly value: T }
@@ -344,4 +354,54 @@ function describe(reason: unknown): string {
     // Circular or otherwise unserializable; the type name is still honest evidence.
     return `unrepresentable ${typeof reason}`;
   }
+}
+
+/**
+ * Ask for one bounded page of stored builds for the History table.
+ *
+ * The request carries a page and a filter and nothing else: which project's history is in scope is
+ * Rust's decision, so this cannot be widened into a listing of somebody else's records (prompt §44).
+ * The row shape is the one Compare already reads, because both surfaces list the same stored builds.
+ */
+export async function listHistoryBuilds(
+  request: HistoryPageRequestDto,
+): Promise<IpcOutcome<CandidatePageDto>> {
+  return await call<CandidatePageDto>(LIST_HISTORY_BUILDS, { request });
+}
+
+/** Ask for one bounded page of stored Gate runs. */
+export async function listHistoryGateRuns(
+  request: HistoryPageRequestDto,
+): Promise<IpcOutcome<HistoryGateRunPageDto>> {
+  return await call<HistoryGateRunPageDto>(LIST_HISTORY_GATE_RUNS, { request });
+}
+
+/** Ask for one bounded page of stored release records. */
+export async function listHistoryReleases(
+  request: HistoryPageRequestDto,
+): Promise<IpcOutcome<HistoryReleasePageDto>> {
+  return await call<HistoryReleasePageDto>(LIST_HISTORY_RELEASES, { request });
+}
+
+/**
+ * Ask the running application what it is: product name, version, identifier, platform, store schema
+ * and the store's file name.
+ *
+ * The Help screen needs a version and must not invent one, so the answer comes from the binary that
+ * is on screen. It is a file name, never a path - the location belongs to Diagnostics (prompt §19).
+ */
+export async function getAppIdentity(): Promise<IpcOutcome<AppIdentityDto>> {
+  return await call<AppIdentityDto>(GET_APP_IDENTITY);
+}
+
+/**
+ * Put the current page's name on the window title.
+ *
+ * The argument is one of five closed values and the title text is composed in Rust, which is why the
+ * capability list stays exactly `core:default` instead of gaining `core:window:allow-set-title`
+ * (`AGENTS.md` 9, prompt §14). A title is presentation: the page's own facts have already been read
+ * by the time this is called, so a failure here is not a reason to blank a table.
+ */
+export async function setWindowTitle(page: MainWindowPage): Promise<IpcOutcome<null>> {
+  return await call<null>(SET_WINDOW_TITLE, { page });
 }

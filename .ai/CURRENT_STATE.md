@@ -34,9 +34,9 @@ last_updated: "2026-10-03"
   race that run lost, test-only (Run `37129900728`, 7 of 7); and the packaging commit turned `bundle.active`
   on, added the three CI package jobs prompt §41 asks for, wrote `scripts/verify_package_artifacts.py` and
   gave the gate a `drift/version identity` step (Run `37133706214`, **7 of 10 — failed**: the seven gate
-  jobs were green and all three package jobs skipped their own build). The tree is now **775 Rust tests /
-  160 UI tests in 6 files / `check.py` 16 steps**, and the authoritative CI set is **10 jobs** for the
-  length of P5 — recorded in `05_ENGINEERING/06_CI_CD_BASELINE.md` and tracked run by run in
+  jobs were green and all three package jobs skipped their own build). The tree reached **775 Rust tests /
+  160 UI tests in 6 files / `check.py` 16 steps** at that point, and the authoritative CI set is **10 jobs**
+  for the length of P5 — recorded in `05_ENGINEERING/06_CI_CD_BASELINE.md` and tracked run by run in
   `P5_VALIDATION/P5_CI_AUTHORITY.md`.
 - **The first 10-job run went red because the gate reported a pass it had not earned.** `cargo install
   tauri-cli` leaves a binary named `cargo-tauri`, which is run as `cargo tauri`; the package group probed
@@ -78,8 +78,31 @@ last_updated: "2026-10-03"
   sections, 42 symbols and 10 evidence rows across a reopen while the UI says "Nothing has been analyzed in
   this session yet"; and the uninstaller never mentions user data, deletes none, and the reinstall reopened
   the same store without re-running the migrations — a retention rule that must now be written where a user
-  reads it. §38 item C (first-run onboarding) is not built, so §64's full journey stays open until Commits C
-  and D land, and §65's negative half stays open because this host has the whole toolchain installed.
+  reads it. §38 item C (first-run onboarding) was not built when that round ran, so §64's full journey stayed
+  open until the next bullet, and §65's negative half stays open because this host has the whole toolchain
+  installed.
+- **Commit C closed §13, §14 and §15–§18 in the code, and closed L21 with them.** First-run guidance is one
+  component read by two surfaces (`GettingStarted.tsx`: the seven answers as a list, plus a dismissible panel
+  Analyze shows in its empty state), Help is a page whose identity block is asked from the running binary
+  rather than kept in the front end, and History is a fourth rail page over three new bounded storage reads —
+  `list_history_builds`, `list_history_gate_runs`, `list_history_releases` — with **no migration added**,
+  which is what §18 asked for first. The window title the install round found frozen is fixed on the Rust
+  side: `set_window_title(MainWindowPage)` composes the text from a closed five-variant enum, because
+  granting the WebView `core:window:allow-set-title` would be a capability change (`AGENTS.md` 9) and a
+  channel from a file name into a window property; `the_title_fix_took_no_new_capability` reads
+  `capabilities/main.json` and asserts the window still holds exactly `["core:default"]`. Two decisions were
+  made from evidence rather than habit: a History filter searches **stored identity columns only**, because
+  matching `artifacts.path` would turn the search box into a directory oracle (the test that seeds real builds
+  into a real temporary directory asserts filtering by that directory's name returns zero rows), and Help
+  names the store **file** and not its folder, because the path is a Diagnostics question with its own
+  allowlist and Diagnostics is not in this commit. Measured: `python scripts/check.py` **16 of 16**, the tree
+  now **812 Rust tests / 200 UI tests in 8 files** (19 storage + 11 desktop + 24 History UI + 16 Help UI),
+  and the page reads 100 builds / 100 runs / 50 releases in 467.9µs / 541.5µs / 248.8µs on the release
+  profile. Seven mutation proofs are in `P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md` §5 and the design
+  review, including the one disclosed non-token measurement, in
+  `P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md`. **What this does not close:** the page has not been operated
+  in an installed binary — §38 C's onboarding and the whole §64 journey still have to be walked against the
+  package, which is the remaining install acceptance, and no CI run has yet seen this head.
 - **One gate run went red for a reason that was not in the commit it ran on**, and that is worth knowing
   before the next stage trusts a green. Run `37128593254` failed `Desktop UI (windows-latest)` on a
   pre-existing race in `compare.test.tsx:1094`: the `Section Changes` region mounts before its first page

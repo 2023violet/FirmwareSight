@@ -1247,3 +1247,137 @@ pub struct BundleExportDto {
     /// successful export is reported, never quietly skipped (§57).
     pub record_written: bool,
 }
+
+// ------------------------------------------------------------------------ History (P5)
+
+/// The page whose name the window title carries.
+///
+/// A closed enum rather than a string for the same reason `FixtureKey` is one: it is the boundary.
+/// The title text is Rust's, so no page name — and certainly no file name or directory — can be put
+/// into the window title from the WebView (prompt §14, `AGENTS.md` 7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum MainWindowPage {
+    Analyze,
+    Compare,
+    Release,
+    History,
+    Help,
+}
+
+impl MainWindowPage {
+    /// The full title for this page. `FirmwareSight` stays first so a taskbar with several windows
+    /// still reads as one product.
+    #[must_use]
+    pub const fn window_title(self) -> &'static str {
+        match self {
+            Self::Analyze => "FirmwareSight - Analyze",
+            Self::Compare => "FirmwareSight - Compare",
+            Self::Release => "FirmwareSight - Release",
+            Self::History => "FirmwareSight - History",
+            Self::Help => "FirmwareSight - Help",
+        }
+    }
+}
+
+/// A bounded page request for one History table.
+///
+/// Which project's history is in scope is not askable, exactly as in `CandidatePageRequestDto`: Rust
+/// fixes it, so the WebView cannot enumerate another project's records (`AGENTS.md` 7, prompt §44).
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HistoryPageRequestDto {
+    #[serde(default)]
+    pub offset: Option<usize>,
+    #[serde(default)]
+    pub limit: Option<usize>,
+    /// Text to narrow the table to. Rust decides which columns it searches, escapes LIKE syntax,
+    /// and never searches a stored path (prompt §16, §44).
+    #[serde(default)]
+    pub filter: Option<String>,
+}
+
+/// One stored Gate run, as History lists it.
+///
+/// `disposition` is the verdict that was recorded, and `counts` is how its findings were stored;
+/// neither is recomputed for the screen. `fileName` is a name, never a path.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HistoryGateRunRowDto {
+    pub run_id: String,
+    pub build_id: String,
+    pub file_name: String,
+    pub baseline_build_id: Option<String>,
+    pub baseline_file_name: Option<String>,
+    pub disposition: String,
+    pub counts: GateCountsDto,
+    /// When this application recorded the verdict, exactly as stored.
+    pub stored_at: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HistoryGateRunPageDto {
+    pub rows: Vec<HistoryGateRunRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    /// The page size Rust actually applied, after clamping.
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+/// One published release, as History lists it. The manifest digest ties the record to a directory
+/// without naming one.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HistoryReleaseRowDto {
+    pub release_id: String,
+    pub release_version: String,
+    pub build_id: String,
+    pub file_name: String,
+    /// The run whose disposition qualified this release.
+    pub gate_run_id: String,
+    pub manifest_sha256: String,
+    pub stored_at: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HistoryReleasePageDto {
+    pub rows: Vec<HistoryReleaseRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+/// What the running application says about itself on the Help screen (prompt §14).
+///
+/// Every field is the runtime's own answer, not text the WebView supplied and not a number the front
+/// end kept a copy of. `storeFileName` is a file name on purpose: where that file sits is a
+/// Diagnostics question with its own privacy test, not an About-page label (prompt §19).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct AppIdentityDto {
+    /// The bundled product name, or the crate name if a build did not set one.
+    pub product_name: String,
+    /// The executable's own name, which is what an installer puts on disk.
+    pub binary_name: String,
+    /// The version this binary was compiled from.
+    pub app_version: String,
+    /// The application identifier the packages are keyed by.
+    pub identifier: String,
+    /// This machine's operating system and CPU, in one short token, for the Support Matrix question
+    /// a reader is most likely asking.
+    pub platform: String,
+    /// The schema version the store this application opened carries.
+    pub storage_schema_version: i64,
+    /// The store's file name, never its directory.
+    pub store_file_name: String,
+}
