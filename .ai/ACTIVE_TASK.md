@@ -56,13 +56,19 @@ zero Clang-produced evidence despite the cohort claim.
 | the commit that lands this row | the read-back written into `P5_PACKAGING_REPORT.md` §5d/§5e and §9, `P5_CI_AUTHORITY.md`, the audit, and `04_TECH/17`'s stale sentence about the CLI companion corrected — the CI sets do archive it, and all three were listed | `37145302229` | success, **10 of 10** |
 | the commit that lands this row too | `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`: §38 A–L and §39 measured on this host with the owner's store parked, hashed and restored | `37147434366`, `37147577288` | success, **10 of 10** each — and §38 C stayed unimplemented, because onboarding did not exist yet |
 | the commit that lands this row as its code | §13 first-run onboarding + §14 Help/About (with L21's window title fixed in Rust over a closed page enum) + §15–§18 local History over three new bounded storage **read** APIs and **no new migration**. 19 storage + 11 desktop + 40 UI tests, seven mutation proofs, `P5_ONBOARDING_HISTORY_REPORT.md` and its design checklist | `37154946484` | success, **10 of 10**, first attempt — locally too: **16 of 16** steps, **812 Rust / 200 UI** |
+| `e070508` | documentation only: wrote Commit C's run back into `P5_CI_AUTHORITY.md` and corrected four governance sentences that had said the read-back had not happened | `37156287999` | success, **10 of 10**, first attempt |
+| the commit that lands this row | two things, in one gate: §32's L22 item — `P5_RELEASE_IDENTITY_ADR_DRAFT.md` (options costed, option C is today's bytes-as-evidence semantics, four questions for the Architect, then STOP) with its premise pinned by `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` — **and** the test-only repair of L23's sixth instance, which the **local** gate lost while verifying it and CI never saw | local: `python scripts/check.py` | **16 of 16** steps, **813 Rust / 201 UI**; three mutation proofs and 20 clean fresh-process runs of the changed suite. The remote row arrives with its successor's read-back, as every run id above did |
 
 The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
 lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
 it had left the rest). Reproduced here without CI — 1 of 30 fresh runs, and 3 of 3 under injected mock
 latency — and repaired by awaiting the one synchronous read, no production source touched. `P5_VALIDATION/
-P5_PRODUCTIZATION_AUDIT.md` §0a carries the evidence; the class is worth a sweep, which is a P5 validation
-task, not a licence to rewrite unrelated tests.
+P5_PRODUCTIZATION_AUDIT.md` §0a carries the evidence. **The sweep that paragraph asked for has now been done,
+in bounded form**, because the same file produced the class's sixth instance — lost by the *local* full gate,
+not by CI, on the tree that came after `20b03e3`. §0a records the repair, three mutation proofs, 20 clean
+fresh-process repetitions, the one chained IPC wave the sweep found, and the five top-level synchronous reads
+that remained after it. What is still open is the honest residue: absence assertions settle by timing, and a
+wave whose shape differs from the one just closed may still exist.
 
 `37133706214` is the second red run and the more instructive of the two, because nothing about the product
 was wrong. All seven gate jobs passed; the three package jobs installed `tauri-cli@2.12.1`, looked for a
@@ -106,7 +112,14 @@ on 2026-10-03 and settled four questions.
 | The store named `firmwaresight-p0.sqlite` | **Keep it.** No rename, no data move; the path becomes visible in Diagnostics instead |
 
 Two questions are not this round's: §32 sends L22 (release identity versus line endings) to the Architect
-as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` followed by a STOP, and §54 forbids this agent from choosing a
+as `P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md` followed by a STOP — **written, and it changes no
+behaviour**: it documents that the notes digest is the file's bytes (`evidence.rs:291` →
+`fingerprint.rs:42`), lays out the normalization and Git-blob options with their costs, names the one
+residual risk the G2 row did not state (`require_clean_git = false` makes the id move with nothing on screen
+saying why), and stops. The premise is now tested rather than argued
+(`crates/firmwaresight-project/tests/bundle_builder.rs`,
+`a_notes_file_that_differs_only_in_line_endings_is_a_different_release`, with the normalization mutation
+shown to redden it). And §54 forbids this agent from choosing a
 licence, so `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands in every P5 document.
 
 ## What P5 must not write
@@ -164,7 +177,8 @@ different commit rather than the present: the remediation round left **770 Rust 
 commits moved it to **775 Rust / 160 UI / `check.py` 16 steps** (migration `0005`'s five storage tests, the
 Details reason test, and the `version identity` drift step), and **Commit C moved it again to 812 Rust /
 200 UI in 8 files** on those same 16 steps — 19 storage History reads, 11 desktop boundary tests, 40 UI
-tests over the two new screens. The evidence directory that round added is `POST_G2_E2E_REMEDIATION/`.
+tests over the two new screens. The present head is **813 Rust / 201 UI**: §32's identity test and L23's
+contract test, one each. The evidence directory that round added is `POST_G2_E2E_REMEDIATION/`.
 
 On 2026-10-02 a real-desktop acceptance round drove the shipping binary through 283 black-box cases and
 closed `PASS_WITH_FINDINGS` — three product defects, no S0, no S1 — and a follow-on round fixed exactly

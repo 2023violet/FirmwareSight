@@ -22,7 +22,8 @@ use firmwaresight_core::domain::diff::{
 };
 use firmwaresight_core::domain::evidence::{EvidenceClass, EvidenceItem, SourceType};
 use firmwaresight_core::domain::gate::{
-    FindingState, GateContext, GateEvaluation, GateGitFacts, GateGrowthFacts, GateRuleId,
+    FindingState, GateContext, GateEvaluation, GateFileStatus, GateGitFacts, GateGrowthFacts,
+    GateRuleId,
 };
 use firmwaresight_core::domain::identity::{
     Architecture, ArtifactKind, ArtifactTimes, Bitness, BuildIdentity, Endianness, Fact, Sha256,
@@ -883,6 +884,89 @@ fn a_configuration_that_found_something_to_say_reaches_the_preview() {
         !html.contains("SBOM is not an MVP Gate capability"),
         "a config warning was embedded in the report"
     );
+}
+
+// ------------------------------------------------- identity is the bytes on disk (P5 §32, L22)
+
+/// What the release-notes digest actually measures, pinned as a test rather than as an argument.
+///
+/// `observe_release_notes` hashes the file it finds, so a checkout that rewrites LF to CRLF has not
+/// changed the release's words — it has changed the release. Both identities move: the notes digest is a
+/// line of the Gate's canonical input, and the Gate run id and the release id are digests of inputs that
+/// contain it. §32 requires this to be documented *and tested*; the prose, the two options that would
+/// change the semantics, and the STOP that keeps this round from choosing either are in
+/// `P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md`.
+#[test]
+fn a_notes_file_that_differs_only_in_line_endings_is_a_different_release() {
+    let lf = World::new("eol-lf", PASSING_CONFIG);
+    let crlf = World::new("eol-crlf", PASSING_CONFIG);
+    let crlf_bytes = NOTES.replace('\n', "\r\n");
+    assert!(
+        crlf_bytes != NOTES,
+        "the fixture must actually differ, or this test proves nothing"
+    );
+    std::fs::write(&crlf.notes, crlf_bytes.as_bytes()).expect("the same words, in CRLF");
+
+    let observed = |world: &World| match observe_release_notes(
+        &world.loaded.root,
+        &world.loaded.policy.release_notes_path,
+    )
+    .status
+    {
+        GateFileStatus::Present {
+            sha256: Some(digest),
+        } => digest,
+        other => panic!("the notes file was not observed as present: {other:?}"),
+    };
+    let (lf_digest, crlf_digest) = (observed(&lf), observed(&crlf));
+
+    // Bytes, not words: each recorded digest is the digest of exactly what is on disk, with no
+    // normalization anywhere between the file and the hash.
+    assert_eq!(lf_digest, digest_of_bytes(NOTES.as_bytes()));
+    assert_eq!(crlf_digest, digest_of_bytes(crlf_bytes.as_bytes()));
+    assert_ne!(
+        lf_digest, crlf_digest,
+        "identical words in a different line ending are the same evidence"
+    );
+
+    // Which moves both identities the product mints.
+    assert_ne!(
+        lf.recomputed_run_id(),
+        crlf.recomputed_run_id(),
+        "the notes digest is inside the Gate's canonical input, so the run id moves with it"
+    );
+    let lf_release = prepare(&lf.request())
+        .expect("the LF release is offerable")
+        .preview
+        .release_id;
+    let crlf_release = prepare(&crlf.request())
+        .expect("the CRLF release is offerable")
+        .preview
+        .release_id;
+    assert_ne!(
+        lf_release, crlf_release,
+        "and so the release this bundle names is a different release"
+    );
+
+    // What does *not* move is the verdict: same rules, same answers, different identity. Treating the
+    // two as one question is what would let a normalization slip in as a "presentation fix".
+    assert_eq!(
+        lf.evaluate().overall_effective_severity,
+        crlf.evaluate().overall_effective_severity
+    );
+    assert_eq!(lf.evaluate().counts, crlf.evaluate().counts);
+
+    // And the bundle ships the bytes it hashed, so the artifact matches its own manifest rather than
+    // being quietly rewritten on the way out.
+    let (bundle, outcome) = crlf.publish("eol-crlf");
+    assert_eq!(outcome.release_id, crlf_release);
+    let shipped = std::fs::read(bundle.join("release-notes.md")).expect("the notes ship");
+    assert_eq!(
+        shipped,
+        crlf_bytes.as_bytes(),
+        "the bundle normalized the bytes it was built from"
+    );
+    verify_bundle(&bundle).expect("a CRLF bundle verifies against its own bytes");
 }
 
 // --------------------------------------------------------------------------- refusals (§8, §9, §10, §11)

@@ -23,7 +23,10 @@ last_updated: "2026-10-03"
   on this host plus macOS/Ubuntu `CI_BUILD_ONLY`**, and the shipped store **keeps the name
   `firmwaresight-p0.sqlite`** with its path made visible rather than moved. Two questions stay other
   people's: §32 sends L22 (release identity versus line endings) to the Architect as an ADR draft plus a
-  STOP, and §54 leaves the licence with the owner. **No P5 verdict exists**: §5 forbids `P5 PASS`, `BETA`,
+  STOP — **the draft is now written** (`P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md`, option C = today's
+  bytes-as-evidence semantics left in place, with the premise pinned by
+  `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` and a mutation proof), and §54
+  leaves the licence with the owner. **No P5 verdict exists**: §5 forbids `P5 PASS`, `BETA`,
   `RC` or `GA` before closure evidence, `baseline_version` stays `0.6.0`, and no tag, GitHub Release or
   published installer is created.
 - **What has landed since that checkpoint**, measured rather than summarized: `4cc8d93` opened governance
@@ -115,6 +118,20 @@ last_updated: "2026-10-03"
   load-bearing rather than a widened timeout. `055b54e` had closed the identical shape at this file's pager
   and said the rest was "not converted then" — this is the third such close (`e83950c` was the first). The
   remaining instances are a sweep for P5's validation work, not an excuse to rewrite unrelated tests.
+- **The sweep happened, and the class produced one more instance first.** Eight commits after `20b03e3`, on a
+  tree whose UI source was identical to a head CI had passed 10 of 10 twice, the **local** full gate went red at
+  `frontend/test`: L23's sixth instance, in the same file. `compare.test.tsx` awaited the ranking region and then
+  read the *added rows* synchronously, though those come from a second IPC wave that commits on its own
+  (`Compare.tsx:217-256`, with its own `Reading the added rows…` branch at `Compare.tsx:876-877`). Three full-suite
+  runs on an idle host passed; the gate, loaded by its own compilation, did not — which is why the record says the
+  wait is load-bearing rather than the reproduction being the proof. Repaired test-only (one awaited query) plus a
+  contract test that holds that wave open; three mutation proofs; 20 clean fresh-process runs of the changed suite;
+  `Compare.tsx` untouched. §0a of the audit now carries the bounded sweep of chained IPC waves that §0a had asked
+  for, the five synchronous top-level reads that remain after it, and the sweep's own limits written next to it:
+  Release's `run`-keyed waves were not walked assertion by assertion, `within(region)` reads inside already-awaited
+  regions were not audited, and the repetitions cover the changed suite rather than every suite — so L23 stays
+  `SHOULD_CLOSE_P5` and the complete sweep is a named remaining task. Present counts on that tree: `check.py`
+  **16 of 16**, **813 Rust / 201 UI in 8 files**.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256

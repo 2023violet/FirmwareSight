@@ -48,7 +48,13 @@ store parked, hashed and restored byte-identically, in `P5_VALIDATION/P5_INSTALL
 §14 Help/About with the window title fixed in Rust over a closed page enum (closing L21, which that install
 round reproduced on the packaged build), and §15–§18 local History over three new bounded storage **read**
 APIs with **no new migration** — `P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md` plus its design checklist.
-The tree is now **812 Rust / 200 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**; what stays
+**§32's L22 item then became a document instead of a claim**: `P5_RELEASE_IDENTITY_ADR_DRAFT.md` costs the three
+answers to "what do we hash the release notes as", leaves today's bytes-as-evidence semantics standing, and stops
+for the Architect, and its premise is a Rust test rather than an argument — same words in LF and CRLF move both
+the run id and the release id while the verdict does not move. Verifying that commit is what surfaced L23's
+**sixth** UI-test-race instance: the same `compare.test.tsx` read the ranking's second IPC wave synchronously and
+the **local** full gate lost it where CI had not, repaired test-only with a contract test for the pending branch.
+The tree is now **813 Rust / 201 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**; what stays
 open is the *acceptance* of those screens in an installed binary (§38 C, §64) and this head's own CI run.
 **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence

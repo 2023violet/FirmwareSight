@@ -1359,3 +1359,94 @@ was rejected and what settled it.
   and seven of them are recorded there — filter offset, request guard, disposition fallback, full digest on
   open, filter payload, a write control on a read-only page, and the Help version default.
 
+# P5 §32 — release identity and line endings: documented, not changed — 2026-10-03
+
+L22 was the one P5 question this round may not answer itself. §32 allows documenting and testing it and
+forbids silently normalizing release identity, and four governance sentences already claimed an ADR draft
+had been sent to the Architect — a claim about a file that did not exist. It exists now
+(`P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md`), and no behaviour changed to produce it.
+
+- **What the current semantics actually are, stated once with their citations.** The release-notes digest is
+  the digest of the file's bytes: `observe_release_notes` → `fingerprint::file_sha256`, which streams raw
+  bytes with no decoding anywhere on the path. That digest is a labelled line in the Gate's canonical input,
+  the Gate run id is the digest of that input, and the release id's canonical text contains both the notes
+  digest *and* the Gate run id. So a checkout that rewrites LF to CRLF has not changed what the notes say —
+  it has changed which release this is.
+- **Tested, because §32 asks for a test and an argument is not one.**
+  `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` in
+  `crates/firmwaresight-project/tests/bundle_builder.rs` writes the same words in LF and CRLF into two
+  release subjects and pins five things: each recorded digest equals the digest of exactly the bytes on
+  disk; the digests differ; the run id and the release id both differ; **the verdict does not** (same
+  `overall_effective_severity`, same five-state counts); and the published bundle ships those same bytes and
+  verifies against its own manifest. The fourth assertion is the one that keeps a normalization from
+  arriving as a presentation fix — identity and correctness are different questions, and a test that only
+  checked the ids would not notice them being conflated.
+- **Proven to bite by implementing the forbidden thing temporarily.** `observe_release_notes` was rewritten
+  to hash the bytes with every `\r` removed — option A applied at exactly the place that would make it
+  invisible — and the test failed on "the recorded digest equals the bytes on disk". The mutation was
+  reverted; `git diff` on `evidence.rs` is empty and the test passes. Reverted with `Edit`, not with
+  `git checkout`, because that file is tracked and a restore would have been the destructive kind of tidy.
+- **Why neither option was taken.** Normalizing before hashing makes the identity digest describe bytes that
+  are not the bytes in the bundle, so the release id and the bundle's own `SHA256SUMS` disagree for one
+  file; the only self-consistent variants are for FirmwareSight to rewrite a copy of a human's document
+  inside a release artifact, or to ship an id nobody can recompute from what shipped. Hashing the Git blob
+  instead fixes the checkout problem by construction but assumes the notes file is tracked in a repository,
+  which the product explicitly does not assume today (a missing Git fact is recorded as *unknown*, not as an
+  error), and it gives a second identity source to a design where each fact has one. Both change what an
+  Observed fact records, which `AGENTS.md` §2 reserves for an ADR — hence the draft, hence the STOP.
+- **One fact this round found that the G2 row did not carry.** The fail-closed behaviour a reader would
+  expect here is policy-dependent: with the default `require_clean_git = true`, a smudged checkout is a dirty
+  workspace and `git.clean` BLOCKs. With it set to `false`, the rule is `N/A` and the release id moves with
+  nothing on screen saying why. That is the residual risk worth the Architect's attention, and it is written
+  into both the draft and the audit's L22 row rather than left implicit.
+- **What was deliberately not done.** No `.gitattributes` advice turned into product behaviour: writing into
+  a customer's project folder is out of bounds (`AGENTS.md` 7), so the repository's own rules stay ours and
+  the user's remain documentation. And `P5_KNOWN_LIMITATIONS.md` — where L22's outcome vocabulary belongs —
+  stays Commit F's deliverable; this commit records the disposition, not the closure.
+
+
+
+# P5 L23 — the race class's sixth instance, closed test-only — 2026-10-03
+
+Counting from the frozen G2 row, which names P3's defects I and J, `055b54e`'s pager and G2-F1 as instances one
+through four, `20b03e3` closed the fifth (the `columnheader` read Run `37128593254` lost) and this is the sixth.
+`P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` §0a had asked for a sweep "instead of letting the next red run name
+the next instance". The next instance named itself eight
+commits later, on a tree whose UI source was byte-identical to a head that had passed 10 of 10 twice: the
+**local** full gate stopped at `frontend/test`, with `rust`, `drift` and `deny` green and the same file red —
+`compare.test.tsx` › "lists growth and additions apart" reporting `Unable to find an accessible element with
+the role "button" and name "Show sections changes for .noinit"`, while `.text` sat on the same screen.
+
+- **Root cause, stated as the component's own contract.** The ranking region renders from `summary` alone; the
+  added rows are a *second* read issued in the effect at `Compare.tsx:217-256`, which commits separately, and
+  the component has an explicit branch for the interval between the two (`Reading the added rows…`,
+  `Compare.tsx:876-877`). The test awaited only the region and then read second-wave content synchronously, so
+  the outcome was decided by which React commit landed first. Three full-suite runs on an idle host passed; the
+  gate, running under its own load, did not. That asymmetry is the reason the fix is a wait and not a retry.
+- **Repaired without touching behaviour.** One `findByRole` replacing one `getByRole`, no production source, no
+  timeout constant, no assertion removed or widened. `git diff --stat` for the repair is a single test file.
+- **A contract test, because the flake was really an untested branch.** "says the added rows are still being read
+  before it names one of them" holds the added-rows read open with a deferred promise and asserts the status
+  line, the *absence* of any added-row button, and that growth is unaffected — then resolves and asserts both
+  flip. Nothing in the suite covered the pending branch before this.
+- **Three mutations, one per assertion that matters.** (1) the old synchronous read with the read held open
+  reproduces the gate's error verbatim, which proves the awaited form is load-bearing rather than polite; (2)
+  the status branch rewritten to the false claim `No section was added.` reddens the new test, which proves the
+  test would catch a normalization of Unknown into absence; (3) an `.noinit` row injected into the growth list
+  reddens the absence assertion, which proves the test catches a fabricated row. All three were reverted with
+  `Edit`; `git diff --stat` shows `Compare.tsx` untouched.
+- **20 fresh-process repetitions of the changed suite, 0 failures** — section 35's count for a suite this commit
+  changed. The full gate then ran **16 of 16** on the exact tree: **813 Rust / 201 UI in 8 files**.
+- **The sweep, in bounded form, with its limit written next to it.** Chained IPC waves — a read issued from state
+  only another read produces — were enumerated across the six page components that hold effects, and one feeds
+  content a test sampled early: the wave closed here. Details' contributor read and Release's derived default build
+  sit in the same shape but their tests await the region each paints. Release keeps further `run`-keyed waves
+  (`Release.tsx:1055,1062,1083`) that were not walked assertion by assertion, `within(region).getBy*` reads inside
+  already-awaited regions were not audited at all, and the empirical half is 3 idle-host full runs plus 20 runs of
+  the changed file, not §35's 20 repetitions of every suite. The five remaining top-level synchronous reads are
+  same-commit or post-await (`compare.test.tsx:530-531`, `release.test.tsx:1152,1157,1323`). §0a carries the full
+  list with its limits; L23 stays `SHOULD_CLOSE_P5`, and the complete sweep is a named task, not a claim.
+- **What this changes about the closure rule.** `check.py` records only the steps it runs and stops a group at
+  its first failure, so a red `frontend/test` reports **15** executed steps (3 + 4 + 7 + 1) where a clean pass
+  is **16** (3 + 5 + 7 + 1). A fraction like `14/15` says where a run stopped; it is not a different gate, and it
+  must never be read as one.

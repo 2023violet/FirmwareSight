@@ -208,7 +208,9 @@ research:
 # it, the package matrix is Windows with real install evidence on this host plus macOS and Ubuntu as
 # CI_BUILD_ONLY, and the shipped store keeps the name firmwaresight-p0.sqlite with its path made visible
 # instead of moved. Two questions are not this round's to answer: section 32 sends the
-# release-identity-versus-line-endings finding (L22) to the Architect as an ADR draft followed by a STOP,
+# release-identity-versus-line-endings finding (L22) to the Architect as an ADR draft followed by a STOP -
+# the draft is written (P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md), it changes no behaviour, and the
+# premise it documents is now tested in crates/firmwaresight-project/tests/bundle_builder.rs -
 # and section 54 leaves the licence with the owner, so
 # OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION stands unchanged. Stage P5 is IN_PROGRESS: no P5
 # verdict exists yet, and section 5 forbids writing P5 PASS, BETA, RC or GA before closure evidence does.
@@ -568,7 +570,7 @@ p5_execution:
     migration: WRITTEN_DECISION_THEN_0005 # P5_MIGRATION_DECISION.md first; 0005 adds sections.file_offset_unknown, symbols.address_unknown and an index on builds.created_at
     package_matrix: WINDOWS_REAL_INSTALL_HERE_PLUS_MACOS_LINUX_CI_BUILD_ONLY # no macOS or Linux runtime exists on this host, so those rows may never read SUPPORTED
     store_filename: KEEP_FIRMWARESIGHT_P0_SQLITE # no rename and no data move; the path becomes visible in Diagnostics instead
-  reserved_for_the_architect: [L22_release_identity_versus_line_endings_needs_P5_RELEASE_IDENTITY_ADR_DRAFT_then_STOP]
+  reserved_for_the_architect: [L22_release_identity_versus_line_endings_ADR_DRAFT_WRITTEN_STOP_IN_FORCE] # P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md: options costed, no behaviour changed, option C (today's bytes-as-evidence) stands until the Architect answers
   reserved_for_the_owner: [OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION] # section 54 forbids this round from choosing a licence
   # What the packaging commit opened, recorded because section 41 makes the job set authoritative and
   # this repository's rule is that a job count never drifts without a record. The reasons, the measured
@@ -604,6 +606,19 @@ p5_execution:
     tests_moved: { rust: 775, ui: 160 } # before Commit C
     tests_after: { rust: 812, ui: 200 } # one cargo test --workspace and one pnpm test; 19 storage + 11 desktop + 40 UI are new
     accepted_in_installed_binary: false # the screens are gated locally; section 38 item C's walk through the package and the section 64 journey run after Commit D
+  release_identity_documentation:
+    adr_draft: P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md # section 32's item, status DRAFT_FOR_ARCHITECT_REVIEW: option C describes today's bytes-as-evidence behaviour and the document stops there
+    behaviour_changed: none # no digest, canonical text, run id or release id computation moved; the diff touches one integration test and documents
+    premise_test: a_notes_file_that_differs_only_in_line_endings_is_a_different_release # crates/firmwaresight-project/tests/bundle_builder.rs, five assertions, one of which is that the verdict does NOT move when the id does
+    residual_risk_named: require_clean_git_false_moves_the_id_silently # the fact the G2 L22 row did not carry, written into the draft and the audit's L22 row
+  ui_test_race_sixth_instance:
+    class: L23 # compare.test.tsx read the ranking's second IPC wave synchronously; the local full gate lost it, not CI
+    counting: sixth # P3 defects I and J, 055b54e's pager, G2-F1, 20b03e3's columnheader read, then this
+    fix_scope: test_only # one awaited query plus a contract test that holds the added-rows read open; no production source, no timeout constant, no weakened assertion
+    mutation_proofs: 3 # the old read with that wave held open reproduces the gate error verbatim; the status branch replaced by a false empty claim reddens the new test; an injected growth row reddens its absence assertion
+    repetitions_of_changed_file: { runs: 20, failures: 0 } # fresh processes, which is section 35's count for a changed UI suite
+    sweep: bounded_chained_ipc_waves # P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md section 0a: the one chained wave found, the five top-level synchronous reads left, and the limits named -- Release's run-keyed waves and within(region) reads were not walked, so the complete sweep is a remaining task
+  tests_after: { rust: 813, ui: 201 } # one cargo test --workspace and one pnpm test on the tree that passed 16 of 16 steps
   baseline_version_stays: 0.6.0
   no_tag_no_release_no_published_installer: true
   explicitly_not: [P5_PASS, beta, RC, GA, production_ready, signed, notarized, security_clean]

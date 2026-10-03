@@ -51,7 +51,8 @@ the owner's checkpoint settled the four questions it reserved for the owner — 
 `0.6.0`, migration `0005` only after `P5_MIGRATION_DECISION.md` is written, the package matrix is Windows
 with a real install on this host plus macOS/Ubuntu `CI_BUILD_ONLY`, and the store keeps the name
 `firmwaresight-p0.sqlite` with its path made visible instead of moved. L22 goes to the Architect as an ADR
-draft, and the licence stays the owner's (§54 forbids this round from choosing one). **P5 is IN_PROGRESS,
+draft — `P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md`, written, changing no behaviour, and it stops there
+per §32 — and the licence stays the owner's (§54 forbids this round from choosing one). **P5 is IN_PROGRESS,
 not passed:** the product is still the G2-passed MVP CANDIDATE at `0.6.0`, and no `P5 PASS`, `BETA`, `RC`,
 `GA`, tag, Release, published installer, signature, updater or new network capability may be written before
 closure evidence exists. If you were sent here to "continue P5", read the audit and `ACTIVE_TASK.md` first —
@@ -99,6 +100,9 @@ two findings above — History is a fourth rail page over three new bounded stor
 migration**, and the title is now Rust's, composed from a closed `MainWindowPage` enum, with
 `the_title_fix_took_no_new_capability` proving `capabilities/main.json` still holds exactly
 `["core:default"]`. Locally: `check.py` **16 of 16**, **812 Rust / 200 UI in 8 files**, seven mutation proofs.
+L23's sixth instance has since closed in the same test-only way — `compare.test.tsx` read the ranking's second
+IPC wave synchronously, and the *local* full gate lost it before CI did — with the evidence, three mutation
+proofs and a bounded sweep of chained waves in `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` §0a.
 The remaining workstream order is unchanged: Commit D's diagnostics and recovery, Commit E's fixture cohort,
 Commit F's documentation and closure. **What Commit C does not close is the acceptance of Commit C**: the
 onboarding panel and the History page have never been operated in the installed binary, so the full §64

@@ -537,6 +537,15 @@ function rowOf(term: string): string {
   return node?.textContent ?? '';
 }
 
+/** A read the test finishes by hand, so an arrival order can be forced rather than wished for. */
+function deferred<T>() {
+  let resolve!: (outcome: IpcOutcome<T>) => void;
+  const promise = new Promise<IpcOutcome<T>>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
+
 describe('the rail and the pages it lists', () => {
   it('lists the stages this build has, and marks the page the reader is on', async () => {
     render(<App />);
@@ -920,8 +929,13 @@ describe('the ranking as a way to the full list', () => {
     expect(within(ranking).getByText('Top growth')).toBeDefined();
     expect(within(ranking).getByText('Largest additions')).toBeDefined();
     // An addition is never shown as growth from zero, and each list names its own rows.
+    // Growth travels with the summary that put the region on screen, so it is already here. The
+    // added rows are a second read that commits on its own (Compare.tsx:224), so naming one of them
+    // has to wait for that read: the sixth L23 instance, lost by the local full gate under load.
     expect(screen.getByRole('button', { name: 'Show sections changes for .text' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Show sections changes for .noinit' })).toBeDefined();
+    expect(
+      await screen.findByRole('button', { name: 'Show sections changes for .noinit' }),
+    ).toBeDefined();
     // The full tables are asked for with no kind filter, so nothing hides behind the ranking.
     const requests = sectionChangesMock.mock.calls.map(([request]) => request);
     expect(requests.some((request) => request.changeKind === null && request.limit === null)).toBe(
@@ -929,6 +943,33 @@ describe('the ranking as a way to the full list', () => {
     );
     expect(await screen.findByRole('region', { name: 'Section Changes' })).toBeDefined();
     expect(screen.getByRole('region', { name: 'Symbol Changes' })).toBeDefined();
+  });
+
+  it('says the added rows are still being read before it names one of them', async () => {
+    await openCompare();
+    // Hold the added-rows read open. The ranking region is painted from the summary and does not
+    // wait for it, so the screen has to say what is missing rather than show a row it never got.
+    const pending = deferred<SectionChangePageDto>();
+    sectionChangesMock.mockImplementation((request) =>
+      request.changeKind === 'added' ? pending.promise : Promise.resolve(sectionChangesAnswer(request)),
+    );
+
+    await runCompare();
+
+    const ranking = await screen.findByRole('region', { name: 'Top growth and largest additions' });
+    expect(within(ranking).getByText('Reading the added rows…')).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Show sections changes for .noinit' })).toBeNull();
+    // The growth list is the summary's own answer, so it is already here.
+    expect(screen.getByRole('button', { name: 'Show sections changes for .text' })).toBeDefined();
+
+    pending.resolve(
+      ok(sectionPage(sectionRows().filter((row) => row.changeKind === 'Added'))),
+    );
+
+    expect(
+      await screen.findByRole('button', { name: 'Show sections changes for .noinit' }),
+    ).toBeDefined();
+    expect(within(ranking).queryByText('Reading the added rows…')).toBeNull();
   });
 
   it('drills a growth entry into the section table that holds it', async () => {

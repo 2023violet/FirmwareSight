@@ -91,6 +91,48 @@ the same latent flake, and a "7 of 7 on the first attempt" closure rule turns ea
 risk on later commits rather than a product defect. P5 should sweep the class once — a list of the reads
 that still sample before their page resolves — instead of letting the next red run name the next instance.
 
+**The sixth instance, found by the local gate rather than by CI.** Counting from the frozen G2 row, which
+names P3's defects I and J, `055b54e`'s pager and G2-F1 as instances one to four, `20b03e3` closed the fifth
+(the `columnheader` read `37128593254` lost) and this is the sixth. The full gate on `e070508` plus the §32
+working tree went red at `frontend/test`: `compare.test.tsx` › "lists growth and additions apart, and keeps
+the full tables reachable" reported `Unable to find an accessible element with the role "button" and name
+"Show sections changes for .noinit"`, with the `.text` button on the same screen. `git diff --stat` at that
+moment held no UI source, and three fresh full-suite runs on an idle host passed, so the shape mattered more
+than the reproduction: the ranking region renders from `summary` alone, while the added rows come from a
+*second* read issued in the effect at `Compare.tsx:217-256`, and the component carries an explicit branch for
+the interval between the two commits (`Reading the added rows…`, `Compare.tsx:876-877`). The test awaited only
+the region and then read the second wave synchronously, so which React commit landed first decided the result.
+Repaired test-only: one `findByRole` on the added-row button, plus a new test — "says the added rows are still
+being read before it names one of them" — that holds the added-rows read open and pins the interval itself, so
+the contract is asserted rather than raced past. Three mutations prove the waits bite: the old synchronous read
+with the read held open reproduces the gate's error verbatim; the status branch swapped for the false claim
+`No section was added.` turns the new test red; and a `.noinit` row injected into the growth list turns its
+absence assertion red. No production source, no timeout constant, no weakened assertion; 20 fresh-process runs
+of the repaired file, 0 failures.
+
+**The bounded sweep this commit actually ran.** Two passes, and their limits are part of the result. Pass one
+enumerated the *chained* IPC waves — a read issued from state that only another read can produce — across the six
+page components that hold effects: `Compare.tsx:217-256` (added rows behind `summary`) is the one whose content a
+test was sampling synchronously, and it is the one closed above. Details' contributor read (`Details.tsx:111-123`)
+and Release's derived default build (`Release.tsx:189-195`) sit in the same shape but their tests already await the
+region each one paints (`details.test.tsx:318` is the clearest), History and Help issue no chained wave
+(`History.tsx:105`, `Help.tsx:70`), and `App.tsx:108` fires the window title with nothing rendered from it. Release
+does have further waves keyed on `run` (`Release.tsx:1055,1062,1083`), and those were not walked one assertion at a
+time — see the limit below. Pass two listed the suite's top-level synchronous reads, of which five remain:
+`compare.test.tsx:530-531` (a helper called only after the combobox it names has been awaited) and
+`release.test.tsx:1152,1157,1323` (same-commit reads after the awaited `Prepare bundle` button, and an absence
+guard). **What this sweep does not cover, stated plainly:** `within(region).getBy*` reads inside a region the test
+has already awaited were not individually audited, so a chained wave that paints *inside* an awaited region is
+still unenumerated — `release.test.tsx:1152` is exactly such a read and is safe here only because the button it
+follows arrives in the same commit. The empirical half is also bounded: 3 full-suite runs on an idle host and 20
+fresh-process runs of the changed file, not §35's 20 repetitions of every suite. L23 therefore stays
+`SHOULD_CLOSE_P5`, and the complete sweep is a named remaining task rather than a claim.
+
+**How the gate counts, because "14/15" is evidence.** `scripts/check.py` records only the steps it ran, and a
+group stops at its first failure while later groups still start. So a red `frontend/test` reports 15 executed
+steps — `rust` 3 + `frontend` 4 (its `build` never starts) + `drift` 7 + `deny` 1 — where a clean pass is 16
+(3 + 5 + 7 + 1). A fraction like `14/15` says where the run stopped; it is not a different gate.
+
 ### 0b. What section A became when packaging was switched on
 
 The packaging commit implements section 8/9/10/41 against the numbers in section A above. Eight findings
@@ -605,8 +647,8 @@ L1…L22, L24, L25, L23).
 | L19 | "Object attribution" means two things | should close | **MUST_CLOSE_P5** | wording scope: Analyze `capabilities.objectAttribution` vs Compare `diff:1 objectChanges.available` |
 | L20 | Compare prints a Core enum word | should close | **MUST_CLOSE_P5** | `weakest basis MapRegionAndElfLoad` vs Analyze's `map-memory-configuration+elf-load` |
 | L21 | Window title fixed at "FirmwareSight - Analyze" | should close | **MUST_CLOSE_P5** | `tauri.conf.json:15`; nothing in the UI sets a title, and it is now the cheapest way to tell a user which page they are on |
-| L22 | Line endings move a release's identity | document / ADR if semantics change | **OWNER_DECISION (architect)** | with `core.autocrlf=true` a checkout rewrites LF notes to CRLF, and the Release Notes digest is inside the Gate run id, so two checkouts of one commit can disagree; it fails closed (`git.clean` BLOCK). §32 requires `P5_RELEASE_IDENTITY_ADR_DRAFT.md` and a STOP — see **D3** |
-| L23 | UI test races, 4th instance found | reduce through test audit | **SHOULD_CLOSE_P5** | §35 asks 20 repetitions per UI suite; four known instances are fixed and mutation-proved, so the residual risk is the fifth one nobody has lost yet |
+| L22 | Line endings move a release's identity | document / ADR if semantics change | **OWNER_DECISION (architect)** | with `core.autocrlf=true` a checkout rewrites LF notes to CRLF, and the Release Notes digest is inside the Gate run id, so two checkouts of one commit can disagree; it fails closed (`git.clean` BLOCK). §32 requires `P5_RELEASE_IDENTITY_ADR_DRAFT.md` and a STOP — see **D3**. **Done as §32 asks:** the draft is written (`P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md`) with the normalization and Git-blob options costed and no behaviour changed, and the premise that made this a limitation is now a test — `a_notes_file_that_differs_only_in_line_endings_is_a_different_release`, reddened by a mutation that normalized at the hash. The draft adds one fact this row did not carry: the fail-closed protection is policy-dependent, because `require_clean_git = false` makes `git.clean` N/A and lets the id move silently |
+| L23 | UI test races, 6th instance found and fixed | reduce through test audit | **SHOULD_CLOSE_P5** | §35 asks 20 repetitions per UI suite; six known instances are fixed and mutation-proved (P3's I and J, `055b54e`, G2-F1, `20b03e3`, this one), the sixth lost by the *local* gate rather than CI (§0a). A bounded sweep of chained IPC waves is recorded with it, so the residual risk is now absence-assertion timing and any wave the sweep's shape missed, not an unswept suite |
 | L24 | `update_goldens.py` cannot rerun over its own Windows leftover scratch | should close | **SHOULD_CLOSE_P5** | `PermissionError [WinError 5]` on a read-only `.git/objects` file; tooling-only, outside the shipped product and outside the gate |
 | L25 | one dead `Apply filter` click, never reproduced | close as NOT_REPRODUCED or fix | **CARRY_FORWARD → target `NOT_REPRODUCED`** | post-G2 Tier A/B drove the filter pages repeatedly with no recurrence (`autoComplete="off"` removed the leading suspect); needs one documented non-repetition count before claiming it |
 

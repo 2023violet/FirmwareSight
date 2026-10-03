@@ -105,6 +105,29 @@ P5 onboarding, Help and local History: BUILT, NOT YET ACCEPTED IN THE PACKAGE (2
         binary is still open.
         Evidence P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md and
         P5_VALIDATION/P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md
+P5 release identity versus line endings (L22): DOCUMENTED, TESTED, NOT CHANGED — STOPPED FOR THE ARCHITECT
+        (2026-10-03). Section 32 allows P5 to document and test this and forbids silently normalizing release
+        identity. The draft lays out the three answers — hash the bytes (today), normalize before hashing, or
+        hash the Git blob — with the reason each of the last two is worse than the problem: a normalized
+        digest no longer describes the bytes inside the bundle it identifies, and a blob hash assumes the
+        notes file is tracked in a repository, which the product does not assume today. The premise is now a
+        test (same words, LF vs CRLF: both ids move, the verdict does not, and the bundle ships the bytes it
+        hashed) and it was shown to bite by temporarily normalizing at the hash. One fact the G2 row did not
+        carry: the fail-closed protection is policy-dependent, because `require_clean_git = false` makes
+        `git.clean` N/A and lets the id move with nothing on screen saying why.
+        Evidence P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md
+P5 UI test races (L23), sixth instance: FOUND BY THE LOCAL GATE, CLOSED TEST-ONLY, STILL OPEN AS A CLASS
+        (2026-10-03). Eight commits after `20b03e3` closed this class's fifth instance, on a tree whose UI source
+        was identical to a head CI had passed twice, `compare.test.tsx` awaited the ranking region and then read
+        the added rows synchronously — content that comes from a second IPC wave and commits on its own, with its
+        own `Reading the added rows…` branch. Three full-suite runs on an idle host passed; the gate, running
+        under its own compile load, did not. Repaired by one awaited query plus a test that holds that wave open,
+        three mutation proofs and 20 clean fresh-process runs, with `Compare.tsx` untouched. The bounded sweep of
+        chained IPC waves that §0a had asked for is recorded there with its limits named — Release's run-keyed
+        waves and every `within(region)` read were not walked assertion by assertion — so L23 stays SHOULD_CLOSE_P5
+        and the complete sweep is a remaining task, not a closed class. check.py 16/16 on that tree, 813 Rust /
+        201 UI.
+        Evidence P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md §0a
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
