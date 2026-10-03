@@ -146,6 +146,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
+│   │   ├── FirmwareSight_P5_Productization_v1.0.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Acceptance_v1.1.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Findings_Remediation_v1.0.txt
 │   │   ├── FirmwareSight_Pre_G2_Compare_UI_Test_Reliability_Closure_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
@@ -587,6 +588,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P4_BUNDLE_DESKTOP_SMOKE_REPORT.md
 │   ├── P4_BUNDLE_EXECUTION_REPORT.md
 │   └── P4_BUNDLE_EXIT_CHECKLIST.md
+├── P5_VALIDATION/
+│   └── P5_PRODUCTIZATION_AUDIT.md
 ├── POST_G2_E2E_REMEDIATION/
 │   ├── EXIT_CHECKLIST.md
 │   ├── FOCUSED_REVALIDATION_REPORT.md

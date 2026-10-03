@@ -292,12 +292,19 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: NONE`** — the G2 engineering closure audit closed `PASS` on 2026-10-01: **FirmwareSight
-Product MVP is ENGINEERING COMPLETE and the product is an MVP CANDIDATE.** No stage is live and nothing may
-be started from this file. What could come next — V1 own-artifact / real-user validation, P5
-productization — needs a separate architect decision, and no authority file puts one before the other.
-The open-source licence is still `PENDING OWNER CONFIRMATION`: a technical MVP candidate is not a licensed
-open-source release. The paragraphs below are the running narrative of how the pointer got here and back
+**`active_task: P5_PRODUCTIZATION`** — stage **P5**, state **`IN_PROGRESS`**, opened on 2026-10-03 by
+*FirmwareSight — P5 Productization, Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, archived in
+`10_AUDIT/SOURCE_PROMPTS/`). Its first deliverable is done and is the only thing that could precede code:
+`P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` answers the prompt's §4 A–H from commands run on the tree, and
+the owner's checkpoint settled version identity (artifacts unify on `0.6.0`), the migration decision
+(`P5_MIGRATION_DECISION.md`, then `0005`), the package matrix (Windows with real install evidence here,
+macOS and Ubuntu `CI_BUILD_ONLY`) and the store filename (`firmwaresight-p0.sqlite` stays). **No P5 verdict
+exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt
+forbids writing `P5 PASS`, `BETA`, `RC` or `GA` before closure evidence, and forbids a tag, a GitHub
+Release, an updater, a certificate and any licence choice. V1 own-artifact / real-user validation still has
+no prompt and stays unauthorized. The open-source licence is still `PENDING OWNER CONFIRMATION`: a
+technical MVP candidate is not a licensed open-source release. The paragraphs below are the running
+narrative of how the pointer got here and back
 to empty, so each one keeps the words its own round wrote.
 
 **`G2` closed `PASS` on 2026-10-01, under its own architect prompt and addendum.** The audit ran the gate

@@ -197,7 +197,22 @@ research:
 # so the one successor commit the prompt allows (section 43) records it, sets G2 = PASS - Product MVP
 # ENGINEERING COMPLETE, state MVP CANDIDATE - and returns the pointer to NONE. The G2 prompt says stop
 # after G2: V1, P5 and anything later need a separate architect decision, and no file here authorizes one.
-active_task: NONE
+# The architect then issued "FirmwareSight - P5 Productization, Execution Prompt v1.0", delivered as a file
+# and archived with its SHA-256 in 10_AUDIT/SOURCE_PROMPTS/, so the pointer moves and nothing else moves
+# with it. AGENTS.md 1 still binds - one named stage, no inference from the roadmap. P5's own section 4 put
+# a productization audit before any product code, and that audit is written:
+# P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md answers section 4 A-H from commands run on this tree, and the
+# owner's checkpoint on 2026-10-03 answered the four questions the audit reserved for the owner - artifact
+# versions unify on 0.6.0 with the workspace version as the single source (baseline_version stays 0.6.0,
+# no tag, no GitHub Release), migration 0005 follows a written P5_MIGRATION_DECISION.md and never precedes
+# it, the package matrix is Windows with real install evidence on this host plus macOS and Ubuntu as
+# CI_BUILD_ONLY, and the shipped store keeps the name firmwaresight-p0.sqlite with its path made visible
+# instead of moved. Two questions are not this round's to answer: section 32 sends the
+# release-identity-versus-line-endings finding (L22) to the Architect as an ADR draft followed by a STOP,
+# and section 54 leaves the licence with the owner, so
+# OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION stands unchanged. Stage P5 is IN_PROGRESS: no P5
+# verdict exists yet, and section 5 forbids writing P5 PASS, BETA, RC or GA before closure evidence does.
+active_task: P5_PRODUCTIZATION
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -531,6 +546,33 @@ g2_execution:
   known_limitations: G2_VALIDATION/G2_KNOWN_LIMITATIONS.md
   baseline_version_stays: 0.6.0
   explicitly_not: [production_ready, GA, beta, release_candidate, signed, installable, security_clean, real_user_validated, commercially_validated, licensed_open_source]
+
+# P5 productization: the stage that turns the G2-passed MVP Candidate into a Productized MVP a stranger
+# can install, use, recover from and remove without the dev team present. Everything under this block is
+# an opened-round record, not a verdict - the round is IN_PROGRESS, and its own section 5 forbids writing
+# P5 PASS, BETA, RC or GA before closure evidence exists. P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md carries
+# the command behind every claim below.
+p5_execution:
+  authorized: true
+  prompt: "FirmwareSight - P5 Productization, Execution Prompt v1.0"
+  prompt_provenance: "delivered as a file and archived at 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_Productization_v1.0.txt, SHA-256 722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae (73,722 bytes, 3,442 lines); the registered hash is recomputed from the archived copy and byte-compared against the delivered file"
+  start_head: d83175a3309a5ac5ec01995bdf7b74ec0ddb3d91 # the post-G2 remediation closure head; audit found HEAD = origin/main and the tree clean
+  start_run: "37101619245, attempt 1, completed / success, 7 of 7 jobs"
+  stage: P5
+  stage_status: IN_PROGRESS
+  opened_on: "2026-10-03"
+  audit: P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md # section 4 A-H, written before any product code, as section 4 requires
+  owner_checkpoint: "2026-10-03 - the cadence the owner set was audit first, then a checkpoint before any product code"
+  decisions:
+    version_identity: ARTIFACTS_UNIFY_ON_0_6_0 # workspace version becomes the single source; the CLI follows through env!("CARGO_PKG_VERSION"), so no second constant is maintained
+    migration: WRITTEN_DECISION_THEN_0005 # P5_MIGRATION_DECISION.md first; 0005 adds sections.file_offset_unknown, symbols.address_unknown and an index on builds.created_at
+    package_matrix: WINDOWS_REAL_INSTALL_HERE_PLUS_MACOS_LINUX_CI_BUILD_ONLY # no macOS or Linux runtime exists on this host, so those rows may never read SUPPORTED
+    store_filename: KEEP_FIRMWARESIGHT_P0_SQLITE # no rename and no data move; the path becomes visible in Diagnostics instead
+  reserved_for_the_architect: [L22_release_identity_versus_line_endings_needs_P5_RELEASE_IDENTITY_ADR_DRAFT_then_STOP]
+  reserved_for_the_owner: [OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION] # section 54 forbids this round from choosing a licence
+  baseline_version_stays: 0.6.0
+  no_tag_no_release_no_published_installer: true
+  explicitly_not: [P5_PASS, beta, RC, GA, production_ready, signed, notarized, security_clean]
 
 p0_execution:
   authorized: true

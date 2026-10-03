@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-09-30"
+last_updated: "2026-10-03"
 ---
 
 # Execution Prompt Register
@@ -475,6 +475,49 @@ text with no source file; each says so in its own entry instead of standing for 
   `POST_G2_E2E_REMEDIATION/`. G2 stays PASS, the product stays MVP CANDIDATE, the baseline stays 0.6.0,
   and the prompt's last instruction - do not start P5, return to the Architect, stop - is what the
   closure commit did.
+
+## P5 Productization to Productized MVP v1.0
+
+- File: `FirmwareSight_P5_Productization_v1.0.txt`
+- SHA-256: `722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae` (73,722 bytes, 3,442 lines,
+  86 numbered sections) — recomputed from the archived copy in this directory and byte-compared against
+  the file the owner supplied, so the registered hash is the hash of the stored bytes, not of a recollection.
+- Authority: turn the G2-passed MVP Candidate into a **Productized MVP** a stranger engineer can install,
+  understand, use (Analyze / Compare / Gate / Bundle), inspect in local History and Diagnostics, recover
+  from, and uninstall or reinstall — without the dev team present. Its discipline is AUDIT FIRST / NO
+  FEATURE SPRAWL / LOCAL-FIRST / FAIL CLOSED / PRESERVE UNKNOWN / PACKAGE WHAT WAS PROVEN, and §4 forbids
+  any product code before `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` exists. It opens with a hard git
+  preflight and a STOP if the remote moved, forbids `reset --hard` / `clean -fd` / `stash` / `restore .` /
+  rebase of published history / force push, and requires a fetch plus a re-read of HEAD and `origin/main`
+  after every commit. It caps the verdict: **P5 PASS is not BETA, RC or GA**, and §5 forbids writing any
+  of those words before closure evidence exists.
+- Explicit boundaries this round must not cross: no new network capability, telemetry, analytics SDK,
+  updater or update endpoint; native dialogs stay Rust-side; no generic shell, `read_file` or SQL IPC;
+  CSP stays restrictive; Git access stays read-only; no signing or notarization execution (§11 fixes the
+  status at `READY_NOT_EXECUTED`, §12 at `UPDATE_READY_MANUAL`, and both forbid a fake certificate or a
+  committed private key); no tag, GitHub Release or published installer (§72). §54 is absolute about the
+  licence: the **P5 agent must not choose** MIT / Apache-2.0 / GPL / AGPL / MPL, so
+  `OPEN_SOURCE_LICENSE_DECISION = PENDING_OWNER_CONFIRMATION` carries through every P5 document. Diagnostics
+  is allowlist-only and must never contain an absolute source path, the project root, firmware bytes, MAP
+  contents, Release Notes, a Git remote, the user name, the home directory, a token dump, the environment,
+  the database path or the bundle destination — and §46/§66 require *positive-control* tests for that, not
+  merely the absence of a leak. Security wording is fixed: never "security clean"; the permitted sentence
+  is "dependency policy passes with documented accepted risks".
+- Deliverables it requires: `P5_VALIDATION/` with 12 named documents (the audit, execution report, exit
+  checklist, packaging, install-recovery, migration-recovery, compatibility matrix, history-diagnostics,
+  desktop-acceptance, security-supportability, known-limitations and CI-authority records), 19 end-user
+  documents, the §26 fixture expansion inside the existing GCC/Clang ELF + GNU ld MAP cohort, and the §61
+  six-commit split — "do not make one giant P5 commit".
+- Status at archive time, 2026-10-03: §5 governance is opened by this commit (`active_task:
+  P5_PRODUCTIZATION`, stage `P5`, state `IN_PROGRESS`, `baseline_version` unchanged at `0.6.0`), the audit
+  is written in `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md`, and the owner's checkpoint answered four of its
+  questions: artifacts unify on **0.6.0** with the workspace version as the single source; migration
+  **0005** follows a written `P5_MIGRATION_DECISION.md` (and never before it); the package matrix is
+  **Windows with real install evidence on this host, macOS and Ubuntu `CI_BUILD_ONLY`**; and the shipped
+  store keeps its existing name `firmwaresight-p0.sqlite` instead of a data move, with its path made
+  visible instead. Two are not this round's to decide: §32 sends the release-identity-versus-line-endings
+  question (L22) to the Architect as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` with a STOP, and §54 leaves the
+  licence with the owner. No P5 verdict exists yet, and none is written here.
 
 ## Supersession note on the V0 Batch A activation entry
 

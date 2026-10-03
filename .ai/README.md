@@ -33,7 +33,10 @@ tree `e35cfe7` and evidence head `f75cbc5` both 7 of 7 on the first attempt) ·
 a rebuilt shipping binary; fix head green on Run #43 `37100371601` at 7 of 7; evidence in
 `POST_G2_E2E_REMEDIATION/`, the 283-case root outside the repository; **G2 unchanged, still MVP
 CANDIDATE**) ·
-`active_task: NONE` · open-source licence `PENDING OWNER CONFIRMATION` ·
+`P5 productization: IN_PROGRESS (opened 2026-10-03; prompt v1.0 delivered as a file, SHA-256
+722125f5…71e0ae, archived; §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md; no P5 verdict
+exists and the product stays MVP CANDIDATE at 0.6.0)` ·
+`active_task: P5_PRODUCTIZATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 

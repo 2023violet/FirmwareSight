@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-02"
+last_updated: "2026-10-03"
 ---
 
 
@@ -19,8 +19,17 @@ Execution state: `P0: PASS — frozen (remote CI Runs #3, #4, #5 and #6 all 7 of
 engine refuses to replace was offered for replacement) and E2E-F003 (S3, a GNU ld MAP refused as another
 linker's output) fixed in `e816dcb` and `971015f`; 770 Rust / 159 UI / `check.py` 15/15, the fix head
 green on Run #43 `37100371601` at 7 of 7 on the first attempt, evidence in `POST_G2_E2E_REMEDIATION/`
-and the 283-case root outside the repository — G2 unchanged, and nothing here authorizes P5 · open-source
-licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task: NONE`
+and the 283-case root outside the repository — G2 unchanged, and that round authorized nothing beyond
+itself · P5 IN_PROGRESS (opened 2026-10-03) — Productization, authorized by execution prompt v1.0
+delivered as a file, SHA-256 `722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae`, archived
+in `10_AUDIT/SOURCE_PROMPTS/`; its §4 audit is written at `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` and
+the owner's checkpoint settled version identity (artifacts unify on `0.6.0`), migration `0005` after a
+written decision doc, the package matrix (Windows with real install evidence here, macOS/Ubuntu
+`CI_BUILD_ONLY`) and the store filename (`firmwaresight-p0.sqlite` stays); **no P5 verdict exists**, the
+product is still MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or
+licence choice is authorized · open-source
+licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task:
+P5_PRODUCTIZATION`
 
 ## Primary reading path
 

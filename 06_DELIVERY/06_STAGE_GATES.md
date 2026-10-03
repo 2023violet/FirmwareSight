@@ -244,7 +244,9 @@ G2 Product MVP Candidate   — PASS (2026-10-01): Product MVP ENGINEERING COMPLE
                               the engineering exit above; evidence in G2_VALIDATION/. Not G3 Productization,
                               Private Beta, RC or GA
 V1 Own-artifact External Validation
-P5 Productization
+P5 Productization            — IN_PROGRESS (opened 2026-10-03 under execution prompt v1.0, archived with its
+                              SHA-256); §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md. No P5
+                              verdict exists, and this line is not G3, B1, RC1 or GA1
 B1 Private Beta
 RC1 Release Candidate
 GA1 General Availability

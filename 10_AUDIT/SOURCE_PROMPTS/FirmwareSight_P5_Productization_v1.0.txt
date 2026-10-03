@@ -1,0 +1,3442 @@
+FirmwareSight — P5 Productization Implementation, Release Readiness & Closure
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight P5 Productization Engineering Agent。
+
+本轮 canonical stage identifier：
+
+P5_PRODUCTIZATION
+
+这不是：
+
+- G2 重跑
+- V1 用户验证
+- B1 Private Beta
+- RC1
+- GA1
+- 商业化
+- 云端化
+- SBOM/CVE 阶段
+- 随意扩功能
+
+本轮目标：
+
+把已经通过 G2、真实桌面 E2E 与 Post-G2 remediation 的 MVP Candidate，
+推进为一个可以被陌生工程师：
+
+安装
+→ 第一次理解
+→ Analyze
+→ Compare
+→ Release Gate
+→ Release Bundle
+→ 查看本地历史
+→ 获取本地诊断
+→ 遇错恢复
+→ 卸载/重新安装
+
+而不需要开发团队在旁边陪同的 Productized MVP。
+
+核心纪律：
+
+AUDIT FIRST.
+NO FEATURE SPRAWL.
+LOCAL-FIRST.
+FAIL CLOSED.
+PRESERVE UNKNOWN.
+PACKAGE WHAT WAS PROVEN.
+DO NOT CLAIM BETA/RC/GA.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at prompt issue time:
+
+origin/main:
+d83175a3309a5ac5ec01995bdf7b74ec0ddb3d91
+
+Commit:
+Post-G2: close the findings remediation and record its evidence
+
+Remote CI:
+Run 37101619245
+run number 44
+attempt 1
+completed / success / 7 of 7
+
+Immediate prior product-fix head:
+971015f4d106f2e77efea52fe225a20ed471a84d
+
+Run:
+37100371601
+
+attempt:
+1
+
+completed / success / 7 of 7
+
+Current technical state:
+
+P0 = PASS
+G1 = PASS
+P1 = PASS / COMPLETE
+P2 = PASS / COMPLETE
+P3 = PASS / COMPLETE
+P4 = PASS / COMPLETE
+G2 = PASS
+
+Post-G2 Real Desktop E2E =
+PASS_WITH_FINDINGS
+
+Post-G2 E2E Remediation =
+PASS
+
+Open E2E product findings:
+
+S0 = 0
+S1 = 0
+S2 = 0
+S3 = 0
+S4 = 0
+
+Product MVP =
+ENGINEERING COMPLETE
+
+Product state =
+MVP CANDIDATE
+
+baseline_version =
+0.6.0
+
+active_task =
+NONE
+
+Current direct validation baseline:
+
+Rust:
+770 passed / 0 failed
+
+Desktop UI:
+159 passed / 6 files
+
+Full engineering gate:
+15 / 15
+
+P5 is NOT started yet.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. P5 AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The repository's current authoritative stage model defines:
+
+P5 =
+Productization
+
+Required deliverable family:
+
+packaging
+onboarding
+reliability
+supportability
+
+Exit evidence:
+
+release readiness
+
+The Productization stage's core work is:
+
+- compatibility matrix
+- parser fixture expansion
+- crash/recovery
+- migrations
+- diagnostics
+- complete design system
+- onboarding
+- project/history model
+- documentation
+- install/sign/update readiness
+
+Interpretation:
+
+P5 is allowed to productize the existing MVP.
+
+P5 is NOT allowed to silently become:
+
+Private Beta
+Release Candidate
+General Availability
+
+P5 may prepare signing/notarization/update architecture.
+
+P5 may NOT claim those release operations were completed unless real credentials/infrastructure exist and a later stage authorizes their use.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -15 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+d83175a3309a5ac5ec01995bdf7b74ec0ddb3d91
+
+worktree:
+clean
+
+If remote moved:
+STOP.
+
+Read the delta first.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git force push
+
+After EVERY commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+This environment has previously auto-pushed commits unexpectedly.
+
+Detect it immediately.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. REQUIRED AUTHORITY READ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before designing P5, read:
+
+AGENTS.md
+
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/DECISIONS.md
+.ai/ACTIVE_TASK.md
+.ai/HANDOFF.md
+
+BASELINE.yaml
+
+06_DELIVERY/06_STAGE_GATES.md
+06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md
+06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md
+
+01_PRODUCT/01_PRD_MVP.md
+01_PRODUCT/04_USER_STORIES_ACCEPTANCE.md
+
+04_TECH/20_PLATFORM_SUPPORT.md
+04_TECH/15_STORAGE_DATABASE_BASELINE.md
+04_TECH/05_SECURITY_PRIVACY.md
+04_TECH/14_IPC_DATA_CONTRACTS.md
+
+G2_VALIDATION/G2_KNOWN_LIMITATIONS.md
+
+POST_G2_E2E_REMEDIATION/REMEDIATION_REPORT.md
+POST_G2_E2E_REMEDIATION/FOCUSED_REVALIDATION_REPORT.md
+POST_G2_E2E_REMEDIATION/EXIT_CHECKLIST.md
+
+all relevant ADRs.
+
+Also inspect:
+
+Cargo.toml
+Cargo.lock
+pnpm-lock.yaml
+apps/desktop/src-tauri/tauri.conf.json
+apps/desktop/src-tauri/Cargo.toml
+current GitHub Actions workflows
+storage migrations
+storage query APIs
+Desktop navigation/layout/components
+CLI distribution surface
+
+Do not design from memory.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. FIRST DELIVERABLE — P5 PRODUCTIZATION AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before product code changes, produce:
+
+P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md
+
+It must answer:
+
+A. Packaging
+- current app productName
+- current Tauri version
+- current package version
+- current workspace version
+- current bundle.active
+- current targets
+- icons
+- custom-protocol requirement
+- current CI package artifacts
+- current installer state
+
+B. Onboarding
+- current cold-start empty state
+- what a new user sees
+- whether first-use guidance exists
+- whether status semantics are discoverable
+- where project policy guidance exists
+
+C. History
+- existing projects table
+- existing builds
+- Gate runs
+- accepted reviews
+- release_records
+- current read/query APIs
+- whether minimal History can be implemented WITHOUT migration
+
+D. Diagnostics
+- current typed errors
+- current logs
+- DB schema/health visibility
+- Git availability visibility
+- WebView/app version visibility
+- current privacy boundary
+
+E. Reliability
+- migration paths currently supported
+- DB transaction boundaries
+- crash/incomplete import behavior
+- stale bundle recovery
+- temp/staging cleanup
+- previous E2E failure/recovery evidence
+
+F. Compatibility
+- currently supported input cohort
+- actual committed fixtures
+- actual toolchains
+- actual linker layouts
+- platform support evidence
+
+G. Known limitations
+
+Classify each current limitation as:
+
+MUST_CLOSE_P5
+SHOULD_CLOSE_P5
+CARRY_FORWARD
+OWNER_DECISION
+
+H. Release readiness
+
+- package version source
+- install path
+- uninstall behavior
+- user-data behavior
+- manual upgrade readiness
+- signing readiness
+- notarization readiness
+- update readiness
+- documentation gaps
+
+No code before this audit is written.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. P5 LIVE GOVERNANCE OPENING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After the audit:
+
+open P5 explicitly.
+
+Set live governance to:
+
+active_task:
+P5_PRODUCTIZATION
+
+stage:
+P5
+
+state:
+IN_PROGRESS
+
+Do NOT write:
+
+P5 PASS
+B1 READY
+BETA
+RC
+GA
+
+until closure evidence exists.
+
+baseline_version remains:
+
+0.6.0
+
+Do not automatically bump product version.
+
+Do not tag.
+
+Do not create a GitHub Release.
+
+Archive this exact prompt under:
+
+10_AUDIT/SOURCE_PROMPTS/
+
+if exact bytes are available.
+
+Register actual SHA-256.
+
+Do not reconstruct it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. P5 WORKSTREAM MAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 consists of these engineering workstreams:
+
+P5-A
+Packaging & Release Metadata
+
+P5-B
+Onboarding & First-Run Experience
+
+P5-C
+Local History / Project Read Model
+
+P5-D
+Diagnostics & Supportability
+
+P5-E
+Reliability / Migration / Recovery
+
+P5-F
+Compatibility & Fixture Expansion
+
+P5-G
+Design-System Completion & Accessibility
+
+P5-H
+Documentation & Release Readiness
+
+P5-I
+Cross-Platform Packaging CI
+
+P5-J
+Real Windows Install / Uninstall / Reinstall Acceptance
+
+P5-K
+Productization Closure
+
+Do not invent extra product epics.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. VERSION AND PACKAGE IDENTITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current known packaging mismatch at the audited tree:
+
+workspace/baseline version:
+0.6.0
+
+Tauri config currently contains:
+
+"version": "0.1.0"
+
+and:
+
+"bundle": {
+  "active": false
+}
+
+P5 MUST eliminate package-version ambiguity.
+
+Requirements:
+
+- define ONE authoritative app version source;
+- Desktop package version must match the canonical FirmwareSight version;
+- CLI and Desktop must report compatible version identity;
+- package artifacts must not accidentally ship as 0.1.0;
+- version drift must be caught by `scripts/check.py` or equivalent drift gate;
+- do not hard-code the same version in multiple places without a drift check.
+
+Do not bump beyond 0.6.0 unless a pre-existing version policy explicitly requires it.
+
+P5 is productization, not a version-release authorization.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. TAURI PACKAGING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Enable real packaging.
+
+Use the existing Tauri 2 stack.
+
+Do not introduce another desktop packaging framework.
+
+Inspect the current Tauri configuration and officially supported target semantics before choosing package targets.
+
+Minimum release-readiness target:
+
+Windows:
+at least ONE real installable package
+
+macOS:
+at least ONE unsigned distributable package build in CI
+
+Ubuntu:
+at least ONE distributable package build in CI
+
+Preferred examples, only if current Tauri tooling supports them cleanly:
+
+Windows:
+NSIS and/or MSI
+
+macOS:
+.app / dmg
+
+Ubuntu:
+deb and/or AppImage
+
+Do not force a target that the current runner/toolchain cannot support.
+
+Record the canonical target chosen per platform and why.
+
+Packaging MUST include the embedded frontend.
+
+The production package must not depend on:
+
+localhost:5173
+
+The custom-protocol requirement must be satisfied automatically by the packaging path.
+
+A user must not need to remember:
+
+`--features custom-protocol`
+
+to build the official package.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. CLI DISTRIBUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The CLI is part of the MVP product surface.
+
+P5 must define how it ships.
+
+Minimum:
+
+each platform release artifact set contains:
+
+- Desktop package
+- `fwsight` CLI binary
+- checksums
+- version information
+
+Do NOT silently modify PATH during Desktop installation unless existing platform conventions and documentation explicitly justify it.
+
+Preferred:
+
+Desktop installer installs Desktop.
+
+CLI is a companion release artifact.
+
+Documentation explains:
+
+- where the CLI binary is
+- how to invoke it
+- machine-readable behavior
+- stable exit-code role
+
+Do not create a shell installer or package manager repository in P5.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. DISTRIBUTION CHECKSUMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Produce deterministic release-artifact metadata for CI-built packages.
+
+At minimum:
+
+SHA256SUMS for distribution artifacts.
+
+This distribution checksum index is NOT the firmware Release Bundle's SHA256SUMS.
+
+Keep the concepts distinct.
+
+Do not invent cryptographic signing.
+
+No private key.
+
+No fake signature.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. SIGNING / NOTARIZATION BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 requirement:
+
+SIGNING READINESS
+
+not:
+
+SIGNED PUBLIC RELEASE
+
+Prepare:
+
+Windows Authenticode strategy
+macOS code-sign/notarization strategy
+Linux package integrity strategy
+
+Document:
+
+required credentials
+CI secret names/placeholders
+where signing occurs in the release pipeline
+what artifact is signed
+verification commands
+failure behavior
+
+Never:
+
+generate a fake production certificate
+commit a private key
+ask for secrets inside source
+claim signed when unsigned
+
+If real credentials are absent:
+
+status:
+
+READY_NOT_EXECUTED
+
+This does NOT by itself block technical P5 closure.
+
+It DOES block any later claim of:
+
+RC signed package
+GA signed release
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. UPDATE READINESS BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 may prepare an update path.
+
+P5 must NOT add an automatic network updater unless separately authorized.
+
+No hidden network calls.
+
+No update server.
+
+No telemetry.
+
+Required:
+
+- manual upgrade semantics documented;
+- installer/reinstall behavior documented;
+- user data persistence defined;
+- migration behavior defined;
+- future updater integration point documented;
+- package version comparison behavior understood.
+
+Expected status:
+
+UPDATE_READY_MANUAL
+
+Do not write:
+
+AUTO_UPDATE_SUPPORTED
+
+unless actually implemented under separate authority.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. FIRST-RUN ONBOARDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A stranger must understand what to do.
+
+Do NOT build a marketing tour.
+
+Implement a compact technical onboarding experience.
+
+Required first-use guidance:
+
+1. What FirmwareSight does
+"Know exactly what ships."
+
+2. First action
+Choose an ELF artifact.
+
+3. MAP role
+Optional GNU ld MAP improves region/layout evidence.
+
+4. Product flow
+Analyze
+→ Compare
+→ Release Gate
+→ Release Bundle
+
+5. Status vocabulary
+PASS
+REVIEW
+BLOCK
+UNKNOWN
+N/A
+
+6. Local-first statement
+Firmware files are analyzed locally.
+No upload is required by the MVP.
+
+7. Project policy
+Explain where `firmwaresight.toml` enters the Release workflow.
+
+Requirements:
+
+- onboarding must be dismissible;
+- no modal trap;
+- no account;
+- no internet;
+- no fake sample analytics;
+- no compulsory wizard before Analyze.
+
+Prefer:
+
+high-quality empty states + Getting Started surface
+
+over:
+
+multi-step onboarding wizard.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. HELP / ABOUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Provide a productized local Help/About surface.
+
+It must show:
+
+FirmwareSight
+version
+build/app identity
+supported input summary
+local-first/privacy statement
+where to find Getting Started
+where to find Support Matrix
+where to find Known Limitations
+where to find Diagnostics
+
+Do not require a browser.
+
+External links may exist only as optional links.
+
+Core help must remain available offline.
+
+Fix the known fixed-window-title limitation:
+
+window title should reflect FirmwareSight and current major page/state appropriately.
+
+Do not encode sensitive file paths in the title.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 is authorized to add a minimal local History surface.
+
+Canonical top-level navigation after implementation may become:
+
+Analyze
+Compare
+Release
+History
+
+Do not add more top-level verbs unless required by evidence.
+
+History is:
+
+local
+read-only
+evidence-oriented
+
+It is NOT:
+
+cloud history
+team activity
+sync
+audit service
+file manager
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. HISTORY REQUIRED CONTENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+History must allow a user to browse persisted:
+
+Builds
+Gate runs
+Release records
+
+Minimum build row:
+
+- artifact file name
+- snapshot id shortened/displayed safely
+- artifact SHA-256 shortened/displayable with full copy/read access
+- analyzed/stored time
+- architecture
+- FLASH/nonvolatile state/value
+- RAM state/value
+
+Minimum Gate row:
+
+- Gate run id
+- build
+- baseline if any
+- disposition
+- counts by state
+- stored time
+
+Minimum Release row:
+
+- release id
+- release version
+- build
+- Gate run
+- manifest SHA-256
+- stored time
+
+History must not expose:
+
+artifact absolute source path
+project root
+bundle destination
+database path
+
+History must work when original firmware bytes no longer exist.
+
+It is a persisted-facts viewer.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. HISTORY INTERACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required:
+
+- pagination/bounded queries
+- deterministic sort
+- basic filter/search
+- open details
+- empty state
+- loading state
+- typed error state
+
+No unlimited `SELECT *` into WebView.
+
+No full-table payload.
+
+No raw SQL from UI.
+
+No delete.
+
+No edit.
+
+No rewrite of release history.
+
+No "rerun Gate" from an old record without revalidating current context.
+
+History must make the difference clear between:
+
+stored evidence
+
+and:
+
+live current workspace facts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. HISTORY STORAGE FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The existing schema already contains:
+
+projects
+builds
+artifacts
+sections
+symbols
+evidence
+memory_footprints
+gate runs / findings / reviews
+release_records
+
+P5 MUST first attempt History using existing persisted facts.
+
+Do NOT create migration 0005 merely to make History easier.
+
+If a migration is genuinely required:
+
+produce:
+
+P5_VALIDATION/P5_MIGRATION_DECISION.md
+
+before implementation.
+
+Explain:
+
+why existing schema cannot satisfy the user story
+exact additive change
+fresh DB behavior
+v1→latest
+v2→latest
+v3→latest
+v4→latest
+rollback/failure behavior
+data preservation
+privacy impact
+
+Only additive, compatibility-preserving P5 migrations are authorized.
+
+No destructive table rewrite without Architect review.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. DIAGNOSTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement local diagnostics for supportability.
+
+A user must be able to export a sanitized Diagnostics Report.
+
+Preferred outputs:
+
+diagnostics.json
+diagnostics.txt
+
+or one deterministic local diagnostics directory.
+
+No ZIP dependency is required.
+
+Do not add one just for this.
+
+Required facts:
+
+- FirmwareSight version
+- platform / architecture
+- Desktop runtime identity
+- WebView runtime version where observable
+- DB schema version
+- SQLite integrity status
+- Git available YES/NO
+- Git version if available
+- product capability summary
+- supported input cohort
+- current storage counts
+- recent typed FirmwareSight error codes if safely available
+- current config/schema versions
+- package/install channel if observable
+
+Diagnostics MUST NOT contain:
+
+artifact absolute source paths
+project root
+firmware bytes
+MAP contents
+Release Notes contents
+Git remote URL
+user name
+home directory
+access tokens
+environment variable dump
+database file path
+bundle destination path
+
+Use an explicit allowlist.
+
+Do not serialize arbitrary application state.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. DIAGNOSTICS PRIVACY TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add positive-control tests.
+
+Inject test-only host paths such as:
+
+C:\Users\Example\SecretProject\
+/home/example/private/
+
+into local-only storage where test harness allows.
+
+Export diagnostics.
+
+Assert:
+
+none appear.
+
+Also assert:
+
+safe file leaf names may appear only if the diagnostics contract explicitly includes them.
+
+Prefer:
+
+no artifact names by default.
+
+Diagnostics should answer:
+
+"Can support understand the environment?"
+
+not:
+
+"What firmware is this person building?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. MIGRATION RELIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 must prove the storage migration chain.
+
+Current pre-P5 schema:
+
+SCHEMA_VERSION = 4
+
+Migrations:
+
+0001
+0002
+0003
+0004
+
+If P5 adds no migration:
+
+latest remains 4.
+
+Still test:
+
+fresh → 4
+v1 → 4
+v2 → 4
+v3 → 4
+v4 → 4
+
+If P5 adds migration 0005:
+
+test:
+
+fresh → 5
+v1 → 5
+v2 → 5
+v3 → 5
+v4 → 5
+v5 reopen
+
+All existing rows preserved.
+
+Invalid/partial migration:
+
+fail closed.
+
+No DB silently reset to empty.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. MIGRATION BACKUP / RECOVERY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Productization must address the real-user migration risk observed during E2E:
+
+the user's live DB may be an older schema.
+
+Implement or prove a safe migration recovery strategy.
+
+Preferred:
+
+before a schema-changing migration,
+create a local backup beside the DB or in app-data backup storage,
+with bounded retention.
+
+Requirements:
+
+- backup is local;
+- no cloud;
+- no firmware bytes beyond what DB already contains;
+- backup creation failure blocks migration;
+- migration failure leaves original recoverable;
+- user receives typed actionable error;
+- app does not silently delete/recreate the DB.
+
+If no new P5 migration is added:
+
+still implement the recovery mechanism or document with executable tests how future migrations will be protected.
+
+Do not use migration backup as a generic History feature.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. CRASH / PROCESS RECOVERY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Test:
+
+kill during idle
+kill during Analyze
+kill during Gate
+kill during Bundle staging where observable
+
+Use disposable state only.
+
+Required:
+
+- app restarts;
+- DB integrity remains valid;
+- incomplete build cannot read as COMPLETE;
+- no corrupt final bundle is presented as success;
+- staging/aside folders are recoverable/cleanable;
+- last-good immutable records remain readable.
+
+Do not add a background crash-report uploader.
+
+No telemetry.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. STARTUP RECOVERY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At startup:
+
+detect clearly actionable storage/open/migration failures.
+
+Never:
+
+blank WebView
+silent hang
+generic "something went wrong"
+
+Provide:
+
+typed error code
+human summary
+safe remediation
+
+If database is corrupt:
+
+do NOT automatically delete it.
+
+Offer/document:
+
+where support diagnostics can be exported
+how to restore from a migration backup
+how to preserve evidence before reset
+
+Any destructive reset remains manual.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. SUPPORTED COHORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT widen the Supported claim beyond evidence.
+
+Current supported cohort remains:
+
+GCC/Clang ELF
++
+GNU ld MAP
+
+unless real fixture evidence proves more.
+
+Keil/IAR remain unsupported in P5 unless:
+
+real fixtures exist
+adapter is separately authorized
+full tests pass
+
+The Post-MVP roadmap explicitly says toolchain expansion is fixture-driven.
+
+Do not write a universal MAP parser.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. FIXTURE EXPANSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expand fixtures INSIDE the existing supported cohort.
+
+Target layout cases, where legitimate compiler/linker-produced fixtures can be created:
+
+A. classic FLASH + RAM
+B. executable-in-RAM section
+C. external SRAM region
+D. DMA / non-cacheable custom region
+E. large discarded-section / long MAP preamble
+F. ELF with debug info
+G. ELF stripped/no debug info
+H. multiple loadable segments
+
+Each fixture must have:
+
+toolchain identity
+build recipe
+hash
+expected facts
+expected memory accounting
+expected evidence basis
+expected Unknowns
+
+Do not fabricate "real" behavior by hand-editing binary bytes after linking.
+
+Linker scripts are allowed.
+
+Compiler-generated artifacts are preferred.
+
+If a layout cannot be produced:
+
+mark NOT_AVAILABLE.
+
+No claim without fixture.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. COMPATIBILITY MATRIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md
+
+Dimensions:
+
+OS packaging
+OS runtime evidence
+ELF producer/toolchain
+linker
+architecture
+MAP
+layout
+debug/no-debug
+Git available/unavailable
+WebView/runtime
+
+Status vocabulary:
+
+SUPPORTED
+SUPPORTED_WITH_LIMITS
+CI_BUILD_ONLY
+NOT_TESTED
+UNSUPPORTED
+
+Never use:
+
+"supported"
+
+when only compilation succeeded.
+
+Windows Tier 1:
+
+must have real package/install/runtime evidence.
+
+macOS/Linux Tier 2:
+
+package CI evidence may be:
+
+CI_BUILD_ONLY
+
+if no real GUI machine was exercised.
+
+Be precise.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. DESIGN SYSTEM COMPLETION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not redesign FirmwareSight.
+
+Consolidate the current visual language into a complete product system.
+
+Required reusable states/components:
+
+page header
+section header
+primary/secondary/danger action
+form field
+native selector wrapper
+status badge
+finding state
+empty state
+loading state
+error state
+warning/note
+data table
+pager
+filter
+metric card
+detail facts
+dialog/confirmation
+help/onboarding callout
+diagnostics block
+history row/detail
+
+Requirements:
+
+- consistent spacing
+- consistent type scale
+- focus ring
+- keyboard use
+- non-color-only states
+- long hashes wrap/scroll safely
+- Unknown remains explicit
+- 1280×720 remains usable
+
+Do not introduce a new UI framework.
+
+Do not add a new design dependency unless absolutely unavoidable.
+
+Preferred:
+
+existing CSS/module/token structure.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. CLOSE NARROW PRODUCTIZATION UI GAPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit and close where narrow:
+
+L19:
+"Object attribution" means two things
+
+Use scope-specific wording.
+
+L20:
+Compare prints Core enum wording
+
+Translate product-facing label without changing Core enum.
+
+L21:
+fixed window title
+
+Make title context-aware.
+
+L25:
+historical dead Apply-filter observation
+
+Re-test on current packaged app.
+
+If not reproducible across targeted repeated real-window checks:
+
+close as NOT_REPRODUCED with evidence.
+
+Do not invent a fix for a non-reproduced issue.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. UNKNOWN REASON GAPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Known storage gaps:
+
+L6:
+sections.file_offset reason
+
+L7:
+symbols.address reason
+
+P5 must audit whether History would display unexplained Unknown because the reason was never persisted.
+
+Preferred outcomes:
+
+A.
+No migration needed because a truthful deterministic reason can be reconstructed from persisted evidence.
+
+or
+
+B.
+Add additive migration 0005 with explicit reason fields.
+
+If B:
+
+do NOT invent historical reasons.
+
+For pre-P5 rows with NULL reason:
+
+display a truthful fallback such as:
+
+"Reason was not persisted by this database version."
+
+New rows must persist the real reason.
+
+No fake provenance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. OBJECT ATTRIBUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L8 remains evidence-dependent.
+
+P5 does NOT require implementing unavailable object/module attribution.
+
+History/Compare must truthfully show:
+
+Unavailable
++
+reason
+
+Do not create synthetic attribution.
+
+Do not infer object ownership from symbol names.
+
+Carry forward if evidence is insufficient.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. RELEASE-IDENTITY LINE ENDINGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L22 requires productization review.
+
+Observed:
+
+Git clean checkouts may yield CRLF/LF differences depending on checkout policy,
+while Release Notes digest participates in Gate identity.
+
+P5 must document and test this.
+
+Do NOT silently normalize release identity semantics.
+
+If a semantic change is proposed:
+
+write:
+
+P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md
+
+Explain:
+
+current bytes-as-evidence semantics
+cross-platform line-ending impact
+normalization option
+Git blob option
+bundle-byte implications
+backward compatibility
+Gate run-id implications
+
+STOP that sub-change for Architect review.
+
+P5 may still continue unrelated workstreams.
+
+Without Architect approval:
+
+current fail-closed semantics stay.
+
+Document them clearly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. DEPENDENCY / RUSTSEC REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Revisit current accepted advisories:
+
+RUSTSEC-2024-0429
+RUSTSEC-2024-0370
+
+Determine:
+
+direct/transitive path
+whether current compatible upgrades remove them
+platform impact
+package impact
+
+Allowed:
+
+upgrade existing dependency families
+if API/behavior remains within P5 scope
+and all tests/package builds pass.
+
+Not allowed:
+
+large framework replacement merely to remove an advisory.
+
+If still accepted:
+
+document current reason and revisit trigger.
+
+Never claim:
+
+zero vulnerabilities
+security clean
+
+unless a separate comprehensive security process proves it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. TOOLING SUPPORTABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 should close developer-supportability limitations where narrow:
+
+L14/L24:
+`scripts/update_goldens.py` Windows cleanup issue
+
+Fix:
+
+- own scratch directory cleanup
+- read-only `.git/objects` handling
+- repeatability
+- dry-run reliability
+
+Required:
+
+Windows dry-run twice
+no tracked changes
+no permission error
+
+L17:
+CI provisioning duplication/index blind spot
+
+Reduce obvious duplicate setup safely.
+
+Improve tracked-source coverage if possible without making the gate fragile.
+
+Do not rewrite CI architecture.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. UI ASYNC TEST RELIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L23 recorded a family of async-test races.
+
+P5 must audit UI tests for the same anti-pattern:
+
+async state rendered later
++
+synchronous `getBy*` immediately after parent mount
+
+Do not mechanically replace all queries.
+
+Only fix causally unsafe assertions.
+
+Required:
+
+- targeted static/code review
+- repeated full UI suite on Windows-equivalent local environment if available
+- at least 20 complete UI-suite repetitions or a justified bounded alternative
+
+No sleeps.
+No retry wrappers.
+No global timeout inflation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. DOCUMENTATION SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create or update the canonical docs.
+
+Do not duplicate existing documents.
+
+Required end-user documentation:
+
+Getting Started
+Installation
+Analyze Guide
+Compare Guide
+Release Gate Guide
+Release Bundle Guide
+History Guide
+CLI Guide
+firmwaresight.toml Reference
+Status Semantics
+Support Matrix
+Known Limitations
+Troubleshooting
+Diagnostics Guide
+Privacy / Local-First
+Upgrade / Reinstall / Uninstall
+Bundle Verification
+Package Verification
+Signing / Notarization Readiness
+
+Do not write marketing promises not supported by evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. PRIVACY DOCUMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+State explicitly:
+
+FirmwareSight Productized MVP is local-first.
+
+No firmware upload is required.
+
+No telemetry is added by P5.
+
+Local SQLite stores:
+
+source artifact location as local-only implementation metadata
+
+but source paths do not cross normal IPC/UI/portable Release Bundle boundaries.
+
+Diagnostics are sanitized.
+
+Document:
+
+what is stored
+what is portable
+what is not
+what uninstall does to local app data
+
+Do not expose an actual user's path in docs.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. WINDOWS REAL INSTALL EXPERIENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Windows is Tier 1.
+
+P5 must perform real installation acceptance.
+
+Prefer:
+
+Windows Sandbox
+disposable VM
+or an otherwise isolated environment.
+
+If unavailable:
+
+use the current machine only with:
+
+- original FirmwareSight app-data DB hash
+- owner-authorized park/backup method
+- restore verification
+
+Never migrate/damage the owner's live store just to test an installer.
+
+Required:
+
+A. fresh install
+B. launch installed Desktop from normal OS surface
+C. first-run onboarding
+D. Analyze real supported fixture
+E. close/reopen
+F. manual reinstall / repair equivalent
+G. uninstall
+H. verify app executable removed
+I. verify documented user-data retention semantics
+J. reinstall
+K. verify retained data behaves exactly as documented
+L. final cleanup/restore
+
+No hidden developer server.
+
+No cargo required on the installed machine for runtime.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. WINDOWS INSTALLER SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Installer must not:
+
+- delete arbitrary user project files
+- delete FirmwareSight app data unless explicitly documented/confirmed
+- write to firmware project directories
+- add PATH unexpectedly
+- require shell profile changes
+- launch network services
+- create updater background services
+- require a developer toolchain
+
+Record:
+
+install location
+package size
+installer hash
+uninstaller behavior
+user-data behavior
+Start Menu behavior
+
+Do not include user-specific absolute paths in repository evidence.
+
+Use environment-variable form or redaction.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. MACOS / LINUX PRODUCTIZATION EVIDENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 requires CI package creation on Tier 2 platforms where current runner/tooling supports it.
+
+At minimum:
+
+macOS package build
+Ubuntu package build
+
+Do not claim real runtime GUI support from package build alone.
+
+If only CI build is observed:
+
+classify:
+
+CI_BUILD_ONLY
+
+No fake real-machine claim.
+
+No notarization claim.
+
+No macOS signing claim.
+
+No Linux distro blanket claim.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. P5 CI PACKAGE JOBS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preserve the existing seven authoritative jobs.
+
+Add package production jobs.
+
+Target P5 remote CI authority:
+
+1. Rust (windows-latest)
+2. Rust (ubuntu-latest)
+3. Desktop UI (windows-latest)
+4. Desktop UI (ubuntu-latest)
+5. Generated output drift
+6. Dependency policy
+7. macOS Core Smoke
+8. Package Windows
+9. Package Ubuntu
+10. Package macOS
+
+Package jobs must:
+
+- use exact lockfiles;
+- produce package artifacts;
+- produce CLI companion binary;
+- produce SHA256SUMS;
+- verify package version;
+- verify frontend embedded;
+- upload artifacts to the workflow run.
+
+Do not publish a GitHub Release.
+
+Do not tag.
+
+Do not sign.
+
+If one package type is unsupported on runner:
+
+choose another Tauri-supported target
+and document the reason.
+
+P5 final closure requires:
+
+all authoritative jobs green.
+
+If the final matrix differs from 10 jobs for a justified technical reason:
+
+record the exact authoritative job set in:
+
+P5_VALIDATION/P5_CI_AUTHORITY.md
+
+before declaring closure.
+
+No silent job-count drift.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. PACKAGE ARTIFACT NAMING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use predictable artifact naming.
+
+Include:
+
+FirmwareSight
+version
+platform
+architecture
+package kind
+
+Do not include:
+
+wall-clock timestamp as required identity
+username
+host path
+
+Example shape:
+
+FirmwareSight-0.6.0-windows-x86_64-<kind>
+
+Do not invent a final release channel name.
+
+No "stable", "beta", "rc" unless stage authority exists.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. PROJECT MODEL BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 may improve the local project/history model only enough to support stable use.
+
+Do not build:
+
+workspace cloud
+multi-user team project
+repository manager
+IDE project system
+
+A FirmwareSight project remains:
+
+local product context
++
+persisted facts
++
+optional firmwaresight.toml/Git workspace evidence
+
+History grouping may use existing `projects` facts.
+
+No background repository scanning.
+
+No auto-discovery across the user's disk.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. HISTORY SECURITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+History UI must receive bounded DTOs.
+
+No:
+
+absolute artifact source path
+SQLite path
+project root
+raw SQL
+raw database row dumping
+
+Add explicit path-leak tests.
+
+History DTOs:
+
+Desktop/Application boundary only.
+
+Do not promote them automatically to public portable schemas.
+
+No `history:1` public schema unless an external interchange use case exists.
+
+History is a local UI contract.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. SUPPORT ERROR VOCABULARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit typed errors across:
+
+Analyze
+Compare
+Gate
+Bundle
+History
+Diagnostics
+Installer/runtime startup
+
+Every user-visible failure must have:
+
+stable code
+human summary
+safe remediation
+
+Do not expose:
+
+Rust debug formatting
+SQLite query text
+stack trace
+host path
+SQL
+panic message
+
+Developer logs may contain technical context,
+but user-visible messages must remain safe.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. DATABASE INTEGRITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add a supported read-only health check.
+
+At minimum:
+
+SQLite `PRAGMA integrity_check`
+
+through storage-owned code,
+not raw SQL from UI.
+
+Diagnostics may report:
+
+OK
+or typed failure.
+
+Do not expose database location.
+
+Do not allow UI to execute arbitrary PRAGMA.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+47. APPLICATION PACKAGE VS RELEASE BUNDLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 packaging concerns the FirmwareSight APPLICATION.
+
+Do not confuse it with the firmware Release Bundle.
+
+Canonical terminology:
+
+Application Package
+=
+the installed/distributed FirmwareSight software
+
+Release Bundle
+=
+evidence package produced for a firmware release
+
+The existing firmware Release Bundle remains:
+
+portable
+deterministic
+self-contained
+hash verified
+offline readable
+
+P5 must not add application-installer files into a firmware Release Bundle.
+
+Keep these artifact domains separate everywhere.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+48. PERFORMANCE CARRY-FORWARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Post-G2 measured:
+
+valid ELF:
+519,179,252 bytes
+≈519.2 MB
+≈495.1 MiB
+
+symbols:
+~2,020,073
+
+warm Analyze:
+~4.73–4.89 s
+
+cold first read:
+~68.7 s on that machine
+
+peak observed working set:
+~1,428 MB
+
+no Not Responding
+no crash
+
+P5 interpretation:
+
+First-use <60 s at that workload:
+PARTIAL / environment-sensitive
+
+Peak RSS:
+MEASURED FOR TESTED WORKLOAD
+
+P5 MAY profile performance.
+
+P5 MUST NOT make a major parser architecture rewrite unless a concrete productization blocker is reproduced.
+
+Allowed narrow optimizations:
+
+- obvious duplicate copies
+- obvious repeated parsing
+- avoidable materialization
+- bounded query/UI virtualization issues
+
+Any architecture-level streaming/mmap redesign:
+
+requires a separate Architect decision.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+49. LARGE HISTORY PERFORMANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Productization History must remain usable with non-trivial local state.
+
+Create test DBs with at least:
+
+100 builds
+100 Gate runs where model permits
+50 release records
+
+Use valid relational facts.
+
+Do not create invalid release records merely to hit counts.
+
+Measure:
+
+History initial render
+pagination
+filter
+detail open
+memory stability
+
+No unbounded WebView payload.
+
+Record actual numbers.
+
+Do not invent hard latency SLA unless repository defines one.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+50. ONBOARDING REAL-DESKTOP ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On packaged Windows app, fresh test state:
+
+A. launch
+B. without reading repository docs, identify first action
+C. choose supported ELF
+D. understand optional MAP role
+E. Analyze
+F. navigate Compare
+G. navigate Release
+H. understand PASS/REVIEW/BLOCK/UNKNOWN/N/A glossary
+I. find Getting Started / Help
+J. find Diagnostics
+K. find History
+
+Use real mouse/keyboard/native dialogs.
+
+Internal heuristic only.
+
+Do not call it real-user validation.
+
+V1 remains separate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+51. HISTORY REAL-DESKTOP ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prepare disposable state containing:
+
+at least:
+3 builds
+2 Gate runs
+1 release record
+
+Then:
+
+restart installed app
+
+open History
+
+verify:
+
+- records persist;
+- build rows show correct facts;
+- Gate rows show correct dispositions;
+- Release row shows correct manifest digest;
+- no source path;
+- source firmware may be moved away and History still works;
+- no edit/delete controls;
+- pagination/filter works;
+- detail can be opened keyboard-only.
+
+No source file needed to read persisted history.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+52. DIAGNOSTICS REAL-DESKTOP ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+From installed app:
+
+export Diagnostics.
+
+Independently inspect generated files.
+
+Verify:
+
+- JSON parses if JSON exists;
+- version correct;
+- OS/platform correct;
+- DB schema correct;
+- Git availability correct;
+- DB health correct;
+- no firmware bytes;
+- no source path;
+- no home path;
+- no Git remote;
+- no environment dump;
+- no database path;
+- no Release Notes body.
+
+Move diagnostics directory.
+
+Read without FirmwareSight.
+
+No network.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+53. INSTALL / REINSTALL DATA SEMANTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Choose one explicit product policy and document it.
+
+Preferred safe default:
+
+uninstall removes application binaries
+but preserves user data/history
+
+unless platform package conventions force otherwise.
+
+If installer offers a "remove data" option:
+
+it must be explicit.
+
+Never silently destroy:
+
+build history
+Gate history
+release records
+
+During reinstall:
+
+existing supported DB opens/migrates safely.
+
+Record:
+
+what happens by design.
+
+Tests must match docs.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+54. LICENSE OWNER DECISION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current state:
+
+root Cargo metadata says:
+license = "Proprietary"
+
+no root LICENSE.
+
+Owner intent:
+open-source project
+
+But license has NOT been selected.
+
+P5 Agent MUST NOT choose:
+
+MIT
+Apache-2.0
+GPL
+AGPL
+MPL
+or any other license
+
+without owner decision.
+
+P5 technical packaging may proceed.
+
+But final P5 report must state:
+
+OPEN_SOURCE_LICENSE_DECISION =
+PENDING_OWNER_CONFIRMATION
+
+Do not claim:
+
+"official open-source release ready for redistribution"
+
+until license is resolved.
+
+This gap does not automatically block technical P5 engineering closure,
+but it blocks a clean public open-source release claim.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+55. SECURITY / CAPABILITY REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 must re-run security/capability review after:
+
+History
+Diagnostics
+Packaging
+
+Verify:
+
+- no network capability added
+- no generic shell IPC
+- no arbitrary `read_file(path)`
+- no SQL IPC
+- no source path leak
+- native file/folder dialogs remain Rust-side
+- Git remains read-only
+- CSP remains restrictive
+- Diagnostics uses allowlist
+- package contains expected files only
+
+No telemetry.
+
+No analytics SDK.
+
+No updater network permission.
+
+Document:
+
+P5_VALIDATION/P5_SECURITY_SUPPORTABILITY_REVIEW.md
+
+Never claim:
+
+security clean
+
+Use:
+
+dependency policy passes with documented accepted risks.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+56. TEST STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use test pyramid.
+
+A. Core/storage/project tests
+migration
+history queries
+diagnostics facts
+recovery
+
+B. Desktop IPC tests
+bounded DTOs
+path leakage
+typed errors
+
+C. UI tests
+History
+onboarding
+Help
+Diagnostics
+productized empty/loading/error states
+
+D. Package tests
+version
+embedded frontend
+package creation
+artifact checksum
+
+E. Real Windows installed-app tests
+fresh install
+launch
+workflow
+history
+diagnostics
+reinstall
+uninstall
+reinstall
+
+F. CI package jobs
+Windows
+Ubuntu
+macOS
+
+No test category substitutes for another.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+57. TEST RELIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preserve the post-G2 discipline.
+
+No:
+
+sleep-based assertions
+global retry wrapper
+timeout inflation
+"rerun until green"
+
+For async UI:
+
+use causal state waits.
+
+For installer:
+
+wait for process/installation state,
+not arbitrary seconds where avoidable.
+
+If a flaky test appears:
+
+reproduce
+classify
+fix
+
+Do not hide it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+58. FULL LOCAL ENGINEERING GATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At every major productization integration head:
+
+Rust:
+
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+
+Frontend:
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+Repository gate:
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py
+
+git diff --check
+
+Current baseline before P5 tests:
+
+Rust:
+770
+
+UI:
+159 / 6 files
+
+Counts may increase.
+
+Report direct counts.
+
+Do not double-count test reruns.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+59. P5 VALIDATION PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/
+
+Required:
+
+P5_PRODUCTIZATION_AUDIT.md
+P5_EXECUTION_REPORT.md
+P5_EXIT_CHECKLIST.md
+P5_PACKAGING_REPORT.md
+P5_INSTALL_RECOVERY_REPORT.md
+P5_MIGRATION_RECOVERY_REPORT.md
+P5_COMPATIBILITY_MATRIX.md
+P5_HISTORY_DIAGNOSTICS_REPORT.md
+P5_DESKTOP_ACCEPTANCE_REPORT.md
+P5_SECURITY_SUPPORTABILITY_REVIEW.md
+P5_KNOWN_LIMITATIONS.md
+P5_CI_AUTHORITY.md
+
+Optional:
+
+P5_RELEASE_IDENTITY_ADR_DRAFT.md
+
+only if L22 semantics need change.
+
+Evidence docs must cite:
+
+commands
+commit SHAs
+run ids
+package hashes
+installer hashes
+fixture hashes
+measured results
+
+No invented evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+60. KNOWN LIMITATIONS DISPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At P5 close, every inherited limitation must be one of:
+
+CLOSED
+REDUCED
+CARRIED_FORWARD
+OWNER_DECISION
+NOT_REPRODUCED
+
+Do not silently drop any limitation.
+
+Special expectations:
+
+L1 Peak RSS:
+update from NOT_MEASURED to measured Post-G2 evidence.
+
+L2 near-500-MiB Desktop:
+update from NOT_MEASURED to measured Post-G2 evidence.
+
+L4 platform/DPI:
+reduce with package matrix; 125/150% DPI may remain carried if no safe environment.
+
+L5 layouts:
+reduce via fixture expansion.
+
+L6/L7:
+resolve or carry with explicit reason.
+
+L8:
+may carry evidence-dependent.
+
+L10:
+History should close.
+
+L12:
+revisit advisory status.
+
+L13:
+OWNER_DECISION.
+
+L14/L24:
+should close.
+
+L15:
+should close if wording/source label is narrow.
+
+L16:
+should close through official package build path.
+
+L17:
+reduce.
+
+L19/L20/L21:
+should close.
+
+L22:
+document / ADR if semantics change.
+
+L23:
+reduce through test audit.
+
+L25:
+close as NOT_REPRODUCED or fix if reproduced.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+61. COMMIT STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not make one giant P5 commit.
+
+Preferred sequence:
+
+Commit A:
+P5: open productization execution
+
+Commit B:
+P5: enable application packaging and release metadata
+
+Commit C:
+P5: add onboarding and local history
+
+Commit D:
+P5: add diagnostics and recovery support
+
+Commit E:
+P5: expand compatibility fixtures and supportability
+
+Commit F:
+P5: complete productization documentation and release readiness
+
+Exact split may change,
+but keep each reviewable.
+
+After every commit:
+
+fetch
+read local HEAD
+read origin/main
+check CI relationship
+
+No force push.
+
+No history rewrite.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+62. SOURCE / GENERATED INTEGRITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Follow repository integrity rules.
+
+When tracked paths change:
+
+regenerate:
+
+DIRECTORY_TREE.txt
+
+Then:
+
+SHA256SUMS
+
+last.
+
+Use the repository's canonical generation/check mechanism.
+
+No CRLF drift.
+
+No host path.
+
+No missing tracked file.
+
+No untracked production source dependency.
+
+Clean detached worktree validation is required before P5 closure.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+63. CLEAN DETACHED WORKTREE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before closure:
+
+create clean detached worktree at exact candidate head.
+
+No ignored/untracked dependency.
+
+Run:
+
+full engineering gate
+package builds that can run locally
+selected smoke tests
+
+Then remove only the worktree created by this round.
+
+Do not delete unrelated directories.
+
+Record:
+
+P5 clean-tree result.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+64. REAL WINDOWS PACKAGE ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is mandatory.
+
+Use the actual installer/package produced by P5.
+
+Not:
+
+`cargo run`
+`cargo build` binary launched directly
+Vite dev server
+
+Required journey:
+
+Installer
+→ install
+→ normal OS launch
+→ first-use onboarding
+→ Analyze
+→ Compare
+→ Gate
+→ Bundle
+→ History
+→ Diagnostics
+→ close
+→ reopen
+→ reinstall
+→ uninstall
+→ reinstall
+→ verify documented data behavior
+
+Use disposable firmware project.
+
+No developer shortcuts.
+
+If installer requires UAC:
+
+record.
+
+Do not bypass with copying binary manually.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+65. PACKAGE SELF-CONTAINMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Installed application must run without:
+
+Rust
+Cargo
+Node
+pnpm
+Vite dev server
+repository checkout
+
+The installed package must include everything required by the application,
+except expected platform runtime components such as WebView where platform conventions provide them.
+
+Test on the cleanest practical environment.
+
+Record required system runtime assumptions.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+66. FIRST-USE NO-DEVELOPER TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On installed app:
+
+do NOT open repository docs.
+
+Use only packaged/in-app docs.
+
+Answer:
+
+- what file do I open?
+- why MAP?
+- where Compare?
+- what does Unknown mean?
+- where project policy enters?
+- why Bundle may be disabled?
+- where History lives?
+- how do I get Diagnostics?
+- where are limitations?
+
+Classify:
+
+DISCOVERABLE
+DISCOVERABLE_WITH_MINOR_CONFUSION
+NOT_DISCOVERABLE
+
+Internal heuristic only.
+
+Not V1 real-user evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+67. PACKAGE VERSION ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Verify the exact same version identity across:
+
+Cargo workspace
+Desktop About
+package filename
+installer metadata
+CLI `--version`
+Diagnostics
+docs examples where version shown
+
+No 0.1.0/0.6.0 split.
+
+Add automated drift check.
+
+A mismatch:
+
+blocks P5 closure.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+68. HISTORY PERSISTENCE ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After installed-app journey creates records:
+
+restart.
+
+History must show them.
+
+Then move original firmware project away.
+
+Restart.
+
+History must still show persisted evidence.
+
+Then uninstall/reinstall according to documented data policy.
+
+History behavior must match that policy.
+
+No source path displayed.
+
+No source artifact required for reading history.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+69. DIAGNOSTICS SUPPORT SCENARIOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Generate diagnostics in:
+
+A. healthy environment
+B. Git unavailable / simulated supported no-Git context
+C. database health failure fixture/test harness
+D. typed Analyze error state
+
+Diagnostics must remain safe.
+
+No host path leak.
+
+No firmware content.
+
+No secret.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+70. PACKAGE / APP OFFLINE TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Installed application must perform core workflow offline.
+
+If safely possible:
+
+disable network.
+
+Otherwise:
+
+observe product network requests.
+
+Required core path:
+
+Analyze
+Compare
+Gate
+Bundle
+History
+Diagnostics
+
+must not require network.
+
+Do not disrupt the user's unrelated machine/network if unsafe.
+
+Record:
+
+OBSERVED_NO_NETWORK_DEPENDENCY
+
+not:
+
+PROVED NEVER NETWORKS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+71. CROSS-PLATFORM PACKAGE CONTENT CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For every CI-produced package/artifact:
+
+record:
+
+file name
+kind
+size
+SHA-256
+version
+architecture
+
+Verify:
+
+no source maps unintentionally shipped if policy forbids them
+no developer `.env`
+no repository `.git`
+no test fixture dump unless intentionally packaged
+no host path in text metadata
+no secret
+
+Do not extract and diff platform binaries byte-for-byte.
+
+Platform packages are not expected to be identical.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+72. NO AUTO-RELEASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 CI may upload workflow artifacts.
+
+It must NOT automatically:
+
+create GitHub Release
+publish package
+upload to package registry
+push tag
+publish Homebrew
+publish winget
+publish apt repo
+
+Those require later distribution authority.
+
+P5 proves release readiness.
+
+It does not perform public distribution.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+73. OUT OF SCOPE — HARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 must NOT implement:
+
+Private Beta cohort tooling
+pricing
+payments
+license key
+team accounts
+cloud sync
+hosted dashboard
+SBOM generation
+CVE intelligence
+OTA
+flashing
+HIL
+device fleet
+GitHub Action product
+GitLab integration
+editor extension
+AI judgement
+AI summary
+automatic updater
+signed production release
+notarized production release
+Keil/IAR claim without fixtures
+PDF renderer
+DOCX
+full call graph
+universal lockfile parser
+plugin marketplace
+
+Do not activate E1/E2/E3/GX roadmap candidates.
+
+Those remain separately authorized future candidates.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+74. P5 BLOCKER POLICY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A P5 blocker includes:
+
+- installer cannot install/launch
+- package uses wrong version
+- packaged app depends on dev server
+- installed app cannot complete core workflow
+- upgrade/reinstall corrupts data
+- migration can silently lose data
+- History leaks host paths
+- Diagnostics leaks sensitive host/project data
+- arbitrary directory deletion
+- supported fixture crashes
+- package CI red on required platform
+- app requires network for core workflow
+- package build cannot reproduce from clean tracked tree
+- S0/S1 real package acceptance defect
+
+When found:
+
+reproduce
+test
+fix narrowly
+revalidate
+
+If fix requires:
+
+new architecture
+new cloud/service
+public schema major change
+destructive migration
+release-identity semantic change
+license choice
+
+STOP that subproblem and request Architect decision.
+
+Continue unrelated authorized work where safe.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+75. P5 EXIT CHECKLIST — PRODUCT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 may close only when:
+
+Packaging:
+□ canonical version
+□ Windows installable package
+□ macOS CI package
+□ Ubuntu CI package
+□ CLI companions
+□ distribution SHA256SUMS
+□ custom-protocol automatic
+□ no dev-server dependency
+
+Onboarding:
+□ first-run guidance
+□ offline help
+□ status glossary
+□ project policy guidance
+
+History:
+□ builds
+□ Gate runs
+□ releases
+□ bounded queries
+□ no host paths
+□ survives source disappearance
+□ restart persistence
+
+Diagnostics:
+□ local export
+□ allowlist
+□ DB health
+□ version/platform/Git facts
+□ no sensitive paths/content
+
+Reliability:
+□ migration matrix
+□ backup/recovery strategy
+□ crash recovery
+□ typed startup errors
+□ clean detached worktree
+
+Compatibility:
+□ supported cohort explicit
+□ fixture expansion
+□ matrix truthful
+□ unsupported formats fail closed
+
+Design:
+□ shared components/states
+□ keyboard
+□ focus
+□ non-color-only
+□ 1280×720 usable
+
+Docs:
+□ installation
+□ getting started
+□ support
+□ limitations
+□ troubleshooting
+□ privacy
+□ diagnostics
+□ upgrade/uninstall
+□ CLI
+□ Bundle verification
+
+Security:
+□ no network capability
+□ no generic shell
+□ no path leak
+□ diagnostics sanitized
+□ dependency review
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+76. P5 EXIT CHECKLIST — WINDOWS REAL INSTALL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ real installer used
+□ install succeeds
+□ OS launch succeeds
+□ first-use onboarding works
+□ Analyze works
+□ Compare works
+□ Gate works
+□ Bundle works
+□ History works
+□ Diagnostics works
+□ close/reopen works
+□ reinstall works
+□ uninstall works
+□ documented user-data behavior matches
+□ reinstall after uninstall works
+□ no developer toolchain required
+□ no user DB corruption
+□ no user project modification
+
+Any S0/S1:
+
+P5 not PASS.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+77. P5 CI AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Final candidate head must have the authoritative P5 job set green.
+
+Target:
+
+10 / 10
+
+Existing 7:
+Rust Windows
+Rust Ubuntu
+Desktop UI Windows
+Desktop UI Ubuntu
+Generated output drift
+Dependency policy
+macOS Core Smoke
+
+P5 package jobs:
+Package Windows
+Package Ubuntu
+Package macOS
+
+All:
+
+completed / success
+
+First attempt preferred.
+
+If a code/product failure occurs:
+
+fix it.
+
+Do not rerun and erase the original failure.
+
+Provisioning faults before repository code:
+
+record separately.
+
+No red required job at closure.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+78. LOCAL COUNTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Record:
+
+direct `cargo test --workspace`
+direct UI test count
+check.py 15/15
+package build count
+package artifact count
+migration test count
+real install steps
+History acceptance steps
+Diagnostics acceptance steps
+
+Do not combine reruns into fake totals.
+
+Example:
+
+770 baseline + N new tests
+
+not:
+
+"12,000 tests passed"
+
+because a 30× repetition was executed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+79. SIGNING STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Final report must say exactly one:
+
+SIGNING_READINESS =
+READY_NOT_EXECUTED
+
+or
+
+BLOCKED
+
+Do not say:
+
+SIGNED
+
+unless a real verified signature exists under authorized credentials.
+
+Expected P5:
+
+READY_NOT_EXECUTED
+
+Same for macOS:
+
+NOTARIZATION_READINESS =
+READY_NOT_EXECUTED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+80. UPDATE STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Final report must say:
+
+UPDATE_MODE =
+MANUAL_UPGRADE_READY
+
+unless a later Architect authorization exists.
+
+Do not claim automatic updater.
+
+No update endpoint.
+
+No update manifest fetch.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+81. LICENSE STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Final report must preserve:
+
+OPEN_SOURCE_LICENSE_DECISION =
+PENDING_OWNER_CONFIRMATION
+
+Do not edit license metadata.
+
+Do not add LICENSE.
+
+Do not change Cargo license.
+
+Owner decides later.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+82. P5 CANDIDATE HEAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before closure:
+
+identify one exact productization candidate SHA.
+
+That head must include:
+
+all P5 product changes
+all P5 tests
+all package workflow changes
+all P5 user docs intended for candidate
+integrity files
+
+Local:
+
+clean
+full gate green
+clean detached worktree green
+Windows installed-app acceptance green
+
+Remote:
+
+authoritative P5 CI green.
+
+Only then:
+
+P5 LOCAL PASS / READY FOR REMOTE CLOSURE
+
+Do not set final PASS before remote result.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+83. CLOSURE GOVERNANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After candidate head remote CI is green:
+
+create ONE final governance/evidence successor.
+
+Set:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+B1 =
+NOT_AUTHORIZED
+
+active_task =
+NONE
+
+baseline_version =
+0.6.0
+
+Do NOT write:
+
+Private Beta
+RC
+GA
+Production Ready
+
+Suggested narrative wording:
+
+FirmwareSight Productized MVP Candidate
+
+or repository-existing equivalent.
+
+If no existing product-state vocabulary supports that phrase:
+
+do not invent a machine status key.
+
+Use narrative wording.
+
+Keep machine fields conservative.
+
+The successor records:
+
+candidate SHA
+CI run
+authoritative jobs
+package hashes
+Windows install evidence
+History/Diagnostics evidence
+known limitations
+license pending
+signing readiness
+manual update readiness
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+84. CLOSURE SUCCESSOR CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The final governance successor itself must get the authoritative P5 CI matrix green.
+
+Do NOT create another docs commit to record its own run.
+
+That CI is external final evidence.
+
+Final PASS requires:
+
+candidate head green
+AND
+closure successor green
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+85. POST-P5 STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If all exit criteria pass:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+G2 remains =
+PASS
+
+MVP core stages remain =
+PASS
+
+B1 =
+NOT_AUTHORIZED
+
+V1 =
+separate post-MVP user validation track
+
+Open-source license =
+PENDING_OWNER_CONFIRMATION
+
+Signing =
+READY_NOT_EXECUTED
+
+Notarization =
+READY_NOT_EXECUTED
+
+Update =
+MANUAL_UPGRADE_READY
+
+Do not start:
+
+B1
+RC1
+GA1
+
+without a separate Architect prompt.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+86. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight P5 Productization Final Report
+
+## 1. Start State
+
+start HEAD
+origin/main
+G2
+Post-G2 E2E/remediation
+baseline
+
+## 2. Productization Audit
+
+packaging
+onboarding
+history
+diagnostics
+reliability
+compatibility
+supportability gaps
+
+## 3. Scope
+
+what P5 implemented
+what P5 explicitly did not implement
+
+## 4. Packaging
+
+Windows
+macOS
+Ubuntu
+CLI companion
+versions
+hashes
+
+## 5. Windows Real Install
+
+installer
+install
+launch
+workflow
+reinstall
+uninstall
+reinstall
+data semantics
+
+## 6. Onboarding
+
+first-run
+Help/About
+offline docs
+status semantics
+
+## 7. History
+
+builds
+Gate runs
+releases
+bounded queries
+path safety
+source-independent read
+
+## 8. Diagnostics
+
+export
+privacy
+DB health
+Git
+platform/version
+
+## 9. Migration / Recovery
+
+schema
+migration matrix
+backup strategy
+crash/process recovery
+
+## 10. Compatibility
+
+supported cohort
+new fixtures
+layout coverage
+platform matrix
+
+## 11. Design / Accessibility
+
+components
+keyboard
+focus
+1280×720
+known UI gaps closed
+
+## 12. Tooling
+
+update_goldens
+CI maintenance
+test-race audit
+
+## 13. Security / Dependency
+
+capabilities
+network
+path leakage
+RustSec/advisories
+
+## 14. Documentation
+
+list canonical docs
+
+## 15. Performance Carry-Forward
+
+519,179,252-byte evidence
+warm
+cold
+RSS
+what was / was not optimized
+
+## 16. Known Limitations
+
+CLOSED
+REDUCED
+CARRIED_FORWARD
+OWNER_DECISION
+
+## 17. Local Validation
+
+Rust count
+UI count
+check.py
+clean detached
+packages
+
+## 18. Candidate Head
+
+SHA
+
+## 19. Candidate CI
+
+run
+attempt
+authoritative job matrix
+
+## 20. Closure Successor
+
+SHA
+
+## 21. Closure CI
+
+run
+attempt
+authoritative job matrix
+
+## 22. Distribution Readiness
+
+SIGNING_READINESS
+NOTARIZATION_READINESS
+UPDATE_MODE
+LICENSE_STATUS
+
+## 23. Final Verdict
+
+P5 =
+PASS_COMPLETE / FAIL / BLOCKED
+
+Productization =
+ENGINEERING_COMPLETE / INCOMPLETE
+
+G2 =
+PASS
+
+baseline =
+0.6.0
+
+active_task =
+NONE / P5_PRODUCTIZATION
+
+B1 =
+NOT_AUTHORIZED
+
+## 24. Remaining Decisions
+
+license
+signing credentials
+notarization credentials
+V1
+B1
+
+## 25. Stop
+
+STOP.
+
+Do not start Private Beta.
+
+Do not tag.
+
+Do not create GitHub Release.
+
+Do not publish installers.
+
+Return to Architect.
+
+END OF PROMPT

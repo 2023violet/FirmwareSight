@@ -5,21 +5,36 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-02"
+last_updated: "2026-10-03"
 ---
 
 # Current State
 
-- Date: 2026-10-02
+- Date: 2026-10-03
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- Active task: **`NONE`** — the G2 Product MVP engineering closure audit reached **PASS** on 2026-10-01:
-  **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2 Product MVP
-  Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256 `3c6ab83e…2bac9`,
-  archived) and its inline *Storage Path Semantics Clarification Addendum v1.0*. Product tree `e35cfe7`
-  (`055b54e` + the G2-F1 test-only fix) on Run `36906482900`, evidence head `f75cbc5` on Run
+- Active task: **`P5_PRODUCTIZATION`** — stage **P5**, state **`IN_PROGRESS`**, opened on 2026-10-03 by
+  *FirmwareSight — P5 Productization, Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, 73,722 bytes,
+  3,442 lines, archived in `10_AUDIT/SOURCE_PROMPTS/`). Its §4 required a productization audit before any
+  product code, and that audit is written: **`P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md`** answers §4 A–H
+  from commands run on this tree at `d83175a` (HEAD = `origin/main`, tree clean, Run `37101619245` 7 of 7).
+  The owner's checkpoint then answered the four questions the audit reserved for the owner — artifact
+  versions **unify on `0.6.0`** with the workspace version as the single source, **migration `0005` only
+  after a written `P5_MIGRATION_DECISION.md`**, the package matrix is **Windows with real install evidence
+  on this host plus macOS/Ubuntu `CI_BUILD_ONLY`**, and the shipped store **keeps the name
+  `firmwaresight-p0.sqlite`** with its path made visible rather than moved. Two questions stay other
+  people's: §32 sends L22 (release identity versus line endings) to the Architect as an ADR draft plus a
+  STOP, and §54 leaves the licence with the owner. **No P5 verdict exists**: §5 forbids `P5 PASS`, `BETA`,
+  `RC` or `GA` before closure evidence, `baseline_version` stays `0.6.0`, and no tag, GitHub Release or
+  published installer is created.
+- The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
+  2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
+  Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256
+  `3c6ab83e…2bac9`, archived) and its inline *Storage Path Semantics Clarification Addendum v1.0*. Product
+  tree `e35cfe7` (`055b54e` + the G2-F1 test-only fix) on Run `36906482900`, evidence head `f75cbc5` on Run
   `36948719972`, each 7 of 7 on the first attempt; 769 Rust / 155 UI / `check.py` 15/15 / clean worktree
-  17/17; the whole chain on both surfaces with byte-identical parity; evidence in `G2_VALIDATION/`. Next
-  tracks (V1, P5) need a separate architect decision; nothing here authorizes one.
+  17/17; the whole chain on both surfaces with byte-identical parity; evidence in `G2_VALIDATION/`. At the
+  time it closed, the next tracks (V1, P5) needed a separate architect decision and nothing there
+  authorized one — P5 has since arrived with its own prompt, and V1 still has not.
 - Post-G2, and the reason the source above is no longer the whole picture: the product then passed a
   **real-desktop MVP end-to-end acceptance** round on 2026-10-02 — 283 cases, black-box mouse, keyboard
   and native dialogs against the shipping binary — verdict **`PASS_WITH_FINDINGS`**, three findings, no
@@ -33,8 +48,9 @@ last_updated: "2026-10-02"
   carry out; **E2E-F003** (S3) — a GNU ld MAP whose banner sat past a 4 KB head window was refused as
   another linker's output. Fixes are `e816dcb` and `971015f`: 770 Rust / 159 UI / `check.py` 15/15,
   fix head green on Run #43 `37100371601` at 7 of 7 on the first attempt, evidence in
-  `POST_G2_E2E_REMEDIATION/`. **G2 stays PASS, the product stays MVP CANDIDATE, the baseline stays
-  0.6.0, and no P5 authority was created.** What the remediation deliberately did not take on is
+  `POST_G2_E2E_REMEDIATION/`. **G2 stayed PASS, the product stayed MVP CANDIDATE, the baseline stayed
+  0.6.0, and that round created no P5 authority of its own** — P5 arrived the next day with its own
+  prompt, recorded above. What the remediation deliberately did not take on is
   recorded there too: large-file latency and peak RSS stay carried forward with the wording
   `PARTIAL / environment-sensitive` and `MEASURED FOR TESTED WORKLOAD`, and 125/150 % DPI, mouse-wheel,
   the `update_goldens` issue and the licence choice are all still open.
@@ -305,11 +321,14 @@ citation written before it. The current stage's pack is the one place a line poi
 
 ## Next work
 
-**`active_task: NONE`.** The G2 engineering closure audit closed `PASS` on 2026-10-01, so the MVP
-engineering candidate is complete, no stage is live and nothing may be started from this file.
-`AGENTS.md` 1 means what it has meant in every round: the pointer names ONE stage, and no agent lifts the
-next one off the roadmap. V1 own-artifact validation and P5 productization are the tracks the stage map
-names next; each needs a separate architect decision, and no authority file puts one before the other.
+**`active_task: P5_PRODUCTIZATION`, stage P5, state `IN_PROGRESS`, opened 2026-10-03.** The G2 engineering
+closure audit closed `PASS` on 2026-10-01, so the MVP engineering candidate is complete and the product
+state is still **MVP CANDIDATE** at baseline `0.6.0`. `AGENTS.md` 1 still means what it has meant in every
+round: the pointer names ONE stage, and no agent lifts the next one off the roadmap. P5 arrived the
+legitimate way — its own architect prompt, delivered as a file and archived with its hash — and it may run
+only inside that prompt: no P5 verdict may be written before closure evidence, no tag, GitHub Release,
+published installer, signing, updater or licence choice, and V1 own-artifact / real-user validation still
+has no prompt.
 
 **`G2` closed `PASS` on 2026-10-01, under its own architect prompt and addendum.** Audit-first: the gate
 ran before anything was written and found G2-F1, a test race fixed test-only in `e35cfe7`; then the whole

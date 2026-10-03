@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-02"
+last_updated: "2026-10-03"
 ---
 
 # Decisions — v0.6.0
@@ -1152,3 +1152,59 @@ PASS, the product stays MVP CANDIDATE, baseline stays 0.6.0, `active_task` stays
   observations; only the ones whose evidence showed a product defect inside existing MVP contracts were
   taken, each with a regression that went red before the fix and a mutation proof after it. Everything
   else is listed as carried forward instead of being quietly widened into scope.
+
+# P5 Productization — opened 2026-10-03
+
+Authorization: *FirmwareSight — P5 Productization, Execution Prompt v1.0*, delivered as a file
+(SHA-256 `722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae`, 73,722 bytes, 3,442 lines),
+archived in `10_AUDIT/SOURCE_PROMPTS/` and registered there against a hash recomputed from the stored
+bytes. `active_task: P5_PRODUCTIZATION`, stage `P5`, state `IN_PROGRESS`. The product it starts on is
+unchanged: G2 `PASS`, **MVP CANDIDATE**, baseline `0.6.0`.
+
+- **The audit came first, and it changed the plan rather than decorating it.** §4 forbids product code
+  before `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md`, and the audit's §A–§H answers are what the round will
+  be built on: no package has ever been produced (`bundle.active: false` at `tauri.conf.json:29`, one CI
+  workflow with five job keys and no packaging step, five icons and no `.icns`); History needs read APIs,
+  not tables; `PRAGMA integrity_check` and any database backup appear nowhere in the repository; and the
+  committed fixture set — 25 files, six sets — is entirely `arm-none-eabi-gcc 14.3.1` plus GNU ld, so the
+  "Clang ELF" half of the supported cohort has no compiler-produced evidence at all.
+- **§7's premise was checked rather than copied.** The prompt says the Tauri config holds `0.1.0`; it does,
+  and so do `Cargo.toml:14` and `apps/desktop/ui/package.json:4`, with the CLI following through
+  `env!("CARGO_PKG_VERSION")` (`fwsight 0.1.0`, measured from the binary). So this is not one straggler to
+  bump: `0.6.0` had never existed outside a document, and unifying means a deliberate choice.
+- **The owner chose that identity: artifacts unify on `0.6.0`,** with the workspace version as the single
+  source so the CLI, the fingerprint and a Snapshot cannot disagree. `baseline_version` in `BASELINE.yaml`
+  stays `0.6.0` — this aligns the artifacts to the promoted baseline instead of promoting a new one, and
+  §5's "do not automatically bump product version" is a prohibition on drifting, not on this decision.
+  No tag, no GitHub Release, no published installer.
+- **Migration `0005` was earned by a write-path defect, not by a UI wish.** §18 forbids creating a
+  migration merely to make History easier, and History genuinely needs none: the rows already exist. What
+  is broken is that `optional_fact_u64` (`db.rs:567-569`) returns the value and discards the reason, so
+  `sections.file_offset` and `symbols.address` — the only 2 of 7 nullable numeric columns with no
+  `*_unknown` twin — lose an `Unknown` reason at the moment of writing, and no read API can recover what
+  was never stored. The owner's order is `P5_MIGRATION_DECISION.md` first, then the additive migration
+  (those two columns plus an index on `builds.created_at`), then the §21 matrix over real v1–v4 stores.
+- **The package matrix is bounded by the machines that exist.** Windows gets a real per-user install,
+  uninstall and reinstall on this host, with the owner's live store parked, re-hashed and restored at both
+  ends of the session; macOS and Ubuntu get CI-built, archived packages recorded as `CI_BUILD_ONLY`. The
+  word `SUPPORTED` is not available to those two rows, because §27 says a successful compile is not a
+  runtime claim, and `04_TECH/20:18-20` puts them at Tier 2. 125/150 % DPI, a second hardware host and any
+  macOS/Linux runtime stay carried forward.
+- **The store keeps its inherited name.** `firmwaresight-p0.sqlite` under `app_data_dir()` is where the
+  existing history already lives; a rename would be cosmetic and would put real user data in front of a
+  data-move code path. The chosen fix is disclosure instead of migration: Diagnostics and the install
+  documentation state the path, so the file is findable and backupable.
+- **Two questions were refused, correctly.** §32 sends L22 — line endings moving a release's content-derived
+  identity, which today fails closed — to the Architect as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` plus a STOP,
+  because normalizing the digest input would change identity semantics, an `AGENTS.md` §2 move. And §54 is
+  absolute: this round must not choose MIT / Apache-2.0 / GPL / AGPL / MPL, so
+  `OPEN_SOURCE_LICENSE_DECISION = PENDING_OWNER_CONFIRMATION` is written into every P5 document rather than
+  resolved by convenience.
+- **A dark theme stays a conflict, not a task.** The lifecycle document asks for one while ADR-0018 and
+  `AGENTS.md` §11 freeze MVP light-only; implementing it would silently move a frozen design baseline, so
+  P5 carries it forward and says why instead of quietly choosing a side.
+- **What `IN_PROGRESS` forbids.** No `P5 PASS`, `BETA`, `RC` or `GA`; no signing or notarization executed
+  (`READY_NOT_EXECUTED`) and no updater (`UPDATE_READY_MANUAL`); no new network capability, telemetry,
+  analytics SDK, generic shell or filesystem permission; Diagnostics allowlist-only with positive-control
+  leak tests; and the security sentence stays the permitted one — *dependency policy passes with documented
+  accepted risks*, never "security clean".

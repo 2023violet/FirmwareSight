@@ -5,10 +5,10 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-02"
+last_updated: "2026-10-03"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / active_task NONE
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization IN_PROGRESS — active_task P5_PRODUCTIZATION
 
 ## Purpose
 
@@ -42,6 +42,21 @@ on 2026-10-01: **`G2` is `PASS` — Product MVP ENGINEERING COMPLETE, state MVP 
 `G2_EXIT_CHECKLIST.md`. If you were sent here to "continue G2", it is closed; V1 own-artifact validation
 and P5 productization each need a separate architect decision, and nothing here authorizes either.
 
+**That last sentence held until 2026-10-03, when the architect issued P5's prompt.** `active_task` is now
+**`P5_PRODUCTIZATION`**, stage **P5**, state **`IN_PROGRESS`**. The prompt came as a file (SHA-256
+`722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae`, 73,722 bytes, 3,442 lines), is archived
+in `10_AUDIT/SOURCE_PROMPTS/`, and its §4 required a productization audit before any product code:
+`P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` answers §4 A–H from commands run on the tree at `d83175a`, and
+the owner's checkpoint settled the four questions it reserved for the owner — artifact versions unify on
+`0.6.0`, migration `0005` only after `P5_MIGRATION_DECISION.md` is written, the package matrix is Windows
+with a real install on this host plus macOS/Ubuntu `CI_BUILD_ONLY`, and the store keeps the name
+`firmwaresight-p0.sqlite` with its path made visible instead of moved. L22 goes to the Architect as an ADR
+draft, and the licence stays the owner's (§54 forbids this round from choosing one). **P5 is IN_PROGRESS,
+not passed:** the product is still the G2-passed MVP CANDIDATE at `0.6.0`, and no `P5 PASS`, `BETA`, `RC`,
+`GA`, tag, Release, published installer, signature, updater or new network capability may be written before
+closure evidence exists. If you were sent here to "continue P5", read the audit and `ACTIVE_TASK.md` first —
+the workstreams and the commit split are the prompt's §6 and §61, not this file's invention.
+
 Four wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here to
 continue P1, P2 or P3, all three are `PASS / COMPLETE` and their acceptance lists are checked item by item
 in `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` and
@@ -50,7 +65,8 @@ sent here to start a **Bundle** without a prompt: that window opened on 2026-09-
 2026-10-01. P4 ran under *FirmwareSight — P4 Release Bundle MVP Implementation, Execution Prompt v1.0 —
 Architect Reviewed*, reached `PASS / COMPLETE`, and returned `active_task` to `NONE`. ADR-0026 removed
 the *research* gate, not the requirement that each stage carry its own architect prompt, so "governance
-got easier" is not a licence to widen scope: **nothing is authorized now.** P4's own §78 said stop after
+got easier" is not a licence to widen scope: **nothing was authorized by that closure** — a statement that
+stood until P5 arrived with a prompt of its own, which is the only way a stage opens here. P4's own §78 said stop after
 P4, and its §5 said the round may not claim `G2 = PASS` — the only G2 statement it wrote is
 `READY_FOR_ENGINEERING_GATE_REVIEW`. The G2 audit's own round, under its own prompt, then closed
 `G2 = PASS` (above). Anything History-shaped, installer-shaped, signing-shaped, updater-shaped or
