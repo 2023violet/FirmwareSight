@@ -50,7 +50,8 @@ diff.
 | `37127791999` | `812b472` | `P5_MIGRATION_DECISION.md` + migration `0005` | 7 of 7 | success |
 | `37128593254` | `9e3b1de` | artifact versions unified on `0.6.0` | **6 of 7** | **failure** — `Desktop UI (windows-latest)`, a pre-existing `compare.test.tsx` race, not the version bump |
 | `37129900728` | `20b03e3` | test-only repair of that race | 7 of 7 | success |
-| _(packaging commit)_ | — | the first 10-job run | — | recorded here when it concludes |
+| `37133706214` | `0c031cd` | packaging + release metadata + the three package jobs | **7 of 10** | **failure** — all seven gate jobs green; `Package Windows`, `Package Ubuntu` and `Package macOS` each installed the pinned CLI, then reported `SKIPPED: the Tauri CLI is not installed on this machine`, `4/4 steps passed`, exit 0, and were caught red by their own upload step (`No files were found with the provided path: target/dist-package/`) |
+| _(the packaging repair)_ | — | `cargo-tauri` found through `cargo tauri`, a `SKIP` that can no longer read as a pass, and the package step run from `apps/desktop` | — | recorded here when it concludes |
 
 The failed run is listed rather than dropped. Every P5 closure claim in this repository is "N of N on the
 first attempt", and a head that went red is part of the chain that produced the head that did not:
@@ -58,6 +59,13 @@ first attempt", and a head that went red is part of the chain that produced the 
 runner it landed on is the one that lost the race, and pretending otherwise would make the green run
 meaningless. The reproduction and repair are in `P5_PRODUCTIZATION_AUDIT.md` §0a, with the evidence root
 outside this repository.
+
+`37133706214` is listed for a second reason: it is the run that showed the gate's own reporting could lie.
+The failure was not the installer — no installer was attempted — and it was not visible in the group result
+at all. `cargo install tauri-cli` leaves a binary named `cargo-tauri`, which is run as `cargo tauri`; the
+group probed the bare name `tauri`, did not find it, printed a skip, and summarised `4/4 steps passed`. Only
+`if-no-files-found: error` on the upload step made that visible as a failure. The repair and its three local
+proofs are `P5_PACKAGING_REPORT.md` §5.
 
 ## What closes P5 against this file
 

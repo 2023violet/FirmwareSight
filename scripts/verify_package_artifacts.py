@@ -9,7 +9,7 @@ two concepts cannot be confused for one another.
     python scripts/verify_package_artifacts.py                  # host platform, target/dist-package
     python scripts/verify_package_artifacts.py --print-prefix    # the section 42 name prefix only
 
-Run it after `tauri build` on the platform being packaged. It checks three things worth naming.
+Run it after `cargo tauri build` on the platform being packaged. It checks three things worth naming.
 
 **The packaged version equals the workspace version.** `BASELINE.yaml` carried 0.6.0 while every
 artifact said 0.1.0 until P5 unified them, so a package that takes its version from somewhere else
@@ -60,7 +60,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BUNDLE = ROOT / "target" / "release" / "bundle"
-DIST = ROOT / "apps" / "desktop" / "ui" / "dist"
+# The frontend package. corepack reads `packageManager` from the nearest manifest, so a version
+# recorded for the toolchain has to be asked *here*, not at the repository root.
+UI = ROOT / "apps" / "desktop" / "ui"
+DIST = UI / "dist"
 CONFIG = ROOT / "apps" / "desktop" / "src-tauri" / "tauri.conf.json"
 
 # The package kinds this project asks Tauri for, per host OS. It mirrors the filter in
@@ -87,8 +90,10 @@ def resolve(name: str) -> str:
     return name
 
 
-def run(argv: list[str]) -> str:
-    completed = subprocess.run(argv, cwd=ROOT, capture_output=True, text=True, check=False)
+def run(argv: list[str], cwd: Path | None = None) -> str:
+    completed = subprocess.run(
+        argv, cwd=cwd or ROOT, capture_output=True, text=True, check=False
+    )
     if completed.returncode != 0:
         raise SystemExit(
             f"command failed (exit {completed.returncode}): {' '.join(argv)}\n"
@@ -97,14 +102,18 @@ def run(argv: list[str]) -> str:
     return (completed.stdout or "").strip()
 
 
-def attempt(argv: list[str]) -> str:
+def attempt(argv: list[str], cwd: Path | None = None) -> str:
     """A toolchain field is recorded as `unavailable` rather than failing a packaging run.
 
     A missing tool raises before it can return non-zero, so both shapes count as unavailable here;
     the required checks above deliberately do not swallow either one.
+
+    `cwd` is not cosmetic: corepack reads the `packageManager` field from the nearest manifest, so
+    asking it at the repository root - which has no `package.json` - answers with its own fallback
+    rather than with the pnpm this project pins and that actually built the frontend.
     """
     try:
-        return run(argv)
+        return run(argv, cwd)
     except (SystemExit, OSError):
         return "unavailable"
 
@@ -167,8 +176,8 @@ def asset_keys() -> list[str]:
     """The frontend's own asset paths, read out of the index this build emitted."""
     if not (DIST / "index.html").is_file():
         raise SystemExit(
-            f"{(DIST / 'index.html').relative_to(ROOT)} is missing. `tauri build` produces it via "
-            "tauri.conf.json's beforeBuildCommand, so run this after the build, not before it."
+            f"{(DIST / 'index.html').relative_to(ROOT)} is missing. `cargo tauri build` produces it "
+            "via tauri.conf.json's beforeBuildCommand, so run this after the build, not before it."
         )
     index = (DIST / "index.html").read_text(encoding="utf-8")
     keys = sorted(
@@ -197,7 +206,7 @@ def find_package(kind: str) -> Path:
         )
         raise SystemExit(
             f"no {kind} package directory at {directory.relative_to(ROOT)}. The bundle tree found "
-            f"here is: {listing}. Either `tauri build` did not run on this host or it did not "
+            f"here is: {listing}. Either `cargo tauri build` did not run on this host or it did not "
             f"produce a {kind} target."
         )
     hits = sorted(p for p in directory.iterdir() if p.name.endswith(KIND_SUFFIX[kind]))
@@ -211,6 +220,24 @@ def find_package(kind: str) -> Path:
 
 def app_bundle() -> Path:
     return BUNDLE / "macos" / f"{product_name()}.app"
+
+
+def tauri_cli_version() -> str:
+    """Record the CLI that produced this package, whichever invocation form this host answers to.
+
+    `cargo install tauri-cli` - the form the CI package jobs use - leaves a binary named
+    `cargo-tauri` and is run as `cargo tauri`, while the npm package leaves a bare `tauri`. Asking
+    only for the bare name wrote `unavailable` into the reproducibility fields of a run that had
+    just built a package with that exact CLI. `check.py`'s `tauri_command()` discovers the same way.
+    """
+    for argv in (
+        [resolve("cargo"), "tauri", "--version"],
+        [resolve("tauri"), "--version"],
+    ):
+        text = attempt(argv)
+        if text != "unavailable":
+            return text
+    return "unavailable"
 
 
 def packaged_binary(kind: str, package: Path, workdir: Path) -> tuple[Path, str]:
@@ -231,13 +258,30 @@ def packaged_binary(kind: str, package: Path, workdir: Path) -> tuple[Path, str]
                 f"{[str(p.relative_to(unpacked)) for p in candidates]}"
             )
         return candidates[0], f"extracted from {package.name} with dpkg-deb -x"
-    if kind == "app":
-        return package / "Contents" / "MacOS" / product_name(), f"read from inside {package.name}"
-    if kind == "dmg":
-        binary = app_bundle() / "Contents" / "MacOS" / product_name()
-        if not binary.is_file():
-            raise SystemExit(f"the .app that this dmg wraps was not found at {binary}")
-        return binary, f"read from the {product_name()}.app built in this same run, which the dmg wraps"
+    if kind in ("app", "dmg"):
+        # The `.app` directory carries the product name, but the executable inside it does not:
+        # tauri-cli builds the bundle binary list from the Cargo bin name
+        # (`interface/rust.rs:945` `BundleBinary::with_path(bin.file_name(), …)`) and
+        # tauri-bundler copies each binary into `Contents/MacOS` under that same name
+        # (`bundle/macos/app.rs:174` `dest_dir.join(bin.name())`). `bundle.mainBinaryName` would
+        # rename it (`desktop.rs:336 rename_app`) and this config does not set it. Reading whichever
+        # single file is there, instead of a name this script guessed, is what keeps a packaging
+        # change from being reported as a missing binary.
+        bundle = package if kind == "app" else app_bundle()
+        bin_dir = bundle / "Contents" / "MacOS"
+        if not bin_dir.is_dir():
+            raise SystemExit(f"no executable directory at {bin_dir.relative_to(ROOT)}")
+        candidates = sorted(p.name for p in bin_dir.iterdir() if p.is_file())
+        if len(candidates) != 1:
+            raise SystemExit(
+                f"expected exactly one executable in {bin_dir.relative_to(ROOT)}, found {candidates}"
+            )
+        relation = (
+            f"read from inside {package.name}"
+            if kind == "app"
+            else f"read from the {bundle.name} built in this same run, which the dmg wraps"
+        )
+        return bin_dir / candidates[0], relation
     if kind == "nsis":
         binary = ROOT / "target" / "release" / f"{DESKTOP_BINARY}.exe"
         if not binary.is_file():
@@ -468,8 +512,8 @@ def main(argv: list[str]) -> int:
             "rustc": attempt(["rustc", "--version"]),
             "cargo": attempt([resolve("cargo"), "--version"]),
             "node": attempt(["node", "--version"]),
-            "pnpm": attempt([resolve("corepack"), "pnpm", "--version"]),
-            "tauri_cli": attempt([resolve("tauri"), "--version"]),
+            "pnpm": attempt([resolve("corepack"), "pnpm", "--version"], cwd=UI),
+            "tauri_cli": tauri_cli_version(),
             "cargo_lock_sha256": sha256(ROOT / "Cargo.lock"),
             "pnpm_lock_sha256": sha256(ROOT / "apps" / "desktop" / "ui" / "pnpm-lock.yaml"),
             "git_commit": attempt([resolve("git"), "rev-parse", "HEAD"]),

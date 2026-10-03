@@ -1238,6 +1238,25 @@ unchanged: G2 `PASS`, **MVP CANDIDATE**, baseline `0.6.0`.
   (3 of 3). The repair is one awaited query, test-only, proven load-bearing by a never-resolving query
   that keeps it red. The failed run is recorded in `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` rather than
   re-run until a green attempt appeared.
+- **A step that did not run is not a pass, and in CI it is a failure.** Run `37133706214` — the first
+  10-job run — went red on all three package jobs for a reason that no result line admitted: `cargo
+  install tauri-cli` leaves a binary called `cargo-tauri`, the group probed the bare name `tauri`, printed
+  `SKIPPED: the Tauri CLI is not installed on this machine`, summed it as `4/4 steps passed`, exited 0, and
+  was caught only by the job's own `if-no-files-found: error` upload. The rule now in `scripts/check.py` is
+  the general one: a skip is recorded as `SKIP`, kept out of the passed total, and makes the run exit
+  non-zero whenever `CI` is set, because a CI job installs every tool its gate needs and therefore has no
+  license to skip one. cargo-deny's local skip moved onto the same machinery, and the Tauri CLI is
+  discovered by probing the forms in the order the install methods produce them — `cargo tauri` first,
+  because that is what a `cargo install` leaves, then the bare `tauri` the npm package installs.
+- **The package step runs from `apps/desktop`, and that is where a hand-run build belongs too.** The CLI
+  resolves its frontend directory from the process cwd and falls back to the shell directory's parent when
+  it finds no `package.json` nearby, so `cargo tauri build` from inside `src-tauri` ran the config's
+  `pnpm build` in a directory that is not a pnpm package and failed. `apps/desktop` is the folder that holds
+  both `ui/` and `src-tauri/`, and from there the CLI's own lookup finds the frontend. Chosen over the
+  config's `{script, cwd}` hook form because that `cwd` is still resolved against wherever a person
+  happened to stand. Building it for real also moved two claims from assumption to evidence: the NSIS
+  package does carry `target/release/firmwaresight-desktop.exe`, and this repository has now produced an
+  installer (§5b of `P5_PACKAGING_REPORT.md`) — produced, not yet installed anywhere.
 - **Two questions were refused, correctly.** §32 sends L22 — line endings moving a release's content-derived
   identity, which today fails closed — to the Architect as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` plus a STOP,
   because normalizing the digest input would change identity semantics, an `AGENTS.md` §2 move. And §54 is

@@ -62,17 +62,27 @@ and the audit landed in `4cc8d93` (Run `37125456689`, 7 of 7); migration `0005` 
 `812b472` (Run `37127791999`, 7 of 7); the `0.6.0` artifact unification in `9e3b1de`, whose gate run
 `37128593254` **failed 6 of 7** on a pre-existing `compare.test.tsx` race that the commit did not introduce
 and did not cause; `20b03e3` repaired that race in one awaited query and came back 7 of 7 on Run
-`37129900728`. The packaging commit then enabled `bundle.active`, added the three §41 package jobs (the
-authoritative set is **ten** now — `P5_VALIDATION/P5_CI_AUTHORITY.md` is the running record), and wrote
+`37129900728`. The packaging commit `0c031cd` then enabled `bundle.active`, added the three §41 package jobs
+(the authoritative set is **ten** now — `P5_CI_AUTHORITY.md` is the running record), and wrote
 `scripts/verify_package_artifacts.py`, whose §8 "no dev-server dependency" check had to be built on the
 embedded asset keys rather than on the absence of `localhost:5173`: both a good and a broken binary contain
 that string, so the intuitive check passes exactly the builds it should refuse. `04_TECH/17` and
 `05_ENGINEERING/06_CI_CD_BASELINE.md` carry the packaging decisions; `P5_VALIDATION/P5_PACKAGING_REPORT.md`
-carries the measurements and, in §9, the list of what packaging has *not* yet proved.
+carries the measurements and, in §9, the list of what packaging has *not* yet proved. That commit's own run
+`37133706214` **failed 7 of 10**, and the reason is the one thing to carry forward: `cargo install` leaves
+`cargo-tauri`, the group probed the bare `tauri`, skipped the build, and still printed `4/4 steps passed` —
+only the upload step's `if-no-files-found: error` told the truth. Its successor makes a `SKIP` impossible to
+count as a pass and fails any skip under `CI`.
 
-**What is next, in order:** the first 10-job CI run of the packaging head must be read back and recorded in
-`P5_CI_AUTHORITY.md`; then §38/§64's real Windows install, uninstall and reinstall acceptance on this host
-with the owner's store parked, hashed and restored (the `P5_INSTALL_RECOVERY_REPORT.md` evidence, and the
+**What is next, in order:** the 10-job run of that successor must be read back and recorded in
+`P5_CI_AUTHORITY.md`. Packaging itself is no longer blocked: installing the pinned CLI on this host made
+`check.py --only package` build this repository's **first real package** —
+`FirmwareSight_0.6.0_x64-setup.exe`, 3,811,140 bytes, digested in `target/dist-package/SHA256SUMS.txt` —
+and doing it found a second defect the stub could not: the package step must run from `apps/desktop`,
+because the CLI resolves its frontend directory from the process cwd and this repository keeps `ui/` and
+`src-tauri/` as siblings (`P5_PACKAGING_REPORT.md` §5a). Then §38/§64's real Windows install, uninstall and
+reinstall acceptance on this host with the owner's store parked, hashed and restored (the
+`P5_INSTALL_RECOVERY_REPORT.md` evidence, and the
 thing no package job can do from a runner); then Commit C's onboarding and local History, Commit D's
 diagnostics and recovery, Commit E's fixture cohort, Commit F's documentation and closure. **Do not start a
 workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and

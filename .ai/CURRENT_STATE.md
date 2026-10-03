@@ -33,9 +33,31 @@ last_updated: "2026-10-03"
   regenerated the seven goldens it moved (Run `37128593254`, **6 of 7 — failed**); `20b03e3` repaired the
   race that run lost, test-only (Run `37129900728`, 7 of 7); and the packaging commit turned `bundle.active`
   on, added the three CI package jobs prompt §41 asks for, wrote `scripts/verify_package_artifacts.py` and
-  gave the gate a `drift/version identity` step. The tree is now **775 Rust tests / 160 UI tests in 6 files
-  / `check.py` 16 steps**, and the authoritative CI set is **10 jobs** for the length of P5 — recorded in
-  `05_ENGINEERING/06_CI_CD_BASELINE.md` and tracked run by run in `P5_VALIDATION/P5_CI_AUTHORITY.md`.
+  gave the gate a `drift/version identity` step (Run `37133706214`, **7 of 10 — failed**: the seven gate
+  jobs were green and all three package jobs skipped their own build). The tree is now **775 Rust tests /
+  160 UI tests in 6 files / `check.py` 16 steps**, and the authoritative CI set is **10 jobs** for the
+  length of P5 — recorded in `05_ENGINEERING/06_CI_CD_BASELINE.md` and tracked run by run in
+  `P5_VALIDATION/P5_CI_AUTHORITY.md`.
+- **The first 10-job run went red because the gate reported a pass it had not earned.** `cargo install
+  tauri-cli` leaves a binary named `cargo-tauri`, which is run as `cargo tauri`; the package group probed
+  the bare name `tauri`, found nothing on the three runners that had installed the CLI one step earlier,
+  printed `SKIPPED: the Tauri CLI is not installed on this machine`, summarised `4/4 steps passed` and
+  exited 0 — and each job was then caught red by its own artifact upload. Two rules replace the instance
+  fix: the group probes the forms in the order the install methods produce them and runs the one that
+  answered, and `check.py` now records a skip as `SKIP`, leaves it out of the passed total, and exits
+  non-zero on any skip when `CI` is set. Measured on this host three ways, in `P5_VALIDATION/
+  P5_PACKAGING_REPORT.md` §5.
+- **This repository has now produced an installer, and building it found a second defect.** With the
+  pinned CLI installed here (`cargo install tauri-cli@2.12.1 --locked`, which leaves `cargo-tauri`),
+  `check.py --only package` ran all four steps for real and wrote
+  `FirmwareSight_0.6.0_x64-setup.exe` — 3,811,140 bytes, digested in `target/dist-package/SHA256SUMS.txt`
+  and verified by `sha256sum -c` — so the bundler's assumption that the NSIS package carries
+  `target/release/firmwaresight-desktop.exe` is now evidence rather than an assumption. The first attempt
+  from `apps/desktop/src-tauri` failed inside the config's own hook,
+  `[ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND]`, because the CLI resolves its frontend directory from the
+  **process** cwd and this repository keeps `ui/` and `src-tauri/` as siblings; the package step now runs
+  from `apps/desktop`. A built file is still not an installed one: §38/§64's real install, launch,
+  uninstall and reinstall acceptance has not happened.
 - **One gate run went red for a reason that was not in the commit it ran on**, and that is worth knowing
   before the next stage trusts a green. Run `37128593254` failed `Desktop UI (windows-latest)` on a
   pre-existing race in `compare.test.tsx:1094`: the `Section Changes` region mounts before its first page

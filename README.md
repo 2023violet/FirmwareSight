@@ -303,7 +303,17 @@ enabled: `bundle.active` with NSIS / `.app`+`.dmg` / `.deb` as the canonical tar
 on top of the seven gate jobs, `scripts/verify_package_artifacts.py` to check the packaged version and the
 embedded frontend and write a **distribution** `SHA256SUMS.txt`, and a `drift/version identity` gate step —
 evidence and the limits of it in `P5_VALIDATION/P5_PACKAGING_REPORT.md`, the job set and every run in
-`P5_VALIDATION/P5_CI_AUTHORITY.md`. **No P5 verdict
+`P5_VALIDATION/P5_CI_AUTHORITY.md`. **The first 10-job run failed**: `37133706214`, head `0c031cd`, kept its
+seven gate jobs green and reddened the three package jobs, because `cargo install tauri-cli` leaves a binary
+named `cargo-tauri` while the group looked for `tauri` — each job installed the CLI, printed `SKIPPED: the
+Tauri CLI is not installed on this machine`, summed that as `4/4 steps passed`, and was stopped only by its
+own empty artifact upload. The fix is the rule rather than the filename: a skip now prints as `SKIP`, stays
+out of the passed total, and fails the run when `CI` is set. Installing the pinned CLI here then produced
+this repository's **first real package** — a 3,811,140-byte `FirmwareSight_0.6.0_x64-setup.exe` — and that
+build surfaced a second defect the stub could not have found: the CLI resolves its frontend directory from
+the process cwd, so the package step has to run from `apps/desktop`, not from `apps/desktop/src-tauri`. Both
+repairs, the produced artifact set with its checksums, and the limits of what has been proved are in
+`P5_PACKAGING_REPORT.md` §5, §5a and §5b. **No P5 verdict
 exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt
 forbids writing `P5 PASS`, `BETA`, `RC` or `GA` before closure evidence, and forbids a tag, a GitHub
 Release, an updater, a certificate and any licence choice. V1 own-artifact / real-user validation still has

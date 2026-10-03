@@ -50,7 +50,8 @@ zero Clang-produced evidence despite the cohort claim.
 | `812b472` | `P5_MIGRATION_DECISION.md`, then migration `0005` and its write/query/IPC/UI path | `37127791999` | success, 7 of 7 |
 | `9e3b1de` | artifact versions unified on `0.6.0`; seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
 | `20b03e3` | test-only repair of the pre-existing race that run lost | `37129900728` | success, 7 of 7 |
-| the packaging commit | `bundle.active`, three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | its own run, 10 jobs | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
+| `0c031cd` | `bundle.active`, three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | `37133706214` | **failure, 7 of 10** |
+| the commit that lands this row | the package group finds `cargo-tauri` through `cargo tauri`, and a `SKIP` can no longer read as a pass | its own run, 10 jobs | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
 
 The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
 lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
@@ -58,6 +59,25 @@ it had left the rest). Reproduced here without CI — 1 of 30 fresh runs, and 3 
 latency — and repaired by awaiting the one synchronous read, no production source touched. `P5_VALIDATION/
 P5_PRODUCTIZATION_AUDIT.md` §0a carries the evidence; the class is worth a sweep, which is a P5 validation
 task, not a licence to rewrite unrelated tests.
+
+`37133706214` is the second red run and the more instructive of the two, because nothing about the product
+was wrong. All seven gate jobs passed; the three package jobs installed `tauri-cli@2.12.1`, looked for a
+binary named `tauri` — `cargo install` leaves `cargo-tauri`, run as `cargo tauri` — reported a skip, and
+printed `4/4 steps passed` with exit 0. What made them red was their own `if-no-files-found: error` upload
+step, i.e. the failure surfaced one step after the verification lied. The repair is the rule, not the
+filename: `check.py` distinguishes `SKIP` from `PASS` in its summary and totals, and exits non-zero when a
+skip happens in CI, where every tool the gate needs is installed by the job itself. Three local proofs are
+in `P5_VALIDATION/P5_PACKAGING_REPORT.md` §5, including a stand-in `cargo-tauri` that measured cargo's
+argument forwarding and then failed verification for building nothing.
+
+Installing the pinned CLI on this host then turned the group from a probe into a build, and it found the
+second defect: run from `apps/desktop/src-tauri`, the CLI's own `beforeBuildCommand` hook executed in a
+directory with no `package.json` (`ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND`), because the CLI resolves its
+frontend from the **process cwd** (`tauri-cli-2.12.1/src/helpers/app_paths.rs:148,153-174`) and this
+repository keeps `ui/` and `src-tauri/` as siblings. The package step now runs from `apps/desktop`, and from
+there it produced this repository's first installer — `FirmwareSight_0.6.0_x64-setup.exe`, 3,811,140 bytes,
+`c5c8cf23…` in `target/dist-package/SHA256SUMS.txt`, verified with `sha256sum -c`. That file is built, not
+installed: §38/§64's real-install acceptance is still ahead, and it is the next thing.
 
 ## What the owner decided at the checkpoint
 

@@ -580,6 +580,8 @@ p5_execution:
     distribution_checksums: target/dist-package/SHA256SUMS.txt # distinct from a firmware Release Bundle's SHA256SUMS, as section 10 requires
     # A CI tool, not a dependency: it never enters Cargo.lock, so cargo-deny's product graph is unchanged.
     ci_tooling: cargo install tauri-cli@2.12.1 --locked
+    desktop_package_command: cargo tauri build -- --locked # cargo install leaves cargo-tauri, which is run through cargo; the bare `tauri` name belongs to the npm distribution
+    ci_skip_policy: FAIL_ON_ANY_SKIPPED_STEP # a job installs every tool its gate needs, so a SKIP there means the claim was never checked (run 37133706214)
     authoritative_job_count: 10 # 1-7 unchanged, plus Package Windows / Package Ubuntu / Package macOS
     signed: false
     released: false

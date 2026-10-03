@@ -168,7 +168,23 @@ pushes `tauri/custom-protocol` for a release build, which is how §8's requireme
 ### What a package job produces
 
 `python scripts/check.py --only package` - the same command CI runs - produces the CLI companion
-release binary, then the desktop package, then `target/dist-package/`:
+release binary, then the desktop package, then `target/dist-package/`. The desktop package step runs
+`cargo tauri build -- --locked`, not `tauri build`: `cargo install tauri-cli` leaves a binary named
+`cargo-tauri`, so the bare name only exists for the npm distribution. The group discovers which form this
+machine answers to by probing both with `--version`, and a machine that answers neither reports `SKIP` —
+and because a job whose purpose is an artifact must not go green without one, `check.py` exits non-zero on
+any `SKIP` when `CI` is set. Run `37133706214` is the case the rule exists for: three jobs installed the
+CLI, skipped the build, printed `4/4 steps passed`, and were caught only by their own empty artifact
+upload.
+
+The step also runs **from `apps/desktop`**, not from `apps/desktop/src-tauri`. The CLI resolves the
+frontend directory from the process cwd (`tauri-cli-2.12.1/src/helpers/app_paths.rs:153-174`) and falls
+back to the shell directory's parent when it finds no `package.json` there
+(`resolve_dirs()`, same file, line 148); this repository keeps `ui/` and `src-tauri/` as siblings, so a cwd
+inside the shell runs the config's `pnpm build` in a directory that is not a pnpm package. Measured, from
+`src-tauri`: `[ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND] No package.json … was found in "<workspace root>"`.
+From `apps/desktop` the lookup answers `apps/desktop/ui`, the hook builds it, and the bundler produces the
+installer. A hand-run build follows the same directory rule.
 
 - `FirmwareSight-<version>-<platform>-<arch>-<kind>` for each package, and `-cli-fwsight` for the CLI
   companion, per §42's shape: product, version, platform, architecture, kind - no wall-clock stamp,

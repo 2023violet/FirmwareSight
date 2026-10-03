@@ -17,16 +17,18 @@ of those packages plus the shell. The `package` group is likewise not in the def
 release binary and a platform installer, which takes minutes rather than seconds and only means
 something on the platform it runs on, so the three CI package jobs invoke it explicitly with
 `--only package`. A machine without the Tauri CLI records that group as SKIPPED rather than as a
-pass it never made.
+pass it never made - and under `CI`, any skipped step fails the run, because a job whose whole
+purpose is to produce an artifact must not go green while printing "skipped" (Run 37133706214).
 
-Exit code is non-zero on the first failing step; every step's command line is printed before it
-runs so a failure can be reproduced by hand.
+Exit code is non-zero on the first failing step, and non-zero under `CI` when a step skipped;
+every step's command line is printed before it runs so a failure can be reproduced by hand.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -36,6 +38,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 UI = ROOT / "apps" / "desktop" / "ui"
 TAURI = ROOT / "apps" / "desktop" / "src-tauri"
+# `cargo tauri build` runs from the folder that holds both the shell and its frontend. The CLI
+# resolves the frontend directory from the *process* cwd (helpers/app_paths.rs:153), and this
+# repository keeps `ui/` and `src-tauri/` as siblings, so a cwd inside `src-tauri` finds no
+# package.json, falls back to `src-tauri/..` = `apps/desktop`, and runs the config's
+# `pnpm build` there - which is not a pnpm project. Running from `apps/desktop` makes the CLI's
+# own lookup land on `apps/desktop/ui`, which is where the frontend lives.
+APP = ROOT / "apps" / "desktop"
 # Tauri's production codegen embeds this directory at compile time.
 UI_MARKER = UI / "dist" / "index.html"
 # The headless product: named so a platform that ships Core but not the shell can still be gated.
@@ -77,7 +86,8 @@ def pnpm_command() -> list[str]:
 
 class Gate:
     def __init__(self) -> None:
-        self.results: list[tuple[str, str, int]] = []
+        # None in the exit-code slot means the step was skipped: it ran nothing and proved nothing.
+        self.results: list[tuple[str, str, int | None]] = []
 
     def run(self, group: str, name: str, argv: list[str], cwd: Path | None = None) -> bool:
         printable = " ".join(argv)
@@ -87,6 +97,11 @@ class Gate:
         if completed.returncode != 0:
             print(f"FAILED: {name} (exit {completed.returncode})", file=sys.stderr, flush=True)
         return completed.returncode == 0
+
+    def skip(self, group: str, name: str, reason: str) -> None:
+        """Record a step that did not run, and say why where the summary will show it."""
+        print(f"\n=== [{group}] {name}\nSKIPPED: {reason}", flush=True)
+        self.results.append((group, name, None))
 
     def inline(self, group: str, name: str, examined: str, evaluate) -> bool:
         """A step whose check lives in this script instead of a subprocess.
@@ -294,6 +309,37 @@ def frontend_steps(gate: Gate) -> None:
             return
 
 
+def tauri_command() -> tuple[list[str], str] | None:
+    """The argv prefix that runs the Tauri CLI on this machine, or None when it is not installed.
+
+    Each candidate is probed with `--version` in the exact form the build will use, because the
+    install method decides the filename: `cargo install tauri-cli` leaves a binary named
+    `cargo-tauri`, and the way to run it is `cargo tauri <args>` - cargo forwards the subcommand
+    token and the CLI strips it (`crates/tauri-cli/src/main.rs` at tag `tauri-cli-v2.12.1`), while
+    the npm package leaves a bare `tauri`. Probing only the bare name reported "not installed" on
+    the three runners that had installed the CLI two steps earlier, which is how Run 37133706214
+    went green-ish on an unbuilt package.
+    """
+    exe = cargo()
+    for prefix, label in (
+        ([exe, "tauri"], "cargo tauri"),
+        ([resolve("tauri")], "tauri"),
+    ):
+        try:
+            # An absent bare `tauri` raises here rather than returning non-zero, because `resolve`
+            # hands back the name it could not find so the printed command line stays readable.
+            probe = subprocess.run(
+                prefix + ["--version"], cwd=APP, capture_output=True, check=False
+            )
+        except OSError:
+            continue
+        if probe.returncode == 0:
+            version = probe.stdout.decode(errors="replace").strip().replace("\n", " ")
+            print(f"[package] Tauri CLI found: {label} - {version}", flush=True)
+            return prefix, label
+    return None
+
+
 def package_steps(gate: Gate) -> None:
     """Build what a stranger would install, then check what the build actually produced.
 
@@ -304,7 +350,7 @@ def package_steps(gate: Gate) -> None:
     `.github/workflows/p0-check.yml` makes.
     """
     exe = cargo()
-    # `tauri build` runs tauri.conf.json's beforeBuildCommand (`pnpm build`), and that needs the
+    # The package build runs tauri.conf.json's beforeBuildCommand (`pnpm build`), and that needs the
     # dependencies the lockfile names. `--frozen-lockfile` is the exact-lockfile rule prompt
     # section 41 asks of a package job, applied where the package actually builds.
     if not gate.run(
@@ -314,31 +360,33 @@ def package_steps(gate: Gate) -> None:
     if not gate.run("package", "cli companion", [exe, "build", "--release", "--locked", "-p", "fwsight"]):
         return
 
-    tauri = resolve("tauri")
-    try:
-        probe = subprocess.run([tauri, "--version"], cwd=TAURI, capture_output=True, check=False)
-    except OSError:
-        probe = subprocess.CompletedProcess([tauri], returncode=1)
-    if probe.returncode != 0:
-        print(
-            "\n=== [package] desktop package\n"
-            "SKIPPED: the Tauri CLI is not installed on this machine, so no package was built and\n"
-            "         nothing here verifies one. CI installs the pinned version, so the package,\n"
-            "         its checksums and its verification come from the CI run rather than from\n"
-            "         here. Locally:\n"
-            "             cargo install tauri-cli@2.12.1 --locked",
-            flush=True,
+    found = tauri_command()
+    if found is None:
+        gate.skip(
+            "package",
+            "desktop package",
+            "no Tauri CLI is installed on this machine, so no package was built and nothing below "
+            "verifies one. CI installs the pinned version, so the package, its checksums and their "
+            "verification come from the CI run rather than from here. Locally:\n"
+            "            cargo install tauri-cli@2.12.1 --locked",
         )
-        gate.results.append(("package", "desktop package (skipped)", 0))
-        gate.results.append(("package", "artifacts verified (skipped)", 0))
+        gate.skip("package", "artifacts verified", "no package was built on this machine")
         return
 
+    tauri, _label = found
     # No `--bundles`: tauri.conf.json names the canonical targets and tauri-bundler intersects that
     # list with what the host can build, so this one command is the whole documented packaging path.
     # That is what prompt section 8 means by a user not having to remember `--features
     # custom-protocol` - the CLI adds the feature itself (tauri-cli's `build_options`), and the
     # verify step below is what proves the effect rather than trusting the intent.
-    if not gate.run("package", "desktop package", [tauri, "build", "--", "--locked"], cwd=TAURI):
+    #
+    # cwd is `apps/desktop`, not `apps/desktop/src-tauri`: measured here, from the shell's own error,
+    # the CLI runs `beforeBuildCommand` in the directory it resolves as the frontend, and a cwd
+    # inside `src-tauri` resolves to `apps/desktop` - which holds no package.json. Measured output
+    # from that cwd: `[ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND] No package.json ... was found in
+    # "<repo root>"`, and the build step failed with exit 1. From `apps/desktop` the CLI finds
+    # `apps/desktop/ui`, runs `pnpm build` there, and produces the installer.
+    if not gate.run("package", "desktop package", tauri + ["build", "--", "--locked"], cwd=APP):
         return
     gate.run("package", "artifacts verified", [sys.executable, "scripts/verify_package_artifacts.py"])
 
@@ -348,13 +396,12 @@ def deny_steps(gate: Gate) -> None:
     # failure it never checked, so the step is recorded as SKIPPED rather than passed.
     probe = subprocess.run([cargo(), "deny", "--version"], cwd=ROOT, capture_output=True, check=False)
     if probe.returncode != 0:
-        print(
-            "\n=== [deny] cargo-deny\n"
-            "SKIPPED: `cargo deny` is not installed on this machine. CI installs it, so the\n"
-            "         license and ban result comes from the CI run rather than from here.",
-            flush=True,
+        gate.skip(
+            "deny",
+            "cargo-deny",
+            "`cargo deny` is not installed on this machine. CI installs it, so the license and ban "
+            "result comes from the CI run rather than from here.",
         )
-        gate.results.append(("deny", "cargo-deny (skipped)", 0))
         return
     gate.run("deny", "cargo-deny", [cargo(), "deny", "check", "licenses", "bans", "sources", "advisories"])
 
@@ -391,10 +438,22 @@ def main(argv: list[str]) -> int:
 
     print("\n=== summary ===")
     for group, name, code in gate.results:
-        mark = "PASS" if code == 0 else f"FAIL({code})"
+        mark = "SKIP" if code is None else "PASS" if code == 0 else f"FAIL({code})"
         print(f"{mark:<10} {group}/{name}")
-    failed = [r for r in gate.results if r[2] != 0]
-    print(f"\n{len(gate.results) - len(failed)}/{len(gate.results)} steps passed")
+    failed = [r for r in gate.results if r[2] is not None and r[2] != 0]
+    skipped = [r for r in gate.results if r[2] is None]
+    print(
+        f"\n{len(gate.results) - len(failed) - len(skipped)}/{len(gate.results)} steps passed"
+        + (f", {len(skipped)} skipped" if skipped else "")
+    )
+    # A CI job is allowed to run only steps it can run: every tool this gate needs is installed by
+    # the job itself. A skip there means the job did not check what it claims to have checked, and
+    # a package job that skips its build still exits 0 while its upload step finds nothing
+    # (Run 37133706214). Locally a skip stays an honest, non-failing report.
+    if skipped and os.environ.get("CI"):
+        for group, name, _code in skipped:
+            print(f"SKIPPED IN CI: {group}/{name}", file=sys.stderr, flush=True)
+        return 1
     return 1 if failed else 0
 
 

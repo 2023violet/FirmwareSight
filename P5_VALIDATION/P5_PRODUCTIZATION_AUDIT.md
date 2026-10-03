@@ -55,7 +55,7 @@ ADR-0015/0016/0018/0023/0026, plus the inspection list in §3: `Cargo.toml`, `Ca
 `.github/workflows/`, `crates/firmwaresight-storage/migrations/`, the storage query APIs,
 `apps/desktop/ui/src/`, `apps/cli/`, `fixtures/`, `scripts/check.py`.
 
-### 0a. What landed after the checkpoint, and the one run that went red
+### 0a. What landed after the checkpoint, and the two runs that went red
 
 | Commit | Content | Gate run | Result |
 | --- | --- | --- | --- |
@@ -63,7 +63,8 @@ ADR-0015/0016/0018/0023/0026, plus the inspection list in §3: `Cargo.toml`, `Ca
 | `812b472` | `P5_MIGRATION_DECISION.md` + migration `0005` and its write/query/IPC/UI path | `37127791999` | success, 7 of 7 |
 | `9e3b1de` | version identity unified on `0.6.0`, seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
 | `20b03e3` | test-only repair of the race `37128593254` lost | `37129900728` | success, 7 of 7 |
-| the commit that lands this row | packaging enabled: `bundle.active`, the three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | follows this commit | — |
+| `0c031cd` | packaging enabled: `bundle.active`, the three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | `37133706214` | **failure, 7 of 10** |
+| the commit that lands this row | `cargo-tauri` found through `cargo tauri`, a `SKIP` that can no longer read as a pass, the package step run from `apps/desktop`, and this repository's first real installer built here | its own run, 10 jobs | — |
 
 The failure was not the version bump. `Desktop UI (windows-latest)` lost a pre-existing race in
 `compare.test.tsx`: `runCompare()` returns as soon as the comparison region exists, and the
@@ -79,7 +80,8 @@ repaired test red — the wait is load-bearing, not a widened timeout. Repaired 
 (`findAllByRole`, awaited), no production source, no timeout constant, no weakened assertion; the full UI
 suite is 160 tests in 6 files, typecheck and lint clean.
 
-**What this says about the gate, not just about this test.** This is the third time the same class hasreddened `Desktop UI (windows-latest)` in this one file: `e83950c` closed it where the KiB test sampled
+**What this says about the gate, not just about this test.** This is the third time the same class has
+reddened `Desktop UI (windows-latest)` in this one file: `e83950c` closed it where the KiB test sampled
 call counts before both tables had resolved (Run `36779715108`), `055b54e` closed it at the pager (Run
 `36892307828` attempt 1), and this commit closes it at the table headers. `055b54e`'s own message said the
 shape "was not converted then", and `e83950c` named it "defect I's class, in the same file, and the local
@@ -90,7 +92,7 @@ that still sample before their page resolves — instead of letting the next red
 
 ### 0b. What section A became when packaging was switched on
 
-The packaging commit implements section 8/9/10/41 against the numbers in section A above. Four findings
+The packaging commit implements section 8/9/10/41 against the numbers in section A above. Seven findings
 from doing it are worth recording here because they were not visible from the audit:
 
 - **A `localhost:5173` absence check would have been a lie.** Section 8 asks that the production package
@@ -116,6 +118,38 @@ from doing it are worth recording here because they were not visible from the au
   ICNS from the listed PNGs when the icon list has none, and the five committed PNGs are RGBA at
   power-of-two sizes — the input that function accepts. Adding a committed `.icns` would have enlarged
   the pixel-comparison drift surface to reproduce work the bundler already does.
+- **A step this gate skipped still printed as a pass, and the first 10-job run proved it.** `cargo install
+  tauri-cli` leaves a binary named `cargo-tauri`; the group probed the bare name `tauri`, found nothing on
+  runners that had installed the CLI two steps earlier, printed `SKIPPED: the Tauri CLI is not installed on
+  this machine`, and summarised `4/4 steps passed` with exit 0. Run `37133706214` was therefore seven
+  honest gate jobs plus three failures that its own `if-no-files-found: error` upload step caused — nothing
+  else in the pipeline knew no installer had been built. Two changes close the class rather than the
+  instance: the group now probes the forms in the order the install methods produce them and runs the form
+  that answered (`cargo tauri build -- --locked` here), and `Gate` records a skip as `None` rather than `0`,
+  prints it as `SKIP`, counts it out of the passed total, and exits non-zero when `CI` is set — because a
+  job that installs every tool it needs is never entitled to skip one. The three proofs, the cargo argument
+  forwarding measured with a stand-in binary, and the cargo-deny group's move to the same machinery are in
+  `P5_PACKAGING_REPORT.md` §5.
+- **The `.app`'s executable name is the Cargo bin name, and the verifier had guessed wrong.** Reading
+  `tauri-cli-2.12.1` and `tauri-bundler-2.10.1` side by side: the CLI builds the bundle's binary list from
+  `bin.file_name()` (`interface/rust.rs:945`), the bundler copies each binary into
+  `FirmwareSight.app/Contents/MacOS/<bin.name()>` (`bundle/macos/app.rs:174`), and only
+  `bundle.mainBinaryName` renames it (`desktop.rs:336 rename_app`) — a key this config does not set. So the
+  file is `Contents/MacOS/firmwaresight-desktop`, while the `.app` *directory* is named from
+  `settings.product_name()` (`app.rs:58`). The verifier looked for `Contents/MacOS/FirmwareSight`, which
+  would have reddened `Package macOS` over a naming rule nobody in this repository chose; it now reads
+  whichever single executable that directory holds and records which one it read. The same class as the
+  `localhost:5173` check above: an assertion written from what sounds right rather than from the artifact.
+- **The CLI's working directory was wrong too, and only a real build could show it.** With
+  `tauri-cli 2.12.1` actually installed, the package step from `apps/desktop/src-tauri` died in the
+  config's own hook: `[ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND] No package.json … was found in
+  "<workspace root>"`. The CLI resolves the frontend from the *process* cwd and falls back to the shell
+  directory's parent when no `package.json` is near it (`helpers/app_paths.rs:148,153-174`), and this
+  repository keeps `ui/` and `src-tauri/` as siblings — so the hook ran where there is no pnpm package.
+  Run from `apps/desktop` the lookup answers `apps/desktop/ui`, and the same command produced this
+  repository's first real installer. The stand-in shim in §0b's earlier bullet could not have found this,
+  because a stub exits 0 whatever the cwd is; L18's "one command packages it" claim rests on §5a/§5b of
+  `P5_PACKAGING_REPORT.md`, not on the config looking plausible.
 
 The CI authoritative set is now ten jobs (section 41), which `05_ENGINEERING/06_CI_CD_BASELINE.md`
 records with its reason: this repository has never had a scheduled workflow, so the matrix row that

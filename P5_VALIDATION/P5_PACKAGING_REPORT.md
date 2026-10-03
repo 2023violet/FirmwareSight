@@ -12,10 +12,11 @@ last_updated: "2026-10-03"
 # P5 — packaging (prompt §8, §9, §10, §11, §12, §41, §42, §65)
 
 **Scope of this document.** It records what packaging was enabled, what was measured to decide it, and
-what has *not* been proved yet. Real Windows install acceptance (§38, §64, §65) and the first-use test
-(§66) belong to `P5_INSTALL_RECOVERY_REPORT.md` and are **not** claimed here: as of this commit no
-installer has been run on a machine, because the CI package jobs that produce one land with this
-commit. Nothing below says `SUPPORTED`, `signed`, `notarized`, `beta`, `RC` or `GA`.
+what has *not* been proved yet. §5b documents the first installer this repository has produced — built on
+this host with the pinned CLI — and it is a built file, not an installed one: no installer has been run on
+a machine yet. Real Windows install acceptance (§38, §64, §65) and the first-use test (§66) belong to
+`P5_INSTALL_RECOVERY_REPORT.md` and are **not** claimed here, and no CI package job has produced an
+artifact yet either. Nothing below says `SUPPORTED`, `signed`, `notarized`, `beta`, `RC` or `GA`.
 
 ## 1. Configuration that changed
 
@@ -106,12 +107,119 @@ any host:
 | --- | --- | --- |
 | `frontend deps` | `corepack pnpm install --frozen-lockfile` | runs |
 | `cli companion` | `cargo build --release --locked -p fwsight` | runs |
-| `desktop package` | `tauri build -- --locked` (cwd `apps/desktop/src-tauri`) | **SKIPPED**, with the pinned install command printed |
+| `desktop package` | `cargo tauri build -- --locked` (cwd `apps/desktop/src-tauri`) | **SKIPPED**, with the pinned install command printed |
 | `artifacts verified` | `python scripts/verify_package_artifacts.py` | **SKIPPED** — no package exists to verify |
 
-Measured here, where the Tauri CLI is deliberately not installed: the group reports `4/4 steps passed`
-with those two rows labelled `(skipped)`, so a local green never means "packaged" (§13's discipline: a
-result that was not measured is not reported as one).
+The CLI is found by probing both forms with `--version` and using whichever answered, because the install
+method decides the filename: `cargo install tauri-cli` leaves `cargo-tauri`, which is run as
+`cargo tauri <args>` — cargo forwards the subcommand token and the CLI strips it
+(`crates/tauri-cli/src/main.rs` at tag `tauri-cli-v2.12.1`) — while the npm package leaves a bare `tauri`.
+Checking only the bare name is what made the three package jobs of Run `37133706214` install the CLI,
+report `SKIPPED: the Tauri CLI is not installed on this machine`, and go on printing `4/4 steps passed`.
+
+Two rules close that class of lie, both measured here:
+
+- **a skip is not a pass.** The summary now prints `SKIP` rows and counts them separately: the same tree
+  that used to say `4/4 steps passed` says `2/4 steps passed, 2 skipped` (`scripts/check.py` records the
+  exit code `None` for a step that ran nothing).
+- **CI may not skip.** Every tool the gate needs is installed by the job itself, so a skip in CI means the
+  job did not check what it claims to have checked. `CI` set in the environment turns any `SKIP` row into
+  exit 1 and names it on stderr. Measured on this host with the CLI absent: `python scripts/check.py
+  --only package` → exit 0 with the two SKIP rows; `CI=true python scripts/check.py --only package` →
+  exit 1 and `SKIPPED IN CI: package/desktop package`, `SKIPPED IN CI: package/artifacts verified`.
+
+The `deny` group's cargo-deny skip moved to the same machinery, so it reports `SKIP` and fails CI for the
+same reason. It is not a live CI condition: `Dependency policy` installs `cargo-deny@0.20.2` one step
+earlier, and this host has it (`cargo-deny.exe` on `PATH`), so the group still runs it for real here.
+
+The third proof is the one that shows the fix is not just a nicer message: with a stand-in `cargo-tauri.exe`
+placed on `PATH` — a Rust binary that prints its argv and exits 0, never presented as the real CLI — the
+same command found it and invoked the build it used to skip:
+
+```
+[package] Tauri CLI found: cargo tauri - tauri-cli 2.12.1 (stand-in, not the real CLI)
+=== [package] desktop package
+$ C:\Users\16429\.cargo\bin\cargo.EXE tauri build -- --locked
+STAND-IN cargo-tauri argv=["…\cargo-tauri.exe", "tauri", "build", "--", "--locked"]
+FAIL(1)    package/artifacts verified
+```
+
+That output is evidence about argument forwarding and about the group's honesty, and nothing else: the
+stand-in built no package, so `verify_package_artifacts.py` failed it —
+`no nsis package directory at target\release\bundle\nsis` — and the group exited 1 rather than reporting a
+packaging success it had not had. It also confirms the verifier refuses a build that claims to have
+succeeded: a `desktop package` step that exits 0 without producing a bundle tree cannot green the group.
+The shim was a 139,776-byte Rust binary compiled in a temp directory, and the temp directory is gone; the
+pinned CLI described next is what replaced it on this host.
+
+### 5a. The directory the CLI has to be run from
+
+The stand-in could not have found this. With the real CLI installed, the same command from
+`apps/desktop/src-tauri` failed one step later, in the config's own hook:
+
+```
+$ cargo tauri build -- --locked
+     Running beforeBuildCommand `pnpm build`
+[ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND] No package.json (or package.yaml, or package.json5) was found
+  in "D:\study\Software\FirmwareSight".
+   Error beforeBuildCommand `pnpm build` failed with exit code 1
+FAILED: desktop package (exit 1)
+```
+
+The cause is in the CLI's path resolution (`helpers/app_paths.rs:153-174` at 2.12.1): the frontend
+directory is resolved from the **process cwd**, not from the shell's directory. `resolve_frontend_dir()`
+looks for a `package.json` at the cwd, then walks *down* three levels for one; finding none inside
+`src-tauri`, `resolve_dirs()` falls back to `tauri.parent()` (`app_paths.rs:148`) = `apps/desktop`, and
+`run_hook()` executes the hook there (`helpers/mod.rs:80,94`). This repository keeps `ui/` and
+`src-tauri/` as siblings, so the hook ran in a directory that is not a pnpm package, and pnpm walked up
+to the workspace root and reported it.
+
+Running the build from **`apps/desktop`** makes the CLI's own lookup answer `apps/desktop/ui`, which is
+where the frontend lives, and the hook then builds it. `scripts/check.py` now invokes the package step with
+that cwd, with the reason in a comment beside it. The alternative the CLI offers —
+`build.beforeBuildCommand` as `{script, cwd}` (`tauri-utils-2.10.0/src/config.rs:3741 HookCommand`) — was
+rejected because its `cwd` is also resolved against wherever the person typing the command happened to
+stand, which is the same trap in a config file. A developer typing `cargo tauri build` by hand gets the
+same instruction: run it from `apps/desktop`.
+
+### 5b. The first package this repository has produced
+
+From this host, Windows 10.0.19045 x86_64, with `cargo install tauri-cli@2.12.1 --locked` actually present,
+`python scripts/check.py --only package` ran all four steps for real and returned `4/4 steps passed`, exit 0:
+
+```
+[package] Tauri CLI found: cargo tauri - tauri-cli 2.12.1
+     Running makensis to produce …\target\release\bundle\nsis\FirmwareSight_0.6.0_x64-setup.exe
+    Finished 1 bundle at:
+        …\target\release\bundle\nsis\FirmwareSight_0.6.0_x64-setup.exe (3.64 MiB)
+```
+
+The build log is `tauri_build_from_approot.log` in the evidence root, and it records the two things §41 asks
+a package job to prove. The bundler patched and packed
+`D:\study\Software\FirmwareSight\target\release\firmwaresight-desktop.exe` — the assumption that the NSIS
+installer carries that exact file is now evidence rather than an assumption — and it downloaded NSIS 3.11
+and `nsis_tauri_utils` 0.5.3 from the pinned releases with hash validation. The produced distribution set:
+
+| Artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| `FirmwareSight-0.6.0-windows-x86_64-nsis.exe` | 3,811,140 | `c5c8cf231aa90bb2686b199335797b99c6a4ecd2972d863d267ed0bf091cf328` |
+| `FirmwareSight-0.6.0-windows-x86_64-cli-fwsight.zip` | 1,668,706 | `761c5a4d21bfa7ba81bc874fd4c3ef2e4682e44bf8b32d1f71953a436e76db07` |
+
+`sha256sum -c SHA256SUMS.txt` reports both `OK`; the zip lists `['fwsight.exe']` at the top level; and the
+version the verifier read is the installer's own payload — `0.6.0` out of
+`firmwaresight-desktop.exe`'s Windows version resource, with the NSIS stub's own `0.6.0` recorded as an
+observation beside it — not a filename.
+
+Producing this set corrected two recorded fields that the stub run had written wrong, both in
+`artifact-metadata.json`'s toolchain block:
+
+| Field | Before | After | Why it was wrong |
+| --- | --- | --- | --- |
+| `tauri_cli` | `unavailable` | `tauri-cli 2.12.1` | the field probed the bare `tauri` name, the same filename assumption that reddened Run `37133706214` |
+| `pnpm` | `12.6.0` | `12.7.0` | corepack reads `packageManager` from the nearest manifest, and the repository root has no `package.json`, so it answered with its own fallback instead of the pinned version `apps/desktop/ui/package.json:6` declares |
+
+Both are now read from a directory where the tool actually has a manifest, and the values above are what a
+run of `scripts/verify_package_artifacts.py` on this tree records.
 
 `verify_package_artifacts.py` then writes, into `target/dist-package/`:
 
@@ -161,7 +269,7 @@ jobs' only credential is the default `contents: read` permission the workflow al
 
 | Platform | What would be signed | Where in the pipeline | Required credential | CI secret name (placeholder only) | Verification command |
 | --- | --- | --- | --- | --- | --- |
-| Windows | the NSIS installer `.exe` (Authenticode, after the payload is built and before upload); optionally the contained `firmwaresight-desktop.exe` | a step between `tauri build` and artifact upload in `Package Windows` | an Authenticode certificate in an HSM or a managed vault, plus a timestamp authority URL | `WINDOWS_SIGNING_IDENTITY` / `WINDOWS_SIGNING_PASSWORD` — **not created** | `signtool verify /pa /v <installer.exe>`; `Get-AuthenticodeSignature` in PowerShell |
+| Windows | the NSIS installer `.exe` (Authenticode, after the payload is built and before upload); optionally the contained `firmwaresight-desktop.exe` | a step between `cargo tauri build` and artifact upload in `Package Windows` | an Authenticode certificate in an HSM or a managed vault, plus a timestamp authority URL | `WINDOWS_SIGNING_IDENTITY` / `WINDOWS_SIGNING_PASSWORD` — **not created** | `signtool verify /pa /v <installer.exe>`; `Get-AuthenticodeSignature` in PowerShell |
 | macOS | the `.app` bundle (`codesign --force --deep --options runtime`), then the notarization ticket stapled to the `.app` and to the `.dmg` | between the `.app` build and the `.dmg` step in `Package macOS` | Apple Developer ID application certificate, its private key in a keychain, plus App Store Connect API key for notarytool | `MACOS_CERTIFICATE` / `MACOS_CERTIFICATE_PWD` / `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` — **not created** | `codesign --verify --deep --strict --verbose=2 <app>`; `spctl -a -vv <app>`; `stapler validate <dmg>` |
 | Linux | none. Integrity is the distribution `SHA256SUMS.txt`; a deb may optionally be signed with `debsig-verify` against a maintainer keyring | n/a for this stage | a Debian maintainer GPG key (a policy decision, not a build step) | — | `sha256sum -c SHA256SUMS.txt` (this is what P5 can prove today) |
 
@@ -215,13 +323,15 @@ Manual upgrade semantics for P5, written where a user will find them and repeate
 
 | Item | Where it gets proved | Status |
 | --- | --- | --- |
-| A package has been built at all | the three package jobs' first run on `main` | pending — CI runs after this commit |
-| A Windows installer installs, launches offline, uninstalls and reinstalls | `P5_INSTALL_RECOVERY_REPORT.md` (§38 A–L, §64, §65) | pending, and it is the next thing that must happen |
+| A package has been built at all | the three package jobs' first run on `main` | **Windows: built, here, in §5b** — the first installer this repository has produced, and the third row of §41's evidence. macOS and Ubuntu still have produced nothing: no machine here builds them, and their package jobs have not yet run on a head that finds the CLI |
+| A Windows installer installs, launches offline, uninstalls and reinstalls | `P5_INSTALL_RECOVERY_REPORT.md` (§38 A–L, §64, §65) | pending, and it is the next thing that must happen. The installer now exists, so this is no longer blocked on packaging |
 | macOS / Ubuntu packages build on their runners | `Package macOS` / `Package Ubuntu` | pending; until observed, `CI_BUILD_ONLY` is not even earned |
+| The `apps/desktop` working directory holds on a Linux and a macOS runner | `Package Ubuntu` / `Package macOS` | §5a's rule is measured on Windows only. The CLI's frontend lookup is platform-independent source, but the `.deb` and `.app` paths have never run a step here |
 | Installed app needs no Rust, Cargo, Node, pnpm, Vite or a checkout (§65) | the real-install session, on the cleanest practical environment | pending |
 | Uninstall behaviour on user data | measured, never asserted (§39 records it) | pending |
 | Desktop About panel and Diagnostics as version surfaces | the commits that add them join `drift/version identity` | not built yet |
 | The `.icns` derivation on a real macOS runner | `Package macOS` | assumed from tauri-bundler's source, unverified by a run |
+| The executable name inside `FirmwareSight.app/Contents/MacOS` | `Package macOS` | **settled from source, not yet from a run.** It is the Cargo bin name, `firmwaresight-desktop`, not the product name: `tauri-cli` builds the bundle binary list from `bin.file_name()` (`interface/rust.rs:945`), `tauri-bundler` copies each binary into `Contents/MacOS` under `bin.name()` (`bundle/macos/app.rs:174`), and only `bundle.mainBinaryName` would rename it (`desktop.rs:336 rename_app`) — which this config does not set. The verifier used to look for `Contents/MacOS/FirmwareSight`, which would have failed that job for a naming rule nobody chose; it now reads whichever single file the directory holds and says which one it read |
 
 Evidence for anything in this document that cites a command carries the command; anything cited from
 upstream source names the file and lines; nothing here is recalled from a previous round.

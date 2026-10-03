@@ -29,11 +29,18 @@ written decision doc, the package matrix (Windows with real install evidence her
 governance + audit (Run `37125456689` 7 of 7), `812b472` migration `0005` (Run `37127791999` 7 of 7),
 `9e3b1de` the `0.6.0` unification — whose Run `37128593254` **failed 6 of 7** on a pre-existing
 `compare.test.tsx` race the commit did not cause — repaired test-only by `20b03e3`, green on Run
-`37129900728`, and the packaging commit that enabled `bundle.active`, added the three §41 package jobs,
-wrote `P5_VALIDATION/P5_PACKAGING_REPORT.md` and `P5_VALIDATION/P5_CI_AUTHORITY.md`, and gave the gate a
-`drift/version identity` step: **775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI jobs**.
-**Still no P5 verdict exists** — the product is MVP CANDIDATE at `0.6.0`, and no tag, Release, installer
-publication, signing, updater or licence choice is authorized · open-source
+`37129900728`, and `0c031cd` the packaging commit — `bundle.active`, the three §41 package jobs,
+`P5_VALIDATION/P5_PACKAGING_REPORT.md`, `P5_VALIDATION/P5_CI_AUTHORITY.md` and the gate's
+`drift/version identity` step — whose first 10-job run `37133706214` **failed 7 of 10**: seven gate jobs
+green, three package jobs skipping their own build because `cargo install tauri-cli` leaves `cargo-tauri`
+and the group probed `tauri`, then reporting `4/4 steps passed`. Its successor makes a `SKIP` uncountable as
+a pass and fails any skip under `CI`, and — with the pinned CLI installed on this host — built this
+repository's first real package, a Windows NSIS installer, which surfaced a second defect: the package step
+must run from `apps/desktop`, because the CLI resolves its frontend directory from the process cwd
+(**775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI
+jobs**). **Still no P5 verdict exists, and no CI artifact exists yet** — the product is
+MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
+choice is authorized · open-source
 licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task:
 P5_PRODUCTIZATION`
 
