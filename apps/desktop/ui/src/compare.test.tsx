@@ -1090,8 +1090,11 @@ describe('accessibility of the comparison', () => {
     await openCompare();
     await runCompare();
 
+    // The region mounts before its first page lands: Compare.tsx clears the page on every request
+    // and the table renders only from a resolved one, so reading its headers synchronously lost
+    // that race on a Windows runner (Run 37128593254) the same way 055b54e closed the pager.
     const table = await screen.findByRole('region', { name: 'Section Changes' });
-    const headers = within(table).getAllByRole('columnheader');
+    const headers = await within(table).findAllByRole('columnheader');
     expect(headers.length).toBeGreaterThan(8);
     const sortable = headers.filter((cell) => cell.getAttribute('aria-sort') !== null);
     expect(sortable.length).toBeGreaterThan(0);

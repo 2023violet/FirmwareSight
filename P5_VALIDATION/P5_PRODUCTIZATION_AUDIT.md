@@ -55,7 +55,41 @@ ADR-0015/0016/0018/0023/0026, plus the inspection list in §3: `Cargo.toml`, `Ca
 `.github/workflows/`, `crates/firmwaresight-storage/migrations/`, the storage query APIs,
 `apps/desktop/ui/src/`, `apps/cli/`, `fixtures/`, `scripts/check.py`.
 
+### 0a. What landed after the checkpoint, and the one run that went red
+
+| Commit | Content | Gate run | Result |
+| --- | --- | --- | --- |
+| `4cc8d93` | governance opened (§5) + this audit + the archived prompt | `37125456689` | success, 7 of 7 |
+| `812b472` | `P5_MIGRATION_DECISION.md` + migration `0005` and its write/query/IPC/UI path | `37127791999` | success, 7 of 7 |
+| `9e3b1de` | version identity unified on `0.6.0`, seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
+| the commit that lands this table | test-only repair of the race `37128593254` lost | follows this commit | — |
+
+The failure was not the version bump. `Desktop UI (windows-latest)` lost a pre-existing race in
+`compare.test.tsx`: `runCompare()` returns as soon as the comparison region exists, and the
+"Section Changes" region mounts before its first page does (`Compare.tsx:1001-1004` clears `page` on
+every request, and the `<table>` renders only from a resolved one at `Compare.tsx:1073`), so the
+accessibility test's synchronous `getAllByRole('columnheader')` read a heading and a filter form and no
+table. `git show --stat 9e3b1de` touches neither `Compare.tsx` nor `compare.test.tsx`; `git log -1 --
+apps/desktop/ui/src/compare.test.tsx` is `055b54e`, whose message already records this exact shape in the
+pager of the same file and says it was not converted everywhere. It is reproducible on this host without
+CI: 29 of 30 fresh-process runs pass and 1 fails at the same line, and 25 ms of injected mock latency
+turns the old read red 3 of 3 and the repaired read green 3 of 3, while a never-resolving query keeps the
+repaired test red — the wait is load-bearing, not a widened timeout. Repaired by one statement
+(`findAllByRole`, awaited), no production source, no timeout constant, no weakened assertion; the full UI
+suite is 160 tests in 6 files, typecheck and lint clean.
+
+**What this says about the gate, not just about this test.** This is the third time the same class has
+reddened `Desktop UI (windows-latest)` in this one file: `e83950c` closed it where the KiB test sampled
+call counts before both tables had resolved (Run `36779715108`), `055b54e` closed it at the pager (Run
+`36892307828` attempt 1), and this commit closes it at the table headers. `055b54e`'s own message said the
+shape "was not converted then", and `e83950c` named it "defect I's class, in the same file, and the local
+gate could not see it". Every remaining synchronous read of a data-gated element in a mock-async UI test is
+the same latent flake, and a "7 of 7 on the first attempt" closure rule turns each one into a scheduling
+risk on later commits rather than a product defect. P5 should sweep the class once — a list of the reads
+that still sample before their page resolves — instead of letting the next red run name the next instance.
+
 ## A. Packaging and version identity
+
 
 | Field | Value | Where measured |
 | --- | --- | --- |
@@ -418,7 +452,7 @@ Tier 2 "CI/release". The validation clause is now partly satisfied by the post-G
 the 2560 case labelled `VIRTUAL_WINDOW_SIZE_ONLY`). There has never been a macOS or Linux **window**:
 `macos-core` compiles and tests the headless crates (`p0-check.yml:145`, `scripts/check.py:140-161`),
 which §27 explicitly forbids calling "supported" — `CI_BUILD_ONLY` is the honest status, and that is also
-what §42 allows for macOS/Linux packaging.
+what §40 allows for macOS/Linux packaging.
 
 ## G. Known-limitation disposition (§4 G, §60 expectations)
 
@@ -446,7 +480,7 @@ L1…L22, L24, L25, L23).
 | L14 | `update_goldens.py` key order, not re-verified | **should close** | **SHOULD_CLOSE_P5** | `scripts/update_goldens.py:250` uses `sort_keys=True`; needs one recorded dry-run-equivalent verification, goldens themselves are guarded by tests |
 | L15 | `ElfProgramHeader` source label | should close if narrow | **SHOULD_CLOSE_P5** | `crates/firmwaresight-artifact/src/pipeline.rs:286` — a label fix, no semantics change |
 | L16 | `custom-protocol` still required | close through official package path | **SHOULD_CLOSE_P5** | §8's requirement "a user must not need to remember `--features custom-protocol`" is satisfied only by `cargo tauri build`/CI packaging; today it is a hand-run requirement (`apps/desktop/src-tauri/Cargo.toml:14-15`). The gate's `clippy --all-features` covers compilation, not packaging |
-| L17 | CI provisioning duplication, index blind spot | reduce | **SHOULD_CLOSE_P5** | the apt prerequisite block is deliberately copied into `rust` and `drift` (`p0-check.yml`, comment "Deliberately a copy rather than a shared script"); `drift/fixtures tracked` remains the only index-reading step (`scripts/check.py:164-186,207-215`). §42 takes CI from 7 to 10 jobs, so the duplication has to be resolved before a third copy appears |
+| L17 | CI provisioning duplication, index blind spot | reduce | **SHOULD_CLOSE_P5** | the apt prerequisite block is deliberately copied into `rust` and `drift` (`p0-check.yml`, comment "Deliberately a copy rather than a shared script"); `drift/fixtures tracked` remains the only index-reading step (`scripts/check.py:164-186,207-215`). §41 takes CI from 7 to 10 jobs, so the duplication has to be resolved before a third copy appears |
 | L18 | local DB retains chosen artifact location | *not listed in §60* | **CARRY_FORWARD (by design)** | adjudicated G2 addendum; `0001_initial.sql:34` `path TEXT NOT NULL` is the storage of record and the display/IPC/`redact()` chain keeps it local. P5 must add positive-control tests, not change the column |
 | L19 | "Object attribution" means two things | should close | **MUST_CLOSE_P5** | wording scope: Analyze `capabilities.objectAttribution` vs Compare `diff:1 objectChanges.available` |
 | L20 | Compare prints a Core enum word | should close | **MUST_CLOSE_P5** | `weakest basis MapRegionAndElfLoad` vs Analyze's `map-memory-configuration+elf-load` |
@@ -473,10 +507,10 @@ disposition for *every* inherited limitation; this table gives all four one anyw
 | dimension | current state | what P5 must add |
 | --- | --- | --- |
 | package version source | three independent `0.1.0` strings (`Cargo.toml:14`, `tauri.conf.json:4`, `ui/package.json:4`) plus a document baseline `0.6.0` (`BASELINE.yaml:7`) | one decision (**D1**) then one source of truth; `FWSIGHT_VERSION` already follows the crate, so choosing the workspace propagates to CLI, fingerprint and Snapshot |
-| install path | none; `bundle.active: false` (`tauri.conf.json:29`), no CI packaging step | Windows per-user NSIS (owner accepted a real install here) + macOS/Linux as `CI_BUILD_ONLY` (§42) |
-| uninstall behavior | undefined — nothing to uninstall | must be *measured*, not asserted: whether `%APPDATA%\com.firmwaresight.desktop\` survives NSIS uninstall, and then documented honestly (§53 data policy) |
+| install path | none; `bundle.active: false` (`tauri.conf.json:29`), no CI packaging step | Windows per-user NSIS (owner accepted a real install here) + macOS/Linux as `CI_BUILD_ONLY` (§40) |
+| uninstall behavior | undefined — nothing to uninstall | must be *measured*, not asserted: whether `%APPDATA%\com.firmwaresight.desktop\` survives NSIS uninstall, and then documented honestly (§39 records what uninstall does) |
 | user-data behavior | `app_data_dir()/firmwaresight-p0.sqlite` (`lib.rs:919-922`), created implicitly, never shown, never backed up | keep-or-move decision (**D6**); backup per §22; explicit statement of what uninstall preserves |
-| manual upgrade readiness | "install the newer build over the older one" is untested; schema upgrade is tested (`storage.rs:476`, `gate_history.rs:314`, `release_records.rs:441`) | install-replace-reinstall acceptance (§41 A–L, §53) plus the §21 migration matrix over a *real* store |
+| manual upgrade readiness | "install the newer build over the older one" is untested; schema upgrade is tested (`storage.rs:476`, `gate_history.rs:314`, `release_records.rs:441`) | install-replace-reinstall acceptance (§38 A–L, §39) plus the §21 migration matrix over a *real* store |
 | signing readiness | **nothing** — no certificate, no key, no signer hook | `READY_NOT_EXECUTED` (§11). Never a fake certificate, never a committed private key, never a claim of "signed" |
 | notarization readiness | nothing; macOS packaging itself is unbuilt | `READY_NOT_EXECUTED`, and any macOS artifact stays `CI_BUILD_ONLY` |
 | update readiness | no updater, no plugin, no endpoint; `AGENTS.md` §2 pins that model | `UPDATE_READY_MANUAL` (§12) — a documented manual upgrade path only; enabling an updater requires a signing/key ADR first |
@@ -518,8 +552,8 @@ today and the Gate did catch the CRLF case; changing it (e.g. normalizing the di
 content-derived identity, which is an ADR-level move under AGENTS.md §2. Draft, then stop.
 
 **D4 — How far the package matrix goes without a second machine.** §8 asks for ≥1 installable Windows
-artifact and ≥1 CI package each for macOS and Ubuntu; §27/§42 allow `CI_BUILD_ONLY` for the latter two,
-and §41 requires real Windows install evidence (owner has accepted a per-user install on this host, with
+artifact and ≥1 CI package each for macOS and Ubuntu; §27/§40 allow `CI_BUILD_ONLY` for the latter two,
+and §38 requires real Windows install evidence (owner has accepted a per-user install on this host, with
 the live store parked, hash-verified and restored). macOS packaging also needs an `.icns` that does not
 exist (`icons/` has 5 files, none `.icns`), and NSIS/AppImage targets need bundle config that is
 currently `active: false`. Confirm: build-and-archive on CI, never "supported".
