@@ -1,0 +1,1387 @@
+FirmwareSight — Post-G2 Real Desktop E2E Findings Remediation & Focused Re-Validation
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight Remediation / Re-Validation Agent。
+
+本轮任务：
+POST_G2_E2E_FINDINGS_REMEDIATION
+
+这不是 P5 Productization。
+这不是重新执行完整 G2。
+这不是重新执行 283 条 Real Desktop E2E。
+这不是性能优化专项。
+
+本轮唯一目标：
+
+修复 Post-G2 Real Desktop E2E 已经真实观察到、并经 Architect 裁决允许修复的窄范围产品缺陷，
+然后使用 targeted automated regression + focused real-desktop re-validation 证明修复有效且没有破坏原有安全语义。
+
+当前优先 Findings：
+
+- E2E-F001 — S3 Minor
+- E2E-F002 — S2 Major
+- E2E-F003 — 必须从原始 E2E evidence 读取后再判定是否属于本轮范围，禁止猜
+
+核心纪律：
+
+READ EVIDENCE FIRST.
+REPRODUCE.
+TEST FIRST.
+SMALLEST FIX.
+FOCUSED RE-VALIDATION.
+NO P5 SCOPE CREEP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at prompt issue time:
+
+origin/main:
+5c52f3d135e16c263e5bf4d928582aeca87e8c26
+
+Commit:
+G2: record the remote closure and pass the gate
+
+Remote CI:
+Run 36949964372
+attempt 1
+completed / success / 7 of 7
+
+Current governance:
+
+P0 = PASS
+G1 = PASS
+P1 = PASS / COMPLETE
+P2 = PASS / COMPLETE
+P3 = PASS / COMPLETE
+P4 = PASS / COMPLETE
+G2 = PASS
+
+Product MVP = ENGINEERING COMPLETE
+Product state = MVP CANDIDATE
+baseline_version = 0.6.0
+active_task = NONE
+
+Post-G2 Real Desktop E2E final verdict:
+PASS_WITH_FINDINGS
+
+Known accepted E2E findings:
+
+E2E-F001 = S3
+E2E-F002 = S2
+E2E-F003 = MUST_READ_FROM_EVIDENCE
+
+No E2E finding is currently classified S0 or S1.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -12 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+5c52f3d135e16c263e5bf4d928582aeca87e8c26
+
+worktree:
+clean
+
+If origin/main moved:
+STOP.
+
+Inspect and report the delta first.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. E2E EVIDENCE IS THE PRIMARY INPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before deciding scope, locate the completed Post-G2 E2E evidence root.
+
+Expected family:
+
+%TEMP%\FirmwareSight-PostG2-E2E-*
+
+The completed round reported an evidence root containing at least:
+
+REAL_DESKTOP_E2E_REPORT.md
+POST_G2_E2E_FINDINGS.md
+POST_G2_E2E_CASES.csv
+POST_G2_E2E_PERFORMANCE.csv
+POST_G2_E2E_JOURNEYS.csv
+13_findings/TIER_A_CHECKPOINT.md
+13_findings/TIER_B_CHECKPOINT.md
+13_findings/TIER_C_CHECKPOINT.md
+28_large/C5_SUMMARY.md
+28_large/C6_SUMMARY.md
+00_environment/CLEANUP_MANIFEST.md
+
+Do NOT infer findings from chat memory if the evidence files exist.
+
+Read:
+
+REAL_DESKTOP_E2E_REPORT.md
+POST_G2_E2E_FINDINGS.md
+all rows referring to E2E-F001
+all rows referring to E2E-F002
+all rows referring to E2E-F003
+
+Also read screenshots/evidence paths cited by those findings.
+
+Produce first:
+
+# Post-G2 E2E Remediation Takeover Report
+
+Include:
+
+- evidence root
+- E2E final verdict
+- E2E-F001 exact title / severity / repro / expected / actual
+- E2E-F002 exact title / severity / repro / expected / actual
+- E2E-F003 exact title / severity / repro / expected / actual
+- actual unmet-expectation count
+- whether F003 is product defect, harness issue, environment limitation, known limitation, or performance observation
+- exact remediation scope proposed
+- product files expected to change
+- tests expected to change
+- whether schema/migration/Core changes are required
+
+Expected for F001/F002:
+
+schema change required = NO
+migration required = NO
+Core semantic change required = NO
+new dependency required = NO
+new design token required = NO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. E2E-F003 DECISION GATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+E2E-F003 is NOT authorized by name alone.
+
+After reading the evidence:
+
+INCLUDE F003 in this round ONLY if all are true:
+
+- it is a genuine product defect;
+- it is reproducible;
+- it can be fixed narrowly inside existing MVP UI/application contracts;
+- no public schema major change;
+- no migration 0005;
+- no new dependency;
+- no architecture change;
+- no P5 productization scope.
+
+EXCLUDE F003 if it is:
+
+- harness/control-channel limitation;
+- environment limitation;
+- Windows DPI gap;
+- mouse-wheel NOT_OBSERVED;
+- large-file cold-disk observation;
+- current-workload RSS observation;
+- performance optimization candidate;
+- known limitation without correctness failure;
+- P5 usability/productization work.
+
+If excluded:
+
+record:
+
+E2E-F003 = CARRIED_FORWARD / NOT_IN_THIS_REMEDIATION
+
+with exact evidence-based reason.
+
+Do not invent a fix.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. PERFORMANCE OBSERVATIONS ARE NOT THIS ROUND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Carry forward, do not optimize here:
+
+Near-500-MiB supported ELF:
+
+519,179,252 bytes
+≈ 519.2 MB
+≈ 495.1 MiB
+
+Observed warm desktop Analyze:
+
+approximately 4.73–4.89 s
+
+Observed cold first read:
+
+approximately 68.7 s
+
+Observed working-set peak:
+
+approximately 1,428 MB
+
+Observed symbols:
+
+2,020,073
+
+Interpretation for this remediation:
+
+- performance evidence is real;
+- cold <60 s requirement is environment-sensitive / PARTIAL;
+- 1,428 MB is MEASURED FOR TESTED WORKLOAD;
+- not enough evidence to call memory leak;
+- no crash / Not Responding was observed.
+
+Do NOT:
+
+- redesign parser;
+- optimize memory;
+- introduce streaming architecture;
+- change 512 MiB guard;
+- change parser representation;
+- add mmap;
+- introduce new dependency;
+- widen this round into performance engineering.
+
+Those are separate Architect decisions / P5 candidates.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. E2E-F001 — AUTHORIZED REMEDIATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect accepted classification:
+
+E2E-F001 = E2E-S3 / MINOR
+
+Observed behavior:
+
+After a successful Analyze result is visible,
+the user selects a different artifact but has NOT pressed Analyze yet.
+
+The page continues displaying the previous build's analysis.
+
+The previous report is not clearly labelled as previous/pending merely because the selection changed.
+
+This is especially misleading when both files have the same leaf name such as:
+
+firmware.elf
+
+Existing current implementation fact at HEAD:
+
+`apps/desktop/ui/src/Analyze.tsx`
+
+currently marks the summary stale when:
+
+`error !== null`
+
+and its existing stale note is designed primarily for a FAILED later analysis.
+
+A new selection by itself does not make `stale=true`.
+
+Required UX contract after fix:
+
+When:
+
+- lastGood exists;
+- the user changes the current artifact selection;
+- that newly selected artifact has not yet produced the displayed lastGood result;
+
+the UI must clearly communicate:
+
+the report below is the previous analysis
+and the newly selected artifact is pending Analyze.
+
+The old report MAY remain visible.
+
+Do NOT blank useful last-good data just to fix attribution unless evidence proves that is the smallest/clearest solution.
+
+Required properties:
+
+- selecting a new artifact does not mutate lastGood;
+- lastGood numbers remain truthful;
+- no new snapshot is created before Analyze;
+- Compare/Release still prefer the last actually analyzed snapshot, not merely selected candidate;
+- failed Analyze continues to use truthful previous-analysis attribution;
+- after successful Analyze of candidate, previous/pending label disappears;
+- same leaf filename must not make the state ambiguous;
+- MAP attach/remove on the pending candidate must not falsely imply lastGood changed.
+
+Preferred implementation direction:
+
+Track enough session-level identity to distinguish:
+
+current selection
+
+from:
+
+selection that produced lastGood.
+
+Do not use filename equality as identity.
+
+A selection id / explicit analyzed-selection identity is preferable to leaf-name comparison.
+
+However:
+
+choose the smallest design consistent with current App/Analyze ownership.
+
+Do not add this identity to portable schema or SQLite.
+
+This is UI/session state only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. E2E-F001 — TESTS FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before product fix:
+
+write a regression test that fails on current `5c52f3d`.
+
+Required scenario:
+
+A. analyze artifact A successfully
+
+B. verify A summary visible
+
+C. select artifact B
+
+D. do NOT Analyze B
+
+Expected after fix:
+
+- A summary may remain visible;
+- explicit previous/pending attribution appears;
+- candidate B is clearly named using the existing safe file-name-only vocabulary where appropriate;
+- the report is not described as B's analysis.
+
+Then:
+
+E. Analyze B successfully
+
+Expected:
+
+- B summary replaces A;
+- previous/pending attribution disappears.
+
+Additional required regression:
+
+same filename scenario.
+
+Artifact A:
+path A/firmware.elf
+
+Artifact B:
+path B/firmware.elf
+
+The UI must still mark previous/pending state after B is selected.
+
+Do not depend on filenames to detect identity.
+
+Required negative proof:
+
+temporarily remove/disable the new pending-selection attribution condition.
+
+The new test must fail.
+
+Restore byte-exact before commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. E2E-F002 — AUTHORIZED REMEDIATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect accepted classification:
+
+E2E-F002 = E2E-S2 / MAJOR
+
+Observed real-desktop behavior:
+
+The user selected a destination where the proposed bundle folder already existed,
+but that folder was an arbitrary non-FirmwareSight directory.
+
+The UI destination state already knew:
+
+`recognizableBundle = false`
+
+and displayed wording equivalent to:
+
+"it is not a bundle this engine wrote — it will not be replaced."
+
+However, after Export returned the occupied-destination condition,
+the confirmation card then stated:
+
+"<folder> already holds a FirmwareSight release bundle"
+
+and offered:
+
+Replace
+
+This statement was false.
+
+When Replace was actually pressed:
+
+the engine correctly failed closed with:
+
+ERR-BUNDLE-6107
+
+and the canary file survived unchanged.
+
+Therefore:
+
+backend destructive safety guard = CORRECT
+
+UI confirmation semantics = DEFECTIVE
+
+Do not weaken or redesign the backend guard.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. E2E-F002 — REQUIRED POST-FIX CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For destination state:
+
+exists = true
+recognizableBundle = false
+
+the UI must NEVER claim:
+
+- it already holds a FirmwareSight release bundle;
+- it is safe/eligible for Replace;
+- the user can authorize replacement.
+
+The UI must NEVER render the Replace confirmation for that destination.
+
+The screen should clearly tell the user:
+
+- the destination is occupied;
+- the existing folder is not a recognizable FirmwareSight bundle;
+- FirmwareSight will not replace it;
+- choose another destination.
+
+Acceptable implementation shapes include:
+
+A. Disable Export immediately for an occupied foreign directory and show truthful guidance.
+
+or:
+
+B. Allow the first non-overwrite export attempt but, when collision returns, show a truthful non-replaceable error and NO Replace confirmation.
+
+Prefer the smallest consistent behavior.
+
+Important:
+
+`destination.recognizableBundle` is already available to the UI.
+
+Do not fabricate bundle recognizability.
+
+For:
+
+exists = true
+recognizableBundle = true
+
+the existing explicit Replace flow must continue to work.
+
+For:
+
+exists = false
+
+normal Export must continue to work.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. E2E-F002 — TESTS FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add/update tests before product fix.
+
+Required case A:
+
+destination:
+exists = true
+recognizableBundle = false
+
+Expected:
+
+- truthful text says it is not a recognized FirmwareSight bundle;
+- no "already holds a FirmwareSight release bundle" statement;
+- no Replace button;
+- no Replace confirmation group;
+- user is directed to choose another destination.
+
+If implementation disables Export immediately:
+
+assert backend export is not called.
+
+If implementation allows one first export attempt:
+
+assert the resulting occupied/error state still offers no Replace path.
+
+Required case B:
+
+exists = true
+recognizableBundle = true
+
+Expected:
+
+- first non-overwrite collision may ask for explicit confirmation;
+- confirmation copy is truthful;
+- Replace button appears;
+- replacement occurs only after second explicit user action.
+
+Required case C:
+
+exists = false
+
+Expected:
+
+normal export succeeds.
+
+Required case D:
+
+foreign directory + canary concept at application boundary where feasible.
+
+At minimum preserve existing engine tests for:
+
+ERR-BUNDLE-6107
+no arbitrary directory replacement.
+
+Do not weaken them.
+
+Required mutation proof:
+
+temporarily restore the old unconditional:
+
+`setConfirm(destination.bundleFolderName)`
+
+for occupied destination handling.
+
+The new regression must fail.
+
+Restore before commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. EXPECTED CODE SURFACES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Likely UI surfaces:
+
+apps/desktop/ui/src/Analyze.tsx
+apps/desktop/ui/src/App.tsx
+apps/desktop/ui/src/Release.tsx
+
+Likely tests:
+
+existing Analyze page/app UI tests
+apps/desktop/ui/src/release.test.tsx
+
+Exact paths must be discovered from repository.
+
+Do not create parallel duplicate components.
+
+Do not change Rust backend for F002 unless investigation proves the UI cannot correctly enforce the already-known `recognizableBundle` fact.
+
+If backend change is proposed:
+
+STOP and explain why UI-only remediation is insufficient.
+
+Architect review required before changing bundle engine semantics.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. OUT OF SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT implement:
+
+- P5
+- History
+- installer
+- signing
+- notarization
+- updater
+- SBOM
+- CVE
+- cloud
+- account/auth
+- telemetry
+- AI
+- parser performance optimization
+- memory optimization
+- new supported formats
+- Keil/IAR adapter
+- new migration
+- public schema v2
+- sixth crate
+- new dependency
+- design-system redesign
+- 125/150% DPI work
+- mouse-wheel infrastructure
+- E2E harness refactor
+- update_goldens cleanup issue
+- license selection
+
+License remains:
+
+PENDING OWNER CONFIRMATION.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. IMPLEMENTATION DISCIPLINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For each included finding:
+
+1. reproduce or establish failing regression
+2. write failing test
+3. implement smallest fix
+4. run targeted test
+5. mutation/negative proof
+6. run whole related test file repeatedly
+7. run complete UI suite
+8. run Rust regression
+9. run full repository gate
+10. build shipping binary
+11. focused real desktop re-validation
+12. remote CI
+
+Do not combine unrelated cleanup.
+
+No opportunistic refactor.
+
+No rename churn.
+
+No design-token churn.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. TARGETED TEST RELIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because this project has already exposed multiple async UI race tests,
+new regression tests must themselves be robust.
+
+Do not:
+
+- synchronous-read async content;
+- use sleeps;
+- inflate global timeouts;
+- retry assertions;
+- assert vacuously before effect completion.
+
+Use causal waits:
+
+findBy*
+waitFor
+observable state
+
+where appropriate.
+
+Required repetition after final fix:
+
+F001 target regression:
+30 / 30
+
+F002 target regression:
+30 / 30
+
+Complete Analyze-related test file:
+10 / 10
+
+Complete release.test.tsx:
+10 / 10
+
+If F003 included:
+target regression 30 / 30
+related file 10 / 10
+
+Any flake:
+investigate.
+Do not call it noise.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. FULL LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After all fixes:
+
+Frontend:
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+Rust:
+
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+
+Expected Rust direct baseline before legitimate new tests:
+
+769 passed / 0 failed
+
+UI baseline before new regression tests:
+
+155 passed / 6 files
+
+Counts may increase because new tests are added.
+
+Report direct counts once.
+
+Engineering gate:
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py
+
+Expected full gate:
+
+15 / 15
+
+Also:
+
+git diff --check
+
+Do not weaken deny policy.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. SHIPPING BUILD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After product code changes are final:
+
+build:
+
+cargo build --release -p firmwaresight-desktop --features custom-protocol
+
+Record:
+
+binary SHA-256
+binary size
+build exit
+
+This binary is the ONLY binary used for focused real-desktop re-validation.
+
+Do not re-use the old `84a26a05…` binary after UI source changes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. FOCUSED REAL DESKTOP RE-VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT rerun all 283 cases.
+
+Only revalidate:
+
+A. E2E-F001
+B. E2E-F002
+C. E2E-F003 if included
+D. one happy-path Analyze → Compare → Gate → Bundle smoke
+E. one error-recovery smoke around affected flows
+
+Use:
+
+real shipping binary
+real mouse/keyboard
+native dialogs
+same black-box discipline
+
+No direct IPC substitution.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. FOCUSED E2E-F001 RE-VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use two test-copy artifacts with the SAME leaf name:
+
+A\firmware.elf
+B\firmware.elf
+
+with distinguishable bytes/facts.
+
+Steps:
+
+1. select A
+2. attach A MAP if required
+3. Analyze A
+4. confirm A facts
+5. select B
+6. do NOT Analyze B
+7. capture visible UI
+
+Required:
+
+- B is shown as current candidate selection;
+- A report is explicitly marked previous/pending;
+- user cannot reasonably read A's facts as B's analysis.
+
+Then:
+
+8. attach B MAP if needed
+9. Analyze B
+10. confirm B facts
+11. confirm previous/pending marker disappears
+
+Repeat:
+
+3 / 3
+
+Then:
+
+perform one failed Analyze after successful A/B flow.
+
+Confirm old "Previous analysis" failure semantics still work.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. FOCUSED E2E-F002 RE-VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use disposable directories only.
+
+Case 1 — New destination
+
+Choose an empty parent.
+
+Expected:
+normal export succeeds.
+
+Case 2 — Recognizable FirmwareSight Bundle
+
+Create/export valid bundle.
+
+Choose same destination again.
+
+Expected:
+explicit truthful Replace confirmation.
+
+Cancel:
+tree hash unchanged.
+
+Then Confirm Replace:
+bundle valid.
+
+Case 3 — Foreign occupied directory
+
+Create foreign target directory with:
+
+DO_NOT_DELETE.txt
+
+Record canary hash.
+
+Choose destination through real native dialog.
+
+Required:
+
+- UI truthfully says directory is not a FirmwareSight bundle;
+- no false statement that it "already holds a FirmwareSight release bundle";
+- no Replace action is offered;
+- canary remains unchanged;
+- directory remains intact.
+
+If Export is disabled:
+verify user can choose a different destination and recover.
+
+If one first export attempt is still permitted:
+verify it ends in a truthful non-replaceable state with no Replace button.
+
+Repeat:
+3 / 3.
+
+Any actual foreign-directory deletion:
+E2E-S0
+STOP immediately.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. HAPPY-PATH REGRESSION SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+One focused complete flow:
+
+Analyze
+→ Compare
+→ Gate PASS
+→ Bundle
+→ independent SHA256 verification
+
+Verify:
+
+- no new blocker;
+- Gate run semantics unchanged;
+- Bundle safety unchanged;
+- portable output valid;
+- no host path leakage.
+
+No need for 5 journeys.
+
+No endurance.
+
+No large-file ladder.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. DATABASE ISOLATION FOR FOCUSED REVALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The completed E2E round restored the real user DB byte-exact.
+
+For this focused re-validation:
+
+reuse the previously owner-authorized safe isolation method ONLY:
+
+- hash original DB/WAL/SHM
+- park/rename them
+- keep independent hash backup
+- run disposable test store
+- close app
+- restore originals
+- verify byte-exact SHA
+
+Do NOT migrate the real user database.
+
+Do NOT delete prior G2/E2E smoke databases.
+
+If safe isolation cannot be established:
+STOP before GUI re-validation.
+
+Final required:
+
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. COMMIT STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Keep implementation auditable.
+
+Preferred:
+
+Commit 1:
+
+fix: clarify pending analysis and bundle replacement safety
+
+Contains:
+
+- product UI changes
+- regression tests
+- generated integrity update as required
+
+If F003 is included and unrelated enough to obscure review:
+use separate narrow Commit 2 for F003.
+
+Do not mix documentation closure into product fix commit if it makes the diff hard to review.
+
+After each commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+If environment auto-pushed unexpectedly:
+detect and report.
+
+Never force push.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. REMOTE CI FOR PRODUCT FIX HEAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Push normal fast-forward only after local gates are green.
+
+Find workflow by exact headSha.
+
+Required:
+
+completed
+success
+7 / 7
+
+Jobs:
+
+Rust Windows
+Rust Ubuntu
+Desktop UI Windows
+Desktop UI Ubuntu
+Generated output drift
+Dependency policy
+macOS Core Smoke
+
+First attempt should be green.
+
+If failure is:
+
+product/test failure:
+investigate.
+
+runner provisioning before repository code:
+record separately.
+
+Do not rerun a real code failure and call the original head reliable.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. REMEDIATION EVIDENCE PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After product fix head is green and focused real-desktop revalidation passes,
+create a small durable evidence pack:
+
+POST_G2_E2E_REMEDIATION/
+├── REMEDIATION_REPORT.md
+├── FOCUSED_REVALIDATION_REPORT.md
+└── EXIT_CHECKLIST.md
+
+Do not copy the entire external 283-case evidence root into the repo.
+
+Summarize:
+
+- original E2E verdict
+- F001 original observation
+- F002 original observation
+- F003 disposition
+- exact fix
+- automated regression
+- mutation proof
+- focused desktop revalidation
+- DB restore
+- local gates
+- remote CI
+- carry-forward performance observations
+
+Keep screenshots/evidence outside repository unless existing repository policy explicitly requires otherwise.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. GOVERNANCE SEMANTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This remediation does NOT reopen G2.
+
+G2 remains:
+
+PASS
+
+Product state remains:
+
+MVP CANDIDATE
+
+No new stage is passed.
+
+Do not write:
+
+P5 PASS
+G3 PASS
+Beta
+RC
+GA
+Production Ready
+
+At closure:
+
+active_task =
+NONE
+
+Record that the post-G2 E2E findings were remediated,
+without changing baseline_version:
+
+0.6.0
+
+Do not create v0.7.0 automatically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. CARRY-FORWARD PERFORMANCE RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The remediation report must preserve these observations as NOT FIXED IN THIS ROUND:
+
+- near-500-MiB supported ELF desktop responsiveness measured;
+- 519,179,252-byte valid ELF;
+- warm Analyze approximately 4.73–4.89 s;
+- cold first-read approximately 68.7 s;
+- observed peak working set approximately 1,428 MB;
+- no Not Responding;
+- no crash;
+- ~2,020,073 symbols;
+- performance optimization remains separate/P5 candidate.
+
+Wording:
+
+First-use <60 s at that workload =
+PARTIAL / environment-sensitive
+
+Peak RSS =
+MEASURED FOR TESTED WORKLOAD
+
+Do not claim:
+
+memory leak
+500 MB universally passes
+performance optimized
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. FINAL CLOSURE COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After product fix head CI = 7/7
+and focused desktop re-validation passes:
+
+create one narrow documentation/governance successor.
+
+Contains:
+
+POST_G2_E2E_REMEDIATION/**
+minimal live-state references if required by repository governance
+DIRECTORY_TREE.txt if tracked path set changed
+SHA256SUMS regenerated LAST
+
+Do not edit unrelated baseline history.
+
+Record:
+
+- product fix commit SHA
+- product fix CI run
+- focused desktop verdict
+- F001 status
+- F002 status
+- F003 disposition
+- remaining findings
+- performance carry-forward
+
+Push normal fast-forward.
+
+The successor's own CI must also be:
+
+completed / success / 7 of 7
+
+Do not create another commit merely to record its own run.
+
+External CI is final evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. EXIT CRITERIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This round may close only if:
+
+F001:
+□ reproduced from evidence
+□ regression red before fix
+□ fixed
+□ same-filename pending selection truthful
+□ success clears marker
+□ failure-path previous-analysis semantics preserved
+□ focused desktop 3/3
+
+F002:
+□ reproduced from evidence
+□ regression red before fix
+□ foreign destination never gets false recognized-bundle claim
+□ foreign destination never gets Replace action
+□ canary survives 3/3
+□ recognizable bundle Replace still works
+□ Cancel preserves tree
+□ new destination export works
+□ backend ERR-BUNDLE-6107 safety remains
+
+F003:
+□ exact original definition read
+□ included or excluded with evidence-based reason
+□ if included, its own regression/revalidation passed
+
+Regression:
+□ target tests repeated
+□ full related files repeated
+□ UI suite green
+□ Rust green
+□ check.py 15/15
+□ shipping build green
+
+Focused desktop:
+□ Analyze→Compare→Gate→Bundle smoke green
+□ original DB restored byte-exact
+□ no S0
+□ no S1
+
+Remote:
+□ product fix head 7/7
+□ closure successor 7/7
+
+Scope:
+□ no P5
+□ no performance refactor
+□ no schema/migration
+□ no new dependency
+□ no license decision
+
+Only then:
+
+POST_G2_E2E_REMEDIATION = PASS
+
+G2 remains PASS.
+
+Product remains MVP CANDIDATE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight Post-G2 E2E Findings Remediation Final Report
+
+## 1. Start State
+
+HEAD
+origin/main
+G2 state
+E2E verdict
+
+## 2. Evidence Intake
+
+evidence root
+F001 original
+F002 original
+F003 original
+
+## 3. Scope Decision
+
+F001 included
+F002 included
+F003 included/excluded + reason
+
+## 4. E2E-F001
+
+root cause
+failing regression
+fix
+mutation proof
+target repetition
+desktop 3/3
+
+## 5. E2E-F002
+
+root cause
+failing regression
+fix
+mutation proof
+target repetition
+foreign canary 3/3
+recognized replace
+cancel
+new destination
+
+## 6. E2E-F003
+
+original evidence
+disposition
+result
+
+## 7. Automated Validation
+
+UI direct count
+Rust direct count
+check.py
+fmt
+clippy
+typecheck
+lint
+build
+
+## 8. Shipping Binary
+
+SHA
+size
+
+## 9. Focused Real Desktop Revalidation
+
+F001
+F002
+F003 if included
+happy path
+
+## 10. DB Safety
+
+ORIGINAL_DB_RESTORED
+ORIGINAL_DB_SHA_MATCH
+
+## 11. Product Fix CI
+
+commit
+run
+attempt
+7/7
+
+## 12. Closure Successor
+
+commit
+
+## 13. Closure CI
+
+run
+attempt
+7/7
+
+## 14. Carry-Forward Performance
+
+519,179,252-byte ELF
+warm time
+cold time
+peak working set
+performance status
+
+## 15. Remaining Findings
+
+S0
+S1
+S2
+S3
+S4
+
+## 16. Final Verdict
+
+POST_G2_E2E_REMEDIATION =
+PASS / FAIL / BLOCKED
+
+G2 =
+PASS
+
+Product state =
+MVP CANDIDATE
+
+baseline =
+0.6.0
+
+active_task =
+NONE
+
+## 17. Next Recommendation
+
+Do NOT start P5 automatically.
+
+Return to Architect.
+
+## 18. Stop
+
+STOP.
+
+Do not implement P5.
+
+END OF PROMPT

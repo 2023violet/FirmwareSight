@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-01"
+last_updated: "2026-10-02"
 ---
 
 # ACTIVE TASK
@@ -57,3 +57,21 @@ RustSec advisories). And not a licensed open-source release: `license = "Proprie
 `Cargo.toml`, there is no root `LICENSE`, and `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`
 remains — `AGENTS.md` 9 puts that decision in front of the owner. Baseline stays `0.6.0`; no tag, GitHub
 Release, installer or `v0.7.0` was created.
+
+## What closed after G2, and what that changes here
+
+The pointer did not move: `active_task` is still `NONE`, G2 is still `PASS`, and the product is still an
+MVP CANDIDATE. What moved is the tree, so the numbers in the section above are now the history of a
+different commit rather than the present: **Rust is 770 tests, UI is 159 in 6 files**, and the newest
+evidence directory is `POST_G2_E2E_REMEDIATION/`.
+
+On 2026-10-02 a real-desktop acceptance round drove the shipping binary through 283 black-box cases and
+closed `PASS_WITH_FINDINGS` — three product defects, no S0, no S1 — and a follow-on round fixed exactly
+those three (`e816dcb`, `971015f`), each with a regression written first, a mutation proof after, and a
+focused real-desktop re-check against a rebuilt binary. Neither round widened anything: no P5 surface, no
+parser performance work, no schema, migration or dependency change, and no licence decision.
+
+The rule above still binds, and both rounds obeyed it: with no active task, no agent may create business
+functionality or pick the next track. V1 and P5 still need their own architect decision, and the carried
+forward list — large-file latency, peak RSS, 125/150 % DPI, mouse-wheel, `update_goldens`, the E2E
+harness — stays carried forward until someone is asked to take it on.

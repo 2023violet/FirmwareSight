@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-30"
+last_updated: "2026-10-02"
 ---
 
 # Decisions — v0.6.0
@@ -1116,3 +1116,39 @@ stays `0.6.0`.
   `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands.
 - **This commit's own run is external evidence.** Prompt §43 ends the CI→docs loop here: it is read with
   `gh run list` and reported, never written into another commit.
+
+# Post-G2 E2E findings remediation — closed 2026-10-02
+
+Verdict: **`POST_G2_E2E_FINDINGS_REMEDIATION = PASS`.** Three real-desktop findings fixed
+(`E2E-F001` S3, `E2E-F002` S2, `E2E-F003` S3), no S0 or S1, and no governance status moved: **G2 stays
+PASS, the product stays MVP CANDIDATE, baseline stays 0.6.0, `active_task` stays `NONE`.** Evidence in
+`POST_G2_E2E_REMEDIATION/`, fix head `971015f` green on Run #43 `37100371601` at 7 of 7 on attempt 1.
+
+- **E2E-F002 was fixed in the UI, and the bundle engine was left alone.** The false sentence — that an
+  occupied folder "already holds a FirmwareSight release bundle" — is authored in
+  `firmwaresight-project::bundle`'s `ERR-BUNDLE-6106` message, so the tempting fix is to edit it.
+  Rejected: rewriting an engine message changes bundle semantics, which this round's brief reserves for
+  Architect review, and hiding it in the UI would withhold an engine-authored fact the release owner is
+  entitled to read. Neither was needed, because the desktop command already derives
+  `recognizableBundle` from the same `is_recognizable_bundle` the write path consults before it replaces
+  anything. The page therefore knows the truth before it could ask, and the guard stays exactly as
+  strict: the engine still refuses a foreign folder, and the race where a folder stops being a bundle
+  between the choice and the replace still ends in the truthful `ERR-BUNDLE-6107` state.
+- **E2E-F003 widened one predicate and accepted a named trade-off.** GNU ld detection now searches the
+  whole already-buffered MAP text instead of its first 4096 characters, because the banner sits behind
+  preambles whose length the project does not control. Consequence stated rather than buried: a foreign
+  MAP carrying the literal `Memory Configuration` beyond 4 KB would now reach the GNU parser, where it
+  still fails closed for want of memory regions — a different error message, never a fabricated layout.
+  No new linker family is claimed, and no Keil/IAR adapter was written.
+- **Session identity stays out of storage.** The marker that says which selection a surviving analysis
+  describes is one React state value keyed on the shell's selection handle. It is not written to the
+  portable schema and not a SQLite column, and file-name equality is not used as identity — the case
+  that has to be caught is two artifacts sharing one leaf name.
+- **Performance observations were not converted into work.** Near-500 MiB first-use latency and peak RSS
+  carry forward with the wording `PARTIAL / environment-sensitive` and `MEASURED FOR TESTED WORKLOAD`.
+  This round changed no parser algorithm, no memory model, no guard threshold, and claimed no
+  optimization.
+- **A round may fix what it can prove and stop.** The 283-case acceptance named more than three
+  observations; only the ones whose evidence showed a product defect inside existing MVP contracts were
+  taken, each with a regression that went red before the fix and a mutation proof after it. Everything
+  else is listed as carried forward instead of being quietly widened into scope.

@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-01"
+last_updated: "2026-10-02"
 ---
 
 # Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / active_task NONE
@@ -419,3 +419,37 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
   and a report that describes them is a claim about a moment that has already moved.
 - After any commit that touches baseline-controlled files, `SHA256SUMS` and `DIRECTORY_TREE.txt` are
   stale: regenerate both, in that order, and verify with `sha256sum -c` plus an independent checker.
+
+## The two rounds that ran after G2 (2026-10-02)
+
+G2 is still the gate that stands, and this file's G2 paragraphs are still true about the tree they
+measured. What is now stale in them is the set of numbers: **Rust is 770 tests, UI is 159 in 6 files**,
+and the newest evidence directory is `POST_G2_E2E_REMEDIATION/`.
+
+Two rounds happened, and the difference between them is the point:
+
+- **Real-desktop MVP acceptance** drove the shipping binary by hand through 283 black-box cases — real
+  mouse, real keyboard, native dialogs, no IPC substituted for a click — and closed
+  `PASS_WITH_FINDINGS`: three product defects, no S0, no S1. It changed no code and made no commit; its
+  evidence root lives under `%TEMP%`, outside the repository, and the owner's live SQLite store was
+  restored byte-exact afterwards.
+- **Findings remediation** then fixed exactly those three, narrowly, each with a regression written
+  first, a mutation proof after, thirty fresh-process repetitions, and a focused real-desktop re-check
+  against a rebuilt binary. `e816dcb` carries the two UI fixes; `971015f` carries the MAP detection fix
+  as its own commit so a reviewer can read them apart.
+
+What the product now says that it did not before, because it is easy to undo without noticing:
+
+- A preserved analysis names the selection it belongs to, and it keys on the shell's selection handle —
+  **not** on the file name. Two artifacts called `firmware.elf` are the case that has to work. The
+  identity is one React state value; it is not in the portable schema and not a SQLite column.
+- A destination folder that exists and is not a bundle this engine wrote gets no Replace offer and no
+  Export press, and the page says why. The engine's guard is untouched and still refuses; do not
+  "simplify" the UI back into asking a question the engine cannot honor.
+- GNU ld MAP detection searches the whole buffered text. The banner sits behind preambles whose length
+  the project does not control, so a fixed head window is not a conservative choice — it is a false
+  statement about the linker.
+
+Carried forward, deliberately not fixed, and still open: near-500 MiB first-use latency and peak RSS
+(`PARTIAL / environment-sensitive`, `MEASURED FOR TESTED WORKLOAD`), 125/150 % DPI coverage,
+mouse-wheel behaviour, the `update_goldens` issue, the E2E harness refactor, and the licence decision.

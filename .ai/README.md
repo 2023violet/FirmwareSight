@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-30"
+last_updated: "2026-10-02"
 ---
 
 # AI Entry Point
@@ -27,6 +27,12 @@ closure heads green at 7 of 7 as read live) ·
 `G2: PASS` — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE (the whole-MVP engineering closure
 audit, 2026-10-01, under its own prompt and storage-path addendum; evidence in `G2_VALIDATION/`; product
 tree `e35cfe7` and evidence head `f75cbc5` both 7 of 7 on the first attempt) ·
+`Post-G2 real-desktop acceptance: PASS_WITH_FINDINGS` and its findings remediation closed the same day
+(2026-10-02; three product defects — E2E-F001 S3, E2E-F002 S2, E2E-F003 S3 — fixed narrowly in
+`e816dcb` and `971015f`, each with a regression, a mutation proof and a focused real-desktop re-check on
+a rebuilt shipping binary; fix head green on Run #43 `37100371601` at 7 of 7; evidence in
+`POST_G2_E2E_REMEDIATION/`, the 283-case root outside the repository; **G2 unchanged, still MVP
+CANDIDATE**) ·
 `active_task: NONE` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
@@ -43,6 +49,13 @@ The G2 engineering closure audit then ran under its own prompt — audit-first, 
 and closed `PASS` the same day, returning the pointer to `NONE` again. Its prompt says **stop after G2**:
 V1, P5, every History / installer / signing / updater / SBOM / cloud / account / telemetry / AI / pricing
 idea and any `v0.7.0` stay unstarted until the architect issues something for them.
+
+The two rounds that ran after G2 obeyed the same rule and did not widen it. The real-desktop acceptance
+round was **observe and record only**: no product change, no commit, no fix of what it found. The
+remediation round that followed was **fix the three proven defects and stop**: no P5 surface, no parser
+performance work, no schema or migration, no new dependency, no licence decision, and the carried-forward
+observations still carry forward. Both prompts ended in the same direction this one does — return to the
+architect.
 
 任何 AI 接手本项目时：
 

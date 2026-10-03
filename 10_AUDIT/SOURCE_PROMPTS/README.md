@@ -440,6 +440,42 @@ text with no source file; each says so in its own entry instead of standing for 
   Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE**, with `active_task` back to `NONE`. The
   successor's own run is external evidence and is not recorded in a further commit.
 
+## Post-G2 Real Desktop MVP End-to-End Acceptance v1.1
+
+- File: `FirmwareSight_PostG2_E2E_Acceptance_v1.1.txt`
+- SHA-256: `8867ff7ab10c440847ee20437d60dcc5d5023b972f8831316970d590f2653e5d` (42,378 bytes)
+- Authority: an observation round on a tree already marked G2 PASS. It authorized black-box real-desktop
+  acceptance only - TEST FIRST / OBSERVE / RECORD / DO NOT FIX - and its section 18 forbade a code
+  change, a commit, a push, P5, and fixing what it found. It capped the verdict at
+  `PASS_WITH_FINDINGS` while an open finding stood, required the owner's live store to be restored
+  byte-exact, and named 125/150 % DPI, mouse-wheel, cold-disk latency and peak RSS as things to record
+  rather than fix.
+- Outcome, 2026-10-02: 283 cases, `REAL_DESKTOP_E2E = PASS_WITH_FINDINGS`, three findings
+  (`E2E-F001` S3, `E2E-F002` S2, `E2E-F003` to be judged from evidence), no S0 or S1,
+  `ACTUAL_EXPECTATION_FAILURE_COUNT = 6`, `ORIGINAL_DB_RESTORED = YES` and
+  `ORIGINAL_DB_SHA_MATCH = YES`. Its recommendation was narrow post-G2 remediation, and the round made no
+  commit - which is why this archive holds its prompt but no `POST_G2_E2E/` evidence directory: the
+  evidence root lives under `%TEMP%`, outside the repository, by that prompt's own instruction.
+
+## Post-G2 E2E Findings Remediation and Focused Re-Validation v1.0
+
+- File: `FirmwareSight_PostG2_E2E_Findings_Remediation_v1.0.txt`
+- SHA-256: `7e98cfbfbda6e57db37088ec68ac41c068c3a14458abe15e8f4c4f3f4c8a45d1` (31,908 bytes)
+- Authority: fix the evidence-backed product defects the acceptance round observed, prove each with a
+  targeted regression and a focused real-desktop re-check, and stop. It made the evidence files - not
+  chat memory - the primary input, required a Takeover Report before any write, put `E2E-F003` behind an
+  eight-condition include/exclude gate with "do not invent a fix", forbade performance work, schema,
+  migration, dependency, architecture and P5 scope, and reserved any bundle-engine semantics change for
+  Architect review. It listed 125/150 % DPI, mouse-wheel infrastructure, the E2E harness refactor, the
+  `update_goldens` issue and licence selection as out of scope, and required remote CI to be green at 7
+  of 7 on the first attempt for both the fix head and the closure successor.
+- Outcome, 2026-10-02: `POST_G2_E2E_FINDINGS_REMEDIATION = PASS`. `E2E-F001` and `E2E-F002` fixed in
+  `e816dcb`, `E2E-F003` included on the gate's evidence and fixed in `971015f`; 770 Rust / 159 UI /
+  `check.py` 15/15; fix head Run #43 `37100371601` completed / success / 7 of 7 on attempt 1. Evidence in
+  `POST_G2_E2E_REMEDIATION/`. G2 stays PASS, the product stays MVP CANDIDATE, the baseline stays 0.6.0,
+  and the prompt's last instruction - do not start P5, return to the Architect, stop - is what the
+  closure commit did.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

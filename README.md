@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-09-30"
+last_updated: "2026-10-02"
 ---
 
 # FirmwareSight v0.6.0
@@ -75,6 +75,18 @@ G2      PASS — Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE (2026-10-
         and store absent. Evidence G2_VALIDATION/; product tree e35cfe7 (Run 36906482900), evidence head
         f75cbc5 (Run 36948719972), both 7 of 7 on the first attempt. Not production-ready, beta, RC or
         GA; not signed, installable, user-validated, security-clean or licensed open source
+Post-G2 real-desktop acceptance: PASS_WITH_FINDINGS (2026-10-02), and its findings remediation closed
+        the same day. 283 black-box cases of mouse, keyboard and native dialogs against the shipping
+        binary found three product defects and no S0 or S1: E2E-F001 (S3, a surviving analysis did not
+        say which selection it described), E2E-F002 (S2, a folder the engine refuses to replace was
+        offered for replacement) and E2E-F003 (S3, a GNU ld MAP refused as another linker's output). All
+        three fixed narrowly in e816dcb and 971015f with a regression and a mutation proof each, then
+        re-validated on a rebuilt shipping binary: F001 3/3, F002 3/3 with a canary that survived, F003
+        5/5 including a positive control that renders byte-identically. 770 Rust / 159 UI / check.py
+        15/15, fix head green on Run #43 37100371601 at 7 of 7 on the first attempt, the owner's store
+        restored byte-exact. Evidence POST_G2_E2E_REMEDIATION/, with the 283-case root outside the
+        repository. G2 stays PASS and the product stays MVP CANDIDATE; large-file latency, peak RSS,
+        125/150 % DPI and mouse-wheel behaviour are carried forward, not fixed
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -244,6 +256,8 @@ compatible upgrade exists inside that pin.
     candidate is complete and any next track (V1 own-artifact validation, P5 productization) needs its
     own architect decision
 13. `G2_VALIDATION/G2_EXIT_CHECKLIST.md` — the whole-MVP verdict, box by box
+13a. `POST_G2_E2E_REMEDIATION/EXIT_CHECKLIST.md` — the three real-desktop findings, each box settled by
+     the test, mutation proof or desktop measurement that closed it
 
 ## Batch A recruitment-ready status
 
@@ -292,6 +306,20 @@ twice and through the shipping window once, with Diff JSON, Diff HTML and the wh
 across the two; proved the tree needs no ignored file in a clean detached worktree; and proved the
 path boundary in 17 checks after the architect adjudicated `artifacts.path` as the local-only storage the
 baseline always had. Evidence and the canonical known-limitations list: `G2_VALIDATION/`.
+
+**After G2, on 2026-10-02, the product was driven end to end by hand rather than by assertion.** A
+real-desktop acceptance round ran 283 black-box cases against the shipping binary — real mouse, real
+keyboard, native dialogs, no IPC substituted for a click — and closed `PASS_WITH_FINDINGS`: three
+product defects, no S0, no S1, the owner's live store restored byte-exact. A second round then fixed
+exactly those three and nothing else, each with a regression that went red before the fix, a mutation
+proof after it, thirty fresh-process repetitions, and a focused real-desktop re-check on a rebuilt
+binary. Two of them are worth naming for what they changed in the product's voice: a preserved analysis
+now says which selection it belongs to, including when two artifacts share one file name; and a folder
+the engine will not replace is no longer offered for replacement. The third widened GNU ld MAP detection
+to the whole text, because the banner sits behind preambles whose length the project does not control.
+What the round deliberately left alone is listed where it was measured: large-file latency and peak RSS
+carry forward as `PARTIAL / environment-sensitive` and `MEASURED FOR TESTED WORKLOAD`, and no parser,
+memory-model or guard change was made to earn a performance claim. Evidence: `POST_G2_E2E_REMEDIATION/`.
 
 *(Recorded at the time as `active_task: NONE`.)* `P1_ANALYZE_DETAILS` completed on 2026-09-29, so the
 Analyze verb is one whole

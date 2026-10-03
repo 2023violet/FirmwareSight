@@ -1,0 +1,2151 @@
+FirmwareSight — Post-G2 Real Desktop MVP End-to-End Acceptance Test
+Execution Prompt v1.1 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight Real Desktop Acceptance Agent。
+
+本轮任务：
+POST_G2_REAL_DESKTOP_MVP_END_TO_END_ACCEPTANCE
+
+这不是开发任务。
+这不是修 Bug 任务。
+这不是 G2 重跑。
+这不是 P5 Productization。
+
+唯一目标：
+
+像一个真正坐在 Windows 电脑前的普通固件工程师一样，
+通过真实鼠标、真实键盘、真实 Windows 文件/文件夹选择器和真实 FirmwareSight shipping binary，
+从启动开始完整使用当前 MVP：
+
+Start
+→ Analyze
+→ Compare
+→ Release Gate
+→ Release Bundle
+→ Close
+→ Reopen
+→ Error Recovery
+
+并系统性暴露真实桌面使用中的：
+
+- 流程阻断
+- 状态/时序问题
+- 焦点问题
+- 键盘问题
+- 鼠标可操作性问题
+- 错误恢复问题
+- 文件覆盖安全问题
+- 状态残留问题
+- 重启/持久化问题
+- 窗口布局/DPI问题
+- 长时间连续使用问题
+- 大文件/内存问题
+- 新手可理解性问题
+
+核心纪律：
+
+TEST FIRST.
+OBSERVE.
+RECORD.
+DO NOT FIX.
+
+发现缺陷只记录证据，不改源码、不改测试、不提交代码。
+测试完成后交回 Architect 决定是否修复以及归属 MVP remediation / P5。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect verified current remote start state:
+
+origin/main:
+5c52f3d135e16c263e5bf4d928582aeca87e8c26
+
+Commit:
+G2: record the remote closure and pass the gate
+
+Remote CI:
+Run 36949964372
+HEAD 5c52f3d135e16c263e5bf4d928582aeca87e8c26
+attempt 1
+completed / success / 7 of 7
+
+Current governance:
+
+P0 = PASS
+G1 = PASS
+P1 = PASS / COMPLETE
+P2 = PASS / COMPLETE
+P3 = PASS / COMPLETE
+P4 = PASS / COMPLETE
+G2 = PASS
+
+FirmwareSight Product MVP = ENGINEERING COMPLETE
+Product state = MVP CANDIDATE
+baseline_version = 0.6.0
+active_task = NONE
+
+V0 = NON_BLOCKING_USER_FEEDBACK_TRACK
+real external sample = 0 / 8
+
+本轮黑盒测试不会自动修改以上治理状态。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. TEST CHARTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+核心问题：
+
+一个真实用户坐在 Windows 电脑前，
+不借助开发者捷径，
+能否安全、清楚、稳定地完成 FirmwareSight MVP 的完整 Firmware Release 工作流？
+
+Primary platform:
+Windows 11 x64
+
+Support tier:
+Tier 1
+
+重点：
+
+1. 自动化测试难发现的真实桌面问题；
+2. 鼠标/键盘/焦点问题；
+3. 对话框和文件系统安全问题；
+4. 连续使用后的 stale state；
+5. 重启后的状态问题；
+6. 用户能看到但开发者测试不容易看到的问题；
+7. G2 已知但未测量的性能/DPI/大文件证据。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. HARD BLACK-BOX RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+产品交互阶段严禁：
+
+- 直接调用 Tauri IPC
+- 调用 invoke(...)
+- 从 DevTools Console 触发产品命令
+- JavaScript click() 代替鼠标
+- 手动设置 React state
+- 调 Rust 内部函数代替 UI
+- 写 SQLite 来模拟用户状态
+- 直接调用 Gate/Compare/Bundle 内部 API
+- 用 shell 命令代替应该由 UI 完成的动作
+- 修改 DOM 让隐藏按钮出现
+- 修改产品源码
+- 修改测试源码
+- 修改 fixture 让流程通过
+- 修改断言或 timeout
+- 为了通过而不断重试到“碰巧绿”
+
+允许作为只读仪器：
+
+- 查看进程 CPU/RSS
+- 查看 filesystem 输出
+- hash 文件
+- 只读 SQLite 核对持久化
+- 查看日志
+- 只读 WebView Console
+- 只读 Network
+- 只读 Accessibility Tree
+- 截图
+- 录屏
+- PowerShell/cmd 做独立验证
+- Windows UI Automation 操作真实可见控件
+- Win32 操作真实原生对话框
+
+DevTools 可以 OBSERVE，
+不能 DRIVE PRODUCT LOGIC。
+
+如果某步骤只能靠内部调用才能完成：
+记录为 Finding。
+不要作弊。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. REPOSITORY READ-ONLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preflight:
+
+git fetch --prune origin
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+
+Expected:
+
+HEAD =
+origin/main =
+5c52f3d135e16c263e5bf4d928582aeca87e8c26
+
+worktree:
+clean
+
+若 origin/main 已移动：
+STOP。
+先报告给 Architect。
+
+本轮严禁：
+
+git add
+git commit
+git push
+git reset
+git clean
+git restore
+git stash
+git rebase
+git cherry-pick
+git merge
+git tag
+
+Repository 全程只读。
+
+所有测试证据写在 repository 之外。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. NO FIXES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+发现缺陷时：
+
+1. 保存当前屏幕；
+2. 记录精确动作；
+3. 记录 Expected；
+4. 记录 Actual；
+5. 安全时最多重复 3 次；
+6. 记录复现率；
+7. 分类严重度；
+8. 继续其他独立场景。
+
+不要修改代码。
+不要修改测试。
+不要创建 fix commit。
+不要为了继续流程临时 patch。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. EVIDENCE ROOT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+创建 repository 之外的 evidence root：
+
+%TEMP%\FirmwareSight-PostG2-E2E-<timestamp>\
+
+建议目录：
+
+00_environment/
+01_startup/
+02_analyze/
+03_compare/
+04_gate/
+05_review/
+06_bundle/
+07_restart/
+08_errors/
+09_keyboard/
+10_layout_dpi/
+11_endurance/
+12_performance/
+13_findings/
+FINAL_REPORT.md
+POST_G2_E2E_CASES.csv
+POST_G2_E2E_FINDINGS.md
+POST_G2_E2E_PERFORMANCE.csv
+POST_G2_E2E_JOURNEYS.csv
+
+截图：
+PNG
+
+命名：
+S<scenario>-<step>-<description>.png
+
+例如：
+S05-04-git-dirty-block.png
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. USER DATA SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+禁止破坏用户真实 FirmwareSight 数据。
+
+优先：
+
+1. 使用 G2 已验证过的 isolated smoke/test DB 机制；
+2. 新建独立 *.postg2-e2e test DB；
+3. 如果无法安全隔离：
+   STOP 并报告。
+
+不要为了 fresh state 删除、覆盖、移动真实用户 DB。
+
+已有 G2 smoke DB：
+除非是本轮创建的，否则不要删。
+
+结束时报告：
+
+ORIGINAL_DB_TOUCHED = YES/NO
+
+Expected:
+NO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. TEST SUBJECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+在 repository 外创建临时真实 Git repository。
+
+不要用 FirmwareSight 仓库本身作为 release subject。
+
+使用当前 committed Supported fixture：
+
+P2 base ELF + MAP
+P2 target ELF + MAP
+
+复制到临时项目。
+
+创建：
+
+firmwaresight.toml
+Release Notes
+Git commit
+Git tag
+
+Happy-path policy 必须得到 PASS。
+
+所有 failure 场景使用 test copy。
+
+禁止修改 committed fixture 原件。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. SHIPPING BINARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用 exact HEAD 5c52f3d 构建/取得 shipping binary。
+
+要求：
+custom-protocol feature
+
+记录：
+
+HEAD
+binary SHA-256
+binary size
+build exit code
+
+整个 GUI acceptance 使用同一个 binary。
+
+如果 binary 改变：
+该轮 GUI 证据作废，重新开始。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. REAL COMPUTER CONTROL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须使用：
+
+鼠标移动
+点击
+双击
+滚轮
+真实键盘
+Tab
+Shift+Tab
+Enter
+Space
+Esc
+方向键
+Ctrl 快捷键
+
+Native file/folder dialog：
+操作真实可见对话框。
+
+UI Automation 只允许激活真实用户能看到的控件。
+
+截图必须来自真实窗口。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. RESULT VOCABULARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step:
+
+PASS
+FAIL
+PARTIAL
+BLOCKED
+NOT_APPLICABLE
+NOT_OBSERVED
+
+Scenario:
+
+PASS
+PASS_WITH_FINDINGS
+FAIL
+BLOCKED
+
+绝对不要：
+
+NOT_OBSERVED → PASS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. FINDING SEVERITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+E2E-S0 — DATA / SAFETY CRITICAL
+
+例如：
+- 覆盖任意用户目录
+- 成功提示但 bundle 损坏
+- 删除真实用户 DB
+- 修改源 firmware
+- stale Gate 仍能生成 PASS bundle
+
+E2E-S1 — MVP BLOCKER
+
+例如：
+- 无法完成 Analyze → Compare → Gate → Bundle
+- valid supported ELF 导致 crash
+- UNKNOWN 被显示成 PASS
+- Bundle 无法独立验证
+- 正常关闭后无法重启
+
+E2E-S2 — MAJOR
+
+例如：
+- 正常错误必须重启才能恢复
+- 经常 dead button
+- focus trap 阻断主要流程
+- 上个 artifact 状态串到新 artifact
+
+E2E-S3 — MINOR
+
+例如：
+- 误导文案
+- 非关键布局裁切
+- 固定窗口标题
+
+E2E-S4 — OBSERVATION
+
+已知限制或 Productization candidate。
+
+Finding id:
+E2E-F001
+E2E-F002
+...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. FINDING TEMPLATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每个 Finding 必须包含：
+
+ID
+Severity
+Scenario
+Step
+App HEAD
+Binary SHA
+Environment
+Precondition
+User Action
+Expected
+Actual
+Screenshot
+Video if available
+Repro 1/2/3
+Repro Rate
+Recovery
+Data Impact
+Filesystem Impact
+Console/Log Evidence
+Known Limitation Match
+New Defect YES/NO
+MVP Blocker Candidate YES/NO
+Notes
+
+本轮不要实现 fix。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. ENVIRONMENT CAPTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+记录：
+
+Windows edition/version/build
+CPU
+RAM
+GPU
+display resolution
+DPI scaling
+monitor count
+WebView2 version
+locale
+Git version
+
+FirmwareSight:
+
+HEAD
+binary SHA
+binary size
+baseline version
+
+Test project:
+
+Git HEAD
+tag
+clean state
+ELF hash
+MAP hash
+config hash
+Release Notes hash
+
+启动前截一张屏幕。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. S00 — COLD START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+步骤：
+
+1. 正常启动 shipping binary；
+2. 记录 launch → visible window；
+3. 记录 launch → visually stable；
+4. 验证不需要 terminal 才能运行；
+5. 顶级导航只有 Analyze / Compare / Release；
+6. 检查空状态；
+7. 判断第一次使用下一步是否可发现；
+8. 无 stale 上一轮结果；
+9. 无 host path；
+10. minimize / restore；
+11. maximize / restore；
+12. X 关闭；
+13. warm relaunch；
+14. 再次正常进入。
+
+记录：
+
+cold start
+warm start
+first-stable
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. S01 — FIRST-TIME ANALYZE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+通过真实文件选择器：
+
+选择 target ELF
+attach MAP
+Run Analyze
+
+验证：
+
+artifact filename
+SHA-256
+architecture
+endianness
+bitness
+entry point / Unknown
+FLASH/nonvolatile
+RAM
+Sections
+Symbols
+Evidence
+Capabilities
+
+操作：
+
+sort symbol
+filter symbol
+clear filter
+Bytes → KiB
+KiB → Bytes
+
+必须确认：
+
+单位切换画面实际变化
+Unknown 不是 0
+filter 后表格正确
+valid artifact 不 crash
+
+Known L19：
+
+Analyze / Compare 的 Object attribution 含义不同。
+
+仅文案已知差异不算新 blocker。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. S02 — SECOND ANALYZE / STATE ISOLATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+分析 base。
+
+再分析 target。
+
+检查：
+
+hash 正确切换
+snapshot 正确切换
+表格不是旧数据
+filter 没有错误串状态
+memory 值对应当前 artifact
+current selection 不混淆
+
+无 History surface 是已知 L10，不算缺陷。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. S03 — COMPARE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+选择：
+
+old = base
+new = target
+
+验证：
+
+old/new 清楚
+FLASH delta
+RAM delta
+positive +
+negative -
+section changes
+symbol changes
+Added
+Removed
+Changed
+pagination
+filter
+clear filter
+
+验证：
+
+object/module attribution 在证据不足时显示 Unavailable。
+
+Known L20：
+
+Compare 可能显示 Core enum 原词。
+若事实正确，仅作 UX observation。
+
+通过 UI 导出：
+
+Diff JSON
+Diff HTML
+
+独立验证：
+
+JSON parse
+HTML offline
+HTML 无网络依赖
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. S04 — GATE HAPPY PATH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+通过真实文件选择器加载 firmwaresight.toml。
+
+选择 target / baseline。
+
+Run Gate。
+
+必须看到 PASS。
+
+确认 10 个 rule：
+
+git.clean
+release.commit_matches_expected
+release.version_matches_policy
+artifacts.required
+artifacts.hashes
+memory.flash_budget
+memory.ram_budget
+diff.growth
+release.notes
+evidence.unknown_review
+
+每条必须：
+
+rule
+state
+evidence
+remediation where applicable
+
+同时验证：
+
+Review ≠ Block
+Unknown ≠ Pass
+N/A neutral
+不是只靠颜色
+Gate run id 可读
+无 host path
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. S05 — DIRTY GIT / RECOVERY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+从 Gate PASS 开始。
+
+在 test project COPY 修改 tracked 文件。
+
+回到 app。
+
+重新 Run Gate。
+
+Expected:
+not PASS
+
+old PASS 不能被静默复用。
+
+尝试 Prepare Bundle：
+
+Expected:
+reject stale PASS context.
+
+恢复文件 byte-exact。
+
+重新 Run Gate。
+
+Expected:
+PASS recovered.
+
+记录 recovery 是否容易理解。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. S06 — NO GIT / UNKNOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+复制项目到非 Git 目录。
+
+Gate。
+
+Expected:
+
+Git-dependent facts = UNKNOWN
+
+不是 PASS。
+
+severity 根据 policy。
+
+Bundle 不得从 unresolved state 生成。
+
+UI Unknown 明确。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. S07 — RELEASE NOTES MISSING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+需要 notes 的 policy。
+
+在 test COPY 移走 notes。
+
+Run Gate。
+
+Expected:
+
+release.notes non-pass / BLOCK。
+
+恢复。
+
+再次 Gate。
+
+Expected:
+PASS。
+
+检查 remediation 是否能理解。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. S08 — MEMORY BUDGET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用 config COPY。
+
+先让 FLASH budget 小于 target。
+
+Expected:
+
+memory.flash_budget BLOCK
+
+恢复。
+
+再让 RAM budget 小于 target。
+
+Expected:
+
+memory.ram_budget BLOCK
+
+检查：
+
+value
+unit
+message
+Unknown/zero 区分
+
+不要改 firmware bytes。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. S09 — REVIEW FLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+让 diff.growth 触发 REVIEW。
+
+Expected:
+
+finding factual state = REVIEW
+
+不是 PASS。
+
+使用真实键盘：
+
+actor
+reason
+Accept Review
+
+验证：
+
+finding 本身仍是 REVIEW
+acceptance 单独存在
+aggregate 在正确 policy 下才变 PASS
+
+尝试：
+
+empty actor
+empty reason
+whitespace actor/reason
+
+Expected:
+reject.
+
+重复 acceptance：
+
+Expected:
+不能静默新增第二条。
+
+只读 DB 可用于确认 immutable row。
+禁止写 DB。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. S10 — BUNDLE HAPPY PATH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+从 PASS Gate：
+
+Prepare Bundle
+检查 preview
+Choose destination folder
+Export
+
+Preview 必须有：
+
+release id
+release version
+snapshot
+baseline
+Gate run
+acceptance count
+file list
+hashes
+
+Bundle 期望：
+
+artifacts/*
+analysis.json
+diff.json
+gate-results.json
+accepted-reviews.json
+release-notes.md
+release-report.html
+SHA256SUMS
+release-manifest.json
+
+独立验证：
+
+JSON parse
+schemas
+SHA256SUMS
+manifest size/hash
+offline HTML
+
+扫描 FirmwareSight-generated text：
+
+不应包含：
+
+user home
+temp root
+project absolute path
+database path
+destination path
+
+不要把 immutable ELF 内 DWARF 路径当产品 metadata leak。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. S11 — OVERWRITE SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+已有 valid Bundle。
+
+再次选择同目标。
+
+第一次：
+
+Cancel / Keep Existing。
+
+验证原 Bundle tree byte-identical。
+
+第二次：
+
+Confirm Replace。
+
+验证 replacement 成功。
+
+然后创建普通非 FirmwareSight 目录到目标位置。
+
+尝试 Replace。
+
+Expected:
+
+REFUSE。
+
+不得删除目录。
+
+若违反：
+
+E2E-S0。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. S12 — STALE BUNDLE PREVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prepare Bundle。
+
+预览完成后：
+
+修改 test-copy ELF 1 byte。
+
+Export。
+
+Expected:
+
+fail closed
+SOURCE_ARTIFACT_CHANGED / PLAN_STALE or equivalent
+无 partial final bundle
+不破坏 existing valid bundle
+
+恢复 exact original bytes。
+
+通过正常流程恢复。
+
+可再测试：
+
+preview 后修改 Release Notes。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. S13 — BAD INPUTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+通过真实 Analyze intake 测试：
+
+.txt
+empty file
+truncated ELF
+random bytes
+known malformed fixture
+
+Expected:
+
+explicit error
+no crash
+no corrupt current UI
+last good result 行为符合设计
+之后可继续分析 valid ELF
+
+每次错误后都必须再次成功 Analyze valid target。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. S14 — SOURCE DELETED AFTER PICK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+通过 dialog 选中 test-copy ELF。
+
+Analyze 前删除/移动 source。
+
+Run Analyze。
+
+Expected:
+
+typed understandable error
+no crash
+无不必要 host path leak
+
+恢复 source。
+
+Retry。
+
+Expected:
+正常完成。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. S15 — CLOSE / REOPEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+完成：
+
+Analyze
+Compare
+Gate
+
+然后关闭应用。
+
+确认进程退出。
+
+重新启动。
+
+观察：
+
+startup 正常
+DB 正常
+没有 stuck Loading
+没有错误 stale state
+没有 crash
+可以继续 workflow
+
+重复：
+
+至少 5 次 close/reopen。
+
+记录每次启动时间。
+
+History 不存在是 L10，不要求浏览历史。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. S16 — RAPID NAVIGATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+快速切换：
+
+Analyze
+Compare
+Release
+Analyze
+Release
+Compare
+
+至少 20 次。
+
+在 loading 中切走/切回。
+
+观察：
+
+stale result
+artifact/baseline 混淆
+永久 spinner
+永久 disabled button
+duplicate dialog
+wrong Gate result
+crash
+
+任何串状态都记录 Finding。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. S17 — REPEATED ANALYZE SOAK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+同一 session：
+
+base
+target
+base
+target
+
+至少 10 次完整 Analyze。
+
+每次记录：
+
+duration
+RSS before
+RSS peak
+RSS after
+UI freeze
+error
+
+不要用内部 analyzer。
+
+只能 GUI。
+
+不要只凭 RSS 噪音宣称 memory leak。
+
+记录趋势即可。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. S18 — FIVE COMPLETE WORKFLOW CYCLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+同一 session：
+
+Analyze
+Compare
+Gate
+Bundle
+
+重复 5 个 cycle。
+
+每轮独立 output dir。
+
+记录：
+
+cycle time
+RSS
+release id
+bundle hash
+error/retry
+
+同语义输入：
+
+release id 应保持相同
+portable outputs 应 deterministic
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. S19 — KEYBOARD-ONLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+尽量不用鼠标。
+
+使用：
+
+Tab
+Shift+Tab
+Enter
+Space
+Arrow
+Esc
+
+覆盖：
+
+top nav
+Analyze controls
+filter
+Compare
+Release
+Review
+Bundle confirmation
+Cancel
+
+验证：
+
+visible focus
+logical tab order
+no focus trap
+dialog focus
+Esc
+Enter activates expected control
+
+Native dialog 如果纯键盘自动化工具无法可靠控制，
+可记录 PARTIAL，
+不要用内部 API 替代。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. S20 — MOUSE-ONLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+完成简化 happy path：
+
+Analyze
+Compare
+Gate
+Bundle
+
+只能鼠标。
+
+不能偷偷用 keyboard fallback。
+
+重点观察：
+
+native select
+tiny targets
+popup
+hover-only control
+
+Known L9：
+native select 曾有 automation gap。
+
+如果真实 mouse 路径仍无法操作：
+记录 Finding。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. S21 — ESC / CANCEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+对所有可见 dialog/transient：
+
+Open → Esc
+Open → Cancel
+
+覆盖：
+
+artifact chooser
+MAP chooser
+project config chooser
+Diff export
+Bundle destination
+Replace confirmation
+Review acceptance
+
+Expected:
+
+无 destructive action
+previous stable state 保留
+无 backdrop 卡死
+focus 正常返回
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. S22 — WINDOW SIZE MATRIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+测试：
+
+1280×720
+1366×768
+1920×1080
+2560×1440
+
+每个尺寸至少截：
+
+Analyze
+Compare
+Release
+
+检查：
+
+nav
+primary action
+table
+scroll
+dialog
+hash
+status
+no overlap
+无不可达按钮
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. S23 — WINDOWS DPI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+环境允许安全切换时测试：
+
+100%
+125%
+150%
+
+每个 DPI：
+
+fresh launch
+Analyze
+Compare
+Release
+one native dialog
+one table
+one confirmation
+
+检查：
+
+text clipping
+overlap
+hit target
+focus ring
+scroll
+native dialog
+
+如果切 DPI 会风险用户环境：
+
+BLOCKED_BY_ENVIRONMENT。
+
+不要把 browser zoom 当 Windows DPI。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. S24 — STATUS SEMANTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+真实捕获：
+
+PASS
+REVIEW
+BLOCK
+UNKNOWN
+N/A
+
+检查：
+
+文字/icon
+不是 color-only
+
+Review vs Block 明确
+Unknown 不像 Pass
+
+截图灰度下也应能理解主要状态。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. S25 — FOCUS STRESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Replace confirmation：
+
+Open
+Cancel
+Open
+Confirm
+
+30 cycles。
+
+Review dialog：
+
+Open
+Tab
+Esc
+Reopen
+
+20 cycles。
+
+观察：
+
+expected focus
+focus 丢失
+Enter 错动作
+关闭后焦点恢复
+
+这是产品行为测试，
+不是 test harness 检查。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. S26 — NEW USER HEURISTIC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+假设没读 repository docs。
+
+从 cold start 回答：
+
+1. 我第一步做什么？
+2. 我要什么文件？
+3. MAP 为什么需要？
+4. Compare 的 old/new 是什么？
+5. Review 是什么？
+6. Unknown 是什么？
+7. 为什么 Bundle disabled？
+8. Gate PASS 后下一步是什么？
+
+分类：
+
+DISCOVERABLE
+DISCOVERABLE_WITH_MINOR_CONFUSION
+NOT_DISCOVERABLE
+
+仅：
+
+INTERNAL_HEURISTIC_ONLY
+
+不是 real-user evidence。
+
+不得转换成 PRD 用户百分比。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. S27 — LARGE FILE / RSS LADDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+目标：
+
+补充 Peak RSS 和 500 MB window evidence gap。
+
+优先使用合法 supported ELF。
+
+目标大小：
+
+10 MB
+50 MB
+100 MB
+250 MB
+约 500 MB
+
+每个实际可获得的 valid supported ELF 记录：
+
+size
+Analyze result
+first useful analysis time
+RSS before
+RSS peak
+RSS after
+UI freeze >2s count
+UI freeze >5s count
+Not Responding
+crash
+
+不要拿任意 padding 文件冒充 supported ELF performance evidence。
+
+无法合理创建某个大小：
+
+NOT_AVAILABLE。
+
+另外做 guard-only：
+
+file > configured max bytes
+
+Expected:
+
+typed guard
+快速 fail
+无 crash
+无巨大 RSS spike
+
+Guard-only 和 valid parse performance 必须分开报告。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. PERFORMANCE MEASUREMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+用 OS-level metric：
+
+PowerShell Get-Process WorkingSet64
+Performance Counter
+Task Manager
+Process Explorer
+
+目标采样：
+
+>=5 Hz where practical。
+
+记录：
+
+RSS baseline
+peak working set
+post-operation RSS
+
+不要用 browser JS heap 代替 process RSS。
+
+所有性能数据标：
+
+OBSERVED ON THIS MACHINE
+
+禁止跨机器推断。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. S28 — ENDURANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+目标：
+
+60 分钟。
+
+如果环境/任务预算不允许：
+
+至少 30 分钟并标 PARTIAL。
+
+期间每 1–3 分钟操作：
+
+navigate
+filter
+paginate
+Analyze
+Compare
+Gate
+Prepare Bundle
+Cancel dialog
+Export to fresh destination
+
+每分钟记录 RSS。
+
+观察：
+
+CPU runaway
+memory growth
+stale Loading
+dead button
+focus loss
+duplicate notification
+crash
+blank WebView
+DB lock
+file handle issue
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. S29 — FIVE FRESH-START JOURNEYS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每次：
+
+close app
+fresh launch
+Analyze
+Compare
+Gate
+Bundle
+close
+
+共：
+
+5 次。
+
+每次 fresh output dir。
+
+记录：
+
+launch ms
+Analyze ms
+Compare ms
+Gate ms
+Bundle ms
+total ms
+retries
+findings
+
+Pass target：
+
+5 / 5 complete
+
+不能用 developer shortcut。
+
+任何 retry 必须记录。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. S30 — ERROR RECOVERY WITHOUT RESTART
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+一个 session 内依次制造：
+
+unsupported file
+missing source
+dirty Git
+missing Release Notes
+stale Bundle preview
+
+每次都通过正常用户操作恢复，
+不重启 app。
+
+最后必须再次完成：
+
+Analyze → Compare → Gate → Bundle
+
+如果非预期必须重启：
+
+E2E-S2 候选。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. S31 — UNICODE / PATH NAMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用 fixture COPY：
+
+folder with spaces
+中文目录
+中文 + spaces
+filename with parentheses
+multiple dots
+
+例如：
+
+测试 固件 (release candidate).elf
+
+通过真实 dialog 完成：
+
+Analyze
+Compare
+Gate
+Bundle
+
+观察：
+
+encoding
+display name
+dialog
+hash
+no host path leak
+
+不要测试 Windows illegal filename。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+47. S32 — OFFLINE / LOCAL-FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+如果能安全断网：
+
+离线完成 happy path。
+
+如果不能安全断全机网络：
+
+只读 Network 面板观察。
+
+Expected:
+
+无 cloud dependency
+无 upload requirement
+
+可写：
+
+OBSERVED_NO_NETWORK_DEPENDENCY
+
+不可写：
+
+PROVED NEVER NETWORKS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+48. S33 — CONSOLE / LOG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+happy path 和 error path 观察：
+
+WebView console
+app logs/stderr
+
+记录：
+
+uncaught exception
+React error
+panic
+stack trace shown to user
+unhandled promise rejection
+error spam
+
+普通 debug/info 不自动算失败。
+
+发现 defect 前不要清日志。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+49. S34 — BUNDLE REPLACE SOAK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+对 valid FirmwareSight Bundle：
+
+Confirm Replace × 10
+
+每次：
+
+verify bundle
+no stale backup/temp
+
+Cancel Replace × 10
+
+每次：
+
+existing bundle tree hash unchanged
+
+用于压力验证 safe swap。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+50. S35 — APP PROCESS RECOVERY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+正常 restart 已覆盖。
+
+额外：
+
+在 TEST INSTANCE idle 时用 Task Manager / Stop-Process terminate。
+
+重启。
+
+Expected:
+
+app starts
+DB readable
+无 fabricated partial Bundle
+
+只使用 disposable test state。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+51. KNOWN LIMITATIONS — DO NOT DUPLICATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+当前 canonical G2 known limitations：
+
+L1 Peak RSS NOT MEASURED
+L2 500 MB window NOT MEASURED
+L3 Fuzzing NOT RUN
+L4 one Windows host / 100% DPI scope
+L5 limited linker layouts
+L6 sections.file_offset reason gap
+L7 symbols.address reason gap
+L8 object/module attribution unavailable
+L9 native select mouse observation gap
+L10 no History
+L11 real-user comprehension untested
+L12 accepted RustSec advisories
+L13 license gap
+L14 golden updater historical issue
+L15 ElfProgramHeader source label
+L16 custom-protocol requirement
+L17 CI maintenance/index blind spot
+L18 local DB source path expected local-only persistence
+L19 Object attribution wording ambiguity
+L20 Compare Core enum wording
+L21 fixed window title
+L22 line endings can move release identity; Gate fails closed
+L23 family of UI test-race shapes
+L24 update_goldens Windows cleanup issue
+L25 historical dead Apply-filter observation
+
+如果只是重新观察到同一个问题：
+
+KNOWN_LIMITATION_RECONFIRMED
+
+不要创建 duplicate finding。
+
+如果影响比记录严重：
+
+新建 Finding 并引用 L#。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+52. SCREENSHOT REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须截图：
+
+每个 FAIL
+每个 PARTIAL
+每个 BLOCKED
+每个 new finding
+
+Happy-path 最少：
+
+cold start
+Analyze
+Compare
+Gate PASS
+Gate REVIEW
+Gate BLOCK
+Gate UNKNOWN
+Review dialog
+Bundle preview
+Bundle success
+Replace confirmation
+1280×720 core pages
+150% DPI core pages if measured
+
+避免截入与项目无关的个人信息。
+
+必要时 crop。
+
+用户可见报告中避免暴露 account/user path。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+53. PERFORMANCE CSV
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+创建：
+
+POST_G2_E2E_PERFORMANCE.csv
+
+Columns:
+
+scenario
+iteration
+artifact_name
+artifact_size_bytes
+valid_supported_input
+duration_ms
+rss_before_bytes
+rss_peak_bytes
+rss_after_bytes
+ui_freeze_over_2s_count
+ui_freeze_over_5s_count
+not_responding
+result
+notes
+
+缺数据：
+
+留空/NA。
+
+禁止估算。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+54. JOURNEY CSV
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+创建：
+
+POST_G2_E2E_JOURNEYS.csv
+
+Columns:
+
+journey
+cold_start_ms
+analyze_ms
+compare_ms
+gate_ms
+bundle_ms
+total_ms
+retries
+findings
+result
+
+至少：
+
+5 rows。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+55. CASE CSV
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+创建：
+
+POST_G2_E2E_CASES.csv
+
+Columns:
+
+scenario_id
+scenario_name
+step_id
+expected
+actual
+result
+finding_id
+evidence_file
+notes
+
+每个 mandatory step 必须有 row。
+
+不能只写：
+
+all passed。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+56. FINDINGS REGISTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+创建：
+
+POST_G2_E2E_FINDINGS.md
+
+先 Summary：
+
+ID
+Severity
+Scenario
+Title
+Repro
+Workflow blocker?
+Known limitation?
+Evidence
+
+再给每个 Finding 完整 §12 record。
+
+不要写 fix commit。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+57. FINAL ACCEPTANCE DIMENSIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+每个维度只能：
+
+PASS
+PASS_WITH_FINDINGS
+FAIL
+BLOCKED
+NOT_MEASURED
+
+维度：
+
+A Startup
+B First-time Analyze
+C Compare
+D Gate happy path
+E Gate failure/recovery
+F Review
+G Bundle
+H Bundle overwrite safety
+I Restart/persistence
+J Error recovery
+K Keyboard
+L Mouse
+M Window/layout
+N DPI
+O Endurance
+P Performance/RSS
+Q Large-file
+R Portability
+S Offline/local-first
+T Overall MVP journey
+
+不要打 1–10 分。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+58. REAL_DESKTOP_E2E VERDICT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+可判：
+
+REAL_DESKTOP_E2E = PASS
+
+仅当：
+
+- 5/5 fresh journeys complete
+- 0 E2E-S0
+- 0 E2E-S1
+- Analyze PASS
+- Compare PASS
+- Gate PASS
+- Bundle PASS
+- dirty Git fail closed
+- Unknown 不变 Pass
+- stale Bundle fail closed
+- arbitrary folder 不被覆盖
+- restart 不损坏
+- bad input 后 valid input 可恢复
+- keyboard primary flow 无 blocker
+- generated docs 无 host path leak
+- 无 app crash
+- source firmware 未被产品修改
+
+允许：
+
+S2/S3/S4 findings 存在。
+
+若有 S1：
+
+REAL_DESKTOP_E2E = FAIL
+
+如果核心场景被环境挡住：
+
+REAL_DESKTOP_E2E = BLOCKED
+
+本轮不改 G2 governance。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+59. PRODUCT STATUS AFTER TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+无论结果如何：
+
+不要修改 repository governance。
+
+报告中写：
+
+G2 remains:
+PASS
+
+MVP Candidate remains:
+current governance state
+
+若发现 S0/S1：
+
+写：
+
+MVP CANDIDATE HAS POST-G2 BLOCKING FINDING PENDING ARCHITECT REVIEW
+
+不要自行 revoke G2。
+
+由 Architect 决定治理后果。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+60. CLEANUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+结束：
+
+关闭 FirmwareSight。
+
+删除：
+
+仅本轮创建且无需保留的 temp project/temp bundle。
+
+保留：
+
+EVIDENCE_ROOT。
+
+不要删除：
+
+用户文件
+真实 DB
+旧 G2 smoke DB
+repo 文件
+不是本轮创建的 /tmp 脚本
+
+记录 cleanup actions。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+61. FINAL REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+返回：
+
+# FirmwareSight Post-G2 Real Desktop MVP End-to-End Acceptance Report
+
+## 1. Executive Verdict
+
+REAL_DESKTOP_E2E =
+PASS / PASS_WITH_FINDINGS / FAIL / BLOCKED
+
+G2 governance remains:
+PASS
+
+MVP Candidate:
+unchanged / blocker found pending Architect review
+
+## 2. Tested Build
+
+HEAD
+origin/main
+binary SHA
+baseline
+CI anchor
+
+## 3. Environment
+
+Windows
+CPU
+RAM
+GPU
+resolution
+DPI
+WebView
+Git
+
+## 4. Black-Box Compliance
+
+Confirm:
+
+repo read-only
+no product source modified
+no test modified
+no commit
+no direct IPC used to replace UI
+no DB write used to simulate actions
+real mouse/keyboard/native dialogs used
+
+## 5. Happy Path
+
+Analyze
+Compare
+Gate
+Bundle
+
+## 6. Five Fresh Journeys
+
+5 rows
+actual pass count
+
+## 7. Analyze
+
+## 8. Compare
+
+## 9. Release Gate
+
+PASS
+REVIEW
+BLOCK
+UNKNOWN
+N/A
+failure/recovery
+
+## 10. Review
+
+## 11. Release Bundle
+
+preview
+export
+replace
+stale source
+independent verification
+
+## 12. Restart / Persistence
+
+five cycles
+
+## 13. Error Recovery
+
+bad input
+missing source
+dirty Git
+missing notes
+stale preview
+
+## 14. Keyboard / Focus
+
+## 15. Mouse Operability
+
+## 16. Window / DPI
+
+1280×720
+1366×768
+1920×1080
+2560×1440
+100/125/150% actual measured values
+
+## 17. Endurance
+
+duration
+cycles
+RSS
+
+## 18. Performance
+
+startup
+Analyze
+large-file ladder
+RSS
+
+500 MB UI:
+PROVEN / PARTIAL / NOT_MEASURED
+
+Peak RSS:
+MEASURED / NOT_MEASURED
+
+## 19. Offline / Portability
+
+## 20. Findings Summary
+
+S0
+S1
+S2
+S3
+S4
+
+## 21. Known Limitations Reconfirmed
+
+L#
+
+## 22. New Findings
+
+E2E-Fxxx
+
+## 23. Data Safety
+
+original DB touched?
+source files modified?
+arbitrary directories overwritten?
+partial bundles left?
+
+## 24. Evidence Package
+
+EVIDENCE_ROOT
+screenshots
+videos
+case rows
+journey rows
+performance rows
+
+## 25. Cleanup
+
+## 26. Recommendation to Architect
+
+只能三选一：
+
+A. No remediation required before P5
+
+B. Narrow post-G2 remediation recommended
+
+C. MVP blocker remediation required before any P5 work
+
+不要执行 recommendation。
+
+## 27. Stop
+
+STOP.
+
+DO NOT MODIFY CODE.
+DO NOT COMMIT.
+DO NOT START P5.
+
+Return evidence to Architect.
+
+END OF PROMPT

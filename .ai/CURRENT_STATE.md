@@ -5,12 +5,12 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-30"
+last_updated: "2026-10-02"
 ---
 
 # Current State
 
-- Date: 2026-10-01
+- Date: 2026-10-02
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - Active task: **`NONE`** — the G2 Product MVP engineering closure audit reached **PASS** on 2026-10-01:
   **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2 Product MVP
@@ -20,6 +20,24 @@ last_updated: "2026-09-30"
   `36948719972`, each 7 of 7 on the first attempt; 769 Rust / 155 UI / `check.py` 15/15 / clean worktree
   17/17; the whole chain on both surfaces with byte-identical parity; evidence in `G2_VALIDATION/`. Next
   tracks (V1, P5) need a separate architect decision; nothing here authorizes one.
+- Post-G2, and the reason the source above is no longer the whole picture: the product then passed a
+  **real-desktop MVP end-to-end acceptance** round on 2026-10-02 — 283 cases, black-box mouse, keyboard
+  and native dialogs against the shipping binary — verdict **`PASS_WITH_FINDINGS`**, three findings, no
+  S0 and no S1. Its evidence root lives outside the repository, under `%TEMP%`, and the owner's live
+  store was restored byte-exact. A follow-on round, *Post-G2 E2E Findings Remediation & Focused
+  Re-Validation, Execution Prompt v1.0 — Architect Reviewed*, then fixed all three, narrowly:
+  **E2E-F001** (S3) — a surviving analysis did not say which selection it described, so choosing a
+  second artifact of the same file name left the first one's figures looking like the new one's;
+  **E2E-F002** (S2) — a destination folder that is not a bundle this engine wrote was offered for
+  replacement above an engine sentence claiming it already holds one, a decision the engine refuses to
+  carry out; **E2E-F003** (S3) — a GNU ld MAP whose banner sat past a 4 KB head window was refused as
+  another linker's output. Fixes are `e816dcb` and `971015f`: 770 Rust / 159 UI / `check.py` 15/15,
+  fix head green on Run #43 `37100371601` at 7 of 7 on the first attempt, evidence in
+  `POST_G2_E2E_REMEDIATION/`. **G2 stays PASS, the product stays MVP CANDIDATE, the baseline stays
+  0.6.0, and no P5 authority was created.** What the remediation deliberately did not take on is
+  recorded there too: large-file latency and peak RSS stay carried forward with the wording
+  `PARTIAL / environment-sensitive` and `MEASURED FOR TESTED WORKLOAD`, and 125/150 % DPI, mouse-wheel,
+  the `update_goldens` issue and the licence choice are all still open.
 - Previous task, kept as history: `P4_RELEASE_BUNDLE` reached `PASS / COMPLETE` on 2026-10-01 and the
   pointer returned to empty. P4 was opened on 2026-09-30 by *FirmwareSight — P4 Release Bundle MVP
   Implementation, Execution Prompt v1.0 — Architect Reviewed*, delivered as a file (the first stage prompt
