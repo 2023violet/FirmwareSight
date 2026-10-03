@@ -52,7 +52,8 @@ zero Clang-produced evidence despite the cohort claim.
 | `20b03e3` | test-only repair of the pre-existing race that run lost | `37129900728` | success, 7 of 7 |
 | `0c031cd` | `bundle.active`, three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | `37133706214` | **failure, 7 of 10** |
 | `1055242` | the package group finds `cargo-tauri` through `cargo tauri`, a `SKIP` can no longer read as a pass, and the step runs from `apps/desktop` | `37138881977` | success, **10 of 10** — and the first run to attach a built package on all three platforms |
-| the commit that lands this row | a `.app` indexed file by file, so the index §41 asks for is readable by `sha256sum -c` | its own run, 10 jobs | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
+| `53578e9` | a `.app` indexed file by file, so the index §41 asks for is readable by `sha256sum -c`, plus each payload's own digest in the metadata | `37143046338` | success, **10 of 10** — and its darwin set, downloaded and checked, closed the index row it was fixing |
+| the commit that lands this row | the read-back written into `P5_PACKAGING_REPORT.md` §5d/§5e and §9, `P5_CI_AUTHORITY.md`, the audit, and `04_TECH/17`'s stale sentence about the CLI companion corrected — the CI sets do archive it, and all three were listed | follows this commit | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
 
 The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
 lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
@@ -81,8 +82,10 @@ there it produced this repository's first installer — `FirmwareSight_0.6.0_x64
 **10 of 10 green** on Run `37138881977` — the first run in this repository to attach a built package on all
 three platforms — and reading those artifacts back found the third defect (§5d of `P5_PACKAGING_REPORT.md`):
 the darwin index gave the `.app` one line naming a directory, so `sha256sum -c` answered
-`FAILED open or read` on a correct build. Built is still not installed: §38/§64's real-install acceptance is
-the next thing.
+`FAILED open or read` on a correct build. The next run fixed it and was read back the same way: Run
+`37143046338` at head `53578e9`, **10 of 10**, five darwin index lines all `OK` with exit 0, and one flipped
+byte in a copied `Contents/Info.plist` making the index exit 1 and name the file. Built is still not
+installed: §38/§64's real-install acceptance is the next thing.
 
 ## What the owner decided at the checkpoint
 

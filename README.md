@@ -319,8 +319,14 @@ answered `FAILED open or read` on a correct build. A directory bundle is now ind
 scanned payload records its own digest — which turned an inference into a measurement: two builds of one
 tree differ in exactly 20 bytes, all of them linker identity (the PE `TimeDateStamp` and the RSDS CodeView
 GUID), so a package digest identifies the set a build produced and is not an equality key across builds.
+Head `53578e9` then went **10 of 10** too (`37143046338`), and its darwin set closed the index row from the
+runner's own bytes: five lines, every one `OK`, exit 0, with one flipped byte in a copy of
+`Contents/Info.plist` making the same index exit 1 and name the file. Comparing the two runs — heads
+differing only in `scripts/` and docs — gave a fact nobody had predicted: the macOS `.app` tree digest is
+identical across both, while the `.dmg` wrapping it, at identical length, is not.
 All three repairs, the artifact sets with their checksums, and the limits of what has been proved are in
 `P5_PACKAGING_REPORT.md` §5 through §5e.
+
 **No P5 verdict
 exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt
 forbids writing `P5 PASS`, `BETA`, `RC` or `GA` before closure evidence, and forbids a tag, a GitHub

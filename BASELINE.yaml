@@ -578,6 +578,7 @@ p5_execution:
     canonical_targets: {windows: nsis, macos: [app, dmg], ubuntu: deb}
     windows_install_mode: currentUser # no administrator prompt, HKCU metadata only; an owner decision for the real install on the owner's machine
     distribution_checksums: target/dist-package/SHA256SUMS.txt # distinct from a firmware Release Bundle's SHA256SUMS, as section 10 requires
+    checksum_index_shape: one_line_per_file # a directory bundle contributes its files, paths relative to the index; one line naming a `.app` made sha256sum answer `FAILED open or read` on a correct build (run 37138881977), and the file-by-file index verified on the runner's own set in run 37143046338
     # A CI tool, not a dependency: it never enters Cargo.lock, so cargo-deny's product graph is unchanged.
     ci_tooling: cargo install tauri-cli@2.12.1 --locked
     desktop_package_command: cargo tauri build -- --locked # cargo install leaves cargo-tauri, which is run through cargo; the bare `tauri` name belongs to the npm distribution

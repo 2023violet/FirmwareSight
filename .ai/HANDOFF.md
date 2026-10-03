@@ -76,12 +76,15 @@ count as a pass and fails any skip under `CI`.
 
 **What is next, in order:** head `1055242` went **10 of 10** on Run `37138881977` and attached three
 §42-named artifact sets, so packaging is now proved on all three platforms in the `CI_BUILD_ONLY` sense the
-owner allowed — and the darwin set was what found the item still open: its `SHA256SUMS.txt` gave the `.app`
-one line naming a directory, so `sha256sum -c`, the tool §41 names, answered `FAILED open or read` on a
-correct build. A bundle is indexed file by file from the commit after this paragraph's head, and **that
-commit's own run must be read back with `gh run download` and verified line by line** before the row in
-`P5_PACKAGING_REPORT.md` §9 closes; a green tick on the job is not the proof, because the job verifies the
-bundle before it writes the index. Then §38/§64's real Windows install, uninstall and
+owner allowed — and the darwin set was what found the item that was still open: its `SHA256SUMS.txt` gave the
+`.app` one line naming a directory, so `sha256sum -c`, the tool §41 names, answered `FAILED open or read` on a
+correct build. A bundle is indexed file by file from `53578e9`, and **that commit's own run was read back the
+same way** — `37143046338`, **10 of 10**, five darwin index lines every one `OK` with exit 0, one flipped byte
+in a copy of `Contents/Info.plist` turning the same index red and naming the file. §9's index row is closed,
+and the read-back's comparison of the two runs is what §5e now states as a measurement: the macOS `.app` tree
+digest repeated exactly between them while its `.dmg`, at identical length, did not. A green tick on the job
+still was not the proof — the job verifies the bundle before it writes the index, which is why the artifact
+set has to be downloaded. Next is §38/§64's real Windows install, uninstall and
 reinstall acceptance on this host with the owner's store parked, hashed and restored (the
 `P5_INSTALL_RECOVERY_REPORT.md` evidence, and the
 thing no package job can do from a runner — the installer for it exists both here and as a run artifact);

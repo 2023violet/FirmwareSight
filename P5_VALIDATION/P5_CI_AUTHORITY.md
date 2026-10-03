@@ -52,15 +52,22 @@ diff.
 | `37129900728` | `20b03e3` | test-only repair of that race | 7 of 7 | success |
 | `37133706214` | `0c031cd` | packaging + release metadata + the three package jobs | **7 of 10** | **failure** — all seven gate jobs green; `Package Windows`, `Package Ubuntu` and `Package macOS` each installed the pinned CLI, then reported `SKIPPED: the Tauri CLI is not installed on this machine`, `4/4 steps passed`, exit 0, and were caught red by their own upload step (`No files were found with the provided path: target/dist-package/`) |
 | `37138881977` | `1055242` | the CLI found through `cargo tauri`, a `SKIP` that cannot read as a pass, and the package step run from `apps/desktop` | **10 of 10** | success, first attempt — and the first run in this repository's history to attach a built package: `FirmwareSight-0.6.0-windows-x86_64`, `FirmwareSight-0.6.0-linux-x86_64` and `FirmwareSight-0.6.0-darwin-arm64`, each with its own `SHA256SUMS.txt` and `artifact-metadata.json` |
-| _(the checksum-index repair)_ | — | a `.app` indexed file by file so `sha256sum -c` can read it | — | recorded here when it concludes |
+| `37143046338` | `53578e9` | a `.app` indexed file by file so `sha256sum -c` can read it, `bytes` summed for a directory bundle, and each scanned payload's own digest recorded | **10 of 10** | success, first attempt. Its darwin set was the point of the run: five index lines, every one `OK`, exit 0, where the previous run's three-line darwin index could not open the `.app`. Proof read from `gh run download`, not from the job summary, and reported in `P5_PACKAGING_REPORT.md` §5d |
 
-Read back with `gh run view 37138881977 --json headSha,conclusion,jobs` and
-`gh api repos/2023violet/FirmwareSight/actions/runs/37138881977/artifacts`; the three sets were then
-downloaded with `gh run download 37138881977` and verified with `sha256sum -c` in the evidence root, where
-two of the three indexes returned `OK` on every line and the darwin index returned
-`FAILED open or read` on the one line naming a directory. That defect and its repair are §5d of
-`P5_PACKAGING_REPORT.md`; it does not change this run's conclusion, because the job verifies the bundle
-before it writes the index, and the index is what §41 asks a stranger to be able to check.
+Read back with `gh run view 37143046338 --json headSha,conclusion,jobs`, then
+`gh run download 37143046338 -D <evidence root>/CI_PACKAGES_INDEX_FIX` — which at that moment returned the
+darwin and Linux sets, `Package Windows` still uploading — and the third set with
+`gh run download 37143046338 -n FirmwareSight-0.6.0-windows-x86_64`, whose files extract flat into the target
+directory and were then moved into `CI_PACKAGES_INDEX_FIX/FirmwareSight-0.6.0-windows-x86_64/` beside the
+other two. Each set was verified from inside its own directory with `sha256sum -c SHA256SUMS.txt`: darwin
+five lines, Linux two, Windows two, every line `OK`, exit 0 in all three. The same verification had been run
+against `37138881977`'s sets, downloaded whole with `gh run download 37138881977` after
+`gh api repos/2023violet/FirmwareSight/actions/runs/37138881977/artifacts` listed them; two of those three
+indexes returned `OK` on every line and the darwin index returned
+`FAILED open or read` on the one line naming a directory. That defect, its repair and the bind test
+that follows it are §5d of `P5_PACKAGING_REPORT.md`; it never changed a run's conclusion, because the job
+verifies the bundle before it writes the index — which is exactly why a green tick on `Package macOS` was not
+the proof, and why the artifact set has to be downloaded and checked line by line.
 
 The failed run is listed rather than dropped. Every P5 closure claim in this repository is "N of N on the
 first attempt", and a head that went red is part of the chain that produced the head that did not:

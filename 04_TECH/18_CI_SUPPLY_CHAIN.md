@@ -83,6 +83,14 @@ payload binaries of identical length with **20 differing bytes**, all of them li
 installers of different sizes, here and on the runner. The full measurement is §5e of
 `P5_VALIDATION/P5_PACKAGING_REPORT.md`.
 
+The comparison was then made across two CI runs whose heads differ only in `scripts/` and docs —
+`git diff --stat 1055242..53578e9` names no `crates/` or `apps/` file — so every byte the compiler saw was the
+same. Every container changed: the `.dmg` at identical length, the `.deb` by four bytes, both CLI archives.
+One artifact did not change at all — the macOS `.app`'s aggregate tree digest is the same `eb12407b…` in
+both, which means its whole bundle, executable and derived `.icns` included, came back byte-identical from
+`macos26` twice. That is a measurement, not a licence: two runs on one image is not reproducibility, and the
+`.dmg` wrapped around that identical bundle still changed. The rule below is what the evidence supports.
+
 So: a package digest identifies **the artifact set a stranger was given**, and `SHA256SUMS.txt` exists so
 they can check that nothing in it changed after the build; it is not a comparison key across builds, and no
 re-release, cache or attestation in this project may be justified by "the digest would have matched". Two

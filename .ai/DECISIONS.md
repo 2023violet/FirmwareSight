@@ -1268,7 +1268,12 @@ unchanged: G2 `PASS`, **MVP CANDIDATE**, baseline `0.6.0`.
   RSDS CodeView GUID — and the installers differ in size too. **A package digest is therefore not an
   equality key across builds here or across hosts**, so no release, cache or attestation in this project may
   be justified by "the digest would have matched"; the reproducibility record stays the input fields
-  `04_TECH/18` lists, and `04_TECH/18` now says so in its own words.
+  `04_TECH/18` lists, and `04_TECH/18` now says so in its own words. The next run proved the index rule on
+  the runner rather than at home (`37143046338`, head `53578e9`, **10 of 10**: five darwin lines, all `OK`,
+  exit 0, and one flipped byte in a copied `Info.plist` making it exit 1 and name the file), and its
+  comparison of the two runs added a nuance worth keeping: the macOS `.app` tree digest repeated exactly
+  between them while the `.dmg` of identical length around it did not — one pair of runs is not
+  reproducibility, and a changed container is not a changed program.
 - **Two questions were refused, correctly.** §32 sends L22 — line endings moving a release's content-derived
   identity, which today fails closed — to the Architect as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` plus a STOP,
   because normalizing the digest input would change identity semantics, an `AGENTS.md` §2 move. And §54 is

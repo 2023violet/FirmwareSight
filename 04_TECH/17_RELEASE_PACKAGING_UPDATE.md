@@ -191,7 +191,8 @@ installer. A hand-run build follows the same directory rule.
   no username, no host path;
 - `SHA256SUMS.txt`, the **distribution** checksum index. One line per distributed **file**: a `.app` is a
   directory, and a line naming a directory makes `sha256sum -c` answer `FAILED open or read` on a good
-  build (measured on the macOS job's own artifact set, run `37138881977`), so a bundle contributes one
+  build (measured on the macOS job's own artifact set, run `37138881977`, and closed by run `37143046338`,
+  whose darwin index verifies on all five lines with exit 0), so a bundle contributes one
   line for each file inside it, path written relative to the index. The single aggregate digest over the
   whole bundle stays in `artifact-metadata.json` as that artifact's identity;
 - `artifact-metadata.json`: the digests, the byte counts, where each version string was read from,
@@ -200,10 +201,13 @@ installer. A hand-run build follows the same directory rule.
 
 The distribution `SHA256SUMS.txt` and a firmware Release Bundle's `SHA256SUMS` are different documents
 about different things, and prompt §10 requires them to stay conceptually separate: the metadata file
-says so in a field rather than relying on the filename. `04_TECH/17` §3's CLI archive convention
-(Windows zip, macOS/Linux tar.gz) is carried by `06_DELIVERY`'s P5 record as an open item: this stage
-publishes no release, so the companion ships inside the run's artifact set as a bare binary, and the
-archive form is a release-channel decision rather than a packaging-mechanics one.
+says so in a field rather than relying on the filename. §3's CLI archive convention (Windows zip,
+macOS/Linux tar.gz) **is** what the CI sets carry: each run attaches
+`FirmwareSight-<version>-<platform>-<arch>-cli-fwsight.zip` or `…-cli-fwsight.tar.gz`, and listing one
+answers with the binary under its ordinary name and nothing else — `fwsight.exe` at the top level on
+Windows, `fwsight` on macOS and Linux, checked with `tar -tzf` against the downloaded darwin and Linux sets.
+Nothing is published from these sets: they are a CI artifact store, not a release channel, so the archive
+here is about keeping the companion one file with a name, not about distribution.
 
 ### Version identity is now a gate step, not a paragraph
 

@@ -288,9 +288,40 @@ changing one byte in `Contents/Info.plist` makes it exit 1 and name that file `F
 tree digest moves with the same byte. A re-run of the Windows and Linux sets is unchanged: two lines, both
 `OK`.
 
-**The runner has not yet said this back.** The fix is local-evidence only until a package job produces a
-darwin set whose index verifies line for line, and this document will not call it closed until that run is
-read from `gh run download`, not from the job's summary.
+**The runner has said it back.** Run `37143046338` (head `53578e9`) is **10 of 10 green**, and its darwin
+set — taken with `gh run download 37143046338` and checked with the same `sha256sum` coreutils binary a
+stranger on Git Bash reaches for — verifies line for line:
+
+```
+$ cd FirmwareSight-0.6.0-darwin-arm64 && sha256sum -c SHA256SUMS.txt
+FirmwareSight-0.6.0-darwin-arm64-app.app/Contents/Info.plist: OK
+FirmwareSight-0.6.0-darwin-arm64-dmg.dmg: OK
+FirmwareSight-0.6.0-darwin-arm64-cli-fwsight.tar.gz: OK
+FirmwareSight-0.6.0-darwin-arm64-app.app/Contents/MacOS/firmwaresight-desktop: OK
+FirmwareSight-0.6.0-darwin-arm64-app.app/Contents/Resources/FirmwareSight.icns: OK
+exit=0
+```
+
+Five lines where §5d's opening quote had three, and the line that used to be a directory with an aggregate
+digest under it is now three lines naming real files. The Linux set (2 lines) and the Windows set (2 lines)
+verify the same way, exit 0. `…-app.app/Contents/MacOS/firmwaresight-desktop` is the Cargo bin name the
+pinned bundler source said it would be, and the `.app`'s metadata entry now records 13,064,290 `bytes` — the
+sum of its files — where the previous run recorded `null` for a directory.
+
+Two properties of that listing were then tested against the runner's own bytes rather than a stand-in:
+flipping one byte of `Contents/Info.plist` in a **copy** of the downloaded bundle makes the same index print
+`…Info.plist: FAILED`, exit 1, with the other four lines `OK`; and recomputing the aggregate tree digest over
+the downloaded bundle with the shipping `sha256_tree()` returns exactly the `eb12407b…` recorded in
+`artifact-metadata.json`, whose `bytes` field equals the sum of the bundle's files. Both commands and their
+outputs are `INDEX_BIND_PROOF.md` in the evidence root, beside the downloads; the downloaded sets themselves
+were left byte-for-byte untouched, so the next round can re-run them.
+
+The local half of the proof is re-runnable rather than narrated: `synthetic_index_proof.py` in the P5
+evidence root, with `synthetic_index_proof.log` beside it, drives the shipping `place()` and `index_lines()`
+over a three-file stand-in bundle and shows all four properties at once — the members listed sorted by path,
+`sha256sum -c` exit 0, one changed byte in `Contents/Info.plist` giving exit 1 and naming
+`…Info.plist: FAILED`, and the aggregate tree digest moving with that byte. The stand-in is not a package
+and is not offered as one.
 
 `verify_package_artifacts.py` then writes, into `target/dist-package/`:
 
@@ -341,6 +372,29 @@ fault.
 
 This is why §5d's index change matters more than it looks: when byte-level identity of a bundle cannot be
 claimed, what a stranger can still check is the per-file index, file by file, of the set they were given.
+
+The same comparison across two CI runs says something sharper, because `git diff --stat 1055242..53578e9`
+names thirteen paths and no `crates/` or `apps/` file among them — the only changed input to the build is
+`scripts/verify_package_artifacts.py`. Every Rust and UI byte the bundler saw was the same in both runs.
+Reading `bytes` and `sha256` out of both runs' `artifact-metadata.json`:
+
+| artifact | run `37138881977` (`1055242`) | run `37143046338` (`53578e9`) | same? |
+| --- | --- | --- | --- |
+| `…-app.app` tree | `eb12407b58f032e5…`, `bytes: null` | `eb12407b58f032e5…`, 13,064,290 bytes | **digest identical** |
+| `…-dmg.dmg` | 4,864,786 B, `93005faba7ff71a5…` | 4,864,786 B, `253da6694956be6c…` | same length, different |
+| `…-linux…-deb.deb` | 5,365,916 B, `772f1c51203338ac…` | 5,365,920 B, `6c5b7a2a4855a8ba…` | 4 bytes apart |
+| `…-linux…-cli-fwsight.tar.gz` | 1,834,782 B, `e236f4d2e0d41a3d…` | 1,834,782 B, `4ae0c04c09bf924a…` | same length, different |
+| `…-nsis.exe` | 3,812,717 B, `c6ce9944a94481a7…` | 3,811,501 B, `5f70efc06c42f343…` | 1,216 bytes apart |
+| `…-cli-fwsight.zip` | 1,668,377 B, `9a7a59b863fbb503…` | 1,668,376 B, `16cd1a1ad9c55d42…` | 1 byte apart |
+
+So the answer is platform- and container-specific, and it is a measurement rather than a rule: **the macOS
+bundle tree did reproduce byte for byte** across two runs on `macos26`, while the `.dmg` wrapped around it —
+identical in length — did not; and every Windows and Linux container here changed. That is exactly the split
+`payload_sha256` was added to make checkable, and it cuts both ways: a repeating digest is not proof a build
+is reproducible (one pair of runs on one runner image), and a changing one is not proof the program changed —
+this run records the same payload digest `d252a5eae2a908d0…` for the `.app` and for the `.dmg` whose own
+digest changed. The rule in `04_TECH/18` stays as written — no package digest is an equality key across
+builds — and no release, cache or attestation may be justified by "the digest would have matched".
 
 ## 6. Distribution checksums are not bundle checksums
 
@@ -425,12 +479,13 @@ Manual upgrade semantics for P5, written where a user will find them and repeate
 | The executable name inside `FirmwareSight.app/Contents/MacOS` | `Package macOS` | **closed by §5c** — the reader found `firmwaresight-desktop`, the Cargo bin name the source said it would be |
 | `dpkg-deb -x` extraction and the version field read | `Package Ubuntu` | **closed by §5c** — the embedded-frontend check ran on the binary extracted from the `.deb` |
 | The `apps/desktop` working directory on Linux and macOS | `Package Ubuntu` / `Package macOS` | **closed by §5c** — all three jobs ran the same `check.py --only package` from that directory and each produced a package |
-| A checksum index a stranger can verify, for a `.app` | `Package macOS` | **open.** §5d: the runner's darwin index carries one line naming a directory, which `sha256sum -c` reports `FAILED` for. Fixed here and proved on a synthetic bundle; it needs the next run's darwin artifact set read back from `gh run download` before this row closes |
+| A checksum index a stranger can verify, for a `.app` | `Package macOS` | **closed by §5d.** Run `37143046338`'s darwin set, downloaded with `gh run download` and checked with `sha256sum -c`, verifies on all five lines with exit 0; one flipped byte in a copy of `Contents/Info.plist` makes it exit 1 and name that file |
 | A Windows installer installs, launches offline, uninstalls and reinstalls | `P5_INSTALL_RECOVERY_REPORT.md` (§38 A–L, §64, §65) | pending, and it is the next thing that must happen. The installer exists on both this host and the runner, so this is no longer blocked on packaging |
 | Installed app needs no Rust, Cargo, Node, pnpm, Vite or a checkout (§65) | the real-install session, on the cleanest practical environment | pending |
 | Uninstall behaviour on user data | measured, never asserted (§39 records it) | pending |
 | Desktop About panel and Diagnostics as version surfaces | the commits that add them join `drift/version identity` | not built yet |
-| Are the produced packages byte-reproducible? | `04_TECH/18`'s reproducibility fields, if a claim is ever made over an installer | **measured and attributed — and the answer is no.** Two builds of the same tree on this host produced installers of 3,811,140 / 3,809,059 / 3,808,294 bytes, and the runner's was 3,812,717; the payload inside differs too, in exactly **20 of 15,001,088 bytes** (§5e): the PE `TimeDateStamp` and the 16-byte RSDS CodeView GUID, which the linker sets per link. No digest in this document is an equality key across builds, and nothing here may claim an installer reproduces byte for byte |
+| Are the produced packages byte-reproducible? | `04_TECH/18`'s reproducibility fields, if a claim is ever made over an installer | **measured and attributed — and the answer is no, with one platform exception that proves nothing on its own.** Two builds of the same tree on this host produced installers of 3,811,140 / 3,809,059 / 3,808,294 bytes, and the runner's 3,812,717 then 3,811,501; the payload inside differs too, in exactly **20 of 15,001,088 bytes** (§5e): the PE `TimeDateStamp` and the 16-byte RSDS CodeView GUID, which the linker sets per link. Across the two CI runs, whose heads differ only in `scripts/` and docs, the macOS `.app` tree digest repeated exactly while its `.dmg`, the `.deb` and both CLI archives did not (§5e's table). No digest in this document is an equality key across builds, and nothing here may claim an installer reproduces byte for byte |
+| Does the verifier open every container? | the real install acceptance, and any future unpacking step | **no, and it says so.** `payload_read_from` records the relation: the `.deb` is genuinely unpacked with `dpkg-deb -x`, while the NSIS `.exe` is checked through `target/release/firmwaresight-desktop.exe` — the file the installer bundles — and the `.dmg` through the `.app` built in the same run. Neither of those two containers is mounted or unpacked, so neither is proved to carry that binary; the Windows install row below is what closes that gap |
 
 
 Evidence for anything in this document that cites a command carries the command; anything cited from

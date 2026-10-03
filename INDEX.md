@@ -40,8 +40,9 @@ CLI resolves its frontend directory from the process cwd — and head `1055242` 
 `37138881977`, the first run ever to attach a built package for Windows, Ubuntu and macOS. Reading those
 artifact sets back found a third defect in the index itself: a directory `.app` given one checksum line
 makes `sha256sum -c` answer `FAILED open or read` on a correct build, so a bundle is now indexed file by file
-with the aggregate tree digest kept in metadata and each payload's digest recorded beside its container
-(**775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI
+with the aggregate tree digest kept in metadata and each payload's digest recorded beside its container — and
+head `53578e9` went **10 of 10** on Run `37143046338`, whose downloaded darwin set verifies on all five lines
+with exit 0 (**775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI
 jobs**). **Still no P5 verdict exists, and nothing has been installed yet** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source

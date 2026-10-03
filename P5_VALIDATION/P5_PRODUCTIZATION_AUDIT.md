@@ -65,7 +65,7 @@ ADR-0015/0016/0018/0023/0026, plus the inspection list in §3: `Cargo.toml`, `Ca
 | `20b03e3` | test-only repair of the race `37128593254` lost | `37129900728` | success, 7 of 7 |
 | `0c031cd` | packaging enabled: `bundle.active`, the three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | `37133706214` | **failure, 7 of 10** |
 | `1055242` | `cargo-tauri` found through `cargo tauri`, a `SKIP` that cannot read as a pass, the package step run from `apps/desktop` | `37138881977` | success, **10 of 10** — and the first run to attach a built package for all three platforms |
-| the commit that lands this row | the darwin `.app` indexed file by file, so `sha256sum -c` can read it, plus each payload's own digest in the metadata | follows this commit | — |
+| `53578e9` | the darwin `.app` indexed file by file, so `sha256sum -c` can read it, plus each payload's own digest in the metadata | `37143046338` | success, **10 of 10** — and the read-back that closed §5d: five darwin index lines, all `OK`, exit 0 |
 
 The failure was not the version bump. `Desktop UI (windows-latest)` lost a pre-existing race in
 `compare.test.tsx`: `runCompare()` returns as soon as the comparison region exists, and the
@@ -93,7 +93,7 @@ that still sample before their page resolves — instead of letting the next red
 
 ### 0b. What section A became when packaging was switched on
 
-The packaging commit implements section 8/9/10/41 against the numbers in section A above. Seven findings
+The packaging commit implements section 8/9/10/41 against the numbers in section A above. Eight findings
 from doing it are worth recording here because they were not visible from the audit:
 
 - **A `localhost:5173` absence check would have been a lie.** Section 8 asks that the production package
@@ -158,13 +158,19 @@ from doing it are worth recording here because they were not visible from the au
   given a directory bundle one line holding an aggregate tree digest — well defined, unreadable by the
   standard tool. The index now lists a directory bundle file by file and keeps the aggregate digest in
   `artifact-metadata.json` as identity; it also records each scanned payload's digest, because the same tree
-  produced installers of 3,811,140 / 3,805,120 / 3,809,059 and 3,808,294 bytes on this host and 3,812,717 on
-  the runner. Diffing two consecutive payloads answered the larger question: same length, **20 bytes
-  different**, all of them linker identity — the PE `TimeDateStamp` (and its three copies in the debug
-  directory) plus the 16-byte RSDS CodeView GUID. A package digest therefore identifies the set a build
-  produced; it is not an equality key across builds, which is now written into `04_TECH/18` beside the list
-  of fields a build records. Read back from `gh run download`, all of this is §5d and §5e of
-  `P5_PACKAGING_REPORT.md`.
+  produced installers of 3,811,140 / 3,805,120 / 3,809,059 and 3,808,294 bytes on this host, then 3,812,717
+  and 3,811,501 on the runner. Diffing two consecutive payloads answered the larger question: same length,
+  **20 bytes different**, all of them linker identity — the PE `TimeDateStamp` (and its three copies in the
+  debug directory) plus the 16-byte RSDS CodeView GUID. A package digest therefore identifies the set a build
+  produced; it is not an equality key across builds, which is now written into `04_TECH/18` beside the list of
+  fields a build records. Read back from `gh run download`, all of this is §5d and §5e of
+  `P5_PACKAGING_REPORT.md`, and that read-back closed the row: run `37143046338`'s darwin index verifies on
+  all five lines with exit 0, and flipping one byte of a copied `Contents/Info.plist` makes it fail and name
+  the file. What the comparison could not have predicted: between those two CI runs — whose heads differ only
+  in `scripts/` and docs, per `git diff --stat 1055242..53578e9` — the macOS `.app` **tree digest repeated
+  exactly**, while its own `.dmg`, at identical length, did not. A digest that repeats is one pair of runs on
+  one image, not a reproducibility claim, and a digest that changes is not evidence the program changed. Both
+  directions are now measured.
 
 The CI authoritative set is now ten jobs (section 41), which `05_ENGINEERING/06_CI_CD_BASELINE.md`
 records with its reason: this repository has never had a scheduled workflow, so the matrix row that

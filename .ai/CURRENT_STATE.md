@@ -47,18 +47,23 @@ last_updated: "2026-10-03"
   answered, and `check.py` now records a skip as `SKIP`, leaves it out of the passed total, and exits
   non-zero on any skip when `CI` is set. Measured on this host three ways, in `P5_VALIDATION/
   P5_PACKAGING_REPORT.md` §5.
-- **Packaging is proved on all three platforms and one index defect is open.** Run `37138881977` at head
-  `1055242` is the first **10 of 10** green run and the first to attach a built package: the three
-  §42-named sets — Windows NSIS, Ubuntu `.deb`, macOS `.app` + `.dmg` — each with its own `SHA256SUMS.txt`
-  and `artifact-metadata.json`. They were downloaded with `gh run download` and read back, which closed the
-  rows that had only ever been read from upstream source: the macOS runner derives an `.icns` from the five
-  committed PNGs, the executable inside `Contents/MacOS` is the Cargo bin name
+- **Packaging is proved on all three platforms, and the index defect that read-back found is now closed by
+  its own read-back.** Run `37138881977` at head `1055242` is the first **10 of 10** green run and the first
+  to attach a built package: the three §42-named sets — Windows NSIS, Ubuntu `.deb`, macOS `.app` + `.dmg` —
+  each with its own `SHA256SUMS.txt` and `artifact-metadata.json`. They were downloaded with `gh run download`
+  and read back, which closed the rows that had only ever been read from upstream source: the macOS runner
+  derives an `.icns` from the five committed PNGs, the executable inside `Contents/MacOS` is the Cargo bin name
   (`firmwaresight-desktop`, exactly as the source said), the `.deb` really is unpacked by `dpkg-deb -x`, and
-  all three jobs build from `apps/desktop`. The read-back also caught a defect of this repository's own: the
+  all three jobs build from `apps/desktop`. That read-back also caught a defect of this repository's own: the
   darwin index gave the `.app` one line naming a directory, so `sha256sum -c` answered
   `FAILED open or read` on a good build. A directory bundle now contributes one line per file, with the
-  aggregate tree digest kept in the metadata as identity; that is proved on a synthetic bundle here and
-  still needs the next run's darwin artifact set before §9's row closes. Nothing has been installed yet:
+  aggregate tree digest kept in the metadata as identity and each scanned payload's digest recorded — and
+  run `37143046338` at head `53578e9`, again **10 of 10**, said it back: five darwin index lines, every one
+  `OK`, exit 0, with one flipped byte in a copy of `Contents/Info.plist` making the same index exit 1 and name
+  that file. Comparing the two runs, whose heads differ only in `scripts/` and docs, produced a fact nobody
+  predicted: the macOS `.app` tree digest is identical across both, while the `.dmg` wrapping it — same
+  length — is not. A repeating digest is one pair of runs on one runner image and licenses no reproducibility
+  claim; a changing one is not evidence the program changed. Nothing has been installed yet:
   the byte-level install, launch-offline, uninstall and reinstall acceptance (§38, §64, §65) is the next
   round, and the installers for it exist on both this host and the runner.
 - **One gate run went red for a reason that was not in the commit it ran on**, and that is worth knowing
