@@ -311,9 +311,17 @@ own empty artifact upload. The fix is the rule rather than the filename: a skip 
 out of the passed total, and fails the run when `CI` is set. Installing the pinned CLI here then produced
 this repository's **first real package** — a 3,811,140-byte `FirmwareSight_0.6.0_x64-setup.exe` — and that
 build surfaced a second defect the stub could not have found: the CLI resolves its frontend directory from
-the process cwd, so the package step has to run from `apps/desktop`, not from `apps/desktop/src-tauri`. Both
-repairs, the produced artifact set with its checksums, and the limits of what has been proved are in
-`P5_PACKAGING_REPORT.md` §5, §5a and §5b. **No P5 verdict
+the process cwd, so the package step has to run from `apps/desktop`, not from `apps/desktop/src-tauri`. Head
+`1055242` then became this repository's **first 10-of-10 run** (`37138881977`), the first to attach a built
+package for Windows, Ubuntu and macOS — and downloading those sets found a third defect, this one in the
+index itself: the darwin `SHA256SUMS.txt` gave the `.app` one line naming a directory, so `sha256sum -c`
+answered `FAILED open or read` on a correct build. A directory bundle is now indexed file by file, and each
+scanned payload records its own digest — which turned an inference into a measurement: two builds of one
+tree differ in exactly 20 bytes, all of them linker identity (the PE `TimeDateStamp` and the RSDS CodeView
+GUID), so a package digest identifies the set a build produced and is not an equality key across builds.
+All three repairs, the artifact sets with their checksums, and the limits of what has been proved are in
+`P5_PACKAGING_REPORT.md` §5 through §5e.
+**No P5 verdict
 exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt
 forbids writing `P5 PASS`, `BETA`, `RC` or `GA` before closure evidence, and forbids a tag, a GitHub
 Release, an updater, a certificate and any licence choice. V1 own-artifact / real-user validation still has

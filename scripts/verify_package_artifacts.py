@@ -393,17 +393,52 @@ def place(kind: str, source: Path, out: Path, version: str, plat: str, arch: str
             shutil.rmtree(target)
         shutil.copytree(source, target)
         digest = sha256_tree(target)
-    else:
-        shutil.copy2(source, target)
-        digest = sha256(target)
+        # A directory cannot be a checksum index line: the CI macOS set carried
+        # `<name>-app.app  <tree digest>`, and `sha256sum -c` answered `Is a directory / FAILED open or
+        # read` on a build that was fine. The aggregate tree digest stays in the metadata as the
+        # artifact's identity, while the index gains one line per file, so the whole bundle is
+        # verifiable with the one tool §41 names.
+        members = sorted(
+            (p for p in target.rglob("*") if p.is_file()),
+            key=lambda p: p.relative_to(out).as_posix(),
+        )
+        return {
+            "kind": kind,
+            "name": name,
+            "built_name": source.name,
+            "sha256": digest,
+            "bytes": sum(p.stat().st_size for p in members),
+            "digest_scope": (
+                "directory bundle: aggregate over every file sorted by relative path; the checksum "
+                "index lists each file separately so `sha256sum -c` can read the whole bundle"
+            ),
+            "index_entries": [
+                {"name": p.relative_to(out).as_posix(), "sha256": sha256(p)} for p in members
+            ],
+        }
+    shutil.copy2(source, target)
+    digest = sha256(target)
     return {
         "kind": kind,
         "name": name,
         "built_name": source.name,
         "sha256": digest,
-        "bytes": target.stat().st_size if target.is_file() else None,
-        "digest_scope": "directory bundle, every file, sorted by relative path" if source.is_dir() else "file",
+        "bytes": target.stat().st_size,
+        "digest_scope": "file",
     }
+
+
+def index_lines(entries: list[dict[str, object]]) -> list[str]:
+    """One `sha256sum -c` readable line per distributed file, sorted by path."""
+    lines: list[str] = []
+    for entry in entries:
+        members = entry.get("index_entries")
+        if isinstance(members, list):
+            for member in members:
+                lines.append(f"{member['sha256']}  {member['name']}")
+        else:
+            lines.append(f"{entry['sha256']}  {entry['name']}")
+    return sorted(lines)
 
 
 def main(argv: list[str]) -> int:
@@ -451,6 +486,7 @@ def main(argv: list[str]) -> int:
                 print(f"  {package.name}: version {observed} from {version_from}")
 
             binary, how = packaged_binary(kind, package, workdir)
+            payload = sha256(binary)
             absent = missing_assets(binary, keys)
             if absent:
                 problems.append(
@@ -460,9 +496,24 @@ def main(argv: list[str]) -> int:
                 )
             else:
                 print(f"  {binary.name}: frontend embedded ({how})")
+                print(f"    payload sha256 {payload}")
 
             entry = place(kind, package, out, version, plat, arch)
-            entries.append({**entry, **observed_version_resources(kind, package)})
+            # The payload's digest is recorded because the container's alone invites a comparison that
+            # cannot hold: the same tree built twice on this host differs, and knowing only that the
+            # installers differ would say nothing. Measured, 20 of 15,001,088 bytes differ between two
+            # builds - the PE `TimeDateStamp`, repeated in four places, and the 16-byte RSDS CodeView
+            # GUID - so no digest here is an equality key across builds. It is a locator: with the
+            # payload digest on the record, a difference can be counted and attributed instead of being
+            # assumed to be the container's fault.
+            entries.append(
+                {
+                    **entry,
+                    "payload_sha256": payload,
+                    "payload_read_from": how,
+                    **observed_version_resources(kind, package),
+                }
+            )
 
         cli = ROOT / "target" / "release" / (f"{CLI_BINARY}.exe" if plat == "windows" else CLI_BINARY)
         if not cli.is_file():
@@ -487,12 +538,7 @@ def main(argv: list[str]) -> int:
             print(f"  PROBLEM: {line}", file=sys.stderr)
         return 1
 
-    checksums.write_text(
-        "\n".join(f"{entry['sha256']}  {entry['name']}" for entry in sorted(entries, key=lambda e: e["name"]))
-        + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    checksums.write_text("\n".join(index_lines(entries)) + "\n", encoding="utf-8", newline="\n")
 
     metadata = {
         "product": product_name(),

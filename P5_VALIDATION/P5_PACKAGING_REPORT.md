@@ -205,6 +205,9 @@ and `nsis_tauri_utils` 0.5.3 from the pinned releases with hash validation. The 
 | `FirmwareSight-0.6.0-windows-x86_64-nsis.exe` | 3,811,140 | `c5c8cf231aa90bb2686b199335797b99c6a4ecd2972d863d267ed0bf091cf328` |
 | `FirmwareSight-0.6.0-windows-x86_64-cli-fwsight.zip` | 1,668,706 | `761c5a4d21bfa7ba81bc874fd4c3ef2e4682e44bf8b32d1f71953a436e76db07` |
 
+These two lines are this build's artifact set, and §5e explains why they are the only ones that can be:
+rebuilding the same tree here gives different digests, and the runner's set (§5c) differs again.
+
 `sha256sum -c SHA256SUMS.txt` reports both `OK`; the zip lists `['fwsight.exe']` at the top level; and the
 version the verifier read is the installer's own payload — `0.6.0` out of
 `firmwaresight-desktop.exe`'s Windows version resource, with the NSIS stub's own `0.6.0` recorded as an
@@ -220,6 +223,74 @@ Producing this set corrected two recorded fields that the stub run had written w
 
 Both are now read from a directory where the tool actually has a manifest, and the values above are what a
 run of `scripts/verify_package_artifacts.py` on this tree records.
+
+### 5c. The three CI package jobs, and what their artifacts said back
+
+Run `37138881977` at head `1055242` is the first 10-of-10 green run, and the first that attached a package
+for every platform (§41's evidence, §42's names). Each set was downloaded with
+`gh run download 37138881977` and read back here rather than described from the log:
+
+| Artifact set (the run's attachment name) | Contents | Largest file |
+| --- | --- | --- |
+| `FirmwareSight-0.6.0-windows-x86_64` | `…-nsis.exe` 3,812,717 B, `…-cli-fwsight.zip` 1,668,377 B, `SHA256SUMS.txt`, `artifact-metadata.json` | the installer |
+| `FirmwareSight-0.6.0-linux-x86_64` | `…-deb.deb` 5,365,916 B, `…-cli-fwsight.tar.gz` 1,834,782 B, index, metadata | the `.deb` |
+| `FirmwareSight-0.6.0-darwin-arm64` | `…-app.app/` (directory), `…-dmg.dmg` 4,864,786 B, `…-cli-fwsight.tar.gz` 1,635,429 B, index, metadata | the `.dmg` |
+
+`sha256sum -c` over the Windows and Linux indexes returns `OK` on every line. Each set's
+`artifact-metadata.json` records `tauri_cli: tauri-cli 2.12.1`, `pnpm: 12.7.0`,
+`rustc 1.98.1 (48a229cea 2026-09-01)`, `git_commit 1055242`, and the runner it came from
+(`win25-vs2026` / `ubuntu24` / `macos26`).
+
+What the runners proved that this host could not (§9's pending rows, now closed):
+
+- **macOS derived an `.icns` from the committed PNGs and shipped.** `Bundling FirmwareSight.app` and
+  `Bundling FirmwareSight_0.6.0_aarch64.dmg` both completed; no `.icns` is in the repository, and the
+  bundler's own `tauri-icns` crate compiled on the runner.
+- **The `.app`'s executable is the Cargo bin name, exactly as §9 predicted from source.** The verifier's
+  line reads `firmwaresight-desktop: frontend embedded (read from inside FirmwareSight.app)` — it found the
+  file by taking whatever single entry `Contents/MacOS` holds, and the name it read back was
+  `firmwaresight-desktop`, not `FirmwareSight`. Had the reader kept its old guess, this job would have
+  failed on a good build.
+- **The `.deb` was really unpacked and the binary inside it scanned**:
+  `firmwaresight-desktop: frontend embedded (extracted from FirmwareSight_0.6.0_amd64.deb with dpkg-deb -x)`.
+- **The Linux job built the shell against the shared prerequisite action**, so the apt list that used to be
+  copied between jobs is now exercised from one place.
+- **§42's names and the bundler's names are different tokens, and the metadata keeps both.** The runner's
+  `.deb` is `FirmwareSight_0.6.0_amd64.deb` and its `.dmg` is `FirmwareSight_0.6.0_aarch64.dmg`, while the
+  distribution names carry the architecture the *host reported* (`x86_64`, `arm64`). Each entry records
+  `built_name` beside `name`, so nothing is lost between the two conventions.
+
+### 5d. The macOS index line the runner exposed, and what it cost
+
+The downloaded darwin set was the only one whose index did not verify:
+
+```
+$ sha256sum -c SHA256SUMS.txt
+sha256sum: FirmwareSight-0.6.0-darwin-arm64-app.app: Is a directory
+FirmwareSight-0.6.0-darwin-arm64-app.app: FAILED open or read
+FirmwareSight-0.6.0-darwin-arm64-cli-fwsight.tar.gz: OK
+FirmwareSight-0.6.0-darwin-arm64-dmg.dmg: OK
+sha256sum: WARNING: 1 listed file could not be read
+```
+
+The `.app` is a directory, and the index gave it one line carrying an aggregate tree digest. That digest is
+well defined — §5's `sha256_tree()` sorts the bundle's relative paths and folds every byte in — but the
+standard tool named by §41 cannot read a directory, so a correct macOS artifact set came home reporting a
+`FAILED` line. This is the mirror image of the `localhost:5173` mistake in §4: an assertion written to be
+readable that a good build cannot satisfy.
+
+The index now keeps both properties. A directory bundle contributes **one line per file**, with the path
+written relative to the index (`…-app.app/Contents/MacOS/firmwaresight-desktop`), so `sha256sum -c` verifies
+every byte of the bundle; the aggregate tree digest stays in `artifact-metadata.json` as the artifact's
+single identity, and `bytes` becomes the sum of the bundle's files instead of `null`. Proved on a synthetic
+three-file bundle on this host: the index lists the three members sorted by path, `sha256sum -c` exits 0,
+changing one byte in `Contents/Info.plist` makes it exit 1 and name that file `FAILED`, and the aggregate
+tree digest moves with the same byte. A re-run of the Windows and Linux sets is unchanged: two lines, both
+`OK`.
+
+**The runner has not yet said this back.** The fix is local-evidence only until a package job produces a
+darwin set whose index verifies line for line, and this document will not call it closed until that run is
+read from `gh run download`, not from the job's summary.
 
 `verify_package_artifacts.py` then writes, into `target/dist-package/`:
 
@@ -245,6 +316,31 @@ the deb `Version` control field via `dpkg-deb -f`, and the `.app`'s `CFBundleSho
 `plutil`. Each is compared to `[workspace.package] version`. One measured asymmetry is recorded rather than
 hidden: `fwsight.exe` carries **no** Windows version resource at all, so the CLI companion's version is
 proved by running it — `fwsight 0.6.0`.
+
+### 5e. What a digest can compare, measured on the payload
+
+Two builds of the same tree on this host produced installers the bundler itself reported as 3.64 MiB and
+3.63 MiB, which is unsurprising for a container. What would matter for `04_TECH/18` "Build reproducibility"
+is the payload, so two consecutive ones were kept and compared byte by byte:
+`target/release/firmwaresight-desktop.exe`, 15,001,088 bytes both times, **20 bytes different** — and those
+20 are all linker identity, not code:
+
+| Offset | Bytes | What lives there | Measured |
+| --- | --- | --- | --- |
+| `256` | 4 | the PE COFF `TimeDateStamp` | `0x6ac14091` = 2026-10-03T17:51:13Z, and `0x6ac14191` = 17:55:29Z — 256 s apart, i.e. the two link times |
+| `12598421`, `12598449`, `12598477` | 4 each | the same `TimeDateStamp` copied into three debug-directory entries, at the 28-byte `IMAGE_DEBUG_DIRECTORY` stride | one byte differs in each, the low-order byte of that second |
+| `12600616…12600631` | 16 | the RSDS CodeView **GUID**, 4 bytes after the `RSDS` magic at `12600612` | `53b528c9b1f36844943429366aa95e1c` against `1bad884cde63df40a882d01d0a54da21` — the linker randomises it per link |
+
+Same length, and nothing outside those 20 bytes differs: the embedded frontend, the version resource and the
+instruction stream are identical between builds. So a package digest is **not** an equality key across
+builds, on this host or across hosts, and no sentence in this repository may claim that an installer or a
+payload binary reproduces byte for byte. The reproducibility record stays what §18 actually asks for —
+toolchain versions, both lockfile digests, the commit, the runner image — and `payload_sha256` exists so
+that a difference can be counted and attributed, as it was here, rather than assumed to be the container's
+fault.
+
+This is why §5d's index change matters more than it looks: when byte-level identity of a bundle cannot be
+claimed, what a stranger can still check is the per-file index, file by file, of the set they were given.
 
 ## 6. Distribution checksums are not bundle checksums
 
@@ -323,15 +419,19 @@ Manual upgrade semantics for P5, written where a user will find them and repeate
 
 | Item | Where it gets proved | Status |
 | --- | --- | --- |
-| A package has been built at all | the three package jobs' first run on `main` | **Windows: built, here, in §5b** — the first installer this repository has produced, and the third row of §41's evidence. macOS and Ubuntu still have produced nothing: no machine here builds them, and their package jobs have not yet run on a head that finds the CLI |
-| A Windows installer installs, launches offline, uninstalls and reinstalls | `P5_INSTALL_RECOVERY_REPORT.md` (§38 A–L, §64, §65) | pending, and it is the next thing that must happen. The installer now exists, so this is no longer blocked on packaging |
-| macOS / Ubuntu packages build on their runners | `Package macOS` / `Package Ubuntu` | pending; until observed, `CI_BUILD_ONLY` is not even earned |
-| The `apps/desktop` working directory holds on a Linux and a macOS runner | `Package Ubuntu` / `Package macOS` | §5a's rule is measured on Windows only. The CLI's frontend lookup is platform-independent source, but the `.deb` and `.app` paths have never run a step here |
+| A package has been built at all | the three package jobs on `main` | **closed for all three platforms.** Windows here in §5b, and Windows / Ubuntu / macOS on the runner in §5c |
+| A macOS and an Ubuntu package build on their runners | `Package macOS` / `Package Ubuntu` | **closed by §5c** — `.app` + `.dmg` and `.deb` produced and verified. This is `CI_BUILD_ONLY` in the owner's words: proof a package builds, not proof anyone ran one |
+| The `.icns` derivation on a real macOS runner | `Package macOS` | **closed by §5c** — `tauri-icns` compiled, `Bundling FirmwareSight.app` completed, and no `.icns` is committed (§2's decision holds) |
+| The executable name inside `FirmwareSight.app/Contents/MacOS` | `Package macOS` | **closed by §5c** — the reader found `firmwaresight-desktop`, the Cargo bin name the source said it would be |
+| `dpkg-deb -x` extraction and the version field read | `Package Ubuntu` | **closed by §5c** — the embedded-frontend check ran on the binary extracted from the `.deb` |
+| The `apps/desktop` working directory on Linux and macOS | `Package Ubuntu` / `Package macOS` | **closed by §5c** — all three jobs ran the same `check.py --only package` from that directory and each produced a package |
+| A checksum index a stranger can verify, for a `.app` | `Package macOS` | **open.** §5d: the runner's darwin index carries one line naming a directory, which `sha256sum -c` reports `FAILED` for. Fixed here and proved on a synthetic bundle; it needs the next run's darwin artifact set read back from `gh run download` before this row closes |
+| A Windows installer installs, launches offline, uninstalls and reinstalls | `P5_INSTALL_RECOVERY_REPORT.md` (§38 A–L, §64, §65) | pending, and it is the next thing that must happen. The installer exists on both this host and the runner, so this is no longer blocked on packaging |
 | Installed app needs no Rust, Cargo, Node, pnpm, Vite or a checkout (§65) | the real-install session, on the cleanest practical environment | pending |
 | Uninstall behaviour on user data | measured, never asserted (§39 records it) | pending |
 | Desktop About panel and Diagnostics as version surfaces | the commits that add them join `drift/version identity` | not built yet |
-| The `.icns` derivation on a real macOS runner | `Package macOS` | assumed from tauri-bundler's source, unverified by a run |
-| The executable name inside `FirmwareSight.app/Contents/MacOS` | `Package macOS` | **settled from source, not yet from a run.** It is the Cargo bin name, `firmwaresight-desktop`, not the product name: `tauri-cli` builds the bundle binary list from `bin.file_name()` (`interface/rust.rs:945`), `tauri-bundler` copies each binary into `Contents/MacOS` under `bin.name()` (`bundle/macos/app.rs:174`), and only `bundle.mainBinaryName` would rename it (`desktop.rs:336 rename_app`) — which this config does not set. The verifier used to look for `Contents/MacOS/FirmwareSight`, which would have failed that job for a naming rule nobody chose; it now reads whichever single file the directory holds and says which one it read |
+| Are the produced packages byte-reproducible? | `04_TECH/18`'s reproducibility fields, if a claim is ever made over an installer | **measured and attributed — and the answer is no.** Two builds of the same tree on this host produced installers of 3,811,140 / 3,809,059 / 3,808,294 bytes, and the runner's was 3,812,717; the payload inside differs too, in exactly **20 of 15,001,088 bytes** (§5e): the PE `TimeDateStamp` and the 16-byte RSDS CodeView GUID, which the linker sets per link. No digest in this document is an equality key across builds, and nothing here may claim an installer reproduces byte for byte |
+
 
 Evidence for anything in this document that cites a command carries the command; anything cited from
 upstream source names the file and lines; nothing here is recalled from a previous round.

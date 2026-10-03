@@ -51,7 +51,16 @@ diff.
 | `37128593254` | `9e3b1de` | artifact versions unified on `0.6.0` | **6 of 7** | **failure** — `Desktop UI (windows-latest)`, a pre-existing `compare.test.tsx` race, not the version bump |
 | `37129900728` | `20b03e3` | test-only repair of that race | 7 of 7 | success |
 | `37133706214` | `0c031cd` | packaging + release metadata + the three package jobs | **7 of 10** | **failure** — all seven gate jobs green; `Package Windows`, `Package Ubuntu` and `Package macOS` each installed the pinned CLI, then reported `SKIPPED: the Tauri CLI is not installed on this machine`, `4/4 steps passed`, exit 0, and were caught red by their own upload step (`No files were found with the provided path: target/dist-package/`) |
-| _(the packaging repair)_ | — | `cargo-tauri` found through `cargo tauri`, a `SKIP` that can no longer read as a pass, and the package step run from `apps/desktop` | — | recorded here when it concludes |
+| `37138881977` | `1055242` | the CLI found through `cargo tauri`, a `SKIP` that cannot read as a pass, and the package step run from `apps/desktop` | **10 of 10** | success, first attempt — and the first run in this repository's history to attach a built package: `FirmwareSight-0.6.0-windows-x86_64`, `FirmwareSight-0.6.0-linux-x86_64` and `FirmwareSight-0.6.0-darwin-arm64`, each with its own `SHA256SUMS.txt` and `artifact-metadata.json` |
+| _(the checksum-index repair)_ | — | a `.app` indexed file by file so `sha256sum -c` can read it | — | recorded here when it concludes |
+
+Read back with `gh run view 37138881977 --json headSha,conclusion,jobs` and
+`gh api repos/2023violet/FirmwareSight/actions/runs/37138881977/artifacts`; the three sets were then
+downloaded with `gh run download 37138881977` and verified with `sha256sum -c` in the evidence root, where
+two of the three indexes returned `OK` on every line and the darwin index returned
+`FAILED open or read` on the one line naming a directory. That defect and its repair are §5d of
+`P5_PACKAGING_REPORT.md`; it does not change this run's conclusion, because the job verifies the bundle
+before it writes the index, and the index is what §41 asks a stranger to be able to check.
 
 The failed run is listed rather than dropped. Every P5 closure claim in this repository is "N of N on the
 first attempt", and a head that went red is part of the chain that produced the head that did not:

@@ -189,7 +189,11 @@ installer. A hand-run build follows the same directory rule.
 - `FirmwareSight-<version>-<platform>-<arch>-<kind>` for each package, and `-cli-fwsight` for the CLI
   companion, per §42's shape: product, version, platform, architecture, kind - no wall-clock stamp,
   no username, no host path;
-- `SHA256SUMS.txt`, the **distribution** checksum index;
+- `SHA256SUMS.txt`, the **distribution** checksum index. One line per distributed **file**: a `.app` is a
+  directory, and a line naming a directory makes `sha256sum -c` answer `FAILED open or read` on a good
+  build (measured on the macOS job's own artifact set, run `37138881977`), so a bundle contributes one
+  line for each file inside it, path written relative to the index. The single aggregate digest over the
+  whole bundle stays in `artifact-metadata.json` as that artifact's identity;
 - `artifact-metadata.json`: the digests, the byte counts, where each version string was read from,
   the signing and updater status in words, and the reproducibility fields §18 of
   `04_TECH/18_CI_SUPPLY_CHAIN.md` asks a build to record.

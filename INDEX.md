@@ -34,11 +34,15 @@ governance + audit (Run `37125456689` 7 of 7), `812b472` migration `0005` (Run `
 `drift/version identity` step — whose first 10-job run `37133706214` **failed 7 of 10**: seven gate jobs
 green, three package jobs skipping their own build because `cargo install tauri-cli` leaves `cargo-tauri`
 and the group probed `tauri`, then reporting `4/4 steps passed`. Its successor makes a `SKIP` uncountable as
-a pass and fails any skip under `CI`, and — with the pinned CLI installed on this host — built this
-repository's first real package, a Windows NSIS installer, which surfaced a second defect: the package step
-must run from `apps/desktop`, because the CLI resolves its frontend directory from the process cwd
+a pass and fails any skip under `CI`; with the pinned CLI installed here the group built this repository's
+first real package and found a second defect — the package step must run from `apps/desktop`, because the
+CLI resolves its frontend directory from the process cwd — and head `1055242` then went **10 of 10** on Run
+`37138881977`, the first run ever to attach a built package for Windows, Ubuntu and macOS. Reading those
+artifact sets back found a third defect in the index itself: a directory `.app` given one checksum line
+makes `sha256sum -c` answer `FAILED open or read` on a correct build, so a bundle is now indexed file by file
+with the aggregate tree digest kept in metadata and each payload's digest recorded beside its container
 (**775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI
-jobs**). **Still no P5 verdict exists, and no CI artifact exists yet** — the product is
+jobs**). **Still no P5 verdict exists, and nothing has been installed yet** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source
 licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task:

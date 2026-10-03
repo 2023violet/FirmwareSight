@@ -1257,6 +1257,18 @@ unchanged: G2 `PASS`, **MVP CANDIDATE**, baseline `0.6.0`.
   happened to stand. Building it for real also moved two claims from assumption to evidence: the NSIS
   package does carry `target/release/firmwaresight-desktop.exe`, and this repository has now produced an
   installer (§5b of `P5_PACKAGING_REPORT.md`) — produced, not yet installed anywhere.
+- **A checksum index lists files, not directories, and the payload gets its own digest.** The macOS job's
+  own artifact set was the evidence: its `SHA256SUMS.txt` gave `FirmwareSight-…-app.app` a single line
+  carrying an aggregate tree digest, and `sha256sum -c` — the tool §41 names — answered
+  `Is a directory / FAILED open or read` on a correct build. A directory bundle now contributes one line per
+  file inside it, path relative to the index, and keeps the aggregate digest in `artifact-metadata.json` as
+  the artifact's identity. Each entry also records `payload_sha256`, and diffing two consecutive builds of
+  this host showed why that matters: the payloads are the same length with **20 bytes different**, all of
+  them linker identity — the PE `TimeDateStamp` (repeated in three debug-directory entries) and the 16-byte
+  RSDS CodeView GUID — and the installers differ in size too. **A package digest is therefore not an
+  equality key across builds here or across hosts**, so no release, cache or attestation in this project may
+  be justified by "the digest would have matched"; the reproducibility record stays the input fields
+  `04_TECH/18` lists, and `04_TECH/18` now says so in its own words.
 - **Two questions were refused, correctly.** §32 sends L22 — line endings moving a release's content-derived
   identity, which today fails closed — to the Architect as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` plus a STOP,
   because normalizing the digest input would change identity semantics, an `AGENTS.md` §2 move. And §54 is

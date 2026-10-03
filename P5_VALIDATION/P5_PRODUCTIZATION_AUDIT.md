@@ -64,7 +64,8 @@ ADR-0015/0016/0018/0023/0026, plus the inspection list in §3: `Cargo.toml`, `Ca
 | `9e3b1de` | version identity unified on `0.6.0`, seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
 | `20b03e3` | test-only repair of the race `37128593254` lost | `37129900728` | success, 7 of 7 |
 | `0c031cd` | packaging enabled: `bundle.active`, the three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | `37133706214` | **failure, 7 of 10** |
-| the commit that lands this row | `cargo-tauri` found through `cargo tauri`, a `SKIP` that can no longer read as a pass, the package step run from `apps/desktop`, and this repository's first real installer built here | its own run, 10 jobs | — |
+| `1055242` | `cargo-tauri` found through `cargo tauri`, a `SKIP` that cannot read as a pass, the package step run from `apps/desktop` | `37138881977` | success, **10 of 10** — and the first run to attach a built package for all three platforms |
+| the commit that lands this row | the darwin `.app` indexed file by file, so `sha256sum -c` can read it, plus each payload's own digest in the metadata | follows this commit | — |
 
 The failure was not the version bump. `Desktop UI (windows-latest)` lost a pre-existing race in
 `compare.test.tsx`: `runCompare()` returns as soon as the comparison region exists, and the
@@ -150,6 +151,20 @@ from doing it are worth recording here because they were not visible from the au
   repository's first real installer. The stand-in shim in §0b's earlier bullet could not have found this,
   because a stub exits 0 whatever the cwd is; L18's "one command packages it" claim rests on §5a/§5b of
   `P5_PACKAGING_REPORT.md`, not on the config looking plausible.
+- **The runner's own macOS artifact set could not be verified with the tool §41 names.** Run
+  `37138881977` went 10 of 10 green and attached three §42-named artifact sets; downloading them and running
+  `sha256sum -c` returned `OK` on every Windows and Linux line and
+  `Is a directory … FAILED open or read` on the darwin line for `FirmwareSight-…-app.app`. The index had
+  given a directory bundle one line holding an aggregate tree digest — well defined, unreadable by the
+  standard tool. The index now lists a directory bundle file by file and keeps the aggregate digest in
+  `artifact-metadata.json` as identity; it also records each scanned payload's digest, because the same tree
+  produced installers of 3,811,140 / 3,805,120 / 3,809,059 and 3,808,294 bytes on this host and 3,812,717 on
+  the runner. Diffing two consecutive payloads answered the larger question: same length, **20 bytes
+  different**, all of them linker identity — the PE `TimeDateStamp` (and its three copies in the debug
+  directory) plus the 16-byte RSDS CodeView GUID. A package digest therefore identifies the set a build
+  produced; it is not an equality key across builds, which is now written into `04_TECH/18` beside the list
+  of fields a build records. Read back from `gh run download`, all of this is §5d and §5e of
+  `P5_PACKAGING_REPORT.md`.
 
 The CI authoritative set is now ten jobs (section 41), which `05_ENGINEERING/06_CI_CD_BASELINE.md`
 records with its reason: this repository has never had a scheduled workflow, so the matrix row that

@@ -74,16 +74,18 @@ carries the measurements and, in §9, the list of what packaging has *not* yet p
 only the upload step's `if-no-files-found: error` told the truth. Its successor makes a `SKIP` impossible to
 count as a pass and fails any skip under `CI`.
 
-**What is next, in order:** the 10-job run of that successor must be read back and recorded in
-`P5_CI_AUTHORITY.md`. Packaging itself is no longer blocked: installing the pinned CLI on this host made
-`check.py --only package` build this repository's **first real package** —
-`FirmwareSight_0.6.0_x64-setup.exe`, 3,811,140 bytes, digested in `target/dist-package/SHA256SUMS.txt` —
-and doing it found a second defect the stub could not: the package step must run from `apps/desktop`,
-because the CLI resolves its frontend directory from the process cwd and this repository keeps `ui/` and
-`src-tauri/` as siblings (`P5_PACKAGING_REPORT.md` §5a). Then §38/§64's real Windows install, uninstall and
+**What is next, in order:** head `1055242` went **10 of 10** on Run `37138881977` and attached three
+§42-named artifact sets, so packaging is now proved on all three platforms in the `CI_BUILD_ONLY` sense the
+owner allowed — and the darwin set was what found the item still open: its `SHA256SUMS.txt` gave the `.app`
+one line naming a directory, so `sha256sum -c`, the tool §41 names, answered `FAILED open or read` on a
+correct build. A bundle is indexed file by file from the commit after this paragraph's head, and **that
+commit's own run must be read back with `gh run download` and verified line by line** before the row in
+`P5_PACKAGING_REPORT.md` §9 closes; a green tick on the job is not the proof, because the job verifies the
+bundle before it writes the index. Then §38/§64's real Windows install, uninstall and
 reinstall acceptance on this host with the owner's store parked, hashed and restored (the
 `P5_INSTALL_RECOVERY_REPORT.md` evidence, and the
-thing no package job can do from a runner); then Commit C's onboarding and local History, Commit D's
+thing no package job can do from a runner — the installer for it exists both here and as a run artifact);
+then Commit C's onboarding and local History, Commit D's
 diagnostics and recovery, Commit E's fixture cohort, Commit F's documentation and closure. **Do not start a
 workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and
 §5's list of forbidden verdicts still applies to every sentence you write.

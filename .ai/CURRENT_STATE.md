@@ -47,17 +47,20 @@ last_updated: "2026-10-03"
   answered, and `check.py` now records a skip as `SKIP`, leaves it out of the passed total, and exits
   non-zero on any skip when `CI` is set. Measured on this host three ways, in `P5_VALIDATION/
   P5_PACKAGING_REPORT.md` §5.
-- **This repository has now produced an installer, and building it found a second defect.** With the
-  pinned CLI installed here (`cargo install tauri-cli@2.12.1 --locked`, which leaves `cargo-tauri`),
-  `check.py --only package` ran all four steps for real and wrote
-  `FirmwareSight_0.6.0_x64-setup.exe` — 3,811,140 bytes, digested in `target/dist-package/SHA256SUMS.txt`
-  and verified by `sha256sum -c` — so the bundler's assumption that the NSIS package carries
-  `target/release/firmwaresight-desktop.exe` is now evidence rather than an assumption. The first attempt
-  from `apps/desktop/src-tauri` failed inside the config's own hook,
-  `[ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND]`, because the CLI resolves its frontend directory from the
-  **process** cwd and this repository keeps `ui/` and `src-tauri/` as siblings; the package step now runs
-  from `apps/desktop`. A built file is still not an installed one: §38/§64's real install, launch,
-  uninstall and reinstall acceptance has not happened.
+- **Packaging is proved on all three platforms and one index defect is open.** Run `37138881977` at head
+  `1055242` is the first **10 of 10** green run and the first to attach a built package: the three
+  §42-named sets — Windows NSIS, Ubuntu `.deb`, macOS `.app` + `.dmg` — each with its own `SHA256SUMS.txt`
+  and `artifact-metadata.json`. They were downloaded with `gh run download` and read back, which closed the
+  rows that had only ever been read from upstream source: the macOS runner derives an `.icns` from the five
+  committed PNGs, the executable inside `Contents/MacOS` is the Cargo bin name
+  (`firmwaresight-desktop`, exactly as the source said), the `.deb` really is unpacked by `dpkg-deb -x`, and
+  all three jobs build from `apps/desktop`. The read-back also caught a defect of this repository's own: the
+  darwin index gave the `.app` one line naming a directory, so `sha256sum -c` answered
+  `FAILED open or read` on a good build. A directory bundle now contributes one line per file, with the
+  aggregate tree digest kept in the metadata as identity; that is proved on a synthetic bundle here and
+  still needs the next run's darwin artifact set before §9's row closes. Nothing has been installed yet:
+  the byte-level install, launch-offline, uninstall and reinstall acceptance (§38, §64, §65) is the next
+  round, and the installers for it exist on both this host and the runner.
 - **One gate run went red for a reason that was not in the commit it ran on**, and that is worth knowing
   before the next stage trusts a green. Run `37128593254` failed `Desktop UI (windows-latest)` on a
   pre-existing race in `compare.test.tsx:1094`: the `Section Changes` region mounts before its first page

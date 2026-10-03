@@ -51,7 +51,8 @@ zero Clang-produced evidence despite the cohort claim.
 | `9e3b1de` | artifact versions unified on `0.6.0`; seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
 | `20b03e3` | test-only repair of the pre-existing race that run lost | `37129900728` | success, 7 of 7 |
 | `0c031cd` | `bundle.active`, three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | `37133706214` | **failure, 7 of 10** |
-| the commit that lands this row | the package group finds `cargo-tauri` through `cargo tauri`, and a `SKIP` can no longer read as a pass | its own run, 10 jobs | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
+| `1055242` | the package group finds `cargo-tauri` through `cargo tauri`, a `SKIP` can no longer read as a pass, and the step runs from `apps/desktop` | `37138881977` | success, **10 of 10** — and the first run to attach a built package on all three platforms |
+| the commit that lands this row | a `.app` indexed file by file, so the index §41 asks for is readable by `sha256sum -c` | its own run, 10 jobs | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
 
 The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
 lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
@@ -76,8 +77,12 @@ directory with no `package.json` (`ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND`), becaus
 frontend from the **process cwd** (`tauri-cli-2.12.1/src/helpers/app_paths.rs:148,153-174`) and this
 repository keeps `ui/` and `src-tauri/` as siblings. The package step now runs from `apps/desktop`, and from
 there it produced this repository's first installer — `FirmwareSight_0.6.0_x64-setup.exe`, 3,811,140 bytes,
-`c5c8cf23…` in `target/dist-package/SHA256SUMS.txt`, verified with `sha256sum -c`. That file is built, not
-installed: §38/§64's real-install acceptance is still ahead, and it is the next thing.
+`c5c8cf23…` in `target/dist-package/SHA256SUMS.txt`, verified with `sha256sum -c`. That head then went
+**10 of 10 green** on Run `37138881977` — the first run in this repository to attach a built package on all
+three platforms — and reading those artifacts back found the third defect (§5d of `P5_PACKAGING_REPORT.md`):
+the darwin index gave the `.app` one line naming a directory, so `sha256sum -c` answered
+`FAILED open or read` on a correct build. Built is still not installed: §38/§64's real-install acceptance is
+the next thing.
 
 ## What the owner decided at the checkpoint
 
