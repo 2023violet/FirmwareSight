@@ -172,6 +172,7 @@ fn section_row(row: StorageSectionRow) -> SectionRowDto {
     let (load_address, load_address_unknown_reason) = hex_fact(row.load_address);
     let (memory_size, memory_size_unknown_reason) = fact_bytes(row.memory_size);
     let (region, region_unknown_reason) = fact_text(row.region);
+    let (file_offset, file_offset_unknown_reason) = hex_fact(row.file_offset);
 
     SectionRowDto {
         index: to_count(row.index),
@@ -185,7 +186,8 @@ fn section_row(row: StorageSectionRow) -> SectionRowDto {
         virtual_address_unknown_reason,
         load_address,
         load_address_unknown_reason,
-        file_offset: row.file_offset.map(hex_value),
+        file_offset,
+        file_offset_unknown_reason,
         file_size: row.file_size,
         memory_size,
         memory_size_unknown_reason,
@@ -197,12 +199,14 @@ fn section_row(row: StorageSectionRow) -> SectionRowDto {
 fn symbol_row(row: StorageSymbolRow) -> SymbolRowDto {
     let (name, name_unknown_reason) = fact_text(row.name);
     let (size, size_unknown_reason) = fact_bytes(row.size);
+    let (address, address_unknown_reason) = hex_fact(row.address);
 
     SymbolRowDto {
         ordinal: to_count(row.ordinal),
         name,
         name_unknown_reason,
-        address: row.address.map(hex_value),
+        address,
+        address_unknown_reason,
         size,
         size_unknown_reason,
         kind: row.kind,

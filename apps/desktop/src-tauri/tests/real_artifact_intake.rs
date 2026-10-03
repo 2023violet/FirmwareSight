@@ -760,6 +760,10 @@ fn the_selection_path_adds_no_schema_migration() {
             "0002_evidence_keyed_by_build".to_owned(),
             "0003_gate_history".to_owned(),
             "0004_release_records".to_owned(),
+            // 0005 is P5's: it stores the Unknown reason the write path used to discard (L6/L7). The
+            // selection path wrote none of these, and a migration that appeared without belonging to a
+            // named stage is what this list is here to catch.
+            "0005_unknown_reasons".to_owned(),
         ],
         "every migration belongs to a named stage, and none of them is the selection path's"
     );

@@ -302,13 +302,17 @@ fn looks_utc(stamp: &str) -> bool {
             .all(|c| c.is_ascii_digit() || b"-T:Z".contains(&c))
 }
 
-/// Turn a version 4 database into the file a version 3 build left behind, by removing exactly what
-/// migration `0004` adds. `DROP TABLE` takes its indexes and triggers with it, so `0004` then runs
-/// against a schema that genuinely predates it.
+/// Turn a current database into the file a version 3 build left behind, by removing exactly what
+/// migrations `0004` and `0005` add. `DROP TABLE` takes its indexes and triggers with it, and the two
+/// `0005` columns have to go by name because `ADD COLUMN` is not idempotent: re-running the upgrade on a
+/// file that still physically holds them would fail, which is the same reason a real v3 file never can.
 fn step_down_to_v3(db: &Database) {
     db.connection()
         .execute_batch(
-            "DROP TABLE release_records;
+            "DROP INDEX idx_builds_created;
+             ALTER TABLE symbols DROP COLUMN address_unknown;
+             ALTER TABLE sections DROP COLUMN file_offset_unknown;
+             DROP TABLE release_records;
              DELETE FROM schema_migrations WHERE version >= 4;",
         )
         .expect("stepped down");
@@ -317,11 +321,14 @@ fn step_down_to_v3(db: &Database) {
 // --------------------------------------------------------------------------- migration 0004
 
 #[test]
-fn the_schema_is_at_version_four_and_the_release_table_starts_empty() {
+fn the_schema_is_at_version_five_and_the_release_table_starts_empty() {
     let file = TempDb::new("fresh");
     let (db, _run) = seeded(&file, "fresh");
 
-    assert_eq!(SCHEMA_VERSION, 4, "P4 raises the schema to version 4");
+    assert_eq!(
+        SCHEMA_VERSION, 5,
+        "P4 raised the schema to version 4 and P5 to version 5"
+    );
     assert_eq!(schema_version(&db), SCHEMA_VERSION);
     assert_eq!(count(&db, "release_records"), 0);
 
@@ -342,6 +349,7 @@ fn the_schema_is_at_version_four_and_the_release_table_starts_empty() {
             (2, "0002_evidence_keyed_by_build".to_owned()),
             (3, "0003_gate_history".to_owned()),
             (4, "0004_release_records".to_owned()),
+            (5, "0005_unknown_reasons".to_owned()),
         ],
         "each stage contributes exactly one numbered step"
     );
@@ -507,8 +515,8 @@ fn a_database_from_the_future_is_refused_and_left_alone() {
             err,
             StorageError::UnsupportedSchemaVersion {
                 found: 99,
-                supported: 4
-            }
+                supported
+            } if supported == SCHEMA_VERSION
         ),
         "{err:?}"
     );

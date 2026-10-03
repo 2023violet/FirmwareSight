@@ -4,4 +4,4 @@ export type SymbolRowDto = {
 /**
  * A row position in this build, not an identity the UI can compare across builds.
  */
-ordinal: number, name: string | null, nameUnknownReason: string | null, address: string | null, size: number | null, sizeUnknownReason: string | null, kind: string, binding: string, sectionRef: string, };
+ordinal: number, name: string | null, nameUnknownReason: string | null, address: string | null, addressUnknownReason: string | null, size: number | null, sizeUnknownReason: string | null, kind: string, binding: string, sectionRef: string, };

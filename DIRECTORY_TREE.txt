@@ -442,7 +442,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── 0001_initial.sql
 │       │   ├── 0002_evidence_keyed_by_build.sql
 │       │   ├── 0003_gate_history.sql
-│       │   └── 0004_release_records.sql
+│       │   ├── 0004_release_records.sql
+│       │   └── 0005_unknown_reasons.sql
 │       ├── src/
 │       │   ├── compare.rs
 │       │   ├── db.rs
@@ -457,7 +458,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── gate_history.rs
 │       │   ├── map_companion_persistence.rs
 │       │   ├── release_records.rs
-│       │   └── storage.rs
+│       │   ├── storage.rs
+│       │   └── unknown_reasons.rs
 │       └── Cargo.toml
 ├── examples/
 │   ├── Cargo.workspace.baseline.toml
@@ -589,6 +591,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P4_BUNDLE_EXECUTION_REPORT.md
 │   └── P4_BUNDLE_EXIT_CHECKLIST.md
 ├── P5_VALIDATION/
+│   ├── P5_MIGRATION_DECISION.md
 │   └── P5_PRODUCTIZATION_AUDIT.md
 ├── POST_G2_E2E_REMEDIATION/
 │   ├── EXIT_CHECKLIST.md

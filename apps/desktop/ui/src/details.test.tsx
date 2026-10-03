@@ -160,6 +160,7 @@ function sectionPage(overrides: Partial<SectionPageDto> = {}): SectionPageDto {
         loadAddress: '0x08000000',
         loadAddressUnknownReason: null,
         fileOffset: '0x00001000',
+        fileOffsetUnknownReason: null,
         fileSize: 60,
         memorySize: 60,
         memorySizeUnknownReason: null,
@@ -179,6 +180,7 @@ function sectionPage(overrides: Partial<SectionPageDto> = {}): SectionPageDto {
         loadAddress: '0x0800005c',
         loadAddressUnknownReason: null,
         fileOffset: '0x00002000',
+        fileOffsetUnknownReason: null,
         fileSize: 4,
         memorySize: 4,
         memorySizeUnknownReason: null,
@@ -202,6 +204,7 @@ function symbolPage(overrides: Partial<SymbolPageDto> = {}): SymbolPageDto {
         name: 'staging_area',
         nameUnknownReason: null,
         address: '0x20000008',
+        addressUnknownReason: null,
         size: 64,
         sizeUnknownReason: null,
         kind: 'Object',
@@ -214,6 +217,7 @@ function symbolPage(overrides: Partial<SymbolPageDto> = {}): SymbolPageDto {
         name: 'g_threshold',
         nameUnknownReason: null,
         address: '0x20000000',
+        addressUnknownReason: null,
         size: null,
         sizeUnknownReason: 'the symbol entry records size 0',
         kind: 'Object',
@@ -342,6 +346,78 @@ describe('after a summary exists', () => {
       .getByText('.text')
       .closest('tr');
     expect(textRow?.textContent ?? '').toContain('no memory-region evidence was supplied');
+  });
+
+  // L6 and L7: the file offset and the symbol address were the two numeric facts whose reason the
+  // store threw away, so their cells read `Unknown` and nothing else. Migration 0005 keeps the
+  // reason, and this is the assertion that says the window now uses it.
+  it('names the reason for an unknown file offset and an unknown symbol address', async () => {
+    const offsetReason = 'the section has no file range; it occupies no bytes on disk';
+    const addressReason = 'the symbol entry is undefined and carries no value';
+    sectionsMock.mockResolvedValue(
+      ok(
+        sectionPage({
+          rows: [
+            {
+              index: 7,
+              name: '.bss',
+              nameUnknownReason: null,
+              role: 'ZeroInitializedData',
+              alloc: true,
+              write: true,
+              execute: false,
+              virtualAddress: '0x20000040',
+              virtualAddressUnknownReason: null,
+              loadAddress: '0x20000040',
+              loadAddressUnknownReason: null,
+              fileOffset: null,
+              fileOffsetUnknownReason: offsetReason,
+              fileSize: 0,
+              memorySize: 16,
+              memorySizeUnknownReason: null,
+              region: 'RAM',
+              regionUnknownReason: null,
+            },
+          ],
+          total: 1,
+        }),
+      ),
+    );
+    symbolsMock.mockResolvedValue(
+      ok(
+        symbolPage({
+          rows: [
+            {
+              ordinal: 0,
+              name: 'undefined_entry',
+              nameUnknownReason: null,
+              address: null,
+              addressUnknownReason: addressReason,
+              size: 4,
+              sizeUnknownReason: null,
+              kind: 'Object',
+              binding: 'Global',
+              sectionRef: 'Undefined',
+            },
+          ],
+          total: 1,
+        }),
+      ),
+    );
+
+    render(<App />);
+    await analyzeOk();
+
+    const sections = await screen.findByRole('tabpanel', { name: 'Sections' });
+    const sectionRow = within(sections).getByText('.bss').closest('tr');
+    expect(sectionRow?.textContent ?? '').toContain('Unknown');
+    expect(sectionRow?.textContent ?? '').toContain(offsetReason);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Symbols' }));
+    const symbols = await screen.findByRole('tabpanel', { name: 'Symbols' });
+    const symbolRow = within(symbols).getByText('undefined_entry').closest('tr');
+    expect(symbolRow?.textContent ?? '').toContain('Unknown');
+    expect(symbolRow?.textContent ?? '').toContain(addressReason);
   });
 });
 

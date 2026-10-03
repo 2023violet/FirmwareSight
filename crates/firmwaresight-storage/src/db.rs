@@ -11,12 +11,13 @@ use firmwaresight_core::domain::identity::Fact;
 use firmwaresight_core::domain::memory::ByteTotal;
 
 /// The schema version this build writes.
-pub const SCHEMA_VERSION: i64 = 4;
+pub const SCHEMA_VERSION: i64 = 5;
 
 const MIGRATION_0001: &str = include_str!("../migrations/0001_initial.sql");
 const MIGRATION_0002: &str = include_str!("../migrations/0002_evidence_keyed_by_build.sql");
 const MIGRATION_0003: &str = include_str!("../migrations/0003_gate_history.sql");
 const MIGRATION_0004: &str = include_str!("../migrations/0004_release_records.sql");
+const MIGRATION_0005: &str = include_str!("../migrations/0005_unknown_reasons.sql");
 
 /// Applied in version order, each in its own transaction, so a failed upgrade leaves the previous
 /// schema and every row in it exactly as they were.
@@ -25,6 +26,7 @@ const MIGRATIONS: &[(i64, &str, &str)] = &[
     (2, "0002_evidence_keyed_by_build", MIGRATION_0002),
     (3, "0003_gate_history", MIGRATION_0003),
     (4, "0004_release_records", MIGRATION_0004),
+    (5, "0005_unknown_reasons", MIGRATION_0005),
 ];
 
 /// Everything the P0 round-trip test compares against the in-memory snapshot.
@@ -394,8 +396,8 @@ fn write_sections(
             "INSERT INTO sections
                  (build_id, section_index, name, name_unknown, role, is_alloc, is_write,
                   is_execute, virt_addr, virt_unknown, load_addr, load_unknown, file_offset,
-                  file_size, mem_size, mem_unknown, region, region_unknown)
-             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18)",
+                  file_offset_unknown, file_size, mem_size, mem_unknown, region, region_unknown)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19)",
         )
         .map_err(write_err)?;
 
@@ -405,7 +407,7 @@ fn write_sections(
         let (mem, mem_unknown) = optional_fact(&section.memory_size);
         let (name, name_unknown) = optional_string(&section.name);
         let (region, region_unknown) = optional_string(&section.region);
-        let file_offset = optional_fact_u64(&section.file_offset);
+        let (file_offset, file_offset_unknown) = optional_fact(&section.file_offset);
 
         stmt.execute(params![
             build_id,
@@ -421,6 +423,7 @@ fn write_sections(
             load,
             load_unknown,
             file_offset,
+            file_offset_unknown,
             section.file_size as i64,
             mem,
             mem_unknown,
@@ -440,15 +443,15 @@ fn write_symbols(
     let mut stmt = tx
         .prepare(
             "INSERT INTO symbols
-                 (build_id, ordinal, name, name_unknown, address, size, size_unknown, kind,
-                  binding, section_ref)
-             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)",
+                 (build_id, ordinal, name, name_unknown, address, address_unknown, size,
+                  size_unknown, kind, binding, section_ref)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",
         )
         .map_err(write_err)?;
 
     for (ordinal, symbol) in snapshot.symbols().iter().enumerate() {
         let (name, name_unknown) = optional_string(&symbol.name);
-        let address = optional_fact_u64(&symbol.address);
+        let (address, address_unknown) = optional_fact(&symbol.address);
         let (size, size_unknown) = optional_fact(&symbol.size);
         stmt.execute(params![
             build_id,
@@ -456,6 +459,7 @@ fn write_symbols(
             name,
             name_unknown,
             address,
+            address_unknown,
             size,
             size_unknown,
             format!("{:?}", symbol.kind),
@@ -562,10 +566,6 @@ fn optional_fact(fact: &Fact<u64>) -> (Option<i64>, Option<String>) {
         Fact::Known(value) => (Some(*value as i64), None),
         Fact::Unknown { reason } => (None, Some(reason.clone())),
     }
-}
-
-fn optional_fact_u64(fact: &Fact<u64>) -> Option<i64> {
-    fact.value().copied().map(|value| value as i64)
 }
 
 fn optional_string(fact: &Fact<String>) -> (Option<String>, Option<String>) {

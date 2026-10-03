@@ -8,8 +8,4 @@
  * offsets are hexadecimal text because they are locators, and byte counts are numbers because the
  * bytes/KiB switch is presentation the UI applies to them.
  */
-export type SectionRowDto = { index: number, name: string | null, nameUnknownReason: string | null, role: string, alloc: boolean, write: boolean, execute: boolean, virtualAddress: string | null, virtualAddressUnknownReason: string | null, loadAddress: string | null, loadAddressUnknownReason: string | null, 
-/**
- * The schema records no reason for an absent file offset, so only the absence crosses.
- */
-fileOffset: string | null, fileSize: number, memorySize: number | null, memorySizeUnknownReason: string | null, region: string | null, regionUnknownReason: string | null, };
+export type SectionRowDto = { index: number, name: string | null, nameUnknownReason: string | null, role: string, alloc: boolean, write: boolean, execute: boolean, virtualAddress: string | null, virtualAddressUnknownReason: string | null, loadAddress: string | null, loadAddressUnknownReason: string | null, fileOffset: string | null, fileOffsetUnknownReason: string | null, fileSize: number, memorySize: number | null, memorySizeUnknownReason: string | null, region: string | null, regionUnknownReason: string | null, };

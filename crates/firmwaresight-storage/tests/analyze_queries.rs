@@ -541,7 +541,11 @@ fn symbols_sort_by_address_in_both_directions_over_the_whole_table() {
         .expect("import");
 
     let ascending = symbol_page(&db, &snapshot, |query| query.sort_by = SymbolSort::Address);
-    let addresses: Vec<Option<u64>> = ascending.rows.iter().map(|row| row.address).collect();
+    let addresses: Vec<Option<u64>> = ascending
+        .rows
+        .iter()
+        .map(|row| row.address.value().copied())
+        .collect();
     assert!(
         addresses.iter().all(Option::is_some),
         "the ELF parser records an address for every symbol in this fixture"
@@ -553,7 +557,11 @@ fn symbols_sort_by_address_in_both_directions_over_the_whole_table() {
         query.sort_by = SymbolSort::Address;
         query.direction = SortDir::Desc;
     });
-    let reversed: Vec<Option<u64>> = descending.rows.iter().map(|row| row.address).collect();
+    let reversed: Vec<Option<u64>> = descending
+        .rows
+        .iter()
+        .map(|row| row.address.value().copied())
+        .collect();
     assert!(reversed.windows(2).all(|pair| pair[0] >= pair[1]));
 
     let mut sorted_asc = addresses.clone();

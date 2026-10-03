@@ -348,8 +348,8 @@ pub struct SectionRowDto {
     pub virtual_address_unknown_reason: Option<String>,
     pub load_address: Option<String>,
     pub load_address_unknown_reason: Option<String>,
-    /// The schema records no reason for an absent file offset, so only the absence crosses.
     pub file_offset: Option<String>,
+    pub file_offset_unknown_reason: Option<String>,
     #[ts(type = "number")]
     pub file_size: u64,
     #[ts(type = "number | null")]
@@ -368,6 +368,7 @@ pub struct SymbolRowDto {
     pub name: Option<String>,
     pub name_unknown_reason: Option<String>,
     pub address: Option<String>,
+    pub address_unknown_reason: Option<String>,
     #[ts(type = "number | null")]
     pub size: Option<u64>,
     pub size_unknown_reason: Option<String>,

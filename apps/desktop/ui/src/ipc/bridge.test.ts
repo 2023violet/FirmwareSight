@@ -141,6 +141,7 @@ describe('detail queries', () => {
           loadAddress: '0x0800005c',
           loadAddressUnknownReason: null,
           fileOffset: '0x00002000',
+          fileOffsetUnknownReason: null,
           fileSize: 4,
           memorySize: 4,
           memorySizeUnknownReason: null,

@@ -476,7 +476,9 @@ function SectionTable({
             <td className={styles['mono']}>
               {row.loadAddress ?? <Unknown reason={row.loadAddressUnknownReason} />}
             </td>
-            <td className={styles['mono']}>{row.fileOffset ?? <Unknown />}</td>
+            <td className={styles['mono']}>
+              {row.fileOffset ?? <Unknown reason={row.fileOffsetUnknownReason} />}
+            </td>
             <td className={styles['mono']}>{formatSize(row.fileSize, unit)}</td>
             <td className={styles['mono']}>
               {row.memorySize === null ? (
@@ -547,7 +549,9 @@ function SymbolTable({
               {row.ordinal}
             </td>
             <td>{row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}</td>
-            <td className={styles['mono']}>{row.address ?? <Unknown />}</td>
+            <td className={styles['mono']}>
+              {row.address ?? <Unknown reason={row.addressUnknownReason} />}
+            </td>
             <td className={styles['mono']}>
               {row.size === null ? (
                 <Unknown reason={row.sizeUnknownReason} />

@@ -611,6 +611,11 @@ fn compare_added_no_schema_change() {
     // The prompt's §44 promise, checked against the files rather than against this sentence. P3 added
     // 0003 for the Gate and P4 added 0004 for the Release Bundle, so the check is that neither numbered
     // step belongs to Compare and that the migration count still equals the schema version.
+    //
+    // `0005_unknown_reasons` is P5's, and it is here because the guard is a *named-stage* check, not a
+    // frozen count: a migration that appeared without belonging to a stage is exactly what this list
+    // would catch. P5 added it to store the Unknown reason that `optional_fact_u64` used to discard
+    // (L6/L7), never to give History a table - see P5_VALIDATION/P5_MIGRATION_DECISION.md.
     let migrations = repo_root().join("crates/firmwaresight-storage/migrations");
     let mut names: Vec<_> = std::fs::read_dir(migrations)
         .expect("migrations dir")
@@ -629,6 +634,7 @@ fn compare_added_no_schema_change() {
             "0002_evidence_keyed_by_build.sql",
             "0003_gate_history.sql",
             "0004_release_records.sql",
+            "0005_unknown_reasons.sql",
         ],
         "every migration belongs to a named stage"
     );

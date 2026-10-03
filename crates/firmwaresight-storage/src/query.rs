@@ -96,9 +96,10 @@ pub struct SectionRow {
     pub execute: bool,
     pub virtual_address: Fact<u64>,
     pub load_address: Fact<u64>,
-    /// The schema has no `file_offset_unknown` column, so an absent offset can only be reported as
-    /// absent. It is never reported as `0`.
-    pub file_offset: Option<u64>,
+    /// An absent offset is `Unknown` with the reason the parser recorded. A row written before
+    /// migration `0005` has no reason to report, and `bytes_or_unknown` says so in words rather than
+    /// inventing one. It is never reported as `0`.
+    pub file_offset: Fact<u64>,
     pub file_size: u64,
     pub memory_size: Fact<u64>,
     pub region: Fact<String>,
@@ -110,8 +111,8 @@ pub struct SymbolRow {
     /// A row position, not an identity: one build's ordinal is stable only for that build.
     pub ordinal: i64,
     pub name: Fact<String>,
-    /// No `address_unknown` column exists either; see [`SectionRow::file_offset`].
-    pub address: Option<u64>,
+    /// The same shape as [`SectionRow::file_offset`].
+    pub address: Fact<u64>,
     pub size: Fact<u64>,
     pub kind: String,
     pub binding: String,
@@ -245,7 +246,8 @@ impl Database {
             .connection()
             .prepare(&format!(
                 "SELECT section_index, name, name_unknown, role, is_alloc, is_write, is_execute,
-                        virt_addr, virt_unknown, load_addr, load_unknown, file_offset, file_size,
+                        virt_addr, virt_unknown, load_addr, load_unknown, file_offset,
+                        file_offset_unknown, file_size,
                         mem_size, mem_unknown, region, region_unknown
                    FROM sections
                   WHERE {filter}
@@ -301,7 +303,8 @@ impl Database {
         let mut stmt = self
             .connection()
             .prepare(&format!(
-                "SELECT ordinal, name, name_unknown, address, size, size_unknown, kind, binding,
+                "SELECT ordinal, name, name_unknown, address, address_unknown, size, size_unknown,
+                        kind, binding,
                         section_ref
                    FROM symbols
                   WHERE {filter}
@@ -447,10 +450,10 @@ fn section_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<SectionRow> {
         execute: row.get::<_, i64>(6)? == 1,
         virtual_address: bytes_or_unknown(row.get(7)?, row.get(8)?),
         load_address: bytes_or_unknown(row.get(9)?, row.get(10)?),
-        file_offset: row.get::<_, Option<i64>>(11)?.map(|value| value as u64),
-        file_size: row.get::<_, i64>(12)? as u64,
-        memory_size: bytes_or_unknown(row.get(13)?, row.get(14)?),
-        region: known_or_unknown(row.get(15)?, row.get(16)?),
+        file_offset: bytes_or_unknown(row.get(11)?, row.get(12)?),
+        file_size: row.get::<_, i64>(13)? as u64,
+        memory_size: bytes_or_unknown(row.get(14)?, row.get(15)?),
+        region: known_or_unknown(row.get(16)?, row.get(17)?),
     })
 }
 
@@ -458,11 +461,11 @@ fn symbol_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<SymbolRow> {
     Ok(SymbolRow {
         ordinal: row.get(0)?,
         name: known_or_unknown(row.get(1)?, row.get(2)?),
-        address: row.get::<_, Option<i64>>(3)?.map(|value| value as u64),
-        size: bytes_or_unknown(row.get(4)?, row.get(5)?),
-        kind: row.get(6)?,
-        binding: row.get(7)?,
-        section_ref: row.get(8)?,
+        address: bytes_or_unknown(row.get(3)?, row.get(4)?),
+        size: bytes_or_unknown(row.get(5)?, row.get(6)?),
+        kind: row.get(7)?,
+        binding: row.get(8)?,
+        section_ref: row.get(9)?,
     })
 }
 

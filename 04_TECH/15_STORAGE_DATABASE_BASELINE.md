@@ -202,3 +202,59 @@ Three tests pinned the literal `3` and were updated by name rather than deleted:
 `map_companion_persistence.rs::closing_the_identity_gap_adds_no_schema_version_and_no_migration`; the
 desktop's `real_artifact_intake.rs::the_selection_path_adds_no_schema_migration` now asserts the migration
 **names** instead of a count.
+
+## P5 numeric Unknown reasons (2026-10-03)
+
+`SCHEMA_VERSION` moves 4 → 5 with one additive migration, `migrations/0005_unknown_reasons.sql`. It adds
+two columns and one index and touches no existing row:
+
+```
+ALTER TABLE sections ADD COLUMN file_offset_unknown TEXT;
+ALTER TABLE symbols  ADD COLUMN address_unknown     TEXT;
+CREATE INDEX idx_builds_created ON builds(created_at);
+```
+
+Why: `0001_initial.sql` states "a fact we could not determine is recorded as a reason, never silently as
+zero" and pairs five of its seven nullable numeric columns with a `*_unknown` twin, but
+`sections.file_offset` and `symbols.address` have none, so `optional_fact_u64` discarded the reason the
+parser handed it. That is L6/L7 in `G2_VALIDATION/G2_KNOWN_LIMITATIONS.md`. The writer now uses the same
+`optional_fact` pair the neighbours use, `SectionRow::file_offset` and `SymbolRow::address` are
+`Fact<u64>` like every other numeric column, and the desktop's `SectionRowDto` / `SymbolRowDto` carry
+`fileOffsetUnknownReason` / `addressUnknownReason` so the Analyze tables explain an Unknown the way the
+Evidence Inspector already does. `P5_VALIDATION/P5_MIGRATION_DECISION.md` holds the decision, the rejected
+alternatives and the checkpoint that authorized it.
+
+What this migration is **not**: it is not History's. Every row a History page shows is already persisted,
+and §18 forbids a migration written to make a screen easier. The index on `builds.created_at` rides along
+because `builds` is the one history table whose ordering column has no index while every comparable column
+does; a History read model works without it.
+
+A `NULL` in either new column is a third state and stays one: it means the version that wrote the row did
+not record a reason, and `query.rs::bytes_or_unknown` renders that as the words "no reason was recorded"
+rather than reconstructing a cause. No backfill is attempted — re-parsing an artifact can disagree with
+what was originally observed, and replacing a lost fact with an invented one is the failure this rule
+exists to prevent.
+
+Diff semantics and the portable documents did not change. `DiffSection::file_offset` and
+`DiffSymbol::address` keep their existing `Option<u64>` shape (`compare.rs`, `report/diff.rs`,
+`desktop/src/compare.rs`), so `diff.json`, `diff.html` and the CLI↔desktop parity claims are byte-for-byte
+what P2 sealed; only the stored-detail path gained the reason.
+
+Covered by `crates/firmwaresight-storage/tests/unknown_reasons.rs` (5 tests): a committed fixture's
+unknown `.bss` offset keeps its reason through the write and comes back through the paging query as
+`Fact::Unknown` with that reason; a symbol whose address is reported Unknown keeps it (the ELF parser does
+not emit that today, so the case is constructed, not claimed); the schema is at version 5 with both
+columns present; and a hand-built v4 file upgrades with its `.bss` row intact and its reason still
+unrecorded. Four named-stage guards that pinned the old migration list were updated rather than deleted —
+`compare_candidates.rs::compare_added_no_schema_change`,
+`map_companion_persistence.rs::closing_the_identity_gap_adds_no_schema_version_and_no_migration`,
+`release_records.rs::the_schema_is_at_version_five_and_the_release_table_starts_empty` (renamed from
+"version four") and the desktop's `real_artifact_intake.rs::the_selection_path_adds_no_schema_migration` —
+and `release_records.rs::a_database_from_the_future_is_refused_and_left_alone` now matches the refusal
+against `SCHEMA_VERSION` instead of a literal, so the guard tests the behaviour rather than the number.
+
+One sequencing rule travels with this schema: a schema-5 store cannot be opened by a schema-4 binary — it
+is refused, not reset — so the recovery path for an upgrade is a backup taken before it. That capability
+does not exist yet (P5 prompt §22, which lands in the commit §61 calls "diagnostics and recovery
+support"), which is why `P5_MIGRATION_DECISION.md` states that no build carrying this migration may be
+installed over a user's real store before it does.

@@ -321,10 +321,13 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
         vec![
             (1, "0001_initial".to_owned()),
             (2, "0002_evidence_keyed_by_build".to_owned()),
-            // 0003 is P3's Gate history and 0004 is P4's release record. The identity closure wrote
-            // neither, which is what this assertion is for: the list grows only when a stage says so.
+            // 0003 is P3's Gate history, 0004 is P4's release record and 0005 is P5's Unknown reasons.
+            // The identity closure wrote none of them, which is what this assertion is for: the list
+            // grows only when a stage says so, and a migration that appeared for no named stage is
+            // exactly what this list would catch.
             (3, "0003_gate_history".to_owned()),
             (4, "0004_release_records".to_owned()),
+            (5, "0005_unknown_reasons".to_owned()),
         ],
         "every migration belongs to a named stage, and none of them is the identity closure's"
     );
