@@ -43,7 +43,9 @@ makes `sha256sum -c` answer `FAILED open or read` on a correct build, so a bundl
 with the aggregate tree digest kept in metadata and each payload's digest recorded beside its container — and
 head `53578e9` went **10 of 10** on Run `37143046338`, whose downloaded darwin set verifies on all five lines
 with exit 0 (**775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI
-jobs**). **Still no P5 verdict exists, and nothing has been installed yet** — the product is
+jobs**). The packaged installer has now been run on this host — §38 A–L and §39 measured with the owner's
+store parked, hashed and restored byte-identically, in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`, whose
+§38 item C (first-run onboarding) and the §64 journey stay open. **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source
 licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task:

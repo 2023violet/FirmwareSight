@@ -63,9 +63,23 @@ last_updated: "2026-10-03"
   that file. Comparing the two runs, whose heads differ only in `scripts/` and docs, produced a fact nobody
   predicted: the macOS `.app` tree digest is identical across both, while the `.dmg` wrapping it — same
   length — is not. A repeating digest is one pair of runs on one runner image and licenses no reproducibility
-  claim; a changing one is not evidence the program changed. Nothing has been installed yet:
-  the byte-level install, launch-offline, uninstall and reinstall acceptance (§38, §64, §65) is the next
-  round, and the installers for it exist on both this host and the runner.
+  claim; a changing one is not evidence the program changed. The installers for §38 exist on both this host
+  and the runner, and the Windows one has now been run here — see the next bullet.
+- **The first real install ran on this machine, and it produced three findings that no source read could.**
+  Windows Sandbox is absent here (`WindowsSandbox.exe` missing, the feature query needs elevation, which this
+  round does not take), so prompt §38's fallback ran: the owner's live store was hashed, parked, and restored
+  to three byte-identical digests, and the packaged installer was driven through its own UI. Install, launch
+  from the Start Menu shortcut, Analyze of a real fixture, close/reopen, repair, uninstall, reinstall and the
+  data-retention check are all transcribed in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md` with §39's record
+  (per-user install path, no UAC prompt, `PATH` entries mentioning FirmwareSight: 0 before and after, no shell
+  profile, no TCP endpoint owned by the app, WebView origin `http://tauri.localhost/`). What it found: the
+  window title still reads `FirmwareSight - Analyze` while the page is Compare — L21 reproduced on the
+  packaged artifact; a returning user sees nothing they did before, because the store kept 1 build, 19
+  sections, 42 symbols and 10 evidence rows across a reopen while the UI says "Nothing has been analyzed in
+  this session yet"; and the uninstaller never mentions user data, deletes none, and the reinstall reopened
+  the same store without re-running the migrations — a retention rule that must now be written where a user
+  reads it. §38 item C (first-run onboarding) is not built, so §64's full journey stays open until Commits C
+  and D land, and §65's negative half stays open because this host has the whole toolchain installed.
 - **One gate run went red for a reason that was not in the commit it ran on**, and that is worth knowing
   before the next stage trusts a green. Run `37128593254` failed `Desktop UI (windows-latest)` on a
   pre-existing race in `compare.test.tsx:1094`: the `Section Changes` region mounts before its first page

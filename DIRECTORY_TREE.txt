@@ -595,6 +595,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── P4_BUNDLE_EXIT_CHECKLIST.md
 ├── P5_VALIDATION/
 │   ├── P5_CI_AUTHORITY.md
+│   ├── P5_INSTALL_RECOVERY_REPORT.md
 │   ├── P5_MIGRATION_DECISION.md
 │   ├── P5_PACKAGING_REPORT.md
 │   └── P5_PRODUCTIZATION_AUDIT.md

@@ -84,12 +84,19 @@ in a copy of `Contents/Info.plist` turning the same index red and naming the fil
 and the read-back's comparison of the two runs is what §5e now states as a measurement: the macOS `.app` tree
 digest repeated exactly between them while its `.dmg`, at identical length, did not. A green tick on the job
 still was not the proof — the job verifies the bundle before it writes the index, which is why the artifact
-set has to be downloaded. Next is §38/§64's real Windows install, uninstall and
-reinstall acceptance on this host with the owner's store parked, hashed and restored (the
-`P5_INSTALL_RECOVERY_REPORT.md` evidence, and the
-thing no package job can do from a runner — the installer for it exists both here and as a run artifact);
-then Commit C's onboarding and local History, Commit D's
-diagnostics and recovery, Commit E's fixture cohort, Commit F's documentation and closure. **Do not start a
+set has to be downloaded. **The real Windows install has since run on this host** — §38 A–L and §39 with the
+owner's store parked, hashed and restored byte-identically, transcribed in
+`P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md` — and it produced three things worth carrying: the window title
+still says `FirmwareSight - Analyze` while the page is Compare (L21, now observed on the packaged build); a
+reopened app shows "Nothing has been analyzed in this session yet" while its store keeps the whole build
+(1 build, 19 sections, 42 symbols, 10 evidence rows), which is the concrete case for History; and the
+uninstaller asks nothing about user data and deletes none, which is a documentation obligation for Commit F,
+not a bug to fix. Next is Commit C — §13 onboarding, §14 Help/About with the window-title fix, §15–§17 the
+local History page over new bounded storage **read** APIs — then Commit D's diagnostics and recovery, then
+Commit E's fixture cohort, then Commit F's documentation and closure. The full §64 journey (install →
+onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen → reinstall →
+uninstall → reinstall → documented data behaviour) runs once after C and D land, on a disposable firmware
+project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. **Do not start a
 workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and
 §5's list of forbidden verdicts still applies to every sentence you write.
 

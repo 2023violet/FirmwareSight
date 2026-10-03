@@ -87,6 +87,14 @@ Post-G2 real-desktop acceptance: PASS_WITH_FINDINGS (2026-10-02), and its findin
         restored byte-exact. Evidence POST_G2_E2E_REMEDIATION/, with the 283-case root outside the
         repository. G2 stays PASS and the product stays MVP CANDIDATE; large-file latency, peak RSS,
         125/150 % DPI and mouse-wheel behaviour are carried forward, not fixed
+P5 packaging: PROVED ON THREE RUNNERS (2026-10-03). Run 37138881977 at head 1055242 is the first 10 of 10
+        and the first to attach a built package; run 37143046338 at 53578e9 is the second, and its downloaded
+        darwin set is what closed the checksum-index row. Evidence P5_VALIDATION/P5_PACKAGING_REPORT.md
+P5 real Windows install acceptance: IN_PROGRESS (2026-10-03). The packaged installer ran here through
+        install, OS-surface launch, Analyze of a real fixture, close/reopen, repair, uninstall, reinstall and
+        the data-retention check, with the owner's store parked, hashed and restored byte-identically; §38 C
+        (first-run onboarding) and the §64 journey are not built yet, so this line is not a verdict.
+        Evidence P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -325,7 +333,12 @@ runner's own bytes: five lines, every one `OK`, exit 0, with one flipped byte in
 differing only in `scripts/` and docs — gave a fact nobody had predicted: the macOS `.app` tree digest is
 identical across both, while the `.dmg` wrapping it, at identical length, is not.
 All three repairs, the artifact sets with their checksums, and the limits of what has been proved are in
-`P5_PACKAGING_REPORT.md` §5 through §5e.
+`P5_PACKAGING_REPORT.md` §5 through §5e. The packaged installer has since been run on this machine — §38 A–L
+and §39 with the owner's live store parked, hashed and restored to three identical digests — and
+`P5_INSTALL_RECOVERY_REPORT.md` records what that found: the window title still reads
+`FirmwareSight - Analyze` on the Compare page, a reopened app shows an empty session while its store keeps
+the whole build, and the uninstaller neither asks about user data nor deletes any. §38 C (first-run
+onboarding) is not built, so the §64 journey and this stage's verdict stay open.
 
 **No P5 verdict
 exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt

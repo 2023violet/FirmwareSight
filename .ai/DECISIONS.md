@@ -1256,7 +1256,10 @@ unchanged: G2 `PASS`, **MVP CANDIDATE**, baseline `0.6.0`.
   config's `{script, cwd}` hook form because that `cwd` is still resolved against wherever a person
   happened to stand. Building it for real also moved two claims from assumption to evidence: the NSIS
   package does carry `target/release/firmwaresight-desktop.exe`, and this repository has now produced an
-  installer (§5b of `P5_PACKAGING_REPORT.md`) — produced, not yet installed anywhere.
+  installer (§5b of `P5_PACKAGING_REPORT.md`) — produced, not yet installed anywhere at the time this bullet
+  was written. It has since been installed on this host, uninstalled and reinstalled with the owner's store
+  parked and restored, and `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md` records what the uninstaller does to
+  user data: nothing, and without asking.
 - **A checksum index lists files, not directories, and the payload gets its own digest.** The macOS job's
   own artifact set was the evidence: its `SHA256SUMS.txt` gave `FirmwareSight-…-app.app` a single line
   carrying an aggregate tree digest, and `sha256sum -c` — the tool §41 names — answered
