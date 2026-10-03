@@ -31,7 +31,8 @@ format, adapter or crate.
 The product is **not** in question: G2 is PASS, Product MVP is ENGINEERING COMPLETE, the state is
 **MVP CANDIDATE**, the baseline is **0.6.0**, and the three post-G2 findings were closed on 2026-10-02 in
 `e816dcb` and `971015f`. What moved is the tree, so the G2 numbers are the history of a different commit:
-Rust is **770** tests, UI is **159** in 6 files.
+**Rust is 775 tests, UI is 160 in 6 files, and `scripts/check.py` is 16 steps** (the drift group gained
+`version identity` when packaging landed).
 
 `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` is written and answers §4 A–H from commands run at `d83175a`
 (HEAD = `origin/main`, tree clean, Run `37101619245` 7 of 7). It found no package has ever been produced
@@ -40,6 +41,23 @@ Rust is **770** tests, UI is **159** in 6 files.
 required for the L6/L7 numeric-Unknown reasons and not for History, that `PRAGMA integrity_check` and any
 database backup appear nowhere, and that the committed fixtures are all `arm-none-eabi-gcc` + GNU ld with
 zero Clang-produced evidence despite the cohort claim.
+
+## What has landed since the audit
+
+| Commit | What it did | Gate run | Result |
+| --- | --- | --- | --- |
+| `4cc8d93` | §5 governance opened + the audit + the archived prompt | `37125456689` | success, 7 of 7 |
+| `812b472` | `P5_MIGRATION_DECISION.md`, then migration `0005` and its write/query/IPC/UI path | `37127791999` | success, 7 of 7 |
+| `9e3b1de` | artifact versions unified on `0.6.0`; seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
+| `20b03e3` | test-only repair of the pre-existing race that run lost | `37129900728` | success, 7 of 7 |
+| the packaging commit | `bundle.active`, three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | its own run, 10 jobs | see `P5_VALIDATION/P5_CI_AUTHORITY.md` |
+
+The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
+lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
+it had left the rest). Reproduced here without CI — 1 of 30 fresh runs, and 3 of 3 under injected mock
+latency — and repaired by awaiting the one synchronous read, no production source touched. `P5_VALIDATION/
+P5_PRODUCTIZATION_AUDIT.md` §0a carries the evidence; the class is worth a sweep, which is a P5 validation
+task, not a licence to rewrite unrelated tests.
 
 ## What the owner decided at the checkpoint
 
@@ -108,8 +126,10 @@ Release, installer or `v0.7.0` was created.
 
 Those two rounds did not move the pointer: `active_task` stayed `NONE`, G2 stayed `PASS`, and the product
 stayed an MVP CANDIDATE. What moved was the tree, so the numbers in the section above are the history of a
-different commit rather than the present: **Rust is 770 tests, UI is 159 in 6 files**, and the newest
-evidence directory became `POST_G2_E2E_REMEDIATION/`.
+different commit rather than the present: the remediation round left **770 Rust / 159 UI**, and P5's own
+commits have moved it again to **775 Rust / 160 UI / `check.py` 16 steps** (migration `0005`'s five storage
+tests, the Details reason test, and the `version identity` drift step). The evidence directory that round
+added is `POST_G2_E2E_REMEDIATION/`.
 
 On 2026-10-02 a real-desktop acceptance round drove the shipping binary through 283 black-box cases and
 closed `PASS_WITH_FINDINGS` — three product defects, no S0, no S1 — and a follow-on round fixed exactly

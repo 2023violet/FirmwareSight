@@ -62,7 +62,8 @@ ADR-0015/0016/0018/0023/0026, plus the inspection list in §3: `Cargo.toml`, `Ca
 | `4cc8d93` | governance opened (§5) + this audit + the archived prompt | `37125456689` | success, 7 of 7 |
 | `812b472` | `P5_MIGRATION_DECISION.md` + migration `0005` and its write/query/IPC/UI path | `37127791999` | success, 7 of 7 |
 | `9e3b1de` | version identity unified on `0.6.0`, seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
-| the commit that lands this table | test-only repair of the race `37128593254` lost | follows this commit | — |
+| `20b03e3` | test-only repair of the race `37128593254` lost | `37129900728` | success, 7 of 7 |
+| the commit that lands this row | packaging enabled: `bundle.active`, the three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | follows this commit | — |
 
 The failure was not the version bump. `Desktop UI (windows-latest)` lost a pre-existing race in
 `compare.test.tsx`: `runCompare()` returns as soon as the comparison region exists, and the
@@ -78,8 +79,7 @@ repaired test red — the wait is load-bearing, not a widened timeout. Repaired 
 (`findAllByRole`, awaited), no production source, no timeout constant, no weakened assertion; the full UI
 suite is 160 tests in 6 files, typecheck and lint clean.
 
-**What this says about the gate, not just about this test.** This is the third time the same class has
-reddened `Desktop UI (windows-latest)` in this one file: `e83950c` closed it where the KiB test sampled
+**What this says about the gate, not just about this test.** This is the third time the same class hasreddened `Desktop UI (windows-latest)` in this one file: `e83950c` closed it where the KiB test sampled
 call counts before both tables had resolved (Run `36779715108`), `055b54e` closed it at the pager (Run
 `36892307828` attempt 1), and this commit closes it at the table headers. `055b54e`'s own message said the
 shape "was not converted then", and `e83950c` named it "defect I's class, in the same file, and the local
@@ -87,6 +87,40 @@ gate could not see it". Every remaining synchronous read of a data-gated element
 the same latent flake, and a "7 of 7 on the first attempt" closure rule turns each one into a scheduling
 risk on later commits rather than a product defect. P5 should sweep the class once — a list of the reads
 that still sample before their page resolves — instead of letting the next red run name the next instance.
+
+### 0b. What section A became when packaging was switched on
+
+The packaging commit implements section 8/9/10/41 against the numbers in section A above. Four findings
+from doing it are worth recording here because they were not visible from the audit:
+
+- **A `localhost:5173` absence check would have been a lie.** Section 8 asks that the production package
+  not depend on the dev server, and the obvious test is to grep the binary for the dev URL. Measured: a
+  release binary built *with* `custom-protocol` and a debug binary of the same crate built *without* it
+  both contain the literal `localhost:5173`, because the dev URL is part of the config Tauri embeds
+  either way. What discriminates is the built asset table — `assets/index-i5lbKrS9.js` and
+  `assets/index-DyI80Tci.css` are present in the shipping binary and absent from the dev-mode one — and
+  that is what `scripts/verify_package_artifacts.py` asserts. Had the audit's L16 row been implemented as
+  the string search it suggested, every good build would have failed and every broken one would have
+  passed.
+- **L17's duplication half is closed; its index half is not.** The apt prerequisite list now exists once,
+  in `.github/actions/linux-tauri-prereqs`, used by `rust`, `drift` and the new `package-ubuntu`. The
+  "index blind spot" half of L17 — that `drift/fixtures tracked` is the only step reading `git ls-files` —
+  is untouched by this commit.
+- **Section 67 needed a gate step, and `drift/version identity` is it.** The audit found the version split
+  by reading four files; a human had to. The step compares `[workspace.package] version`, `tauri.conf.json`,
+  the UI `package.json` and `BASELINE.yaml product.baseline_version`, and requires every workspace crate to
+  inherit `version.workspace = true` so no manifest can hold a string the check cannot see. Both directions
+  are proven to bind: splitting the UI package version reddens it, and one crate's literal version names
+  that crate.
+- **No `.icns` is committed, on purpose.** `tauri-bundler`'s `macos/icon.rs::create_icns_file` packs an
+  ICNS from the listed PNGs when the icon list has none, and the five committed PNGs are RGBA at
+  power-of-two sizes — the input that function accepts. Adding a committed `.icns` would have enlarged
+  the pixel-comparison drift surface to reproduce work the bundler already does.
+
+The CI authoritative set is now ten jobs (section 41), which `05_ENGINEERING/06_CI_CD_BASELINE.md`
+records with its reason: this repository has never had a scheduled workflow, so the matrix row that
+gives packaging a home — "nightly → optional package smoke" — has never run and could not have produced
+this stage's evidence.
 
 ## A. Packaging and version identity
 

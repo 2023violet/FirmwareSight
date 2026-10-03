@@ -26,8 +26,19 @@
     }
   },
   "bundle": {
-    "active": false,
-    "targets": "all",
+    "active": true,
+    "targets": ["nsis", "app", "dmg", "deb"],
+    "publisher": "FirmwareSight",
+    "category": "DeveloperTool",
+    "shortDescription": "Local-first ELF firmware size and symbol analysis for release reviews.",
+    "longDescription": "FirmwareSight analyses an ELF firmware artifact on this machine: sections, symbols, memory regions, the size delta between two builds, a five-state release Gate and a portable Release Bundle. Analysis, comparison, Gate and bundling all run offline - there is no network service, no telemetry and no upload.",
+    "createUpdaterArtifacts": false,
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "startMenuFolder": "FirmwareSight"
+      }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

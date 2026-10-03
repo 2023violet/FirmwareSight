@@ -26,6 +26,26 @@ last_updated: "2026-10-03"
   STOP, and §54 leaves the licence with the owner. **No P5 verdict exists**: §5 forbids `P5 PASS`, `BETA`,
   `RC` or `GA` before closure evidence, `baseline_version` stays `0.6.0`, and no tag, GitHub Release or
   published installer is created.
+- **What has landed since that checkpoint**, measured rather than summarized: `4cc8d93` opened governance
+  and archived the prompt (Run `37125456689`, 7 of 7); `812b472` wrote `P5_MIGRATION_DECISION.md` then
+  migration `0005`, which keeps the two numeric `Unknown` reasons the storage write path had been
+  discarding (Run `37127791999`, 7 of 7); `9e3b1de` unified every artifact version on `0.6.0` and
+  regenerated the seven goldens it moved (Run `37128593254`, **6 of 7 — failed**); `20b03e3` repaired the
+  race that run lost, test-only (Run `37129900728`, 7 of 7); and the packaging commit turned `bundle.active`
+  on, added the three CI package jobs prompt §41 asks for, wrote `scripts/verify_package_artifacts.py` and
+  gave the gate a `drift/version identity` step. The tree is now **775 Rust tests / 160 UI tests in 6 files
+  / `check.py` 16 steps**, and the authoritative CI set is **10 jobs** for the length of P5 — recorded in
+  `05_ENGINEERING/06_CI_CD_BASELINE.md` and tracked run by run in `P5_VALIDATION/P5_CI_AUTHORITY.md`.
+- **One gate run went red for a reason that was not in the commit it ran on**, and that is worth knowing
+  before the next stage trusts a green. Run `37128593254` failed `Desktop UI (windows-latest)` on a
+  pre-existing race in `compare.test.tsx:1094`: the `Section Changes` region mounts before its first page
+  does (`Compare.tsx:1001-1004` clears the page, the `<table>` renders only from a resolved one), so a
+  synchronous `getAllByRole('columnheader')` after `findByRole('region')` waits for nothing. It reproduced
+  on this host without CI (1 of 30 fresh runs) and 3 of 3 under 25 ms of injected mock latency; the repair
+  is one awaited query, and a never-resolving query keeps the repaired test red, so the wait is
+  load-bearing rather than a widened timeout. `055b54e` had closed the identical shape at this file's pager
+  and said the rest was "not converted then" — this is the third such close (`e83950c` was the first). The
+  remaining instances are a sweep for P5's validation work, not an excuse to rewrite unrelated tests.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256

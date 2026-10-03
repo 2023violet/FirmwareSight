@@ -1194,6 +1194,50 @@ unchanged: G2 `PASS`, **MVP CANDIDATE**, baseline `0.6.0`.
   existing history already lives; a rename would be cosmetic and would put real user data in front of a
   data-move code path. The chosen fix is disclosure instead of migration: Diagnostics and the install
   documentation state the path, so the file is findable and backupable.
+- **Packaging chose the targets the runners can prove, not the list that reads best.** Windows builds
+  NSIS only — MSI would pull the WiX toolset for an "enterprise evaluation" no evidence asks for. macOS
+  builds the `.app` and the `.dmg` that wraps it, because the embedded-frontend check needs the `.app`'s
+  bytes. Ubuntu builds `.deb` and not AppImage, because AppImage needs `linuxdeploy` at build time and
+  FUSE at run time on a platform this round may only call `CI_BUILD_ONLY`. `AGENTS.md` §2 is intact: no
+  framework changed, no target forced, and §8's instruction to record the canonical target per platform
+  is answered in `04_TECH/17`.
+- **`installMode: currentUser` is written down rather than inherited.** It is Tauri's default
+  (`tauri-utils` 2.10.0 `config.rs:825-844`), and it is the mode that cannot prompt for administrator
+  rights and keeps its metadata under `HKCU` — which is what an install on the owner's own machine should
+  do. Setting it explicitly makes any later change to it a reviewable diff instead of a silent drift.
+- **The Tauri CLI is a CI tool, not a dependency.** `cargo install tauri-cli@2.12.1 --locked`, the same
+  shape this workflow already uses for `cargo-deny@0.20.2`: it never enters `Cargo.lock`, so the audited
+  product graph is unchanged. The npm alternative (`@tauri-apps/cli` as a devDependency) was rejected
+  because it would have widened the frontend's locked dependency set for a tool the frontend does not use
+  at runtime — an `AGENTS.md` §4 question with an answer of "the standard tooling here already has a
+  pattern".
+- **A check that would have passed the broken build was caught before it shipped.** Section 8's "must not
+  depend on `localhost:5173`" invites grepping the binary for the dev URL. Measured on this tree: the
+  release binary *with* `custom-protocol` and the debug binary *without* it both contain
+  `localhost:5173`, because it is embedded config either way — so the tempting check fails every good
+  build and passes every broken one. The discriminating signal is the built asset table
+  (`assets/index-*.js`, `assets/index-*.css`), present in the shipping binary and absent in the dev-mode
+  one, and `scripts/verify_package_artifacts.py` asserts that, against the binary that was actually
+  packaged.
+- **Version identity became a gate step.** §67 makes a version split a closure blocker, so
+  `drift/version identity` now compares `[workspace.package] version`, `tauri.conf.json`,
+  `apps/desktop/ui/package.json` and `BASELINE.yaml product.baseline_version` on every commit and
+  requires every crate to inherit `version.workspace = true`. Both directions are proven to bind by
+  mutation. The packaging that once asked a human to read four files is now a step that can fail.
+- **CI went from seven authoritative jobs to ten, with the reason on record.** §41 asks for package jobs;
+  the frozen matrix in `05_ENGINEERING/06` put packaging on a nightly or a release tag, and this
+  repository has never had a scheduled workflow, so that row has never run and cannot produce this
+  stage's evidence. The three jobs therefore run on a push to `main` and still not on a pull request, and
+  the change is written into `05_ENGINEERING/06` rather than left implicit. The apt prerequisite list that
+  used to exist in two jobs now exists once in `.github/actions/linux-tauri-prereqs`, which is the half of
+  L17 this commit could close.
+- **One gate run went red for a reason that was not the commit it ran on.** Run `37128593254` on `9e3b1de`
+  failed `Desktop UI (windows-latest)` on a pre-existing race in `compare.test.tsx` — the region mounts
+  before its first page lands, the same shape `055b54e` closed at the pager and said had been left
+  elsewhere. It reproduced here without CI (1 of 30 fresh runs), and under 25 ms of injected mock latency
+  (3 of 3). The repair is one awaited query, test-only, proven load-bearing by a never-resolving query
+  that keeps it red. The failed run is recorded in `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` rather than
+  re-run until a green attempt appeared.
 - **Two questions were refused, correctly.** §32 sends L22 — line endings moving a release's content-derived
   identity, which today fails closed — to the Architect as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` plus a STOP,
   because normalizing the digest input would change identity semantics, an `AGENTS.md` §2 move. And §54 is

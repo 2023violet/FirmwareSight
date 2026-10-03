@@ -1,0 +1,47 @@
+name: Linux prerequisites for the Tauri shell
+description: Install the system libraries the Tauri 2 shell needs to compile on Ubuntu.
+
+# One copy of this list, three jobs that need it (`rust` on its ubuntu matrix leg, `drift`, and
+# `package-ubuntu`). It used to be duplicated inline with a comment arguing that two copies were
+# cheaper than an abstraction; prompt section 41 adds a third job that compiles the shell, and that
+# is what turned a two-copy arrangement into a maintenance problem. The list itself is unchanged.
+#
+# Why each entry is here, from the two runs that proved it was needed:
+#
+# Run 36360310447 failed `clippy --all-features` on ubuntu-latest inside glib-sys' build script with
+# `pkg-config cannot find glib-2.0`. That is runner provisioning, not a source defect - the same
+# crate graph compiles on Windows, and the Ubuntu UI job was green. Run #2 of the drift gate,
+# 36378384225, proved the same thing from the other direction: `drift/desktop icons` passed and
+# `drift/ipc bindings` died in gobject-sys' build script with `Package gobject-2.0 was not found in
+# the pkg-config search path`.
+#
+#   libwebkit2gtk-4.1-dev  brings the whole pkg-config chain the -sys crates ask for (gtk+-3.0,
+#                          glib-2.0/gobject-2.0/gio-2.0, gdk-pixbuf-2.0, atk, pango, cairo,
+#                          javascriptcoregtk-4.1, libsoup-3.0, webkit2gtk-4.1)
+#   build-essential        the C compiler that builds libsqlite3-sys from source
+#   libdbus-1-dev          named because libdbus-sys (through tao) asks for dbus-1 by name; relying
+#                          on another package to pull it in transitively is not worth a failed cycle
+#   curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+#                          the rest of the list Tauri 2 documents for Linux
+#
+# pkg-config itself is deliberately not installed: run 36360310447's own log shows it ran and
+# returned status 1, so it was the .pc files that were missing, not the tool.
+
+runs:
+  using: composite
+  steps:
+    - name: Install the WebView stack and its build tools
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libwebkit2gtk-4.1-dev \
+          build-essential \
+          curl \
+          wget \
+          file \
+          libxdo-dev \
+          libssl-dev \
+          libayatana-appindicator3-dev \
+          librsvg2-dev \
+          libdbus-1-dev

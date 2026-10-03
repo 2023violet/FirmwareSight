@@ -298,7 +298,12 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` answers the prompt's §4 A–H from commands run on the tree, and
 the owner's checkpoint settled version identity (artifacts unify on `0.6.0`), the migration decision
 (`P5_MIGRATION_DECISION.md`, then `0005`), the package matrix (Windows with real install evidence here,
-macOS and Ubuntu `CI_BUILD_ONLY`) and the store filename (`firmwaresight-p0.sqlite` stays). **No P5 verdict
+macOS and Ubuntu `CI_BUILD_ONLY`) and the store filename (`firmwaresight-p0.sqlite` stays). Packaging is now
+enabled: `bundle.active` with NSIS / `.app`+`.dmg` / `.deb` as the canonical targets, three CI package jobs
+on top of the seven gate jobs, `scripts/verify_package_artifacts.py` to check the packaged version and the
+embedded frontend and write a **distribution** `SHA256SUMS.txt`, and a `drift/version identity` gate step —
+evidence and the limits of it in `P5_VALIDATION/P5_PACKAGING_REPORT.md`, the job set and every run in
+`P5_VALIDATION/P5_CI_AUTHORITY.md`. **No P5 verdict
 exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt
 forbids writing `P5 PASS`, `BETA`, `RC` or `GA` before closure evidence, and forbids a tag, a GitHub
 Release, an updater, a certificate and any licence choice. V1 own-artifact / real-user validation still has

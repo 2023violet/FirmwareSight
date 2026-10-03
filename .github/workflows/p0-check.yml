@@ -1,6 +1,9 @@
-# The P0 gate. Every step here is the same `scripts/check.py` a developer runs, so CI cannot be
-# green while the local gate is red, or the other way round.
 name: P0 verification gate
+
+# Every step in the seven gate jobs below is the same `scripts/check.py` a developer runs, so CI
+# cannot be green while the local gate is red, or the other way round. The three package jobs do
+# something the gate deliberately does not: they build an installer. They still call into check.py
+# (`--only package`) rather than carrying their own command list, for the same reason.
 
 on:
   push:
@@ -40,30 +43,13 @@ jobs:
         run: corepack enable
       # Run 36360310447 failed `clippy --all-features` on ubuntu-latest inside glib-sys' build
       # script: `pkg-config cannot find glib-2.0`. That is runner provisioning, not a source
-      # defect - the same crate graph compiles on Windows, and the Ubuntu UI job was green. These
-      # are the prerequisites Tauri 2 documents for Linux. The graph that needs them:
-      # libwebkit2gtk-4.1-dev brings the whole pkg-config chain our -sys crates ask for (gtk+-3.0,
-      # glib-2.0/gobject-2.0/gio-2.0, gdk-pixbuf-2.0, atk, pango, cairo, javascriptcoregtk-4.1,
-      # libsoup-3.0, webkit2gtk-4.1), build-essential supplies the C compiler that builds
-      # libsqlite3-sys from source, and libdbus-1-dev is named because libdbus-sys (through tao)
-      # asks for dbus-1 - depending on another package to pull it in transitively is not worth a
-      # failed cycle. pkg-config itself is not installed because the same log shows it ran and
-      # returned status 1; it was the .pc files that were missing.
+      # defect - the same crate graph compiles on Windows, and the Ubuntu UI job was green. The
+      # list and its reasoning now live in .github/actions/linux-tauri-prereqs, which this job,
+      # `drift` and `package-ubuntu` all use: prompt section 41 adds a third job that compiles the
+      # shell, which is what turned two deliberate copies into a maintenance problem.
       - name: Install Linux prerequisites for the Tauri shell
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            build-essential \
-            curl \
-            wget \
-            file \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev \
-            libdbus-1-dev
+        uses: ./.github/actions/linux-tauri-prereqs
       - name: Verification gate (fmt, clippy, test)
         run: python scripts/check.py --only rust
 
@@ -105,23 +91,9 @@ jobs:
       # regenerates the ts-rs bindings by running `cargo test -p firmwaresight-desktop`, which links
       # the GTK stack. Run #2 (36378384225) proved it - `drift/desktop icons` passed and
       # `drift/ipc bindings` died in gobject-sys' build script with
-      # `Package gobject-2.0 was not found in the pkg-config search path`. Deliberately a copy
-      # rather than a shared script: two jobs need this list, and abstracting ten apt lines is a
-      # new portability and testing surface, not a smaller change.
+      # `Package gobject-2.0 was not found in the pkg-config search path`.
       - name: Install Linux prerequisites for the Tauri shell
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            build-essential \
-            curl \
-            wget \
-            file \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev \
-            libdbus-1-dev
+        uses: ./.github/actions/linux-tauri-prereqs
       # Regenerates tokens.css, the desktop icons and the ts-rs bindings, then requires that the
       # committed files did not move. `git diff --exit-code` is the assertion.
       - name: Verification gate (drift)
@@ -154,3 +126,121 @@ jobs:
           python-version: "3.13"
       - name: Verification gate (core smoke)
         run: python scripts/check.py --only core-smoke
+
+  # ── P5 package jobs (prompt section 41) ────────────────────────────────────────────────
+  #
+  # The seven jobs above answer "is this tree correct". These three answer "can a stranger install
+  # it", which the gate structurally cannot: an installer can only be built for the platform
+  # standing in front of the runner, and `04_TECH/17` names NSIS for Windows, .app/.dmg for macOS
+  # and .deb for Linux as the baseline's own targets. The frozen CI matrix said packaging belongs
+  # to a nightly or a release tag; P5 moves it onto a push to main for the length of this stage,
+  # and that change is recorded in `04_TECH/17` and `05_ENGINEERING/06` rather than left implicit.
+  # Pull requests still do not package.
+  #
+  # Each job runs `python scripts/check.py --only package`, the same command a developer runs, and
+  # uploads what it produced. Nothing here publishes a GitHub Release, creates a tag, signs a
+  # binary or enables an updater: the artifacts land on the workflow run and stay unsigned, which
+  # is the boundary P5 was given.
+
+  package-windows:
+    name: Package Windows
+    if: github.event_name != 'pull_request'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Enable the pinned pnpm
+        run: corepack enable
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # The Tauri CLI is what makes `--features custom-protocol` the build's problem rather than the
+      # user's (prompt section 8). Pinned exactly and installed `--locked`, the same way this
+      # workflow installs cargo-deny, so the packaging tool is as reproducible as the crate graph.
+      - name: Install the pinned Tauri CLI
+        run: cargo install tauri-cli@2.12.1 --locked
+      - name: Build and verify the Windows package
+        run: python scripts/check.py --only package
+      - name: Resolve the distribution name prefix
+        id: dist
+        shell: bash
+        run: echo "prefix=$(python scripts/verify_package_artifacts.py --print-prefix)" >> "$GITHUB_OUTPUT"
+      - name: Upload the artifact set
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.dist.outputs.prefix }}
+          path: target/dist-package/
+          if-no-files-found: error
+          retention-days: 14
+
+  package-ubuntu:
+    name: Package Ubuntu
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Enable the pinned pnpm
+        run: corepack enable
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # This job builds the shell itself, so it needs the WebView stack the other Linux jobs need.
+      - name: Install Linux prerequisites for the Tauri shell
+        uses: ./.github/actions/linux-tauri-prereqs
+      - name: Install the pinned Tauri CLI
+        run: cargo install tauri-cli@2.12.1 --locked
+      - name: Build and verify the Ubuntu package
+        run: python scripts/check.py --only package
+      - name: Resolve the distribution name prefix
+        id: dist
+        shell: bash
+        run: echo "prefix=$(python scripts/verify_package_artifacts.py --print-prefix)" >> "$GITHUB_OUTPUT"
+      - name: Upload the artifact set
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.dist.outputs.prefix }}
+          path: target/dist-package/
+          if-no-files-found: error
+          retention-days: 14
+
+  package-macos:
+    name: Package macOS
+    if: github.event_name != 'pull_request'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Enable the pinned pnpm
+        run: corepack enable
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install the pinned Tauri CLI
+        run: cargo install tauri-cli@2.12.1 --locked
+      # Unsigned on purpose: no certificate, no notary profile, no signing identity. The run
+      # produces a .app and the .dmg that wraps it and calls neither of them signed, which is the
+      # `CI_BUILD_ONLY` evidence prompt section 40 allows - it is proof a package can be built, not
+      # proof that anyone ran it.
+      - name: Build and verify the macOS packages
+        run: python scripts/check.py --only package
+      - name: Resolve the distribution name prefix
+        id: dist
+        shell: bash
+        run: echo "prefix=$(python scripts/verify_package_artifacts.py --print-prefix)" >> "$GITHUB_OUTPUT"
+      - name: Upload the artifact set
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.dist.outputs.prefix }}
+          path: target/dist-package/
+          if-no-files-found: error
+          retention-days: 14

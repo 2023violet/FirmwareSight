@@ -9,11 +9,15 @@ Usage:
     python scripts/check.py --only rust         # one group
     python scripts/check.py --list
 
-Groups: rust, frontend, drift, deny, and core-smoke - the last being the headless subset without
-the Tauri shell, which is what the macOS job in 05_ENGINEERING/06_CI_CD_BASELINE.md asks for. It is
-a real local command, not a CI-only copy: run `python scripts/check.py --only core-smoke` on any
+Groups: rust, frontend, drift, deny, package, and core-smoke - the last being the headless subset
+without the Tauri shell, which is what the macOS job in 05_ENGINEERING/06_CI_CD_BASELINE.md asks for.
+It is a real local command, not a CI-only copy: run `python scripts/check.py --only core-smoke` on any
 host. The default full gate does not repeat it, because the `rust` group already covers every one
-of those packages plus the shell.
+of those packages plus the shell. The `package` group is likewise not in the default set: it builds a
+release binary and a platform installer, which takes minutes rather than seconds and only means
+something on the platform it runs on, so the three CI package jobs invoke it explicitly with
+`--only package`. A machine without the Tauri CLI records that group as SKIPPED rather than as a
+pass it never made.
 
 Exit code is non-zero on the first failing step; every step's command line is printed before it
 runs so a failure can be reproduced by hand.
@@ -23,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -30,6 +35,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 UI = ROOT / "apps" / "desktop" / "ui"
+TAURI = ROOT / "apps" / "desktop" / "src-tauri"
 # Tauri's production codegen embeds this directory at compile time.
 UI_MARKER = UI / "dist" / "index.html"
 # The headless product: named so a platform that ships Core but not the shell can still be gated.
@@ -184,6 +190,61 @@ def untracked_fixture_paths(root: Path) -> list[str]:
     ]
 
 
+def version_identity_reasons(root: Path) -> list[str]:
+    """Prompt section 67: one version identity across every declared surface, checked not asserted.
+
+    Until P5 the repository carried two answers to "which version is this": `BASELINE.yaml` said 0.6.0
+    while `Cargo.toml`, `tauri.conf.json` and the UI package all said 0.1.0, and no command could see
+    the split. Section 67 makes a split a closure blocker, so it needs a check that runs on every
+    commit rather than a paragraph that gets re-read at closure.
+
+    Two surfaces are deliberately not here. The package filename and the installer's own metadata
+    only exist after a build, so `scripts/verify_package_artifacts.py` compares them against
+    `[workspace.package] version` inside each CI package job; the Desktop About panel and
+    Diagnostics do not exist yet and will be added to this list by the commits that create them.
+    """
+    import tomllib
+
+    def read(path: Path) -> str:
+        return path.read_text(encoding="utf-8")
+
+    workspace = tomllib.loads(read(root / "Cargo.toml"))["workspace"]["package"]["version"]
+    # The document baseline is the surface that used to be the only place 0.6.0 appeared, which is
+    # precisely the split section 67 forbids, so it joins the equality rather than commenting on it.
+    # A missing key reads as `MISSING`, which fails the equality instead of raising a traceback.
+    baseline = re.search(r"^  baseline_version:\s*(\S+)", read(root / "BASELINE.yaml"), re.MULTILINE)
+    surfaces = {
+        "Cargo.toml [workspace.package] version": workspace,
+        "tauri.conf.json version": json.loads(
+            read(root / "apps" / "desktop" / "src-tauri" / "tauri.conf.json")
+        )["version"],
+        "apps/desktop/ui/package.json version": json.loads(
+            read(root / "apps" / "desktop" / "ui" / "package.json")
+        )["version"],
+        "BASELINE.yaml product.baseline_version": baseline.group(1) if baseline else "MISSING",
+    }
+
+    problems = [
+        f"{name} is {value!r} but [workspace.package] version is {workspace!r}"
+        for name, value in surfaces.items()
+        if value != workspace
+    ]
+
+    # Every crate must inherit rather than restate. A crate with its own literal version string is a
+    # surface this check cannot see, because it is not in any of the four places above.
+    for manifest in sorted((root / "crates").glob("*/Cargo.toml")) + [
+        root / "apps" / "cli" / "Cargo.toml",
+        root / "apps" / "desktop" / "src-tauri" / "Cargo.toml",
+    ]:
+        body = read(manifest)
+        if not re.search(r"^version\.workspace\s*=\s*true\s*$", body, re.MULTILINE):
+            problems.append(
+                f"{manifest.relative_to(root)} does not set `version.workspace = true`, so it can "
+                "carry a version this check never reads"
+            )
+    return problems
+
+
 def drift_steps(gate: Gate) -> None:
     py = sys.executable
     checks = (
@@ -213,6 +274,15 @@ def drift_steps(gate: Gate) -> None:
         lambda: untracked_fixture_paths(ROOT),
     ):
         return
+    # One version across four declared surfaces, plus the rule that no crate restates it.
+    if not gate.inline(
+        "drift",
+        "version identity",
+        "Cargo.toml, tauri.conf.json, ui/package.json and BASELINE.yaml agree, and every crate "
+        "inherits `version.workspace = true`",
+        lambda: version_identity_reasons(ROOT),
+    ):
+        return
     gate.run("drift", "goldens unchanged", [resolve("git"), "diff", "--exit-code", "--", "golden"])
 
 
@@ -222,6 +292,55 @@ def frontend_steps(gate: Gate) -> None:
         argv = pnpm + (["install", "--frozen-lockfile"] if name == "install" else [name])
         if not gate.run("frontend", name, argv, cwd=UI):
             return
+
+
+def package_steps(gate: Gate) -> None:
+    """Build what a stranger would install, then check what the build actually produced.
+
+    This is the group the three CI package jobs run. It is separate from `rust` and `frontend`
+    because a package can only be built for the platform standing in front of it, and because an
+    installer is a minutes-long artifact rather than a lint. It is still the same command a
+    developer runs, which is the promise the header comment of
+    `.github/workflows/p0-check.yml` makes.
+    """
+    exe = cargo()
+    # `tauri build` runs tauri.conf.json's beforeBuildCommand (`pnpm build`), and that needs the
+    # dependencies the lockfile names. `--frozen-lockfile` is the exact-lockfile rule prompt
+    # section 41 asks of a package job, applied where the package actually builds.
+    if not gate.run(
+        "package", "frontend deps", pnpm_command() + ["install", "--frozen-lockfile"], cwd=UI
+    ):
+        return
+    if not gate.run("package", "cli companion", [exe, "build", "--release", "--locked", "-p", "fwsight"]):
+        return
+
+    tauri = resolve("tauri")
+    try:
+        probe = subprocess.run([tauri, "--version"], cwd=TAURI, capture_output=True, check=False)
+    except OSError:
+        probe = subprocess.CompletedProcess([tauri], returncode=1)
+    if probe.returncode != 0:
+        print(
+            "\n=== [package] desktop package\n"
+            "SKIPPED: the Tauri CLI is not installed on this machine, so no package was built and\n"
+            "         nothing here verifies one. CI installs the pinned version, so the package,\n"
+            "         its checksums and its verification come from the CI run rather than from\n"
+            "         here. Locally:\n"
+            "             cargo install tauri-cli@2.12.1 --locked",
+            flush=True,
+        )
+        gate.results.append(("package", "desktop package (skipped)", 0))
+        gate.results.append(("package", "artifacts verified (skipped)", 0))
+        return
+
+    # No `--bundles`: tauri.conf.json names the canonical targets and tauri-bundler intersects that
+    # list with what the host can build, so this one command is the whole documented packaging path.
+    # That is what prompt section 8 means by a user not having to remember `--features
+    # custom-protocol` - the CLI adds the feature itself (tauri-cli's `build_options`), and the
+    # verify step below is what proves the effect rather than trusting the intent.
+    if not gate.run("package", "desktop package", [tauri, "build", "--", "--locked"], cwd=TAURI):
+        return
+    gate.run("package", "artifacts verified", [sys.executable, "scripts/verify_package_artifacts.py"])
 
 
 def deny_steps(gate: Gate) -> None:
@@ -244,19 +363,20 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--only",
-        choices=("rust", "frontend", "drift", "deny", "core-smoke"),
+        choices=("rust", "frontend", "drift", "deny", "core-smoke", "package"),
         help="run a single group instead of the whole gate",
     )
     parser.add_argument("--list", action="store_true", help="print the groups and exit")
     args = parser.parse_args(argv[1:])
 
     if args.list:
-        print("rust\nfrontend\ndrift\ndeny\ncore-smoke")
+        print("rust\nfrontend\ndrift\ndeny\ncore-smoke\npackage")
         return 0
 
     gate = Gate()
-    # `core-smoke` is deliberately not in the default set: every package it selects is already
-    # inside `cargo test --workspace`, so running both would re-lint the same code twice.
+    # `core-smoke` and `package` are deliberately not in the default set: every package `core-smoke`
+    # selects is already inside `cargo test --workspace`, and `package` builds a release installer
+    # for whichever host runs it, so neither belongs in the per-commit cycle on every machine.
     groups = [args.only] if args.only else ["rust", "frontend", "drift", "deny"]
     dispatch = {
         "rust": rust_steps,
@@ -264,6 +384,7 @@ def main(argv: list[str]) -> int:
         "drift": drift_steps,
         "deny": deny_steps,
         "core-smoke": core_smoke_steps,
+        "package": package_steps,
     }
     for group in groups:
         dispatch[group](gate)

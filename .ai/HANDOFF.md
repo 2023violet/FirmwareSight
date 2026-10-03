@@ -57,6 +57,27 @@ not passed:** the product is still the G2-passed MVP CANDIDATE at `0.6.0`, and n
 closure evidence exists. If you were sent here to "continue P5", read the audit and `ACTIVE_TASK.md` first —
 the workstreams and the commit split are the prompt's §6 and §61, not this file's invention.
 
+Four commits of that split are done, and the fifth is the one that makes the rest installable. Governance
+and the audit landed in `4cc8d93` (Run `37125456689`, 7 of 7); migration `0005` and its written decision in
+`812b472` (Run `37127791999`, 7 of 7); the `0.6.0` artifact unification in `9e3b1de`, whose gate run
+`37128593254` **failed 6 of 7** on a pre-existing `compare.test.tsx` race that the commit did not introduce
+and did not cause; `20b03e3` repaired that race in one awaited query and came back 7 of 7 on Run
+`37129900728`. The packaging commit then enabled `bundle.active`, added the three §41 package jobs (the
+authoritative set is **ten** now — `P5_VALIDATION/P5_CI_AUTHORITY.md` is the running record), and wrote
+`scripts/verify_package_artifacts.py`, whose §8 "no dev-server dependency" check had to be built on the
+embedded asset keys rather than on the absence of `localhost:5173`: both a good and a broken binary contain
+that string, so the intuitive check passes exactly the builds it should refuse. `04_TECH/17` and
+`05_ENGINEERING/06_CI_CD_BASELINE.md` carry the packaging decisions; `P5_VALIDATION/P5_PACKAGING_REPORT.md`
+carries the measurements and, in §9, the list of what packaging has *not* yet proved.
+
+**What is next, in order:** the first 10-job CI run of the packaging head must be read back and recorded in
+`P5_CI_AUTHORITY.md`; then §38/§64's real Windows install, uninstall and reinstall acceptance on this host
+with the owner's store parked, hashed and restored (the `P5_INSTALL_RECOVERY_REPORT.md` evidence, and the
+thing no package job can do from a runner); then Commit C's onboarding and local History, Commit D's
+diagnostics and recovery, Commit E's fixture cohort, Commit F's documentation and closure. **Do not start a
+workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and
+§5's list of forbidden verdicts still applies to every sentence you write.
+
 Four wrong turns to refuse. If you were sent here to "continue P0", P0 is closed. If you were sent here to
 continue P1, P2 or P3, all three are `PASS / COMPLETE` and their acceptance lists are checked item by item
 in `P1_VALIDATION/P1_ANALYZE_EXIT_CHECKLIST.md`, `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` and

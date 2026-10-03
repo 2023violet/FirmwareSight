@@ -8,6 +8,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 ├── .cargo/
 │   └── config.toml
 ├── .github/
+│   ├── actions/
+│   │   └── linux-tauri-prereqs/
+│   │       └── action.yml
 │   └── workflows/
 │       └── p0-check.yml
 ├── 00_GOVERNANCE/
@@ -591,7 +594,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P4_BUNDLE_EXECUTION_REPORT.md
 │   └── P4_BUNDLE_EXIT_CHECKLIST.md
 ├── P5_VALIDATION/
+│   ├── P5_CI_AUTHORITY.md
 │   ├── P5_MIGRATION_DECISION.md
+│   ├── P5_PACKAGING_REPORT.md
 │   └── P5_PRODUCTIZATION_AUDIT.md
 ├── POST_G2_E2E_REMEDIATION/
 │   ├── EXIT_CHECKLIST.md
@@ -616,7 +621,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── requirements.txt
 │   ├── update_goldens.py
 │   ├── verify_baseline_artifacts.py
-│   └── verify_bundle_portability.py
+│   ├── verify_bundle_portability.py
+│   └── verify_package_artifacts.py
 ├── templates/
 │   ├── ADR_TEMPLATE.md
 │   ├── BUG_REPORT_TEMPLATE.md

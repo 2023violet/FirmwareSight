@@ -570,6 +570,20 @@ p5_execution:
     store_filename: KEEP_FIRMWARESIGHT_P0_SQLITE # no rename and no data move; the path becomes visible in Diagnostics instead
   reserved_for_the_architect: [L22_release_identity_versus_line_endings_needs_P5_RELEASE_IDENTITY_ADR_DRAFT_then_STOP]
   reserved_for_the_owner: [OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION] # section 54 forbids this round from choosing a licence
+  # What the packaging commit opened, recorded because section 41 makes the job set authoritative and
+  # this repository's rule is that a job count never drifts without a record. The reasons, the measured
+  # evidence and the rejected alternatives are in 04_TECH/17 "P5 packaging" and
+  # 05_ENGINEERING/06 "P5 package jobs"; this block is the index, not the argument.
+  packaging:
+    canonical_targets: {windows: nsis, macos: [app, dmg], ubuntu: deb}
+    windows_install_mode: currentUser # no administrator prompt, HKCU metadata only; an owner decision for the real install on the owner's machine
+    distribution_checksums: target/dist-package/SHA256SUMS.txt # distinct from a firmware Release Bundle's SHA256SUMS, as section 10 requires
+    # A CI tool, not a dependency: it never enters Cargo.lock, so cargo-deny's product graph is unchanged.
+    ci_tooling: cargo install tauri-cli@2.12.1 --locked
+    authoritative_job_count: 10 # 1-7 unchanged, plus Package Windows / Package Ubuntu / Package macOS
+    signed: false
+    released: false
+    updater: false
   baseline_version_stays: 0.6.0
   no_tag_no_release_no_published_installer: true
   explicitly_not: [P5_PASS, beta, RC, GA, production_ready, signed, notarized, security_clean]

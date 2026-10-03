@@ -25,9 +25,15 @@ delivered as a file, SHA-256 `722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c491
 in `10_AUDIT/SOURCE_PROMPTS/`; its §4 audit is written at `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` and
 the owner's checkpoint settled version identity (artifacts unify on `0.6.0`), migration `0005` after a
 written decision doc, the package matrix (Windows with real install evidence here, macOS/Ubuntu
-`CI_BUILD_ONLY`) and the store filename (`firmwaresight-p0.sqlite` stays); **no P5 verdict exists**, the
-product is still MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or
-licence choice is authorized · open-source
+`CI_BUILD_ONLY`) and the store filename (`firmwaresight-p0.sqlite` stays`). Landed since: `4cc8d93`
+governance + audit (Run `37125456689` 7 of 7), `812b472` migration `0005` (Run `37127791999` 7 of 7),
+`9e3b1de` the `0.6.0` unification — whose Run `37128593254` **failed 6 of 7** on a pre-existing
+`compare.test.tsx` race the commit did not cause — repaired test-only by `20b03e3`, green on Run
+`37129900728`, and the packaging commit that enabled `bundle.active`, added the three §41 package jobs,
+wrote `P5_VALIDATION/P5_PACKAGING_REPORT.md` and `P5_VALIDATION/P5_CI_AUTHORITY.md`, and gave the gate a
+`drift/version identity` step: **775 Rust / 160 UI / `check.py` 16 steps / 10 authoritative CI jobs**.
+**Still no P5 verdict exists** — the product is MVP CANDIDATE at `0.6.0`, and no tag, Release, installer
+publication, signing, updater or licence choice is authorized · open-source
 licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task:
 P5_PRODUCTIZATION`
 
@@ -37,9 +43,10 @@ P5_PRODUCTIZATION`
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — `NONE`; G2 closed `PASS` on 2026-10-01, and with no live task `AGENTS.md` 1
-    means no agent may create business functionality or lift V1 or P5 off the roadmap. Each needs its own
-    architect decision
+5. `.ai/ACTIVE_TASK.md` — `P5_PRODUCTIZATION`; G2 closed `PASS` on 2026-10-01 and P5 opened on
+   2026-10-03 under an execution prompt of its own, which is the only way a stage opens here. With a live
+   task the pointer still names exactly one stage: nothing in it authorizes V1, and no agent lifts a
+   later track off the roadmap
 5a. `G2_VALIDATION/G2_EXIT_CHECKLIST.md` and `G2_ENGINEERING_CLOSURE_REPORT.md` — the whole-MVP verdict
 5b. `POST_G2_E2E_REMEDIATION/` — the narrow remediation of the post-G2 real-desktop findings: what was
     fixed and why (`REMEDIATION_REPORT.md`), the focused real-desktop re-validation on the shipping
