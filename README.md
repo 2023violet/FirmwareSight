@@ -126,7 +126,7 @@ P5 UI test races (L23), sixth instance: FOUND BY THE LOCAL GATE, CLOSED TEST-ONL
         chained IPC waves that §0a had asked for is recorded there with its limits named — Release's run-keyed
         waves and every `within(region)` read were not walked assertion by assertion — so L23 stays SHOULD_CLOSE_P5
         and the complete sweep is a remaining task, not a closed class. check.py 16/16 on that tree, 813 Rust /
-        201 UI.
+        201 UI, and Run `37158606478` on `111fe32` returned 10 of 10 with both `Desktop UI` jobs green.
         Evidence P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md §0a
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```

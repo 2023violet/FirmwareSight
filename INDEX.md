@@ -54,8 +54,9 @@ for the Architect, and its premise is a Rust test rather than an argument — sa
 the run id and the release id while the verdict does not move. Verifying that commit is what surfaced L23's
 **sixth** UI-test-race instance: the same `compare.test.tsx` read the ranking's second IPC wave synchronously and
 the **local** full gate lost it where CI had not, repaired test-only with a contract test for the pending branch.
-The tree is now **813 Rust / 201 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**; what stays
-open is the *acceptance* of those screens in an installed binary (§38 C, §64) and this head's own CI run.
+The tree is now **813 Rust / 201 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**, and that head
+went **10 of 10** on Run `37158606478` at its first attempt; what stays
+open is the *acceptance* of those screens in an installed binary (§38 C, §64).
 **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source

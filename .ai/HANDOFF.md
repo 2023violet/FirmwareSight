@@ -110,7 +110,12 @@ journey (install → onboarding → Analyze → Compare → Gate → Bundle → 
 reinstall → uninstall → reinstall → documented data behaviour) still runs once after D lands, on a
 disposable firmware project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. The
 remote has seen this head: Run `37154946484` on `e863d0c` came back **10 of 10** on the first attempt, which
-is the repository's rule for every P5 head, and `P5_VALIDATION/P5_CI_AUTHORITY.md` carries the row. **Do not start a
+is the repository's rule for every P5 head, and `P5_VALIDATION/P5_CI_AUTHORITY.md` carries the row. **The
+current head honours that rule too**: `111fe32` — §32's L22 draft with its identity premise test, plus the
+test-only repair of L23's sixth race instance — went **10 of 10** on Run `37158606478`, first attempt. The §32
+STOP is still in force: the draft leaves today's bytes-as-evidence semantics standing and **nothing in it may be
+implemented until the Architect answers its four questions**, so do not arrive here and "fix" the line-ending
+finding by normalizing a digest. **Do not start a
 workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and
 §5's list of forbidden verdicts still applies to every sentence you write.
 

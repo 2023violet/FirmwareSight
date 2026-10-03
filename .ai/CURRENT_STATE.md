@@ -131,7 +131,9 @@ last_updated: "2026-10-03"
   Release's `run`-keyed waves were not walked assertion by assertion, `within(region)` reads inside already-awaited
   regions were not audited, and the repetitions cover the changed suite rather than every suite — so L23 stays
   `SHOULD_CLOSE_P5` and the complete sweep is a named remaining task. Present counts on that tree: `check.py`
-  **16 of 16**, **813 Rust / 201 UI in 8 files**.
+  **16 of 16**, **813 Rust / 201 UI in 8 files** — and the remote agreed: Run `37158606478` on `111fe32` came back
+  **10 of 10** at its first attempt, with `Desktop UI` green on **both** Windows and Ubuntu runners, which is where
+  an awaited second-wave query earns its keep.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256
