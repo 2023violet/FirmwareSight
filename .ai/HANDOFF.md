@@ -104,9 +104,9 @@ Commit F's documentation and closure. **What Commit C does not close is the acce
 onboarding panel and the History page have never been operated in the installed binary, so the full §64
 journey (install → onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen →
 reinstall → uninstall → reinstall → documented data behaviour) still runs once after D lands, on a
-disposable firmware project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. And this
-head has no CI run behind it yet — `P5_VALIDATION/P5_CI_AUTHORITY.md` is where that gets written, and the
-repository's rule is 10 of 10 on the first attempt. **Do not start a
+disposable firmware project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. The
+remote has seen this head: Run `37154946484` on `e863d0c` came back **10 of 10** on the first attempt, which
+is the repository's rule for every P5 head, and `P5_VALIDATION/P5_CI_AUTHORITY.md` carries the row. **Do not start a
 workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and
 §5's list of forbidden verdicts still applies to every sentence you write.
 

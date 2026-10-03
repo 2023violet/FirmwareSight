@@ -102,7 +102,9 @@ last_updated: "2026-10-03"
   review, including the one disclosed non-token measurement, in
   `P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md`. **What this does not close:** the page has not been operated
   in an installed binary — §38 C's onboarding and the whole §64 journey still have to be walked against the
-  package, which is the remaining install acceptance, and no CI run has yet seen this head.
+  package, which is the remaining install acceptance. The remote said 10 of 10 on the first attempt for
+  this head (Run `37154946484` on `e863d0c`), so the new page's UI tests and the rail guards have run on
+  both Windows and Ubuntu runners.
 - **One gate run went red for a reason that was not in the commit it ran on**, and that is worth knowing
   before the next stage trusts a green. Run `37128593254` failed `Desktop UI (windows-latest)` on a
   pre-existing race in `compare.test.tsx:1094`: the `Section Changes` region mounts before its first page
