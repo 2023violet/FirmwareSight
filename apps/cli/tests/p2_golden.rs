@@ -285,7 +285,10 @@ fn the_html_golden_is_one_self_contained_file() {
         );
     }
     assert!(
-        html.contains("FirmwareSight 0.1.0"),
+        html.contains(&format!(
+            "FirmwareSight {}",
+            firmwaresight_artifact::pipeline::FWSIGHT_VERSION
+        )),
         "the version is visible"
     );
     assert!(html.contains("urn:firmwaresight:schema:diff:1"));

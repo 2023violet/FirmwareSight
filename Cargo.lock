@@ -916,7 +916,7 @@ checksum = "aedcfb3409746eddb02b9e19ebda1c3394f759a152e48ee875a0844d1b955484"
 
 [[package]]
 name = "firmwaresight-artifact"
-version = "0.1.0"
+version = "0.6.0"
 dependencies = [
  "firmwaresight-core",
  "object",
@@ -927,11 +927,11 @@ dependencies = [
 
 [[package]]
 name = "firmwaresight-core"
-version = "0.1.0"
+version = "0.6.0"
 
 [[package]]
 name = "firmwaresight-desktop"
-version = "0.1.0"
+version = "0.6.0"
 dependencies = [
  "firmwaresight-artifact",
  "firmwaresight-core",
@@ -948,7 +948,7 @@ dependencies = [
 
 [[package]]
 name = "firmwaresight-project"
-version = "0.1.0"
+version = "0.6.0"
 dependencies = [
  "firmwaresight-core",
  "firmwaresight-report",
@@ -962,7 +962,7 @@ dependencies = [
 
 [[package]]
 name = "firmwaresight-report"
-version = "0.1.0"
+version = "0.6.0"
 dependencies = [
  "firmwaresight-core",
  "serde",
@@ -972,7 +972,7 @@ dependencies = [
 
 [[package]]
 name = "firmwaresight-storage"
-version = "0.1.0"
+version = "0.6.0"
 dependencies = [
  "firmwaresight-artifact",
  "firmwaresight-core",
@@ -1113,7 +1113,7 @@ dependencies = [
 
 [[package]]
 name = "fwsight"
-version = "0.1.0"
+version = "0.6.0"
 dependencies = [
  "clap",
  "firmwaresight-artifact",

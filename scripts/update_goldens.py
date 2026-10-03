@@ -23,6 +23,7 @@ import difflib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -158,6 +159,24 @@ def diff_html() -> str:
     return scratch.read_text(encoding="utf-8")
 
 
+def _force_removal(func, path, _exc) -> None:
+    """Clear a read-only bit and retry the unlink.
+
+    The scratch subject carries a real `.git`, and git writes its pack objects read-only. Windows then
+    refuses `rmtree` with `PermissionError [WinError 5]`, so the updater could not run twice on one
+    machine (L24): the first run's leftover made every later run fail before it wrote anything.
+    """
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def _remove_tree(path: Path) -> None:
+    if sys.version_info >= (3, 12):
+        shutil.rmtree(path, onexc=_force_removal)
+    else:
+        shutil.rmtree(path, onerror=_force_removal)
+
+
 def release_subject() -> Path:
     """A throwaway release subject: the P4 project fixture, committed and tagged with pinned facts.
 
@@ -169,7 +188,7 @@ def release_subject() -> Path:
         raise SystemExit("git is not on PATH; the P4 bundle golden needs a real workspace to cut from")
     scratch = ROOT / "target" / "update_goldens-p4"
     if scratch.exists():
-        shutil.rmtree(scratch)
+        _remove_tree(scratch)
     project = scratch / "project"
     (project / "docs").mkdir(parents=True)
     fixture = ROOT / P4_PROJECT_FIXTURE

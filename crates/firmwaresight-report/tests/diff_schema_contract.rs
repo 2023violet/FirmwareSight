@@ -669,7 +669,9 @@ fn the_html_is_self_contained_deterministic_and_escape_checked() {
     }
 
     assert!(
-        html.contains("FirmwareSight 0.1.0"),
+        // Every workspace crate carries `version.workspace = true`, so this is the same string the
+        // pipeline embeds as `FWSIGHT_VERSION`; naming it keeps the assertion true across a bump.
+        html.contains(&format!("FirmwareSight {}", env!("CARGO_PKG_VERSION"))),
         "the version must be visible"
     );
     assert!(html.contains("urn:firmwaresight:schema:diff:1"));

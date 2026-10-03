@@ -81,7 +81,13 @@ const TAG: &str = "v1.2.3";
 
 /// The release id and workspace commit the pinned subject produces. Spelled out because a bundle whose
 /// identity silently changed is the exact thing this file exists to catch.
-const RELEASE_ID: &str = "release-974f661d3a6def9d7e7393e940e907a3c462710df2d071ad8140fe8894742ab0";
+///
+/// P5 moved this value. `canonical_release_text` folds in `app={fwsight_version}`, so unifying the
+/// artifact version on 0.6.0 (the owner's D1 decision, recorded in
+/// `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md`) re-issued the id for the same firmware, the same notes
+/// and the same commit. The id below is read from the golden the 0.6.0 binary wrote, not computed by
+/// hand; gate and diff identities did not move because neither input carries the app version.
+const RELEASE_ID: &str = "release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5";
 const EXPECTED_HEAD: &str = "585dafd3eb59592563923818cdfec4e9a370a83b";
 
 fn repo_root() -> PathBuf {

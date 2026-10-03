@@ -28,7 +28,7 @@
     "sections": 17,
     "symbols": 32
   },
-  "createdByFwsightVersion": "0.1.0",
+  "createdByFwsightVersion": "0.6.0",
   "evidence": [
     {
       "classification": "observed",
