@@ -242,6 +242,15 @@ Pre-G2 closures                fe420d1 BASELINE alignment (Run 36892307828, atte
 G2 product tree                e35cfe70aa0e8f273a75ac14b9dc62377483af36 — 055b54e + the G2-F1 test-only fix; Run 36906482900 attempt 1, 7 of 7
 G2 evidence head               f75cbc5f40fa823d17463855102dfaeca3fb8c43 — G2_VALIDATION/, prompt archives, governance; Run 36948719972 attempt 1, 7 of 7
 G2 closure                     the successor of f75cbc5 sets G2 PASS; its own run is external evidence, not recorded in a further commit
+P5 — where the chain stands now (the row-level authority is P5_VALIDATION/P5_CI_AUTHORITY.md; this is the shape, not a copy of it)
+P5 opening head                d83175a — the post-G2 remediation closure head, Run 37101619245, 7 of 7, the tree the §4 audit measured
+P5 Commits A–B                 4cc8d93 (audit + §5 governance + prompt archive) · 812b472 (migration 0005) · 9e3b1de (artifacts unified on 0.6.0) · 20b03e3 (test-only race repair) · 0c031cd (packaging + three CI package jobs) · 1055242 (the package group finds `cargo-tauri`) · 53578e9 (the `.app` indexed file by file) · a674774 · 9ab089f · 4719e1f (the first real Windows install and its report)
+P5 Commit C                    e863d0c — §13 onboarding, §14 Help/About with the title fixed in Rust, §15–§18 local History, no new migration · e070508 (its read-back)
+P5 §32 / L23                   111fe32 — the L22 identity draft with its premise test, plus the repair of L23's sixth race instance · 2cdfced (its read-back)
+P5 Commit D                    3400981 — integrity_check, the pre-migration online backup, the re-run matrix, the 41-key Diagnostics allowlist and its export, the typed startup refusal, ADR-0028 · bccea88 (test-only repair) · 90aa69d (the record + L26) · **956e250 — the §32 read-back successor, and the current HEAD = origin/main**
+Three red heads, kept in the record because dropping them would make the green ones meaningless: 9e3b1de (6 of 7 — a pre-existing `compare.test.tsx` race it never touched), 0c031cd (7 of 10 — three package jobs printing a skip and going red on their own upload), 3400981 (8 of 10 — a clock race inside a test Commit D added, fixed test-only at bccea88, which went 10 of 10)
+The authoritative job set is TEN since 0c031cd: the seven gate jobs plus Package Windows / Ubuntu / macOS. `P5_CI_AUTHORITY.md` names them and every run measured against them
+§34 STOP in force from 2026-10-04: Commit D and its successor are complete, so nothing else in P5 starts without a new architect prompt — no Commit E, no fixture expansion, no P5 closure, no V1/B1/RC/GA
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -302,7 +311,12 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
 
 ## What the code does and how it is proven
 
-- 556 Rust tests in 28 executable suites (plus 6 empty doc-test suites) and 135 UI tests in 6 files on
+- **Present figures, measured on 2026-10-04 at `956e250`:** `cargo test --workspace` **854 Rust tests**
+  (storage 131, desktop 222) and **210 UI tests in 8 files**, on one gate — `python scripts/check.py`
+  **16 steps** (`rust` 3 + `frontend` 5 + `drift` 7 + `deny` 1), plus 3 under `--only core-smoke` and 4 under
+  `--only package`, all green locally and 10 of 10 jobs on the remote. The paragraph below is the **P3-era
+  snapshot** it grew from, kept because its arithmetic and its suite-by-suite breakdown are the record of that
+  round: 556 Rust tests in 28 executable suites (plus 6 empty doc-test suites) and 135 UI tests in 6 files on
   one gate: `python scripts/check.py`, which
   CI calls unchanged — 15 steps on a tree that already has the built frontend, 17 when it builds that too,
   plus 3 under `--only core-smoke`. The v0.6.0 promotion measured 104 / 19; P1-A0 and its correctness
@@ -450,6 +464,17 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     `V0_VALIDATION/protocol/**`, `V0_VALIDATION/sessions/TEMPLATE.md`,
     `V0_VALIDATION/batch_a/**` including `recruitment_ready/**`, and
     `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
+20. `P4_VALIDATION/` and `G2_VALIDATION/` — the completed Release Bundle round and the whole-MVP engineering
+    closure audit that made the product `MVP CANDIDATE`, including `G2_KNOWN_LIMITATIONS.md`, the L-list every
+    P5 row is dispositioned against
+21. **The live round, and the first thing to read if you are joining now:** `P5_VALIDATION/`.
+    `P5_PRODUCTIZATION_AUDIT.md` (§4 A–H plus the §G limitation dispositions, L26 included),
+    `P5_CI_AUTHORITY.md` (the ten jobs and every run measured against them), `P5_PACKAGING_REPORT.md`,
+    `P5_INSTALL_RECOVERY_REPORT.md`, `P5_ONBOARDING_HISTORY_REPORT.md`, `P5_COMMIT_D_DESIGN.md` and
+    `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (whose §8 is the §32 read-back), then
+    `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md`. `.ai/ACTIVE_TASK.md` holds the commit table and
+    the §34 STOP; `10_AUDIT/SOURCE_PROMPTS/README.md` says which prompt authorizes which of them — and no
+    prompt authorizes the next commit yet.
 
 ## Boundaries still in force
 
@@ -538,8 +563,10 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 ## The two rounds that ran after G2 (2026-10-02)
 
 G2 is still the gate that stands, and this file's G2 paragraphs are still true about the tree they
-measured. What is now stale in them is the set of numbers: **Rust is 770 tests, UI is 159 in 6 files**,
-and the newest evidence directory is `POST_G2_E2E_REMEDIATION/`.
+measured. What was stale **as of 2026-10-02** is the set of numbers: that date stood at Rust 770 tests,
+UI 159 in 6 files, and the newest evidence directory was `POST_G2_E2E_REMEDIATION/`. P5 has moved the tree
+again since — the current figures are the ones at the top of "What the code does and how it is proven", and
+`P5_VALIDATION/` is now the newest evidence directory. Read the rest of this section as the history it is.
 
 Two rounds happened, and the difference between them is the point:
 

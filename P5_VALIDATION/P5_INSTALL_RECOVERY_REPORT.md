@@ -12,10 +12,13 @@ last_updated: "2026-10-04"
 
 **What this document proves and what it does not.** Sections 38 A–L and section 39 were executed on this
 machine with the real P5 installer, and every line below is a transcript of what the operating system and
-the application did. Section 38 item **C — first-run onboarding — is not built yet**, and with it the whole
-section 64 journey (`→ Gate → Bundle → History → Diagnostics`) stays open: those surfaces arrive in Commits
-C and D. `status: IN_PROGRESS` is therefore the honest header for this file, and nothing here says
-`P5 PASS`, `BETA`, `RC` or `GA`.
+the application did **on 2026-10-03**. Section 38 item **C — first-run onboarding — was not built when this
+round ran**, and that is why the row reads as it does; Commits C and D have since built it together with Help,
+History and Diagnostics, and the 2026-10-04 walk (§7 of this file) saw onboarding and Diagnostics operating
+inside the installed binary. What still keeps this file at `status: IN_PROGRESS` is not an unbuilt surface: it
+is that the whole section 64 journey (`install → onboarding → Analyze → Compare → Gate → Bundle → History →
+Diagnostics → close → reopen → reinstall → uninstall → reinstall`) has never been walked end to end in one
+installed build. Nothing here says `P5 PASS`, `BETA`, `RC` or `GA`.
 
 Environment decision first, because section 38 asks for it: **Windows Sandbox is not available on this
 host** — `C:\Windows\System32\WindowsSandbox.exe` does not exist, and the optional-feature query
@@ -46,7 +49,7 @@ Nothing in that directory was deleted at any point — the test-created store wa
 | --- | --- | --- |
 | A fresh install | NSIS 3.11 wizard: Welcome → Choose Install Location → Choose Start Menu Folder → progress → "Installation Complete / Setup was completed successfully." | the wizard was driven through its own UI, not a silent flag |
 | B launch from a normal OS surface | `cmd /c start "" "…\Start Menu\Programs\FirmwareSight\FirmwareSight.lnk"` started the installed binary; window title `FirmwareSight - Analyze`, process path `%LOCALAPPDATA%\FirmwareSight\firmwaresight-desktop.exe` | `list_apps` and `Get-Process` both report that path, not a `target/` path |
-| C first-run onboarding | **not built.** The cold window shows the rail and "Nothing has been analyzed in this session yet. Choose an artifact and run Analyze." and nothing else | open — Commit C, prompt §13 |
+| C first-run onboarding | **not built at this run (2026-10-03).** The cold window shows the rail and "Nothing has been analyzed in this session yet. Choose an artifact and run Analyze." and nothing else | built since in Commit C and **seen operating in the installed binary on 2026-10-04** — see §7 |
 | D Analyze a real supported fixture | `fixtures/elf/p0-basic/firmware.elf` through the native dialog titled "Choose the firmware artifact to analyze": File `firmware.elf`, SHA-256 `1c0ae94e…`, Size `7,288 bytes`, Format `Arm 32-bit little`, Kind `elf`, Parser `object-elf/0.40`, Entry `0x00008001`, Build ID "- no .note.gnu.build-id section is present"; Memory: Nonvolatile `Exact 160 bytes`, Runtime RAM `Partial 2 … 72 bytes` | screenshot transcript plus the store rows it wrote |
 | E close / reopen | the close button ended the process (0 instances afterwards); relaunch from the same shortcut worked; the reopened window again said nothing had been analyzed | see §3 — this is where the real finding is |
 | F manual reinstall / repair equivalent | re-running the same installer produced a maintenance page: "FirmwareSight 0.6.0 is already installed. Select the operation you want to perform", with **Add/Reinstall components** preselected. With the app still running the installer interrupted: **"FirmwareSight is running! Click OK to kill it"**; after OK, `uninstall.exe` was rewritten (11:59:42) while `firmwaresight-desktop.exe` kept its packaged timestamp (11:41:42) and digest `c68ebe28…`. The store was untouched by the repair: 1 build, 19 sections before and after | directory listing, digests, store query |

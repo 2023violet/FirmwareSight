@@ -93,7 +93,9 @@ P5 packaging: PROVED ON THREE RUNNERS (2026-10-03). Run 37138881977 at head 1055
 P5 real Windows install acceptance: IN_PROGRESS (2026-10-03). The packaged installer ran here through
         install, OS-surface launch, Analyze of a real fixture, close/reopen, repair, uninstall, reinstall and
         the data-retention check, with the owner's store parked, hashed and restored byte-identically; §38 C
-        (first-run onboarding) and the §64 journey are not built yet, so this line is not a verdict.
+        (first-run onboarding) and the §64 journey were not built at that run, so this line is not a verdict.
+        Onboarding has since been built (Commit C) and **seen operating in the installed binary on
+        2026-10-04**; §64's full journey still has not been walked end to end.
         Evidence P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md
 P5 onboarding, Help and local History: BUILT, NOT YET ACCEPTED IN THE PACKAGE (2026-10-03). §13 guidance is
         one component read by Analyze's empty state and by Help; §14 Help reports the running binary's own

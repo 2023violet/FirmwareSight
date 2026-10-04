@@ -120,12 +120,28 @@ P5_PRODUCTIZATION`
     agreeing on one run id. Three product defects live there — a version pattern quoted into an evidence
     locator that made a run unpersistable, one build carrying two run ids across the two surfaces, and a
     disabled button keeping its accent border — each with the test that now pins it
+16. `P4_VALIDATION/` — Release Bundle: the portable bundle contract, its exit checklist and the desktop smoke
+    that produced it
+17. `P5_VALIDATION/` — **the live round, and the place a newcomer starts.** `P5_PRODUCTIZATION_AUDIT.md`
+    (§4 A–H, plus §G's disposition of every inherited limitation and the new L26),
+    `P5_CI_AUTHORITY.md` (the ten authoritative jobs and every run measured against them, failures included),
+    `P5_MIGRATION_DECISION.md`, `P5_PACKAGING_REPORT.md`, `P5_INSTALL_RECOVERY_REPORT.md`,
+    `P5_ONBOARDING_HISTORY_REPORT.md`, `P5_COMMIT_D_DESIGN.md`, `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (its §8
+    is the §32 read-back of the whole Commit D chain), `P5_RELEASE_IDENTITY_ADR_DRAFT.md`, and
+    `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` for the decision that replaced it
 
-`DIRECTORY_TREE.txt` and `SHA256SUMS` are the regenerated **v0.6.0** baseline record: the tree lists
-this repository's tracked layout and `SHA256SUMS` covers the baseline-controlled files in it. They were
-produced by the promotion round, in that order, and verified with `sha256sum -c` plus an independent
-checker; `P0_FINAL_PROMOTION_REPORT.md` records the commands. The v0.5.1 manifest these replaced is
-history, and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
+`DIRECTORY_TREE.txt` and `SHA256SUMS` began life as the regenerated **v0.6.0** baseline record and are now
+regenerated on **every** commit that changes the tracked set — the tree first, `SHA256SUMS` last, then
+`sha256sum -c` plus `scripts/verify_baseline_artifacts.py` (756 lines and 649 entries at the time of writing).
+`P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
+and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
+
+**Read one limit with that file, recorded as L26:** `SHA256SUMS` is generated from *working-copy* bytes, and
+this repository runs `core.autocrlf=true` with `.gitattributes` `text eol=lf`, so 17 entries match the
+Windows working tree that wrote them and disagree with a clean checkout's LF bytes. No CI job and no
+`scripts/check.py` step runs `verify_baseline_artifacts.py`, so the artifact has never been contradicted by a
+machine other than its own — the local `RESULT PASS` is agreement with the generating host, not
+reproducibility. Deciding which bytes it means belongs to Commit F; see `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` §G.
 
 
 ## All Markdown documents

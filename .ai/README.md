@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-02"
+last_updated: "2026-10-04"
 ---
 
 # AI Entry Point
@@ -34,8 +34,15 @@ a rebuilt shipping binary; fix head green on Run #43 `37100371601` at 7 of 7; ev
 `POST_G2_E2E_REMEDIATION/`, the 283-case root outside the repository; **G2 unchanged, still MVP
 CANDIDATE**) ·
 `P5 productization: IN_PROGRESS (opened 2026-10-03; prompt v1.0 delivered as a file, SHA-256
-722125f5…71e0ae, archived; §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md; no P5 verdict
-exists and the product stays MVP CANDIDATE at 0.6.0)` ·
+722125f5…71e0ae, archived; §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md; Commits A–D have
+landed — audit + migration 0005 + version unification, packaging on three runners with the job set grown from
+seven to ten, §38/§39 real Windows install, §13–§18 onboarding/Help/History, and Commit D's integrity check,
+pre-migration backup, 41-key Diagnostics allowlist, typed startup refusal and ADR-0028. Commit D is COMPLETE
+as of 2026-10-04 and its §32 read-back successor 956e250 is the current HEAD = origin/main, 10 of 10 on Run
+37204847474 attempt 1; three P5 heads went red and keep their rows — 9e3b1de, 0c031cd and 3400981 — with
+P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. §34's STOP is in force: no Commit E, no fixture
+expansion, no P5 closure, no V1. New limitation recorded, deliberately unfixed: L26, SHA256SUMS verifies only
+on the host that wrote it. No P5 verdict exists and the product stays MVP CANDIDATE at 0.6.0)` ·
 `active_task: P5_PRODUCTIZATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.

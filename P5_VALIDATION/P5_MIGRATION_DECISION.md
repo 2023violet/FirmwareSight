@@ -3,10 +3,10 @@ title: "P5 Migration Decision"
 doc_id: "FS-P5-MIGRATION"
 product: "FirmwareSight"
 version: "1.0"
-status: "DECIDED_PENDING_IMPLEMENTATION"
+status: "DECIDED_AND_IMPLEMENTED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # P5 — migration decision (prompt §18)
