@@ -131,8 +131,29 @@ ever disagreed. It is recorded as **L26** in `P5_PRODUCTIZATION_AUDIT.md` §G wi
 `golden/…/SHA256SUMS` row that has no entry, and the 25 names this method could not compare. **Do not "fix" it
 from this handoff**: the choice of which bytes the artifact means belongs to Commit F, and the file is the
 repository's own baseline evidence.
-The remaining workstream order is unchanged: Commit E's fixture cohort, then Commit F's documentation and
-closure. **What Commits C and D do not close is the acceptance of Commit C**: the
+**Commit E has since landed**, under a prompt of its own — *FirmwareSight P5 Commit E — Compatibility
+Fixtures, Support Matrix & Supportability Closure, v1.0* (SHA-256 `030ca28233b964958d6aea8e59a312c66ceb4d117273cba9e667950b4ba21148`,
+53,915 bytes, 2,459 LF lines, archived and registered in `10_AUDIT/SOURCE_PROMPTS/README.md`), which is the
+answer Commit D's §34 STOP was waiting for. The compatibility cohort is six new fixture directories and 31 new
+tracked files under `fixtures/elf/p5-compat/` (`p5-ram-exec`, `p5-extsram`, `p5-dma-region`, `p5-long-preamble`,
+`p5-no-debug` with two ELFs, `p5-clang-arm`), built on this host by `arm-none-eabi-gcc 14.3.1` and
+`clang 22.1.8` over GNU `ld 2.44.0.20250616`; `fixtures/manifest.json` moved 25 → 56 entries and re-running
+`scripts/gen_p5_compat_fixtures.py --force` reproduces all 13 ELF and MAP bytes identically, with no binary byte
+moved by the metadata the records gained. The 14 tests in `p5_compat_fixtures.rs` re-derive each fixture's
+expected image and live-RAM totals from `readelf` section headers plus the MAP's own region attributes instead of
+trusting the model's arithmetic, and that independent rule found the round's one product defect: clang emits
+`.ARM.exidx.text.main` with `sh_type` `0x70000001`, and the parser had been inferring "not allocated" from
+"unrecognised kind", so 8 real FLASH bytes entered neither budget while the total still printed `Exact`. Ten of
+the eleven committed ELFs already agreed with the rule, which is why a per-fixture test could not see it. The fix
+is the narrow one the owner approved — `map_section_kind` reads `SHF_ALLOC` from the section header, which is what
+`04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §3 and §4 item 3 already require — proven by five mutations (A, B, C, E
+and F). Locally on the final tree: **868 Rust / 217 UI in 8 files**, `check.py` **16 of 16**, `--only package`
+**4 of 4** with no `SKIP`, `core-smoke` 3/3, drift 7/7, deny 1/1, and the UI reliability campaign 20 runs × 217
+tests with **0 failing**. §48's fourteen dispositions are in `P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md`, the
+cohort evidence in `P5_COMPATIBILITY_FIXTURE_REPORT.md`, and `P5_COMPATIBILITY_MATRIX.md` was rewritten from the
+tree rather than from prose.
+The remaining workstream order is now: Commit F's documentation and closure. **What Commits C, D and E do not
+close is the acceptance of Commit C**: the
 onboarding panel and the History page have never been operated in the installed binary, so the full §64
 journey (install → onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen →
 reinstall → uninstall → reinstall → documented data behaviour) still runs once, on a
@@ -248,9 +269,10 @@ P5 Commits A–B                 4cc8d93 (audit + §5 governance + prompt archiv
 P5 Commit C                    e863d0c — §13 onboarding, §14 Help/About with the title fixed in Rust, §15–§18 local History, no new migration · e070508 (its read-back)
 P5 §32 / L23                   111fe32 — the L22 identity draft with its premise test, plus the repair of L23's sixth race instance · 2cdfced (its read-back)
 P5 Commit D                    3400981 — integrity_check, the pre-migration online backup, the re-run matrix, the 41-key Diagnostics allowlist and its export, the typed startup refusal, ADR-0028 · bccea88 (the test-only repair of its clock race, and the last head here that changed a line of Rust) · 90aa69d (the record + L26) · 956e250 (the §32 read-back successor, documentation only) · 57a904e (the documentation closeout; the two "current HEAD" sentences it shipped are corrected by the head after it) · No head in this ledger names itself "current HEAD": the commit that wrote it down would be the one that made it false, so read git rev-parse HEAD
+P5 Commit E                     split as §61 requires, in two heads: E1 — the fixture cohort (6 directories, 31 files, manifest 25 → 56), `scripts/gen_p5_compat_fixtures.py`, `p5_compat_fixtures.rs` (14 tests), the `SHF_ALLOC` fix in `crates/firmwaresight-artifact/src/elf.rs`, `P5_COMPATIBILITY_MATRIX.md`, `P5_COMPATIBILITY_FIXTURE_REPORT.md`, and the archived prompt with its registration · E2 — the §48 dispositions (`P5_SUPPORTABILITY_REPORT.md`), the §42 STOP draft (`P5_COMMIT_E_SCHEMA_DECISION.md`), the round's design record (`P5_COMMIT_E_DESIGN.md`, which describes both halves), the five UI files L19/L20/L23 touched (`Analyze.tsx`, `Compare.tsx`, `compare.test.tsx`, `details.test.tsx`, `history.test.tsx`), the workload-size sentence corrected, the governance closeout and the regenerated `DIRECTORY_TREE.txt` + `SHA256SUMS`. Their head SHAs and their runs are written by the §59 read-back successor: a commit cannot record the run its own push started
 Three red heads, kept in the record because dropping them would make the green ones meaningless: 9e3b1de (6 of 7 — a pre-existing `compare.test.tsx` race it never touched), 0c031cd (7 of 10 — three package jobs printing a skip and going red on their own upload), 3400981 (8 of 10 — a clock race inside a test Commit D added, fixed test-only at bccea88, which went 10 of 10)
 The authoritative job set is TEN since 0c031cd: the seven gate jobs plus Package Windows / Ubuntu / macOS. `P5_CI_AUTHORITY.md` names them and every run measured against them
-§34 STOP in force from 2026-10-04: Commit D and its successor are complete, so nothing else in P5 starts without a new architect prompt — no Commit E, no fixture expansion, no P5 closure, no V1/B1/RC/GA
+§34 STOP ran from 2026-10-04 and has been ANSWERED by the Architect's next prompt, the one that authorized Commit E (its digest is in the paragraph above). That STOP therefore now applies to what Commit E did not take: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general source-control linter, no V1/B1/RC/GA — and Commit E added two STOPs of its own, §42 (L15 is a serialized-contract decision that belongs to the Architect) and §63/§64 (the round stops at its exit lists)
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -311,10 +333,17 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
 
 ## What the code does and how it is proven
 
-- **Present figures, measured on 2026-10-04 at `956e250`:** `cargo test --workspace` **854 Rust tests**
-  (storage 131, desktop 222) and **210 UI tests in 8 files**, on one gate — `python scripts/check.py`
-  **16 steps** (`rust` 3 + `frontend` 5 + `drift` 7 + `deny` 1), plus 3 under `--only core-smoke` and 4 under
-  `--only package`, all green locally and 10 of 10 jobs on the remote. The paragraph below is the **P3-era
+- **Present figures, measured on 2026-10-04 at the Commit E tree:** `cargo test --workspace` **868 Rust tests
+  across 47 executables** (storage 131, desktop 222, and the +14 all in the new
+  `crates/firmwaresight-artifact/tests/p5_compat_fixtures.rs`) and **217 UI tests in 8 files** — 6 added to
+  `compare.test.tsx` and 1 to `details.test.tsx`, while `history.test.tsx` changed a test without adding one —
+  on one gate: `python scripts/check.py` **16 steps** (`rust` 3 + `frontend` 5 + `drift` 7 + `deny` 1), plus
+  3 under `--only core-smoke` and 4 under `--only package`, every one green locally and the package group with
+  **no `SKIP`**. What the remote says about these heads is a separate fact and belongs to
+  `P5_VALIDATION/P5_CI_AUTHORITY.md`, written by the run's reader rather than by the commit that provoked it.
+- **The immediately previous total, measured 2026-10-04 at `956e250`, was 854 Rust tests** (storage 131,
+  desktop 222) **and 210 UI tests in 8 files**, on the same 16 steps, all green locally and 10 of 10 jobs on the
+  remote. The paragraph below is the **P3-era
   snapshot** it grew from, kept because its arithmetic and its suite-by-suite breakdown are the record of that
   round: 556 Rust tests in 28 executable suites (plus 6 empty doc-test suites) and 135 UI tests in 6 files on
   one gate: `python scripts/check.py`, which
@@ -471,10 +500,16 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     `P5_PRODUCTIZATION_AUDIT.md` (§4 A–H plus the §G limitation dispositions, L26 included),
     `P5_CI_AUTHORITY.md` (the ten jobs and every run measured against them), `P5_PACKAGING_REPORT.md`,
     `P5_INSTALL_RECOVERY_REPORT.md`, `P5_ONBOARDING_HISTORY_REPORT.md`, `P5_COMMIT_D_DESIGN.md` and
-    `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (whose §8 is the §32 read-back), then
-    `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md`. `.ai/ACTIVE_TASK.md` holds the commit table and
-    the §34 STOP; `10_AUDIT/SOURCE_PROMPTS/README.md` says which prompt authorizes which of them — and no
-    prompt authorizes the next commit yet.
+    `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (whose §8 is the §32 read-back), then Commit E's own three:
+    `P5_COMMIT_E_DESIGN.md` (§4 lists the five mutation proofs, §6 the reliability campaign),
+    `P5_COMPATIBILITY_FIXTURE_REPORT.md` (per-fixture provenance, commands, hashes and product answers) with
+    `P5_COMPATIBILITY_MATRIX.md` (the §23-vocabulary cohort claim) and `P5_SUPPORTABILITY_REPORT.md`
+    (§48's fourteen dispositions, L25's non-reproduction and L15's STOP included), then
+    `P5_COMMIT_E_SCHEMA_DECISION.md` — that one is a question for the Architect, not a record of a decision —
+    and finally `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md`. `.ai/ACTIVE_TASK.md` holds the commit
+    table and the STOP chain; `10_AUDIT/SOURCE_PROMPTS/README.md` names the current active authority, which is
+    the Commit E prompt, and **no prompt authorizes a Commit F, a P5 closure, the §64 journey or an L26 fix
+    yet**.
 
 ## Boundaries still in force
 

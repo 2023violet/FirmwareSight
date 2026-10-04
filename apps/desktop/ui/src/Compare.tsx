@@ -677,6 +677,31 @@ function DeltaFigure({
   );
 }
 
+/// The five evidence bases the memory model can name, in the vocabulary Analyze already uses.
+///
+/// `weakest_basis` crosses IPC as the Core enum's own identity (`domain::diff.rs` formats it with
+/// `{:?}`), which is a wire name, not a caption. Mapping it here is presentation only: no enum is
+/// renamed, no basis is recomputed, and a value outside this list stays visible as what it is.
+const EVIDENCE_BASIS_CAPTIONS = new Map<string, string>([
+  ['MapRegionAndElfLoad', 'MAP regions + ELF load evidence'],
+  ['map-memory-configuration+elf-load', 'MAP regions + ELF load evidence'],
+  ['RegionConfigAndElfLoad', 'configured regions + ELF load evidence'],
+  ['region-config+elf-load', 'configured regions + ELF load evidence'],
+  ['ElfAddressAndFlags', 'ELF address/flags evidence'],
+  ['elf-address-and-flags', 'ELF address/flags evidence'],
+  ['SectionNameHeuristic', 'section-name heuristic'],
+  ['section-name-heuristic', 'section-name heuristic'],
+  ['Insufficient', 'insufficient evidence'],
+  ['unattributed', 'insufficient evidence'],
+]);
+
+function basisCaption(basis: string | null): string {
+  if (basis === null) {
+    return 'unknown';
+  }
+  return EVIDENCE_BASIS_CAPTIONS.get(basis) ?? 'Unrecognized evidence basis';
+}
+
 function SideEvidenceRow({
   label,
   side,
@@ -693,9 +718,7 @@ function SideEvidenceRow({
           label={side.mapBacked ? 'Linker MAP used' : 'No linker MAP'}
         />
         <span className={styles['monoSmall']}>layout {side.layoutSource}</span>
-        <span className={styles['monoSmall']}>
-          weakest basis {side.weakestEvidenceBasis ?? 'unknown'}
-        </span>
+        <span className={styles['monoSmall']}>weakest basis {basisCaption(side.weakestEvidenceBasis)}</span>
         <span className={styles['note']}>
           {side.footprintRowPresent
             ? 'a footprint row was recorded'
@@ -735,7 +758,9 @@ function EvidenceNotice({ summary }: { readonly summary: CompareSummaryDto }) {
         </ul>
       )}
       <div className={styles['row']}>
-        <span className={styles['term']}>Object attribution</span>
+        {/* L19: this page answers "did any object file change between the two builds", which is not
+            the question Analyze's capability row answers. The two labels must stay distinct. */}
+        <span className={styles['term']}>Object-level change attribution</span>
         <span className={styles['value']}>
           <StateBadge
             state={objectChanges.available ? 'PASS' : 'N/A'}

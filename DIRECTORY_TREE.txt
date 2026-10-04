@@ -152,6 +152,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P5_CommitD_Continue_v1.2.txt
 │   │   ├── FirmwareSight_P5_CommitD_Diagnostics_Recovery_v1.0.txt
+│   │   ├── FirmwareSight_P5_CommitE_Compatibility_Supportability_v1.0.txt
 │   │   ├── FirmwareSight_P5_Productization_v1.0.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Acceptance_v1.1.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Findings_Remediation_v1.0.txt
@@ -411,7 +412,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── tests/
 │   │   │   ├── map_companion_identity.rs
 │   │   │   ├── p0_acceptance.rs
-│   │   │   └── p2_fixture_pair.rs
+│   │   │   ├── p2_fixture_pair.rs
+│   │   │   └── p5_compat_fixtures.rs
 │   │   └── Cargo.toml
 │   ├── firmwaresight-core/
 │   │   ├── src/
@@ -525,23 +527,67 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── firmware.map
 │   │   │   ├── fixture.toml
 │   │   │   └── p0-dual-region.ld
-│   │   └── p2-diff/
-│   │       ├── base/
+│   │   ├── p2-diff/
+│   │   │   ├── base/
+│   │   │   │   ├── source/
+│   │   │   │   │   ├── common.c
+│   │   │   │   │   └── payload.c
+│   │   │   │   ├── firmware.elf
+│   │   │   │   ├── firmware.ld
+│   │   │   │   ├── firmware.map
+│   │   │   │   └── fixture.toml
+│   │   │   └── target/
+│   │   │       ├── source/
+│   │   │       │   ├── common.c
+│   │   │       │   └── payload.c
+│   │   │       ├── firmware.elf
+│   │   │       ├── firmware.ld
+│   │   │       ├── firmware.map
+│   │   │       └── fixture.toml
+│   │   └── p5-compat/
+│   │       ├── clang-arm/
 │   │       │   ├── source/
-│   │       │   │   ├── common.c
-│   │       │   │   └── payload.c
+│   │       │   │   └── main.c
 │   │       │   ├── firmware.elf
-│   │       │   ├── firmware.ld
+│   │       │   ├── firmware.map
+│   │       │   ├── fixture.toml
+│   │       │   └── plain.ld
+│   │       ├── dma-region/
+│   │       │   ├── source/
+│   │       │   │   └── main.c
+│   │       │   ├── dma-region.ld
+│   │       │   ├── firmware.elf
 │   │       │   ├── firmware.map
 │   │       │   └── fixture.toml
-│   │       └── target/
+│   │       ├── extsram/
+│   │       │   ├── source/
+│   │       │   │   └── main.c
+│   │       │   ├── extsram.ld
+│   │       │   ├── firmware.elf
+│   │       │   ├── firmware.map
+│   │       │   └── fixture.toml
+│   │       ├── long-preamble/
+│   │       │   ├── source/
+│   │       │   │   └── main.c
+│   │       │   ├── firmware.elf
+│   │       │   ├── firmware.map
+│   │       │   ├── fixture.toml
+│   │       │   └── plain.ld
+│   │       ├── no-debug/
+│   │       │   ├── source/
+│   │       │   │   └── main.c
+│   │       │   ├── firmware-nodebug.elf
+│   │       │   ├── firmware-stripped.elf
+│   │       │   ├── firmware.map
+│   │       │   ├── fixture.toml
+│   │       │   └── plain.ld
+│   │       └── ram-exec/
 │   │           ├── source/
-│   │           │   ├── common.c
-│   │           │   └── payload.c
+│   │           │   └── main.c
 │   │           ├── firmware.elf
-│   │           ├── firmware.ld
 │   │           ├── firmware.map
-│   │           └── fixture.toml
+│   │           ├── fixture.toml
+│   │           └── ram-exec.ld
 │   ├── malformed/
 │   │   ├── empty.bin
 │   │   ├── README.md
@@ -634,6 +680,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 ├── P5_VALIDATION/
 │   ├── P5_CI_AUTHORITY.md
 │   ├── P5_COMMIT_D_DESIGN.md
+│   ├── P5_COMMIT_E_DESIGN.md
+│   ├── P5_COMMIT_E_SCHEMA_DECISION.md
+│   ├── P5_COMPATIBILITY_FIXTURE_REPORT.md
+│   ├── P5_COMPATIBILITY_MATRIX.md
 │   ├── P5_DIAGNOSTICS_DESIGN_CHECKLIST.md
 │   ├── P5_DIAGNOSTICS_RECOVERY_REPORT.md
 │   ├── P5_INSTALL_RECOVERY_REPORT.md
@@ -642,7 +692,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P5_ONBOARDING_HISTORY_REPORT.md
 │   ├── P5_PACKAGING_REPORT.md
 │   ├── P5_PRODUCTIZATION_AUDIT.md
-│   └── P5_RELEASE_IDENTITY_ADR_DRAFT.md
+│   ├── P5_RELEASE_IDENTITY_ADR_DRAFT.md
+│   └── P5_SUPPORTABILITY_REPORT.md
 ├── POST_G2_E2E_REMEDIATION/
 │   ├── EXIT_CHECKLIST.md
 │   ├── FOCUSED_REVALIDATION_REPORT.md
@@ -660,6 +711,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── gen_p0_fixtures.py
 │   ├── gen_p0_workload.py
 │   ├── gen_p2_fixtures.py
+│   ├── gen_p5_compat_fixtures.py
 │   ├── generate_baseline_artifacts.py
 │   ├── generate_design_tokens.py
 │   ├── measure_workloads.py

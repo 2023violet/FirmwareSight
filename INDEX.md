@@ -68,7 +68,7 @@ closed 41-key allowlist (counted off `ALLOWED_KEYS: [&str; 41]` in `apps/desktop
 the page that already exists, exported through a native dialog that opens only when a person names a
 folder, and proven by positive-control tests rather than by the
 absence of a leak — the exported file on the installed build contains no `/` and no `\` character at all.
-The tree is now **854 Rust / 210 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**, with the
+Commit D left the tree at **854 Rust / 210 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**, with the
 package group **4 of 4** beside it, and §27's focused walk ran against the packaged installer with the
 owner's store parked, backed up on a second volume and restored byte-identically:
 `P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md` and its design checklist. That walk earned its keep by
@@ -80,6 +80,20 @@ found a third defect the local gate could not: the product head came back **8 of
 asserted two snapshot files differ when the only difference its fixtures offered was a second-granular
 timestamp, so the claim was a race with a clock. The repair names the difference instead of timing it, and the
 failed head keeps its row in `P5_VALIDATION/P5_CI_AUTHORITY.md`.
+
+**Commit E is the present tree: 868 Rust / 217 UI in 8 files, `check.py` 16 steps, the same 10 authoritative
+CI jobs, package group 4 of 4 with no `SKIP`.** It ran under its own prompt (SHA-256 `030ca282…ba21148`,
+53,915 bytes, 2,459 LF lines, §0–§64) and did three things: it widened the committed cohort with
+`fixtures/elf/p5-compat/` — 6 new sets, 31 new files, manifest 25 → 56, all built here by real
+`arm-none-eabi-gcc 14.3.1` and `clang 22.1.8` over GNU `ld 2.44.0`, every expected total derived from
+`readelf` plus the MAP's own region attributes rather than from the model — which found and fixed a real
+undercount (clang's allocated `.ARM.exidx.text.main`, 8 bytes, charged nothing because the parser inferred
+"not allocated" from "unrecognised section kind"; `SHF_ALLOC` is now read from the section header); it
+rewrote `P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md` from the tree instead of from prose; and it dispositioned
+§48's fourteen supportability rows — L14/L16/L19/L20/L24 `CLOSED`, L4/L5/L17/L23 `REDUCED`, L25
+`NOT_REPRODUCED`, L8/L12 `CARRIED_FORWARD`, L15 `STOPPED_FOR_ARCHITECT` in
+`P5_COMMIT_E_SCHEMA_DECISION.md`. Evidence: `P5_COMMIT_E_DESIGN.md`,
+`P5_COMPATIBILITY_FIXTURE_REPORT.md`, `P5_COMPATIBILITY_MATRIX.md`, `P5_SUPPORTABILITY_REPORT.md`.
 **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source
@@ -128,11 +142,18 @@ P5_PRODUCTIZATION`
     `P5_MIGRATION_DECISION.md`, `P5_PACKAGING_REPORT.md`, `P5_INSTALL_RECOVERY_REPORT.md`,
     `P5_ONBOARDING_HISTORY_REPORT.md`, `P5_COMMIT_D_DESIGN.md`, `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (its §8
     is the §32 read-back of the whole Commit D chain), `P5_RELEASE_IDENTITY_ADR_DRAFT.md`, and
-    `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` for the decision that replaced it
+    `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` for the decision that replaced it. Commit E's five:
+    `P5_COMMIT_E_DESIGN.md` (fixture design, the five mutation proofs, the reliability campaign),
+    `P5_COMPATIBILITY_FIXTURE_REPORT.md` (per-fixture provenance, commands, hashes, and what the product
+    answered), `P5_COMPATIBILITY_MATRIX.md` (§23's vocabulary, written from the tree),
+    `P5_SUPPORTABILITY_REPORT.md` (§48's fourteen dispositions) and — a question rather than a record, held for
+    the Architect under §42 — `P5_COMMIT_E_SCHEMA_DECISION.md`
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` began life as the regenerated **v0.6.0** baseline record and are now
 regenerated on **every** commit that changes the tracked set — the tree first, `SHA256SUMS` last, then
-`sha256sum -c` plus `scripts/verify_baseline_artifacts.py` (756 lines and 649 entries at the time of writing).
+`sha256sum -c` plus `scripts/verify_baseline_artifacts.py` (**808 lines and 688 entries** after Commit E: 690
+tracked paths, of which the two files named `SHA256SUMS` — the root manifest and
+`golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 

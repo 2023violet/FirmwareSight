@@ -176,6 +176,44 @@ last_updated: "2026-10-04"
   home **10 of 10** on their first attempt — `bccea88` on Run `37202016141`, the record commit `90aa69d` on Run
   `37202301591` — with the two runners that lost the race verified green on the repaired test, and §8 of
   `P5_DIAGNOSTICS_RECOVERY_REPORT.md` is the read-back for the chain.
+- **Commit E widened the cohort with bytes a real toolchain produced, and those bytes found a product defect.**
+  It ran under its own architect prompt — *FirmwareSight P5 Commit E — Compatibility Fixtures, Support Matrix &
+  Supportability Closure, v1.0* (SHA-256 `030ca282…ba21148`, 53,915 bytes, 2,459 lines, archived and registered
+  in `10_AUDIT/SOURCE_PROMPTS/README.md` as the current active authority), which is the answer Commit D's §34 STOP
+  was waiting for and which authorizes exactly three things: fixtures, the matrix, and the §48 dispositions. Six
+  new fixture directories and 31 new files now sit under `fixtures/elf/p5-compat/` (`p5-ram-exec`, `p5-extsram`,
+  `p5-dma-region`, `p5-long-preamble`, `p5-no-debug` with two ELFs, `p5-clang-arm`), the manifest went from 25 to
+  56 entries, and every file was written by `scripts/gen_p5_compat_fixtures.py` from this host's
+  `arm-none-eabi-gcc 14.3.1` and `clang 22.1.8`, both final-linked by GNU `ld 2.44.0.20250616` — no hand-edited
+  evidence, and the generator reproduces the committed ELFs and MAPs byte-identically on a second run
+  (`identical = 13`, no binary byte moved by the metadata extension). The 14 tests in
+  `crates/firmwaresight-artifact/tests/p5_compat_fixtures.rs` re-derive each fixture's expected image and live-RAM
+  totals from `readelf` section headers plus the MAP's own region attributes rather than from the model's
+  arithmetic, and holding the product to that independent rule is what exposed the undercount: clang emits
+  `.ARM.exidx.text.main` with `sh_type` `0x70000001`, the parser mapped an unrecognised kind to "no role" and then
+  to "not allocated", so 8 real FLASH bytes entered neither budget while the total still printed `Exact`. It is
+  the only committed ELF whose allocated payload sits outside `SHT_PROGBITS` — ten of eleven were already agreeing,
+  which is why the cohort could not see it. Fixed the narrow way the owner approved: `map_section_kind` now reads
+  `SHF_ALLOC` from the section header, which is what `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §3 and §4 item 3
+  already require, with a fixture-wide invariant test and five mutation proofs (A, B, C, E, F).
+- **Commit E's other half was the §48 disposition sweep, and it changed no product contract.** L14, L16, L19, L20
+  and L24 are `CLOSED` on measurement — L16 by the package group running **4 of 4** with no `SKIP` on this host,
+  L19 by each page naming the attribution question it actually answers, L20 by a closed display mapping so Compare
+  no longer prints a Core enum word and an `Unrecognized evidence basis` string for anything outside it — while L4,
+  L5, L17 and L23 are `REDUCED` with their residue named, L25 is `NOT_REPRODUCED` (30 legitimate Apply
+  activations across both tables, 6 more through form submit), L8 and L12 are `CARRIED_FORWARD` with what was
+  measured about them, and **L15 is `CARRIED_FORWARD → ARCHITECT`**: the prompt's §42 asks for a decision about a
+  serialized public contract, and the label turns out to be written in three different namespaces (`elf.program-header`
+  in the JSON Schema, the same in the report DTO, `ElfProgramHeader` in the stored `evidence.source_type`, plus the
+  bundle's `analysis.json`), so `P5_COMMIT_E_SCHEMA_DECISION.md` costes four options, asks four questions and
+  STOPS. L26 is untouched by §1 and stays Commit F's decision. Present counts at the tree this bullet describes:
+  `cargo test --workspace` **868 passed / 0 failed across 47 targets**, UI **217 in 8 files**, `check.py`
+  **16 of 16**, `--only core-smoke` 3/3, `--only drift` 7/7, `--only deny` 1/1, `--only package` **4 of 4**, and the
+  UI reliability campaign **20 runs × 217 tests with 0 failing runs**. The one UI change was test-only
+  (`history.test.tsx`'s macrotask sleep replaced by a microtask flush, proven still load-bearing by mutation F).
+  `P5_COMPATIBILITY_MATRIX.md` was rewritten from the tree rather than from prose: ten GCC-built ELF files, one
+  clang-built, nine MAP files across four distinct region shapes. **Not closed, and not claimed:** no P5 verdict,
+  no `SUPPORTED` row that was not measured, no §64 journey, no L26 fix, no general source-control linter.
 - **A limitation surfaced by that record, and deliberately not fixed: L26.** `SHA256SUMS` is generated from
   working-copy bytes, so with `core.autocrlf=true` and `.gitattributes` `text eol=lf` 17 entries verify on the
   host that wrote them and disagree with a clean checkout elsewhere; measured identically at `3400981` and at
@@ -421,7 +459,12 @@ shipped-window result: `P0_DESKTOP_SMOKE_REPORT.md`.
   DPI, no Linux or macOS window, and the loading state stayed a test-only claim (recorded NOT
   OBSERVED).
 - **Two linker layouts tested.** Executable-in-RAM, external SRAM, DMA pools, overlays and
-  MPU-aligned sections are unproven; DWARF is recognized but not consumed.
+  MPU-aligned sections are unproven; DWARF is recognized but not consumed. **This is the v0.6.0 promotion's
+  sentence, and Commit E widened exactly half of it:** `fixtures/elf/p5-compat/` now carries executable-in-RAM,
+  external SRAM and a DMA-shaped writable region as real linked evidence across four distinct MAP region shapes
+  plus a Clang-built image, so those three are proven rather than unproven. Overlays and MPU-aligned sections
+  still are not, and DWARF is still recognized and not consumed — see `P5_COMPATIBILITY_MATRIX.md` and L5's
+  `REDUCED` disposition in `P5_SUPPORTABILITY_REPORT.md`.
 - **Two stored facts carry no reason.** `sections.file_offset` and `symbols.address` are nullable with
   no companion `*_unknown` column, so a reason cannot survive the write. The read layer types them as a
   plain option and the UI says `Unknown` with no invented explanation. Closing this needs a migration,
@@ -431,6 +474,12 @@ shipped-window result: `P0_DESKTOP_SMOKE_REPORT.md`.
   not be reproduced on the shipped binary or in the automated reproducer. The leading hypothesis is the
   WebView2 autofill popup, and `autoComplete="off"` removes that surface, but no cause is established.
   Recorded as unresolved in `P1_ANALYZE_DETAILS_SMOKE_REPORT.md` §6 rather than written up as fixed.
+  **Commit E re-ran the question with volume and still found nothing**: 30 legitimate click activations across
+  both filter tables and 6 more through form submit, each verified to reach the shell as a request carrying its
+  value (`compare.test.tsx`, and L25's `NOT_REPRODUCED` row in `P5_SUPPORTABILITY_REPORT.md`). Keyboard
+  activation stays `NOT_VERIFIED_THROUGH_A_KEYPRESS` — a synthetic Enter `keydown` produces no request because
+  jsdom does not implement implicit form submission, and a real keypress needs an installed window, which
+  §64's journey (Commit F's) will supply.
 - **Icon provisioning duplication is a real cost.** Two jobs copy the same apt block; a third job that
   compiles the shell on Linux is the trigger to extract it.
 - **Every gate step except one reads the working tree, not the index.** That blind spot is how P2's

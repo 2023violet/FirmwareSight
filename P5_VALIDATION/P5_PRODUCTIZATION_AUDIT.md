@@ -579,8 +579,11 @@ Full frames and registers stay outside the repository at
 **Supported cohort, unchanged by this audit:** GCC/Clang ELF + GNU ld MAP. Keil/IAR remain unsupported;
 no P5 work here widens that.
 
-**Actual committed fixtures** (`fixtures/manifest.json`, schema `firmwaresight-fixtures-1`,
-25 files across 6 named sets; dirs `fixtures/elf/{p0-basic,p0-dual-region,p2-diff/{base,target}}`,
+**Actual committed fixtures** — the counts below are what this audit measured at `d83175a`. Commit E has since
+added `fixtures/elf/p5-compat/`: six more sets, 31 more files, manifest 25 → 56 entries, and
+`P5_COMPATIBILITY_FIXTURE_REPORT.md` is the record of those while `fixtures/manifest.json` remains the single
+registry for both (`firmwaresight-fixtures-1`,
+25 files across 6 named sets at the time of the audit; dirs `fixtures/elf/{p0-basic,p0-dual-region,p2-diff/{base,target}}`,
 `fixtures/generated`, `fixtures/malformed`, `fixtures/project/p4-release`):
 
 | set | files | what it proves |
@@ -647,6 +650,12 @@ OWNER_DECISION`). The §60 close vocabulary (`CLOSED / REDUCED / CARRIED_FORWARD
 NOT_REPRODUCED`) is the outcome and gets written at close into `P5_KNOWN_LIMITATIONS.md`. Source of
 truth for the inherited list: `G2_VALIDATION/G2_KNOWN_LIMITATIONS.md:23-47` (25 rows; physical order is
 L1…L22, L24, L25, L23).
+
+**Read `P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md` §1 before treating any row below as current.** Commit E
+wrote the outcome for the fourteen rows its §48 names — L4, L5, L8, L12, L14, L15, L16, L17, L19, L20, L23,
+L24, L25 and L26 — on 2026-10-04. Compared against §48's own expected directions, thirteen kept the expected
+word and L15 went to the Architect instead; the plan answer in the third column below stays as it was written.
+The rows §48 did not name keep the plan answer here until P5 closes.
 
 | # | inherited state (G2) | §60 expectation | P5 classification | audited note |
 | --- | --- | --- | --- | --- |

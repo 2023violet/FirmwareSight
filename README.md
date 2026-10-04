@@ -173,6 +173,33 @@ P5 diagnostics and recovery (Commit D): BUILT, GATED, AND WALKED IN AN INSTALLED
         COMPLETE; P5 remains IN_PROGRESS and the prompt's section 34 STOP is in force.
         Evidence P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md, P5_VALIDATION/P5_COMMIT_D_DESIGN.md and
         P5_VALIDATION/P5_DIAGNOSTICS_DESIGN_CHECKLIST.md
+P5 compatibility cohort and supportability (Commit E): BUILT FROM REAL TOOL OUTPUT, AND THE COHORT FOUND A
+        PRODUCT DEFECT (2026-10-04). Run under its own architect prompt — FirmwareSight P5 Commit E —
+        Compatibility Fixtures, Support Matrix & Supportability Closure v1.0, SHA-256 030ca282…ba21148, 53,915
+        bytes, 2,459 lines, archived in 10_AUDIT/SOURCE_PROMPTS/ — which is what answered Commit D's §34 STOP.
+        Six new fixture directories and 31 new tracked files now sit under fixtures/elf/p5-compat/ (executable-in-
+        RAM, external SRAM, a DMA-shaped writable region, a linker whose MAP banner lands at byte 16571, a
+        debug/no-debug pair, and one Clang-built Arm image), the manifest moved 25 → 56 entries, and every file
+        was produced on this host by arm-none-eabi-gcc 14.3.1 and clang 22.1.8 final-linked by GNU ld 2.44.0 —
+        no hand-edited evidence, and re-running the generator returns all 13 ELF and MAP bytes identical. The 14
+        new tests derive each fixture's expected image and live-RAM totals from readelf section headers plus the
+        MAP's own region attributes instead of from the model's arithmetic, and that independent rule found the
+        round's one product defect: clang emits .ARM.exidx.text.main with sh_type 0x70000001 and SHF_ALLOC set,
+        the parser had been reading "unrecognised kind" as "not allocated", and 8 real FLASH bytes entered
+        neither budget while the total still printed Exact. Ten of the eleven committed ELFs already agreed, which
+        is why no per-fixture test could see it. Fixed the narrow way the owner approved — SHF_ALLOC is read from
+        the section header, which is what 04_TECH/23_MEMORY_ACCOUNTING_MODEL.md §3 and §4 item 3 already require —
+        with a cohort-wide invariant test and five mutation proofs (A, B, C, E, F). §48's fourteen rows: L14, L16,
+        L19, L20 and L24 CLOSED on measurement, L4, L5, L17 and L23 REDUCED with their residue named (L23's seventh
+        instance repaired test-only, then 20 campaign runs × 217 tests with 0 failing), L25 NOT_REPRODUCED (30
+        legitimate Apply activations), L8 and L12 CARRIED_FORWARD, and L15 STOPPED FOR THE ARCHITECT because the
+        label is serialized in three namespaces and renaming it is a public contract change, not a cleanup. No
+        capability, schema, migration, dependency, licence or IPC surface changed. Locally: 868 Rust / 217 UI in 8
+        files, check.py 16 of 16, core-smoke 3/3, drift 7/7, deny 1/1, package 4 of 4 with no SKIP. COMMIT_E lands
+        under its own §42/§63 STOPs: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general
+        source-control linter. Evidence P5_VALIDATION/P5_COMMIT_E_DESIGN.md,
+        P5_COMPATIBILITY_FIXTURE_REPORT.md, P5_COMPATIBILITY_MATRIX.md, P5_SUPPORTABILITY_REPORT.md and
+        P5_COMMIT_E_SCHEMA_DECISION.md
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 

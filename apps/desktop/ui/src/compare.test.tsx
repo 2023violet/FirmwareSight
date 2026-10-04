@@ -386,6 +386,19 @@ function degradedComparison(): CompareSummaryDto {
   };
 }
 
+/** One pair whose two sides report the given evidence bases, for the wording guards below. */
+function withBases(baseBasis: string | null, targetBasis: string | null): CompareSummaryDto {
+  const summary = comparison();
+  return {
+    ...summary,
+    memory: {
+      ...summary.memory,
+      base: { ...summary.memory.base, weakestEvidenceBasis: baseBasis },
+      target: { ...summary.memory.target, weakestEvidenceBasis: targetBasis },
+    },
+  };
+}
+
 function selectionSummary(): AnalysisSummaryDto {
   return {
     source: 'artifact',
@@ -728,7 +741,64 @@ describe('the summary and its signs', () => {
 
     const memory = await screen.findByRole('region', { name: 'Memory comparison' });
     expect(memory.textContent).toContain('No linker MAP');
-    expect(memory.textContent).toContain('weakest basis elf-address-and-flags');
+    expect(memory.textContent).toContain('weakest basis ELF address/flags evidence');
+  });
+
+  // L20: `weakest_basis` crosses IPC as the Core enum's own identity, formatted with `{:?}` in
+  // `domain::diff.rs`. That is a wire name, and the screen used to print it. The mapping below is
+  // presentation only — no variant is renamed and no basis is recomputed in the UI — so every value
+  // the shell can send today gets a caption, and anything it cannot gets said to be unrecognized
+  // rather than being quietly rendered as a known basis or crashing the page.
+  it('captions the two MAP and region backed evidence bases instead of printing the enum', async () => {
+    await openCompare(withBases('MapRegionAndElfLoad', 'RegionConfigAndElfLoad'));
+    await runCompare();
+
+    const memory = await screen.findByRole('region', { name: 'Memory comparison' });
+    expect(memory.textContent).toContain('weakest basis MAP regions + ELF load evidence');
+    expect(memory.textContent).toContain('weakest basis configured regions + ELF load evidence');
+    expect(memory.textContent).not.toContain('MapRegionAndElfLoad');
+    expect(memory.textContent).not.toContain('RegionConfigAndElfLoad');
+  });
+
+  it('captions the ELF and name-heuristic evidence bases', async () => {
+    await openCompare(withBases('ElfAddressAndFlags', 'SectionNameHeuristic'));
+    await runCompare();
+
+    const memory = await screen.findByRole('region', { name: 'Memory comparison' });
+    expect(memory.textContent).toContain('weakest basis ELF address/flags evidence');
+    expect(memory.textContent).toContain('weakest basis section-name heuristic');
+    expect(memory.textContent).not.toContain('SectionNameHeuristic');
+  });
+
+  it('captions an insufficient basis and names an unknown future variant as unrecognized', async () => {
+    await openCompare(withBases('Insufficient', 'SomeBasisNoBuildHasEverSent'));
+    await runCompare();
+
+    const memory = await screen.findByRole('region', { name: 'Memory comparison' });
+    expect(memory.textContent).toContain('weakest basis insufficient evidence');
+    expect(memory.textContent).toContain('weakest basis Unrecognized evidence basis');
+    expect(memory.textContent).not.toContain('SomeBasisNoBuildHasEverSent');
+  });
+
+  it('keeps a missing basis Unknown rather than captioning it as something', async () => {
+    await openCompare(withBases('MapRegionAndElfLoad', null));
+    await runCompare();
+
+    const memory = await screen.findByRole('region', { name: 'Memory comparison' });
+    expect(memory.textContent).toContain('weakest basis unknown');
+  });
+
+  it('labels object attribution as the two different questions the pages answer', async () => {
+    // L19: Analyze answers whether one build can attribute rows to an object or module; Compare
+    // answers whether any object file changed between two builds. One word on both pages made a
+    // reader choose. The labels must stay distinct, and the states under them must not move.
+    await openCompare();
+    await runCompare();
+
+    const notice = await screen.findByRole('region', { name: 'Capability and evidence' });
+    expect(within(notice).getByText('Object-level change attribution')).toBeDefined();
+    expect(notice.textContent).not.toContain('Object attribution');
+    expect(within(notice).getByText('unavailable')).toBeDefined();
   });
 
   it('re-labels the same figures in KiB and asks the shell for nothing', async () => {
@@ -854,6 +924,77 @@ describe('the change tables', () => {
         true,
       );
     });
+  });
+
+  it('applies every filter the two change tables are offered, and each one reaches the shell', async () => {
+    // L25 revalidation. One dead `Apply filter` click was reported against an intermediate P1 build
+    // and never reproduced on a shipped binary, so this drives the control at the count the round
+    // asks for rather than once: 15 name filters on sections, 15 on symbols, and 6 more submitted
+    // from the keyboard. Each one types a different value, because an unchanged draft emits no
+    // request at all — that is correct behaviour, and counting it as an Apply would inflate the
+    // very number this test exists to establish.
+    const sectionQueries = [
+      '.text', '.data', '.bss', 'boot', 'decode', 'uart', 'cfg', '.ota', 'noinit', 'task',
+      'ring', 'flash', 'irq', 'stack', '.rodata',
+    ];
+    const symbolQueries = [
+      'mqtt_task', 'tls_handshake', 'sensor_fifo', 'g_threshold', 'g_scratch', 'main',
+      'decode_packet', 'uart_putc', 'irq_handler', 'ring_push', 'cfg_table', 'ota_verify',
+      'flash_write', 'task_init', 'boot_header',
+    ];
+    // Values the click loops above never typed, so a request carrying one can only have come from
+    // the keyboard path being asserted here.
+    const submitQueries = ['eeprom', 'watchdog', 'spi', 'i2c', 'crc', 'timer'];
+
+    await openCompare();
+    await runCompare();
+
+    const sections = await screen.findByRole('region', { name: 'Section Changes' });
+    const symbols = await screen.findByRole('region', { name: 'Symbol Changes' });
+    const sectionInput = within(sections).getByRole('textbox', { name: 'Filter sections by name' });
+    const symbolInput = within(symbols).getByRole('textbox', { name: 'Filter symbols by name' });
+    const sectionApply = within(sections).getByRole('button', { name: 'Apply filter' });
+    const sectionForm = sectionInput.closest('form');
+    expect(sectionForm).not.toBeNull();
+    const symbolApply = within(symbols).getByRole('button', { name: 'Apply filter' });
+
+    const requested = <T extends { filter: string | null; offset: number }>(
+      mock: { mock: { calls: readonly [T][] } },
+      value: string,
+    ) => mock.mock.calls.some(([request]) => request.filter === value && request.offset === 0);
+
+    let applied = 0;
+    for (const value of sectionQueries) {
+      fireEvent.change(sectionInput, { target: { value } });
+      expect((sectionApply as HTMLButtonElement).disabled).toBe(false);
+      fireEvent.click(sectionApply);
+      await waitFor(() => expect(requested(sectionChangesMock, value)).toBe(true));
+      applied += 1;
+    }
+    for (const value of symbolQueries) {
+      fireEvent.change(symbolInput, { target: { value } });
+      expect((symbolApply as HTMLButtonElement).disabled).toBe(false);
+      fireEvent.click(symbolApply);
+      await waitFor(() => expect(requested(symbolChangesMock, value)).toBe(true));
+      applied += 1;
+    }
+
+    // The keyboard path, as far as this harness can honestly take it. A synthetic Enter keydown was
+    // tried first and produced no request at all — jsdom does not implement implicit form
+    // submission — so a real keypress in an installed window stays `NOT_VERIFIED_THROUGH_A_KEYPRESS`
+    // and is recorded as such rather than being claimed from here. What this can prove is the two
+    // conditions a browser needs for Enter to work, plus the code path Enter then takes: the control
+    // is a submit button inside a form, and that form's submit handler asks the shell for the filter.
+    expect((sectionApply as HTMLButtonElement).type).toBe('submit');
+    let bySubmit = 0;
+    for (const value of submitQueries) {
+      fireEvent.change(sectionInput, { target: { value } });
+      fireEvent.submit(sectionForm as HTMLElement);
+      await waitFor(() => expect(requested(sectionChangesMock, value)).toBe(true));
+      bySubmit += 1;
+    }
+
+    expect([applied, bySubmit]).toEqual([30, 6]);
   });
 
   it('asks for the other direction when the same column is chosen twice', async () => {

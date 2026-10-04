@@ -34,18 +34,28 @@ a rebuilt shipping binary; fix head green on Run #43 `37100371601` at 7 of 7; ev
 `POST_G2_E2E_REMEDIATION/`, the 283-case root outside the repository; **G2 unchanged, still MVP
 CANDIDATE**) ·
 `P5 productization: IN_PROGRESS (opened 2026-10-03; prompt v1.0 delivered as a file, SHA-256
-722125f5…71e0ae, archived; §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md; Commits A–D have
+722125f5…71e0ae, archived; §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md; Commits A–E have
 landed — audit + migration 0005 + version unification, packaging on three runners with the job set grown from
-seven to ten, §38/§39 real Windows install, §13–§18 onboarding/Help/History, and Commit D's integrity check,
-pre-migration backup, 41-key Diagnostics allowlist, typed startup refusal and ADR-0028. Commit D is COMPLETE
+seven to ten, §38/§39 real Windows install, §13–§18 onboarding/Help/History, Commit D's integrity check,
+pre-migration backup, 41-key Diagnostics allowlist, typed startup refusal and ADR-0028, and Commit E run under
+its own architect prompt (FirmwareSight P5 Commit E v1.0, SHA-256 030ca282…ba21148, 53,915 bytes, 2,459 lines,
+archived): the compatibility cohort — 6 new fixture directories and 31 new files under
+fixtures/elf/p5-compat/, manifest 25 → 56, built here by arm-none-eabi-gcc 14.3.1 and clang 22.1.8 over GNU
+ld 2.44.0 — the undercount those fixtures exposed (clang's allocated .ARM.exidx section charged nothing while
+the total printed Exact) and the narrow SHF_ALLOC fix that closed it, P5_COMPATIBILITY_MATRIX.md rewritten from
+the tree, and §48's fourteen dispositions: L14/L16/L19/L20/L24 CLOSED, L4/L5/L17/L23 REDUCED, L25
+NOT_REPRODUCED, L8/L12 CARRIED_FORWARD, L15 STOPPED for the Architect. Commit D is COMPLETE
 as of 2026-10-04. Its §32 read-back successor 956e250, 10 of 10 on Run 37204847474 attempt 1, is
-documentation-only, as is the closeout 57a904e after it; the last head that changed a line of Rust was the
-test-only repair bccea88. Neither 956e250 nor 57a904e is written down here as "current HEAD" — a commit that
+documentation-only, as is the closeout 57a904e after it; the last head that changed a line of Rust before
+Commit E was the test-only repair bccea88. Neither 956e250 nor 57a904e is written down here as "current HEAD" — a commit that
 asserted that would be falsified by its own existence, so read git rev-parse HEAD for it. Three P5 heads went
 red and keep their rows — 9e3b1de, 0c031cd and 3400981 — with
-P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. §34's STOP is in force: no Commit E, no fixture
-expansion, no P5 closure, no V1. New limitation recorded, deliberately unfixed: L26, SHA256SUMS verifies only
-on the host that wrote it. No P5 verdict exists and the product stays MVP CANDIDATE at 0.6.0)` ·
+P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. Commit E's §42 STOP is in force from here: no
+Commit F, no P5 closure, no §64 full journey, no L26 fix, no general source-control linter, no V1. L26 stays
+recorded and deliberately unfixed — SHA256SUMS verifies only on the host that wrote it, and choosing which
+bytes that artifact means is Commit F's decision. The
+present counts are 868 Rust / 217 UI in 8 files with the local gate at 16 of 16 and the package group at 4 of
+4 with no SKIP. No P5 verdict exists and the product stays MVP CANDIDATE at 0.6.0)` ·
 `active_task: P5_PRODUCTIZATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.

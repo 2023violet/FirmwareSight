@@ -1482,8 +1482,11 @@ with the alternative that was rejected and what settled it.
 - **Diagnostics lives on the page that already exists.** A fifth rail verb was the obvious shape and is
   wrong: `AGENTS.md` and the P5 prompt forbid a new product verb, and a support payload is a reading
   surface, which is what Help already is. The payload is assembled in Rust from an explicit allowlist —
-  31 leaf fields, counted off the exported file — and the UI renders what the shell answered or
-  `not reported`, never a default.
+  **41 keys**, the set `ALLOWED_KEYS: [&str; 41]` names at
+  `apps/desktop/src-tauri/tests/diagnostics.rs:47`, which counts the nested object keys as well as their
+  leaves — and the UI renders what the shell answered or `not reported`, never a default. This row's earlier
+  "31 leaf fields, counted off the exported file" was the last survivor of the mistake the bottom of this
+  document already records: the count now reads off the constant that defines it.
 - **The store is named, not located.** `firmwaresight-p0.sqlite` appears on screen and in the file; its
   directory appears in neither. Four sentences elsewhere in this repository had promised that Diagnostics
   "will tell you where it sits"; they were stale, and they were corrected rather than re-explained. The
@@ -1543,3 +1546,71 @@ with the alternative that was rejected and what settled it.
   top-level page, no P5 closure. `capabilities/main.json` is still `["core:default"]`; the two new commands
   take no arguments at all; `unsafe_code` remains forbidden in both crates that grew code. The permitted
   security sentence stands as written: *dependency policy passes with documented accepted risks*.
+
+# P5 Commit E — compatibility fixtures, support matrix and supportability — 2026-10-04
+
+Authorization: *FirmwareSight — P5 Commit E — Compatibility Fixtures, Support Matrix & Supportability
+Closure, Execution Prompt v1.0*, delivered as a file (SHA-256
+`030ca28233b964958d6aea8e59a312c66ceb4d117273cba9e667950b4ba21148`, 53,915 bytes, 2,459 LF lines, §0–§64 — 65
+numbered sections),
+archived in `10_AUDIT/SOURCE_PROMPTS/` and registered there as the current active authority, which replaces
+Commit D's entry as `CURRENT ACTIVE AUTHORITY`. Its discipline is the round's boundary: REAL FIXTURES / NO
+HAND-EDITED EVIDENCE / CLAIM ONLY WHAT WAS PROVEN / NO FORMAT SCOPE EXPANSION / NO P5 CLOSURE / NO L26 FIX /
+NO FULL §64 JOURNEY.
+
+- **Start authority was waited for, not assumed.** Commit D's documentation closeout (`57a904e`) had shipped
+  two sentences that its own existence made false, and its correction `bfbc1aa` was still running. The owner
+  chose to start from `bfbc1aa` **after that run concluded** rather than beside it; measured afterwards: Run
+  `37214675036`, `completed` / `success`, **10 jobs**, every one of the ten names read. So the round began on a
+  head the remote had already agreed about, and the rebase audit in `P5_COMMIT_E_DESIGN.md` §1 was written
+  against it rather than against the prompt's assumed tree.
+- **A fixture's expected answer must be derivable without the model under test.** This is the round's central
+  design decision. Each `fixture.toml` carries `expected_image_bytes` and `expected_live_ram_bytes` computed by
+  `scripts/gen_p5_compat_fixtures.py` from `readelf` section headers plus the MAP's own `Memory Configuration`
+  region attributes, and `p5_compat_fixtures.rs` parses those strings out of the record and holds the analyzer
+  to them. The rule was first validated against evidence the round did not create: the same arithmetic
+  reproduces `p0-dual-region` (image 160 / live RAM 72), `p2-diff/base` (256 / 8) and `p2-diff/target`
+  (376 / 76) — `P5_COMPATIBILITY_FIXTURE_REPORT.md` §2 cites the pre-existing test lines that already carry
+  those numbers. A test that re-prints the
+  model's own totals would have kept this round's defect hidden.
+- **That independence found a product defect, and the owner chose the narrow fix.** clang emits
+  `.ARM.exidx.text.main` with `sh_type` `0x70000001` (`SHT_ARM_EXIDX`) and `SHF_ALLOC` set, 8 bytes at
+  `0x08000030`; `map_section_kind()` mapped an unrecognised kind to `SectionRole::Unknown` and the model then
+  inferred "not allocated" from "no recognised role", so those 8 image bytes entered neither budget while the
+  total still reported `Exact` with nothing in `unattributed`. Three responses were on the table — a
+  performance-shaped rework of the accounting model, an allowlist of ARM-specific section types, and reading
+  `SHF_ALLOC` from the section header. The owner chose the third: it is what
+  `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §3 already requires (a custom section settles by segment and region
+  evidence, never by its name) and §4 item 3 already lists as an evidence source, it changes one derivation,
+  and it is falsifiable by a fixture rather than by an argument. Mutation A reverts the rule (`left: 50,
+  right: 58`), mutation E reads `SHF_WRITE` instead and reddens 8 tests across the workspace.
+- **Ten of eleven were already right, and that is the lesson, not the fix.** The cohort-wide invariant
+  (`the_reported_image_footprint_equals_the_bytes_the_file_claims_are_loaded`) reads every manifest-listed ELF's
+  section headers and compares the sum of allocated non-`NOBITS` payload to the model's charged total. Only
+  `p5-clang-arm` has an allocated section whose `sh_type` sits outside `SHT_PROGBITS`, so no per-fixture test
+  written before this round could have seen the gap: the defect needed a second compiler, not a second assert.
+- **L15 is a contract decision and this round stopped on it.** The prompt's §42 asks whether
+  `ElfProgramHeader` should be renamed. Measured: the label is already serialized in three namespaces with two
+  spellings — `elf.program-header` in `schemas/analysis.schema.json` and the report DTO, `ElfProgramHeader` in
+  the stored `evidence.source_type` (`db.rs` formats the Debug name) and in the bundle's `analysis.json` — and
+  four golden rows carry it. Renaming is a breaking change to a persisted, published shape, so
+  `P5_COMMIT_E_SCHEMA_DECISION.md` records the three namespaces, costs four options, asks four questions and
+  ends `STOPPED_FOR_ARCHITECT`. No byte moved.
+- **A test's settle primitive was changed instead of its assertion, so the change needed its own proof.**
+  `history.test.tsx`'s stale-reply test waited a macrotask; the bounded sweep found a second timer the test did
+  not need. Replacing the sleep with `await act(async () => { await Promise.resolve(); })` keeps the test green
+  but proves nothing on its own, so mutation **F** breaks the production guard (`History.tsx:94` →
+  `if (false)`) and the edited test must still redden. It did; `History.tsx` was restored and verified by
+  digest `29022971f963082d618ae9178771eaee5b0279dccdd10e8f229b3fa266e5ecea` with `git diff` empty. Deleting the
+  claim was the rejected option.
+- **The three questions the owner answered, answered before the work rather than after it.** Start from
+  `bfbc1aa` once its run concluded; fold the `.ai/DECISIONS.md` "31 leaf fields" → **41 keys** correction into
+  this commit rather than shipping a separate documentation-only head; take the Clang-exposed undercount now,
+  narrowly, with a regression test and a mutation proof — not as a accounting-model project.
+- **What this commit did not do.** No Commit F, no P5 closure, no `P5 PASS`, no tag, Release or published
+  installer, no §64 installed journey, no L26 fix and no baseline-artifact regeneration beyond the current
+  convention, no general source-control linter, no DWARF consumption, no new format, adapter, crate, capability,
+  IPC command, schema, migration, design token or dependency, no licence choice, and no performance claim.
+  Locally on the final tree: **868 Rust / 217 UI in 8 files**, `check.py` **16 of 16**, `core-smoke` 3/3,
+  drift 7/7, deny 1/1, package **4 of 4 with no `SKIP`**, campaign **20 runs / 0 failing**. The permitted
+  security sentence is unchanged: *dependency policy passes with documented accepted risks*.

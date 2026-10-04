@@ -341,6 +341,18 @@ describe('after a summary exists', () => {
     await waitFor(() => expect(sectionsMock).toHaveBeenCalled());
   });
 
+  it('names the attribution capability by the scope it actually reports', async () => {
+    // L19: this row answers whether one build can attribute rows to an object or module. Compare
+    // asks a different question with similar words — whether any object file changed between two
+    // builds — so the two labels must not collapse back into the one phrase.
+    render(<App />);
+    await analyzeOk();
+
+    const capabilities = await screen.findByRole('region', { name: 'Capabilities' });
+    expect(within(capabilities).getByText('Object/module attribution')).toBeDefined();
+    expect(capabilities.textContent).not.toContain('Object attribution');
+  });
+
   it('renders an unknown region as the word Unknown and its reason, never as a blank', async () => {
     render(<App />);
     await analyzeOk();

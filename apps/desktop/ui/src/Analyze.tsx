@@ -369,7 +369,8 @@ function Report({
         <CapabilityRow term="Symbols" value={capabilities.symbols} />
         <CapabilityRow term="Debug info" value={capabilities.debugInfo} />
         <CapabilityRow term="MAP" value={capabilities.map} />
-        <CapabilityRow term="Object attribution" value={capabilities.objectAttribution} />
+        {/* L19: the scope here is one build's attribution capability, not a delta between builds. */}
+        <CapabilityRow term="Object/module attribution" value={capabilities.objectAttribution} />
         <CapabilityRow term="Git" value={capabilities.git} />
       </Section>
 

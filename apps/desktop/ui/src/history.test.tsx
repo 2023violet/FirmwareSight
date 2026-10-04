@@ -19,7 +19,7 @@
  * The bridge is mocked the way the other page tests mock it; the plumbing has its own file.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
@@ -408,8 +408,8 @@ describe('History filters and pages through the shell', () => {
 
     // The superseded answer now arrives, and the screen must not go back to it.
     late.resolve(buildPage([candidate({ fileName: 'stale.elf' })], { total: 1 }));
-    await new Promise((done) => {
-      setTimeout(done, 0);
+    await act(async () => {
+      await Promise.resolve();
     });
     expect(screen.queryByText('stale.elf')).toBeNull();
     expect(screen.getByText('newer.elf')).toBeDefined();

@@ -5,8 +5,9 @@ These are NOT firmware. Each file is the first bytes of a real linked ELF with t
 which is exactly the shape the full-buffer guard has to survive: a plausible header followed by
 an unreasonable amount of data. Nothing about them is a claim that such a firmware exists.
 
-They are never committed: `fixtures/generated/` is in `.gitignore`, and ~1.1 GiB of generated
-bytes would bloat the repository for a number that has to be re-measured on each machine anyway.
+They are never committed: `fixtures/generated/` is in `.gitignore`, and the 1,447,035,904 bytes the four
+workloads measure on disk would bloat the repository for a number that has to be re-measured on each
+machine anyway.
 
 Usage:
     python scripts/gen_p0_workload.py            # write the workloads
