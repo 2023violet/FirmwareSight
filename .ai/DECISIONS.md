@@ -1607,6 +1607,17 @@ NO FULL §64 JOURNEY.
   `bfbc1aa` once its run concluded; fold the `.ai/DECISIONS.md` "31 leaf fields" → **41 keys** correction into
   this commit rather than shipping a separate documentation-only head; take the Clang-exposed undercount now,
   narrowly, with a regression test and a mutation proof — not as a accounting-model project.
+- **One push, one run, and the row that says so instead of inventing a second one.** §56 split the round into
+  E1 (`859648e`) and E2 (`59d85c3`); §58 then required a fast-forward push and a 10-of-10 read. One
+  `git push origin main` carried both commits, GitHub starts one workflow run per push and binds it to the tip
+  head, so `gh run list --json headSha` shows `37228929762` on `59d85c3` and **no run whose head is `859648e`**.
+  The temptation is to write a run number on the E1 row anyway; the record instead states the absence and gives
+  E1's bytes a second, independent verification: a clean detached worktree at the candidate SHA where 56 manifest
+  paths exist, are tracked and match their recorded hashes with no generator run, the 14 fixture tests pass with
+  `arm-none-eabi-gcc`, `clang`, `arm-none-eabi-readelf` and `ld.lld` all absent from `PATH`, and the full gate
+  runs **18 of 18** (the same 16 steps plus the two asset steps a cold checkout needs). Read back: attempt 1,
+  `completed` / `success`, 10 jobs, every step inspected; the run's single `skipped` step is the conditional
+  Ubuntu apt block on the Windows runner.
 - **What this commit did not do.** No Commit F, no P5 closure, no `P5 PASS`, no tag, Release or published
   installer, no §64 installed journey, no L26 fix and no baseline-artifact regeneration beyond the current
   convention, no general source-control linter, no DWARF consumption, no new format, adapter, crate, capability,

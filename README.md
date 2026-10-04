@@ -195,7 +195,12 @@ P5 compatibility cohort and supportability (Commit E): BUILT FROM REAL TOOL OUTP
         legitimate Apply activations), L8 and L12 CARRIED_FORWARD, and L15 STOPPED FOR THE ARCHITECT because the
         label is serialized in three namespaces and renaming it is a public contract change, not a cleanup. No
         capability, schema, migration, dependency, licence or IPC surface changed. Locally: 868 Rust / 217 UI in 8
-        files, check.py 16 of 16, core-smoke 3/3, drift 7/7, deny 1/1, package 4 of 4 with no SKIP. COMMIT_E lands
+        files, check.py 16 of 16, core-smoke 3/3, drift 7/7, deny 1/1, package 4 of 4 with no SKIP, and a clean
+        detached worktree at the candidate SHA green at 18 of 18 with all 56 manifest paths hash-matching and the
+        fixture tests passing with no cross-compiler on PATH. The remote agreed: Run 37228929762 at head 59d85c3,
+        attempt 1, 10 of 10, every job and every step read — the E1 head 859648e has no run of its own because one
+        push carried both commits and GitHub runs the tip, which is recorded as an absence, not as a pass.
+        COMMIT_E lands
         under its own §42/§63 STOPs: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general
         source-control linter. Evidence P5_VALIDATION/P5_COMMIT_E_DESIGN.md,
         P5_COMPATIBILITY_FIXTURE_REPORT.md, P5_COMPATIBILITY_MATRIX.md, P5_SUPPORTABILITY_REPORT.md and

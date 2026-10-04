@@ -250,6 +250,31 @@ All required tools are present on this host, so the check was run rather than de
 4. After the template extension, the six `fixture.toml` records and their manifest digests moved and
    **no binary or MAP byte moved** — checked with `git diff --name-only` over the fixture tree.
 
+## 7a. Clean detached worktree (§52), and what it did not need
+
+Run against the candidate head before the push, in `target/wt-p5e` created by
+`git worktree add --detach target/wt-p5e <candidate>` and removed afterwards:
+
+| check | result |
+| --- | --- |
+| checkout state | detached at the candidate SHA, `git status --short` empty |
+| manifest paths present | **56 of 56 exist**, `missing=0` — no generator was run in the worktree |
+| manifest paths tracked | `untracked=0` against the worktree's own `git ls-files` |
+| committed hashes | `hash_mismatch=0`: each file's SHA-256 equals the manifest's `sha256` field, byte for byte, from a fresh checkout |
+| no local compiler needed | `cargo test -p firmwaresight-artifact --test p5_compat_fixtures` ran with `arm-none-eabi-gcc`, `clang`, `arm-none-eabi-readelf` and `ld.lld` all **absent from `PATH`**: the PATH was built by filtering the Arm toolchain and LLVM directories out, and `command -v` in that same environment resolves all four to nothing while `cargo`, `rustc`, `node`, `corepack` and `python` still resolve. The test command's own first log line is `toolchain absent, run valid`, so the precondition sits next to the result instead of being assumed. **14 passed / 0 failed** |
+| full gate in the worktree | `python scripts/check.py` **18 of 18** — the same 16 steps as the main tree plus the two `rust/frontend assets (install)` and `(build)` preparatory steps a cold checkout needs before the desktop crate compiles. `cargo test --workspace` there reported **868 passed across 47 targets** and the UI suite **217 in 8 files**, identical to the main tree |
+| package group | **NOT_RUN in the worktree**, stated rather than glossed. Rebuilding the installer in a second tree would re-measure a step already measured on identical bytes; the package authority for this head is the local `--only package` **4 of 4 with no `SKIP`** plus the three `Package` jobs of Run `37228929762` at head `59d85c3` — `Build and verify the …package` and `Upload the artifact set` green on Windows, Ubuntu and macOS — read in `P5_CI_AUTHORITY.md` |
+
+Why this section exists at all: `.gitignore` once ate half of the `p2-diff` fixture pair, the manifest
+recorded both halves, every local run digested the bytes the generator had left on disk, and CI — which
+clones — was the only thing that disagreed. `drift/fixtures tracked` closes the "listed but untracked"
+case, and this worktree check is the stronger form: it shows the tracked bytes are also the *right* bytes
+with nothing on disk but what a clone produces.
+
+Note the boundary §57 draws around the other artifact: nothing here claims that the **root `SHA256SUMS`**
+verifies in a clean checkout. That is L26, deliberately untouched by this round, and it concerns working-copy
+bytes of CRLF-affected text files, not these fixtures.
+
 ## 8. What an ordinary test run needs
 
 **Nothing beyond the repository.** The fixtures are committed binaries, so

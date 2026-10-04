@@ -214,6 +214,16 @@ last_updated: "2026-10-04"
   `P5_COMPATIBILITY_MATRIX.md` was rewritten from the tree rather than from prose: ten GCC-built ELF files, one
   clang-built, nine MAP files across four distinct region shapes. **Not closed, and not claimed:** no P5 verdict,
   no `SUPPORTED` row that was not measured, no §64 journey, no L26 fix, no general source-control linter.
+- **Commit E's remote read-back, and the one thing it does not cover.** The round went up as one push of two
+  commits, so GitHub started one run: `37228929762` at head `59d85c3` (E2, whose tree contains E1), attempt 1,
+  `completed` / `success`, **10 of 10**, with all ten job names and every step read — the only `skipped` step in
+  the run is the conditional Ubuntu apt block on the Windows runner, which is the workflow's design. The E1 head
+  `859648e` has no run of its own, and that is recorded as an absence rather than given an invented number.
+  A clean detached worktree at the candidate SHA checked the same bytes a second way: 56 manifest paths all
+  present, tracked and hash-matching with no generator run, the 14 fixture tests green with
+  `arm-none-eabi-gcc`, `clang`, `arm-none-eabi-readelf` and `ld.lld` all absent from `PATH`, and the gate
+  **18 of 18** (the same 16 steps plus the two cold-checkout asset steps). Evidence:
+  `P5_COMPATIBILITY_FIXTURE_REPORT.md` §7a and `P5_VALIDATION/P5_CI_AUTHORITY.md`.
 - **A limitation surfaced by that record, and deliberately not fixed: L26.** `SHA256SUMS` is generated from
   working-copy bytes, so with `core.autocrlf=true` and `.gitattributes` `text eol=lf` 17 entries verify on the
   host that wrote them and disagree with a clean checkout elsewhere; measured identically at `3400981` and at

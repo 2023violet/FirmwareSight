@@ -93,7 +93,10 @@ rewrote `P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md` from the tree instead of from
 §48's fourteen supportability rows — L14/L16/L19/L20/L24 `CLOSED`, L4/L5/L17/L23 `REDUCED`, L25
 `NOT_REPRODUCED`, L8/L12 `CARRIED_FORWARD`, L15 `STOPPED_FOR_ARCHITECT` in
 `P5_COMMIT_E_SCHEMA_DECISION.md`. Evidence: `P5_COMMIT_E_DESIGN.md`,
-`P5_COMPATIBILITY_FIXTURE_REPORT.md`, `P5_COMPATIBILITY_MATRIX.md`, `P5_SUPPORTABILITY_REPORT.md`.
+`P5_COMPATIBILITY_FIXTURE_REPORT.md`, `P5_COMPATIBILITY_MATRIX.md`, `P5_SUPPORTABILITY_REPORT.md`. The remote
+read-back is Run `37228929762` at head `59d85c3` — attempt 1, **10 of 10**, every job and step read — with the
+E1 head `859648e` carrying no run of its own because one push moved both commits; §7a of the fixture report
+holds the clean detached worktree that proves the same bytes again without a compiler on `PATH`.
 **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source
