@@ -70,19 +70,27 @@ fn classify_by_name(name: &str) -> Option<SectionRole> {
 }
 
 /// Role plus the alloc/write/execute attributes, from the parser's section classification.
-fn map_section_kind(kind: SectionKind, name: Option<&str>) -> (SectionRole, SectionFlags) {
+///
+/// `alloc` is the ELF's own `SHF_ALLOC` bit, not an inference from `SectionKind`. The inference used
+/// to read "kind I do not recognise" as "not allocated", which silently dropped a section the header
+/// said occupies the image: clang emits `.ARM.exidx.text.main` with `SHF_ALLOC|SHF_LINK_ORDER` inside
+/// a declared FLASH region, and the dual-budget model charged it to neither side while reporting the
+/// total as `Exact` with nothing listed as unattributed. `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §3
+/// says a custom section is settled by segment and region evidence and never by guessing from its
+/// name, so honouring the bit is what the model already required.
+///
+/// The metadata-name net still overrides it: bytes the product knows to be host tooling stay out of
+/// the device budget whatever their flags say, which is the mistake this function was written to
+/// avoid. `write` and `execute` stay as they were — the finding was about allocation, and changing
+/// those would move classifications no evidence here asked to move.
+fn map_section_kind(
+    kind: SectionKind,
+    name: Option<&str>,
+    is_alloc: bool,
+) -> (SectionRole, SectionFlags) {
     let named_role = name.and_then(classify_by_name);
 
-    let alloc = named_role.is_none()
-        && !matches!(
-            kind,
-            SectionKind::Unknown
-                | SectionKind::Debug
-                | SectionKind::DebugString
-                | SectionKind::Note
-                | SectionKind::Metadata
-                | SectionKind::OtherString
-        );
+    let alloc = is_alloc && named_role.is_none();
     let write = matches!(
         kind,
         SectionKind::Data
@@ -210,7 +218,13 @@ pub fn parse(bytes: &[u8], _sha256: &Sha256) -> Result<ElfFacts, ArtifactError> 
         let index = section.index().0;
         let name: Option<&str> = section.name().ok().filter(|value| !value.is_empty());
         let kind = section.kind();
-        let (role, flags) = map_section_kind(kind, name);
+        // `SHF_ALLOC` straight from the section header. `SectionKind::Unknown` means the parser did
+        // not recognise the section, which is not the same fact as the file not being loaded.
+        let allocated = matches!(
+            section.flags(),
+            object::SectionFlags::Elf { sh_flags, .. } if sh_flags.contains(object::elf::SHF_ALLOC)
+        );
+        let (role, flags) = map_section_kind(kind, name, allocated);
 
         // `data()` yields the bytes actually stored in the file. A NOBITS section such as `.bss`
         // reports an empty slice, which is the distinction the memory model depends on.

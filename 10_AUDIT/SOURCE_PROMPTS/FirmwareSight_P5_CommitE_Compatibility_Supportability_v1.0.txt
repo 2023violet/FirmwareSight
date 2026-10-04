@@ -1,0 +1,2459 @@
+FirmwareSight — P5 Commit E
+Compatibility Fixtures, Support Matrix & Supportability Closure
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight P5 Productization Commit E Engineering Agent。
+
+本轮 canonical unit：
+
+P5_COMMIT_E_COMPATIBILITY_SUPPORTABILITY
+
+这不是：
+
+- Commit D 延长
+- Commit F
+- P5 最终 closure
+- V1 用户验证
+- B1 Private Beta
+- RC / GA
+- 新格式扩张
+- parser 大重构
+
+本轮目标：
+
+在 FirmwareSight 已经通过 Commit D 的基础上，
+用真实、可重建、可审计的 compiler/linker fixtures 扩大现有受支持 cohort 的证据覆盖，
+建立正式 Compatibility Matrix，
+并关闭或降低 P5 中仍适合窄修的 supportability gaps。
+
+核心纪律：
+
+REAL FIXTURES.
+NO HAND-EDITED EVIDENCE.
+CLAIM ONLY WHAT WAS PROVEN.
+NO FORMAT SCOPE EXPANSION.
+NO P5 CLOSURE.
+NO L26 FIX.
+NO FULL §64 JOURNEY.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at prompt issue time:
+
+origin/main =
+
+956e250c8448d965175ee16169621ae9fb84f6fb
+
+Latest authoritative CI:
+
+Run =
+37204847474
+
+attempt =
+1
+
+result =
+completed / success
+
+authoritative matrix =
+10 / 10
+
+Current stage:
+
+P5_PRODUCTIZATION
+
+state =
+IN_PROGRESS
+
+baseline_version =
+0.6.0
+
+Product state =
+MVP CANDIDATE
+
+Current direct local validation baseline:
+
+Rust =
+854 passed / 0 failed
+
+UI =
+210 passed / 8 files
+
+full local gate =
+16 / 16
+
+Commit D =
+COMPLETE
+
+Historical truth remains:
+
+3400981
+Run 37200245520
+attempt 1
+8 / 10 failure
+
+then:
+
+bccea88
+Run 37202016141
+attempt 1
+10 / 10 success
+
+90aa69d
+Run 37202301591
+attempt 1
+10 / 10 success
+
+956e250
+Run 37204847474
+attempt 1
+10 / 10 success
+
+Do not rewrite the red head as green.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD CARRY-FORWARD — DO NOT TOUCH IN COMMIT E
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+These are reserved for Commit F / P5 closure preparation.
+
+A. §64 complete installed-app journey
+
+History has not yet been operated as part of the full installed sequence:
+
+Install
+→ Analyze
+→ Compare
+→ Gate
+→ Bundle
+→ History
+→ Diagnostics
+→ close/reopen
+→ reinstall
+→ uninstall
+→ reinstall
+
+Commit E MUST NOT run or claim this full closure journey.
+
+A narrow packaged UI check required for a Commit E supportability issue is allowed,
+but must be labelled:
+
+FOCUSED_COMMIT_E_PACKAGE_CHECK
+
+not:
+
+P5_INSTALLED_JOURNEY_PASS
+
+B. L26 — root SHA256SUMS semantics
+
+Current finding:
+
+root `SHA256SUMS` is generated from working-copy bytes.
+
+With Windows `core.autocrlf=true` plus repository line-ending policy,
+17 measured entries agree with the generating host but disagree with clean checkout/archive bytes.
+
+No CI job currently runs the baseline verifier.
+
+L26 requires a separate governance decision about what repository baseline checksums mean.
+
+Commit E MUST NOT:
+
+- switch to blob bytes
+- normalize line endings
+- redefine baseline checksum semantics
+- add the verifier to CI as if the semantic decision were already made
+- modify ADR-0028 to solve repository baseline checksums
+
+L26 =
+CARRY_FORWARD TO COMMIT F / ARCHITECT
+
+C. P5 closure documents
+
+Do not create empty/duplicated closure docs just to satisfy names.
+
+The following remain Commit F outputs:
+
+P5_VALIDATION/P5_MIGRATION_RECOVERY_REPORT.md
+P5_VALIDATION/P5_HISTORY_DIAGNOSTICS_REPORT.md
+
+Commit D already supplied evidence for them.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -15 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+956e250c8448d965175ee16169621ae9fb84f6fb
+
+worktree =
+clean
+
+If remote moved:
+
+STOP.
+
+Read and classify the delta first.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+
+After every commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+Detect unexpected auto-push immediately.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. REQUIRED READ SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before design, read current versions of:
+
+AGENTS.md
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+BASELINE.yaml
+
+P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md
+P5_VALIDATION/P5_CI_AUTHORITY.md
+P5_VALIDATION/P5_COMMIT_D_DESIGN.md
+P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md
+
+G2_VALIDATION/G2_KNOWN_LIMITATIONS.md
+
+04_TECH/20_PLATFORM_SUPPORT.md
+04_TECH/05_SECURITY_PRIVACY.md
+04_TECH/14_IPC_DATA_CONTRACTS.md
+
+scripts/gen_p0_fixtures.py
+scripts/gen_p2_fixtures.py
+scripts/update_goldens.py
+scripts/check.py
+
+fixtures/manifest.json
+all current `fixtures/elf/**/fixture.toml`
+all current linker scripts
+
+crates/firmwaresight-artifact/src/*
+relevant Core memory/evidence types
+
+apps/desktop/ui/src/Analyze.tsx
+apps/desktop/ui/src/Compare.tsx
+relevant UI tests
+
+.github/workflows/p0-check.yml
+deny.toml
+
+Do not treat the original P5 audit as if nothing has changed since it was written.
+
+Re-baseline against current HEAD.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. FIRST DELIVERABLE — COMMIT E REBASE AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before production changes, create:
+
+P5_VALIDATION/P5_COMMIT_E_DESIGN.md
+
+Section 1 must reclassify the inherited gaps against current `956e250`.
+
+For every relevant limitation, state:
+
+CURRENT FACT
+STATUS AT COMMIT E START
+TARGET THIS ROUND
+FILES / TESTS
+STOP CONDITION
+
+At minimum inspect:
+
+L4 platform/runtime evidence
+L5 fixture/layout/DWARF coverage
+L8 object/module attribution evidence
+L12 dependency advisories
+L14 update_goldens ordering/dry-run
+L15 evidence source label
+L16 custom-protocol packaging
+L17 CI provisioning/index coverage
+L19 object-attribution wording
+L20 Core enum wording in Compare
+L23 async UI race family
+L24 update_goldens Windows scratch cleanup
+L25 dead Apply-filter observation
+L26 root SHA256SUMS
+
+Expected starting dispositions after current P5 work:
+
+L6/L7 =
+CLOSED by migration 0005
+
+L10 =
+CLOSED by History
+
+L16 =
+likely CLOSED by official package path,
+but verify rather than assume
+
+L21 =
+CLOSED by context-aware window title
+
+L22 =
+CLOSED by ADR-0028
+
+L26 =
+CARRY_FORWARD TO COMMIT F
+
+Do not reopen closed items without evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. COMMIT E PRIMARY DELIVERABLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md
+
+P5_VALIDATION/P5_COMPATIBILITY_FIXTURE_REPORT.md
+
+P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md
+
+These are Commit E evidence.
+
+Do NOT create:
+
+P5 final report
+P5 final exit verdict
+P5 closure successor
+
+P5 remains IN_PROGRESS.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. SUPPORTED COHORT — FROZEN BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current product claim remains:
+
+GCC/Clang ELF
++
+GNU ld MAP
+
+Commit E may strengthen evidence INSIDE this cohort.
+
+It may NOT widen to:
+
+Keil
+IAR
+TI COFF
+HEX
+BIN
+UF2
+Mach-O
+PE
+universal MAP formats
+DWARF semantic analysis as a new product feature
+
+Keil/IAR remain UNSUPPORTED.
+
+Do not write a new vendor adapter in Commit E.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. CURRENT FIXTURE FACTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At Commit E start:
+
+all committed ELF/MAP fixtures are produced by:
+
+arm-none-eabi-gcc
++
+GNU ld
+
+Measured baseline:
+
+compiler family:
+Arm GNU Toolchain 14.3.Rel1
+
+linker family:
+GNU ld 2.44.0.20250616
+
+architecture evidence:
+Cortex-M / Arm
+
+Current named ELF fixture sets:
+
+p0-basic
+p0-dual-region
+p2-diff-base
+p2-diff-target
+
+Current audit found:
+
+ZERO committed Clang-produced ELF fixture evidence.
+
+Therefore the word "Clang" in the support claim is currently under-evidenced.
+
+Commit E must either:
+
+A. add legitimate committed Clang-produced evidence
+
+or:
+
+B. narrow the documented support claim truthfully.
+
+Do not leave blanket "Clang supported" with no fixture.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. CLANG FIXTURE — PREFERRED PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current host audit measured:
+
+clang 22.1.8
+ld.lld available
+arm-none-eabi-gcc / GNU ld available
+
+Preferred proof:
+
+Clang produces an Arm/Cortex-M object or ELF using an explicit Arm target,
+and the final supported fixture remains inside the existing ELF cohort.
+
+Strongest preferred combination:
+
+Clang compiler
++
+Arm target
++
+GNU ld final link
++
+GNU ld MAP
+
+This would prove:
+
+Clang-produced embedded code/object
+while also exercising the existing GNU ld MAP adapter.
+
+Do NOT hard-code this recipe before proving it works.
+
+Measure first.
+
+If it cannot be done with already-installed tools:
+
+use a bounded alternative.
+
+If only native/x86_64 Clang ELF can be produced,
+classify it precisely:
+
+PARSER_EVIDENCE_ONLY
+
+It does NOT prove embedded Cortex-M Clang support.
+
+Do not install a new compiler/toolchain automatically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. FIXTURE PROVENANCE RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Every new fixture must be genuine compiler/linker output.
+
+Allowed:
+
+C/C++/assembly source
+linker script
+compiler flags
+linker flags
+objcopy/strip
+generator script
+real ELF
+real GNU ld MAP
+
+Not allowed:
+
+manual ELF byte editing
+hex-patching ELF headers
+hand-writing a fake MAP and calling it linker output
+padding random bytes to simulate layout
+copying GCC ELF and relabelling it Clang
+
+Fixture bytes are evidence.
+
+Do not fake provenance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. FIXTURE GENERATOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prefer a dedicated P5 compatibility generator such as:
+
+scripts/gen_p5_compat_fixtures.py
+
+if extending `gen_p0_fixtures.py` would blur P0 baseline scope.
+
+Do not create parallel tooling without reason.
+
+Generator requirements:
+
+- relative build paths
+- no private absolute paths in committed outputs where avoidable
+- explicit host-path leakage check
+- exact compiler version
+- exact linker version
+- compiler identity separate from linker identity
+- exact rebuild commands
+- temporary build files removed
+- committed artifacts are sufficient for normal tests
+- CI/parser tests do not require compiler installation
+
+Generator may require the toolchain only when regenerating fixtures.
+
+Python standard library only unless already available.
+
+No new Python package.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. FIXTURE METADATA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Each compatibility fixture needs a provenance record.
+
+Reuse `fixture.toml` conventions where possible.
+
+Required facts:
+
+fixture_id
+purpose
+architecture / target
+
+compiler:
+name
+version
+
+linker:
+name
+version
+
+build:
+generator
+commands
+important flags
+
+artifact hashes
+
+expected:
+architecture
+entry point
+memory accounting
+evidence basis
+Unknowns
+limitations
+
+If current metadata cannot separate compiler/linker identity,
+extend it minimally.
+
+This is repository evidence metadata,
+not a public product schema.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. FIXTURE MANIFEST / TRACKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update:
+
+fixtures/manifest.json
+
+Every manifest-listed path must be tracked by Git.
+
+Existing:
+
+`drift/fixtures tracked`
+
+must remain green.
+
+Before commit:
+
+git ls-files
+
+must prove every manifest path is tracked.
+
+Do not repeat the historical half-untracked `p2-diff/target` failure.
+
+If a fixture directory collides with `.gitignore`,
+fix the narrow ignore issue or choose a safe directory name.
+
+Do not use force-add as a permanent substitute for understanding the ignore rule.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. §26 A–H DISPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit E must disposition all eight compatibility cases.
+
+Use only:
+
+PROVED_BY_EXISTING_FIXTURE
+PROVED_BY_NEW_FIXTURE
+SUPPORTED_WITH_LIMITS
+NOT_AVAILABLE
+
+Cases:
+
+A. classic FLASH + RAM
+B. executable-in-RAM section
+C. external SRAM region
+D. DMA / non-cacheable custom region
+E. large discarded-section / long GNU ld MAP preamble
+F. ELF with debug info
+G. ELF stripped / no debug
+H. multiple loadable segments
+
+No silent omission.
+
+Do not create duplicate fixtures if an existing one already proves the case.
+
+Add missing assertions where sufficient.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. CASE A — CLASSIC FLASH + RAM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit current `p0-dual-region`.
+
+If it already proves:
+
+- executable/read-only load image
+- RAM runtime region
+- .data VMA in RAM / LMA in ROM/FLASH
+- .bss RAM-only
+- correct nonvolatile total
+- correct runtime RAM total
+
+then:
+
+do NOT add a redundant fixture.
+
+Instead add explicit compatibility assertions and classify:
+
+PROVED_BY_EXISTING_FIXTURE
+
+If naming `ROM` instead of `FLASH` materially limits the claim,
+document that limit.
+
+Do not duplicate only for cosmetic region names.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. CASE B — EXECUTABLE IN RAM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Produce a legitimate linker layout where executable code runs from RAM/writable memory.
+
+Prefer a meaningful load/run arrangement:
+
+load image may live in FLASH
+runtime address lives in RAM
+
+Test:
+
+- section VMA/LMA
+- runtime contribution
+- nonvolatile contribution
+- evidence basis
+- correct section classification
+
+This case must prove the model follows actual load/runtime evidence,
+not simplistic `.text == FLASH`.
+
+No hand-patched addresses.
+
+If legitimate toolchain output cannot be produced:
+
+NOT_AVAILABLE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. CASE C — EXTERNAL SRAM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Produce a real linker script with a distinct external SRAM region.
+
+Example conceptual names may be:
+
+FLASH
+RAM
+EXTSRAM
+
+but use actual toolchain semantics.
+
+Test:
+
+- region observed from real MAP evidence
+- external SRAM contributes to runtime RAM
+- load image charged only where evidence says so
+- source/evidence basis remains truthful
+
+Do not classify purely by region name if the product model does not.
+
+Test the actual rules.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. CASE D — DMA / NON-CACHEABLE CUSTOM REGION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Produce a custom writable memory region used by a DMA-style section.
+
+Commit E does NOT add cacheability as a new semantic dimension.
+
+This fixture proves:
+
+custom linker-defined writable RAM-like regions are not lost merely because their names are unfamiliar.
+
+Expected:
+
+- region observed
+- runtime memory accounted
+- no invented cacheability claim
+- Unknown stays Unknown for evidence the product cannot derive
+
+No cache/coherency subsystem.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. CASE E — LONG GNU LD MAP PREAMBLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Post-G2 F003 is already fixed in production.
+
+Commit E should add a genuine committed fixture only if GNU ld can naturally generate a MAP whose relevant recognizable content lies beyond the historical 4096-character boundary.
+
+Preferred:
+
+real discarded/input-section output generated by linker behavior.
+
+Do NOT manually prepend fake text.
+
+Test:
+
+- MAP is genuine GNU ld output
+- relevant marker offset > 4096
+- adapter recognizes it
+- expected regions/memory parse
+
+If a real linker-generated long preamble is not reasonably obtainable:
+
+classify:
+
+SUPPORTED_BY_REGRESSION_ONLY
+
+and keep the existing F003 regression.
+
+Do not manufacture evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. CASE F — DEBUG INFO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Existing fixtures compile with `-g`.
+
+Confirm and directly test:
+
+- ELF with debug sections parses
+- debug metadata is excluded from memory accounting
+- product does not claim semantic DWARF analysis
+
+Correct wording:
+
+ELF with debug info is accepted.
+
+DWARF semantic analysis is not implemented/consumed.
+
+Do not write:
+
+DWARF supported
+
+unless actual semantic parsing exists.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. CASE G — NO DEBUG / STRIPPED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Produce a real no-debug or stripped ELF.
+
+Preferred:
+
+build without `-g`
+
+and/or measured use of:
+
+arm-none-eabi-objcopy -S
+or
+llvm-objcopy -S
+
+depending on what is available.
+
+Do not conflate:
+
+built without debug
+
+with:
+
+post-link stripped
+
+unless both are generated.
+
+At least one real no-debug path is required.
+
+Test:
+
+- parser succeeds
+- architecture/entry remain correct
+- memory remains correct
+- missing debug is not corruption
+- unrelated facts do not become fake Unknown
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. CASE H — MULTIPLE PT_LOAD SEGMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current `p0-dual-region` likely already contains multiple PT_LOAD segments.
+
+Do not infer only from linker-script intent.
+
+Add a direct assertion from the actual ELF:
+
+PT_LOAD count >= 2
+
+Then connect that fact to memory-accounting acceptance.
+
+If proven:
+
+PROVED_BY_EXISTING_FIXTURE
+
+No duplicate fixture required.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. CLANG SUPPORT CLAIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After fixture work, update support claim based on evidence.
+
+Allowed outcomes:
+
+A.
+Real Arm Clang fixture committed and green.
+
+Then:
+
+Clang Arm ELF =
+SUPPORTED for the tested target/layout cohort
+
+B.
+Only native Clang ELF proved.
+
+Then:
+
+Clang ELF parser compatibility =
+SUPPORTED_WITH_LIMITS
+
+Embedded Arm Clang =
+NOT_TESTED
+
+C.
+No legitimate Clang fixture produced.
+
+Then:
+
+Clang =
+NOT_TESTED
+
+Do not retain blanket SUPPORTED without evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. COMPATIBILITY MATRIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md
+
+Status vocabulary:
+
+SUPPORTED
+SUPPORTED_WITH_LIMITS
+CI_BUILD_ONLY
+NOT_TESTED
+UNSUPPORTED
+
+Dimensions:
+
+Platforms:
+- measured Windows host
+- Windows 10 only if actually tested
+- macOS package
+- Ubuntu package
+- other Linux
+- ARM64 platforms
+
+Compiler:
+- arm-none-eabi-gcc exact measured version
+- Clang exact measured version
+
+Linker:
+- GNU ld exact measured version
+- ld.lld only if actually used
+
+Architecture:
+- Arm/Cortex-M
+- x86_64 only if real fixture exists
+
+Artifact:
+- ELF
+- GNU ld MAP
+
+Layout A-H
+
+Debug:
+- with debug
+- no debug/stripped
+
+Git:
+- available
+- unavailable
+
+Package/runtime:
+- Windows installed evidence
+- macOS/Linux CI_BUILD_ONLY when no GUI runtime evidence exists
+
+Never use SUPPORTED from compilation alone.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. COMPATIBILITY FIXTURE REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_COMPATIBILITY_FIXTURE_REPORT.md
+
+For each fixture record:
+
+fixture id
+files
+compiler
+compiler version
+linker
+linker version
+target
+generation command
+ELF SHA-256
+MAP SHA-256 if present
+expected architecture
+entry
+expected memory
+expected basis
+expected Unknowns
+actual result
+limitations
+
+Also state:
+
+normal tests do not require fixture toolchains to be installed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. ACCEPTANCE TEST DEPTH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not test only `parse == Ok`.
+
+Each fixture should assert the facts that justify its existence.
+
+Where applicable:
+
+artifact kind
+architecture
+bitness
+endianness
+entry point
+section facts
+symbol facts
+memory region facts
+nonvolatile total
+runtime RAM total
+evidence basis
+Unknown reason
+MAP adapter identity
+PT_LOAD count
+debug/no-debug condition
+
+Avoid incidental ordering assertions.
+
+Assert product contracts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. HOST-PATH / HASH SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Every committed fixture must have:
+
+stable manifest identity
+tracked path
+no private machine path in textual evidence
+no username
+no temp directory
+no build-machine drive path where avoidable
+
+Search textual MAP/debug provenance for leaks.
+
+Use relative build paths.
+
+If compiler debug info embeds unwanted absolute paths:
+
+regenerate with supported deterministic prefix/path flags if appropriate.
+
+Do NOT patch final binaries.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. L5 DISPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L5 combines:
+
+limited layout coverage
+ELF-only scope
+DWARF not consumed
+
+Commit E should substantially REDUCE it.
+
+Do not falsely close it just because more fixtures exist.
+
+Expected possible final status:
+
+L5 =
+REDUCED
+
+with:
+
+- layout evidence expanded
+- debug/no-debug acceptance proved
+- DWARF semantic analysis still not implemented
+- ELF remains intentional scope
+
+Do not add DWARF parsing merely to close a limitation row.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. L8 OBJECT / MODULE ATTRIBUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L8 is evidence-dependent.
+
+Do not create synthetic object attribution.
+
+During real GNU ld MAP generation,
+inspect whether produced MAP evidence contains object/module facts the current adapter already understands.
+
+If existing parser can truthfully expose them through a narrow current path:
+
+add a fixture/test.
+
+If not:
+
+L8 =
+CARRIED_FORWARD
+
+Do not infer object ownership from symbol names.
+
+If closing L8 requires a new significant MAP grammar/parser subsystem:
+
+STOP that subproblem and return to Architect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. L12 DEPENDENCY REVISIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run current:
+
+cargo deny check licenses bans sources advisories
+
+Inspect:
+
+RUSTSEC-2024-0429
+RUSTSEC-2024-0370
+
+Determine:
+
+current path
+versions
+platform exposure
+compatible upgrade availability
+
+Allowed:
+
+narrow compatible upgrade inside the existing frozen framework family
+if all package/runtime tests remain green.
+
+Not allowed:
+
+Tauri/gtk replacement
+major framework jump solely to remove advisory
+
+If still required by current Tauri/gtk line:
+
+record:
+
+REVISITED / CARRIED_FORWARD
+
+Use:
+
+dependency policy passes with documented accepted risks
+
+Never:
+
+security clean
+zero vulnerabilities
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. L14 UPDATE_GOLDENS REVALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not modify `update_goldens.py` simply because L14 exists.
+
+First verify.
+
+On Windows host:
+
+run dry-run/no-confirm mode twice in succession.
+
+Expected:
+
+- exit success
+- no tracked changes
+- no semantic golden changes
+- no key-order rewrite
+- second run same result
+- clean repository afterward
+
+If yes:
+
+L14 =
+CLOSED BY REVALIDATION
+
+No code change.
+
+If failure:
+
+reproduce and fix narrowly.
+
+Do not use `--confirm` merely to make tests green.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. L24 WINDOWS SCRATCH CLEANUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current script already contains cleanup logic for read-only Git objects.
+
+Exercise the scratch-producing path twice.
+
+If second run has no:
+
+PermissionError [WinError 5]
+
+and owned scratch is cleaned:
+
+L24 =
+CLOSED / NOT_REPRODUCED ON CURRENT HEAD
+
+If reproduced:
+
+fix only scratch cleanup owned by the script.
+
+Never delete:
+
+real repository `.git`
+unrelated target folders
+user data
+
+Add regression if code changes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. L15 EVIDENCE SOURCE LABEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit:
+
+MemoryEvidenceBasis::ElfAddressAndFlags
+
+currently maps to a source label involving:
+
+ElfProgramHeader
+
+Determine whether this is:
+
+A. user-facing wording only
+
+or:
+
+B. serialized/public portable evidence semantics
+
+Do NOT change portable evidence semantics casually.
+
+Preferred narrow closure:
+
+keep internal/portable enum stable if required,
+but show clearer product-facing wording.
+
+Conceptual direction:
+
+ELF address + flags
+
+rather than:
+
+ELF program header
+
+unless program-header facts are truly the evidence source.
+
+If changing SourceType itself changes:
+
+analysis portable JSON
+Release Bundle analysis
+goldens
+release identity
+schema semantics
+
+STOP this subproblem for Architect review.
+
+No hidden schema semantic change in Commit E.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. L19 OBJECT ATTRIBUTION WORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Analyze and Compare currently use "Object attribution" for distinct concepts.
+
+Make product-facing scope explicit.
+
+Analyze concept:
+
+single-build object/module attribution capability
+
+Compare concept:
+
+object-level changes between two builds
+
+Choose concise distinct labels.
+
+Example direction:
+
+Analyze:
+Object/module attribution
+
+Compare:
+Object-level change attribution
+
+Do not change Core capability semantics.
+
+Add UI tests guarding the distinction.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. L20 CORE ENUM WORDING IN COMPARE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Compare currently can expose Core enum-shaped text such as:
+
+MapRegionAndElfLoad
+
+Do not rename Core enum values.
+
+Add a closed UI display mapping for current variants.
+
+Use vocabulary aligned with Analyze, e.g.:
+
+MAP regions + ELF load evidence
+configured regions + ELF load evidence
+ELF address/flags evidence
+section-name heuristic
+insufficient evidence
+
+Exact wording should follow canonical docs.
+
+Unknown future value:
+
+must not crash.
+
+Use safe fallback:
+
+Unrecognized evidence basis
+
+while preserving UNKNOWN semantics.
+
+Add tests for every current value.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. L17 CI / INDEX BLIND SPOT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The provisioning-duplication half has already been reduced/closed.
+
+Do not redo it.
+
+Investigate only the remaining bounded index-blind-spot risk:
+
+local files used by fixtures/generators/resources but absent from tracked Git.
+
+Fixtures already have:
+
+drift/fixtures tracked
+
+Do not add a rule that every untracked repo file is an error.
+
+Allowed narrow improvements:
+
+- manifest-listed fixture files must be tracked
+- generated-binding/resource manifests must refer only to tracked sources where a canonical list exists
+- package resources explicitly required by build must be tracked
+
+If no additional falsifiable set exists:
+
+L17 =
+REDUCED
+
+with residual risk documented.
+
+Do not build a general source-control linter.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. L23 UI ASYNC RELIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Six race instances are already known/fixed.
+
+Commit E performs the P5 bounded reliability sweep.
+
+A. Static/code review
+
+Look for:
+
+- async IPC start
+- first loading commit
+- chained/second IPC wave
+- synchronous assertion reading later-wave state
+- absence assertion before effect settles
+
+B. Repetition
+
+Target:
+
+20 complete UI-suite runs
+
+Prefer fresh processes.
+
+Record:
+
+suite size
+repetitions
+failures
+wall time
+environment
+
+Do NOT multiply repetitions into the canonical direct test count.
+
+If failure occurs:
+
+reproduce and classify.
+
+Test-only race:
+fix causally using actual awaited state.
+
+Product race:
+treat as a product defect.
+
+No sleeps.
+No retry wrappers.
+No timeout inflation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. L25 APPLY FILTER REVALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Historical finding:
+
+one dead `Apply filter` click,
+never reproduced later.
+
+Required:
+
+automated/reliable interaction over:
+
+Section changes filter
+Symbol changes filter
+
+At least 30 Apply actions total,
+distributed across both.
+
+Include keyboard activation where supported.
+
+If feasible without running the full §64 journey:
+
+perform one narrow packaged Compare filter check on a disposable store.
+
+Label:
+
+FOCUSED_COMMIT_E_PACKAGE_CHECK
+
+If no failure:
+
+L25 =
+NOT_REPRODUCED
+
+Record exact attempt count and environment.
+
+If reproduced:
+
+capture state and fix narrowly.
+
+Do not claim closed from one unit-test click.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. L16 PACKAGE / CUSTOM-PROTOCOL RECHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current package path appears to have closed L16.
+
+Verify only.
+
+Official package build must:
+
+- build frontend
+- invoke Tauri package path
+- enable custom-protocol automatically
+- require no manual `--features custom-protocol`
+
+Run current package group.
+
+If green:
+
+L16 =
+CLOSED
+
+No package architecture rewrite.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. PLATFORM EVIDENCE DISCIPLINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Windows:
+
+real installed/runtime evidence exists on the measured host.
+
+Record exact OS only if measured.
+
+Do not infer Windows 11.
+
+Windows 10:
+
+NOT_TESTED unless actually exercised.
+
+macOS:
+
+package CI exists.
+
+No real GUI runtime evidence:
+CI_BUILD_ONLY
+
+Ubuntu:
+
+package CI exists.
+
+No real GUI runtime evidence:
+CI_BUILD_ONLY
+
+Other Linux:
+
+best effort / no blanket claim.
+
+Windows ARM64 / Linux ARM64:
+
+follow canonical platform document,
+do not infer support.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. MALFORMED / FAIL-CLOSED REGRESSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Fixture expansion must not weaken malformed input behavior.
+
+Re-run malformed fixture acceptance.
+
+Required:
+
+- no panic
+- typed rejection
+- unsupported never becomes PASS
+- Unknown remains visible where evidence is insufficient
+
+Do not add fuzzing.
+
+Fuzzing remains separately blocked by toolchain policy.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. PERFORMANCE BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit E is not the large-file performance round.
+
+Carry forward:
+
+519,179,252-byte valid ELF
+warm Analyze ~4.73–4.89 s
+cold first read ~68.7 s
+working set ~1,428 MB
+no Not Responding
+no crash
+
+Do NOT introduce:
+
+mmap
+parser streaming redesign
+symbol-store redesign
+2M-symbol UI redesign
+
+unless a compatibility fixture exposes a correctness blocker.
+
+Performance remains separate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. PUBLIC SCHEMA STOP RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit E must not casually change:
+
+analysis:1
+diff:1
+gate-results:1
+accepted-reviews:1
+release-manifest:1
+
+or release identity.
+
+If a fixture exposes a fix requiring:
+
+new portable field
+renamed serialized enum
+schema version
+release-id semantic change
+
+STOP that subproblem.
+
+Write:
+
+P5_VALIDATION/P5_COMMIT_E_SCHEMA_DECISION.md
+
+with:
+
+problem
+fixture evidence
+old contract
+proposed change
+compatibility impact
+Release Bundle impact
+golden impact
+
+Return that subproblem to Architect.
+
+Continue unrelated authorized work if safe.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. TEST-FIRST / CONTRACT-FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For missing behavior, establish failing/missing-contract tests before production changes where practical.
+
+Examples:
+
+- Clang fixture acceptance
+- executable-in-RAM accounting
+- external SRAM
+- custom DMA region
+- stripped ELF
+- PT_LOAD count
+- long MAP preamble
+- Compare basis display mapping
+- object-attribution wording distinction
+
+For already-correct behavior:
+
+use revalidation evidence.
+
+Do not write pointless red tests just to satisfy process.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. MUTATION PROOFS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For changed behavior, minimum mutation proofs:
+
+Fixture accounting:
+mutate one expected memory/evidence rule or expectation
+→ acceptance test red
+
+Clang provenance:
+replace compiler identity with GCC/wrong identity
+→ provenance acceptance red
+
+Compare basis wording:
+restore raw Core enum rendering
+→ UI test red
+
+Object-attribution wording:
+restore ambiguous same label
+→ UI test red
+
+If update_goldens changes:
+remove cleanup fix
+→ regression red
+
+If L25 code changes:
+restore reproduced broken behavior
+→ interaction test red
+
+Restore byte-exact.
+
+No mutation lands.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. GOLDEN POLICY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not regenerate existing goldens simply because fixtures were added.
+
+Prefer dedicated compatibility acceptance expectations.
+
+Use new golden only when it materially protects a product output contract.
+
+`scripts/update_goldens.py --confirm` is NOT a routine step.
+
+Never regenerate to hide unexpected output changes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. DEPENDENCY / CAPABILITY RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred:
+
+no new Rust dependency
+no new npm dependency
+
+Fixture generator may invoke fixed measured compiler/linker processes.
+
+Normal product must not gain:
+
+network
+telemetry
+generic shell IPC
+generic filesystem IPC
+SQL IPC
+arbitrary command runner
+broad Tauri capability
+
+If new product dependency/capability is required:
+
+STOP before adding it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+47. FOCUSED PACKAGED CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Full §64 journey is RESERVED FOR COMMIT F.
+
+Commit E may use a packaged app only to verify:
+
+- Analyze/Compare wording changed by Commit E
+- L25 filter reliability if needed
+
+If used:
+
+apply the existing owner-store isolation protocol:
+
+hash
+→ park
+→ independent backup/hash
+→ disposable store
+→ focused check
+→ close
+→ restore
+→ hash compare
+
+Required:
+
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+
+Do not operate full Gate/Bundle/History/Diagnostics closure journey.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+48. SUPPORTABILITY REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md
+
+Record final disposition for:
+
+L4
+L5
+L8
+L12
+L14
+L15
+L16
+L17
+L19
+L20
+L23
+L24
+L25
+L26
+
+Allowed status:
+
+CLOSED
+REDUCED
+CARRIED_FORWARD
+OWNER_DECISION
+NOT_REPRODUCED
+
+Expected direction, subject to evidence:
+
+L4 =
+REDUCED / CARRIED_FORWARD
+
+L5 =
+REDUCED
+
+L8 =
+likely CARRIED_FORWARD
+
+L12 =
+REVISITED / CARRIED_FORWARD unless safe compatible upgrade exists
+
+L14 =
+CLOSED if dry-run verified
+
+L15 =
+CLOSED only if narrow contract-safe wording fix
+
+L16 =
+CLOSED if package path verified
+
+L17 =
+REDUCED
+
+L19 =
+CLOSED
+
+L20 =
+CLOSED
+
+L23 =
+REDUCED after sweep
+
+L24 =
+CLOSED or NOT_REPRODUCED
+
+L25 =
+NOT_REPRODUCED or CLOSED if reproduced/fixed
+
+L26 =
+CARRIED_FORWARD TO COMMIT F
+
+Evidence decides.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+49. COMPATIBILITY CLAIM DISCIPLINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Every support statement must name:
+
+fixture
+compiler
+linker
+architecture
+layout
+test/runtime evidence
+
+Forbidden broad claims:
+
+"Clang supported" with zero Clang fixture
+
+"macOS supported" from package build only
+
+"DWARF supported" because debug sections parse
+
+"all linker scripts supported"
+
+"all Cortex-M supported"
+
+Use bounded evidence-backed statements.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+50. LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At final Commit E candidate:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+python scripts/check.py --only deny
+python scripts/check.py --only drift
+
+Current baseline:
+
+Rust = 854
+UI = 210 / 8 files
+full gate = 16 / 16
+
+Counts may increase.
+
+Report direct counts only.
+
+Do not sum repetition campaigns.
+
+No required-group SKIP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+51. FIXTURE REGENERATION VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If required toolchains are present:
+
+regenerate fixtures in a controlled clean/scratch context.
+
+Compare with committed outputs.
+
+Expected:
+
+byte-identical where deterministic output is promised.
+
+If compiler embeds volatile data:
+
+identify exact field.
+
+Use supported deterministic flags if appropriate.
+
+Do not patch final artifact bytes.
+
+If exact binary determinism cannot be achieved:
+
+document the limitation and use a truthful reproducible strategy.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+52. CLEAN DETACHED WORKTREE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before closure:
+
+create clean detached worktree at exact candidate SHA.
+
+Prove:
+
+- manifest-listed fixtures all exist
+- every manifest path is tracked
+- committed fixture hashes match
+- tests do not require local compiler installation
+- fixture acceptance passes
+- full gate green
+- package authority green where locally supported
+
+This is mandatory because this repository has previously had a half-untracked fixture pair.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+53. UI RELIABILITY CAMPAIGN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After final UI changes:
+
+run complete UI suite:
+
+target 20 / 20 fresh-process repetitions.
+
+Record:
+
+direct UI test count
+repetitions
+failures
+files
+wall time
+environment
+
+Do not report multiplied totals as canonical test count.
+
+Any race:
+
+investigate before CI.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+54. UPDATE_GOLDENS REVALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For L14/L24:
+
+run no-confirm dry-run twice.
+
+Then verify:
+
+git status --short
+git diff -- golden
+git diff -- fixtures
+
+Expected clean.
+
+If scratch tree is created:
+
+prove the second run can clean and recreate it.
+
+Do not touch unrelated scratch/evidence.
+
+If current code passes:
+
+no code change needed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+55. L25 REVALIDATION COUNT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Record:
+
+Section Apply filter:
+N attempts / N success
+
+Symbol Apply filter:
+N attempts / N success
+
+Keyboard activation:
+N attempts / N success
+
+Minimum total:
+
+30 legitimate Apply actions
+
+Do not count an intentionally disabled control as a failed click.
+
+If packaged check used:
+
+record package/binary identity.
+
+Do not call that the full P5 installed journey.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+56. COMMIT STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred split if needed:
+
+Commit E1:
+
+P5: expand compatibility fixtures and prove the supported cohort
+
+Commit E2:
+
+P5: close narrow supportability gaps
+
+A single Commit E is acceptable only if reviewable.
+
+Do NOT create Commit F.
+
+After every commit:
+
+fetch
+check local HEAD
+check origin/main
+
+No force push.
+
+No history rewrite.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+57. SOURCE / INTEGRITY ARTIFACTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Follow current repository conventions.
+
+When tracked path set changes:
+
+regenerate:
+
+DIRECTORY_TREE.txt
+
+Then regenerate:
+
+SHA256SUMS
+
+LAST
+
+Important:
+
+L26 means root SHA256SUMS clean-checkout semantics are still open.
+
+Do NOT fix L26 here.
+
+Generate under current convention only so existing gate remains internally consistent.
+
+Do not claim cross-checkout reproducibility.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+58. REMOTE CI — CANDIDATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After local candidate is green:
+
+push normal fast-forward.
+
+Find workflow by exact head SHA.
+
+Required:
+
+10 / 10
+
+completed / success.
+
+Inspect all jobs individually.
+
+Load-bearing jobs for Commit E:
+
+Rust Windows
+Rust Ubuntu
+macOS Core Smoke
+Generated output drift
+Dependency policy
+Package Windows
+Package Ubuntu
+Package macOS
+
+If fixture hash/path differs on a runner:
+
+real reproducibility defect.
+
+Investigate.
+
+Do not rerun until green and erase history.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+59. CI READ-BACK SUCCESSOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After candidate 10/10:
+
+create one narrow documentation/read-back successor if current P5 governance convention still requires it.
+
+Record:
+
+candidate SHA
+run id
+attempt
+ten jobs
+Rust count
+UI count
+fixture sets
+compiler/linker versions
+A-H dispositions
+Clang disposition
+supportability statuses
+L26 carry-forward
+§64 carry-forward
+Commit F closure docs pending
+
+No product source changes in successor.
+
+Successor CI:
+
+10 / 10
+
+Do not create another commit merely to record successor CI.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+60. COMMIT E EXIT — FIXTURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ fixture inventory re-audited
+
+□ A-H all explicitly dispositioned
+
+□ A classic FLASH/RAM proved
+
+□ B executable-in-RAM proved or honestly NOT_AVAILABLE
+
+□ C external SRAM proved or honestly NOT_AVAILABLE
+
+□ D custom DMA/writable region proved or honestly NOT_AVAILABLE
+
+□ E genuine long-preamble linker fixture OR regression-only limit recorded
+
+□ F debug ELF acceptance proved
+
+□ G no-debug/stripped ELF proved
+
+□ H multiple PT_LOAD directly asserted
+
+□ Clang backed by real compiler-produced evidence OR support claim narrowed
+
+□ no hand-edited ELF/MAP evidence
+
+□ compiler/linker provenance recorded
+
+□ hashes recorded
+
+□ no host-path leak
+
+□ manifest updated
+
+□ every manifest path tracked
+
+□ clean detached checkout proves fixtures without regeneration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+61. COMMIT E EXIT — SUPPORTABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ Compatibility Matrix created
+
+□ Compatibility Fixture Report created
+
+□ Supportability Report created
+
+□ L12 revisited
+
+□ L14 dry-run/order evidence
+
+□ L15 audited and only contract-safe change made
+
+□ L16 package path reverified
+
+□ L17 residual precisely stated/reduced
+
+□ L19 wording disambiguated
+
+□ L20 raw Core enum no longer printed directly to user
+
+□ L23 bounded reliability sweep complete
+
+□ L24 Windows scratch path checked
+
+□ L25 repeated filter interaction checked
+
+□ L26 explicitly carried to Commit F untouched
+
+□ no new public schema without Architect decision
+
+□ no new format scope
+
+□ no broad Tauri capability
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+62. COMMIT E EXIT — VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ fmt
+
+□ clippy
+
+□ direct Rust workspace tests
+
+□ typecheck
+
+□ lint
+
+□ direct UI suite
+
+□ complete UI reliability repetitions
+
+□ check.py full gate
+
+□ core-smoke
+
+□ package
+
+□ deny
+
+□ drift
+
+□ update_goldens repeat evidence
+
+□ clean detached worktree
+
+□ owner DB untouched or restored byte-exact if focused package check used
+
+□ candidate remote CI 10/10
+
+□ read-back successor remote CI 10/10 if created
+
+Only then:
+
+COMMIT_E =
+COMPLETE
+
+P5 remains:
+
+IN_PROGRESS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+63. MUST REMAIN OPEN AFTER COMMIT E
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Unless separately authorized:
+
+§64 full installed journey =
+OPEN FOR COMMIT F
+
+L26 SHA256SUMS semantic decision =
+OPEN FOR COMMIT F / ARCHITECT
+
+P5_MIGRATION_RECOVERY_REPORT.md =
+COMMIT F CONSOLIDATION
+
+P5_HISTORY_DIAGNOSTICS_REPORT.md =
+COMMIT F CONSOLIDATION
+
+P5_KNOWN_LIMITATIONS.md final consolidated version =
+COMMIT F
+
+P5 final Windows install/reinstall closure =
+COMMIT F
+
+Signing readiness final record =
+COMMIT F
+
+Notarization readiness final record =
+COMMIT F
+
+Manual upgrade readiness final record =
+COMMIT F
+
+Open-source license =
+PENDING_OWNER_CONFIRMATION
+
+Do not quietly close these in Commit E.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+64. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight P5 Commit E Final Report
+
+## 1. Start authority
+
+HEAD
+origin/main
+P5 state
+Commit D state
+
+## 2. Rebase audit
+
+limitations at start
+closed items not reopened
+Commit E scope
+
+## 3. Toolchain evidence
+
+GCC
+GNU ld
+Clang
+lld if used
+versions
+targets
+
+## 4. Fixture generator
+
+script
+determinism
+relative paths
+provenance
+
+## 5. A-H cases
+
+For each:
+fixture
+toolchain
+expected
+actual
+status
+
+## 6. Clang disposition
+
+fixture
+architecture
+linker
+MAP
+support claim
+
+## 7. Compatibility Matrix
+
+platforms
+compiler/linker
+artifact formats
+layouts
+debug/no-debug
+runtime vs CI_BUILD_ONLY
+
+## 8. L5 / L8
+
+layout/DWARF
+object attribution
+
+## 9. Supportability
+
+L12
+L14
+L15
+L16
+L17
+L19
+L20
+L23
+L24
+L25
+L26
+
+## 10. UI reliability
+
+direct UI count
+repetitions
+failures
+race findings
+
+## 11. update_goldens
+
+dry runs
+scratch cleanup
+tracked changes
+
+## 12. L25 filter check
+
+section
+symbol
+keyboard
+packaged check if used
+
+## 13. Security / dependencies
+
+new Rust deps?
+new npm deps?
+new capability?
+network?
+telemetry?
+
+## 14. Fixture integrity
+
+manifest
+tracked paths
+host-path scan
+clean detached checkout
+
+## 15. Local validation
+
+Rust count
+UI count
+full gate
+core-smoke
+package
+deny
+drift
+
+## 16. Candidate head
+
+SHA
+
+## 17. Candidate CI
+
+run
+attempt
+10/10 jobs
+
+## 18. Read-back successor
+
+SHA if created
+
+## 19. Successor CI
+
+run
+attempt
+10/10 if applicable
+
+## 20. Carry-forward to Commit F
+
+§64
+L26
+closure docs
+license
+signing/notarization/update readiness
+
+## 21. Verdict
+
+COMMIT_E =
+COMPLETE / FAIL / BLOCKED
+
+P5 =
+IN_PROGRESS
+
+Product state =
+MVP CANDIDATE
+
+baseline =
+0.6.0
+
+## 22. Stop
+
+STOP.
+
+Do not start Commit F.
+
+Do not start the §64 full installed journey.
+
+Do not decide L26.
+
+Return to Architect.
+
+END OF PROMPT

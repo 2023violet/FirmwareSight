@@ -3,7 +3,8 @@
   "generated_by": "scripts/gen_p0_fixtures.py",
   "generators": [
     "scripts/gen_p0_fixtures.py",
-    "scripts/gen_p2_fixtures.py"
+    "scripts/gen_p2_fixtures.py",
+    "scripts/gen_p5_compat_fixtures.py"
   ],
   "note": "Tests verify these hashes before trusting any golden. Each value is the SHA-256 of the committed blob, so it must also equal the bytes a fresh checkout yields on any platform; .gitattributes is what makes that true.",
   "files": [
@@ -114,6 +115,192 @@
       "sha256": "96bdab3bb248eb5e2d30e66994ad2e1dfe855552e7face2ad98ee43a2dcfdba0",
       "fixture": "p2-diff-target",
       "purpose": "p2-diff-support"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/clang-arm/firmware.elf",
+      "sha256": "722bf7e20f1d731a35bcd111e5d10f49a70a882a9fc3187b7dd0765d667b85f4",
+      "fixture": "p5-clang-arm",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/clang-arm/firmware.map",
+      "sha256": "39a7eb5492d881cf55ef0a64e56af58982baf54bb70d7d367644dea9d23831c1",
+      "fixture": "p5-clang-arm",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/clang-arm/fixture.toml",
+      "sha256": "ed0f1e63ba0ab20607a654322996e8e8238de233b162be445a6bfb09cd92d108",
+      "fixture": "p5-clang-arm",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/clang-arm/plain.ld",
+      "sha256": "04b47a695c2b453f4aa4a331959ab36ff2de0e3333c34d9ea84878f702ea85d8",
+      "fixture": "p5-clang-arm",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/clang-arm/source/main.c",
+      "sha256": "f2bf7748d934310a6d50aa73faf09fc4391e2ef261989e850f081d9948d30e89",
+      "fixture": "p5-clang-arm",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/dma-region/dma-region.ld",
+      "sha256": "ec1783590e68c8775d594e3e85cbd645c6123118896a5cf99eabbc9c60488d6c",
+      "fixture": "p5-dma-region",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/dma-region/firmware.elf",
+      "sha256": "31c9c638b1787495430fa64e8a788f794b27ba27a8b0b2250e61e5e7ad698214",
+      "fixture": "p5-dma-region",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/dma-region/firmware.map",
+      "sha256": "1bc4c628d34990edf7d16812e6c5505a4ee8a262f112ff4fa9b779683433ce94",
+      "fixture": "p5-dma-region",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/dma-region/fixture.toml",
+      "sha256": "22b8b9fc7e79a289b6a7da1d2565cc35b4e0b9794d7416351dfbe44f72f7bd95",
+      "fixture": "p5-dma-region",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/dma-region/source/main.c",
+      "sha256": "92c4fad1ea2a5f34577d0ca76af410f8b48abac26a47acb3bf22a1a63103de1d",
+      "fixture": "p5-dma-region",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/extsram/extsram.ld",
+      "sha256": "201a60d9dd383a1dd54be502b8408035afff786bd5c2f426d4f515ca4f12c6dc",
+      "fixture": "p5-extsram",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/extsram/firmware.elf",
+      "sha256": "cd6c269e4586c88bbe934784437b96bf57ffd9c6c55fc286b3ab5a049c7bae43",
+      "fixture": "p5-extsram",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/extsram/firmware.map",
+      "sha256": "e31912d757cd2bd3591ff5b3ec03299583711828ebf7857f6aa61a823b2fa0f4",
+      "fixture": "p5-extsram",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/extsram/fixture.toml",
+      "sha256": "3b13f2b74ef336f375c242aedb0ba1a102ada557aad4f1faf409459239da5765",
+      "fixture": "p5-extsram",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/extsram/source/main.c",
+      "sha256": "4ec65c6bee098eacf7af8e42902f416e652557c97aef5f535ba786f09adab25c",
+      "fixture": "p5-extsram",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/long-preamble/firmware.elf",
+      "sha256": "8552c799084594e87d438ccce5691cdda40c65b79f3637196d4de3187ca14e74",
+      "fixture": "p5-long-preamble",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/long-preamble/firmware.map",
+      "sha256": "ef65bd002673c78897dfca148ad2487c4b68da3faa3479608ab0b7bd16f13316",
+      "fixture": "p5-long-preamble",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/long-preamble/fixture.toml",
+      "sha256": "6d2c402dae05d14a884e54ab223c01bb49894d4664c5182a0ca3c6a082dd18bb",
+      "fixture": "p5-long-preamble",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/long-preamble/plain.ld",
+      "sha256": "04b47a695c2b453f4aa4a331959ab36ff2de0e3333c34d9ea84878f702ea85d8",
+      "fixture": "p5-long-preamble",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/long-preamble/source/main.c",
+      "sha256": "78c7e0fbda9530a3bdae3ee700918e888bacb92440b5ea9ebd20a3ab42bb4991",
+      "fixture": "p5-long-preamble",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/no-debug/firmware-nodebug.elf",
+      "sha256": "9f50445b7f2316e187c9f298e83cc1fbe120794a5516d24920438694bd9e218c",
+      "fixture": "p5-no-debug",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/no-debug/firmware-stripped.elf",
+      "sha256": "f7a72eddabb9fdd24eba0bc4240eb763896227958d54b2fb2058f94771760711",
+      "fixture": "p5-no-debug",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/no-debug/firmware.map",
+      "sha256": "616c0e35544efd586f7a11534c5ea708c914e95f5b645cb40d859fd382a4de35",
+      "fixture": "p5-no-debug",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/no-debug/fixture.toml",
+      "sha256": "eca53e6307708e23fe9c3a7ff43e69d494225417a9c69e16f6655d5ec2bda372",
+      "fixture": "p5-no-debug",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/no-debug/plain.ld",
+      "sha256": "04b47a695c2b453f4aa4a331959ab36ff2de0e3333c34d9ea84878f702ea85d8",
+      "fixture": "p5-no-debug",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/no-debug/source/main.c",
+      "sha256": "f2bf7748d934310a6d50aa73faf09fc4391e2ef261989e850f081d9948d30e89",
+      "fixture": "p5-no-debug",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/ram-exec/firmware.elf",
+      "sha256": "54e77ae42cb17c7d17366ef2461aaa7b78337eb7c9edb84e0b8945828400642f",
+      "fixture": "p5-ram-exec",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/ram-exec/firmware.map",
+      "sha256": "2891c91004f30cb104b9face1f617685a69ae59146ebf7d77535885423021b41",
+      "fixture": "p5-ram-exec",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/ram-exec/fixture.toml",
+      "sha256": "dd3c97a86516457f6be1fc76d14c13c6f19d9c9f9aebdcbcae4628ad3a06b79f",
+      "fixture": "p5-ram-exec",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/ram-exec/ram-exec.ld",
+      "sha256": "f1fabed001b13eab48b11929c1afa8c3839b8a6ea7a615faf2050c07eae413c0",
+      "fixture": "p5-ram-exec",
+      "purpose": "compatibility-acceptance"
+    },
+    {
+      "path": "fixtures/elf/p5-compat/ram-exec/source/main.c",
+      "sha256": "210ad51570f5cffb0e789d2dbcc4f10f36c38f042106a189c4f96fd219acd3d9",
+      "fixture": "p5-ram-exec",
+      "purpose": "compatibility-acceptance"
     },
     {
       "path": "fixtures/malformed/empty.bin",

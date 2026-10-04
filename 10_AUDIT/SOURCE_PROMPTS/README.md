@@ -534,7 +534,7 @@ text with no source file; each says so in its own entry instead of standing for 
   told — not because it governs anything now. `P5_VALIDATION/P5_COMMIT_D_DESIGN.md` §0 carries the
   correction, and the design decisions that survived from this prompt are the ones the continuation restated.
 
-## P5 Commit D Continuation v1.2 — CURRENT ACTIVE AUTHORITY
+## P5 Commit D Continuation v1.2 — COMPLETE, HISTORICAL
 
 - File: `FirmwareSight_P5_CommitD_Continue_v1.2.txt`
 - SHA-256: `600d70a358778280b667d1c423b7309079f3a5b575ad0c4b919b75de8c274033` (31,588 bytes, 1,472 LF
@@ -557,6 +557,44 @@ text with no source file; each says so in its own entry instead of standing for 
   archived — the measurement and the stop were reported, and the owner chose to archive **v1.2** as this
   round's authority. What v1.1 said is not nothing: v1.2's §1 restates its content and §2 lists the work it
   had already validly produced, which is what made the continuation safe to resume without a redo.
+
+## P5 Commit E Compatibility Fixtures, Support Matrix & Supportability Closure v1.0 — CURRENT ACTIVE AUTHORITY
+
+- File: `FirmwareSight_P5_CommitE_Compatibility_Supportability_v1.0.txt`
+- SHA-256: `030ca28233b964958d6aea8e59a312c66ceb4d117273cba9e667950b4ba21148` (53,915 bytes, 2,459 LF
+  endings, 65 numbered sections) — recomputed from the archived copy in this directory and `cmp`-verified
+  byte-identical to the file the owner delivered on 2026-10-04.
+- Authority: the canonical unit `P5_COMMIT_E_COMPATIBILITY_SUPPORTABILITY` and nothing else. It names what it
+  is **not** — not a Commit D extension, not Commit F, not P5 closure, not V1, not B1/RC/GA, not a format
+  expansion, not a parser rewrite — and its discipline is REAL FIXTURES / NO HAND-EDITED EVIDENCE / CLAIM
+  ONLY WHAT WAS PROVEN / NO FORMAT SCOPE EXPANSION / NO P5 CLOSURE / NO L26 FIX / NO FULL §64 JOURNEY. Its
+  work is to strengthen evidence **inside** the frozen GCC/Clang ELF + GNU ld MAP cohort (§6 forbids Keil,
+  IAR, TI COFF, HEX, BIN, UF2, Mach-O, PE and universal MAP shapes, and forbids a DWARF semantic-analysis
+  feature), produce `P5_COMPATIBILITY_MATRIX.md`, `P5_COMPATIBILITY_FIXTURE_REPORT.md` and
+  `P5_SUPPORTABILITY_REPORT.md`, and disposition §13's eight layout cases A–H with four words only.
+- The start-authority delta, measured rather than smoothed. §0 and §2 fix the start at
+  `origin/main = 956e250`, Run `37204847474`, 10 of 10, and §2 requires a STOP plus a classification if the
+  remote moved. It had moved two heads: `57a904e` and `bfbc1aa`, ten files, 98 insertions and 30 deletions,
+  every one of them `.ai/`, `P5_VALIDATION/`, `README.md`, `INDEX.md` or `SHA256SUMS` — **no** product
+  source, fixture, schema, migration, script, configuration or workflow path. The behaviour tree Commit E
+  builds on is therefore the one §0 describes, and `bfbc1aa` — green 10 of 10 on Run `37214675036`, first
+  attempt, all ten jobs read individually — is the HEAD the round actually starts from. Nothing was rewound;
+  no published history was rewritten.
+- What it reserves for Commit F (§1, §63): the full §64 installed journey (a Commit E packaged check is
+  allowed but must be labelled `FOCUSED_COMMIT_E_PACKAGE_CHECK`, never an installed-journey pass), the L26
+  `SHA256SUMS` semantic decision — explicitly not to be fixed here, not by blob bytes, not by normalizing
+  line endings, not by wiring the verifier into CI, and not by editing `ADR-0028` — and the two consolidation
+  documents `P5_MIGRATION_RECOVERY_REPORT.md` and `P5_HISTORY_DIAGNOSTICS_REPORT.md`.
+- Where it must stop mid-round: §28 sends L8 back to the Architect if closing it needs a new MAP
+  grammar/parser subsystem; §32 stops the L15 subproblem if the change would move serialized evidence
+  semantics; §42 stops any fix that needs a new portable field, a renamed serialized enum, a schema version
+  or a release-identity change, and asks for `P5_COMMIT_E_SCHEMA_DECISION.md` in its place; §46 stops before
+  any new product dependency or capability. §9 is absolute about provenance — a fixture is genuine
+  compiler/linker output, and hand-edited ELF bytes, hex-patched headers, a hand-written MAP, padding bytes
+  dressed up as layout, or a GCC ELF relabelled as Clang are all forbidden. §45 forbids regenerating
+  existing goldens as a routine step, and §50/§53 forbid counting repetition campaigns into the direct test
+  totals. §22 closes with three honest Clang outcomes and no fourth: blanket `SUPPORTED` without a fixture is
+  not one of them.
 
 ## Supersession note on the V0 Batch A activation entry
 
