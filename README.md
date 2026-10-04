@@ -157,12 +157,16 @@ P5 diagnostics and recovery (Commit D): BUILT, GATED, AND WALKED IN AN INSTALLED
         person names a folder; the store is named by file and never by directory, on screen and in the file, and
         the exported file on the packaged build contains no `/` and no `\` character at all. The startup refusal
         is now a typed sentence and exit code 1 rather than a panic. check.py 16/16 with the package group 4/4,
-        854 Rust / 210 UI, seven mutation proofs, and §27's focused walk run against the installed package with
+        854 Rust / 210 UI, eight mutation proofs, and §27's focused walk run against the installed package with
         the owner's store parked, copied to a second volume and restored byte-identically
         (ORIGINAL_DB_RESTORED = YES, ORIGINAL_DB_SHA_MATCH = YES). Two of the fixes exist only because the
         installed walk was run: a `setup` error is panicked by Tauri inside its event loop, so the exit path
         that looked typed was a 101 with a build-machine path in it, and a file that is not a database was being
-        reported as a rolled-back migration to "schema version 0".
+        reported as a rolled-back migration to "schema version 0". A third exists only because the remote was
+        run: the product head came back **8 of 10** (macOS Core Smoke, Rust ubuntu-latest) on a Commit D test
+        that compared two snapshot files whose only available difference was a second-granular timestamp, so the
+        assertion was a race with a clock; the repair is test-only, marks each store with a row it can name, and
+        reads the standing snapshot to prove which one won.
         Evidence P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md, P5_VALIDATION/P5_COMMIT_D_DESIGN.md and
         P5_VALIDATION/P5_DIAGNOSTICS_DESIGN_CHECKLIST.md
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP

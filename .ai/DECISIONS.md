@@ -1520,6 +1520,16 @@ with the alternative that was rejected and what settled it.
   memory, no byte-exact archive was claimed for v1.1, and the owner chose to archive **v1.2** as this round's
   authority. The v1.0 prompt that an earlier round had archived as *the* authority is kept, re-labelled
   `SUPERSEDED, HISTORICAL`.
+- **A test that passes on one machine's clock is not a test.** The snapshot-replacement assertion in
+  `integrity_and_backup.rs` compared two whole files and required them to differ, and the only difference its
+  two fixtures could offer was the second-granular `applied_at` default on `schema_migrations`. So the product
+  head came back **8 of 10**: `macOS Core Smoke` and `Rust (ubuntu-latest)` red on that one line, the same test
+  green on `Rust (windows-latest)` and on this host. Rejected: sleeping until a second boundary (a slower test
+  that still races), retrying until the bytes differ (a test that passes by waiting for luck), and dropping the
+  assertion (which snapshot survives is worth proving). The repair marks each store with a named `sections` row
+  and reads that row back out of the standing snapshot, so the claim is about data and the byte comparison is no
+  longer the only evidence for it. The failed head stays listed in `P5_CI_AUTHORITY.md`; the row was not made to
+  wait for a green one.
 - **What this commit did not do.** No Commit E fixture expansion, no parser performance work, no signing, no
   notarization, no updater, no telemetry, no network, no cloud, no accounts, no licence choice, no fifth
   top-level page, no P5 closure. `capabilities/main.json` is still `["core:default"]`; the two new commands

@@ -153,7 +153,7 @@ last_updated: "2026-10-04"
   error is panicked by the framework inside its event-loop callback
   (`tauri-2.12.0/src/app.rs:1443-1445`) and the `Error::Setup` arm written for it was unreachable — and a
   file that is not a database was being described as a rolled-back migration to "schema version 0", a step
-  that never ran. Both are fixed in this commit, the second with a seventh mutation proof. It also
+  that never ran. Both are fixed in this commit, the second with the seventh mutation proof. It also
   falsified two sentences this repository had written for itself: a `setup` failure does *not* return
   before the event loop starts, and a window *is* mapped — measured visible from t=20 ms until the process
   leaves at t=360 ms — so §22's stop is now described as it measures (a window with nothing true to say)
@@ -163,6 +163,17 @@ last_updated: "2026-10-04"
   `installChannel: "nsis"`. Present counts: `check.py` **16 of 16**, package group **4 of 4**,
   **854 Rust / 210 UI in 8 files**. The owner's store was parked, backed up on a second volume and restored
   byte-identically at both cycles; `ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`.
+- **The remote found a third, and it was in Commit D's own test.** Run `37200245520` on the product head came
+  back **8 of 10**: `macOS Core Smoke` and `Rust (ubuntu-latest)` each panicked on one assertion in the
+  snapshot-retention test this commit added, which compared two whole snapshot files whose only available
+  difference was the **second-granular** `applied_at` default on `schema_migrations` — a clock, not a fact. The
+  same test was green on this host and on `Rust (windows-latest)`, so nothing about the product was in
+  question and all three package jobs passed on that head. Rejected: a sleep, a retry, and deleting the claim;
+  the repair marks each store with a named row and reads that row back out of the standing snapshot, proven
+  non-vacuous by an eighth mutation (`backup.rs` keeping a stale snapshot reddens it alone), then 20
+  fresh-process runs of the repaired test and a local `16 of 16` + `3 of 3` core-smoke. The failed head is
+  listed in `P5_CI_AUTHORITY.md` rather than replaced, and **the repair head's own run still has to be read
+  back before any sentence calls Commit D green.**
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256

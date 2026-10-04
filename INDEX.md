@@ -75,7 +75,11 @@ owner's store parked, backed up on a second volume and restored byte-identically
 finding two defects no unit test could reach — the startup refusal exited **101 through a Tauri panic**
 rather than the typed exit 1, because a `setup` error is panicked by the framework inside the event loop
 (`tauri-2.12.0/src/app.rs:1443-1445`), and a file that is not a database was being described as a rolled-back
-migration to "schema version 0" — both fixed here, the second with the seventh mutation proof.
+migration to "schema version 0" — both fixed here, the second with the seventh mutation proof. The remote then
+found a third defect the local gate could not: the product head came back **8 of 10** because a Commit D test
+asserted two snapshot files differ when the only difference its fixtures offered was a second-granular
+timestamp, so the claim was a race with a clock. The repair names the difference instead of timing it, and the
+failed head keeps its row in `P5_VALIDATION/P5_CI_AUTHORITY.md`.
 **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source

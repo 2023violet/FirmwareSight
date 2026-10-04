@@ -111,12 +111,19 @@ Diagnostics is a closed 31-field allowlist on the Help page exported through a R
 walk ran against the packaged installer: the exported file contains no `/` and no `\` character at all, the
 store is named by file and never by folder, and the owner's store was parked, copied to a second volume and
 restored byte-identically at both cycles (`ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`).
-Locally: `check.py` **16 of 16**, package group **4 of 4**, **854 Rust / 210 UI in 8 files**, seven mutation
+Locally: `check.py` **16 of 16**, package group **4 of 4**, **854 Rust / 210 UI in 8 files**, eight mutation
 proofs. Two of this commit's fixes exist **because the installed walk found them** and no unit test could
 have: the startup refusal exited 101 through a Tauri `panic!` rather than the typed exit 1 (a `setup` error
 is panicked by the framework inside its event loop, `tauri-2.12.0/src/app.rs:1443-1445`), and a file that is
 not a database was being described as a rolled-back migration to "schema version 0". Read
 `P5_COMMIT_D_DESIGN.md` §9 before touching that boundary again.
+A **third** fix exists because the remote found it: the same head went **8 of 10**, and the two red jobs —
+`macOS Core Smoke` and `Rust (ubuntu-latest)` — panicked on one assertion in a test Commit D added, which
+compared two snapshot files whose only available difference was a **second-granular** `applied_at` default.
+That is a race with a clock, and it is this repository's own L23 shape wearing a storage badge; the repair
+names the difference instead of timing it (§11 and §12 of `P5_COMMIT_D_DESIGN.md`, mutation H), so a claim
+about which snapshot stands now holds a fact a reader can query rather than a window the runner happens to
+leave open.
 The remaining workstream order is unchanged: Commit E's fixture cohort, then Commit F's documentation and
 closure. **What Commits C and D do not close is the acceptance of Commit C**: the
 onboarding panel and the History page have never been operated in the installed binary, so the full §64
@@ -124,9 +131,13 @@ journey (install → onboarding → Analyze → Compare → Gate → Bundle → 
 reinstall → uninstall → reinstall → documented data behaviour) still runs once, on a
 disposable firmware project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. The
 remote has seen this head: Run `37154946484` on `e863d0c` came back **10 of 10** on the first attempt, which
-is the repository's rule for every P5 head, and `P5_VALIDATION/P5_CI_AUTHORITY.md` carries the row. **The
-current head honours that rule too**: `111fe32` — §32's L22 draft with its identity premise test, plus the
-test-only repair of L23's sixth race instance — went **10 of 10** on Run `37158606478`, first attempt. The §32
+is the repository's rule for every P5 head, and `P5_VALIDATION/P5_CI_AUTHORITY.md` carries the row. **Commit D's
+product head broke that rule, and the row says so rather than waiting for the next green one**: Run
+`37200245520` on `3400981` came back **8 of 10** on its first attempt, with the two red jobs both naming one
+assertion in a test that head added. The test-only repair is the head you are reading this from; its own run is
+what the next read-back writes into that file, and until you have read it, no sentence in this repository may
+call Commit D's CI history clean. `111fe32` before it did honour the rule — **10 of 10** on Run
+`37158606478`, first attempt. The §32
 STOP has been **answered**: `ADR-0028` is Accepted and decides that release identity uses the exact bytes
 observed on disk, so the line-ending finding stays exactly as it behaves — do not arrive here and "fix" it by
 normalizing a digest, and do not edit this repository's `.gitattributes`. **Do not start a

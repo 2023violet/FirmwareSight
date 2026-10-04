@@ -334,6 +334,38 @@ processes with 0 failures. `cargo fmt --all -- --check`,
 `npx eslint .` are clean at this point, and the complete local gate ran **16 of 16** on this tree with the
 package group **4 of 4** beside it.
 
+**One of those numbers was a race, and the remote found it.** Run `37200245520` on the Commit D product head
+came back **8 of 10** — `macOS Core Smoke` and `Rust (ubuntu-latest)` both red, on the same assertion in the
+same test, at `integrity_and_backup.rs:814`:
+`a_repeated_transition_keeps_one_snapshot_and_replaces_it_only_with_a_written_one` asserted
+`assert_ne!(reread_snapshot, kept_snapshot)` and the two byte strings were equal. The product was not wrong —
+the fixture was. `build_a_v4_store` writes fixed data on purpose, so the two v4 stores that test builds differ
+only by the `applied_at` default on `schema_migrations`, and that default is
+`strftime('%Y-%m-%dT%H:%M:%SZ','now')`: **one-second granularity**. A rebuild inside the same second produces a
+byte-identical file, so the assertion was a comparison against the clock. It passed on this Windows host and on
+`Rust (windows-latest)` and failed on `macOS Core Smoke` and `Rust (ubuntu-latest)`, which is what a race looks
+like: same test, same bytes of source, three machines, two outcomes. Both red jobs named the storage suite, not
+a product command, so the repair below is test-only and no production behaviour changed — the counts above are
+unchanged by it, because no test function was added.
+
+The repair removes the clock from the claim instead of slowing the test down. `mark_a_v4_store` inserts a
+`sections` row with `section_index = 99` whose `name` says which store it is, the test marks the first store
+`snapshot-marker-first` and the second `snapshot-marker-second`, and after the retention assertion the test
+reads the marker **out of the standing snapshot** and asserts it is the second one, plus
+`schema_version_at(&backup) == 4` so the file that won is still the before-state. The `assert_ne!` stays — a
+replacement has to change the bytes — but it is no longer the only evidence, and the evidence that replaced it
+names a fact rather than a timestamp. `rusqlite::Connection::open`, not `Database::open`, because opening the
+snapshot with the product would migrate it. No sleep, no retry, no widened timeout: §29's ban on L23-style
+timing work applies to a fix for a timing bug more than anywhere else.
+
+Measured after the repair, on this tree: `cargo test -p firmwaresight-storage` **131 passed, 0 failed**; the
+repaired test run **20 times in fresh processes**, 20 passed and 0 failed; `python scripts/check.py` **16 of 16
+steps passed**; `python scripts/check.py --only core-smoke` — the group whose macOS job went red — **3 of 3**;
+`cargo fmt --all -- --check` clean. The package group was not re-run on this host: the only file that changed
+after the **4 of 4** packaging above is a test file, and CI's three package jobs built and verified that same
+product source on the failed head and came back green, so packaging is proven against the bytes this repair
+leaves standing — and it runs again remotely on the repair head.
+
 ## 12. Mutation proofs run (§23)
 
 Each mutation was applied to the production source, the affected suite run, and the file restored from a copy
@@ -349,17 +381,24 @@ taken before the edit; the restored SHA-256 equals the pre-mutation value in eve
 | E | `startup.rs`: `without_directories` returns the engine's words unchanged | `startup` unit tests | 3 failed — the folder-repeat test, the catch-all wording test, the snapshot-wording test |
 | F | `Help.tsx`: render an `unhealthy` store as `healthy` | `help.test.tsx` | 1 failed — `describes a damaged store in words…`; the other 24 stayed green |
 | G | `startup.rs`: the version-0 arm's pattern widened to `version: 1` | `startup` unit tests | 1 failed — `a_file_that_is_not_a_database_is_reported_as_nothing_having_run`, at its first assertion, because the corrupt file then falls through to the rolled-back sentence |
+| H | `backup.rs`: a snapshot already in place is kept instead of replaced (`snapshot_to` returns `Ok` when the destination exists, after deleting its staging file) | `integrity_and_backup` | 2 failed — the retention test on its `assert_ne!` at `:833`, and the un-writable-destination test at `:741`. With the byte assertion temporarily lifted, the marker read-back failed on its own at `:846` with `left: "snapshot-marker-first"`, `right: "snapshot-marker-second"`, which is the proof that the new assertion carries the claim and is not decoration on the old one |
 
-A–D are §23's four. E, F and G are additions this round earned: the startup redaction and the health sentence
+A–D are §23's four. E, F, G and H are additions this round earned: the startup redaction and the health sentence
 are new behaviour in this commit, and a regression that cannot be reddened is not evidence for it. G came out
 of the installed-app walk rather than out of imagination — §9 explains why the sentence it protects was wrong
-before it was written. D and F are the
+before it was written. H came out of the remote's red job, and it is the one that checks a *test*: the claim
+under repair was the new marker read-back, so the mutation had to remove the replacement rather than the
+message. D and F are the
 two worth reading twice — each reddens exactly one test, which is what a targeted leak and a targeted mistranslation
 look like, and each proves that the remaining suite is not the one carrying that claim.
 
 The SHA-256 each mutated file was restored to, recorded so the byte-exact claim is checkable rather than
 asserted: `health.rs e314a85e2f2b0685…`, `db.rs 6a65434a0b402a9b…`, `diagnostics.rs a96c172239ed9c49…` (both
-after C and after D), `startup.rs e4bb8d583ffd814e…`, `Help.tsx 3ea38cbb193bdf59…`.
+after C and after D), `startup.rs e4bb8d583ffd814e…`, `Help.tsx 3ea38cbb193bdf59…`,
+`backup.rs af7bac846bf5e1d2…` (after H). For H the test file was edited too, to lift one assertion so the
+other could be measured alone; it was copied before the edit and restored from that copy, and
+`sha256sum` matched the pre-edit value `f8f6a0ec6c8439ec…` afterwards. The restored `backup.rs` and a
+`git diff --stat` that names only the test file are the two facts that say no mutation landed.
 
 ## 13. Security and dependency review (§24)
 

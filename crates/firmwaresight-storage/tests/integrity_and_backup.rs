@@ -476,6 +476,23 @@ fn build_a_v4_store_at(store: &Store) {
     build_a_v4_store(store);
 }
 
+/// One row that says *which* of two v4 stores this is.
+///
+/// `build_a_v4_store` is deliberately fixed data, so two builds of it differ only by the second-granular
+/// `applied_at` default on `schema_migrations` — a clock, not a fact. A snapshot claimed to be the newer
+/// one has to carry something the older one cannot, or that claim is a race with the timer: it passes on
+/// a slow machine and fails on a fast one.
+fn mark_a_v4_store(store: &Store, marker: &str) {
+    let conn = rusqlite::Connection::open(store.path()).expect("reopen the v4 file");
+    conn.execute(
+        "INSERT INTO sections (build_id, section_index, name, role, is_alloc, is_write,
+                               is_execute, file_offset, file_size)
+         VALUES ('build-d', 99, ?1, 'code', 1, 0, 0, 4096, 16)",
+        rusqlite::params![marker],
+    )
+    .expect("mark the v4 store");
+}
+
 // ---- C. backup: taken before the upgrade reaches the store --------------------------------------
 
 #[test]
@@ -789,6 +806,7 @@ fn a_snapshot_that_cannot_be_written_stops_the_upgrade_and_leaves_the_store_at_v
 fn a_repeated_transition_keeps_one_snapshot_and_replaces_it_only_with_a_written_one() {
     let store = Store::new("backup-replace");
     build_a_v4_store(&store);
+    mark_a_v4_store(&store, "snapshot-marker-first");
     let first = Database::open(store.path()).expect("the first upgrade runs");
     drop(first);
     assert!(
@@ -802,6 +820,7 @@ fn a_repeated_transition_keeps_one_snapshot_and_replaces_it_only_with_a_written_
     let backup = store.backup_for(4);
     let kept = std::fs::read(&backup).expect("read the first snapshot");
     build_a_v4_store_at(&store);
+    mark_a_v4_store(&store, "snapshot-marker-second");
     let second = Database::open(store.path()).expect("the second upgrade runs");
     drop(second);
 
@@ -815,6 +834,28 @@ fn a_repeated_transition_keeps_one_snapshot_and_replaces_it_only_with_a_written_
         std::fs::read(&backup).expect("reread the snapshot"),
         kept,
         "the replacement is the newer snapshot, not the stale one left standing"
+    );
+    // The bytes differ, which is not yet the claim. Read the marker out of the standing snapshot so the
+    // difference has a name: this proves the one file present came from the *second* store and not from
+    // the first. `rusqlite::Connection::open`, not `Database::open` — opening the snapshot with the
+    // product would migrate it, and a snapshot has to stay the before state.
+    let standing =
+        rusqlite::Connection::open(&backup).expect("the standing snapshot is a database");
+    let marker: String = standing
+        .query_row(
+            "SELECT name FROM sections WHERE section_index = 99",
+            [],
+            |row| row.get(0),
+        )
+        .expect("the standing snapshot carries the marker row");
+    assert_eq!(
+        marker, "snapshot-marker-second",
+        "the only snapshot in the directory came from the second store"
+    );
+    assert_eq!(
+        schema_version_at(&backup),
+        4,
+        "and it is still the before schema, not the schema the store became"
     );
     assert_eq!(schema_version_at(store.path()), SCHEMA_VERSION);
 }

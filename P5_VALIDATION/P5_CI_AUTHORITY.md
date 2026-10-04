@@ -6,7 +6,7 @@ version: "1.0"
 status: "IN_PROGRESS"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # P5 — the authoritative CI job set (prompt §41)
@@ -59,6 +59,8 @@ diff.
 | `37154946484` | `e863d0c` | Commit C: §13 first-run onboarding, §14 Help/About with the window title fixed in Rust over a closed page enum, and §15–§18 local History over three new bounded storage read APIs with no new migration (19 storage + 11 desktop + 40 UI tests new) | **10 of 10** | success, first attempt. The two `Desktop UI` jobs are the load-bearing pair for this head: the History page's 40 UI tests and the rail's four-entry guard assertions ran on both `windows-latest` and `ubuntu-latest`, and the same head ran `Rust` on both, so the new reads are proven on two platforms' SQLite rather than one |
 | `37156287999` | `e070508` | documentation only: Commit C's run read back into `P5_CI_AUTHORITY.md`, and four governance sentences corrected to say it had been read at all | **10 of 10** | success, first attempt. Worth its row for one negative fact: `Desktop UI (windows-latest)` was green on the head whose UI tree is byte-identical to the one that later lost L23's sixth instance **locally**, so CI's green said nothing about that race and the local full gate under its own compile load was what found it |
 | `37158606478` | `111fe32` | §32's L22 ADR draft plus the identity premise test, and the test-only repair of L23's sixth instance | **10 of 10** | success, first attempt. `Desktop UI (windows-latest)` **and** `Desktop UI (ubuntu-latest)` are the load-bearing pair for this head: the repaired Compare suite ran on both, so the awaited second-wave query is proven on two runners rather than only on the host that lost it, and `Rust (windows)` + `Rust (ubuntu)` ran the new `bundle_builder.rs` identity test on two filesystems' line-ending behaviour |
+| `37159810291` | `2cdfced` | documentation only: that run read back into this file, and the governance sentences corrected to name the two jobs that carry the proof | **10 of 10** | success, first attempt |
+| `37200245520` | `3400981` | Commit D's product head: storage-owned `integrity_check`, the WAL-safe online-backup snapshot taken before any older store is migrated, the migration matrix re-run against it, the closed 31-field Diagnostics allowlist with its Rust-side export, the typed startup refusal, `ADR-0028`, the installed-app walk and its two product fixes | **8 of 10** | **failure**, first attempt — the rule broke here, and the break is this commit's own doing. Two jobs red on one assertion: `macOS Core Smoke` and `Rust (ubuntu-latest)` each panicked at `integrity_and_backup.rs:814`, where the snapshot-retention test compared two whole-file byte strings that were **equal**, because the only difference its two fixtures could offer was the second-granular `applied_at` default on `schema_migrations` — a clock, not a fact. The product took no blame and the repair is test-only: `Rust (windows-latest)`, both `Desktop UI` jobs, `Generated output drift`, `Dependency policy` and **all three `Package` jobs** were green on the same head, so the installer this run attached is the one §27 walked |
 
 Read back with `gh run view 37143046338 --json headSha,conclusion,jobs`, then
 `gh run download 37143046338 -D <evidence root>/CI_PACKAGES_INDEX_FIX` — which at that moment returned the
@@ -81,6 +83,14 @@ first attempt", and a head that went red is part of the chain that produced the 
 runner it landed on is the one that lost the race, and pretending otherwise would make the green run
 meaningless. The reproduction and repair are in `P5_PRODUCTIZATION_AUDIT.md` §0a, with the evidence root
 outside this repository.
+
+`3400981` is the second failed head, and the two failures teach opposite lessons. `9e3b1de` was reddened by a
+race it never touched; `3400981` was reddened by a race **it wrote**, in a test added by the commit under
+review. And where `111fe32`'s row records a local gate that caught something CI missed, this head records the
+inverse: the same test passed here on every run made before the push, passed the whole `16 of 16` gate twice,
+and the two machines that disagree on clock granularity are the ones that found it. A snapshot-replacement
+claim that survives only on a slow host is not a claim. Both red jobs, their assertion, and the mutation that
+proves the repaired assertion carries the claim are in `P5_COMMIT_D_DESIGN.md` §11 and §12.
 
 `37133706214` is listed for a second reason: it is the run that showed the gate's own reporting could lie.
 The failure was not the installer — no installer was attempted — and it was not visible in the group result
