@@ -191,3 +191,80 @@ half of the first, §2's rows 2-11 are the diagnostics half of the second, and t
 the online backup API rather than `VACUUM INTO`, why version 0 gets its own sentence, what the allowlist
 excludes and how that is proven — is in `P5_COMMIT_D_DESIGN.md`. Nothing here is a P5 verdict; the state
 stays `IN_PROGRESS`.
+
+## 8. §32 read-back — the chain of heads, and the twelve facts it asks for
+
+Read back with `gh api repos/…/actions/runs/<id>` and `…/runs/<id>/jobs`, one call per run, every job named
+individually rather than inferred from a green overall state (§31). No run was re-attempted: each of the three
+runs below is `run_attempt = 1`, and the one failure stays failed in the record.
+
+| Head | What it is | Run | Attempt | Jobs |
+| --- | --- | --- | --- | --- |
+| `3400981` | Commit D's product head | `37200245520` | 1 | **8 of 10 — failure.** `macOS Core Smoke` and `Rust (ubuntu-latest)` red on one assertion in a test this head added |
+| `bccea88` | the test-only repair of it | `37202016141` | 1 | **10 of 10 — success.** `macOS Core Smoke` and `Rust (ubuntu-latest)` both green on the same test |
+| `90aa69d` | the record commit (the audit's §0a, §G and L26) | `37202301591` | 1 | **10 of 10 — success** |
+| this commit | §32's read-back successor | — | — | its own run is external evidence; §32 forbids a further commit to record it |
+
+The ten jobs, named as Actions reports them, from the two 10-of-10 runs: `Rust (windows-latest)`,
+`Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`, `Desktop UI (ubuntu-latest)`, `Generated output drift`,
+`Dependency policy`, `macOS Core Smoke`, `Package Windows`, `Package Ubuntu`, `Package macOS`. The three
+package jobs cannot close on a skipped group: the gate returns 1 when CI records a skip, and each of these
+uploaded its set (`if-no-files-found: error` is the second net).
+
+**The twelve items §32 names, each with the measurement behind it.**
+
+1. **Product head SHA** — `3400981`, `git rev-parse` of the commit that carries the code, not of the docs
+   commit that followed.
+2. **Run id and attempt** — `37200245520`, attempt 1, conclusion `failure`; the repair's `37202016141` and the
+   record's `37202301591`, both attempt 1, both `success`.
+3. **The exact ten jobs** — above, listed from the API rather than from the workflow file.
+4. **Rust count** — **854** passed / 0 failed, summed over the 46 test targets of one
+   `python scripts/check.py` `rust/test` run on the repaired tree (that log's `frontend/test` line:
+   **210 passed (210)** in 8 files).
+5. **Local gate** — `check.py` **16 of 16** steps; `--only core-smoke` **3 of 3**, which is the group whose
+   macOS job went red; `--only package` **4 of 4** on the packaged build before the repair, and the repair
+   touches no source the installer contains.
+6. **Backup mechanism** — SQLite's own online backup through `rusqlite`'s `backup` feature
+   (`Connection::backup("main", &staging, None)`), staged beside the destination, opened, `integrity_check`ed
+   and schema-checked, then `rename`d into place. Rejected: `std::fs::copy`, wrong under WAL, and
+   `VACUUM INTO`, whose filename binds as SQL `TEXT` and whose engine error carries an absolute path.
+   Adds no package: 22 storage / 246 workspace either way, `Cargo.lock` untouched.
+7. **Integrity results** — `integrity_check()` is storage-owned, read-only, repairs nothing; healthy proof,
+   unhealthy proof, a many-problems store bounded to ≤ 4 segments and 600 characters with a truncation notice
+   and no path separator, and a check that writes nothing to a store with rows. `integrity_and_backup.rs` is
+   13 tests; storage is 131; the corruption fixtures were repeated 10 times in fresh processes with 0 failures.
+8. **Migration matrix** — fresh → v5 writes no snapshot; v1, v2, v3 and v4 file-backed stores each snapshot
+   **at the version they were found in**, each named `…pre-migration-v<from>-to-v5.sqlite`, each preserving its
+   rows through the upgrade; a v5 reopen backs nothing up; and a snapshot that cannot be written stops the
+   upgrade with the store left at the schema it had.
+9. **Diagnostics privacy evidence** — a closed **41-key** allowlist
+   (`ALLOWED_KEYS: [&str; 41]`, `apps/desktop/src-tauri/tests/diagnostics.rs:47`, enforced by
+   `no_field_of_the_payload_can_hold_a_path`), eight `Diagnostics*` structs, no map and no `Value`;
+   positive controls that plant an absolute artifact path, a project name, a symbol name and a Git remote in a
+   real session and assert none of them can reach the payload or the exported file;
+   and the installed export measured: 1,122 bytes, **zero `/` and zero `\` characters in it**, the store named
+   by file and never by folder.
+10. **Installed-app focused evidence** — §27's 17 items, row by row in §2, against the packaged NSIS installer
+    rather than `cargo run`: dialog driven from Rust, the file parsed by a JSON reader with no product code in
+    the way, a minimal Analyze smoke that moved the counts from zero to one project and one build, and the
+    close → reopen → re-export cycle.
+11. **Owner DB restoration** — parked before the walk with its three digests recorded, copied to a second
+    volume, restored at both cycles and byte-identical to §1: `ORIGINAL_DB_RESTORED = YES`,
+    `ORIGINAL_DB_SHA_MATCH = YES`, and the store reading `integrity_check = ok` with the same 1 project,
+    2 builds, 3 artifacts and 34 sections it held before.
+12. **`ADR-0028`** — release identity uses the exact bytes observed on disk; `status: BASELINE`; no release
+    identity production code changed in Commit D, the line-ending premise stays a green test
+    (`a_notes_file_that_differs_only_in_line_endings_is_a_different_release`), and §32's draft is re-statused
+    `EXECUTION_RECORD` rather than rewritten.
+
+**What this successor changed.** Documentation only: `git diff --stat` against `90aa69d` names no file under
+`crates/`, `apps/` or `scripts/`. **What the repair changed** was one test file — `bccea88`'s diff touches
+`crates/firmwaresight-storage/tests/integrity_and_backup.rs` and documentation, no production source, which is
+why the packaged evidence in §1-§5 still describes the binary this commit closes on.
+
+**Two counts this file's own round got wrong, corrected here rather than left standing:** the allowlist is 41
+keys, not the "31-field" figure six governance sentences carried from the product head, and the DTO is eight
+structs, not seven (§7 of the design doc records both measurements). **And one limitation the read-back
+exposed:** `SHA256SUMS` verifies on the host that wrote it and disagrees with a clean checkout for 17 entries;
+it is L26 in the audit, deliberately unfixed, because deciding which bytes a baseline checksum file means is
+Commit F's call.

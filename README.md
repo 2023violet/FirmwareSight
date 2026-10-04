@@ -152,7 +152,7 @@ P5 diagnostics and recovery (Commit D): BUILT, GATED, AND WALKED IN AN INSTALLED
         file-backed store is snapshotted with SQLite's **online backup API before** it is migrated (a file copy
         is wrong under WAL, and `VACUUM INTO` binds its filename as text), the copy is opened and health-checked
         before it is renamed into place, and a snapshot that cannot be written stops the upgrade instead of
-        starting it. Diagnostics is a closed 31-field allowlist assembled in Rust, shown on the page that
+        starting it. Diagnostics is a closed 41-key allowlist assembled in Rust, shown on the page that
         already exists rather than as a fifth verb, and exported through a native dialog that opens only when a
         person names a folder; the store is named by file and never by directory, on screen and in the file, and
         the exported file on the packaged build contains no `/` and no `\` character at all. The startup refusal
@@ -166,7 +166,9 @@ P5 diagnostics and recovery (Commit D): BUILT, GATED, AND WALKED IN AN INSTALLED
         run: the product head came back **8 of 10** (macOS Core Smoke, Rust ubuntu-latest) on a Commit D test
         that compared two snapshot files whose only available difference was a second-granular timestamp, so the
         assertion was a race with a clock; the repair is test-only, marks each store with a row it can name, and
-        reads the standing snapshot to prove which one won.
+        reads the standing snapshot to prove which one won. Both repair heads came back 10/10 on their first
+        attempts (bccea88 on 37202016141, 90aa69d on 37202301591), every job read individually. COMMIT_D =
+        COMPLETE; P5 remains IN_PROGRESS and the prompt's section 34 STOP is in force.
         Evidence P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md, P5_VALIDATION/P5_COMMIT_D_DESIGN.md and
         P5_VALIDATION/P5_DIAGNOSTICS_DESIGN_CHECKLIST.md
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP

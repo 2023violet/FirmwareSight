@@ -160,7 +160,6 @@ do not take one.
 ## 7. Diagnostics allowlist (§16) and forbidden data (§17)
 
 Seven closed structs, no map, no `Value`, no path type. Fields and where each comes from:
-
 | section | fields | source |
 | --- | --- | --- |
 | product | name, version, binary, identifier | `tauri::AppHandle` config + package info (`support.rs:43`) |
@@ -190,6 +189,17 @@ Recent error codes were judged proportionate, so §21's escape hatch was not tak
 five converters that turn a typed domain error into an envelope (`envelope_from_artifact`,
 `envelope_from_storage`, `envelope_from_project`, `envelope_from_diff`, `envelope_from_bundle`). Codes
 only — a message can quote the path it failed on.
+
+**Two counts in this section were wrong as first written, and both are now measured.** The allowlist is
+**41 keys**, not the "31-field" figure this round's governance sentences carried: `ALLOWED_KEYS: [&str; 41]`
+in `apps/desktop/src-tauri/tests/diagnostics.rs:47` names every key the payload may hold,
+`no_field_of_the_payload_can_hold_a_path` fails if the set moves, and the eight `Diagnostics*` structs in
+`ipc.rs` declare 41 public fields between them — counted two ways, and they agree. "Seven closed structs"
+above counted the seven sub-sections and forgot the root `DiagnosticsDto` that holds `schema`, `generatedAt`
+and `recentErrorCodes`, so it is **eight**. The 31 was not a stale value that drifted; it was written into
+`3400981`'s documentation without being checked against the constant that already existed in the same commit,
+and six sentences repeated it. The exported file from §27 carries **9 top-level keys**, which is a different
+count of a different thing and is what that row claims.
 
 ## 8. Export surface and DTO (§19, §20)
 

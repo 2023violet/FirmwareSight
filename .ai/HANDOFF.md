@@ -106,7 +106,7 @@ proofs and a bounded sweep of chained waves in `P5_VALIDATION/P5_PRODUCTIZATION_
 **Commit D has since landed** (§§4-27 of its continuation prompt): storage owns its health
 (`integrity_check()`, read-only, repairs nothing), any older file-backed store is snapshotted with SQLite's
 online backup API **before** it is migrated and a snapshot that cannot be written stops the upgrade, and
-Diagnostics is a closed 31-field allowlist on the Help page exported through a Rust-side native dialog.
+Diagnostics is a closed 41-key allowlist on the Help page exported through a Rust-side native dialog.
 `P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md` and its design checklist are the record, and §27's focused
 walk ran against the packaged installer: the exported file contains no `/` and no `\` character at all, the
 store is named by file and never by folder, and the owner's store was parked, copied to a second volume and
@@ -141,9 +141,12 @@ remote has seen this head: Run `37154946484` on `e863d0c` came back **10 of 10**
 is the repository's rule for every P5 head, and `P5_VALIDATION/P5_CI_AUTHORITY.md` carries the row. **Commit D's
 product head broke that rule, and the row says so rather than waiting for the next green one**: Run
 `37200245520` on `3400981` came back **8 of 10** on its first attempt, with the two red jobs both naming one
-assertion in a test that head added. The test-only repair is the head you are reading this from; its own run is
-what the next read-back writes into that file, and until you have read it, no sentence in this repository may
-call Commit D's CI history clean. `111fe32` before it did honour the rule — **10 of 10** on Run
+assertion in a test that head added. **The chain has since been read back and it is clean from the repair
+forward**: `bccea88` — the test-only repair — went **10 of 10** on Run `37202016141`, attempt 1, and the record
+commit `90aa69d` went **10 of 10** on Run `37202301591`, attempt 1, each job verified individually, including
+the two runners that had lost the race. `P5_DIAGNOSTICS_RECOVERY_REPORT.md` §8 is that read-back, and §33's
+exit list is checked against it. So **Commit D is COMPLETE and §34's STOP is in force**: return to the
+Architect. `111fe32` before it had honoured the rule — **10 of 10** on Run
 `37158606478`, first attempt. The §32
 STOP has been **answered**: `ADR-0028` is Accepted and decides that release identity uses the exact bytes
 observed on disk, so the line-ending finding stays exactly as it behaves — do not arrive here and "fix" it by

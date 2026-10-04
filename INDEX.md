@@ -64,7 +64,7 @@ that asked the question is re-statused `EXECUTION_RECORD` rather than rewritten.
 health (`PRAGMA integrity_check`, read-only, never a repair) and takes a WAL-safe online-backup snapshot of
 any older file-backed store **before** migrating it, with a snapshot that cannot be written stopping the
 upgrade; the migration matrix re-runs fresh/v1/v2/v3/v4/v5 against that behaviour. Diagnostics is a
-closed 31-field allowlist (counted off the exported file, not off the design) assembled in Rust, shown on
+closed 41-key allowlist (counted off `ALLOWED_KEYS: [&str; 41]` in `apps/desktop/src-tauri/tests/diagnostics.rs:47`, not off prose) assembled in Rust, shown on
 the page that already exists, exported through a native dialog that opens only when a person names a
 folder, and proven by positive-control tests rather than by the
 absence of a leak — the exported file on the installed build contains no `/` and no `\` character at all.

@@ -145,7 +145,7 @@ last_updated: "2026-10-04"
   file copy is wrong under WAL and `VACUUM INTO` binds its filename as text, so a non-UTF-8 path fails or
   names the wrong file), the snapshot is opened and health-checked before it is renamed into place, and a
   snapshot that cannot be written stops the upgrade rather than starting it. Diagnostics is a closed
-  31-field allowlist assembled in Rust and exported through a native dialog that opens only when a person
+  41-key allowlist assembled in Rust and exported through a native dialog that opens only when a person
   names a folder; the exported file on the packaged build contains **no `/` and no `\` character at all**,
   and the store is named by file, never by directory, on screen and in the file.
 - **What that walk found is the reason it was run.** Two defects, neither reachable from a unit test:
@@ -172,8 +172,10 @@ last_updated: "2026-10-04"
   the repair marks each store with a named row and reads that row back out of the standing snapshot, proven
   non-vacuous by an eighth mutation (`backup.rs` keeping a stale snapshot reddens it alone), then 20
   fresh-process runs of the repaired test and a local `16 of 16` + `3 of 3` core-smoke. The failed head is
-  listed in `P5_CI_AUTHORITY.md` rather than replaced, and **the repair head's own run still has to be read
-  back before any sentence calls Commit D green.**
+  listed in `P5_CI_AUTHORITY.md` rather than replaced. Both repair heads have since been read back and both came
+  home **10 of 10** on their first attempt — `bccea88` on Run `37202016141`, the record commit `90aa69d` on Run
+  `37202301591` — with the two runners that lost the race verified green on the repaired test, and §8 of
+  `P5_DIAGNOSTICS_RECOVERY_REPORT.md` is the read-back for the chain.
 - **A limitation surfaced by that record, and deliberately not fixed: L26.** `SHA256SUMS` is generated from
   working-copy bytes, so with `core.autocrlf=true` and `.gitattributes` `text eol=lf` 17 entries verify on the
   host that wrote them and disagree with a clean checkout elsewhere; measured identically at `3400981` and at

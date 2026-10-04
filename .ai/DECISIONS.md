@@ -1530,6 +1530,14 @@ with the alternative that was rejected and what settled it.
   and reads that row back out of the standing snapshot, so the claim is about data and the byte comparison is no
   longer the only evidence for it. The failed head stays listed in `P5_CI_AUTHORITY.md`; the row was not made to
   wait for a green one.
+- **A number written into six sentences without reading the constant that defined it.** Commit D's
+  documentation called Diagnostics "a closed 31-field allowlist"; `ALLOWED_KEYS: [&str; 41]`
+  (`apps/desktop/src-tauri/tests/diagnostics.rs:47`) names 41 keys, the eight `Diagnostics*` structs declare
+  41 public fields, and `no_field_of_the_payload_can_hold_a_path` fails if that set moves. The count was
+  corrected in all six places, and the design doc §7 now records that 31 was never a stale value drifting —
+  it was asserted while the authority for it sat in the same commit, unread. A count that is worth printing is
+  worth reading from the file that defines it, which is the same rule that makes the round's test totals come
+  from a `cargo test` run rather than from prose.
 - **What this commit did not do.** No Commit E fixture expansion, no parser performance work, no signing, no
   notarization, no updater, no telemetry, no network, no cloud, no accounts, no licence choice, no fifth
   top-level page, no P5 closure. `capabilities/main.json` is still `["core:default"]`; the two new commands
