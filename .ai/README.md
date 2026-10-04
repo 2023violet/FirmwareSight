@@ -38,8 +38,11 @@ CANDIDATE**) ·
 landed — audit + migration 0005 + version unification, packaging on three runners with the job set grown from
 seven to ten, §38/§39 real Windows install, §13–§18 onboarding/Help/History, and Commit D's integrity check,
 pre-migration backup, 41-key Diagnostics allowlist, typed startup refusal and ADR-0028. Commit D is COMPLETE
-as of 2026-10-04 and its §32 read-back successor 956e250 is the current HEAD = origin/main, 10 of 10 on Run
-37204847474 attempt 1; three P5 heads went red and keep their rows — 9e3b1de, 0c031cd and 3400981 — with
+as of 2026-10-04. Its §32 read-back successor 956e250, 10 of 10 on Run 37204847474 attempt 1, is
+documentation-only, as is the closeout 57a904e after it; the last head that changed a line of Rust was the
+test-only repair bccea88. Neither 956e250 nor 57a904e is written down here as "current HEAD" — a commit that
+asserted that would be falsified by its own existence, so read git rev-parse HEAD for it. Three P5 heads went
+red and keep their rows — 9e3b1de, 0c031cd and 3400981 — with
 P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. §34's STOP is in force: no Commit E, no fixture
 expansion, no P5 closure, no V1. New limitation recorded, deliberately unfixed: L26, SHA256SUMS verifies only
 on the host that wrote it. No P5 verdict exists and the product stays MVP CANDIDATE at 0.6.0)` ·
