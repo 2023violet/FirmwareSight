@@ -124,6 +124,13 @@ That is a race with a clock, and it is this repository's own L23 shape wearing a
 names the difference instead of timing it (§11 and §12 of `P5_COMMIT_D_DESIGN.md`, mutation H), so a claim
 about which snapshot stands now holds a fact a reader can query rather than a window the runner happens to
 leave open.
+**One finding came out of writing that record, and it was not fixed.** `SHA256SUMS` is generated from
+working-copy bytes, so with `core.autocrlf=true` and `text eol=lf` its 17 CRLF-in-tree entries verify on the host
+that wrote them and disagree with a clean checkout anywhere else; no CI job runs the verifier, so nothing has
+ever disagreed. It is recorded as **L26** in `P5_PRODUCTIZATION_AUDIT.md` §G with the measurement, the
+`golden/…/SHA256SUMS` row that has no entry, and the 25 names this method could not compare. **Do not "fix" it
+from this handoff**: the choice of which bytes the artifact means belongs to Commit F, and the file is the
+repository's own baseline evidence.
 The remaining workstream order is unchanged: Commit E's fixture cohort, then Commit F's documentation and
 closure. **What Commits C and D do not close is the acceptance of Commit C**: the
 onboarding panel and the History page have never been operated in the installed binary, so the full §64

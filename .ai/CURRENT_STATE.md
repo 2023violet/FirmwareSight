@@ -174,6 +174,12 @@ last_updated: "2026-10-04"
   fresh-process runs of the repaired test and a local `16 of 16` + `3 of 3` core-smoke. The failed head is
   listed in `P5_CI_AUTHORITY.md` rather than replaced, and **the repair head's own run still has to be read
   back before any sentence calls Commit D green.**
+- **A limitation surfaced by that record, and deliberately not fixed: L26.** `SHA256SUMS` is generated from
+  working-copy bytes, so with `core.autocrlf=true` and `.gitattributes` `text eol=lf` 17 entries verify on the
+  host that wrote them and disagree with a clean checkout elsewhere; measured identically at `3400981` and at
+  the repair head, so it predates this round. No CI job runs `verify_baseline_artifacts.py`, which is why nothing
+  has ever contradicted it. It is recorded with its measurement in `P5_PRODUCTIZATION_AUDIT.md` §G, and choosing
+  which bytes the artifact means is Commit F's decision, not a task to pick up between other work.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256

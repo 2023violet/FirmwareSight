@@ -55,7 +55,7 @@ ADR-0015/0016/0018/0023/0026, plus the inspection list in §3: `Cargo.toml`, `Ca
 `.github/workflows/`, `crates/firmwaresight-storage/migrations/`, the storage query APIs,
 `apps/desktop/ui/src/`, `apps/cli/`, `fixtures/`, `scripts/check.py`.
 
-### 0a. What landed after the checkpoint, and the two runs that went red
+### 0a. What landed after the checkpoint, and the runs that went red
 
 | Commit | Content | Gate run | Result |
 | --- | --- | --- | --- |
@@ -132,6 +132,30 @@ fresh-process runs of the changed file, not §35's 20 repetitions of every suite
 group stops at its first failure while later groups still start. So a red `frontend/test` reports 15 executed
 steps — `rust` 3 + `frontend` 4 (its `build` never starts) + `drift` 7 + `deny` 1 — where a clean pass is 16
 (3 + 5 + 7 + 1). A fraction like `14/15` says where the run stopped; it is not a different gate.
+
+**A third run went red, and it was this stage's own doing.** Commit D's product head `3400981` came back
+**8 of 10** on Run `37200245520`, first attempt: `macOS Core Smoke` and `Rust (ubuntu-latest)` both panicked at
+`integrity_and_backup.rs:814`, and `Rust (windows-latest)` plus both `Desktop UI` jobs and all three `Package`
+jobs were green on the same head. The failing assertion compared two whole snapshot files and required them to
+differ; the only difference its two fixtures could offer was the `applied_at` default on `schema_migrations`,
+which SQLite fills from `strftime(…,'%Y-%m-%dT%H:%M:%SZ','now')` — **one second** of granularity. Two rebuilds
+inside one second therefore produce a byte-identical file, the test passes on a slow host and fails on a fast
+one, and no product behaviour was involved. Repaired test-only by giving each store a named row and reading that
+row back out of the standing snapshot (`bccea88`); a sleep and a retry were both rejected, and §29's ban on
+L23-shaped timing work is the reason the repair removes the clock instead of widening the window. L23's shape
+wearing a storage badge is worth saying out loud: the class is not confined to the UI suite, and a test that
+asserts "these two things differ" has to name the thing that differs.
+
+**And the repair's own bookkeeping exposed a fourth finding** — recorded as **L26** below, not fixed here. The
+`SHA256SUMS` artifact is generated from working-copy bytes, and with `core.autocrlf=true` plus
+`.gitattributes` `text eol=lf` the working copy and the committed blob are not the same bytes for 17 files.
+Measured on this head: `git archive HEAD` extracted to a clean directory, each tracked path hashed and compared
+against its recorded line — **17 differ**, and the same 17 at the previous head, so the condition predates the
+repair. The verifier passes on this host because it, too, reads working-copy bytes: host-relative agreement is
+not the same claim as reproducible digests, and CI has never run that verifier, which is why no job has ever
+disagreed. L22's ADR settled the *release* case by deciding bytes-as-observed; this row is the same collision on
+a governance artifact, and it needs a decision about which bytes `SHA256SUMS` means before Commit F can call the
+baseline verifiable.
 
 ### 0b. What section A became when packaging was switched on
 
@@ -651,6 +675,7 @@ L1…L22, L24, L25, L23).
 | L23 | UI test races, 6th instance found and fixed | reduce through test audit | **SHOULD_CLOSE_P5** | §35 asks 20 repetitions per UI suite; six known instances are fixed and mutation-proved (P3's I and J, `055b54e`, G2-F1, `20b03e3`, this one), the sixth lost by the *local* gate rather than CI (§0a). A bounded sweep of chained IPC waves is recorded with it, so the residual risk is now absence-assertion timing and any wave the sweep's shape missed, not an unswept suite |
 | L24 | `update_goldens.py` cannot rerun over its own Windows leftover scratch | should close | **SHOULD_CLOSE_P5** | `PermissionError [WinError 5]` on a read-only `.git/objects` file; tooling-only, outside the shipped product and outside the gate |
 | L25 | one dead `Apply filter` click, never reproduced | close as NOT_REPRODUCED or fix | **CARRY_FORWARD → target `NOT_REPRODUCED`** | post-G2 Tier A/B drove the filter pages repeatedly with no recurrence (`autoComplete="off"` removed the leading suspect); needs one documented non-repetition count before claiming it |
+| **L26** | *found in P5, not inherited from G2*: `SHA256SUMS` verifies on the host that wrote it and nowhere else | decide which bytes the artifact means | **SHOULD_CLOSE_P5 (Commit F)** | `scripts/generate_baseline_artifacts.py` hashes working-copy bytes; with `core.autocrlf=true` and `.gitattributes` `text eol=lf`, 17 tracked files are LF in the index and CRLF on this disk, so `git archive <head>` extracted clean disagrees with the recorded line for all 17 — measured identically at `3400981` and `bccea88`, so it is neither new nor caused by the repair. `verify_baseline_artifacts.py` reports `RESULT PASS` here because it reads the same working copy: agreement with the generating host is not reproducibility. Two further facts, both measured: `golden/reports/p4-release/SHA256SUMS` is tracked but has **no entry**, because the generator skips any basename equal to `SHA256SUMS`; and 25 non-ASCII-named files under `10_AUDIT/` could not be compared by this method at all, since the extraction mangles their names on this shell — that is a limit of the measurement, not a claim about those files. No job runs the verifier, so CI cannot see any of it. The decision is the same collision L22 had (`ADR-0028`: identity is the exact bytes observed) on a governance artifact instead of a release input, and it is not this round's to make — a fix changes how a baseline file is produced, and §34 stops here. What Commit F inherits: choose blob bytes or declared normalization, regenerate, and make the verifier fail on a host that is not the one that wrote it |
 
 Carried forward from the post-G2 round itself: the harness limit set (Tier B `B2/B4/B9 PARTIAL`, `B3` two
 `NOT_RUN` targets — all harness, not product), DPI 100 % only, `HARNESS-INCIDENT-16` (a close loop that
