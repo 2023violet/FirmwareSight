@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # Decisions — v0.6.0
@@ -1450,3 +1450,78 @@ the role "button" and name "Show sections changes for .noinit"`, while `.text` s
   its first failure, so a red `frontend/test` reports **15** executed steps (3 + 4 + 7 + 1) where a clean pass
   is **16** (3 + 5 + 7 + 1). A fraction like `14/15` says where a run stopped; it is not a different gate, and it
   must never be read as one.
+
+# P5 Commit D — diagnostics, integrity, backup and the startup boundary — 2026-10-04
+
+Prompt §§4-27 of *P5 Commit D Continuation v1.2* (sha256 `600d70a3…274033`, 31,588 bytes, 1,472 lines,
+archived and registered). The decisions below are the ones a later reader cannot recover from `git log`, each
+with the alternative that was rejected and what settled it.
+
+- **L22 is decided, and the deciding document is the ADR, not the draft.** `ADR-0028` is Accepted:
+  *release identity uses the exact bytes observed on disk*. Rejected: normalize on read (it would silently
+  re-hash a person's release notes and make an old release id unanswerable), and hash the Git blob instead
+  of the file (it makes the working tree's bytes irrelevant while still letting `require_clean_git = false`
+  move the id). The consequence is accepted rather than smoothed: two files with the same words and
+  different line endings are two releases, and `require_clean_git = false` can move a release identity with
+  nothing on screen saying why. `.gitattributes` is recommended **in the user's repository**; FirmwareSight
+  does not normalize and does not edit its own. The draft that asked is re-statused `EXECUTION_RECORD` and
+  its analysis stays, because "what was considered and rejected" is the part that stops being re-derivable.
+- **The backup is SQLite's online backup API, and that was measured before it was chosen.** A plain file
+  copy is wrong under WAL — the committed state is the file *plus* the frames the log still holds — and
+  `VACUUM INTO` was tried and rejected: it binds its filename as SQL `TEXT`, so a non-UTF-8 store path
+  either fails or names a different file, and pointed at an occupied path it answers with an engine message
+  containing an **absolute path** the shell would then have to redact. What made the API affordable is that
+  `rusqlite`'s `backup` feature has an empty dependency list, so enabling it adds no package: storage subtree
+  22 either way, `Cargo.lock` unmodified. The rule, not the reading: the manifest was toggled and
+  `cargo tree` re-run in both states.
+- **A snapshot is owed to a store that already has a schema and has an upgrade pending — and to no other.**
+  A fresh database is created at the current version, so it gets no backup and Diagnostics correctly reports
+  `backupFiles: []`. Retention is bounded rather than growing beside the user's data. A snapshot that cannot
+  be written stops the migration *before* it starts; the alternative (upgrade, then try) is how an
+  unrecoverable half-state is produced.
+- **Diagnostics lives on the page that already exists.** A fifth rail verb was the obvious shape and is
+  wrong: `AGENTS.md` and the P5 prompt forbid a new product verb, and a support payload is a reading
+  surface, which is what Help already is. The payload is assembled in Rust from an explicit allowlist —
+  31 leaf fields, counted off the exported file — and the UI renders what the shell answered or
+  `not reported`, never a default.
+- **The store is named, not located.** `firmwaresight-p0.sqlite` appears on screen and in the file; its
+  directory appears in neither. Four sentences elsewhere in this repository had promised that Diagnostics
+  "will tell you where it sits"; they were stale, and they were corrected rather than re-explained. The
+  privacy claim is a positive control, not an absence: the exported file contains no `/` and no `\`
+  character at all, and a test that plants a path-shaped value and demands it come back is what makes that
+  a proof instead of a hope.
+- **Store health is prose with no status colour, and that is a reversal this commit made.** The first draft
+  rendered `healthy` in `--fs-color-status-pass` and `unhealthy` in `--fs-color-status-block` — the verdict
+  palette on a page with no verdict. `DESIGN.md` 5 names five states and health is not one of them;
+  `DESIGN.md` 9 says colour only ever aids a carrier. Either a badge with its icon, or a fact in the page's
+  own grey, and the second is what a reading page can actually say. The word is always present, which is
+  what the test asserts, and the mutation that mistranslates the word still reddens it.
+- **The startup refusal leaves from inside the hook, because the framework will not carry it out.**
+  `tauri::Builder::run` was read as `build(context)?.run(…)`, and from that a `setup` error was expected to
+  arrive as `Error::Setup`. The packaged binary answered **101** with a framework `panic!` naming a
+  build-machine path: the hook runs inside the event loop's `Ready` arm and a returned `Err` is panicked by
+  Tauri itself (`tauri-2.12.0/src/app.rs:1443-1445`). So `StartupFailure::abort()` prints and exits with
+  `EXIT_CODE` (1) from where the refusal happens, and `run()` keeps `.expect(…)` for faults this round has
+  no words for. A refusal and a crash are different events and a launcher can now tell them apart.
+- **A file that is not a database is not a rolled-back migration.** `ensure_bookkeeping()` reports its own
+  failure as `Migration { version: 0 }`, and the sentence written for a half-run step claimed an upgrade had
+  begun and been undone. Version 0 now answers in its own words and carries the engine's phrase, filtered,
+  because "file is not a database" and "database is locked" ask a person for different repairs.
+- **`payload_sha256` is a locator, not the digest of what a user launches.** The bundler overwrites 3 bytes
+  of the binary it packs — the token `__TAURI_BUNDLE_TYPE_VAR_UNK` becomes `…_VAR_NSS`, same length
+  (`tauri-bundler-2.10.1/src/bundle.rs:41-95`) — so that the running application can name its own install
+  channel, which is why the installed build reports `installChannel: "nsis"` and a `target/release` run does
+  not. The verifier's own wording claimed "the exact file this installer bundles"; the measurement corrected
+  the sentence rather than the digest.
+- **The authority for this round is v1.2, and the record says why.** v1.2's §1 named
+  `FirmwareSight_P5_CommitD_Continue_v1.1.txt` (`f38ee5f2…ab045`, 27,834 bytes, 1,014 lines) as canonical and
+  required a STOP if those bytes could not be found. They cannot be found on this machine, in this
+  repository or in the temp tree. The measurement and the stop were reported, nothing was reconstructed from
+  memory, no byte-exact archive was claimed for v1.1, and the owner chose to archive **v1.2** as this round's
+  authority. The v1.0 prompt that an earlier round had archived as *the* authority is kept, re-labelled
+  `SUPERSEDED, HISTORICAL`.
+- **What this commit did not do.** No Commit E fixture expansion, no parser performance work, no signing, no
+  notarization, no updater, no telemetry, no network, no cloud, no accounts, no licence choice, no fifth
+  top-level page, no P5 closure. `capabilities/main.json` is still `["core:default"]`; the two new commands
+  take no arguments at all; `unsafe_code` remains forbidden in both crates that grew code. The permitted
+  security sentence stands as written: *dependency policy passes with documented accepted risks*.

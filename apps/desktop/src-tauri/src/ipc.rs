@@ -1359,8 +1359,9 @@ pub struct HistoryReleasePageDto {
 /// What the running application says about itself on the Help screen (prompt §14).
 ///
 /// Every field is the runtime's own answer, not text the WebView supplied and not a number the front
-/// end kept a copy of. `storeFileName` is a file name on purpose: where that file sits is a
-/// Diagnostics question with its own privacy test, not an About-page label (prompt §19).
+/// end kept a copy of. `storeFileName` is a file name on purpose: no surface of this product reports
+/// the directory the store sits in, and Diagnostics is one of the surfaces that does not, because
+/// prompt §19 puts an absolute path outside that payload.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 #[ts(export)]
@@ -1380,4 +1381,161 @@ pub struct AppIdentityDto {
     pub storage_schema_version: i64,
     /// The store's file name, never its directory.
     pub store_file_name: String,
+}
+
+// --------------------------------------------------------------------------- Diagnostics (P5 Commit D)
+
+/// The support payload prompt §19 defines: bounded, explicit fields, every one filled by Rust from a
+/// source that is not the WebView.
+///
+/// This is a Desktop/Application contract, not a portable firmware schema — it is versioned by its own
+/// `schema` label and nothing outside this shell reads it. The shape is an allowlist made of closed
+/// structs precisely so that "what a Diagnostics file contains" cannot grow by an accident of
+/// serialization: there is no map here, no `serde_json::Value`, and no field whose type is a path.
+/// Prompt §7's prohibitions (no artifact path, no project root, no database directory, no home, no
+/// username, no remote, no bytes, no notes text, no symbol names, no environment dump, no SQL, no raw
+/// rows) are all enforced by the simple fact that no field of this struct can hold such a thing, and
+/// tested by `tests/diagnostics.rs`, which plants each of them in the session first.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsDto {
+    /// This payload's own contract label, so a support file states what shape it is.
+    pub schema: String,
+    /// When this was captured, as read by the engine. Observation metadata only: FirmwareSight hashes
+    /// no field of this payload, and no identity claim reads it (prompt §18).
+    pub generated_at: Option<String>,
+    pub product: DiagnosticsProductDto,
+    pub runtime: DiagnosticsRuntimeDto,
+    pub store: DiagnosticsStoreDto,
+    pub git: DiagnosticsGitDto,
+    pub support: DiagnosticsSupportDto,
+    /// The policy the Release page would run against, when one is loaded. `null` is the honest answer
+    /// for a session that has not opened a project (prompt §6: a policy *may* be reported, not must).
+    pub policy: Option<DiagnosticsPolicyDto>,
+    /// Stable error codes this process produced, newest last, capped. Codes only — never a message,
+    /// because a message can quote the path it failed on (prompt §24).
+    pub recent_error_codes: Vec<String>,
+}
+
+/// What the product is. Names and versions, no locations.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsProductDto {
+    pub product_name: String,
+    pub app_version: String,
+    pub binary_name: String,
+    /// The application identifier the packages are keyed by: a reverse-domain constant, not a path.
+    pub identifier: String,
+    /// The logical store name (prompt §8): `firmwaresight-p0.sqlite`, file name only, no parent.
+    pub store_file_name: String,
+}
+
+/// What the program is running on. An unavailable fact says `not_reported`; nothing here is guessed
+/// and nothing here needed a new dependency to read (prompt §26).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsRuntimeDto {
+    /// `windows`, `macos`, `linux` — the operating system family.
+    pub os_family: String,
+    /// `x86_64`, `aarch64` and friends.
+    pub architecture: String,
+    /// The two joined, which is the form the Support Matrix speaks in.
+    pub platform: String,
+    /// `not_reported`. This build has no OS-version source it trusts: the standard library does not
+    /// carry one, and prompt §26 forbids a platform-specific dependency for a single field.
+    pub os_version: String,
+    /// The Tauri version this binary was compiled against.
+    pub tauri_version: String,
+    /// The WebView runtime, when the platform reports one; `not_reported` otherwise.
+    pub webview_version: String,
+}
+
+/// The store's own health and shape. `health` is the point of the section; the rest says what a
+/// support conversation would otherwise have to ask a person to read off a screen.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsStoreDto {
+    /// The schema the *file* carries, read from its bookkeeping. `null` when the store would not
+    /// answer, which is itself a fact worth having.
+    #[ts(type = "number | null")]
+    pub schema_version: Option<i64>,
+    /// The schema this build speaks. Equal to the field above for any store this application opened.
+    #[ts(type = "number")]
+    pub supported_schema_version: i64,
+    /// `healthy`, `unhealthy`, or `unknown` when the check itself could not be asked.
+    pub health: String,
+    /// The bounded, directory-free problems, present only for `unhealthy`.
+    pub health_summary: Option<String>,
+    /// A stable code, present only for `unknown`. A code and never a message.
+    pub health_error_code: Option<String>,
+    /// `wal`, `delete`, `memory`, `off`, `truncate`, `persist` or `other`.
+    pub journal_mode: String,
+    pub counts: DiagnosticsCountsDto,
+    /// File names of the pre-migration snapshots kept beside the store, in name order, capped. A
+    /// snapshot's existence is the recovery story a support file has to be able to tell (prompt §17),
+    /// and a name is not a path.
+    pub backup_files: Vec<String>,
+}
+
+/// The five object classes prompt §6 names. A count that SQLite would not answer for is `null` rather
+/// than `0`: "no builds" and "this damaged store would not say" are different facts.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsCountsDto {
+    #[ts(type = "number | null")]
+    pub projects: Option<i64>,
+    #[ts(type = "number | null")]
+    pub builds: Option<i64>,
+    #[ts(type = "number | null")]
+    pub gate_runs: Option<i64>,
+    #[ts(type = "number | null")]
+    pub accepted_reviews: Option<i64>,
+    #[ts(type = "number | null")]
+    pub release_records: Option<i64>,
+}
+
+/// Whether Git can be reached from this application at all, and which Git it is. Nothing about any
+/// repository: no remote, no path, no branch, no commit (prompt §25).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsGitDto {
+    pub available: bool,
+    /// The first line of `git --version`, bounded and shape-checked, or `not_reported`.
+    pub version: String,
+}
+
+/// What this product claims to read, and how it was delivered.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsSupportDto {
+    /// The supported input cohort, stated by this build, and nothing the parser was asked to infer.
+    pub input_cohort: String,
+    /// The bundle the running binary carries its marker in (`msi`, `nsis`, `deb`, `rpm`, `appimage`,
+    /// `app`), or `unknown` when no marker was written. A path string was never used to guess this
+    /// (prompt §27).
+    pub install_channel: String,
+}
+
+/// The loaded project's policy, reduced to the flags that decide a verdict.
+///
+/// `require_clean_git` is reported because it changes what the Gate believes, and it travels with the
+/// caveat the Architect attached to it (prompt §0, §6's L22 note): a reader who sees `false` has to be
+/// able to learn what that does and does not mean without opening the source. No project name, no root,
+/// no config path.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DiagnosticsPolicyDto {
+    #[ts(type = "number")]
+    pub config_schema_version: i64,
+    pub require_clean_git: bool,
+    pub require_clean_git_note: String,
+    pub require_release_notes: bool,
 }

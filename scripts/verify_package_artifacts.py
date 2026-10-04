@@ -33,9 +33,10 @@ additionally requires a build to record its toolchain, so the metadata file carr
 pnpm and tauri-cli versions, both lockfile digests, the commit and the runner image.
 
 What this script does *not* claim: it does not open the NSIS container (there is no stdlib
-decompressor for its payload), so on Windows the embedded check runs against the exact binary the
-bundler packed and the metadata says so in as many words. The behavioral proof of "the installed app
-runs with no dev server" is the real Windows install acceptance, not a byte scan.
+decompressor for its payload), so on Windows the embedded check runs against the binary the bundler
+packed, before the bundler patches 3 bytes of it to name the bundle type, and the metadata says so in
+as many words. The behavioral proof of "the installed app runs with no dev server" is the real Windows
+install acceptance, not a byte scan.
 
 Signing is not performed and not claimed. Every artifact here is unsigned, and the metadata records
 that rather than leaving it to be inferred.
@@ -288,9 +289,15 @@ def packaged_binary(kind: str, package: Path, workdir: Path) -> tuple[Path, str]
             raise SystemExit(f"the binary the bundler packed was not found at {binary}")
         return (
             binary,
-            f"read from target/release/{binary.name}, the exact file this installer bundles; the NSIS "
+            f"read from target/release/{binary.name}, the file this installer is built from; the NSIS "
             "container itself is not opened here, and the real install acceptance is what proves the "
-            "installed app runs offline",
+            "installed app runs offline. Not byte-identical to what a user installs: the bundler "
+            "overwrites the 27-byte token `__TAURI_BUNDLE_TYPE_VAR_UNK` inside the copy it packs with "
+            "`__TAURI_BUNDLE_TYPE_VAR_NSS`, same length, so that the running app can name its own "
+            "bundle type (`tauri-bundler-2.10.1/src/bundle.rs:41-95`, read back at "
+            "`tauri-utils-2.10.1/src/platform.rs:357-368`). Measured on the installed binary: 3 bytes "
+            "differ and nothing else. So this digest locates the build; it is not the digest of the "
+            "file a user launches.",
         )
     raise SystemExit(f"no binary reader for package kind {kind!r}")
 

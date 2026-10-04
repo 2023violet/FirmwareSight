@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # ACTIVE TASK
@@ -58,6 +58,8 @@ zero Clang-produced evidence despite the cohort claim.
 | the commit that lands this row as its code | §13 first-run onboarding + §14 Help/About (with L21's window title fixed in Rust over a closed page enum) + §15–§18 local History over three new bounded storage **read** APIs and **no new migration**. 19 storage + 11 desktop + 40 UI tests, seven mutation proofs, `P5_ONBOARDING_HISTORY_REPORT.md` and its design checklist | `37154946484` | success, **10 of 10**, first attempt — locally too: **16 of 16** steps, **812 Rust / 200 UI** |
 | `e070508` | documentation only: wrote Commit C's run back into `P5_CI_AUTHORITY.md` and corrected four governance sentences that had said the read-back had not happened | `37156287999` | success, **10 of 10**, first attempt |
 | `111fe32` | two things, in one gate: §32's L22 item — `P5_RELEASE_IDENTITY_ADR_DRAFT.md` (options costed, option C is today's bytes-as-evidence semantics, four questions for the Architect, then STOP) with its premise pinned by `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` — **and** the test-only repair of L23's sixth instance, which the **local** gate lost while verifying it and CI never saw | `37158606478` | success, **10 of 10**, first attempt — preceded by a local `python scripts/check.py` **16 of 16** at **813 Rust / 201 UI**, three mutation proofs and 20 clean fresh-process runs of the changed suite |
+
+| the commit that lands this row as its code | Commit D: storage-owned `PRAGMA integrity_check`, a WAL-safe online-backup snapshot before any older store is migrated, the migration matrix re-run against it, a 31-field Diagnostics allowlist with a native-dialog export and positive-control privacy tests, the typed startup refusal, and §32's L22 answer as `ADR-0028` — `P5_COMMIT_D_DESIGN.md`, `P5_DIAGNOSTICS_RECOVERY_REPORT.md` and its design checklist. 131 storage / 222 desktop Rust, 210 UI, seven mutation proofs | pending | pending |
 
 The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
 lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
@@ -177,8 +179,12 @@ different commit rather than the present: the remediation round left **770 Rust 
 commits moved it to **775 Rust / 160 UI / `check.py` 16 steps** (migration `0005`'s five storage tests, the
 Details reason test, and the `version identity` drift step), and **Commit C moved it again to 812 Rust /
 200 UI in 8 files** on those same 16 steps — 19 storage History reads, 11 desktop boundary tests, 40 UI
-tests over the two new screens. The present head is **813 Rust / 201 UI**: §32's identity test and L23's
-contract test, one each. The evidence directory that round added is `POST_G2_E2E_REMEDIATION/`.
+tests over the two new screens. §32's identity test and L23's contract test made that **813 / 201**, and
+**Commit D is the present total: 854 Rust / 210 UI in 8 files** — storage at 131 (5 unit, 126 integration,
+of which 13 are the new `integrity_and_backup.rs`), desktop at 222 (96 unit including the 7 `startup.rs`
+mappings, 126 integration including 8 in `tests/diagnostics.rs`), and 9 new UI tests over the section that
+makes 210 — with the local gate at **16 of 16** and the package group at **4 of 4**. The evidence
+directory that round added is `POST_G2_E2E_REMEDIATION/`.
 
 On 2026-10-02 a real-desktop acceptance round drove the shipping binary through 283 black-box cases and
 closed `PASS_WITH_FINDINGS` — three product defects, no S0, no S1 — and a follow-on round fixed exactly

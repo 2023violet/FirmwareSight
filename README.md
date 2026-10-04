@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-02"
+last_updated: "2026-10-04"
 ---
 
 # FirmwareSight v0.6.0
@@ -128,6 +128,43 @@ P5 UI test races (L23), sixth instance: FOUND BY THE LOCAL GATE, CLOSED TEST-ONL
         and the complete sweep is a remaining task, not a closed class. check.py 16/16 on that tree, 813 Rust /
         201 UI, and Run `37158606478` on `111fe32` returned 10 of 10 with both `Desktop UI` jobs green.
         Evidence P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md §0a
+P5 release identity (L22): DECIDED — ADR-0028, THE BYTES ON DISK ARE THE EVIDENCE (2026-10-04). The
+        Architect answered the draft above. Release identity uses the exact bytes observed on disk: LF and CRLF
+        are distinct evidence, the Release Notes digest hashes the file as it was found, the Gate run id and the
+        release id may therefore move between two checkouts of one commit, and the bundle ships the bytes it
+        hashed and still verifies against them. No normalization, no Git-blob substitution, no identity-schema
+        change — and no production identity code moved, because the rule is what the code already did.
+        `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` is now ADR-0028's canonical
+        contract test rather than a premise written to prove a limitation, and it may not be weakened.
+        `release.require_clean_git = false` stays a valid, explicit project-policy option and is not forced to
+        `true`; its caveat is stated wherever the flag is reported, because with `false` a working-tree byte
+        difference — line endings included — can change the digest, the run id and the release id without
+        `git.clean` blocking the release. The recommended project practice is a `.gitattributes` rule pinning
+        byte-sensitive release files, in the *user's* repository: FirmwareSight does not edit `.gitattributes`
+        and never writes into the project folder it is analyzing. Diagnostics carries the caveat sentence
+        beside the flag it explains, so a support file states what the flag costs.
+        Evidence 09_ADR/ADR-0028-release-identity-bytes-as-evidence.md and
+        P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md
+P5 diagnostics and recovery (Commit D): BUILT, GATED, AND WALKED IN AN INSTALLED BINARY (2026-10-04). The
+        store now answers for its own structure: `integrity_check()` asks SQLite and reports what comes back,
+        read-only, and repairs nothing — no PRAGMA write, no VACUUM, no rebuild — which is what lets the Help
+        screen state that a damaged store will be left damaged for a restore rather than rewritten. Any older
+        file-backed store is snapshotted with SQLite's **online backup API before** it is migrated (a file copy
+        is wrong under WAL, and `VACUUM INTO` binds its filename as text), the copy is opened and health-checked
+        before it is renamed into place, and a snapshot that cannot be written stops the upgrade instead of
+        starting it. Diagnostics is a closed 31-field allowlist assembled in Rust, shown on the page that
+        already exists rather than as a fifth verb, and exported through a native dialog that opens only when a
+        person names a folder; the store is named by file and never by directory, on screen and in the file, and
+        the exported file on the packaged build contains no `/` and no `\` character at all. The startup refusal
+        is now a typed sentence and exit code 1 rather than a panic. check.py 16/16 with the package group 4/4,
+        854 Rust / 210 UI, seven mutation proofs, and §27's focused walk run against the installed package with
+        the owner's store parked, copied to a second volume and restored byte-identically
+        (ORIGINAL_DB_RESTORED = YES, ORIGINAL_DB_SHA_MATCH = YES). Two of the fixes exist only because the
+        installed walk was run: a `setup` error is panicked by Tauri inside its event loop, so the exit path
+        that looked typed was a 101 with a build-machine path in it, and a file that is not a database was being
+        reported as a rolled-back migration to "schema version 0".
+        Evidence P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md, P5_VALIDATION/P5_COMMIT_D_DESIGN.md and
+        P5_VALIDATION/P5_DIAGNOSTICS_DESIGN_CHECKLIST.md
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 

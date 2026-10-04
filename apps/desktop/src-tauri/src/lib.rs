@@ -23,17 +23,24 @@
 //! The folder comes from a directory dialog Rust opened and is never returned; the plan is held in memory
 //! because it carries every byte it would write; the build it packages is the one this session analyzed,
 //! since §22 has to re-read the source files where they are (`bundle`).
+//!
+//! P5 adds Diagnostics: one bounded, allowlisted payload about this application and its store, read out by
+//! Rust and shown under Help/About, plus an export through a native Save dialog the WebView has no route to
+//! (`diagnostics`). Nothing in it is a path, a message or a raw row — the shape is the boundary, and the
+//! payload's own test plants each prohibited value in the session before asserting it is absent.
 
 #![forbid(unsafe_code)]
 
 pub mod bundle;
 pub mod compare;
 pub mod details;
+pub mod diagnostics;
 pub mod history;
 pub mod intake;
 pub mod ipc;
 pub mod release;
 pub mod service;
+pub mod startup;
 pub mod support;
 
 use std::collections::{HashMap, VecDeque};
@@ -255,6 +262,12 @@ impl DestinationStore {
 pub struct Session {
     catalog: FixtureCatalog,
     db: Mutex<Database>,
+    /// Where this run's store is, kept on the Rust side only.
+    ///
+    /// Diagnostics needs the directory to say which pre-migration snapshots exist beside the file
+    /// (prompt §17 asks that a backup's existence be explainable), and prompt §7 puts a database path
+    /// outside every payload. The name crosses; the parent never does.
+    store_path: PathBuf,
     selections: Mutex<SelectionStore>,
     diffs: Mutex<DiffStore>,
     project: Mutex<Option<LoadedProject>>,
@@ -267,9 +280,11 @@ impl Session {
     /// Open the catalog and database a run needs. Split from Tauri so the parity tests build a
     /// session against a temporary database with no window, runtime or event loop involved.
     pub fn open(catalog: FixtureCatalog, db_path: impl AsRef<Path>) -> Result<Self, StorageError> {
+        let db_path = db_path.as_ref().to_path_buf();
         Ok(Self {
             catalog,
-            db: Mutex::new(Database::open(db_path.as_ref())?),
+            db: Mutex::new(Database::open(&db_path)?),
+            store_path: db_path,
             selections: Mutex::new(SelectionStore::default()),
             diffs: Mutex::new(DiffStore::default()),
             project: Mutex::new(None),
@@ -277,6 +292,12 @@ impl Session {
             bundles: Mutex::new(BundleStore::default()),
             destinations: Mutex::new(DestinationStore::default()),
         })
+    }
+
+    /// The store's logical name (prompt §8): a file name, with no directory attached to it.
+    #[must_use]
+    pub(crate) fn store_file_name(&self) -> String {
+        display_name(&self.store_path)
     }
 
     #[must_use]
@@ -752,7 +773,6 @@ fn require_readable(path: &Path, operation_id: &str) -> Result<(), ErrorEnvelope
         remediation: Some("Check the path, or select the artifact in a file dialog.".to_owned()),
     })
 }
-
 /// Codes are `&'static str` from the two registries; the envelope owns its text.
 ///
 /// `hidden` is every path this run knows about. The artifact errors quote the path they failed on,
@@ -763,13 +783,15 @@ fn envelope_from_artifact(
     operation_id: &str,
     hidden: &[&Path],
 ) -> ErrorEnvelopeDto {
-    ErrorEnvelopeDto {
+    let envelope = ErrorEnvelopeDto {
         code: err.stable_code().to_owned(),
         message: err.user_message(),
         operation_id: operation_id.to_owned(),
         details: Some(redact(&format!("{err}"), hidden)),
         remediation: Some(err.remediation().to_owned()),
-    }
+    };
+    crate::diagnostics::record_error_code(&envelope.code);
+    envelope
 }
 
 /// Replace every occurrence of a located path in a diagnostic string with its file name.
@@ -794,13 +816,15 @@ fn display_path_of(path: &Path) -> String {
 }
 
 fn envelope_from_storage(err: &StorageError, operation_id: &str) -> ErrorEnvelopeDto {
-    ErrorEnvelopeDto {
+    let envelope = ErrorEnvelopeDto {
         code: err.stable_code().to_owned(),
         message: format!("{err}"),
         operation_id: operation_id.to_owned(),
         details: None,
         remediation: Some(err.remediation().to_owned()),
-    }
+    };
+    crate::diagnostics::record_error_code(&envelope.code);
+    envelope
 }
 
 /// A project-policy or provenance failure, put into the shape the CLI prints for the same error.
@@ -813,7 +837,7 @@ fn envelope_from_project(
     operation_id: &str,
     hidden: &[&Path],
 ) -> ErrorEnvelopeDto {
-    ErrorEnvelopeDto {
+    let envelope = ErrorEnvelopeDto {
         code: err.code().to_owned(),
         // The redacted text is the whole user-facing statement. `details` stays empty rather than
         // repeating it, because the unreduced form of several of these messages is a host path.
@@ -821,7 +845,9 @@ fn envelope_from_project(
         operation_id: operation_id.to_owned(),
         details: None,
         remediation: Some(project_remediation(err.code()).to_owned()),
-    }
+    };
+    crate::diagnostics::record_error_code(&envelope.code);
+    envelope
 }
 
 fn project_remediation(code: &str) -> &'static str {
@@ -911,18 +937,33 @@ fn fixture_catalog() -> FixtureCatalog {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         // Registered for the Rust-side dialog only. No capability entry grants the WebView any
         // dialog, filesystem or shell permission (`ADR-0025`).
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             use tauri::Manager;
 
-            let data_dir = app.path().app_data_dir()?;
-            std::fs::create_dir_all(&data_dir)?;
-            let session =
-                Session::open(fixture_catalog(), data_dir.join("firmwaresight-p0.sqlite"))
-                    .map_err(|err| format!("{} (code {})", err, err.stable_code()))?;
+            // Every refusal on this path arrives as one typed, readable sentence: a stable code, what
+            // happened to the person's data, a next step, and a nonzero exit instead of a panic
+            // (`startup`, prompt §22). It has to be the hook that leaves, not the hook that answers: a
+            // `setup` error is panicked by Tauri inside its event-loop callback
+            // (`tauri-2.12.0/src/app.rs:1443-1445`), which would replace this sentence with a framework
+            // one carrying a build-machine path, and exit 101 rather than the code below.
+            let data_dir = match app.path().app_data_dir() {
+                Ok(data_dir) => data_dir,
+                Err(err) => startup::StartupFailure::data_directory(&err).abort(),
+            };
+            if let Err(err) = std::fs::create_dir_all(&data_dir) {
+                startup::StartupFailure::store_folder(&err).abort();
+            }
+            // One constant names the store everywhere the product speaks of it (`support::
+            // STORE_FILE_NAME`), so Diagnostics and Help cannot report a file this run did not open.
+            let store_path = data_dir.join(support::STORE_FILE_NAME);
+            let session = match Session::open(fixture_catalog(), &store_path) {
+                Ok(session) => session,
+                Err(err) => startup::StartupFailure::from_storage(&err, &store_path).abort(),
+            };
             app.manage(Arc::new(session));
             Ok(())
         })
@@ -954,8 +995,16 @@ pub fn run() {
             history::list_history_gate_runs,
             history::list_history_releases,
             support::get_app_identity,
-            support::set_window_title
-        ])
+            support::set_window_title,
+            diagnostics::collect_diagnostics,
+            diagnostics::export_diagnostics
+        ]);
+
+    // A store this application cannot read has already left through `startup::StartupFailure::abort`,
+    // with its own sentence and exit code, so anything arriving here is a builder or runtime fault this
+    // round has no words for — and turning an unknown failure into a calm exit code would hide a defect
+    // behind a number.
+    builder
         .run(tauri::generate_context!())
         .expect("error while running the FirmwareSight desktop application");
 }

@@ -4,8 +4,9 @@
  * What the running application says about itself on the Help screen (prompt §14).
  *
  * Every field is the runtime's own answer, not text the WebView supplied and not a number the front
- * end kept a copy of. `storeFileName` is a file name on purpose: where that file sits is a
- * Diagnostics question with its own privacy test, not an About-page label (prompt §19).
+ * end kept a copy of. `storeFileName` is a file name on purpose: no surface of this product reports
+ * the directory the store sits in, and Diagnostics is one of the surfaces that does not, because
+ * prompt §19 puts an absolute path outside that payload.
  */
 export type AppIdentityDto = { 
 /**

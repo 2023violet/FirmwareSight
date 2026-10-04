@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Project"
-last_updated: "2026-09-26"
+last_updated: "2026-10-04"
 ---
 
 # `firmwaresight.toml`
@@ -142,3 +142,10 @@ enabled = false                     # 记录并警告，不产生任何规则
 
 政策指纹哈希的是语义（`firmwaresight-core` 的 `canonical_policy_text`），不是注释或键序：同样的值
 产生同一个 `policy_sha256`，任何改变求值的改动都会改变它。
+
+`[release] require_clean_git` 与字节身份（`ADR-0028`）：Release Notes 的 digest 是磁盘上那份字节的
+SHA-256，LF 与 CRLF 因此是两份不同的 evidence，Gate run id 与 release id 会随行尾一起移动。
+`require_clean_git = false` 是有效的项目显式选项，产品不把它强制为 `true`；但它允许上面的身份移动在
+`git.clean` 不 BLOCK 的情况下发生，所以这句话必须与开关一起被读到（也写在 Diagnostics 的 payload 里）。
+需要字节稳定的项目应在**自己的仓库**里用 `.gitattributes` 固定 release 文件；FirmwareSight 不修改
+`.gitattributes`，也不写被分析的项目目录（`AGENTS.md` §7）。

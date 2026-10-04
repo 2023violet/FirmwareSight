@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "IN_PROGRESS"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # P5 — real Windows install, uninstall and data behaviour
@@ -122,3 +122,29 @@ points at, and it stays open.
 Every number above came from a command in this session. The raw transcripts, the store listings, the
 screenshots of the wizard pages and the retained test store live in the P5 evidence root outside this
 repository, named `PRE_INSTALL_STATE.md` and `INSTALL_TEST_STORE_RETAINED/`.
+
+## 7. What Commit D's installed walk settled, and what it did not (2026-10-04)
+
+Item 1 and half of item 2 above have since happened, on a packaged build, and the record says so here rather
+than leaving §2's rows to read as permanent.
+
+- **§38 C is no longer "not built".** The Commit D walk installed
+  `FirmwareSight-0.6.0-windows-x86_64-nsis.exe` and the cold window rendered the **Getting started** panel —
+  the seven facts, "Hide this", and the sentence that hiding them hides nothing else. So the row that read
+  "**not built.** … open — Commit C, prompt §13" is now: built, and **seen operating in an installed
+  binary**. Its `status` consequence is limited to exactly that: it was seen, its controls were not
+  stress-tested, and its dismissal persistence was not re-checked after a reopen.
+- **Diagnostics is now an installed surface with a file behind it.** §27's focused walk exported the payload
+  through the native dialog, parsed it outside the product, and found no path-shaped character anywhere in
+  it. That is `P5_DIAGNOSTICS_RECOVERY_REPORT.md` §2, rows 8-11, and it closes the Diagnostics half of item 2.
+- **History was not visited.** The walk went install → Analyze → Help → close → reopen → Help → export →
+  uninstall. The History page has still never been operated in an installed binary, so item 2's other half
+  stays open and this file stays `IN_PROGRESS`.
+- **One measurement here no longer generalizes.** §2 H recorded
+  `%LOCALAPPDATA%\FirmwareSight` left behind **empty but present** after an uninstall. Commit D's
+  install → uninstall cycle on the same host left **no such directory**. Both rows are true for their own
+  run; the rule was not worked out, and the user-facing uninstall wording is Commit F's to write against a
+  fresh measurement rather than against either one.
+- **§64's full journey is still one run away**, and it is the same list as before: install → onboarding →
+  Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen → reinstall → uninstall →
+  reinstall → documented data behaviour, against a disposable firmware project.

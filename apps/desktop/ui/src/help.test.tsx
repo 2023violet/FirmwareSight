@@ -17,15 +17,32 @@
  *   and no network to open it with (`AGENTS.md` 7);
  * - the first-use guidance is a panel, not a gate, and hiding it is the reader's decision for the
  *   session (prompt §13).
+ *
+ * The Diagnostics section (prompt §20) is held to three more:
+ *
+ * - it shows the five facts the exported file is built from, and it shows them from
+ *   `collect_diagnostics` rather than from the identity call, so the two reads cannot substitute for
+ *   each other and neither one's failure blanks the other;
+ * - the export action reports what the dialog actually did, and declining to choose or to overwrite is
+ *   a decision the screen states as a decision, not an error;
+ * - nothing the section renders can hold a path. The payload has no such field (that is proven in
+ *   Rust, `apps/desktop/src-tauri/tests/diagnostics.rs`), so what this file checks is that the screen
+ *   does not invent one — no directory, no drive letter, no separator anywhere in the section's text.
  */
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
-import { getAppIdentity, setWindowTitle } from './ipc/bridge';
+import { exportDiagnostics, getAppIdentity, getDiagnostics, setWindowTitle } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
-import type { AppIdentityDto, ErrorEnvelopeDto } from './ipc/types';
+import type {
+  AppIdentityDto,
+  DiagnosticsDto,
+  DiagnosticsStoreDto,
+  ErrorEnvelopeDto,
+  ExportOutcomeDto,
+} from './ipc/types';
 
 vi.mock('./ipc/bridge', () => ({
   selectArtifact: vi.fn(),
@@ -37,6 +54,8 @@ vi.mock('./ipc/bridge', () => ({
   queryEvidence: vi.fn(),
   setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
   getAppIdentity: vi.fn(),
+  getDiagnostics: vi.fn(),
+  exportDiagnostics: vi.fn(),
   // Empty pages, because one test walks to History to prove the first-use panel does not come back.
   listHistoryBuilds: vi.fn(() =>
     Promise.resolve({ ok: true, value: { rows: [], total: 0, offset: 0, limit: 25, nextOffset: null } }),
@@ -51,6 +70,8 @@ vi.mock('./ipc/bridge', () => ({
 
 const identityMock = vi.mocked(getAppIdentity);
 const titleMock = vi.mocked(setWindowTitle);
+const diagnosticsMock = vi.mocked(getDiagnostics);
+const exportMock = vi.mocked(exportDiagnostics);
 
 function ok<T>(value: T): IpcOutcome<T> {
   return { ok: true, value };
@@ -90,6 +111,75 @@ const IDENTITY_REFUSED: ErrorEnvelopeDto = {
   remediation: 'Restart FirmwareSight; if it persists, report this message.',
 };
 
+/**
+ * What `collect_diagnostics` answers on a healthy machine.
+ *
+ * Every value here is the shape the Rust payload has, fields and all, because the section is only
+ * under test if it is fed what the real command feeds it: `storeFileName` is a name rather than a path,
+ * the counts are nullable, and `osVersion` says `not_reported` rather than guessing.
+ */
+function diagnostics(overrides: Partial<DiagnosticsDto> = {}): DiagnosticsDto {
+  const base: DiagnosticsDto = {
+    schema: 'firmwaresight-diagnostics-1',
+    generatedAt: '2026-10-04T09:00:00Z',
+    product: {
+      productName: 'FirmwareSight',
+      appVersion: '0.6.0',
+      binaryName: 'firmwaresight.exe',
+      identifier: 'com.firmwaresight.desktop',
+      storeFileName: 'firmwaresight-p0.sqlite',
+    },
+    runtime: {
+      osFamily: 'windows',
+      architecture: 'x86_64',
+      platform: 'windows-x86_64',
+      osVersion: 'not_reported',
+      tauriVersion: '2.10.2',
+      webviewVersion: 'not_reported',
+    },
+    store: {
+      schemaVersion: 5,
+      supportedSchemaVersion: 5,
+      health: 'healthy',
+      healthSummary: null,
+      healthErrorCode: null,
+      journalMode: 'wal',
+      counts: { projects: 1, builds: 3, gateRuns: 1, acceptedReviews: 0, releaseRecords: 0 },
+      backupFiles: [],
+    },
+    git: { available: true, version: 'git version 2.45.1.windows.1' },
+    support: {
+      inputCohort: 'ELF firmware artifacts, with an optional GNU ld MAP file beside them',
+      installChannel: 'msi',
+    },
+    policy: null,
+    recentErrorCodes: [],
+  };
+  return { ...base, ...overrides };
+}
+
+/** The same payload with the store section moved, so a health path is one line of fixture. */
+function withStore(overrides: Partial<DiagnosticsStoreDto>): DiagnosticsDto {
+  const base = diagnostics();
+  return { ...base, store: { ...base.store, ...overrides } };
+}
+
+const DIAGNOSTICS_REFUSED: ErrorEnvelopeDto = {
+  code: 'ERR-STORAGE-4012',
+  message: 'FirmwareSight could not ask the store how healthy it is.',
+  operationId: 'op-diagnostics-2',
+  details: null,
+  remediation: 'Export diagnostics once it answers, then restart FirmwareSight.',
+};
+
+const EXPORT_REFUSED: ErrorEnvelopeDto = {
+  code: 'ERR-DESKTOP-7004',
+  message: 'The diagnostics file could not be written.',
+  operationId: 'op-diagnostics-5',
+  details: 'the chosen folder is read-only',
+  remediation: 'Choose a folder you can write to and try again.',
+};
+
 /** The seven answers prompt §13 lists, titled the way the shared component titles them. */
 const ANSWERS: readonly string[] = [
   'What FirmwareSight does',
@@ -111,11 +201,21 @@ function aboutSection(): HTMLElement {
   return screen.getByRole('region', { name: 'About this application' });
 }
 
+function diagnosticsSection(): HTMLElement {
+  return screen.getByRole('region', { name: 'Diagnostics' });
+}
+
 beforeEach(() => {
   identityMock.mockReset();
   titleMock.mockReset();
+  diagnosticsMock.mockReset();
+  exportMock.mockReset();
   identityMock.mockResolvedValue(ok(identity()));
   titleMock.mockResolvedValue(ok(null));
+  diagnosticsMock.mockResolvedValue(ok(diagnostics()));
+  exportMock.mockResolvedValue(
+    ok({ status: 'written', fileName: 'firmwaresight-diagnostics.json', format: 'json' }),
+  );
 });
 
 describe('Help says which application is running', () => {
@@ -173,8 +273,11 @@ describe('Help says which application is running', () => {
     await within(aboutSection()).findByText('firmwaresight-p0.sqlite');
 
     const section = aboutSection();
+    // Diagnostics exists now, and it does not answer this question either: prompt §19 keeps the
+    // directory out of that payload, so the sentence that used to point the reader at it was a promise
+    // no surface in this product could keep.
     expect(
-      within(section).getByText(/Where it sits on this machine is a Diagnostics question/),
+      within(section).getByText(/absolute path stays inside the application/),
     ).toBeDefined();
     expect(prose(section)).not.toMatch(/[A-Za-z]:[\\/]/);
     expect(prose(section)).not.toMatch(/\\AppData\\/);
@@ -242,13 +345,16 @@ describe('Help bounds what it claims', () => {
     const flagged = items.filter((item) => prose(item).includes('not carried inside the installed package'));
 
     expect(items).toHaveLength(4);
-    // Only Getting Started is reachable from an installed package, and it is on this screen.
-    expect(flagged).toHaveLength(3);
+    // Getting Started is on this screen, and so is Diagnostics now that Commit D shipped it. The two
+    // that remain are source-tree documents a package does not carry.
+    expect(flagged).toHaveLength(2);
     expect(prose(items[0] ?? null)).toContain('this screen, and the panel on Analyze');
     expect(prose(items[0] ?? null)).not.toContain('not carried');
+    expect(prose(items[3] ?? null)).toContain('this screen, and the file you export from it');
+    expect(prose(items[3] ?? null)).not.toContain('not carried');
     expect(prose(section)).toContain('04_TECH/20_PLATFORM_SUPPORT.md');
     expect(prose(section)).toContain('P5_VALIDATION/P5_KNOWN_LIMITATIONS.md');
-    expect(prose(section)).toContain('not in this build yet');
+    expect(prose(section)).not.toContain('not in this build yet');
   });
 
   it('gives a stranger no link to click and no service to trust', async () => {
@@ -358,5 +464,167 @@ describe('Help repeats what Analyze shows on a first run', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Help page' }));
     const help = await screen.findByRole('region', { name: 'Getting started' });
     expect(within(help).getByText('What FirmwareSight does')).toBeDefined();
+  });
+});
+
+describe('Help carries the diagnostics the shell can state', () => {
+  it('states the five facts the exported file is built from', async () => {
+    await openHelp();
+
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    await within(section).findByText('healthy');
+    expect(within(section).getAllByRole('definition').map((row) => row.textContent)).toEqual([
+      '0.6.0',
+      'v5',
+      'healthy',
+      'available',
+      'firmwaresight-p0.sqlite',
+    ]);
+
+    // One call, and it asks for nothing: the payload is the shell's own allowlist, so the screen holds
+    // no argument with which to widen what gets reported (prompt §19).
+    expect(diagnosticsMock).toHaveBeenCalledTimes(1);
+    expect(diagnosticsMock.mock.calls[0]).toEqual([]);
+
+    // The local-only boundary is part of the sentence rather than an implication of it (prompt §22).
+    const words = prose(section);
+    expect(words).toContain('no upload');
+    expect(words).toContain('no telemetry');
+  });
+
+  it('holds no default for any of them until the shell answers', async () => {
+    let resolveDiagnostics!: (outcome: IpcOutcome<DiagnosticsDto>) => void;
+    diagnosticsMock.mockReturnValue(
+      new Promise<IpcOutcome<DiagnosticsDto>>((done) => {
+        resolveDiagnostics = done;
+      }),
+    );
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Help page' }));
+
+    // The identity reply is the wave this waits on, and it is a different call from the one still open
+    // below: About standing while Diagnostics has not answered is the point, because the two reads gate
+    // their own sections and nothing else.
+    await within(aboutSection()).findByText('0.6.0');
+    const section = diagnosticsSection();
+    expect(within(section).getAllByText('not reported')).toHaveLength(5);
+    expect(prose(section)).not.toContain('0.6.0');
+
+    resolveDiagnostics(
+      ok(diagnostics({ product: { ...diagnostics().product, appVersion: '0.7.0-local' } })),
+    );
+    await within(section).findByText('0.7.0-local');
+    expect(within(section).queryByText('not reported')).toBeNull();
+  });
+
+  it('describes a damaged store in words, and says plainly that it will not touch it', async () => {
+    diagnosticsMock.mockResolvedValue(
+      ok(withStore({ health: 'unhealthy', healthSummary: 'btree page 41 has an invalid cell count' })),
+    );
+    await openHelp();
+
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    await within(section).findByText('unhealthy');
+    const words = prose(section);
+    expect(words).toContain('btree page 41 has an invalid cell count');
+    expect(words).toContain('does not repair, replace or delete the store');
+    // The screen reports a damaged store and stops there: an action that "fixed" one would be a
+    // destructive operation offered without confirmation (`AGENTS.md` 9).
+    expect(within(section).queryByRole('button', { name: /repair|reset|delete/i })).toBeNull();
+  });
+
+  it('names the code when the check could not be asked, and never a message', async () => {
+    diagnosticsMock.mockResolvedValue(
+      ok(withStore({ health: 'unknown', healthErrorCode: 'ERR-STORAGE-4012' })),
+    );
+    await openHelp();
+
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    await within(section).findByText('unknown');
+    const words = prose(section);
+    expect(words).toContain('could not be asked');
+    expect(words).toContain('ERR-STORAGE-4012');
+  });
+
+  it('keeps a failed diagnostics read inside the Diagnostics section', async () => {
+    diagnosticsMock.mockResolvedValue(fail(DIAGNOSTICS_REFUSED));
+    await openHelp();
+
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    const alert = within(section).getByRole('alert');
+    expect(within(alert).getByText('ERR-STORAGE-4012')).toBeDefined();
+    // The five rows stay, still saying they have not been told, and the sections that needed no reply
+    // from this call keep everything they had.
+    expect(within(section).getAllByText('not reported')).toHaveLength(5);
+    await within(aboutSection()).findByText('0.6.0');
+    expect(screen.getByRole('region', { name: 'Local-first statement' })).toBeDefined();
+  });
+
+  it('writes the file through the closed command and reports what it did', async () => {
+    await openHelp();
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    await within(section).findByText('healthy');
+
+    fireEvent.click(within(section).getByRole('button', { name: 'Export diagnostics' }));
+    await within(section).findByText('Wrote firmwaresight-diagnostics.json.');
+
+    // Argument-free like the read: the destination is chosen in the native dialog Rust opens, so the
+    // WebView never names a folder it was not given (`ADR-0025`).
+    expect(exportMock).toHaveBeenCalledTimes(1);
+    expect(exportMock.mock.calls[0]).toEqual([]);
+  });
+
+  it('reports declining the dialog as the decision it is', async () => {
+    let resolveExport!: (outcome: IpcOutcome<ExportOutcomeDto>) => void;
+    exportMock.mockReturnValue(
+      new Promise<IpcOutcome<ExportOutcomeDto>>((done) => {
+        resolveExport = done;
+      }),
+    );
+    await openHelp();
+
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    const button = within(section).getByRole('button', { name: 'Export diagnostics' });
+    fireEvent.click(button);
+
+    // The dialog is the shell's, so the screen says what it is waiting for and takes the click away
+    // until the answer lands: a second click would open a second dialog.
+    await within(section).findByText(/Waiting for the save dialog/);
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+
+    resolveExport(ok({ status: 'cancelled', fileName: null, format: 'json' }));
+    await within(section).findByText('Export cancelled. No file was written.');
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('keeps the facts on screen when the export fails', async () => {
+    exportMock.mockResolvedValue(fail(EXPORT_REFUSED));
+    await openHelp();
+
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    fireEvent.click(within(section).getByRole('button', { name: 'Export diagnostics' }));
+
+    const alert = await within(section).findByRole('alert');
+    expect(within(alert).getByText('ERR-DESKTOP-7004')).toBeDefined();
+    // A file that was not written says nothing about the store, so the rows above it do not move.
+    expect(within(section).getByText('healthy')).toBeDefined();
+    expect(within(section).queryByText(/No file was written/)).toBeNull();
+  });
+
+  it('prints no folder anywhere in the section', async () => {
+    diagnosticsMock.mockResolvedValue(
+      ok(withStore({ backupFiles: ['firmwaresight-p0.pre-migration-v4-to-v5.sqlite'] })),
+    );
+    await openHelp();
+
+    const section = await screen.findByRole('region', { name: 'Diagnostics' });
+    await within(section).findByText('healthy');
+    const words = prose(section);
+    // The payload cannot carry a path at all - proven in Rust, with every one of them planted in the
+    // session first. What this checks is narrower and still worth holding: that the screen does not
+    // assemble a location out of the pieces it was given.
+    expect(words).not.toMatch(/[\\/]/);
+    expect(words).not.toContain('AppData');
+    expect(words).not.toContain('home');
   });
 });

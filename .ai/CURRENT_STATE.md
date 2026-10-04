@@ -5,12 +5,12 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # Current State
 
-- Date: 2026-10-03
+- Date: 2026-10-04
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - Active task: **`P5_PRODUCTIZATION`** — stage **P5**, state **`IN_PROGRESS`**, opened on 2026-10-03 by
   *FirmwareSight — P5 Productization, Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, 73,722 bytes,
@@ -21,12 +21,16 @@ last_updated: "2026-10-03"
   versions **unify on `0.6.0`** with the workspace version as the single source, **migration `0005` only
   after a written `P5_MIGRATION_DECISION.md`**, the package matrix is **Windows with real install evidence
   on this host plus macOS/Ubuntu `CI_BUILD_ONLY`**, and the shipped store **keeps the name
-  `firmwaresight-p0.sqlite`** with its path made visible rather than moved. Two questions stay other
-  people's: §32 sends L22 (release identity versus line endings) to the Architect as an ADR draft plus a
-  STOP — **the draft is now written** (`P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md`, option C = today's
-  bytes-as-evidence semantics left in place, with the premise pinned by
-  `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` and a mutation proof), and §54
-  leaves the licence with the owner. **No P5 verdict exists**: §5 forbids `P5 PASS`, `BETA`,
+  `firmwaresight-p0.sqlite`** with its path made visible rather than moved. One question stayed another
+  person's and one has now been answered. **L22 (release identity versus line endings) is decided**: the
+  draft that cost the three answers (`P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md`, option C = today's
+  bytes-as-evidence semantics left in place, its premise pinned by
+  `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` and a mutation proof) went to the
+  Architect and came back as **`ADR-0028`, Accepted: release identity uses the exact bytes observed on
+  disk`** — `require_clean_git = false` stays valid with its caveat written down, `.gitattributes` is
+  recommended for the *user's* repository, and this repository does not edit its own. The draft is
+  re-statused `EXECUTION_RECORD`, not rewritten. **§54 still leaves the licence with the owner**, so
+  `OPEN_SOURCE_LICENSE_DECISION = PENDING_OWNER_CONFIRMATION` stands in every P5 document. **No P5 verdict exists**: §5 forbids `P5 PASS`, `BETA`,
   `RC` or `GA` before closure evidence, `baseline_version` stays `0.6.0`, and no tag, GitHub Release or
   published installer is created.
 - **What has landed since that checkpoint**, measured rather than summarized: `4cc8d93` opened governance
@@ -134,6 +138,31 @@ last_updated: "2026-10-03"
   **16 of 16**, **813 Rust / 201 UI in 8 files** — and the remote agreed: Run `37158606478` on `111fe32` came back
   **10 of 10** at its first attempt, with `Desktop UI` green on **both** Windows and Ubuntu runners, which is where
   an awaited second-wave query earns its keep.
+- **Commit D landed the recovery half, and the installed walk is what made it honest.** Storage now owns its
+  own health: `integrity_check()` asks the engine and reports, and repairs nothing — no `PRAGMA` write, no
+  VACUUM, no rebuild, which is what lets the Help screen say a damaged store will not be touched. Any older
+  file-backed store is now snapshotted with SQLite's **online backup API** before it is migrated (a plain
+  file copy is wrong under WAL and `VACUUM INTO` binds its filename as text, so a non-UTF-8 path fails or
+  names the wrong file), the snapshot is opened and health-checked before it is renamed into place, and a
+  snapshot that cannot be written stops the upgrade rather than starting it. Diagnostics is a closed
+  31-field allowlist assembled in Rust and exported through a native dialog that opens only when a person
+  names a folder; the exported file on the packaged build contains **no `/` and no `\` character at all**,
+  and the store is named by file, never by directory, on screen and in the file.
+- **What that walk found is the reason it was run.** Two defects, neither reachable from a unit test:
+  the startup refusal exited **101 through a Tauri panic** instead of the typed exit 1, because a `setup`
+  error is panicked by the framework inside its event-loop callback
+  (`tauri-2.12.0/src/app.rs:1443-1445`) and the `Error::Setup` arm written for it was unreachable — and a
+  file that is not a database was being described as a rolled-back migration to "schema version 0", a step
+  that never ran. Both are fixed in this commit, the second with a seventh mutation proof. It also
+  falsified two sentences this repository had written for itself: a `setup` failure does *not* return
+  before the event loop starts, and a window *is* mapped — measured visible from t=20 ms until the process
+  leaves at t=360 ms — so §22's stop is now described as it measures (a window with nothing true to say)
+  rather than as it was reasoned (no window at all). And `payload_sha256` never was the digest of the file
+  a user launches: the bundler overwrites 3 bytes of it to name the bundle type
+  (`tauri-bundler-2.10.1/src/bundle.rs:41-95`), which is why the installed binary reports
+  `installChannel: "nsis"`. Present counts: `check.py` **16 of 16**, package group **4 of 4**,
+  **854 Rust / 210 UI in 8 files**. The owner's store was parked, backed up on a second volume and restored
+  byte-identically at both cycles; `ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256

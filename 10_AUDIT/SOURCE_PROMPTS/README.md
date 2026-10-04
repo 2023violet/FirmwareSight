@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # Execution Prompt Register
@@ -518,6 +518,45 @@ text with no source file; each says so in its own entry instead of standing for 
   visible instead. Two are not this round's to decide: §32 sends the release-identity-versus-line-endings
   question (L22) to the Architect as `P5_RELEASE_IDENTITY_ADR_DRAFT.md` with a STOP, and §54 leaves the
   licence with the owner. No P5 verdict exists yet, and none is written here.
+
+## P5 Commit D Diagnostics and Recovery v1.0 — SUPERSEDED, HISTORICAL
+
+- File: `FirmwareSight_P5_CommitD_Diagnostics_Recovery_v1.0.txt`
+- SHA-256: `5ec32b8b3d88dd512a9fb4b6aeab56bcf0f5f40f12559c8b671801acd8a8105f` (35,119 bytes, 1,355 lines) —
+  recomputed from the archived copy in this directory.
+- Authority: the **first** Commit D round. It authorized the preflight, the authority read of the storage
+  core, the IPC surface and the audit's section D, the dependency baseline, and the same five workstreams
+  the continuation later restated: sanitized Diagnostics, storage-owned integrity health, a consistent
+  pre-migration backup, migration recovery evidence, and logical store identity.
+- Disposition, corrected on 2026-10-04. The first round archived this file *as the authority of Commit D*,
+  and that was wrong: the continuation prompt superseded it as the authority for the remaining work before
+  the storage half was finished. It stays here because its bytes are the record of what the first round was
+  told — not because it governs anything now. `P5_VALIDATION/P5_COMMIT_D_DESIGN.md` §0 carries the
+  correction, and the design decisions that survived from this prompt are the ones the continuation restated.
+
+## P5 Commit D Continuation v1.2 — CURRENT ACTIVE AUTHORITY
+
+- File: `FirmwareSight_P5_CommitD_Continue_v1.2.txt`
+- SHA-256: `600d70a358778280b667d1c423b7309079f3a5b575ad0c4b919b75de8c274033` (31,588 bytes, 1,472 LF
+  endings) — recomputed from the archived copy, `cmp`-verified byte-identical to the file the owner
+  delivered on 2026-10-04.
+- Authority: continue the in-flight Commit D without redoing its valid work; correct the D-0 authority
+  evidence first; decide L22 as `ADR-0028` (Accepted) and propagate that decision; then implement the five
+  workstreams §4 names under the §7 test-first gate, §23's mutation proofs, §24's dependency and capability
+  STOP rules, §26's "never touch the owner's live store while developing" and §27's focused installed-app
+  walk, and stop at §34. Its §0 re-anchors the round at `2cdfced` with Run `37159810291` as the
+  authoritative 10-of-10 CI, and its baseline numbers (Rust 813, UI 201, local gate 16/16) are the ones this
+  round was measured against.
+- The v1.1 question, stated rather than papered over. §1 of this prompt names
+  `FirmwareSight_P5_CommitD_Continue_v1.1.txt` — sha256 `f38ee5f2c1d640058f5ed84e5ef00f78577bd6c0d68536aca5e9ff4c7e8ab045`,
+  27,834 bytes, 1,014 lines — as the canonical active authority and instructs the executing agent to locate
+  those exact bytes, verify the hash, and STOP with `AUTHORITY_PROMPT_BYTES_UNAVAILABLE` if they cannot be
+  recovered. They cannot be recovered on this machine: no copy exists in the owner's downloads, in this
+  repository, or in the temp tree, and the bytes were never delivered to any round here. The prompt's own
+  fallback was therefore taken — no reconstruction from memory, no byte-exact claim, no claim that v1.1 was
+  archived — the measurement and the stop were reported, and the owner chose to archive **v1.2** as this
+  round's authority. What v1.1 said is not nothing: v1.2's §1 restates its content and §2 lists the work it
+  had already validly produced, which is what made the continuation safe to resume without a redo.
 
 ## Supersession note on the V0 Batch A activation entry
 

@@ -64,10 +64,9 @@ impl Database {
             path: path.display().to_string(),
             source,
         })?;
-        Self::establish(conn).map_err(|err| match err {
-            StorageError::Open { .. } => err,
-            other => other,
-        })
+        // The path travels no further than here: an open on a file-backed store owes it a snapshot
+        // before any pending migration runs, and an in-memory store owes it nothing.
+        Self::establish(conn, Some(path))
     }
 
     #[cfg(test)]
@@ -76,11 +75,11 @@ impl Database {
             path: ":memory:".to_owned(),
             source,
         })?;
-        Self::establish(conn)
+        Self::establish(conn, None)
     }
 
     /// Apply the baseline connection settings, then migrate.
-    fn establish(conn: Connection) -> Result<Self, StorageError> {
+    fn establish(conn: Connection, store: Option<&Path>) -> Result<Self, StorageError> {
         // `foreign_keys` is per-connection in SQLite, so it is set on every open rather than
         // once at creation time.
         conn.pragma_update(None, "foreign_keys", "ON")
@@ -112,12 +111,20 @@ impl Database {
         }
 
         let mut db = Self { conn };
-        db.migrate()?;
+        db.migrate_from(store)?;
         Ok(db)
     }
 
     /// Create the schema bookkeeping and apply any unapplied migrations, in order.
+    ///
+    /// Called with no store path, so an explicit re-migration never writes a snapshot: the open path
+    /// is the one that owes the file a copy, and it is the only caller that passes a path.
     pub fn migrate(&mut self) -> Result<(), StorageError> {
+        self.migrate_from(None)
+    }
+
+    /// The migration body, with the snapshot decision made against the store it was opened from.
+    fn migrate_from(&mut self, store: Option<&Path>) -> Result<(), StorageError> {
         self.ensure_bookkeeping()?;
         let current = self.current_version()?;
         if current > SCHEMA_VERSION {
@@ -126,6 +133,12 @@ impl Database {
                 found: current,
                 supported: SCHEMA_VERSION,
             });
+        }
+        // Before anything changes the file: a store that already holds user schema and has a pending
+        // upgrade gets a verified copy first, and a snapshot that cannot be written stops the upgrade
+        // here rather than halfway through it.
+        if let Some(destination) = crate::backup::backup_plan(store, current, SCHEMA_VERSION) {
+            self.snapshot_to(&destination, current)?;
         }
         self.apply(MIGRATIONS, current)
     }

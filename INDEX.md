@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 
@@ -57,6 +57,25 @@ the **local** full gate lost it where CI had not, repaired test-only with a cont
 The tree is now **813 Rust / 201 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**, and that head
 went **10 of 10** on Run `37158606478` at its first attempt; what stays
 open is the *acceptance* of those screens in an installed binary (§38 C, §64).
+**Commit D then landed the recovery half, and §32's L22 question with an answer.** ADR-0028 decides release
+identity as *the exact bytes observed on disk*, keeps `require_clean_git = false` valid with its caveat
+written down, recommends `.gitattributes` for the user's repository and does not touch this one; the draft
+that asked the question is re-statused `EXECUTION_RECORD` rather than rewritten. Storage now owns its own
+health (`PRAGMA integrity_check`, read-only, never a repair) and takes a WAL-safe online-backup snapshot of
+any older file-backed store **before** migrating it, with a snapshot that cannot be written stopping the
+upgrade; the migration matrix re-runs fresh/v1/v2/v3/v4/v5 against that behaviour. Diagnostics is a
+closed 31-field allowlist (counted off the exported file, not off the design) assembled in Rust, shown on
+the page that already exists, exported through a native dialog that opens only when a person names a
+folder, and proven by positive-control tests rather than by the
+absence of a leak — the exported file on the installed build contains no `/` and no `\` character at all.
+The tree is now **854 Rust / 210 UI in 8 files / `check.py` 16 steps / 10 authoritative CI jobs**, with the
+package group **4 of 4** beside it, and §27's focused walk ran against the packaged installer with the
+owner's store parked, backed up on a second volume and restored byte-identically:
+`P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md` and its design checklist. That walk earned its keep by
+finding two defects no unit test could reach — the startup refusal exited **101 through a Tauri panic**
+rather than the typed exit 1, because a `setup` error is panicked by the framework inside the event loop
+(`tauri-2.12.0/src/app.rs:1443-1445`), and a file that is not a database was being described as a rolled-back
+migration to "schema version 0" — both fixed here, the second with the seventh mutation proof.
 **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source
@@ -231,6 +250,7 @@ history, and the nine-entry drift that `0.6.0` closed is described in `.ai/DECIS
 | `09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md` | ADR-0025 — Conditional Pre-G1 Analyze Implementation (P1-A0; sequencing partly superseded by ADR-0026) |
 | `09_ADR/ADR-0026-open-source-mvp-first-delivery.md` | ADR-0026 — Open-Source MVP-First Delivery (G1 basis, V0 non-blocking) |
 | `09_ADR/ADR-0027-project-policy-and-provenance-adapter.md` | ADR-0027 — Project Policy and Provenance Adapter Boundary (P3; authorizes `firmwaresight-project`) |
+| `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` | ADR-0028 — Release Identity Uses the Exact Bytes Observed on Disk (P5; decides L22) |
 | `10_AUDIT/00_V0.3_AUDIT_RESOLUTION.md` | v0.3.0 Audit Resolution |
 | `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
 | `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |

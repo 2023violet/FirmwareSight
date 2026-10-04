@@ -2,23 +2,29 @@
 title: "P5 Release Identity and Line Endings — ADR Draft"
 doc_id: "FS-P5-RELID-ADR-DRAFT"
 product: "FirmwareSight"
-version: "0.1"
-status: "DRAFT_FOR_ARCHITECT_REVIEW"
+version: "0.2"
+status: "EXECUTION_RECORD"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-03"
-related: "[L22] G2_VALIDATION/G2_KNOWN_LIMITATIONS.md:44, P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md §G, prompt §32"
+last_updated: "2026-10-04"
+related: "[L22] G2_VALIDATION/G2_KNOWN_LIMITATIONS.md:44, P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md §G, prompt §32; decided by 09_ADR/ADR-0028-release-identity-bytes-as-evidence.md"
 ---
 
 # Draft: does a release's identity include its line endings? (prompt §32, limitation L22)
 
-**Status: DRAFT. Nothing here is decided, and no behaviour described below is changed by P5.** §32 says
-this round may document and test L22 but may not silently normalize release identity, and that a semantic
-change requires this document followed by a STOP for Architect review. That is the whole of its mandate, so
-this file states the current semantics precisely, what the alternatives would cost, and what the next
-authoritative decision is. **Until an Architect approves one of options A or B, option C — today's
-behaviour — remains the behaviour of the product.** `AGENTS.md` §2 puts a change to evidence
-classification and to identity semantics behind an ADR, which is what this draft is for.
+**Status: decided — this file is decision history, and stands as written.** The Architect answered it on
+2026-10-04 in *FirmwareSight — P5 Commit D, Continuation Prompt v1.2 — Architect Reviewed* §3, and the answer
+is **`09_ADR/ADR-0028-release-identity-bytes-as-evidence.md`**, status Accepted: **release identity uses the
+exact bytes observed on disk** — that is option C below, which is what §5 says was already the behaviour of
+the product. Nothing in the analysis that follows was rewritten for that reason: §1 states the semantics the
+ADR confirms, §2 states the cross-platform mechanism and the `require_clean_git = false` hole the ADR
+requires be documented wherever the flag is reported, §3 and §4 are the two alternatives that were costed and
+rejected, and §7 is the question that was actually put. The ADR carries the answers; this file is the evidence
+for them.
+
+The STOP in §8 was honoured and is now closed by ADR-0028. No behaviour described below was changed by P5
+Commit D either: the bytes-as-evidence rule was already the rule, and what Commit D added was the
+`require_clean_git` caveat text inside the Diagnostics payload, which §2 asked for.
 
 Every claim below was read off the code at head `e070508` with the `path:line` cited, or run. Where a
 number is quoted, the command that produced it is named.
@@ -150,7 +156,12 @@ No semantic change. What is asked for instead is that the surprise be visible wh
   Diagnostics may name the notes digest it observed, since a digest of a user-owned document is already
   inside the Diagnostics allowlist question rather than outside it.
 
-**This is the default if nobody approves anything, and it is the option P5 has implemented.**
+**This is the default if nobody approves anything, and it is the option P5 has implemented.** It is no longer
+a default waiting on approval: ADR-0028 adopts it as the decided rule, and its Status section says so.
+
+*[Commit D's actual choice, recorded here so nobody looks for a field that was not added: Diagnostics reports
+the policy flag and the caveat sentence, not the observed notes digest. §16's allowlist does not carry a
+digest of a user-owned document, and Commit D did not widen that list on its own authority.]*
 
 ## 6. Backward compatibility, for whichever option is chosen
 
@@ -165,6 +176,12 @@ field to be discoverable by a reader of an old bundle; the release manifest's `s
 neither today distinguishes "normalized" from "raw" identity.
 
 ## 7. Questions for the Architect
+
+*Answered 2026-10-04 in ADR-0028. The questions are left exactly as put, because what was asked is part of the
+evidence: 1 — bytes, and the ADR states it in `AGENTS.md` §8's vocabulary; 2 — `false` stays a valid explicit
+project-policy option, with the caveat documented wherever the flag is reported; 3 — does not arise, Git-blob
+identity was rejected; 4 — no externally-held bundle needs to be re-verifiable across a change, because there
+is no change and no versioned identity field is introduced.*
 
 1. Is a release's identity the bytes a human handed over, or the document those bytes encode? §3–§5 are
    three answers to that one question, and the choice should be stated in `AGENTS.md` §8's vocabulary.
@@ -181,3 +198,9 @@ Per §32, this sub-change stops here. P5 does not implement option A or B, does 
 change `observe_release_notes`, `canonical_input`, `canonical_release_text`, either id derivation, or any
 stored row. P5 continues with the unrelated workstreams the same prompt authorizes (diagnostics, recovery,
 compatibility fixtures, documentation), and the next word on this file is the Architect's.
+
+*The next word arrived, and the STOP is closed.* Commit D kept the promise this section makes: no identity
+code moved, and the only bytes-as-evidence artifacts it added were the `require_clean_git` caveat sentence
+inside the Diagnostics payload and ADR-0028 itself. `P5_VALIDATION/P5_COMMIT_D_DESIGN.md` records the
+Diagnostics half, and the contract test named in §2's "What P5 added here" is now ADR-0028's canonical
+regression rather than a premise written to prove a limitation.

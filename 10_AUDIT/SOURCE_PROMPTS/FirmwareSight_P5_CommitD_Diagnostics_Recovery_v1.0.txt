@@ -1,0 +1,1355 @@
+FirmwareSight — P5 Commit D
+Diagnostics, Store Health, Migration Backup & Focused Recovery
+Continuation Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+START AUTHORITY
+
+origin/main =
+2cdfced48594ec15f368ab15e4eaef8dbb26dc98
+
+Latest validated heads:
+
+111fe32398c812c05380611f7be83b0fd01491bd
+Run 37158606478
+attempt 1
+10 / 10 success
+
+2cdfced48594ec15f368ab15e4eaef8dbb26dc98
+Run 37159810291
+attempt 1
+10 / 10 success
+
+Current stage:
+
+P5_PRODUCTIZATION
+state = IN_PROGRESS
+baseline_version = 0.6.0
+
+Current direct local counts reported on the §32 head:
+
+Rust = 813
+UI = 201
+check.py = 16 / 16
+
+This continuation authorizes only Commit D.
+
+DO NOT start Commit E.
+DO NOT close P5.
+DO NOT start V1/B1/RC/GA.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. ARCHITECT DECISION — L22 IS NOW RESOLVED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect has reviewed:
+
+P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md
+
+Decision:
+
+OPTION C IS APPROVED.
+
+Canonical rule:
+
+RELEASE IDENTITY USES THE EXACT BYTES OBSERVED ON DISK.
+
+Therefore:
+
+- Release Notes are hashed as exact bytes.
+- LF and CRLF are different evidence.
+- Gate run id may differ when Release Notes bytes differ.
+- Release id may differ when Release Notes bytes differ.
+- Release Bundle ships the bytes it hashed.
+- verify_bundle continues to verify those exact bytes.
+- no CRLF/LF normalization is introduced.
+- no Git-blob identity replaces worktree-byte identity.
+- no release-identity schema/version change is introduced.
+
+The existing regression:
+
+a_notes_file_that_differs_only_in_line_endings_is_a_different_release
+
+is now a canonical contract test, not merely an ADR premise test.
+
+Do not remove or weaken it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. REQUIRE_CLEAN_GIT POLICY DECISION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`release.require_clean_git = false`
+
+remains a valid explicit project-policy option.
+
+Do NOT remove it.
+
+Do NOT force it to true globally.
+
+Reason:
+
+FirmwareSight separates:
+
+observed release identity
+
+from:
+
+policy deciding whether workspace cleanliness blocks release.
+
+If a project explicitly disables the clean-tree requirement,
+FirmwareSight must not silently override that policy.
+
+However the product must make the caveat legible:
+
+when:
+
+require_clean_git = false
+
+a working-tree line-ending difference can change Release Notes digest / Gate id / Release id
+without `git.clean` blocking the release.
+
+This fact may be documented in:
+
+- project/config reference
+- Release Gate documentation
+- Diagnostics policy summary if included safely
+
+Do not display a warning that claims the workspace is dirty unless Git actually says so.
+
+Do not change release identity semantics in Commit D.
+
+Update the ADR draft status to an Architect-approved decision record using the repository's existing ADR/governance convention.
+
+Do not create a new semantic version.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. COMMIT D GOAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement the narrow P5 supportability unit:
+
+A. sanitized local Diagnostics
+B. storage-owned integrity health check
+C. safe pre-migration database backup
+D. backup/recovery evidence
+E. explicit logical store identity
+F. focused startup/storage recovery support where required by A–D
+
+This unit does NOT include:
+
+- fixture expansion
+- performance optimization
+- signing
+- updater
+- licensing
+- telemetry
+- network
+- crash-upload service
+- new top-level navigation page
+- Commit E compatibility work
+- P5 closure
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+
+Expected:
+
+HEAD =
+origin/main =
+2cdfced48594ec15f368ab15e4eaef8dbb26dc98
+
+worktree:
+clean
+
+If remote moved:
+
+STOP and report delta.
+
+After every commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+Never force push.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. READ BEFORE DESIGN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read current versions of:
+
+P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md
+P5_VALIDATION/P5_MIGRATION_DECISION.md
+P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md
+P5_VALIDATION/P5_CI_AUTHORITY.md
+
+04_TECH/05_SECURITY_PRIVACY.md
+04_TECH/15_STORAGE_DATABASE_BASELINE.md
+04_TECH/21_OBSERVABILITY_DIAGNOSTICS.md
+04_TECH/14_IPC_DATA_CONTRACTS.md
+
+crates/firmwaresight-storage/src/db.rs
+crates/firmwaresight-storage/src/error.rs
+crates/firmwaresight-storage/src/lib.rs
+crates/firmwaresight-storage/migrations/0001_initial.sql
+...
+0005
+
+apps/desktop/src-tauri/src/lib.rs
+apps/desktop/src-tauri/src/ipc.rs
+apps/desktop/ui/src/App.tsx
+current Help/About implementation
+current History implementation
+current generated IPC bindings
+
+Do not implement from this prompt alone.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. DIAGNOSTICS SURFACE PLACEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT add a fifth top-level navigation verb.
+
+Keep top-level product navigation:
+
+Analyze
+Compare
+Release
+History
+
+Diagnostics belongs under the productized Help/About/support surface.
+
+A user must be able to:
+
+open Help/About
+→ inspect environment/support facts
+→ export Diagnostics
+
+No account.
+No network.
+No telemetry.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. DIAGNOSTICS CONTRACT — ALLOWLIST ONLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Diagnostics must be built from an explicit allowlist.
+
+Do NOT serialize arbitrary application/session state.
+
+Minimum safe facts:
+
+Product:
+- product name
+- FirmwareSight version
+- build/application identity where currently available
+- baseline/product schema version where applicable
+
+Runtime:
+- OS family
+- OS version if safely observable
+- architecture
+- Tauri/Desktop runtime identity
+- WebView version if safely observable
+  - if unavailable: `not_reported`
+  - never fabricate
+
+Storage:
+- logical store filename ONLY
+- database schema version
+- database health result
+- journal mode if useful
+- storage object counts:
+  projects
+  builds
+  Gate runs
+  accepted reviews
+  release records
+
+Git:
+- available YES/NO
+- Git version if available
+
+Product support:
+- supported input cohort
+- package/install channel if reliably known
+- current application version
+
+Policy/config:
+- project config schema version
+- if a project policy is currently loaded, safe policy flags MAY be reported
+- do not report project root
+- do not report config absolute path
+
+L22 caveat:
+if `require_clean_git = false` is included in diagnostics,
+report only the boolean/effective policy and a safe explanatory note.
+No project path.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. DIAGNOSTICS MUST NEVER CONTAIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Never include:
+
+- artifact absolute source path
+- MAP absolute path
+- project root
+- database absolute path
+- bundle destination
+- user home path
+- username
+- Git remote URL
+- repository URL
+- firmware bytes
+- MAP contents
+- Release Notes contents
+- symbol names
+- environment variable dump
+- access token
+- credential
+- shell history
+- arbitrary logs without sanitization
+- stack trace
+- SQL
+- raw SQLite rows
+
+No artifact attachment.
+
+No automatic upload.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. STORE IDENTITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The current physical store filename remains:
+
+firmwaresight-p0.sqlite
+
+Do NOT rename it in Commit D.
+
+Do NOT migrate user data solely to improve the filename.
+
+Diagnostics may show:
+
+store:
+firmwaresight-p0.sqlite
+
+Diagnostics must NOT show:
+
+C:\Users\...\AppData\...\firmwaresight-p0.sqlite
+
+or any parent directory.
+
+User-facing wording should explain:
+
+"Local FirmwareSight data store"
+
+not:
+
+"P0 test database"
+
+even if the historical filename retains `p0`.
+
+If changing the filename is ever proposed:
+
+that is a separate migration/compatibility decision.
+
+Not Commit D.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. STORAGE-OWNED INTEGRITY CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement a storage-owned read-only health API.
+
+At minimum:
+
+PRAGMA integrity_check
+
+The UI must not send SQL.
+
+The Desktop command must not accept a PRAGMA name.
+
+Suggested storage contract:
+
+Database::integrity_check()
+
+returning a bounded typed result such as:
+
+Healthy
+
+or:
+
+Unhealthy { summary }
+
+Do not expose arbitrary SQLite result rows.
+
+Expected healthy state:
+
+`ok`
+
+For unexpected multiple failure rows:
+
+bound the result.
+
+Do not copy unlimited database diagnostics into IPC.
+
+No repair is performed automatically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. INTEGRITY CHECK ERROR SEMANTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Health check failures must be typed.
+
+Use existing error vocabulary where possible.
+
+If a new stable error code is genuinely required:
+
+keep it within the storage/supportability family.
+
+Do not expose:
+
+rusqlite error debug output
+SQL query text
+database path
+
+Normal UI remediation:
+
+- preserve the database
+- export diagnostics if possible
+- restore from a known backup if appropriate
+- contact/support using Diagnostics ID where applicable
+
+Never:
+
+delete database
+create empty replacement
+run destructive repair automatically
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. PRE-MIGRATION BACKUP — REQUIREMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The application now has schema version 5.
+
+Commit D must make future/older-store migrations safe.
+
+When opening a FILE-BACKED database and:
+
+current_schema < SCHEMA_VERSION
+
+FirmwareSight must create a consistent local backup BEFORE applying any pending migration.
+
+This includes tests opening a v4 store and migrating to v5.
+
+In-memory databases:
+
+do not create filesystem backups.
+
+Fresh database with no prior user schema/data:
+
+do not create a meaningless migration backup.
+
+Database already at latest schema:
+
+do not create a backup merely on every startup.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. BACKUP MUST BE SQLITE-CONSISTENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT use a naive byte copy of only the `.sqlite` file while WAL state may exist.
+
+The backup mechanism must produce a consistent SQLite snapshot.
+
+Preferred design:
+
+SQLite-supported online backup / VACUUM-INTO style consistent snapshot
+
+using the existing SQLite stack.
+
+Before adding a new dependency:
+
+STOP and prove why existing rusqlite/SQLite cannot do it.
+
+Enabling a narrowly required feature on the existing `rusqlite` dependency is permitted only if:
+
+- no new package family is introduced;
+- dependency review remains green;
+- implementation is materially safer than filesystem copying.
+
+Record the chosen mechanism and why it is WAL-safe.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. BACKUP NAMING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Backup files must have deterministic safe names.
+
+Example conceptual shape:
+
+firmwaresight-p0.pre-migration-v4-to-v5.sqlite
+
+or equivalent.
+
+Do not include:
+
+username
+project name
+artifact name
+
+A timestamp MAY be used only for bounded retention bookkeeping if required.
+
+Prefer a deterministic "last pre-migration backup" strategy unless evidence requires more.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. BACKUP RETENTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Keep retention bounded.
+
+Minimum acceptable P5 strategy:
+
+one verified pre-migration backup per immediately previous schema transition
+
+or:
+
+one last-known-good migration backup
+
+Document exact rule.
+
+Do not accumulate unbounded backups.
+
+Do not silently overwrite the only good backup before a new one is fully written and verified.
+
+Use safe staging + replace where needed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. BACKUP FAILURE MUST BLOCK MIGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If the backup cannot be created or verified:
+
+DO NOT RUN THE MIGRATION.
+
+Return a typed actionable error.
+
+Original DB must remain at its original schema.
+
+No partial migration.
+
+No reset.
+
+No empty replacement.
+
+Required regression:
+
+start with v4 database
+force backup destination failure
+open with v5 app
+
+Expected:
+
+- open/migration fails closed
+- schema stays v4
+- rows remain
+- no v5 schema_migrations row
+- no user data loss
+
+Use a deterministic cross-platform failure fixture,
+not unreliable chmod semantics.
+
+Do not weaken production design merely to facilitate the test.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. BACKUP SUCCESS REGRESSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create a real v4 store containing representative data.
+
+Open with schema v5 application/storage layer.
+
+Expected:
+
+1. backup exists before migration result is committed
+2. backup opens as valid SQLite
+3. backup schema = v4
+4. backup row counts/content match pre-migration source
+5. live DB schema = v5
+6. live rows preserved
+7. integrity_check = healthy on both
+8. reopening live v5 DB creates no second unnecessary backup
+9. backup contains exactly the source DB state expected for a local recovery snapshot
+
+Do not claim backup strips local paths:
+it is a database backup and intentionally preserves the database's existing local-only metadata.
+
+The privacy boundary is:
+
+backup remains local
+
+not:
+
+backup redacts the DB.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. RESTORE SEMANTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit D does NOT need a one-click destructive Restore button.
+
+Productization requires:
+
+- backup existence is explainable
+- backup filename/purpose is documented
+- recovery steps are documented
+- app never auto-restores without explicit user action
+
+If a safe non-destructive "Open backup location" action would require filesystem capability changes:
+
+do NOT add it in this unit.
+
+Help/docs may describe the platform app-data location using environment-variable form,
+not a captured user's absolute path.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. DIAGNOSTICS EXPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+User-triggered only.
+
+Use native Save/Folder dialog through Rust-side product command.
+
+No arbitrary path-taking IPC.
+
+Preferred output:
+
+diagnostics.json
+
+optionally plus:
+
+diagnostics.txt
+
+No ZIP dependency.
+
+Output must be deterministic for deterministic fields.
+
+Runtime/environment facts may naturally vary.
+
+Do not include wall-clock time in a hash/identity claim.
+
+If generated_at is included:
+
+label it as observation metadata only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. DIAGNOSTICS DTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Diagnostics DTO is a Desktop/Application IPC contract.
+
+It is NOT a public portable firmware schema.
+
+Use bounded explicit fields.
+
+Generate TypeScript bindings through existing ts-rs process.
+
+No:
+
+rusqlite types
+PathBuf in DTO
+Tauri types
+arbitrary map of environment facts
+
+Prefer structured closed DTOs.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. POSITIVE-CONTROL PRIVACY TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tests must inject sensitive-looking values such as:
+
+C:\Users\Example\SecretProject\firmware.elf
+/home/example/private/project/firmware.elf
+
+Git remote:
+git@example.com:secret/repo.git
+
+Release Notes body:
+SECRET_RELEASE_TEXT_SHOULD_NOT_LEAK
+
+symbol:
+top_secret_symbol_name
+
+Then export diagnostics.
+
+Assert all are absent.
+
+Also assert absence of:
+
+actual temporary directory
+database absolute path
+project root
+
+The test is load-bearing only if the source storage/session actually contains the positive-control secret.
+
+Prove that before checking absence.
+
+No vacuous privacy test.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. DIAGNOSTICS CONTENT TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Assert safe facts ARE present:
+
+- FirmwareSight version
+- OS family
+- architecture
+- DB schema version
+- integrity status
+- Git availability
+- supported cohort
+- storage counts
+- logical store filename
+
+A privacy test that exports an empty object is not acceptable.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. CORRUPT / UNHEALTHY DATABASE TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Test the storage health API independently.
+
+Use a controlled disposable corrupted database fixture/copy.
+
+Expected:
+
+- no panic
+- typed unhealthy/error result
+- source file not deleted
+- no empty DB silently created over it
+
+Do not corrupt the owner's database.
+
+Do not run corruption test against app_data_dir.
+
+Use a temp test DB only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. STARTUP BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not turn Commit D into a full startup recovery redesign.
+
+But if the backup/integrity implementation reveals that current startup uses `.expect(...)`
+and therefore turns an anticipated storage condition into a process panic,
+fix only the narrow path needed for:
+
+- backup failure
+- migration failure
+- unsupported schema
+- integrity/open error
+
+The user must receive a product-level typed/actionable startup failure if the current architecture can support it without a large shell redesign.
+
+If this requires a new recovery window/page architecture:
+
+STOP that subproblem and report to Architect.
+
+Do not build a recovery application inside Commit D.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. ERROR RECORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not add telemetry.
+
+Do not add persistent verbose logging solely for Diagnostics.
+
+Recent typed error codes are optional:
+
+only include them if they can be captured safely with a small bounded in-memory mechanism.
+
+If implementing:
+
+- fixed small capacity
+- codes only, optionally operation id
+- no message if message could contain path
+- no arbitrary details
+
+If that adds disproportionate cross-cutting work:
+
+record:
+
+recent_error_codes = NOT_AVAILABLE_IN_THIS_BUILD
+
+and continue.
+
+Do not block Commit D on this optional field.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. GIT VERSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Diagnostics may report:
+
+git.available
+git.version
+
+Use a fixed Rust-side Git probe.
+
+Do not add generic shell execution IPC.
+
+Do not report:
+
+git remote
+repository path
+branch
+commit
+
+unless a later product requirement explicitly needs those facts.
+
+Diagnostics describes support environment,
+not project provenance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. WEBVIEW VERSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Report WebView version only if current Tauri/WebView APIs expose it safely and deterministically.
+
+If not:
+
+webview_version:
+NOT_REPORTED
+
+Do not scrape binaries.
+Do not read registry broadly.
+Do not run PowerShell from the UI.
+Do not add a platform-specific dependency just for this field.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. PACKAGE / INSTALL CHANNEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Only report package/install channel if the running application can know it truthfully.
+
+Do not infer "installed" solely from a path string exposed to the WebView.
+
+If reliable channel identity does not exist:
+
+report a conservative value or omit the optional field.
+
+No false support facts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. HELP/ABOUT INTEGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use the existing Help/About surface from Commit C.
+
+Add a Diagnostics section/action there.
+
+Do not add:
+
+Settings page
+Diagnostics top-level page
+Support cloud portal
+
+Minimum UI:
+
+Diagnostics
+- database health
+- schema version
+- Git available
+- product version
+- Export diagnostics
+
+Do not show database absolute path.
+
+Logical store identity may show:
+
+firmwaresight-p0.sqlite
+
+with copy explaining:
+
+"Local FirmwareSight data store"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. L22 DOCUMENTATION UPDATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because Architect approved Option C:
+
+update:
+
+P5_RELEASE_IDENTITY_ADR_DRAFT.md
+
+to the repository's accepted/decided status convention.
+
+Record:
+
+Decision:
+bytes-as-evidence
+
+No production semantic change required.
+
+Add documentation note:
+
+Projects that set:
+
+release.require_clean_git = false
+
+accept that worktree byte differences, including line endings,
+can change Gate/release identity without the clean-tree rule blocking.
+
+Recommended repository practice:
+
+pin line endings for byte-sensitive release files using `.gitattributes`.
+
+Do NOT make FirmwareSight edit `.gitattributes`.
+
+Do NOT auto-normalize files.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. TEST-FIRST REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before implementation, add failing regressions for:
+
+A. integrity_check healthy
+B. integrity_check unhealthy/corrupt fixture
+C. v4 → v5 creates consistent backup before migration
+D. backup failure prevents migration
+E. latest v5 reopen creates no redundant migration backup
+F. Diagnostics positive safe fields
+G. Diagnostics positive-control secret/path absence
+H. Diagnostics DTO bounded/no paths
+I. Diagnostics export file parses
+J. Help/About export action uses closed use-case IPC
+
+Do not write product changes before corresponding red tests where practical.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. MUTATION PROOFS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At least:
+
+Mutation 1:
+return Healthy without executing integrity_check
+
+Expected:
+corrupt DB health test fails.
+
+Mutation 2:
+remove backup-before-migration ordering
+
+Expected:
+pre-migration backup test fails.
+
+Mutation 3:
+allow absolute DB path into diagnostics
+
+Expected:
+privacy test fails.
+
+Mutation 4:
+export arbitrary session/error details
+
+Expected:
+positive-control secret test fails.
+
+Restore all mutations byte-exact.
+
+No mutation lands.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. MIGRATION MATRIX REVALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After backup changes:
+
+run:
+
+fresh → v5
+v1 → v5
+v2 → v5
+v3 → v5
+v4 → v5
+v5 reopen
+
+For each file-backed old schema:
+
+verify backup behavior matches documented policy.
+
+Do not require a backup for in-memory migration tests.
+
+Check:
+
+row preservation
+schema version
+integrity
+backup existence where expected
+
+No silent reset.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. OWNER DATABASE SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT exercise migration/backup features on the owner's live DB while developing.
+
+Use temp databases.
+
+For any real packaged-app acceptance later:
+
+use the already owner-authorized:
+
+hash
+→ park
+→ independent backup
+→ disposable app store
+→ close
+→ restore
+→ hash compare
+
+Commit D local/unit tests should not require touching the owner store.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. REAL DESKTOP FOCUSED CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After automated validation and shipping package build:
+
+perform a focused real installed-app check.
+
+Use disposable test store.
+
+Required:
+
+1. launch installed package
+2. open Help/About
+3. find Diagnostics
+4. verify logical store name shown, no path
+5. verify DB health displayed
+6. export diagnostics using native dialog
+7. independently inspect diagnostics file
+8. confirm no source/home/project/DB path
+9. confirm safe facts correct
+10. close/reopen
+11. diagnostics still works
+
+No need to rerun full Analyze→Bundle acceptance in this unit.
+
+A minimal Analyze smoke is sufficient.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run:
+
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+plus the current P5 package group required by repository authority.
+
+Current baseline:
+
+Rust = 813
+UI = 201
+
+Counts may increase.
+
+Report direct counts once.
+
+Do not double-count repetitions.
+
+Current full gate semantics are 16 / 16 on the latest validated head.
+
+Use current repository output as authority if the number legitimately changes.
+
+No skipped required group.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. UI TEST RELIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not introduce another L23 instance.
+
+Diagnostics UI tests must await causal state.
+
+No sleep.
+
+No "rerun until green".
+
+For any chained IPC waves:
+
+await the specific wave the assertion depends on.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. SECURITY REVIEW FOR COMMIT D
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Confirm:
+
+- no network capability
+- no telemetry
+- no arbitrary read_file(path)
+- no execute_shell IPC
+- no run_sql IPC
+- no raw DB path DTO
+- no PathBuf in generated TS
+- no Git remote
+- no database content dump
+- no firmware attachment
+- no hidden background upload
+- CSP unchanged unless separately justified
+- capabilities remain minimal
+
+If a capability change becomes necessary:
+
+STOP and report before adding it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. DEPENDENCY RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred:
+
+no new dependency.
+
+If consistent SQLite backup requires enabling an existing `rusqlite` feature:
+
+measure and document it.
+
+Run cargo tree before/after.
+
+If it introduces a new transitive dependency family or materially changes platform behavior:
+
+STOP for Architect review.
+
+Do not add a third-party diagnostics/logging framework.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. COMMIT CONTENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred Commit D product commit:
+
+P5: add local diagnostics and protect database migrations
+
+Expected change families:
+
+- storage health/backup implementation
+- storage tests
+- Desktop Diagnostics DTO/use-case command
+- generated TS binding
+- Help/About diagnostics UI
+- UI/IPC tests
+- P5 diagnostics/recovery evidence
+- approved L22 decision record
+- narrowly required canonical docs
+
+Do NOT include:
+
+fixture expansion
+performance work
+Commit E compatibility changes
+P5 closure
+
+Regenerate:
+
+DIRECTORY_TREE.txt if tracked path set changes
+
+SHA256SUMS last.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After local gate is green:
+
+commit
+push normal fast-forward
+
+Find workflow by exact head SHA.
+
+Required authoritative matrix:
+
+10 / 10
+
+all completed / success.
+
+Read the actual jobs.
+
+Do not infer from overall conclusion alone.
+
+If code/test failure:
+
+fix.
+
+If package job exposes a real artifact defect:
+
+investigate.
+
+Do not call a rerun a first-attempt pass.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. CI READ-BACK SUCCESSOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Follow the current P5 convention.
+
+After Commit D head gets 10 / 10:
+
+create one narrow documentation/read-back successor if current P5 governance requires it.
+
+Record:
+
+- Commit D SHA
+- Run id
+- attempt
+- exact 10 jobs
+- new Rust/UI counts
+- Diagnostics findings
+- backup/integrity evidence
+- focused installed-app evidence
+
+No product source change in the read-back successor.
+
+Its own authoritative CI must also be:
+
+10 / 10
+
+Do not create an infinite CI→docs recursion.
+
+The successor's own run is external evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. COMMIT D EXIT CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L22:
+□ Architect Option C recorded
+□ no normalization
+□ no Git-blob identity
+□ require_clean_git=false remains explicit option
+□ caveat documented
+□ byte-identity regression still green
+
+Diagnostics:
+□ user-triggered
+□ Help/About integration
+□ safe facts present
+□ allowlist
+□ store filename only
+□ no DB path
+□ no project/source path
+□ no firmware/MAP/notes content
+□ no Git remote
+□ export parses
+□ positive-control privacy test
+
+Health:
+□ storage-owned integrity_check
+□ healthy test
+□ corrupt/unhealthy test
+□ no auto-repair
+□ no silent reset
+
+Backup:
+□ consistent SQLite backup
+□ before migration
+□ file-backed only
+□ backup failure blocks migration
+□ v4 backup preserved before v5
+□ v5 reopen no redundant backup
+□ bounded retention
+□ backup integrity verified
+
+Migration:
+□ fresh→5
+□ v1→5
+□ v2→5
+□ v3→5
+□ v4→5
+□ v5 reopen
+□ row preservation
+
+Desktop:
+□ packaged focused check
+□ diagnostics export works
+□ no host-path leakage
+□ owner DB not modified
+
+Validation:
+□ fmt
+□ clippy
+□ Rust tests
+□ typecheck
+□ lint
+□ UI tests
+□ frontend build
+□ full check.py
+□ package group as current P5 authority requires
+
+Remote:
+□ product head 10/10
+□ read-back successor 10/10
+
+Only then:
+
+COMMIT_D =
+COMPLETE
+
+P5 remains:
+
+IN_PROGRESS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. STOP POINT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After Commit D and its CI read-back successor are complete:
+
+STOP.
+
+Return to Architect.
+
+Do NOT start:
+
+Commit E
+fixture expansion
+compatibility matrix implementation
+P5 closure
+
+The next unit requires a new Architect continuation decision.
+
+END OF PROMPT

@@ -252,7 +252,7 @@ pub(crate) fn envelope_from_diff(err: &DiffError, operation_id: &str) -> ErrorEn
             "Both sides name the same build, so there is nothing to compare."
         }
     };
-    ErrorEnvelopeDto {
+    let envelope = ErrorEnvelopeDto {
         code: err.code().to_owned(),
         message: message.to_owned(),
         operation_id: operation_id.to_owned(),
@@ -262,9 +262,10 @@ pub(crate) fn envelope_from_diff(err: &DiffError, operation_id: &str) -> ErrorEn
              is not the same as nothing having changed."
                 .to_owned(),
         ),
-    }
+    };
+    crate::diagnostics::record_error_code(&envelope.code);
+    envelope
 }
-
 /// What the user asked to write. The format is carried by the command name, so the WebView never
 /// sends a path, a file name or a format string.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -377,7 +378,7 @@ fn short(sha: &str) -> &str {
 }
 
 /// Open the native save dialog. Modal, so it only ever runs on a blocking thread.
-fn save_path(
+pub(crate) fn save_path(
     app: &AppHandle,
     title: &str,
     format: ExportFormat,
@@ -396,7 +397,7 @@ fn save_path(
 }
 
 /// Ask, in a person's words, whether an existing file may be replaced.
-fn confirm_replacement(app: &AppHandle, file_name: &str) -> bool {
+pub(crate) fn confirm_replacement(app: &AppHandle, file_name: &str) -> bool {
     app.dialog()
         .message(format!(
             "{file_name} already exists. Replacing it overwrites the file you have."

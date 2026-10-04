@@ -22,6 +22,7 @@ import type {
   CandidatePageRequestDto,
   CompareRequestDto,
   CompareSummaryDto,
+  DiagnosticsDto,
   ErrorEnvelopeDto,
   EvidencePageDto,
   EvidenceRequestDto,
@@ -72,6 +73,8 @@ const LIST_HISTORY_GATE_RUNS = 'list_history_gate_runs';
 const LIST_HISTORY_RELEASES = 'list_history_releases';
 const GET_APP_IDENTITY = 'get_app_identity';
 const SET_WINDOW_TITLE = 'set_window_title';
+const COLLECT_DIAGNOSTICS = 'collect_diagnostics';
+const EXPORT_DIAGNOSTICS = 'export_diagnostics';
 
 export type IpcOutcome<T> =
   | { readonly ok: true; readonly value: T }
@@ -388,7 +391,8 @@ export async function listHistoryReleases(
  * and the store's file name.
  *
  * The Help screen needs a version and must not invent one, so the answer comes from the binary that
- * is on screen. It is a file name, never a path - the location belongs to Diagnostics (prompt §19).
+ * is on screen. It is a file name, never a path: no command in this bridge returns the store's
+ * directory, and Diagnostics does not either (prompt §19).
  */
 export async function getAppIdentity(): Promise<IpcOutcome<AppIdentityDto>> {
   return await call<AppIdentityDto>(GET_APP_IDENTITY);
@@ -404,4 +408,25 @@ export async function getAppIdentity(): Promise<IpcOutcome<AppIdentityDto>> {
  */
 export async function setWindowTitle(page: MainWindowPage): Promise<IpcOutcome<null>> {
   return await call<null>(SET_WINDOW_TITLE, { page });
+}
+
+/**
+ * Ask what this application and its data store can truthfully say about themselves.
+ *
+ * The call sends no arguments: the payload is an allowlist of closed fields assembled in Rust, so the
+ * WebView names no path, no table and no query and cannot widen what gets reported (prompt §19).
+ */
+export async function getDiagnostics(): Promise<IpcOutcome<DiagnosticsDto>> {
+  return await call<DiagnosticsDto>(COLLECT_DIAGNOSTICS);
+}
+
+/**
+ * Write that same payload to a file chosen in the native Save dialog.
+ *
+ * Rust opens the dialog and the destination never crosses this boundary, which is why the capability
+ * list gains nothing for an export (`ADR-0025`). Declining to choose, and declining to overwrite, come
+ * back as outcomes rather than errors, exactly as the Compare export reports them.
+ */
+export async function exportDiagnostics(): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await call<ExportOutcomeDto>(EXPORT_DIAGNOSTICS);
 }

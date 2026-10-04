@@ -9,7 +9,12 @@ description = "SQLite-backed structured history via rusqlite (bundled)."
 
 [dependencies]
 firmwaresight-core = { workspace = true }
-rusqlite = { version = "0.40.2", features = ["bundled"] }
+# `backup` is the online-backup API, and it is the reason a pre-migration snapshot is a consistent
+# copy rather than a file copy: the store runs in WAL mode where the filesystem allows it, so the
+# committed state is the `.sqlite` file plus whatever the log still holds. The feature is declared in
+# rusqlite's own manifest as `backup = []`, so it adds no package to this graph; `bundled` already
+# compiles the `sqlite3_backup_*` symbols it calls.
+rusqlite = { version = "0.40.2", features = ["bundled", "backup"] }
 thiserror = "2.0.21"
 tracing = "0.1.44"
 

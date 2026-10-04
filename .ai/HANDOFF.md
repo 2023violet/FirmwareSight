@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-04"
 ---
 
 # Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization IN_PROGRESS — active_task P5_PRODUCTIZATION
@@ -103,19 +103,33 @@ migration**, and the title is now Rust's, composed from a closed `MainWindowPage
 L23's sixth instance has since closed in the same test-only way — `compare.test.tsx` read the ranking's second
 IPC wave synchronously, and the *local* full gate lost it before CI did — with the evidence, three mutation
 proofs and a bounded sweep of chained waves in `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` §0a.
-The remaining workstream order is unchanged: Commit D's diagnostics and recovery, Commit E's fixture cohort,
-Commit F's documentation and closure. **What Commit C does not close is the acceptance of Commit C**: the
+**Commit D has since landed** (§§4-27 of its continuation prompt): storage owns its health
+(`integrity_check()`, read-only, repairs nothing), any older file-backed store is snapshotted with SQLite's
+online backup API **before** it is migrated and a snapshot that cannot be written stops the upgrade, and
+Diagnostics is a closed 31-field allowlist on the Help page exported through a Rust-side native dialog.
+`P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md` and its design checklist are the record, and §27's focused
+walk ran against the packaged installer: the exported file contains no `/` and no `\` character at all, the
+store is named by file and never by folder, and the owner's store was parked, copied to a second volume and
+restored byte-identically at both cycles (`ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`).
+Locally: `check.py` **16 of 16**, package group **4 of 4**, **854 Rust / 210 UI in 8 files**, seven mutation
+proofs. Two of this commit's fixes exist **because the installed walk found them** and no unit test could
+have: the startup refusal exited 101 through a Tauri `panic!` rather than the typed exit 1 (a `setup` error
+is panicked by the framework inside its event loop, `tauri-2.12.0/src/app.rs:1443-1445`), and a file that is
+not a database was being described as a rolled-back migration to "schema version 0". Read
+`P5_COMMIT_D_DESIGN.md` §9 before touching that boundary again.
+The remaining workstream order is unchanged: Commit E's fixture cohort, then Commit F's documentation and
+closure. **What Commits C and D do not close is the acceptance of Commit C**: the
 onboarding panel and the History page have never been operated in the installed binary, so the full §64
 journey (install → onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen →
-reinstall → uninstall → reinstall → documented data behaviour) still runs once after D lands, on a
+reinstall → uninstall → reinstall → documented data behaviour) still runs once, on a
 disposable firmware project, and only then does `P5_INSTALL_RECOVERY_REPORT.md` leave `IN_PROGRESS`. The
 remote has seen this head: Run `37154946484` on `e863d0c` came back **10 of 10** on the first attempt, which
 is the repository's rule for every P5 head, and `P5_VALIDATION/P5_CI_AUTHORITY.md` carries the row. **The
 current head honours that rule too**: `111fe32` — §32's L22 draft with its identity premise test, plus the
 test-only repair of L23's sixth race instance — went **10 of 10** on Run `37158606478`, first attempt. The §32
-STOP is still in force: the draft leaves today's bytes-as-evidence semantics standing and **nothing in it may be
-implemented until the Architect answers its four questions**, so do not arrive here and "fix" the line-ending
-finding by normalizing a digest. **Do not start a
+STOP has been **answered**: `ADR-0028` is Accepted and decides that release identity uses the exact bytes
+observed on disk, so the line-ending finding stays exactly as it behaves — do not arrive here and "fix" it by
+normalizing a digest, and do not edit this repository's `.gitattributes`. **Do not start a
 workstream the prompt has not authorized and do not close P5 from this file**: §61's split is the scope, and
 §5's list of forbidden verdicts still applies to every sentence you write.
 

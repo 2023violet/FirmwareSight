@@ -4,6 +4,8 @@
  * A reading page, so the same page rhythm as the other three: one column of text with a measure,
  * hairline separators between sections, mono for every identifier, digest, version and file name.
  * No accent fill anywhere - the accent is reserved for the actions of the workflow pages (DESIGN.md 5).
+ * The page has exactly one action, the diagnostics export, and it is the neutral control rather than a
+ * primary: a reading screen does not lead the reader into the workflow.
  */
 
 .page {
@@ -99,5 +101,55 @@
    this package, without borrowing a state badge that would read as a Gate result (DESIGN.md 5). */
 .documentFlag {
   color: var(--fs-color-status-unknown);
+  font-size: var(--fs-font-size-metadata);
+}
+
+/*
+ * Store health: bold prose in the page's own text colour, and no status colour at all.
+ *
+ * DESIGN.md 5 names five states and this is not one of them — "the database is structurally sound" is
+ * a fact the store reports, not a release verdict — and DESIGN.md 9's rule that colour only ever aids a
+ * carrier is what keeps it that way. Painting it `status-pass` or `status-block` would borrow the
+ * verdict palette for a non-verdict: the worst of both readings, a value that looks like a decision the
+ * Gate was never asked to make and is not one. The sentence under the row is what makes a damaged store
+ * legible, and the word is always there for a reader who cannot see the difference.
+ */
+.health {
+  font-weight: bold;
+}
+
+/* The one action on the page. Same neutral control as the workflow pages, without their accent. */
+.exports {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+.control {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font: inherit;
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.control:hover:not(:disabled) {
+  border-color: var(--fs-color-text-disabled);
+}
+
+.control:disabled {
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border-color: var(--fs-color-border-default);
+  cursor: default;
+}
+
+.status {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
 }

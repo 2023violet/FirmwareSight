@@ -12,17 +12,30 @@
  * the version, the identifier, the platform, the schema the store carries and the store's file name
  * come from the running binary, and the screen says plainly when it has not received them.
  *
- * The store is named, not located. Its full path belongs to Diagnostics (prompt §19), which has its
- * own privacy test and is not this commit.
+ * The store is named, not located - and the Diagnostics section below does not locate it either. An
+ * absolute path is outside that payload by rule (prompt §19), so no surface this product has prints the
+ * folder the store sits in.
+ *
+ * Diagnostics is placed on this page rather than on a fifth navigation verb (prompt §5), and what it
+ * shows is a subset of what the exported file says, so a reader can check the facts before writing them
+ * down. Two boundaries are the point of that section: the payload is assembled in Rust from a fixed list
+ * of fields, and it leaves the machine only when a person names a folder in the native Save dialog the
+ * shell owns. Nothing is uploaded, because there is nothing here to upload it to.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import styles from './Help.module.css';
 import { ErrorPanel } from './components/ErrorPanel';
 import { GettingStartedList } from './GettingStarted';
-import { getAppIdentity } from './ipc/bridge';
-import type { AppIdentityDto, ErrorEnvelopeDto } from './ipc/types';
+import { exportDiagnostics, getAppIdentity, getDiagnostics } from './ipc/bridge';
+import type {
+  AppIdentityDto,
+  DiagnosticsDto,
+  DiagnosticsStoreDto,
+  ErrorEnvelopeDto,
+  ExportOutcomeDto,
+} from './ipc/types';
 
 /**
  * Where each of the four documents the reader is pointed to lives, and whether it is on this machine.
@@ -35,7 +48,7 @@ const DOCUMENTS: readonly { readonly name: string; readonly path: string; readon
   { name: 'Getting Started', path: 'this screen, and the panel on Analyze', shipped: true },
   { name: 'Support Matrix', path: '04_TECH/20_PLATFORM_SUPPORT.md', shipped: false },
   { name: 'Known Limitations', path: 'P5_VALIDATION/P5_KNOWN_LIMITATIONS.md', shipped: false },
-  { name: 'Diagnostics', path: 'not in this build yet', shipped: false },
+  { name: 'Diagnostics', path: 'this screen, and the file you export from it', shipped: true },
 ];
 
 /**
@@ -50,6 +63,77 @@ function told(
   pick: (value: AppIdentityDto) => string,
 ): string {
   return identity === null ? 'not reported' : pick(identity);
+}
+
+/** The same rule for the Diagnostics rows: the screen holds no default for any of them. */
+function known(
+  diagnostics: DiagnosticsDto | null,
+  pick: (value: DiagnosticsDto) => string,
+): string {
+  return diagnostics === null ? 'not reported' : pick(diagnostics);
+}
+
+/**
+ * The store's health, as a word.
+ *
+ * Deliberately prose rather than one of the five state badges: PASS and BLOCK on this page would read
+ * as a release verdict the Gate was never asked to make, the same reasoning that keeps the document
+ * list below in plain grey (DESIGN.md 5). Carrying that badge's *colours* without its icon would be the
+ * worst of both — a value that looks like a verdict and is not one — so health is bold prose in the
+ * same grey every other fact on this page uses, and the sentence under it is what makes a damaged store
+ * legible. A health value this build does not know is reported as unknown rather than rounded to
+ * healthy.
+ */
+function health(store: DiagnosticsStoreDto): string {
+  switch (store.health) {
+    case 'healthy':
+      return 'healthy';
+    case 'unhealthy':
+      return 'unhealthy';
+    default:
+      return 'unknown';
+  }
+}
+
+/**
+ * The one sentence a health value earns: the engine's own bounded detail, and what the product will
+ * not do about it.
+ *
+ * `integrity_check` is a read (`AGENTS.md` 9): FirmwareSight never repairs, replaces or deletes a store
+ * it finds damaged, so the screen says that instead of offering a button that would. A check that could
+ * not be asked shows its stable code and no message, because the message of an open failure can quote
+ * the path it failed on (prompt §19).
+ */
+function healthNote(store: DiagnosticsStoreDto): string {
+  if (store.health === 'unhealthy') {
+    return `The store check reported: ${store.healthSummary ?? 'no detail returned'}. FirmwareSight only reads this check; it does not repair, replace or delete the store.`;
+  }
+  if (store.health === 'unknown') {
+    const code = store.healthErrorCode === null ? '' : ` (code ${store.healthErrorCode})`;
+    return `The health check could not be asked${code}. The store is left exactly where it is.`;
+  }
+  return '';
+}
+
+/**
+ * What the Save dialog and the write actually did.
+ *
+ * Declining to choose a folder, and declining to overwrite a file that was already there, are normal
+ * outcomes rather than errors - the Compare export established that contract, and Diagnostics keeps the
+ * same words for the same decisions.
+ */
+function outcomeWords(outcome: ExportOutcomeDto): string {
+  switch (outcome.status) {
+    case 'written':
+      return `Wrote ${outcome.fileName ?? 'the diagnostics file'}.`;
+    case 'cancelled':
+      return 'Export cancelled. No file was written.';
+    case 'kept-existing':
+      return 'Kept the file that was already there. Nothing was written.';
+    default:
+      // An outcome this build does not know is reported as what it is, not as a guess.
+      return `The export reported an outcome this build does not know: ${outcome.status}`;
+  }
 }
 
 export function Help() {
@@ -121,10 +205,12 @@ export function Help() {
           </div>
         </dl>
         <p className={styles['note']}>
-          The store is named by file, not by folder. Where it sits on this machine is a Diagnostics
-          question, and Diagnostics is not in this build yet.
+          The store is named by file, not by folder. Where it sits is not stated here, and not stated in
+          the diagnostics file either: an absolute path stays inside the application.
         </p>
       </section>
+
+      <Diagnostics />
 
       <section className={styles['section']} aria-label="What it can read">
         <h2>What it can read</h2>
@@ -181,5 +267,144 @@ export function Help() {
         </p>
       </section>
     </main>
+  );
+}
+
+/**
+ * The Diagnostics section: five facts, one action, and the file those facts become.
+ *
+ * It owns its own IPC call and its own state, so an identity read that has not arrived cannot blank
+ * this section and a diagnostics read that failed cannot blank the About block above it. The Version
+ * row repeats the About block on purpose - it is the payload's copy of the same answer, read from
+ * `collect_diagnostics` rather than from `get_app_identity`, and it is the number that will be written
+ * into the file.
+ */
+function Diagnostics() {
+  const [payload, setPayload] = useState<DiagnosticsDto | null>(null);
+  const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<ErrorEnvelopeDto | null>(null);
+
+  useEffect(() => {
+    void getDiagnostics().then((outcome) => {
+      if (outcome.ok) {
+        setPayload(outcome.value);
+        setError(null);
+      } else {
+        setError(outcome.envelope);
+      }
+    });
+  }, []);
+
+  const exportNow = useCallback(async () => {
+    setExporting(true);
+    const outcome = await exportDiagnostics();
+    setExporting(false);
+    if (!outcome.ok) {
+      // A failed export says nothing about the facts above, so the section stays standing.
+      setExportError(outcome.envelope);
+      setNote(null);
+      return;
+    }
+    setExportError(null);
+    setNote(outcomeWords(outcome.value));
+  }, []);
+
+  const store = payload?.store ?? null;
+  const detail = store === null ? '' : healthNote(store);
+
+  return (
+    <section className={styles['section']} aria-label="Diagnostics">
+      <h2>Diagnostics</h2>
+      <p>
+        One file that says what this application is and what its own data store can say about itself, so
+        a support conversation can start from facts rather than from a person reading values off a
+        screen. It is written here and goes nowhere else: there is no upload, no telemetry, and no
+        service in this product to send it to.
+      </p>
+      {error === null ? null : (
+        <ErrorPanel
+          envelope={error}
+          label="Diagnostics error"
+          heading="The application could not describe its data store"
+        />
+      )}
+      <dl className={styles['facts']}>
+        <div>
+          <dt>Version</dt>
+          <dd className={styles['mono']}>
+            {known(payload, (value) => value.product.appVersion)}
+          </dd>
+        </div>
+        <div>
+          <dt>Store schema</dt>
+          <dd className={styles['mono']}>
+            {known(payload, (value) =>
+              value.store.schemaVersion === null
+                ? 'not reported'
+                : `v${String(value.store.schemaVersion)}`,
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Store health</dt>
+          <dd className={styles['health']}>
+            {known(payload, (value) => health(value.store))}
+          </dd>
+        </div>
+        <div>
+          <dt>Git</dt>
+          <dd>
+            {known(payload, (value) =>
+              value.git.available ? 'available' : 'not available on this machine',
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Local FirmwareSight data store</dt>
+          <dd className={styles['mono']}>
+            {known(payload, (value) => value.product.storeFileName)}
+          </dd>
+        </div>
+      </dl>
+      {detail === '' ? null : <p className={styles['note']}>{detail}</p>}
+      <div className={styles['exports']}>
+        <button
+          type="button"
+          className={styles['control']}
+          disabled={exporting}
+          onClick={() => {
+            void exportNow();
+          }}
+        >
+          Export diagnostics
+        </button>
+        {exporting ? (
+          <p className={styles['status']} role="status" aria-live="polite">
+            Waiting for the save dialog&hellip;
+          </p>
+        ) : null}
+        {note === null ? null : (
+          <p className={styles['status']} role="status" aria-live="polite">
+            {note}
+          </p>
+        )}
+      </div>
+      {exportError === null ? null : (
+        <ErrorPanel
+          envelope={exportError}
+          label="Diagnostics export error"
+          heading="The diagnostics file was not written"
+        />
+      )}
+      <p className={styles['note']}>
+        The file carries these five facts and the ones this screen has no room for: journal mode, bounded
+        row counts, the names of any pre-migration snapshots kept beside the store, the install channel,
+        the loaded release policy, and up to eight stable error codes this run produced. Never a folder,
+        a user name, a firmware byte, a MAP line, a release note, a symbol name, a Git remote, an SQL
+        statement or a stack trace. Codes only, never the message that goes with one.
+      </p>
+    </section>
   );
 }

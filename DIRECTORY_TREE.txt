@@ -143,12 +143,15 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0024-post-mvp-candidate-governance.md
 │   ├── ADR-0025-conditional-pre-g1-analyze-implementation.md
 │   ├── ADR-0026-open-source-mvp-first-delivery.md
-│   └── ADR-0027-project-policy-and-provenance-adapter.md
+│   ├── ADR-0027-project-policy-and-provenance-adapter.md
+│   └── ADR-0028-release-identity-bytes-as-evidence.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
+│   │   ├── FirmwareSight_P5_CommitD_Continue_v1.2.txt
+│   │   ├── FirmwareSight_P5_CommitD_Diagnostics_Recovery_v1.0.txt
 │   │   ├── FirmwareSight_P5_Productization_v1.0.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Acceptance_v1.1.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Findings_Remediation_v1.0.txt
@@ -219,6 +222,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── bundle.rs
 │       │   │   ├── compare.rs
 │       │   │   ├── details.rs
+│       │   │   ├── diagnostics.rs
 │       │   │   ├── history.rs
 │       │   │   ├── intake.rs
 │       │   │   ├── ipc.rs
@@ -226,12 +230,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── main.rs
 │       │   │   ├── release.rs
 │       │   │   ├── service.rs
+│       │   │   ├── startup.rs
 │       │   │   └── support.rs
 │       │   ├── tests/
 │       │   │   ├── analyze_details.rs
 │       │   │   ├── bundle_ipc.rs
 │       │   │   ├── compare_ipc.rs
 │       │   │   ├── desktop_parity.rs
+│       │   │   ├── diagnostics.rs
 │       │   │   ├── history_reads.rs
 │       │   │   ├── real_artifact_intake.rs
 │       │   │   └── release_gate.rs
@@ -273,6 +279,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── CompareRequestDto.ts
 │           │   │   │   ├── CompareSummaryDto.ts
 │           │   │   │   ├── ContributorDto.ts
+│           │   │   │   ├── DiagnosticsCountsDto.ts
+│           │   │   │   ├── DiagnosticsDto.ts
+│           │   │   │   ├── DiagnosticsGitDto.ts
+│           │   │   │   ├── DiagnosticsPolicyDto.ts
+│           │   │   │   ├── DiagnosticsProductDto.ts
+│           │   │   │   ├── DiagnosticsRuntimeDto.ts
+│           │   │   │   ├── DiagnosticsStoreDto.ts
+│           │   │   │   ├── DiagnosticsSupportDto.ts
 │           │   │   │   ├── DiffCountsDto.ts
 │           │   │   │   ├── DiffMemoryDto.ts
 │           │   │   │   ├── DiffSideDto.ts
@@ -466,10 +480,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── 0004_release_records.sql
 │       │   └── 0005_unknown_reasons.sql
 │       ├── src/
+│       │   ├── backup.rs
 │       │   ├── compare.rs
+│       │   ├── counts.rs
 │       │   ├── db.rs
 │       │   ├── error.rs
 │       │   ├── gate.rs
+│       │   ├── health.rs
 │       │   ├── history.rs
 │       │   ├── lib.rs
 │       │   ├── query.rs
@@ -479,6 +496,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── compare_candidates.rs
 │       │   ├── gate_history.rs
 │       │   ├── history_reads.rs
+│       │   ├── integrity_and_backup.rs
 │       │   ├── map_companion_persistence.rs
 │       │   ├── release_records.rs
 │       │   ├── storage.rs
@@ -615,6 +633,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── P4_BUNDLE_EXIT_CHECKLIST.md
 ├── P5_VALIDATION/
 │   ├── P5_CI_AUTHORITY.md
+│   ├── P5_COMMIT_D_DESIGN.md
+│   ├── P5_DIAGNOSTICS_DESIGN_CHECKLIST.md
+│   ├── P5_DIAGNOSTICS_RECOVERY_REPORT.md
 │   ├── P5_INSTALL_RECOVERY_REPORT.md
 │   ├── P5_MIGRATION_DECISION.md
 │   ├── P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md

@@ -207,12 +207,15 @@ research:
 # no tag, no GitHub Release), migration 0005 follows a written P5_MIGRATION_DECISION.md and never precedes
 # it, the package matrix is Windows with real install evidence on this host plus macOS and Ubuntu as
 # CI_BUILD_ONLY, and the shipped store keeps the name firmwaresight-p0.sqlite with its path made visible
-# instead of moved. Two questions are not this round's to answer: section 32 sends the
-# release-identity-versus-line-endings finding (L22) to the Architect as an ADR draft followed by a STOP -
-# the draft is written (P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md), it changes no behaviour, and the
-# premise it documents is now tested in crates/firmwaresight-project/tests/bundle_builder.rs -
-# and section 54 leaves the licence with the owner, so
-# OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION stands unchanged. Stage P5 is IN_PROGRESS: no P5
+# instead of moved. One question is not this round's to answer: section 54 leaves the licence with the
+# owner, so OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION stands unchanged. The other one has been
+# answered: section 32 sent the release-identity-versus-line-endings finding (L22) to the Architect as
+# P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md followed by a STOP, and it came back decided as
+# 09_ADR/ADR-0028-release-identity-bytes-as-evidence.md, Accepted - release identity uses the exact bytes
+# observed on disk, require_clean_git = false stays valid with its caveat written down, .gitattributes is
+# recommended for the user's repository and this repository does not edit its own, and the premise test in
+# crates/firmwaresight-project/tests/bundle_builder.rs is named there as one that may not be removed or
+# weakened. The draft is re-statused EXECUTION_RECORD rather than rewritten. Stage P5 is IN_PROGRESS: no P5
 # verdict exists yet, and section 5 forbids writing P5 PASS, BETA, RC or GA before closure evidence does.
 active_task: P5_PRODUCTIZATION
 

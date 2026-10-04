@@ -350,13 +350,15 @@ fn acceptance_of(accepted: AcceptedReview) -> BundleAcceptance {
 /// same condition — and no path appears, because every name in a `BundleError` is bundle-relative or a
 /// display name.
 fn envelope_from_bundle(err: &BundleError, operation_id: &str) -> ErrorEnvelopeDto {
-    ErrorEnvelopeDto {
+    let envelope = ErrorEnvelopeDto {
         code: err.code().to_owned(),
         message: err.to_string(),
         operation_id: operation_id.to_owned(),
         details: None,
         remediation: Some(err.remediation().to_owned()),
-    }
+    };
+    crate::diagnostics::record_error_code(&envelope.code);
+    envelope
 }
 
 /// A bundle needs a policy: §11 resolves the release version from it, and §44 records its fingerprint.
