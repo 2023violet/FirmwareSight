@@ -170,12 +170,21 @@ P5_PRODUCTIZATION`
     record of the vocabulary cleanup and the L15 decision. Commit F's design record, written before its code:
     `P5_COMMIT_F_DESIGN.md` — L26's measured history, the index-vs-HEAD-vs-worktree comparison, the generation
     sequence the tools now enforce, the seven cross-checkout and mutation proofs, L15's display-only plan, and
-    the F1/F2/F3 boundaries with §64 sequenced behind an explicit owner confirmation
+    the F1/F2/F3 boundaries with §64 sequenced behind an explicit owner confirmation. **Commit F2's eight,
+    written after the installed round they describe** (2026-10-05): `P5_DESKTOP_ACCEPTANCE_REPORT.md` (the §64
+    journey on the exact CI-built F1 installer, its findings classified §27, and the coverage boundaries §31
+    forbids rounding off), `P5_MIGRATION_RECOVERY_REPORT.md` (the installed synthetic v4 → v5 proof on 34
+    measured checks, and the §4 statement that v1/v2/v3 → v5 through an installed binary has been run by
+    nobody), `P5_HISTORY_DIAGNOSTICS_REPORT.md` (History read back after its source project moved, and the
+    diagnostics export proved path-free), `P5_SECURITY_SUPPORTABILITY_REVIEW.md`, `P5_KNOWN_LIMITATIONS.md`
+    (the file `Help.tsx:50` already pointed at and which did not exist until this round),
+    `P5_EXECUTION_REPORT.md`, `P5_EXIT_CHECKLIST.md`, `P5_RELEASE_READINESS.md`
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` began life as the regenerated **v0.6.0** baseline record and are now
 regenerated on **every** commit that changes the tracked set — the tree first, `SHA256SUMS` last, then
 `python scripts/verify_baseline_artifacts.py` (**813 lines and 693 entries** at Commit F1: 695 tracked paths,
-of which the two files named `SHA256SUMS` — the root manifest and
+**822 lines and 702 entries** at Commit F2: 704 — nine documents added, no path removed; of the tracked set the
+two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.

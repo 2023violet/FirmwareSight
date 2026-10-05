@@ -90,13 +90,17 @@ Post-G2 real-desktop acceptance: PASS_WITH_FINDINGS (2026-10-02), and its findin
 P5 packaging: PROVED ON THREE RUNNERS (2026-10-03). Run 37138881977 at head 1055242 is the first 10 of 10
         and the first to attach a built package; run 37143046338 at 53578e9 is the second, and its downloaded
         darwin set is what closed the checksum-index row. Evidence P5_VALIDATION/P5_PACKAGING_REPORT.md
-P5 real Windows install acceptance: IN_PROGRESS (2026-10-03). The packaged installer ran here through
-        install, OS-surface launch, Analyze of a real fixture, close/reopen, repair, uninstall, reinstall and
-        the data-retention check, with the owner's store parked, hashed and restored byte-identically; §38 C
-        (first-run onboarding) and the §64 journey were not built at that run, so this line is not a verdict.
-        Onboarding has since been built (Commit C) and **seen operating in the installed binary on
-        2026-10-04**; §64's full journey still has not been walked end to end.
-        Evidence P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md
+P5 real Windows install acceptance: PROVED ON THE INSTALLED F1 ARTIFACT (first run 2026-10-03, accepted run
+        2026-10-05). The packaged installer ran on 2026-10-03 through install, OS-surface launch, Analyze of a
+        real fixture, close/reopen, repair, uninstall, reinstall and the data-retention check, with the owner's
+        store parked, hashed and restored byte-identically; §38 C (first-run onboarding) and the §64 journey
+        were not built at that run, so that line was not a verdict. Onboarding has since been built (Commit C)
+        and **seen operating in the installed binary on 2026-10-04**, and **Commit F2 walked the whole §64
+        journey contiguously on the exact CI-built F1 installer on 2026-10-05** — install through final
+        uninstall, twice, with the migration proof and the owner-data barrier. What that round did not cover is
+        listed rather than rounded off: `P5_DESKTOP_ACCEPTANCE_REPORT.md` §7 and the boundaries in
+        `P5_MIGRATION_RECOVERY_REPORT.md` §4.
+        Evidence P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md, P5_DESKTOP_ACCEPTANCE_REPORT.md
 P5 onboarding, Help and local History: BUILT, NOT YET ACCEPTED IN THE PACKAGE (2026-10-03). §13 guidance is
         one component read by Analyze's empty state and by Help; §14 Help reports the running binary's own
         identity and ships zero links; §15–§18 History is a fourth rail page over three new bounded storage
@@ -270,14 +274,57 @@ P5 Commit F1 (ADR-0029 + L15 presentation), documentation, tooling and one UI ca
         DIRECTORY_TREE.txt 813 lines and SHA256SUMS 693 entries over 695 tracked paths. A clean detached
         worktree at the F1 commit runs 19 of 19 for the same reason the main tree runs 17: the two cold-checkout
         asset steps. Evidence P5_VALIDATION/P5_COMMIT_F_DESIGN.md.
-        **Sequencing, with the owner's answer recorded:** the owner was asked before any live-machine work and
+        **Sequencing, with both owner answers recorded:** the owner was asked before any live-machine work and
         chose *land F1, then confirm*, so F2 — downloading the exact F1 CI-built Windows artifact, parking the
-        owner's app-data store, the installed old-schema migration proof and the full §64 journey — has NOT been
-        run and will not be started on an assumption. Pre-test machine state was measured read-only first:
+        owner's app-data store, the installed old-schema migration proof and the full §64 journey — was NOT run
+        in F1 and was not started on an assumption. Pre-test machine state was measured read-only first:
         %LOCALAPPDATA%\FirmwareSight absent, no uninstall registry entry, no running process, and the owner's
-        store untouched at 155,648 bytes / d6e41034…ca836468 / last written 2026-09-30. F3, which alone may write
+        store untouched at 155,648 bytes / d6e41034…ca836468 / last written 2026-09-30. After F1 returned 10 of
+        10 the owner released F2, and the paragraph below is that round's record. F3, which alone may write
         P5 = PASS_COMPLETE, is not authorized until §62's ready-for-closure gate passes. So: P5 = IN_PROGRESS,
         product = MVP CANDIDATE at baseline 0.6.0, and still no P5 PASS, BETA, RC, GA or Production Ready anywhere.
+P5 Commit F2 (installed productization acceptance), documentation, evidence and governance only (2026-10-05).
+        Authorized by FirmwareSight P5 Commit F2 Installed Productization Acceptance v1.0 — Architect Authorized,
+        whose scope line is 本 Prompt 只解除 F1 结束后的人工暂停，并授权 F2。不授权 F3: it lifts the manual pause
+        after F1 and authorizes F2, and nothing beyond it. The prompt arrived at 19,040 bytes / 1,044 lines and
+        vanished from Downloads after being read, so the archived copy is a transcript reconstruction, verified
+        contiguous and byte-length-matched, and the register says so rather than implying provenance.
+        **What was tested is the artifact CI built, not a local rebuild:** artifact 11337963032 of run
+        37293381181 at head 0bca373 — 3,885,631 bytes, installer SHA-256 a1152ef3…3c076b, installed as
+        downloaded, its inner package set verified file by file first, and the installed binary re-hashed to
+        15,362,048 bytes / 93be8c8e…0c50. §3/§35 forbid product and tooling changes because any one of them
+        would make that installer no longer the candidate under test, so **three product findings (one S2 layout,
+        two S3) are recorded rather than patched**. Against this record itself: **three harness defects** — one of
+        which had been silently delivering installer clicks to a browser window for most of the round — plus one
+        harness-classed incident in which a title-bar close and some stray keystrokes reached a bystander window;
+        all four are owned in `P5_DESKTOP_ACCEPTANCE_REPORT.md` §6 with their evidence files.
+        **The §64 journey ran once, contiguously, on the installed binary driven by real mouse and keyboard
+        input:** onboarding, Analyze baseline, Analyze target, Compare, Release Gate, Bundle, relocated-Bundle
+        verify, History, History after source relocation, Diagnostics export, close, reopen, repair over a
+        running app, uninstall, reinstall, retained-data re-verify, final uninstall. Synthetic **v4 → v5**
+        migration through the installed binary passed on 34 measured checks, and retention was proved
+        semantically rather than by digest because a WAL database churns bytes legitimately. The owner's store
+        was parked and restored **twice**, hashes re-measured on both sides before any commit
+        (ORIGINAL_DB_RESTORED / ORIGINAL_DB_SHA_MATCH / OWNER_STORE_OPENED_BY_F1 = YES / YES / NO).
+        **Two boundaries are written down instead of smoothed over:** installed migration covers one path, and
+        the owner's real store read back at **schema v2** — so the chained v2 → v5 installed upgrade has never
+        been executed by the shipping artifact; and the uninstaller's "Delete the application data" option was
+        never exercised, because that folder also holds unrelated historical stores from earlier phases.
+        Counts at the F2 tree, printed rather than expected: **868 Rust / 219 UI in 8 files, both unchanged from
+        F1** — §37's stop condition, since a docs-only round that moved either count would be a product change
+        wearing a documentation diff — full gate **17 of 17**, drift **8 of 8**, core-smoke 3/3, deny 1/1,
+        package 4/4 with no SKIP, and a clean detached worktree at **19 of 19** — the two extra steps are
+        `rust/frontend assets (install)` and `rust/frontend assets (build)`, which a warm tree has already
+        satisfied. DIRECTORY_TREE.txt 822 lines and SHA256SUMS 702 entries over 704 tracked paths, the baseline
+        verifier PASS with `index blob mismatch 0`, and `git archive` of the candidate extracted outside the
+        repository verifying **702 OK / 0 FAILED**. Both detached proofs were run at the F2 evidence head
+        `d1dc61c` and are re-run at this head before anything is pushed.
+        Evidence P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md,
+        P5_MIGRATION_RECOVERY_REPORT.md, P5_HISTORY_DIAGNOSTICS_REPORT.md,
+        P5_SECURITY_SUPPORTABILITY_REVIEW.md, P5_KNOWN_LIMITATIONS.md, P5_EXECUTION_REPORT.md,
+        P5_EXIT_CHECKLIST.md, P5_RELEASE_READINESS.md. Verdict: **F2 = COMPLETE, P5 = IN_PROGRESS,
+        F3 = READY_FOR_ARCHITECT_REVIEW** — and this head sets none of P5 PASS_COMPLETE, active_task NONE, a
+        tag, a GitHub Release, a signature, a notarization, an updater or a licence.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -534,9 +581,11 @@ stored intake directory, because a search box that answered "which folders hold 
 question §16 forbids. Measured locally: `check.py` **16 of 16**, **812 Rust / 200 UI tests**, seven mutation
 proofs, and page reads of 467.9µs / 541.5µs / 248.8µs over 100 builds / 100 runs / 50 releases
 (`P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md`, design review in
-`P5_VALIDATION/P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md`). What that leaves open is the acceptance of these
-screens rather than their code: §38 C has never been walked in an installed binary, and this head has no CI
-run behind it yet, so the §64 journey and this stage's verdict stay open.
+`P5_VALIDATION/P5_ONBOARDING_HISTORY_DESIGN_CHECKLIST.md`). What that left open was the acceptance of these
+screens rather than their code: §38 C had not been walked in an installed binary, and that head had no CI run
+behind it. **Commit F2 closed the first of those two on 2026-10-05** — onboarding, History and Diagnostics were
+each driven in the installed F1 artifact, History read back after its source project moved, and the export
+proved to carry no path — while the stage's verdict stays open, because only F3 may write it.
 
 **No P5 verdict
 exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt
