@@ -2,7 +2,7 @@
 title: "P5 Commit E supportability report"
 doc_id: "FS-P5-COMMIT-E-SUPPORTABILITY"
 product: "FirmwareSight"
-version: "1.0"
+version: "1.1"
 status: "MEASURED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
@@ -28,6 +28,14 @@ the inherited sentence implies because `measure_workloads.py` already prints an 
 workload, so the only
 blind spot left is a newly-added file nobody has referenced yet.
 
+**What changed in this file on 2026-10-04.** The closure normalization round touched two things here and
+nothing else: L15's disposition moved from `CARRIED_FORWARD → ARCHITECT` to the canonical
+`CARRIED_FORWARD` with the reason `LEGACY_WIRE_IDENTIFIER`, because the Architect answered that one stop with
+**Option E** and the answer is now recorded in `P5_COMMIT_E_SCHEMA_DECISION.md` §11; and every §48 disposition
+word still means what §48 defined, so **no row here is `CLOSED` that was not closed by evidence** — L15 in
+particular stays open on purpose, because preserving a legacy identifier documents the risk rather than
+removing it.
+
 ## 1. Disposition table
 
 | row | inherited state at start HEAD `bfbc1aa` | Commit E disposition | what decided it |
@@ -37,7 +45,7 @@ blind spot left is a newly-added file nobody has referenced yet.
 | L8 | object/module attribution Unavailable by evidence | **CARRIED_FORWARD** | the MAP facts are parsed but reach no product surface; no narrow current path exists to expose them |
 | L12 | two advisories accepted in `deny.toml` | **REVISITED / CARRIED_FORWARD** | local `cargo deny` green; the compatible upgrade measured does not exist |
 | L14 | `update_goldens.py` key order, unverified | **CLOSED BY REVALIDATION** (§30) | dry-run twice, 14 goldens `unchanged`, no rewrite, tree clean afterwards |
-| L15 | `ElfProgramHeader` source label | **CARRIED_FORWARD → ARCHITECT** (§42 STOP) | the label is serialized in three namespaces; fixing it is a public contract change |
+| L15 | `ElfProgramHeader` source label | **CARRIED_FORWARD** — reason `LEGACY_WIRE_IDENTIFIER` | the label is serialized in three namespaces, so fixing it is a public contract change; §42's stop was **answered by the Architect on 2026-10-04 with Option E** — identifier preserved, meaning documented (`P5_COMMIT_E_SCHEMA_DECISION.md` §11). Not `CLOSED`: the name stays inaccurate inside `analysis:1` |
 | L16 | `custom-protocol` needed by hand | **CLOSED** (§38) | package group 4/4 PASS on this host with `cargo tauri build -- --locked` and no manual feature flag |
 | L17 | CI provisioning duplication, index blind spot | **REDUCED** (§35) | duplication already gone; the two canonical lists that exist were checked and are satisfied |
 | L19 | "Object attribution" means two things | **CLOSED** (§33) | Analyze and Compare now name their own scope, each with a test |
@@ -137,7 +145,7 @@ and the `onerror=` fallback for older interpreters at `:177`). No repository `.g
 `target/`, no user data was deleted, and the tool touched no goldens. **L24 = CLOSED / NOT_REPRODUCED
 ON CURRENT HEAD.** No code change, so §31's "add a regression if code changes" does not apply.
 
-### L15 — the source label, stopped
+### L15 — the source label: stopped, answered, carried forward with a reason
 
 Audit row L15 asked whether `MemoryEvidenceBasis::ElfAddressAndFlags` showing `ElfProgramHeader` is
 (A) user-facing wording or (B) serialized public portable evidence semantics. Measured answer: **(B)**,
@@ -151,13 +159,35 @@ store's `evidence.source_type` column holding the Rust `Debug` name `ElfProgramH
 and a verbatim passthrough in `apps/desktop/ui/src/Details.tsx:667`.
 
 §32 says stop if changing `SourceType` moves the portable JSON, the bundle, the goldens or schema
-semantics. It does, so **this subproblem is stopped and returned to the Architect** with
+semantics. It does, so **this subproblem was stopped and returned to the Architect** with
 `P5_VALIDATION/P5_COMMIT_E_SCHEMA_DECISION.md`, which prices four options (display-only mapping,
 additive enum member, corrective rename plus migration, or documented status quo) and names what each
 one moves. Nothing in Commit E renamed an enum, bumped a schema version, or wrote a UI caption over the
 top of the stored value. `CLOSED only if narrow contract-safe wording fix` (§48) is therefore not
-claimed: the wording fix that is contract-safe is a subset of option A, and choosing it is not this
+claimed: the wording fix that is contract-safe is a subset of option A, and choosing it was not this
 round's call.
+
+**The call was made afterwards, and it is recorded here rather than in Commit E.** The Architect answered
+with **Option E — legacy wire identifier preserved, accurate presentation / documentation** (§8–§12 of the
+closure normalization prompt; decision text in `P5_COMMIT_E_SCHEMA_DECISION.md` §11):
+
+- kept: `SourceType::ElfProgramHeader`, the wire token `"elf.program-header"`, the stored
+  `ElfProgramHeader` rows, `analysis:1`, the Bundle `analysis.json` contract, the goldens, `SCHEMA_VERSION`,
+  release identity and `ADR-0028`;
+- refused: no `ElfSectionFlags`, no enum rename, no wire rename, no rewritten history, **no migration 0006**,
+  no `analysis:2`, no golden byte moved;
+- documented instead: `elf.program-header` is a **legacy `analysis:1` compatibility identifier**, and the
+  accurate human meaning of `MemoryEvidenceBasis::ElfAddressAndFlags` is **ELF address + flags evidence** —
+  which the Compare basis caption already says (`Compare.tsx:690`, `ELF address/flags evidence`);
+- disposition: **`CARRIED_FORWARD` with reason `LEGACY_WIRE_IDENTIFIER`**, and explicitly **not** `CLOSED`,
+  because §11 of that prompt forbids pretending the historical identifier became accurate. The risk is now
+  bounded and defined; a true rename remains available only inside a future `analysis:2`, which is a
+  major-contract decision no document here previews.
+- **carried to Commit F as a named presentation item:** the Evidence Inspector renders the stored token
+  verbatim (`Details.tsx:667`, fed by `db.rs:507` → `query.rs:503` → `details.rs:223`), so a user expanding
+  such a row reads `ElfProgramHeader` rather than the accurate meaning. Fixing that is a display-only caption
+  mapping in the closed-table shape L20 already used for the basis captions — product source, and therefore
+  not this documentation-only round's to touch.
 
 ### L16 — package path and `custom-protocol`
 

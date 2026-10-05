@@ -2,8 +2,8 @@
 title: "P5 Commit E schema decision request"
 doc_id: "FS-P5-COMMIT-E-SCHEMA"
 product: "FirmwareSight"
-version: "1.0"
-status: "STOPPED_FOR_ARCHITECT"
+version: "1.1"
+status: "RESOLVED_BY_ARCHITECT"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
 last_updated: "2026-10-04"
@@ -16,7 +16,13 @@ enum, a schema version or a release-id semantic change, Commit E must STOP that 
 document, and return it to the Architect. L15 does exactly that, so it is stopped here and nothing in
 Commit E changed it. Unrelated authorized work continued, which §42 also permits.
 
-This document decides nothing. It prices the options and names the surfaces each one moves.
+**Update, 2026-10-04, after the round that wrote this closed.** The Architect answered in
+*P5 Commit E Closure Normalization v1.0* (§8–§12) with **Option E**, recorded in section 11 below. Sections 1
+to 10 stay exactly as Commit E wrote them — they are the measurement the decision was taken against, and the
+status field's move from `STOPPED_FOR_ARCHITECT` to `RESOLVED_BY_ARCHITECT` is the only thing that changed in
+them. Nothing in this document's pricing was rewritten to agree with the answer.
+
+Until section 11, this document decided nothing: it priced the options and named the surfaces each one moves.
 
 ## 1. The problem
 
@@ -144,7 +150,8 @@ already holds through L26).
 - Kept L15 open with this document as its disposition record.
 - Made the *user-facing basis wording* honest for Compare (L20) and the attribution wording for Analyze
   and Compare (L19), neither of which passes through `SourceType`.
-- Recorded L15 as `CARRIED_FORWARD → ARCHITECT` in `P5_SUPPORTABILITY_REPORT.md`.
+- Recorded L15 as `CARRIED_FORWARD → ARCHITECT` in `P5_SUPPORTABILITY_REPORT.md`. *(Answered on 2026-10-04;
+  see section 11 — the row now reads `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`.)*
 
 ## 10. What the Architect needs to decide
 
@@ -160,3 +167,67 @@ already holds through L26).
 
 Commit E does not answer these and does not implement any of them. **STOP** on this subproblem; the
 rest of Commit E proceeded, and this row returns to the Architect with the fixture evidence attached.
+
+## 11. Architect Decision — Option E (recorded 2026-10-04)
+
+The return was received and answered. The decision is **intentionally a fifth shape**, beyond A/B/C/D as they
+were priced above:
+
+> **OPTION E — LEGACY WIRE IDENTIFIER PRESERVED, ACCURATE PRESENTATION / DOCUMENTATION**
+
+**What is kept, unchanged:**
+
+| surface | value after the decision |
+| --- | --- |
+| Rust enum member | `SourceType::ElfProgramHeader` |
+| portable wire token (`analysis:1`) | `"elf.program-header"` |
+| existing SQLite `evidence.source_type` rows | `ElfProgramHeader`, not rewritten |
+| `analysis:1` enum | unchanged |
+| existing Release Bundle `analysis.json` | unchanged contract |
+| goldens | unchanged |
+| schema version | unchanged |
+| migration | **no migration 0006** |
+| release identity | unchanged, and `ADR-0028` untouched |
+
+**What is forbidden, and why it is the whole cost of the other options:** no `ElfSectionFlags` member is
+added, the enum is not renamed, the wire value is not renamed, persisted rows are not rewritten, no
+`analysis:2` is created, no golden byte moves, and no Bundle semantics change. Options B and C above were
+priced precisely to make that cost visible; Option E declines to pay it because the defect is a **name**, not
+a wrong number — the charge itself has been correct since the `SHF_ALLOC` fix in Commit E.
+
+**The semantic definition that replaces the accuracy the name never had:** `elf.program-header` is a
+**LEGACY COMPATIBILITY IDENTIFIER** inside `analysis:1`. It must not be read as a guarantee that the evidence
+came literally from an ELF `PT_*` program header. For the current `MemoryEvidenceBasis::ElfAddressAndFlags`,
+the accurate human-facing description is:
+
+```text
+ELF address + flags evidence
+```
+
+The legacy wire name survives only for compatibility. Three rules follow, and they are the reason this is a
+decision rather than a comment: do not pretend the old identifier is literally accurate; do not redefine what
+already-published bundles say; do not rewrite persisted history.
+
+**Where the accurate wording already lives, measured rather than assumed:** the Compare page's evidence-basis
+captions (Commit E's L20 work in `apps/desktop/ui/src/Compare.tsx`) render the five bases as human sentences,
+and the `ElfAddressAndFlags` caption at `Compare.tsx:690` is already `ELF address/flags evidence`. That is the
+definition above with a slash where the prompt's phrase uses a plus sign — the same meaning in the page's own
+punctuation, and §10 says an accurate caption is left alone rather than re-litigated. So no basis display needs
+correcting.
+
+**What is still user-visible, and deliberately not fixed in this round:** the Evidence Inspector's `Source`
+field is a pass-through of the stored token — `crates/firmwaresight-storage/src/db.rs:507` writes
+`format!("{:?}", …)`, `crates/firmwaresight-storage/src/query.rs:503` reads it back as a `String`,
+`apps/desktop/src-tauri/src/details.rs:223` forwards it unchanged, and `apps/desktop/ui/src/Details.tsx:667`
+renders `row.sourceType` verbatim in mono. A user who expands such an evidence row therefore sees
+`ElfProgramHeader`, which is the legacy spelling, not the accurate meaning. §10 of the normalization prompt
+forbids touching product source in a documentation-only round, so this is **recorded for Commit F**: a
+presentation-only caption mapping at that one field, in the same closed-table shape L20 used for the basis
+captions, would make the screen agree with the definition above without moving one stored byte. Commit F, not
+this round.
+
+**L15's disposition after the decision:** `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, in
+`P5_SUPPORTABILITY_REPORT.md` §1/§2. It is **not** `CLOSED`: the identifier remains technically inaccurate
+forever inside `analysis:1`, and what changed is that the inaccuracy is now bounded, defined and documented
+instead of merely observed. A true wire rename stays possible only as part of a future `analysis:2`, which is a
+major-contract decision this round does not make and no document here previews.

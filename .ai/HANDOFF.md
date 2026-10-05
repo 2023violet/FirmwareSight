@@ -155,7 +155,28 @@ tree rather than from prose. The remote agreed on the tip of that pair: Run `372
 back **10 of 10** on attempt 1 with every job and every step read individually, and `859648e` — the E1 head —
 has no run of its own because one push carried both commits and GitHub runs the tip; §7a of the fixture report
 carries the clean detached worktree that verifies the same bytes a second way.
-The remaining workstream order is now: Commit F's documentation and closure. **What Commits C, D and E do not
+**Commit E then needed a documentation-only normalization, and got one** — *P5 Commit E Closure Normalization
+v1.0*, archived with both its hashes because the delivered bytes were CRLF and the archive is LF (delivered
+`9571df2cc08107ea134ed89acc4a984254803b40e451c57c6e9c3ca480075599`, 28,738 bytes; stored
+`62040e3d02fffe0f7682909828e4a2d6a91d81b09a937c0bd0b4765e6c7af887`, 27,366 bytes, 1,373 lines proven identical
+one by one). Two things changed and nothing else: the **vocabulary** — the matrix status column now holds only
+`SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY / NOT_TESTED / UNSUPPORTED` (38 cells validated, 0 outside;
+the drifted words' meanings moved into the evidence column, and signing/notarization/updater readiness moved out
+of a status column altogether into a `state` column, because `READY_NOT_EXECUTED` was never a compatibility
+claim), and the A–H disposition column now holds only `PROVED_BY_EXISTING_FIXTURE / PROVED_BY_NEW_FIXTURE /
+SUPPORTED_WITH_LIMITS / NOT_AVAILABLE` with **A, F and H recorded as existing** — and the **L15 answer**. The
+Architect chose **Option E: preserve `SourceType::ElfProgramHeader` / the `analysis:1` wire token
+`"elf.program-header"`, and document the accurate meaning instead** — "ELF address + flags evidence" — with no
+enum rename, no wire rename, no rewritten history, **no migration 0006, no `analysis:2`**, no golden byte moved
+and no Bundle change; `P5_COMMIT_E_SCHEMA_DECISION.md` is now `RESOLVED_BY_ARCHITECT` with its pricing sections
+untouched, `04_TECH/23` §7 records the legacy identifier next to the precedence rule it names loosely, and L15 is
+`CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, explicitly **not** `CLOSED`. One user-visible residue is recorded
+rather than fixed, because this round may not touch code: the Evidence Inspector still prints the stored token
+verbatim (`Details.tsx:667` ← `details.rs:223` ← `query.rs:503` ← `db.rs:507`), so a person expanding such a row
+reads `ElfProgramHeader`; a display-only caption in L20's closed-table shape is Commit F's call. Full record:
+`P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md`.
+The remaining workstream order is now: Commit F's documentation and closure — which still requires its own
+architect authorization. **What Commits C, D and E do not
 close is the acceptance of Commit C**: the
 onboarding panel and the History page have never been operated in the installed binary, so the full §64
 journey (install → onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen →
@@ -273,9 +294,10 @@ P5 Commit C                    e863d0c — §13 onboarding, §14 Help/About with
 P5 §32 / L23                   111fe32 — the L22 identity draft with its premise test, plus the repair of L23's sixth race instance · 2cdfced (its read-back)
 P5 Commit D                    3400981 — integrity_check, the pre-migration online backup, the re-run matrix, the 41-key Diagnostics allowlist and its export, the typed startup refusal, ADR-0028 · bccea88 (the test-only repair of its clock race, and the last head here that changed a line of Rust) · 90aa69d (the record + L26) · 956e250 (the §32 read-back successor, documentation only) · 57a904e (the documentation closeout; the two "current HEAD" sentences it shipped are corrected by the head after it) · No head in this ledger names itself "current HEAD": the commit that wrote it down would be the one that made it false, so read git rev-parse HEAD
 P5 Commit E                     split as §61 requires, in two heads: E1 — the fixture cohort (6 directories, 31 files, manifest 25 → 56), `scripts/gen_p5_compat_fixtures.py`, `p5_compat_fixtures.rs` (14 tests), the `SHF_ALLOC` fix in `crates/firmwaresight-artifact/src/elf.rs`, `P5_COMPATIBILITY_MATRIX.md`, `P5_COMPATIBILITY_FIXTURE_REPORT.md`, and the archived prompt with its registration · E2 — the §48 dispositions (`P5_SUPPORTABILITY_REPORT.md`), the §42 STOP draft (`P5_COMMIT_E_SCHEMA_DECISION.md`), the round's design record (`P5_COMMIT_E_DESIGN.md`, which describes both halves), the five UI files L19/L20/L23 touched (`Analyze.tsx`, `Compare.tsx`, `compare.test.tsx`, `details.test.tsx`, `history.test.tsx`), the workload-size sentence corrected, the governance closeout and the regenerated `DIRECTORY_TREE.txt` + `SHA256SUMS`. · E1 = `859648e`, E2 = `59d85c3`, and the head that writes this line is the §59 read-back successor after them. One `git push` carried both commits, so GitHub started one run — `37228929762` at the tip head `59d85c3`, attempt 1, **10 of 10**, every job and every step read — and `859648e` has no run of its own; that absence is a fact about push granularity, not a missing verification, and it is written in `P5_CI_AUTHORITY.md` beside the row that says so
+P5 Commit E, after                    6981625 — the §59 read-back successor (docs only): the candidate's run written into `P5_CI_AUTHORITY.md`, §7a added to the fixture report, and the "last head that changed a line of Rust" sentence dated instead of left to mislead · Run `37230689636`, attempt 1, **10 of 10**, every job and step read · the normalization head after it (this commit) — `P5: normalize Commit E evidence and record the L15 decision`: matrix status vocabulary closed to five values, A–H dispositions closed to four, **L15 answered as Option E**, `04_TECH/23` §7 added, and no path under `crates/`, `apps/`, `scripts/`, `fixtures/`, `schemas/`, `golden/` or `.github/` touched. Its own run is external evidence, and §27 forbids writing a further commit just to record it
 Three red heads, kept in the record because dropping them would make the green ones meaningless: 9e3b1de (6 of 7 — a pre-existing `compare.test.tsx` race it never touched), 0c031cd (7 of 10 — three package jobs printing a skip and going red on their own upload), 3400981 (8 of 10 — a clock race inside a test Commit D added, fixed test-only at bccea88, which went 10 of 10)
 The authoritative job set is TEN since 0c031cd: the seven gate jobs plus Package Windows / Ubuntu / macOS. `P5_CI_AUTHORITY.md` names them and every run measured against them
-§34 STOP ran from 2026-10-04 and has been ANSWERED by the Architect's next prompt, the one that authorized Commit E (its digest is in the paragraph above). That STOP therefore now applies to what Commit E did not take: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general source-control linter, no V1/B1/RC/GA — and Commit E added two STOPs of its own, §42 (L15 is a serialized-contract decision that belongs to the Architect) and §63/§64 (the round stops at its exit lists)
+§34 STOP ran from 2026-10-04 and has been ANSWERED by the Architect's next prompt, the one that authorized Commit E (its digest is in the paragraph above). That STOP therefore now applies to what Commit E did not take: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general source-control linter, no V1/B1/RC/GA — and Commit E added two STOPs of its own, §63/§64 (the round stops at its exit lists), which still hold, and §42 (L15 as a serialized-contract decision for the Architect), which has been **ANSWERED**: Option E preserves `SourceType::ElfProgramHeader` / `elf.program-header` and documents the accurate meaning instead, so L15 is `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` rather than CLOSED, and no rename, migration 0006 or `analysis:2` is authorized by that answer. The closure normalization prompt that carried the decision adds its own stops (§14 L26 untouched, §15 §64 unrun, §16 consolidation docs unwritten, §27 no commit merely to record its run)
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -503,15 +525,20 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     `P5_PRODUCTIZATION_AUDIT.md` (§4 A–H plus the §G limitation dispositions, L26 included),
     `P5_CI_AUTHORITY.md` (the ten jobs and every run measured against them), `P5_PACKAGING_REPORT.md`,
     `P5_INSTALL_RECOVERY_REPORT.md`, `P5_ONBOARDING_HISTORY_REPORT.md`, `P5_COMMIT_D_DESIGN.md` and
-    `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (whose §8 is the §32 read-back), then Commit E's own three:
+    `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (whose §8 is the §32 read-back), then Commit E's own four:
     `P5_COMMIT_E_DESIGN.md` (§4 lists the five mutation proofs, §6 the reliability campaign),
-    `P5_COMPATIBILITY_FIXTURE_REPORT.md` (per-fixture provenance, commands, hashes and product answers) with
-    `P5_COMPATIBILITY_MATRIX.md` (the §23-vocabulary cohort claim) and `P5_SUPPORTABILITY_REPORT.md`
-    (§48's fourteen dispositions, L25's non-reproduction and L15's STOP included), then
-    `P5_COMMIT_E_SCHEMA_DECISION.md` — that one is a question for the Architect, not a record of a decision —
-    and finally `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md`. `.ai/ACTIVE_TASK.md` holds the commit
+    `P5_COMPATIBILITY_FIXTURE_REPORT.md` (per-fixture provenance, commands, hashes and product answers; §4 is
+    the normalized A–H disposition table, §7a the clean detached worktree) with
+    `P5_COMPATIBILITY_MATRIX.md` (status column closed to the five canonical values, §7b holding the
+    release-readiness states that are not compatibility claims) and `P5_SUPPORTABILITY_REPORT.md`
+    (§48's fourteen dispositions, L25's non-reproduction, and L15 now `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`),
+    then `P5_COMMIT_E_SCHEMA_DECISION.md` — which was the question and is now **the answer too**: §1 to §10 are
+    Commit E's pricing, §11 is the Architect's Option E — and the short record of the whole cleanup,
+    `P5_COMMIT_E_CLOSURE_NORMALIZATION.md`. Finally `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md`,
+    and `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §7 if you are wondering what `elf.program-header` actually
+    means. `.ai/ACTIVE_TASK.md` holds the commit
     table and the STOP chain; `10_AUDIT/SOURCE_PROMPTS/README.md` names the current active authority, which is
-    the Commit E prompt, and **no prompt authorizes a Commit F, a P5 closure, the §64 journey or an L26 fix
+    the Commit E closure-normalization prompt, and **no prompt authorizes a Commit F, a P5 closure, the §64 journey or an L26 fix
     yet**.
 
 ## Boundaries still in force

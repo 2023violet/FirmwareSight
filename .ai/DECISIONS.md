@@ -1625,3 +1625,77 @@ NO FULL §64 JOURNEY.
   Locally on the final tree: **868 Rust / 217 UI in 8 files**, `check.py` **16 of 16**, `core-smoke` 3/3,
   drift 7/7, deny 1/1, package **4 of 4 with no `SKIP`**, campaign **20 runs / 0 failing**. The permitted
   security sentence is unchanged: *dependency policy passes with documented accepted risks*.
+
+# P5 Commit E closure normalization — evidence vocabulary and the L15 decision — 2026-10-04
+
+Authorization: *FirmwareSight — P5 Commit E Closure Normalization (Evidence Vocabulary + L15 Architect
+Decision), Execution Prompt v1.0 — Architect Reviewed*, delivered as a file and archived as
+`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitE_Closure_Normalization_v1.0.txt`. This is not a new product
+stage: §1 permits documentation, governance, audit and integrity paths only, and §19 fixes the direct counts at
+**Rust 868 / UI 217** so that a test-count movement in this round is itself the alarm, not a result.
+
+- **A status column is a contract, and Commit E's matrix broke it while its facts stayed right.** The engineering
+  prompt required five values (`SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY / NOT_TESTED / UNSUPPORTED`)
+  and the file shipped with `BEST_EFFORT_NO_CLAIM`, `DEFERRED_NO_MVP`, `NOT_CLAIMED`, `MEASURED, NOT INFERRED`,
+  `BUILT_AND_VERIFIED_IN_CI` and half-sentences like "`SUPPORTED` for the region" in status cells. Each was
+  re-labeled to the canonical word and its meaning moved verbatim into the evidence column; a scratch validator
+  that parses the markdown tables and reads only columns whose header is `status` now reports **38 cells
+  checked, 0 violations**. Two decisions inside that cleanup are worth naming, because both were tempting to do
+  wrong: **"measured, not inferred" is evidence about a row, not a sixth status**, so the `objcopy -S` row is
+  `SUPPORTED` with the measurement in its note; and **`READY_NOT_EXECUTED` / `UPDATE_READY_MANUAL` are release
+  readiness states fixed by P5 §11/§12, not compatibility claims**, so they moved to a `state` column in a new
+  §7b rather than being forced into a vocabulary that would have had to mean something they do not mean.
+- **A new assertion on an existing fixture is not a new fixture.** The A–H table said F was "already covered"
+  and H was "new and named", which is two different truths wearing one column. Under
+  `PROVED_BY_EXISTING_FIXTURE / PROVED_BY_NEW_FIXTURE / SUPPORTED_WITH_LIMITS / NOT_AVAILABLE` the Architect
+  mapped **A, F and H to existing** and **B, C, D, E and G to new**: every pre-Commit-E fixture was already a
+  `-g` build, and `p0-dual-region` plus the `p2-diff` pair already carried 3, 5 and 4 `PT_LOAD` segments before
+  this round counted them. H's evidence note now says plainly that what was new was the direct assertion, and
+  `SUPPORTED_WITH_LIMITS` / `NOT_AVAILABLE` are left unused with the reason written next to them rather than
+  invented a use for.
+- **L15 is decided: Option E — legacy wire identifier preserved, accurate presentation / documentation.**
+  `SourceType::ElfProgramHeader` and the `analysis:1` token `"elf.program-header"` stay exactly as they are,
+  together with the stored `ElfProgramHeader` rows, the report DTO, the Bundle `analysis.json` contract, the
+  goldens, `SCHEMA_VERSION`, release identity and `ADR-0028`. Refused: a new `ElfSectionFlags` member, an enum
+  rename, a wire rename, rewritten history, **migration 0006**, `analysis:2`, and any golden byte — which is the
+  price options B and C were written down to show. What replaces the accuracy the identifier never had is a
+  definition: `elf.program-header` is a **legacy compatibility identifier** and carries no guarantee that the
+  evidence came from a `PT_*` header, while the accurate human meaning of `MemoryEvidenceBasis::ElfAddressAndFlags`
+  is **ELF address + flags evidence**. L15 becomes `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` and §11 forbids
+  marking it `CLOSED`, because preserving a name documents a risk instead of removing one. The rule this
+  decision follows is the one that already decided ADR-0028: a published identity is bytes, and bytes already
+  written are not edited to make a label look better.
+- **Documenting an inaccurate name is allowed; changing what it points at is not.** The clarification lands in
+  `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §7 — a dated section that says in terms that it changes no earlier
+  clause, no evidence class and no precedence rule — because that document's §4 item 3 is the rule whose label
+  is loose, and a reader of the model is where the confusion starts. `04_TECH/02_DOMAIN_MODEL.md`, which carries
+  `EvidenceItem.source_type` and is `status: BASELINE`, was **not** edited: `AGENTS.md` 2 puts an artifact
+  evidence classification change behind an ADR, and §1 of this prompt does not buy that permission.
+- **One residue is visible to users and was deliberately left alone.** The Evidence Inspector renders the stored
+  token verbatim (`Details.tsx:667` ← `details.rs:223` ← `query.rs:503` ← `db.rs:507`), so expanding such a row
+  shows `ElfProgramHeader`, not the accurate phrase. §10 of the prompt says: if the UI still exposes the legacy
+  wire token, do **not** fix code in a documentation-only round — record it for Commit F if user-visible. It is,
+  so it is recorded, in the schema decision's §11, the supportability report's L15 row, and here.
+- **The delivered prompt was CRLF and the archive is LF, and both hashes are in the record.** Delivered bytes:
+  28,738 with 1,372 CRLF terminators, SHA-256 `9571df2cc08107ea134ed89acc4a984254803b40e451c57c6e9c3ca480075599`.
+  Stored bytes: 27,366 with 1,372 LF, SHA-256 `62040e3d02fffe0f7682909828e4a2d6a91d81b09a937c0bd0b4765e6c7af887`.
+  The difference is the terminator that `.gitattributes`' `*.txt text eol=lf` requires, which this round did not
+  touch (`AGENTS.md` 9 makes a line-ending or integrity-policy change a human decision, and the other thirteen
+  archived prompts all arrived LF). Content identity was proven, not assumed: `cp` + `cmp` at archive time, then
+  a line-by-line split of delivered against stored — 1,373 lines each, `identical: True`. §3's rule against
+  inventing a hash is why the record keeps the delivered hash too: the delivered CRLF hash does not reproduce
+  from a checkout of this directory, and saying so is the honest version.
+- **What this round may not do, stated as the boundary it held.** No product source, no fixture byte, no schema,
+  no migration, no dependency, no capability, no workflow change; **L26 stays undecided** (§14: not blob bytes,
+  not canonical checkout bytes, not the verifier wired into CI, not an `ADR-0028` edit), the §64 installed
+  journey stays unrun (§15), no owner-store park/restore and no package installation, and Commit F's
+  consolidation documents stay unwritten (§16) rather than created to check a filename off a list. The root
+  `SHA256SUMS` was regenerated for ordinary bookkeeping under the current convention only, with the caveat
+  retained and **no cross-checkout reproducibility claim**.
+- **The only verdicts this round may write.** Before its own CI: Commit E engineering `PASS`, evidence closure
+  `NORMALIZATION_PENDING_REMOTE_CI`. After that run reads 10 of 10: `COMMIT_E = FINAL PASS / COMPLETE`,
+  `P5 = IN_PROGRESS`, product `MVP CANDIDATE`, baseline `0.6.0`, `Commit F = NOT_AUTHORIZED`, L15
+  `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, L26 `CARRIED_FORWARD TO COMMIT F / ARCHITECT`, §64
+  `OPEN FOR COMMIT F`, licence `PENDING OWNER CONFIRMATION`. §27 closes the loop the way §32 and §59 did before
+  it: this head is itself the final normalization successor, its run is external evidence, and no further commit
+  is written merely to record it.

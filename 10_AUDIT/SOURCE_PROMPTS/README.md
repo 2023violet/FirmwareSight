@@ -558,7 +558,7 @@ text with no source file; each says so in its own entry instead of standing for 
   round's authority. What v1.1 said is not nothing: v1.2's §1 restates its content and §2 lists the work it
   had already validly produced, which is what made the continuation safe to resume without a redo.
 
-## P5 Commit E Compatibility Fixtures, Support Matrix & Supportability Closure v1.0 — CURRENT ACTIVE AUTHORITY
+## P5 Commit E Compatibility Fixtures, Support Matrix & Supportability Closure v1.0 — ENGINEERING COMPLETE, ACTIVE AUTHORITY NOW SUPERSEDED BY THE NORMALIZATION PROMPT BELOW
 
 - File: `FirmwareSight_P5_CommitE_Compatibility_Supportability_v1.0.txt`
 - SHA-256: `030ca28233b964958d6aea8e59a312c66ceb4d117273cba9e667950b4ba21148` (53,915 bytes, 2,459 LF
@@ -595,6 +595,58 @@ text with no source file; each says so in its own entry instead of standing for 
   existing goldens as a routine step, and §50/§53 forbid counting repetition campaigns into the direct test
   totals. §22 closes with three honest Clang outcomes and no fourth: blanket `SUPPORTED` without a fixture is
   not one of them.
+- Its own outcome, recorded before the next entry is read: engineering `PASS` at candidate `59d85c3` on Run
+  `37228929762` (attempt 1, 10 of 10, every job and step read), read back by `6981625` on Run `37230689636`
+  (attempt 1, 10 of 10). Two evidence-contract mismatches survived that — the matrix status column and the A–H
+  disposition column had drifted outside the vocabularies this prompt itself required — and §42's STOP was
+  answered by the Architect rather than by this round. Both are what the entry below exists to settle.
+
+## P5 Commit E Closure Normalization v1.0 (Evidence Vocabulary + L15 Architect Decision) — CURRENT ACTIVE AUTHORITY
+
+- File: `FirmwareSight_P5_CommitE_Closure_Normalization_v1.0.txt`
+- Two hashes, both measured, because the delivered bytes and the stored bytes differ in one respect only.
+  Delivered to the agent on 2026-10-04 as **28,738 bytes with 1,372 CRLF terminators** and a final unterminated
+  line: SHA-256 `9571df2cc08107ea134ed89acc4a984254803b40e451c57c6e9c3ca480075599`. The copy in this directory
+  is the same content normalized to **27,366 bytes, 1,372 LF, 1,373 content lines**: SHA-256
+  `62040e3d02fffe0f7682909828e4a2d6a91d81b09a937c0bd0b4765e6c7af887`. Verified with `cp` + `cmp` at archive time
+  and then split line by line against the delivered file (1,373 lines each, content `identical: True`), so
+  nothing was reconstructed and no line was edited — the only difference is the terminator, which
+  `.gitattributes`' `*.txt text eol=lf` rule requires for every text file in this repository (that rule was
+  **not** modified to preserve CRLF: §1 does not allow a line-ending or integrity-policy change, and
+  `AGENTS.md` 9 puts such a change in front of a human). Consequence, stated rather than hidden: the delivered
+  CRLF hash does **not** reproduce from a checkout of this directory, and this is the first archived prompt here
+  whose delivered bytes needed normalization — the other thirteen arrived LF.
+- Authority: a **documentation-only** closure normalization of Commit E and nothing else. §1 lists what it may
+  touch (`P5_VALIDATION/*.md`, `.ai/*.md`, `04_TECH/*.md` only where L15 legacy semantics need documenting,
+  `README.md`, `INDEX.md`, `10_AUDIT/SOURCE_PROMPTS/*`, `DIRECTORY_TREE.txt` because archiving adds a path, and
+  `SHA256SUMS` last) and what must stay empty: `crates/**`, `apps/**`, `scripts/**`, `fixtures/**`,
+  `schemas/**`, `golden/**`, `.github/**`, `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`,
+  `tauri.conf.json`, `deny.toml`, `migrations/**`, any generated TS binding, any ELF/MAP/binary fixture. If a
+  forbidden path appears the instruction is STOP, not "fix it while here" — and §19 fixes the expected direct
+  counts at **Rust 868 / UI 217**, so a test-count move in this round is itself the alarm.
+- Its four jobs: normalize the matrix status column to
+  `SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY / NOT_TESTED / UNSUPPORTED` with nuance confined to the
+  evidence column (§5, §6, §23A); normalize the A–H dispositions to
+  `PROVED_BY_EXISTING_FIXTURE / PROVED_BY_NEW_FIXTURE / SUPPORTED_WITH_LIMITS / NOT_AVAILABLE` with the
+  architect's own mapping — A, F and H **existing**, B, C, D, E and G **new**, because H's multiple `PT_LOAD`
+  and F's `-g` builds were already in the cohort and a new assertion is not a new fixture (§7, §23B); record
+  the Architect's **L15 Option E** (§8–§12); and reconcile the governance files (§17).
+- The L15 answer, in one line: `SourceType::ElfProgramHeader` and the wire token `elf.program-header` are
+  **kept** as legacy `analysis:1` identifiers, with `analysis:1` / `diff:1` / `gate-results:1` /
+  `accepted-reviews:1` / `release-manifest:1` / the SQLite schema / `SCHEMA_VERSION` / goldens / fixture bytes /
+  release identity / `ADR-0028` all unchanged — **no migration 0006, no `analysis:2`, no wire rename** — and the
+  accurate human meaning, "ELF address + flags evidence", documented instead. L15 therefore becomes
+  `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, and §11 forbids marking it `CLOSED`: the identifier stays
+  technically inaccurate; the risk is now bounded and written down rather than removed.
+- Hard stops that survive this round: §14 keeps **L26** undecided (no blob-byte sums, no canonical checkout
+  bytes, no baseline verifier wired into CI, no `ADR-0028` edit for repository baseline checksums), §15 forbids
+  the §64 installed journey and any owner-store park/restore or package installation, §16 keeps Commit F's
+  consolidation documents unwritten, and §18 caps the outcome vocabulary: before this head's CI,
+  `Commit E evidence closure = NORMALIZATION_PENDING_REMOTE_CI`; after 10 of 10, `COMMIT_E = FINAL PASS /
+  COMPLETE` with `P5 = IN_PROGRESS` and `Commit F = NOT_AUTHORIZED`. §27 then forbids a further commit merely to
+  record that run: it is external evidence, reported back in chat.
+- Where the verdict is written: `P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md` (§24), whose Remote CI
+  section says `PENDING` because the document is committed before the run exists.
 
 ## Supersession note on the V0 Batch A activation entry
 

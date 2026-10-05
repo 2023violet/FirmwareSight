@@ -44,14 +44,29 @@ fixtures/elf/p5-compat/, manifest 25 → 56, built here by arm-none-eabi-gcc 14.
 ld 2.44.0 — the undercount those fixtures exposed (clang's allocated .ARM.exidx section charged nothing while
 the total printed Exact) and the narrow SHF_ALLOC fix that closed it, P5_COMPATIBILITY_MATRIX.md rewritten from
 the tree, and §48's fourteen dispositions: L14/L16/L19/L20/L24 CLOSED, L4/L5/L17/L23 REDUCED, L25
-NOT_REPRODUCED, L8/L12 CARRIED_FORWARD, L15 STOPPED for the Architect. Commit D is COMPLETE
+NOT_REPRODUCED, L8/L12 CARRIED_FORWARD, L15 stopped for the Architect — then a documentation-only closure
+normalization under its own prompt (FirmwareSight P5 Commit E Closure Normalization v1.0; delivered bytes
+SHA-256 9571df2c…075599, 28,738 CRLF; archived LF copy 62040e3d…e6c7af887, 27,366 bytes, 1,373 lines proven
+identical one by one): the matrix status column closed to SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY /
+NOT_TESTED / UNSUPPORTED with release readiness moved to a state column, the A–H dispositions closed to
+PROVED_BY_EXISTING_FIXTURE / PROVED_BY_NEW_FIXTURE / SUPPORTED_WITH_LIMITS / NOT_AVAILABLE (A, F and H recorded
+as existing, because a new assertion on an old fixture is not a new fixture), and **L15 answered as Option E**
+— `SourceType::ElfProgramHeader` and the `analysis:1` token `elf.program-header` preserved as a legacy wire
+identifier, its accurate meaning documented as "ELF address + flags evidence" in
+P5_COMMIT_E_SCHEMA_DECISION.md §11 and 04_TECH/23 §7, with no enum rename, no wire rename, no migration 0006,
+no analysis:2 and no golden byte moved, so L15 is CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER and not CLOSED. Commit D is COMPLETE
 as of 2026-10-04. Its §32 read-back successor 956e250, 10 of 10 on Run 37204847474 attempt 1, is
 documentation-only, as is the closeout 57a904e after it; the last head that changed a line of Rust before
 Commit E was the test-only repair bccea88. Neither 956e250 nor 57a904e is written down here as "current HEAD" — a commit that
 asserted that would be falsified by its own existence, so read git rev-parse HEAD for it. Three P5 heads went
 red and keep their rows — 9e3b1de, 0c031cd and 3400981 — with
-P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. Commit E's §42 STOP is in force from here: no
-Commit F, no P5 closure, no §64 full journey, no L26 fix, no general source-control linter, no V1. L26 stays
+P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. Commit E's engineering candidate 59d85c3 is 10 of
+10 on Run 37228929762 attempt 1, its §59 read-back successor 6981625 is 10 of 10 on Run 37230689636 attempt 1,
+and the normalization head after them carries its own run as external evidence (§27 forbids a further commit
+written merely to record it). Commit E's §42 STOP has been ANSWERED — Option E, recorded above, and it authorizes
+no rename and no migration — while the stops that remain in force are Commit E's §63/§64 and the normalization
+prompt's §14/§15/§16/§27: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general
+source-control linter, no consolidation documents written just to check a filename, no V1. L26 stays
 recorded and deliberately unfixed — SHA256SUMS verifies only on the host that wrote it, and choosing which
 bytes that artifact means is Commit F's decision. The
 present counts are 868 Rust / 217 UI in 8 files with the local gate at 16 of 16 and the package group at 4 of

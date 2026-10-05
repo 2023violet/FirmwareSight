@@ -202,11 +202,12 @@ last_updated: "2026-10-04"
   no longer prints a Core enum word and an `Unrecognized evidence basis` string for anything outside it — while L4,
   L5, L17 and L23 are `REDUCED` with their residue named, L25 is `NOT_REPRODUCED` (30 legitimate Apply
   activations across both tables, 6 more through form submit), L8 and L12 are `CARRIED_FORWARD` with what was
-  measured about them, and **L15 is `CARRIED_FORWARD → ARCHITECT`**: the prompt's §42 asks for a decision about a
+  measured about them, and **L15 was stopped for the Architect** under §42: the prompt asks for a decision about a
   serialized public contract, and the label turns out to be written in three different namespaces (`elf.program-header`
   in the JSON Schema, the same in the report DTO, `ElfProgramHeader` in the stored `evidence.source_type`, plus the
-  bundle's `analysis.json`), so `P5_COMMIT_E_SCHEMA_DECISION.md` costes four options, asks four questions and
-  STOPS. L26 is untouched by §1 and stays Commit F's decision. Present counts at the tree this bullet describes:
+  bundle's `analysis.json`), so `P5_COMMIT_E_SCHEMA_DECISION.md` costs four options, asks four questions and
+  STOPS — which is where this bullet stopped, and where the closure normalization round below picks it up.
+  L26 is untouched by §1 and stays Commit F's decision. Present counts at the tree this bullet describes:
   `cargo test --workspace` **868 passed / 0 failed across 47 targets**, UI **217 in 8 files**, `check.py`
   **16 of 16**, `--only core-smoke` 3/3, `--only drift` 7/7, `--only deny` 1/1, `--only package` **4 of 4**, and the
   UI reliability campaign **20 runs × 217 tests with 0 failing runs**. The one UI change was test-only
@@ -224,6 +225,35 @@ last_updated: "2026-10-04"
   `arm-none-eabi-gcc`, `clang`, `arm-none-eabi-readelf` and `ld.lld` all absent from `PATH`, and the gate
   **18 of 18** (the same 16 steps plus the two cold-checkout asset steps). Evidence:
   `P5_COMPATIBILITY_FIXTURE_REPORT.md` §7a and `P5_VALIDATION/P5_CI_AUTHORITY.md`.
+- **Commit E's evidence vocabulary was then normalized, and its one open question was answered — both in
+  documents, with zero product source.** *P5 Commit E Closure Normalization v1.0* (SHA-256 of the delivered
+  bytes `9571df2c…075599`, 28,738 bytes CRLF; stored under `10_AUDIT/SOURCE_PROMPTS/` as 27,366 bytes / 1,372
+  LF with hash `62040e3d…e6c7af887`, the difference being only the terminator `.gitattributes` requires for
+  `*.txt`, and line-by-line identity proven rather than asserted) authorizes four things and nothing else:
+  the matrix's **status column** now uses exactly `SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY /
+  NOT_TESTED / UNSUPPORTED` — a scratch validator over every table's status cell reports **38 cells checked, 0
+  violations**, and what the old non-canonical words (`BEST_EFFORT_NO_CLAIM`, `DEFERRED_NO_MVP`, `NOT_CLAIMED`,
+  `MEASURED, NOT INFERRED`, `BUILT_AND_VERIFIED_IN_CI`) meant moved into the evidence column unchanged, while
+  signing/notarization/update readiness moved out of a status column entirely because `READY_NOT_EXECUTED` is
+  not a compatibility claim; the A–H **disposition column** now uses exactly
+  `PROVED_BY_EXISTING_FIXTURE / PROVED_BY_NEW_FIXTURE / SUPPORTED_WITH_LIMITS / NOT_AVAILABLE`, with A, F and H
+  recorded as **existing** because a new assertion on a pre-existing fixture is not a new fixture; and **L15 is
+  decided**. The Architect's answer is **Option E — legacy wire identifier preserved, accurate presentation /
+  documentation**: `SourceType::ElfProgramHeader` and the `analysis:1` token `"elf.program-header"` stay, so no
+  enum rename, no wire rename, no rewritten history, **no migration 0006, no `analysis:2`**, no golden byte and
+  no Bundle change occurs, and what was inaccurate becomes documented — the token is a legacy compatibility
+  identifier, and the accurate meaning of `MemoryEvidenceBasis::ElfAddressAndFlags` is **ELF address + flags
+  evidence** (`04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §7 now says so next to the precedence rule it names
+  loosely; `P5_COMMIT_E_SCHEMA_DECISION.md` is `RESOLVED_BY_ARCHITECT` with its §1–§10 pricing left exactly as
+  Commit E wrote it). L15 is therefore `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` and **not `CLOSED`**: the
+  name remains wrong, the risk is now bounded and documented. One visible residue is recorded rather than
+  fixed, because this round may not touch code: the Evidence Inspector still renders the stored token verbatim
+  (`Details.tsx:667` ← `details.rs:223` ← `query.rs:503` ← `db.rs:507`), so a user expands such a row and reads
+  `ElfProgramHeader`; a display-only caption in L20's closed-table shape is Commit F's to make.
+  §18 fixes what may be written about the outcome while this head's own run is still unread: Commit E
+  engineering **PASS**, evidence closure **`NORMALIZATION_PENDING_REMOTE_CI`**, `P5 = IN_PROGRESS`, product
+  **MVP CANDIDATE**, baseline `0.6.0`, Commit F **`NOT_AUTHORIZED`** — and no `P5 PASS`, `BETA`, `RC` or `GA`
+  anywhere.
 - **A limitation surfaced by that record, and deliberately not fixed: L26.** `SHA256SUMS` is generated from
   working-copy bytes, so with `core.autocrlf=true` and `.gitattributes` `text eol=lf` 17 entries verify on the
   host that wrote them and disagree with a clean checkout elsewhere; measured identically at `3400981` and at

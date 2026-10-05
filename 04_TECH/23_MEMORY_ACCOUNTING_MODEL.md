@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Architecture"
-last_updated: "2026-09-27"
+last_updated: "2026-10-04"
 ---
 
 # Firmware Memory Accounting Model
@@ -68,3 +68,35 @@ Analyze/Compare 必须区分：
 - runtime RAM footprint
 
 若产品简写为 FLASH/RAM，UI 必须可打开 accounting explanation/evidence。
+
+## 7. L15 legacy source identifier (2026-10-04)
+
+This section documents a name. It changes no earlier clause of this document, no evidence class, no
+precedence rule, no serialized value and no stored row.
+
+§4 item 3 — "ELF segment/section address + flags 的 deterministic mapping" — is the rule that produces
+`MemoryEvidenceBasis::ElfAddressAndFlags`. The evidence label that rule writes down is **not** named after it:
+`SourceType::ElfProgramHeader`, whose `analysis:1` wire token is `"elf.program-header"`
+(`crates/firmwaresight-report/src/dto.rs:139`, `schemas/analysis.schema.json:616`). The name suggests only an
+ELF program header, while §4 item 3's charge reads section **and** segment attributes; a reader is therefore
+entitled to find the label loose. It is, and it stays.
+
+The Architect's decision, recorded in `P5_VALIDATION/P5_COMMIT_E_SCHEMA_DECISION.md` §11 (Option E,
+`RESOLVED_BY_ARCHITECT`, 2026-10-04), is to **preserve the identifier and document the meaning** rather than
+rename it:
+
+- `elf.program-header` is a **legacy `analysis:1` compatibility identifier**. It carries no guarantee that the
+  evidence came literally from a `PT_*` program header, and must not be read as one.
+- The accurate human-facing description of that basis is **ELF address + flags evidence**. Documentation aimed
+  at people should use that phrase; the Compare page's basis caption already does
+  (`apps/desktop/ui/src/Compare.tsx:690`).
+- Explicitly refused, because each one is a public-contract change: a new enum member, a renamed member, a
+  renamed wire value, rewritten `evidence.source_type` history, a `migration 0006`, an `analysis:2`, a moved
+  golden byte, or a changed Bundle `analysis.json`. The charge has been arithmetically correct since Commit E
+  read `SHF_ALLOC` from the section header; only its label is imprecise, and L15 therefore remains
+  `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, **not** `CLOSED`.
+- Open for a later round: the Evidence Inspector renders the stored token verbatim
+  (`Details.tsx:667` ← `details.rs:223` ← `query.rs:503` ← `db.rs:507`), so a user sees `ElfProgramHeader`.
+  A display-only caption there is a presentation decision; it is named as a Commit F item in
+  `P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md` §2's L15 row. §1 and §10 of the closure normalization round that
+  wrote this section forbade touching product source, so nothing was changed to make the screen agree.

@@ -192,15 +192,46 @@ P5 compatibility cohort and supportability (Commit E): BUILT FROM REAL TOOL OUTP
         with a cohort-wide invariant test and five mutation proofs (A, B, C, E, F). §48's fourteen rows: L14, L16,
         L19, L20 and L24 CLOSED on measurement, L4, L5, L17 and L23 REDUCED with their residue named (L23's seventh
         instance repaired test-only, then 20 campaign runs × 217 tests with 0 failing), L25 NOT_REPRODUCED (30
-        legitimate Apply activations), L8 and L12 CARRIED_FORWARD, and L15 STOPPED FOR THE ARCHITECT because the
+        legitimate Apply activations), L8 and L12 CARRIED_FORWARD, and L15 stopped for the Architect because the
         label is serialized in three namespaces and renaming it is a public contract change, not a cleanup. No
         capability, schema, migration, dependency, licence or IPC surface changed. Locally: 868 Rust / 217 UI in 8
         files, check.py 16 of 16, core-smoke 3/3, drift 7/7, deny 1/1, package 4 of 4 with no SKIP, and a clean
         detached worktree at the candidate SHA green at 18 of 18 with all 56 manifest paths hash-matching and the
         fixture tests passing with no cross-compiler on PATH. The remote agreed: Run 37228929762 at head 59d85c3,
         attempt 1, 10 of 10, every job and every step read — the E1 head 859648e has no run of its own because one
-        push carried both commits and GitHub runs the tip, which is recorded as an absence, not as a pass.
-        COMMIT_E lands
+        push carried both commits and GitHub runs the tip, which is recorded as an absence, not as a pass. The
+        §59 read-back successor 6981625 came back 10 of 10 too, on Run 37230689636, attempt 1.
+P5 Commit E closure normalization (evidence vocabulary + the L15 decision): DOCUMENTATION ONLY, NO PRODUCT
+        SOURCE, NO FIXTURE BYTE (2026-10-04). Run under FirmwareSight P5 Commit E Closure Normalization v1.0 —
+        delivered as 28,738 CRLF bytes with SHA-256 9571df2c…075599, archived under 10_AUDIT/SOURCE_PROMPTS/ as
+        27,366 LF bytes / 1,373 lines with SHA-256 62040e3d…e6c7af887; both hashes recorded, because the stored
+        copy differs from the delivered one only in the line terminator that .gitattributes requires for *.txt,
+        and that difference is written down instead of hidden. Two fixes, no behavior: (1) the compatibility
+        matrix's status column now uses exactly SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY / NOT_TESTED /
+        UNSUPPORTED — 38 cells validated with a table-parsing check, 0 outside the five — so the drifted values
+        it had shipped with (BEST_EFFORT_NO_CLAIM, DEFERRED_NO_MVP, NOT_CLAIMED, "MEASURED, NOT INFERRED",
+        BUILT_AND_VERIFIED_IN_CI and half-sentences like "SUPPORTED for the region") carry their meaning in the
+        evidence column instead, and signing/notarization/updater readiness moved into a state column because
+        READY_NOT_EXECUTED is a release-readiness state, not a compatibility claim; (2) the A-H disposition
+        column now uses only PROVED_BY_EXISTING_FIXTURE / PROVED_BY_NEW_FIXTURE / SUPPORTED_WITH_LIMITS /
+        NOT_AVAILABLE, with A, F and H recorded as EXISTING — every pre-Commit-E fixture was already a -g build
+        and p0-dual-region and the p2-diff pair already carried 3, 5 and 4 PT_LOAD segments, so a new assertion
+        on an old fixture is not a new fixture. And (3) the answer Commit E asked for: the Architect chose
+        **Option E — legacy wire identifier preserved, accurate presentation / documentation**.
+        SourceType::ElfProgramHeader and the analysis:1 token "elf.program-header" stay, the stored
+        ElfProgramHeader rows stay, and nothing is renamed: no ElfSectionFlags, no wire rename, no rewritten
+        history, no migration 0006, no analysis:2, no golden byte, no Bundle contract change, no release-identity
+        move, ADR-0028 untouched. What replaces the accuracy the name never had is a definition —
+        elf.program-header is a legacy compatibility identifier and promises nothing about PT_* headers, while
+        MemoryEvidenceBasis::ElfAddressAndFlags means **ELF address + flags evidence**, now stated in
+        P5_COMMIT_E_SCHEMA_DECISION.md §11 and 04_TECH/23_MEMORY_ACCOUNTING_MODEL.md §7. L15 is therefore
+        CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER and explicitly NOT CLOSED, and one visible residue is recorded
+        rather than fixed because this round may not touch code: the Evidence Inspector prints the stored token
+        verbatim (Details.tsx:667 ← details.rs:223 ← query.rs:503 ← db.rs:507), so a user expanding such a row
+        reads ElfProgramHeader; a display-only caption is Commit F's call. Direct counts unchanged as §19
+        requires (868 Rust / 217 UI / gate 16 of 16 / drift 7 of 7 / deny 1 of 1 / package 4 of 4), the owner's
+        store never opened, L26 still undecided, the §64 journey still unrun, and Commit F still unauthorized.
+        Evidence P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md. COMMIT_E lands
         under its own §42/§63 STOPs: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general
         source-control linter. Evidence P5_VALIDATION/P5_COMMIT_E_DESIGN.md,
         P5_COMPATIBILITY_FIXTURE_REPORT.md, P5_COMPATIBILITY_MATRIX.md, P5_SUPPORTABILITY_REPORT.md and

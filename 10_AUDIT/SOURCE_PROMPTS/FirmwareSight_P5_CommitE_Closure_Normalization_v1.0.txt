@@ -1,0 +1,1373 @@
+FirmwareSight — P5 Commit E Closure Normalization
+Evidence Vocabulary + L15 Architect Decision
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+你是 FirmwareSight P5 Productization Commit E Closure Normalization Agent。
+
+这不是新的产品开发阶段。
+
+本轮只做：
+
+1. Commit E evidence vocabulary normalization
+2. L15 Architect decision record
+3. governance reconciliation
+4. normal repository integrity regeneration
+5. remote 10/10 CI proof
+
+禁止任何产品代码、fixture、schema、migration、dependency、capability 或 release-identity 改动。
+
+完成后：
+
+COMMIT_E = FINAL PASS
+
+但：
+
+P5 = IN_PROGRESS
+
+Commit F 仍需新的 Architect 授权。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at prompt issue time:
+
+origin/main =
+6981625a6491aeb82fd6346d17f219dcb413548b
+
+Latest Commit E candidate:
+
+59d85c308ad2c68cdc80956b47641a67ebf63b41
+
+Candidate CI:
+
+Run =
+37228929762
+
+attempt =
+1
+
+result =
+completed / success
+
+authoritative jobs =
+10 / 10
+
+Current read-back successor:
+
+6981625a6491aeb82fd6346d17f219dcb413548b
+
+Successor CI:
+
+Run =
+37230689636
+
+attempt =
+1
+
+result =
+completed / success
+
+authoritative jobs =
+10 / 10
+
+Current measured direct counts:
+
+Rust =
+868 passed / 0 failed / 47 targets
+
+UI =
+217 passed / 8 files
+
+full local gate =
+16 / 16
+
+core-smoke =
+3 / 3
+
+drift =
+7 / 7
+
+deny =
+1 / 1
+
+package =
+4 / 4
+
+P5 =
+IN_PROGRESS
+
+Product state =
+MVP CANDIDATE
+
+baseline =
+0.6.0
+
+Commit E engineering =
+PASS
+
+Commit E evidence closure =
+NEEDS_DOCS_ONLY_NORMALIZATION
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This round MAY change only documentation/governance/audit artifacts.
+
+Expected allowed families:
+
+P5_VALIDATION/*.md
+.ai/*.md
+04_TECH/*.md only where necessary to document L15 legacy semantics
+README.md
+INDEX.md
+10_AUDIT/SOURCE_PROMPTS/*
+10_AUDIT/SOURCE_PROMPTS/README.md
+DIRECTORY_TREE.txt only if prompt archival adds a path
+SHA256SUMS last
+
+This round MUST NOT change:
+
+crates/**
+apps/**
+scripts/**
+fixtures/**
+schemas/**
+golden/**
+.github/**
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+migrations/**
+any source code
+any generated TS binding
+any binary fixture
+any MAP fixture
+any ELF fixture
+
+If any forbidden path changes:
+
+STOP.
+
+Do not "fix it while here".
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+
+Expected:
+
+HEAD =
+origin/main =
+6981625a6491aeb82fd6346d17f219dcb413548b
+
+worktree =
+clean
+
+If remote moved:
+
+STOP.
+
+Read the delta first.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. ARCHIVE THIS PROMPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Archive the exact delivered bytes under:
+
+10_AUDIT/SOURCE_PROMPTS/
+
+Use a descriptive name equivalent to:
+
+FirmwareSight_P5_CommitE_Closure_Normalization_v1.0.txt
+
+Compute and record its actual:
+
+SHA-256
+byte count
+line count
+
+Do not reconstruct the prompt.
+
+If exact delivered bytes are unavailable:
+
+record that fact honestly.
+
+Do not invent a hash.
+
+Because this adds a tracked path:
+
+DIRECTORY_TREE.txt must be regenerated before SHA256SUMS.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. WHY THIS NORMALIZATION EXISTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit E engineering evidence is valid.
+
+However two evidence-contract mismatches remain.
+
+A. Compatibility Matrix status vocabulary drift
+
+Commit E Prompt required the matrix status vocabulary to be restricted to:
+
+SUPPORTED
+SUPPORTED_WITH_LIMITS
+CI_BUILD_ONLY
+NOT_TESTED
+UNSUPPORTED
+
+Current matrix contains additional status-like values such as:
+
+DEFERRED_NO_MVP
+BUILT_AND_VERIFIED_IN_CI
+MEASURED, NOT INFERRED
+NOT_CLAIMED
+and phrases such as:
+SUPPORTED for the tested target and layout cohort
+SUPPORTED as presence, UNSUPPORTED as semantics
+
+The facts are useful,
+but the status column must use the canonical vocabulary.
+
+Keep nuance in the evidence/notes column.
+
+B. A-H disposition vocabulary drift
+
+Commit E Prompt required A-H fixture dispositions to use:
+
+PROVED_BY_EXISTING_FIXTURE
+PROVED_BY_NEW_FIXTURE
+SUPPORTED_WITH_LIMITS
+NOT_AVAILABLE
+
+Current table uses prose such as:
+
+covered
+new
+already covered
+new and named
+
+Normalize the disposition column without changing the underlying evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. COMPATIBILITY MATRIX — CANONICAL STATUS VOCABULARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File:
+
+P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md
+
+Every status cell must use ONLY:
+
+SUPPORTED
+SUPPORTED_WITH_LIMITS
+CI_BUILD_ONLY
+NOT_TESTED
+UNSUPPORTED
+
+No sixth status.
+
+Descriptive nuance belongs in the evidence column.
+
+Required normalization includes at least:
+
+Windows measured host:
+SUPPORTED_WITH_LIMITS
+if the row itself acknowledges one host / one WebView / 100% DPI limitations.
+
+Windows 10 distinct configuration:
+NOT_TESTED
+
+Windows 11:
+NOT_TESTED
+
+macOS:
+CI_BUILD_ONLY
+
+Ubuntu:
+CI_BUILD_ONLY
+
+Windows ARM64 / Linux ARM64:
+UNSUPPORTED
+
+Evidence note may say:
+deferred / future roadmap / outside current MVP
+
+but `DEFERRED_NO_MVP` must not be a status value.
+
+arm-none-eabi-gcc exact measured cohort:
+SUPPORTED
+
+Clang Arm at the one measured Cortex-M4 / optimization / GNU ld cohort:
+SUPPORTED_WITH_LIMITS
+
+Other Clang targets:
+NOT_TESTED
+
+Keil / IAR:
+UNSUPPORTED
+
+GNU ld tested cohort:
+SUPPORTED
+
+ld.lld MAP:
+NOT_TESTED
+
+ELF tested Arm cohort:
+SUPPORTED
+
+GNU ld MAP tested shapes:
+SUPPORTED
+
+HEX / BIN / UF2 / Mach-O / PE:
+UNSUPPORTED
+
+DWARF semantic analysis:
+UNSUPPORTED
+
+Debug-info ELF acceptance:
+SUPPORTED_WITH_LIMITS
+
+Reason:
+debug sections are accepted/excluded,
+but DWARF semantics are not consumed.
+
+No-debug ELF:
+SUPPORTED
+
+Post-link stripped ELF:
+SUPPORTED
+
+The current measured `objcopy -S` result:
+SUPPORTED
+
+Put:
+"measured, not inferred"
+in evidence text,
+not status.
+
+DMA/custom writable region:
+SUPPORTED_WITH_LIMITS
+
+Reason:
+region/memory accounting supported,
+cacheability semantics not claimed.
+
+Do not use:
+NOT_CLAIMED
+as a status.
+
+Installed Windows app:
+SUPPORTED_WITH_LIMITS
+
+macOS/Linux app runtime:
+CI_BUILD_ONLY
+
+Do not turn package build into runtime support.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. MATRIX VOCABULARY VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After editing the matrix:
+
+programmatically or manually inspect every table status cell.
+
+Prove there are no status values outside:
+
+SUPPORTED
+SUPPORTED_WITH_LIMITS
+CI_BUILD_ONLY
+NOT_TESTED
+UNSUPPORTED
+
+Do not perform blind global replacement over prose paragraphs.
+
+Only normalize semantic status fields.
+
+Evidence prose may still use ordinary English words.
+
+Record the validation in the normalization report.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. A-H DISPOSITION NORMALIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File:
+
+P5_VALIDATION/P5_COMPATIBILITY_FIXTURE_REPORT.md
+
+The §13 / A-H disposition table must use ONLY:
+
+PROVED_BY_EXISTING_FIXTURE
+PROVED_BY_NEW_FIXTURE
+SUPPORTED_WITH_LIMITS
+NOT_AVAILABLE
+
+Required mapping:
+
+A classic FLASH + RAM
+=
+PROVED_BY_EXISTING_FIXTURE
+
+Evidence:
+p0-dual-region
+
+B executable-in-RAM
+=
+PROVED_BY_NEW_FIXTURE
+
+Evidence:
+p5-ram-exec
+
+C external SRAM
+=
+PROVED_BY_NEW_FIXTURE
+
+Evidence:
+p5-extsram
+
+D DMA / custom writable region
+=
+PROVED_BY_NEW_FIXTURE
+
+Evidence note:
+region accounting proved;
+cacheability semantics explicitly not claimed.
+
+E long GNU ld MAP preamble
+=
+PROVED_BY_NEW_FIXTURE
+
+Evidence:
+p5-long-preamble
+
+F ELF with debug info
+=
+PROVED_BY_EXISTING_FIXTURE
+
+Reason:
+pre-Commit-E fixtures already used `-g`;
+Commit E's Clang fixture deepened the evidence but did not create the first proof.
+
+Evidence note:
+debug-info presence/acceptance proved;
+DWARF semantic analysis remains unsupported.
+
+G stripped / no debug
+=
+PROVED_BY_NEW_FIXTURE
+
+Evidence:
+p5-no-debug
+
+H multiple PT_LOAD segments
+=
+PROVED_BY_EXISTING_FIXTURE
+
+Reason:
+p0-dual-region / p2-diff already contained multiple PT_LOAD;
+Commit E added direct assertions and broader counts.
+
+Do not call H "new" merely because the assertion is new.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. L15 — ARCHITECT DECISION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The Architect has reviewed:
+
+P5_VALIDATION/P5_COMMIT_E_SCHEMA_DECISION.md
+
+Architect decision:
+
+OPTION E
+
+Name:
+
+LEGACY WIRE IDENTIFIER PRESERVED,
+ACCURATE PRESENTATION / DOCUMENTATION
+
+This is intentionally a fifth shape beyond A/B/C/D.
+
+Canonical decision:
+
+KEEP:
+
+Rust:
+SourceType::ElfProgramHeader
+
+portable wire:
+"elf.program-header"
+
+existing SQLite evidence rows:
+ElfProgramHeader
+
+analysis:1 enum:
+unchanged
+
+existing Release Bundle `analysis.json`:
+unchanged contract
+
+goldens:
+unchanged
+
+schema version:
+unchanged
+
+migration:
+NO migration 0006
+
+release identity:
+unchanged
+
+DO NOT:
+
+add ElfSectionFlags
+rename the enum
+rename the wire value
+rewrite existing rows
+create analysis:2
+move golden bytes
+change Bundle semantics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. L15 — SEMANTIC DEFINITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Document the following precisely:
+
+`elf.program-header`
+
+is a LEGACY COMPATIBILITY IDENTIFIER in `analysis:1`.
+
+It MUST NOT be interpreted as a guarantee that the evidence literally came only from an ELF PT_* program header.
+
+For the current:
+
+MemoryEvidenceBasis::ElfAddressAndFlags
+
+the accurate human-facing semantic description is:
+
+ELF address + flags evidence
+
+The legacy wire name survives only for compatibility.
+
+Do not pretend the old identifier is literally accurate.
+
+Do not redefine old bundles.
+
+Do not rewrite persisted history.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. L15 — HUMAN-FACING WORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All documentation intended for humans should prefer:
+
+ELF address + flags evidence
+
+where describing the semantic meaning.
+
+When documenting the wire contract, say something equivalent to:
+
+`elf.program-header` — legacy analysis:1 compatibility identifier;
+human meaning: ELF address + flags evidence.
+
+Do not change product source in this round.
+
+If current UI already displays an accurate caption:
+leave it.
+
+If current UI still exposes the legacy wire token somewhere:
+do NOT fix code here.
+
+Record it for Commit F if user-visible.
+
+This normalization round is documentation-only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. L15 FINAL DISPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In:
+
+P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md
+
+change L15 from:
+
+CARRIED_FORWARD → ARCHITECT
+
+to canonical:
+
+CARRIED_FORWARD
+
+with reason:
+
+LEGACY_WIRE_IDENTIFIER
+
+Suggested semantic wording:
+
+L15 =
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+
+Architect decision:
+preserve `SourceType::ElfProgramHeader` / `elf.program-header`
+for analysis:1 compatibility;
+document its accurate semantic meaning as
+"ELF address + flags evidence";
+consider a true wire rename only in a future `analysis:2`.
+
+Do not mark L15 CLOSED.
+
+The historical identifier remains technically inaccurate.
+
+The risk is now bounded and documented.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. SCHEMA DECISION DOCUMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update:
+
+P5_VALIDATION/P5_COMMIT_E_SCHEMA_DECISION.md
+
+It currently ends:
+
+STOPPED_FOR_ARCHITECT
+
+That is no longer current.
+
+Preserve:
+
+- measured surfaces
+- options A/B/C/D
+- compatibility analysis
+- Bundle impact
+- golden impact
+- original questions
+
+Add a final:
+
+Architect Decision
+
+section recording Option E.
+
+Use an existing repository status convention if one exists.
+
+If no machine-readable resolved status convention exists:
+
+do NOT invent a new parser-facing enum.
+
+Use narrative:
+
+RESOLVED BY ARCHITECT
+
+and make the former STOP historical.
+
+The document must make clear:
+
+Commit E itself correctly stopped;
+the Architect answered after Commit E engineering completed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. PUBLIC CONTRACT IMPACT — NONE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Verify and explicitly record:
+
+analysis:1 =
+UNCHANGED
+
+diff:1 =
+UNCHANGED
+
+gate-results:1 =
+UNCHANGED
+
+accepted-reviews:1 =
+UNCHANGED
+
+release-manifest:1 =
+UNCHANGED
+
+SQLite schema =
+UNCHANGED
+
+SCHEMA_VERSION =
+UNCHANGED
+
+goldens =
+UNCHANGED
+
+fixture bytes =
+UNCHANGED
+
+release identity =
+UNCHANGED
+
+ADR-0028 =
+UNCHANGED
+
+No production semantic change occurs in this round.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. L26 — HARD STOP / CARRY FORWARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT decide L26.
+
+Do NOT:
+
+switch root SHA256SUMS to Git blob bytes
+normalize line endings
+define canonical checkout bytes
+add baseline verifier to CI
+modify ADR-0028 for repository baseline checksums
+
+L26 remains:
+
+CARRIED_FORWARD TO COMMIT F / ARCHITECT
+
+When root SHA256SUMS is regenerated for normal repository bookkeeping:
+
+use the CURRENT repository convention only.
+
+Do not describe that as cross-checkout reproducibility.
+
+Explicitly retain the caveat.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. §64 — HARD CARRY FORWARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT run:
+
+Install
+→ Analyze
+→ Compare
+→ Gate
+→ Bundle
+→ History
+→ Diagnostics
+→ close/reopen
+→ reinstall
+→ uninstall
+→ reinstall
+
+That is Commit F.
+
+No installed-app testing is required in this docs-only normalization round.
+
+Owner live DB must not be opened.
+
+No package installation.
+
+No owner-store park/restore operation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. CLOSURE DOCS — STILL NOT THIS ROUND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT create final consolidation copies merely to check filenames.
+
+Still reserved for Commit F:
+
+P5_VALIDATION/P5_MIGRATION_RECOVERY_REPORT.md
+
+P5_VALIDATION/P5_HISTORY_DIAGNOSTICS_REPORT.md
+
+final consolidated:
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+
+P5 final report
+
+P5 final exit checklist
+
+signing readiness final record
+
+notarization readiness final record
+
+manual-upgrade readiness final record
+
+Those remain open.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. GOVERNANCE RECONCILIATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update only the governance files that would otherwise remain materially stale.
+
+Likely candidates:
+
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+README.md
+INDEX.md
+
+Required durable facts:
+
+- Commit E engineering candidate = 59d85c3
+- candidate Run 37228929762 = attempt 1 / 10 of 10
+- read-back successor = 6981625
+- successor Run 37230689636 = attempt 1 / 10 of 10
+- engineering evidence valid
+- evidence vocabulary normalized in this round
+- L15 Architect Option E decided
+- P5 remains IN_PROGRESS
+- Commit F NOT AUTHORIZED yet
+- §64 open
+- L26 open
+- closure docs open
+- license PENDING OWNER CONFIRMATION
+
+Do not hard-code "current HEAD" in prose that will become false immediately after commit.
+
+Prefer durable wording:
+
+"pre-normalization authority head"
+"Commit E read-back head"
+
+For moving HEAD:
+tell reader to use `git rev-parse HEAD`.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. ALLOWED STATUS OF COMMIT E
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before this round's CI:
+
+Commit E engineering =
+PASS
+
+Commit E evidence closure =
+NORMALIZATION_PENDING_REMOTE_CI
+
+After this normalization head gets 10 / 10:
+
+Commit E =
+FINAL PASS / COMPLETE
+
+P5 =
+IN_PROGRESS
+
+Product state =
+MVP CANDIDATE
+
+Commit F =
+NOT_AUTHORIZED
+
+Do not write:
+
+P5 PASS
+Productization COMPLETE
+Private Beta
+RC
+GA
+Production Ready
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. NO PRODUCT TEST COUNT MOVEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because this is docs-only:
+
+expected direct counts remain:
+
+Rust =
+868
+
+UI =
+217
+
+If direct test counts change:
+
+STOP.
+
+A docs-only normalization should not add/remove product tests.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. DIFF ALLOWLIST PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before commit, inspect:
+
+git diff --name-only
+
+Every changed path must be documentation/governance/audit/integrity only.
+
+Explicitly prove zero paths under:
+
+crates/
+apps/
+scripts/
+fixtures/
+schemas/
+golden/
+.github/
+
+Also prove no changes to:
+
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+deny.toml
+
+If any appears:
+
+STOP.
+
+Do not use `git restore .`.
+
+Do not touch unrelated user changes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. DIRECTORY TREE / SHA256SUMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If archiving this prompt adds a tracked file:
+
+regenerate:
+
+DIRECTORY_TREE.txt
+
+Then regenerate:
+
+SHA256SUMS
+
+LAST.
+
+If no tracked path is added:
+
+do not regenerate DIRECTORY_TREE.txt unnecessarily.
+
+Root SHA256SUMS must use the current repository convention.
+
+Record:
+
+L26 semantics remain unresolved.
+
+Do not claim the regenerated root sums are portable across checkout line-ending transformations.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run at minimum:
+
+git diff --check
+
+cargo fmt --all -- --check
+
+cargo test --workspace
+
+corepack pnpm test
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+
+python scripts/check.py --only deny
+
+python scripts/check.py --only package
+
+Expected direct counts:
+
+Rust =
+868
+
+UI =
+217 / 8 files
+
+check.py =
+16 / 16
+
+You may run the full canonical P5 local matrix.
+
+Do not skip required groups.
+
+Do not multiply rerun counts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. CONTENT-SPECIFIC VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before commit, prove:
+
+A.
+Compatibility Matrix has no status-cell value outside:
+
+SUPPORTED
+SUPPORTED_WITH_LIMITS
+CI_BUILD_ONLY
+NOT_TESTED
+UNSUPPORTED
+
+B.
+A-H disposition table has no disposition outside:
+
+PROVED_BY_EXISTING_FIXTURE
+PROVED_BY_NEW_FIXTURE
+SUPPORTED_WITH_LIMITS
+NOT_AVAILABLE
+
+C.
+L15 contains:
+
+CARRIED_FORWARD
+LEGACY_WIRE_IDENTIFIER
+
+D.
+Schema decision contains:
+
+Architect Decision
+Option E
+no migration 0006
+no analysis:2
+no wire rename
+
+E.
+L26 still says:
+
+CARRIED_FORWARD TO COMMIT F
+
+F.
+§64 remains open.
+
+G.
+No product source changed.
+
+Record exact validation commands/results.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. NORMALIZATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md
+
+Keep it concise.
+
+Required sections:
+
+1. Start authority
+2. Why normalization was required
+3. Matrix vocabulary corrections
+4. A-H disposition corrections
+5. L15 Architect Option E
+6. Explicit no-code/no-schema impact
+7. L26 carry-forward
+8. §64 carry-forward
+9. Diff allowlist
+10. Local validation
+11. Commit SHA
+12. Remote CI
+13. Verdict
+
+Before remote CI is known:
+
+Remote CI =
+PENDING
+
+Do not fabricate the run.
+
+After push:
+the final chat report may record the external run without another commit.
+
+Do not create a second commit merely to write this commit's own CI run.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred commit message:
+
+P5: normalize Commit E evidence and record the L15 decision
+
+One commit only.
+
+No product source.
+
+No fixture byte.
+
+No schema.
+
+No migration.
+
+No dependency.
+
+No workflow change.
+
+After commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+Push normal fast-forward if not auto-pushed.
+
+Never force push.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find workflow by exact normalization commit SHA.
+
+Required authoritative matrix:
+
+10 / 10
+
+Jobs:
+
+Rust (windows-latest)
+Rust (ubuntu-latest)
+Desktop UI (windows-latest)
+Desktop UI (ubuntu-latest)
+Generated output drift
+Dependency policy
+macOS Core Smoke
+Package Windows
+Package Ubuntu
+Package macOS
+
+All must be:
+
+completed / success
+
+Read each job.
+
+Do not infer only from overall workflow conclusion.
+
+If a job fails because docs/integrity are wrong:
+
+fix in a new corrective commit.
+
+Do not rerun-until-green.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. NO CI READ-BACK RECURSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This normalization commit is itself the final evidence-normalization successor for Commit E.
+
+After its remote CI is green:
+
+DO NOT create another commit merely to record that run.
+
+The run is external final evidence.
+
+Report it back to Architect in chat.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. FINAL COMMIT E VERDICT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If:
+
+- diff allowlist clean
+- matrix vocabulary normalized
+- A-H vocabulary normalized
+- L15 Option E recorded
+- no product/source/schema change
+- local validation green
+- normalization commit remote CI 10/10
+
+then report:
+
+COMMIT_E =
+FINAL PASS / COMPLETE
+
+P5 =
+IN_PROGRESS
+
+Product state =
+MVP CANDIDATE
+
+baseline =
+0.6.0
+
+Commit F =
+NOT_AUTHORIZED
+
+L15 =
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+
+L26 =
+CARRIED_FORWARD TO COMMIT F / ARCHITECT
+
+§64 =
+OPEN FOR COMMIT F
+
+License =
+PENDING OWNER CONFIRMATION
+
+Do not declare P5 complete.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. STOP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After successful normalization CI:
+
+STOP.
+
+Return to Architect.
+
+Do NOT start:
+
+Commit F
+L26 implementation
+§64 full installed journey
+migration 0006
+analysis:2
+wire enum rename
+signing
+notarization
+automatic updater
+Private Beta
+RC
+GA
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight P5 Commit E Closure Normalization Final Report
+
+## 1. Start authority
+
+HEAD
+origin/main
+Commit E candidate
+Commit E read-back head
+
+## 2. Scope proof
+
+changed paths
+forbidden-path diff = empty
+
+## 3. Compatibility Matrix normalization
+
+before vocabulary issues
+after canonical statuses
+validation command/result
+
+## 4. A-H disposition normalization
+
+A through H
+canonical dispositions
+
+## 5. L15 Architect Decision
+
+Option E
+legacy wire retained
+accurate human meaning
+analysis:1 unchanged
+SQLite unchanged
+Bundle contract unchanged
+goldens unchanged
+migration 0006 absent
+
+## 6. L15 final disposition
+
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+
+## 7. L26
+
+CARRIED_FORWARD TO COMMIT F
+unchanged semantics
+
+## 8. §64
+
+OPEN FOR COMMIT F
+not executed
+
+## 9. Local validation
+
+Rust count
+UI count
+check.py
+drift
+deny
+package
+
+## 10. Normalization commit
+
+SHA
+commit message
+
+## 11. Remote CI
+
+run id
+run number
+attempt
+ten jobs
+result
+
+## 12. Safety
+
+product source changed? NO
+fixtures changed? NO
+schema changed? NO
+migration changed? NO
+dependency changed? NO
+workflow changed? NO
+owner DB touched? NO
+
+## 13. Verdict
+
+COMMIT_E =
+FINAL PASS / COMPLETE
+
+P5 =
+IN_PROGRESS
+
+Product =
+MVP CANDIDATE
+
+Commit F =
+NOT_AUTHORIZED
+
+## 14. Stop
+
+STOP.
+
+Return to Architect.
+
+END OF PROMPT

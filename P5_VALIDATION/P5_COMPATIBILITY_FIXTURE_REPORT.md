@@ -2,7 +2,7 @@
 title: "P5 Commit E compatibility fixture report"
 doc_id: "FS-P5-COMMIT-E-FIXTURES"
 product: "FirmwareSight"
-version: "1.0"
+version: "1.1"
 status: "MEASURED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
@@ -188,16 +188,27 @@ six bullets. Adding a second classic fixture would have grown the cohort without
 
 ## 4. §13 A–H disposition
 
+Disposition uses exactly four values and no fifth: `PROVED_BY_EXISTING_FIXTURE`, `PROVED_BY_NEW_FIXTURE`,
+`SUPPORTED_WITH_LIMITS`, `NOT_AVAILABLE`. The column used to carry prose (`covered`, `new`, `already covered`,
+`new and named`), which is what the closure normalization round replaced; no case's evidence moved, and the two
+words that went unused here are named at the end of the table.
+
 | case | disposition | evidence |
 | --- | --- | --- |
-| A classic FLASH + RAM | covered, no new fixture | `p0-dual-region`, §3.7 |
-| B executable-in-RAM | **new** | `p5-ram-exec` |
-| C external SRAM | **new** | `p5-extsram` |
-| D DMA / custom writable region | **new**, cacheability explicitly not claimed | `p5-dma-region` |
-| E long MAP preamble | **new**, real discarded sections | `p5-long-preamble` |
-| F ELF with debug info | already covered (`-g` on every fixture); recognized, not consumed | `p5-clang-arm` deepens it: 8 debug sections, excluded, no DWARF claim |
-| G stripped / no debug | **new** | `p5-no-debug` (two files, two absences) |
-| H multiple `PT_LOAD` | **new and named** | counts recorded per fixture (2, 4, 4, 1, 2, 2, 2) and asserted by `real_linkers_emit_several_load_segments_and_the_fixtures_say_how_many`; `p0-dual-region` = 3 and `p2-diff` pair = 5 and 4 |
+| A classic FLASH + RAM | `PROVED_BY_EXISTING_FIXTURE` | `p0-dual-region`, §3.7 — the case was already proved before this round, which re-recorded the assertion instead of duplicating the fixture. |
+| B executable-in-RAM | `PROVED_BY_NEW_FIXTURE` | `p5-ram-exec` |
+| C external SRAM | `PROVED_BY_NEW_FIXTURE` | `p5-extsram` |
+| D DMA / custom writable region | `PROVED_BY_NEW_FIXTURE` | `p5-dma-region`. Region accounting is what is proved; cacheability semantics are **explicitly not claimed**, and a test fails if the model ever says `cache`, `coherent` or `non-cacheable`. |
+| E long MAP preamble | `PROVED_BY_NEW_FIXTURE` | `p5-long-preamble`, with the preamble made of real discarded sections rather than pasted filler |
+| F ELF with debug info | `PROVED_BY_EXISTING_FIXTURE` | Every pre-Commit-E fixture was already a `-g` build, so the first proof of this case predates the round. `p5-clang-arm` **deepens** it — 8 debug sections, recognized, excluded, no DWARF claim — without creating the evidence. Debug-info presence is accepted; DWARF semantic analysis remains `UNSUPPORTED` in the matrix. |
+| G stripped / no debug | `PROVED_BY_NEW_FIXTURE` | `p5-no-debug` (two files, two absences) |
+| H multiple `PT_LOAD` | `PROVED_BY_EXISTING_FIXTURE` | `p0-dual-region` already carried 3 load segments and the `p2-diff` pair 5 and 4, so the fixture evidence was existing. What is new is the **direct assertion**: counts are now recorded per fixture (2, 4, 4, 1, 2, 2, 2) and held by `real_linkers_emit_several_load_segments_and_the_fixtures_say_how_many`. A new assertion on an existing fixture is not a new fixture, and the disposition says so. |
+
+Nothing in A–H is `NOT_AVAILABLE`: all eight cases have committed evidence in this cohort.
+`SUPPORTED_WITH_LIMITS` is unused here rather than in D's and F's rows because §7's mapping records what a
+*fixture* proved, while the limits those two cases carry are limits of the **claim**, and they live with their
+status cells in `P5_COMPATIBILITY_MATRIX.md` §5 (`SUPPORTED_WITH_LIMITS` for both) instead of being stated twice
+in two vocabularies.
 
 ## 5. Acceptance-test depth (§25) and the mutation proofs (§44)
 

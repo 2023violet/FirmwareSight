@@ -91,12 +91,26 @@ undercount (clang's allocated `.ARM.exidx.text.main`, 8 bytes, charged nothing b
 "not allocated" from "unrecognised section kind"; `SHF_ALLOC` is now read from the section header); it
 rewrote `P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md` from the tree instead of from prose; and it dispositioned
 §48's fourteen supportability rows — L14/L16/L19/L20/L24 `CLOSED`, L4/L5/L17/L23 `REDUCED`, L25
-`NOT_REPRODUCED`, L8/L12 `CARRIED_FORWARD`, L15 `STOPPED_FOR_ARCHITECT` in
+`NOT_REPRODUCED`, L8/L12 `CARRIED_FORWARD`, L15 stopped for the Architect in
 `P5_COMMIT_E_SCHEMA_DECISION.md`. Evidence: `P5_COMMIT_E_DESIGN.md`,
 `P5_COMPATIBILITY_FIXTURE_REPORT.md`, `P5_COMPATIBILITY_MATRIX.md`, `P5_SUPPORTABILITY_REPORT.md`. The remote
 read-back is Run `37228929762` at head `59d85c3` — attempt 1, **10 of 10**, every job and step read — with the
 E1 head `859648e` carrying no run of its own because one push moved both commits; §7a of the fixture report
-holds the clean detached worktree that proves the same bytes again without a compiler on `PATH`.
+holds the clean detached worktree that proves the same bytes again without a compiler on `PATH`. Commit E's
+§59 read-back successor `6981625` came back **10 of 10** on Run `37230689636`, attempt 1.
+**Commit E closure normalization (2026-10-04), documentation only.** Two evidence-contract fixes and one answer,
+with zero product source: the matrix status column closed to
+`SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY / NOT_TESTED / UNSUPPORTED` (38 cells checked programmatically,
+0 outside; the drifted words moved to the evidence column and release-readiness states to a separate `state`
+column), the A–H disposition column closed to
+`PROVED_BY_EXISTING_FIXTURE / PROVED_BY_NEW_FIXTURE / SUPPORTED_WITH_LIMITS / NOT_AVAILABLE` with A, F and H
+recorded as **existing** — a new assertion on an old fixture is not a new fixture — and the Architect's answer
+to L15 recorded as **Option E**: `SourceType::ElfProgramHeader` / `elf.program-header` preserved as a legacy
+`analysis:1` identifier, its accurate meaning documented as **ELF address + flags evidence**
+(`P5_COMMIT_E_SCHEMA_DECISION.md` §11, `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §7), with no rename, no migration
+0006, no `analysis:2` and no golden byte moved, so L15 is `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, not
+`CLOSED`. `P5_COMMIT_E_CLOSURE_NORMALIZATION.md` is the short record; the prompt is archived with both its
+hashes because the delivered CRLF bytes and the stored LF bytes differ only in terminator.
 **Still no P5 verdict exists** — the product is
 MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
 choice is authorized · open-source
@@ -145,12 +159,15 @@ P5_PRODUCTIZATION`
     `P5_MIGRATION_DECISION.md`, `P5_PACKAGING_REPORT.md`, `P5_INSTALL_RECOVERY_REPORT.md`,
     `P5_ONBOARDING_HISTORY_REPORT.md`, `P5_COMMIT_D_DESIGN.md`, `P5_DIAGNOSTICS_RECOVERY_REPORT.md` (its §8
     is the §32 read-back of the whole Commit D chain), `P5_RELEASE_IDENTITY_ADR_DRAFT.md`, and
-    `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` for the decision that replaced it. Commit E's five:
+    `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` for the decision that replaced it. Commit E's six:
     `P5_COMMIT_E_DESIGN.md` (fixture design, the five mutation proofs, the reliability campaign),
     `P5_COMPATIBILITY_FIXTURE_REPORT.md` (per-fixture provenance, commands, hashes, and what the product
-    answered), `P5_COMPATIBILITY_MATRIX.md` (§23's vocabulary, written from the tree),
-    `P5_SUPPORTABILITY_REPORT.md` (§48's fourteen dispositions) and — a question rather than a record, held for
-    the Architect under §42 — `P5_COMMIT_E_SCHEMA_DECISION.md`
+    answered; §4 the normalized A–H table, §7a the clean detached worktree), `P5_COMPATIBILITY_MATRIX.md`
+    (status column closed to the five canonical values, §7b the release-readiness states that are not
+    compatibility claims), `P5_SUPPORTABILITY_REPORT.md` (§48's fourteen dispositions),
+    `P5_COMMIT_E_SCHEMA_DECISION.md` — the question Commit E stopped on **and the answer**, §1–§10 priced as
+    written, §11 recording the Architect's Option E — and `P5_COMMIT_E_CLOSURE_NORMALIZATION.md`, the short
+    record of the vocabulary cleanup and the L15 decision
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` began life as the regenerated **v0.6.0** baseline record and are now
 regenerated on **every** commit that changes the tracked set — the tree first, `SHA256SUMS` last, then

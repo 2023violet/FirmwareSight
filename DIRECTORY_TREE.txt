@@ -152,6 +152,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P5_CommitD_Continue_v1.2.txt
 │   │   ├── FirmwareSight_P5_CommitD_Diagnostics_Recovery_v1.0.txt
+│   │   ├── FirmwareSight_P5_CommitE_Closure_Normalization_v1.0.txt
 │   │   ├── FirmwareSight_P5_CommitE_Compatibility_Supportability_v1.0.txt
 │   │   ├── FirmwareSight_P5_Productization_v1.0.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Acceptance_v1.1.txt
@@ -680,6 +681,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 ├── P5_VALIDATION/
 │   ├── P5_CI_AUTHORITY.md
 │   ├── P5_COMMIT_D_DESIGN.md
+│   ├── P5_COMMIT_E_CLOSURE_NORMALIZATION.md
 │   ├── P5_COMMIT_E_DESIGN.md
 │   ├── P5_COMMIT_E_SCHEMA_DECISION.md
 │   ├── P5_COMPATIBILITY_FIXTURE_REPORT.md
