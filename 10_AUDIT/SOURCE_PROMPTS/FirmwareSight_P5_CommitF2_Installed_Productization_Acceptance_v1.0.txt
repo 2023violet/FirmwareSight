@@ -1,0 +1,1043 @@
+FirmwareSight — P5 Commit F2
+Installed Productization Acceptance
+Exact F1 CI Artifact → Old-Schema Migration → §64 Full Journey → Evidence Candidate
+Continuation Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+
+你继续执行已经归档的：
+FirmwareSight_P5_CommitF_Final_Productization_Closure_v1.0.txt
+
+本 Prompt 只解除 F1 结束后的人工暂停，并授权 F2。
+不授权 F3。
+
+0. START AUTHORITY
+
+Current authoritative main:
+0bca373ed46082f98a9f474908d09f836174ff1b
+
+F1 remote CI:
+Run 37293381181
+run #68
+attempt 1
+completed / success
+10 / 10
+
+F1 verdict:
+FINAL PASS
+
+ADR-0029:
+ACCEPTED / IMPLEMENTED
+
+L26:
+CLOSED — DECIDED_BY_ADR_0029_AND_IMPLEMENTED
+
+L15 presentation residue:
+CLOSED
+
+L15 wire debt:
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+
+P5:
+IN_PROGRESS
+
+F2:
+AUTHORIZED
+
+F3:
+NOT AUTHORIZED
+
+1. EXACT F1 CI ARTIFACT
+
+Use exactly:
+
+Run:
+37293381181
+
+Head:
+0bca373ed46082f98a9f474908d09f836174ff1b
+
+GitHub Actions artifact:
+FirmwareSight-0.6.0-windows-x86_64
+
+Artifact ID:
+11337963032
+
+GitHub artifact ZIP/container size:
+5,533,537 bytes
+
+IMPORTANT:
+5,533,537 B is the GitHub Actions artifact ZIP size.
+It is NOT the NSIS installer size.
+
+After download:
+- extract artifact;
+- inventory files;
+- read artifact-metadata.json;
+- verify internal SHA256SUMS.txt;
+- identify actual NSIS installer;
+- measure actual installer bytes;
+- compute actual installer SHA-256;
+- identify CLI companion and hash;
+- confirm version 0.6.0;
+- confirm provenance to Run 37293381181 / F1 head.
+
+Do not locally rebuild a substitute package.
+
+2. PREFLIGHT
+
+Before machine mutation:
+
+git fetch --prune origin
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+
+Expected:
+HEAD = origin/main =
+0bca373ed46082f98a9f474908d09f836174ff1b
+
+Tree clean.
+
+If remote moved:
+STOP.
+
+Re-read:
+P5_VALIDATION/P5_COMMIT_F_DESIGN.md
+P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md
+P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md
+P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md
+P5_VALIDATION/P5_MIGRATION_DECISION.md
+P5_VALIDATION/P5_PACKAGING_REPORT.md
+and master Commit F prompt §§25–62.
+
+Do not redo F1.
+
+3. SOURCE FREEZE BEFORE INSTALLED TEST
+
+Before §64:
+NO product/source/tooling change.
+
+Do not modify:
+crates/**
+apps/**
+scripts/**
+fixtures/**
+schemas/**
+migrations/**
+.github/**
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+
+Any such change invalidates the F1 installer as the candidate under test.
+
+4. EXTERNAL EVIDENCE ROOT
+
+Create outside the repository, e.g.:
+
+FirmwareSight-P5-F2-<timestamp>/
+
+Suggested:
+00_preflight
+01_artifact
+02_owner_backup
+03_migration
+04_project
+05_install
+06_onboarding
+07_analyze
+08_compare
+09_gate
+10_bundle
+11_history
+12_diagnostics
+13_reopen
+14_repair
+15_uninstall
+16_reinstall
+17_owner_restore
+18_summary
+
+Keep an evidence manifest.
+
+5. MACHINE SNAPSHOT — READ ONLY FIRST
+
+Before changes record:
+
+- FirmwareSight processes;
+- installer/uninstaller processes;
+- install directory state;
+- Start Menu state;
+- uninstall registry state;
+- PATH mentions;
+- app-data directory listing;
+- owner main/WAL/SHM presence, size, mtime, SHA-256;
+- sibling smoke/test stores;
+- Git HEAD/status;
+- Windows version;
+- WebView2 version if safely measurable.
+
+Do not trust prior measurements.
+
+6. OWNER STORE SAFETY BARRIER
+
+The F1 candidate MUST NOT open or migrate the owner store.
+
+Before install:
+
+1. ensure all FirmwareSight processes closed;
+2. hash owner main/WAL/SHM;
+3. make independent byte-for-byte backup;
+4. verify backup hashes;
+5. park original files outside the live app-data path;
+6. verify live path no longer holds owner main/WAL/SHM;
+7. verify no process holds parked files.
+
+Do not open owner DB through FirmwareSight.
+
+Required before proceeding:
+
+OWNER_STORE_PARKED = YES
+OWNER_BACKUP_HASH_MATCH = YES
+
+Else STOP.
+
+7. DOWNLOAD EXACT F1 ARTIFACT
+
+Download artifact ID 11337963032 from Run 37293381181.
+
+Verify:
+artifact name
+artifact id
+run id
+head SHA
+
+Extract and validate internal:
+SHA256SUMS.txt
+artifact-metadata.json
+
+Record:
+ACTUAL_NSIS_FILENAME
+ACTUAL_NSIS_SIZE
+ACTUAL_NSIS_SHA256
+CLI_FILENAME
+CLI_SIZE
+CLI_SHA256
+ARTIFACT_METADATA_SHA256
+SHA256SUMS_TXT_SHA256
+
+Do not confuse artifact ZIP digest/size with installer digest/size.
+
+8. INSTALLED OLD-SCHEMA MIGRATION PROOF
+
+Before fresh §64:
+use a synthetic disposable old-schema DB.
+
+Preferred:
+v4 → v5
+
+Do not use owner data.
+
+Use a repository-valid synthetic v4 construction, not a hand-waved schema approximation.
+
+Place only the disposable store at live app-data location.
+
+Install the exact F1 NSIS.
+Launch through normal OS surface.
+
+Verify:
+- app starts;
+- pre-migration snapshot created;
+- snapshot name identifies v4→v5;
+- snapshot opens;
+- snapshot schema = v4;
+- expected rows preserved;
+- live DB schema = v5;
+- expected rows preserved;
+- integrity_check(snapshot) = ok;
+- integrity_check(live) = ok;
+- migration 0005 present once;
+- second reopen creates no duplicate snapshot;
+- no duplicate migration row.
+
+If History-readable rows exist in the synthetic DB, verify them.
+If not, do not invent that proof.
+
+If installed migration fails:
+F2 = BLOCKED
+STOP and return evidence.
+
+9. RESET TO FRESH DISPOSABLE APP STATE
+
+After migration proof:
+close app;
+preserve migrated DB + snapshot externally;
+remove only disposable live app-store files;
+keep owner parked;
+create fresh disposable app store for §64.
+
+10. DISPOSABLE FIRMWARE PROJECT
+
+Create outside repository.
+
+Copy supported existing fixture pair, preferably P2 base/target.
+
+Do not modify repository fixtures.
+
+Prepare:
+baseline ELF/MAP
+target ELF/MAP
+firmwaresight.toml
+Release Notes
+local Git repo
+clean Git state
+expected version/tag context
+budgets
+growth policy
+required artifacts
+
+Use current canonical project schema.
+No private firmware.
+
+Record hashes.
+
+11. §64 CONTIGUOUS INSTALLED JOURNEY
+
+One contiguous run, same F1 binary and same disposable store:
+
+Install/confirm F1 installed
+→ First-run onboarding
+→ Analyze baseline
+→ Analyze target
+→ Compare
+→ Release Gate
+→ Release Bundle
+→ History
+→ Diagnostics
+→ Close
+→ Reopen
+→ History after source relocation
+→ Repair/reinstall
+→ Verify retention
+→ Uninstall
+→ Verify product removal + data retention
+→ Reinstall
+→ Verify retained History / Diagnostics
+→ Final close
+→ Final uninstall to restore pre-test machine state
+→ Owner restore
+
+No DB writes as substitutes for UI actions.
+Read-only DB queries allowed as independent evidence.
+
+12. ONBOARDING
+
+From installed app alone verify discoverability of:
+purpose
+choose ELF
+optional MAP
+Analyze → Compare → Release
+PASS / REVIEW / BLOCK / UNKNOWN / N/A
+local-first
+project policy concept
+History
+Help/About
+Diagnostics
+
+Classify:
+DISCOVERABLE
+DISCOVERABLE_WITH_MINOR_CONFUSION
+NOT_DISCOVERABLE
+
+This is not V1 external user validation.
+
+13. ANALYZE BASELINE
+
+Through installed UI/native dialog.
+
+Verify:
+artifact leaf
+SHA
+architecture
+bitness
+endianness
+entry
+nonvolatile/RAM
+sections
+symbols
+evidence
+Unknown reasons
+MAP evidence
+no private absolute path in normal UI
+History receives build.
+
+14. ANALYZE TARGET
+
+Repeat through installed UI.
+
+Verify:
+current selection attribution correct;
+no stale-result ambiguity;
+History receives second build;
+no duplicate baseline row.
+
+15. COMPARE
+
+Use the two installed-generated build records.
+
+Verify expected deltas.
+
+Also:
+baseline/target labels
+human evidence captions
+no raw Core enum
+Analyze label = Object/module attribution
+Compare label = Object-level change attribution
+section filter works
+symbol filter works
+keyboard access where supported
+
+L15:
+UI should show:
+ELF address + flags evidence
+
+not:
+elf.program-header
+
+Portable wire/export may retain elf.program-header.
+
+16. RELEASE GATE
+
+Run real happy-path Gate through installed UI.
+
+Prefer PASS.
+
+Record:
+Gate run id
+10 findings
+states
+overall disposition
+
+Do not bypass Gate.
+
+17. RELEASE BUNDLE
+
+From qualifying Gate create Bundle through installed UI.
+
+Verify:
+source rehash
+Gate revalidation
+release id
+manifest
+SHA256SUMS
+analysis.json
+diff.json if expected
+gate-results.json
+accepted-reviews.json
+release-report.html
+Release Notes exact bytes
+no host paths
+
+Relocate Bundle to another directory.
+Run independent reader/verifier.
+
+Required:
+RELOCATED_BUNDLE_VERIFY = PASS
+
+Keep repository root / distribution / firmware Bundle checksum domains separate.
+
+18. HISTORY — MANDATORY INSTALLED PROOF
+
+Installed History must show at least:
+2 builds
+1 Gate run
+1 release
+
+Verify:
+ordering
+bounded/paginated read
+build detail
+Gate detail
+release id
+manifest digest
+no artifact absolute path
+no project root
+no DB path
+no bundle destination
+no edit/delete
+keyboard detail access
+
+Then:
+close app;
+move disposable firmware source directory away;
+reopen app.
+
+History must remain readable without source files.
+
+Required:
+HISTORY_SOURCE_INDEPENDENT = YES
+
+19. DIAGNOSTICS
+
+Open Help/About → Diagnostics.
+
+Verify:
+FirmwareSight 0.6.0
+OS/arch
+schema v5
+integrity healthy
+Git availability/version
+supported cohort
+store counts
+logical store filename only
+
+Export via native dialog.
+
+Independently parse JSON.
+
+Assert absence of:
+firmware path
+project root
+DB path
+Bundle destination
+Git remote
+username/home
+Release Notes body
+symbol names
+firmware bytes
+MAP contents
+environment dump
+unbounded arbitrary fields
+
+Required:
+DIAGNOSTICS_PRIVACY = PASS
+
+No network/telemetry claim beyond measured evidence.
+
+20. CLOSE / REOPEN
+
+Close normally.
+Verify process exits.
+
+Reopen from Start Menu/installed OS surface.
+
+Verify:
+installed executable path
+History persists
+Diagnostics persists
+no duplicate Gate
+no duplicate release
+no duplicate migration
+integrity healthy
+
+No cargo/Vite launch.
+
+21. REPAIR / REINSTALL
+
+Run same exact F1 NSIS over installed app.
+
+Use normal installer maintenance flow.
+
+Record:
+running-app handling
+binary refresh
+Start Menu
+registry
+logical data before/after
+History counts
+schema
+
+Expected:
+files refreshed
+user data preserved
+History preserved
+schema v5
+no duplicate rows merely from repair
+
+Do not rely solely on whole SQLite file hash if WAL/checkpoint activity legitimately changes bytes.
+Use semantic data proof too.
+
+22. UNINSTALL AUTHORITY
+
+Policy:
+
+UNINSTALL removes:
+application binaries
+shortcuts
+installer registration
+
+UNINSTALL preserves:
+local user data
+History
+
+Acceptable install directory:
+ABSENT
+or
+PRESENT_EMPTY
+
+Not acceptable:
+executable remains
+uninstaller remains
+shortcut remains
+uninstall registry remains
+app data deleted
+firmware project touched
+PATH changed
+
+23. UNINSTALL
+
+Use actual uninstaller UI.
+
+Verify:
+desktop executable absent
+uninstall.exe absent
+Start Menu absent
+uninstall registry absent
+PATH unchanged
+firmware project untouched
+app-data preserved
+History DB remains
+
+Record install-directory state:
+ABSENT or PRESENT_EMPTY
+
+24. REINSTALL AFTER UNINSTALL
+
+Install same exact F1 NSIS again.
+
+Launch normally.
+
+Verify:
+version 0.6.0
+existing v5 store opens
+no migration rerun
+History retains builds/Gate/release
+Diagnostics counts coherent
+no duplicate rows
+Analyze page functional
+
+Required:
+REINSTALL_RETAINED_DATA = PASS
+
+25. FINAL PRODUCT CLEANUP
+
+Pre-F2 machine was uninstalled.
+
+After retained-data proof:
+close app;
+uninstall again;
+verify product executable/shortcut/registry absent.
+
+Preserve disposable F2 app-data externally.
+Remove only disposable F2 live app-store files.
+
+Do not delete sibling historical evidence stores.
+
+26. OWNER RESTORE — BEFORE ANY F2 COMMIT
+
+Verify no FirmwareSight/installer/uninstaller process.
+
+Restore original owner main/WAL/SHM exactly.
+
+Hash restored files.
+
+Required:
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+OWNER_STORE_OPENED_BY_F1 = NO
+
+If any NO:
+STOP.
+Do not commit closure docs.
+
+27. FINDING RULE
+
+Classify:
+PRODUCT
+HARNESS
+ENVIRONMENT
+KNOWN_LIMITATION
+OBSERVATION
+
+Product severity:
+S0 / S1 / S2 / S3
+
+Any S0/S1:
+STOP F2 closure.
+
+Any product fix after F1:
+old F1 artifact ceases to be final acceptance authority.
+A new product commit + new CI artifact + affected installed revalidation is required.
+
+Do not patch silently.
+
+28. F2 CLOSURE DOCUMENT PACK
+
+Only after:
+§64 PASS
+installed migration PASS
+owner restore PASS
+
+create/update:
+
+P5_VALIDATION/P5_MIGRATION_RECOVERY_REPORT.md
+P5_VALIDATION/P5_HISTORY_DIAGNOSTICS_REPORT.md
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md
+P5_VALIDATION/P5_SECURITY_SUPPORTABILITY_REVIEW.md
+P5_VALIDATION/P5_EXECUTION_REPORT.md
+P5_VALIDATION/P5_EXIT_CHECKLIST.md
+P5_VALIDATION/P5_RELEASE_READINESS.md
+
+Update:
+P5_INSTALL_RECOVERY_REPORT.md
+P5_CI_AUTHORITY.md
+P5_PRODUCTIZATION_AUDIT.md only as needed
+.ai governance only as needed
+
+Do NOT set:
+P5 PASS_COMPLETE
+Productization ENGINEERING_COMPLETE
+active_task NONE
+
+Those belong to F3.
+
+29. USER DOC AUDIT
+
+Map each required topic to a real canonical surface before creating new files:
+
+Getting Started
+Installation
+Analyze
+Compare
+Release Gate
+Release Bundle
+History
+CLI
+firmwaresight.toml
+Status Semantics
+Support Matrix
+Known Limitations
+Troubleshooting
+Diagnostics
+Privacy / Local-First
+Upgrade / Reinstall / Uninstall
+Bundle Verification
+Package Verification
+Signing / Notarization Readiness
+
+For each:
+TOPIC
+CANONICAL SURFACE
+STATUS
+GAP
+
+Do not create empty duplicate docs for checklist compliance.
+
+30. UNINSTALL/RETENTION DOCUMENTATION
+
+User-facing policy must match measured behavior:
+
+Uninstall removes application files/shortcut/registration.
+Uninstall preserves local FirmwareSight user data and History by default.
+
+If install directory remains empty:
+document as installer residue.
+
+Use environment-variable paths, not owner-specific paths.
+
+31. MIGRATION REPORT BOUNDARY
+
+Distinguish:
+
+integration tested:
+fresh→v5
+v1→v5
+v2→v5
+v3→v5
+v4→v5
+v5 reopen
+failure rollback
+backup/integrity
+
+installed F1 tested:
+the one actual synthetic path used in F2, preferably v4→v5
+
+Do not overclaim installed coverage.
+
+32. HISTORY / DIAGNOSTICS REPORT
+
+History:
+builds
+Gate
+release
+pagination
+detail
+source-independent reopen
+repair persistence
+uninstall/reinstall persistence
+path safety
+
+Diagnostics:
+41-key allowlist
+8 structs
+integrity
+Git
+runtime
+counts
+logical store
+privacy export
+no upload/network capability
+
+33. FINAL KNOWN LIMITATIONS
+
+Account for every G2/P5 limitation.
+
+At minimum:
+L26 = CLOSED — ADR-0029
+L15 presentation residue = CLOSED
+L15 wire = CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+L11 = CARRIED_FORWARD, no external V1
+L12 = CARRIED_FORWARD accepted advisories
+L13/license = OWNER_DECISION
+L3/fuzzing = CARRIED_FORWARD
+platform/runtime gaps bounded honestly
+
+Do not drop closed rows.
+
+34. RELEASE READINESS STATES
+
+SIGNING_READINESS = READY_NOT_EXECUTED
+NOTARIZATION_READINESS = READY_NOT_EXECUTED
+UPDATE_MODE = MANUAL_UPGRADE_READY
+OPEN_SOURCE_LICENSE_DECISION = PENDING_OWNER_CONFIRMATION
+PUBLIC_DISTRIBUTION = NOT_AUTHORIZED
+GITHUB_RELEASE = NOT_CREATED
+TAG = NOT_CREATED
+PRIVATE_BETA = NOT_AUTHORIZED
+RC = NOT_AUTHORIZED
+GA = NOT_AUTHORIZED
+
+Do not sign/notarize/publish/tag/update.
+
+35. F2 SOURCE PROVENANCE BARRIER
+
+Normal successful F2 must not change product/tooling relative to F1:
+
+crates/**
+apps/**
+scripts/**
+fixtures/**
+schemas/**
+migrations/**
+.github/**
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+
+F2 should be docs/evidence/governance/integrity only.
+
+If product/tooling changes:
+STOP normal closure.
+New package evidence is required.
+
+36. ADR-0029 BASELINE WORKFLOW FOR F2 COMMIT
+
+Use:
+edit docs
+→ inspect
+→ stage intended non-baseline files
+→ generate DIRECTORY_TREE from index
+→ stage tree
+→ generate SHA256SUMS from stage-0 blobs
+→ stage sums
+→ verify_baseline_artifacts.py
+→ full gate
+→ inspect staged diff
+→ commit
+
+Do not revert to worktree-byte sums semantics.
+
+37. F2 LOCAL VALIDATION
+
+Expected docs-only product counts:
+
+Rust = 868
+UI = 219 / 8 files
+
+Expected gate:
+full = 17
+drift = 8
+core-smoke = 3
+package = 4
+
+Run:
+
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+python scripts/check.py
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+python scripts/verify_baseline_artifacts.py
+
+Report actual counts.
+
+If Rust/UI count moves on docs-only F2:
+STOP.
+
+38. CLEAN DETACHED F2 PROOF
+
+At exact F2 candidate:
+clean detached worktree
+baseline verifier PASS
+full gate PASS
+package where local tooling available
+git archive → sha256sum -c SHA256SUMS PASS
+
+Remove only this round's temporary worktree.
+
+39. F2 COMMIT
+
+Suggested:
+P5: complete installed productization acceptance and closure evidence
+
+Before commit:
+owner store already restored/hash-matched.
+
+F2 must NOT set P5 PASS_COMPLETE.
+
+Push normal fast-forward only.
+
+40. F2 REMOTE CI
+
+Run by exact F2 SHA.
+
+Required:
+10 / 10 authoritative jobs
+completed/success
+
+Read all individually.
+Keep attempt history truthful.
+
+Do NOT begin F3 after green.
+
+41. F2 EXIT CRITERIA
+
+All required:
+
+F1 exact CI Windows artifact used
+internal package checksums verified
+actual installer hash recorded
+owner backup/park barrier passed
+installed synthetic migration PASS
+§64 contiguous journey PASS
+onboarding checked
+Analyze baseline PASS
+Analyze target PASS
+Compare PASS
+Gate PASS
+Bundle PASS
+relocated Bundle verifier PASS
+History installed PASS
+History source-independent PASS
+Diagnostics export/privacy PASS
+repair/reinstall PASS
+uninstall removal PASS
+uninstall retention PASS
+reinstall retained-data PASS
+final product state uninstalled
+owner restored
+owner hashes exact
+closure docs present
+known limitations complete
+user docs audited
+security review present
+release readiness correct
+license pending owner
+no tag/release/sign/notarization/updater
+F2 local gate green
+detached proof green
+archive proof green
+F2 remote CI 10/10
+
+Then:
+
+F2 = COMPLETE
+P5 = IN_PROGRESS
+F3 = READY_FOR_ARCHITECT_REVIEW
+
+42. FINAL REPORT FORMAT
+
+Return:
+
+# FirmwareSight P5 Commit F2 Installed Productization Acceptance Report
+
+1. Start authority
+2. Exact CI artifact
+3. Owner-data preflight
+4. Installed migration proof
+5. Fresh §64 project
+6. Onboarding
+7. Analyze baseline
+8. Analyze target
+9. Compare
+10. Gate
+11. Bundle
+12. History
+13. Diagnostics
+14. Close/reopen
+15. Repair/reinstall
+16. Uninstall
+17. Reinstall
+18. Final machine cleanup
+19. Owner restore
+20. Findings
+21. Closure documents
+22. Known limitations
+23. Release readiness
+24. F2 source provenance
+25. Local validation
+26. F2 commit
+27. F2 remote CI
+28. Verdict
+29. Stop
+
+Final verdict block must be:
+
+F1 = FINAL PASS
+F2 = COMPLETE / FAIL / BLOCKED
+P5 = IN_PROGRESS
+Product = MVP CANDIDATE
+F3 = READY_FOR_ARCHITECT_REVIEW / NOT_READY
+
+STOP.
+
+Do not start F3.
+Do not set P5 PASS_COMPLETE.
+Do not set active_task NONE.
+Do not tag.
+Do not create GitHub Release.
+Return to Architect.
+
+END OF PROMPT

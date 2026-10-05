@@ -144,6 +144,14 @@ one that does not write to `HKLM`. It is written explicitly rather than left to 
 later change to it is a diff a reviewer sees. `startMenuFolder` is set to `FirmwareSight` so the
 shortcut lands in a named folder rather than loose in the Start Menu root.
 
+What the same installer does **not** do is delete a user's local data. The uninstall page presents
+"Delete the application data" **unchecked**, `bundle.windows.nsis.deleteAppDataOnUninstall` is never set, and
+uninstall removes only what the install section wrote: the payload, the uninstaller, the Start Menu folder,
+the desktop shortcut and the `HKCU` registration. `%APPDATA%\com.firmwaresight.desktop` and the History store
+inside it survive. Measured across three uninstall cycles on 2026-10-05, with the wording a user is actually
+given recorded in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md` §8; that section, not this paragraph, is the
+surface to change if the behaviour ever moves.
+
 ### The frontend-embedding check, and the check that would have lied
 
 Section 8 requires the production package not to depend on `localhost:5173`, and section 41 requires a

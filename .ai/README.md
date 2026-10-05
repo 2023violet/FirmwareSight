@@ -67,16 +67,28 @@ and the normalization head after them, 80b47c4, is recorded above by its own run
 failed to install `clippy-preview-x86_64-unknown-linux-gnu` over a `bin/cargo-clippy` conflict and rolled back
 before any crate compiled — **and 10 of 10 on attempt 2**, with only that job re-executed and the other nine
 attempt-1 executions carried forward. Two attempts, stated as two attempts; the same runner-provisioning class
-P4's 157f749 already records at `BASELINE.yaml:514`. Commit E's §42 STOP has been ANSWERED — Option E — and
-Commit F is now authorized by its own prompt, so the stops that remain in force are narrower than they were:
-no P5 closure before §62, no §64 journey before the owner's confirmation, no general source-control linter, no
-consolidation documents written just to check a filename, and no V1/B1/RC/GA. **L26 is decided and closed by
+P4's 157f749 already records at `BASELINE.yaml:514`. Commit E's §42 STOP has been ANSWERED — Option E.
+**Commit F1 landed 2026-10-05** as `0bca373`, **10 of 10 on Run 37293381181 attempt 1**, and it is the product
+and tooling layer: ADR-0029, the two baseline scripts, the new drift step, and L15's display caption.
+**Commit F2 lands after it** as the installed-evidence layer and nothing else — **no path under `crates/`,
+`apps/`, `scripts/`, `fixtures/`, `schemas/`, `migrations/` or `.github/`, and no `Cargo.toml`, `Cargo.lock`,
+`package.json`, `pnpm-lock.yaml`, `tauri.conf.json` or `deny.toml`**, because any one of those invalidates the
+F1 installer as the candidate under test. F2 ran the whole §64 journey once on the exact CI-built F1 Windows
+artifact (artifact id `11337963032` of run `37293381181`, 3,885,631 bytes,
+`a1152ef3…3c076b`, installed as downloaded), proved the installed synthetic **v4 → v5** migration on 34
+measured checks, and parked and restored the owner's store **twice** with §26's gates satisfied before any
+commit. Its verdict is `F2 = COMPLETE`, `P5 = IN_PROGRESS`, `F3 = READY_FOR_ARCHITECT_REVIEW` — and it does
+**not** close P5. The stops that remain are F3's to lift: no `P5 PASS_COMPLETE`, no `active_task NONE`, no tag,
+no GitHub Release, no signing, notarization, updater or licence choice. **L26 is decided and closed by
 ADR-0029** — root `SHA256SUMS` holds canonical Git stage-0 index blob digests, the verifier runs in the
 authoritative drift gate, and `sha256sum -c SHA256SUMS` against a working tree is no longer a valid check (read
 `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` before touching either tool). **L15
 stays `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`**, with its Evidence Inspector presentation residue CLOSED by
-F1's caption. The present counts are 868 Rust / **219 UI** in 8 files with the local gate at **17 of 17**
-(drift **8 of 8**) and the package group at 4 of 4 with no SKIP. No P5 verdict exists and the product stays
+F1's caption and **re-proved in the installed binary by F2**, by analysing the target ELF deliberately without
+its MAP. The present counts are 868 Rust / **219 UI** in 8 files with the local gate at **17 of 17**
+(drift **8 of 8**, deny 1/1, core-smoke 3/3) and the package group at 4 of 4 with no SKIP — **and F2 is the
+head that first had to hold those two test counts still**, since §37 treats a moved count on a docs-only round
+as evidence that the round is not docs-only. No P5 verdict exists and the product stays
 MVP CANDIDATE at 0.6.0)` ·
 `active_task: P5_PRODUCTIZATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·

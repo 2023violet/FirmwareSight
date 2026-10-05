@@ -1787,3 +1787,85 @@ Verdicts this head may write: L26 `CLOSED — DECIDED_BY_ADR_0029_AND_IMPLEMENTE
 `FINAL PASS / COMPLETE`, `P5 = IN_PROGRESS`, product `MVP CANDIDATE`, baseline `0.6.0`, §64 `NOT_RUN_IN_F1`,
 licence `PENDING OWNER CONFIRMATION`. `P5 PASS`, `Productization COMPLETE`, `B1`, V1, RC and GA are not
 written here: §18 and §67 put them behind F2 and F3.
+
+# P5 Commit F2 — installed productization acceptance — 2026-10-05
+
+Authorized by *FirmwareSight — P5 Commit F2 Installed Productization Acceptance, Continuation Prompt v1.0 —
+Architect Authorized*. Its scope line is the whole authority claim: **"本 Prompt 只解除 F1 结束后的人工暂停，
+并授权 F2。不授权 F3。"** It releases the human pause that ended F1 and authorizes F2. Nothing more.
+
+## What F2 decided
+
+- **F2 changes no product, tooling, dependency, capability, schema, fixture or golden byte.** §3 and §35
+  forbid `crates/**`, `apps/**`, `scripts/**`, `fixtures/**`, `schemas/**`, `migrations/**`, `.github/**`,
+  `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json` and `deny.toml`, and the
+  reason is evidential rather than procedural: **any one of them invalidates the F1 installer as the
+  candidate under test.** Three product findings were therefore recorded and **not patched** (§27 "do not
+  patch silently"). The count check that proves the claim is §37's own: a docs-only round that moves the Rust
+  or UI test count is a product change wearing a documentation diff, and both counts held at F1's values.
+- **The candidate is a byte string from CI, not a build.** `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`,
+  3,885,631 bytes, SHA-256 `a1152ef31a2c28b0fa522d88b7fe08eee543af1b86a161a4ab60acf04b3c076b`, downloaded as
+  artifact id `11337963032` of run `37293381181` at head `0bca373` and installed as received. No local
+  rebuild, because a locally built installer would have tested this host's toolchain rather than what the
+  repository ships.
+- **Acceptance input is real input.** Every UI action was a `SendInput` mouse or keyboard event against the
+  installed window, including the native file, folder and save dialogs. **No database write stands in for a
+  UI action** (§11); SQL ran only through `file:…?mode=ro`, to check what the screen had already shown. No
+  WebView2 debugging protocol, no synthetic UIA `Invoke` — the UIA tree exposes WebView content as generic
+  regions, so a screenshot is the only channel that can show what a user would see.
+- **Retention is proved semantically, never by a whole-file digest.** Every before/after compares read-only
+  replays of the product's own candidate, Gate and release SQL plus table counts, evidence rows and
+  `PRAGMA integrity_check`. This is not pedantry: across the repair the main database file and the WAL both
+  *predated* the operation and only the `-shm` index moved, so a file hash would have "changed" or "not
+  changed" for reasons that have nothing to do with the data.
+- **Installed migration is one path and the boundary is written where it could mislead.** Synthetic
+  v4 → v5, 34 measured checks, in the installed binary launched from the Start Menu. Fresh→v5 and
+  v1/v2/v3→v5 remain storage-integration proofs (`for found in 1..=4` in
+  `integrity_and_backup.rs:582`). §31's "do not overclaim installed coverage" is honoured by naming the gap
+  that the round itself discovered: **the owner's real store is at schema v2**, so the chained v2 → v5
+  upgrade a returning pre-P5 user would actually receive has never been run by an installed build.
+- **The owner-store barrier held twice, and the second time was self-inflicted.** §6's park was required
+  before anything ran; §24 then needed a second installed cycle that the first pass had not fully covered,
+  because the counted reinstall had proved retention and no-duplicates but not the version readout, Analyze
+  functionality or a post-reinstall diagnostics export — and the installed app resolves its store from
+  Tauri's `app_data_dir()` with no environment override (`lib.rs:953`), so there was no way in. The cycle was
+  repeated rather than the section marked passing. Both passes verified the parked copy against the original
+  digests **before** moving it and again after, and both reported `sibling stores lost: 0`.
+- **One option was deliberately not exercised.** The uninstaller presents "Delete the application data",
+  unchecked. It was never ticked, because that folder also holds unrelated historical stores from earlier
+  phases, including ~1 GB of retired WAL files. Recorded as `NOT_TESTED_BY_DESIGN`, a coverage boundary, not
+  a pass.
+- **A documentation gap that was hiding in the shipped UI.** `apps/desktop/ui/src/Help.tsx:50` already
+  points readers at `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md`, and the screen honestly marks it
+  `shipped: false` — but the file did not exist, so even a reader with the source tree followed the pointer
+  into nothing. F2 wrote it. No product code was touched, and none could have been.
+- **The F2 prompt file vanished after being read, and the archive says so.** It was delivered at
+  `C:\Users\16429\Downloads\…v1.0.txt`, recorded by `ls -la` at 19,040 bytes, read whole into the session at
+  14:16Z, and gone by the time archiving was due. The archived copy is a reconstruction from the session
+  transcript's `Read` result, verified contiguous over lines 1–1,044 with no gap and matching the recorded
+  19,040 bytes. `10_AUDIT/SOURCE_PROMPTS/README.md` states all of that rather than implying the bytes came
+  from the original file.
+- **Three harness defects were found and owned, and one invalidated an earlier classification.** The driver's
+  `clickscreen` raised whatever window owned the target pixel, and a browser window covering the work area
+  was swallowing installer clicks — which is what two wizard events previously recorded as ENVIRONMENT were
+  really caused by, so they are reclassified HARNESS. A second driver sent message id `0x0010` to a wizard's
+  child buttons intending `BM_GETCHECK` (`0x00F0`); `0x0010` is `WM_CLOSE`, and it destroyed the finish page,
+  which then painted empty. That blank page is **not** product behaviour, the attempt's evidence is
+  quarantined, and no verdict is taken from it. A third action raised the app window before sending a key,
+  which steals focus from a native dialog in the same process.
+
+## Counts and verdicts this head may write
+
+`cargo test --workspace` **868 passed / 0 failed across 47 targets**; UI **219 passed in 8 files**; full gate
+**17 of 17**; `--only drift` **8/8**, `--only deny` **1/1**, `--only core-smoke` **3/3**, `--only package`
+**4/4** with no gate skip (the only "skipped" line in that log is pnpm's "Lockfile is up to date, resolution
+step is skipped"); `scripts/verify_baseline_artifacts.py` **RESULT PASS**.
+
+`F2 = COMPLETE`. `P5 = IN_PROGRESS`. `F3 = READY_FOR_ARCHITECT_REVIEW`. Product `MVP CANDIDATE`, baseline
+`0.6.0`. `SIGNING_READINESS` / `NOTARIZATION_READINESS` `READY_NOT_EXECUTED`, `UPDATE_MODE`
+`MANUAL_UPGRADE_READY`, `OPEN_SOURCE_LICENSE_DECISION` `PENDING_OWNER_CONFIRMATION`, `PUBLIC_DISTRIBUTION` /
+`PRIVATE_BETA` / `RC` / `GA` `NOT_AUTHORIZED`, `GITHUB_RELEASE` / `TAG` `NOT_CREATED`.
+
+**Not written, and not writable by this head:** `P5 PASS`, `P5 PASS_COMPLETE`, `Productization COMPLETE`,
+`Productization ENGINEERING_COMPLETE`, `active_task NONE`, `BETA`, `RC`, `GA`, `Security Clean`. §39 and §42
+put those in F3's hands and then send this round back to the Architect.

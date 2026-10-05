@@ -308,6 +308,40 @@ last_updated: "2026-10-05"
   token, no schema, no `SCHEMA_VERSION` move, no migration 0006, no `analysis:2`, no golden byte.
   **L15 itself therefore stays `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`**; what moved is the layer beneath it,
   recorded as *user-facing presentation residue: CLOSED*.
+- **Commit F2 lands on 2026-10-05 and it is the installed-evidence layer, not a product layer.** Authorized
+  by *FirmwareSight — P5 Commit F2 Installed Productization Acceptance, Continuation Prompt v1.0 — Architect
+  Authorized*, whose own scope line reads "本 Prompt 只解除 F1 结束后的人工暂停，并授权 F2。不授权 F3。" **F2
+  changed no product, tooling, dependency, capability, schema, fixture or golden byte** — §3 and §35 forbid it,
+  because any such change would invalidate the F1 installer as the candidate under test. Three product
+  findings were recorded and deliberately **not patched** (§27's "do not patch silently"), which means the F1
+  artifact is still the artifact that was accepted.
+  What it proved: the exact CI-built Windows package — **artifact id `11337963032` of run `37293381181`**,
+  3,885,631 bytes, SHA-256 `a1152ef3…3c076b`, installed as downloaded with no local rebuild — was walked
+  through the **whole §64 journey in one contiguous pass**: install, first-run onboarding, Analyze ×2,
+  Compare, Gate, Bundle plus relocated verification, History, a source-independent reopen after the firmware
+  folder was renamed, Diagnostics export and its privacy assertions, close/reopen, repair over a running app,
+  uninstall, reinstall, retained-data behaviour, a final uninstall, and the owner's store restored. Every
+  action was a real `SendInput` event; SQL ran only read-only, to check what the screen had already shown;
+  no WebView2 debugging protocol and no synthetic UIA `Invoke` were used.
+  The installed migration is **one path, synthetic v4 → v5, on 34 measured checks**, and the boundary is
+  written where it could mislead rather than implied: the owner's real store turned out to be at **schema
+  v2**, so the chained v2 → v5 upgrade a returning pre-P5 user would receive has never been executed by an
+  installed build. That fact also proves the barrier held — had the installed candidate ever opened the
+  owner's store, migrations 0003–0005 would have run and it would be at v5.
+  Owner-data discipline was applied **twice**, because §24 needed a second installed cycle the first pass had
+  not fully covered: park, hash, verify the copy, move, confirm the live path is clear; on the way back,
+  verify the parked copy against the original digests before moving and again after. `d6e41034…` /
+  `e3b0c442…` / `fd4c9fda…` both times, `sibling stores lost: 0` both times, and
+  **`ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`, `OWNER_STORE_OPENED_BY_F1 = NO` were all
+  established before any commit was written**, as §26 requires.
+  Counts at the F2 tree, printed rather than expected: `cargo test --workspace` **868 passed / 0 failed
+  across 47 targets**, UI **219 passed in 8 files**, full gate **17 of 17**, `--only drift` 8/8, `--only deny`
+  1/1, `--only core-smoke` 3/3, `--only package` 4/4. **§37 says to STOP if the Rust or UI count moves on a
+  docs-only F2; neither moved**, which is the check that shows the diff really is documentation.
+  Verdict: **F2 = COMPLETE, P5 = IN_PROGRESS, F3 = READY_FOR_ARCHITECT_REVIEW.** No `P5 PASS_COMPLETE`, no
+  `active_task NONE`, no tag, no GitHub Release, no signature, no notarization, no updater, no licence choice
+  — §34's states are recorded in `P5_VALIDATION/P5_RELEASE_READINESS.md` and the F2 prompt returns the round
+  to the Architect rather than forwarding it.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256

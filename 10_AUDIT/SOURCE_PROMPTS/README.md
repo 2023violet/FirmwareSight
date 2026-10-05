@@ -688,6 +688,38 @@ text with no source file; each says so in its own entry instead of standing for 
   §19 requires) and `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md`. F1's own CI run is
   external evidence and is not written into F1.
 
+## P5 Commit F2 Installed Productization Acceptance v1.0 — executed by F2
+
+- File: `FirmwareSight_P5_CommitF2_Installed_Productization_Acceptance_v1.0.txt`
+- SHA-256 `cd6bf2b958e2708fa31eb9e05d62e5d7b8b8f3ed036b7a1e38effc5dc7b335f5`, 19,040 bytes, 1,044 lines,
+  LF-only.
+- **This archived copy is a reconstruction, and the register says so rather than implying it is the
+  delivered file.** The prompt arrived at `C:\Users\16429\Downloads\FirmwareSight_P5_CommitF2_Installed_
+  Productization_Acceptance_v1.0.txt`, and `ls -la` taken in this session recorded it there at 19,040 bytes
+  on 2026-10-05 07:15. It was read whole into the session at 14:16Z. By the time this directory was written
+  the file was gone from `Downloads`, and no other copy exists on the machine. The copy stored here was
+  rebuilt from the transcript's `Read` result by stripping its `line_number<TAB>` prefixes; the reconstruction
+  is contiguous over lines 1–1,044 with no gap, ends at the prompt's own `END OF PROMPT`, and measures the
+  same 19,040 bytes the directory listing recorded. So size and line count agree with the delivered file and
+  the digest is this copy's, not a claim about bytes nobody still holds. If the original resurfaces, compare
+  it against the digest above; a match makes this entry ordinary, a mismatch means the reconstruction drifted
+  and this note has to be rewritten.
+- Authority: releases only the human pause that ended F1 and authorizes **F2**. Its own scope line is
+  explicit — "本 Prompt 只解除 F1 结束后的人工暂停，并授权 F2。不授权 F3。" It therefore authorizes no F3 work,
+  and §39/§42 forbid F2 from setting `P5 PASS_COMPLETE`, `active_task NONE`, a tag or a GitHub Release.
+- What it makes non-substitutable: §11 forbids a database write standing in for a UI action (read-only
+  queries are allowed as independent evidence), §6 requires `OWNER_STORE_PARKED = YES` and
+  `OWNER_BACKUP_HASH_MATCH = YES` before anything runs, §26 requires `ORIGINAL_DB_RESTORED`,
+  `ORIGINAL_DB_SHA_MATCH` and `OWNER_STORE_OPENED_BY_F1 = NO` **before any commit**, and §27 stops the whole
+  closure on any S0/S1 product finding. §35 bars changes under `crates/`, `apps/`, `scripts/`, `fixtures/`,
+  `schemas/`, `migrations/`, `.github/`, `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`,
+  `tauri.conf.json` and `deny.toml`, because any one of them invalidates the F1 installer as the candidate
+  under test.
+- Where F2's verdict is written: `P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md` for the §64 journey,
+  `P5_VALIDATION/P5_MIGRATION_RECOVERY_REPORT.md` for the installed migration and its coverage boundary, and
+  the rest of the §28 closure pack beside them. The evidence root is outside this repository, named
+  `FirmwareSight-P5-F2-20261005T073141`.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that
