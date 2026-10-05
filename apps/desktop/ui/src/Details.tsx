@@ -647,6 +647,20 @@ function EvidenceTable({
 }
 
 /**
+ * One legacy identifier, rendered as what the evidence is actually of.
+ *
+ * `ElfProgramHeader` is the Debug name the storage column holds (`db.rs` writes `format!("{:?}", …)`) and
+ * `elf.program-header` is its `analysis:1` wire twin; both name a program header, while the facts they
+ * accompany come from an ELF address plus section flags. Option E keeps both names forever, so the
+ * inaccuracy is bounded here instead of being renamed: no stored value, DTO field, exported JSON or golden
+ * changes, and a value outside this table stays on screen exactly as it is stored.
+ */
+const SOURCE_TYPE_CAPTIONS = new Map<string, string>([
+  ['ElfProgramHeader', 'ELF address + flags evidence'],
+  ['elf.program-header', 'ELF address + flags evidence'],
+]);
+
+/**
  * The whole provenance of one fact.
  *
  * A locator a reader can go back and check is the point of the evidence model, so it is shown in
@@ -654,6 +668,7 @@ function EvidenceTable({
  * painted above the table because a table taller than the window buries the answer below it.
  */
 function Inspector({ row }: { readonly row: EvidenceRowDto }) {
+  const sourceCaption = SOURCE_TYPE_CAPTIONS.get(row.sourceType);
   return (
     <section className={styles['inspector']} aria-label="Evidence detail">
       <h2>{row.field}</h2>
@@ -664,7 +679,9 @@ function Inspector({ row }: { readonly row: EvidenceRowDto }) {
         </div>
         <div>
           <dt>Source</dt>
-          <dd className={styles['mono']}>{row.sourceType}</dd>
+          <dd className={sourceCaption === undefined ? styles['mono'] : undefined}>
+            {sourceCaption ?? row.sourceType}
+          </dd>
         </div>
         <div>
           <dt>Locator</dt>

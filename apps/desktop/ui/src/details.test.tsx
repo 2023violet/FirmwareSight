@@ -29,6 +29,7 @@ import type {
   AnalysisSummaryDto,
   EvidencePageDto,
   EvidenceRequestDto,
+  EvidenceRowDto,
   ErrorEnvelopeDto,
   SectionPageDto,
   SectionRequestDto,
@@ -651,6 +652,20 @@ describe('filtering, sorting and paging', () => {
   });
 });
 
+function evidenceRow(overrides: Partial<EvidenceRowDto> = {}): EvidenceRowDto {
+  return {
+    id: 'ev-basis',
+    field: 'memory_basis',
+    classification: 'observed',
+    sourceType: 'ElfProgramHeader',
+    sourceLocator: 'elf.section_header[1] + elf:sh_flags',
+    rawValue: '0x08000030',
+    rule: 'elf-address-and-flags',
+    confidence: null,
+    ...overrides,
+  };
+}
+
 describe('the evidence inspector', () => {
   it('shows where a fact came from, rule and locator included', async () => {
     render(<App />);
@@ -666,6 +681,55 @@ describe('the evidence inspector', () => {
     expect(within(inspector).getByText('elf-header/e_entry')).toBeDefined();
     expect(within(inspector).getByText('0x080003f8')).toBeDefined();
     expect(within(inspector).getByText('observed')).toBeDefined();
+  });
+
+  it('names the legacy program-header source by what it actually observed', async () => {
+    // L15 Option E keeps `ElfProgramHeader` in storage and `elf.program-header` on the wire forever, so
+    // the only place the inaccuracy can still reach a human is this row. The caption is presentation only:
+    // the row object handed to this test still carries the identifier it was stored under.
+    const legacy = evidenceRow();
+    evidenceMock.mockResolvedValue(ok(evidencePage({ rows: [legacy], total: 1 })));
+    render(<App />);
+    await analyzeOk();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Evidence' }));
+    const panel = await screen.findByRole('tabpanel', { name: 'Evidence' });
+    fireEvent.click(within(panel).getByRole('button', { name: 'Inspect memory_basis' }));
+
+    const inspector = await screen.findByRole('region', { name: 'Evidence detail' });
+    expect(within(inspector).getByText('ELF address + flags evidence')).toBeDefined();
+    expect(within(inspector).queryByText('ElfProgramHeader')).toBeNull();
+    expect(within(inspector).queryByText('elf.program-header')).toBeNull();
+    // the locator keeps saying where to go and check, which is the whole point of the panel
+    expect(within(inspector).getByText('elf.section_header[1] + elf:sh_flags')).toBeDefined();
+    expect(legacy.sourceType).toBe('ElfProgramHeader');
+  });
+
+  it('names the same source when it arrives in its wire spelling, and leaves every other name alone', async () => {
+    // Two namespaces, one legacy identifier: storage writes the Debug name and `analysis:1` writes this one.
+    const both = [
+      evidenceRow({ id: 'ev-wire', sourceType: 'elf.program-header' }),
+      evidenceRow({
+        id: 'ev-symbol',
+        field: 'symbol_table',
+        sourceType: 'ElfSymbolTable',
+        sourceLocator: 'elf.section_header[7].sh_offset',
+      }),
+    ];
+    evidenceMock.mockResolvedValue(ok(evidencePage({ rows: both, total: 2 })));
+    render(<App />);
+    await analyzeOk();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Evidence' }));
+    const panel = await screen.findByRole('tabpanel', { name: 'Evidence' });
+
+    fireEvent.click(within(panel).getByRole('button', { name: 'Inspect memory_basis' }));
+    const captioned = await screen.findByRole('region', { name: 'Evidence detail' });
+    expect(within(captioned).getByText('ELF address + flags evidence')).toBeDefined();
+
+    fireEvent.click(within(panel).getByRole('button', { name: 'Inspect symbol_table' }));
+    const plain = await screen.findByRole('region', { name: 'Evidence detail' });
+    expect(within(plain).getByText('ElfSymbolTable')).toBeDefined();
   });
 
   it('places the inspector above the table, where the click already landed', async () => {

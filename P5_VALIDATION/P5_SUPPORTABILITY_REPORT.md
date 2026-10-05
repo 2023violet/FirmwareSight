@@ -2,11 +2,11 @@
 title: "P5 Commit E supportability report"
 doc_id: "FS-P5-COMMIT-E-SUPPORTABILITY"
 product: "FirmwareSight"
-version: "1.1"
+version: "1.2"
 status: "MEASURED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-04"
+last_updated: "2026-10-05"
 ---
 
 # P5 Commit E — supportability dispositions (prompt §48)
@@ -36,6 +36,16 @@ word still means what §48 defined, so **no row here is `CLOSED` that was not cl
 particular stays open on purpose, because preserving a legacy identifier documents the risk rather than
 removing it.
 
+**What changed in this file on 2026-10-05.** Commit F1 touched two things here and nothing else, and neither
+was a rewrite of what this round measured: L26's §2 section gained a dated position reading
+`CLOSED — DECIDED_BY_ADR_0029_AND_IMPLEMENTED` with the counts that decided it, and the disposition table's
+L26 cell keeps Commit E's `CARRIED_FORWARD TO COMMIT F` beside a pointer to that note instead of being
+rewritten into a word this round never earned. **No other row moved, and no row became `CLOSED` that evidence
+did not close.** L15 stays `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` after F1, because what F1 closed is the
+presentation residue Option E allowed it to close — `Details.tsx` now renders the legacy token as *ELF address
++ flags evidence* — while the identifier itself remains inside `analysis:1`, the report DTO, the stored rows
+and the bundle. L4, L8, L12 and L23 are untouched by this round and stay exactly as measured.
+
 ## 1. Disposition table
 
 | row | inherited state at start HEAD `bfbc1aa` | Commit E disposition | what decided it |
@@ -53,7 +63,7 @@ removing it.
 | L23 | UI test races, six known instances fixed | **REDUCED** (§36) | 20/20 fresh-process runs green; bounded sweep read every candidate; one more timer flush removed with a mutation proof |
 | L24 | `update_goldens.py` cannot rerun over its Windows leftover scratch | **CLOSED / NOT_REPRODUCED ON CURRENT HEAD** (§31) | second dry-run over the scratch the first one left, no `PermissionError [WinError 5]` |
 | L25 | one dead `Apply filter` click, never reproduced | **NOT_REPRODUCED** (§37) | 30 legitimate Apply activations across both tables, 6 more through form submit, no failure |
-| L26 | `SHA256SUMS` verifies only on the host that wrote it | **CARRIED_FORWARD TO COMMIT F** (§48) | untouched by §1; this round neither ran the baseline generator nor changed how a baseline file is produced |
+| L26 | `SHA256SUMS` verifies only on the host that wrote it | **CARRIED_FORWARD TO COMMIT F** (§48) — **CLOSED by Commit F1 on 2026-10-05**, `DECIDED_BY_ADR_0029_AND_IMPLEMENTED`; read the note in §2's L26 section, the table cell keeps the word this round said | untouched by §1; this round neither ran the baseline generator nor changed how a baseline file is produced |
 
 ## 2. Row detail
 
@@ -372,6 +382,20 @@ this round contributed is adjacent, not the decision — the fixture regeneratio
 compatibility binaries reproduce byte-identically here (§51), which is a fact about the fixtures, not
 about `SHA256SUMS` for a `git archive` extraction on a different host. The blob-vs-declared-normalization
 choice stays with whoever owns Commit F, and `scripts/generate_baseline_artifacts.py` was not run.
+
+**L26 after Commit F1, 2026-10-05 — CLOSED, `DECIDED_BY_ADR_0029_AND_IMPLEMENTED`.** The paragraph above keeps
+Commit E's word because it is Commit E's answer to §48, and `CARRIED_FORWARD TO COMMIT F` was the truthful
+disposition when that round closed. Commit F decided it: `ADR-0029` settles that the root `SHA256SUMS` records
+the SHA-256 of each path's canonical Git stage-0 index blob rather than its working-directory bytes, both
+baseline scripts were rewritten to that rule, and `scripts/verify_baseline_artifacts.py` now runs inside the
+authoritative drift gate — so the claim is checked on three platforms instead of agreeing with the host that
+wrote the file. What made it a measurement rather than a decision by impression is the count: the
+worktree-versus-blob difference read **19, 19, 14, 14, 17, 13, 13** across the seven P5 heads before it, and the
+closure evidence is that `80b47c4`'s own manifest returns **13 FAILED** against a clean `git archive` of
+`80b47c4` while F1's returns **693 OK, 0 FAILED** against a clean archive of the same kind. The plan, the seven
+proofs and the raw numbers are `P5_COMMIT_F_DESIGN.md` §1 and §4–§7, and `.ai/DECISIONS.md` (F1). `ADR-0028` is
+untouched: release identity still means the exact bytes observed on disk, and prompt §6 is why the two rules
+stay in separate documents.
 
 ## 3. The product change this round's evidence forced
 

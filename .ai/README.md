@@ -60,17 +60,24 @@ documentation-only, as is the closeout 57a904e after it; the last head that chan
 Commit E was the test-only repair bccea88. Neither 956e250 nor 57a904e is written down here as "current HEAD" — a commit that
 asserted that would be falsified by its own existence, so read git rev-parse HEAD for it. Three P5 heads went
 red and keep their rows — 9e3b1de, 0c031cd and 3400981 — with
-P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. Commit E's engineering candidate 59d85c3 is 10 of
+P5_VALIDATION/P5_CI_AUTHORITY.md as the row-level authority. P5 Commit E's engineering candidate 59d85c3 is 10 of
 10 on Run 37228929762 attempt 1, its §59 read-back successor 6981625 is 10 of 10 on Run 37230689636 attempt 1,
-and the normalization head after them carries its own run as external evidence (§27 forbids a further commit
-written merely to record it). Commit E's §42 STOP has been ANSWERED — Option E, recorded above, and it authorizes
-no rename and no migration — while the stops that remain in force are Commit E's §63/§64 and the normalization
-prompt's §14/§15/§16/§27: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general
-source-control linter, no consolidation documents written just to check a filename, no V1. L26 stays
-recorded and deliberately unfixed — SHA256SUMS verifies only on the host that wrote it, and choosing which
-bytes that artifact means is Commit F's decision. The
-present counts are 868 Rust / 217 UI in 8 files with the local gate at 16 of 16 and the package group at 4 of
-4 with no SKIP. No P5 verdict exists and the product stays MVP CANDIDATE at 0.6.0)` ·
+and the normalization head after them, 80b47c4, is recorded above by its own run: **Run 37262147348 (#67) went
+9 of 10 on attempt 1** — the single red being `Generated output drift`, where rustup on the Ubuntu runner
+failed to install `clippy-preview-x86_64-unknown-linux-gnu` over a `bin/cargo-clippy` conflict and rolled back
+before any crate compiled — **and 10 of 10 on attempt 2**, with only that job re-executed and the other nine
+attempt-1 executions carried forward. Two attempts, stated as two attempts; the same runner-provisioning class
+P4's 157f749 already records at `BASELINE.yaml:514`. Commit E's §42 STOP has been ANSWERED — Option E — and
+Commit F is now authorized by its own prompt, so the stops that remain in force are narrower than they were:
+no P5 closure before §62, no §64 journey before the owner's confirmation, no general source-control linter, no
+consolidation documents written just to check a filename, and no V1/B1/RC/GA. **L26 is decided and closed by
+ADR-0029** — root `SHA256SUMS` holds canonical Git stage-0 index blob digests, the verifier runs in the
+authoritative drift gate, and `sha256sum -c SHA256SUMS` against a working tree is no longer a valid check (read
+`09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` before touching either tool). **L15
+stays `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`**, with its Evidence Inspector presentation residue CLOSED by
+F1's caption. The present counts are 868 Rust / **219 UI** in 8 files with the local gate at **17 of 17**
+(drift **8 of 8**) and the package group at 4 of 4 with no SKIP. No P5 verdict exists and the product stays
+MVP CANDIDATE at 0.6.0)` ·
 `active_task: P5_PRODUCTIZATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.

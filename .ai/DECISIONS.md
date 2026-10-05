@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-04"
+last_updated: "2026-10-05"
 ---
 
 # Decisions — v0.6.0
@@ -1699,3 +1699,91 @@ stage: §1 permits documentation, governance, audit and integrity paths only, an
   `OPEN FOR COMMIT F`, licence `PENDING OWNER CONFIRMATION`. §27 closes the loop the way §32 and §59 did before
   it: this head is itself the final normalization successor, its run is external evidence, and no further commit
   is written merely to record it.
+
+# P5 Commit F1 — repository baseline checksums and the L15 caption — 2026-10-05
+
+Authorization:
+
+- *FirmwareSight — P5 Commit F — Final Productization Closure, Execution Prompt v1.0 — Architect Reviewed*,
+  delivered as a file and archived at
+  `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitF_Final_Productization_Closure_v1.0.txt`: 68,315 bytes,
+  3,159 lines, LF-only, SHA-256 `887f2e9d8045d8c2f6ed7e8f86ddb129f5383cbe9189f7e866586514962fe9ca`. The
+  delivered file, the archived copy and the stage-0 index blob for that path were each recomputed and return
+  the same bytes and the same digest, so this register entry has one hash instead of two — the first archived
+  prompt here that could say that, because it arrived with the terminator `.gitattributes` requires.
+- §4 splits the round in three: F1 product/tooling, F2 installed evidence, F3 governance closure. F1 is this
+  record. §18 forbids running §64, writing `P5 PASS` or `Productization COMPLETE`, tagging, signing,
+  publishing, choosing a licence, changing a portable schema or a migration inside F1.
+- The owner's sequencing answer, given 2026-10-04 and recorded where it binds: **land F1, then confirm**.
+  Nothing is installed and no owner app-data file moves until F1 is green across the authoritative ten jobs
+  and the owner says go again. §27's park/restore protocol and §43's `ORIGINAL_DB_RESTORED` /
+  `ORIGINAL_DB_SHA_MATCH` gates therefore belong to F2, not here.
+
+Decisions:
+
+- **`ADR-0029` — the root `SHA256SUMS` is the digest of canonical Git stage-0 index blob bytes, never of
+  working-directory bytes.** L26 had been narrative since Commit D wrote it; this round measured it instead.
+  On this host the working copy disagrees with the index for **13** tracked paths, and the same comparison
+  head-by-head over the P5 chain reads **19, 19, 14, 14, 17, 13, 13** (`3400981`, `90aa69d`, `57a904e`,
+  `bfbc1aa`, `859648e`, `59d85c3`, `80b47c4`) — the number moved five times with nobody deciding anything.
+  The "17" that a dozen documents repeated was true at `859648e` and stopped being true afterwards; Commit F
+  writes measured values and dates the historical ones rather than editing them.
+- **Index, not `HEAD`, and not the worktree.** A staged new file has no `HEAD` entry, and the manifest has to
+  be regenerable *before* the commit that introduces it; the worktree is a rendering of the repository rather
+  than the repository, which is exactly the mistake L26 recorded. At a clean checkout the stage-0 blob and the
+  `HEAD` tree blob are the same object, so this is the same bytes seen one step earlier, not a third thing to
+  keep in sync.
+- **`ADR-0029` does not touch `ADR-0028`, and the two must not be read as one policy.** Prompt §6 is the rule
+  and the ADR's own relationship section is the text: firmware artifact / MAP / Release Notes / Release Bundle
+  identity stays the exact bytes observed on disk; the repository source baseline is index blob content; a
+  distribution package's `SHA256SUMS.txt` is raw artifact bytes. Three domains, three generators, three names.
+- **The generation guard asks Git and never inspects EOL bytes.** `sums` refuses to write while any tracked
+  path has an *unstaged semantic* change, with `SHA256SUMS` itself exempted because the redirection truncates
+  it before the script runs, and `DIRECTORY_TREE.txt` deliberately not exempted — that pairing is what makes
+  the recorded order (edit → stage → tree → stage → sums → stage) self-enforcing instead of a habit two
+  rounds had already broken.
+- **The verifier stays independent.** It imports nothing from the generator, resolves content through a
+  different Git route (`:<path>` rather than the OID list), reads both artifacts *from their index blobs*
+  rather than from unsaved worktree bytes, and fails closed on an unmerged stage or on artifact worktree
+  drift. `listed but absent on disk` is reported and not failed, because a checkout missing a file is a
+  checkout problem, not a baseline problem — that is ADR-0029's consequence, printed where a reader sees it.
+- **It runs in the authoritative gate.** `scripts/check.py` gained `drift/baseline integrity`, so the drift
+  group is 8 steps and the full gate 17; the authoritative job set stays ten jobs and no job-count drift
+  occurred, which is what `P5_CI_AUTHORITY.md` now says in as many words.
+- **L15's last user-visible half closed as presentation only.** `Details.tsx` maps the legacy
+  `ElfProgramHeader` and `elf.program-header` spellings to **ELF address + flags evidence** and renders
+  everything else verbatim, following the precedent `Compare.tsx` already sets for the same two-namespace
+  fact. The stored column, the DTO, `analysis:1`, the goldens, the bundle and the SQLite rows keep carrying
+  the identifier — Option E, unchanged — and the new test asserts both halves: the operator reads the caption
+  *and* the stored token is still the legacy one, so nobody can read the caption as a rewrite. A caption is a
+  sentence, so it loses the `mono` class (`AGENTS.md` 11); an identifier keeps it.
+- **Wording drift was named, not repaired.** `Compare.tsx` prints `ELF address/flags evidence` for the same
+  concept and is pinned by Commit E's tests; unifying two accurate captions would be a wording change wearing
+  a fix's clothes. It goes to the limitations document, one line.
+- **BASELINE.yaml was not touched.** §64 lists it as an **F3** path, and F1's allowlist (§18) does not reach
+  the baseline record. The ADR, the design doc, the gate and the governance entry points carry F1's evidence;
+  the stage-level baseline moves when the stage closes.
+
+Proofs, measured on this head (`P5_VALIDATION/P5_COMMIT_F_DESIGN.md` §7 is the plan they follow):
+
+| | condition | result |
+| --- | --- | --- |
+| A | this Windows checkout, `core.autocrlf=true` inherited | verifier `RESULT PASS`, exit 0 — 695 tracked, 693 sum entries, 0 index-blob mismatches |
+| B | clean detached worktree at the candidate tree | verifier PASS inside it; the full gate there is §23's own run |
+| C | a second checkout, and `core.autocrlf` set locally to the other value | verifier PASS and `sha256sum -c SHA256SUMS` **693 OK / 0 FAILED**, before and after the flip — the axis is inert here because **all 695 tracked paths carry an explicit `text` attribute** (659 set, 36 unset, measured with `git check-attr`), which is also why the 13 differences exist at all: they are files that predate or escaped the rule, not files the rule permits |
+| D | `git archive` of the candidate extracted **outside** the repository | `sha256sum -c SHA256SUMS`: **693 OK, 0 FAILED, exit 0**. The counterfactual in the same command: `80b47c4`'s own manifest against a clean archive of `80b47c4` returns **677 OK, 13 FAILED, exit 1**, and the 13 names are exactly the 13 paths whose worktree bytes differ from their blobs on this host |
+| E | modify a tracked file, **stage** it, do not regenerate the manifest | verifier exit 1, `index blob mismatch 1`, and it prints the path — `!! index blob mismatch: P5_VALIDATION/P5_COMMIT_F_DESIGN.md` |
+| F | modify a tracked file, leave it **unstaged**, ask the generator for sums | exit 1, nothing written (0 bytes on stdout), and the refusal names the path and says why: the manifest would certify content that is not about to be committed |
+| G | a line-ending-only worktree difference | `git status --porcelain` flags the file, `git diff --name-only` does not, and the guard follows `git diff` — the generator does not refuse, the verifier still PASSes, and the recorded digest is provably the blob's and not the checkout's (the CRLF bytes hash differently). Restored byte-exact and re-verified by digest |
+
+Every mutation was restored and the restore confirmed by SHA-256; the temporary worktree, the dangling
+candidate commit and the two archive directories are this round's own scratch, created to be measured and
+removed afterwards. The only product-source file in F1's diff is the caption table in `Details.tsx` and its
+test; `Cargo.lock`, `pnpm-lock.yaml`, `fixtures/`, `golden/`, `schemas/`, `migrations/`, `.github/` and
+`.gitattributes` are not in it.
+
+Verdicts this head may write: L26 `CLOSED — DECIDED_BY_ADR_0029_AND_IMPLEMENTED`, L15 presentation residue
+`CLOSED` with the wire identifier `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, Commit E stays
+`FINAL PASS / COMPLETE`, `P5 = IN_PROGRESS`, product `MVP CANDIDATE`, baseline `0.6.0`, §64 `NOT_RUN_IN_F1`,
+licence `PENDING OWNER CONFIRMATION`. `P5 PASS`, `Productization COMPLETE`, `B1`, V1, RC and GA are not
+written here: §18 and §67 put them behind F2 and F3.

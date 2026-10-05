@@ -270,6 +270,13 @@ def drift_steps(gate: Gate) -> None:
         if not gate.run("drift", name, argv):
             return
 
+    # ADR-0029: the root SHA256SUMS is the SHA-256 of canonical stage-0 index blob content, and
+    # scripts/verify_baseline_artifacts.py resolves that content on its own, without the generator. Until
+    # this step existed no job anywhere ran the verifier, which is how a manifest describing one host's
+    # checkout survived five stages unnoticed.
+    if not gate.run("drift", "baseline integrity", [py, "scripts/verify_baseline_artifacts.py"]):
+        return
+
     # ts-rs writes the bindings during `cargo test`, so regeneration is the check: any diff after
     # running it means the committed `.ts` files no longer match the Rust DTOs.
     if not gate.run("drift", "ipc bindings", [cargo(), "test", "-p", "firmwaresight-desktop"]):
@@ -281,7 +288,8 @@ def drift_steps(gate: Gate) -> None:
     ):
         return
     # A fixture the repository does not carry is not a fixture: it reproduces nothing and its hash
-    # proves nothing. This is the only step that looks at the index rather than the working tree.
+    # proves nothing. This is the only inline step that reads the index; `baseline integrity` reads it
+    # too, through the verifier, which is why the sentence that used to claim uniqueness is gone.
     if not gate.inline(
         "drift",
         "fixtures tracked",

@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-10-04"
+last_updated: "2026-10-05"
 ---
 
 # Execution Prompt Register
@@ -601,7 +601,7 @@ text with no source file; each says so in its own entry instead of standing for 
   disposition column had drifted outside the vocabularies this prompt itself required — and §42's STOP was
   answered by the Architect rather than by this round. Both are what the entry below exists to settle.
 
-## P5 Commit E Closure Normalization v1.0 (Evidence Vocabulary + L15 Architect Decision) — CURRENT ACTIVE AUTHORITY
+## P5 Commit E Closure Normalization v1.0 (Evidence Vocabulary + L15 Architect Decision) — COMPLETE, SUPERSEDED BY COMMIT F ABOVE
 
 - File: `FirmwareSight_P5_CommitE_Closure_Normalization_v1.0.txt`
 - Two hashes, both measured, because the delivered bytes and the stored bytes differ in one respect only.
@@ -646,7 +646,47 @@ text with no source file; each says so in its own entry instead of standing for 
   COMPLETE` with `P5 = IN_PROGRESS` and `Commit F = NOT_AUTHORIZED`. §27 then forbids a further commit merely to
   record that run: it is external evidence, reported back in chat.
 - Where the verdict is written: `P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md` (§24), whose Remote CI
-  section says `PENDING` because the document is committed before the run exists.
+  section said `PENDING` because the document was committed before the run existed. That read-back is now in
+  `P5_CI_AUTHORITY.md`: Run `37262147348` went **9 of 10 on attempt 1** (`Generated output drift` red on Ubuntu
+  runner toolchain provisioning, corroborated rather than rerun on instinct) and **10 of 10 on attempt 2**
+  after one `gh run rerun --failed`. `COMMIT_E = FINAL PASS / COMPLETE`, and §27's ban on a further commit
+  merely to record that run is what the two paragraphs above are standing on.
+
+## P5 Commit F Final Productization Closure v1.0 (L26 ADR + installed §64 journey + P5 closure) — CURRENT ACTIVE AUTHORITY
+
+- File: `FirmwareSight_P5_CommitF_Final_Productization_Closure_v1.0.txt`
+- **One hash, not two.** Delivered to the agent on 2026-10-04 as 68,315 bytes, 3,159 lines, LF-only, SHA-256
+  `887f2e9d8045d8c2f6ed7e8f86ddb129f5383cbe9189f7e866586514962fe9ca`; the copy in this directory and the
+  stage-0 index blob for that path were each recomputed and return the same 68,315 bytes and the same digest,
+  so delivered = stored = staged and there is no transport difference to explain. §2's transport-safe rule was
+  still followed (byte copy, then digest both sides) — it just happens to be the first archived prompt here
+  whose two hashes can be written as one, because it arrived with the terminator `.gitattributes` requires.
+- Authority: the third and last Commit prompt of P5. §4 maps it to three heads — **F1** product/tooling
+  (L26 decided in `ADR-0029` and implemented in the baseline generator, verifier and drift gate, plus L15's
+  display-only caption), **F2** installed evidence (the exact CI-built F1 Windows artifact, §29's contiguous
+  installed journey, the §28 old-schema migration proof, and §45's consolidation documents), and **F3** the
+  governance successor, which is the only head permitted to write `P5 = PASS_COMPLETE` (§67). It authorizes
+  no fourth commit: §27 and §66 forbid one written merely to record a run.
+- What it forbids while F1 is in flight: §18 bars running §64, writing `P5 PASS` or `Productization COMPLETE`,
+  tagging, releasing, signing, notarizing, publishing, choosing a licence, adding an updater, changing a
+  portable schema or changing migration schema; §20 stops the round if L26 appears to need `analysis:1`,
+  `diff:1`, `gate-results:1`, `accepted-reviews:1`, `release-manifest:1`, the SQLite schema, `SCHEMA_VERSION`,
+  release identity or `ADR-0028` — "L26 is repository tooling semantics, not product portable-schema
+  semantics"; §21 allows no new Rust/npm/Python dependency, no capability, no network; §6 and §9 require
+  `ADR-0029` and `ADR-0028` to stay distinct documents rather than merge into one checksum policy; §52 again
+  refuses to let this agent pick a licence.
+- How it wants failures handled (§24): a first attempt that fails on repository logic or content is **not**
+  rerun — it is fixed in a new commit; a failure before repository logic, from runner provisioning or
+  toolchain state, may be rerun once after the exact log is captured and corroborated, and the attempt-1 red
+  must stay explicit. Attempt 2 may never be described as first-attempt green.
+- Owner decision inside this round, recorded where it binds: asked on 2026-10-04 how to sequence F2's
+  live-machine phase — installing the packaged build and temporarily parking the owner's app-data store under
+  §27 — the owner chose **land F1, then confirm**. Nothing is installed and no owner file moves until F1 is
+  green on the remote ten and the owner says go again. §27's ten-step protocol and §43's
+  `ORIGINAL_DB_RESTORED` / `ORIGINAL_DB_SHA_MATCH` gates are therefore F2's, not F1's.
+- Where F1's verdict is written: `P5_VALIDATION/P5_COMMIT_F_DESIGN.md` §1–§11 (design before implementation, as
+  §19 requires) and `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md`. F1's own CI run is
+  external evidence and is not written into F1.
 
 ## Supersession note on the V0 Batch A activation entry
 

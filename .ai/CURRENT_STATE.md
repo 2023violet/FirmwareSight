@@ -5,12 +5,12 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-04"
+last_updated: "2026-10-05"
 ---
 
 # Current State
 
-- Date: 2026-10-04
+- Date: 2026-10-05
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - Active task: **`P5_PRODUCTIZATION`** — stage **P5**, state **`IN_PROGRESS`**, opened on 2026-10-03 by
   *FirmwareSight — P5 Productization, Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, 73,722 bytes,
@@ -246,20 +246,68 @@ last_updated: "2026-10-04"
   evidence** (`04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §7 now says so next to the precedence rule it names
   loosely; `P5_COMMIT_E_SCHEMA_DECISION.md` is `RESOLVED_BY_ARCHITECT` with its §1–§10 pricing left exactly as
   Commit E wrote it). L15 is therefore `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` and **not `CLOSED`**: the
-  name remains wrong, the risk is now bounded and documented. One visible residue is recorded rather than
-  fixed, because this round may not touch code: the Evidence Inspector still renders the stored token verbatim
+  name remains wrong, the risk is now bounded and documented. One visible residue was recorded rather than
+  fixed, because that round may not touch code: the Evidence Inspector still rendered the stored token verbatim
   (`Details.tsx:667` ← `details.rs:223` ← `query.rs:503` ← `db.rs:507`), so a user expands such a row and reads
-  `ElfProgramHeader`; a display-only caption in L20's closed-table shape is Commit F's to make.
-  §18 fixes what may be written about the outcome while this head's own run is still unread: Commit E
+  `ElfProgramHeader`; a display-only caption in L20's closed-table shape was Commit F's to make — **and F1 made
+  it**, in the bullet below, which is why that chain now ends at a caption instead of at a raw enum name.
+  §18 fixed what could be written about the outcome while that head's own run was still unread: Commit E
   engineering **PASS**, evidence closure **`NORMALIZATION_PENDING_REMOTE_CI`**, `P5 = IN_PROGRESS`, product
   **MVP CANDIDATE**, baseline `0.6.0`, Commit F **`NOT_AUTHORIZED`** — and no `P5 PASS`, `BETA`, `RC` or `GA`
-  anywhere.
-- **A limitation surfaced by that record, and deliberately not fixed: L26.** `SHA256SUMS` is generated from
-  working-copy bytes, so with `core.autocrlf=true` and `.gitattributes` `text eol=lf` 17 entries verify on the
-  host that wrote them and disagree with a clean checkout elsewhere; measured identically at `3400981` and at
-  the repair head, so it predates this round. No CI job runs `verify_baseline_artifacts.py`, which is why nothing
-  has ever contradicted it. It is recorded with its measurement in `P5_PRODUCTIZATION_AUDIT.md` §G, and choosing
-  which bytes the artifact means is Commit F's decision, not a task to pick up between other work.
+  anywhere. The remote has since answered, and this head is the one allowed to record it: Run
+  `37262147348` at `80b47c4` went **9 of 10 on attempt 1** (the single red was `Generated output drift`, killed
+  by Ubuntu-runner rustup provisioning before it compiled anything, corroborated and then rerun once) and
+  **10 of 10 success on attempt 2**, every job and every step read. **COMMIT_E = FINAL PASS / COMPLETE**, and
+  Commit F is authorized by the Architect's next prompt, not by this file deciding it.
+- **Commit F is authorized, and its first layer F1 lands on 2026-10-05** under *FirmwareSight — P5 Commit F
+  Final Productization Closure, Execution Prompt v1.0 — Architect Reviewed* (delivered 68,315 bytes, SHA-256
+  `887f2e9d…962fe9ca`, 3,159 lines; archived byte-identically at
+  `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitF_Final_Productization_Closure_v1.0.txt` — this prompt arrived
+  LF-only, so unlike Commit E's closure prompt the delivered and stored hashes are the same value and there is
+  no transport divergence to explain). F1 is the product/tooling layer and nothing else: ADR-0029, the two
+  baseline scripts, one new drift step, L15's display caption and its test, the design record
+  `P5_VALIDATION/P5_COMMIT_F_DESIGN.md` (written before the implementation, as §19 requires), and narrow
+  documentation. **F2 — the exact CI-built Windows artifact, the owner-store park, the installed migration
+  proof and the full §64 journey — is sequenced behind an explicit owner confirmation taken 2026-10-04, not
+  behind a silent assumption**; the owner chose *land F1, then confirm*, so the live machine is untouched until
+  F1 is green remotely and the owner says go. F3 (`P5 = PASS_COMPLETE`) is not written by this commit and cannot
+  be written at all unless §62's ready-for-closure gate passes first.
+  Counts at the F1 tree: `cargo test --workspace` **868 passed / 0 failed across 47 targets** (unchanged — F1
+  adds no Rust test), UI **219 passed in 8 files** (217 → 219, the two new L15 inspector cases), full gate
+  **17 of 17** (16 → 17 and drift 7 → 8 from the new `drift/baseline integrity` step; `--only core-smoke` 3/3,
+  `--only deny` 1/1, `--only package` 4/4), `DIRECTORY_TREE.txt` **813 lines** and `SHA256SUMS` **693 entries**
+  over 695 tracked paths. Every one of those is the printed value, not the expected one: §22 forbids forcing
+  the expected numbers, and the expected direction was "drift likely becomes 8, full gate likely 17".
+- **L26 was decided by ADR-0029 and implemented in Commit F1, landing 2026-10-05: the root `SHA256SUMS` is now the
+  SHA-256 of canonical Git stage-0 index blob bytes, not of working-directory bytes.** The limitation it closes
+  was measured, not remembered: `core.autocrlf` is `true` at both system and global scope here,
+  `.gitattributes` declares `text eol=lf`, and the manifest hashed the working copy while taking its path set
+  from the index — so the number of entries that disagreed with a clean checkout moved
+  **19 → 19 → 14 → 14 → 17 → 13 → 13** across the seven heads from `3400981` to `80b47c4` without anyone deciding
+  anything. The "17" quoted by `INDEX.md`, this file, `.ai/HANDOFF.md` and four P5 reports was the value true
+  at `859648e`; at `80b47c4` the measured value is 13, and those documents are corrected rather than rewritten,
+  because each was accurate about the tree it described. What changed in F1:
+  `scripts/generate_baseline_artifacts.py` hashes index blobs fetched through one batched
+  `git cat-file --batch` (and refuses to write while Git reports an unstaged semantic change to a tracked
+  path, so a forgotten `git add` can no longer certify stale content), `scripts/verify_baseline_artifacts.py`
+  re-derives the same content through a different Git path (`:<path>`) with no shared helper, and
+  `python scripts/check.py --only drift` now runs the verifier as `drift/baseline integrity` on every
+  authoritative CI run — the defect had survived five stages precisely because no machine other than the
+  writing host ever contradicted it. **A consequence to know before typing the old command: `sha256sum -c
+  SHA256SUMS` against a working tree is no longer a valid check and reports those 13 files as failures on this
+  host by design.** The canonical checks are `python scripts/verify_baseline_artifacts.py` and, for an external
+  proof, `git archive <commit>` extracted outside the repository followed by `sha256sum -c SHA256SUMS` over the
+  extracted tree, which carries canonical blob content. ADR-0028 is untouched: release identity still means the
+  exact bytes observed on disk, and three checksum domains — repository baseline, distribution package
+  `SHA256SUMS.txt`, Release Bundle `SHA256SUMS` — stay separate on purpose.
+- **F1 also closed L15's user-facing residue, presentation only.** The Evidence Inspector no longer prints the
+  stored legacy identifier: `apps/desktop/ui/src/Details.tsx` maps both namespaces of it
+  (`ElfProgramHeader` from storage, `elf.program-header` from the wire) to **`ELF address + flags evidence`**,
+  a value outside the table still renders verbatim, and `details.test.tsx` proves the caption while asserting
+  the row object still carries the identifier it was stored under. Nothing was renamed: no enum member, no wire
+  token, no schema, no `SCHEMA_VERSION` move, no migration 0006, no `analysis:2`, no golden byte.
+  **L15 itself therefore stays `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`**; what moved is the layer beneath it,
+  recorded as *user-facing presentation residue: CLOSED*.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256
@@ -540,20 +588,37 @@ measured evidence and their own signed prompt.
 
 ## Integrity record
 
-`DIRECTORY_TREE.txt` and `SHA256SUMS` are the **v0.6.0** baseline artifacts, regenerated by the promotion
-round after every document change and gate run, in that order: the tree lists the tracked layout rooted
-at `FirmwareSight_Project_Baseline_v0.6.0/`, and the manifest hashes each baseline-controlled tracked
-file with a lowercase SHA-256, LF line endings, lexicographic path order and no self-entry. Both are
+`DIRECTORY_TREE.txt` and `SHA256SUMS` are the **v0.6.0** baseline artifacts, regenerated after every change to
+the tracked set, in that order: the tree lists the tracked layout rooted
+at `FirmwareSight_Project_Baseline_v0.6.0/`, and the manifest carries a lowercase SHA-256, LF line endings,
+lexicographic path order and no self-entry for each baseline-controlled tracked file. Both are
 produced by `scripts/generate_baseline_artifacts.py` (`tree`, then `sums`) and re-checked by
-`scripts/verify_baseline_artifacts.py`, which shares no code with the generator: it re-derives the
-tracked set from `git ls-files` and hashes the files straight off disk, because the manifest cannot
-certify itself. `sha256sum -c SHA256SUMS` is the third, external pass. This tooling used to live under
+`scripts/verify_baseline_artifacts.py`, which shares no code and no hashing helper with the generator, because
+the manifest cannot certify itself.
+
+**Since ADR-0029 the digests are of canonical Git stage-0 index blob bytes, not of working-directory bytes** —
+see the L26 bullet above for why, and `09_ADR/ADR-0029-…md` for the rule and its alternatives. Three
+consequences for whoever runs these tools next:
+
+- The order is load-bearing, not stylistic: stage the intended changes, regenerate the tree, **stage the tree**,
+  then generate the manifest. `sums` refuses to write while Git reports an unstaged semantic change to a
+  tracked path, so the sequence cannot be silently short-cut; a line-ending-only difference is not such a
+  change, because the guard asks Git rather than reading bytes.
+- `sha256sum -c SHA256SUMS` against a working tree is **not** a valid check any more, and on this host it
+  reports 13 files as failures because their checkout representation is CRLF and their blobs are LF. The
+  canonical pass is `python scripts/verify_baseline_artifacts.py`, which now also runs as the
+  `drift/baseline integrity` step of `python scripts/check.py` on every authoritative CI run. For an external
+  proof, `git archive <commit>` extracted outside the repository validates with plain `sha256sum -c`, because
+  an archive carries canonical blob content.
+- The basename exclusion is unchanged, so the two tracked files named `SHA256SUMS` — the root manifest and
+  `golden/reports/p4-release/SHA256SUMS`, a Release Bundle fixture in a different checksum domain — both stay
+  out of the root manifest.
+
+This tooling used to live under
 gitignored `target/`, which meant a fresh clone could not regenerate either artifact; it is tracked now.
 `manifest.txt` is left exactly as the v0.5.1 delivery wrote it - the frozen package list, not
-this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the counts. P4's closure
-regenerated both artifacts after the tracked path set grew by this stage's fixtures, golden bundle,
-tests, scripts and validation pack — `DIRECTORY_TREE.txt` first and `SHA256SUMS` last, as the order
-requires — and the closure commit records the checker's zero-mismatch result.
+this tree - and `P0_FINAL_PROMOTION_REPORT.md` §10 records the commands and the counts of that promotion,
+which describe the tree they measured rather than this one.
 
 **How to read a `file:line` citation in this repository.** A closed validation pack is evidence about the
 tree it measured, so its line numbers are as-of-writing, not live: `App.module.css` and `App.tsx` have

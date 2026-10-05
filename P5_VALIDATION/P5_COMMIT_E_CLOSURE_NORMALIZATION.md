@@ -298,6 +298,20 @@ subject is that message. `6981625` is its parent, and `59d85c3` / `859648e` are 
 
 ## 13. Remote CI
 
+**§13a, read afterwards (written by Commit F1 on 2026-10-05, the head after this one).** This head could not
+record its own run, and §27 forbade a further commit whose only content would be that record — so the run
+became readable only from its successor, which is this paragraph. Run `37262147348` (#67) at headSha
+`80b47c4…`: **attempt 1 completed/failure, 9 of 10** — the single red `Generated output drift`, where rustup on
+the Ubuntu runner logged "recovering from a partially installed toolchain" and then
+`failed to install component: 'clippy-preview-x86_64-unknown-linux-gnu', detected conflict: 'bin/cargo-clippy'`,
+rolling back about half a second in, before any crate was compiled. The raw log was read before the rerun, and
+corroborated by the same SHA's green `Rust (ubuntu-latest)` and `Package Ubuntu`, which bootstrap the same
+toolchain — the provisioning class `BASELINE.yaml:514` already records for P4's `157f749`, not a repository
+content failure. One `gh run rerun --failed` followed: drift returned **7 of 7** and the run concluded
+**10 of 10 success**. Attempt 2 is one re-executed job plus nine attempt-1 executions carried into the attempt-2
+object, and is not written here as first-attempt green. §14's verdict line below therefore resolves to
+**`COMMIT_E = FINAL PASS / COMPLETE`**, with the row-level authority in `P5_CI_AUTHORITY.md`.
+
 ```text
 Remote CI = PENDING
 ```

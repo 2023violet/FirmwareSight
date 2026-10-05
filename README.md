@@ -236,6 +236,48 @@ P5 Commit E closure normalization (evidence vocabulary + the L15 decision): DOCU
         source-control linter. Evidence P5_VALIDATION/P5_COMMIT_E_DESIGN.md,
         P5_COMPATIBILITY_FIXTURE_REPORT.md, P5_COMPATIBILITY_MATRIX.md, P5_SUPPORTABILITY_REPORT.md and
         P5_COMMIT_E_SCHEMA_DECISION.md
+P5 Commit F1 (ADR-0029 + L15 presentation), documentation, tooling and one UI caption (2026-10-05). Authorized
+        by FirmwareSight P5 Commit F Final Productization Closure v1.0, received 2026-10-04 as 68,315 bytes with
+        SHA-256 887f2e9d…962fe9ca over 3,159 lines and archived byte-identically (it arrived LF-only, so unlike
+        Commit E's closure prompt there is no delivered-versus-stored hash divergence to explain).
+        **L26 is decided and closed: root SHA256SUMS now carries the SHA-256 of canonical Git stage-0 index blob
+        bytes, not of working-directory bytes** (09_ADR/ADR-0029). The measured reason it moved: with
+        core.autocrlf=true and text eol=lf, the count of entries disagreeing with a clean checkout was
+        19, 19, 14, 14, 17, 13 at successive heads from 3400981 to 80b47c4 — 13 at this one — and no job anywhere
+        had ever run the verifier, so nothing outside the writing host contradicted it. scripts/generate_baseline_artifacts.py
+        now hashes index blobs through one batched git cat-file --batch and REFUSES to write while Git reports an
+        unstaged semantic change to a tracked path; scripts/verify_baseline_artifacts.py re-derives the same
+        content independently through :<path> index notation with no shared hashing helper; and
+        drift/baseline integrity runs it inside the authoritative gate on Windows, Ubuntu and macOS, which is
+        what makes the claim portable rather than host-local.
+        **Operator-visible change: sha256sum -c SHA256SUMS against a working tree is no longer a valid check** and
+        reports those 13 files as failures on this host by design; the canonical passes are
+        python scripts/verify_baseline_artifacts.py and, externally, git archive <commit> extracted outside the
+        repository. ADR-0028 is untouched — release identity is still the exact bytes observed on disk — and the
+        three checksum domains (repository baseline, distribution SHA256SUMS.txt, Release Bundle SHA256SUMS) stay
+        separate. ADR-0029 also keeps the basename exclusion, so golden/reports/p4-release/SHA256SUMS remains
+        unlisted in the root manifest, by rule and on purpose.
+        **L15's user-facing residue is closed, presentation only:** apps/desktop/ui/src/Details.tsx maps both
+        namespaces of the legacy identifier (ElfProgramHeader from storage, elf.program-header from the wire) to
+        **ELF address + flags evidence**, anything outside the table still renders verbatim, and details.test.tsx
+        proves the caption while asserting the row object still carries the identifier it was stored under. No
+        enum rename, no wire rename, no schema or golden change, no migration 0006, no analysis:2 — so
+        **L15 itself stays CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER** with the presentation layer beneath it
+        CLOSED.
+        Counts at the F1 tree, printed rather than expected: 868 Rust passed / 0 failed across 47 targets
+        (unchanged, F1 adds no Rust test), UI **219 in 8 files** (217 + the two inspector cases), full gate
+        **17 of 17** with drift **8 of 8** (the new step), core-smoke 3/3, deny 1/1, package 4/4 with no SKIP,
+        DIRECTORY_TREE.txt 813 lines and SHA256SUMS 693 entries over 695 tracked paths. A clean detached
+        worktree at the F1 commit runs 19 of 19 for the same reason the main tree runs 17: the two cold-checkout
+        asset steps. Evidence P5_VALIDATION/P5_COMMIT_F_DESIGN.md.
+        **Sequencing, with the owner's answer recorded:** the owner was asked before any live-machine work and
+        chose *land F1, then confirm*, so F2 — downloading the exact F1 CI-built Windows artifact, parking the
+        owner's app-data store, the installed old-schema migration proof and the full §64 journey — has NOT been
+        run and will not be started on an assumption. Pre-test machine state was measured read-only first:
+        %LOCALAPPDATA%\FirmwareSight absent, no uninstall registry entry, no running process, and the owner's
+        store untouched at 155,648 bytes / d6e41034…ca836468 / last written 2026-09-30. F3, which alone may write
+        P5 = PASS_COMPLETE, is not authorized until §62's ready-for-closure gate passes. So: P5 = IN_PROGRESS,
+        product = MVP CANDIDATE at baseline 0.6.0, and still no P5 PASS, BETA, RC, GA or Production Ready anywhere.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 

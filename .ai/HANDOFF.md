@@ -124,13 +124,23 @@ That is a race with a clock, and it is this repository's own L23 shape wearing a
 names the difference instead of timing it (§11 and §12 of `P5_COMMIT_D_DESIGN.md`, mutation H), so a claim
 about which snapshot stands now holds a fact a reader can query rather than a window the runner happens to
 leave open.
-**One finding came out of writing that record, and it was not fixed.** `SHA256SUMS` is generated from
-working-copy bytes, so with `core.autocrlf=true` and `text eol=lf` its 17 CRLF-in-tree entries verify on the host
-that wrote them and disagree with a clean checkout anywhere else; no CI job runs the verifier, so nothing has
-ever disagreed. It is recorded as **L26** in `P5_PRODUCTIZATION_AUDIT.md` §G with the measurement, the
-`golden/…/SHA256SUMS` row that has no entry, and the 25 names this method could not compare. **Do not "fix" it
-from this handoff**: the choice of which bytes the artifact means belongs to Commit F, and the file is the
-repository's own baseline evidence.
+**One finding came out of writing that record, and it was not fixed then.** `SHA256SUMS` was generated from
+working-copy bytes, so with `core.autocrlf=true` and `text eol=lf` its CRLF-in-tree entries verified on the host
+that wrote them and disagreed with a clean checkout anywhere else; no CI job ran the verifier, so nothing has
+ever disagreed. It was recorded as **L26** in `P5_PRODUCTIZATION_AUDIT.md` §G with the measurement, the
+`golden/…/SHA256SUMS` row that has no entry, and the 25 names that method could not compare, and the instruction
+then was **do not "fix" it from this handoff** — the choice of which bytes the artifact means belonged to
+Commit F, and the file is the repository's own baseline evidence.
+
+**That instruction is discharged: Commit F1 decided it, as ADR-0029.** Root `SHA256SUMS` now holds the SHA-256
+of canonical Git **stage-0 index blob** bytes; `scripts/generate_baseline_artifacts.py` refuses to write over an
+unstaged semantic change, `scripts/verify_baseline_artifacts.py` re-derives the same content through a different
+Git path, and `drift/baseline integrity` runs it on every authoritative CI job. Read
+`09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` before touching either tool, and note
+the one thing that will surprise you: **`sha256sum -c SHA256SUMS` against a working tree is no longer a valid
+check** and reports 13 files on this host as failures that mean "this is a checkout". The measured count moved
+19 → 19 → 14 → 14 → 17 → 13 across the heads before the fix, which is why the old prose quoting a single number
+was never going to stay true.
 **Commit E has since landed**, under a prompt of its own — *FirmwareSight P5 Commit E — Compatibility
 Fixtures, Support Matrix & Supportability Closure, v1.0* (SHA-256 `030ca28233b964958d6aea8e59a312c66ceb4d117273cba9e667950b4ba21148`,
 53,915 bytes, 2,459 LF lines, archived and registered in `10_AUDIT/SOURCE_PROMPTS/README.md`), which is the
@@ -170,13 +180,20 @@ Architect chose **Option E: preserve `SourceType::ElfProgramHeader` / the `analy
 enum rename, no wire rename, no rewritten history, **no migration 0006, no `analysis:2`**, no golden byte moved
 and no Bundle change; `P5_COMMIT_E_SCHEMA_DECISION.md` is now `RESOLVED_BY_ARCHITECT` with its pricing sections
 untouched, `04_TECH/23` §7 records the legacy identifier next to the precedence rule it names loosely, and L15 is
-`CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, explicitly **not** `CLOSED`. One user-visible residue is recorded
-rather than fixed, because this round may not touch code: the Evidence Inspector still prints the stored token
-verbatim (`Details.tsx:667` ← `details.rs:223` ← `query.rs:503` ← `db.rs:507`), so a person expanding such a row
-reads `ElfProgramHeader`; a display-only caption in L20's closed-table shape is Commit F's call. Full record:
-`P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md`.
-The remaining workstream order is now: Commit F's documentation and closure — which still requires its own
-architect authorization. **What Commits C, D and E do not
+`CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, explicitly **not** `CLOSED`. One user-visible residue was recorded
+rather than fixed there, because that round may not touch code: the Evidence Inspector still printed the stored
+token verbatim (`Details.tsx:667` ← `details.rs:223` ← `query.rs:503` ← `db.rs:507`), so a person expanding such
+a row read `ElfProgramHeader`; a display-only caption in L20's closed-table shape was Commit F's call. **Commit
+F1 made it**: `Details.tsx` now maps both namespaces of that identifier to `ELF address + flags evidence`, every
+other stored value still renders verbatim, and `details.test.tsx` proves both halves while asserting the row
+object still carries the identifier it was stored under. The wire debt is unchanged and stays
+`CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`; only the presentation residue is `CLOSED`. Full record:
+`P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md`, and §8 of `P5_VALIDATION/P5_COMMIT_F_DESIGN.md` for what
+F1 was allowed to touch.
+The remaining workstream order is now: **Commit F's F2 layer** — the exact CI-built F1 Windows artifact, the
+owner-store park, the installed old-schema migration proof and the full §64 journey — sequenced behind the
+owner's explicit confirmation, then the closure pack, then **F3**, which alone may write `P5 = PASS_COMPLETE`.
+**What Commits C, D, E and F1 do not
 close is the acceptance of Commit C**: the
 onboarding panel and the History page have never been operated in the installed binary, so the full §64
 journey (install → onboarding → Analyze → Compare → Gate → Bundle → History → Diagnostics → close → reopen →
@@ -294,10 +311,11 @@ P5 Commit C                    e863d0c — §13 onboarding, §14 Help/About with
 P5 §32 / L23                   111fe32 — the L22 identity draft with its premise test, plus the repair of L23's sixth race instance · 2cdfced (its read-back)
 P5 Commit D                    3400981 — integrity_check, the pre-migration online backup, the re-run matrix, the 41-key Diagnostics allowlist and its export, the typed startup refusal, ADR-0028 · bccea88 (the test-only repair of its clock race, and the last head here that changed a line of Rust) · 90aa69d (the record + L26) · 956e250 (the §32 read-back successor, documentation only) · 57a904e (the documentation closeout; the two "current HEAD" sentences it shipped are corrected by the head after it) · No head in this ledger names itself "current HEAD": the commit that wrote it down would be the one that made it false, so read git rev-parse HEAD
 P5 Commit E                     split as §61 requires, in two heads: E1 — the fixture cohort (6 directories, 31 files, manifest 25 → 56), `scripts/gen_p5_compat_fixtures.py`, `p5_compat_fixtures.rs` (14 tests), the `SHF_ALLOC` fix in `crates/firmwaresight-artifact/src/elf.rs`, `P5_COMPATIBILITY_MATRIX.md`, `P5_COMPATIBILITY_FIXTURE_REPORT.md`, and the archived prompt with its registration · E2 — the §48 dispositions (`P5_SUPPORTABILITY_REPORT.md`), the §42 STOP draft (`P5_COMMIT_E_SCHEMA_DECISION.md`), the round's design record (`P5_COMMIT_E_DESIGN.md`, which describes both halves), the five UI files L19/L20/L23 touched (`Analyze.tsx`, `Compare.tsx`, `compare.test.tsx`, `details.test.tsx`, `history.test.tsx`), the workload-size sentence corrected, the governance closeout and the regenerated `DIRECTORY_TREE.txt` + `SHA256SUMS`. · E1 = `859648e`, E2 = `59d85c3`, and the head that writes this line is the §59 read-back successor after them. One `git push` carried both commits, so GitHub started one run — `37228929762` at the tip head `59d85c3`, attempt 1, **10 of 10**, every job and every step read — and `859648e` has no run of its own; that absence is a fact about push granularity, not a missing verification, and it is written in `P5_CI_AUTHORITY.md` beside the row that says so
-P5 Commit E, after                    6981625 — the §59 read-back successor (docs only): the candidate's run written into `P5_CI_AUTHORITY.md`, §7a added to the fixture report, and the "last head that changed a line of Rust" sentence dated instead of left to mislead · Run `37230689636`, attempt 1, **10 of 10**, every job and step read · the normalization head after it (this commit) — `P5: normalize Commit E evidence and record the L15 decision`: matrix status vocabulary closed to five values, A–H dispositions closed to four, **L15 answered as Option E**, `04_TECH/23` §7 added, and no path under `crates/`, `apps/`, `scripts/`, `fixtures/`, `schemas/`, `golden/` or `.github/` touched. Its own run is external evidence, and §27 forbids writing a further commit just to record it
+P5 Commit E, after                    6981625 — the §59 read-back successor (docs only): the candidate's run written into `P5_CI_AUTHORITY.md`, §7a added to the fixture report, and the "last head that changed a line of Rust" sentence dated instead of left to mislead · Run `37230689636`, attempt 1, **10 of 10**, every job and step read · the normalization head after it, `80b47c4` — `P5: normalize Commit E evidence and record the L15 decision`: matrix status vocabulary closed to five values, A–H dispositions closed to four, **L15 answered as Option E**, `04_TECH/23` §7 added, and no path under `crates/`, `apps/`, `scripts/`, `fixtures/`, `schemas/`, `golden/` or `.github/` touched. Its run is now a read-back fact, not a self-claim: Run `37262147348` (#67) at that headSha went **9 of 10 on attempt 1**, the single red being `Generated output drift`, where rustup on the Ubuntu runner logged "recovering from a partially installed toolchain" and then `failed to install component: 'clippy-preview-x86_64-unknown-linux-gnu', detected conflict: 'bin/cargo-clippy'` and rolled back ~0.5 s later without compiling anything — the same provisioning class P4's `157f749` recorded at `BASELINE.yaml:514`. **Attempt 2** re-ran only that failed job (`gh run rerun --failed`; the workflow has no `needs:` graph), drift came back **7/7**, and the run concluded **10 of 10 success**, with the other nine jobs' attempt-1 executions carried into the attempt-2 object rather than run again. Two attempts, stated as two attempts
+P5 Commit F1                         ADR-0029 and the L15 caption, landing 2026-10-05: root `SHA256SUMS` now means canonical Git stage-0 index blob bytes, the generator refuses to certify unstaged semantic changes, the verifier re-derives the same content through a different Git path, `drift/baseline integrity` joins the authoritative gate (drift 7 → 8, full gate 16 → 17), and the Evidence Inspector captions the legacy identifier instead of printing it (217 → 219 UI). **Its own run is external evidence** — read `gh run list --json headSha` at this head and do not write a successor merely to record it. F2 (§64, the CI artifact, the owner-store park) waits on the owner's explicit go-ahead, which was asked for and answered *land F1, then confirm* on 2026-10-04
 Three red heads, kept in the record because dropping them would make the green ones meaningless: 9e3b1de (6 of 7 — a pre-existing `compare.test.tsx` race it never touched), 0c031cd (7 of 10 — three package jobs printing a skip and going red on their own upload), 3400981 (8 of 10 — a clock race inside a test Commit D added, fixed test-only at bccea88, which went 10 of 10)
 The authoritative job set is TEN since 0c031cd: the seven gate jobs plus Package Windows / Ubuntu / macOS. `P5_CI_AUTHORITY.md` names them and every run measured against them
-§34 STOP ran from 2026-10-04 and has been ANSWERED by the Architect's next prompt, the one that authorized Commit E (its digest is in the paragraph above). That STOP therefore now applies to what Commit E did not take: no Commit F, no P5 closure, no §64 full journey, no L26 fix, no general source-control linter, no V1/B1/RC/GA — and Commit E added two STOPs of its own, §63/§64 (the round stops at its exit lists), which still hold, and §42 (L15 as a serialized-contract decision for the Architect), which has been **ANSWERED**: Option E preserves `SourceType::ElfProgramHeader` / `elf.program-header` and documents the accurate meaning instead, so L15 is `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` rather than CLOSED, and no rename, migration 0006 or `analysis:2` is authorized by that answer. The closure normalization prompt that carried the decision adds its own stops (§14 L26 untouched, §15 §64 unrun, §16 consolidation docs unwritten, §27 no commit merely to record its run)
+§34 STOP ran from 2026-10-04 and has been ANSWERED by the Architect's next prompt, the one that authorized Commit E (its digest is in the paragraph above). That STOP therefore now applies to what Commit E did not take: no §64 full journey, no general source-control linter, no V1/B1/RC/GA — and Commit E added two STOPs of its own, §63/§64 (the round stops at its exit lists), which still hold, and §42 (L15 as a serialized-contract decision for the Architect), which has been **ANSWERED**: Option E preserves `SourceType::ElfProgramHeader` / `elf.program-header` and documents the accurate meaning instead, so L15 is `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` rather than CLOSED, and no rename, migration 0006 or `analysis:2` is authorized by that answer. The closure normalization prompt that carried the decision added its own stops (§14 L26 untouched, §15 §64 unrun, §16 consolidation docs unwritten, §27 no commit merely to record its run) — and **all four have since been discharged by their rightful owners**: §14 by Commit F1's `ADR-0029` (L26 is CLOSED, and a general source-control linter is still not authorized), §15 by the owner's own sequencing answer rather than by an assumption (F1 was landed first, so §64 remains unrun and still waits on the owner's go-ahead), §16 by F2's assignment in the Commit F prompt (§45's consolidation documents are F2's, and F1 did not write them), and §27 by nobody — it still holds, which is why F1's run is not written into F1. The Commit F prompt now bounds the round: §18 keeps §64, any P5 verdict, any tag/release/sign/notarize/publish, any licence choice and any schema or migration change out of F1; §20 stops the round if L26 appears to need a portable-schema change; §67 reserves `P5 = PASS_COMPLETE` for F3 alone; §66 forbids an F4 written merely to record F3's run.
 ```
 
 Run #1 (`36360310447`, `f9b8ccb`) and Run #2 (`36378384225`, `ebda52d`) concluded `failure` and stay
@@ -623,7 +641,12 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
 - Read remote CI with `gh run view`. A run's ID, head SHA and per-job conclusion are external facts,
   and a report that describes them is a claim about a moment that has already moved.
 - After any commit that touches baseline-controlled files, `SHA256SUMS` and `DIRECTORY_TREE.txt` are
-  stale: regenerate both, in that order, and verify with `sha256sum -c` plus an independent checker.
+  stale. Since ADR-0029 the order is: stage the intended changes, regenerate the tree, **stage the tree**,
+  regenerate the manifest, **stage the manifest**, then `python scripts/verify_baseline_artifacts.py`. The
+  manifest hashes Git stage-0 index blobs, so an unstaged semantic edit makes `sums` refuse rather than
+  certify stale content. Do **not** reach for `sha256sum -c SHA256SUMS` on a working tree — it is not the
+  check any more; the archive form (`git archive <commit>` extracted outside the repository) is what still
+  validates with it.
 
 ## The two rounds that ran after G2 (2026-10-02)
 

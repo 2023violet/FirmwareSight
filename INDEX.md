@@ -167,22 +167,34 @@ P5_PRODUCTIZATION`
     compatibility claims), `P5_SUPPORTABILITY_REPORT.md` (§48's fourteen dispositions),
     `P5_COMMIT_E_SCHEMA_DECISION.md` — the question Commit E stopped on **and the answer**, §1–§10 priced as
     written, §11 recording the Architect's Option E — and `P5_COMMIT_E_CLOSURE_NORMALIZATION.md`, the short
-    record of the vocabulary cleanup and the L15 decision
+    record of the vocabulary cleanup and the L15 decision. Commit F's design record, written before its code:
+    `P5_COMMIT_F_DESIGN.md` — L26's measured history, the index-vs-HEAD-vs-worktree comparison, the generation
+    sequence the tools now enforce, the seven cross-checkout and mutation proofs, L15's display-only plan, and
+    the F1/F2/F3 boundaries with §64 sequenced behind an explicit owner confirmation
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` began life as the regenerated **v0.6.0** baseline record and are now
 regenerated on **every** commit that changes the tracked set — the tree first, `SHA256SUMS` last, then
-`sha256sum -c` plus `scripts/verify_baseline_artifacts.py` (**808 lines and 688 entries** after Commit E: 690
-tracked paths, of which the two files named `SHA256SUMS` — the root manifest and
+`python scripts/verify_baseline_artifacts.py` (**813 lines and 693 entries** at Commit F1: 695 tracked paths,
+of which the two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 
-**Read one limit with that file, recorded as L26:** `SHA256SUMS` is generated from *working-copy* bytes, and
-this repository runs `core.autocrlf=true` with `.gitattributes` `text eol=lf`, so 17 entries match the
-Windows working tree that wrote them and disagree with a clean checkout's LF bytes. No CI job and no
-`scripts/check.py` step runs `verify_baseline_artifacts.py`, so the artifact has never been contradicted by a
-machine other than its own — the local `RESULT PASS` is agreement with the generating host, not
-reproducibility. Deciding which bytes it means belongs to Commit F; see `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` §G.
+**What those digests are of, since ADR-0029 (Commit F1, 2026-10-05):** the canonical Git **stage-0 index blob
+bytes**, not the bytes sitting in the working directory. The rule and its alternatives are in
+`09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md`; the limitation it closes was L26, and
+its measured history is the table in `P5_VALIDATION/P5_COMMIT_F_DESIGN.md` §1 — the count of entries that
+disagreed with a clean checkout moved **19 → 19 → 14 → 14 → 17 → 13** across seven heads while every document
+quietly kept quoting one of them. Two practical consequences. **`sha256sum -c SHA256SUMS` against a working
+tree is no longer a valid check**: with `core.autocrlf=true` here, 13 tracked files are LF in the object store
+and CRLF on disk, so those 13 lines now report failures that mean "this is a checkout", not "this is corrupt".
+The canonical local pass is the verifier above, which `python scripts/check.py --only drift` also runs as
+`drift/baseline integrity` on every authoritative CI run; the canonical external pass is
+`git archive <commit>` extracted outside the repository, which carries blob content and does validate with
+plain `sha256sum -c`. And **`sums` refuses to write while Git reports an unstaged semantic change to a tracked
+path**, so the intended edits have to be staged first — a line-ending-only difference is not one, because the
+guard asks Git instead of reading bytes. ADR-0028 still governs release evidence: the exact bytes observed on
+disk, in a checksum domain that is deliberately not this one.
 
 
 ## All Markdown documents
@@ -312,6 +324,7 @@ reproducibility. Deciding which bytes it means belongs to Commit F; see `P5_VALI
 | `09_ADR/ADR-0026-open-source-mvp-first-delivery.md` | ADR-0026 — Open-Source MVP-First Delivery (G1 basis, V0 non-blocking) |
 | `09_ADR/ADR-0027-project-policy-and-provenance-adapter.md` | ADR-0027 — Project Policy and Provenance Adapter Boundary (P3; authorizes `firmwaresight-project`) |
 | `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` | ADR-0028 — Release Identity Uses the Exact Bytes Observed on Disk (P5; decides L22) |
+| `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` | ADR-0029 — Repository Baseline Checksums Are the Canonical Git Stage-0 Index Blob Bytes (P5 Commit F1; decides L26, distinct from ADR-0028 by evidence domain) |
 | `10_AUDIT/00_V0.3_AUDIT_RESOLUTION.md` | v0.3.0 Audit Resolution |
 | `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
 | `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |

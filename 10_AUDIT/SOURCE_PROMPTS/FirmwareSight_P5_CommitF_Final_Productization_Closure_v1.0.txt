@@ -1,0 +1,3159 @@
+FirmwareSight — P5 Commit F
+Final Productization Closure
+L26 Canonical Baseline Integrity → Full Installed Journey → Final Evidence → P5 Closure
+Execution Prompt v1.0 — Architect Reviewed
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+
+你是 FirmwareSight P5 Productization Commit F Engineering & Closure Agent。
+
+本轮 canonical unit：
+
+P5_COMMIT_F_FINAL_PRODUCTIZATION_CLOSURE
+
+这是 P5 的最后一个授权单元。
+
+本轮必须完成：
+
+1. L26 repository baseline checksum semantics 的正式架构决策与实现；
+2. L15 最后的 display-only presentation residue；
+3. exact CI-built Windows candidate 的完整 §64 installed journey；
+4. disposable old-schema installed migration proof；
+5. History / Diagnostics / migration / uninstall / reinstall 的最终产品化证据；
+6. 所有 P5 closure documents；
+7. 最终 candidate remote CI；
+8. 最终 governance closure successor；
+9. successor remote CI；
+10. 只有全部满足后才允许写：
+   P5 = PASS_COMPLETE
+   Productization = ENGINEERING_COMPLETE
+
+本轮不是：
+
+- V1 外部用户验证
+- B1 Private Beta
+- RC1
+- GA1
+- 正式公开发布
+- 签名发布
+- notarized 发布
+- 自动 updater
+- 商业化
+- cloud/auth
+- SBOM/CVE 产品功能
+- 新 parser format
+- 新 toolchain adapter
+
+核心原则：
+
+CANONICAL SOURCE INTEGRITY.
+INSTALL THE ACTUAL CI ARTIFACT.
+PRESERVE OWNER DATA.
+CLOSE WHAT P5 ACTUALLY PROVED.
+CARRY FORWARD WHAT IT DID NOT.
+NO RELEASE CLAIM BEYOND EVIDENCE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at prompt issue time:
+
+origin/main =
+
+80b47c4fcb43aeffd24a63cc90e02334a6b32be1
+
+Commit:
+
+P5: normalize Commit E evidence and record the L15 decision
+
+Commit E engineering candidate:
+
+59d85c308ad2c68cdc80956b47641a67ebf63b41
+
+Run:
+37228929762
+
+attempt:
+1
+
+result:
+10 / 10 success
+
+Commit E read-back head:
+
+6981625a6491aeb82fd6346d17f219dcb413548b
+
+Run:
+37230689636
+
+attempt:
+1
+
+result:
+10 / 10 success
+
+Commit E closure-normalization head:
+
+80b47c4fcb43aeffd24a63cc90e02334a6b32be1
+
+Run:
+37262147348
+
+run number:
+67
+
+Attempt 1:
+9 / 10
+
+The only failed job:
+
+Generated output drift
+job 111611411544
+
+Measured failure:
+
+rustup:
+"recovering from a partially installed toolchain"
+
+then:
+
+failed to install:
+clippy-preview-x86_64-unknown-linux-gnu
+
+because:
+
+detected conflict:
+bin/cargo-clippy
+
+The repository did not compile before this runner/toolchain failure.
+
+The same attempt's other nine jobs were success,
+including:
+
+Rust (ubuntu-latest)
+Package Ubuntu
+
+Attempt 2:
+
+10 / 10 success
+
+Current run object:
+
+completed / success
+run_attempt = 2
+
+This history MUST remain explicit.
+
+Do NOT rewrite Run 67 as first-attempt green.
+
+Current direct validation baseline:
+
+Rust =
+868 passed / 0 failed / 47 targets
+
+UI =
+217 passed / 8 files
+
+full local gate =
+16 / 16
+
+core-smoke =
+3 / 3
+
+drift =
+7 / 7
+
+deny =
+1 / 1
+
+package =
+4 / 4
+
+Current stage:
+
+P5_PRODUCTIZATION
+
+state:
+IN_PROGRESS
+
+Product state:
+MVP CANDIDATE
+
+baseline_version:
+0.6.0
+
+Commit A =
+COMPLETE
+
+Commit B =
+COMPLETE
+
+Commit C =
+COMPLETE
+
+Commit D =
+COMPLETE
+
+Commit E =
+FINAL PASS / COMPLETE
+
+Commit F =
+AUTHORIZED BY THIS PROMPT
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD PRECONDITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -20 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+80b47c4fcb43aeffd24a63cc90e02334a6b32be1
+
+worktree =
+clean
+
+If remote moved:
+
+STOP.
+
+Read and classify the remote delta.
+
+Do not merge or rebase by reflex.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+
+After every commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+The environment has previously auto-pushed commits.
+
+Detect it immediately.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. ARCHIVE THIS PROMPT — TRANSPORT-SAFE RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Archive this prompt under:
+
+10_AUDIT/SOURCE_PROMPTS/
+
+Preferred repository filename:
+
+FirmwareSight_P5_CommitF_Final_Productization_Closure_v1.0.txt
+
+Record:
+
+- received/delivered byte SHA-256
+- received byte count
+- received line count
+
+Then record the Git-stored blob SHA-256 / byte count after `.gitattributes` normalization.
+
+Important:
+
+Previous `.txt` prompt transport has converted CRLF ↔ LF.
+
+Therefore:
+
+exact byte identity is preferred,
+but a demonstrated EOL-only transport normalization is NOT a blocker when all of the following are proven:
+
+- delivered hash recorded;
+- stored blob hash recorded;
+- line counts recorded;
+- line-by-line textual content identical;
+- `.gitattributes` not weakened;
+- no content other than line terminators changed.
+
+Do NOT modify `.gitattributes` merely to preserve a transport CRLF copy.
+
+Do NOT invent a hash.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. REQUIRED READ SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before design / implementation read current HEAD versions of:
+
+AGENTS.md
+
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+
+BASELINE.yaml
+
+06_DELIVERY/06_STAGE_GATES.md
+06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md
+06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md
+
+P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md
+P5_VALIDATION/P5_PACKAGING_REPORT.md
+P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md
+P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md
+P5_VALIDATION/P5_MIGRATION_DECISION.md
+P5_VALIDATION/P5_ONBOARDING_HISTORY_REPORT.md
+P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md
+P5_VALIDATION/P5_COMPATIBILITY_FIXTURE_REPORT.md
+P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md
+P5_VALIDATION/P5_COMMIT_E_SCHEMA_DECISION.md
+P5_VALIDATION/P5_COMMIT_E_CLOSURE_NORMALIZATION.md
+P5_VALIDATION/P5_CI_AUTHORITY.md
+
+G2_VALIDATION/G2_KNOWN_LIMITATIONS.md
+
+09_ADR/ADR-0028-release-identity-bytes-as-evidence.md
+
+scripts/generate_baseline_artifacts.py
+scripts/verify_baseline_artifacts.py
+scripts/check.py
+
+.gitattributes
+
+apps/desktop/ui/src/Details.tsx
+relevant Details tests
+
+current user docs:
+Installation
+Getting Started
+History
+Diagnostics
+Upgrade / Reinstall / Uninstall
+Privacy / Local-First
+Support Matrix
+Known Limitations
+Troubleshooting
+Package Verification
+Bundle Verification
+
+Do not use stale prompt assumptions when current source says otherwise.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. COMMIT F PHASE MAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit F has three deliberate layers.
+
+F1 — PRODUCT / TOOLING CANDIDATE
+
+Implement:
+
+- ADR-0029
+- L26 canonical baseline checksum semantics
+- baseline verifier in drift authority
+- L15 Evidence Inspector display-only caption
+- tests
+- narrowly required docs
+
+Then:
+
+local gate
+clean detached validation
+push
+remote 10 / 10
+
+F2 — FINAL EVIDENCE CANDIDATE
+
+After F1 is green:
+
+- download F1 CI-produced Windows artifact
+- run full §64 installed journey against that exact artifact
+- run installed old-schema migration proof on a disposable store
+- produce final P5 evidence/consolidation docs
+- update user-facing install/retention documentation
+- update final known limitations
+- no product-source change unless a real §64 blocker is found
+
+Then:
+
+push
+remote 10 / 10
+
+F3 — P5 GOVERNANCE CLOSURE SUCCESSOR
+
+Only after F2 is green and every exit criterion is satisfied:
+
+set:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+active_task =
+NONE
+
+B1 =
+NOT_AUTHORIZED
+
+baseline =
+0.6.0
+
+Then push.
+
+F3 itself must receive authoritative remote CI.
+
+No F4 read-back commit merely to record F3 CI.
+
+F3 CI is external final evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. ARCHITECT DECISION — L26
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L26 is now decided.
+
+Create:
+
+09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
+
+Status:
+
+Accepted
+
+Canonical decision:
+
+THE ROOT REPOSITORY `SHA256SUMS`
+REPRESENTS THE SHA-256 OF CANONICAL GIT STAGE-0 INDEX BLOB BYTES,
+NOT THE RAW BYTES CURRENTLY PRESENT IN THE WORKING DIRECTORY.
+
+At a clean committed checkout:
+
+stage-0 index blob bytes
+=
+HEAD tree blob bytes
+
+At pre-commit generation time:
+
+stage-0 index blob bytes
+=
+the exact canonical bytes intended to be committed.
+
+This is the repository source-baseline domain.
+
+It is deliberately different from ADR-0028.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. ADR-0028 VS ADR-0029 — MUST REMAIN DISTINCT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ADR-0028:
+
+FirmwareSight firmware release identity.
+
+Rule:
+
+exact bytes observed on disk / shipped into the Release Bundle.
+
+Why:
+
+those bytes are the evidence the product releases.
+
+ADR-0029:
+
+FirmwareSight repository baseline integrity.
+
+Rule:
+
+canonical Git stage-0 index blob bytes.
+
+Why:
+
+the repository baseline must be stable across:
+
+- Windows / Linux / macOS
+- `core.autocrlf`
+- checkout line-ending transformations
+- clean worktrees
+- `git archive`
+
+Do NOT use ADR-0029 to normalize:
+
+firmware artifact bytes
+MAP evidence bytes
+Release Notes bytes
+Release Bundle bytes
+
+Do NOT weaken ADR-0028.
+
+Different evidence domains have different identity rules.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. WHY INDEX, NOT WORKING TREE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The current root baseline generator:
+
+- gets path names from `git ls-files`
+- hashes file bytes directly from the working directory
+
+That mixes:
+
+canonical Git identity
+
+with:
+
+host checkout/smudge bytes
+
+and caused L26:
+
+17 entries measured different from a clean checkout/archive.
+
+The index is the correct pre-commit source authority because Git has already applied:
+
+.gitattributes
+clean filters
+EOL canonicalization
+
+to staged content.
+
+This allows the generator to describe:
+
+"what is going to be committed"
+
+before the commit exists.
+
+Do NOT define the root baseline as:
+
+arbitrary working-directory bytes.
+
+Do NOT define it only as:
+
+HEAD blobs
+
+because that cannot describe staged new/modified files before commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. L26 GENERATION WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The new canonical closeout order is:
+
+1. edit intended source/docs
+2. ensure no unrelated changes
+3. stage all intended non-baseline changes
+4. if tracked path set changed:
+   generate DIRECTORY_TREE.txt from the index path set
+5. stage DIRECTORY_TREE.txt
+6. generate root SHA256SUMS from stage-0 index blob bytes
+7. stage SHA256SUMS
+8. run independent baseline verifier
+9. run full gate
+10. inspect staged diff
+11. commit
+
+The generator must explain this workflow in its help/docstring.
+
+Do not quietly hash an unstaged change.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. GENERATOR — INDEX CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Modify:
+
+scripts/generate_baseline_artifacts.py
+
+Requirements:
+
+Path authority:
+
+Git stage-0 index.
+
+Reject:
+
+unmerged entries / non-stage-0 conflict state.
+
+`tree` mode:
+
+derive the tracked path set from the index.
+
+`sums` mode:
+
+for every tracked stage-0 path except files whose basename is exactly:
+
+SHA256SUMS
+
+hash the canonical Git blob content represented by the index.
+
+Do NOT open working-directory file bytes as checksum authority.
+
+Efficient implementation is preferred.
+
+Do not launch hundreds of heavyweight shell processes if one Git batch plumbing command can do the same safely.
+
+No new Python dependency.
+
+Use Git plumbing available in normal Git.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. INDEX CONSISTENCY GUARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`sums` mode must fail clearly if the developer has tracked unstaged semantic changes that are not represented in the index.
+
+Purpose:
+
+prevent:
+
+edit file
+→ forget `git add`
+→ generate manifest for old index bytes
+→ think the new work is covered
+
+A line-ending-only worktree representation that Git's clean filter considers identical to the index is not a semantic unstaged change and should not be treated as one.
+
+Do not inspect raw EOL bytes and call them dirty when Git itself says the file is clean.
+
+The baseline is intentionally the canonical staged content.
+
+A new untracked file is not part of the baseline until staged/tracked.
+
+Document this.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. VERIFIER — INDEPENDENT INDEX PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Modify:
+
+scripts/verify_baseline_artifacts.py
+
+It must independently verify root SHA256SUMS against:
+
+Git stage-0 index blob content.
+
+Do NOT import the generator.
+
+Do NOT share a hashing helper with the generator.
+
+The verifier may use separate Git plumbing calls / separate parsing.
+
+Required checks retain existing guarantees:
+
+- malformed entry
+- duplicate
+- stale
+- tracked but unlisted
+- manifest hashes itself
+- ordering
+- LF-only manifest/tree
+- host path
+- DIRECTORY_TREE names baseline files
+
+Add:
+
+- unmerged index rejection
+- manifest digest mismatch against canonical index blob bytes
+- clear diagnostic naming the path
+- clear note that raw disk bytes are not the root-baseline authority
+
+Do not auto-fix.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. STANDARD `sha256sum -c` SEMANTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After ADR-0029:
+
+root repository `SHA256SUMS`
+
+is NOT guaranteed to validate arbitrary checked-out raw working-directory bytes when checkout filters intentionally transform representation.
+
+Canonical verifier:
+
+python scripts/verify_baseline_artifacts.py
+
+However:
+
+a `git archive` extraction should contain canonical Git blob content
+unless an explicit export transformation exists.
+
+Therefore a strong independent proof is:
+
+git archive <candidate>
+→ extract outside repository
+→ `sha256sum -c SHA256SUMS`
+→ all entries OK
+
+If repository attributes include an archive-transforming rule:
+
+measure and document it.
+
+Do not assume.
+
+Distribution package `SHA256SUMS.txt` remains raw artifact checksums.
+
+Firmware Release Bundle `SHA256SUMS` remains raw release-evidence checksums.
+
+Do not conflate the three checksum domains.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. ADD BASELINE VERIFIER TO AUTHORITATIVE DRIFT GATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L26 is not closed if CI never executes the verifier.
+
+Add an explicit drift step in:
+
+scripts/check.py
+
+Equivalent authority:
+
+python scripts/verify_baseline_artifacts.py
+
+The drift group must now prove baseline integrity on every authoritative CI run.
+
+Expected step-count movement:
+
+drift:
+7 → 8
+
+full default gate:
+16 → 17
+
+These are expected directions, not numbers to fake.
+
+Report actual numbers.
+
+Do not create another workflow job.
+
+The authoritative job set remains:
+
+10 jobs.
+
+Generated output drift simply gains one real step.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. L26 TESTS / MUTATION PROOFS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before declaring L26 closed, prove:
+
+A. Windows current checkout
+
+With the measured `core.autocrlf` / attributes environment:
+
+verifier PASS.
+
+B. clean detached worktree
+
+Verifier PASS.
+
+C. alternate checkout EOL policy
+
+Use a disposable worktree or clone with a materially different `core.autocrlf` setting.
+
+Verifier PASS because it checks index blob bytes.
+
+Do not modify the user's global Git config.
+
+Use worktree/local config only.
+
+D. Git archive
+
+Archive exact candidate commit.
+
+Extract outside repository.
+
+Run root:
+
+sha256sum -c SHA256SUMS
+
+Expected:
+all entries OK
+
+unless a measured export filter exists.
+
+E. mutation — stale manifest
+
+Modify and stage a tracked source/docs file without regenerating root sums.
+
+Verifier must FAIL.
+
+F. mutation — unstaged semantic edit
+
+Modify a tracked file but do not stage it.
+
+Generator `sums` must refuse or otherwise clearly prevent generating a manifest that silently ignores the edit.
+
+G. mutation — EOL transport only
+
+Create a disposable condition where worktree representation differs only in a way Git cleans back to the same index blob.
+
+The index-based verifier must behave according to ADR-0029,
+not according to raw worktree byte identity.
+
+Record what Git reports.
+
+Restore every mutation safely.
+
+No mutation lands.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. L26 FINAL DISPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+L26 may become:
+
+CLOSED
+
+only if:
+
+- ADR-0029 Accepted
+- generator hashes index blobs
+- verifier independently hashes index blobs
+- drift CI runs verifier
+- Windows current host PASS
+- detached worktree PASS
+- alternate checkout policy PASS
+- Git archive raw `sha256sum -c` proof PASS or measured exception documented
+- mutation proofs bite
+
+If any cross-checkout case remains ambiguous:
+
+L26 =
+REDUCED / CARRIED_FORWARD
+
+and P5 closure must explain whether that ambiguity is a blocker.
+
+Do not mark CLOSED from one machine.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. L15 FINAL PRESENTATION RESIDUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit E Architect decision:
+
+Option E
+
+Wire identity stays:
+
+SourceType::ElfProgramHeader
+
+analysis:1 token:
+"elf.program-header"
+
+No schema change.
+
+No migration 0006.
+
+No analysis:2.
+
+However Commit E recorded one remaining human-facing residue:
+
+Evidence Inspector renders the stored legacy token verbatim.
+
+Commit F is authorized to close ONLY that display residue.
+
+Use a display-only caption mapping.
+
+Human-facing caption:
+
+ELF address + flags evidence
+
+Do not rename the stored/wire value.
+
+Do not change exported JSON.
+
+Do not change SQLite.
+
+Do not change goldens representing public wire output.
+
+Add UI regression proving:
+
+stored:
+elf.program-header
+
+renders to user as:
+
+ELF address + flags evidence
+
+while the underlying token remains unchanged.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. L15 FINAL STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Even after display residue is closed:
+
+L15 remains:
+
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+
+Reason:
+
+analysis:1 permanently retains the inaccurate historical compatibility name.
+
+Do not mark the underlying limitation CLOSED.
+
+Record two layers:
+
+user-facing presentation residue:
+CLOSED
+
+legacy wire compatibility debt:
+CARRIED_FORWARD
+
+A real rename belongs only to a future:
+
+analysis:2
+
+under separate authority.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. F1 COMMIT SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F1 preferred commit message:
+
+P5: make repository baseline checksums checkout-independent
+
+Allowed F1 product/tooling scope:
+
+09_ADR/ADR-0029-*.md
+scripts/generate_baseline_artifacts.py
+scripts/verify_baseline_artifacts.py
+scripts/check.py
+L26 tests / test tooling
+Details.tsx display-only L15 caption
+related UI test
+narrow technical/user docs
+P5 F design/evidence doc
+prompt archive
+integrity artifacts
+
+Do NOT in F1:
+
+run §64
+write P5 PASS
+write Productization COMPLETE
+tag/release
+sign
+notarize
+publish
+change license
+add updater
+change public portable schemas
+change migration schema
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. F1 DESIGN RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before implementation create:
+
+P5_VALIDATION/P5_COMMIT_F_DESIGN.md
+
+Required:
+
+- L26 problem statement
+- ADR-0029 decision
+- index-vs-HEAD-vs-worktree comparison
+- generation sequence
+- verifier design
+- CI integration
+- mutation plan
+- L15 display-only plan
+- exact public-contract non-impact
+- §64 test plan
+- owner-store isolation plan
+- F1/F2/F3 commit boundaries
+- STOP conditions
+
+Do not write implementation before the decision is explicit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. F1 PUBLIC CONTRACT STOP RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F1 must not change:
+
+analysis:1
+diff:1
+gate-results:1
+accepted-reviews:1
+release-manifest:1
+SQLite schema
+SCHEMA_VERSION
+release identity
+ADR-0028 semantics
+
+If implementation appears to require any of these:
+
+STOP that subproblem.
+
+Return to Architect.
+
+L26 is repository tooling semantics,
+not product portable-schema semantics.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. F1 DEPENDENCY / CAPABILITY RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No new Rust dependency.
+
+No new npm dependency.
+
+No new Python package.
+
+No new Tauri capability.
+
+No network.
+
+No telemetry.
+
+No generic shell IPC.
+
+Git plumbing is used only by repository Python tooling,
+not exposed as a product IPC command.
+
+If any dependency/capability appears necessary:
+
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. F1 LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+
+python scripts/verify_baseline_artifacts.py
+
+plus:
+
+L26 cross-checkout/archive proofs.
+
+Starting direct counts:
+
+Rust = 868
+UI = 217 / 8 files
+full gate = 16 / 16
+drift = 7 / 7
+
+Expected:
+
+UI may increase due L15 regression.
+full gate likely becomes 17.
+drift likely becomes 8.
+
+Report actual counts.
+
+Do not force expected numbers.
+
+No SKIP in required closure groups.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. F1 CLEAN DETACHED VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create a clean detached worktree at exact F1 candidate tree before commit if possible,
+or at the F1 commit immediately after creation before push.
+
+Required:
+
+- baseline verifier PASS
+- full gate PASS
+- package group where local tool exists
+- no untracked dependency
+- no raw working-directory checksum assumption
+- no fixture regression
+
+Do not remove unrelated worktrees.
+
+Remove only the worktree created by this round.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. F1 CANDIDATE COMMIT / CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit F1.
+
+Push normal fast-forward.
+
+Find remote workflow by exact SHA.
+
+Required authoritative set:
+
+10 jobs
+
+all completed / success.
+
+Read every job.
+
+Expected load-bearing changes:
+
+Generated output drift now includes baseline verifier.
+
+If the first attempt fails because repository logic/content fails:
+
+do NOT rerun.
+
+Fix in a new commit.
+
+If the failure occurs before repository logic due runner provisioning/toolchain state:
+
+capture exact log,
+corroborate,
+and a one-time failed-job rerun may be allowed,
+but the attempt-1 red history must remain explicit.
+
+Do not call attempt 2 "first-attempt green".
+
+Only after F1 remote authority is acceptable may §64 begin.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. USE THE EXACT F1 CI-BUILT WINDOWS ARTIFACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For §64:
+
+prefer the Windows Application Package artifact produced by the exact F1 CI run.
+
+Download that workflow artifact.
+
+Do NOT substitute:
+
+- a package from an older head
+- local `cargo run`
+- raw `target/release` binary
+- Vite dev server
+- a locally rebuilt installer when CI artifact is available
+
+Verify:
+
+artifact set metadata
+SHA256SUMS.txt
+NSIS installer filename
+installer version
+installer SHA-256
+CLI companion
+artifact-metadata.json
+head SHA association where metadata supports it
+
+Record exact artifact identity.
+
+This is the package P5 closure accepts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. §64 PRE-INSTALL SAFETY SNAPSHOT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any installation:
+
+close all FirmwareSight processes.
+
+Record:
+
+- installed app presence/absence
+- install directory state
+- Start Menu state
+- uninstall registry state
+- owner app-data directory state
+- owner main DB existence/hash/size
+- owner WAL existence/hash/size
+- owner SHM existence/hash/size
+- sibling smoke/test stores
+- current Git HEAD/status
+- installer SHA
+- evidence root
+
+The owner store has historically been older than schema 5.
+
+Therefore it MUST NOT be opened by the candidate.
+
+Do not let the installed app migrate the owner store.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. OWNER STORE ISOLATION — MANDATORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use the already-approved discipline:
+
+1. hash owner main / WAL / SHM
+2. make an independent byte-for-byte backup on a distinct evidence location
+3. verify backup hashes
+4. park the owner files out of the application store path
+5. verify no FirmwareSight process holds them
+6. create/use only disposable test state
+7. after all installed testing:
+   close app
+8. preserve test evidence
+9. restore original owner files
+10. verify all original hashes exact
+
+Required final:
+
+ORIGINAL_DB_RESTORED = YES
+
+ORIGINAL_DB_SHA_MATCH = YES
+
+If any owner hash mismatch:
+
+STOP.
+
+This becomes an S0 safety blocker for P5 closure.
+
+Do not "repair" the owner's database.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. INSTALLED OLD-SCHEMA MIGRATION PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before the fresh §64 journey,
+prove the actual installed F1 application can exercise the already-tested migration/backup path.
+
+Use a synthetic/disposable old-schema database.
+
+Preferred:
+
+v4
+
+because it exercises one migration and pre-migration backup clearly.
+
+v2 is acceptable if the repository already has a reliable synthetic v2 builder.
+
+Do NOT use the owner's real database contents.
+
+Place the synthetic old-schema store at the disposable app-data location.
+
+Launch the installed candidate.
+
+Verify:
+
+- application opens or reports migration result correctly
+- pre-migration snapshot created
+- snapshot name identifies from-version → v5
+- snapshot opens
+- snapshot schema = old version
+- snapshot rows preserved
+- live DB schema = v5
+- live rows preserved
+- integrity_check healthy on both
+- no repeated backup on second reopen
+- History can read the migrated stored facts if the synthetic data includes supported history rows
+
+If startup fails closed:
+
+capture exact typed error and classify.
+
+A product failure here blocks P5.
+
+After proof:
+
+close app
+preserve migration test store + snapshot in evidence root
+remove disposable app-store copy
+
+Then start the fresh §64 journey from an empty disposable app store.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. §64 FULL INSTALLED JOURNEY — ONE CONTIGUOUS RUN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run one contiguous end-to-end journey against the installed F1 candidate:
+
+Install
+→ first-run onboarding
+→ Analyze
+→ Analyze second build
+→ Compare
+→ Release Gate
+→ Release Bundle
+→ History
+→ Diagnostics
+→ close
+→ reopen
+→ History persistence
+→ repair/reinstall
+→ uninstall
+→ reinstall
+→ retained-data verification
+
+Do not split the core proof across different application versions.
+
+Do not replace a UI verb with direct DB writes.
+
+Supporting read-only DB inspection is allowed as independent evidence.
+
+Core product actions must be driven through the installed product.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. DISPOSABLE FIRMWARE PROJECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create a disposable firmware project outside the repository.
+
+Reuse existing committed fixtures by COPYING them into the disposable project.
+
+Do not modify repository fixtures.
+
+Use a real supported pair suitable for Compare,
+preferably the existing P2 base/target evidence.
+
+Prepare:
+
+- target ELF/MAP
+- baseline ELF/MAP
+- firmwaresight.toml
+- Release Notes
+- local Git repo where Gate expects one
+- clean commit/tag/version context required by current policy
+- budgets / growth policy required for a happy Gate
+
+Do not invent a new policy format.
+
+Use current canonical project schema.
+
+Record every file hash.
+
+No private user project.
+
+No owner repository.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. FIRST-RUN ONBOARDING ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On the installed F1 app with fresh disposable app state:
+
+Verify that without opening repository docs the user can discover:
+
+- FirmwareSight purpose
+- first action = choose ELF
+- optional MAP role
+- Analyze → Compare → Release flow
+- PASS / REVIEW / BLOCK / UNKNOWN / N/A meanings
+- local-first statement
+- where project policy enters
+- Help/About
+- History
+- Diagnostics
+
+Classify:
+
+DISCOVERABLE
+
+or:
+
+DISCOVERABLE_WITH_MINOR_CONFUSION
+
+or:
+
+NOT_DISCOVERABLE
+
+This is an internal heuristic.
+
+Do NOT call it V1 user validation.
+
+No external user participated.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. ANALYZE ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Through installed UI and native dialogs:
+
+Analyze baseline build.
+
+Verify:
+
+- correct selected leaf name
+- correct SHA
+- architecture
+- entry
+- memory
+- evidence states
+- MAP evidence
+- no host path displayed
+- no stale previous-result ambiguity
+- History receives build record
+
+Then Analyze target build.
+
+Verify same categories.
+
+Do not seed builds directly into SQLite.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. COMPARE ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use the two builds created through installed Analyze.
+
+Verify:
+
+- correct baseline/target
+- FLASH/nonvolatile delta
+- RAM delta
+- evidence-basis human captions
+- no raw Core enum wording
+- object/module vs object-level wording remains distinct
+- Section changes filter
+- Symbol changes filter
+
+The L15 human-facing residue should also be inspected where relevant:
+
+no user-facing literal:
+
+elf.program-header
+
+where a semantic caption is expected.
+
+If the portable JSON/export contains that token:
+
+that is correct legacy compatibility,
+not a UI defect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. RELEASE GATE ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run a real happy-path Gate against the disposable project.
+
+Required:
+
+- project policy discovered
+- Git state valid
+- expected version valid
+- required artifacts valid
+- hashes valid
+- memory budgets valid
+- growth policy valid
+- Release Notes present
+- Unknown/review semantics as current policy defines
+
+Expected final Gate disposition:
+
+PASS
+
+unless the chosen canonical test project intentionally needs a REVIEW acceptance.
+
+Prefer a clean PASS path for the closure journey.
+
+Record:
+
+Gate run id
+10 findings
+states
+effective disposition
+
+Do not bypass Gate to reach Bundle.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. RELEASE BUNDLE ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+From that live Gate result:
+
+prepare a real Release Bundle through installed UI.
+
+Verify:
+
+- Bundle allowed only after qualifying Gate
+- source artifacts re-hashed
+- Gate revalidated
+- release id deterministic for same observed context
+- output directory recognized correctly
+- Release Bundle generated
+- release-manifest.json valid
+- SHA256SUMS valid
+- analysis.json valid
+- diff.json if expected
+- gate-results.json
+- accepted-reviews.json
+- report HTML
+- Release Notes exact bytes
+- no host absolute paths
+
+Independently relocate Bundle.
+
+Run independent reader/verifier.
+
+Do not confuse this Release Bundle with the FirmwareSight installer package.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. HISTORY — MANDATORY INSTALLED ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is the missing §64 evidence.
+
+Open History in the installed app.
+
+Must observe at minimum:
+
+- both analyzed builds
+- Gate run
+- release record
+
+Verify:
+
+- bounded/paginated read
+- deterministic sort
+- build details
+- Gate disposition
+- release id / manifest digest
+- no artifact absolute source path
+- no project root
+- no DB path
+- no bundle destination
+- no edit/delete controls
+- keyboard detail access
+
+Then:
+
+close app.
+
+Move the disposable firmware source project away.
+
+Reopen app.
+
+History must still show the persisted facts.
+
+No source firmware file should be required to read History.
+
+If History fails because source path disappeared:
+
+P5 blocker.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. DIAGNOSTICS — FINAL INSTALLED ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+From the same installed run:
+
+open Help/About → Diagnostics.
+
+Verify:
+
+- product version
+- OS/arch
+- store schema v5
+- integrity healthy
+- Git availability/version
+- supported cohort
+- store counts reflect created builds/Gate/release
+- logical store filename only
+- export through native dialog
+
+Independently parse export.
+
+Assert absence of:
+
+- firmware absolute path
+- project root
+- DB path
+- bundle destination
+- Git remote
+- username/home
+- Release Notes body
+- symbol names
+- firmware bytes
+- MAP contents
+- environment dump
+
+Legacy L15 wire token may appear only if the Diagnostics contract explicitly exports stored evidence identifiers.
+If Diagnostics does not need it:
+prefer absence.
+
+No network.
+
+No telemetry.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. CLOSE / REOPEN ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Close via normal app UI/window.
+
+Verify process exits.
+
+Reopen from normal OS surface:
+
+Start Menu shortcut / installed application entry.
+
+Verify:
+
+- no dev server
+- no repo path
+- History remains
+- Diagnostics remains
+- last persisted records correct
+- no duplicate Gate/release records from simple reopen
+- no migration rerun on current schema
+- DB integrity healthy
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. REPAIR / REINSTALL ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run the same exact F1 installer again over the installed app.
+
+Use the normal installer maintenance/reinstall flow.
+
+Record:
+
+- whether app must be closed/killed
+- files replaced
+- Start Menu behavior
+- registry behavior
+- version
+- user-data store hash before/after where stable
+- History row counts before/after
+
+Expected:
+
+application binaries refreshed
+user data preserved
+History preserved
+schema remains v5
+no migration rerun
+no duplicate records caused solely by reinstall
+
+No PATH modification.
+
+No shell-profile modification.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. UNINSTALL POLICY — ARCHITECT PRODUCT DECISION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 final uninstall policy:
+
+UNINSTALL REMOVES APPLICATION BINARIES / SHORTCUTS / INSTALLER REGISTRATION.
+
+UNINSTALL PRESERVES LOCAL USER DATA / HISTORY BY DEFAULT.
+
+No silent user-data destruction.
+
+An empty install directory may remain after uninstall depending on NSIS/runtime cleanup timing.
+
+That empty directory is NOT the user-data store and is not a data-loss defect.
+
+Document it as implementation residue if reproduced.
+
+Do not promise the install directory itself is always removed.
+
+Do promise:
+
+application executable is removed
+uninstaller is removed
+Start Menu product shortcut removed
+uninstall registry entry removed
+app-data store preserved
+
+If any executable remains runnable after uninstall:
+
+block P5.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. UNINSTALL ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Through actual uninstaller UI:
+
+uninstall.
+
+Verify:
+
+- installed executable absent
+- uninstaller absent
+- Start Menu entry absent
+- uninstall registration absent
+- user app-data remains
+- DB remains
+- History data remains on disk
+- no firmware project files touched
+- no arbitrary directory deletion
+- PATH unchanged
+
+Record whether:
+
+%LOCALAPPDATA%\FirmwareSight
+
+is:
+
+absent
+
+or:
+
+present but empty
+
+Both may be acceptable under the policy above,
+but actual behavior must be reported.
+
+No silent cleanup beyond installer-owned files.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. REINSTALL AFTER UNINSTALL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Install the same exact F1 NSIS candidate again.
+
+Launch from normal OS surface.
+
+Verify:
+
+- same version
+- existing v5 DB opens
+- no migration rerun
+- History still contains build/Gate/release records
+- Diagnostics store counts remain coherent
+- no duplicate records from install alone
+- core product works
+
+This is the final retained-data proof.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. FINAL TEST-STORE CLEANUP / OWNER RESTORE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After all §64 evidence is captured:
+
+close FirmwareSight.
+
+Verify no installer/uninstaller/FirmwareSight processes.
+
+Preserve the disposable test store and required screenshots/logs under the external evidence root.
+
+Remove installed test application if pre-test state was uninstalled.
+
+Restore owner app-data main/WAL/SHM byte-exact.
+
+Verify:
+
+ORIGINAL_DB_RESTORED = YES
+
+ORIGINAL_DB_SHA_MATCH = YES
+
+Also verify:
+
+owner store was never opened by the F1 candidate.
+
+If owner store was accidentally opened/migrated:
+
+STOP.
+
+Do not continue to P5 closure.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. OFFLINE / SELF-CONTAINMENT WORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The installed application must demonstrate:
+
+core workflow does not require a network service.
+
+Use prior capability/security evidence plus the installed run.
+
+If safely observable:
+
+record no product network dependency.
+
+Do not disable the user's entire machine network if that could disrupt unrelated work.
+
+Correct wording:
+
+OBSERVED_NO_NETWORK_DEPENDENCY
+
+not:
+
+PROVED NEVER NETWORKS
+
+The host has Rust/Node/Cargo installed,
+so do not falsely claim a clean machine proved those tools are absent.
+
+What can be proved:
+
+installed app launched from %LOCALAPPDATA%
+not target/
+not Vite
+not cargo run
+
+and completed the workflow without invoking the developer server.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. F2 CONSOLIDATION DOCUMENTS — REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After §64 succeeds, create/update the complete P5 closure pack.
+
+Required files:
+
+P5_VALIDATION/P5_MIGRATION_RECOVERY_REPORT.md
+
+P5_VALIDATION/P5_HISTORY_DIAGNOSTICS_REPORT.md
+
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+
+P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md
+
+P5_VALIDATION/P5_SECURITY_SUPPORTABILITY_REVIEW.md
+
+P5_VALIDATION/P5_EXECUTION_REPORT.md
+
+P5_VALIDATION/P5_EXIT_CHECKLIST.md
+
+P5_VALIDATION/P5_RELEASE_READINESS.md
+
+Update existing:
+
+P5_INSTALL_RECOVERY_REPORT.md
+
+P5_CI_AUTHORITY.md
+
+P5_PRODUCTIZATION_AUDIT.md
+only where final dispositions need reconciliation
+
+Do not copy whole old reports into new files.
+
+Consolidate and point to the authoritative evidence already in the repository.
+
+No contradictory duplicate facts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. MIGRATION RECOVERY REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5_MIGRATION_RECOVERY_REPORT.md must consolidate:
+
+- schema history 1→5
+- migration 0005
+- pre-migration online backup
+- WAL-safe rationale
+- snapshot naming
+- bounded retention
+- failure blocks migration
+- fresh→5
+- v1→5
+- v2→5
+- v3→5
+- v4→5
+- v5 reopen
+- integrity checks
+- row preservation
+- installed synthetic old-schema migration proof from Commit F
+- no owner-store migration
+- recovery instructions
+- no one-click destructive auto-restore
+
+Distinguish:
+
+unit/integration evidence
+
+from:
+
+installed-package evidence.
+
+Do not imply every migration version was installed-app tested if only one was.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+47. HISTORY / DIAGNOSTICS REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5_HISTORY_DIAGNOSTICS_REPORT.md must consolidate:
+
+History:
+
+- builds
+- Gate runs
+- releases
+- pagination
+- filters
+- detail
+- source-independent read
+- no path leak
+- persistence across reopen
+- persistence across uninstall/reinstall
+- installed §64 evidence
+
+Diagnostics:
+
+- 41-key allowlist
+- eight structs
+- integrity state
+- Git facts
+- runtime facts
+- store counts
+- logical store only
+- positive-control privacy tests
+- installed export
+- no host/project/db paths
+- no upload/network
+
+Make clear:
+
+History = persisted product facts
+
+Diagnostics = sanitized support environment facts
+
+They are not portable firmware schemas.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+48. FINAL KNOWN LIMITATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+
+Every inherited G2/P5 limitation must be accounted for.
+
+No dropped rows.
+
+Use one of:
+
+CLOSED
+REDUCED
+CARRIED_FORWARD
+OWNER_DECISION
+NOT_REPRODUCED
+
+At minimum reconcile:
+
+L1 peak RSS
+L2 ~500 MiB UI workload
+L3 fuzzing
+L4 platform/DPI
+L5 layout / ELF / DWARF
+L6 file_offset reasons
+L7 symbol address reasons
+L8 object/module attribution
+L9 native select path
+L10 History
+L11 real-user comprehension/V0
+L12 RustSec advisories
+L13 license
+L14 update_goldens ordering
+L15 legacy wire identifier
+L16 custom-protocol packaging
+L17 index blind spot
+L18 local DB path semantics
+L19 wording
+L20 enum wording
+L21 window title
+L22 line-ending release identity
+L23 async UI races
+L24 Windows scratch cleanup
+L25 Apply filter
+L26 root SHA256SUMS
+
+Plus any P5-discovered findings.
+
+Expected broad direction:
+
+L1 =
+CLOSED AS MEASURED / or REDUCED
+Do not say optimized.
+
+L2 =
+REDUCED / MEASURED FOR TESTED WORKLOAD
+
+L3 =
+CARRIED_FORWARD
+
+L4 =
+REDUCED
+
+L5 =
+REDUCED
+
+L6/L7 =
+CLOSED
+
+L8 =
+CARRIED_FORWARD
+
+L9 =
+reconcile with installed UI evidence or carry
+
+L10 =
+CLOSED
+
+L11 =
+CARRIED_FORWARD
+
+L12 =
+CARRIED_FORWARD
+
+L13 =
+OWNER_DECISION
+
+L14 =
+CLOSED
+
+L15 =
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+with user-facing residue CLOSED.
+
+L16 =
+CLOSED
+
+L17 =
+REDUCED
+
+L18 =
+CLOSED / EXPECTED LOCAL-ONLY STORAGE semantics documented
+
+L19/L20/L21/L22 =
+CLOSED
+
+L23 =
+REDUCED
+
+L24 =
+CLOSED / NOT_REPRODUCED
+
+L25 =
+NOT_REPRODUCED
+
+L26 =
+CLOSED only if ADR-0029 proofs all pass.
+
+Do not force these statuses if evidence contradicts them.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+49. SECURITY / SUPPORTABILITY FINAL REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_SECURITY_SUPPORTABILITY_REVIEW.md
+
+Verify final tree:
+
+- no network capability added
+- no telemetry
+- no generic shell IPC
+- no generic filesystem read IPC
+- no SQL IPC
+- no source path leak
+- no DB path leak
+- no Git remote leak
+- Diagnostics allowlist
+- History bounded DTOs
+- package contains expected assets only
+- Git product adapter remains read-only
+- CSP restrictive
+- no updater network permission
+- no signing secret
+- no private key
+- dependency policy green
+
+Correct security wording:
+
+dependency policy passes with documented accepted risks.
+
+Do NOT write:
+
+security clean
+zero vulnerabilities
+
+L12 advisories remain visible if still accepted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+50. USER DOCUMENTATION FINAL AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Audit the canonical docs required by the original P5 prompt:
+
+Getting Started
+Installation
+Analyze Guide
+Compare Guide
+Release Gate Guide
+Release Bundle Guide
+History Guide
+CLI Guide
+firmwaresight.toml Reference
+Status Semantics
+Support Matrix
+Known Limitations
+Troubleshooting
+Diagnostics Guide
+Privacy / Local-First
+Upgrade / Reinstall / Uninstall
+Bundle Verification
+Package Verification
+Signing / Notarization Readiness
+
+Update only gaps.
+
+Ensure uninstall policy matches measured §64 behavior:
+
+- app binaries removed
+- user data preserved
+- empty install directory may remain
+
+Do not claim data deletion that does not happen.
+
+Do not tell users to delete app data unless they explicitly want to reset local history.
+
+Do not expose owner-specific paths.
+
+Use environment-variable form.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+51. RELEASE READINESS FINAL RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_RELEASE_READINESS.md
+
+Required final states:
+
+SIGNING_READINESS =
+READY_NOT_EXECUTED
+
+NOTARIZATION_READINESS =
+READY_NOT_EXECUTED
+
+UPDATE_MODE =
+MANUAL_UPGRADE_READY
+
+OPEN_SOURCE_LICENSE_DECISION =
+PENDING_OWNER_CONFIRMATION
+
+PUBLIC_DISTRIBUTION =
+NOT_AUTHORIZED
+
+GITHUB_RELEASE =
+NOT_CREATED
+
+TAG =
+NOT_CREATED
+
+PRIVATE_BETA =
+NOT_AUTHORIZED
+
+RC =
+NOT_AUTHORIZED
+
+GA =
+NOT_AUTHORIZED
+
+Signing readiness means:
+
+pipeline placement + credential model + verification commands documented.
+
+It does NOT mean:
+
+signed.
+
+Notarization readiness means:
+
+workflow/credential requirements documented.
+
+It does NOT mean:
+
+notarized.
+
+Manual-upgrade-ready means:
+
+install newer package over current,
+preserve app data,
+run schema migrations fail-closed.
+
+It does NOT mean:
+
+automatic updater.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+52. LICENSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT select a license.
+
+Do NOT add LICENSE.
+
+Do NOT change:
+
+Cargo license = Proprietary
+
+unless owner explicitly makes a license choice in a separate decision.
+
+Final P5 technical closure may still pass.
+
+But final report must state:
+
+OPEN_SOURCE_LICENSE_DECISION =
+PENDING_OWNER_CONFIRMATION
+
+and:
+
+PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM =
+BLOCKED BY OWNER LICENSE DECISION
+
+Do not call the repository a finished public open-source release.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+53. PERFORMANCE FINAL WORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Carry measured Post-G2 evidence:
+
+valid ELF:
+519,179,252 bytes
+
+symbols:
+~2,020,073
+
+warm Analyze:
+~4.73–4.89 s
+
+cold first read:
+~68.7 s
+
+peak observed working set:
+~1,428 MB
+
+no Not Responding
+no crash
+
+Correct closure wording:
+
+near-500-MiB UI =
+MEASURED
+
+first-use <60 s at that workload =
+PARTIAL / environment-sensitive
+
+RSS =
+MEASURED FOR TESTED WORKLOAD
+
+Do NOT claim:
+
+performance optimized
+<500 MB memory target achieved
+all large files under 60 s
+
+No performance redesign in Commit F unless §64 discovers a release blocker.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+54. F2 MUST BE DOCS / EVIDENCE ONLY UNLESS A REAL BLOCKER EXISTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After F1 candidate is remotely green and §64 is executed:
+
+F2 should normally contain only:
+
+P5_VALIDATION
+user docs
+governance docs
+prompt/evidence indexing
+DIRECTORY_TREE / SHA256SUMS under ADR-0029 workflow
+
+No product source.
+
+No fixture changes.
+
+No dependency.
+
+No migration.
+
+No workflow change.
+
+If §64 exposes a genuine product defect:
+
+DO NOT bury the fix in F2.
+
+Classify severity.
+
+Create a separate narrow corrective product commit,
+rerun local gate,
+remote 10/10,
+download the NEW exact Windows artifact,
+and rerun the affected installed acceptance.
+
+If S0/S1:
+
+P5 closure blocked until repaired and revalidated.
+
+Do not keep using the old artifact after code changes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+55. F2 CANDIDATE PROVENANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F2 may be documentation/evidence-only after the installed F1 artifact.
+
+Prove:
+
+git diff F1..F2
+
+contains no product/package source path:
+
+crates/**
+apps/**
+scripts/**
+fixtures/**
+schemas/**
+migrations/**
+.github/**
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+
+except repository baseline integrity files / docs explicitly intended for F2.
+
+Important nuance:
+
+scripts/** should be unchanged between F1 and F2 because L26 tooling already landed in F1.
+
+If F2 modifies product/package/tooling bytes,
+the installed F1 artifact no longer represents the final candidate.
+
+Then:
+
+new package + affected installed revalidation is required.
+
+Do not waive this.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+56. F2 FINAL CANDIDATE LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On F2 tree:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+
+python scripts/verify_baseline_artifacts.py
+
+clean detached worktree validation
+
+Git archive baseline validation
+
+Expected gate movement after L26:
+
+report actual,
+likely:
+
+full gate = 17
+drift = 8
+
+Do not fake counts.
+
+No SKIP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+57. F2 FINAL CANDIDATE COMMIT / REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit F2.
+
+Suggested message:
+
+P5: complete installed productization acceptance and closure evidence
+
+Push normal fast-forward.
+
+Find workflow by exact F2 SHA.
+
+Required:
+
+10 / 10 authoritative jobs
+
+all completed / success.
+
+Read every job.
+
+If repository-content failure:
+
+fix it.
+
+If infrastructure failure before repo logic:
+
+record attempt truthfully.
+
+Do not erase failed attempts.
+
+F2 is the final closure candidate.
+
+Do NOT set P5 PASS_COMPLETE yet.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+58. P5 EXIT CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_EXIT_CHECKLIST.md
+
+Every item must be:
+
+PASS
+CARRIED_FORWARD_NONBLOCKING
+OWNER_DECISION_NONBLOCKING
+BLOCKED
+
+No unchecked box with a PASS verdict.
+
+Required categories:
+
+Packaging
+Onboarding
+History
+Diagnostics
+Migration/recovery
+Compatibility
+Design/accessibility
+Documentation
+Security/supportability
+Windows real install
+Version identity
+Repository baseline integrity
+Signing readiness
+Notarization readiness
+Manual update readiness
+License
+CI
+Clean detached tree
+Owner DB restore
+
+P5 cannot pass if any required engineering item is BLOCKED.
+
+License may be:
+
+OWNER_DECISION_NONBLOCKING
+
+for technical P5,
+while blocking public open-source release claim.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+59. P5 EXECUTION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_EXECUTION_REPORT.md
+
+This is the durable stage narrative.
+
+Required:
+
+Start head:
+d83175a... P5 opening baseline
+
+Final product/tooling candidate:
+F1 SHA
+
+Installed artifact:
+exact F1 CI run + artifact hash
+
+Final evidence candidate:
+F2 SHA
+
+P5 closure successor:
+F3 SHA after created
+
+Summarize:
+
+Commit A
+Commit B
+Commit C
+Commit D
+Commit E
+Commit F
+
+Include red runs.
+
+Do NOT create a false all-green history.
+
+Important failures that remain in history:
+
+- version head / compare race
+- initial package jobs that skipped build
+- Commit D product head 8/10
+- Commit E normalization Run 67 attempt 1 runner toolchain conflict
+
+Classify product/test/infra accurately.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+60. FINAL DESKTOP ACCEPTANCE REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md
+
+Record the exact §64 journey.
+
+For each step:
+
+action
+expected
+actual
+evidence
+verdict
+
+Include:
+
+installer SHA
+F1 SHA
+CI run
+Windows version
+WebView if measured
+store isolation
+old-schema migration
+onboarding
+Analyze ×2
+Compare
+Gate
+Bundle
+History
+Diagnostics
+close/reopen
+reinstall
+uninstall
+reinstall
+owner restore
+
+Report any partial.
+
+Do not hide UI confusion.
+
+Do not call automated operator behavior a real external user study.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+61. FINAL CI AUTHORITY RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update:
+
+P5_VALIDATION/P5_CI_AUTHORITY.md
+
+Record:
+
+F1 candidate run
+F2 candidate run
+
+and every relevant attempt.
+
+Do not write F3 run inside F3 itself.
+
+F3's run remains external evidence.
+
+The authoritative set stays ten jobs unless the Architect separately changes it.
+
+The drift job step count may increase,
+but that does not create an eleventh authoritative job.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+62. F2 READY-FOR-CLOSURE GATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before F3 is authorized internally, prove:
+
+F2 remote CI =
+10 / 10 acceptable
+
+§64 =
+PASS
+
+installed old-schema migration =
+PASS
+
+History installed =
+PASS
+
+Diagnostics installed =
+PASS
+
+uninstall/reinstall data semantics =
+PASS
+
+owner restore =
+YES / SHA MATCH YES
+
+L26 =
+CLOSED
+
+L15 user-facing residue =
+CLOSED
+
+L15 wire debt =
+CARRIED_FORWARD
+
+license =
+PENDING OWNER CONFIRMATION
+
+signing =
+READY_NOT_EXECUTED
+
+notarization =
+READY_NOT_EXECUTED
+
+update =
+MANUAL_UPGRADE_READY
+
+no S0
+no S1
+
+no required P5 checklist BLOCKED
+
+Only then proceed to F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+63. F3 — FINAL GOVERNANCE CLOSURE SUCCESSOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F3 is one narrow governance/evidence successor.
+
+No product source.
+
+No scripts.
+
+No fixtures.
+
+No schema.
+
+No migration.
+
+No dependency.
+
+No workflow.
+
+Set canonical state:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+G2 =
+PASS
+
+P0/P1/P2/P3/P4 =
+remain PASS / COMPLETE as already recorded
+
+active_task =
+NONE
+
+baseline_version =
+0.6.0
+
+Product machine state:
+keep existing conservative vocabulary,
+do not invent a new machine enum.
+
+Narrative wording allowed:
+
+FirmwareSight Productized MVP Candidate
+
+B1 =
+NOT_AUTHORIZED
+
+V1 external validation =
+NOT_EXECUTED / separate track
+
+Signing =
+READY_NOT_EXECUTED
+
+Notarization =
+READY_NOT_EXECUTED
+
+Update =
+MANUAL_UPGRADE_READY
+
+Open-source license =
+PENDING_OWNER_CONFIRMATION
+
+Do NOT write:
+
+Production Ready
+Beta
+Private Beta
+RC
+GA
+Signed
+Notarized
+Security Clean
+Open-source release complete
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+64. F3 CHANGED-PATH ALLOWLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F3 expected paths:
+
+BASELINE.yaml
+.ai/*
+README / INDEX if stage summary requires
+P5_VALIDATION final state docs
+DIRECTORY_TREE if tracked set changes
+SHA256SUMS using ADR-0029 workflow
+
+No:
+
+crates/
+apps/
+scripts/
+fixtures/
+schemas/
+migrations/
+.github/
+dependencies
+
+If a product-source change is needed at F3:
+
+STOP.
+
+The candidate was not actually ready.
+
+Go back to a new candidate instead of hiding code in the closure commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+65. F3 LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run final local gate on F3.
+
+Expected product test counts should equal F2.
+
+If Rust/UI direct counts change on governance-only F3:
+
+STOP.
+
+Run:
+
+full check.py
+drift
+deny
+core-smoke
+package
+baseline verifier
+clean detached worktree
+
+No skip.
+
+Then commit.
+
+Suggested commit:
+
+P5: close productization after installed release-readiness proof
+
+Push normal fast-forward.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+66. F3 REMOTE CI — FINAL EXTERNAL EVIDENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find workflow by exact F3 SHA.
+
+Required:
+
+10 / 10
+
+completed / success.
+
+Read all jobs individually.
+
+Do NOT create F4 merely to record this run.
+
+F3 CI is external evidence.
+
+Final Architect report can cite it.
+
+If F3 CI has a repository-content failure:
+
+P5 is NOT PASS_COMPLETE despite the committed status text.
+
+Create a corrective successor only after fixing the underlying issue,
+and treat the premature status as wrong.
+
+If pure runner provisioning failure:
+
+record attempt exactly,
+apply the same evidence standard used for Run 67,
+and do not erase attempt history.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+67. FINAL P5 VERDICT RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+P5 may be accepted only when:
+
+F1 =
+product/tooling candidate green
+
+exact F1 CI Windows artifact =
+full installed acceptance green
+
+F2 =
+evidence candidate green
+
+F3 =
+governance closure successor green
+
+owner DB restored =
+YES
+
+owner hashes match =
+YES
+
+L26 =
+CLOSED
+
+§64 =
+PASS
+
+required closure docs =
+present and consistent
+
+no required checklist BLOCKED
+
+Then final external Architect verdict:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+Product =
+MVP CANDIDATE / narrative Productized MVP Candidate
+
+B1 =
+NOT_AUTHORIZED
+
+No automatic next stage.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+68. NO PUBLIC RELEASE ACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit F MUST NOT:
+
+create Git tag
+create GitHub Release
+publish installers publicly
+publish package registry
+publish winget
+publish Homebrew
+publish apt repository
+sign with production credentials
+notarize
+turn on updater
+start beta enrollment
+start analytics/telemetry
+
+Workflow artifacts may remain normal CI artifacts.
+
+This is release readiness,
+not public release.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+69. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight P5 Commit F / Final Productization Closure Report
+
+## 1. Start authority
+
+start HEAD
+origin/main
+Commit E final state
+Run 67 attempt history
+
+## 2. ADR-0029 / L26 decision
+
+index-blob semantics
+why distinct from ADR-0028
+generator
+verifier
+CI integration
+
+## 3. L26 proofs
+
+Windows
+alternate checkout
+detached worktree
+Git archive
+mutation proofs
+final disposition
+
+## 4. L15
+
+display residue
+legacy wire
+final disposition
+
+## 5. F1 product/tooling candidate
+
+SHA
+local counts
+CI run
+attempt
+10 jobs
+Windows artifact identity
+
+## 6. Owner-data preflight
+
+owner main/WAL/SHM hashes
+park
+independent backup
+
+## 7. Installed migration proof
+
+old schema
+snapshot
+live v5
+integrity
+row preservation
+reopen
+
+## 8. §64 full journey
+
+Install
+Onboarding
+Analyze baseline
+Analyze target
+Compare
+Gate
+Bundle
+History
+Diagnostics
+Close/reopen
+Repair/reinstall
+Uninstall
+Reinstall
+
+## 9. Release Bundle verification
+
+release id
+manifest
+SHA256SUMS
+relocation
+reader
+
+## 10. History acceptance
+
+persisted records
+source removed
+reopen
+reinstall
+path safety
+
+## 11. Diagnostics acceptance
+
+allowlist
+store counts
+privacy
+export
+
+## 12. Uninstall / data retention
+
+binaries
+shortcut
+registry
+install dir residue
+app data
+history
+
+## 13. Owner restore
+
+ORIGINAL_DB_RESTORED
+ORIGINAL_DB_SHA_MATCH
+
+## 14. Final documentation
+
+list closure docs
+
+## 15. Final known limitations
+
+closed
+reduced
+carried
+owner decisions
+
+## 16. Security / dependency
+
+capabilities
+network
+telemetry
+advisories
+
+## 17. Performance
+
+519MB
+warm
+cold
+RSS
+correct bounded wording
+
+## 18. Release readiness
+
+SIGNING_READINESS
+NOTARIZATION_READINESS
+UPDATE_MODE
+LICENSE_STATUS
+PUBLIC_DISTRIBUTION
+
+## 19. F2 evidence candidate
+
+SHA
+local counts
+CI run
+attempt
+10 jobs
+
+## 20. Exit checklist
+
+PASS / carry / owner decision / blockers
+
+## 21. F3 closure successor
+
+SHA
+changed-path proof
+local gate
+
+## 22. F3 final CI
+
+run
+attempt history
+ten jobs
+result
+
+## 23. Final verdict
+
+P5 =
+PASS_COMPLETE / FAIL / BLOCKED
+
+Productization =
+ENGINEERING_COMPLETE / INCOMPLETE
+
+G2 =
+PASS
+
+Product state =
+MVP CANDIDATE
+
+Narrative =
+FirmwareSight Productized MVP Candidate
+
+baseline =
+0.6.0
+
+active_task =
+NONE
+
+B1 =
+NOT_AUTHORIZED
+
+V1 =
+NOT_EXECUTED / SEPARATE TRACK
+
+Signing =
+READY_NOT_EXECUTED
+
+Notarization =
+READY_NOT_EXECUTED
+
+Update =
+MANUAL_UPGRADE_READY
+
+License =
+PENDING_OWNER_CONFIRMATION
+
+## 24. No overclaim
+
+not Beta
+not RC
+not GA
+not Production Ready
+not signed
+not notarized
+not public release
+not externally user validated
+
+## 25. Stop
+
+STOP.
+
+Do not start V1.
+
+Do not start B1.
+
+Do not tag.
+
+Do not create GitHub Release.
+
+Return to Architect.
+
+END OF PROMPT

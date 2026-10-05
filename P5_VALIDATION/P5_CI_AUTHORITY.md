@@ -2,11 +2,11 @@
 title: "P5 CI Authority"
 doc_id: "FS-P5-CI-AUTHORITY"
 product: "FirmwareSight"
-version: "1.0"
+version: "1.1"
 status: "IN_PROGRESS"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-04"
+last_updated: "2026-10-05"
 ---
 
 # P5 — the authoritative CI job set (prompt §41)
@@ -41,6 +41,15 @@ implements cannot produce §41's evidence, so P5 runs the three package jobs on 
 the stage. The change is written into that baseline document in the same commit, not left implied by the
 diff.
 
+diff.
+
+**Ten jobs is not ten steps.** Job 5 runs `scripts/check.py --only drift`, which was seven steps from the
+packaging commit until Commit E and is **eight** from Commit F1, where `drift/baseline integrity`
+(`python scripts/verify_baseline_artifacts.py`) was added under `ADR-0029`. The authoritative set above did
+not change and no job-count drift occurred, which is what §41 forbids; what changed is the load inside one
+job, so the F1 candidate is measured by the same ten jobs with a step in one of them that did not exist
+before. The full local gate moved with it: 16 steps through `80b47c4`, 17 from F1.
+
 ## Runs measured against it
 
 | Run | Head | Content of the head | Jobs green | Conclusion |
@@ -68,6 +77,8 @@ diff.
 | `37214675036` | `bfbc1aa` | the correction `57a904e` made necessary: `.ai/README.md` and `.ai/HANDOFF.md` no longer call any head "current HEAD", and the closeout's own run is recorded here rather than in the head it records. This is also the head Commit E started from, chosen by the owner after this run concluded rather than beside it | **10 of 10** | success, first attempt, all ten job names read — the fact that made `bfbc1aa` a safe base |
 | no run of its own | `859648e` | **Commit E1**: the fixture cohort — 6 new sets and 31 new files under `fixtures/elf/p5-compat/` (manifest 25 → 56), `scripts/gen_p5_compat_fixtures.py`, `p5_compat_fixtures.rs` (14 tests), the `SHF_ALLOC` fix in `crates/firmwaresight-artifact/src/elf.rs`, the matrix and the fixture report, and the archived Commit E prompt | not applicable | **The push was one `git push` of two commits, and GitHub started one workflow run — for the tip head only.** `gh run list --json headSha` returns no run whose head is `859648e`; its bytes are verified by `37228929762`, whose tree contains them, and by the clean detached worktree recorded in `P5_COMPATIBILITY_FIXTURE_REPORT.md` §7a. Recording a run number against E1 would be inventing one |
 | `37228929762` | `59d85c3` | **Commit E2**, and with it the whole Commit E tree: the §48 dispositions, the L19/L20 label work in `Analyze.tsx` and `Compare.tsx` with its six new `compare.test.tsx` and one new `details.test.tsx` case, L23's seventh instance repaired test-only in `history.test.tsx`, `P5_COMMIT_E_SCHEMA_DECISION.md` (a question, `STOPPED_FOR_ARCHITECT`), the workload-size sentence corrected, the governance closeout, and `DIRECTORY_TREE.txt` + `SHA256SUMS` regenerated in that order | **10 of 10** | success, attempt 1, run #65, `event: push`, `headSha` 59d85c308ad2c68cdc80956b47641a67ebf63b41 — every job read individually and every step read: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`, `Desktop UI (ubuntu-latest)`, `Generated output drift`, `Dependency policy`, `macOS Core Smoke`, `Package Windows`, `Package Ubuntu`, `Package macOS`. The single `skipped` step in the whole run is the conditional Ubuntu apt block on the Windows runner, which is the job's design and not a gate skip. Load-bearing for Commit E: the two Rust jobs (the fixture hashes and the derived expectations must survive three checkouts), `Generated output drift` (the tracked-set guard over 56 manifest paths), and all three `Package` jobs green with `Build and verify…` and `Upload the artifact set` both succeeding |
+| `37230689636` | `6981625` | Commit E's §59 read-back successor: `59d85c3`'s run written into this file and the governance entry points, the "last head that changed a line of Rust" sentence dated instead of left to mislead, and §7a added to the fixture report for the clean detached worktree. Documentation only | **10 of 10** | success, attempt 1, every job and every step read individually — the first Commit E head able to carry its own run, because the run it needed belonged to the head before it |
+| `37262147348` | `80b47c4` | **Commit E closure normalization**: the matrix status column closed to five canonical values (38 cells, 0 outside the vocabulary), the A–H dispositions closed to four with the Architect's mapping, **L15 answered as Option E**, `04_TECH/23` §7 added, the prompt archived. No path under `crates/`, `apps/`, `scripts/`, `fixtures/`, `schemas/`, `golden/` or `.github/` was touched | attempt 1 **9 of 10**, attempt 2 **10 of 10** | **two attempts, and both stay in the record.** Attempt 1's single red was `Generated output drift`: rustup on the Ubuntu runner logged "recovering from a partially installed toolchain", then `failed to install component: 'clippy-preview-x86_64-unknown-linux-gnu', detected conflict: 'bin/cargo-clippy'`, and rolled back ~0.5 s in without compiling a line — the provisioning class `BASELINE.yaml:514` already records for `157f749`. Read the log before touching the rerun button, and corroborate it: the same SHA's `Rust (ubuntu-latest)` and `Package Ubuntu` both passed, and they bootstrap the same toolchain. Then one `gh run rerun --failed` — the workflow has no `needs:` graph, so this re-executed that one job and carried the other nine attempt-1 executions into the attempt-2 object — drift returned **7 of 7**, and the run concluded **10 of 10 success**. Attempt 2 is therefore not written as first-attempt green |
 
 Two heads between Commit D and Commit E are documentation-only, and no head in this file is described as "the
 current HEAD". That is deliberate: the moment a commit calls itself the current head, pushing it is what makes
