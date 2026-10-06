@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-04"
+last_updated: "2026-10-06"
 ---
 
 
@@ -132,6 +132,18 @@ licence PENDING OWNER CONFIRMATION, and `PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM
 DECISION` · pricing and commercial research DEFERRED_POST_MVP · active_task:
 NONE, which authorizes no next track: V1, B1, RC and GA each need a new architect prompt`
 
+**V1 own-artifact external validation opened on 2026-10-06**, the same day P5 closed, under its own architect
+prompt (delivered SHA-256 `48768ff0…ec10a0f`, 46,207 CRLF bytes; stored LF blob `d5e8d457…51774`, SHA-256
+`c62314fe…90c34e`, 44,510 bytes, 1,698 lines proven identical) — so the sentence quoted above is now the record
+of what F3 knew, and the live pointer reads `active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`. V1 is a research
+track at `IN_PROGRESS / RECRUITMENT_READY` with **0 eligible external sessions** against a minimum of 8: §5's
+branch, because no real participant exists and an agent must not become one. `V1_VALIDATION/` holds its sixteen
+protocol and register files with every count at zero; the cohort build is frozen to F3's CI artifact
+(`37475580080` / artifact `11419727517` / NSIS 3,888,432 bytes / `182506f2…63d12`, unsigned, verified against its
+own `SHA256SUMS.txt`, preserved outside Git). `P5 = PASS_COMPLETE`, G2 `PASS`, product `MVP_CANDIDATE` at
+`0.6.0` and the counts **868 Rust / 225 UI in 8 files** all unchanged, and no B1, beta, RC, GA, licence,
+signing, notarization, updater or feature is authorized by it.
+
 ## Primary reading path
 
 1. `README.md`
@@ -221,7 +233,11 @@ removed, so this head adds no product path at all; **828 lines and 708 entries**
 2026-10-06): 710 — two paths added, the archived F3 prompt
 `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt` and this stage's closing
 record `P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md`, with nothing removed and **no product path among the 30
-changed**, every product tree OID identical to the head it closes; of the tracked set the
+changed**, every product tree OID identical to the head it closes; **850 lines and 725 entries** at the V1
+activation head (2026-10-06): 727 — seventeen paths added, the archived V1 prompt
+`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt` and `V1_VALIDATION/`'s
+sixteen protocol and register files, nothing removed and again **no product path among them**, because V1 §43
+confines a research activation to documentation and V1 §45 requires the product counts to stand still; of the tracked set the
 two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
@@ -485,6 +501,22 @@ disk, in a checksum domain that is deliberately not this one.
 | `V0_VALIDATION/prototype/README.md` | V0 Clickable Prototype |
 | `V0_VALIDATION/sessions/README.md` | Session Register |
 | `V0_VALIDATION/sessions/TEMPLATE.md` | V0 Session — Participant [ID] |
+| `V1_VALIDATION/README.md` | FirmwareSight V1 Validation Workspace |
+| `V1_VALIDATION/V1_METRICS.md` | V1 Metric Contract |
+| `V1_VALIDATION/V1_PARTICIPANT_REGISTER.md` | V1 Participant Register |
+| `V1_VALIDATION/V1_PLAN.md` | V1 Plan |
+| `V1_VALIDATION/analysis/FINDINGS.md` | V1 Product Findings Register |
+| `V1_VALIDATION/analysis/METRICS.md` | V1 Aggregate Metrics |
+| `V1_VALIDATION/analysis/MISUNDERSTANDINGS.md` | V1 Misunderstanding Log |
+| `V1_VALIDATION/deliverables/V1_GATE_RECOMMENDATION.md` | V1 Gate Recommendation |
+| `V1_VALIDATION/deliverables/V1_VALIDATION_REPORT.md` | V1 Validation Report |
+| `V1_VALIDATION/protocol/CONSENT_PRIVACY.md` | V1 Consent and Privacy |
+| `V1_VALIDATION/protocol/INTERVIEW_SCRIPT.md` | V1 Interview Script |
+| `V1_VALIDATION/protocol/MODERATOR_GUIDE.md` | V1 Moderator Guide |
+| `V1_VALIDATION/protocol/PARTICIPANT_SCREENING.md` | V1 Participant Screening |
+| `V1_VALIDATION/protocol/TASK_SCRIPT.md` | V1 Task Script |
+| `V1_VALIDATION/sessions/README.md` | V1 Session Register |
+| `V1_VALIDATION/sessions/TEMPLATE.md` | V1 Session — Participant [ID] |
 | `assets/ui-mockups/README.md` | UI Mockup Asset Register |
 | `fixtures/malformed/README.md` | Malformed Fixtures |
 | `golden/reports/README.md` | Report Goldens |

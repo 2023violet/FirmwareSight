@@ -12,16 +12,39 @@ last_updated: "2026-10-06"
 
 - Date: 2026-10-06
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `NONE`.** Stage **P5 (Productization)** ran from 2026-10-03 and **closed `PASS_COMPLETE` on
-  2026-10-06** under *FirmwareSight — P5 Commit F3 Final Governance Closure, Execution Prompt v1.0 — Architect
-  Authorized* (delivered as a file, SHA-256 `860e00976b242f15de1473455941140599a8a5cd639409521e7c38a28a64514c`,
-  36,458 delivered CRLF bytes, archived in `10_AUDIT/SOURCE_PROMPTS/`). Canonical state: `P5 = PASS_COMPLETE`,
-  **Productization = ENGINEERING_COMPLETE**, product = **MVP_CANDIDATE**, narrative = **FirmwareSight
-  Productized MVP Candidate**, `baseline_version = 0.6.0`, `active_task = NONE`, G2 `PASS`, P0–P4 unchanged.
-  The closure required §6's re-audit first: every P5 exit criterion re-read, and no required engineering item
-  `BLOCKED` (`P5_VALIDATION/P5_EXIT_CHECKLIST.md` §7). **Nothing next is authorized by that sentence**: V1,
-  B1, private beta, RC, GA, signing, notarization, an updater, a licence choice and any new feature all need a
-  new architect decision, and §37 of the F3 prompt ends the round at a STOP.
+- **Active task: `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1** opened on 2026-10-06 under
+  *FirmwareSight — V1 Own-artifact External Validation, Execution Prompt v1.0 — Architect Authorized*
+  (delivered as a file, SHA-256 `48768ff025e3d6351b7b1d8d593ea8bfb18a7930a0a21a101af3093bbec10a0f`, 46,207
+  delivered CRLF bytes, 1,697 CRLF pairs, 1,698 logical lines; archived in `10_AUDIT/SOURCE_PROMPTS/` as Git blob
+  `d5e8d4575581bd656b568eed97090e7130a51774`, SHA-256 `c62314fee5032ca5ffdbcfe95f51cf3bdb783e7d55a42a165ea526686690c34e`,
+  44,510 LF bytes). State: **`V1 = IN_PROGRESS`, `research_state = RECRUITMENT_READY`, eligible external
+  sessions = 0.** It is a **research** track, not a product stage: no feature, no schema, no migration, no
+  dependency, no cloud, no account, no telemetry, no updater, no signing, no notarization, no licence choice, no
+  pricing, no B1, no RC, no GA (§4, §33). The product under test is one frozen build — run `37475580080`, head
+  `08fdfcb`, artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256
+  `182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12`, **unsigned**, verified against its own
+  `SHA256SUMS.txt` at activation and preserved outside Git.
+- **What this round did, and the branch it took.** §5 decides it: with no real eligible external participant and
+  no session evidence, an agent writes the **Recruitment Ready pack** and stops — it does not simulate a user. So
+  `V1_VALIDATION/` now holds §13's sixteen files (plan, metric contract, participant register, five protocol
+  documents, sessions register and template, three analysis registers, two deliverables), every register at
+  **zero**, the report a **skeleton**, and no fabricated participant, session, quote, timing or completion.
+  `P5 = PASS_COMPLETE`, Productization `ENGINEERING_COMPLETE`, G2 `PASS`, product **`MVP_CANDIDATE`**, narrative
+  **FirmwareSight Productized MVP Candidate**, `baseline_version = 0.6.0` — all unchanged, and
+  `product.status` / `validation.current_gate` deliberately still carry no V1 term: those strings record verdicts,
+  and V1 has earned none (the same rule P5 followed while it was running). Counts and gate held exactly at
+  **868 Rust / 225 UI in 8 files, 17-step gate** (§45), because a docs-only round that moved either number would
+  be a product change wearing a documentation diff.
+- **The P5 closure sentence, and what it did and did not open.** P5 ran from 2026-10-03 and closed
+  `PASS_COMPLETE` on 2026-10-06 under *FirmwareSight — P5 Commit F3 Final Governance Closure, Execution Prompt
+  v1.0 — Architect Authorized* (SHA-256 `860e0097…64514c`, 36,458 delivered CRLF bytes, archived). The closure
+  required §6's re-audit first: every P5 exit criterion re-read, and no required engineering item `BLOCKED`
+  (`P5_VALIDATION/P5_EXIT_CHECKLIST.md` §7). F3's §37 ended that round at a STOP and wrote **`active_task = NONE`**,
+  and its prompt said plainly that nothing next was authorized by the closure sentence itself — V1, B1, private
+  beta, RC, GA, signing, notarization, an updater, a licence choice and any new feature each need a new
+  architect decision. That is exactly what happened next and what did not: the architect issued the V1 prompt,
+  so V1 is open; **no** prompt has authorized B1, beta, RC, GA, signing, notarization, an updater, a licence or a
+  feature, and V1's own §40 says even a full V1 pass does not open B1.
 - **What P5 opened with**, kept as the record of the round that ran: *FirmwareSight — P5 Productization,
   Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, 73,722 bytes, 3,442 lines, archived in
   `10_AUDIT/SOURCE_PROMPTS/`), opened on 2026-10-03 from `d83175a` (HEAD = `origin/main`, tree clean, Run
@@ -801,21 +824,31 @@ citation written before it. The current stage's pack is the one place a line poi
 
 ## Next work
 
-**`active_task: NONE`.** Stage **P5 (Productization)** opened on 2026-10-03 and **closed `PASS_COMPLETE` on
-2026-10-06** with Commit F3, the only head its prompt reserved the closure sentence for. What a new reader
-inherits is therefore: Productization **ENGINEERING_COMPLETE**, product **MVP CANDIDATE** at baseline
-**`0.6.0`** (narrative: **FirmwareSight Productized MVP Candidate**), `G2 = PASS`, and P0 / P1 / P2 / P3 / P4
-still at their own `PASS` / `PASS_COMPLETE` — nothing earlier was re-statused retroactively. `AGENTS.md` 1
-still means what it has meant in every round: with no active task, no agent may create business functionality
-or lift the next track off the roadmap.
+**`active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1** opened on 2026-10-06 under its own
+architect prompt, at the head P5's Commit F3 closed the stage with (`08fdfcb`, Run `37475580080`, #72, attempt 1,
+10 of 10). What a new reader inherits is therefore: Productization **ENGINEERING_COMPLETE**, `P5 = PASS_COMPLETE`,
+product **MVP CANDIDATE** at baseline **`0.6.0`** (narrative: **FirmwareSight Productized MVP Candidate**),
+`G2 = PASS`, P0 / P1 / P2 / P3 / P4 still at their own `PASS` / `PASS_COMPLETE` — nothing earlier was re-statused
+retroactively — and a research track that has run **zero** sessions.
 
-**Closing P5 authorizes nothing after it.** The likely next decision is V1 own-artifact / real-user validation
-— the track that exists to answer L11, which P5 explicitly did *not* close — and it needs a **new architect
-prompt**, exactly as B1 / private beta, RC, GA, commercialization, licensing, signing, notarization, an
-updater and any new product verb, format, adapter or crate do. `P5_RELEASE_READINESS.md` §5 freezes those ten
-states as they stand, and `P5_FINAL_CLOSURE_REPORT.md` §14 says what `PASS_COMPLETE` does not mean. Start
-reading at `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md`: 26 rows, each with its disposition and what it does not
-cover.
+**What V1 is working on right now, and who has to move next.** V1 is at `RECRUITMENT_READY`: the protocol pack
+exists (`V1_VALIDATION/`, sixteen files), the cohort build is frozen and verified, and there is nothing for an
+agent to measure because §5 forbids an agent from being the participant. **Recruitment, consent and moderation
+are the human operator's work** (§47, §48): real external firmware/embedded engineers, screened against §7,
+running their **own** artifacts on the exact frozen installer. The repository's next V1 write should be a Batch A
+evidence commit after four eligible participants exist — not a document written before one session has happened.
+`AGENTS.md` 1 still means what it has meant in every round: this pointer names V1 and nothing beyond it, and no
+agent may lift the next track off the roadmap.
+
+**What still needs a new architect prompt.** B1 / private beta, RC, GA, commercialization, licensing, signing,
+notarization, an updater, any new product verb, format, adapter or crate, and every E1/E2/E3/GX candidate —
+unchanged from P5's closure list, and V1 adds nothing to it. V1's own §40 is explicit that **even a full V1 pass
+does not open B1**, and §39/§54 forbid this track from self-issuing `V1_PASS_COMPLETE`, `B1_READY` or
+`PRIVATE_BETA`. `P5_RELEASE_READINESS.md` §5 still freezes the ten release-readiness states, and
+`P5_FINAL_CLOSURE_REPORT.md` §14 still says what `PASS_COMPLETE` does not mean. Start reading the carried
+limitations at `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md`: 26 rows, each with its disposition and what it does not
+cover — **L11 is the row V1 exists to answer, and it stays `CARRIED_FORWARD` until real people have been
+through it.**
 
 **`G2` closed `PASS` on 2026-10-01, under its own architect prompt and addendum.** Audit-first: the gate
 ran before anything was written and found G2-F1, a test race fixed test-only in `e35cfe7`; then the whole

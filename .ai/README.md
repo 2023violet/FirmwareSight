@@ -118,8 +118,31 @@ limitation became CLOSED merely because P5 closed**. `F3 remote CI = PENDING_EXT
 commit: **final external acceptance requires F3 remote CI**, and §34 forbids a further commit written only to
 record it. What P5's closure authorizes: **nothing next.** V1, B1, private beta, RC, GA, signing, notarization,
 an updater and any licence decision each need a new architect prompt, and `P5_VALIDATION/
-P5_FINAL_CLOSURE_REPORT.md` §14 states what `PASS_COMPLETE` does not mean)` ·
-`active_task: NONE` · open-source licence `PENDING OWNER CONFIRMATION` ·
+P5_FINAL_CLOSURE_REPORT.md` §14 states what `PASS_COMPLETE` does not mean. *(Dated: of that list the architect
+has since issued exactly one thing — **V1**, on 2026-10-06, under its own prompt archived with its measured
+digest. B1, private beta, RC, GA, signing, notarization, an updater and a licence still need prompts of their
+own, and V1's §40 says even a clean V1 pass does not authorize B1.)*
+`V1 own-artifact external validation: IN_PROGRESS (opened 2026-10-06 under *FirmwareSight — V1 Own-artifact
+External Validation, Execution Prompt v1.0 — Architect Authorized*, delivered file SHA-256 `48768ff0…ec10a0f`,
+46,207 CRLF bytes, archived as Git blob `d5e8d457…51774` / SHA-256 `c62314fe…90c34e` / 44,510 LF bytes, every
+line proven identical and `.gitattributes` untouched). It is a **research** stage, not a product stage: no
+feature, no schema, no migration, no dependency, no cloud, no account, no telemetry, no updater, no signing, no
+notarization, no licence, no pricing, no B1, no RC, no GA — and the product code is frozen for the length of a
+formal cohort. §1 froze the cohort build to the exact F3 Windows artifact (run `37475580080`, head `08fdfcb`,
+artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256 `182506f2…63d12`, **unsigned**, internal
+`SHA256SUMS.txt` verified `OK`, preserved outside Git; the 5,536,303-byte figure is the artifact container, not
+the installer, and the activation commit's own package is explicitly **not** the cohort build). **§5 is the
+branch this round took: with no real eligible participant there is nothing to measure, so an agent writes the
+Recruitment Ready pack and stops rather than inventing a user.** `V1_VALIDATION/` now holds §13's sixteen files —
+plan, metric contract with M1–M6 thresholds fixed **before** any data, participant register, five protocol
+documents continued from V0's discipline, sessions register and template, three analysis registers, two
+deliverables — with every register at **zero**, the report a **skeleton**, and no fabricated participant,
+session, quote or timing. `research_state = RECRUITMENT_READY`, **eligible external sessions = 0**,
+recommendation `V1_INCOMPLETE_INSUFFICIENT_SAMPLE`, and the next move is **human**: recruit, consent, moderate
+(§47/§48). `P5` stays `PASS_COMPLETE`, `G2` stays `PASS`, the product stays `MVP_CANDIDATE` at `0.6.0`, L11 stays
+`CARRIED_FORWARD` (the row V1 exists to answer), and the counts held at **868 Rust / 225 UI in 8 files** on the
+same 17-step gate because §45 requires them not to move)` ·
+`active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 
@@ -142,6 +165,13 @@ remediation round that followed was **fix the three proven defects and stop**: n
 performance work, no schema or migration, no new dependency, no licence decision, and the carried-forward
 observations still carry forward. Both prompts ended in the same direction this one does — return to the
 architect.
+
+V1 arrived the same way and obeys the same rule, with one difference worth naming: it is the first track whose
+blocking dependency is a **person** rather than a decision. Its prompt can authorize the protocol, freeze the
+build and open the register; it cannot produce a firmware engineer holding their own artifact. §5 anticipates
+exactly that and gives the only acceptable answer — build the pack, set `RECRUITMENT_READY`, report **0 eligible
+external sessions**, and stop. Later V1 rounds will be judged on whether a real transcript existed before its
+session file did.
 
 任何 AI 接手本项目时：
 

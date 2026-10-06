@@ -44,7 +44,10 @@ validation:
     # ran from 2026-10-03, and Commit F3 closed it PASS_COMPLETE on 2026-10-06, so its entry is no longer
     # a track that can be authorized; it is history, and p5_execution records it. It was removed from this
     # list rather than left to mislead the next reader into thinking P5 is still the thing to start.
-    - V1_own_artifact_external_validation_after_G2
+    # The same rule now applies to V1: its own architect prompt arrived on 2026-10-06, the pointer names it,
+    # and v1_execution records what it is doing. Listing it here as a track still awaiting authorization would
+    # be describing a state that no longer exists, so it was removed - not because V1 is finished (it has run
+    # zero sessions) but because it is the live task rather than a candidate for a future one.
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
   g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
@@ -225,7 +228,14 @@ research:
 # CI-built artifacts. What F3 did NOT write: BETA, RC, GA, Production Ready, security clean, a tag, a GitHub
 # Release, a published installer, a signature, a notarization, an updater or a licence. V1 own-artifact /
 # real-user validation still has no prompt and stays unauthorized.
-active_task: NONE
+# That last sentence was true when it was written and stopped being true on the same day it was overtaken: the
+# architect issued FirmwareSight - V1 Own-artifact External Validation, Execution Prompt v1.0 on 2026-10-06,
+# delivered as a file and archived with its measured digest in 10_AUDIT/SOURCE_PROMPTS/, so the pointer moves
+# and nothing else moves with it. The sentence above is kept as the record of what F3 knew rather than rewritten,
+# because F3's closure round was correct at its own head: no file in that tree authorized V1. v1_execution below
+# is the opening record; P5 stays PASS_COMPLETE and the product stays MVP_CANDIDATE, and AGENTS.md 1 still binds
+# - one named stage, and V1 authorizes no B1, beta, RC, GA, licence, signing, notarization, updater or feature.
+active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -659,7 +669,116 @@ p5_execution:
   # Everything else in the list stays forbidden and unclaimed, and F3 adds the same prohibition to V1, B1, G3
   # and any new feature: closing P5 authorizes no next track.
   explicitly_not: [beta, RC, GA, production_ready, signed, notarized, security_clean, real_user_validated, licensed_open_source]
-  next_stage_after_this_one: V1_own_artifact_external_validation # NOT authorized by this file; L11 (real-user comprehension, V0 at 0/8) is what V1 exists to answer, and it needs its own architect prompt
+  next_stage_after_this_one: V1_own_artifact_external_validation # NOT authorized by this file; L11 (real-user comprehension, V0 at 0/8) is what V1 exists to answer, and it needs its own architect prompt. It got one on 2026-10-06, so this line is now a pointer to the live task rather than a statement that nothing had been issued: see v1_execution, and note that V1 arriving does not retroactively authorize anything P5 declined - P5's closure still wrote no B1, beta, RC, GA, tag, release, signature, notarization, updater or licence, and V1 writes none of them either.
+
+# V1 own-artifact external validation: the research track P5's closure handed Known Limitation L11 to, opened
+# on 2026-10-06 under its own architect prompt. It is a research stage, not a product stage. The product code is
+# frozen for the length of a formal cohort (prompt §32), and nothing in this block authorizes a feature, a
+# schema, a migration, a dependency, a signature, a notarization, an updater, a licence, a release or B1.
+v1_execution:
+  authorized: true
+  prompt: "FirmwareSight - V1 Own-artifact External Validation, Execution Prompt v1.0 - Architect Authorized"
+  canonical_unit: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION
+  prompt_provenance: "delivered as a file and archived at 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt. Delivered bytes: SHA-256 48768ff025e3d6351b7b1d8d593ea8bfb18a7930a0a21a101af3093bbec10a0f, 46,207 bytes, 1,697 CRLF pairs, no lone CR, no final newline, 1,698 logical lines. Stored LF copy: Git blob d5e8d4575581bd656b568eed97090e7130a51774, SHA-256 c62314fee5032ca5ffdbcfe95f51cf3bdb783e7d55a42a165ea526686690c34e, 44,510 bytes. The two digests differ by exactly the 1,697 removed CR bytes and split into 1,698 identical lines on each side, so the archived text is the delivered text and not a reconstruction - the transport-safe rule P5 Commit F3 recorded for its own prompt."
+  stage: V1
+  opened_on: "2026-10-06"
+  start_head: 08fdfcb710f78f8084bfcf614dc508c8b6e7e25b # P5 Commit F3's closure head. §0 states it as the verified start authority; §3 preflight confirmed HEAD = origin/main = it, tree clean, one worktree, no remote delta to classify.
+  start_run: "37475580080, run #72, attempt 1, completed / success, 10 of 10 jobs"
+  stage_status: IN_PROGRESS
+  # §14 asks for this field by the name research_state; V0's equivalent field was external_validation_state and
+  # V0's own block still reads ACTIVE_WAITING_FOR_REAL_PARTICIPANTS. Nothing here renames V0's history.
+  research_state: RECRUITMENT_READY
+  why_this_state: "§5 is the branch that decides it: with no real eligible external participant and no session evidence, the round is Recruitment Ready only. No participant was simulated, no LLM persona was used, no internal team member was counted, no quote was invented, no task completion was marked and no session was marked complete. The pack is built, the track is opened, and the round stops."
+  # What the product state does NOT move while V1 runs. P5 closed as PASS_COMPLETE and stays there; a research
+  # track cannot re-open an engineering verdict, and it cannot manufacture a next one either.
+  keeps:
+    p5: PASS_COMPLETE
+    productization: ENGINEERING_COMPLETE
+    g2: PASS
+    product_state: MVP_CANDIDATE
+    narrative: "FirmwareSight Productized MVP Candidate"
+    baseline_version_stays: 0.6.0
+    composite_strings_do_not_move: "product.status and validation.current_gate still carry no V1 term. While P5 was IN_PROGRESS at 4cc8d93 neither string mentioned P5 either: these fields record verdicts, and V1 has earned none."
+  cohort_build_frozen: # §1: the exact bytes a formal participant must run, verified at activation rather than assumed
+    ci_run: "37475580080"
+    head: 08fdfcb710f78f8084bfcf614dc508c8b6e7e25b
+    artifact_id: "11419727517"
+    artifact_name: FirmwareSight-0.6.0-windows-x86_64
+    artifact_zip_bytes: 5536303 # the container, not the installer - §1 calls this distinction out on purpose
+    nsis_file: FirmwareSight-0.6.0-windows-x86_64-nsis.exe
+    nsis_built_name: FirmwareSight_0.6.0_x64-setup.exe
+    nsis_bytes: 3888432
+    nsis_sha256: 182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12
+    cli_zip_sha256: 76bf7d0c1c4acb0f64a5fdda75b036ec658f272086b2283ce0ba56d3543f7ddd
+    internal_index_check: "sha256sum -c SHA256SUMS.txt over the downloaded set: both lines OK, exit 0, measured 2026-10-06"
+    payload_executable_sha256: 6598880dd8dde479d9326e678d0c22eddfc859a6c8cbc98ce7049b8f3c310646 # target/release/firmwaresight-desktop.exe; the bundler rewrites a 27-byte token inside the copy it packs, so this digest locates the build and is not the digest of the file a user launches
+    expired_at_activation: false
+    github_expiry: "2026-10-20T14:21:52Z"
+    signing: unsigned # no certificate, no signature, no notarization; participants are told this before install
+    reproducibility: "not byte-reproducible, measured and attributed at P5_PACKAGING_REPORT.md's reproducibility row - a payload differs in 20 of 15,001,088 bytes per link (PE TimeDateStamp plus the 16-byte RSDS CodeView GUID). So each session records the installer SHA the participant actually ran; a head is not a build."
+    preserved_outside_git: "the downloaded set lives in the external evidence root; §1 forbids committing the installer and nothing in this round committed a byte of it"
+    substitutions_forbidden: [F2R1_artifact_11397938806, local_rebuild, cargo_run, vite_dev_server, later_docs_only_ci_artifact, any_unreviewed_product_head]
+    activation_artifact_is_not_the_cohort_build: true # §46: the activation commit's own package proves only that the product did not move
+  distribution:
+    public_distribution: NOT_AUTHORIZED # unchanged by this prompt; §2 keeps it and says so explicitly
+    authorized_transfer: [private_direct_transfer, participant_restricted_temporary_link, supervised_installation, controlled_research_machine]
+    forbidden: [public_download_page, public_github_release, public_forum_link, package_manager_publication, unrestricted_shared_link, participant_redistribution, calling_the_build_a_public_beta]
+    pre_install_disclosure_required: [unsigned_research_build, windows_may_show_security_or_reputation_warning, participant_may_decline, do_not_disable_windows_security_globally, no_product_semantics_taught_before_measurement]
+    install_friction: recorded as evidence under T0, not removed before measurement
+  sample:
+    minimum_eligible_unique_participants: 8
+    target: "12-15"
+    eligible_external_sessions_today: 0
+    sessions_conducted_today: 0
+    follow_ups_do_not_raise_unique_N: true
+    not_counted: [internal_project_members, repeat_session_as_new_participant, taught_before_task_sessions, simulated_sessions, invalid_or_unsupported_inputs_in_supported_workflow_denominators]
+    if_below_minimum: V1_INCOMPLETE_INSUFFICIENT_SAMPLE # and no forced PASS/FAIL conclusion
+  metrics_contract: # §15 thresholds, written before any data exists; §15 forbids redefining them after seeing data
+    M1_import_activation: ">80%"
+    M2_time_to_first_value: "median <60s"
+    M3_analyze_to_compare: ">=60%"
+    M4_gate_meaning_comprehension: ">80%"
+    M5_real_new_information: ">=30%"
+    M6_return_intent: ">=62.5% AND >=5 unique YES participants"
+    reporting: "always numerator, denominator, percentage and exclusion reason; never a bare percentage and never a laundered denominator (§37)"
+    today: "all six NOT_MEASURED - no denominator exists yet, which is a fact about recruitment and not a result about the product"
+  pack: V1_VALIDATION/ # §13's sixteen files: README, plan, metrics contract, participant register, five protocol documents, sessions README and template, three analysis registers, two deliverables
+  pack_written_empty_on_purpose: "the registers hold zeros and the report holds a skeleton. §13 forbids fake completed session files, and the §35 interim review and §52 synthesis files are not created because they would summarize nothing."
+  evidence_root_outside_git: "FirmwareSight-V1-External-Validation-20261006/ with 00_authority, 01_artifact, 02_recruitment, 03_consent_private, 04_sessions_raw, 05_recordings_private, 06_artifact_metadata_private, 07_analysis_working, 08_reports, 09_archive (§41)"
+  human_agent_division: # §48
+    human: [recruit_participants, obtain_consent, transfer_research_build, moderate_or_receive_recording, protect_private_artifact_data]
+    agent: [maintain_protocol, validate_eligibility, convert_real_notes_into_anonymized_records, calculate_metrics, classify_findings, synthesize_evidence, refuse_to_fabricate_missing_data]
+    agent_cannot_substitute_for_a_participant: true
+  code_freeze: # §32
+    one_frozen_artifact_per_cohort: true
+    silent_product_patch_mid_cohort: forbidden
+    on_S0_or_S1: "stop formal sessions, preserve evidence, return to the Architect"
+    new_product_code_creates: [new_cohort_version, new_ci_artifact]
+    pooling_pre_and_post_hotfix_metrics: forbidden
+  known_limitation_owned:
+    id: L11
+    text: "user comprehension untested (V0 0/8)"
+    today: "CARRIED_FORWARD, owner V1 - unchanged by this round, because there is no evidence to carry it forward on"
+    agent_may_write_only_after_verdict: READY_FOR_ARCHITECT_REVIEW # §55; never CLOSED before the Architect says so
+    note: "L11 lives in P5_VALIDATION/P5_KNOWN_LIMITATIONS.md, which §43 does not allow this round to write to. V1 owns the evidence; it does not own the disposition line."
+  product_counts_required_unchanged: # §45; a docs-only round that moves one of these is a product change wearing a documentation diff
+    rust: 868
+    ui: 225
+    ui_files: 8
+    full_gate: 17
+    drift: 8
+    package: 4
+    required_skips: none
+  activation_diff_boundary: # §43
+    allowed: [V1_VALIDATION/**, BASELINE.yaml, .ai/*.md, README.md, INDEX.md, 10_AUDIT/SOURCE_PROMPTS/**, DIRECTORY_TREE.txt, SHA256SUMS, 06_DELIVERY/*.md_where_materially_stale]
+    forbidden: [apps/**, crates/**, scripts/**, fixtures/**, schemas/**, golden/**, migrations/**, .github/**, Cargo.toml, Cargo.lock, package.json, pnpm-lock.yaml, tauri.conf.json, deny.toml, assets/design-tokens.json]
+    if_a_product_path_changes: STOP
+  explicitly_not: [feature_implementation, product_redesign_from_participant_preference, schema_change, migration, dependency_change, cloud, accounts, network, telemetry, updater, signing, notarization, license_selection, pricing_model, paid_plans, invented_price_anchors, E1, E2, E3, GX, B1, private_beta, RC, GA, public_release] # §4, §22, §33
+  never_self_issued: [V1_PASS_COMPLETE, B1_READY, PRIVATE_BETA] # §39, §54 - metrics alone do not pass a stage; §38 keeps Architect review over critical misunderstandings, S0/S1, cohort concentration, protocol and privacy integrity
+  even_a_full_pass_does_not_open: B1_private_beta # §40: G4/B1 suggests 20-50 users and 3-5 teams plus its own support loop and release-train decision
+  next_stage_after_this_one: B1_private_beta # NOT authorized by this file, NOT authorized by V1 passing, and no prompt authorizes it today
+  stop_condition: "§5's nine steps end at a STOP: Recruitment Ready, zero eligible external sessions, WAITING FOR REAL EXTERNAL PARTICIPANTS. The next repository write happens only when a real session has happened."
+  owner_input_required: "recruitment of real external participants, and the operator decision of who moderates. Nothing in this round can substitute for either (§47, §48)."
 
 p0_execution:
   authorized: true

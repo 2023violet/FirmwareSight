@@ -443,6 +443,56 @@ P5 Commit F3 (final governance closure), governance / evidence / indexing only (
         licence, signing, notarization, an updater and any new feature all need a NEW architect prompt.
         PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION: license = "Proprietary"
         stands, there is no root LICENSE, and FirmwareSight is not a licensed open-source release.
+V1 own-artifact external validation: OPENED 2026-10-06, IN_PROGRESS at RECRUITMENT_READY, 0 SESSIONS.
+        Authorized by FirmwareSight — V1 Own-artifact External Validation, Execution Prompt v1.0 — Architect
+        Authorized (delivered file SHA-256 48768ff025e3d6351b7b1d8d593ea8bfb18a7930a0a21a101af3093bbec10a0f,
+        46,207 bytes, 1,697 CRLF pairs, 1,698 logical lines; archived as
+        10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt, Git blob
+        d5e8d4575581bd656b568eed97090e7130a51774, SHA-256 c62314fee5032ca5ffdbcfe95f51cf3bdb783e7d55a42a165ea526686690c34e,
+        44,510 LF bytes — the two digests differ by exactly the 1,697 removed CR bytes and split into the same
+        1,698 lines, every one identical, .gitattributes untouched). It is a RESEARCH track, not a product
+        stage: no feature, schema, migration, dependency, cloud, account, telemetry, updater, signing,
+        notarization, licence, pricing, B1, RC or GA, and the product code is frozen for the length of a formal
+        cohort. §3 preflight: HEAD = origin/main = 08fdfcb (P5's F3 closure head), tree clean, one worktree, no
+        remote delta. §1 froze the cohort build to that head's CI artifact — run 37475580080, artifact id
+        11419727517, ZIP container 5,536,303 bytes which is NOT the installer size, NSIS
+        FirmwareSight_0.6.0_x64-setup.exe delivered as FirmwareSight-0.6.0-windows-x86_64-nsis.exe at
+        3,888,432 bytes / SHA-256 182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12, internal
+        SHA256SUMS.txt verified OK on both entries with exit 0, payload firmwaresight-desktop.exe
+        6598880dd8dde479d9326e678d0c22eddfc859a6c8cbc98ce7049b8f3c310646, unsigned, expired: false at
+        activation — downloaded, verified and preserved OUTSIDE Git, because §1 forbids committing the
+        installer. Those bytes legitimately differ from F2R1's installer even though the product trees are
+        identical: P5_PACKAGING_REPORT.md measured these packages to be NOT byte-reproducible (a payload
+        differs in 20 of 15,001,088 bytes per link — PE TimeDateStamp plus the RSDS CodeView GUID), so a head
+        is not a build and every session must record the SHA the participant actually ran.
+        **§5 is the branch this round took, and it is the whole story of the round: there are no real
+        participants.** No agent may simulate one, use an LLM as one, count an internal team member, invent a
+        quote, invent a task completion or mark a session complete. So V1 wrote the Recruitment Ready pack and
+        stopped: V1_VALIDATION/'s sixteen §13 files — README, plan, metric contract (M1 >80 %, M2 median <60 s,
+        M3 ≥60 %, M4 >80 %, M5 ≥30 %, M6 ≥62.5 % AND ≥5 unique YES, all fixed BEFORE any data because §15
+        forbids moving a threshold after seeing it), participant register, five protocol documents carried
+        forward from V0's discipline rather than reinvented (M01–M17, exclusions, neutral tasks; three named
+        changes: installed product instead of a prototype, thresholds now exist, and C6–C8 added to V0's
+        C1–C5), sessions register and template, three analysis registers, two deliverables — with every
+        register at ZERO, the validation report a skeleton, and the recommendation
+        V1_INCOMPLETE_INSUFFICIENT_SAMPLE at N = 0 against a minimum of 8.
+        State written: active_task = V1_OWN_ARTIFACT_EXTERNAL_VALIDATION · V1 = IN_PROGRESS · research_state =
+        RECRUITMENT_READY · eligible external sessions = 0. What did NOT move: P5 = PASS_COMPLETE,
+        Productization = ENGINEERING_COMPLETE, G2 = PASS, product = MVP_CANDIDATE, baseline = 0.6.0, the ten
+        frozen release-readiness states, the licence with the owner, and deliberately product.status /
+        validation.current_gate — while P5 was running neither string mentioned P5, because those fields carry
+        verdicts and V1 has earned none. V1_own_artifact_external_validation_after_G2 left
+        next_authorizable_tracks for the same reason P5's entry did: it is now the live task, not a track
+        awaiting a decision. §43's boundary held with zero forbidden paths, and §45 requires the counts to stand
+        still at 868 Rust / 225 UI in 8 files on the 17-step gate. L11 — the row V1 exists to answer — stays
+        CARRIED_FORWARD in P5_VALIDATION/P5_KNOWN_LIMITATIONS.md, which §43 does not let this round write to;
+        §55 allows at most READY_FOR_ARCHITECT_REVIEW, and only once evidence exists to review.
+        **And V1 stops here, at §5 step 9.** The next move is a human one (§47, §48): recruit real firmware and
+        embedded engineers, screen them against §7, obtain consent, transfer the frozen unsigned build
+        one-to-one to named consenting participants only, and moderate. PUBLIC_DISTRIBUTION remains
+        NOT_AUTHORIZED and the research build is not a beta. V1 may never self-issue V1_PASS_COMPLETE, B1_READY
+        or PRIVATE_BETA (§39, §54), and even a full pass at N ≥ 8 with all six metrics met yields only
+        V1_READY_FOR_ARCHITECT_VERDICT — §40 says plainly that it does not open B1.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -649,24 +699,42 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: NONE`.** Stage **P5 (Productization)** opened on 2026-10-03 and **closed `PASS_COMPLETE` on
-2026-10-06** with Commit F3, the only head of the stage authorized to write that sentence and only after §6's
-exit re-audit found no required engineering item `BLOCKED`. The state a newcomer inherits is therefore:
-Productization **`ENGINEERING_COMPLETE`**, product **`MVP_CANDIDATE`** at baseline **`0.6.0`**, narrative
-**FirmwareSight Productized MVP Candidate**, `G2 = PASS`, P0–P4 unchanged. Read
+**`active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1 (Own-artifact External Validation)** opened
+on 2026-10-06 under its own architect prompt, at **`IN_PROGRESS` / `research_state = RECRUITMENT_READY`**, with
+**0 eligible external sessions**. It is a research track, not a product stage: the cohort build is frozen to P5
+Commit F3's CI artifact (run `37475580080`, artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256
+`182506f2…63d12`, **unsigned**, verified against its own `SHA256SUMS.txt` and preserved outside Git), the product
+counts must stay at **868 Rust / 225 UI in 8 files** for as long as V1 runs, and nothing V1 does can authorize a
+feature, a schema, a dependency, a licence, a signature, a release or B1.
+
+**The work that is actually blocked, and on whom.** V1 needs real firmware and embedded engineers running their
+**own** artifacts. §48 assigns recruitment, consent, transfer and moderation to the **human operator**; an agent
+maintains the protocol, validates eligibility, and turns real notes or transcripts into anonymized records — and
+§5 forbids it from being a participant, using an LLM as one, or writing a session file for a session that did not
+happen. Start at `V1_VALIDATION/README.md`, then `V1_PLAN.md`, `V1_METRICS.md` and the five `protocol/`
+documents. The next repository write in this track should be a Batch A evidence commit **after** four eligible
+participants exist.
+
+**`P5` closed on 2026-10-06 and stays closed.** Stage **P5 (Productization)** opened on 2026-10-03 and **closed
+`PASS_COMPLETE` on 2026-10-06** with Commit F3, the only head of the stage authorized to write that sentence and
+only after §6's exit re-audit found no required engineering item `BLOCKED`. The state a newcomer inherits is
+therefore: Productization **`ENGINEERING_COMPLETE`**, product **`MVP_CANDIDATE`** at baseline **`0.6.0`**,
+narrative **FirmwareSight Productized MVP Candidate**, `G2 = PASS`, P0–P4 unchanged. Read
 `P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md` for the verdict and its boundaries,
 `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md` for all 26 carried rows, and `P5_VALIDATION/P5_RELEASE_READINESS.md`
 for the ten frozen release-readiness states.
 
-**Nothing after P5 is authorized by P5's closure.** V1 own-artifact / real-user validation is the likely next
-decision — it is the track that exists to answer L11, which P5 carried forward rather than closing — and it
-needs its own architect prompt, as do B1 / private beta, RC, GA, commercialization, a licence, signing,
-notarization, an updater and any new product verb, format, adapter or crate. `AGENTS.md` 1 binds: with no
-active task, no agent picks the next track or creates business functionality.
+**Nothing after P5 was authorized by P5's closure** — and that is still true of the closure sentence itself,
+which wrote `active_task: NONE` and named no successor. V1 own-artifact / real-user validation was the likely
+next decision (it is the track that exists to answer L11, which P5 carried forward rather than closing), and it
+did need its own architect prompt: it arrived on 2026-10-06 and opened the stage above. B1 / private beta, RC,
+GA, commercialization, a licence, signing, notarization, an updater and any new product verb, format, adapter or
+crate still have no prompt. `AGENTS.md` 1 binds exactly as it did: an agent executes the task the pointer names
+and stops there.
 
 *(the paragraphs below are P5's running narrative from 2026-10-03 onward. Each keeps the words its own round
-wrote, including the `IN_PROGRESS` states those rounds were required to hold; the present answer is the two
-paragraphs above.)*
+wrote, including the `IN_PROGRESS` states those rounds were required to hold; the present answer is the four
+paragraphs above, and the live pointer is `.ai/ACTIVE_TASK.md`.)*
 
 **`active_task: P5_PRODUCTIZATION`** — stage **P5**, state **`IN_PROGRESS`**, opened on 2026-10-03 by
 *FirmwareSight — P5 Productization, Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, archived in

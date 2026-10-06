@@ -1963,6 +1963,80 @@ anything else.
 **What closure does not authorize.** §37 stops the round: V1, private beta, B1, RC, GA, commercialization,
 licensing, signing, notarization, an updater and new feature development are all untouched, and the likely next
 decision — V1 own-artifact / real-user validation, the track that exists to answer L11 — needs a new architect
-prompt. §14's sentence is kept visible rather than repaired by an agent:
+prompt. *(Dated: that prompt arrived the same day, 2026-10-06, and the section below is its record. Every other
+item in this sentence's list still needs a prompt of its own, and V1's §40 adds that even a clean V1 pass does
+not authorize B1.)* §14's sentence is kept visible rather than repaired by an agent:
 **`PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION`**, because `AGENTS.md` 9 puts a
 licence change in front of a human and no P5 prompt let an agent choose one.
+
+## V1 (2026-10-06) — own-artifact external validation opened, at RECRUITMENT_READY and with zero sessions
+
+*FirmwareSight — V1 Own-artifact External Validation, Execution Prompt v1.0 — Architect Authorized* arrived the
+way every stage in this repository has arrived: as a file, hashed and archived
+(`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt`; delivered SHA-256
+`48768ff0…ec10a0f`, 46,207 CRLF bytes, 1,697 CRLF pairs, 1,698 logical lines; stored LF blob
+`d5e8d457…51774`, SHA-256 `c62314fe…90c34e`, 44,510 bytes — differing by exactly the 1,697 removed `CR` bytes,
+with every line proven identical and `.gitattributes` untouched). `AGENTS.md` 1 was not consulted about this and
+was not violated by it: the pointer moved because the architect named V1, not because the roadmap listed it after
+P5.
+
+**The decision that shaped the whole round is §5's branch, and it was taken honestly rather than conveniently.**
+V1 needs real external firmware engineers running their **own** artifacts. None exist: no participant has been
+recruited, no consent obtained, no session conducted. §5's answer in that case is explicit — do not simulate a
+participant, do not use an LLM as one, do not count an internal team member, do not invent a quote, do not
+invent a task completion, do not mark a session complete — and instead create the Recruitment Ready pack, set
+`active_task = V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`, `V1 = IN_PROGRESS`,
+`research_state = RECRUITMENT_READY`, keep `P5 = PASS_COMPLETE` and product `MVP_CANDIDATE`, commit docs and
+governance only, pass CI, and **stop**. That is what this round did. `V1_VALIDATION/` is therefore sixteen files
+of protocol and **zero rows** of evidence, and the report is a skeleton; nothing in it is a result.
+
+**What a round like this could have faked, and did not.** A V0-style "internal dry run" dressed up as a session,
+an LLM persona answering the M4 rubric, a repository fixture ELF substituted for an own artifact (§9 forbids
+exactly that), a denominator quietly reduced until a threshold passed (§37 names the failure mode), or a
+threshold softened after the fact (§15 forbids it, which is why the M1–M6 numbers are written down before any
+data exists). Each of these would have produced a greener-looking repository and a worthless track. The honest
+state is `V1_INCOMPLETE_INSUFFICIENT_SAMPLE` at N = 0.
+
+**The cohort build is a set of bytes, not a head.** §1 froze the research artifact to run `37475580080`,
+artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256 `182506f2…63d12`, verified against its own
+internal `SHA256SUMS.txt` (both entries `OK`, exit 0) and preserved **outside Git** because §1 forbids
+committing the installer. Two consequences were recorded rather than glossed: the 5,536,303-byte figure is the
+artifact *container*, not the installer; and because `P5_PACKAGING_REPORT.md` measured these packages to be
+**not byte-reproducible** (a payload differs in 20 of 15,001,088 bytes per link — PE `TimeDateStamp` plus the
+RSDS CodeView GUID), F3's installer legitimately differs from F2R1's even though their product trees are
+identical. So a head is not a build, and each V1 session must record the SHA of the bytes its participant
+actually ran. The activation commit's own CI package is explicitly **not** the cohort build (§46).
+
+**`product.status` and `validation.current_gate` did not gain a V1 term.** While P5 was running at `4cc8d93`,
+neither string mentioned P5: they carry verdicts, and V1 has earned none. `v1_execution` is where the open state
+lives, alongside `active_task`. The same convention decided that `next_authorizable_tracks` **loses** its
+`V1_own_artifact_external_validation_after_G2` entry — not because V1 is finished, but because it is now the live
+task rather than a track awaiting a decision, which is how P5's own entry left the same list at F3.
+
+**V1 may not write to P5's limitation list, and did not try.** §43 confines this round to `V1_VALIDATION/**`,
+the archived prompt, `BASELINE.yaml`, `.ai/*.md`, `README.md`, `INDEX.md`, `10_AUDIT/SOURCE_PROMPTS/**`,
+`06_DELIVERY/*.md` where materially stale, and the two regenerated baseline artifacts. So **L11** —
+real-user comprehension, the row V1 exists to answer — stays `CARRIED_FORWARD, owner V1` in
+`P5_VALIDATION/P5_KNOWN_LIMITATIONS.md`, untouched. §55 lets an agent write at most
+`READY_FOR_ARCHITECT_REVIEW` for it, and only once there is evidence to review; with zero sessions that would
+have been a claim dressed as a status.
+
+**V1 continues V0's discipline instead of starting a parallel one**, because §6 asks for reuse and because two
+incompatible methodologies would make every future comparison meaningless. M01–M17, the exclusion of team
+members and pre-briefed participants, the neutral-task rule, the anonymized register and the refusal to
+fabricate all carry over from `V0_VALIDATION/protocol/` and the archived V0 Batch A prompt. Three changes are
+named where they are used rather than left implicit: the instrument is now the installed product rather than a
+clickable prototype; M1–M6 have **fixed thresholds decided before any data** (V0 deliberately had none); and
+V0's five critical watches gain C6–C8, which only a real installed binary on a real own artifact can make
+possible.
+
+**Release readiness is unchanged, and the research build is not a distribution.** Signing `READY_NOT_EXECUTED`,
+notarization `READY_NOT_EXECUTED`, update `MANUAL_UPGRADE_READY`, licence `PENDING_OWNER_CONFIRMATION`, public
+distribution `NOT_AUTHORIZED`, tag and GitHub Release `NOT_CREATED`. The build participants receive is
+**unsigned**, moves one-to-one to named consenting people only, and must never be called a public beta (§2).
+
+**What this round stops at.** §5 step 9. `V1 = IN_PROGRESS / RECRUITMENT_READY`, eligible external sessions
+`0`, and the next move is a human one (§47, §48): recruit, consent, transfer, moderate. No B1, beta, RC, GA,
+feature, schema, migration, dependency, cloud, account, telemetry, updater, signing, notarization, licence or
+pricing is authorized — and V1's §39/§54 forbid it from ever writing its own `PASS`, even with all six metrics
+met at N ≥ 8, which would only produce `V1_READY_FOR_ARCHITECT_VERDICT`.

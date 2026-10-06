@@ -832,6 +832,53 @@ text with no source file; each says so in its own entry instead of standing for 
   no RC, no GA, no signing, no notarization, no updater, no new feature, and **no F4** — this is the final
   repository commit of P5.
 
+## V1 Own-artifact External Validation v1.0 — executed as far as §5 allows (2026-10-06)
+
+- File: `FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt`
+- **Delivered** bytes: SHA-256 `48768ff025e3d6351b7b1d8d593ea8bfb18a7930a0a21a101af3093bbec10a0f`, 46,207 bytes,
+  1,697 CRLF pairs, no lone `CR`, no final newline, 1,698 logical lines — measured from the attachment this
+  session was given, before copying it here.
+- **Git-stored blob**: object `d5e8d4575581bd656b568eed97090e7130a51774`, SHA-256
+  `c62314fee5032ca5ffdbcfe95f51cf3bdb783e7d55a42a165ea526686690c34e`, 44,510 bytes, 1,698 LF lines, no `CR`.
+- **The two hashes differ only because of transport, and that is proved.** `.gitattributes` carries
+  `*.txt text eol=lf`; the byte delta is exactly the `CR` count (46,207 − 44,510 = 1,697), and splitting the
+  delivered file on `\r\n` against the stored copy on `\n` gives 1,698 logical lines on each side with **zero
+  differing lines**. Same rule as P5 Commit F3's entry: state both digests, prove textual identity, do not touch
+  `.gitattributes`.
+- Authority: canonical unit `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`, **the first research stage opened since V0**,
+  issued by the architect on 2026-10-06 after P5 Commit F3 closed productization and returned the pointer to
+  `NONE`. §0 fixes its own start authority: `origin/main` = `08fdfcb710f78f8084bfcf614dc508c8b6e7e25b` (F3,
+  Run `37475580080`, #72, attempt 1, 10 of 10), `P5 = PASS_COMPLETE`, Productization `ENGINEERING_COMPLETE`,
+  product `MVP_CANDIDATE`, baseline `0.6.0`, counts 868 Rust / 225 UI in 8 files, gate 17 with drift 8 and
+  package 4.
+- What V1 **is**: real external firmware/embedded engineers, their **own** real artifacts, the frozen installed
+  build, and six pre-registered metrics — M1 import activation > 80 %, M2 time-to-first-value median < 60 s,
+  M3 Analyze→Compare ≥ 60 %, M4 Gate comprehension > 80 %, M5 real new information ≥ 30 %, M6 return intent
+  ≥ 62.5 % **and** ≥ 5 unique `YES` — at N ≥ 8 eligible unique participants (target 12–15). §15 forbids
+  redefining a threshold after seeing data; §37 forbids reporting a percentage without its denominator.
+- What V1 **is not**, in its own words: "NOT product development, Beta, Private Beta, RC, GA, pricing, public
+  release, licensing, signing, notarization or feature expansion." §4 forbids feature implementation, redesign
+  from participant preference, schema/migration/dependency change, cloud/account/network/telemetry, updater,
+  signing, notarization, licence selection, pricing, E1/E2/E3/GX and B1. §32 freezes product code for the length
+  of a cohort. §39 and §54 forbid `V1_PASS_COMPLETE`, `B1_READY` and `PRIVATE_BETA` from ever being self-issued,
+  and §40 states that even a clean pass does not open B1.
+- **§5 is the branch this round ran**, and it is the reason the round is short: with no real eligible external
+  participant and no session evidence, an agent must **not** simulate one, use an LLM as one, count an internal
+  team member, invent a quote or a completion, or mark a session complete — it builds the Recruitment Ready pack,
+  sets `active_task`, `V1 = IN_PROGRESS` and `research_state = RECRUITMENT_READY`, keeps P5 `PASS_COMPLETE` and
+  product `MVP_CANDIDATE`, commits docs/governance only, passes CI, and **stops** at `V1 = IN_PROGRESS /
+  RECRUITMENT_READY`, `eligible external sessions = 0`, `WAITING FOR REAL EXTERNAL PARTICIPANTS`.
+- Where the artifact identity lives: §1 names the cohort build as run `37475580080`'s artifact `11419727517` —
+  ZIP container 5,536,303 bytes (**not** the installer size), NSIS `FirmwareSight_0.6.0_x64-setup.exe` at
+  3,888,432 bytes / SHA-256 `182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12`, unsigned,
+  `expired: false` at activation. It was downloaded, verified against its internal `SHA256SUMS.txt` (both
+  entries `OK`, exit 0) and preserved **outside Git**; §1 forbids committing the installer and forbids
+  substituting F2R1's artifact, a local rebuild, `cargo run`, Vite, a later docs-only artifact or this
+  activation commit's own package (§46).
+- Where the round's record lives: `V1_VALIDATION/` — §13's sixteen files, every register at zero, the validation
+  report a skeleton, and the recommendation `V1_INCOMPLETE_INSUFFICIENT_SAMPLE`. The external evidence root is
+  `FirmwareSight-V1-External-Validation-20261006/` outside the repository (§41).
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

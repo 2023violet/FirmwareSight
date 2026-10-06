@@ -165,6 +165,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_Pre_G2_Compare_UI_Test_Reliability_Closure_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
 │   │   ├── FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
+│   │   ├── FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt
 │   │   └── README.md
 │   ├── SOURCE_REVIEWS/
 │   │   ├── ADR-0018-ui-baseline-tokens-governance.md
@@ -810,6 +811,27 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── V0_EXECUTION_PROVENANCE.md
 │   ├── V0_PLAN.md
 │   └── V0_TAKEOVER_REPORT.md
+├── V1_VALIDATION/
+│   ├── analysis/
+│   │   ├── FINDINGS.md
+│   │   ├── METRICS.md
+│   │   └── MISUNDERSTANDINGS.md
+│   ├── deliverables/
+│   │   ├── V1_GATE_RECOMMENDATION.md
+│   │   └── V1_VALIDATION_REPORT.md
+│   ├── protocol/
+│   │   ├── CONSENT_PRIVACY.md
+│   │   ├── INTERVIEW_SCRIPT.md
+│   │   ├── MODERATOR_GUIDE.md
+│   │   ├── PARTICIPANT_SCREENING.md
+│   │   └── TASK_SCRIPT.md
+│   ├── sessions/
+│   │   ├── README.md
+│   │   └── TEMPLATE.md
+│   ├── README.md
+│   ├── V1_METRICS.md
+│   ├── V1_PARTICIPANT_REGISTER.md
+│   └── V1_PLAN.md
 ├── .gitattributes
 ├── .gitignore
 ├── AGENTS.md

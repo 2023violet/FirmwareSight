@@ -243,7 +243,16 @@ P4 Release Bundle          — PASS / COMPLETE (2026-10-01); evidence in P4_VALI
 G2 Product MVP Candidate   — PASS (2026-10-01): Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE, on
                               the engineering exit above; evidence in G2_VALIDATION/. Not G3 Productization,
                               Private Beta, RC or GA
-V1 Own-artifact External Validation
+V1 Own-artifact External Validation — IN_PROGRESS / RECRUITMENT_READY (opened 2026-10-06 under its own architect
+                              prompt, delivered as a file and archived with its SHA-256). A research track, not a
+                              product stage: it measures whether real external firmware engineers, on their own
+                              artifacts and the frozen F3 build, can use Analyze / Compare / Gate, learn something
+                              true, and come back. Eligible external sessions 0 of a minimum 8; M1–M6 thresholds
+                              fixed before any data; protocol pack in V1_VALIDATION/. It authorizes no feature,
+                              schema, migration, dependency, cloud, account, telemetry, updater, signing,
+                              notarization, licence, pricing, B1, RC or GA — and §40 says even a full pass does
+                              not open B1. This line was blank before that round opened it, which is why this file
+                              is one of the paths §43 allowed a docs-only activation to touch.
 P5 Productization            — PASS_COMPLETE (opened 2026-10-03 under execution prompt v1.0, archived with its
                               SHA-256; closed 2026-10-06 by Commit F3 after §6's exit re-audit found no required
                               engineering item BLOCKED). Productization is ENGINEERING_COMPLETE and the product

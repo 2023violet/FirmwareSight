@@ -1,0 +1,1698 @@
+FirmwareSight — V1 Own-artifact External Validation
+Execution Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+CANONICAL UNIT
+V1_OWN_ARTIFACT_EXTERNAL_VALIDATION
+
+MISSION
+Use the final P5 productized MVP candidate with REAL external firmware/embedded engineers and THEIR OWN real firmware artifacts. Measure whether they can independently understand and use Analyze / Compare / Gate, whether they discover real new information, and whether they intend to use FirmwareSight again.
+
+This is NOT product development, Beta, Private Beta, RC, GA, pricing, public release, licensing, signing, notarization or feature expansion.
+
+HARD PRINCIPLES
+REAL PEOPLE.
+REAL OWN ARTIFACTS.
+NO SIMULATED USERS.
+NO INTERNAL TEAM AS FORMAL PARTICIPANTS.
+NO LEADING MODERATION.
+NO SECRET PRODUCT PATCHES DURING A COHORT.
+REPORT ACTUAL NUMERATOR / DENOMINATOR.
+PRESERVE PRIVACY.
+CANDIDATE ≠ TASK.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current origin/main:
+08fdfcb710f78f8084bfcf614dc508c8b6e7e25b
+
+Commit:
+P5: close productization after installed and corrective acceptance
+
+F3 remote CI:
+Run 37475580080
+run #72
+attempt 1
+10 / 10 authoritative jobs success
+
+Canonical current state:
+P5 = PASS_COMPLETE
+Productization = ENGINEERING_COMPLETE
+Product = MVP_CANDIDATE
+Narrative = FirmwareSight Productized MVP Candidate
+baseline = 0.6.0
+active_task = NONE
+G2 = PASS
+
+Not authorized before this prompt:
+V1, B1, Private Beta, RC, GA
+
+Release-readiness state:
+Signing = READY_NOT_EXECUTED
+Notarization = READY_NOT_EXECUTED
+Update = MANUAL_UPGRADE_READY
+Open-source license = PENDING_OWNER_CONFIRMATION
+Public distribution = NOT_AUTHORIZED
+Tag = NOT_CREATED
+GitHub Release = NOT_CREATED
+
+Final P5 product counts:
+Rust = 868 / 0 failed / 47 targets
+UI = 225 / 8 files
+full gate = 17 / 17
+drift = 8 / 8
+package = 4 / 4
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. FROZEN V1 RESEARCH ARTIFACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Formal V1 sessions use the exact P5 F3 Windows CI artifact:
+
+Run:
+37475580080
+
+Head:
+08fdfcb710f78f8084bfcf614dc508c8b6e7e25b
+
+Artifact:
+FirmwareSight-0.6.0-windows-x86_64
+
+GitHub artifact id:
+11419727517
+
+GitHub artifact ZIP/container size:
+5,536,303 bytes
+
+At Architect verification:
+expired = false
+
+GitHub expiry:
+2026-10-20T14:21:52Z
+
+The ZIP size is NOT the NSIS installer size.
+
+At activation:
+- download this exact artifact immediately;
+- extract it;
+- verify internal SHA256SUMS.txt;
+- read artifact-metadata.json;
+- record actual NSIS filename / size / SHA-256;
+- record installed executable identity;
+- preserve a verified research copy OUTSIDE Git.
+
+Do NOT commit the installer.
+
+Do NOT substitute:
+- F2R1 artifact;
+- a local rebuild;
+- cargo run;
+- Vite;
+- a later docs-only CI artifact;
+- any unreviewed product head.
+
+If artifact 11419727517 expires before preservation:
+STOP and return to Architect.
+Do not silently rebuild.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. CONTROLLED EXTERNAL RESEARCH DISTRIBUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PUBLIC_DISTRIBUTION remains NOT_AUTHORIZED.
+
+This prompt authorizes controlled one-to-one transfer of the exact V1 research build to named, consenting participants only.
+
+Allowed:
+- private direct transfer;
+- participant-restricted temporary link;
+- supervised installation;
+- controlled research machine.
+
+Forbidden:
+- public download page;
+- public GitHub Release;
+- public forum link;
+- package manager publication;
+- unrestricted shared link;
+- participant redistribution;
+- calling the build a public beta.
+
+The build is unsigned.
+
+Before install, tell participants:
+- this is an unsigned research/evaluation build;
+- Windows may show a security/reputation warning;
+- they may decline;
+- do not disable Windows security globally;
+- no product semantics will be taught before measurement.
+
+Record install friction as evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before repository writes:
+
+git fetch --prune origin
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+
+Expected:
+HEAD = origin/main =
+08fdfcb710f78f8084bfcf614dc508c8b6e7e25b
+
+tree clean.
+
+If remote moved:
+STOP and read/classify the delta.
+
+Never:
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git push --force
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. AUTHORIZED / FORBIDDEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AUTHORIZED:
+- open V1 validation track;
+- prepare recruitment/screening/consent/session protocol;
+- preserve exact F3 artifact for research;
+- recruit real external participants;
+- conduct real sessions;
+- record anonymized behavior/timing/quotes;
+- calculate metrics;
+- classify misunderstandings/findings;
+- produce V1 evidence and recommendations.
+
+NOT AUTHORIZED:
+- product feature implementation;
+- product redesign from participant preference;
+- schema/migration/dependency change;
+- cloud/account/network/telemetry;
+- updater;
+- signing/notarization;
+- license selection;
+- pricing model;
+- paid plans;
+- E1/E2/E3/GX implementation;
+- B1 / Private Beta;
+- RC / GA;
+- public release.
+
+Product code stays frozen during a formal cohort.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. NO REAL PARTICIPANTS = RECRUITMENT READY ONLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If no real eligible external participant/session evidence exists:
+
+DO NOT simulate a participant.
+DO NOT use an LLM as participant.
+DO NOT count an internal team member.
+DO NOT invent quotes.
+DO NOT invent task completion.
+DO NOT mark sessions complete.
+
+Instead:
+1. create full V1 Recruitment Ready pack;
+2. set active_task = V1_OWN_ARTIFACT_EXTERNAL_VALIDATION;
+3. set V1 = IN_PROGRESS;
+4. set research_state = RECRUITMENT_READY using existing schema/conventions where possible;
+5. keep P5 PASS_COMPLETE;
+6. keep Product MVP_CANDIDATE;
+7. commit docs/governance only;
+8. pass CI;
+9. STOP.
+
+Return:
+V1 = IN_PROGRESS / RECRUITMENT_READY
+eligible external sessions = 0
+
+WAITING FOR REAL EXTERNAL PARTICIPANTS.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. REQUIRED RESEARCH SOURCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read and reuse the established V0 research discipline:
+
+V0_VALIDATION/protocol/PARTICIPANT_SCREENING.md
+V0_VALIDATION/protocol/CONSENT_PRIVACY.md
+V0_VALIDATION/protocol/MODERATOR_GUIDE.md
+V0_VALIDATION/protocol/TASK_SCRIPT.md
+V0_VALIDATION/protocol/INTERVIEW_SCRIPT.md
+
+and:
+
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
+
+Also read:
+06_DELIVERY/06_STAGE_GATES.md
+09_ADR/ADR-0024-post-mvp-candidate-governance.md
+06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md
+BASELINE.yaml
+.ai/ACTIVE_TASK.md
+.ai/CURRENT_STATE.md
+
+V0 prototype tasks are history.
+V1 tests the real installed product.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. PARTICIPANT ELIGIBILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Formal participant must:
+
+A. be external to the FirmwareSight project/team;
+
+B. not have authored FirmwareSight code, prompts, design, protocol or evidence;
+
+C. not have been pre-trained on Analyze / Compare / Gate / Unknown / Review / Evidence semantics;
+
+D. have real involvement in embedded firmware development/review/release;
+
+E. fit a target role family:
+- Firmware Engineer
+- Senior Firmware Engineer
+- Firmware Lead
+- Embedded Software Engineer
+- Embedded Team Lead
+- firmware-oriented QA/release reviewer
+- small hardware founder/team member who personally handles firmware release evidence
+
+F. have authority to use the selected artifact(s) in research;
+
+G. use REAL OWN-PROJECT artifact(s) for formal own-artifact tasks.
+
+Record only anonymized:
+Participant ID
+role
+experience band
+toolchain
+MCU/RTOS ecosystem
+team-size band
+release-frequency band
+current pre-release workflow
+cohort status
+
+No employer/customer identity by default.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. SUPPORTED COHORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Formal workflow metrics should use inputs inside FirmwareSight's measured support boundary.
+
+Preferred:
+- GCC / arm-none-eabi-gcc ELF;
+- Clang ELF in the documented measured Arm cohort;
+- GNU ld MAP when available.
+
+Keil/IAR participants are valuable discovery participants,
+but MUST NOT be told those toolchains are currently supported.
+
+If their real output cannot enter the supported input path:
+classify:
+DISCOVERY_OUT_OF_COHORT
+
+They may contribute qualitative demand/workflow/toolchain evidence,
+but do not enter supported-workflow metric denominators unless they independently provide a supported artifact.
+
+Do not turn unsupported-toolchain behavior into a usability defect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. OWN-ARTIFACT RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Formal V1 means OWN ARTIFACT.
+
+Each full-workflow participant should bring:
+- >=1 real own-project ELF;
+- preferably matching MAP;
+- preferably 2 real builds of the same project: baseline + target.
+
+Two valid own-project builds are required for the formal Analyze→Compare denominator.
+
+A participant with only one valid own build may still contribute:
+- Import activation
+- TTFV
+- Analyze understanding
+- Gate comprehension interview
+- new-information metric
+- return intent
+
+but is excluded from Analyze→Compare denominator.
+
+Repository/demo fixtures may NOT substitute for formal own-artifact tasks.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. PRIVACY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT collect by default:
+- firmware binary bytes;
+- MAP files;
+- source code;
+- private repos;
+- credentials;
+- customer/device identifiers;
+- confidential release info;
+- private Git remotes.
+
+Participant artifacts remain:
+their machine
+or controlled research machine.
+
+Raw evidence root is OUTSIDE Git.
+
+Committed session docs contain anonymized evidence only.
+
+Repo-safe artifact facts:
+OWN_ARTIFACT = YES
+artifact type
+toolchain category
+ecosystem category
+size band
+MAP YES/NO
+
+Full artifact SHA may remain private if needed.
+
+No private absolute paths in Git.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. CONSENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before each formal session obtain explicit consent.
+
+Explain:
+- product/workflow research purpose;
+- unsigned evaluation build;
+- own artifact remains local by default;
+- participant can stop;
+- recording optional;
+- reporting anonymized;
+- no employer/customer secrets requested.
+
+Audio/screen/video recording requires explicit consent.
+
+If recording is declined:
+moderated notes are acceptable.
+
+Post-hoc opinion alone is NOT enough for behavioral metrics.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. SAMPLE RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Minimum formal external sample:
+N >= 8 eligible unique participants
+
+Target:
+12–15
+
+Do NOT count:
+- internal project members;
+- repeated session from same person as new participant;
+- taught-before-task sessions;
+- simulated sessions;
+- invalid/unsupported inputs inside supported-workflow denominators.
+
+Follow-up sessions:
+V1-P001-F1 etc.
+They do not increase unique N.
+
+If N < 8:
+V1 = V1_INCOMPLETE_INSUFFICIENT_SAMPLE
+
+No forced PASS/FAIL conclusion.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. CREATE V1 PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+V1_VALIDATION/README.md
+V1_VALIDATION/V1_PLAN.md
+V1_VALIDATION/V1_METRICS.md
+V1_VALIDATION/V1_PARTICIPANT_REGISTER.md
+
+V1_VALIDATION/protocol/PARTICIPANT_SCREENING.md
+V1_VALIDATION/protocol/CONSENT_PRIVACY.md
+V1_VALIDATION/protocol/MODERATOR_GUIDE.md
+V1_VALIDATION/protocol/TASK_SCRIPT.md
+V1_VALIDATION/protocol/INTERVIEW_SCRIPT.md
+
+V1_VALIDATION/sessions/README.md
+V1_VALIDATION/sessions/TEMPLATE.md
+
+V1_VALIDATION/analysis/METRICS.md
+V1_VALIDATION/analysis/MISUNDERSTANDINGS.md
+V1_VALIDATION/analysis/FINDINGS.md
+
+V1_VALIDATION/deliverables/V1_VALIDATION_REPORT.md
+V1_VALIDATION/deliverables/V1_GATE_RECOMMENDATION.md
+
+Do NOT create fake completed session files.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. ACTIVATE V1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Using existing governance conventions:
+
+active_task =
+V1_OWN_ARTIFACT_EXTERNAL_VALIDATION
+
+stage =
+V1
+
+state =
+IN_PROGRESS
+
+If no participants:
+research_state =
+RECRUITMENT_READY
+
+Keep:
+P5 = PASS_COMPLETE
+G2 = PASS
+Product = MVP_CANDIDATE
+baseline = 0.6.0
+
+No B1/Beta/RC/GA.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. V1 METRIC CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required V1 metrics:
+
+M1 Import activation >80%
+
+M2 Time to First Value <60 s
+
+M3 Analyze→Compare completion >=60%
+
+M4 Gate meaning comprehension >80%
+
+M5 >=30% discover real new information
+
+M6 Return intent >=62.5% AND >=5 unique YES participants
+
+Always report actual numerator/denominator.
+
+Historical "5/8" is NOT a universal metric.
+The repository requires:
+>=62.5% AND at least 5 people.
+
+Do not redefine thresholds after seeing data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. M1 IMPORT ACTIVATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Denominator:
+eligible supported-cohort sessions with a valid own ELF.
+
+Numerator:
+participant reaches a rendered Analyze result for own ELF
+without directional moderator instruction about which product control to use.
+
+Neutral task wording allowed.
+
+Target:
+>80%
+
+Report:
+activated / eligible = %
+
+Directional help:
+flag intervention and do not count that task as unassisted success.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. M2 TIME TO FIRST VALUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect operational definition.
+
+START:
+participant has installed app open and receives neutral own-artifact task.
+
+END:
+both are true:
+1. own Analyze result rendered;
+2. participant correctly identifies >=1 concrete non-trivial fact.
+
+Examples:
+Flash/image footprint
+RAM footprint
+major contributor
+evidence limitation
+Unknown reason
+MAP-driven evidence improvement
+
+Do not stop timer at UI load alone.
+
+Report:
+every measured participant time
+median
+p75 when useful
+count <60 s
+
+Target:
+median TTFV <60 s
+
+If directional intervention occurs before first value:
+keep time but flag:
+INTERVENTION_BEFORE_FIRST_VALUE = YES
+
+If timestamps are insufficient:
+TTFV = NOT_MEASURED
+Never guess.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. M3 ANALYZE→COMPARE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Denominator:
+eligible participants with two valid own-project builds of same project.
+
+Numerator:
+participant completes meaningful Compare unassisted:
+- correct baseline/target;
+- Compare rendered;
+- can state >=1 real delta.
+
+Target:
+>=60%
+
+Report:
+completed / eligible-two-build
+
+No demo fixture substitution.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. M4 GATE MEANING COMPREHENSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After use, ask neutral questions.
+
+Participant must correctly distinguish:
+PASS
+REVIEW
+BLOCK
+UNKNOWN
+N/A
+
+Comprehension PASS requires:
+A. PASS = policy/evidence result, NOT universal release approval;
+B. UNKNOWN = insufficient/unresolved evidence, NOT clean;
+C. REVIEW = accountable human judgment, NOT automatic proof;
+D. BLOCK prevents qualification;
+E. N/A = rule not applicable in context.
+
+Target:
+>80%
+
+Report:
+comprehension-pass / eligible
+plus per-concept misses.
+
+Any belief that PASS certifies legal/compliance/security/safety:
+Critical.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. M5 REAL NEW INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEW_INFORMATION = YES only when participant explicitly identifies a concrete fact about THEIR OWN build they did not know, had not noticed, or would otherwise investigate separately.
+
+Examples:
+unexpected size growth
+surprising contributor
+missing evidence
+custom section impact
+RAM growth
+MAP resolves ambiguity
+release-policy issue
+historical comparison fact
+
+Do not count generic praise.
+
+Target:
+>=30%
+
+Report:
+new-info / eligible
+plus anonymized examples.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. M6 RETURN INTENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ask:
+
+"Thinking about a real release/review like the one you work on,
+would you intentionally open FirmwareSight again for a future release?"
+
+Code:
+YES
+MAYBE
+NO
+
+Only YES enters numerator.
+
+Target:
+>=62.5%
+AND
+>=5 unique YES participants
+
+Examples:
+5/8 = 62.5%, 5 yes → meets
+5/10 = 50% → fails
+6/9 = 66.7%, 6 yes → meets
+
+Always print numerator/denominator.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. COMMERCIAL SIGNAL IS SECONDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+May record:
+purchase process
+approval owner
+pilot willingness
+budget ownership
+
+But V1 pass does NOT depend on pricing.
+
+No pricing model.
+No paid plans.
+No invented price anchors.
+
+If no Architect-provided anchors:
+ask qualitative value/pilot questions only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. FORMAL TASK FLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use neutral wording.
+
+T0 Install / launch
+"Please install and open this evaluation build."
+
+Record:
+install friction
+SmartScreen/reputation warning
+launch success/refusal
+
+T1 Analyze
+"Use FirmwareSight to understand this firmware build."
+
+Do NOT say:
+click Analyze
+choose ELF
+add MAP
+
+T2 Evidence improvement
+If MAP exists:
+"Please see whether you can get more detailed or more trustworthy evidence from the files you already have."
+
+Do NOT say:
+Add .map file.
+
+T3 Compare
+If two builds exist:
+"Please work out what materially changed between these two builds."
+
+Do NOT say:
+open Compare.
+
+T4 Release readiness
+"Assume this is a build your team is considering for release.
+Use the product to work out what it is telling you about release readiness."
+
+Do NOT say:
+run Gate.
+
+T5 Gate semantics
+After task behavior, ask M4 comprehension rubric.
+
+T6 Bundle
+"If you needed to hand the release evidence to someone else,
+what would you do from here?"
+
+T7 History
+"Imagine you return later and need to explain why a prior build was accepted.
+Where would you look?"
+
+T8 Support/Diagnostics
+Only if relevant:
+"If the tool behaved unexpectedly and you needed support,
+what information would you look for?"
+
+Never add hints to task wording.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. MODERATOR DISCIPLINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Forbidden before task completion:
+
+"Click Analyze."
+"Go to Compare."
+"You need to add MAP."
+"UNKNOWN means missing evidence."
+"PASS does not mean compliance."
+"Use History."
+"This is correct."
+"Great, you understood it."
+
+If stalled:
+wait.
+
+Then neutral prompt:
+"What would you try next?"
+or
+"If this were software at work, where would you look?"
+
+Directional help:
+MODERATOR_INTERVENTION = YES
+
+A taught completion does not count as unassisted success.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. FIRST PATH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For T1/T3/T4/T6/T7 record:
+first click
+first navigation path
+wrong turns
+backtracks
+stalls
+Help usage
+interventions
+
+Do not invent a threshold for first-click behavior.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. MISUNDERSTANDING TAXONOMY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reuse V0:
+
+M01 Product positioning
+M02 Navigation
+M03 Analyze
+M04 Compare
+M05 Gate
+M06 Evidence
+M07 Unknown
+M08 Review
+M09 N/A
+M10 Bundle
+M11 History
+M12 Error recovery
+M13 Compliance misunderstanding
+M14 Pricing/value
+M15 Toolchain expectation
+M16 Evidence state transition
+M17 MAP/capability misunderstanding
+
+Use M18+ only when genuinely not representable.
+
+If adding M18+, document why.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. CRITICAL WATCH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Any single occurrence enters Interim Review:
+
+C1 PASS interpreted as legal/regulatory certification
+C2 UNKNOWN interpreted as "no problem"
+C3 accepted REVIEW interpreted as objective proof
+C4 missing/unsupported evidence treated as exact fact
+C5 participant would ship based on misunderstood state
+C6 materially incorrect supported-artifact result
+C7 product unexpectedly damages/modifies participant artifact/project
+C8 crash/data corruption in formal workflow
+
+Report:
+1 / N observed
+
+Never generalize one observation to "users".
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. QUOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Quotes must be verbatim.
+
+Separate:
+QUOTE
+from
+INTERPRETATION
+
+If exact wording uncertain:
+MODERATOR_NOTE — NOT VERBATIM QUOTE
+
+Redact employer/project secrets.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. SESSION IDS / QUALITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use:
+V1-P001
+V1-P002
+...
+
+Follow-up:
+V1-P001-F1
+
+Quality flags:
+VALID
+VALID_WITH_INTERVENTION
+DISCOVERY_OUT_OF_COHORT
+EXCLUDED_PROTOCOL_CONTAMINATED
+EXCLUDED_INTERNAL
+EXCLUDED_NO_CONSENT
+EXCLUDED_NO_REAL_ARTIFACT
+
+A repeat session does not increase unique participant N.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. SESSION RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Each session file includes:
+
+Participant ID
+Eligibility
+Role
+Experience band
+Toolchain
+MCU/RTOS
+Team-size band
+Release-frequency band
+
+Own artifact YES/NO
+Own baseline+target pair YES/NO
+MAP YES/NO
+
+Consent YES
+Recording AUDIO/SCREEN/VIDEO/NOTES_ONLY
+
+Product:
+FirmwareSight 0.6.0
+F3 head 08fdfcb
+artifact id 11419727517
+actual installer SHA
+
+T0–T8 outcomes
+
+First path
+Interventions
+M01–M18+
+C1–C8
+
+M1 activation
+M2 TTFV
+M3 Compare completion
+M4 Gate comprehension
+M5 New information
+M6 Return intent
+
+Verbatim quotes
+Observations
+Product findings
+Participant recommendations
+Moderator interpretation
+
+No PII/secrets.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. PRODUCT FINDING CLASSIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Classify:
+PRODUCT
+RESEARCH_HARNESS
+ENVIRONMENT
+UNSUPPORTED_COHORT
+KNOWN_LIMITATION
+PREFERENCE
+FEATURE_REQUEST
+OBSERVATION
+
+Product severity:
+S0 catastrophic data/security/integrity
+S1 core workflow blocker/materially wrong supported evidence
+S2 major product/usability defect
+S3 minor defect
+S4 cosmetic/observation
+
+Do not call preferences bugs.
+Do not call unsupported Keil/IAR input a parser defect if correctly unsupported.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. CODE FREEZE / HOTFIX RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Formal cohort uses one frozen artifact.
+
+NO silent product patch mid-cohort.
+
+If S0/S1:
+STOP formal sessions.
+Preserve evidence.
+Return to Architect.
+
+If S2:
+continue only if it does not invalidate measured tasks;
+flag for Interim Review.
+
+Any product code change creates a new cohort version and NEW CI artifact.
+
+Do not pool pre/post-hotfix metrics blindly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. NO FEATURE IMPLEMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+V1 may recommend but may NOT implement:
+
+CSV/Markdown/PDF export
+SBOM/CVE
+CI automation
+stack analysis
+watch mode
+cloud sync
+accounts
+team dashboard
+AI
+pricing
+subscriptions
+new Gate rules
+new parser formats
+E1/E2/E3/GX
+
+without new Architect authority.
+
+ADR-0024 remains:
+candidate ≠ task.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. BATCHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred:
+
+Batch A:
+first 4 eligible participants
+
+Then Interim Review.
+
+Batch B:
+participants 5–8 minimum
+
+Optional Batch C:
+participants 9–12/15
+
+Do NOT declare V1 complete after Batch A.
+
+Batch A detects:
+catastrophic misunderstanding
+broken protocol
+artifact/cohort mismatch
+obvious blocker
+
+Do not redesign from four people.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. BATCH A INTERIM REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+V1_VALIDATION/analysis/BATCH_A_INTERIM_REVIEW.md
+
+Include:
+
+eligible N
+cohort mix
+M1–M6 current numerator/denominator
+TTFV distribution
+misunderstandings
+Critical watches
+product findings
+out-of-cohort observations
+return intent
+new-info examples
+interventions
+protocol contamination risk
+
+Recommendation ONLY:
+
+CONTINUE_UNCHANGED
+
+CONTINUE_WITH_PROTOCOL_CLARIFICATION
+
+STOP_FOR_ARCHITECT_PRODUCT_REVIEW
+
+No product change from this document.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. EARLY STOP TRIGGERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Immediate Architect review if:
+
+any S0
+any S1
+credible C1–C8 product risk
+same S2 independently observed by >=3 participants
+same misunderstanding independently observed by >=3 participants
+Import activation <60% after first 4 valid sessions
+Gate comprehension <50% after first 4
+privacy/consent breach
+research artifact provenance mismatch
+participant receives wrong build
+
+Do not wait for N=8 when protocol/product is invalid.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. METRIC REPORTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Always report:
+
+numerator
+denominator
+percentage
+exclusion reason
+
+Examples:
+
+Import:
+7/8 = 87.5%
+
+Compare:
+5/7 valid two-build participants = 71.4%
+
+not:
+5/8
+if one had no build pair.
+
+Return:
+6/9 = 66.7%, 6 unique YES
+
+No denominator laundering.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. V1 QUANTITATIVE PASS SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For V1_METRICS_PASS consideration:
+
+N >= 8 eligible unique external participants
+
+M1 Import activation >80%
+
+M2 median TTFV <60 s
+
+M3 Analyze→Compare >=60%
+
+M4 Gate comprehension >80%
+
+M5 New information >=30%
+
+M6 Return intent >=62.5%
+AND >=5 unique YES
+
+All six required.
+
+Metrics alone do NOT self-issue stage PASS.
+
+Architect also reviews:
+Critical misunderstandings
+S0/S1
+cohort concentration
+protocol integrity
+privacy integrity
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. V1 VERDICT STATES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If N < 8:
+V1_INCOMPLETE_INSUFFICIENT_SAMPLE
+
+If N >=8 but metric(s) miss or major risk remains:
+V1_EVIDENCE_PARTIAL
+
+If N>=8, all 6 thresholds pass, no unresolved S0/S1, no invalidating Critical misunderstanding, protocol/privacy pass:
+V1_READY_FOR_ARCHITECT_VERDICT
+
+Then STOP.
+
+DO NOT self-write:
+V1 = PASS_COMPLETE
+
+Only Architect may issue final V1 verdict.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. NO AUTOMATIC B1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Even V1 PASS does NOT authorize B1.
+
+Private Beta / G4 suggests:
+20–50 users
+3–5 teams
+
+and requires a separate beta support loop and release-train decision.
+
+Do not start B1.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. EXTERNAL EVIDENCE ROOT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create OUTSIDE repository:
+
+FirmwareSight-V1-External-Validation-<date>/
+
+Suggested:
+00_authority
+01_artifact
+02_recruitment
+03_consent_private
+04_sessions_raw
+05_recordings_private
+06_artifact_metadata_private
+07_analysis_working
+08_reports
+09_archive
+
+Raw PII and proprietary facts stay outside Git.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. ACTIVATION COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before participant data:
+
+archive this prompt under:
+10_AUDIT/SOURCE_PROMPTS/
+
+create V1 pack.
+
+Update:
+active_task = V1_OWN_ARTIFACT_EXTERNAL_VALIDATION
+V1 = IN_PROGRESS
+research_state = RECRUITMENT_READY if no sessions
+
+Keep:
+P5 = PASS_COMPLETE
+Product = MVP_CANDIDATE
+baseline = 0.6.0
+
+Suggested commit:
+V1: open own-artifact external validation
+
+Docs/governance/research protocol only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. ACTIVATION DIFF BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Allowed:
+V1_VALIDATION/**
+BASELINE.yaml
+.ai/*.md
+README.md
+INDEX.md
+10_AUDIT/SOURCE_PROMPTS/**
+DIRECTORY_TREE.txt
+SHA256SUMS
+
+06_DELIVERY/*.md only if current pointer materially stale.
+
+Forbidden:
+apps/**
+crates/**
+scripts/**
+fixtures/**
+schemas/**
+golden/**
+migrations/**
+.github/**
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+assets/design-tokens.json
+
+If product path changes:
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. ADR-0029 BASELINE WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+edit
+→ inspect
+→ stage intended non-baseline files
+→ generate DIRECTORY_TREE from stage-0 index if path set changed
+→ stage tree
+→ generate SHA256SUMS from stage-0 index blobs
+→ stage sums
+→ verify_baseline_artifacts.py
+→ full gate
+→ inspect
+→ commit
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. ACTIVATION LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run:
+
+git diff --check
+cargo fmt --all -- --check
+cargo test --workspace
+corepack pnpm test
+python scripts/check.py
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+python scripts/verify_baseline_artifacts.py
+
+Required unchanged product counts:
+
+Rust = 868
+UI = 225 / 8 files
+full gate = 17
+drift = 8
+package = 4
+
+No required SKIP.
+
+If product counts move:
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. ACTIVATION REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Push normal fast-forward.
+
+Find run by exact activation SHA.
+
+Require:
+10 / 10 authoritative jobs
+
+Read all individually.
+
+The activation commit only proves the product did not move.
+
+Formal participant build stays the frozen F3 artifact:
+Run 37475580080
+artifact id 11419727517
+
+Do NOT switch cohort to a docs-only activation package.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+47. RECRUITMENT MESSAGE REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prepare a concise outreach template stating:
+
+- research on a local desktop tool for firmware release evidence;
+- seeking firmware/embedded engineers;
+- ~30–45 minute session;
+- use own authorized/non-confidential build artifacts;
+- no source code requested;
+- artifacts remain local by default;
+- unsigned evaluation build;
+- no public redistribution;
+- feedback anonymized;
+- recording optional with consent.
+
+Do not promise compensation unless owner provides it.
+
+Do not call product Beta/released.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+48. HUMAN / AGENT DIVISION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Human/operator:
+- recruits participants;
+- obtains consent;
+- transfers research build;
+- moderates or receives recording;
+- protects private artifact data.
+
+Agent:
+- maintains protocol;
+- validates eligibility;
+- converts REAL notes/transcripts into anonymized records;
+- calculates metrics;
+- classifies findings;
+- synthesizes evidence;
+- refuses to fabricate missing data.
+
+Agent cannot substitute for participant.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+49. WHEN A REAL TRANSCRIPT/SESSION ARRIVES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. validate consent;
+2. validate Participant ID/eligibility;
+3. validate product build;
+4. extract timeline;
+5. extract first path;
+6. identify interventions;
+7. calculate TTFV only if timestamps support it;
+8. code task completion;
+9. code M01–M18+;
+10. code C1–C8;
+11. extract verbatim quotes;
+12. separate interpretation;
+13. calculate M1–M6 contribution;
+14. redact secrets;
+15. write anonymized session;
+16. update aggregate metrics.
+
+Never infer missing timing.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+50. PRIVACY CHECK BEFORE GIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before staging session evidence scan for:
+
+real name
+email
+company/customer name
+private repo
+absolute private path
+Git remote
+device serial
+firmware bytes
+MAP content
+confidential release info
+recording URL/private location
+
+Redact or retain only outside Git.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+51. BATCH COMMITS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred:
+Activation commit
+Batch A evidence commit after 4 eligible participants
+Batch B evidence commit after >=8
+Optional Batch C
+Final evidence candidate
+
+All normal V1 evidence commits are docs/evidence only.
+
+Product test counts remain:
+868 Rust
+225 UI
+
+Every pushed evidence commit still passes authoritative CI.
+
+No weakening CI because docs-only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+52. FINAL ANALYSIS FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At N>=8 or explicit interim request create/update:
+
+V1_VALIDATION/analysis/V1_METRIC_TABLE.md
+V1_VALIDATION/analysis/V1_COHORT_SUMMARY.md
+V1_VALIDATION/analysis/V1_MISUNDERSTANDING_MATRIX.md
+V1_VALIDATION/analysis/V1_PRODUCT_FINDINGS.md
+V1_VALIDATION/analysis/V1_VALUE_SIGNALS.md
+V1_VALIDATION/analysis/V1_RETURN_INTENT.md
+V1_VALIDATION/analysis/V1_TOOLCHAIN_DEMAND.md
+V1_VALIDATION/deliverables/V1_VALIDATION_REPORT.md
+V1_VALIDATION/deliverables/V1_GATE_RECOMMENDATION.md
+
+No fake statistical significance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+53. V1 VALIDATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required:
+
+1. Authority/artifact
+2. Protocol
+3. Eligibility
+4. Cohort composition
+5. Sample/exclusions
+6. Toolchains/artifact distribution
+7. M1 Import
+8. M2 TTFV
+9. M3 Compare
+10. M4 Gate comprehension
+11. M5 New information
+12. M6 Return intent
+13. Interventions
+14. Misunderstandings
+15. Critical watches
+16. Product findings
+17. Unsupported cohort
+18. Quotes
+19. Value signal
+20. Pilot/commercial signal if collected
+21. Privacy/protocol integrity
+22. Study limitations
+23. Metric verdict
+24. Recommendation
+
+Every metric must show numerator/denominator.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+54. FINAL RECOMMENDATION VALUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Allowed:
+
+V1_INCOMPLETE_INSUFFICIENT_SAMPLE
+
+V1_EVIDENCE_PARTIAL
+
+V1_READY_FOR_ARCHITECT_VERDICT
+
+Never self-issue:
+V1_PASS_COMPLETE
+B1_READY
+PRIVATE_BETA
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+55. WHAT V1 OWNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+V1 owns the evidence needed to resolve/reduce:
+
+P5 Known Limitation L11:
+real-user comprehension untested
+
+Agent may write:
+L11 = READY_FOR_ARCHITECT_REVIEW
+
+not:
+CLOSED
+
+before Architect verdict.
+
+V1 may inform roadmap priority,
+but does not activate E1/E2/E3/GX.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+56. WHAT V1 DOES NOT PROVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Even strong V1 does NOT prove:
+
+market size
+PMF
+production safety
+security certification
+regulatory compliance
+enterprise readiness
+all-platform runtime support
+optimal pricing
+long-term retention
+team deployment
+support scalability
+Beta readiness by itself
+
+No overclaim.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+57. RECRUITMENT-READY REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If no real sessions exist, return:
+
+# FirmwareSight V1 Activation / Recruitment-Ready Report
+
+## 1. Start authority
+HEAD
+origin/main
+P5
+F3 Run 72
+
+## 2. Frozen research artifact
+run
+head
+artifact id
+artifact name
+actual installer
+size
+SHA
+internal verification
+
+## 3. V1 scope
+authorized
+forbidden
+
+## 4. Protocol pack
+files
+
+## 5. Eligibility
+formal
+discovery
+exclusions
+
+## 6. Privacy
+artifact
+PII
+recording
+
+## 7. Metrics
+M1–M6
+thresholds
+
+## 8. Recruitment
+message
+screening
+current N
+
+## 9. Governance
+active_task
+V1 state
+P5 unchanged
+
+## 10. Validation
+Rust
+UI
+gate
+drift
+package
+baseline
+
+## 11. Activation commit
+SHA
+diff
+product unchanged
+
+## 12. Remote CI
+run
+attempt
+10 jobs
+
+## 13. Verdict
+V1 = IN_PROGRESS / RECRUITMENT_READY
+eligible sessions = 0
+P5 = PASS_COMPLETE
+Product = MVP_CANDIDATE
+B1 = NOT_AUTHORIZED
+
+## 14. Stop
+WAITING FOR REAL EXTERNAL PARTICIPANTS.
+DO NOT SIMULATE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+58. FINAL V1 REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When real cohort is ready:
+
+# FirmwareSight V1 Own-artifact External Validation Report
+
+## 1 Authority
+## 2 Research integrity
+## 3 Cohort
+## 4 M1 Import activation
+## 5 M2 TTFV
+## 6 M3 Analyze→Compare
+## 7 M4 Gate comprehension
+## 8 M5 New information
+## 9 M6 Return intent
+## 10 Moderator interventions
+## 11 Misunderstandings
+## 12 Critical watches
+## 13 Product findings
+## 14 Unsupported cohort
+## 15 Quotes
+## 16 Value signal
+## 17 Commercial/pilot signal if collected
+## 18 Study limitations
+## 19 Metric verdict
+## 20 Recommendation
+## 21 No overclaim
+## 22 Stop
+
+Final recommendation:
+V1_INCOMPLETE_INSUFFICIENT_SAMPLE
+or
+V1_EVIDENCE_PARTIAL
+or
+V1_READY_FOR_ARCHITECT_VERDICT
+
+STOP.
+
+Return to Architect.
+
+Do NOT start B1.
+Do NOT start Private Beta.
+Do NOT implement roadmap candidates.
+Do NOT create public release.
+Do NOT change license.
+
+END OF PROMPT
