@@ -419,81 +419,83 @@ function SectionTable({
   readonly onSort: (column: SectionSortDto) => void;
 }) {
   return (
-    <table className={styles['table']}>
-      <caption className={styles['caption']}>
-        Sections of the analyzed artifact, as the parser recorded them
-      </caption>
-      <thead>
-        <tr>
-          <SortHeader label="Index" sortable direction={direction} active={sort === 'index'} onSort={() => onSort('index')} />
-          <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
-          <SortHeader
-              label="Role"
-              sortable={false}
-              direction={direction}
-            />
-          <SortHeader
-              label="Flags"
-              sortable={false}
-              direction={direction}
-            />
-          <SortHeader
-              label="Virtual address"
-              sortable={false}
-              direction={direction}
-            />
-          <SortHeader
-              label="Load address"
-              sortable={false}
-              direction={direction}
-            />
-          <SortHeader
-              label="File offset"
-              sortable={false}
-              direction={direction}
-            />
-          <SortHeader label="File size" sortable direction={direction} active={sort === 'fileSize'} onSort={() => onSort('fileSize')} />
-          <SortHeader label="Memory size" sortable direction={direction} active={sort === 'memorySize'} onSort={() => onSort('memorySize')} />
-          <SortHeader
-              label="Region"
-              sortable={false}
-              direction={direction}
-            />
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={row.index}>
-            <td className={styles['mono']}>{row.index}</td>
-            <td>
-              {row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}
-            </td>
-            <td>{row.role}</td>
-            <td className={styles['mono']}>{flags(row)}</td>
-            <td className={styles['mono']}>
-              {row.virtualAddress ?? <Unknown reason={row.virtualAddressUnknownReason} />}
-            </td>
-            <td className={styles['mono']}>
-              {row.loadAddress ?? <Unknown reason={row.loadAddressUnknownReason} />}
-            </td>
-            <td className={styles['mono']}>
-              {row.fileOffset ?? <Unknown reason={row.fileOffsetUnknownReason} />}
-            </td>
-            <td className={styles['mono']}>{formatSize(row.fileSize, unit)}</td>
-            <td className={styles['mono']}>
-              {row.memorySize === null ? (
-                <Unknown reason={row.memorySizeUnknownReason} />
-              ) : (
-                formatSize(row.memorySize, unit)
-              )}
-            </td>
-            <td>
-              {row.region === null ? <Unknown reason={row.regionUnknownReason} /> : row.region}
-            </td>
+    <div className={styles['viewport']}>
+      <table className={styles['table']}>
+        <caption className={styles['caption']}>
+          Sections of the analyzed artifact, as the parser recorded them
+        </caption>
+        <thead>
+          <tr>
+            <SortHeader label="Index" sortable direction={direction} active={sort === 'index'} onSort={() => onSort('index')} />
+            <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
+            <SortHeader
+                label="Role"
+                sortable={false}
+                direction={direction}
+              />
+            <SortHeader
+                label="Flags"
+                sortable={false}
+                direction={direction}
+              />
+            <SortHeader
+                label="Virtual address"
+                sortable={false}
+                direction={direction}
+              />
+            <SortHeader
+                label="Load address"
+                sortable={false}
+                direction={direction}
+              />
+            <SortHeader
+                label="File offset"
+                sortable={false}
+                direction={direction}
+              />
+            <SortHeader label="File size" sortable direction={direction} active={sort === 'fileSize'} onSort={() => onSort('fileSize')} />
+            <SortHeader label="Memory size" sortable direction={direction} active={sort === 'memorySize'} onSort={() => onSort('memorySize')} />
+            <SortHeader
+                label="Region"
+                sortable={false}
+                direction={direction}
+              />
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.index}>
+              <td className={styles['mono']}>{row.index}</td>
+              <td>
+                {row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}
+              </td>
+              <td>{row.role}</td>
+              <td className={styles['mono']}>{flags(row)}</td>
+              <td className={styles['mono']}>
+                {row.virtualAddress ?? <Unknown reason={row.virtualAddressUnknownReason} />}
+              </td>
+              <td className={styles['mono']}>
+                {row.loadAddress ?? <Unknown reason={row.loadAddressUnknownReason} />}
+              </td>
+              <td className={styles['mono']}>
+                {row.fileOffset ?? <Unknown reason={row.fileOffsetUnknownReason} />}
+              </td>
+              <td className={styles['mono']}>{formatSize(row.fileSize, unit)}</td>
+              <td className={styles['mono']}>
+                {row.memorySize === null ? (
+                  <Unknown reason={row.memorySizeUnknownReason} />
+                ) : (
+                  formatSize(row.memorySize, unit)
+                )}
+              </td>
+              <td>
+                {row.region === null ? <Unknown reason={row.regionUnknownReason} /> : row.region}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -515,57 +517,59 @@ function SymbolTable({
   readonly onSort: (column: SymbolSortDto) => void;
 }) {
   return (
-    <table className={styles['table']}>
-      <caption className={styles['caption']}>
-        Symbols, ordered and filtered by the shell rather than by this page
-      </caption>
-      <thead>
-        <tr>
-          <SortHeader label="Ordinal" sortable direction={direction} active={sort === 'ordinal'} onSort={() => onSort('ordinal')} />
-          <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
-          <SortHeader label="Address" sortable direction={direction} active={sort === 'address'} onSort={() => onSort('address')} />
-          <SortHeader label="Size" sortable direction={direction} active={sort === 'size'} onSort={() => onSort('size')} />
-          <SortHeader
-              label="Kind"
-              sortable={false}
-              direction={direction}
-            />
-          <SortHeader
-              label="Binding"
-              sortable={false}
-              direction={direction}
-            />
-          <SortHeader
-              label="Section"
-              sortable={false}
-              direction={direction}
-            />
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={row.ordinal}>
-            <td className={styles['mono']} title="A row position in this build, not an identity">
-              {row.ordinal}
-            </td>
-            <td>{row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}</td>
-            <td className={styles['mono']}>
-              {row.address ?? <Unknown reason={row.addressUnknownReason} />}
-            </td>
-            <td className={styles['mono']}>
-              {row.size === null ? (
-                <Unknown reason={row.sizeUnknownReason} />
-              ) : (
-                formatSize(row.size, unit)
-              )}
-            </td>
-            <td>{row.kind}</td>
-            <td>{row.binding}</td>
-            <td className={styles['mono']}>{row.sectionRef}</td>
+    <div className={styles['viewport']}>
+      <table className={styles['table']}>
+        <caption className={styles['caption']}>
+          Symbols, ordered and filtered by the shell rather than by this page
+        </caption>
+        <thead>
+          <tr>
+            <SortHeader label="Ordinal" sortable direction={direction} active={sort === 'ordinal'} onSort={() => onSort('ordinal')} />
+            <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
+            <SortHeader label="Address" sortable direction={direction} active={sort === 'address'} onSort={() => onSort('address')} />
+            <SortHeader label="Size" sortable direction={direction} active={sort === 'size'} onSort={() => onSort('size')} />
+            <SortHeader
+                label="Kind"
+                sortable={false}
+                direction={direction}
+              />
+            <SortHeader
+                label="Binding"
+                sortable={false}
+                direction={direction}
+              />
+            <SortHeader
+                label="Section"
+                sortable={false}
+                direction={direction}
+              />
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.ordinal}>
+              <td className={styles['mono']} title="A row position in this build, not an identity">
+                {row.ordinal}
+              </td>
+              <td>{row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}</td>
+              <td className={styles['mono']}>
+                {row.address ?? <Unknown reason={row.addressUnknownReason} />}
+              </td>
+              <td className={styles['mono']}>
+                {row.size === null ? (
+                  <Unknown reason={row.sizeUnknownReason} />
+                ) : (
+                  formatSize(row.size, unit)
+                )}
+              </td>
+              <td>{row.kind}</td>
+              <td>{row.binding}</td>
+              <td className={styles['mono']}>{row.sectionRef}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -588,60 +592,62 @@ function EvidenceTable({
     <>
       {inspected === null ? null : <Inspector row={inspected} />}
 
-      <table className={styles['table']}>
-        <caption className={styles['caption']}>
-          Recorded facts and the class each one belongs to
-        </caption>
-        <thead>
-          <tr>
-            <SortHeader
-              label="Detail"
-              sortable={false}
-              direction={direction}
-            />
-            <SortHeader label="Field" sortable direction={direction} active={sort === 'field'} onSort={() => onSort('field')} />
-            <SortHeader
-              label="Classification"
-              sortable
-              direction={direction}
-              active={sort === 'classification'}
-              onSort={() => onSort('classification')}
-            />
-            <SortHeader
-              label="Value"
-              sortable={false}
-              direction={direction}
-            />
-            <SortHeader
-              label="Source"
-              sortable={false}
-              direction={direction}
-            />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              <td>
-                <button
-                  type="button"
-                  className={styles['inspect']}
-                  aria-label={`Inspect ${row.field}`}
-                  onClick={() => {
-                    onInspect(row);
-                  }}
-                >
-                  Inspect
-                </button>
-              </td>
-              <td>{row.field}</td>
-              <td>{row.classification}</td>
-              <td className={cx(styles['mono'], styles['value'])}>{row.rawValue}</td>
-              <td className={styles['mono']}>{row.sourceLocator}</td>
+      <div className={styles['viewport']}>
+        <table className={styles['table']}>
+          <caption className={styles['caption']}>
+            Recorded facts and the class each one belongs to
+          </caption>
+          <thead>
+            <tr>
+              <SortHeader
+                label="Detail"
+                sortable={false}
+                direction={direction}
+              />
+              <SortHeader label="Field" sortable direction={direction} active={sort === 'field'} onSort={() => onSort('field')} />
+              <SortHeader
+                label="Classification"
+                sortable
+                direction={direction}
+                active={sort === 'classification'}
+                onSort={() => onSort('classification')}
+              />
+              <SortHeader
+                label="Value"
+                sortable={false}
+                direction={direction}
+              />
+              <SortHeader
+                label="Source"
+                sortable={false}
+                direction={direction}
+              />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id}>
+                <td>
+                  <button
+                    type="button"
+                    className={styles['inspect']}
+                    aria-label={`Inspect ${row.field}`}
+                    onClick={() => {
+                      onInspect(row);
+                    }}
+                  >
+                    Inspect
+                  </button>
+                </td>
+                <td>{row.field}</td>
+                <td>{row.classification}</td>
+                <td className={cx(styles['mono'], styles['value'])}>{row.rawValue}</td>
+                <td className={styles['mono']}>{row.sourceLocator}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

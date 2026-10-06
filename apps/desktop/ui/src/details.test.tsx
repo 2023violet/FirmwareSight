@@ -764,6 +764,50 @@ describe('the evidence inspector', () => {
   });
 });
 
+describe('the table layout contract', () => {
+  // F2R-01: at the frozen minimum window the sections table squeezed its one wrappable column to
+  // 18 px and rendered an Unknown reason one character per line, 380 px tall
+  // (`P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md` finding row, capture
+  // `07_analyze/L07_base_sections_symbols.png`). jsdom cannot measure a clip and this environment
+  // cannot read a stylesheet as text, so the tree is pinned here and the pixel proof is the installed
+  // run; §20 names that screenshot pair as the authoritative geometry mutation.
+  it('puts every detail table inside its viewport and keeps all of its columns', async () => {
+    render(<App />);
+    await analyzeOk();
+
+    // The scroll axis belongs to the wrapper, so the table keeps its own intrinsic minimum instead of
+    // being pinned to the width of the pane and laid out below its own minimum.
+    for (const tab of ['Sections', 'Symbols', 'Evidence'] as const) {
+      fireEvent.click(screen.getByRole('tab', { name: tab }));
+      const panel = await screen.findByRole('tabpanel', { name: tab });
+      const table = within(panel).getByRole('table');
+      expect(table.parentElement?.className).toContain('viewport');
+      expect(table.tagName).toBe('TABLE');
+    }
+
+    // Ten columns at the minimum window, because the answer to a wide table is a scroll the table area
+    // owns, not a column that goes quiet.
+    fireEvent.click(screen.getByRole('tab', { name: 'Sections' }));
+    const sections = await screen.findByRole('tabpanel', { name: 'Sections' });
+    const headers = within(within(sections).getByRole('table')).getAllByRole('columnheader');
+    // The sort arrow is part of the button's text, not part of the column's name.
+    expect(
+      headers.map((header) => (header.textContent ?? '').replace(/[↑↓]/gu, '').trim()),
+    ).toEqual([
+      'Index',
+      'Name',
+      'Role',
+      'Flags',
+      'Virtual address',
+      'Load address',
+      'File offset',
+      'File size',
+      'Memory size',
+      'Region',
+    ]);
+  });
+});
+
 describe('the filter box', () => {
   it('offers no browser autofill for a name typed to query firmware', async () => {
     render(<App />);

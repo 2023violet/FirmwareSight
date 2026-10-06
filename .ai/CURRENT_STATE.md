@@ -5,12 +5,12 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-05"
+last_updated: "2026-10-06"
 ---
 
 # Current State
 
-- Date: 2026-10-05
+- Date: 2026-10-06
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - Active task: **`P5_PRODUCTIZATION`** — stage **P5**, state **`IN_PROGRESS`**, opened on 2026-10-03 by
   *FirmwareSight — P5 Productization, Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, 73,722 bytes,
@@ -342,6 +342,49 @@ last_updated: "2026-10-05"
   `active_task NONE`, no tag, no GitHub Release, no signature, no notarization, no updater, no licence choice
   — §34's states are recorded in `P5_VALIDATION/P5_RELEASE_READINESS.md` and the F2 prompt returns the round
   to the Architect rather than forwarding it.
+- **Commit F2R1 lands on 2026-10-06 and it is a narrow UI corrective, not a new layer.** Authorized by
+  *FirmwareSight — P5 Commit F2R Installed UI Productization Corrective Candidate, Execution Prompt v1.0 —
+  Architect Authorized*, archived with both of its measured digests (delivered `5d8719ec…fb375`, 47,100
+  bytes, 2,117 CRLF lines; stored Git blob `6281f5d2…fe4ed`, 44,984 bytes, 2,116 LF lines), it sits between
+  F2 and F3 and fixes exactly the three findings F2 recorded against the installed product: **F2R-01 / S2**
+  Analyze → Sections collapsed its prose column to one character per line, **F2R-02 / S3** the History row's
+  `Details` control fell off the right edge at the default window width, **F2R-03 / S3** Release → Evidence
+  basis printed the Core enum `MapRegionAndElfLoad` where a person should read *MAP regions + ELF load
+  evidence*. The two table defects share one mechanism and it was measured before anything changed:
+  `display: block` on the `<table>` pinned the box to the pane and let its columns be laid out below their
+  own minimum, while `overflow-wrap: anywhere` made that prose column's minimum one character, so it took
+  the entire deficit. `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_DESIGN.md` §3 keeps the probe numbers and the
+  negative control that showed a wrapper alone does not fix it, and §5 why sticky pinning was rejected
+  (195 px over the sections header, 163 px over an opened History row). The repair is the one §5 asks for
+  first: a `.viewport` wrapper owns `overflow-x: auto`, the table went back to being a table and kept its
+  intrinsic minimum, prose cells took a `24ch` measure with `break-word`, an Unknown reason moved onto its
+  own line under the word it explains, and the History action moved to the **leading** cell — the placement
+  the Evidence table already used, so the precedent is this repo's own rather than a new invention.
+  **No design token changed and no pixel constant was invented:** `assets/design-tokens.json` is
+  byte-identical, and `ch` is the unit the prose of every page already bounds itself with (60ch, 68ch,
+  72ch, 80ch, 88ch). F2R-03 reuses the accepted Compare vocabulary through one new shared
+  `evidenceBasis.ts` instead of writing second wording for the same evidence, so Compare, Release and the
+  Analyze weakest-basis line now say the same sentence for the same basis; `Analyze.tsx` and its test
+  joined the diff for that reason, which §13 authorizes even though §16's path list alone would not.
+  Scope checked mechanically, not remembered: the only product paths in the diff are
+  `apps/desktop/ui/src/**`, and zero bytes changed under `crates/`, `apps/desktop/src-tauri/`, `scripts/`,
+  `fixtures/`, `schemas/`, `migrations/`, `.github/`, `Cargo.toml`, `Cargo.lock`, `pnpm-lock.yaml`,
+  `tauri.conf.json`, `deny.toml` or the token file. The serialized contract is untouched — `analysis:1`,
+  `diff:1`, `gate-results:1`, `accepted-reviews:1`, `release-manifest:1`, schema 5, migrations 0001–0005,
+  ADR-0028, ADR-0029, `elf.program-header` — because this round is display/layout only.
+  Counts at this head, printed rather than expected: `cargo test --workspace` **868 passed / 0 failed
+  across 47 targets**, unchanged as §21 requires, and UI **219 → 225 passed in the same 8 files** (+6: the
+  three contracts and their guards). The authoritative gate is **17 of 17** with drift
+  **8 of 8**, deny **1 of 1**, `core-smoke` **3 of 3** and package **4 of 4**, all with no `SKIP`. §20's four mutation proofs each reddened exactly the test that
+  covers what they target, and §22's campaign is **20 fresh-process repetitions, 20 green, 0 failing, 225
+  tests every time, 7 min 25 s**. One sequencing fact is recorded rather than smoothed over: the first
+  §21 logs and the first §22 campaign described a tree that three comment-only lines then moved, so both
+  were stopped, kept, and re-run — the numbers above come from runs that prove the UI manifest identical
+  before and after.
+  **What this commit deliberately does not claim:** §26's exact F2R1 Windows artifact has not been
+  downloaded and §30–§33's focused installed revalidation at 1024×720 / 1056×799 / 1440×900 has not been
+  run, so **no F2 finding is closed by F2R1** — §36 requires the new installed artifact before any
+  disposition moves, and F2R2 records it. `P5 = IN_PROGRESS`; F3 is not authorized by this head.
 - The task before it, kept as history: the G2 Product MVP engineering closure audit reached **PASS** on
   2026-10-01: **Product MVP ENGINEERING COMPLETE, state MVP CANDIDATE.** Authorized by *FirmwareSight — G2
   Product MVP Engineering Closure Audit, Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256

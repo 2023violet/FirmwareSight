@@ -1,0 +1,2117 @@
+FirmwareSight — P5 Commit F2R
+Installed UI Productization Corrective Candidate
+Three F2 Real-Desktop Findings → Narrow UI Fix → Exact CI Artifact → Focused Installed Revalidation
+Execution Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+
+你是 FirmwareSight P5 Productization 的 F2R Corrective Engineering Agent。
+
+本轮 canonical unit：
+
+P5_COMMIT_F2R_UI_PRODUCTIZATION_CORRECTIVE
+
+这是 Commit F2 之后、F3 最终治理封口之前插入的一次窄修。
+
+本轮只解决 F2 真机验收发现的三个 UI 产品问题：
+
+F2R-01 / S2
+Analyze → Sections 在默认/最小桌面窗口宽度下发生文本列压缩，表格变得不可读。
+
+F2R-02 / S3
+History 在默认窗口宽度下，行尾的 Details 按钮发生裁切。
+
+F2R-03 / S3
+Release → Evidence basis 直接显示 Core enum：
+MapRegionAndElfLoad
+
+本轮不重新设计产品，不扩功能，不重新跑完整 §64，不进入 F3。
+
+目标：
+
+1. 用最小 UI/CSS 变更修复三个已测问题；
+2. 用测试固定语义/结构；
+3. 用真实 Windows 窗口重新验证布局；
+4. 用新的 exact CI-built Windows artifact 做 focused installed revalidation；
+5. 更新 F2/P5 evidence；
+6. remote CI 再次 10/10；
+7. STOP，返回 Architect；
+8. 只有 Architect 再次审查后才可进入 F3。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at prompt issue time:
+
+origin/main =
+
+55fad63d2071c5511133ea1cfffc664885b0b47e
+
+Current commit:
+
+P5: reconcile the entry documents with the installed round that landed
+
+F2 evidence commit:
+
+d1dc61c4b5912892ce1888bcb03439333253e327
+
+F2 documentation reconciliation:
+
+55fad63d2071c5511133ea1cfffc664885b0b47e
+
+F1 product/tooling candidate:
+
+0bca373ed46082f98a9f474908d09f836174ff1b
+
+F1 CI:
+
+Run =
+37293381181
+
+attempt =
+1
+
+result =
+10 / 10 success
+
+F2 CI:
+
+Run =
+37367382516
+
+run number =
+69
+
+head =
+55fad63d2071c5511133ea1cfffc664885b0b47e
+
+Attempt 1:
+3 success / 7 cancelled
+cancelled jobs had 0 executed steps
+
+Attempt 2:
+6 success / 4 cancelled
+cancelled jobs had 0 executed steps
+
+Attempt 3:
+10 / 10 success
+
+Current run object:
+completed / success
+run_attempt = 3
+
+Do NOT rewrite F2 as first-attempt green.
+
+Current direct product counts:
+
+Rust =
+868 passed / 0 failed / 47 targets
+
+UI =
+219 passed / 8 files
+
+full gate =
+17 / 17
+
+drift =
+8 / 8
+
+deny =
+1 / 1
+
+core-smoke =
+3 / 3
+
+package =
+4 / 4
+
+Current stage:
+
+P5_PRODUCTIZATION
+
+P5 =
+IN_PROGRESS
+
+Product =
+MVP CANDIDATE
+
+F1 =
+FINAL PASS
+
+F2 installed journey =
+PASS
+
+F2 evidence =
+VALID
+
+F2 closure =
+NEEDS_CORRECTIVE_PRODUCT_HEAD
+
+F3 =
+NOT AUTHORIZED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. WHY F3 IS NOT YET AUTHORIZED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F2 proved the core installed-product journey:
+
+Install
+→ onboarding
+→ Analyze ×2
+→ Compare
+→ Gate
+→ Bundle
+→ History
+→ Diagnostics
+→ close/reopen
+→ repair/reinstall
+→ uninstall
+→ reinstall
+→ retained-data proof
+→ owner restore
+
+That evidence remains valid.
+
+However F2 real-desktop acceptance found three product UI defects:
+
+F2R-01 / S2:
+Analyze Sections table becomes unreadable at a window size users can realistically hit.
+
+F2R-02 / S3:
+History Details control is clipped at the default tested width.
+
+F2R-03 / S3:
+Release prints a raw Core enum in a human-facing Evidence basis column.
+
+A P5 final closure cannot knowingly declare:
+
+Productization = ENGINEERING_COMPLETE
+
+while carrying an S2 defect in the frozen desktop design range.
+
+Therefore:
+
+F2 remains PASS as an installed workflow proof,
+but a corrective product head is required before F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -20 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+55fad63d2071c5511133ea1cfffc664885b0b47e
+
+worktree =
+clean
+
+If remote moved:
+
+STOP.
+
+Read and classify the delta.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+
+After every commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. ARCHIVE THIS PROMPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Archive the delivered prompt under:
+
+10_AUDIT/SOURCE_PROMPTS/
+
+Preferred filename:
+
+FirmwareSight_P5_CommitF2R_UI_Productization_Corrective_v1.0.txt
+
+Record:
+
+delivered SHA-256
+delivered byte count
+delivered line count
+
+Then record Git-stored blob digest/count.
+
+If transport normalizes CRLF ↔ LF:
+
+do not modify `.gitattributes`.
+
+Use the established transport-safe rule:
+
+- delivered hash recorded;
+- stored blob hash recorded;
+- line-by-line textual identity proven;
+- only line terminators differ.
+
+Do not reconstruct from memory if the delivered file is available.
+
+If it is unavailable:
+state that honestly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. REQUIRED READ SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before design:
+
+AGENTS.md
+DESIGN.md
+assets/design-tokens.json
+
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+
+P5_VALIDATION/P5_COMMIT_F_DESIGN.md
+P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md
+P5_VALIDATION/P5_EXIT_CHECKLIST.md
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+P5_VALIDATION/P5_EXECUTION_REPORT.md
+P5_VALIDATION/P5_CI_AUTHORITY.md
+P5_VALIDATION/P5_RELEASE_READINESS.md
+
+apps/desktop/ui/src/Analyze.tsx
+apps/desktop/ui/src/Analyze.module.css
+
+apps/desktop/ui/src/Details.tsx
+apps/desktop/ui/src/Details.module.css
+apps/desktop/ui/src/details.test.tsx
+
+apps/desktop/ui/src/History.tsx
+apps/desktop/ui/src/History.module.css
+apps/desktop/ui/src/history.test.tsx
+
+apps/desktop/ui/src/Release.tsx
+apps/desktop/ui/src/Release.module.css
+the actual Release test file(s)
+
+apps/desktop/ui/src/Compare.tsx
+the actual Compare test file(s)
+
+current shared UI helpers/components
+
+Do not assume file names from the prompt if repository naming differs.
+
+Find the actual test file.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. DESIGN AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frozen design facts:
+
+assets/design-tokens.json:
+
+desktop_min:
+1024 × 720
+
+design_target:
+1440 × 900
+
+evidence inspector:
+min 320
+default 340
+max 420
+
+DESIGN.md:
+
+- all numeric design values use semantic tokens;
+- tables use token row density;
+- long values must remain fully viewable/copyable;
+- Evidence Inspector default width is not a hard lock;
+- focus-visible must remain clear.
+
+Do NOT invent arbitrary pixel constants merely to pass one screenshot.
+
+Use:
+
+existing tokens
+intrinsic CSS sizing
+wrapping
+contained horizontal scrolling
+grid/flex behavior
+
+before adding a new design token.
+
+If a genuinely new semantic token is necessary:
+
+STOP and explain why before changing frozen tokens.
+
+Preferred outcome:
+
+no token change.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. F2R-01 — ANALYZE SECTIONS TABLE / S2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Measured F2 defect:
+
+At the real installed window,
+including the default measured 1056 × 799 range,
+Analyze → Sections can compress the table's text/name columns until rows become unreadable.
+
+Current implementation facts:
+
+Analyze renders:
+
+<Details ... />
+
+Sections table lives in:
+
+Details.tsx
+
+Current CSS puts:
+
+overflow-x: auto
+
+on the `<table>` itself.
+
+The table carries many columns and most cells are:
+
+white-space: nowrap
+
+The issue must be solved as a table/layout problem,
+not by deleting columns.
+
+Acceptance sizes:
+
+A.
+1024 × 720
+the frozen desktop minimum
+
+B.
+1056 × 799
+the F2 defect/default measured size
+
+C.
+1440 × 900
+the frozen design target
+
+At A and B:
+
+PASS requires:
+
+- Section Name remains legible;
+- headers remain legible;
+- cells do not collapse to near-zero width;
+- Unknown reason text remains readable/viewable;
+- table content remains reachable;
+- the page itself does not acquire uncontrolled horizontal overflow;
+- if horizontal scrolling is needed, the TABLE AREA owns it;
+- no column is silently hidden;
+- no data is removed;
+- sort/filter/pagination remain functional;
+- keyboard focus remains usable.
+
+Do NOT solve by:
+
+- reducing font below design tokens;
+- hiding columns at minimum width;
+- replacing values with ellipsis without a full-view path;
+- making the whole app window horizontally scroll;
+- hard-coding one host's 1056 px screenshot geometry.
+
+Preferred design direction:
+
+a semantic table viewport/wrapper that owns horizontal overflow,
+with table intrinsic minimum sizing rather than destructive column collapse.
+
+This is a direction, not an implementation mandate.
+
+Measure before choosing.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. F2R-01 — TEST CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+jsdom does not provide trustworthy real layout measurement.
+
+Therefore use two layers.
+
+Automated UI test:
+
+prove the DOM/layout contract that makes the real fix possible, e.g.:
+
+- a table viewport exists;
+- table remains semantically a table;
+- headers/cells remain present;
+- filter/sort/pager remain present;
+- no responsive branch deletes columns.
+
+Do not write a fake `offsetWidth` test and call layout proven.
+
+Real-desktop installed proof later is the authority for actual clipping/readability.
+
+If a CSS/source contract test is added:
+
+it must protect a meaningful invariant,
+not merely assert a class name with no behavior.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. F2R-02 — HISTORY DETAILS BUTTON / S3
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Measured F2 defect:
+
+History row action:
+
+Details
+
+is clipped at the default real-window width.
+
+This exists across History's table family:
+
+Stored builds
+Stored Gate runs
+Stored release records
+
+Acceptance sizes:
+
+1024 × 720
+1056 × 799
+1440 × 900
+
+At 1024 × 720 and 1056 × 799:
+
+every row action must be:
+
+- fully visible;
+- readable;
+- pointer clickable;
+- keyboard focusable;
+- activation works;
+- `aria-expanded` behavior unchanged;
+- no page-wide horizontal overflow required to reach the action.
+
+If the data table itself must scroll:
+
+the action must still have a usable design.
+
+Allowed strategies include:
+
+- responsive column sizing;
+- wrapping non-action cells;
+- a dedicated action column that remains visible;
+- contained table scrolling with an appropriate sticky action cell.
+
+Do not blindly implement sticky positioning if it introduces overlap.
+
+Measure the actual page.
+
+Do not shorten "Details" to an icon-only control.
+
+The textual action is part of the accessibility contract.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. F2R-02 — TEST CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Existing tests already prove:
+
+Details is a BUTTON
+focus works
+aria-expanded works
+row opens/closes
+
+Preserve them.
+
+Add the minimum structural regression needed for the chosen responsive solution.
+
+Again:
+
+jsdom cannot certify real clipping.
+
+The installed real-window proof is mandatory.
+
+No screenshot-only unit test library may be added.
+
+No new frontend test dependency.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. F2R-03 — RELEASE RAW EVIDENCE ENUM / S3
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Measured F2 defect:
+
+Release → Evidence basis currently prints:
+
+row.basis
+
+verbatim.
+
+Current line shape:
+
+row.basis ?? 'no basis recorded'
+
+Therefore a product-facing cell can show:
+
+MapRegionAndElfLoad
+
+This reopens L20's product-facing problem on a surface Commit E did not cover.
+
+The data itself is correct.
+
+The presentation is wrong.
+
+No Core/domain/schema change is allowed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. F2R-03 — CANONICAL DISPLAY MAPPING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Compare already owns a closed mapping covering current evidence-basis variants.
+
+Do not create divergent wording in Release.
+
+Preferred:
+
+extract/reuse one shared UI-only helper such as:
+
+evidenceBasisCaption(...)
+
+under an appropriate UI utility module.
+
+It may be used by:
+
+Compare
+Release
+
+and any other human-facing surface that needs the same semantic caption.
+
+Canonical current wording must remain aligned with existing accepted Compare vocabulary.
+
+At minimum:
+
+MapRegionAndElfLoad
+→ MAP regions + ELF load evidence
+
+ConfiguredRegionAndElfLoad
+→ configured regions + ELF load evidence
+
+ElfAddressAndFlags
+→ ELF address + flags evidence
+
+SectionNameHeuristic
+→ section-name heuristic
+
+InsufficientEvidence
+→ insufficient evidence
+
+Also support current wire/kebab aliases only if Compare already does.
+
+Do not invent semantics.
+
+Unknown future value:
+
+Unrecognized evidence basis
+
+Missing/null:
+
+retain context-appropriate neutral wording,
+e.g.:
+no basis recorded
+
+Do not serialize the caption.
+
+Do not change DTO values.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. F2R-03 — TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add tests that prove:
+
+Release:
+MapRegionAndElfLoad
+renders:
+MAP regions + ELF load evidence
+
+and does NOT render:
+MapRegionAndElfLoad
+
+Also prove:
+
+unknown value
+→ Unrecognized evidence basis
+
+null
+→ neutral no-basis text
+
+If mapping is extracted:
+
+Compare tests must still pass and should use the same helper behavior.
+
+No public schema/golden movement.
+
+No Rust/Core rename.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. RE-AUDIT RAW PRODUCT-FACING ENUMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because F2 found the same defect shape on a surface L20 missed:
+
+perform a narrow UI grep/static audit for current evidence-basis enum spellings:
+
+MapRegionAndElfLoad
+ConfiguredRegionAndElfLoad
+ElfAddressAndFlags
+SectionNameHeuristic
+InsufficientEvidence
+
+and current wire aliases.
+
+Classify every hit:
+
+DOMAIN/TEST DATA
+PORTABLE/WIRE — allowed
+UI DISPLAY MAPPING — allowed
+HUMAN-FACING VERBATIM OUTPUT — not allowed
+
+Do not expand into a general enum-removal project.
+
+If another human-facing verbatim output is found:
+
+include it only if the same shared display helper closes it narrowly.
+
+If it requires product semantics or public schema change:
+
+STOP that subproblem and return to Architect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. CREATE F2R DESIGN RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before production change create:
+
+P5_VALIDATION/P5_F2R_UI_CORRECTIVE_DESIGN.md
+
+Required:
+
+- start authority;
+- three findings;
+- F2 evidence that found them;
+- severity;
+- reproduction;
+- current code path;
+- chosen minimal solution;
+- design-token compliance;
+- automated-test boundary;
+- real-desktop acceptance sizes;
+- focused installed plan;
+- no-public-contract impact;
+- owner-store isolation plan;
+- stop conditions.
+
+Do not write P5 PASS.
+
+Do not claim F3 authorized.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. TEST-FIRST DISCIPLINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For Release raw enum:
+
+write a failing test first.
+
+It must fail on:
+
+55fad63
+
+because the raw enum appears.
+
+Then implement.
+
+For layout issues:
+
+establish a structural regression test first where practical,
+but do NOT manufacture a fake failing geometry assertion in jsdom.
+
+The authoritative red evidence already exists in F2 real-desktop captures.
+
+Record that the layout red is:
+
+REAL_DESKTOP_F2_EVIDENCE
+
+and the test protects the implemented layout contract.
+
+This is acceptable.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. MINIMAL IMPLEMENTATION SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expected product paths:
+
+apps/desktop/ui/src/Details.tsx
+apps/desktop/ui/src/Details.module.css
+apps/desktop/ui/src/details.test.tsx
+
+apps/desktop/ui/src/History.tsx
+apps/desktop/ui/src/History.module.css
+apps/desktop/ui/src/history.test.tsx
+
+apps/desktop/ui/src/Release.tsx
+apps/desktop/ui/src/Release.module.css only if necessary
+actual Release test file
+
+apps/desktop/ui/src/Compare.tsx
+actual Compare test file
+only if extracting a shared caption helper
+
+possibly one small UI-only helper module.
+
+No Rust change expected.
+
+No Tauri change expected.
+
+No storage change.
+
+No fixture change.
+
+No schema change.
+
+No migration.
+
+No workflow.
+
+No dependency.
+
+No package config.
+
+No design-token change expected.
+
+If any of those becomes necessary:
+
+STOP and return to Architect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. PUBLIC CONTRACT HARD STOP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Must remain byte/semantic compatible:
+
+analysis:1
+diff:1
+gate-results:1
+accepted-reviews:1
+release-manifest:1
+
+SQLite schema = 5
+migrations = 0001–0005
+
+ADR-0028
+ADR-0029
+
+L15 legacy wire:
+elf.program-header
+
+No migration 0006.
+No analysis:2.
+No wire rename.
+No release identity change.
+
+This round is display/layout only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. DEPENDENCY / SECURITY HARD STOP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No new:
+
+Rust crate
+npm package
+Python package
+Tauri capability
+network permission
+telemetry
+generic filesystem IPC
+generic shell IPC
+SQL IPC
+updater
+signing
+
+If proposed UI fix needs a package:
+
+reject that approach first.
+
+Use platform CSS/React already present.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. LOCAL VISUAL REPRODUCTION BEFORE FIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before implementation if practical:
+
+use current 55fad63 package/window or development product only to reproduce the three findings.
+
+Do NOT touch owner store.
+
+For layout:
+
+capture:
+
+1024 × 720
+1056 × 799
+1440 × 900
+
+For Release enum:
+
+capture raw MapRegionAndElfLoad if safely reproducible.
+
+This is supporting evidence.
+
+If reproducing 55fad63 requires unsafe owner-store mutation:
+
+do not do it.
+
+F2 evidence is already authoritative red evidence.
+
+Do not risk owner data just to recreate a known failure.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. F2R MUTATION PROOFS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Release mapping:
+
+restore direct:
+row.basis
+
+Expected:
+Release mapping test RED.
+
+Shared mapping:
+
+remove MapRegionAndElfLoad entry.
+
+Expected:
+Compare and/or Release mapping test RED.
+
+History responsive structure:
+
+remove the chosen action-column/viewport invariant.
+
+Expected:
+structural regression test RED where testable.
+
+Analyze responsive structure:
+
+remove the chosen table-viewport/intrinsic-size invariant.
+
+Expected:
+structural regression test RED where testable.
+
+For real geometry:
+
+the authoritative mutation is the pre-fix F2 screenshot vs post-fix installed screenshot.
+
+Do not pretend jsdom measured pixels.
+
+Restore all mutations.
+
+Nothing lands.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. LOCAL FUNCTIONAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At final F2R product candidate:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+
+python scripts/verify_baseline_artifacts.py
+
+Current baseline:
+
+Rust =
+868
+
+UI =
+219 / 8 files
+
+full gate =
+17
+
+drift =
+8
+
+Rust count should remain 868.
+
+UI count should increase only by the added UI tests.
+
+If Rust count changes unexpectedly:
+
+STOP.
+
+If any required group SKIPs:
+
+not closure-ready.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. UI RELIABILITY RE-RUN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because UI production code changes after the L23 race campaign:
+
+run the complete UI suite:
+
+20 fresh-process repetitions
+
+after all F2R UI changes settle.
+
+Record:
+
+direct UI test count
+files
+20 repetitions
+failing runs
+wall time
+Node version
+host
+
+Required:
+
+20 / 20 green
+
+Do not multiply repeated runs into the canonical UI test count.
+
+No sleeps.
+No retry wrappers.
+No timeout inflation.
+
+If an async race appears:
+
+fix causally before remote CI.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. BASELINE CLOSEOUT — ADR-0029
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Follow the index-blob workflow:
+
+1. edit
+2. inspect
+3. stage intended non-baseline changes
+4. if path set changes, generate DIRECTORY_TREE from index
+5. stage DIRECTORY_TREE
+6. generate SHA256SUMS from stage-0 blobs
+7. stage SHA256SUMS
+8. verify_baseline_artifacts.py
+9. full gate
+10. inspect staged diff
+11. commit
+
+Do not hash arbitrary worktree bytes.
+
+Git archive proof remains required before remote acceptance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. F2R PRODUCT CANDIDATE COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred commit message:
+
+P5: close installed UI productization findings
+
+Product commit should contain:
+
+three UI fixes
+UI tests
+F2R design/evidence doc
+narrow P5 limitation/checklist status updates if needed
+prompt archive
+integrity artifacts
+
+Do NOT write:
+
+P5 PASS_COMPLETE
+Productization ENGINEERING_COMPLETE
+active_task NONE
+
+No F3 state.
+
+After commit:
+
+fetch
+HEAD/origin comparison
+
+push normal fast-forward.
+
+No force push.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. F2R PRODUCT CANDIDATE REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find run by exact F2R product SHA.
+
+Required:
+
+10 / 10 authoritative jobs
+
+completed / success.
+
+Read all ten individually.
+
+Attempt history remains truthful.
+
+If repository/content failure:
+
+fix forward in a new product commit.
+
+Do not rerun-until-green.
+
+If a job is cancelled with zero executed steps due allocation/provisioning:
+
+capture evidence,
+do not classify as a product failure,
+and return to Architect if retry policy becomes ambiguous.
+
+Do not borrow F2 Run 69.
+
+This new UI head needs its own CI.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. EXACT NEW WINDOWS ARTIFACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After F2R candidate remote CI is acceptable:
+
+download the Windows artifact from THAT exact run/head.
+
+Do NOT use:
+
+F1 artifact 11337963032
+F2's old installed binary
+local cargo build
+local Tauri build
+
+The focused installed revalidation must test the new UI bytes.
+
+Verify internal:
+
+SHA256SUMS.txt
+artifact-metadata.json
+
+Record:
+
+run
+head SHA
+artifact id
+artifact name
+actual NSIS filename
+actual NSIS size
+actual NSIS SHA
+installed binary SHA
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. FOCUSED INSTALLED REVALIDATION — NOT FULL §64
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT rerun full:
+
+migration
+Bundle relocation
+repair
+uninstall retention
+reinstall retention
+
+unless a new defect requires it.
+
+Those F2 results remain valid because this corrective head changes only UI presentation/layout.
+
+Focused installed scope:
+
+A. Analyze Sections layout
+B. History Details layout/action
+C. Release Evidence basis caption
+D. quick smoke:
+   Analyze
+   Compare
+   Gate
+   History
+   Diagnostics
+E. no crash / no new path leak
+
+No full Release Bundle required unless necessary to obtain a History release row and no preserved disposable store is available.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. OWNER STORE SAFETY FOR FOCUSED INSTALLED CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The machine ended F2:
+
+FirmwareSight uninstalled
+owner store restored
+
+Therefore before installing F2R candidate:
+
+close FirmwareSight.
+
+hash owner main/WAL/SHM.
+
+make independent backup.
+
+verify hashes.
+
+park owner store.
+
+Required:
+
+OWNER_STORE_PARKED = YES
+OWNER_BACKUP_HASH_MATCH = YES
+
+Use a COPY of the preserved F2 disposable v5 test store if available.
+
+Do NOT move the only evidence copy.
+
+Preferred:
+
+copy F2 disposable store containing:
+
+3 builds
+1 Gate run
+1 release
+
+into the live app-data path.
+
+This immediately gives History all three table families.
+
+If that preserved store is unavailable:
+
+create new disposable state through the installed UI.
+
+Do not seed records by arbitrary SQL writes.
+
+Do not use owner data.
+
+After focused validation:
+
+uninstall candidate if pre-check machine state was uninstalled.
+
+remove only disposable live test state.
+
+restore owner store byte-exact.
+
+Required:
+
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+OWNER_STORE_OPENED_BY_F2R = NO
+
+Any mismatch:
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. DESKTOP HARNESS SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F2 exposed harness mistakes.
+
+Do not repeat them.
+
+Forbidden:
+
+blind screen-coordinate click without confirming target ownership
+sending undocumented Win32 message ids
+clicking while another application owns the foreground
+DevTools / CDP product actions
+JavaScript click()
+direct Tauri IPC
+direct DB mutation as product action
+
+Before every automated pointer/key action:
+
+verify intended FirmwareSight/window/dialog is:
+
+- present;
+- not minimized;
+- foreground or can be safely foregrounded;
+- the target window owns the intended click location.
+
+If foreground ownership cannot be obtained:
+
+REFUSE THE CLICK.
+
+Do not click through Chrome or another application.
+
+For native dialogs:
+
+target the exact dialog/process.
+
+Do not send keys to a stale/hidden edit control.
+
+If active human input is detected and interferes:
+
+pause the UI-driving sequence.
+
+Do not keep clicking around the desktop.
+
+Bank completed evidence.
+
+Resume only when the desktop is stable.
+
+Harness failures are:
+
+HARNESS
+
+not:
+
+PRODUCT
+
+unless reproduced independently.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. FOCUSED ANALYZE REAL-WINDOW ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Using only disposable firmware/store:
+
+open installed F2R candidate.
+
+Perform/reuse an Analyze result through normal UI.
+
+Navigate:
+
+Analyze → Sections.
+
+Test exactly:
+
+1024 × 720
+1056 × 799
+1440 × 900
+
+At each size capture:
+
+full app
+table area
+row text
+header
+horizontal scroll behavior if present
+
+PASS at 1024 and 1056 requires:
+
+- Name text legible;
+- Unknown reason/view remains accessible;
+- headers legible;
+- no near-zero collapsed text column;
+- no page-wide uncontrolled horizontal overflow;
+- every column reachable;
+- filter still usable;
+- sort still usable;
+- pager still usable;
+- keyboard tab order usable.
+
+At 1440 × 900:
+
+no regression from target layout.
+
+Record:
+
+F2R_01_INSTALLED =
+PASS / FAIL
+
+A failure here blocks F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. FOCUSED HISTORY REAL-WINDOW ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use disposable store with builds/Gate/release rows.
+
+At:
+
+1024 × 720
+1056 × 799
+1440 × 900
+
+check:
+
+Stored builds Details
+Stored Gate runs Details
+Stored release records Details
+
+At 1024 and 1056:
+
+Details must be:
+
+fully visible
+readable
+pointer clickable
+keyboard focusable
+Enter/Space activatable where native button behavior applies
+aria-expanded transitions correct
+
+No page-wide horizontal scrolling should be required merely to reach the action.
+
+If a table has its own horizontal scroll:
+
+the action remains usable by the chosen design.
+
+Open and close each detail row.
+
+Record:
+
+F2R_02_INSTALLED =
+PASS / FAIL
+
+Failure blocks F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. FOCUSED RELEASE REAL-WINDOW ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use disposable project/policy.
+
+If preserved F2 store is used:
+
+select/reuse appropriate stored build through supported UI.
+
+Run the minimum Gate action necessary to render Release evidence tables.
+
+Do not bypass the product.
+
+Inspect:
+
+Evidence basis
+
+Expected human text for MAP-backed exact memory evidence:
+
+MAP regions + ELF load evidence
+
+Must NOT display:
+
+MapRegionAndElfLoad
+
+Also force/inspect an ELF address+flags path if practical:
+
+ELF address + flags evidence
+
+No raw Core enum on this surface.
+
+Portable JSON/storage may retain canonical enum/wire value.
+
+Record:
+
+F2R_03_INSTALLED =
+PASS / FAIL
+
+Failure blocks F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. QUICK FUNCTIONAL SMOKE AFTER UI FIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On the same installed corrective candidate:
+
+Analyze:
+works
+
+Compare:
+opens expected pair and deltas
+
+Gate:
+runs
+
+History:
+reads persisted facts
+
+Diagnostics:
+opens and reports healthy v5 disposable store
+
+No need to recreate Bundle if not required for the focused target.
+
+No migration proof rerun.
+
+No uninstall/reinstall retention proof rerun beyond cleanup.
+
+No performance workload.
+
+Record any new anomaly.
+
+If new S0/S1:
+STOP.
+
+If new S2:
+STOP before F3.
+
+If S3:
+Architect review required; do not self-waive.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. DESIGN / ACCESSIBILITY EXIT JUDGMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After real-window focused validation:
+
+update the P5 final exit evidence with an explicit category:
+
+DESIGN / ACCESSIBILITY
+
+Do not imply WCAG certification.
+
+Correct bounded claim:
+
+P5_DESIGN_ACCESSIBILITY =
+PASS_FOR_FROZEN_DESKTOP_SCOPE
+
+only if all are true:
+
+- frozen 1024 × 720 minimum works for the corrected surfaces;
+- 1056 × 799 F2 defect size works;
+- design target 1440 × 900 works;
+- Details controls remain keyboard focusable/activatable;
+- no text-only critical control is clipped;
+- no raw evidence enum is shown on corrected human-facing surface;
+- existing focus-visible/design token rules remain;
+- full UI suite green;
+- focused installed artifact green.
+
+Also record:
+
+WCAG_CERTIFICATION =
+NOT_PERFORMED
+
+MULTI_DPI_125_150 =
+NOT_TESTED unless actually tested
+
+SECOND_WINDOWS_HOST =
+NOT_TESTED
+
+Do not overclaim.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. L20 FINAL DISPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F2 showed:
+
+L20 was closed on Compare,
+but the same raw-enum problem existed on Release.
+
+Therefore current historical interpretation:
+
+L20 =
+REOPENED_BY_F2_FOR_RELEASE_SURFACE
+
+After F2R passes:
+
+L20 =
+CLOSED ACROSS VERIFIED HUMAN-FACING MEMORY-BASIS SURFACES
+
+Do not alter the historical Commit E text.
+
+Update current final known-limitations / addendum.
+
+Retain wire/domain enums internally.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. F2 FINDING DISPOSITIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add a narrow F2R finding table.
+
+F2R-01 Analyze narrow table:
+before = S2 PRODUCT
+after = CLOSED only after installed proof
+
+F2R-02 History Details clipping:
+before = S3 PRODUCT
+after = CLOSED only after installed proof
+
+F2R-03 Release raw Core enum:
+before = S3 PRODUCT
+after = CLOSED only after installed proof
+
+Do not mark CLOSED from unit tests alone.
+
+Installed new artifact is required.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. F2R EVIDENCE REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md
+
+Required:
+
+1. start authority
+2. F2 findings
+3. exact code fixes
+4. tests
+5. design-token impact
+6. local validation
+7. product candidate SHA
+8. candidate remote CI
+9. exact Windows artifact
+10. owner-store isolation
+11. Analyze 1024/1056/1440
+12. History 1024/1056/1440
+13. Release evidence basis
+14. quick functional smoke
+15. owner restore
+16. finding dispositions
+17. Design / Accessibility bounded verdict
+18. L20 final disposition
+19. P5 state
+20. STOP before F3
+
+Do not write:
+
+P5 PASS_COMPLETE
+
+inside the report.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. UPDATE CURRENT P5 DOCUMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After focused installed PASS update only necessary current records:
+
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+P5_VALIDATION/P5_EXIT_CHECKLIST.md
+P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md
+P5_VALIDATION/P5_EXECUTION_REPORT.md
+P5_VALIDATION/P5_CI_AUTHORITY.md
+
+Use addendum/history language.
+
+Do not rewrite F2 as if it never found defects.
+
+Preserve:
+
+F2 discovered the issues.
+
+F2R closed them.
+
+F2 Run 69 attempt history remains unchanged.
+
+Do not delete evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+39. F2R TWO-HEAD STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred:
+
+F2R1 — product corrective candidate
+
+Contains:
+UI code
+UI tests
+design record
+prompt archive
+minimal pre-installed governance
+integrity artifacts
+
+Then:
+remote CI 10/10
+
+Then:
+download exact F2R1 Windows artifact
+
+Then:
+focused installed revalidation
+
+F2R2 — evidence read-back successor
+
+Contains:
+P5_F2R_UI_CORRECTIVE_REPORT.md
+known limitation disposition updates
+exit checklist Design/Accessibility entry
+desktop acceptance addendum
+execution report
+CI authority row for F2R1
+README/INDEX only if materially stale
+integrity artifacts
+
+F2R2 MUST NOT contain product code.
+
+Then:
+remote CI 10/10
+
+Then:
+STOP.
+
+F3 remains Architect-controlled.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+40. F2R1 PROVENANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F2R1 may change only the narrow UI product surface plus evidence/governance.
+
+Allowed product paths:
+
+apps/desktop/ui/src/**
+
+only those necessary for the three findings.
+
+Forbidden:
+
+crates/**
+apps/desktop/src-tauri/**
+scripts/**
+fixtures/**
+schemas/**
+migrations/**
+.github/**
+Cargo.toml
+Cargo.lock
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+assets/design-tokens.json unless Architect stop/review occurred
+
+No package dependency.
+
+No backend change.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+41. F2R1 REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required:
+
+10 / 10
+
+Read all jobs individually.
+
+Expected:
+
+Rust counts remain 868.
+
+UI count increases.
+
+Package jobs build the exact corrected application.
+
+After green:
+
+retrieve Windows artifact identity.
+
+No docs-only successor before the focused installed run.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+42. F2R2 PROVENANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F2R2 after installed PASS must be docs/evidence/governance only.
+
+Forbidden product changes:
+
+apps/**
+crates/**
+scripts/**
+fixtures/**
+schemas/**
+migrations/**
+.github/**
+dependencies
+package config
+
+If focused installed testing discovers a defect requiring product code:
+
+DO NOT bury it in F2R2.
+
+Create a new corrective product candidate,
+new CI artifact,
+and rerun affected focused acceptance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+43. F2R2 LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because F2R2 is docs-only:
+
+Rust direct count must equal F2R1.
+
+UI direct count must equal F2R1.
+
+Run:
+
+full check.py
+drift
+deny
+core-smoke
+package
+baseline verifier
+clean detached worktree
+git archive SHA256SUMS proof
+
+No required skip.
+
+Then commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+44. F2R2 REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required:
+
+10 / 10 authoritative jobs.
+
+Read each.
+
+Preserve attempt history.
+
+Do not create F2R3 merely to write its own CI result.
+
+External CI is final evidence.
+
+If product-content failure occurs:
+
+the closure is not ready.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+45. F2R EXIT CRITERIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All required:
+
+□ F2 history preserved truthfully
+
+□ three findings reproduced or anchored to F2 evidence
+
+□ F2R-01 fixed narrowly
+
+□ F2R-02 fixed narrowly
+
+□ F2R-03 fixed narrowly
+
+□ no new dependencies
+
+□ no Rust/backend change
+
+□ no schema/migration change
+
+□ no wire/public contract change
+
+□ no design-token mutation
+
+□ Release shared caption behavior tested
+
+□ Analyze structural responsive contract tested
+
+□ History action structural contract tested
+
+□ direct Rust count stable
+
+□ direct UI suite green
+
+□ 20/20 UI reliability campaign green
+
+□ full local gate green
+
+□ drift green
+
+□ package green
+
+□ baseline verifier green
+
+□ F2R1 remote CI 10/10
+
+□ exact F2R1 Windows artifact installed
+
+□ owner store parked safely
+
+□ Analyze 1024×720 installed PASS
+
+□ Analyze 1056×799 installed PASS
+
+□ Analyze 1440×900 installed PASS
+
+□ History 1024×720 installed PASS
+
+□ History 1056×799 installed PASS
+
+□ History 1440×900 installed PASS
+
+□ Release caption installed PASS
+
+□ quick functional smoke PASS
+
+□ no new S0
+
+□ no new S1
+
+□ no open S2
+
+□ owner store restored
+
+□ owner SHA exact
+
+□ F2R2 docs/evidence-only
+
+□ F2R2 local gate green
+
+□ F2R2 remote CI 10/10
+
+Only then:
+
+F2R =
+FINAL PASS / COMPLETE
+
+F2 =
+PASS
+
+P5 =
+IN_PROGRESS
+
+F3 =
+READY_FOR_ARCHITECT_REVIEW
+
+Not:
+
+P5 PASS_COMPLETE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+46. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight P5 Commit F2R UI Corrective Final Report
+
+## 1. Start authority
+
+HEAD
+origin/main
+F2 SHA
+F2 Run 69 attempts
+
+## 2. Architect scope
+
+three findings
+F3 not authorized
+
+## 3. F2R-01 Analyze
+
+pre-fix evidence
+code cause
+fix
+tests
+1024 result
+1056 result
+1440 result
+
+## 4. F2R-02 History
+
+pre-fix evidence
+code cause
+fix
+tests
+1024 result
+1056 result
+1440 result
+keyboard
+
+## 5. F2R-03 Release
+
+pre-fix raw enum
+shared caption mapping
+tests
+installed evidence
+
+## 6. Human-facing enum audit
+
+hits
+allowed domain/wire
+human surfaces
+verdict
+
+## 7. Public contract safety
+
+analysis:1
+diff:1
+gate-results:1
+accepted-reviews:1
+release-manifest:1
+SQLite
+migrations
+L15 wire
+
+all unchanged
+
+## 8. Local validation
+
+Rust count
+UI count/files
+20/20 campaign
+full gate
+drift
+deny
+core-smoke
+package
+baseline verifier
+
+## 9. F2R1 product candidate
+
+SHA
+changed paths
+remote run
+attempt history
+10 jobs
+
+## 10. Corrective Windows artifact
+
+run
+head
+artifact id
+installer filename
+size
+SHA
+installed binary SHA
+
+## 11. Owner isolation
+
+pre hashes
+backup
+park
+
+## 12. Focused installed revalidation
+
+Analyze
+History
+Release
+quick smoke
+
+## 13. Design / Accessibility
+
+1024×720
+1056×799
+1440×900
+keyboard
+bounded verdict
+not WCAG certification
+
+## 14. Findings
+
+F2R-01
+F2R-02
+F2R-03
+
+final dispositions
+
+## 15. L20
+
+REOPENED_BY_F2
+then CLOSED_BY_F2R
+
+## 16. Owner restore
+
+ORIGINAL_DB_RESTORED
+ORIGINAL_DB_SHA_MATCH
+OWNER_STORE_OPENED_BY_F2R
+
+## 17. F2R2 evidence successor
+
+SHA
+changed-path proof
+product bytes unchanged
+
+## 18. F2R2 remote CI
+
+run
+attempt history
+10 jobs
+result
+
+## 19. Verdict
+
+F1 =
+FINAL PASS
+
+F2 =
+PASS
+
+F2R =
+FINAL PASS / COMPLETE / FAIL / BLOCKED
+
+P5 =
+IN_PROGRESS
+
+Product =
+MVP CANDIDATE
+
+F3 =
+READY_FOR_ARCHITECT_REVIEW / NOT_READY
+
+## 20. Stop
+
+STOP.
+
+Do not start F3.
+
+Do not set:
+P5 PASS_COMPLETE
+Productization ENGINEERING_COMPLETE
+active_task NONE
+
+Do not tag.
+Do not create GitHub Release.
+Do not sign.
+Do not notarize.
+Do not start V1/B1.
+
+Return to Architect.
+
+END OF PROMPT

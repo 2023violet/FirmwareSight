@@ -232,6 +232,30 @@ async function openFirstRow(region: HTMLElement): Promise<HTMLElement> {
   return details;
 }
 
+/**
+ * The cell of a row that sits under a named column.
+ *
+ * A stored row is read by its columns, so an assertion says which column it means instead of counting
+ * positions — the row action leads its row precisely so that it cannot be clipped, and a count would
+ * make that fix look like a breakage.
+ */
+function cellOf(row: HTMLElement, header: string): HTMLElement {
+  const table = row.closest('table');
+  if (table === null) {
+    throw new Error(`a ${header} cell needs a table`);
+  }
+  const headers = within(table as HTMLElement).getAllByRole('columnheader');
+  const index = headers.findIndex((cell) => (cell.textContent ?? '').trim() === header);
+  if (index < 0) {
+    throw new Error(`no column is named ${header}`);
+  }
+  const cell = within(row).getAllByRole('cell')[index];
+  if (cell === undefined) {
+    throw new Error(`${header} has no cell in this row`);
+  }
+  return cell as HTMLElement;
+}
+
 beforeEach(() => {
   buildsMock.mockReset();
   runsMock.mockReset();
@@ -475,8 +499,11 @@ describe('History shows stored verdicts as stored', () => {
     runsMock.mockResolvedValue(runPage([gateRow({ baselineBuildId: null, baselineFileName: null })]));
     await openHistory();
 
-    const cells = within(await firstGateRow()).getAllByRole('cell');
-    expect(cells[2]?.textContent).toBe('None');
+    const row = await firstGateRow();
+    // Seven columns, and the baseline is one of them by name rather than by count: no column is
+    // dropped to make the row fit, which is what §6 forbids.
+    expect(within(row).getAllByRole('cell')).toHaveLength(7);
+    expect(cellOf(row, 'Baseline').textContent).toBe('None');
   });
 
   it('leaves an unrecorded budget unknown through a unit change', async () => {
@@ -494,6 +521,39 @@ describe('History shows stored verdicts as stored', () => {
     fireEvent.click(within(screen.getByRole('group', { name: 'Size units' })).getByLabelText('KiB'));
     expect(row.textContent).toContain('Unknown');
     expect(row.textContent).not.toMatch(/\b0 (bytes|KiB)\b/);
+  });
+});
+
+describe('the row action stays reachable', () => {
+  // F2R-02: `Details` was clipped at the default installed window width in all three table families,
+  // because a stored row of ids, digests and times is wider than the frozen 1024 minimum and the action
+  // was the last thing on it. The position is the contract; the pixel proof is the installed run.
+  it('leads each stored row with its action, and its header with the same column', async () => {
+    await openHistory();
+
+    for (const region of [await buildsRegion(), await runsRegion(), await releasesRegion()]) {
+      const header = within(region).getAllByRole('row')[0] as HTMLElement;
+      expect((within(header).getAllByRole('columnheader')[0]?.textContent ?? '').trim()).toBe(
+        'Row actions',
+      );
+      const row = within(region).getAllByRole('row')[1] as HTMLElement;
+      const first = within(row).getAllByRole('cell')[0] as HTMLElement;
+      expect(within(first).getByRole('button', { name: 'Details' })).toBeDefined();
+    }
+  });
+
+  it('gives the scroll axis to a wrapper around each stored table', async () => {
+    // The same mechanism F2R-01 removed from the detail tables: a table pinned to the width of its pane
+    // gets laid out below its own minimum, and the column that gives way is the one that was readable.
+    // The wrapper is what lets the table keep its intrinsic width, so the tree says which element owns
+    // the scroll.
+    await openHistory();
+
+    for (const region of [await buildsRegion(), await runsRegion(), await releasesRegion()]) {
+      const table = within(region).getByRole('table');
+      expect(table.parentElement?.className).toContain('viewport');
+      expect(table.tagName).toBe('TABLE');
+    }
   });
 });
 

@@ -41,12 +41,17 @@
   line-height: var(--fs-line-height-section);
 }
 
-/* A table that owns its own scroll axis, so a long digest column never pushes the page sideways. */
+/* The scroll axis belongs to a wrapper, not to the table: a `display: block` table is pinned to the
+   width of its pane and lays its columns out below their own minimum. As a table it keeps that
+   minimum, and this element owns whatever scroll is left, so a long digest column never pushes the
+   page sideways. */
+.viewport {
+  overflow-x: auto;
+}
+
 .grid {
   width: 100%;
   border-collapse: collapse;
-  display: block;
-  overflow-x: auto;
 }
 
 .caption {
@@ -62,6 +67,14 @@
   height: var(--fs-row-compact);
   border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   text-align: left;
+  /* Words break so a stored value cannot push a whole column out of reach; the ids, digests and
+     times below stay on one line, because a split digest is not copyable. */
+  white-space: normal;
+}
+
+/* Cells only: the opened row's full digests are `mono` too, and they are meant to wrap. */
+.grid td.mono,
+.grid th.mono {
   white-space: nowrap;
 }
 
@@ -160,6 +173,8 @@
   color: var(--fs-color-text-primary);
   font: inherit;
   cursor: pointer;
+  /* The word is the control's name, so it is never the thing that breaks in a narrow column. */
+  white-space: nowrap;
   transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
 }
 

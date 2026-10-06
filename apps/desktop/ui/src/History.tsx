@@ -261,92 +261,98 @@ export function History({
                   : `No stored build matches “${builds.applied}”.`}
               </p>
             ) : (
-              <table className={styles['grid']}>
-                <caption className={styles['caption']}>
-                  Ordered by when FirmwareSight stored the build, newest first.
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Artifact</th>
-                    <th scope="col">Snapshot</th>
-                    <th scope="col">SHA-256</th>
-                    <th scope="col">Stored</th>
-                    <th scope="col">Format</th>
-                    <th scope="col">Non-volatile</th>
-                    <th scope="col">RAM</th>
-                    <th scope="col">
-                      <span className={styles['srOnly']}>Row actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {builds.state.rows.map((row) => (
-                    <Fragment key={row.buildId}>
-                      <tr>
-                        <td title={row.fileName}>{row.fileName}</td>
-                        <td className={styles['mono']}>{truncateMiddle(row.snapshotId, 8)}</td>
-                        <td className={styles['mono']}>{truncateMiddle(row.sha256, 8)}</td>
-                        <td className={styles['mono']}>{row.importedAt}</td>
-                        <td>{row.architecture}</td>
-                        <td>
-                          <Budget state={row.nonvolatile.state} bytes={row.nonvolatile.bytes} unit={unit} />
-                        </td>
-                        <td>
-                          <Budget state={row.runtimeRam.state} bytes={row.runtimeRam.bytes} unit={unit} />
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className={styles['action']}
-                            aria-expanded={open !== null && open.kind === 'build' && open.id === row.buildId}
-                            onClick={() => {
-                              toggle('build', row.buildId);
-                            }}
-                          >
-                            Details
-                          </button>
-                        </td>
-                      </tr>
-                      {open !== null && open.kind === 'build' && open.id === row.buildId ? (
-                        <tr key={`${row.buildId}-detail`} className={styles['detail']}>
-                          <td colSpan={8}>
-                            <dl className={styles['facts']}>
-                              <div>
-                                <dt>Build id</dt>
-                                <dd className={styles['mono']}>{row.buildId}</dd>
-                              </div>
-                              <div>
-                                <dt>Snapshot id</dt>
-                                <dd className={styles['mono']}>{row.snapshotId}</dd>
-                              </div>
-                              <div>
-                                <dt>Artifact SHA-256</dt>
-                                <dd className={styles['mono']}>{row.sha256}</dd>
-                              </div>
-                              <div>
-                                <dt>Size</dt>
-                                <dd className={styles['mono']}>{formatSize(row.byteSize, unit)}</dd>
-                              </div>
-                              <div>
-                                <dt>Architecture</dt>
-                                <dd>{row.architecture}</dd>
-                              </div>
-                              <div>
-                                <dt>Stored</dt>
-                                <dd className={styles['mono']}>{row.importedAt}</dd>
-                              </div>
-                            </dl>
-                            <p className={styles['detailNote']}>
-                              The file name is all FirmwareSight keeps visible here. Where the artifact
-                              lives is never shown, and this row does not need the file to still exist.
-                            </p>
+              <div className={styles['viewport']}>
+                <table className={styles['grid']}>
+                  <caption className={styles['caption']}>
+                    Ordered by when FirmwareSight stored the build, newest first.
+                  </caption>
+                  <thead>
+                    <tr>
+                      {/* The action leads its row. A table of stored ids, digests and times is wider
+                          than the frozen minimum window, so an action at the end of it is the thing
+                          that falls off the right edge (F2R-02); the Evidence table already puts its
+                          row action first for the same reason. */}
+                      <th scope="col">
+                        <span className={styles['srOnly']}>Row actions</span>
+                      </th>
+                      <th scope="col">Artifact</th>
+                      <th scope="col">Snapshot</th>
+                      <th scope="col">SHA-256</th>
+                      <th scope="col">Stored</th>
+                      <th scope="col">Format</th>
+                      <th scope="col">Non-volatile</th>
+                      <th scope="col">RAM</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {builds.state.rows.map((row) => (
+                      <Fragment key={row.buildId}>
+                        <tr>
+                          <td>
+                            <button
+                              type="button"
+                              className={styles['action']}
+                              aria-expanded={open !== null && open.kind === 'build' && open.id === row.buildId}
+                              onClick={() => {
+                                toggle('build', row.buildId);
+                              }}
+                            >
+                              Details
+                            </button>
+                          </td>
+                          <td title={row.fileName}>{row.fileName}</td>
+                          <td className={styles['mono']}>{truncateMiddle(row.snapshotId, 8)}</td>
+                          <td className={styles['mono']}>{truncateMiddle(row.sha256, 8)}</td>
+                          <td className={styles['mono']}>{row.importedAt}</td>
+                          <td>{row.architecture}</td>
+                          <td>
+                            <Budget state={row.nonvolatile.state} bytes={row.nonvolatile.bytes} unit={unit} />
+                          </td>
+                          <td>
+                            <Budget state={row.runtimeRam.state} bytes={row.runtimeRam.bytes} unit={unit} />
                           </td>
                         </tr>
-                      ) : null}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
+                        {open !== null && open.kind === 'build' && open.id === row.buildId ? (
+                          <tr key={`${row.buildId}-detail`} className={styles['detail']}>
+                            <td colSpan={8}>
+                              <dl className={styles['facts']}>
+                                <div>
+                                  <dt>Build id</dt>
+                                  <dd className={styles['mono']}>{row.buildId}</dd>
+                                </div>
+                                <div>
+                                  <dt>Snapshot id</dt>
+                                  <dd className={styles['mono']}>{row.snapshotId}</dd>
+                                </div>
+                                <div>
+                                  <dt>Artifact SHA-256</dt>
+                                  <dd className={styles['mono']}>{row.sha256}</dd>
+                                </div>
+                                <div>
+                                  <dt>Size</dt>
+                                  <dd className={styles['mono']}>{formatSize(row.byteSize, unit)}</dd>
+                                </div>
+                                <div>
+                                  <dt>Architecture</dt>
+                                  <dd>{row.architecture}</dd>
+                                </div>
+                                <div>
+                                  <dt>Stored</dt>
+                                  <dd className={styles['mono']}>{row.importedAt}</dd>
+                                </div>
+                              </dl>
+                              <p className={styles['detailNote']}>
+                                The file name is all FirmwareSight keeps visible here. Where the artifact
+                                lives is never shown, and this row does not need the file to still exist.
+                              </p>
+                            </td>
+                          </tr>
+                        ) : null}
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
             <Pager
               total={builds.state.total}
@@ -386,38 +392,40 @@ export function History({
                   : `No stored Gate run matches “${runs.applied}”.`}
               </p>
             ) : (
-              <table className={styles['grid']}>
-                <caption className={styles['caption']}>
-                  Ordered by when FirmwareSight stored the verdict, newest first. A stored run is
-                  immutable, so this list cannot be edited and a re-run adds a row rather than
-                  replacing one.
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Run</th>
-                    <th scope="col">Build</th>
-                    <th scope="col">Baseline</th>
-                    <th scope="col">Disposition</th>
-                    <th scope="col">Findings by state</th>
-                    <th scope="col">Stored</th>
-                    <th scope="col">
-                      <span className={styles['srOnly']}>Row actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {runs.state.rows.map((row) => (
-                    <GateRows
-                      key={row.runId}
-                      row={row}
-                      open={open !== null && open.kind === 'gate' && open.id === row.runId}
-                      onToggle={() => {
-                        toggle('gate', row.runId);
-                      }}
-                    />
-                  ))}
-                </tbody>
-              </table>
+              <div className={styles['viewport']}>
+                <table className={styles['grid']}>
+                  <caption className={styles['caption']}>
+                    Ordered by when FirmwareSight stored the verdict, newest first. A stored run is
+                    immutable, so this list cannot be edited and a re-run adds a row rather than
+                    replacing one.
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        <span className={styles['srOnly']}>Row actions</span>
+                      </th>
+                      <th scope="col">Run</th>
+                      <th scope="col">Build</th>
+                      <th scope="col">Baseline</th>
+                      <th scope="col">Disposition</th>
+                      <th scope="col">Findings by state</th>
+                      <th scope="col">Stored</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {runs.state.rows.map((row) => (
+                      <GateRows
+                        key={row.runId}
+                        row={row}
+                        open={open !== null && open.kind === 'gate' && open.id === row.runId}
+                        onToggle={() => {
+                          toggle('gate', row.runId);
+                        }}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
             <Pager
               total={runs.state.total}
@@ -461,37 +469,39 @@ export function History({
                   : `No stored release record matches “${releases.applied}”.`}
               </p>
             ) : (
-              <table className={styles['grid']}>
-                <caption className={styles['caption']}>
-                  Ordered by when FirmwareSight recorded the release, newest first. Each row names the
-                  Gate run that qualified it.
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Release</th>
-                    <th scope="col">Version</th>
-                    <th scope="col">Build</th>
-                    <th scope="col">Gate run</th>
-                    <th scope="col">Manifest SHA-256</th>
-                    <th scope="col">Stored</th>
-                    <th scope="col">
-                      <span className={styles['srOnly']}>Row actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {releases.state.rows.map((row) => (
-                    <ReleaseRows
-                      key={row.releaseId}
-                      row={row}
-                      open={open !== null && open.kind === 'release' && open.id === row.releaseId}
-                      onToggle={() => {
-                        toggle('release', row.releaseId);
-                      }}
-                    />
-                  ))}
-                </tbody>
-              </table>
+              <div className={styles['viewport']}>
+                <table className={styles['grid']}>
+                  <caption className={styles['caption']}>
+                    Ordered by when FirmwareSight recorded the release, newest first. Each row names the
+                    Gate run that qualified it.
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        <span className={styles['srOnly']}>Row actions</span>
+                      </th>
+                      <th scope="col">Release</th>
+                      <th scope="col">Version</th>
+                      <th scope="col">Build</th>
+                      <th scope="col">Gate run</th>
+                      <th scope="col">Manifest SHA-256</th>
+                      <th scope="col">Stored</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {releases.state.rows.map((row) => (
+                      <ReleaseRows
+                        key={row.releaseId}
+                        row={row}
+                        open={open !== null && open.kind === 'release' && open.id === row.releaseId}
+                        onToggle={() => {
+                          toggle('release', row.releaseId);
+                        }}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
             <Pager
               total={releases.state.total}
@@ -542,6 +552,16 @@ function GateRows({
   return (
     <>
       <tr>
+        <td>
+          <button
+            type="button"
+            className={styles['action']}
+            aria-expanded={open}
+            onClick={onToggle}
+          >
+            Details
+          </button>
+        </td>
         <td className={styles['mono']}>{truncateMiddle(row.runId, 8)}</td>
         <td title={row.fileName}>{row.fileName}</td>
         <td>{row.baselineFileName === null ? 'None' : row.baselineFileName}</td>
@@ -558,16 +578,6 @@ function GateRows({
           </span>
         </td>
         <td className={styles['mono']}>{row.storedAt}</td>
-        <td>
-          <button
-            type="button"
-            className={styles['action']}
-            aria-expanded={open}
-            onClick={onToggle}
-          >
-            Details
-          </button>
-        </td>
       </tr>
       {open ? (
         <tr className={styles['detail']}>
@@ -616,12 +626,6 @@ function ReleaseRows({
   return (
     <>
       <tr>
-        <td className={styles['mono']}>{truncateMiddle(row.releaseId, 8)}</td>
-        <td className={styles['mono']}>{row.releaseVersion}</td>
-        <td title={row.fileName}>{row.fileName}</td>
-        <td className={styles['mono']}>{truncateMiddle(row.gateRunId, 8)}</td>
-        <td className={styles['mono']}>{truncateMiddle(row.manifestSha256, 8)}</td>
-        <td className={styles['mono']}>{row.storedAt}</td>
         <td>
           <button
             type="button"
@@ -632,6 +636,12 @@ function ReleaseRows({
             Details
           </button>
         </td>
+        <td className={styles['mono']}>{truncateMiddle(row.releaseId, 8)}</td>
+        <td className={styles['mono']}>{row.releaseVersion}</td>
+        <td title={row.fileName}>{row.fileName}</td>
+        <td className={styles['mono']}>{truncateMiddle(row.gateRunId, 8)}</td>
+        <td className={styles['mono']}>{truncateMiddle(row.manifestSha256, 8)}</td>
+        <td className={styles['mono']}>{row.storedAt}</td>
       </tr>
       {open ? (
         <tr className={styles['detail']}>

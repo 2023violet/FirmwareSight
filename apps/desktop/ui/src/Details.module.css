@@ -123,13 +123,17 @@
   cursor: default;
 }
 
+/* The scroll axis belongs to a wrapper, not to the table. A `display: block` table is forced to the
+   width of its pane and then lays its columns out *narrower than their own minimum*, which is how one
+   prose column ended up one character wide (F2R-01, measured in `01_layout_probe`). As a table it
+   keeps its intrinsic minimum, and this element owns whatever scroll is left. */
+.viewport {
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
-  /* The table is the widest thing on the screen and a dense read is the point, so it owns its own
-     scroll axis instead of pushing the page sideways. */
-  display: block;
-  overflow-x: auto;
 }
 
 .caption {
@@ -144,28 +148,45 @@
   padding: var(--fs-space-1) var(--fs-space-2);
   border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   text-align: left;
+  /* Words break; figures do not. A cell that cannot break is a cell that pushes its neighbours down
+     to their minimum, which is the mechanism behind F2R-01. */
+  white-space: normal;
+}
+
+/* Addresses, byte counts, flags and ids stay on one line: a split figure is no longer the figure the
+   column aligned, and a split address is not copyable. Cells only — the inspector's own values, which
+   carry `mono` outside a table, keep wrapping at their own width. */
+.table td.mono {
   white-space: nowrap;
 }
 
 /* A recorded value can be a whole memory-region list or a full hash. This is the one column whose
-   content has no bound, so it is the column that wraps rather than the one that pushes. */
-.value {
+   content has no bound, so it is the column that wraps rather than the one that pushes. It breaks on
+   word boundaries and keeps a measure, because a column whose minimum is one character is the defect
+   this round exists to remove. `ch` is the unit the prose of every page already bounds itself with
+   (60ch, 68ch, 72ch, 80ch, 88ch), and it follows `.mono` because a value cell carries both classes. */
+.table td.value {
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  min-width: 24ch;
 }
 
 .unknown {
   display: inline-flex;
-  align-items: baseline;
-  gap: var(--fs-space-2);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--fs-space-1);
   color: var(--fs-color-status-unknown);
 }
 
+/* The reason belongs on its own line under the word it explains, so the column carries `Unknown` and
+   a readable measure of prose instead of a whole sentence on one line. */
 .note {
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  min-width: 24ch;
 }
 
 .mono {

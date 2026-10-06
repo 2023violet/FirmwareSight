@@ -720,6 +720,55 @@ text with no source file; each says so in its own entry instead of standing for 
   the rest of the §28 closure pack beside them. The evidence root is outside this repository, named
   `FirmwareSight-P5-F2-20261005T073141`.
 
+## P5 Commit F2R Installed UI Productization Corrective v1.0 — executing
+
+- File: `FirmwareSight_P5_CommitF2R_UI_Productization_Corrective_v1.0.txt`
+- **Delivered** bytes: SHA-256 `5d8719eca4a6ee5e2ee5b1b2c126c69d8a1ef027881da6ef98e11be9bd1fb375`, 47,100 bytes,
+  2,117 lines, CRLF-terminated (2,116 `\r\n` pairs, no lone `CR`), measured from the attachment this session
+  was given before copying it here.
+- **Git-stored blob**: object `5f2bbda77c82fdcf57a6f9dfb48a4e622b28aa3e`, SHA-256
+  `6281f5d2067ce6975597d609fa556c6a7f3626c828a624b706c8c2335c8fe4ed`, 44,984 bytes, 2,116 LF, no `CR`.
+- **The two hashes differ only because of transport, and that is proved rather than asserted.** `.gitattributes`
+  carries `*.txt text eol=lf`, so the checkout normalizes CRLF to LF on staging; the byte delta is exactly the
+  CR count (47,100 − 44,984 = 2,116) and a line-by-line comparison of the delivered file split on `\r\n`
+  against the stored blob split on `\n` returns identical for all 2,117 lines with zero differing lines.
+  `.gitattributes` was not modified to make the hashes agree — that file is an integrity-policy boundary
+  (`AGENTS.md` 9), and the established rule here is to record both digests and prove textual identity instead.
+  Unlike the F2 entry below, this copy is the delivered file, not a reconstruction.
+- Authority: a narrow corrective inserted **between F2 and F3**. It authorizes fixing exactly the three
+  real-desktop UI findings F2 measured — F2R-01 Analyze sections table compression (S2), F2R-02 History
+  `Details` action clipped (S3), F2R-03 Release printing the raw Core enum `MapRegionAndElfLoad` (S3) — plus
+  the tests, the new CI artifact, the focused installed revalidation and the evidence updates needed to close
+  them. It explicitly does **not** authorize redesign, new features, a full §64 rerun, or F3: §1 states that a
+  P5 closure cannot declare `Productization = ENGINEERING_COMPLETE` while carrying an S2 in the frozen desktop
+  design range, so F2 stays `PASS` as an installed workflow proof with `F2 closure = NEEDS_CORRECTIVE_PRODUCT_HEAD`.
+  §45's exit list ends at `F2R = FINAL PASS / COMPLETE` with `P5 = IN_PROGRESS` and says explicitly **not**
+  `P5 PASS_COMPLETE`, and §46's STOP forbids a tag, a GitHub Release, a signature, a notarization and V1/B1
+  here as well; §24 and §37 repeat the same three words at the commit and at the report. §39 then splits
+  the round into an F2R1 product head, its CI, its artifact, the installed revalidation, and an F2R2
+  docs-only head with its own CI.
+- What it makes non-substitutable: §26 forbids testing anything but the **new** Windows artifact built by the
+  F2R1 head's own green run — not F1's `11337963032`, not F2's installed binary, not a local `cargo`/`tauri`
+  build — because this round must exercise the new UI bytes. §17 pins the public contract (`analysis:1`,
+  `diff:1`, `gate-results:1`, `accepted-reviews:1`, `release-manifest:1`, SQLite schema 5, migrations
+  0001–0005, `elf.program-header`, ADR-0028 and ADR-0029) as display/layout-only, and §18 admits no new
+  dependency of any kind. §5 makes the frozen tokens authority: existing tokens, intrinsic sizing, wrapping
+  and contained scrolling before any new semantic token, and a STOP if a token change looks necessary. §7 and
+  §9 state that jsdom cannot certify clipping, so the real-window installed pass is the layout authority and a
+  fake `offsetWidth` assertion is not a test. §28 re-applies the owner-store park and restore gates
+  (`OWNER_STORE_PARKED`, `OWNER_BACKUP_HASH_MATCH`, then `ORIGINAL_DB_RESTORED`, `ORIGINAL_DB_SHA_MATCH`,
+  `OWNER_STORE_OPENED_BY_F2R = NO`) before any commit, and §29 bans the specific harness failures F2 recorded:
+  a blind screen-coordinate click without target ownership, undocumented Win32 message ids, clicking while
+  another application owns the foreground, DevTools/CDP or `click()` standing in for a real action. §34 caps
+  the design claim at `PASS_FOR_FROZEN_DESKTOP_SCOPE` with `WCAG_CERTIFICATION = NOT_PERFORMED`, and §35 sets
+  L20 to `REOPENED_BY_F2_FOR_RELEASE_SURFACE` and only then to `CLOSED ACROSS VERIFIED HUMAN-FACING
+  MEMORY-BASIS SURFACES`, without rewriting Commit E's historical text.
+- Where this round's verdict will be written: `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_DESIGN.md` (before any
+  production change, as §14 requires) and `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md` (after the installed
+  revalidation), with the §38 addenda landing in `P5_KNOWN_LIMITATIONS.md`, `P5_EXIT_CHECKLIST.md`,
+  `P5_DESKTOP_ACCEPTANCE_REPORT.md`, `P5_EXECUTION_REPORT.md` and `P5_CI_AUTHORITY.md`. The evidence root is
+  outside this repository, named `FirmwareSight-P5-F2R-20261005T221112`.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

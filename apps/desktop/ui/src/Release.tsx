@@ -30,6 +30,7 @@ import styles from './Release.module.css';
 import { ErrorPanel } from './components/ErrorPanel';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
+import { evidenceBasisCaption } from './evidenceBasis';
 import { formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
 import {
   acceptReview,
@@ -979,7 +980,7 @@ function BudgetRow({ row, unit }: { readonly row: GateBudgetRowDto; readonly uni
         <span className={styles['note']}> effective {row.effectiveSeverity}</span>
       </td>
       <td className={styles['wrap']}>
-        <span>{row.basis ?? 'no basis recorded'}</span>
+        <span>{row.basis === null ? 'no basis recorded' : evidenceBasisCaption(row.basis)}</span>
         <span className={styles['note']}>
           {' · '}
           {row.exact ? 'complete attribution' : 'floor'}

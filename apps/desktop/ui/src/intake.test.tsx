@@ -325,6 +325,21 @@ describe('P1-A0 intake screen', () => {
     expect(screen.getByText('Git')).toBeDefined();
   });
 
+  it('names the weakest basis in the words a reader needs, not the identifier behind it', async () => {
+    // `weakestEvidenceBasis` is a portable wire value, and a wire value in a sentence is the shape L20
+    // closed on Compare and F2 found again on Release. The shell still sends what it sends; this page
+    // stops quoting it.
+    await chooseArtifact();
+    await analyze();
+
+    expect(
+      await screen.findByText(
+        'Weakest basis MAP regions + ELF load evidence; region evidence came from the linker.',
+      ),
+    ).toBeDefined();
+    expect(document.body.textContent).not.toContain('map-memory-configuration+elf-load');
+  });
+
   it('reports a missing MAP as an absent optional input, not a failure', async () => {
     selectMock.mockResolvedValue(
       ok(selection({ fileName: 'basic.elf', selectionId: 'sel-basic-1' })),

@@ -930,6 +930,55 @@ describe('The numbers behind the findings', () => {
     expect(cells[4]).toContain('the snapshot carries no complete RAM attribution');
   });
 
+  it('names a memory basis by what it means, not by the Core word behind it', async () => {
+    // F2 found this column printing `MapRegionAndElfLoad` in a human-facing cell while Analyze, Compare
+    // and History all said what the evidence was (F2R-03). The value the shell sends is not a display
+    // decision; the caption is, so the cell keeps the meaning and loses the identifier.
+    const run = gateRun();
+    const tables = run.tables;
+    if (tables === null) {
+      throw new Error('the fixture run carries no tables');
+    }
+    tables.budgets = tables.budgets.map((row, index) => ({
+      ...row,
+      basis: index === 0 ? 'MapRegionAndElfLoad' : 'region-config+elf-load',
+    }));
+    runGateMock.mockResolvedValue(ok(run));
+    await openRelease();
+    await runGate();
+    await screen.findByText('memory.flash_budget');
+    const table = block('Memory budgets').querySelector('table');
+    if (table === null) {
+      throw new Error('the budget table is missing');
+    }
+    expect(within(table).getByText('MAP regions + ELF load evidence')).toBeDefined();
+    // The wire spelling is a portable value elsewhere and a caption here, so both arrive as prose.
+    expect(within(table).getByText('configured regions + ELF load evidence')).toBeDefined();
+    expect(table.textContent).not.toContain('MapRegionAndElfLoad');
+    expect(table.textContent).not.toContain('region-config+elf-load');
+  });
+
+  it('says plainly what it cannot name, and what was never recorded', async () => {
+    // A basis from a future Core release must not be dressed up as one this page understands, and a
+    // budget with no basis at all keeps the sentence that says so rather than going blank (§11).
+    await openRelease();
+    await runGate();
+    await screen.findByText('memory.flash_budget');
+    const table = block('Memory budgets').querySelector('table');
+    if (table === null) {
+      throw new Error('the budget table is missing');
+    }
+    const flash = within(table).getByText('FLASH').closest('tr');
+    const ram = within(table).getByText('RAM').closest('tr');
+    if (flash === null || ram === null) {
+      throw new Error('a budget row is missing');
+    }
+    // The fixture's `SectionHeaders` is a word the domain has never sent.
+    expect(within(flash).getByText('Unrecognized evidence basis')).toBeDefined();
+    expect(flash.textContent).not.toContain('SectionHeaders');
+    expect(within(ram).getByText('no basis recorded')).toBeDefined();
+  });
+
   it('moves the growth numbers P2 computed instead of recomputing them', async () => {
     await openRelease();
     await runGate();

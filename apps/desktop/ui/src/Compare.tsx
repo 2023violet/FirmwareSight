@@ -24,6 +24,7 @@ import { ErrorPanel } from './components/ErrorPanel';
 import { Pager, SortHeader } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
+import { evidenceBasisCaption } from './evidenceBasis';
 import { ABSENT, formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
 import {
   compareSnapshots,
@@ -677,29 +678,15 @@ function DeltaFigure({
   );
 }
 
-/// The five evidence bases the memory model can name, in the vocabulary Analyze already uses.
+/// What Compare adds to the shared evidence-basis caption: its own word for a side that recorded none.
 ///
-/// `weakest_basis` crosses IPC as the Core enum's own identity (`domain::diff.rs` formats it with
-/// `{:?}`), which is a wire name, not a caption. Mapping it here is presentation only: no enum is
-/// renamed, no basis is recomputed, and a value outside this list stays visible as what it is.
-const EVIDENCE_BASIS_CAPTIONS = new Map<string, string>([
-  ['MapRegionAndElfLoad', 'MAP regions + ELF load evidence'],
-  ['map-memory-configuration+elf-load', 'MAP regions + ELF load evidence'],
-  ['RegionConfigAndElfLoad', 'configured regions + ELF load evidence'],
-  ['region-config+elf-load', 'configured regions + ELF load evidence'],
-  ['ElfAddressAndFlags', 'ELF address/flags evidence'],
-  ['elf-address-and-flags', 'ELF address/flags evidence'],
-  ['SectionNameHeuristic', 'section-name heuristic'],
-  ['section-name-heuristic', 'section-name heuristic'],
-  ['Insufficient', 'insufficient evidence'],
-  ['unattributed', 'insufficient evidence'],
-]);
-
+/// The mapping of the five bases the memory model can name lives in `evidenceBasis.ts`, in the
+/// vocabulary Analyze already uses, so this page and Release cannot drift apart.
 function basisCaption(basis: string | null): string {
   if (basis === null) {
     return 'unknown';
   }
-  return EVIDENCE_BASIS_CAPTIONS.get(basis) ?? 'Unrecognized evidence basis';
+  return evidenceBasisCaption(basis);
 }
 
 function SideEvidenceRow({

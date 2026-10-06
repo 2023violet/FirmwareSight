@@ -16,6 +16,7 @@ import { Details } from './Details';
 import { GettingStartedPanel } from './GettingStarted';
 import { ErrorPanel } from './components/ErrorPanel';
 import { StateBadge, type StateName } from './components/StateBadge';
+import { evidenceBasisCaption } from './evidenceBasis';
 import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
 import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type {
@@ -412,12 +413,13 @@ function EvidenceQuality({ memory }: { readonly memory: AnalysisSummaryDto['memo
       />
     );
   }
+  const caption = evidenceBasisCaption(basis);
   if (memory.admissibleForHardBlock) {
     return (
       <StateBadge
         state="PASS"
         label="Admissible for a hard limit"
-        note={`Weakest basis ${basis}; region evidence came from the linker.`}
+        note={`Weakest basis ${caption}; region evidence came from the linker.`}
       />
     );
   }
@@ -425,7 +427,7 @@ function EvidenceQuality({ memory }: { readonly memory: AnalysisSummaryDto['memo
     <StateBadge
       state="UNKNOWN"
       label="Not admissible for a hard limit"
-      note={`Weakest basis ${basis} is name- or flag-derived. Supply the linker MAP to strengthen it.`}
+      note={`Weakest basis ${caption} is name- or flag-derived. Supply the linker MAP to strengthen it.`}
     />
   );
 }
