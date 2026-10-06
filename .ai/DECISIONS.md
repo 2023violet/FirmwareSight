@@ -1869,3 +1869,100 @@ step is skipped"); `scripts/verify_baseline_artifacts.py` **RESULT PASS**.
 **Not written, and not writable by this head:** `P5 PASS`, `P5 PASS_COMPLETE`, `Productization COMPLETE`,
 `Productization ENGINEERING_COMPLETE`, `active_task NONE`, `BETA`, `RC`, `GA`, `Security Clean`. §39 and §42
 put those in F3's hands and then send this round back to the Architect.
+
+
+## Commit F2R (2026-10-06) — the installed-UI corrective the Architect inserted between F2 and F3
+
+*FirmwareSight — P5 Commit F2R Installed UI Productization Corrective, Execution Prompt v1.0 — Architect
+Authorized* is a narrow authority, not a new layer: it authorized fixing **exactly the three real-desktop
+findings F2 measured** (F2R-01 Analyze → Sections text collapse S2, F2R-02 History's `Details` action clipped
+S3, F2R-03 Release printing the raw Core enum `MapRegionAndElfLoad` S3), plus the tests, the CI artifact, the
+focused installed revalidation and the evidence updates needed to close them. It explicitly did **not**
+authorize redesign, new features, a full §64 rerun, or F3.
+
+- **What was decided, and by whom.** The Architect chose a corrective rather than letting F3 start around three
+  open product findings. That is a sequencing decision of the kind `AGENTS.md` 1 reserves to the architect, and
+  the round that ran it obeyed the boundary it was given: the only product path in the diff is
+  `apps/desktop/ui/src/**`, and no design token, dependency, capability, contract, schema, migration or line of
+  Rust moved.
+- **The mechanism was measured before anything was changed.** `display: block` on the `<table>` pins the box to
+  the pane and lets its columns be laid out *below their own minimum*; `overflow-wrap: anywhere` made the prose
+  column's minimum one character, so that column absorbed the whole deficit between a 736 px pane and a 939 px
+  rigid table. The negative control — a wrapper alone does not fix it — and the 195 px / 163 px occlusion that
+  ruled out sticky pinning are in `P5_F2R_UI_CORRECTIVE_DESIGN.md` §3 and §5.
+- **The repair follows the design authority rather than inventing one.** A `.viewport` wrapper owns
+  `overflow-x: auto`; the tables are tables again and keep their intrinsic minimum; prose cells take a `24ch`
+  measure with `break-word`, `ch` being the unit the shipped prose rules already bound themselves with (60ch,
+  68ch, 72ch, 80ch, 88ch); the Unknown reason sits on its own line under the word it explains; and the History
+  action moved to the **leading** cell, which is the placement the Evidence table already used, so the
+  precedent is this repository's own. F2R-03 routed Compare, Release and the Analyze weakest-basis sentence
+  through one new shared `evidenceBasis.ts` because the prompt forbade divergent wording for the same evidence —
+  second captions would have been a second source of truth for one fact.
+- **L20's disposition moved twice, and both moves are on the record.** `CLOSED` on Compare by Commit E →
+  `REOPENED_BY_F2` for the Release surface E's closure had never covered → `CLOSED_BY_F2R ACROSS VERIFIED
+  HUMAN-FACING MEMORY-BASIS SURFACES`, installed on F2R1's own CI-built artifact at 1024×720, 1056×799 and
+  1440×900. Commit E's sentence was not rewritten; a dated reconciliation was added beside it. Two spellings
+  that prompt prose carried (`ConfiguredRegionAndElfLoad`, `InsufficientEvidence`) have no code behind them and
+  were **not** mapped, because inventing semantics to fill a table is the same error in the other direction.
+- **What F2R refused to claim.** At 1440×900 the corrected Sections table needs a contained scroll of about
+  1.06× the pane to reach its last column; that trade is recorded rather than hidden, and the zero-scroll
+  alternative measured a 71 × 120 px prose column at 1024. The design verdict stays
+  `PASS_FOR_FROZEN_DESKTOP_SCOPE` on one host at 96 dpi / 100 % scale, with `WCAG_CERTIFICATION =
+  NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED` and `SECOND_WINDOWS_HOST = NOT_TESTED` unchanged.
+- **Owner data was parked and restored, not opened.** `OWNER_STORE_PARKED = YES`, `OWNER_BACKUP_HASH_MATCH =
+  YES` before install; `ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`,
+  `OWNER_STORE_OPENED_BY_F2R = NO` after. The harness was hardened **before** any installed action, and one
+  real click was genuinely refused by the pixel-ownership guard rather than silently delivered elsewhere.
+
+`F2R1 = fb5f628` (product, run `37431977428` attempt 1, **10 of 10**, artifact `11397938806`).
+`F2R2` = the evidence head, docs-only, both counts held at **868 Rust / 225 UI in 8 files**.
+`F2R = FINAL PASS / COMPLETE`. `P5` stayed `IN_PROGRESS` and F3 stayed unauthorized: this round ended at a STOP
+and returned to the Architect, which is exactly what `AGENTS.md` 1 requires of a round with no next authority.
+
+## Commit F3 (2026-10-06) — final governance closure: how a stage is allowed to end
+
+*FirmwareSight — P5 Commit F3 Final Governance Closure, Execution Prompt v1.0 — Architect Authorized* is the
+last authorized unit of P5 and the only head that may write the stage's closure sentence. Its decision is not a
+product decision — it changes no byte of the product — but three things it established are worth keeping as
+governance precedent.
+
+- **A closure is gated on a re-audit, not on the calendar.** §6 required every P5 exit criterion to be re-read
+  and to land on `PASS`, `CARRIED_FORWARD_NONBLOCKING` or `OWNER_DECISION_NONBLOCKING`, with **no required item
+  `BLOCKED`**, before §15's sentence could be written. The re-audit passed, and its one real find was in this
+  repository's own paperwork: `P5_EXIT_CHECKLIST.md` asserted every L1–L26 row was accounted for while
+  `P5_KNOWN_LIMITATIONS.md` held **25 of 26 — L12 had no row**, though the fact it covers (two RustSec
+  advisories accepted in `deny.toml`, measured as unupgradable inside the frozen Tauri / gtk line) was carried
+  honestly in two other documents. The correction was to **add the row and fix the assertion**, not to delete
+  the claim: a completeness assertion is a measurement and is held to it.
+- **Closing a stage must not launder its limitations.** §11's rule — **no limitation becomes `CLOSED` merely
+  because P5 closes** — is why L3, L4, L5, L8, L11, L12, L13, L15, L17, L23 and L25 all keep their carried
+  dispositions after the verdict, why L15 stays split into presentation `CLOSED` and wire
+  `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER` with no `analysis:2` and no enum rename, and why §12's measured
+  performance truth is quoted unchanged (519,179,252 bytes, ~2,020,073 symbols, warm ~4.73–4.89 s, cold ~68.7 s,
+  ~1,428 MB peak observed working set) with first-use-under-60 s still **not proved at this workload**. §7
+  carried F2R's `PASS_FOR_FROZEN_DESKTOP_SCOPE` **exactly**, refusing the upgrade to WCAG / all-DPI / all-monitor
+  language.
+- **The self-referential limit is named rather than faked.** A commit cannot certify the run of its own SHA. F3
+  therefore writes `F3 remote CI = PENDING_EXTERNAL_EVIDENCE` and states that **final external acceptance
+  requires F3 remote CI**, while §34 forbids the infinite `commit → CI → record CI → CI` loop and §33 fixes what
+  happens if that run disagrees: a content failure withholds the external verdict and is fixed forward, never
+  re-rolled until a green attempt appears; a pure provisioning failure may justify one rerun only with the log
+  read first and both attempts left in the record. No new machine enum was coined for the pending state,
+  because §22 forbids inventing one that does not already exist.
+
+**Canonical state F3 wrote**, in `BASELINE.yaml` and the entry documents and using only that file's existing
+vocabulary (`stage_status`, `closed_on`, `tests_at_close`, `product_state`, `next_stage_after_this_one`):
+`P5 = PASS_COMPLETE` · Productization `ENGINEERING_COMPLETE` · `active_task = NONE` · product `MVP_CANDIDATE` ·
+narrative **FirmwareSight Productized MVP Candidate** · `baseline_version` `0.6.0` · `G2 = PASS`, P0–P4
+untouched. `explicitly_not` lost `P5_PASS` for the reason above and kept `beta`, `RC`, `GA`,
+`production_ready`, `signed`, `notarized`, `security_clean`, `real_user_validated` and `licensed_open_source`;
+`reserved_for_the_architect` is now empty because L22, L26 and L15 were each answered by their own ADR or
+decision; and `next_stage_after_this_one` names V1 while recording that this file authorizes neither it nor
+anything else.
+
+**What closure does not authorize.** §37 stops the round: V1, private beta, B1, RC, GA, commercialization,
+licensing, signing, notarization, an updater and new feature development are all untouched, and the likely next
+decision — V1 own-artifact / real-user validation, the track that exists to answer L11 — needs a new architect
+prompt. §14's sentence is kept visible rather than repaired by an agent:
+**`PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION`**, because `AGENTS.md` 9 puts a
+licence change in front of a human and no P5 prompt let an agent choose one.

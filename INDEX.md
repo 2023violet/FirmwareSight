@@ -20,7 +20,7 @@ engine refuses to replace was offered for replacement) and E2E-F003 (S3, a GNU l
 linker's output) fixed in `e816dcb` and `971015f`; 770 Rust / 159 UI / `check.py` 15/15, the fix head
 green on Run #43 `37100371601` at 7 of 7 on the first attempt, evidence in `POST_G2_E2E_REMEDIATION/`
 and the 283-case root outside the repository — G2 unchanged, and that round authorized nothing beyond
-itself · P5 IN_PROGRESS (opened 2026-10-03) — Productization, authorized by execution prompt v1.0
+itself · P5 PASS_COMPLETE (opened 2026-10-03, closed 2026-10-06 by Commit F3) — Productization, authorized by execution prompt v1.0
 delivered as a file, SHA-256 `722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae`, archived
 in `10_AUDIT/SOURCE_PROMPTS/`; its §4 audit is written at `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` and
 the owner's checkpoint settled version identity (artifacts unify on `0.6.0`), migration `0005` after a
@@ -105,9 +105,12 @@ documentation-only and held both counts; **Commit F2R1 `fb5f628`** fixed F2's th
 took the UI suite to **225 in the same 8 files** while Rust stayed **868**, and **Commit F2R2** is the
 evidence head that installed F2R1's own CI artifact and revalidated them on a real window — it holds **868 /
 225** unchanged because §43 treats a moved count on a docs-only head as proof the head is not docs-only. The
-authoritative CI set is still the same ten jobs, package group 4 of 4 with no `SKIP`, and `P5 = IN_PROGRESS`
-with the product at **MVP CANDIDATE** — F2R ended in a STOP, so **F3 remains Architect-controlled** and no P5
-closure sentence exists anywhere in this repository.
+authoritative CI set is still the same ten jobs, package group 4 of 4 with no `SKIP`. **Commit F3 closed the
+stage on 2026-10-06: `P5 = PASS_COMPLETE`, Productization `ENGINEERING_COMPLETE`, `active_task NONE`**, with the
+product at **MVP CANDIDATE** and both counts held at 868 / 225 — F3 changes no product byte, and §5 makes a
+moved count on a docs-only head a stop condition rather than an explanation. Its own CI is
+`PENDING_EXTERNAL_EVIDENCE` inside the commit; final external acceptance requires F3 remote CI, and §34
+forbids a further head written only to record it.
 **Commit E closure normalization (2026-10-04), documentation only.** Two evidence-contract fixes and one answer,
 with zero product source: the matrix status column closed to
 `SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY / NOT_TESTED / UNSUPPORTED` (38 cells checked programmatically,
@@ -121,11 +124,13 @@ to L15 recorded as **Option E**: `SourceType::ElfProgramHeader` / `elf.program-h
 0006, no `analysis:2` and no golden byte moved, so L15 is `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, not
 `CLOSED`. `P5_COMMIT_E_CLOSURE_NORMALIZATION.md` is the short record; the prompt is archived with both its
 hashes because the delivered CRLF bytes and the stored LF bytes differ only in terminator.
-**Still no P5 verdict exists** — the product is
-MVP CANDIDATE at `0.6.0`, and no tag, Release, installer publication, signing, updater or licence
-choice is authorized · open-source
-licence PENDING OWNER CONFIRMATION · pricing and commercial research DEFERRED_POST_MVP · active_task:
-P5_PRODUCTIZATION`
+**P5 closed `PASS_COMPLETE` on 2026-10-06 under Commit F3** — the product is
+MVP CANDIDATE at `0.6.0`, narrative **FirmwareSight Productized MVP Candidate**, and no tag, Release, installer
+publication, signing, notarization, updater or licence
+choice is authorized or exists · open-source
+licence PENDING OWNER CONFIRMATION, and `PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE
+DECISION` · pricing and commercial research DEFERRED_POST_MVP · active_task:
+NONE, which authorizes no next track: V1, B1, RC and GA each need a new architect prompt`
 
 ## Primary reading path
 
@@ -163,7 +168,8 @@ P5_PRODUCTIZATION`
     disabled button keeping its accent border — each with the test that now pins it
 16. `P4_VALIDATION/` — Release Bundle: the portable bundle contract, its exit checklist and the desktop smoke
     that produced it
-17. `P5_VALIDATION/` — **the live round, and the place a newcomer starts.** `P5_PRODUCTIZATION_AUDIT.md`
+17. `P5_VALIDATION/` — **the closed stage, and the place a newcomer starts.** `P5_FINAL_CLOSURE_REPORT.md` is
+    the verdict with its boundaries and comes first. Then `P5_PRODUCTIZATION_AUDIT.md`
     (§4 A–H, plus §G's disposition of every inherited limitation and the new L26),
     `P5_CI_AUTHORITY.md` (the ten authoritative jobs and every run measured against them, failures included),
     `P5_MIGRATION_DECISION.md`, `P5_PACKAGING_REPORT.md`, `P5_INSTALL_RECOVERY_REPORT.md`,
@@ -194,7 +200,15 @@ P5_PRODUCTIZATION`
     occlusion that is why sticky pinning was rejected, and the design-token compliance argument) and
     `P5_F2R_UI_CORRECTIVE_REPORT.md` (§37's twenty parts: the exact F2R1 CI artifact that was installed, the
     three findings revalidated at 1024×720 / 1056×799 / 1440×900, the owner-store park and byte-exact restore,
-    and the bounded `PASS_FOR_FROZEN_DESKTOP_SCOPE` verdict that is not a WCAG claim).
+    and the bounded `PASS_FOR_FROZEN_DESKTOP_SCOPE` verdict that is not a WCAG claim). **Commit F3's one, on the
+    day the stage closed:** `P5_FINAL_CLOSURE_REPORT.md` — start authority, P5's scope, the A–F2R lineage, the
+    final engineering exit checklist, the installed-acceptance and corrective authorities, owner-data safety, the
+    carried limitations, the frozen release-readiness states, the licence boundary, the final local validation,
+    the F3 governance commit, `F3 remote CI = PENDING_EXTERNAL_EVIDENCE`, and the verdict together with what it
+    does not mean. F3 adds no other document: it changes no product byte, and §19–§21 put its record into the
+    files F2 and F2R already wrote (`P5_EXECUTION_REPORT.md` §7, `P5_EXIT_CHECKLIST.md` §7–§8,
+    `P5_CI_AUTHORITY.md`'s F2R2 rows, `P5_KNOWN_LIMITATIONS.md` §9, `P5_SUPPORTABILITY_REPORT.md` §2's L20
+    reconciliation and `P5_RELEASE_READINESS.md` §5).
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` began life as the regenerated **v0.6.0** baseline record and are now
 regenerated on **every** commit that changes the tracked set — the tree first, `SHA256SUMS` last, then
@@ -203,7 +217,11 @@ regenerated on **every** commit that changes the tracked set — the tree first,
 entries** at Commit F2R1 `fb5f628`: 707 — three paths added, the archived F2R prompt, its design record and
 `apps/desktop/ui/src/evidenceBasis.ts`, with no path removed; **826 lines and 706 entries** at Commit F2R2:
 708 — exactly one path added, the documentation file `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md`, nothing
-removed, so this head adds no product path at all; of the tracked set the
+removed, so this head adds no product path at all; **828 lines and 708 entries** at Commit F3 (the closure head, on
+2026-10-06): 710 — two paths added, the archived F3 prompt
+`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt` and this stage's closing
+record `P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md`, with nothing removed and **no product path among the 30
+changed**, every product tree OID identical to the head it closes; of the tracked set the
 two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,

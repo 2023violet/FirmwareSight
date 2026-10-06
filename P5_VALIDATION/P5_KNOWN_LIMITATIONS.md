@@ -3,7 +3,7 @@ title: "P5 Known Limitations"
 doc_id: "FS-P5-LIMITS"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
 last_updated: "2026-10-06"
@@ -82,6 +82,7 @@ the identifier, document the meaning, and fix what the user is shown.
 | L8 | Object / module attribution | **CARRIED_FORWARD** | the MAP facts are parsed but reach no product surface; no narrow current path exists to expose them without a feature decision |
 | L9 | Same-pair lock in the window never mouse-verified | **CARRIED_FORWARD** | the native `<select>` popup is not drivable by this harness. F2's own driver is real `SendInput` mouse and keyboard, and it still could not reach that popup — which is evidence for the limitation, not against it |
 | L11 | User comprehension untested (V0 0/8) | **CARRIED_FORWARD, owner V1** | P5 has no user panel and §60 never asked for one. Whether people read `Unknown`, `Review` and a MAP request correctly remains unverified |
+| L12 | Two RustSec advisories accepted in `deny.toml` | **CARRIED_FORWARD** | `RUSTSEC-2024-0429` (`glib` 0.18.5, unsound in `glib::VariantStrIter`) and `RUSTSEC-2024-0370` (`proc-macro-error` 1.0.4, unmaintained), both reached through the gtk 0.18 line the frozen Tauri 2.12.0 requires. Commit E measured the way out and it does not exist: `cargo update -p glib --precise 0.20.0 --dry-run` fails on `glib = "^0.18"` required by `gtk v0.18.2`. Moving glib means moving gtk-rs, muda, tao and webkit2gtk, which is an ADR and not a CI fix. `cargo deny` reports `advisories ok, bans ok, licenses ok, sources ok` with both accepts still matching, and `unused-ignored-advisory` stays at `warn`, so an acceptance that goes stale is itself reported. Neither is compiled for Windows or macOS, and the second is build-time only. **This row was missing from this file until Commit F3 added it on 2026-10-06**: the fact was carried honestly in `P5_SUPPORTABILITY_REPORT.md` §2 and `P5_SECURITY_SUPPORTABILITY_REVIEW.md` §2 the whole time, and what failed was this list's completeness, which the exit checklist had asserted. §9 records how F3 found it |
 | L18 | Local database retains the chosen artifact location | **BY_DESIGN** | adjudicated by the G2 Storage Path Semantics Clarification Addendum. `artifacts.path` is the storage of record and the display/IPC/redaction chain keeps it local. F2 adds a related observation below, not a contradiction |
 | L25 | One dead `Apply filter` click, never reproduced | **NOT_REPRODUCED** | 30 legitimate Apply activations across both tables plus 6 through form submit, no failure |
 
@@ -174,3 +175,41 @@ numbers. And the Design / Accessibility verdict in `P5_EXIT_CHECKLIST.md` §4 is
 `WCAG_CERTIFICATION = NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED`,
 `SECOND_WINDOWS_HOST = NOT_TESTED` unchanged.
 
+## 9. Addendum — what Commit F3 closed the stage with, and what it refused to move (2026-10-06)
+
+F3 is the governance closure head: **it changes no product byte**, so it can close no code row and must open
+none. What it did to this list was two things, one of them a correction of this repository's own record.
+
+**The correction.** `P5_EXIT_CHECKLIST.md`'s "known limitations complete" row asserted that every L1–L26 row
+was accounted for. Counting this file at `a5ce7c4`: 25 of the 26 rows were present, and **L12 was not** —
+it lived only in `P5_SUPPORTABILITY_REPORT.md` §2 and `P5_SECURITY_SUPPORTABILITY_REVIEW.md` §2. The fact was
+carried honestly; the assertion that the list was complete was not. F3 added the L12 row above rather than
+deleting the assertion, because the missing row was the defect and the checklist row was merely the place the
+defect became visible. The corrected assertion is in `P5_EXIT_CHECKLIST.md` §7.
+
+**What P5's closure did not do to any row.** `AGENTS.md` §8 aside, the rule the Architect wrote into F3 §11 is
+the one this file exists to enforce: **no limitation becomes `CLOSED` merely because P5 closes.** So at the
+head that writes `P5 = PASS_COMPLETE`:
+
+| Row | Disposition at closure | Why it did not move |
+| --- | --- | --- |
+| L3 fuzzing | **CARRIED_FORWARD** | still blocked by `ADR-0016` plus the pinned `1.98.1` toolchain; the no-panic claim still rests on `fixtures/malformed/*`, not on fuzzing |
+| L4 platform / DPI | **REDUCED, bounded** | one host, 96 dpi / 100 % scale, one WebView2; `MULTI_DPI_125_150 = NOT_TESTED`, `SECOND_WINDOWS_HOST = NOT_TESTED` |
+| L5 ELF / layout / DWARF | **REDUCED** | the cohort grew; DWARF is still recognised and not consumed |
+| L8 object / module attribution | **CARRIED_FORWARD** | needs a new portable field and a feature decision, neither of which a closure head may make |
+| L11 real-user comprehension | **CARRIED_FORWARD, owner V1** | V0 stays `0 / 8`; closing it is the V1 track, which **P5 does not authorize** |
+| L12 accepted advisories | **CARRIED_FORWARD** | the compatible upgrade was measured and does not exist inside the frozen Tauri/gtk line; clearing it is an ADR |
+| L13 licence | **OWNER_DECISION** | `license = "Proprietary"`, no root `LICENSE`; F3 §14 states the consequence instead of resolving it |
+| L15 legacy wire identifier | **CARRIED_FORWARD** (presentation half CLOSED) | F3 creates no `analysis:2`, renames no enum, moves no stored row |
+| L17 CI/index blind spot | **REDUCED** | the two canonical lists that exist were checked; no general source-control linter was built |
+| L23 async UI race class | **REDUCED** | seven instances fixed and proved by mutation, 20/20 fresh-process runs; a differently-shaped wave may still exist |
+| L25 `Apply filter` | **NOT_REPRODUCED** | 30 legitimate activations plus 6 through form submit, no failure |
+
+**The two rows F3 states rather than settles.** `L15` keeps its two halves exactly as §3 writes them, and `L26`
+is `CLOSED — ADR-0029`, deliberately kept distinct from `ADR-0028`: one decides what the **repository baseline**
+digests (canonical Git stage-0 index blobs), the other decides what a **Release identity** is (the exact bytes
+observed on disk). F3 adds no new checksum semantics of either kind.
+
+**Where the closure sentence lives.** Not here: this file's job is the honest list. `P5_VALIDATION/
+P5_FINAL_CLOSURE_REPORT.md` carries the verdict and its boundaries, `BASELINE.yaml` carries the machine state,
+and `.ai/ACTIVE_TASK.md` returns the pointer to `NONE`.

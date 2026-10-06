@@ -6,7 +6,7 @@ product:
   cli: fwsight
   baseline_version: 0.6.0
   date: 2026-09-28
-  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_PASS_MVP_CANDIDATE_V0_NON_BLOCKING
+  status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_PASS_MVP_CANDIDATE_P5_PASS_COMPLETE_V0_NON_BLOCKING
 
 principles:
   - evidence_first
@@ -27,7 +27,7 @@ users:
     - small_hardware_founder_team
 
 validation:
-  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_PASS_MVP_CANDIDATE_V0_NON_BLOCKING
+  current_gate: G0_PASS_P0_PASS_G1_PASS_ON_P0_BASIS_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_PASS_MVP_CANDIDATE_P5_PASS_COMPLETE_V0_NON_BLOCKING
   # ADR-0026 (2026-09-29) re-based G1 on P0 PASS for open-source MVP delivery and made V0 a
   # non-blocking feedback track. Before that date this file read g1_requires: [V0_PASS, P0_PASS] with
   # g1_claimed: false, and the historical records say so; the gate content of G1 itself (the verified
@@ -40,8 +40,11 @@ validation:
     # own-artifact / real-user validation and P5 productization; neither is authorized by this file,
     # no authority file puts one before the other, and each needs its own architect decision. No B1, RC1 or GA1 work, no History page, installer, signing, updater, SBOM,
     # cloud, account, telemetry, AI or pricing exists or is implied by what is listed here.
+    # P5 later arrived the legitimate way - its own architect prompt, delivered as a file and archived -
+    # ran from 2026-10-03, and Commit F3 closed it PASS_COMPLETE on 2026-10-06, so its entry is no longer
+    # a track that can be authorized; it is history, and p5_execution records it. It was removed from this
+    # list rather than left to mislead the next reader into thinking P5 is still the thing to start.
     - V1_own_artifact_external_validation_after_G2
-    - P5_productization_after_G2
     - V0_workflow_prototype_validation_as_non_blocking_feedback
   g1_requires: [P0_PASS]
   g1_basis_changed_by: 09_ADR/ADR-0026-open-source-mvp-first-delivery.md
@@ -215,9 +218,14 @@ research:
 # observed on disk, require_clean_git = false stays valid with its caveat written down, .gitattributes is
 # recommended for the user's repository and this repository does not edit its own, and the premise test in
 # crates/firmwaresight-project/tests/bundle_builder.rs is named there as one that may not be removed or
-# weakened. The draft is re-statused EXECUTION_RECORD rather than rewritten. Stage P5 is IN_PROGRESS: no P5
-# verdict exists yet, and section 5 forbids writing P5 PASS, BETA, RC or GA before closure evidence does.
-active_task: P5_PRODUCTIZATION
+# weakened. The draft is re-statused EXECUTION_RECORD rather than rewritten. Stage P5 ran from that opening
+# to 2026-10-06, when Commit F3 - the only head its own prompt reserved the closure sentence for - re-audited
+# every exit criterion and wrote P5 = PASS_COMPLETE: the section 5 prohibition was on writing a verdict
+# before closure evidence existed, and the evidence is P5_VALIDATION/ plus two installed-acceptance rounds on
+# CI-built artifacts. What F3 did NOT write: BETA, RC, GA, Production Ready, security clean, a tag, a GitHub
+# Release, a published installer, a signature, a notarization, an updater or a licence. V1 own-artifact /
+# real-user validation still has no prompt and stays unauthorized.
+active_task: NONE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -553,10 +561,12 @@ g2_execution:
   explicitly_not: [production_ready, GA, beta, release_candidate, signed, installable, security_clean, real_user_validated, commercially_validated, licensed_open_source]
 
 # P5 productization: the stage that turns the G2-passed MVP Candidate into a Productized MVP a stranger
-# can install, use, recover from and remove without the dev team present. Everything under this block is
-# an opened-round record, not a verdict - the round is IN_PROGRESS, and its own section 5 forbids writing
-# P5 PASS, BETA, RC or GA before closure evidence exists. P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md carries
-# the command behind every claim below.
+# can install, use, recover from and remove without the dev team present. Everything under this block was an
+# opened-round record while the round ran - its section 5 forbade writing P5 PASS, BETA, RC or GA before
+# closure evidence existed. That evidence exists: P5_VALIDATION/ holds eleven rounds of measurements, two
+# installed-acceptance rounds on CI-built Windows artifacts, and the item-by-item re-audit in
+# P5_VALIDATION/P5_EXIT_CHECKLIST.md §7 that Commit F3 was required to pass before writing the verdict.
+# BETA, RC, GA, production-ready, signed, notarized and "security clean" remain unwritten and unauthorized.
 p5_execution:
   authorized: true
   prompt: "FirmwareSight - P5 Productization, Execution Prompt v1.0"
@@ -564,7 +574,15 @@ p5_execution:
   start_head: d83175a3309a5ac5ec01995bdf7b74ec0ddb3d91 # the post-G2 remediation closure head; audit found HEAD = origin/main and the tree clean
   start_run: "37101619245, attempt 1, completed / success, 7 of 7 jobs"
   stage: P5
-  stage_status: IN_PROGRESS
+  # The closure sentence belongs to Commit F3 alone (P5 prompt §61's split, F3 prompt §15), and F3 wrote it only
+  # after §6's re-audit found no required engineering item BLOCKED. P5 = PASS_COMPLETE, and the canonical
+  # wording that goes with it - Productization = ENGINEERING_COMPLETE, product state MVP_CANDIDATE, narrative
+  # "FirmwareSight Productized MVP Candidate" - is below and in .ai/ACTIVE_TASK.md, .ai/CURRENT_STATE.md and
+  # P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md. No new machine enum was invented for the pending remote run:
+  # F3's own CI is external evidence (remote_ci), and §34 forbids a further commit written only to record it.
+  stage_status: PASS_COMPLETE
+  closed_on: "2026-10-06"
+  product_state: MVP_CANDIDATE
   opened_on: "2026-10-03"
   audit: P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md # section 4 A-H, written before any product code, as section 4 requires
   owner_checkpoint: "2026-10-03 - the cadence the owner set was audit first, then a checkpoint before any product code"
@@ -573,7 +591,7 @@ p5_execution:
     migration: WRITTEN_DECISION_THEN_0005 # P5_MIGRATION_DECISION.md first; 0005 adds sections.file_offset_unknown, symbols.address_unknown and an index on builds.created_at
     package_matrix: WINDOWS_REAL_INSTALL_HERE_PLUS_MACOS_LINUX_CI_BUILD_ONLY # no macOS or Linux runtime exists on this host, so those rows may never read SUPPORTED
     store_filename: KEEP_FIRMWARESIGHT_P0_SQLITE # no rename and no data move; the path becomes visible in Diagnostics instead
-  reserved_for_the_architect: [L22_release_identity_versus_line_endings_ADR_DRAFT_WRITTEN_STOP_IN_FORCE] # P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md: options costed, no behaviour changed, option C (today's bytes-as-evidence) stands until the Architect answers
+  reserved_for_the_architect: [] # nothing is left with the Architect. L22 (release identity versus line endings) came back decided as 09_ADR/ADR-0028-release-identity-bytes-as-evidence.md, Accepted, and the draft that costed it is re-statused EXECUTION_RECORD rather than rewritten; L26 (the repository baseline digesting working-tree bytes) came back as 09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md and Commit F1 implemented it; L15 came back as Option E, legacy wire identifier preserved with its meaning documented; and the F3 closure round itself was the Architect's decision, issued as its own prompt. The key stays as an empty list rather than being deleted, because its history is in the two ADRs and in P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md
   reserved_for_the_owner: [OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION] # section 54 forbids this round from choosing a licence
   # What the packaging commit opened, recorded because section 41 makes the job set authoritative and
   # this repository's rule is that a job count never drifts without a record. The reasons, the measured
@@ -608,7 +626,7 @@ p5_execution:
     navigation: [Analyze, Compare, Release, History] # section 15's canonical four; Help is listed under its own "Help and about" navigation so it cannot read as a fifth stage
     tests_moved: { rust: 775, ui: 160 } # before Commit C
     tests_after: { rust: 812, ui: 200 } # one cargo test --workspace and one pnpm test; 19 storage + 11 desktop + 40 UI are new
-    accepted_in_installed_binary: false # the screens are gated locally; section 38 item C's walk through the package and the section 64 journey run after Commit D
+    accepted_in_installed_binary: true # was false while the screens were gated locally. Commit F2 walked section 38 item C and the section 64 journey in the CI-built F1 Windows artifact (onboarding panel and Help on a cold window, History read back after its source project was renamed, Diagnostics export carrying no path), and Commit F2R revalidated the corrected Analyze / History / Release surfaces on F2R1's own CI-built artifact at 1024x720, 1056x799 and 1440x900. Evidence: P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md and P5_F2R_UI_CORRECTIVE_REPORT.md
   release_identity_documentation:
     adr_draft: P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md # section 32's item, status DRAFT_FOR_ARCHITECT_REVIEW: option C describes today's bytes-as-evidence behaviour and the document stops there
     behaviour_changed: none # no digest, canonical text, run id or release id computation moved; the diff touches one integration test and documents
@@ -622,9 +640,26 @@ p5_execution:
     repetitions_of_changed_file: { runs: 20, failures: 0 } # fresh processes, which is section 35's count for a changed UI suite
     sweep: bounded_chained_ipc_waves # P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md section 0a: the one chained wave found, the five top-level synchronous reads left, and the limits named -- Release's run-keyed waves and within(region) reads were not walked, so the complete sweep is a remaining task
   tests_after: { rust: 813, ui: 201 } # one cargo test --workspace and one pnpm test on the tree that passed 16 of 16 steps
+  # The stage's closure counts, one `cargo test --workspace` and one `corepack pnpm test`, direct only: 868
+  # passed / 0 failed / 0 ignored across 47 executable suites, and 225 passed in 8 files. Commit E took Rust
+  # 854 → 868 (its 14 new fixture tests), F1 took UI 217 → 219 (L15's two caption cases) and F2R1 took UI
+  # 219 → 225 (the three installed-UI contracts and their guards). F2, F2R2 and F3 each held both numbers
+  # still, because a docs-only head that moves a count is a product change wearing a documentation diff.
+  tests_at_close: { rust: 868, ui: 225 }
+  # Gates at closure, from F3's own runs on the final staged tree, printed rather than expected.
+  gates_at_close: "cargo fmt --all -- --check 0; cargo clippy --workspace --all-targets --all-features -- -D warnings 0; one cargo test --workspace 868 passed / 0 failed across 47 test-result lines; corepack pnpm install --frozen-lockfile / typecheck / lint / test / build each exit 0, with 225 passed in 8 files; python scripts/check.py 17 of 17 steps PASS with no SKIP (rust 3, frontend 5, drift 8 including drift/baseline integrity, deny 1); --only drift 8/8, --only deny 1/1, --only core-smoke 3/3, --only package 4/4; scripts/verify_baseline_artifacts.py RESULT PASS (710 tracked paths, 708 manifest entries, every mismatch counter 0)"
+  # What the remote said, read by exact headSha and never recalled. The closure head's own run is the
+  # external half of this record and cannot be written into the commit it measures (F3 §19, §32, §34).
+  remote_ci: "PREDECESSOR GREEN, CLOSURE RUN PENDING. The last head before F3 is a5ce7c4 (F2R2), Run 37453402452 (#71), attempt 1, completed / success, 10 of 10 jobs, every job name read individually on 2026-10-06 with gh api repos/2023violet/FirmwareSight/actions/runs/37453402452/jobs. The F3 commit's own run is PENDING_EXTERNAL_EVIDENCE: the SHA does not exist until the commit is written and the run does not exist until it is pushed, §19 forbids fabricating it in the commit, and §34 forbids a further commit whose only content is recording it. If that run fails on repository content, §33 withholds the external PASS_COMPLETE and the issue is fixed forward rather than re-rolled; 31f10c7 and d1dc61c keep their no-run-of-its-own rows for the same push-granularity reason"
   baseline_version_stays: 0.6.0
   no_tag_no_release_no_published_installer: true
-  explicitly_not: [P5_PASS, beta, RC, GA, production_ready, signed, notarized, security_clean]
+  evidence: P5_VALIDATION/ # the pack this stage wrote, including P5_FINAL_CLOSURE_REPORT.md for the verdict and its boundaries
+  known_limitations: P5_VALIDATION/P5_KNOWN_LIMITATIONS.md # 26 rows, all accounted for as of F3: L12 was missing until F3 added it, and no row became CLOSED because the stage closed
+  # P5_PASS is gone from this list because F3 §15 authorizes exactly that sentence and §6's re-audit earned it.
+  # Everything else in the list stays forbidden and unclaimed, and F3 adds the same prohibition to V1, B1, G3
+  # and any new feature: closing P5 authorizes no next track.
+  explicitly_not: [beta, RC, GA, production_ready, signed, notarized, security_clean, real_user_validated, licensed_open_source]
+  next_stage_after_this_one: V1_own_artifact_external_validation # NOT authorized by this file; L11 (real-user comprehension, V0 at 0/8) is what V1 exists to answer, and it needs its own architect prompt
 
 p0_execution:
   authorized: true

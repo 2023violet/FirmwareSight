@@ -11,28 +11,41 @@ last_updated: "2026-10-06"
 # ACTIVE TASK
 
 ```text
-P5_PRODUCTIZATION — stage P5, state IN_PROGRESS, opened 2026-10-03.
-Authorized by FirmwareSight — P5 Productization, Execution Prompt v1.0 (file, SHA-256
-722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae, 73,722 bytes, 3,442 lines), archived in
-10_AUDIT/SOURCE_PROMPTS/ and registered in that directory's README.
-Goal: carry the G2-passed MVP CANDIDATE to a Productized MVP a stranger engineer can install, understand,
-use (Analyze / Compare / Gate / Bundle), inspect in local History and Diagnostics, recover from, and
-uninstall or reinstall, without the dev team present.
-Discipline: AUDIT FIRST / NO FEATURE SPRAWL / LOCAL-FIRST / FAIL CLOSED / PRESERVE UNKNOWN / PACKAGE WHAT
-WAS PROVEN / DO NOT CLAIM BETA, RC OR GA.
+NONE.
 
-AGENTS.md 1 still binds: this pointer names one stage and nothing beyond it. P5 does not authorize V1,
-G3, a private beta, a release, a licence change, a signing or updater capability, or any new product verb,
-format, adapter or crate.
+Stage P5 (Productization) closed on 2026-10-06 as PASS_COMPLETE, written by Commit F3 — the only head its
+prompt reserved the closure sentence for — after F3 §6 re-audited every P5 exit criterion and found no
+required engineering item BLOCKED. Authorized by FirmwareSight — P5 Productization, Execution Prompt v1.0
+(file, SHA-256 722125f5aa68e324ba1dea4826f66d8392acab9ad9a015c4919ed5ade471e0ae, 73,722 bytes, 3,442 lines)
+and closed under FirmwareSight — P5 Commit F3 Final Governance Closure, Execution Prompt v1.0 (file, SHA-256
+860e00976b242f15de1473455941140599a8a5cd639409521e7c38a28a64514c, 36,458 delivered CRLF bytes), both archived
+in 10_AUDIT/SOURCE_PROMPTS/ and registered in that directory's README.
+
+Machine state: stage P5 = PASS_COMPLETE · Productization = ENGINEERING_COMPLETE · product = MVP_CANDIDATE ·
+narrative = FirmwareSight Productized MVP Candidate · baseline_version = 0.6.0 · G2 = PASS · P0/P1/P2/P3/P4
+keep their existing PASS / COMPLETE states, and nothing earlier was re-statused retroactively.
+
+NOTHING NEXT IS AUTHORIZED BY THIS. V1 = NOT AUTHORIZED BY P5. B1 / Private Beta = NOT AUTHORIZED. RC, GA,
+commercialization, licensing, signing, notarization and an updater = NOT AUTHORIZED. G3 = NOT STARTED.
+Any next track needs a NEW Architect decision and prompt; AGENTS.md 1 forbids an agent from lifting one off
+the roadmap, and the likely next decision (V1 external real-user validation, which is what closes L11) is
+the owner's and the Architect's, not this file's.
+
+If you were sent here to "continue P5": it is closed. Read P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md for the
+verdict and its boundaries, P5_VALIDATION/P5_KNOWN_LIMITATIONS.md for the 26 carried rows, and BASELINE.yaml
+p5_execution for the machine state. Then stop: with active_task NONE there is no business functionality to
+create and no track to pick.
 ```
 
 ## What is already true when P5 opens
 
 The product is **not** in question: G2 is PASS, Product MVP is ENGINEERING COMPLETE, the state is
 **MVP CANDIDATE**, the baseline is **0.6.0**, and the three post-G2 findings were closed on 2026-10-02 in
-`e816dcb` and `971015f`. What moved is the tree, so the G2 numbers are the history of a different commit:
-**Rust is 775 tests, UI is 160 in 6 files, and `scripts/check.py` is 16 steps** (the drift group gained
-`version identity` when packaging landed).
+`e816dcb` and `971015f`. What moved is the tree, so the G2 numbers are the history of a different commit: the
+tree at that point read **775 Rust tests, 160 UI in 6 files, and `scripts/check.py` 16 steps** (the drift group
+gained `version identity` when packaging landed). **Nothing in this paragraph is the present total** — the
+present total is in the last ledger row above and in `.ai/HANDOFF.md`: **868 Rust / 225 UI in 8 files** on a
+**17-step** gate.
 
 `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` is written and answers §4 A–H from commands run at `d83175a`
 (HEAD = `origin/main`, tree clean, Run `37101619245` 7 of 7). It found no package has ever been produced
@@ -70,6 +83,7 @@ zero Clang-produced evidence despite the cohort claim.
 | the head that carries this row | **Commit F2 — installed productization acceptance.** Documentation, evidence and governance only: **zero** paths under `crates/`, `apps/`, `scripts/`, `fixtures/`, `schemas/`, `migrations/`, `.github/`, and no change to `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json` or `deny.toml` — §3/§35 forbid them because any one invalidates the F1 installer as the candidate under test, and three product findings were therefore recorded rather than patched. Ran the whole §64 journey once, contiguously, on the exact CI-built F1 Windows artifact (artifact id `11337963032` of run `37293381181`, 3,885,631 B, `a1152ef3…3c076b`, installed as downloaded), driven by real `SendInput` with read-only SQL used only as independent evidence. Proved the installed synthetic **v4 → v5** migration on 34 measured checks; proved retention semantically rather than by file digest, because a WAL database churns bytes legitimately; parked and restored the owner's store **twice** with the §26 gates satisfied before any commit. Wrote §28's eight-document closure pack, §29's user-doc audit — which found that `Help.tsx:50` already points readers at `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md`, a path that **did not exist until F2 created it**, fixed without touching product code — §30's user-facing uninstall/retention wording, and §31's coverage boundary. **Two boundaries were written down instead of being smoothed over:** installed migration is one path and the owner's real store is at **schema v2**, so the chained v2 → v5 installed upgrade remains unexecuted; and the uninstaller's "Delete the application data" option was **never exercised**, because that folder holds unrelated historical stores from earlier phases. Also recorded against itself: three harness defects found and owned, one of which had been silently delivering installer clicks to a browser window for most of the round, and the F2 prompt file vanishing from `Downloads` after it was read — the archived copy is a transcript reconstruction, verified contiguous over lines 1–1,044 and matching the 19,040 bytes the directory listing recorded, and the register says so | its own run is external evidence, read with `gh run view <sha> --json headSha,conclusion,jobs` | **868 Rust / 219 UI in 8 files — both unchanged from F1, which is the check §37 names**: a docs-only round that moved either count would be a product change wearing a documentation diff. Full gate **17 of 17**, drift **8 of 8**, deny 1/1, `core-smoke` 3/3, package 4/4 with no `SKIP`. `F2 = COMPLETE`, `P5 = IN_PROGRESS`, `F3 = READY_FOR_ARCHITECT_REVIEW`. Not set: `P5 PASS_COMPLETE`, `active_task NONE`, a tag, a GitHub Release, a signature, a notarization, an updater, or a licence |
 | `fb5f628` | **Commit F2R1 — the narrow installed-UI corrective the Architect inserted between F2 and F3.** Three F2 real-desktop findings, all of them display-layer, fixed inside §16's only allowed product path `apps/desktop/ui/src/**`: **F2R-01 / S2**, Analyze → Sections laid its prose column out one character per line, because `Details.module.css` put `display: block` on the `<table>` — which pins the box to the pane and lets its columns sit *below their own minimum* — while `overflow-wrap: anywhere` on the reason made that minimum one character, so the column absorbed the whole deficit; **F2R-02 / S3**, History's `Details` was the last cell of a table wider than the frozen minimum window, so the only action on the row was the thing that fell off the right edge; **F2R-03 / S3**, Release printed the Core enum `MapRegionAndElfLoad` at a person. The mechanism was measured before it was changed: `P5_F2R_UI_CORRECTIVE_DESIGN.md` §3 keeps the probe numbers, including the negative control showing that a wrapper alone does not fix it and the 195 px / 163 px occlusion that is why sticky pinning was rejected. The repair is what §5 asks for first — a `.viewport` wrapper owns `overflow-x: auto`, the tables are tables again and so keep their intrinsic minimum, prose cells take a `24ch` measure with `break-word`, an Unknown reason sits on its own line under the word, and the History action moves to the **leading** cell, the placement the Evidence table already uses. F2R-03 routes Compare, Release and the Analyze weakest-basis sentence through one new `evidenceBasis.ts` holding the captions Compare used to inline, because §11 forbids divergent wording for the same evidence and §13 authorizes the extra surfaces that share the helper. **No token changed, no pixel constant invented, no dependency, no capability, no contract move**: `assets/design-tokens.json` is byte-identical and `analysis:1`, `diff:1`, `gate-results:1`, `accepted-reviews:1`, `release-manifest:1`, SQLite schema 5, migrations 0001–0005, ADR-0028, ADR-0029 and `elf.program-header` all stay as they are — this round is display/layout only | run `37431977428` (#70), attempt 1 — read back in `P5_CI_AUTHORITY.md`, all ten jobs and every step read individually as §41 requires; §25 forbids borrowing F2's run, and this head has its own | **868 Rust unchanged / 225 UI in the same 8 files** (219 → 225: the three contracts and their guards), full gate **17 of 17** with drift **8 of 8**, deny **1 of 1**, `core-smoke` **3 of 3**, package **4 of 4** and no `SKIP`; §20's four mutation proofs each reddened their own test; §21 re-run on the tree actually committed and §22 reliability **20 repetitions / 20 green / 0 failing / 7 min 25 s**, both re-taken after three comment-only lines moved (the superseded runs are kept, not deleted, and §9 of the design record says why). **Not done and not claimed here:** §26's exact F2R1 artifact download and §30–§33's focused installed revalidation at 1024×720 / 1056×799 / 1440×900, so no F2 finding is closed by this head — §36 requires the installed artifact first. **F2R2 below is the head that ran it and closed them.** `P5 = IN_PROGRESS`; no `P5 PASS_COMPLETE`, no `active_task NONE`, no F3 state |
 | the head that lands this row | **Commit F2R2 — the installed round F2R1 was forbidden to claim.** §26's artifact and §30–§33's focused revalidation ran on **run #70's own Windows package**: artifact id `11397938806`, `FirmwareSight_0.6.0_x64-setup.exe` 3,886,598 B `efbc45a3…d5fd4`, installed `firmwaresight-desktop.exe` 15,362,048 B `2cf01a6d…670b` — not F1's `11337963032`, not F2's binary, no local `cargo`/`tauri` build, and the artifact set's own `SHA256SUMS.txt` verified before it was run. The harness was hardened **before** any installed action (`require_app()` refuses `NO_PROCESS`/`NO_WINDOW` instead of falling back to another application's window — the first probe had matched a window titled "Claude"), and every click still passes the pixel-ownership guard that refused one real click this round (`POINT_OWNED_BY_OTHER_WINDOW`, pid 26036 owned the pixel, no input sent). **All three findings CLOSED** at 1024×720 / 1056×799 / 1440×900: Sections prose wraps at a readable measure with the table area owning the scroll, `Details` leads every History row and survives `SPACE` close/reopen with a visible focus ring, and Release reads "ELF address/flags evidence" / **"MAP regions + ELF load evidence"** where F2 captured `MapRegionAndElfLoad`. The 1440×900 trade is recorded rather than glossed: content ≈1.06× the pane, a contained scroll where the pre-fix layout fitted the pane by rendering one character per line. §33 smoke green (Analyze, Compare, Gate ×2, History, Diagnostics; no crash, no new path leak), §34 `P5_DESIGN_ACCESSIBILITY = PASS_FOR_FROZEN_DESKTOP_SCOPE` with `WCAG_CERTIFICATION = NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED`, `SECOND_WINDOWS_HOST = NOT_TESTED` unchanged, §35 **L20 = CLOSED ACROSS VERIFIED HUMAN-FACING MEMORY-BASIS SURFACES** without rewriting Commit E's text, and the owner's store restored byte-exact with `OWNER_STORE_OPENED_BY_F2R = NO`. F2R2 itself is **docs/evidence/governance only** (§42), writing `P5_F2R_UI_CORRECTIVE_REPORT.md` with §37's twenty parts plus the §38 addenda to `P5_KNOWN_LIMITATIONS.md` §8, `P5_EXIT_CHECKLIST.md` §4–§6, `P5_DESKTOP_ACCEPTANCE_REPORT.md` §9, `P5_CI_AUTHORITY.md` (F2's heads and F2R1's run, attempts read individually) and these entry documents | its own run is external evidence, read with `gh run list --json headSha,runAttempt` after the push — a head cannot certify the worktree and archive proofs of its own SHA, and §44 forbids a further head written only to record it | **868 Rust / 225 UI in 8 files — both identical to F2R1, which is exactly the check §43 names**: a docs-only round that moved either count would be a product change wearing a documentation diff. Full gate **17 of 17** with drift **8 of 8**, deny **1 of 1**, `core-smoke` **3 of 3**, package **4 of 4** and no `SKIP`, and the baseline verifier **RESULT PASS** at the identical staged state (tracked **708**, entries **706**, every mismatch counter 0). This row first carried F2R1's figures (707 / 705) and a worktree figure it had not yet earned; the head that lands it corrects them to the measured ones, because §23's order generates `SHA256SUMS` from the stage-0 blobs and only then counts them. The two proofs that can only address a SHA that exists — the clean detached worktree and `git archive` extracted outside the repository — stay §3's asymmetry: executed after this head, reported to the Architect, and not self-certified inside the commit they prove, which is also why §44 forbids a further head written only to record them. `F2R = FINAL PASS / COMPLETE`, `F2 = PASS`, `P5 = IN_PROGRESS`, product **MVP CANDIDATE**. `F3 = READY_FOR_ARCHITECT_REVIEW` is this round's conclusion **and** is gated on that external run reading 10 of 10; F3 is *not authorized here*, no F3 work was started, and no P5 closure token, `active_task NONE`, tag, GitHub Release, signature, notarization or updater appears in any of it |
+| the head that lands this row | **Commit F3 — final governance closure: the last authorized unit of P5, and the only head that may write the stage's verdict.** Authorized by *FirmwareSight — P5 Commit F3 Final Governance Closure, Execution Prompt v1.0 — Architect Authorized*, archived at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt` with **both** digests because transport moves them: delivered bytes SHA-256 `860e00976b242f15de1473455941140599a8a5cd639409521e7c38a28a64514c` (36,458 B, 1,821 CRLF lines, no final newline) and stored Git blob `f00751304ebf789f67b8b5355864a5ca3eefcd5c` → SHA-256 `6cacd10ee1eff4a6c4ab90b4f9d51df987bad16cf94fe142961c0d37fd749c66` (34,637 B, 1,821 LF). The delta is exactly the 1,821 carriage returns and the line-by-line comparison returns identical text on all 1,822 logical lines with zero differing lines; `cmp` proves the archive is the delivered file, so nothing was reconstructed, and `.gitattributes` was not touched to make the hashes agree (`AGENTS.md` 9). **Order was not negotiable: §6's exit re-audit ran before any closure sentence.** All nineteen areas were re-read against measurements and **no required engineering item came back `BLOCKED`** (`P5_EXIT_CHECKLIST.md` §7) — Design/Accessibility carried F2R's `PASS_FOR_FROZEN_DESKTOP_SCOPE` **exactly**, with `WCAG_CERTIFICATION = NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED` and `SECOND_WINDOWS_HOST = NOT_TESTED` untouched (§7), and Security/supportability stayed at the bounded sentence, never "security clean". The re-audit's one real find was in this repository's own paperwork: the checklist asserted every L1–L26 row was accounted for while `P5_KNOWN_LIMITATIONS.md` held **25 of 26 — L12 had no row**, though the two accepted RustSec advisories it covers were carried honestly in `P5_SUPPORTABILITY_REPORT.md` §2 and `P5_SECURITY_SUPPORTABILITY_REVIEW.md` §2. F3 added the row and corrected the assertion instead of deleting the claim, then §11's rule held the rest: **no limitation became `CLOSED` merely because P5 closed** — L3, L4, L5, L8, L11, L12, L13, L15, L17, L23 and L25 all keep their carried dispositions. L15 stays split (presentation `CLOSED`, wire `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, no enum rename, no `analysis:2`), L26 is `CLOSED — ADR-0029` kept deliberately distinct from `ADR-0028` with no new checksum semantic, L20's reopen/reclose is reconciled **with dates** rather than by rewriting Commit E's measurement (§8/§23), and §12's performance truth is quoted unchanged: 519,179,252 bytes, ~2,020,073 symbols, warm ~4.73–4.89 s, cold first read ~68.7 s, ~1,428 MB peak observed working set, never "Not Responding" — near-500-MiB UI `MEASURED`, first-use-under-60 s **not proved at this workload**, and no claim that performance was optimized, that a 500 MB target was achieved or that every large file finishes inside a stated window appears in the tree. §13 froze all ten release-readiness states and §14 wrote the consequence rather than resolving it: **`PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION`**. §24 kept this round off the machine entirely: **nothing installed, no owner app-data store opened, no parking needed** — installed authority remains F2R1's `fb5f628` / run `37431977428` / artifact `11397938806`. **Canonical state written (§15–§18):** `P5 = PASS_COMPLETE` · Productization `ENGINEERING_COMPLETE` · `active_task = NONE` · product `MVP_CANDIDATE` · narrative **FirmwareSight Productized MVP Candidate** · `baseline_version` `0.6.0` · `G2 = PASS` with P0–P4 untouched — in `BASELINE.yaml` using only that file's existing vocabulary (`stage_status`, `closed_on`, `tests_at_close`, `product_state`, `gates_at_close`, `remote_ci`, `next_stage_after_this_one`; **no key invented for prose, no new machine enum**), and in `.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`, `.ai/HANDOFF.md`, `.ai/README.md`, `.ai/DECISIONS.md`, `README.md`, `INDEX.md` and `06_DELIVERY/06_STAGE_GATES.md`, with every stale `IN_PROGRESS` / `F3 READY_FOR_ARCHITECT_REVIEW` current claim replaced by a dated state and each round's own words preserved beside it. §19–§22 finalized the lineage with every red and interrupted run kept (`3400981` 8/10; #67 attempt 1 infra-then-attempt 2; #69 attempts 1–2 zero-step cancellations then 3; #70 and #71 attempt 1, 10 of 10), added F2R2's external row while preserving `31f10c7`'s no-run row, and created `P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md` | **its own run is external evidence and cannot be certified from inside the commit that waits for it** — `F3 remote CI = PENDING_EXTERNAL_EVIDENCE`, read after the push by exact SHA with all ten jobs enumerated individually, and §34 forbids a further commit whose only content is the number. The predecessor `a5ce7c4` is green: run `37453402452` (#71), attempt 1, 10 of 10, re-read with `gh api` on 2026-10-06 | **868 Rust / 225 UI in 8 files — both exactly as §5 requires them to stand still**, which is the check that proves this is documentation and not a product change wearing a documentation diff: `cargo test --workspace` 868 passed / 0 failed across 47 test-result lines, `pnpm test` 225 passed in 8 files, `cargo fmt --check` 0, `clippy -D warnings` 0, full gate **17 of 17** (rust 3, frontend 5, drift 8 including `drift/baseline integrity`, deny 1) with **no `SKIP`**, `--only drift` 8/8, `--only deny` 1/1, `--only core-smoke` 3/3, `--only package` 4/4, and `verify_baseline_artifacts.py` **RESULT PASS** at the final staged state (710 tracked paths, 708 entries — the two new paths are the archived F3 prompt and the new closure report, and no product path is among the 30 changed). §25's allowlist is proved from the staged diff: **zero** paths under `apps/` `crates/` `scripts/` `fixtures/` `schemas/` `golden/` `migrations/` `.github/`, and no `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json`, `deny.toml`, `rust-toolchain.toml` or `assets/design-tokens.json` byte — stronger still, every one of those **tree OIDs is identical** between `a5ce7c4` and the staged F3 tree, so `apps` `dd8cccf…`, `crates` `0c93332…`, `apps/desktop/ui/src` `8e893af3…`, `scripts` `76c1e1c…`, `.github` `174bd58…` and the token file `b818d11…` cannot have moved. `P5 = PASS_COMPLETE`, `Productization = ENGINEERING_COMPLETE`, `active_task = NONE`, product **MVP CANDIDATE**, narrative **FirmwareSight Productized MVP Candidate**. **And §37 stops the stage: V1, B1, private beta, RC, GA, commercialization, licensing, signing, notarization, an updater and new feature development are all unauthorized, and final external acceptance requires F3 remote CI** |
 
 The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
 lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
@@ -114,7 +128,10 @@ answered: *FirmwareSight — P5 Commit E — Compatibility Fixtures, Support Mat
 Execution Prompt v1.0* (archived with its digest in `10_AUDIT/SOURCE_PROMPTS/`) authorizes the fixture
 cohort, the compatibility matrix and the §48 dispositions — and explicitly not the §64 full journey, not
 L26 and not a general source-control linter, so the installed-binary walk and Commit F stay behind a
-further return to the Architect rather than in the next free pair of hands.
+further return to the Architect rather than in the next free pair of hands. *(That return happened: Commit E
+closed, the Architect issued Commit F, and F1–F3 all landed. See the ledger rows above and
+`P5_VALIDATION/P5_EXECUTION_REPORT.md` §7 for the head-by-head record; this paragraph is kept as what was true
+when it was written, dated rather than deleted.)*
 
 Commit E is since **FINAL PASS / COMPLETE**, and the Architect did return: *FirmwareSight — P5 Commit F —
 Final Productization Closure, Execution Prompt v1.0 — Architect Reviewed* (archived with its measured digest
@@ -124,7 +141,10 @@ in three commits, F1 (product/tooling), F2 (installed evidence) and F3 (the only
 `P5 = PASS_COMPLETE`). It forbids §64 inside F1, and it forbids a fourth commit merely to record a run. What
 decides the order of the last two is the owner's own answer, given on 2026-10-05: **land F1 first, then
 confirm**. So F1 is this head, no installer has been run, and no file of the owner's has moved; the §64 walk
-stays behind that confirmation, not behind a free pair of hands.
+stays behind that confirmation, not behind a free pair of hands. *(The owner then released F2, and F2 ran the
+whole §64 journey on F1's own CI-built artifact with the owner's store parked, hashed and restored twice; the
+Architect inserted F2R between F2 and F3 for the three findings that walk produced, and F3 closed the stage on
+2026-10-06. This paragraph is F1's own state of play, kept as written and dated here rather than deleted.)*
 
 ## What the owner decided at the checkpoint
 
@@ -151,12 +171,20 @@ licence, so `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands in 
 
 ## What P5 must not write
 
-No `P5 PASS`, `B1 READY`, `BETA`, `RC` or `GA` until closure evidence exists (§5). No tag, GitHub Release
-or published installer (§72). No signing or notarization executed — those statuses stay
-`READY_NOT_EXECUTED` (§11) — and updates stay `UPDATE_READY_MANUAL` (§12): no updater, no endpoint, no
-certificate, no committed private key. No "security clean"; the permitted sentence is "dependency policy
-passes with documented accepted risks". No new network capability, telemetry, analytics SDK, generic shell
-or filesystem permission, and native dialogs stay Rust-side.
+*(This is the discipline list the P5 prompt §5/§11/§12/§72 wrote on 2026-10-03, and it is what the round
+obeyed for eleven heads. One item of it has since been earned rather than lifted: F3 §5 permitted
+`P5 = PASS_COMPLETE` only after §6's re-audit found no required engineering item `BLOCKED`, and that re-audit
+is `P5_VALIDATION/P5_EXIT_CHECKLIST.md` §7. Everything else below still binds after closure, and none of it
+was touched by F3.)*
+
+No `B1 READY`, `BETA`, `RC` or `GA` — closure did not produce any of them. No tag, GitHub Release or published
+installer (§72). No signing or notarization executed — those statuses stay `READY_NOT_EXECUTED` (§11) — and
+updates stay `UPDATE_READY_MANUAL` (§12): no updater, no endpoint, no certificate, no committed private key.
+No "security clean"; the permitted sentence is "dependency policy passes with documented accepted risks". No
+new network capability, telemetry, analytics SDK, generic shell or filesystem permission, and native dialogs
+stay Rust-side. No licence decision: `PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE
+DECISION`, and that sentence is §14's, not a defect to repair. And no next track: V1, G3 and B1 each need
+their own architect prompt.
 
 ## What closed before P5
 
@@ -213,11 +241,16 @@ makes 210 — with the local gate at **16 of 16** and the package group at **4 o
 `crates/firmwaresight-artifact/tests/p5_compat_fixtures.rs` and the 7 new UI tests in `compare.test.tsx` (6)
 and `details.test.tsx` (1) — on a gate that stayed at **16 of 16** because that round added no step, with
 `core-smoke` 3/3, drift 7/7, deny 1/1 and package 4/4 holding and no `SKIP`.
-**Commit F1 is the present total: 868 Rust / 219 UI in 8 files** — no Rust test moved (F1 changes repository
+**Commit F1's total was 868 Rust / 219 UI in 8 files** — no Rust test moved (F1 changes repository
 tooling, not the product), and `details.test.tsx` gained the two L15 inspector cases — while the gate moved
 **16 → 17 steps** because the drift group gained `baseline integrity`, so drift is **8 of 8**, `core-smoke`
-3/3, deny 1/1 and package 4/4, all with no `SKIP`. The evidence
-directory that round added is `POST_G2_E2E_REMEDIATION/`.
+3/3, deny 1/1 and package 4/4, all with no `SKIP`.
+**The present total, as Commit F3 closed the stage on 2026-10-06, is 868 Rust / 225 UI in 8 files** — F2 held
+both numbers as its own docs-only proof, **F2R1 took UI 219 → 225** with the three installed-UI contracts and
+their guards (Rust unchanged), and F2R2 and F3 each held 868 / 225 still for the same reason F2 did. The gate
+has been **17 steps** since F1: drift **8 of 8** with `baseline integrity` inside it, deny 1 of 1,
+`core-smoke` 3 of 3, package 4 of 4, no `SKIP`, and the cold detached worktree at 19. The evidence
+directory the post-G2 real-desktop remediation round added is `POST_G2_E2E_REMEDIATION/`.
 
 On 2026-10-02 a real-desktop acceptance round drove the shipping binary through 283 black-box cases and
 closed `PASS_WITH_FINDINGS` — three product defects, no S0, no S1 — and a follow-on round fixed exactly

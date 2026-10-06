@@ -3,9 +3,9 @@ title: "P5 Diagnostics and Recovery Report"
 doc_id: "FS-P5-DIAGNOSTICS-RECOVERY"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 owner: "Engineering"
-last_updated: "2026-10-04"
+last_updated: "2026-10-06"
 ---
 
 # P5 Commit D — diagnostics, integrity, backup and the startup boundary, run against the installed package

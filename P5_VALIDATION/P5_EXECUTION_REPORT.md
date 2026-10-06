@@ -3,7 +3,7 @@ title: "P5 Execution Report"
 doc_id: "FS-P5-EXECUTION"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
 last_updated: "2026-10-06"
@@ -13,6 +13,10 @@ last_updated: "2026-10-06"
 
 P5 ran in six heads. This is the round's own record of what each did, what was measured, and what was
 deliberately not done. It is written by Commit F2 and therefore reports F2 completely and F3 not at all.
+
+*(the sentence above was true when F2 wrote it on 2026-10-05 and stopped being true the moment F3 existed. §7
+is F3's continuation: the complete head lineage, the red and interrupted runs kept as they happened, and the
+closure. Sections 1–6 are left exactly as F2 and F2R wrote them.)*
 
 | Head | What it delivered | Gate |
 | --- | --- | --- |
@@ -161,3 +165,73 @@ already owned and three surfaces now read.
   against the log it quotes, in place, with the correction dated and the log line reproduced — the file itself
   is the evidence, and the edit is visible inside it.
 
+## 7. Commit F3 — the complete lineage, and the closure (2026-10-06)
+
+F3 is governance, evidence and indexing only: **zero** paths under `apps/`, `crates/`, `scripts/`, `fixtures/`,
+`schemas/`, `golden/`, `migrations/` or `.github/`, and no `Cargo.toml`, `Cargo.lock`, `package.json`,
+`pnpm-lock.yaml`, `tauri.conf.json`, `deny.toml`, `rust-toolchain.toml` or `assets/design-tokens.json` byte.
+Because no product byte moves, §5 requires both test counts to stand still, and they do: **868 Rust / 225 UI
+in 8 files**. §24 forbids installing anything in F3 and nothing was installed; §24 forbids touching the
+owner's app-data store and it was not opened.
+
+### The whole stage, head by head
+
+Every red and every interrupted run keeps its row. The count of heads is not six, and the two paragraphs above
+that say otherwise are F2's and F2R's own records rather than the stage's.
+
+| Layer | Head(s) | Run / attempt | Result |
+| --- | --- | --- | --- |
+| P5 opening baseline | `d83175a` (post-G2 remediation closure, = `origin/main`, tree clean) | `37101619245` a1 | 7 of 7, success |
+| Commit A — audit first, then migration `0005` | `4cc8d93`, `812b472` | `37125456689` a1, `37127791999` a1 | 7 of 7 each |
+| version unification | `9e3b1de` | `37128593254` a1 | **6 of 7 — failure**, a pre-existing `compare.test.tsx` race it never touched |
+| the race's test-only repair | `20b03e3` | `37129900728` a1 | 7 of 7 |
+| Commit B — packaging, three CI package jobs | `0c031cd` | `37133706214` a1 | **7 of 10 — failure**: three package jobs printed a `SKIP` and `4/4 steps passed`, then went red on their own upload step |
+| Commit B, repaired | `1055242` | `37138881977` a1 | 10 of 10 — first run in the repository to attach a built package on all three platforms |
+| the `.app` indexed file by file | `53578e9` | `37143046338` a1 | 10 of 10 |
+| read-back, then the first real install | `a674774`, `9ab089f`, `4719e1f` | `37145302229`, `37147434366`, `37147577288` a1 each | 10 of 10 each |
+| Commit C — onboarding, Help/About, History | `e863d0c` | `37154946484` a1 | 10 of 10 (812 Rust / 200 UI) |
+| Commit C read-back | `e070508` | `37156287999` a1 | 10 of 10 |
+| §32 L22 draft + L23's sixth instance | `111fe32`, `2cdfced` | `37158606478`, `37159810291` a1 each | 10 of 10 each |
+| Commit D — integrity_check, backup, Diagnostics, `ADR-0028` | `3400981` | `37200245520` a1 | **8 of 10 — failure**: a clock race inside a test this commit wrote, red on `macOS Core Smoke` and `Rust (ubuntu-latest)` |
+| its test-only repair and read-backs | `bccea88`, `90aa69d`, `956e250`, `57a904e`, `bfbc1aa` | `37202016141`, `37202301591`, `37204847474`, `37212546755`, and `bfbc1aa`'s own | 10 of 10 each, attempt 1 |
+| Commit E1 — the compatibility cohort + the `SHF_ALLOC` fix | `859648e` | **no run of its own** | one push of two commits starts one run at the tip; its bytes are verified by the tip run and by a clean detached worktree |
+| Commit E2 — §48's fourteen dispositions | `59d85c3` | `37228929762` a1 | 10 of 10 |
+| Commit E read-back | `6981625` | `37230689636` a1 | 10 of 10 |
+| Commit E closure normalization | `80b47c4` | `37262147348` **(#67) a1 then a2** | **attempt 1: 9 of 10 — failure**, `Generated output drift` killed by Ubuntu rustup provisioning before it compiled anything; **attempt 2: 10 of 10** after one `gh run rerun --failed`. Two attempts, stated as two attempts |
+| Commit F1 — `ADR-0029`, the index-blob baseline, L15's caption | `0bca373` | `37293381181` a1 | 10 of 10 (gate 16 → **17** steps, drift 7 → 8) |
+| Commit F2 — the §64 installed journey | `d1dc61c`, `55fad63` | `d1dc61c` **no run**; `55fad63` = `37367382516` **(#69) a1, a2, a3** | **attempt 1: 3 jobs success, 7 jobs `cancelled` with 0 executed steps**; **attempt 2: 6 success, 4 `cancelled` with 0 steps**; **attempt 3: 10 of 10**. Zero-step cancellations are allocation, not product, and all three stay |
+| Commit F2R1 — the three installed-UI fixes | `fb5f628` | `37431977428` **(#70) a1** | **10 of 10**, one run, no cancellation to explain; 868 Rust / 225 UI read out of the runner's own logs; its artifact `11397938806` is the one installed |
+| Commit F2R2 — the installed read-back and the record | `31f10c7`, `a5ce7c4` | `31f10c7` **no run**; `a5ce7c4` = `37453402452` **(#71) a1** | **10 of 10**. `31f10c7` is the head that first carried two figures it had not yet measured; `a5ce7c4` corrects them at the head that lands them, which is why it exists |
+| **Commit F3 — this head** | the head that lands this row | **not knowable from inside the commit** | `F3 remote CI = PENDING_EXTERNAL_EVIDENCE`. The SHA exists once the commit is written; its run exists once it is pushed. §19 forbids fabricating it here and §34 forbids a fourth round written only to record it |
+
+**Four heads went red or were interrupted, and each keeps its row for a different reason.** `9e3b1de` shows a
+green CI can say nothing about a race the local gate is the only thing that loses. `0c031cd` shows a gate
+summary that could lie, and it is why `check.py` distinguishes `SKIP` from `PASS` and fails on a skip in CI.
+`3400981` shows an assertion that was a race with a clock and passed on the host that wrote it. `80b47c4` and
+F2's #69 show two kinds of non-product failure — a provisioning fault and a zero-step allocation cancellation —
+and the rule that covers both: read the log before touching the rerun button, and never rewrite a run as
+first-attempt green.
+
+### What F3 wrote, and what it refused to write
+
+Wrote: `P5 = PASS_COMPLETE`, `Productization = ENGINEERING_COMPLETE`, `active_task = NONE`, product
+**MVP CANDIDATE** at baseline `0.6.0`, narrative **FirmwareSight Productized MVP Candidate**, and the §6
+re-audit that had to pass first (`P5_EXIT_CHECKLIST.md` §7; the row-level record is
+`EXIT_REAUDIT_FINAL.txt` in the F3 evidence root outside this repository). It also corrected one assertion of
+its own repository's making: `P5_KNOWN_LIMITATIONS.md` was missing its L12 row while the exit checklist
+asserted the list was complete, so F3 added the row and corrected the assertion rather than deleting the claim.
+
+Refused: any tag, GitHub Release, publication, signature, notarization, updater or licence choice; V1, B1, G3,
+RC or GA; `security clean`, WCAG compliance, any claim that performance was optimized or that a memory target was met, all-DPI or all-monitor coverage; a new
+checksum semantic, a renamed Core enum, a moved wire value, migration `0006` or `analysis:2`; and a further
+commit whose only content is F3's own run number.
+
+`P5 = PASS_COMPLETE` means the MVP was productized to P5's engineering scope. It does not mean market fit,
+real-user validation, beta or RC quality, GA readiness, a signed or notarized release, an automatic update
+path, all-platform runtime validation, WCAG certification, all-DPI validation, a selected licence or a public
+open-source release. `P5_FINAL_CLOSURE_REPORT.md` §14 states that boundary, and the paragraph below keeps the
+stage's performance truth unchanged: the valid ELF at **519,179,252 bytes** with about **2,020,073 symbols**
+ran warm in **~4.73–4.89 s**, its cold first read took **~68.7 s**, the peak observed working set was
+**~1,428 MB**, and it never showed "Not Responding" and never crashed. Near-500-MiB UI is `MEASURED`;
+first-use under 60 s is **not proved at this workload** and stays environment-sensitive; RSS is measured for
+the tested workload only.

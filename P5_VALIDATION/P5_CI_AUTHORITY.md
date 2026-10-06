@@ -3,7 +3,7 @@ title: "P5 CI Authority"
 doc_id: "FS-P5-CI-AUTHORITY"
 product: "FirmwareSight"
 version: "1.1"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
 last_updated: "2026-10-06"
@@ -83,6 +83,9 @@ before. The full local gate moved with it: 16 steps through `80b47c4`, 17 from F
 | `37367382516` | `55fad63` | **Commit F2**, tip head: the entry documents reconciled with the installed round that landed — `.ai/CURRENT_STATE.md`, `.ai/ACTIVE_TASK.md`, the entry README, and the F2 acceptance evidence | attempt 3, **10 of 10** | success, but **three attempts, and all three stay in the record** — read per attempt with `gh api repos/…/actions/runs/37367382516/attempts/<n>/jobs`, not from the run summary. Attempt 1: 3 jobs success, **7 jobs `cancelled` with 0 executed steps**, all seven ending at 20:18:46Z, fifteen minutes after they started — runner allocation, nothing compiled, no product signal at all (§25's rule: a zero-step cancellation is allocation, not product, and it is not evidence to chase). Attempt 2: 6 jobs success, **4 jobs `cancelled` with 0 executed steps** at 20:36:37Z. Attempt 3: those four re-executed and passed, the six earlier successes carried forward (the workflow has no `needs:` graph, so a rerun of the failed jobs leaves the other executions intact), **10 of 10 success**. F2 is not rewritten as first-attempt green here or in its own report |
 | `37431977428` | `fb5f628` | **Commit F2R1**, the product corrective head: three installed-UI findings fixed inside `apps/desktop/ui/src/**` — F2R-01 Analyze Sections (`Details.module.css` + `Details.tsx`: a `.viewport` wrapper owns `overflow-x`, the table returns to `display: table`, prose takes a `24ch` measure with `break-word`, the Unknown reason moves onto its own line), F2R-02 History's `Details` moved to the **leading** cell of every row and header row (`History.module.css` + `History.tsx`), F2R-03 the new `evidenceBasis.ts` shared caption map used by `Release.tsx`, `Compare.tsx` and `Analyze.tsx` so no human-facing surface prints a memory-basis enum. Six new UI tests, the design record, the archived F2R prompt, and the two baseline artifacts. **No token, no dependency, no contract, no Rust change** | **10 of 10** | success, **attempt 1**, `event: push`, `headSha` fb5f62852a4c3b83bc472f5903bff214888ab621, created 2026-10-06T07:48:28Z three seconds after the push (`origin/main` reflog 00:48:25 -0700) — exactly one run exists for this head, so there is no cancellation and no rerun to explain. Every job read individually: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`, `Desktop UI (ubuntu-latest)`, `Generated output drift`, `Dependency policy`, `macOS Core Smoke`, `Package Windows`, `Package Ubuntu`, `Package macOS`; the single step outside `success` in the whole run is `Rust (windows-latest)`'s conditional `Install Linux prerequisites for the Tauri shell`, which is the job's design and not a gate skip. Read from the runner's own logs rather than recalled: `Rust (ubuntu-latest)` (job `112164719342`) sums **47 suites, 868 passed, 0 failed, 0 ignored** and `Desktop UI (ubuntu-latest)` (job `112164719325`) prints `Test Files 8 passed (8)` / `Tests 225 passed (225)` — §41's two expectations, Rust stable and UI up, both met remotely. **This is the run whose Windows artifact F2R installed and revalidated: artifact id `11397938806`, `FirmwareSight_0.6.0_x64-setup.exe`, 3,886,598 bytes, SHA-256 `efbc45a3258986e1763343f7f46e927e8450b48293aa9bbd5b447a5a246d5fd4`, installing `firmwaresight-desktop.exe` at 15,362,048 bytes / `2cf01a6d5887a09981c3f338c217f7270bf1fc303101b9a2ec7d77d406eb670b`.** F1's `11337963032` was not used, and no local build was installed. `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md` parts 9–13 carry that chain |
 
+| no run of its own | `31f10c7` | **Commit F2R2**, first head: `P5_F2R_UI_CORRECTIVE_REPORT.md` with §37's twenty parts, and the §38 addenda to `P5_KNOWN_LIMITATIONS.md` §8, `P5_EXIT_CHECKLIST.md` §4–§6, `P5_DESKTOP_ACCEPTANCE_REPORT.md` §9, `P5_EXECUTION_REPORT.md` §6, this file's F2 and F2R1 rows and the `.ai` entry documents | not applicable | **`gh api "repos/2023violet/FirmwareSight/actions/runs?head_sha=31f10c7…" --jq .total_count` returns `0`, measured again on 2026-10-06.** Both F2R2 heads went up in one push, GitHub starts one run at the tip head, and the tip was `a5ce7c4` — the row below. `31f10c7` is also the head that first printed two baseline figures it had not yet earned (707 / 705) and a worktree figure belonging to a different proof; its successor corrects them at the head that lands the correction, so this is a no-run head *and* a corrected-record head, and saying only the first half would leave the second unexplained. E1's and F2's rows above make the same point about push granularity: writing a run number here would be inventing one |
+| `37453402452` | `a5ce7c4` | **Commit F2R2**, tip head: the baseline counted at the head that reads the corrective back — `DIRECTORY_TREE.txt` (826 lines) and `SHA256SUMS` (706 entries) regenerated from the stage-0 index blobs, `INDEX.md`'s recorded figures, and the corrected verifier line in `.ai/ACTIVE_TASK.md`. Documentation and generated baseline artifacts only; **no product path, no token, no dependency** | **10 of 10** | success, **attempt 1**, `event: push`, `headSha` a5ce7c43a1656966efbb9d2d99ea64d1aad27f97, run number 71 — re-read on 2026-10-06 with `gh api repos/2023violet/FirmwareSight/actions/runs/37453402452` (`status: completed`, `conclusion: success`, `run_attempt: 1`) and `…/jobs?per_page=100` (`total_count: 10`), every job named and every job `success`: `Rust (windows-latest)`, `Rust (ubuntu-latest)`, `Desktop UI (windows-latest)`, `Desktop UI (ubuntu-latest)`, `Generated output drift`, `Dependency policy`, `macOS Core Smoke`, `Package Windows`, `Package Ubuntu`, `Package macOS`. This is the last head **before** F3, and therefore the head §21 means by "CI = PASS through F2R2 before F3": the closure sentence is written on a tree whose predecessor is green, while F3's own run is external evidence read after the push (§20, §32) |
+
 Two heads between Commit D and Commit E are documentation-only, and no head in this file is described as "the
 current HEAD". That is deliberate: the moment a commit calls itself the current head, pushing it is what makes
 the sentence false, and `57a904e` shipped exactly that error in two places — `.ai/README.md` and
@@ -131,11 +134,27 @@ proofs are `P5_PACKAGING_REPORT.md` §5.
 
 ## What closes P5 against this file
 
-The F2R heads are the last two rows above, and the same asymmetry that bound F1, F2 and Commit E binds
-**F2R2**: this file is one of the documents F2R2 edits, so the run that measures F2R2's own SHA cannot be
-written into the commit it measures. It is read back after the push with
-`gh run list --json headSha,conclusion,runAttempt` and reported to the Architect in the round's final
-report, and only a further head would record it here — which §44 forbids creating for that purpose.
+**F3, and the last asymmetry of the stage.** The F2R2 rows above are the last head-before-closure, and Commit
+F3 inherits exactly the wall F1, F2, Commit E and F2R2 each met: F3 edits this file, so the run that measures
+F3's own SHA cannot be written into the commit it measures. Inside the F3 commit the statement is therefore
+
+```
+F3 remote CI = PENDING_EXTERNAL_EVIDENCE
+```
+
+with the SHA knowable only once the commit exists and the run knowable only once it is pushed. F3 §19 forbids
+fabricating that run, and §34 forbids a further commit whose only content is recording it — no
+`commit → CI → record CI → CI` loop. F3 is intended to be the final repository commit of P5, so this file ends
+with the asymmetry named rather than dissolved.
+
+What the closure rests on, written here so the next reader does not have to reconstruct it: the last head
+**before** F3 is green and measured — `a5ce7c4`, run `37453402452`, attempt 1, **10 of 10**, all ten job names
+read individually on 2026-10-06 — and F3 changes no product byte, so §21's "CI = PASS through F2R2 before F3"
+is the in-tree state and F3's own run is the external confirmation. **If F3's remote run later fails because of
+repository content, the external `P5 = PASS_COMPLETE` is not accepted** (§33): the issue is fixed forward in a
+corrective successor, never by re-rolling a content failure until a green attempt appears, and never by
+erasing attempt history. A pure runner-provisioning failure before any repository step could run is the one
+class a single rerun may answer, and only with the log read first and both attempts left in this table.
 
 §41 requires **all authoritative jobs green** at closure. That means a run of the closure head with
 10 of 10 jobs concluded `success`, on the first attempt, with the job set above unchanged; if any job is

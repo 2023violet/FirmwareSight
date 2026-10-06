@@ -244,9 +244,15 @@ G2 Product MVP Candidate   — PASS (2026-10-01): Product MVP ENGINEERING COMPLE
                               the engineering exit above; evidence in G2_VALIDATION/. Not G3 Productization,
                               Private Beta, RC or GA
 V1 Own-artifact External Validation
-P5 Productization            — IN_PROGRESS (opened 2026-10-03 under execution prompt v1.0, archived with its
-                              SHA-256); §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md. No P5
-                              verdict exists, and this line is not G3, B1, RC1 or GA1
+P5 Productization            — PASS_COMPLETE (opened 2026-10-03 under execution prompt v1.0, archived with its
+                              SHA-256; closed 2026-10-06 by Commit F3 after §6's exit re-audit found no required
+                              engineering item BLOCKED). Productization is ENGINEERING_COMPLETE and the product
+                              narrative is "FirmwareSight Productized MVP Candidate"; `active_task` returned to
+                              NONE, which authorizes no next track. §4 audit remains written at
+                              P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md, the verdict and its boundaries at
+                              P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md, and the carried limitations at
+                              P5_VALIDATION/P5_KNOWN_LIMITATIONS.md. This line is not G3, B1, RC1 or GA1, and
+                              closing P5 did not make it one
 B1 Private Beta
 RC1 Release Candidate
 GA1 General Availability

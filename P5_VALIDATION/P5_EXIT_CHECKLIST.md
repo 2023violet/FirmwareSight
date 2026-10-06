@@ -3,7 +3,7 @@ title: "P5 Exit Checklist"
 doc_id: "FS-P5-EXIT-CHECKLIST"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
 last_updated: "2026-10-06"
@@ -43,7 +43,7 @@ confidence from the other thirty-one.
 | owner restored | **PASS** | `ORIGINAL_DB_RESTORED = YES`, both passes; parked copy verified against §6 **before** moving and again after |
 | owner hashes exact | **PASS** | `d6e41034…` 155,648 B / `e3b0c442…` 0 B / `fd4c9fda…` 32,768 B, matching §6 byte for byte, twice |
 | closure docs present | **PASS** | all eight §28 documents exist and carry measurements; `P5_CI_AUTHORITY.md` and `P5_INSTALL_RECOVERY_REPORT.md` updated |
-| known limitations complete | **PASS** | every L1–L26 row accounted for, no closed row dropped, L15 split into its presentation and wire halves, and F2's three new rows (F2-1/2/3) added |
+| known limitations complete | **PASS** | every L1–L26 row accounted for, no closed row dropped, L15 split into its presentation and wire halves, and F2's three new rows (F2-1/2/3) added. **This row's assertion was one row short and F3 corrected it on 2026-10-06: L12 had no row in `P5_KNOWN_LIMITATIONS.md`,** although the fact it covers was carried honestly in `P5_SUPPORTABILITY_REPORT.md` §2 and `P5_SECURITY_SUPPORTABILITY_REVIEW.md` §2. §7 records the correction and the re-counted list |
 | user docs audited | **PASS** | §29's 19 topics mapped to canonical surfaces in `P5_EXECUTION_REPORT.md` §3; **Troubleshooting recorded as absent rather than stubbed**, per §29's own prohibition |
 | security review present | **PASS** | `P5_SECURITY_SUPPORTABILITY_REVIEW.md`, which says "passes with documented accepted risks" and never says "security clean" |
 | release readiness correct | **PASS** | `P5_RELEASE_READINESS.md` carries §34's ten states verbatim |
@@ -171,3 +171,64 @@ outcome; the zero-scroll alternative measured a 71 × 120 px prose column at 102
 - No installed coverage beyond what the focused pass ran: the §64 full journey is F2's, already walked on
   F1's artifact, and F2R deliberately revalidated only the three corrected surfaces plus the smoke list.
 - The uninstaller's data-deletion option is still unexercised, and no claim about it changed.
+
+*(§6 is F2R's own boundary, written on 2026-10-06 when F3 did not yet exist. The Architect then issued F3, and
+§7 is that round's checklist. Nothing above is rewritten: F2R really did claim none of it.)*
+
+## 7. Final P5 exit re-audit (F3 prompt §6 and §21), written 2026-10-06 at `a5ce7c4`
+
+§6 of the F3 prompt requires every required engineering item to be `PASS`, `CARRIED_FORWARD_NONBLOCKING` or
+`OWNER_DECISION_NONBLOCKING` before the closure sentence may be written, and forbids any required item reading
+`BLOCKED`. §21 names the states; the middle column is what F3 wrote; the right column names the command or the
+screen that produced it, because a row that borrows confidence from a sibling row is not a measurement.
+
+| Area | State F3 writes | Produced by |
+| --- | --- | --- |
+| Packaging | **PASS** | F2R2 head green on all three package jobs; `--only package` 4 of 4 with no `SKIP`; nsis / app+dmg / deb canonical, distribution index one line per file and verified on the runner's own set |
+| Onboarding | **PASS** | cold installed window rendered the Getting-started panel's seven facts and "Hide this"; Help repeats the same seven |
+| History | **PASS** | installed 3 / 1 / 1 over three bounded read APIs, Details on every row, no edit or delete control, leaf names only; re-read after the source project moved; F2R-02 closed the clipped action on F2R1's artifact |
+| Diagnostics | **PASS** | 1,122-byte export, 37 keys inside `ALLOWED_KEYS`' 41, 11 absence classes clean against the raw bytes, counts equal to a read-only query of the same store |
+| Migration / recovery | **PASS** | installed v4 → v5 on 34 measured checks with a named pre-migration snapshot and `integrity_check ok` on both files; the machinery is integration-tested for v1–v4 → v5, v5 reopen and failure rollback |
+| Compatibility | **PASS within the documented cohort** | five-value status column, 38 cells, 0 outside the vocabulary; 56 manifest entries; Windows runtime-evidenced, macOS / Ubuntu `CI_BUILD_ONLY` and never written as `SUPPORTED` |
+| Design / Accessibility | **PASS_FOR_FROZEN_DESKTOP_SCOPE** | F2R prompt §34's nine conditions on the installed F2R1 artifact at 1024×720 / 1056×799 / 1440×900, plus §4's block. **Carried exactly, not upgraded**: `WCAG_CERTIFICATION = NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED`, `SECOND_WINDOWS_HOST = NOT_TESTED` |
+| Documentation | **PASS for P5 canonical surfaces** | §29's 19 topics mapped to surfaces that already document them; Troubleshooting recorded as absent rather than stubbed; `P5_KNOWN_LIMITATIONS.md` now exists at the path `Help.tsx:50` names and now holds all 26 rows |
+| Security / supportability | **PASS_WITH_DOCUMENTED_ACCEPTED_RISKS** | no TCP endpoint owned by the running app; packaged `http://tauri.localhost/` origin; capabilities grant no general shell or filesystem; `installMode: currentUser`, UAC never prompted, no HKLM key; `cargo deny` four checks ok with two advisories accepted in `deny.toml` and measured as unupgradable inside the frozen Tauri / gtk line. This is the bounded sentence, and the repository has never written the other one |
+| Windows installed product acceptance | **PASS** | F2's §64 journey on the CI-built F1 artifact, F2R's focused revalidation on the CI-built F2R1 artifact, plus repair, uninstall, reinstall and a second uninstall |
+| Version identity | **PASS** | every artifact version unified on `0.6.0` through `env!("CARGO_PKG_VERSION")`, `drift/version identity` in the gate, Help reading its identity from the running binary |
+| Repository baseline integrity | **PASS** | `ADR-0029`: root `SHA256SUMS` digests canonical Git stage-0 index blobs, the verifier re-derives through a different Git path, and `drift/baseline integrity` runs it on all three CI platforms. At F2R2: tracked 708 / entries 706 / every mismatch counter 0 / `RESULT PASS` |
+| Signing readiness | **PASS as `READY_NOT_EXECUTED`** | the readiness is the deliverable; executing needs a certificate, a key-management ADR and an owner decision, none of which F3 has |
+| Notarization readiness | **PASS as `READY_NOT_EXECUTED`** | the macOS package builds and its index reads; no submission, no Apple credentials, none requested |
+| Manual upgrade readiness | **PASS** | no updater by design; the manual path — newer installer over older, store migrating behind a snapshot — measured across the whole install cycle |
+| License | **OWNER_DECISION_NONBLOCKING for technical P5** | `license = "Proprietary"`, no root `LICENSE`, `OPEN_SOURCE_LICENSE_DECISION = PENDING_OWNER_CONFIRMATION`; `AGENTS.md` §9 and P5 §54 put the choice with the owner. §14's consequence is in `P5_RELEASE_READINESS.md` |
+| CI | **PASS through F2R2, before F3** | head `a5ce7c4` / run `37453402452` / attempt 1 / **10 of 10 success**, all ten job names read individually. F3's own run is `PENDING_EXTERNAL_EVIDENCE` inside this commit |
+| Clean detached tree | **PASS** | executed at every head that can address one; F3's runs at the F3 SHA after the commit and is reported, not self-certified (§3's asymmetry) |
+| Owner DB restore | **PASS** | F2R's `ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`, `OWNER_STORE_OPENED_BY_F2R = NO`; F3 §24 forbids touching the owner store and F3 touches nothing |
+| External user validation | **NOT_EXECUTED — separate V1 track** | L11, V0 at `0 / 8`. P5 closes without it and does not start it |
+| Public distribution | **NOT_AUTHORIZED** | §13's freeze, restated in `P5_RELEASE_READINESS.md` |
+
+**No required engineering row is `BLOCKED`.** The only `BLOCKED` phrase the stage writes is the one §14 requires
+of it, and it is about a distribution claim rather than an engineering item:
+`PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION`.
+
+**The one defect this re-audit found and fixed was in this repository's own record, not in the product:**
+the §41 table's "known limitations complete" row above asserted a completeness this file's sibling list did not
+have, and L12 had no row in `P5_KNOWN_LIMITATIONS.md`. F3 added the row and corrected the assertion rather than
+deleting the claim. That is also why §6's performance and coverage language is unchanged: a closure round that
+quietly re-labelled a carried limitation as closed would be making the stage look cleaner than the evidence
+does, and F3 §11 forbids exactly that.
+
+## 8. What F3 does **not** claim
+
+`P5 = PASS_COMPLETE`, `Productization = ENGINEERING_COMPLETE` and `active_task = NONE` are F3's to write and are
+written — in `BASELINE.yaml`, `.ai/CURRENT_STATE.md`, `.ai/ACTIVE_TASK.md`, `.ai/HANDOFF.md`, `README.md`,
+`INDEX.md` and `P5_FINAL_CLOSURE_REPORT.md`. What F3 writes **none** of:
+
+- BETA, RC, GA, Production Ready, market fit, real-user validated, `security clean`, or WCAG compliance.
+- A signature, a notarization submission, a tag, a GitHub Release, a published installer or an updater.
+- A licence decision, or any claim that FirmwareSight is a licensed open-source release.
+- V1, B1, G3 or any other next track: no prompt authorizes them, and P5's closure is not one.
+- A new checksum semantic, a renamed Core enum, a moved wire value, a migration `0006`, or `analysis:2`.
+- A product byte. F3 changes none, which §5 tests by requiring **868 Rust / 225 UI in 8 files** to be unchanged
+  and §25 proves from the staged diff.
+- Its own remote CI run. It is external evidence read after the push; §34 forbids writing a further commit to
+  record it.

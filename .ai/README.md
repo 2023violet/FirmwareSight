@@ -33,7 +33,7 @@ tree `e35cfe7` and evidence head `f75cbc5` both 7 of 7 on the first attempt) ·
 a rebuilt shipping binary; fix head green on Run #43 `37100371601` at 7 of 7; evidence in
 `POST_G2_E2E_REMEDIATION/`, the 283-case root outside the repository; **G2 unchanged, still MVP
 CANDIDATE**) ·
-`P5 productization: IN_PROGRESS (opened 2026-10-03; prompt v1.0 delivered as a file, SHA-256
+`P5 productization: PASS_COMPLETE — closed 2026-10-06 (opened 2026-10-03; prompt v1.0 delivered as a file, SHA-256
 722125f5…71e0ae, archived; §4 audit written at P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md; Commits A–E have
 landed — audit + migration 0005 + version unification, packaging on three runners with the job set grown from
 seven to ten, §38/§39 real Windows install, §13–§18 onboarding/Help/History, Commit D's integrity check,
@@ -104,9 +104,22 @@ returns to the Architect, L20 is `CLOSED ACROSS VERIFIED HUMAN-FACING MEMORY-BAS
 verdict is `PASS_FOR_FROZEN_DESKTOP_SCOPE` on one host at 100 % scale with `WCAG_CERTIFICATION =
 NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED` and `SECOND_WINDOWS_HOST = NOT_TESTED` all unchanged. The
 twenty-part record is `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md`; what was measured before any CSS moved
-is `P5_F2R_UI_CORRECTIVE_DESIGN.md`. No P5 verdict exists and the product stays
-MVP CANDIDATE at 0.6.0)` ·
-`active_task: P5_PRODUCTIZATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
+is `P5_F2R_UI_CORRECTIVE_DESIGN.md`. **Commit F3 then closed the stage on 2026-10-06**, under *FirmwareSight —
+P5 Commit F3 Final Governance Closure, Execution Prompt v1.0 — Architect Authorized* (delivered SHA-256
+`860e0097…64514c`, 36,458 CRLF bytes; stored blob `6cacd10e…d749c66`, 34,637 LF bytes; every line proven
+identical, `.gitattributes` untouched). F3 §6 re-audited all nineteen exit areas, found **no required
+engineering item `BLOCKED`**, corrected the one thing the record had got wrong (`P5_KNOWN_LIMITATIONS.md` was
+missing its L12 row while the exit checklist asserted the list was complete), and wrote the canonical state:
+**`P5 = PASS_COMPLETE`, Productization = `ENGINEERING_COMPLETE`, product `MVP_CANDIDATE`, narrative
+"FirmwareSight Productized MVP Candidate", baseline `0.6.0`, `active_task = NONE`** — holding 868 Rust / 225 UI
+still, changing no product byte, installing nothing, touching no owner data, and carrying every limitation
+forward: L3, L4, L5, L8, L11, L12, L13, L15, L17, L23 and L25 all keep their dispositions, because **no
+limitation became CLOSED merely because P5 closed**. `F3 remote CI = PENDING_EXTERNAL_EVIDENCE` inside the
+commit: **final external acceptance requires F3 remote CI**, and §34 forbids a further commit written only to
+record it. What P5's closure authorizes: **nothing next.** V1, B1, private beta, RC, GA, signing, notarization,
+an updater and any licence decision each need a new architect prompt, and `P5_VALIDATION/
+P5_FINAL_CLOSURE_REPORT.md` §14 states what `PASS_COMPLETE` does not mean)` ·
+`active_task: NONE` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 

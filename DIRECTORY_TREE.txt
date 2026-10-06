@@ -157,6 +157,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_P5_CommitE_Compatibility_Supportability_v1.0.txt
 │   │   ├── FirmwareSight_P5_CommitF2_Installed_Productization_Acceptance_v1.0.txt
 │   │   ├── FirmwareSight_P5_CommitF2R_UI_Productization_Corrective_v1.0.txt
+│   │   ├── FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt
 │   │   ├── FirmwareSight_P5_CommitF_Final_Productization_Closure_v1.0.txt
 │   │   ├── FirmwareSight_P5_Productization_v1.0.txt
 │   │   ├── FirmwareSight_PostG2_E2E_Acceptance_v1.1.txt
@@ -699,6 +700,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P5_EXIT_CHECKLIST.md
 │   ├── P5_F2R_UI_CORRECTIVE_DESIGN.md
 │   ├── P5_F2R_UI_CORRECTIVE_REPORT.md
+│   ├── P5_FINAL_CLOSURE_REPORT.md
 │   ├── P5_HISTORY_DIAGNOSTICS_REPORT.md
 │   ├── P5_INSTALL_RECOVERY_REPORT.md
 │   ├── P5_KNOWN_LIMITATIONS.md

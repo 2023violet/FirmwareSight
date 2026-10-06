@@ -3,10 +3,10 @@ title: "P5 Onboarding, Help and History Design Checklist"
 doc_id: "FS-P5-ONBOARDING-HISTORY-DESIGN"
 product: "FirmwareSight"
 version: "1.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-06"
 ---
 
 # P5 — onboarding, Help and History: design checklist (prompt §13, §14, §16, AGENTS.md 11)

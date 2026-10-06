@@ -59,7 +59,7 @@ and the bundle. L4, L8, L12 and L23 are untouched by this round and stay exactly
 | L16 | `custom-protocol` needed by hand | **CLOSED** (§38) | package group 4/4 PASS on this host with `cargo tauri build -- --locked` and no manual feature flag |
 | L17 | CI provisioning duplication, index blind spot | **REDUCED** (§35) | duplication already gone; the two canonical lists that exist were checked and are satisfied |
 | L19 | "Object attribution" means two things | **CLOSED** (§33) | Analyze and Compare now name their own scope, each with a test |
-| L20 | Compare prints a Core enum word | **CLOSED** (§34) | closed display mapping for all five current variants + Unknown-safe fallback, 4 tests |
+| L20 | Compare prints a Core enum word | **CLOSED** (§34) — **REOPENED_BY_F2 on Release, CLOSED_BY_F2R again**; read §2's L20 section for the whole sequence | closed display mapping for all five current variants + Unknown-safe fallback, 4 tests |
 | L23 | UI test races, six known instances fixed | **REDUCED** (§36) | 20/20 fresh-process runs green; bounded sweep read every candidate; one more timer flush removed with a mutation proof |
 | L24 | `update_goldens.py` cannot rerun over its Windows leftover scratch | **CLOSED / NOT_REPRODUCED ON CURRENT HEAD** (§31) | second dry-run over the scratch the first one left, no `PermissionError [WinError 5]` |
 | L25 | one dead `Apply filter` click, never reproduced | **NOT_REPRODUCED** (§37) | 30 legitimate Apply activations across both tables, 6 more through form submit, no failure |
@@ -283,6 +283,26 @@ Unknown meaning rather than becoming a claim.
 Tests: `compare.test.tsx:752` (both MAP/region bases), `:763` (ELF and name-heuristic), `:773`
 (insufficient plus an unknown future variant in the same run), `:783` (a missing basis stays `unknown`).
 **L20 = CLOSED.**
+
+> **Dated reconciliation, added by Commit F3 on 2026-10-06 — the sequence, not a rewrite.**
+> The paragraph above is Commit E's measurement of 2026-10-04 and it stands exactly as written: on the audited
+> Compare surface, `MapRegionAndElfLoad` stopped reaching a person, four tests held it, and nothing was renamed.
+> What it did not cover — and could not have, because it was not looked for — was the rest of the product.
+>
+> | Date | Event | What was true |
+> | --- | --- | --- |
+> | 2026-10-04 | **Commit E: CLOSED on Compare / the surfaces then audited** | the display mapping and its four tests, measured on `Compare.tsx` |
+> | 2026-10-05 | **F2: REOPENED_BY_F2 on Release** | the installed binary printed `MapRegionAndElfLoad` in Release's Evidence basis column — L20's shape on a surface L20's closure had never covered. F2 was forbidden to patch it, so it graded the finding S3 and wrote it down |
+> | 2026-10-06 | **F2R: CLOSED_BY_F2R ACROSS VERIFIED HUMAN-FACING MEMORY-BASIS SURFACES** | `evidenceBasis.ts` holds the one caption map, read by `Release.tsx`, `Compare.tsx` and `Analyze.tsx`; the §13 re-audit classified every remaining hit as domain, wire, display-map, test data or documentation and found no human-facing surface printing a memory-basis value raw; re-measured on F2R1's own CI-built artifact at 1024×720 / 1056×799 / 1440×900 |
+> | 2026-10-06 | **Current final disposition: L20 = CLOSED** | the closure is scoped to the surfaces that were verified, which is what makes it a measurement rather than a hope |
+>
+> Two things this reconciliation does **not** do. It does not rewrite Commit E's sentence above, because that
+> sentence reported what Commit E measured and it was true when written. And it does not invent semantics for
+> spellings that have no code behind them: `ConfiguredRegionAndElfLoad` (real variant `RegionConfigAndElfLoad`)
+> and `InsufficientEvidence` (real variant `Insufficient`) were found in prompt prose, not in the enum, and were
+> deliberately **not** added to the map. The Core enum was not renamed, no public or wire value moved, and no
+> code changed in F3. `P5_KNOWN_LIMITATIONS.md` §8 carries the same sequence in the list the shipped Help screen
+> points at, and `P5_EXIT_CHECKLIST.md` §4 carries the installed measurements that closed it.
 
 ### L23 — async reliability, swept and repeated
 

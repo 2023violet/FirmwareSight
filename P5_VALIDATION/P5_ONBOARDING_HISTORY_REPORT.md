@@ -3,10 +3,10 @@ title: "P5 Onboarding, Help and Local History Report"
 doc_id: "FS-P5-ONBOARDING-HISTORY"
 product: "FirmwareSight"
 version: "1.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-03"
+last_updated: "2026-10-06"
 ---
 
 # P5 — first-run onboarding, Help/About and local History (prompt §13, §14, §15, §16, §17, §18)

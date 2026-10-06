@@ -177,7 +177,7 @@ P5 diagnostics and recovery (Commit D): BUILT, GATED, AND WALKED IN AN INSTALLED
         assertion was a race with a clock; the repair is test-only, marks each store with a row it can name, and
         reads the standing snapshot to prove which one won. Both repair heads came back 10/10 on their first
         attempts (bccea88 on 37202016141, 90aa69d on 37202301591), every job read individually. COMMIT_D =
-        COMPLETE; P5 remains IN_PROGRESS and the prompt's section 34 STOP is in force.
+        COMPLETE; P5 remained IN_PROGRESS at that head and the prompt's section 34 STOP was in force.
         Evidence P5_VALIDATION/P5_DIAGNOSTICS_RECOVERY_REPORT.md, P5_VALIDATION/P5_COMMIT_D_DESIGN.md and
         P5_VALIDATION/P5_DIAGNOSTICS_DESIGN_CHECKLIST.md
 P5 compatibility cohort and supportability (Commit E): BUILT FROM REAL TOOL OUTPUT, AND THE COHORT FOUND A
@@ -284,7 +284,7 @@ P5 Commit F1 (ADR-0029 + L15 presentation), documentation, tooling and one UI ca
         %LOCALAPPDATA%\FirmwareSight absent, no uninstall registry entry, no running process, and the owner's
         store untouched at 155,648 bytes / d6e41034…ca836468 / last written 2026-09-30. After F1 returned 10 of
         10 the owner released F2, and the paragraph below is that round's record. F3, which alone may write
-        P5 = PASS_COMPLETE, is not authorized until §62's ready-for-closure gate passes. So: P5 = IN_PROGRESS,
+        P5 = PASS_COMPLETE, is not authorized until §62's ready-for-closure gate passes. So, at that head: P5 = IN_PROGRESS,
         product = MVP CANDIDATE at baseline 0.6.0, and still no P5 PASS, BETA, RC, GA or Production Ready anywhere.
 P5 Commit F2 (installed productization acceptance), documentation, evidence and governance only (2026-10-05).
         Authorized by FirmwareSight P5 Commit F2 Installed Productization Acceptance v1.0 — Architect Authorized,
@@ -392,6 +392,57 @@ P5 Commit F2R (installed UI productization corrective), two heads (2026-10-06). 
         **F3 = READY_FOR_ARCHITECT_REVIEW and is not authorized here** — F2R's own prompt ends in a STOP. This
         head sets no P5 completion token, no active_task NONE, no tag, no GitHub Release, no signature, no
         notarization, no updater and no licence.
+P5 Commit F3 (final governance closure), governance / evidence / indexing only (2026-10-06). Authorized by
+        FirmwareSight P5 Commit F3 Final Governance Closure Execution Prompt v1.0 — Architect Authorized, the
+        last authorized unit of the stage, archived at
+        10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt with BOTH digests:
+        delivered bytes SHA-256 860e00976b242f15de1473455941140599a8a5cd639409521e7c38a28a64514c (36,458 B,
+        1,821 CRLF lines) and stored Git blob 6cacd10ee1eff4a6c4ab90b4f9d51df987bad16cf94fe142961c0d37fd749c66
+        (34,637 B, 1,821 LF lines). They differ only because .gitattributes normalizes *.txt to LF, and that is
+        proved rather than asserted: the byte delta is exactly the 1,821 carriage returns, and comparing the
+        delivered file split on CRLF against the stored blob split on LF gives identical text on every one of
+        the 1,822 logical lines with zero differing lines. .gitattributes was not touched to make the hashes
+        agree — it is an AGENTS.md 9 integrity boundary.
+        **Order mattered: §6's exit re-audit ran before any closure sentence was written.** All nineteen areas
+        were re-read against measurements — Packaging, Onboarding, History, Diagnostics, Migration/recovery,
+        Compatibility, Design/Accessibility, Documentation, Security/supportability, Windows real install,
+        Version identity, Repository baseline integrity, Signing, Notarization, Manual update, License, CI,
+        Clean detached tree, Owner DB restore — and **no required engineering item came back BLOCKED**; the
+        only BLOCKED phrase in the whole record is the one §14 requires about redistribution, which is a claim
+        about publishing rather than an engineering item. The re-audit's one real find was in this
+        repository's own paperwork: P5_EXIT_CHECKLIST.md asserted every L1–L26 row was accounted for while
+        P5_KNOWN_LIMITATIONS.md held 25 of 26 — **L12 had no row**, though the fact it covers was carried
+        honestly in two other documents. F3 added the row and corrected the assertion rather than deleting the
+        claim. L20's history was reconciled with dates (Commit E CLOSED on Compare → F2 REOPENED_BY_F2 on
+        Release → F2R CLOSED_BY_F2R → CLOSED) without rewriting Commit E's measurement; L15 stays split
+        (presentation CLOSED, wire CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER, no analysis:2); L26 is CLOSED —
+        ADR-0029, kept distinct from ADR-0028; and **no limitation became CLOSED merely because P5 closed** —
+        L3, L4, L5, L8, L11, L12, L13, L15, L17, L23, L25 all keep their carried dispositions. The measured
+        performance truth is untouched: a valid ELF of 519,179,252 bytes with about 2,020,073 symbols, warm
+        Analyze ~4.73–4.89 s, cold first read ~68.7 s, peak observed working set ~1,428 MB, never "Not
+        Responding" and never a crash — near-500-MiB UI is MEASURED, first-use-under-60 s is NOT PROVED at
+        this workload, and no claim that performance was optimized, that a 500 MB target was achieved or that
+        every large file finishes inside a stated window appears anywhere.
+        **Canonical state now: P5 = PASS_COMPLETE · Productization = ENGINEERING_COMPLETE · product =
+        MVP_CANDIDATE · narrative = FirmwareSight Productized MVP Candidate · baseline = 0.6.0 · active_task =
+        NONE**, with G2 still PASS and P0–P4 untouched. BASELINE.yaml was updated only in its own existing
+        vocabulary (stage_status, closed_on, tests_at_close, product_state, next_stage_after_this_one) and no
+        machine enum was invented for the run F3 could not yet read: inside this commit **F3 remote CI =
+        PENDING_EXTERNAL_EVIDENCE**, and FINAL EXTERNAL ACCEPTANCE REQUIRES F3 REMOTE CI — if that run fails on
+        repository content the external verdict is withheld and the fix goes forward, never re-rolled until
+        green; §34 forbids a fourth round written only to record a number. Proof it is still documentation:
+        **868 Rust / 225 UI in 8 files unchanged** (§5 requires the counts to stand still and F3 stops if they
+        do), zero paths under apps/ crates/ scripts/ fixtures/ schemas/ golden/ migrations/ .github/, and no
+        Cargo.toml, Cargo.lock, package.json, pnpm-lock.yaml, tauri.conf.json, deny.toml, rust-toolchain.toml
+        or assets/design-tokens.json byte. §24: **nothing was installed and no owner file was touched** —
+        installed authority stays F2R1's head fb5f628, run 37431977428, artifact 11397938806. The record is
+        P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md, with the full head-by-head lineage in P5_EXECUTION_REPORT.md
+        §7, the exit re-audit in P5_EXIT_CHECKLIST.md §7 and the CI rows in P5_CI_AUTHORITY.md.
+        **And the stage stops here.** Closing P5 authorizes nothing after it: V1 own-artifact / real-user
+        validation (the track that exists to answer L11), B1 / private beta, RC, GA, commercialization, a
+        licence, signing, notarization, an updater and any new feature all need a NEW architect prompt.
+        PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION: license = "Proprietary"
+        stands, there is no root LICENSE, and FirmwareSight is not a licensed open-source release.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -557,9 +608,10 @@ compatible upgrade exists inside that pin.
 9. `V0_VALIDATION/README.md`
 10. `V0_VALIDATION/deliverables/V0_GATE_RECOMMENDATION.md`
 11. `10_AUDIT/SOURCE_PROMPTS/README.md`
-12. `.ai/ACTIVE_TASK.md` — currently `NONE`; G2 closed `PASS` on 2026-10-01, so the MVP engineering
-    candidate is complete and any next track (V1 own-artifact validation, P5 productization) needs its
-    own architect decision
+12. `.ai/ACTIVE_TASK.md` — currently `NONE`: G2 closed `PASS` on 2026-10-01 and P5 productization closed
+    `PASS_COMPLETE` on 2026-10-06, so the MVP engineering candidate is complete and productized to P5's
+    engineering scope. **No next track is authorized by either closure**; V1 own-artifact validation, B1, RC
+    and GA each need their own architect decision
 13. `G2_VALIDATION/G2_EXIT_CHECKLIST.md` — the whole-MVP verdict, box by box
 13a. `POST_G2_E2E_REMEDIATION/EXIT_CHECKLIST.md` — the three real-desktop findings, each box settled by
      the test, mutation proof or desktop measurement that closed it
@@ -596,6 +648,25 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 `10_AUDIT/SOURCE_PROMPTS/README.md`.
 
 ## Next work
+
+**`active_task: NONE`.** Stage **P5 (Productization)** opened on 2026-10-03 and **closed `PASS_COMPLETE` on
+2026-10-06** with Commit F3, the only head of the stage authorized to write that sentence and only after §6's
+exit re-audit found no required engineering item `BLOCKED`. The state a newcomer inherits is therefore:
+Productization **`ENGINEERING_COMPLETE`**, product **`MVP_CANDIDATE`** at baseline **`0.6.0`**, narrative
+**FirmwareSight Productized MVP Candidate**, `G2 = PASS`, P0–P4 unchanged. Read
+`P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md` for the verdict and its boundaries,
+`P5_VALIDATION/P5_KNOWN_LIMITATIONS.md` for all 26 carried rows, and `P5_VALIDATION/P5_RELEASE_READINESS.md`
+for the ten frozen release-readiness states.
+
+**Nothing after P5 is authorized by P5's closure.** V1 own-artifact / real-user validation is the likely next
+decision — it is the track that exists to answer L11, which P5 carried forward rather than closing — and it
+needs its own architect prompt, as do B1 / private beta, RC, GA, commercialization, a licence, signing,
+notarization, an updater and any new product verb, format, adapter or crate. `AGENTS.md` 1 binds: with no
+active task, no agent picks the next track or creates business functionality.
+
+*(the paragraphs below are P5's running narrative from 2026-10-03 onward. Each keeps the words its own round
+wrote, including the `IN_PROGRESS` states those rounds were required to hold; the present answer is the two
+paragraphs above.)*
 
 **`active_task: P5_PRODUCTIZATION`** — stage **P5**, state **`IN_PROGRESS`**, opened on 2026-10-03 by
 *FirmwareSight — P5 Productization, Execution Prompt v1.0* (file, SHA-256 `722125f5…71e0ae`, archived in
@@ -652,12 +723,20 @@ proofs, and page reads of 467.9µs / 541.5µs / 248.8µs over 100 builds / 100 r
 screens rather than their code: §38 C had not been walked in an installed binary, and that head had no CI run
 behind it. **Commit F2 closed the first of those two on 2026-10-05** — onboarding, History and Diagnostics were
 each driven in the installed F1 artifact, History read back after its source project moved, and the export
-proved to carry no path — while the stage's verdict stays open, because only F3 may write it.
+proved to carry no path — while the stage's verdict stayed open, because only F3 may write it. **F3 wrote it on
+2026-10-06: `P5 = PASS_COMPLETE`.**
 
-**No P5 verdict
-exists yet** — the product is still the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, and the prompt
-forbids writing `P5 PASS`, `BETA`, `RC` or `GA` before closure evidence, and forbids a tag, a GitHub
-Release, an updater, a certificate and any licence choice. V1 own-artifact / real-user validation still has
+**P5 closed `PASS_COMPLETE` on 2026-10-06 under Commit F3**, and what that verdict does *not* mean is written
+where the verdict is: `P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md` §14, and the ledger entry above. The product
+remains the G2-passed **MVP CANDIDATE** at baseline **0.6.0**, now with a productized engineering scope:
+installable packages on three platforms, an installed Windows journey walked twice on CI-built artifacts,
+onboarding, History, Diagnostics, migration behind a pre-migration snapshot, and a repository baseline that
+verifies from Git index blobs. What is still forbidden and still unwritten: `BETA`, `RC`, `GA`, Production
+Ready, a tag, a GitHub Release, a published installer, an updater, a certificate, a signature, a notarization
+and any licence choice. **`PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION`** —
+`license = "Proprietary"` stands, there is no root `LICENSE`, and a technically complete MVP candidate is not a
+licensed open-source release. V1 own-artifact / real-user validation still has no prompt and stays
+unauthorized: **P5's closure opens nothing.** V1 own-artifact / real-user validation still has
 no prompt and stays unauthorized. The open-source licence is still `PENDING OWNER CONFIRMATION`: a
 technical MVP candidate is not a licensed open-source release. The paragraphs below are the running
 narrative of how the pointer got here and back

@@ -1,0 +1,1822 @@
+FirmwareSight — P5 Commit F3
+Final Governance Closure
+F2R Final Pass → P5 PASS_COMPLETE → Productization ENGINEERING_COMPLETE
+Execution Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+ROLE
+
+你是 FirmwareSight P5 Productization 的最终 Governance Closure Agent。
+
+本轮 canonical unit：
+
+P5_COMMIT_F3_FINAL_GOVERNANCE_CLOSURE
+
+这是 P5 的最后一个授权单元。
+
+本轮不是产品开发。
+
+本轮不允许修功能、不允许改 UI、不允许改 tooling。
+
+本轮只做：
+
+1. 对当前 F2R closure head 做最后一次 read-back；
+2. 对所有 P5 exit criteria 做最终一致性审计；
+3. 对 P5_SUPPORTABILITY_REPORT.md 的 L20 历史进行 reconciliation；
+4. 将 canonical stage state 从：
+   P5_PRODUCTIZATION / IN_PROGRESS
+   变为：
+   P5 / PASS_COMPLETE
+5. 将 Productization 标为：
+   ENGINEERING_COMPLETE
+6. 将 active task 变为：
+   NONE
+7. 保持产品机器状态：
+   MVP CANDIDATE
+8. 允许叙述性名称：
+   FirmwareSight Productized MVP Candidate
+9. 运行最终本地 gate / detached / archive proof；
+10. 创建一个纯治理 F3 commit；
+11. F3 commit 本身接受 authoritative remote CI；
+12. remote CI 绿后 STOP；
+13. 不创建 F4 只为写回自己的 CI。
+
+P5 完成 ≠ Beta。
+P5 完成 ≠ RC。
+P5 完成 ≠ GA。
+P5 完成 ≠ Production Ready。
+P5 完成 ≠ public release。
+P5 完成 ≠ signed/notarized release。
+P5 完成 ≠ open-source licence decision。
+P5 完成 ≠ external user validation。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED ARCHITECT AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect independently re-verified F2R.
+
+Current authoritative origin/main:
+
+a5ce7c43a1656966efbb9d2d99ea64d1aad27f97
+
+Commit:
+
+P5: count the baseline at the head that reads the corrective back
+
+F2R1 product corrective head:
+
+fb5f62852a4c3b83bc472f5903bff214888ab621
+
+F2R1 remote CI:
+
+Run:
+37431977428
+
+run number:
+70
+
+attempt:
+1
+
+result:
+10 / 10 success
+
+F2R2 evidence/read-back head:
+
+a5ce7c43a1656966efbb9d2d99ea64d1aad27f97
+
+Intermediate docs commit in same push:
+
+31f10c7dc35e4d1e563b6f340ad7618de5c72f79
+
+31f10c7:
+no workflow run of its own
+
+Reason:
+same push ended at a5ce7c4
+
+F2R2 remote CI:
+
+Run:
+37453402452
+
+run number:
+71
+
+attempt:
+1
+
+result:
+10 / 10 success
+
+All ten authoritative jobs individually verified success:
+
+1. Dependency policy
+2. Generated output drift
+3. Package Ubuntu
+4. macOS Core Smoke
+5. Rust (windows-latest)
+6. Rust (ubuntu-latest)
+7. Desktop UI (windows-latest)
+8. Desktop UI (ubuntu-latest)
+9. Package Windows
+10. Package macOS
+
+F2R final measured product counts:
+
+Rust =
+868 passed / 0 failed / 47 targets
+
+UI =
+225 passed / 8 files
+
+full gate =
+17 / 17
+
+drift =
+8 / 8
+
+deny =
+1 / 1
+
+core-smoke =
+3 / 3
+
+package =
+4 / 4
+
+F2R UI reliability campaign:
+
+20 / 20 green
+
+F2R installed artifact:
+
+Run =
+37431977428
+
+Head =
+fb5f62852a4c3b83bc472f5903bff214888ab621
+
+Windows artifact id =
+11397938806
+
+NSIS =
+FirmwareSight_0.6.0_x64-setup.exe
+
+NSIS bytes =
+3,886,598
+
+NSIS SHA-256 =
+efbc45a3258986e1763343f7f46e927e8450b48293aa9bbd5b447a5a246d5fd4
+
+F2R installed verdict:
+
+F2R-01 Analyze narrow Sections =
+CLOSED
+
+F2R-02 History Details clipping =
+CLOSED
+
+F2R-03 Release raw enum =
+CLOSED
+
+P5_DESIGN_ACCESSIBILITY =
+PASS_FOR_FROZEN_DESKTOP_SCOPE
+
+WCAG_CERTIFICATION =
+NOT_PERFORMED
+
+MULTI_DPI_125_150 =
+NOT_TESTED
+
+SECOND_WINDOWS_HOST =
+NOT_TESTED
+
+Owner safety:
+
+ORIGINAL_DB_RESTORED =
+YES
+
+ORIGINAL_DB_SHA_MATCH =
+YES
+
+OWNER_STORE_OPENED_BY_F2R =
+NO
+
+Current high-level state before F3:
+
+F1 =
+FINAL PASS
+
+F2 =
+PASS
+
+F2R =
+FINAL PASS / COMPLETE
+
+P5 =
+IN_PROGRESS
+
+Product =
+MVP CANDIDATE
+
+F3 =
+AUTHORIZED BY THIS PROMPT
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -20 --oneline --decorate
+
+Expected:
+
+HEAD =
+origin/main =
+a5ce7c43a1656966efbb9d2d99ea64d1aad27f97
+
+worktree =
+clean
+
+If remote moved:
+
+STOP.
+
+Read and classify the delta.
+
+Do NOT:
+
+git reset --hard
+git clean -fd
+git stash
+git restore .
+git rebase published history
+git push --force
+
+No product work is authorized if preflight differs.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. ARCHIVE THIS PROMPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Archive the delivered prompt under:
+
+10_AUDIT/SOURCE_PROMPTS/
+
+Preferred filename:
+
+FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt
+
+Record:
+
+delivered SHA-256
+delivered byte count
+delivered line count
+
+Then record Git-stored blob digest/count.
+
+Use the established transport-safe rule:
+
+if only CRLF/LF differs,
+record both hashes/counts,
+prove line-by-line textual identity,
+do not weaken `.gitattributes`.
+
+Do not reconstruct prompt bytes if the delivered file exists.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. REQUIRED READ SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read current HEAD versions of:
+
+AGENTS.md
+
+BASELINE.yaml
+
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+
+README.md
+INDEX.md
+
+06_DELIVERY/06_STAGE_GATES.md
+06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md
+06_DELIVERY/08_MILESTONE_DELIVERABLE_MATRIX.md
+
+P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md
+P5_VALIDATION/P5_COMMIT_F_DESIGN.md
+P5_VALIDATION/P5_DESKTOP_ACCEPTANCE_REPORT.md
+P5_VALIDATION/P5_MIGRATION_RECOVERY_REPORT.md
+P5_VALIDATION/P5_HISTORY_DIAGNOSTICS_REPORT.md
+P5_VALIDATION/P5_SECURITY_SUPPORTABILITY_REVIEW.md
+P5_VALIDATION/P5_KNOWN_LIMITATIONS.md
+P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md
+P5_VALIDATION/P5_EXECUTION_REPORT.md
+P5_VALIDATION/P5_EXIT_CHECKLIST.md
+P5_VALIDATION/P5_RELEASE_READINESS.md
+P5_VALIDATION/P5_CI_AUTHORITY.md
+P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md
+P5_VALIDATION/P5_F2R_UI_CORRECTIVE_DESIGN.md
+
+09_ADR/ADR-0028-release-identity-bytes-as-evidence.md
+09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
+
+Do not rely on old prompt prose where current repository evidence is newer.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. F3 ABSOLUTE CHANGED-PATH BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F3 is governance / evidence / indexing only.
+
+Allowed families:
+
+BASELINE.yaml
+
+.ai/*.md
+
+README.md
+INDEX.md
+
+06_DELIVERY/*.md
+only if stage status/current pointer is materially stale
+
+P5_VALIDATION/*.md
+
+10_AUDIT/SOURCE_PROMPTS/*
+10_AUDIT/SOURCE_PROMPTS/README.md
+
+DIRECTORY_TREE.txt
+SHA256SUMS
+
+No other product/source/tooling path.
+
+Forbidden:
+
+apps/**
+crates/**
+scripts/**
+fixtures/**
+schemas/**
+golden/**
+migrations/**
+.github/**
+
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+rust-toolchain.toml
+assets/design-tokens.json
+
+If any forbidden path appears in F3 diff:
+
+STOP.
+
+F3 is not allowed to "just fix one last thing".
+
+Any product change means P5 was not ready for F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. NO PRODUCT TEST COUNT MOVEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+F3 is docs/governance only.
+
+Therefore product direct counts must remain exactly:
+
+Rust =
+868
+
+UI =
+225 / 8 files
+
+If Rust direct count changes:
+
+STOP.
+
+If UI direct count changes:
+
+STOP.
+
+Do not update tests in F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. FINAL P5 EXIT RE-AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before writing PASS_COMPLETE:
+
+re-read every current P5 exit criterion.
+
+Every required engineering item must be one of:
+
+PASS
+CARRIED_FORWARD_NONBLOCKING
+OWNER_DECISION_NONBLOCKING
+
+No required item may be:
+
+BLOCKED
+
+Specifically recheck:
+
+Packaging
+Onboarding
+History
+Diagnostics
+Migration / recovery
+Compatibility
+Design / Accessibility
+Documentation
+Security / supportability
+Windows real install
+Version identity
+Repository baseline integrity
+Signing readiness
+Notarization readiness
+Manual update readiness
+License
+CI
+Clean detached tree
+Owner DB restore
+
+If a required engineering item is BLOCKED:
+
+STOP.
+
+Do not write P5 PASS_COMPLETE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. DESIGN / ACCESSIBILITY FINAL BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Carry F2R's bounded result exactly:
+
+P5_DESIGN_ACCESSIBILITY =
+PASS_FOR_FROZEN_DESKTOP_SCOPE
+
+Supported proof:
+
+1024 × 720
+1056 × 799
+1440 × 900
+
+corrected Analyze / History / Release surfaces
+keyboard activation/focus on tested controls
+20/20 UI campaign
+real installed F2R1 artifact
+
+Do NOT upgrade this to:
+
+WCAG compliant
+fully accessible
+all DPI verified
+all monitors verified
+
+Retain:
+
+WCAG_CERTIFICATION =
+NOT_PERFORMED
+
+MULTI_DPI_125_150 =
+NOT_TESTED
+
+SECOND_WINDOWS_HOST =
+NOT_TESTED
+
+These are nonblocking carried limits for P5.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. L20 HISTORY RECONCILIATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+One explicit F3 cleanup is authorized:
+
+P5_VALIDATION/P5_SUPPORTABILITY_REPORT.md
+
+Current historical problem:
+
+its original Commit E L20 row says CLOSED
+because Compare stopped exposing the raw Core enum.
+
+F2 later discovered Release still exposed:
+
+MapRegionAndElfLoad
+
+F2R then closed that Release surface and re-audited current human-facing memory-basis surfaces.
+
+Do NOT rewrite the original Commit E measurement as if it never happened.
+
+Use history-preserving wording.
+
+Required current interpretation:
+
+L20 historical sequence:
+
+Commit E:
+CLOSED on Compare / the surfaces then audited
+
+F2:
+REOPENED_BY_F2 on Release
+
+F2R:
+CLOSED_BY_F2R
+ACROSS VERIFIED HUMAN-FACING MEMORY-BASIS SURFACES
+
+Current final disposition:
+
+L20 =
+CLOSED
+
+But retain dated history explaining the reopen/reclose.
+
+Do not rename Core enum.
+Do not alter public/wire values.
+Do not change code.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. L15 MUST REMAIN CARRIED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT accidentally close L15.
+
+Final:
+
+L15 presentation residue =
+CLOSED
+
+L15 legacy wire identifier =
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+
+Keep:
+
+SourceType::ElfProgramHeader
+"elf.program-header"
+analysis:1
+SQLite rows
+Release Bundle analysis.json compatibility
+
+A real wire rename belongs only to future:
+
+analysis:2
+
+F3 must not create it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. L26 FINAL STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Final:
+
+L26 =
+CLOSED — ADR-0029
+
+Reason:
+
+repository root baseline integrity now uses canonical Git stage-0 index blob bytes.
+
+Keep distinct from ADR-0028.
+
+No new checksum semantics in F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. FINAL KNOWN LIMITATIONS — MUST REMAIN HONEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not erase carry-forward items to make P5 look cleaner.
+
+At minimum preserve:
+
+L3 fuzzing =
+CARRIED_FORWARD
+
+L4 platform/DPI =
+REDUCED / bounded
+
+L5 ELF/layout/DWARF =
+REDUCED
+
+L8 object/module attribution =
+CARRIED_FORWARD
+
+L11 external real-user comprehension/V1 =
+CARRIED_FORWARD
+
+L12 accepted RustSec advisories =
+CARRIED_FORWARD
+
+L13 open-source license =
+OWNER_DECISION
+
+L15 legacy wire =
+CARRIED_FORWARD
+
+L17 source-control/index blind spot residual =
+REDUCED
+
+L23 async UI race class =
+REDUCED
+
+L25 Apply filter =
+NOT_REPRODUCED
+
+Any performance limitations already recorded remain.
+
+No limitation becomes CLOSED merely because P5 closes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. PERFORMANCE WORDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Retain measured performance truth:
+
+valid ELF:
+519,179,252 bytes
+
+symbols:
+~2,020,073
+
+warm Analyze:
+~4.73–4.89 s
+
+cold first read:
+~68.7 s
+
+peak observed working set:
+~1,428 MB
+
+no Not Responding
+no crash
+
+Correct wording:
+
+near-500-MiB UI =
+MEASURED
+
+first-use <60 s =
+NOT PROVED at this workload
+environment-sensitive / partial
+
+RSS =
+MEASURED FOR TESTED WORKLOAD
+
+Do NOT write:
+
+performance optimized
+<500 MB RAM target achieved
+all large files under 60 s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. RELEASE READINESS STATES — FREEZE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Final P5 release-readiness states remain:
+
+SIGNING_READINESS =
+READY_NOT_EXECUTED
+
+NOTARIZATION_READINESS =
+READY_NOT_EXECUTED
+
+UPDATE_MODE =
+MANUAL_UPGRADE_READY
+
+OPEN_SOURCE_LICENSE_DECISION =
+PENDING_OWNER_CONFIRMATION
+
+PUBLIC_DISTRIBUTION =
+NOT_AUTHORIZED
+
+GITHUB_RELEASE =
+NOT_CREATED
+
+TAG =
+NOT_CREATED
+
+PRIVATE_BETA =
+NOT_AUTHORIZED
+
+RC =
+NOT_AUTHORIZED
+
+GA =
+NOT_AUTHORIZED
+
+Do NOT sign.
+Do NOT notarize.
+Do NOT create tag.
+Do NOT create GitHub Release.
+Do NOT publish installer.
+Do NOT start updater.
+Do NOT select license.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. LICENSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No license decision exists.
+
+Keep:
+
+Cargo license metadata =
+Proprietary
+
+root LICENSE =
+absent
+
+OPEN_SOURCE_LICENSE_DECISION =
+PENDING_OWNER_CONFIRMATION
+
+Final technical P5 may pass.
+
+But final docs must state:
+
+PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM =
+BLOCKED BY OWNER LICENSE DECISION
+
+Do not call FirmwareSight a finished licensed open-source release.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. FINAL CANONICAL STAGE STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Only after §6 re-audit passes,
+F3 may write:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+stage =
+P5
+
+active_task =
+NONE
+
+baseline_version =
+0.6.0
+
+Product state =
+MVP_CANDIDATE
+or the repository's existing exact machine vocabulary
+
+Do NOT invent a new machine enum.
+
+Narrative descriptor allowed:
+
+FirmwareSight Productized MVP Candidate
+
+G2 =
+PASS
+
+P0/P1/P2/P3/P4 =
+remain their existing PASS / COMPLETE states
+
+No retroactive status changes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. ACTIVE TASK POINTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update:
+
+.ai/ACTIVE_TASK.md
+
+to reflect:
+
+active task =
+NONE
+
+Reason:
+
+P5_PRODUCTIZATION closed PASS_COMPLETE.
+
+No next track is auto-authorized.
+
+Explicitly state:
+
+V1 =
+NOT AUTHORIZED BY P5
+
+B1 / Private Beta =
+NOT AUTHORIZED
+
+Any next stage requires a new Architect decision/prompt.
+
+Do not automatically activate:
+
+V1
+G3
+B1
+Private Beta
+RC
+Release
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. BASELINE.yaml
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update BASELINE.yaml only according to its existing schema.
+
+Do NOT invent new keys if equivalent keys already exist.
+
+Required semantic result:
+
+P5 state =
+PASS_COMPLETE
+
+P5 closure date =
+current repository closure date
+
+active_task =
+NONE
+
+baseline_version =
+0.6.0
+
+product state remains:
+MVP_CANDIDATE
+
+If BASELINE.yaml has separate Productization state:
+set it to the existing accepted vocabulary equivalent of:
+ENGINEERING_COMPLETE
+
+If no such field exists:
+do not invent one solely for prose.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. CURRENT_STATE / HANDOFF / README / INDEX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reconcile current entry points so a new agent cannot read:
+
+P5 IN_PROGRESS
+F3 READY_FOR_ARCHITECT_REVIEW
+
+after F3 closure.
+
+Update only stale current-state claims.
+
+Required current truth:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+Product =
+MVP CANDIDATE
+
+Narrative =
+Productized MVP Candidate
+
+active task =
+NONE
+
+V1 =
+NOT STARTED / NOT AUTHORIZED
+
+B1 =
+NOT AUTHORIZED
+
+No tag/release/signing/notarization/license decision.
+
+Preserve historical paragraphs.
+
+Date them rather than deleting important provenance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. P5_EXECUTION_REPORT FINALIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Finalize:
+
+P5_VALIDATION/P5_EXECUTION_REPORT.md
+
+It must carry complete lineage:
+
+P5 opening baseline
+Commit A
+Commit B
+Commit C
+Commit D
+Commit E
+Commit E normalization
+F1
+F2
+F2R1
+F2R2
+F3
+
+Preserve meaningful red/interrupted runs.
+
+At minimum keep explicit:
+
+Commit D initial product head:
+8 / 10
+
+Commit E normalization Run 67:
+attempt 1 infrastructure/toolchain failure
+attempt 2 success
+
+F2 Run 69:
+attempt 1 queue cancellations
+attempt 2 queue cancellations
+attempt 3 success
+
+F2R1:
+Run 70 attempt 1 / 10 of 10
+
+F2R2:
+Run 71 attempt 1 / 10 of 10
+
+F3:
+SHA known inside the commit;
+remote run unknown until after push.
+
+Do not fabricate F3 run in the commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. P5_CI_AUTHORITY FINALIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update:
+
+P5_VALIDATION/P5_CI_AUTHORITY.md
+
+Add F2R2 external evidence row:
+
+head =
+a5ce7c43a1656966efbb9d2d99ea64d1aad27f97
+
+Run =
+37453402452
+
+attempt =
+1
+
+result =
+10 / 10
+
+Also preserve:
+
+31f10c7 has no run of its own.
+
+Do NOT add F3 run before it exists.
+
+Inside F3 commit:
+
+F3 remote CI =
+PENDING_EXTERNAL_EVIDENCE
+
+No F4 merely to record it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. FINAL EXIT CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update:
+
+P5_VALIDATION/P5_EXIT_CHECKLIST.md
+
+Required current engineering states:
+
+Packaging =
+PASS
+
+Onboarding =
+PASS
+
+History =
+PASS
+
+Diagnostics =
+PASS
+
+Migration/recovery =
+PASS
+
+Compatibility =
+PASS within documented cohort
+
+Design/Accessibility =
+PASS_FOR_FROZEN_DESKTOP_SCOPE
+
+Documentation =
+PASS for P5 canonical surfaces
+
+Security/supportability =
+PASS_WITH_DOCUMENTED_ACCEPTED_RISKS
+or repository-equivalent bounded language
+
+Windows installed product acceptance =
+PASS
+
+Version identity =
+PASS
+
+Repository baseline integrity =
+PASS
+
+Signing readiness =
+PASS as READY_NOT_EXECUTED
+
+Notarization readiness =
+PASS as READY_NOT_EXECUTED
+
+Manual upgrade readiness =
+PASS
+
+License =
+OWNER_DECISION_NONBLOCKING for technical P5
+
+CI =
+PASS through F2R2 before F3
+
+Clean detached tree =
+PASS
+
+Owner DB restore =
+PASS
+
+Future items:
+
+external user validation =
+NOT_EXECUTED / separate V1 track
+
+public distribution =
+NOT_AUTHORIZED
+
+No required engineering row may be BLOCKED.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. P5 FINAL CLOSURE RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create if absent:
+
+P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md
+
+Keep it concise.
+
+Required sections:
+
+1. Start authority
+2. P5 scope
+3. Commit A–F2R lineage
+4. Final engineering exit checklist
+5. Installed acceptance authority
+6. F2R corrective authority
+7. Owner-data safety
+8. Final known limitations
+9. Release readiness
+10. License boundary
+11. Final local validation
+12. F3 governance commit
+13. F3 remote CI = external/pending in-tree
+14. Verdict
+
+Inside the commit:
+
+canonical stage may be written PASS_COMPLETE,
+but explicitly state:
+
+FINAL EXTERNAL ACCEPTANCE REQUIRES F3 REMOTE CI.
+
+Do not invent a new machine enum solely for:
+PASS_COMPLETE_PENDING_REMOTE_CI
+unless that enum already exists.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. P5_SUPPORTABILITY_REPORT RECONCILIATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Update only stale current dispositions.
+
+Specifically:
+
+L20 history:
+
+Commit E:
+closed on audited Compare surface
+
+F2:
+Release surface exposed raw MapRegionAndElfLoad
+
+F2R:
+shared evidenceBasis display mapping closed verified human-facing surfaces
+
+Final:
+CLOSED
+
+L15:
+CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER
+
+L26:
+CLOSED — ADR-0029
+
+Do not rewrite historical Commit E evidence.
+
+Use dated addendum/current-disposition wording.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. NO F3 INSTALLED APP TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT reinstall FirmwareSight in F3.
+
+F3 changes no product byte.
+
+Installed authority remains:
+
+F2R1 product head:
+fb5f62852a4c3b83bc472f5903bff214888ab621
+
+Run:
+37431977428
+
+artifact id:
+11397938806
+
+F2R2 and F3 are docs/governance only.
+
+No owner-store parking needed.
+
+Do not touch owner app-data store.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. F3 DIFF ALLOWLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before baseline regeneration:
+
+git diff --name-only
+
+Prove every changed path is allowed.
+
+Explicitly prove zero hits under:
+
+apps/
+crates/
+scripts/
+fixtures/
+schemas/
+golden/
+migrations/
+.github/
+
+and zero changes to:
+
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+rust-toolchain.toml
+assets/design-tokens.json
+
+If any appears:
+
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. ADR-0029 BASELINE WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use canonical index-blob workflow:
+
+1. edit intended governance/docs
+2. inspect diff
+3. stage all intended non-baseline changes
+4. if path set changed:
+   generate DIRECTORY_TREE.txt from stage-0 index
+5. stage DIRECTORY_TREE.txt
+6. generate root SHA256SUMS from stage-0 index blob bytes
+7. stage SHA256SUMS
+8. run independent verifier
+9. run full gate
+10. inspect staged diff
+11. commit
+
+Do not use raw working-directory bytes as root checksum authority.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. FINAL LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run on final staged F3 tree:
+
+git diff --check
+git diff --cached --check
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+
+python scripts/verify_baseline_artifacts.py
+
+Required product counts:
+
+Rust =
+868
+
+UI =
+225 / 8 files
+
+Expected gate structure:
+
+full =
+17
+
+drift =
+8
+
+deny =
+1
+
+core-smoke =
+3
+
+package =
+4
+
+Report actual.
+
+No required SKIP.
+
+If product direct counts differ:
+
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. CLEAN DETACHED WORKTREE FINAL PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At exact F3 candidate SHA:
+
+create clean detached worktree.
+
+Run:
+
+baseline verifier
+full gate
+package group where local environment supports canonical path
+
+Verify:
+
+no product count drift
+no untracked dependency
+no stale generated artifact
+
+Record actual gate step count.
+
+Remove only the temporary worktree created for F3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. GIT ARCHIVE BASELINE PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+git archive <F3 candidate SHA>
+
+Extract outside repository.
+
+Run:
+
+sha256sum -c SHA256SUMS
+
+Required:
+
+all listed entries OK
+zero failures
+
+Record:
+
+tracked path count
+manifest entry count
+OK count
+failure count
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. F3 COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preferred commit message:
+
+P5: close productization after installed and corrective acceptance
+
+One governance closure commit.
+
+Do not split into:
+
+status commit
+then read-back commit
+
+unless a real defect is found before push.
+
+F3 itself is intended to be the final P5 repository commit.
+
+After commit:
+
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/main
+
+Push normal fast-forward.
+
+No force push.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. F3 COMMIT CONTENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Inside F3 commit repository should say:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+active_task =
+NONE
+
+Product =
+MVP CANDIDATE
+
+Narrative =
+FirmwareSight Productized MVP Candidate
+
+baseline =
+0.6.0
+
+F3 remote CI:
+PENDING_EXTERNAL_EVIDENCE
+or equivalent prose
+
+No next stage authorized.
+
+If F3 remote CI later fails because of repository content,
+external PASS_COMPLETE is not accepted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. F3 REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find workflow by exact F3 SHA.
+
+Required authoritative set:
+
+10 jobs
+
+All:
+completed / success
+
+Read every job individually.
+
+Required names:
+
+Rust (windows-latest)
+Rust (ubuntu-latest)
+Desktop UI (windows-latest)
+Desktop UI (ubuntu-latest)
+Generated output drift
+Dependency policy
+macOS Core Smoke
+Package Windows
+Package Ubuntu
+Package macOS
+
+Confirm:
+
+Rust log =
+868
+
+UI log =
+225 / 8 files
+
+drift includes baseline integrity
+
+package jobs actually build/verify/upload
+
+No required gate skip.
+
+Conditional Linux prerequisite skip on a non-Linux runner is not a gate skip.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. F3 FAILURE RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If F3 remote CI fails because repository content is wrong:
+
+P5 external verdict =
+NOT ACCEPTED
+
+Do not claim final PASS_COMPLETE externally.
+
+Fix underlying issue in a corrective successor.
+
+No rerun-until-green for content failure.
+
+If failure is pure runner provisioning/infrastructure before repo logic:
+
+capture exact log.
+
+A one-time failed-job rerun may be justified only with strong evidence.
+
+Never erase attempt history.
+
+If ambiguous:
+
+STOP and return to Architect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. NO F4 JUST TO WRITE F3 RUN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If F3 remote CI succeeds:
+
+do NOT create another documentation commit solely to put the run number into the repository.
+
+F3 CI is external final evidence.
+
+No infinite:
+
+commit → CI → record CI → CI
+
+loop.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. FINAL EXTERNAL VERDICT IF F3 CI GREEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Only if F3 remote CI is accepted:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+Product machine state =
+MVP CANDIDATE
+
+Narrative =
+FirmwareSight Productized MVP Candidate
+
+baseline =
+0.6.0
+
+active_task =
+NONE
+
+G2 =
+PASS
+
+V1 =
+NOT EXECUTED / NOT AUTHORIZED
+
+B1 =
+NOT AUTHORIZED
+
+Private Beta =
+NOT AUTHORIZED
+
+RC =
+NOT AUTHORIZED
+
+GA =
+NOT AUTHORIZED
+
+Signing =
+READY_NOT_EXECUTED
+
+Notarization =
+READY_NOT_EXECUTED
+
+Update =
+MANUAL_UPGRADE_READY
+
+Open-source license =
+PENDING_OWNER_CONFIRMATION
+
+Public distribution =
+NOT_AUTHORIZED
+
+GitHub Release =
+NOT_CREATED
+
+Tag =
+NOT_CREATED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. WHAT P5 PASS_COMPLETE MEANS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+It means:
+
+the MVP has been productized to the P5 engineering scope.
+
+Evidence includes:
+
+- installable package pipeline;
+- Windows real installed journey;
+- migration/backup/recovery;
+- onboarding;
+- History;
+- Diagnostics;
+- compatibility cohort;
+- repository baseline integrity;
+- installed UI corrective closure;
+- data preservation through uninstall/reinstall;
+- owner-data safety;
+- release-readiness documentation;
+- final engineering gate.
+
+It does NOT mean:
+
+market fit
+real-user validation
+Beta quality
+RC quality
+GA readiness
+signed release
+notarized release
+automatic update
+all platforms runtime-validated
+WCAG certification
+all DPI validated
+license selected
+public open-source release
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. NEXT TRACK — DO NOT AUTO START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After P5 closure:
+
+STOP.
+
+Do not automatically enter:
+
+V1
+Private Beta
+B1
+RC
+GA
+commercialization
+licensing
+signing
+notarization
+updater
+new feature development
+
+The likely next decision is:
+
+V1 external real-user validation
+
+but it requires a NEW Architect prompt.
+
+No current task.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+38. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight P5 Commit F3 Final Governance Closure Report
+
+## 1. Start authority
+
+HEAD
+origin/main
+F2R1
+F2R2
+Run 70
+Run 71
+
+## 2. F2R acceptance
+
+three findings
+installed artifact
+Design/Accessibility bounded verdict
+owner restore
+
+## 3. Final exit re-audit
+
+Packaging
+Onboarding
+History
+Diagnostics
+Migration
+Compatibility
+Design/Accessibility
+Documentation
+Security/supportability
+Install
+Identity
+Baseline integrity
+Readiness
+License
+CI
+Detached tree
+Owner restore
+
+## 4. L20 reconciliation
+
+Commit E
+F2 reopen
+F2R close
+final CLOSED
+
+## 5. L15
+
+presentation closed
+wire carried
+
+## 6. L26
+
+ADR-0029
+CLOSED
+
+## 7. Known limitations
+
+closed
+reduced
+carried
+owner decisions
+
+## 8. Release readiness
+
+signing
+notarization
+update
+license
+distribution
+tag/release
+
+## 9. Canonical governance changes
+
+BASELINE.yaml
+.ai/ACTIVE_TASK
+.ai/CURRENT_STATE
+.ai/HANDOFF
+README
+INDEX
+P5 docs
+
+## 10. Changed-path proof
+
+allowed paths
+forbidden paths = empty
+product source changed = NO
+
+## 11. Local validation
+
+Rust
+UI
+full gate
+drift
+deny
+core-smoke
+package
+baseline verifier
+
+## 12. Detached/archive proof
+
+worktree
+archive
+manifest entries
+failures
+
+## 13. F3 commit
+
+SHA
+message
+changed files
+
+## 14. F3 remote CI
+
+run id
+run number
+attempt history
+all 10 jobs
+Rust count
+UI count
+result
+
+## 15. Final verdict
+
+P5 =
+PASS_COMPLETE / NOT_ACCEPTED / BLOCKED
+
+Productization =
+ENGINEERING_COMPLETE / INCOMPLETE
+
+Product =
+MVP CANDIDATE
+
+Narrative =
+FirmwareSight Productized MVP Candidate
+
+baseline =
+0.6.0
+
+active_task =
+NONE if PASS
+
+G2 =
+PASS
+
+V1 =
+NOT_EXECUTED / NOT_AUTHORIZED
+
+B1 =
+NOT_AUTHORIZED
+
+Signing =
+READY_NOT_EXECUTED
+
+Notarization =
+READY_NOT_EXECUTED
+
+Update =
+MANUAL_UPGRADE_READY
+
+License =
+PENDING_OWNER_CONFIRMATION
+
+Public distribution =
+NOT_AUTHORIZED
+
+## 16. No overclaim
+
+not Beta
+not RC
+not GA
+not Production Ready
+not signed
+not notarized
+not public release
+not licensed open-source release
+not external-user validated
+not WCAG certified
+not multi-DPI validated
+
+## 17. Stop
+
+STOP.
+
+Do not start V1.
+Do not start B1.
+Do not create tag.
+Do not create GitHub Release.
+Do not sign.
+Do not notarize.
+
+Return to Architect.
+
+END OF PROMPT

@@ -3,10 +3,10 @@ title: "P5 Diagnostics Design Checklist"
 doc_id: "FS-P5-DIAGNOSTICS-DESIGN"
 product: "FirmwareSight"
 version: "1.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-04"
+last_updated: "2026-10-06"
 ---
 
 # P5 — the Diagnostics section on Help: design checklist (prompt §20, AGENTS.md 11)

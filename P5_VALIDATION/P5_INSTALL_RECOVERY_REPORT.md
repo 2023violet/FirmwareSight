@@ -3,9 +3,9 @@ title: "P5 Install and Recovery Report"
 doc_id: "FS-P5-INSTALL-RECOVERY"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 owner: "Engineering"
-last_updated: "2026-10-05"
+last_updated: "2026-10-06"
 ---
 
 # P5 — real Windows install, uninstall and data behaviour

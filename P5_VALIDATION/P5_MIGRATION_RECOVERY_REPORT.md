@@ -3,10 +3,10 @@ title: "P5 Migration and Recovery Report"
 doc_id: "FS-P5-MIGRATION-RECOVERY"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-05"
+last_updated: "2026-10-06"
 ---
 
 # P5 — migration and recovery, and exactly which layer proves what

@@ -3,10 +3,10 @@ title: "P5 Security and Supportability Review"
 doc_id: "FS-P5-SECURITY-SUPPORTABILITY"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "IN_PROGRESS"
+status: "VALIDATED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-05"
+last_updated: "2026-10-06"
 ---
 
 # P5 — security and supportability, as the installed build leaves them

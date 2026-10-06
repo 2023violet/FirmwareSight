@@ -720,7 +720,7 @@ text with no source file; each says so in its own entry instead of standing for 
   the rest of the §28 closure pack beside them. The evidence root is outside this repository, named
   `FirmwareSight-P5-F2-20261005T073141`.
 
-## P5 Commit F2R Installed UI Productization Corrective v1.0 — executing
+## P5 Commit F2R Installed UI Productization Corrective v1.0 — executed, F2R = FINAL PASS / COMPLETE (2026-10-06)
 
 - File: `FirmwareSight_P5_CommitF2R_UI_Productization_Corrective_v1.0.txt`
 - **Delivered** bytes: SHA-256 `5d8719eca4a6ee5e2ee5b1b2c126c69d8a1ef027881da6ef98e11be9bd1fb375`, 47,100 bytes,
@@ -768,6 +768,69 @@ text with no source file; each says so in its own entry instead of standing for 
   revalidation), with the §38 addenda landing in `P5_KNOWN_LIMITATIONS.md`, `P5_EXIT_CHECKLIST.md`,
   `P5_DESKTOP_ACCEPTANCE_REPORT.md`, `P5_EXECUTION_REPORT.md` and `P5_CI_AUTHORITY.md`. The evidence root is
   outside this repository, named `FirmwareSight-P5-F2R-20261005T221112`.
+
+## P5 Commit F3 Final Governance Closure v1.0 — executed, `P5 = PASS_COMPLETE` (2026-10-06)
+
+- File: `FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt`
+- **Delivered** bytes: SHA-256 `860e00976b242f15de1473455941140599a8a5cd639409521e7c38a28a64514c`, 36,458 bytes,
+  1,821 lines, CRLF-terminated (1,821 `\r\n` pairs, no lone `CR`, no final newline), measured from the
+  attachment this session was given before copying it here. `cmp` against the copy returns identical, so this
+  entry archives the delivered bytes and does **not** reconstruct them (§2's own instruction).
+- **Git-stored blob**: object `f00751304ebf789f67b8b5355864a5ca3eefcd5c`, SHA-256
+  `6cacd10ee1eff4a6c4ab90b4f9d51df987bad16cf94fe142961c0d37fd749c66`, 34,637 bytes, 1,821 LF, no `CR`, no final
+  newline.
+- **The two hashes differ only because of transport, and that is proved.** `.gitattributes` carries
+  `*.txt text eol=lf`; the byte delta is exactly the CR count (36,458 − 34,637 = 1,821), and comparing the
+  delivered file split on `\r\n` against the stored blob split on `\n` gives 1,822 logical lines on each side
+  with **zero differing lines**. `.gitattributes` was not touched — the recorded rule here is to state both
+  digests and prove textual identity instead of weakening the integrity policy (`AGENTS.md` 9).
+- Authority: **the last authorized unit of P5**, canonical `P5_COMMIT_F3_FINAL_GOVERNANCE_CLOSURE`. The
+  Architect states in §0 that it independently re-verified F2R and fixes the authority it closure is built on:
+  `origin/main` = `a5ce7c43a1656966efbb9d2d99ea64d1aad27f97` (F2R2, Run `37453402452`, #71, attempt 1,
+  10 of 10), the product corrective head `fb5f62852a4c3b83bc472f5903bff214888ab621` (Run `37431977428`, #70,
+  attempt 1, 10 of 10), the intermediate docs commit `31f10c7dc35e4d1e563b6f340ad7618de5c72f79` carrying **no
+  run of its own**, counts 868 Rust / 225 UI in 8 files, gate 17 with drift 8, deny 1, core-smoke 3, package 4,
+  the 20/20 UI campaign, installed artifact id `11397938806` (NSIS `efbc45a3…d5fd4`, 3,886,598 bytes), the
+  three findings CLOSED, `P5_DESIGN_ACCESSIBILITY = PASS_FOR_FROZEN_DESKTOP_SCOPE`, and the owner-store gates
+  satisfied with `OWNER_STORE_OPENED_BY_F2R = NO`.
+- What F3 **is**: governance, evidence and indexing only. It re-reads the closure head, re-audits every P5 exit
+  criterion against current evidence (§6 — no required item may be `BLOCKED`), reconciles the L20 history in
+  `P5_SUPPORTABILITY_REPORT.md` (§8 and §23), moves the canonical state to `P5 = PASS_COMPLETE`,
+  `Productization = ENGINEERING_COMPLETE`, `active_task = NONE` while the product stays `MVP CANDIDATE`
+  (§15–§18), finalizes the execution report and CI authority with F2R2's row and no invented F3 row (§19–§20),
+  sets the final exit-checklist states (§21), creates `P5_FINAL_CLOSURE_REPORT.md` (§22), runs the full local
+  gate plus the detached-worktree and `git archive` proofs (§27–§29), makes **one** governance commit
+  (§30), and then accepts remote CI for that commit (§32).
+- What F3 **is not**, in the prompt's own words: §4 forbids `apps/**`, `crates/**`, `scripts/**`,
+  `fixtures/**`, `schemas/**`, `golden/**`, `migrations/**`, `.github/**`, `Cargo.toml`, `Cargo.lock`,
+  `package.json`, `pnpm-lock.yaml`, `tauri.conf.json`, `deny.toml`, `rust-toolchain.toml` and
+  `assets/design-tokens.json`, and says STOP rather than "just fix one last thing"; §5 requires the direct
+  counts to stay exactly 868 and 225/8 or F3 stops; §7 carries F2R's bounded accessibility verdict without
+  upgrading it to WCAG, all-DPI or all-monitor; §9–§14 keep L15 carried on the wire, L26 closed by `ADR-0029`,
+  the carry-forward limitations honest, the measured performance wording intact, the release-readiness states
+  frozen, and the licence with the owner — with the explicit sentence that public open-source redistribution is
+  blocked by that owner decision; §24 forbids reinstalling the app or touching the owner's store, because F3
+  changes no product byte; §34 forbids an F4 written merely to record F3's own CI result; §37 ends the stage
+  with a STOP — V1, B1, private beta, RC, GA, signing, notarization, updater and commercialization all need a
+  **new** Architect prompt, and §13's narrative allowance stops at "FirmwareSight Productized MVP Candidate".
+- Where this round's verdict is written: the canonical state in `BASELINE.yaml` and the `.ai/` entry documents,
+  the evidence in `P5_VALIDATION/P5_EXIT_CHECKLIST.md`, `P5_EXECUTION_REPORT.md`, `P5_CI_AUTHORITY.md`,
+  `P5_SUPPORTABILITY_REPORT.md` and the new `P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md`. F3's own remote run is
+  external evidence read after the push (§32), reported to the Architect, and not written into the commit that
+  waits for it (§20, §31, §34).
+- **How it ended.** §1 preflight confirmed `HEAD = origin/main = a5ce7c4…d27f97` with a clean tree, and §6's
+  re-audit came back with **no required engineering item `BLOCKED`**, which is what licensed §15's sentence.
+  §2's archive rule was obeyed literally: the delivered file existed, so it was copied verbatim (`cmp` identical)
+  and both digests recorded rather than one hash reconstructed. The round changed no product byte, so §5's
+  counts stood still at **868 Rust / 225 UI in 8 files**, §25's allowlist proved zero hits in the forbidden
+  families from the staged diff, and §24 kept the app uninstalled and the owner's store unopened. It wrote
+  `P5 = PASS_COMPLETE`, `Productization = ENGINEERING_COMPLETE` and `active_task = NONE` in the repository's
+  existing vocabulary, added the missing **L12** row that §11 required and the exit checklist had asserted was
+  already there, reconciled L20's reopen/reclose sequence with dates instead of rewriting Commit E's
+  measurement, kept L15 split and L26 closed by `ADR-0029`, froze the ten release-readiness states as measured,
+  and stated §14's licence consequence rather than resolving it. It ended at §37's STOP: no V1, no B1, no beta,
+  no RC, no GA, no signing, no notarization, no updater, no new feature, and **no F4** — this is the final
+  repository commit of P5.
 
 ## Supersession note on the V0 Batch A activation entry
 
