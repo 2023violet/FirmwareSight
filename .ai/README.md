@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-04"
+last_updated: "2026-10-06"
 ---
 
 # AI Entry Point
@@ -85,10 +85,26 @@ authoritative drift gate, and `sha256sum -c SHA256SUMS` against a working tree i
 `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` before touching either tool). **L15
 stays `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`**, with its Evidence Inspector presentation residue CLOSED by
 F1's caption and **re-proved in the installed binary by F2**, by analysing the target ELF deliberately without
-its MAP. The present counts are 868 Rust / **219 UI** in 8 files with the local gate at **17 of 17**
-(drift **8 of 8**, deny 1/1, core-smoke 3/3) and the package group at 4 of 4 with no SKIP — **and F2 is the
-head that first had to hold those two test counts still**, since §37 treats a moved count on a docs-only round
-as evidence that the round is not docs-only. No P5 verdict exists and the product stays
+its MAP. The counts **as Commit F2 left them on 2026-10-05** were 868 Rust / **219 UI** in 8 files with the local gate
+at **17 of 17** (drift **8 of 8**, deny 1/1, core-smoke 3/3) and the package group at 4 of 4 with no SKIP —
+and F2 was the first head that had to hold those two numbers still, since a docs-only round that moves a count
+is a product change wearing a documentation diff.
+**Commit F2R landed on 2026-10-06 as the narrow corrective the Architect inserted between F2 and F3**, in two
+heads: **F2R1** `fb5f628` fixed F2's three installed findings inside `apps/desktop/ui/src/**` and nowhere else
+— the Analyze Sections prose column (S2), History's clipped `Details` (S3), Release printing the raw Core enum
+`MapRegionAndElfLoad` (S3) — with **no design token changed and no contract, schema, migration, Rust or
+dependency movement**; and **F2R2** is the evidence head that downloaded and installed **F2R1's own** CI
+artifact (run `37431977428`, **10 of 10 on attempt 1**; artifact id `11397938806`, installer
+`efbc45a3…d5fd4`), revalidated all three on a real window at 1024×720 / 1056×799 / 1440×900, then uninstalled
+and restored the owner's store byte-exact. **The present counts are 868 Rust / 225 UI in 8 files** on the same
+17-step gate, and F2R2 holds both numbers identical to F2R1 because that equality is its own docs-only proof.
+Its verdict is `F2R = FINAL PASS / COMPLETE`, `F2 = PASS`, `P5 = IN_PROGRESS`, product **MVP CANDIDATE**,
+`F3 = READY_FOR_ARCHITECT_REVIEW` — **which is not the same as F3 being authorized**: F2R ends with a STOP and
+returns to the Architect, L20 is `CLOSED ACROSS VERIFIED HUMAN-FACING MEMORY-BASIS SURFACES`, and the §34
+verdict is `PASS_FOR_FROZEN_DESKTOP_SCOPE` on one host at 100 % scale with `WCAG_CERTIFICATION =
+NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED` and `SECOND_WINDOWS_HOST = NOT_TESTED` all unchanged. The
+twenty-part record is `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md`; what was measured before any CSS moved
+is `P5_F2R_UI_CORRECTIVE_DESIGN.md`. No P5 verdict exists and the product stays
 MVP CANDIDATE at 0.6.0)` ·
 `active_task: P5_PRODUCTIZATION` · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·

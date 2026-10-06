@@ -99,7 +99,10 @@ P5 real Windows install acceptance: PROVED ON THE INSTALLED F1 ARTIFACT (first r
         journey contiguously on the exact CI-built F1 installer on 2026-10-05** — install through final
         uninstall, twice, with the migration proof and the owner-data barrier. What that round did not cover is
         listed rather than rounded off: `P5_DESKTOP_ACCEPTANCE_REPORT.md` §7 and the boundaries in
-        `P5_MIGRATION_RECOVERY_REPORT.md` §4.
+        `P5_MIGRATION_RECOVERY_REPORT.md` §4. **Commit F2R then installed its own CI artifact on 2026-10-06** —
+        a *focused* revalidation of the three findings F2 raised at 1024×720 / 1056×799 / 1440×900 plus the
+        §33 smoke list, not a second §64 walk, and §9 of the acceptance report says exactly which F2
+        boundaries that left untouched.
         Evidence P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md, P5_DESKTOP_ACCEPTANCE_REPORT.md
 P5 onboarding, Help and local History: BUILT, NOT YET ACCEPTED IN THE PACKAGE (2026-10-03). §13 guidance is
         one component read by Analyze's empty state and by Help; §14 Help reports the running binary's own
@@ -325,6 +328,70 @@ P5 Commit F2 (installed productization acceptance), documentation, evidence and 
         P5_EXIT_CHECKLIST.md, P5_RELEASE_READINESS.md. Verdict: **F2 = COMPLETE, P5 = IN_PROGRESS,
         F3 = READY_FOR_ARCHITECT_REVIEW** — and this head sets none of P5 PASS_COMPLETE, active_task NONE, a
         tag, a GitHub Release, a signature, a notarization, an updater or a licence.
+P5 Commit F2R (installed UI productization corrective), two heads (2026-10-06). Authorized by
+        FirmwareSight P5 Commit F2R Installed UI Productization Corrective Candidate v1.0 — Architect
+        Authorized, archived with both measured digests (delivered 5d8719ec…fb375 / 47,100 bytes / 2,117 CRLF
+        lines; stored blob 6281f5d2…fe4ed / 44,984 bytes / 2,116 LF lines). It exists because Commit F2
+        measured three product findings on an installed binary it was forbidden to patch, and the Architect
+        chose a narrow corrective over letting F3 inherit them.
+        **F2R1 `fb5f628` is the only head here that contains product code, and all of it sits in
+        apps/desktop/ui/src/**.** F2R-01 (S2): Analyze → Sections laid its prose column out one character per
+        line, because display: block on the `<table>` pinned the box to the pane and let its columns sit *below
+        their own minimum* while overflow-wrap: anywhere made that minimum one character. F2R-02 (S3):
+        History's Details was the **last** cell of a table whose rigid minimum measures 939 px against a 736 px
+        pane, so the only action on the row was the thing that fell off the right edge. F2R-03 (S3): Release
+        printed the Core enum MapRegionAndElfLoad at a person. The repair is one mechanism, measured first
+        (P5_F2R_UI_CORRECTIVE_DESIGN.md keeps the probe numbers, the negative control that a wrapper alone does
+        not fix it, and the 195 px / 163 px occlusion that is why sticky pinning was rejected): a `.viewport`
+        wrapper owns overflow-x: auto, the tables are tables again, prose cells take a 24ch measure with
+        break-word, the Unknown reason moves onto its own line, the History action moves to the leading cell
+        (the Evidence table's own precedent), and one shared UI-only evidenceBasis.ts feeds Compare, Release and
+        the Analyze weakest-basis sentence the same caption for the same basis. **No design token byte changed,
+        no pixel constant invented, no dependency, no capability, no schema, migration or contract movement** —
+        analysis:1, diff:1, gate-results:1, accepted-reviews:1, release-manifest:1, SQLite schema 5, migrations
+        0001–0005, ADR-0028, ADR-0029 and elf.program-header are untouched, because this round is
+        display/layout only. Counts at the F2R1 tree: **868 Rust unchanged / 225 UI in the same 8 files**
+        (219 + 6: one details contract, two history contracts, one Analyze caption, two Release captions), four
+        mutation proofs each reddening their own test, full gate **17 of 17** with drift 8/8, deny 1/1,
+        core-smoke 3/3, package 4/4 and no SKIP, and a §22 reliability campaign of **20 fresh-process
+        repetitions, 20 green**. Remote: Run `37431977428` (#70), **attempt 1, 10 of 10**, every job and step
+        read individually, with 868 Rust / 225 UI taken out of the runner's own logs.
+        **F2R2 is this head: docs, evidence and governance only, with both counts held identical to F2R1** —
+        which is §43's own proof that a documentation round is not a product change wearing a documentation
+        diff. It downloaded and installed **F2R1's own CI artifact** (§26 forbids borrowing F1's
+        `11337963032`, F2's binary, or any local cargo/tauri build): artifact id `11397938806`,
+        FirmwareSight_0.6.0_x64-setup.exe 3,886,598 bytes `efbc45a3…d5fd4`, installed
+        firmwaresight-desktop.exe 15,362,048 bytes `2cf01a6d…670b`, verified against the set's own
+        SHA256SUMS.txt before it ran, with the bundler's 3-byte `__TAURI_BUNDLE_TYPE_*` rewrite checked on the
+        installed bytes rather than taken on trust. The owner's store was parked with digests first
+        (OWNER_STORE_PARKED / OWNER_BACKUP_HASH_MATCH = YES / YES) and a copy of F2's preserved disposable v5
+        store seeded the live slot; the product was never pointed at owner data. Focused revalidation at
+        **1024×720, 1056×799 and 1440×900** — all three findings **CLOSED** on the installed window, `Details`
+        surviving SPACE close/reopen under a visible focus ring, Release reading "ELF address/flags evidence"
+        and **"MAP regions + ELF load evidence"** with no raw enum on that surface or on Analyze's
+        weakest-basis line. §33 smoke green (Analyze, Compare, Gate twice, History, Diagnostics) with no crash,
+        no new path leak, no new S0 and no new S1. §34 gives **P5_DESIGN_ACCESSIBILITY =
+        PASS_FOR_FROZEN_DESKTOP_SCOPE and nothing more** — one host at 96 dpi / 100 % scale, with
+        WCAG_CERTIFICATION = NOT_PERFORMED, MULTI_DPI_125_150 = NOT_TESTED and SECOND_WINDOWS_HOST =
+        NOT_TESTED unchanged — and one trade is recorded rather than glossed: at 1440×900 the corrected Sections
+        table now needs a contained scroll of about 1.06× the pane, where the pre-fix layout fitted the pane by
+        being unreadable. §35 closes **L20 across verified human-facing memory-basis surfaces** (Compare →
+        REOPENED_BY_F2 on Release → CLOSED_BY_F2R) without rewriting Commit E's sentence, and the §13 re-audit
+        records ConfiguredRegionAndElfLoad and InsufficientEvidence as **spellings with no code behind them**
+        rather than mapping invented semantics. Uninstalled with "Delete the application data" read
+        (BM_GETCHECK) as unchecked and deliberately left unchecked — that option is **still NOT_TESTED_BY_DESIGN**,
+        for the same reason F2 gave — then the disposable store's final bytes were preserved, its three live
+        files removed, and the owner's store restored byte-exact: **ORIGINAL_DB_RESTORED = YES,
+        ORIGINAL_DB_SHA_MATCH = YES, OWNER_STORE_OPENED_BY_F2R = NO**. Harness facts owned, not buried: one
+        refused installer click (POINT_OWNED_BY_OTHER_WINDOW — a Chrome window owned the pixel and no input was
+        sent), one mis-set installer step table, one FOREGROUND_NOT_ACQUIRED retried only after raising the app
+        window, and a geometry driver that first matched somebody else's window and was fixed with
+        require_app() **before** any installed evidence existed. Evidence root
+        `FirmwareSight-P5-F2R-20261005T221112`, outside the repository. Verdict: **F2R = FINAL PASS / COMPLETE,
+        F2 = PASS, P5 = IN_PROGRESS**, product stays **MVP CANDIDATE** at `0.6.0`,
+        **F3 = READY_FOR_ARCHITECT_REVIEW and is not authorized here** — F2R's own prompt ends in a STOP. This
+        head sets no P5 completion token, no active_task NONE, no tag, no GitHub Release, no signature, no
+        notarization, no updater and no licence.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 

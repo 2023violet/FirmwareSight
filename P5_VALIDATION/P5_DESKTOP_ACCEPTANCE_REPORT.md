@@ -6,7 +6,7 @@ version: "0.6.0"
 status: "IN_PROGRESS"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-05"
+last_updated: "2026-10-06"
 ---
 
 # P5 — the §64 journey, walked end to end on the installed F1 build
@@ -177,3 +177,39 @@ send the round back to the Architect rather than forward to F3.
 
 Evidence root: `FirmwareSight-P5-F2-20261005T073141`, outside this repository, with the running log at
 `18_summary/JOURNEY_LOG.md`.
+
+## 9. Addendum — the three product findings this report raised, and how F2R closed them (2026-10-06)
+
+Nothing in §6, §7 or §8 above is rewritten. This report stays the record of what F2 measured on the **F1**
+artifact, including that F2 was forbidden to patch anything it found (§35), and that the artifact under test
+was F1's `11337963032`.
+
+The Architect answered §6's three PRODUCT rows with one narrow corrective rather than letting F3 start
+around them: *FirmwareSight — P5 Commit F2R — Installed UI Productization Corrective, Execution Prompt
+v1.0*, executed as **F2R1** `fb5f628` (the product fix) and **F2R2** (the evidence head that writes this
+paragraph). The full record is `P5_F2R_UI_CORRECTIVE_REPORT.md`; the mechanism, the measurements and the
+rejected alternatives are in `P5_F2R_UI_CORRECTIVE_DESIGN.md`.
+
+| §6 finding | F2 grade | Closed by | Re-measured on |
+| --- | --- | --- | --- |
+| Analyze sections table collapses its text column at a narrow window | **S2** | `.viewport` wrapper owns the scroll, the table keeps its intrinsic minimum, prose wraps at a `24ch` measure, the Unknown reason moves to its own line | F2R1's own CI-built Windows artifact (`11397938806`, installer `efbc45a3…d5fd4`), installed at 1024×720, 1056×799 and 1440×900 — **CLOSED** |
+| History's "Details" clipped at the default width | **S3** | the row action moved to the **leading** cell of every row and header row, the placement this round's own Evidence table already used | same artifact, same three sizes, plus `SPACE` close/reopen with a visible focus ring — **CLOSED** |
+| Release prints the raw Core enum `MapRegionAndElfLoad` | **S3** | one shared UI-only caption map, `apps/desktop/ui/src/evidenceBasis.ts`, read by `Release.tsx`, `Compare.tsx` and `Analyze.tsx`; stored value and wire token unchanged, caption never serialized | same artifact: "ELF address/flags evidence" without a MAP, **"MAP regions + ELF load evidence"** with one — **CLOSED** |
+
+What this report still claims and the corrective does **not** change:
+
+- **The journey this file documents was F2's, on F1's bytes.** F2R ran a *focused* revalidation (§30–§33),
+  not a second §64 walk, and did not re-prove the migration, bundle, relocation or repair paths.
+- **§7's boundaries all still stand.** One installed migration path; the owner's store still at schema v2;
+  WebView2 still an untested negative; the uninstaller's "Delete the application data" option **still never
+  exercised** — F2R read it as unchecked with `BM_GETCHECK` and deliberately left it alone, for the same
+  reason this round did; and one host, one DPI setting, one WebView2 version.
+- **New residue, stated here rather than buried:** at 1440×900 the corrected Sections table needs a small
+  contained horizontal scroll (≈1.06× the pane) that the pre-fix squeezed layout did not have, because the
+  pre-fix layout fitted the pane by being unreadable.
+- F2R found no new S0 and no new S1. Its harness notes — one refused click that would otherwise have gone to
+  a browser window, one mis-set step table, one lost foreground that was retried only after raising the app
+  window, and a geometry driver that initially matched somebody else's window and was fixed before any
+  installed action — are in `11_harness/DRIVER.txt` and `10_install/INSTALL_RECORD.txt`, classified as
+  harness, and kept.
+

@@ -342,6 +342,45 @@ last_updated: "2026-10-06"
   `active_task NONE`, no tag, no GitHub Release, no signature, no notarization, no updater, no licence choice
   — §34's states are recorded in `P5_VALIDATION/P5_RELEASE_READINESS.md` and the F2 prompt returns the round
   to the Architect rather than forwarding it.
+- **Commit F2R2 lands on 2026-10-06 and it is the read-back head: F2R1's three findings are now closed on a
+  real machine, and this head contains no product code.** The §26 artifact is run `37431977428`'s own Windows
+  package — artifact id `11397938806`, installer `FirmwareSight_0.6.0_x64-setup.exe` 3,886,598 B
+  `efbc45a3…d5fd4`, installed `firmwaresight-desktop.exe` 15,362,048 B `2cf01a6d…670b`, verified against the
+  set's own `SHA256SUMS.txt` before it was run; F1's `11337963032`, F2's binary and any local
+  `cargo`/`tauri` build were all excluded by §26 and were not used. The focused revalidation ran with the
+  owner's store parked (`OWNER_STORE_PARKED = YES`, `OWNER_BACKUP_HASH_MATCH = YES`) and restored
+  byte-exact (`ORIGINAL_DB_RESTORED = YES`, `ORIGINAL_DB_SHA_MATCH = YES`,
+  `OWNER_STORE_OPENED_BY_F2R = NO`), against a copy of F2's preserved disposable v5 store. **All three
+  findings CLOSED at 1024×720, 1056×799 and 1440×900** (§30–§32): Sections prose wraps at a readable measure
+  with the table area owning the scroll, `Details` leads every History row and was closed and reopened with
+  `SPACE` under a visible focus ring, and Release renders "ELF address/flags evidence" and **"MAP regions +
+  ELF load evidence"** with no raw enum on either that surface or the Analyze weakest-basis line. §33's smoke
+  (Analyze, Compare, Gate twice, History, Diagnostics) passed with no crash, no new path leak and no new S0
+  or S1. **§34 gives `P5_DESIGN_ACCESSIBILITY = PASS_FOR_FROZEN_DESKTOP_SCOPE` and nothing beyond it** — one
+  host at 96 dpi / 100 % scale, with `WCAG_CERTIFICATION = NOT_PERFORMED`,
+  `MULTI_DPI_125_150 = NOT_TESTED`, `SECOND_WINDOWS_HOST = NOT_TESTED` unchanged, and one trade recorded
+  rather than glossed: at 1440×900 the corrected table now needs a contained scroll of about 1.06× the pane
+  where the pre-fix layout fitted the pane by being unreadable. §35 moves **L20 to CLOSED ACROSS VERIFIED
+  HUMAN-FACING MEMORY-BASIS SURFACES** (Compare → REOPENED_BY_F2 on Release → CLOSED_BY_F2R) without
+  rewriting Commit E's historical sentence, and the §13 re-audit records the two prompt spellings that have
+  no code behind them (`ConfiguredRegionAndElfLoad`, `InsufficientEvidence`) as **not found** rather than
+  mapping invented semantics.
+  What F2R2 writes: `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md` (§37's twenty parts, and it does not
+  contain P5's completion token), the §38 addenda to `P5_KNOWN_LIMITATIONS.md` §8, `P5_EXIT_CHECKLIST.md`
+  §4–§6, `P5_DESKTOP_ACCEPTANCE_REPORT.md` §9 and `P5_EXECUTION_REPORT.md` §6, and `P5_CI_AUTHORITY.md`'s
+  F2 and F2R1 rows — where F2's run #69 is recorded as **three attempts** (7 jobs then 4 jobs cancelled with
+  **0 executed steps**, §25's allocation class, and a 10-of-10 third attempt) and `d1dc61c` is recorded as
+  having **no run of its own**, because one push of two commits produces one run at the tip. F2R1's own run
+  was read job by job and step by step: **10 of 10 on attempt 1**, with `868 Rust / 225 UI` taken out of the
+  runner's logs rather than recalled. §42's docs-only rule is proved by §43's count rule: **868 Rust and 225
+  UI in 8 files, identical to F2R1** — a documentation head that moved either number would be a product
+  change wearing a documentation diff. Harness facts owned rather than buried: one refused installer click
+  (`POINT_OWNED_BY_OTHER_WINDOW`, a Chrome window owned the pixel, no input sent), one mis-set installer step
+  table, one `FOREGROUND_NOT_ACQUIRED` retry, and a geometry driver that initially matched a window titled
+  "Claude" and was fixed with `require_app()` **before** any installed evidence existed.
+  `F2R = FINAL PASS / COMPLETE`, `F2 = PASS`, `P5 = IN_PROGRESS`, product **MVP CANDIDATE**. **F3 stays
+  Architect-controlled**: §46 ends this round with a STOP, no F3 work was started, no P5 completion sentence,
+  no `active_task NONE`, no tag, release, signature, notarization or updater appears anywhere in it.
 - **Commit F2R1 lands on 2026-10-06 and it is a narrow UI corrective, not a new layer.** Authorized by
   *FirmwareSight — P5 Commit F2R Installed UI Productization Corrective Candidate, Execution Prompt v1.0 —
   Architect Authorized*, archived with both of its measured digests (delivered `5d8719ec…fb375`, 47,100

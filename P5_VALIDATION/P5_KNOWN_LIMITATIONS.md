@@ -6,7 +6,7 @@ version: "0.6.0"
 status: "IN_PROGRESS"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-05"
+last_updated: "2026-10-06"
 ---
 
 # P5 — known limitations, as the installed build leaves them
@@ -40,7 +40,7 @@ Disposition words are the ones P5 already uses: **CLOSED**, **CLOSED BY REVALIDA
 | L15 | `ElfProgramHeader` source label | **CLOSED for presentation**, **CARRIED_FORWARD for the wire** — see §3 | the display-only half is what closed |
 | L16 | `custom-protocol` needed by hand | **CLOSED** | the package group builds 4/4 with `cargo tauri build -- --locked` and no manual feature flag |
 | L19 | "Object attribution" meant two things | **CLOSED** | Analyze and Compare now name their own scope, each with a test |
-| L20 | Compare printed a Core enum word | **CLOSED** | closed display mapping over the five current variants plus an Unknown-safe fallback |
+| L20 | Compare printed a Core enum word | **CLOSED**, then **REOPENED_BY_F2**, now **CLOSED** again — see §8 | Commit E closed the display mapping over the five current variants plus an Unknown-safe fallback. F2 then found the same shape on the Release surface, which that closure had never covered, and Commit F2R reclosed it on 2026-10-06 across every human-facing memory-basis surface found, installed on its own CI-built artifact |
 | L21 | Window title fixed at "…- Analyze" | **CLOSED** | the title now tracks the page in Rust over a closed page enum. F2 read it off the installed window on all five pages: `FirmwareSight - Analyze / Compare / Release / History / Help` |
 | L14 | `update_goldens.py` key order, unverified | **CLOSED BY REVALIDATION** | dry-run twice, 14 goldens `unchanged`, tree clean afterwards |
 | L24 | `update_goldens.py` cannot rerun over its Windows leftover | **CLOSED / NOT_REPRODUCED ON CURRENT HEAD** | second dry-run over the scratch the first left, no `PermissionError [WinError 5]` |
@@ -124,3 +124,53 @@ candidate under test. Three are product presentation or layout observations for 
 page's Evidence basis column printing the raw Core enum word `MapRegionAndElfLoad` while every other page
 prints human text, which is L20's shape reappearing on a surface L20 did not cover). The rest belong to
 the test driver, and they are listed there under their own heading rather than quietly dropped.
+
+*(as written by Commit F2 on 2026-10-05; left intact as the record of what it found. The three findings above
+were taken by the Architect as a corrective rather than as F3's opening problem — see §8 for what F2R closed
+and on which artifact.)*
+
+## 8. Addendum — what Commit F2R closed on 2026-10-06, in date order
+
+F2 measured three product findings on the installed F1 artifact and, by its own §35, could not patch them.
+The Architect answered with a narrow corrective instead of letting F3 start around them: *FirmwareSight —
+P5 Commit F2R — Installed UI Productization Corrective, Execution Prompt v1.0*, executed as two heads —
+**F2R1** `fb5f628` (the product fix) and **F2R2** (this record). Report:
+`P5_F2R_UI_CORRECTIVE_REPORT.md`; mechanism and rejected alternatives: `P5_F2R_UI_CORRECTIVE_DESIGN.md`.
+
+F2's rows above are **not** rewritten. F2 discovered the issues; F2R closed them; the grading in
+`P5_DESKTOP_ACCEPTANCE_REPORT.md` §6 and F2's run #69 attempt history both stay as they were written.
+
+| Finding F2 raised | Disposition now | What closed it, and what it does not cover |
+| --- | --- | --- |
+| Analyze → Sections collapses its prose column at a narrow window (F2 **S2**) | **CLOSED ACROSS THE THREE FROZEN SIZES, INSTALLED** | `Details.module.css`/`Details.tsx`: a `.viewport` wrapper owns `overflow-x: auto`, the table returns to `display: table` so it keeps its intrinsic minimum, prose takes `overflow-wrap: break-word` with a `24ch` measure, and the Unknown reason moves onto its own line. Re-measured on F2R1's own CI-built artifact at 1024×720, 1056×799 and 1440×900. Does **not** cover a window narrower than the frozen 1024 minimum, nor any DPI but 100 % |
+| History's `Details` clipped at the default width (F2 **S3**) | **CLOSED, INSTALLED** | The action moved to the **leading** cell of every row and header row in all three table families — the placement the Evidence table already used — so it is the one control that cannot fall off the right edge. `Details` stays a text button with `aria-expanded`; keyboard close/open with `SPACE` re-verified on the installed window. Does not make the tables fit without scrolling at every width; it makes the action reachable |
+| Release printed the raw Core enum `MapRegionAndElfLoad` (F2 **S3**) | **CLOSED, INSTALLED** | New `apps/desktop/ui/src/evidenceBasis.ts` holds the captions `Compare.tsx` used to inline, and `Release.tsx`, `Compare.tsx` and `Analyze.tsx` all read that one map. Installed evidence: "ELF address/flags evidence" without a MAP, **"MAP regions + ELF load evidence"** with one. The stored value, the DTO and the wire token are unchanged and the caption is never serialized |
+
+**L20, restated with its whole history.** Closed on Compare in Commit E → **REOPENED_BY_F2** for the Release
+surface → **CLOSED_BY_F2R ACROSS VERIFIED HUMAN-FACING MEMORY-BASIS SURFACES** (Release's Evidence basis
+column, the Analyze weakest-basis sentence, and Compare, which already read the same map). The §13 re-audit
+classified every remaining hit as domain, wire, display-map, test data or documentation, and found no
+human-facing surface printing a memory-basis value raw. Two spellings that prompt names carry no code behind
+them — `ConfiguredRegionAndElfLoad` (real variant `RegionConfigAndElfLoad`) and `InsufficientEvidence` (real
+variant `Insufficient`) — and were **not** added to the map, because inventing semantics is the other half of
+the same prohibition that made this row necessary.
+
+**Rows this round did not move.** L15's wire half stays `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`. F2-1 and
+F2-2 stay exactly as written: installed migration is still one path, and the owner's real store on this
+machine is still at schema v2, so the chained v2 → v5 installed upgrade remains unexecuted. F2-3's WebView2
+negative is untested. The uninstaller's "Delete the application data" option was offered again on the F2R1
+artifact, read with `BM_GETCHECK` as unchecked, and **left unchecked and still unexercised** — F2R had the
+same reason F2 did, which is that this folder holds unrelated historical stores from earlier phases. The
+install directory's post-uninstall behaviour is still not rule-bound; on F2R1's uninstall it was removed
+entirely, which is one more observation and not a pattern.
+
+**New residue this round created, named rather than smoothed.** At 1440×900 the corrected Sections table now
+needs a small **contained** horizontal scroll (content ≈1.06× the pane, i.e. about the Index column's width)
+to reach its last column, where the pre-fix layout fitted the pane by rendering one character per line. The
+table area owns that scroll, which is what the design authority asks for; the alternative that scrolls 0 at
+the target leaves a 71 × 120 px prose column at 1024. `P5_F2R_UI_CORRECTIVE_DESIGN.md` §7 records both
+numbers. And the Design / Accessibility verdict in `P5_EXIT_CHECKLIST.md` §4 is
+`PASS_FOR_FROZEN_DESKTOP_SCOPE` — a scope statement on one host at 100 % scale, with
+`WCAG_CERTIFICATION = NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED`,
+`SECOND_WINDOWS_HOST = NOT_TESTED` unchanged.
+

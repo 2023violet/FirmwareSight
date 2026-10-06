@@ -6,7 +6,7 @@ version: "0.6.0"
 status: "IN_PROGRESS"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-05"
+last_updated: "2026-10-06"
 ---
 
 # P5 — execution report
@@ -115,3 +115,49 @@ both outcomes and no rule has been worked out.
   nothing" for most of the round: the driver raised whatever window owned the target pixel, and a browser
   window covering the work area was swallowing installer clicks. Two wizard events earlier classified
   ENVIRONMENT are reclassified HARNESS. The detail is `P5_DESKTOP_ACCEPTANCE_REPORT.md` §6.
+
+## 6. Addendum — what Commit F2R changed in the record (2026-10-06)
+
+Sections 1–5 above are F2's and stay as F2 wrote them, including the finding that F2's prompt forbade it from
+touching `apps/**` and the note about the reconstructed prompt file. What follows is the part of the stage
+that happened after it.
+
+**Why F2R exists.** F2 closed the §64 journey and, in the same report, raised three product findings it could
+not fix. The Architect chose a narrow corrective between F2 and F3 rather than letting F3 inherit them, and
+F2R's prompt scopes it to exactly those three findings, exactly one product path (`apps/desktop/ui/src/**`),
+and exactly two heads.
+
+**What landed.**
+
+| Head | Content | Proof it carries |
+| --- | --- | --- |
+| `fb5f628` (**F2R1**) | the three fixes plus six new UI tests, the design record, the archived F2R prompt, `DIRECTORY_TREE.txt` and `SHA256SUMS` | run `37431977428` (#70) **10 of 10 on attempt 1**; 868 Rust / 225 UI read out of the runner's own logs; its Windows artifact `11397938806` was downloaded, installed, and used for the focused revalidation |
+| **F2R2** (this head) | evidence, dispositions and governance only — `P5_F2R_UI_CORRECTIVE_REPORT.md` plus the addenda in `P5_KNOWN_LIMITATIONS.md` §8, `P5_EXIT_CHECKLIST.md` §4–§6, `P5_DESKTOP_ACCEPTANCE_REPORT.md` §9, `P5_CI_AUTHORITY.md`'s F2 and F2R1 rows, and the `.ai` entry documents | §43's count rule: **868 Rust / 225 UI in 8 files, identical to F2R1.** A docs-only head that moved either number would be a product change wearing a documentation diff |
+
+**The three findings, in one line each.** F2R-01 (S2): `display: block` on the `<table>` plus
+`overflow-wrap: anywhere` on the reason column made that column's minimum one character, so it absorbed the
+whole deficit between the pane and the table's real minimum — fixed by giving a `.viewport` wrapper the scroll
+axis, letting the table keep its intrinsic minimum, and bounding the prose at a `24ch` measure. F2R-02 (S3):
+History's action was the **last** cell of a table whose rigid minimum measured 939 px against a 736 px pane,
+so it sat 195 px past the right edge — fixed by making it the leading cell, the placement the Evidence table
+already used. F2R-03 (S3): Release printed `row.basis` straight — fixed by one shared caption map that Compare
+already owned and three surfaces now read.
+
+**Method notes the next reader will want, in the same spirit as §5.**
+
+- Evidence root `FirmwareSight-P5-F2R-20261005T221112`, outside the repository, 21 numbered directories. The
+  owner's store was parked with digests before install and restored byte-exact afterwards
+  (`OWNER_STORE_OPENED_BY_F2R = NO`); only the disposable live store's files were removed, and their final
+  bytes were preserved first.
+- The desktop driver was hardened **before** any installed action: `require_app()` refuses with `NO_PROCESS`
+  / `NO_WINDOW` rather than falling back to some other application's window, and every click still passes the
+  pixel-ownership guard that refused one real click during this round. Only documented Win32 entry points; no
+  `WM_*` message ids, no CDP, no injected `click()`, no direct IPC, no SQL writes.
+- Two §21/§22 runs were **superseded rather than deleted**, because three comment-only lines moved while they
+  were running. The kept files say they back no claim.
+- vitest emits colour escapes; a plain grep for its summary text matches nothing in the campaign log. The
+  counts were taken with the escapes stripped, and the record states that.
+- One transcription typo in `06_local_validation/S21_S22_FINAL.txt` ("225 files" for "8 files") was corrected
+  against the log it quotes, in place, with the correction dated and the log line reproduced — the file itself
+  is the evidence, and the edit is visible inside it.
+

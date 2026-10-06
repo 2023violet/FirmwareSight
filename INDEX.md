@@ -81,7 +81,8 @@ asserted two snapshot files differ when the only difference its fixtures offered
 timestamp, so the claim was a race with a clock. The repair names the difference instead of timing it, and the
 failed head keeps its row in `P5_VALIDATION/P5_CI_AUTHORITY.md`.
 
-**Commit E is the present tree: 868 Rust / 217 UI in 8 files, `check.py` 16 steps, the same 10 authoritative
+**Commit E was the present tree when this line was written on 2026-10-04: 868 Rust / 217 UI in 8 files,
+`check.py` 16 steps, the same 10 authoritative
 CI jobs, package group 4 of 4 with no `SKIP`.** It ran under its own prompt (SHA-256 `030ca282…ba21148`,
 53,915 bytes, 2,459 LF lines, §0–§64) and did three things: it widened the committed cohort with
 `fixtures/elf/p5-compat/` — 6 new sets, 31 new files, manifest 25 → 56, all built here by real
@@ -98,6 +99,15 @@ read-back is Run `37228929762` at head `59d85c3` — attempt 1, **10 of 10**, ev
 E1 head `859648e` carrying no run of its own because one push moved both commits; §7a of the fixture report
 holds the clean detached worktree that proves the same bytes again without a compiler on `PATH`. Commit E's
 §59 read-back successor `6981625` came back **10 of 10** on Run `37230689636`, attempt 1.
+**The tree moved three times after that line, and the present numbers are these.** Commit F1 `0bca373` made
+the gate **17 steps** (drift gained `baseline integrity`) and the UI suite **219**; Commit F2 was
+documentation-only and held both counts; **Commit F2R1 `fb5f628`** fixed F2's three installed UI findings and
+took the UI suite to **225 in the same 8 files** while Rust stayed **868**, and **Commit F2R2** is the
+evidence head that installed F2R1's own CI artifact and revalidated them on a real window — it holds **868 /
+225** unchanged because §43 treats a moved count on a docs-only head as proof the head is not docs-only. The
+authoritative CI set is still the same ten jobs, package group 4 of 4 with no `SKIP`, and `P5 = IN_PROGRESS`
+with the product at **MVP CANDIDATE** — F2R ended in a STOP, so **F3 remains Architect-controlled** and no P5
+closure sentence exists anywhere in this repository.
 **Commit E closure normalization (2026-10-04), documentation only.** Two evidence-contract fixes and one answer,
 with zero product source: the matrix status column closed to
 `SUPPORTED / SUPPORTED_WITH_LIMITS / CI_BUILD_ONLY / NOT_TESTED / UNSUPPORTED` (38 cells checked programmatically,
@@ -178,12 +188,22 @@ P5_PRODUCTIZATION`
     nobody), `P5_HISTORY_DIAGNOSTICS_REPORT.md` (History read back after its source project moved, and the
     diagnostics export proved path-free), `P5_SECURITY_SUPPORTABILITY_REVIEW.md`, `P5_KNOWN_LIMITATIONS.md`
     (the file `Help.tsx:50` already pointed at and which did not exist until this round),
-    `P5_EXECUTION_REPORT.md`, `P5_EXIT_CHECKLIST.md`, `P5_RELEASE_READINESS.md`
+    `P5_EXECUTION_REPORT.md`, `P5_EXIT_CHECKLIST.md`, `P5_RELEASE_READINESS.md`. **Commit F2R's two, landing
+    2026-10-06:** `P5_F2R_UI_CORRECTIVE_DESIGN.md` (written before the code moved — the measured root cause of
+    both table defects, the negative control that a wrapper alone does not fix it, the 195 px / 163 px
+    occlusion that is why sticky pinning was rejected, and the design-token compliance argument) and
+    `P5_F2R_UI_CORRECTIVE_REPORT.md` (§37's twenty parts: the exact F2R1 CI artifact that was installed, the
+    three findings revalidated at 1024×720 / 1056×799 / 1440×900, the owner-store park and byte-exact restore,
+    and the bounded `PASS_FOR_FROZEN_DESKTOP_SCOPE` verdict that is not a WCAG claim).
 
 `DIRECTORY_TREE.txt` and `SHA256SUMS` began life as the regenerated **v0.6.0** baseline record and are now
 regenerated on **every** commit that changes the tracked set — the tree first, `SHA256SUMS` last, then
 `python scripts/verify_baseline_artifacts.py` (**813 lines and 693 entries** at Commit F1: 695 tracked paths,
-**822 lines and 702 entries** at Commit F2: 704 — nine documents added, no path removed; of the tracked set the
+**822 lines and 702 entries** at Commit F2: 704 — nine documents added, no path removed; **825 lines and 705
+entries** at Commit F2R1 `fb5f628`: 707 — three paths added, the archived F2R prompt, its design record and
+`apps/desktop/ui/src/evidenceBasis.ts`, with no path removed; **826 lines and 706 entries** at Commit F2R2:
+708 — exactly one path added, the documentation file `P5_VALIDATION/P5_F2R_UI_CORRECTIVE_REPORT.md`, nothing
+removed, so this head adds no product path at all; of the tracked set the
 two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
