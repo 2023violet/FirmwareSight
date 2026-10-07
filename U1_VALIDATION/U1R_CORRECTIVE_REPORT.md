@@ -91,7 +91,7 @@ depended on for the same label on that page.
 Changed product paths, all three inside the UI layer:
 
 ```text
-apps/desktop/ui/src/Analyze.tsx        +52 -19
+apps/desktop/ui/src/Analyze.tsx        +50 -21
 apps/desktop/ui/src/Details.tsx        +12 -1
 apps/desktop/ui/src/intake.test.tsx    +142 -0
 ```
