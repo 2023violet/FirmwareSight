@@ -25,9 +25,22 @@ last_updated: "2026-10-07"
   `ENGINEERING_COMPLETE`, G2 `PASS`, **`MVP_CANDIDATE`** at `0.6.0`, and U1 claims no stage — not G3, not B1, not
   RC, not GA. Counts: **868 Rust (unchanged) / 236 UI in 9 files (was 225 in 8)**, 17-step gate shape unchanged
   and run **17 of 17 PASS with no SKIP** at the fully staged closeout,
-  no new IPC command (27), and the one non-CSS change is the additive `MainWindowPage::Overview` title variant
+  no new IPC command (the registry holds 30 at `f481b78` and 30 at `7dc2ca8`; the 27 an earlier draft of this
+  line carried was wrong and is corrected in `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md` §2), and the one
+  non-CSS change is the additive `MainWindowPage::Overview` title variant
   declared in `BASELINE.yaml`'s `u1_execution.non_css_change`. Evidence and verdict:
   `U1_VALIDATION/U1_VALIDATION_REPORT.md`.
+- **U1's status now: `READY_FOR_ARCHITECT_VISUAL_REVIEW`.** A second U1 unit ran the same day —
+  `U1_PUSH_CI_AND_INSTALLED_VISUAL_ACCEPTANCE` (prompt v1.1, Architect authorized) — and it is the round that
+  pushed `8efe9c8` + `7dc2ca8`, read remote run `37609108402` (#74, attempt 1) at **10 of 10**, installed the
+  Windows artifact that run built (id `11477857379`, installer `372631c3…`, installed executable
+  `afdc528b…`), and examined it on a real screen: six primary states at 1440×900, nine responsive captures at
+  1024×720 and 1056×799, a functional smoke pass on those same bytes, an eight-dimension convergence matrix, and
+  one open **U1-V2** presentation finding that was deliberately not self-waived. No U1-V3 or U1-V4 was observed.
+  The owner's store was parked and restored byte-exact; the machine is uninstalled again, as it was. Evidence:
+  `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md`, with the review pack outside Git under
+  `%TEMP%\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z\`. That status is **not** visual approval, not
+  `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
   eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
   `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause

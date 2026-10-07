@@ -142,7 +142,7 @@ recommendation `V1_INCOMPLETE_INSUFFICIENT_SAMPLE`, and the next move is **human
 (§47/§48). `P5` stays `PASS_COMPLETE`, `G2` stays `PASS`, the product stays `MVP_CANDIDATE` at `0.6.0`, L11 stays
 `CARRIED_FORWARD` (the row V1 exists to answer), and the counts held at **868 Rust / 225 UI in 8 files** on the
 same 17-step gate because §45 requires them not to move)` ·
-`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE` (the UI productization round that ran on 2026-10-07 and closed at first round; **V1 is paused with every state field intact**, `v1_execution.paused_for` naming this track) · open-source licence `PENDING OWNER CONFIRMATION` ·
+`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE` (the UI productization track that ran on 2026-10-07: the first round closed at first round, and its continuation round installed the CI-built product and inspected it, so **U1 is `READY_FOR_ARCHITECT_VISUAL_REVIEW`** with one U1-V2 finding open and unwaived; **V1 is paused with every state field intact**, `v1_execution.paused_for` naming this track) · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 

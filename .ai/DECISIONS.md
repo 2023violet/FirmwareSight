@@ -2080,6 +2080,12 @@ shape are unchanged — and it is pinned by `apps/desktop/src-tauri/tests/histor
 binding regenerated and proved by the `ipc bindings unchanged` drift step. No DTO, schema, migration, storage
 contract, analysis wire field, release identity rule or ADR-0028/0029 conclusion moved, and no new command was
 added: the desktop command count stays 27, and Overview renders DTOs the shell already returns.
+*Correction, same date, measured in the continuation round:* the count in that sentence is wrong. Reading
+`generate_handler![…]` in `apps/desktop/src-tauri/src/lib.rs` gives **30** commands at `08fdfcb`, `f481b78` and
+`7dc2ca8` alike — U1 added none and removed none, so the claim "no new command" stands and only the number was
+wrong. It predates P5 Commit C, which registered the three `list_history_*` commands. See
+`U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md` §2. The entry above is left as written because it is a dated
+record; this note is the correction.
 
 **Unused components were deleted rather than shipped.** The plan drafted a content/detail pair and a
 `DetailPanel` for the references' right-hand column. No page holds a selection to put in it, so the pair was

@@ -245,6 +245,13 @@ the tree's +25 lines being those twenty-three plus the two new directory rows `U
 tsx + module pairs, `Overview.tsx` with its CSS module, `stateWords.ts` and `overview.test.tsx`) and five under
 `U1_VALIDATION/`, and unlike every entry above this one, **the added paths are product code**: U1 is a UI round
 delivered by the owner's own prompt, so its 236 UI tests are the diff rather than a documentation overlay;
+**878 lines and 751 entries** at U1's visual-acceptance head later the same day (2026-10-07): 753 — three paths
+added and nothing removed, being the two archived revisions of the continuation prompt
+(`FirmwareSight_U1_Push_CI_Installed_Visual_Acceptance_v1.1.txt`, operative, and `…v1.0_prior_revision.txt`)
+under `10_AUDIT/SOURCE_PROMPTS/` plus `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md`. **No product path is among
+them and no product line moved**, because that round's successor commit is the docs/evidence commit its §21
+authorizes: the installed screenshots it records were taken from the CI bytes of the head before it, and any code
+change would have invalidated them;
 of the tracked set the
 two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).

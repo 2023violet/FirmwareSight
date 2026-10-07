@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-10-07"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07 — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, then installed and inspected the same day so U1 is READY_FOR_ARCHITECT_VISUAL_REVIEW — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
 
 ## Purpose
 
@@ -622,10 +622,17 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     `182506f2…63d12`. Nothing here is for an agent to do: recruitment, consent and moderation are the
     operator's (§47, §48), and writing a session file for a session that did not happen is the one thing the
     track forbids. Its pause field is `v1_execution.paused_for`.
-23. **U1, the round that just ran:** `U1_VALIDATION/U1_UI_GAP_AUDIT.md` (FS-U1-001 — what the tree agreed
+23. **U1, the track that is live now:** `U1_VALIDATION/U1_UI_GAP_AUDIT.md` (FS-U1-001 — what the tree agreed
     with the references about, the twelve measured gaps, and what was refused with the reason),
-    `U1_DESIGN_CONVERGENCE_PLAN.md` (FS-U1-002) and `U1_VALIDATION_REPORT.md` (FS-U1-003). §6 of the report
-    is the unfinished list, and §7 is the wording the round is allowed to use.
+    `U1_DESIGN_CONVERGENCE_PLAN.md` (FS-U1-002), `U1_VALIDATION_REPORT.md` (FS-U1-003) and
+    `U1_VISUAL_ACCEPTANCE_REPORT.md` (FS-U1-004 — the second round: push, remote CI read-back, the exact CI
+    artifact installed, and what the installed product actually looked like on a real screen). §6 of FS-U1-003
+    is the unfinished list from the first round, and §7 is the wording that round was allowed to use.
+    **Start here if you are the Architect:** FS-U1-004 §11 is the finding register, and the review pack it names
+    under `%TEMP%\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z\14_review_pack\` holds the reference images
+    beside the installed ones. One U1-V2 finding is open and unwaived. U1's status is
+    `READY_FOR_ARCHITECT_VISUAL_REVIEW`; it is not visual approval, and the next action is a human judgement,
+    not more agent work.
 
 ## Boundaries still in force
 

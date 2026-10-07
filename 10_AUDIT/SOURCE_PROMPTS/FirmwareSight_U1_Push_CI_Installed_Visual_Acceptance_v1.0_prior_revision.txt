@@ -1,0 +1,1371 @@
+FirmwareSight — U1
+Remote Promotion + Real Desktop Visual Acceptance
+Local U1 Candidate → Remote CI → Exact Installed Artifact → Mockup Convergence Review
+Execution Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+CANONICAL UNIT
+
+U1_REMOTE_PROMOTION_AND_VISUAL_ACCEPTANCE
+
+PURPOSE
+
+The previous U1 implementation round produced two local commits but deliberately did not push them,
+and explicitly reported:
+
+visual_evidence = STRUCTURAL_CONTRACTS_ONLY
+
+That is NOT sufficient to close a UI Productization / Design Convergence round.
+
+This prompt authorizes the next narrow step:
+
+1. independently prove the two local commits are exactly the intended U1 candidate;
+2. push them as a normal fast-forward to origin/main;
+3. read the exact remote CI run;
+4. download the Windows artifact built from that exact U1 head;
+5. install that exact artifact with the owner store protected;
+6. capture real-desktop visual evidence against the seven accepted mockups;
+7. perform a bounded functional smoke;
+8. restore the machine and owner data;
+9. write an evidence-only read-back;
+10. STOP at READY_FOR_ARCHITECT_VISUAL_REVIEW.
+
+This prompt does NOT authorize:
+- V1 participant sessions;
+- B1 / Private Beta;
+- new feature work;
+- schema/storage/wire changes;
+- public release;
+- signing/notarization;
+- licence selection;
+- pricing;
+- a U1 PASS_COMPLETE verdict.
+
+The final visual/aesthetic verdict belongs to the Architect/Product Owner after the screenshot pack is reviewed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED REMOTE AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at issue time:
+
+origin/main =
+f481b78059c14e1c83d3ba18e082004b7de72ee2
+
+Commit:
+V1: open own-artifact external validation
+
+Remote CI:
+Run:
+37508243514
+
+run number:
+73
+
+attempt:
+1
+
+result:
+10 / 10 success
+
+Current remote governance:
+
+P5 =
+PASS_COMPLETE
+
+Productization =
+ENGINEERING_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+V1 =
+IN_PROGRESS
+
+V1 research_state =
+RECRUITMENT_READY
+
+eligible external sessions =
+0
+
+B1 =
+NOT_AUTHORIZED
+
+The prior U1 report claims two local commits:
+
+U1 product/design convergence commit:
+8efe9c8
+
+U1 ledger/index successor:
+7dc2ca8
+
+Neither is visible on origin/main at Architect issue time.
+
+Therefore:
+their exact content is NOT YET independently accepted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD LOCAL PRECONDITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before push:
+
+git fetch --prune origin
+
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git log --oneline --decorate --graph -8
+git worktree list
+
+Required local shape:
+
+origin/main =
+f481b78059c14e1c83d3ba18e082004b7de72ee2
+
+Local U1 tip should be:
+7dc2ca8...
+
+and ancestry must be exactly:
+
+f481b78...
+  ↓
+8efe9c8...
+  ↓
+7dc2ca8...
+
+No unrelated local commit between them.
+
+Worktree:
+clean
+
+If any of these differ:
+
+STOP.
+
+Do not push.
+
+Return exact state to Architect.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git rebase published history
+git push --force
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. PRE-PUSH DIFF AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before push, inspect:
+
+git diff --stat f481b78..7dc2ca8
+git diff --name-status f481b78..7dc2ca8
+git diff --check f481b78..7dc2ca8
+
+Produce a path-classified audit.
+
+Expected classes:
+
+A. UI product presentation
+apps/desktop/ui/src/**
+
+B. the one explicitly declared additive window-page/title integration,
+if actually present
+
+C. U1 validation/design documents
+
+D. governance/current-state docs needed to pause V1 without erasing it
+
+E. prompt/archive/index/baseline integrity files
+
+No unrelated product/backend work.
+
+Explicitly detect any changes under:
+
+crates/**
+schemas/**
+migrations/**
+fixtures/**
+.github/**
+scripts/**
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+tauri.conf.json
+deny.toml
+assets/design-tokens.json
+
+The prior U1 report claims:
+
+- no new token values;
+- assets/design-tokens.json untouched;
+- command count remains 27;
+- no schema/migration/storage/wire/release-identity movement;
+- one additive MainWindowPage Overview variant only.
+
+Verify each claim from the actual local diff.
+
+Do not trust the previous prose.
+
+If a backend change is broader than an additive window-page/title enum/path needed to expose Overview:
+
+STOP before push.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. MOCKUP AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The accepted visual references are the seven tracked files under:
+
+assets/ui-mockups/
+
+corresponding to:
+
+FS-UI-01 Overview
+FS-UI-02 Analyze
+FS-UI-03 Compare
+FS-UI-04 Release Gate
+FS-UI-05 Bundle & History
+FS-UI-06 Parse Failure
+FS-UI-07 Unknown Dependency
+
+Their role:
+
+DESIGN_DIRECTION_AUTHORITY
+
+They define intended:
+
+- shell grammar;
+- density;
+- page hierarchy;
+- panel/card treatment;
+- table treatment;
+- state presentation;
+- top bars;
+- action hierarchy;
+- detail-panel language;
+- neutral local-first product tone.
+
+They are NOT automatic feature authority.
+
+If a reference contains a capability the current product does not actually support:
+
+do NOT fake it.
+
+Classify:
+
+REFERENCE_ONLY_NOT_IMPLEMENTED
+
+or equivalent.
+
+The previous U1 report specifically classified FS-UI-07 Dependencies / Declare / Re-scan
+and related controls as reference-only because current product capability does not support that full workflow.
+
+Keep that boundary unless the actual source proves otherwise.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. U1 TRACK NAME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Keep:
+
+U1 — UI Productization / Design Convergence
+
+Do NOT call this B1.
+
+B1 is already canonical for Private Beta.
+
+Do not introduce a second meaning.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. V1 INTERLOCK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+V1 currently has:
+
+0 eligible sessions.
+
+During U1 visual acceptance:
+
+NO participant recruitment/session execution.
+
+Do not use the frozen F3 V1 build with participants while U1 candidate evaluation is in flight.
+
+Preserve V1's existing state/history.
+
+Use wording such as:
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+U1 =
+IN_REVIEW
+
+V1 participant execution =
+PAUSED_BY_ARCHITECT_FOR_UI_CANDIDATE_REVIEW
+
+Do NOT erase:
+V1 protocol pack
+V1 metrics
+V1 participant register
+V1 F3 artifact history
+
+After U1 final visual verdict,
+the Architect will decide whether to re-baseline V1's frozen cohort artifact from F3 to U1.
+
+Do NOT make that re-baseline decision yourself.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. PRE-PUSH LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The previous report claimed:
+
+Rust =
+868
+
+UI =
+236 / 9 files
+
+full gate =
+17 / 17
+
+baseline verifier =
+PASS
+
+but:
+
+core-smoke and package were not separately run.
+
+Before push, run the COMPLETE authoritative local groups:
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+
+python scripts/verify_baseline_artifacts.py
+
+Required:
+
+Rust =
+868
+
+UI =
+report actual
+expected from previous round:
+236 / 9 files
+
+full gate =
+17 / 17
+
+drift =
+8 / 8
+
+deny =
+1 / 1
+
+core-smoke =
+3 / 3
+
+package =
+4 / 4
+
+No required SKIP.
+
+If the counts do not match the actual candidate:
+report actual and investigate.
+
+Do not force expected numbers.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. PUSH AUTHORIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Only if §§1–6 pass:
+
+push both local U1 commits together as one normal fast-forward.
+
+No rebase.
+No squash unless Architect separately authorizes it.
+No force push.
+No history rewrite.
+
+Expected remote tip after push:
+
+7dc2ca8...
+
+Because both commits are in one push,
+GitHub may create one run on the tip only.
+
+If 8efe9c8 has no separate run:
+record that truthfully.
+
+Do not fabricate a run per commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. REMOTE CI AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find the workflow run by exact head SHA:
+
+7dc2ca8...
+
+Do not use "latest" without checking headSha.
+
+Required authoritative jobs:
+
+10 / 10
+
+Read each individually:
+
+Rust (windows-latest)
+Rust (ubuntu-latest)
+Desktop UI (windows-latest)
+Desktop UI (ubuntu-latest)
+Generated output drift
+Dependency policy
+macOS Core Smoke
+Package Windows
+Package Ubuntu
+Package macOS
+
+Confirm from logs:
+
+Rust =
+868
+
+UI =
+actual U1 count / 9 files
+
+drift includes baseline integrity
+
+Package Windows actually:
+builds
+verifies
+uploads
+
+Attempt history must remain exact.
+
+Repository-content failure:
+fix forward, no blind rerun.
+
+Pure runner/provisioning failure:
+capture evidence and return to Architect if retry policy is ambiguous.
+
+Do not begin installed visual acceptance until the candidate's own CI is accepted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. EXACT U1 WINDOWS ARTIFACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After remote CI green:
+
+download the Windows artifact from THAT exact U1 tip run.
+
+Do NOT use:
+
+- F3 V1 artifact 11419727517;
+- F2R artifact;
+- local Tauri build;
+- cargo run;
+- Vite dev server.
+
+Verify:
+
+artifact id
+artifact name
+head SHA
+run id
+
+Extract and verify:
+
+SHA256SUMS.txt
+artifact-metadata.json
+
+Record:
+
+ACTUAL_NSIS_FILENAME
+ACTUAL_NSIS_SIZE
+ACTUAL_NSIS_SHA256
+INSTALLED_EXE_SHA256
+CLI_FILENAME / SHA if present
+
+This exact CI-built package is the visual-acceptance product.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. VISUAL ACCEPTANCE EVIDENCE ROOT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create OUTSIDE repository:
+
+FirmwareSight-U1-Visual-Acceptance-<timestamp>/
+
+Suggested:
+
+00_authority/
+01_candidate_artifact/
+02_owner_backup/
+03_reference_mockups/
+04_overview/
+05_analyze/
+06_compare/
+07_release_gate/
+08_history/
+09_parse_failure/
+10_reference_only/
+11_responsive/
+12_smoke/
+13_owner_restore/
+14_review_pack/
+
+Do not commit raw screenshot evidence unless separately requested.
+
+The repository may contain:
+hashes
+filenames
+summary findings
+
+but not a large screenshot dump by default.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. OWNER STORE SAFETY — EXPLICITLY AUTHORIZED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For this visual-acceptance round,
+the Architect explicitly authorizes owner-store parking using the already-proven P5 discipline.
+
+Before installing U1 candidate:
+
+close FirmwareSight.
+
+Hash owner:
+main
+WAL
+SHM
+if present.
+
+Record:
+size
+mtime
+SHA-256
+
+Create independent byte-for-byte backup.
+
+Verify backup hashes.
+
+Park owner store outside the live app-data path.
+
+Required:
+
+OWNER_STORE_PARKED = YES
+OWNER_BACKUP_HASH_MATCH = YES
+
+Use ONLY disposable test state.
+
+The U1 candidate must not open/migrate the owner store.
+
+After testing:
+
+uninstall if pre-round state was uninstalled
+
+remove only disposable live test state
+
+restore owner files exactly
+
+Required:
+
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+OWNER_STORE_OPENED_BY_U1 = NO
+
+Any mismatch:
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. DISPOSABLE PRODUCT STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use a disposable project/store capable of rendering:
+
+Overview
+Analyze success
+Compare
+Release Gate
+Bundle/History
+Parse Failure
+
+Prefer existing committed supported fixtures copied OUT of repo.
+
+Do not modify repository fixtures.
+
+Do not use owner/private firmware.
+
+For visual acceptance, deterministic synthetic/demo data is allowed,
+because this is NOT V1 user-value research.
+
+However:
+do not fake unsupported product capabilities.
+
+If the current product has no Dependencies workflow:
+
+do not seed a fake Dependencies DB row or invent IPC.
+
+Classify the FS-UI-07 reference as:
+REFERENCE_ONLY_NOT_IMPLEMENTED
+unless current product genuinely supports it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. PRIMARY VISUAL TARGET SIZE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The reference mockups are desktop target compositions.
+
+Primary visual review:
+
+1440 × 900
+
+At this size capture:
+
+full-window screenshot
+
+for every implemented target state.
+
+Also perform responsive sanity at:
+
+1056 × 799
+
+and:
+
+1024 × 720
+
+for core pages:
+
+Overview
+Analyze
+Compare
+Release Gate
+History
+
+At smaller sizes:
+no unreadable collapse
+no critical clipped controls
+no page-wide accidental overflow
+no broken navigation
+
+Do not claim visual mockup parity from 1024 alone.
+
+1440 × 900 is the primary convergence review size.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. SCREENSHOT SET — REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Capture real installed U1 screenshots:
+
+S01:
+Overview
+1440 × 900
+
+S02:
+Analyze success
+1440 × 900
+
+S03:
+Compare
+1440 × 900
+
+S04:
+Release Gate
+1440 × 900
+
+S05:
+Bundle & History
+1440 × 900
+
+S06:
+Analyze Parse Failure
+1440 × 900
+
+S07:
+the current product surface closest to the Unknown/Capability/Evidence state represented by FS-UI-07,
+ONLY if it is real.
+
+If the actual Dependencies workflow does not exist:
+
+do NOT fake S07.
+
+Instead produce:
+
+S07_REFERENCE_ONLY.md
+
+explaining:
+
+reference intent
+current nearest real surface
+what visual grammar was adopted
+what functionality remains unimplemented
+
+Also capture responsive sanity screenshots:
+
+R01 Overview 1024×720
+R02 Analyze 1024×720
+R03 Compare 1024×720
+R04 Release Gate 1024×720
+R05 History 1024×720
+
+and corresponding 1056×799 shots where a prior productization finding could recur.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. MOCKUP CONVERGENCE RUBRIC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For each implemented reference page,
+score eight dimensions:
+
+1. SHELL / NAVIGATION
+2. PAGE HIERARCHY
+3. INFORMATION DENSITY
+4. COMPONENT LANGUAGE
+5. TYPOGRAPHY / SPACING RHYTHM
+6. STATE / ACTION HIERARCHY
+7. TABLE / DETAIL PRESENTATION
+8. OVERALL PRODUCT POLISH
+
+Allowed rating:
+
+MATCH
+CLOSE
+PARTIAL
+GAP
+
+Do NOT use a numeric percentage as fake precision.
+
+For each dimension:
+
+REFERENCE:
+what the mockup establishes
+
+CURRENT:
+what installed U1 shows
+
+GAP:
+what remains
+
+RATING:
+MATCH / CLOSE / PARTIAL / GAP
+
+Architect acceptance is required for the aesthetic conclusion.
+
+Agent may NOT self-declare:
+
+"matches mockups"
+
+unless every claim is supported by the real installed screenshots.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. CORE ACCEPTANCE EXPECTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+U1 may be considered ready for Architect visual review only if:
+
+- all implemented core pages are functionally correct;
+- no new S0/S1/S2 product defect;
+- visual hierarchy is visibly closer to the accepted mockups than f481b78;
+- shared shell/component language is coherent across pages;
+- state semantics remain correct;
+- local-first language remains correct;
+- primary actions remain clear;
+- responsive minimums remain usable;
+- reference-only capabilities are not faked.
+
+The Agent does NOT issue the final aesthetic pass.
+
+The Product Owner / Architect does.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. VISUAL DIFFERENCE HONESTY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not hide differences from mockups.
+
+Explicitly classify:
+
+STRUCTURE_MATCHED
+VISUAL_LANGUAGE_MATCHED
+PARTIAL_CONVERGENCE
+REFERENCE_ONLY
+NOT_IMPLEMENTED
+DEFERRED
+INTENTIONAL_DIFFERENCE
+
+Examples of legitimate differences:
+
+- a mockup shows a feature not backed by current product capability;
+- current product carries more real evidence than the mockup;
+- current status semantics are stricter than reference text;
+- current install build must preserve accessibility behavior not visible in static reference.
+
+Do not change correct product semantics merely to make pixels look closer.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. FUNCTIONAL SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On the exact installed U1 artifact:
+
+Overview:
+opens
+navigation actions route correctly
+
+Analyze:
+select file
+successful result
+Details/tables usable
+parse-failure state usable
+
+Compare:
+select builds
+diff renders
+export control still works where authorized
+
+Release Gate:
+gate renders
+states correct
+actions usable
+
+History:
+stored facts render
+Details actions usable
+
+Help/Diagnostics:
+still accessible
+
+No need to rerun full P5 §64.
+
+This is a focused UI candidate revalidation.
+
+Any product regression:
+classify and STOP if S0/S1/S2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. MOCKUP-SPECIFIC REVIEW NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FS-UI-01 Overview:
+check:
+top product bar
+artifact/project identity
+ELF/MAP/Git state row
+Can we ship now?
+next-step actions
+summary metrics
+overall whitespace balance
+
+FS-UI-02 Analyze:
+check:
+page header
+artifact state chips
+Sections table
+Symbols table
+right-side / secondary detail language if implemented
+size/delta emphasis
+row selection
+density
+
+FS-UI-03 Compare:
+check:
+baseline→target identity
+top delta summary
+Gate-state chips
+change table
+growth-contributor summary
+added/removed/changed treatment
+export action hierarchy
+
+FS-UI-04 Release Gate:
+check:
+verdict strip
+BLOCK/REVIEW/UNKNOWN/PASS/N/A grouping
+why/evidence/next hierarchy
+bundle preview or current equivalent
+primary/secondary actions
+
+FS-UI-05 Bundle & History:
+check:
+history density
+selected-row treatment
+details hierarchy
+manifest/content presentation
+verify/export/open-folder action hierarchy
+
+FS-UI-06 Parse Failure:
+check:
+clear error title
+what happened
+why we know
+what to do
+diagnostic identifier
+safe last-good-state message
+recovery action hierarchy
+
+FS-UI-07 Unknown Dependency:
+if unsupported:
+do not fake.
+Assess only reusable design language:
+unknown-state presentation
+evidence panel grammar
+declare/resolve interaction pattern as future reference.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. NO SECRET FIX AFTER SCREENSHOTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not edit product code after capturing acceptance screenshots
+and then call those screenshots evidence for the edited product.
+
+If visual review exposes a required product/UI fix:
+
+record:
+
+U1_VISUAL_FINDING
+
+Do not hide it.
+
+If code changes:
+
+create a new U1 corrective candidate
+run local validation
+push
+remote CI
+download NEW exact artifact
+repeat affected screenshots
+
+Old screenshots no longer certify the new bytes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. VISUAL FINDING SEVERITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Classify:
+
+U1-V0:
+cosmetic observation
+
+U1-V1:
+minor convergence gap
+
+U1-V2:
+material visual/product-quality gap
+
+U1-V3:
+functional/readability/accessibility regression
+
+U1-V4:
+semantic/product integrity regression
+
+V3/V4:
+STOP closure.
+
+V2:
+do not self-waive; return to Architect with evidence.
+
+V0/V1:
+may remain in final review pack.
+
+Do not use severity to hide aesthetic disagreement.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. EVIDENCE-ONLY READ-BACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After installed visual acceptance and owner restore,
+write:
+
+U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md
+
+Required:
+
+- remote U1 candidate SHA;
+- CI run and attempts;
+- exact Windows artifact identity;
+- owner-store safety;
+- screenshot manifest and hashes;
+- seven mockup dispositions;
+- 1440×900 review;
+- 1056×799 sanity;
+- 1024×720 sanity;
+- functional smoke;
+- visual findings;
+- current limitations;
+- V1 interlock;
+- recommendation.
+
+Raw screenshots remain outside Git by default.
+
+Do not commit proprietary/user data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. REVIEW PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Produce a shareable external review pack:
+
+U1_VISUAL_REVIEW_PACK/
+
+Include:
+
+00_README.txt
+
+REFERENCE/
+copies or pointers to the seven authoritative mockups
+
+CURRENT/
+S01_Overview_1440x900.png
+S02_Analyze_1440x900.png
+S03_Compare_1440x900.png
+S04_ReleaseGate_1440x900.png
+S05_History_1440x900.png
+S06_ParseFailure_1440x900.png
+S07 only if real
+
+RESPONSIVE/
+1024 and 1056 screenshots
+
+U1_CONVERGENCE_MATRIX.md
+
+SHA256SUMS.txt
+
+The final report must print the absolute path to this review pack
+so the owner can upload it to the Architect.
+
+Do not delete it before review.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. U1 CURRENT VERDICT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before Architect sees screenshots,
+the strongest allowed verdict is:
+
+U1 =
+READY_FOR_ARCHITECT_VISUAL_REVIEW
+
+not:
+
+PASS_COMPLETE
+
+not:
+
+DESIGN_COMPLETE
+
+not:
+
+MOCKUP_MATCHED
+
+V1 remains:
+
+IN_PROGRESS / RECRUITMENT_READY
+
+participant execution remains paused.
+
+No B1.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. V1 ARTIFACT REBASE — DO NOT DO YET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The existing V1 frozen research build is still the F3 artifact.
+
+Because:
+
+eligible external sessions = 0
+
+the Architect MAY later decide to re-freeze V1 on the accepted U1 product candidate.
+
+But this prompt does NOT authorize that change.
+
+Do not edit V1 metric definitions.
+
+Do not start participants.
+
+Do not silently replace the V1 research artifact.
+
+After visual review,
+Architect will choose:
+
+A.
+reject U1 and retain F3 V1 artifact
+
+B.
+accept U1 and re-baseline V1 artifact before Session 1
+
+C.
+require another U1 corrective round
+
+Only Architect decides.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. EVIDENCE SUCCESSOR COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If installed visual/functional acceptance contains no V3/V4
+and owner restore passes:
+
+create one docs/evidence successor commit.
+
+Allowed:
+
+U1_VALIDATION/**
+.ai/*.md if current U1/V1 state pointer needs honest update
+README.md / INDEX.md if materially stale
+10_AUDIT evidence register
+DIRECTORY_TREE.txt
+SHA256SUMS
+
+No product code.
+
+No UI source.
+
+No backend.
+
+No dependency.
+
+Use ADR-0029 index-blob workflow.
+
+Suggested message:
+
+U1: record installed visual convergence evidence
+
+Do not set U1 PASS_COMPLETE.
+
+Set:
+
+U1 =
+READY_FOR_ARCHITECT_VISUAL_REVIEW
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+participant execution =
+PAUSED_FOR_ARCHITECT_UI_REVIEW
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. EVIDENCE SUCCESSOR VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because evidence successor is docs-only:
+
+product counts must equal U1 candidate:
+
+Rust =
+868
+
+UI =
+same U1 candidate count
+expected 236 / 9 files
+
+Run:
+
+cargo fmt --all -- --check
+cargo test --workspace
+corepack pnpm test
+python scripts/check.py
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+python scripts/verify_baseline_artifacts.py
+
+No product count movement.
+
+Push normal fast-forward.
+
+Read remote CI by exact evidence SHA.
+
+Require 10 / 10.
+
+Do NOT create another commit just to record this CI.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight U1 Remote Promotion & Visual Acceptance Report
+
+## 1. Start authority
+
+origin/main
+local 8efe9c8
+local 7dc2ca8
+ancestry
+clean status
+
+## 2. Pre-push diff audit
+
+changed paths
+product UI paths
+non-UI product paths
+backend semantic impact
+token impact
+schema/storage/wire impact
+
+## 3. Local validation
+
+Rust
+UI
+full gate
+drift
+deny
+core-smoke
+package
+baseline
+
+## 4. Remote promotion
+
+push result
+remote SHA
+commit list
+
+## 5. Candidate CI
+
+run
+attempt
+10 jobs
+counts
+
+## 6. Exact Windows artifact
+
+run
+artifact id
+installer
+size
+SHA
+
+## 7. Owner-store safety
+
+pre hashes
+park
+backup
+
+## 8. Visual evidence
+
+S01–S07
+responsive screenshots
+review-pack path
+
+## 9. Convergence matrix
+
+for each mockup:
+shell
+hierarchy
+density
+components
+typography/spacing
+states/actions
+table/detail
+polish
+
+ratings:
+MATCH / CLOSE / PARTIAL / GAP
+
+## 10. Reference-only features
+
+FS-UI-07 and any other unsupported capability
+no fake functionality
+
+## 11. Functional smoke
+
+Overview
+Analyze
+Compare
+Release
+History
+Help/Diagnostics
+
+## 12. Visual findings
+
+V0
+V1
+V2
+V3
+V4
+
+## 13. Owner restore
+
+ORIGINAL_DB_RESTORED
+ORIGINAL_DB_SHA_MATCH
+OWNER_STORE_OPENED_BY_U1
+
+## 14. Evidence successor
+
+SHA
+docs-only proof
+product counts unchanged
+remote CI
+
+## 15. V1 interlock
+
+V1 state
+eligible sessions
+participant execution paused
+frozen artifact unchanged
+
+## 16. Verdict
+
+U1 =
+READY_FOR_ARCHITECT_VISUAL_REVIEW / BLOCKED
+
+P5 =
+PASS_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+B1 =
+NOT_AUTHORIZED
+
+## 17. Stop
+
+STOP.
+
+Do not start V1 participant sessions.
+
+Do not re-freeze the V1 artifact.
+
+Do not start B1.
+
+Do not create Beta/RC/GA.
+
+Return screenshot review pack to Architect/Product Owner.
+
+END OF PROMPT

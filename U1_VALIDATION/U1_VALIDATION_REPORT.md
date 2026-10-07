@@ -84,8 +84,10 @@ three tables moved onto `ScrollArea`, and the four CSS rules that only existed f
 were deleted.
 
 **FS-UI-06/07 and the reference-only items.** The dependency / declare / re-scan screen has no backend: the
-desktop surface is 27 use-case commands and none of them reads a package, writes a source or re-scans a project,
-so its actions are `NOT_IMPLEMENTED_IN_U1`. `Link repository`, `Mark N/A`, `New bundle` / `Open folder` and
+desktop surface is 30 use-case commands (counted from `generate_handler!` in
+`apps/desktop/src-tauri/src/lib.rs`; this sentence said 27 when it was first written, which was wrong and is
+corrected in `U1_VISUAL_ACCEPTANCE_REPORT.md` §2) and none of them reads a package, writes a source or re-scans
+a project, so its actions are `NOT_IMPLEMENTED_IN_U1`. `Link repository`, `Mark N/A`, `New bundle` / `Open folder` and
 `Recent activity` are `DESIGN_REFERENCE_ONLY` — real-looking controls whose backing does not exist yet, so they
 were not added. The mockups' `relay-controller · v0.3.0-rc2` values are declared sample data by
 `03_DESIGN/06_UI_REFERENCE_SCREENS.md` and nothing prints them. The theme toggle and card elevation are

@@ -512,7 +512,8 @@ U1 UI productization convergence: OPENED AND CLOSED 2026-10-07, CLOSED_FIRST_ROU
         non-CSS change was declared before it was made: MainWindowPage gained an additive Overview variant,
         because the window title is Rust's and not the WebView's.
         What did NOT move: no Core semantic, schema, migration, storage contract, analysis wire field, release
-        identity rule, ADR-0028 or ADR-0029 conclusion, capability, dependency or IPC command (27). P5 stays
+        identity rule, ADR-0028 or ADR-0029 conclusion, capability, dependency or IPC command (30 at both the
+        base head and the U1 head). P5 stays
         PASS_COMPLETE, Productization ENGINEERING_COMPLETE, G2 PASS, product MVP_CANDIDATE at 0.6.0, the ten frozen
         release-readiness states, the licence with the owner, and every V1 state field — V1 gains only paused_for.
         L11 stays CARRIED_FORWARD: U1 built no participant evidence, it built a UI.

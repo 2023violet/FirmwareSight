@@ -915,7 +915,45 @@ text with no source file; each says so in its own entry instead of standing for 
   and the §12 D validation report (FS-U1-003), plus `00_authority/` with the preflight and the transcription.
   §13's honesty clause is §6 of the report: six named things this round did not reach, and
   `visual_evidence = STRUCTURAL_CONTRACTS_ONLY` because the real-desktop pass needs the owner's store parked and
-  was not authorized in this session.
+  was not authorized in this session. **That last clause is now historical**: the owner authorized the parking
+  and the installed pass in the continuation unit below, which is what `visual_evidence` was waiting on.
+
+## U1 Push → CI → Installed Visual Acceptance v1.1 (prior revision v1.0 archived) — executed, `U1 = READY_FOR_ARCHITECT_VISUAL_REVIEW` (2026-10-07)
+
+- Canonical unit: `U1_PUSH_CI_AND_INSTALLED_VISUAL_ACCEPTANCE`. Title as delivered: 《FirmwareSight — U1
+  Continuation: Push → CI Read-back → Exact Artifact → Real Desktop Visual Acceptance, Execution Prompt
+  v1.1 — Architect Authorized》.
+- **Both revisions were delivered as files** and both are archived here as delivered bytes, LF-normalized by
+  `*.txt text eol=lf` exactly as every other prompt in this register:
+
+  | revision | delivered (CRLF) | stored in Git |
+  | --- | --- | --- |
+  | **v1.1, operative** — `FirmwareSight_U1_Push_CI_Installed_Visual_Acceptance_v1.1.txt` | 1,201 lines, 25,378 bytes, 1,202 CRLF pairs, SHA-256 `99012d9c0e5ae9080b357fc41b1d4843c623a6417524db43240b9c07cd72b3ca` | blob `1db4c96bf7e10dd5efdd0f2d06c61b2cbaaa9b68`, 24,177 LF bytes, SHA-256 `6403800bd34a44af89840f8f43e0c4e4fd2318be8815dc9ed41e6e239fafbdcc` |
+  | v1.0, prior revision — `FirmwareSight_U1_Push_CI_Installed_Visual_Acceptance_v1.0_prior_revision.txt` | 1,370 lines, 30,195 bytes, 1,371 CRLF pairs, SHA-256 `c6ab8ca327d0e0d5c6abb7c2475163a749f745e247393f00350cbf718339b081` | blob `f571f1b7b17ce9d7b9c1c75ba4742dca6e45d069`, 28,825 LF bytes, SHA-256 `a7143d64a1f8bade8d090a44c6aa5a9ddcec5510993257363b783bf2b6c8c5f5` |
+
+  The delivered and stored digests differ because of the EOL normalization, and both are recorded so neither is
+  ever presented as the other. The byte counts agree with the pair counts: 25,378 − 24,177 = 1,201 and
+  30,195 − 28,825 = 1,370.
+- **Which revision governs was asked of the owner, not assumed.** The answer: v1.1 governs; v1.0 is the earlier
+  revision of the same unit and is followed only where it adds a requirement v1.1 does not contradict. v1.0 is
+  kept because it is the history of that decision, not because it still authorizes anything.
+- Authority chain it executed: local `8efe9c8` + `7dc2ca8` on top of remote base `f481b78`, pushed as a fast
+  forward, remote CI run `37609108402` (#74, attempt 1) read back at 10 of 10 by head SHA, then the Windows
+  artifact **that run** produced — id `11477857379`, zip `cf1a6c84…`, NSIS installer
+  `372631c367b34dc5c985025fb498d56dd8c70af6b31e33c8b9eaae6fd506f6f8`, installed executable
+  `afdc528b97dcdce147183f272e4fdd5a97325855103213d69348e7c4398070a0`. Substitutions it named and refused: F3's
+  V1 cohort artifact `11419727517`, any F2/F2R artifact, this round's own local `--only package` installer,
+  `cargo run`, `cargo tauri build`, Vite, and any source-tree execution.
+- What it required and got: the owner's store parked with an independent backup and re-hashed back to the exact
+  pre-round digests; a real-mouse install; S01–S06 at 1440×900 plus nine responsive captures; a functional smoke
+  pass on the same bytes; an eight-dimension convergence matrix rated only MATCH/CLOSE/PARTIAL/GAP; a severity
+  register that stopped at U1-V2 and returned it to the Architect unwaived; `S07` left uncaptured with the
+  reason written down; one docs/evidence successor commit and no product code touched after the screenshots.
+- What it forbade and this round did not breach: renaming U1 to B1, resuming V1 or running a session,
+  re-freezing V1's cohort artifact, setting `PASS_COMPLETE` / `DESIGN_COMPLETE` / `MOCKUP_MATCHED`, and claiming
+  final visual approval.
+- Where the record lives: `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md` (FS-U1-004), with the evidence root and
+  review pack outside Git under `%TEMP%\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z\`.
 
 ## Supersession note on the V0 Batch A activation entry
 
