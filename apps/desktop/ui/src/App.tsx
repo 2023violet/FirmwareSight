@@ -138,14 +138,12 @@ export function App() {
       <TopBar project={project?.projectName ?? null} />
       <div className={styles['shell']}>
         <div className={styles['rail']}>
-          <div className={styles['railSticky']}>
-            <nav className={styles['nav']} aria-label="Pages">
-              {PAGES.map((entry) => navItem(page, setPage, entry))}
-            </nav>
-            <nav className={styles['nav']} aria-label="Help and about">
-              {AUXILIARY.map((entry) => navItem(page, setPage, entry))}
-            </nav>
-          </div>
+          <nav className={styles['nav']} aria-label="Pages">
+            {PAGES.map((entry) => navItem(page, setPage, entry))}
+          </nav>
+          <nav className={styles['nav']} aria-label="Help and about">
+            {AUXILIARY.map((entry) => navItem(page, setPage, entry))}
+          </nav>
         </div>
 
         <div className={styles['workspace']}>

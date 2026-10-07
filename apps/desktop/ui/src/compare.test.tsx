@@ -53,6 +53,7 @@ import type {
   SymbolChangeQueryDto,
   SymbolChangeRowDto,
 } from './ipc/types';
+import { precedes } from './test/order';
 
 vi.mock('./ipc/bridge', () => ({
   selectArtifact: vi.fn(),
@@ -1330,5 +1331,42 @@ describe('the table layout contract', () => {
       expect(table.tagName).toBe('TABLE');
       expect(table.parentElement?.className).toContain('viewport');
     }
+  });
+});
+
+describe('U1P Compare hierarchy', () => {
+  it('names the pair first, then what moved, then what it cost, then the prose', async () => {
+    await openCompare();
+    await runCompare();
+
+    const selectors = screen.getByRole('region', { name: 'Build selection' });
+    const moved = await screen.findByRole('region', { name: 'What moved' });
+    const memory = screen.getByRole('region', { name: 'Memory comparison' });
+    const sections = screen.getByRole('region', { name: 'Section Changes' });
+    const symbols = screen.getByRole('region', { name: 'Symbol Changes' });
+    const evidence = screen.getByRole('region', { name: 'Capability and evidence' });
+
+    // §10: the result leads the page. The reader meets the change counts before the flash and RAM
+    // deltas, those before the tables, and the evidence narrative last, because it explains a
+    // comparison instead of being one.
+    expect(precedes(selectors, moved)).toBe(true);
+    expect(precedes(moved, memory)).toBe(true);
+    expect(precedes(memory, sections)).toBe(true);
+    expect(precedes(sections, symbols)).toBe(true);
+    expect(precedes(symbols, evidence)).toBe(true);
+  });
+
+  it('states the pair as two labelled picks with an arrow that says nothing twice', async () => {
+    await openCompare();
+
+    const selectors = screen.getByRole('region', { name: 'Build selection' });
+    // Each side is answerable by name, which is what keeps the pair readable in the accessibility tree.
+    expect(within(selectors).getByRole('combobox', { name: 'Old / Base' })).toBeDefined();
+    expect(within(selectors).getByRole('combobox', { name: 'New / Target' })).toBeDefined();
+
+    // The arrow is decoration. Left unhidden it would be read out between two selects that already name
+    // their own direction, and §22 counts a spoken glyph that repeats a label as noise.
+    const arrow = selectors.querySelector('[aria-hidden="true"]');
+    expect(arrow?.textContent).toBe('\u2192');
   });
 });

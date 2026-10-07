@@ -5,6 +5,7 @@ import { App } from './App';
 import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type { AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto } from './ipc/types';
+import { precedes } from './test/order';
 
 // The bridge is the boundary; mocking it keeps these tests about what the screen shows rather than
 // about Tauri's invoke plumbing, which `ipc/bridge.test.ts` covers.
@@ -772,5 +773,63 @@ describe('U1R capability strip: current attempt, not retained evidence', () => {
     expect(screen.queryByRole('region', { name: 'Last good analysis' })).toBeNull();
     expect(screen.getByRole('region', { name: 'Snapshot details' })).toBeDefined();
     expect(screen.getByText('12 sections')).toBeDefined();
+  });
+});
+
+/**
+ * U1P §21. The hierarchy a reader meets, asserted as document order.
+ *
+ * These three tests are the only ones in the suite that say "before" rather than "present", because the
+ * finding they answer was not that a fact was missing but that it arrived in the wrong order: the shell
+ * scrolled its own navigation, Analyze opened with an identity dossier, and a failed attempt buried its
+ * recovery action under the previous build's numbers. An ordering assertion is also the kind that survives
+ * a window resize, which a coordinate assertion would not.
+ */
+describe('U1P page hierarchy', () => {
+  it('keeps the navigation outside the page it does not scroll with', async () => {
+    render(<App />);
+    const rail = await screen.findByRole('navigation', { name: 'Pages' });
+
+    // The rail is a sibling of the page, never a passenger inside it: `main` is the region that scrolls,
+    // so anything living inside it travels with long content. §7A.
+    const page = document.querySelector('main');
+    expect(page).not.toBeNull();
+    expect(page?.contains(rail)).toBe(false);
+    expect(rail.closest('main')).toBeNull();
+  });
+
+  it('puts the result figures and the analysis tables above the identity dossier', async () => {
+    await chooseArtifact();
+    await analyze();
+
+    const result = await screen.findByRole('region', { name: 'Analysis result' });
+    const details = screen.getByRole('region', { name: 'Snapshot details' });
+    const report = screen.getByRole('region', { name: 'Analysis summary' });
+
+    expect(precedes(result, details)).toBe(true);
+    expect(precedes(details, report)).toBe(true);
+    // The dossier is still the dossier: moving it down did not remove the facts that make an analysis
+    // checkable, which is the difference between secondary and gone.
+    expect(within(report).getByText('SHA-256')).toBeDefined();
+    expect(within(report).getByText('Parser')).toBeDefined();
+  });
+
+  it('keeps the failure and its recovery ahead of what the last attempt left behind', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+
+    analyzeMock.mockResolvedValue(fail(PARSE_FAILURE));
+    await analyze();
+    const alert = await screen.findByRole('alert');
+
+    // The recovery move is inside the failure, where the reader who needs it is looking (§13C), and the
+    // retained result stays reachable underneath it without opening the page (§13D).
+    expect(within(alert).getByRole('button', { name: 'Choose another artifact' })).toBeDefined();
+    const retained = await screen.findByRole('region', { name: 'Last good analysis result' });
+    expect(precedes(alert, retained)).toBe(true);
+    expect(
+      screen.getByRole('region', { name: 'Snapshot details of the last good analysis' }),
+    ).toBeDefined();
   });
 });

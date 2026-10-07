@@ -3,16 +3,21 @@
  *
  * `.page` repeats what five pages each declared for themselves, with the same measure and the same
  * rhythm, so that a page can no longer have a different idea of what "the top of the screen" costs.
+ *
+ * U1P tightens that cost rather than restyling it: the section gap drops from the 24 px band to the
+ * 16 px one and the outer padding to 24 px all round, because the first viewport of a desktop tool is
+ * the product's most expensive real estate and the composition, not the type size, is what should be
+ * paying for it (prompt §16: density from hierarchy, never from shrinking text).
  */
 
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--fs-space-6);
+  gap: var(--fs-space-4);
   max-width: var(--fs-layout-design-target-width);
   min-height: 100%;
   margin: 0 auto;
-  padding: var(--fs-space-8) var(--fs-space-6);
+  padding: var(--fs-space-6);
 }
 
 /* The scroll axis belongs to this wrapper and never to the table inside it (F2R-01). A `display: block`

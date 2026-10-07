@@ -172,11 +172,22 @@
 
 .sideFacts {
   display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
+  flex-wrap: wrap;
+  column-gap: var(--fs-space-3);
+  row-gap: var(--fs-space-1);
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
   overflow-wrap: anywhere;
+}
+
+/* Once a run exists, the inputs that produced it are configuration rather than conclusion. They stay
+   open, labelled and reachable - U1P §11D forbids hiding a control a reader needs - and they take the
+   quiet surface instead. */
+.secondary {
+  background: var(--fs-color-bg-subtle);
+  padding: var(--fs-space-4);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
 }
 
 .pickerActions {

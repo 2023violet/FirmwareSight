@@ -198,3 +198,36 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* The view switch. One segmented row: the active entry carries weight and an accent rule as well as its
+   surface, so the state is never colour alone (DESIGN.md 9), and the row sits on the same hairline the
+   sections below it already use so the switch reads as part of the page rather than as a toolbar. */
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-1);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.view {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font: inherit;
+  color: var(--fs-color-text-secondary);
+  background: none;
+  border: 0;
+  border-bottom: var(--fs-focus-ring-width) solid transparent;
+  border-radius: var(--fs-radius-control) var(--fs-radius-control) 0 0;
+  cursor: pointer;
+  transition: color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.view:hover {
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-subtle);
+}
+
+.viewActive {
+  color: var(--fs-color-text-primary);
+  font-weight: bold;
+  border-bottom-color: var(--fs-color-accent-primary);
+}

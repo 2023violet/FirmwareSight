@@ -1,0 +1,1607 @@
+FirmwareSight — U1P
+Final Visual Polish / Information-Hierarchy Convergence
+Real Screenshot Review → Product-Like First Screen → Exact CI Artifact → Final Visual Pack
+Execution Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+CANONICAL UNIT
+
+U1P_FINAL_VISUAL_POLISH_AND_INFORMATION_HIERARCHY_CONVERGENCE
+
+PURPOSE
+
+The Architect/Product Owner has now directly reviewed the consolidated
+FirmwareSight_U1_Final_Visual_Review pack.
+
+The engineering result is accepted:
+- U1 shipped and passed exact remote CI;
+- U1R closed U1-V2-06;
+- the product is stable;
+- no U1-V3/U1-V4 remains.
+
+The visual verdict is NOT final acceptance.
+
+The screenshots show that FirmwareSight has a coherent design language,
+but several core pages still present information like an engineering workbench
+rather than the intended mature desktop product.
+
+This round is a SECOND, BOUNDED visual-polish round.
+
+It focuses on:
+- first-screen hierarchy;
+- information density;
+- master/detail composition;
+- decision-first presentation;
+- stable shell behavior;
+- naming consistency.
+
+It does NOT add product capabilities.
+It does NOT alter Core semantics.
+It does NOT start V1.
+It does NOT start B1.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect-verified current remote head:
+
+0cc47058b4f81b2d345e14e2a4730d14d408fc1d
+
+Current relevant lineage:
+
+U1 product:
+7dc2ca80e5273b9aac48bb7ca216d24c2c1585ce
+
+U1R product:
+4d36f103d2a8fd103e8e3b466e4d2b2010a0a4ef
+
+U1R evidence/governance:
+8929b3d18292a68ed9e436788c43d60d3ab76832
+
+Current head:
+0cc47058b4f81b2d345e14e2a4730d14d408fc1d
+
+Remote CI:
+
+Run #76 / 37637056980:
+attempt 1
+10 / 10 success
+
+Run #77 / 37644985372:
+attempt 1
+10 / 10 success
+
+Run #78 / 37645580060:
+attempt 1
+10 / 10 success
+
+Current product counts:
+
+Rust =
+868 / 0 failed
+
+UI =
+242 / 9 files
+
+Current state:
+
+U1 =
+READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+
+U1-V2-06 =
+CLOSED_BY_U1R
+
+P5 =
+PASS_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+eligible external sessions =
+0
+
+V1 participant execution =
+PAUSED_FOR_ARCHITECT_UI_REVIEW
+
+B1 =
+NOT_AUTHORIZED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. ARCHITECT FINAL VISUAL VERDICT ON U1/U1R
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Engineering acceptance:
+PASS
+
+State-consistency corrective:
+PASS
+
+Visual/product-design acceptance:
+REQUIRES_POLISH
+
+Do NOT rewrite this as:
+REJECT_DIRECTION
+
+The direction is accepted.
+
+The problem is not the visual language.
+The problem is first-screen hierarchy and information composition.
+
+The current UI already has useful strengths:
+
+- restrained desktop visual language;
+- coherent left navigation;
+- consistent Button / Chip / Panel vocabulary;
+- strong typography basics;
+- clean local-first tone;
+- usable responsiveness;
+- correct state semantics after U1R;
+- Release Gate has the strongest existing product character.
+
+The next round should preserve those strengths.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. VISUAL EVIDENCE AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Primary reference authority remains:
+
+assets/ui-mockups/
+
+Seven references:
+
+FS-UI-01 Overview
+FS-UI-02 Analyze
+FS-UI-03 Compare
+FS-UI-04 Release Gate
+FS-UI-05 Bundle & History
+FS-UI-06 Parse Failure
+FS-UI-07 Unknown Dependency
+
+The consolidated visual pack should still exist at:
+
+C:\Users\16429\Downloads\FirmwareSight_U1_Final_Visual_Review
+
+and/or:
+
+C:\Users\16429\Downloads\FirmwareSight_U1_Final_Visual_Review.zip
+
+If present, read:
+
+05_SIDE_BY_SIDE/
+06_REPORTS/
+04_U1R_CORRECTIVE/
+
+Treat the original screenshots as evidence.
+
+Do not use the previous Agent's MATCH/CLOSE/PARTIAL ratings as authority.
+The Architect has now visually reviewed the pages directly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before writes:
+
+git fetch --prune origin
+
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+
+Required:
+
+HEAD =
+origin/main =
+0cc47058b4f81b2d345e14e2a4730d14d408fc1d
+
+tree clean.
+
+If remote moved:
+
+STOP.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git rebase published history
+git push --force
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. ARCHIVE THIS PROMPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Archive under:
+
+10_AUDIT/SOURCE_PROMPTS/
+
+Preferred:
+
+FirmwareSight_U1P_Final_Visual_Polish_Information_Hierarchy_v1.0.txt
+
+Record:
+delivered SHA-256
+bytes
+logical lines
+
+Use established LF/CRLF provenance discipline.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. ABSOLUTE PRODUCT BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This round may change:
+
+apps/desktop/ui/src/**
+
+and only if strictly necessary for existing window-page titles:
+
+the smallest existing desktop presentation adapter.
+
+Do NOT change:
+
+crates/**
+schemas/**
+migrations/**
+fixtures/**
+storage model
+wire DTO meaning
+analysis schema
+Gate rule semantics
+Release identity
+bundle format
+V1 metrics
+CI topology
+dependencies
+design-token values unless a proven existing token deficiency blocks the composition
+
+No new IPC command.
+
+No new backend capability.
+
+No new database query.
+
+No invented feature.
+
+If a proposed visual layout needs data that the current frontend does not already receive:
+
+do NOT fake it.
+
+Either:
+- omit the unsupported element;
+- use existing real data;
+- record REFERENCE_ONLY.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. DESIGN GOAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 1440×900, the product's first viewport should answer:
+
+"What is this?"
+"What matters right now?"
+"What changed?"
+"Can I ship?"
+"What should I do next?"
+
+without forcing the user to scroll through raw facts first.
+
+The visual target is:
+
+professional desktop engineering product
+
+not:
+
+raw data inspector
+
+not:
+
+wizard form
+
+not:
+
+settings page
+
+not:
+
+marketing dashboard
+
+Keep:
+calm
+precise
+evidence-first
+local-first
+low-decoration
+
+Improve:
+hierarchy
+density
+scanability
+decision prominence
+master/detail relationship
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. GLOBAL SHELL POLISH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Observed current state:
+
+the shell is coherent,
+but the page and rail scroll together in places,
+and the top-level composition feels looser than the references.
+
+Required:
+
+A. Left navigation should visually remain stable while content scrolls.
+
+Preferred:
+viewport-height shell
+independent main content scroll
+rail itself not casually moving with long page content.
+
+B. Keep the current restrained top bar.
+
+C. Preserve:
+FirmwareSight identity
+project chip
+"Local workspace — nothing leaves this machine"
+
+D. Avoid oversized vertical padding.
+
+E. Main content max-width / gutters should support dense desktop work,
+not create large unused white fields.
+
+F. Do not introduce a new visual theme.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. OVERVIEW — REQUIRED RECOMPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect visual finding:
+
+The current Overview is readable,
+but the three capability blocks:
+
+ELF
+MAP
+Git
+
+are stacked vertically as large cards.
+
+This consumes most of the first viewport.
+
+At 1024×720:
+the "Can we ship now?" card is pushed low,
+and the metric summary is below the fold.
+
+That hierarchy is backwards.
+
+The Overview's primary value is:
+release/readiness summary.
+
+Required 1440×900 composition:
+
+1. Compact page header:
+project/artifact identity
+primary actions
+
+2. Compact input/evidence capability band:
+ELF
+MAP
+Git
+
+Prefer:
+three compact horizontal cells/cards in one row
+
+not:
+three large stacked blocks
+
+3. Dominant:
+"Can we ship now?"
+
+This should be visually stronger than the capability band.
+
+4. Key metric row visible in the same first viewport:
+Flash
+RAM if real/currently available
+Largest section
+Symbols
+Last Gate
+or the nearest existing real metrics.
+
+Do not invent metrics.
+
+5. Next-step actions belong near the verdict.
+
+Acceptance:
+
+At 1440×900:
+capabilities + ship verdict + key metrics are all visible without vertical scrolling.
+
+At 1024×720:
+ship verdict must be visible in the first viewport;
+metrics may partially continue below,
+but capability cards must not consume the whole viewport.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. ANALYZE — HIGHEST PRIORITY RECOMPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect visual finding:
+
+The current Analyze success page is clean,
+but it opens with:
+
+explanatory prose
+capability chips
+artifact fact rows
+memory fact rows
+
+and the high-value analysis tables are not the first visual object.
+
+This still reads like an engineering inspector.
+
+The reference direction is much stronger:
+Sections + Symbols are the primary product result,
+with selection/detail context beside them.
+
+Required:
+
+A. Keep the current page header and U1R state-consistency contract.
+
+B. After a successful Analyze:
+the first major content region should be the analytical result,
+not a long general fact sheet.
+
+C. Establish a compact result summary band:
+artifact
+flash/load footprint
+RAM
+sections
+symbols
+evidence quality/capability
+
+using existing real data only.
+
+D. Put primary analysis views directly under it.
+
+Preferred structure:
+
+Tabs or segmented navigation:
+Sections
+Symbols
+Evidence / Details
+only where those views already exist.
+
+At minimum:
+Sections and Symbols must become first-class, immediately visible.
+
+E. At 1440×900:
+show a real data table plus useful detail/context in the first viewport.
+
+Preferred:
+master/detail or table + secondary panel.
+
+If no selected-row detail data exists,
+do not invent it.
+
+Instead use a compact evidence/context panel with real current data.
+
+F. General Artifact metadata:
+SHA
+format
+kind
+parser
+build id
+
+should move to:
+secondary details
+collapsible/details region
+or lower priority section.
+
+It should not dominate the first viewport.
+
+G. Preserve U1R behavior:
+failed/pending state may retain last-good report,
+but must never show stale current chips.
+
+Acceptance:
+
+At 1440×900 Analyze success:
+a user should see actual Sections/Symbols analytical value immediately,
+without needing initial vertical scrolling past a metadata dossier.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. COMPARE — RESULT-FIRST, NOT FORM-FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect visual finding:
+
+The current Compare first viewport is dominated by:
+
+Old/Base selector
+New/Target selector
+descriptive prose
+memory/evidence facts
+
+The actual diff is below.
+
+That makes Compare feel like a setup form.
+
+Required:
+
+A. Keep baseline/target selection.
+
+B. Compress selection into a compact top comparison bar.
+
+The selected pair should read visually like:
+
+BASE → TARGET
+
+not two large separate form columns.
+
+C. After a comparison result exists,
+the result must become the main first-screen content.
+
+D. Add/retain a compact summary strip using existing data:
+
+Flash delta
+RAM delta
+Gate/policy status if already available
+comparison evidence basis
+
+E. Primary result table:
+section changes
+
+must be visible in first viewport at 1440×900.
+
+F. Secondary:
+biggest growth contributors
+or existing growth lists
+
+should sit beside / near the primary diff.
+
+G. Added / Removed / Changed / Unchanged should remain visually distinguishable.
+
+H. Detailed evidence text moves below or into a secondary panel.
+
+I. Do NOT invent Export diff if current product does not implement it.
+
+Acceptance:
+
+At 1440×900:
+pair identity + delta summary + section diff + growth contributors
+must all be visible before the user scrolls to deeper evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. RELEASE GATE — DECISION-FIRST REFINEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect visual finding:
+
+Release Gate is the strongest current page,
+but the current screenshot still places:
+
+Project policy
+Build and baseline setup
+
+as large sequential sections before the detailed rule result.
+
+The reference establishes a stronger decision-first hierarchy.
+
+Required:
+
+A. Keep the top verdict strip.
+
+B. Make the verdict the dominant page element.
+
+C. When a Gate run exists:
+show rule-state breakdown immediately after the verdict.
+
+Required state groups:
+
+BLOCK
+REVIEW
+UNKNOWN
+PASS
+N/A
+
+using the existing real findings.
+
+D. Policy / Build / Baseline controls remain available,
+but should be visually secondary once a run exists.
+
+Options:
+
+compact setup panel
+collapsible "Gate inputs"
+or condensed configuration band
+
+Do not hide required controls completely.
+
+E. Use a two-column decision composition where supported by existing data:
+
+main:
+rule findings
+
+secondary:
+bundle readiness / gate summary / current run metadata
+
+Do not invent bundle preview data if the frontend does not possess it.
+
+F. Preserve semantics exactly.
+
+Acceptance:
+
+At 1440×900 with an existing Gate run:
+verdict + meaningful rule findings must be visible in the first viewport.
+
+The user should not have to scroll past configuration to understand why the Gate passed/blocked/reviewed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. BUNDLE & HISTORY — PRODUCT HISTORY COMPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect visual finding:
+
+Current page title reads:
+History
+
+while navigation reads:
+Bundle & History.
+
+The page is a series of vertically stacked database-like tables:
+Builds
+Gate runs
+Releases
+
+This is technically honest,
+but visually still feels like storage inspection.
+
+Required:
+
+A. Page naming must be consistent.
+
+Use:
+Bundle & History
+
+unless repository product language establishes a stronger canonical label.
+
+B. Preserve entity distinctions:
+Build
+Gate run
+Release/Bundle
+
+Do NOT falsely merge semantics.
+
+C. Replace the long stacked-table feel with a more deliberate history workspace.
+
+Preferred:
+
+left/main:
+history category tabs/segmented views
+or one active list at a time
+
+right:
+selected item's real Details panel
+
+Current Details capabilities already exist.
+Use them.
+
+D. Default view should show the most useful history entity
+without requiring all three tables simultaneously.
+
+E. Existing filters remain available,
+but should not visually dominate.
+
+F. Selected row should have a strong, consistent state.
+
+G. Details panel should surface:
+identity
+timestamp
+artifact
+state/verdict
+stored evidence
+existing real actions
+
+Do not invent bundle actions.
+
+Acceptance:
+
+At 1440×900:
+the first viewport should show one focused history list plus selected detail,
+not three database tables stacked vertically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. PARSE FAILURE — KEEP U1R TRUTH, IMPROVE COMPOSITION ONLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+U1R semantic fix is accepted.
+
+Do not regress:
+
+Current analysis failed
+Previous result retained below
+explicit previous-analysis caption
+
+Architect visual finding:
+
+The current failure layout is clear,
+but the retained Artifact dossier begins immediately below,
+making the page much longer than the reference.
+
+Required:
+
+A. Keep failure context strong and obvious.
+
+B. Keep:
+What happened
+Code
+Why we know
+What to do
+Diagnostics ID
+
+C. Make the immediate recovery action more visually prominent if already available.
+
+D. Keep previous result accessible,
+but visually secondary.
+
+Possible:
+collapsed/secondary "Previous successful analysis"
+or lower-detail continuation.
+
+Do not hide evidence.
+
+E. Do not reintroduce stale capability chips.
+
+Acceptance:
+
+At 1440×900:
+failure + diagnosis + next action + previous-result status
+should be understandable without scrolling.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. FS-UI-07 UNKNOWN DEPENDENCY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Still:
+
+REFERENCE_ONLY_NOT_IMPLEMENTED
+
+Do NOT implement:
+
+Dependency detection workflow
+Declare version
+Re-scan
+new dependency storage
+new IPC
+
+This reference remains a visual-language source only.
+
+No fake screenshot.
+
+No fake rows.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. VISUAL LANGUAGE — PRESERVE, DO NOT REDESIGN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Keep current strengths:
+
+white/light-gray desktop background
+thin borders
+restrained blue primary action
+green/red/amber state semantics
+monospace for identities / hashes / code facts
+quiet navigation
+low-elevation surfaces
+
+Do not introduce:
+
+gradients
+glassmorphism
+large shadows
+rounded consumer-app cards
+marketing illustrations
+hero banners
+AI-blue neon
+motion decoration
+
+The issue is composition,
+not branding.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. SPACING / DENSITY RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The current U1 uses too much vertical space on several pages.
+
+This round should reduce vertical waste carefully.
+
+Guideline:
+
+major page section gap:
+compact
+
+card/panel padding:
+enough for readability,
+not oversized
+
+table rows:
+dense desktop-tool density
+
+body prose:
+avoid multi-paragraph intro where one concise sentence is enough
+
+Do not blindly shrink font sizes.
+
+Typography remains readable.
+
+Use hierarchy and composition,
+not tiny text,
+to create density.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. TEXT / COPY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current pages sometimes explain the product at length before showing value.
+
+Keep helpful prose,
+but shorten it where the UI itself can communicate the structure.
+
+Do not remove essential semantic caveats.
+
+Especially preserve:
+
+local-first statement
+Gate non-compliance disclaimer
+Unknown / evidence honesty
+last-good distinction
+release semantics
+
+Do not rewrite domain meaning for brevity.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. RESPONSIVE CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Primary visual target:
+
+1440×900
+
+Secondary:
+
+1056×799
+1024×720
+
+At 1440×900:
+optimize information hierarchy aggressively.
+
+At 1024×720:
+allow secondary panels to stack,
+but preserve:
+primary conclusion
+primary action
+navigation
+no critical clipping
+no page-wide overflow
+
+A responsive stack is acceptable.
+
+A desktop first viewport dominated by setup cards is not.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. REQUIRED GAP-AUDIT ADDENDUM BEFORE CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before editing,
+create:
+
+U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md
+
+For each page:
+
+REFERENCE FIRST-VIEWPORT
+CURRENT FIRST-VIEWPORT
+ARCHITECT FINDING
+TARGET COMPOSITION
+REAL DATA AVAILABLE
+REFERENCE-ONLY ELEMENTS
+IMPLEMENTATION BOUNDARY
+ACCEPTANCE SCREENSHOT
+
+Do not code before this plan exists.
+
+This is the only new design-plan document required.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. IMPLEMENTATION ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement in this order:
+
+1. Global shell / fixed rail / main-scroll contract
+
+2. Overview
+
+3. Analyze
+
+4. Compare
+
+5. Release Gate
+
+6. Bundle & History
+
+7. Parse Failure composition check
+
+Do not bounce randomly between pages.
+
+After each page:
+run focused UI tests.
+
+Do not commit page-by-page unless necessary.
+One coherent product commit is preferred.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. TEST CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not rely on screenshots alone.
+
+Add/update focused structural tests for:
+
+Shell:
+nav remains outside page content scroll ownership
+
+Overview:
+ship/readiness section appears before secondary metric/detail sections in DOM/semantic hierarchy
+
+Analyze:
+primary analytical result controls/tables appear before low-priority metadata details
+
+Compare:
+existing result view exposes diff summary before deep evidence sections
+
+Release:
+existing run verdict/findings appear before secondary configuration detail when run exists
+
+History:
+canonical heading is Bundle & History
+focused list/detail composition remains accessible
+
+Parse Failure:
+U1R stale-state contract remains intact
+
+Tests should verify semantics and structure,
+not pixel values.
+
+Mutation proof for newly introduced hierarchy contract where practical.
+
+Do not create brittle CSS-coordinate tests.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. ACCESSIBILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preserve:
+
+keyboard focus
+native/appropriate semantics
+aria names
+StateBadge meaning
+table headers
+button labels
+scroll access
+
+Do not create visual-only meaning.
+
+If tabbed history/analyze views are introduced:
+use correct tab semantics or accessible button/region pattern.
+
+No WCAG certification claim.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run:
+
+git diff --check
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+
+python scripts/verify_baseline_artifacts.py
+
+Expected before this round:
+
+Rust =
+868
+
+UI =
+242 / 9 files
+
+Rust should remain:
+868
+
+UI may increase due focused tests.
+
+Full gate:
+17 / 17
+
+drift:
+8 / 8
+
+deny:
+1 / 1
+
+core-smoke:
+3 / 3
+
+package:
+4 / 4
+
+No required skip.
+
+If Rust product test count changes:
+STOP and explain.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. PRODUCT COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create one product UI-polish commit.
+
+Suggested message:
+
+U1P: converge core pages on decision-first desktop hierarchy
+
+Use ADR-0029 baseline workflow.
+
+Record exact changed paths.
+
+Do not hide any backend change.
+
+Expected:
+frontend UI + tests + U1P plan/report + governance pointers/baseline artifacts.
+
+No unauthorized feature work.
+
+Push normal fast-forward.
+
+No force.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find run by exact product SHA.
+
+Require:
+
+10 / 10 authoritative jobs.
+
+Read individually.
+
+Confirm:
+
+Rust =
+868
+
+UI =
+actual count
+
+Package Windows:
+built
+verified
+uploaded
+
+Preserve attempts honestly.
+
+Do not blind-rerun content failures.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. EXACT WINDOWS ARTIFACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Download the Windows artifact from the exact U1P product SHA.
+
+Do NOT use:
+U1 artifact
+U1R artifact
+local package
+cargo run
+Vite
+
+Record:
+
+run id
+artifact id
+artifact name
+ZIP digest
+NSIS filename
+NSIS size
+NSIS SHA
+installed exe SHA
+
+Verify internal SHA256SUMS.txt.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. OWNER STORE SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use proven parking discipline.
+
+Before install:
+
+hash main/WAL/SHM
+backup
+verify
+park
+
+Required:
+
+OWNER_STORE_PARKED = YES
+OWNER_BACKUP_HASH_MATCH = YES
+
+Use disposable state only.
+
+After test:
+
+close/uninstall as appropriate
+remove disposable state only
+restore owner exact
+
+Required:
+
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+OWNER_STORE_OPENED_BY_U1P = NO
+
+Any failure:
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. EXACT INSTALLED VISUAL ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use the exact U1P CI artifact.
+
+Create:
+
+FirmwareSight-U1P-Visual-Acceptance-<timestamp>/
+
+Capture 1440×900:
+
+P01_Overview_1440x900.png
+P02_Analyze_1440x900.png
+P03_Compare_1440x900.png
+P04_ReleaseGate_1440x900.png
+P05_BundleHistory_1440x900.png
+P06_ParseFailure_1440x900.png
+
+Capture 1024×720:
+
+R01_Overview
+R02_Analyze
+R03_Compare
+R04_ReleaseGate
+R05_BundleHistory
+R06_ParseFailure
+
+Capture 1056×799 at least:
+
+Analyze
+Compare
+History
+Release
+
+Use real installed state.
+
+Do not fake data unsupported by the product.
+
+FS-UI-07 remains reference-only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. ARCHITECT-FIRST SCREENSHOT REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For 1440×900:
+
+Overview:
+must show capabilities + ship verdict + key metrics in first viewport
+
+Analyze:
+must show meaningful analysis table/result in first viewport
+
+Compare:
+must show pair + delta summary + actual diff in first viewport
+
+Release:
+must show verdict + actual finding/rule content in first viewport
+
+History:
+must show focused history list + selected detail in first viewport
+
+Parse Failure:
+must show failure + diagnosis + next action + previous-result status in first viewport
+
+If any of these conditions are not met:
+do not self-pass.
+
+Record:
+U1P-V2
+
+and return to Architect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. SIDE-BY-SIDE PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Produce:
+
+U1P_FINAL_VISUAL_REVIEW_PACK/
+
+Include:
+
+REFERENCE/
+seven original mockups
+
+BEFORE/
+the accepted U1/U1R screenshots from the prior final pack
+
+AFTER/
+P01–P06 and responsive captures
+
+SIDE_BY_SIDE/
+reference vs U1P for 01–06
+
+REPORTS/
+U1P_VISUAL_POLISH_PLAN.md
+U1P_VISUAL_ACCEPTANCE_REPORT.md
+U1/U1R prior matrices for context
+
+SHA256SUMS.txt
+
+Do not retouch screenshots.
+
+Derived side-by-side images may scale uniformly only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. VISUAL ACCEPTANCE REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md
+
+For each page:
+
+ARCHITECT FINDING
+WHAT CHANGED
+WHAT DID NOT CHANGE
+FIRST-VIEWPORT RESULT
+RESPONSIVE RESULT
+FUNCTIONAL RISK
+REFERENCE-ONLY DIFFERENCE
+OPEN POLISH
+
+Use verdicts:
+
+ACCEPT
+ACCEPT_WITH_MINOR_POLISH
+REQUIRES_POLISH
+
+Do NOT use:
+MOCKUP_MATCHED
+PIXEL_PERFECT
+
+The goal is product hierarchy,
+not screenshot cloning.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. FUNCTIONAL SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On exact installed U1P bytes:
+
+Overview navigation
+
+Analyze:
+valid success
+Sections/Symbols or equivalent primary result
+failed parse
+recovery
+
+Compare:
+select pair
+run/render diff
+switch units if supported
+
+Release:
+select/run Gate
+rule findings
+existing bundle flow
+
+History:
+switch category/view if introduced
+select row
+Details
+filters/pagination where existing
+
+Help/Diagnostics:
+open
+
+No S0/S1/S2.
+
+No new stale-state contradiction.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. FINAL U1P AGENT VERDICT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The strongest Agent state allowed:
+
+U1 =
+READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+
+again.
+
+Do NOT issue:
+PASS_COMPLETE
+
+The Agent cannot decide aesthetics.
+
+If any required first-viewport condition fails:
+
+U1 =
+REQUIRES_ARCHITECT_POLISH_REVIEW
+
+and report exact page.
+
+V1 remains paused.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. V1 INTERLOCK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not start participants.
+
+Do not re-baseline the V1 artifact.
+
+Keep:
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+eligible sessions =
+0
+
+participant execution =
+PAUSED_FOR_ARCHITECT_UI_REVIEW
+
+After the new screenshot pack returns,
+Architect will decide:
+
+1. U1 final visual acceptance;
+2. whether to re-freeze V1 on U1P;
+3. whether to resume recruitment/session execution.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+35. B1 / RELEASE BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Still forbidden:
+
+B1
+Private Beta
+RC
+GA
+tag
+GitHub Release
+public release
+signing
+notarization
+updater
+licence selection
+pricing
+
+No change.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+36. EVIDENCE SUCCESSOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After installed acceptance and owner restore,
+create one docs/evidence successor if appropriate.
+
+No product source in successor.
+
+Use ADR-0029 baseline workflow.
+
+Run complete local gates.
+
+Push normal fast-forward.
+
+Read exact successor CI.
+
+Require 10 / 10.
+
+Do not create a CI-recursion commit.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+37. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight U1P Final Visual Polish Report
+
+## 1. Start authority
+
+HEAD
+origin/main
+clean state
+
+## 2. Architect visual findings accepted
+
+Overview
+Analyze
+Compare
+Release
+History
+Parse Failure
+
+## 3. U1P plan
+
+first-viewport targets
+data available
+reference-only elements
+
+## 4. Changed paths
+
+UI
+tests
+docs/governance
+backend = none
+
+## 5. Page results
+
+Overview
+Analyze
+Compare
+Release Gate
+Bundle & History
+Parse Failure
+
+## 6. Structural/accessibility tests
+
+new/updated tests
+mutation proof where used
+UI count
+Rust count
+
+## 7. Local validation
+
+Rust
+UI
+gate
+drift
+deny
+core-smoke
+package
+baseline
+
+## 8. Product commit
+
+SHA
+message
+
+## 9. Remote CI
+
+run
+attempt
+10 jobs
+
+## 10. Exact artifact
+
+artifact id
+NSIS
+SHA
+installed exe SHA
+
+## 11. Installed screenshots
+
+P01–P06
+responsive
+absolute pack path
+
+## 12. First-viewport acceptance
+
+per page:
+PASS / FAIL
+
+## 13. Functional smoke
+
+results
+
+## 14. Open visual findings
+
+V0/V1/V2
+no V3/V4
+
+## 15. Owner restore
+
+ORIGINAL_DB_RESTORED
+ORIGINAL_DB_SHA_MATCH
+OWNER_STORE_OPENED_BY_U1P
+
+## 16. Evidence successor
+
+SHA
+CI
+
+## 17. V1 interlock
+
+still paused
+0 sessions
+artifact unchanged
+
+## 18. Verdict
+
+U1 =
+READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+or
+REQUIRES_ARCHITECT_POLISH_REVIEW
+
+P5 =
+PASS_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+B1 =
+NOT_AUTHORIZED
+
+## 19. Stop
+
+STOP.
+
+Return U1P_FINAL_VISUAL_REVIEW_PACK to Architect/Product Owner.
+
+Do not resume V1.
+Do not re-baseline V1 artifact.
+Do not start B1.
+
+END OF PROMPT

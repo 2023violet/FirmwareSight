@@ -43,9 +43,6 @@
   gap: var(--fs-space-1);
   min-width: 0;
   padding: var(--fs-space-4);
-  background: var(--fs-color-bg-surface);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-panel);
 }
 
 /* The label is uppercase because the references draw it that way and no token is needed to do it. The
@@ -75,12 +72,36 @@
   line-height: var(--fs-line-height-metadata);
 }
 
-/* The inspector minimum is the narrowest column the product already governs, so the row breaks to two
-   columns at the frozen 1024 px width instead of squeezing four cards past their own content. */
-.summaryRow {
+/* The band: one hairline container whose cells are separated by the gap rather than by their own boxes.
+   This is the device both Overview reference rows use, and the reason U1-V1-01 exists: the row this
+   replaced was authored as `minmax(320px, minmax(0, 1fr))`, and a nested `minmax()` is not a valid track
+   breadth, so the whole `grid-template-columns` declaration was dropped and every "row" in the product
+   rendered as a one-column stack. A valid `minmax(<token>, 1fr)` is what makes it a row.
+   The inspector minimum is the narrowest column the product already governs, so the band breaks to two
+   cells per line at the frozen 1024 px width instead of squeezing a cell past its own content. */
+.band {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--fs-layout-evidence-inspector-min), minmax(0, 1fr)));
-  gap: var(--fs-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(var(--fs-layout-evidence-inspector-min), 1fr));
+  gap: var(--fs-border-width-hairline);
+  background: var(--fs-color-border-default);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+/* The narrow variant, for a band of short figures rather than of prose cells. The rail width is the other
+   governed column width this product already owns, so a six-figure strip can exist without inventing a
+   number nothing else agrees with. */
+.bandNarrow {
+  grid-template-columns: repeat(auto-fit, minmax(var(--fs-layout-nav-rail), 1fr));
+}
+
+.band > * {
+  background: var(--fs-color-bg-surface);
+}
+
+/* A panel that lives inside a band keeps its content and its padding and surrenders its own box. */
+.panelBare {
+  border: 0;
+  border-radius: 0;
 }
 
 .empty {

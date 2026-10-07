@@ -17,7 +17,7 @@ import { Chip } from './components/Chip';
 import { ErrorPanel } from './components/ErrorPanel';
 import { Page } from './components/Layout';
 import { PageHeader, PageSection } from './components/PageHeader';
-import { EmptyState, FactList, FactRow, Figure, Qualifier } from './components/Panel';
+import { Band, EmptyState, FactList, FactRow, Figure, Qualifier, SummaryCard } from './components/Panel';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { Details } from './Details';
 import { evidenceBasisCaption } from './evidenceBasis';
@@ -26,8 +26,8 @@ import { GettingStartedPanel } from './GettingStarted';
 import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
-  BudgetDto,
   ErrorEnvelopeDto,
+  MemorySummaryDto,
   SelectionDto,
 } from './ipc/types';
 import { capabilityState } from './stateWords';
@@ -166,7 +166,7 @@ export function Analyze({
               ]
         }
         subhead="Choose a firmware artifact and FirmwareSight reports the Core facts it can prove. Nothing
-          here changes the artifact. Comparing two builds that were already analyzed happens on Compare."
+          here changes the artifact."
         actions={
           <>
             <Button
@@ -277,7 +277,22 @@ export function Analyze({
         </p>
       ) : null}
       {error === null ? null : (
-        <ErrorPanel envelope={error} label="Analysis error" heading="Analysis failed" />
+        <ErrorPanel
+          envelope={error}
+          label="Analysis error"
+          heading="Analysis failed"
+          action={
+            <Button
+              variant="primary"
+              disabled={analyzing}
+              onClick={() => {
+                void chooseArtifact();
+              }}
+            >
+              Choose another artifact
+            </Button>
+          }
+        />
       )}
       {summary === null && !analyzing && error === null ? (
         <>
@@ -292,28 +307,93 @@ export function Analyze({
         </>
       ) : null}
 
+      {/* U1P §9 and §13, in one place: the analysis comes before the dossier, and everything on screen
+          that describes a past attempt sits on a quieter surface than the failure above it. The band is
+          the four figures that answer "was this worth reading", `Details` is the actual sections and
+          symbols, and the identity dossier moves below them as the reference puts it. Under a failed
+          attempt or a selection that has not been analyzed, all three keep saying whose numbers they are
+          — the band's region name, the report's own sentence, the details' accessible name — which is
+          the U1R contract, restated in a new position rather than loosened. */}
       {summary === null ? null : (
-        <Report
-          summary={summary}
-          stale={error !== null || pendingSelection}
-          candidateName={selection?.fileName ?? null}
-          pending={pendingSelection}
-          unit={unit}
-        />
-      )}
-
-      {/* One snapshot id, the last one the shell proved. A later attempt that failed cannot repoint
-          these tables, because the last-good summary only moves on a summary. The region carries the
-          same truth the report above it carries: whose snapshot these rows are. */}
-      {summary === null ? null : (
-        <Details
-          snapshotId={summary.identity.snapshotId}
-          unit={unit}
-          onUnitChange={onUnitChange}
-          stale={error !== null || pendingSelection}
-        />
+        <div className={error === null && !pendingSelection ? undefined : styles['retained']}>
+          <ResultBand summary={summary} stale={error !== null || pendingSelection} unit={unit} />
+          <Details
+            snapshotId={summary.identity.snapshotId}
+            unit={unit}
+            onUnitChange={onUnitChange}
+            stale={error !== null || pendingSelection}
+          />
+          <Report
+            summary={summary}
+            stale={error !== null || pendingSelection}
+            candidateName={selection?.fileName ?? null}
+            pending={pendingSelection}
+            unit={unit}
+          />
+        </div>
       )}
     </Page>
+  );
+}
+
+/**
+ * The result figures, stated once.
+ *
+ * Four facts answer "was this worth analyzing, and how good is the evidence": what the build costs in
+ * flash and in RAM, whether the load evidence is strong enough to bind a limit, and how much recorded
+ * evidence stands behind the screen. Each is Core's own word and number, projected into the five
+ * presentation states by the same mapping the rest of the product uses; nothing here is computed.
+ */
+function ResultBand({
+  summary,
+  stale,
+  unit,
+}: {
+  readonly summary: AnalysisSummaryDto;
+  readonly stale: boolean;
+  readonly unit: SizeUnit;
+}) {
+  const { memory, evidenceSummary } = summary;
+  const quality = evidenceQuality(memory);
+  const flash = memory.nonvolatileImageFootprint;
+  const ram = memory.runtimeRamFootprint;
+
+  const budgetCell = (label: string, budget: typeof flash, rule: string) => (
+    <SummaryCard
+      label={label}
+      state={
+        <StateBadge
+          state={budgetState(budget)}
+          label={budgetWord(budget.state)}
+          count={budget.state === 'partial' ? budget.unattributed.length : undefined}
+          note={budget.reason ?? undefined}
+        />
+      }
+      value={<Figure>{formatSize(budget.bytes, unit)}</Figure>}
+      context={`${budget.classification} · ${rule}`}
+    />
+  );
+
+  return (
+    <section
+      className={styles['result']}
+      aria-label={stale ? 'Last good analysis result' : 'Analysis result'}
+    >
+      <Band narrow label="Result figures">
+        {budgetCell('Flash footprint', flash, memory.accountingRule)}
+        {budgetCell('Runtime RAM', ram, memory.layoutSource)}
+        <SummaryCard
+          label="Load evidence"
+          state={<StateBadge state={quality.state} label={quality.label} />}
+          context={quality.note}
+        />
+        <SummaryCard
+          label="Evidence recorded"
+          value={<Figure>{String(evidenceSummary.total)}</Figure>}
+          context={`${String(evidenceSummary.observed)} observed · ${String(evidenceSummary.derived)} derived · ${String(evidenceSummary.declared)} declared · ${String(evidenceSummary.unknown)} unknown`}
+        />
+      </Band>
+    </section>
   );
 }
 
@@ -338,7 +418,7 @@ function Report({
   readonly candidateName: string | null;
   readonly unit: SizeUnit;
 }) {
-  const { artifact, memory, capabilities, evidenceSummary } = summary;
+  const { artifact, memory, capabilities } = summary;
 
   // The second half of the note. Two artifacts can share one leaf name, which is the case this
   // screen exists for, so naming the candidate has to be skipped when the names are equal: it
@@ -400,17 +480,10 @@ function Report({
         </FactList>
       </PageSection>
 
+      {/* The two budgets and the strength of the evidence behind them are stated once, in the result band
+          above the tables. What stays here is the accounting that explains those figures. */}
       <PageSection title="Memory">
         <FactList>
-          <BudgetRow
-            term="Nonvolatile / load image"
-            budget={memory.nonvolatileImageFootprint}
-            unit={unit}
-          />
-          <BudgetRow term="Runtime RAM" budget={memory.runtimeRamFootprint} unit={unit} />
-          <FactRow term="Load evidence">
-            <EvidenceQuality memory={memory} />
-          </FactRow>
           <FactRow term="Layout source">
             {memory.layoutSource}
             <Qualifier>{`Accounting rule ${memory.accountingRule}`}</Qualifier>
@@ -440,24 +513,6 @@ function Report({
         </FactList>
       </PageSection>
 
-      <PageSection title="Counts">
-        <FactList>
-          <FactRow term="Sections">
-            <Figure>{String(summary.sectionCount)}</Figure>
-          </FactRow>
-          <FactRow term="Symbols">
-            <Figure>{String(summary.symbolCount)}</Figure>
-          </FactRow>
-          <FactRow term="Evidence">
-            <StateBadge
-              state="PASS"
-              label={`${String(evidenceSummary.total)} recorded`}
-              note={`${String(evidenceSummary.observed)} observed, ${String(evidenceSummary.derived)} derived, ${String(evidenceSummary.declared)} declared, ${String(evidenceSummary.unknown)} unknown`}
-            />
-          </FactRow>
-        </FactList>
-      </PageSection>
-
       <footer className={styles['footer']}>
         <span className={styles['monoSmall']}>{summary.identity.snapshotId}</span>
         <span>
@@ -470,60 +525,43 @@ function Report({
   );
 }
 
-function EvidenceQuality({ memory }: { readonly memory: AnalysisSummaryDto['memory'] }) {
+/**
+ * How strong the load evidence behind the two budgets is.
+ *
+ * Returned as data rather than as markup because the same answer is the Analyze result band's third cell
+ * and the dossier has no room for it twice. The words are Core's: the weakest basis is what caps the
+ * pair, and admissibility for a hard limit is a property of that evidence, not a mood.
+ */
+function evidenceQuality(memory: MemorySummaryDto): {
+  readonly state: StateName;
+  readonly label: string;
+  readonly note: string;
+} {
   const basis = memory.weakestEvidenceBasis;
   if (basis === null) {
-    return (
-      <StateBadge
-        state="UNKNOWN"
-        label="No load evidence"
-        note="No allocatable section carried an address and flag pair. Re-run with a linker MAP."
-      />
-    );
+    return {
+      state: 'UNKNOWN',
+      label: 'No load evidence',
+      note: 'No allocatable section carried an address and flag pair. Re-run with a linker MAP.',
+    };
   }
   const caption = evidenceBasisCaption(basis);
-  if (memory.admissibleForHardBlock) {
-    return (
-      <StateBadge
-        state="PASS"
-        label="Admissible for a hard limit"
-        note={`Weakest basis ${caption}; region evidence came from the linker.`}
-      />
-    );
-  }
-  return (
-    <StateBadge
-      state="UNKNOWN"
-      label="Not admissible for a hard limit"
-      note={`Weakest basis ${caption} is name- or flag-derived. Supply the linker MAP to strengthen it.`}
-    />
-  );
+  return memory.admissibleForHardBlock
+    ? {
+        state: 'PASS',
+        label: 'Admissible for a hard limit',
+        note: `Weakest basis ${caption}; region evidence came from the linker.`,
+      }
+    : {
+        state: 'UNKNOWN',
+        label: 'Not admissible for a hard limit',
+        note: `Weakest basis ${caption} is name- or flag-derived. Supply the linker MAP to strengthen it.`,
+      };
 }
 
-function BudgetRow({
-  term,
-  budget,
-  unit,
-}: {
-  readonly term: string;
-  readonly budget: BudgetDto;
-  readonly unit: SizeUnit;
-}) {
-  const state: StateName =
-    budget.state === 'exact' ? 'PASS' : budget.state === 'partial' ? 'REVIEW' : 'UNKNOWN';
-  return (
-    <FactRow term={term}>
-      <StateBadge
-        state={state}
-        label={budgetWord(budget.state)}
-        count={budget.state === 'partial' ? budget.unattributed.length : undefined}
-        note={budget.reason ?? undefined}
-      />
-      {/* The figure sits beside the state word rather than inside it: a bare number with no
-          evidence label would be a number without context (DESIGN.md 9). */}
-      <Figure>{formatSize(budget.bytes, unit)}</Figure>
-    </FactRow>
-  );
+/** A budget's own evidence quality, in the five presentation states. `partial` asks for a look, not a pass. */
+function budgetState(budget: MemorySummaryDto['nonvolatileImageFootprint']): StateName {
+  return budget.state === 'exact' ? 'PASS' : budget.state === 'partial' ? 'REVIEW' : 'UNKNOWN';
 }
 
 function budgetWord(state: string): string {

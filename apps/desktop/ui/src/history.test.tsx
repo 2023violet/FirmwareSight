@@ -40,6 +40,7 @@ import type {
   HistoryReleasePageDto,
   HistoryReleaseRowDto,
 } from './ipc/types';
+import { precedes } from './test/order';
 
 vi.mock('./ipc/bridge', () => ({
   selectArtifact: vi.fn(),
@@ -200,22 +201,34 @@ function deferred<T>() {
 async function openHistory(): Promise<void> {
   render(<App />);
   fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
-  await screen.findByRole('heading', { level: 1, name: 'History' });
+  await screen.findByRole('heading', { level: 1, name: 'Bundle & History' });
   await screen.findByText(BUILD_FILE);
+}
+
+/**
+ * U1P §12 shows one stored entity at a time, so a test that means to read a second table says which one
+ * it is looking at, exactly as a reader does. The switch is a button with `aria-pressed`, not a link and
+ * not a tab, so this is the whole of what reaching a table costs.
+ */
+async function showView(label: 'Builds' | 'Gate runs' | 'Release records'): Promise<void> {
+  fireEvent.click(screen.getByRole('button', { name: label }));
 }
 
 /** The builds table, once its first page has painted. */
 async function buildsRegion(): Promise<HTMLElement> {
+  await showView('Builds');
   await screen.findByText(BUILD_FILE);
   return screen.getByRole('region', { name: 'Stored builds' });
 }
 
 async function runsRegion(): Promise<HTMLElement> {
+  await showView('Gate runs');
   await screen.findByText(GATE_FILE);
   return screen.getByRole('region', { name: 'Stored Gate runs' });
 }
 
 async function releasesRegion(): Promise<HTMLElement> {
+  await showView('Release records');
   await screen.findByText(RELEASE_FILE);
   return screen.getByRole('region', { name: 'Stored release records' });
 }
@@ -275,7 +288,7 @@ describe('History states what a row is', () => {
     // The whole header, not the heading's own box: `PageHeader` puts the title and the metadata line in
     // one block and the subhead beside it, so the sentence a reader sees under the title lives one level
     // up from the `h1`.
-    const header = (await screen.findByRole('heading', { level: 1, name: 'History' })).closest(
+    const header = (await screen.findByRole('heading', { level: 1, name: 'Bundle & History' })).closest(
       'header',
     );
     const words = prose(header ?? null);
@@ -355,6 +368,7 @@ describe('History filters and pages through the shell', () => {
 
   it('does not filter on a keystroke', async () => {
     await openHistory();
+    await showView('Gate runs');
 
     const form = await filterForm('Gate runs');
     fireEvent.change(within(form).getByRole('textbox'), { target: { value: 'gate' } });
@@ -637,8 +651,9 @@ describe('History has no way to change a stored row', () => {
       expect(within(page).queryAllByRole('button', { name: verb })).toEqual([]);
     }
     expect(page.querySelectorAll('a')).toHaveLength(0);
-    // The only fields on the page are the three bounded filters.
-    expect(within(page).getAllByRole('textbox')).toHaveLength(3);
+    // The only field on the page is the active view's bounded filter. U1P §12 shows one stored entity at
+    // a time, so the three filters that used to sit on screen together are now one per view.
+    expect(within(page).getAllByRole('textbox')).toHaveLength(1);
   });
 
   it('shows no host path anywhere on the page', async () => {
@@ -675,19 +690,24 @@ describe('History when a read has nothing to show or cannot show it', () => {
     await screen.findByText('No stored build matches \u201cnope\u201d.');
   });
 
-  it('keeps two healthy tables on screen when the third cannot be read', async () => {
+  it('keeps a failed read inside the one view it belongs to', async () => {
     runsMock.mockResolvedValue(fail(READ_REFUSED));
     await openHistory();
 
+    // U1P §12 shows one stored entity at a time, so the refusal is read where it lives — inside the Gate
+    // runs view — and the isolation this test has always proved is now proved one view at a time: the
+    // other two still show exactly what the shell returned for them.
+    await showView('Gate runs');
     const alert = await screen.findByRole('alert');
     expect(within(alert).getByText('ERR-STORAGE-4009')).toBeDefined();
     expect(within(alert).getByText('the store is busy')).toBeDefined();
     expect(within(alert).getByText('Try again after the running operation finishes.')).toBeDefined();
     expect(within(alert).getByText('op-hist-7')).toBeDefined();
 
-    // The failure belongs to one table: the other two still show what the shell returned.
-    expect(screen.getByRole('region', { name: 'Stored builds' })).toBeDefined();
-    expect(screen.getByRole('region', { name: 'Stored release records' })).toBeDefined();
+    const builds = await buildsRegion();
+    expect(within(builds).getByText(BUILD_FILE)).toBeDefined();
+    const releases = await releasesRegion();
+    expect(within(releases).getByText('2.1.0')).toBeDefined();
     expect(runsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -701,5 +721,52 @@ describe('History when a read has nothing to show or cannot show it', () => {
     // Rows that answer the previous question are gone before the new one is asked, so a slow reply
     // cannot be mistaken for the current one.
     expect(within(builds).queryAllByRole('table')).toEqual([]);
+  });
+});
+
+describe('U1P Bundle & History hierarchy', () => {
+  it('names the page once, then shows the one stored list the reader asked for', async () => {
+    await openHistory();
+
+    // §12: one canonical heading. The page used to answer to "History" here and "Bundle & History" in
+    // the rail, which left the window title and the screen disagreeing about the same place.
+    expect(screen.getByRole('heading', { level: 1, name: 'Bundle & History' })).toBeDefined();
+
+    const views = screen.getByRole('group', { name: 'Stored history' });
+    expect(
+      within(views)
+        .getAllByRole('button')
+        .map((button) => [button.textContent, button.getAttribute('aria-pressed')]),
+    ).toEqual([
+      ['Builds', 'true'],
+      ['Gate runs', 'false'],
+      ['Release records', 'false'],
+    ]);
+
+    // The other two lists are not parked off-screen, they are not mounted, so a reader who navigates by
+    // landmark cannot land on a table they did not ask for.
+    const builds = screen.getByRole('region', { name: 'Stored builds' });
+    expect(precedes(views, builds)).toBe(true);
+    expect(screen.queryByRole('region', { name: 'Stored Gate runs' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Stored release records' })).toBeNull();
+
+    fireEvent.click(within(views).getByRole('button', { name: 'Gate runs' }));
+    expect(screen.queryByRole('region', { name: 'Stored builds' })).toBeNull();
+    expect(await screen.findByRole('region', { name: 'Stored Gate runs' })).toBeDefined();
+  });
+
+  it('closes an open row when the view changes, so no detail outlives the list it came from', async () => {
+    await openHistory();
+    const builds = await buildsRegion();
+    await openFirstRow(builds);
+    expect(screen.getByText(SHA256)).toBeDefined();
+
+    await showView('Gate runs');
+    expect(screen.queryByText(SHA256)).toBeNull();
+
+    await showView('Builds');
+    const again = await buildsRegion();
+    const details = await within(again).findByRole('button', { name: 'Details' });
+    await waitFor(() => expect(details.getAttribute('aria-expanded')).toBe('false'));
   });
 });

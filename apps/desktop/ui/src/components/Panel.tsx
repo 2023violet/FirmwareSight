@@ -23,6 +23,7 @@ export function Panel({
   labelledBy,
   children,
   className,
+  bare,
 }: {
   readonly title?: ReactNode;
   /** The quiet explanation opposite the title - what this panel is standing on. */
@@ -30,13 +31,15 @@ export function Panel({
   readonly labelledBy?: string;
   readonly children: ReactNode;
   readonly className?: string;
+  /** Inside a `Band`: keep the content, surrender the box, because the band owns the hairlines. */
+  readonly bare?: boolean;
 }) {
   // Same rule as `PageSection`: a `<section>` is only a named region when something names it, so a
   // string title becomes the accessible label unless the caller pointed at an element that carries it.
   const namedByString = labelledBy === undefined && typeof title === 'string';
   return (
     <section
-      className={cx(styles['panel'], className)}
+      className={cx(styles['panel'], bare ? styles['panelBare'] : undefined, className)}
       aria-label={namedByString ? title : undefined}
       aria-labelledby={labelledBy}
     >
@@ -67,7 +70,8 @@ export function SummaryCard({
   state,
 }: {
   readonly label: string;
-  readonly value: ReactNode;
+  /** The figure. A cell may carry a state instead of a number, which is still an answer. */
+  readonly value?: ReactNode;
   readonly context?: ReactNode;
   /** A state glyph beside the value, when the number's meaning depends on it. */
   readonly state?: ReactNode;
@@ -84,19 +88,33 @@ export function SummaryCard({
   );
 }
 
-/** The summary row the Overview reference shows: the cards sit on one line and wrap as a group. */
-export function SummaryRow({
+/**
+ * The divided band: one hairline container, several cells, hairlines between them.
+ *
+ * Both reference rows on FS-UI-01 are drawn this way - the capability cells and the metric cells share one
+ * box and are separated by rules, not by four boxes floating in a page gutter. Cells keep whatever semantics
+ * they bring (a `Panel` inside a band is still a named region, a `SummaryCard` is still a figure with its
+ * context), which is the point: the band is a layout, not a component with an opinion about its contents.
+ */
+export function Band({
   label,
+  narrow,
   children,
 }: {
   readonly label?: string;
+  /** Short-figure cells: three or six across at 1440 instead of two or three. */
+  readonly narrow?: boolean;
   readonly children: ReadonlyArray<ReactNode>;
 }) {
-  // A `group` rather than a bare region: the row is a set of related controls, not a landmark the reader
-  // navigates to. `aria-label` on a plain `div` would be dropped by every screen reader, which is why the
-  // label is not simply left off.
+  // A `group` rather than a bare region, which is the reasoning `SummaryRow` recorded: the row is a set of
+  // related facts, not a landmark a reader navigates to, and an `aria-label` on a plain `div` is dropped by
+  // every screen reader unless the role names it.
   return (
-    <div className={styles['summaryRow']} role="group" aria-label={label}>
+    <div
+      className={cx(styles['band'], narrow ? styles['bandNarrow'] : undefined)}
+      role="group"
+      aria-label={label}
+    >
       {children}
     </div>
   );

@@ -22,10 +22,14 @@
   gap: var(--fs-space-3);
 }
 
+/* The answer, at the size the reference gives it. U1P §8 asks for a verdict that is visually stronger than
+   the capability band above it, and the reference's own device is a bold page-size sentence rather than a
+   bigger box or a heavier border - prominence from type, not from decoration (DESIGN.md 4). */
 .verdictSentence {
   margin: 0;
-  font-size: var(--fs-font-size-section);
-  line-height: var(--fs-line-height-section);
+  font-size: var(--fs-font-size-page);
+  line-height: var(--fs-line-height-page);
+  font-weight: bold;
   min-width: 0;
   overflow-wrap: anywhere;
 }

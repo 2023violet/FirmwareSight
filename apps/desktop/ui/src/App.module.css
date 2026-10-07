@@ -4,12 +4,17 @@
  * The rail width is the frozen layout token, the hairline is the only separator, and the active
  * page is marked by position, weight and `aria-current` as well as an accent rule - colour never
  * carries the state alone (DESIGN.md 4, 9).
+ *
+ * U1P makes the frame the thing that is fixed, not the rail's position inside a scrolling document.
+ * The shell is exactly as tall as the window and the workspace owns the vertical scroll, so a long
+ * report moves while the rail and the product bar do not. A sticky rail could only postpone the
+ * page's scroll; it could never be independent of it (prompt section 7A, finding U1-V1-05).
  */
 
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100%;
 }
 
 .shell {
@@ -17,24 +22,18 @@
   grid-template-columns: var(--fs-layout-nav-rail) minmax(0, 1fr);
   align-items: stretch;
   flex: 1;
+  min-height: 0;
 }
 
 .rail {
-  align-self: stretch;
-  padding: var(--fs-space-6) var(--fs-space-3);
-  background: var(--fs-color-bg-surface);
-  border-right: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
-
-/* The rail box is as tall as the page so its surface and hairline run the full height; the page buttons
-   are what must stay reachable while a long report scrolls, so they are the sticky part. `top` equals the
-   box's own padding, which is why sticking is not a jump. */
-.railSticky {
-  position: sticky;
-  top: var(--fs-space-6);
   display: flex;
   flex-direction: column;
   gap: var(--fs-space-6);
+  min-height: 0;
+  padding: var(--fs-space-6) var(--fs-space-3);
+  overflow-y: auto;
+  background: var(--fs-color-bg-surface);
+  border-right: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
 }
 
 /* The pages this build has. A stage that does not exist gets no entry, so an empty shell can
@@ -68,6 +67,8 @@
   border-left-color: var(--fs-color-accent-primary);
 }
 
+/* The one scroll axis a page has. Everything a page overflows, overflows here. */
 .workspace {
   min-width: 0;
+  overflow-y: auto;
 }

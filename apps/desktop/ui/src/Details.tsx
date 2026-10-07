@@ -205,8 +205,6 @@ export function Details({
       className={styles['area']}
       aria-label={stale ? 'Snapshot details of the last good analysis' : 'Snapshot details'}
     >
-      <Contributors rows={contributors} unit={unit} />
-
       <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
 
       <div role="tablist" aria-label="Analyze details" className={styles['tabs']}>
@@ -300,6 +298,11 @@ export function Details({
           />
         </div>
       )}
+
+      {/* U1P §9 moved this below the table rather than above it. The ranked payload list is context that
+          explains the rows a reader is looking at, and on the reference's Analyze screen the table is the
+          first object on the page, not the second. */}
+      <Contributors rows={contributors} unit={unit} />
     </section>
   );
 }

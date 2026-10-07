@@ -454,7 +454,7 @@ describe('Help repeats what Analyze shows on a first run', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Bundle & History page' }));
-    await screen.findByRole('heading', { level: 1, name: 'History' });
+    await screen.findByRole('heading', { level: 1, name: 'Bundle & History' });
     fireEvent.click(screen.getByRole('button', { name: 'Analyze page' }));
     await screen.findByRole('heading', { level: 1, name: 'Analyze' });
 

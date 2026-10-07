@@ -7,17 +7,28 @@
  */
 
 import styles from './ErrorPanel.module.css';
+import type { ReactNode } from 'react';
+
 import type { ErrorEnvelopeDto } from '../ipc/types';
 
 export function ErrorPanel({
   envelope,
   label,
   heading,
+  action,
 }: {
   readonly envelope: ErrorEnvelopeDto;
   /** Names the region for a screen reader: which action failed. */
   readonly label: string;
   readonly heading: string;
+  /**
+   * The move that answers the failure, when the page has one to offer.
+   *
+   * U1P §13C asks for the recovery action to be as prominent as the diagnosis. It stays an optional slot
+   * rather than a second copy of the markup because a page that has no recovery to offer must be able to
+   * say so by leaving it out, not by hiding a button it never had.
+   */
+  readonly action?: ReactNode;
 }) {
   return (
     <section className={styles['error']} role="alert" aria-label={label}>
@@ -48,6 +59,7 @@ export function ErrorPanel({
           <dd className={styles['mono']}>{envelope.operationId}</dd>
         </div>
       </dl>
+      {action === undefined || action === null ? null : <div className={styles['action']}>{action}</div>}
     </section>
   );
 }

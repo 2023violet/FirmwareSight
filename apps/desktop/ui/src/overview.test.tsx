@@ -13,6 +13,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Overview, type OverviewTarget } from './Overview';
 import { TopBar } from './components/TopBar';
 import type { AnalysisSummaryDto, GateFindingRowDto, GateRunDto } from './ipc/types';
+import { precedes } from './test/order';
 
 function summary(over: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDto {
   return {
@@ -279,6 +280,32 @@ describe('Overview with a real analysis and a real run', () => {
     // A passing rule and a rule that does not apply are not open findings.
     expect(ship.textContent).not.toContain('entry_point.valid');
     expect(ship.textContent).not.toContain('sbom.present');
+  });
+});
+
+describe('U1P Overview hierarchy', () => {
+  it('reads inputs, then the verdict, then the figures that back it', () => {
+    renderOverview({ summary: summary(), gateRun: gateRun() });
+
+    const inputs = screen.getByRole('group', { name: 'Input capabilities' });
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    const figures = screen.getByRole('group', { name: 'Key figures' });
+
+    // §8: the verdict is the page's one dominant element, so it sits between what went in and the
+    // numbers that support it. A KPI strip above the sentence would be a figure answering nothing.
+    expect(precedes(inputs, ship)).toBe(true);
+    expect(precedes(ship, figures)).toBe(true);
+
+    // The capability band is three separate answers, not one merged string, and the figures band holds
+    // the count words the same page used to scatter.
+    expect(
+      within(inputs)
+        .getAllByRole('region')
+        .map((cell) => cell.getAttribute('aria-label')),
+    ).toEqual(['ELF', 'MAP', 'Git']);
+    expect(
+      Array.from(figures.querySelectorAll('[class*="summaryLabel"]')).map((cell) => cell.textContent),
+    ).toEqual(['Flash footprint', 'Runtime RAM', 'Symbols', 'Evidence']);
   });
 });
 

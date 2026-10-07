@@ -63,6 +63,7 @@ import type {
   ProjectContextDto,
   ProjectPolicyDto,
 } from './ipc/types';
+import { precedes } from './test/order';
 
 vi.mock('./ipc/bridge', () => ({
   selectArtifact: vi.fn(),
@@ -1178,7 +1179,7 @@ describe('Release bundle', () => {
 
   it('attaches the bundle under Release and adds no navigation verb', async () => {
     await prepared();
-    const heading = screen.getByRole('heading', { level: 2, name: '6 · Release Bundle' });
+    const heading = screen.getByRole('heading', { level: 2, name: '4 · Release Bundle' });
     // §58: the rail is still the workflow stages. A bundle is a section of Release, not a fifth
     // doorway, so the only new verb this page has is the one inside it.
     const rail = screen.getByRole('navigation', { name: 'Pages' });
@@ -1620,5 +1621,55 @@ describe('the table layout contract', () => {
       expect(table.tagName).toBe('TABLE');
       expect(table.parentElement?.className).toContain('viewport');
     }
+  });
+});
+
+describe('U1P Release hierarchy', () => {
+  it('gives the verdict, then the run that produced it, then the settings that made it', async () => {
+    await openRelease();
+    await runGate();
+
+    const verdict = await screen.findByRole('region', { name: 'Gate verdict' });
+    const findings = screen.getByRole('region', { name: '1 · Findings by state' });
+    const readiness = screen.getByRole('region', { name: '2 · FirmwareSight policy readiness' });
+    const evidence = screen.getByRole('region', { name: '3 · What the findings were judged on' });
+    const bundle = screen.getByRole('region', { name: '4 · Release Bundle' });
+    const policy = screen.getByRole('region', { name: '5 · Project policy' });
+    const builds = screen.getByRole('region', { name: '6 · Build and baseline' });
+
+    // §11: once a run exists, the run is the page. The verdict leads, the findings follow it
+    // immediately, and the two sections that configured the attempt drop below in a quieter surface.
+    // The numbers now read in the order a reader meets them, which they did not before this round.
+    expect(precedes(verdict, findings)).toBe(true);
+    expect(precedes(findings, readiness)).toBe(true);
+    expect(precedes(readiness, evidence)).toBe(true);
+    expect(precedes(evidence, bundle)).toBe(true);
+    expect(precedes(bundle, policy)).toBe(true);
+    expect(precedes(policy, builds)).toBe(true);
+  });
+
+  it('keeps both configuration sections open and labelled after a run, instead of hiding them', async () => {
+    await openRelease();
+    await runGate();
+    await screen.findByRole('region', { name: 'Gate verdict' });
+
+    // §11D forbids demoting a control to invisible: quieter surface, same access.
+    const policy = screen.getByRole('region', { name: '5 · Project policy' });
+    const builds = screen.getByRole('region', { name: '6 · Build and baseline' });
+    expect(within(policy).getByRole('button', { name: 'Edit policy' })).toBeDefined();
+    expect(within(builds).getByRole('combobox', { name: 'Current build' })).toBeDefined();
+    expect(within(builds).getByRole('button', { name: 'Run Gate' })).toBeDefined();
+  });
+
+  it('leads with the settings it has to be given, while there is no run to report', async () => {
+    await openRelease();
+
+    // With no run the verdict band renders nothing, so the page's first block is the one that can
+    // actually be used. Asserting the empty case is what keeps the reordering from becoming a claim
+    // that the verdict is always on screen.
+    expect(screen.queryByRole('region', { name: 'Gate verdict' })).toBeNull();
+    const policy = screen.getByRole('region', { name: '5 · Project policy' });
+    const builds = screen.getByRole('region', { name: '6 · Build and baseline' });
+    expect(precedes(policy, builds)).toBe(true);
   });
 });

@@ -504,12 +504,14 @@ describe('the bytes / KiB switch', () => {
     render(<App />);
     await analyzeOk();
 
-    // The runtime footprint of this summary is unknown, and one symbol has no size.
-    const memory = await screen.findByRole('region', { name: 'Memory' });
+    // The runtime footprint of this summary is unknown, and one symbol has no size. U1P moved the two
+    // budgets out of the Memory dossier and into the result band above the tables, so the figure that
+    // must never become `0 KiB` is looked for where it now lives.
+    const result = await screen.findByRole('region', { name: 'Analysis result' });
     fireEvent.click(screen.getByRole('radio', { name: 'KiB' }));
 
-    expect(within(memory).getAllByText('Unknown').length).toBeGreaterThan(0);
-    expect(within(memory).queryByText(/^0(\.00)? KiB$/)).toBeNull();
+    expect(within(result).getAllByText('Unknown').length).toBeGreaterThan(0);
+    expect(within(result).queryByText(/^0(\.00)? KiB$/)).toBeNull();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Symbols' }));
     const symbols = await screen.findByRole('tabpanel', { name: 'Symbols' });

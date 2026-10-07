@@ -23,7 +23,7 @@ import { Button, LinkButton } from './components/Button';
 import { Chip, StatusStrip } from './components/Chip';
 import { Page } from './components/Layout';
 import { PageHeader } from './components/PageHeader';
-import { EmptyState, Panel, SummaryCard, SummaryRow } from './components/Panel';
+import { EmptyState, Band, Panel, SummaryCard } from './components/Panel';
 import { StateBadge } from './components/StateBadge';
 import { formatSize, truncateMiddle, type SizeUnit } from './format';
 import type {
@@ -105,7 +105,7 @@ export function Overview({
 
       <Readiness gateRun={gateRun} summary={summary} onOpen={onOpen} />
 
-      {summary === null ? null : <Facts summary={summary} gateRun={gateRun} unit={unit} />}
+      {summary === null ? null : <Facts summary={summary} unit={unit} />}
     </Page>
   );
 }
@@ -122,9 +122,13 @@ function InputRow({
 }) {
   const { capabilities, artifact } = summary;
 
+  // One band, three cells, hairlines between them - which is what the reference draws and what this
+  // component asked for since U1. The cells stay named regions because they are three separate answers a
+  // reader may want to jump between, and a band is a layout, not an excuse to flatten semantics.
   return (
-    <SummaryRow label="Input capabilities">
+    <Band label="Input capabilities">
       <Panel
+        bare
         title="ELF"
         hint={<StateBadge variant="chip" state={capabilityState(capabilities.elf)} label={capabilities.elf} />}
       >
@@ -134,6 +138,7 @@ function InputRow({
         <LinkButton onClick={() => onOpen('analyze')}>Open Analyze</LinkButton>
       </Panel>
       <Panel
+        bare
         title="MAP"
         hint={<StateBadge variant="chip" state={capabilityState(capabilities.map)} label={capabilities.map} />}
       >
@@ -145,15 +150,15 @@ function InputRow({
         <LinkButton onClick={() => onOpen('analyze')}>Attach one on Analyze</LinkButton>
       </Panel>
       <Panel
+        bare
         title="Git"
         hint={<StateBadge variant="chip" state={capabilityState(capabilities.git)} label={capabilities.git} />}
       >
         <p className={styles['inputDetail']}>
-          Commit provenance is judged by the <code>git.clean</code> rule, from the repository this build
-          came from.
+          Judged by the <code>git.clean</code> rule, from the repository this build came from.
         </p>
       </Panel>
-    </SummaryRow>
+    </Band>
   );
 }
 
@@ -263,41 +268,40 @@ function Readiness({
   );
 }
 
-/** The four numbers a reader scans before they read anything. */
+/** The four figures a reader scans before they read anything, subordinate to the verdict above them. */
 function Facts({
   summary,
-  gateRun,
   unit,
 }: {
   readonly summary: AnalysisSummaryDto;
-  readonly gateRun: GateRunDto | null;
   readonly unit: SizeUnit;
 }) {
-  const flash = summary.memory.nonvolatileImageFootprint;
-  const evidence = summary.evidenceSummary;
+  const { memory, capabilities, evidenceSummary } = summary;
+  const flash = memory.nonvolatileImageFootprint;
+  const ram = memory.runtimeRamFootprint;
 
   return (
-    <SummaryRow>
+    <Band narrow label="Key figures">
       <SummaryCard
         label="Flash footprint"
         value={flash.bytes === null ? 'Unknown' : formatSize(flash.bytes, unit)}
         context={`${flash.classification} · ${flash.state}${flash.reason === null ? '' : ` · ${flash.reason}`}`}
       />
       <SummaryCard
+        label="Runtime RAM"
+        value={ram.bytes === null ? 'Unknown' : formatSize(ram.bytes, unit)}
+        context={`${ram.classification} · ${ram.state}${ram.reason === null ? '' : ` · ${ram.reason}`}`}
+      />
+      <SummaryCard
         label="Symbols"
         value={String(summary.symbolCount)}
-        context={`capability ${summary.capabilities.symbols}`}
+        context={`capability ${capabilities.symbols}`}
       />
       <SummaryCard
         label="Evidence"
-        value={String(evidence.total)}
-        context={`${String(evidence.observed)} observed · ${String(evidence.derived)} derived · ${String(evidence.declared)} declared · ${String(evidence.unknown)} unknown`}
+        value={String(evidenceSummary.total)}
+        context={`${String(evidenceSummary.observed)} observed · ${String(evidenceSummary.derived)} derived · ${String(evidenceSummary.declared)} declared · ${String(evidenceSummary.unknown)} unknown`}
       />
-      <SummaryCard
-        label="Last gate"
-        value={gateRun === null ? '—' : truncateMiddle(gateRun.runId, 8)}
-        context={gateRun === null ? 'no run in this session' : gateRun.createdAt}
-      />
-    </SummaryRow>
+    </Band>
   );
 }

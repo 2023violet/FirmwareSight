@@ -342,6 +342,9 @@ export function Compare({
             disabled={comparing}
             onSelect={setBaseId}
           />
+          <span className={styles['pairArrow']} aria-hidden="true">
+            {'→'}
+          </span>
           <SnapshotPicker
             id="fs-target"
             label="New / Target"
@@ -415,9 +418,20 @@ export function Compare({
             </p>
           ) : null}
 
-          <MemoryComparison memory={summary.memory} unit={unit} />
-          <EvidenceNotice summary={summary} />
+          {/* U1P §10: the result leads. What moved, then what it cost in flash and RAM, then the section
+              diff itself, with the growth lists beside it - and the long evidence prose, which explains a
+              comparison rather than being one, moves below. The order is the only thing that changed: every
+              region keeps its own name, its own rows and its own words. */}
           <WhatMoved counts={summary.counts} />
+          <MemoryComparison memory={summary.memory} unit={unit} />
+
+          {/* One pair of tables for one comparison: each resets its own filter when the handle it
+              was given changes. */}
+          <SectionChanges
+            diffId={summary.diffId}
+            unit={unit}
+            focus={sectionFocus}
+          />
 
           <Ranking
             summary={summary}
@@ -431,18 +445,13 @@ export function Compare({
             }}
           />
 
-          {/* One pair of tables for one comparison: each resets its own filter when the handle it
-              was given changes. */}
-          <SectionChanges
-            diffId={summary.diffId}
-            unit={unit}
-            focus={sectionFocus}
-          />
           <SymbolChanges
             diffId={summary.diffId}
             unit={unit}
             focus={symbolFocus}
           />
+
+          <EvidenceNotice summary={summary} />
 
           <Exports
             note={exportNote}

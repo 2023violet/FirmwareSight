@@ -31,6 +31,7 @@ import { Pager } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { formatSize, truncateMiddle, type SizeUnit } from './format';
+import { cx } from './styles/classnames';
 import {
   listHistoryBuilds,
   listHistoryGateRuns,
@@ -61,6 +62,23 @@ interface PageState<T> {
  * `fetch` is passed in a `useCallback` by the caller, so changing the filter or the offset re-runs
  * exactly one read and nothing else.
  */
+/**
+ * The three stored entities, and the one the page is showing.
+ *
+ * U1P §12 asks for a history workspace rather than three database tables stacked in one column. The
+ * entities stay separate because they are three different facts about the store — a build, a gate run,
+ * a release — and merging their rows would be the false simplification §12B forbids. What changes is
+ * that the page shows one of them at a time, so a reader looking at Builds sees a list and its detail
+ * rather than the third of a screen each of three tables leaves them.
+ */
+type View = 'builds' | 'runs' | 'releases';
+
+const VIEWS: readonly { readonly key: View; readonly label: string }[] = [
+  { key: 'builds', label: 'Builds' },
+  { key: 'runs', label: 'Gate runs' },
+  { key: 'releases', label: 'Release records' },
+];
+
 function useBoundedPage<T>(
   fetch: (request: HistoryPageRequestDto) => Promise<IpcOutcome<PageState<T>>>,
 ): {
@@ -199,6 +217,8 @@ export function History({
   readonly onUnitChange: (unit: SizeUnit) => void;
 }) {
   const [open, setOpen] = useState<{ readonly kind: Open; readonly id: string } | null>(null);
+  /** Which one of the three stored entities the page is showing. See the view switch below. */
+  const [view, setView] = useState<View>('builds');
 
   const builds = useBoundedPage(
     useCallback(
@@ -226,12 +246,33 @@ export function History({
   return (
     <Page>
       <PageHeader
-        title="History"
+        title="Bundle & History"
         subhead="What this computer has already stored: the builds that were analyzed, the Gate runs that were recorded, and the releases that were published. These are persisted facts, not the artifact currently open on Analyze, and a row stays readable after the firmware file it came from has moved or been deleted. Nothing on this page changes a stored row."
       />
 
       <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
 
+      {/* One list at a time. A button group with `aria-pressed` rather than an ARIA tablist, because each
+          list below is a named region a reader may want to navigate to, and a `tabpanel` role would take
+          that landmark away to buy a pattern the switch does not need (§22). */}
+      <div className={styles['views']} role="group" aria-label="Stored history">
+        {VIEWS.map((entry) => (
+          <button
+            key={entry.key}
+            type="button"
+            aria-pressed={view === entry.key}
+            className={cx(styles['view'], view === entry.key ? styles['viewActive'] : undefined)}
+            onClick={() => {
+              setView(entry.key);
+              setOpen(null);
+            }}
+          >
+            {entry.label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'builds' ? (
       <section className={styles['table']} aria-label="Stored builds">
         <h2>Builds</h2>
         <FilterForm
@@ -362,7 +403,9 @@ export function History({
           </>
         )}
       </section>
+      ) : null}
 
+      {view === 'runs' ? (
       <section className={styles['table']} aria-label="Stored Gate runs">
         <h2>Gate runs</h2>
         <FilterForm
@@ -435,7 +478,9 @@ export function History({
           </>
         )}
       </section>
+      ) : null}
 
+      {view === 'releases' ? (
       <section className={styles['table']} aria-label="Stored release records">
         <h2>Release records</h2>
         <FilterForm
@@ -511,6 +556,7 @@ export function History({
           </>
         )}
       </section>
+      ) : null}
     </Page>
   );
 }

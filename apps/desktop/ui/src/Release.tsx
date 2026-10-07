@@ -19,7 +19,7 @@
  *    compliant or certified: the Gate answers one policy, and the wording on the screen stops there
  *    (prompt §43).
  * 6. **A bundle attaches under Release, and only after a PASS.** P4 added no fifth stage to the rail; the
- *    Release Bundle is section 6 of this page, disabled with its reason while the disposition says otherwise,
+ *    Release Bundle is a numbered section of this page, disabled with its reason while the disposition says otherwise,
  *    and its preview, destination token and typed errors all come from the same engine the command line
  *    drives (prompt §48, §35).
  */
@@ -317,14 +317,38 @@ export function Release({
         subhead="FirmwareSight policy readiness for one stored build, judged against one project policy. The answer below is that policy’s verdict and nothing more: no claim on this page reaches beyond the rules the project itself wrote."
       />
 
-      {/* U1 §B.5: the verdict used to arrive at section 3, after the reader had scrolled past a policy
-          editor and a build picker to find out whether the build can ship. The counts below are
+      {/* U1 §B.5: the verdict used to sit below the policy editor and the build picker, so a reader had
+          to scroll past both to find out whether the build can ship. The counts below are
           `GateCountsDto` verbatim and the severity is Core's disposition aggregate; this band displays
           both and decides neither. */}
       {run === null ? null : <Verdict run={run} />}
 
-      <section className={styles['section']} aria-labelledby="fs-policy-heading">
-        <h2 id="fs-policy-heading">1 · Project policy</h2>
+      {/* U1P §11: once a run exists, the run's own content is the page. The grouped findings follow the
+          verdict immediately, the run record and the evidence tables follow them, and the two sections
+          that configured the attempt drop below in a quieter surface - still open, still labelled, still
+          the only way to change the build or judge again (§11D forbids hiding a control a reader needs).
+          Nothing inside these regions changed: the same components, the same Core words, the same order
+          of the five state groups. */}
+      {run === null ? null : (
+        <>
+          {error === null ? null : (
+            <p className={styles['stale']} role="status">
+              The record below is the last run that succeeded ({truncateMiddle(run.runId, 10)}). It is not
+              the result of the attempt that failed.
+            </p>
+          )}
+          <Findings run={run} onAccept={accept} />
+          <Readiness run={run} restored={restored} onReload={() => void reload()} />
+          {run.tables === null ? null : <Evidence run={run} unit={unit} />}
+          <BundleSection run={run} unit={unit} />
+        </>
+      )}
+
+      <section
+        className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
+        aria-labelledby="fs-policy-heading"
+      >
+        <h2 id="fs-policy-heading">5 · Project policy</h2>
         <div className={styles['row']}>
           <span className={styles['term']}>Config</span>
           <span className={styles['value']}>
@@ -393,8 +417,11 @@ export function Release({
         )}
       </section>
 
-      <section className={styles['section']} aria-labelledby="fs-builds-heading">
-        <h2 id="fs-builds-heading">2 · Build and baseline</h2>
+      <section
+        className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
+        aria-labelledby="fs-builds-heading"
+      >
+        <h2 id="fs-builds-heading">6 · Build and baseline</h2>
         {candidateError === null ? null : (
           <ErrorPanel envelope={candidateError} label="Build list failed" heading="Build list error" />
         )}
@@ -472,20 +499,6 @@ export function Release({
       {error === null ? null : (
         <ErrorPanel envelope={error} label="Gate run failed" heading="Gate run error" />
       )}
-      {run === null ? null : (
-        <>
-          {error === null ? null : (
-            <p className={styles['stale']} role="status">
-              The record below is the last run that succeeded ({truncateMiddle(run.runId, 10)}). It is not
-              the result of the attempt that failed.
-            </p>
-          )}
-          <Readiness run={run} restored={restored} onReload={() => void reload()} />
-          <Findings run={run} onAccept={accept} />
-          {run.tables === null ? null : <Evidence run={run} unit={unit} />}
-          <BundleSection run={run} unit={unit} />
-        </>
-      )}
     </Page>
   );
 }
@@ -505,7 +518,7 @@ function Readiness({
 }) {
   return (
     <section className={styles['section']} aria-labelledby="fs-readiness-heading">
-      <h2 id="fs-readiness-heading">3 · FirmwareSight policy readiness</h2>
+      <h2 id="fs-readiness-heading">2 · FirmwareSight policy readiness</h2>
       <div className={styles['states']}>
         <StateBadge
           state={stateName(run.dispositionEffectiveSeverity)}
@@ -620,7 +633,7 @@ function Findings({
 }) {
   return (
     <section className={styles['section']} aria-labelledby="fs-findings-heading">
-      <h2 id="fs-findings-heading">4 · Findings by state</h2>
+      <h2 id="fs-findings-heading">1 · Findings by state</h2>
       {run.findings.length === 0 ? (
         <p className={styles['hint']}>This run returned no findings.</p>
       ) : null}
@@ -817,7 +830,7 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
   }
   return (
     <section className={styles['section']} aria-labelledby="fs-evidence-heading">
-      <h2 id="fs-evidence-heading">5 · What the findings were judged on</h2>
+      <h2 id="fs-evidence-heading">3 · What the findings were judged on</h2>
 
       <div className={styles['block']}>
         <h3>Required artifacts</h3>
@@ -1007,7 +1020,7 @@ const STALE_PLAN_CODES: readonly string[] = [
 ];
 
 /**
- * 6 · Release Bundle (prompt §48, §49, §50, §58).
+ * 4 · Release Bundle (prompt §48, §49, §50, §58).
  *
  * Three facts decide what this section can do, and none of them is computed here: the disposition is Core's
  * aggregate, the plan's contents are the bundle engine's, and the destination is a folder a person chose in a
@@ -1143,7 +1156,7 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
 
   return (
     <section className={styles['section']} aria-labelledby="fs-bundle-heading">
-      <h2 id="fs-bundle-heading">6 · Release Bundle</h2>
+      <h2 id="fs-bundle-heading">4 · Release Bundle</h2>
       {ready ? (
         <p className={styles['hint']}>
           This run&rsquo;s disposition is PASS, so the release can be packaged into a folder you choose.
