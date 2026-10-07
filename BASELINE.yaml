@@ -833,9 +833,30 @@ u1_execution:
     ui_files: 9 # was 8; this round adds overview.test.tsx
     gate_full_steps: 17 # rust 3, frontend 5, drift 8, deny 1 - the same shape V1's §45 froze
   counts_change_is_authorized: "V1's `product_counts_required_unchanged` froze the counts for a docs-only research round. U1 is a product-UI round delivered by the owner's own prompt, and the count that moved is the UI count: 225 -> 236 in 9 files, with 868 Rust tests unchanged. The gate shape did not move."
-  gates_at_close: "python scripts/check.py 17 of 17 steps PASS with no SKIP (rust 3, frontend 5, drift 8 including drift/baseline integrity, deny 1), run at the fully staged closeout state; cargo fmt --all -- --check 0; cargo clippy --workspace --all-targets -- -D warnings 0; one cargo test --workspace 868 passed / 0 failed; corepack pnpm install --frozen-lockfile / typecheck / lint / test / build each exit 0 through the gate, with 236 passed in 9 files; scripts/verify_baseline_artifacts.py RESULT PASS (750 tracked paths, 748 manifest entries, every mismatch counter 0). The pre-staging run of the same gate reached 14 steps and failed only drift/ipc bindings unchanged, which was the unstaged ts-rs regeneration. --only core-smoke and --only package were not run in this round, so no figure for either appears in any U1 document."
+  gates_at_close: "python scripts/check.py 17 of 17 steps PASS with no SKIP (rust 3, frontend 5, drift 8 including drift/baseline integrity, deny 1), run at the fully staged closeout state; cargo fmt --all -- --check 0; cargo clippy --workspace --all-targets -- -D warnings 0; one cargo test --workspace 868 passed / 0 failed; corepack pnpm install --frozen-lockfile / typecheck / lint / test / build each exit 0 through the gate, with 236 passed in 9 files; scripts/verify_baseline_artifacts.py RESULT PASS (750 tracked paths, 748 manifest entries, every mismatch counter 0). The pre-staging run of the same gate reached 14 steps and failed only drift/ipc bindings unchanged, which was the unstaged ts-rs regeneration. --only core-smoke and --only package were not run during the initial U1 implementation round, and that stays the first-round record; the figures below belong to the continuation that ran them, not to that round."
+  gates_continuation_evidence: # U1R §8 - dated, so the first-round sentence above is not read as if those groups had been run then
+    initial_u1_implementation: "core-smoke and package not separately run; no figure is written for that round and none is retro-fitted to it"
+    u1_continuation: "python scripts/check.py --only core-smoke 3 of 3 PASS and --only package 4 of 4 PASS with no required SKIP, measured at the continuation's fully staged state on 2026-10-07 and recorded in U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md"
+    current_evidence: "measured, not recalled - the U1R recheck below carries the figures re-run against the corrective tree"
+  u1r_recheck: # U1R - the corrective's own record, kept beside U1's first-round block instead of replacing it. Gate and CI figures are written only after the run that produced them, so this block carries the counts measured on the corrective tree.
+    canonical_unit: U1R_STALE_CAPABILITY_CORRECTIVE_AND_FINAL_RECHECK
+    prompt: FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt
+    start_head: 6f35b144d4c161390fba0c1b2f15b1bbdd5d728f # preflight measured HEAD == origin/main == ls-remote with a clean tree, so there was no remote movement to classify
+    finding_closed: U1-V2-06 # the top capability strip borrowed the last good summary's words during a failed or unanalyzed attempt
+    product_scope: [apps/desktop/ui/src/Analyze.tsx, apps/desktop/ui/src/Details.tsx, apps/desktop/ui/src/intake.test.tsx]
+    rust_product_source_changed: false # so the prompt's "STOP and return to Architect" condition was never reached
+    counts_after:
+      rust: 868 # `cargo test --workspace`: 47 result lines, 868 passed, 0 failed - unchanged from U1's close
+      ui: 242 # was 236; six contract tests added to intake.test.tsx, none deleted
+      ui_files: 9 # unchanged; U1R adds no test file
+    commands_total_after: 30 # U1R registers nothing; the same 30-entry generate_handler! list U1 opened on
+    design_tokens_unchanged: "94336906997d23b1f36cbaf81711c6824082d88b18aa89c38dd12721564a14d4 - the HEAD blob digest and the worktree digest are one value, so assets/design-tokens.json is byte-identical"
+    mutation_proof: "reverting the derivation to the shipped-bug form fails T2, T3 and T6 (3 failed / 26 passed in the file) and nothing else; the file was restored by digest, sha256sum -c reported OK for all three paths, and no mutation code is committed"
+    design_note: U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md # FS-U1R-001, written before the installed recheck
+    v1_minor_gaps: OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT # the seven U1-V1 items; U1R implements none of them (prompt §12)
+    never_self_issued: [U1_PRODUCTIZATION_COMPLETE, U1_V2_06_CLOSED, V1_RESUMED, B1_READY, PRIVATE_BETA, RC, GA]
   semantic_surfaces_untouched: [core_crates, parser, diff, gate_rules, evidence_classification, schema, migrations, storage_contracts, analysis_wire_format, release_identity_rules, bundle_manifest, diagnostics, ADR-0028_conclusions, ADR-0029_conclusions, dependencies, tauri_capabilities, updater, signing]
-  new_commands_added: 0 # the desktop command count stays 27; Overview renders DTOs the shell already returns
+  new_commands_added: 0 # Overview renders DTOs the shell already returns. The total this line guards is 30, not 27: the `generate_handler!` list in apps/desktop/src-tauri/src/lib.rs registers 30 commands at HEAD and registered 30 already at f481b78, U1's own start head, and it reached 30 in 3400981 during P5 - so the 27 this block originally carried was stale before U1 opened, and U1 added none. U1R re-extracted the list from the tree on 2026-10-07 rather than repeating the old figure; see .ai/CURRENT_STATE.md for the same correction in prose.
   visual_evidence: STRUCTURAL_CONTRACTS_ONLY # the real-desktop before/after pass is a machine-level operation (it parks the owner's store) and was not authorized in this session; what is claimed instead is listed in U1_VALIDATION/U1_VALIDATION_REPORT.md
   deferred_explicitly: # §13 - first-round productization, not a finished design system
     - the reference screens' right-hand detail column (no page holds a selection to describe; the components drafted for it were deleted rather than shipped unused)

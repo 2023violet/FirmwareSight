@@ -259,7 +259,7 @@ C:\Users\16429\AppData\Local\Temp\FirmwareSight-U1-Visual-Acceptance-20261007T10
                   v1.0 c6ab8ca327d0e0d5c6abb7c2475163a749f745e247393f00350cbf718339b081), SCREENSHOT_MANIFEST.tsv
   01_artifact/    the downloaded zip, its SHA256SUMS and metadata, the installer, INSTALL.json
   02_owner_backup/ BASELINE.json, PARK.json, backup/ (independent copy), parked/ (emptied by the restore),
-                   RESTORE.json / OWNER_RESTORE.json
+                   RESTORE.json
   03_references/  the seven mockups as copied, MOCKUP_SHA256SUMS.txt
   04..09, 11      S01-S06 and R01-R09, plus the working probes
   10_reference_only/ S07_REFERENCE_ONLY.md
@@ -267,6 +267,14 @@ C:\Users\16429\AppData\Local\Temp\FirmwareSight-U1-Visual-Acceptance-20261007T10
   13_owner_restore/ UNINSTALL_raw.txt, UNINSTALL.md, PRE_RESTORE_LIVE.txt, OWNER_RESTORE.txt, OWNER_RESTORE.json
   14_review_pack/U1_VISUAL_REVIEW_PACK/  the §18 deliverable
 ```
+
+Path correction, recorded by U1R on 2026-10-07: this listing previously put `OWNER_RESTORE.json` under
+`02_owner_backup/` alongside `RESTORE.json`. `ls` of the evidence root puts `OWNER_RESTORE.json` in
+`13_owner_restore/` and leaves only `RESTORE.json` in `02_owner_backup/`, which is what the line above now
+says. Nothing about the owner-restore verdict moves with it: `13_owner_restore/OWNER_RESTORE.json` still
+records `ORIGINAL_DB_RESTORED = YES` with a digest match, and `02_owner_backup/RESTORE.json` is still the
+park-cycle restore of the same store. A file in the wrong directory in a hand-written index is an index
+error, not a second restore and not missing evidence.
 
 ## 15. Recommendation
 

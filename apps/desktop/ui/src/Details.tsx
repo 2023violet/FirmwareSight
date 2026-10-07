@@ -78,10 +78,18 @@ export function Details({
   snapshotId,
   unit,
   onUnitChange,
+  stale = false,
 }: {
   readonly snapshotId: string;
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
+  /**
+   * Whether these tables belong to a retained snapshot rather than to the attempt now in the row.
+   *
+   * The report above already says so; this is the same fact in the accessible name of a region a
+   * screen-reader jumps to directly, so the label does not depend on having read the paragraph first.
+   */
+  readonly stale?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>('sections');
   const [contributors, setContributors] = useState<readonly SectionRowDto[] | null>(null);
@@ -193,7 +201,10 @@ export function Details({
   const tabId = (key: Tab) => `fs-tab-${key}`;
 
   return (
-    <section className={styles['area']} aria-label="Snapshot details">
+    <section
+      className={styles['area']}
+      aria-label={stale ? 'Snapshot details of the last good analysis' : 'Snapshot details'}
+    >
       <Contributors rows={contributors} unit={unit} />
 
       <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />

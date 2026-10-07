@@ -1,0 +1,1302 @@
+FirmwareSight — U1R
+Stale Capability-State Corrective + Governance Reconciliation + Final Installed Recheck
+Execution Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+CANONICAL UNIT
+
+U1R_STALE_CAPABILITY_CORRECTIVE_AND_FINAL_RECHECK
+
+PURPOSE
+
+U1 installed visual acceptance is real and remotely verified,
+but the Architect does NOT accept U1 as visually complete yet.
+
+One material presentation finding remains:
+
+U1-V2-06
+
+During a failed Analyze attempt,
+the top capability chips still show the LAST GOOD analysis state
+(for example "ELF supported / MAP provided")
+while the current failed attempt / current selected input is not entitled to those claims.
+
+This creates a false current-state impression.
+
+The lower retained report is allowed to survive as historical/last-good evidence
+because the product already marks it as stale/previous.
+The top capability strip must NOT present stale facts as current facts.
+
+This prompt authorizes a narrow corrective only.
+
+It also authorizes two governance/documentation reconciliations already measured:
+
+1. BASELINE.yaml still says the desktop command count is 27.
+   Measured current command count is 30.
+   U1 added zero new commands.
+
+2. BASELINE.yaml still says U1 did not run:
+   --only core-smoke
+   --only package
+
+   But the U1 continuation did run:
+   core-smoke = 3 / 3
+   package = 4 / 4
+   with no SKIP.
+
+A third documentation typo may be corrected:
+
+U1_VISUAL_ACCEPTANCE_REPORT.md §14 lists OWNER_RESTORE.json under 02_owner_backup/,
+while the actual file is under 13_owner_restore/.
+Correct the path only if the current repository text still contains that error.
+
+This is NOT a second UI redesign round.
+
+Do NOT implement the seven minor U1-V1 aesthetic gaps in this unit.
+They remain for Architect/Product Owner visual judgement after the corrected screenshots are reviewed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. VERIFIED START AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Architect live verification at prompt issue time:
+
+origin/main =
+
+6f35b144d4c161390fba0c1b2f15b1bbdd5d728f
+
+Commit:
+
+U1: record installed visual convergence evidence
+
+Candidate product head:
+
+7dc2ca80e5273b9aac48bb7ca216d24c2c1585ce
+
+Candidate remote CI:
+
+Run:
+37609108402
+
+run number:
+74
+
+attempt:
+1
+
+result:
+10 / 10 success
+
+Evidence successor remote CI:
+
+Run:
+37619704397
+
+run number:
+75
+
+attempt:
+1
+
+result:
+10 / 10 success
+
+Current product counts:
+
+Rust =
+868 passed / 0 failed
+
+UI =
+236 passed / 9 files
+
+Current U1 state:
+
+U1 =
+READY_FOR_ARCHITECT_VISUAL_REVIEW
+
+Current unresolved material visual finding:
+
+U1-V2-06 =
+OPEN
+
+U1-V3 =
+none
+
+U1-V4 =
+none
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+eligible external sessions =
+0
+
+V1 participant execution =
+PAUSED_FOR_ARCHITECT_UI_REVIEW
+
+B1 / Private Beta =
+NOT_AUTHORIZED
+
+P5 =
+PASS_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+baseline =
+0.6.0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before any write:
+
+git fetch --prune origin
+
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log -8 --oneline --decorate
+
+Required:
+
+HEAD =
+origin/main =
+6f35b144d4c161390fba0c1b2f15b1bbdd5d728f
+
+worktree =
+clean
+
+If remote moved:
+
+STOP.
+
+Read and classify the delta.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git rebase published history
+git push --force
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. ARCHIVE THIS PROMPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Archive under:
+
+10_AUDIT/SOURCE_PROMPTS/
+
+Preferred filename:
+
+FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt
+
+Record:
+
+delivered SHA-256
+delivered bytes
+logical lines
+
+Use the established transport-safe CRLF/LF rule if needed.
+
+Do not invent an owner-side digest if only a normalized copy exists.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. REQUIRED READ SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read:
+
+AGENTS.md
+
+BASELINE.yaml
+
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+
+README.md
+INDEX.md
+
+U1_VALIDATION/U1_UI_GAP_AUDIT.md
+U1_VALIDATION/U1_DESIGN_CONVERGENCE_PLAN.md
+U1_VALIDATION/U1_VALIDATION_REPORT.md
+U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md
+
+apps/desktop/ui/src/Analyze.tsx
+apps/desktop/ui/src/Analyze.module.css
+apps/desktop/ui/src/intake.test.tsx
+apps/desktop/ui/src/overview.test.tsx
+apps/desktop/ui/src/components/Chip.tsx
+apps/desktop/ui/src/components/StateBadge.tsx
+apps/desktop/ui/src/stateWords.ts
+
+and any directly relevant tests/components required to understand the stale-state contract.
+
+Do not re-open unrelated page redesign.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. ROOT CAUSE — ARCHITECT VERIFIED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 6f35b14 / current main:
+
+Analyze.tsx keeps:
+
+const summary = lastGood;
+
+and intentionally retains the last-good summary after a later analysis fails.
+
+This is valid for the retained historical report.
+
+The lower report already receives:
+
+stale={error !== null || pendingSelection}
+
+and renders explicit previous/last-good wording.
+
+However, the top capability strip currently renders from:
+
+summary.capabilities.elf
+summary.capabilities.map
+summary.capabilities.git
+
+whenever summary != null,
+without conditioning those capability chips on stale/current-attempt state.
+
+Therefore a failed new analysis can show:
+
+current error / current selected artifact
+
+AND simultaneously:
+
+green capability chips belonging to the previous successful snapshot.
+
+That is the defect.
+
+Do NOT "fix" it by deleting last-good retention.
+
+Last-good retention is useful and already part of product behavior.
+
+The correction must separate:
+
+CURRENT ATTEMPT STATE
+
+from:
+
+LAST GOOD RETAINED EVIDENCE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. REQUIRED UX CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The top capability/status strip must describe the CURRENT attempt/context.
+
+It must never silently borrow capability facts from lastGood when:
+
+error != null
+
+or:
+
+pendingSelection == true
+
+or any equivalent state where the selected/current artifact has not produced a successful current summary.
+
+Required behavior:
+
+A. Current successful analysis
+
+Show the normal capability chips derived from the successful CURRENT summary.
+
+Example:
+
+ELF supported
+MAP provided
+Git available
+
+B. No analysis yet
+
+Show neutral no-analysis / input-ready presentation,
+not invented capabilities.
+
+C. Selection changed but not yet successfully analyzed
+
+Do NOT show the last-good capability chips as if current.
+
+Use a neutral current-context presentation such as:
+
+"Current selection not analyzed"
+
+and, if useful:
+
+"Previous result retained below"
+
+D. Current analysis failed
+
+Do NOT show last-good capability chips as current.
+
+Use a neutral/error-context presentation such as:
+
+"Current analysis failed"
+
+and optionally:
+
+"Previous result retained below"
+
+The exact human wording should follow the existing U1 visual language.
+
+Do not add a new domain state.
+
+Do not map failure to PASS/REVIEW/BLOCK/UNKNOWN/N/A unless that mapping is already semantically correct.
+
+This is presentation state,
+not a Gate verdict.
+
+E. Retained lower report
+
+The last-good report and Details may remain visible if current product behavior intentionally preserves them.
+
+But they MUST remain explicitly labelled:
+
+Previous analysis / Last good analysis
+
+and must not be confused with current-attempt facts.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. PREFERRED IMPLEMENTATION SHAPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prefer a small derived presentation state.
+
+For example, conceptually:
+
+currentSummaryIsAuthoritative =
+summary != null && error == null && !pendingSelection
+
+Then:
+
+if authoritative:
+render current capability chips
+
+else if error:
+render neutral failed-current-attempt chip/message
++ retained-result hint if lastGood exists
+
+else if pendingSelection:
+render neutral not-yet-analyzed chip/message
++ retained-result hint if lastGood exists
+
+else:
+render no-analysis state
+
+Do NOT duplicate domain logic.
+
+Do NOT mutate the stored lastGood summary.
+
+Do NOT clear persisted history merely to fix presentation.
+
+Do NOT create backend IPC.
+
+Do NOT change storage/schema/wire.
+
+The exact React implementation may differ,
+but the semantic contract above is required.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. TEST CONTRACT — REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add focused UI tests that would fail on current 6f35b14 behavior.
+
+At minimum prove:
+
+T1.
+After a successful analysis,
+top capability chips show the current successful capability state.
+
+T2.
+After changing selection without re-analysis,
+the previous capability chips are NOT presented as current.
+
+T3.
+After a later parse failure,
+the previous green capability chips are NOT presented as current.
+
+T4.
+After that parse failure,
+the last-good analysis remains available below
+with explicit stale/previous wording.
+
+T5.
+The failure ErrorPanel still renders the actual current failure.
+
+T6.
+A subsequent successful analysis replaces the retained state
+and normal capability chips return for the new current summary.
+
+Tests must assert semantics/accessibility-visible text,
+not brittle screenshot pixels.
+
+Mutation proof:
+
+temporarily restore the old unconditional stale-chip behavior
+or otherwise demonstrate the new contract test reds.
+
+Record the mutation result.
+
+Do not leave mutation code in the repository.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. GOVERNANCE RECONCILIATION — BASELINE.yaml
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Correct only the measured stale U1 facts.
+
+Current stale claim:
+
+desktop command count stays 27
+
+Measured truth:
+
+desktop command count =
+30
+
+U1 new commands added =
+0
+
+Write this distinction explicitly.
+
+Do NOT claim U1 added three commands.
+
+It did not.
+
+The previous count was already stale before U1.
+
+Also reconcile:
+
+U1 gates_at_close / continuation evidence
+
+The original first-round note that:
+
+--only core-smoke and --only package were not run
+
+was true for the FIRST U1 implementation round.
+
+The continuation later measured:
+
+core-smoke =
+3 / 3
+
+package =
+4 / 4
+
+no SKIP
+
+Preserve history.
+
+Do NOT rewrite the first-round fact as if those commands had been run then.
+
+Use dated/addendum/current-evidence wording:
+
+Initial U1 implementation:
+not separately run
+
+U1 continuation:
+core-smoke 3/3
+package 4/4
+no SKIP
+
+Current evidence:
+measured
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. DOCUMENTATION PATH TYPO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Inspect:
+
+U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md
+
+If it currently says OWNER_RESTORE.json is under:
+
+02_owner_backup/
+
+but actual evidence location was:
+
+13_owner_restore/
+
+correct that reference.
+
+Do not change any underlying owner-restore verdict.
+
+Do not invent missing evidence.
+
+This is a path correction only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. ABSOLUTE PRODUCT SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Expected product-code scope:
+
+apps/desktop/ui/src/Analyze.tsx
+
+plus:
+
+focused Analyze/intake tests
+
+and ONLY if necessary:
+
+a tiny shared presentational helper/component already in the UI layer.
+
+No broad page redesign.
+
+Do NOT change:
+
+Overview layout
+Compare layout
+Release layout
+History layout
+shared design tokens
+backend Core
+storage
+schema
+migrations
+wire DTOs
+release identity
+Gate semantics
+bundle semantics
+V1 metric definitions
+
+Unless an actual compile/test necessity proves a narrow generated binding update,
+there should be no Tauri/Rust product change.
+
+If any Rust product source becomes necessary:
+
+STOP and return to Architect before implementing.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. DESIGN TOKENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not add or change design token values.
+
+Prefer existing:
+
+Chip
+StateBadge
+Panel
+PageHeader
+existing text/status styles
+
+This corrective is about stale-state truthfulness,
+not a new visual system.
+
+assets/design-tokens.json must remain byte-identical.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. U1-V1 MINOR FINDINGS — DO NOT EXPAND SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The previous visual acceptance recorded seven U1-V1 minor gaps,
+including examples such as:
+
+- stacked Overview cards pushing metrics below the fold;
+- Analyze hierarchy/density differences;
+- missing paired right-hand detail on several pages;
+- History heading/title inconsistency;
+- rail scrolling behavior;
+- debug label joining;
+- wide-table presentation residue.
+
+Do NOT implement those in U1R.
+
+Why:
+
+The Architect has not yet reviewed the actual screenshot pack directly,
+and those are aesthetic/product-polish judgments rather than the one material state-truth defect.
+
+U1R closes only U1-V2-06.
+
+The minor gaps remain:
+
+OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT
+
+not:
+
+CLOSED
+
+not:
+
+IGNORED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run:
+
+git diff --check
+
+cargo fmt --all -- --check
+
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+cargo test --workspace
+
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+
+python scripts/check.py
+
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+
+python scripts/verify_baseline_artifacts.py
+
+Expected baseline counts before U1R:
+
+Rust =
+868
+
+UI =
+236 / 9 files
+
+U1R may add focused UI tests,
+so UI count may increase.
+
+Rust count should remain:
+868
+
+If Rust count changes:
+STOP and explain why.
+
+Expected gate shape:
+
+full =
+17 / 17
+
+drift =
+8 / 8
+
+deny =
+1 / 1
+
+core-smoke =
+3 / 3
+
+package =
+4 / 4
+
+No required SKIP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. U1R PRODUCT COMMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After local validation:
+
+create one narrow product corrective commit.
+
+Suggested message:
+
+U1R: keep stale capability state out of failed Analyze attempts
+
+Commit may include:
+
+Analyze presentation fix
+focused UI tests
+BASELINE.yaml reconciliation
+U1 visual report path correction
+U1R design/evidence note
+prompt archive
+baseline artifacts
+
+But do not let governance edits hide the product diff.
+
+Record exact changed paths.
+
+Use ADR-0029 index-blob baseline workflow.
+
+Push normal fast-forward.
+
+No force push.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. REMOTE CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Find run by exact U1R product SHA.
+
+Require:
+
+10 / 10 authoritative jobs
+
+Read every job individually.
+
+Confirm:
+
+Rust =
+868
+
+UI =
+actual new count / actual file count
+
+drift includes baseline integrity
+
+Package Windows:
+build
+verify
+upload
+
+Preserve attempt history.
+
+Do not blind-rerun repository-content failures.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. EXACT U1R WINDOWS ARTIFACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After exact U1R CI green:
+
+download the Windows artifact built from THAT exact U1R product SHA.
+
+Do NOT reuse:
+
+U1 artifact 11477857379
+F3 V1 artifact
+local package
+cargo run
+Vite
+
+Record:
+
+run id
+head SHA
+artifact id
+artifact name
+ZIP size
+
+Extract and verify:
+
+SHA256SUMS.txt
+artifact-metadata.json
+
+Record:
+
+NSIS filename
+NSIS bytes
+NSIS SHA-256
+installed executable SHA-256
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. OWNER STORE SAFETY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use the already proven owner-store parking discipline.
+
+Before installation:
+
+close FirmwareSight
+
+hash main/WAL/SHM
+
+backup byte-exact
+
+verify backup
+
+park owner store
+
+Required:
+
+OWNER_STORE_PARKED = YES
+
+OWNER_BACKUP_HASH_MATCH = YES
+
+Use disposable state only.
+
+After testing:
+
+close/uninstall as appropriate
+
+remove disposable live state only
+
+restore owner store exact
+
+Required:
+
+ORIGINAL_DB_RESTORED = YES
+
+ORIGINAL_DB_SHA_MATCH = YES
+
+OWNER_STORE_OPENED_BY_U1R = NO
+
+Any NO:
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. FOCUSED INSTALLED RECHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do NOT rerun the entire U1 screenshot matrix unless a new regression forces it.
+
+Required installed scenarios:
+
+A. Analyze success
+
+Use valid supported ELF.
+
+Capture at:
+
+1440 × 900
+
+Verify:
+
+normal current capability chips display correctly.
+
+B. Selection changed / pending analysis
+
+If reproducible in UI,
+capture and verify:
+
+previous capability chips are NOT presented as current.
+
+C. Parse failure after a prior successful analysis
+
+Use the same real installed workflow that produced:
+
+ERR-PARSE-2002
+
+or an equivalent deterministic invalid/truncated ELF.
+
+Capture at:
+
+1440 × 900
+1056 × 799
+1024 × 720
+
+Verify simultaneously:
+
+1. current parse error visible;
+2. stale green/current-looking capability chips absent;
+3. neutral current-attempt state visible;
+4. retained last-good result still available;
+5. retained result explicitly labelled previous/last-good;
+6. no contradiction between current input state and retained report;
+7. no critical clipping/overflow.
+
+D. Recovery
+
+Analyze a valid file again.
+
+Verify:
+
+current successful capability chips return for the new summary.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. REQUIRED SCREENSHOT PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create outside Git:
+
+FirmwareSight-U1R-Visual-Recheck-<timestamp>/
+
+Required:
+
+REFERENCE/
+FS-UI-06 Parse Failure reference
+and optionally FS-UI-02 Analyze
+
+CURRENT/
+
+U1R_S01_AnalyzeSuccess_1440x900.png
+
+U1R_S02_ParseFailure_1440x900.png
+
+U1R_S03_ParseFailure_1056x799.png
+
+U1R_S04_ParseFailure_1024x720.png
+
+U1R_S05_RecoverySuccess_1440x900.png
+
+If pending-selection state is meaningfully capturable:
+
+U1R_S06_PendingSelection_1440x900.png
+
+Also include:
+
+U1R_STATE_CONSISTENCY_MATRIX.md
+
+SHA256SUMS.txt
+
+00_README.txt
+
+Print the absolute review-pack path in the final report.
+
+Do not delete the pack.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. U1-V2-06 CLOSURE CRITERIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+U1-V2-06 may move to:
+
+CLOSED_BY_U1R
+
+only if:
+
+- exact U1R CI artifact installed;
+- parse failure reproduced after a previous success;
+- current failure visible;
+- stale previous capability chips no longer look current;
+- retained previous analysis remains clearly labelled;
+- recovery to a new successful analysis restores normal current chips;
+- 1440/1056/1024 layouts remain usable;
+- focused tests pass;
+- no new U1-V2/V3/V4 introduced.
+
+Otherwise:
+
+U1-V2-06 =
+OPEN
+
+and STOP.
+
+Do not self-waive.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. FUNCTIONAL SMOKE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Focused smoke only:
+
+Analyze success
+Analyze failure
+Details after failure
+recovery success
+navigation to Overview
+navigation back to Analyze
+
+Also quickly verify:
+
+Compare opens
+Release opens
+History opens
+
+No need to re-run full feature journey unless a regression is observed.
+
+Any new S0/S1/S2 or U1-V3/V4:
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. EVIDENCE REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create/update:
+
+U1_VALIDATION/U1R_CORRECTIVE_REPORT.md
+
+Required:
+
+1. Start authority
+2. Root cause
+3. UI contract
+4. Code change
+5. Test/mutation proof
+6. BASELINE reconciliation
+7. Report path correction
+8. Local validation
+9. U1R product commit
+10. U1R remote CI
+11. exact Windows artifact
+12. owner-store safety
+13. installed recheck
+14. screenshot manifest
+15. U1-V2-06 disposition
+16. remaining U1-V1 minor findings
+17. V1 interlock
+18. recommendation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. U1 FINAL STATE — DO NOT OVERCLAIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If U1-V2-06 closes and no new material issue appears:
+
+U1 engineering/UI corrective status may become:
+
+U1 =
+READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+
+Do NOT write:
+
+U1 PASS_COMPLETE
+
+DESIGN_COMPLETE
+
+MOCKUP_MATCHED
+
+The Architect/Product Owner still has not directly reviewed the actual U1/U1R screenshot pack.
+
+The minor U1-V1 gaps remain open for that judgement.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. V1 INTERLOCK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Keep:
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+eligible sessions =
+0
+
+participant execution =
+PAUSED_FOR_ARCHITECT_UI_REVIEW
+
+Do NOT re-baseline V1's frozen artifact.
+
+Do NOT start participant sessions.
+
+Do NOT alter M1–M6 definitions.
+
+After U1R screenshots return,
+Architect will decide whether:
+
+A.
+U1 accepted and V1 frozen artifact re-baselined to U1R
+
+B.
+another UI polish round required
+
+C.
+retain F3 artifact for V1
+
+Only Architect decides.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. B1 / RELEASE BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Still forbidden:
+
+B1
+Private Beta
+RC
+GA
+tag
+GitHub Release
+public installer
+signing
+notarization
+updater
+license choice
+pricing
+commercialization
+
+U1R grants none of these.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. EVIDENCE SUCCESSOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After installed recheck and owner restore,
+if U1-V2-06 closes:
+
+create one docs/evidence successor if needed.
+
+No product source in successor.
+
+Allowed:
+
+U1_VALIDATION/**
+.ai/*.md if current U1/V1 pointer needs honest update
+README.md / INDEX.md if materially stale
+10_AUDIT/SOURCE_PROMPTS/**
+BASELINE.yaml if only recording the now-measured current U1R evidence
+DIRECTORY_TREE.txt
+SHA256SUMS
+
+Product counts unchanged from U1R product commit.
+
+Run local gate.
+
+Push normal fast-forward.
+
+Read exact successor CI.
+
+Require 10 / 10.
+
+Do not create another commit merely to write back its own run.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight U1R Stale Capability Corrective Report
+
+## 1. Start authority
+
+HEAD
+origin/main
+U1 candidate
+Run 74
+U1 evidence head
+Run 75
+
+## 2. Root cause
+
+lastGood
+current attempt
+top chip defect
+lower stale report behavior
+
+## 3. Corrective UX contract
+
+success
+pending selection
+failed current attempt
+retained previous analysis
+recovery
+
+## 4. Changed paths
+
+product
+tests
+governance
+docs
+forbidden paths = none
+
+## 5. Test proof
+
+new tests
+mutation proof
+UI count
+Rust count
+
+## 6. BASELINE reconciliation
+
+command count 30
+U1 adds 0 commands
+initial core/package history
+continuation 3/3 and 4/4
+
+## 7. Documentation path correction
+
+OWNER_RESTORE.json
+
+## 8. Local validation
+
+Rust
+UI
+gate
+drift
+deny
+core-smoke
+package
+baseline verifier
+
+## 9. Product commit
+
+SHA
+message
+
+## 10. Remote CI
+
+run
+attempt
+10 jobs
+
+## 11. Exact Windows artifact
+
+artifact id
+installer
+size
+SHA
+installed exe SHA
+
+## 12. Installed recheck
+
+success
+pending selection
+parse failure
+recovery
+
+## 13. Screenshots
+
+absolute pack path
+S01–S06
+hashes
+
+## 14. U1-V2-06
+
+OPEN / CLOSED_BY_U1R
+
+## 15. Remaining U1-V1 findings
+
+list unchanged
+no broad polish performed
+
+## 16. Owner restore
+
+ORIGINAL_DB_RESTORED
+ORIGINAL_DB_SHA_MATCH
+OWNER_STORE_OPENED_BY_U1R
+
+## 17. Evidence successor
+
+SHA
+docs-only
+remote CI
+
+## 18. Current state
+
+U1 =
+READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT / BLOCKED
+
+P5 =
+PASS_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+eligible external sessions =
+0
+
+B1 =
+NOT_AUTHORIZED
+
+## 19. Stop
+
+STOP.
+
+Do not start V1 participant sessions.
+
+Do not re-baseline V1 artifact.
+
+Do not start B1.
+
+Return U1/U1R screenshot packs to Architect/Product Owner.
+
+END OF PROMPT

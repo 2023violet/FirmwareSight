@@ -632,3 +632,145 @@ describe('P1-A0 intake screen', () => {
     expect(page).not.toMatch(/\bGate\b/);
   });
 });
+
+/**
+ * U1R / U1-V2-06.
+ *
+ * The finding was not that a retained result is shown - that is deliberate, and the report below has
+ * always said so. It is that the pills at the top of the page took their words from the retained
+ * snapshot whenever one existed, so a failed attempt could read "ELF supported / MAP provided" in the
+ * affirmative green of the previous build while the row underneath it said `MAP: Not provided`.
+ *
+ * Every assertion here is about an accessible name or a visible word, never about a pixel: the same
+ * contract has to hold at 1440, 1056 and 1024, and a screenshot-derived test would only prove the
+ * size it was written against.
+ */
+describe('U1R capability strip: current attempt, not retained evidence', () => {
+  const strip = () => screen.getByRole('group', { name: 'Input capabilities' });
+
+  /** The three words a successful analysis of the standard fixture earns. */
+  async function expectCurrentChips() {
+    const inputs = await screen.findByRole('group', { name: 'Input capabilities' });
+    expect(within(inputs).getByText('ELF supported')).toBeDefined();
+    expect(within(inputs).getByText('MAP provided')).toBeDefined();
+    expect(within(inputs).getByText('Git unknown')).toBeDefined();
+    expect(within(inputs).queryByText(/retained below/)).toBeNull();
+  }
+
+  function expectNoBorrowedChips(inputs: HTMLElement) {
+    for (const word of ['ELF supported', 'MAP provided', 'Git unknown']) {
+      expect(within(inputs).queryByText(word)).toBeNull();
+    }
+  }
+
+  it('T1 states the current capability words after a successful analysis', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+
+    await expectCurrentChips();
+    // The header line belongs to the same attempt, so it names that artifact's figures.
+    expect(screen.getByText('12 sections')).toBeDefined();
+    expect(screen.getByText('34 symbols')).toBeDefined();
+  });
+
+  it('T2 withholds the previous words when the selection moves without an analysis', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+    await expectCurrentChips();
+
+    selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
+    await screen.findByText('other.elf');
+
+    const inputs = strip();
+    expectNoBorrowedChips(inputs);
+    expect(within(inputs).getByText('other.elf selected, not analyzed yet')).toBeDefined();
+    expect(within(inputs).getByText('Previous result retained below')).toBeDefined();
+    // Choosing is not analyzing, and the header no longer quotes the retained snapshot.
+    expect(screen.queryByText('12 sections')).toBeNull();
+    expect(analyzeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('T3 withholds the previous words when the current attempt fails', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+    await expectCurrentChips();
+
+    analyzeMock.mockResolvedValue(fail(PARSE_FAILURE));
+    await analyze();
+    await screen.findByRole('alert');
+
+    const inputs = strip();
+    expectNoBorrowedChips(inputs);
+    expect(within(inputs).getByText('Current analysis failed')).toBeDefined();
+    expect(within(inputs).getByText('Previous result retained below')).toBeDefined();
+    expect(screen.queryByText('12 sections')).toBeNull();
+  });
+
+  it('T4 keeps the retained analysis visible below, and keeps it labelled as retained', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+
+    analyzeMock.mockResolvedValue(fail(PARSE_FAILURE));
+    await analyze();
+    await screen.findByRole('alert');
+
+    const lastGood = await screen.findByRole('region', { name: 'Last good analysis' });
+    expect(within(lastGood).getByText(/Previous analysis of app\.elf/)).toBeDefined();
+    expect(within(lastGood).getByText('5,432 bytes')).toBeDefined();
+    expect(within(lastGood).getByText('app.elf')).toBeDefined();
+    // The tables under the report are the same retained snapshot, and say so in their own name.
+    expect(
+      screen.getByRole('region', { name: 'Snapshot details of the last good analysis' }),
+    ).toBeDefined();
+  });
+
+  it('T5 still reports the failure that actually happened', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+
+    analyzeMock.mockResolvedValue(fail(PARSE_FAILURE));
+    await analyze();
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('Analysis failed');
+    expect(alert.textContent).toContain('Could not parse artifact as ELF.');
+    expect(alert.textContent).toContain('ERR-PARSE-2002');
+    expect(alert.textContent).toContain('truncated section table');
+    expect(alert.textContent).toContain('op-1a2b');
+  });
+
+  it('T6 returns the current words when a later attempt succeeds', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+
+    analyzeMock.mockResolvedValue(fail(PARSE_FAILURE));
+    await analyze();
+    await screen.findByRole('alert');
+    expectNoBorrowedChips(strip());
+
+    const base = summary();
+    analyzeMock.mockResolvedValue(
+      ok(
+        summary({
+          artifact: { ...base.artifact, byteSize: 6789, sha256: 'c'.repeat(64) },
+          identity: { ...base.identity, snapshotId: 'snap-cafebabe-p0-normalize-1' },
+        }),
+      ),
+    );
+    await analyze();
+    await screen.findByText('6,789 bytes');
+
+    await expectCurrentChips();
+    expect(screen.getByRole('region', { name: 'Analysis summary' })).toBeDefined();
+    expect(screen.queryByRole('region', { name: 'Last good analysis' })).toBeNull();
+    expect(screen.getByRole('region', { name: 'Snapshot details' })).toBeDefined();
+    expect(screen.getByText('12 sections')).toBeDefined();
+  });
+});

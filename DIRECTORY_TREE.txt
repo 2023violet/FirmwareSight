@@ -165,6 +165,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_Pre_G2_Compare_UI_Test_Reliability_Closure_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_U1_Push_CI_Installed_Visual_Acceptance_v1.0_prior_revision.txt
 │   │   ├── FirmwareSight_U1_Push_CI_Installed_Visual_Acceptance_v1.1.txt
+│   │   ├── FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt
 │   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
 │   │   ├── FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt
 │   │   ├── FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt
@@ -774,7 +775,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── U1_DESIGN_CONVERGENCE_PLAN.md
 │   ├── U1_UI_GAP_AUDIT.md
 │   ├── U1_VALIDATION_REPORT.md
-│   └── U1_VISUAL_ACCEPTANCE_REPORT.md
+│   ├── U1_VISUAL_ACCEPTANCE_REPORT.md
+│   └── U1R_CAPABILITY_STATE_DESIGN.md
 ├── V0_VALIDATION/
 │   ├── analysis/
 │   │   ├── METRICS.md

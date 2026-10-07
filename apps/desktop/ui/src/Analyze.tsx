@@ -135,18 +135,34 @@ export function Analyze({
    */
   const pendingSelection = selection !== null && selection.selectionId !== analyzedSelectionId;
 
+  /**
+   * The summary that is entitled to be read as the current one, which is not always `lastGood`.
+   *
+   * U1-V2-06: a failed attempt, or a selection that has not been analyzed yet, leaves the previous
+   * snapshot in `lastGood`. Keeping it is correct and is what the report below does under an
+   * explicit "Previous analysis of …" note. Presenting its capability words at the top of the page
+   * as if they described the file now in the row is not: green "ELF supported / MAP provided" above a
+   * row reading `MAP: Not provided` states a current fact the current attempt never earned. So the
+   * top of this page reads from this value, and the retained evidence reads from `summary`.
+   *
+   * This is a presentation distinction over facts the shell already returned. It defines no domain
+   * state, maps nothing onto the five Gate states, and mutates nothing.
+   */
+  const currentSummary =
+    summary !== null && error === null && !pendingSelection ? summary : null;
+
   return (
     <Page>
       <PageHeader
         title="Analyze"
         meta={
-          summary === null
+          currentSummary === null
             ? [selection === null ? 'no artifact selected' : `selected ${selection.fileName}`]
             : [
-                `artifact ${summary.artifact.fileName}`,
-                <span key="sha">sha256 {truncateMiddle(summary.artifact.sha256, 6)}</span>,
-                `${String(summary.sectionCount)} sections`,
-                `${String(summary.symbolCount)} symbols`,
+                `artifact ${currentSummary.artifact.fileName}`,
+                <span key="sha">sha256 {truncateMiddle(currentSummary.artifact.sha256, 6)}</span>,
+                `${String(currentSummary.sectionCount)} sections`,
+                `${String(currentSummary.symbolCount)} symbols`,
               ]
         }
         subhead="Choose a firmware artifact and FirmwareSight reports the Core facts it can prove. Nothing
@@ -176,30 +192,37 @@ export function Analyze({
 
       {/* The three inputs, stated as pills rather than as rows deep in a list: what this screen can
           actually prove about the build is the first thing a reader needs, and the words are Core's
-          capability answers mapped to the five states, not a judgement made here. */}
-      <div className={styles['states']} aria-label="Input capabilities">
-        {summary === null ? (
-          <Chip>
-            {selection === null
-              ? 'No artifact selected yet'
-              : `${selection.fileName} selected, not analyzed yet`}
-          </Chip>
+          capability answers mapped to the five states, not a judgement made here. They describe the
+          current attempt only — see `currentSummary`. When it has no right to speak, the strip says
+          so in neutral words and points at the retained report instead of borrowing its pills. */}
+      <div className={styles['states']} role="group" aria-label="Input capabilities">
+        {currentSummary === null ? (
+          <>
+            <Chip>
+              {error !== null
+                ? 'Current analysis failed'
+                : selection === null
+                  ? 'No artifact selected yet'
+                  : `${selection.fileName} selected, not analyzed yet`}
+            </Chip>
+            {summary === null ? null : <Chip>Previous result retained below</Chip>}
+          </>
         ) : (
           <>
             <StateBadge
               variant="chip"
-              state={capabilityState(summary.capabilities.elf)}
-              label={`ELF ${summary.capabilities.elf}`}
+              state={capabilityState(currentSummary.capabilities.elf)}
+              label={`ELF ${currentSummary.capabilities.elf}`}
             />
             <StateBadge
               variant="chip"
-              state={capabilityState(summary.capabilities.map)}
-              label={`MAP ${summary.capabilities.map}`}
+              state={capabilityState(currentSummary.capabilities.map)}
+              label={`MAP ${currentSummary.capabilities.map}`}
             />
             <StateBadge
               variant="chip"
-              state={capabilityState(summary.capabilities.git)}
-              label={`Git ${summary.capabilities.git}`}
+              state={capabilityState(currentSummary.capabilities.git)}
+              label={`Git ${currentSummary.capabilities.git}`}
             />
           </>
         )}
@@ -280,9 +303,15 @@ export function Analyze({
       )}
 
       {/* One snapshot id, the last one the shell proved. A later attempt that failed cannot repoint
-          these tables, because the last-good summary only moves on a summary. */}
+          these tables, because the last-good summary only moves on a summary. The region carries the
+          same truth the report above it carries: whose snapshot these rows are. */}
       {summary === null ? null : (
-        <Details snapshotId={summary.identity.snapshotId} unit={unit} onUnitChange={onUnitChange} />
+        <Details
+          snapshotId={summary.identity.snapshotId}
+          unit={unit}
+          onUnitChange={onUnitChange}
+          stale={error !== null || pendingSelection}
+        />
       )}
     </Page>
   );
