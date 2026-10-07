@@ -1,0 +1,79 @@
+/*
+ * The page opening: title, metadata line, action slot, optional subhead.
+ *
+ * The measure is the one the pages already bound their prose with (60ch, used by Analyze and Compare
+ * before U1) rather than a new number, and the two-column header is what lets the actions sit at the
+ * reader's starting edge at 1440 px and fall below the title at the frozen 1024 px minimum instead of
+ * squeezing it.
+ */
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--fs-space-3) var(--fs-space-4);
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  min-width: 0;
+}
+
+.meta {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  overflow-wrap: anywhere;
+}
+
+.metaItem {
+  display: inline;
+}
+
+/* The separator is punctuation, not content: a screen reader should not announce a dot between every
+   fact, and `aria-hidden` on the span is what keeps it out of the announcement without breaking the
+   visual rhythm. */
+.dot {
+  color: var(--fs-color-text-disabled);
+}
+
+.subhead {
+  grid-column: 1 / -1;
+  margin: 0;
+  max-width: 60ch;
+  color: var(--fs-color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  min-width: 0;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fs-space-2) var(--fs-space-4);
+}
+
+.sectionHint {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  text-align: right;
+}

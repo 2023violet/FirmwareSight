@@ -1255,9 +1255,14 @@ pub struct BundleExportDto {
 /// A closed enum rather than a string for the same reason `FixtureKey` is one: it is the boundary.
 /// The title text is Rust's, so no page name — and certainly no file name or directory — can be put
 /// into the window title from the WebView (prompt §14, `AGENTS.md` 7).
+///
+/// U1 adds `Overview` and aligns two titles with the names the pages give themselves on screen
+/// (`Release Gate`, `Bundle & History`). The variant *names* stay as they were: they are the wire form of
+/// `set_window_title`, and a page gaining a clearer label is not a reason to rename a command argument.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export)]
 pub enum MainWindowPage {
+    Overview,
     Analyze,
     Compare,
     Release,
@@ -1271,10 +1276,11 @@ impl MainWindowPage {
     #[must_use]
     pub const fn window_title(self) -> &'static str {
         match self {
+            Self::Overview => "FirmwareSight - Overview",
             Self::Analyze => "FirmwareSight - Analyze",
             Self::Compare => "FirmwareSight - Compare",
-            Self::Release => "FirmwareSight - Release",
-            Self::History => "FirmwareSight - History",
+            Self::Release => "FirmwareSight - Release Gate",
+            Self::History => "FirmwareSight - Bundle & History",
             Self::Help => "FirmwareSight - Help",
         }
     }

@@ -255,14 +255,28 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       └── ui/
 │           ├── src/
 │           │   ├── components/
+│           │   │   ├── Button.module.css
+│           │   │   ├── Button.tsx
+│           │   │   ├── Chip.module.css
+│           │   │   ├── Chip.tsx
 │           │   │   ├── ErrorPanel.module.css
 │           │   │   ├── ErrorPanel.tsx
+│           │   │   ├── Layout.module.css
+│           │   │   ├── Layout.tsx
+│           │   │   ├── PageHeader.module.css
+│           │   │   ├── PageHeader.tsx
+│           │   │   ├── Panel.module.css
+│           │   │   ├── Panel.tsx
+│           │   │   ├── RankBar.module.css
+│           │   │   ├── RankBar.tsx
 │           │   │   ├── SizeUnitSwitch.module.css
 │           │   │   ├── SizeUnitSwitch.tsx
 │           │   │   ├── StateBadge.module.css
 │           │   │   ├── StateBadge.tsx
 │           │   │   ├── table.module.css
-│           │   │   └── Table.tsx
+│           │   │   ├── Table.tsx
+│           │   │   ├── TopBar.module.css
+│           │   │   └── TopBar.tsx
 │           │   ├── ipc/
 │           │   │   ├── generated/
 │           │   │   │   ├── AcceptedReviewDto.ts
@@ -386,9 +400,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── History.tsx
 │           │   ├── intake.test.tsx
 │           │   ├── main.tsx
+│           │   ├── Overview.module.css
+│           │   ├── overview.test.tsx
+│           │   ├── Overview.tsx
 │           │   ├── Release.module.css
 │           │   ├── release.test.tsx
-│           │   └── Release.tsx
+│           │   ├── Release.tsx
+│           │   └── stateWords.ts
 │           ├── .npmrc
 │           ├── eslint.config.js
 │           ├── index.html
@@ -747,6 +765,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── DESIGN_CHECKLIST_TEMPLATE.md
 │   ├── FEATURE_SPEC_TEMPLATE.md
 │   └── RELEASE_CHECKLIST_TEMPLATE.md
+├── U1_VALIDATION/
+│   ├── 00_authority/
+│   │   ├── PREFLIGHT_U1.txt
+│   │   └── SOURCE_PROMPT_U1_transcription.md
+│   ├── U1_DESIGN_CONVERGENCE_PLAN.md
+│   ├── U1_UI_GAP_AUDIT.md
+│   └── U1_VALIDATION_REPORT.md
 ├── V0_VALIDATION/
 │   ├── analysis/
 │   │   ├── METRICS.md

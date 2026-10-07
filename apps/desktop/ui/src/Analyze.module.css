@@ -1,60 +1,30 @@
 /*
- * The Analyze page. Hairlines, token values, one accent: the report is a read, not a dashboard
- * (DESIGN.md 4, 5).
+ * The Analyze page's own shapes.
+ *
+ * What used to live here and now lives in the shared layer: `.page` (`components/Layout`), `.header`
+ * and the prose measure (`components/PageHeader`), `.control`/`.primary` and their disabled-contrast
+ * reasoning (`components/Button`), and the `.rows`/`.row`/`.term`/`.value` list (`components/Panel`).
+ * The hairline rule that separates a control row from a result, and the rule that a chosen file is
+ * named rather than located, are still this page's business.
  */
 
-.page {
-  max-width: var(--fs-layout-design-target-width);
-  margin: 0 auto;
-  padding: var(--fs-space-8) var(--fs-space-6);
+/* The three input pills under the title. A row of chips, not a card: they state what the screen can
+   prove about the inputs, and a box around them would compete with the panels below. */
+.states {
   display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-6);
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-}
-
-.subhead {
-  color: var(--fs-color-text-secondary);
-  max-width: 60ch;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-2);
 }
 
 /* A plain hairline separates the control row; no card, no shadow (DESIGN.md 4). */
 .controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--fs-space-3);
   padding-bottom: var(--fs-space-4);
   border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
-
-/* Secondary controls: the same outline and radius the P0 select used, because they are the same
-   kind of control. Only the Primary Analyze action carries the accent (DESIGN.md 5). */
-.control {
-  padding: var(--fs-space-2) var(--fs-space-3);
-  font: inherit;
-  color: var(--fs-color-text-primary);
-  background: var(--fs-color-bg-surface);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-control);
-  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
-}
-
-.control:hover:not(:disabled) {
-  border-color: var(--fs-color-text-disabled);
-}
-
-/* Same trap as `.primary:disabled`: `text.disabled` on `bg.subtle` measures about 2.3:1, so the
-   label would fade out exactly when the whole row is locked during an analysis. */
-.control:disabled {
-  color: var(--fs-color-text-secondary);
-  background: var(--fs-color-bg-subtle);
-  cursor: default;
 }
 
 /* The chosen file is named, never located: the title attribute carries the whole name for overflow
@@ -65,53 +35,26 @@
 }
 
 .meta {
+  margin: 0;
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
 }
 
 .actions {
   display: flex;
   gap: var(--fs-space-2);
+  margin-left: auto;
 }
 
-/* The preserved result is a fact about a past analysis, so it gets its own hairline note rather
-   than a banner: DESIGN.md forbids decorative treatment, and the sentence has to stay readable. */
+/* The preserved result is a fact about a past analysis, so it gets its own hairline note rather than a
+   banner: DESIGN.md forbids decorative treatment, and the sentence has to stay readable. */
 .stale {
   padding: var(--fs-space-2) var(--fs-space-3);
   color: var(--fs-color-text-secondary);
   background: var(--fs-color-bg-subtle);
   border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   border-radius: var(--fs-radius-control);
-}
-
-/* One Primary per region (DESIGN.md 5); accent comes from tokens, not from a local colour. */
-.primary {
-  padding: var(--fs-space-2) var(--fs-space-4);
-  font: inherit;
-  font-weight: bold;
-  color: var(--fs-color-text-on-accent);
-  background: var(--fs-color-accent-primary);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
-  border-radius: var(--fs-radius-control);
-  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
-}
-
-.primary:hover:not(:disabled) {
-  background: var(--fs-color-accent-hover);
-}
-
-.primary:active:not(:disabled) {
-  background: var(--fs-color-accent-pressed);
-}
-
-/* A disabled Primary has to stay readable. `text.disabled` and `accent.disabled` are the same
-   token value (#98A2B3), so the P0 pairing painted the label in its own background - invisible
-   whenever Analyze starts disabled, which is every time now that a selection is required first.
-   Secondary text on a subtle surface keeps the word legible without borrowing the accent. */
-.primary:disabled {
-  color: var(--fs-color-text-secondary);
-  background: var(--fs-color-bg-subtle);
-  border-color: var(--fs-color-border-default);
 }
 
 .status {
@@ -124,61 +67,6 @@
   gap: var(--fs-space-6);
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
-}
-
-.rows {
-  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
-
-.row {
-  display: grid;
-  /* The label column reuses the inspector minimum rather than inventing a width. */
-  grid-template-columns: var(--fs-layout-evidence-inspector-min) minmax(0, 1fr);
-  align-items: baseline;
-  gap: var(--fs-space-4);
-  min-height: var(--fs-row-default);
-  padding: var(--fs-space-2) 0;
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
-
-.term {
-  color: var(--fs-color-text-secondary);
-}
-
-.value {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--fs-space-2);
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.mono {
-  font-family: var(--fs-font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
-.count {
-  font-family: var(--fs-font-mono);
-  color: var(--fs-color-text-secondary);
-}
-
-.note {
-  color: var(--fs-color-text-secondary);
-  font-size: var(--fs-font-size-metadata);
-}
-
-.monoSmall {
-  font-family: var(--fs-font-mono);
-  font-size: var(--fs-font-size-metadata);
-  font-variant-numeric: tabular-nums;
-}
-
 .footer {
   display: flex;
   flex-direction: column;
@@ -187,4 +75,10 @@
   border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
+}
+
+.monoSmall {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
 }

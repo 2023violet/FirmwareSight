@@ -1,0 +1,64 @@
+/*
+ * The fact pill and the count strip.
+ *
+ * Same pill geometry as a state chip on purpose: one radius token (`--fs-radius-pill`) and one hairline,
+ * so a reader learns one shape for "this is a label, not a sentence".
+ */
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--fs-space-1);
+  padding: var(--fs-space-1) var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-pill);
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.strip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+.stripItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+  font-size: var(--fs-font-size-metadata);
+}
+
+/* The count is a number, so it is mono and tabular; the glyph above it is the state. */
+.stripCount {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fs-color-text-secondary);
+}
+
+.pass {
+  color: var(--fs-color-status-pass);
+}
+
+.review {
+  color: var(--fs-color-status-review-strong);
+}
+
+.block {
+  color: var(--fs-color-status-block);
+}
+
+.unknown {
+  color: var(--fs-color-status-unknown);
+}
+
+.na {
+  color: var(--fs-color-text-disabled);
+}

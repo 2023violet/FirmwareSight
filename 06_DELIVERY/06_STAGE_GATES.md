@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Delivery"
-last_updated: "2026-09-29"
+last_updated: "2026-10-07"
 ---
 
 # Stage Gates
@@ -262,6 +262,18 @@ P5 Productization            — PASS_COMPLETE (opened 2026-10-03 under executio
                               P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md, and the carried limitations at
                               P5_VALIDATION/P5_KNOWN_LIMITATIONS.md. This line is not G3, B1, RC1 or GA1, and
                               closing P5 did not make it one
+U1 UI Productization Convergence — IN_PROGRESS (opened 2026-10-07; prompt delivered inline, and the owner
+                              registered the track here as `U1` because the prompt's own title says `B1`, `B1`
+                              below is Private Beta, and both F3 §37 and V1 §40 record that identifier as NOT
+                              AUTHORIZED. A UI productization track, not a product stage and not a gate: it
+                              converges the desktop React shell toward the frozen seven-screen reference set in
+                              `assets/ui-mockups/` and changes no Core semantics, evidence class, schema,
+                              migration, storage contract, wire format, release identity rule, ADR-0028 or
+                              ADR-0029 conclusion. It authorizes no feature, dependency, cloud, account,
+                              telemetry, updater, signing, notarization, licence, pricing, B1, RC or GA. V1 stays
+                              `IN_PROGRESS / RECRUITMENT_READY` with its 0 eligible sessions and its frozen cohort
+                              build, `paused_for` this track. Evidence and the two governance documents are in
+                              `U1_VALIDATION/`)
 B1 Private Beta
 RC1 Release Candidate
 GA1 General Availability

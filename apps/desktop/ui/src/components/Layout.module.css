@@ -1,0 +1,24 @@
+/*
+ * The page container, the content/detail pair, and the scroll wrapper.
+ *
+ * `.page` repeats what five pages each declared for themselves, with the same measure and the same
+ * rhythm, so that a page can no longer have a different idea of what "the top of the screen" costs.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+  max-width: var(--fs-layout-design-target-width);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: var(--fs-space-8) var(--fs-space-6);
+}
+
+/* The scroll axis belongs to this wrapper and never to the table inside it (F2R-01). A `display: block`
+   table is forced to the width of its pane and then lays its columns out *narrower than their own
+   minimum*, which is how one prose column ended up one character wide - measured in `01_layout_probe`.
+   As a table it keeps its intrinsic minimum, and this element owns whatever scroll is left. */
+.viewport {
+  overflow-x: auto;
+}

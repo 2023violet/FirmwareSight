@@ -1,0 +1,64 @@
+/*
+ * The ranked bar row.
+ *
+ * The track is one spacing token tall (`--fs-space-2`) rather than a new pixel size, its empty part is
+ * `--fs-color-chart-other`, and the fill is one blue (`--fs-color-chart-blue-4`) rather than a per-rank
+ * shade: `DESIGN.md` 7 forbids a blue sequence as the only encoding, and here it is not an encoding at
+ * all - the number beside the bar is.
+ */
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(var(--fs-space-16), minmax(0, 1fr)) auto;
+  align-items: center;
+  gap: var(--fs-space-3);
+  min-height: var(--fs-row-compact);
+}
+
+.pickable {
+  width: 100%;
+  padding: var(--fs-space-1) var(--fs-space-2);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: var(--fs-border-width-hairline) solid transparent;
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.pickable:hover {
+  background: var(--fs-color-bg-subtle);
+  border-color: var(--fs-color-border-default);
+}
+
+.label {
+  font-family: var(--fs-font-mono);
+  overflow-wrap: anywhere;
+}
+
+.track {
+  display: block;
+  height: var(--fs-space-2);
+  background: var(--fs-color-chart-other);
+  border-radius: var(--fs-radius-control);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--fs-color-chart-blue-4);
+  border-radius: var(--fs-radius-control);
+}
+
+.absent {
+  color: var(--fs-color-text-disabled);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.value {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

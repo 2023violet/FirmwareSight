@@ -568,6 +568,7 @@ fn the_history_scope_is_the_shells_own_project_and_cannot_be_asked_for() {
 #[test]
 fn the_window_title_comes_from_a_closed_page_set_with_nothing_to_inject() {
     let pages = [
+        MainWindowPage::Overview,
         MainWindowPage::Analyze,
         MainWindowPage::Compare,
         MainWindowPage::Release,
@@ -578,13 +579,15 @@ fn the_window_title_comes_from_a_closed_page_set_with_nothing_to_inject() {
     assert_eq!(
         titles,
         vec![
+            "FirmwareSight - Overview",
             "FirmwareSight - Analyze",
             "FirmwareSight - Compare",
-            "FirmwareSight - Release",
-            "FirmwareSight - History",
+            "FirmwareSight - Release Gate",
+            "FirmwareSight - Bundle & History",
             "FirmwareSight - Help",
         ],
-        "the five pages the shell can be told about"
+        "the six pages the shell can be told about, each title matching the name its page gives itself \
+         on screen (U1 §3: a rail label and a title bar that disagree are two names for one place)"
     );
     for title in titles {
         assert!(
@@ -597,13 +600,13 @@ fn the_window_title_comes_from_a_closed_page_set_with_nothing_to_inject() {
         );
     }
 
-    // The wire form is the closed union, not a free string: five variants and no payload.
+    // The wire form is the closed union, not a free string: six variants and no payload.
     let json: Vec<Value> = pages
         .iter()
         .map(|page| serde_json::to_value(page).expect("a page serializes"))
         .collect();
-    assert_eq!(json[0], Value::String("Analyze".to_owned()));
-    assert_eq!(json[4], Value::String("Help".to_owned()));
+    assert_eq!(json[0], Value::String("Overview".to_owned()));
+    assert_eq!(json[5], Value::String("Help".to_owned()));
 }
 
 #[test]

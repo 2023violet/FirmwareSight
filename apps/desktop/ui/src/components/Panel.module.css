@@ -1,0 +1,153 @@
+/*
+ * Panels, summary cards, the detail column and the empty state.
+ *
+ * Surface, hairline, radius-panel: the same three ingredients the evidence inspector and the error panel
+ * already use, so a new box cannot look like a different product. Elevation is not one of them
+ * (DESIGN.md 4, 9).
+ */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  min-width: 0;
+  padding: var(--fs-space-4);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+.panelHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fs-space-2) var(--fs-space-4);
+}
+
+.panelTitle {
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+}
+
+.panelHint {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  min-width: 0;
+  padding: var(--fs-space-4);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+/* The label is uppercase because the references draw it that way and no token is needed to do it. The
+   DOM text stays sentence case, so a screen reader never spells it out. */
+.summaryLabel {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  text-transform: uppercase;
+}
+
+.summaryValue {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fs-space-2);
+  margin: 0;
+  font-size: var(--fs-font-size-page);
+  line-height: var(--fs-line-height-page);
+  overflow-wrap: anywhere;
+}
+
+.summaryContext {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}
+
+/* The inspector minimum is the narrowest column the product already governs, so the row breaks to two
+   columns at the frozen 1024 px width instead of squeezing four cards past their own content. */
+.summaryRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--fs-layout-evidence-inspector-min), minmax(0, 1fr)));
+  gap: var(--fs-space-4);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  margin: 0;
+  padding: var(--fs-space-4);
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+.emptyMessage {
+  margin: 0;
+}
+
+.emptyNext {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-2);
+}
+
+/* The term/value list. The label column is the inspector minimum, which is the width the product already
+   trusts for a label column - Analyze said so in its own CSS first, and four pages agreeing on one
+   existing token is the whole reason this list is shared. */
+.facts {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.factRow {
+  display: grid;
+  grid-template-columns: var(--fs-layout-evidence-inspector-min) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--fs-space-4);
+  min-height: var(--fs-row-default);
+  padding: var(--fs-space-2) 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.factTerm {
+  color: var(--fs-color-text-secondary);
+}
+
+.factValue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.figure {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.qualifier {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}

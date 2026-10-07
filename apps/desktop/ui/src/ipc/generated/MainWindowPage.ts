@@ -6,5 +6,9 @@
  * A closed enum rather than a string for the same reason `FixtureKey` is one: it is the boundary.
  * The title text is Rust's, so no page name — and certainly no file name or directory — can be put
  * into the window title from the WebView (prompt §14, `AGENTS.md` 7).
+ *
+ * U1 adds `Overview` and aligns two titles with the names the pages give themselves on screen
+ * (`Release Gate`, `Bundle & History`). The variant *names* stay as they were: they are the wire form of
+ * `set_window_title`, and a page gaining a clearer label is not a reason to rename a command argument.
  */
-export type MainWindowPage = "Analyze" | "Compare" | "Release" | "History" | "Help";
+export type MainWindowPage = "Overview" | "Analyze" | "Compare" | "Release" | "History" | "Help";

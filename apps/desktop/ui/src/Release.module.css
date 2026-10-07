@@ -5,27 +5,11 @@
  * Every length, colour, radius and duration is a token: no magic number appears here (AGENTS.md 11,
  * DESIGN.md 9). The five Gate states never rely on colour alone - they are icon + text, drawn by
  * `StateBadge`, and UNKNOWN stays in the neutral grey the frozen tokens give it.
+ *
+ * U1 deleted this file's `.page`, `.header`, `.subhead`, `.control`, `.link`, `.primary` and the local
+ * focus-ring list: the page takes those from `Layout`, `PageHeader`, `Button` and `styles/global.css`,
+ * and a control that is styled in two places is a control that changes in one of them.
  */
-
-.page {
-  max-width: var(--fs-layout-design-target-width);
-  margin: 0 auto;
-  padding: var(--fs-space-8) var(--fs-space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-6);
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-}
-
-.subhead {
-  color: var(--fs-color-text-secondary);
-  max-width: 68ch;
-}
 
 .section {
   display: flex;
@@ -153,67 +137,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--fs-space-3);
-}
-
-.control,
-.link {
-  padding: var(--fs-space-2) var(--fs-space-3);
-  font: inherit;
-  color: var(--fs-color-text-primary);
-  background: var(--fs-color-bg-surface);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-control);
-  cursor: pointer;
-  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
-}
-
-.link {
-  padding: 0 var(--fs-space-1);
-  background: none;
-  border: 0;
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
-  border-radius: 0;
-  color: var(--fs-color-accent-primary);
-}
-
-.control:hover:not(:disabled),
-.primary:hover:not(:disabled) {
-  border-color: var(--fs-color-accent-hover);
-}
-
-.control:disabled,
-.primary:disabled {
-  color: var(--fs-color-text-secondary);
-  background: var(--fs-color-bg-subtle);
-  /* The accent border is what makes an enabled primary control an accent one, so a disabled control
-     has to give it up too: grey text on a grey field inside a blue frame still reads as available. */
-  border-color: var(--fs-color-border-default);
-  cursor: default;
-}
-
-.primary {
-  padding: var(--fs-space-2) var(--fs-space-4);
-  font: inherit;
-  font-weight: bold;
-  color: var(--fs-color-text-on-accent);
-  background: var(--fs-color-accent-primary);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
-  border-radius: var(--fs-radius-control);
-  cursor: pointer;
-  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
-}
-
-.primary:active:not(:disabled) {
-  background: var(--fs-color-accent-pressed);
-}
-
-.control:focus-visible,
-.primary:focus-visible,
-.link:focus-visible,
-.select:focus-visible,
-.input:focus-visible {
-  outline: var(--fs-focus-ring-width) solid var(--fs-focus-ring-color);
-  outline-offset: var(--fs-focus-ring-offset);
 }
 
 .selectors {
@@ -431,10 +354,9 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  /* These tables are the widest thing on the page and a dense read is the point, so each one owns its
-     scroll axis instead of pushing the page sideways. */
-  display: block;
-  overflow-x: auto;
+  /* The scroll axis belongs to the wrapper, not to the table (F2R-01): a `display: block` table is pinned
+     to the width of its pane and then lays its columns out below their own minimum. `ScrollArea` owns the
+     axis and the table keeps its intrinsic minimum. */
 }
 
 .table th,
@@ -452,10 +374,12 @@
 }
 
 /* A reason or an evidence basis has no bound, so the cell that carries it wraps rather than the one
-   that would push the table sideways. */
+   that would push the table sideways. The 24ch measure is the one F2R-01 pinned for a prose column: a
+   column that can be squeezed to one character is the defect that round closed. */
 .wrap {
   white-space: normal;
   overflow-wrap: anywhere;
+  min-width: 24ch;
 }
 
 .caption {
@@ -465,4 +389,27 @@
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
   max-width: 88ch;
+}
+
+/* The verdict band (U1 §B.5). A surface, a hairline and the counts: the answer is the first thing on the
+   page, and it is still not a banner - no shadow, no accent fill, nothing that would make a policy
+   verdict look like a marketing claim (DESIGN.md 4, 9). */
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-3) var(--fs-space-4);
+  padding: var(--fs-space-3) var(--fs-space-4);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+.verdictSentence {
+  flex: 1;
+  min-width: min(100%, 40ch);
+  margin: 0;
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+  overflow-wrap: anywhere;
 }

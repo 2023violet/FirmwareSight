@@ -27,29 +27,6 @@
   list-style: none;
 }
 
-.contributor {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: var(--fs-space-4);
-  min-height: var(--fs-row-compact);
-  padding: 0 var(--fs-space-2);
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
-
-.name {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--fs-space-2);
-  overflow-wrap: anywhere;
-}
-
-/* Each contributor row is its own grid, so the byte column is aligned on its right edge rather
-   than on a track every row shares. */
-.number {
-  text-align: right;
-}
-
 .role {
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
@@ -123,14 +100,8 @@
   cursor: default;
 }
 
-/* The scroll axis belongs to a wrapper, not to the table. A `display: block` table is forced to the
-   width of its pane and then lays its columns out *narrower than their own minimum*, which is how one
-   prose column ended up one character wide (F2R-01, measured in `01_layout_probe`). As a table it
-   keeps its intrinsic minimum, and this element owns whatever scroll is left. */
-.viewport {
-  overflow-x: auto;
-}
-
+/* The scroll axis moved to `ScrollArea` in U1; `.table` below stays a table so its columns keep their
+   own minimum (F2R-01). */
 .table {
   width: 100%;
   border-collapse: collapse;

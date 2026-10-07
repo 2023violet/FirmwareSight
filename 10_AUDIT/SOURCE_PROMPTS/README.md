@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-10-05"
+last_updated: "2026-10-07"
 ---
 
 # Execution Prompt Register
@@ -878,6 +878,44 @@ text with no source file; each says so in its own entry instead of standing for 
 - Where the round's record lives: `V1_VALIDATION/` — §13's sixteen files, every register at zero, the validation
   report a skeleton, and the recommendation `V1_INCOMPLETE_INSUFFICIENT_SAMPLE`. The external evidence root is
   `FirmwareSight-V1-External-Validation-20261006/` outside the repository (§41).
+
+## U1 UI Productization / Design Convergence v1.0 — executed and closed at first round (2026-10-07)
+
+- **File: none — prompt supplied inline**, the same treatment the P0, P1-A0 design-addendum, P2, P3, P4, G2
+  addendum and V0 Batch A prompts received: no SHA-256 is recorded for a delivered file, because no delivered
+  file existed. Inventing a digest for a message is not provenance.
+- Title as delivered: 《FirmwareSight B1 — UI Productization / Design Convergence》 版本 v1.0. **Executed as
+  `U1_UI_PRODUCTIZATION_CONVERGENCE`**, at the owner's decision in this session: `B1` is this register's canonical
+  Private Beta identifier, F3 §37 and V1 §40 both record it NOT AUTHORIZED, and a UI round must not appear to
+  authorize a beta by sharing its name. Section numbers elsewhere in this repository cite the delivered text as
+  written (§6 gap audit, §8.n page targets, §11 validation, §12 deliverables, §13 honesty, §15 wording, §16 order).
+- Where the content lives instead: `U1_VALIDATION/00_authority/SOURCE_PROMPT_U1_transcription.md` — an **agent
+  transcription of the delivered message**, 503 lines, 16,762 bytes, SHA-256
+  `67067dce624a6dc458055dd79e21b6ed4e983c7ac665426561e72b939de52865`. That is the digest of the transcription and
+  **must not be cited as the prompt's digest**; the transcription normalizes roughly twenty full-width CJK
+  quotation marks to ASCII, so it is faithful in content and structure and not byte-identical. It also records
+  the three owner decisions taken before any file was written (the `U1` rename; V1 paused with its state intact
+  rather than closed; the frozen ADR-0018 precedence chain kept above the mockups). The pre-move copy measured
+  16,544 bytes at `418ca7f4a8cde5bb7c15d4f1294bc791f3ce1d318cc29f6b579cba952555d28b`, and the machine evidence
+  root `FirmwareSight-U1-UI-Convergence-20261006/` still holds it.
+- Authority: start head `f481b78059c14e1c83d3ba18e082004b7de72ee2` = `origin/main`, clean tree, run
+  `37508243514` (#73, attempt 1) 10 of 10. The delivered §0 asserted the incoming `active_task` was `NONE`; it
+  was V1's activation head instead. **That difference was reported and resolved by the owner before any edit**,
+  which is §14.4's stop condition handled as a question rather than as a silence.
+- What it authorized: converging the desktop React UI toward the frozen seven reference screens, preferring
+  CSS/layout/components, forbidding invented features, and requiring an audit before code and a report after
+  validation. What it forbade and this round did not breach: rewriting product, gate, release-identity, evidence,
+  bundle or history semantics; schema, migrations, storage contracts, the analysis wire format, ADR-0028 or
+  ADR-0029; faking a backend to match a mockup; turning the round into a full refactor.
+- One declared exception to its own §9.1 preference, because a new page needs a title and the title is Rust's
+  (AGENTS.md 7): `MainWindowPage` gained an **additive** `Overview` variant. No existing variant name, command
+  shape, DTO or contract moved; the change is pinned by `apps/desktop/src-tauri/tests/history_reads.rs` and its
+  ts-rs binding is proved by the `drift/ipc bindings unchanged` step.
+- Where the round's record lives: `U1_VALIDATION/` — the §6 gap audit (FS-U1-001), the §12 B plan (FS-U1-002)
+  and the §12 D validation report (FS-U1-003), plus `00_authority/` with the preflight and the transcription.
+  §13's honesty clause is §6 of the report: six named things this round did not reach, and
+  `visual_evidence = STRUCTURAL_CONTRACTS_ONLY` because the real-desktop pass needs the owner's store parked and
+  was not authorized in this session.
 
 ## Supersession note on the V0 Batch A activation entry
 

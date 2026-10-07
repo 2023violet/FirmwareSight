@@ -1,16 +1,22 @@
 /**
- * The desktop shell: one navigation rail and one page at a time.
+ * The desktop shell: one product bar, one navigation rail and one page at a time.
  *
- * P5 adds the fourth workflow page History and the local Help surface, so the rail now lists exactly
- * the stages this build implements - four workflow pages in the order prompt §15 names them, plus
- * Help under its own heading because it is not a stage of the workflow and should not read as one. A
- * stage that does not exist still gets no entry and no words anywhere on the screen.
+ * U1 adds the Overview page and moves the brand into a product bar that states what the workspace is
+ * holding, so the rail now lists five workflow pages in the order the product runs them - Overview,
+ * Analyze, Compare, Release Gate, Bundle & History - plus Help under its own heading because it is not a
+ * stage of the workflow and should not read as one. A stage that does not exist still gets no entry and
+ * no words anywhere on the screen: the rail is a list of what this build does, never a preview of what
+ * it might.
  *
- * The rail also names the window. `tauri.conf.json` can only carry a static title, and giving the
- * WebView `core:window:allow-set-title` to let it write its own title bar would be both a capability
- * change (`AGENTS.md` 9 reserves that for a human decision) and a way for a file name to reach a
- * window property. So the page moves, this shell tells the shell which page moved, and Rust composes
- * the text from a closed set (`MainWindowPage`).
+ * The rail also used to carry the brand. It moved to `TopBar` because the reference screens put the
+ * product identity, the project chip and the local-first promise on one line above everything, and a
+ * promise that lives only in Help is the least visible important sentence in the product.
+ *
+ * The page still cannot write its own window title. `tauri.conf.json` can only carry a static title, and
+ * giving the WebView `core:window:allow-set-title` would be both a capability change (`AGENTS.md` 9
+ * reserves that for a human decision) and a way for a file name to reach a window property. So the page
+ * moves, this shell tells the shell which page moved, and Rust composes the text from a closed set
+ * (`MainWindowPage`).
  *
  * Five pieces of state live here because they outlive a page switch:
  *
@@ -19,10 +25,11 @@
  * - what Analyze currently holds, so navigating to Compare and back does not make the session forget the
  *   build it just analyzed;
  * - the last summary Analyze proved, which Compare and Release are allowed to *prefer* as their choice -
- *   the build the reader most recently looked at - but never act on their own initiative (prompt §18);
+ *   the build the reader most recently looked at - but never act on their own initiative (prompt §18),
+ *   and which the Overview page reads as the only analysis this session can honestly summarize;
  * - the loaded project policy plus the last Gate run, because a Release record that vanishes when the
  *   reader checks one section in Compare would leave them with nothing to accept a review against
- *   (prompt §49);
+ *   (prompt §49), and because the Overview's ship question is meaningless without the run it came from;
  * - and whether the first-use panel has been hidden, which is one deliberate act of the reader and must
  *   survive a trip to History and back without coming back on its own (prompt §13).
  */
@@ -37,21 +44,31 @@ import { Help } from './Help';
 import { History } from './History';
 import type { AnalysisSummaryDto, GateRunDto, MainWindowPage, ProjectContextDto, SelectionDto } from './ipc/types';
 import { setWindowTitle } from './ipc/bridge';
+import { Overview } from './Overview';
 import { Release } from './Release';
 import { cx } from './styles/classnames';
+import { TopBar } from './components/TopBar';
 
-type Page = 'analyze' | 'compare' | 'release' | 'history' | 'help';
+type Page = 'overview' | 'analyze' | 'compare' | 'release' | 'history' | 'help';
 
-/** The four workflow stages, in the order the product flow runs. */
+/**
+ * The workflow pages, in the order the product flow runs them.
+ *
+ * U1 renames two labels to the names the pages give themselves on screen: the Release page's own heading
+ * already read "Release Gate" (`Release.tsx:311`) while the rail called it "Release", and the History
+ * page holds bundles as well as runs. The `title` values stay the Rust enum's words, because those are
+ * the wire form of `set_window_title` and a clearer label is not a reason to rename a command argument.
+ */
 const PAGES: readonly {
   readonly key: Page;
   readonly label: string;
   readonly title: MainWindowPage;
 }[] = [
+  { key: 'overview', label: 'Overview', title: 'Overview' },
   { key: 'analyze', label: 'Analyze', title: 'Analyze' },
   { key: 'compare', label: 'Compare', title: 'Compare' },
-  { key: 'release', label: 'Release', title: 'Release' },
-  { key: 'history', label: 'History', title: 'History' },
+  { key: 'release', label: 'Release Gate', title: 'Release' },
+  { key: 'history', label: 'Bundle & History', title: 'History' },
 ];
 
 /** The surfaces that describe the product rather than move work along. */
@@ -84,6 +101,15 @@ function navItem(
 }
 
 export function App() {
+  /**
+   * The session still opens on Analyze, not on the new Overview page.
+   *
+   * The reference screen lands a reader on Overview, and the honest reason this build does not is that
+   * Overview summarizes an analysis and a gate run, so on a first run it is an empty state wearing the
+   * product's front door - while Analyze is where §13's first-use guidance, the artifact chooser and the
+   * only way to produce a fact all live. A reader who has never analyzed anything gets more from the page
+   * that makes the first fact than from the page that reports on it.
+   */
   const [page, setPage] = useState<Page>('analyze');
   const [unit, setUnit] = useState<SizeUnit>('bytes');
   const [selection, setSelection] = useState<SelectionDto | null>(null);
@@ -98,74 +124,87 @@ export function App() {
   /**
    * The page names the window, in the shell that owns the page.
    *
-   * One rule for all five entries, so a page that fails to load a single fact still cannot leave the
+   * One rule for all six entries, so a page that fails to load a single fact still cannot leave the
    * previous page's title behind. `setWindowTitle` resolves to an outcome and never throws: the title
    * is presentation, and the data on screen does not depend on it.
    */
   useEffect(() => {
-    const title = [...PAGES, ...AUXILIARY].find((entry) => entry.key === page)?.title ?? 'Analyze';
+    const title = [...PAGES, ...AUXILIARY].find((entry) => entry.key === page)?.title ?? 'Overview';
     void setWindowTitle(title);
   }, [page]);
 
   return (
-    <div className={styles['shell']}>
-      <div className={styles['rail']}>
-        <div className={styles['railSticky']}>
-          <span className={styles['brand']}>FirmwareSight</span>
-          <nav className={styles['nav']} aria-label="Pages">
-            {PAGES.map((entry) => navItem(page, setPage, entry))}
-          </nav>
-          <nav className={styles['nav']} aria-label="Help and about">
-            {AUXILIARY.map((entry) => navItem(page, setPage, entry))}
-          </nav>
+    <div className={styles['app']}>
+      <TopBar project={project?.projectName ?? null} />
+      <div className={styles['shell']}>
+        <div className={styles['rail']}>
+          <div className={styles['railSticky']}>
+            <nav className={styles['nav']} aria-label="Pages">
+              {PAGES.map((entry) => navItem(page, setPage, entry))}
+            </nav>
+            <nav className={styles['nav']} aria-label="Help and about">
+              {AUXILIARY.map((entry) => navItem(page, setPage, entry))}
+            </nav>
+          </div>
         </div>
-      </div>
 
-      <div className={styles['workspace']}>
-        {page === 'analyze' ? (
-          <Analyze
-            unit={unit}
-            onUnitChange={setUnit}
-            selection={selection}
-            onSelectionChange={setSelection}
-            analyzedSelectionId={analyzedSelectionId}
-            lastGood={lastGood}
-            gettingStartedHidden={gettingStartedHidden}
-            onHideGettingStarted={() => {
-              setGettingStartedHidden(true);
-            }}
-            onLastGoodChange={(summary, selectionId) => {
-              setLastGood(summary);
-              setAnalyzedSelectionId(selectionId);
-            }}
-          />
-        ) : page === 'compare' ? (
-          <Compare
-            unit={unit}
-            onUnitChange={setUnit}
-            lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
-            onGoToAnalyze={() => {
-              setPage('analyze');
-            }}
-          />
-        ) : page === 'release' ? (
-          <Release
-            unit={unit}
-            onUnitChange={setUnit}
-            lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
-            project={project}
-            onProjectChange={setProject}
-            run={gateRun}
-            onRunChange={setGateRun}
-            onGoToAnalyze={() => {
-              setPage('analyze');
-            }}
-          />
-        ) : page === 'history' ? (
-          <History unit={unit} onUnitChange={setUnit} />
-        ) : (
-          <Help />
-        )}
+        <div className={styles['workspace']}>
+          {page === 'overview' ? (
+            <Overview
+              summary={lastGood}
+              selection={selection}
+              gateRun={gateRun}
+              project={project}
+              unit={unit}
+              onOpen={(target) => {
+                setPage(target);
+              }}
+            />
+          ) : page === 'analyze' ? (
+            <Analyze
+              unit={unit}
+              onUnitChange={setUnit}
+              selection={selection}
+              onSelectionChange={setSelection}
+              analyzedSelectionId={analyzedSelectionId}
+              lastGood={lastGood}
+              gettingStartedHidden={gettingStartedHidden}
+              onHideGettingStarted={() => {
+                setGettingStartedHidden(true);
+              }}
+              onLastGoodChange={(summary, selectionId) => {
+                setLastGood(summary);
+                setAnalyzedSelectionId(selectionId);
+              }}
+            />
+          ) : page === 'compare' ? (
+            <Compare
+              unit={unit}
+              onUnitChange={setUnit}
+              lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
+              onGoToAnalyze={() => {
+                setPage('analyze');
+              }}
+            />
+          ) : page === 'release' ? (
+            <Release
+              unit={unit}
+              onUnitChange={setUnit}
+              lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
+              project={project}
+              onProjectChange={setProject}
+              run={gateRun}
+              onRunChange={setGateRun}
+              onGoToAnalyze={() => {
+                setPage('analyze');
+              }}
+            />
+          ) : page === 'history' ? (
+            <History unit={unit} onUnitChange={setUnit} />
+          ) : (
+            <Help />
+          )}
+        </div>
       </div>
     </div>
   );

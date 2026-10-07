@@ -1,0 +1,82 @@
+/*
+ * The three button levels (DESIGN.md 5) plus the link-styled action. Every length and colour is a
+ * token; the only shared geometry is the control radius, and no level gets a shadow.
+ */
+
+.button {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font: inherit;
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: default;
+}
+
+/* One Primary per region, and it is the only level that wears the accent. */
+.primary {
+  font-weight: bold;
+  color: var(--fs-color-text-on-accent);
+  background: var(--fs-color-accent-primary);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
+  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--fs-color-accent-hover);
+  border-color: var(--fs-color-accent-hover);
+}
+
+.primary:active:not(:disabled) {
+  background: var(--fs-color-accent-pressed);
+  border-color: var(--fs-color-accent-pressed);
+}
+
+.primary:disabled {
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border-color: var(--fs-color-border-default);
+}
+
+.secondary {
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--fs-color-text-disabled);
+}
+
+.secondary:disabled {
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+}
+
+/* A Ghost has no box: it is a verb inside a row, not a decision. Its boundary is the text itself, so
+   the focus ring is what tells a keyboard reader where they are. */
+.ghost {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  background: none;
+  border: var(--fs-border-width-hairline) solid transparent;
+}
+
+.ghost:hover:not(:disabled) {
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-subtle);
+}
+
+.link {
+  padding: 0;
+  color: var(--fs-color-accent-primary);
+  background: none;
+  border: 0;
+}
+
+.link:hover:not(:disabled) {
+  color: var(--fs-color-accent-hover);
+  text-decoration: underline;
+}

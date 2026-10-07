@@ -9,15 +9,20 @@
  * the in-flight flag - is this page's own business.
  */
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useState } from 'react';
 
 import styles from './Analyze.module.css';
-import { Details } from './Details';
-import { GettingStartedPanel } from './GettingStarted';
+import { Button } from './components/Button';
+import { Chip } from './components/Chip';
 import { ErrorPanel } from './components/ErrorPanel';
+import { Page } from './components/Layout';
+import { PageHeader, PageSection } from './components/PageHeader';
+import { EmptyState, FactList, FactRow, Figure, Qualifier } from './components/Panel';
 import { StateBadge, type StateName } from './components/StateBadge';
+import { Details } from './Details';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
+import { GettingStartedPanel } from './GettingStarted';
 import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
@@ -25,7 +30,7 @@ import type {
   ErrorEnvelopeDto,
   SelectionDto,
 } from './ipc/types';
-import { cx } from './styles/classnames';
+import { capabilityState } from './stateWords';
 
 export function Analyze({
   unit,
@@ -131,29 +136,81 @@ export function Analyze({
   const pendingSelection = selection !== null && selection.selectionId !== analyzedSelectionId;
 
   return (
-    <main className={styles['page']}>
-      <header className={styles['header']}>
-        <h1>Analyze</h1>
-        <p className={styles['subhead']}>
-          Choose a firmware artifact and FirmwareSight reports the Core facts it can prove. Nothing
-          here changes the artifact. Comparing two builds that were already analyzed happens on
-          Compare.
-        </p>
-      </header>
+    <Page>
+      <PageHeader
+        title="Analyze"
+        meta={
+          summary === null
+            ? [selection === null ? 'no artifact selected' : `selected ${selection.fileName}`]
+            : [
+                `artifact ${summary.artifact.fileName}`,
+                <span key="sha">sha256 {truncateMiddle(summary.artifact.sha256, 6)}</span>,
+                `${String(summary.sectionCount)} sections`,
+                `${String(summary.symbolCount)} symbols`,
+              ]
+        }
+        subhead="Choose a firmware artifact and FirmwareSight reports the Core facts it can prove. Nothing
+          here changes the artifact. Comparing two builds that were already analyzed happens on Compare."
+        actions={
+          <>
+            <Button
+              disabled={analyzing}
+              onClick={() => {
+                void chooseArtifact();
+              }}
+            >
+              Choose firmware artifact
+            </Button>
+            <Button
+              variant="primary"
+              disabled={analyzing || selection === null}
+              onClick={() => {
+                void analyze();
+              }}
+            >
+              Analyze
+            </Button>
+          </>
+        }
+      />
+
+      {/* The three inputs, stated as pills rather than as rows deep in a list: what this screen can
+          actually prove about the build is the first thing a reader needs, and the words are Core's
+          capability answers mapped to the five states, not a judgement made here. */}
+      <div className={styles['states']} aria-label="Input capabilities">
+        {summary === null ? (
+          <Chip>
+            {selection === null
+              ? 'No artifact selected yet'
+              : `${selection.fileName} selected, not analyzed yet`}
+          </Chip>
+        ) : (
+          <>
+            <StateBadge
+              variant="chip"
+              state={capabilityState(summary.capabilities.elf)}
+              label={`ELF ${summary.capabilities.elf}`}
+            />
+            <StateBadge
+              variant="chip"
+              state={capabilityState(summary.capabilities.map)}
+              label={`MAP ${summary.capabilities.map}`}
+            />
+            <StateBadge
+              variant="chip"
+              state={capabilityState(summary.capabilities.git)}
+              label={`Git ${summary.capabilities.git}`}
+            />
+          </>
+        )}
+      </div>
 
       <section className={styles['controls']} aria-label="Artifact selection">
-        <button
-          type="button"
-          className={styles['control']}
-          onClick={() => {
-            void chooseArtifact();
-          }}
-          disabled={analyzing}
-        >
-          Choose firmware artifact
-        </button>
-
-        {selection === null ? null : (
+        {selection === null ? (
+          <p className={styles['meta']}>
+            No artifact is selected. The Analyze action stays unavailable until one is.
+          </p>
+        ) : (
           <>
             <p className={styles['selected']} title={selection.fileName}>
               {selection.fileName}
@@ -164,55 +221,28 @@ export function Analyze({
                 : 'MAP: Not provided'}
             </p>
             <div className={styles['actions']}>
+              <Button
+                disabled={analyzing}
+                onClick={() => {
+                  void addMap();
+                }}
+              >
+                {selection.mapAttached ? 'Replace MAP' : 'Add MAP'}
+              </Button>
               {selection.mapAttached ? (
-                <button
-                  type="button"
-                  className={styles['control']}
-                  onClick={() => {
-                    void addMap();
-                  }}
+                <Button
+                  variant="ghost"
                   disabled={analyzing}
-                >
-                  Replace MAP
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={styles['control']}
-                  onClick={() => {
-                    void addMap();
-                  }}
-                  disabled={analyzing}
-                >
-                  Add MAP
-                </button>
-              )}
-              {selection.mapAttached ? (
-                <button
-                  type="button"
-                  className={styles['control']}
                   onClick={() => {
                     void removeMap();
                   }}
-                  disabled={analyzing}
                 >
                   Remove MAP
-                </button>
+                </Button>
               ) : null}
             </div>
           </>
         )}
-
-        <button
-          type="button"
-          className={styles['primary']}
-          onClick={() => {
-            void analyze();
-          }}
-          disabled={analyzing || selection === null}
-        >
-          Analyze
-        </button>
       </section>
 
       {analyzing ? (
@@ -228,9 +258,10 @@ export function Analyze({
       )}
       {summary === null && !analyzing && error === null ? (
         <>
-          <section className={styles['status']} aria-label="No analysis yet">
-            <p>Nothing has been analyzed in this session yet. Choose an artifact and run Analyze.</p>
-          </section>
+          <EmptyState
+            label="No analysis yet"
+            message="Nothing has been analyzed in this session yet. Choose an artifact and run Analyze."
+          />
           {/* §13's first-use guidance, above the empty state it explains and below the controls that
               answer it. It is a panel, not a gate: every control on this page is reachable with it
               showing, and hiding it is one click that hides nothing else. */}
@@ -253,7 +284,7 @@ export function Analyze({
       {summary === null ? null : (
         <Details snapshotId={summary.identity.snapshotId} unit={unit} onUnitChange={onUnitChange} />
       )}
-    </main>
+    </Page>
   );
 }
 
@@ -307,88 +338,96 @@ function Report({
         </p>
       ) : null}
 
-      <Section title="Artifact">
-        <Row term="File" value={artifact.fileName} title={artifact.fileName} />
-        <Row term="SHA-256" value={artifact.sha256} mono title={artifact.sha256} />
-        <Row term="Size" value={formatSize(artifact.byteSize, unit)} mono />
-        <Row
-          term="Format"
-          value={`${artifact.architecture} ${artifact.bitness}-bit ${artifact.endianness}`}
-        />
-        <Row term="Kind" value={artifact.kind} />
-        <Row term="Parser" value={artifact.parserId} mono />
-        <Row
-          term="Entry"
-          value={formatOptional(artifact.entryPoint)}
-          mono={artifact.entryPoint !== null}
-          note={artifact.entryPointUnknownReason ?? null}
-        />
-        <Row
-          term="Build ID"
-          value={truncateMiddle(formatOptional(artifact.buildId), 8)}
-          mono={artifact.buildId !== null}
-          note={artifact.buildIdUnknownReason ?? null}
-        />
-      </Section>
+      <PageSection title="Artifact">
+        <FactList>
+          <FactRow term="File" title={artifact.fileName}>
+            {artifact.fileName}
+          </FactRow>
+          <FactRow term="SHA-256" title={artifact.sha256}>
+            <Figure>{artifact.sha256}</Figure>
+          </FactRow>
+          <FactRow term="Size">
+            <Figure>{formatSize(artifact.byteSize, unit)}</Figure>
+          </FactRow>
+          <FactRow term="Format">
+            {`${artifact.architecture} ${artifact.bitness}-bit ${artifact.endianness}`}
+          </FactRow>
+          <FactRow term="Kind">{artifact.kind}</FactRow>
+          <FactRow term="Parser">
+            <Figure>{artifact.parserId}</Figure>
+          </FactRow>
+          <FactRow term="Entry">
+            {formatOptional(artifact.entryPoint)}
+            {artifact.entryPointUnknownReason === null ? null : (
+              <Qualifier>{artifact.entryPointUnknownReason}</Qualifier>
+            )}
+          </FactRow>
+          <FactRow term="Build ID">
+            {truncateMiddle(formatOptional(artifact.buildId), 8)}
+            {artifact.buildIdUnknownReason === null ? null : (
+              <Qualifier>{artifact.buildIdUnknownReason}</Qualifier>
+            )}
+          </FactRow>
+        </FactList>
+      </PageSection>
 
-      <Section title="Memory">
-        <BudgetRow
-          term="Nonvolatile / load image"
-          budget={memory.nonvolatileImageFootprint}
-          unit={unit}
-        />
-        <BudgetRow term="Runtime RAM" budget={memory.runtimeRamFootprint} unit={unit} />
-        <div className={styles['row']}>
-          <span className={styles['term']}>Load evidence</span>
-          <EvidenceQuality memory={memory} />
-        </div>
-        <Row
-          term="Layout source"
-          value={memory.layoutSource}
-          note={`Accounting rule ${memory.accountingRule}`}
-        />
-        <Row
-          term="Dual-accounted"
-          value={
-            memory.dualAccountedSections.length === 0
+      <PageSection title="Memory">
+        <FactList>
+          <BudgetRow
+            term="Nonvolatile / load image"
+            budget={memory.nonvolatileImageFootprint}
+            unit={unit}
+          />
+          <BudgetRow term="Runtime RAM" budget={memory.runtimeRamFootprint} unit={unit} />
+          <FactRow term="Load evidence">
+            <EvidenceQuality memory={memory} />
+          </FactRow>
+          <FactRow term="Layout source">
+            {memory.layoutSource}
+            <Qualifier>{`Accounting rule ${memory.accountingRule}`}</Qualifier>
+          </FactRow>
+          <FactRow term="Dual-accounted">
+            {memory.dualAccountedSections.length === 0
               ? 'none'
-              : memory.dualAccountedSections.join(', ')
-          }
-          mono
-          count={memory.dualAccountedSections.length}
-        />
-        <Row
-          term="Device metadata excluded"
-          value={formatSize(memory.excludedMetadataBytes, unit)}
-          mono
-        />
-      </Section>
+              : memory.dualAccountedSections.join(', ')}
+            <Qualifier>{`${String(memory.dualAccountedSections.length)} section(s)`}</Qualifier>
+          </FactRow>
+          <FactRow term="Device metadata excluded">
+            <Figure>{formatSize(memory.excludedMetadataBytes, unit)}</Figure>
+          </FactRow>
+        </FactList>
+      </PageSection>
 
-      <Section title="Capabilities">
-        <CapabilityRow term="ELF" value={capabilities.elf} />
-        <CapabilityRow term="Sections" value={capabilities.sections} />
-        <CapabilityRow term="Symbols" value={capabilities.symbols} />
-        <CapabilityRow term="Debug info" value={capabilities.debugInfo} />
-        <CapabilityRow term="MAP" value={capabilities.map} />
-        {/* L19: the scope here is one build's attribution capability, not a delta between builds. */}
-        <CapabilityRow term="Object/module attribution" value={capabilities.objectAttribution} />
-        <CapabilityRow term="Git" value={capabilities.git} />
-      </Section>
+      <PageSection title="Capabilities">
+        <FactList>
+          <CapabilityRow term="ELF" value={capabilities.elf} />
+          <CapabilityRow term="Sections" value={capabilities.sections} />
+          <CapabilityRow term="Symbols" value={capabilities.symbols} />
+          <CapabilityRow term="Debug info" value={capabilities.debugInfo} />
+          <CapabilityRow term="MAP" value={capabilities.map} />
+          {/* L19: the scope here is one build's attribution capability, not a delta between builds. */}
+          <CapabilityRow term="Object/module attribution" value={capabilities.objectAttribution} />
+          <CapabilityRow term="Git" value={capabilities.git} />
+        </FactList>
+      </PageSection>
 
-      <Section title="Counts">
-        <Row term="Sections" value={String(summary.sectionCount)} mono />
-        <Row term="Symbols" value={String(summary.symbolCount)} mono />
-        <div className={styles['row']}>
-          <span className={styles['term']}>Evidence</span>
-          <span className={styles['value']}>
+      <PageSection title="Counts">
+        <FactList>
+          <FactRow term="Sections">
+            <Figure>{String(summary.sectionCount)}</Figure>
+          </FactRow>
+          <FactRow term="Symbols">
+            <Figure>{String(summary.symbolCount)}</Figure>
+          </FactRow>
+          <FactRow term="Evidence">
             <StateBadge
               state="PASS"
               label={`${String(evidenceSummary.total)} recorded`}
               note={`${String(evidenceSummary.observed)} observed, ${String(evidenceSummary.derived)} derived, ${String(evidenceSummary.declared)} declared, ${String(evidenceSummary.unknown)} unknown`}
             />
-          </span>
-        </div>
-      </Section>
+          </FactRow>
+        </FactList>
+      </PageSection>
 
       <footer className={styles['footer']}>
         <span className={styles['monoSmall']}>{summary.identity.snapshotId}</span>
@@ -444,20 +483,17 @@ function BudgetRow({
   const state: StateName =
     budget.state === 'exact' ? 'PASS' : budget.state === 'partial' ? 'REVIEW' : 'UNKNOWN';
   return (
-    <div className={styles['row']}>
-      <span className={styles['term']}>{term}</span>
-      <span className={styles['value']}>
-        <StateBadge
-          state={state}
-          label={budgetWord(budget.state)}
-          count={budget.state === 'partial' ? budget.unattributed.length : undefined}
-          note={budget.reason ?? undefined}
-        />
-        {/* The figure sits beside the state word rather than inside it: a bare number with no
-            evidence label would be a number without context (DESIGN.md 9). */}
-        <span className={styles['mono']}>{formatSize(budget.bytes, unit)}</span>
-      </span>
-    </div>
+    <FactRow term={term}>
+      <StateBadge
+        state={state}
+        label={budgetWord(budget.state)}
+        count={budget.state === 'partial' ? budget.unattributed.length : undefined}
+        note={budget.reason ?? undefined}
+      />
+      {/* The figure sits beside the state word rather than inside it: a bare number with no
+          evidence label would be a number without context (DESIGN.md 9). */}
+      <Figure>{formatSize(budget.bytes, unit)}</Figure>
+    </FactRow>
   );
 }
 
@@ -473,74 +509,9 @@ function budgetWord(state: string): string {
 }
 
 function CapabilityRow({ term, value }: { readonly term: string; readonly value: string }) {
-  const state: StateName = capabilityState(value);
   return (
-    <div className={styles['row']}>
-      <span className={styles['term']}>{term}</span>
-      <span className={styles['value']}>
-        <StateBadge state={state} label={value} />
-      </span>
-    </div>
-  );
-}
-
-/**
- * Presentation mapping only: the shell already decided availability, this turns the word into
- * one of the five frozen states. `not-provided` is N/A rather than UNKNOWN because the user
- * chose not to supply that input; it is not missing evidence.
- */
-function capabilityState(value: string): StateName {
-  switch (value) {
-    case 'supported':
-    case 'available':
-    case 'provided':
-      return 'PASS';
-    case 'partial':
-      return 'REVIEW';
-    case 'unsupported':
-      return 'BLOCK';
-    case 'unavailable':
-    case 'not-provided':
-      return 'N/A';
-    default:
-      return 'UNKNOWN';
-  }
-}
-
-function Section({ title, children }: { readonly title: string; readonly children: ReactNode }) {
-  return (
-    <section className={styles['section']} aria-label={title}>
-      <h2>{title}</h2>
-      <div className={styles['rows']}>{children}</div>
-    </section>
-  );
-}
-
-function Row({
-  term,
-  value,
-  mono = false,
-  note,
-  title,
-  count,
-}: {
-  readonly term: string;
-  readonly value: string;
-  readonly mono?: boolean | undefined;
-  readonly note?: string | null;
-  readonly title?: string | undefined;
-  readonly count?: number | undefined;
-}) {
-  return (
-    <div className={styles['row']}>
-      <span className={styles['term']}>{term}</span>
-      <span className={cx(styles['value'], mono ? styles['mono'] : undefined)} title={title}>
-        {value}
-        {count === undefined ? null : <span className={styles['count']}>{count}</span>}
-        {note === undefined || note === null || note.length === 0 ? null : (
-          <span className={styles['note']}>{note}</span>
-        )}
-      </span>
-    </div>
+    <FactRow term={term}>
+      <StateBadge state={capabilityState(value)} label={value} />
+    </FactRow>
   );
 }

@@ -522,7 +522,7 @@ function bundleExport(overrides: Partial<BundleExportDto> = {}): BundleExportDto
 
 async function openRelease(): Promise<void> {
   render(<App />);
-  fireEvent.click(await screen.findByRole('button', { name: 'Release page' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Release Gate page' }));
   await screen.findByRole('heading', { level: 1, name: 'Release Gate' });
 }
 
@@ -599,20 +599,22 @@ beforeEach(() => {
 });
 
 describe('Release navigation', () => {
-  it('lists the four stages this build has and no others', async () => {
+  it('lists the five stages this build has and no others', async () => {
     await openRelease();
     const rail = screen.getByRole('navigation', { name: 'Pages' });
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Overview',
       'Analyze',
       'Compare',
-      'Release',
-      'History',
+      'Release Gate',
+      'Bundle & History',
     ]);
     const words = document.body.textContent ?? '';
     // P4 makes `Bundle` a word this build has earned, so it is no longer banned here: §48 attaches the
-    // bundle *under* Release, and what §58 forbids is a fifth navigation verb, which the rail assertion
-    // above is what pins. P5 earns `History`, because the rows it lists were already being stored. What
-    // is still not built gets none of its words.
+    // bundle *under* Release, and what §58 forbids is a navigation verb for a stage that does not exist.
+    // U1 renames this page's rail entry to "Release Gate" and P5's to "Bundle & History", and adds
+    // Overview, which summarizes runs this build already stores. What is still not built gets none of its
+    // words.
     for (const stage of ['Settings', 'Pricing', 'Cloud']) {
       expect(words).not.toMatch(new RegExp(`\\b${stage}\\b`));
     }
@@ -645,7 +647,7 @@ describe('Project config', () => {
     );
     await openRelease();
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
-    await screen.findByText('Controller v2');
+    await screen.findAllByText('Controller v2');
     expect(document.body.textContent).toContain('firmwaresight.toml');
     expect(document.body.textContent).toContain('schema_version 1');
     expect(document.body.textContent).toContain('[gate] unknown_evidence_review_count');
@@ -657,7 +659,7 @@ describe('Project config', () => {
     );
     await openRelease();
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
-    await screen.findByText('Controller v2');
+    await screen.findAllByText('Controller v2');
     const words = document.body.textContent ?? '';
     expect(words).not.toMatch(/[A-Za-z]:[\\/]/);
     expect(words).not.toContain('secret-project');
@@ -667,7 +669,7 @@ describe('Project config', () => {
     openConfigMock.mockResolvedValue(ok(project()));
     await openRelease();
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
-    await screen.findByText('Controller v2');
+    await screen.findAllByText('Controller v2');
 
     openConfigMock.mockResolvedValue(fail(MALFORMED));
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
@@ -689,7 +691,7 @@ describe('Project config', () => {
     openConfigMock.mockResolvedValue(ok(project()));
     await openRelease();
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
-    await screen.findByText('Controller v2');
+    await screen.findAllByText('Controller v2');
     fireEvent.click(screen.getByRole('button', { name: 'Edit policy' }));
 
     fireEvent.change(await screen.findByLabelText('FLASH budget (bytes)'), {
@@ -731,7 +733,7 @@ describe('Project config', () => {
     savePolicyMock.mockResolvedValue(fail(SAVE_REFUSED));
     await openRelease();
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
-    await screen.findByText('Controller v2');
+    await screen.findAllByText('Controller v2');
     fireEvent.click(screen.getByRole('button', { name: 'Edit policy' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Save policy' }));
 
@@ -1181,12 +1183,17 @@ describe('Release bundle', () => {
     // doorway, so the only new verb this page has is the one inside it.
     const rail = screen.getByRole('navigation', { name: 'Pages' });
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Overview',
       'Analyze',
       'Compare',
-      'Release',
-      'History',
+      'Release Gate',
+      'Bundle & History',
     ]);
-    expect(within(rail).queryByRole('button', { name: /bundle/i })).toBeNull();
+    // §58's claim is about actions, not nouns: the rail holds pages, never the bundle verbs that live
+    // inside Release. U1 renamed History to "Bundle & History", so the old `/bundle/i` check would now
+    // fail on a page name that is legitimately there; what must stay absent is a doorway that *does*
+    // something.
+    expect(within(rail).queryByRole('button', { name: /build|export|prepare/i })).toBeNull();
     expect(heading.closest('nav')).toBeNull();
   });
 
@@ -1547,7 +1554,7 @@ describe('Accessibility', () => {
     openConfigMock.mockResolvedValue(ok(project()));
     await openRelease();
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
-    await screen.findByText('Controller v2');
+    await screen.findAllByText('Controller v2');
     fireEvent.click(screen.getByRole('button', { name: 'Edit policy' }));
 
     const controls = Array.from(
@@ -1595,5 +1602,23 @@ describe('Accessibility', () => {
     const switchGroup = screen.getByRole('group', { name: 'Size units' });
     expect(within(switchGroup).getByRole('radio', { name: 'Bytes' })).toBeDefined();
     expect(within(switchGroup).getByRole('radio', { name: 'KiB' })).toBeDefined();
+  });
+});
+
+describe('the table layout contract', () => {
+  // The same rule `details.test.tsx` pins for Analyze and `compare.test.tsx` pins for Compare, applied
+  // to the four tables this page renders from one gate run: the scroll axis belongs to the wrapper, and
+  // a reason or evidence-basis column keeps a measure instead of collapsing to one character.
+  it('puts every gate table inside a scroll wrapper and keeps it a table', async () => {
+    await openRelease();
+    await runGate();
+    await screen.findByRole('heading', { level: 3, name: 'Required artifacts' });
+
+    const tables = screen.getAllByRole('table');
+    expect(tables.length).toBeGreaterThan(0);
+    for (const table of tables) {
+      expect(table.tagName).toBe('TABLE');
+      expect(table.parentElement?.className).toContain('viewport');
+    }
   });
 });

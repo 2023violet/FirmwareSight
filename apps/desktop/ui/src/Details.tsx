@@ -19,6 +19,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './Details.module.css';
+import { ScrollArea } from './components/Layout';
+import { RankBar } from './components/RankBar';
 import { Pager, SortHeader } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { formatSize, formatOptional, type SizeUnit } from './format';
@@ -301,6 +303,10 @@ function Contributors({
   if (rows === null || rows.length === 0) {
     return null;
   }
+  // The bar is a ratio against the largest row in this same list, so it says "half of the biggest",
+  // never "half of the image". The number beside it is the fact; the bar only accelerates it, which is
+  // why it carries no colour-only meaning and is hidden from the accessibility tree.
+  const largest = Math.max(...rows.map((row) => row.fileSize));
   return (
     <section className={styles['contributors']} aria-label="Largest stored payload">
       <h2>Largest stored payload</h2>
@@ -310,12 +316,17 @@ function Contributors({
       </p>
       <ol className={styles['contributorList']}>
         {rows.map((row) => (
-          <li key={row.index} className={styles['contributor']}>
-            <span className={styles['name']}>
-              <span>{row.name ?? 'Unknown'}</span>
-              <span className={styles['role']}>{row.role}</span>
-            </span>
-            <span className={cx(styles['mono'], styles['number'])}>{formatSize(row.fileSize, unit)}</span>
+          <li key={row.index}>
+            <RankBar
+              label={
+                <>
+                  {row.name ?? 'Unknown'}
+                  <span className={styles['role']}>{row.role}</span>
+                </>
+              }
+              ratio={largest > 0 ? row.fileSize / largest : null}
+              value={formatSize(row.fileSize, unit)}
+            />
           </li>
         ))}
       </ol>
@@ -419,7 +430,7 @@ function SectionTable({
   readonly onSort: (column: SectionSortDto) => void;
 }) {
   return (
-    <div className={styles['viewport']}>
+    <ScrollArea label="Sections table">
       <table className={styles['table']}>
         <caption className={styles['caption']}>
           Sections of the analyzed artifact, as the parser recorded them
@@ -495,7 +506,7 @@ function SectionTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </ScrollArea>
   );
 }
 
@@ -517,7 +528,7 @@ function SymbolTable({
   readonly onSort: (column: SymbolSortDto) => void;
 }) {
   return (
-    <div className={styles['viewport']}>
+    <ScrollArea label="Symbols table">
       <table className={styles['table']}>
         <caption className={styles['caption']}>
           Symbols, ordered and filtered by the shell rather than by this page
@@ -569,7 +580,7 @@ function SymbolTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </ScrollArea>
   );
 }
 
@@ -592,7 +603,7 @@ function EvidenceTable({
     <>
       {inspected === null ? null : <Inspector row={inspected} />}
 
-      <div className={styles['viewport']}>
+      <ScrollArea label="Evidence table">
         <table className={styles['table']}>
           <caption className={styles['caption']}>
             Recorded facts and the class each one belongs to
@@ -647,7 +658,7 @@ function EvidenceTable({
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollArea>
     </>
   );
 }

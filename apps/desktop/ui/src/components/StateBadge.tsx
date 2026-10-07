@@ -11,21 +11,37 @@ interface Props {
   readonly count?: number | undefined;
   /** What is known and what to do next, shown under the badge. */
   readonly note?: string | undefined;
+  /**
+   * `inline` is the row-level read the P0 pages shipped with. `chip` puts the same icon and label in the
+   * pill the reference screens use for a page-level state, and changes nothing about how the state is
+   * carried: glyph, then words, then colour as an aid.
+   */
+  readonly variant?: 'inline' | 'chip';
 }
 
 /**
  * A state is icon + label (+ optional count). Colour is an aid, never the carrier (DESIGN.md 9),
  * and UNKNOWN keeps a hollow icon in neutral grey so it can never be mistaken for PASS.
  */
-export function StateBadge({ state, label, count, note }: Props) {
+export function StateBadge({ state, label, count, note, variant = 'inline' }: Props) {
   return (
-    <span className={cx(styles['badge'], styles[stateClass(state)])}>
-      <Icon state={state} />
+    <span className={cx(styles['badge'], styles[stateClass(state)], variant === 'chip' ? styles['chip'] : undefined)}>
+      <StateIcon state={state} />
       <span className={styles['label']}>{label}</span>
       {count === undefined ? null : <span className={styles['count']}>{count}</span>}
       {note === undefined ? null : <span className={styles['note']}>{note}</span>}
     </span>
   );
+}
+
+/**
+ * The glyph on its own, for the places that show a count beside a state rather than a sentence.
+ *
+ * Exported because the verdict strip on the Gate page needs the same five shapes, and a second copy of
+ * five paths is five chances for one state to stop matching its own icon elsewhere in the product.
+ */
+export function StateIcon({ state }: { readonly state: StateName }) {
+  return <Icon state={state} />;
 }
 
 function stateClass(state: StateName): string {

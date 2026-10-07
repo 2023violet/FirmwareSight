@@ -598,15 +598,16 @@ describe('P1-A0 intake screen', () => {
     await screen.findByRole('button', { name: 'Choose firmware artifact' });
 
     // P1 could claim there was nothing to navigate to. P2 made Compare a real page, P3 made Release
-    // one, and P5 makes History one because the rows it shows were already being stored. The claim is
-    // still exactly as wide as the build: the rail lists the stages that exist, and a stage that does
-    // not exist gets no entry, no link and none of its words.
+    // one, P5 made History one, and U1 adds Overview because the facts it summarizes are the facts the
+    // shell already holds. The claim is still exactly as wide as the build: the rail lists the stages
+    // that exist, and a stage that does not exist gets no entry, no link and none of its words.
     const rail = await screen.findByRole('navigation', { name: 'Pages' });
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Overview',
       'Analyze',
       'Compare',
-      'Release',
-      'History',
+      'Release Gate',
+      'Bundle & History',
     ]);
     // Help is a description of the product and not a stage of the workflow, so it is listed under its
     // own heading instead of after Release, where it would read as a fifth step (prompt §14).
@@ -617,11 +618,17 @@ describe('P1-A0 intake screen', () => {
     fireEvent.click(within(rail).getByRole('button', { name: 'Compare page' }));
     await screen.findByRole('heading', { level: 1, name: 'Compare' });
     const body = document.body.textContent ?? '';
-    for (const stage of ['Bundle', 'Settings', 'SBOM', 'Pricing', 'Cloud']) {
+    // `Bundle` and `Gate` left this list in U1 for a reason worth stating: they were once words for
+    // stages that did not exist, and now they name shipped surfaces - the Release Bundle section and
+    // the rail's own "Release Gate" / "Bundle & History". A rail label is not an advertisement for
+    // something unbuilt. The four words below still name nothing this product has.
+    for (const stage of ['Settings', 'SBOM', 'Pricing', 'Cloud']) {
       expect(body).not.toMatch(new RegExp(`\\b${stage}\\b`));
     }
-    // `Gate` is Release's word and appears on no other page: a rail entry names a stage, it does not
-    // advertise one that has not been built (prompt §43).
-    expect(body).not.toMatch(/\bGate\b/);
+    // `Gate` is Release's word and appears on no other page. U1 scopes the check to the page rather than
+    // the document, because the rail now names the stage "Release Gate" on every screen: the claim that
+    // survives is that Compare itself says nothing about gate verdicts (prompt §43).
+    const page = document.querySelector('main')?.textContent ?? '';
+    expect(page).not.toMatch(/\bGate\b/);
   });
 });

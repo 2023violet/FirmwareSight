@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-06"
+last_updated: "2026-10-07"
 ---
 
 
@@ -135,8 +135,9 @@ NONE, which authorizes no next track: V1, B1, RC and GA each need a new architec
 **V1 own-artifact external validation opened on 2026-10-06**, the same day P5 closed, under its own architect
 prompt (delivered SHA-256 `48768ff0…ec10a0f`, 46,207 CRLF bytes; stored LF blob `d5e8d457…51774`, SHA-256
 `c62314fe…90c34e`, 44,510 bytes, 1,698 lines proven identical) — so the sentence quoted above is now the record
-of what F3 knew, and the live pointer reads `active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`. V1 is a research
-track at `IN_PROGRESS / RECRUITMENT_READY` with **0 eligible external sessions** against a minimum of 8: §5's
+of what F3 knew, and the live pointer moved twice after it: to `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`, then on 2026-10-07 to
+`U1_UI_PRODUCTIZATION_CONVERGENCE`. V1 is a research
+track at `IN_PROGRESS / RECRUITMENT_READY`, **paused for U1** with **0 eligible external sessions** against a minimum of 8: §5's
 branch, because no real participant exists and an agent must not become one. `V1_VALIDATION/` holds its sixteen
 protocol and register files with every count at zero; the cohort build is frozen to F3's CI artifact
 (`37475580080` / artifact `11419727517` / NSIS 3,888,432 bytes / `182506f2…63d12`, unsigned, verified against its
@@ -462,6 +463,11 @@ disk, in a checksum domain that is deliberately not this one.
 | `P2_VALIDATION/P2_COMPARE_DESKTOP_SMOKE_REPORT.md` | P2 Compare Desktop Real-Window Smoke Report |
 | `P2_VALIDATION/P2_COMPARE_EXECUTION_REPORT.md` | P2 Compare Execution Report (incl. the CLI smoke and defect E) |
 | `P2_VALIDATION/P2_COMPARE_EXIT_CHECKLIST.md` | P2 Compare Exit Checklist |
+| `U1_VALIDATION/00_authority/PREFLIGHT_U1.txt` | U1 Preflight and Authority Record |
+| `U1_VALIDATION/00_authority/SOURCE_PROMPT_U1_transcription.md` | U1 Source Instruction — Agent Transcription, Not a Delivered File |
+| `U1_VALIDATION/U1_DESIGN_CONVERGENCE_PLAN.md` | U1 Design Convergence Plan |
+| `U1_VALIDATION/U1_UI_GAP_AUDIT.md` | U1-A0 UI Gap Audit |
+| `U1_VALIDATION/U1_VALIDATION_REPORT.md` | U1 Validation Report |
 | `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
 | `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
 | `V0_VALIDATION/V0_PLAN.md` | V0 Plan |

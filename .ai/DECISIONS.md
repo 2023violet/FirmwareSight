@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-05"
+last_updated: "2026-10-07"
 ---
 
 # Decisions — v0.6.0
@@ -2040,3 +2040,55 @@ distribution `NOT_AUTHORIZED`, tag and GitHub Release `NOT_CREATED`. The build p
 feature, schema, migration, dependency, cloud, account, telemetry, updater, signing, notarization, licence or
 pricing is authorized — and V1's §39/§54 forbid it from ever writing its own `PASS`, even with all six metrics
 met at N ≥ 8, which would only produce `V1_READY_FOR_ARCHITECT_VERDICT`.
+
+## U1 (2026-10-07) — a UI productization track opens, and V1 is paused with its state intact
+
+Three things had to be decided before a line of UI could be written, and all three were put to the owner rather
+than resolved by the executing agent, because each one either moves a canonical identifier or suspends a live
+track.
+
+**1. The track is `U1`, not the `B1` its own title says.** The delivered prompt is titled
+《FirmwareSight B1 — UI Productization / Design Convergence》. `B1` is already the canonical identifier for
+**Private Beta** in `06_DELIVERY/06_STAGE_GATES.md`, and both F3 §37 and V1 §40 record that identifier as
+NOT AUTHORIZED. Registering a UI round under `B1` would have made the beta look authorized by a rename, which is
+the failure mode AGENTS.md §2 exists to prevent. The owner chose `U1_UI_PRODUCTIZATION_CONVERGENCE`, and the
+prompt's section numbers are still cited as delivered (`§6` is the gap audit, `§8.n` the page targets) so the
+trace back to the instruction stays intact.
+
+**2. V1 pauses; nothing about V1 is rewritten.** `active_task` moves to U1 and `v1_execution` gains
+`paused_for`, `paused_on` and `paused_at_head`. `stage_status` stays `IN_PROGRESS`, `research_state` stays
+`RECRUITMENT_READY`, eligible sessions stay `0`, and the frozen cohort build stays the F3 artifact at
+`182506f2…63d12`. A pause suspends the turn, not the state — and it is not a verdict, which is why no V1 field
+was upgraded, downgraded or summarized. `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md` was **not** written to: L11 is
+still `CARRIED_FORWARD, owner V1`, because U1 produced no user-comprehension evidence either. It is a UI
+construction round, and no participant ran anything.
+
+**3. The frozen precedence chain stands over the mockups.** The delivered §2C makes the reference images design
+authority while insisting they are not a functional contract; the owner confirmed the existing chain —
+治理红线 > frozen assets / ADRs / `assets/design-tokens.json` > root `DESIGN.md` > accepted screenshots — is what
+governs. So structure, hierarchy and density converged toward the references, and *treatments the design system
+forbids did not enter the tree at all*: no card elevation (AGENTS.md §11 and `DESIGN.md` 4/9 forbid it; the tree
+still contains zero `box-shadow`), no theme toggle (`DESIGN.md` freezes a light MVP), and no printed sample
+values. Each such case is recorded with a disposition in `U1_VALIDATION/U1_UI_GAP_AUDIT.md` §D rather than left
+as a silent omission.
+
+**The one non-CSS change was declared before it was made.** §9.1 asks for minimal breakage and prefers
+CSS/layout/components; a new page still needs a window title, and the title is Rust's, not the WebView's
+(AGENTS.md §7). `MainWindowPage` therefore gained an `Overview` variant and two title strings aligned with what
+the pages call themselves. It is additive — the five existing variant names and the `set_window_title` argument
+shape are unchanged — and it is pinned by `apps/desktop/src-tauri/tests/history_reads.rs`, with the ts-rs
+binding regenerated and proved by the `ipc bindings unchanged` drift step. No DTO, schema, migration, storage
+contract, analysis wire field, release identity rule or ADR-0028/0029 conclusion moved, and no new command was
+added: the desktop command count stays 27, and Overview renders DTOs the shell already returns.
+
+**Unused components were deleted rather than shipped.** The plan drafted a content/detail pair and a
+`DetailPanel` for the references' right-hand column. No page holds a selection to put in it, so the pair was
+removed at close instead of being left as an abstraction waiting for a requirement — the same rule that made
+FS-UI-07's dependency/declare/re-scan screen a `NOT_IMPLEMENTED_IN_U1` instead of a fake backend. The gap stays
+open and is named in `U1_VALIDATION/U1_VALIDATION_REPORT.md`.
+
+**Counts.** `225 → 236` UI tests in `8 → 9` files, `868` Rust tests unchanged, and the `17`-step gate shape
+unchanged. V1's §45 froze those counts for a *docs-only* round; U1 was delivered to change the UI, so the UI
+count moving is the authorized outcome rather than a violation — and the eleven added tests are all U1's own,
+with none deleted. Five pre-existing test files needed their assertions reworded for the new markup, and every
+one of those edits is listed by name in the report rather than presented as an untouched suite.

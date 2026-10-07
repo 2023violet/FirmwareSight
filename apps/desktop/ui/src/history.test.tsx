@@ -199,7 +199,7 @@ function deferred<T>() {
 
 async function openHistory(): Promise<void> {
   render(<App />);
-  fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
   await screen.findByRole('heading', { level: 1, name: 'History' });
   await screen.findByText(BUILD_FILE);
 }
@@ -272,7 +272,12 @@ describe('History states what a row is', () => {
   it('says these are stored facts and not the artifact now open', async () => {
     await openHistory();
 
-    const header = (await screen.findByRole('heading', { level: 1, name: 'History' })).parentElement;
+    // The whole header, not the heading's own box: `PageHeader` puts the title and the metadata line in
+    // one block and the subhead beside it, so the sentence a reader sees under the title lives one level
+    // up from the `h1`.
+    const header = (await screen.findByRole('heading', { level: 1, name: 'History' })).closest(
+      'header',
+    );
     const words = prose(header ?? null);
     expect(words).toContain('What this computer has already stored');
     expect(words).toContain('not the artifact currently open on Analyze');
@@ -653,7 +658,7 @@ describe('History when a read has nothing to show or cannot show it', () => {
   it('distinguishes a store that is empty from a filter that matched nothing', async () => {
     buildsMock.mockResolvedValue(buildPage([]));
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
 
     const builds = await screen.findByRole('region', { name: 'Stored builds' });
     expect(
@@ -689,7 +694,7 @@ describe('History when a read has nothing to show or cannot show it', () => {
   it('announces that it is loading before a table has answered', async () => {
     buildsMock.mockReturnValue(new Promise<never>(() => undefined));
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
 
     const builds = await screen.findByRole('region', { name: 'Stored builds' });
     expect(within(builds).getByRole('status').textContent).toContain('Loading builds');

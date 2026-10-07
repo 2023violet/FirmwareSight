@@ -5,39 +5,11 @@
  * Every length, colour and duration is a token. The change kinds carry their own text and take their
  * colour from the frozen diff roles, so a row never reads as a colour alone (DESIGN.md 5, 9;
  * prompt §40).
+ *
+ * U1 deleted this file's copies of `.page`, `.header`, `.subhead`, `.empty`, `.control`, `.apply`,
+ * `.export` and `.primary`: the page now takes those from `Layout`, `PageHeader`, `Panel` and `Button`,
+ * which is where one product's grammar for them lives.
  */
-
-.page {
-  max-width: var(--fs-layout-design-target-width);
-  margin: 0 auto;
-  padding: var(--fs-space-8) var(--fs-space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-6);
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-}
-
-.subhead {
-  color: var(--fs-color-text-secondary);
-  max-width: 60ch;
-}
-
-/* Fewer than two builds is a fact about the session, not an error, so it gets a hairline note and
-   the way out - never a comparison made up from one build (prompt §19). */
-.empty {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-3);
-  padding: var(--fs-space-4);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-panel);
-  background: var(--fs-color-bg-subtle);
-}
 
 .selectors {
   display: grid;
@@ -80,57 +52,6 @@
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
   overflow-wrap: anywhere;
-}
-
-.control,
-.apply,
-.export {
-  padding: var(--fs-space-2) var(--fs-space-3);
-  font: inherit;
-  color: var(--fs-color-text-primary);
-  background: var(--fs-color-bg-surface);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-control);
-  cursor: pointer;
-  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
-}
-
-.control:hover:not(:disabled),
-.apply:hover:not(:disabled),
-.export:hover:not(:disabled) {
-  border-color: var(--fs-color-text-disabled);
-}
-
-.control:disabled,
-.apply:disabled,
-.export:disabled,
-.primary:disabled {
-  color: var(--fs-color-text-secondary);
-  background: var(--fs-color-bg-subtle);
-  /* A disabled control has to give up the accent border too: grey text in a blue frame still reads
-     as available (the P3 smoke found this on the Release page, where the same rule lives). */
-  border-color: var(--fs-color-border-default);
-  cursor: default;
-}
-
-.primary {
-  padding: var(--fs-space-2) var(--fs-space-4);
-  font: inherit;
-  font-weight: bold;
-  color: var(--fs-color-text-on-accent);
-  background: var(--fs-color-accent-primary);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);
-  border-radius: var(--fs-radius-control);
-  cursor: pointer;
-  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
-}
-
-.primary:hover:not(:disabled) {
-  background: var(--fs-color-accent-hover);
-}
-
-.primary:active:not(:disabled) {
-  background: var(--fs-color-accent-pressed);
 }
 
 .pickerActions {
@@ -411,10 +332,9 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  /* The change tables are the widest thing on the screen and a dense read is the point, so each one
-     owns its scroll axis instead of pushing the page sideways. */
-  display: block;
-  overflow-x: auto;
+  /* The scroll axis belongs to the wrapper, not to the table (F2R-01): a `display: block` table is pinned
+     to the width of its pane and then lays its columns out below their own minimum, which is how one prose
+     column ended up one character wide. `ScrollArea` owns the axis; the table keeps its intrinsic minimum. */
 }
 
 .table th,
@@ -426,10 +346,13 @@
 }
 
 /* A firmware or symbol name has no bound, so it is the cell that wraps rather than the one that
-   pushes the table sideways. It also carries a contributor's name inside its own row. */
+   pushes the table sideways. It also carries a contributor's name inside its own row. The measure is
+   the one F2R-01 pinned for a prose column: a column that can be squeezed to one character is the
+   defect that round closed, and `ch` is the unit every other page bounds its prose with. */
 .wrap {
   white-space: normal;
   overflow-wrap: anywhere;
+  min-width: 24ch;
 }
 
 .exports {

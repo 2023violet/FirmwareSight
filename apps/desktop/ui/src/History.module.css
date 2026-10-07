@@ -5,27 +5,11 @@
  * frozen compact row height, mono with tabular figures for ids, digests and times, and one accent
  * that belongs to the primary action of the page - which History does not have, because a read-only
  * viewer has no primary action. So nothing here is accent-filled.
+ *
+ * U1 deleted this file's `.page`, `.header`, `.subhead` and `.viewport`: the first three are `Layout`
+ * and `PageHeader`'s, and the scroll wrapper is `ScrollArea`. The row action and the filter control stay
+ * here, because they are a density the shared button levels do not model - see the validation report.
  */
-
-.page {
-  max-width: var(--fs-layout-design-target-width);
-  margin: 0 auto;
-  padding: var(--fs-space-8) var(--fs-space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-6);
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-}
-
-.subhead {
-  color: var(--fs-color-text-secondary);
-  max-width: 80ch;
-}
 
 .table {
   display: flex;
@@ -39,14 +23,6 @@
   margin: 0;
   font-size: var(--fs-font-size-section);
   line-height: var(--fs-line-height-section);
-}
-
-/* The scroll axis belongs to a wrapper, not to the table: a `display: block` table is pinned to the
-   width of its pane and lays its columns out below their own minimum. As a table it keeps that
-   minimum, and this element owns whatever scroll is left, so a long digest column never pushes the
-   page sideways. */
-.viewport {
-  overflow-x: auto;
 }
 
 .grid {

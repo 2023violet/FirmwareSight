@@ -20,7 +20,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './Compare.module.css';
+import { Button } from './components/Button';
 import { ErrorPanel } from './components/ErrorPanel';
+import { Page, ScrollArea } from './components/Layout';
+import { PageHeader } from './components/PageHeader';
+import { EmptyState } from './components/Panel';
 import { Pager, SortHeader } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
@@ -296,15 +300,11 @@ export function Compare({
       targetId !== summary.target.snapshotId);
 
   return (
-    <main className={styles['page']}>
-      <header className={styles['header']}>
-        <h1>Compare</h1>
-        <p className={styles['subhead']}>
-          Pick two builds FirmwareSight has already analyzed and stored, and it reports what moved
-          between those recorded facts. A comparison does not re-read the original files, and nothing
-          here writes to them.
-        </p>
-      </header>
+    <Page>
+      <PageHeader
+        title="Compare"
+        subhead="Pick two builds FirmwareSight has already analyzed and stored, and it reports what moved between those recorded facts. A comparison does not re-read the original files, and nothing here writes to them."
+      />
 
       {candidateError === null ? null : (
         <ErrorPanel
@@ -323,12 +323,11 @@ export function Compare({
       {candidates === null || hasTwoBuilds || candidateError !== null ? null : (
         // Fewer than two builds is a fact about the session, and the screen says so instead of
         // inventing a comparison out of one build (prompt §19).
-        <section className={styles['empty']} aria-label="Nothing to compare yet">
-          <p>Analyze another firmware build before comparing.</p>
-          <button type="button" className={styles['control']} onClick={onGoToAnalyze}>
-            Go to Analyze
-          </button>
-        </section>
+        <EmptyState
+          label="Nothing to compare yet"
+          message="Analyze another firmware build before comparing."
+          nextStep={<Button onClick={onGoToAnalyze}>Go to Analyze</Button>}
+        />
       )}
 
       {candidates === null || !hasTwoBuilds ? null : (
@@ -355,35 +354,27 @@ export function Compare({
           />
           <div className={styles['pickerActions']}>
             {candidates.nextOffset === null ? null : (
-              <button
-                type="button"
-                className={styles['control']}
+              <Button
                 onClick={() => {
                   void loadMore();
                 }}
                 disabled={comparing}
               >
                 Show more builds
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
-              className={styles['control']}
-              onClick={swap}
-              disabled={!bothChosen || samePair || comparing}
-            >
+            <Button onClick={swap} disabled={!bothChosen || samePair || comparing}>
               Swap
-            </button>
-            <button
-              type="button"
-              className={styles['primary']}
+            </Button>
+            <Button
+              variant="primary"
               onClick={() => {
                 void compare();
               }}
               disabled={!bothChosen || samePair || comparing}
             >
               Compare
-            </button>
+            </Button>
           </div>
         </section>
       )}
@@ -476,7 +467,7 @@ export function Compare({
           </footer>
         </section>
       )}
-    </main>
+    </Page>
   );
 }
 
@@ -1084,115 +1075,117 @@ function SectionChanges({
 
       {page === null ? null : (
         <>
-          <table className={styles['table']}>
-            <caption className={styles['caption']}>
-              Every section the diff lists as changed, filtered and ordered by the shell
-            </caption>
-            <thead>
-              <tr>
-                <Sortable
-                  label="Change"
-                  column="changeKind"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <Sortable
-                  label="Name"
-                  column="key"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <SortHeader label="Old file" sortable={false} direction={direction} />
-                <SortHeader label="New file" sortable={false} direction={direction} />
-                <Sortable
-                  label="Delta file"
-                  column="delta"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <SortHeader label="Old RAM" sortable={false} direction={direction} />
-                <SortHeader label="New RAM" sortable={false} direction={direction} />
-                <SortHeader label="Delta RAM" sortable={false} direction={direction} />
-                <Sortable
-                  label="RAM size"
-                  column="memorySize"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <Sortable
-                  label="File size"
-                  column="fileSize"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <SortHeader label="Also differs" sortable={false} direction={direction} />
-              </tr>
-            </thead>
-            <tbody>
-              {page.rows.map((row, index) => (
-                <tr key={`${row.key}:${String(index)}`}>
-                  <td>
-                    <Kind kind={row.changeKind} />
-                  </td>
-                  <td className={styles['wrap']}>
-                    {row.key}
-                    {row.nameKnown ? null : (
-                      <span className={styles['note']}> no name was recorded for this row</span>
-                    )}
-                    {row.ambiguous ? (
-                      <span className={styles['note']}> the name repeats, so this row is unpaired</span>
-                    ) : null}
-                  </td>
-                  <td className={styles['mono']}>
-                    <SideValue change={row.fileSize} side="base" kind={row.changeKind} unit={unit} />
-                  </td>
-                  <td className={styles['mono']}>
-                    <SideValue
-                      change={row.fileSize}
-                      side="target"
-                      kind={row.changeKind}
-                      unit={unit}
-                    />
-                  </td>
-                  <td className={styles['mono']}>
-                    <DeltaFigure change={row.fileSize} unit={unit} />
-                  </td>
-                  <td className={styles['mono']}>
-                    <SideValue
-                      change={row.memorySize}
-                      side="base"
-                      kind={row.changeKind}
-                      unit={unit}
-                    />
-                  </td>
-                  <td className={styles['mono']}>
-                    <SideValue
-                      change={row.memorySize}
-                      side="target"
-                      kind={row.changeKind}
-                      unit={unit}
-                    />
-                  </td>
-                  <td className={styles['mono']}>
-                    <DeltaFigure change={row.memorySize} unit={unit} />
-                  </td>
-                  <td className={styles['mono']}>
-                    {sizeText(row.memorySize, unit)}
-                    {' / '}
-                    {sizeText(row.fileSize, unit)}
-                  </td>
-                  <td>
-                    <Differs row={row} />
-                  </td>
+          <ScrollArea label="Section changes table">
+            <table className={styles['table']}>
+              <caption className={styles['caption']}>
+                Every section the diff lists as changed, filtered and ordered by the shell
+              </caption>
+              <thead>
+                <tr>
+                  <Sortable
+                    label="Change"
+                    column="changeKind"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <Sortable
+                    label="Name"
+                    column="key"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <SortHeader label="Old file" sortable={false} direction={direction} />
+                  <SortHeader label="New file" sortable={false} direction={direction} />
+                  <Sortable
+                    label="Delta file"
+                    column="delta"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <SortHeader label="Old RAM" sortable={false} direction={direction} />
+                  <SortHeader label="New RAM" sortable={false} direction={direction} />
+                  <SortHeader label="Delta RAM" sortable={false} direction={direction} />
+                  <Sortable
+                    label="RAM size"
+                    column="memorySize"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <Sortable
+                    label="File size"
+                    column="fileSize"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <SortHeader label="Also differs" sortable={false} direction={direction} />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {page.rows.map((row, index) => (
+                  <tr key={`${row.key}:${String(index)}`}>
+                    <td>
+                      <Kind kind={row.changeKind} />
+                    </td>
+                    <td className={styles['wrap']}>
+                      {row.key}
+                      {row.nameKnown ? null : (
+                        <span className={styles['note']}> no name was recorded for this row</span>
+                      )}
+                      {row.ambiguous ? (
+                        <span className={styles['note']}> the name repeats, so this row is unpaired</span>
+                      ) : null}
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue change={row.fileSize} side="base" kind={row.changeKind} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue
+                        change={row.fileSize}
+                        side="target"
+                        kind={row.changeKind}
+                        unit={unit}
+                      />
+                    </td>
+                    <td className={styles['mono']}>
+                      <DeltaFigure change={row.fileSize} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue
+                        change={row.memorySize}
+                        side="base"
+                        kind={row.changeKind}
+                        unit={unit}
+                      />
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue
+                        change={row.memorySize}
+                        side="target"
+                        kind={row.changeKind}
+                        unit={unit}
+                      />
+                    </td>
+                    <td className={styles['mono']}>
+                      <DeltaFigure change={row.memorySize} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      {sizeText(row.memorySize, unit)}
+                      {' / '}
+                      {sizeText(row.fileSize, unit)}
+                    </td>
+                    <td>
+                      <Differs row={row} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollArea>
 
           <Pager
             total={page.total}
@@ -1325,91 +1318,93 @@ function SymbolChanges({
 
       {page === null ? null : (
         <>
-          <table className={styles['table']}>
-            <caption className={styles['caption']}>
-              Every symbol the diff lists as changed, filtered and ordered by the shell
-            </caption>
-            <thead>
-              <tr>
-                <Sortable
-                  label="Change"
-                  column="changeKind"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <Sortable
-                  label="Name"
-                  column="name"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <SortHeader label="Kind / binding" sortable={false} direction={direction} />
-                <SortHeader label="Old address" sortable={false} direction={direction} />
-                <SortHeader label="New address" sortable={false} direction={direction} />
-                <SortHeader label="Old size" sortable={false} direction={direction} />
-                <SortHeader label="New size" sortable={false} direction={direction} />
-                <Sortable
-                  label="Delta size"
-                  column="sizeDelta"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <Sortable
-                  label="Size"
-                  column="size"
-                  sort={sort}
-                  direction={direction}
-                  onSort={chooseSort}
-                />
-                <SortHeader label="Section" sortable={false} direction={direction} />
-                <SortHeader label="Also differs" sortable={false} direction={direction} />
-              </tr>
-            </thead>
-            <tbody>
-              {page.rows.map((row, index) => (
-                <tr key={`${row.name}:${String(index)}`}>
-                  <td>
-                    <Kind kind={row.changeKind} />
-                  </td>
-                  <td className={styles['wrap']}>
-                    {row.name}
-                    {row.ambiguous ? (
-                      <span className={styles['note']}>
-                        {' '}
-                        this name repeats, so the rows were left unpaired
-                      </span>
-                    ) : null}
-                  </td>
-                  <td>
-                    {row.kind} / {row.binding}
-                  </td>
-                  <td className={styles['mono']}>{sideAddress(row, 'base')}</td>
-                  <td className={styles['mono']}>{sideAddress(row, 'target')}</td>
-                  <td className={styles['mono']}>
-                    <SideValue change={row.size} side="base" kind={row.changeKind} unit={unit} />
-                  </td>
-                  <td className={styles['mono']}>
-                    <SideValue change={row.size} side="target" kind={row.changeKind} unit={unit} />
-                  </td>
-                  <td className={styles['mono']}>
-                    <DeltaFigure change={row.size} unit={unit} />
-                  </td>
-                  <td className={styles['mono']}>{sizeText(row.size, unit)}</td>
-                  <td className={styles['mono']}>
-                    {row.base === null ? ABSENT : row.base.sectionRef}
-                    {' → '}
-                    {row.target === null ? ABSENT : row.target.sectionRef}
-                  </td>
-                  <td>
-                    <Differs row={row} />
-                  </td>
+          <ScrollArea label="Symbol changes table">
+            <table className={styles['table']}>
+              <caption className={styles['caption']}>
+                Every symbol the diff lists as changed, filtered and ordered by the shell
+              </caption>
+              <thead>
+                <tr>
+                  <Sortable
+                    label="Change"
+                    column="changeKind"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <Sortable
+                    label="Name"
+                    column="name"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <SortHeader label="Kind / binding" sortable={false} direction={direction} />
+                  <SortHeader label="Old address" sortable={false} direction={direction} />
+                  <SortHeader label="New address" sortable={false} direction={direction} />
+                  <SortHeader label="Old size" sortable={false} direction={direction} />
+                  <SortHeader label="New size" sortable={false} direction={direction} />
+                  <Sortable
+                    label="Delta size"
+                    column="sizeDelta"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <Sortable
+                    label="Size"
+                    column="size"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <SortHeader label="Section" sortable={false} direction={direction} />
+                  <SortHeader label="Also differs" sortable={false} direction={direction} />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {page.rows.map((row, index) => (
+                  <tr key={`${row.name}:${String(index)}`}>
+                    <td>
+                      <Kind kind={row.changeKind} />
+                    </td>
+                    <td className={styles['wrap']}>
+                      {row.name}
+                      {row.ambiguous ? (
+                        <span className={styles['note']}>
+                          {' '}
+                          this name repeats, so the rows were left unpaired
+                        </span>
+                      ) : null}
+                    </td>
+                    <td>
+                      {row.kind} / {row.binding}
+                    </td>
+                    <td className={styles['mono']}>{sideAddress(row, 'base')}</td>
+                    <td className={styles['mono']}>{sideAddress(row, 'target')}</td>
+                    <td className={styles['mono']}>
+                      <SideValue change={row.size} side="base" kind={row.changeKind} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue change={row.size} side="target" kind={row.changeKind} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <DeltaFigure change={row.size} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>{sizeText(row.size, unit)}</td>
+                    <td className={styles['mono']}>
+                      {row.base === null ? ABSENT : row.base.sectionRef}
+                      {' → '}
+                      {row.target === null ? ABSENT : row.target.sectionRef}
+                    </td>
+                    <td>
+                      <Differs row={row} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollArea>
 
           <Pager
             total={page.total}
@@ -1451,26 +1446,22 @@ function Exports({
         one self-contained file. Neither carries a timestamp, a host path or a script.
       </p>
       <div className={styles['exports']}>
-        <button
-          type="button"
-          className={styles['export']}
+        <Button
           disabled={exporting}
           onClick={() => {
             onExport('json');
           }}
         >
           Export JSON
-        </button>
-        <button
-          type="button"
-          className={styles['export']}
+        </Button>
+        <Button
           disabled={exporting}
           onClick={() => {
             onExport('html');
           }}
         >
           Export HTML
-        </button>
+        </Button>
         {exporting ? (
           <p className={styles['status']} role="status" aria-live="polite">
             Waiting for the save dialog…
@@ -1584,9 +1575,7 @@ function ChangeFilters({
           onDraftChange(event.target.value);
         }}
       />
-      <button type="submit" className={styles['apply']}>
-        Apply filter
-      </button>
+      <Button type="submit">Apply filter</Button>
     </form>
   );
 }

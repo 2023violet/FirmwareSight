@@ -5,14 +5,35 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-06"
+last_updated: "2026-10-07"
 ---
 
 # Current State
 
-- Date: 2026-10-06
+- Date: 2026-10-07
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1** opened on 2026-10-06 under
+- **Active task: `U1_UI_PRODUCTIZATION_CONVERGENCE`.** A **UI productization track**, opened 2026-10-07 under
+  《FirmwareSight B1 — UI Productization / Design Convergence》 v1.0, delivered **inline** (no file, so
+  `10_AUDIT/SOURCE_PROMPTS/` records it the way the three inline P0 precedents are recorded, and the agent's
+  labelled transcription is archived at `U1_VALIDATION/00_authority/`). The owner renamed it `U1` because `B1` is
+  the canonical Private Beta identifier and stays NOT AUTHORIZED. It converged the desktop React shell toward the
+  frozen seven reference screens: one shared design-system layer (`components/Button|Chip|Layout|PageHeader|Panel|
+  RankBar|TopBar`), a new Overview page made only of DTOs the shell already returns, the Release verdict moved to
+  the top of its page, and the F2R-01 block-table defect closed on Compare and Release, where it was still live.
+  Start authority was HEAD = `origin/main` = `f481b78059c14e1c83d3ba18e082004b7de72ee2`, tree clean, run
+  `37508243514` 10 of 10. Product state did **not** move: P5 `PASS_COMPLETE`, Productization
+  `ENGINEERING_COMPLETE`, G2 `PASS`, **`MVP_CANDIDATE`** at `0.6.0`, and U1 claims no stage — not G3, not B1, not
+  RC, not GA. Counts: **868 Rust (unchanged) / 236 UI in 9 files (was 225 in 8)**, 17-step gate shape unchanged
+  and run **17 of 17 PASS with no SKIP** at the fully staged closeout,
+  no new IPC command (27), and the one non-CSS change is the additive `MainWindowPage::Overview` title variant
+  declared in `BASELINE.yaml`'s `u1_execution.non_css_change`. Evidence and verdict:
+  `U1_VALIDATION/U1_VALIDATION_REPORT.md`.
+- **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
+  eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
+  `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause
+  suspends the turn and is not a verdict. Resuming needs a real external participant, which is operator work
+  (V1 §47, §48) and no agent action. The rest of this section is the record of how V1 opened on 2026-10-06.
+- **Active task before U1: `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1** opened on 2026-10-06 under
   *FirmwareSight — V1 Own-artifact External Validation, Execution Prompt v1.0 — Architect Authorized*
   (delivered as a file, SHA-256 `48768ff025e3d6351b7b1d8d593ea8bfb18a7930a0a21a101af3093bbec10a0f`, 46,207
   delivered CRLF bytes, 1,697 CRLF pairs, 1,698 logical lines; archived in `10_AUDIT/SOURCE_PROMPTS/` as Git blob
@@ -824,25 +845,32 @@ citation written before it. The current stage's pack is the one place a line poi
 
 ## Next work
 
-**`active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1** opened on 2026-10-06 under its own
-architect prompt, at the head P5's Commit F3 closed the stage with (`08fdfcb`, Run `37475580080`, #72, attempt 1,
-10 of 10). What a new reader inherits is therefore: Productization **ENGINEERING_COMPLETE**, `P5 = PASS_COMPLETE`,
-product **MVP CANDIDATE** at baseline **`0.6.0`** (narrative: **FirmwareSight Productized MVP Candidate**),
-`G2 = PASS`, P0 / P1 / P2 / P3 / P4 still at their own `PASS` / `PASS_COMPLETE` — nothing earlier was re-statused
-retroactively — and a research track that has run **zero** sessions.
+**`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE`, and it closed on 2026-10-07.** A new reader inherits: Productization
+**ENGINEERING_COMPLETE**, `P5 = PASS_COMPLETE`, product **MVP CANDIDATE** at baseline **`0.6.0`** (narrative:
+**FirmwareSight Productized MVP Candidate**), `G2 = PASS`, P0 / P1 / P2 / P3 / P4 still at their own
+`PASS` / `PASS_COMPLETE` — nothing earlier was re-statused retroactively — **V1 paused at
+`RECRUITMENT_READY` with zero eligible sessions**, and **U1** having converged the desktop UI one round toward
+the reference screens without claiming a stage of its own.
 
-**What V1 is working on right now, and who has to move next.** V1 is at `RECRUITMENT_READY`: the protocol pack
-exists (`V1_VALIDATION/`, sixteen files), the cohort build is frozen and verified, and there is nothing for an
-agent to measure because §5 forbids an agent from being the participant. **Recruitment, consent and moderation
-are the human operator's work** (§47, §48): real external firmware/embedded engineers, screened against §7,
-running their **own** artifacts on the exact frozen installer. The repository's next V1 write should be a Batch A
-evidence commit after four eligible participants exist — not a document written before one session has happened.
-`AGENTS.md` 1 still means what it has meant in every round: this pointer names V1 and nothing beyond it, and no
-agent may lift the next track off the roadmap.
+**What U1 leaves for the next UI round.** `U1_VALIDATION/U1_VALIDATION_REPORT.md` §6 is the list, and it is
+deliberately unpolished: the references' right-hand detail column (no page holds a selection to fill it, so the
+components drafted for it were deleted rather than shipped unused), a fourth compact button level for dense table
+row actions, the `History` heading against the `Bundle & History` rail and window-title name, the two Release
+actions with no command behind them, and a real-desktop before/after screenshot pass this session was not
+authorized to run. Nothing on that list is a defect; each is unfinished convergence, and §13 is the reason it is
+written down instead of quietly omitted.
+
+**What V1 is waiting on, and who has to move next.** V1 is paused, not closed, and its blocker is not the pause:
+it is at `RECRUITMENT_READY` because §5 forbids an agent from being the participant. **Recruitment, consent and
+moderation are the human operator's work** (§47, §48): real external firmware/embedded engineers, screened
+against §7, running their **own** artifacts on the exact frozen installer. The repository's next V1 write should
+be a Batch A evidence commit after four eligible participants exist — not a document written before one session
+has happened. `AGENTS.md` 1 still means what it has meant in every round: a pointer names one track and nothing
+beyond it, and no agent may lift the next track off the roadmap.
 
 **What still needs a new architect prompt.** B1 / private beta, RC, GA, commercialization, licensing, signing,
 notarization, an updater, any new product verb, format, adapter or crate, and every E1/E2/E3/GX candidate —
-unchanged from P5's closure list, and V1 adds nothing to it. V1's own §40 is explicit that **even a full V1 pass
+unchanged from P5's closure list: V1 added nothing to it, and U1 added nothing to it either. V1's own §40 is explicit that **even a full V1 pass
 does not open B1**, and §39/§54 forbid this track from self-issuing `V1_PASS_COMPLETE`, `B1_READY` or
 `PRIVATE_BETA`. `P5_RELEASE_READINESS.md` §5 still freezes the ten release-readiness states, and
 `P5_FINAL_CLOSURE_REPORT.md` §14 still says what `PASS_COMPLETE` does not mean. Start reading the carried

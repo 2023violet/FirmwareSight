@@ -5,10 +5,10 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-06"
+last_updated: "2026-10-07"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation IN_PROGRESS / RECRUITMENT_READY — active_task V1_OWN_ARTIFACT_EXTERNAL_VALIDATION — FirmwareSight Productized MVP Candidate — 0 real external sessions
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07 — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
 
 ## Purpose
 
@@ -606,15 +606,26 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     `P5_COMMIT_E_CLOSURE_NORMALIZATION.md`. Finally `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md`,
     and `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §7 if you are wondering what `elf.program-header` actually
     means. `.ai/ACTIVE_TASK.md` holds the commit
-    table and the STOP chain, and it now reads **`active_task: NONE`**. The reading-path note above this list
+    table and the STOP chain, and at F3's own head it read **`active_task: NONE`** — which was true of that
+    commit and has since moved twice, once to V1 and once to U1, each by its own architect prompt. The reading-path note above this list
     was written when Commit E's closure normalization was the live authority and it was true that **no prompt
     authorized a Commit F, a P5 closure, the §64 journey or an L26 fix**; all four were authorized afterwards,
     each by its own architect prompt — Commit F by *P5 Commit F — Final Productization Closure v1.0* (L26 as
     `ADR-0029` plus the §64 journey), F2's install by the owner's answer to the pause after F1, the F2R
     corrective by the Architect inserting it between F2 and F3, and the closure by *P5 Commit F3 — Final
     Governance Closure v1.0* — and the sentence is kept here dated rather than deleted because it is the
-    record of what the tree did not yet have. **Current active authority: none.** `10_AUDIT/SOURCE_PROMPTS/README.md`
+    record of what the tree did not yet have. **Active authority at that head: none.** F3 closed P5 with no next track authorized by the closure sentence itself; two tracks arrived afterwards, each under its own prompt, and both are listed below. `10_AUDIT/SOURCE_PROMPTS/README.md`
     lists every prompt P5 ran under with its measured digests, F3's last.
+22. **V1, paused:** `V1_VALIDATION/README.md`, then `V1_PLAN.md`, `V1_METRICS.md` and the five protocol
+    documents. `stage_status: IN_PROGRESS`, `research_state: RECRUITMENT_READY`, eligible external sessions
+    **0**, the cohort build frozen at run `37475580080` / artifact `11419727517` / installer SHA-256
+    `182506f2…63d12`. Nothing here is for an agent to do: recruitment, consent and moderation are the
+    operator's (§47, §48), and writing a session file for a session that did not happen is the one thing the
+    track forbids. Its pause field is `v1_execution.paused_for`.
+23. **U1, the round that just ran:** `U1_VALIDATION/U1_UI_GAP_AUDIT.md` (FS-U1-001 — what the tree agreed
+    with the references about, the twelve measured gaps, and what was refused with the reason),
+    `U1_DESIGN_CONVERGENCE_PLAN.md` (FS-U1-002) and `U1_VALIDATION_REPORT.md` (FS-U1-003). §6 of the report
+    is the unfinished list, and §7 is the wording the round is allowed to use.
 
 ## Boundaries still in force
 

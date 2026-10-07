@@ -453,7 +453,7 @@ describe('Help repeats what Analyze shows on a first run', () => {
       expect(screen.queryByRole('region', { name: 'Getting started' })).toBeNull(),
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'History page' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Bundle & History page' }));
     await screen.findByRole('heading', { level: 1, name: 'History' });
     fireEvent.click(screen.getByRole('button', { name: 'Analyze page' }));
     await screen.findByRole('heading', { level: 1, name: 'Analyze' });

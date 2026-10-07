@@ -55,3 +55,17 @@
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
 }
+
+/* The pill the reference screens use for a page-level state. `--fs-radius-pill` existed in the frozen
+   token file with no user until now, so this is the design system being used rather than extended. The
+   outline borrows the state colour because the icon and the words already carry it; a reader who cannot
+   see colour still gets "REVIEW" and a triangle, which is the part `DESIGN.md` 9 protects. */
+.chip {
+  gap: var(--fs-space-1);
+  padding: var(--fs-space-1) var(--fs-space-2);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid currentColor;
+  border-radius: var(--fs-radius-pill);
+}

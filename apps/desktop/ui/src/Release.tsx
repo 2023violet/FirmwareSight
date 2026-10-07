@@ -27,11 +27,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './Release.module.css';
+import { Button, LinkButton } from './components/Button';
+import { StatusStrip } from './components/Chip';
 import { ErrorPanel } from './components/ErrorPanel';
+import { Page, ScrollArea } from './components/Layout';
+import { PageHeader } from './components/PageHeader';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
+import { gateVerdictSentence, severityState } from './stateWords';
 import {
   acceptReview,
   chooseBundleDestination,
@@ -306,15 +311,17 @@ export function Release({
     candidates?.rows.find((row) => row.snapshotId === id);
 
   return (
-    <div className={styles['page']}>
-      <header className={styles['header']}>
-        <h1>Release Gate</h1>
-        <p className={styles['subhead']}>
-          FirmwareSight policy readiness for one stored build, judged against one project policy. The
-          answer below is that policy&rsquo;s verdict and nothing more: no claim on this page reaches
-          beyond the rules the project itself wrote.
-        </p>
-      </header>
+    <Page>
+      <PageHeader
+        title="Release Gate"
+        subhead="FirmwareSight policy readiness for one stored build, judged against one project policy. The answer below is that policy’s verdict and nothing more: no claim on this page reaches beyond the rules the project itself wrote."
+      />
+
+      {/* U1 §B.5: the verdict used to arrive at section 3, after the reader had scrolled past a policy
+          editor and a build picker to find out whether the build can ship. The counts below are
+          `GateCountsDto` verbatim and the severity is Core's disposition aggregate; this band displays
+          both and decides neither. */}
+      {run === null ? null : <Verdict run={run} />}
 
       <section className={styles['section']} aria-labelledby="fs-policy-heading">
         <h2 id="fs-policy-heading">1 · Project policy</h2>
@@ -354,27 +361,22 @@ export function Release({
           </ul>
         ) : null}
         <div className={styles['actions']}>
-          <button type="button" className={styles['control']} onClick={() => void open()}>
-            Open project config
-          </button>
-          <button
-            type="button"
-            className={styles['control']}
+          <Button onClick={() => void open()}>Open project config</Button>
+          <Button
             onClick={() => {
               setDraft(draft === null ? (seed ?? blankPolicy(project?.projectName ?? '')) : null);
             }}
-            aria-expanded={draft !== null}
+            ariaExpanded={draft !== null}
           >
             {draft === null ? 'Edit policy' : 'Close policy editor'}
-          </button>
-          <button
-            type="button"
-            className={styles['primary']}
+          </Button>
+          <Button
+            variant="primary"
             disabled={draft === null || saving}
             onClick={() => void save()}
           >
             {saving ? 'Saving…' : project === null ? 'Save as firmwaresight.toml' : 'Save policy'}
-          </button>
+          </Button>
           {policyNote === null ? null : <span className={styles['status']}>{policyNote}</span>}
         </div>
         {policyError === null ? null : (
@@ -399,10 +401,7 @@ export function Release({
         {candidates !== null && candidates.rows.length === 0 ? (
           <p className={styles['empty']}>
             Nothing is stored yet, so there is nothing to gate.{' '}
-            <button type="button" className={styles['link']} onClick={onGoToAnalyze}>
-              Analyze a build
-            </button>{' '}
-            first, then come back.
+            <LinkButton onClick={onGoToAnalyze}>Analyze a build</LinkButton> first, then come back.
           </p>
         ) : (
           <div className={styles['selectors']}>
@@ -457,14 +456,13 @@ export function Release({
               ) : null}
             </div>
             <div className={styles['pickerActions']}>
-              <button
-                type="button"
-                className={styles['primary']}
+              <Button
+                variant="primary"
                 disabled={snapshotId === null || running}
                 onClick={() => void gate()}
               >
                 {running ? 'Judging…' : 'Run Gate'}
-              </button>
+              </Button>
               <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
             </div>
           </div>
@@ -488,7 +486,7 @@ export function Release({
           <BundleSection run={run} unit={unit} />
         </>
       )}
-    </div>
+    </Page>
   );
 }
 
@@ -599,9 +597,9 @@ function Readiness({
         {restored ? (
           <span className={styles['status']}>Showing the record as history stores it.</span>
         ) : (
-          <button type="button" className={styles['control']} onClick={onReload}>
+          <Button onClick={onReload}>
             Read the stored record
-          </button>
+          </Button>
         )}
         <span className={styles['status']}>
           A stored record keeps findings, evidence and accepted reviews. The numbers a policy produced
@@ -764,23 +762,20 @@ function FindingRow({
                 />
               </label>
               <div className={styles['actions']}>
-                <button
-                  type="button"
-                  className={styles['primary']}
+                <Button
+                  variant="primary"
                   disabled={busy || actor.trim().length === 0 || reason.trim().length === 0}
                   onClick={() => void submit()}
                 >
                   {busy ? 'Recording…' : 'Record acceptance'}
-                </button>
-                <button
-                  type="button"
-                  className={styles['control']}
+                </Button>
+                <Button
                   onClick={() => {
                     setOpenForm(false);
                   }}
                 >
                   Cancel
-                </button>
+                </Button>
                 <span className={styles['status']}>
                   Both are required. An acceptance without a name and a reason is not an audit record.
                 </span>
@@ -794,15 +789,13 @@ function FindingRow({
               )}
             </div>
           ) : (
-            <button
-              type="button"
-              className={styles['control']}
+            <Button
               onClick={() => {
                 setOpenForm(true);
               }}
             >
               Accept review
-            </button>
+            </Button>
           )}
         </div>
       ) : null}
@@ -828,36 +821,38 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
 
       <div className={styles['block']}>
         <h3>Required artifacts</h3>
-        <table className={styles['table']}>
-          <caption className={styles['caption']}>
-            Policy requirement against what this build holds. P3 analyzes ELF and reads GNU ld MAP
-            files; a required BIN or HEX is checked for presence only.
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Kind</th>
-              <th scope="col">Policy</th>
-              <th scope="col">Build</th>
-              <th scope="col">SHA-256</th>
-              <th scope="col">Size</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tables.artifacts.map((row) => (
-              <tr key={row.kind}>
-                <th scope="row" className={styles['mono']}>
-                  {row.kind}
-                </th>
-                <td>{row.required ? 'Required' : 'Not required'}</td>
-                <td>{row.present ? 'Present' : 'Missing'}</td>
-                <td className={styles['monoSmall']}>
-                  {row.sha256 === null ? '—' : truncateMiddle(row.sha256, 8)}
-                </td>
-                <td className={styles['mono']}>{formatSize(row.byteSize, unit)}</td>
+        <ScrollArea label="Required artifact table">
+          <table className={styles['table']}>
+            <caption className={styles['caption']}>
+              Policy requirement against what this build holds. P3 analyzes ELF and reads GNU ld MAP
+              files; a required BIN or HEX is checked for presence only.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Kind</th>
+                <th scope="col">Policy</th>
+                <th scope="col">Build</th>
+                <th scope="col">SHA-256</th>
+                <th scope="col">Size</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {tables.artifacts.map((row) => (
+                <tr key={row.kind}>
+                  <th scope="row" className={styles['mono']}>
+                    {row.kind}
+                  </th>
+                  <td>{row.required ? 'Required' : 'Not required'}</td>
+                  <td>{row.present ? 'Present' : 'Missing'}</td>
+                  <td className={styles['monoSmall']}>
+                    {row.sha256 === null ? '—' : truncateMiddle(row.sha256, 8)}
+                  </td>
+                  <td className={styles['mono']}>{formatSize(row.byteSize, unit)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollArea>
       </div>
 
       <div className={styles['block']}>
@@ -867,27 +862,29 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
             No FLASH or RAM budget is configured, so neither rule has anything to measure against.
           </p>
         ) : (
-          <table className={styles['table']}>
-            <caption className={styles['caption']}>
-              Actual against budget, with the evidence the actual figure rests on. A floor is not a
-              measurement of the whole, so a partial total never blocks.
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Side</th>
-                <th scope="col">Actual</th>
-                <th scope="col">Budget</th>
-                <th scope="col">Headroom / over</th>
-                <th scope="col">State</th>
-                <th scope="col">Evidence basis</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tables.budgets.map((row) => (
-                <BudgetRow key={row.ruleId} row={row} unit={unit} />
-              ))}
-            </tbody>
-          </table>
+          <ScrollArea label="Memory budget table">
+            <table className={styles['table']}>
+              <caption className={styles['caption']}>
+                Actual against budget, with the evidence the actual figure rests on. A floor is not a
+                measurement of the whole, so a partial total never blocks.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Side</th>
+                  <th scope="col">Actual</th>
+                  <th scope="col">Budget</th>
+                  <th scope="col">Headroom / over</th>
+                  <th scope="col">State</th>
+                  <th scope="col">Evidence basis</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tables.budgets.map((row) => (
+                  <BudgetRow key={row.ruleId} row={row} unit={unit} />
+                ))}
+              </tbody>
+            </table>
+          </ScrollArea>
         )}
       </div>
 
@@ -898,27 +895,29 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
             No `[diff]` growth threshold is configured, so nothing is compared with a baseline here.
           </p>
         ) : (
-          <table className={styles['table']}>
-            <caption className={styles['caption']}>
-              The deltas are the same ones Compare shows: Core computed them once and this page moves
-              them.
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Side</th>
-                <th scope="col">Old</th>
-                <th scope="col">New</th>
-                <th scope="col">Delta</th>
-                <th scope="col">Review threshold</th>
-                <th scope="col">State</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tables.growth.map((row) => (
-                <GrowthRow key={row.side} row={row} unit={unit} />
-              ))}
-            </tbody>
-          </table>
+          <ScrollArea label="Growth against the baseline table">
+            <table className={styles['table']}>
+              <caption className={styles['caption']}>
+                The deltas are the same ones Compare shows: Core computed them once and this page moves
+                them.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Side</th>
+                  <th scope="col">Old</th>
+                  <th scope="col">New</th>
+                  <th scope="col">Delta</th>
+                  <th scope="col">Review threshold</th>
+                  <th scope="col">State</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tables.growth.map((row) => (
+                  <GrowthRow key={row.side} row={row} unit={unit} />
+                ))}
+              </tbody>
+            </table>
+          </ScrollArea>
         )}
       </div>
 
@@ -1160,32 +1159,27 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
         </p>
       )}
       <div className={styles['actions']}>
-        <button
-          type="button"
-          className={styles['primary']}
+        <Button
+          variant="primary"
           disabled={!ready || busy}
           onClick={() => void prepare()}
         >
           {busy && preview === null ? 'Preparing…' : 'Prepare bundle'}
-        </button>
-        <button
-          type="button"
-          className={styles['control']}
+        </Button>
+        <Button
           disabled={preview === null || busy}
           onClick={() => void choose()}
         >
           {busy && preview !== null && destination === null
             ? 'Choosing…'
             : 'Choose destination folder'}
-        </button>
-        <button
-          type="button"
-          className={styles['control']}
+        </Button>
+        <Button
           disabled={preview === null || destination === null || busy || foreignOccupied}
           onClick={() => void exportBundle(false)}
         >
           {busy && outcome === null ? 'Writing…' : 'Export bundle'}
-        </button>
+        </Button>
       </div>
       {foreignOccupied && destination !== null ? (
         <p className={styles['stale']} role="status">
@@ -1216,18 +1210,16 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
             verified; keeping it writes nothing.
           </p>
           <div className={styles['actions']}>
-            <button
+            <Button
+              variant="primary"
               ref={confirmRef}
-              type="button"
-              className={styles['primary']}
+
               disabled={busy}
               onClick={() => void exportBundle(true)}
             >
               Replace the existing bundle named {confirm}
-            </button>
-            <button
-              type="button"
-              className={styles['control']}
+            </Button>
+            <Button
               onClick={() => {
                 setConfirm(null);
                 setError(null);
@@ -1235,7 +1227,7 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
               }}
             >
               Keep it
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1307,32 +1299,34 @@ function BundlePreview({
           <dd className={cx(styles['value'], styles['mono'])}>{preview.bundleFolderName}</dd>
         </div>
       </dl>
-      <table className={styles['table']}>
-        <caption className={styles['caption']}>
-          Every file the bundle will hold, named as it will appear inside it. The digests are the ones the
-          plan computed before anything was written, and SHA256SUMS and the manifest repeat them.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">File</th>
-            <th scope="col">Role</th>
-            <th scope="col">Size</th>
-            <th scope="col">SHA-256</th>
-          </tr>
-        </thead>
-        <tbody>
-          {preview.files.map((file) => (
-            <tr key={file.path}>
-              <th scope="row" className={styles['mono']}>
-                {file.path}
-              </th>
-              <td className={styles['mono']}>{file.role}</td>
-              <td className={styles['mono']}>{formatSize(file.byteSize, unit)}</td>
-              <td className={styles['monoSmall']}>{truncateMiddle(file.sha256, 8)}</td>
+      <ScrollArea label="Bundle file list">
+        <table className={styles['table']}>
+          <caption className={styles['caption']}>
+            Every file the bundle will hold, named as it will appear inside it. The digests are the ones the
+            plan computed before anything was written, and SHA256SUMS and the manifest repeat them.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">File</th>
+              <th scope="col">Role</th>
+              <th scope="col">Size</th>
+              <th scope="col">SHA-256</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {preview.files.map((file) => (
+              <tr key={file.path}>
+                <th scope="row" className={styles['mono']}>
+                  {file.path}
+                </th>
+                <td className={styles['mono']}>{file.role}</td>
+                <td className={styles['mono']}>{formatSize(file.byteSize, unit)}</td>
+                <td className={styles['monoSmall']}>{truncateMiddle(file.sha256, 8)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </ScrollArea>
       {preview.warnings.length === 0 ? null : (
         <ul className={styles['noticeList']} aria-label="Plan warnings">
           {preview.warnings.map((warning) => (
@@ -1741,6 +1735,36 @@ function notesPresence(present: boolean | null): string {
     return 'Missing';
   }
   return 'Not observed';
+}
+
+/**
+ * The verdict band, first on the page.
+ *
+ * `DESIGN.md` 9 forbids this sentence from reaching past policy readiness into a legal, security or
+ * compliance claim, and the page's own subhead already says so; the band repeats nothing for that reason.
+ * What it does add is the case the numbered sections handled worst: when accepted reviews change the
+ * aggregate, the two severities are different facts, and showing only one of them would let a reader
+ * believe the build cleared on its own.
+ */
+function Verdict({ run }: { readonly run: GateRunDto }) {
+  const severity = severityState(run.dispositionEffectiveSeverity);
+
+  return (
+    <section className={styles['verdict']} aria-label="Gate verdict">
+      <StateBadge variant="chip" state={severity} label={severity} />
+      <p className={styles['verdictSentence']}>{gateVerdictSentence(run)}</p>
+      <StatusStrip
+        counts={{
+          PASS: run.counts.pass,
+          REVIEW: run.counts.review,
+          BLOCK: run.counts.block,
+          UNKNOWN: run.counts.unknown,
+          'N/A': run.counts.notApplicable,
+        }}
+        label="Findings by state in this run"
+      />
+    </section>
+  );
 }
 
 /**

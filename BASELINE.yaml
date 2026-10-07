@@ -235,7 +235,15 @@ research:
 # because F3's closure round was correct at its own head: no file in that tree authorized V1. v1_execution below
 # is the opening record; P5 stays PASS_COMPLETE and the product stays MVP_CANDIDATE, and AGENTS.md 1 still binds
 # - one named stage, and V1 authorizes no B1, beta, RC, GA, licence, signing, notarization, updater or feature.
-active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION
+# That pointer moved again on 2026-10-07, the same way it moved off P5's `NONE`: the architect issued a new
+# prompt and the owner activated the track it names. `u1_execution` below is its opening record. V1 is PAUSED,
+# not closed - `stage_status` stays IN_PROGRESS, `research_state` stays RECRUITMENT_READY, the eligible-session
+# count stays 0, the cohort build stays the frozen F3 artifact, and nothing in V1's own block is rewritten by
+# this round. Pausing a research track is not a verdict on it: `v1_execution.paused_for` is the only field that
+# changes, and the human recruitment work it describes is still the operator's whenever the track resumes.
+# U1 is a UI productization track and authorizes no product stage: not G3, not B1 Private Beta, not RC, not GA,
+# not signing, notarization, an updater, a licence, pricing or cloud. AGENTS.md 1 still binds - one named stage.
+active_task: U1_UI_PRODUCTIZATION_CONVERGENCE
 
 
 # Execution record of the V0 prompt's own scope. `p0_authorized: false` describes what the V0
@@ -685,6 +693,14 @@ v1_execution:
   start_head: 08fdfcb710f78f8084bfcf614dc508c8b6e7e25b # P5 Commit F3's closure head. §0 states it as the verified start authority; §3 preflight confirmed HEAD = origin/main = it, tree clean, one worktree, no remote delta to classify.
   start_run: "37475580080, run #72, attempt 1, completed / success, 10 of 10 jobs"
   stage_status: IN_PROGRESS
+  # Paused 2026-10-07, by the owner's decision, for the UI productization track. Every field below stays exactly
+  # as V1 wrote it: a pause suspends the *turn*, not the state. The cohort build stays frozen and named, the
+  # eligible-session count stays 0, and no session was written while the track was open or while it is paused.
+  # Resuming needs no new authorization - it needs a real external participant, which is operator work (§48).
+  paused_for: U1_UI_PRODUCTIZATION_CONVERGENCE
+  paused_on: "2026-10-07"
+  paused_at_head: f481b78059c14e1c83d3ba18e082004b7de72ee2 # V1's own activation head: the track pauses with no product or research write of its own after it
+  pause_changes_nothing_in: [research_state, sample.eligible_external_sessions_today, sample.sessions_conducted_today, cohort_build_frozen, metrics_contract, distribution]
   # §14 asks for this field by the name research_state; V0's equivalent field was external_validation_state and
   # V0's own block still reads ACTIVE_WAITING_FOR_REAL_PARTICIPANTS. Nothing here renames V0's history.
   research_state: RECRUITMENT_READY
@@ -779,6 +795,59 @@ v1_execution:
   next_stage_after_this_one: B1_private_beta # NOT authorized by this file, NOT authorized by V1 passing, and no prompt authorizes it today
   stop_condition: "§5's nine steps end at a STOP: Recruitment Ready, zero eligible external sessions, WAITING FOR REAL EXTERNAL PARTICIPANTS. The next repository write happens only when a real session has happened."
   owner_input_required: "recruitment of real external participants, and the operator decision of who moderates. Nothing in this round can substitute for either (§47, §48)."
+
+u1_execution:
+  authorized: true
+  prompt: "FirmwareSight B1 — UI Productization / Design Convergence, Execution Prompt v1.0 (delivered inline)"
+  canonical_unit: U1_UI_PRODUCTIZATION_CONVERGENCE # the owner's rename; see .ai/DECISIONS.md 2026-10-07 entry 1
+  prompt_provenance: "delivered as inline message text in session 78e09536-12ab-4712-adbe-865215e0a59f on 2026-10-06, not as a file. There is therefore no owner-side byte stream to hash, and 10_AUDIT/SOURCE_PROMPTS/README.md records this track the way the three inline P0 precedents are recorded: File: none (delivered inline). A labelled agent transcription is archived at U1_VALIDATION/00_authority/SOURCE_PROMPT_U1_transcription.md - 503 lines, 16,762 bytes, SHA-256 67067dce624a6dc458055dd79e21b6ed4e983c7ac665426561e72b939de52865 - and its digest is the digest of that transcription, never of the delivered prompt. It normalizes roughly twenty full-width CJK quotation marks to ASCII, so it is not a byte-identical copy; the pre-move copy in the machine evidence root measured 16,544 bytes at SHA-256 418ca7f4a8cde5bb7c15d4f1294bc791f3ce1d318cc29f6b579cba952555d28b."
+  stage: U1
+  opened_on: "2026-10-07"
+  # A UI track, so its status word is not a stage verdict: the round did the convergence its prompt asked
+  # for and stopped. Nothing on this line says the UI is finished, that it equals the references, or that a
+  # product stage passed - the six items in deferred_explicitly below are what it did not reach.
+  stage_status: CLOSED_FIRST_ROUND
+  closed_on: "2026-10-07"
+  start_head: f481b78059c14e1c83d3ba18e082004b7de72ee2 # V1's activation head = origin/main. §2A preflight measured HEAD == origin/main == ls-remote, clean tree, one worktree, one branch, and no remote movement to classify.
+  start_run: "37508243514, run #73, attempt 1, completed / success, 10 of 10 jobs" # V1's own CI read-back; this round opened on a green head
+  track_kind: ui_productization_not_a_product_stage
+  deliverables:
+    audit: U1_VALIDATION/U1_UI_GAP_AUDIT.md # FS-U1-001, delivered §6 A-F, written before any code
+    plan: U1_VALIDATION/U1_DESIGN_CONVERGENCE_PLAN.md # FS-U1-002, §12 deliverable B
+    code: apps/desktop/ui/ # plus the one non-CSS change recorded in non_css_change below
+    report: U1_VALIDATION/U1_VALIDATION_REPORT.md # FS-U1-003, §12 deliverable D
+  design_precedence_kept: "the frozen chain of ADR-0018 and AGENTS.md 11: 治理红线 > frozen assets / ADRs / assets/design-tokens.json > root DESIGN.md > accepted screenshots > upstream reference. The mockups are direction authority for structure, hierarchy and density; they do not outrank the token file and they were read, not edited."
+  frozen_assets_read_not_written: [assets/design-tokens.json, apps/desktop/ui/src/styles/tokens.css, DESIGN.md, assets/ui-mockups/]
+  new_token_values_created: 0 # styles/tokens.css is generated by scripts/generate_design_tokens.py and its --check step passes unchanged
+  non_css_change: # the single declared exception to the CSS/layout/component rule (delivered §9.1)
+    file: apps/desktop/src-tauri/src/ipc.rs
+    change: "MainWindowPage gains an `Overview` variant and two title strings align with the names the pages give themselves (`Release Gate`, `Bundle & History`)"
+    why_needed: "the window title is Rust's, not the WebView's (AGENTS.md 7), so a new page cannot be titled from the frontend; the alternative was a new page with no title"
+    wire_surface: "additive only. The five existing variant names are unchanged, `set_window_title` argument shape is unchanged, and no DTO, schema, migration, storage contract, analysis wire field or release identity rule moved."
+    pinned_by: apps/desktop/src-tauri/tests/history_reads.rs # six variants, expected title vector, and the closed-enum JSON form
+    regenerated_binding: apps/desktop/ui/src/ipc/generated/MainWindowPage.ts # ts-rs output; drift step `ipc bindings unchanged` proves it matches the Rust
+  counts_after:
+    rust: 868 # `cargo test --workspace`: sum of the passed column; 0 failed. Unchanged from V1's freeze.
+    desktop_lib: 96
+    ui: 236 # was 225 at f481b78; eleven added, none deleted
+    ui_files: 9 # was 8; this round adds overview.test.tsx
+    gate_full_steps: 17 # rust 3, frontend 5, drift 8, deny 1 - the same shape V1's §45 froze
+  counts_change_is_authorized: "V1's `product_counts_required_unchanged` froze the counts for a docs-only research round. U1 is a product-UI round delivered by the owner's own prompt, and the count that moved is the UI count: 225 -> 236 in 9 files, with 868 Rust tests unchanged. The gate shape did not move."
+  gates_at_close: "python scripts/check.py 17 of 17 steps PASS with no SKIP (rust 3, frontend 5, drift 8 including drift/baseline integrity, deny 1), run at the fully staged closeout state; cargo fmt --all -- --check 0; cargo clippy --workspace --all-targets -- -D warnings 0; one cargo test --workspace 868 passed / 0 failed; corepack pnpm install --frozen-lockfile / typecheck / lint / test / build each exit 0 through the gate, with 236 passed in 9 files; scripts/verify_baseline_artifacts.py RESULT PASS (750 tracked paths, 748 manifest entries, every mismatch counter 0). The pre-staging run of the same gate reached 14 steps and failed only drift/ipc bindings unchanged, which was the unstaged ts-rs regeneration. --only core-smoke and --only package were not run in this round, so no figure for either appears in any U1 document."
+  semantic_surfaces_untouched: [core_crates, parser, diff, gate_rules, evidence_classification, schema, migrations, storage_contracts, analysis_wire_format, release_identity_rules, bundle_manifest, diagnostics, ADR-0028_conclusions, ADR-0029_conclusions, dependencies, tauri_capabilities, updater, signing]
+  new_commands_added: 0 # the desktop command count stays 27; Overview renders DTOs the shell already returns
+  visual_evidence: STRUCTURAL_CONTRACTS_ONLY # the real-desktop before/after pass is a machine-level operation (it parks the owner's store) and was not authorized in this session; what is claimed instead is listed in U1_VALIDATION/U1_VALIDATION_REPORT.md
+  deferred_explicitly: # §13 - first-round productization, not a finished design system
+    - the reference screens' right-hand detail column (no page holds a selection to describe; the components drafted for it were deleted rather than shipped unused)
+    - a fourth compact button level for dense table row actions (`.action` in History, `.inspect`/`.apply` in Details stay local)
+    - the app version in the product bar (it would cost a second `get_app_identity` read per session)
+    - the Dependencies / Declare / Re-scan actions of FS-UI-07 (no such command exists; §C refuses to fake the backend)
+    - the page heading `History` against the rail and window-title name `Bundle & History` (naming convergence reaches an IPC title surface)
+  never_self_issued: [UI_PRODUCTIZATION_COMPLETE, V1_RESUMED, B1_READY, PRIVATE_BETA, RC, GA]
+  permitted_final_wording: "the UI converged from an engineering-complete MVP candidate toward the intended desktop product interface" # §15
+  forbidden_final_wording: [V1_done, GA, equals_the_mockups, all_future_interactions] # §15
+  stop_condition: "§16 ends the round with a report and STOP. U1 does not open V1 again, does not claim a stage, and does not start B1, RC, GA, packaging or a feature round."
+  next_stage_after_this_one: NONE # V1 is paused and resumable by the operator; no next track is authorized by this file
 
 p0_execution:
   authorized: true

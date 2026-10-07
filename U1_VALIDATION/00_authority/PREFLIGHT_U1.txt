@@ -1,0 +1,74 @@
+# U1 UI Productization / Design Convergence — preflight and authority record
+
+Run date: 2026-10-06. Every value below was printed by a command run in this session, not recalled.
+
+## §2A repository state (git, measured)
+
+```text
+git rev-parse HEAD            f481b78059c14e1c83d3ba18e082004b7de72ee2
+git rev-parse origin/main     f481b78059c14e1c83d3ba18e082004b7de72ee2
+git ls-remote origin main     f481b78059c14e1c83d3ba18e082004b7de72ee2
+git status --short            (empty)
+git diff --stat               (empty)
+git diff --cached --stat      (empty)
+git worktree list             D:/study/Software/FirmwareSight f481b78 [main]
+git branch -vv                * main f481b78 [origin/main] V1: open own-artifact external validation
+```
+
+HEAD == origin/main, no local delta, no remote movement to classify, tree clean, one worktree, one
+branch. Preflight passes.
+
+## Start-state difference against the delivered instruction
+
+The instruction's §0 says the incoming state is `active_task = NONE`. That was true at F3's closure
+head `08fdfcb`; the V1 round the owner authorized afterwards activated
+`active_task = V1_OWN_ARTIFACT_EXTERNAL_VALIDATION` at `f481b78`, the head this round starts from.
+So §14.4 ("repo state seriously inconsistent with authority") was checked and reported rather than
+assumed away. The owner resolved it in this session; the resolutions are recorded in
+`.ai/DECISIONS.md` and in `BASELINE.yaml`, not only here.
+
+## Owner decisions, 2026-10-06, taken before any file was written
+
+1. **Track token.** Delivered title says `B1`. `B1` is already canonical for Private Beta
+   (`06_DELIVERY/06_STAGE_GATES.md`), and F3 §37 and V1 §40 both record `B1 = NOT AUTHORIZED`.
+   Decision: register this track as `U1_UI_PRODUCTIZATION_CONVERGENCE`; `B1 Private Beta` stays
+   reserved, untouched and unauthorized.
+2. **V1 disposition.** Decision: V1 keeps `stage_status IN_PROGRESS` and
+   `research_state RECRUITMENT_READY` with its 0-session counts and its frozen cohort build, and gains
+   `paused_for: U1_UI_PRODUCTIZATION_CONVERGENCE`; `active_task` moves to U1.
+3. **Design precedence.** Decision: the frozen chain stands — 治理红线 > frozen assets / ADRs /
+   `assets/design-tokens.json` > root `DESIGN.md` > accepted screenshots (ADR-0018, AGENTS.md §11).
+   The mockups are direction authority for structure, hierarchy and density; they do not outrank the
+   token set, and where a mockup shows a treatment the design system forbids, the treatment is not
+   adopted and the case is recorded with the honest label.
+
+## Design authority inputs, measured
+
+`PRODUCT_BASELINE.md:114` names `assets/ui-mockups/` the accepted seven-screen reference set; every
+file is tracked, listed in `manifest.txt`, hashed in `SHA256SUMS`, and is classified `binary` in
+`.gitattributes`, so a checkout cannot alter its bytes. They are frozen assets: this round reads them
+and does not write to them.
+
+```text
+sha256sum assets/ui-mockups/*.png
+564f34c2566202e9d163c83b4a97694de5aa4d7c6bcd04c323f3849c50c784be  FS-UI-01-Overview.png          119962 B
+a133ec9e4ec291d10dc7cb43df51850a421efa1a0b6d2215aef5c2bb30c222a6  FS-UI-02-Analyze.png          126404 B
+a38dabc51676b3a054a0ce12f94a1881f1bf48055bff2acb2a9be8f28064064f  FS-UI-03-Compare.png          119000 B
+86a08240bfbc117faf2de0072ce86f5d71dd39e3a79634fb1be736d9e66e498d  FS-UI-04-Release-Gate.png     161622 B
+af33ffd1b7fbda2a9808b4baf0cc5c3907e1fcdbca01aff91679be19745ccde6  FS-UI-05-Bundle-History.png   164874 B
+0b0dd1eb3e3b9262100151cdea2be1b56845a914f287871f0bd281142d369706  FS-UI-06-Parse-Failure.png     96614 B
+3a84f0fc3d5dada84a34722de0799c0dc40f7fe864928017095daa7639f6f7bb  FS-UI-07-Unknown-Dependency.png 131306 B
+git log --oneline -2 -- assets/ui-mockups/    e086e98 v0.5.1 / eaad8db FirmwareSight_Project_Baseline_v0.5.0
+```
+
+The seven files map one-to-one onto the seven pages §2C lists, so no reference image is missing and no
+eighth image is being invented.
+
+## Source instruction provenance
+
+`00_authority/SOURCE_PROMPT_U1_transcription.md` — 16,544 bytes, 500 lines, SHA-256 recorded by the
+command that produced it. It is an **agent transcription** of an inline-delivered prompt, with its
+fidelity limit stated inside the file (CJK curly quotes rendered as ASCII quotes). It is deliberately
+kept outside Git and its digest is never cited as the digest of the owner's prompt. The repository
+register entry in `10_AUDIT/SOURCE_PROMPTS/README.md` will read `File: none (delivered inline)`, which
+is the precedent the three inline P0 rounds already set.

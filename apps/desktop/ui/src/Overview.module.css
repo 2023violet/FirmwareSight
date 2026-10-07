@@ -1,0 +1,84 @@
+/*
+ * The Overview page's own shapes: the verdict row, the open-finding list, the next-step row and the
+ * scope sentence.
+ *
+ * The cards, the pill and the page rhythm are the shared ones (`components/Panel`, `components/Layout`),
+ * which is the point of the round: a page is allowed to own only what is genuinely specific to it.
+ */
+
+.inputDetail {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-3);
+}
+
+.verdictSentence {
+  margin: 0;
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.quiet {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+}
+
+/* The open findings are a list because they are a set of things to resolve, and the order is Core's:
+   `GateRunDto.findings` arrives in canonical rule order and this page only filters it for display. */
+.findings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.finding {
+  padding: var(--fs-space-2) 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  min-width: 0;
+}
+
+.more {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.nextSteps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-2) var(--fs-space-3);
+}
+
+.nextLabel {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+/* The red line itself, in the card that could otherwise drift into sounding like a certification
+   (DESIGN.md 9). It is a sentence of its own rather than a tooltip, because a reader has to be able to
+   find the limit of the claim without hovering over it. */
+.scope {
+  margin: 0;
+  padding-top: var(--fs-space-2);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  max-width: 80ch;
+}

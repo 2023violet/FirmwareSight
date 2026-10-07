@@ -564,13 +564,15 @@ describe('the rail and the pages it lists', () => {
     render(<App />);
 
     const rail = await screen.findByRole('navigation', { name: 'Pages' });
-    // P3 added a third real page and P5 a fourth, so this list is the build's own inventory: an entry
-    // appears when the stage exists and nowhere else does its word appear (prompt §43).
+    // P3 added a third real page, P5 a fourth, and U1 a fifth - Overview - while two entries took the
+    // names the pages already gave themselves on screen. This list is still the build's own inventory: an
+    // entry appears when the stage exists and nowhere else does its word appear (prompt §43).
     expect(within(rail).getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Overview',
       'Analyze',
       'Compare',
-      'Release',
-      'History',
+      'Release Gate',
+      'Bundle & History',
     ]);
     expect(screen.getByRole('button', { name: 'Analyze page' }).getAttribute('aria-current')).toBe(
       'page',
@@ -1308,5 +1310,25 @@ describe('accessibility of the comparison', () => {
         sectionChangesMock.mock.calls.some(([request]) => request.filter === '.text'),
       ).toBe(true),
     );
+  });
+});
+
+describe('the table layout contract', () => {
+  // F2R-01 closed this defect class on the Analyze sections table; U1 §B.9 found the same shape still
+  // live here, where both change tables carried `display: block` and a name column allowed to wrap.
+  // jsdom cannot measure a clip, so the tree is pinned and the geometry proof stays with the
+  // installed run, exactly as `details.test.tsx` puts it.
+  it('puts every change table inside a scroll wrapper and keeps it a table', async () => {
+    await openCompare();
+    await runCompare();
+
+    const tables = await screen.findAllByRole('table');
+    // The contract is universal rather than counted: a third table added later is inside a wrapper or
+    // this test fails, which is the case a fixed count would silently wave through.
+    expect(tables.length).toBeGreaterThan(0);
+    for (const table of tables) {
+      expect(table.tagName).toBe('TABLE');
+      expect(table.parentElement?.className).toContain('viewport');
+    }
   });
 });

@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-04"
+last_updated: "2026-10-07"
 ---
 
 # FirmwareSight v0.6.0
@@ -493,6 +493,37 @@ V1 own-artifact external validation: OPENED 2026-10-06, IN_PROGRESS at RECRUITME
         NOT_AUTHORIZED and the research build is not a beta. V1 may never self-issue V1_PASS_COMPLETE, B1_READY
         or PRIVATE_BETA (§39, §54), and even a full pass at N ≥ 8 with all six metrics met yields only
         V1_READY_FOR_ARCHITECT_VERDICT — §40 says plainly that it does not open B1.
+U1 UI productization convergence: OPENED AND CLOSED 2026-10-07, CLOSED_FIRST_ROUND, V1 PAUSED WITH STATE INTACT.
+        Authorized by 《FirmwareSight B1 — UI Productization / Design Convergence》 v1.0, delivered INLINE as
+        message text rather than a file, so there is no owner-side byte stream to hash: the source-prompt register
+        records it as File: none (delivered inline), the way the three inline P0 precedents are recorded, and the
+        executing agent's labelled transcription is archived at
+        U1_VALIDATION/00_authority/SOURCE_PROMPT_U1_transcription.md (503 lines, 16,762 bytes, SHA-256
+        67067dce624a6dc458055dd79e21b6ed4e983c7ac665426561e72b939de52865 — the transcription's digest, never the
+        prompt's). The owner re-registered the track as U1 because B1 is the canonical Private Beta identifier and
+        both F3 §37 and V1 §40 record it NOT AUTHORIZED. Start authority: HEAD = origin/main = f481b78, tree
+        clean, run 37508243514 (#73) 10 of 10.
+        What converged: seven shared components replacing five page dialects of the same grammar (373 lines of
+        duplicated page CSS deleted, zero token values created, the generated styles/tokens.css and
+        assets/design-tokens.json untouched and proved so by drift/design tokens), a new Overview page made only of
+        DTOs the shell already returns with every action a navigation rather than a performed verb, the Release
+        verdict moved to the top of its page with one shared verdict sentence so a run cannot read two ways on two
+        pages, and the F2R-01 block-table defect closed on Compare and Release, where it was still live. The single
+        non-CSS change was declared before it was made: MainWindowPage gained an additive Overview variant,
+        because the window title is Rust's and not the WebView's.
+        What did NOT move: no Core semantic, schema, migration, storage contract, analysis wire field, release
+        identity rule, ADR-0028 or ADR-0029 conclusion, capability, dependency or IPC command (27). P5 stays
+        PASS_COMPLETE, Productization ENGINEERING_COMPLETE, G2 PASS, product MVP_CANDIDATE at 0.6.0, the ten frozen
+        release-readiness states, the licence with the owner, and every V1 state field — V1 gains only paused_for.
+        L11 stays CARRIED_FORWARD: U1 built no participant evidence, it built a UI.
+        Counts: 868 Rust unchanged / 236 UI in 9 files (was 225 in 8; eleven added, none deleted), same 17-step
+        gate. visual_evidence = STRUCTURAL_CONTRACTS_ONLY: the real-desktop before/after pass needs the owner's
+        store parked and was not authorized, so no screenshot was taken and no pixel claim is made.
+        **U1 issues no stage and opens nothing.** It is not V1 done, not GA, not "equals the mockups"; the detail
+        column, the compact control level, the History / Bundle & History naming, the two Release actions with no
+        command behind them and the real-desktop evidence pass are listed as unfinished in
+        U1_VALIDATION/U1_VALIDATION_REPORT.md §6 rather than presented as finished. The round ends at its own §16
+        step 8: report, then STOP.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -699,13 +730,28 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1 (Own-artifact External Validation)** opened
-on 2026-10-06 under its own architect prompt, at **`IN_PROGRESS` / `research_state = RECRUITMENT_READY`**, with
-**0 eligible external sessions**. It is a research track, not a product stage: the cohort build is frozen to P5
+**`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE`, and that round closed on 2026-10-07.** U1 was a **UI
+productization track**, not a product stage: it converged the desktop interface toward the frozen seven-screen
+reference set in `assets/ui-mockups/` — one shared design-system layer instead of five page dialects, a new
+Overview page built only from facts the shell already reports, the Release verdict moved to the top of its page,
+and the layout defect F2R-01 closed on the two pages that still carried it. It moved no Core semantic, no schema,
+no migration, no storage contract, no wire format, no release identity rule and no ADR conclusion, added no IPC
+command, and created no token value. `U1_VALIDATION/U1_VALIDATION_REPORT.md` is the record, and its §6 is the list
+of six things the round deliberately did **not** reach. The product stays **`MVP_CANDIDATE`** at baseline
+`0.6.0` with narrative **FirmwareSight Productized MVP Candidate**; P5 stays `PASS_COMPLETE`, G2 stays `PASS`, and
+U1 authorizes no stage — `B1` Private Beta (the identifier the delivered prompt used for itself, which the owner
+re-registered) remains reserved and NOT_AUTHORIZED, and so do RC, GA, signing, notarization, an updater, a licence
+and any new feature.
+
+**`V1 (Own-artifact External Validation)` is paused, not closed.** It opened on 2026-10-06 under its own
+architect prompt at **`IN_PROGRESS` / `research_state = RECRUITMENT_READY`**, with **0 eligible external
+sessions**, and it keeps every one of those values while paused (`v1_execution.paused_for` names U1). It is a
+research track, not a product stage: the cohort build is frozen to P5
 Commit F3's CI artifact (run `37475580080`, artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256
-`182506f2…63d12`, **unsigned**, verified against its own `SHA256SUMS.txt` and preserved outside Git), the product
-counts must stay at **868 Rust / 225 UI in 8 files** for as long as V1 runs, and nothing V1 does can authorize a
-feature, a schema, a dependency, a licence, a signature, a release or B1.
+`182506f2…63d12`, **unsigned**, verified against its own `SHA256SUMS.txt` and preserved outside Git). While V1
+ran, the product counts were required to hold at **868 Rust / 225 UI in 8 files**; U1 was authorized by its own
+prompt to change the UI, so the live figure is now **868 Rust / 236 UI in 9 files** on the same 17-step gate, and
+nothing either track does can authorize a feature, a schema, a dependency, a licence, a signature or a release.
 
 **The work that is actually blocked, and on whom.** V1 needs real firmware and embedded engineers running their
 **own** artifacts. §48 assigns recruitment, consent, transfer and moderation to the **human operator**; an agent

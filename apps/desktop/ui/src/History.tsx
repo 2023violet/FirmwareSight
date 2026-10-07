@@ -25,6 +25,8 @@ import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './History.module.css';
 import { ErrorPanel } from './components/ErrorPanel';
+import { Page, ScrollArea } from './components/Layout';
+import { PageHeader } from './components/PageHeader';
 import { Pager } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
@@ -222,16 +224,11 @@ export function History({
   };
 
   return (
-    <main className={styles['page']}>
-      <header className={styles['header']}>
-        <h1>History</h1>
-        <p className={styles['subhead']}>
-          What this computer has already stored: the builds that were analyzed, the Gate runs that
-          were recorded, and the releases that were published. These are persisted facts, not the
-          artifact currently open on Analyze, and a row stays readable after the firmware file it
-          came from has moved or been deleted. Nothing on this page changes a stored row.
-        </p>
-      </header>
+    <Page>
+      <PageHeader
+        title="History"
+        subhead="What this computer has already stored: the builds that were analyzed, the Gate runs that were recorded, and the releases that were published. These are persisted facts, not the artifact currently open on Analyze, and a row stays readable after the firmware file it came from has moved or been deleted. Nothing on this page changes a stored row."
+      />
 
       <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
 
@@ -261,7 +258,7 @@ export function History({
                   : `No stored build matches “${builds.applied}”.`}
               </p>
             ) : (
-              <div className={styles['viewport']}>
+              <ScrollArea label="Stored builds table">
                 <table className={styles['grid']}>
                   <caption className={styles['caption']}>
                     Ordered by when FirmwareSight stored the build, newest first.
@@ -352,7 +349,7 @@ export function History({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollArea>
             )}
             <Pager
               total={builds.state.total}
@@ -392,7 +389,7 @@ export function History({
                   : `No stored Gate run matches “${runs.applied}”.`}
               </p>
             ) : (
-              <div className={styles['viewport']}>
+              <ScrollArea label="Stored Gate runs table">
                 <table className={styles['grid']}>
                   <caption className={styles['caption']}>
                     Ordered by when FirmwareSight stored the verdict, newest first. A stored run is
@@ -425,7 +422,7 @@ export function History({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollArea>
             )}
             <Pager
               total={runs.state.total}
@@ -469,7 +466,7 @@ export function History({
                   : `No stored release record matches “${releases.applied}”.`}
               </p>
             ) : (
-              <div className={styles['viewport']}>
+              <ScrollArea label="Stored release records table">
                 <table className={styles['grid']}>
                   <caption className={styles['caption']}>
                     Ordered by when FirmwareSight recorded the release, newest first. Each row names the
@@ -501,7 +498,7 @@ export function History({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollArea>
             )}
             <Pager
               total={releases.state.total}
@@ -514,7 +511,7 @@ export function History({
           </>
         )}
       </section>
-    </main>
+    </Page>
   );
 }
 
