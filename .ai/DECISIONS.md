@@ -2098,3 +2098,50 @@ unchanged. V1's §45 froze those counts for a *docs-only* round; U1 was delivere
 count moving is the authorized outcome rather than a violation — and the eleven added tests are all U1's own,
 with none deleted. Five pre-existing test files needed their assertions reworded for the new markup, and every
 one of those edits is listed by name in the report rather than presented as an untouched suite.
+
+## U1R (2026-10-07) — a corrective round that fixed a presentation lie without deleting the evidence
+
+**The defect was one level above the retention.** `Analyze.tsx` resolved its visible summary as
+`const summary = lastGood;` and rendered the top capability strip from `summary.capabilities.*` whenever
+`summary !== null`, with no conditioning on whether that summary belonged to the current attempt. So after a
+failed attempt the page could show a green "ELF supported / MAP provided" row — the *previous* file's facts —
+above a row naming a different file whose MAP was absent, next to an error panel saying the parse failed. The
+architect's prompt named the fix it did **not** want: deleting last-good retention. Retention is the product
+behavior that keeps evidence a reader already had on screen, and it is untouched.
+
+**The fix is a derived presentation value, not a new state.**
+`currentSummary = summary !== null && error === null && !pendingSelection ? summary : null` decides only which
+of two already-known facts the top of the page is allowed to speak for. No domain state was defined, nothing was
+mapped onto PASS / REVIEW / BLOCK / UNKNOWN / N/A that `capabilityState()` did not already map, and the failure
+and pending readings are neutral `Chip` sentences rather than a verdict. `Details.tsx` gained one optional
+`stale` prop used only for its region's accessible name, because a screen-reader user jumps to that region
+without reading the paragraph above it. No Rust source changed, so the prompt's "STOP and return to Architect"
+condition was never reached; `assets/design-tokens.json` is byte-identical and no token, CSS rule or component
+was added.
+
+**A test that cannot fail is not a guard.** Six contract tests were added, and the derivation was then reverted
+to the shipped-bug form with the tests untouched: T2, T3 and T6 go red, the other three stay green for reasons
+the report states (two assert behavior the bug also got right, one asserts the error panel the mutation does not
+touch). The mutation was undone by digest and verified with `sha256sum -c`, and no mutation code is committed.
+
+**Two governance facts were stale and are corrected, with their dates kept.** The desktop command count this
+track guards is **30**, not 27, and `new_commands_added: 0` still means zero: the `generate_handler!` list
+registered 30 at U1's own start head and reached 30 during P5, so the 27 was wrong **before** U1 opened and U1
+added nothing to it. And the first-round note that `--only core-smoke` and `--only package` were not run stays
+true of the first round; the continuation measured 3/3 and 4/4, and that is recorded as dated
+`gates_continuation_evidence` rather than retro-fitted into the earlier sentence. `U1_VISUAL_ACCEPTANCE_REPORT.md`
+§14 also listed `OWNER_RESTORE.json` under the wrong directory; the fix is a path correction only and moves no
+owner-restore verdict.
+
+**What U1R refused to do.** The seven `U1-V1` minor visual gaps and `U1-V0-09` stay
+`OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT`: the Architect has not yet looked at the screenshot pack, and those are
+aesthetic judgements rather than the one material state-truth defect. V1 was not resumed, no session was run, and
+V1's frozen cohort artifact was neither re-downloaded nor re-baselined. `U1-V2-06` moved to `CLOSED_BY_U1R` only
+against the nine conditions §20 lists, each with named evidence, and the strongest word this round allows itself
+is `U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` — not `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not
+`MOCKUP_MATCHED`.
+
+**Counts.** `236 → 242` UI tests in `9 → 9` files (six added, none deleted), `868` Rust tests unchanged, the
+`17`-step gate shape unchanged and run 17 of 17 with no SKIP, plus drift 8/8, deny 1/1, core-smoke 3/3 and
+package 4/4. Product commit `4d36f10`, remote run `37637056980` (#76, attempt 1) 10 of 10, Windows artifact
+`11491960105` installed for the recheck.

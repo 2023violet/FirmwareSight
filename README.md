@@ -525,6 +525,36 @@ U1 UI productization convergence: OPENED AND CLOSED 2026-10-07, CLOSED_FIRST_ROU
         command behind them and the real-desktop evidence pass are listed as unfinished in
         U1_VALIDATION/U1_VALIDATION_REPORT.md §6 rather than presented as finished. The round ends at its own §16
         step 8: report, then STOP.
+U1's two later units the same day: INSTALLED, INSPECTED, THEN CORRECTED. The record above is U1's first round and
+        its visual_evidence line is what that round produced; two more units ran on 2026-10-07 under their own
+        Architect prompts, and neither rewrote the other's lines.
+        **U1_PUSH_CI_AND_INSTALLED_VISUAL_ACCEPTANCE** (prompt v1.1 operative, v1.0 archived as its prior revision)
+        pushed 8efe9c8 + 7dc2ca8, read run 37609108402 (#74) at 10 of 10, installed the Windows artifact that run
+        built (11477857379) and looked at it on a real screen: six primary states at 1440x900, nine responsive
+        captures, a functional smoke pass and an eight-dimension convergence matrix. It raised one material
+        presentation finding, U1-V2-06, and did not self-waive it. FS-U1-004,
+        U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md.
+        **U1R_STALE_CAPABILITY_CORRECTIVE_AND_FINAL_RECHECK** (prompt v1.0, archived with its delivered digest
+        0ff7b3f6…650bb over 28,659 bytes and 1,302 logical lines) closed that finding. Analyze had been resolving
+        its visible summary as the stored last-good one and rendering the top capability strip from it whenever any
+        summary existed, so a failed attempt showed the previous file's green "ELF supported / MAP provided" pills
+        above a row naming a different file. Retention stayed: the header and the strip now read from a derived
+        presentation value populated only when the current attempt earned it, while the retained report and Details
+        keep reading from the last good summary and keep saying whose they are. Three UI files changed and no Rust
+        source did; no domain state was defined, no Gate verdict moved, and assets/design-tokens.json is
+        byte-identical. Six contract tests guard it (242 UI in 9 files, was 236; 868 Rust unchanged), and reverting
+        the derivation fails three of them. Gate 17 of 17 with no SKIP plus drift 8/8, deny 1/1, core-smoke 3/3 and
+        package 4/4; product commit 4d36f10 pushed as a normal fast-forward; run 37637056980 (#76, attempt 1)
+        10 of 10; Windows artifact 11491960105 installed and re-checked in the success, pending,
+        failed-at-three-sizes and recovered states with the owner's store parked and restored byte-exact.
+        FS-U1R-001 U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md and FS-U1R-002
+        U1_VALIDATION/U1R_CORRECTIVE_REPORT.md.
+        **Where that leaves U1:** U1-V2-06 = CLOSED_BY_U1R, and U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT — the
+        strongest word those rounds allow themselves. It is not visual approval, not PASS_COMPLETE, not
+        DESIGN_COMPLETE, not MOCKUP_MATCHED: the seven U1-V1 minor gaps and U1-V0-09 stay
+        OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT, V1 stays paused at RECRUITMENT_READY with 0 eligible sessions and its
+        frozen cohort build untouched, and no product stage moved: not B1, not Private Beta, not RC, not GA, no tag,
+        no GitHub Release, no public installer, no signing, notarization, updater, licence choice or pricing.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -731,14 +761,21 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE`, and that round closed on 2026-10-07.** U1 was a **UI
+**`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE`, and its three rounds closed on 2026-10-07.** U1 was a **UI
 productization track**, not a product stage: it converged the desktop interface toward the frozen seven-screen
 reference set in `assets/ui-mockups/` — one shared design-system layer instead of five page dialects, a new
 Overview page built only from facts the shell already reports, the Release verdict moved to the top of its page,
 and the layout defect F2R-01 closed on the two pages that still carried it. It moved no Core semantic, no schema,
 no migration, no storage contract, no wire format, no release identity rule and no ADR conclusion, added no IPC
 command, and created no token value. `U1_VALIDATION/U1_VALIDATION_REPORT.md` is the record, and its §6 is the list
-of six things the round deliberately did **not** reach. The product stays **`MVP_CANDIDATE`** at baseline
+of six things the round deliberately did **not** reach. Two more U1 units ran the same day under their own
+Architect prompts: the second installed the CI-built Windows bytes and inspected them on a real screen
+(`U1_VISUAL_ACCEPTANCE_REPORT.md`), raising one material presentation finding it refused to self-waive, and the
+third — **U1R** — closed exactly that finding in the presentation layer
+(`U1R_CAPABILITY_STATE_DESIGN.md`, `U1R_CORRECTIVE_REPORT.md`). `U1-V2-06` is `CLOSED_BY_U1R` and
+**`U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`**, which is the strongest word those rounds allow: not visual
+approval, not `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`, and the seven `U1-V1` minor gaps plus
+`U1-V0-09` stay open for the Architect's judgement. The product stays **`MVP_CANDIDATE`** at baseline
 `0.6.0` with narrative **FirmwareSight Productized MVP Candidate**; P5 stays `PASS_COMPLETE`, G2 stays `PASS`, and
 U1 authorizes no stage — `B1` Private Beta (the identifier the delivered prompt used for itself, which the owner
 re-registered) remains reserved and NOT_AUTHORIZED, and so do RC, GA, signing, notarization, an updater, a licence
@@ -751,7 +788,8 @@ research track, not a product stage: the cohort build is frozen to P5
 Commit F3's CI artifact (run `37475580080`, artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256
 `182506f2…63d12`, **unsigned**, verified against its own `SHA256SUMS.txt` and preserved outside Git). While V1
 ran, the product counts were required to hold at **868 Rust / 225 UI in 8 files**; U1 was authorized by its own
-prompt to change the UI, so the live figure is now **868 Rust / 236 UI in 9 files** on the same 17-step gate, and
+prompt to change the UI, so the live figure after U1R is **868 Rust / 242 UI in 9 files** on the same 17-step gate
+(236 after U1's first round, plus U1R's six contract tests, with no Rust test moving and none deleted), and
 nothing either track does can authorize a feature, a schema, a dependency, a licence, a signature or a release.
 
 **The work that is actually blocked, and on whom.** V1 needs real firmware and embedded engineers running their

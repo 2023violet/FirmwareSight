@@ -776,7 +776,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── U1_UI_GAP_AUDIT.md
 │   ├── U1_VALIDATION_REPORT.md
 │   ├── U1_VISUAL_ACCEPTANCE_REPORT.md
-│   └── U1R_CAPABILITY_STATE_DESIGN.md
+│   ├── U1R_CAPABILITY_STATE_DESIGN.md
+│   └── U1R_CORRECTIVE_REPORT.md
 ├── V0_VALIDATION/
 │   ├── analysis/
 │   │   ├── METRICS.md

@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-10-07"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, then installed and inspected the same day so U1 is READY_FOR_ARCHITECT_VISUAL_REVIEW — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, then corrected on the same day by U1R so U1 is READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT with U1-V2-06 CLOSED_BY_U1R — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
 
 ## Purpose
 
@@ -628,11 +628,18 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     `U1_VISUAL_ACCEPTANCE_REPORT.md` (FS-U1-004 — the second round: push, remote CI read-back, the exact CI
     artifact installed, and what the installed product actually looked like on a real screen). §6 of FS-U1-003
     is the unfinished list from the first round, and §7 is the wording that round was allowed to use.
-    **Start here if you are the Architect:** FS-U1-004 §11 is the finding register, and the review pack it names
-    under `%TEMP%\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z\14_review_pack\` holds the reference images
-    beside the installed ones. One U1-V2 finding is open and unwaived. U1's status is
-    `READY_FOR_ARCHITECT_VISUAL_REVIEW`; it is not visual approval, and the next action is a human judgement,
-    not more agent work.
+    **The third round on the same day, U1R, closed the one material finding FS-U1-004 raised:** read
+    `U1R_CAPABILITY_STATE_DESIGN.md` (FS-U1R-001 — root cause, the §5 A–E contract, the derived presentation
+    value, the six tests and the mutation outcome, written before the installed recheck) and
+    `U1R_CORRECTIVE_REPORT.md` (FS-U1R-002 — the eighteen-part record: start authority, BASELINE reconciliation,
+    local validation, the product commit, remote CI, the exact artifact, owner-store safety, the installed
+    recheck, the screenshot manifest, the `U1-V2-06` disposition and the recommendation).
+    **Start here if you are the Architect:** FS-U1R-002 §15 is the closure argument and its pack under
+    `%TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\` holds the six recheck captures beside the two
+    reference mockups; FS-U1-004 §11 remains the register of everything still open. `U1-V2-06` is
+    `CLOSED_BY_U1R`, the seven `U1-V1` items and `U1-V0-09` are `OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT`, and U1's
+    status is `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` — which is not visual approval, and the next action is a
+    human judgement on the two packs, not more agent work.
 
 ## Boundaries still in force
 

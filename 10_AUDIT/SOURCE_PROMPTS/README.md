@@ -955,6 +955,58 @@ text with no source file; each says so in its own entry instead of standing for 
 - Where the record lives: `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md` (FS-U1-004), with the evidence root and
   review pack outside Git under `%TEMP%\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z\`.
 
+## U1R Stale Capability-State Corrective + Governance Reconciliation + Final Installed Recheck v1.0 — executed, `U1-V2-06 = CLOSED_BY_U1R` (2026-10-07)
+
+- Canonical unit: `U1R_STALE_CAPABILITY_CORRECTIVE_AND_FINAL_RECHECK`. Title as delivered: 《FirmwareSight — U1R
+  Stale Capability-State Corrective + Governance Reconciliation + Final Installed Recheck, Execution Prompt
+  v1.0 — Architect Authorized》.
+- **Delivered as a file**, archived here as delivered bytes, LF-normalized by `*.txt text eol=lf` like every
+  other entry in this register:
+
+  | revision | delivered (CRLF) | stored in Git |
+  | --- | --- | --- |
+  | **v1.0, operative** — `FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt` | 1,302 logical lines, 28,659 bytes, 1,301 CRLF pairs, SHA-256 `0ff7b3f6495fb29b73ff5aaed03895f47ce0a133762b0e737718118008b650bb` | blob `9bbbdcbd1dfcb23d639706634abbee62e888049f`, 27,358 LF bytes, SHA-256 `660edf4de6eebdf63522952d0111119ea65bb3de3d8177ed4b4db52fcc9f5529` |
+
+  The two digests differ by the EOL normalization alone, and the byte counts agree with the pair count:
+  28,659 − 27,358 = 1,301.
+- What it corrected, and what it explicitly forbade as a fix: `Analyze.tsx` rendered the top capability strip
+  from the stored last-good summary whenever any summary existed, so a failed or unanalyzed attempt showed the
+  previous file's capability words as current. §4 states the root cause and §5 sets the A–E presentation
+  contract; §4 also says the defect is **not** to be fixed by deleting last-good retention, and retention is
+  untouched. §6's preferred shape — a derived `currentSummary` — is what shipped.
+- Scope it allowed and the scope it refused: three UI files (`Analyze.tsx`, `Details.tsx`, `intake.test.tsx`) plus
+  governance and evidence; §10 forbids touching Overview / Compare / Release / History layout, tokens, Core,
+  storage, schema, migrations, wire DTOs, release identity, Gate or bundle semantics and V1 metric definitions, and
+  stops at "If any Rust product source becomes necessary: STOP and return to Architect before implementing." No
+  Rust source changed, so that STOP was never reached. §11 required `assets/design-tokens.json` to stay
+  byte-identical (proved by digest) and §12 required the seven U1-V1 minor gaps to stay
+  `OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT` — U1R implemented none of them.
+- Governance it ordered reconciled rather than restated: §8 required the desktop command count to be written as
+  **30 with U1 adding 0**, and says plainly "Do NOT claim U1 added three commands. It did not. The previous count
+  was already stale before U1."; it also required the first-round note about `--only core-smoke` /
+  `--only package` to be preserved and the continuation's 3/3 and 4/4 added as dated evidence. §9 corrected one
+  path in `U1_VISUAL_ACCEPTANCE_REPORT.md` §14 and forbade changing any owner-restore verdict with it.
+- Authority chain it executed: start `6f35b14` (= `origin/main`, clean tree), product commit `4d36f10` pushed as a
+  normal fast-forward, remote CI run `37637056980` (#76, attempt 1) read back at 10 of 10 by head SHA, then the
+  Windows artifact **that run** produced — id `11491960105`, zip `2627f405…`, NSIS installer
+  `41f26a8c50aaa25e2cc1e2592d3263f547e3512667546fcc82ce5241259e9f79`, installed executable
+  `e62652bb6c7e0c5684c80064757d79ec4423a5bf126978e2b9be270999daa8db`. Substitutions §16 named and this round
+  refused: U1's artifact `11477857379`, F3's V1 cohort artifact, this round's own local `--only package` output,
+  `cargo run` and Vite.
+- What it required and got: the owner's store parked with an independent backup and re-hashed back to the exact
+  pre-round digests (`OWNER_STORE_OPENED_BY_U1R = NO`); a real-mouse install; the focused recheck in the success,
+  pending, parse-failure-after-success and recovered states at 1440×900, 1056×799 and 1024×720 with all seven §18-C
+  conditions holding in each; a six-capture pack with its own consistency matrix and checksum index; a mutation
+  proof that fails three of the six new tests when the fix is reverted; and §20's nine conditions each matched
+  against named evidence before `U1-V2-06` was moved to `CLOSED_BY_U1R`.
+- What it forbade and this round did not breach: §23's `PASS_COMPLETE` / `DESIGN_COMPLETE` / `MOCKUP_MATCHED`,
+  §24's V1 re-baseline or session run, and §25's B1, Private Beta, RC, GA, tag, GitHub Release, public installer,
+  signing, notarization, updater, licence choice, pricing and commercialization. §17's "Any NO: STOP" was not
+  reached: all five required owner-store fields came back as required.
+- Where the record lives: `U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md` (FS-U1R-001, written before the installed
+  recheck) and `U1_VALIDATION/U1R_CORRECTIVE_REPORT.md` (FS-U1R-002, the eighteen-part record), with the evidence
+  pack outside Git under `%TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\`.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

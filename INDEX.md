@@ -252,6 +252,14 @@ under `10_AUDIT/SOURCE_PROMPTS/` plus `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT
 them and no product line moved**, because that round's successor commit is the docs/evidence commit its §21
 authorizes: the installed screenshots it records were taken from the CI bytes of the head before it, and any code
 change would have invalidated them;
+**881 lines and 754 entries** at the U1R corrective head (2026-10-07): 756 tracked paths — three added and nothing
+removed across U1R's two commits, being `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt`,
+`U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md` and `U1_VALIDATION/U1R_CORRECTIVE_REPORT.md`. The first of U1R's two
+commits **does** carry product code — `apps/desktop/ui/src/Analyze.tsx`, `Details.tsx` and `intake.test.tsx`, the
+capability-strip corrective and its six contract tests — and its baseline artifacts were regenerated after staging
+those, so the manifest describes the tree the corrective lives in; the second commit is the governance successor
+(`.ai/*`, `BASELINE.yaml`, this ledger and the report) and moves no product line, for the same reason U1's
+successor did: the installed evidence it records was taken from the bytes CI built from the first
 of the tracked set the
 two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
@@ -482,6 +490,9 @@ disk, in a checksum domain that is deliberately not this one.
 | `U1_VALIDATION/U1_DESIGN_CONVERGENCE_PLAN.md` | U1 Design Convergence Plan |
 | `U1_VALIDATION/U1_UI_GAP_AUDIT.md` | U1-A0 UI Gap Audit |
 | `U1_VALIDATION/U1_VALIDATION_REPORT.md` | U1 Validation Report |
+| `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md` | U1 Visual Acceptance Report — installed pass, finding register (FS-U1-004) |
+| `U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md` | U1R Capability-State Corrective — design and evidence note (FS-U1R-001) |
+| `U1_VALIDATION/U1R_CORRECTIVE_REPORT.md` | U1R Corrective Report — eighteen-part record and U1-V2-06 disposition (FS-U1R-002) |
 | `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
 | `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
 | `V0_VALIDATION/V0_PLAN.md` | V0 Plan |

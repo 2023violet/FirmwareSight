@@ -41,6 +41,28 @@ last_updated: "2026-10-07"
   `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md`, with the review pack outside Git under
   `%TEMP%\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z\`. That status is **not** visual approval, not
   `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`.
+- **U1's status now: `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`, and `U1-V2-06` is `CLOSED_BY_U1R`.** A third U1
+  unit ran the same day — `U1R_STALE_CAPABILITY_CORRECTIVE_AND_FINAL_RECHECK` (prompt v1.0, Architect authorized,
+  archived at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt`,
+  delivered bytes 28,659 / SHA-256 `0ff7b3f6…650bb`, 1,302 logical lines) — and it closed the one material
+  presentation defect the installed pass had raised: the Analyze page's top capability strip used to borrow the
+  previous file's words during a failed or unanalyzed attempt, so a green "ELF supported / MAP provided" row sat
+  above a row naming a different file whose MAP was absent. The fix is a derived presentation value in
+  `apps/desktop/ui/src/Analyze.tsx` plus one optional `stale` label on `Details.tsx`; last-good retention stays
+  exactly where it was, no domain state was added, no Gate verdict was touched, and
+  `assets/design-tokens.json` is byte-identical (`94336906…14d4`). Six contract tests guard it
+  (**242 UI in 9 files, was 236 in 9**; **868 Rust unchanged**, 47 result lines, 0 failed) and reverting the
+  derivation fails T2, T3 and T6 — the mutation was undone by digest, not by hand. Gate **17 of 17** with no SKIP,
+  drift 8/8, deny 1/1, core-smoke 3/3, package 4/4, `verify_baseline_artifacts.py` PASS at 755 tracked files /
+  753 sum entries. Product commit `4d36f103d2a8fd103e8e3b466e4d2b2010a0a4ef` pushed as a normal fast-forward;
+  remote run `37637056980` (#76, attempt 1) **10 of 10**; Windows artifact `11491960105` installed from that
+  commit's own bytes (NSIS `41f26a8c…`, installed executable `e62652bb…`) and re-checked on a real screen in the
+  success, pending, failed-at-three-sizes and recovered states. The owner's store was parked and restored
+  byte-exact and was never opened by this round; the machine is uninstalled again, as it was. Evidence:
+  `U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md`, `U1_VALIDATION/U1R_CORRECTIVE_REPORT.md`, and the pack under
+  `%TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\`. This is still **not** visual approval, not
+  `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`: the eight `U1-V1` / `U1-V0` visual items stay
+  `OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT`, and the Architect has not looked at the screenshot pack directly.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
   eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
   `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause

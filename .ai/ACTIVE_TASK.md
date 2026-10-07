@@ -54,6 +54,37 @@ U1-V3 or U1-V4 was observed. The owner's store was parked for the round and is r
 back to uninstalled, which is how it was found.
 This status is not visual approval, not PASS_COMPLETE, not DESIGN_COMPLETE and not MOCKUP_MATCHED; those belong
 to the Architect. V1 stays paused with 0 eligible sessions and its frozen cohort build untouched.
+
+CURRENT STATUS OF THIS TRACK, as of the third U1 round on 2026-10-07 (this block supersedes the line above it
+that says "One U1-V2 presentation finding is open"; the earlier block is kept because it is a dated record of
+what that round knew):
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1-V2-06 = CLOSED_BY_U1R.  participant execution stays
+PAUSED_FOR_ARCHITECT_UI_REVIEW.
+The corrective unit U1R_STALE_CAPABILITY_CORRECTIVE_AND_FINAL_RECHECK (prompt v1.0, Architect authorized,
+archived at 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt,
+delivered 28,659 bytes / SHA-256 0ff7b3f6495fb29b73ff5aaed03895f47ce0a133762b0e737718118008b650bb, 1,302 logical
+lines) fixed the one material presentation defect the installed pass raised. The Analyze page resolved its
+visible summary as the stored last-good one and rendered the top capability strip from it whenever any summary
+existed, so a failed attempt or an unanalyzed selection showed the previous file's green "ELF supported /
+MAP provided" pills above a row naming a different file. Retention was not the bug and was not removed: the
+header and the strip now read from a derived presentation value that is populated only when the current attempt
+earned it, the retained report and Details keep reading from the last good summary and keep saying whose they
+are, no domain state was defined, no Gate verdict moved, and assets/design-tokens.json is byte-identical.
+Three product paths changed (Analyze.tsx, Details.tsx, intake.test.tsx) and no Rust source did: 868 Rust tests
+unchanged, 242 UI tests in 9 files (six added, none deleted), gate 17 of 17 with no SKIP, drift 8/8, deny 1/1,
+core-smoke 3/3, package 4/4, baseline verifier PASS at 755 tracked files / 753 sum entries. Product commit
+4d36f103d2a8fd103e8e3b466e4d2b2010a0a4ef, pushed 6f35b14..4d36f10 as a normal fast-forward; remote run
+37637056980 (#76, attempt 1) 10 of 10; Windows artifact 11491960105 built from that commit installed and
+re-checked on a real screen in the success, pending, failed-at-1440x900/1056x799/1024x720 and recovered states.
+The owner's store was parked and restored byte-exact (OWNER_STORE_PARKED = YES, OWNER_BACKUP_HASH_MATCH = YES,
+ORIGINAL_DB_RESTORED = YES, ORIGINAL_DB_SHA_MATCH = YES, OWNER_STORE_OPENED_BY_U1R = NO) and the machine is
+uninstalled again, as it was found. Evidence: U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md,
+U1_VALIDATION/U1R_CORRECTIVE_REPORT.md and %TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\.
+What U1R did NOT do: it did not implement the seven U1-V1 minor gaps or U1-V0-09, which stay
+OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT; it did not resume V1, run a session or re-baseline V1's cohort artifact; it
+did not open B1, Private Beta, RC, GA, a tag, a GitHub Release, a public installer, signing, notarization, an
+updater, a licence choice or pricing. If you were sent here to "continue U1" or "finish the UI": the next word is
+the Architect's visual verdict on the two screenshot packs, not another code round.
 ```
 
 ## The V1 pointer that was live before U1, kept as the record of 2026-10-06
