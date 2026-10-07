@@ -238,7 +238,14 @@ changed**, every product tree OID identical to the head it closes; **850 lines a
 activation head (2026-10-06): 727 — seventeen paths added, the archived V1 prompt
 `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt` and `V1_VALIDATION/`'s
 sixteen protocol and register files, nothing removed and again **no product path among them**, because V1 §43
-confines a research activation to documentation and V1 §45 requires the product counts to stand still; of the tracked set the
+confines a research activation to documentation and V1 §45 requires the product counts to stand still;
+**875 lines and 748 entries** at the U1 head (2026-10-07): 750 — twenty-three paths added and nothing removed,
+the tree's +25 lines being those twenty-three plus the two new directory rows `U1_VALIDATION/` and
+`U1_VALIDATION/00_authority/`. Eighteen sit under `apps/desktop/ui/src` (the seven shared components as
+tsx + module pairs, `Overview.tsx` with its CSS module, `stateWords.ts` and `overview.test.tsx`) and five under
+`U1_VALIDATION/`, and unlike every entry above this one, **the added paths are product code**: U1 is a UI round
+delivered by the owner's own prompt, so its 236 UI tests are the diff rather than a documentation overlay;
+of the tracked set the
 two files named `SHA256SUMS` — the root manifest and
 `golden/reports/p4-release/SHA256SUMS` — are both skipped by basename, so the manifest cannot certify itself).
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
