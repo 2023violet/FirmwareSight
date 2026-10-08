@@ -1007,6 +1007,75 @@ text with no source file; each says so in its own entry instead of standing for 
   recheck) and `U1_VALIDATION/U1R_CORRECTIVE_REPORT.md` (FS-U1R-002, the eighteen-part record), with the evidence
   pack outside Git under `%TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\`.
 
+## U1P Final Visual Polish and Information Hierarchy v1.0 — executed, product commit `6a071c5` (2026-10-08)
+
+- File: `FirmwareSight_U1P_Final_Visual_Polish_Information_Hierarchy_v1.0.txt` — delivered 36,140 bytes /
+  1,607 lines with CRLF endings, sha256 `d92bd88f0742c1738ef004a2964fef7dc785e32ca2c0fe39d4c3df6199bf6d4e`;
+  stored as blob `f5359a68c36bd6c1f306f9d74899c31c4e565df6`, 34,534 bytes LF, sha256 `aad28646…`. The difference
+  between the two digests is the line-ending normalization, stated here rather than hidden.
+- Canonical unit: `U1P_FINAL_VISUAL_POLISH_AND_INFORMATION_HIERARCHY_CONVERGENCE`.
+- What it authorized: a UI-only convergence of the five core pages and the shell onto a decision-first desktop
+  hierarchy, with the frozen design tokens, the parser, diff, gate and evidence semantics, the schema and the
+  wire format all declared off-limits. Start head `0cc4705`; Rust 868 and the UI suite were required to stay
+  green and did (242 → 253 tests in the same 9 files, no test deleted or weakened).
+- What it produced: 31 files, +2,619/−246, committed as `6a071c51c81a00b7a35facaefa5849e9975e715c`
+  ("U1P: converge core pages on decision-first desktop hierarchy") and pushed as a normal fast-forward. The
+  product scope was 26 paths, 25 modified and one new (`apps/desktop/ui/src/test/order.ts`); no Rust product
+  source changed.
+- What it forbade and this round did not breach: it issued no stage for U1 or V1, and it did not touch B1, RC,
+  GA, tags, signing, the updater, distribution or pricing.
+
+## U1P CI Artifact Installed Visual Acceptance Continuation v1.0 — executed through the CI wait point (2026-10-08)
+
+- File: `FirmwareSight_U1P_CI_Artifact_Installed_Visual_Acceptance_Continuation_v1.0.txt` — 31,856 bytes,
+  sha256 `5d76815748d865ae1ab0a9f4cfd50951569c8ed25b7e0f4d6c3c3f7a26e66f66`, stored as blob
+  `10c507c405eb0f1ee1bc6b13d12923748211dea9`.
+- Canonical unit: `U1P_CI_ARTIFACT_INSTALLED_VISUAL_ACCEPTANCE_CONTINUATION`.
+- What it authorized: resuming the already-pushed product commit at its CI wait point and continuing without a
+  further go-ahead for reading CI, downloading the exact artifact, installing it, parking the owner store,
+  capturing screenshots or pushing an evidence successor — subject to its own STOP conditions, including §4's
+  failure branch that classifies a content failure separately from a runner failure and permits a same-SHA retry
+  only where repository policy already clearly authorizes one.
+- Where it was executed: run #79 reached attempt 1 with eight jobs successful and two — `Generated output drift`
+  and `Package Ubuntu` — cancelled at the six-hour ceiling while executing the Linux prerequisite
+  `apt-get update`, with no repository-specific step started in either. That is the retry class named in
+  `P5_VALIDATION/P5_CI_AUTHORITY.md`, and the owner authorized exactly one `gh run rerun --failed` under it.
+  The continuation itself stopped at that decision point rather than assume it; the rerun and the rest of the
+  acceptance were then completed under the U1P-A1 prompt below.
+
+## U1P-A1 Installed Acceptance After CI Rerun v1.0 — executed, `U1 = REQUIRES_ARCHITECT_POLISH_REVIEW` (2026-10-08)
+
+- File: `FirmwareSight_U1P_A1_Installed_Acceptance_After_CI_Rerun_v1.0.txt` — 13,977 bytes,
+  sha256 `70aa6efc2cb56c2f4cf4d026f15c79bb4a2d8da0bedca325ed3147cb30e7c2f3`, stored as blob
+  `e06d68ce632394f764e5344070979c51fac5f2e1`.
+- Canonical unit: `U1P_INSTALLED_ACCEPTANCE_AFTER_CI_RERUN`.
+- What it stated as authority and required to be preserved: attempt 2 effective 10 of 10, with the instruction
+  not to describe all ten jobs as newly executed and to retain attempt 1's history and cancellation cause. The
+  read-back confirms only `Generated output drift` (04:12:25Z→04:15:07Z) and `Package Ubuntu`
+  (04:13:01Z→04:24:51Z) re-executed; the other eight carry attempt 1's execution window to the second. No
+  attempt 3 was issued.
+- What it required and got: artifact `11504871803` verified end to end (zip 5,538,316 bytes
+  `57651a3e…c1bb`, NSIS 3,890,447 bytes `f69cda6c…`, installed EXE 15,366,656 bytes `7327d374…`,
+  `toolchain.git_commit = 6a071c5…`); the owner store parked and restored byte-exact with all four flags YES and
+  `OWNER_STORE_OPENED_BY_U1P = NO`; sixteen measured installed captures — P01–P06 at 1440×900, R01–R06 at
+  1024×720, R07–R10 at 1056×799 — each recorded with timestamp, client size, artifact and EXE digests and state;
+  six binary first-viewport results, all PASS, plus `SHELL_PASS` proved by pixel comparison rather than CSS; a
+  thirteen-step functional smoke; the review pack and an uploadable ZIP at
+  `C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip` (4,727,314 bytes,
+  sha256 `0f59f4cee90bd31e388e90e0b2097a621ab0c26811fbf50162b84f0f17f3881b`).
+- §9's authorized fallback was used and is stated as such: the Downloads `FirmwareSight_U1_Final_Visual_Review`
+  folder and ZIP no longer exist, so `BEFORE/` was taken from the retained Temp roots for U1 and U1R after
+  verifying 28/28 and 51/51 of their own manifest entries. No earlier evidence was regenerated from a new build.
+- What it found: one material open finding, `U1P-V2-01` — Overview's ship verdict does not name the build it
+  judges, and the page's subject line can name a different one — recorded with its screenshot rather than
+  self-waived, which is why §12's gate yields `REQUIRES_ARCHITECT_POLISH_REVIEW` and not a ready state.
+- What it forbade and this round did not breach: §7's post-capture product edit (none was made; the tree is
+  unchanged since `6a071c5`), §12's `PASS_COMPLETE` / `VISUAL_ACCEPTED` / `MOCKUP_MATCHED` / V1 pass, §5's
+  invention of FS-UI-07 behaviour, and §14's interlocks — P5 stays `PASS_COMPLETE`, the product stays
+  `MVP_CANDIDATE` 0.6.0, V1 stays paused with zero eligible sessions and its F3 cohort artifact untouched.
+- Where the record lives: `U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md`, with the raw evidence outside Git
+  under `%TEMP%\FirmwareSight-U1P-Visual-Acceptance-20261008T001110Z\`.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

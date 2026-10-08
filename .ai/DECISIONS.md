@@ -2145,3 +2145,70 @@ is `U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` — not `PASS_COMPLETE`, not 
 `17`-step gate shape unchanged and run 17 of 17 with no SKIP, plus drift 8/8, deny 1/1, core-smoke 3/3 and
 package 4/4. Product commit `4d36f10`, remote run `37637056980` (#76, attempt 1) 10 of 10, Windows artifact
 `11491960105` installed for the recheck.
+
+## U1P (2026-10-08) — hierarchy convergence that adds no capability, and proves its own tests bite
+
+The Architect's U1 verdict was `REQUIRES_POLISH` with the direction accepted, so U1P was scoped to composition
+only: the same five pages, the same facts, the same semantic surfaces, arranged so the first viewport answers the
+question each page exists to answer. Nothing in the parser, diff, gate rules, evidence classification, schema,
+wire format or command list moved, and `assets/design-tokens.json` stayed byte-identical
+(`94336906…14d4`), which is the constraint that keeps a "polish" round from quietly becoming a redesign.
+
+Two decisions in this round are worth stating rather than assuming a reader will infer them from the diff.
+
+**The shell owns the viewport, and the rail is a sibling of the scrolling main.** U1-V1-05 was a rail that
+travelled with a long page. A sticky element inside the scroller would have looked right in a screenshot and
+behaved wrong on a wheel, so the fix moved the scroll to `main` and left the rail outside it. That is also why
+the acceptance test for this round is a pixel comparison of before/after captures and not a CSS reading.
+
+**The Release Gate section numbers were renumbered to match DOM order.** The page carried 1, 2, 5, 6, 3, 4: a
+reader meeting the run's own findings first was told they were third. Renumbering is cheaper than an
+explanation, and the alternative — leaving numbers that contradict the order — is the kind of small dishonesty
+that compounds.
+
+The round added eleven structural tests (**242 → 253** UI in the same nine files, none deleted) and then ran
+five reversals to check the new contract actually bites. Each fails its guarding test with the mutation and
+passes after the undo; M5, reverting the Bundle & History heading to the rail-inconsistent word, fails 26 tests,
+which is what makes a heading load-bearing rather than decorative. The tree was restored by digest and verified
+with `diff -r` against a copy taken before the run.
+
+`868` Rust tests unchanged, gate 17/17 with no SKIP, drift 8/8 including baseline integrity, deny 1/1,
+core-smoke 3/3, package 4/4. Product commit `6a071c5`, pushed as a normal fast-forward. What this round may not
+issue is stated in its own §33: no `PASS_COMPLETE`, no `DESIGN_COMPLETE`, no `MOCKUP_MATCHED`. The ceiling is a
+candidate that goes to the Architect.
+
+## U1P-A1 (2026-10-08) — a rerun that keeps both attempts, and a finding that lowers the status
+
+Two governance habits this round had to hold at once, and both are easy to lose under a green checkmark.
+
+**A rerun does not get to erase the attempt it replaced.** Run `37668291893` (#79) is 10 of 10 on attempt 2, and
+the record still says what attempt 1 was: eight jobs successful, `Generated output drift` and `Package Ubuntu`
+cancelled at the six-hour ceiling while each was executing the Linux prerequisite `apt-get update`, with no
+repository-specific step started in either. That is the class `P5_VALIDATION/P5_CI_AUTHORITY.md` allows one
+same-SHA rerun for, the owner authorized exactly one, and in attempt 2 only those two jobs re-executed — the
+other eight carry attempt 1's execution window to the second, so calling all ten "newly run" would be false even
+though the table reads 10/10. A job id changes for every job in a new attempt object, so id churn is not
+evidence of re-execution; the execution window is. There was no attempt 3.
+
+**An acceptance round that finds something reports it and moves the status down.** All six first-viewport
+contracts passed on the installed bytes, the shell passed by pixel comparison, and a thirteen-step smoke found
+no regression — the natural pull is to call that ready. It is not ready: `U1P-V2-01` is open. Overview's ship
+verdict does not name the build it judges while the page's own subject line can name a different one, and
+`App.tsx` holds the gate run and the last analysis as independent state that nothing ties together. Nothing the
+page says is false — the run id is printed and the claim is scoped to it — but the reader cannot check the
+pairing from that page. U1P did not create the ownership; promoting the verdict to the dominant element is what
+made the gap material, and a round that just recomposed the page is not allowed to grade its own consequence
+away. So `U1 = REQUIRES_ARCHITECT_POLISH_REVIEW`, with the correction sketched (name the run's subject build, or
+suppress the verdict when it does not belong to the named snapshot) and left for the Architect to call.
+
+The evidence chain was kept honest in the places where it is easiest to cheat: the missing Downloads pack was
+replaced from the retained Temp roots *after* verifying 28/28 and 51/51 of their own manifest entries, and that
+substitution is stated in the report rather than presented as the original; the Overview capture showing the
+mismatch was preserved as finding evidence instead of being quietly re-taken, and the aligned capture was
+produced by driving the app back into the matching state; and the bundle flow stopped at its preview so nothing
+was exported to disk.
+
+`253` UI / `868` Rust unchanged by this round, which touched no product source. The owner's store came back
+byte-exact with all four flags YES and `OWNER_STORE_OPENED_BY_U1P = NO`, and the fourteen unrelated siblings
+compare identical. V1 stays paused at `RECRUITMENT_READY` with zero eligible sessions and its frozen cohort
+artifact untouched.

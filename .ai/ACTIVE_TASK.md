@@ -87,6 +87,80 @@ updater, a licence choice or pricing. If you were sent here to "continue U1" or 
 the Architect's visual verdict on the two screenshot packs, not another code round.
 ```
 
+CURRENT STATUS OF THIS TRACK, as of the fourth and fifth U1 rounds on 2026-10-08 (this block supersedes the
+`READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` line above; that block is kept because it is what U1R knew on
+2026-10-07, and dated records are not rewritten here):
+
+```text
+U1 = REQUIRES_ARCHITECT_POLISH_REVIEW.  U1-V2-06 stays CLOSED_BY_U1R.  U1P-V2-01 is OPEN and NOT self-waived.
+Participant execution stays PAUSED_FOR_ARCHITECT_UI_REVIEW.
+
+The fourth round, U1P_FINAL_VISUAL_POLISH_AND_INFORMATION_HIERARCHY_CONVERGENCE, changed no capability and no
+semantic surface. It recomposed the shell and five pages so the first viewport answers the page's own question:
+the rail became a sibling of an independently scrolling main rather than a sticky element inside it; Overview
+puts the ship verdict above the key figures and the ELF/MAP/Git facts became one compact band; Analyze leads
+with the result band and the Sections/Symbols tables and drops the identity dossier below them; Compare reads as
+a pair bar with the direction between the pickers and reports what moved before what it cost; Release Gate puts
+the run's own sections directly after the verdict and numbers them in the order a reader meets them; Bundle &
+History shows one stored entity at a time behind an aria-pressed button group, with the page heading finally
+equal to the rail label. 253 UI tests in the same 9 files (was 242; eleven structural tests added, none deleted
+or skipped), 868 Rust unchanged, 30 registered commands unchanged, assets/design-tokens.json byte-identical,
+gate 17/17 with drift 8/8 including baseline integrity, deny 1/1, core-smoke 3/3, package 4/4. Five reversals
+were run to prove the new hierarchy tests bite: each fails the guarding test with the mutation and passes after
+the undo, and the tree came back byte-for-byte. Product commit
+6a071c51c81a00b7a35facaefa5849e9975e715c, pushed as a normal fast-forward.
+
+The fifth round, U1P_INSTALLED_ACCEPTANCE_AFTER_CI_RERUN, took those exact bytes to a real screen. Run
+37668291893 (#79) is 10 of 10 on attempt 2, and the attempt history is part of the record rather than something
+the rerun erased: attempt 1 left eight jobs green and cancelled Generated output drift and Package Ubuntu at the
+six-hour runner ceiling while each was still executing the Linux prerequisite apt-get update, with no
+repository-specific step started in either. That is the one class P5_VALIDATION/P5_CI_AUTHORITY.md lets a single
+same-SHA rerun answer, and the owner authorized exactly one gh run rerun --failed. In attempt 2 only those two
+jobs re-executed (drift 04:12:25Z->04:15:07Z, Package Ubuntu 04:13:01Z->04:24:51Z); the other eight carry
+attempt 1's execution window to the second and are not described as newly run. No attempt 3 was issued. Windows
+artifact 11504871803 (zip 5,538,316 bytes sha256 57651a3e...c1bb equal to its own API digest, NSIS 3,890,447
+bytes f69cda6c..., installed executable 15,366,656 bytes 7327d374..., toolchain.git_commit 6a071c5...) was
+installed with real input after the owner's store was parked. Sixteen captures were taken with the client size
+re-read from the live window each time: P01-P06 at 1440x900, R01-R06 at 1024x720, R07-R10 at 1056x799. All six
+first-viewport contracts came back PASS and the readiness verdict is still visible at 1024x720; the shell is
+SHELL_PASS, proved by comparing before/after captures across six real single wheel notches (rail band
+identical, main band and scrollbar strip both move) rather than by reading CSS. A thirteen-step functional smoke
+found no S0/S1/S2 regression, and Prepare bundle was stopped at its preview so nothing was exported to disk.
+The owner's store came back byte-exact with OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED
+and ORIGINAL_DB_SHA_MATCH all YES, OWNER_STORE_OPENED_BY_U1P = NO, and the fourteen unrelated entries in the
+application-data folder compare identical on kind, size and digest. The machine had no install before the round,
+so the round uninstalled, and the uninstaller's Delete-the-application-data option was never pressed.
+
+Why the status moved down and not up: U1P-V2-01 is open. Overview's ship verdict does not name the build it
+judges, and the page's own subject line can name a different one - the captured pair shows snapshot
+snap-3f6...64ed363e with that build's 256 bytes and 47 symbols beside a PASS belonging to run
+gate-deb...b202fdd6, whose subject build is snap-4b4087e1407c... as that row's own Details confirms. Nothing
+stated is false: the run id is printed and the panel scopes its claim to the run named. The gap is that the
+reader cannot check the pairing from Overview, because App.tsx holds the gate run and the last analysis as
+independent state and clears nothing when a different build becomes current. U1P did not create that ownership;
+promoting the verdict to the dominant element is what made the mismatch material. A narrow correction would name
+the run's subject build in the panel, or suppress the verdict when it does not belong to the named snapshot.
+Three lesser items are recorded with it: U1P-V1-01 (a wrapped band leaves an empty filled cell at 1024),
+U1P-V1-02 (the Compare result does not survive navigation) and note U1P-V0-01 (the Analyze table header sits at
+the fold at 1024x720). No U1P-V3 and no U1P-V4, and U1R's truthfulness holds in both failure captures.
+
+Evidence: U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md, U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md, the raw set
+under %TEMP%\FirmwareSight-U1P-Visual-Acceptance-20261008T001110Z\, and the uploadable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip (4,727,314 bytes, sha256
+0f59f4cee90bd31e388e90e0b2097a621ab0c26811fbf50162b84f0f17f3881b). The BEFORE/ material came from the retained
+Temp roots, not from Downloads, because the U1 review folder and its ZIP are no longer in Downloads; both roots
+were verified against their own manifests first (28/28 and 51/51) and the seven mockups match the digests the
+accepted U1 pack recorded.
+
+What these two rounds did NOT do: they issued no stage - not PASS_COMPLETE, not VISUAL_ACCEPTED, not
+MOCKUP_MATCHED, not U1_PRODUCTIZATION_COMPLETE; they did not resume V1, run a session, contact a participant or
+re-baseline V1's frozen cohort artifact; they did not open B1, Private Beta, RC, GA, a tag, a GitHub Release, a
+public installer, signing, notarization, an updater, a licence choice or pricing; and no product code was edited
+after the screenshots, which is the condition that makes those screenshots evidence about these bytes.
+If you were sent here to "continue U1": the next word is the Architect's on U1P-V2-01 and the three lesser
+items, not another code round.
+```
+
 ## The V1 pointer that was live before U1, kept as the record of 2026-10-06
 
 ```text

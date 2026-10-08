@@ -1,0 +1,167 @@
+FirmwareSight — U1P-A1
+Green CI → Exact Installed Artifact → Visual Acceptance → Uploadable ZIP
+Continuation Execution Prompt v1.0
+Canonical unit: U1P_INSTALLED_ACCEPTANCE_AFTER_CI_RERUN
+
+PURPOSE
+Continue the existing U1P execution from its CI wait point. The implementation is already committed and pushed. Do not repeat development, make product code changes, or start a new track. Complete exact-artifact installed visual acceptance, restore owner data, and deliver a human-reviewable ZIP.
+
+0. ARCHITECT-VERIFIED AUTHORITY
+Repository: https://github.com/2023violet/FirmwareSight
+origin/main at issue: 6a071c51c81a00b7a35facaefa5849e9975e715c
+Product commit: U1P: converge core pages on decision-first desktop hierarchy
+CI run ID: 37668291893; run #79; head SHA 6a071c51c81a00b7a35facaefa5849e9975e715c
+Current CI: COMPLETED / SUCCESS / ATTEMPT 2 / EFFECTIVE 10 OF 10 JOBS SUCCESS.
+Attempt 1: 8 jobs succeeded. Generated output drift and Package Ubuntu were cancelled at the six-hour ceiling while executing Linux prerequisite apt-get update; the repository-specific steps in those two jobs had not started.
+Only one `gh run rerun --failed` was issued under runner-infrastructure retry policy.
+Attempt 2: Package Ubuntu and Generated output drift both succeeded. The eight previously successful jobs were carried forward. DO NOT describe all ten as newly executed in attempt 2; retain attempt 1 history and the cause of the cancellations. Do not issue attempt 3.
+
+Exact GitHub Windows artifact from this SAME run/head:
+Artifact ID: 11504871803
+Artifact name: FirmwareSight-0.6.0-windows-x86_64
+Artifact ZIP size: 5,538,316 bytes
+Artifact ZIP SHA256: 57651a3ee749d34fce6a7859ec979f4b845fbd15c31291140d779a3e8880c1bb
+The Windows package was uploaded successfully in attempt 1; that artifact REMAINS CORRECT for the exact run and head after the failed-jobs-only rerun. There is no requirement for a newly uploaded Windows artifact in attempt 2.
+
+Implementation report baseline: Rust 868 passing; UI 253 in 9 files; local gate 17/17, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4. Verify actual logs where necessary; never force expected counts.
+P5 = PASS_COMPLETE; Product = MVP_CANDIDATE 0.6.0; U1 visual verdict pending; V1 = IN_PROGRESS / RECRUITMENT_READY, 0 eligible sessions and participants paused; B1 NOT_AUTHORIZED.
+
+1. RESUME PREFLIGHT AND PRESERVE EXISTING WORK
+Run git fetch --prune origin; git rev-parse HEAD; git rev-parse origin/main; git status --short; git diff; git diff --cached.
+Required HEAD = origin/main = 6a071c51c81a00b7a35facaefa5849e9975e715c and tracked tree clean. If remote differs, STOP and report. Never reset --hard, clean, stash, rebase/amend published history or force-push.
+
+Reuse the EXISTING evidence root:
+%TEMP%\FirmwareSight-U1P-Visual-Acceptance-20261008T001110Z
+The existing owner-store BASELINE/SNAPSHOT, fixture project, attempt-1 CI logs and classification are already present. Inventory and verify them. Do NOT overwrite, re-baseline or erase earlier evidence. An existing baseline is not proof that the store has already been parked.
+Fixture project already exists:
+%TEMP%\U1P-disposable\project
+Use verified copies of committed fixtures only; do not change fixtures in Git or use private firmware.
+
+2. FINAL CI READ-BACK
+Re-read exact run 37668291893 by run ID and full head SHA. Record both attempts, all ten job names and effective results. Read both attempt-2 jobs individually; prove Generated output drift actually ran and passed the baseline integrity check, and Package Ubuntu actually built/verified as prescribed. Confirm Package Windows from attempt 1 built, verified and uploaded. No additional rerun.
+If CI authority is inconsistent, STOP rather than continuing to install.
+
+3. DOWNLOAD AND VERIFY THE EXACT WINDOWS PACKAGE
+Download artifact ID 11504871803. Verify its name, run/head provenance, size and SHA256 against §0. Extract it without edits. Verify artifact-metadata.json, SHA256SUMS.txt and each internal payload checksum. Confirm toolchain.git_commit equals 6a071c51c81a00b7a35facaefa5849e9975e715c.
+Record ACTUAL NSIS installer filename, size and full SHA256, and CLI hashes if present. Record installed EXE size and SHA256 after installation.
+Do NOT substitute U1/U1R/F3 artifact, a local package, cargo run, Vite, or a later documentation-only CI artifact.
+
+4. OWNER STORE SAFETY — MANDATORY
+Close FirmwareSight. Confirm live owner main/WAL/SHM hashes, sizes and mtimes match the EXISTING preserved owner baseline. If mismatched: STOP, do not move files.
+Create independent byte-for-byte backup, verify digests, and park the owner files outside the application's live data location using proven P5/U1/U1R procedure. Check other sibling stores are untouched.
+Before launch require OWNER_STORE_PARKED=YES and OWNER_BACKUP_HASH_MATCH=YES. Never open/migrate the owner store. Use only named disposable U1P data. No broad cleanup.
+Install the verified exact NSIS artifact, preserving its installer/executable SHA evidence.
+
+5. REFERENCE AUTHORITY
+Use the seven reference images under D:\study\Software\FirmwareSight\assets\ui-mockups (FS-UI-01 Overview, 02 Analyze, 03 Compare, 04 Release Gate, 05 Bundle & History, 06 Parse Failure, 07 Unknown Dependency).
+FS-UI-07 remains REFERENCE_ONLY_NOT_IMPLEMENTED; never invent Dependency / Declare / Re-scan functions, data or screenshots.
+Use genuine installed product states from disposable fixture artifacts: Analyze success, real Compare result, Gate findings, History with selected details, Parse Failure after last-good success, and recovery where supported. Screenshots from source mocks, Vite or local builds are invalid.
+
+6. REAL INSTALLED SCREENSHOTS
+Capture exact measured CLIENT sizes, showing real data-bearing page states rather than blank/default placeholders.
+1440x900:
+P01_Overview_1440x900.png
+P02_Analyze_1440x900.png
+P03_Compare_1440x900.png
+P04_ReleaseGate_1440x900.png
+P05_BundleHistory_1440x900.png
+P06_ParseFailure_1440x900.png
+
+1024x720:
+R01_Overview_1024x720.png
+R02_Analyze_1024x720.png
+R03_Compare_1024x720.png
+R04_ReleaseGate_1024x720.png
+R05_BundleHistory_1024x720.png
+R06_ParseFailure_1024x720.png
+
+1056x799:
+R07_Analyze_1056x799.png
+R08_Compare_1056x799.png
+R09_ReleaseGate_1056x799.png
+R10_BundleHistory_1056x799.png
+
+Required: at least 16 unmodified screenshots from the exact installed U1P EXE. Record timestamps, client dimensions, artifact SHA/EXE SHA and state for each. Never fake a missing capture.
+
+7. FIRST-VIEWPORT PIXEL REVIEW — SIX BINARY RESULTS
+From the actual screenshots, record PASS/FAIL, exact evidence filename and visible justification for each:
+Overview 1440: compact ELF/MAP/Git capability band + ship verdict + key metrics + next-step action above fold. At 1024 readiness must still be visible.
+Analyze 1440: genuine Section/Symbol analysis values/table visible above fold; a long artifact metadata dossier must not dominate. Failed parse must retain U1R truthfulness (no green stale current capability).
+Compare 1440: BASE→TARGET pair, actual deltas, meaningful diff rows and growth/contributors if supported above fold; setup form secondary.
+Release Gate 1440: verdict + meaningful real findings (BLOCK/REVIEW/UNKNOWN/PASS/N/A only as actually present) visible before configuration.
+Bundle & History 1440: canonical title, focused category/list and selected real detail; not three vertically stacked database tables.
+Parse Failure 1440: current failure, reason/evidence, diagnostic, recovery/next action and retained-previous-result status all discernible.
+
+Shell: fixed/stationary navigation rail while main scrolls; 1024-width navigation and primary actions usable. Verify real scrolling rather than inferring it from CSS.
+
+If a mandatory viewport contract fails, record U1P-V2 (material). Any new readability/accessibility failure U1P-V3; semantic/stale-state contradiction U1P-V4. Do NOT self-waive V2. Do NOT edit product code after screenshots; report issues to Architect. If a dangerous functional failure appears, preserve evidence then restore owner before STOP.
+
+8. FOCUSED FUNCTIONAL SMOKE
+On same installed bytes, exercise Overview navigation; Analyze valid/invalid/recovery and Section/Symbol views; Compare pair and diff; Gate run/findings and supported bundle flow; History categories, selection and Details; Help/Diagnostics access. Do not invent unsupported actions. Record actual outcomes and any S0/S1/S2.
+
+9. PREVIOUS VISUAL EVIDENCE — AUTHORIZED FALLBACK
+The old Downloads U1_Final_Visual_Review folder and ZIP were reported MISSING. Do not block solely because Downloads originals are absent.
+Instead use verified retained source roots:
+C:\Users\16429\AppData\Local\Temp\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z
+C:\Users\16429\AppData\Local\Temp\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z
+Verify both source manifests, screenshot hashes and reference images. Copy original reference and BEFORE screenshots byte-for-byte. Document that the source was retained Temp evidence, NOT the missing Downloads ZIP. If either original source is actually lost or corrupt, STOP the consolidated review-pack step; do not regenerate old evidence from a new build.
+
+10. RESTORE OWNER STORE EVEN IF VISUAL ACCEPTANCE FAILS
+Close all app/installer processes. If machine was uninstalled before round, uninstall U1P using the safe option (never select broad app-data deletion). Hash/remove ONLY named disposable U1P store. Restore original owner main/WAL/SHM byte-for-byte; rehash and verify other sibling stores unchanged.
+Mandatory: ORIGINAL_DB_RESTORED=YES, ORIGINAL_DB_SHA_MATCH=YES, OWNER_STORE_OPENED_BY_U1P=NO, UNRELATED_SIBLING_STORES_UNTOUCHED=YES. A failure blocks closure; preserve data and report exact discrepancy, with no destructive improvisation.
+
+11. BUILD USER-UPLOADABLE REVIEW ZIP — NO ANOTHER HANDOFF ROUND
+Outside Git create U1P_FINAL_VISUAL_REVIEW_PACK/ with:
+00_README.txt
+REFERENCE/ seven untouched mockups
+BEFORE/ U1 and U1R prior installed screenshots
+AFTER_1440/ P01–P06
+AFTER_RESPONSIVE/ R01–R10
+SIDE_BY_SIDE/ reference vs U1P (six) and useful U1/U1R vs U1P before/after
+REPORTS/ original U1/U1R matrices, U1P plan, U1P acceptance report
+HASHES/ SHA256SUMS.txt and SOURCE_MAP.txt.
+
+Preserve original PNG bytes; composites are clearly DERIVED and may only use neutral letterboxing/uniform scaling/labels outside pixels. Do not hide defects by cropping or editing. Include FS-UI-07 text-only reference disposition.
+Verify pack hashes (0 missing/failed), ZIP CRC, entry inventory and extract/re-hash round-trip. Exclude owner DB/WAL/SHM, private firmware, installers, participant PII, .git and unrelated Temp files.
+Create C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip, or Desktop fallback if Downloads unavailable. Print ABSOLUTE PATH, byte size and full ZIP SHA-256. A Temp directory alone is NOT sufficient for delivery to Architect.
+
+12. ONE TRUTHFUL EVIDENCE REPORT
+Write U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md with:
+- exact #79 attempts 1 and 2; attempt 1 cancellation reason and two re-executed jobs;
+- Windows artifact 11504871803, verified installer/installed EXE hash;
+- owner backup/park/restore;
+- six screenshot-backed first-viewport outcomes and shell verdict;
+- responsive captures, functional smoke, visual findings U1P-V0..V4;
+- missing Downloads source and verified original-Temp fallback;
+- uploadable review ZIP path/hash;
+- FS-UI-07 reference-only;
+- V1 artifact unchanged, zero external users, research still paused.
+
+If ANY material V2 remains: U1 = REQUIRES_ARCHITECT_POLISH_REVIEW.
+If all six + shell + functional smoke + owner restore pass, with no V2/V3/V4: U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.
+NEVER write PASS_COMPLETE, VISUAL_ACCEPTED, MOCKUP_MATCHED, or V1 PASS. The human reviewer decides.
+
+13. OPTIONAL SINGLE DOCS-ONLY SUCCESSOR AFTER RESTORE
+If all evidence exists, exact product CI is accepted and owner restore succeeded, create at most one docs-only evidence successor with ADR-0029 index-blob SHA256SUMS discipline. Allowed: U1_VALIDATION/**, necessary .ai/*.md/README/INDEX/BASELINE references, source-prompt archive, DIRECTORY_TREE.txt, SHA256SUMS. No product code, crates, scripts, fixtures, CI topology, dependencies, schema, tokens or wire changes.
+Local verification: cargo fmt check; cargo test --workspace (868); pnpm test (253 in 9 files); check.py full 17/17, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4; baseline verifier PASS. Tests remain unchanged.
+If valid, one normal fast-forward push of this docs-only successor is authorized, no force/amend/rebase. Verify exact successor CI, all 10 authoritative jobs. No new commit just to mention that CI. If a gate fails, do not push; stop with evidence.
+
+14. STRICT INTERLOCK / FINAL REPORT
+P5 remains PASS_COMPLETE; Product remains MVP_CANDIDATE 0.6.0.
+V1 remains IN_PROGRESS / RECRUITMENT_READY, eligible sessions 0, participant execution paused. Its F3 frozen cohort artifact is UNCHANGED.
+B1/Private Beta, RC, GA, GitHub Release, tag, signing, public distribution, updater, license selection and pricing remain forbidden.
+
+Final response required:
+1. HEAD/preflight.
+2. CI #79 attempt1 cancelled 8/10 vs attempt2 effective success 10/10, with jobs provenance.
+3. Exact artifact 11504871803 ZIP SHA, installer SHA and installed EXE SHA.
+4. Owner backup/park and final restore flags.
+5. P01–P06/R01–R10 paths, state and dimensions.
+6. Six first-viewport PASS/FAIL decisions with screenshot evidence; shell verdict.
+7. Functional smoke and open visual findings.
+8. ZIP absolute path, byte count, SHA and verified count.
+9. Evidence successor SHA, tests and exact CI if committed.
+10. U1 state recommendation, V1 interlock and explicit STOP.
+
+STOP after reporting. Do not modify product code, rebase V1 or start B1.
+END OF PROMPT

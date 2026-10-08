@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-10-07"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, then corrected on the same day by U1R so U1 is READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT with U1-V2-06 CLOSED_BY_U1R — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, corrected the same day by U1R (U1-V2-06 CLOSED_BY_U1R), then recomposed on 2026-10-08 by U1P and installed-and-adjudicated by U1P-A1, so U1 is now REQUIRES_ARCHITECT_POLISH_REVIEW with U1P-V2-01 open and not self-waived — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
 
 ## Purpose
 
@@ -637,9 +637,19 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     **Start here if you are the Architect:** FS-U1R-002 §15 is the closure argument and its pack under
     `%TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\` holds the six recheck captures beside the two
     reference mockups; FS-U1-004 §11 remains the register of everything still open. `U1-V2-06` is
-    `CLOSED_BY_U1R`, the seven `U1-V1` items and `U1-V0-09` are `OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT`, and U1's
-    status is `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` — which is not visual approval, and the next action is a
-    human judgement on the two packs, not more agent work.
+    `CLOSED_BY_U1R`, the seven `U1-V1` items and `U1-V0-09` are `OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT`.
+    That was the state on 2026-10-07; two further U1 rounds ran on 2026-10-08 and moved it. U1P recomposed the
+    shell and the five pages onto a decision-first hierarchy and added no capability
+    (`U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md`, product commit `6a071c5`), and U1P-A1 took those exact bytes to a
+    real screen (`U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md`). All six first-viewport contracts passed, the
+    shell passed by pixel comparison, and the smoke found no regression — but the round reports one open
+    material finding rather than grading its own consequence away: `U1P-V2-01`, that Overview's ship verdict does
+    not name the build it judges while the page's subject line can name a different one. So U1's status is now
+    `REQUIRES_ARCHITECT_POLISH_REVIEW`, which is not visual approval. The pack to judge is
+    `C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip` (58 hashed files plus 11 labelled
+    derived composites, the seven untouched mockups, the U1 and U1R before-set and the sixteen U1P captures);
+    `U1P-V1-01`, `U1P-V1-02` and note `U1P-V0-01` are recorded with it. The next action is a human judgement on
+    `U1P-V2-01` and the packs, not more agent work.
 
 ## Boundaries still in force
 

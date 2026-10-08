@@ -1,0 +1,1435 @@
+FirmwareSight — U1P Continuation
+Exact CI Completion → Exact Windows Artifact → Installed Visual Acceptance → Final Review Pack
+Execution Prompt v1.0 — Architect Authorized
+
+Repository:
+https://github.com/2023violet/FirmwareSight
+
+CANONICAL UNIT
+
+U1P_CI_ARTIFACT_INSTALLED_VISUAL_ACCEPTANCE_CONTINUATION
+
+PURPOSE
+
+Resume the already-implemented U1P product round from its current wait point.
+
+The product commit already exists and has been pushed:
+
+6a071c51c81a00b7a35facaefa5849e9975e715c
+
+The local product work is complete.
+Do NOT edit product code while its exact CI run is still pending.
+
+This continuation authorizes:
+
+1. waiting for the exact run on 6a071c5 to finish;
+2. authoritative CI read-back;
+3. exact Windows artifact download from that run;
+4. owner-store protection;
+5. installation of that exact artifact;
+6. the required 1440×900 / 1056×799 / 1024×720 visual captures;
+7. functional smoke;
+8. first-viewport acceptance adjudication;
+9. owner-store restore;
+10. one evidence-only successor if appropriate;
+11. exact successor CI read-back;
+12. STOP with a review pack for Architect/Product Owner.
+
+If and only if the exact product run reaches authoritative 10/10 success,
+continue automatically through the rest of this prompt.
+
+Do NOT stop again merely to ask whether:
+- CI may be read;
+- the artifact may be downloaded;
+- the exact U1P installer may be installed;
+- owner-store parking may be used;
+- screenshots may be captured;
+- the evidence successor may be pushed.
+
+Those actions are explicitly authorized by this prompt, subject to the STOP conditions below.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. ARCHITECT LIVE-VERIFIED CONTINUATION STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At prompt issue time:
+
+origin/main =
+6a071c51c81a00b7a35facaefa5849e9975e715c
+
+Commit:
+U1P: converge core pages on decision-first desktop hierarchy
+
+Previous accepted base:
+0cc47058b4f81b2d345e14e2a4730d14d408fc1d
+
+Exact product CI:
+
+Run ID:
+37668291893
+
+Run number:
+79
+
+Attempt:
+1
+
+Head SHA:
+6a071c51c81a00b7a35facaefa5849e9975e715c
+
+Workflow status at Architect check:
+IN_PROGRESS
+
+Already completed successfully at Architect check:
+
+Package Windows
+Dependency policy
+Rust (windows-latest)
+macOS Core Smoke
+Desktop UI (ubuntu-latest)
+Desktop UI (windows-latest)
+Rust (ubuntu-latest)
+Package macOS
+
+Still in progress at Architect check:
+
+Package Ubuntu
+Generated output drift
+
+No job had failed at Architect check.
+
+Expected product counts from the implementation report:
+
+Rust =
+868 passed / 0 failed / 47 result lines
+
+UI =
+253 passed / 9 files
+
+Local validation already reported:
+
+full gate =
+17 / 17
+
+drift =
+8 / 8
+
+deny =
+1 / 1
+
+core-smoke =
+3 / 3
+
+package =
+4 / 4
+
+design tokens =
+byte-identical
+
+Current product stage:
+
+P5 =
+PASS_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+U1 =
+visual track still pending final Architect verdict
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+eligible external sessions =
+0
+
+participant execution =
+PAUSED_FOR_ARCHITECT_UI_REVIEW
+
+B1 =
+NOT_AUTHORIZED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HARD CONTINUATION PREFLIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before doing anything:
+
+git fetch --prune origin
+
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git log --oneline --decorate -6
+
+Required:
+
+HEAD =
+origin/main =
+6a071c51c81a00b7a35facaefa5849e9975e715c
+
+tree =
+clean
+
+If origin/main moved away from 6a071c5:
+
+STOP.
+
+Do not merge/rebase/reset.
+
+Return:
+remote SHA
+local SHA
+new commits
+exact run state.
+
+Never:
+
+git reset --hard
+git clean -fd
+git stash
+git rebase published history
+git push --force
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. DO NOT CHANGE PRODUCT CODE DURING CI WAIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+While Run #79 is still in progress:
+
+do not edit:
+apps/**
+crates/**
+schemas/**
+migrations/**
+fixtures/**
+scripts/**
+.github/**
+Cargo.toml
+Cargo.lock
+package.json
+pnpm-lock.yaml
+assets/design-tokens.json
+
+Do not create a corrective commit preemptively.
+
+The current task is evidence acquisition.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. AUTHORITATIVE CI READ-BACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Poll/read exact run:
+
+37668291893
+
+by exact run id and exact head SHA.
+
+Do not use "latest" without checking headSha.
+
+Record:
+
+status
+conclusion
+run number
+attempt
+event
+head SHA
+timestamps
+
+Read each of the ten authoritative jobs individually:
+
+1. Rust (windows-latest)
+2. Rust (ubuntu-latest)
+3. Desktop UI (windows-latest)
+4. Desktop UI (ubuntu-latest)
+5. Generated output drift
+6. Dependency policy
+7. macOS Core Smoke
+8. Package Windows
+9. Package Ubuntu
+10. Package macOS
+
+Required to proceed:
+
+10 / 10 success
+
+and:
+attempt history honestly recorded.
+
+Confirm from logs:
+
+Rust =
+868 / 0 failed
+
+UI =
+253 / 9 files
+unless the actual log proves otherwise.
+
+Generated output drift:
+must include baseline integrity PASS.
+
+Package Windows:
+must actually build, verify and upload.
+
+If #79 completes 10/10:
+
+CONTINUE AUTOMATICALLY to §5.
+
+Do not stop for another go-ahead.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. CI FAILURE BRANCH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If any job fails:
+
+First classify.
+
+A. Repository/product/content failure
+
+Examples:
+test failure
+lint failure
+build failure caused by source
+baseline mismatch
+package verification failure caused by product bytes
+
+Then:
+
+STOP.
+
+Do not rerun blindly.
+Do not patch without a new Architect decision.
+
+Return:
+failing job
+failing step
+log excerpt
+root-cause hypothesis
+whether local validation failed to predict it.
+
+B. Clear external runner/provisioning failure
+
+Examples:
+toolchain installation conflict
+runner network/package mirror outage
+ephemeral provisioning failure unrelated to repo content
+
+Preserve attempt 1.
+
+Do not rewrite history.
+
+If repository policy already clearly authorizes a same-SHA retry for that class:
+one retry is allowed.
+
+Otherwise:
+STOP for Architect.
+
+Never convert a genuine content failure into "runner issue".
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. EXACT WINDOWS ARTIFACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Only after Run #79 is accepted 10/10:
+
+download the Windows artifact produced by:
+
+Run:
+37668291893
+
+Head:
+6a071c51c81a00b7a35facaefa5849e9975e715c
+
+Do NOT use:
+
+U1 artifact
+U1R artifact
+F3/V1 artifact
+local --only package output
+cargo tauri build
+cargo run
+Vite dev server
+a later docs-only successor artifact
+
+Record:
+
+artifact id
+artifact name
+artifact ZIP bytes
+GitHub/API digest if available
+
+Extract and verify:
+
+artifact-metadata.json
+SHA256SUMS.txt
+
+Record:
+
+NSIS filename
+NSIS size
+NSIS SHA-256
+
+CLI filename/hash if present
+
+toolchain.git_commit
+
+Required:
+
+toolchain.git_commit =
+6a071c51c81a00b7a35facaefa5849e9975e715c
+
+After install also record:
+
+installed EXE size
+installed EXE SHA-256
+
+The artifact ZIP size is not the NSIS size.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. VISUAL AUTHORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reference authority:
+
+D:\study\Software\FirmwareSight\assets\ui-mockups
+
+Seven references:
+
+FS-UI-01 Overview
+FS-UI-02 Analyze
+FS-UI-03 Compare
+FS-UI-04 Release Gate
+FS-UI-05 Bundle & History
+FS-UI-06 Parse Failure
+FS-UI-07 Unknown Dependency
+
+Prior accepted review evidence:
+
+C:\Users\16429\Downloads\FirmwareSight_U1_Final_Visual_Review
+
+or its ZIP.
+
+FS-UI-07 remains:
+
+REFERENCE_ONLY_NOT_IMPLEMENTED
+
+Do not fabricate dependency/declare/re-scan functionality.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. OWNER STORE SAFETY — EXPLICITLY AUTHORIZED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use the same proven P5/U1/U1R owner-store parking discipline.
+
+Before installing U1P:
+
+close all FirmwareSight processes.
+
+Identify the owner store.
+
+Hash:
+main
+WAL
+SHM
+if present.
+
+Record:
+path
+size
+mtime
+SHA-256
+
+Make an independent byte-for-byte backup.
+
+Verify backup hashes.
+
+Park owner store outside the live app-data location.
+
+Required before launch:
+
+OWNER_STORE_PARKED = YES
+
+OWNER_BACKUP_HASH_MATCH = YES
+
+Do not open/migrate the owner store.
+
+Use only disposable U1P test state.
+
+After the round:
+
+close all app instances
+
+uninstall if the pre-round state was uninstalled
+
+do NOT select any broad "delete all app data" option that could touch unrelated stores
+
+remove only the named disposable U1P live state
+
+restore the owner store byte-exact
+
+re-hash
+
+Required:
+
+ORIGINAL_DB_RESTORED = YES
+
+ORIGINAL_DB_SHA_MATCH = YES
+
+OWNER_STORE_OPENED_BY_U1P = NO
+
+Any failure:
+
+STOP.
+
+U1P cannot be accepted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. TEST DATA / PRODUCT JOURNEY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use disposable supported artifacts only.
+
+Prefer copies of committed supported fixtures outside the repository.
+
+Do not modify repository fixtures.
+
+Do not use owner/private firmware.
+
+Prepare enough state to render:
+
+Overview
+Analyze success
+Compare result
+Release Gate with real findings
+Bundle & History with selectable history/detail
+Parse Failure after a prior successful Analyze
+recovery after failure
+
+Do not fabricate unsupported product data.
+
+If a desired mockup element has no real source:
+omit it and record REFERENCE_ONLY.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. OUTPUT EVIDENCE ROOT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create outside Git:
+
+C:\Users\16429\AppData\Local\Temp\FirmwareSight-U1P-Visual-Acceptance-<timestamp>\
+
+Suggested:
+
+00_authority/
+01_artifact/
+02_owner_backup/
+03_reference/
+04_1440/
+05_1024/
+06_1056/
+07_smoke/
+08_owner_restore/
+09_review_pack/
+
+Do not commit raw screenshots by default.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. PRIMARY 1440×900 CAPTURE SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Capture full client area at:
+
+1440 × 900
+
+Required:
+
+P01_Overview_1440x900.png
+P02_Analyze_1440x900.png
+P03_Compare_1440x900.png
+P04_ReleaseGate_1440x900.png
+P05_BundleHistory_1440x900.png
+P06_ParseFailure_1440x900.png
+
+These must come from the exact installed U1P artifact.
+
+No source-tree rendering.
+
+No local dev server.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. 1024×720 RESPONSIVE CAPTURE SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Capture:
+
+R01_Overview_1024x720.png
+R02_Analyze_1024x720.png
+R03_Compare_1024x720.png
+R04_ReleaseGate_1024x720.png
+R05_BundleHistory_1024x720.png
+R06_ParseFailure_1024x720.png
+
+Required:
+
+no unreadable collapse
+no critical clipped action
+no accidental page-wide overflow
+left navigation usable
+primary action reachable
+primary conclusion visible where the U1P acceptance contract requires it
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. 1056×799 RESPONSIVE CAPTURE SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Capture at least:
+
+R07_Analyze_1056x799.png
+R08_Compare_1056x799.png
+R09_ReleaseGate_1056x799.png
+R10_BundleHistory_1056x799.png
+
+If Overview or Parse Failure exhibits any width-sensitive behavior:
+capture them too.
+
+Do not claim a size was tested without an actual measured capture.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. FIRST-VIEWPORT ACCEPTANCE — OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 1440×900:
+
+Required in the first viewport:
+
+A. compact evidence/input capability band
+B. "Can we ship now?" / readiness verdict
+C. key metric summary
+D. primary next-step actions near the verdict
+
+The capability band must not consume most of the viewport.
+
+Ship/readiness must have greater visual priority than ELF/MAP/Git setup facts.
+
+At 1024×720:
+
+readiness verdict must still be visible in the first viewport.
+
+If this fails:
+
+record:
+U1P-V2-OVERVIEW-FIRST-VIEWPORT
+
+Do not self-pass.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. FIRST-VIEWPORT ACCEPTANCE — ANALYZE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 1440×900:
+
+Required:
+
+A. compact current-result summary
+B. actual analytical value visible immediately
+
+At minimum:
+Sections or Symbols primary table/view in the first viewport.
+
+C. general metadata dossier must not dominate the page before analysis output.
+D. U1R state-consistency remains correct.
+
+At parse failure:
+
+current failure remains authoritative
+previous result clearly secondary/retained
+no stale current-looking capability chip
+
+If success view still requires scrolling past a large metadata dossier before seeing meaningful Sections/Symbols output:
+
+FAIL.
+
+Record:
+U1P-V2-ANALYZE-FIRST-VIEWPORT
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. FIRST-VIEWPORT ACCEPTANCE — COMPARE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 1440×900:
+
+Required together in first viewport:
+
+A. BASE → TARGET identity
+B. delta summary
+C. actual section/diff result
+D. meaningful growth/change contributors if available
+
+Selection controls must read as a compact comparison bar,
+not dominate as a two-column form.
+
+If actual diff remains below setup/evidence blocks:
+
+FAIL.
+
+Record:
+U1P-V2-COMPARE-FIRST-VIEWPORT
+
+Do not invent an Export control if none exists.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. FIRST-VIEWPORT ACCEPTANCE — RELEASE GATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 1440×900 with an existing Gate run:
+
+Required:
+
+A. dominant verdict
+B. meaningful rule/finding content
+C. state hierarchy visible:
+BLOCK / REVIEW / UNKNOWN / PASS / N/A as actually present
+
+Configuration/policy/build inputs must be secondary once a run exists.
+
+If the user must scroll past configuration to understand the result:
+
+FAIL.
+
+Record:
+U1P-V2-RELEASE-FIRST-VIEWPORT
+
+Do not change Gate semantics.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. FIRST-VIEWPORT ACCEPTANCE — BUNDLE & HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 1440×900:
+
+Required:
+
+A. heading:
+Bundle & History
+
+B. one focused history list/category as the main workspace
+C. selected real detail visible in the same first viewport where possible
+D. not three database-style tables stacked one after another
+E. category switching / selection accessible if introduced
+
+Do not merge Build/Gate/Release semantics.
+
+Do not invent bundle actions.
+
+If the page still reads primarily as three stacked persistence tables:
+
+FAIL.
+
+Record:
+U1P-V2-HISTORY-COMPOSITION
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. FIRST-VIEWPORT ACCEPTANCE — PARSE FAILURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 1440×900:
+
+Required in the first viewport:
+
+A. current failure
+B. what happened / why we know
+C. diagnostics/code
+D. what to do / recovery action
+E. clear previous-result retained status
+
+Previous successful result detail may continue below or be secondary.
+
+Do not regress U1R.
+
+If stale current-state contradiction returns:
+
+U1P-V4
+
+STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. GLOBAL SHELL ACCEPTANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Verify:
+
+left navigation remains visually stable while main content scrolls.
+
+The shell should own viewport height.
+
+Main content should scroll independently.
+
+Do not accept:
+rail casually travelling with a long page.
+
+At 1024×720:
+navigation must remain usable.
+
+Record:
+SHELL_PASS / SHELL_FAIL
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. FUNCTIONAL SMOKE — SAME INSTALLED BYTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Overview:
+opens
+primary navigation/actions used where safe
+
+Analyze:
+valid file
+success result
+primary result view/table
+invalid file
+parse failure
+recovery success
+
+Compare:
+select valid pair
+render diff
+exercise introduced category/tab control if any
+unit switch if supported
+
+Release:
+existing run
+run Gate if required to produce findings
+rule groups
+existing bundle flow
+
+Bundle & History:
+switch active category/view
+select row
+detail area
+existing filters/pagination where present
+
+Help/Diagnostics:
+open
+
+No S0/S1/S2 regression.
+
+No new U1-V2/V3/V4 semantic defect.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. VISUAL FINDING CLASSIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use:
+
+U1P-V0 =
+cosmetic observation
+
+U1P-V1 =
+minor visual/polish gap
+
+U1P-V2 =
+material product-hierarchy/composition gap
+
+U1P-V3 =
+functional/readability/accessibility regression
+
+U1P-V4 =
+semantic/product-integrity regression
+
+Any V3/V4:
+STOP product visual acceptance.
+
+Any first-viewport requirement failure:
+at least V2.
+
+Do not self-waive V2.
+
+Do not immediately edit product code in this continuation.
+
+Return evidence to Architect.
+
+This continuation is an acceptance unit, not another coding loop.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. NO SECRET FIX AFTER CAPTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do not:
+
+capture screenshots
+notice a defect
+edit product code
+reuse old screenshots as evidence for new bytes.
+
+If any product-code change appears necessary:
+
+STOP.
+
+Report:
+exact screenshot
+finding severity
+proposed narrow correction
+
+Wait for Architect.
+
+Any new product commit requires:
+new CI
+new artifact
+new installed capture.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. BEFORE / AFTER REVIEW PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+U1P_FINAL_VISUAL_REVIEW_PACK/
+
+under the U1P evidence root.
+
+Required structure:
+
+00_README.txt
+REFERENCE/
+BEFORE/
+AFTER_1440/
+AFTER_RESPONSIVE/
+SIDE_BY_SIDE/
+REPORTS/
+HASHES/
+
+REFERENCE:
+copy seven original accepted mockups byte-for-byte.
+
+BEFORE:
+copy the relevant original U1/U1R 1440×900 screenshots from:
+C:\Users\16429\Downloads\FirmwareSight_U1_Final_Visual_Review
+
+AFTER_1440:
+P01–P06
+
+AFTER_RESPONSIVE:
+R01–R10 and any extra responsive captures
+
+REPORTS:
+U1P plan
+U1P acceptance report
+prior U1/U1R convergence matrix for context
+
+FS-UI-07 remains text-only reference disposition.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+24. SIDE-BY-SIDE COMPARISONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create neutral derived comparison images:
+
+COMPARE_01_Overview_REFERENCE_vs_U1P.png
+COMPARE_02_Analyze_REFERENCE_vs_U1P.png
+COMPARE_03_Compare_REFERENCE_vs_U1P.png
+COMPARE_04_ReleaseGate_REFERENCE_vs_U1P.png
+COMPARE_05_BundleHistory_REFERENCE_vs_U1P.png
+COMPARE_06_ParseFailure_REFERENCE_vs_U1P.png
+
+Also create useful before/after composites:
+
+COMPARE_07_Overview_U1_vs_U1P.png
+COMPARE_08_Analyze_U1R_vs_U1P.png
+COMPARE_09_Compare_U1_vs_U1P.png
+COMPARE_10_Release_U1_vs_U1P.png
+COMPARE_11_History_U1_vs_U1P.png
+
+No retouching.
+No filters.
+No color correction.
+No crop hiding defects.
+Uniform scaling only if needed.
+Preserve aspect ratio.
+
+Original screenshots remain authoritative.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+25. VISUAL ACCEPTANCE REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md
+
+Required per page:
+
+ARCHITECT TARGET
+ACTUAL FIRST VIEWPORT
+PASS / FAIL
+WHAT CHANGED
+WHAT REMAINS
+RESPONSIVE RESULT
+FUNCTIONAL RESULT
+REFERENCE-ONLY DIFFERENCE
+FINDING IDS
+
+Also include:
+
+shell verdict
+FS-UI-07 disposition
+artifact identity
+screenshot hashes
+owner-store safety
+exact CI provenance
+
+Do not use:
+PIXEL_PERFECT
+MOCKUP_MATCHED
+
+Allowed page-level conclusions:
+
+ACCEPT
+ACCEPT_WITH_MINOR_POLISH
+REQUIRES_POLISH
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+26. ACCEPTANCE GATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For all six implemented reference states:
+
+Overview
+Analyze
+Compare
+Release Gate
+Bundle & History
+Parse Failure
+
+evaluate:
+
+FIRST_VIEWPORT_PASS =
+true / false
+
+The U1P engineering visual candidate is eligible for:
+
+READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+
+only if:
+
+all six FIRST_VIEWPORT_PASS = true
+
+and:
+
+SHELL_PASS = true
+
+and:
+
+no U1P-V2/V3/V4 remains open
+
+and:
+
+functional smoke passes
+
+and:
+
+owner restore passes.
+
+If any material V2 remains:
+
+set:
+
+U1 =
+REQUIRES_ARCHITECT_POLISH_REVIEW
+
+Do not claim ready.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+27. OWNER RESTORE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After screenshots/smoke:
+
+close all FirmwareSight processes.
+
+Verify no installer/uninstaller/app process remains.
+
+If pre-round machine state was uninstalled:
+uninstall U1P.
+
+Do not use broad data-deletion option.
+
+Hash disposable store before removal.
+
+Remove only the named disposable U1P store.
+
+Restore owner main/WAL/SHM exactly.
+
+Re-hash.
+
+Required:
+
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+OWNER_STORE_OPENED_BY_U1P = NO
+
+Record unrelated sibling stores remained untouched.
+
+Any mismatch:
+BLOCKED.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+28. HASH REVIEW PACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create:
+
+HASHES/SHA256SUMS.txt
+
+Cover all review-pack files except self where canonical generation excludes it.
+
+Verify:
+
+0 missing
+0 failed
+
+Create:
+
+HASHES/SOURCE_MAP.txt
+
+For every copied or derived file record:
+
+destination
+source
+source type
+source SHA
+artifact/head relation
+
+For derived comparison files:
+left source + SHA
+right source + SHA
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+29. EVIDENCE SUCCESSOR — ONLY AFTER ACCEPTANCE WORK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After:
+
+exact product CI accepted
+installed visual review complete
+owner restore PASS
+
+create one evidence/governance successor commit.
+
+No product source.
+
+Allowed:
+
+U1_VALIDATION/**
+.ai/*.md only where current U1/V1 pointer needs truthful state update
+README.md / INDEX.md if materially stale
+10_AUDIT/SOURCE_PROMPTS/**
+BASELINE.yaml for measured U1P evidence
+DIRECTORY_TREE.txt
+SHA256SUMS
+
+Forbidden:
+
+apps/**
+crates/**
+scripts/**
+schemas/**
+migrations/**
+fixtures/**
+.github/**
+dependencies
+design token values
+
+If U1P contains material V2:
+
+record:
+U1 = REQUIRES_ARCHITECT_POLISH_REVIEW
+
+If all acceptance conditions pass:
+
+record:
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+
+Do NOT write:
+U1 PASS_COMPLETE
+VISUAL_ACCEPTED
+DESIGN_COMPLETE
+
+Only Architect issues final visual acceptance.
+
+Use ADR-0029 baseline workflow.
+
+Suggested message:
+
+U1P: record installed decision-first visual evidence
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30. EVIDENCE SUCCESSOR LOCAL VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Because successor must be docs/evidence only:
+
+Rust =
+868
+
+UI =
+253 / 9 files
+
+must remain unchanged.
+
+Run:
+
+git diff --check
+cargo fmt --all -- --check
+cargo test --workspace
+corepack pnpm test
+python scripts/check.py
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+python scripts/verify_baseline_artifacts.py
+
+Required:
+
+Rust 868
+UI 253 / 9
+full gate 17/17
+drift 8/8
+deny 1/1
+core-smoke 3/3
+package 4/4
+baseline PASS
+
+No required SKIP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+31. EVIDENCE SUCCESSOR PUSH + CI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If §30 passes:
+
+push evidence successor as normal fast-forward.
+
+This push is explicitly authorized.
+
+No force push.
+No amend.
+No rebase.
+
+Find exact successor run by head SHA.
+
+Require:
+
+10 / 10 authoritative jobs.
+
+Read all ten individually.
+
+Do not create another commit solely to record that run.
+
+If successor CI is green:
+record its run in the final response only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+32. V1 INTERLOCK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Throughout this continuation:
+
+V1 remains:
+
+IN_PROGRESS / RECRUITMENT_READY
+
+eligible external sessions =
+0
+
+participant execution =
+PAUSED_FOR_ARCHITECT_UI_REVIEW
+
+Do NOT:
+
+start recruitment execution
+start participant sessions
+edit M1–M6
+replace cohort artifact
+change V1 report verdict
+claim V1 PASS
+
+The frozen V1 cohort artifact remains unchanged during this prompt.
+
+Architect will decide re-baselining only after seeing U1P screenshots.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+33. B1 / RELEASE BOUNDARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Still NOT authorized:
+
+B1
+Private Beta
+Beta
+RC
+GA
+tag
+GitHub Release
+public installer
+signing
+notarization
+updater
+license selection
+pricing
+commercialization
+
+No change.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+34. FINAL REPORT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return:
+
+# FirmwareSight U1P CI / Installed Visual Acceptance Report
+
+## 1. Continuation authority
+
+HEAD
+origin/main
+clean state
+product SHA
+
+## 2. Exact product CI
+
+run id
+run number
+attempt
+head SHA
+10 jobs
+Rust count
+UI count
+drift
+result
+
+## 3. Exact Windows artifact
+
+artifact id
+artifact name
+ZIP bytes/digest
+NSIS filename
+NSIS bytes
+NSIS SHA
+toolchain.git_commit
+installed EXE SHA
+
+## 4. Owner store protection
+
+pre hashes
+backup
+park
+OWNER_STORE_PARKED
+OWNER_BACKUP_HASH_MATCH
+
+## 5. Visual capture set
+
+P01–P06
+R01–R10
+extra captures
+absolute evidence root
+
+## 6. Shell acceptance
+
+SHELL_PASS / FAIL
+
+## 7. First-viewport acceptance
+
+Overview PASS/FAIL
+Analyze PASS/FAIL
+Compare PASS/FAIL
+Release Gate PASS/FAIL
+Bundle & History PASS/FAIL
+Parse Failure PASS/FAIL
+
+## 8. Functional smoke
+
+Overview
+Analyze
+Compare
+Release
+History
+Help/Diagnostics
+
+## 9. Findings
+
+U1P-V0
+U1P-V1
+U1P-V2
+U1P-V3
+U1P-V4
+
+## 10. Review pack
+
+absolute path
+file count
+SHA manifest result
+
+## 11. Owner restore
+
+ORIGINAL_DB_RESTORED
+ORIGINAL_DB_SHA_MATCH
+OWNER_STORE_OPENED_BY_U1P
+
+## 12. Evidence successor
+
+SHA
+docs-only proof
+product counts unchanged
+local gates
+
+## 13. Successor CI
+
+run
+attempt
+10 / 10
+
+## 14. V1 interlock
+
+V1 state
+eligible sessions
+participant execution paused
+cohort artifact unchanged
+
+## 15. Verdict
+
+U1 =
+READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+or
+REQUIRES_ARCHITECT_POLISH_REVIEW
+
+P5 =
+PASS_COMPLETE
+
+Product =
+MVP_CANDIDATE
+
+V1 =
+IN_PROGRESS / RECRUITMENT_READY
+
+B1 =
+NOT_AUTHORIZED
+
+## 16. Stop
+
+STOP.
+
+Do not edit product code after capture.
+
+Do not resume V1.
+
+Do not re-baseline V1.
+
+Do not start B1.
+
+Return U1P_FINAL_VISUAL_REVIEW_PACK to Architect/Product Owner.
+
+END OF PROMPT

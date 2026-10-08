@@ -549,12 +549,24 @@ U1's two later units the same day: INSTALLED, INSPECTED, THEN CORRECTED. The rec
         failed-at-three-sizes and recovered states with the owner's store parked and restored byte-exact.
         FS-U1R-001 U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md and FS-U1R-002
         U1_VALIDATION/U1R_CORRECTIVE_REPORT.md.
-        **Where that leaves U1:** U1-V2-06 = CLOSED_BY_U1R, and U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT — the
+        **Where that left U1 on 2026-10-07:** U1-V2-06 = CLOSED_BY_U1R, and U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT — the
         strongest word those rounds allow themselves. It is not visual approval, not PASS_COMPLETE, not
         DESIGN_COMPLETE, not MOCKUP_MATCHED: the seven U1-V1 minor gaps and U1-V0-09 stay
         OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT, V1 stays paused at RECRUITMENT_READY with 0 eligible sessions and its
         frozen cohort build untouched, and no product stage moved: not B1, not Private Beta, not RC, not GA, no tag,
         no GitHub Release, no public installer, no signing, notarization, updater, licence choice or pricing.
+        **Where two further U1 rounds on 2026-10-08 leave it now:** U1P recomposed the shell and the five pages onto a
+        decision-first hierarchy and added no capability (U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md, product commit
+        6a071c5, 253 UI tests in the same 9 files, 868 Rust unchanged), and U1P-A1 installed that exact commit's
+        Windows artifact 11504871803 and adjudicated it on a real screen
+        (U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md): run 37668291893 is 10 of 10 on attempt 2 with attempt 1's
+        two six-hour ceiling cancellations and the single authorized rerun both kept in the record, all six
+        first-viewport contracts passed, the shell passed by pixel comparison, and the thirteen-step smoke found no
+        regression. U1 is therefore **REQUIRES_ARCHITECT_POLISH_REVIEW**, because the round reports one open material
+        finding instead of grading its own consequence away: **U1P-V2-01**, that Overview's ship verdict does not name
+        the build it judges while the page's subject line can name a different one. U1P-V1-01, U1P-V1-02 and note
+        U1P-V0-01 are recorded with it; there is no U1P-V3 or U1P-V4. This is still not visual approval, and the owner's
+        store came back byte-exact with the machine uninstalled again as it was found.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -773,9 +785,16 @@ Architect prompts: the second installed the CI-built Windows bytes and inspected
 (`U1_VISUAL_ACCEPTANCE_REPORT.md`), raising one material presentation finding it refused to self-waive, and the
 third — **U1R** — closed exactly that finding in the presentation layer
 (`U1R_CAPABILITY_STATE_DESIGN.md`, `U1R_CORRECTIVE_REPORT.md`). `U1-V2-06` is `CLOSED_BY_U1R` and
-**`U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`**, which is the strongest word those rounds allow: not visual
-approval, not `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`, and the seven `U1-V1` minor gaps plus
-`U1-V0-09` stay open for the Architect's judgement. The product stays **`MVP_CANDIDATE`** at baseline
+on 2026-10-07 that put U1 at `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`. Two more rounds ran on 2026-10-08:
+**U1P** recomposed the shell and the five pages onto a decision-first hierarchy without adding a capability
+(`U1P_VISUAL_POLISH_PLAN.md`, commit `6a071c5`), and **U1P-A1** installed that commit's own Windows artifact and
+adjudicated it on a real screen (`U1P_VISUAL_ACCEPTANCE_REPORT.md`). All six first-viewport contracts passed, the
+shell passed by pixel comparison rather than CSS, and a thirteen-step smoke found no regression — and the round
+still reports an open material finding, **`U1P-V2-01`**: Overview's ship verdict does not name the build it
+judges while the page's subject line can name a different one. So **`U1 = REQUIRES_ARCHITECT_POLISH_REVIEW`**,
+which is not visual approval, not `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`; `U1P-V1-01`,
+`U1P-V1-02` and note `U1P-V0-01` are recorded with it, there is no `U1P-V3` or `U1P-V4`, and the seven `U1-V1`
+minor gaps plus `U1-V0-09` stay open for the Architect's judgement. The product stays **`MVP_CANDIDATE`** at baseline
 `0.6.0` with narrative **FirmwareSight Productized MVP Candidate**; P5 stays `PASS_COMPLETE`, G2 stays `PASS`, and
 U1 authorizes no stage — `B1` Private Beta (the identifier the delivered prompt used for itself, which the owner
 re-registered) remains reserved and NOT_AUTHORIZED, and so do RC, GA, signing, notarization, an updater, a licence

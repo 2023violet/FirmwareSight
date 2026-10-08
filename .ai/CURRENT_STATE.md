@@ -63,6 +63,42 @@ last_updated: "2026-10-07"
   `%TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\`. This is still **not** visual approval, not
   `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`: the eight `U1-V1` / `U1-V0` visual items stay
   `OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT`, and the Architect has not looked at the screenshot pack directly.
+- **U1's status now: `REQUIRES_ARCHITECT_POLISH_REVIEW`.** Two more units ran on 2026-10-08, and the line above
+  stays where it is because it is what U1R recorded on 2026-10-07. The first is the U1P product round —
+  `U1P_FINAL_VISUAL_POLISH_AND_INFORMATION_HIERARCHY_CONVERGENCE` — which recomposed the shell and the five core
+  pages onto a decision-first hierarchy without adding a capability: fixed rail with an independently scrolling
+  main, the verdict above the metrics on Overview, the analysis result above the dossier on Analyze, a compact
+  pair bar above the diff on Compare, the run's own sections above configuration on Release Gate, and one stored
+  entity at a time on Bundle & History. **253 UI tests in the same 9 files** (was 242; eleven structural tests
+  added, none removed), **868 Rust unchanged**, 30 registered commands unchanged, `assets/design-tokens.json`
+  byte-identical, gate 17/17 with drift 8/8 including baseline integrity. Product commit
+  `6a071c51c81a00b7a35facaefa5849e9975e715c`, pushed as a normal fast-forward.
+  The second unit, `U1P_INSTALLED_ACCEPTANCE_AFTER_CI_RERUN`, took those exact bytes onto a real screen. Run
+  `37668291893` (#79) finished **10 of 10 on attempt 2**: attempt 1 left eight jobs green and cancelled
+  `Generated output drift` and `Package Ubuntu` at the six-hour ceiling while each was still on the Linux
+  prerequisite `apt-get update`, with no repository step started in either — the one class
+  `P5_VALIDATION/P5_CI_AUTHORITY.md` lets a single same-SHA rerun answer, and the owner authorized exactly that
+  one rerun. In attempt 2 only those two jobs re-executed; the other eight carry attempt 1's window to the
+  second and are not described as newly run. There was no attempt 3. Windows artifact `11504871803` (zip
+  `57651a3e…c1bb`, NSIS `f69cda6c…`, installed executable `7327d374…`) was installed with real input after the
+  owner's store was parked, and sixteen measured captures were taken — P01–P06 at 1440×900, R01–R06 at 1024×720,
+  R07–R10 at 1056×799. All six first-viewport contracts came back PASS, the shell is `SHELL_PASS` proved by
+  pixel comparison rather than CSS, and the thirteen-step functional smoke found no S0/S1/S2 regression. The
+  owner's store came back byte-exact with all four flags YES and `OWNER_STORE_OPENED_BY_U1P = NO`, the fourteen
+  unrelated siblings compare identical, and the machine is uninstalled again as it was before.
+  Why the status moved down rather than up: one material finding is open. `U1P-V2-01` is that Overview's ship
+  verdict does not name the build it judges while the page's own subject line can name a different one — nothing
+  stated is false, but the reader cannot check the pairing from that page, and `App.tsx` keeps the gate run and
+  the last analysis as independent state. U1P did not create that ownership; it promoted the verdict to the
+  dominant element, which is what made the gap material. It is reported, not self-waived, so §12's gate yields
+  `REQUIRES_ARCHITECT_POLISH_REVIEW`. Three lesser items go with it: `U1P-V1-01` (a wrapped band leaves an empty
+  filled cell at 1024), `U1P-V1-02` (the Compare result does not survive navigation) and note `U1P-V0-01`. No
+  `U1P-V3`, no `U1P-V4`, and U1R's truthfulness holds in both failure captures. Evidence:
+  `U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md`, `U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md`, the raw set under
+  `%TEMP%\FirmwareSight-U1P-Visual-Acceptance-20261008T001110Z\`, and the uploadable pack
+  `C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip` (4,727,314 bytes, SHA-256
+  `0f59f4ce…3881b`). This is still **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and
+  `MOCKUP_MATCHED` are not states U1P may issue, and no product code was touched after the captures.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
   eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
   `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause
