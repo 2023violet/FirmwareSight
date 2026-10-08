@@ -88,8 +88,9 @@ the Architect's visual verdict on the two screenshot packs, not another code rou
 ```
 
 CURRENT STATUS OF THIS TRACK, as of the fourth and fifth U1 rounds on 2026-10-08 (this block supersedes the
-`READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` line above; that block is kept because it is what U1R knew on
-2026-10-07, and dated records are not rewritten here):
+`READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` line above; its own opening status lines are superseded in turn by the
+sixth round's block below it. Both are kept, because dated records are not rewritten here — each is what that round
+knew when it stopped):
 
 ```text
 U1 = REQUIRES_ARCHITECT_POLISH_REVIEW.  U1-V2-06 stays CLOSED_BY_U1R.  U1P-V2-01 is OPEN and NOT self-waived.
@@ -221,6 +222,92 @@ This is still not visual approval: PASS_COMPLETE, VISUAL_ACCEPTED and MOCKUP_MAT
 may issue, V1 stays paused at 0 eligible sessions with its frozen cohort untouched, and B1 stays not authorized.
 If you were sent here to "continue U1": the next word is the Architect's on the final visual verdict, and on the
 three lesser items plus the git-capability observation above - not another code round.
+```
+
+The sixth U1 round, run the same day, is the current word on this track:
+
+```text
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 stays CLOSED_BY_U1P_R1.  U1P-V2-02 is CLOSED_BY_U1P_R2.
+U1-V2-06 stays CLOSED_BY_U1R.  Participant execution stays PAUSED_FOR_ARCHITECT_UI_REVIEW.
+
+Unit U1P_R2_OVERVIEW_PENDING_SELECTION_EVIDENCE_SCOPE ran under 《FirmwareSight — U1P-R2, Overview
+Pending-Selection Evidence Scope + Evidence-ID Consistency Audit, Architect execution prompt v1.0》 (delivered as a
+file: 21,194 bytes, 449 logical lines, 448 CRLF pairs, SHA-256
+3b6108b6e61582f9e31004d41e9768ba1a0daaaee1150b345c194a7e52b6221e; archived byte-exact at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R2_Overview_Pending_Selection_Evidence_Scope_v1.0.txt, stored blob
+aea814d62902b78cd9a98ba164807abe3b0b7e95 = 20,746 bytes, SHA-256
+fd8d28aafe411ac76dbf7262852f22a125c4b12ec3cadafbebc42b35f7a35102 — the 448-byte gap is the CRLF terminators Git
+normalises out of the blob, measured rather than assumed). Start authority HEAD = origin/main =
+60f10a6473ef446dc933c94a5edbab8e9b662ad1, tree clean, that head's run 37765205830 10 of 10.
+What was wrong was scope, not wording. On a selection the user had not analyzed, Overview rendered its capability
+band and its four figures from the RETAINED analysis while the MAP sentence described the NEW selection — the pair
+the Architect saw, `MAP provided` beside `Symbol-level analysis depends on it`. U1P-R1 had already bound the VERDICT
+to its judged snapshot; the bands around it were still speaking in one voice. Overview now derives every current
+band from `selection.selectionId === analyzedSelectionId`: a pending selection is named `firmware.elf · not analyzed
+yet` with its own MAP state and no pill and no figure, the Gate card stays neutral, the primary action is
+`Analyze selected artifact` with `View previous Gate run` beside it, and the retained work sits under
+`Previous analysis` inside bands named `Previous input capabilities` and `Previous key figures`, attributed in
+audible text (a `role="note"`, not a `title`) — including the case where the new selection has the SAME file name as
+the analyzed one, which is exactly why `selectionId` and not `fileName` is the handle. Nothing was hidden, no
+retained value was deleted, and no Unknown was turned into a zero.
+Three product paths changed (Overview.tsx +233/-71, Overview.module.css +13/0, overview.test.tsx +260/0) and no Rust
+source did: 278 UI tests in 9 files (twelve added, R2-T1..T12, none deleted), 868 Rust tests unchanged across 47
+result lines, gate 17 of 17 with no SKIP and no FAIL, drift 8/8, deny 1/1, assets/design-tokens.json byte-identical
+at 94336906…, and the generate_handler! list is the same 30 named entries at both heads (counting `module::` pairs
+under-reads it as 28 because list_fixtures and get_analysis_summary have no module prefix). Six of the twelve new tests fail on
+60f10a6's unmodified Overview.tsx (6 failed / 29 passed) and all 35 pass after it; five bounded mutations each kill
+at least one test and every one was undone by digest, the restored files re-hashing equal to the committed
+implementation.
+Product commit 2e2e21997ae01f035ac72b97658b3a0b329da362, pushed 60f10a6..2e2e219 as a normal fast-forward — the
+authorization is the prompt's own §14 ("Push normal fast-forward (authorized if gates pass)") and the gate had just
+come back 17 of 17 locally; no force, no history rewrite, no tag, no release. Run 37783219031 is 10 of 10, read job by job from GitHub's own API. Windows
+artifact 11554271914 (zip 5,542,981 bytes 94f16ab5…, NSIS 3,895,064 bytes fd2d4935…, installed executable
+15,367,680 bytes 196036e2…, toolchain.git_commit == 2e2e219) was installed with real mouse input AFTER the owner's
+store was parked; the two artifacts this round must not use (11539359554, 11504871803) and any local build are named
+in the report. Seven installed scenarios ran on that screen — matched, other-build, pending, pending-without-MAP,
+parse failure after a good result, genuine recovery, and a real policy swap EXECUTED by loading a second project
+whose policy differs by one committed line — with three 1024x720 captures, one 1056x799 capture, seven regression
+glances and a keyboard-only traversal. Twenty-one capture rows and twenty observation rows: two grabs were
+mis-scoped by the shared main scroll container, are labelled VOID in the log rather than edited out, and the gate
+filters them from adjudication. All eleven identities the captures carry are length-checked against the product's own
+SQLite rows and the committed fixture digests (69-character run ids, 149-character snapshots).
+The acceptance gate 09_acceptance/ACCEPTANCE_GATE.json holds: 20 boxes PASS and 1 box MISMATCH_PROVED,
+all_boxes_hold true, conclusion "U1P-V2-02 is closed by this round's installed evidence". The owner's store came
+back byte-exact — OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED, ORIGINAL_DB_SHA_MATCH and
+UNRELATED_SIBLING_STORES_UNTOUCHED all YES, OWNER_STORE_OPENED_BY_U1P_R2 = NO — with the 14 unrelated application-data
+entries identical on kind, size and digest across the 17-entry before and after inventories; this round's own
+disposable store was hashed first and moved by name, never deleted; the machine was found uninstalled and is
+uninstalled again; and the uninstaller's delete-the-application-data option was read through BM_GETCHECK as unchecked
+and never activated.
+Three things are stated rather than smoothed. The §7 identity audit did NOT confirm its own prompt's premise: the
+U1P-R1 report's run A and snapshot B had each been transcribed one character short (68 where a SHA-256 forces 69,
+148 where it forces 149) and the prompt's own expected strings carry the same short forms, so no document-to-document
+comparison can see the defect. Both authorities — sha256sum of the committed fixtures, and the installed product's
+own gate_runs/builds rows — say the same thing, so the minimum documented location was corrected with its exact
+before/after bytes inside this unit's single docs-only successor; the already-hashed U1P-R1 pack was not rewritten or
+repacked, and no separate audit commit was made. Second: the build-time note predicting ERR-PARSE-2002 for the junk
+input was wrong; the installed product answers ERR-FORMAT-0001, and the original sentence is quoted unmodified beside
+the correction. Third: both earlier delivery archives had left Downloads by pack time — a read-only check found them
+in the Recycle Bin re-hashed to exactly the digests BASELINE.yaml records — so this pack's historical images are the
+delivered bytes rather than a regeneration, but whether a moved delivery copy is itself a §13 gap is the Architect's
+call, and one installed link is honestly missing: no press-then-window-title pair was recorded for Overview's two
+pending actions, so their destination rests on R2-T5 and mutation M3 rather than on a pixel.
+U1P-V1-01, U1P-V1-02 and note U1P-V0-01 stay OPEN_FOR_ARCHITECT_JUDGEMENT exactly as U1P recorded them, the
+1024 wrapped-band empty cell and the git-capability question stay with the Architect, and this unit neither fixed nor
+waived any of them. Evidence: U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md, the raw set under
+%TEMP%\FirmwareSight-U1P-R2-Pending-Selection-20261008T132730Z\, and the single shareable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_R2_Final_Visual_Review.zip (4,113,494 bytes, sha256
+d3674569a0c4237452332b76ecda9b9a03b7ff9ece068f7a9d4a93d0441bb34c; 87 entries, CRC clean, 87/87 extraction round
+trip, 0 missing / 0 unlisted / 0 invalid SHA entries, four composites labelled DERIVED with their raw originals
+retained, forbidden-content scan clean). This is the SECOND build of that pack: the first (4,111,505 bytes, sha256
+d74f6ee34f28fdede0c59b8ee40293ed9ea9068dcdbd8b2fd690fd5565e212e7, 86 entries) carried the same evidence but stated
+28 registered commands in the report inside it where the list holds 30, and it was moved aside with an explanatory
+note rather than deleted - see 09_review_pack\superseded\ in the evidence root.
+This is still not visual approval: PASS_COMPLETE, VISUAL_ACCEPTED and MOCKUP_MATCHED remain states no UI round may
+issue, V1 stays paused at 0 eligible sessions with its frozen cohort untouched, and B1 stays not authorized. If you
+were sent here to "continue U1": the next word is the Architect's on the single U1P-R2 pack above — which contains
+the U1P six-page baseline, the U1P-R1 before-images and this round's after-images in one archive — and on the four
+open items listed above. There is no code round left for an agent to run.
 ```
 
 ## The V1 pointer that was live before U1, kept as the record of 2026-10-06

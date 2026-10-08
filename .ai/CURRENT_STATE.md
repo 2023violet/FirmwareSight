@@ -135,6 +135,58 @@ last_updated: "2026-10-08"
   `C:\Users\16429\Downloads\FirmwareSight_U1P_R1_Overview_Subject_Review.zip` (1,381,951 bytes, SHA-256
   `342fb89b…99a6`). This is still **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and
   `MOCKUP_MATCHED` remain states no UI round may issue, and no product source was touched after the captures.
+- **`U1P-V2-02` is `CLOSED_BY_U1P_R2`, and U1 stays `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`.** A sixth U1 unit ran
+  on 2026-10-08 under *FirmwareSight — U1P-R2, Overview Pending-Selection Evidence Scope + Evidence-ID Consistency
+  Audit, Architect execution prompt v1.0* (delivered as a file, 21,194 bytes / 449 lines / 448 CRLF pairs, SHA-256
+  `3b6108b6…b6221e`; archived byte-exact, stored blob `aea814d6…`, 20,746 LF-normalised bytes, SHA-256
+  `fd8d28aa…a35102`). It moved no capability, no verdict rule and no stored fact. The defect was scope, not
+  wording: with a selection the user had not analyzed, the capability band and the four figures were rendered from
+  the **retained** analysis while the MAP sentence described the **new** selection — `MAP provided` beside
+  `Symbol-level analysis depends on it`. `Overview` now derives every current band from
+  `selection.selectionId === analyzedSelectionId`; a pending selection is named as `not analyzed yet`, gets no pill
+  and no figure, and the retained work sits under `Previous analysis` inside bands literally named
+  `Previous input capabilities` and `Previous key figures`, attributed in audible text (`role="note"`) including the
+  same-file-name case. Nothing was hidden and no Unknown became a zero.
+  Evidence, all of it on this unit's own CI bytes: product commit `2e2e219`, run `37783219031` 10/10 job by job,
+  Windows artifact `11554271914` (zip 5,542,981 bytes `94f16ab5…`, NSIS 3,895,064 bytes `fd2d4935…`, installed EXE
+  15,367,680 bytes `196036e2…`, `toolchain.git_commit == 2e2e219`) installed with real input after the owner's store
+  was parked. Seven installed scenarios — matched, other-build, pending, pending-without-MAP, parse failure after a
+  good result, genuine recovery, and a real policy swap — plus three 1024×720 and one 1056×799 captures, seven
+  regression glances and a keyboard-only traversal. Twenty-one capture rows, twenty observation rows, two of them
+  kept and labelled VOID after a shared-scroll mis-capture. The Overview test file went from 6 failed / 29 passed
+  against `60f10a6`'s unmodified implementation to 35 passed after it; 278 UI tests in 9 files (twelve added, none
+  deleted), 868 Rust tests unchanged, gate 17 of 17 with no SKIP, `assets/design-tokens.json` byte-identical, the
+  `generate_handler!` list still its same 30 entries, name for name, at both heads. `09_acceptance/ACCEPTANCE_GATE.json`: 20 boxes PASS and
+  1 MISMATCH_PROVED.
+  The owner's store came back byte-exact — `OWNER_STORE_PARKED`, `OWNER_BACKUP_HASH_MATCH`, `ORIGINAL_DB_RESTORED`,
+  `ORIGINAL_DB_SHA_MATCH`, `UNRELATED_SIBLING_STORES_UNTOUCHED` all YES, `OWNER_STORE_OPENED_BY_U1P_R2 = NO` — the
+  14 unrelated application-data entries compare identical on kind, size and digest, this round's own disposable store
+  was hashed then moved by name rather than deleted, and the uninstaller's delete-the-application-data option was
+  read as unticked through `BM_GETCHECK` and never activated.
+  Three things are stated rather than smoothed. **One:** the round's §7 identity audit found a demonstrable mismatch
+  rather than confirming the prompt's premise — the U1P-R1 report's run A and snapshot B had each been transcribed
+  one character short (68 and 148 where a SHA-256 makes 69 and 149 the only well-formed lengths), and the prompt's
+  own expected strings carry the same short forms, so document-to-document comparison cannot see it. The two lines
+  were corrected with their before/after bytes proved against the committed fixtures and the product's own SQLite
+  rows, inside this unit's single docs-only successor; the already-hashed U1P-R1 pack was not rewritten or repacked.
+  **Two:** the build-time note that predicted `ERR-PARSE-2002` for the junk input was wrong — the installed product
+  answers `ERR-FORMAT-0001` — and the original sentence is quoted unmodified beside the correction. **Three:** both
+  earlier delivery archives had left `Downloads` by pack time; a read-only check found them in the Recycle Bin
+  re-hashed to the exact digests `BASELINE.yaml` records, so the pack's historical images are the delivered bytes and
+  not a regeneration, but whether a moved delivery copy is itself a §13 gap is the Architect's call.
+  `U1P-V1-01`, `U1P-V1-02` and note `U1P-V0-01` stay open exactly as U1P recorded them, and the Git
+  capability/Gate-rule observation U1P-R1 raised stays with the Architect; this unit neither fixed nor waived any of
+  them, and it records one limitation plainly — the destination of Overview's pending primary action is held by
+  contract test R2-T5 and mutation `M3_pending_cta`, because no press-then-window-title pair was captured on the
+  installed build. Evidence: `U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md`, the raw set under
+  `%TEMP%\FirmwareSight-U1P-R2-Pending-Selection-20261008T132730Z\`, and the single shareable pack
+  `C:\Users\16429\Downloads\FirmwareSight_U1P_R2_Final_Visual_Review.zip` (4,113,494 bytes, SHA-256
+  `d3674569…1bb34c`, 87 entries, CRC clean, 87/87 round trip, 0 missing / 0 invalid manifest entries). It is the
+  second build of that pack: the first (`4,111,505` bytes, `d74f6ee3…e212e7`, 86 entries) carried the same evidence
+  with a wrong command count in the report inside it, and was moved aside with an explanatory note rather than
+  deleted. This is still
+  **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and `MOCKUP_MATCHED` remain states no UI round may
+  issue, and no product source changed after the captures.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
   eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
   `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause

@@ -204,11 +204,19 @@ run was judged under; both fingerprints are printed in the capture.
 Real identities used by the drive:
 
 - snapshot A `snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e`
-- run A `gate-ff7fae0be1318f32e62eff3a7e216c080d90534a50ec596cc9a1916a1cbea96`, stored 2026-10-08T09:39:05Z
-- snapshot B `snap-4b4087e1407ceddcb1e1cfd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6`
+- run A `gate-ff7fae0be1318f32e62eeff3a7e216c080d90534a50ec596cc9a1916a1cbea96`, stored 2026-10-08T09:39:05Z
+- snapshot B `snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6`
 - run B `gate-38a07cc0830d93a53412dcd6b9ccfae71b728d3e59c74368033d8b48bbad6bfb`, stored 2026-10-08T09:45:21Z
 - loaded policy `bcc2f9da1e5a1004428cd98eedffb4a182c2bbf363104db727f8ea3d9c5e83ed`; S5's other policy
   `b87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98`
+
+> **Corrected 2026-10-08 by the next unit (U1P-R2), not by this one.** Two of the five lines above had been
+> transcribed one character short — run A as 68 characters instead of 69, and snapshot B as 148 instead of 149 — a
+> defect no document-to-document check can see, because every copy agreed with every other copy. The authorities used
+> are the `sha256sum` of the four committed fixtures those ids are built from and the installed product's own
+> `gate_runs` / `builds` rows read from its store. The exact before and after bytes, and the audit that decided the
+> correction, are in `U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md` §18. The already-hashed U1P-R1
+> review pack keeps its own copy of this file as it was shipped: a historical archive is quoted, never rewritten.
 
 ## 11. §14 acceptance gate, box by box
 

@@ -673,6 +673,38 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     analysis, because `Capabilities::with_git()` has no production caller — a pre-existing Core behaviour,
     reported for the Architect and deliberately not fixed under this unit's boundary.
 
+    The round after U1P-R1, **U1P-R2** (`U1P_R2_OVERVIEW_PENDING_SELECTION_EVIDENCE_SCOPE`, prompt archived
+    byte-exact at 21,194 delivered bytes / SHA-256 `3b6108b6…b6221e`, stored blob `aea814d6`, 20,746 LF bytes),
+    closed the finding U1P-R1 left in its own page: a selection the user had never analyzed was wearing the
+    *retained* analysis's capability pills and key figures while its MAP line described the new selection.
+    `Overview` now derives every current band from `selection.selectionId === analyzedSelectionId`, so a pending
+    selection says `not analyzed yet`, carries no pill, no figure and no Gate claim, and the retained work is shown
+    under `Previous analysis` in bands named `Previous input capabilities` and `Previous key figures` — attributed
+    in audible text, including when the new selection has the same file name as the analyzed one. Plan-less by
+    design (the prompt's §4 rebase audit is the record), report `U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md`,
+    product commit `2e2e219`, CI `37783219031` 10/10, artifact `11554271914`, installed EXE `196036e2…`; 278 UI
+    tests in 9 files (twelve added), 868 Rust unchanged, gate 17/17, twenty acceptance boxes hold and one is
+    MISMATCH_PROVED. **U1P-V2-02 is `CLOSED_BY_U1P_R2`; U1 stays `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`**, and
+    the single archive to judge is
+    `C:\Users\16429\Downloads\FirmwareSight_U1P_R2_Final_Visual_Review.zip` (4,113,494 bytes, SHA-256
+    `d3674569…1bb34c`, 87 entries — the second build of the pack; the first said 28 registered commands inside its
+    report where the list holds 30, and it is kept aside with a note, not deleted) — it carries the seven mockups,
+    the U1P six-page baseline, the U1P-R1
+    before-images and this round's after-images together, so the six-page verdict needs no second download.
+    Three things a newcomer should not have to rediscover. (1) An identity that is one character short is still
+    self-consistent: U1P-R1's report carried run A as 68 characters and snapshot B as 148, and the U1P-R2 prompt
+    quoted the same two short forms back, so document-to-document review could not see it — the only authorities
+    that can are `sha256sum` of the committed fixtures and the product's own `gate_runs`/`builds` rows, and length
+    is the cheapest check (`gate-` + 64 hex = 69; `snap-` + 64 + `-p0-normalize-1-` + 64 = 149). (2) `Downloads` is
+    a live operator folder, not an evidence directory: both earlier delivery archives had been removed from it
+    before this round's pack ran, and a read-only pass over the Recycle Bin's `$I`/`$R` pairs re-hashed them to
+    exactly the digests `BASELINE.yaml` records — which is how a round proves a historical pack without rewriting
+    or regenerating it. (3) The desktop harness must scroll the shared main container to top before every
+    navigation: one page's scroll offset carried into the next, which cost this round two captures that are
+    recorded as VOID in the observation log rather than quietly dropped. One gap is stated in the report rather
+    than papered over: no press-then-window-title pair was recorded on the installed build for Overview's two
+    pending actions, so their destination rests on contract test R2-T5 and mutation `M3_pending_cta`.
+
 ## Boundaries still in force
 
 - The completed slice stays closed: `P1-A0` was real artifact intake plus the Analyze summary, and its

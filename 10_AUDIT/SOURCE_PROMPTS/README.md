@@ -1098,7 +1098,7 @@ text with no source file; each says so in its own entry instead of standing for 
   accompanying authorization message** — §9 and §16 both refuse to treat a quoted instruction inside the
   attachment as approval.
 
-## U1P-R2 Overview Pending-Selection Evidence Scope v1.0 — executing (2026-10-08)
+## U1P-R2 Overview Pending-Selection Evidence Scope v1.0 — executed, U1P-V2-02 CLOSED_BY_U1P_R2 (2026-10-08)
 
 - File: `FirmwareSight_U1P_R2_Overview_Pending_Selection_Evidence_Scope_v1.0.txt` — 21,194 delivered bytes and 449
   logical lines, delivered sha256 `3b6108b6e61582f9e31004d41e9768ba1a0daaaee1150b345c194a7e52b6221e`; stored as blob
@@ -1125,6 +1125,25 @@ text with no source file; each says so in its own entry instead of standing for 
   green) rather than requiring a separate operator authorization message as U1P-R1 §9 did; §14 grants the same for
   the one docs-only successor. No force, no amend of published commits, no rebase, and installation is refused
   unless the exact product run reads 10 of 10.
+- How it ended, on 2026-10-08: **executed and closed.** Product commit `2e2e219` (three UI paths, no Rust source),
+  run `37783219031` 10 of 10, artifact `11554271914` installed on a real screen after the owner's store was parked,
+  seven installed scenarios plus responsive and regression captures, and `09_acceptance/ACCEPTANCE_GATE.json` at
+  20 boxes PASS plus 1 MISMATCH_PROVED with `all_boxes_hold = true`. `U1P-V2-02` is `CLOSED_BY_U1P_R2`;
+  `U1P-V2-01` stayed `CLOSED_BY_U1P_R1`; U1 remains `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`, which is not visual
+  approval. Record: `U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md`, pack
+  `FirmwareSight_U1P_R2_Final_Visual_Review.zip` (4,113,494 bytes, sha256 `d3674569…1bb34c`, 87 entries).
+- **§7's audit did not confirm §7's premise, and the prompt was not quietly re-read to make it fit.** §7 asserted
+  the two quoted identities are "already identical" and told the round not to invent a dated erratum. Measured
+  against the committed fixtures' `sha256sum` and the installed product's own `gate_runs`/`builds` rows, the
+  U1P-R1 report's run A was 68 characters and its snapshot B 148 — each the authority minus exactly one character,
+  and a 63-hex half cannot be a SHA-256 at all — while §7's own "expected" strings reproduce the same short forms,
+  so the disagreement is invisible to document-to-document review and visible to length plus two authorities. §7's
+  second branch was therefore used: the minimum documented location corrected in the single docs-only successor
+  with exact before/after bytes, no separate audit commit, the already-hashed historical archive untouched, baseline
+  validation rerun. The same class of error was caught in this round's own counting twice: a `module::`-prefix regex
+  under-reads the registered command list as 28 where splitting it on commas gives 30, and a build-time guess at the
+  parse-failure error code (`ERR-PARSE-2002`) was replaced by what the installed product actually answers
+  (`ERR-FORMAT-0001`), with the original sentence kept quoted and unmodified beside the correction.
 
 ## Supersession note on the V0 Batch A activation entry
 
