@@ -1,0 +1,745 @@
+FirmwareSight — U1P-R3 | Final Narrow Corrective & Visual Closure
+Execution Prompt v1.0 — Architect-authorized, scope-locked
+Repository: https://github.com/2023violet/FirmwareSight
+Canonical unit: U1P_R3_FINAL_NARROW_CORRECTIVE_AND_INSTALLED_VISUAL_REVIEW
+
+MISSION
+
+You are taking over a mature, functional MVP Candidate; this is NOT a new UI redesign.
+The independent Architect has reviewed the actual U1P-R2 visual ZIP, not just your reports.
+Verdict: U1 = REQUIRES_NARROW_CORRECTIVE.
+
+The previous R2 evidence-scope bug was genuinely corrected and must stay closed.
+There are exactly THREE corrective deliverables for this round:
+
+  A. Compare: stop leaving a vast unexplained blank area before a comparison;
+     retain a valid, previously computed comparison when the user leaves and returns
+     within the SAME desktop process/session; keep the first viewport result-first.
+
+  B. Overview at 1024px: eliminate the obvious empty cell in the three-item
+     ELF/MAP/Git capability band, without breaking responsive behavior elsewhere.
+
+  C. Final evidence pack: compute truthful PASS/MISMATCH_PROVED totals from
+     actual accepted JSON and deliver an auditable, directly uploadable ZIP.
+
+Minor, strictly related copy and two stale ordinal labels may be corrected INSIDE
+an otherwise-authorized change; they are not independent reasons for a commit.
+
+No Core, schema, migrations, release identity, new IPC, Gate semantics, or new
+feature expansion. This is the FINAL proposed U1 polish pass. Do not invent R4.
+The Agent does not declare U1 PASS_COMPLETE; only the Architect can do that after
+reviewing the installed screenshots of the exact CI Windows build.
+
+============================================================
+0. LIVE VERIFIED START AUTHORITY / FREEZE
+============================================================
+
+Architect GitHub check at prompt creation:
+
+origin/main:
+f01eec110c76591c741d283e4ee862566e211a2f
+
+U1P-R2 product:
+2e2e21997ae01f035ac72b97658b3a0b329da362
+Product CI: Run 37783219031, #83, attempt 1, 10/10 success.
+
+U1P-R2 evidence successor:
+f01eec110c76591c741d283e4ee862566e211a2f
+Evidence CI: Run 37801519343, #84, attempt 1, 10/10 success.
+
+R2 authoritative local test baseline as reported:
+Rust cargo test --workspace: 868 passed, 0 failed; 47 result lines.
+UI Vitest: 278 passed, 9 files.
+Full check.py: 17/17; drift 8/8; deny 1/1; core-smoke 3/3; package 4/4.
+
+P5 = PASS_COMPLETE.
+Product = MVP_CANDIDATE 0.6.0.
+R1 Gate subject mismatch = CLOSED.
+R2 pending-selection stale facts = CLOSED.
+V1 = IN_PROGRESS / RECRUITMENT_READY; 0 eligible external sessions;
+participant execution = PAUSED_FOR_ARCHITECT_UI_REVIEW.
+Frozen V1 cohort artifact remains the original F3 artifact. Do not change it.
+B1 is the reserved Private Beta track and is NOT AUTHORIZED.
+
+Do NOT assume this start SHA stays current. Enforce preflight below.
+
+============================================================
+1. HARD PREFLIGHT — BEFORE ANY WRITE
+============================================================
+
+Run and record:
+
+git fetch --prune origin
+git rev-parse --show-toplevel
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+git ls-remote origin refs/heads/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+git log --oneline --decorate -8
+
+Require local HEAD = origin/main = remote main = f01eec110c76591c741d283e4ee862566e211a2f.
+Require clean worktree and no unexplained changes.
+If not: STOP. Do not merge, reset, stash, rebase, clean, or push.
+Never use force push, rewrite published history, or delete owner data.
+
+Archive this exact prompt once under 10_AUDIT/SOURCE_PROMPTS/ following the
+repository's existing transport-safe CRLF/LF and SHA provenance discipline.
+Do not manufacture the owner-delivered byte digest.
+
+============================================================
+2. AUTHORITY READ SET
+============================================================
+
+Read BEFORE proposing code:
+
+AGENTS.md
+BASELINE.yaml
+.ai/README.md
+.ai/CURRENT_STATE.md
+.ai/ACTIVE_TASK.md
+.ai/DECISIONS.md
+.ai/HANDOFF.md
+01_PRODUCT/01_PRD_MVP.md
+03_DESIGN/DESIGN.md or the repository's actual canonical design document
+06_DELIVERY/06_STAGE_GATES.md
+U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md (or actual tracked equivalent)
+U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md
+R1 subject-corrective report
+all existing U1P/U1P-R1/U1P-R2 visual acceptance evidence indices
+
+Frontend source/tests:
+apps/desktop/ui/src/App.tsx
+apps/desktop/ui/src/Compare.tsx
+apps/desktop/ui/src/Compare.module.css
+apps/desktop/ui/src/compare.test.tsx
+apps/desktop/ui/src/Overview.tsx
+apps/desktop/ui/src/Overview.module.css
+apps/desktop/ui/src/overview.test.tsx
+apps/desktop/ui/src/components/Panel.tsx
+apps/desktop/ui/src/components/Panel.module.css
+apps/desktop/ui/src/components/Layout.tsx
+apps/desktop/ui/src/ipc/types.ts
+any directly referenced bridge calls or DTOs, READ ONLY.
+
+Visual inputs:
+D:\study\Software\FirmwareSight\assets\ui-mockups
+
+User-uploaded R2 review ZIP's original source on the workstation (verify existence):
+C:\Users\16429\Downloads\FirmwareSight_U1P_R2_Final_Visual_Review.zip
+
+Authoritatively reviewed screenshots inside that pack:
+U1P_R2_FINAL_VISUAL_REVIEW/U1P_BASELINE/P03_Compare_1440x900.png
+U1P_R2_FINAL_VISUAL_REVIEW/REGRESSION/REG_Compare_1440x900.png
+U1P_R2_FINAL_VISUAL_REVIEW/U1P_BASELINE/R03_Compare_1024x720.png
+U1P_R2_FINAL_VISUAL_REVIEW/U1P_R2_AFTER/R2_R01_Matched_1024x720.png
+
+If Downloads pack is missing, use an untouched/hash-verifiable retained evidence
+source or the corresponding original evidence root; do not fabricate before images.
+The current user-uploaded R2 pack was independently checked to have
+4,113,494 bytes / SHA-256 d3674569a0c4237452332b76ecda9b9a03b7ff9ece068f7a9d4a93d0441bb34c.
+The prior ZIP is historical evidence. NEVER modify/overwrite its bytes.
+
+If a specified doc path differs, locate the actual file by repository tree;
+do not create a new empty placeholder with the requested name.
+
+============================================================
+3. FINAL ARCHITECT FINDINGS — INPUT, NOT SELF-RATING
+============================================================
+
+F1 — Compare re-entry (material UX gap):
+
+In real installed REG_Compare_1440x900.png, candidate builds and Swap/Compare
+controls are present but the remainder of the page is empty. The user is not told
+why a previously seen diff vanished or what action to take.
+
+Source cause verified:
+- Compare.tsx keeps baseId, targetId, summary and diffId-related state in
+  component-local useState.
+- App.tsx conditionally renders <Compare/>; leaving the page unmounts it.
+- The current EmptyState handles fewer than TWO candidates only.
+- There is no explanatory no-result state when TWO OR MORE candidates exist.
+
+F2 — Compare primary result below the fold:
+
+The real screenshot's visible first viewport prioritizes pair selection and
+headline facts; the actual meaningful section diff table is not clearly above fold.
+After a valid comparison at 1440x900, the user must see real change rows in the
+first viewport, not just two form fields and unexpanded narrative.
+
+F3 — 1024 Overview capability band empty grid cell:
+
+The shared Panel.module.css .band currently has
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--fs-layout-evidence-inspector-min), 1fr));
+For three capability cells at 1024, auto-fit resolves to two columns, leaving
+one unfilled cell-looking grey region next to the final third item.
+The fix must not damage other users of shared Band, especially metric rows.
+
+E1 — Deliverable metadata defect:
+
+Historical R2 ZIP's 00_README shows PASS=0, MISMATCH_PROVED=0, while
+REPORTS/ACCEPTANCE_GATE.json holds real 20 PASS + 1 MISMATCH_PROVED.
+This is an evidence-summary bug, not proof that the product itself failed.
+Do NOT rewrite the historical R2 ZIP.
+R3 pack must derive summary counts from the current final acceptance data.
+
+Already accepted (do not reopen):
+U1R parse-failure last-good protection;
+U1P-R1 Gate verdict snapshot/policy scope;
+U1P-R2 current selection vs retained capability/figure scope;
+Release and History result-first composition;
+FS-UI-07 is REFERENCE_ONLY_NOT_IMPLEMENTED.
+
+============================================================
+4. REQUIRED CODE DESIGN GATE — WRITE A SHORT PLAN BEFORE CODE
+============================================================
+
+Produce U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md with:
+
+- exact files and React lifecycle causing Compare result loss;
+- current diffId lifetime/IPC semantics (session handle, not persisted identity);
+- selected pair vs summary pair truthfulness and stale-result caption;
+- proposed MINIMAL session-level retention architecture;
+- no-result two-candidate state behavior;
+- how data should avoid leaking across process restart, project context or an
+  invalidated diff handle;
+- how content moves above fold WITHOUT hiding the actual diff evidence;
+- exact 1024 band layout change limited to a safe scope;
+- before/after screenshot acceptance grid;
+- known unsupported mockup functions kept reference-only;
+- tests that fail on current source prior to implementation.
+
+Review the plan for contradictions; only then write product code.
+
+============================================================
+5. COMPARE STATE LIFECYCLE — REQUIRED CONTRACT
+============================================================
+
+Implement meaningful intra-process, cross-navigation continuity.
+
+Scenario C1: fresh application session / never compared.
+If candidates >=2 and no successful comparison in this app session:
+- show a purposeful, compact, accessible empty state with a heading such as
+  "Ready to compare" and a direct explanation:
+  "Choose Old / Base and New / Target, then select Compare."
+- the primary Compare button is visible and actionable;
+- do not fake delta values, empty diff counts, or a calculated PASS;
+- no acres of unexplained blank screen below the selectors.
+If candidates <2, preserve existing "Nothing to compare yet" flow.
+
+Scenario C2: compare valid pair A -> B, then navigate to Overview / Analyze /
+Release / History and return to Compare WITHOUT exiting the desktop process.
+- the same REAL successfully computed comparison remains accessible;
+- its base, target and diff are correctly attributed;
+- Section/Symbol detail still loads against a valid diffId;
+- never silently create a new comparison or fabricate a persisted one.
+- selected pair MUST be preserved or explicitly distinguished from last good
+  result using the already accepted "previous comparison" semantics.
+
+Scenario C3: user changes either selected build but does not press Compare.
+- previous summary is NOT presented as if for the new selections;
+- label it as last-good/stale and explain how to recompute;
+- do not auto-run comparison merely because a selection changed.
+
+Scenario C4: comparison fails after a previous success.
+- actual error visible;
+- last good comparison retained only with previous-result attribution;
+- no false assertion that current pair has been compared.
+
+Scenario C5: fresh PROCESS/app session; or known invalidated ephemeral diffId.
+- do not resurrect a diff handle from disk, SQLite, filesystem, or browser storage;
+- display normal candidate-selection + no-result empty state;
+- if the handle becomes invalid after a genuine runtime event, fail visibly and
+  invite a new Compare. Do not silently reuse another handle.
+
+Scenario C6: async race / navigation while compare is in flight.
+- no state update from an obsolete async response may clobber a newer pair
+  or display result for the wrong selection;
+- avoid unhandled promise/re-render errors when leaving/reentering;
+- do not introduce uncontrolled background comparison runs.
+
+Recommended solution family: lift the minimal comparison session state to the
+App-level session owner (or maintain an explicitly scoped, stable UI session
+controller). The implementation must be justified by the actual code, not
+prescribed from habit. Keep the frontend-owned session state small and typed.
+
+DO NOT implement "persistence" via SQLite, backend IPC, localStorage, or new
+schema; the comparison diffId is explicitly an ephemeral in-process handle.
+Avoid an unsafely hidden-but-mounted huge page if this breaks accessibility or
+background IPC; if chosen, demonstrate lifecycle safety and render invariants.
+
+Do not change CompareSummaryDto semantics, Snapshot identity, or Core diff rules.
+
+============================================================
+6. COMPARE VISUAL HIERARCHY — REAL DATA ABOVE FOLD
+============================================================
+
+After a genuine successful comparison, at 1440×900 require in FIRST VIEWPORT:
+
+- Old/Base -> New/Target identity;
+- a compact memory/change summary;
+- at least the first meaningful section-change rows (or an honest empty-result
+  explanation if the real diff has no changed sections);
+- a clear next action / existing detail route;
+- growth contributors near enough to be discoverable, not hidden behind
+  a long data-proof introduction.
+
+Prefer small composition changes to existing Compare.tsx / Compare.module.css:
+compact header and selector controls, eliminate excessive leading whitespace,
+trim repetitive explanatory copy, prioritize diff table over secondary dossier.
+Maintain all caveats and real evidence information somewhere discoverable.
+
+Use only existing real comparison data. Do not invent preview numbers, sections,
+contributors, dynamic chart data or an Export capability.
+
+At 1024x720 and 1056x799:
+- normal responsive stacking is permitted;
+- selector inputs and Compare button remain usable;
+- data table can scroll within its proper region;
+- no page-wide accidental overflow, clipped primary action, or orphan labels.
+
+Do not shrink type to illegibility, add an animation framework, or change tokens
+for an otherwise-solvable layout problem.
+
+============================================================
+7. OVERVIEW BAND 1024 FIX — THREE CELLS, ZERO FAKE FOURTH
+============================================================
+
+Affects THREE real capability cells (ELF/MAP/Git) on the Overview page.
+
+At width 1024x720:
+- the row must NOT visually imply a fourth empty capability cell;
+- acceptable patterns: 3-cell single row if readable; 2+1 where the last
+  cell spans the remaining row; or a deliberate single-column stack if
+  screenshot evidence proves it is more legible and doesn't bury readiness.
+- ensure "Can we ship now?" / its neutral equivalent remains reachable and
+  preferably visible within the first viewport;
+- at 1440x900 retain a compact, balanced three-cell band;
+- at 1056x799 no false blank slot or overflow.
+
+Risk boundary:
+- shared components/Panel.module.css is used on other pages.
+- prefer local Overview class / modifier over a global change that could
+  alter Analyze, Compare, Release, or History.
+- no "empty placeholder" or hidden fabricated fourth item.
+- do not regress U1P-R2: pending selection shows no stale green current chips
+  or old figures; Previous analysis remains labelled.
+
+============================================================
+8. LIGHT COPY / PROVENANCE AUDIT — NOT NEW FEATURES
+============================================================
+
+Only if confirmed relevant while touching the same UI:
+
+- MAP help text must match its exact presented capability/evidence context.
+  Do not conflate MAP selected/attached with actual symbol-analysis evidence.
+- Pending and previous data must stay attributed to the right selection.
+- Analyse success, parse failure, R1 Gate mismatch, R2 pending selection remain
+  true after the R3 Compare/Overview changes.
+
+Read-only audit:
+"Analyze Git UNKNOWN" versus "Gate git.clean PASS/BLOCK".
+Trace each source (analysis capability, current project/git linkage,
+Gate's actual version/policy evidence) and note whether the apparent
+inconsistency arises from different subjects/requirements.
+If it is merely different semantics, document precise explanation.
+If a real safety-critical false Gate PASS is discovered, STOP and escalate.
+Do NOT rewrite Core/Gate semantics in R3 merely to align badge colors.
+
+Two existing ordinal documentation mistakes ("sixth U1 unit/round") may be
+repaired in the ONE normal final evidence successor if they are still present.
+Do not make a standalone commit for two words; preserve historical narrative.
+
+============================================================
+9. TEST-FIRST CONTRACT — RED ON OLD HEAD
+============================================================
+
+Before product change, add targeted failing UI tests demonstrating:
+
+T1: candidates>=2 and summary absent -> helpful empty state + usable Compare.
+T2: candidates<2 -> existing "Nothing to compare yet" remains.
+T3: successful comparison -> navigation away/back -> real result retained.
+T4: same case -> base/target and diffId remain tied to actual result.
+T5: change selected pair -> stale attribution, no false current-pair result.
+T6: failed new compare -> real error + last-good attributed separately.
+T7: new process/session -> not a persisted phantom comparison.
+T8: navigation/async overlap -> obsolete response cannot overwrite newer
+    comparison session state or trigger state-update-after-unmount faults.
+T9: keyboard/accessible names for empty state, filters and selection preserved.
+T10: Overview successful matched build still shows truthful three capabilities.
+T11: Overview pending selected build remains scoped as U1P-R2 requires.
+T12: 1024px 3-cell layout has an explicit layout contract, and real screenshots
+     confirm no blank fourth-cell appearance. Do not pretend jsdom measures pixels.
+T13: R1 Gate snapshot/policy mismatch and U1R parse failure regressions remain green.
+
+Show a real RED demonstration on unchanged product behavior for new semantic
+tests before product edits; record actual failing names, not just a statement.
+
+GREEN after implementation. Tests should prefer semantic accessible-role checks
+and real behavior, not brittle inner CSS class names. CSS appearance requires
+REAL installed screenshots.
+
+Run targeted mutation tests for at least the Compare empty-state contract and
+cross-navigation retention (and stale attribution if implementation makes it
+newly vulnerable). Restore mutated code EXACTLY; verify by file digest.
+Do not weaken or delete existing tests to get green.
+
+If a proposed persistence solution would require modifying a Rust command,
+backend project model, storage, schema, migrations or generated DTO semantics:
+STOP. Return the minimum real blocker to Architect without implementing it.
+
+============================================================
+10. IMPLEMENTATION ALLOWLIST / BLOCKLIST
+============================================================
+
+Expected product files:
+apps/desktop/ui/src/App.tsx
+apps/desktop/ui/src/Compare.tsx
+apps/desktop/ui/src/Compare.module.css
+apps/desktop/ui/src/compare.test.tsx
+apps/desktop/ui/src/Overview.module.css
+apps/desktop/ui/src/overview.test.tsx
+possibly a tiny typed frontend session helper under apps/desktop/ui/src/**
+and any needed corresponding narrow UI test file.
+
+Only change Overview.tsx if necessary for a clearly justified local layout/
+copy regression, not to revisit identity logic.
+Shared Panel module changes need specific evidence they are safe across pages.
+
+Forbidden by default:
+crates/**
+schemas/**
+migrations/**
+fixtures/**
+scripts/**
+.github/**
+Cargo.toml / Cargo.lock
+package.json / pnpm-lock.yaml
+assets/design-tokens.json
+analysis Gate rules, release bundle formats, IPC command count
+new dependencies or unrelated product pages.
+
+If a forbidden file becomes necessary, STOP before touching it.
+No Feature E1/E2/Growth implementation in this round.
+
+============================================================
+11. LOCAL FULL VALIDATION
+============================================================
+
+After focused tests, run all authoritative checks:
+
+git diff --check
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+python scripts/check.py
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+python scripts/verify_baseline_artifacts.py
+
+Expected Rust 868/0 unchanged; if it changes, STOP and classify.
+UI baseline 278/9 files; may increase only for targeted tests.
+Full gate 17/17; drift 8/8; deny 1/1; core-smoke 3/3; package 4/4.
+Baseline verifier PASS; no required SKIP.
+
+Counts must be measured from logs, not hardcoded. Do not double-count
+cargo test reruns invoked internally by scripts/check.py.
+
+No design token additions; verify token file byte-identical.
+
+============================================================
+12. ONE U1P-R3 PRODUCT COMMIT, EXACT REMOTE CI
+============================================================
+
+After all local validation and explicit path audit, create ONE normal product
+commit containing:
+- narrow UI fix/tests;
+- R3 plan/report skeleton as appropriate;
+- required baseline provenance files, prompt archive;
+- no unrelated product work.
+
+Suggested message:
+U1P-R3: retain comparison context and close narrow viewport gaps
+
+Use existing ADR-0029 Git-index-blob SHA256SUMS workflow exactly.
+Do not modify any published commit.
+
+The user has authorized this R3 scope; for a shared-branch push, obey the
+Coding Agent's direct user-approval policy. If current chat requires an
+additional direct go-ahead, do not interpret this attachment as a bypass.
+
+Once authorized and tests green, normal fast-forward push only.
+No force, no rebase, no squash, no amend.
+
+Find CI run by exact product HEAD, not "latest".
+Require 10 authoritative jobs individually successful.
+Record run number, id, attempt history, Rust/UI counts and baseline drift PASS.
+Do not ignore a failed job just because overall workflow looks green.
+
+Pure runner infrastructure failure: record full attempt and use the repo's
+explicit same-SHA rerun policy if authorized; no blind source failure reruns.
+No product source edits after successful install evidence is captured.
+
+============================================================
+13. EXACT CI-BUILT WINDOWS INSTALLER / OWNER STORE SAFETY
+============================================================
+
+Download the Windows artifact from the EXACT R3 product head CI run,
+not from R2, a docs successor, local build, cargo run or Vite server.
+
+Record:
+product SHA
+workflow id, attempt history
+artifact id, name, ZIP size and digest
+artifact-metadata.json and toolchain.git_commit
+SHA256SUMS.txt verification
+NSIS exact filename, bytes and SHA-256
+installed EXE bytes/SHA-256
+
+Do not confuse artifact container ZIP bytes and installer NSIS bytes.
+
+Before install/launch:
+close FirmwareSight;
+hash owner main/WAL/SHM, size/mtime;
+create independent byte-for-byte backup;
+verify backup hashes;
+park only identified owner files outside app live data directory;
+use named disposable fixture-only test state.
+
+Required:
+OWNER_STORE_PARKED=YES
+OWNER_BACKUP_HASH_MATCH=YES
+OWNER_STORE_OPENED_BY_R3=NO
+
+No private firmware, no real customer data, no invented diff/Gate records.
+Do not click destructive uninstall option or delete unrelated sibling stores.
+
+After installed test:
+close app/uninstaller processes;
+uninstall if the pre-round machine had no install;
+hash then remove or park only identifiable disposable R3 live store;
+restore owner main/WAL/SHM byte-exact;
+verify final hashes and independent sibling inventory.
+
+Required:
+ORIGINAL_DB_RESTORED=YES
+ORIGINAL_DB_SHA_MATCH=YES
+OWNER_STORE_OPENED_BY_R3=NO
+UNRELATED_SIBLING_STORES_UNTOUCHED=YES
+
+On any data-integrity mismatch STOP, preserve evidence and report.
+
+============================================================
+14. INSTALLED ACCEPTANCE — FINITE SCREENSHOT MATRIX
+============================================================
+
+Primary resolution 1440x900, real installed exact R3 bytes.
+
+Capture latest product head:
+P01_Overview_Matched_1440x900.png
+P02_Analyze_Success_1440x900.png
+P03_Compare_Ready_1440x900.png [two candidates, no summary]
+P04_Compare_Result_1440x900.png [actual section diff visible]
+P05_Compare_AfterNavigation_1440x900.png [same valid diff still visible]
+P06_ReleaseGate_1440x900.png
+P07_BundleHistory_1440x900.png
+P08_ParseFailure_1440x900.png
+P09_Overview_PendingSelection_1440x900.png
+P10_Overview_GateMismatch_1440x900.png if available via genuine state.
+
+Capture responsiveness:
+R01_Overview_Matched_1024x720.png
+R02_Overview_Pending_1024x720.png
+R03_Overview_Matched_1056x799.png
+R04_Compare_Ready_1024x720.png
+R05_Compare_Result_1024x720.png
+R06_Compare_AfterNavigation_1024x720.png
+R07_Compare_Result_1056x799.png
+R08_Analyze_Success_1024x720.png
+R09_ReleaseGate_1024x720.png
+R10_BundleHistory_1024x720.png
+
+The exact original reference image set is under assets/ui-mockups.
+FS-UI-07 Unknown Dependency stays REFERENCE_ONLY_NOT_IMPLEMENTED.
+
+Capture actual window/client dimensions and product EXE SHA in manifest.
+No mocked screenshot. No developer server. No CSS screenshot as a substitute.
+
+If a specific required state cannot be produced safely, report NOT_CAPTURED
+with the reason, do not create fake screenshots.
+
+============================================================
+15. INSTALLED PASS/FAIL CONTRACT
+============================================================
+
+COMPARE:
+- C1: fresh session two-candidate view has visible useful message + Compare CTA.
+- C2: actual computed diff and at least one meaningful section row in the first
+  1440x900 viewport (or honest zero-changes state if input truly has zero changes).
+- C3: navigation away/back in same process retains genuine result, not a
+  fabricated last-good preview.
+- C4: base/target identities and async state remain truthful.
+- C5: new session starts without resurrecting an old ephemeral diffId.
+- C6: failed compare after valid compare keeps a clearly attributed old report.
+- C7: 1024/1056 controls and table are readable and reachable.
+
+OVERVIEW:
+- O1: no false blank fourth capability cell at 1024 and 1056.
+- O2: readiness/gate card visible and not buried beyond first viewport.
+- O3: matched current facts remain correct; pending selection still neutral;
+  previous figures clearly previous; R1 policy/Gate mismatches stay neutral.
+
+GENERAL:
+- no S0/S1/S2 functional regression;
+- no reintroduced U1R/R1/R2 evidence-scope contradiction;
+- Analyze/Release/History/ParseFailure still readable and accessible;
+- keyboard navigation, focus/labels and scroll behavior remain usable.
+
+Each requirement gets PASS/FAIL/NOT_VERIFIED with direct screenshot or observed
+interaction trace reference. No numeric mockup-similarity guesses.
+
+If product-integrity/semantic error or S0/S1/S2 appears:
+STOP acceptance, restore owner data, return to Architect.
+Do NOT secretly fix product code after screenshots.
+
+============================================================
+16. NEW FINAL ZIP — CORRECT COUNTS, PRESERVE HISTORY
+============================================================
+
+Create ONE new review pack OUTSIDE repo and outside Temp when finalizing:
+
+C:\Users\16429\Downloads\FirmwareSight_U1P_R3_Final_Visual_Review.zip
+
+Required pack contents:
+00_README.txt
+REFERENCE/ seven untouched accepted reference images
+BEFORE_R2/ untouched originals from verified R2 historical ZIP
+AFTER_R3/ original R3 installed screenshots
+RESPONSIVE/ original R3 responsive screenshots
+SIDE_BY_SIDE/ derived reference-vs-R3 and R2-vs-R3 comparisons
+REPORTS/ R3 acceptance report, identity/lifecycle matrix, read-only Git
+         cross-surface evidence audit, R1/R2 provenance references
+HASHES/ SHA256SUMS.txt and SOURCE_MAP.txt
+ACCEPTANCE_GATE.json with measured item-level results
+
+Historical source:
+C:\Users\16429\Downloads\FirmwareSight_U1P_R2_Final_Visual_Review.zip
+If missing, locate and verify retained original hash-identical evidence roots.
+Do not restore trash, delete files, or rewrite past ZIPs without authorization.
+
+IMPORTANT R3 README/ACCEPTANCE_GATE INVARIANT:
+- derive PASS / FAIL / NOT_VERIFIED / MISMATCH_PROVED counts directly from the
+  final acceptance JSON, not a separate handwritten tally;
+- the README counts MUST equal the JSON and its item list;
+- do not treat MISMATCH_PROVED as PASS without identifying the actual meaning;
+- include a packaging self-check that fails on a count mismatch;
+- no unexplained stale PASS=0 / MISMATCH_PROVED=0;
+- retained historical R2 README error must be documented as historical only.
+
+Never retouch/crop original screenshot pixels to conceal defects.
+Derived composites only label and uniformly scale/pad as needed.
+Verify source hashes, ZIP CRC, extraction rehash, and no private DB,
+WAL/SHM, customer firmware, personal data, installer, nested archive or .git.
+
+Print absolute ZIP path, size, SHA-256, file count and manifest pass count.
+This final ZIP must be directly uploadable for the Architect's independent
+visual review, not merely a private Temp tree.
+
+============================================================
+17. R3 REPORT + ONE DOCS-ONLY SUCCESSOR
+============================================================
+
+Create:
+U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md
+
+Record:
+root causes; RED/GREEN/mutation; exact product path diff;
+Compare UI session ownership; no-result explanation; first viewport;
+1024 band; read-only Git evidence audit; local tests;
+product commit + exact CI; artifact identity; screenshot files;
+owner-store integrity; final ZIP counts/hashes;
+source/unknown classifications; unresolved issues and V1 interlock.
+
+If still present, correct the two wrong U1 unit ordinals in
+.ai/ACTIVE_TASK.md and .ai/CURRENT_STATE.md as part of THIS normal
+successor, not a standalone documentation-only CI cycle.
+
+Once owner restore passes, create at most ONE docs/evidence successor using
+ADR-0029. Allowed: U1_VALIDATION/**, accurately necessary .ai/**,
+README/INDEX if materially stale, prompt archive, BASELINE.yaml,
+DIRECTORY_TREE.txt, SHA256SUMS. No product source in docs successor.
+
+Run the complete authoritative local gate again and verify Rust/UI test
+counts unchanged from R3 product head.
+Normal fast-forward push only under user authorization.
+Read successor CI by exact head, 10 individual jobs.
+Do not make a further commit just to write the CI run back into the record.
+
+If product CI and screenshot evidence pass, strongest AGENT verdict is:
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+
+If Compare result/1024 band/pack integrity fails:
+U1 = REQUIRES_ARCHITECT_POLISH_REVIEW or BLOCKED as justified.
+
+The Agent NEVER issues U1 PASS_COMPLETE / VISUAL_ACCEPTED.
+
+============================================================
+18. STOP / STAGE INTERLOCK
+============================================================
+
+V1 stays:
+IN_PROGRESS / RECRUITMENT_READY
+0 eligible real external participants
+participant execution PAUSED_FOR_ARCHITECT_UI_REVIEW
+frozen F3 cohort artifact UNCHANGED.
+
+No V1 cohort re-freeze.
+No recruiting or user sessions.
+No B1 / Private Beta.
+No RC/GA, signing, notarization, automatic updater,
+license decision, public installer, pricing or GitHub Release.
+
+Do not use these limitations as motivation to add unrelated features.
+
+============================================================
+19. FINAL REPORT FORMAT (RETURN ALL PARTS)
+============================================================
+
+# FirmwareSight U1P-R3 Final Narrow Corrective Report
+
+1. Authority (local/remote HEAD, pristine start)
+2. Original photo/ZIP provenance and three Architect findings
+3. R3 plan and exact allowlisted paths
+4. Compare empty-state lifecycle/retention design and safeguards
+5. Compare first-viewport result with real data
+6. 1024/1056 capability band before/after
+7. Copy audit and Git cross-surface source conclusion
+8. RED/GREEN tests, mutation proofs, Rust/UI actual counts
+9. Full local gates and baseline integrity
+10. Product commit SHA, normal push, exact 10-job CI/attempt history
+11. Exact Windows artifact ID/hash/installed EXE hash
+12. Owner backup, park and final restore proof
+13. Installed primary screenshots and responsive filenames
+14. Itemized first-viewport/functional PASS/FAIL/NOT_VERIFIED
+15. Packaging correction: JSON vs README counted truth and historical R2 ZIP unchanged
+16. Final user-uploadable ZIP path/size/SHA and verified file counts
+17. Evidence successor SHA, path-only audit, exact CI 10/10
+18. Open known minor findings: list, do not self-waive or add new scope
+19. V1/B1 interlock, and agent recommendation to Architect
+20. STOP
+
+Do not request a new product scope unless an actual STOP blocker occurred.
+Return the R3 ZIP to the owner for the last independent visual verdict.
+
+END OF PROMPT

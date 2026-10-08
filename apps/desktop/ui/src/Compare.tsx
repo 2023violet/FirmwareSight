@@ -1,7 +1,7 @@
 /**
  * The Compare page: two builds this application already analyzed, and what moved between them.
  *
- * Four rules decide the shape of this screen.
+ * Five rules decide the shape of this screen.
  *
  * 1. **Nothing is computed here.** Deltas, change kinds, comparability and ranking come from Core
  *    through the shell; this page chooses words and layout, and filters, sorts and pages by asking
@@ -15,6 +15,10 @@
  * 4. **A failed comparison does not delete the last good one.** The summary moves only when the
  *    shell returns one, and the surviving report says which pair of builds it belongs to and which
  *    pair it does not (prompt §42).
+ * 5. **A comparison outlives the page that computed it.** The pair and the result are session facts,
+ *    so the shell holds them and navigating to Overview and back neither loses the answer nor recomputes
+ *    it. The diff handle that answers for it lives in this process only, which is why a fresh process
+ *    starts with no comparison at all (U1P-R3 F1).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -24,7 +28,7 @@ import { Button } from './components/Button';
 import { ErrorPanel } from './components/ErrorPanel';
 import { Page, ScrollArea } from './components/Layout';
 import { PageHeader } from './components/PageHeader';
-import { EmptyState } from './components/Panel';
+import { EmptyState, Panel } from './components/Panel';
 import { Pager, SortHeader } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
@@ -90,22 +94,65 @@ const KIND_FILTERS: readonly {
   { label: 'Changed', value: 'changed' },
 ];
 
+/**
+ * What the shell keeps about a comparison, and the only part of one that has to survive a page switch.
+ *
+ * The pair and the result travel together because they are one fact: a diff that outlives its own selectors
+ * is the stale-pair problem wearing a different coat. `diffId` rides inside `summary` and is deliberately
+ * *not* mirrored here - it is this process's handle for a computed comparison, so a fresh session starts
+ * with no comparison at all and nothing on this page may suggest otherwise.
+ */
+export type ComparisonSession = {
+  readonly baseId: string | null;
+  readonly targetId: string | null;
+  readonly summary: CompareSummaryDto | null;
+};
+
+export const EMPTY_COMPARISON: ComparisonSession = { baseId: null, targetId: null, summary: null };
+
 export function Compare({
   unit,
   onUnitChange,
   lastAnalyzedSnapshotId,
+  session,
+  onSessionChange,
   onGoToAnalyze,
 }: {
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
   readonly lastAnalyzedSnapshotId: string | null;
+  readonly session: ComparisonSession;
+  readonly onSessionChange: (
+    next: ComparisonSession | ((previous: ComparisonSession) => ComparisonSession),
+  ) => void;
   readonly onGoToAnalyze: () => void;
 }) {
   const [candidates, setCandidates] = useState<CandidatePageDto | null>(null);
   const [candidateError, setCandidateError] = useState<ErrorEnvelopeDto | null>(null);
-  const [baseId, setBaseId] = useState<string | null>(null);
-  const [targetId, setTargetId] = useState<string | null>(null);
-  const [summary, setSummary] = useState<CompareSummaryDto | null>(null);
+  // The pair and the result are the shell's, so leaving the page cannot throw them away (U1P-R3 F1).
+  const { baseId, targetId, summary } = session;
+  // Every write is an update function rather than a literal built from `session`, because two writes issued
+  // from one render would otherwise both spread the same snapshot and the second would silently undo the
+  // first - and a comparison that lands late must merge into whatever pair the reader has since chosen,
+  // not resurrect the pair they pressed Compare on.
+  const setPair = useCallback(
+    (next: { readonly baseId: string | null; readonly targetId: string | null }) => {
+      onSessionChange((previous) => ({ ...previous, baseId: next.baseId, targetId: next.targetId }));
+    },
+    [onSessionChange],
+  );
+  const setBaseId = useCallback(
+    (id: string | null) => {
+      onSessionChange((previous) => ({ ...previous, baseId: id }));
+    },
+    [onSessionChange],
+  );
+  const setTargetId = useCallback(
+    (id: string | null) => {
+      onSessionChange((previous) => ({ ...previous, targetId: id }));
+    },
+    [onSessionChange],
+  );
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [comparing, setComparing] = useState(false);
   const [sectionFocus, setSectionFocus] = useState<Focus | null>(null);
@@ -145,6 +192,10 @@ export function Compare({
    * The build Analyze last proved is the one the reader most likely wants to compare, so it becomes
    * the target and the next distinct build becomes the base. Choosing is not comparing: no diff runs
    * until the reader presses Compare.
+   *
+   * The guard that keeps this from running is the same one that protects a retained session: on re-entry both
+   * ids are already named, so the pair the reader left behind comes back unchanged and the restored comparison
+   * is not silently re-pointed at a different pair (U1P-R3 §11).
    */
   useEffect(() => {
     if (
@@ -162,9 +213,11 @@ export function Compare({
     const preferred =
       candidates.rows.find((row) => row.snapshotId === lastAnalyzedSnapshotId) ?? mostRecent;
     const other = candidates.rows.find((row) => row.snapshotId !== preferred.snapshotId) ?? null;
-    setTargetId(preferred.snapshotId);
-    setBaseId(other === null ? null : other.snapshotId);
-  }, [baseId, candidates, lastAnalyzedSnapshotId, targetId]);
+    setPair({
+      baseId: other === null ? null : other.snapshotId,
+      targetId: preferred.snapshotId,
+    });
+  }, [baseId, candidates, lastAnalyzedSnapshotId, setPair, targetId]);
 
   /** More stored builds, appended to the list the selectors already hold. */
   const loadMore = useCallback(async () => {
@@ -190,6 +243,11 @@ export function Compare({
    *
    * `summary` only ever moves when the shell returns one, so a failed attempt changes the error and
    * the label on the surviving report - nothing else.
+   *
+   * The result is written through the shell rather than into the page, which is what makes a comparison that
+   * finishes after the reader has navigated away still arrive instead of landing on an unmounted setter. The
+   * write merges into whatever the selectors name by then, so an obsolete response cannot drag the pair back
+   * with it; the report simply says which pair it belongs to.
    */
   const compare = useCallback(async () => {
     if (baseId === null || targetId === null || baseId === targetId) {
@@ -200,7 +258,7 @@ export function Compare({
     setComparing(false);
 
     if (outcome.ok) {
-      setSummary(outcome.value);
+      onSessionChange((previous) => ({ ...previous, summary: outcome.value }));
       setError(null);
       setExportNote(null);
       setExportError(null);
@@ -209,12 +267,11 @@ export function Compare({
       return;
     }
     setError(outcome.envelope);
-  }, [baseId, targetId]);
+  }, [baseId, onSessionChange, targetId]);
 
   const swap = useCallback(() => {
-    setBaseId(targetId);
-    setTargetId(baseId);
-  }, [baseId, targetId]);
+    setPair({ baseId: targetId, targetId: baseId });
+  }, [baseId, setPair, targetId]);
 
   /* The largest additions come from the same bounded query the table below uses, so a capped list
      and the full list cannot disagree about which rows exist. If this read fails, that table asks
@@ -303,7 +360,7 @@ export function Compare({
     <Page>
       <PageHeader
         title="Compare"
-        subhead="Pick two builds FirmwareSight has already analyzed and stored, and it reports what moved between those recorded facts. A comparison does not re-read the original files, and nothing here writes to them."
+        subhead="Pick two builds FirmwareSight has already analyzed and stored, and it reports what moved between those recorded facts."
       />
 
       {candidateError === null ? null : (
@@ -403,7 +460,23 @@ export function Compare({
         <ErrorPanel envelope={error} label="Comparison error" heading="Comparison failed" />
       )}
 
-      <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
+      {/* Two stored builds and no comparison is the state every re-entry of this page used to land in, and
+          it used to land in an empty band of page: the pickers, a hairline, and nothing under them. It is a
+          real fact about the session - there is a pair to compare and no result yet - so it gets the words
+          for that fact (U1P-R3 F1). It claims no numbers, no delta and no verdict, because a promise of a
+          result is not one, and it does not replace the Compare action it describes. */}
+      {candidates === null || !hasTwoBuilds || summary !== null || comparing ? null : (
+        <Panel title="Ready to compare">
+          <p className={styles['readyMessage']}>
+            Choose Old / Base and New / Target, then select Compare.
+          </p>
+        </Panel>
+      )}
+
+      {/* Before there is a result the unit governs the recorded figures beside the two selectors, so the
+          switch sits under them; once there is one it belongs with the figures it re-labels, which is the
+          row it heads (U1P-R3 §6). Exactly one switch is on screen at a time. */}
+      {summary === null ? <SizeUnitSwitch unit={unit} onSelect={onUnitChange} /> : null}
 
       {summary === null ? null : (
         <section
@@ -422,7 +495,7 @@ export function Compare({
               diff itself, with the growth lists beside it - and the long evidence prose, which explains a
               comparison rather than being one, moves below. The order is the only thing that changed: every
               region keeps its own name, its own rows and its own words. */}
-          <WhatMoved counts={summary.counts} />
+          <WhatMoved counts={summary.counts} unit={unit} onUnitChange={onUnitChange} />
           <MemoryComparison memory={summary.memory} unit={unit} />
 
           {/* One pair of tables for one comparison: each resets its own filter when the handle it
@@ -472,6 +545,10 @@ export function Compare({
             <span>
               The diff id is this session&rsquo;s handle for the computed comparison: not stored, not
               portable, and not part of what the diff proves.
+            </span>
+            <span>
+              A comparison reads the records this application stored for these two builds. It does not
+              re-read the original files, and nothing here writes to them.
             </span>
           </footer>
         </section>
@@ -577,11 +654,13 @@ function MemoryComparison({
 }) {
   return (
     <section className={styles['section']} aria-label="Memory comparison">
-      <h2>Memory</h2>
-      <p className={styles['caption']}>
-        Delta = target &minus; base. A positive delta is growth. Unknown and{' '}
-        &ldquo;{ABSENT}&rdquo; are never written as 0.
-      </p>
+      <div className={styles['sectionHead']}>
+        <h2>Memory</h2>
+        <p className={styles['caption']}>
+          Delta = target &minus; base. A positive delta is growth. Unknown and{' '}
+          &ldquo;{ABSENT}&rdquo; are never written as 0.
+        </p>
+      </div>
       <div className={styles['rows']}>
         <MemoryRow term="Nonvolatile / load image" change={memory.nonvolatile} unit={unit} />
         <MemoryRow term="Runtime RAM" change={memory.runtimeRam} unit={unit} />
@@ -765,11 +844,26 @@ function EvidenceNotice({ summary }: { readonly summary: CompareSummaryDto }) {
  *
  * Added, Removed and Changed are not Gate states and borrow no Gate icon: each is a word with a
  * count, and the unpaired count says what the pairing could not decide (prompt §40).
+ *
+ * The unit switch moved into this row (U1P-R3 §6) because it answers a question about the figures below,
+ * and a full-width row of its own above them pushed the first section rows off the first viewport. The
+ * counts do not convert, so the switch sits here as the page's unit rather than as a control for this row.
  */
-function WhatMoved({ counts }: { readonly counts: DiffCountsDto }) {
+function WhatMoved({
+  counts,
+  unit,
+  onUnitChange,
+}: {
+  readonly counts: DiffCountsDto;
+  readonly unit: SizeUnit;
+  readonly onUnitChange: (unit: SizeUnit) => void;
+}) {
   return (
     <section className={styles['section']} aria-label="What moved">
-      <h2>What moved</h2>
+      <div className={styles['sectionHead']}>
+        <h2>What moved</h2>
+        <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
+      </div>
       <div className={styles['rows']}>
         <CountRow term="Sections" counts={counts.sections} unchanged={counts.unchangedSections} />
         <CountRow term="Symbols" counts={counts.symbols} unchanged={counts.unchangedSymbols} />

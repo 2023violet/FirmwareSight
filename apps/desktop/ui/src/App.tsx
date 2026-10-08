@@ -18,7 +18,7 @@
  * moves, this shell tells the shell which page moved, and Rust composes the text from a closed set
  * (`MainWindowPage`).
  *
- * Five pieces of state live here because they outlive a page switch:
+ * Six pieces of state live here because they outlive a page switch:
  *
  * - the size unit, which is one answer to one question and must not differ between two tables the same
  *   reader is comparing (US-001, prompt §39);
@@ -34,6 +34,10 @@
  * - the loaded project policy plus the last Gate run, because a Release record that vanishes when the
  *   reader checks one section in Compare would leave them with nothing to accept a review against
  *   (prompt §49), and because the Overview's ship question is meaningless without the run it came from;
+ * - the comparison the reader actually asked for, which is the same argument one level down: U1P-R3 found
+ *   Compare showing two named builds and an empty page after a trip to Overview, because the diff lived in
+ *   the page and the page is unmounted on every navigation. It is held here as a pair plus a summary - the
+ *   shell's own session facts, not a persisted record, because `diffId` is an in-process handle;
  * - and whether the first-use panel has been hidden, which is one deliberate act of the reader and must
  *   survive a trip to History and back without coming back on its own (prompt §13).
  */
@@ -42,7 +46,7 @@ import { useEffect, useState } from 'react';
 
 import styles from './App.module.css';
 import { Analyze } from './Analyze';
-import { Compare } from './Compare';
+import { Compare, EMPTY_COMPARISON, type ComparisonSession } from './Compare';
 import type { SizeUnit } from './format';
 import { Help } from './Help';
 import { History } from './History';
@@ -122,6 +126,12 @@ export function App() {
   const [analyzedSelectionId, setAnalyzedSelectionId] = useState<string | null>(null);
   const [project, setProject] = useState<ProjectContextDto | null>(null);
   const [gateRun, setGateRun] = useState<GateRunDto | null>(null);
+  /**
+   * The pair the reader named and the comparison that pair produced, kept together on purpose: they are
+   * one fact with two halves, and separating them is how a page ends up showing a diff for a build the
+   * selectors no longer point at.
+   */
+  const [comparison, setComparison] = useState<ComparisonSession>(EMPTY_COMPARISON);
   /** Hidden for the session by the reader, not by the application deciding they have read it. */
   const [gettingStartedHidden, setGettingStartedHidden] = useState(false);
 
@@ -185,6 +195,8 @@ export function App() {
               unit={unit}
               onUnitChange={setUnit}
               lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
+              session={comparison}
+              onSessionChange={setComparison}
               onGoToAnalyze={() => {
                 setPage('analyze');
               }}

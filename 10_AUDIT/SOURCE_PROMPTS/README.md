@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 # Execution Prompt Register
@@ -1144,6 +1144,41 @@ text with no source file; each says so in its own entry instead of standing for 
   under-reads the registered command list as 28 where splitting it on commas gives 30, and a build-time guess at the
   parse-failure error code (`ERR-PARSE-2002`) was replaced by what the installed product actually answers
   (`ERR-FORMAT-0001`), with the original sentence kept quoted and unmodified beside the correction.
+
+## U1P-R3 Final Narrow Corrective and Visual Closure v1.0 — IN PROGRESS (2026-10-08)
+
+- File: `FirmwareSight_U1P_R3_Final_Narrow_Corrective_and_Visual_Closure_v1.0.txt` — 32,849 delivered bytes,
+  745 logical lines, delivered sha256 `a185890edd043344a4332dfcc048fd63add1f8a5226dead4af373cc1ceab4de9`; stored as
+  blob `384e8ca42db8d8238d263c18111d58e5d8da1ab1`, 32,849 bytes, **the same sha256**. One digest rather than two
+  because this prompt arrived with LF terminators only (measured: 745 LF, 0 CR), so `.gitattributes`
+  `*.txt text eol=lf` had nothing to normalise. That equality is a measurement, not an assumption: the CRLF
+  arrivals in the two entries above each needed a second digest and a line-by-line proof, and a future round must
+  not read "one hash" as licence to skip the check.
+- Canonical unit: `U1P_R3_FINAL_NARROW_CORRECTIVE_AND_INSTALLED_VISUAL_REVIEW`, verbatim from prompt line 4.
+- What it responds to: an **independent Architect review of the actual R2 image pack**, whose verdict was
+  `U1 = REQUIRES_NARROW_CORRECTIVE`. §3 states the three findings as input rather than as self-rating —
+  `F1` Compare leaves a large unexplained blank area once two candidates exist and its result is lost on
+  re-entry; `F2` the real section diff sits below the first viewport at 1440×900; `F3` the shared
+  `auto-fit` band resolves to two columns at 1024 and leaves a cell that reads as a missing fourth capability.
+  `E1` is a deliverable defect, not a product one: the R2 pack's own `00_README.txt` printed
+  `MISMATCH_PROVED=0, PASS=0` while the JSON beside it held 20 and 1.
+- Exactly three deliverables, and no fourth: (A) Compare intra-process retention plus a purposeful two-candidate
+  empty state and a result-first first viewport; (B) the 1024/1056 Overview band with three real cells and no
+  fake fourth; (C) a final pack whose README counts are derived from the acceptance JSON with a self-check that
+  fails on any mismatch. §8 permits light copy work and the two stale U1 ordinal labels **inside** an authorized
+  change, and forbids a commit for either on its own.
+- Scope locks: §5 bans persistence through SQLite, backend IPC, localStorage or schema — `diffId` is an ephemeral
+  in-process handle — and §10 forbids `crates/**`, schemas, migrations, fixtures, scripts, `.github/**`,
+  manifests, tokens, new IPC and new dependencies. §9 stops the round if a proposed solution would need any of
+  them. §12/§17 allow one product commit and at most one docs-only successor, each a normal fast-forward, with
+  no force, rebase, squash or amend, and no further commit merely to write a CI number back.
+- §14/§15 fix the acceptance evidence to real installed bytes: named captures P01–P10 and R01–R10, each with its
+  measured client dimensions and installed EXE digest, every contract item answered PASS / FAIL / NOT_VERIFIED
+  against a screenshot or trace, `NOT_CAPTURED` with a reason instead of a substitute, and no product edit after
+  the captures.
+- Ceiling word: §17 permits the agent at most `U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`. §18 keeps V1 at
+  `IN_PROGRESS / RECRUITMENT_READY` with zero sessions and the F3 cohort artifact unchanged, and §19 ends with
+  STOP and a recommendation, not a verdict.
 
 ## Supersession note on the V0 Batch A activation entry
 

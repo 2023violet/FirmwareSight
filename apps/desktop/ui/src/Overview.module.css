@@ -15,6 +15,33 @@
   overflow-wrap: anywhere;
 }
 
+/* U1P-R3 F2: the capability band fills the line its cells wrap onto.
+ *
+ * `components/Panel.module.css` lays a band out as `repeat(auto-fit, minmax(--fs-layout-evidence-inspector-min, 1fr))`,
+ * which is right for every band in the product until a band holds three cells and the window holds two
+ * tracks. At the frozen 1024 px desktop minimum the workspace column is about 752 px, so ELF and MAP take
+ * the row and Git starts a second one with a track left beside it - and a band's own background is the
+ * border colour, so that track reads as a fourth capability this product does not have. It is in
+ * `R2_R01_Matched_1024x720.png`, measured by the Architect rather than by jsdom, which lays nothing out.
+ *
+ * A wrapping flex line has no track to leave over: the items on the final line grow into what remains, so
+ * Git spans the row at 1024 and 1056 while 1440 still gets one balanced row of three. The basis is the same
+ * governed inspector minimum the shared band already uses, so nothing here invents a width.
+ *
+ * Deliberately local, and deliberately reaching the band through the role its own tests bind to
+ * (`role="group"`, `Panel.tsx:115`) rather than through a hashed class name: the shared component and the
+ * bands on Analyze, Compare, Release and History are untouched.
+ */
+.fillBand > [role='group'] {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.fillBand > [role='group'] > * {
+  flex: 1 1 var(--fs-layout-evidence-inspector-min);
+  min-width: 0;
+}
+
 .verdict {
   display: flex;
   flex-wrap: wrap;

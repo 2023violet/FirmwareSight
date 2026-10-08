@@ -278,8 +278,15 @@ function capabilityCells(
       title="Git"
       hint={<StateBadge variant="chip" state={capabilityState(capabilities.git)} label={capabilities.git} />}
     >
+      {/* U1P-R3 §8 found this sentence crediting the fact to the wrong source. The pill is `capabilities.git`,
+          which the analysis path leaves at Core's default (`firmwaresight-artifact/src/pipeline.rs` builds
+          every snapshot from `Capabilities::elf_only()`); no gate rule writes it, and `git.clean` reads the
+          *opened project's* workspace rather than any repository this artifact came from. The cell now names
+          the one thing that actually produced the value, and leaves the rule's verdict on the page that
+          judged it. */}
       <p className={styles['inputDetail']}>
-        Judged by the <code>git.clean</code> rule, from the repository this build came from.
+        Core&rsquo;s analysis capability for Git provenance. The <code>git.clean</code> rule is the
+        gate&rsquo;s separate question, about the opened project.
       </p>
     </Panel>,
   ];
@@ -300,19 +307,25 @@ function InputRow({
   // reader may want to jump between, and a band is a layout, not an excuse to flatten semantics.
   // This band is only ever rendered when the summary describes the selection in hand, so its two facts -
   // Core's capability and the selection's MAP attachment - are the same artifact's by construction.
+  // The wrapper is the U1P-R3 F2 fix and nothing else: it asks this one band to fill the line its cells wrap
+  // onto, because at the frozen 1024 px width three capability cells land in a two-track row and the leftover
+  // track showed the band's own background as a fourth cell that does not exist. `components/Panel` is not
+  // touched, so the bands on Analyze, Compare, Release and History are the ones that were approved.
   return (
-    <Band label="Input capabilities">
-      {capabilityCells(
-        summary,
-        selection?.mapAttached
-          ? (selection.mapFileName ?? 'attached')
-          : 'Symbol-level analysis depends on it',
-        {
-          elf: <LinkButton onClick={() => onOpen('analyze')}>Open Analyze</LinkButton>,
-          map: <LinkButton onClick={() => onOpen('analyze')}>Attach one on Analyze</LinkButton>,
-        },
-      )}
-    </Band>
+    <div className={styles['fillBand']}>
+      <Band label="Input capabilities">
+        {capabilityCells(
+          summary,
+          selection?.mapAttached
+            ? (selection.mapFileName ?? 'attached')
+            : 'Symbol-level analysis depends on it',
+          {
+            elf: <LinkButton onClick={() => onOpen('analyze')}>Open Analyze</LinkButton>,
+            map: <LinkButton onClick={() => onOpen('analyze')}>Attach one on Analyze</LinkButton>,
+          },
+        )}
+      </Band>
+    </div>
   );
 }
 
@@ -381,13 +394,15 @@ function PreviousAnalysis({
         {`Previous analysis of ${artifact.fileName}.${attribution}`}
       </p>
       <p className={styles['identity']}>{`Snapshot ${summary.identity.snapshotId}`}</p>
-      <Band label="Previous input capabilities">
-        {capabilityCells(
-          summary,
-          `As reported by the analysis of ${artifact.fileName}.`,
-          { elf: null, map: null },
-        )}
-      </Band>
+      <div className={styles['fillBand']}>
+        <Band label="Previous input capabilities">
+          {capabilityCells(
+            summary,
+            `As reported by the analysis of ${artifact.fileName}.`,
+            { elf: null, map: null },
+          )}
+        </Band>
+      </div>
       <Band narrow label="Previous key figures">
         {figureCells(summary, unit)}
       </Band>

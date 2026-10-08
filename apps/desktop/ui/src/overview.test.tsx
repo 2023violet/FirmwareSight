@@ -1033,3 +1033,93 @@ describe('U1P-R2 a pending selection may not wear the previous build’s facts',
     expect(previous.textContent).toContain(SNAP_B);
   });
 });
+
+/**
+ * U1P-R3 §9 T10-T12: the Overview band's cells, counted rather than admired.
+ *
+ * The Architect found the third defect in a screenshot - at 1024 px the capability band resolves to two
+ * columns and the unfilled track reads as a missing fourth capability - and a browser window is not
+ * reproducible in jsdom, so T12 states the part that *is* checkable here: the band carries exactly the
+ * three inputs the product reads, each with its own answer, and nothing in the markup stands in for a
+ * fourth. Whether the row leaves a grey void is answered by the installed capture, and the test says so in
+ * its own name rather than pretending to measure layout.
+ *
+ * These three are locks, not RED proofs, and that was measured rather than assumed: with HEAD's
+ * `Overview.tsx`, `components/Panel.tsx` and `components/Panel.module.css` written back over the working
+ * copies, all 38 tests in this file passed (the record, with the restore digests, is in
+ * `target/u1p_r3_red.txt`). The DOM was never the defect - the track was.
+ */
+describe('U1P-R3 the Overview capability band has three real cells', () => {
+  /** The three answers the band is allowed to contain, in the order the references draw them. */
+  const CELLS = ['ELF', 'MAP', 'Git'];
+
+  function capabilityCells() {
+    return within(screen.getByRole('group', { name: 'Input capabilities' })).getAllByRole('region');
+  }
+
+  it('T10 shows all three capabilities as the analyzed build own facts', () => {
+    render(
+      <Overview
+        summary={summary()}
+        selection={selection()}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun()}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    expect(capabilityCells().map((cell) => cell.getAttribute('aria-label'))).toEqual(CELLS);
+    // No cell is a placeholder: each carries the detail line that makes it mean something.
+    for (const cell of capabilityCells()) {
+      expect((cell.textContent ?? '').trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it('T11 shows no capability cell at all while the selection is pending', () => {
+    render(
+      <Overview
+        summary={summary()}
+        selection={selection({ selectionId: 'sel-2', fileName: 'other.elf' })}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun()}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    // U1P-R2's rule, re-locked: a pending selection borrows no green chip and no figure as a current fact.
+    expect(screen.queryByRole('group', { name: 'Input capabilities' })).toBeNull();
+    expect(
+      within(screen.getByRole('group', { name: 'Selected artifact' })).getAllByRole('region').map(
+        (cell) => cell.getAttribute('aria-label'),
+      ),
+    ).toEqual(['Artifact', 'MAP']);
+    expect(
+      within(screen.getByRole('group', { name: 'Previous input capabilities' })).getAllByRole('region'),
+    ).toHaveLength(3);
+  });
+
+  it('T12 counts three cells and no invented fourth, leaving the pixel question to the screenshots', () => {
+    render(
+      <Overview
+        summary={summary()}
+        selection={selection()}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun()}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const band = screen.getByRole('group', { name: 'Input capabilities' });
+    // The fix must fill the row, not pad it: an empty element standing in for the missing capability would
+    // pass a width assertion and fail this one.
+    expect(band.children).toHaveLength(3);
+    expect(within(band).queryAllByRole('region')).toHaveLength(3);
+    expect(band.textContent).not.toMatch(/fourth|placeholder|reserved/i);
+  });
+});

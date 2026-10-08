@@ -1370,3 +1370,196 @@ describe('U1P Compare hierarchy', () => {
     expect(arrow?.textContent).toBe('\u2192');
   });
 });
+
+/**
+ * U1P-R3: a comparison is a fact about this session, so it must outlive the page that computed it.
+ *
+ * The Architect read the installed `REG_Compare_1440x900.png` and found two candidates named, the action
+ * present, and nothing below: `Compare.tsx` kept `summary` in component state while `App.tsx` unmounts the
+ * page on every navigation, and the only empty state on the page answers "fewer than two builds".
+ *
+ * Measured against `f01eec1` before any product file changed - see `target/u1p_r3_red.txt` for the run and
+ * the digest-restored re-check of T3b: T1, T3, T3b, T4, T5, T6, T8 and T9 failed, because the behaviour they
+ * require did not exist. T2 and T7 passed and were meant to: they are locks on the two states that must not
+ * move while the gap is closed - the fewer-than-two flow and the session that has no comparison to show.
+ *
+ * No test here measures a pixel. jsdom lays nothing out, so the blank-cell question and the above-the-fold
+ * question are answered by the installed screenshots, and the matching Overview contract says so in its own
+ * name.
+ */
+describe('U1P-R3 the comparison survives the page it was made on', () => {
+  it('T1 tells a reader with two builds and no comparison what to do next', async () => {
+    await openCompare();
+
+    const ready = await screen.findByRole('region', { name: 'Ready to compare' });
+    expect(within(ready).getByRole('heading', { level: 2, name: 'Ready to compare' })).toBeDefined();
+    expect(
+      within(ready).getByText('Choose Old / Base and New / Target, then select Compare.'),
+    ).toBeDefined();
+
+    // A promise of a result is not a result: the ready state may not smuggle in counts, deltas or a verdict.
+    expect(screen.queryByRole('region', { name: 'Build comparison' })).toBeNull();
+    expect(screen.queryByText('What moved')).toBeNull();
+    expect(compareMock).not.toHaveBeenCalled();
+    // and the action it describes stays available, because the empty state must not replace the control.
+    expect((screen.getByRole('button', { name: 'Compare' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('T2 keeps asking for another build when there is only one, and says something different', async () => {
+    candidatesMock.mockResolvedValue(
+      ok(candidatePage([candidate()], { total: 1, nextOffset: null })),
+    );
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Compare page' }));
+
+    const single = await screen.findByRole('region', { name: 'Nothing to compare yet' });
+    expect(within(single).getByText(/Analyze another firmware build before comparing/)).toBeDefined();
+    // The two empty states are different facts and must not collapse into one sentence.
+    expect(screen.queryByRole('region', { name: 'Ready to compare' })).toBeNull();
+  });
+
+  it('T3 keeps the real comparison on screen after the reader leaves Compare and comes back', async () => {
+    await openCompare();
+    await runCompare();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Overview page' }));
+    await screen.findByRole('heading', { level: 1, name: 'Overview' });
+    fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
+
+    const report = await screen.findByRole('region', { name: 'Build comparison' });
+    expect(within(report).getByText('What moved')).toBeDefined();
+    // Retaining is not recomputing: the shell was asked for exactly the one comparison the reader pressed.
+    expect(compareMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('T3b keeps the comparison through the pages scenario C2 names', async () => {
+    await openCompare();
+    await runCompare();
+
+    // C2 lists four destinations, and the shell unmounts Compare for every one of them: `App.tsx` renders
+    // one page at a time from a single ternary chain. Walking more than one is the difference between
+    // proving the retention once and proving it is not a special case of the page the test visited.
+    // Bundle & History is not walked here because the page reads three list commands this file's bridge
+    // mock does not answer, and stubbing them would be a harness change with no bearing on what is under
+    // test: the comparison is not stored in the page, so which page the reader went to cannot matter. The
+    // installed capture covers that leg on the real shell.
+    const c2Pages = ['Overview page', 'Analyze page', 'Release Gate page'];
+    for (const page of c2Pages) {
+      fireEvent.click(screen.getByRole('button', { name: page }));
+      fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
+      await screen.findByRole('region', { name: 'Build comparison' });
+    }
+
+    expect(compareMock).toHaveBeenCalledTimes(1);
+    const [base, target] = pair();
+    expect([base.value, target.value]).toEqual(['snap-old', 'snap-new']);
+  });
+
+  it('T4 restores the pair the result belongs to and keeps querying its own handle', async () => {
+    await openCompare();
+    await runCompare();
+    const [beforeBase, beforeTarget] = pair();
+    const shown = [beforeBase.value, beforeTarget.value];
+    expect(shown).toEqual(['snap-old', 'snap-new']);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Analyze page' }));
+    await screen.findByRole('heading', { level: 1, name: 'Analyze' });
+    fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
+    await screen.findByRole('region', { name: 'Build comparison' });
+
+    const [afterBase, afterTarget] = pair();
+    expect([afterBase.value, afterTarget.value]).toEqual(shown);
+    // Every paged read still addresses the diff the reader computed - not a fresh handle, not a stale one.
+    const handles = new Set(sectionChangesMock.mock.calls.map(([request]) => request.diffId));
+    expect([...handles]).toEqual(['cmp-7f3a-1']);
+    const symbolHandles = new Set(symbolChangesMock.mock.calls.map(([request]) => request.diffId));
+    expect([...symbolHandles]).toEqual(['cmp-7f3a-1']);
+  });
+
+  it('T5 labels a restored comparison as the old pair the moment a selector moves', async () => {
+    await openCompare();
+    await runCompare();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Overview page' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
+    await screen.findByRole('region', { name: 'Build comparison' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    const lastGood = await screen.findByRole('region', { name: 'Last good comparison' });
+    expect(
+      within(lastGood).getByText(/The pair selected above is a different one; press Compare to move to it/),
+    ).toBeDefined();
+    // Swapping is choosing, not comparing.
+    expect(compareMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('T6 keeps a failed attempt and the surviving report attributed separately after a return', async () => {
+    await openCompare();
+    await runCompare();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Overview page' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
+    await screen.findByRole('region', { name: 'Build comparison' });
+
+    compareMock.mockResolvedValueOnce(fail(PAIR_REFUSED));
+    fireEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
+
+    expect(await screen.findByText('ERR-DIFF-5001')).toBeDefined();
+    const lastGood = await screen.findByRole('region', { name: 'Last good comparison' });
+    expect(
+      within(lastGood).getByText(/The attempt above produced no result, so nothing here was replaced/),
+    ).toBeDefined();
+  });
+
+  it('T7 starts a fresh session showing no comparison, which is all a session with nothing persisted can show', async () => {
+    await openCompare();
+
+    // What this proves is the visible half of scenario C5: a new mount of the shell has no report, no
+    // stale-labelled report, and asks the shell for no change rows. What it cannot prove is the negative
+    // about storage - a test of absence needs the diff, and the diff adds no `localStorage`, no IPC read and
+    // no schema field for a comparison, so there is nowhere a handle could be resurrected from. The installed
+    // round proves the process half by relaunching the app against a store that already holds two builds.
+    expect(compareMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole('region', { name: 'Build comparison' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Last good comparison' })).toBeNull();
+    expect(sectionChangesMock).not.toHaveBeenCalled();
+  });
+
+  it('T8 records a comparison that lands while the reader is on another page', async () => {
+    const pending = deferred<CompareSummaryDto>();
+    compareMock.mockReturnValue(pending.promise);
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Compare page' }));
+    await screen.findByRole('combobox', { name: 'New / Target' });
+    await waitFor(() =>
+      expect((screen.getByRole('button', { name: 'Compare' }) as HTMLButtonElement).disabled).toBe(
+        false,
+      ),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
+    // The reader does not wait: they move on, and the page that asked is gone before the answer arrives.
+    fireEvent.click(screen.getByRole('button', { name: 'Overview page' }));
+    await screen.findByRole('heading', { level: 1, name: 'Overview' });
+    pending.resolve(ok(comparison()));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
+    const report = await screen.findByRole('region', { name: 'Build comparison' });
+    expect(within(report).getByText('What moved')).toBeDefined();
+  });
+
+  it('T9 keeps the accessible names of the pickers, the action and the ready state together', async () => {
+    await openCompare();
+    await screen.findByRole('region', { name: 'Ready to compare' });
+
+    const selectors = screen.getByRole('region', { name: 'Build selection' });
+    expect(within(selectors).getByRole('combobox', { name: 'Old / Base' })).toBeDefined();
+    expect(within(selectors).getByRole('combobox', { name: 'New / Target' })).toBeDefined();
+    expect(within(selectors).getByRole('button', { name: 'Compare' })).toBeDefined();
+    // The ready state explains the page; it does not become a live region that speaks over the reader's
+    // own typing, and it does not hide the controls behind a dialog role.
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByRole('status', { name: 'Ready to compare' })).toBeNull();
+  });
+});
