@@ -41,6 +41,30 @@
 
 /* The open findings are a list because they are a set of things to resolve, and the order is Core's:
    `GateRunDto.findings` arrives in canonical rule order and this page only filters it for display. */
+/* The full identity of the build a run judged, or the pair of them when they differ (U1P-R1 §5.A, §5.B). Mono
+   because it is an identifier, metadata size because it is evidence rather than the answer, and wrapping
+   because a snapshot id the reader cannot finish reading is not an attributable identity. Nothing is truncated
+   here: a value that never shortens needs no hidden copy of itself, and a `title` attribute is not reachable by
+   a keyboard reader. */
+.identity {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* A run that is retained rather than current: hairline-subordinate, quiet, and never carrying the verdict
+   type size. U1P-R1 §5.B asks for historical detail to read below the neutral answer when it is shown at all. */
+.pastRun {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  padding-top: var(--fs-space-2);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
 .findings {
   display: flex;
   flex-direction: column;

@@ -14,6 +14,12 @@
  * that executes the gate. This page does not: running the gate belongs to Release, where the policy, the
  * build and the baseline are chosen and where an overwrite is confirmed. The button navigates, and
  * `U1_UI_GAP_AUDIT.md` §D records that choice rather than burying it.
+ *
+ * U1P-R1 added the question this page could not previously ask. It holds a run and an analysis that arrived
+ * through different doors, on different pages, at different times, and it used to treat "I have a run" as
+ * "I have an answer for the build above". `readinessScope` is the one derived read that separates them, and
+ * it changes no fact: the run keeps its own verdict on the page that made it, and this page stops borrowing it
+ * for a build the gate never saw.
  */
 
 import styles from './Overview.module.css';
@@ -42,9 +48,84 @@ import {
 /** The page that can carry out a next step. Overview moves the reader; it never acts for them. */
 export type OverviewTarget = 'analyze' | 'compare' | 'release' | 'history';
 
+/**
+ * Whether the Gate run in hand is about the build this page is describing.
+ *
+ * Derived, read-only, and derived from identities the shell already owns: nothing here computes a verdict, and
+ * nothing here decides which build a run judged - `GateRunDto.snapshotId` already said that, in Core, when the
+ * run was made. U1P-R1 adds this one question because the page could not previously ask it: `App` kept
+ * `analyzedSelectionId` for `Analyze` and never passed it here, so a run made for one build rendered as the
+ * shipping answer about another.
+ */
+type ReadinessScope =
+  | { readonly kind: 'current' }
+  | { readonly kind: 'otherBuild' }
+  | { readonly kind: 'selectionPending' }
+  | { readonly kind: 'noAnalysis' }
+  | { readonly kind: 'otherPolicy' };
+
+function readinessScope(
+  gateRun: GateRunDto,
+  summary: AnalysisSummaryDto | null,
+  selection: SelectionDto | null,
+  analyzedSelectionId: string | null,
+  project: ProjectContextDto | null,
+): ReadinessScope {
+  // The same identity rule `Analyze.tsx:136` uses for its own pending badge: the shell's selection handle, never
+  // a file name, because two artifacts chosen in one session can both be called `firmware.elf`.
+  if (selection !== null && selection.selectionId !== analyzedSelectionId) {
+    return { kind: 'selectionPending' };
+  }
+  if (summary === null) {
+    return { kind: 'noAnalysis' };
+  }
+  if (gateRun.snapshotId !== summary.identity.snapshotId) {
+    return { kind: 'otherBuild' };
+  }
+  // Both values are real 64-hex fingerprints, and a default-policy run fingerprints the default policy, so a
+  // difference here is a fact rather than a missing value. With no project loaded there is nothing to compare
+  // and nothing is claimed.
+  if (project !== null && project.policySha256 !== gateRun.policySha256) {
+    return { kind: 'otherPolicy' };
+  }
+  return { kind: 'current' };
+}
+
+/** The neutral word for the answer this page cannot give, plus the sentence that explains why. */
+const NOT_CURRENT: Record<
+  Exclude<ReadinessScope['kind'], 'current'>,
+  { readonly label: string; readonly headline: string; readonly retained: string }
+> = {
+  otherBuild: {
+    label: 'Not assessed for this build',
+    headline:
+      'The latest Gate run judged a different build, so this page has no shipping answer about the build it is describing.',
+    retained: 'Retained run for a different build',
+  },
+  selectionPending: {
+    label: 'Not assessed for the selected artifact',
+    headline:
+      'The artifact you selected has not been analyzed, so the run below cannot be its shipping answer.',
+    retained: 'Retained run for the previous build',
+  },
+  noAnalysis: {
+    label: 'No analysis in this session',
+    headline:
+      'This session has analyzed nothing, so there is no build here to pair the stored run with.',
+    retained: 'Retained run with no build to compare against',
+  },
+  otherPolicy: {
+    label: 'Not assessed under the policy loaded now',
+    headline:
+      'The run below was judged under a different policy fingerprint, so its result does not answer for the policy loaded now.',
+    retained: 'Retained run under a different policy',
+  },
+};
+
 export function Overview({
   summary,
   selection,
+  analyzedSelectionId,
   gateRun,
   project,
   unit,
@@ -52,6 +133,8 @@ export function Overview({
 }: {
   readonly summary: AnalysisSummaryDto | null;
   readonly selection: SelectionDto | null;
+  /** Which selection produced `summary`; it is the shell's handle, and it moves with the summary. */
+  readonly analyzedSelectionId: string | null;
   readonly gateRun: GateRunDto | null;
   readonly project: ProjectContextDto | null;
   readonly unit: SizeUnit;
@@ -103,7 +186,14 @@ export function Overview({
         <InputRow summary={summary} selection={selection} onOpen={onOpen} />
       )}
 
-      <Readiness gateRun={gateRun} summary={summary} onOpen={onOpen} />
+      <Readiness
+        gateRun={gateRun}
+        summary={summary}
+        selection={selection}
+        analyzedSelectionId={analyzedSelectionId}
+        project={project}
+        onOpen={onOpen}
+      />
 
       {summary === null ? null : <Facts summary={summary} unit={unit} />}
     </Page>
@@ -163,21 +253,29 @@ function InputRow({
 }
 
 /**
- * The ship question, answered with the run's own aggregate.
+ * The ship question, and the one thing that has to be true before this page may answer it: the run in hand
+ * has to be about the build the page is describing.
  *
  * `DESIGN.md` 9 forbids presenting this as a legal, security or compliance conclusion, so the sentence
  * that limits it is part of the card rather than a footnote a reader has to remember to look for. The
  * counts come from `GateCountsDto` and the severity is Core's disposition aggregate; the sentence is
  * `gateVerdictSentence`, the same builder the gate page uses, so the two pages cannot state one run two
- * ways.
+ * ways. U1P-R1 does not change any of that - it stops the page from attributing that aggregate to a
+ * build the gate never looked at.
  */
 function Readiness({
   gateRun,
   summary,
+  selection,
+  analyzedSelectionId,
+  project,
   onOpen,
 }: {
   readonly gateRun: GateRunDto | null;
   readonly summary: AnalysisSummaryDto | null;
+  readonly selection: SelectionDto | null;
+  readonly analyzedSelectionId: string | null;
+  readonly project: ProjectContextDto | null;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
   if (gateRun === null) {
@@ -195,6 +293,22 @@ function Readiness({
     );
   }
 
+  const scope = readinessScope(gateRun, summary, selection, analyzedSelectionId, project);
+  return scope.kind === 'current'
+    ? <CurrentReadiness gateRun={gateRun} summary={summary} onOpen={onOpen} />
+    : <NotCurrentReadiness gateRun={gateRun} summary={summary} scope={scope} project={project} onOpen={onOpen} />;
+}
+
+/** The run's own answer, shown as the page's answer - which is only reachable when the subjects match. */
+function CurrentReadiness({
+  gateRun,
+  summary,
+  onOpen,
+}: {
+  readonly gateRun: GateRunDto;
+  readonly summary: AnalysisSummaryDto | null;
+  readonly onOpen: (target: OverviewTarget) => void;
+}) {
   const state = severityState(gateRun.dispositionEffectiveSeverity);
   const open = gateRun.findings.filter((finding) => finding.state !== 'PASS' && finding.state !== 'N/A');
 
@@ -207,7 +321,7 @@ function Readiness({
         </>
       }
     >
-      <div className={styles['verdict']}>
+      <div className={styles['verdict']} role="group" aria-label="Readiness for the build this page describes">
         <StateBadge variant="chip" state={state} label={state} />
         <p className={styles['verdictSentence']}>{gateVerdictSentence(gateRun)}</p>
         {/* The same strip the gate page puts under its verdict: a verdict word without the counts it was
@@ -222,6 +336,10 @@ function Readiness({
           }}
           label="Findings by state in this run"
         />
+        {/* U1P-R1 §5.A: the verdict names the build it judged, in full, as text inside the answer itself. A
+            truncated value is not an answer a reader can check, and a `title` attribute is not reachable by a
+            keyboard reader, so this line is never shortened. */}
+        <p className={styles['identity']}>{`Judged snapshot ${gateRun.snapshotId}`}</p>
       </div>
 
       {open.length === 0 ? (
@@ -257,6 +375,83 @@ function Readiness({
         </Button>
         {summary !== null && capabilityState(summary.capabilities.map) !== 'PASS' ? (
           <Button onClick={() => onOpen('analyze')}>Attach a MAP file</Button>
+        ) : null}
+      </div>
+
+      <p className={styles['scope']}>
+        This is FirmwareSight policy readiness for the run named above. It is not a legal, security or
+        product-compliance conclusion, and it never replaces a person&rsquo;s decision.
+      </p>
+    </Panel>
+  );
+}
+
+/**
+ * The page has a run and cannot answer for the build it is describing: §5.H's invariant lives here.
+ *
+ * What this state says is the whole of what it knows - which run exists, which snapshot that run judged, which
+ * snapshot the page is describing, and that the answer belongs to Release Gate. What it deliberately does not
+ * do is repeat the run's verdict sentence or its counts. §5.B permits showing historical details if they are
+ * labelled and subordinate, and the smaller truthful shape was chosen over the more informative-looking one on
+ * purpose: a green word that a reader has to scroll back up to disown is exactly the failure this unit exists
+ * to close. Nothing is deleted - the run and every finding of it are still on the page that made them.
+ */
+function NotCurrentReadiness({
+  gateRun,
+  summary,
+  scope,
+  project,
+  onOpen,
+}: {
+  readonly gateRun: GateRunDto;
+  readonly summary: AnalysisSummaryDto | null;
+  readonly scope: Exclude<ReadinessScope, { readonly kind: 'current' }>;
+  readonly project: ProjectContextDto | null;
+  readonly onOpen: (target: OverviewTarget) => void;
+}) {
+  const words = NOT_CURRENT[scope.kind];
+
+  return (
+    <Panel
+      title="Can we ship now?"
+      hint={
+        <>
+          Latest evidence: run <Chip mono>{truncateMiddle(gateRun.runId, 8)}</Chip> · {gateRun.createdAt}
+        </>
+      }
+    >
+      <div className={styles['verdict']} role="group" aria-label="Readiness for the build this page describes">
+        <StateBadge variant="chip" state="UNKNOWN" label={words.label} />
+        <p className={styles['verdictSentence']}>{words.headline}</p>
+      </div>
+
+      <div className={styles['pastRun']} role="group" aria-label={words.retained}>
+        <p className={styles['identity']}>{`Judged snapshot ${gateRun.snapshotId}`}</p>
+        {summary === null ? null : (
+          <p className={styles['identity']}>{`Snapshot this page describes ${summary.identity.snapshotId}`}</p>
+        )}
+        {scope.kind === 'otherPolicy' && project !== null ? (
+          <p className={styles['identity']}>
+            {`Run policy ${gateRun.policySha256} · loaded policy ${project.policySha256}`}
+          </p>
+        ) : null}
+        <p className={styles['quiet']}>
+          Its verdict and its findings stay on the Release Gate page, where the run was made, and nothing here
+          restates them for a build the gate did not judge.
+        </p>
+      </div>
+
+      <div className={styles['nextSteps']}>
+        <span className={styles['nextLabel']}>Next steps</span>
+        {/* Navigation only: choosing a build and running the gate is the Release page's work, and arriving
+            there must never imply a run happened. */}
+        <Button variant="primary" onClick={() => onOpen('release')}>
+          Choose this build on Release Gate
+        </Button>
+        {summary === null || scope.kind === 'selectionPending' ? (
+          <Button onClick={() => onOpen('analyze')}>
+            {summary === null ? 'Analyze an artifact' : 'Analyze the selected artifact'}
+          </Button>
         ) : null}
       </div>
 

@@ -1076,6 +1076,28 @@ text with no source file; each says so in its own entry instead of standing for 
 - Where the record lives: `U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md`, with the raw evidence outside Git
   under `%TEMP%\FirmwareSight-U1P-Visual-Acceptance-20261008T001110Z\`.
 
+## U1P-R1 Overview Gate Subject Consistency v1.0 — executed (2026-10-08)
+
+- File: `FirmwareSight_U1P_R1_Overview_Gate_Subject_Consistency_v1.0.txt` — 33,484 bytes,
+  sha256 `0263e0fe92b7065fcc6a8cf1280630ff753eb2e4415ecb07fd40c72bd8e8d024`, stored as blob
+  `df5b2d0dcc28e2438861c26e00ae5b0369a3e8a3`, 654 logical lines. **Delivered and stored bytes are identical**: the
+  file arrived with LF endings already, so §2's "both digests when line-endings differ" resolves to one digest
+  here, and that equality is measured (`git show :path | sha256sum` = the delivered value), not assumed.
+- Canonical unit: `U1P_R1_OVERVIEW_GATE_SUBJECT_CONSISTENCY`.
+- What it authorized: closing `U1P-V2-01` as a **subject-binding and presentation correctness** defect — not a
+  redesign — within four UI paths (`App.tsx`, `Overview.tsx`, `Overview.module.css`, `overview.test.tsx`), with
+  `crates/**`, `apps/desktop/src-tauri/**`, `ipc/generated/**`, schemas, migrations, storage, Gate and analysis
+  semantics, release identity, bundle contents, CI topology, dependencies and design tokens all forbidden by
+  default and a STOP required if Core, Rust or IPC appears to be needed. It also names three items this unit must
+  **not** touch: `U1P-V1-01`, `U1P-V1-02` and `U1P-V0-01`, which wait for a separate judgement.
+- What it required about the identity contract: compare only `GateRunDto.snapshotId` with
+  `AnalysisSummaryDto.identity.snapshotId`, never a truncated id, filename, timestamp, Git commit, content size or
+  the run's `baselineSnapshotId`; state the full judged identity in accessible text; and §5.H's strict invariant
+  that no unqualified current PASS may appear beside another build's figures.
+- Publication discipline it states: a normal fast-forward push only, and only with the **operator's own
+  accompanying authorization message** — §9 and §16 both refuse to treat a quoted instruction inside the
+  attachment as approval.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

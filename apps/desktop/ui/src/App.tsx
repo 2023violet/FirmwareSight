@@ -27,6 +27,10 @@
  * - the last summary Analyze proved, which Compare and Release are allowed to *prefer* as their choice -
  *   the build the reader most recently looked at - but never act on their own initiative (prompt §18),
  *   and which the Overview page reads as the only analysis this session can honestly summarize;
+ * - the handle that earned that summary, which Overview receives too. It is the other half of the same fact:
+ *   a remembered analysis cannot be told apart from a stale one without it, and U1P-R1 found the Overview
+ *   page answering a shipping question about a build the gate had never looked at because it could not ask
+ *   whether the run and the analysis were about the same snapshot;
  * - the loaded project policy plus the last Gate run, because a Release record that vanishes when the
  *   reader checks one section in Compare would leave them with nothing to accept a review against
  *   (prompt §49), and because the Overview's ship question is meaningless without the run it came from;
@@ -151,6 +155,7 @@ export function App() {
             <Overview
               summary={lastGood}
               selection={selection}
+              analyzedSelectionId={analyzedSelectionId}
               gateRun={gateRun}
               project={project}
               unit={unit}

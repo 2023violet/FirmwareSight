@@ -12,8 +12,23 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Overview, type OverviewTarget } from './Overview';
 import { TopBar } from './components/TopBar';
-import type { AnalysisSummaryDto, GateFindingRowDto, GateRunDto } from './ipc/types';
+import type {
+  AnalysisSummaryDto,
+  GateFindingRowDto,
+  GateRunDto,
+  ProjectContextDto,
+  ProjectPolicyDto,
+  SelectionDto,
+} from './ipc/types';
 import { precedes } from './test/order';
+
+/**
+ * Two full snapshot ids, in the grammar `build_snapshot.rs:35` produces: `snap-<artifact sha256>-<normalization>`.
+ * They are long on purpose. A guard that only works because the fixture ids are short would be a guard that
+ * truncation is allowed to break, and truncation is exactly what §5.A has to survive.
+ */
+const SNAP_A = `snap-${'a1b2c3d4'.repeat(8)}-norm-3`;
+const SNAP_B = `snap-${'e5f60718'.repeat(8)}-norm-3`;
 
 function summary(over: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDto {
   return {
@@ -121,17 +136,97 @@ function gateRun(over: Partial<GateRunDto> = {}): GateRunDto {
   };
 }
 
+/**
+ * A run whose own answer is PASS, judged against `snapshotId`. Used wherever a test needs to prove a green
+ * verdict did *not* reach a build it never judged: a BLOCK fixture would pass that assertion for the wrong
+ * reason.
+ */
+function passRun(snapshotId: string): GateRunDto {
+  return gateRun({
+    snapshotId,
+    overallEffectiveSeverity: 'PASS',
+    dispositionEffectiveSeverity: 'PASS',
+    counts: { pass: 8, review: 0, block: 0, unknown: 0, notApplicable: 2 },
+    findings: [
+      finding({
+        id: 'f-git',
+        ruleId: 'git.clean',
+        state: 'PASS',
+        effectiveSeverity: 'PASS',
+        summary: 'The workspace has no uncommitted changes.',
+      }),
+    ],
+  });
+}
+
+function policy(over: Partial<ProjectPolicyDto> = {}): ProjectPolicyDto {
+  const base: ProjectPolicyDto = {
+    projectName: 'relay-controller',
+    requiredArtifactKinds: null,
+    flashBudget: null,
+    ramBudget: null,
+    requireCleanGit: null,
+    requireReleaseNotes: null,
+    releaseNotesPath: null,
+    versionSource: null,
+    versionPattern: null,
+    expectedVersion: null,
+    expectedCommit: null,
+    flashGrowthReviewBytes: null,
+    ramGrowthReviewBytes: null,
+    unknownEvidenceReviewCount: null,
+    onUnknown: {
+      gitClean: 'review',
+      commitMatchesRelease: 'review',
+      versionMatch: 'review',
+      flashBudget: 'block',
+      ramBudget: 'block',
+      baselineGrowth: 'review',
+      releaseNotes: 'review',
+    },
+  };
+  return { ...base, ...over };
+}
+
+function project(over: Partial<ProjectContextDto> = {}): ProjectContextDto {
+  const base: ProjectContextDto = {
+    projectName: 'relay-controller',
+    configFileName: 'firmwaresight.toml',
+    configSchemaVersion: 1,
+    policy: policy(),
+    policySha256: 'b4d5'.repeat(16),
+    warnings: [],
+    unknownKeys: [],
+  };
+  return { ...base, ...over };
+}
+
+function selection(over: Partial<SelectionDto> = {}): SelectionDto {
+  const base: SelectionDto = {
+    selectionId: 'sel-1',
+    fileName: 'relay.elf',
+    mapFileName: 'relay.map',
+    mapAttached: true,
+  };
+  return { ...base, ...over };
+}
+
+/** The `App`-shaped props, with the defaults `App` itself starts from. */
 function renderOverview(over: {
   readonly summary?: AnalysisSummaryDto | null;
   readonly gateRun?: GateRunDto | null;
+  readonly selection?: SelectionDto | null;
+  readonly analyzedSelectionId?: string | null;
+  readonly project?: ProjectContextDto | null;
 } = {}) {
   const onOpen = vi.fn<(target: OverviewTarget) => void>();
   render(
     <Overview
       summary={over.summary ?? null}
-      selection={null}
+      selection={over.selection ?? null}
+      analyzedSelectionId={over.analyzedSelectionId ?? null}
       gateRun={over.gateRun ?? null}
-      project={null}
+      project={over.project ?? null}
       unit="bytes"
       onOpen={onOpen}
     />,
@@ -168,6 +263,7 @@ describe('Overview with a real analysis and a real run', () => {
       <Overview
         summary={summary()}
         selection={null}
+        analyzedSelectionId={null}
         gateRun={null}
         project={null}
         unit="bytes"
@@ -319,5 +415,361 @@ describe('the product bar', () => {
     render(<TopBar project={'relay-controller'} />);
     expect(screen.getByText('relay-controller')).toBeDefined();
     expect(screen.getByText(/nothing leaves this machine/)).toBeDefined();
+  });
+});
+
+/**
+ * U1P-R1 red-before-green guards.
+ *
+ * These five run against `a2e6b30`'s unmodified `Overview.tsx` first, and they must fail there: the page has no
+ * subject guard, so a run made for one build is rendered as the shipping answer about another. They are written
+ * on the props the component already accepts (`summary`, `selection`, `gateRun`, `project`) so the defect is
+ * proved in the product and not manufactured by a new prop.
+ */
+describe('U1P-R1 the run in hand must be about the build on screen', () => {
+  it('T2 does not answer for build B with build A PASS', () => {
+    render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_B } })}
+        selection={selection({ selectionId: 'sel-2' })}
+        analyzedSelectionId="sel-2"
+        gateRun={passRun(SNAP_A)}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    // §5.H in its strongest form: the clear-build sentence must not appear at all, not merely appear somewhere
+    // else on the page, while the page is describing a build no run has judged.
+    expect(screen.queryByText(/Clear —/)).toBeNull();
+    expect(ship.textContent).toMatch(/Not assessed for this build/);
+    expect(ship.textContent).toContain(SNAP_A);
+    expect(ship.textContent).toContain(SNAP_B);
+  });
+
+  it('T3 does not answer for build B with build A BLOCK either', () => {
+    render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_B } })}
+        selection={selection({ selectionId: 'sel-2' })}
+        analyzedSelectionId="sel-2"
+        gateRun={gateRun({ snapshotId: SNAP_A })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    // The mismatch is stated, and stated about the right things.
+    expect(ship.textContent).toMatch(/Not assessed for this build/);
+    const retained = within(ship).getByRole('group', { name: /Retained run/ });
+    expect(retained.textContent).toContain(SNAP_A);
+    expect(retained.textContent).toContain(SNAP_B);
+    // A BLOCK belongs to A, so no BLOCK sentence may be read as this build's answer - and the aggregate A
+    // really has is not restated here at all, which is the shape §5.H is safest in.
+    expect(screen.queryByText(/Blocked —/)).toBeNull();
+    expect(within(ship).queryByText(/BLOCK/)).toBeNull();
+  });
+
+  it('T6 does not call a stored run the answer about a session that analyzed nothing', () => {
+    render(
+      <Overview
+        summary={null}
+        selection={null}
+        analyzedSelectionId={null}
+        gateRun={gateRun({ snapshotId: SNAP_A })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/No analysis in this session/);
+    expect(ship.textContent).toContain(SNAP_A);
+    expect(screen.queryByText(/Blocked —/)).toBeNull();
+  });
+
+  it('T10 does not call the old run an answer about the policy loaded now', () => {
+    render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_A } })}
+        selection={selection({ selectionId: 'sel-1' })}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun({ snapshotId: SNAP_A, policySha256: 'b4d5'.repeat(16) })}
+        project={project({ policySha256: 'c9aa'.repeat(16) })}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/Not assessed under the policy loaded now/);
+    expect(ship.textContent).toContain('b4d5'.repeat(16));
+    expect(ship.textContent).toContain('c9aa'.repeat(16));
+    expect(screen.queryByText(/Clear —/)).toBeNull();
+  });
+
+  it('T11 reads the judged target, never the baseline', () => {
+    render(
+      <Overview
+        // The displayed analysis is the run's *baseline*, which is the one identity that must not satisfy the guard.
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_A } })}
+        selection={selection({ selectionId: 'sel-1' })}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun({ snapshotId: SNAP_B, baselineSnapshotId: SNAP_A })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/Not assessed for this build/);
+    expect(screen.queryByText(/Blocked —/)).toBeNull();
+  });
+});
+
+/**
+ * U1P-R1 the states the corrective must leave alone, and the way back to a real answer.
+ *
+ * Half of these are the "do not weaken what was accepted" guards: a subject guard that also quietly changed a
+ * verdict sentence, dropped the counts, or cost the page its figures would be a redesign wearing a fix.
+ */
+describe('U1P-R1 a matched subject still gets its own answer', () => {
+  it('T1 names the judged snapshot in full inside the verdict region', () => {
+    render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_A } })}
+        selection={selection({ selectionId: 'sel-1' })}
+        analyzedSelectionId="sel-1"
+        gateRun={passRun(SNAP_A)}
+        project={project({ policySha256: 'b4d5'.repeat(16) })}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    const answer = within(ship).getByRole('group', { name: 'Readiness for the build this page describes' });
+    expect(within(answer).getByText(/Clear —/)).toBeDefined();
+    // The full identity, not the eight-character form the header uses.
+    expect(answer.textContent).toContain(SNAP_A);
+    expect(answer.textContent).not.toMatch(/\.\.\./);
+    expect(within(answer).getByRole('img', { name: /Findings by state in this run/ })).toBeDefined();
+    expect(ship.textContent).toContain('run-12');
+    expect(ship.textContent).toContain('2026-10-06T09:14:22Z');
+  });
+
+  it('T4 leaves REVIEW with an accepted review, and UNKNOWN, exactly as Core aggregated them', () => {
+    const view = render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_A } })}
+        selection={selection()}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun({
+          snapshotId: SNAP_A,
+          overallEffectiveSeverity: 'BLOCK',
+          dispositionEffectiveSeverity: 'REVIEW',
+          counts: { pass: 4, review: 1, block: 1, unknown: 0, notApplicable: 1 },
+          findings: [
+            finding({
+              id: 'f-2',
+              ruleId: 'flash_budget.soft',
+              state: 'REVIEW',
+              effectiveSeverity: 'REVIEW',
+              acceptable: true,
+              acceptance: {
+                findingId: 'f-2',
+                actor: 'engineer',
+                reason: 'expected growth',
+                recordedAt: '2026-10-06T09:20:04Z',
+              } as unknown as GateFindingRowDto['acceptance'],
+            }),
+          ],
+        })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const answer = screen.getByRole('group', { name: 'Readiness for the build this page describes' });
+    expect(answer.textContent).toMatch(/Needs a decision/);
+    expect(answer.textContent).toMatch(/accepted review\(s\) counted/);
+    expect(answer.textContent).toMatch(/read BLOCK/);
+
+    view.rerender(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_A } })}
+        selection={selection()}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun({
+          snapshotId: SNAP_A,
+          overallEffectiveSeverity: 'UNKNOWN',
+          dispositionEffectiveSeverity: 'UNKNOWN',
+          counts: { pass: 3, review: 0, block: 0, unknown: 2, notApplicable: 1 },
+          findings: [],
+        })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const unknownAnswer = screen.getByRole('group', { name: 'Readiness for the build this page describes' });
+    expect(unknownAnswer.textContent).toMatch(/Not evaluated — 2 finding\(s\)/);
+    // The counts are the run's, echoed as it reported them. This page does not recount them.
+    expect(
+      within(unknownAnswer).getByRole('img', { name: /Findings by state in this run/ }).textContent,
+    ).toMatch(/2/);
+  });
+
+  it('T8 brings the answer back when the run and the analysis become the same build', () => {
+    const view = render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_B } })}
+        selection={selection({ selectionId: 'sel-2' })}
+        analyzedSelectionId="sel-2"
+        gateRun={gateRun({ snapshotId: SNAP_A })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('region', { name: 'Can we ship now?' }).textContent)
+      .toMatch(/Not assessed for this build/);
+
+    view.rerender(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_B } })}
+        selection={selection({ selectionId: 'sel-2' })}
+        analyzedSelectionId="sel-2"
+        gateRun={gateRun({ snapshotId: SNAP_B })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const answer = within(screen.getByRole('region', { name: 'Can we ship now?' })).getByRole('group', {
+      name: 'Readiness for the build this page describes',
+    });
+    expect(answer.textContent).toMatch(/Blocked —/);
+    expect(answer.textContent).toContain(SNAP_B);
+  });
+
+  it('T9 speaks for the newest run and stops speaking for the one it replaced', () => {
+    const view = render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_A } })}
+        selection={selection()}
+        analyzedSelectionId="sel-1"
+        gateRun={gateRun({ snapshotId: SNAP_A })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('region', { name: 'Can we ship now?' }).textContent).toContain('run-12');
+
+    view.rerender(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_B } })}
+        selection={selection({ selectionId: 'sel-2' })}
+        analyzedSelectionId="sel-2"
+        gateRun={gateRun({ runId: 'run-99', snapshotId: SNAP_B, baselineSnapshotId: SNAP_A })}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toContain('run-99');
+    expect(ship.textContent).toContain(SNAP_B);
+    expect(ship.textContent).not.toContain('run-12');
+    // A new run's baseline is not a second subject claim: the page names the target it judged, and only that.
+    expect(ship.textContent).not.toContain(SNAP_A);
+  });
+});
+
+/** §5.C, §5.E, §5.G, and the parts of §14 that say "and nothing else broke". */
+describe('U1P-R1 the neutral states and the page around them', () => {
+  it('T5 does not let an unanalyzed selection inherit a matching run', () => {
+    render(
+      <Overview
+        summary={summary({ identity: { ...summary().identity, snapshotId: SNAP_A } })}
+        selection={selection({ selectionId: 'sel-2', fileName: 'pump.elf' })}
+        analyzedSelectionId="sel-1"
+        gateRun={passRun(SNAP_A)}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    // The subject ids match, so only the selection handle can stop the PASS - which is what §5.C asks for.
+    expect(ship.textContent).toMatch(/Not assessed for the selected artifact/);
+    expect(screen.queryByText(/Clear —/)).toBeNull();
+    expect(ship.textContent).toContain(SNAP_A);
+  });
+
+  it('T7 keeps the no-run state honest, and its step still navigates', () => {
+    const onOpen = renderOverview({ summary: summary(), gateRun: null });
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/has not run the gate in this session/);
+    expect(screen.queryByText(/Clear —/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Run it on Release Gate' }));
+    expect(onOpen).toHaveBeenCalledWith('release');
+  });
+
+  it('T12 keeps the inputs, the figures and the purely navigational actions intact', () => {
+    const onOpen = renderOverview({
+      summary: summary(),
+      gateRun: passRun('snap-7f3a-2'),
+      selection: selection(),
+      analyzedSelectionId: 'sel-1',
+    });
+
+    const inputs = screen.getByRole('group', { name: 'Input capabilities' });
+    expect(within(inputs).getByRole('region', { name: 'ELF' }).textContent).toContain('supported');
+    expect(within(inputs).getByRole('region', { name: 'MAP' }).textContent).toContain('provided');
+    expect(within(inputs).getByRole('region', { name: 'Git' }).textContent).toContain('available');
+
+    const figures = screen.getByRole('group', { name: 'Key figures' });
+    expect(figures.textContent).toContain('497,840');
+    expect(figures.textContent).toContain('65,536');
+    expect(figures.textContent).toContain('1284');
+    expect(figures.textContent).toContain('212');
+
+    // Every action here moves the reader somewhere. None of them analyzes, gates, accepts or writes.
+    fireEvent.click(within(inputs).getByRole('button', { name: 'Open Analyze' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Compare builds' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Bundle & History' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open Release Gate' }));
+    expect(onOpen.mock.calls.map((call) => call[0])).toEqual(['analyze', 'compare', 'history', 'release']);
+  });
+
+  it('keeps the page order U1P was accepted on when the answer goes neutral', () => {
+    const onOpen = renderOverview({
+      summary: summary({ identity: { ...summary().identity, snapshotId: SNAP_B } }),
+      gateRun: gateRun({ snapshotId: SNAP_A }),
+      selection: selection({ selectionId: 'sel-2' }),
+      analyzedSelectionId: 'sel-2',
+    });
+
+    const inputs = screen.getByRole('group', { name: 'Input capabilities' });
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    const figures = screen.getByRole('group', { name: 'Key figures' });
+    expect(precedes(inputs, ship)).toBe(true);
+    expect(precedes(ship, figures)).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Choose this build on Release Gate' }));
+    expect(onOpen).toHaveBeenCalledWith('release');
   });
 });
