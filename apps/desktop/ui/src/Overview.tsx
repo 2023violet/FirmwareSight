@@ -20,6 +20,14 @@
  * "I have an answer for the build above". `readinessScope` is the one derived read that separates them, and
  * it changes no fact: the run keeps its own verdict on the page that made it, and this page stops borrowing it
  * for a build the gate never saw.
+ *
+ * U1P-R2 answers the same question for the rest of the page. The Gate card learned to hold its tongue about an
+ * unanalyzed selection while the capability band and the figures kept speaking for the previous build, and the
+ * MAP cell took its pill from one artifact and its sentence from another. A reader who selects a second
+ * `firmware.elf` now meets a band that names that file and says it has not been analyzed, and everything that
+ * belongs to the earlier result is gathered under `Previous analysis`, in the region that carries its snapshot
+ * identity. `Analyze.tsx` already makes exactly this separation for its own report; this page was the last one
+ * that had not.
  */
 
 import styles from './Overview.module.css';
@@ -64,6 +72,23 @@ type ReadinessScope =
   | { readonly kind: 'noAnalysis' }
   | { readonly kind: 'otherPolicy' };
 
+/**
+ * The selection this page is holding but has no analysis for, or `null` when the selection is the one that
+ * produced `summary`.
+ *
+ * The same identity rule `Analyze.tsx:136` uses for its own pending badge: the shell's selection handle, never
+ * a file name, because two artifacts chosen in one session can both be called `firmware.elf`. U1P-R1 read it
+ * only for the Gate verdict; U1P-R2 reads it once for the whole page, because a capability pill and a key
+ * figure are exactly as much another build's facts as a verdict is. Returning the selection rather than a
+ * boolean lets the caller render it without re-deriving the same comparison.
+ */
+function pendingSelectionOf(
+  selection: SelectionDto | null,
+  analyzedSelectionId: string | null,
+): SelectionDto | null {
+  return selection !== null && selection.selectionId !== analyzedSelectionId ? selection : null;
+}
+
 function readinessScope(
   gateRun: GateRunDto,
   summary: AnalysisSummaryDto | null,
@@ -71,9 +96,7 @@ function readinessScope(
   analyzedSelectionId: string | null,
   project: ProjectContextDto | null,
 ): ReadinessScope {
-  // The same identity rule `Analyze.tsx:136` uses for its own pending badge: the shell's selection handle, never
-  // a file name, because two artifacts chosen in one session can both be called `firmware.elf`.
-  if (selection !== null && selection.selectionId !== analyzedSelectionId) {
+  if (pendingSelectionOf(selection, analyzedSelectionId) !== null) {
     return { kind: 'selectionPending' };
   }
   if (summary === null) {
@@ -140,15 +163,24 @@ export function Overview({
   readonly unit: SizeUnit;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
+  // One derivation, three surfaces: the header, the input band and the figures all answer to the same question,
+  // and §4.I is the reason the header cannot keep naming the retained artifact whenever it is not current.
+  const pending = pendingSelectionOf(selection, analyzedSelectionId);
+
   const meta: ReactNode[] = [];
   if (project !== null) {
     meta.push(<span key="project">{project.projectName}</span>);
   }
-  if (summary !== null) {
+  if (summary !== null && pending === null) {
     meta.push(<span key="artifact">{`artifact ${summary.artifact.fileName}`}</span>);
     meta.push(<span key="snapshot">snapshot {truncateMiddle(summary.identity.snapshotId, 8)}</span>);
   } else if (selection !== null) {
     meta.push(<span key="selected">selected {selection.fileName}, not analyzed yet</span>);
+    if (summary !== null) {
+      meta.push(
+        <span key="previous">{`previous analysis ${truncateMiddle(summary.identity.snapshotId, 8)}`}</span>,
+      );
+    }
   } else {
     meta.push(<span key="none">no artifact selected</span>);
   }
@@ -182,6 +214,8 @@ export function Overview({
             </Button>
           }
         />
+      ) : pending !== null ? (
+        <SelectedRow selection={pending} onOpen={onOpen} />
       ) : (
         <InputRow summary={summary} selection={selection} onOpen={onOpen} />
       )}
@@ -195,9 +229,60 @@ export function Overview({
         onOpen={onOpen}
       />
 
-      {summary === null ? null : <Facts summary={summary} unit={unit} />}
+      {summary === null || pending !== null ? null : <Facts summary={summary} unit={unit} />}
+      {summary === null || pending === null ? null : (
+        <PreviousAnalysis summary={summary} candidate={pending} unit={unit} />
+      )}
     </Page>
   );
+}
+
+/**
+ * The three capability cells, every one of them stated from a single summary.
+ *
+ * `mapDetail` and the two actions are parameters because the same three cells answer for two different
+ * subjects - the build that is current, and a result retained from an earlier one - and U1P-V2-02 was exactly
+ * the page mixing one subject's pill with the other's sentence. A caller now has to say, per cell, which
+ * artifact it is talking about; the shape will not let it borrow one line from somewhere else.
+ */
+function capabilityCells(
+  summary: AnalysisSummaryDto,
+  mapDetail: ReactNode,
+  actions: { readonly elf: ReactNode; readonly map: ReactNode },
+): ReactNode[] {
+  const { capabilities, artifact } = summary;
+  return [
+    <Panel
+      key="elf"
+      bare
+      title="ELF"
+      hint={<StateBadge variant="chip" state={capabilityState(capabilities.elf)} label={capabilities.elf} />}
+    >
+      <p className={styles['inputDetail']}>
+        {`${artifact.fileName} · ${formatSize(artifact.byteSize, 'bytes')} · sha256 ${truncateMiddle(artifact.sha256, 6)}`}
+      </p>
+      {actions.elf}
+    </Panel>,
+    <Panel
+      key="map"
+      bare
+      title="MAP"
+      hint={<StateBadge variant="chip" state={capabilityState(capabilities.map)} label={capabilities.map} />}
+    >
+      <p className={styles['inputDetail']}>{mapDetail}</p>
+      {actions.map}
+    </Panel>,
+    <Panel
+      key="git"
+      bare
+      title="Git"
+      hint={<StateBadge variant="chip" state={capabilityState(capabilities.git)} label={capabilities.git} />}
+    >
+      <p className={styles['inputDetail']}>
+        Judged by the <code>git.clean</code> rule, from the repository this build came from.
+      </p>
+    </Panel>,
+  ];
 }
 
 /** The three inputs the product reads, each with the capability Core reported for it. */
@@ -210,45 +295,103 @@ function InputRow({
   readonly selection: SelectionDto | null;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
-  const { capabilities, artifact } = summary;
-
   // One band, three cells, hairlines between them - which is what the reference draws and what this
   // component asked for since U1. The cells stay named regions because they are three separate answers a
   // reader may want to jump between, and a band is a layout, not an excuse to flatten semantics.
+  // This band is only ever rendered when the summary describes the selection in hand, so its two facts -
+  // Core's capability and the selection's MAP attachment - are the same artifact's by construction.
   return (
     <Band label="Input capabilities">
-      <Panel
-        bare
-        title="ELF"
-        hint={<StateBadge variant="chip" state={capabilityState(capabilities.elf)} label={capabilities.elf} />}
-      >
-        <p className={styles['inputDetail']}>
-          {`${artifact.fileName} · ${formatSize(artifact.byteSize, 'bytes')} · sha256 ${truncateMiddle(artifact.sha256, 6)}`}
-        </p>
+      {capabilityCells(
+        summary,
+        selection?.mapAttached
+          ? (selection.mapFileName ?? 'attached')
+          : 'Symbol-level analysis depends on it',
+        {
+          elf: <LinkButton onClick={() => onOpen('analyze')}>Open Analyze</LinkButton>,
+          map: <LinkButton onClick={() => onOpen('analyze')}>Attach one on Analyze</LinkButton>,
+        },
+      )}
+    </Band>
+  );
+}
+
+/**
+ * The selected artifact, stated with only what a selection can prove: its name and whether a MAP came with it.
+ *
+ * There is deliberately no capability pill here. An unanalyzed file is not an `UNKNOWN` verdict - it is the
+ * absence of one, and §4.J refuses to let this page name a state Core has not been asked about. The two lines
+ * below are the whole of what the shell knows before Analyze runs, and the action is the one move that changes
+ * them.
+ */
+function SelectedRow({
+  selection,
+  onOpen,
+}: {
+  readonly selection: SelectionDto;
+  readonly onOpen: (target: OverviewTarget) => void;
+}) {
+  return (
+    <Band label="Selected artifact">
+      <Panel bare title="Artifact">
+        <p className={styles['inputDetail']}>{`${selection.fileName} · not analyzed yet`}</p>
         <LinkButton onClick={() => onOpen('analyze')}>Open Analyze</LinkButton>
       </Panel>
-      <Panel
-        bare
-        title="MAP"
-        hint={<StateBadge variant="chip" state={capabilityState(capabilities.map)} label={capabilities.map} />}
-      >
+      <Panel bare title="MAP">
         <p className={styles['inputDetail']}>
-          {selection?.mapAttached
-            ? (selection.mapFileName ?? 'attached')
-            : 'Symbol-level analysis depends on it'}
+          {selection.mapAttached
+            ? `MAP attached: ${selection.mapFileName ?? 'attached'}`
+            : 'No MAP attached to this selection'}
         </p>
-        <LinkButton onClick={() => onOpen('analyze')}>Attach one on Analyze</LinkButton>
-      </Panel>
-      <Panel
-        bare
-        title="Git"
-        hint={<StateBadge variant="chip" state={capabilityState(capabilities.git)} label={capabilities.git} />}
-      >
-        <p className={styles['inputDetail']}>
-          Judged by the <code>git.clean</code> rule, from the repository this build came from.
-        </p>
+        <LinkButton onClick={() => onOpen('analyze')}>
+          {selection.mapAttached ? 'Change it on Analyze' : 'Attach one on Analyze'}
+        </LinkButton>
       </Panel>
     </Band>
+  );
+}
+
+/**
+ * Everything this page holds about some other artifact, inside one region that says so.
+ *
+ * §4.B allows retained history only under an explicit heading carrying its own snapshot identity, and §4.I
+ * requires that label to sit in the immediate visual vicinity of the figures rather than in a warning a reader
+ * has to go looking for. The attribution follows `Analyze.tsx`'s accepted device, including the case that
+ * motivated it: two artifacts can share one leaf name, and "it is not an analysis of firmware.elf" under
+ * "Previous analysis of firmware.elf" would state nothing.
+ */
+function PreviousAnalysis({
+  summary,
+  candidate,
+  unit,
+}: {
+  readonly summary: AnalysisSummaryDto;
+  readonly candidate: SelectionDto;
+  readonly unit: SizeUnit;
+}) {
+  const { artifact } = summary;
+  const sameName = candidate.fileName === artifact.fileName;
+  const attribution = sameName
+    ? ' The artifact selected now has the same name and has not been analyzed; nothing here describes it.'
+    : ` It is not an analysis of ${candidate.fileName}: that selection has not been analyzed yet.`;
+
+  return (
+    <Panel title="Previous analysis" hint="retained from this session">
+      <p className={styles['stale']} role="note">
+        {`Previous analysis of ${artifact.fileName}.${attribution}`}
+      </p>
+      <p className={styles['identity']}>{`Snapshot ${summary.identity.snapshotId}`}</p>
+      <Band label="Previous input capabilities">
+        {capabilityCells(
+          summary,
+          `As reported by the analysis of ${artifact.fileName}.`,
+          { elf: null, map: null },
+        )}
+      </Band>
+      <Band narrow label="Previous key figures">
+        {figureCells(summary, unit)}
+      </Band>
+    </Panel>
   );
 }
 
@@ -443,16 +586,28 @@ function NotCurrentReadiness({
 
       <div className={styles['nextSteps']}>
         <span className={styles['nextLabel']}>Next steps</span>
-        {/* Navigation only: choosing a build and running the gate is the Release page's work, and arriving
-            there must never imply a run happened. */}
-        <Button variant="primary" onClick={() => onOpen('release')}>
-          Choose this build on Release Gate
-        </Button>
-        {summary === null || scope.kind === 'selectionPending' ? (
-          <Button onClick={() => onOpen('analyze')}>
-            {summary === null ? 'Analyze an artifact' : 'Analyze the selected artifact'}
-          </Button>
-        ) : null}
+        {/* Navigation only in every arm: choosing a build and running the gate is the Release page's work, and
+            arriving there must never imply a run happened. §4.H is why the pending case leads with Analyze.
+            Its primary control used to read "Choose this build on Release Gate", and the build Release
+            preselects when the reader clicks is the retained one - so the strongest label on the page promised
+            a choice about a file it was not about to choose. */}
+        {scope.kind === 'selectionPending' ? (
+          <>
+            <Button variant="primary" onClick={() => onOpen('analyze')}>
+              Analyze selected artifact
+            </Button>
+            <Button onClick={() => onOpen('release')}>View previous Gate run</Button>
+          </>
+        ) : (
+          <>
+            <Button variant="primary" onClick={() => onOpen('release')}>
+              Choose this build on Release Gate
+            </Button>
+            {summary === null ? (
+              <Button onClick={() => onOpen('analyze')}>Analyze an artifact</Button>
+            ) : null}
+          </>
+        )}
       </div>
 
       <p className={styles['scope']}>
@@ -463,6 +618,40 @@ function NotCurrentReadiness({
   );
 }
 
+/** The four figures, always read from one summary; the band around them decides whose figures they are. */
+function figureCells(summary: AnalysisSummaryDto, unit: SizeUnit): ReactNode[] {
+  const { memory, capabilities, evidenceSummary } = summary;
+  const flash = memory.nonvolatileImageFootprint;
+  const ram = memory.runtimeRamFootprint;
+
+  return [
+    <SummaryCard
+      key="flash"
+      label="Flash footprint"
+      value={flash.bytes === null ? 'Unknown' : formatSize(flash.bytes, unit)}
+      context={`${flash.classification} · ${flash.state}${flash.reason === null ? '' : ` · ${flash.reason}`}`}
+    />,
+    <SummaryCard
+      key="ram"
+      label="Runtime RAM"
+      value={ram.bytes === null ? 'Unknown' : formatSize(ram.bytes, unit)}
+      context={`${ram.classification} · ${ram.state}${ram.reason === null ? '' : ` · ${ram.reason}`}`}
+    />,
+    <SummaryCard
+      key="symbols"
+      label="Symbols"
+      value={String(summary.symbolCount)}
+      context={`capability ${capabilities.symbols}`}
+    />,
+    <SummaryCard
+      key="evidence"
+      label="Evidence"
+      value={String(evidenceSummary.total)}
+      context={`${String(evidenceSummary.observed)} observed · ${String(evidenceSummary.derived)} derived · ${String(evidenceSummary.declared)} declared · ${String(evidenceSummary.unknown)} unknown`}
+    />,
+  ];
+}
+
 /** The four figures a reader scans before they read anything, subordinate to the verdict above them. */
 function Facts({
   summary,
@@ -471,32 +660,5 @@ function Facts({
   readonly summary: AnalysisSummaryDto;
   readonly unit: SizeUnit;
 }) {
-  const { memory, capabilities, evidenceSummary } = summary;
-  const flash = memory.nonvolatileImageFootprint;
-  const ram = memory.runtimeRamFootprint;
-
-  return (
-    <Band narrow label="Key figures">
-      <SummaryCard
-        label="Flash footprint"
-        value={flash.bytes === null ? 'Unknown' : formatSize(flash.bytes, unit)}
-        context={`${flash.classification} · ${flash.state}${flash.reason === null ? '' : ` · ${flash.reason}`}`}
-      />
-      <SummaryCard
-        label="Runtime RAM"
-        value={ram.bytes === null ? 'Unknown' : formatSize(ram.bytes, unit)}
-        context={`${ram.classification} · ${ram.state}${ram.reason === null ? '' : ` · ${ram.reason}`}`}
-      />
-      <SummaryCard
-        label="Symbols"
-        value={String(summary.symbolCount)}
-        context={`capability ${capabilities.symbols}`}
-      />
-      <SummaryCard
-        label="Evidence"
-        value={String(evidenceSummary.total)}
-        context={`${String(evidenceSummary.observed)} observed · ${String(evidenceSummary.derived)} derived · ${String(evidenceSummary.declared)} declared · ${String(evidenceSummary.unknown)} unknown`}
-      />
-    </Band>
-  );
+  return <Band narrow label="Key figures">{figureCells(summary, unit)}</Band>;
 }

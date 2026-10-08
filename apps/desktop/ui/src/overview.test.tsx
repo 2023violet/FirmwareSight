@@ -9,6 +9,7 @@
 
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import type { ComponentProps } from 'react';
 
 import { Overview, type OverviewTarget } from './Overview';
 import { TopBar } from './components/TopBar';
@@ -771,5 +772,264 @@ describe('U1P-R1 the neutral states and the page around them', () => {
     expect(precedes(ship, figures)).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: 'Choose this build on Release Gate' }));
     expect(onOpen).toHaveBeenCalledWith('release');
+  });
+});
+
+/**
+ * U1P-R2 red-before-green guards for `U1P-V2-02`.
+ *
+ * The defect is not the Gate card, which U1P-R1 already made honest. It is the rest of the page: while a newly
+ * chosen artifact waits for Analyze, `InputRow` paints the *retained* ELF/MAP/Git capabilities and takes only the
+ * MAP detail line from the live selection, and `Facts` prints the retained Flash/RAM/Symbols/Evidence figures with
+ * nothing near them saying they belong to a previous result. A reader who selects `firmware.elf` from another
+ * directory therefore meets another build's facts under this build's name.
+ *
+ * R2-T1, R2-T4, R2-T8, R2-T9, R2-T10 and R2-T11 are regression locks on behaviour the Architect has already
+ * accepted, so they are expected to pass before the change as well as after it; they are reported as locks, never
+ * counted as proof that the fix landed. R2-T2, R2-T3, R2-T5, R2-T6, R2-T7 and R2-T12 must fail on `60f10a6`.
+ */
+describe('U1P-R2 a pending selection may not wear the previous build’s facts', () => {
+  /** The retained analysis: an analyzed `firmware.elf` whose run judged SNAP_B. */
+  function retained(): AnalysisSummaryDto {
+    return summary({
+      artifact: { ...summary().artifact, fileName: 'firmware.elf' },
+      identity: { ...summary().identity, snapshotId: SNAP_B },
+    });
+  }
+
+  /** The same shell shape `App` holds when a second file has been chosen but not yet analyzed. */
+  function pendingProps(over: Partial<ComponentProps<typeof Overview>> = {}): ComponentProps<typeof Overview> {
+    return {
+      summary: retained(),
+      selection: selection({ selectionId: 'sel-3', fileName: 'firmware.elf', mapAttached: true }),
+      analyzedSelectionId: 'sel-2',
+      gateRun: passRun(SNAP_B),
+      project: null,
+      unit: 'bytes',
+      onOpen: () => undefined,
+      ...over,
+    };
+  }
+
+  it('R2-T1 keeps the current selection’s own capabilities, figures and verdict', () => {
+    renderOverview({
+      summary: summary({ identity: { ...summary().identity, snapshotId: SNAP_A } }),
+      selection: selection({ selectionId: 'sel-1', fileName: 'firmware.elf' }),
+      analyzedSelectionId: 'sel-1',
+      gateRun: passRun(SNAP_A),
+    });
+
+    const inputs = screen.getByRole('group', { name: 'Input capabilities' });
+    expect(within(inputs).getByRole('region', { name: 'ELF' }).textContent).toContain('supported');
+    expect(within(inputs).getByRole('region', { name: 'MAP' }).textContent).toContain('provided');
+    expect(screen.getByRole('group', { name: 'Key figures' })).toBeDefined();
+    expect(screen.getByRole('region', { name: 'Can we ship now?' }).textContent).toMatch(/Clear —/);
+    expect(screen.queryByRole('region', { name: 'Previous analysis' })).toBeNull();
+  });
+
+  it('R2-T2 does not offer retained chips or figures as the pending selection’s current facts', () => {
+    render(
+      <Overview {...pendingProps()} />,
+    );
+
+    // The current-status band belongs to a build the page no longer describes, so it is not shown as current.
+    expect(screen.queryByRole('group', { name: 'Input capabilities' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Key figures' })).toBeNull();
+
+    const current = screen.getByRole('group', { name: 'Selected artifact' });
+    expect(current.textContent).toContain('firmware.elf');
+    expect(current.textContent).toMatch(/not analyzed yet/i);
+    // Nothing that reads like a capability verdict may sit in the current band.
+    for (const word of ['supported', 'provided', 'available']) {
+      expect(current.textContent).not.toContain(word);
+    }
+
+    // The retained result survives, labelled and below the decision.
+    const previous = screen.getByRole('region', { name: 'Previous analysis' });
+    expect(previous.textContent).toContain('497,840');
+    expect(previous.textContent).toContain(SNAP_B);
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(precedes(current, ship)).toBe(true);
+    expect(precedes(ship, previous)).toBe(true);
+  });
+
+  it('R2-T3 keeps a MAP chip and its explanation inside one artifact’s context', () => {
+    render(
+      <Overview {...pendingProps({ selection: selection({ selectionId: 'sel-3', fileName: 'pump.elf', mapAttached: false, mapFileName: null }) })} />,
+    );
+
+    const current = screen.getByRole('group', { name: 'Selected artifact' });
+    const mapCell = within(current).getByRole('region', { name: 'MAP' });
+    expect(mapCell.textContent).toContain('No MAP attached to this selection');
+    // The proven contradiction: a green "provided" pill over the sentence that says the map is missing.
+    expect(mapCell.textContent).not.toContain('Symbol-level analysis depends on it');
+    expect(current.textContent).not.toContain('provided');
+
+    const previous = screen.getByRole('region', { name: 'Previous analysis' });
+    expect(within(previous).getByRole('region', { name: 'MAP' }).textContent).toContain('provided');
+  });
+
+  it('R2-T4 gives the pending selection no current PASS, BLOCK or REVIEW', () => {
+    render(<Overview {...pendingProps()} />);
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/Not assessed for the selected artifact/);
+    expect(ship.textContent).not.toMatch(/Clear —/);
+    expect(ship.textContent).not.toMatch(/Blocked —/);
+  });
+
+  it('R2-T5 makes the pending selection’s primary step an analysis, not a Gate claim', () => {
+    const onOpen = vi.fn<(target: OverviewTarget) => void>();
+    render(<Overview {...pendingProps({ onOpen })} />);
+
+    const analyze = screen.getByRole('button', { name: 'Analyze selected artifact' });
+    expect(analyze.className).toContain('primary');
+    expect(screen.queryByRole('button', { name: 'Choose this build on Release Gate' })).toBeNull();
+
+    fireEvent.click(analyze);
+    expect(onOpen).toHaveBeenLastCalledWith('analyze');
+
+    // The Release trip stays available and is named for what it actually opens: the stored run, not a new verdict.
+    const release = screen.getByRole('button', { name: 'View previous Gate run' });
+    fireEvent.click(release);
+    expect(onOpen).toHaveBeenLastCalledWith('release');
+    expect(screen.queryByText(/Rerun|Re-run|run the gate now/i)).toBeNull();
+  });
+
+  it('R2-T6 keeps a failed new selection from becoming a fresh success and labels what it left behind', () => {
+    render(
+      <Overview
+        {...pendingProps({
+          selection: selection({ selectionId: 'sel-9', fileName: 'not-an-elf.elf', mapAttached: false, mapFileName: null }),
+        })}
+      />,
+    );
+
+    const current = screen.getByRole('group', { name: 'Selected artifact' });
+    expect(current.textContent).toContain('not-an-elf.elf');
+    expect(current.textContent).toMatch(/not analyzed yet/i);
+
+    const previous = screen.getByRole('region', { name: 'Previous analysis' });
+    expect(previous.textContent).toContain('not an analysis of not-an-elf.elf');
+    expect(previous.textContent).toContain('firmware.elf');
+    expect(screen.getByRole('group', { name: /Previous key figures/i })).toBeDefined();
+  });
+
+  it('R2-T7 returns the current figures when the pending selection is genuinely analyzed', () => {
+    const { rerender } = render(<Overview {...pendingProps()} />);
+    expect(screen.queryByRole('group', { name: 'Input capabilities' })).toBeNull();
+
+    // The same props `App` passes the moment `onLastGoodChange` has moved `lastGood` and its handle together.
+    // The Flash figure is `memory.nonvolatileImageFootprint.bytes`, not the artifact size, so the new result has
+    // to differ in the field the page actually reads.
+    rerender(
+      <Overview
+        summary={summary({
+          artifact: { ...summary().artifact, fileName: 'firmware.elf', byteSize: 613_568 },
+          identity: { ...summary().identity, snapshotId: SNAP_A },
+          symbolCount: 999,
+          memory: {
+            ...summary().memory,
+            nonvolatileImageFootprint: {
+              ...summary().memory.nonvolatileImageFootprint,
+              bytes: 771_000,
+            },
+          },
+        })}
+        selection={selection({ selectionId: 'sel-3', fileName: 'firmware.elf' })}
+        analyzedSelectionId="sel-3"
+        gateRun={passRun(SNAP_A)}
+        project={null}
+        unit="bytes"
+        onOpen={() => undefined}
+      />,
+    );
+
+    expect(screen.queryByRole('region', { name: 'Previous analysis' })).toBeNull();
+    expect(screen.getByRole('group', { name: 'Input capabilities' })).toBeDefined();
+    const figures = screen.getByRole('group', { name: 'Key figures' });
+    expect(figures.textContent).toContain('771,000');
+    expect(figures.textContent).toContain('999');
+    expect(figures.textContent).not.toContain('497,840');
+    expect(figures.textContent).not.toContain('1284');
+  });
+
+  it('R2-T8 keeps U1P-R1’s other-build guard and its full identities while the analysis stays current', () => {
+    renderOverview({
+      summary: summary({ identity: { ...summary().identity, snapshotId: SNAP_B } }),
+      selection: selection({ selectionId: 'sel-2' }),
+      analyzedSelectionId: 'sel-2',
+      gateRun: passRun(SNAP_A),
+    });
+
+    // §4.F: a currently authoritative summary keeps its capabilities and figures; only the verdict stays borrowed-free.
+    expect(screen.getByRole('group', { name: 'Input capabilities' })).toBeDefined();
+    expect(screen.getByRole('group', { name: 'Key figures' })).toBeDefined();
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/judged a different build/);
+    expect(ship.textContent).toContain(SNAP_A);
+    expect(ship.textContent).toContain(SNAP_B);
+    expect(ship.textContent).not.toMatch(/Clear —/);
+  });
+
+  it('R2-T9 keeps U1P-R1’s other-policy guard neutral', () => {
+    renderOverview({
+      summary: summary({ identity: { ...summary().identity, snapshotId: SNAP_B } }),
+      selection: selection({ selectionId: 'sel-2' }),
+      analyzedSelectionId: 'sel-2',
+      gateRun: passRun(SNAP_B),
+      project: project({ policySha256: 'c0ffee'.repeat(10) + 'c0' }),
+    });
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/different policy fingerprint/);
+    expect(ship.textContent).toContain('c0ffee'.repeat(10) + 'c0');
+    expect(ship.textContent).not.toMatch(/Clear —/);
+  });
+
+  it('R2-T10 leaves the real verdict alone when run, build and policy all agree', () => {
+    renderOverview({
+      summary: summary({ identity: { ...summary().identity, snapshotId: SNAP_B } }),
+      selection: selection({ selectionId: 'sel-2' }),
+      analyzedSelectionId: 'sel-2',
+      gateRun: passRun(SNAP_B),
+      project: project(),
+    });
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).toMatch(/Clear —/);
+    expect(ship.textContent).toContain(`Judged snapshot ${SNAP_B}`);
+    expect(screen.queryByRole('group', { name: 'Selected artifact' })).toBeNull();
+  });
+
+  it('R2-T11 says plainly when there is neither a selection nor an analysis', () => {
+    renderOverview({ summary: null, selection: null, analyzedSelectionId: null, gateRun: null });
+
+    expect(screen.getByText(/Nothing has been analyzed in this session yet/)).toBeDefined();
+    expect(screen.queryByRole('group', { name: /Key figures/ })).toBeNull();
+    expect(screen.queryByRole('group', { name: /Previous/ })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Choose an artifact' })).toBeDefined();
+  });
+
+  it('R2-T12 names a previous result in text a reader can hear, not only in a distant warning', () => {
+    render(<Overview {...pendingProps()} />);
+
+    const previous = screen.getByRole('region', { name: 'Previous analysis' });
+    const note = within(previous).getByRole('note');
+    expect(note.textContent).toMatch(/^Previous analysis of firmware\.elf\./);
+    expect(note.textContent).toMatch(/same name|not an analysis of/);
+    // The disclaimer is metadata-styled secondary text in the same block as the figures it disclaims. Mutation
+    // M4 swapped this class for the generic `.quiet` and every other assertion still passed, so the style that
+    // keeps the note subordinate to the answer is asserted here rather than trusted: a note painted at body
+    // weight beside a verdict is a note nobody reads as a caveat.
+    expect(note.className).toContain('stale');
+    // Every retained region says so in its own accessible name.
+    expect(
+      within(previous)
+        .getAllByRole('group', { name: /^Previous/i })
+        .map((region) => region.getAttribute('aria-label')),
+    ).toEqual(['Previous input capabilities', 'Previous key figures']);
+    expect(previous.textContent).toContain(SNAP_B);
   });
 });

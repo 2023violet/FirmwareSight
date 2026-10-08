@@ -169,6 +169,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_U1P_CI_Artifact_Installed_Visual_Acceptance_Continuation_v1.0.txt
 │   │   ├── FirmwareSight_U1P_Final_Visual_Polish_Information_Hierarchy_v1.0.txt
 │   │   ├── FirmwareSight_U1P_R1_Overview_Gate_Subject_Consistency_v1.0.txt
+│   │   ├── FirmwareSight_U1P_R2_Overview_Pending_Selection_Evidence_Scope_v1.0.txt
 │   │   ├── FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt
 │   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
 │   │   ├── FirmwareSight_V0_Workflow_Prototype_Validation_PROMPT_v1.1.txt

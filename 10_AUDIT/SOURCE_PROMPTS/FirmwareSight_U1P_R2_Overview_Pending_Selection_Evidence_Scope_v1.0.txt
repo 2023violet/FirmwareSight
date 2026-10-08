@@ -1,0 +1,449 @@
+FirmwareSight — U1P-R2
+Overview Pending-Selection Evidence Scope + Evidence-ID Consistency Audit
+Architect execution prompt v1.0
+
+CANONICAL UNIT:
+U1P_R2_OVERVIEW_PENDING_SELECTION_EVIDENCE_SCOPE
+
+REPOSITORY:
+https://github.com/2023violet/FirmwareSight
+
+PURPOSE
+
+The U1P-R1 Gate-subject corrective is accepted for U1P-V2-01. This is NOT a request to reopen it.
+
+Architect independently reviewed the 38-file U1P-R1 screenshot ZIP and found an additional material
+current-versus-retained presentation inconsistency on S3 (new artifact selected, not yet analyzed).
+
+The Gate card properly says “Not assessed for the selected artifact”, but the Overview capability band
+still takes ELF/MAP/Git from the retained lastGood summary while its MAP detail reads the new selection.
+The real installed screenshot shows MAP “provided” next to “Symbol-level analysis depends on it”.
+The Flash/RAM/Symbols/Evidence figures likewise appear without an explicit previous-result scope.
+
+This is U1P-V2-02 — PENDING_SELECTION_STALE_ANALYSIS_PRESENTATION, OPEN.
+
+This unit must narrowly close U1P-V2-02 WITHOUT undoing U1P-V2-01, U1R, or the decision-first U1P layout.
+The prior Agent report alleges two identity transcription errors. An independent comparison of the
+CURRENT uploaded ZIP, its IDENTITY_MATRIX.txt / ACCEPTANCE_GATE.json, and current remote report lines
+207–208 found the full IDs already identical. DO NOT modify them on the assumption that typos exist.
+Audit them read-only again; only correct a demonstrable mismatch, with original and replacement proved.
+Do not create any independent documentation commit just for this audit.
+
+AUTHORIZED OUTCOME:
+A new U1P-R2 frontend-only product commit, exact local + remote validation, its own CI Windows
+installer real-installed acceptance, screenshots, owner-store restoration, one evidence successor,
+and a single shareable final U1 visual pack for Architect review. STOP. Agent cannot self-pass U1.
+
+0. START AUTHORITY
+
+Architect live checks at prompt issue:
+origin/main = 60f10a6473ef446dc933c94a5edbab8e9b662ad1
+U1P-R1 product = 42f75a7d2d90a4c25ca1a3c5c91f6ece16c2d5bf
+Product Run #81 = 37753793004, attempt 1, ten of ten authoritative jobs success.
+U1P-R1 evidence = 60f10a6473ef446dc933c94a5edbab8e9b662ad1
+Evidence Run #82 = 37765205830, attempt 1, ten of ten authoritative jobs success.
+Product test baseline: Rust 868/0, UI 266/9 files, full gate 17/17.
+U1P-V2-01 = CLOSED_BY_U1P_R1.
+U1P-V2-02 = OPEN (new independent Architect observation).
+P5 = PASS_COMPLETE; Product = MVP_CANDIDATE, baseline 0.6.0.
+V1 = IN_PROGRESS/RECRUITMENT_READY; eligible human sessions = 0; participants PAUSED.
+F3 V1 research cohort artifact unchanged. B1/Private Beta NOT_AUTHORIZED.
+
+Source review ZIP on owner machine:
+C:\Users\16429\Downloads\FirmwareSight_U1P_R1_Overview_Subject_Review.zip
+Original U1P review ZIP (if available):
+C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip
+Reference assets:
+D:\study\Software\FirmwareSight\assets\ui-mockups\
+
+Authoritative U1P-R1 visual evidence:
+AFTER/R1_S03_UnanalyzedSelection_1440x900.png
+AFTER/R1_S01_Matched_1440x900.png
+AFTER/R1_S02_Mismatch_1440x900.png
+AFTER/R1_S05_PolicyChanged_1440x900.png
+
+1. HARD PREFLIGHT
+
+git fetch --prune origin
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+git diff
+git diff --cached
+git worktree list
+
+Require local HEAD=origin/main=60f10a6473ef446dc933c94a5edbab8e9b662ad1 and clean tree.
+If not, STOP and disclose the difference. No reset --hard, clean, stash, rebase, amend of published
+history, or force-push. Verify CI authority rather than copying the numbers above blindly.
+
+2. SOURCE READ SET
+
+Read AGENTS.md, .ai/README.md, .ai/CURRENT_STATE.md, .ai/ACTIVE_TASK.md,
+.ai/DECISIONS.md, .ai/HANDOFF.md, BASELINE.yaml,
+U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md,
+U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md,
+U1_VALIDATION/U1P_R1_SUBJECT_CONSISTENCY_PLAN.md if present,
+apps/desktop/ui/src/App.tsx,
+apps/desktop/ui/src/Overview.tsx,
+apps/desktop/ui/src/Overview.module.css,
+apps/desktop/ui/src/overview.test.tsx,
+apps/desktop/ui/src/Analyze.tsx,
+apps/desktop/ui/src/ipc/generated/AnalysisSummaryDto.ts,
+apps/desktop/ui/src/ipc/generated/GateRunDto.ts,
+apps/desktop/ui/src/ipc/generated/SelectionDto.ts.
+
+Inventory screenshot sources and provenance without modifying originals.
+Archive THIS prompt through the established 10_AUDIT/SOURCE_PROMPTS procedure.
+
+3. VERIFIED ROOT CAUSE AND BEHAVIOUR
+
+App.tsx owns four separate facts:
+selection: SelectionDto|null
+lastGood: AnalysisSummaryDto|null
+analyzedSelectionId: string|null
+gateRun: GateRunDto|null
+
+U1P-R1 already passes analyzedSelectionId to Overview.
+The existing readinessScope guard identifies selectionPending when
+selection.selectionId !== analyzedSelectionId; it correctly withholds a current Gate verdict.
+
+However Overview.tsx also renders:
+<InputRow summary={summary} selection={selection} ... />
+<Readiness ... />
+<Facts summary={summary} ... />
+
+InputRow destructures capabilities from summary (retained lastGood) but obtains mapAttached and
+mapFileName from selection (new pending input). Its capability chip and explanatory detail can
+therefore refer to DIFFERENT ARTIFACTS in the same cell.
+
+The user-visible Flash/RAM/Symbols/Evidence figures derive from lastGood, yet lack a prior/retained
+label when a new selection has not completed Analyze.
+
+This is NOT a Core or Gate evaluation error. It is a presentation-scope boundary error.
+Do not fix it by clearing lastGood or deleting history.
+
+4. REQUIRED NEW STATE CONTRACT
+
+A. CURRENT ANALYZED SELECTION
+When summary belongs to current selection, show all current capabilities and all current metrics.
+Do not change U1P decision-first hierarchy. The matching Gate run still shows its real verdict
+and full judged snapshot ID.
+
+B. DIFFERENT CURRENT SELECTION, NOT YET ANALYZED
+When selection != null and selection.selectionId != analyzedSelectionId, show the SELECTED artifact
+as pending. Do not display retained ELF/MAP/Git capability chips as CURRENT.
+Do not show retained Flash/RAM/Symbols/Evidence values as the selected artifact's current facts.
+Preferred minimal design:
+- a compact, neutral current-selection band naming the new file and stating NOT ANALYZED;
+- action to Analyze the selected artifact;
+- optional retained historical analysis panel only with explicit “Previous analysis” heading
+  and its real snapshot identity, never mixed into a current status band;
+- Gate readiness stays “Not assessed for the selected artifact”.
+
+C. MAP INTEGRITY
+A MAP chip and MAP explanatory detail in the same panel MUST come from the SAME artifact/context.
+The proven contradictory pair “MAP provided” and “Symbol-level analysis depends on it”
+must not appear as a statement about one current selected input.
+
+D. PARSE FAILURE AFTER PREVIOUS SUCCESS
+Preserve U1R truth: current failure first; previous analysis labelled previous/last-good;
+no prior green capability presented as current. Overview must not turn a failed new selection
+into a newly successful analysis.
+
+E. RETURN TO SUCCESS
+After a genuine new successful analysis, replace current capability and metric values
+with those from the newly authoritative summary. No artificial sticky pending state.
+
+F. DIFFERENT BUILD WITH BOTH SUCCESSFULLY ANALYZED
+Keep U1P-R1's otherBuild handling and full snapshot identities. With a currently authoritative
+summary, its capabilities/metrics may remain visible, even if an older Gate run concerns another build.
+No current Gate verdict may be borrowed.
+
+G. DIFFERENT POLICY
+Preserve otherPolicy handling; no verdict from a different policy may be ascribed to the loaded one.
+
+H. NAVIGATION CTA
+During selectionPending, do not label the primary action “Choose this build on Release Gate”
+if clicking merely navigates to Release with lastGood preselected instead of the pending file.
+Prefer “Analyze selected artifact” as the primary action. Any secondary Release navigation
+must be accurately named (e.g. “View previous Gate run”), without claiming the pending file
+was chosen or judged. No automatic Gate rerun.
+
+I. NO EMPTY-STATE LIES
+“No selection”, “no analysis” and “retained analysis” are different.
+The Overview header and auxiliary text must not conflate them. If prior metrics are kept,
+label them in the immediate visual vicinity, not only in a distant warning.
+
+J. NO NEW DOMAIN STATE
+A neutral UI label for selectionPending is not a PASS/REVIEW/BLOCK/UNKNOWN/N/A Gate verdict.
+Never invent a backend fact, recompute a Gate rule or add an IPC command.
+
+5. PREFERRED IMPLEMENTATION BOUNDARY
+
+Narrow frontend-only derived presentation authority, preferably using existing
+selection.selectionId / analyzedSelectionId / summary identity.
+Do not duplicate Core semantics, rebuild analysis state, or change lastGood ownership.
+
+Expected product paths:
+apps/desktop/ui/src/Overview.tsx
+apps/desktop/ui/src/Overview.module.css, only for minimal layout need
+apps/desktop/ui/src/overview.test.tsx
+Optional tiny App.tsx presentation change only if rigorously necessary.
+
+Do NOT change: crates/**, schema/**, migrations/**, generated IPC/DTOs, storage, release/Gate
+semantics, bundles, design tokens, dependencies, CI topology, product roadmap or V1 metrics.
+
+Do not expand into broader aesthetic polish. Do not modify Compare retention in this round.
+
+6. RED/GREEN CONTRACT TESTS — BEFORE PRODUCT IMPLEMENTATION
+
+Add focused UI tests that fail on current main:
+T1 analyzed selected build A -> correct capability + metrics + readiness when run matches.
+T2 analyzed B then choose NEW pending selection C (same firmware.elf name) -> no B green chips
+   presented as current; no B metrics presented as C; neutral C not-analyzed state visible.
+T3 pending C with MAP not attached after analyzed B had MAP attached -> never “MAP provided”
+   alongside C's MAP-missing instructions as a single current statement.
+T4 B has a retained run -> C pending displays NO current PASS/BLOCK/REVIEW for C.
+T5 pending C's primary action routes to Analyze rather than implying C's Gate was run.
+T6 parse failure for C retains B historical report, explicitly labelled as previous, with no
+   false current B capabilities.
+T7 after successful Analyze of C -> C's own values and chips return, no stale B data.
+T8 B current but Gate run for A -> U1P-R1 otherBuild remains neutral, snapshot IDs intact.
+T9 B current but loaded policy differs from B's run -> U1P-R1 otherPolicy remains neutral.
+T10 Gate run matching B and loaded policy -> real verdict remains unchanged.
+T11 no selection/no analysis -> no fabricated metrics, clear next action.
+T12 any previous-result block is explicitly identified using readable accessible text.
+
+Do not fake test success through mocks that bypass the actual Overview state props.
+Record RED proof on unmodified implementation, then GREEN proof after the fix.
+Perform a bounded mutation where possible; leave zero mutation code residue.
+
+7. EVIDENCE-ID CONSISTENCY AUDIT — READ ONLY UNLESS A REAL ERROR EXISTS
+
+The earlier Agent report alleged two missing hex characters in prose IDs, but the Architect independently
+compared the CURRENT 38-file uploaded ZIP's REPORTS/IDENTITY_MATRIX.txt, REPORTS/ACCEPTANCE_GATE.json,
+REPORTS/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md, and the CURRENT GitHub report lines 207–208.
+The full run A and snapshot B strings match across these current sources.
+
+Expected run A currently evidenced:
+gate-ff7fae0be1318f32e62eff3a7e216c080d90534a50ec596cc9a1916a1cbea96
+
+Expected snapshot B currently evidenced:
+snap-4b4087e1407ceddcb1e1cfd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6
+
+Check these against local repository HEAD and current evidence sources with an exact parser and full string
+comparison, and preserve the earlier Agent report's historical assertion as a disclosure.
+
+IF all current values match:
+- report AUDIT_MATCHES_CURRENT_EVIDENCE;
+- do not edit those IDs;
+- do not invent a dated erratum;
+- do not rewrite or repack the historical ZIP just to create churn.
+
+ONLY IF a concrete present-day mismatch is demonstrated:
+- quote exact before and after bytes and authoritative source;
+- correct the minimum documented location as part of the normal post-acceptance evidence successor;
+- never rewrite the original already-hashed historical ZIP;
+- rerun baseline validation.
+
+8. COMPLETE LOCAL VALIDATION
+
+Required:
+git diff --check
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+corepack pnpm install --frozen-lockfile
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+python scripts/check.py
+python scripts/check.py --only drift
+python scripts/check.py --only deny
+python scripts/check.py --only core-smoke
+python scripts/check.py --only package
+python scripts/verify_baseline_artifacts.py
+
+Rust expected unchanged: 868 pass / 0 fail / 47 result lines.
+UI baseline 266 passed / 9 files; count may grow with focused tests.
+Full gate: 17/17; drift 8/8; deny 1/1; core-smoke 3/3; package 4/4.
+No required SKIP. No design-token drift. Check CLI command count remains 30.
+
+If Rust product count or protected paths unexpectedly change: STOP and report.
+
+9. PRODUCT COMMIT AND CI
+
+If preconditions and local validation pass:
+Create ONE narrow frontend product commit. Suggested:
+U1P-R2: scope Overview analysis facts to the current selection
+
+Use ADR-0029 baseline/index workflow. A normal fast-forward push is authorized ONLY if:
+- local HEAD still follows expected origin/main;
+- worktree modifications are understood;
+- no forbidden path changed;
+- all authoritative local tests pass.
+
+Do not force, amend published commits, rebase shared history or auto-fix unrelated content.
+Read exact product CI run by HEAD SHA, all ten jobs individually, preserving attempts.
+Do not proceed to Windows install unless exact product run is accepted 10/10.
+If content failure: STOP. Runner-only retry must obey repository policy and preserve attempt 1.
+
+10. EXACT INSTALLED WINDOWS ARTIFACT
+
+Download artifact from the NEW U1P-R2 PRODUCT run, not:
+U1P-R1 artifact 11539359554;
+U1P artifact 11504871803;
+U1R, U1, F3, local build, cargo run or Vite.
+
+Record:
+run id, head SHA, attempt(s), artifact ID/name/size, API/ZIP SHA-256,
+internal SHA256SUMS, artifact-metadata.json.toolchain.git_commit,
+actual NSIS filename/bytes/digest, installed EXE bytes/digest.
+
+Owner-store protection MUST be performed before installing or launching:
+close all app processes;
+hash owner DB main/WAL/SHM;
+verified byte-exact independent backup;
+park owner data following proven P5/U1/U1R discipline;
+use only disposable fixture project/store.
+
+Required before launch:
+OWNER_STORE_PARKED = YES
+OWNER_BACKUP_HASH_MATCH = YES
+
+No private firmware; no broad data-delete action in uninstaller.
+
+11. INSTALLED ACCEPTANCE SCENARIOS
+
+Use real installed UI and genuine committed-fixture inputs, not dev mocks.
+Capture at 1440x900:
+R2_S01_Matched_1440x900.png
+R2_S02_OtherBuild_1440x900.png
+R2_S03_PendingSelection_1440x900.png
+R2_S04_PendingSelection_NoMap_1440x900.png
+R2_S05_ParseFailureAfterLastGood_1440x900.png
+R2_S06_RecoverySuccess_1440x900.png
+R2_S07_PolicyMismatch_1440x900.png
+
+At 1024x720 capture at least:
+R2_R01_Matched_1024x720.png
+R2_R02_PendingSelection_1024x720.png
+R2_R03_PendingSelection_NoMap_1024x720.png
+
+At 1056x799 capture pending-selection state if responsive concerns appear.
+All images must state measured client dimensions, actual installed EXE SHA, timestamp, scenario ID.
+
+Required real checks:
+- new selection's current status does not borrow old green chip facts;
+- MAP label and detail refer to same context;
+- old metrics are absent or explicitly previous;
+- action semantics truthful and keyboard accessible;
+- U1P-R1 Gate subject/policy guards stay correct;
+- U1R failure/last-good semantics stay correct;
+- new successful analysis restores current values;
+- no clipped primary controls / unintended full-page horizontal overflow.
+
+NO product code edits after acceptance screenshots. If defect found: record and STOP for Architect.
+
+12. OWNER RESTORE
+
+After all captures/smoke:
+close FirmwareSight;
+uninstall if found uninstalled before round;
+remove only named disposable state;
+restore owner main/WAL/SHM exactly;
+rehash each and sibling inventory.
+
+Required:
+ORIGINAL_DB_RESTORED = YES
+ORIGINAL_DB_SHA_MATCH = YES
+OWNER_STORE_OPENED_BY_U1P_R2 = NO
+UNRELATED_SIBLING_STORES_UNTOUCHED = YES
+
+Any mismatch: STOP. Preserve evidence, do not perform destructive cleanup.
+
+13. SINGLE SHAREABLE VISUAL REVIEW ZIP
+
+Create outside Git and deliver a single ZIP under Downloads:
+C:\Users\16429\Downloads\FirmwareSight_U1P_R2_Final_Visual_Review.zip
+
+Contents:
+REFERENCE/ seven unmodified accepted mockups;
+U1P_BASELINE/ original U1P primary and responsive screenshots from existing U1P pack;
+U1P_R1_BEFORE/ original real S1–S5 screenshots and correction finding;
+U1P_R2_AFTER/ all new real R2 captures;
+SIDE_BY_SIDE/ original pending S3 vs corrected pending R2, MAP contradiction before/after,
+             current matched before/after and reference Overview vs current R2;
+REPORTS/ U1P-R1 prior report, U1P-R2 report, disposition matrix and evidence-ID erratum;
+HASHES/ independent SHA256SUMS and source map.
+
+If the original U1P pack cannot be found: report exactly what is missing; do not invent or
+regenerate historical screenshots. The product corrective can be tested, but the COMPLETE
+six-page final visual verdict must remain pending until the actual U1P screenshots are available.
+
+No Photoshop/retouch/hiding faults. Composites labelled DERIVED; original PNG bytes retained.
+Verify ZIP CRC and extraction round-trip, 0 missing and 0 invalid SHA entries.
+Never include owner DB, firmware binaries, installers, personal or participant information.
+Print exact absolute ZIP path/size/SHA in the final report.
+
+14. EVIDENCE REPORT AND ONE DOCS-ONLY SUCCESSOR
+
+After installed acceptance and owner restore:
+Write U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md.
+Document:
+root cause, current vs previous authority, same-name artifact test,
+MAP contradiction before/after, value display truth, CTA truth,
+regression protection of U1P-V2-01/U1R,
+local/CI/artifact evidence, owner restore, screenshots, responsive,
+ZIP source map, a read-only current ID consistency audit (or narrowly proven corrections only if truly needed),
+remaining U1P-V1/U1P-V0 findings and V1 interlock.
+
+Create at most ONE docs/evidence successor, using ADR-0029 and full local gates.
+No product source in evidence successor. Push normal fast-forward (authorized if gates pass).
+Require exact successor head CI 10/10; no self-referential CI-recursion commit.
+
+U1P-V2-02 may become CLOSED_BY_U1P_R2 only if installed tests actually prove all acceptance
+items without introducing a new material regression.
+U1P-V2-01 stays CLOSED_BY_U1P_R1.
+Agent's strongest permissible state:
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT
+or, if any material issue remains:
+U1 = REQUIRES_ARCHITECT_POLISH_REVIEW / BLOCKED.
+
+Agent MUST NOT self-declare U1 PASS_COMPLETE, V1 PASS, MOCKUP_MATCHED, B1/Beta/RC/GA.
+
+15. OUT-OF-SCOPE ITEMS / FUTURE OBSERVATIONS
+
+Do not expand into:
+- Compare result retention after navigation (existing V1-class observation);
+- 1024 wrapped band empty-cell polish;
+- Analyze table at 1024 fold;
+- FS-UI-07 dependency features;
+- Git capability “unknown” versus Gate git.clean rule handling.
+
+These may be reported accurately but need separate Architect triage before product changes.
+Preserve release/bundle/evidence semantics and local-first guarantee.
+
+16. FINAL REPORT STRUCTURE
+
+1. Head / origin/main / clean preflight.
+2. U1P-V2-02 root-cause proof (selected vs retained data).
+3. Pre-change RED tests, post-change GREEN and mutation proof.
+4. Changed paths / forbidden changes absent.
+5. All local gates and exact counts.
+6. R2 product commit, exact remote CI, all ten jobs.
+7. Exact Windows artifact/installer/installed executable identity.
+8. Owner park/backup evidence.
+9. S01–S07 + responsive screenshot identities.
+10. Pending-selection capability/MAP/metrics/CTA truthfulness.
+11. U1P-V2-01 and U1R regression status.
+12. Owner restore exact safety flags.
+13. Current report/ZIP identity audit: match proof, or exact before/after only if a real mismatch exists.
+14. Uploadable final review ZIP absolute path, byte size, full SHA and checks.
+15. Evidence successor docs-only proof and its exact CI.
+16. V1 paused, frozen F3 artifact unchanged, no B1.
+17. U1 READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT or REQUIRES_ARCHITECT_POLISH_REVIEW.
+18. STOP.
+
+END OF PROMPT

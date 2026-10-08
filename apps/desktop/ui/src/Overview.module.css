@@ -39,6 +39,19 @@
   color: var(--fs-color-text-secondary);
 }
 
+/* The scope sentence that keeps a retained result from reading as a fresh one (U1P-R2 §4.I). It sits directly
+   above the figures it disclaims rather than in a heading a reader has to scroll back to, and it is a `note`
+   so a screen reader announces the change of subject when the region is reached. Metadata size and secondary
+   colour because it is provenance, not the answer, and it borrows no state glyph: an unanalyzed selection is
+   the absence of a verdict, not a sixth one. */
+.stale {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  max-width: 80ch;
+}
+
 /* The open findings are a list because they are a set of things to resolve, and the order is Core's:
    `GateRunDto.findings` arrives in canonical rule order and this page only filters it for display. */
 /* The full identity of the build a run judged, or the pair of them when they differ (U1P-R1 §5.A, §5.B). Mono

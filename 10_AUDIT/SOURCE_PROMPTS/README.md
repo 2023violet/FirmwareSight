@@ -1098,6 +1098,34 @@ text with no source file; each says so in its own entry instead of standing for 
   accompanying authorization message** — §9 and §16 both refuse to treat a quoted instruction inside the
   attachment as approval.
 
+## U1P-R2 Overview Pending-Selection Evidence Scope v1.0 — executing (2026-10-08)
+
+- File: `FirmwareSight_U1P_R2_Overview_Pending_Selection_Evidence_Scope_v1.0.txt` — 21,194 delivered bytes and 449
+  logical lines, delivered sha256 `3b6108b6e61582f9e31004d41e9768ba1a0daaaee1150b345c194a7e52b6221e`; stored as blob
+  `aea814d62902b78cd9a98ba164807abe3b0b7e95`, 20,746 bytes, sha256
+  `fd8d28aafe411ac76dbf7262852f22a125c4b12ec3cadafbebc42b35f7a35102`. **Two digests, because this prompt arrived
+  with CRLF terminators** (448 CRLF, 0 bare LF) and `.gitattributes` holds `*.txt text eol=lf`. Line-by-line proof:
+  the delivered bytes with `\r\n` → `\n` equal the stored blob exactly, 449 lines against 449, zero differing lines,
+  and the byte delta is 448 — precisely the CR count. Measured with `git show :path | sha256sum`, not assumed.
+- Canonical unit: `U1P_R2_OVERVIEW_PENDING_SELECTION_EVIDENCE_SCOPE`, verbatim from prompt line 6.
+- What it authorized: closing **`U1P-V2-02` — `PENDING_SELECTION_STALE_ANALYSIS_PRESENTATION`**, an independent
+  Architect observation on the U1P-R1 S3 capture: the Gate card correctly withheld its verdict, but the Overview
+  capability band still took ELF/MAP/Git from the retained `lastGood` while the MAP detail line read the *new*
+  selection, so a pending file was described by another build's capabilities, and the Flash/RAM/Symbols/Evidence
+  figures appeared with no previous-result scope. Narrow frontend-only work in
+  `Overview.tsx` / `Overview.module.css` / `overview.test.tsx`, with `App.tsx` allowed only if rigorously
+  necessary; §3 requires it be fixed **without** clearing `lastGood` or deleting history, and §4 forbids new domain
+  state, a recomputed Gate rule or an added IPC command.
+- What it explicitly preserved: `U1P-V2-01 = CLOSED_BY_U1P_R1`, U1R's failure/last-good contract, the otherBuild and
+  otherPolicy handling with full snapshot identities, and the U1P decision-first hierarchy. §15 keeps Compare
+  retention, the 1024 wrapped-band cell, the Analyze table at the fold, FS-UI-07 and the `capabilities.git`
+  unknown-versus-`git.clean` observation **out of scope** for product change.
+- Publication discipline it states, and how it differs from U1P-R1: §9 grants the normal fast-forward push on four
+  technical conditions (expected parent, understood worktree, no forbidden path, all authoritative local tests
+  green) rather than requiring a separate operator authorization message as U1P-R1 §9 did; §14 grants the same for
+  the one docs-only successor. No force, no amend of published commits, no rebase, and installation is refused
+  unless the exact product run reads 10 of 10.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that
