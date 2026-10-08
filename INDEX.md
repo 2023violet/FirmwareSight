@@ -272,6 +272,14 @@ governance and evidence — `.ai/*`, `BASELINE.yaml`, this ledger, `README.md`, 
 new documents — because the sixteen screenshots it reports were taken from the bytes CI built from
 `6a071c5`, and a code change in the same commit would have invalidated them. `scripts/verify_baseline_artifacts.py`
 reports `RESULT PASS` at this staged state.
+
+**890 lines and 763 entries** at the U1P-R1 evidence successor (2026-10-08): 765 tracked paths, one added and
+none removed since the U1P-R1 product head `42f75a7` — `U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md`,
+the record of the round that closed `U1P-V2-01`. The same split holds: the product commit carried the four UI
+paths and their thirteen tests, and this successor carries only governance and evidence — `.ai/*`,
+`BASELINE.yaml`, this ledger, `README.md` and that report — because the fifteen installed captures it cites were
+taken from the bytes CI built from `42f75a7`, and a code change here would have invalidated them. The baseline
+verifier reports `RESULT PASS` at this staged state.
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 
@@ -504,6 +512,8 @@ disk, in a checksum domain that is deliberately not this one.
 | `U1_VALIDATION/U1R_CORRECTIVE_REPORT.md` | U1R Corrective Report — eighteen-part record and U1-V2-06 disposition (FS-U1R-002) |
 | `U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md` | U1P Visual Polish and Information Hierarchy Plan — what each page had to answer in its first viewport (FS-U1P-001) |
 | `U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md` | U1P Installed Visual Acceptance Report — sixteen measured captures, six first-viewport results, shell verdict, U1P-V2-01 (FS-U1P-VISUAL-ACCEPTANCE) |
+| `U1_VALIDATION/U1P_R1_SUBJECT_CONSISTENCY_PLAN.md` | U1P-R1 Overview Gate-Subject Consistency — correction plan, written before the code (FS-U1P-R1-001) |
+| `U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md` | U1P-R1 Corrective Report — identity contract, thirteen acceptance boxes, five installed scenarios and U1P-V2-01 disposition (FS-U1P-R1-002) |
 | `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
 | `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
 | `V0_VALIDATION/V0_PLAN.md` | V0 Plan |

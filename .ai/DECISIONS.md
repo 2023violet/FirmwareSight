@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 # Decisions — v0.6.0
@@ -2212,3 +2212,59 @@ was exported to disk.
 byte-exact with all four flags YES and `OWNER_STORE_OPENED_BY_U1P = NO`, and the fourteen unrelated siblings
 compare identical. V1 stays paused at `RECRUITMENT_READY` with zero eligible sessions and its frozen cohort
 artifact untouched.
+
+## U1P-R1 (2026-10-08) — a subject bound by identity, and the neutrality that disagreement forces
+
+**The fix was to give the page a question to ask, not to give it nicer words.** `U1P-V2-01` was closed by
+binding a subject: `App` now passes `Overview` the selection handle that earned its last-good analysis — the
+same handle `Analyze` has used for its own pending badge since before this unit existed — and `Overview` compares
+`GateRunDto.snapshotId` against the snapshot it is describing. Everything else followed from that one
+comparison. The temptation in a presentation fix is to reword the verdict slot; rewording would have left the
+page unable to tell whether its own headline was true.
+
+**A list of near-equivalents was rejected as evidence, on purpose.** Truncated ids, file names, timestamps,
+commits, byte sizes and the run's baseline all *can* agree while the subjects differ — two artifacts chosen in
+one session can both be called `firmware.elf`, and a run made for one build can be judged under a policy whose
+name has not changed. Only full identities were allowed to carry the judgement, and the same rule is what makes
+the fourth state (a loaded policy whose fingerprint differs from the run's) reachable at all.
+
+**Where the page cannot answer, it says so and stops quoting.** The four non-current states each render a hollow
+UNKNOWN chip plus the reason, name both full identities as visible text rather than truncated-with-title, and
+refuse to restate the other subject's aggregate. A `title` attribute was rejected because a keyboard reader
+cannot reach it, and a value that never shortens needs no recovery path — which is why the judged snapshot is
+printed at full length even though it is ugly. Last-good retention stayed exactly where U1R left it: the
+retained report is still on the page, still labelled as someone else's answer.
+
+**The round proves its guards bite in the product, twice, in opposite directions.** Five of the thirteen new
+tests failed against the previous head's unmodified `Overview.tsx` *before* any code was written, so the defect
+was demonstrated in the shipped page rather than asserted in a test file; afterwards, deleting only the subject
+dispatch turned eight red, and removing the prop from `App`'s call breaks the authoritative typecheck with
+`TS2741`. The recheck then drove the mismatch the other way round from the U1P finding — run on the base, page
+on the target — and the same guard caught it, which is what a comparison on identities buys.
+
+**An installed round that finds something pre-existing reports it and still does not fix it.** Two observations
+came out of the real screen. The NSIS uninstaller re-launches itself as `Un.exe`, so the borrowed pid-waiting
+driver saw no window while a live wizard was on screen; the wizard was finished through the handle it actually
+owns, and the first record was corrected rather than quietly replaced. And `capabilities.git` renders `unknown`
+on Analyze while the Gate's `git.clean` rule returns a definite BLOCK from real git evidence for the same
+snapshot — because `Capabilities::with_git()` has no production caller at all. That second one is a genuine
+cross-page tension, and it is deliberately *not* filed as a new `U1P-V2/V3/V4` and *not* fixed: it predates this
+unit, Core sits outside this unit's boundary, and inventing a finding to look thorough is as bad as hiding one.
+It is handed to the Architect by name.
+
+**A commit message was corrected before it was ever public, and that is disclosed rather than buried.** The
+product commit shipped a wrong file count. It was amended once while still unpushed, with the tree identical
+before and after (`5291183e…` on both sides) and both reflog entries left in place, and the push that followed was
+a single normal fast-forward. The distinction the round holds itself to is this: rewriting *published* history is
+forbidden, and an unpublished message typo is a thing to fix and say you fixed — not to ship wrong forever, and
+not to do silently.
+
+`266` UI in 9 files (thirteen added, none deleted), `868` Rust unchanged, `assets/design-tokens.json`
+byte-identical, gate 17/17 with no SKIP, baseline PASS at 889 tree lines / 762 sum entries over 764 tracked
+paths. All thirteen acceptance boxes hold on this unit's own CI bytes (`42f75a7`, run `37753793004`, artifact
+`11539359554`), so `U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` — the strongest word available, and still not
+`PASS_COMPLETE`, `VISUAL_ACCEPTED` or `MOCKUP_MATCHED`. `U1P-V1-01`, `U1P-V1-02` and note `U1P-V0-01` stay open
+as the Architect left them. The owner's store came back byte-exact with `OWNER_STORE_OPENED_BY_U1P_R1 = NO` and
+the seventeen application-data entries identical; the round uninstalled as the machine was found, and the
+broad "delete the application data" option was read unticked and never touched. V1 stays paused at
+`RECRUITMENT_READY` with zero eligible sessions and its frozen cohort untouched; B1 stays not authorized.

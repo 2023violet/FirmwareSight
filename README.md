@@ -567,6 +567,20 @@ U1's two later units the same day: INSTALLED, INSPECTED, THEN CORRECTED. The rec
         the build it judges while the page's subject line can name a different one. U1P-V1-01, U1P-V1-02 and note
         U1P-V0-01 are recorded with it; there is no U1P-V3 or U1P-V4. This is still not visual approval, and the owner's
         store came back byte-exact with the machine uninstalled again as it was found.
+        **A sixth U1 round the same day closed that finding:** U1P-R1
+        (U1P_R1_OVERVIEW_GATE_SUBJECT_CONSISTENCY, prompt archived at 33,484 bytes / SHA-256 0263e0fe…) bound the
+        subject rather than rewording the page — App now hands Overview the selection handle that earned its
+        last-good analysis, and Overview compares the run's judged snapshot against the one it is describing,
+        answering NEUTRAL and naming both full identities whenever they differ (U1_VALIDATION/
+        U1P_R1_SUBJECT_CONSISTENCY_PLAN.md written before the code, U1_VALIDATION/
+        U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md as the record). Four product paths, 266 UI tests in the same
+        9 files, 868 Rust unchanged, tokens byte-identical; product commit 42f75a7, CI 37753793004 10 of 10,
+        Windows artifact 11539359554 installed with real input, five scenarios on that screen including a real
+        policy swap that was executed rather than declared unsupported, and all thirteen acceptance boxes proved.
+        U1 is therefore **READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT** — still not visual approval, still not
+        PASS_COMPLETE — with U1P-V1-01, U1P-V1-02, note U1P-V0-01 and one pre-existing Core behaviour
+        (capabilities.git always reads "unknown", because with_git() has no production caller) left for the
+        Architect. The owner's store again came back byte-exact and the machine is uninstalled as it was found.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -791,7 +805,14 @@ on 2026-10-07 that put U1 at `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`. Two mor
 adjudicated it on a real screen (`U1P_VISUAL_ACCEPTANCE_REPORT.md`). All six first-viewport contracts passed, the
 shell passed by pixel comparison rather than CSS, and a thirteen-step smoke found no regression — and the round
 still reports an open material finding, **`U1P-V2-01`**: Overview's ship verdict does not name the build it
-judges while the page's subject line can name a different one. So **`U1 = REQUIRES_ARCHITECT_POLISH_REVIEW`**,
+judges while the page's subject line can name a different one. A third round on 2026-10-08, **U1P-R1**, closed
+exactly that finding by binding a subject rather than rewording a page: `Overview` is now handed the selection
+handle that earned its last-good analysis and compares the run's judged snapshot against the one the page
+describes, answering NEUTRAL and naming both full identities whenever they differ
+(`U1P_R1_SUBJECT_CONSISTENCY_PLAN.md` written before the code, `U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md`
+as the record, commit `42f75a7`, CI `37753793004` 10/10, artifact `11539359554` installed and driven through five
+scenarios). `U1P-V2-01` is `CLOSED_BY_U1P_R1` with all thirteen acceptance boxes proved on those bytes, so
+**`U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`**,
 which is not visual approval, not `PASS_COMPLETE`, not `DESIGN_COMPLETE`, not `MOCKUP_MATCHED`; `U1P-V1-01`,
 `U1P-V1-02` and note `U1P-V0-01` are recorded with it, there is no `U1P-V3` or `U1P-V4`, and the seven `U1-V1`
 minor gaps plus `U1-V0-09` stay open for the Architect's judgement. The product stays **`MVP_CANDIDATE`** at baseline

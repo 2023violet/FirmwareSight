@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 # Current State
@@ -99,6 +99,42 @@ last_updated: "2026-10-07"
   `C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip` (4,727,314 bytes, SHA-256
   `0f59f4ce…3881b`). This is still **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and
   `MOCKUP_MATCHED` are not states U1P may issue, and no product code was touched after the captures.
+- **U1's status now: `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`, and `U1P-V2-01` is `CLOSED_BY_U1P_R1`.** A
+  fourth U1 unit ran on 2026-10-08 under *FirmwareSight — U1P-R1 Overview Gate Subject Consistency, Execution
+  Prompt v1.0* (delivered as a file, 33,484 bytes, SHA-256 `0263e0fe…e8d024`, archived byte-exact). It closed the
+  one material finding the round above left open, and it did so by binding a subject rather than by restyling a
+  page: `App` now hands `Overview` the selection handle that earned its last-good analysis — the same handle
+  `Analyze` had used for its own pending badge since before this unit — and `Overview` asks whether
+  `GateRunDto.snapshotId` is the snapshot it is describing. Four states answer NEUTRAL instead of borrowing an
+  verdict: a run that judged another build, a selection never analyzed, a stored run with no analysis in the
+  session, and a loaded policy whose fingerprint is not the one a run was judged under. Each names both full
+  identities as text rather than truncated-with-title, because a `title` attribute is unreachable by a keyboard
+  reader. Only the matching state shows the run's own sentence and counts, and it now prints the judged snapshot
+  too. Truncated ids, file names, timestamps, commits, byte sizes and the run's baseline were all rejected as
+  substitutes, since any of them can agree while the subjects differ.
+  Evidence, all of it on this unit's own CI bytes: head `42f75a7`, run `37753793004` (#81) 10/10 with each job's
+  own execution window checked, Windows artifact `11539359554` (zip `45922e90…56d8`, NSIS `dd5c8de8…`, installed
+  EXE `3bf541bb…`) installed with real mouse input after the owner's store was parked. Five installed scenarios
+  — matched, mismatched, unanalyzed selection, matched again after a new run, and a real policy swap that was
+  **EXECUTED rather than recorded unsupported** — plus a 1056×799 mismatch capture, a keyboard-only traversal
+  that lands a visible focus ring inside the readiness card, and a five-page regression glance in which U1R's
+  stale-capability contract still holds in both the pending and the parse-failure states. Fifteen captures
+  (sixteen log lines, one of them a superseded mis-click), every one with its client rectangle measured before
+  and after the grab. All thirteen acceptance boxes hold.
+  The owner's store came back byte-exact with all four flags YES and `OWNER_STORE_OPENED_BY_U1P_R1 = NO`, the
+  seventeen application-data entries compare identical, and the machine is uninstalled again as it was before.
+  Two things are stated rather than smoothed. The commit message was amended **once before any push** to replace
+  a wrong file count, with the tree identical before and after; and one pre-existing Core behaviour was observed
+  during the recheck — `capabilities.git` renders `unknown` on Analyze while the Gate reads real git facts for
+  the same snapshot, because `Capabilities::with_git()` has no production caller. It is reported for the
+  Architect's judgement, not filed as a new finding and not fixed, because Core is outside this unit's boundary.
+  `U1P-V1-01`, `U1P-V1-02` and note `U1P-V0-01` stay open exactly as U1P recorded them; this unit neither fixed
+  nor waived them. Evidence: `U1_VALIDATION/U1P_R1_SUBJECT_CONSISTENCY_PLAN.md` (written before the code),
+  `U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md`, the raw set under
+  `%TEMP%\FirmwareSight-U1P-R1-Subject-Recheck-20261008T090319Z\`, and the uploadable pack
+  `C:\Users\16429\Downloads\FirmwareSight_U1P_R1_Overview_Subject_Review.zip` (1,381,951 bytes, SHA-256
+  `342fb89b…99a6`). This is still **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and
+  `MOCKUP_MATCHED` remain states no UI round may issue, and no product source was touched after the captures.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
   eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
   `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause

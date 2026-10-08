@@ -5,10 +5,10 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, corrected the same day by U1R (U1-V2-06 CLOSED_BY_U1R), then recomposed on 2026-10-08 by U1P and installed-and-adjudicated by U1P-A1, so U1 is now REQUIRES_ARCHITECT_POLISH_REVIEW with U1P-V2-01 open and not self-waived — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, corrected the same day by U1R (U1-V2-06 CLOSED_BY_U1R), then recomposed on 2026-10-08 by U1P and installed-and-adjudicated by U1P-A1, then corrected the same day by U1P-R1 (U1P-V2-01 CLOSED_BY_U1P_R1, all thirteen acceptance boxes proved on this unit's own CI-built bytes), so U1 is now READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT — not visual approval — with U1P-V1-01, U1P-V1-02 and note U1P-V0-01 still open for the Architect — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
 
 ## Purpose
 
@@ -650,6 +650,28 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     derived composites, the seven untouched mockups, the U1 and U1R before-set and the sixteen U1P captures);
     `U1P-V1-01`, `U1P-V1-02` and note `U1P-V0-01` are recorded with it. The next action is a human judgement on
     `U1P-V2-01` and the packs, not more agent work.
+
+    A sixth round on the same day closed that finding. **U1P-R1** (`U1P_R1_OVERVIEW_GATE_SUBJECT_CONSISTENCY`,
+    prompt archived byte-exact at 33,484 bytes / SHA-256 `0263e0fe…e8d024`) bound the subject instead of rewording
+    the page: `App` now passes `Overview` the selection handle that earned its last-good analysis, and `Overview`
+    compares `GateRunDto.snapshotId` against the snapshot it is describing. Four states answer NEUTRAL — a run
+    that judged another build, a selection never analyzed, a stored run with no analysis, and a loaded policy
+    whose fingerprint is not the one a run was judged under — each naming both full identities as visible text
+    and refusing to restate the other subject's aggregate; only the matching state shows a verdict, and it now
+    names the judged snapshot in full. Truncated ids, file names, timestamps, commits, byte sizes and the
+    baseline were all rejected as substitutes, because any of them can agree while the subjects differ. Plan
+    `U1_VALIDATION/U1P_R1_SUBJECT_CONSISTENCY_PLAN.md` (written before the code), record
+    `U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md`, product commit `42f75a7`, CI
+    `37753793004` 10/10, artifact `11539359554`, installed EXE `3bf541bb…`. Five installed scenarios ran on
+    those bytes — including a real policy swap that was EXECUTED rather than declared unsupported — and all
+    thirteen acceptance boxes hold, so **U1 is now `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`**, which is still
+    not visual approval. The pack to judge is
+    `C:\Users\16429\Downloads\FirmwareSight_U1P_R1_Overview_Subject_Review.zip` (1,381,951 bytes, SHA-256
+    `342fb89b…99a6`; 38 files, 37 of them in its own manifest, zero mismatches on re-hash). Two things a
+    newcomer should not have to rediscover: the NSIS uninstaller re-launches as `Un.exe`, so a driver that waits
+    on the launched pid never sees its window; and `capabilities.git` reads `unknown` on Analyze for *every*
+    analysis, because `Capabilities::with_git()` has no production caller — a pre-existing Core behaviour,
+    reported for the Architect and deliberately not fixed under this unit's boundary.
 
 ## Boundaries still in force
 

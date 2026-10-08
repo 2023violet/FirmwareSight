@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 # ACTIVE TASK
@@ -159,6 +159,68 @@ public installer, signing, notarization, an updater, a licence choice or pricing
 after the screenshots, which is the condition that makes those screenshots evidence about these bytes.
 If you were sent here to "continue U1": the next word is the Architect's on U1P-V2-01 and the three lesser
 items, not another code round.
+
+CURRENT STATUS OF THIS TRACK, as of the sixth U1 round on 2026-10-08 (this block supersedes the "Why the status
+moved down and not up" paragraph above; that paragraph is kept because it is the dated record of what U1P-A1
+knew, and it is the finding this unit was issued to close):
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 = CLOSED_BY_U1P_R1.  participant execution stays
+PAUSED_FOR_ARCHITECT_UI_REVIEW.
+The corrective unit U1P_R1_OVERVIEW_GATE_SUBJECT_CONSISTENCY (prompt v1.0, Architect authorized, delivered as a
+file and archived byte-exact at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R1_Overview_Gate_Subject_Consistency_v1.0.txt, 33,484 bytes /
+SHA-256 0263e0fe92b7065fcc6a8cf1280630ff753eb2e4415ecb07fd40c72bd8e8d024, blob df5b2d0dcc28e2438861c26e00ae5b0369a3e8a3)
+bound the subject instead of restyling the page. App now hands Overview the selection handle that earned its
+last-good analysis - the same handle Analyze has used for its own pending badge since before this round - and
+Overview asks whether GateRunDto.snapshotId is the snapshot it is describing. Four states answer NEUTRAL: a run
+that judged another build, a selection never analyzed, a stored run with no analysis in the session, and a loaded
+policy whose fingerprint is not the one a run was judged under. Each names both full identities as text rather
+than truncated-with-title, because a title attribute is unreachable by a keyboard reader, and each stops
+restating the other subject's aggregate. Only the matching state shows the run's own sentence and counts, and it
+now prints the judged snapshot in full. The no-run panel and the scope disclaimer are byte-for-byte what U1P
+shipped. Truncated ids, file names, timestamps, commits, byte sizes and the run's baseline were all rejected as
+substitutes, because any of them can agree while the subjects differ.
+Four product paths changed (Overview.tsx, App.tsx, Overview.module.css, overview.test.tsx) and no Rust source
+did: 868 Rust tests unchanged, 266 UI tests in 9 files (thirteen added, none deleted), gate 17 of 17 with no
+SKIP, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4, baseline verifier PASS at 889 tree lines / 762 sum
+entries over 764 tracked paths, assets/design-tokens.json byte-identical. Five of the thirteen new tests failed
+against a2e6b30's unmodified Overview.tsx before any code was written; with only the subject dispatch deleted
+afterwards eight fail; removing the prop from App's Overview call breaks the authoritative typecheck with TS2741.
+Product commit 42f75a7d2d90a4c25ca1a3c5c91f6ece16c2d5bf, pushed a2e6b30..42f75a7 as a normal fast-forward under
+the operator's separate direct authorization. Its message was amended once, before any push, to replace a wrong
+file count, with the tree identical before and after - both reflog entries remain, and nothing published was
+rewritten.
+Run 37753793004 (#81, attempt 1) is 10 of 10, read job by job with each job's own execution window checked.
+Windows artifact 11539359554 (zip 5,539,797 bytes 45922e90..., NSIS 3,891,883 bytes dd5c8de8..., installed
+executable 15,367,168 bytes 3bf541bb..., toolchain.git_commit 42f75a7...) was installed with real mouse input
+after the owner's store was parked. Five scenarios ran on that screen: matched, mismatched, unanalyzed
+selection, matched again after a new run, and a real policy swap that was EXECUTED rather than recorded
+unsupported - with two analyzed builds, two stored runs and two loaded policy fingerprints, all of them named in
+the evidence. A 1056x799 mismatch capture, a keyboard-only traversal that lands a visible focus ring inside the
+readiness card, and a five-page regression glance came with them; U1R's stale-capability contract still holds in
+both the pending and the ERR-FORMAT-0001 parse-failure states. Fifteen captures, sixteen log lines, one of them
+a superseded mis-click kept in the log rather than edited out.
+The owner's store came back byte-exact: OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED,
+ORIGINAL_DB_SHA_MATCH and UNRELATED_SIBLING_STORES_UNTOUCHED all YES, OWNER_STORE_OPENED_BY_U1P_R1 = NO, and the
+seventeen application-data entries compare identical on kind, size and digest. The app ran against a disposable
+store it created itself, hashed and then moved out by name rather than deleted; the round uninstalled as the
+machine was found, and the uninstaller's Delete-the-application-data option was read through BM_GETCHECK, found
+unticked, and never activated.
+Two things are stated rather than smoothed. The NSIS uninstaller re-launches itself as Un.exe, so the borrowed
+pid-waiting driver could not see its window and the wizard was finished through the handle it actually owns.
+And one pre-existing Core behaviour was observed: capabilities.git renders "unknown" on Analyze while the Gate's
+git.clean rule returns a definite BLOCK from real git evidence for the same snapshot, because
+Capabilities::with_git() has no production caller. It is reported for the Architect's judgement, not filed as a
+new U1P-V2/V3/V4 and not fixed, because Core is outside this unit's boundary.
+U1P-V1-01, U1P-V1-02 and note U1P-V0-01 stay OPEN_FOR_ARCHITECT_JUDGEMENT exactly as U1P recorded them; this
+unit neither fixed nor waived them. Evidence: U1_VALIDATION/U1P_R1_SUBJECT_CONSISTENCY_PLAN.md (written before
+the code), U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md, the raw set under
+%TEMP%\FirmwareSight-U1P-R1-Subject-Recheck-20261008T090319Z\, and the uploadable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_R1_Overview_Subject_Review.zip (1,381,951 bytes, sha256
+342fb89be6baf9f4e1670edba901ace57576112ec680af5e0e1f6cb3dee299a6).
+This is still not visual approval: PASS_COMPLETE, VISUAL_ACCEPTED and MOCKUP_MATCHED remain states no UI round
+may issue, V1 stays paused at 0 eligible sessions with its frozen cohort untouched, and B1 stays not authorized.
+If you were sent here to "continue U1": the next word is the Architect's on the final visual verdict, and on the
+three lesser items plus the git-capability observation above - not another code round.
 ```
 
 ## The V1 pointer that was live before U1, kept as the record of 2026-10-06
