@@ -224,7 +224,7 @@ If you were sent here to "continue U1": the next word is the Architect's on the 
 three lesser items plus the git-capability observation above - not another code round.
 ```
 
-The sixth U1 round, run the same day, is the current word on this track:
+The seventh U1 round, run the same day, is the current word on this track:
 
 ```text
 U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 stays CLOSED_BY_U1P_R1.  U1P-V2-02 is CLOSED_BY_U1P_R2.
@@ -308,6 +308,108 @@ issue, V1 stays paused at 0 eligible sessions with its frozen cohort untouched, 
 were sent here to "continue U1": the next word is the Architect's on the single U1P-R2 pack above — which contains
 the U1P six-page baseline, the U1P-R1 before-images and this round's after-images in one archive — and on the four
 open items listed above. There is no code round left for an agent to run.
+```
+
+The eighth U1 round, closed on 2026-10-08, is the current word on this track:
+
+```text
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 stays CLOSED_BY_U1P_R1.  U1P-V2-02 stays CLOSED_BY_U1P_R2.
+U1P-V1-01 and U1P-V1-02 are CLOSED_BY_U1P_R3, on installed bytes.  U1-V2-06 stays CLOSED_BY_U1R.
+Participant execution stays PAUSED_FOR_ARCHITECT_UI_REVIEW.
+
+Unit U1P_R3_FINAL_NARROW_CORRECTIVE_AND_INSTALLED_VISUAL_REVIEW ran under 《FirmwareSight — U1P-R3 Final Narrow
+Corrective and Visual Closure, Execution Prompt v1.0》, delivered as a file: 32,849 bytes, 745 logical lines, 0 CR,
+SHA-256 a185890edd043344a4332dfcc048fd63add1f8a5226dead4af373cc1ceab4de9; archived byte-exact at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Final_Narrow_Corrective_and_Visual_Closure_v1.0.txt (blob
+384e8ca42db8d8238d263c18111d58e5d8da1ab1, the same 32,849 bytes — this prompt was delivered with LF terminators, so
+nothing was normalised away, measured rather than assumed). Start authority HEAD = origin/main =
+f01eec110c76591c741d283e4ee862566e211a2f, tree clean, as recorded in
+U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md before any code was written. That head's own CI was not read at round
+start and is not claimed to have been: it was read at this closeout, job by job from GitHub's API — run
+37801519343 (#84, attempt 1), 10 jobs, all success.
+Three deliverables, and only three: Compare's unexplained blank, Overview's empty capability-band cell at 1024, and
+an evidence pack whose totals are computed from its own acceptance record. No capability was added.
+What was wrong in Compare was ownership, not rendering. App.tsx renders one page at a time, so Compare's own
+useState died the moment the user navigated away, and the page came back showing its action above nothing. The
+comparison session now lives in the shell — six pieces of state App owns and passes down as session/onSessionChange
+— writes go through functional updaters so two writes in one render cannot clobber each other and an obsolete async
+answer cannot resurrect a stale pair, a first session with two candidates and no result says "Ready to compare" and
+names the next step, and a brand-new process does not resurrect an ephemeral diffId. The diffId is in-process only:
+no SQLite row, no IPC call, no localStorage, no schema change.
+What was wrong in Overview at 1024 was a track nothing filled. The shared band is an auto-fit grid whose gap is
+painted in the border colour, so a wrapped line with three cells leaves a fourth cell-shaped rectangle of grey. A
+local .fillBand class (display:flex, flex-wrap:wrap, children flex:1 1 the inspector-min token) fills the line
+instead. components/Panel.tsx and Panel.module.css are NOT in the commit: a shared fill prop was implemented,
+reviewed and reverted to its HEAD digest, because §10 prefers a local class and "provably inert on the other four
+pages" is a weaker claim than "not touched". The bands the Architect already approved stayed untouched.
+Thirteen tests came with it (compare.test.tsx T1-T9, overview.test.tsx T10-T12), 291 UI tests in 9 files, up from
+278 with none deleted; 868 Rust tests unchanged in 47 result lines; gate 17 of 17 with no SKIP and no FAIL, drift
+8/8 including baseline integrity, deny 1/1; assets/design-tokens.json byte-identical; generate_handler! still the
+same 30 named entries. The RED run against the untouched tree reported seven failures — T1, T3, T4, T5, T6, T8, T9 —
+and T3b, written after that run, is RED in its own separately recorded run, so eight of the thirteen are RED on the
+old bytes and all thirteen pass at the head. T2 and T7 are recorded as locks rather than as RED, and so is the
+Overview trio T10-T12: re-measured with HEAD copies of Overview.tsx, components/Panel.tsx and Panel.module.css
+written back over the working copies, all 38 tests in that file pass against the unchanged product code, because
+jsdom lays nothing out and a DOM test cannot see an empty band track — that question is answered only by the
+installed screenshot. An earlier draft of the report claimed the trio was RED; that claim was wrong and the report
+says so. Three mutation records, described as the log has them: M2 removes the Ready to compare panel (2 failed,
+T1 and T9), M3 hard-wires the stale rule to false (4 failed — T5 and T6 plus two pre-existing U1P tests, which is
+the proof the rule is load-bearing across rounds), and M1 is not a separate edit at all: page-local state IS
+f01eec1, so the RED run is the retention measurement and recording it again would count one measurement twice. Each
+measurement restored its files and re-checked their digests. Two self-corrections are in the report rather than smoothed over: a stray brace had made overview.test.tsx
+collect zero tests while a header asserted three of them had passed, and the historical U1P Compare baseline image
+carries the Windows taskbar in its bottom 33 px, so the capture harness now refuses any grab whose client bottom
+falls below the work area and every R3 capture records client_inside_work_area: true.
+Product commit 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177 (12 files, +1,532/-58), pushed f01eec1..41bb6a36 as a
+normal fast-forward under the owner's written authorization for this round; no force, no rewrite, no tag, no
+release. Run 37828673549 (#85, attempt 1) is 10 of 10 read job by job from GitHub's own API. Windows artifact
+11573661113 (zip 5,544,133 bytes 330e83af…, NSIS 3,896,257 bytes 9a51e86a…, installed executable 15,368,192 bytes
+5c828ecf…, toolchain.git_commit == the product head) was downloaded from that run and installed with real mouse and
+keyboard input after the owner's store was parked; the artifacts this round must not use (11539359554,
+11504871803) and any local build are named in the report. Twenty-six capture rows and twenty-four observation rows:
+the named matrix P01-P10 at 1440x900 and R01-R10 at 1024x720 / 1056x799 is complete, with C6's refusal sequence, the
+Git cross-surface trace, the baseline-picker observation and a keyboard traversal beside it. One grab was discarded
+for a misclick and ships in the pack labelled discarded, because a pack that only keeps flattering frames is not
+evidence.
+09_acceptance/ACCEPTANCE_GATE.json: 25 items — 23 PASS, 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED, and 2 of the 23 PASS
+items flagged MISMATCH_PROVED (the stale policy fingerprint Overview names, and the refused same-build compare).
+MISMATCH_PROVED is not a fifth verdict and not extra success: it marks PASS items whose subject IS a mismatch the
+product proved, and none of them says the build is ready. The two findings this round measured and did NOT fix are
+reported, not waived: Analyze's metric band leaves the same unfilled track at 1024 (126 wide rows, identical on the
+R2-era image, so it predates this commit and is outside §7's scope and §10's allowlist), and the gate's baseline
+picker resets on navigation. The §8 read-only trace found no false Gate PASS — git.clean is the gate's true
+statement about a genuinely clean opened project while Analyze's Git UNKNOWN is about the artifact — so §8 produced
+no STOP; the wrong-source sentence it did surface in Overview.tsx was repaired inside the authorized scope.
+Owner data: OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED, ORIGINAL_DB_SHA_MATCH and
+UNRELATED_SIBLING_STORES_UNTOUCHED all YES, OWNER_STORE_OPENED_BY_R3 = NO, 12 unrelated digest-bearing application-
+data files identical across the 17-entry before and after inventories, this round's disposable store hashed and moved
+out whole rather than deleted, the uninstaller's delete-the-application-data box read as unticked and never clicked,
+and the machine uninstalled again as it was found.
+Evidence: U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md (written before the code),
+U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md, the raw set under
+%TEMP%\FirmwareSight-U1P-R3-Narrow-Corrective-20261008T190057Z\, and the uploadable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_R3_Final_Visual_Review.zip (4,224,650 bytes, sha256
+4de07c7669574955493f2fd31594539422662415c14d8c5d378e2126ac831e52, 102 members, CRC clean, 102/102 extraction
+round trip, 101 manifest entries with the manifest itself and the post-hoc verification record documented as
+exclusions, 104 checks on the pack all passed, 8 composites labelled DERIVED over native-size unaltered originals,
+forbidden-content scan clean). Its README counts are generated by summing the acceptance JSON's boxes array and the
+builder refuses to finish when README and JSON disagree — including a negative control that alters one count and
+requires the checker to reject it. The R2 archive is preserved untouched at its own digest and its stale
+"MISMATCH_PROVED=0, PASS=0" README line is documented there as historical only. This is the SECOND build of the R3
+pack: the first (4,223,656 bytes, sha256 b2e787cf411d808f6dcd21601bb3473976db1f2b2f3c2b263d766fd244b0ab45) had the
+right counts but interleaved the negative control's intended rejection among its own checks, and it was moved aside
+to 08_pack\superseded_first_build\ in the evidence root rather than deleted.
+Three governance ordinals were wrong and are corrected by this successor, with the dated narrative around each left
+intact: CURRENT_STATE.md called U1P-R1 "a fourth U1 unit" (it is the sixth) and U1P-R2 "a sixth U1 unit" (it is the
+seventh), and ACTIVE_TASK.md introduced the U1P-R2 block as "the sixth U1 round". By the enumeration those documents
+themselves give — U1, the continuation push, U1R, then the U1P product round and its installed acceptance as the
+fourth and fifth — U1P-R1 is the sixth, U1P-R2 the seventh and this unit the eighth.
+This is still not visual approval: PASS_COMPLETE, VISUAL_ACCEPTED and MOCKUP_MATCHED remain states no UI round may
+issue, V1 stays IN_PROGRESS / RECRUITMENT_READY at 0 eligible sessions with its frozen F3 cohort artifact untouched,
+and B1 stays not authorized. If you were sent here to "continue U1": the next word is the Architect's, on
+FirmwareSight_U1P_R3_Final_Visual_Review.zip and on what it chooses to do with the two findings above and the
+C2-first-viewport reading. There is no code round left for an agent to run, and §19 of the R3 prompt says do not
+invent an R4.
 ```
 
 ## The V1 pointer that was live before U1, kept as the record of 2026-10-06

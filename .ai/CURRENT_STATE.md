@@ -100,7 +100,7 @@ last_updated: "2026-10-08"
   `0f59f4ce…3881b`). This is still **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and
   `MOCKUP_MATCHED` are not states U1P may issue, and no product code was touched after the captures.
 - **U1's status now: `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`, and `U1P-V2-01` is `CLOSED_BY_U1P_R1`.** A
-  fourth U1 unit ran on 2026-10-08 under *FirmwareSight — U1P-R1 Overview Gate Subject Consistency, Execution
+  sixth U1 unit ran on 2026-10-08 under *FirmwareSight — U1P-R1 Overview Gate Subject Consistency, Execution
   Prompt v1.0* (delivered as a file, 33,484 bytes, SHA-256 `0263e0fe…e8d024`, archived byte-exact). It closed the
   one material finding the round above left open, and it did so by binding a subject rather than by restyling a
   page: `App` now hands `Overview` the selection handle that earned its last-good analysis — the same handle
@@ -135,7 +135,7 @@ last_updated: "2026-10-08"
   `C:\Users\16429\Downloads\FirmwareSight_U1P_R1_Overview_Subject_Review.zip` (1,381,951 bytes, SHA-256
   `342fb89b…99a6`). This is still **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and
   `MOCKUP_MATCHED` remain states no UI round may issue, and no product source was touched after the captures.
-- **`U1P-V2-02` is `CLOSED_BY_U1P_R2`, and U1 stays `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`.** A sixth U1 unit ran
+- **`U1P-V2-02` is `CLOSED_BY_U1P_R2`, and U1 stays `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`.** A seventh U1 unit ran
   on 2026-10-08 under *FirmwareSight — U1P-R2, Overview Pending-Selection Evidence Scope + Evidence-ID Consistency
   Audit, Architect execution prompt v1.0* (delivered as a file, 21,194 bytes / 449 lines / 448 CRLF pairs, SHA-256
   `3b6108b6…b6221e`; archived byte-exact, stored blob `aea814d6…`, 20,746 LF-normalised bytes, SHA-256
@@ -187,6 +187,84 @@ last_updated: "2026-10-08"
   deleted. This is still
   **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED` and `MOCKUP_MATCHED` remain states no UI round may
   issue, and no product source changed after the captures.
+- **`U1P-V1-01` and `U1P-V1-02` are `CLOSED_BY_U1P_R3`, and U1 stays `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`.** An
+  eighth U1 unit ran on 2026-10-08 under *FirmwareSight — U1P-R3 Final Narrow Corrective and Visual Closure,
+  Execution Prompt v1.0* (delivered as a file, 32,849 bytes / 745 lines / 0 CR, SHA-256 `a185890e…ab4de9`; archived
+  byte-exact at `10_AUDIT/SOURCE_PROMPTS/…v1.0.txt`, blob `384e8ca4…`, the same 32,849 bytes — this prompt arrived
+  LF-only, so nothing was normalised away). Start authority `f01eec110c76591c741d283e4ee862566e211a2f`, clean tree;
+  that head's run `37801519343` (#84) is 10 of 10, read at closeout and recorded in
+  `00_authority/START_AUTHORITY_CI.txt`.
+  Two presentation defects were closed and no capability was added. **Compare** kept its result in page state while
+  `App.tsx` renders one page at a time, so navigating away unmounted the page and its result with it and the screen
+  returned showing its action above nothing: the comparison session is now shell state, six values `App` owns and
+  hands down as `session` / `onSessionChange`, writes go through functional updaters so two writes in one render
+  cannot clobber each other and an obsolete async answer cannot resurrect a stale pair, a first session with two
+  candidates and no result says `Ready to compare` and names the next step, and a new process does not resurrect an
+  ephemeral `diffId` — in-process only, no SQLite row, no IPC call, no `localStorage`, no schema change.
+  **Overview at 1024** painted a fourth, unfilled band track as a grey rectangle because the shared auto-fit grid
+  strokes its gap in the border colour: a local `.fillBand` class fills the wrapped line instead, and
+  `components/Panel.tsx` / `Panel.module.css` are **not** in the commit — a shared `fill` prop was implemented,
+  reviewed and reverted to its HEAD digest, because §10 prefers a local class and "provably inert on the other four
+  pages" is a weaker claim than "not touched".
+  Thirteen tests came with it (T1–T9 in `compare.test.tsx`, T10–T12 in `overview.test.tsx`); **291 UI tests in the
+  same 9 files** (was 278, none deleted), **868 Rust unchanged** across 47 result lines, gate **17 of 17** with no
+  SKIP, drift 8/8 including baseline integrity, deny 1/1, `assets/design-tokens.json` byte-identical, the
+  `generate_handler!` list still its same 30 named entries. The RED run against the untouched tree reported seven
+  failures (T1, T3, T4, T5, T6, T8, T9) and T3b, written after it, is RED in its own separately recorded run, so
+  eight of the thirteen are RED on the old bytes and all thirteen pass at the head; T2 and T7 are recorded as locks
+  rather than as RED, and so is the Overview trio — re-measured over HEAD copies of `Overview.tsx`,
+  `components/Panel.tsx` and `Panel.module.css`, all 38 tests in that file pass against the unchanged product code,
+  because jsdom lays nothing out and a DOM test cannot see an empty band track. An earlier draft of the report
+  claimed the trio was RED; that claim was wrong and the report says so. Three mutation records: M2 removes the
+  `Ready to compare` panel (T1, T9 fail), M3 hard-wires the `stale` rule to false (4 fail — T5 and T6 plus two
+  pre-existing U1P tests, which is the proof the rule is load-bearing), and M1 is not a separate edit at all —
+  page-local state *is* `f01eec1`, so the RED run is the retention measurement. Product commit
+  `41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177` (12 files, +1,532/−58), pushed `f01eec1..41bb6a3` as a normal
+  fast-forward under the owner's written authorization for this round; run `37828673549` (#85, attempt 1) **10 of
+  10** job by job. Windows artifact `11573661113` (zip 5,544,133 bytes `330e83af…`, NSIS 3,896,257 bytes `9a51e86a…`,
+  installed executable 15,368,192 bytes `5c828ecf…`, `toolchain.git_commit == 41bb6a36`) was downloaded from that run
+  — never built locally — and installed with real mouse and keyboard input after the owner's store was parked.
+  Twenty-six capture rows and twenty-four observation rows: the named matrix **P01–P10 at 1440×900** and **R01–R10 at
+  1024×720 / 1056×799** is complete, each with its requested and measured client size and
+  `client_inside_work_area: true` — the harness now refuses a grab whose client bottom falls below the work area,
+  which is also the correction of a historical image that carried 33 px of taskbar. One grab was discarded for a
+  misclick and ships in the pack labelled discarded, because a pack that keeps only flattering frames is not
+  evidence.
+  `09_acceptance/ACCEPTANCE_GATE.json`: **25 items — 23 PASS, 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED**, 2 of the 23
+  PASS items flagged `MISMATCH_PROVED` (the stale policy fingerprint Overview names, the refused same-build compare);
+  that flag is not a fifth verdict and not extra success, and the README of the pack prints the arithmetic
+  `PASS + FAIL + NOT_VERIFIED + NOT_CAPTURED = ITEMS` because the counts are summed from that JSON at packaging time
+  and the builder refuses to finish when README and JSON disagree — including a negative control that alters one
+  count and requires the checker to reject it. The one FAIL is a finding this round measured and deliberately did
+  not fix: **Analyze's metric band leaves the same unfilled track at 1024** (126 wide rows, and the identical 126 on
+  the R2-era image, so it predates this commit and sits outside §7's scope and §10's allowlist). The one
+  NOT_VERIFIED is honest coverage: no R3 frame re-photographed Overview's `Previous analysis` band, so the O3 leg for
+  it stays unverified rather than folded into a PASS. A third observation, recorded not waived: the gate's baseline
+  picker resets on navigation. The §8 read-only trace found **no false Gate PASS** — `git.clean` is the gate's true
+  statement about a genuinely clean opened project while Analyze's `Git unknown` is about the artifact — so §8
+  produced no STOP; the wrong-source sentence it did surface in `Overview.tsx` was repaired inside the authorized
+  scope and is quoted off installed bytes.
+  Owner data: `OWNER_STORE_PARKED`, `OWNER_BACKUP_HASH_MATCH`, `ORIGINAL_DB_RESTORED`, `ORIGINAL_DB_SHA_MATCH` and
+  `UNRELATED_SIBLING_STORES_UNTOUCHED` all YES, `OWNER_STORE_OPENED_BY_R3 = NO`, 12 unrelated digest-bearing
+  application-data files identical across the 17-entry before and after inventories, this round's disposable store
+  hashed and moved out whole rather than deleted, the uninstaller's delete-the-application-data box read as unticked
+  and never clicked, and the machine uninstalled again as it was found.
+  Evidence: `U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md` (written before the code),
+  `U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md`, the raw set under
+  `%TEMP%\FirmwareSight-U1P-R3-Narrow-Corrective-20261008T190057Z\`, and the uploadable pack
+  `C:\Users\16429\Downloads\FirmwareSight_U1P_R3_Final_Visual_Review.zip` (4,224,650 bytes, SHA-256
+  `4de07c76…831e52`, 102 members, CRC clean, 102/102 extraction round trip, 104 checks on the pack all passed, 8
+  composites labelled DERIVED over unaltered originals, forbidden-content scan clean). It is the **second** build of
+  that pack: the first (4,223,656 bytes, `b2e787cf…4b0ab45`) carried the same evidence with the right counts but
+  interleaved the negative control's intended rejection among its own checks, and it was moved to
+  `08_pack\superseded_first_build\` in the evidence root rather than deleted. The R2 archive stays untouched at its
+  own digest, and its stale `MISMATCH_PROVED=0, PASS=0` README line is documented there as historical only.
+  Three governance ordinals were repaired by this unit's docs successor, with the dated narrative around each left
+  intact: U1P-R1 is the **sixth** U1 unit (it was called the fourth), U1P-R2 the **seventh** (it was called the
+  sixth), and this unit the **eighth**. This is still **not** visual approval: `PASS_COMPLETE`, `VISUAL_ACCEPTED`
+  and `MOCKUP_MATCHED` remain states no UI round may issue, no product source was touched after the captures, V1
+  stays `IN_PROGRESS` / `RECRUITMENT_READY` at 0 eligible sessions with its frozen F3 cohort artifact untouched, and
+  B1 stays not authorized.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
   eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
   `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause

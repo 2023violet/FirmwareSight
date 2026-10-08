@@ -280,6 +280,25 @@ paths and their thirteen tests, and this successor carries only governance and e
 `BASELINE.yaml`, this ledger, `README.md` and that report — because the fifteen installed captures it cites were
 taken from the bytes CI built from `42f75a7`, and a code change here would have invalidated them. The baseline
 verifier reports `RESULT PASS` at this staged state.
+
+**892 lines and 765 entries** at the U1P-R2 evidence successor (2026-10-08): 767 tracked paths, one added and none
+removed since the U1P-R2 product head `2e2e219` — `U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md`.
+Read at this head rather than recalled: `git show f01eec1:SHA256SUMS | wc -l` = 765 and
+`git ls-tree -r --name-only f01eec1 | wc -l` = 767, which is also what `scripts/verify_baseline_artifacts.py`
+reported when that successor was staged.
+
+**894 lines and 767 entries** at the U1P-R3 product head `41bb6a36` (2026-10-08): 769 tracked paths, two added and
+none removed since `f01eec1` — the archived U1P-R3 prompt and `U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md`, the
+plan written before the code. Six of the twelve paths that commit carries are product source under
+`apps/desktop/ui/src` (five files plus two test files counted together), and the UI test count it leaves is 291.
+
+**895 lines and 768 entries** at this U1P-R3 evidence successor (2026-10-08): 770 tracked paths, one added and none
+removed — `U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md`. No product path is in this commit and no test
+count moves, because the twenty-six installed capture rows it reports were taken from the bytes CI built from
+`41bb6a36` and a code change here would have invalidated them; `.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`,
+`.ai/HANDOFF.md`, `BASELINE.yaml`, `README.md`, this ledger and the two baseline artifacts are the rest. The
+complete authoritative gate was re-run at this staged state and the Rust and UI counts came back unchanged from the
+product head — see the report's §7 and `u1_execution.u1p_r3_narrow_corrective.gates_at_product_head`.
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 
@@ -514,6 +533,9 @@ disk, in a checksum domain that is deliberately not this one.
 | `U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md` | U1P Installed Visual Acceptance Report — sixteen measured captures, six first-viewport results, shell verdict, U1P-V2-01 (FS-U1P-VISUAL-ACCEPTANCE) |
 | `U1_VALIDATION/U1P_R1_SUBJECT_CONSISTENCY_PLAN.md` | U1P-R1 Overview Gate-Subject Consistency — correction plan, written before the code (FS-U1P-R1-001) |
 | `U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md` | U1P-R1 Corrective Report — identity contract, thirteen acceptance boxes, five installed scenarios and U1P-V2-01 disposition (FS-U1P-R1-002) |
+| `U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md` | U1P-R2 Corrective Report — pending-selection evidence scope, the §7 identity erratum, twenty-one captures and U1P-V2-02 disposition (FS-U1P-R2-002) |
+| `U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md` | U1P-R3 Narrow Corrective Plan — Compare lifecycle and the 1024 band contract, written before the code (no `doc_id` front matter; it is cited as the plan by FS-U1P-R3-002) |
+| `U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md` | U1P-R3 Final Narrow Corrective Report — Compare retention, the 1024 band, twenty-five acceptance items and the pack that counts itself (FS-U1P-R3-002) |
 | `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
 | `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
 | `V0_VALIDATION/V0_PLAN.md` | V0 Plan |

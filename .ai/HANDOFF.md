@@ -8,7 +8,7 @@ owner: "Engineering"
 last_updated: "2026-10-08"
 ---
 
-# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, corrected the same day by U1R (U1-V2-06 CLOSED_BY_U1R), then recomposed on 2026-10-08 by U1P and installed-and-adjudicated by U1P-A1, then corrected the same day by U1P-R1 (U1P-V2-01 CLOSED_BY_U1P_R1, all thirteen acceptance boxes proved on this unit's own CI-built bytes), so U1 is now READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT — not visual approval — with U1P-V1-01, U1P-V1-02 and note U1P-V0-01 still open for the Architect — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
+# Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — U1 UI productization convergence CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, corrected the same day by U1R (U1-V2-06 CLOSED_BY_U1R), then recomposed on 2026-10-08 by U1P and installed-and-adjudicated by U1P-A1, then corrected the same day by U1P-R1 (U1P-V2-01 CLOSED_BY_U1P_R1, all thirteen acceptance boxes proved on this unit's own CI-built bytes), then by U1P-R2 (U1P-V2-02 CLOSED_BY_U1P_R2) and by U1P-R3 (U1P-V1-01 and U1P-V1-02 CLOSED_BY_U1P_R3, 291 UI tests in 9 files, the review pack computing its own counts), so U1 is now READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT — not visual approval — with note U1P-V0-01 plus two findings U1P-R3 measured and did not fix (Analyze's 1024 band track, the gate baseline picker) still open for the Architect — active_task U1_UI_PRODUCTIZATION_CONVERGENCE — FirmwareSight Productized MVP Candidate — 0 real external sessions
 
 ## Purpose
 
@@ -704,6 +704,42 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     recorded as VOID in the observation log rather than quietly dropped. One gap is stated in the report rather
     than papered over: no press-then-window-title pair was recorded on the installed build for Overview's two
     pending actions, so their destination rests on contract test R2-T5 and mutation `M3_pending_cta`.
+  * **U1P-R3 — the eighth U1 round, and the last agent-run round on this track (2026-10-08).**
+    `U1P_R3_FINAL_NARROW_CORRECTIVE_AND_INSTALLED_VISUAL_REVIEW`, prompt archived byte-exact (32,849 bytes, SHA-256
+    `a185890e…ab4de9`). It closed the two presentation items U1P had left open and nothing else. **Compare**: the
+    result had lived in page state while `App.tsx` renders one page at a time, so returning to Compare showed the
+    action above a blank; the comparison session is now shell state, writes go through functional updaters, a fresh
+    session with two candidates says `Ready to compare`, and a new process does not resurrect an ephemeral
+    `diffId` (in-process only — no SQLite row, no IPC call, no `localStorage`, no schema change). **Overview at
+    1024**: the auto-fit band strokes its gap in the border colour, so three cells on a wrapped line left a fourth
+    grey rectangle; a local `.fillBand` class fills the line, and `components/Panel.tsx` / `Panel.module.css` are
+    not in the commit — the shared `fill` prop was implemented, reviewed and reverted to its HEAD digest, because
+    §10 prefers a local class and "not touched" is a stronger claim than "provably inert". Plan
+    `U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md`, report
+    `U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md`, product commit `41bb6a36`, run `37828673549` (#85,
+    attempt 1) 10 of 10, artifact `11573661113` installed with real input, **291 UI tests in 9 files** (thirteen
+    added, none deleted), 868 Rust unchanged, gate 17/17. **U1P-V1-01 and U1P-V1-02 are `CLOSED_BY_U1P_R3`**; U1
+    stays `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`, and note `U1P-V0-01` stays with the Architect. The pack to
+    judge is `C:\Users\16429\Downloads\FirmwareSight_U1P_R3_Final_Visual_Review.zip` (4,224,650 bytes, SHA-256
+    `4de07c76…831e52`, 102 members), which carries the seven mockups, the R2-era originals read out of the
+    untouched R2 archive, this round's named matrix P01–P10 and R01–R10, the interaction traces, eight labelled
+    DERIVED composites and the acceptance record — 25 items: 23 PASS (2 of them MISMATCH_PROVED, which is a flag on
+    a proved mismatch and not a fifth verdict), 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED, with every count summed from
+    `ACCEPTANCE_GATE.json` rather than typed and a negative control that requires the count checker to fail on an
+    altered README.
+    Three things a newcomer should not have to rediscover. (1) A measurement beats an opinion about a blank area:
+    the void was counted as rows whose longest horizontal run of the border colour reached 100 px — 115 rows on the
+    R2 Overview frame at 1024, 3 on this round's, and 4 on a 1440 control where nothing is wrong — so the fix and
+    the remaining defect are both arithmetic rather than taste (`U1_VALIDATION` report §11,
+    `00_authority/O1_VOID_PROBE_CALIBRATION.txt`). (2) Two findings are recorded and deliberately NOT fixed, and
+    that is not a waiver: Analyze's metric band leaves the same unfilled track at 1024 (identical 126 rows on the
+    R2-era image, so it predates this commit and is outside the round's scope and allowlist), and the gate's
+    baseline picker resets on navigation. (3) A capture harness must refuse frames that include the taskbar: one
+    historical image did, so the harness now pins the window to the origin and records
+    `client_inside_work_area` for every grab, and a discarded misclicked frame ships inside the pack labelled
+    discarded rather than being quietly dropped. The owner's store was parked, never opened, and came back
+    byte-exact with all six flags as §13 requires; the machine is uninstalled again, as it was found. **The next
+    word is the Architect's**, and §19 says do not invent an R4.
 
 ## Boundaries still in force
 

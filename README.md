@@ -821,6 +821,26 @@ U1 authorizes no stage — `B1` Private Beta (the identifier the delivered promp
 re-registered) remains reserved and NOT_AUTHORIZED, and so do RC, GA, signing, notarization, an updater, a licence
 and any new feature.
 
+**Two more U1 units ran on 2026-10-08, and they are the last word an agent gets to write on this track.**
+**U1P-R2** closed the finding U1P-R1 left inside its own page: with a selection the reader had never analyzed,
+`Overview` rendered its capability band and its four figures from the *retained* analysis while the MAP sentence
+described the *new* one, so `MAP provided` sat beside `Symbol-level analysis depends on it`; every current band now
+derives from `selection.selectionId === analyzedSelectionId`, and retained work is labelled `Previous analysis` in
+audible text (`U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md`, commit `2e2e219`). **U1P-R3** then closed the two
+presentation items U1P had left open and finished the evidence trail: the comparison a reader computes now survives
+navigating away and back inside the same session (it is shell state, not page state, and its `diffId` stays
+in-process — no storage, no IPC, no schema), a wrapped capability band at 1024 no longer paints an empty fourth
+cell, and the review pack's totals are summed from its own acceptance JSON rather than typed, with a negative
+control that makes the count checker prove it can fail (`U1P_R3_NARROW_CORRECTIVE_PLAN.md` written before the code,
+`U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md` as the record, commit `41bb6a36`, CI `37828673549` 10/10, artifact
+`11573661113` installed and driven through the named matrix P01–P10 and R01–R10). `U1P-V1-01` and `U1P-V1-02` are
+`CLOSED_BY_U1P_R3`; **`U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`** still, and still not visual approval. Two
+findings are recorded rather than waived: Analyze's metric band leaves the same empty track at 1024 — proved
+pre-existing by an identical measurement on the R2-era image, and outside the round's scope and allowlist — and the
+gate's baseline picker resets on navigation. The pack for the verdict is
+`C:\Users\16429\Downloads\FirmwareSight_U1P_R3_Final_Visual_Review.zip` (4,224,650 bytes, SHA-256
+`4de07c76…831e52`, 102 members), and the next word is the Architect's, not another agent round.
+
 **`V1 (Own-artifact External Validation)` is paused, not closed.** It opened on 2026-10-06 under its own
 architect prompt at **`IN_PROGRESS` / `research_state = RECRUITMENT_READY`**, with **0 eligible external
 sessions**, and it keeps every one of those values while paused (`v1_execution.paused_for` names U1). It is a
@@ -831,6 +851,13 @@ ran, the product counts were required to hold at **868 Rust / 225 UI in 8 files*
 prompt to change the UI, so the live figure after U1R is **868 Rust / 242 UI in 9 files** on the same 17-step gate
 (236 after U1's first round, plus U1R's six contract tests, with no Rust test moving and none deleted), and
 nothing either track does can authorize a feature, a schema, a dependency, a licence, a signature or a release.
+
+**Dated correction to that figure, 2026-10-08.** The 242 above is what U1R left; four more UI units ran that day and
+each added tests without deleting any. The live count at the **U1P-R3** head `41bb6a36` is **868 Rust / 291 UI in 9
+files** on the same 17-step gate — 253 after U1P, 266 after U1P-R1, 278 after U1P-R2, 291 after U1P-R3 — with the
+Rust figure unmoved since V1 froze it and `scripts/check.py` still 17 of 17 with no SKIP. The same gate shape, the
+same 30 registered IPC commands and the byte-identical `assets/design-tokens.json` are what make that growth a
+series of presentation rounds rather than a change of product scope.
 
 **The work that is actually blocked, and on whom.** V1 needs real firmware and embedded engineers running their
 **own** artifacts. §48 assigns recruitment, consent, transfer and moderation to the **human operator**; an agent
