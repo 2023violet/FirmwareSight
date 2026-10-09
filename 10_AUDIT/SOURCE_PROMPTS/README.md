@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-10-08"
+last_updated: "2026-10-09"
 ---
 
 # Execution Prompt Register
@@ -1259,6 +1259,64 @@ text with no source file; each says so in its own entry instead of standing for 
   the F3→candidate product delta) are machine evidence and live outside Git in the re-freeze evidence root, alongside
   the installers themselves — §1's rule that a research build is never committed still holds, so this register points
   at the record and the record points at the root.
+
+
+## A0 Truthfulness Corrective / Execution Authorization v1.0 — EXECUTED, `A0_PRODUCT_TRUTHFULNESS_CORRECTIVE = COMPLETE` (2026-10-09)
+
+- File: `FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt` — 18,845 delivered bytes, 252 logical lines, delivered
+  sha256 `660dae54c5d1ed3f892c4f927c353414b4b057ce78813d5ce32516f8c42f42eb`; stored as blob
+  `c0d89fc210d5a7102c7706071f22572aace63cc7`, same 18,845 bytes, **the same sha256**. One digest rather than two
+  because the arrival was LF-only (measured: 252 LF, 0 `CR`), so `.gitattributes` `*.txt text eol=lf` had nothing to
+  normalise, and the archive was compared to the owner's own file byte-for-byte rather than re-encoded. The file
+  reached the agent under a percent-encoded filename (`FirmwareSight_A0_%E7%9C%9F…_v1.0.txt`); the archived copy
+  carries a clean name and the delivered bytes, which is why the two hashes are the proof and the name is not.
+- Canonical unit: `A0_PRODUCT_TRUTHFULNESS_CORRECTIVE`, nature `BOUNDED PRODUCT CORRECTIVE / TESTED / NO SCOPE
+  EXPANSION`, verbatim from the authorization's own header.
+- What it responds to: the owner's **Product Vision Reconciliation** review (a read-only round whose gap register
+  named `GAP-01` a false Object Attribution declaration, `GAP-06`'s copy half a next-step sentence offering an input
+  the entry point refuses, `GAP-09` an undisclosed size-basis difference on Compare, and an Overview test file whose
+  rule ids were all mockup names). §二 of this authorization opened **exactly those four and no other stage**, and
+  says so: `AGENTS.md` 1 forbids an agent inventing business features while `ACTIVE_TASK` is `NONE`, so the file is
+  itself the scope grant, and ambiguity is to be stopped and asked, not self-approved.
+- Scope locks: §三 forbids a new `ObjectContribution` table, field, persistence model, object-level diff or
+  attribution UI, forbids touching `map.rs`'s absolute-path filtering, object-identity normalisation or
+  archive-member semantics, forbids summing MAP rows into an object total, and forbids changing `MemoryFootprint`,
+  budgets or any Gate rule — with a STOP clause if correcting the claim would move a Gate verdict, a Snapshot ID, a
+  Release ID or committed evidence semantics. §四 keeps the BIN/HEX range conflict between ADR-0006, the PRD, the MVP
+  cohort documents and the current Compatibility Matrix an open D07/Owner question, and forbids implementing BIN/HEX
+  "Basic", rewriting ADR-0006 or declaring the conflict closed. §五 allows one short, accurately placed sentence and
+  forbids a fake sum reconciliation, new charts or cards, and any page re-flow. §六 requires the ten canonical rule ids
+  to be read from source rather than from a mockup and forbids a new rule, a rename, a reorder or an
+  `EffectiveSeverity` change. §七 lists eleven exclusions (attribution implementation, finding→Inspector links,
+  BuildIdentity/ArtifactTimes/Git binding, a new verify command, real BIN/HEX parsing, the unified timeline and Trend
+  and Watch and CI work, `.su`/Dependencies/SBOM/CVE/Keil/IAR adapters, drag-and-drop, dark theme, branding and
+  re-drawing the seven screens, toolchain/dependency/licence/signing/updater/network/telemetry changes, and the whole
+  V1 cohort baseline, protocol, M1–M6, enrollment and participant records) and states that even a new GitHub artifact
+  from this round's CI is a validation output, **not** a new identity for the frozen research build — no automatic
+  re-freeze, and nothing replaces `11573661113`. §八 requires a targeted regression that fails before and passes after
+  each subitem, with mutation proofs confined to isolated copies and no `reset`, `clean` or forced overwrite of the
+  working tree. §九 requires the 17-step gate, the golden/schema/contract drift checks and the ADR-0029 index-blob
+  baseline mechanism, and forbids hand-editing a hash or treating an unstaged tree as the authoritative baseline. §十
+  authorizes one normal fast-forward commit and push to the existing authorized branch with job-by-job CI read-back,
+  forbids force push, amending published history, deleting branches and merging other work, and ends the round.
+- Outcome, and what the STOP clause found: all four subitems shipped as `FIXED` and none was blocked. The clause was
+  tested before any edit by reading the four composition sites — `build_snapshot.rs:34-41`, `fingerprint.rs:34-39`
+  with `domain/gate.rs:676-729`, `release.rs:334-385`, and `capability.rs:93`'s `best_supportable_evidence_class()`,
+  which has no production caller — and none of them carries `capabilities`. It was then corroborated by the bytes:
+  `gate-results.json` regenerated identical, and the golden manifest's `release.id`, `build.snapshot_id` and
+  `extensions.gate_run_id` are the same strings before and after the correction.
+- Where the record lives: `A0_TRUTHFULNESS_VALIDATION/A0_CORRECTIVE_REPORT.md` (per-subitem before/after, evidence
+  paths and line numbers, each red→green proof including the A0-04 mutation cycle, the golden table, the changed-path
+  audit and the remaining limitations), `A0_TRUTHFULNESS_VALIDATION/A0_DESIGN_CHECKLIST.md` (`AGENTS.md` 11's answer for
+  the two surfaces the round made user-visible — one prose sentence in an existing element, and one reported value),
+  machine evidence outside Git in the round's evidence root named in the report, and state
+  in `BASELINE.yaml` `a0_truthfulness_corrective`; counts moved **868 → 870 Rust** and **291 → 295 UI**, which is the
+  round's own measurement on this tree.
+- `active_task`: **`NONE` when this authorization arrived, and `NONE` now.** §十 ends the round at
+  `A0_PRODUCT_TRUTHFULNESS_CORRECTIVE = COMPLETE` and forbids entering Stage A, Stage B, V1, B1, RC or GA on its own
+  authority, so no pointer was lifted. U1's verdict and its guarded tally, V1's paused recruitment, its re-frozen
+  cohort build and its zero sessions, and D07-1…D07-6 are all untouched by this round.
+
 
 
 ## Supersession note on the V0 Batch A activation entry

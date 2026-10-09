@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-08"
+last_updated: "2026-10-09"
 ---
 
 # AI Entry Point
@@ -165,6 +165,14 @@ the newer artifact's bytes (NSIS 3,896,257 bytes `9a51e86a…`) because the reco
 read. **Dated later on 2026-10-08:** the separate authority that recommendation asked for then arrived, and the cohort
 build did move to that re-verified artifact — the sentence in this entry that said "the F3 artifact is still the frozen
 cohort build" was true of the recording round and is superseded by the re-freeze entry above it, not by this one.
+**Dated 2026-10-09, and this is the live pointer for the two test figures:** the A0 truthfulness corrective ran under its
+own owner-authorized prompt and moved the counts to **870 Rust across the same 47 result lines / 295 UI in 9 files**, on
+the same 17-step gate with no `SKIP` — the +2 Rust are A0-01's and A0-02's regressions in
+`crates/firmwaresight-artifact/tests/p0_acceptance.rs`, the +4 UI are A0-03's in `compare.test.tsx` and A0-04's three in
+`overview.test.tsx`. Every other count sentence in this entry, including the two that read "The present counts are 868
+Rust / 225 UI in 8 files" and "Counts unmoved at 868 / 291", is that round's own dated record and is kept as written.
+A0 opened no stage: `active_task` was `NONE` before it and is `NONE` now, and its report is
+`A0_TRUTHFULNESS_VALIDATION/A0_CORRECTIVE_REPORT.md` ·
 Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
 stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
 and its continuation round installed the CI-built product and inspected it, so **U1 was

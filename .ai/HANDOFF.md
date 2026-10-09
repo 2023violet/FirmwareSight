@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-08"
+last_updated: "2026-10-09"
 ---
 
 # Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — **U1 UI productization convergence CLOSED 2026-10-08 by the Architect's independent visual acceptance record: `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`, scoped to visual readiness for a controlled V1 study and explicitly not GA quality, not feature completeness, not distribution approval** — the eight units that ran were: U1 first round CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, corrected the same day by U1R (U1-V2-06 CLOSED_BY_U1R), then recomposed on 2026-10-08 by U1P and installed-and-adjudicated by U1P-A1, then corrected the same day by U1P-R1 (U1P-V2-01 CLOSED_BY_U1P_R1, all thirteen acceptance boxes proved on this unit's own CI-built bytes), then by U1P-R2 (U1P-V2-02 CLOSED_BY_U1P_R2) and by U1P-R3 (U1P-V1-01 and U1P-V1-02 CLOSED_BY_U1P_R3, 291 UI tests in 9 files, the review pack computing its own counts) — acceptance tally frozen as the verdict guards it: **25 items, 23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED, 2 MISMATCH_PROVED flags inside the 23 PASS, and no document may restate it as 25/25 or 100%** — four deviations stay enumerated and open, not silently closed: A Analyze's 1024x720 metric-band track (the round's FAIL box, now a U1 visual known issue and a V1 UX observation, prioritised from participant evidence rather than as a pre-V1 engineering gate), B Compare's Section Changes first data row below the 1440x900 fold (one-scroll-detail accepted for V1 only), C the Gate baseline picker resetting on navigation (a study usability ambiguity; the persisted GateRunDto keeps its own baselineSnapshotId, snapshotId and policySha256), D Overview's Previous-analysis panel never re-captured in R3 (the round's NOT_VERIFIED box; R2 images are contextual evidence, not a substitute); E, a count defect in these entry documents, was corrected by the next already authorized governance update rather than by a stand-alone CI-loop commit — **active_task NONE**, V1 NOT resumed by a visual verdict (still 0 eligible external sessions; the record's closing section read NEXT ACTION RECOMMENDATION, NOT EXECUTED, and that recording round only re-downloaded and re-hashed artifact 11573661113 — NSIS 3,896,257 bytes 9a51e86a… — because that record conditions document changes on the read), **and V1's cohort build then RE-FROZEN 2026-10-08 to that accepted build under the owner's inline V1 Cohort Re-freeze / Execution Authorization v1.0: COHORT_BUILD = REFROZEN_TO_U1_CANDIDATE — run 37828673549 · head 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177 · artifact 11573661113 · container 5,544,133 B 330e83af… · NSIS 3,896,257 B 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93 · unsigned · GitHub expiry 2026-10-22T19:18:25Z · first freeze F3's artifact 11419727517 / 182506f2… preserved and dated superseded, not deleted; the authorization granted the instrument and withheld the cohort — no recruitment, no session, no install, no distribution, M1–M6 still NOT_MEASURED — record V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md** — FirmwareSight Productized MVP Candidate — 0 real external sessions
@@ -430,6 +430,18 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   `intake.test.tsx`, 2 in `release.test.tsx`). **F2, F2R2 and F3 were each required to hold both numbers
   still** — F3 §5 states the rule in its sharpest form, because a docs-only head that moves a count is a
   product change wearing a documentation diff, and the round must stop rather than explain it.
+- **Figures on the A0 tree, measured 2026-10-09 — these are the present ones, and the bullet above is dated history:**
+  the gate's `rust/test` step reports **870 Rust tests** (0 failed) and
+  **295 UI tests in 9 files**, on the same **17-step** gate. The +2 Rust are `a_map_supplies_region_evidence_without_becoming_an_object_attribution_claim`
+  and `the_unsupported_format_next_step_offers_only_what_the_pipeline_accepts`, both in
+  `crates/firmwaresight-artifact/tests/p0_acceptance.rs`; the +4 UI are one in `compare.test.tsx` (A0-03) and three
+  in `overview.test.tsx` (A0-04). No test was deleted or weakened to get there. That step prints **47 `test result:`
+  lines** (41 test-binary lines + 6 doc-test lines), the same 47 the bullets above cite, so A0 moved the count and not
+  the shape. A standalone `cargo test --workspace` re-run of the same
+  tree prints 49 such lines because that invocation emits `firmwaresight_report`'s and `firmwaresight_storage`'s
+  doc-test targets twice, with the identical 870 — cite the gate log, not the ad-hoc re-run.
+  The bullet above is a **dated F3-tree record**, kept as history the way this file keeps every earlier
+  measurement; the U1 rounds already moved the UI line past it, and A0 moved it again.
 - **Figures at the Commit E tree, measured 2026-10-04:** `cargo test --workspace` **868 Rust tests
   across 47 executables** (storage 131, desktop 222, and the +14 all in the new
   `crates/firmwaresight-artifact/tests/p5_compat_fixtures.rs`) and **217 UI tests in 8 files** — 6 added to

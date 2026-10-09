@@ -1,0 +1,252 @@
+FirmwareSight — A0 Truthfulness Corrective
+产品真实性与误导性表述修复｜Coding Agent 执行授权 v1.0
+项目：2023violet/FirmwareSight
+授权单元：A0_PRODUCT_TRUTHFULNESS_CORRECTIVE
+性质：BOUNDED PRODUCT CORRECTIVE / TESTED / NO SCOPE EXPANSION
+日期：2026-10-09
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+一、为什么开启 A0，而不是继续扩大开发
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本轮基于已经完成的 Product Vision Reconciliation（D01–D07）及最新 Phase 5 架构评审，针对产品中已经有源码证据、无需先解决战略争议的有限问题实施纠正。
+
+最终审查指出：
+- GAP-01：系统把“提供了 MAP”误报为“具备 Object / Module Attribution”，但实际对象贡献信息未进入快照与 UI；误报还传播到 CLI 和 Release Bundle。
+- GAP-06：非 ELF 输入按设计被拒绝，但某个解析错误的 remediation 建议用户提供 BIN/HEX，使用户陷入再次失败的操作。
+- GAP-09：Compare 头部的 nonvolatile/load image delta 与增长排名使用不同、但都有标识的统计口径；缺少一句明确的说明，用户可能误以为前五排名应当加总到头部数字。这不是内存统计错误。
+- Overview UI tests：部分展示用规则 ID 是 Mockup 示例，而不是实际十项 Gate Rule ID。测试示例本身不构成产品缺陷，但缺少真实规则 ID 的回归覆盖。
+
+本轮目的：只纠正这些已确认的真实性/文案/回归覆盖问题。
+
+绝不把 A0 解释为：
+- 已经解决对象级归因；
+- 已经解决构建产物与 Git Commit 的身份绑定；
+- 产品已经达到最终设计预期；
+- V1、B1、RC 或 GA 已经通过；
+- Product Vision Reconciliation 的 D07 决策已被所有者全部批准。
+
+本提示词由产品所有者作为独立、明确的 A0 范围授权交付。AGENTS.md 中 ACTIVE_TASK=NONE 禁止代理自行创建业务功能；本文件只开放下面明确列出的纠正单元，不开放任何其它阶段。若对授权范围有歧义，停止并询问，不得自我扩权。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+二、接手与不可改变的项目状态
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+预期接手基线（必须现场核实，不得假定）：
+- repository：2023violet/FirmwareSight
+- HEAD：19dcf889624fab172095e4de9e6b33ad53141f3c
+- 工作树 clean；ACTIVE_TASK=NONE
+- 0.6.0 MVP_CANDIDATE
+- P5=PASS_COMPLETE
+- U1=PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS
+- U1 tally：25 items = 23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED，另有 2 个 PASS 内的 MISMATCH_PROVED 标记
+- U1 deviations A–D 不得静默关闭
+- V1=IN_PROGRESS / RECRUITMENT_READY，合格外部用户 0，M1–M6 NOT_MEASURED
+- V1 当前冻结研究构建是 Artifact 11573661113 / product head 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177，NSIS SHA-256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93
+- B1 / RC / GA = NOT_AUTHORIZED
+
+开始时按 AGENTS.md 规定阅读：
+1. README.md
+2. .ai/README.md
+3. .ai/CURRENT_STATE.md
+4. .ai/DECISIONS.md
+5. .ai/ACTIVE_TASK.md
+6. 04_TECH/09_TECH_DECISION_MATRIX.md
+7. DESIGN.md、assets/design-tokens.json（因为本轮触及用户可见输出）
+8. 与本轮有关的 ADR、规格与测试规范，尤其 ADR-0018、ADR-0021、ADR-0027、ADR-0028、ADR-0029、04_TECH/26_PORTABLE_SCHEMA_POLICY.md
+9. Product Vision Reconciliation 的最新 D05、D06、D07 与 Phase 5 G1/G2/G6 研究结论
+
+如果 HEAD、分支或工作区不同于上述状态：先报告差异；特别是存在任何未提交用户改动时，停止自动写入，不得 stash、reset、checkout 覆盖或清理。不得把历史版本的审查行号当成当前源码真相。
+
+在实际开始改动前，输出简短的 A0 preflight：列出当前真实代码路径、最小修改清单、预计受影响的测试和对公共输出的风险。若发现需要新业务功能/Schema/语义重构，STOP，等待架构师裁决。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+三、唯一授权修正 A0-01：Object Attribution 能力声明纠正
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+核心问题：
+目前 crates/firmwaresight-artifact/src/pipeline.rs 的 build_capabilities() 对 MAP 存在性与对象归因可用性使用了相同条件；crates/firmwaresight-core/src/domain/capability.rs 的 with_map(provision, attribution) 会把 attribution 状态写入 Capabilities。当前对象贡献没有在 BuildSnapshot / Storage / UI 中形成可查询的实际结果，Compare 则明确报告 unavailable。
+
+必须独立确认：
+- map_evidence 的确仅说明 MAP 已解析，而不代表可提供对象级归因结果；
+- 当前 production 不持久化、不展示对象/模块归因记录；
+- 纠正状态时，MAP Provided/Available 的事实与 section/region/load-address 分析仍然保持正确；
+- 哪些消费者依赖 object_attribution 的 availability。
+
+实施要求：
+1. 在源头将对象归因状态改为与实际可交付能力一致；在当前实现确实无可查询对象归因结果时，不得继续报 Available。应选用现有 canonical Availability 枚举与真实事实相符的状态，避免发明第五种证据分类。
+2. MAP 的存在、MAP region evidence、已有 Section/Symbol 结果不能因此变为 Unavailable。
+3. 对用户可见的 Analyze、Overview、CLI report、Release Bundle 等输出检查实际显示是否一致。不要只在一个 React 页面隐藏错误文本，而让报告继续误报。
+4. 为 MAP 提供 / 未提供各建立回归覆盖；MAP Provided 与 Object Attribution Unavailable 应可同时成立；与现有 Compare 的不支持理由一致。
+5. 如需要变更既有 report/golden 中的一行陈述，先检查其契约地位，再做严格对应的预期更新与差异证明。不得利用脚本批量重新生成无关 Golden。
+
+**本轮禁止：**
+- 新增 ObjectContribution 表、字段、持久化模型、对象级 diff 或对象归因 UI。
+- 修改 map.rs 的绝对路径筛选机制、对象身份归一化及 archive-member 语义；它们属于后续独立设计。
+- 把所有 MAP 行简单相加并声称获得精确对象级 FLASH 大小。
+- 更改 MemoryFootprint、Budget 或 Gate 规则判断。
+- 以“能力变更”为由扩大兼容范围。
+
+如果把虚假声明纠正为真实状态会意外改变 Gate Verdict、Snapshot ID、Release ID 或已承诺的证据语义，立即暂停并上报最小可复现证据，不得自行继续。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+四、唯一授权修正 A0-02：不支持格式的错误提示
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+核查：
+- crates/firmwaresight-artifact/src/intake.rs 对格式的识别；
+- crates/firmwaresight-artifact/src/pipeline.rs 非 ELF 输入拒绝路径；
+- crates/firmwaresight-artifact/src/error.rs 的 UnsupportedFormat remediation（上轮位于约第 86 行）。
+
+若确认当前支持矩阵仍然仅允许 ELF 被该分析路径接受，则修复误导文案。可采用含义如下的明确提示：
+“请选择受支持的 ELF 链接输出文件进行分析。本版本的 BIN/HEX 文件尚不支持通过此分析入口处理。”
+
+具体英文产品文字应遵守现有 Error Model 与 UX 用语规范，内容必须符合实际支持范围，不得让用户误认为改用 BIN/HEX 就能解决错误。
+
+必须补充或修正覆盖：
+- ELF 可正常分析；
+- 被拒绝的 BIN/HEX 仍被拒绝且错误信息给出正确下一步；
+- CLI/Desktop 均使用相同的真实 remediation 来源；
+- 错误结构的 code/details/operationId 等事实不被丢失。
+
+**重要范围边界：**
+早期 ADR-0006、PRD、MVP Cohort 文档与现行 Compatibility Matrix 存在 BIN/HEX 范围冲突。这个冲突保留为 D07/Owner 待裁决事项，本轮只修复用户当前真正会看到的错误建议；**不**擅自实现 BIN/HEX Basic、不擅自重写 ADR-0006、不擅自宣布该范围冲突已关闭。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+五、唯一授权修正 A0-03：Compare 排名与总体 Δ 的口径说明
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+报告已复核：
+- headline “Nonvolatile / load image” 使用非易失/装载镜像口径；
+- Section 和符号排名可按 runtime memory-size delta 排序；
+- 两种 delta 的底层字段与 DTO 均已正确保留；
+- 排名只展示部分项目（如 Top growth），并非全部贡献的完整分解。
+
+本轮只添加**一条简短、位置准确的事实说明**，建议放在 Compare 的排名区附近，回答：
+- 排名依据是什么；
+- 为什么不应把可见排名项直接相加与顶部 nonvolatile/load image 增量比较；
+- 何时属于不同 size basis、何时是因为只显示 Top N。
+
+必须遵守：
+- 不用新计算伪装成“总和核对”；
+- 不引入新图表、新详情页或复杂说明卡；
+- 文案不能将 runtime-size 与 file-size 概念偷换；
+- 允许在真实布局合理的位置进行最小编辑，不能顺便重排整个页面；
+- 对该说明至少有一个稳健的组件测试/断言，不对像素截图做虚假的运行态声称。
+
+如果现有 UI 已经有完全等价且足够明确的提示，应出示证据，并可将该子项记录为 NO_CHANGE_WITH_EVIDENCE，禁止重复制造说明。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+六、唯一授权修正 A0-04：Overview 真实 Rule ID 回归覆盖
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+核对当前 Gate 的 canonical Rule IDs（上一轮报告共十项），以源码定义而非 Mockup 为权威。
+
+在 apps/desktop/ui/src 的 Overview 相关测试中：
+- 保留必要的展示层自由字符串测试；
+- 至少引入一个真实 Gate ID（例如 memory.flash_budget，须以现有源码确认）贯穿输入和最终显示断言；
+- 验证 Verdict、Finding、Evidence label 的正常映射；
+- 若已有规则编号只用于证明 Unknown/Mockup 不会产生虚构事实，不得盲目改写这类 negative test。
+
+这个子任务只补产品真实性的回归覆盖，不准新加 Gate rule，不改变规则名称、规则顺序或 EffectiveSeverity 语义。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+七、明确排除的其他事项
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本轮不许触碰或启动：
+1. GAP-02 的 Object / Archive / Module Attribution 实现（需要后续独立授权与可能的新 ADR）。
+2. GAP-03 Gate Finding → Evidence Inspector 的交互链接（Stage A）。
+3. GAP-04 Artifact BuildIdentity、ArtifactTimes、Git provenance 的数据绑定（Stage A / Owner 决策）。
+4. GAP-05 Bundle 的新验证命令、Bundle 文件清单改造（Stage A / Owner 决策）。
+5. GAP-06 BIN/HEX 实际解析或发布范围裁决。
+6. GAP-07 Trigger/Source Schema、History 统一时间线、Trend、Watch、CI bot。
+7. `.su`、Dependencies、SBOM、CVE、Keil/IAR/其他 adapter。
+8. 拖放导入、Dark Theme、品牌重新设计、七屏高保真图重新绘制。
+9. 修改 Rust toolchain、依赖、lockfile、licence、signing、updater、网络/Telemetry。
+10. 改 V1 cohort baseline、研究协议、M1–M6、入组条件或任何真实参与者记录。
+11. 以 A0 完成为由宣称 V1 = PASS 或 B1 = authorized。
+
+即使 A0 修改后 CI 重新打包生成新的 GitHub Artifact，该 Artifact 也只能是本轮验证输出，**不是** V1 已冻结研究构建的新身份；不得自动 re-freeze，不得用新的程序替换 11573661113。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+八、工程实施顺序与安全边界
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+实施顺序建议：
+A0-00 Preflight：验证仓库状态、追踪现有输出链、列出精确变化范围。
+A0-01 Object attribution truthfulness。
+A0-02 Unsupported format remediation。
+A0-03 Compare disclosure。
+A0-04 Overview rule-ID regression。
+A0-05 Cross-surface audits + tests + evidence report。
+A0-06 仅按现行 repo 治理更新必要的状态/索引，并收尾。
+
+每个子项都应优先建立能够在修复前失败、修复后通过的定向回归；记录 red→green 证据。若需要 mutation proof，使用隔离的临时副本或明确无损的回归测试方法；不可破坏现有工作树，不可对用户原始文件执行 reset、clean、强制覆盖。
+
+任何代码改动都要满足：
+- 路径最小化、无无关重构。
+- Core-first：UI 不自建归因、diff、budget、Gate 算法。
+- Observed / Derived / Declared / Unknown 规则不变。
+- 五态 PASS / REVIEW / BLOCK / UNKNOWN / N/A 规则不变。
+- U1 frozen mockups、tokens 不变。
+- Local-first、无隐式网络请求、无主机绝对路径泄漏。
+- release-manifest、analysis / diff / gate 等公共契约不无声改版。
+- 对 CLI/Bundle 用户可见文本变动，只更新相应真实预期与测试。
+
+如果任何子项需要新 Schema/Migration、公共契约语义调整、Snapshot/Release ID 重新定义、内存计算方式修改、Gate 判定逻辑修改，停止该子项并上报；其余无争议子项可完成并独立交付，但不得靠扩大任务来消除 STOP。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+九、验证和交付
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必须执行并保留完整结果：
+1. 新增/修订的精确 Rust 回归；
+2. UI 回归测试；
+3. `cargo fmt --check`、`cargo clippy` 与 Rust tests（依照仓库既有严格参数）；
+4. UI typecheck、lint、test、build；
+5. `python scripts/check.py` 项目 17 步门禁，不能跳过失败步骤；
+6. Golden/Schema/Contract drift 与版本化基线校验；
+7. `git diff --check`、变动路径审计、构建产物漂移检查；
+8. 涉及用户可见输出时，覆盖 Map provided / missing、unsupported input、真实 Rule ID、两种 size basis 的测试用例。
+
+通过测试不代表实际安装应用已被人类使用。没有真实的运行截图时标明 NOT_RUNTIME_VERIFIED；不要伪造 V1 的会话或验收结论。
+
+本轮应交付一份简明、可回溯的 A0_CORRECTIVE_REPORT，内容至少包括：
+- 各 A0 子项修复前/后行为；
+- 证据文件路径、行号或函数；
+- 真实用户可见变化；
+- 每项回归的失败前置与通过后置证明；
+- 精确变更路径、diff 统计；
+- Rust/UI 测试与 check.py 结果；
+- 是否触及公共合同；
+- 新建/仍有的已知限制；
+- 完成后下一项推荐（仅建议，不执行）。
+
+报告可按仓库的既有治理规范归档；只在必要时改动 `.ai/` 当前状态、基线校验文件和相关审计索引。若仓库要求更新 SHA256SUMS / DIRECTORY_TREE 等生成文件，必须严格采用 ADR-0029 的 index-blob / staged-index 机制，先明确脚本行为并验证，不得手改散列或把未暂存工作树当成权威基线。保留历史 immutable evidence。不得为“写下本轮 CI 编号”额外循环提交。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+十、Git 交付授权与最终停止
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本提示词授权针对 A0 的最小代码/测试/必要治理文档改动。在预检干净、全部本地门禁通过、变更路径完全属于 A0 后，允许正常 fast-forward commit/push 到既有授权分支，并按仓库规定回读其 CI 结果；禁止 force push、amend 已发表历史、删除分支或合并其它工作。
+
+如出现未预期的工作树改动、权限疑问、阻断性回归、安全/Schema/公共契约变更，STOP，不得为了获得绿灯而自行扩大授权。远端 CI 若失败，仅允许对本次 A0 造成的范围内问题作有证据的纠正；超出范围须返回请求授权。
+
+交付时报告：
+- Git HEAD / origin/main 是否一致（如已推送）；
+- 工作树是否清洁；
+- 变动 commit id 和文件清单；
+- 本地 17-step gate；
+- CI run ID、head SHA、job-by-job status；
+- 四个 A0 子项结论：FIXED / NO_CHANGE_WITH_EVIDENCE / BLOCKED；
+- 保留的 Owner 决策 D07-1 至 D07-6；
+- U1、V1、研究构建、参与者及指标状态没有被本轮重写；
+- 明确说明 A0 不是产品价值验证，也不是新 V1 cohort。
+
+本轮完成状态仅为：
+A0_PRODUCT_TRUTHFULNESS_CORRECTIVE = COMPLETE / or PARTIAL_WITH_EXPLICIT_BLOCKERS
+
+然后停止。不得自动进入 Stage A（Evidence Loop）、Stage B（Object Attribution）、V1、B1、RC 或 GA。
+
+我们最终期待的不是“又一个绿 CI”，而是 FirmwareSight 从界面、CLI 到 Release Bundle，不再对当前实际上做不到的事情作出错误承诺。

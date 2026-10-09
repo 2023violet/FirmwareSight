@@ -148,6 +148,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
+│   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
 │   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
@@ -214,6 +215,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 01_UI_BASELINE_REVIEW.md
 │   ├── 02_V0.5_EXPERT_REVIEW_RESOLUTION.md
 │   └── 03_ADOPTION_DECISION_REGISTER.md
+├── A0_TRUTHFULNESS_VALIDATION/
+│   ├── A0_CORRECTIVE_REPORT.md
+│   └── A0_DESIGN_CHECKLIST.md
 ├── apps/
 │   ├── cli/
 │   │   ├── src/
