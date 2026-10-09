@@ -195,6 +195,25 @@ touched, the four implementation units `C1-U1`…`C1-U4` are specified and **non
 build is still `11573661113` at `41bb6a36`. The other vision-reconciliation findings stay review inputs and open.
 State: `BASELINE.yaml` `c1_direction_and_design_freeze`; the pointer is `NONE` before and after this round.
 
+**Dated later on 2026-10-09, and this is the sentence that supersedes the "none is authorized" clause above.** The Owner
+then authorized one implementation unit — 《C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权 v1.0》
+(`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt`, 15,072 bytes / 132 `LF` /
+0 `CR` / SHA-256 `61a33d53…484b65`) — together with a mid-turn continuation for the ERR-BUNDLE stable-code check
+(`…_ERR_BUNDLE_Code_Check_And_TDD_Continuation_v1.0.txt`, 10,162 bytes / 84 `LF` / 0 `CR` / SHA-256 `79a91df6…c3c0a`),
+and it was executed. What now exists in code: `GateAttachmentFact` / `KindBasis` and a separate
+`GateContext.attachments`; the canonical rule that keeps `firmwaresight-gate-input/1` byte-frozen while the set is empty
+and moves to `/2` with its own `attachments[…]` block when it is not; `ReleaseAttachment` plus `observe_attachment()` in
+`firmwaresight-project` — stat, regular-file check, refuse zero bytes, streaming SHA-256, length, with ELF and MAP
+refused by kind before any read and three typed refusals at `ERR-BUNDLE-6115` / `6116` / `6117`; and migration
+`0006_release_attachments.sql`, whose rows are written atomically with the run and re-read in stored ordinal order so a
+re-read rebuilds the same canonical text and the same `run_id`. **What does not exist is the feature:** no UI control, no
+CLI `--attach`, no IPC command, no `attachment:` locator and no bundle verification, so `required = ["bin"]` / `["hex"]`
+**still `BLOCK`s** and a bundle **still cannot ship** a BIN or HEX file. `BIN_HEX_RELEASE_ATTACH` therefore moves from
+`DESIGN_APPROVED / NOT_IMPLEMENTED` to **`DESIGN_APPROVED / NOT_USER_AVAILABLE`**, `BIN_HEX_ANALYSIS` stays
+`UNSUPPORTED`, and `C1-U2` / `C1-U3` / `C1-U4` are `NOT_AUTHORIZED / NOT_STARTED`. Reports
+`C1_VALIDATION/C1_U1_EXECUTION_REPORT.md` and the plan `C1_VALIDATION/C1_U1_DATA_AND_IDENTITY_PLAN.md`; state
+`BASELINE.yaml` `c1_u1_data_and_identity`; the pointer was `NONE` before, during and after this round.
+
 ## Primary reading path
 
 1. `README.md`
@@ -470,6 +489,29 @@ path was added or removed, which is the direct proof that a self-correction stay
 forbidden-OID audit and `drift/goldens unchanged` and `drift/ipc bindings unchanged` are re-run against it, and the gate
 log that measures its bytes is `target/c1_freeze_gate_final5.txt`. A CI number is still absent from it for
 the same reason as before: the run it would carry is the one its own push produces.
+
+**914 tree lines and 784 entries over 786 tracked paths** at C1-U1 (2026-10-09), the first code of that freeze: six
+paths added and none removed — `crates/firmwaresight-storage/migrations/0006_release_attachments.sql`,
+`crates/firmwaresight-project/tests/release_attachments.rs`, `C1_VALIDATION/C1_U1_DATA_AND_IDENTITY_PLAN.md`,
+`C1_VALIDATION/C1_U1_EXECUTION_REPORT.md` and the two archived authorizations
+(`FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt`, 15,072 bytes, 132 `LF`, 0 `CR`, sha256
+`61a33d53…484b65`; `…_ERR_BUNDLE_Code_Check_And_TDD_Continuation_v1.0.txt`, 10,162 bytes, 84 `LF`, 0 `CR`, sha256
+`79a91df6…c3c0a`). Because two of the six land in a directory the tree did not yet list, the tree grew by seven lines
+for six paths, and the seventh line is the new directory row `C1_VALIDATION/` itself. Thirty existing paths gained
+content — the migration's schema-number consequences in the storage and
+desktop guards, the two technical documents this unit owns (`04_TECH/02`, `04_TECH/15`), the five `.ai/` entry
+documents, the prompt register, this ledger and `BASELINE.yaml` — and 6 + 30 + 2 regenerated artifacts are the
+thirty-eight staged paths, which is the whole scope claim: 38 = 6 + 30 + 2.
+**Both counts moved, and this time they are supposed to: 870 → 900 Rust across 48 `test result:` lines** (the 48th is
+this unit's new `release_attachments` test target, and 30 tests were added with none deleted or weakened) **while the frontend stays at Test Files 9 / Tests 295**, because no UI path was
+touched. `python scripts/check.py` ran at the final staged state and returned **17 of 17 with no `SKIP` and no `FAIL`**,
+with `scripts/verify_baseline_artifacts.py` **RESULT PASS** at these same 914 lines and 784 entries, `index blob mismatch
+0`, `tracked but unlisted 0`, `duplicate entries 0`. Two of those steps carry the proof this unit is actually making:
+`drift/goldens unchanged` passing means the frozen `p4-release` `/1` bytes still reproduce, and `drift/ipc bindings
+unchanged` passing means no public contract moved — which is the mechanical form of "data and identity, not a feature".
+One disclosure belongs here rather than in a footnote: the first version of the ordering assertion did **not**
+discriminate, and the mutation proof caught it — see `C1_VALIDATION/C1_U1_DATA_AND_IDENTITY_PLAN.md` §12.1. A CI number is
+absent from this entry for the same reason as the two above it.
 
 **What those digests are of, since ADR-0029 (Commit F1, 2026-10-05):** the canonical Git **stage-0 index blob
 bytes**, not the bytes sitting in the working directory. The rule and its alternatives are in

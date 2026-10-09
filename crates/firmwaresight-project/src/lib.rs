@@ -44,8 +44,8 @@ pub use config::{
 };
 pub use error::ProjectError;
 pub use evidence::{
-    FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, SnapshotFacts, build_context, footprint_evidence_id,
-    observe_release_notes,
+    AttachmentError, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, ReleaseAttachment, SnapshotFacts,
+    build_context, footprint_evidence_id, observe_attachment, observe_release_notes,
 };
 pub use fingerprint::{policy_sha256, run_id};
 pub use git::{GitObservation, GitProbe};

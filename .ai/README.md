@@ -186,6 +186,15 @@ ELF-plus-optional-MAP and an attachment's provenance to the build stays `Unknown
 compatibility matrix keeps `UNSUPPORTED`, none of `C1-U1`…`C1-U4` was run, nothing was installed so the round is
 `NOT_RUNTIME_VERIFIED`, and V1's cohort build is still `11573661113` at `41bb6a36`. No product byte moved, so **the two
 test figures above are unchanged by this round**, and `active_task` was `NONE` when it arrived and is `NONE` now ·
+**Dated later on 2026-10-09, and this is the live state of the BIN/HEX range question:** the Owner then authorized
+C1-U1 — 《C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权 v1.0》, archived with its ERR-BUNDLE
+continuation — and it was executed, so attachment facts, the `/1`-frozen `/2`-when-non-empty Gate identity,
+`observe_attachment()` with three typed refusals and migration `0006_release_attachments.sql` (`SCHEMA_VERSION` 6) now
+exist in code. **Identity is not a feature and not satisfaction:** no UI, CLI flag or IPC command offers a file, so
+`required = ["bin"] / ["hex"]` still `BLOCK`s and a bundle still cannot ship BIN or HEX.
+`BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1_U2_U3_U4 = NOT_AUTHORIZED / NOT_STARTED`,
+`BIN_HEX_ANALYSIS` stays `UNSUPPORTED`, and the matrix keeps its status column. **The present counts are 900 Rust across
+48 result lines / 295 UI in 9 files** on a 17-of-17 gate, and `active_task` is `NONE` ·
 Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
 stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
 and its continuation round installed the CI-built product and inspected it, so **U1 was

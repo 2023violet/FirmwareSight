@@ -25,8 +25,9 @@ use crate::compare::{StoredBudget, read_err};
 use crate::db::write_err;
 use crate::error::StorageError;
 use firmwaresight_core::domain::gate::{
-    EffectiveSeverity, FindingState, GateEvaluation, GateRuleId,
+    EffectiveSeverity, FindingState, GateAttachmentFact, GateEvaluation, GateRuleId, KindBasis,
 };
+use firmwaresight_core::domain::identity::{ArtifactKind, Fact};
 
 /// How many `Unknown` evidence ids a read returns as a sample. The count below is always complete;
 /// the list is a bounded excerpt, so a snapshot with ten thousand gaps does not turn one Gate run into
@@ -96,6 +97,11 @@ pub struct GateRunDraft<'a> {
     pub baseline_build_id: Option<&'a str>,
     pub policy_sha256: &'a str,
     pub evaluation: &'a GateEvaluation,
+    /// The attachment rows this run bound, in the canonical order the run identity was computed from
+    /// (`04_TECH/28` §5, §7.7). Written inside the same transaction as the run, so a run never exists
+    /// without the facts it was judged from. An empty slice is a run that attached nothing, which is
+    /// every run stored before C1-U1 and every run the surfaces store today.
+    pub attachments: &'a [GateAttachmentFact],
 }
 
 /// A finding as it was stored.
@@ -120,6 +126,32 @@ impl StoredGateFinding {
     }
 }
 
+/// One attachment of a stored run, exactly as its row holds it: a kind, the digest of bytes nobody
+/// re-reads here, the length those bytes were recorded at, and the basis of the kind. The original file
+/// is not opened by this read and is not needed by it, which is the whole point of storing the facts
+/// rather than a path (`ADR-0030` D-9, D-10).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StoredGateAttachment {
+    pub kind: ArtifactKind,
+    /// Observed: the 64-character lowercase hex digest the row was written with.
+    pub sha256: Fact<String>,
+    pub byte_size: u64,
+    pub kind_basis: KindBasis,
+}
+
+impl StoredGateAttachment {
+    /// The row as the Gate reads it, so a stored run can be re-judged from its own rows.
+    #[must_use]
+    pub fn as_gate_fact(&self) -> GateAttachmentFact {
+        GateAttachmentFact {
+            kind: self.kind,
+            sha256: self.sha256.clone(),
+            byte_size: self.byte_size,
+            kind_basis: self.kind_basis.clone(),
+        }
+    }
+}
+
 /// A whole stored run, findings in canonical order.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StoredGateRun {
@@ -131,6 +163,9 @@ pub struct StoredGateRun {
     /// `gate_runs.created_at`: when FirmwareSight stored this run. Not a build time.
     pub created_at: String,
     pub findings: Vec<StoredGateFinding>,
+    /// The attachments in the canonical order they were bound in. Empty is the ordinary answer: it is
+    /// what every run stored before C1-U1 reads back as, and what a run with no attachment stores.
+    pub attachments: Vec<StoredGateAttachment>,
 }
 
 impl StoredGateRun {
@@ -237,6 +272,37 @@ impl Database {
             };
         }
 
+        // The rows are stored in the order the identity was computed from, and the ordinal a re-read
+        // depends on is that position. A draft that hands over rows in another order, or with one pair
+        // listed twice, would store an ordinal that cannot rebuild the canonical text, so it is refused
+        // before anything is written rather than repaired here.
+        let canonical = GateAttachmentFact::canonicalized(draft.attachments);
+        if canonical.len() != draft.attachments.len() || canonical != draft.attachments {
+            return Err(StorageError::Invariant {
+                detail: format!(
+                    "Gate run `{}` was handed {} attachment rows that are not the canonical set the run \
+                     identity binds; the stored ordinal is the position in that set",
+                    draft.run_id,
+                    draft.attachments.len()
+                ),
+            });
+        }
+        // An attachment is a digest of bytes that were read. `04_TECH/28` §5 rule 3 says the canonical
+        // block has no `unknown:` row, and a row cannot store what was never observed.
+        let mut digests = Vec::with_capacity(canonical.len());
+        for row in &canonical {
+            let Some(digest) = row.sha256.value() else {
+                return Err(StorageError::Invariant {
+                    detail: format!(
+                        "Gate run `{}` was handed an attachment whose digest was not observed; a file \
+                         that could not be hashed is a refusal, not a stored fact",
+                        draft.run_id
+                    ),
+                });
+            };
+            digests.push(digest.clone());
+        }
+
         let tx = self.conn.transaction().map_err(write_err)?;
         tx.execute(
             "INSERT INTO gate_runs
@@ -280,6 +346,28 @@ impl Database {
             }
         }
 
+        for (ordinal, (attachment, digest)) in canonical.iter().zip(&digests).enumerate() {
+            tx.execute(
+                "INSERT INTO gate_run_attachments
+                     (run_id, ordinal, kind, sha256, byte_size, kind_basis)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![
+                    draft.run_id,
+                    ordinal as i64,
+                    attachment.kind.word(),
+                    digest,
+                    i64::try_from(attachment.byte_size).map_err(|_| StorageError::Invariant {
+                        detail: format!(
+                            "attachment `{}` of run `{}` is longer than a stored length can say",
+                            digest, draft.run_id
+                        ),
+                    })?,
+                    attachment.kind_basis.word(),
+                ],
+            )
+            .map_err(|source| describe_write(source, draft.run_id))?;
+        }
+
         tx.commit().map_err(write_err)?;
         Ok(GateRunWrite::Inserted)
     }
@@ -316,6 +404,7 @@ impl Database {
                 detail: format!("stored run `{run_id}` carries the severity `{severity}`"),
             })?;
         let findings = self.gate_findings(run_id)?;
+        let attachments = self.gate_attachments(run_id)?;
         Ok(Some(StoredGateRun {
             run_id: run_id.to_owned(),
             build_id,
@@ -324,7 +413,69 @@ impl Database {
             overall_effective_severity,
             created_at,
             findings,
+            attachments,
         }))
+    }
+
+    /// A run's stored attachment rows, in the canonical order they were written in.
+    ///
+    /// Ordered by the stored `ordinal`, so the text a re-read rebuilds matches the text the run id was
+    /// computed from without sorting or deduplicating again. A run that bound nothing returns an empty
+    /// vector, which is what every run stored before C1-U1 holds.
+    fn gate_attachments(&self, run_id: &str) -> Result<Vec<StoredGateAttachment>, StorageError> {
+        let mut statement = self
+            .conn
+            .prepare(
+                "SELECT kind, sha256, byte_size, kind_basis
+                   FROM gate_run_attachments WHERE run_id = ?1 ORDER BY ordinal",
+            )
+            .map_err(|source| describe_write(source, run_id))?;
+        let rows = statement
+            .query_map(params![run_id], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, i64>(2)?,
+                    row.get::<_, String>(3)?,
+                ))
+            })
+            .map_err(|source| describe_write(source, run_id))?;
+        let mut attachments = Vec::new();
+        for row in rows {
+            let (kind, sha256, byte_size, basis) =
+                row.map_err(|source| describe_write(source, run_id))?;
+            let Some(kind) = attachment_kind(&kind) else {
+                return Err(StorageError::Invariant {
+                    detail: format!("stored run `{run_id}` carries the attachment kind `{kind}`"),
+                });
+            };
+            // A derived basis names the byte sample it was derived from, and this schema stores the
+            // word rather than the sample. Reading one back would invent a detail the row does not
+            // hold, so the gap is reported instead of papered over — the same rule `0005` set for an
+            // Unknown reason that used to be discarded.
+            let Some(kind_basis) = KindBasis::from_word(&basis) else {
+                return Err(StorageError::Invariant {
+                    detail: format!(
+                        "stored run `{run_id}` carries the attachment kind basis `{basis}`, whose \
+                         derived detail this schema does not persist"
+                    ),
+                });
+            };
+            let Ok(byte_size) = u64::try_from(byte_size) else {
+                return Err(StorageError::Invariant {
+                    detail: format!(
+                        "stored run `{run_id}` carries the attachment length `{byte_size}`"
+                    ),
+                });
+            };
+            attachments.push(StoredGateAttachment {
+                kind,
+                sha256: Fact::known(sha256),
+                byte_size,
+                kind_basis,
+            });
+        }
+        Ok(attachments)
     }
 
     /// Record that a person accepted one `REVIEW` finding of one run.
@@ -616,6 +767,22 @@ impl Database {
     }
 }
 
+/// The three kinds an attachment row may name, read back through Core's own spelling so the `0006`
+/// CHECK and this decode cannot drift apart.
+///
+/// `unknown` is attachable (`04_TECH/28` §2.2) and is deliberately absent from `ArtifactKind::from_word`,
+/// which reads the kinds a bundle ships — a bundle never ships a file whose kind it could not establish.
+/// Matching on [`ArtifactKind::word`] instead of on literals keeps one spelling authoritative.
+fn attachment_kind(word: &str) -> Option<ArtifactKind> {
+    [
+        ArtifactKind::Bin,
+        ArtifactKind::IntelHex,
+        ArtifactKind::Unknown,
+    ]
+    .into_iter()
+    .find(|kind| kind.word() == word)
+}
+
 /// Findings and refs are compared to the draft so a dedupe means "identical", not "same id".
 fn matches_existing(existing: &StoredGateRun, draft: &GateRunDraft<'_>) -> bool {
     if existing.build_id != draft.build_id
@@ -623,10 +790,11 @@ fn matches_existing(existing: &StoredGateRun, draft: &GateRunDraft<'_>) -> bool 
         || existing.policy_sha256 != draft.policy_sha256
         || existing.overall_effective_severity != draft.evaluation.overall_effective_severity
         || existing.findings.len() != draft.evaluation.findings.len()
+        || existing.attachments.len() != draft.attachments.len()
     {
         return false;
     }
-    existing
+    let findings_match = existing
         .findings
         .iter()
         .zip(&draft.evaluation.findings)
@@ -638,7 +806,15 @@ fn matches_existing(existing: &StoredGateRun, draft: &GateRunDraft<'_>) -> bool 
                 && stored.summary == fresh.summary
                 && stored.remediation == fresh.remediation
                 && stored.evidence_refs == fresh.evidence_refs
-        })
+        });
+    // The attachment rows are part of what "identical" means: one run id that bound different bytes
+    // would be one answer and two evidence sets (`04_TECH/28` §6, `ADR-0030` D-9).
+    let attachments_match = existing
+        .attachments
+        .iter()
+        .zip(draft.attachments)
+        .all(|(stored, fresh)| stored.as_gate_fact() == *fresh);
+    findings_match && attachments_match
 }
 
 const ACCEPTANCE_SELECT: &str = "SELECT a.run_id, a.finding_id, a.actor, a.accepted_at, a.reason, \

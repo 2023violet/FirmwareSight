@@ -931,3 +931,94 @@ fn the_store_states_its_own_schema_version_and_the_journal_it_runs() {
         "every journal mode has a name a support file can state"
     );
 }
+
+/// C1-U1's old-store arm (§四 F): a v4 file that already holds a Gate run upgrades to this build's
+/// schema, gains the attachment table holding nothing, and keeps the run it holds readable with an
+/// empty attachment set. The stored run id and its finding are the bytes they were; the upgrade adds a
+/// table, it does not re-judge anything.
+#[test]
+fn a_v4_store_holding_a_gate_run_gains_the_attachment_table_and_keeps_the_run_readable() {
+    let store = Store::new("v4-run-to-v6");
+    build_a_v4_store(&store);
+
+    let run = format!("gate-{}", "ab".repeat(32));
+    let policy = "cd".repeat(32);
+    {
+        let conn = rusqlite::Connection::open(store.path()).expect("reopen the v4 file");
+        conn.execute(
+            "INSERT INTO gate_runs (id, build_id, baseline_build_id, policy_sha256,
+                                    overall_effective_severity)
+             VALUES (?1, 'build-d', NULL, ?2, 'PASS')",
+            rusqlite::params![run, policy],
+        )
+        .expect("one stored PASS run at v4");
+        conn.execute(
+            "INSERT INTO gate_findings (run_id, id, rule_id, state, effective_severity, summary,
+                                        remediation, ordinal)
+             VALUES (?1, ?2, 'git.clean', 'PASS', 'PASS', 'Workspace was clean.', NULL, 0)",
+            rusqlite::params![run, format!("{run}#git.clean")],
+        )
+        .expect("the run's finding at v4");
+        drop(conn);
+    }
+
+    let mut db = Database::open(store.path())
+        .expect("a v4 store holding a Gate run upgrades in place and keeps the run");
+    assert_eq!(
+        schema_version_at(store.path()),
+        SCHEMA_VERSION,
+        "the v4 store reached this build's schema"
+    );
+    assert_eq!(SCHEMA_VERSION, 6, "C1-U1 added exactly one migration");
+
+    let name: String = db
+        .connection()
+        .query_row(
+            "SELECT name FROM schema_migrations WHERE version = 6",
+            [],
+            |row| row.get(0),
+        )
+        .expect("the version 6 row names its stage");
+    assert_eq!(name, "0006_release_attachments");
+
+    // The new table exists and holds nothing for a run that bound no attachment.
+    let rows: i64 = db
+        .connection()
+        .query_row("SELECT COUNT(*) FROM gate_run_attachments", [], |row| {
+            row.get(0)
+        })
+        .expect("the attachment table exists");
+    assert_eq!(rows, 0);
+
+    let stored = db
+        .gate_run_by_id(&run)
+        .expect("query")
+        .expect("the run the v4 file held is still there");
+    assert_eq!(stored.run_id, run, "the upgrade did not renumber the run");
+    assert_eq!(stored.policy_sha256, policy);
+    assert_eq!(stored.findings.len(), 1);
+    assert_eq!(stored.findings[0].summary, "Workspace was clean.");
+    assert!(
+        stored.attachments.is_empty(),
+        "an old run reads back as having attached nothing, which is what it did"
+    );
+
+    // Re-migrating the same file adds no row and refuses nothing: the version 6 stage is applied once.
+    db.migrate().expect("a second migrate pass is a no-op");
+    let stages: i64 = db
+        .connection()
+        .query_row("SELECT COUNT(*) FROM schema_migrations", [], |row| {
+            row.get(0)
+        })
+        .expect("the bookkeeping reads");
+    assert_eq!(stages, SCHEMA_VERSION, "one row per applied migration");
+    drop(db);
+
+    let reopened = Database::open(store.path()).expect("the upgraded file reopens");
+    assert_eq!(schema_version_at(store.path()), SCHEMA_VERSION);
+    let again = reopened
+        .gate_run_by_id(&run)
+        .expect("query")
+        .expect("the run survives the reopen");
+    assert!(again.attachments.is_empty());
+}

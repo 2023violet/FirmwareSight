@@ -78,6 +78,7 @@ fn mixed_context() -> GateContext {
             sha256: Fact::known(POLICY_SHA.to_owned()),
             byte_size: 4096,
         }],
+        attachments: Vec::new(),
         memory: Some(GateMemoryFacts {
             nonvolatile: Some(GateBudgetFact::exact(
                 40_000,

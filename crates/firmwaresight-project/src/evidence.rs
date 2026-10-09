@@ -14,10 +14,12 @@ use firmwaresight_core::domain::build_snapshot::BuildSnapshot;
 use firmwaresight_core::domain::diff::{BudgetState, DiffResult};
 use firmwaresight_core::domain::evidence::{EvidenceClass, EvidenceItem};
 use firmwaresight_core::domain::gate::{
-    GateArtifactFact, GateBudgetFact, GateContext, GateFileFact, GateFileStatus, GateGrowthFacts,
-    GateMemoryFacts, GatePolicy, GateUnknownEvidence, UnknownPolicy,
+    GateArtifactFact, GateAttachmentFact, GateBudgetFact, GateContext, GateFileFact,
+    GateFileStatus, GateGrowthFacts, GateMemoryFacts, GatePolicy, GateUnknownEvidence, KindBasis,
+    UnknownPolicy,
 };
 use firmwaresight_core::domain::identity::{ArtifactKind, Fact};
+use firmwaresight_core::domain::release::sanitize_leaf_name;
 
 use crate::config;
 use crate::fingerprint;
@@ -301,6 +303,162 @@ pub fn observe_release_notes(root: &Path, relative_path: &str) -> GateFileFact {
     }
 }
 
+/// One file the release owner chose to ship, as this crate observed it: a leaf name, the kind they
+/// declared for it, the digest of its bytes and their length. No structural claim lives here, because
+/// nothing read the file as a container (`04_TECH/28` §2).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ReleaseAttachment {
+    /// The sanitized leaf name. A name is release identity and never Gate identity (§5 rules 4 and 5),
+    /// so this field is what a person recognizes, not what a run id binds.
+    pub file_name: String,
+    pub kind: ArtifactKind,
+    pub sha256: Fact<String>,
+    pub byte_size: u64,
+    pub kind_basis: KindBasis,
+}
+
+impl ReleaseAttachment {
+    /// The row the Gate binds: these facts with the name removed. One projection, so no surface can
+    /// re-derive a digest on the way into a context.
+    #[must_use]
+    pub fn as_gate_fact(&self) -> GateAttachmentFact {
+        GateAttachmentFact {
+            kind: self.kind,
+            sha256: self.sha256.clone(),
+            byte_size: self.byte_size,
+            kind_basis: self.kind_basis.clone(),
+        }
+    }
+}
+
+/// Why one chosen file could not become an attachment. Every arm is a refusal a release owner can act
+/// on, so none is filed as an internal error, and none names a host path: the `name` carried is a
+/// sanitized leaf (`04_TECH/28` §4.3 E-1, E-2 and E-3). E-4 `AttachmentSetChanged` is a preview-to-export
+/// concern and belongs to `C1-U2`, so it is not represented here.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum AttachmentError {
+    /// E-1: the stat failed, the path is not a regular file, or the streamed read failed.
+    #[error("`{name}` is not a readable regular file: {detail}")]
+    Unreadable { name: String, detail: String },
+
+    /// E-2: an analyzed kind was offered. `elf` and `map` are produced by the analysis path, and an
+    /// unanalyzed file must not stand in for the ELF a release is about (`ADR-0030` D-3).
+    #[error(
+        "a `{}` file is an analysis input rather than a release attachment",
+        kind.word()
+    )]
+    KindNotAttaching { kind: ArtifactKind },
+
+    /// E-3: the file is 0 bytes. Without this refusal an empty file would be evidence of an image.
+    #[error("`{name}` is empty, so it carries no bytes to attach")]
+    Empty { name: String },
+}
+
+impl AttachmentError {
+    /// The stable diagnostics code, continuing the release family the engine registers in
+    /// `crates/firmwaresight-project/src/bundle.rs` and `crates/firmwaresight-core/src/domain/release.rs`
+    /// (`ERR-BUNDLE-6101`..`6114`). The observation refusal is not a `BundleError` variant: an
+    /// attachment is observed long before any bundle is planned, and coupling it to the export path
+    /// would make a `C1-U1` refusal depend on `C1-U2` code.
+    #[must_use]
+    pub fn code(&self) -> &'static str {
+        match self {
+            Self::Unreadable { .. } => "ERR-BUNDLE-6115",
+            Self::KindNotAttaching { .. } => "ERR-BUNDLE-6116",
+            Self::Empty { .. } => "ERR-BUNDLE-6117",
+        }
+    }
+
+    /// The next step, stated as the owner's action rather than as this crate's failure.
+    #[must_use]
+    pub fn remediation(&self) -> &'static str {
+        match self {
+            Self::Unreadable { .. } => {
+                "choose the file again, or close the program that holds it open"
+            }
+            Self::KindNotAttaching { .. } => {
+                "analyze the ELF on the Analyze page and attach the MAP there; a release attachment is a \
+                 BIN, an Intel HEX or an unidentified file"
+            }
+            Self::Empty { .. } => "attach the built image; an empty file ships nothing to verify",
+        }
+    }
+
+    /// The leaf name the person can act on, where one exists. The kind refusal is about a declaration,
+    /// so it names no file.
+    #[must_use]
+    pub fn name(&self) -> Option<&str> {
+        match self {
+            Self::Unreadable { name, .. } | Self::Empty { name } => Some(name),
+            Self::KindNotAttaching { .. } => None,
+        }
+    }
+}
+
+/// The one observation path for a release attachment (`04_TECH/28` §3).
+///
+/// The order is the design's: refuse a kind that is never an attachment, then `stat`, then regular
+/// file, then non-empty, then the streaming SHA-256, then the length. `GuardedInput::load` is not used,
+/// because it allocates a whole file for parsing; `fingerprint::file_sha256` streams a 64 KiB buffer and
+/// holds nothing, so an attachment of any size is hashed without being read into memory.
+///
+/// The length recorded is the one the same `stat` reported for the file that was then hashed. A file
+/// that moves between the two is caught at export, where the digest and size are re-checked together
+/// (§4.2's `SourceArtifactChanged` row); nothing here re-reads the file to reassure itself, and no
+/// second observation path exists to disagree with the first.
+///
+/// # Errors
+///
+/// [`AttachmentError::KindNotAttaching`] for `elf` or `map`, [`AttachmentError::Unreadable`] when the
+/// path is missing, is not a regular file or cannot be read, and [`AttachmentError::Empty`] for 0 bytes.
+pub fn observe_attachment(
+    path: &Path,
+    declared_kind: ArtifactKind,
+) -> Result<ReleaseAttachment, AttachmentError> {
+    if matches!(declared_kind, ArtifactKind::Elf | ArtifactKind::Map) {
+        return Err(AttachmentError::KindNotAttaching {
+            kind: declared_kind,
+        });
+    }
+    let name = attachment_leaf_name(path);
+    let metadata = std::fs::metadata(path).map_err(|error| AttachmentError::Unreadable {
+        name: name.clone(),
+        detail: io_reason(&error),
+    })?;
+    if !metadata.is_file() {
+        return Err(AttachmentError::Unreadable {
+            name,
+            detail: "the chosen path is not a regular file".to_owned(),
+        });
+    }
+    if metadata.len() == 0 {
+        return Err(AttachmentError::Empty { name });
+    }
+    let digest = fingerprint::file_sha256(path).map_err(|error| AttachmentError::Unreadable {
+        name: name.clone(),
+        detail: io_reason(&error),
+    })?;
+    Ok(ReleaseAttachment {
+        file_name: name,
+        kind: declared_kind,
+        sha256: Fact::known(digest),
+        byte_size: metadata.len(),
+        // The owner declared this kind by choosing the file; nothing here inferred it from the bytes
+        // (`ADR-0030` D-8), so a derived basis is never produced by an observation.
+        kind_basis: KindBasis::Declared,
+    })
+}
+
+/// The leaf name an attachment refusal may quote. The full path stays with the caller: `AGENTS.md` §7 and
+/// `04_TECH/28` §4.4 forbid a host path in a message a person copies into a report.
+fn attachment_leaf_name(path: &Path) -> String {
+    let raw = path
+        .file_name()
+        .map(|leaf| leaf.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    sanitize_leaf_name(&raw)
+}
+
 /// Join a validated relative path onto a root, component by component. `..` cannot escape because the
 /// path was already refused by `config::require_project_relative`; the loop makes that a property of
 /// this function too rather than only of its caller.
@@ -369,6 +527,9 @@ pub fn build_context(request: &GateRunRequest) -> GateContext {
     GateContext {
         snapshot_id: request.target.snapshot_id.clone(),
         artifacts: request.target.artifacts.clone(),
+        // Empty by construction this unit: no surface attaches a file yet, so no observation feeds
+        // this set, and every run a person has already stored keeps its `/1` identity.
+        attachments: Vec::new(),
         memory: request.target.memory.clone(),
         git: request.git.facts.clone(),
         version,

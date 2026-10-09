@@ -20,6 +20,7 @@ pub fn gate_context() -> GateContext {
             sha256: Fact::known("b".repeat(64)),
             byte_size: 1_024,
         }],
+        attachments: Vec::new(),
         memory: None,
         git: GateGitFacts {
             available: true,

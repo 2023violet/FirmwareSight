@@ -369,7 +369,8 @@ mod tests {
                 "DROP INDEX idx_builds_created;
                  ALTER TABLE sections DROP COLUMN file_offset_unknown;
                  ALTER TABLE symbols DROP COLUMN address_unknown;
-                 DELETE FROM schema_migrations WHERE version = 5;
+                 DELETE FROM schema_migrations WHERE version >= 5;
+                 DROP TABLE gate_run_attachments;
                  DROP TABLE sections;",
             )
             .expect("the store is stepped back to a v4 shape with one table missing");

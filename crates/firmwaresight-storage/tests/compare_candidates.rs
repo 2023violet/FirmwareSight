@@ -619,6 +619,8 @@ fn compare_added_no_schema_change() {
     // frozen count: a migration that appeared without belonging to a stage is exactly what this list
     // would catch. P5 added it to store the Unknown reason that `optional_fact_u64` used to discard
     // (L6/L7), never to give History a table - see P5_VALIDATION/P5_MIGRATION_DECISION.md.
+    // `0006_release_attachments` is C1-U1's: the additive `gate_run_attachments` table of
+    // `04_TECH/28` §7.7, named for the unit that wrote it rather than added to a frozen count.
     let migrations = repo_root().join("crates/firmwaresight-storage/migrations");
     let mut names: Vec<_> = std::fs::read_dir(migrations)
         .expect("migrations dir")
@@ -638,6 +640,7 @@ fn compare_added_no_schema_change() {
             "0003_gate_history.sql",
             "0004_release_records.sql",
             "0005_unknown_reasons.sql",
+            "0006_release_attachments.sql",
         ],
         "every migration belongs to a named stage"
     );

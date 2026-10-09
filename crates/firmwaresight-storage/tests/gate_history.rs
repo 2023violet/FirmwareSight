@@ -12,9 +12,9 @@ use std::path::{Path, PathBuf};
 
 use firmwaresight_core::domain::diff::{ByteChange, Comparability};
 use firmwaresight_core::domain::gate::{
-    EffectiveSeverity, FindingState, GateArtifactFact, GateBudgetFact, GateContext, GateEvaluation,
-    GateGitFacts, GateGrowthFacts, GateMemoryFacts, GatePolicy, GateRuleId, GateUnknownEvidence,
-    UnknownDisposition, UnknownPolicy,
+    EffectiveSeverity, FindingState, GateArtifactFact, GateAttachmentFact, GateBudgetFact,
+    GateContext, GateEvaluation, GateGitFacts, GateGrowthFacts, GateMemoryFacts, GatePolicy,
+    GateRuleId, GateUnknownEvidence, KindBasis, UnknownDisposition, UnknownPolicy,
 };
 use firmwaresight_core::domain::identity::{ArtifactKind, Fact};
 use firmwaresight_storage::{
@@ -70,6 +70,7 @@ fn mixed_context() -> GateContext {
             sha256: Fact::known(sha("e1")),
             byte_size: 4096,
         }],
+        attachments: Vec::new(),
         memory: Some(GateMemoryFacts {
             nonvolatile: Some(GateBudgetFact::unknown(
                 "the build carries no MAP companion",
@@ -182,6 +183,7 @@ fn draft<'a>(id: &'a str, evaluation: &'a GateEvaluation) -> GateRunDraft<'a> {
         baseline_build_id: Some(BASELINE_BUILD.as_str()),
         policy_sha256: POLICY_SHA.as_str(),
         evaluation,
+        attachments: &[],
     }
 }
 
@@ -1075,10 +1077,339 @@ fn a_run_id_that_is_not_a_fingerprint_is_refused() {
         baseline_build_id: None,
         policy_sha256: &other_policy,
         evaluation: &evaluation,
+        attachments: &[],
     };
     let err = db
         .persist_gate_run(&mismatched)
         .expect_err("one id cannot stand in for another");
     assert!(matches!(err, StorageError::Invariant { .. }), "got {err:?}");
     assert_eq!(count(&db, "gate_runs"), 0, "and the refusal wrote nothing");
+}
+
+// ── C1-U1: the attachment rows a run judged, stored with the run (`04_TECH/28` §7.7, U1-04) ──
+
+fn attached(kind: ArtifactKind, digest: &str, byte_size: u64) -> GateAttachmentFact {
+    GateAttachmentFact {
+        kind,
+        sha256: Fact::known(digest.to_owned()),
+        byte_size,
+        kind_basis: KindBasis::Declared,
+    }
+}
+
+fn attached_draft<'a>(
+    id: &'a str,
+    evaluation: &'a GateEvaluation,
+    attachments: &'a [GateAttachmentFact],
+) -> GateRunDraft<'a> {
+    GateRunDraft {
+        attachments,
+        ..draft(id, evaluation)
+    }
+}
+
+/// The stored `ordinal` column, read back rather than inferred from the vector a test handed in.
+fn ordinals(db: &Database, id: &str) -> Vec<i64> {
+    let mut statement = db
+        .connection()
+        .prepare("SELECT ordinal FROM gate_run_attachments WHERE run_id = ?1 ORDER BY ordinal")
+        .expect("the attachment ordinals are readable");
+    let rows = statement
+        .query_map(params![id], |row| row.get::<_, i64>(0))
+        .expect("the attachment rows are readable");
+    rows.map(|row| row.expect("one ordinal")).collect()
+}
+
+#[test]
+fn a_stored_run_keeps_its_attachment_rows_in_the_canonical_order() {
+    let (_file, mut db) = seeded("attach-order");
+    let rows = vec![
+        attached(ArtifactKind::Bin, &hex64("bin"), 245_760),
+        attached(ArtifactKind::IntelHex, &hex64("hex"), 683_214),
+    ];
+    let id = run_id("u1");
+    let mut context = mixed_context();
+    context.attachments = rows.clone();
+    let evaluation = evaluate_run(&context, &id);
+
+    db.persist_gate_run(&attached_draft(&id, &evaluation, &rows))
+        .expect("a run with attachments is stored");
+
+    let stored = db
+        .gate_run_by_id(&id)
+        .expect("query")
+        .expect("the run is there");
+    assert_eq!(stored.attachments.len(), 2);
+    assert_eq!(stored.attachments[0].kind, ArtifactKind::Bin);
+    assert_eq!(
+        stored.attachments[0].sha256.value().map(String::as_str),
+        Some(hex64("bin").as_str())
+    );
+    assert_eq!(stored.attachments[0].byte_size, 245_760);
+    assert_eq!(stored.attachments[0].kind_basis, KindBasis::Declared);
+    assert_eq!(stored.attachments[1].kind, ArtifactKind::IntelHex);
+    // The position is a column, so a re-read does not sort to reproduce the canonical block.
+    assert_eq!(ordinals(&db, &id), vec![0, 1]);
+}
+
+#[test]
+fn a_re_read_of_the_stored_rows_rebuilds_the_same_canonical_input_and_run_id() {
+    // T-C1-05, the C1-U1 half: the stored facts alone reproduce the judged text. The external
+    // `gate-results` document half is C1-U3's and is not claimed here.
+    let (_file, mut db) = seeded("attach-rebuild");
+    let rows = vec![
+        attached(ArtifactKind::Bin, &hex64("b1"), 4_096),
+        attached(ArtifactKind::Unknown, &hex64("uk"), 512),
+    ];
+    let id = run_id("u2");
+    let mut context = mixed_context();
+    context.attachments = rows.clone();
+    let evaluation = evaluate_run(&context, &id);
+    db.persist_gate_run(&attached_draft(&id, &evaluation, &rows))
+        .expect("persist");
+
+    let stored = db
+        .gate_run_by_id(&id)
+        .expect("query")
+        .expect("the run is there");
+    let rebuilt = GateContext {
+        attachments: stored
+            .attachments
+            .iter()
+            .map(|row| row.as_gate_fact())
+            .collect(),
+        ..context.clone()
+    };
+    assert_eq!(
+        rebuilt.canonical_input(),
+        context.canonical_input(),
+        "a stored run must re-judge from its own rows, not from the files it read"
+    );
+    assert!(
+        rebuilt
+            .canonical_input()
+            .starts_with("firmwaresight-gate-input/2\n"),
+        "{}",
+        rebuilt.canonical_input()
+    );
+    assert_eq!(stored.run_id, id);
+}
+
+#[test]
+fn the_same_run_id_with_a_different_attachment_set_is_refused_and_overwrites_nothing() {
+    let (_file, mut db) = seeded("attach-collision");
+    let first = vec![attached(ArtifactKind::Bin, &hex64("keep"), 1_024)];
+    let id = run_id("u3");
+    let mut context = mixed_context();
+    context.attachments = first.clone();
+    let evaluation = evaluate_run(&context, &id);
+    db.persist_gate_run(&attached_draft(&id, &evaluation, &first))
+        .expect("persist");
+
+    let second = vec![attached(ArtifactKind::Bin, &hex64("swap"), 1_024)];
+    let err = db
+        .persist_gate_run(&attached_draft(&id, &evaluation, &second))
+        .expect_err("one run id cannot be made to mean two attachment sets");
+    assert!(matches!(err, StorageError::Invariant { .. }), "got {err:?}");
+
+    let stored = db
+        .gate_run_by_id(&id)
+        .expect("query")
+        .expect("the run is there");
+    assert_eq!(
+        stored.attachments.len(),
+        1,
+        "the refused write added nothing"
+    );
+    assert_eq!(
+        stored.attachments[0].sha256.value().map(String::as_str),
+        Some(hex64("keep").as_str()),
+        "the refused write replaced nothing"
+    );
+}
+
+#[test]
+fn a_draft_whose_rows_are_not_the_canonical_set_is_refused_before_any_write() {
+    let (_file, mut db) = seeded("attach-uncanonical");
+    let id = run_id("u4");
+    let swapped = vec![
+        attached(ArtifactKind::IntelHex, &hex64("z"), 16),
+        attached(ArtifactKind::Bin, &hex64("a"), 16),
+    ];
+    let mut context = mixed_context();
+    context.attachments = swapped.clone();
+    let evaluation = evaluate_run(&context, &id);
+
+    let err = db
+        .persist_gate_run(&attached_draft(&id, &evaluation, &swapped))
+        .expect_err("an unsorted row set would store an ordinal that cannot rebuild the text");
+    assert!(matches!(err, StorageError::Invariant { .. }), "got {err:?}");
+    assert_eq!(count(&db, "gate_runs"), 0, "the refusal wrote no run");
+    assert_eq!(count(&db, "gate_run_attachments"), 0);
+}
+
+#[test]
+fn a_run_without_attachments_stores_no_rows_and_reads_back_an_empty_set() {
+    let (_file, mut db) = seeded("attach-none");
+    let id = run_id("u5");
+    let evaluation = evaluate_run(&mixed_context(), &id);
+    db.persist_gate_run(&draft(&id, &evaluation))
+        .expect("a zero-attachment run is stored exactly as before");
+    assert_eq!(count(&db, "gate_run_attachments"), 0);
+    let stored = db
+        .gate_run_by_id(&id)
+        .expect("query")
+        .expect("the run is there");
+    assert!(stored.attachments.is_empty());
+}
+
+#[test]
+fn the_attachment_table_refuses_an_illegal_row_at_the_boundary() {
+    let (_file, mut db) = seeded("attach-checks");
+    let id = run_id("u6");
+    let evaluation = evaluate_run(&mixed_context(), &id);
+    db.persist_gate_run(&draft(&id, &evaluation))
+        .expect("the run is stored first");
+
+    let insert = |ordinal: &str, kind: &str, digest: &str, size: &str, basis: &str, run: &str| {
+        format!(
+            "INSERT INTO gate_run_attachments (run_id, ordinal, kind, sha256, byte_size, kind_basis) \
+             VALUES ('{run}', {ordinal}, '{kind}', '{digest}', {size}, '{basis}')"
+        )
+    };
+    let good = hex64("e");
+    // A digest with letters in it, because `hex64` hex-encodes ASCII and therefore only ever produces
+    // digits: an "uppercase" fixture built from it would be byte-identical to its lowercase form.
+    let upper = "AB".repeat(32);
+    let refusals = [
+        (
+            insert("0", "elf", &good, "4096", "declared", &id),
+            "an elf row",
+        ),
+        (
+            insert("0", "map", &good, "4096", "declared", &id),
+            "a map row",
+        ),
+        (
+            insert("0", "bin", &upper, "4096", "declared", &id),
+            "an uppercase digest",
+        ),
+        (
+            insert("0", "bin", &"ab".repeat(33), "4096", "declared", &id),
+            "a 66-character digest",
+        ),
+        (
+            insert("0", "bin", &good, "0", "declared", &id),
+            "a zero-length attachment",
+        ),
+        (
+            insert("0", "bin", &good, "4096", "guessed", &id),
+            "a basis the schema does not name",
+        ),
+        (
+            insert("-1", "bin", &good, "4096", "declared", &id),
+            "a negative ordinal",
+        ),
+        (
+            insert("0", "bin", &good, "4096", "declared", "gate-not-stored"),
+            "a row for a run that was never stored",
+        ),
+    ];
+    for (sql, what) in &refusals {
+        assert!(
+            db.connection().execute(sql, []).is_err(),
+            "{what} was accepted: {sql}"
+        );
+    }
+    assert_eq!(
+        count(&db, "gate_run_attachments"),
+        0,
+        "every refusal above wrote nothing"
+    );
+
+    // The three kind words the schema does accept, each written once.
+    for (ordinal, kind) in [("0", "bin"), ("1", "hex"), ("2", "unknown")] {
+        db.connection()
+            .execute(&insert(ordinal, kind, &good, "4096", "declared", &id), [])
+            .expect("an allowed row is written");
+    }
+    assert_eq!(count(&db, "gate_run_attachments"), 3);
+    assert_eq!(ordinals(&db, &id), vec![0, 1, 2]);
+
+    // The rows belong to an immutable run, so they are not editable either.
+    let edited = db.connection().execute(
+        &format!(
+            "UPDATE gate_run_attachments SET byte_size = 1 WHERE run_id = '{id}' AND ordinal = 0"
+        ),
+        [],
+    );
+    assert!(edited.is_err(), "a stored attachment row was edited");
+    assert_eq!(count(&db, "gate_run_attachments"), 3);
+}
+
+#[test]
+fn an_attachment_row_that_violates_a_check_leaves_no_half_stored_run() {
+    let (_file, mut db) = seeded("attach-rollback");
+    let id = run_id("u7");
+    let mut context = mixed_context();
+    let rows = vec![attached(ArtifactKind::Bin, &"AB".repeat(32), 4_096)];
+    context.attachments = rows.clone();
+    let evaluation = evaluate_run(&context, &id);
+
+    let err = db
+        .persist_gate_run(&attached_draft(&id, &evaluation, &rows))
+        .expect_err("the CHECK refuses an uppercase digest");
+    assert!(matches!(err, StorageError::Write { .. }), "got {err:?}");
+    assert_eq!(count(&db, "gate_runs"), 0, "the run row was rolled back");
+    assert_eq!(count(&db, "gate_findings"), 0, "and so were its findings");
+    assert_eq!(count(&db, "gate_run_attachments"), 0);
+}
+
+#[test]
+fn a_draft_carrying_an_attachment_with_no_observed_digest_is_refused_before_any_write() {
+    let (_file, mut db) = seeded("attach-no-digest");
+    let id = run_id("u8");
+    let rows = vec![GateAttachmentFact {
+        kind: ArtifactKind::Bin,
+        sha256: Fact::unknown("the read never completed"),
+        byte_size: 4_096,
+        kind_basis: KindBasis::Declared,
+    }];
+    let mut context = mixed_context();
+    context.attachments = rows.clone();
+    let evaluation = evaluate_run(&context, &id);
+
+    let err = db
+        .persist_gate_run(&attached_draft(&id, &evaluation, &rows))
+        .expect_err("an unobserved digest is a refusal, not a stored fact");
+    assert!(matches!(err, StorageError::Invariant { .. }), "got {err:?}");
+    assert_eq!(count(&db, "gate_runs"), 0);
+    assert_eq!(count(&db, "gate_run_attachments"), 0);
+}
+
+#[test]
+fn a_derived_basis_row_is_reported_rather_than_read_back_as_more_than_it_states() {
+    // `0006` admits the word `derived_from_leading_bytes` for the unit that will write a basis with a
+    // byte sample. This build stores the word only, so reading it back would invent a detail the row
+    // does not hold; the read says so instead.
+    let (_file, mut db) = seeded("attach-derived");
+    let id = run_id("u9");
+    let evaluation = evaluate_run(&mixed_context(), &id);
+    db.persist_gate_run(&draft(&id, &evaluation))
+        .expect("the run is stored first");
+    db.connection()
+        .execute(
+            &format!(
+                "INSERT INTO gate_run_attachments (run_id, ordinal, kind, sha256, byte_size, kind_basis) \
+                 VALUES ('{id}', 0, 'bin', '{digest}', 4096, 'derived_from_leading_bytes')",
+                digest = hex64("d")
+            ),
+            [],
+        )
+        .expect("the schema admits the word 0006 names");
+
+    let err = db
+        .gate_run_by_id(&id)
+        .expect_err("the read refuses to invent a byte sample");
+    assert!(matches!(err, StorageError::Invariant { .. }), "got {err:?}");
 }

@@ -36,14 +36,18 @@ pub use counts::{JournalMode, StoreCounts};
 // be able to name them. Re-exported rather than made the caller take a second dependency: the
 // storage boundary already speaks them in its public signatures.
 pub use firmwaresight_core::domain::evidence::EvidenceClass;
-pub use firmwaresight_core::domain::identity::Fact;
+// A stored attachment row is typed in these two Core names, so a caller that reads one run's rows has
+// to be able to name them; the same reason `Fact` is re-exported above.
+pub use firmwaresight_core::domain::gate::{GateAttachmentFact, KindBasis};
+pub use firmwaresight_core::domain::identity::{ArtifactKind, Fact};
 // Compare reads persisted facts only; the diff itself is decided in `firmwaresight-core`.
 pub use compare::{
     CandidateQuery, CompareCandidate, DEFAULT_CANDIDATE_LIMIT, MAX_CANDIDATE_LIMIT, StoredBudget,
 };
 pub use gate::{
     AcceptReviewError, AcceptedReview, GateArtifactRow, GateEvidenceGaps, GateFootprintRow,
-    GateRunDraft, GateRunWrite, GateSnapshotFacts, StoredGateFinding, StoredGateRun,
+    GateRunDraft, GateRunWrite, GateSnapshotFacts, StoredGateAttachment, StoredGateFinding,
+    StoredGateRun,
 };
 // History reads persisted facts only; it adds no table and decides no verdict.
 pub use history::{

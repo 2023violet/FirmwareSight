@@ -1,0 +1,84 @@
+FirmwareSight — C1-U1 执行中续接｜ERR-BUNDLE 稳定错误码核查、登记与 TDD 继续
+Coding Agent Targeted Continuation v1.0｜2026-10-09
+
+【执行上下文｜不是新任务授权】
+你当前正在执行已交付的《FirmwareSight — C1-U1 / Release Attachment Data & Identity / Coding Agent 实施授权 v1.0》。
+你已完成初始前置检查：起点 114a84e = origin/main，起始工作树清洁，migration 0006 空闲；已建立执行计划；已经针对 /2 identity 建立 RED 测试，得到 8 个缺失 API 相关编译错误；接下来正在实现 Core fact types 与 /1-/2 canonicalization。
+在实施过程中出现一个明确、局部的待查事项：ReleaseAttachment / GateAttachment 的观测拒绝需要稳定诊断错误码，须先核实 ERR-BUNDLE 61xx 家族的登记位置、现有上限和职责边界。
+
+本文件仅为上述 C1-U1 任务的定向续接，不重启 preflight，不推翻已经建立的计划，不授权 C1-U2/U3/U4，不改变已批准的 ADR-0030 或 04_TECH/28。
+
+【一、首先保护当前进行中的工作】
+1. 先只读记录：当前分支、git rev-parse HEAD、origin/main、git status --porcelain、git diff --stat、git diff --cached --stat、当前计划文件和 TDD RED 日志的路径。
+2. 本轮已经进入编码阶段，因此工作树出现你自己产生的未提交文件和修改是正常的。不能重新套用“初始工作树必须清洁，否则 STOP”规则去重置正在进行的 C1-U1 工作；要与交接时的 clean 记录和自己的改动清单逐项对应。
+3. 不执行 git reset、git checkout --、git clean、git stash、rebase、force push 或删除、覆盖任何不确定归属的文件；不要重新生成并替换现有任务计划。
+4. 如果出现不属于本轮计划的第三方修改、远端 HEAD 改变或不能解释的差异，停止会造成风险的写操作，保留全部现状并报告。
+
+【二、定位 ERR-BUNDLE 代码的真正登记位置】
+请在你正在开发的本地真实工作树 D:\study\Software\FirmwareSight（具体以 pwd 和 Git root 为准）执行全仓只读检索。
+建议查询（可按终端调整转义）：
+  rg -n --hidden --glob '!target/**' --glob '!node_modules/**' --glob '!.git/**' 'ERR-BUNDLE-[0-9]{4}|ERR-BUNDLE|611[0-9]|AttachmentError|BundleError|stable_code\(|\.code\(' .
+  rg -n --hidden --glob '!target/**' --glob '!node_modules/**' --glob '!.git/**' '6101|6102|6103|6104|6105|6106|6107|6108|6109|6110|6111|6112|6113|6114|6115|6116|6117' apps crates 04_TECH 05_ENGINEERING 09_ADR templates
+  git diff --unified=3 -- crates/firmwaresight-project/src crates/firmwaresight-core/src apps/desktop/src-tauri/src 05_ENGINEERING/03_ERROR_MODEL.md
+不要仅凭 grep 返回空行就声称完整；如果已有产生但尚未登记的 C1-U1 错误类型，也必须纳入编号冲突检查。
+
+基于仓库远端既有提交 114a84e 的独立只读核查，目前可以作为查找线索的锚点如下（行号仅供导航，以本地内容为准）：
+A. crates/firmwaresight-core/src/domain/release.rs：ReleaseError::code()，约 593–609 行；6101 = GateNotReady / NoReleaseArtifacts；6110 = VersionUnavailable。其他不可恢复模型错误走 ERR-INTERNAL-9002。
+B. crates/firmwaresight-project/src/bundle.rs：BundleError::code()，约 165–180 行；6102 = GateContextChanged；6103 = SourceArtifactChanged；6104 = ReleaseNotesChanged；6105 = PlanStale；6106 = DestinationExists；6107 = UnsafeDestination；6108 = WriteFailed；6109 = Index / VerificationFailed。Internal 错误走 ERR-INTERNAL-9004。
+C. apps/desktop/src-tauri/src/bundle.rs：模块头部约 20–23 行说明 6111–6114 由 Desktop session 层拥有；6111 = Bundle 已写出但 Release Record 未存入数据库（约 317 行）；6112 = 未加载 Project Policy（约 367 行）；6113 = 无效/未签发的目标目录 token（先全仓查清确切实现位置）；6114 = 此次 Session 没有该构建的分析结果（约 388 行）。
+D. 05_ENGINEERING/03_ERROR_MODEL.md：目前定义错误 taxonomy、What happened / Why we know / What user can do / Diagnostics ID 的呈现契约，但在上述提交中没有 6101–6114 的逐项编号注册表。
+E. 04_TECH/21_OBSERVABILITY_DIAGNOSTICS.md：诊断/可观测性契约资料；请核对是否后来增加新的编号表。
+F. apps/cli/src/main.rs 和 apps/desktop/src-tauri/src/bundle.rs：调用各层 .code() / remediation() 构成对外错误呈现通路；应保持同一错误原因的语义一致，不允许前后端随意重新映射。
+
+在 114a84e 这份已提交基线上，所发现已占用 ERR-BUNDLE 最大编号是 6114；6115、6116、6117 没有在上述权威映射里被使用。但【这不是对当前未提交本地工作树的断言】，必须由你先扫描本地结果确认。
+
+【三、先输出一个精确的错误码登记结果】
+请先在对话中输出一个不超过一页的调查结果，表格至少包含：
+- 原始文件路径和本地行号；
+- 枚举或代码常量的具体位置；
+- 每个 ERR-BUNDLE 6101–6114 的当前含义/所有者层；
+- 是否存在独立 registry 文件，以及 05_ENGINEERING/03_ERROR_MODEL.md 是否实际列码；
+- 6115/6116/6117 是否确实未占用；
+- 当前工作树是否已经改写这些映射；
+- 如存在重复、不同编号同义、同编号异义，列为阻塞冲突，不自行掩盖。
+
+【四、仅在冲突检查通过后，处理 C1-U1 的三个观测拒绝】
+如果确认 6115–6117 可用，可采用如下初步分配；若现有实现有更严格规范，以权威规范为准并说明：
+- ERR-BUNDLE-6115 → AttachmentUnreadable（stat 失败、路径不可读、非普通文件或流式读取失败；禁止泄露原始绝对路径）。
+- ERR-BUNDLE-6116 → AttachmentKindNotAttaching（非法附件类型，例如 ELF 或 MAP；提示回到 Analyze 路径）。
+- ERR-BUNDLE-6117 → AttachmentEmpty（零字节产物被拒绝；不得满足未来 required kind）。
+
+三个编号对应 04_TECH/28 §4.3 的 E-1/E-2/E-3。§4.3 E-4 AttachmentSetChanged 属于 C1-U2 的集合变更 / preview-export 时效处理，禁止在本轮提前实现；它未来所用编号尚未由本轮分配。
+
+本轮所需的稳定错误契约：
+1. 单一权威映射，避免在 BundleError、ProjectError、Core、CLI、Desktop 各复制三份互相漂移的编号字符串。视实际分层可由独立的 Project 层 AttachmentError 提供 code()/remediation()，但不要为了注册错误码把观察逻辑耦合到 C1-U2 的 Bundle implementation。
+2. 对外消息具有 What happened、可核验原因、可采取下一步和 Diagnostics ID；不要暴露磁盘绝对路径、秘密配置或堆栈。
+3. 关键错误原因不能归到笼统的 ERR-INTERNAL-900x，以免把用户可修复的输入拒绝误报为软件自身错误。
+4. 错误的枚举、code() 与 remediation() 必须由针对性的正负回归保护；附加稳定码唯一性检查，尤其覆盖已有 6101–6114。
+5. 若在实际项目里 05_ENGINEERING/03_ERROR_MODEL.md 是规范说明而非编号 registry，不能仅为迎合提示词假定它已有代码表；可以在 C1-U1 的文档白名单内增加一段准确的 dated registry/discovery 说明，或只更新权威代码与本轮报告，并解释为何无需全量重写该文档。严禁将历史代码归属错误地写成同一个 crate。
+6. 遵守错误模型的可扩展性。C1-U1 只完成 observe_attachment 的观测错误，不引入 C1-U2 的 SourceArtifactChanged/AttachmentSetChanged 包装或 Bundle 写出行为。
+
+【五、继续原 C1-U1 TDD，而不是只停在编号调查】
+错误码事实确认及必要的测试完成后，回到已经建立的原计划，从当前 RED→GREEN 状态继续：
+- Core 领域类型 ReleaseAttachment / GateAttachmentFact / KindBasis 的正确边界。
+- 观察入口 observe_attachment，普通文件/非空/流式 SHA-256 和稳定拒绝；Declared 与 Derived 不混同。
+- GateContext.attachments 独立集合与 /1、/2 canonicalization；零附件旧 /1 必须逐字节兼容，非空 /2 排序、去重、变更归属和同字节改名语义正确。
+- Migration 0006 gate_run_attachments；原子写入、重读和重复 run id 不同事实拒绝；不得把附件原始字节写入 SQLite，也不把本机绝对路径写入公开文档。
+- 仅为编译和零附件兼容而适配现有调用方；Gate 的 artifacts.required / artifacts.hashes 仍不读取 attachments。
+- 保留 T-C1-01/02/03/05 的 U1 部分和 T-C1-16 的真实结果；不要偷报 U3 才能完成的 extensions 文档验证。
+- 继续做 fail-before/regression、fmt/clippy/test、python scripts/check.py、漂移检查与正常 CI 验证，按原执行授权的 Step 5–8 完成。
+
+【六、禁止事项与 STOP】
+不得自动推进 C1-U2/U3/U4；不得调整 SnapshotId::compose；不得改 Gate 五态判断、policy fingerprint、Release ID grammar；不得新增 CLI --attach、React UI、公开 schema major、新依赖、网络、签名、更新器；不得重冻结 V1 cohort；不得更换 Golden 语义来使旧测试通过。
+
+若 ERR-BUNDLE 6115–6117 已被本地其他代码占用、产生跨 crate 的同码异义、或需要违反 ADR-0030/04_TECH/28 才能实现三种拒绝，请停止编号分配与相关修改，保留工作树，提交定位报告等待裁决；不应清理自己的 RED 现场作为“恢复干净”。
+
+【七、最终交付】
+除了原 C1-U1 的所有交付条款，追加：
+- ERR-BUNDLE 登记调查表（含最高已有编号与含义）。
+- 新错误码的分配依据、源码位置、对外 message/remediation、稳定回归结果。
+- 原有 6101–6114 的行为与对外错误码没有发生改变的证据。
+- RED、GREEN、Gate、CI 的实测记录；最终已提交范围的所有改动清单。
+- 如果本轮只完成了错误码搜索而没有完成其余 C1-U1，明确状态 PARTIAL / IN_PROGRESS，不得报告 C1-U1 COMPLETE。
+
+最终状态仍由《C1-U1 / Release Attachment Data & Identity》原执行授权决定。完成 C1-U1 后立即停止，不得擅自启动 C1-U2。

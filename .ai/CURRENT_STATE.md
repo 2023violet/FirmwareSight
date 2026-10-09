@@ -32,14 +32,13 @@ last_updated: "2026-10-09"
   `P5` stays `PASS_COMPLETE`, Productization
   `ENGINEERING_COMPLETE`, `G2 PASS`, product **`MVP_CANDIDATE`** at `0.6.0`. B1 / RC / GA / public release / signing /
   notarization / updater / commercial distribution stay `NOT_AUTHORIZED`; licence `PENDING_OWNER_CONFIRMATION`;
-  **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. Counts **moved with A0 on
-  2026-10-09** (the bullet below this one): **870 Rust / 295 UI in 9 files**, gate 17 of 17, 30 IPC commands,
-  `assets/design-tokens.json` at
-  `94336906…14d4`. The Rust figure is the gate's own `rust/test` step on the A0 tree: **870 passed / 0 failed across 47
-  `test result:` lines** — 41 test-binary lines plus 6 doc-test lines, the same 47 the pre-A0 rounds cited, so the line
-  count did not move with A0 and only the total did, 868 → 870. A standalone `cargo test --workspace` re-run of the same
-  tree prints 49 such lines, because that invocation emits two crates' doc-test targets twice; it reports the identical
-  870. Cite the gate log rather than the ad-hoc re-run. What is blocked is blocked on a person: recruitment needs real
+  **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. **The present counts are
+  900 Rust / 295 UI in 9 files** on gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
+  `94336906…14d4`: C1-U1 moved the Rust figure **870 → 900 across 48 `test result:` lines** (the 48th line is the new
+  `release_attachments` test binary), and the earlier figures below are their rounds' dated records — A0 moved
+  **868 → 870 across 47 lines** and the C1 freeze moved nothing. A standalone `cargo test --workspace` re-run at this
+  head prints 48 such lines and reports the identical 900, so the gate log and the ad-hoc run agree here; cite either,
+  but cite a measurement. What is blocked is blocked on a person: recruitment needs real
   firmware engineers (§47/§48), the cohort bytes need private archival before they expire on 2026-10-22, and any UI
   follow-up needs its own prompt. Read `.ai/ACTIVE_TASK.md`'s top block, then
   stop — AGENTS.md 1 forbids lifting the next track off the roadmap.
@@ -74,6 +73,38 @@ last_updated: "2026-10-09"
   register entry in `10_AUDIT/SOURCE_PROMPTS/README.md`; §6 step 9's closeout report was delivered in conversation,
   because §4's five allowed kinds of document change name no report path. Machine state: `BASELINE.yaml`
   `c1_direction_and_design_freeze`.
+- **`C1-U1` (release attachment data + identity) ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE`
+  throughout and is `NONE` now.** The Owner delivered
+  《FirmwareSight — C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权 v1.0》 as a file (archived at
+  `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt`, 15,072 bytes, 132 lines,
+  0 `CR`, sha256 `61a33d53…484b65`, `cmp` clean at archive time) and a mid-turn continuation for the ERR-BUNDLE
+  stable-code check (`…_ERR_BUNDLE_Code_Check_And_TDD_Continuation_v1.0.txt`, 10,162 bytes, 84 lines, 0 `CR`, sha256
+  `79a91df6…c3c0a`, `cmp` re-run after archiving and still identical). Preflight met the §1 handover head
+  `114a84e3…337bc7` with a clean tree; §7's ten hard stops were each measured and none fired.
+  What now exists in code: `GateAttachmentFact` / `KindBasis` and a separate `GateContext.attachments` in Core, the
+  `/1`-byte-frozen and `/2`-when-non-empty canonical rule, `ReleaseAttachment` + `observe_attachment()` in
+  `firmwaresight-project` (stat → regular file → refuse zero bytes → streaming SHA-256 → length, with ELF and MAP
+  refused **by kind before any read**), three typed refusals carrying the newly allocated `ERR-BUNDLE-6115` / `6116` /
+  `6117`, and migration `0006_release_attachments.sql` (`SCHEMA_VERSION` 5 → 6) whose `gate_run_attachments` rows are
+  written atomically with the run, refused before any statement if the draft is not the canonical set or a digest was
+  never observed, and read back in stored ordinal order so a re-read rebuilds the same canonical text and the same
+  `run_id`. The `/1` lock is held by three authorities at once — a committed test carrying the constants measured at
+  the handover head (1,044 bytes, `72d5c108…c5da00`), the untouched `p4-release` goldens reproducing byte-for-byte, and
+  a mutation proof that breaks four golden tests the moment an empty block is emitted.
+  **This unit adds data and identity, not a feature a person can use.** No UI control, no CLI flag, no IPC command and
+  no attach flow exist; `artifacts.required = ["bin"]` / `["hex"]` **still evaluate to BLOCK** because the rules do not
+  read the attachment set; a bundle **still cannot ship** a BIN or HEX file; `analysis.json`, `diff.json`,
+  `gate-results` and the release manifest gained no field, so their bytes are unchanged; `BIN_HEX_ANALYSIS` stays
+  `UNSUPPORTED` and `BIN_HEX_RELEASE_ATTACH` moves from `DESIGN_APPROVED / NOT_IMPLEMENTED` to
+  **`DESIGN_APPROVED / NOT_USER_AVAILABLE`**. `C1-U2`/`U3`/`U4` are `NOT_AUTHORIZED / NOT_STARTED`.
+  Counts moved as designed: **900 Rust tests across 48 result lines** (from 870) and **295 UI in 9 files**, unchanged,
+  on `python scripts/check.py` **17 of 17 PASS** with no `SKIP` and no `FAIL`; fmt and `clippy -D warnings` clean;
+  `cargo-deny` unchanged. `SnapshotId::compose`, the five-state and effective-severity model, Unknown aggregation, the
+  policy fingerprint and the release-id grammar did not move, and no destructive migration, dependency, capability,
+  signing or network boundary was touched. Installed behaviour is `NOT_RUNTIME_VERIFIED`: the storage proofs run
+  against real SQLite files, but no store of a user's was upgraded. Durable record:
+  `C1_VALIDATION/C1_U1_EXECUTION_REPORT.md`, the plan's dated §11 and §12, the two register entries, and `BASELINE.yaml`
+  `c1_u1_data_and_identity`.
 - **A0 PRODUCT TRUTHFULNESS CORRECTIVE ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE` throughout and
   is `NONE` now.** *FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0* was delivered as a file,
   archived verbatim at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt` (18,845 bytes, 252

@@ -253,7 +253,11 @@ fn the_schema_pairs_every_nullable_numeric_column_with_a_reason() {
     let file = TempDb::new("shape");
     let db = open(&file);
 
-    assert_eq!(SCHEMA_VERSION, 5, "P5 raises the schema to version 5");
+    assert_eq!(
+        SCHEMA_VERSION, 6,
+        "P5 raised the schema to version 5; C1-U1's additive attachment table raised it to 6, and \
+         neither of the two reason columns moved"
+    );
     assert_eq!(schema_version(&db), SCHEMA_VERSION);
 
     let columns = |table: &str, column: &str| -> i64 {

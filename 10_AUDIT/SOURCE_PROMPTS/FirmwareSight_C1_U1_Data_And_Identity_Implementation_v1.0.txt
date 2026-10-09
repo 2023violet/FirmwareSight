@@ -1,0 +1,132 @@
+FirmwareSight — C1-U1 / Release Attachment Data & Identity
+Coding Agent 实施授权 v1.0｜2026-10-09
+
+【执行定位】
+你是 FirmwareSight 的维护执行者与代码审查者。本文件被产品所有者明确交给你执行时，仅授权完成 ADR-0030 和 04_TECH/28 已批准架构中的 C1-U1（Data + Identity），并执行必要的测试、记录、普通 fast-forward 提交与 CI 复核。
+这不是重做产品方向论证，不是 C1-U2/U3/U4 的授权，不是对 V1 研究构建的新冻结，也不是 BIN/HEX 产品功能上线许可。
+
+仓库：https://github.com/2023violet/FirmwareSight
+预期交接 HEAD：114a84e3cb3e9e5fb7f23ee17f044f8d46337bc7
+正式基线：main（必须以实际远端验证为准；如发生分歧则停机报告）
+已获 Owner 裁决：OPTION_C1 — Analyze ELF-only；BIN/HEX 在 Release 作为独立字节证据；Gate 最终可依凭附件存在性与哈希，但本次不实现 Gate 规则改变。
+批准设计：09_ADR/ADR-0030-release-attached-byte-evidence.md；04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md。
+
+【一、前置检查：不符合即 STOP】
+1. 严格遵守 AGENTS.md 接手顺序，读取 README.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、04_TECH/09_TECH_DECISION_MATRIX.md，及本轮 ADR/Spec。
+2. 检查 HEAD、origin/main、git status --porcelain、worktree、stash、最近提交及前一轮 C1 Freeze 的两次 CI。确认 main 正式 HEAD、工作树清洁、没有他人待提交内容。发现预期 HEAD 与真实 HEAD 不一致、工作树 dirty、authority 文件冲突、C1-U1 已部分实施或基线无法判定，停止并报告，不执行 checkout/reset/clean/stash/force 操作。
+3. 查明现有迁移编号及数据库 schema、GateContext 与 GateRunRequest 构造、Gate canonicalization、fingerprint、storage write/read、release evidence assembly 的实际源码。不要依据前轮报告的文件行号假定代码仍未移动。
+4. 明确列出本轮源文件白名单及其原因、预期对外行为、最小测试范围；如实际架构与 ADR-0030 或 04_TECH/28 存在硬性矛盾，STOP，不暗改规范。
+
+【二、仅准许实现 C1-U1】
+根据 04_TECH/28 §2、§3、§5、§7.7、§13 完成下列闭环，且每个节点只有一个权威事实来源。
+
+U1-01｜领域与事实类型
+- 在规定的 crate 边界加入 ReleaseAttachment 与 GateAttachmentFact，KindBasis 只允许 Declared 或 DerivedFromLeadingBytes（如确有依据），重用现有 ArtifactKind（Bin、IntelHex、Unknown）。
+- 禁止将 Elf/Map 作为 ReleaseAttachment；必须返回可识别的拒绝结果，不能静默丢弃。
+- attachment 的事实仅为原始文件存在性、byte_size、sha256 与 kind_basis；分析结构、原生 Intel HEX 记录有效性、地址跨度、内存、entry point、symbol、object、构建 commit 归属均不得被伪造。
+- 区分文件名/宿主路径与证据事实；宿主绝对路径不得进入 Gate canonical text、快照身份或可移交公共证据。不得新增网络、Tauri 权限、依赖或将本机地址暴露给前端。
+
+U1-02｜唯一的 observe_attachment
+- 由 firmwaresight-project 提供唯一观测入口（适配已有函数命名和签名）。仅按用户显式选择的单个文件做 stat → 普通文件校验 → 拒绝零字节 → 流式 SHA-256 → 记录长度；不得使用为 ELF Parser 准备的整文件 GuardedInput::load，不得一次性把整个 BIN/HEX 读入内存。
+- 复用已有 fingerprint::file_sha256 等安全机制。对不可读、非普通文件、空文件、禁止 kind，返回明确的类型化错误与不泄漏宿主路径的可用信息；不自行扩展目录扫描、glob 或递归导入。
+- 观测与声明须分离；不允许仅凭扩展名把 Declared 升格为 Observed，不允许使用启发式格式判断推导出 HEX 有效或任何结构字段。
+- 本轮通过 Core / Project 层单元与集成测试调用该入口；不新增 UI 按钮、CLI --attach 或用户可用的完整 Release 附件流程。
+
+U1-03｜GateContext 与确定性身份
+- 新增 GateContext.attachments 独立集合，不合并到原 GateContext.artifacts；现有 ELF/MAP 快照行语义原封不动。
+- canonical input：附件集合为空时，firmwaresight-gate-input/1 的文本必须与交接 HEAD 逐字节一致，包含换行、排序、空值处理，所得旧 run_id 必须完全相同；不得为 /1 新增空 attachments 块或空字段。
+- 附件非空时才使用 firmwaresight-gate-input/2；独立 attachments[... ] 块，行格式按 04_TECH/28 §5 与 ADR-0030 D-4/D-5；按 (kind word, lowercase sha256) 排序，完全相同的 (kind,sha) 只绑定一次，多件不同字节的同 kind 均绑定。
+- Gate identity 不包含文件名、绝对路径、mtime、inode 或 size；size 作为独立事实保存并校验，摘要作为 Gate 身份基底；重命名同字节文件不改变 Gate run_id，变更 kind 或 bytes 必须改变 run_id。
+- 遵守 SnapshotId::compose 完全不变；不改 release id grammar；不改变五态规则判断、effective severity、证据 Unknown 聚合或 Policy SHA-256 语义。
+- 对现有全部 GateContext 构造路径使用显式 empty attachments 的兼容初始化。零附件行为不得有可观察回归。
+
+U1-04｜Additive Storage Migration 与 re-read
+- 新增单条 additive migration，优先按批准规格命名 0006_release_attachments.sql；先核查编号未被占用。
+- 表应独立于现有 artifacts，名 gate_run_attachments，引用 gate_runs(id)，保存 ordinal、kind、sha256、byte_size、kind_basis；对合法 kind、64 位 lowercase hex 摘要、非零大小、主键及外键施加明确约束。参照 04_TECH/28 §7.7，不要将其当作可直接复制而不审核的 SQL。
+- 原有 artifacts 表的 parser_id、architecture、bitness、endianness 非空约束不得放宽或用假数据填充；原有 migration 不得重写；不添加破坏性操作。
+- 新 Gate run 的附件事实应与 Gate run 原子写入（事务）；重复 run_id + 不同附件事实必须拒绝，不得覆盖旧 Run。重读时按 canonical ordinal 恢复相同 Gate 上下文与 run_id。
+- 现有旧数据库无需迁移手工处理即可升级，新列/新表不导致已有 run_id 改变；读取旧 run 必须自然得到空附件集。
+- 仔细核查规格草案表中没有保存 source path，如何在“不存储原始附件字节”和“不把宿主绝对路径写入可移交证据”的约束下，可靠实现 persisted fact re-read。C1-U1 只需可靠还原被判断的事实；未来再观测与真正装包属于 C1-U2。若现有运行接口隐含“仅凭已保存事实就能重找原始文件”，不要编造这个保证，应如实区分；如必须违反 ADR-0030 才能实现，STOP 并提出明确设计冲突。
+
+【三、准确界定本轮与后续工作的边界】
+本轮 C1-U1 可以修改必要的 Core/Project/Storage 代码、对应测试、additive migration、以及本轮负责的技术文档；为编译兼容，可调整现有调用者对 attachments 的空值装配，但不得由此新增用户行为。
+本轮严禁提前实现：
+- C1-U2：artifacts.required / artifacts.hashes 两来源判定、attachment: evidence locator、verify_attachments、BundleInputChecks、preview/export staleness、E-4、Bundle file inclusion。
+- C1-U3：gate-results:1 / release-manifest:1 新 extensions 输出、公开 schema 变更、迁移既有 Golden 语义或打包兼容性宣称；C1-U1 应为后续测试准备内部事实与身份证据，但不得伪称 T-C1-05 的外部 JSON 文档验证已经完成。
+- C1-U4：React Release Attach UI、CLI --attach、IPC 新命令、视觉验收、新 Capability Banner 或更新 P5 兼容状态。
+- 对 Intel HEX 做记录解析、校验和校验、地址跨度、加载内容分析；BIN/HEX Analysis；Section/Symbol/Memory 归因；Git provenance 承诺；签名、SBOM、CI bot。
+- 改 SnapshotId::compose、MemoryFootprint、Gate 规则集、五态语义、policy hash、Release identity grammar、Artifact intake 接受范围。
+- 修改 V1 frozen cohort、研究数据、参与者注册、U1/P5/G2 历史裁决、B1/RC/GA、license、updater、signing。
+- 引入 dependencies、外网/上传、Tauri capabilities、Schema major 或 destructive migration。
+
+【四、验收标准：必须有真实证据】
+A. T-C1-01：零附件 Gate canonical input 与基线 bytes 一致，关键既有 golden run_id 完全不变。必须留出 compare-before/after 的直接测试证据，而非口头声称。
+B. T-C1-02：在相同 Snapshot/Policy/Git 上，仅修改 BIN 内容即改变 /2 run_id；SnapshotId 不变。
+C. T-C1-03：相同输入、不同附件枚举顺序均得同一 /2 run_id；重复 (kind,sha) 不重复绑定；不同 SHA 的同类文件均被绑定；同 bytes 改名字不改变 Gate id；改 kind 改变 id。
+D. T-C1-05 的 U1 子集：从已保存 attachment fact + snapshot fact 重建同一 canonical input / run_id。完整 gate-results extensions 的外部重算证明属于 C1-U3，不得提前宣称通过。
+E. T-C1-16：现有项目配置在 C1-U1 前后 policy fingerprint 保持一致。
+F. 旧 DB readback、同一 run id 的重复写入、事务失败回滚、migration 幂等、关联约束/大小/哈希 CHECK 均通过；至少一个旧格式 DB 回放。
+G. 类型化拒绝：Elf/Map attachment、空文件、目录、不可读输入均不被装配成已观测事实；不允许生成结构分析字段。
+H. 未改现有 release-bundle/gate-results/analysis/diff 的对外语义，任何无附件的旧 golden 必须保持可复核。若生成器带来可预见改动，记录并仅以获授权的基线生成步骤处理，不能直接手改 Golden。
+I. 本次测试不能宣称 BIN/HEX 在 Release 中已经可用。交付状态只能为 C1-U1 完成、C1-U2…U4 未启动。
+
+优先添加精确的 positive / negative regression；可以用故意失败的暂时性 test mutation 验证测试的辨别力，但必须完整恢复，提交前无残留，且不得用它污染既有历史证据。
+
+【五、文档和提交范围】
+根据 04_TECH/28 §13，更新（仅与本轮真实完成项有关的章节）
+- 04_TECH/02_DOMAIN_MODEL.md：ReleaseAttachment、GateAttachmentFact 及其边界。
+- 04_TECH/15_STORAGE_DATABASE_BASELINE.md：0006 表、原子写入/重读及与 artifacts 表的区分。
+- 允许更新本轮记录、.ai 当前状态指针、BASELINE.yaml、INDEX.md、prompt register，以及按仓库自动生成程序更新 DIRECTORY_TREE.txt、SHA256SUMS。
+- 不得改写 ADR-0030 与 04_TECH/28 的规范性原文来迁就代码；若发现规范冲突，必须停下来，等待 Owner/Architect。任何实现状态说明只能追加可追溯日期标记，不得改写旧的阶段结论。
+- 只使用本轮确实改过的路径生成报告；禁止一边扩展任务，一边用“文档同步”理由修改无关文件。
+
+【六、建议执行顺序】
+Step 0：读取权威并固定基线，报告 expected/actual HEAD、clean status、源文件清单、是否 STOP。
+Step 1：对照 ADR-0030、04_TECH/28 和实际代码，制定严格有限的实现计划，先列出 old-ID 与 snapshot-id 的保护断言。
+Step 2：先实现类型与 canon /1-/2 的红绿回归，再加入 observe_attachment 与必要错误类型。
+Step 3：设计并落地 additive migration 0006，连接 atomic storage/re-read；新旧 DB 回放与冲突拒绝测试。
+Step 4：只做调用者的空集合适配，不借机将 attachments 纳入 Gate rule 或 Bundle。
+Step 5：运行相关 Rust unit/integration + fmt/clippy；按项目实际 gate 运行 python scripts/check.py。核查其测试结果、生成物及各步 FAIL/SKIP，必要时按生成器/官方脚本刷新检查产物。
+Step 6：逐文件审计 git diff，确认没有未授权的代码、public schema、tokens、packages、lockfiles、历史实验数据；用 git diff --check 检查 whitespace；确认 pre-round 其他人的工作没有被更改。
+Step 7：在 clean reference 且验收通过的前提下正常 commit 和 push main（或遵守有效仓库分支保护要求）。只能 fast-forward；不得 amend/force/reset/clean/stash。若需覆盖已有内容或远端 HEAD 已改变，STOP。不得把失败伪装成成功。
+Step 8：Push 后读回真实 remote HEAD 和对应 GitHub Actions run，必须读取每个 job 的 conclusion；若 CI fail，报告真实原因，不擅自开超范围修复任务。
+
+【七、硬性 STOP CONDITIONS】
+立即停工并报告最小可复现证据，未经进一步授权不得继续：
+1. 实际 main 与交接基线不能一致解释，或工作树并非 clean；
+2. SnapshotId::compose 必须改，或无附件 /1 Canonical text 必须改；
+3. 需要修改分析输入、ELF/MAP/Memory 模型或 Gate rule 语义才能完成本单元；
+4. 需要 public schema major / 新依赖 / destructive migration / 签名/更新/权限变更；
+5. 实现需要将附件二进制原件存进 SQLite，或公开证据不得不携带 host absolute path；
+6. 持久化后无法准确复原 attachment fact、重复同 id 不同内容无法安全拒绝；
+7. 新增代码导致旧 run id、policy fingerprint、SnapshotId 或不相关 golden 漂移；
+8. 需要开发 U2/U3/U4 才能保持 U1 内部真实性，而无设计上允许的兼容边界；
+9. 核心测试 / drift / 远端 CI 异常，并且修复需要越界；
+10. 预期技术方案与 ADR-0030 / 04_TECH/28 的权威描述存在实质矛盾。
+
+【八、最终交付格式】
+在对话中提供 C1-U1 完整交付报告，必须包含：
+- HEAD before/after、commit(s)、GitHub push / remote HEAD / CI run、worktree 状态；
+- 修改文件路径和修改意图；
+- Gate canonical /1 字节不变的证据、/2 的确定性证据；
+- T-C1-01/02/03/05(U1 子集)/16 逐项 PASS/FAIL/NOT_VERIFIED；
+- 0006 migration 与新旧数据库读回、约束、重复写入拒绝证据；
+- Rust/frontend gate 真实计数（不要只写“所有测试通过”），远程每个 Job 状态；
+- 对真实附件观测行为的边界，Runtime NOT_VERIFIED 时要明确写出；
+- 哪些只在 U2/U3/U4 才会完成，特别是 Gate required 的 BIN/HEX 目前仍是 BLOCK、bundle 目前仍不能 ship BIN/HEX；
+- 不得误将新的 CI artifact 当成 V1 cohort；
+- 遗留问题及下一单元 C1-U2 的建议，仅建议，不执行。
+
+结束状态：
+C1_PRODUCT_DIRECTION = OWNER_APPROVED
+C1_ADR_AND_DESIGN_FREEZE = COMPLETE
+C1_U1_DATA_AND_IDENTITY = COMPLETE（仅在验收真正通过时）
+C1_U2_U3_U4 = NOT_AUTHORIZED / NOT_STARTED
+BIN_HEX_ANALYSIS = UNSUPPORTED
+BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE
+V1 = IN_PROGRESS / RECRUITMENT_READY，0 eligible external sessions，M1-M6 NOT_MEASURED
+COHORT_BUILD = 11573661113 at 41bb6a36（绝不改变）
+B1 / RC / GA = NOT_AUTHORIZED
+ACTIVE_TASK = NONE（任务关闭后）
+
+完成 C1-U1 后停止，等待下一个单独授权；不得自动进入 C1-U2。

@@ -258,6 +258,9 @@ impl Session {
                 baseline_build_id: baseline_build.as_deref(),
                 policy_sha256: &digest,
                 evaluation: &evaluation,
+                // Nothing attaches a file yet: no surface offers a choice, so the run that is judged
+                // and stored here binds an empty set (`04_TECH/28` §3, C1-U1's boundary).
+                attachments: &[],
             })
             .map_err(|err| envelope_from_storage(&err, operation_id))?;
         }

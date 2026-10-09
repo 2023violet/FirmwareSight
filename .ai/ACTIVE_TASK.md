@@ -17,11 +17,56 @@ pointer note). V1 itself stays paused-at-recruitment with 0 eligible external se
 verdict, and re-freezing the instrument measures nothing.
 ON 2026-10-09 THE OWNER DECIDED THE BIN/HEX RANGE QUESTION. ADR-0030 accepts Option C1 — release-attached byte
 evidence — as product direction, and 04_TECH/28 freezes its design. That is a decision and a specification, not a
-feature: C1_IMPLEMENTATION = NOT_AUTHORIZED / NOT_STARTED, BIN_HEX_ANALYSIS stays UNSUPPORTED, the compatibility
-matrix keeps UNSUPPORTED, and this pointer stayed NONE before and after the round.
+feature; BIN_HEX_ANALYSIS stays UNSUPPORTED and the compatibility matrix keeps UNSUPPORTED. The same day the owner
+authorized the first unit of that design and it was executed: C1-U1 (attachment data + Gate identity + storage proof)
+is COMPLETE at 04_TECH/28 §9's U1 row. C1_U2 / C1_U3 / C1_U4 remain NOT_AUTHORIZED / NOT_STARTED, no person can attach
+a file yet, and this pointer stayed NONE before, during and after each round.
 
 THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
 stopped, kept because this project does not rewrite history, and they are not instructions for the next round.
+
+On 2026-10-09 the owner delivered 《FirmwareSight — C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权
+v1.0》 as a file and asked for it to be executed, then delivered a mid-turn continuation for the ERR-BUNDLE stable-code
+check. Both are archived: 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt
+(15,072 bytes, 132 LF, 0 CR, sha256 61a33d5381eca5828f8e6c979c25e58db6c2289b88fddccb37cdc71a0c484b65, blob
+76ecf114c46311803c30dc322fc81aa0c3c28ac9) and
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U1_ERR_BUNDLE_Code_Check_And_TDD_Continuation_v1.0.txt (10,162 bytes, 84 LF,
+0 CR, sha256 79a91df69ff80dbd19fcb12c724b52630a9c52dda92e6a49db0dee3418ec3c0a, blob c49c589d8c0955612e4fa2d8ccbf24273bd020b6,
+cmp identical to the delivered file, which had arrived under a percent-encoded name). Preflight met the expected handover
+head 114a84e3cb3e9e5fb7f23ee17f044f8d46337bc7 with a clean tree, and the architecture the prompt described matched source.
+
+What C1-U1 built, all of it behind a surface nobody can reach: GateAttachmentFact / KindBasis and a separate
+GateContext.attachments set in Core; the canonical rule — /1 byte-frozen while the set is empty, /2 with an
+attachments[ … ] block sorted by (kind word, digest) and one exact (kind, digest) pair bound once when it is not;
+ReleaseAttachment and observe_attachment() in firmwaresight-project (stat, regular-file check, refuse zero bytes,
+streaming SHA-256, length; ELF and MAP refused by kind before any filesystem access, no whole-file buffering, no
+GuardedInput::load); three typed refusals carrying ERR-BUNDLE-6115 / 6116 / 6117 after a read-only registry scan
+established that the Rust code() matches are the only registry in the repository; and migration
+0006_release_attachments.sql (SCHEMA_VERSION 5 → 6) with gate_run_attachments, its five CHECKs, its
+PRIMARY KEY (run_id, ordinal), its UNIQUE (run_id, kind, sha256) and an immutability trigger. persist_gate_run now
+refuses a non-canonical row set or an unobserved digest before any statement runs, writes the rows in the run's own
+transaction, and refuses a repeated run id over different attachment facts as an invariant rather than an overwrite.
+
+The protections held, and were attacked to prove it. The /1 text is 1,044 bytes with sha256
+72d5c108e9f5b362e2f108b112389a04abfa10934207045926e1a02bd8c5da00 and is now carried by a committed test; the untouched
+p4-release golden (run id gate-a17e9861ce643da5e7061ac349793f80d1be87736ad52b2daf3433dc8cb8bc26, extensions.policy_sha256
+b87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98) still reproduces byte-for-byte, and it fails the moment
+an empty block is emitted. Four mutations were run and each was caught or exposed a weak assertion that was then fixed:
+dropping the kind word from the sort key initially passed, so the order test now spells the expected sequence out with
+digests chosen to make the two keys disagree; removing the dedupe, relaxing byte_size > 0 and emitting an empty
+attachments block each failed the test that owns that rule. Every mutated file was restored to its pre-mutation checksum
+and the whole suite re-run green. Validation: 17/17 check.py steps PASS, 900 Rust tests across 48 result lines (870 at
+handover), UI 295 tests across 9 files, unchanged — this unit touched no frontend path.
+
+What it does NOT do: no UI control, no CLI --attach, no IPC command and no user-facing attach flow, so a person still
+cannot attach a file; artifacts.required / artifacts.hashes still judge only analyzed artifacts and no attachment
+satisfies a rule yet; no attachment: locator, no verify_attachments, no bundle file inclusion, no preview staleness and
+no E-4 (and E-4 has no allocated number); no new extensions output, no public schema change and no golden edit, so the
+external documents of gate-results, analysis, diff and release-bundle are byte-identical; SnapshotId::compose, the
+five-state and effective-severity model, Unknown aggregation, the policy hash and the release id grammar are untouched;
+C1-U2 / C1-U3 / C1-U4 are NOT_AUTHORIZED / NOT_STARTED; V1, the frozen cohort 11573661113 at 41bb6a36, P5, U1P, G2 and
+the licence question are untouched; nothing was installed or run against a real store, so the installed migration path
+stays NOT_RUNTIME_VERIFIED at this head.
 
 On 2026-10-09, after A0 had closed earlier the same day, the owner delivered 《FirmwareSight — Option C1 /
 Release-Attached Byte Evidence｜产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权 v1.0》 as a file and asked for it

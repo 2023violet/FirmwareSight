@@ -1383,6 +1383,95 @@ text with no source file; each says so in its own entry instead of standing for 
   `c1_direction_and_design_freeze`. A `C1-U*` implementation needs its own authorization; §4's own words are that
   this round prepares a stable specification and executes none of it.
 
+## C1-U1 Release Attachment Data & Identity / Coding Agent Implementation Authorization v1.0 — EXECUTED (2026-10-09)
+
+- File: `FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt` — 15,072 delivered bytes, 132 lines
+  (132 `LF`, file ends with a newline), **0 `CR`**, delivered sha256
+  `61a33d5381eca5828f8e6c979c25e58db6c2289b88fddccb37cdc71a0c484b65`; stored as blob
+  `76ecf114c46311803c30dc322fc81aa0c3c28ac9` with **the same sha256**, the arrival already being LF-only. `cmp`
+  against the owner's delivered file was run at archive time and returned identical, so the archived bytes are a copy
+  and not a retranscription; the delivered file is no longer in the owner's Downloads folder, which is why this entry
+  cites the digest and the `cmp` result rather than claiming a comparison that cannot be repeated today. It arrived
+  under a percent-encoded filename, exactly as the freeze round's did, so again the digest is the provenance and the
+  name is not.
+- Canonical units: `OWNER_AUTHORIZED_UNIT = C1-U1 (Data + Identity)` and, in the same sentence, that
+  "这不是重做产品方向论证，不是 C1-U2/U3/U4 的授权，不是对 V1 研究构建的新冻结，也不是 BIN/HEX 产品功能上线许可。" §1's
+  expected handover HEAD `114a84e3cb3e9e5fb7f23ee17f044f8d46337bc7` was measured with `git rev-parse HEAD` and matched,
+  with a clean tree, so no STOP was owed at preflight. §1.3's warning — "不要依据前轮报告的文件行号假定代码仍未移动" —
+  was honored by re-reading each target file rather than citing the freeze round's line numbers.
+- What it authorizes, exactly: the `ReleaseAttachment` / `GateAttachmentFact` / `KindBasis` types reusing
+  `ArtifactKind`, one `observe_attachment()` in `firmwaresight-project`, the `/1`-byte-frozen and `/2`-when-non-empty
+  canonical rule, the additive `0006_release_attachments.sql` storage proof, and explicit empty-set initialization at
+  every existing construction path. §2.4 forbids a user-facing attach surface, and §3 forbids every C1-U2/U3/U4
+  mechanism by name: no `artifacts.required` change, no `attachment:` locator, no `verify_attachments`, no
+  `BundleInputChecks`, no new `extensions` output, no public schema change, no React or CLI work, and no Intel HEX
+  record analysis.
+- Stop clauses: §7's ten conditions were each checked against source before writing, and none was triggered — the
+  architecture matched `ADR-0030` and `04_TECH/28` (including its §9 U1 row), the migration number `0006` was free, no
+  `/1`-identity, `SnapshotId`, five-state, effective-severity, Unknown-aggregation, policy-hash or release-id-grammar
+  semantics moved, and no destructive migration or historical-file rewrite was needed. §2's own escape clause was
+  exercised and reported rather than invoked: the storage read path **could** have kept the "the saved facts let us
+  find the file again" pretence, and instead a `derived_from_leading_bytes` row is refused as an invariant because the
+  schema stores the basis word and not the sample. §4's "临时测试变异…必须完整恢复，提交前无残留" was carried out with
+  pre/post checksums; see the plan's §12.
+- Outcome and the two disclosures this entry owes: 30 new Rust tests (870 → 900 across 48 result lines), UI 295/9
+  untouched, `python scripts/check.py` 17/17 PASS, four mutation proofs run and fully restored. First disclosure: the
+  ordering assertion written initially did **not** discriminate — sorting the attachment rows by digest alone passed
+  the whole suite, because every fixture's kind order and digest order agreed. The test was strengthened to spell out
+  the expected sequence with digests chosen to make the two keys disagree, and only then did the mutation fail. Second:
+  the storage ordinal test compares the stored order with `canonicalized()`'s own output, so it is a self-consistency
+  check and cannot catch a sort-key change by itself; the Project test is the authority for the rule, and this is stated
+  instead of being hidden behind a green suite.
+- Final state as §八 requires: `C1_U1_DATA_AND_IDENTITY = COMPLETE`, `C1_U2_U3_U4 = NOT_AUTHORIZED / NOT_STARTED`,
+  `BIN_HEX_ANALYSIS = UNSUPPORTED`, `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`,
+  `V1 = IN_PROGRESS / RECRUITMENT_READY` with 0 eligible external sessions, `COHORT_BUILD = 11573661113 at 41bb6a36`
+  unchanged, `ACTIVE_TASK = NONE`. `NOT_RUNTIME_VERIFIED` in part, and precisely: the migration and the identity are
+  proven by tests against real SQLite files and the real Gate, but nothing was installed over a user's store and no
+  person can attach a file, because no surface offers one. Machine state: `BASELINE.yaml` `c1_u1_data_and_identity`.
+
+## C1-U1 In-Flight Continuation — ERR-BUNDLE stable-code check and TDD continuation v1.0 — executed, explicitly not a new authorization (2026-10-09)
+
+- File: `FirmwareSight_C1_U1_ERR_BUNDLE_Code_Check_And_TDD_Continuation_v1.0.txt` — 10,162 bytes, 84 lines
+  (84 `LF`, ends with a newline), **0 `CR`**, sha256
+  `79a91df69ff80dbd19fcb12c724b52630a9c52dda92e6a49db0dee3418ec3c0a`, stored as blob
+  `c49c589d8c0955612e4fa2d8ccbf24273bd020b6` with the same digest. `cmp` against the delivered file
+  (`FirmwareSight_C1-U1_ERR-BUNDLE%E9%94%99%E8%AF%AF%E7%A0%81%E6%A0%B8%E6%9F%A5%E4%B8%8ETDD%E7%BB%AD%E6%8E%A5_v1.0.txt`,
+  still present in the owner's Downloads folder) was run **after** the archive and returned identical.
+- Its own §1 frames it: "【执行上下文｜不是新任务授权】… 不重启 preflight，不推翻已经建立的计划，不授权 C1-U2/U3/U4".
+  It therefore changed no scope, and §1's protection instruction overrode the initial authorization's clean-tree rule
+  for the duration: the worktree already held this round's uncommitted `RED` files, which §1 declares normal and
+  §6 forbids tidying ("不应清理自己的 RED 现场作为'恢复干净'"). No `git reset`, `checkout --`, `clean`, `stash`,
+  rebase or force push was used at any point in the round.
+- §2/§3 asked for a read-only registry scan and a findings table **before** any numbering. Measured, with the command
+  behind each line rather than a grep-shaped summary: the only registry of `ERR-BUNDLE-*` codes in the repository is
+  the set of `code()` match arms and envelope literals in
+  `crates/firmwaresight-core/src/domain/release.rs:600-601` (`6101`, `6110`),
+  `crates/firmwaresight-project/src/bundle.rs:171-178` (`6102`–`6109`),
+  `apps/desktop/src-tauri/src/bundle.rs:317,367,388` (`6111`, `6112`, `6114`) and
+  `apps/desktop/src-tauri/src/lib.rs:730,749` (`6105` reused for a plan this session dropped, and `6113`);
+  `05_ENGINEERING/03_ERROR_MODEL.md` contains **no** `ERR-*-NNNN` table (its `:34` is about copying a Diagnostics ID),
+  `04_TECH/21` contains none, and `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md:474`'s `BUNDLE | 6101–6114 | 14` is a
+  closed-stage tally in a finished round's report, so it was left as written. `6115`–`6117` were free; the one
+  cross-file reuse the scan found is `6105`, where the Desktop's dropped-plan envelope answers with the engine's
+  `PlanStale` code for the same situation, and it predates this round rather than conflicting with §3; no code carried
+  two meanings and no two codes meant the same thing, so §4's allocation was not blocked.
+- §4's allocation, after that check: `ERR-BUNDLE-6115` = `AttachmentError::Unreadable`, `6116` =
+  `KindNotAttaching`, `6117` = `Empty`, each with `code()` and `remediation()` and neither carrying an absolute path,
+  a secret or a stack. They are Project-layer refusals, not filed as `ERR-INTERNAL-900x`, and **E-4 stays unnumbered**:
+  §4 says its number is not this round's to allocate, so no placeholder constant exists anywhere. Regression:
+  `release_attachments.rs::the_three_refusals_are_three_distinct_codes_each_with_its_own_next_step` and
+  `the_new_codes_take_no_number_that_an_existing_refusal_already_uses`, the latter calling the real `code()` on eleven
+  constructed `BundleError`/`ReleaseError` values and asserting the 14-entry `6101`–`6114` family still comes out
+  unchanged.
+- §11's four corrections to its own readings, recorded because the prompt asked for wrong premises to be surfaced:
+  the project convention is `code()` while artifact/storage uses `stable_code()` (not both `code()`); there is no CLI
+  `GateRunDraft` construction to adapt — the only production caller is `apps/desktop/src-tauri/src/release.rs:255`; four
+  named-stage migration guards pin the list, not two; and more version pins moved than the prompt predicted, including
+  a user-visible one (a v4 store's pre-migration backup is now named `…v4-to-v6.sqlite`).
+- Status: this continuation completed **inside** C1-U1 and adds no separate verdict. Its §7 required the report to say
+  `PARTIAL / IN_PROGRESS` if only the code search had finished; the code search, the allocation, the regression tests
+  and the remaining C1-U1 steps all finished, so the round reports `C1_U1_DATA_AND_IDENTITY = COMPLETE` and nothing else.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

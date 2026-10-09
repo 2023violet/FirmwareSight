@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Architecture"
-last_updated: "2026-09-30"
+last_updated: "2026-10-09"
 ---
 
 # SQLite Storage Baseline
@@ -258,3 +258,71 @@ is refused, not reset — so the recovery path for an upgrade is a backup taken 
 does not exist yet (P5 prompt §22, which lands in the commit §61 calls "diagnostics and recovery
 support"), which is why `P5_MIGRATION_DECISION.md` states that no build carrying this migration may be
 installed over a user's real store before it does.
+
+## C1-U1 release attachment facts (2026-10-09)
+
+`SCHEMA_VERSION` moves 5 → 6 with one additive migration, `migrations/0006_release_attachments.sql`. It
+creates one table and touches nothing else: no earlier table is altered, renamed or re-keyed, and no
+existing row changes, so a run stored before this migration still reads back with the same id and an empty
+attachment set.
+
+`gate_run_attachments` is **the set of raw-byte facts one stored Gate run bound**, not a file catalogue and
+not a copy of the bytes:
+
+| column | what it fixes |
+| --- | --- |
+| `run_id` | `gate_runs(id)` `ON DELETE CASCADE` — the run that judged these bytes |
+| `ordinal` | the canonical position `04_TECH/28` §5 rule 1 defines, so a re-read rebuilds the same text without sorting again |
+| `kind` | `bin` / `hex` / `unknown` — an analyzed kind cannot be stored |
+| `sha256` | 64-character lowercase hex, the exact spelling the canonical `attachments[…]` block prints |
+| `byte_size` | a positive length: a zero-byte row would describe an image that ships nothing |
+| `kind_basis` | `declared` or `derived_from_leading_bytes`, the evidence class of the kind claim |
+
+`PRIMARY KEY (run_id, ordinal)` and `UNIQUE (run_id, kind, sha256)` are the storage form of "one exact
+`(kind, digest)` pair, bound once, in one order". The table stores no bytes (the `RawInputBytes` rule of
+`0001_initial.sql:8`), no name, no path and no mtime (`AGENTS.md` §7): one row is a digest, a length, a
+kind and the basis for that kind.
+
+Why `artifacts` was **not** reused: `0001_initial.sql` makes `parser_id`, `architecture`, `bitness` and
+`endianness` `NOT NULL`. A BIN or HEX attachment is by definition a file nothing parsed, so storing it
+there would require inventing analysis values for it — the exact failure `ADR-0030` exists to prevent. The
+two tables therefore mean two different things: `artifacts` is what an import observed about a parsed file
+of a build, `gate_run_attachments` is what one verdict bound.
+
+`gate_run_attachments_are_immutable` refuses UPDATE for the same reason `gate_runs` and `gate_findings` do:
+editing which bytes a stored verdict was judged from is rewriting the verdict. Deleting the run still
+cascades.
+
+Write path (`crates/firmwaresight-storage/src/gate.rs`, no rusqlite escapes):
+`GateRunDraft.attachments` is a borrow of the same `GateAttachmentFact` rows the Gate canonicalized, and
+`persist_gate_run` refuses, **before any statement runs**, a draft whose rows are not the canonical set or
+whose attachment carries no observed digest. Rows insert in the same transaction as the run and its
+findings, so a violation leaves no half-stored run. Replaying the same `run_id` over a different attachment
+set is `StorageError::Invariant`, not an overwrite.
+
+Read path: `gate_run_by_id` returns the rows in stored `ordinal` order and `StoredGateAttachment::as_gate_fact`
+rebuilds them, which is what makes "a re-read restores the same canonical text and the same run id" a
+checked property rather than a claim (`gate_history.rs::a_re_read_of_the_stored_rows_rebuilds_the_same_canonical_input_and_run_id`).
+A `derived_from_leading_bytes` row is reported as an invariant instead of being read back as
+`KindBasis::DerivedFromLeadingBytes` with a fabricated sample, because this schema persists the basis word
+and not the bytes it was derived from.
+
+Covered by `crates/firmwaresight-storage/tests/gate_history.rs` (31 tests, 10 of them this unit's): the
+canonical ordinal read-back, the `/2` re-read, same-id-different-attachment-set refusal, non-canonical and
+unobserved-digest drafts refused with zero rows written, a zero-attachment run storing no rows, eight
+boundary CHECK refusals re-checked through hand-written `INSERT`s, the three allowed kind words, UPDATE
+refusal by raw SQL, transaction rollback leaving no half-stored run, and the derived-basis read refusal.
+`release_records.rs` adds `a_v4_store_holding_a_gate_run_gains_the_attachment_table_and_keeps_the_run_readable`,
+so the 5 → 6 step is proven against a v4 file that holds real Gate rows.
+
+Six guards that pinned the old migration list were updated by naming the sixth stage rather than weakened:
+`compare_candidates.rs`, `map_companion_persistence.rs`, `release_records.rs` (whose
+`the_schema_is_at_version_five_…` is now `the_schema_is_at_this_builds_version_…` and whose
+`step_down_to_v3` drops the new table), `unknown_reasons.rs`, the desktop's `real_artifact_intake.rs`, and
+the two hand-built v4 stores in `startup.rs` / `diagnostics.rs`. One user-visible consequence follows: a v4
+store's pre-migration backup is now named `…v4-to-v6.sqlite` instead of `…v4-to-v5.sqlite`, because the
+backup name records the step this build actually takes.
+
+Nothing here makes an attachment usable by a person: no UI control, CLI flag or IPC command offers a file
+yet, and `artifacts.required` / `artifacts.hashes` still judge only the analyzed artifacts. Those are
+C1-U2 and later.

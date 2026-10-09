@@ -412,6 +412,78 @@ pub struct GateArtifactFact {
     pub byte_size: u64,
 }
 
+/// How an attachment came to be read as the kind it carries (`ADR-0030` D-8).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum KindBasis {
+    /// The release owner chose the kind when selecting the file. This is the only basis an observation
+    /// can produce for an attached file, because nothing reads the file as a container.
+    Declared,
+    /// The kind came from the bytes at the start of the file, with what was seen named. Reserved for a
+    /// path that does not exist yet: an attached file's structure is never analyzed, so a derived kind
+    /// may describe a shape and may not state validity, records or an address span.
+    DerivedFromLeadingBytes(String),
+}
+
+impl KindBasis {
+    /// The stable word migration `0006` stores. The derived variant's detail is not a column, which is
+    /// why [`Self::from_word`] refuses to invent one.
+    #[must_use]
+    pub fn word(&self) -> &'static str {
+        match self {
+            Self::Declared => "declared",
+            Self::DerivedFromLeadingBytes(_) => "derived_from_leading_bytes",
+        }
+    }
+
+    /// The basis a stored word names, or `None` when the word carries a detail this schema does not
+    /// persist. A reconstruction never fabricates a byte sample it does not have.
+    #[must_use]
+    pub fn from_word(word: &str) -> Option<Self> {
+        match word {
+            "declared" => Some(Self::Declared),
+            _ => None,
+        }
+    }
+}
+
+/// One file the release owner attached to the release, as the Gate needs it: raw bytes, their length and
+/// their digest, plus the basis of the kind claimed for them. It carries no section, symbol, memory,
+/// entry point or object claim, because nothing read the file as a container (`ADR-0030` D-1, D-8).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GateAttachmentFact {
+    /// `Bin`, `IntelHex` or `Unknown`. `Elf` and `Map` are refused before a fact exists: they come from
+    /// the analysis path, and letting an unanalyzed ELF stand in for the ELF a release is about would
+    /// decouple the verdict from the build it claims to gate (`04_TECH/28` 2.2).
+    pub kind: ArtifactKind,
+    /// Observed: the digest of the bytes actually read. An attachment that could not be hashed never
+    /// reaches a context, so a canonical block has no `unknown:` row.
+    pub sha256: Fact<String>,
+    /// Observed: the length of those same bytes. Stored and re-checked at packaging, never hashed into
+    /// the identity (`04_TECH/28` §5 rule 1).
+    pub byte_size: u64,
+    pub kind_basis: KindBasis,
+}
+
+impl GateAttachmentFact {
+    /// The identity's own ordering of a set of attachment rows: sorted by `(kind word, digest)`, with an
+    /// exact `(kind, digest)` pair kept once (`04_TECH/28` §5 rules 1 and 2).
+    ///
+    /// Exposed as a function over rows rather than only as a method on a context, because storage has to
+    /// check the same rule against a draft it never assembled into a context — and a second, slightly
+    /// different copy of that rule is how a stored ordinal stops matching the text it came from.
+    #[must_use]
+    pub fn canonicalized(rows: &[Self]) -> Vec<Self> {
+        let mut sorted = rows.to_vec();
+        sorted.sort_by(|left, right| {
+            artifact_kind_label(left.kind)
+                .cmp(artifact_kind_label(right.kind))
+                .then_with(|| fact_text(&left.sha256).cmp(&fact_text(&right.sha256)))
+        });
+        sorted.dedup_by(|left, right| left.kind == right.kind && left.sha256 == right.sha256);
+        sorted
+    }
+}
+
 /// The count of snapshot evidence items classified `Unknown`, plus a bounded deterministic sample of
 /// their locators (prompt §25). The items themselves are never reclassified here.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -426,6 +498,11 @@ pub struct GateUnknownEvidence {
 pub struct GateContext {
     pub snapshot_id: String,
     pub artifacts: Vec<GateArtifactFact>,
+    /// The files the release owner attached, as observed bytes. A separate set from `artifacts` on
+    /// purpose: `artifacts` answers what the analyzed snapshot holds, and an attachment answers what the
+    /// release ships. Merging them would put attachment prose into snapshot findings, which is the
+    /// defect `ADR-0030` D-4 refuses (`04_TECH/28` §2).
+    pub attachments: Vec<GateAttachmentFact>,
     pub memory: Option<GateMemoryFacts>,
     pub git: GateGitFacts,
     /// `None` when no `[version]` policy is configured, or when no tag needs matching.
@@ -666,6 +743,15 @@ impl GateContext {
         }
     }
 
+    /// The attachment rows in the order and multiplicity the identity binds: sorted by
+    /// `(kind word, digest)`, with an exact `(kind, digest)` pair bound once. `04_TECH/28` §5 rules 1
+    /// and 2. Storage writes its `ordinal` from this order, so a re-read restores the same text without
+    /// sorting again.
+    #[must_use]
+    pub fn canonical_attachments(&self) -> Vec<GateAttachmentFact> {
+        GateAttachmentFact::canonicalized(&self.attachments)
+    }
+
     /// A canonical, self-labelled rendering of everything that affects the verdict. The same facts
     /// produce the same text and therefore the same run id; a dirty workspace, a policy edit, a
     /// different baseline or different Release Notes bytes change it.
@@ -674,7 +760,13 @@ impl GateContext {
     /// construction, so they cannot be included by accident.
     #[must_use]
     pub fn canonical_input(&self) -> String {
-        let mut text = String::from("firmwaresight-gate-input/1\n");
+        let attachments = self.canonical_attachments();
+        let label = if attachments.is_empty() {
+            "firmwaresight-gate-input/1\n"
+        } else {
+            "firmwaresight-gate-input/2\n"
+        };
+        let mut text = String::from(label);
         text.push_str(&format!("snapshot={}\n", self.snapshot_id));
         text.push_str(&format!(
             "baseline={}\n",
@@ -689,6 +781,19 @@ impl GateContext {
             ));
         }
         text.push_str("]\n");
+        // Emitted only when a row exists: with no attachment the text stays byte-identical to the
+        // `/1` a reviewer already accepted, so no historical run id moves.
+        if !attachments.is_empty() {
+            text.push_str("attachments[\n");
+            for row in &attachments {
+                text.push_str(&format!(
+                    "  {} {}\n",
+                    artifact_kind_label(row.kind),
+                    fact_text(&row.sha256)
+                ));
+            }
+            text.push_str("]\n");
+        }
         text.push_str(&format!("git.available={}\n", self.git.available));
         text.push_str(&format!("git.head={}\n", fact_text(&self.git.head_commit)));
         text.push_str(&format!("git.tag={}\n", fact_text(&self.git.exact_tag)));
@@ -1625,6 +1730,7 @@ mod tests {
                 sha256: Fact::known("b".repeat(64)),
                 byte_size: 1_024,
             }],
+            attachments: Vec::new(),
             memory: None,
             git: GateGitFacts {
                 available: true,

@@ -906,8 +906,9 @@ fn a_snapshot_this_store_forced_is_named_and_never_located() {
     let sandbox = Sandbox::new("snapshot");
     let store = sandbox.store_path();
 
-    // A store a version-4 build would have left behind, made by removing exactly what 0005 added, and
-    // holding one build so the upgrade is of a file with history in it rather than of an empty shell.
+    // A store a version-4 build would have left behind, made by removing exactly what the later stages
+    // added, and holding one build so the upgrade is of a file with history in it rather than of an
+    // empty shell.
     {
         let db = Database::open(&store).expect("the store is created");
         db.connection()
@@ -915,7 +916,8 @@ fn a_snapshot_this_store_forced_is_named_and_never_located() {
                 "DROP INDEX idx_builds_created;
                  ALTER TABLE sections DROP COLUMN file_offset_unknown;
                  ALTER TABLE symbols DROP COLUMN address_unknown;
-                 DELETE FROM schema_migrations WHERE version = 5;
+                 DROP TABLE gate_run_attachments;
+                 DELETE FROM schema_migrations WHERE version >= 5;
                  INSERT INTO projects (id, name) VALUES ('proj-s', 'Snapshot project');
                  INSERT INTO builds (id, project_id, snapshot_id, normalization_version,
                                      created_by_fwsight, state)
@@ -931,7 +933,7 @@ fn a_snapshot_this_store_forced_is_named_and_never_located() {
 
     assert_eq!(
         payload.store.backup_files,
-        vec!["firmwaresight-p0.pre-migration-v4-to-v5.sqlite".to_owned()],
+        vec!["firmwaresight-p0.pre-migration-v4-to-v6.sqlite".to_owned()],
         "the snapshot this transition owed is reported by name: {:?}",
         payload.store.backup_files
     );
@@ -939,7 +941,7 @@ fn a_snapshot_this_store_forced_is_named_and_never_located() {
         store
             .parent()
             .expect("the store has a directory")
-            .join("firmwaresight-p0.pre-migration-v4-to-v5.sqlite")
+            .join("firmwaresight-p0.pre-migration-v4-to-v6.sqlite")
             .exists(),
         "the file the payload names is the file that exists"
     );

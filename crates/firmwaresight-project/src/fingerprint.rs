@@ -99,6 +99,37 @@ mod tests {
         assert_ne!(policy_sha256(&disposition), policy_sha256(&changed));
     }
 
+    /// PA-1 / T-C1-01. These four constants were measured at the C1 handover head (`114a84e`), before
+    /// `attachments` existed, and they are the point of the byte-freeze: a zero-attachment run must
+    /// still hash to the id a reviewer already accepted. The digest and the id are the same value
+    /// because the id is `gate-` plus this text's digest.
+    #[test]
+    fn the_zero_attachment_canonical_text_is_byte_frozen() {
+        let context = gate_context();
+        let text = context.canonical_input();
+        assert!(
+            text.starts_with("firmwaresight-gate-input/1\n"),
+            "the label moved while no attachment was bound: {text}"
+        );
+        assert!(
+            !text.contains("attachments["),
+            "an empty attachment set wrote a block, which is how `/1` bytes would drift: {text}"
+        );
+        assert_eq!(
+            text.len(),
+            1044,
+            "the canonical text changed length: {text}"
+        );
+        assert_eq!(
+            sha256_hex(text.as_bytes()),
+            "72d5c108e9f5b362e2f108b112389a04abfa10934207045926e1a02bd8c5da00"
+        );
+        assert_eq!(
+            run_id(&context),
+            "gate-72d5c108e9f5b362e2f108b112389a04abfa10934207045926e1a02bd8c5da00"
+        );
+    }
+
     #[test]
     fn a_run_id_is_prefixed_and_binds_the_whole_input() {
         let context = gate_context();

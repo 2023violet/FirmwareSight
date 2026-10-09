@@ -203,6 +203,7 @@ fn passing_context(snapshot_id: &str) -> GateContext {
             sha256: Fact::known(hex64("artifact")),
             byte_size: 4096,
         }],
+        attachments: Vec::new(),
         memory: Some(GateMemoryFacts {
             nonvolatile: Some(GateBudgetFact::exact(
                 2048,
@@ -247,6 +248,7 @@ fn persist_run(db: &mut Database, tag: &str, build_id: &str, snapshot_id: &str) 
         baseline_build_id: None,
         policy_sha256: &hex64("policy"),
         evaluation: &evaluation,
+        attachments: &[],
     })
     .unwrap_or_else(|err| panic!("persist gate run {tag}: {err}"));
     evaluation
@@ -1051,6 +1053,7 @@ fn history_stays_bounded_at_productization_scale() {
             baseline_build_id: None,
             policy_sha256: &hex64("policy"),
             evaluation: &evaluation,
+            attachments: &[],
         })
         .unwrap_or_else(|err| panic!("persist run {index}: {err}"));
         evaluations.push(evaluation);

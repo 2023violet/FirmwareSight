@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-08"
+last_updated: "2026-10-09"
 ---
 
 # Decisions — v0.6.0
@@ -2411,3 +2411,59 @@ archived authorization; no new directory row, which is why the tree grew by exac
 no `SKIP` and no `FAIL`**, and the counts that A0 moved are unchanged by a docs-only round: **870 Rust across 47 result
 lines / 295 UI in 9 files**, 30 IPC commands, `assets/design-tokens.json` at `94336906…14d4`.
 `active_task = NONE` before and after.
+
+## C1-U1 (2026-10-09) — the first code of an approved direction, and a mutation proof that found its own weak assertion
+
+The Owner's 《C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权 v1.0》 authorized one unit of the design
+`ADR-0030` froze the same day, and said so in its own words: "这不是重做产品方向论证，不是 C1-U2/U3/U4 的授权，不是对 V1
+研究构建的新冻结，也不是 BIN/HEX 产品功能上线许可." The round therefore wrote code for the first time since the freeze,
+and everything it decided was already decided in `ADR-0030` or `04_TECH/28`; what is recorded here are the places where
+implementing the design had to choose something the design left open.
+
+**A digest is bound as a set, in one order, and the order is proven by a fixture that makes the two keys disagree.**
+`04_TECH/28` §5 rules 1 and 2 say rows sort by `(kind word, lowercase sha256)` and one exact `(kind, digest)` pair is
+bound once. The first version of the test only asserted that the first row started with `bin `, using digests whose
+order happened to agree with the kind order — so deleting the kind word from the sort key passed the entire suite. The
+mutation proof caught it, the test was strengthened rather than the rule being softened, and it now pins the whole
+sequence with `hex sha(0)` alongside `bin sha(9)` so the two keys must disagree. The sibling disclosure travels with
+it: `gate_history.rs`'s ordinal test compares the stored order against `canonicalized()`'s own output, so it is a
+self-consistency check and must never be cited as the guard for the ordering rule. **A green suite is not the same
+thing as a discriminating test, and this round found that out by breaking its own code on purpose.**
+
+**Attachments are not artifacts, in the type system and in the schema.** `GateContext.artifacts` is documented as what
+the snapshot holds, and both `artifacts.required` and `artifacts.hashes` say so, so attachment rows went into a new
+`attachments` set with their own canonical block — `ADR-0030` D-4, implemented as written. The same reasoning chose the
+storage shape: `0001_initial.sql` makes `parser_id`, `architecture`, `bitness` and `endianness` `NOT NULL`, so reusing
+`artifacts` for a BIN row would have meant inventing analysis values for a file nothing parsed. A new table
+`gate_run_attachments` therefore says one thing: these are the raw-byte facts this verdict was judged from.
+
+**Storage refuses rather than reconciles.** Two rules that used to be implicit became pre-write refusals: a draft whose
+rows are not the canonical set, and an attachment carrying no observed digest. Both are refused before any statement
+runs, so an id stored today can always be re-derived from the rows beside it — which is the only honest way to make "a
+re-read restores the same context" a property instead of a hope. A repeated `run_id` over different attachment facts is
+an invariant, not an overwrite, and `derived_from_leading_bytes` is refused on read rather than being handed back with
+a fabricated sample, because this schema persists the basis word and not the bytes behind it.
+
+**The error-code registry was measured before it was extended.** The continuation asked for 6115–6117 to be allocated
+only after a conflict check, and the check found something worth stating: `05_ENGINEERING/03_ERROR_MODEL.md` has no
+code table at all — the only registry in the repository is the set of `code()` arms and envelope literals across four
+files, and `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md:474`'s `6101–6114` line is a closed-stage tally, not a live
+authority. So the three new codes were added in code with `code()` and `remediation()`, protected by a uniqueness test
+that calls the real `code()` on eleven live error values rather than trusting a copied list, and the markdown was left
+as it is instead of being dressed up as something it is not. **E-4 stayed unnumbered on purpose**: it is C1-U2's
+refusal and §4 says its number is not this round's to allocate.
+
+**What did not move, and was checked rather than assumed:** `SnapshotId::compose`, the five-state vocabulary and
+`EffectiveSeverity`, Unknown aggregation, the policy hash, the release-id grammar, every `gate-results` / `analysis` /
+`diff` / `release-manifest` byte, every golden, every fixture, every pre-C1 run id, the compatibility matrix's
+`UNSUPPORTED`, the frontend, the V1 cohort, U1's verdict and its guarded 25-item tally, P5, G2, the licence, L11 and
+L15, and `B1 / RC / GA`. Six migration-number guards were updated by naming the sixth stage instead of being loosened,
+and one user-visible consequence is disclosed rather than buried: a v4 store's pre-migration backup is now named
+`…v4-to-v6.sqlite`, because that is the step this build actually takes.
+
+**The honesty boundary is the point of the unit, not a caveat attached to it.** Nothing here lets a person attach a
+file: no UI, no CLI flag, no IPC command. `required = ["bin"]` still BLOCKs, because the rules do not read the new set —
+and `an_attachment_still_satisfies_nothing_because_the_rules_do_not_read_it_yet` asserts exactly that so no later round
+can mistake identity for satisfaction. `BIN_HEX_RELEASE_ATTACH` therefore moves from
+`DESIGN_APPROVED / NOT_IMPLEMENTED` to `DESIGN_APPROVED / NOT_USER_AVAILABLE`: implemented, tested, and unreachable.
+No installed store was upgraded, so the installed path stays `NOT_RUNTIME_VERIFIED` at this head.
