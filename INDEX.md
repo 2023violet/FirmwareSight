@@ -431,7 +431,7 @@ migration, fixture, script, `.github/**`, ADR or `.gitattributes` path is in the
 paths added and none removed since the A0 corrective — `09_ADR/ADR-0030-release-attached-byte-evidence.md`,
 `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` and
 `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt` (the delivered
-authorization, 15,545 bytes, 186 lines, 0 `CR`, sha256 `3dbd8781…e8f9c5`, identical on the owner's file, in this
+authorization, 15,545 bytes, 185 lines, 0 `CR`, sha256 `3dbd8781…e8f9c5`, identical on the owner's file, in this
 repository's index blob and in the `SHA256SUMS` row) — and because all three land in directories the tree already
 lists, the tree grew by exactly three lines rather than four. Sixteen existing paths gained content, all of them
 documents: the eight that carry a dated clarification pointing at the new ADR (`ADR-0006`, `01_PRD_MVP.md`,
@@ -456,6 +456,20 @@ absent from the diff, byte-for-byte verified before and after the commit: every 
 `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json`, `deny.toml`, `DESIGN.md` and the
 design tokens. **What is deliberately not in this ledger entry: a CI number.** §6 step 8 reads the run this push
 produces back job by job after the push, and no third commit is made to write it into the commit that triggers it.
+
+**This freeze round's own transcription defects, disclosed by the successor that corrects them.** The paragraph above
+first described the archive as 186 lines and the change set as thirteen existing paths. Both are measured here instead:
+185 `LF` with a trailing newline, and sixteen, which is the number that makes 3 + 16 + 2 = 21. Six of the seven places
+were fixed before the commit, and one — this ledger row's own `186` — was not, so it reached `origin/main` inside
+`b5f732d` and is corrected in a dated successor rather than by amending a pushed commit: `AGENTS.md` 9 keeps history
+rewrites behind a human decision, §7 of the authorization forbids amend and force outright, and the rule this repository
+has followed since Commit F is that a wrong number is answered by a new dated sentence rather than by editing the old one
+away. The successor moves two documents — this ledger row and `BASELINE.yaml`'s verification block — and one regenerated
+artifact: `SHA256SUMS` re-hashes those two blobs, while `DIRECTORY_TREE.txt` regenerated **byte-identical** because no
+path was added or removed, which is the direct proof that a self-correction stayed a documentation event. The
+forbidden-OID audit and `drift/goldens unchanged` and `drift/ipc bindings unchanged` are re-run against it, and the gate
+log that measures its bytes is `target/c1_freeze_gate_final5.txt`. A CI number is still absent from it for
+the same reason as before: the run it would carry is the one its own push produces.
 
 **What those digests are of, since ADR-0029 (Commit F1, 2026-10-05):** the canonical Git **stage-0 index blob
 bytes**, not the bytes sitting in the working directory. The rule and its alternatives are in
