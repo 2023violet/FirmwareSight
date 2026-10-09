@@ -1089,6 +1089,23 @@ describe('the ranking as a way to the full list', () => {
     expect(screen.getByRole('region', { name: 'Symbol Changes' })).toBeDefined();
   });
 
+  it('tells the reader the ranked lists are not a breakdown of the load-image delta', async () => {
+    await openCompare();
+    await runCompare();
+
+    // A reader who adds up the rows on screen gets a number that will not land on the Memory
+    // headline, and the reason is a difference of basis as well as a cut-off. The screen has to say
+    // so next to the lists rather than leave the gap to be guessed at.
+    const ranking = await screen.findByRole('region', { name: 'Top growth and largest additions' });
+    const basis = within(ranking).getByText(/load image[\s\S]*delta/i);
+    // Which headline the sentence points at, what each side is measured over, and that a shortfall
+    // is neither a bug nor a row the table is hiding.
+    expect(basis.textContent).toMatch(/neither/i);
+    expect(basis.textContent).toMatch(/whole image/i);
+    expect(basis.textContent).toMatch(/runtime size/i);
+    expect(basis.textContent).toMatch(/not a missing row/i);
+  });
+
   it('says the added rows are still being read before it names one of them', async () => {
     await openCompare();
     // Hold the added-rows read open. The ranking region is painted from the summary and does not

@@ -85,7 +85,7 @@ function summary(over: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDto {
       symbols: 'provided',
       debugInfo: 'partial',
       map: 'provided',
-      objectAttribution: 'partial',
+      objectAttribution: 'unavailable',
       git: 'available',
     },
     evidenceSummary: { total: 212, observed: 180, derived: 24, declared: 4, unknown: 4 },
@@ -1121,5 +1121,111 @@ describe('U1P-R3 the Overview capability band has three real cells', () => {
     expect(band.children).toHaveLength(3);
     expect(within(band).queryAllByRole('region')).toHaveLength(3);
     expect(band.textContent).not.toMatch(/fourth|placeholder|reserved/i);
+  });
+});
+
+/**
+ * A0-04: the ids this file has always been written around are mockup names.
+ *
+ * That is legitimate for a page whose only job is to show `finding.ruleId` wherever Core put it — but it also
+ * means nothing in this file would notice if that line stopped carrying the id. These three tests are threaded
+ * on the canonical identities read out of `gate.rs:172-181`'s `as_str()`, so the chain from a real rule through
+ * the run's aggregate to the sentence the reader gets is covered by something.
+ */
+describe('A0 the open findings are named by the rules the run evaluated', () => {
+  /** The FLASH locator a real run carries: `footprint_evidence_id` (`evidence.rs:144`) inside the
+   *  `evidence:` scheme `total_fact` writes (`evidence.rs:190`). */
+  const FLASH_REF = 'evidence:ev-memory-nonvolatile_image_footprint_bytes';
+
+  /** A row whose sentence is derived from its own id, so no fixture attributes one rule's story to another. */
+  const blocked = (
+    ruleId: string,
+    index: number,
+    evidenceRefs: string[] = ['ev-91'],
+  ): GateFindingRowDto =>
+    finding({
+      id: `f-${String(index)}`,
+      ruleId,
+      state: 'BLOCK',
+      effectiveSeverity: 'BLOCK',
+      summary: `${ruleId} did not hold for this build.`,
+      evidenceRefs,
+    });
+
+  it('shows the rule id Core wrote beside the sentence that rule produced', () => {
+    renderOverview({
+      summary: summary(),
+      gateRun: gateRun({
+        overallEffectiveSeverity: 'BLOCK',
+        dispositionEffectiveSeverity: 'BLOCK',
+        counts: { pass: 8, review: 0, block: 1, unknown: 0, notApplicable: 1 },
+        findings: [
+          blocked('memory.flash_budget', 1, [FLASH_REF]),
+          finding({
+            id: 'f-notes',
+            ruleId: 'release.notes',
+            state: 'N/A',
+            effectiveSeverity: 'N/A',
+            summary: 'release.notes does not apply: the policy names no notes file.',
+          }),
+        ],
+      }),
+    });
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    const row = within(ship).getByText('memory.flash_budget');
+    expect(row.closest('li')?.textContent).toContain(
+      'memory.flash_budget did not hold for this build.',
+    );
+    // The verdict word and its count are this run's aggregate, and it agrees with the row below it.
+    expect(ship.textContent).toContain('Blocked — 1 rule(s) failed.');
+    // A rule that does not apply is not an open finding, whatever its id looks like.
+    expect(within(ship).queryByText('release.notes')).toBeNull();
+  });
+
+  it('counts every open rule it does not show, when the run has more than four', () => {
+    const openRules = [
+      'memory.flash_budget',
+      'memory.ram_budget',
+      'diff.growth',
+      'artifacts.hashes',
+      'evidence.unknown_review',
+    ];
+    renderOverview({
+      summary: summary(),
+      gateRun: gateRun({
+        overallEffectiveSeverity: 'BLOCK',
+        dispositionEffectiveSeverity: 'BLOCK',
+        counts: { pass: 5, review: 0, block: 5, unknown: 0, notApplicable: 0 },
+        findings: openRules.map(blocked),
+      }),
+    });
+
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    for (const ruleId of openRules.slice(0, 4)) {
+      expect(within(ship).getByText(ruleId)).toBeDefined();
+    }
+    // The fifth is not silently dropped: it is counted and sent to the page that can open it.
+    expect(within(ship).queryByText('evidence.unknown_review')).toBeNull();
+    expect(ship.textContent).toContain('1 more finding(s) on the Release Gate page.');
+  });
+
+  it('labels evidence with the analyzed build’s own counts and quotes no locator it cannot open', () => {
+    renderOverview({
+      summary: summary(),
+      gateRun: gateRun({ findings: [blocked('memory.flash_budget', 1, [FLASH_REF])] }),
+    });
+
+    // The one evidence statement this page makes is the class breakdown of the build on screen.
+    const evidence = screen.getByText('Evidence').parentElement;
+    expect(evidence?.textContent).toContain('212');
+    expect(evidence?.textContent).toContain(
+      '180 observed · 24 derived · 4 declared · 4 unknown',
+    );
+    // The run's own locators stay on the page that resolves them. A bare `evidence:…` string here would
+    // read as a fact the reader has no way to check, from a page that says it cannot open the run.
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.textContent).not.toContain('evidence:ev-');
+    expect(ship.textContent).toContain('Judged snapshot');
   });
 });

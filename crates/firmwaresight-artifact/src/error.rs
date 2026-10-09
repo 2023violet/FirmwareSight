@@ -83,7 +83,10 @@ impl ArtifactError {
             Self::ArtifactTooLarge { .. } => {
                 "Raise max_full_buffer_bytes in firmwaresight.toml only if this size is expected."
             }
-            Self::UnsupportedFormat { .. } => "Provide an ELF linker output, or a BIN/HEX image.",
+            Self::UnsupportedFormat { .. } => {
+                "Choose the ELF linker output this build produced; BIN and Intel HEX images are not \
+                 analyzed by this entry point."
+            }
             Self::MalformedArtifact { .. } | Self::InvalidElf { .. } => {
                 "Choose the linker ELF output rather than a stripped or truncated copy."
             }

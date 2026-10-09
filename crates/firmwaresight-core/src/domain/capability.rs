@@ -40,7 +40,9 @@ pub struct Capabilities {
     pub symbols: Availability,
     pub debug_info: Availability,
     pub map: Provision,
-    /// Per-object/per-input-file attribution, which needs a MAP or DWARF.
+    /// Per-object/per-input-file attribution. `Available` claims that object or module results can be
+    /// read back out of this snapshot, so it requires a persisted attribution record — supplying a MAP
+    /// or carrying debug sections is a precondition, never the result itself.
     pub object_attribution: Availability,
     pub git: Availability,
 }

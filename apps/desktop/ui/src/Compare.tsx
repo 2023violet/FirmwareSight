@@ -949,7 +949,10 @@ function Ranking({
       <h2>Top growth and largest additions</h2>
       <p className={styles['hint']}>
         These lists are navigation aids. The Section Changes and Symbol Changes tables below hold
-        every changed row, and choosing an entry filters that table to the row it names.
+        every changed row, and choosing an entry filters that table to the row it names. Neither list
+        sums to the &ldquo;Nonvolatile / load image&rdquo; delta above: that is the whole
+        image&rsquo;s change, while these are only the top few rows ranked by runtime size, so a
+        shortfall is a basis difference and a cut-off, not a missing row.
       </p>
       <div className={styles['ranking']}>
         <div className={styles['list']}>

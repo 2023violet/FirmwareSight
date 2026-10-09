@@ -239,11 +239,11 @@ fn build_capabilities(facts: &elf::ElfFacts, map_evidence: Option<&MapEvidence>)
             } else {
                 Provision::NotProvided
             },
-            if map_evidence.is_some() {
-                Availability::Available
-            } else {
-                Availability::Unavailable
-            },
+            // A MAP is the input an object attribution would one day be built from, not the result.
+            // `map::parse` collects input-section-to-object rows and nothing carries them into the
+            // snapshot, so the only honest answer on every path today is `Unavailable` — which is also
+            // what `domain::diff::ObjectAttribution` tells Compare for the same build.
+            Availability::Unavailable,
         )
 }
 

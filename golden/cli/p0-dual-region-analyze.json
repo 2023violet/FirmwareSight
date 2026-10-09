@@ -18,7 +18,7 @@
     "elf": "supported",
     "git": "unknown",
     "map": "provided",
-    "objectAttribution": "available",
+    "objectAttribution": "unavailable",
     "sections": "available",
     "symbols": "available"
   },

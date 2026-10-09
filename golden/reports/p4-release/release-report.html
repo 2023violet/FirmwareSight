@@ -317,7 +317,7 @@ h4 {
 <tr><th>Symbols</th><td><span class="mono">available</span></td></tr>
 <tr><th>Debug info</th><td><span class="mono">available</span></td></tr>
 <tr><th>MAP companion</th><td><span class="mono">provided</span></td></tr>
-<tr><th>Object attribution</th><td><span class="mono">available</span></td></tr>
+<tr><th>Object attribution</th><td><span class="mono">unavailable</span></td></tr>
 <tr><th>Git facts</th><td><span class="mono">unknown</span></td></tr>
 </tbody>
 </table>
@@ -415,7 +415,7 @@ h4 {
 <thead><tr><th>Bundle path</th><th>SHA-256</th><th class="num">Bytes</th></tr></thead>
 <tbody>
 <tr><td class="mono">accepted-reviews.json</td><td class="mono">50afd7fab31bbd69f5fb91a5357f3128544e76696b5e3562081acd58e23e0076</td><td class="num">170</td></tr>
-<tr><td class="mono">analysis.json</td><td class="mono">1e9fde475327c80e0ab85f73893823103079c4c2a652a1c16d31798dfdd5195b</td><td class="num">26961</td></tr>
+<tr><td class="mono">analysis.json</td><td class="mono">ba20d979db4c92fd98780f8afc5186e0e51d7a8dfef8f40eb8ad6c3786bf199a</td><td class="num">26963</td></tr>
 <tr><td class="mono">artifacts/firmware.elf</td><td class="mono">4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374</td><td class="num">17464</td></tr>
 <tr><td class="mono">artifacts/firmware.map</td><td class="mono">a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</td><td class="num">4664</td></tr>
 <tr><td class="mono">diff.json</td><td class="mono">1930cdb6a098c67456297ec321910315d21aeb3ce79ef7264fcc4037e148242a</td><td class="num">64355</td></tr>
@@ -452,6 +452,7 @@ h4 {
 <caption>Capability reporting, taken from the analysis document in this bundle.</caption>
 <thead><tr><th>Capability</th><th>Reported</th><th>What that means for this release</th></tr></thead>
 <tbody>
+<tr><td>Object attribution</td><td class="mono">unavailable</td><td>Totals are reported per section and per symbol only. No per-object-file or per-module total is claimed here, and none should be inferred from the section rows.</td></tr>
 <tr><td>Git facts</td><td class="mono">unknown</td><td>This capability is reported at less than full coverage by the analysis document in this bundle.</td></tr>
 </tbody>
 </table>

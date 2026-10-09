@@ -187,7 +187,7 @@ function summary(overrides: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDt
       symbols: 'available',
       debugInfo: 'available',
       map: 'provided',
-      objectAttribution: 'available',
+      objectAttribution: 'unavailable',
       git: 'unknown',
     },
     evidenceSummary: {

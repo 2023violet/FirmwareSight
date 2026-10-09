@@ -295,6 +295,28 @@ fn without_a_map_the_model_reports_weaker_evidence_not_false_confidence() {
 }
 
 #[test]
+fn a_map_supplies_region_evidence_without_becoming_an_object_attribution_claim() {
+    let analysis =
+        pipeline::analyze(&AnalysisRequest::new(dual_region_elf()).with_map(dual_region_map()))
+            .expect("ELF plus a GNU ld MAP analyzes");
+
+    assert_eq!(analysis.capabilities.map, Provision::Provided);
+    assert_eq!(
+        analysis.capabilities.object_attribution,
+        Availability::Unavailable,
+        "no object or module result reaches the snapshot, so a MAP must not be reported as one"
+    );
+    // The MAP still does the work it genuinely does, and none of it is withdrawn with the claim.
+    assert_eq!(analysis.capabilities.sections, Availability::Available);
+    assert_eq!(analysis.capabilities.symbols, Availability::Available);
+    assert!(matches!(
+        analysis.memory.weakest_basis,
+        Some(MemoryEvidenceBasis::MapRegionAndElfLoad)
+    ));
+    assert!(analysis.memory.admissible_for_hard_block());
+}
+
+#[test]
 fn evidence_records_provenance_and_not_only_numbers() {
     let analysis =
         pipeline::analyze(&AnalysisRequest::new(dual_region_elf()).with_map(dual_region_map()))
@@ -374,6 +396,28 @@ fn missing_file_is_input_not_found_and_carries_a_stable_code() {
     assert!(matches!(err, ArtifactError::InputNotFound { .. }));
     assert_eq!(err.stable_code(), "ERR-INPUT-0001");
     assert!(!err.remediation().is_empty());
+}
+
+#[test]
+fn the_unsupported_format_next_step_offers_only_what_the_pipeline_accepts() {
+    // A committed file that is real, readable and not ELF: `pipeline::analyze` detects it and refuses
+    // it, which is the exact moment the user reads this sentence.
+    let result = pipeline::analyze(&AnalysisRequest::new(fixture(
+        "fixtures/elf/p0-dual-region/firmware.map",
+    )));
+    let err = result.expect_err("a linker MAP is not an ELF artifact");
+
+    assert!(matches!(err, ArtifactError::UnsupportedFormat { .. }));
+    assert_eq!(err.stable_code(), "ERR-FORMAT-0001");
+    let remediation = err.remediation();
+    assert!(
+        remediation.contains("ELF"),
+        "the next step must name the input that works: {remediation}"
+    );
+    assert!(
+        remediation.contains("not analyzed"),
+        "the next step must state the limit instead of offering another rejected format: {remediation}"
+    );
 }
 
 #[test]

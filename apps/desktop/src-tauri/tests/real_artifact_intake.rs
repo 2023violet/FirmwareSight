@@ -596,7 +596,13 @@ fn format_truth_comes_from_the_bytes_not_from_an_elf_extension() {
         err.message,
         "That file is not a format FirmwareSight can analyze yet."
     );
-    assert!(err.remediation.is_some());
+    let remediation = err.remediation.expect("this refusal carries a next step");
+    assert_eq!(
+        remediation,
+        "Choose the ELF linker output this build produced; BIN and Intel HEX images are not analyzed \
+         by this entry point.",
+        "the desktop must quote the one remediation the artifact layer writes, not a second copy"
+    );
 }
 
 #[test]
