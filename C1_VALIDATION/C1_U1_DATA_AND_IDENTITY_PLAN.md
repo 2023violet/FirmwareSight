@@ -39,7 +39,7 @@ provenance and the filename is not.
 | worktrees / stashes | `git worktree list`, `git stash list` | one worktree on `main`; no stash |
 | prior round's CI | `gh run list` | `37955752208` (#91, `b5f732d`) and `37957442415` (#92, `114a84e`), both `success` |
 | migration numbers | `ls crates/firmwaresight-storage/migrations/` | `0001`–`0005` exist, `0006` is free |
-| partial C1-U1 | `grep -c -i attachment crates/firmwaresight-core/src/domain/gate.rs` | **0** — the unit is genuinely unstarted, so §一.2's "already partly implemented" STOP does not fire |
+| partial C1-U1 | `grep -c -i attachment crates/firmwaresight-core/src/domain/gate.rs` | **0** — the unit is genuinely unstarted, so §一.2's STOP on 「C1-U1 已部分实施」 ("C1-U1 already partly implemented") does not fire |
 
 ## 3. Protection assertions, written before the code that must satisfy them
 

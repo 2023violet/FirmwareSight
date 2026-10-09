@@ -301,7 +301,7 @@ findings, so a violation leaves no half-stored run. Replaying the same `run_id` 
 set is `StorageError::Invariant`, not an overwrite.
 
 Read path: `gate_run_by_id` returns the rows in stored `ordinal` order and `StoredGateAttachment::as_gate_fact`
-rebuilds them, which is what makes "a re-read restores the same canonical text and the same run id" a
+rebuilds them, which is what makes a re-read restoring the same canonical text and the same run id a
 checked property rather than a claim (`gate_history.rs::a_re_read_of_the_stored_rows_rebuilds_the_same_canonical_input_and_run_id`).
 A `derived_from_leading_bytes` row is reported as an invariant instead of being read back as
 `KindBasis::DerivedFromLeadingBytes` with a fabricated sample, because this schema persists the basis word
