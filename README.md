@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 # FirmwareSight v0.6.0
@@ -581,6 +581,24 @@ U1's two later units the same day: INSTALLED, INSPECTED, THEN CORRECTED. The rec
         PASS_COMPLETE — with U1P-V1-01, U1P-V1-02, note U1P-V0-01 and one pre-existing Core behaviour
         (capabilities.git always reads "unknown", because with_git() has no production caller) left for the
         Architect. The owner's store again came back byte-exact and the machine is uninstalled as it was found.
+        **And where the track actually stands, which the four paragraphs above do not reach:** two further units ran
+        on 2026-10-08 — U1P-R2 (2e2e219, 278 UI tests in 9 files) closed U1P-V2-02 by scoping Overview's bands to the
+        selection they describe, and U1P-R3 (41bb6a36, 291 UI tests in 9 files) moved the comparison session into shell
+        state so Compare's genuine report survives navigation and filled the auto-fit band that had painted a fourth
+        grey cell at 1024 — each installed and re-checked on its own CI-built bytes, each closing at
+        READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT and neither self-waiving the findings it left. **The track then closed
+        on the Architect's own authority: U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS**
+        (10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt — 5,159 bytes, 52 lines,
+        0 CR, SHA-256 8634321c…36c619, blob f16f0e7e…; record U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md).
+        The scope is inside the word: visual readiness for a controlled V1 study, NOT GA quality, NOT feature
+        completeness, NOT distribution approval. The tally is guarded verbatim — 25 items, 23 PASS / 1 FAIL /
+        1 NOT_VERIFIED / 0 NOT_CAPTURED, 2 MISMATCH_PROVED flags — and no later document may restate it as 25/25 or
+        100%. Deviations A–D stay open and named; E, a count defect in these entry documents, was corrected by the next
+        already authorized governance update. **active_task = NONE**, V1 still paused at 0 eligible sessions with the F3
+        artifact still frozen (the record's closing section reads NEXT ACTION RECOMMENDATION, NOT EXECUTED), counts
+        unmoved at 868 Rust across 47 result lines / 291 UI in 9 files on the 17-step gate, 30 IPC commands,
+        assets/design-tokens.json byte-identical. Read the block above this one as the record of the round that wrote
+        it, not as the current position.
 Pricing / willingness-to-pay / pilot signal: DEFERRED_POST_MVP
 ```
 
@@ -786,6 +804,34 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 `10_AUDIT/SOURCE_PROMPTS/README.md`.
 
 ## Next work
+
+**`active_task: NONE`, and stage U1 is closed.** On 2026-10-08 the Architect delivered an independent visual
+acceptance record of the installed product and issued the word no agent round was allowed to issue:
+**`U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**, scoped by its own sentence to *"visual
+productization readiness for a controlled V1 external-user study, NOT GA quality, feature completeness, or public
+distribution approval"*, and characterised as *"an ARCHITECT waiver of specifically enumerated cosmetic/interaction
+residuals, not a claim that every Agent acceptance box passed."* The record is archived at
+`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt` (5,159 bytes, 52 lines, SHA-256
+`8634321c…36c619`) as an **authority record rather than an execution prompt** — the first document there that closes a
+track instead of opening one — and the round that filed it is `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`
+with the machine state at `BASELINE.yaml` `u1_execution.architect_final_verdict`.
+
+What that leaves for a human, and nothing else: the acceptance tally stands as delivered and guarded —
+**25 items, 23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED, with 2 `MISMATCH_PROVED` flags inside the 23 PASS** —
+and the verdict forbids restating it as 25/25 or 100 %. Four residuals stay enumerated rather than absorbed (Analyze's
+1024 metric-band track, Compare's section table sitting one scroll below the 1440 fold, the Gate baseline picker
+resetting on navigation, and Overview's Previous-analysis box never re-captured in R3), each carrying a phrase the
+record now forbids. **V1 is not resumed by a visual verdict**: it stays `IN_PROGRESS` / `RECRUITMENT_READY` with **0
+eligible external sessions**, the cohort build stays the frozen F3 artifact, and the record's own closing section is
+titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED` — it asks for a separate owner authority to re-freeze the cohort onto
+this product's artifact before participant #1, and for separate authorization to recruit, consent and moderate with the
+unsigned-build disclosure. L11 therefore stays carried: only real sessions close it. B1 / private beta / RC / GA /
+public release / signing / notarization / updater / commercial distribution remain **NOT AUTHORIZED**, and the
+open-source licence remains **PENDING OWNER CONFIRMATION**. Nothing below this block is a live pointer; each paragraph
+is what its own round knew.
+
+*(The rest of this section is the track's own record, kept dated and unrewritten. It was written while U1 was open, so
+its first line is now two rounds out of date:)*
 
 **`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE`, and its three rounds closed on 2026-10-07.** U1 was a **UI
 productization track**, not a product stage: it converged the desktop interface toward the frozen seven-screen

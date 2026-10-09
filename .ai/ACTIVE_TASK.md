@@ -11,6 +11,81 @@ last_updated: "2026-10-08"
 # ACTIVE TASK
 
 ```text
+NONE.  Stage U1 is CLOSED: PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS, on the Architect's own authority.
+V1 stays paused with 0 eligible external sessions, and this verdict does not resume it.
+
+THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each U1 round knew when it
+stopped, kept because this project does not rewrite history, and they are not instructions for the next round.
+
+On 2026-10-08 the Architect delivered an independent visual acceptance record —
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt, 5,159 bytes, 52 logical lines,
+0 CR, delivered SHA-256 8634321c5a289f68b83202c2016465fb21133afc7e23ca1d3a558e6bc036c619, stored blob
+f16f0e7ef1279883d62d909d5161d42ab756d74b, `cmp` clean against the delivered bytes. It is an authority record, not an
+execution prompt: it authorizes no work, and it is the first document in that directory that closes a track instead
+of opening one. Eight U1 units ran; four of them closed on `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` and none got
+past it, while the rest stopped at `READY_FOR_ARCHITECT_VISUAL_REVIEW` and `REQUIRES_ARCHITECT_POLISH_REVIEW` — the
+same ceiling in different words. This word came from outside them, which is why every `never_self_issued` list in
+BASELINE.yaml is left exactly as written.
+
+The verdict, with its scope sentence attached to it rather than below it:
+  U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS
+  Scope: visual productization readiness for a controlled V1 external-user study, NOT GA quality, feature
+         completeness, or public distribution approval.
+  "This is an ARCHITECT waiver of specifically enumerated cosmetic/interaction residuals, not a claim that every
+   Agent acceptance box passed."
+
+The tally is unchanged and is guarded by name: 25 items — 23 PASS, 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED, with 2
+MISMATCH_PROVED flags inside the 23 PASS items. The record re-counted it independently and says "DO NOT rewrite this
+tally to 25/25 or to 100%." Four residuals stay enumerated under that record's own heading
+`ACCEPTED DEVIATIONS / MUST NOT BE SILENTLY CLOSED`: (A) Analyze's metric band leaves the empty grey track at
+1024x720 — the round's FAIL box, now a U1 visual known issue and a V1 UX observation, prioritised from the first
+four participant reports or from layout impact, and NOT a mandatory pre-V1 engineering gate; (B) Compare's Section
+Changes first actual data row sits below the 1440x900 viewport while the aggregate counts and real deltas are above
+it — one-scroll-detail accepted for V1 only, which is not literal satisfaction of the stricter aspiration; (C) the
+Release Gate's baseline picker loses its draft selection on navigation — recorded as a study usability ambiguity,
+with the persisted GateRunDto carrying its own baselineSnapshotId, snapshotId and policySha256 so nothing saved is
+rewritten; (D) R3 never re-captured Overview's Previous-analysis panel — the round's NOT_VERIFIED box, where R2's
+images plus unchanged scoped-source behaviour are contextual evidence and not a substitute. None of the four may be
+closed by an agent. Deviation (E), a document defect in this very file, is corrected in the record block below with
+this update rather than by a stand-alone CI-loop commit, exactly as the verdict routed it.
+
+Nothing else in the governance state moved. P5 remains PASS_COMPLETE, Productization ENGINEERING_COMPLETE, G2 PASS,
+the product 0.6.0 MVP_CANDIDATE. V1 remains stage_status IN_PROGRESS / research_state RECRUITMENT_READY with 0
+eligible external sessions until separate authority is granted. B1 private beta, RC, GA, public release, signing,
+notarization, the updater and commercial distribution remain NOT_AUTHORIZED; the open-source licence stays
+PENDING_OWNER_CONFIRMATION; L11 stays CARRIED_FORWARD because a visual acceptance of the UI is not a research pass,
+and L15 stays CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER. This round changed no product byte, no test, no token, no
+schema and no Gate rule: 868 Rust across 47 result lines and 291 UI in 9 files on the 17-step gate, 30 IPC commands,
+assets/design-tokens.json at 94336906...14d4.
+
+The record's last section is titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED`, and this pointer treats that title as
+binding. It recommends, before participant #1, a SEPARATE V1 cohort re-freeze from the F3 research artifact
+(11419727517, NSIS 3,888,432 bytes, 182506f2...63d12) to this product's CI artifact 11573661113 (run 37828673549,
+#85, product head 41bb6a36...), with the bytes independently re-verified first, the F3 source and all historical
+immutable research records preserved, and no automatic start of participants. What this round did is the read the
+record conditions its own document changes on: it downloaded and hashed artifact 11573661113 again and confirmed
+every figure — NSIS FirmwareSight-0.6.0-windows-x86_64-nsis.exe 3,896,257 bytes,
+SHA-256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93, container 5,544,133 bytes 330e83af...4f3fb4,
+the container's internal SHA256SUMS verified entry by entry, toolchain.git_commit 41bb6a36..., the artifact not
+expired, and nothing installed or launched. One subtraction stated plainly: GitHub's `sha256_digest` is null for this
+artifact, so the second authority is the internal manifest plus the metadata commit, not a self-referential digest.
+What it did NOT do: touch V1_VALIDATION/, move `v1_execution.cohort_build_frozen`, amend the protocol, or begin
+recruitment. Re-verifying bytes is evidence about a candidate; it is not a stage transition, and the F3 artifact
+stays the frozen cohort build in every authority document until a separate authority says otherwise.
+
+So the pointer is NONE, and what is blocked below it is blocked on a person rather than on a task. The cohort
+re-freeze needs owner authority. Recruitment and consent need real firmware engineers and human moderation
+(V1_VALIDATION/sessions/README.md's intake path, §47/§48) — an agent cannot produce either, and inventing one is the
+single thing this track exists to forbid. Any UI follow-up, including A and C, needs its own prompt and is
+prioritised by the Architect from participant evidence. If you were sent here to "continue U1": it is closed, by the
+Architect's judgment of the uploaded evidence, and U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md §8 is the
+section that says why re-reading an artifact is not resuming V1. With active_task NONE, AGENTS.md 1 forbids creating
+business functionality or lifting the next track off the roadmap. Read, then stop.
+```
+
+## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do
+
+```text
 U1_UI_PRODUCTIZATION_CONVERGENCE — stage U1, a UI productization track, opened 2026-10-07.
 Authorized by 《FirmwareSight B1 — UI Productization / Design Convergence》 v1.0 — Architect prompt, delivered
 INLINE as message text (no file, so no owner-side byte stream to hash). The owner re-registered the track as
@@ -310,7 +385,8 @@ the U1P six-page baseline, the U1P-R1 before-images and this round's after-image
 open items listed above. There is no code round left for an agent to run.
 ```
 
-The eighth U1 round, closed on 2026-10-08, is the current word on this track:
+The eighth U1 round, closed on 2026-10-08, was the current word on this track until the Architect's final verdict
+record arrived the same day and closed it — read the NONE block at the top of this file for the live pointer:
 
 ```text
 U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 stays CLOSED_BY_U1P_R1.  U1P-V2-02 stays CLOSED_BY_U1P_R2.
@@ -356,10 +432,17 @@ says so. Three mutation records, described as the log has them: M2 removes the R
 T1 and T9), M3 hard-wires the stale rule to false (4 failed — T5 and T6 plus two pre-existing U1P tests, which is
 the proof the rule is load-bearing across rounds), and M1 is not a separate edit at all: page-local state IS
 f01eec1, so the RED run is the retention measurement and recording it again would count one measurement twice. Each
-measurement restored its files and re-checked their digests. Two self-corrections are in the report rather than smoothed over: a stray brace had made overview.test.tsx
-collect zero tests while a header asserted three of them had passed, and the historical U1P Compare baseline image
+measurement restored its files and re-checked their digests. Three self-corrections are in the report rather than smoothed over: a stray brace had made overview.test.tsx
+collect zero tests while a header asserted three of them had passed; the historical U1P Compare baseline image
 carries the Windows taskbar in its bottom 33 px, so the capture harness now refuses any grab whose client bottom
-falls below the work area and every R3 capture records client_inside_work_area: true.
+falls below the work area and every R3 capture records client_inside_work_area: true; and an earlier draft of the
+report's own §4 described the three mutations from memory and got them wrong — it made M2 the shell-ownership
+removal, M3 the ready-panel removal and M1 a do-nothing negative control, and claimed eight RED failures where the
+log reports seven, T3b having been measured in a second run because it was written after the first.
+(Dated correction, 2026-10-08: this sentence read "Two self-corrections" until the Architect's final verdict record
+routed the fix into the next already authorized governance update — deviation E, and not by a stand-alone CI-loop
+commit. The omitted third is the report §5's own item 3, and it is the round correcting its own reporting rather
+than a measurement of the product.)
 Product commit 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177 (12 files, +1,532/-58), pushed f01eec1..41bb6a36 as a
 normal fast-forward under the owner's written authorization for this round; no force, no rewrite, no tag, no
 release. Run 37828673549 (#85, attempt 1) is 10 of 10 read job by job from GitHub's own API. Windows artifact

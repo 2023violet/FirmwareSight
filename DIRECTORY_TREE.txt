@@ -170,6 +170,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_U1P_Final_Visual_Polish_Information_Hierarchy_v1.0.txt
 │   │   ├── FirmwareSight_U1P_R1_Overview_Gate_Subject_Consistency_v1.0.txt
 │   │   ├── FirmwareSight_U1P_R2_Overview_Pending_Selection_Evidence_Scope_v1.0.txt
+│   │   ├── FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt
 │   │   ├── FirmwareSight_U1P_R3_Final_Narrow_Corrective_and_Visual_Closure_v1.0.txt
 │   │   ├── FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt
 │   │   ├── FirmwareSight_V0_Batch_A_External_Validation_PROMPT_v1.0.txt
@@ -786,6 +787,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md
 │   ├── U1P_R1_SUBJECT_CONSISTENCY_PLAN.md
 │   ├── U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md
+│   ├── U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md
 │   ├── U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md
 │   ├── U1P_R3_NARROW_CORRECTIVE_PLAN.md
 │   ├── U1P_VISUAL_ACCEPTANCE_REPORT.md

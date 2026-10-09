@@ -10,9 +10,33 @@ last_updated: "2026-10-08"
 
 # Current State
 
-- Date: 2026-10-07
+- Date: 2026-10-08
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `U1_UI_PRODUCTIZATION_CONVERGENCE`.** A **UI productization track**, opened 2026-10-07 under
+- **Active task: `NONE`.** Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
+  issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
+  `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`; the machine state is `BASELINE.yaml`
+  `u1_execution.architect_final_verdict`. The scope sentence is part of the verdict, not commentary: **visual
+  readiness for a controlled V1 external-user study**, explicitly *not* GA quality, *not* feature completeness, *not*
+  public distribution approval. The acceptance tally stands as the record guards it — **25 items: 23 PASS, 1 FAIL,
+  1 NOT_VERIFIED, 0 NOT_CAPTURED, with 2 `MISMATCH_PROVED` flags inside the 23 PASS** — and the verdict's instruction
+  is binding on every later document: **"DO NOT rewrite this tally to 25/25 or to 100%."** Deviations A–D stay
+  enumerated and open (Analyze's 1024 band track, Compare's section table one scroll down, the Gate picker reset,
+  Overview's never-recaptured Previous-analysis box), each with a phrase it now forbids; deviation E, a count defect
+  in this file's sibling entry documents, is corrected by this update rather than by a stand-alone CI-loop commit.
+  **V1 stays paused** — `IN_PROGRESS` / `RECRUITMENT_READY`, 0 eligible external sessions — because the record's
+  closing section is titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED` and nothing here re-freezes the cohort: the F3
+  artifact remains the frozen research build in every authority document, and the newer product artifact's bytes were
+  re-downloaded and re-hashed as *evidence about a candidate* only. `P5` stays `PASS_COMPLETE`, Productization
+  `ENGINEERING_COMPLETE`, `G2 PASS`, product **`MVP_CANDIDATE`** at `0.6.0`. B1 / RC / GA / public release / signing /
+  notarization / updater / commercial distribution stay `NOT_AUTHORIZED`; licence `PENDING_OWNER_CONFIRMATION`;
+  **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. Counts unmoved: **868 Rust
+  across 47 result lines / 291 UI in 9 files**, gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
+  `94336906…14d4`. What is blocked is blocked on a person: the re-freeze needs owner authority, recruitment needs real
+  firmware engineers (§47/§48), and any UI follow-up needs its own prompt. Read `.ai/ACTIVE_TASK.md`'s top block, then
+  stop — AGENTS.md 1 forbids lifting the next track off the roadmap.
+- **Active task as of 2026-10-07, kept as what the first U1 round was authorized to do and where it stopped** (the
+  live pointer is the block above, and the dated blocks below carry the track through to its closure):
+  `U1_UI_PRODUCTIZATION_CONVERGENCE`. A **UI productization track**, opened 2026-10-07 under
   《FirmwareSight B1 — UI Productization / Design Convergence》 v1.0, delivered **inline** (no file, so
   `10_AUDIT/SOURCE_PROMPTS/` records it the way the three inline P0 precedents are recorded, and the agent's
   labelled transcription is archived at `U1_VALIDATION/00_authority/`). The owner renamed it `U1` because `B1` is
@@ -265,6 +289,62 @@ last_updated: "2026-10-08"
   and `MOCKUP_MATCHED` remain states no UI round may issue, no product source was touched after the captures, V1
   stays `IN_PROGRESS` / `RECRUITMENT_READY` at 0 eligible sessions with its frozen F3 cohort artifact untouched, and
   B1 stays not authorized.
+- **U1 is now CLOSED: `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`, on the Architect's authority, and the
+  active-task pointer is `NONE`.** The word arrived on 2026-10-08 as an independent visual acceptance record —
+  *FirmwareSight | Architect Independent Visual Acceptance Record*, delivered as
+  `C:\Users\16429\Downloads\FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt` and archived at
+  `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt`: **5,159 bytes, 52 logical
+  lines, 0 CR**, delivered SHA-256 `8634321c…36c619`, stored blob `f16f0e7ef1279883d62d909d5161d42ab756d74b` with the
+  same length and the same digest, `cmp` clean. It is the first document in that directory that closes a track
+  instead of opening one, and it is an **authority record, not an execution prompt** — it authorized no work.
+  The scope travels with the verdict and is part of it, not commentary: *"visual productization readiness for a
+  controlled V1 external-user study, NOT GA quality, feature completeness, or public distribution approval"*, and
+  *"an ARCHITECT waiver of specifically enumerated cosmetic/interaction residuals, not a claim that every Agent
+  acceptance box passed."* Eight units ran; four closed on `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` and none got
+  past it, so every `never_self_issued` list is left exactly as written — the word came from outside them, and the
+  record itself says *"R3 Agent did not and could not self-authorize this verdict."*
+  What the round that filed it did: re-read both cited runs from GitHub's own API rather than copying them
+  (`37828673549` #85 at head `41bb6a36` and `37846189269` #86 at head `4d25c85f`, both completed / success, 10 of 10
+  authoritative jobs; the run-list endpoint reports `attempt: null` for both, so the verdict's "attempt 1" is filed
+  as its claim while the job count and conclusion are the re-read part), re-hashed the delivered pack where it lies
+  (still 4,224,650 bytes, `4de07c76…831e52`), and **independently re-verified the artifact bytes the verdict's
+  recommendation turns on before writing them anywhere**: artifact `11573661113` re-downloaded from run #85, container
+  5,544,133 bytes `330e83af…4f3fb4` CRC-clean and not expired, NSIS `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`
+  **3,896,257 bytes `9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93`** — matching the verdict —
+  the container's internal `SHA256SUMS.txt` verified entry by entry and `artifact-metadata.json` reporting
+  `toolchain.git_commit = 41bb6a36…`; ten checks, all true, nothing installed or launched. One honest subtraction:
+  this endpoint returns `sha256_digest: null` for the artifact, as U1P-R1 found for its own, so the second authority
+  is the internal manifest plus the metadata commit rather than a self-referential digest.
+  What it did **not** do: the record's last section is titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED` and was
+  treated as binding. No cohort re-freeze, no protocol amendment, no touch to `V1_VALIDATION/`, no movement of
+  `v1_execution.cohort_build_frozen`, no recruitment. **The F3 artifact stays the frozen cohort build in every
+  authority document**; re-verifying newer bytes is evidence about a candidate, not a stage transition.
+  The tally is guarded by name — 25 items, **23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED**, 2
+  `MISMATCH_PROVED` flags inside the 23 PASS — and the verdict says **"DO NOT rewrite this tally to 25/25 or to
+  100%."** Four residuals stay enumerated under its own heading `MUST NOT BE SILENTLY CLOSED`, each with a phrase
+  it now forbids: **A** Analyze's metric band at 1024×720 (the round's FAIL box; now a U1 visual known issue and a V1
+  UX observation prioritised from the first four participant reports or from layout impact, **not** a mandatory
+  pre-V1 engineering gate), **B** Compare's Section Changes first data row below the 1440×900 fold (one-scroll-detail
+  accepted for V1 only, not literal satisfaction of the stricter aspiration), **C** the Gate baseline picker resetting
+  on navigation (a study usability ambiguity; the persisted `GateRunDto` carries its own `baselineSnapshotId`,
+  `snapshotId` and `policySha256`, so the reset rewrites no saved record), **D** Overview's Previous-analysis panel,
+  never re-captured in R3 (the round's NOT_VERIFIED box; R2's images are contextual evidence, not a substitute).
+  **E** was a defect in this file's own entry documents and the verdict routed it rather than excusing it: the
+  ordinal/paragraph-count note may be corrected *with the next already authorized governance update, no stand-alone
+  CI-loop commit* — which is this update, and it fixed `.ai/ACTIVE_TASK.md`'s "Two self-corrections" to the three the
+  R3 report's §5 actually lists, adding the omitted third (an earlier draft of §4 described the mutations and the RED
+  count from memory and got them wrong). Nothing was self-waived and no count moved: **868 Rust across 47 result
+  lines / 291 UI in 9 files**, 17-step gate, 30 IPC commands, `assets/design-tokens.json` byte-identical at
+  `94336906…14d4`, zero product paths in the diff. Evidence: `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`
+  (FS-U1P-R3-003), machine state at `BASELINE.yaml` `u1_execution.architect_final_verdict`, raw set under
+  `%TEMP%\FirmwareSight-U1-Verdict-Record-20261009T013609Z\`.
+  `P5` stays `PASS_COMPLETE`, `G2` stays `PASS`, the product stays **`MVP_CANDIDATE`** at `0.6.0`, V1 stays
+  `IN_PROGRESS` / `RECRUITMENT_READY` at **0** eligible external sessions, and B1 / RC / GA / public release /
+  signing / notarization / updater / commercial distribution stay `NOT_AUTHORIZED` with the licence
+  `PENDING_OWNER_CONFIRMATION`. **L11 stays `CARRIED_FORWARD` — a visual acceptance of the UI is not a research pass,
+  and only real sessions close it.** What is blocked now is blocked on a person, not a task: the re-freeze needs owner
+  authority, recruitment needs real firmware engineers and human moderation (§47/§48), and any UI follow-up — including
+  A and C — needs its own prompt and is prioritised by the Architect from participant evidence.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
   eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
   `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause

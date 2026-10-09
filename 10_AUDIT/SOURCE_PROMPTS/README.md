@@ -1145,7 +1145,7 @@ text with no source file; each says so in its own entry instead of standing for 
   parse-failure error code (`ERR-PARSE-2002`) was replaced by what the installed product actually answers
   (`ERR-FORMAT-0001`), with the original sentence kept quoted and unmodified beside the correction.
 
-## U1P-R3 Final Narrow Corrective and Visual Closure v1.0 — IN PROGRESS (2026-10-08)
+## U1P-R3 Final Narrow Corrective and Visual Closure v1.0 — EXECUTED, both findings closed the same day (2026-10-08)
 
 - File: `FirmwareSight_U1P_R3_Final_Narrow_Corrective_and_Visual_Closure_v1.0.txt` — 32,849 delivered bytes,
   745 logical lines, delivered sha256 `a185890edd043344a4332dfcc048fd63add1f8a5226dead4af373cc1ceab4de9`; stored as
@@ -1179,6 +1179,52 @@ text with no source file; each says so in its own entry instead of standing for 
 - Ceiling word: §17 permits the agent at most `U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT`. §18 keeps V1 at
   `IN_PROGRESS / RECRUITMENT_READY` with zero sessions and the F3 cohort artifact unchanged, and §19 ends with
   STOP and a recommendation, not a verdict.
+- Outcome, same day: executed to its stop condition. Product commit `41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177`
+  (12 paths, six of them UI source or UI tests) closed `U1P-V1-02` by making the comparison session shell state
+  with `diffId` left in-process, and `U1P-V1-01` by a local `.fillBand` class that fills the wrapped line instead
+  of touching the shared `Panel`. Run `37828673549` (#85, attempt 1) 10 of 10, artifact `11573661113` installed
+  with real input, 26 capture rows against the named P01–P10 / R01–R10 matrix, 25 adjudicated items at 23 PASS /
+  1 FAIL / 1 NOT_VERIFIED with 2 `MISMATCH_PROVED` flags, and the one ZIP at
+  `FirmwareSight_U1P_R3_Final_Visual_Review.zip` (4,224,650 bytes, SHA-256 `4de07c76…831e52`, 102 members) whose
+  README counts are summed from its own acceptance JSON and refused on disagreement. The evidence successor
+  `4d25c85f96a844a43b84a56f12a085d12b3f834d` is documentation only and ran `37846189269` (#86, attempt 1) 10 of 10.
+  Two findings were measured and deliberately **not** fixed — the Analyze metric band's unfilled track at 1024 and
+  the Gate's page-local baseline picker — and the agent's ceiling word stayed where §17 put it. The verdict that
+  §19 said it could not write is the next entry.
+
+## U1P-R3 Architect Independent Visual Acceptance Record — the verdict that closed U1 (2026-10-08)
+
+- File: `FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt` — 5,159 delivered bytes, 52 logical lines,
+  delivered SHA-256 `8634321c5a289f68b83202c2016465fb21133afc7e23ca1d3a558e6bc036c619`; stored as blob
+  `f16f0e7ef1279883d62d909d5161d42ab756d74b`, 5,159 bytes, **the same SHA-256**, and the archived copy compared
+  byte-for-byte against the delivered file (`cmp` clean). LF-only on arrival (0 CR), so nothing was normalised —
+  measured the same way as the entry above rather than assumed.
+- **This is not an execution prompt and is not filed as one.** It is an authority record: the Architect's own
+  independent review of the U1P-R3 pack, which the agent was forbidden to write. It issues
+  `U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`, scoped by its own sentence to *"visual
+  productization readiness for a controlled V1 external-user study, NOT GA quality, feature completeness, or
+  public distribution approval"*, and it says plainly that the record represents the Architect's judgement and
+  that the R3 agent neither did nor could self-authorize it.
+- What it binds the repository to keep: `DO NOT rewrite this tally to 25/25 or to 100%` — the acceptance JSON
+  stands at 25 items, 23 PASS, 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED, with 2 `MISMATCH_PROVED` flags inside the
+  23; deviation **D** repeats that R3's own `Previous analysis` box must not be marked PASS; and the five
+  independently re-counted pack facts (`4,224,650` bytes, `4de07c76…`, 102 entries, CRC pass, 101/101 manifest
+  entries valid) are the same figures the pack prints.
+- What it enumerates and keeps open rather than closing: **A** the Analyze metric band's empty track at
+  1024×720, classified as a U1 visual known issue / V1 UX observation and explicitly *not* a mandatory pre-V1
+  engineering gate; **B** the Compare Section Changes first data row below the 1440×900 fold, accepted as a
+  one-scroll-detail deviation **for V1 only**, with the record stating that this is not literal satisfaction of
+  the stricter first-viewport aspiration; **C** the Gate baseline picker losing its draft on navigation, with the
+  persisted `GateRunDto` carrying its own baseline, snapshot and policy so nothing saved is rewritten; **E** the
+  entry-document count note, permitted to be corrected **inside an already authorized governance update** and
+  expressly not by a stand-alone CI-loop commit — which is how this round handled it.
+- What it does **not** do: it does not authorize V1. Its last section is labelled
+  `NEXT ACTION RECOMMENDATION, NOT EXECUTED`, recommending a separate cohort re-freeze from the F3 research
+  artifact to `11573661113` before participant #1 and requiring independent byte re-verification before any
+  authority document changes. V1 stays `IN_PROGRESS / RECRUITMENT_READY` at zero eligible sessions; B1, RC, GA,
+  public release, signing, notarization, updater and commercial distribution stay `NOT_AUTHORIZED`; P5 stays
+  `PASS_COMPLETE` and the product stays `0.6.0 MVP_CANDIDATE`.
+
 
 ## Supersession note on the V0 Batch A activation entry
 

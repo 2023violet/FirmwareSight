@@ -262,18 +262,40 @@ P5 Productization            — PASS_COMPLETE (opened 2026-10-03 under executio
                               P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md, and the carried limitations at
                               P5_VALIDATION/P5_KNOWN_LIMITATIONS.md. This line is not G3, B1, RC1 or GA1, and
                               closing P5 did not make it one
-U1 UI Productization Convergence — IN_PROGRESS (opened 2026-10-07; prompt delivered inline, and the owner
-                              registered the track here as `U1` because the prompt's own title says `B1`, `B1`
-                              below is Private Beta, and both F3 §37 and V1 §40 record that identifier as NOT
-                              AUTHORIZED. A UI productization track, not a product stage and not a gate: it
-                              converges the desktop React shell toward the frozen seven-screen reference set in
-                              `assets/ui-mockups/` and changes no Core semantics, evidence class, schema,
-                              migration, storage contract, wire format, release identity rule, ADR-0028 or
-                              ADR-0029 conclusion. It authorizes no feature, dependency, cloud, account,
-                              telemetry, updater, signing, notarization, licence, pricing, B1, RC or GA. V1 stays
-                              `IN_PROGRESS / RECRUITMENT_READY` with its 0 eligible sessions and its frozen cohort
-                              build, `paused_for` this track. Evidence and the two governance documents are in
-                              `U1_VALIDATION/`)
+U1 UI Productization Convergence — CLOSED 2026-10-08 by the Architect: PASS_COMPLETE /
+                              VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS. Opened 2026-10-07; prompt delivered inline,
+                              and the owner registered the track here as `U1` because the prompt's own title says
+                              `B1`, `B1` below is Private Beta, and both F3 §37 and V1 §40 record that identifier as
+                              NOT AUTHORIZED. A UI productization track, not a product stage and not a gate: it
+                              converged the desktop React shell toward the frozen seven-screen reference set in
+                              `assets/ui-mockups/` and changed no Core semantics, evidence class, schema, migration,
+                              storage contract, wire format, release identity rule, ADR-0028 or ADR-0029 conclusion.
+                              Eight units ran on 2026-10-07 and 2026-10-08; each closed at an Architect-review word
+                              and none self-issued this verdict — the record says so itself ("R3 Agent did not and
+                              could not self-authorize this verdict"). The closing word arrived as an independent
+                              visual acceptance record, archived at
+                              `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt`
+                              (5,159 bytes, 52 lines, 0 CR, SHA-256 `8634321c…36c619`, blob `f16f0e7e…`) and
+                              recorded at `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`; it is an
+                              authority record, not an execution prompt, and it authorizes no work.
+                              Its scope is part of the word: visual readiness for a controlled V1 external-user
+                              study, NOT GA quality, NOT feature completeness, NOT public distribution approval —
+                              an Architect waiver of enumerated cosmetic/interaction residuals, not a claim that
+                              every acceptance box passed. The tally stays guarded: 25 items, 23 PASS / 1 FAIL /
+                              1 NOT_VERIFIED / 0 NOT_CAPTURED, 2 `MISMATCH_PROVED` flags, and the record forbids
+                              restating it as 25/25 or 100 %. Four residuals stay enumerated and open (Analyze's
+                              1024 metric-band track, Compare's section table one scroll below the 1440×900 fold,
+                              the Gate baseline picker resetting on navigation, Overview's never-recaptured
+                              Previous-analysis box). It authorizes no feature, dependency, cloud, account,
+                              telemetry, updater, signing, notarization, licence, pricing, B1, RC or GA, and it does
+                              **not** resume V1: V1 stays `IN_PROGRESS / RECRUITMENT_READY` with its 0 eligible
+                              sessions and its frozen F3 cohort build, `paused_for` this track, and the record's
+                              closing section reads `NEXT ACTION RECOMMENDATION, NOT EXECUTED` — the cohort
+                              re-freeze onto the product artifact needs a separate owner authority before
+                              participant #1. `active_task` is `NONE`. Evidence and the governance documents are in
+                              `U1_VALIDATION/`; machine state at `BASELINE.yaml`
+                              `u1_execution.architect_final_verdict`. This line is not G3, B1, RC1 or GA1, and
+                              closing U1 did not make it one
 B1 Private Beta
 RC1 Release Candidate
 GA1 General Availability

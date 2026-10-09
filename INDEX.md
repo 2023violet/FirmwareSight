@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 
@@ -135,8 +135,17 @@ NONE, which authorizes no next track: V1, B1, RC and GA each need a new architec
 **V1 own-artifact external validation opened on 2026-10-06**, the same day P5 closed, under its own architect
 prompt (delivered SHA-256 `48768ff0…ec10a0f`, 46,207 CRLF bytes; stored LF blob `d5e8d457…51774`, SHA-256
 `c62314fe…90c34e`, 44,510 bytes, 1,698 lines proven identical) — so the sentence quoted above is now the record
-of what F3 knew, and the live pointer moved twice after it: to `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`, then on 2026-10-07 to
-`U1_UI_PRODUCTIZATION_CONVERGENCE`. V1 is a research
+of what F3 knew, and the live pointer moved four times after it: to `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`, then on
+2026-10-07 to `U1_UI_PRODUCTIZATION_CONVERGENCE`, and back to **`NONE` on 2026-10-08** when the Architect's
+independent visual acceptance record closed U1 as
+**`PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`** (`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt`,
+5,159 bytes / 52 lines / 0 CR / SHA-256 `8634321c…36c619` / blob `f16f0e7e…`; record
+`U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`; state `BASELINE.yaml`
+`u1_execution.architect_final_verdict`). That closure grants nothing beyond itself — its scope sentence is *visual
+readiness for a controlled V1 external-user study*, explicitly not GA quality, not feature completeness, not
+distribution approval — and it leaves the guarded tally intact at **25 items, 23 PASS / 1 FAIL / 1 NOT_VERIFIED /
+0 NOT_CAPTURED with 2 `MISMATCH_PROVED` flags**, with the verdict's own instruction that no later document may restate
+it as 25/25 or 100 %. **V1 is not resumed by it**: `paused_for` still names U1. V1 is a research
 track at `IN_PROGRESS / RECRUITMENT_READY`, **paused for U1** with **0 eligible external sessions** against a minimum of 8: §5's
 branch, because no real participant exists and an agent must not become one. `V1_VALIDATION/` holds its sixteen
 protocol and register files with every count at zero; the cohort build is frozen to F3's CI artifact
@@ -151,9 +160,12 @@ signing, notarization, updater or feature is authorized by it.
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — `P5_PRODUCTIZATION`; G2 closed `PASS` on 2026-10-01 and P5 opened on
-   2026-10-03 under an execution prompt of its own, which is the only way a stage opens here. With a live
-   task the pointer still names exactly one stage: nothing in it authorizes V1, and no agent lifts a
+5. `.ai/ACTIVE_TASK.md` — **`NONE` since 2026-10-08**. The pointer has moved four times since G2 closed `PASS` on
+   2026-10-01, each move under a prompt or verdict of its own, which is the only way a stage opens or closes here:
+   `P5_PRODUCTIZATION` (opened 2026-10-03) → `NONE` (P5's Commit F3, 2026-10-06) →
+   `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION` (2026-10-06) → `U1_UI_PRODUCTIZATION_CONVERGENCE` (2026-10-07) → `NONE`
+   (the Architect's U1 visual acceptance record, 2026-10-08). With a live task the pointer names exactly one stage;
+   with `NONE` it authorizes none, and the file's top block names what is blocked and by whom. No agent lifts a
    later track off the roadmap
 5a. `G2_VALIDATION/G2_EXIT_CHECKLIST.md` and `G2_ENGINEERING_CLOSURE_REPORT.md` — the whole-MVP verdict
 5b. `POST_G2_E2E_REMEDIATION/` — the narrow remediation of the post-G2 real-desktop findings: what was
@@ -299,6 +311,21 @@ count moves, because the twenty-six installed capture rows it reports were taken
 `.ai/HANDOFF.md`, `BASELINE.yaml`, `README.md`, this ledger and the two baseline artifacts are the rest. The
 complete authoritative gate was re-run at this staged state and the Rust and UI counts came back unchanged from the
 product head — see the report's §7 and `u1_execution.u1p_r3_narrow_corrective.gates_at_product_head`.
+
+**897 lines and 770 entries** at the Architect final-verdict record (2026-10-08): 772 tracked paths, two added and
+none removed since `4d25c85` — `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt`
+(the delivered record, 5,159 bytes, 0 CR, byte-identical to the archived copy and to its own stored blob) and
+`U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md` (FS-U1P-R3-003, the round that filed it). Every other path
+in this commit is an existing document gaining a dated block: `.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`,
+`.ai/HANDOFF.md`, `.ai/README.md`, `README.md`, `BASELINE.yaml`, `06_DELIVERY/06_STAGE_GATES.md` and the prompt
+register. **Zero product paths**: nothing under `apps/`, `crates/`, `fixtures/`, `golden/`, `assets/`, `schemas/`,
+`migrations/`, `scripts/` or `.github/`, no lockfile, no `tauri.conf.json`, no `deny.toml`, and
+`assets/design-tokens.json` stays `94336906…14d4`. The verdict closes stage U1 on the Architect's authority, so this
+is the record of a decision and not a new round of UI work; the counts a docs-only head must hold still are **868
+Rust / 291 UI in 9 files**, and the complete gate re-run at this staged state returns **17 of 17 steps with no `SKIP`
+and no `FAIL`** — the figures are read out of that log into `u1_execution.architect_final_verdict`, not carried over
+from the round above. Because these two paths are the only additions, writing sentences into files that were already
+tracked moves neither the 897-line tree nor the 770-entry manifest.
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 
@@ -536,6 +563,7 @@ disk, in a checksum domain that is deliberately not this one.
 | `U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md` | U1P-R2 Corrective Report — pending-selection evidence scope, the §7 identity erratum, twenty-one captures and U1P-V2-02 disposition (FS-U1P-R2-002) |
 | `U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md` | U1P-R3 Narrow Corrective Plan — Compare lifecycle and the 1024 band contract, written before the code (no `doc_id` front matter; it is cited as the plan by FS-U1P-R3-002) |
 | `U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md` | U1P-R3 Final Narrow Corrective Report — Compare retention, the 1024 band, twenty-five acceptance items and the pack that counts itself (FS-U1P-R3-002) |
+| `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md` | U1 Architect Final Verdict Record — the Architect's independent visual acceptance, its scope sentence, the tally guard, deviations A–E and the recommendation it did not execute (FS-U1P-R3-003) |
 | `V0_VALIDATION/README.md` | FirmwareSight V0 Validation Workspace |
 | `V0_VALIDATION/V0_EXECUTION_PROVENANCE.md` | V0 Execution Provenance |
 | `V0_VALIDATION/V0_PLAN.md` | V0 Plan |

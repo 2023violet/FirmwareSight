@@ -1,0 +1,52 @@
+FirmwareSight | Architect Independent Visual Acceptance Record
+Date: 2026-10-08 (user local date)
+Review scope: U1P-R3 exact installed Windows visual evidence + GitHub CI/commit read-back
+
+VERDICT
+U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS
+Scope: visual productization readiness for a controlled V1 external-user study, NOT GA quality, feature completeness, or public distribution approval.
+This is an ARCHITECT waiver of specifically enumerated cosmetic/interaction residuals, not a claim that every Agent acceptance box passed.
+
+ENGINEERING AUTHORITY
+Product commit: 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177
+Product CI: 37828673549, #85, attempt 1, 10/10 success
+Evidence successor: 4d25c85f96a844a43b84a56f12a085d12b3f834d
+Evidence CI: 37846189269, #86, attempt 1, 10/10 success
+Remote main during review: 4d25c85f96a844a43b84a56f12a085d12b3f834d
+Successor diff: docs/governance/baseline only.
+
+ZIP AUTHORITY
+File: FirmwareSight_U1P_R3_Final_Visual_Review.zip
+Size: 4,224,650 bytes
+SHA-256: 4de07c7669574955493f2fd31594539422662415c14d8c5d378e2126ac831e52
+Zip entries: 102; CRC pass; SHA256SUMS: 101/101 valid (manifest excluded by design).
+Acceptance JSON (independently re-counted): 25 items, 23 PASS, 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED; 2 MISMATCH_PROVED flags inside the 23 PASS items.
+DO NOT rewrite this tally to 25/25 or to 100%.
+
+ARCHITECT DIRECT IMAGE REVIEW
+1. Compare Ready 1440 / 1024: user-facing Ready to compare explanation present; no misleading fabricated diff.
+2. Compare Result 1440: real Sections/Symbols added/removed/changed counts and nonvolatile/RAM delta visible above fold. The Section Changes table heading begins around y=766, column headings near y=865, first actual per-section data below 900px; ONE-SCROLL DETAIL exception ACCEPTED for V1. This is NOT literal satisfaction of the stricter first-data-row-before-fold aspiration.
+3. Compare after same-process navigation: genuine report remains visible. Cross-process retention is correctly NOT claimed; diffId stays ephemeral.
+4. Overview 1024 / 1056: old fourth-cell-like grey void removed, three capability cells remain truthful. Readiness visible.
+5. Overview matched, pending selection and policy mismatch: separate scoped statuses; no stale current PASS manufactured.
+6. Analyze success 1440: real sections table in first viewport. Parse failure state correctly identifies current failure and previous retained result.
+7. Release Gate 1440: BLOCK/UNKNOWN actual rule findings readable. Historical run is identified by stored facts; frontend picker is for new runs.
+8. History 1440: focused categories and rows; current dataset has not selected details by default, but detail actions exist.
+
+ACCEPTED DEVIATIONS / MUST NOT BE SILENTLY CLOSED
+A. Analyze metric band at 1024x720 has a conspicuous empty grey track (Agent acceptance box FAIL). It does not hide primary buttons or falsify evidence. Classify U1 visual known issue / V1 UX observation; prioritize based on first four participant reports or layout impact, not a mandatory pre-V1 engineering gate.
+B. Compare Section Changes FIRST actual data row falls below the 1440x900 viewport. Aggregate section-change counts and genuine deltas are visible. Accept one-scroll-detail deviation for V1 only.
+C. Release Gate baseline picker loses its draft selection when navigating away. Persisted historical GateRunDto carries its actual baselineSnapshotId, snapshotId and policySha256, so the picker reset does not rewrite that saved record. Record this usability ambiguity for the study. Do not imply the picker is a historical input transcript.
+D. R3 itself does not recapture Overview's Previous-analysis panel (NOT_VERIFIED R3 box); previously supplied R2 images plus unchanged scoped-source behavior are contextual evidence, not a substitute for a new R3 screenshot. Do not mark that R3 box PASS.
+E. .ai/ACTIVE_TASK.md ordinal/paragraph-count note may be corrected with the next ALREADY AUTHORIZED governance update; no stand-alone CI-loop commit.
+
+GATE INTERLOCK
+P5 remains PASS_COMPLETE. Product remains 0.6.0 MVP_CANDIDATE.
+V1 remains IN_PROGRESS / RECRUITMENT_READY, 0 eligible external sessions until separate authority is granted.
+B1 Private Beta, RC, GA, public release, signing/notarization, updater and commercial distribution remain NOT_AUTHORIZED.
+R3 Agent did not and could not self-authorize this verdict; this record represents Architect's judgment of the uploaded evidence.
+
+NEXT ACTION RECOMMENDATION, NOT EXECUTED
+Authorize a separate V1 cohort re-freeze / research protocol amendment, BEFORE participant #1, from the old F3 research artifact to R3 product CI artifact 11573661113 (Run #85, product SHA 41bb6a36...). The installed NSIS reported by the pack is 3,896,257 bytes, SHA-256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93; independently re-verify downloaded bytes before updating any authority documents. Preserve the F3 source and all historical immutable research records. Do not automatically begin V1 participants; require separate owner authorization for recruitment and controlled private transfer, with unsigned build disclosure and consent.
+
+END

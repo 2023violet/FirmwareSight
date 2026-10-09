@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 # AI Entry Point
@@ -142,7 +142,23 @@ recommendation `V1_INCOMPLETE_INSUFFICIENT_SAMPLE`, and the next move is **human
 (§47/§48). `P5` stays `PASS_COMPLETE`, `G2` stays `PASS`, the product stays `MVP_CANDIDATE` at `0.6.0`, L11 stays
 `CARRIED_FORWARD` (the row V1 exists to answer), and the counts held at **868 Rust / 225 UI in 8 files** on the
 same 17-step gate because §45 requires them not to move)` ·
-`active_task: U1_UI_PRODUCTIZATION_CONVERGENCE` (the UI productization track that ran on 2026-10-07: the first round closed at first round, and its continuation round installed the CI-built product and inspected it, so **U1 is `READY_FOR_ARCHITECT_VISUAL_REVIEW`** with one U1-V2 finding open and unwaived; **V1 is paused with every state field intact**, `v1_execution.paused_for` naming this track) · open-source licence `PENDING OWNER CONFIRMATION` ·
+`active_task: NONE` — **stage U1 is CLOSED as `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS` on the
+Architect's own independent visual acceptance record of 2026-10-08** (`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt`,
+5,159 bytes / 52 lines / 0 CR / SHA-256 `8634321c…36c619` / blob `f16f0e7e…`, archived and registered as an authority
+record rather than an execution prompt; verdict record `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`;
+machine state `BASELINE.yaml` `u1_execution.architect_final_verdict`). The scope is part of the word: visual readiness
+for a controlled V1 study, **not** GA quality, not feature completeness, not distribution approval. The tally is
+guarded verbatim — 25 items, 23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED, 2 `MISMATCH_PROVED` flags — and
+**no later document may restate it as 25/25 or 100%**. Deviations A–D stay open and enumerated; E, a count defect in
+these entry documents, was corrected by this update exactly as the record routed it. **V1 is not resumed by this**:
+`paused_for` still names U1, the F3 artifact is still the frozen cohort build, 0 eligible external sessions, and the
+record's closing section is `NEXT ACTION RECOMMENDATION, NOT EXECUTED` — this round only re-downloaded and re-hashed
+the newer artifact's bytes (NSIS 3,896,257 bytes `9a51e86a…`) because the record conditions document changes on that
+read. Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
+stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
+and its continuation round installed the CI-built product and inspected it, so **U1 was
+`READY_FOR_ARCHITECT_VISUAL_REVIEW`** with one U1-V2 finding open and unwaived; V1 paused with every state field
+intentionally intact)* · open-source licence `PENDING OWNER CONFIRMATION` ·
 `V0: NON_BLOCKING_USER_FEEDBACK_TRACK, 0 / 8 honest zero` ·
 `Pricing/commercial research: DEFERRED_POST_MVP`.
 
