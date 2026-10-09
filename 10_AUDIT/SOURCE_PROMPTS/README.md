@@ -1226,6 +1226,41 @@ text with no source file; each says so in its own entry instead of standing for 
   `PASS_COMPLETE` and the product stays `0.6.0 MVP_CANDIDATE`.
 
 
+## V1 Cohort Re-freeze / Execution Authorization v1.0 — executed as `V1_COHORT_REFREEZE` (2026-10-08)
+
+- **File: none (delivered inline)** — the authorization was supplied as chat message text, the same treatment the P0,
+  P1-A0 design-addendum, P2, P3, P4, G2
+  addendum, V0 Batch A and U1 v1.0 prompts received: no SHA-256 is recorded for a delivered file, because no delivered
+  file existed. Inventing a digest for a message is not provenance.
+- Title as delivered: 《FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0》. **Executed as
+  `V1_COHORT_REFREEZE`**, the only grant in it (§三). It is an *authorization to move a research build identity*, and it
+  explicitly withheld recruitment, sessions, installs and external distribution (§四, §六), so it opens no track and
+  closes none: `active_task` was `NONE` when it arrived and is `NONE` now.
+- Where the content lives instead: `V1_VALIDATION/00_authority/SOURCE_PROMPT_V1_REFREEZE_transcription.md` — an
+  **agent transcription of the delivered message**, 142 lines, 5,366 bytes, 0 `CR`, LF-only with a final newline,
+  SHA-256 `88ef07bd2ec830b51e13f5a1335a5aaa6ed561d417310604fdf57784aca636a2`, Git blob
+  `b5c68606141b1ea01baf37fe44ff24866bdd85b6`. That is the digest of the transcription and **must not be cited as the
+  authorization's digest**: the transcription quotes the owner's own section headings and requirements but is the
+  agent's rendering of a chat message, not a received byte stream. It is filed inside `V1_VALIDATION/00_authority/`
+  rather than here, because it is research-round authority and this register is where *delivered files* live — the
+  same placement U1's transcription got in `U1_VALIDATION/00_authority/`.
+- What it changed, in one line: V1's cohort build moved from run `37475580080`'s artifact `11419727517`
+  (NSIS 3,888,432 bytes, `182506f2…63d12`) to run `37828673549`'s artifact `11573661113` at product head
+  `41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177` (NSIS 3,896,257 bytes,
+  `9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93`), both downloaded and hashed again before either
+  was written into an authority document, and the first freeze preserved and dated superseded rather than deleted.
+  Everything else the authorization named stayed: 0 eligible external sessions, M1–M6 `NOT_MEASURED`, the metric
+  operations/denominators/thresholds, U1's verdict and its guarded tally, P5 `PASS_COMPLETE`, product `0.6.0
+  MVP_CANDIDATE`, B1/RC/GA `NOT_AUTHORIZED`. Record: `V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md`; state:
+  `BASELINE.yaml` `v1_execution.cohort_build_refreeze` / `cohort_build_state`.
+- Note on what this register does **not** hold for this round: the authorization named its two builds by identifier,
+  and §二 required them to be verified rather than trusted. The verification outputs (both containers, extracted
+  payloads, internal `SHA256SUMS.txt` checks, `artifact-metadata.json` toolchain rows, both runs read job by job, and
+  the F3→candidate product delta) are machine evidence and live outside Git in the re-freeze evidence root, alongside
+  the installers themselves — §1's rule that a research build is never committed still holds, so this register points
+  at the record and the record points at the root.
+
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

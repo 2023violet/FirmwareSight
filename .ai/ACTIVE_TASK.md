@@ -12,10 +12,33 @@ last_updated: "2026-10-08"
 
 ```text
 NONE.  Stage U1 is CLOSED: PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS, on the Architect's own authority.
-V1 stays paused with 0 eligible external sessions, and this verdict does not resume it.
+V1's cohort build is now REFROZEN_TO_U1_CANDIDATE (owner authority, later on 2026-10-08; see the block below the
+pointer note). V1 itself stays paused-at-recruitment with 0 eligible external sessions — a build identity is not a
+verdict, and re-freezing the instrument measures nothing.
 
-THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each U1 round knew when it
+THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
 stopped, kept because this project does not rewrite history, and they are not instructions for the next round.
+
+On 2026-10-08, after the pointer had returned to NONE from U1's closure, the owner delivered
+《FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0》 inline, granting only V1_COHORT_REFREEZE.
+It moved the formal research build off P5 Commit F3's artifact 11419727517 (NSIS 3,888,432 bytes, 182506f2...63d12,
+run 37475580080 at head 08fdfcb7) onto the build the Architect's visual acceptance was actually granted over:
+run 37828673549 (#85, attempt 1, 10 of 10 jobs), product head 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177, artifact
+11573661113, container 5,544,133 bytes (330e83af...4f3fb4), NSIS FirmwareSight-0.6.0-windows-x86_64-nsis.exe
+3,896,257 bytes, SHA-256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93, CLI companion 1,668,149
+bytes (924f3a71...1d8373), payload 5026c47b...0ddaae, version 0.6.0, unsigned, not expired, GitHub expiry
+2026-10-22T19:18:25Z. Both builds were downloaded and hashed again before anything was written about either; the F3
+block in BASELINE.yaml is left intact and dated as superseded; and no session, install, recruitment or external
+distribution was started. Record: V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md; protocol: V1_VALIDATION/README.md.
+The swap is defensible rather than convenient because F3→41bb6a36 is 44 product paths, all of them the presentation
+layer (42 under apps/desktop/ui/src, plus ipc.rs's additive MainWindowPage::Overview variant and two window-title
+strings, plus that test): crates/, assets/, schemas/, fixtures/, golden/, .github/, scripts/, 09_ADR/ and templates/
+are byte-identical subtrees, the same 30 IPC commands are registered at both heads, both runs report 868 Rust tests
+across 47 result lines, and both lockfile digests match — so not one M1–M6 metric, denominator or threshold is
+touched, while the interface a participant reads genuinely changed, which is the reason the accepted build and the
+frozen build have to be the same bytes. The docs-only head's own artifact 11592690212 (run 37874177649, #87) is
+named here only to be refused: §二 forbids treating a rebuild, a documentation package or any other product as the
+frozen research version.
 
 On 2026-10-08 the Architect delivered an independent visual acceptance record —
 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt, 5,159 bytes, 52 logical lines,
@@ -72,15 +95,22 @@ artifact, so the second authority is the internal manifest plus the metadata com
 What it did NOT do: touch V1_VALIDATION/, move `v1_execution.cohort_build_frozen`, amend the protocol, or begin
 recruitment. Re-verifying bytes is evidence about a candidate; it is not a stage transition, and the F3 artifact
 stays the frozen cohort build in every authority document until a separate authority says otherwise.
+Dated later the same day, in this file's own words: a separate authority did say otherwise. The paragraph above is
+kept as the verdict recording round's own boundary — that round executed nothing, and the block at the top of this
+fence is the round the owner authorized to do it. The two are different rounds on different authorities, which is why
+the verdict's section title reads `NEXT ACTION RECOMMENDATION, NOT EXECUTED`.
 
-So the pointer is NONE, and what is blocked below it is blocked on a person rather than on a task. The cohort
-re-freeze needs owner authority. Recruitment and consent need real firmware engineers and human moderation
-(V1_VALIDATION/sessions/README.md's intake path, §47/§48) — an agent cannot produce either, and inventing one is the
-single thing this track exists to forbid. Any UI follow-up, including A and C, needs its own prompt and is
+So the pointer is NONE, and what is blocked below it is blocked on a person rather than on a task. Recruitment and
+consent need real firmware engineers and human moderation (V1_VALIDATION/sessions/README.md's intake path, §47/§48) —
+an agent cannot produce either, and inventing one is the single thing this track exists to forbid. The build a session
+will run is now named and verified, and its bytes still have to be privately archived before 2026-10-22T19:18:25Z,
+which is an owner action no agent may take. Any UI follow-up, including A and C, needs its own prompt and is
 prioritised by the Architect from participant evidence. If you were sent here to "continue U1": it is closed, by the
 Architect's judgment of the uploaded evidence, and U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md §8 is the
-section that says why re-reading an artifact is not resuming V1. With active_task NONE, AGENTS.md 1 forbids creating
-business functionality or lifting the next track off the roadmap. Read, then stop.
+section that says why re-reading an artifact is not resuming V1. If you were sent here to "start V1": the re-freeze
+authorized the instrument and withheld the cohort — §三's allowed list has no recruitment, no session, no install and
+no distribution in it, and §五 requires the session count to still read 0 when this round ends. With active_task NONE,
+AGENTS.md 1 forbids creating business functionality or lifting the next track off the roadmap. Read, then stop.
 ```
 
 ## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do
@@ -547,6 +577,14 @@ five protocol documents. If no real session has happened since the activation co
 agent to do — recruitment, consent and moderation are the human operator's (§48) — and writing a session file
 for a session that did not happen is the one thing this track exists to forbid. When a real transcript or set of
 notes arrives, follow V1_VALIDATION/sessions/README.md's sixteen-step intake path.
+
+DATED 2026-10-08, ADDED TO A RECORD THAT IS NOT OTHERWISE CHANGED: "the frozen F3 build" and the artifact
+11419727517 / 182506f2...63d12 identification above are what this pointer knew on 2026-10-06, and they are kept as
+written. The owner's V1 Cohort Re-freeze / Execution Authorization v1.0 then moved the cohort build to artifact
+11573661113 of run 37828673549 at product head 41bb6a36, with F3's block preserved and dated as superseded rather
+than rewritten. Read the build a session runs from V1_VALIDATION/README.md, not from this record; read the reason
+from V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md. Nothing else above moves: the build identity changed, and
+sessions, metrics, thresholds and every forbidden list did not.
 ```
 
 ## The P5 closure sentence, kept as the record of 2026-10-06

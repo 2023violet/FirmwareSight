@@ -2268,3 +2268,70 @@ as the Architect left them. The owner's store came back byte-exact with `OWNER_S
 the seventeen application-data entries identical; the round uninstalled as the machine was found, and the
 broad "delete the application data" option was read unticked and never touched. V1 stays paused at
 `RECRUITMENT_READY` with zero eligible sessions and its frozen cohort untouched; B1 stays not authorized.
+
+## V1 re-freeze (2026-10-08) — a build identity moved, and the dated supersession note is the whole method
+
+**A recommendation is not an authority, and the round that reads it is not the round that may act on it.** U1's
+closure came as an *Architect independent visual acceptance record*, and its last section was titled
+`NEXT ACTION RECOMMENDATION, NOT EXECUTED`: it asked for a separate owner authority to move V1's frozen cohort build
+off P5 Commit F3's installer onto the bytes the acceptance was actually granted over. The recording round obeyed that
+title — it re-downloaded and re-hashed the candidate artifact because the record conditioned document changes on the
+read, and wrote nothing into `V1_VALIDATION/`. The owner then delivered
+《FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0》 inline on the same date, granting only
+`V1_COHORT_REFREEZE`, and only that message made the move legitimate. Two rounds, two authorities, one pointer.
+
+**The rule that decided it was V1's own §32, not a preference about which build is newer.** *"Formal cohort uses one
+frozen artifact"*, and *"Any product code change creates a new cohort version and NEW CI artifact."* U1 changed product
+code — 44 product paths between the two heads — so freezing the cohort on F3 would have studied a build the visual
+acceptance does not describe and the product no longer is. V1 exists to answer L11 about the interface a real
+participant sees; measuring an abandoned interface would have produced a number nobody could act on.
+
+**What was verified before it was written, because the bytes came from the network and not from memory.** Both
+artifacts were downloaded again and hashed from the downloaded bytes: F3's container 5,536,303 B /
+`40cb5c99…37850e` with NSIS 3,888,432 B / `182506f2…63d12`, and the candidate's container 5,544,133 B /
+`330e83af…4f3fb4` with NSIS 3,896,257 B / `9a51e86a…c87d93`, each checked entry by entry against its own
+container-internal `SHA256SUMS.txt`, each with `artifact-metadata.json` reporting `toolchain.git_commit` equal to the
+head that build is named for, neither expired. GitHub's own `sha256_digest` is **`null` for both**, so it is stated as
+absent rather than borrowed: the second authorities are the internal manifest and the metadata commit. The first
+authorities for CI health are the two runs read job by job — `37475580080` (#72) and `37828673549` (#85), each
+attempt 1, each **10 of 10**.
+
+**The delta was measured by subtree tree OID, which is what made the swap safe to state in public.** `crates/`,
+`assets/` (including `design-tokens.json` at `94336906…14d4`), `schemas/`, `fixtures/`, `golden/`, `.github/`,
+`scripts/`, `09_ADR/` and `templates/` are **byte-identical** between the two heads, `generate_handler!` registers the
+same **30** commands at both with nothing added or removed, both runs report **868 Rust tests across 47 result lines**,
+and `Cargo.lock` / `pnpm-lock.yaml` digests match. So no M1–M6 operation, denominator or threshold moved — while the
+UI suite grew **225 in 8 files → 291 in 9 files**, which is U1's own test contract riding on the interface change and
+not a research metric. The Rust-side product delta is one additive enum variant (`MainWindowPage::Overview`) and two
+window-title strings; the variant **names**, which are the wire form, are unchanged.
+
+**The seductive wrong answer was enumerated in order to refuse it.** HEAD's own CI also produced a Windows artifact —
+`11592690212` from run `37874177649` (#87) — and it is named in the substitution ban list precisely because a reader
+could mistake "the newest package" for "the frozen research build". It packages a documentation commit. So is the
+superseded F3 artifact `11419727517` now on that list, next to F2R1's `11397938806`, a local rebuild, `cargo run`, the
+Vite dev server, and any product head that is not `41bb6a36`.
+
+**The method for moving a frozen value in this repository is a dated supersession key, never an edit.** Every byte
+count and digest in `v1_execution.cohort_build_frozen` still reads what V1's activation wrote; the round appended
+`superseded_on`, `superseded_by`, `supersession_reason`, `history_status` and — for the first time anywhere — the F3
+container's own digest, which activation had recorded only as a size. A parallel `cohort_build_refreeze` block carries
+the new identity, and `product_counts_required_unchanged` keeps `ui: 225 / ui_files: 8` as the activation head's guard
+while a nested `refrozen_guard` names the live one. History stays readable; the current answer stays single-valued.
+Nothing was deleted, and no session count, metric or threshold was touched.
+
+**One hazard was surfaced instead of smoothed over.** Both installers live outside Git — §1 forbids committing them —
+and GitHub expires the artifacts on **2026-10-20** (F3) and **2026-10-22** (the cohort build). If neither copy is
+deliberately archived, the frozen research build becomes unrecoverable within a fortnight and a cohort cannot run
+against bytes nobody can hand out. Private archival is an owner action, it is listed first among the round's outstanding
+human actions, and this round claims no long-term archive exists.
+
+`868 Rust across 47 result lines / 291 UI in 9 files`, gate **17 of 17 with no SKIP and no FAIL**, 30 IPC commands,
+`assets/design-tokens.json` byte-identical, `scripts/verify_baseline_artifacts.py` **RESULT PASS** at **900 tree lines
+and 772 sum entries over 774 tracked paths** — two paths added (`V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` and
+`V1_VALIDATION/00_authority/SOURCE_PROMPT_V1_REFREEZE_transcription.md`) and none removed, no product path in the diff.
+`V1 = IN_PROGRESS / RECRUITMENT_READY`, `COHORT_BUILD = REFROZEN_TO_U1_CANDIDATE`, `ELIGIBLE_EXTERNAL_SESSIONS = 0`,
+M1–M6 `NOT_MEASURED`, `U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS` with its tally guard intact,
+`P5 = PASS_COMPLETE`, product `0.6.0 MVP_CANDIDATE`, `B1 / RC / GA NOT_AUTHORIZED`, licence `PENDING OWNER
+CONFIRMATION`, `active_task = NONE`. Note on this file's own coverage: the two UI rounds before this one and the
+verdict record are not given sections here — they are dated in `BASELINE.yaml` and in their own reports — and this
+section is not a backfill of them.

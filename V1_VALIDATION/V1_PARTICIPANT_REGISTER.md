@@ -42,7 +42,7 @@ participants excluded                  = 0
 | Quality flag | `VALID` / `VALID_WITH_INTERVENTION` / `DISCOVERY_OUT_OF_COHORT` / `EXCLUDED_PROTOCOL_CONTAMINATED` / `EXCLUDED_INTERNAL` / `EXCLUDED_NO_CONSENT` / `EXCLUDED_NO_REAL_ARTIFACT` |
 | Consent | `YES` (formal sessions require it before the session starts) |
 | Recording | `AUDIO` / `SCREEN` / `VIDEO` / `NOTES_ONLY` |
-| Build received | artifact id `11419727517`, head `08fdfcb`, **and the SHA of the installer bytes that participant actually used** |
+| Build received | artifact id `11573661113`, head `41bb6a36` (the cohort build from 2026-10-08; the first frozen build `11419727517` / `08fdfcb` is superseded and must not be handed out), **and the SHA of the installer bytes that participant actually used** |
 
 Never recorded here: name, email, employer or customer identity, private repository or remote, device serial,
 absolute private paths, firmware bytes, MAP content, source, or confidential release information (§10, §50).

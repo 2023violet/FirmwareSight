@@ -30,7 +30,8 @@ Applied in order, and the order matters because each step can invalidate the nex
 
 1. validate consent (including the recording permission actually given);
 2. validate Participant ID and §7 eligibility, including the internal-author and pre-briefed exclusions;
-3. validate the product build against the frozen artifact — head `08fdfcb`, artifact id `11419727517`, and the
+3. validate the product build against the frozen artifact — head `41bb6a36`, artifact id `11573661113`
+   (refrozen 2026-10-08; the first frozen build, head `08fdfcb` / artifact `11419727517`, is superseded), and the
    installer SHA the participant actually ran;
 4. extract the timeline;
 5. extract the first path for T1/T3/T4/T6/T7;

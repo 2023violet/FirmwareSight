@@ -37,24 +37,55 @@ formal cohort (§32). Nothing in this directory authorizes a next stage: even a 
 
 ## The build under test is frozen, and it is a specific set of bytes
 
+**REFROZEN 2026-10-08** under the owner's inline *V1 Cohort Re-freeze — Execution Authorization v1.0*. The cohort
+build is the U1-accepted product build, the exact bytes the Architect's visual acceptance was granted over. Record:
+`V1_COHORT_REFREEZE_RECORD.md`. The previous frozen build is preserved below and is **not** the cohort build any more.
+
 | Field | Value |
 |---|---|
-| CI run | `37475580080` (P5 Commit F3's run, #72, attempt 1, 10 of 10 jobs) |
-| Head | `08fdfcb710f78f8084bfcf614dc508c8b6e7e25b` |
+| CI run | `37828673549` (U1P-R3's product run, #85, attempt 1, 10 of 10 jobs, read job by job 2026-10-08) |
+| Head | `41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177` |
 | Artifact name | `FirmwareSight-0.6.0-windows-x86_64` |
-| GitHub artifact id | `11419727517` |
-| Artifact ZIP container | 5,536,303 bytes — **not** the installer size |
-| NSIS installer as delivered | `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`, built name `FirmwareSight_0.6.0_x64-setup.exe`, 3,888,432 bytes, SHA-256 `182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12` |
-| CLI companion | `FirmwareSight-0.6.0-windows-x86_64-cli-fwsight.zip`, 1,668,153 bytes, SHA-256 `76bf7d0c1c4acb0f64a5fdda75b036ec658f272086b2283ce0ba56d3543f7ddd` |
-| Internal index | `SHA256SUMS.txt` — `sha256sum -c` over the downloaded set returned both lines `OK`, exit 0 |
-| Payload executable identity | `target/release/firmwaresight-desktop.exe`, `payload_sha256` `6598880dd8dde479d9326e678d0c22eddfc859a6c8cbc98ce7049b8f3c310646`, `installer_version_resource` `0.6.0` |
-| Toolchain | rustc 1.98.1 (48a229cea 2026-09-01), cargo 1.98.1, tauri-cli 2.12.1, node v24.21.0, pnpm 12.7.0, runner `win25-vs2026` X64 |
-| Signing | **unsigned** — no certificate, no signature, no notarization |
+| GitHub artifact id | `11573661113` |
+| Artifact ZIP container | 5,544,133 bytes, SHA-256 `330e83af75db705b2acae6ff559baf0e863d7766947bc21240488861cd4f3fb4` — **not** the installer size |
+| NSIS installer as delivered | `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`, built name `FirmwareSight_0.6.0_x64-setup.exe`, 3,896,257 bytes, SHA-256 `9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93` |
+| CLI companion | `FirmwareSight-0.6.0-windows-x86_64-cli-fwsight.zip`, 1,668,149 bytes, SHA-256 `924f3a7130b3be7bba95dac9e14331aacfb0bdbb761d839af96d51d28c1d8373` |
+| Internal index | `SHA256SUMS.txt` — re-downloaded and verified entry by entry on 2026-10-08: both entries `OK`, CRC clean |
+| Payload executable identity | `target/release/firmwaresight-desktop.exe`, `payload_sha256` `5026c47b82f34229d8d5198b16288b35d37f3048935d58c46b2eaac4390ddaae`, `installer_version_resource` `0.6.0` |
+| Toolchain | rustc 1.98.1 (48a229cea 2026-09-01), cargo 1.98.1 (797e8a9bc 2026-08-05), tauri-cli 2.12.1, node v24.21.0, pnpm 12.7.0, runner `win25-vs2026` X64 — identical to the previous build, as are `Cargo.lock` (`ee99d5bb…`) and `pnpm-lock.yaml` (`7aac74e3…`) digests in the metadata, so no dependency moved |
+| Signing | **unsigned** — no certificate, no signature, no notarization; the participant disclosure is unchanged |
 | Updater | not enabled (`bundle.createUpdaterArtifacts` is false) |
-| Expiry at activation | `expired: false`, measured 2026-10-06; GitHub expiry 2026-10-20T14:21:52Z |
+| Expiry | `expired: false`, measured 2026-10-08; GitHub expiry **2026-10-22T19:18:25Z** — the bytes must be privately archived before then |
+| GitHub's own `sha256_digest` | `null` for this artifact, so the second authority is the internal manifest plus `artifact-metadata.json`'s `toolchain.git_commit`, which equals the head above |
 
-Full record with the commands behind every row: `01_artifact/ARTIFACT_VERIFICATION.txt` in the external
-evidence root below.
+### The first frozen build, recorded and superseded on 2026-10-08
+
+These are the bytes V1 froze at activation (`BASELINE.yaml` `v1_execution.cohort_build_frozen`, and the external
+evidence root's `01_artifact/ARTIFACT_VERIFICATION.txt`). They are kept here as history; **a session must not run
+them.** Re-downloaded and re-hashed on 2026-10-08, all ten checks still true (dates in this pack are the owner's
+local date; the evidence root's own name is the UTC instant it was created):
+
+| Field | Value |
+|---|---|
+| CI run / head | `37475580080` (#72, attempt 1, 10 of 10) / `08fdfcb710f78f8084bfcf614dc508c8b6e7e25b` (P5 Commit F3) |
+| GitHub artifact id | `11419727517` |
+| Artifact ZIP container | 5,536,303 bytes, SHA-256 `40cb5c9933e84583ae0895923249c873e129fd4f3c5a51d2b549e5e3ee37850e` |
+| NSIS installer | 3,888,432 bytes, SHA-256 `182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12` |
+| CLI companion | 1,668,153 bytes, SHA-256 `76bf7d0c1c4acb0f64a5fdda75b036ec658f272086b2283ce0ba56d3543f7ddd` |
+| Payload executable | `6598880dd8dde479d9326e678d0c22eddfc859a6c8cbc98ce7049b8f3c310646` |
+| GitHub expiry | **2026-10-20T14:21:52Z** |
+
+### What did and did not change between them
+
+14 commits, 96 paths, **44 of them product paths**: 42 under `apps/desktop/ui/src`, plus
+`apps/desktop/src-tauri/src/ipc.rs` (the additive `MainWindowPage::Overview` variant and two window-title strings —
+the variant names, which are the wire form, are unchanged) and its test. `crates/` (all Core, storage and the
+migrations inside it), `assets/` including `design-tokens.json`, `schemas/`, `fixtures/`, `golden/`, `.github/`,
+`scripts/`, `09_ADR/` and `templates/` are **byte-identical subtrees**, and `generate_handler!` registers the same
+**30** commands at both heads. Both CI runs report **868 Rust tests across 47 result lines**; the UI suite moved
+225 in 8 files → **291 in 9 files**. So no metric operation, denominator or threshold in `V1_METRICS.md` is affected
+by the swap — what changed is the interface a participant reads, which is exactly why the accepted build and the
+frozen build have to be the same bytes.
 
 Two consequences follow, and both are protocol rather than footnote:
 
@@ -63,10 +94,12 @@ Two consequences follow, and both are protocol rather than footnote:
    installer sizes and that the payload differs in 20 of 15,001,088 bytes (PE `TimeDateStamp` plus the 16-byte
    RSDS CodeView GUID, set per link). F3's installer therefore differs from F2R1's even though their product
    trees are identical. Each session records the SHA of the bytes that participant actually received (§30).
-2. **No substitute is allowed** (§1): not F2R1's artifact `11397938806`, not a local rebuild, not `cargo run`,
-   not Vite, not a later docs-only CI artifact, not any unreviewed product head. The V1 activation commit's own
-   CI artifact is likewise **not** the cohort build — §46 says so explicitly, because the activation commit only
-   proves the product did not move.
+2. **No substitute is allowed** (§1): not F2R1's artifact `11397938806`, not the superseded F3 `11419727517`, not
+   the documentation head's own artifact `11592690212` (run `37874177649`, #87 — it packages a docs-only commit and
+   is enumerated here only to be refused), not a local rebuild, not `cargo run`, not Vite, not a later docs-only CI
+   artifact, not any unreviewed product head. The V1 activation commit's own CI artifact is likewise **not** the
+   cohort build — §46 says so explicitly, because the activation commit only proves the product did not move.
+   **Changing this table requires the owner's authority; a round may not re-point it to make a comparison easier.**
 
 ## Distribution is controlled, one-to-one, and not public
 
@@ -208,7 +241,7 @@ change deliberately, and each is recorded where it is used rather than left impl
 
 | | V0 | V1 |
 |---|---|---|
-| instrument | clickable 7-screen prototype at v0.1.0 | the installed F3 Windows build |
+| instrument | clickable 7-screen prototype at v0.1.0 | the installed cohort Windows build — `11573661113` from head `41bb6a36`, refrozen 2026-10-08 (the first frozen build was F3's `11419727517`) |
 | thresholds | no preset mathematical threshold | M1–M6 thresholds fixed **before** data (§15, §18 "do not redefine after seeing data") |
 | critical watch | C1–C5 | C1–C8, adding product-risk codes C6–C8 (§27) |
 | gating role | `NON_BLOCKING_USER_FEEDBACK_TRACK` since ADR-0026 | V1 is the track that P5 explicitly handed its L11 limitation to |

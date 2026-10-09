@@ -148,10 +148,15 @@ distribution approval — and it leaves the guarded tally intact at **25 items, 
 it as 25/25 or 100 %. **V1 is not resumed by it**: `paused_for` still names U1. V1 is a research
 track at `IN_PROGRESS / RECRUITMENT_READY`, **paused for U1** with **0 eligible external sessions** against a minimum of 8: §5's
 branch, because no real participant exists and an agent must not become one. `V1_VALIDATION/` holds its sixteen
-protocol and register files with every count at zero; the cohort build is frozen to F3's CI artifact
+protocol and register files with every count at zero. **Its cohort build was re-frozen on 2026-10-08 under the owner's
+inline *V1 Cohort Re-freeze / Execution Authorization v1.0*, which granted only that**: run `37828673549` (#85,
+attempt 1, 10 of 10) / artifact `11573661113` / head `41bb6a36` / NSIS 3,896,257 bytes / `9a51e86a…c87d93`, unsigned,
+GitHub expiry `2026-10-22T19:18:25Z`, preserved outside Git, with F3's first freeze
 (`37475580080` / artifact `11419727517` / NSIS 3,888,432 bytes / `182506f2…63d12`, unsigned, verified against its
-own `SHA256SUMS.txt`, preserved outside Git). `P5 = PASS_COMPLETE`, G2 `PASS`, product `MVP_CANDIDATE` at
-`0.6.0` and the counts **868 Rust / 225 UI in 8 files** all unchanged, and no B1, beta, RC, GA, licence,
+own `SHA256SUMS.txt`, preserved outside Git) recorded as **superseded and kept, not deleted** — see
+`V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` and `BASELINE.yaml` `v1_execution.cohort_build_refreeze`. `P5 = PASS_COMPLETE`, G2 `PASS`, product `MVP_CANDIDATE` at
+`0.6.0` and the counts **868 Rust / 291 UI in 9 files at the re-frozen build** (225 in 8 at V1's own activation,
+which is what §45 held still there) all unchanged by the re-freeze, and no B1, beta, RC, GA, licence,
 signing, notarization, updater or feature is authorized by it.
 
 ## Primary reading path
@@ -326,6 +331,24 @@ Rust / 291 UI in 9 files**, and the complete gate re-run at this staged state re
 and no `FAIL`** — the figures are read out of that log into `u1_execution.architect_final_verdict`, not carried over
 from the round above. Because these two paths are the only additions, writing sentences into files that were already
 tracked moves neither the 897-line tree nor the 770-entry manifest.
+
+**900 lines and 772 entries** at this V1 re-freeze record (2026-10-08): 774 tracked paths, two added and none removed
+since `6e3ee22` — `V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` (FS-V1-RF-001) and
+`V1_VALIDATION/00_authority/SOURCE_PROMPT_V1_REFREEZE_transcription.md` (the inline authorization's labelled agent
+transcription, whose digest is its own and never the authorization's) — plus the first directory row for
+`V1_VALIDATION/00_authority/`, which is why the tree grew by three lines while two paths were added. The other
+twenty-three staged paths are existing documents gaining dated blocks: the eleven other files under
+`V1_VALIDATION/` (`README.md`, `V1_PLAN.md`, `V1_PARTICIPANT_REGISTER.md`, `analysis/FINDINGS.md`,
+`analysis/METRICS.md`, both `deliverables/`, both `protocol/` and both `sessions/` documents), `BASELINE.yaml`,
+the five `.ai/` entry documents, root `README.md`, `06_DELIVERY/06_STAGE_GATES.md`, this ledger, the prompt register
+`10_AUDIT/SOURCE_PROMPTS/README.md`, and the two baseline artifacts. **Zero product paths**: nothing under `apps/`, `crates/`, `fixtures/`, `golden/`, `assets/`, `schemas/`,
+`migrations/`, `scripts/` or `.github/`, no lockfile, no `tauri.conf.json`, no `deny.toml`, and
+`assets/design-tokens.json` stays `94336906…14d4` — which matters here more than usual, because this round's subject
+*is* a product build: the bytes it froze were built by CI at `41bb6a36` on 2026-10-08, and a code change in this commit
+would have invalidated the very digests it records. The counts a docs-only head must hold still are **868 Rust across
+47 result lines / 291 UI in 9 files**, and the complete gate was run twice — once at the intermediate staged state and
+once at the state this commit carries — each returning **17 of 17 steps with no `SKIP` and no `FAIL`**, with the
+verifier **RESULT PASS** at these same 900 lines and 772 entries.
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 
@@ -603,7 +626,9 @@ disk, in a checksum domain that is deliberately not this one.
 | `V0_VALIDATION/prototype/README.md` | V0 Clickable Prototype |
 | `V0_VALIDATION/sessions/README.md` | Session Register |
 | `V0_VALIDATION/sessions/TEMPLATE.md` | V0 Session — Participant [ID] |
+| `V1_VALIDATION/00_authority/SOURCE_PROMPT_V1_REFREEZE_transcription.md` | V1 Re-freeze Authorization — Agent Transcription, Not a Delivered File |
 | `V1_VALIDATION/README.md` | FirmwareSight V1 Validation Workspace |
+| `V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` | V1 Cohort Re-freeze Record (FS-V1-RF-001) |
 | `V1_VALIDATION/V1_METRICS.md` | V1 Metric Contract |
 | `V1_VALIDATION/V1_PARTICIPANT_REGISTER.md` | V1 Participant Register |
 | `V1_VALIDATION/V1_PLAN.md` | V1 Plan |

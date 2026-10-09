@@ -80,4 +80,9 @@ one team on one toolchain is not six independent samples, and the table is what 
 3. Five of six metrics met is **not** a pass set (§38).
 4. A clean pass set is `V1_READY_FOR_ARCHITECT_VERDICT`, never `V1_PASS_COMPLETE` (§39, §54).
 5. The product counts this round must not move: 868 Rust / 225 UI in 8 files, gate 17, drift 8, package 4. If one
-   of them changes, something other than documentation happened, and the round stops (§45).
+   of them changes, something other than documentation happened, and the round stops (§45). Dated 2026-10-08: the
+   cohort build was re-frozen that day onto `41bb6a36`'s artifact `11573661113`, and the live guard figure is now
+   **868 Rust across 47 result lines / 291 UI in 9 files** on the same 17-step gate — the UI line grew across U1,
+   which ran after this pack was written. That is a build-identity guard, not a metric: none of the M1–M6 operations,
+   denominators or thresholds in this file or in `V1_METRICS.md` moved, and rule 2 still forbids adjusting one after
+   seeing data.

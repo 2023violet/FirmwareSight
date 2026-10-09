@@ -40,8 +40,9 @@ if and only if they were actually captured.
 - install friction, minute by minute where it mattered;
 - the SmartScreen / reputation warning, quoted or described, and how the participant reacted;
 - launch success or a typed refusal;
-- the SHA-256 of the installer they used, and whether it is the frozen F3 bytes
-  (`182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12`).
+- the SHA-256 of the installer they used, and whether it is the frozen cohort bytes
+  (`9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93`, refrozen 2026-10-08; the first frozen build
+  `182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12` is superseded and is not the build to hand out).
 
 Install friction is **evidence about distribution**, not something to eliminate before the measurement starts.
 

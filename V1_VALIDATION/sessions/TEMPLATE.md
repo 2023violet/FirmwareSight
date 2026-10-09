@@ -56,9 +56,10 @@ last_updated: "2026-10-06"
 | Field | Value |
 |---|---|
 | Product | FirmwareSight 0.6.0 |
-| F3 head | `08fdfcb710f78f8084bfcf614dc508c8b6e7e25b` |
-| GitHub artifact id | `11419727517` (run `37475580080`) |
-| Installer SHA-256 the participant actually ran | (frozen F3 bytes are `182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12`) |
+| Cohort head | `41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177` (U1P-R3 product commit; refrozen 2026-10-08 by `V1_COHORT_REFREEZE_RECORD.md`) |
+| CI run | `37828673549` (#85, attempt 1, 10 of 10) |
+| GitHub artifact id | `11573661113` |
+| Installer SHA-256 the participant actually ran | (the frozen cohort bytes are `9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93`, 3,896,257 bytes; the container holding them is 5,544,133 bytes `330e83af…`, which is **not** the installer size) |
 | Matches frozen artifact | YES / NO — a NO is a §36 early-stop trigger |
 | Machine / OS the participant used | band only, no hostname |
 | Install friction and security warning (T0 evidence) | |

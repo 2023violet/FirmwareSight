@@ -805,6 +805,25 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
+**`active_task: NONE`, and V1's cohort build is re-frozen.** Later on 2026-10-08 the owner delivered
+*FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0* inline, granting **only** `V1_COHORT_REFREEZE`:
+the formal research build moves off P5 Commit F3's artifact onto the build the Architect's visual acceptance was
+granted over — CI run `37828673549` (#85, attempt 1, **10 of 10**), product head
+`41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177`, artifact id `11573661113`, NSIS installer **3,896,257 bytes / SHA-256
+`9a51e86a…c87d93`**, **unsigned**, `expired: false`, GitHub expiry **`2026-10-22T19:18:25Z`**, preserved outside Git.
+F3's freeze (run `37475580080`, artifact `11419727517`, NSIS 3,888,432 bytes, `182506f2…63d12`) is **preserved and
+dated superseded, not rewritten**, and both builds were re-downloaded and re-hashed before either was written into an
+authority document. What did not move: **0 eligible external sessions**, M1–M6 `NOT_MEASURED`, the metric operations,
+denominators and thresholds, U1's verdict with its guarded 25-item tally and deviations A–D open, `P5 PASS_COMPLETE`,
+product **0.6.0 `MVP_CANDIDATE`**, `G2 PASS`, B1 / RC / GA `NOT_AUTHORIZED`, L11 `CARRIED_FORWARD`. The swap is honest
+rather than convenient because the F3→`41bb6a36` delta is 44 product paths and every one of them is the presentation
+layer, with `crates/`, `assets/`, `schemas/`, `fixtures/`, `golden/`, `.github/`, `scripts/`, `09_ADR/` and
+`templates/` byte-identical and the same **30** IPC commands at both heads. Record:
+`V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md`; state: `BASELINE.yaml`
+`v1_execution.cohort_build_refreeze` / `cohort_build_state: REFROZEN_TO_U1_CANDIDATE`. The next move is still the
+operator's, and the authorization withheld it: recruit, consent, transfer one-to-one, moderate — and privately archive
+the cohort bytes before they expire.
+
 **`active_task: NONE`, and stage U1 is closed.** On 2026-10-08 the Architect delivered an independent visual
 acceptance record of the installed product and issued the word no agent round was allowed to issue:
 **`U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**, scoped by its own sentence to *"visual
@@ -822,10 +841,12 @@ and the verdict forbids restating it as 25/25 or 100 %. Four residuals stay enum
 1024 metric-band track, Compare's section table sitting one scroll below the 1440 fold, the Gate baseline picker
 resetting on navigation, and Overview's Previous-analysis box never re-captured in R3), each carrying a phrase the
 record now forbids. **V1 is not resumed by a visual verdict**: it stays `IN_PROGRESS` / `RECRUITMENT_READY` with **0
-eligible external sessions**, the cohort build stays the frozen F3 artifact, and the record's own closing section is
+eligible external sessions**, and at the moment that record was filed the cohort build was still the frozen F3 artifact;
+the record's own closing section is
 titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED` — it asks for a separate owner authority to re-freeze the cohort onto
 this product's artifact before participant #1, and for separate authorization to recruit, consent and moderate with the
-unsigned-build disclosure. L11 therefore stays carried: only real sessions close it. B1 / private beta / RC / GA /
+unsigned-build disclosure. **That first separate authority arrived later the same day and is the paragraph that opens
+this section; the second one, for recruitment, has not.** L11 therefore stays carried: only real sessions close it. B1 / private beta / RC / GA /
 public release / signing / notarization / updater / commercial distribution remain **NOT AUTHORIZED**, and the
 open-source licence remains **PENDING OWNER CONFIRMATION**. Nothing below this block is a live pointer; each paragraph
 is what its own round knew.
@@ -890,9 +911,13 @@ gate's baseline picker resets on navigation. The pack for the verdict is
 **`V1 (Own-artifact External Validation)` is paused, not closed.** It opened on 2026-10-06 under its own
 architect prompt at **`IN_PROGRESS` / `research_state = RECRUITMENT_READY`**, with **0 eligible external
 sessions**, and it keeps every one of those values while paused (`v1_execution.paused_for` names U1). It is a
-research track, not a product stage: the cohort build is frozen to P5
+research track, not a product stage: at its opening the cohort build was frozen to P5
 Commit F3's CI artifact (run `37475580080`, artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256
-`182506f2…63d12`, **unsigned**, verified against its own `SHA256SUMS.txt` and preserved outside Git). While V1
+`182506f2…63d12`, **unsigned**, verified against its own `SHA256SUMS.txt` and preserved outside Git) — **and that
+identification is now the superseded first freeze: on 2026-10-08 the owner's re-freeze authorization moved the cohort
+to run `37828673549`'s artifact `11573661113` at head `41bb6a36`, NSIS 3,896,257 bytes / `9a51e86a…c87d93`, unsigned,
+expiry `2026-10-22T19:18:25Z`, with F3's record preserved and dated rather than rewritten; see the `## Next work`
+block above and `V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md`.** While V1
 ran, the product counts were required to hold at **868 Rust / 225 UI in 8 files**; U1 was authorized by its own
 prompt to change the UI, so the live figure after U1R is **868 Rust / 242 UI in 9 files** on the same 17-step gate
 (236 after U1's first round, plus U1R's six contract tests, with no Rust test moving and none deleted), and

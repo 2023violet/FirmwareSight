@@ -859,6 +859,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── V0_PLAN.md
 │   └── V0_TAKEOVER_REPORT.md
 ├── V1_VALIDATION/
+│   ├── 00_authority/
+│   │   └── SOURCE_PROMPT_V1_REFREEZE_transcription.md
 │   ├── analysis/
 │   │   ├── FINDINGS.md
 │   │   ├── METRICS.md
@@ -876,6 +878,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── README.md
 │   │   └── TEMPLATE.md
 │   ├── README.md
+│   ├── V1_COHORT_REFREEZE_RECORD.md
 │   ├── V1_METRICS.md
 │   ├── V1_PARTICIPANT_REGISTER.md
 │   └── V1_PLAN.md

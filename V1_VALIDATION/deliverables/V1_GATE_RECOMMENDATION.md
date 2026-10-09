@@ -86,5 +86,7 @@ classifies findings, and refuses to fabricate what is missing.
 
 Nothing further happens in the repository until a real session exists. The next commits this track can make are
 the Batch A evidence commit after four eligible participants, then the Batch B evidence commit at eight or more
-(§51) — each one docs/evidence only, each one holding 868 Rust / 225 UI in 8 files and passing the same 10-job
-authoritative CI.
+(§51) — each one docs/evidence only, each one holding the cohort build's product counts and passing the same 10-job
+authoritative CI. Those counts are **868 Rust across 47 result lines / 291 UI in 9 files** at the build re-frozen on
+2026-10-08 (artifact `11573661113`, head `41bb6a36`); this file was written when the cohort was F3's build and the
+figure was 225 UI in 8 files, and that is left as the record of what was true then.

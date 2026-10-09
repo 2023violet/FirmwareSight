@@ -131,7 +131,13 @@ notarization, no licence, no pricing, no B1, no RC, no GA — and the product co
 formal cohort. §1 froze the cohort build to the exact F3 Windows artifact (run `37475580080`, head `08fdfcb`,
 artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256 `182506f2…63d12`, **unsigned**, internal
 `SHA256SUMS.txt` verified `OK`, preserved outside Git; the 5,536,303-byte figure is the artifact container, not
-the installer, and the activation commit's own package is explicitly **not** the cohort build). **§5 is the
+the installer, and the activation commit's own package is explicitly **not** the cohort build). **Dated 2026-10-08,
+and this is the live identity: the owner's inline *V1 Cohort Re-freeze / Execution Authorization v1.0* re-froze the
+cohort to the U1-accepted build — run `37828673549`, head `41bb6a36`, artifact id `11573661113`, NSIS 3,896,257 bytes,
+SHA-256 `9a51e86a…c87d93`, still **unsigned**, still preserved outside Git, GitHub expiry `2026-10-22T19:18:25Z` — with
+F3's freeze preserved and dated superseded rather than rewritten, and with sessions, metrics and thresholds untouched
+(`v1_execution.cohort_build_refreeze` / `cohort_build_state: REFROZEN_TO_U1_CANDIDATE`, record
+`V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md`).** **§5 is the
 branch this round took: with no real eligible participant there is nothing to measure, so an agent writes the
 Recruitment Ready pack and stops rather than inventing a user.** `V1_VALIDATION/` now holds §13's sixteen files —
 plan, metric contract with M1–M6 thresholds fixed **before** any data, participant register, five protocol
@@ -141,7 +147,9 @@ session, quote or timing. `research_state = RECRUITMENT_READY`, **eligible exter
 recommendation `V1_INCOMPLETE_INSUFFICIENT_SAMPLE`, and the next move is **human**: recruit, consent, moderate
 (§47/§48). `P5` stays `PASS_COMPLETE`, `G2` stays `PASS`, the product stays `MVP_CANDIDATE` at `0.6.0`, L11 stays
 `CARRIED_FORWARD` (the row V1 exists to answer), and the counts held at **868 Rust / 225 UI in 8 files** on the
-same 17-step gate because §45 requires them not to move)` ·
+same 17-step gate because §45 requires them not to move — the figure at the re-frozen cohort build is
+**868 Rust / 291 UI in 9 files**, which is U1's own test contract rather than a V1 metric, and
+`v1_execution.product_counts_required_unchanged.refrozen_guard` is the live guard)` ·
 `active_task: NONE` — **stage U1 is CLOSED as `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS` on the
 Architect's own independent visual acceptance record of 2026-10-08** (`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt`,
 5,159 bytes / 52 lines / 0 CR / SHA-256 `8634321c…36c619` / blob `f16f0e7e…`, archived and registered as an authority
@@ -151,10 +159,13 @@ for a controlled V1 study, **not** GA quality, not feature completeness, not dis
 guarded verbatim — 25 items, 23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED, 2 `MISMATCH_PROVED` flags — and
 **no later document may restate it as 25/25 or 100%**. Deviations A–D stay open and enumerated; E, a count defect in
 these entry documents, was corrected by this update exactly as the record routed it. **V1 is not resumed by this**:
-`paused_for` still names U1, the F3 artifact is still the frozen cohort build, 0 eligible external sessions, and the
+`paused_for` still names U1, 0 eligible external sessions, and the
 record's closing section is `NEXT ACTION RECOMMENDATION, NOT EXECUTED` — this round only re-downloaded and re-hashed
 the newer artifact's bytes (NSIS 3,896,257 bytes `9a51e86a…`) because the record conditions document changes on that
-read. Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
+read. **Dated later on 2026-10-08:** the separate authority that recommendation asked for then arrived, and the cohort
+build did move to that re-verified artifact — the sentence in this entry that said "the F3 artifact is still the frozen
+cohort build" was true of the recording round and is superseded by the re-freeze entry above it, not by this one.
+Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
 stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
 and its continuation round installed the CI-built product and inspected it, so **U1 was
 `READY_FOR_ARCHITECT_VISUAL_REVIEW`** with one U1-V2 finding open and unwaived; V1 paused with every state field

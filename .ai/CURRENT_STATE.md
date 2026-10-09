@@ -23,17 +23,51 @@ last_updated: "2026-10-08"
   enumerated and open (Analyze's 1024 band track, Compare's section table one scroll down, the Gate picker reset,
   Overview's never-recaptured Previous-analysis box), each with a phrase it now forbids; deviation E, a count defect
   in this file's sibling entry documents, is corrected by this update rather than by a stand-alone CI-loop commit.
-  **V1 stays paused** — `IN_PROGRESS` / `RECRUITMENT_READY`, 0 eligible external sessions — because the record's
-  closing section is titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED` and nothing here re-freezes the cohort: the F3
-  artifact remains the frozen research build in every authority document, and the newer product artifact's bytes were
-  re-downloaded and re-hashed as *evidence about a candidate* only. `P5` stays `PASS_COMPLETE`, Productization
+  **V1 stays paused** — `IN_PROGRESS` / `RECRUITMENT_READY`, 0 eligible external sessions — because that record's
+  closing section is titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED` and it re-froze nothing itself: the newer
+  product artifact's bytes were re-downloaded and re-hashed as *evidence about a candidate* only. **Dated later the
+  same day, and this is the live build identity:** the owner then issued the separate authority the record asked for,
+  and V1's cohort build is now `REFROZEN_TO_U1_CANDIDATE` — artifact `11573661113` of run `37828673549` at product
+  head `41bb6a36`, NSIS `3,896,257` bytes / `9a51e86a…c87d93`, unsigned. See the bullet below this one.
+  `P5` stays `PASS_COMPLETE`, Productization
   `ENGINEERING_COMPLETE`, `G2 PASS`, product **`MVP_CANDIDATE`** at `0.6.0`. B1 / RC / GA / public release / signing /
   notarization / updater / commercial distribution stay `NOT_AUTHORIZED`; licence `PENDING_OWNER_CONFIRMATION`;
   **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. Counts unmoved: **868 Rust
   across 47 result lines / 291 UI in 9 files**, gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
-  `94336906…14d4`. What is blocked is blocked on a person: the re-freeze needs owner authority, recruitment needs real
-  firmware engineers (§47/§48), and any UI follow-up needs its own prompt. Read `.ai/ACTIVE_TASK.md`'s top block, then
+  `94336906…14d4`. What is blocked is blocked on a person: recruitment needs real
+  firmware engineers (§47/§48), the cohort bytes need private archival before they expire on 2026-10-22, and any UI
+  follow-up needs its own prompt. Read `.ai/ACTIVE_TASK.md`'s top block, then
   stop — AGENTS.md 1 forbids lifting the next track off the roadmap.
+- **V1's cohort build was re-frozen on 2026-10-08, under its own owner authority: `COHORT_BUILD =
+  REFROZEN_TO_U1_CANDIDATE`.** *FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0* was delivered
+  **inline** (no file, so `10_AUDIT/SOURCE_PROMPTS/README.md` records it the way the other inline authorizations are
+  and the agent's labelled transcription at `V1_VALIDATION/00_authority/SOURCE_PROMPT_V1_REFREEZE_transcription.md`,
+  SHA-256 `88ef07bd…a636a2`, is the transcription's digest and never the authorization's). It grants
+  **only** `V1_COHORT_REFREEZE`: the formal research build moves off P5 Commit F3's artifact `11419727517`
+  (`08fdfcb` / run `37475580080` / NSIS `3,888,432` B / `182506f2…63d12`) onto the build the Architect's visual
+  acceptance was granted over — run `37828673549` (#85, attempt 1, **10 of 10**), head
+  `41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177`, artifact `11573661113`, container `5,544,133` B
+  (`330e83af…4f3fb4`, **not** the installer size), NSIS `FirmwareSight_0.6.0_x64-setup.exe` delivered as
+  `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`, **`3,896,257` bytes /
+  `9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93`**, CLI companion `1,668,149` B
+  (`924f3a71…1d8373`), payload `5026c47b…0ddaae`, version `0.6.0`, **unsigned**, `expired: false`, GitHub expiry
+  **`2026-10-22T19:18:25Z`**. Both builds were downloaded and hashed again before either was written into an authority
+  document (§二), each verified entry by entry against its own container `SHA256SUMS.txt`; GitHub's
+  `sha256_digest` is `null` for both, so the second authorities are that internal manifest and
+  `artifact-metadata.json`'s `toolchain.git_commit`. **F3's block in `BASELINE.yaml` is preserved and dated as
+  superseded, not rewritten.** What did *not* move: sessions stay **0**, M1–M6 stay `NOT_MEASURED`, the metric
+  operations/denominators/thresholds are untouched, U1 keeps its verdict and its guarded 25-item tally with
+  deviations A–D open, P5 `PASS_COMPLETE`, product `0.6.0 MVP_CANDIDATE`, G2 `PASS`, B1/RC/GA `NOT_AUTHORIZED`, L11
+  `CARRIED_FORWARD`, and the build was not installed, recruited for, or distributed. Why the swap is honest rather
+  than convenient: F3→`41bb6a36` is 44 product paths and every one is the presentation layer (42 under
+  `apps/desktop/ui/src`, plus `ipc.rs`'s additive `MainWindowPage::Overview` variant and two window titles, plus that
+  test); `crates/`, `assets/`, `schemas/`, `fixtures/`, `golden/`, `.github/`, `scripts/`, `09_ADR/` and `templates/`
+  are **byte-identical subtrees**, the same **30** commands are registered at both heads, both runs report **868 Rust
+  across 47 result lines**, and `Cargo.lock` / `pnpm-lock.yaml` digests match — while the UI suite grew from **225 in
+  8 files** to **291 in 9 files**, which is U1's own test contract, not a V1 metric. The docs-only head's own artifact
+  `11592690212` (run `37874177649`, #87) is named only to be refused. Record:
+  `V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` (FS-V1-RF-001); machine state: `BASELINE.yaml`
+  `v1_execution.cohort_build_refreeze` with `cohort_build_state: REFROZEN_TO_U1_CANDIDATE`.
 - **Active task as of 2026-10-07, kept as what the first U1 round was authorized to do and where it stopped** (the
   live pointer is the block above, and the dated blocks below carry the track through to its closure):
   `U1_UI_PRODUCTIZATION_CONVERGENCE`. A **UI productization track**, opened 2026-10-07 under
@@ -319,6 +353,9 @@ last_updated: "2026-10-08"
   treated as binding. No cohort re-freeze, no protocol amendment, no touch to `V1_VALIDATION/`, no movement of
   `v1_execution.cohort_build_frozen`, no recruitment. **The F3 artifact stays the frozen cohort build in every
   authority document**; re-verifying newer bytes is evidence about a candidate, not a stage transition.
+  *(Dated later on 2026-10-08: the separate authority this sentence waited for then arrived, and the build moved —
+  see the re-freeze bullet near the top of this file. The sentence above is kept because it is the closure round's
+  own boundary, and that round did execute nothing.)*
   The tally is guarded by name — 25 items, **23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED**, 2
   `MISMATCH_PROVED` flags inside the 23 PASS — and the verdict says **"DO NOT rewrite this tally to 25/25 or to
   100%."** Four residuals stay enumerated under its own heading `MUST NOT BE SILENTLY CLOSED`, each with a phrase
@@ -346,10 +383,14 @@ last_updated: "2026-10-08"
   authority, recruitment needs real firmware engineers and human moderation (§47/§48), and any UI follow-up — including
   A and C — needs its own prompt and is prioritised by the Architect from participant evidence.
 - **V1 is paused, not closed.** `stage_status` stays `IN_PROGRESS`, `research_state` stays `RECRUITMENT_READY`,
-  eligible external sessions stay **0**, and the cohort build stays the frozen F3 artifact at SHA-256
-  `182506f2…63d12`. `v1_execution.paused_for` names U1; nothing else in V1's block was rewritten, because a pause
-  suspends the turn and is not a verdict. Resuming needs a real external participant, which is operator work
-  (V1 §47, §48) and no agent action. The rest of this section is the record of how V1 opened on 2026-10-06.
+  eligible external sessions stay **0**. **Its cohort build was re-frozen on 2026-10-08**: the bytes a formal
+  participant must run are now artifact `11573661113` / head `41bb6a36` / NSIS `3,896,257` B /
+  `9a51e86a…c87d93` (`v1_execution.cohort_build_refreeze`), and the F3 artifact `11419727517` at
+  `182506f2…63d12` is preserved as the superseded first freeze rather than deleted. `v1_execution.paused_for` names
+  U1; nothing else in V1's block was rewritten, because a pause
+  suspends the turn and is not a verdict, and a build identity is not a verdict either. Resuming needs a real external
+  participant, which is operator work (V1 §47, §48) and no agent action. The rest of this section is the record of how
+  V1 opened on 2026-10-06.
 - **Active task before U1: `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`.** Stage **V1** opened on 2026-10-06 under
   *FirmwareSight — V1 Own-artifact External Validation, Execution Prompt v1.0 — Architect Authorized*
   (delivered as a file, SHA-256 `48768ff025e3d6351b7b1d8d593ea8bfb18a7930a0a21a101af3093bbec10a0f`, 46,207
@@ -358,10 +399,12 @@ last_updated: "2026-10-08"
   44,510 LF bytes). State: **`V1 = IN_PROGRESS`, `research_state = RECRUITMENT_READY`, eligible external
   sessions = 0.** It is a **research** track, not a product stage: no feature, no schema, no migration, no
   dependency, no cloud, no account, no telemetry, no updater, no signing, no notarization, no licence choice, no
-  pricing, no B1, no RC, no GA (§4, §33). The product under test is one frozen build — run `37475580080`, head
+  pricing, no B1, no RC, no GA (§4, §33). The product under test was, as §1 froze it on 2026-10-06, one build — run
+  `37475580080`, head
   `08fdfcb`, artifact id `11419727517`, NSIS installer 3,888,432 bytes, SHA-256
   `182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12`, **unsigned**, verified against its own
-  `SHA256SUMS.txt` at activation and preserved outside Git.
+  `SHA256SUMS.txt` at activation and preserved outside Git. That identification is this bullet's 2026-10-06 record;
+  the live cohort build is the one named in the bullet above it.
 - **What this round did, and the branch it took.** §5 decides it: with no real eligible external participant and
   no session evidence, an agent writes the **Recruitment Ready pack** and stops — it does not simulate a user. So
   `V1_VALIDATION/` now holds §13's sixteen files (plan, metric contract, participant register, five protocol

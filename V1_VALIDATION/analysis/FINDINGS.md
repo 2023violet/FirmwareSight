@@ -46,7 +46,9 @@ covers Keil/IAR and anything outside the measured support boundary in
 
 ## Freeze rule while this register is open (§32)
 
-The formal cohort runs against one frozen artifact: head `08fdfcb`, artifact id `11419727517`. No silent product
+The formal cohort runs against one frozen artifact: head `41bb6a36`, artifact id `11573661113`, installer SHA-256
+`9a51e86a…87d93` (refrozen 2026-10-08 by `V1_COHORT_REFREEZE_RECORD.md`; the first frozen build, head `08fdfcb` /
+artifact `11419727517`, is superseded and must not be run). No silent product
 patch mid-cohort. A product change creates a new cohort version and a **new CI artifact**, and pre- and
 post-hotfix metrics are never pooled. V1 recommends; it does not fix (§33) — which is also why this register can
 stay open across a batch without a single line of Rust changing.

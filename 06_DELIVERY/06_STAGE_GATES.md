@@ -244,11 +244,14 @@ G2 Product MVP Candidate   — PASS (2026-10-01): Product MVP ENGINEERING COMPLE
                               the engineering exit above; evidence in G2_VALIDATION/. Not G3 Productization,
                               Private Beta, RC or GA
 V1 Own-artifact External Validation — IN_PROGRESS / RECRUITMENT_READY (opened 2026-10-06 under its own architect
-                              prompt, delivered as a file and archived with its SHA-256). A research track, not a
+                              prompt, delivered as a file and archived with its SHA-256; PAUSED for U1 from
+                              2026-10-07 and not resumed by U1's closure; cohort build RE-FROZEN 2026-10-08 to the
+                              U1-accepted artifact 11573661113 at head 41bb6a36 under the owner's inline re-freeze
+                              authorization, with F3's first freeze preserved and dated superseded). A research track, not a
                               product stage: it measures whether real external firmware engineers, on their own
-                              artifacts and the frozen F3 build, can use Analyze / Compare / Gate, learn something
+                              artifacts and the frozen build, can use Analyze / Compare / Gate, learn something
                               true, and come back. Eligible external sessions 0 of a minimum 8; M1–M6 thresholds
-                              fixed before any data; protocol pack in V1_VALIDATION/. It authorizes no feature,
+                              fixed before any data and unmoved by the re-freeze; protocol pack in V1_VALIDATION/. It authorizes no feature,
                               schema, migration, dependency, cloud, account, telemetry, updater, signing,
                               notarization, licence, pricing, B1, RC or GA — and §40 says even a full pass does
                               not open B1. This line was blank before that round opened it, which is why this file
@@ -289,10 +292,12 @@ U1 UI Productization Convergence — CLOSED 2026-10-08 by the Architect: PASS_CO
                               Previous-analysis box). It authorizes no feature, dependency, cloud, account,
                               telemetry, updater, signing, notarization, licence, pricing, B1, RC or GA, and it does
                               **not** resume V1: V1 stays `IN_PROGRESS / RECRUITMENT_READY` with its 0 eligible
-                              sessions and its frozen F3 cohort build, `paused_for` this track, and the record's
+                              sessions, `paused_for` this track, and the record's
                               closing section reads `NEXT ACTION RECOMMENDATION, NOT EXECUTED` — the cohort
-                              re-freeze onto the product artifact needs a separate owner authority before
-                              participant #1. `active_task` is `NONE`. Evidence and the governance documents are in
+                              re-freeze onto the product artifact needed a separate owner authority before
+                              participant #1. That authority arrived later on 2026-10-08 and is recorded on the V1
+                              row above, not here: this verdict moved no build and started nobody. Recruitment,
+                              consent and moderation still need their own owner authorization. `active_task` is `NONE`. Evidence and the governance documents are in
                               `U1_VALIDATION/`; machine state at `BASELINE.yaml`
                               `u1_execution.architect_final_verdict`. This line is not G3, B1, RC1 or GA1, and
                               closing U1 did not make it one

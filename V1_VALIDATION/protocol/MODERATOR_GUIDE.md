@@ -92,8 +92,9 @@ to "users".
 
 V0 reset a prototype to a known state. V1's equivalent, because the store is real and persists:
 
-1. confirm the participant is installing artifact `11419727517` from run `37475580080`, and record the
-   installer SHA of the bytes they actually received;
+1. confirm the participant is installing artifact `11573661113` from run `37828673549` (head `41bb6a36`), and record the
+   installer SHA of the bytes they actually received — the frozen cohort installer is
+   `9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93`; anything else is a §36 early-stop trigger;
 2. start from a fresh local store unless the session is deliberately about History — if a prior session left
    data, say which state the participant is seeing;
 3. do **not** use the owner's real FirmwareSight store as a demo surface; the owner's data is out of scope for

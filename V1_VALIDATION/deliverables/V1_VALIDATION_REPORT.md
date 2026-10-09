@@ -17,9 +17,12 @@ the thresholds in `V1_METRICS.md` before the first session. Every metric line re
 
 ## 1. Authority and artifact
 V1 prompt v1.0 (delivered SHA-256 `48768ff0…ec10a0f`), canonical unit `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`,
-product `MVP_CANDIDATE` at baseline `0.6.0`. Cohort build frozen at run `37475580080`, head `08fdfcb`, artifact
-`11419727517`; installer `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`, 3,888,432 bytes, SHA-256
-`182506f2…63d12`; internal `SHA256SUMS.txt` verified `OK` for both entries at activation. _To be completed: per-session
+product `MVP_CANDIDATE` at baseline `0.6.0`. **Cohort build refrozen 2026-10-08** (`V1_COHORT_REFREEZE_RECORD.md`,
+owner's inline Execution Authorization v1.0) to run `37828673549`, head `41bb6a36`, artifact
+`11573661113`; installer `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`, 3,896,257 bytes, SHA-256
+`9a51e86a…87d93`; internal `SHA256SUMS.txt` verified entry by entry on re-download. The build frozen at activation —
+run `37475580080`, head `08fdfcb`, artifact `11419727517`, 3,888,432 bytes, `182506f2…63d12` — is recorded there as
+superseded history and is **not** to be handed out. _To be completed: per-session
 confirmation that each participant ran these exact bytes._
 
 ## 2. Protocol

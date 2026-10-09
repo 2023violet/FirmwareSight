@@ -253,6 +253,16 @@ research:
 # participant #1 and titles that section NEXT ACTION RECOMMENDATION, NOT EXECUTED; this round re-downloaded and
 # re-hashed the newer artifact's bytes because the record conditions document changes on that read, and changed no
 # V1 field, protocol or register. Nothing next is authorized by U1's closure.
+# Dated later on 2026-10-08: the owner then authorized exactly the thing that paragraph named as unauthorized -
+# `FirmwareSight - V1 Cohort Re-freeze / Execution Authorization v1.0`, inline, granting only V1_COHORT_REFREEZE.
+# So the cohort build is no longer the frozen F3 artifact: it is the U1-accepted product build, artifact 11573661113
+# of run 37828673549 at head 41bb6a36, recorded in `v1_execution.cohort_build_refreeze` and
+# V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md, with F3's block preserved above it and superseded by date, not deleted.
+# The pointer itself does not move: this is a research-instrument identity change, not a task, and the same message
+# withheld recruitment, sessions, installs and external distribution. Everything else the paragraph above lists is
+# still true - stage_status IN_PROGRESS, research_state RECRUITMENT_READY, 0 eligible external sessions, P5
+# PASS_COMPLETE, product 0.6.0 MVP_CANDIDATE, B1 NOT_AUTHORIZED. AGENTS.md 1 still binds: with the pointer at NONE,
+# nobody may invent the next round.
 active_task: NONE
 
 
@@ -717,6 +727,13 @@ v1_execution:
   # own evidence root. So `paused_for` now names a CLOSED track, which is accurate rather than tidy: the pause was
   # the owner's decision, its cause is finished, and the next field to move here is `research_state` - and only when
   # the owner grants the re-freeze or a real participant arrives.
+  # Dated later the same day, 2026-10-08: the owner did grant the re-freeze (`cohort_build_refreeze` below), so the
+  # build named in this block is no longer the one a session runs. That is not a resumption and not a pause changing
+  # something: `pause_changes_nothing_in` still reads as V1 wrote it, because the PAUSE moved none of those fields -
+  # a separate, later, explicitly granted authority moved the build identity and only the build identity.
+  # `research_state` stays RECRUITMENT_READY and `sample.eligible_external_sessions_today` stays 0 for the reason this
+  # block has always given: re-freezing the instrument does not measure anything. The owner granted the swap and, in
+  # the same message, withheld recruitment, sessions, installs and distribution.
   paused_for: U1_UI_PRODUCTIZATION_CONVERGENCE
   paused_on: "2026-10-07"
   paused_at_head: f481b78059c14e1c83d3ba18e082004b7de72ee2 # V1's own activation head: the track pauses with no product or research write of its own after it
@@ -755,6 +772,59 @@ v1_execution:
     preserved_outside_git: "the downloaded set lives in the external evidence root; §1 forbids committing the installer and nothing in this round committed a byte of it"
     substitutions_forbidden: [F2R1_artifact_11397938806, local_rebuild, cargo_run, vite_dev_server, later_docs_only_ci_artifact, any_unreviewed_product_head]
     activation_artifact_is_not_the_cohort_build: true # §46: the activation commit's own package proves only that the product did not move
+    # ---- Dated 2026-10-08: this build is superseded as the cohort build and preserved as immutable history. ----
+    # Not one value above was edited. The whole set was re-downloaded from artifact 11419727517 and re-hashed in the
+    # re-freeze round before anything was written about it (owner's §二: verify before you record), and all ten
+    # identity checks came back true, so the block still stands as the measured record of the first frozen build -
+    # including the container digest, which activation never wrote down: §1 recorded the container's SIZE and the
+    # installer's digest, and this round hashed the container itself for the first time.
+    container_sha256_measured_at_refreeze: 40cb5c9933e84583ae0895923249c873e129fd4f3c5a51d2b549e5e3ee37850e
+    refreeze_reverified_on: "2026-10-08" # run 37475580080's artifact, downloaded and verified entry by entry against its own internal SHA256SUMS.txt
+    superseded_on: "2026-10-08"
+    superseded_by: v1_execution.cohort_build_refreeze # the owner's inline re-freeze authorization, not an agent decision
+    supersession_reason: "V1 was paused for the UI productization track; that track closed on the Architect's own visual acceptance of a different, later product build. Freezing the cohort onto the accepted bytes is what keeps a participant's interface and the Architect's judgement the same interface. The reason is written in V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md §4-§5."
+    history_status: PRESERVED_NOT_DELETED # §四: no historical research evidence was deleted or rewritten; a session must not run these bytes any more, and the record says so
+    expiry_note: "2026-10-20T14:21:52Z still governs these bytes. They are history, so nothing is scheduled to run them, but the superseded build was not re-pointed or blanked - it stays verifiable until it is not."
+  cohort_build_state: REFROZEN_TO_U1_CANDIDATE # the owner's §二/§三 grant, recorded verbatim in that token. A build identity, not a verdict: V1 still has zero sessions, M1-M6 are still NOT_MEASURED, and this block issues nothing.
+  cohort_build_refreeze: # the owner's inline Execution Authorization v1.0 of 2026-10-08, the only authority that moved the cohort
+    authorized_by: "FirmwareSight - V1 Cohort Re-freeze / Execution Authorization v1.0, delivered inline by the owner on 2026-10-08. Inline delivery has no owner byte stream to hash (§9's rule from P0): the authorization's own text is quoted in V1_VALIDATION/00_authority/SOURCE_PROMPT_V1_REFREEZE_transcription.md, and that file's digest is the transcription's, never the authorization's."
+    granted: [V1_COHORT_REFREEZE] # §三's five allowed items, nothing wider
+    explicitly_not_granted: [recruitment, a test session, an install, external distribution, any change to M1-M6 metrics or denominators or thresholds, any product source or dependency or token change, signing/updater/permission/licensing change, B1, RC, GA, a V1 verdict]
+    executed_on: "2026-10-08"
+    start_authority: 6e3ee22307e83b05ea3a318f9c9a3853f13ba552 # HEAD = origin/main at §一, tree carrying no pre-existing uncommitted change; nothing was cleaned, stashed, reset or deleted
+    record: V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md # FS-V1-RF-001
+    ci_run: "37828673549"
+    ci_run_reading: "#85 (push), attempt 1, completed / success, 10 of 10 jobs, read job by job from the GitHub API; head sha on the run equals the head frozen below"
+    head: 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177
+    artifact_id: "11573661113"
+    artifact_name: FirmwareSight-0.6.0-windows-x86_64
+    artifact_zip_bytes: 5544133 # the container again, not the installer - the trap §1 named still applies
+    artifact_zip_sha256: 330e83af75db705b2acae6ff559baf0e863d7766947bc21240488861cd4f3fb4
+    nsis_file: FirmwareSight-0.6.0-windows-x86_64-nsis.exe
+    nsis_built_name: FirmwareSight_0.6.0_x64-setup.exe
+    nsis_bytes: 3896257
+    nsis_sha256: 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93
+    cli_zip_sha256: 924f3a7130b3be7bba95dac9e14331aacfb0bdbb761d839af96d51d28c1d8373
+    internal_index_check: "sha256sum -c SHA256SUMS.txt over the downloaded candidate set: 2 entries, both OK, exit 0, measured 2026-10-08"
+    payload_executable_sha256: 5026c47b82f34229d8d5198b16288b35d37f3048935d58c46b2eaac4390ddaae # target/release/firmwaresight-desktop.exe; same caveat as above - the bundler rewrites a 27-byte token in the packed copy, so this locates the build
+    installer_version_resource: 0.6.0
+    product_version: 0.6.0
+    toolchain_identity: "rustc 1.98.1 (48a229cea 2026-09-01), cargo 1.98.1 (797e8a9bc 2026-08-05), tauri-cli 2.12.1, node v24.21.0, pnpm 12.7.0, runner win25-vs2026 X64 - identical to the superseded build, and Cargo.lock ee99d5bb... and pnpm-lock.yaml 7aac74e3... in artifact-metadata.json match the repo's current lockfiles, so no dependency moved between the two builds"
+    github_digest_field: "null for this artifact and for the superseded one, which is why the second authorities are the container-internal SHA256SUMS.txt and artifact-metadata.json's toolchain.git_commit; GitHub's own digest is not a check that exists here"
+    expired_at_refreeze: false
+    github_expiry: "2026-10-22T19:18:25Z" # 14 days out at the time of writing, and the installer cannot be committed: private archival is the owner's action and is outstanding human action 1 in §10 of the record
+    signing: unsigned # unchanged model; §四 forbids touching signing, updater, permissions or licence, and this round did not
+    why_this_build_and_not_another: "It is the exact CI-built product artifact the Architect's visual acceptance was granted over (PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS, u1_execution.architect_final_verdict). §二 forbids treating a rebuild, a docs-only HEAD's package or any other product as the frozen research version, so the docs head's own artifact 11592690212 (run 37874177649, #87) is enumerated here to be refused, not used."
+    product_delta_is_interface_only: "F3 -> this head is 14 commits / 96 paths, of which 44 are product paths: 42 under apps/desktop/ui/src plus apps/desktop/src-tauri/src/ipc.rs (additive MainWindowPage::Overview variant plus two window-title strings; the variant names on the wire are unchanged) and its test. crates/, assets/, schemas/, fixtures/, golden/, .github/, scripts/, 09_ADR/ and templates/ are byte-identical subtrees by tree OID, generate_handler! registers the same 30 commands at both heads, and both runs report 868 Rust tests in 47 result lines. So §四's forbidden M1-M6 denominators and thresholds are untouched while the participant-visible interface did change."
+    preserved_outside_git: "the candidate's downloaded set lives in the re-freeze evidence root (02_candidate_build/); no installer byte entered Git, at either build"
+    substitutions_forbidden: [F3_artifact_11419727517, F2R1_artifact_11397938806, docs_only_head_artifact_11592690212, local_rebuild, cargo_run, vite_dev_server, later_docs_only_ci_artifact, any_product_head_that_is_not_41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177, any_unreviewed_product_head]
+    this_round_local_validation: "the complete authoritative gate was run three times, and the intermediate runs are named rather than dropped. python scripts/check.py exits 0 with 17 of 17 steps PASS, no SKIP and no FAIL (rust 3, frontend 5, drift 8 including baseline integrity, deny 1); the rust group reports 868 passed / 0 failed across 47 result lines; the frontend group reports Test Files 9 passed (9) and Tests 291 passed (291); scripts/verify_baseline_artifacts.py RESULT PASS at 900 tree lines and 772 sum entries over 774 tracked paths, index blob mismatch 0, tracked-but-unlisted 0, duplicates 0, SHA256SUMS self-excluded; git diff --cached --check exit 0. Run 1 (target/v1_refreeze_gate.txt, filed as 05_validation/GATE_LOG_intermediate_pass1.txt) measured the staged tree before .ai/DECISIONS.md's section, this ledger's row and these two fields existed. Run 2 (target/v1_refreeze_gate_final.txt, filed as 05_validation/GATE_LOG_run2.txt) measured the state after them. Run 3 re-runs the same command at the exact state this commit carries, and its figures are the ones quoted in this field; the two earlier logs are retained so a reader can check that nothing moved between them. The drift group re-runs the desktop crate (11 result lines / 222 tests), so a whole-log sum reads 58 lines / 1090 and double-counts; the authoritative Rust figure is the single rust group."
+    this_round_remote_ci: "reported separately from the local gate, and never as PASS while unrun. This commit's own run is read job by job from the GitHub API after the push and written into the evidence root's 03_ci/ and the final report; a commit cannot record the number of the run its own push produces, and no second commit is made merely to write a number back. The two cohort runs this round re-read as evidence about builds are 37475580080 (#72, attempt 1, 10 of 10) and 37828673549 (#85, attempt 1, 10 of 10), and the docs head's run 37874177649 (#87, attempt 1) is also 10 of 10 - which proves only that a package exists for it, not that it is the cohort build."
+    this_round_never_self_issued: [V1_PASS_COMPLETE, V1_RESUMED, V1_REBASELINED, COHORT_BUILD_PASSED, B1_READY, PRIVATE_BETA, RC, GA, PARTICIPANT_RECRUITED, SESSION_CONDUCTED] # the authorization named none of these, and a build identity is not a verdict
+    evidence_root: "%TEMP%\\FirmwareSight-V1-Refreeze-20261009T035521Z # 00_authority (PRE_ROUND_MACHINE_STATE, BOTH_BUILDS_VERIFIED, PRODUCT_DELTA_F3_TO_CANDIDATE, DIFF_ALLOWLIST), 01_old_f3_build (superseded container + extracted payload), 02_candidate_build (the frozen container, payload and BUILD_VERIFICATION.json), 03_ci (BOTH_COHORT_RUNS_READBACK plus the docs-head job list), 04_record (this round's record and the authorization transcription), 05_validation (the gate logs and read-outs). The name is a UTC instant; the dates written into the repository are the owner's local date. Retained, not deleted, and nothing in it was committed."
+  cohort_build_frozen_previous: # kept so the pointer reads both ways: the first freeze's identity is one key above, unchanged
+    see: v1_execution.cohort_build_frozen
+    status: SUPERSEDED_ON_2026-10-08_NOT_DELETED
   distribution:
     public_distribution: NOT_AUTHORIZED # unchanged by this prompt; §2 keeps it and says so explicitly
     authorized_transfer: [private_direct_transfer, participant_restricted_temporary_link, supervised_installation, controlled_research_machine]
@@ -805,6 +875,17 @@ v1_execution:
     drift: 8
     package: 4
     required_skips: none
+    recorded_against: "the V1 activation head 08fdfcb7... and run 37475580080, whose Desktop UI jobs reported Test files 8 / Tests 225. Left exactly as V1 wrote it."
+    refrozen_guard: # dated 2026-10-08: the same §45 rule, re-pointed at the cohort build this round froze. This is not an M1-M6 metric, denominator or threshold - those are in metrics_contract and none of them moved - it is the regression guard that rides on the build identity, and the build identity moved under the owner's authorization.
+      rust: 868
+      ui: 291
+      ui_files: 9
+      full_gate: 17
+      drift: 8
+      package: 4
+      required_skips: none
+      measured_from: "run 37828673549 read job by job: Rust (ubuntu + windows) 868 passed / 0 failed across 47 result lines on both, Desktop UI (ubuntu + windows) Test files 9 / Tests 291 on both. The UI suite grew across the eight U1 rounds that followed V1's activation; the Rust count, the gate, the drift and package step counts and both lockfile digests did not move."
+      from_here_on: "an evidence commit during the cohort that changes one of these numbers is a product change wearing a documentation diff - §45's rule, now aimed at 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177"
   activation_diff_boundary: # §43
     allowed: [V1_VALIDATION/**, BASELINE.yaml, .ai/*.md, README.md, INDEX.md, 10_AUDIT/SOURCE_PROMPTS/**, DIRECTORY_TREE.txt, SHA256SUMS, 06_DELIVERY/*.md_where_materially_stale]
     forbidden: [apps/**, crates/**, scripts/**, fixtures/**, schemas/**, golden/**, migrations/**, .github/**, Cargo.toml, Cargo.lock, package.json, pnpm-lock.yaml, tauri.conf.json, deny.toml, assets/design-tokens.json]
@@ -1067,6 +1148,7 @@ u1_execution:
     first_viewport_reading_refined: "the Architect reads the section table HEADING near y=766 and its COLUMN HEADINGS near y=865, where the round's own probe had reported a header at y≈869 — different rows of the same table, both agreeing on the operative fact that the first data row sits below 900 px. The verdict's numbers govern the review being recorded; the round's probe measured a different row and said so in §11."
     what_this_round_did_not_do: "the re-freeze was NOT executed. V1_VALIDATION/ is untouched, `v1_execution.cohort_build_frozen` did not move, no protocol was amended, nothing was recruited and no participant started. The F3 artifact (11419727517, NSIS 3,888,432 bytes, 182506f2...63d12) stays the frozen cohort build in every authority document until a separate authority says otherwise; the newer bytes re-verified above are filed as evidence about a candidate, which is what the record's 'NEXT ACTION RECOMMENDATION, NOT EXECUTED' title requires. No installer was run and nothing was launched."
     gate_interlock_reaffirmed: "P5 remains PASS_COMPLETE. Product remains 0.6.0 MVP_CANDIDATE with narrative 'FirmwareSight Productized MVP Candidate'. G2 remains PASS. V1 remains stage_status IN_PROGRESS / research_state RECRUITMENT_READY with 0 eligible external sessions until separate authority is granted. B1 private beta, RC, GA, public release, signing, notarization, the updater and commercial distribution remain NOT_AUTHORIZED. Open-source licence stays PENDING OWNER CONFIRMATION. L11 stays CARRIED_FORWARD — a visual acceptance of the UI is not a research pass, and only real sessions close it. L15 stays CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER."
+    re_freeze_followed_on: "2026-10-08, later the same day, under its own authority. The sentence above ('stays the frozen cohort build in every authority document until a separate authority says otherwise') was the correct state when this verdict round wrote it and is left as written; the separate authority then arrived as the owner's inline V1 Cohort Re-freeze / Execution Authorization v1.0, and `v1_execution.cohort_build_refreeze` plus V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md record it. This verdict round executed nothing itself - the recommendation and the execution are in different rounds, on different authorities, which is the whole point of writing 'NOT EXECUTED' in the record's title."
     u1_state: PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS # the Architect's word, on the Architect's own authority, with the scope sentence above attached to it. It is visual readiness for a controlled study and nothing more; it is not GA quality, not feature completeness, not distribution authority, and not a V1 verdict.
     closed_on: "2026-10-08"
     active_task_after: NONE # U1 is closed by its own authority, so the pointer returns to NONE. Blocked and by whom: the V1 cohort re-freeze (owner authority, separate prompt), recruitment and consent (§47/§48, human), any UI follow-up (its own prompt), and residuals A and C (prioritised by the Architect from participant evidence, not by an agent deciding to tidy a layout). AGENTS.md 1 forbids inventing work where the pointer says none.

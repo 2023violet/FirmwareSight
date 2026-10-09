@@ -30,6 +30,12 @@ artifact for research; recruit real external participants; conduct real sessions
 behavior, timing and quotes; calculate metrics; classify misunderstandings and findings; produce V1 evidence
 and recommendations.
 
+*(Dated amendment, 2026-10-08: the owner's inline V1 Cohort Re-freeze authorization moved the preserved research
+artifact from F3's `11419727517` to the U1-accepted `11573661113`, and requires **both** sets of bytes to be
+preserved — the new one because the cohort runs on it, the old one because it is immutable research history. See
+`V1_COHORT_REFREEZE_RECORD.md`. The wording above is the delivered prompt's own §4 list and is kept as it was
+received.)*
+
 ## 3. What is not authorized (§4, §33, §40)
 
 No product feature implementation; no product redesign from participant preference; no schema, migration or
@@ -124,7 +130,13 @@ the repository. Before any session evidence is staged, §50's scan runs.
 
 Every pushed evidence commit still passes the authoritative 10-job CI, and none of them moves a product count:
 **868 Rust / 225 UI in 8 files, gate 17, drift 8, package 4**. A docs-only round that changes one of those
-numbers is a product change wearing a documentation diff. Forbidden in all of them: `apps/**`, `crates/**`,
+numbers is a product change wearing a documentation diff. **Dated 2026-10-08, when the cohort was re-frozen:** the
+numbers above are the activation head's, and they are kept as what §45 held still at V1's own commit. The cohort
+build is now `41bb6a36`'s artifact `11573661113`, whose CI reports **868 Rust across 47 result lines / 291 UI in
+9 files** on the same 17-step gate with the same 8 drift and 4 package steps and no required skip — the UI line grew
+across the eight U1 rounds that followed this activation, and no Rust test moved or was deleted. From the re-freeze
+onward, that is the figure an evidence commit must not move
+(`BASELINE.yaml` `v1_execution.product_counts_required_unchanged.refrozen_guard`). Forbidden in all of them: `apps/**`, `crates/**`,
 `scripts/**`, `fixtures/**`, `schemas/**`, `golden/**`, `migrations/**`, `.github/**`, `Cargo.toml`,
 `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json`, `deny.toml`,
 `assets/design-tokens.json`. If a product path appears: **STOP**.
