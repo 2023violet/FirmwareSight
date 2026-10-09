@@ -36,23 +36,25 @@ mutation proofs, is `C1_U1_DATA_AND_IDENTITY_PLAN.md` beside it (§11 and §12 a
 
 ## 2. Change set and intent
 
+The line figures below are `git diff --numstat 114a84e 8e2aab9`, not estimates.
+
 | Path | Intent |
 | --- | --- |
-| `crates/firmwaresight-core/src/domain/gate.rs` | `KindBasis`, `GateAttachmentFact` with `canonicalized()`, `GateContext.attachments`, and the `/1`-vs-`/2` canonical rule (+108 lines) |
-| `crates/firmwaresight-project/src/evidence.rs` | `ReleaseAttachment`, `AttachmentError` with the three stable codes, `observe_attachment()`, `attachment_leaf_name()` (+165) |
-| `crates/firmwaresight-project/src/fingerprint.rs` | the PA-1 / T-C1-01 byte-freeze test carrying the constants measured at `114a84e` (+31) |
-| `crates/firmwaresight-project/src/fixtures.rs`, `src/lib.rs` | explicit empty attachment set at the fixture; re-exports (+5, −2) |
+| `crates/firmwaresight-core/src/domain/gate.rs` | `KindBasis`, `GateAttachmentFact` with `canonicalized()`, `GateContext.attachments`, and the `/1`-vs-`/2` canonical rule (107 added, 1 removed) |
+| `crates/firmwaresight-project/src/evidence.rs` | `ReleaseAttachment`, `AttachmentError` with the three stable codes, `observe_attachment()`, `attachment_leaf_name()` (163 added, 2 removed) |
+| `crates/firmwaresight-project/src/fingerprint.rs` | the PA-1 / T-C1-01 byte-freeze test carrying the constants measured at `114a84e` (31 added) |
+| `crates/firmwaresight-project/src/fixtures.rs`, `src/lib.rs` | explicit empty attachment set at the fixture (1 added); re-exports (2 added, 2 removed) |
 | `crates/firmwaresight-project/tests/release_attachments.rs` | **new**, 19 tests: identity set, policy/run-id, observation, refusals, code uniqueness |
 | `crates/firmwaresight-storage/migrations/0006_release_attachments.sql` | **new**, additive `gate_run_attachments` + immutability trigger |
 | `crates/firmwaresight-storage/src/db.rs` | `SCHEMA_VERSION` 5 → 6, `MIGRATION_0006`, the third tuple in `MIGRATIONS` |
-| `crates/firmwaresight-storage/src/gate.rs` | draft attachment rows, two pre-write refusals, in-transaction insert, ordinal read-back, `StoredGateAttachment`, extended duplicate check (+182) |
-| `crates/firmwaresight-storage/src/lib.rs` | re-exports for the new types |
-| `crates/firmwaresight-storage/tests/gate_history.rs` | +10 attachment tests, three of them §四 G's storage proofs (+337) |
-| `crates/firmwaresight-storage/tests/integrity_and_backup.rs` | §四 F's old-store arm: a v4 file holding a real run upgrades, gains an empty table, keeps the run readable (+91) |
-| `crates/firmwaresight-storage/tests/release_records.rs` | its `the_schema_is_at_version_five_…` pin renamed to `the_schema_is_at_this_builds_version_…`, `step_down_to_v3` now also drops `gate_run_attachments`, and its two fixtures gain the empty set (+13, −4) |
-| `crates/firmwaresight-storage/tests/{compare_candidates,map_companion_persistence,unknown_reasons,history_reads}.rs`, `crates/firmwaresight-report/tests/gate_schema_contract.rs` | mechanical consequences: the sixth named stage in the migration lists, the sixth version where a literal pinned it, `attachments: Vec::new()` in hand-built contexts |
-| `apps/desktop/src-tauri/src/release.rs` | the **only** production `GateRunDraft` construction gains `attachments: &[]` (+3) |
-| `apps/desktop/src-tauri/src/startup.rs`, `tests/diagnostics.rs`, `tests/real_artifact_intake.rs` | hand-built v4 stores and the expected pre-migration backup name `…v4-to-v6.sqlite` |
+| `crates/firmwaresight-storage/src/gate.rs` | draft attachment rows, two pre-write refusals, in-transaction insert, ordinal read-back, `StoredGateAttachment`, extended duplicate check (179 added, 3 removed) |
+| `crates/firmwaresight-storage/src/lib.rs` | re-exports for the new types (6 added, 2 removed) |
+| `crates/firmwaresight-storage/tests/gate_history.rs` | +9 attachment tests, three of them §四 G's storage proofs (334 added, 3 removed) |
+| `crates/firmwaresight-storage/tests/integrity_and_backup.rs` | §四 F's old-store arm: a v4 file holding a real run upgrades, gains an empty table, keeps the run readable (91 added) |
+| `crates/firmwaresight-storage/tests/release_records.rs` | its `the_schema_is_at_version_five_…` pin renamed to `the_schema_is_at_this_builds_version_…`, `step_down_to_v3` now also drops `gate_run_attachments`, and its two fixtures gain the empty set (9 added, 4 removed) |
+| `crates/firmwaresight-storage/tests/{compare_candidates,map_companion_persistence,history_reads}.rs`, `crates/firmwaresight-report/tests/gate_schema_contract.rs` (1–3 added each), `tests/unknown_reasons.rs` (5 added, 1 removed) | mechanical consequences: the sixth named stage in the migration lists, the sixth version where a literal pinned it, `attachments: Vec::new()` in hand-built contexts |
+| `apps/desktop/src-tauri/src/release.rs` | the **only** production `GateRunDraft` construction gains `attachments: &[]` (3 added) |
+| `apps/desktop/src-tauri/src/startup.rs` (2 added, 1 removed), `tests/diagnostics.rs` (7 added, 5 removed), `tests/real_artifact_intake.rs` (3 added) | hand-built v4 stores and the expected pre-migration backup name `…v4-to-v6.sqlite` |
 | `04_TECH/02_DOMAIN_MODEL.md`, `04_TECH/15_STORAGE_DATABASE_BASELINE.md` | this unit's dated additions (§五) |
 | `.ai/ACTIVE_TASK.md`, `10_AUDIT/SOURCE_PROMPTS/README.md`, `C1_VALIDATION/*`, `BASELINE.yaml`, `INDEX.md` | round records and pointers |
 
@@ -159,8 +161,13 @@ no placeholder constant exists anywhere in the workspace.
 
 ## 7. Gate and counts, measured
 
-- `python scripts/check.py` — **17 of 17 PASS, no SKIP, no FAIL** (log `target/c1_u1_check_pre_docs.txt`; a second run
-  after the documents and the regenerated baseline artifacts is the pre-commit state).
+- `python scripts/check.py` — **17 of 17 PASS, no SKIP, no FAIL**. Four runs are on the record and each names the
+  state it measured: `target/c1_u1_check_pre_docs.txt` before the documents of this unit were written,
+  `target/c1_u1_gate_final.txt` at `8e2aab9`'s committed bytes (the run whose figures are quoted above),
+  `target/c1_u1_gate_successor.txt` at the first staged state of the docs-only successor, and
+  `target/c1_u1_gate_successor_final.txt` at that successor's final bytes. All returned 17 of 17. A gate run is a
+  measurement of one byte-state, so a later edit retires the run that preceded it rather than leaving it as evidence
+  for something it never saw.
 - Rust: `cargo test --workspace` → **900 passed, 0 failed across 48 result lines** (`target/c1_u1_final_workspace.txt`).
   The handover recorded 870, so this unit adds 30 tests. Note for the next reader: `check.py`'s own log sums to a larger
   number than 900 because its `drift/ipc bindings` step runs a second `cargo test` to regenerate the ts-rs bindings; the
@@ -219,3 +226,37 @@ external sessions and M1–M6 `NOT_MEASURED`, `COHORT_BUILD = 11573661113 at 41b
 `B1 / RC / GA = NOT_AUTHORIZED`, `ACTIVE_TASK = NONE`.
 
 The round stops here. C1-U2 needs its own authorization.
+
+## 11. Self-corrections carried by the docs-only successor
+
+The product commit `8e2aab9` wrote three numbers about itself that its own files contradict, and each is answered by a
+dated successor rather than by an amend, because §Step 7 of the authorization forbids amend and force and `AGENTS.md` 9
+puts a pushed-history rewrite behind a human decision — the same route `114a84e` took for the freeze round's 186-to-185
+slip.
+
+1. `gate_history.rs` gained **9** attachment tests, not 10. The unit's +30 decomposes as 19 in the new
+   `release_attachments.rs`, 9 in `gate_history.rs`, one v4-store replay in `integrity_and_backup.rs` and the `/1`
+   byte-freeze test in `fingerprint.rs`;
+   `git diff 114a84e HEAD | grep -c '^+[[:space:]]*#\[test\]'` returns 30 and 900 − 870 confirms the total. The
+   `[[:space:]]*` in that pattern is load-bearing — without it the same diff returns 29, because the `fingerprint.rs`
+   test is indented inside its existing `mod tests` and the other 29 attributes sit at column 0, so a command quoted in a
+   document has to be the one that actually produces the number next to it. The **totals were never wrong** — only the
+   breakdown was — which is why a sum alone does not audit a claim.
+2. The change table in §2 quoted estimated line counts. It now carries `git diff --numstat 114a84e 8e2aab9` for every
+   path it names, so the next reader has the command rather than my arithmetic.
+3. §7 quoted one gate log for a round that ran three. The names and the state each measured are listed there now.
+
+Nothing in this section changes a verdict, a count that the gate prints, or a claim about the product: the successor
+touches three documents, `DIRECTORY_TREE.txt` regenerated byte-identical because no path moved, and `SHA256SUMS`
+re-hashes the changed blobs.
+
+A fourth defect belongs here because it was caught before it could be committed rather than after. Midway through the
+successor's edits I ran the closeout order but wrote
+`python scripts/generate_baseline_artifacts.py sums` **without the `> SHA256SUMS` redirection** the generator's own
+docstring puts in steps 4 and 6 — it emits to stdout by design, so that the manifest is never written in text mode on
+Windows. Nothing failed: the script printed 784 rows, the shell discarded them, and `git add SHA256SUMS` staged a file
+still carrying the digests of the *previous* index. The independent verifier then reported
+`index blob mismatch` on exactly the two paths edited since that manifest was regenerated, and `RESULT FAIL`. This is
+the control ADR-0029 installed for this specific mistake — the header says the guard exists because the manifest "has
+made this mistake twice" — and it worked: a stale manifest could not pass as a fresh one. The correction is the
+redirection, plus re-reading the generator's documented order instead of reconstructing it from memory.

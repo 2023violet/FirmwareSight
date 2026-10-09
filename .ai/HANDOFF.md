@@ -433,8 +433,12 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
 - **Figures on the C1-U1 tree, measured 2026-10-09 — these are the present ones, and the bullets below are dated
   history:** the gate's own `rust/test` step reports **900 Rust tests** (0 failed) across **48 `test result:` lines**
   (the 48th is the new `crates/firmwaresight-project/tests/release_attachments.rs` target) and the frontend still reports
-  **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP` and no `FAIL`. The +30 Rust are C1-U1's: 19
-  attachment tests in that new file, 10 in `gate_history.rs` and the v4-store replay in `integrity_and_backup.rs`. No
+  **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP` and no `FAIL`. The +30 Rust are C1-U1's, and
+  their arithmetic is measured rather than recalled: 19 in that new file, 9 in `gate_history.rs`, the v4-store replay in
+  `integrity_and_backup.rs` and the `/1` byte-freeze test in `fingerprint.rs` — 19 + 9 + 1 + 1 = 30, which is what
+  `git diff 114a84e HEAD | grep -c '^+[[:space:]]*#\[test\]'` counts. That pattern is not decoration: dropping the
+  `[[:space:]]*` yields 29, because the `fingerprint.rs` test is indented inside its existing `mod tests` while the other
+  29 sit at column 0. No
   test was deleted or weakened to get there, and one assertion that did not discriminate was strengthened instead — see
   `C1_VALIDATION/C1_U1_DATA_AND_IDENTITY_PLAN.md` §12.1. A standalone `cargo test --workspace` re-run at this head prints
   48 such lines and the identical 900, so the gate log and the ad-hoc run agree here; the two disagree on line count on

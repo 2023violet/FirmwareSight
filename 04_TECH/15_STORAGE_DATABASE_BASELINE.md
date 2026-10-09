@@ -307,7 +307,7 @@ A `derived_from_leading_bytes` row is reported as an invariant instead of being 
 `KindBasis::DerivedFromLeadingBytes` with a fabricated sample, because this schema persists the basis word
 and not the bytes it was derived from.
 
-Covered by `crates/firmwaresight-storage/tests/gate_history.rs` (31 tests, 10 of them this unit's): the
+Covered by `crates/firmwaresight-storage/tests/gate_history.rs` (31 tests, 9 of them this unit's): the
 canonical ordinal read-back, the `/2` re-read, same-id-different-attachment-set refusal, non-canonical and
 unobserved-digest drafts refused with zero rows written, a zero-attachment run storing no rows, eight
 boundary CHECK refusals re-checked through hand-written `INSERT`s, the three allowed kind words, UPDATE
