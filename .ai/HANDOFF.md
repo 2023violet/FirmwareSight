@@ -563,6 +563,12 @@ Known engineering `scripts/update_goldens.py` no longer reproduces the committed
                   `--features custom-protocol` shows a WebView network error. Each with its reason in
                   `P1_A0_VALIDATION/P1_A0_EXECUTION_REPORT.md` §9.7
 CI duplication    two jobs install the same ten apt lines on purpose
+Format scope      the BIN / Intel HEX range conflict between ADR-0006, the PRD,
+                  07_MVP_COHORT_AND_CLI_POLICY, 04_TECH/03 and P5's matrix is DECIDED as product
+                  direction on 2026-10-09 — ADR-0030 accepts Option C1, release-attached byte
+                  evidence, and 04_TECH/28 freezes the design — and is still UNIMPLEMENTED, so the
+                  compatibility row stays UNSUPPORTED and no C1-U* unit is authorized. The Intel HEX
+                  address-span promise is withdrawn by that decision, not deferred.
 ```
 
 Never describe this tree as "zero vulnerabilities" or "security clean"; the two advisories above are

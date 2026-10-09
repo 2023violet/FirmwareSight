@@ -179,6 +179,22 @@ sessions, `M1–M6 NOT_MEASURED` and D07-1…D07-6 are untouched. Reports
 `A0_TRUTHFULNESS_VALIDATION/A0_CORRECTIVE_REPORT.md` and `A0_TRUTHFULNESS_VALIDATION/A0_DESIGN_CHECKLIST.md`; state
 `BASELINE.yaml` `a0_truthfulness_corrective`; the pointer was `NONE` when the authorization arrived and is `NONE` now.
 
+**Dated 2026-10-09, and this is the sentence that supersedes the "stays a D07/Owner decision" clause above.** The Owner
+delivered 《Option C1 / Release-Attached Byte Evidence｜产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权 v1.0》,
+archived at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt`
+(15,545 bytes / 185 lines / 0 `CR` / SHA-256 `3dbd8781…e8f9c5`, `cmp` clean against the delivered bytes), and it made two
+decisions: **`OWNER_PRODUCT_DIRECTION = OPTION_C1`** and **`OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY`**.
+`ADR-0030` records them and `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` is the design baseline: BIN and Intel HEX are
+**release-attached byte evidence** — raw bytes, `byte_size`, SHA-256, declared kind — bound into the Gate
+required-artifact verdict and into the release identity, while Analyze stays ELF-plus-optional-MAP. The range conflict
+between `ADR-0006`, the PRD, the cohort policy, `04_TECH/03` and the compatibility matrix now has one dated answer, and
+eight live documents gained clarification notes pointing at `ADR-0030` rather than having their records rewritten.
+**This closes a decision, not a gap:** `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_IMPLEMENTED`,
+`BIN_HEX_ANALYSIS = UNSUPPORTED`, the compatibility matrix keeps its `UNSUPPORTED` status column, no code path was
+touched, the four implementation units `C1-U1`…`C1-U4` are specified and **none is authorized**, and the frozen cohort
+build is still `11573661113` at `41bb6a36`. The other vision-reconciliation findings stay review inputs and open.
+State: `BASELINE.yaml` `c1_direction_and_design_freeze`; the pointer is `NONE` before and after this round.
+
 ## Primary reading path
 
 1. `README.md`
@@ -411,6 +427,36 @@ push produces is read back after the push rather than written into the commit th
 stays `94336906…14d4`, and no `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `deny.toml`, `tauri.conf.json`, schema,
 migration, fixture, script, `.github/**`, ADR or `.gitattributes` path is in the diff.
 
+**907 tree lines and 778 entries over 780 tracked paths** at this C1 decision-and-design freeze (2026-10-09): three
+paths added and none removed since the A0 corrective — `09_ADR/ADR-0030-release-attached-byte-evidence.md`,
+`04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` and
+`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt` (the delivered
+authorization, 15,545 bytes, 186 lines, 0 `CR`, sha256 `3dbd8781…e8f9c5`, identical on the owner's file, in this
+repository's index blob and in the `SHA256SUMS` row) — and because all three land in directories the tree already
+lists, the tree grew by exactly three lines rather than four. Sixteen existing paths gained content, all of them
+documents: the eight that carry a dated clarification pointing at the new ADR (`ADR-0006`, `01_PRD_MVP.md`,
+`07_MVP_COHORT_AND_CLI_POLICY.md`, `04_TECH/01`, `04_TECH/03`, `04_TECH/16`, `05_ENGINEERING/07`,
+`P5_COMPATIBILITY_MATRIX.md`), this ledger, the prompt register, the five `.ai/` entry documents (`ACTIVE_TASK.md`,
+`CURRENT_STATE.md`, `DECISIONS.md`, `HANDOFF.md`, `README.md`) and `BASELINE.yaml`. Three new paths plus those sixteen
+plus the two regenerated artifacts `DIRECTORY_TREE.txt` and `SHA256SUMS` are the twenty-one staged paths, and that
+arithmetic is the whole scope claim: 21 = 3 + 16 + 2. **No count
+moved, and for a docs-only round that equality is the proof:** the gate's `rust/test` step still reports **870 passed /
+0 failed across 47 `test result:` lines** and the frontend still reports **Test Files 9 / Tests 295**, the identical
+pair A0 left behind, with 30 IPC commands, five goldens untouched and `assets/design-tokens.json` still
+`94336906…14d4`. `python scripts/check.py` ran at the final staged state and returned **17 of 17 with no `SKIP` and no
+`FAIL`**, with `scripts/verify_baseline_artifacts.py` **RESULT PASS** at these same 907 lines and 778 entries,
+`index blob mismatch 0`, `tracked but unlisted 0`, `duplicate entries 0`; `drift/goldens unchanged` and
+`drift/ipc bindings unchanged` passing is the proof that no contract or generated output moved. **One dated correction
+belongs in this ledger rather than in a silent edit:** the A0 paragraph above opens with 904 lines and 775 entries over
+777 tracked paths and then quotes its verifier at "these same 903 lines and 774 entries"; those two pairs cannot
+describe one state, this round's own measurement is exactly the first pair plus three, so the second is a
+transcription defect in that paragraph and it is left as written and corrected here by date. Forbidden by §5 and
+absent from the diff, byte-for-byte verified before and after the commit: every path under `apps/`, `crates/`,
+`schemas/`, `migrations/`, `fixtures/`, `golden/`, `assets/`, `templates/`, `scripts/` and `.github/`, plus
+`Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json`, `deny.toml`, `DESIGN.md` and the
+design tokens. **What is deliberately not in this ledger entry: a CI number.** §6 step 8 reads the run this push
+produces back job by job after the push, and no third commit is made to write it into the commit that triggers it.
+
 **What those digests are of, since ADR-0029 (Commit F1, 2026-10-05):** the canonical Git **stage-0 index blob
 bytes**, not the bytes sitting in the working directory. The rule and its alternatives are in
 `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md`; the limitation it closes was L26, and
@@ -491,6 +537,7 @@ disk, in a checksum domain that is deliberately not this one.
 | `04_TECH/25_TYPED_IPC_BINDINGS.md` | Typed IPC Bindings |
 | `04_TECH/26_PORTABLE_SCHEMA_POLICY.md` | Portable Schema Policy |
 | `04_TECH/27_GATE_STATE_SEMANTICS.md` | Release Gate State Semantics |
+| `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` | Release-Attached Byte Evidence (C1 design baseline; `ADR-0030`) |
 | `05_ENGINEERING/00_REPO_STRUCTURE.md` | Repository Structure |
 | `05_ENGINEERING/01_CODING_STANDARDS.md` | Coding Standards |
 | `05_ENGINEERING/02_TEST_STRATEGY.md` | Test Strategy |
@@ -556,6 +603,7 @@ disk, in a checksum domain that is deliberately not this one.
 | `09_ADR/ADR-0027-project-policy-and-provenance-adapter.md` | ADR-0027 — Project Policy and Provenance Adapter Boundary (P3; authorizes `firmwaresight-project`) |
 | `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` | ADR-0028 — Release Identity Uses the Exact Bytes Observed on Disk (P5; decides L22) |
 | `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` | ADR-0029 — Repository Baseline Checksums Are the Canonical Git Stage-0 Index Blob Bytes (P5 Commit F1; decides L26, distinct from ADR-0028 by evidence domain) |
+| `09_ADR/ADR-0030-release-attached-byte-evidence.md` | ADR-0030 — BIN and Intel HEX Ship as Release-Attached Byte Evidence, Not as Analyzed Builds (Owner product direction 2026-10-09; qualified supersession of ADR-0006's BIN/HEX clause; design approved, not implemented) |
 | `10_AUDIT/00_V0.3_AUDIT_RESOLUTION.md` | v0.3.0 Audit Resolution |
 | `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
 | `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |

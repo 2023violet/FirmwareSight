@@ -1319,6 +1319,70 @@ text with no source file; each says so in its own entry instead of standing for 
 
 
 
+## C1 Product Direction and ADR + Specification Freeze / Execution Authorization v1.0 — EXECUTED as `C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY` (2026-10-09)
+
+- File: `FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt` — 15,545 delivered bytes, 185 lines
+  (185 `LF`, file ends with a newline), **0 `CR`**, delivered sha256
+  `3dbd878181655271d95df4f283102853c5996081b0a06df911e6c46ff7e8f9c5`; stored as blob
+  `5e8e5621d32c113878f982328d04b6a1d0c2aa80` with **the same sha256**, because the arrival was already LF-only and
+  `.gitattributes` `*.txt text eol=lf` therefore had nothing to normalise. `cmp` against the owner's own file was run
+  and returned identical, so this is a copy and not a retranscription. The file reached the agent under a
+  percent-encoded filename (`FirmwareSight_C1_%E6%AD%A3%E5%BC%8F…_v1.0.txt`), which is why the digest and the `cmp`
+  result are the provenance and the name is not.
+- Canonical units: `OWNER_PRODUCT_DIRECTION = OPTION_C1` and
+  `OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY`, both read verbatim out of §0, whose condition is that
+  the Owner hands this file to the agent and asks for it to be executed. That condition is met: it arrived with the
+  instruction 执行prompt. §0 also fixes the meaning, and §6 step 0 required the provenance to be displayed before
+  anything was written: "这是一项产品方向与文档设计的授权，不是实现授权，也不是批准升级或替换任何 V1 cohort 构建。"
+- What it responds to: two read-only rounds of 2026-10-09 whose deliverables were **conversation-only and are
+  deliberately not archived here** — `FORMAT_SCOPE_RECONCILIATION` (the BIN/HEX A/B/C decision packet,
+  `RECOMMENDATION_READY`) and `FORMAT_SCOPE_C_ARCHITECTURE_PREFLIGHT` (verdict `C = FEASIBLE_WITH_ADR`, with C2 judged
+  `HARD_STOP_REQUIRES_OWNER_ADR`). Neither wrote a byte into the repository, so this register has no entry for them
+  and is not the place a recommendation is recorded. Their analysis was re-verified against source before this
+  round wrote anything, and one refinement was found and is recorded in `ADR-0030` D-4 rather than silently adopted:
+  the Gate canonical text already prints one `"<kind> <digest>"` line per artifact row, but
+  `gate.rs:405-413` and the two rule summaries bind that vector to *the snapshot*, so attachments need their own
+  field, their own canonical block and their own locator prefix instead of being appended to it.
+- Scope: §4 allows **exactly** five kinds of document change — (A) one new ADR, (B) one new technical specification,
+  (C) an Implementation Readiness Matrix as its appendix, (D) minimal dated clarifications on currently-valid
+  product/spec documents, (E) indexes, the prompt archive and governance pointers. §4B suggested
+  `04_TECH/27_RELEASE_ATTACHED_BYTE_EVIDENCE.md`; `04_TECH/27` is occupied by `27_GATE_STATE_SEMANTICS.md`, so the
+  document landed at `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` under the same instruction's own
+  "若已占用需选新路径" clause. §4C named the future units U1–U4; they are written `C1-U1`…`C1-U4` because `U1` is
+  already the identifier of the closed UI productization stage, and the four scopes and their order are unchanged.
+- Prohibitions and stop clauses: §5 forbids `apps/`, `crates/`, `schemas/`, `migrations/`, `fixtures/`, `golden/`,
+  `assets/`, `templates/`, `scripts/`, `.github/`, `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`,
+  `tauri.conf.json`, `deny.toml`, `DESIGN.md` and design tokens, and forbids writing product code, adding a field,
+  IPC command, migration or test, installing or running the client, swapping the cohort artifact, recruiting,
+  starting V1/B1/RC/GA, signing, releasing, widening the toolchain, adding a dependency, force-pushing, rewriting
+  history, or deleting or overwriting user work. Its six hard stops were each checked: Owner choice confirmed (§0),
+  tree clean and at the reference head, no C1 premise broken (§2's re-verification), the strict stale/export proof
+  written as the six-link chain in `04_TECH/28` §6, no fabricated analysis data or evidence grade, and no security
+  or network boundary crossed. **None was triggered.** §4's closing warning was implemented literally: an approved
+  direction is not a supported capability, so the compatibility matrix still reads `UNSUPPORTED`.
+- Outcome: `ADR-0030` accepted as product direction and design baseline, with a **qualified supersession** of
+  ADR-0006's "BIN/Intel HEX 基础 metadata" clause and its three clauses left standing; the specification frozen with
+  a data-flow diagram, a state machine, an invalidation table, an error model, an evidence-grading table, a
+  six-contract impact matrix and nineteen numbered contract tests; clarification notes added to `ADR-0006`,
+  `01_PRD_MVP.md`, `07_MVP_COHORT_AND_CLI_POLICY.md`, `04_TECH/01`, `04_TECH/03`, `04_TECH/16`,
+  `05_ENGINEERING/07` and `P5_COMPATIBILITY_MATRIX.md`, each of which keeps its own dated text and points at the ADR.
+  Contract decisions taken, not deferred: **no schema major moves** and `SnapshotId` is untouched; the Gate canonical
+  input gains an `attachments[…]` block emitted only when non-empty, under `firmwaresight-gate-input/2`, with `/1`
+  byte-frozen so every existing run id, golden and stored row keeps its meaning; `gate-results:1` and
+  `release-manifest:1` carry the new disclosure in their declared `extensions` point, in the same technique P3 and P4
+  used, and the pair label-plus-extension is what keeps the two grammars distinguishable. Intel HEX record checksums,
+  address span, loaded content, sections and symbols are excluded as `Unknown / Not verified` — which withdraws the
+  `04_TECH/03` address-span promise rather than deferring it — and an attachment's provenance to the analyzed build is
+  `Unknown` permanently and is never counted into `unknown.count`.
+- Final state as §6 step 9 requires, and as the only handover fact this entry asserts:
+  `C1_PRODUCT_DIRECTION = OWNER_APPROVED`, `C1_ADR_AND_DESIGN_FREEZE = COMPLETE`,
+  `C1_IMPLEMENTATION = NOT_AUTHORIZED / NOT_STARTED`, `BIN_HEX_ANALYSIS = UNSUPPORTED`,
+  `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_IMPLEMENTED`, `V1_COHORT = UNCHANGED (artifact 11573661113)`,
+  `ACTIVE_TASK = NONE`, `B1 / RC / GA = NOT_AUTHORIZED`. `NOT_RUNTIME_VERIFIED` in full: nothing was built, installed
+  or run, and no screenshot or session exists for this round. Machine state: `BASELINE.yaml`
+  `c1_direction_and_design_freeze`. A `C1-U*` implementation needs its own authorization; §4's own words are that
+  this round prepares a stable specification and executes none of it.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

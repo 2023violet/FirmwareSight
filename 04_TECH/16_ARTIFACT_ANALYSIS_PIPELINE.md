@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Architecture"
-last_updated: "2026-09-26"
+last_updated: "2026-10-09"
 ---
 
 # Artifact Analysis Pipeline
@@ -115,6 +115,18 @@ Intel HEX:
 - validation of records/checksum。
 
 They cannot supply symbols unless paired with ELF/MAP.
+
+> **Dated 2026-10-09 (`ADR-0030`) — this section is the pre-C1 design intent, and C1 changes what it delivers.**
+> Analysis stays ELF-only: the pipeline refuses every non-ELF input (`pipeline.rs:83-97`) and a snapshot seals from a
+> primary ELF plus an optional MAP (`build_snapshot.rs:123-136`), so nothing in §7 is produced *by analysis*. What is
+> decided instead is the Release-side half: BIN and Intel HEX ship as **release-attached byte evidence** — hash and
+> size observed on the bytes actually read, kind declared, `release packaging metadata` as the shipped bundle's own
+> record. Of the Intel HEX list above, `parsed address span`, `payload byte count` and `validation of
+> records/checksum` are **excluded**, not deferred: no parser exists and `ADR-0030` forbids inventing one for C1, so
+> those properties stay `Unknown / Not verified` and are never reported as zero. The last sentence above holds exactly
+> as written — and C1 does not weaken it into a symbols claim either, because an attachment is never paired with
+> anything in a snapshot. Specification: `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`. Status: approved design,
+> not implemented.
 
 ## 8. Normalization
 

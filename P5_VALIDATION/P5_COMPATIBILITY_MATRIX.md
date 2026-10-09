@@ -6,7 +6,7 @@ version: "1.1"
 status: "MEASURED"
 stage: "P5_PRODUCTIZATION"
 owner: "Engineering"
-last_updated: "2026-10-04"
+last_updated: "2026-10-09"
 ---
 
 # P5 Commit E — compatibility matrix (prompt §23, claim discipline §49, vocabulary §5 of the closure normalization)
@@ -67,6 +67,15 @@ unsupported and nothing in this file widens that.
 | GNU ld MAP | `SUPPORTED` | Section 3 above. |
 | HEX / BIN / UF2 / Mach-O / PE | `UNSUPPORTED` | Not in the cohort, not claimed. |
 | DWARF semantic analysis | `UNSUPPORTED` | Not implemented, and not this round's to implement. Debug sections are **recognized and excluded**, never read for meaning. §49 forbids writing "DWARF supported" because a debug section parses, and `debug_sections_cost_real_bytes_and_enter_neither_budget` asserts that no capability claims DWARF. |
+
+**Dated 2026-10-09, and this row's status is unchanged by that date.** `ADR-0030` was accepted on 2026-10-09 as product
+direction and design for BIN and Intel HEX as **release-attached byte evidence** — raw bytes, `byte_size`, SHA-256 and a
+declared kind, bound into the Gate required-artifact verdict and the release identity. It approves no code, so nothing in
+this table moved and the `HEX / BIN` entry above stays `UNSUPPORTED` with its evidence sentence intact: there is still no
+fixture, no attachment observation path and no runtime evidence. The status column keeps the five-value vocabulary the
+closure normalization fixed it to; `SUPPORTED_WITH_LIMITS` is the word a later round would use, and only with an
+attached-file fixture plus a measured run. Governance state words such as `DESIGN_APPROVED / NOT_IMPLEMENTED` belong to
+`.ai/` and `BASELINE.yaml`, not to this column. Design: `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`.
 
 ## 5. Memory layout shapes (§26 cases A–H)
 

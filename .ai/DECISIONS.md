@@ -2343,3 +2343,71 @@ M1–M6 `NOT_MEASURED`, `U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITAT
 CONFIRMATION`, `active_task = NONE`. Note on this file's own coverage: the two UI rounds before this one and the
 verdict record are not given sections here — they are dated in `BASELINE.yaml` and in their own reports — and this
 section is not a backfill of them.
+
+## C1 format-scope decision (2026-10-09) — an Owner choice written down, and the difference between a decision and a capability
+
+The BIN / Intel HEX conflict that A0 named and deliberately left open was decided the only way this project lets such
+a thing be decided: the Owner delivered an authorization file and asked for it to be executed. §0 of
+`FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt` (15,545 bytes, 185 lines, 0 `CR`, sha256
+`3dbd8781…e8f9c5`, archived and `cmp`-proved against the delivered bytes) turns that single act into
+`OWNER_PRODUCT_DIRECTION = OPTION_C1` and `OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY`, and nothing
+else — it is explicitly "not an implementation authorization, not approval to upgrade or replace any V1 cohort build".
+`ADR-0030` is the record; `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` is the design baseline.
+
+**The method worth keeping for the next round is that the decision was tested against the code before it was written
+down.** The Owner's §2 forbade treating the round's own summary as fact and required the prior C1 preflight's key
+citations to be re-verified. Every one held, and re-verification produced one refinement that changed the design: the
+Gate canonical text already prints one `"<kind> <digest>"` line per artifact row, so attached bytes *would* bind into
+the run id automatically — but `gate.rs:405-413` documents that vector as the snapshot's own and both rule summaries
+say "in the snapshot", so appending attachment rows there would have put a false sentence into a `PASS`. C1 therefore
+gets its own field, its own canonical block and its own `attachment:` locator, and the false-prose risk became a
+specification instead of a bug. Re-verification also found the structural argument against the tempting shortcut:
+`crates/firmwaresight-storage/migrations/0001_initial.sql:31-47` declares `parser_id`, `architecture`, `bitness`
+and `endianness` `NOT NULL`, so a BIN row in the `artifacts` table is not merely out of place, it is impossible
+without inventing analysis data — the same class of defect A0-01 closed in the capability report.
+
+**Two rulings do the real work, and both were the round's stated highest-risk gate.** First, identity:
+`firmwaresight-gate-input/1` is declared byte-frozen and is emitted whenever the attachment set is empty, and a
+non-empty set is canonicalized under `/2` with its own block. That single rule is what lets every existing run id,
+golden and stored `gate_runs` row keep reproducing exactly as they do today while new runs bind new bytes — the
+alternative of always emitting the block would have silently invalidated history, which is what §5's third hard stop
+forbids. Second, contracts: **no schema major moves.** `gate-results:1` and `release-manifest:1` keep their field sets
+and their meanings, and the new disclosure rides in the `extensions` point that `04_TECH/26` declares and that P3
+(`policy_sha256`, `overall_effective_severity`) and P4 (`gate_run_id`, `integrity_model`) already used for exactly this
+kind of additive fact. This is not an extension field dodging the semantics-change-needs-major rule: the version
+discrimination is carried by the canonical label inside the hashed input *and* by a mandatory-on-presence pair of
+extension entries, so a reader can always tell which grammar produced an id, and old documents are read with their
+original meaning rather than rewritten. A `gate-results:2` was considered and rejected for precisely that reason.
+
+**A decision is not a capability, and the round says so in eight documents rather than one.** `ADR-0006`, the PRD,
+`07_MVP_COHORT_AND_CLI_POLICY`, `04_TECH/01`, `04_TECH/03`, `04_TECH/16`, `05_ENGINEERING/07` and
+`P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md` each gained a dated clarification pointing at `ADR-0030`; not one of their
+earlier sentences was rewritten, and the compatibility matrix keeps `UNSUPPORTED` because there is still no fixture, no
+attachment path and no runtime evidence. The Intel HEX "address span" promise in `04_TECH/03` is **withdrawn, not
+deferred** — no record walker exists and C1 adds none. One instruction needed reconciling rather than obeying
+literally: §4's "兼容矩阵仍应标 UNSUPPORTED / NOT_IMPLEMENTED" mixes a status-column value with a governance state word,
+and that column is closed to the five values P5's normalization fixed, so the matrix reads `UNSUPPORTED` and
+`DESIGN_APPROVED / NOT_IMPLEMENTED` lives in `.ai/` and `BASELINE.yaml`. The distinction is recorded in `ADR-0030` D-10
+so the next reader sees the reconciliation, not a silent deviation.
+
+**What did not move, deliberately:** no product byte, schema, migration, fixture, golden, script, asset, template, CI
+file, dependency, lockfile, `DESIGN.md` or token; `SnapshotId` and its composition; the five-state vocabulary and
+`EffectiveSeverity`; U1's verdict and its guarded 25-item tally; V1's pause, its cohort build `11573661113` at
+`41bb6a36`, its 0 sessions and `M1–M6 NOT_MEASURED`; `P5 PASS_COMPLETE`, `G2 PASS`, `0.6.0 MVP_CANDIDATE`; the licence;
+L11 and L15; `B1 / RC / GA`. The four implementation units `C1-U1`…`C1-U4` are specified and none is authorized, and
+the `C1-` prefix exists because `U1` already names a closed stage. Nothing was built, installed or run:
+`NOT_RUNTIME_VERIFIED`.
+
+**Dated correction, found while writing this round's own ledger row:** `INDEX.md`'s A0 paragraph of 2026-10-09 opens
+with **904 tree lines and 775 entries over 777 tracked paths** and then says its gate verifier passed at "these same
+903 lines and 774 entries". Those two pairs cannot both describe one state, and the second matches nothing measured
+before or since — the re-freeze ledger immediately above it reads 900/772/774, and this round measures exactly
+904+3 / 775+3 / 777+3 after three added paths, which corroborates the first pair and not the second. It is therefore a
+transcription defect inside that paragraph, left there as written and corrected here by date rather than by editing
+another round's record; `BASELINE.yaml`'s `a0_truthfulness_corrective` block records no artifact counts of its own, so
+the ledger sentence is the only figure to check against, and this is the check. This round measures
+**907 tree lines and 778 entries over 780 tracked paths** (three paths added: the ADR, the specification and the
+archived authorization; no new directory row, which is why the tree grew by exactly three lines), gate **17 of 17 with
+no `SKIP` and no `FAIL`**, and the counts that A0 moved are unchanged by a docs-only round: **870 Rust across 47 result
+lines / 295 UI in 9 files**, 30 IPC commands, `assets/design-tokens.json` at `94336906…14d4`.
+`active_task = NONE` before and after.

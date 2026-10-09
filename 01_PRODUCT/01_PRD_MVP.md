@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product"
-last_updated: "2026-09-26"
+last_updated: "2026-10-09"
 ---
 
 # MVP PRD
@@ -28,6 +28,12 @@ last_updated: "2026-09-26"
 - 原文件默认只读；
 - 记录 SHA-256；
 - 不静默修改输入。
+
+> **Dated 2026-10-09（`ADR-0030`，限定 P0-1 的第三条输入）。** BIN / HEX 不是 Analyze 的输入，也不产出 metadata：
+> 架构、entry point、section、symbol 与 Intel HEX 地址跨度一律不声称。它们以 **Release 附属字节证据**进入产品——
+> 原始字节、byte size、SHA-256、声明的 kind——并且可以满足 `[artifacts] required` 里的 `bin` / `hex`。上面的
+> "记录 SHA-256" 与"原文件默认只读"两条继续适用于附属文件，且实现方式就是流式哈希。
+> 这一天 C1 只是**已批准的设计**：功能未实现（`04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`），本条不是能力声明。
 
 ### P0-2 Build Analysis
 ELF 最少展示：

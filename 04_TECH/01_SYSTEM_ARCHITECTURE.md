@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Architecture"
-last_updated: "2026-09-26"
+last_updated: "2026-10-09"
 ---
 
 # System Architecture
@@ -100,6 +100,13 @@ domain + normalize + diff + gate + release models.
 
 ### artifact
 ELF/MAP/BIN/HEX adapters.
+
+> **Dated 2026-10-09 (`ADR-0030`).** Read against the code: this crate's analyzer handles ELF and its auxiliary reader
+> handles GNU ld MAP. BIN and Intel HEX are detected as bytes (`intake.rs:179-202`) and then refused as analysis input
+> (`pipeline.rs:83-97`), so there is no BIN or HEX *adapter* here and C1 does not add one. `ADR-0030` puts those two
+> formats on the Release side instead, as release-attached byte evidence whose observation lives in
+> `firmwaresight-project`. Approved design, not implemented — see
+> `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`.
 
 ### storage
 SQLite repository implementations.

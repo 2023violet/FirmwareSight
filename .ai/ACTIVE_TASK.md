@@ -15,9 +15,65 @@ NONE.  Stage U1 is CLOSED: PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATION
 V1's cohort build is now REFROZEN_TO_U1_CANDIDATE (owner authority, later on 2026-10-08; see the block below the
 pointer note). V1 itself stays paused-at-recruitment with 0 eligible external sessions — a build identity is not a
 verdict, and re-freezing the instrument measures nothing.
+ON 2026-10-09 THE OWNER DECIDED THE BIN/HEX RANGE QUESTION. ADR-0030 accepts Option C1 — release-attached byte
+evidence — as product direction, and 04_TECH/28 freezes its design. That is a decision and a specification, not a
+feature: C1_IMPLEMENTATION = NOT_AUTHORIZED / NOT_STARTED, BIN_HEX_ANALYSIS stays UNSUPPORTED, the compatibility
+matrix keeps UNSUPPORTED, and this pointer stayed NONE before and after the round.
 
 THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
 stopped, kept because this project does not rewrite history, and they are not instructions for the next round.
+
+On 2026-10-09, after A0 had closed earlier the same day, the owner delivered 《FirmwareSight — Option C1 /
+Release-Attached Byte Evidence｜产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权 v1.0》 as a file and asked for it
+to be executed. Its §0 makes that act exactly two decisions and no more: OWNER_PRODUCT_DIRECTION = OPTION_C1 and
+OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY. The file is archived at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt (15,545 bytes, 185 lines,
+0 CR, sha256 3dbd878181655271d95df4f283102853c5996081b0a06df911e6c46ff7e8f9c5, cmp clean against the delivered bytes).
+It is DOCS-ONLY in its own words — "这是一项产品方向与文档设计的授权，不是实现授权，也不是批准升级或替换任何 V1 cohort
+构建" — so the round wrote ADR-0030, 04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md, dated clarification notes on the
+eight live documents that disagreed, and the governance pointers. No path under apps/, crates/, schemas/, migrations/,
+fixtures/, golden/, assets/, templates/ or scripts/ was touched, and no dependency, lockfile, DESIGN.md or token moved.
+
+What C1 decides, stated once: Analyze stays ELF-plus-optional-MAP; a .bin or Intel HEX file becomes a RELEASE
+ATTACHMENT carrying raw bytes, byte_size, SHA-256 and a declared kind; attachment bytes bind into the Gate identity, so
+required = ["bin"] / ["hex"] finally has a satisfiable path instead of a permanent BLOCK; the release identity and the
+bundle byte checks already covered exactly this and are inherited, not rewritten; and an attachment's provenance to the
+analyzed build is Unknown permanently — never promoted to Observed, and never counted into unknown.count, which is why
+attaching a file cannot move evidence.unknown_review. The Intel HEX address-span promise in 04_TECH/03 is withdrawn,
+not deferred, and no parser is added.
+
+The contract ruling, which its §3 called the highest-risk gate: NO schema major moves. gate-results:1 and
+release-manifest:1 keep version 1 and every existing field's meaning, and the new disclosure rides in their declared
+extensions point — the same technique P3 used for policy_sha256 and P4 used for integrity_model. Discriminability is
+carried by the Gate canonical label, not by an optional field: firmwaresight-gate-input/1 is byte-frozen and is emitted
+whenever the attachment set is empty, so every existing run id, golden and stored row keeps reproducing exactly as it
+does today; a non-empty attachment set is canonicalized under /2 with its own attachments[ ... ] block and must declare
+both extensions entries. SnapshotId and SnapshotId::compose are untouched, and no BIN/HEX row can enter a snapshot —
+the artifacts table's NOT NULL parser_id / architecture / bitness / endianness columns are the structural proof that
+putting one there would mean inventing analysis data.
+
+Its six hard stops were each checked before anything was written and none was triggered: the Owner's choice is the file
+itself and is displayed in the report; the tree was clean at the reference head d41284e54f723d74687cf351d85f1f2fc0b0be2a
+with no worktree or stash residue; the preflight premises were re-verified against source, and the one refinement found
+(attachments need their own GateContext field, their own canonical block and their own attachment: locator, because
+gate.rs:405-413 and the two rule summaries bind the existing vector to the snapshot) is recorded in ADR-0030 D-4
+instead of being smoothed over; the strict stale/export proof is written as a six-link chain; no analysis data or
+evidence grade is fabricated; and no security, path-authority or network boundary moved.
+
+What it does NOT do: implement C1 — the four units are specified as C1-U1 Data+Identity, C1-U2 Gate+Bundle,
+C1-U3 Contract+Regression and C1-U4 UI+CLI, and none is authorized; the C1- prefix exists because U1 already names the
+closed UI productization stage. It starts no V1 work, resumes nothing, recruits nobody, and does not re-freeze anything:
+the cohort build stays 11573661113 at product head 41bb6a36, NSIS 3,896,257 bytes 9a51e86a…c87d93, and that round's
+known consequence is left on the record rather than fixed by swapping the instrument — the cohort bytes predate A0, so
+participants will still see the pre-A0 refusal copy. U1's verdict and its guarded 25-item tally, P5 PASS_COMPLETE,
+G2 PASS, 0.6.0 MVP_CANDIDATE, licence PENDING_OWNER_CONFIRMATION, L11 and L15 CARRIED_FORWARD and
+B1 / RC / GA NOT_AUTHORIZED are untouched. Nothing was built, installed or run, so the round is NOT_RUNTIME_VERIFIED.
+Report: §6 step 9 asks for a closeout report, and §4 names no report path among the five kinds of document change it
+allows, so the report was delivered in conversation to the owner and is not written into the tree; the durable record
+is ADR-0030, 04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md and this file's register entry at
+10_AUDIT/SOURCE_PROMPTS/README.md. Machine state: BASELINE.yaml c1_direction_and_design_freeze. The pointer was NONE
+when the authorization arrived and is NONE now, and §6 step 9 ends the round here: a C1-U* implementation needs a new,
+separate authorization.
 
 On 2026-10-09 the owner delivered 《FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0》 as a
 file, granting only A0_PRODUCT_TRUTHFULNESS_CORRECTIVE: four bounded truthfulness fixes, eleven named exclusions, and

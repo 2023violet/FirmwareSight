@@ -71,7 +71,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 24_BUILD_IDENTITY_EVIDENCE.md
 │   ├── 25_TYPED_IPC_BINDINGS.md
 │   ├── 26_PORTABLE_SCHEMA_POLICY.md
-│   └── 27_GATE_STATE_SEMANTICS.md
+│   ├── 27_GATE_STATE_SEMANTICS.md
+│   └── 28_RELEASE_ATTACHED_BYTE_EVIDENCE.md
 ├── 05_ENGINEERING/
 │   ├── 00_REPO_STRUCTURE.md
 │   ├── 01_CODING_STANDARDS.md
@@ -145,10 +146,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0026-open-source-mvp-first-delivery.md
 │   ├── ADR-0027-project-policy-and-provenance-adapter.md
 │   ├── ADR-0028-release-identity-bytes-as-evidence.md
-│   └── ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
+│   ├── ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
+│   └── ADR-0030-release-attached-byte-evidence.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
+│   │   ├── FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt
 │   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt

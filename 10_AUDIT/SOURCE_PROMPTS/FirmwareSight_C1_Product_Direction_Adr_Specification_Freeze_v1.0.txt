@@ -1,0 +1,185 @@
+FirmwareSight — Option C1 / Release-Attached Byte Evidence
+产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权 v1.0
+日期：2026-10-09
+模式：DOCS-ONLY / ARCHITECTURE-DECISION / SPECIFICATION-BASELINE
+
+========================
+0. 授权语义（必须先读）
+========================
+本提示词是为产品所有者准备的“下一轮执行授权文件”，不是架构师已经擅自批准 C 的证明。
+
+【Owner 授权条件】只有产品所有者亲自将本文件交给 Coding Agent 并明确要求执行时，才构成以下两个决定：
+  OWNER_PRODUCT_DIRECTION = OPTION_C1
+  OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY
+
+该选择的含义：
+  - Analyze 继续仅分析 ELF（GNU ld MAP 为可选辅助证据）。
+  - .bin / Intel HEX 是 Release 侧附属“发布字节证据”，只做原始字节、大小、SHA-256 和有限的来源/声明状态记录。
+  - C1 与 C3 的边界：选择 C1 —— 附属发布产物必须能进入 Gate 的 required-artifact 判定，并被 Gate 输入身份绑定，而不是仅打包、不参与 Gate。
+  - 不声称 BIN/HEX 能被解析为 ELF 的 Section/Symbol/Memory/Entry Point，不声称 Intel HEX 地址跨度或记录校验和已核实。
+  - 这是一项产品方向与文档设计的授权，不是实现授权，也不是批准升级或替换任何 V1 cohort 构建。
+
+如本文件仅作为分析材料出现、并非 Owner 发出的明确执行指令，或 Owner 明确选择了 A / B / C3 / 暂缓，则 STOP，先请求确认；不得将“推荐 C1”擅自视为批准。
+
+========================
+1. 已有证据与本轮唯一目标
+========================
+项目：2023violet/FirmwareSight
+参考 HEAD（执行前重新读）：d41284e54f723d74687cf351d85f1f2fc0b0be2a。
+已完成的独立审查：PRODUCT_VISION_RECONCILIATION、Phase 4/5、FORMAT_SCOPE_RECONCILIATION、FORMAT_SCOPE_C_ARCHITECTURE_PREFLIGHT。禁止重新开展全量调研。
+A0_PRODUCT_TRUTHFULNESS_CORRECTIVE 已完成；对象归因标签和非 ELF 错误提示已按实际能力纠正，但 BIN/HEX 原始 MVP 承诺与实现仍冲突。
+
+当前约束（先核对，不得直接依赖本段作事实）：
+- ACTIVE_TASK = NONE；产品 0.6.0 MVP_CANDIDATE。
+- V1 = IN_PROGRESS / RECRUITMENT_READY；0 eligible sessions，M1–M6 NOT_MEASURED。
+- V1 cohort 仍为 GitHub artifact 11573661113，产品 head 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177；NSIS SHA256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93。
+- A0 后 head d41284e 及它的 CI 包不是新的 cohort 版本。
+- B1 / RC / GA 未授权；U1/P5/G2 既有裁决保留。
+
+本轮交付唯一目的：将 Option C1 从“可行的架构建议”转为**经 Owner 明确选择、附带可检验边界的正式产品方向与技术设计文档**，为以后分包实施准备稳定规格。不得实现任何 C1 功能。
+
+========================
+2. 接手、差异与 STOP 前置检查
+========================
+严格遵循 AGENTS.md §1–§11：先读 README.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、04_TECH/09_TECH_DECISION_MATRIX.md，以及任务相关 ADR 和规格。
+
+前置只读测量：
+- git rev-parse HEAD；git ls-remote origin main；git status --porcelain；git worktree list；git stash list（只读）。
+- 检查是否有未提交/未推送用户工作；若树非 clean 或与预期基线冲突，STOP，不 stash/reset/checkout/clean/强推。
+- 核对 09_ADR/ 现有最高编号和命名规范：若 ADR-0030 尚未占用，可用 ADR-0030；否则按真实序列选下一空编号，不能抢占或覆盖。
+- 读取先前 C1 可行性审查的完整报告，并核实关键代码定位；这是确认 ADR 依据，不是重做整轮研究。
+
+重点读取和交叉核对：
+09_ADR/ADR-0006-mvp-format-scope.md
+09_ADR/ADR-0021-memory-accounting.md
+09_ADR/ADR-0023-gate-five-state-semantics.md
+09_ADR/ADR-0026-open-source-mvp-first-delivery.md
+09_ADR/ADR-0027-project-policy-and-provenance-adapter.md
+09_ADR/ADR-0028-release-identity-bytes-as-evidence.md
+09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
+01_PRODUCT/01_PRD_MVP.md
+01_PRODUCT/07_MVP_COHORT_AND_CLI_POLICY.md
+04_TECH/03_FORMAT_SUPPORT.md
+04_TECH/24_BUILD_IDENTITY_EVIDENCE.md
+04_TECH/26_PORTABLE_SCHEMA_POLICY.md
+P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md
+V1_VALIDATION/README.md
+schemas/analysis.schema.json, gate-results.schema.json, project-config.schema.json, release-manifest.schema.json
+以及当前 Gate/Bundle/Config/Release UI 对应的真实实现。
+
+如发现先前 C1 预审中的关键判断与当前源码不符，在写任何规范前 STOP 并报告，不得“边设计边猜”。
+
+========================
+3. 必须正式裁决的六个技术问题
+========================
+D1｜分析输入 vs 发布附件的实体边界
+- 一个分析对象依旧是必需的 ELF；可选 MAP；不得创造 BIN-only 的假 BuildSnapshot，不得把 BIN/HEX 作为 Section/Symbol 为空的伪构建加入 Compare。
+- ReleaseAttachment 是附属于一次发布准备上下文的另一类实体。其权威持有者、何时选择、何时哈希、何时产生 GateContext、何时被 Bundle 收集，都必须在规格中指定唯一生产路径。
+- 不得改变 SnapshotId::compose 的含义，不得暗中改变 analysis:1/diff:1 的已有事实。
+
+D2｜附件身份、Gate 时序和抗 stale-PASS
+- C1 的 required = ["bin", "hex"] 必须有真实、可验证的满足路径；“词法允许却永远 BLOCK”不能延续。
+- Gate canonical input 必须绑定每个被评价附件的类型与实际字节 SHA-256；明确名称/路径是否也是身份的一部分，顺序、重名、多个同 kind 文件的规范化与稳定排序规则。
+- 同一 ELF+MAP，仅更换 BIN 字节：旧 Gate 不得依然有效；重复相同输入：Gate 身份必须稳定。
+- 附件被修改、替换、删除、增加、重命名后，何时重新计算、何时拒绝导出、何时需重新 Gate，写成确定的状态转移及错误路径。
+- 必须区分“文件存在”“文件内容读取并校验”“是否真实来自此 ELF/Git 构建”。最后一项如果不可证明，就是 Unknown，不得提升为 Observed。
+
+D3｜公开契约与版本策略（本轮最高风险关口）
+- Gate run_id 当前由 firmwaresight-gate-input/1 的 canonical input 得到；Gate-results v1 包含 run_id + snapshot_id，但尚未表达 snapshot 之外附件的身份依据。
+- 设计必须选定一个清晰且可复算的规范方案：例如经授权的可选 extensions 附件摘要说明，或 gate-input 版本升级与对应公共契约升级；两者不可含混，也不能用 extension 字段绕过“语义改变需 major”的 04_TECH/26 强规则。
+- 给出旧 Gate Run/旧 Release Bundle 的读取语义；不能要求已保存证据被静默重写；不能让同一 schema major 被两种不可区分的语义解释。
+- 对 analysis:1、diff:1、gate-results:1、accepted-reviews:1、release-manifest:1、project-config:1 逐项列出字段变化、语义变化、version/extension 选择与具体 contract tests。
+- 若明确证明该方案必须进行未获 Owner 授权的 major 变更或既有证据身份重定义，STOP，提交兼容性影响与两种可选策略，等待新授权。绝不能自行推进 C3 或实施破坏性升级。
+
+D4｜Bundle 与发布源一致性
+- 扩展源码现有 verify_sources、InputChecks、PlanStale 的设计边界，让附件和快照行受到同等 digest/size/source membership 约束；Gate judged A、Bundle ships B 必须不可发生。
+- 分清 bundle 内真实分析输入与被发布输出；Bundle 内只允许安全、规范的相对路径，禁止泄露绝对主机路径。
+- 说明不同目录同名文件、Windows 大小写折叠、非法相对路径、符号链接、TOCTOU、目录外路径、空文件、超大文件的处理。不能在预览和导出采用不同规则。
+- Release ID 和 manifest 现有 hash chain 不得失真；若附件使 bundle 字节变化，相关发布身份必须变化；既有校验器的兼容边界必须说明。
+
+D5｜证据等级与 Intel HEX 限制
+- 原始字节、长度、SHA-256：从实际读到的文件取得，Observed。
+- 来自用户选择的 kind：Declared；来自后缀或文件头启发式：Derived，并说明依据与不确定性。不要把后缀当格式校验。
+- Intel HEX 记录校验和、有效性、地址跨度、装载内容、Sections、Symbols、Memory、Entry Point、Object Attribution：本阶段一律 Unknown / Not verified，不能编造、不能当作 0。
+- .hex 扩展名但内容异常时：可以在“未经格式验证的原始字节附件”策略内保留，但不得向 Gate/Bundle/接收方断言其有效 Intel HEX。若影响 required-kind 规则的语义，给出明确对策和负向测试。
+- 不新增 HEX parser、不新增跨平台文件格式识别引擎。
+
+D6｜UI / CLI / 工作流分层
+- Analyze 文案 = 选择 ELF linker output 进行分析；MAP 可选。
+- Release 文案 = 附加真实发布文件，包含 BIN / HEX；动词为 Attach / Ship 而非 Analyze。
+- Gate 必须表达 required-kind 的可满足性、缺失、不可核验及具体拒绝依据；不因附件存在而推断它来自给定构建。
+- Bundle 预览与导出显示文件名、byte size、完整 hash、证据等级和局限提示；内部实现是否显示 source path 必须遵守本地隐私边界。
+- 不改变四动词导航，不引入设计新主题、不修改 tokens、不复制 mockup 中的虚构业务规则。
+- UI/CLI 共用 Core/Application 真相，不让 React 重新计算哈希、diff 或 Gate。
+
+========================
+4. 正式文档交付（本轮允许写入）
+========================
+允许且仅允许形成以下文档型改动：
+
+A｜一条新 ADR：明确批准 C1、其上下文、拒绝 A/B/C3 的原因、技术决定、契约/身份语义、Backward Compatibility、风险、排除项、回滚与可验证验收标准。明确标注它对 ADR-0006 中 BIN/HEX Basic 承诺的“限定性 supersession”，不覆写旧历史。
+
+B｜一份新技术规格（建议 04_TECH/27_RELEASE_ATTACHED_BYTE_EVIDENCE.md，若已占用需选新路径）：用实体/状态/数据流/规范化/错误模型/权限/证据分级的精确语言描述 C1。必须有数据流图（文本/Mermaid 均可）与示例输入/输出，明确排除哪些不可推导结论。
+
+C｜一份 Implementation Readiness Matrix（可作为该技术规格附录）：后续 U1 Data+Identity、U2 Gate+Bundle、U3 Contract+Regression、U4 UI/CLI 四个独立实施单元的输入、依赖、验收、STOP 条件。它是未来任务拆分，不是本轮开发授权。
+
+D｜对**当前有效**产品/规格文档提供最小 dated clarification：优先通过明确引用新 ADR 解决 PRD、cohort policy、format support、范围矩阵之间的口径冲突。对于记录当时事实的 P5/V1/U1 验证文件，不得改写历史结论或将历史 UNSUPPORTED 改写成今天 SUPPORTED；附加当前决策说明必须明确“设计已批准、功能尚未实现”。
+
+E｜必要的索引/源提示词存档/治理指针：09_ADR 索引、INDEX、.ai/CURRENT_STATE/.ai/DECISIONS/.ai/HANDOFF/ACTIVE_TASK 当前指针，以及基线校验相关索引。修改以项目既有管理规范为准；旧时间点记录保持原貌。不得让 ACTIVE_TASK 长期保留运行中的 C1 开发状态，结束后仍为 NONE。
+
+特别注意：文档“产品方向决定已批准”不等于“BIN/HEX 功能已经支持”。直到后续实现并得到运行证据，兼容矩阵仍应标 UNSUPPORTED / NOT_IMPLEMENTED；不得写 Supported。
+
+========================
+5. 禁止范围及 STOP 条款
+========================
+禁止改动：
+apps/、crates/、schemas/、migrations/、fixtures/、golden/、assets/、templates/、scripts/、.github/、Cargo.toml、Cargo.lock、package.json、pnpm-lock.yaml、tauri.conf.json、deny.toml、DESIGN.md、design tokens。
+
+禁止：写产品代码、添加新字段/IPC/迁移/测试、安装/运行客户端、替换 cohort artifact、参与者招募、启动 V1、B1、RC、GA、签名、发布、扩大工具链、引入依赖、强推/改写历史、删除/覆盖用户工作。
+
+硬停止情形：
+1. 无法确认 Owner 已正式选择 C1，或当前环境存在未获处理许可的 dirty worktree。
+2. 最新源码不再满足 C1 预审关键前提。
+3. 方案依赖对 SnapshotId 的静默变更、旧 Gate 的不可辨认重解释、Schema major 的未授权升级。
+4. 无法给出附件加入 Gate 后的严格 stale/export 一致性证明。
+5. 为显示 BIN/HEX 需要伪造分析数据或不实证据等级。
+6. 需要突破安全边界、默认网络传输、任意路径读取权限或破坏数据。
+
+遇到 STOP：不得转为自行批准 C3、A、B；记录具体证据、选择与待批准项，立即停工。
+
+========================
+6. 质量门、提交与交接
+========================
+执行步骤：
+0）展示 Owner 批准 C1 + 本轮 DOCS-ONLY 的授权出处；若没有，STOP。
+1）完成 preflight；说明可写路径和绝对禁区。
+2）先写 ADR 决议与技术规格，审查 D1–D6 所有问题是否闭合。
+3）输出 Contract Impact Matrix + Identity Proof Obligations + Compatibility & Security Checklist + 分包验收矩阵。
+4）核查所有允许修改的资料仍把“已批准的方向”与“尚未实现的功能”分开。
+5）执行仓库现有必要的静态/文档一致性检查与可执行的基线校验；不得因绿灯而声称运行态完成。
+6）只在规定文档范围内整理变更，并按项目规定更新 DIRECTORY_TREE/SHA256SUMS（只允许既有生成脚本生成，绝不手工修）及必要的索引。
+7）在没有 STOP、无脏工作冲突且所有检查通过时，按正常 fast-forward 提交并 push。不得 amend/force；提交应清楚标注 DOCS-ONLY；提交前后提供文件白名单/黑名单差异审计。
+8）远程 CI 如果由 push 触发，读回 Run ID/head sha/每个 Job conclusion；不要为在同一提交中记录它自己的 CI 编号而再制造第三个提交。
+9）交付一份完整决策和设计收口报告，并 STOP。下一轮真正 U1 实现需要单独的新授权。
+
+验收标准：
+- C1 被明确记录为 Owner 批准的产品方向（不冒充部署/运行支持）。
+- 不引入 BIN-only 分析快照、无 SnapshotId 静默漂移、无虚构 HEX 结构信息。
+- Gate 附件身份、Required Artifact、stale export、Bundle 字节一致性全部有明确规范且可被未来测试反证。
+- 公共 schema/version 的语义变化被清晰、正式地裁决；旧证据读取方式明确。
+- 文档冲突有 dated resolution，不抹除 ADR-0006/P5/V1 的当时历史。
+- 所有代码与资产禁区字节不变；无产品功能被更改。
+- 当前 V1 cohort 及 U1/P5/G2 裁决不变。
+- 形成可独立授权的 U1–U4 四个实施单位，但没有一个被本轮执行。
+
+最终状态（仅在验收完成后，作为本轮交接事实记录）：
+C1_PRODUCT_DIRECTION = OWNER_APPROVED
+C1_ADR_AND_DESIGN_FREEZE = COMPLETE
+C1_IMPLEMENTATION = NOT_AUTHORIZED / NOT_STARTED
+BIN_HEX_ANALYSIS = UNSUPPORTED
+BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_IMPLEMENTED
+V1_COHORT = UNCHANGED (artifact 11573661113)
+ACTIVE_TASK = NONE
+B1 / RC / GA = NOT_AUTHORIZED
+
+这是文档与决策回合。完成后停止，等待下一份明确执行授权。

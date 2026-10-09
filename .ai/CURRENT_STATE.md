@@ -43,6 +43,37 @@ last_updated: "2026-10-09"
   firmware engineers (§47/§48), the cohort bytes need private archival before they expire on 2026-10-22, and any UI
   follow-up needs its own prompt. Read `.ai/ACTIVE_TASK.md`'s top block, then
   stop — AGENTS.md 1 forbids lifting the next track off the roadmap.
+- **`C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY` ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE` throughout and
+  is `NONE` now.** After A0 had returned the pointer, the Owner delivered
+  《FirmwareSight — Option C1 / Release-Attached Byte Evidence｜产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权
+  v1.0》 as a file and asked for it to be executed — archived verbatim at
+  `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt` (15,545 bytes, 185
+  lines, 0 `CR`, sha256 `3dbd8781…e8f9c5`, `cmp` clean against the delivered bytes) — and its §0 turns that act into two
+  decisions and no others: `OWNER_PRODUCT_DIRECTION = OPTION_C1`,
+  `OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY`. **The range conflict A0 left open is therefore decided as
+  product direction**: `ADR-0030` accepts Option C1 with a *qualified supersession* of ADR-0006's
+  "BIN/Intel HEX 基础 metadata" clause (its other three clauses and the Keil/ArmClang/IAR fixture precondition stand), and
+  `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` freezes the design — a `.bin` or Intel HEX file is a **release
+  attachment** carrying raw bytes, `byte_size`, SHA-256 and a declared kind; its bytes bind into the Gate identity, so
+  `required = ["bin"]` / `["hex"]` finally has a satisfiable path instead of a permanent `BLOCK`; an attachment's
+  provenance to the analyzed build is `Unknown` permanently and is never counted into `unknown.count`; Analyze stays
+  ELF-plus-optional-MAP and no BIN/HEX row may enter a snapshot. **A decision is not a capability:**
+  `C1_IMPLEMENTATION = NOT_AUTHORIZED / NOT_STARTED`, `BIN_HEX_ANALYSIS = UNSUPPORTED`,
+  `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_IMPLEMENTED`, and the compatibility matrix keeps `UNSUPPORTED` — the
+  word `NOT_IMPLEMENTED` belongs to governance state, not to that column, which is closed to five values.
+  No schema major moved, `SnapshotId` is untouched, and no `apps/`, `crates/`, `schemas/`, `migrations/`, `fixtures/`,
+  `golden/`, `assets/`, `templates/`, `scripts/` or `.github/` path, dependency, lockfile, `DESIGN.md` or design token
+  was touched; the counts **did not move with this round** — **870 Rust / 295 UI in 9 files** on the 17-step gate, 30
+  IPC commands, `assets/design-tokens.json` at `94336906…14d4`. The four implementation units are specified as
+  `C1-U1`…`C1-U4` (the `C1-` prefix avoids colliding with the closed `U1` stage) and **none was executed**.
+  `NOT_RUNTIME_VERIFIED` in full: nothing was built, installed or run, no screenshot or session exists, and the eight
+  clarification notes point at the ADR instead of rewriting any round's record. U1's verdict and guarded tally, V1's
+  pause, its cohort build (`11573661113` / `9a51e86a…c87d93`), its 0 sessions and `M1–M6 NOT_MEASURED`, `P5
+  PASS_COMPLETE`, `G2 PASS`, `0.6.0 MVP_CANDIDATE`, the licence `PENDING_OWNER_CONFIRMATION`, L11 and L15
+  `CARRIED_FORWARD` and `B1 / RC / GA NOT_AUTHORIZED` are all untouched. Durable record: `ADR-0030`, `04_TECH/28`, the
+  register entry in `10_AUDIT/SOURCE_PROMPTS/README.md`; §6 step 9's closeout report was delivered in conversation,
+  because §4's five allowed kinds of document change name no report path. Machine state: `BASELINE.yaml`
+  `c1_direction_and_design_freeze`.
 - **A0 PRODUCT TRUTHFULNESS CORRECTIVE ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE` throughout and
   is `NONE` now.** *FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0* was delivered as a file,
   archived verbatim at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt` (18,845 bytes, 252

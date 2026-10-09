@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product"
-last_updated: "2026-09-27"
+last_updated: "2026-10-09"
 ---
 
 # MVP Cohort & CLI Policy
@@ -21,6 +21,12 @@ FirmwareSight 的长期目标用户覆盖 GCC/Clang、Keil/ArmClang、IAR 等生
 - Git provenance optional。
 
 Keil/IAR 用户仍属于 discovery cohort，但在 adapter fixture/回归完成前不得宣传 Supported。
+
+> **Dated 2026-10-09（`ADR-0030`）。** 上面第三条在本轮的口径由该 ADR 限定：BIN/Intel HEX 不在 Supported cohort 的
+> 分析能力里，也不提供 metadata；它们属于 **Release 侧附属字节证据**（字节、byte size、SHA-256、声明 kind），参与
+> Gate 的 required-artifact 判定与身份绑定。截至该日期此能力**已批准设计、尚未实现**，所以对用户仍不得宣传 Supported；
+> `P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md` 的 `UNSUPPORTED` 行是当前的真实状态。规格见
+> `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`。
 
 ## 2. CLI scope resolution
 

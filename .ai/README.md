@@ -173,6 +173,19 @@ the same 17-step gate with no `SKIP` — the +2 Rust are A0-01's and A0-02's reg
 Rust / 225 UI in 8 files" and "Counts unmoved at 868 / 291", is that round's own dated record and is kept as written.
 A0 opened no stage: `active_task` was `NONE` before it and is `NONE` now, and its report is
 `A0_TRUTHFULNESS_VALIDATION/A0_CORRECTIVE_REPORT.md` ·
+**Dated later on 2026-10-09, and this is the live pointer for the BIN/HEX range question:** the Owner delivered
+《FirmwareSight — Option C1 / Release-Attached Byte Evidence｜产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权
+v1.0》 and asked for it to be executed, which its §0 makes into exactly two decisions —
+`OWNER_PRODUCT_DIRECTION = OPTION_C1` and `OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY`. `ADR-0030`
+records them with a **qualified supersession** of ADR-0006's "BIN/Intel HEX 基础 metadata" clause, and
+`04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md` is the frozen design: a `.bin` or Intel HEX file becomes a
+**release-attached byte evidence** file — raw bytes, `byte_size`, SHA-256, declared kind — that can finally satisfy the
+Gate's `bin`/`hex` requirements and is bound into the run and release identities, while Analyze stays
+ELF-plus-optional-MAP and an attachment's provenance to the build stays `Unknown`. **A decision is not a capability:**
+`BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_IMPLEMENTED`, `C1_IMPLEMENTATION = NOT_AUTHORIZED / NOT_STARTED`, the
+compatibility matrix keeps `UNSUPPORTED`, none of `C1-U1`…`C1-U4` was run, nothing was installed so the round is
+`NOT_RUNTIME_VERIFIED`, and V1's cohort build is still `11573661113` at `41bb6a36`. No product byte moved, so **the two
+test figures above are unchanged by this round**, and `active_task` was `NONE` when it arrived and is `NONE` now ·
 Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
 stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
 and its continuation round installed the CI-built product and inspected it, so **U1 was
