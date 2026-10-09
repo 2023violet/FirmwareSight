@@ -144,6 +144,12 @@ a non-circular check, recorded in `01_artifact/ARTIFACT_IDENTITY.json`. The inst
 with real `SendInput` (no `/S`, no message injection); `01_artifact/INSTALL.json` carries the wizard trail and
 the digest of the bytes actually launched, which was re-hashed from disk before it ran.
 
+*(Dated erratum, later on 2026-10-08, owned by the V1 re-freeze round: the sentence above about a `null`
+`sha256_digest` was a missing key read through `--jq`. The field is **`digest`**, and for `11539359554` GitHub
+publishes `sha256:45922e90d1ca19b1fa42966497f9ec262cd24d123f769a08f4d1b24e1aec56d8` — the same value as the ZIP hash in
+the table above. So the round's conclusion stands and its evidence was in fact one authority richer than it claimed.
+Nothing this report accepted is reopened.)*
+
 ## 9. Owner store protection and restore
 
 The owner's live store was recorded (size, mtime, full SHA-256), independently backed up and hash-verified, then

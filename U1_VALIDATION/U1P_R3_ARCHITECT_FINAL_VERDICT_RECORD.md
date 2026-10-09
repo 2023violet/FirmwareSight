@@ -83,6 +83,14 @@ the container's internal `SHA256SUMS.txt` verified entry by entry, CRC clean, `a
 authority here is the internal manifest plus the metadata commit, not a self-referential digest. Re-downloading
 the bytes is evidence about the bytes; it is not the re-freeze, and nothing was installed or launched.
 
+*(Dated erratum, later on 2026-10-08, owned by the V1 re-freeze round: the subtraction in the paragraph above is
+withdrawn. These endpoints publish the checksum as **`digest`**, formatted `sha256:<hex>`, and there is no field named
+`sha256_digest` — `gh api … --jq .sha256_digest` prints `null` for a **missing key**, which is not a published null. For
+`11573661113` GitHub's `digest` is `sha256:330e83af75db705b2acae6ff559baf0e863d7766947bc21240488861cd4f3fb4`, equal to
+the container hash this record's own check measured, so a GitHub-side authority does exist and the byte identity is
+corroborated outside this repository's arithmetic. The verdict, the tally and the recommendation are untouched; the
+nine other checks in §3 all read the same. Key presence was re-tested with `in` on both endpoints.)*
+
 ## 4. What the Architect looked at directly
 
 Eight readings, taken off the images rather than off the agent's description of them: Compare's ready state at

@@ -29,7 +29,12 @@ run 37828673549 (#85, attempt 1, 10 of 10 jobs), product head 41bb6a36dd6e1ce40d
 bytes (924f3a71...1d8373), payload 5026c47b...0ddaae, version 0.6.0, unsigned, not expired, GitHub expiry
 2026-10-22T19:18:25Z. Both builds were downloaded and hashed again before anything was written about either; the F3
 block in BASELINE.yaml is left intact and dated as superseded; and no session, install, recruitment or external
-distribution was started. Record: V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md; protocol: V1_VALIDATION/README.md.
+distribution was started. A third authority sits beside the local bytes and the container's manifest: GitHub publishes
+`digest` = `sha256:330e83af…4f3fb4` for the live build and `sha256:40cb5c99…37850e` for the superseded one, each equal
+to the container hash measured from the downloaded bytes. Dated erratum, later on 2026-10-08: the block below the
+re-freeze one, and the rounds above it, said "GitHub's `sha256_digest` is null" — that was a missing key read through
+`jq`, not a published null. The field is named `digest`, and it matches. Record:
+V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md; protocol: V1_VALIDATION/README.md.
 The swap is defensible rather than convenient because F3→41bb6a36 is 44 product paths, all of them the presentation
 layer (42 under apps/desktop/ui/src, plus ipc.rs's additive MainWindowPage::Overview variant and two window-title
 strings, plus that test): crates/, assets/, schemas/, fixtures/, golden/, .github/, scripts/, 09_ADR/ and templates/
@@ -92,6 +97,11 @@ SHA-256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93, contai
 the container's internal SHA256SUMS verified entry by entry, toolchain.git_commit 41bb6a36..., the artifact not
 expired, and nothing installed or launched. One subtraction stated plainly: GitHub's `sha256_digest` is null for this
 artifact, so the second authority is the internal manifest plus the metadata commit, not a self-referential digest.
+(Dated erratum, later on 2026-10-08, owned by the re-freeze round: that subtraction is withdrawn. These endpoints
+expose `digest`, not `sha256_digest`, and for 11573661113 it reads `sha256:330e83af…4f3fb4` — the same value as the
+container hash measured from the downloaded bytes, so GitHub is a second authority after all. The verdict it qualifies
+is unchanged: the tally, the waiver and the recommendation all still stand. Evidence: this round's evidence root,
+00_authority/GITHUB_ARTIFACT_DIGEST_FIELD.json, and the values are reprinted in the record §3.)
 What it did NOT do: touch V1_VALIDATION/, move `v1_execution.cohort_build_frozen`, amend the protocol, or begin
 recruitment. Re-verifying bytes is evidence about a candidate; it is not a stage transition, and the F3 artifact
 stays the frozen cohort build in every authority document until a separate authority says otherwise.

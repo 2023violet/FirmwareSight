@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "EXECUTION_RECORD"
 owner: "Research"
-last_updated: "2026-10-06"
+last_updated: "2026-10-08"
 ---
 
 # V1 Own-artifact External Validation
@@ -56,7 +56,7 @@ build is the U1-accepted product build, the exact bytes the Architect's visual a
 | Signing | **unsigned** — no certificate, no signature, no notarization; the participant disclosure is unchanged |
 | Updater | not enabled (`bundle.createUpdaterArtifacts` is false) |
 | Expiry | `expired: false`, measured 2026-10-08; GitHub expiry **2026-10-22T19:18:25Z** — the bytes must be privately archived before then |
-| GitHub's own `sha256_digest` | `null` for this artifact, so the second authority is the internal manifest plus `artifact-metadata.json`'s `toolchain.git_commit`, which equals the head above |
+| GitHub's own published checksum | the artifact API's **`digest`** field: `sha256:330e83af75db705b2acae6ff559baf0e863d7766947bc21240488861cd4f3fb4` — **equal to the container hash measured above**, so GitHub is a second authority outside the download. There is no field named `sha256_digest` on these endpoints; where earlier documents in this repository wrote "`sha256_digest: null" they were reading a *missing key* through `--jq`, and this row is the dated correction of that wording (evidence: re-freeze evidence root `00_authority/GITHUB_ARTIFACT_DIGEST_FIELD.json`) |
 
 ### The first frozen build, recorded and superseded on 2026-10-08
 
@@ -74,6 +74,10 @@ local date; the evidence root's own name is the UTC instant it was created):
 | CLI companion | 1,668,153 bytes, SHA-256 `76bf7d0c1c4acb0f64a5fdda75b036ec658f272086b2283ce0ba56d3543f7ddd` |
 | Payload executable | `6598880dd8dde479d9326e678d0c22eddfc859a6c8cbc98ce7049b8f3c310646` |
 | GitHub expiry | **2026-10-20T14:21:52Z** |
+
+GitHub's published `digest` for `11419727517` is `sha256:40cb5c9933e84583ae0895923249c873e129fd4f3c5a51d2b549e5e3ee37850e`,
+which equals the container hash re-measured on 2026-10-08 — so the superseded build is as independently checkable as the
+live one, and neither row here rests on this repository's own arithmetic alone.
 
 ### What did and did not change between them
 

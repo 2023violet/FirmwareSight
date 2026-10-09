@@ -775,6 +775,13 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     `toolchain.git_commit = 41bb6a36…`. Ten checks, all true, nothing installed or launched. One subtraction stated
     plainly: GitHub's `sha256_digest` is `null` for this artifact, as it was for U1P-R1's, so the second authority is
     the internal manifest plus the metadata commit, not a self-referential digest.
+    *(Dated erratum, later on 2026-10-08, owned by the re-freeze round: that field name was wrong and the subtraction
+    was an overstatement. GitHub publishes the checksum as **`digest`**, formatted `sha256:<hex>`, and for
+    `11573661113` it equals the container hash measured above — `sha256:330e83af…4f3fb4`. Reading
+    `.sha256_digest` with `--jq` prints `null` for a key these endpoints do not return, which is not the same fact. So a
+    GitHub-side authority does exist, and the freeze now rests on three: that digest, the container-internal
+    `SHA256SUMS.txt`, and the metadata `git_commit`. Evidence:
+    `%TEMP%\FirmwareSight-V1-Refreeze-20261009T035521Z\00_authority\GITHUB_ARTIFACT_DIGEST_FIELD.json`.)*
     **The tally, guarded by the verdict's own sentence.** 25 items — **23 PASS, 1 FAIL, 1 NOT_VERIFIED,
     0 NOT_CAPTURED** — with 2 `MISMATCH_PROVED` flags inside the 23 PASS. *"DO NOT rewrite this tally to 25/25 or to
     100%."* A waiver converts nothing: the FAIL stays a FAIL and the NOT_VERIFIED stays NOT_VERIFIED.

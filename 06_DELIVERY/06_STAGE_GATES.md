@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Delivery"
-last_updated: "2026-10-07"
+last_updated: "2026-10-08"
 ---
 
 # Stage Gates

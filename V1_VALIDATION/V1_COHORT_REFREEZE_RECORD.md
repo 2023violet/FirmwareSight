@@ -80,14 +80,23 @@ launched, or opened.
 | Signed | **no** — unsigned, disclosed to participants before install | **no** — same, and the disclosure is unchanged |
 | GitHub expiry | `2026-10-20T14:21:52Z` | `2026-10-22T19:18:25Z` |
 
-Two honest notes about the method. **The container size is not the installer size** — 5,536,303 against 3,888,432,
-and conflating them is a trap this project has recorded before. And **GitHub's `sha256_digest` field is `null` for
-both artifacts**, so the API's own digest cannot be the second authority; what is checked instead is the container
-hash, the artifact's internal `SHA256SUMS.txt` verified entry by entry, and `artifact-metadata.json`'s
-`toolchain.git_commit` matching the head the run reports. The payload digest *locates* the build; it is not the
-digest of the file a participant launches, because the bundler rewrites a 27-byte bundle-type token inside the copy
-it packs. Full records: `01_old_f3_build/BUILD_VERIFICATION.json`,
-`02_candidate_build/BUILD_VERIFICATION.json`, `00_authority/BOTH_BUILDS_VERIFIED.txt`.
+Two honest notes about the method, one of which corrects an earlier round's wording **and this round's own first draft
+of it**. **The container size is not the installer size** — 5,536,303 against 3,888,432, and conflating them is a trap
+this project has recorded before. And the GitHub-side digest authority does exist, under a different field name than
+this repository has been writing: the artifact API publishes **`digest`, whose value is `sha256:<hex>`**, and there is
+**no field named `sha256_digest`** on either the run-artifacts list or the single-artifact endpoint. Querying
+`sha256_digest` returns `null` because the key is *absent*, not because GitHub published a null digest — and that is
+what U1P-R1, the U1P-R3 verdict record and the first draft of this paragraph reported. Re-measured here with the key's
+presence checked rather than assumed: GitHub's published `digest` for `11573661113` is
+`sha256:330e83af75db705b2acae6ff559baf0e863d7766947bc21240488861cd4f3fb4` and for the superseded `11419727517` is
+`sha256:40cb5c9933e84583ae0895923249c873e129fd4f3c5a51d2b549e5e3ee37850e` — **each equal to the container digest this
+round hashed from the downloaded bytes**, so the freeze is corroborated by an authority outside the download, which is
+what the owner's §五 first acceptance criterion asks for. Two further authorities stay in place: the artifact's
+internal `SHA256SUMS.txt` verified entry by entry, and `artifact-metadata.json`'s `toolchain.git_commit` matching the
+head the run reports. The payload digest *locates* the build; it is not the digest of the file a participant launches,
+because the bundler rewrites a 27-byte bundle-type token inside the copy it packs. Full records:
+`01_old_f3_build/BUILD_VERIFICATION.json`, `02_candidate_build/BUILD_VERIFICATION.json`,
+`00_authority/BOTH_BUILDS_VERIFIED.txt`, `00_authority/GITHUB_ARTIFACT_DIGEST_FIELD.json`.
 
 **What this round deliberately refused.** HEAD's own CI built a Windows artifact too — `11592690212`, run
 `37874177649` (#87), container 5,536,796 B, enumerated from the API and never fetched. That
@@ -186,6 +195,19 @@ legitimate. **V1 remains `IN_PROGRESS` / `RECRUITMENT_READY` and no participant 
 - **Consent and disclosure unchanged**: the build is still unsigned, participants are still told so before install,
   and install friction is still evidence rather than something to remove.
 
+**Same-day correction, and the commit that carries it.** After `f633b28` was pushed, a script raised
+`KeyError: 'sha256_digest'` — a bug in this round's own tooling that turned out to be a finding, because the same
+missing key had been read as a published null by U1P-R1, by the U1P-R3 verdict record and by this record's first draft
+(§3). The correction was propagated by *appending dated notes where earlier rounds wrote their own words* and rewriting
+only this round's own assertions: `BASELINE.yaml` gained `github_digest_field_erratum_2026_10_08` beside U1P-R1's
+`windows_artifact`, `github_digest_field_name_note_2026_10_08` beside U1P-R2's, an erratum sentence inside the verdict
+block's `artifact_re_verified_before_writing_its_bytes_anywhere`, and a corrected `github_digest_field`;
+`U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md` §8 and `U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md` §3 each gained a
+bracketed dated note; `.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`, `.ai/DECISIONS.md` and `.ai/HANDOFF.md` were
+reconciled the same way. No verdict, tally, waiver, deviation or disposition changed: the correction *adds* an
+authority to a byte identity that was already accepted, and removes one understatement. That is the whole content of the
+docs-only successor commit this paragraph is written for.
+
 ## 8. The retention hazard this round surfaced, and did not paper over
 
 GitHub artifacts expire, and the expiry dates are now the binding constraint on the whole cohort:
@@ -203,7 +225,9 @@ the single most time-sensitive item in this record.
 
 **Observed**: the downloaded byte counts and SHA-256 digests of both containers and both installers; the internal
 `SHA256SUMS.txt` results; `artifact-metadata.json` version, toolchain and `git_commit`; the API's `expired` and
-expiry fields; the ten-job outcomes and the per-job test counts of both runs; the subtree tree-OIDs; the
+expiry fields; the API's `digest` for both cohort artifacts, and the absence of any `sha256_digest` key on either
+endpoint, checked by key presence rather than by a rendered default; the ten-job outcomes and the per-job test counts
+of both runs; the subtree tree-OIDs; the
 `generate_handler!` command list at both heads; the clean pre-round machine state. **Derived**: the tables above,
 computed from those reads. **Declared**: the owner's authorization and its boundary list; the U1 verdict's
 recommendation; the metrics contract's M1–M6 definitions — quoted, not re-derived. **Unknown**: whether the candidate

@@ -2291,8 +2291,16 @@ artifacts were downloaded again and hashed from the downloaded bytes: F3's conta
 `40cb5c99…37850e` with NSIS 3,888,432 B / `182506f2…63d12`, and the candidate's container 5,544,133 B /
 `330e83af…4f3fb4` with NSIS 3,896,257 B / `9a51e86a…c87d93`, each checked entry by entry against its own
 container-internal `SHA256SUMS.txt`, each with `artifact-metadata.json` reporting `toolchain.git_commit` equal to the
-head that build is named for, neither expired. GitHub's own `sha256_digest` is **`null` for both**, so it is stated as
-absent rather than borrowed: the second authorities are the internal manifest and the metadata commit. The first
+head that build is named for, neither expired. GitHub does publish a checksum for these artifacts: the field is
+**`digest`**, formatted `sha256:<hex>`, and it equals the container hash measured here on both sides
+(`sha256:330e83af…4f3fb4` live, `sha256:40cb5c99…37850e` superseded). **The erratum this round owns:** U1P-R1, the
+U1P-R3 verdict record and this round's own first draft wrote that `sha256_digest` is `null` for these artifacts,
+because `gh api … --jq .sha256_digest` prints `null` for a key the endpoint does not return. A missing key read through
+`jq` is not a published null, and the distinction matters — that digest is an authority *outside* this repository's
+arithmetic, which is what a frozen research build should rest on. It was corrected by checking key presence with `in`
+instead of trusting the rendered default (evidence: `00_authority/GITHUB_ARTIFACT_DIGEST_FIELD.json`). The GitHub
+field is therefore a third authority alongside the internal manifest and the metadata commit, not a substitute for
+them. The first
 authorities for CI health are the two runs read job by job — `37475580080` (#72) and `37828673549` (#85), each
 attempt 1, each **10 of 10**.
 

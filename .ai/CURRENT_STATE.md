@@ -52,9 +52,14 @@ last_updated: "2026-10-08"
   `9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93`**, CLI companion `1,668,149` B
   (`924f3a71…1d8373`), payload `5026c47b…0ddaae`, version `0.6.0`, **unsigned**, `expired: false`, GitHub expiry
   **`2026-10-22T19:18:25Z`**. Both builds were downloaded and hashed again before either was written into an authority
-  document (§二), each verified entry by entry against its own container `SHA256SUMS.txt`; GitHub's
-  `sha256_digest` is `null` for both, so the second authorities are that internal manifest and
-  `artifact-metadata.json`'s `toolchain.git_commit`. **F3's block in `BASELINE.yaml` is preserved and dated as
+  document (§二), each verified entry by entry against its own container `SHA256SUMS.txt`, and each **independently
+  corroborated by GitHub's published artifact `digest`**, which equals the measured container hash on both sides
+  (`sha256:330e83af…` for the live build, `sha256:40cb5c99…` for the superseded one). **Erratum, same day:** earlier
+  documents in this repository — U1P-R1, the U1P-R3 verdict record, and this round's own first draft — wrote that
+  "GitHub's `sha256_digest` is `null`". The field is named **`digest`** (value `sha256:<hex>`); no field called
+  `sha256_digest` exists on these endpoints, and `--jq .sha256_digest` prints `null` for a *missing key*. The
+  correction strengthens the freeze rather than weakening it: the checksum now has an authority outside this
+  repository's own arithmetic. `F3`'s block in `BASELINE.yaml` is preserved and dated as
   superseded, not rewritten.** What did *not* move: sessions stay **0**, M1–M6 stay `NOT_MEASURED`, the metric
   operations/denominators/thresholds are untouched, U1 keeps its verdict and its guarded 25-item tally with
   deviations A–D open, P5 `PASS_COMPLETE`, product `0.6.0 MVP_CANDIDATE`, G2 `PASS`, B1/RC/GA `NOT_AUTHORIZED`, L11
@@ -67,7 +72,11 @@ last_updated: "2026-10-08"
   8 files** to **291 in 9 files**, which is U1's own test contract, not a V1 metric. The docs-only head's own artifact
   `11592690212` (run `37874177649`, #87) is named only to be refused. Record:
   `V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` (FS-V1-RF-001); machine state: `BASELINE.yaml`
-  `v1_execution.cohort_build_refreeze` with `cohort_build_state: REFROZEN_TO_U1_CANDIDATE`.
+  `v1_execution.cohort_build_refreeze` with `cohort_build_state: REFROZEN_TO_U1_CANDIDATE`. The re-freeze is commit
+  `f633b28`, whose own CI run 37885059634 read back **10 of 10** at 868 Rust / 291 UI and 774 tracked paths; the digest
+  erratum above rides in the single docs-only successor that follows it, and a round cannot cite its own hash, so the
+  successor's run is the next reader's to record — `BASELINE.yaml`
+  `v1_execution.cohort_build_refreeze.predecessor_docs_commit_ci_readback` carries `f633b28`'s figures job by job.
 - **Active task as of 2026-10-07, kept as what the first U1 round was authorized to do and where it stopped** (the
   live pointer is the block above, and the dated blocks below carry the track through to its closure):
   `U1_UI_PRODUCTIZATION_CONVERGENCE`. A **UI productization track**, opened 2026-10-07 under
@@ -349,6 +358,10 @@ last_updated: "2026-10-08"
   `toolchain.git_commit = 41bb6a36…`; ten checks, all true, nothing installed or launched. One honest subtraction:
   this endpoint returns `sha256_digest: null` for the artifact, as U1P-R1 found for its own, so the second authority
   is the internal manifest plus the metadata commit rather than a self-referential digest.
+  *(Dated erratum, later on 2026-10-08: that reading queried a key these endpoints do not have. GitHub publishes
+  **`digest`** = `sha256:<hex>`, and for `11573661113` it equals the container hash the re-freeze round measured —
+  so a GitHub-side authority does exist and the sentence above understated it. The subtraction was real; its name was
+  wrong. See the re-freeze bullet at the top of this file.)*
   What it did **not** do: the record's last section is titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED` and was
   treated as binding. No cohort re-freeze, no protocol amendment, no touch to `V1_VALIDATION/`, no movement of
   `v1_execution.cohort_build_frozen`, no recruitment. **The F3 artifact stays the frozen cohort build in every

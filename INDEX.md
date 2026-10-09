@@ -348,7 +348,23 @@ the five `.ai/` entry documents, root `README.md`, `06_DELIVERY/06_STAGE_GATES.m
 would have invalidated the very digests it records. The counts a docs-only head must hold still are **868 Rust across
 47 result lines / 291 UI in 9 files**, and the complete gate was run twice — once at the intermediate staged state and
 once at the state this commit carries — each returning **17 of 17 steps with no `SKIP` and no `FAIL`**, with the
-verifier **RESULT PASS** at these same 900 lines and 772 entries.
+verifier **RESULT PASS** at these same 900 lines and 772 entries. *(Dated correction on the same day: three gate runs
+were kept, not two — `05_validation/GATE_LOG_intermediate_pass1.txt`, `GATE_LOG_run2.txt` and the final
+`GATE_LOG.txt` — and `BASELINE.yaml` `this_round_local_validation` names all three; the row above understated its own
+round. The figures are identical across them.)*
+
+**The same-day erratum successor, also 2026-10-08.** One more docs-only commit follows the re-freeze, and it exists for
+a finding rather than for a number: GitHub's artifact checksum is published as **`digest`**, not `sha256_digest`, and for
+both cohort builds its value equals the container hash measured from the downloaded bytes, so the byte identity the
+re-freeze claims now rests partly on an authority outside this repository's own arithmetic
+(`V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` §3 and §7 hold the correction and the method). **Twenty-one content paths
+plus `SHA256SUMS` make twenty-two**, and `DIRECTORY_TREE.txt`, regenerated, came back **byte-identical**, the direct
+proof that no path was added or removed, which is why this ledger
+still reads **900 lines and 772 entries over 774 tracked paths**: `BASELINE.yaml`, the four `.ai/` entry documents,
+`06_DELIVERY/06_STAGE_GATES.md`, this ledger, two `U1_VALIDATION/` reports that gained a bracketed dated note instead of
+a rewrite, and the twelve `V1_VALIDATION/` documents. Eleven of the twenty-one change only their front-matter
+`last_updated`, which had fallen behind the dated blocks already inside them; `V1_VALIDATION/README.md` carries both that
+refresh and the corrected checksum row. Zero product paths again, and the design tokens still hash `94336906…14d4`.
 `P0_FINAL_PROMOTION_REPORT.md` records the original commands. The v0.5.1 manifest these replaced is history,
 and the nine-entry drift that `0.6.0` closed is described in `.ai/DECISIONS.md`.
 
