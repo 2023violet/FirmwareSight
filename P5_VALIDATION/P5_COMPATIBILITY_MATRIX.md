@@ -77,6 +77,23 @@ closure normalization fixed it to; `SUPPORTED_WITH_LIMITS` is the word a later r
 attached-file fixture plus a measured run. Governance state words such as `DESIGN_APPROVED / NOT_IMPLEMENTED` belong to
 `.ai/` and `BASELINE.yaml`, not to this column. Design: `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`.
 
+**Dated 2026-10-10, and this row's status is still unchanged by that date.** `C1-U4` produced the measured run the
+paragraph above anticipated: a real Windows install attached a 4,120-byte BIN and a 716-byte Intel HEX, ran the Gate to
+`PASS` with `attachment:bin:3080a363…` and `attachment:hex:1d806a87…` cited, previewed both as `release-attachment`
+rows and exported a bundle whose shipped bytes re-hash identical to their sources and which the portable verifier
+accepts 63 of 63 (`C1_VALIDATION/C1_U4_USER_WORKFLOW_INSTALLED_REPORT.md` §5, §9). **`HEX / BIN` stays `UNSUPPORTED`
+here anyway, for two reasons, and the second is why this is a note rather than a status change.** First, this row is
+about an artifact *class the product can analyze*, and C1 analyzes nothing: `BIN_HEX_ANALYSIS` is `UNSUPPORTED`, the
+kinds are declarations read from file names, and moving this row would claim a parser that does not exist. Second, the
+condition above names "an attached-file fixture **plus** a measured run", and only half of it is met inside the
+repository — the attached bytes this round shipped live in an evidence root outside Git, not in `fixtures/`, so the
+fixture half is still unsatisfied no matter how many runs happen outside the tree. What *did* move is the governance
+word, which the paragraph above already assigns elsewhere: `BIN_HEX_RELEASE_ATTACH` is now
+`DESIGN_APPROVED / USER_VERIFIED_ON_WINDOWS` in `.ai/` and `BASELINE.yaml`, and macOS/Linux installed acceptance stays
+`NOT_RUNTIME_VERIFIED`. Whether a committed attachment fixture plus a `SUPPORTED_WITH_LIMITS` row for
+*release-attached byte evidence* (as distinct from analysis) should exist at all is an Architect decision, and it is
+recorded as one in `C1_VALIDATION/C1_U4_USER_WORKFLOW_INSTALLED_REPORT.md` §16 rather than taken here.
+
 ## 5. Memory layout shapes (§26 cases A–H)
 
 | case | status | evidence |

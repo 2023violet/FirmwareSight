@@ -56,11 +56,50 @@ because no such test had ever been written. Gate at **987 Rust / 48 lines on thi
 POSIX, NOT measured — still no POSIX runner here) / 295 UI in 9 files**, 17 of 17 with no SKIP, verifier PASS at
 797 / 795 / 925, seven mutations each killed by a named test and reverted byte-identically.
 Status word: `C1_U3 = LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING`.
-That is still not a feature: no UI control, no CLI --attach and no IPC command exists, so no person can attach a file.
-C1_U4 is authorized as stage 3 and remains NOT_STARTED; C1-U3's own entry condition was C1-U2R1's objective gate,
-which was green locally, and the packet — not this round's self-assessment — is what authorized the work. Neither
-`C1-U2R1` nor `C1-U3` is accepted yet: both read ARCHITECT_REVIEW_PENDING, and no push has happened — `origin/main`
-is still `2859bb2`. This pointer stayed NONE before, during and after each round.
+At stage 2's close that was still not a feature: no UI control, no CLI --attach and no IPC command existed, so no
+person could attach a file, and `C1_U4` was authorized as stage 3 but NOT_STARTED. C1-U3's own entry condition was
+C1-U2R1's objective gate, which was green locally, and the packet — not this round's self-assessment — is what
+authorized the work.
+STAGE 3 OF THAT PACKET RAN THE SAME DAY AS `C1-U4`, and it is the stage that made the thing usable. The CLI gained a
+repeatable `--attach <FILE>` on `gate` and `release prepare` with every exit code unchanged; the desktop gained four
+use-case IPC commands (30 registered commands to 34) behind session-local `att-<pid>-<n>` handles, so no host path
+crosses to the WebView; the Release page gained the §9 "Release attachments" section with leaf, declared kind, byte
+size, full SHA-256 and evidence class; `release-report.html` gained its limits line **conditionally**, which is what
+kept `p4_golden.rs` and `drift/goldens unchanged` green; and the storage invariant sentence now names the attachment
+set. The declared kind is read from the file name and never from the bytes, so `image.bin` yields
+`attachment:bin:3080a363…` while the same bytes named `payload.img` yield `attachment:unknown:3080a363…` and satisfy
+nothing — ADR-0030 D-3, observed at a surface a person drives.
+THEN THE INSTALLED WALK FOUND TWO DEFECTS THAT NO TEST HAD FOUND. On a build packaged from `d95acea`, the Gate's own
+"Required artifacts" table printed `bin Required Missing` underneath an `artifacts.required` PASS that cited
+`attachment:bin:3080a363…`, and the bundle preview labelled `artifacts/image.bin` with role `artifact` — the same role
+the analyzed ELF and MAP carry. Both surfaces had re-decided a question Core had already answered. `073c83c` moved the
+answer to one place: Core's new `RequirementSource::{Analyzed, Attachment}` and `requirement_evidence(word)` now feed
+both the rule and the table (via `GateArtifactRowDto.satisfied_by` and a "Satisfied by" column reading *Analyzed
+build* / *Release attachment* / *Missing*), and `FileRole::ReleaseAttachment` gives a shipped attachment its own role
+in the preview while an attachment-free guard proves nothing leaks. Neither fix touched a schema, a golden or a
+digest.
+The walk was then repeated on a build packaged from `073c83c` (`3d9a3512…`, 0 dirty paths) and both fixes were read
+back off the installed binary. All four verbs ran on the installed app against a disposable project; three refusals
+were observed rather than staged — `ERR-BUNDLE-6114` twice (once naming the current build, then, after that build was
+re-analyzed, naming the **baseline**, so the session boundary is per-side) and `ERR-BUNDLE-6102` once, when
+`image.bin` was mutated after the preview: it refused on **Gate-run identity**, because the file is tracked and
+mutating it dirtied the workspace, and the destination folder was empty before and empty after. The bundle the
+installed app wrote passed `sha256sum -c` on 10 of 10 indexed files and `verify_bundle_portability.py` at 63 of 63,
+which also closes `C1-U3` §12.1's outstanding item. The CLI and the desktop computed the **same** Gate run id
+`gate-a6cb8e84…d47239`, the same policy sha, the same release id `release-acdd6e7193df…` and the same proposed folder,
+from different edges.
+Gate at **1,020 Rust / 48 lines on this Windows host (POSIX NOT MEASURED — still no runner here) / 305 UI in 9
+files**, 17 of 17 with no SKIP, core-smoke 3/3, package 4/4, drift 8/8 including goldens and IPC bindings unchanged.
+Status words: `C1_U4 = LOCAL_USER_WORKFLOW_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and the product word this round may
+propose but not grant is `C1_U4 = READY_FOR_ARCHITECT_PRODUCT_ACCEPTANCE`. `BIN_HEX_RELEASE_ATTACH` moved to
+`DESIGN_APPROVED / USER_VERIFIED_ON_WINDOWS`; `BIN_HEX_ANALYSIS` stayed `UNSUPPORTED` and nothing parsed a BIN or a
+HEX; macOS and Linux installed acceptance stays `NOT_RUNTIME_VERIFIED`.
+The machine was put back: uninstalled through the uninstaller's own UI with "Delete the application data" left
+unchecked, the test store moved into the evidence root, and the owner's store restored to the three digests it had
+before it was parked. Neither `C1-U2R1`, `C1-U3` nor `C1-U4` is accepted yet: all three read ARCHITECT_REVIEW_PENDING,
+and no push has happened — `origin/main` is still `2859bb2`, with `99a1bfd`, `7a6af54`, `268440a`, `920e764`,
+`3cfbc03`, `d95acea`, `073c83c` and this round's records on top of it locally. This pointer stayed NONE before, during
+and after each round.
 
 THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
 stopped, kept because this project does not rewrite history, and they are not instructions for the next round.

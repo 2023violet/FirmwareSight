@@ -10,8 +10,9 @@ last_updated: "2026-10-10"
 
 # Current State
 
-- Date: 2026-10-10 *(the live state is the `C1-U3` entry below; the `C1-U2R1` entry it follows, the C1-U2 entry that
-  round reworks, and the U1 entry all of those supersede keep their own dates inside their own bullets)*
+- Date: 2026-10-10 *(the live state is the `C1-U4` entry below; the `C1-U3` entry it follows, the `C1-U2R1` entry that
+  round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
+  inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - **Active task: `NONE`.** Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
@@ -175,6 +176,80 @@ last_updated: "2026-10-10"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
+- **`C1-U4` (desktop + CLI + installed acceptance, stage 3 of the same packet) ran on 2026-10-10 and is
+  `LOCAL_USER_WORKFLOW_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.**
+  Its record is `C1_VALIDATION/C1_U4_USER_WORKFLOW_INSTALLED_REPORT.md`; the product word it proposes and does not
+  grant is `READY_FOR_ARCHITECT_PRODUCT_ACCEPTANCE`, and nothing here signs `C1 COMPLETE`, `USER_AVAILABLE`,
+  `SUPPORTED_WITH_LIMITS`, beta, RC or GA. **This is the stage where a person can finally attach a file**: a
+  repeatable `--attach <FILE>` on the CLI's `gate` and `release prepare` with all six exit codes unchanged; four
+  use-case desktop commands (30 registered commands → 34) behind session-local `att-<pid>-<n>` handles so no host path
+  crosses to the WebView; the §9 "Release attachments" section with leaf, declared kind, byte size, **full** SHA-256
+  and evidence class, verbs Attach and Ship and the word Analyze never as an action; the report's limits line, written
+  **conditionally** so `apps/cli/tests/p4_golden.rs` and `drift/goldens unchanged` stayed green; and the storage
+  invariant sentence now naming the attachment set. `BIN_HEX_RELEASE_ATTACH` therefore moves to
+  **`DESIGN_APPROVED / USER_VERIFIED_ON_WINDOWS`**; `BIN_HEX_ANALYSIS` stays **`UNSUPPORTED`** — nothing parsed a BIN
+  or a HEX, and the walk showed the declaration rule working as frozen, since the same bytes arrive as
+  `attachment:bin:3080a363…` named `image.bin` and as `attachment:unknown:3080a363…` named `payload.img`, satisfying
+  nothing in the second case.
+  **The installed walk found two defects that 1,020 Rust tests, 305 UI tests and a 63-check portable verifier had all
+  missed, and both are recorded rather than smoothed.** On a build packaged from `d95acea` the Gate page's own
+  "Required artifacts" table printed `bin Required Missing` underneath an `artifacts.required` **PASS** whose evidence
+  list cited `attachment:bin:3080a363…` — the table had re-decided from analyzed rows only a question Core had already
+  answered, which is the same failure §9's Gate row exists to prevent, one level up. On the same build the bundle
+  preview labelled `artifacts/image.bin` with role `artifact`, the label the analyzed ELF and MAP carry, so a reader
+  could not tell the two evidence classes apart. `073c83c` moved the answer into one place — Core's new
+  `RequirementSource::{Analyzed, Attachment}` and `requirement_evidence(word)` now feed **both** the rule and the
+  table (through `GateArtifactRowDto.satisfied_by` and a "Satisfied by" column reading *Analyzed build* / *Release
+  attachment* / *Missing*), and `FileRole::ReleaseAttachment` gives a shipped attachment its own role while an
+  attachment-free guard asserts nothing leaks. Neither fix touched a schema, a golden or a digest. Both were then read
+  back off a build packaged from `073c83c` (`FirmwareSight_0.6.0_x64-setup-U4F.exe`, 3,962,441 bytes, sha256
+  `3d9a3512af82e04a4d2e0de5de94491130d2c7b3e247dd421bbf9aa64f25be25`, 0 dirty paths), reinstalled through its own NSIS
+  wizard and re-walked. **§9's "exactly as for analyzed rows" was read as being about the columns and not the role, and
+  that reading is put in front of the Architect rather than buried in a commit message** — it is the one place §9's
+  wording underdetermined the behaviour (`04_TECH/28` §14.3).
+  **Three refusals were observed, none staged.** `ERR-BUNDLE-6114` twice from `Prepare bundle`: once naming the current
+  build `snap-4b4087e`, then — after that build was re-analyzed — naming the **baseline** `snap-3f615b6`, which shows
+  the session boundary is per-side and that a bundle carrying a comparison needs both sides analyzed since launch; a
+  rule §4 never states in words. `ERR-BUNDLE-6102` once from `Export bundle`, after a tracked `image.bin` was mutated
+  on disk: it refused on **Gate-run identity** rather than on a digest comparison, because the mutation dirtied the
+  project's workspace and so changed the canonical input and the run id — mechanism checked with `git status`, not
+  assumed — and the destination folder was empty before and empty after, so nothing partial was written.
+  `ERR-BUNDLE-6115` from the CLI on an unreadable `--attach` path, exit **3**.
+  **The two edges agreed on every identity.** CLI at 12:09 local and the installed desktop at 13:11–13:39 local
+  computed the same `gate-a6cb8e84d226921d242bafebc7ca45534ce82a27cb7b3d9e5946249168d47239`, the same policy sha
+  `a6a38dbb5df043c4d06e99b1296da8ce4aee04b03aaad985adc645f5d6f9ea77`, the same build and baseline snapshot ids, the same
+  `release-acdd6e7193df941a80deae5b17c9f4ac252066b519c5466fa6704d8806646299` and the same proposed folder
+  `u4e-brake-node-1.2.3-acdd6e7193df`; re-running the Gate after the reinstall produced that run id unchanged. The
+  folder the installed app wrote passed `sha256sum -c SHA256SUMS` on **10 of 10** indexed files and
+  `verify_bundle_portability.py` at **63 of 63**, with shipped `image.bin`/`boot.hex` hashing identical to their
+  sources and `git_dirty: false` in the manifest — **which closes `C1-U3` §12.1's first outstanding item**: an external
+  SHA-256 implementation has now verified a bundle this product wrote.
+  **Counts, per run, with the host named: 1,020 Rust across the same 48 `test result:` lines / 0 failed on this Windows
+  host (+33 over stage 2's 987), and POSIX `NOT MEASURED`** — still no runner here, so no POSIX figure is stated for
+  this head and `M11`'s `#[cfg(unix)]` cases have still never compiled. The +33 is reported as a total and **not
+  attributed target by target**, because this round did not re-measure the per-target baseline at `3cfbc03`; no test
+  was deleted, renamed away from a T-C1 id or weakened, and no new test binary appeared. **305 UI in 9 files** (from
+  295); gate **17 of 17** with no `SKIP` and `GATE_EXIT=0`; core-smoke 3/3; package 4/4 with `PKG_EXIT=0`; drift 8/8
+  including `drift/goldens unchanged` and `drift/ipc bindings unchanged`; deny "advisories ok, bans ok, licenses ok,
+  sources ok".
+  **Four things are reported rather than fixed.** A visible `git.exe` console window appears above the installed app
+  during bundle work — observed twice, stealing foreground and closing on its own — because the Gate reads
+  `git:status`/`git:head`; the child is expected, the console is a decision about the spawn path. The Gate page's build
+  and baseline selectors reset to defaults on navigation while the verdict panel keeps the last run, which is honest
+  (the panel names its run id and `Prepare bundle` refuses at 6114 rather than packaging the new selection) but can
+  mislead a reader who skips the identity block. `6114`'s requirement is nowhere stated before the press. And
+  `6102` prints two long run ids and asks a person to spot the difference. **`P5` §38 row H** measured
+  `%LOCALAPPDATA%\FirmwareSight` as "emptied but not deleted" on 2026-10-03; this round measured the directory itself
+  gone, and that is reported here rather than rewritten into P5's dated text.
+  **The machine was put back.** Windows Sandbox is unavailable on this host, so P5's fallback ran again under U4 §23:
+  the owner's live store was hashed, parked and restored byte-identical (`d6e41034…`, `fd4c9fda…`, `e3b0c442…`), never
+  opened or upgraded; the app was uninstalled through its own UI with "Delete the application data" left **unchecked**;
+  the test store was moved into the evidence root rather than deleted; and no V1 cohort was reused or replaced.
+  **No push**: `origin/main` stays `2859bb2`, the packet grants none, and `99a1bfd`, `7a6af54`, `268440a`, `920e764`,
+  `3cfbc03`, `d95acea`, `073c83c` and this round's records sit on top of it locally. **No CI-built artifact exists for
+  any of the three packet stages**, so this round's installed evidence is real but is not the CI-artifact install P5
+  §8 has; the ten-job CI read-back in the register still belongs to `facf287`. `C1-U2R1`, `C1-U3` and `C1-U4` all read
+  `ARCHITECT_REVIEW_PENDING`, and a coding agent's own walk is not the independent acceptance any of them needs.
 - **`C1-U3` (portable contract and regression, stage 2 of the same packet) ran on 2026-10-10 and is
   `LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.** Its
   mission was the five compatibility promises `04_TECH/28` §7 makes about machinery `C1-U1`/`U2` had already built,

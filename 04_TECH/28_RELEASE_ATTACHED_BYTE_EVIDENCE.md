@@ -665,3 +665,70 @@ promise remains withdrawn rather than deferred. What `C1-U3` added is the guaran
 attach bytes documents them in a way the five published contracts accept without a version bump — and the evidence
 that they do, measured against P4's frozen bundle rather than asserted.
 
+**That paragraph is now superseded, by name and by date.** It was true when `C1-U3` wrote it, and the same is true of
+§14's table rows reading `C1-U3 / C1-U4 = NOT_AUTHORIZED / NOT_STARTED` — that table is the state 2026-10-09 left
+behind and is kept as it was written. `C1-U4` landed the surfaces they list; §14.3 is the record.
+
+### 14.3 Executed 2026-10-10 by `C1-U4` — §9's sentences reach a person, and the installed walk corrects this document's §9 reading
+
+Status and reconciliation only; §§1–13 stay as the Owner froze them and §14/§14.1/§14.2 stay as their rounds wrote
+them. `C1-U4` is stage 3 of the same packet, and its own record is
+`C1_VALIDATION/C1_U4_USER_WORKFLOW_INSTALLED_REPORT.md`. Its status word is
+**`LOCAL_USER_WORKFLOW_GATE_PASS / ARCHITECT_REVIEW_PENDING`**, and the product word it proposes but does not grant
+is `READY_FOR_ARCHITECT_PRODUCT_ACCEPTANCE`.
+
+**Every §9 row is now on a surface.** The CLI carries a repeatable `--attach <FILE>` on `gate` and
+`release prepare` with all six exit codes unchanged; the desktop carries four use-case commands behind
+session-local `att-<pid>-<n>` handles so no host path crosses to the WebView; the Release page carries the
+"Release attachments" section with leaf, declared kind, byte size, full SHA-256 and the evidence class, with the
+verbs Attach and Ship and the word Analyze never appearing as an action there; the Analyze refusal carries its
+pointing clause; `release-report.html` carries the limits line; and the storage invariant sentence now names the
+attachment set. §9's frozen sentences were read off an **installed** Windows binary, not off a dev server, which is
+what §13 requires.
+
+**§9's "exactly as for analyzed rows" was read as *the same columns*, not *the same role*, and the installed walk
+is what forced that reading into the open.** §9 says the bundle preview must show an attachment "the same list with
+kind, size, full hash and evidence class shown for attachments exactly as for analyzed rows". The first installed
+build gave an attachment the identical columns — and the identical **role**, `artifact`, which is the label the
+analyzed ELF and MAP carry. A reader of that preview could not tell the two evidence classes apart, which is the
+distinction the whole of C1 exists to keep. `C1-U4` therefore read "exactly as" as being about the *columns*, and
+added `FileRole::ReleaseAttachment` (`release-attachment`) so the row that carries the same facts also carries the
+class those facts belong to. `FileRole` reaches the preview DTO and no portable document, so no schema, golden or
+digest moved. **This is a reading the Architect should confirm or overturn, and it is recorded here rather than
+buried in a commit message because it is the one place §9's wording underdetermined the behaviour.**
+
+**Two §9 rows were being violated by surfaces that re-decided a Core question, and both were fixed in `073c83c`.**
+The first is the one §9's Gate row exists to prevent. On a build packaged from `d95acea`, the Gate page's own
+"Required artifacts" table printed `bin Required Missing` underneath an `artifacts.required` **PASS** whose evidence
+list cited `attachment:bin:3080a363…`: the table had looked at analyzed snapshot rows only and answered the question
+for itself. §9's requirement that the rule "must stop saying 'in the snapshot' when it did not come from one" is
+about the same failure one level up — a surface stating an origin it did not observe. The fix keeps the answer in
+one place rather than duplicating it: Core gained `RequirementSource::{Analyzed, Attachment}` and
+`requirement_evidence(word)`, the `artifacts.required` rule now *reads that predicate* instead of owning the
+mapping, `GateArtifactRowDto` carries `satisfied_by` computed from it, and the table renders *Analyzed build* /
+*Release attachment* / *Missing*. A Core test pins each required word to the one set that can satisfy it, so the
+words and the table cannot drift apart again. Both fixes were then read back off a build packaged from `073c83c`.
+
+**§7.7's invariant sentence gained the fourth term** — "a changed policy, workspace, baseline **or attachment set**
+produces a new run id" — and the installed walk demonstrated why the term belongs there. Mutating a tracked
+attachment after the preview did not produce a digest-mismatch refusal; it dirtied the project's workspace, which
+changed the canonical Gate input, which changed the run id, so `Export bundle` refused at `ERR-BUNDLE-6102` on
+identity and left the destination folder empty before and after.
+
+**§8's declaration rule, observed rather than asserted.** The same bytes reached two different locators depending
+only on the file's name: `image.bin` → `attachment:bin:3080a363…`, `payload.img` → `attachment:unknown:3080a363…`,
+and the second satisfies no required kind. Nothing opened either file to ask what it was. §8's kind-conflict
+sentence remains unimplemented and §14's finding list still owns it: `kind_basis` is always `declared`,
+`detect_format` is never called on the attach path, so a file named `.hex` holding raw binary ships as a declared
+HEX with no disagreement shown. `C1-U4` re-confirmed the behaviour without resolving that question.
+
+**The live capability word is now** `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / USER_VERIFIED_ON_WINDOWS`.
+`BIN_HEX_ANALYSIS` stays **`UNSUPPORTED`** and nothing this round parsed a BIN or a HEX. macOS and Linux installed
+acceptance stay **`NOT_RUNTIME_VERIFIED`**: no artifact for either platform was installed or run, and
+`P5_COMPATIBILITY_MATRIX`'s status column moves only where a runtime run exists. The session boundary the walk
+exposed — `ERR-BUNDLE-6114` naming the current build and then, after that build was re-analyzed, naming the
+**baseline** — is a `C1-U2` composition rule that §4 never stated in words: a bundle carrying a comparison needs
+both sides of it analyzed since the app was launched. It is reported in §14.3's own terms and left to the
+Architect to place in §4 or accept as unstated.
+
+
