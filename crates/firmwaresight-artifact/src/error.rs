@@ -85,7 +85,8 @@ impl ArtifactError {
             }
             Self::UnsupportedFormat { .. } => {
                 "Choose the ELF linker output this build produced; BIN and Intel HEX images are not \
-                 analyzed by this entry point."
+                 analyzed by this entry point. Attach them on the Release page to ship them as byte \
+                 evidence."
             }
             Self::MalformedArtifact { .. } | Self::InvalidElf { .. } => {
                 "Choose the linker ELF output rather than a stripped or truncated copy."

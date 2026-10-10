@@ -27,6 +27,7 @@ use firmwaresight_desktop::ipc::{
     BundlePreviewDto, ErrorEnvelopeDto, GateFindingRowDto, GateRunDto, GateRunRequestDto,
 };
 use firmwaresight_desktop::service::FixtureCatalog;
+use firmwaresight_project::{fingerprint, verify_bundle};
 use firmwaresight_storage::{
     Database, ReleaseRecordDraft, ReleaseRecordWrite, StoredReleaseRecord,
 };
@@ -798,4 +799,345 @@ fn no_desktop_surface_of_a_bundle_carries_the_folder_it_was_written_to() {
     }
     assert!(text.contains(&outcome.folder_display_name), "{text}");
     assert!(!text.contains(TEMP_MARKER), "{text}");
+}
+
+// ------------------------------------------------------------------ release attachments (C1-U4)
+
+/// Bytes a release owner would have chosen in the dialog, in a folder of their own. They are never written
+/// inside the project repository: this world's policy requires a clean workspace, and an uncommitted file
+/// would make the Gate answer about Git rather than about attachments.
+struct ChosenFiles(PathBuf);
+
+impl ChosenFiles {
+    fn new(label: &str) -> Self {
+        let dir = temp_name(label, "");
+        std::fs::create_dir_all(&dir).expect("a folder for chosen files");
+        Self(dir)
+    }
+
+    fn write(&self, name: &str, bytes: &[u8]) -> PathBuf {
+        let path = self.0.join(name);
+        std::fs::write(&path, bytes).expect("a chosen file");
+        path
+    }
+}
+
+impl Drop for ChosenFiles {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
+fn attach(session: &Session, path: &Path) -> String {
+    session
+        .attach_release_file(Some(path.to_path_buf()), "op-attach")
+        .expect("a chosen file is observed or refused with its own code")
+        .expect("a dialog that returned a file is not the cancel path")
+        .attachment_id
+}
+
+#[test]
+fn an_attached_bin_and_hex_are_judged_stored_shipped_and_verified_from_their_bytes() {
+    let world = World::new("attach-chain", &release_policy());
+    let chosen = ChosenFiles::new("attach-chain");
+    let bin = chosen.write("app.bin", b"APP-BYTES");
+    let hex = chosen.write("boot.hex", b":00000001FF");
+
+    let row = world
+        .session
+        .attach_release_file(Some(bin.clone()), "op-attach")
+        .expect("the BIN is observed")
+        .expect("a file was chosen");
+    assert_eq!(row.file_name, "app.bin");
+    assert_eq!(row.kind, "bin", "the name declared it");
+    assert_eq!(row.kind_basis, "declared");
+    assert_eq!(row.provenance, "unknown");
+    assert_eq!(row.byte_size, b"APP-BYTES".len() as u64);
+    assert_eq!(row.sha256.len(), 64, "the full digest, not a shortened one");
+    attach(&world.session, &hex);
+
+    let run = world.gate_run();
+    let set = world
+        .session
+        .release_attachments(Some(&run.run_id), "op-read")
+        .expect("the set reads back");
+    assert_eq!(set.attachments.len(), 2);
+    assert_eq!(
+        set.matches_gate_run,
+        Some(true),
+        "the set the page holds is the set this run judged"
+    );
+
+    let outcome = world.publish(false);
+    let bundle = world.bundle_dir(&outcome);
+    let verification =
+        verify_bundle(&bundle).expect("a bundle that shipped attachments still verifies");
+    assert_eq!(verification.release_id, outcome.release_id);
+
+    let manifest = document(&bundle, "release-manifest.json");
+    let rows = manifest["extensions"]["attachments"]
+        .as_array()
+        .expect("the manifest discloses what it shipped")
+        .clone();
+    assert_eq!(rows.len(), 2, "{rows:?}");
+    for row in &rows {
+        let path = row["path"].as_str().expect("a bundle-relative locator");
+        let shipped = bundle.join(path);
+        assert!(shipped.is_file(), "{path} is disclosed but not shipped");
+        assert_eq!(
+            fingerprint::file_sha256(&shipped).expect("the shipped bytes re-hash"),
+            row["sha256"].as_str().expect("a digest"),
+            "{path} ships bytes that are not the ones the manifest disclosed"
+        );
+        assert_eq!(row["provenance"], serde_json::json!("unknown"));
+    }
+
+    let gate = document(&bundle, "gate-results.json");
+    assert_eq!(
+        gate["extensions"]["canonical_input_label"],
+        serde_json::json!("firmwaresight-gate-input/2"),
+        "the shipped document names the grammar its own run id was taken over"
+    );
+    assert_eq!(
+        gate["run_id"], manifest["extensions"]["gate_run_id"],
+        "one bundle cannot gate one run and ship another's verdict"
+    );
+
+    // §9's line in the report the person reads, with the count this bundle actually carries.
+    let report =
+        std::fs::read_to_string(bundle.join("release-report.html")).expect("the report is written");
+    assert!(
+        report.contains("2 release attachment(s) ship as byte evidence"),
+        "the limits section has to say what was not analyzed: {report}"
+    );
+}
+
+#[test]
+fn a_cancelled_dialog_changes_nothing_and_is_not_reported_as_a_failure() {
+    let (_db, session) = bare_session("attach-cancel");
+    let before = session
+        .release_attachments(None, "op-cancel")
+        .expect("an empty set reads back");
+    assert!(before.attachments.is_empty());
+    assert_eq!(
+        before.matches_gate_run, None,
+        "with no run on screen there is nothing for the set to agree or disagree with, and `true` would \
+         claim an agreement that was never made"
+    );
+
+    let cancelled = session
+        .attach_release_file(None, "op-cancel")
+        .expect("cancel is a decision, not an error");
+    assert!(cancelled.is_none());
+    assert!(
+        session
+            .release_attachments(None, "op-cancel")
+            .expect("the set is still empty")
+            .attachments
+            .is_empty()
+    );
+}
+
+#[test]
+fn an_attachment_row_carries_the_leaf_it_ships_and_never_the_folder_it_came_from() {
+    let (_db, session) = bare_session("attach-path");
+    let chosen = ChosenFiles::new("attach-path");
+    let bin = chosen.write("motor-controller.bin", b"BYTES");
+
+    let row = session
+        .attach_release_file(Some(bin), "op-attach")
+        .expect("observed")
+        .expect("a file was chosen");
+    assert_eq!(row.file_name, "motor-controller.bin");
+    let text = serde_json::to_string(&row).expect("a row serializes");
+    if let Some(marker) = host_path_in(&text) {
+        panic!("the attachment row carries {marker}: {text}");
+    }
+    assert!(!text.contains(TEMP_MARKER), "{text}");
+}
+
+#[test]
+fn adding_a_file_after_a_run_makes_that_run_not_current_until_the_gate_is_re_run() {
+    let world = World::new("attach-added", &release_policy());
+    let chosen = ChosenFiles::new("attach-added");
+    let bin = chosen.write("app.bin", b"FIRST");
+    let hex = chosen.write("boot.hex", b"SECOND");
+
+    attach(&world.session, &bin);
+    let first = world.gate_run();
+    assert_eq!(
+        world
+            .session
+            .release_attachments(Some(&first.run_id), "op-read")
+            .expect("the set reads back")
+            .matches_gate_run,
+        Some(true)
+    );
+
+    attach(&world.session, &hex);
+    assert_eq!(
+        world
+            .session
+            .release_attachments(Some(&first.run_id), "op-read")
+            .expect("the set reads back")
+            .matches_gate_run,
+        Some(false),
+        "the run on screen judged one file; the page now holds two, and saying otherwise would be a stale \
+         verdict"
+    );
+
+    let second = world.gate_run();
+    assert_ne!(
+        first.run_id, second.run_id,
+        "the set is part of the identity"
+    );
+    assert_eq!(
+        world
+            .session
+            .release_attachments(Some(&second.run_id), "op-read")
+            .expect("the set reads back")
+            .matches_gate_run,
+        Some(true)
+    );
+}
+
+#[test]
+fn withdrawing_an_attachment_leaves_the_run_it_judged_untouched_and_the_page_disagreeing() {
+    let world = World::new("attach-withdraw", &release_policy());
+    let chosen = ChosenFiles::new("attach-withdraw");
+    let bin = chosen.write("app.bin", b"FIRST");
+    let hex = chosen.write("boot.hex", b"SECOND");
+    let second_id = attach(&world.session, &hex);
+    attach(&world.session, &bin);
+
+    let run = world.gate_run();
+    let remaining = world
+        .session
+        .remove_attachment(&second_id, "op-remove")
+        .expect("the withdrawal is reported as the set that remains");
+    assert_eq!(remaining.len(), 1);
+    assert_eq!(remaining[0].file_name, "app.bin");
+
+    // The stored run is a record, not a view: it keeps the two rows it judged, and the page's set now
+    // differs from it.
+    let set = world
+        .session
+        .release_attachments(Some(&run.run_id), "op-read")
+        .expect("the set reads back");
+    assert_eq!(set.attachments.len(), 1);
+    assert_eq!(set.matches_gate_run, Some(false));
+    let stored: GateRunDto = world
+        .session
+        .gate_run(&run.run_id, "op-read")
+        .expect("the run is still readable")
+        .expect("the run was stored");
+    assert_eq!(stored.run_id, run.run_id, "withdrawing rewrote nothing");
+}
+
+#[test]
+fn a_renamed_attachment_that_cannot_be_found_refuses_the_export_and_writes_nothing() {
+    // §28's re-read covers attached bytes: the plan froze a path, and a file that is gone when the person
+    // presses Ship stops the write rather than shipping a bundle that quietly lost a file.
+    let world = World::new("attach-moved", &release_policy());
+    let chosen = ChosenFiles::new("attach-moved");
+    let bin = chosen.write("app.bin", b"APP-BYTES");
+    attach(&world.session, &bin);
+
+    let preview = world.prepare().expect("the release prepares");
+    std::fs::remove_file(&bin).expect("the chosen file is moved away after the preview");
+    let chosen_folder = world.choose(&preview.plan_id).expect("a folder was chosen");
+    let refused = world
+        .export(&preview.plan_id, &chosen_folder.destination_token, false)
+        .expect_err("an attached file that no longer exists cannot be shipped silently");
+
+    assert_eq!(refused.code, "ERR-BUNDLE-6115", "{refused:?}");
+    assert!(
+        refused.message.contains("app.bin"),
+        "the refusal names the leaf the owner chose: {refused:?}"
+    );
+    let text = serde_json::to_string(&refused).expect("an envelope serializes");
+    if let Some(marker) = host_path_in(&text) {
+        panic!("the refusal carries {marker}: {text}");
+    }
+    assert!(
+        !std::fs::exists(&world.release.destination).unwrap_or(false)
+            || entries(&world.release.destination).is_empty(),
+        "a refused export wrote a bundle"
+    );
+}
+
+#[test]
+fn declaring_a_different_kind_moves_the_run_identity_without_touching_the_bytes() {
+    // `.img` is not one of the two names the picker rule knows, so it enters as `unknown` — and the person
+    // can say what they meant. The digest is the same file either way: a declaration changes what the run
+    // binds, not what was measured.
+    let world = World::new("attach-declared", &release_policy());
+    let chosen = ChosenFiles::new("attach-declared");
+    let img = chosen.write("payload.img", b"BYTES");
+    let id = attach(&world.session, &img);
+    let before = world
+        .session
+        .release_attachments(None, "op-read")
+        .expect("the set reads back")
+        .attachments;
+    assert_eq!(before[0].kind, "unknown");
+    let digest = before[0].sha256.clone();
+
+    let first = world.gate_run();
+    let declared = world
+        .session
+        .set_attachment_kind(&id, "bin", "op-kind")
+        .expect("the kind is re-declared");
+    assert_eq!(declared.kind, "bin");
+    assert_eq!(declared.sha256, digest, "the bytes were not touched");
+    assert_eq!(declared.byte_size, b"BYTES".len() as u64);
+
+    let second = world.gate_run();
+    assert_ne!(
+        first.run_id, second.run_id,
+        "a run that bound a declared BIN is not the run that bound an unidentified file"
+    );
+}
+
+#[test]
+fn a_kind_word_outside_the_three_a_release_can_attach_is_refused_not_stored() {
+    let world = World::new("attach-word", &release_policy());
+    let chosen = ChosenFiles::new("attach-word");
+    let bin = chosen.write("app.bin", b"BYTES");
+    let id = attach(&world.session, &bin);
+
+    for word in ["elf", "map", "IMAGE", ""] {
+        let refused = world
+            .session
+            .set_attachment_kind(&id, word, "op-kind")
+            .expect_err("`{word}` is not a kind a release may declare");
+        assert_eq!(refused.code, "ERR-INPUT-0001", "{refused:?}");
+    }
+    // The refusal changed nothing: the row still says what the name declared.
+    assert_eq!(
+        world
+            .session
+            .release_attachments(None, "op-read")
+            .expect("the set reads back")
+            .attachments[0]
+            .kind,
+        "bin"
+    );
+}
+
+#[test]
+fn an_attachment_handle_this_session_never_issued_is_refused_rather_than_invented() {
+    let world = World::new("attach-handle", &release_policy());
+    let refused = world
+        .session
+        .remove_attachment("att-dead-beef", "op-remove")
+        .expect_err("a handle this process never issued is not an attachment");
+    assert_eq!(refused.code, "ERR-INPUT-0001", "{refused:?}");
+}
+
+/// One JSON document read out of a written bundle.
+fn document(bundle: &Path, name: &str) -> Value {
+    let bytes = std::fs::read(bundle.join(name))
+        .unwrap_or_else(|error| panic!("`{name}` is not in the bundle: {error}"));
+    serde_json::from_slice(&bytes).unwrap_or_else(|error| panic!("`{name}` is not JSON: {error}"))
 }

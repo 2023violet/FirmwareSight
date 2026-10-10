@@ -1146,6 +1146,51 @@ pub struct GateRunDto {
     pub record_note: Option<String>,
 }
 
+// --------------------------------------------------------------------------- Release attachments (C1-U4)
+
+/// One byte file the release owner chose to ship with this release (`04_TECH/28` §9's Release row).
+///
+/// Every field here is something Rust measured or a thing the person declared: the digest and the length
+/// come from one read of the file, the kind is the owner's declaration, and `provenance` is the word
+/// `unknown` because an attached file's build origin is permanently unestablished (`ADR-0030` D-7). The
+/// path does not cross, and neither does its directory: `file_name` is the sanitized leaf.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ReleaseAttachmentDto {
+    /// Session-local handle, in the shape of every other id here: not portable, not written to a document.
+    pub attachment_id: String,
+    pub file_name: String,
+    /// Byte counts of an attached image are far below 2^53, for the same reason `BundleFileRowDto` states
+    /// for a shipped row: `number` is exact there, and `bigint` would claim a precision the payload does
+    /// not need.
+    #[ts(type = "number")]
+    pub byte_size: u64,
+    /// The full digest. §9 asks for the full SHA-256 on this surface, so nothing truncates it here.
+    pub sha256: String,
+    /// `bin`, `hex` or `unknown` — the three kinds a release may attach.
+    pub kind: String,
+    /// Always `declared`: no attachment kind is derived from the bytes.
+    pub kind_basis: String,
+    /// Always `unknown`, and the reason the section carries its limitation sentence.
+    pub provenance: String,
+}
+
+/// The set the Release page holds, and whether it still matches the run the page is showing.
+///
+/// `matches_gate_run` is Rust's answer, not the screen's inference: the screen cannot compare an attachment
+/// set to a stored run's rows without re-implementing the identity rule, and a stale `PASS` displayed as
+/// current is exactly the failure `04_TECH/28` §4.2 refuses. `null` when no run is on screen — there is
+/// nothing yet for the set to disagree with, and saying `true` would claim a match that was never made.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ReleaseAttachmentsDto {
+    pub attachments: Vec<ReleaseAttachmentDto>,
+    pub gate_run_id: Option<String>,
+    pub matches_gate_run: Option<bool>,
+}
+
 // --------------------------------------------------------------------------- Release Bundle (P4)
 
 /// The three ids one bundle is assembled from, and nothing else (§26).

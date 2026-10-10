@@ -70,6 +70,8 @@ export type { MemorySummaryDto } from './generated/MemorySummaryDto';
 export type { ObjectAttributionDto } from './generated/ObjectAttributionDto';
 export type { ProjectContextDto } from './generated/ProjectContextDto';
 export type { ProjectPolicyDto } from './generated/ProjectPolicyDto';
+export type { ReleaseAttachmentDto } from './generated/ReleaseAttachmentDto';
+export type { ReleaseAttachmentsDto } from './generated/ReleaseAttachmentsDto';
 export type { SectionChangePageDto } from './generated/SectionChangePageDto';
 export type { SectionChangeQueryDto } from './generated/SectionChangeQueryDto';
 export type { SectionChangeRowDto } from './generated/SectionChangeRowDto';

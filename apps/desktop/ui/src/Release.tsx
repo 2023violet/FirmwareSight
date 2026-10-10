@@ -39,14 +39,18 @@ import { formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format
 import { gateVerdictSentence, severityState } from './stateWords';
 import {
   acceptReview,
+  attachReleaseFile,
   chooseBundleDestination,
   exportReleaseBundle,
   getGateRun,
+  getReleaseAttachments,
   listCompareCandidates,
   openProjectConfig,
   prepareReleaseBundle,
+  removeReleaseAttachment,
   runReleaseGate,
   saveProjectPolicy,
+  setReleaseAttachmentKind,
 } from './ipc/bridge';
 import type {
   AcceptReviewRequestDto,
@@ -62,6 +66,7 @@ import type {
   GateRunDto,
   ProjectContextDto,
   ProjectPolicyDto,
+  ReleaseAttachmentsDto,
   UnknownDispositionDto,
 } from './ipc/types';
 import { cx } from './styles/classnames';
@@ -310,6 +315,19 @@ export function Release({
   const chosen = (id: string | null): CompareCandidateDto | undefined =>
     candidates?.rows.find((row) => row.snapshotId === id);
 
+  /**
+   * Invalidate the run on screen because the attachment set it judged is no longer the set the page holds.
+   *
+   * The set is part of what a run identity binds (`04_TECH/28` §3), so a verdict about three files is not a
+   * verdict about two. The page drops the record — and with it the bundle preview, which lives inside the
+   * run region and holds the set its plan was built from — instead of leaving a `PASS` standing for bytes
+   * it never judged. Pressing Run Gate again makes a new record of the set that is actually held.
+   */
+  const invalidateRun = useCallback(() => {
+    onRunChange(null);
+    setRestored(false);
+  }, [onRunChange]);
+
   return (
     <Page>
       <PageHeader
@@ -340,9 +358,21 @@ export function Release({
           <Findings run={run} onAccept={accept} />
           <Readiness run={run} restored={restored} onReload={() => void reload()} />
           {run.tables === null ? null : <Evidence run={run} unit={unit} />}
+          <Attachments
+            gateRunId={run.runId}
+            unit={unit}
+            onSetChanged={invalidateRun}
+          />
           <BundleSection run={run} unit={unit} />
         </>
       )}
+
+      {/* The same region before any run exists, because attaching is something a person does *before*
+          judging: a policy that requires a BIN is not satisfiable from this page until a file is chosen,
+          and a control that only appears after the verdict it feeds would be a dead end. */}
+      {run === null ? (
+        <Attachments gateRunId={null} unit={unit} onSetChanged={invalidateRun} />
+      ) : null}
 
       <section
         className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
@@ -837,8 +867,8 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
         <ScrollArea label="Required artifact table">
           <table className={styles['table']}>
             <caption className={styles['caption']}>
-              Policy requirement against what this build holds. P3 analyzes ELF and reads GNU ld MAP
-              files; a required BIN or HEX is checked for presence only.
+              Policy requirement against what this build holds. Required bin/hex are satisfied by release
+              files you attach; FirmwareSight records their bytes and SHA-256 and does not analyze them.
             </caption>
             <thead>
               <tr>
@@ -1033,6 +1063,187 @@ const STALE_PLAN_CODES: readonly string[] = [
  * shipped build grants no clipboard or shell surface (`AGENTS.md` 7), so the two values are rendered as
  * selectable text instead of a button that would fail.
  */
+/**
+ * The three kinds a release may declare for an attached file. The shell owns what they mean —
+ * `observe_attachment` refuses anything else, and no word here makes FirmwareSight read a container.
+ */
+const ATTACHMENT_KINDS: readonly string[] = ['bin', 'hex', 'unknown'];
+
+/**
+ * Release attachments: the byte files this release ships without analyzing them.
+ *
+ * Every value on these rows came from the shell: the length and the digest from one read of the chosen
+ * file, the kind from what its name stated or the owner re-declared, and `provenance: unknown` because an
+ * attached file's build origin is permanently unestablished (`ADR-0030` D-7). Nothing is hashed, sized or
+ * classified on this side of the boundary (`AGENTS.md` 3).
+ *
+ * The verbs are **Attach** and **Withdraw** beside the **Ship** flow, never Analyze, and §9's limitation
+ * sentence sits in the caption — where a reader is forming the expectation — rather than in a tooltip.
+ *
+ * The region carries no number on purpose. The six numbered sections of this page are labels a reader
+ * quotes in a screenshot and a test asserts by name, so inserting a number here would silently renumber
+ * three regions that existing evidence already cites. This one is named by what it is.
+ */
+function Attachments({
+  gateRunId,
+  unit,
+  onSetChanged,
+}: {
+  readonly gateRunId: string | null;
+  readonly unit: SizeUnit;
+  readonly onSetChanged: () => void;
+}) {
+  const [set, setSet] = useState<ReleaseAttachmentsDto | null>(null);
+  const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  /** Re-read the set from the shell, asking it whether the run on screen still matches. */
+  const load = useCallback(async (): Promise<void> => {
+    const outcome = await getReleaseAttachments(gateRunId);
+    if (outcome.ok) {
+      setSet(outcome.value);
+      setError(null);
+      return;
+    }
+    setError(outcome.envelope);
+  }, [gateRunId]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  /** Open the native dialog. A cancel is a decision: the set stays as it was and nothing is reported. */
+  const attach = async (): Promise<void> => {
+    setBusy(true);
+    const outcome = await attachReleaseFile();
+    setBusy(false);
+    if (!outcome.ok) {
+      setError(outcome.envelope);
+      return;
+    }
+    if (outcome.value === null) {
+      return;
+    }
+    await load();
+    onSetChanged();
+  };
+
+  /** Re-declare one file's kind. The shell re-reads the same bytes, so the digest on the row does not move. */
+  const declare = async (attachmentId: string, kind: string): Promise<void> => {
+    setBusy(true);
+    const outcome = await setReleaseAttachmentKind(attachmentId, kind);
+    setBusy(false);
+    if (!outcome.ok) {
+      setError(outcome.envelope);
+      return;
+    }
+    await load();
+    onSetChanged();
+  };
+
+  /** Withdraw one file and show the set that remains. */
+  const withdraw = async (attachmentId: string): Promise<void> => {
+    setBusy(true);
+    const outcome = await removeReleaseAttachment(attachmentId);
+    setBusy(false);
+    if (!outcome.ok) {
+      setError(outcome.envelope);
+      return;
+    }
+    await load();
+    onSetChanged();
+  };
+
+  const rows = set?.attachments ?? [];
+  return (
+    <section className={styles['section']} aria-labelledby="fs-attachments-heading">
+      <h2 id="fs-attachments-heading">Release attachments</h2>
+      <ScrollArea label="Release attachment table">
+        <table className={styles['table']}>
+          <caption className={styles['caption']}>
+            Bytes verified; build provenance not verified. BIN/HEX contents are not analyzed.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">File</th>
+              <th scope="col">Kind</th>
+              <th scope="col">Size</th>
+              <th scope="col">SHA-256</th>
+              <th scope="col">Evidence</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} className={styles['empty']}>
+                  Nothing is attached. A required BIN or HEX is satisfied only by a file you attach here, and
+                  an attached file ships as bytes: its size and SHA-256 are recorded, and it is not
+                  analyzed.
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => (
+                <tr key={row.attachmentId}>
+                  <th scope="row" className={styles['mono']}>
+                    {row.fileName}
+                  </th>
+                  <td>
+                    <select
+                      className={styles['select']}
+                      aria-label={`Declared kind for ${row.fileName}`}
+                      value={row.kind}
+                      disabled={busy}
+                      onChange={(event) => {
+                        void declare(row.attachmentId, event.target.value);
+                      }}
+                    >
+                      {ATTACHMENT_KINDS.map((kind) => (
+                        <option key={kind} value={kind}>
+                          {kind}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className={styles['monoSmall']}>{formatSize(row.byteSize, unit)}</td>
+                  <td className={styles['monoSmall']}>{row.sha256}</td>
+                  <td>
+                    {`Bytes observed · kind ${row.kindBasis} · provenance ${row.provenance}`}
+                  </td>
+                  <td>
+                    <Button disabled={busy} onClick={() => void withdraw(row.attachmentId)}>
+                      Withdraw
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </ScrollArea>
+      <div className={styles['actions']}>
+        <Button disabled={busy} onClick={() => void attach()}>
+          Attach
+        </Button>
+      </div>
+      <p className={styles['hint']}>
+        Attach takes the file chosen in the native dialog exactly as it stands. Its kind is the one its name
+        states, and a name that states nothing is recorded as unknown — which satisfies no required kind. Its
+        build provenance stays unestablished, and nothing here reads the file as a container.
+      </p>
+      {set?.matchesGateRun === false ? (
+        <p className={styles['stale']} role="status">
+          The set on this page is not the set{' '}
+          {truncateMiddle(set.gateRunId ?? '', 10)} judged. Run the Gate again to judge these bytes.
+        </p>
+      ) : null}
+      {error === null ? null : (
+        <ErrorPanel envelope={error} label="Attachment step failed" heading="Attachment error" />
+      )}
+    </section>
+  );
+}
+
 function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit: SizeUnit }) {
   const [preview, setPreview] = useState<BundlePreviewDto | null>(null);
   const [destination, setDestination] = useState<BundleDestinationDto | null>(null);

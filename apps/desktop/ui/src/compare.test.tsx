@@ -74,6 +74,17 @@ vi.mock('./ipc/bridge', () => ({
   listHistoryBuilds: vi.fn(),
   listHistoryGateRuns: vi.fn(),
   listHistoryReleases: vi.fn(),
+  // C1-U4: the Release page reads its attachment set when it mounts, and this file navigates there. An
+  // unmocked read is an unhandled rejection, not a red test, so the empty answer is stated here.
+  attachReleaseFile: vi.fn(),
+  removeReleaseAttachment: vi.fn(),
+  setReleaseAttachmentKind: vi.fn(),
+  getReleaseAttachments: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { attachments: [], gateRunId: null, matchesGateRun: null },
+    }),
+  ),
 }));
 
 const selectMock = vi.mocked(selectArtifact);

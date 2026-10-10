@@ -38,7 +38,7 @@ use firmwaresight_project::evidence::{
 };
 use firmwaresight_project::{
     CONFIG_FILE_NAME, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, GitObservation, GitProbe,
-    build_context, observe_release_notes, policy_sha256,
+    build_context_with_attachments, observe_release_notes, policy_sha256,
 };
 use firmwaresight_storage::{
     AcceptReviewError, AcceptedReview, GateRunDraft, GateSnapshotFacts, StoredBudget,
@@ -53,7 +53,8 @@ use crate::ipc::{
     AcceptReviewOutcomeDto, AcceptReviewRequestDto, AcceptedReviewDto, ErrorEnvelopeDto,
     GateArtifactRowDto, GateBudgetRowDto, GateCountsDto, GateFindingRowDto, GateGitDto,
     GateGrowthRowDto, GateNotesDto, GateRunDto, GateRunRequestDto, GateTablesDto,
-    ProjectContextDto, ProjectPolicyDto, UnknownDispositionDto, UnknownPolicyDto,
+    ProjectContextDto, ProjectPolicyDto, ReleaseAttachmentDto, ReleaseAttachmentsDto,
+    UnknownDispositionDto, UnknownPolicyDto,
 };
 use crate::{
     Session, envelope_from_project, envelope_from_storage, next_operation_id, service,
@@ -239,13 +240,25 @@ impl Session {
             _ => None,
         };
 
-        let context = build_context(&GateRunRequest {
-            target: &target,
-            growth: growth.clone(),
-            git: &git,
-            release_notes: notes.clone(),
-            policy: policy.clone(),
-        });
+        // Re-observed now, from the paths the person chose: the run binds the bytes on disk at the moment
+        // the Gate is pressed, not the digest the picker recorded earlier in the session, so a file that
+        // changed since it was chosen changes the verdict instead of riding under the old one.
+        let attached = self.attachment_facts(operation_id)?;
+        let context = build_context_with_attachments(
+            &GateRunRequest {
+                target: &target,
+                growth: growth.clone(),
+                git: &git,
+                release_notes: notes.clone(),
+                policy: policy.clone(),
+            },
+            &attached,
+        );
+        // Stored in the order the identity binds them, not the order they were picked: the stored ordinal is
+        // the position in the canonical set, so rows handed over in pick order would be a refusal
+        // (`ERR-INTERNAL-9002`) whenever a HEX was chosen before a BIN and a silent agreement whenever the
+        // two orders happened to coincide. One source for both — the context's own rows.
+        let judged = context.canonical_attachments();
         let generated = firmwaresight_project::run_id(&context);
         let evaluation = context.evaluate(&generated);
         let digest = policy_sha256(&policy);
@@ -258,9 +271,9 @@ impl Session {
                 baseline_build_id: baseline_build.as_deref(),
                 policy_sha256: &digest,
                 evaluation: &evaluation,
-                // Nothing attaches a file yet: no surface offers a choice, so the run that is judged
-                // and stored here binds an empty set (`04_TECH/28` §3, C1-U1's boundary).
-                attachments: &[],
+                // The set this run judged, stored beside it so a later read re-judges from these rows and
+                // not from whatever files happen to be there now (`04_TECH/28` §3, `T-C1-05`).
+                attachments: &judged,
             })
             .map_err(|err| envelope_from_storage(&err, operation_id))?;
         }
@@ -1271,6 +1284,86 @@ pub(crate) async fn accept_review(
 
     tauri::async_runtime::spawn_blocking(move || {
         session.accept_gate_review(&request, &operation_id)
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+/// Choose a BIN or Intel HEX file to ship with this release as byte evidence.
+///
+/// This opens the same native single-file dialog the Analyze page already uses to choose an artifact, so no
+/// new capability, plugin or permission is involved; the chosen path stays on the Rust side and only the
+/// measured row crosses back. Cancelling resolves to `None`, which is a decision and not a failure.
+#[tauri::command]
+pub(crate) async fn attach_release_file(
+    app: AppHandle,
+    state: State<'_, Arc<Session>>,
+) -> Result<Option<ReleaseAttachmentDto>, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+
+    let picked = tauri::async_runtime::spawn_blocking(move || {
+        pick_path(
+            &app,
+            "Choose a BIN or Intel HEX file to ship with this release",
+        )
+    })
+    .await
+    .map_err(task_join_error)?;
+
+    session.attach_release_file(picked, &operation_id)
+}
+
+/// Declare what kind of file an attachment is, from the three kinds a release may attach.
+///
+/// The word is the release owner's declaration and nothing else: choosing `hex` here does not make
+/// FirmwareSight read records, and the row that comes back still says its provenance is unknown.
+#[tauri::command]
+pub(crate) async fn set_release_attachment_kind(
+    attachment_id: String,
+    kind: String,
+    state: State<'_, Arc<Session>>,
+) -> Result<ReleaseAttachmentDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+
+    tauri::async_runtime::spawn_blocking(move || {
+        session.set_attachment_kind(&attachment_id, &kind, &operation_id)
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+/// Withdraw one attachment, and report the set that remains.
+#[tauri::command]
+pub(crate) async fn remove_release_attachment(
+    attachment_id: String,
+    state: State<'_, Arc<Session>>,
+) -> Result<Vec<ReleaseAttachmentDto>, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+
+    tauri::async_runtime::spawn_blocking(move || {
+        session.remove_attachment(&attachment_id, &operation_id)
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+/// The attachment set the Release page holds, and whether it is still the set the run on screen judged.
+///
+/// `gateRunId` is `null` while nothing has been judged, and the answer about matching is then `null` too —
+/// not `true`, which would claim a match against a run that does not exist.
+#[tauri::command]
+pub(crate) async fn get_release_attachments(
+    gate_run_id: Option<String>,
+    state: State<'_, Arc<Session>>,
+) -> Result<ReleaseAttachmentsDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+
+    tauri::async_runtime::spawn_blocking(move || {
+        session.release_attachments(gate_run_id.as_deref(), &operation_id)
     })
     .await
     .map_err(task_join_error)?

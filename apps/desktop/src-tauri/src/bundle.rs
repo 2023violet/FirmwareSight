@@ -30,7 +30,7 @@ use firmwaresight_core::domain::build_snapshot::BuildSnapshot;
 use firmwaresight_core::domain::diff::{DiffResult, DiffSnapshotInput, compare};
 use firmwaresight_project::{
     BundleAcceptance, BundleError, BundleOutcome, BundleRequest, GitObservation, GitProbe,
-    LoadedProject, is_recognizable_bundle, prepare,
+    LoadedProject, is_recognizable_bundle, prepare_with_attachments,
 };
 use firmwaresight_storage::{AcceptedReview, ReleaseRecordDraft, ReleaseRecordWrite};
 use tauri::{AppHandle, State};
@@ -100,8 +100,12 @@ impl Session {
         operation_id: &str,
     ) -> Result<BundlePreviewDto, ErrorEnvelopeDto> {
         let inputs = self.gather_bundle(request, operation_id)?;
-        let plan =
-            prepare(&inputs.request()).map_err(|err| envelope_from_bundle(&err, operation_id))?;
+        // The set the Release page holds at this moment is the set this preview is built from, and it is the
+        // set the export will re-observe. A person who changes their mind after preparing changes what the
+        // next preview is of; the plan they already authorized keeps shipping the bytes they authorized.
+        let attachments = self.attachment_selections(operation_id)?;
+        let plan = prepare_with_attachments(&inputs.request(), &attachments)
+            .map_err(|err| envelope_from_bundle(&err, operation_id))?;
 
         let accepted = inputs.acceptances.len();
         let preview = plan.preview.clone();
@@ -112,6 +116,7 @@ impl Session {
                 snapshot_id: request.snapshot_id.clone(),
                 baseline_snapshot_id: request.baseline_snapshot_id.clone(),
                 gate_run_id: request.gate_run_id.clone(),
+                attachments,
             },
             operation_id,
         )?;
@@ -192,9 +197,10 @@ impl Session {
         overwrite: bool,
         operation_id: &str,
     ) -> Result<BundleExportDto, ErrorEnvelopeDto> {
-        let (plan, request) = self.with_bundle(plan_id, operation_id, |held| {
+        let (plan, attachments, request) = self.with_bundle(plan_id, operation_id, |held| {
             (
                 held.plan.clone(),
+                held.attachments.clone(),
                 BundlePlanRequestDto {
                     snapshot_id: held.snapshot_id.clone(),
                     baseline_snapshot_id: held.baseline_snapshot_id.clone(),
@@ -205,10 +211,10 @@ impl Session {
         let parent = self.destination_of(destination_token, operation_id)?;
 
         // §28: the world is re-read rather than trusted. Anything that moved since the preview — a source
-        // file, the notes, the policy, the workspace — stops the write with its own code.
+        // file, the notes, the policy, the workspace, an attached file — stops the write with its own code.
         let inputs = self.gather_bundle(&request, operation_id)?;
         let outcome = plan
-            .publish(&inputs.request(), &parent, overwrite)
+            .publish_with_attachments(&inputs.request(), &attachments, &parent, overwrite)
             .map_err(|err| envelope_from_bundle(&err, operation_id))?;
 
         let record_written = self.record_release(&outcome, &inputs, operation_id)?;

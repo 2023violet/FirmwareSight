@@ -265,7 +265,8 @@ impl Database {
                 Err(StorageError::Invariant {
                     detail: format!(
                         "Gate run `{}` is already stored with a different result; a changed policy, \
-                         workspace or baseline produces a new run id rather than rewriting this one",
+                         workspace, baseline or attachment set produces a new run id rather than rewriting \
+                         this one",
                         draft.run_id
                     ),
                 })

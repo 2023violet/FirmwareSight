@@ -845,6 +845,21 @@ fn render_limits(report: &ReleaseBundleReport<'_>, out: &mut String) {
         out.push_str("</tbody>\n</table>\n");
     }
 
+    // §9's one line, and only for a bundle that earned it: an attachment-free release writes the same report
+    // bytes it wrote before attachments existed, which is what the P4 golden compares, while a release that
+    // ships bytes nobody parsed has to say so where a reader looks for limits rather than where it looks for
+    // analysis.
+    let disclosed = report.gate.extensions.attachments.len();
+    if disclosed > 0 {
+        stated = true;
+        out.push_str(&format!(
+            "<div class=\"notice\"><p><strong>Release attachments</strong></p>\n<p class=\"meta\">{disclosed} \
+             release attachment(s) ship as byte evidence: their bytes and their SHA-256 digests are verified by \
+             this bundle, their structure and their build provenance are not verified, and nothing in this \
+             report analyzes them.</p></div>\n"
+        ));
+    }
+
     if !stated {
         out.push_str(
             "<p class=\"empty\">The analysis of this build recorded no capability gap, and the comparison \

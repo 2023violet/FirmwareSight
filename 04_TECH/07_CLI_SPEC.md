@@ -65,8 +65,14 @@ fwsight gate --project . --artifact firmware.elf
 fwsight gate --project . --artifact firmware.elf --map firmware.map
 fwsight gate --project . --artifact firmware.elf --baseline old.elf --baseline-map old.map
 fwsight gate --project . --artifact firmware.elf --json
+fwsight gate --project . --artifact firmware.elf --attach image.bin --attach boot.hex
 ```
 
+- `--attach <FILE>`（C1-U4，`ADR-0030`）可重复，每个文件一次。附件的 kind 由**文件名**声明：`.bin`→`bin`，
+  `.hex`→`hex`（大小写不敏感），其余一律 `unknown`；命令行没有、也不新增 `--attach-kind`，因为 §9 冻结的
+  载体只有这一个 flag。FirmwareSight 不读文件内容来判定格式，`unknown` 不满足任何 `required` kind。
+  读不到的文件按引擎自己的码拒绝（`ERR-BUNDLE-6115`、`6116`、`6117`），退出码 3：这是取输入失败，不是
+  判定结果（4/5），也不是写出失败（6）。不带 `--attach` 的调用，stdout 文档与之前逐字节相同。
 - `--artifact` 必填。没有 artifact 就没有可评的构建，而一张“全部 N/A”的表会被读成放行。
 - `--project` 默认当前目录，解析到 `<project>/firmwaresight.toml`。读不到或读不懂一律 exit 2：
   FirmwareSight 不用默认值补全一份它读不全的政策。诊断码 `ERR-CONFIG-7001..7006`。
@@ -88,7 +94,13 @@ fwsight release prepare --project . --artifact firmware.elf --out dist/release
 fwsight release prepare --project . --artifact firmware.elf --map firmware.map --out dist/release
 fwsight release prepare --project . --artifact firmware.elf --baseline old.elf --baseline-map old.map --out dist/release
 fwsight release prepare --project . --artifact firmware.elf --out dist/release --force --json
+fwsight release prepare --project . --artifact firmware.elf --out dist/release --attach image.bin --attach boot.hex
 ```
+
+- `--attach <FILE>`（C1-U4）与 `gate` 同一个 flag、同一条声明规则、同一处观测函数
+  （`observe_attachment`）：preview 与 publish 各自重新观测一次，所以一个人授权的字节和写出的字节是同一份，
+  文件在两次之间变了就拒绝写。这里的拒绝走 §34 既有的 exit 6，并保留引擎自己的码（`6115`…`6118`）；
+  两个名字折叠成同一个 bundle 内叶名时是 `ERR-BUNDLE-6109`，说的是选择本身，不是一份没人写过的清单。
 
 - 原 spec 示例 `release prepare --project . --out dist/release` 不指定 artifact：`firmwaresight.toml`
   描述的是政策，不是"哪一次构建在发布"。P4 用显式 `--artifact` 补全这处欠定，属于实现澄清，

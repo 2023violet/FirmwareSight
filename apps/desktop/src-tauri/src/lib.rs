@@ -51,10 +51,17 @@ use firmwaresight_artifact::ArtifactError;
 use firmwaresight_artifact::pipeline::Analysis;
 use firmwaresight_core::domain::build_snapshot::BuildSnapshot;
 use firmwaresight_core::domain::diff::DiffResult;
+use firmwaresight_core::domain::identity::ArtifactKind;
 use firmwaresight_project::BundlePlan;
-use firmwaresight_project::{LoadedProject, ProjectError};
+use firmwaresight_project::{
+    AttachmentError, AttachmentSelection, LoadedProject, ProjectError, ReleaseAttachment,
+    declared_kind_for_path, observe_attachment,
+};
 use firmwaresight_storage::{Database, StorageError};
-use ipc::{AnalysisSummaryDto, ErrorEnvelopeDto, FixtureOptionDto, SelectionDto};
+use ipc::{
+    AnalysisSummaryDto, ErrorEnvelopeDto, FixtureOptionDto, ReleaseAttachmentDto,
+    ReleaseAttachmentsDto, SelectionDto,
+};
 use service::{FixtureCatalog, display_name};
 
 pub use ipc::FixtureKey;
@@ -198,6 +205,10 @@ struct HeldBundle {
     snapshot_id: String,
     baseline_snapshot_id: Option<String>,
     gate_run_id: String,
+    /// The attachment selections the preview was built from, held so the export ships the set a person
+    /// authorized rather than whatever the page holds at the moment they press Ship. If the two have come
+    /// apart, the engine's own re-check stops the write (`04_TECH/28` §4.2).
+    attachments: Vec<AttachmentSelection>,
 }
 
 /// The session's bundle store, in the same shape as [`DiffStore`]: a per-process counter, bounded, never
@@ -256,6 +267,84 @@ impl DestinationStore {
     }
 }
 
+/// One release attachment this session holds: the file the release owner chose, and what the engine
+/// measured about it when they chose it (`04_TECH/28` §9's Release row).
+///
+/// The path stays on this side of the boundary, exactly as a staged artifact path does. The observed row is
+/// kept beside it rather than re-derived for the screen, because a digest is a fact about one read and the
+/// Release page shows the fact the shell produced, not a fresh guess.
+#[derive(Debug, Clone)]
+struct ChosenAttachment {
+    path: PathBuf,
+    observed: ReleaseAttachment,
+}
+
+/// The attachment set the Release page is working with, in the shape every other session store here uses:
+/// a per-process counter, ids of the form `att-<pid>-<n>`, never persisted, never portable, never a path.
+///
+/// Deliberately unbounded, unlike the analysis and bundle stores. Those bound a cache; this one holds the
+/// set a Gate run is about to bind, and evicting a byte file the person selected would change what the next
+/// run identifies without anyone asking for it.
+#[derive(Debug, Default)]
+struct AttachmentStore {
+    next: u64,
+    order: Vec<String>,
+    chosen: HashMap<String, ChosenAttachment>,
+}
+
+impl AttachmentStore {
+    fn insert(&mut self, attachment: ChosenAttachment) -> String {
+        self.next += 1;
+        let id = format!("att-{:x}-{:x}", std::process::id(), self.next);
+        self.order.push(id.clone());
+        self.chosen.insert(id.clone(), attachment);
+        id
+    }
+
+    /// Replace what one handle holds, keeping the handle. A person who re-declares a kind did not choose a
+    /// different file, and a new id for the same file would read as one more attachment.
+    fn replace(&mut self, id: &str, attachment: ChosenAttachment) {
+        if !self.chosen.contains_key(id) {
+            self.order.push(id.to_owned());
+        }
+        self.chosen.insert(id.to_owned(), attachment);
+    }
+
+    fn remove(&mut self, id: &str) -> Option<ChosenAttachment> {
+        self.order.retain(|existing| existing != id);
+        self.chosen.remove(id)
+    }
+
+    fn get(&self, id: &str) -> Option<&ChosenAttachment> {
+        self.chosen.get(id)
+    }
+
+    /// The set in the order it was chosen, as the screen may show it. The engine canonicalizes by kind and
+    /// digest before a run identity is taken over, so this order is what a person listed and nothing an
+    /// identity depends on.
+    fn rows(&self) -> Vec<ReleaseAttachmentDto> {
+        self.order
+            .iter()
+            .filter_map(|id| {
+                self.chosen
+                    .get(id)
+                    .map(|choice| release_attachment_dto(id, &choice.observed))
+            })
+            .collect()
+    }
+
+    fn selections(&self) -> Vec<AttachmentSelection> {
+        self.order
+            .iter()
+            .filter_map(|id| self.chosen.get(id))
+            .map(|choice| AttachmentSelection {
+                path: choice.path.clone(),
+                declared_kind: choice.observed.kind,
+            })
+            .collect()
+    }
+}
+
 /// The shell's state: a fixture catalog, one SQLite handle, the selections currently staged, the project
 /// whose policy the Release page runs against, and the session-local build, bundle and destination stores
 /// that make a Release Bundle possible without giving the WebView a path.
@@ -274,6 +363,7 @@ pub struct Session {
     analyses: Mutex<AnalysisStore>,
     bundles: Mutex<BundleStore>,
     destinations: Mutex<DestinationStore>,
+    attachments: Mutex<AttachmentStore>,
 }
 
 impl Session {
@@ -291,6 +381,7 @@ impl Session {
             analyses: Mutex::new(AnalysisStore::default()),
             bundles: Mutex::new(BundleStore::default()),
             destinations: Mutex::new(DestinationStore::default()),
+            attachments: Mutex::new(AttachmentStore::default()),
         })
     }
 
@@ -624,6 +715,184 @@ impl Session {
         })
     }
 
+    fn lock_attachments(
+        &self,
+        operation_id: &str,
+    ) -> Result<std::sync::MutexGuard<'_, AttachmentStore>, ErrorEnvelopeDto> {
+        self.attachments.lock().map_err(|_| ErrorEnvelopeDto {
+            code: "ERR-INTERNAL-9001".to_owned(),
+            message: "FirmwareSight hit an internal error.".to_owned(),
+            operation_id: operation_id.to_owned(),
+            details: Some("the attachment lock was poisoned by an earlier panic".to_owned()),
+            remediation: Some("Report the operation id; no artifact data is needed.".to_owned()),
+        })
+    }
+
+    /// Take one chosen file into the release attachment set (`04_TECH/28` §9's Release row).
+    ///
+    /// Cancel is a decision rather than a failure: with nothing picked the set stays exactly as it was and
+    /// the screen keeps what it was showing, which is how every other picker here behaves. A file the engine
+    /// cannot observe is refused with the engine's own code and next step, naming the leaf and never the
+    /// folder it sat in.
+    ///
+    /// The kind comes from the file's name, by the same library rule `fwsight --attach` uses, so one file
+    /// cannot arrive as `bin` on one surface and `unknown` on the other. A person who means a different kind
+    /// says so with [`Session::set_attachment_kind`], and nothing here reads the bytes as a container.
+    ///
+    /// # Errors
+    ///
+    /// `ERR-BUNDLE-6115`, `6116` or `6117` from the observation itself, and `ERR-INTERNAL-9001` if the
+    /// session lock was poisoned.
+    pub fn attach_release_file(
+        &self,
+        picked: Option<PathBuf>,
+        operation_id: &str,
+    ) -> Result<Option<ReleaseAttachmentDto>, ErrorEnvelopeDto> {
+        let Some(path) = picked else {
+            return Ok(None);
+        };
+        let observed = observe_attachment(&path, declared_kind_for_path(&path))
+            .map_err(|error| attachment_envelope(&error, operation_id))?;
+        let row = observed.clone();
+        let mut store = self.lock_attachments(operation_id)?;
+        let id = store.insert(ChosenAttachment { path, observed });
+        Ok(Some(release_attachment_dto(&id, &row)))
+    }
+
+    /// Re-declare the kind of an attachment the person already chose.
+    ///
+    /// The file is re-observed under the new declaration rather than relabelled, so a kind change cannot
+    /// leave a stale digest or a stale length on the screen — and the run identity the set feeds moves with
+    /// it, which is the point of declaring instead of detecting.
+    ///
+    /// # Errors
+    ///
+    /// `ERR-INPUT-0001` for a handle this session does not hold or a word outside the three attachable
+    /// kinds, and the engine's observation codes for a file that has since gone.
+    pub fn set_attachment_kind(
+        &self,
+        attachment_id: &str,
+        kind_word: &str,
+        operation_id: &str,
+    ) -> Result<ReleaseAttachmentDto, ErrorEnvelopeDto> {
+        let kind =
+            attaching_kind(kind_word).ok_or_else(|| attachment_word_missing(operation_id))?;
+        let mut store = self.lock_attachments(operation_id)?;
+        let path = store
+            .get(attachment_id)
+            .ok_or_else(|| attachment_missing(attachment_id, operation_id))?
+            .path
+            .clone();
+        let observed = observe_attachment(&path, kind)
+            .map_err(|error| attachment_envelope(&error, operation_id))?;
+        let row = observed.clone();
+        store.replace(attachment_id, ChosenAttachment { path, observed });
+        Ok(release_attachment_dto(attachment_id, &row))
+    }
+
+    /// Withdraw one attachment, and report what the set now holds.
+    ///
+    /// Withdrawing is as much a decision as choosing. It changes what the next run identifies, so the set on
+    /// the screen and the set a shown run judged become different things — which
+    /// [`Session::release_attachments`] states instead of papering over.
+    ///
+    /// # Errors
+    ///
+    /// `ERR-INPUT-0001` for a handle this session does not hold.
+    pub fn remove_attachment(
+        &self,
+        attachment_id: &str,
+        operation_id: &str,
+    ) -> Result<Vec<ReleaseAttachmentDto>, ErrorEnvelopeDto> {
+        let mut store = self.lock_attachments(operation_id)?;
+        if store.get(attachment_id).is_none() {
+            return Err(attachment_missing(attachment_id, operation_id));
+        }
+        store.remove(attachment_id);
+        Ok(store.rows())
+    }
+
+    /// The set as the screen holds it, and whether it is still the set the run on screen judged.
+    ///
+    /// Rust answers the second question. A WebView that worked out whether a `PASS` is current would be a
+    /// second identity rule, and §4.2's refusal order exists so that no second one can exist. `None` when
+    /// no run is on screen: there is nothing for the set to disagree with yet, and answering `true` to that
+    /// would claim a match no run ever made.
+    ///
+    /// # Errors
+    ///
+    /// The storage codes when the named run cannot be read back, and `ERR-STORAGE-4005` when it is not
+    /// stored at all.
+    pub fn release_attachments(
+        &self,
+        gate_run_id: Option<&str>,
+        operation_id: &str,
+    ) -> Result<ReleaseAttachmentsDto, ErrorEnvelopeDto> {
+        let rows = {
+            let store = self.lock_attachments(operation_id)?;
+            store.rows()
+        };
+        let matches = match gate_run_id {
+            None => None,
+            Some(id) => {
+                let db = self.lock_db(operation_id)?;
+                let stored = db
+                    .gate_run_by_id(id)
+                    .map_err(|err| envelope_from_storage(&err, operation_id))?
+                    .ok_or_else(|| crate::release::stored_run_missing(id, operation_id))?;
+                let mut judged: Vec<(String, String, u64)> = stored
+                    .attachments
+                    .iter()
+                    .map(|row| {
+                        (
+                            row.kind.word().to_owned(),
+                            row.sha256.value().cloned().unwrap_or_default(),
+                            row.byte_size,
+                        )
+                    })
+                    .collect();
+                let mut current: Vec<(String, String, u64)> = rows
+                    .iter()
+                    .map(|row| (row.kind.clone(), row.sha256.clone(), row.byte_size))
+                    .collect();
+                judged.sort();
+                current.sort();
+                Some(judged == current)
+            }
+        };
+        Ok(ReleaseAttachmentsDto {
+            attachments: rows,
+            gate_run_id: gate_run_id.map(str::to_owned),
+            matches_gate_run: matches,
+        })
+    }
+
+    /// The set in the engine's selection shape, for `prepare_with_attachments` and
+    /// `publish_with_attachments`. The plan and the export both re-observe from these paths, so the bytes a
+    /// person previewed and the bytes that ship are checked twice against each other, not once.
+    pub(crate) fn attachment_selections(
+        &self,
+        operation_id: &str,
+    ) -> Result<Vec<AttachmentSelection>, ErrorEnvelopeDto> {
+        Ok(self.lock_attachments(operation_id)?.selections())
+    }
+
+    /// Re-observe every chosen file now, so a run binds the bytes on disk rather than the digest the picker
+    /// recorded earlier. A file that has since been moved or emptied is refused with the engine's own code
+    /// instead of being judged from a stale row.
+    pub(crate) fn attachment_facts(
+        &self,
+        operation_id: &str,
+    ) -> Result<Vec<ReleaseAttachment>, ErrorEnvelopeDto> {
+        self.attachment_selections(operation_id)?
+            .iter()
+            .map(|choice| {
+                observe_attachment(&choice.path, choice.declared_kind)
+                    .map_err(|error| attachment_envelope(&error, operation_id))
+            })
+            .collect()
+    }
+
     /// The snapshot this session analyzed for one build, or `None` when it never analyzed that build.
     pub(crate) fn held_snapshot(
         &self,
@@ -700,6 +969,93 @@ fn selection_missing(_selection_id: &str, operation_id: &str) -> ErrorEnvelopeDt
         operation_id: operation_id.to_owned(),
         details: Some("the shell holds paths for the current run only; this session never issued, or no longer holds, the handle given".to_owned()),
         remediation: Some("Choose the artifact in the file dialog again.".to_owned()),
+    }
+}
+
+/// The three kinds a release may attach, and no others (`ADR-0030` D-3, §2.2).
+///
+/// `elf` and `map` are refused here rather than reaching the engine, because on this surface the word is
+/// typed by a caller instead of coming from a name: an analyzed kind is produced by analysis, and a
+/// declaration cannot manufacture one.
+#[must_use]
+fn attaching_kind(word: &str) -> Option<ArtifactKind> {
+    match word {
+        "bin" => Some(ArtifactKind::Bin),
+        "hex" => Some(ArtifactKind::IntelHex),
+        "unknown" => Some(ArtifactKind::Unknown),
+        _ => None,
+    }
+}
+
+/// The row the Release page shows for one attachment.
+///
+/// The digest is the one the engine measured; a row that could not carry one never entered the set, so this
+/// says so rather than drawing an empty cell a reader would have to interpret.
+fn release_attachment_dto(id: &str, row: &ReleaseAttachment) -> ReleaseAttachmentDto {
+    ReleaseAttachmentDto {
+        attachment_id: id.to_owned(),
+        file_name: row.file_name.clone(),
+        byte_size: row.byte_size,
+        sha256: row
+            .sha256
+            .value()
+            .cloned()
+            .expect("a file whose bytes could not be hashed never enters the attachment set"),
+        kind: row.kind.word().to_owned(),
+        kind_basis: row.kind_basis.word().to_owned(),
+        provenance: "unknown".to_owned(),
+    }
+}
+
+/// Carry the engine's attachment refusal across the boundary unchanged, in code and in next step.
+///
+/// The engine's sentence goes in `details`, where it names the sanitized leaf only: `AttachmentError` is
+/// built from a leaf and an I/O reason, so no directory crosses, and no desktop-side re-wording can turn
+/// "empty" back into a generic "could not read".
+fn attachment_envelope(error: &AttachmentError, operation_id: &str) -> ErrorEnvelopeDto {
+    let message = match error {
+        AttachmentError::Unreadable { .. } => "That file could not be attached.",
+        AttachmentError::Empty { .. } => "That file carries no bytes to attach.",
+        AttachmentError::KindNotAttaching { .. } => {
+            "That kind is an analysis input, not a release attachment."
+        }
+    };
+    ErrorEnvelopeDto {
+        code: error.code().to_owned(),
+        message: message.to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: Some(error.to_string()),
+        remediation: Some(error.remediation().to_owned()),
+    }
+}
+
+/// An attachment handle this session never issued, or has already withdrawn.
+fn attachment_missing(_attachment_id: &str, operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: "ERR-INPUT-0001".to_owned(),
+        message: "That attachment is no longer available.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: Some(
+            "the shell holds chosen files for the current run only; this session never issued, or no \
+             longer holds, the handle given"
+                .to_owned(),
+        ),
+        remediation: Some("Attach the file again from the Release page.".to_owned()),
+    }
+}
+
+/// A kind word outside the three a release may attach.
+fn attachment_word_missing(operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: "ERR-INPUT-0001".to_owned(),
+        message: "That kind cannot be declared for an attachment.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: Some(
+            "a release attaches a BIN, an Intel HEX or an unidentified file; the kinds an analyzed build \
+             produces are not among them"
+                .to_owned(),
+        ),
+        remediation: Some("Choose bin, hex or unknown for this attachment.".to_owned()),
     }
 }
 
@@ -988,6 +1344,10 @@ pub fn run() {
             release::run_release_gate,
             release::accept_review,
             release::get_gate_run,
+            release::attach_release_file,
+            release::set_release_attachment_kind,
+            release::remove_release_attachment,
+            release::get_release_attachments,
             bundle::prepare_release_bundle,
             bundle::choose_bundle_destination,
             bundle::export_release_bundle,

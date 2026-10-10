@@ -225,6 +225,12 @@ export function Help() {
           authoritative list of what is claimed to work, on which platform, and to what depth; this
           screen is not a substitute for it.
         </p>
+        <p>
+          A BIN or Intel HEX file is still not something FirmwareSight reads. It is something a release
+          ships: the Release page attaches it, records its size and SHA-256 under the kind its name
+          states, and carries those bytes inside a verified bundle, with its build provenance left
+          unestablished by design (`ADR-0030`).
+        </p>
       </section>
 
       <section className={styles['section']} aria-label="Local-first statement">

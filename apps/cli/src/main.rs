@@ -30,8 +30,10 @@ use firmwaresight_core::domain::gate::{EffectiveSeverity, GateGrowthFacts};
 use firmwaresight_core::domain::release::ReleaseError;
 use firmwaresight_project::evidence::{SnapshotFacts, growth_facts, observe_release_notes};
 use firmwaresight_project::{
-    BundleError, BundleRequest, GateRunRequest, GitObservation, GitProbe, LoadedProject,
-    ProjectError, build_context, prepare, run_id,
+    AttachmentError, AttachmentSelection, BundleError, BundleRequest, GateRunRequest,
+    GitObservation, GitProbe, LoadedProject, ProjectError, ReleaseAttachment,
+    build_context_with_attachments, declared_kind_for_path, observe_attachment,
+    prepare_with_attachments, run_id,
 };
 use firmwaresight_report::{
     AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, render,
@@ -108,6 +110,15 @@ struct ReleasePrepareArgs {
     /// GNU ld MAP file for the baseline artifact.
     #[arg(long, value_name = "FILE")]
     baseline_map: Option<PathBuf>,
+
+    /// A BIN or Intel HEX file to ship inside the bundle as byte evidence. Repeatable, one per file.
+    ///
+    /// The same rule and the same single observation path as `gate --attach`: the file's bytes are hashed,
+    /// shipped under `artifacts/` and indexed, its kind is the one its name declares, and its build
+    /// provenance stays unestablished. Re-observed before the write, so a file that changed after the
+    /// preview stops the export instead of shipping two answers.
+    #[arg(long, value_name = "FILE")]
+    attach: Vec<PathBuf>,
 
     /// The folder the bundle directory is created in.
     #[arg(long, value_name = "DIR")]
@@ -192,6 +203,15 @@ struct GateArgs {
     /// GNU ld MAP file for the baseline artifact.
     #[arg(long, value_name = "FILE")]
     baseline_map: Option<PathBuf>,
+
+    /// A BIN or Intel HEX file this release ships as byte evidence. Repeatable, one per file.
+    ///
+    /// FirmwareSight records the file's size and SHA-256 under a kind its name declares, and does not
+    /// analyze it. A `.bin` is declared `bin`, a `.hex` is declared `hex`, in any letter case, and any other
+    /// name is declared `unknown` — which satisfies no required kind. Nothing here reads the file as a
+    /// container, so no name promises valid records, an address span or symbols.
+    #[arg(long, value_name = "FILE")]
+    attach: Vec<PathBuf>,
 
     /// Emit exactly one gate-results JSON document on stdout.
     #[arg(long)]
@@ -383,13 +403,21 @@ fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
         .require_release_notes
         .then(|| observe_release_notes(&project.root, &project.policy.release_notes_path));
     let facts = SnapshotFacts::from_snapshot(&target.snapshot);
-    let context = build_context(&GateRunRequest {
-        target: &facts,
-        growth,
-        git: &git,
-        policy: project.policy.clone(),
-        release_notes,
-    });
+    let selections = attachment_selections(&args.attach);
+    let attached = match observe_selections(&selections) {
+        Ok(rows) => rows,
+        Err(error) => return report_attachment_error(&error, args.json, operation_id),
+    };
+    let context = build_context_with_attachments(
+        &GateRunRequest {
+            target: &facts,
+            growth,
+            git: &git,
+            policy: project.policy.clone(),
+            release_notes,
+        },
+        &attached,
+    );
 
     let run = run_id(&context);
     let evaluation = context.evaluate(&run);
@@ -414,6 +442,16 @@ fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
     eprintln!("diagnostics: map {}", map_state(&target));
     if let Some(baseline) = &args.baseline {
         eprintln!("diagnostics: baseline {}", file_name(baseline));
+    }
+    if !attached.is_empty() {
+        // The kinds stated back as the names declared them, before the document says the same thing: this is
+        // the stderr half of the `--json` contract (§39), and a release owner reading it learns that a
+        // `--attach payload.img` was taken as `unknown`, not as a BIN they did not name.
+        let declared: Vec<String> = attached
+            .iter()
+            .map(|row| format!("{}={}", row.file_name, row.kind.word()))
+            .collect();
+        eprintln!("diagnostics: attachments {}", declared.join(", "));
     }
     eprintln!("diagnostics: git {}", git_state(&git));
     eprintln!(
@@ -500,15 +538,19 @@ fn run_release_prepare(args: ReleasePrepareArgs, operation_id: &str) -> ExitCode
         fwsight_version: pipeline::FWSIGHT_VERSION,
     };
 
-    let plan = match prepare(&request) {
+    let selections = attachment_selections(&args.attach);
+
+    let plan = match prepare_with_attachments(&request, &selections) {
         Ok(plan) => plan,
         Err(error) => {
             return report_bundle_error(&error, release_exit_code(&error), args.json, operation_id);
         }
     };
     // §28 re-checks every input against what the preview was built from, so the second `publish` argument is
-    // not a formality: a file that moved between the two calls stops the write.
-    let outcome = match plan.publish(&request, &args.out, args.force) {
+    // not a formality: a file that moved between the two calls stops the write — and that now includes an
+    // attached file, which the same call re-observes by path before anything is created.
+    let outcome = match plan.publish_with_attachments(&request, &selections, &args.out, args.force)
+    {
         Ok(outcome) => outcome,
         Err(error) => {
             return report_bundle_error(&error, release_exit_code(&error), args.json, operation_id);
@@ -624,6 +666,59 @@ fn report_config_error(err: &ProjectError, json: bool, operation_id: &str) -> Ex
     );
     tracing::error!(operation_id, code = err.code(), "project config rejected");
     ExitCode::from(EXIT_USAGE)
+}
+
+/// The `--attach` arguments as the engine's own selection type, in the order they were typed.
+///
+/// Kind comes from the file name and from nowhere else, because `04_TECH/28` §9 freezes this command's
+/// carrier as a repeatable `--attach <FILE>` with no kind flag. The name is the statement the release owner
+/// made; recording anything stronger would be a format claim the CLI never tested, and recording nothing
+/// would leave the engine with no declaration to bind (`ADR-0030` D-8).
+fn attachment_selections(paths: &[PathBuf]) -> Vec<AttachmentSelection> {
+    paths
+        .iter()
+        .map(|path| AttachmentSelection {
+            path: path.clone(),
+            declared_kind: declared_kind_for_path(path),
+        })
+        .collect()
+}
+
+/// Observe every selection on the engine's one observation path, stopping at the first refusal.
+///
+/// One path, not a CLI version of it: the digest, the length and the sanitized leaf a `gate` run binds are
+/// the same three facts `release prepare` will re-derive from the same bytes before it writes them.
+fn observe_selections(
+    selections: &[AttachmentSelection],
+) -> Result<Vec<ReleaseAttachment>, AttachmentError> {
+    selections
+        .iter()
+        .map(|choice| observe_attachment(&choice.path, choice.declared_kind))
+        .collect()
+}
+
+/// Refuse an attachment the engine could not observe, in the engine's words and under the engine's code.
+///
+/// A file that cannot be read is an input this run could not take, which is the parse/import half of the
+/// frozen table (3) rather than a verdict (4, 5) and rather than a write failure (6) — an attach failure on
+/// the export path is a different event and travels as a `BundleError` through [`report_bundle_error`].
+/// Nothing was written and no run was judged when this returns.
+fn report_attachment_error(error: &AttachmentError, json: bool, operation_id: &str) -> ExitCode {
+    let envelope = render::ErrorEnvelope::new(error.code(), error.to_string(), operation_id)
+        .with_remediation(error.remediation());
+    if json {
+        println!("{}", envelope.to_json());
+    }
+    eprintln!(
+        "error: {} (code {}, operation {operation_id})",
+        envelope.message, envelope.code
+    );
+    tracing::error!(
+        operation_id,
+        code = error.code(),
+        "release attachment refused"
+    );
+    ExitCode::from(EXIT_PARSE_IMPORT)
 }
 
 /// One line about what the workspace Git said. It describes the *directory the release owner pointed

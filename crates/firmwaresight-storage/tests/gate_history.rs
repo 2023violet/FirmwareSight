@@ -1389,6 +1389,35 @@ fn a_draft_carrying_an_attachment_with_no_observed_digest_is_refused_before_any_
 }
 
 #[test]
+fn the_refusal_a_stale_pass_meets_names_the_attachment_set_as_a_cause() {
+    // `04_TECH/28` §9's storage row. This is the one message a release owner reads when the run id they are
+    // holding already carries a different answer, and an attachment set is the fourth thing that can move
+    // under it. Naming the cause is the whole difference between an action and a dead end.
+    let (_file, mut db) = seeded("attach-invariant-words");
+    let id = run_id("u11");
+    let plain = evaluate_run(&mixed_context(), &id);
+    db.persist_gate_run(&draft(&id, &plain))
+        .expect("the run is stored first");
+
+    let rows = vec![attached(ArtifactKind::Bin, &hex64("bin"), 4096)];
+    let mut bound = mixed_context();
+    bound.attachments = rows.clone();
+    let bound_evaluation = evaluate_run(&bound, &id);
+
+    let err = db
+        .persist_gate_run(&attached_draft(&id, &bound_evaluation, &rows))
+        .expect_err("one run id cannot carry two results");
+    let StorageError::Invariant { detail } = err else {
+        panic!("expected the invariant refusal, got {err:?}");
+    };
+    assert!(detail.contains("attachment set"), "{detail}");
+    assert!(
+        detail.contains("policy") && detail.contains("workspace") && detail.contains("baseline"),
+        "the three causes that were already named stay in the sentence: {detail}"
+    );
+}
+
+#[test]
 fn a_derived_basis_row_is_reported_rather_than_read_back_as_more_than_it_states() {
     // `0006` admits the word `derived_from_leading_bytes` for the unit that will write a basis with a
     // byte sample. This build stores the word only, so reading it back would invent a detail the row

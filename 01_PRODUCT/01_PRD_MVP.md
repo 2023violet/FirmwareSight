@@ -35,6 +35,14 @@ last_updated: "2026-10-09"
 > "记录 SHA-256" 与"原文件默认只读"两条继续适用于附属文件，且实现方式就是流式哈希。
 > 这一天 C1 只是**已批准的设计**：功能未实现（`04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`），本条不是能力声明。
 
+> **Dated 2026-10-10（C1-U4，接上一条）。** 上面那句"功能未实现"从这一天起不再成立：Release 附属字节证据现在
+> 有了一条一个人能操作的通路——Release 页面的 **Release attachments** 区块（Attach / Withdraw、leaf 名、字节数、
+> 完整 SHA-256、声明的 kind、`provenance: unknown`，并写明"Bytes verified; build provenance not verified.
+> BIN/HEX contents are not analyzed."），以及 `fwsight gate` / `fwsight release prepare` 上可重复的
+> `--attach <FILE>`。这仍然**不是能力声明**：BIN/HEX 不被解析，构建出处不被验证，已发布产物里也没有这条通路，
+> 所以产品状态词仍是 `DESIGN_APPROVED / NOT_USER_AVAILABLE`，直到独立的架构验收与一次真实的推送、发布之后才改。
+> 四个动词没有增加第五个：附属只在 Release 下发生。
+
 ### P0-2 Build Analysis
 ELF 最少展示：
 - target architecture；

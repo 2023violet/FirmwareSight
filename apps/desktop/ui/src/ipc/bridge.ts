@@ -35,6 +35,8 @@ import type {
   MainWindowPage,
   ProjectContextDto,
   ProjectPolicyDto,
+  ReleaseAttachmentDto,
+  ReleaseAttachmentsDto,
   SectionChangePageDto,
   SectionChangeQueryDto,
   SectionPageDto,
@@ -65,6 +67,10 @@ const SAVE_PROJECT_POLICY = 'save_project_policy';
 const RUN_RELEASE_GATE = 'run_release_gate';
 const ACCEPT_REVIEW = 'accept_review';
 const GET_GATE_RUN = 'get_gate_run';
+const ATTACH_RELEASE_FILE = 'attach_release_file';
+const SET_RELEASE_ATTACHMENT_KIND = 'set_release_attachment_kind';
+const REMOVE_RELEASE_ATTACHMENT = 'remove_release_attachment';
+const GET_RELEASE_ATTACHMENTS = 'get_release_attachments';
 const PREPARE_RELEASE_BUNDLE = 'prepare_release_bundle';
 const CHOOSE_BUNDLE_DESTINATION = 'choose_bundle_destination';
 const EXPORT_RELEASE_BUNDLE = 'export_release_bundle';
@@ -253,6 +259,58 @@ export async function acceptReview(
  */
 export async function getGateRun(runId: string): Promise<IpcOutcome<GateRunDto | null>> {
   return await call<GateRunDto | null>(GET_GATE_RUN, { runId });
+}
+
+/**
+ * Ask the shell to open the native file dialog for one release attachment.
+ *
+ * `null` means the person cancelled — a decision, not a failure, and the set stays exactly as it was.
+ * What comes back for a chosen file is what the shell measured: the sanitized leaf, the byte length and
+ * the full SHA-256, the kind the file's *name* declared, and `provenance: unknown`, because an attached
+ * file's build origin is not established by shipping it. The path itself never crosses (prompt §27,
+ * `04_TECH/28` §4.4).
+ */
+export async function attachReleaseFile(): Promise<IpcOutcome<ReleaseAttachmentDto | null>> {
+  return await call<ReleaseAttachmentDto | null>(ATTACH_RELEASE_FILE);
+}
+
+/**
+ * Declare what kind one chosen file is, from the three kinds a release may attach.
+ *
+ * This is the owner's statement, not a finding: naming a file `hex` makes no claim that its records were
+ * read, and the row comes back with the same digest and the same `provenance: unknown`.
+ */
+export async function setReleaseAttachmentKind(
+  attachmentId: string,
+  kind: string,
+): Promise<IpcOutcome<ReleaseAttachmentDto>> {
+  return await call<ReleaseAttachmentDto>(SET_RELEASE_ATTACHMENT_KIND, { attachmentId, kind });
+}
+
+/**
+ * Withdraw one attachment and return the set that remains.
+ *
+ * Withdrawing changes what the next Gate run identifies. A stored run keeps the rows it judged; the set on
+ * the page and that record then differ, and `getReleaseAttachments` says so rather than leaving the
+ * screen to guess (`04_TECH/28` §4.2).
+ */
+export async function removeReleaseAttachment(
+  attachmentId: string,
+): Promise<IpcOutcome<Array<ReleaseAttachmentDto>>> {
+  return await call<Array<ReleaseAttachmentDto>>(REMOVE_RELEASE_ATTACHMENT, { attachmentId });
+}
+
+/**
+ * Read the attachment set the shell holds, and whether it is still the set the given run judged.
+ *
+ * Pass the run id the page is showing, or `null` while nothing has been judged. `matchesGateRun` is the
+ * shell's comparison — the screen cannot make it without re-implementing the identity rule — and it is
+ * `null`, not `true`, when there is no run to compare against.
+ */
+export async function getReleaseAttachments(
+  gateRunId: string | null,
+): Promise<IpcOutcome<ReleaseAttachmentsDto>> {
+  return await call<ReleaseAttachmentsDto>(GET_RELEASE_ATTACHMENTS, { gateRunId });
 }
 
 /**

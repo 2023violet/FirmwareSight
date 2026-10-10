@@ -15,7 +15,10 @@
  *   nothing offers to edit or delete the record (prompt §48);
  * - and a run that failed leaves the last good one on screen, labelled as previous (prompt §49);
  * - and the bundle section stays a section of this page: it opens only on a PASS disposition, asks before
- *   it replaces anything, and shows the plan the engine rather than the page composed (prompt §48, §58).
+ *   it replaces anything, and shows the plan the engine rather than the page composed (prompt §48, §58);
+ * - and a release attachment is shown as measured bytes with a declared kind and an unestablished
+ *   provenance, never as an analyzed file, and changing the set takes the verdict with it
+ *   (`04_TECH/28` §9, §4.2).
  *
  * The bridge is mocked, the way the P1 and P2 files do it: the plumbing has its own test. No assertion
  * here checks a number the shell did not send, because the page computes none of them.
@@ -29,6 +32,7 @@ import {
   acceptReview,
   analyzeSelection,
   attachMap,
+  attachReleaseFile,
   chooseBundleDestination,
   clearMap,
   compareSnapshots,
@@ -36,6 +40,7 @@ import {
   exportCompareJson,
   exportReleaseBundle,
   getGateRun,
+  getReleaseAttachments,
   listCompareCandidates,
   openProjectConfig,
   prepareReleaseBundle,
@@ -44,9 +49,11 @@ import {
   querySections,
   querySymbolChanges,
   querySymbols,
+  removeReleaseAttachment,
   runReleaseGate,
   saveProjectPolicy,
   selectArtifact,
+  setReleaseAttachmentKind,
 } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type {
@@ -62,6 +69,8 @@ import type {
   GateRunDto,
   ProjectContextDto,
   ProjectPolicyDto,
+  ReleaseAttachmentDto,
+  ReleaseAttachmentsDto,
 } from './ipc/types';
 import { precedes } from './test/order';
 
@@ -84,6 +93,10 @@ vi.mock('./ipc/bridge', () => ({
   runReleaseGate: vi.fn(),
   acceptReview: vi.fn(),
   getGateRun: vi.fn(),
+  attachReleaseFile: vi.fn(),
+  getReleaseAttachments: vi.fn(),
+  removeReleaseAttachment: vi.fn(),
+  setReleaseAttachmentKind: vi.fn(),
   prepareReleaseBundle: vi.fn(),
   chooseBundleDestination: vi.fn(),
   exportReleaseBundle: vi.fn(),
@@ -103,6 +116,10 @@ const getRunMock = vi.mocked(getGateRun);
 const prepareBundleMock = vi.mocked(prepareReleaseBundle);
 const chooseDestinationMock = vi.mocked(chooseBundleDestination);
 const exportBundleMock = vi.mocked(exportReleaseBundle);
+const attachFileMock = vi.mocked(attachReleaseFile);
+const readAttachmentsMock = vi.mocked(getReleaseAttachments);
+const removeAttachmentMock = vi.mocked(removeReleaseAttachment);
+const declareKindMock = vi.mocked(setReleaseAttachmentKind);
 
 function ok<T>(value: T): IpcOutcome<T> {
   return { ok: true, value };
@@ -558,6 +575,29 @@ function findingRow(rule: string): HTMLElement {
   return row;
 }
 
+/** One attachment row, exactly as the shell sends it: measured bytes, declared kind, unknown provenance. */
+function attachment(over: Partial<ReleaseAttachmentDto> = {}): ReleaseAttachmentDto {
+  return {
+    attachmentId: 'att-1',
+    fileName: 'app.bin',
+    byteSize: 960,
+    sha256: 'a'.repeat(64),
+    kind: 'bin',
+    kindBasis: 'declared',
+    provenance: 'unknown',
+    ...over,
+  };
+}
+
+/** The set the shell reports, with the run it compared it against and the answer it gave. */
+function attachmentSet(
+  rows: readonly ReleaseAttachmentDto[],
+  gateRunId: string | null = null,
+  matchesGateRun: boolean | null = null,
+): ReleaseAttachmentsDto {
+  return { attachments: [...rows], gateRunId, matchesGateRun };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   candidatesMock.mockResolvedValue(
@@ -597,6 +637,12 @@ beforeEach(() => {
   prepareBundleMock.mockResolvedValue(ok(bundlePreview()));
   chooseDestinationMock.mockResolvedValue(ok(bundleDestination()));
   exportBundleMock.mockResolvedValue(ok(bundleExport()));
+  // The attachment surface reads empty by default: a screen that never had a file chosen must not render
+  // one, and the tests below hand it rows the way the shell would.
+  attachFileMock.mockResolvedValue(ok(null));
+  readAttachmentsMock.mockResolvedValue(ok(attachmentSet([])));
+  removeAttachmentMock.mockResolvedValue(ok([]));
+  declareKindMock.mockResolvedValue(ok(attachment()));
 });
 
 describe('Release navigation', () => {
@@ -900,7 +946,13 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
-    expect(block('Required artifacts').textContent).toContain('checked for presence only');
+    // §9's replacement caption: the required BIN/HEX is satisfied by an attached file, and the sentence has
+    // to say what that does *not* include. The old words ("checked for presence only") described the rule
+    // before an attachment could satisfy it.
+    expect(block('Required artifacts').textContent).toContain(
+      'are satisfied by release files you attach',
+    );
+    expect(block('Required artifacts').textContent).toContain('does not analyze them');
     const words = document.body.textContent ?? '';
     expect(words).not.toMatch(/BIN files are analyzed/i);
   });
@@ -1671,5 +1723,156 @@ describe('U1P Release hierarchy', () => {
     const policy = screen.getByRole('region', { name: '5 · Project policy' });
     const builds = screen.getByRole('region', { name: '6 · Build and baseline' });
     expect(precedes(policy, builds)).toBe(true);
+  });
+});
+
+describe('Release attachments', () => {
+  it('lists a chosen file with its measured bytes, its full digest and the limit that comes with them', async () => {
+    readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
+    await openRelease();
+
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    expect(within(region).getByText('app.bin')).toBeDefined();
+    expect(within(region).getByText('960 bytes')).toBeDefined();
+    // §9 asks for the full SHA-256 on this surface, so nothing here truncates it the way a run id is.
+    expect(within(region).getByText('a'.repeat(64))).toBeDefined();
+    expect(
+      within(region).getByText('Bytes observed · kind declared · provenance unknown'),
+    ).toBeDefined();
+    expect(within(region).getByText('Withdraw')).toBeDefined();
+    const words = region.textContent ?? '';
+    expect(words).toContain('Bytes verified; build provenance not verified.');
+    expect(words).toContain('BIN/HEX contents are not analyzed.');
+    expect(words).not.toMatch(/analyz(e|es|ing) (the )?(BIN|HEX|file|bytes)/i);
+  });
+
+  it('names no folder on the attachment row, in either direction', async () => {
+    readAttachmentsMock.mockResolvedValue(
+      ok(attachmentSet([attachment({ fileName: 'motor-controller.bin' })])),
+    );
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const words = region.textContent ?? '';
+    expect(words).toContain('motor-controller.bin');
+    // A leaf is what a person recognizes. A folder on the row would be the shell's leak, not the owner's
+    // mistake, and the DTO has no field for one: no separator, no drive root, and the file cell is the
+    // leaf alone.
+    expect(within(region).getByText('motor-controller.bin')).toBeDefined();
+    expect(words).not.toContain('\\');
+    expect(words).not.toMatch(/[A-Za-z]:[\\/]/);
+    expect(words).not.toContain('fwsight');
+  });
+
+  it('says what an empty set means, in words the release owner can act on', async () => {
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    expect(region.textContent).toContain('Nothing is attached.');
+    expect(region.textContent).toContain('it is not analyzed');
+  });
+
+  it('asks the shell for a file when Attach is pressed, and shows the row the shell measured', async () => {
+    readAttachmentsMock
+      .mockResolvedValueOnce(ok(attachmentSet([])))
+      .mockResolvedValueOnce(ok(attachmentSet([attachment()])));
+    attachFileMock.mockResolvedValue(ok(attachment()));
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+
+    fireEvent.click(within(region).getByRole('button', { name: 'Attach' }));
+    await waitFor(() => expect(attachFileMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(within(region).getByText('app.bin')).toBeDefined());
+  });
+
+  it('treats a cancelled dialog as no change at all', async () => {
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const readsBefore = readAttachmentsMock.mock.calls.length;
+
+    attachFileMock.mockResolvedValue(ok(null));
+    fireEvent.click(within(region).getByRole('button', { name: 'Attach' }));
+    await waitFor(() => expect(attachFileMock).toHaveBeenCalledTimes(1));
+
+    // Cancel is a decision: no re-read, no invalidation, no error, and the empty row list stays as it was.
+    expect(readAttachmentsMock.mock.calls.length).toBe(readsBefore);
+    expect(within(region).queryByRole('alert')).toBeNull();
+    expect(region.textContent).toContain('Nothing is attached.');
+  });
+
+  it('drops the verdict the moment the set it judged is no longer the set on the page', async () => {
+    await openRelease();
+    await runGate();
+    await screen.findByRole('region', { name: 'Gate verdict' });
+    expect(screen.getByRole('region', { name: '1 · Findings by state' })).toBeDefined();
+
+    readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
+    attachFileMock.mockResolvedValue(ok(attachment()));
+    const attached = await screen.findByRole('region', { name: 'Release attachments' });
+    fireEvent.click(within(attached).getByRole('button', { name: 'Attach' }));
+
+    // §4.2's order, on the surface a person stands at: a run that bound no file cannot be a verdict about
+    // one file, so the record goes and the page asks again.
+    await waitFor(() =>
+      expect(screen.queryByRole('region', { name: 'Gate verdict' })).toBeNull(),
+    );
+    const again = await screen.findByRole('region', { name: 'Release attachments' });
+    await waitFor(() => expect(within(again).getByText('app.bin')).toBeDefined());
+  });
+
+  it('says which run a changed set no longer matches, in the shell’s own comparison', async () => {
+    readAttachmentsMock.mockResolvedValue(
+      ok(attachmentSet([attachment()], 'gate-0123456789abcdef', false)),
+    );
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const stale = within(region).getByRole('status');
+    expect(stale.textContent).toContain('is not the set');
+    expect(stale.textContent).toContain('Run the Gate again');
+  });
+
+  it('offers only the three kinds a release may declare, and sends the owner’s choice to the shell', async () => {
+    readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const picker = within(region).getByRole('combobox', {
+      name: 'Declared kind for app.bin',
+    }) as HTMLSelectElement;
+    expect(within(picker)
+      .getAllByRole('option')
+      .map((option) => option.textContent)).toEqual(['bin', 'hex', 'unknown']);
+    expect(picker.value).toBe('bin');
+
+    declareKindMock.mockResolvedValue(ok(attachment({ kind: 'hex' })));
+    fireEvent.change(picker, { target: { value: 'hex' } });
+    await waitFor(() =>
+      expect(declareKindMock).toHaveBeenCalledWith('att-1', 'hex'),
+    );
+  });
+
+  it('withdraws one file and shows the set that remains', async () => {
+    readAttachmentsMock
+      .mockResolvedValueOnce(ok(attachmentSet([attachment()])))
+      .mockResolvedValueOnce(ok(attachmentSet([])));
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    fireEvent.click(within(region).getByRole('button', { name: 'Withdraw' }));
+    await waitFor(() => expect(removeAttachmentMock).toHaveBeenCalledWith('att-1'));
+    await waitFor(() => expect(region.textContent).toContain('Nothing is attached.'));
+  });
+
+  it('reports a refused attachment step with the shell’s sentence and keeps the rows it had', async () => {
+    readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
+    declareKindMock.mockResolvedValue(
+      fail(ENVELOPE('ERR-INPUT-0001', 'That kind cannot be declared for an attachment.')),
+    );
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    fireEvent.change(within(region).getByRole('combobox', { name: 'Declared kind for app.bin' }), {
+      target: { value: 'unknown' },
+    });
+    await waitFor(() =>
+      expect(within(region).getByText('That kind cannot be declared for an attachment.')).toBeDefined(),
+    );
+    // The refusal changed nothing: the row is still the one the shell reported.
+    expect(within(region).getByText('app.bin')).toBeDefined();
   });
 });

@@ -600,7 +600,7 @@ fn format_truth_comes_from_the_bytes_not_from_an_elf_extension() {
     assert_eq!(
         remediation,
         "Choose the ELF linker output this build produced; BIN and Intel HEX images are not analyzed \
-         by this entry point.",
+         by this entry point. Attach them on the Release page to ship them as byte evidence.",
         "the desktop must quote the one remediation the artifact layer writes, not a second copy"
     );
 }

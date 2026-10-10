@@ -47,7 +47,7 @@ pub use error::ProjectError;
 pub use evidence::{
     AttachmentError, AttachmentSelection, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest,
     ReleaseAttachment, SnapshotFacts, build_context, build_context_with_attachments,
-    footprint_evidence_id, observe_attachment, observe_release_notes,
+    declared_kind_for_path, footprint_evidence_id, observe_attachment, observe_release_notes,
 };
 pub use fingerprint::{policy_sha256, run_id};
 pub use git::{GitObservation, GitProbe};

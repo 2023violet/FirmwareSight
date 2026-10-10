@@ -577,6 +577,29 @@ pub struct AttachmentSelection {
     pub declared_kind: ArtifactKind,
 }
 
+/// The declared kind a file name states, for the one surface that gets a name and no kind: `04_TECH/28` §9
+/// freezes the CLI's attach carrier as a repeatable `--attach <FILE>`, so a `.bin` argument has to be recorded
+/// as *some* kind and the only fact that edge was given is the extension.
+///
+/// This is a reading of the release owner's words, not of their bytes. It opens nothing, looks for no record
+/// structure, and knows two spellings — `bin` and `hex`, in any case — and nothing else, so `payload.ihex`
+/// arrives as `unknown` rather than as a claim this rule cannot support. It can never return `Elf` or `Map`:
+/// those are the kinds only an analyzed file may hold, and `observe_attachment` refuses them as declarations
+/// (§2.2). A surface that can ask — the desktop — offers the three kinds and uses this only to pre-fill.
+#[must_use]
+pub fn declared_kind_for_path(path: &Path) -> ArtifactKind {
+    match path
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .map(|extension| extension.to_ascii_lowercase())
+        .as_deref()
+    {
+        Some("bin") => ArtifactKind::Bin,
+        Some("hex") => ArtifactKind::IntelHex,
+        _ => ArtifactKind::Unknown,
+    }
+}
+
 /// The disposition table a config omits entirely, exposed so the desktop's "no config yet" screen can
 /// show what would be applied.
 #[must_use]
@@ -850,6 +873,68 @@ mod tests {
             firmwaresight_core::domain::gate::FindingState::Pass,
             "{}",
             finding.summary
+        );
+    }
+
+    /// `04_TECH/28` §9's CLI row freezes one carrier — a repeatable `--attach <FILE>` with no kind flag — so a
+    /// file name is all that edge gets. These four cases hold the rule that answers for it.
+    #[test]
+    fn a_bin_name_declares_bin_and_a_hex_name_declares_intel_hex() {
+        assert_eq!(
+            declared_kind_for_path(Path::new("build/app.bin")),
+            ArtifactKind::Bin
+        );
+        assert_eq!(
+            declared_kind_for_path(Path::new("build/boot.hex")),
+            ArtifactKind::IntelHex
+        );
+    }
+
+    #[test]
+    fn the_name_rule_reads_the_extension_case_insensitively_and_never_opens_the_file() {
+        // `FIRMWARE.BIN` is the same statement as `firmware.bin`. A rule that had to read bytes to know that
+        // would be a format check under another name, which `ADR-0030` D-8 forbids.
+        for (name, expected) in [
+            ("FIRMWARE.BIN", ArtifactKind::Bin),
+            ("Mixed.Bin", ArtifactKind::Bin),
+            ("Release.HEX", ArtifactKind::IntelHex),
+            ("Mixed.Hex", ArtifactKind::IntelHex),
+        ] {
+            assert_eq!(declared_kind_for_path(Path::new(name)), expected, "{name}");
+        }
+    }
+
+    #[test]
+    fn a_name_that_says_nothing_this_rule_knows_declares_unknown() {
+        // Including `.ihex`, a real Intel HEX spelling this rule deliberately does not claim. A person who
+        // means it declares so explicitly; the CLI's only carrier cannot ask, so the honest answer is unknown,
+        // and `unknown` satisfies no required kind.
+        for name in [
+            "payload",
+            "payload.ihex",
+            "image.img",
+            "app.bin.tmp",
+            "notes.",
+        ] {
+            assert_eq!(
+                declared_kind_for_path(Path::new(name)),
+                ArtifactKind::Unknown,
+                "{name} names neither of the two spellings"
+            );
+        }
+    }
+
+    #[test]
+    fn the_name_rule_can_never_declare_a_kind_that_only_an_analyzed_file_has() {
+        // `observe_attachment` refuses `elf` and `map` as declarations (§2.2); a name rule that could produce
+        // them would let a file name claim the status of a parsed artifact.
+        assert_eq!(
+            declared_kind_for_path(Path::new("firmware.elf")),
+            ArtifactKind::Unknown
+        );
+        assert_eq!(
+            declared_kind_for_path(Path::new("firmware.map")),
+            ArtifactKind::Unknown
         );
     }
 }

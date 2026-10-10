@@ -64,7 +64,9 @@ export function GettingStartedList() {
             ))}
           </ol>
           Analyze proves one build, Compare measures two, Release judges them against a policy, and
-          Bundle writes the result out as a folder a release owner can hand to somebody else.
+          Bundle writes the result out as a folder a release owner can hand to somebody else. A BIN or
+          Intel HEX file belongs to Release, not to Analyze: attach it there and its bytes ship as
+          evidence, unanalyzed (`ADR-0030`).
         </dd>
       </div>
       <div>

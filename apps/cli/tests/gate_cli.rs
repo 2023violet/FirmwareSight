@@ -603,3 +603,246 @@ fn the_human_report_reads_as_a_verdict_and_the_json_carries_the_same_states() {
     );
     assert_eq!(human.status.code(), Some(4), "{}", errors(&human));
 }
+
+// ------------------------------------------------------------------ release attachments (`C1-U4`)
+
+/// A policy that asks for the two kinds nothing in this build analyzes. `elf` stays in the list because the
+/// config requires it (`config.rs:434`) and an attachment is never allowed to stand in for it
+/// (`ADR-0030` D-3) — which is what the last two cases below pin.
+const BIN_HEX_POLICY: &str = "schema_version = 1\n\
+     [project]\nname = \"brake-node\"\n\
+     [artifacts]\nrequired = [\"elf\", \"bin\", \"hex\"]\n\
+     [release]\nrequire_clean_git = false\nrequire_release_notes = false\n";
+
+/// As above, with `hex` left out: a required kind that one name can declare and another cannot.
+const BIN_POLICY: &str = "schema_version = 1\n\
+     [project]\nname = \"brake-node\"\n\
+     [artifacts]\nrequired = [\"elf\", \"bin\"]\n\
+     [release]\nrequire_clean_git = false\nrequire_release_notes = false\n";
+
+/// One file the release owner could have pointed `--attach` at, and the path as the process receives it.
+fn attachable(project: &TempProject, name: &str, bytes: &[u8]) -> String {
+    let path = project.path().join(name);
+    std::fs::write(&path, bytes).expect("an attachment fixture");
+    path.to_string_lossy().into_owned()
+}
+
+fn json_document(output: &Output) -> serde_json::Value {
+    serde_json::from_str(&text(output)).expect("exactly one JSON document on stdout")
+}
+
+#[test]
+fn two_attached_files_satisfy_kinds_no_analyzed_artifact_can() {
+    let project = TempProject::new("attach-pass", BIN_HEX_POLICY);
+    let bin = attachable(&project, "app.bin", b"APP-BYTES");
+    let hex = attachable(&project, "boot.hex", b":00000001FF");
+
+    let output = gate(&project, &["--attach", &bin, "--attach", &hex, "--json"]);
+    assert_eq!(output.status.code(), Some(0), "{}", errors(&output));
+    let document = json_document(&output);
+    assert_eq!(state_of(&document, "artifacts.required"), "PASS");
+    assert_eq!(state_of(&document, "artifacts.hashes"), "PASS");
+    assert!(
+        summary_of(&document, "artifacts.required").contains("release attachments"),
+        "the sentence that credits a PASS to bytes must say so: {}",
+        summary_of(&document, "artifacts.required")
+    );
+
+    let extensions = document["extensions"].as_object().expect("extensions");
+    assert_eq!(
+        extensions["canonical_input_label"],
+        serde_json::json!("firmwaresight-gate-input/2"),
+        "a run that bound bytes must name the grammar its id was taken over"
+    );
+    let rows = extensions["attachments"]
+        .as_array()
+        .expect("attachment rows");
+    assert_eq!(rows.len(), 2, "{rows:?}");
+    // Identity order, not typing order: the rows are sorted by kind word then digest.
+    assert_eq!(rows[0]["kind"], serde_json::json!("bin"));
+    assert_eq!(rows[1]["kind"], serde_json::json!("hex"));
+    for row in rows {
+        assert_eq!(
+            row["sha256"].as_str().expect("digest").len(),
+            64,
+            "a full digest, not a shortened one: {row}"
+        );
+        assert!(row["byte_size"].as_u64().expect("size") > 0);
+    }
+
+    // The stderr half of the `--json` contract, and the only place the CLI says which kind each *name*
+    // declared — the document carries the rows, this line carries the reading of the owner's words.
+    assert!(
+        errors(&output).contains("diagnostics: attachments app.bin=bin, boot.hex=hex"),
+        "{}",
+        errors(&output)
+    );
+}
+
+#[test]
+fn a_gate_with_no_attach_flag_writes_the_document_it_wrote_before_the_flag_existed() {
+    let project = TempProject::new("attach-none", &quiet_policy());
+    let output = gate(&project, &["--json"]);
+    assert_eq!(output.status.code(), Some(0), "{}", errors(&output));
+    let document = json_document(&output);
+    let extensions = document["extensions"].as_object().expect("extensions");
+    for key in ["canonical_input_label", "attachments"] {
+        assert!(
+            !extensions.contains_key(key),
+            "an attachment-free run carries neither half of the pair: {extensions:?}"
+        );
+    }
+    assert!(
+        !errors(&output).contains("diagnostics: attachments"),
+        "a line about named files must not appear when none were: {}",
+        errors(&output)
+    );
+}
+
+#[test]
+fn a_required_kind_no_attachment_covers_blocks_and_names_both_sets() {
+    let project = TempProject::new("attach-partial", BIN_HEX_POLICY);
+    let bin = attachable(&project, "app.bin", b"APP-BYTES");
+
+    let output = gate(&project, &["--attach", &bin, "--json"]);
+    assert_eq!(output.status.code(), Some(5), "{}", errors(&output));
+    let document = json_document(&output);
+    assert_eq!(state_of(&document, "artifacts.required"), "BLOCK");
+    let summary = summary_of(&document, "artifacts.required");
+    assert!(
+        summary.contains("neither the analyzed build nor the release attachments")
+            && summary.contains("hex"),
+        "the refusal must say which two sets it looked in: {summary}"
+    );
+}
+
+#[test]
+fn a_path_that_does_not_exist_refuses_before_any_verdict_exists() {
+    let project = TempProject::new("attach-missing", BIN_HEX_POLICY);
+    let absent = project
+        .path()
+        .join("no-such.bin")
+        .to_string_lossy()
+        .into_owned();
+
+    // Human mode: a refusal prints no verdict on stdout, and it is the engine's own code, not a CLI wording.
+    let human = gate(&project, &["--attach", &absent]);
+    assert_eq!(human.status.code(), Some(3), "{}", errors(&human));
+    assert!(text(&human).is_empty(), "{}", text(&human));
+    let stderr = errors(&human);
+    assert!(stderr.contains("ERR-BUNDLE-6115"), "{stderr}");
+    assert!(stderr.contains("not a readable regular file"), "{stderr}");
+
+    // Machine mode: the envelope on stdout is the same refusal, and still no gate document.
+    let machine = gate(&project, &["--attach", &absent, "--json"]);
+    assert_eq!(machine.status.code(), Some(3), "{}", errors(&machine));
+    let envelope = json_document(&machine);
+    assert_eq!(
+        envelope["code"],
+        serde_json::json!("ERR-BUNDLE-6115"),
+        "{envelope}"
+    );
+    assert!(
+        envelope.get("findings").is_none(),
+        "a refused run writes no findings: {envelope}"
+    );
+}
+
+#[test]
+fn an_empty_file_is_refused_as_carrying_nothing_to_attach() {
+    let project = TempProject::new("attach-empty", BIN_HEX_POLICY);
+    let empty = attachable(&project, "zero.bin", b"");
+
+    let output = gate(&project, &["--attach", &empty]);
+    assert_eq!(output.status.code(), Some(3), "{}", errors(&output));
+    let stderr = errors(&output);
+    assert!(stderr.contains("ERR-BUNDLE-6117"), "{stderr}");
+    assert!(stderr.contains("empty"), "{stderr}");
+    assert!(text(&output).is_empty(), "{}", text(&output));
+}
+
+#[test]
+fn a_name_this_rule_does_not_know_is_declared_unknown_and_satisfies_nothing() {
+    let project = TempProject::new("attach-unknown", BIN_POLICY);
+    // `.ihex` is a real Intel HEX spelling this CLI rule deliberately does not claim: the flag carries no
+    // kind, so the honest declaration is `unknown`, and `unknown` satisfies no required kind.
+    let img = attachable(&project, "payload.ihex", b"BYTES");
+
+    let output = gate(&project, &["--attach", &img, "--json"]);
+    assert_eq!(output.status.code(), Some(5), "{}", errors(&output));
+    let document = json_document(&output);
+    assert_eq!(state_of(&document, "artifacts.required"), "BLOCK");
+    let rows = document["extensions"]["attachments"]
+        .as_array()
+        .expect("rows");
+    assert_eq!(rows[0]["kind"], serde_json::json!("unknown"), "{rows:?}");
+    assert!(
+        errors(&output).contains("payload.ihex=unknown"),
+        "{}",
+        errors(&output)
+    );
+}
+
+#[test]
+fn a_mixed_case_name_declares_the_kind_a_lowercase_name_declares() {
+    let project = TempProject::new("attach-case", BIN_POLICY);
+    let shouted = attachable(&project, "FIRMWARE.BIN", b"BYTES");
+
+    let output = gate(&project, &["--attach", &shouted, "--json"]);
+    assert_eq!(output.status.code(), Some(0), "{}", errors(&output));
+    let document = json_document(&output);
+    let rows = document["extensions"]["attachments"]
+        .as_array()
+        .expect("rows");
+    assert_eq!(rows[0]["kind"], serde_json::json!("bin"), "{rows:?}");
+}
+
+#[test]
+fn an_elf_pointed_at_by_attach_is_recorded_as_declared_and_never_as_an_analyzed_build() {
+    let project = TempProject::new("attach-elf", &quiet_policy());
+    let elf = repo_root().join(ARTIFACT).to_string_lossy().into_owned();
+
+    let output = gate(&project, &["--attach", &elf, "--json"]);
+    assert_eq!(output.status.code(), Some(0), "{}", errors(&output));
+    let document = json_document(&output);
+    let rows = document["extensions"]["attachments"]
+        .as_array()
+        .expect("rows");
+    assert_eq!(
+        rows[0]["kind"],
+        serde_json::json!("unknown"),
+        "a name rule can never declare the kind only analysis produces: {rows:?}"
+    );
+    assert_eq!(
+        state_of(&document, "artifacts.required"),
+        "PASS",
+        "and the requirement is still met by the analyzed artifact, not by the attached copy"
+    );
+}
+
+#[test]
+fn changing_only_an_attached_files_bytes_changes_the_run_id() {
+    // `T-C1-02` at the edge a person stands at: the bytes a release owner dropped into a folder are part of
+    // what the run identity binds, so replacing one is a different run and not the same verdict.
+    let project = TempProject::new("attach-growth", BIN_POLICY);
+    let bin = attachable(&project, "app.bin", b"FIRST");
+
+    let first = json_document(&gate(&project, &["--attach", &bin, "--json"]));
+    attachable(&project, "app.bin", b"SECOND-BYTES");
+    let second = json_document(&gate(&project, &["--attach", &bin, "--json"]));
+
+    assert_ne!(
+        first["run_id"], second["run_id"],
+        "the same name over different bytes cannot produce the same id"
+    );
+    // Measured against the fixture bytes themselves rather than a hand count of them, which is how this
+    // assertion got its first number wrong.
+    assert_eq!(
+        first["extensions"]["attachments"][0]["byte_size"],
+        serde_json::json!(b"FIRST".len() as u64)
+    );
+    assert_eq!(
+        second["extensions"]["attachments"][0]["byte_size"],
+        serde_json::json!(b"SECOND-BYTES".len() as u64)
+    );
+}

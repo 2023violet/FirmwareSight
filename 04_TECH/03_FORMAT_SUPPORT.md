@@ -47,9 +47,14 @@ last_updated: "2026-10-09"
 > - The `package` half of both rows is the surviving promise: BIN and Intel HEX become **release attachments** — raw
 >   bytes, `byte_size`, SHA-256, declared kind — bound into the Gate required-artifact verdict and into the release
 >   identity, and verified into the bundle.
-> - Status as of this date: **design approved, not implemented.** `ADR-0030` authorizes no code. The specification is
->   `04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md`, and the measured state stays
->   `P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md`'s `UNSUPPORTED`.
+> - Status as of 2026-10-10: **implemented as byte evidence, and still not a support claim.** C1-U1…U4 landed the
+>   attachment data and identity, the portable disclosure, and the surfaces a person uses — `--attach <FILE>` on
+>   `fwsight gate` and `fwsight release prepare`, and the Release page's **Release attachments** section over four
+>   use-case IPC commands. None of it analyzes a BIN or Intel HEX: `ADR-0030` still excludes record walking,
+>   checksum validation, address spans, symbols and provenance, and the measured support state remains
+>   `P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md`'s row for these formats, which moves only where a runtime run is
+>   recorded there. The earlier line in this bullet — "design approved, not implemented" — described the state
+>   before those units ran, and is kept here as what changed rather than deleted.
 
 ## Capability reporting
 

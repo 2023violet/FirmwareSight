@@ -13,6 +13,10 @@
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
+/// The engine, called directly from the test process: a release that ships attachments has to verify against
+/// bytes the CLI's own exit code cannot vouch for, so the proof does not use the runner that produced them.
+use firmwaresight_project::{fingerprint, verify_bundle};
+
 const TARGET_ELF: &str = "fixtures/elf/p2-diff/target/firmware.elf";
 const TARGET_MAP: &str = "fixtures/elf/p2-diff/target/firmware.map";
 const BASE_ELF: &str = "fixtures/elf/p2-diff/base/firmware.elf";
@@ -748,5 +752,286 @@ fn an_unregistered_release_verb_is_a_usage_error() {
     assert!(
         !std::fs::exists(&world.out).unwrap_or(false),
         "a rejected verb created a folder"
+    );
+}
+
+// ------------------------------------------------------------------ release attachments (`C1-U4`)
+
+/// The passing policy with the two kinds nothing in this build analyzes added to the requirement list: the
+/// release cannot pass until a person attaches them, and cannot pass on an analyzed stand-in either.
+const ATTACHING: &str = r#"schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+required = ["elf", "map", "bin", "hex"]
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = true
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"
+expected_version = "1.4.2"
+"#;
+
+/// The same policy with `hex` left out. Two files whose leaves differ only by case are both BIN, so a policy
+/// that also demanded a HEX would stop at the Gate and never reach the naming question — a BLOCK is refused
+/// before any collision is looked at, which is adjudication D's order and this case is here to show rather
+/// than to work around.
+const ATTACH_TWO_BINS: &str = r#"schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+required = ["elf", "map", "bin"]
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = true
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"
+expected_version = "1.4.2"
+"#;
+
+/// One file a release owner could point `--attach` at. It is written beside the project and never inside it,
+/// because this world's policy requires a clean repository: bytes dropped into the workspace would fail the
+/// release for a reason that has nothing to do with attachments.
+fn attachable(world: &World, folder: &str, name: &str, bytes: &[u8]) -> String {
+    let dir = world
+        .project
+        .parent()
+        .expect("the project sits in a scratch folder")
+        .join(folder);
+    std::fs::create_dir_all(&dir).expect("an attachment folder");
+    let path = dir.join(name);
+    std::fs::write(&path, bytes).expect("an attachment");
+    path.to_string_lossy().into_owned()
+}
+
+/// One document read out of a written bundle.
+fn bundle_document(bundle: &Path, name: &str) -> serde_json::Value {
+    let bytes = std::fs::read(bundle.join(name))
+        .unwrap_or_else(|error| panic!("`{name}` is not in the bundle: {error}"));
+    serde_json::from_slice(&bytes).unwrap_or_else(|error| panic!("`{name}` is not JSON: {error}"))
+}
+
+/// The report the person reads, as text.
+fn bundle_report(bundle: &Path) -> String {
+    std::fs::read_to_string(bundle.join("release-report.html")).expect("the report is written")
+}
+
+#[test]
+fn a_release_that_attaches_two_files_ships_their_bytes_and_verifies_from_them() {
+    let world = World::new("attach-ship", ATTACHING);
+    let bin = attachable(&world, "build", "app.bin", b"APP-BYTES");
+    let hex = attachable(&world, "build", "boot.hex", b":00000001FF");
+
+    let output = world.prepare(&["--attach", &bin, "--attach", &hex]);
+    assert_eq!(code(&output), Some(0), "{}", errors(&output));
+    let bundle = world.published();
+
+    // Independent of the process that just ran: the engine re-hashes every byte the bundle carries against
+    // the index it carries, and that is what "verified" means in this product (`04_TECH/17`).
+    let verification =
+        verify_bundle(&bundle).expect("a bundle that ships attachments still verifies");
+
+    let manifest = bundle_document(&bundle, "release-manifest.json");
+    let rows = manifest["extensions"]["attachments"]
+        .as_array()
+        .expect("the manifest discloses what it shipped")
+        .clone();
+    assert_eq!(rows.len(), 2, "{rows:?}");
+    assert_eq!(
+        verification.release_id,
+        manifest["release"]["id"].as_str().expect("a release id"),
+        "the id the engine recomputed is the id the manifest claims"
+    );
+
+    // The disclosure half of the six-link chain: each row names a bundle-relative path, the bytes at that
+    // path re-hash to the row's digest, and nothing about them is claimed beyond what was measured.
+    for row in &rows {
+        let path = row["path"].as_str().expect("a bundle-relative locator");
+        let shipped = bundle.join(path);
+        assert!(shipped.is_file(), "{path} is indexed but was not shipped");
+        assert_eq!(
+            fingerprint::file_sha256(&shipped).expect("the shipped bytes re-hash"),
+            row["sha256"].as_str().expect("a digest"),
+            "{path} ships bytes that are not the ones the manifest disclosed"
+        );
+        assert_eq!(row["provenance"], serde_json::json!("unknown"), "{row}");
+        assert_eq!(row["kind_basis"], serde_json::json!("declared"), "{row}");
+    }
+
+    // The same two sets in the gate document, with the grammar they were bound under, and one run id that
+    // both documents agree on — a bundle cannot gate one run and ship another's verdict.
+    let gate = bundle_document(&bundle, "gate-results.json");
+    assert_eq!(
+        gate["extensions"]["canonical_input_label"],
+        serde_json::json!("firmwaresight-gate-input/2")
+    );
+    let disclosed = gate["extensions"]["attachments"]
+        .as_array()
+        .expect("the gate discloses what it bound");
+    assert_eq!(disclosed.len(), 2, "{disclosed:?}");
+    for row in disclosed {
+        let digest = row["sha256"].as_str().expect("a digest");
+        assert!(
+            rows.iter().any(|ship| ship["sha256"] == digest),
+            "the gate bound {digest}, which the manifest does not ship"
+        );
+    }
+    assert_eq!(
+        gate["run_id"], manifest["extensions"]["gate_run_id"],
+        "one bundle, one gate run"
+    );
+}
+
+#[test]
+fn a_release_with_no_attach_flag_ships_the_bundle_it_shipped_before_the_flag_existed() {
+    let world = World::new("attach-none", ATTACHING);
+    // The requirement list is the same on both runs, so the only difference is the flag: without any
+    // attachment the release must BLOCK (a required kind nothing covers), which is the honest half of this
+    // case — an unchanged bundle shape cannot be shown passing on a policy the bytes do not satisfy.
+    let blocked = world.prepare(&[]);
+    assert_eq!(code(&blocked), Some(5), "{}", errors(&blocked));
+    assert!(
+        wrote_nothing(&world.out),
+        "a BLOCK stops before the write: {:?}",
+        tree(&world.out)
+    );
+
+    // The unchanged-shape proof therefore runs against a policy that asks for nothing new.
+    let plain = World::new("attach-none-plain", PASSING);
+    let output = plain.prepare(&[]);
+    assert_eq!(code(&output), Some(0), "{}", errors(&output));
+    let bundle = plain.published();
+    let manifest = bundle_document(&bundle, "release-manifest.json");
+    let gate = bundle_document(&bundle, "gate-results.json");
+    for (document, name) in [(&manifest, "release-manifest"), (&gate, "gate-results")] {
+        let extensions = document["extensions"]
+            .as_object()
+            .unwrap_or_else(|| panic!("`{name}` carries extensions"));
+        for key in ["attachments", "canonical_input_label"] {
+            assert!(
+                !extensions.contains_key(key),
+                "`{name}` grew a C1 entry although nothing was attached: {extensions:?}"
+            );
+        }
+    }
+    assert!(
+        !bundle_report(&bundle).contains("byte evidence"),
+        "a bundle with no attachment has nothing to say about attachments"
+    );
+}
+
+#[test]
+fn two_attachments_that_fold_onto_one_leaf_but_differ_in_bytes_ship_as_two_entries() {
+    // Found by writing the opposite expectation and running it: a shipped attachment is named by
+    // `disambiguated_name(kind, sha256, leaf)`, so two selections whose leaves differ only by case land on
+    // two different files and the release proceeds. That is the behaviour, so it gets a test — a reader of
+    // the case below needs to know which of the two folded shapes is refused and why.
+    let world = World::new("attach-fold-distinct", ATTACH_TWO_BINS);
+    let lower = attachable(&world, "build", "app.bin", b"FIRST");
+    let upper = attachable(&world, "ship", "APP.BIN", b"SECOND");
+
+    let output = world.prepare(&["--attach", &lower, "--attach", &upper]);
+    assert_eq!(code(&output), Some(0), "{}", errors(&output));
+    let bundle = world.published();
+    let manifest = bundle_document(&bundle, "release-manifest.json");
+    let rows = manifest["extensions"]["attachments"]
+        .as_array()
+        .expect("rows");
+    assert_eq!(rows.len(), 2, "{rows:?}");
+    let paths: Vec<&str> = rows
+        .iter()
+        .map(|row| row["path"].as_str().expect("a locator"))
+        .collect();
+    assert_ne!(paths[0], paths[1], "{paths:?}");
+    verify_bundle(&bundle).expect("both folded-spelling entries still verify");
+}
+
+#[test]
+fn two_attachments_that_fold_onto_one_leaf_and_carry_one_digest_are_refused_and_write_nothing() {
+    // The shape that cannot ship: the same bytes selected twice under names that differ only by case
+    // collapse to one bundle entry. §B's point is that the person is told about *their selection*, so this
+    // asserts the sentence a release owner reads, not just the code.
+    let world = World::new("attach-fold", ATTACH_TWO_BINS);
+    let lower = attachable(&world, "build", "app.bin", b"SHARED");
+    let upper = attachable(&world, "ship", "APP.BIN", b"SHARED");
+
+    let output = world.prepare(&["--attach", &lower, "--attach", &upper]);
+    assert_eq!(code(&output), Some(6), "{}", errors(&output));
+    let stderr = errors(&output);
+    assert!(stderr.contains("ERR-BUNDLE-6109"), "{stderr}");
+    assert!(
+        stderr.contains("is attached twice") && stderr.contains("differ only in the case"),
+        "the refusal has to be about the two names the owner selected, not about a manifest they never \
+         wrote: {stderr}"
+    );
+    assert!(
+        wrote_nothing(&world.out),
+        "a refused selection wrote a partial bundle: {:?}",
+        tree(&world.out)
+    );
+}
+
+#[test]
+fn an_attachment_that_cannot_be_read_refuses_the_release_with_the_export_code() {
+    let world = World::new("attach-absent", ATTACHING);
+    let absent = world
+        .project
+        .parent()
+        .expect("a scratch folder")
+        .join("nowhere.bin")
+        .to_string_lossy()
+        .into_owned();
+
+    let output = world.prepare(&["--attach", &absent]);
+    // A file that cannot be read stops a release for the reason §34 freezes: the export could not be
+    // produced. The refusal keeps the engine's own observation code inside it, so one refusal carries one
+    // code wherever a person meets it.
+    assert_eq!(code(&output), Some(6), "{}", errors(&output));
+    let stderr = errors(&output);
+    assert!(stderr.contains("ERR-BUNDLE-6115"), "{stderr}");
+    assert!(
+        wrote_nothing(&world.out),
+        "an unreadable attachment left a bundle behind: {:?}",
+        tree(&world.out)
+    );
+}
+
+#[test]
+fn a_bundle_that_ships_attachments_says_so_in_the_report_it_ships() {
+    let world = World::new("attach-report", ATTACHING);
+    let bin = attachable(&world, "build", "app.bin", b"APP-BYTES");
+    let hex = attachable(&world, "build", "boot.hex", b":00000001FF");
+    assert_eq!(
+        code(&world.prepare(&["--attach", &bin, "--attach", &hex])),
+        Some(0)
+    );
+    let bundle = world.published();
+    let report = bundle_report(&bundle);
+
+    // §9's one line, in the limits section, with the count the bundle actually carries. It says what was
+    // verified and what was not, in that order, and it does not say `analyzed`.
+    assert!(
+        report.contains("2 release attachment(s) ship as byte evidence"),
+        "{report}"
+    );
+    assert!(
+        report.contains("their structure and their build provenance are not verified"),
+        "{report}"
+    );
+    assert!(
+        !report.contains("BIN and Intel HEX are analyzed"),
+        "the report must not promise the analysis this release does not do"
     );
 }
