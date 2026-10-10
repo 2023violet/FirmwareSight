@@ -171,9 +171,10 @@ last_updated: "2026-10-10"
   *(Dated 2026-10-10 by the closeout, on two dates it should not blur. The authorization and most of the work carry
   2026-10-09; the product commit `facf287` (`2026-10-10T00:45:10-07:00`), the docs-only successor `2859bb2`
   (`01:56:39-07:00`) and both CI runs — #96 created `2026-10-10T08:18:23Z`, #97 `09:55:15Z` — carry 2026-10-10, so
-  where a C1-U2 document says "ran on 2026-10-09", read the day the unit opened. #97 is the run taken at the head a
-  reader now holds: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
-  lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs.)*
+  where a C1-U2 document says "ran on 2026-10-09", read the day the unit opened. #97 is the run taken at the landed
+  docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
+  lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
+  not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
 - **A0 PRODUCT TRUTHFULNESS CORRECTIVE ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE` throughout and
   is `NONE` now.** *FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0* was delivered as a file,
   archived verbatim at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt` (18,845 bytes, 252

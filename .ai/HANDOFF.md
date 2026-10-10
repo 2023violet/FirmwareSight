@@ -438,8 +438,9 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   individually) the `Rust (windows-latest)` job printed **953 across 48 lines** and `Rust (ubuntu-latest)` printed
   **952 across 48 lines**, 0 failed on both, while both `Desktop UI` jobs printed **295 in 9 files**. Run #97
   (`38043088870`) reprints all of it at the docs-only successor head `2859bb2` — 953 and 952 across the same 48 lines,
-  295 in 9 files on both UI jobs, read from that run's own job logs — so the head a reader holds now is a head these
-  numbers were measured on, not only its predecessor. One test explains
+  295 in 9 files on both UI jobs, read from that run's own job logs. Both are measurement points, not claims about your
+  checkout: read `git rev-parse HEAD` for that, and remember a docs-only head cannot move a count, so every figure
+  above also holds at the docs-only heads stacked on top of `2859bb2`. One test explains
   the whole difference — `one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice` is
   `#[cfg(windows)]` (`bundle_builder.rs:2324`), so that target reports 78 on Windows and 77 on Ubuntu — and no
   `#[cfg(unix)]` test exists, so nothing runs only on Linux. Say "953 on Windows / 952 on POSIX", never "953 everywhere";

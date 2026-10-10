@@ -822,20 +822,23 @@ provenance stays permanently `Unknown`, and the Intel HEX address-span promise i
 units then ran: `C1-U1` (attachment data + Gate identity + migration `0006`, `SCHEMA_VERSION` 6) is **`COMPLETE`** at
 `8e2aab9` + `b9cc3e2` + `1b33bbc`, and `C1-U2` (attachments satisfying Gate rules and entering a verified Release
 Bundle, the six-link byte chain L-1…L-6) is **`READY_FOR_ARCHITECT_REVIEW`** at `facf287` + its docs-only successor
-`2859bb2`, each read **10 of 10** on CI runs #96 (`38037417546`) and #97 (`38043088870`) with every job green on its
-first attempt. **None of it is reachable by a person:** no UI control, no `--attach`, no IPC command, so
+`2859bb2`, and U2's two heads read **10 of 10** on CI runs #96 (`38037417546`) and #97 (`38043088870`) with every job
+green on its first attempt; `C1-U1`'s three heads read runs #93, #94 and #95 the same way. **None of it is reachable by a person:** no UI control, no `--attach`, no IPC command, so
 `BIN_HEX_RELEASE_ATTACH` is `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1-U3` (portable contract) and `C1-U4` (every
 surface a person touches) stay `NOT_AUTHORIZED / NOT_STARTED`, and both rounds stay `NOT_RUNTIME_VERIFIED` — green CI
 on a library build is not installed verification, and no artifact from either run was downloaded or launched. Figures
-at the current head `2859bb2`, taken from run #97's own job logs: **953 Rust on the Windows job and 952 on the Ubuntu
+below are measurement points, not a claim about your checkout — read `git rev-parse HEAD` for that, and note that a
+DOCS-ONLY head cannot move a test count. Measured at `2859bb2` from run #97's own job logs: **953 Rust on the Windows
+job and 952 on the Ubuntu
 one** across the same 48 `test result:` lines (one U2 case is `#[cfg(windows)]`), **295 UI in 9 files** on both UI
 jobs, gate 17 of 17 with drift 8/8, deny 1/1 and package 4/4, and the ADR-0029 baseline verifier `RESULT PASS` at
 917 tree lines / 787 entries / 789 tracked paths. Unchanged elsewhere, and unchanged by all of the above: `P5
 PASS_COMPLETE`, `G2 PASS`, stage `U1` closed with its guarded 25-item tally, V1 paused at **0 eligible external
 sessions** with the cohort still `11573661113` at `41bb6a36` (every CI artifact after it is validation output, not the
 cohort), product `0.6.0 MVP_CANDIDATE`, licence `PENDING_OWNER_CONFIRMATION`, and B1 / RC / GA / signing / distribution
-still unauthorized. The single current answer is `.ai/ACTIVE_TASK.md`'s live pointer and `.ai/CURRENT_STATE.md`; the
-open questions that belong to the Architect rather than to an implementer are the four findings in `04_TECH/28` §14.
+still unauthorized. The single current answer is `.ai/ACTIVE_TASK.md`'s live pointer and `.ai/CURRENT_STATE.md`; what is owed to the
+Architect rather than to an implementer is the `GateRunRequest.attachments` field-vs-siblings deviation and the four
+reported findings, all of them in `04_TECH/28` §14.
 
 **`active_task: NONE`, and V1's cohort build is re-frozen.** Later on 2026-10-08 the owner delivered
 *FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0* inline, granting **only** `V1_COHORT_REFREEZE`:
