@@ -1606,6 +1606,15 @@ text with no source file; each says so in its own entry instead of standing for 
   `11573661113` at `41bb6a36` with 0 sessions.
 - Outcome: recorded by the stage-1 round in `C1_VALIDATION/C1_U2R1_ARCHITECT_CORRECTIVE_REPORT.md`; this entry records
   the authorization and its provenance only.
+- Stage 2 outcome, added the same day: **`C1-U3` ran from stage 1's head `920e764`** and is recorded in
+  `C1_VALIDATION/C1_U3_CONTRACT_REGRESSION_PLAN.md` and
+  `C1_VALIDATION/C1_U3_CONTRACT_REGRESSION_REPORT.md`, with the machine-readable block
+  `c1_u3_portable_contract_and_regression` in `BASELINE.yaml`. Its status word is the packet's own stage-2 word,
+  `LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING` — a green local gate, not an accepted review — and the two
+  documents it holds open are the ones the round filed rather than resolved: `T-C1-10`'s literal `sha256sum -c` run,
+  and `04_TECH/28` §8's kind-conflict sentence, which is still not implemented on the attach path. **Stage 3
+  (`C1-U4`) is authorized by this packet and has not started**, and no stage of it has been executed at the time of
+  this entry.
 
 
 

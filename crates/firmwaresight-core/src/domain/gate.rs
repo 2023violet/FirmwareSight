@@ -710,6 +710,12 @@ pub fn canonical_policy_text(policy: &GatePolicy) -> String {
 }
 
 impl GateContext {
+    /// The grammar of a canonical input that bound no attached byte — byte-for-byte the text every pre-C1
+    /// run was judged over (`ADR-0030` D-4).
+    pub const INPUT_LABEL_UNBOUND: &'static str = "firmwaresight-gate-input/1";
+    /// The grammar of a canonical input that bound at least one attached byte (`04_TECH/28` §5).
+    pub const INPUT_LABEL_BOUND: &'static str = "firmwaresight-gate-input/2";
+
     /// Evaluate every MVP rule once, in canonical order. `run_id` comes from the caller because hashing
     /// is the project adapter's job; [`Self::canonical_input`] makes it checkable that the id covers
     /// exactly the facts that decide the verdict.
@@ -752,6 +758,19 @@ impl GateContext {
         GateAttachmentFact::canonicalized(&self.attachments)
     }
 
+    /// The canonical grammar this context's text is written in: `/2` when an attachment row is bound, `/1`
+    /// when none is. [`Self::canonical_input`] takes its first line from here and the portable document
+    /// discloses it from here too (`04_TECH/28` §7.3), so no caller can pair a verdict judged as one grammar
+    /// with a record that reads as the other.
+    #[must_use]
+    pub fn canonical_input_label(&self) -> &'static str {
+        if self.canonical_attachments().is_empty() {
+            Self::INPUT_LABEL_UNBOUND
+        } else {
+            Self::INPUT_LABEL_BOUND
+        }
+    }
+
     /// A canonical, self-labelled rendering of everything that affects the verdict. The same facts
     /// produce the same text and therefore the same run id; a dirty workspace, a policy edit, a
     /// different baseline or different Release Notes bytes change it.
@@ -761,12 +780,8 @@ impl GateContext {
     #[must_use]
     pub fn canonical_input(&self) -> String {
         let attachments = self.canonical_attachments();
-        let label = if attachments.is_empty() {
-            "firmwaresight-gate-input/1\n"
-        } else {
-            "firmwaresight-gate-input/2\n"
-        };
-        let mut text = String::from(label);
+        let mut text = String::from(self.canonical_input_label());
+        text.push('\n');
         text.push_str(&format!("snapshot={}\n", self.snapshot_id));
         text.push_str(&format!(
             "baseline={}\n",

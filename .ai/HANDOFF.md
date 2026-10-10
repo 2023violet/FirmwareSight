@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-09"
+last_updated: "2026-10-10"
 ---
 
 # Handoff — FirmwareSight v0.6.0 / P0 closed PASS / G1 PASS on the P0 basis / P1 Analyze COMPLETE / P2 Compare COMPLETE / P3 Release Gate COMPLETE / P4 Release Bundle COMPLETE / G2 PASS — MVP CANDIDATE / P5 productization PASS_COMPLETE — V1 own-artifact external validation PAUSED at RECRUITMENT_READY — **U1 UI productization convergence CLOSED 2026-10-08 by the Architect's independent visual acceptance record: `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`, scoped to visual readiness for a controlled V1 study and explicitly not GA quality, not feature completeness, not distribution approval** — the eight units that ran were: U1 first round CLOSED_FIRST_ROUND on 2026-10-07, installed and inspected the same day, corrected the same day by U1R (U1-V2-06 CLOSED_BY_U1R), then recomposed on 2026-10-08 by U1P and installed-and-adjudicated by U1P-A1, then corrected the same day by U1P-R1 (U1P-V2-01 CLOSED_BY_U1P_R1, all thirteen acceptance boxes proved on this unit's own CI-built bytes), then by U1P-R2 (U1P-V2-02 CLOSED_BY_U1P_R2) and by U1P-R3 (U1P-V1-01 and U1P-V1-02 CLOSED_BY_U1P_R3, 291 UI tests in 9 files, the review pack computing its own counts) — acceptance tally frozen as the verdict guards it: **25 items, 23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED, 2 MISMATCH_PROVED flags inside the 23 PASS, and no document may restate it as 25/25 or 100%** — four deviations stay enumerated and open, not silently closed: A Analyze's 1024x720 metric-band track (the round's FAIL box, now a U1 visual known issue and a V1 UX observation, prioritised from participant evidence rather than as a pre-V1 engineering gate), B Compare's Section Changes first data row below the 1440x900 fold (one-scroll-detail accepted for V1 only), C the Gate baseline picker resetting on navigation (a study usability ambiguity; the persisted GateRunDto keeps its own baselineSnapshotId, snapshotId and policySha256), D Overview's Previous-analysis panel never re-captured in R3 (the round's NOT_VERIFIED box; R2 images are contextual evidence, not a substitute); E, a count defect in these entry documents, was corrected by the next already authorized governance update rather than by a stand-alone CI-loop commit — **active_task NONE**, V1 NOT resumed by a visual verdict (still 0 eligible external sessions; the record's closing section read NEXT ACTION RECOMMENDATION, NOT EXECUTED, and that recording round only re-downloaded and re-hashed artifact 11573661113 — NSIS 3,896,257 bytes 9a51e86a… — because that record conditions document changes on the read), **and V1's cohort build then RE-FROZEN 2026-10-08 to that accepted build under the owner's inline V1 Cohort Re-freeze / Execution Authorization v1.0: COHORT_BUILD = REFROZEN_TO_U1_CANDIDATE — run 37828673549 · head 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177 · artifact 11573661113 · container 5,544,133 B 330e83af… · NSIS 3,896,257 B 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93 · unsigned · GitHub expiry 2026-10-22T19:18:25Z · first freeze F3's artifact 11419727517 / 182506f2… preserved and dated superseded, not deleted; the authorization granted the instrument and withheld the cohort — no recruitment, no session, no install, no distribution, M1–M6 still NOT_MEASURED — record V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md** — FirmwareSight Productized MVP Candidate — 0 real external sessions
@@ -430,8 +430,25 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   `intake.test.tsx`, 2 in `release.test.tsx`). **F2, F2R2 and F3 were each required to hold both numbers
   still** — F3 §5 states the rule in its sharpest form, because a docs-only head that moves a count is a
   product change wearing a documentation diff, and the round must stop rather than explain it.
-- **Figures on the C1-U2R1 tree, measured 2026-10-10 — these are the present ones, and every bullet below is dated
-  history:** one `cargo test --workspace` on this Windows host prints **48 `test result:` lines / 960 passed / 0 failed
+- **Figures on the C1-U3 tree, measured 2026-10-10 — these are the present ones, and every bullet below is dated
+  history:** one `cargo test --workspace` on this Windows host prints **48 `test result:` lines / 987 passed / 0 failed
+  / 0 ignored**, the frontend still reports **295 UI tests in 9 files**, the gate is the same **17 steps** with no `SKIP`
+  and no `FAIL` plus 3 under `--only core-smoke` and 4 under `--only package`, and `verify_baseline_artifacts.py` is
+  `RESULT PASS` at **797 tracked / 795 entries / 925 tree lines**. Twenty-seven new `#[test]` functions, all
+  platform-neutral, counted per target rather than recalled: `gate_schema_contract` 13 → 19,
+  `release_schema_contract` 34 → 35, `bundle_builder` 84 → 99, `release_attachments` 20 → 24, `gate_history`
+  33 → 34, with no new test binary so the line count stayed 48. **The POSIX figure is a projection of 988 and was never
+  measured**, for the unchanged reason — no `docker`, no `wsl` distribution — and `C1-U2R1`'s four `#[cfg(unix)]` cases
+  have therefore still never been compiled by anything; `M11` stays `NOT_VERIFIED` as executed evidence, and `M12`'s
+  >512 MiB bound too. Seven mutations were run (the unconditional pair, the mis-gated label, the uncanonicalized block,
+  the dropped run-id tie, the accepted half-pair, the skipped set comparison, and an opened `files[]` boundary in the
+  published schema), each killed by named tests and each reverted, with `schemas/**` proven byte-identical to `HEAD` by
+  `git diff --exit-code`. Two measurements are reported as missing rather than as clean: no test has ever run the
+  literal `sha256sum -c` over a bundle index, and one transient `bundle_builder` failure (98/1) appeared once with its
+  test name dropped by the grep in use, then did not reappear in five re-runs of that target or in either full
+  workspace run.
+- **Figures on the C1-U2R1 tree, measured 2026-10-10 — dated history, the live ones being the bullet above:**
+  one `cargo test --workspace` on this Windows host prints **48 `test result:` lines / 960 passed / 0 failed
   / 0 ignored**, and the frontend still reports **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP`
   and no `FAIL`, plus 3 under `--only core-smoke` and 4 under `--only package`; `verify_baseline_artifacts.py` is
   `RESULT PASS` at **795 tracked / 793 entries / 923 tree lines**. Eleven `#[test]` functions were written (10 in

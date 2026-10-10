@@ -18,7 +18,9 @@
 
 use serde::Serialize;
 
-use firmwaresight_core::domain::gate::{EffectiveSeverity, GateEvaluation, GateFinding};
+use firmwaresight_core::domain::gate::{
+    EffectiveSeverity, GateAttachmentFact, GateContext, GateEvaluation, GateFinding,
+};
 
 /// The identity of a gate-results document, so a reader can find the schema without a side channel.
 pub const GATE_SCHEMA_ID: &str = "urn:firmwaresight:schema:gate-results:1";
@@ -70,6 +72,47 @@ pub struct GateExtensionsDto {
     /// The aggregate Core computed for this run with no acceptances in play. Carried rather than
     /// re-derived, so no consumer implements Gate precedence.
     pub overall_effective_severity: &'static str,
+    /// The canonical grammar the run id was taken over — present only for a run that bound attached bytes,
+    /// because a run that bound none is documented exactly the way P4 documented one (`ADR-0030` D-4).
+    /// `04_TECH/28` §7.3: the two entries arrive as a pair or not at all.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub canonical_input_label: Option<&'static str>,
+    /// The attached bytes this verdict was judged over, in the identity's own order. Omitted entirely when
+    /// there are none, so no pre-C1 document's bytes move.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub attachments: Vec<GateAttachmentDto>,
+}
+
+/// One bound attachment, disclosed as the identity binds it: the kind its owner declared and the bytes that
+/// were read. No file name and no size-derived claim travels here, because the digest fixes the length
+/// (`04_TECH/28` §5 rule 1) and a name is not part of a run id.
+#[derive(Debug, Clone, Serialize)]
+pub struct GateAttachmentDto {
+    pub kind: &'static str,
+    pub sha256: String,
+    pub byte_size: u64,
+}
+
+impl GateAttachmentDto {
+    /// Project one canonical row. The kind word and the digest are Core's, not re-derived here.
+    ///
+    /// # Panics
+    ///
+    /// Never in a run this engine produced: an attachment whose bytes could not be hashed was refused at
+    /// observation (`04_TECH/28` §5 rule 3), so every row that reached a context names a digest. The
+    /// `expect` states that boundary rather than inventing a digest for a row that has none.
+    #[must_use]
+    pub fn of(row: &GateAttachmentFact) -> Self {
+        Self {
+            kind: row.kind.word(),
+            sha256: row
+                .sha256
+                .value()
+                .expect("an attached file that could not be hashed never reached a Gate context")
+                .clone(),
+            byte_size: row.byte_size,
+        }
+    }
 }
 
 /// The acceptances a release owner recorded against one run.
@@ -102,14 +145,24 @@ pub struct AcceptedReviewsExtensionsDto {
 }
 
 impl GateResultsDto {
-    /// Project an evaluation. `policy_sha256` and `project_config_schema_version` come from the project
-    /// adapter, which owns hashing and reads the config's own version — this crate names neither.
+    /// Project a run's verdict and the bytes that verdict was judged over.
+    ///
+    /// The context is a parameter rather than an option, and this is the reason: `04_TECH/28` §7.3 makes the
+    /// canonical-input label and the attachment rows a pair that arrives together or not at all, and a
+    /// projection built from an evaluation alone could describe a `/2` run as though it had judged nothing
+    /// extra. Taking the context means the one predicate Core owns — [`GateContext::canonical_input_label`] —
+    /// decides both the grammar the id was taken over and what this document says about it.
+    /// `policy_sha256` and `project_config_schema_version` come from the project adapter, which owns hashing
+    /// and reads the config's own version — this crate names neither.
     #[must_use]
     pub fn from_evaluation(
+        context: &GateContext,
         evaluation: &GateEvaluation,
         policy_sha256: &str,
         project_config_schema_version: i64,
     ) -> Self {
+        let attachments = context.canonical_attachments();
+        let bound = !attachments.is_empty();
         Self {
             schema_version: GATE_SCHEMA_VERSION,
             run_id: evaluation.run_id.clone(),
@@ -124,6 +177,8 @@ impl GateResultsDto {
                 project_config_schema_version,
                 baseline_snapshot_id: evaluation.baseline_snapshot_id.clone(),
                 overall_effective_severity: evaluation.overall_effective_severity.as_str(),
+                canonical_input_label: bound.then(|| context.canonical_input_label()),
+                attachments: attachments.iter().map(GateAttachmentDto::of).collect(),
             },
         }
     }

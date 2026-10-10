@@ -10,8 +10,8 @@ last_updated: "2026-10-10"
 
 # Current State
 
-- Date: 2026-10-10 *(the live state is the `C1-U2R1` entry below; the C1-U2 entry it reworks, and the U1 entry that
-  rework supersedes, keep their own dates inside their own bullets)*
+- Date: 2026-10-10 *(the live state is the `C1-U3` entry below; the `C1-U2R1` entry it follows, the C1-U2 entry that
+  round reworks, and the U1 entry all of those supersede keep their own dates inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - **Active task: `NONE`.** Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
@@ -175,6 +175,60 @@ last_updated: "2026-10-10"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
+- **`C1-U3` (portable contract and regression, stage 2 of the same packet) ran on 2026-10-10 and is
+  `LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.** Its
+  mission was the five compatibility promises `04_TECH/28` §7 makes about machinery `C1-U1`/`U2` had already built,
+  and the first finding is that one of those promises had never been implemented: `grep -rn canonical_input_label`
+  over `crates/**`, `apps/**`, `schemas/**` and `golden/**` returned **zero** hits, so a run that judged attached
+  bytes wrote a document that said nothing about them. §7.3's extension pair is code now —
+  `extensions.canonical_input_label` and `extensions.attachments = [{kind, sha256, byte_size}]`, written together from
+  one predicate over `canonical_attachments()`, in the identity's `(kind, digest)` order, and **absent together** when
+  a run bound nothing, which is what keeps every attachment-free document byte-for-byte the document P4 wrote.
+  `GateResultsDto::from_evaluation` now takes the `GateContext`, and there is deliberately no attachment-free second
+  constructor: a projection that could be built from an evaluation alone could describe a `/2` run as though it had
+  judged nothing. `verify_bundle` gained `check_gate_disclosure`, which refuses a half-pair in either direction, a
+  `/1` or unknown grammar label, a row carrying more than kind/digest/length, a malformed digest, a zero length, an
+  unattachable kind word, rows out of `(kind, digest)` order or bound twice, a disclosed set that disagrees with the
+  manifest's, and — the tie that closed `C1-U2`'s six links never had — a Gate `run_id` that is not the manifest's
+  `extensions.gate_run_id`. Every one of those is `ERR-BUNDLE-6109`, the code the other read-back refusals already
+  use; **no schema file moved, no major moved, no new error number was allocated**, because `extensions` is already
+  `additionalProperties: true` in both contracts and an iff expressed in the schema would mean narrowing that
+  reserved slot, which is a semantics change. So the pairing is a reader rule and the schemas prove only containment.
+  **The `path` versus `file` divergence is ruled and written down**: `04_TECH/28` §7.5/§12 sketch `file`, the shipped
+  row is `{path, kind, sha256, size, kind_basis, provenance}`, and the Architect's ruling (keep `path` as the
+  bundle-relative locator because `files[]` and the verifier already speak it, keep `provenance: "unknown"` mandatory)
+  is recorded as a dated reconciliation naming the superseded sketch in `04_TECH/28` §14.2 and in `04_TECH/26`'s new
+  C1 section — not by deleting the sketch. **The old corpus was read back rather than asserted**: all five JSON
+  documents in `golden/reports/p4-release/` validate against the schema each one names (the test enumerates the
+  directory instead of transcribing a list), none of them carries either new key, six of the eight `SHA256SUMS` lines
+  re-hash to what they record with the two artifact bytes named as deliberately absent, and that pre-C1 bundle, given
+  back the two committed fixtures its own index already names, verifies under this round's stricter reader and
+  re-derives `release-e400a8ac…`, the id it claims. **All nineteen T-C1 rows now have a named test** — seven gained
+  their missing half here, and `T-C1-04`, `T-C1-17`, `T-C1-18` went from nothing (or one direction) to both: ELF-magic
+  bytes declared `hex` satisfy a required `hex` as raw bytes with no HEX-validity claim anywhere in the bundle, and a
+  sweep over every finding citing an `attachment:` locator, every report line naming an attached leaf and both
+  disclosure rows finds no span, record-checksum, section, symbol or architecture claim. One citation in the frozen
+  design turned out to be false and is corrected in §14.2 rather than quietly satisfied: §7.3's `T-C1-07` refers to
+  "the existing `the_run_is_judged_from_stored_rows_after_the_files_are_gone` test", and no such test had ever been
+  written — this round wrote it, under that name, for the no-attachment run.
+  **Counts, per run, with the host named: 987 Rust across 48 `test result:` lines / 0 failed on this Windows host, and
+  988 projected for a POSIX runner — projected, not measured.** The +27 are five new test *targets*-free additions:
+  `gate_schema_contract` 13 → 19, `release_schema_contract` 34 → 35, `bundle_builder` 84 → 99,
+  `release_attachments` 20 → 24, `gate_history` 33 → 34, counted per target from the runs themselves, with no new test
+  binary so the line count stayed 48. 295 UI in 9 files unchanged; gate **17 of 17** with no `SKIP`; drift 8/8,
+  deny 1/1, core-smoke 3/3, package 4/4, frontend 5/5; verifier `RESULT PASS` at **797 tracked / 795 entries /
+  925 tree lines**; **seven** mutations killed by named tests (M-A/M-B the unconditional or mis-gated pair, M-C the
+  uncanonicalized block, M-D the run-id tie, M-E the half-pair, M-F the set agreement, M-G the `files[]` strictness)
+  with every mutated file restored — `report/gate.rs ad8dded3…`, `project/bundle.rs aa8cef2f…`,
+  `core/gate.rs 76b964fa…`, `schemas/` clean against `HEAD`.
+  **Two measurements this round lost or failed to make, stated rather than smoothed**: `sha256sum -c` was never
+  executed against a bundle index (T-C1-10 is closed in-process only), and one transient `bundle_builder` failure
+  (98 passed / 1 failed) appeared in a sequential five-target loop whose grep dropped the failing test's name; it did
+  not reappear in five later runs of that target or in either full workspace run (987 / 0 / 48, twice), and no cause
+  is claimed.
+  **No push**: `origin/main` stays `2859bb2`, the cover grants none, `C1-U2R1` and `C1-U3` are both still
+  `ARCHITECT_REVIEW_PENDING` — a green local gate is not an accepted review — and stage 3 (`C1-U4`) is the unit that
+  would first let a person attach anything at all.
 - **`C1-U2R1` (targeted safety and Architect-review closure) ran on 2026-10-10 and is `LOCAL_CORRECTIVE_GATE_PASS /
   ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.** The Architect's independent read of
   `facf287` returned **`REWORK REQUIRED`**, which supersedes `READY_FOR_ARCHITECT_REVIEW` as the live word for that
@@ -211,7 +265,7 @@ last_updated: "2026-10-10"
   alone. **One behaviour fact was reported rather than fixed**: a library caller that carries run A's acceptance to run
   B is refused by the bundle layer as `ERR-INTERNAL-9004`, not as a branchable code; that is right for a correct caller
   and unhelpful for a mis-carrying one, and it is an error-model decision this unit does not own.
-  **Counts, per run, with the host named: 960 Rust across 48 `test result:` lines / 0 failed on this Windows host, and
+  **Counts at that head, per run, with the host named: 960 Rust across 48 `test result:` lines / 0 failed on this Windows host, and
   961 projected for a POSIX runner — projected, not measured**, because no POSIX environment exists here (`docker`
   absent, `wsl` installed with no distribution) and the four `#[cfg(unix)]` cases therefore neither compiled nor ran,
   while the Windows symlink case self-skipped on `ERROR_PRIVILEGE_NOT_HELD` (1314). 295 UI in 9 files unchanged; gate

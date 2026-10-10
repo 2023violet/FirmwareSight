@@ -40,8 +40,8 @@ pub use diff::DiffResultDto;
 pub use dto::AnalyzeResultDto;
 pub use gate::{
     ACCEPTANCE_ORIGINAL_STATE, ACCEPTED_REVIEWS_SCHEMA_ID, ACCEPTED_REVIEWS_SCHEMA_VERSION,
-    AcceptanceDto, AcceptedReviewsDto, GATE_SCHEMA_ID, GATE_SCHEMA_VERSION, GateFindingDto,
-    GateResultsDto,
+    AcceptanceDto, AcceptedReviewsDto, GATE_SCHEMA_ID, GATE_SCHEMA_VERSION, GateAttachmentDto,
+    GateFindingDto, GateResultsDto,
 };
 pub use release::{
     BuildFactsDto, GeneratedByDto, IntegrityModelDto, ManifestError, ManifestFileDto,

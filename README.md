@@ -767,8 +767,9 @@ compatible upgrade exists inside that pin.
 12. `.ai/ACTIVE_TASK.md` — currently `NONE`: G2 closed `PASS` on 2026-10-01 and P5 productization closed
     `PASS_COMPLETE` on 2026-10-06, so the MVP engineering candidate is complete and productized to P5's
     engineering scope. **No next track is authorized by either closure**; V1 own-artifact validation, B1, RC
-    and GA each need their own architect decision *(dated 2026-10-10: three more authorities ran since that
-    sentence was written — A0, the `ADR-0030` / `04_TECH/28` freeze and the two `C1` library units — the
+    and GA each need their own architect decision *(dated 2026-10-10: more authorities ran since that
+    sentence was written — A0, the `ADR-0030` / `04_TECH/28` freeze, the two `C1` library units, and stages 1 and 2
+    of the continuous packet that returned `REWORK REQUIRED` on the second of them — the
     pointer returned to `NONE` after each, and the first entry under Next work is that record)*
 13. `G2_VALIDATION/G2_EXIT_CHECKLIST.md` — the whole-MVP verdict, box by box
 13a. `POST_G2_E2E_REMEDIATION/EXIT_CHECKLIST.md` — the three real-desktop findings, each box settled by
@@ -807,7 +808,53 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: NONE`, and the C1 track is three rounds deep — still with no user entry.** Four authorities arrived on
+**`active_task: NONE`, and the C1 track is four rounds deep — still with no user entry.** Stage 2 of the 2026-10-10
+continuous packet ran the same day, starting from `920e764`, as **`C1-U3`** — the portable contract for
+release-attached bytes and the proof that nothing already frozen moved. Its status word is
+**`C1_U3 = LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING`**, which is the same discipline as stage 1: a green
+local gate is an accepted *gate*, not an accepted *review*. `GateExtensionsDto` grows the two entries
+`04_TECH/28` §7.3 reserved in the `gate-results:1` `extensions` slot — `canonical_input_label` and `attachments[]`,
+each row `kind` / `sha256` / `byte_size` — written **together or not at all**, filled from
+`context.canonical_attachments()`, and both decided by the one new Core predicate (`canonical_input_label()` returns
+`firmwaresight-gate-input/1` or `/2`, and `canonical_input()` takes its first line from that same method), so the
+document cannot describe a grammar the run id was not taken over. A run that bound nothing writes neither key, so a
+pre-C1 gate document is byte-identical to what it was; there is deliberately no second constructor that could
+project an attachment-free view of a bound run. **No schema major moved** — all six stay `1`, `schemas/` is
+byte-identical to `920e764` (`git diff --exit-code -- schemas/` prints nothing), every closed property list stayed
+closed, and the packet's STOP condition ("If this cannot validate with existing :1 schemas, STOP rather than bump a
+major") never fired. The label⇔rows rule is enforced as a **reader rule** in `verify_bundle` rather than a schema
+rule, because `extensions` is `additionalProperties: true` by the P3/P4 design and an iff written there would narrow
+the one slot that makes majors stable; `check_gate_disclosure` refuses a half-pair in either direction, a foreign or
+malformed label, extra row keys, an unattachable kind word, a non-64-hex digest, a zero or absent size, rows out of
+identity order or bound twice, a disclosed set that is not the manifest's deduplicated set, and — the integrity gap this round's own inventory found
+— a gate document whose `run_id` is not the manifest's `gate_run_id`. Every refusal reuses `ERR-BUNDLE-6109`; no new
+code in the family was allocated. `04_TECH/28` §14.2 records the pair plus two corrections made in place (the locator
+is `path`, not the sketch's `file`; and the `T-C1-07` test §7.3 cited as existing did not exist and is now written
+under that name), and `04_TECH/26` carries the contract on the schema-policy side. Figures are measurement points, not
+a claim about your checkout — read `git rev-parse HEAD` for that. Measured on this Windows host: **987 Rust across 48
+`test result:` lines / 0 failed**, from 27 new tests in the **five existing** targets (19 / 35 / 99 / 24 / 34, no new
+test binary), **295 UI in 9 files**, gate 17 of 17 with no `SKIP`, drift 8/8, deny 1/1, package 4/4, and the ADR-0029
+baseline verifier `RESULT PASS` at 797 tracked paths / 795 entries / 925 tree lines. Seven mutations, each killed by
+named tests and reverted, with two disclosures in
+`C1_VALIDATION/C1_U3_CONTRACT_REGRESSION_REPORT.md` §8 (M-G went back via `git checkout --` on a file this round had
+not otherwise changed, and one transient `bundle_builder` failure lost its test name to a grep and is reported as a
+lost measurement). Compatibility was proved rather than asserted: the five frozen golden JSON documents still
+validate against today's schemas carrying neither new key, and P4's bundle still verifies and re-derives
+`release-e400a8ac…` under the *stricter* reader. **The POSIX figure is a projection of 988 and was not measured** —
+all 27 of this round's cases are platform-neutral, but `docker` is absent and `wsl` holds no distribution, so stage
+1's four `#[cfg(unix)]` cases have *still* never been compiled and `M11` stays `NOT_VERIFIED`. Still nothing a person
+can reach: no UI control, no `--attach`, no IPC command, no report limits line, so `BIN_HEX_RELEASE_ATTACH` stays
+`DESIGN_APPROVED / NOT_USER_AVAILABLE` and `BIN_HEX_ANALYSIS` stays `UNSUPPORTED` with the compatibility matrix
+untouched; `C1-U4` is stage 3, `AUTHORIZED_BY_PACKET_STAGE_3 / NOT_STARTED`, and starting it is the owner's word.
+**No push** — `origin/main` stays `2859bb2`, and both stage commits ship only locally until the owner authorizes a
+normal fast-forward push. What is owed to the Architect is the five items in `BASELINE.yaml`'s
+`c1_u3_portable_contract_and_regression.open_findings_for_the_architect` (the literal `sha256sum -c` run, the size of
+the pre-C1 corpus the repository actually carries, §8's unimplemented kind-conflict sentence, the consistently-forged
+bundle caveat, and `M11`/`M12`) plus stage 1's three, and above all the independent acceptance that neither
+`ARCHITECT_REVIEW_PENDING` word pretends to have.
+
+**`active_task: NONE`, and the C1 track is three rounds deep — still with no user entry.** *(Dated 2026-10-10: the
+stage-1 record; the live paragraph is the one above. Four authorities arrived on
 2026-10-09, in this order: the A0 corrective, the C1 direction decision, `C1-U1`, then `C1-U2` (a fifth 2026-10-09
 entry sits in `10_AUDIT/SOURCE_PROMPTS/README.md` and says of itself that it is an
 in-flight continuation, "explicitly not a new authorization"). A fifth authority arrived on 2026-10-10: the four-file
@@ -836,7 +883,8 @@ Windows counterpart holds the symlink rule. Its status word is
 **`LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING`** — a green local gate is not an accepted review. **None of it
 is reachable by a person:** no UI control, no `--attach`, no IPC command, so
 `BIN_HEX_RELEASE_ATTACH` is `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1-U3` (portable contract) and `C1-U4` (every
-surface a person touches) are authorized as stages 2 and 3 and stay `NOT_STARTED`, and every round stays
+surface a person touches) were authorized as stages 2 and 3 and were both `NOT_STARTED` at that head — stage 2 has
+since run, in the paragraph above, and stage 3 has not — and every round stays
 `NOT_RUNTIME_VERIFIED` — green CI
 on a library build is not installed verification, and no artifact from any run was downloaded or launched. Figures
 below are measurement points, not a claim about your checkout — read `git rev-parse HEAD` for that, and note that a

@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-09"
+last_updated: "2026-10-10"
 ---
 
 # ACTIVE TASK
@@ -40,10 +40,27 @@ Status word: `C1_U2R1 = LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING`. 
 (`ERROR_PRIVILEGE_NOT_HELD`, 1314) so the Windows case prints a declared SKIP, and the `#[cfg(unix)]` module neither
 compiled nor ran, because `docker` is absent and `wsl` holds no distribution. It closes on one Linux run, which
 needs the push this packet withholds.
+STAGE 2 OF THAT PACKET RAN THE SAME DAY AS `C1-U3`, the portable-contract and regression unit, and it changed what a
+document says rather than what a person can do. `04_TECH/28` §7.3's `gate-results:1` extension pair is now code:
+`extensions.canonical_input_label = "firmwaresight-gate-input/2"` and `extensions.attachments =
+[{kind, sha256, byte_size}]`, written together and only for a run that bound attached bytes, in the identity's
+`(kind, digest)` order — an attachment-free document still carries neither key, which the untouched
+`apps/cli/tests/p4_golden.rs` byte comparison proves independently. `verify_bundle` now enforces the pairing and,
+for the first time, ties the Gate document's `run_id` to the manifest's `extensions.gate_run_id`; before this round
+a bundle could ship one run's verdict beside another run's gate and still self-verify. No schema file moved, no
+major moved, no new `ERR-BUNDLE-61xx` code was allocated, and the five JSON documents in P4's frozen bundle all
+validate against today's contracts — with its two committed artifacts copied back in, that pre-C1 bundle verifies
+under the stricter reader and re-derives its own `release-e400a8ac…`. All nineteen T-C1 rows now have a named test,
+and `C1-U3` had to write the one §7.3 cited as already existing (`the_run_is_judged_from_stored_rows_after_the_files_are_gone`)
+because no such test had ever been written. Gate at **987 Rust / 48 lines on this Windows host (988 projected for
+POSIX, NOT measured — still no POSIX runner here) / 295 UI in 9 files**, 17 of 17 with no SKIP, verifier PASS at
+797 / 795 / 925, seven mutations each killed by a named test and reverted byte-identically.
+Status word: `C1_U3 = LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING`.
 That is still not a feature: no UI control, no CLI --attach and no IPC command exists, so no person can attach a file.
-C1_U3 / C1_U4 are now AUTHORIZED BY THE PACKET as stages 2 and 3 and remain NOT_STARTED — stage 2's entry condition
-is stage 1's objective gate, which is green locally, and starting it is the owner's word. This pointer stayed NONE
-before, during and after each round.
+C1_U4 is authorized as stage 3 and remains NOT_STARTED; C1-U3's own entry condition was C1-U2R1's objective gate,
+which was green locally, and the packet — not this round's self-assessment — is what authorized the work. Neither
+`C1-U2R1` nor `C1-U3` is accepted yet: both read ARCHITECT_REVIEW_PENDING, and no push has happened — `origin/main`
+is still `2859bb2`. This pointer stayed NONE before, during and after each round.
 
 THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
 stopped, kept because this project does not rewrite history, and they are not instructions for the next round.

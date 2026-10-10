@@ -373,6 +373,10 @@ fn gate() -> GateResultsDto {
             project_config_schema_version: 1,
             baseline_snapshot_id: Some("snap-0000".to_owned()),
             overall_effective_severity: "REVIEW",
+            // This fixture judged no attached byte, so it discloses neither half of the C1 pair — which is
+            // the shape every pre-C1 document has, and the shape `04_TECH/28` §7.3 keeps it in.
+            canonical_input_label: None,
+            attachments: Vec::new(),
         },
     }
 }
@@ -1412,6 +1416,66 @@ fn a_manifest_that_discloses_attachments_still_validates_against_the_unmodified_
         !validate(&widened).is_empty(),
         "the validator is awake on this document, so the assertion above proves something"
     );
+}
+
+#[test]
+fn the_strict_boundaries_that_make_extensions_the_only_slot_are_still_closed() {
+    // `C1-U3` adds disclosure and must prove it added it nowhere else. Each closed list this design could
+    // have quietly widened is read back from the published contract itself: the manifest's root, its `files[]`
+    // items, the Gate document's root, and `analysis:1`, which has no `extensions` key at all because an
+    // attached file is never an analyzed one (`ADR-0030` D-1).
+    let manifest = manifest_schema();
+    assert_eq!(
+        manifest["additionalProperties"],
+        serde_json::Value::Bool(false),
+        "the manifest's root list is closed"
+    );
+    assert_eq!(
+        manifest["properties"]["files"]["items"]["additionalProperties"],
+        serde_json::Value::Bool(false),
+        "and so is every `files[]` item, which is why an attachment's kind travels in `extensions`"
+    );
+    assert_eq!(
+        manifest["properties"]["extensions"]["additionalProperties"],
+        serde_json::Value::Bool(true),
+        "the one open place is the one v1 reserved"
+    );
+
+    let gate = {
+        let path = repo_root().join("schemas").join("gate-results.schema.json");
+        let text = std::fs::read_to_string(&path).expect("the Gate contract is readable");
+        serde_json::from_str::<serde_json::Value>(&text).expect("the Gate contract parses")
+    };
+    assert_eq!(gate["additionalProperties"], serde_json::Value::Bool(false));
+    assert_eq!(
+        gate["properties"]["extensions"]["additionalProperties"],
+        serde_json::Value::Bool(true)
+    );
+
+    let analysis = {
+        let path = repo_root().join("schemas").join("analysis.schema.json");
+        let text = std::fs::read_to_string(&path).expect("the analysis contract is readable");
+        serde_json::from_str::<serde_json::Value>(&text).expect("the analysis contract parses")
+    };
+    assert!(
+        analysis["properties"].get("extensions").is_none(),
+        "`analysis:1` reserves no extension slot, so there is nowhere for a pseudo-analysis row to go"
+    );
+    for contract in ["release-manifest", "gate-results", "analysis"] {
+        let path = repo_root()
+            .join("schemas")
+            .join(format!("{contract}.schema.json"));
+        let text = std::fs::read_to_string(&path).expect("a published contract reads");
+        let document: serde_json::Value =
+            serde_json::from_str(&text).expect("a published contract parses");
+        assert!(
+            document["$id"]
+                .as_str()
+                .expect("each contract names its own URN")
+                .ends_with(":1"),
+            "{contract} is still published at major 1"
+        );
+    }
 }
 
 #[test]

@@ -14,9 +14,9 @@ use std::path::{Path, PathBuf};
 
 use firmwaresight_core::domain::diff::{ByteChange, Comparability};
 use firmwaresight_core::domain::gate::{
-    EffectiveSeverity, FindingState, GateArtifactFact, GateBudgetFact, GateContext, GateEvaluation,
-    GateGitFacts, GateGrowthFacts, GateMemoryFacts, GatePolicy, GateRuleId, GateUnknownEvidence,
-    UnknownDisposition, UnknownPolicy,
+    EffectiveSeverity, FindingState, GateArtifactFact, GateAttachmentFact, GateBudgetFact,
+    GateContext, GateEvaluation, GateGitFacts, GateGrowthFacts, GateMemoryFacts, GatePolicy,
+    GateRuleId, GateUnknownEvidence, KindBasis, UnknownDisposition, UnknownPolicy,
 };
 use firmwaresight_core::domain::identity::{ArtifactKind, Fact};
 use firmwaresight_report::gate::{
@@ -123,8 +123,45 @@ fn evaluation() -> GateEvaluation {
 }
 
 fn gate_document() -> Value {
-    let dto = GateResultsDto::from_evaluation(&evaluation(), POLICY_SHA, 1);
+    document_for(&mixed_context())
+}
+
+/// One context, judged and projected: the evaluation always comes from the context it is projected with, so
+/// no test can pair a verdict with a disclosure of a different run.
+fn document_for(context: &GateContext) -> Value {
+    let dto = GateResultsDto::from_evaluation(context, &context.evaluate(RUN_ID), POLICY_SHA, 1);
     serde_json::to_value(&dto).expect("a DTO always serializes")
+}
+
+fn rendered_for(context: &GateContext) -> String {
+    gate_render::render_json(&GateResultsDto::from_evaluation(
+        context,
+        &context.evaluate(RUN_ID),
+        POLICY_SHA,
+        1,
+    ))
+}
+
+/// An attachment row with the shape `04_TECH/28` §2.1 allows: a declared kind, an observed digest and the
+/// length of the bytes that produced it.
+fn attachment(kind: ArtifactKind, digest: &str, byte_size: u64) -> GateAttachmentFact {
+    GateAttachmentFact {
+        kind,
+        sha256: Fact::known(digest.to_owned()),
+        byte_size,
+        kind_basis: KindBasis::Declared,
+    }
+}
+
+/// The mixed run, but judging attached bytes too, so the document under test is a `/2` run's document.
+fn context_with_attachments(rows: Vec<GateAttachmentFact>) -> GateContext {
+    let mut context = mixed_context();
+    context.attachments = rows;
+    context
+}
+
+fn bound_document(rows: Vec<GateAttachmentFact>) -> Value {
+    document_for(&context_with_attachments(rows))
 }
 
 fn acceptance_dto(finding_id: &str) -> AcceptanceDto {
@@ -251,13 +288,17 @@ fn no_host_path_reaches_the_gate_document() {
 
 #[test]
 fn rendering_the_same_run_twice_produces_identical_bytes() {
+    let context = mixed_context();
+    let evaluation = context.evaluate(RUN_ID);
     let first = gate_render::render_json(&GateResultsDto::from_evaluation(
-        &evaluation(),
+        &context,
+        &evaluation,
         POLICY_SHA,
         1,
     ));
     let second = gate_render::render_json(&GateResultsDto::from_evaluation(
-        &evaluation(),
+        &context,
+        &evaluation,
         POLICY_SHA,
         1,
     ));
@@ -304,6 +345,231 @@ fn the_gate_document_rejects_a_field_v1_never_declared() {
     assert!(
         !schema_check::validate(&gate_schema(), &missing).is_empty(),
         "findings is required"
+    );
+}
+
+// --------------------------------------------------------------------------- the C1 extension pair
+
+/// A digest shaped exactly like an observed one: 64 lowercase hex, no more structure than that.
+fn hex(letter: char) -> String {
+    letter.to_string().repeat(64)
+}
+
+/// The `extensions` keys as this crate's serializer writes them: no map is used for the document, but
+/// `serde_json::to_value` collects an object into sorted order, so a key list here is a set assertion.
+fn extension_keys(document: &Value) -> Vec<String> {
+    document["extensions"]
+        .as_object()
+        .expect("extensions is an object")
+        .keys()
+        .cloned()
+        .collect()
+}
+
+#[test]
+fn a_run_that_bound_no_attachment_writes_neither_new_extension_entry() {
+    // `04_TECH/28` §7.3's first half, and the compatibility rule `ADR-0030` D-4 depends on: a run that
+    // judged no attached byte is documented exactly the way P4 documented one.
+    let doc = gate_document();
+    assert_eq!(
+        extension_keys(&doc),
+        vec![
+            "baseline_snapshot_id",
+            "overall_effective_severity",
+            "policy_sha256",
+            "project_config_schema_version",
+        ],
+        "neither `canonical_input_label` nor `attachments` appears for a run that bound no attachment"
+    );
+
+    let text = rendered_for(&mixed_context());
+    assert!(
+        !text.contains("canonical_input_label") && !text.contains("\"attachments\""),
+        "the emitted bytes carry neither key: {text}"
+    );
+}
+
+#[test]
+fn a_run_that_bound_attachments_writes_the_label_and_the_rows_together() {
+    // The other half of §7.3, and `T-C1-04`'s positive direction: the two entries arrive as a pair, and
+    // what arrives is the byte facts the identity bound — nothing else.
+    let rows = vec![
+        attachment(ArtifactKind::IntelHex, &hex('7'), 683_214),
+        attachment(ArtifactKind::Bin, &hex('1'), 245_760),
+    ];
+    let context = context_with_attachments(rows);
+    let doc = document_for(&context);
+
+    assert_eq!(
+        extension_keys(&doc),
+        vec![
+            "attachments",
+            "baseline_snapshot_id",
+            "canonical_input_label",
+            "overall_effective_severity",
+            "policy_sha256",
+            "project_config_schema_version",
+        ],
+        "one entry without the other is not a document this build writes"
+    );
+    assert_eq!(
+        doc["extensions"]["canonical_input_label"], "firmwaresight-gate-input/2",
+        "the label names the grammar that actually ran"
+    );
+
+    let disclosed = doc["extensions"]["attachments"]
+        .as_array()
+        .expect("attachments is a list");
+    assert_eq!(disclosed.len(), 2);
+    // §5 rule 1: the block sorts by kind word then digest, whatever order the caller assembled it in.
+    assert_eq!(disclosed[0]["kind"], "bin");
+    assert_eq!(disclosed[0]["sha256"], hex('1'));
+    assert_eq!(disclosed[0]["byte_size"], 245_760);
+    assert_eq!(disclosed[1]["kind"], "hex");
+    assert_eq!(disclosed[1]["sha256"], hex('7'));
+    assert_eq!(disclosed[1]["byte_size"], 683_214);
+
+    for row in disclosed {
+        let keys = row
+            .as_object()
+            .expect("a row is an object")
+            .keys()
+            .cloned()
+            .collect::<Vec<_>>();
+        assert_eq!(
+            keys,
+            vec!["byte_size", "kind", "sha256"],
+            "an attachment row discloses the observed bytes and the declared kind, and nothing a \
+             release owner might also have a file named"
+        );
+    }
+
+    let text = rendered_for(&context);
+    assert!(
+        !text.contains("app.bin")
+            && !text.contains("C:")
+            && !text.contains('\\')
+            && !text.contains("/home"),
+        "no file name and no host path reaches a portable document: {text}"
+    );
+}
+
+#[test]
+fn an_exact_kind_and_digest_pair_is_disclosed_once_however_many_copies_arrive() {
+    // §5 rule 2 is an identity rule, and the disclosure describes the identity: two files of identical
+    // bytes say one thing twice. They still ship as two bundle files — that half is `bundle_names`' and is
+    // held in `crates/firmwaresight-project/tests/bundle_builder.rs`.
+    let doc = bound_document(vec![
+        attachment(ArtifactKind::Bin, &hex('a'), 1_024),
+        attachment(ArtifactKind::Bin, &hex('a'), 1_024),
+        attachment(ArtifactKind::Bin, &hex('b'), 2_048),
+    ]);
+    let disclosed = doc["extensions"]["attachments"]
+        .as_array()
+        .expect("attachments is a list");
+    assert_eq!(
+        disclosed.len(),
+        2,
+        "the duplicate pair is bound once and the distinct digest keeps its own row"
+    );
+    assert_eq!(disclosed[0]["sha256"], hex('a'));
+    assert_eq!(disclosed[1]["sha256"], hex('b'));
+    assert_eq!(disclosed[1]["byte_size"], 2_048);
+}
+
+#[test]
+fn the_attachment_pair_rides_the_reserved_extension_slot_and_widens_no_closed_list() {
+    // The disclosure is additive *because* v1 reserved `extensions` and closed everything else. Asserting
+    // the closedness is the assertion that no schema file moved for C1, and a document with the pair in it
+    // still validates against that same untouched contract.
+    let schema = gate_schema();
+    assert_eq!(
+        schema["additionalProperties"],
+        json!(false),
+        "the top level of `gate-results:1` is still closed"
+    );
+    assert_eq!(
+        schema["properties"]["extensions"]["additionalProperties"],
+        json!(true),
+        "`extensions` is still the slot v1 reserved for exactly this"
+    );
+    assert_eq!(
+        schema["$id"], GATE_SCHEMA_ID,
+        "and its identity is still major 1"
+    );
+
+    let doc = bound_document(vec![attachment(ArtifactKind::Bin, &hex('1'), 245_760)]);
+    let errors = schema_check::validate(&schema, &doc);
+    assert!(errors.is_empty(), "{errors:?}\n{doc}");
+
+    let mut outside_extensions = doc.clone();
+    outside_extensions["attachments"] = json!([]);
+    assert!(
+        !schema_check::validate(&schema, &outside_extensions).is_empty(),
+        "the pair belongs in `extensions`: a root-level `attachments` is a field v1 never declared"
+    );
+}
+
+#[test]
+fn the_document_names_the_grammar_the_canonical_text_already_used() {
+    // The disclosure is a *description* of the identity, so the two must agree line by line: the label the
+    // document prints is the first line of the text the run id was taken over, and every disclosed row is
+    // a row of that text's `attachments[...]` block.
+    let rows = vec![
+        attachment(ArtifactKind::IntelHex, &hex('7'), 683_214),
+        attachment(ArtifactKind::Bin, &hex('1'), 245_760),
+    ];
+    let context = context_with_attachments(rows);
+    let canonical = context.canonical_input();
+    let doc = document_for(&context);
+
+    let first_line = canonical.lines().next().expect("a labelled text");
+    assert_eq!(
+        first_line,
+        doc["extensions"]["canonical_input_label"]
+            .as_str()
+            .expect("the pair is present"),
+        "one predicate decides the grammar in both places"
+    );
+    for row in doc["extensions"]["attachments"]
+        .as_array()
+        .expect("attachments is a list")
+    {
+        let kind = row["kind"].as_str().expect("kind");
+        let digest = row["sha256"].as_str().expect("sha256");
+        assert!(
+            canonical.contains(&format!("  {kind} known:{digest}\n")),
+            "the disclosed row `{kind} {digest}` is not in the text the identity binds:\n{canonical}"
+        );
+    }
+}
+
+#[test]
+fn a_pre_c1_gate_results_document_still_validates_and_carries_neither_entry() {
+    // `T-C1-06`'s gate half against the corpus the repository actually carries: the document P4 froze, read
+    // by today's contract, unmodified. The whole-corpus read-back over all five documents is
+    // `crates/firmwaresight-project/tests/release_attachments.rs`.
+    let path = repo_root().join("golden/reports/p4-release/gate-results.json");
+    let text = std::fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must be readable: {error}", path.display()));
+    let doc: Value = serde_json::from_str(&text).expect("the frozen golden is JSON");
+
+    let errors = schema_check::validate(&gate_schema(), &doc);
+    assert!(errors.is_empty(), "{errors:?}");
+    assert_eq!(
+        extension_keys(&doc),
+        vec![
+            "baseline_snapshot_id",
+            "overall_effective_severity",
+            "policy_sha256",
+            "project_config_schema_version",
+        ],
+        "the pre-C1 document carries neither entry, and a reader that sees no `attachments` key reads \
+         it as a run that bound none"
+    );
+    assert_eq!(
+        doc["run_id"], "gate-a17e9861ce643da5e7061ac349793f80d1be87736ad52b2daf3433dc8cb8bc26",
+        "and its run id is the one the pre-C1 build recorded, not one regenerated to suit this code"
     );
 }
 
@@ -466,8 +732,13 @@ fn a_run_without_a_baseline_says_so_instead_of_naming_an_absent_one() {
         FindingState::Unknown,
         "a threshold with nothing to compare against is an evidence gap"
     );
-    let doc = serde_json::to_value(GateResultsDto::from_evaluation(&evaluation, POLICY_SHA, 1))
-        .expect("serializes");
+    let doc = serde_json::to_value(GateResultsDto::from_evaluation(
+        &context,
+        &evaluation,
+        POLICY_SHA,
+        1,
+    ))
+    .expect("serializes");
     assert!(schema_check::validate(&gate_schema(), &doc).is_empty());
     assert_eq!(doc["extensions"]["baseline_snapshot_id"], Value::Null);
     let out = gate_render::render_human(&evaluation, POLICY_SHA);
@@ -494,8 +765,13 @@ fn an_unknown_disposition_of_block_never_projects_the_gap_away() {
     assert_eq!(git.state, FindingState::Unknown);
     assert_eq!(git.effective_severity, EffectiveSeverity::Block);
 
-    let doc = serde_json::to_value(GateResultsDto::from_evaluation(&evaluation, POLICY_SHA, 1))
-        .expect("serializes");
+    let doc = serde_json::to_value(GateResultsDto::from_evaluation(
+        &context,
+        &evaluation,
+        POLICY_SHA,
+        1,
+    ))
+    .expect("serializes");
     assert!(
         schema_check::validate(&gate_schema(), &doc).is_empty(),
         "an unknown-with-a-blocking-disposition is still a v1 document: {doc}"

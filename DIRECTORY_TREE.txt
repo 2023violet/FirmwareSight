@@ -457,7 +457,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md
 │   ├── C1_U2_GATE_BUNDLE_PLAN.md
 │   ├── C1_U2R1_ARCHITECT_CORRECTIVE_PLAN.md
-│   └── C1_U2R1_ARCHITECT_CORRECTIVE_REPORT.md
+│   ├── C1_U2R1_ARCHITECT_CORRECTIVE_REPORT.md
+│   ├── C1_U3_CONTRACT_REGRESSION_PLAN.md
+│   └── C1_U3_CONTRACT_REGRESSION_REPORT.md
 ├── crates/
 │   ├── firmwaresight-artifact/
 │   │   ├── src/

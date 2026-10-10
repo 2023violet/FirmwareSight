@@ -3215,6 +3215,559 @@ fn a_shipped_file_claimed_as_both_analyzed_and_attached_is_refused() {
     );
 }
 
+// ------------------------------------------------------------------- C1-U3 the `gate-results:1` pair, read back
+
+/// Every tamper below re-records **both** indexes with `reindex`, so the bundle is refused because its two
+/// documents disagree, not because a digest went stale. A tamper that leaves the indexes stale proves only
+/// that hashing works, and `C1-U2` already has tests for that.
+#[test]
+fn a_bundle_that_ships_attachments_discloses_the_same_bytes_in_both_documents() {
+    // `T-C1-04`'s positive direction on a real bundle, and `T-C1-05`'s pairing half: the Gate document names
+    // the grammar that judged the attached bytes and lists exactly the rows the manifest discloses.
+    let world = attached_world("u3-pair");
+    let (bundle, _) = world.publish_attached("pair");
+    let gate = read_document(&bundle, "gate-results.json");
+    let manifest = read_manifest(&bundle);
+
+    assert_eq!(
+        gate["extensions"]["canonical_input_label"], "firmwaresight-gate-input/2",
+        "a run that bound attached bytes says which grammar judged them"
+    );
+    let rows = gate["extensions"]["attachments"]
+        .as_array()
+        .expect("the disclosure is a list");
+    assert_eq!(
+        rows.len(),
+        2,
+        "one row per bound `(kind, digest)`: {rows:?}"
+    );
+    for row in rows {
+        let keys = row
+            .as_object()
+            .expect("a row is an object")
+            .keys()
+            .cloned()
+            .collect::<Vec<_>>();
+        assert_eq!(
+            keys,
+            vec!["byte_size", "kind", "sha256"],
+            "the disclosure is the identity's own facts, with no name and no structure claim"
+        );
+    }
+    let kinds = rows
+        .iter()
+        .map(|row| row["kind"].as_str().expect("kind").to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(kinds, vec!["bin".to_owned(), "hex".to_owned()], "{rows:?}");
+    let disclosed = manifest["extensions"]["attachments"]
+        .as_array()
+        .expect("the manifest discloses its attachments");
+    for row in rows {
+        let found = disclosed
+            .iter()
+            .find(|entry| entry["sha256"] == row["sha256"] && entry["kind"] == row["kind"])
+            .expect("every bound row is a shipped attachment");
+        assert_eq!(
+            found["size"], row["byte_size"],
+            "both documents state the same length for the same bytes"
+        );
+    }
+    assert_eq!(
+        gate["run_id"], manifest["extensions"]["gate_run_id"],
+        "the bundle gates the run whose verdict it ships"
+    );
+    verify_bundle(&bundle).expect("a bundle that discloses its pair verifies");
+
+    // And the owner's file names are not the document's order. The publish path hands the Gate its attached
+    // rows sorted by path, so a BIN named last and a HEX named first arrive at the context as `hex, bin` —
+    // and the disclosure still has to come out in the identity's `(kind, digest)` order, because a run id was
+    // taken over the canonicalized set and not over the alphabetical one (`04_TECH/28` §5 rule 1).
+    let mut reversed = World::new("u3-pair-order", ATTACHING_CONFIG);
+    let late_bin = reversed.dir.join("build/attached/zz-image.bin");
+    let early_hex = reversed.dir.join("build/attached/aa-image.hex");
+    std::fs::write(&late_bin, b"BIN bytes offered under a name that sorts last")
+        .expect("the BIN is written");
+    std::fs::write(
+        &early_hex,
+        b":0000\r\nhex bytes offered under a name that sorts first",
+    )
+    .expect("the HEX is written");
+    reversed.attach(&early_hex, ArtifactKind::IntelHex);
+    reversed.attach(&late_bin, ArtifactKind::Bin);
+    let (second, _) = reversed.publish_attached("pairorder");
+    let second_gate = read_document(&second, "gate-results.json");
+    let kinds = second_gate["extensions"]["attachments"]
+        .as_array()
+        .expect("the pair is present")
+        .iter()
+        .filter_map(|row| row["kind"].as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        kinds,
+        vec!["bin", "hex"],
+        "the disclosure is canonicalized, not transcribed from the order the paths sort into"
+    );
+    verify_bundle(&second)
+        .expect("a bundle whose owner attached in the other order still verifies the same way");
+}
+
+#[test]
+fn a_pre_c1_bundle_that_attached_nothing_still_verifies_without_the_pair() {
+    // The compatibility direction, on the document side this time: an attachment-free release writes neither
+    // entry, and the reader that has learned to demand the pair still accepts it.
+    let world = World::new("u3-pair-none", PASSING_CONFIG);
+    let (bundle, _) = world.publish("pairnone");
+    let gate = read_document(&bundle, "gate-results.json");
+    assert!(
+        gate["extensions"].get("canonical_input_label").is_none()
+            && gate["extensions"].get("attachments").is_none(),
+        "a run that bound nothing is documented the way P4 documented one: {}",
+        gate["extensions"]
+    );
+    verify_bundle(&bundle).expect("the pair is conditional in the reader as well as the writer");
+}
+
+#[test]
+fn a_gate_document_that_discloses_rows_without_a_label_is_refused() {
+    let world = attached_world("u3-pair-rows");
+    let (bundle, _) = world.publish_attached("rows");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    gate["extensions"]
+        .as_object_mut()
+        .expect("extensions is an object")
+        .remove("canonical_input_label");
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error = verify_bundle(&bundle).expect_err("half a pair is not a disclosure");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error.to_string().contains("is absent"),
+        "the refusal names the missing half: {error}"
+    );
+}
+
+#[test]
+fn a_gate_document_that_names_a_label_with_no_rows_is_refused() {
+    let world = attached_world("u3-pair-label");
+    let (bundle, _) = world.publish_attached("label");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    gate["extensions"]["attachments"] = serde_json::Value::Array(Vec::new());
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error = verify_bundle(&bundle).expect_err("a label over an empty block claims nothing");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error
+            .to_string()
+            .contains("while no attachment is disclosed"),
+        "{error}"
+    );
+}
+
+#[test]
+fn a_gate_document_that_names_another_canonical_grammar_is_refused() {
+    // Not a coercion: a document that says its run id came from a grammar this build does not write is a
+    // disagreement about identity, and reading it as a `/1` run would quietly drop the attached bytes from
+    // the record of what was judged.
+    for (name, label) in [
+        ("u3-grammar-one", "firmwaresight-gate-input/1"),
+        ("u3-grammar-three", "firmwaresight-gate-input/3"),
+    ] {
+        let world = attached_world(name);
+        let (bundle, _) = world.publish_attached(name);
+        let mut gate = read_document(&bundle, "gate-results.json");
+        gate["extensions"]["canonical_input_label"] = serde_json::Value::String(label.to_owned());
+        write_document(&bundle, "gate-results.json", &gate);
+        reindex(&bundle, "gate-results.json");
+
+        let error = verify_bundle(&bundle).expect_err("a bound run cannot claim another grammar");
+        assert_eq!(error.code(), "ERR-BUNDLE-6109", "{name}: {error}");
+        assert!(
+            error
+                .to_string()
+                .contains("only grammar a document with bound rows can name"),
+            "{name}: {error}"
+        );
+    }
+}
+
+#[test]
+fn a_gate_document_whose_rows_are_out_of_the_identitys_order_is_refused() {
+    let world = attached_world("u3-order");
+    let (bundle, _) = world.publish_attached("order");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    let rows = gate["extensions"]["attachments"]
+        .as_array_mut()
+        .expect("the disclosure is a list");
+    rows.reverse();
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error =
+        verify_bundle(&bundle).expect_err("a reordered block is a different canonical text");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error.to_string().contains("sort before or beside"),
+        "{error}"
+    );
+}
+
+#[test]
+fn a_gate_document_that_binds_one_pair_twice_is_refused() {
+    let world = attached_world("u3-dupe");
+    let (bundle, _) = world.publish_attached("dupe");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    let rows = gate["extensions"]["attachments"]
+        .as_array_mut()
+        .expect("the disclosure is a list");
+    let again = rows[0].clone();
+    rows.push(again);
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error = verify_bundle(&bundle).expect_err("one `(kind, digest)` pair is bound once");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error.to_string().contains("sort before or beside"),
+        "{error}"
+    );
+}
+
+#[test]
+fn a_gate_document_that_discloses_bytes_the_manifest_does_not_ship_is_refused() {
+    let world = attached_world("u3-sets");
+    let (bundle, _) = world.publish_attached("sets");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    gate["extensions"]["attachments"]
+        .as_array_mut()
+        .expect("the disclosure is a list")[0]["sha256"] =
+        serde_json::Value::String("0".repeat(64));
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error = verify_bundle(&bundle).expect_err("the two documents name different bytes");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error
+            .to_string()
+            .contains("disclose different attached bytes"),
+        "{error}"
+    );
+}
+
+#[test]
+fn an_attachment_release_documented_as_though_it_judged_nothing_is_refused() {
+    // The pre-C1 document shape is *not* a legal reading of an attachment release: dropping the pair would
+    // turn a run that judged four files into a record that claims it judged two.
+    let world = attached_world("u3-nodisclosure");
+    let (bundle, _) = world.publish_attached("nodisclosure");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    let extensions = gate["extensions"]
+        .as_object_mut()
+        .expect("extensions is an object");
+    extensions.remove("attachments");
+    extensions.remove("canonical_input_label");
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error = verify_bundle(&bundle).expect_err("an attached byte vanished from the record");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error
+            .to_string()
+            .contains("disclose different attached bytes"),
+        "{error}"
+    );
+}
+
+#[test]
+fn a_gate_document_that_reports_another_run_than_the_bundle_gates_is_refused() {
+    // The highest-signal tamper the bundle permits: every digest still matches, both indexes agree with the
+    // bytes, the document still validates against `gate-results:1` — and the verdict inside it belongs to a
+    // different run than the one the release gates. Nothing here read that back before `C1-U3`.
+    let world = attached_world("u3-runid");
+    let (bundle, _) = world.publish_attached("runid");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    let original = gate["run_id"].as_str().expect("a run id").to_owned();
+    let other = format!("gate-{}", "f".repeat(64));
+    gate["run_id"] = serde_json::Value::String(other.clone());
+    for finding in gate["findings"].as_array_mut().expect("findings is a list") {
+        let rule = finding["rule_id"].as_str().expect("rule id").to_owned();
+        finding["id"] = serde_json::Value::String(format!("{other}#{rule}"));
+    }
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error =
+        verify_bundle(&bundle).expect_err("the document names a run this bundle does not gate");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error
+            .to_string()
+            .contains("one run's verdict beside another"),
+        "{error}"
+    );
+    assert_eq!(
+        original.len(),
+        69,
+        "the run id the bundle really gates: `{original}`"
+    );
+}
+
+#[test]
+fn a_gate_document_that_discloses_a_field_beyond_the_identity_is_refused() {
+    // A row that carries a file name, a path or a structure claim is asserting something the run id never
+    // bound, and §11's excluded conclusions start here.
+    for (name, key) in [
+        ("u3-extra-name", "file_name"),
+        ("u3-extra-span", "address_span"),
+    ] {
+        let world = attached_world(name);
+        let (bundle, _) = world.publish_attached(name);
+        let mut gate = read_document(&bundle, "gate-results.json");
+        gate["extensions"]["attachments"]
+            .as_array_mut()
+            .expect("the disclosure is a list")[0][key] = serde_json::Value::String("x".to_owned());
+        write_document(&bundle, "gate-results.json", &gate);
+        reindex(&bundle, "gate-results.json");
+
+        let error =
+            verify_bundle(&bundle).expect_err("a disclosed field nothing judged is refused");
+        assert_eq!(error.code(), "ERR-BUNDLE-6109", "{name}: {error}");
+        assert!(
+            error
+                .to_string()
+                .contains("enters a run id as its declared kind"),
+            "{name}: {error}"
+        );
+    }
+}
+
+#[test]
+fn a_gate_document_that_discloses_a_digest_that_is_not_a_digest_is_refused() {
+    let world = attached_world("u3-digest");
+    let (bundle, _) = world.publish_attached("digest");
+    let mut gate = read_document(&bundle, "gate-results.json");
+    gate["extensions"]["attachments"]
+        .as_array_mut()
+        .expect("the disclosure is a list")[0]["sha256"] =
+        serde_json::Value::String("ZZ".to_owned());
+    write_document(&bundle, "gate-results.json", &gate);
+    reindex(&bundle, "gate-results.json");
+
+    let error = verify_bundle(&bundle).expect_err("a malformed digest is not evidence of anything");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error.to_string().contains("not the 64 lowercase hex"),
+        "{error}"
+    );
+}
+
+/// The two documents a release with attachments ships about its attached files, read as a stranger reads
+/// them: `analysis.json` records what was analyzed, and nothing records what was not.
+#[test]
+fn an_analysis_document_never_grows_a_row_for_an_attached_file() {
+    // `T-C1-11`: `analysis:1` stays the shape of one analyzed build. `C1-U2` proved the negative half (the
+    // attached leaf is absent from the artifact rows); this is the exact-row-set half, asserted on the bytes
+    // a real publish wrote rather than on a projection.
+    let world = attached_world("u3-analysis");
+    let (bundle, _) = world.publish_attached("analysis");
+    let analysis = read_document(&bundle, "analysis.json");
+    let kinds = analysis["artifacts"]
+        .as_array()
+        .expect("the analysis lists what it read")
+        .iter()
+        .map(|row| row["kind"].as_str().expect("a kind").to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        kinds,
+        vec!["elf".to_owned(), "map".to_owned()],
+        "an attached BIN and HEX are not pseudo-analyzed into `analysis.json` (`ADR-0030` D-1)"
+    );
+    let names = analysis["artifacts"]
+        .as_array()
+        .expect("the analysis lists what it read")
+        .iter()
+        .filter_map(|row| row["fileName"].as_str())
+        .collect::<Vec<_>>();
+    for attached in ["app.bin", "boot.hex"] {
+        assert!(
+            !names.contains(&attached),
+            "`{attached}` ships as bytes and was never analyzed"
+        );
+    }
+    assert!(
+        !analysis.to_string().contains("app.bin"),
+        "the document does not mention the attached files at all: {}",
+        analysis["artifacts"]
+    );
+}
+
+#[test]
+fn bytes_that_begin_with_the_elf_magic_declared_hex_satisfy_hex_and_claim_nothing_more() {
+    // `T-C1-17`: the kind an owner declares is what the Gate records, and the bytes are what the identity
+    // binds. A file whose first four bytes are the ELF magic, offered as `hex`, satisfies a required `hex`
+    // **as raw bytes of a kind the owner declared** (`ADR-0030` D-8) — and nothing this release ships says
+    // those bytes are well-formed Intel HEX, because no parser here exists to say it.
+    let world = attached_world("u3-elfmagic");
+    std::fs::write(
+        &world.hex,
+        [0x7f_u8, b'E', b'L', b'F', 2, 1, 1, 0, 0, 0, 0, 0],
+    )
+    .expect("the attached file is rewritten before the release is prepared");
+    let (bundle, _) = world.publish_attached("elfmagic");
+
+    let gate = read_document(&bundle, "gate-results.json");
+    let required = gate["findings"]
+        .as_array()
+        .expect("findings")
+        .iter()
+        .find(|finding| finding["rule_id"] == "artifacts.required")
+        .expect("the rule always answers");
+    assert_eq!(required["state"], "PASS", "{required}");
+    let summary = required["summary"].as_str().expect("a summary");
+    assert!(
+        summary.contains("bytes verified, provenance not verified"),
+        "the sentence that satisfies the requirement also states its limit: {summary}"
+    );
+    for claim in ["Intel HEX", "hex records", "checksum", "well-formed"] {
+        assert!(
+            !summary.to_lowercase().contains(&claim.to_lowercase()),
+            "the finding asserts `{claim}` about bytes no parser read: {summary}"
+        );
+    }
+
+    let manifest = read_manifest(&bundle);
+    let disclosed = manifest["extensions"]["attachments"]
+        .as_array()
+        .expect("the release discloses its attachments")
+        .iter()
+        .filter(|row| row["kind"] == "hex")
+        .collect::<Vec<_>>();
+    assert_eq!(
+        disclosed.len(),
+        1,
+        "the ELF-shaped bytes are still disclosed as `hex`"
+    );
+    assert_eq!(disclosed[0]["kind_basis"], "declared", "{:?}", disclosed[0]);
+    assert_eq!(disclosed[0]["provenance"], "unknown", "{:?}", disclosed[0]);
+
+    let analysis = read_document(&bundle, "analysis.json");
+    assert!(
+        !analysis.to_string().contains("boot.hex"),
+        "and the analysis document gains no row for bytes it never analyzed"
+    );
+    verify_bundle(&bundle)
+        .expect("a declared kind the bytes disagree with is still a legal release");
+}
+
+#[test]
+fn no_finding_and_no_report_line_reports_structure_for_an_attached_file() {
+    // `T-C1-18` and §11's excluded conclusions: the structural vocabulary belongs to a container format, and
+    // an attached image is not one. Every sentence this release writes *about an attached file* is swept —
+    // each finding that cites an `attachment:` locator, and each line of the report page that names one.
+    let forbidden = [
+        "address span",
+        "record checksum",
+        "well-formed",
+        "sections",
+        "symbols",
+        "entry point",
+        "architecture",
+        "memory regions",
+        "object attribution",
+    ];
+    let world = attached_world("u3-structure");
+    let (bundle, _) = world.publish_attached("structure");
+
+    let gate = read_document(&bundle, "gate-results.json");
+    let cited: Vec<&serde_json::Value> = gate["findings"]
+        .as_array()
+        .expect("findings")
+        .iter()
+        .filter(|finding| {
+            finding["evidence_refs"]
+                .as_array()
+                .expect("refs")
+                .iter()
+                .filter_map(serde_json::Value::as_str)
+                .any(|reference| reference.starts_with("attachment:"))
+        })
+        .collect();
+    assert!(
+        !cited.is_empty(),
+        "a release with attachments cites them, so this sweep is not over an empty set"
+    );
+    for finding in &cited {
+        let text = format!(
+            "{} {}",
+            finding["summary"].as_str().expect("a summary"),
+            finding["remediation"].as_str().unwrap_or_default()
+        );
+        for word in forbidden {
+            assert!(
+                !text.to_lowercase().contains(word),
+                "the finding `{}` states {} about bytes that were only hashed:\n{text}",
+                finding["rule_id"].as_str().expect("a rule id"),
+                word
+            );
+        }
+    }
+
+    let report = std::fs::read_to_string(bundle.join("release-report.html"))
+        .expect("the report page is in the bundle");
+    let mut lines_that_name_one = 0usize;
+    for line in report.lines() {
+        if !["app.bin", "boot.hex"]
+            .iter()
+            .any(|leaf| line.contains(leaf))
+        {
+            continue;
+        }
+        lines_that_name_one += 1;
+        for word in forbidden {
+            assert!(
+                !line.to_lowercase().contains(word),
+                "the report page states {word} about an attached file: {line}"
+            );
+        }
+    }
+    assert!(
+        lines_that_name_one > 0,
+        "the page lists what the bundle ships, so the sweep above is not vacuous"
+    );
+
+    // The disclosure rows themselves: two documents, and neither has room for a structure claim.
+    for (name, rows) in [
+        (
+            "gate-results.json",
+            gate["extensions"]["attachments"]
+                .as_array()
+                .expect("the pair is present")
+                .clone(),
+        ),
+        (
+            "release-manifest.json",
+            read_manifest(&bundle)["extensions"]["attachments"]
+                .as_array()
+                .expect("the disclosure is present")
+                .clone(),
+        ),
+    ] {
+        for row in &rows {
+            let text = row.to_string().to_lowercase();
+            for word in forbidden {
+                assert!(
+                    !text.contains(word),
+                    "`{name}` carries `{word}` for an attached file: {row}"
+                );
+            }
+        }
+    }
+}
+
 /// M15 and the compatibility half of every link above: a release that attaches nothing writes no disclosure
 /// key at all, so its bundle's bytes are the bytes this engine wrote before `C1-U1` existed.
 #[test]

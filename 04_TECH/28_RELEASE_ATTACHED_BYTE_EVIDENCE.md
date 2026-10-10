@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Architecture"
-last_updated: "2026-10-09"
+last_updated: "2026-10-10"
 ---
 
 # Release-Attached Byte Evidence — the C1 design baseline
@@ -606,3 +606,62 @@ caller that mis-carries an acceptance list deserves a branchable code rather tha
 §9's user-facing sentences, §7.3's `gate-results:1` extension pair and the pre-C1 corpus re-validation are untouched
 here: `C1-U3` and `C1-U4` still own them, and `BIN_HEX_RELEASE_ATTACH` is still
 **`DESIGN_APPROVED / NOT_USER_AVAILABLE`**.
+
+### 14.2 Executed 2026-10-10 by `C1-U3` — the pair lands, the corpus is read back, and two sentences here are corrected
+
+Status and reconciliation only; §§1–13 stay as the Owner froze them and §14/§14.1 stay as their rounds wrote them.
+`C1-U3` is stage 2 of the four-file continuous-delivery packet archived in
+`10_AUDIT/SOURCE_PROMPTS/`, and its own record is `C1_VALIDATION/C1_U3_CONTRACT_REGRESSION_REPORT.md` with the
+T-C1-01…19 matrix row by row. Its status word is **`LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING`**.
+
+**§7.3's extension pair is code.** `extensions.canonical_input_label` and `extensions.attachments` are written
+together and only when a run bound attached bytes, in §5's `(kind, digest)` order with an exact pair bound once;
+an attachment-free document still has neither key, which `apps/cli/tests/p4_golden.rs`'s byte-for-byte golden
+comparison proves independently of any test this round wrote. No schema file moved: both `gate-results:1` and
+`release-manifest:1` already reserve `extensions` as `additionalProperties: true`, and every closed property list —
+both roots and `files[]` items — is asserted still-closed by `the_strict_boundaries_that_make_extensions_the_only_slot_are_still_closed`.
+No major moved, no mandatory root field was added, and no new `ERR-BUNDLE-61xx` number was allocated: the new
+reader refusals travel on `ERR-BUNDLE-6109`, the code every other read-back refusal already uses.
+
+**The "present iff" rule is a reader rule, and this document's §7.3 wording is why.** §7.3 says the pair is
+"present **iff** at least one attachment was bound" and calls `additionalProperties: false` "not loosened". Both
+are true, and the second is what makes the first unstatable in the schema: `extensions` is open *by design*, so a
+schema that required the two keys to arrive together would have to narrow that reserved slot, which is a semantics
+change and would need a major. The rule therefore lives in `verify_bundle`, which refuses half a pair, a `/1` or
+unknown grammar label, rows out of §5 order or bound twice, a disclosed set that disagrees with the manifest's
+`extensions.attachments`, and — the check that closes the gap §6's L-6 left open — a `gate-results.json` whose
+`run_id` is not the manifest's `extensions.gate_run_id`. §7.3's reading rules said a mismatch "is a hard error,
+never a re-interpretation"; that sentence is now held by tests rather than by intent.
+
+**Correction 1 — the locator name in §7.5 and §12.** §7.5 sketches `attachments: [{file, kind, kind_basis, sha256,
+size}]` and §12's worked example writes `"file": "artifacts/app.bin"`. The shipped field is **`path`**, and it also
+carries **`provenance: "unknown"`**. The Architect ruled this on 2026-10-10 in the U3 prompt §4: `path` is the
+canonical bundle-relative locator because `files[]` and the verifier already speak it, and `provenance` is
+mandatory disclosure so no reader can mistake an attached file for an analyzed one. **The `file` spelling in §7.5
+and §12 is superseded by this sentence, not deleted from them**, and `04_TECH/26`'s C1 section records the same
+ruling in the policy document that owns the vocabulary. Two aliases would drift; silently renaming `files[]` would
+break readers; pretending the sketch never said `file` would lose the reason the shipped row has six fields.
+
+**Correction 2 — §7.3's `T-C1-07` cites a test that did not exist.** That row reads "the existing
+`the_run_is_judged_from_stored_rows_after_the_files_are_gone` test extended to a no-attachment run". No test by
+that name existed in the repository when `C1-U3` read the row — the design referred to a planned test as an
+existing one. `C1-U3` wrote it under that exact name, for the case the row names (a stored run with no attachment
+rows, its source files deleted, re-judged from the stored columns to the same findings and the same `/1` canonical
+text), in `crates/firmwaresight-storage/tests/gate_history.rs`. The row is now true; the record of it having been
+false stays here.
+
+**One reading caution for §§3–8.** Those sections cite source line numbers as they stood when the design was frozen
+(`bundle.rs:664-670`, `:993-1003`, `:1506-1560`, `gate.rs:1471-1478`, `release.rs:343` and the rest). Every one of
+them has since moved, some by more than a hundred lines, because the units this document describes were built on
+top of it. Read the symbols and the rules, and locate them with `git grep`; a numbered pointer in a frozen design
+is a snapshot, not an address.
+
+**What is still not code.** §9's user-facing sentences — the Release page's "Release attachments" section, the
+Attach and Ship verbs, the repeatable `--attach`, the report's limits line, the IPC command — are `C1-U4`'s and
+this round touched no `apps/desktop/**` path and added no CLI argument (the one `apps/cli` edit is the new
+`from_evaluation` parameter at the existing call site). So `BIN_HEX_RELEASE_ATTACH` remains
+**`DESIGN_APPROVED / NOT_USER_AVAILABLE`**, `ADR-0030`'s exclusions still bind, and the Intel HEX address-span
+promise remains withdrawn rather than deferred. What `C1-U3` added is the guarantee that a release which *does*
+attach bytes documents them in a way the five published contracts accept without a version bump — and the evidence
+that they do, measured against P4's frozen bundle rather than asserted.
+

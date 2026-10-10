@@ -699,3 +699,299 @@ fn an_observed_attachment_bound_to_a_context_is_the_same_fact_the_identity_reads
     assert_eq!(bound.attachments.len(), 1);
     let _ = std::fs::remove_dir_all(&root);
 }
+
+// ------------------------------------------------------- C1-U3 the pre-C1 corpus, read by today's contracts
+
+/// The repository root, reached the way
+/// `the_projects_own_policy_fingerprint_and_the_recorded_run_id_are_untouched` reaches it.
+fn repo_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("..")
+        .canonicalize()
+        .expect("the repository root")
+}
+
+/// The JSON documents the frozen P4 bundle carries, found by listing the directory. `T-C1-06` says *every*
+/// pre-C1 document, so the corpus is measured here rather than transcribed: a sixth document dropped into
+/// that bundle would be validated by this test instead of silently unlisted.
+fn golden_json_documents() -> Vec<(String, PathBuf)> {
+    let dir = repo_root().join("golden/reports/p4-release");
+    let mut found = std::fs::read_dir(&dir)
+        .unwrap_or_else(|error| panic!("{} must be readable: {error}", dir.display()))
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().is_some_and(|ext| ext == "json"))
+        .map(|path| {
+            (
+                path.file_name()
+                    .expect("a bundle document has a name")
+                    .to_string_lossy()
+                    .into_owned(),
+                path,
+            )
+        })
+        .collect::<Vec<_>>();
+    found.sort();
+    found
+}
+
+/// The contract each document names, by the spelling the bundle itself uses.
+fn schema_for(name: &str) -> Option<&'static str> {
+    Some(match name {
+        "analysis.json" => "analysis.schema.json",
+        "diff.json" => "diff.schema.json",
+        "gate-results.json" => "gate-results.schema.json",
+        "accepted-reviews.json" => "accepted-reviews.schema.json",
+        "release-manifest.json" => "release-manifest.schema.json",
+        _ => return None,
+    })
+}
+
+fn schema(name: &str) -> serde_json::Value {
+    let path = repo_root().join("schemas").join(name);
+    let text = std::fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must be readable: {error}", path.display()));
+    serde_json::from_str(&text).unwrap_or_else(|error| panic!("{name} must parse: {error}"))
+}
+
+#[test]
+fn every_pre_c1_bundle_document_still_validates_against_the_schema_it_names() {
+    // `T-C1-06`, and the compatibility claim `ADR-0030` D-4 rests on: five portable contracts, all still at
+    // major 1, still accept the documents a pre-C1 build wrote. No golden byte is edited to make that true,
+    // and no schema file was widened for C1 — the second half of this test asserts the corpus carries no
+    // C1 disclosure at all, which is the same fact from the reader's side.
+    let documents = golden_json_documents();
+    let names = documents
+        .iter()
+        .map(|(name, _)| name.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        names,
+        vec![
+            "accepted-reviews.json",
+            "analysis.json",
+            "diff.json",
+            "gate-results.json",
+            "release-manifest.json",
+        ],
+        "the corpus this test reads is the corpus the bundle holds"
+    );
+
+    for (name, path) in &documents {
+        let schema_name = schema_for(name).expect("every bundle document names a contract");
+        let text = std::fs::read_to_string(path).expect("the golden document reads");
+        let document: serde_json::Value =
+            serde_json::from_str(&text).unwrap_or_else(|error| panic!("{name}: {error}"));
+        let contract = schema(schema_name);
+
+        let errors = firmwaresight_report::schema_check::validate(&contract, &document);
+        assert!(errors.is_empty(), "{name} must still validate: {errors:?}");
+
+        let declared = document
+            .get("schema_version")
+            .or(document.get("schemaVersion"))
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or_default();
+        assert_eq!(declared, 1, "{name} is a major-1 document");
+        assert!(
+            contract["$id"]
+                .as_str()
+                .expect("every published contract carries its URN")
+                .ends_with(":1"),
+            "{schema_name} is still published at major 1"
+        );
+
+        let extensions = document.get("extensions");
+        for key in ["attachments", "canonical_input_label"] {
+            let present = extensions
+                .and_then(|value| value.get(key))
+                .is_some_and(|value| !value.is_null());
+            assert!(
+                !present,
+                "{name} predates C1 and must not be read as if it disclosed {key}"
+            );
+        }
+    }
+}
+
+#[test]
+fn the_frozen_bundle_indexes_the_bytes_it_holds_and_names_the_two_it_does_not() {
+    // `T-C1-10`'s golden half: the index a pre-C1 build wrote still matches the bytes on disk, recomputed
+    // here rather than trusted. The two entries it cannot check are the two the golden deliberately does not
+    // hold — `apps/cli/tests/p4_golden.rs` pins that this corpus is documents without artifact bytes — and
+    // naming them is what makes the next test's copy-in an addition rather than a surprise.
+    let dir = repo_root().join("golden/reports/p4-release");
+    let index = std::fs::read_to_string(dir.join("SHA256SUMS")).expect("the golden index reads");
+    let mut absent: Vec<String> = Vec::new();
+    let mut checked = 0usize;
+    for line in index.lines().filter(|line| !line.trim().is_empty()) {
+        let (digest, path) = line
+            .split_once("  ")
+            .unwrap_or_else(|| panic!("an index line is `<digest>  <path>`: {line}"));
+        let file = dir.join(path);
+        if file.is_file() {
+            let bytes = std::fs::read(&file).expect("the indexed file reads");
+            assert_eq!(
+                firmwaresight_project::fingerprint::sha256_hex(&bytes),
+                digest,
+                "`{path}` must hash to the line its own index carries"
+            );
+            checked += 1;
+        } else {
+            absent.push(path.to_owned());
+        }
+    }
+    // Measured, not assumed: the index has eight lines (the manifest indexes nine entries, because it also
+    // indexes `SHA256SUMS`, which by §20's own rule carries no digest of itself), six of them on disk here.
+    assert_eq!(
+        checked, 6,
+        "six of the eight indexed files are in the corpus"
+    );
+    assert_eq!(
+        absent,
+        vec![
+            "artifacts/firmware.elf".to_owned(),
+            "artifacts/firmware.map".to_owned()
+        ],
+        "and the two that are not are the artifact bytes the golden deliberately omits"
+    );
+}
+
+#[test]
+fn the_relocated_golden_bundle_verifies_and_re_derives_the_release_id_it_claims() {
+    // `T-C1-14`'s read-back on the immutable corpus: the P4 bundle, moved into scratch, given the two
+    // committed fixtures its own index already names, and verified by this build's `verify_bundle` — which
+    // since `C1-U3` also reads the Gate disclosure pair and ties the run id. A pre-C1 bundle must pass that
+    // stricter reader unchanged, or the stricter reader is a breaking change and this test is the STOP.
+    let scratch = temp_root("golden-relocated");
+    let source = repo_root().join("golden/reports/p4-release");
+    copy_dir(&source, &scratch);
+    let artifacts = scratch.join("artifacts");
+    std::fs::create_dir_all(&artifacts).expect("the artifacts folder is made");
+    for name in ["firmware.elf", "firmware.map"] {
+        std::fs::copy(
+            repo_root().join("fixtures/elf/p2-diff/target").join(name),
+            artifacts.join(name),
+        )
+        .expect("the committed fixture the index names is copied in");
+    }
+
+    let verification = firmwaresight_project::bundle::verify_bundle(&scratch)
+        .expect("the frozen bundle verifies under this build's verifier");
+    let manifest: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(scratch.join("release-manifest.json"))
+            .expect("the manifest reads"),
+    )
+    .expect("the manifest is JSON");
+    assert_eq!(
+        verification.release_id,
+        manifest["release"]["id"].as_str().expect("a release id"),
+        "the id the bytes describe is the id the bundle claims"
+    );
+    assert_eq!(
+        verification.release_id,
+        "release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5",
+        "and that id is the one P4 froze, not one regenerated to suit this code"
+    );
+    assert_eq!(
+        verification.artifact_count, 2,
+        "the analyzed ELF and MAP ship"
+    );
+    let _ = std::fs::remove_dir_all(&scratch);
+}
+
+/// The copy the relocated read-back needs: documents as they are, in a directory that is not the repository.
+fn copy_dir(from: &Path, to: &Path) {
+    for entry in std::fs::read_dir(from).expect("the source reads") {
+        let entry = entry.expect("one entry");
+        let target = to.join(entry.file_name());
+        if entry.path().is_dir() {
+            std::fs::create_dir_all(&target).expect("the directory is made");
+            copy_dir(&entry.path(), &target);
+        } else {
+            std::fs::copy(entry.path(), &target).expect("the file is copied");
+        }
+    }
+}
+
+#[test]
+fn the_disclosed_rows_rebuild_the_text_the_run_id_was_taken_over() {
+    // `T-C1-05`'s document half: the rows a portable document discloses are enough, beside the saved context
+    // the rest of the grammar needs, to re-derive the same canonical text and therefore the same run id. A
+    // reader that recomputes from the document detects a moved byte; it does not have to trust the id.
+    let rows = vec![
+        attachment(ArtifactKind::IntelHex, &sha('7'), 683_214),
+        attachment(ArtifactKind::Bin, &sha('1'), 4_096),
+    ];
+    let judged = context(rows);
+    let id = run_id(&judged);
+    let text = judged.canonical_input();
+    let document =
+        serde_json::to_value(firmwaresight_report::gate::GateResultsDto::from_evaluation(
+            &judged,
+            &judged.evaluate(&id),
+            &sha('p'),
+            1,
+        ))
+        .expect("a DTO always serializes");
+
+    let disclosed = document["extensions"]["attachments"]
+        .as_array()
+        .expect("the pair is present for a bound run");
+    assert_eq!(
+        disclosed
+            .iter()
+            .filter_map(|row| row["kind"].as_str())
+            .collect::<Vec<_>>(),
+        vec!["bin", "hex"],
+        "the document arrives in the identity's order, not the order the owner attached in"
+    );
+    let rebuilt = disclosed
+        .iter()
+        .map(|row| {
+            attachment(
+                attachable_kind(row["kind"].as_str().expect("a kind word")),
+                row["sha256"].as_str().expect("a digest"),
+                row["byte_size"].as_u64().expect("a length"),
+            )
+        })
+        .collect::<Vec<_>>();
+    let reread = context(rebuilt);
+    assert_eq!(
+        reread.canonical_input(),
+        text,
+        "the document's rows rebuild the identity's own text"
+    );
+    assert_eq!(run_id(&reread), id, "and therefore the same run id");
+
+    // And the recomputation discriminates: one disclosed digest moved is a different run, not the same run
+    // described slightly differently.
+    let mut moved = disclosed.clone();
+    moved[0]["sha256"] = serde_json::Value::String(sha('2'));
+    let drift = moved
+        .iter()
+        .map(|row| {
+            attachment(
+                attachable_kind(row["kind"].as_str().expect("a kind word")),
+                row["sha256"].as_str().expect("a digest"),
+                row["byte_size"].as_u64().expect("a length"),
+            )
+        })
+        .collect::<Vec<_>>();
+    assert_ne!(
+        run_id(&context(drift)),
+        id,
+        "a recomputed id must move when a disclosed digest moves"
+    );
+}
+
+/// The kind words a release may attach, read the way a reader of the disclosure reads them.
+fn attachable_kind(word: &str) -> ArtifactKind {
+    match word {
+        "bin" => ArtifactKind::Bin,
+        "hex" => ArtifactKind::IntelHex,
+        "unknown" => ArtifactKind::Unknown,
+        other => panic!("`{other}` is not a kind a release can attach"),
+    }
+}

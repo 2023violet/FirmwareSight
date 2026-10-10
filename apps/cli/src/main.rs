@@ -394,6 +394,7 @@ fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
     let run = run_id(&context);
     let evaluation = context.evaluate(&run);
     let dto = GateResultsDto::from_evaluation(
+        &context,
         &evaluation,
         &project.policy_sha256,
         project.config.schema_version,

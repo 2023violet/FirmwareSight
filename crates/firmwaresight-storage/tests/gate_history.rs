@@ -1502,6 +1502,81 @@ fn a_stored_run_that_bound_attachments_rejudges_from_its_own_rows() {
     assert_ne!(without.canonical_input(), context.canonical_input());
 }
 
+/// `T-C1-07` for the run that predates attachments, which is the case §7.3 names and, when this round read
+/// it, described as "the existing
+/// `the_run_is_judged_from_stored_rows_after_the_files_are_gone` test extended to a no-attachment run". No
+/// such test existed; the design was referring to a row that had been planned and not written. This is that
+/// test, under the name the design used, and `04_TECH/28` §14.2 records the correction rather than letting
+/// the row keep claiming coverage it never had.
+///
+/// The claim is small and load-bearing: a stored run with no attachment rows reads back as exactly what was
+/// stored, re-judges to the same findings from the stored columns, and its canonical text is still the `/1`
+/// grammar — so `C1-U3`'s new reader rules cannot turn an old run into a run that judged something else.
+#[test]
+fn the_run_is_judged_from_stored_rows_after_the_files_are_gone() {
+    let (_file, mut db) = seeded("pre-c1-rejudge");
+    let id = run_id("u3-pre-c1");
+    let context = review_context();
+    assert!(
+        context.attachments.is_empty(),
+        "the fixture is a pre-C1 run: it judged no attached byte"
+    );
+    let evaluation = evaluate_run(&context, &id);
+    db.persist_gate_run(&draft(&id, &evaluation))
+        .expect("a run that bound nothing is stored");
+    assert_eq!(
+        count(&db, "gate_run_attachments"),
+        0,
+        "and it leaves no attachment row behind, because there was none to write"
+    );
+
+    let stored = db
+        .gate_run_by_id(&id)
+        .expect("query")
+        .expect("the run is there");
+    assert_eq!(
+        stored.run_id, id,
+        "the stored id is the id the run was judged under"
+    );
+    assert!(
+        stored.attachments.is_empty(),
+        "a pre-C1 run reads back with no attachment rows"
+    );
+
+    let rebuilt = GateContext {
+        attachments: stored
+            .attachments
+            .iter()
+            .map(|row| row.as_gate_fact())
+            .collect(),
+        ..context.clone()
+    };
+    let text = rebuilt.canonical_input();
+    assert!(
+        text.starts_with("firmwaresight-gate-input/1\n"),
+        "the rebuilt context writes the grammar every pre-C1 run used:\n{text}"
+    );
+    assert!(
+        !text.contains("attachments["),
+        "and no empty block appears where a bound set would have been:\n{text}"
+    );
+    assert_eq!(
+        text,
+        context.canonical_input(),
+        "the stored rows rebuild the identical canonical text"
+    );
+
+    let again = evaluate_run(&rebuilt, &stored.run_id);
+    assert_eq!(
+        again.findings, evaluation.findings,
+        "a re-judgement from stored rows changed a finding the run recorded"
+    );
+    assert_eq!(
+        again.overall_effective_severity, evaluation.overall_effective_severity,
+        "or the aggregate the release owner acted on"
+    );
+}
+
 /// `T-C1-08` at the storage boundary (`04_TECH/28` §7.4, `C1-U2R1` must-execute item 1): an acceptance disposes
 /// of **one run's finding**, so a different attachment set — which is a different run over the same analyzed
 /// build — cannot inherit it.

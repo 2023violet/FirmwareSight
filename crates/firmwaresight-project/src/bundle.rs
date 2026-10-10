@@ -959,6 +959,7 @@ fn observe(
     let release_id = ReleaseModel::release_id_from(&acceptance_bound_digest(&model));
 
     let gate_document = GateResultsDto::from_evaluation(
+        &context,
         &evaluation,
         &request.project.policy_sha256,
         request.project.config.schema_version,
@@ -2009,6 +2010,13 @@ pub fn verify_bundle(root: &Path) -> Result<BundleVerification, BundleError> {
         .ok_or_else(|| fail("`release-manifest.json` carries no release id".to_owned()))?;
     let reviews_bytes = read_bytes(root, ACCEPTED_REVIEWS_DOC_NAME)?;
     let rebuilt = model_from_documents(&manifest, &analysis, &reviews, &indexed, &reviews_bytes)?;
+    // The Gate document's own disclosure, read against the manifest beside it: the pair, the identity's
+    // ordering, the set of bytes both documents describe, and the run this bundle gates. It runs *after*
+    // `model_from_documents` on purpose: the manifest-side checks above name a broken disclosure more
+    // precisely than a cross-document disagreement does, and a bundle that fails both must report the
+    // narrower cause. This is the check that catches what nothing here looked at before — a Gate document
+    // that describes a different run, or half a disclosure.
+    check_gate_disclosure(&gate, &manifest)?;
     let recomputed = ReleaseModel::release_id_from(&acceptance_bound_digest(&rebuilt));
     if recomputed != claimed {
         return Err(fail(format!(
@@ -2351,8 +2359,188 @@ fn disclosed_attachments(
     Ok(out)
 }
 
+/// The `gate-results:1` attachment disclosure, checked against the bundle it travels in (`04_TECH/28` §7.3,
+/// `C1-U3`'s reader-side half).
+///
+/// WHY THIS IS A READER RULE AND NOT A SCHEMA RULE. `extensions` is `additionalProperties: true` in the
+/// frozen contract — that is the slot v1 reserved so facts like this one could be added without a major
+/// version. The pair rule ("no `/2` label without attached rows, and no rows without the label") therefore
+/// cannot be stated in the schema without narrowing a closed-by-design property list, which *is* a semantics
+/// change. It is stated here instead, and refused here deterministically: a document that half-discloses is
+/// not re-read as a `/1` run, because a run that judged attached bytes is not a run that judged none, and
+/// coercing it would write a false fact into a release record.
+///
+/// What a bundle that carries neither entry gets is the pre-C1 reading: no attachment was bound, nothing to
+/// disclose, and its bytes are untouched by this unit (`ADR-0030` D-4, applied on the reader's side exactly as
+/// [`disclosed_attachments`] does for the manifest).
+fn check_gate_disclosure(
+    gate: &serde_json::Value,
+    manifest: &serde_json::Value,
+) -> Result<(), BundleError> {
+    let extensions = gate.get("extensions");
+    let label = extensions.and_then(|value| value.get("canonical_input_label"));
+    let declared = extensions.and_then(|value| value.get("attachments"));
+
+    let mut rows: Vec<(String, String, u64)> = Vec::new();
+    match declared {
+        None => {}
+        Some(serde_json::Value::Array(items)) => {
+            for (index, row) in items.iter().enumerate() {
+                let pointer = format!("/extensions/attachments/{index}");
+                let object = row.as_object().ok_or_else(|| {
+                    fail(format!(
+                        "`{pointer}` is not an attachment row: `gate-results:1` discloses an attached file \
+                         as a kind, a digest and a length"
+                    ))
+                })?;
+                for key in object.keys() {
+                    if !["byte_size", "kind", "sha256"].contains(&key.as_str()) {
+                        return Err(fail(format!(
+                            "`{pointer}` discloses `{key}`, and an attached file enters a run id as its \
+                             declared kind and its digest — a file name, a path or a structure claim is not \
+                             part of what was judged"
+                        )));
+                    }
+                }
+                let kind = object
+                    .get("kind")
+                    .and_then(serde_json::Value::as_str)
+                    .and_then(attached_kind)
+                    .ok_or_else(|| {
+                        fail(format!(
+                            "`{pointer}` names a kind no release can attach, so nothing here can say what \
+                             evidence class that row belongs to"
+                        ))
+                    })?;
+                let digest = object
+                    .get("sha256")
+                    .and_then(serde_json::Value::as_str)
+                    .ok_or_else(|| {
+                        fail(format!(
+                            "`{pointer}` discloses an attachment with no digest"
+                        ))
+                    })?;
+                Sha256::parse(digest).map_err(|_| {
+                    fail(format!(
+                        "`{pointer}` discloses `{digest}`, which is not the 64 lowercase hex a run id is \
+                         built from"
+                    ))
+                })?;
+                let size = object
+                    .get("byte_size")
+                    .and_then(serde_json::Value::as_u64)
+                    .filter(|value| *value > 0)
+                    .ok_or_else(|| {
+                        fail(format!(
+                            "`{pointer}` discloses an attachment with no byte length, and an attached file \
+                             that is empty was refused before it reached a context"
+                        ))
+                    })?;
+                rows.push((kind.word().to_owned(), digest.to_owned(), size));
+            }
+        }
+        Some(_) => {
+            return Err(fail(
+                "`extensions.attachments` is present on a `gate-results` document and is not the list of \
+                 bound rows this build writes"
+                    .to_owned(),
+            ));
+        }
+    }
+
+    // The pair, both directions.
+    match label {
+        None if rows.is_empty() => {}
+        None => {
+            return Err(fail(
+                "`extensions.attachments` discloses bound bytes while `canonical_input_label` is absent, \
+                 and a reader cannot tell which canonical grammar judged them"
+                    .to_owned(),
+            ));
+        }
+        Some(serde_json::Value::String(text)) if rows.is_empty() => {
+            return Err(fail(format!(
+                "`extensions.canonical_input_label` is `{text}` while no attachment is disclosed: the \
+                 label names the grammar that binds attached bytes, and a run that bound none is \
+                 documented the way it was before C1"
+            )));
+        }
+        Some(serde_json::Value::String(text)) => {
+            if text != GateContext::INPUT_LABEL_BOUND {
+                return Err(fail(format!(
+                    "`extensions.canonical_input_label` is `{text}`, and the only grammar a document with \
+                     bound rows can name is `{}` — a disagreement about the identity is refused rather \
+                     than re-read as a run that judged fewer bytes",
+                    GateContext::INPUT_LABEL_BOUND
+                )));
+            }
+        }
+        Some(_) => {
+            return Err(fail(
+                "`extensions.canonical_input_label` is present and is not the single-line grammar label"
+                    .to_owned(),
+            ));
+        }
+    }
+
+    // The order and multiplicity the identity itself used (`04_TECH/28` §5 rules 1 and 2): sorted by
+    // `(kind word, digest)`, with an exact `(kind, digest)` pair bound once. A document in any other shape
+    // describes a set the run id was not taken over, and reading it as though it did is the coercion this
+    // function exists to refuse.
+    for pair in rows.windows(2) {
+        let earlier = (&pair[0].0.as_str(), pair[0].1.as_str());
+        let later = (&pair[1].0.as_str(), pair[1].1.as_str());
+        if earlier >= later {
+            return Err(fail(format!(
+                "`extensions.attachments` is not the block the identity binds: `{}` would have to sort \
+                 before or beside `{}`, so the rows are either out of `(kind, digest)` order or the same \
+                 pair is bound twice",
+                earlier.1, later.1
+            )));
+        }
+    }
+
+    // The same bytes, named by both documents that describe them.
+    let mut from_manifest: Vec<(String, String, u64)> = disclosed_attachments(manifest)?
+        .iter()
+        .map(|(_, kind, digest, size)| (kind.word().to_owned(), digest.clone(), *size))
+        .collect::<std::collections::HashSet<_>>()
+        .into_iter()
+        .collect();
+    from_manifest.sort();
+    let from_gate: std::collections::HashSet<(String, String, u64)> = rows.into_iter().collect();
+    if from_gate
+        != from_manifest
+            .iter()
+            .cloned()
+            .collect::<std::collections::HashSet<_>>()
+    {
+        return Err(fail(
+            "the Gate document and the release manifest disclose different attached bytes: the verdict \
+             and the bundle must name the same set, which is the sixth link's whole point"
+                .to_owned(),
+        ));
+    }
+
+    // The verdict belongs to the run this bundle gates.
+    let gated = manifest
+        .pointer("/extensions/gate_run_id")
+        .and_then(serde_json::Value::as_str);
+    let recorded = gate.get("run_id").and_then(serde_json::Value::as_str);
+    if gated.is_none() || gated != recorded {
+        return Err(fail(format!(
+            "`gate-results.json` reports run `{}`, while the manifest gates run `{gated:?}` — a bundle \
+             cannot ship one run's verdict beside another run's gate",
+            recorded.unwrap_or("<absent>")
+        )));
+    }
+
+    Ok(())
+}
+
 /// Rebuild the semantic inputs from the bundle's own documents, so a release id is checked against the bytes
-/// rather than against the plan that produced them.///
+/// rather than against the plan that produced them.
+///
 /// Every field comes out of a file: the manifest for the identity, version source and workspace facts, the
 /// analysis document for which kind of artifact each shipped leaf is, the file list for the digests, and the
 /// acceptance document's own bytes for the digest that binds them.
