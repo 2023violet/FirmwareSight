@@ -24,8 +24,26 @@ C1-U2 (attachments satisfying Gate rules, entering a verified Release Bundle, an
 is READY_FOR_ARCHITECT_REVIEW — code implemented and a tested library API, with the gate green at 953 Rust / 295 UI
 (952 on an Ubuntu runner, because one C1-U2 case is `#[cfg(windows)]`), pushed as `facf287` and read 10 of 10 on
 remote CI run #96, all ten jobs on attempt 1.
+ON 2026-10-10 THE ARCHITECT RETURNED `REWORK REQUIRED` ON THAT ROUND and delivered a three-stage continuous packet
+(`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Continuous_Delivery_Read_First_v1.0.txt` and its three unit prompts, all
+four archived with digests proven against the received zip). Stage 1 ran the same day as `C1-U2R1`, a narrow
+corrective and nothing else: `T-C1-08`'s acceptance pairing is now proved against a changed attachment set at BOTH
+the store (`ERR-STORAGE-4007`) and the bundle, `T-C1-13`'s exact with/without growth comparison exists as a test, the
+folded-case refusal names the owner's duplicate selection instead of a manifest nobody wrote (still
+`ERR-BUNDLE-6109`, still an invariant refusal, nothing written), and the source-side symlink rule is now held by
+tests. Adjudication A closed the §3 field-versus-siblings question as ACCEPTED; adjudication D left the
+Gate-before-staleness order alone. Gate at **960 Rust / 48 lines on this Windows host (961 projected for POSIX, NOT
+measured — no POSIX runner exists here) / 295 UI in 9 files**, 17 of 17 with no SKIP, verifier PASS at
+795 / 793 / 923, four mutations each killed by a named test and reverted byte-identically.
+Status word: `C1_U2R1 = LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING`. **M11 is stated and tested but
+`NOT_VERIFIED` as executed evidence on this host in both directions**: Windows refuses link creation
+(`ERROR_PRIVILEGE_NOT_HELD`, 1314) so the Windows case prints a declared SKIP, and the `#[cfg(unix)]` module neither
+compiled nor ran, because `docker` is absent and `wsl` holds no distribution. It closes on one Linux run, which
+needs the push this packet withholds.
 That is still not a feature: no UI control, no CLI --attach and no IPC command exists, so no person can attach a file.
-C1_U3 / C1_U4 remain NOT_AUTHORIZED / NOT_STARTED, and this pointer stayed NONE before, during and after each round.
+C1_U3 / C1_U4 are now AUTHORIZED BY THE PACKET as stages 2 and 3 and remain NOT_STARTED — stage 2's entry condition
+is stage 1's objective gate, which is green locally, and starting it is the owner's word. This pointer stayed NONE
+before, during and after each round.
 
 THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
 stopped, kept because this project does not rewrite history, and they are not instructions for the next round.

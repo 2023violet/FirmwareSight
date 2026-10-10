@@ -1534,7 +1534,80 @@ text with no source file; each says so in its own entry instead of standing for 
   single docs-only successor, because a commit cannot record the run its own push produces.
   This entry records the authorization and its provenance.
 
-## Supersession note on the V0 Batch A activation entry
+## C1 Continuous Delivery — `U2R1` + `U3` + `U4`, three prompts in one packet / Architect task prompts v1.0 — DISPATCHED (2026-10-10)
+
+- Files, all four archived verbatim in this directory:
+  - `FirmwareSight_C1_Continuous_Delivery_Read_First_v1.0.txt` — 5,574 bytes, 39 lines, **0 `CR`**,
+    sha256 `db2cd4e83067f933fa249572ea95def52c1ea6848f2804b2bc89a3c366e113db`
+  - `FirmwareSight_C1_U2R1_Targeted_Safety_Closure_v1.0.txt` — 6,591 bytes, 27 lines, **0 `CR`**,
+    sha256 `8d498e3b7cfa84aef7e7fae040bef0ebe46da3cbb558edc93786aa7f4e0fa34b`
+  - `FirmwareSight_C1_U3_Portable_Contract_And_Regression_v1.0.txt` — 5,949 bytes, 23 lines, **0 `CR`**,
+    sha256 `6e4053db37fd5ba9560e7941bfa9ba2773d912c13f5261a6d590364e16345f83`
+  - `FirmwareSight_C1_U4_Desktop_CLI_Installed_Acceptance_v1.0.txt` — 7,357 bytes, 29 lines, **0 `CR`**,
+    sha256 `370aa01495c5f072e633614166506e3446936d4a5bcdc1425703e427ecf3330f`
+- **Provenance, and it is stronger than the entry above it because the delivered bytes were still present when the
+  archive was written.** The packet arrived as
+  `C:\Users\16429\Downloads\FirmwareSight_C1_U2R1_U3_U4_Continuous_Delivery_v1.0.zip` (sha256
+  `bf8222f625b4eb9ed4f52128f500a7ffa43aac16e74703a5071d1456cf0244a4`, 4 entries, `testzip()` reporting no CRC failure),
+  extracted beside it. For each of the four: the bytes in the zip equal the bytes on disk at the extracted path
+  (`MATCH`), and the archived repo copy equals them by digest (`zip_sha == archived_copy_sha: YES`). No transport digest
+  is claimed beyond what was measured here: the zip was received already in that folder, so nothing in this entry
+  asserts where it came from or how it arrived.
+- **One measurement this round got wrong and re-took, recorded rather than dropped.** The first CR survey of the
+  delivered files printed `CR=39 / 27 / 23 / 29` using `grep -c $'\r'`, which is read as "the files are CRLF". It is
+  an artifact of that command form, not a property of the bytes: `tr -cd '\r' < file | wc -c` returns **0 for all four
+  delivered files and 0 for all four archived copies**, and `cmp` of delivered against archived returns identical. So
+  the files were LF-only as delivered, no normalization happened on archiving, and the four digests above are the
+  digests of the delivered bytes. `git check-attr text eol --` on an archived copy reports `text: set`, `eol: lf`, so
+  the rule that would have normalized them had there been anything to normalize.
+- Authority: three sequential Architect task prompts (stage 1 of 3, 2 of 3, 3 of 3) plus the read-first cover. The
+  cover's own words bound them: "This package is a proposed set of execution instructions, NOT evidence that work has
+  run, commits exist, or remote push permission is granted", "Owner dispatch of all three files is a single continuous
+  coding authorization to perform local work within each task's permission boundary. There is NO blanket authority to
+  push, rewrite history, distribute, release, recruit V1 participants, change V1 cohort or invent test results.
+  Separate owner push approval is needed", and "Do NOT mark existing history as already authorized or completed
+  because this text was created."
+- **What it adjudicates, and it is the first independent read of `C1-U2`.** The cover records
+  `C1-U2 product code exists at facf287 but ARCHITECT REVIEW = REWORK REQUIRED (narrow corrective)`, so
+  `READY_FOR_ARCHITECT_REVIEW` is superseded as the live word for that round by a rework instruction, and stage 1 is
+  that rework. Its four items are exactly the four things `C1-U2` refused to close by invention: `T-C1-08`'s
+  acceptance-against-a-changed-attachment-set pairing, `T-C1-13`'s exact with/without growth comparison, the M5
+  folded-case diagnostic wording, and the M11 source-side symlink rule. Its adjudications are lettered A–D:
+  **A ACCEPT** the `field → siblings` carrier as a backward-compatibility deviation (so `04_TECH/28` §14's open
+  question closes as accepted, not overturned); **B** keep `ERR-BUNDLE-6109` and the invariant refusal for a
+  case-folded duplicate that names one real file, but distinguish a selection-level duplicate from a corrupt
+  already-written bundle and give it an accurate remediation before export, with no absolute source path;
+  **C** a source-side symlink **may follow** its target when that target is a readable non-empty regular file, never
+  traverse a directory, and a broken/directory/inaccessible/moved target must fail safely, with no symlink ever
+  inside a bundle; **D** keep the Gate-before-staleness error precedence rather than swapping it for cosmetic
+  consistency.
+- Preflight instruction it issues, exercised before any write: "Execution agent MUST independently verify Git ancestry,
+  actual changed paths and immutable product tree OIDs; no guess." At `268440a` this measured: `origin/main` and
+  `git ls-remote` both `2859bb2a7335b8cdea5be2f817a5b848dce126a1`, `rev-list --left-right --count` = `0 3`, one
+  worktree, no stash, `git status --porcelain=v1` empty, the three local commits touching only `.ai/`, `README.md`,
+  `06_DELIVERY/06_STAGE_GATES.md`, `04_TECH/28` and `SHA256SUMS`, and the tree OIDs of `apps`, `crates`, `schemas`,
+  `golden`, `fixtures`, `.github`, `scripts`, `assets`, `templates`, `Cargo.toml`, `Cargo.lock`, `deny.toml`, `DESIGN.md`
+  all identical between `2859bb2` and `HEAD`.
+- **One name in the packet does not resolve in this repository, and it is reported rather than smoothed.** The cover's
+  baseline paragraph says "The user subsequently reported LOCAL-ONLY DOCS commits `98596e21`, `7a6af54` and `268440a`".
+  `git cat-file -t 98596e21` returns `fatal: Not a valid object name`, and no tracked file mentions that string; the
+  first of those three commits is `99a1bfd801623d119e6e6e85f683b504a91dc5aa`, with `git reflog show main` placing it at
+  `main@{2}` between `2859bb2` at `main@{3}` and `7a6af54` at `main@{1}` — so three local docs-only commits exist in the
+  stated position with a different first name, and no history rewrite is visible. That is a transcription difference in
+  a reported name, not a material divergence of remote or local state, so the packet's STOP condition ("If either
+  remote or local differs materially") did not fire and work proceeded on the verified head.
+- Stage boundaries it sets, which are the checkpoint words this register will carry until an independent review signs
+  them: `U2R1 = LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING`, `U3 = LOCAL_CONTRACT_GATE_PASS /
+  ARCHITECT_REVIEW_PENDING`, `U4 = LOCAL_USER_WORKFLOW_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and
+  `READY_FOR_ARCHITECT_PRODUCT_ACCEPTANCE` only with packaged runtime evidence — "Do not set `PASS_COMPLETE`,
+  `USER_AVAILABLE` or `SUPPORTED_WITH_LIMITS` without the corresponding approved independent acceptance." Its shared
+  rules also freeze what must not move: the `/1` Gate identity, `SnapshotId`, schema major 1, the P4 goldens,
+  `SCHEMA_VERSION` 6, the design tokens, Core's zero third-party dependencies, and the V1 cohort
+  `11573661113` at `41bb6a36` with 0 sessions.
+- Outcome: recorded by the stage-1 round in `C1_VALIDATION/C1_U2R1_ARCHITECT_CORRECTIVE_REPORT.md`; this entry records
+  the authorization and its provenance only.
+
+
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that
 **was** executed on 2026-09-29 and whose outcome stands: activation happened, the recruitment pack was

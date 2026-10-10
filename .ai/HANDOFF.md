@@ -430,8 +430,20 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   `intake.test.tsx`, 2 in `release.test.tsx`). **F2, F2R2 and F3 were each required to hold both numbers
   still** — F3 §5 states the rule in its sharpest form, because a docs-only head that moves a count is a
   product change wearing a documentation diff, and the round must stop rather than explain it.
-- **Figures on the C1-U2 tree, measured 2026-10-09 — these are the present ones, and the bullets below are dated
-  history:** the gate's own `rust/test` step reports **953 Rust tests** (0 failed) across the **same 48 `test result:`
+- **Figures on the C1-U2R1 tree, measured 2026-10-10 — these are the present ones, and every bullet below is dated
+  history:** one `cargo test --workspace` on this Windows host prints **48 `test result:` lines / 960 passed / 0 failed
+  / 0 ignored**, and the frontend still reports **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP`
+  and no `FAIL`, plus 3 under `--only core-smoke` and 4 under `--only package`; `verify_baseline_artifacts.py` is
+  `RESULT PASS` at **795 tracked / 793 entries / 923 tree lines**. Eleven `#[test]` functions were written (10 in
+  `bundle_builder.rs`, 1 in `gate_history.rs`, counted by the awk in `C1_VALIDATION/C1_U2R1_ARCHITECT_CORRECTIVE_REPORT.md`
+  §8): five platform-neutral and two `#[cfg(windows)]` run here, and four `#[cfg(unix)]` ones do not. **The POSIX figure
+  is therefore a projection of 961 and was never measured** — `docker` is absent, `wsl` holds no distribution, so those
+  four cases have not been compiled by any compiler this round could reach, which is a stronger caveat than "not run"
+  and is recorded as such. `M11` stays `NOT_VERIFIED` as executed evidence on this host in both directions, and the
+  Windows symlink case prints a `SKIPPED` line instead of passing on an assertion it did not make. Four mutations were
+  run (M1, M2, M2b, M3), each killed by a named test, each reverted with the file digest re-measured.
+- **Figures on the C1-U2 tree, measured 2026-10-09 — dated history, the live ones being the bullet above:** the gate's
+  own `rust/test` step reports **953 Rust tests** (0 failed) across the **same 48 `test result:`
   lines** and the frontend still reports **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP` and no
   `FAIL`, plus 3 under `--only core-smoke` and 4 under `--only package`. **This 953 is a Windows-host figure, and remote
   CI proved the qualifier:** at product head `facf287` run `38037417546` (#96, attempt 1, 10 of 10 jobs green
@@ -443,7 +455,10 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   above also holds at the docs-only heads stacked on top of `2859bb2`. One test explains
   the whole difference — `one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice` is
   `#[cfg(windows)]` (`bundle_builder.rs:2324`), so that target reports 78 on Windows and 77 on Ubuntu — and no
-  `#[cfg(unix)]` test exists, so nothing runs only on Linux. Say "953 on Windows / 952 on POSIX", never "953 everywhere";
+  `#[cfg(unix)]` test existed there, so at that head nothing ran only on Linux. (That last clause is now false of the
+  current tree: C1-U2R1 added `#[cfg(unix)] mod source_symlink_posix` with four cases — the bullet above is the live
+  figure.)
+  Say "953 on Windows / 952 on POSIX", never "953 everywhere";
   note the coincidence that 77 is both the Ubuntu target's honest count and the count this round's accidentally deleted
   test produced locally on Windows. The +53 Rust are C1-U2's, and their arithmetic is
   counted from the staged diff rather than recalled (`git diff -U0 | awk '/^diff --git/{f=$0}
@@ -606,15 +621,18 @@ CI duplication    two jobs install the same ten apt lines on purpose
 Format scope      the BIN / Intel HEX range conflict between ADR-0006, the PRD,
                   07_MVP_COHORT_AND_CLI_POLICY, 04_TECH/03 and P5's matrix is DECIDED as product
                   direction on 2026-10-09 — ADR-0030 accepts Option C1, release-attached byte
-                  evidence, and 04_TECH/28 freezes the design. Two implementation units ran the same
-                  day: C1-U1 (facts + Gate identity + storage) is COMPLETE and C1-U2 (Gate rules +
-                  Release Bundle, the six-link byte chain) is READY_FOR_ARCHITECT_REVIEW, so at
+                  evidence, and 04_TECH/28 freezes the design. Three implementation rounds have run:
+                  C1-U1 (facts + Gate identity + storage) is COMPLETE; C1-U2 (Gate rules +
+                  Release Bundle, the six-link byte chain) came back REWORK REQUIRED from the
+                  Architect on 2026-10-10 and C1-U2R1 closed the four review findings, so it stands
+                  at LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING; at
                   library level required = [bin] / [hex] is now satisfiable and a bundle can ship and
                   self-verify an attached BIN or HEX file. Still no user-facing capability: no UI
                   control, no --attach, no IPC command, so the compatibility matrix keeps UNSUPPORTED
                   and BIN_HEX_RELEASE_ATTACH reads DESIGN_APPROVED / NOT_USER_AVAILABLE. C1-U3
                   (portable-contract closure) and C1-U4 (every surface a person touches) are
-                  NOT_AUTHORIZED / NOT_STARTED. The Intel HEX address-span
+                  AUTHORIZED as stages 2 and 3 of the 2026-10-10 continuous-delivery packet and are
+                  NOT_STARTED. The Intel HEX address-span
                   promise is withdrawn by that decision, not deferred.
 ```
 
@@ -881,7 +899,7 @@ requires (`cargo update -p glib --precise 0.20.0` fails against `gtk = "^0.18"`)
     on different authorities, and `V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md` §4 is the chain that shows it. The
     re-freeze authorized the instrument and withheld the cohort — no recruitment, no session, no install, no
     distribution, sessions still 0, M1–M6 still `NOT_MEASURED`.
-    **Machine state now: `active_task = NONE`**, `P5 = PASS_COMPLETE`, Productization `ENGINEERING_COMPLETE`, `G2 PASS`,
+    **Machine state as this round left it, and stale within one day: `active_task = NONE`**, `P5 = PASS_COMPLETE`, Productization `ENGINEERING_COMPLETE`, `G2 PASS`,
     product `MVP_CANDIDATE` at `0.6.0`, V1 `IN_PROGRESS` / `RECRUITMENT_READY` at 0 eligible external sessions, B1 / RC
     / GA / public release / signing / notarization / updater / commercial distribution `NOT_AUTHORIZED`, licence
     `PENDING_OWNER_CONFIRMATION`. Counts held: **868 Rust across 47 result lines / 291 UI in 9 files**, 17-step gate,

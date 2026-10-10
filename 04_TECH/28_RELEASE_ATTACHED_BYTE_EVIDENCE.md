@@ -555,7 +555,7 @@ person, and the compatibility matrix column is untouched.
 `GateRunRequest.attachments` **field**. That struct is built by literal in `apps/desktop/src-tauri/**` and `apps/cli/**`,
 both of which C1-U2's prompt forbids touching without a new Architect decision, and its §11 instructs "do NOT quietly
 patch desktop". `C1-U2` therefore added siblings instead of fields —
-`build_context_with_attachments`, `prepare_with_attachments`, `BundleRequest::publish_with_attachments`,
+`build_context_with_attachments`, `prepare_with_attachments`, `BundlePlan::publish_with_attachments`,
 `ReleaseManifestDto::from_parts_with_attachments` — each of which is what §3's field would have become with an empty
 list, and the pre-existing entry points delegate to them with `&[]`. The consequence the Architect should accept or
 overturn: **a reviewer reading §3 will look for a field that does not exist.** The semantics §3 specifies are unchanged;
@@ -577,3 +577,32 @@ compatibility-proposal branch never fired.
    `a_withdrawn_attachment_the_policy_requires_is_refused_by_the_gate_first`; §4.2 as frozen does not name the precedence.
 4. §8's M12 asks that a large attachment be read without loading it. A 1 MiB case proves the streaming path; no >512 MiB
    fixture was created, so that size is `NOT_VERIFIED` rather than assumed.
+
+### 14.1 Adjudicated 2026-10-10 by `C1-U2R1` — the Architect's review, and which of §14's four findings closed
+
+The Architect read `facf287` and returned **`REWORK REQUIRED` (narrow corrective)**, not a completion. That word is now
+the live state for the round §14 recorded as `READY_FOR_ARCHITECT_REVIEW`; the four things §14 left open are answered
+by its adjudications A–D, and `C1-U2R1` executed exactly those and nothing else. §§1–13 stay as frozen, and §14 stays
+as the round wrote it; this section is the dated answer, not a rewrite.
+
+| §14 item | adjudication | what landed |
+| --- | --- | --- |
+| The §3 field-vs-siblings carrier | **A — ACCEPTED** as a backward-compatibility deviation | The carrier stays four siblings; `GateRunRequest` gains no `attachments` field and no `apps/**` caller is patched. A reviewer following §3 must look for `build_context_with_attachments` (`evidence.rs`), `prepare_with_attachments` and **`BundlePlan::publish_with_attachments`** (`bundle.rs` — §14 and `04_TECH/17` both wrote `BundleRequest::`, which never named the type, and both were corrected in place), `ReleaseManifestDto::from_parts_with_attachments` (`report/release.rs`). This closes the question §14 put to the Architect; it does not make the deviation invisible, it makes it decided. |
+| Finding 1, the folded-case sentence | **B — CLOSED** | `ERR-BUNDLE-6109` and the invariant refusal stay exactly as they were. What was wrong was that a *selection* collision spoke about a *document*: the assembly path now answers `BundleError::DuplicateBundleName { name }`, a bundle-relative leaf, whose remediation names the two spellings and the case-fold, while `VerificationFailed` and every other index refusal keep the integrity sentence "keep whatever was written, and report the release id and the Gate run id". Refusal still happens before any destination exists, still names no host path, and no caller's branch moves. Asserted by `a_folded_duplicate_selection_is_refused_by_naming_the_selection_and_not_a_manifest` (portable: two files, one content, fold-equal leaves), `the_ntfs_fold_of_one_host_file_names_its_own_cause` (`#[cfg(windows)]`: one host file, two spellings) and `a_selection_duplicate_and_a_written_manifest_duplicate_are_told_apart`. |
+| Finding 2, the source-side symlink | **C — CLOSED as a rule, and the rule is now tested** | A link the release owner chose explicitly **may be followed** to its target when that target is a readable, non-empty regular file; a broken, directory, inaccessible or subsequently re-pointed target fails safely; a directory is never traversed; and nothing a bundle writes is ever a symlink. This is `observe_attachment`'s existing behaviour (`std::fs::metadata` then `is_file()`), which is why §14 could have passed it off as verified — the hole was the absence of tests, and `source_symlink_posix` (four cases) plus `a_source_symlink_on_windows_ships_its_target_bytes_when_the_host_permits_links` now hold it. **Verification status is not uniform and is stated in `C1_VALIDATION/C1_U2R1_ARCHITECT_CORRECTIVE_REPORT.md` §8**: the POSIX module neither compiled nor ran on the Windows host that wrote it, and that host refuses link creation with `ERROR_PRIVILEGE_NOT_HELD`, so M11 remains `NOT_VERIFIED` as *executed evidence* until a Linux run exists. |
+| Finding 3, the refusal order | **D — CONFIRMED, unchanged** | "Gate-refusal-before-staleness" is kept: §4.2's table and §3's recompute-at-export rule are honoured in that precedence, and `a_withdrawn_attachment_the_policy_requires_is_refused_by_the_gate_first` continues to assert it. §14's wording stands as the specification of the order. |
+| Finding 4, M12's upper bound | **not adjudicated, still open** | No >512 MiB fixture exists. `NOT_VERIFIED` remains the honest word. |
+
+One new observation goes to the Architect rather than being decided here. A cross-run acceptance — a caller handing
+run A's finding id to run B — is refused by the bundle layer as `ERR-INTERNAL-9004`, an internal invariant, because a
+correct caller reads acceptances from storage keyed to the run it selected and could not produce one. The store does
+refuse it as a user-facing, typed answer (`AcceptReviewError::FindingNotFound` at `ERR-STORAGE-4007`, now tested by
+`an_acceptance_recorded_over_one_attachment_set_does_not_dispose_of_a_different_one`), and the path a person actually
+reaches — the Gate re-run over a new set whose review is not yet accepted — answers `ERR-BUNDLE-6101`. So the
+isolation holds at both layers that a product path can reach, and the question left open is only whether a library
+caller that mis-carries an acceptance list deserves a branchable code rather than an invariant. `T-C1-08` is
+`CLOSED` for the attachment-set pairing; that classification question is not part of it.
+
+§9's user-facing sentences, §7.3's `gate-results:1` extension pair and the pre-C1 corpus re-validation are untouched
+here: `C1-U3` and `C1-U4` still own them, and `BIN_HEX_RELEASE_ATTACH` is still
+**`DESIGN_APPROVED / NOT_USER_AVAILABLE`**.

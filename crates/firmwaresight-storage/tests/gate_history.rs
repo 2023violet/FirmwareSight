@@ -1501,3 +1501,154 @@ fn a_stored_run_that_bound_attachments_rejudges_from_its_own_rows() {
     );
     assert_ne!(without.canonical_input(), context.canonical_input());
 }
+
+/// `T-C1-08` at the storage boundary (`04_TECH/28` §7.4, `C1-U2R1` must-execute item 1): an acceptance disposes
+/// of **one run's finding**, so a different attachment set — which is a different run over the same analyzed
+/// build — cannot inherit it.
+///
+/// `C1-U2` proved the keying mechanism (`<run_id>#<rule_id>`) and recorded in its own report that no test
+/// paired an acceptance against a changed attachment set. This is that pairing, against a real SQLite file with
+/// real attachment rows, and it is deliberately two-sided: run B's own finding, accepted under B's id, does
+/// dispose of B, which is what makes the refusal about the key rather than about attachments blocking releases.
+#[test]
+fn an_acceptance_recorded_over_one_attachment_set_does_not_dispose_of_a_different_one() {
+    let (_file, mut db) = seeded("attach-acceptance-isolation");
+    let set_a = vec![attached(ArtifactKind::Bin, &hex64("set-a-bin"), 245_760)];
+    let set_b = vec![attached(ArtifactKind::Bin, &hex64("set-b-bin"), 131_072)];
+
+    let mut context_a = review_context();
+    context_a.policy.required_artifact_kinds = vec!["elf".to_owned(), "bin".to_owned()];
+    context_a.attachments = set_a.clone();
+    let id_a = run_id("u2r1-isolation-a");
+    let evaluation_a = evaluate_run(&context_a, &id_a);
+    let required = evaluation_a
+        .finding(GateRuleId::RequiredArtifacts)
+        .expect("the rule always answers");
+    assert_eq!(required.state, FindingState::Pass, "{}", required.summary);
+    // Exactly one finding is open to disposition, and it is the growth REVIEW the context was built to hold.
+    let reviews_a: Vec<_> = evaluation_a
+        .findings
+        .iter()
+        .filter(|finding| finding.state == FindingState::Review)
+        .collect();
+    assert_eq!(reviews_a.len(), 1, "{:?}", evaluation_a.findings);
+    let review_a = &reviews_a[0];
+
+    db.persist_gate_run(&attached_draft(&id_a, &evaluation_a, &set_a))
+        .expect("run A and its attachment rows are stored together");
+    let accepted = db
+        .accept_review(
+            &id_a,
+            &review_a.id,
+            "release-owner",
+            "the growth is the new modem driver, reviewed by hand",
+        )
+        .expect("a REVIEW finding of a stored run is acceptable");
+    assert_eq!(accepted.original_state, FindingState::Review);
+
+    // The release owner attaches a different file. The analyzed build did not move; the judged bytes did.
+    let context_b = GateContext {
+        attachments: set_b.clone(),
+        ..context_a.clone()
+    };
+    let id_b = run_id("u2r1-isolation-b");
+    let evaluation_b = evaluate_run(&context_b, &id_b);
+    assert_eq!(
+        evaluation_b.snapshot_id, evaluation_a.snapshot_id,
+        "the same analyzed build must not gain a second identity from an attachment"
+    );
+    assert_ne!(
+        context_b.canonical_input(),
+        context_a.canonical_input(),
+        "the two attachment sets canonicalize alike, so the adapter would hand them one run id"
+    );
+    assert_ne!(id_a, id_b);
+    db.persist_gate_run(&attached_draft(&id_b, &evaluation_b, &set_b))
+        .expect("run B and its own rows are stored");
+
+    // A's acceptance is nobody's for run B: nothing is recorded under B, and carrying A's finding id over the
+    // top leaves B still REVIEW.
+    assert!(
+        db.accepted_reviews_for_run(&id_b)
+            .expect("the query runs")
+            .is_empty(),
+        "an acceptance was written against the run it was not recorded for"
+    );
+    assert_eq!(
+        evaluation_b.aggregate_with_acceptances(std::slice::from_ref(&accepted.finding_id)),
+        EffectiveSeverity::Review,
+        "a review of another run's bytes disposed of this one"
+    );
+    // And the store refuses the cross-run acceptance by name rather than deduping it into place.
+    let refusal = db
+        .accept_review(
+            &id_b,
+            &accepted.finding_id,
+            "release-owner",
+            "reusing A's decision",
+        )
+        .expect_err("one run's finding id is not another run's finding");
+    assert!(
+        matches!(refusal, AcceptReviewError::FindingNotFound { .. }),
+        "{refusal}"
+    );
+    assert_eq!(refusal.stable_code(), "ERR-STORAGE-4007");
+
+    // The positive control: B's own review, accepted under B's id, does dispose of B.
+    let review_b = evaluation_b
+        .findings
+        .iter()
+        .find(|finding| finding.state == FindingState::Review)
+        .expect("run B holds the same growth review");
+    db.accept_review(
+        &id_b,
+        &review_b.id,
+        "release-owner",
+        "reviewed against the bytes B actually bound",
+    )
+    .expect("a run's own review is acceptable under its own id");
+    let ids: Vec<String> = db
+        .accepted_reviews_for_run(&id_b)
+        .expect("the query runs")
+        .iter()
+        .map(|row| row.finding_id.clone())
+        .collect();
+    assert_eq!(
+        evaluation_b.aggregate_with_acceptances(&ids),
+        EffectiveSeverity::Pass,
+        "the refusal above was about keying, and this proves it"
+    );
+
+    // History stays as written: run A's finding, acceptance and attachment rows are untouched by B's arrival,
+    // and the two runs now hold exactly one acceptance each.
+    let stored_a = db
+        .gate_run_by_id(&id_a)
+        .expect("query")
+        .expect("run A is still there");
+    assert_eq!(stored_a.attachments.len(), 1);
+    assert_eq!(
+        stored_a.attachments[0].sha256.value().map(String::as_str),
+        set_a[0].sha256.value().map(String::as_str),
+        "a stored attachment row was rewritten"
+    );
+    // ADR-0023's rule, re-proved where an attachment is involved: the acceptance is a row beside the finding,
+    // and the finding keeps saying REVIEW.
+    let stored_review = stored_a
+        .findings
+        .iter()
+        .find(|finding| finding.id == review_a.id)
+        .expect("the accepted finding is still recorded");
+    assert_eq!(
+        stored_review.state,
+        FindingState::Review,
+        "an acceptance rewrote the finding it accepted"
+    );
+    assert_eq!(
+        db.accepted_reviews_for_run(&id_a)
+            .expect("the query runs")
+            .len(),
+        1,
+        "run A gained or lost an acceptance when run B arrived"
+    );
+    assert_eq!(count(&db, "accepted_reviews"), 2, "one per run");
+}

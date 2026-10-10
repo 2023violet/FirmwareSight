@@ -10,8 +10,8 @@ last_updated: "2026-10-10"
 
 # Current State
 
-- Date: 2026-10-10 *(the live state is the C1-U2 entry below; the U1 entry it superseded keeps its own 2026-10-08 dates
-  inside that bullet)*
+- Date: 2026-10-10 *(the live state is the `C1-U2R1` entry below; the C1-U2 entry it reworks, and the U1 entry that
+  rework supersedes, keep their own dates inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - **Active task: `NONE`.** Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
@@ -33,8 +33,8 @@ last_updated: "2026-10-10"
   `P5` stays `PASS_COMPLETE`, Productization
   `ENGINEERING_COMPLETE`, `G2 PASS`, product **`MVP_CANDIDATE`** at `0.6.0`. B1 / RC / GA / public release / signing /
   notarization / updater / commercial distribution stay `NOT_AUTHORIZED`; licence `PENDING_OWNER_CONFIRMATION`;
-  **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. **The present counts are
-  953 Rust / 295 UI in 9 files** on gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
+  **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. **The counts at C1-U2's head
+  were 953 Rust / 295 UI in 9 files** on gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
   `94336906…14d4`: C1-U2 moved the Rust figure **900 → 953 across the same 48 `test result:` lines** (no new test binary
   was created — its 53 tests went into two existing project integration targets, the inline `bundle` module, the core
   `gate` module and two contract suites), C1-U1 moved **870 → 900 across 48 lines** (the 48th line is that round's new
@@ -175,7 +175,62 @@ last_updated: "2026-10-10"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
-- **A0 PRODUCT TRUTHFULNESS CORRECTIVE ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE` throughout and
+- **`C1-U2R1` (targeted safety and Architect-review closure) ran on 2026-10-10 and is `LOCAL_CORRECTIVE_GATE_PASS /
+  ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.** The Architect's independent read of
+  `facf287` returned **`REWORK REQUIRED`**, which supersedes `READY_FOR_ARCHITECT_REVIEW` as the live word for that
+  round, and it arrived as a three-stage continuous packet delivered as files and archived at
+  `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Continuous_Delivery_Read_First_v1.0.txt` plus
+  `…_C1_U2R1_Targeted_Safety_Closure_v1.0.txt`, `…_C1_U3_Portable_Contract_And_Regression_v1.0.txt`,
+  `…_C1_U4_Desktop_CLI_Installed_Acceptance_v1.0.txt` (5,574 / 6,591 / 5,949 / 7,357 bytes, 39 / 27 / 23 / 29 lines, all
+  **0 `CR`**, digests `db2cd4e8…`, `8d498e3b…`, `6e4053db…`, `370aa014…`). Their provenance is the strongest in the
+  register since the C1 freeze: the delivered files were still present, the received zip
+  (`bf8222f6…0244a4`, 4 entries, `testzip()` clean) holds bytes equal to them, and `cmp` of archived against delivered
+  is identical — with one measurement re-taken and disclosed, because the first CR survey printed
+  `CR=39/27/23/29` through `grep -c $'\r'`, which is a command artifact rather than a byte property
+  (`tr -cd '\r' | wc -c` = 0 on all eight files). **Preflight met the head the cover described and said so where it did
+  not match by name**: `origin/main` = `2859bb2` locally and remotely, ahead 3, clean, one worktree, no stash,
+  953/48/0 measured at the handover head, and the product tree OIDs identical — but the cover's first docs commit name
+  `98596e21` is not a valid object here (`git cat-file` → `Not a valid object name`; the real one is
+  `99a1bfd8016…`, at `main@{2}` in the reflog), a transcription difference rather than the material divergence whose
+  STOP condition therefore did not fire.
+  **What this round changed, and it is four holes plus one sentence.** `T-C1-08` is proved at both layers against a
+  changed attachment set: the store (`an_acceptance_recorded_over_one_attachment_set_does_not_dispose_of_a_different_one`
+  — `accepted_reviews_for_run(B)` empty, A's finding id under B answers `FindingNotFound` at `ERR-STORAGE-4007`, B's own
+  id does dispose of B, A's rows and single acceptance unchanged) and the bundle
+  (`an_acceptance_recorded_over_one_attachment_set_does_not_make_another_set_release_ready` — identical-set publishes and
+  verifies, then the bytes move, the run id moves, `snapshot_id` does not, and two refusals are asserted with no
+  destination created). `T-C1-13`'s exact comparison now exists
+  (`the_growth_rule_answers_identically_with_and_without_release_attachments`: `state`, `effective_severity`, `summary`
+  and `evidence_refs` of `diff.growth` equal with and without attachments, `counts.unknown` and `snapshot_id` equal,
+  `run_id` and the finding id not equal). The folded-case refusal
+  (`ERR-BUNDLE-6109`, adjudication **B**) now speaks about the selection — a new `BundleError::DuplicateBundleName` arm,
+  mapped at the one assembly call site by `duplicate_selection`, while `VerificationFailed` and every other index
+  refusal keep the integrity sentence and the code does not move. The source-side symlink rule (adjudication **C**) is
+  held by `source_symlink_posix` (four cases) and a Windows counterpart that prints a declared `SKIPPED`. Adjudication
+  **A** closes the field-vs-siblings question as **accepted**; adjudication **D** leaves the Gate-before-staleness order
+  alone. **One behaviour fact was reported rather than fixed**: a library caller that carries run A's acceptance to run
+  B is refused by the bundle layer as `ERR-INTERNAL-9004`, not as a branchable code; that is right for a correct caller
+  and unhelpful for a mis-carrying one, and it is an error-model decision this unit does not own.
+  **Counts, per run, with the host named: 960 Rust across 48 `test result:` lines / 0 failed on this Windows host, and
+  961 projected for a POSIX runner — projected, not measured**, because no POSIX environment exists here (`docker`
+  absent, `wsl` installed with no distribution) and the four `#[cfg(unix)]` cases therefore neither compiled nor ran,
+  while the Windows symlink case self-skipped on `ERROR_PRIVILEGE_NOT_HELD` (1314). 295 UI in 9 files unchanged; gate
+  **17 of 17** with no `SKIP`; drift 8/8, deny 1/1, core-smoke 3/3, package 4/4, frontend 5/5; verifier `RESULT PASS`
+  at **795 tracked / 793 entries / 923 tree lines**; four mutations killed by named tests (M1 growth-cites-attachments,
+  M2 aggregate-by-rule-suffix, M2b silently-ignore, M3 transparent carry) with every mutated file restored
+  byte-identically (`gate.rs 0c62a998…`, `bundle.rs 21b28a91…`). **`M11` is `NOT_VERIFIED` as executed evidence on this
+  host in both directions**, and that is the honest word rather than a gap to be rounded off.
+  **No push**: `origin/main` stays `2859bb2`, the cover grants no push authority, and stage 2 (`C1-U3`) starts only on
+  the owner's word. `BIN_HEX_RELEASE_ATTACH` stays `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `BIN_HEX_ANALYSIS` stays
+  `UNSUPPORTED`, the compatibility matrix is untouched, `/1`'s 1,044 bytes and `72d5c108…` still reproduce, the P4
+  goldens and `SCHEMA_VERSION` 6 did not move, and `apps/**` / schemas / migrations / fixtures / golden / `.github` /
+  lockfiles / design tokens have no diff. U1's guarded 25-item tally, V1's pause with cohort `11573661113` at
+  `41bb6a36` and 0 sessions, `P5 PASS_COMPLETE`, `G2 PASS`, `0.6.0 MVP_CANDIDATE`, the licence question and
+  `B1 / RC / GA NOT_AUTHORIZED` are all untouched; the locally built `target/dist-package/` installer is validation
+  output, not a cohort identity and not installed. Durable record:
+  `C1_VALIDATION/C1_U2R1_ARCHITECT_CORRECTIVE_PLAN.md` and `C1_VALIDATION/C1_U2R1_ARCHITECT_CORRECTIVE_REPORT.md`,
+  `04_TECH/28` §14.1, `10_AUDIT/SOURCE_PROMPTS/README.md`; machine state `BASELINE.yaml`
+  `c1_u2r1_targeted_safety_closure`.
   is `NONE` now.** *FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0* was delivered as a file,
   archived verbatim at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt` (18,845 bytes, 252
   lines, 0 `CR`, sha256 `660dae54…42eb` — identical on the owner's file and the archive), and opened **exactly four**

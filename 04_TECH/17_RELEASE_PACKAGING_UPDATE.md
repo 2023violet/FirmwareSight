@@ -278,7 +278,7 @@ index entry beside it is refused. A relocated bundle therefore still verifies wi
 byte in a shipped attachment breaks it.
 
 **Who can produce such a bundle.** A library caller only. `prepare_with_attachments` and
-`BundleRequest::publish_with_attachments` are the attachment-aware entries; `prepare` and `publish` keep delegating to
+`BundlePlan::publish_with_attachments` are the attachment-aware entries; `prepare` and `publish` keep delegating to
 them with an empty selection, so the desktop shell, the CLI and every existing caller compile and behave exactly as
 before. No UI control, no `--attach` flag and no IPC command exists, so **nothing here reaches a user** — that is
 `C1-U4`'s, and the full portable-contract closure (the `gate-results:1` extension pair, the complete

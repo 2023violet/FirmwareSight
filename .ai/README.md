@@ -207,13 +207,26 @@ verified Release Bundle: two evidence classes in `artifacts.required` / `artifac
 one sanctioned library path (`prepare_with_attachments`, `publish_with_attachments`) whose export re-verifies through a
 `verify_attachments` sibling of `verify_sources` before any destination write, staleness over one typed row set with the
 new E-4 at `ERR-BUNDLE-6118`, and a self-verifying bundle that re-derives its release id with its sources deleted.
-**The counts are now 953 Rust across the same 48 result lines / 295 UI in 9 files** on a 17-of-17 gate — 953 on a Windows
+**The counts at that head were 953 Rust across the same 48 result lines / 295 UI in 9 files** on a 17-of-17 gate — 953 on a Windows
 host and **952 on a POSIX one**, because one U2 case is `#[cfg(windows)]`, which is exactly what remote CI printed at the
 product head (`facf287`, run `38037417546`, #96, attempt 1, ten of ten jobs individually green: windows Rust 953,
 ubuntu Rust 952, both Desktop UI jobs 295 in 9 files); the +53 Rust are
 U2's, in six files, with no new test binary. Identity is still not a feature: no UI control, no `--attach`, no IPC
-command, so `BIN_HEX_RELEASE_ATTACH` stays `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1_U3` / `C1_U4` stay
-`NOT_AUTHORIZED / NOT_STARTED`, and `active_task` is `NONE` ·
+command, so `BIN_HEX_RELEASE_ATTACH` stays `DESIGN_APPROVED / NOT_USER_AVAILABLE`, and `active_task` is `NONE` ·
+**Dated 2026-10-10, and this is the live C1 clause: the Architect returned `REWORK REQUIRED` on C1-U2 and stage 1 of
+the three-part continuous packet ran the same day as `C1-U2R1` = `LOCAL_CORRECTIVE_GATE_PASS /
+ARCHITECT_REVIEW_PENDING`.** Four review-proved holes closed: `T-C1-08`'s acceptance pairing is now proved against a
+changed attachment set at the store (`ERR-STORAGE-4007`) and at the bundle, `T-C1-13`'s exact with/without growth
+comparison exists as a test, the folded-case `ERR-BUNDLE-6109` refusal now names the owner's duplicate selection
+instead of a manifest nobody wrote (a new `BundleError::DuplicateBundleName` arm; code, refusal and the general
+self-verification path unchanged), and the source-side symlink rule is held by `source_symlink_posix` plus a Windows
+case that prints a declared `SKIPPED`. Adjudication A closes the field-vs-siblings question as **accepted**; D leaves
+the Gate-before-staleness order alone. Counts: **960 Rust across 48 result lines on this Windows host, 961 PROJECTED
+for POSIX — not measured**, because `docker` is absent, `wsl` has no distribution, and the four `#[cfg(unix)]` cases
+therefore neither compiled nor ran; **295 UI in 9 files** unchanged; gate **17 of 17** with no `SKIP`; verifier PASS
+at **795 / 793 / 923**; four mutations killed by named tests and reverted byte-identically. **No push** —
+`origin/main` stays `2859bb2` and the packet grants none; `C1_U3` / `C1_U4` are authorized as stages 2 and 3 and are
+`NOT_STARTED`; `M11` stays `NOT_VERIFIED` as executed evidence on this host ·
 Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
 stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
 and its continuation round installed the CI-built product and inspected it, so **U1 was

@@ -1,0 +1,39 @@
+FirmwareSight — C1 Continuous Delivery | Read First | 2026-10-10
+Architecture: three independent execution prompts in one packet, executed sequentially by the SAME Coding Agent if the owner chooses to give this packet to that agent as authorization.
+This package is a proposed set of execution instructions, NOT evidence that work has run, commits exist, or remote push permission is granted.
+
+GOAL: Produce a usable, honest release-attached byte evidence workflow (ELF analysis + declared BIN/HEX attachments + Gate + independently verified Release Bundle). Do not build a BIN/HEX parser.
+
+ORDER:
+  01_C1_U2R1_Targeted_Safety_Closure.txt
+   -> mandatory objective checkpoint: source, tests, reports, and direct regressions GREEN; any blocker STOP.
+  02_C1_U3_Portable_Contract_And_Regression.txt
+   -> mandatory objective checkpoint: old corpora and :1 extensions proved; any blocker STOP.
+  03_C1_U4_Desktop_CLI_Installed_Acceptance.txt
+   -> mandatory objective checkpoint: user operation, packaged installation, UI truthfulness; any blocker STOP.
+
+Owner dispatch of all three files is a single continuous coding authorization to perform local work within each task's permission boundary. There is NO blanket authority to push, rewrite history, distribute, release, recruit V1 participants, change V1 cohort or invent test results. Separate owner push approval is needed. Not an autonomous perpetual task.
+
+CURRENT REMOTE BASELINE VERIFIED BY ARCHITECT 2026-10-10:
+  origin/main = 2859bb2a7335b8cdea5be2f817a5b848dce126a1
+  CI #97 = run 38043088870, attempt 1, 10/10 green; Rust Windows 953 (48 lines), Ubuntu 952 (48 lines), both UI 295 (9 files).
+The user subsequently reported LOCAL-ONLY DOCS commits 98596e21, 7a6af54 and 268440a (local HEAD), NOT remote-pushed at the architect's last read. These are NOT treated as trustworthy merely because reported. Execution agent MUST independently verify Git ancestry, actual changed paths and immutable product tree OIDs; no guess. If either remote or local differs materially: STOP before writes, preserve work, report SHA and diff.
+
+C1-U1 = COMPLETE; C1-U2 product code exists at facf287 but ARCHITECT REVIEW = REWORK REQUIRED (narrow corrective); C1-U3/U4 not executed at baseline. ACTIVE_TASK = NONE. BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE; BIN_HEX_ANALYSIS = UNSUPPORTED.
+Owner's decision to deliver these prompts to a Coding Agent is the only authorization for these tasks. Do NOT mark existing history as already authorized or completed because this text was created.
+
+Shared rules for all three:
+1. Read AGENTS.md, README.md, .ai/README.md, .ai/CURRENT_STATE.md, .ai/DECISIONS.md, .ai/ACTIVE_TASK.md, BASELINE.yaml, 04_TECH/09_TECH_DECISION_MATRIX.md, ADR-0030, 04_TECH/28, 04_TECH/26, C1 U1/U2 reports, and relevant implementation/tests. Read complete relevant ADR/spec before edits. No reliance on stale line numbers. Archive exact prompt bytes without asserting transport provenance not measured.
+2. Preflight: git status --porcelain=v1, branch, HEAD, origin/main, ls-remote, rev-list --left-right --count, worktree list, stash list, log; verify any local-only docs history has no changes to apps/crates/schemas/golden/migrations/.github, no hidden modifications, and baseline verifier works. STOP on unknown dirty files, force flags, unexpected head, untrusted local state, missing data or conflicting instructions. No destructive cleanup/reset/stash/rebase/amend.
+3. Prefer TDD and discriminating positive AND negative tests, stable names, no test deletion to hide regression. Record real commands/results and evidence locations. No invented PASS. Maintain immutable legacy /1 Gate IDs, SnapshotId, schema major 1, P4 goldens, migration schema v6, design tokens, Core no third-party deps, no new network/cloud/update/telemetry.
+4. Separate stage commits and separately scoped reports; do not amend published commits. If a stage fails its contractual objective, do NOT enter the next stage. If all three pass local objective checks, STOP and request independent architectural acceptance and owner approval before normal fast-forward push. If user separately approves pushes earlier, each must be a non-force fast-forward to verified remote ancestor, with exact CI attempt and ten-job logs read back. Never force push, including --force-with-lease.
+5. Maintain T-C1 cross-stage truth table: real runnable test path, evidence, PASS/FAIL/NOT_VERIFIED; don't treat U2-only tests as completion of U3/U4.
+6. Always preserve frozen V1 cohort: artifact 11573661113 at commit 41bb6a36..., 0 eligible real user sessions; no re-freeze or participant invocation. B1, Private Beta, RC, GA, GitHub Releases, signing, notarization, updater, pricing and license remain outside scope.
+7. Don't spend another round on incidental memory compression, neat-freak cleanup or historical restyling. Only update status and required docs when corresponding code/evidence actually changes; preserve date-qualified history. Treat support for BIN/HEX as release attachment only and unverified provenance.
+
+Expected checkpoint declarations (NOT automatically granted by passing tests):
+  U2R1 = LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING
+  U3 = LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING
+  U4 = LOCAL_USER_WORKFLOW_GATE_PASS / ARCHITECT_REVIEW_PENDING
+  final release attachment feature = READY_FOR_ARCHITECT_PRODUCT_ACCEPTANCE only after actual packaged runtime evidence.
+Do not set PASS_COMPLETE, USER_AVAILABLE or SUPPORTED_WITH_LIMITS without the corresponding approved independent acceptance.

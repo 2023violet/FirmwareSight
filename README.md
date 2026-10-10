@@ -807,10 +807,11 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: NONE`, and the C1 track is two library units deep — with no user entry.** Four separate authorities
-arrived on 2026-10-09, in this order: the A0 corrective, the C1 direction decision, `C1-U1`, then `C1-U2` (a fifth
-2026-10-09 entry sits in `10_AUDIT/SOURCE_PROMPTS/README.md` and says of itself that it is an in-flight continuation,
-"explicitly not a new authorization").
+**`active_task: NONE`, and the C1 track is three rounds deep — still with no user entry.** Four authorities arrived on
+2026-10-09, in this order: the A0 corrective, the C1 direction decision, `C1-U1`, then `C1-U2` (a fifth 2026-10-09
+entry sits in `10_AUDIT/SOURCE_PROMPTS/README.md` and says of itself that it is an
+in-flight continuation, "explicitly not a new authorization"). A fifth authority arrived on 2026-10-10: the four-file
+continuous-delivery packet, which returned `REWORK REQUIRED` on `C1-U2` and authorized three stages.
 《A0 Truthfulness Corrective》 (`A0_PRODUCT_TRUTHFULNESS_CORRECTIVE`) closed **4 / 4 FIXED** at
 `c674617` + `d41284e`, read 10 of 10 on CI run #90 (`37922697253`), making four user-facing claims match what the
 pipeline actually proves: object attribution, unsupported-format remediation copy, Compare's ranking basis, and
@@ -821,24 +822,43 @@ release identity, and verified into the bundle, while Analyze stays ELF-plus-opt
 provenance stays permanently `Unknown`, and the Intel HEX address-span promise is **withdrawn, not deferred**. Two
 units then ran: `C1-U1` (attachment data + Gate identity + migration `0006`, `SCHEMA_VERSION` 6) is **`COMPLETE`** at
 `8e2aab9` + `b9cc3e2` + `1b33bbc`, and `C1-U2` (attachments satisfying Gate rules and entering a verified Release
-Bundle, the six-link byte chain L-1…L-6) is **`READY_FOR_ARCHITECT_REVIEW`** at `facf287` + its docs-only successor
-`2859bb2`, and U2's two heads read **10 of 10** on CI runs #96 (`38037417546`) and #97 (`38043088870`) with every job
-green on its first attempt; `C1-U1`'s three heads read runs #93, #94 and #95 the same way. **None of it is reachable by a person:** no UI control, no `--attach`, no IPC command, so
+Bundle, the six-link byte chain L-1…L-6) reached `facf287` + its docs-only successor
+`2859bb2`, U2's two heads reading **10 of 10** on CI runs #96 (`38037417546`) and #97 (`38043088870`) with every job
+green on its first attempt; `C1-U1`'s three heads read runs #93, #94 and #95 the same way. The Architect then returned
+**`REWORK REQUIRED`** on `C1-U2` (2026-10-10): four review-proved holes — `T-C1-08`'s acceptance pairing was asserted
+but never proved against a changed attachment set, `T-C1-13`'s exact with/without comparison existed only as an
+unknown-count check, the folded-duplicate-case remediation named a manifest that was never written, and the
+source-side symlink rule had no test at all. Stage 1 of the packet ran the same day as **`C1-U2R1`** and closed all
+four: the pairing is now proved in two layers (store at `ERR-STORAGE-4007`, bundle end-to-end), the growth comparison
+is a test, a new `BundleError::DuplicateBundleName` arm answers that refusal with the owner's own duplicate selection
+under the **same** `ERR-BUNDLE-6109` code and the same nothing-written invariant, and `source_symlink_posix` plus a
+Windows counterpart holds the symlink rule. Its status word is
+**`LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING`** — a green local gate is not an accepted review. **None of it
+is reachable by a person:** no UI control, no `--attach`, no IPC command, so
 `BIN_HEX_RELEASE_ATTACH` is `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1-U3` (portable contract) and `C1-U4` (every
-surface a person touches) stay `NOT_AUTHORIZED / NOT_STARTED`, and both rounds stay `NOT_RUNTIME_VERIFIED` — green CI
-on a library build is not installed verification, and no artifact from either run was downloaded or launched. Figures
+surface a person touches) are authorized as stages 2 and 3 and stay `NOT_STARTED`, and every round stays
+`NOT_RUNTIME_VERIFIED` — green CI
+on a library build is not installed verification, and no artifact from any run was downloaded or launched. Figures
 below are measurement points, not a claim about your checkout — read `git rev-parse HEAD` for that, and note that a
-DOCS-ONLY head cannot move a test count. Measured at `2859bb2` from run #97's own job logs: **953 Rust on the Windows
+DOCS-ONLY head cannot move a test count. Measured on this Windows host at the `C1-U2R1` head: **960 Rust across 48
+`test result:` lines / 0 failed**, **295 UI in 9 files**, gate 17 of 17 with drift 8/8, deny 1/1 and package 4/4, and
+the ADR-0029 baseline verifier `RESULT PASS` at 923 tree lines / 793 entries / 795 tracked paths. **The POSIX figure is
+a projection of 961 and was not measured** — `docker` is absent, `wsl` holds no distribution, so the four
+`#[cfg(unix)]` cases this round wrote have not been compiled by anything, which is why `M11` is filed as
+`NOT_VERIFIED` rather than closed. For comparison, the head this corrective started from (`2859bb2`, run #97's own
+job logs) printed **953 Rust on the Windows
 job and 952 on the Ubuntu
 one** across the same 48 `test result:` lines (one U2 case is `#[cfg(windows)]`), **295 UI in 9 files** on both UI
-jobs, gate 17 of 17 with drift 8/8, deny 1/1 and package 4/4, and the ADR-0029 baseline verifier `RESULT PASS` at
-917 tree lines / 787 entries / 789 tracked paths. Unchanged elsewhere, and unchanged by all of the above: `P5
+jobs. **No push was performed and this round has authority to perform none:** `origin/main` stays `2859bb2`, and the
+corrective commit these documents ship in is local-only until the owner authorizes a normal fast-forward push.
+Unchanged elsewhere, and unchanged by all of the above: `P5
 PASS_COMPLETE`, `G2 PASS`, stage `U1` closed with its guarded 25-item tally, V1 paused at **0 eligible external
 sessions** with the cohort still `11573661113` at `41bb6a36` (every CI artifact after it is validation output, not the
 cohort), product `0.6.0 MVP_CANDIDATE`, licence `PENDING_OWNER_CONFIRMATION`, and B1 / RC / GA / signing / distribution
-still unauthorized. The single current answer is `.ai/ACTIVE_TASK.md`'s live pointer and `.ai/CURRENT_STATE.md`; what is owed to the
-Architect rather than to an implementer is the `GateRunRequest.attachments` field-vs-siblings deviation and the four
-reported findings, all of them in `04_TECH/28` §14.
+still unauthorized. The single current answer is `.ai/ACTIVE_TASK.md`'s live pointer and `.ai/CURRENT_STATE.md`; `04_TECH/28`
+§14.1 records the four adjudications, and what is still owed to the Architect rather than to an implementer is the
+`ERR-INTERNAL-9004` classification a cross-run acceptance gets at the bundle layer, `M11`'s one Linux run, and
+`M12`'s `>512 MiB` upper bound.
 
 **`active_task: NONE`, and V1's cohort build is re-frozen.** Later on 2026-10-08 the owner delivered
 *FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0* inline, granting **only** `V1_COHORT_REFREEZE`:
@@ -959,7 +979,9 @@ prompt to change the UI, so the live figure after U1R is **868 Rust / 242 UI in 
 nothing either track does can authorize a feature, a schema, a dependency, a licence, a signature or a release.
 
 **Dated correction to that figure, 2026-10-08.** The 242 above is what U1R left; four more UI units ran that day and
-each added tests without deleting any. The live count at the **U1P-R3** head `41bb6a36` is **868 Rust / 291 UI in 9
+each added tests without deleting any. The count at the **U1P-R3** head `41bb6a36` — live when this line was written,
+superseded by the C1 rounds since, and the present figure is in the `## Next work` block above — is **868 Rust / 291 UI
+in 9
 files** on the same 17-step gate — 253 after U1P, 266 after U1P-R1, 278 after U1P-R2, 291 after U1P-R3 — with the
 Rust figure unmoved since V1 froze it and `scripts/check.py` still 17 of 17 with no SKIP. The same gate shape, the
 same 30 registered IPC commands and the byte-identical `assets/design-tokens.json` are what make that growth a

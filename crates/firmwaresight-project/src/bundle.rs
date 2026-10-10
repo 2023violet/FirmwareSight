@@ -119,6 +119,17 @@ pub enum BundleError {
     #[error(transparent)]
     Index(#[from] ManifestError),
 
+    /// Two selected files fold onto one bundle entry. This is the same refusal the index layer raises — the
+    /// same rule, the same moment before a destination exists, and the same `ERR-BUNDLE-6109` — re-described
+    /// because the index layer names a document, while what the release owner did was choose two files whose
+    /// leaves differ only by case. A person reading "a manifest cannot hash one file twice" is told about a
+    /// manifest they never wrote (`C1-U2R1` §B).
+    #[error(
+        "`{name}` is attached twice: two of the selected files differ only in the case of their names, and \
+         one bundle cannot hold both"
+    )]
+    DuplicateBundleName { name: String },
+
     /// The run that was selected is not the run this context produces (§9).
     #[error(
         "the Gate run selected is `{selected}` but the current project context recomputes to \
@@ -185,6 +196,9 @@ impl BundleError {
         match self {
             Self::Release(error) => error.code(),
             Self::Index(_) | Self::VerificationFailed { .. } => "ERR-BUNDLE-6109",
+            // §B keeps this refusal on the code it already had: a caller that branches on `6109` sees the same
+            // answer, and only the sentence a person reads moved.
+            Self::DuplicateBundleName { .. } => "ERR-BUNDLE-6109",
             Self::GateContextChanged { .. } => "ERR-BUNDLE-6102",
             Self::SourceArtifactChanged { .. } => "ERR-BUNDLE-6103",
             Self::Attachment(error) => error.code(),
@@ -214,6 +228,10 @@ impl BundleError {
             Self::Index(_) | Self::VerificationFailed { .. } => {
                 "keep whatever was written, and report the release id and the Gate run id: a bundle that \
                  does not verify against itself is evidence, not something to retry over the top of"
+            }
+            Self::DuplicateBundleName { .. } => {
+                "attach the two files under names that differ by more than case, or ship only one of them, \
+                 then prepare the bundle again: nothing was written, so there is no bundle to repair"
             }
             Self::GateContextChanged { .. } => "run the Gate again and review the new result",
             Self::SourceArtifactChanged { .. } => {
@@ -1064,7 +1082,8 @@ fn observe(
         &manifest_files,
         &content.policy_sha256,
         &disclosure,
-    )?;
+    )
+    .map_err(duplicate_selection)?;
     content.manifest_json = release_render::render_json(&manifest);
     content.manifest_sha256 = fingerprint::sha256_hex(content.manifest_json.as_bytes());
 
@@ -1379,6 +1398,19 @@ fn bundle_names(rows: &[VerifiedRow]) -> Vec<String> {
             }
         })
         .collect()
+}
+
+/// §B of `C1-U2R1`: one refusal, two different stories. The index layer is shared by the bundle being written
+/// and the bundle being read back, so its sentence has to speak about a document — correct for a corrupt
+/// already-written manifest, and useless for a release owner who attached two files whose leaves fold together.
+/// This re-describes only that one case, and only on the way out of the assembly call above; every other index
+/// refusal still travels transparently, and the stable code is `ERR-BUNDLE-6109` for both halves.
+#[must_use]
+fn duplicate_selection(error: ManifestError) -> BundleError {
+    match error {
+        ManifestError::DuplicatePath { value } => BundleError::DuplicateBundleName { name: value },
+        other => BundleError::Index(other),
+    }
 }
 
 /// §11's precedence, read off the context the Gate judged rather than from a dialog.

@@ -40,6 +40,7 @@ use firmwaresight_project::evidence::{
     build_context_with_attachments, growth_facts, observe_attachment, observe_release_notes,
 };
 use firmwaresight_project::{GitObservation, LoadedProject, SnapshotFacts, policy_sha256, run_id};
+use firmwaresight_report::release::ManifestError;
 
 const TARGET_ELF: &str = "fixtures/elf/p2-diff/target/firmware.elf";
 const TARGET_MAP: &str = "fixtures/elf/p2-diff/target/firmware.map";
@@ -99,6 +100,31 @@ require_clean_git = true
 require_release_notes = true
 release_notes_path = "RELEASE_NOTES.md"
 expected_version = "1.4.2"
+"#;
+
+/// The attaching policy **and** a growth threshold the fixture pair is over, so one release carries both a
+/// requirement only an attachment can satisfy and a `REVIEW` only an acceptance can dispose of. `C1-U2R1`
+/// items 1 and 2 are both about how those two facts interact, which neither single-lesson config can reach.
+const ATTACHING_REVIEWING_CONFIG: &str = r#"schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+required = ["elf", "map", "bin", "hex"]
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = true
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"
+expected_version = "1.4.2"
+
+[diff]
+flash_growth_review_bytes = 100
 "#;
 
 fn repo_root() -> PathBuf {
@@ -1950,6 +1976,11 @@ fn every_refusal_a_caller_can_branch_on_has_a_code_and_a_remediation() {
             name: "app.bin".to_owned(),
             change: "added",
         },
+        // The folded-selection refusal `C1-U2R1` §B separates from the integrity sentence. It keeps `6109`, so
+        // a caller that branches on the code sees no change — only the words a person reads do.
+        BundleError::DuplicateBundleName {
+            name: "artifacts/app.bin".to_owned(),
+        },
     ];
     let codes: Vec<&str> = cases.iter().map(BundleError::code).collect();
     assert_eq!(
@@ -1968,6 +1999,7 @@ fn every_refusal_a_caller_can_branch_on_has_a_code_and_a_remediation() {
             "ERR-BUNDLE-6116",
             "ERR-BUNDLE-6117",
             "ERR-BUNDLE-6118",
+            "ERR-BUNDLE-6109",
         ]
     );
     for error in &cases {
@@ -2318,9 +2350,8 @@ fn two_attachment_leaves_differing_only_in_case_are_named_apart_by_content() {
 /// This is the case the POSIX half cannot reach: the resolved paths are different strings, so the duplicate
 /// selection is not caught as a repeated path, and the two rows carry the same digest. What stops the bundle
 /// is the manifest's own case-folded duplicate rule — which refuses before a destination is chosen, so
-/// nothing is written and no file is silently dropped. The remediation it offers is the integrity-failure
-/// sentence rather than a naming sentence, and that is recorded as a finding for the Architect rather than
-/// patched here, since changing it is a portable-contract decision (`04_TECH/28` §4.3 owns the register).
+/// nothing is written and no file is silently dropped. Its wording was recorded as `C1-U2` finding 1 and
+/// adjudicated by `C1-U2R1` §B, which is what `the_ntfs_fold_of_one_host_file_names_its_own_cause` now pins.
 #[cfg(windows)]
 #[test]
 fn one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice() {
@@ -2343,6 +2374,126 @@ fn one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice() 
     assert!(
         !world.parent("m5ntfs").exists(),
         "a refused plan still created a destination"
+    );
+}
+
+/// M5's wording, on the host where one file really is offered twice. §B kept the code and the refusal and
+/// asked only that the sentence a release owner reads name **the selection that collided** rather than a
+/// manifest they never wrote, so this asserts the message, the remediation, the absence of a host path, and
+/// the absence of any written destination — every one of which the pre-§B wording failed.
+#[cfg(windows)]
+#[test]
+fn the_ntfs_fold_of_one_host_file_names_its_own_cause() {
+    let mut world = World::new("u2r1-m5-ntfs-wording", ATTACHING_CONFIG);
+    let upper = world.dir.join("build/attached/APP.BIN");
+    let lower = world.bin.clone();
+    world.attach(&lower, ArtifactKind::Bin);
+    world.attach(&upper, ArtifactKind::Bin);
+    world.attach(&world.hex.clone(), ArtifactKind::IntelHex);
+    world.select_stored_run();
+
+    let error = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("the same host file is still one file under two spellings");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    let message = error.to_string();
+    let remediation = error.remediation();
+    // Names the attachment collision, not the document the caller never wrote.
+    assert!(message.contains("attached"), "{message}");
+    assert!(!message.contains("manifest"), "{message}");
+    assert!(remediation.contains("case"), "{remediation}");
+    assert!(
+        !message.contains(&world.dir.display().to_string()),
+        "{message}"
+    );
+    assert!(
+        !world.parent("u2r1-m5-ntfs-wording").exists(),
+        "a refused plan still created a destination"
+    );
+}
+
+/// M5, the portable half of the same refusal: two **distinct** host files holding identical bytes under leaves
+/// that fold to one name. `bundle_names` renames both halves to `<kind>-<sha8>-<leaf>`, and because the digest
+/// is shared, the two renamings still fold together — so the manifest rule that refuses them fires on Linux and
+/// macOS exactly as it fires on NTFS, without needing a case-insensitive filesystem to exist.
+///
+/// This is the test `C1-U2` could not write for the wording finding, because the wording was the finding: its
+/// pair, `two_attachment_leaves_differing_only_in_case_are_named_apart_by_content`, covers the *different*-bytes
+/// case, where the content-keyed rename saves the pair and both files ship.
+#[test]
+fn a_folded_duplicate_selection_is_refused_by_naming_the_selection_and_not_a_manifest() {
+    let mut world = World::new("u2r1-m5-fold", ATTACHING_CONFIG);
+    let upper = world.dir.join("build/attached/other/APP.BIN");
+    std::fs::create_dir_all(upper.parent().expect("the folder has a parent"))
+        .expect("the second folder exists");
+    std::fs::copy(&world.bin, &upper).expect("the same bytes under a second spelling");
+    assert_eq!(
+        digest_of(&world.bin),
+        digest_of(&upper),
+        "identical bytes are the premise; without them the pair would ship"
+    );
+
+    world.attach(&world.bin.clone(), ArtifactKind::Bin);
+    world.attach(&upper, ArtifactKind::Bin);
+    world.attach(&world.hex.clone(), ArtifactKind::IntelHex);
+    world.select_stored_run();
+
+    let error = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("one bundle cannot ship the same bytes under two spellings");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    let message = error.to_string();
+    let remediation = error.remediation();
+    assert!(message.contains("attached"), "{message}");
+    assert!(!message.contains("manifest"), "{message}");
+    assert!(remediation.contains("case"), "{remediation}");
+    // What is named is a bundle-relative entry, never the throwaway host directory.
+    assert!(message.contains("`artifacts/"), "{message}");
+    assert!(
+        !message.contains(&world.dir.display().to_string())
+            && !remediation.contains(&world.dir.display().to_string()),
+        "a host path leaked: {message} / {remediation}"
+    );
+    assert!(
+        !world.parent("u2r1-m5-fold").exists(),
+        "a refused plan still created a destination"
+    );
+}
+
+/// §B's other half: the two `6109` stories stay two stories. A duplicate found while assembling what this
+/// release *selects* is the owner's collision and gets the naming sentence; a duplicate found inside a manifest
+/// that already exists on disk is a broken bundle, and there the document really is the thing that disagrees
+/// with itself, so it keeps the integrity sentence. One stable code, so no caller's branch moves.
+#[test]
+fn a_selection_duplicate_and_a_written_manifest_duplicate_are_told_apart() {
+    let written = BundleError::Index(ManifestError::DuplicatePath {
+        value: "artifacts/app.bin".to_owned(),
+    });
+    let selected = BundleError::DuplicateBundleName {
+        name: "artifacts/app.bin".to_owned(),
+    };
+    assert_eq!(written.code(), selected.code(), "one refusal, one code");
+    assert_eq!(selected.code(), "ERR-BUNDLE-6109");
+    assert!(
+        written
+            .remediation()
+            .starts_with("keep whatever was written"),
+        "{}",
+        written.remediation()
+    );
+    assert!(
+        selected.remediation().contains("case"),
+        "{}",
+        selected.remediation()
+    );
+    assert!(written.to_string().contains("manifest"), "{written}");
+    assert!(!selected.to_string().contains("manifest"), "{selected}");
+    // Only the folded-selection case is re-described: every other index refusal still carries the report
+    // layer's own words, which is what "do not alter the general self-verification path" requires.
+    let untouched = BundleError::Index(ManifestError::NoFiles);
+    assert_eq!(untouched.code(), "ERR-BUNDLE-6109");
+    assert_eq!(
+        untouched.to_string(),
+        ManifestError::NoFiles.to_string(),
+        "a transparent arm must not gain a re-worded message"
     );
 }
 
@@ -3119,4 +3270,360 @@ fn the_attachment_rows_a_context_binds_are_the_facts_the_observation_produced() 
             "`{path}` is disclosed with bytes it does not hold"
         );
     }
+}
+
+/// `T-C1-13` (`04_TECH/28` §7.2, `C1-U2R1` must-execute item 2): a growth verdict identical with and without
+/// attachments. `C1-U2` recorded this exact comparison as NOT_VERIFIED and declined to infer it from the
+/// unknown-count half, and the packet asks for the direct one — same snapshot, same baseline, same rule, twice.
+#[test]
+fn the_growth_rule_answers_identically_with_and_without_release_attachments() {
+    let mut world = World::new("u2r1-tc113-growth", ATTACHING_REVIEWING_CONFIG);
+    world.with_baseline();
+
+    let without = world.evaluate();
+    let base = without
+        .finding(GateRuleId::BaselineGrowth)
+        .expect("every rule always answers");
+    assert_eq!(base.state, FindingState::Review, "{}", base.summary);
+
+    world.attach(&world.bin.clone(), ArtifactKind::Bin);
+    world.attach(&world.hex.clone(), ArtifactKind::IntelHex);
+    let with = world.evaluate();
+    let grown = with
+        .finding(GateRuleId::BaselineGrowth)
+        .expect("every rule always answers");
+
+    // The verdict, its severity, its prose and its citations are the same facts over the same footprint rows.
+    assert_eq!(grown.state, base.state);
+    assert_eq!(grown.effective_severity, base.effective_severity);
+    assert_eq!(
+        grown.summary, base.summary,
+        "the growth prose moved with the set"
+    );
+    assert_eq!(
+        grown.evidence_refs, base.evidence_refs,
+        "the growth rule cited an attachment, which §7.2 forbids"
+    );
+    // The two boundaries D-1 and D-7 draw: the build is one build, and an attachment is not unknown evidence.
+    assert_eq!(with.snapshot_id, without.snapshot_id, "SnapshotId moved");
+    assert_eq!(
+        with.counts.unknown, without.counts.unknown,
+        "an attachment entered unknown.count, so evidence.unknown_review could move because a file was chosen"
+    );
+    assert_ne!(
+        with.run_id, without.run_id,
+        "the two runs must be genuinely different judgements"
+    );
+    assert_ne!(grown.id, base.id, "a finding id is keyed to its run");
+    // And the attachments did the job they are for, out of the other evidence class.
+    let required = with
+        .finding(GateRuleId::RequiredArtifacts)
+        .expect("every rule always answers");
+    assert_eq!(required.state, FindingState::Pass, "{}", required.summary);
+    assert!(
+        required
+            .evidence_refs
+            .iter()
+            .any(|reference| reference.starts_with("artifact:elf:")),
+        "{:?}",
+        required.evidence_refs
+    );
+    assert!(
+        required
+            .evidence_refs
+            .iter()
+            .any(|reference| reference.starts_with("attachment:bin:"))
+            && required
+                .evidence_refs
+                .iter()
+                .any(|reference| reference.starts_with("attachment:hex:")),
+        "{:?}",
+        required.evidence_refs
+    );
+}
+
+/// `T-C1-08` at the bundle boundary (`C1-U2R1` must-execute item 1): an acceptance recorded over one attachment
+/// set does not make a different set's run releasable, and the refusal arrives before anything is written.
+///
+/// Two refusals are asserted, because two callers can be here: a library caller carrying run A's acceptance
+/// across to run B meets the engine's own invariant (`ERR-INTERNAL-9004`, naming both ids), and the path a
+/// person reaches — the Gate re-run over the new set, its review not yet accepted — meets the ordinary
+/// `ERR-BUNDLE-6101`. A desktop is stopped one layer earlier still, by the store, which is what
+/// `an_acceptance_recorded_over_one_attachment_set_does_not_dispose_of_a_different_one` in
+/// `crates/firmwaresight-storage/tests/gate_history.rs` proves against a real SQLite file.
+///
+/// Both halves are asserted, because a refusal alone could be read as "attachments block releases": the
+/// identical-set case ships first, and the changed set ships once the review is accepted **against its own run
+/// id**. This is the pairing `C1-U2` named as missing in its own report.
+#[test]
+fn an_acceptance_recorded_over_one_attachment_set_does_not_make_another_set_release_ready() {
+    let mut world = World::new("u2r1-tc108-bundle", ATTACHING_REVIEWING_CONFIG);
+    world.with_baseline();
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    let evaluation_a = world.evaluate();
+    let run_a = evaluation_a.run_id.clone();
+    world.accept(GateRuleId::BaselineGrowth);
+    world.select_stored_run();
+
+    let (bundle_a, outcome_a) = world.publish_attached("tc108-a");
+    assert_eq!(
+        outcome_a.gate_run_id, run_a,
+        "the release names the run it was judged over"
+    );
+    verify_bundle(&bundle_a).expect("the accepted-review release verifies against its own bytes");
+
+    // The release owner replaces one attached file. The analyzed build did not move; the judged bytes did.
+    std::fs::write(&bin, b"BIN\xff\x00revised image bytes").expect("the attached bytes move");
+    let evaluation_b = world.evaluate();
+    let run_b = evaluation_b.run_id.clone();
+    assert_ne!(
+        run_b, run_a,
+        "a different attachment set must be a different run"
+    );
+    assert_eq!(
+        evaluation_b.snapshot_id, evaluation_a.snapshot_id,
+        "the attachment moved the release, not the build"
+    );
+    world.selected_run_id = None;
+
+    // Two refusals, because two different callers can be here. A library caller that hands over run A's
+    // acceptance list for run B is handed the engine's own invariant: the id it carries names no finding of the
+    // run being judged. Nothing is written either way.
+    let stale = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("one run's acceptance is not another run's disposition");
+    assert_eq!(stale.code(), "ERR-INTERNAL-9004", "{stale}");
+    assert!(stale.to_string().contains(&run_a), "{stale}");
+    assert!(stale.to_string().contains(&run_b), "{stale}");
+
+    // And the path a person actually reaches — the Gate was re-run over the new set, and its review has not
+    // been accepted yet — is the ordinary Gate-not-ready refusal, because a REVIEW survives an attachment change
+    // exactly as it survives any other change of bytes.
+    world.acceptances.clear();
+    let unready = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("the new run's review is still undisposed");
+    assert_eq!(unready.code(), "ERR-BUNDLE-6101", "{unready}");
+    assert!(
+        !world.parent("tc108-b").exists(),
+        "a refused plan still created a destination"
+    );
+    assert_eq!(
+        world
+            .folder_contents(&world.dir)
+            .into_iter()
+            .filter(|name| name.starts_with("out-tc108-b"))
+            .count(),
+        0,
+        "a refusal wrote beside the project"
+    );
+
+    // Accepting B's own review, under B's id, releases it. The refusal above was about the key.
+    world.accept(GateRuleId::BaselineGrowth);
+    world.select_stored_run();
+    let (bundle_b, outcome_b) = world.publish_attached("tc108-b");
+    assert_eq!(outcome_b.gate_run_id, run_b);
+    assert_ne!(outcome_b.release_id, outcome_a.release_id);
+    verify_bundle(&bundle_b).expect("the second release verifies against its own bytes");
+
+    // And run A's shipped history is untouched: the earlier bundle still stands on its own bytes and still
+    // records the run it answered.
+    verify_bundle(&bundle_a).expect("the first release still verifies after the second one");
+    assert_eq!(
+        read_manifest(&bundle_a)["extensions"]["gate_run_id"]
+            .as_str()
+            .expect("a recorded run id"),
+        run_a.as_str(),
+        "the first bundle's record of which run it answered moved"
+    );
+}
+
+// ── C1-U2R1: M11's source-side symlink rule, adjudication C ──────────────────────────────────────────────
+//
+// The rule as the Architect set it: a link the release owner chose deliberately is followed to its target, and
+// what ships is that target's bytes under the name they chose; a broken, directory or inaccessible target fails
+// safely; nothing inside a bundle is ever a symlink. `C1-U2` left this unwritten because "writing a test here
+// would have fixed one behaviour by inventing a rule" — the rule now exists, so the tests do.
+//
+// **Platform record, stated before any reader reaches it.** The `#[cfg(unix)]` half below did not compile and
+// did not run on the Windows host this round was written on, and cannot: `docker` is absent and `wsl` has no
+// installed distribution, so the only POSIX execution this repository offers is a CI job, which this round had
+// no authorization to trigger. These assertions are therefore evidence *pending a Linux run*, and the corrective
+// report files M11 as `NOT_VERIFIED` on this host. The Windows counterpart self-reports in the same spirit: it
+// prints a `SKIPPED` line and returns when the host refuses link creation, rather than passing on an assertion
+// it never made.
+#[cfg(unix)]
+mod source_symlink_posix {
+    use super::*;
+
+    /// §C's positive half: an explicitly chosen link ships exactly its target's bytes, under the leaf the owner
+    /// named, and the bundle holds a regular file where the link was.
+    #[test]
+    fn a_symlink_offered_as_a_source_ships_its_target_bytes_and_leaves_no_link_behind() {
+        let mut world = World::new("u2r1-m11-follow", ATTACHING_CONFIG);
+        let target = world.dir.join("build/attached/real-image.bin");
+        std::fs::write(&target, b"BIN\xff\x00behind the link").expect("the target is written");
+        let link = world.dir.join("build/attached/linked.bin");
+        std::os::unix::fs::symlink(&target, &link)
+            .expect("symlink creation is permitted on this runner");
+
+        world.attach(&link, ArtifactKind::Bin);
+        world.attach(&world.hex.clone(), ArtifactKind::IntelHex);
+        world.select_stored_run();
+
+        let (bundle, _) = world.publish_attached("m11");
+        let names = shipped_artifacts(&bundle);
+        assert!(
+            names.iter().any(|name| name == "linked.bin"),
+            "the shipped leaf is not the name the owner chose: {names:?}"
+        );
+        let shipped = bundle.join("artifacts").join("linked.bin");
+        assert_eq!(
+            digest_of(&shipped),
+            digest_of(&target),
+            "the link shipped, not the bytes behind it"
+        );
+        let metadata = std::fs::symlink_metadata(&shipped).expect("the shipped entry is statable");
+        assert!(
+            metadata.is_file() && !metadata.file_type().is_symlink(),
+            "a bundle holds a symlink, and a relocated bundle would then hold a broken one"
+        );
+        for name in &names {
+            let entry = std::fs::symlink_metadata(bundle.join("artifacts").join(name))
+                .expect("a shipped entry is statable");
+            assert!(
+                !entry.file_type().is_symlink(),
+                "`{name}` is a symlink inside the bundle"
+            );
+        }
+        verify_bundle(&bundle).expect("the bundle verifies against its own bytes");
+    }
+
+    /// §C's first refusal: a link to nothing has no bytes, so it is E-1 at the moment of observation — before
+    /// any Gate judgement, and it names the leaf the owner chose rather than the host path either end of it.
+    #[test]
+    fn a_broken_symlink_offered_as_a_source_is_refused_without_naming_its_host_path() {
+        let world = World::new("u2r1-m11-broken", ATTACHING_CONFIG);
+        let link = world.dir.join("build/attached/dangling.bin");
+        std::os::unix::fs::symlink(world.dir.join("build/attached/not-here.bin"), &link)
+            .expect("symlink creation is permitted on this runner");
+
+        let error = observe_attachment(&link, ArtifactKind::Bin)
+            .expect_err("a link to nothing carries no bytes to ship");
+        assert_eq!(error.code(), "ERR-BUNDLE-6115");
+        assert!(error.to_string().contains("dangling.bin"), "{error}");
+        assert!(
+            !error
+                .to_string()
+                .contains(&world.path().display().to_string()),
+            "a host path leaked: {error}"
+        );
+    }
+
+    /// §C's second refusal, and the one that keeps the rule from becoming a directory walk: a link to a
+    /// directory is not a file, and following it must not turn the release into a subtree.
+    #[test]
+    fn a_symlink_to_a_directory_offered_as_a_source_is_refused_as_not_a_regular_file() {
+        let world = World::new("u2r1-m11-dirlink", ATTACHING_CONFIG);
+        let directory = world.dir.join("build/attached/sub");
+        std::fs::create_dir_all(&directory).expect("the directory is created");
+        std::fs::write(directory.join("inner.bin"), b"inner").expect("a file inside it");
+        let link = world.dir.join("build/attached/sub.link");
+        std::os::unix::fs::symlink(&directory, &link)
+            .expect("symlink creation is permitted on this runner");
+
+        let error = observe_attachment(&link, ArtifactKind::Bin)
+            .expect_err("a directory is not a file a release ships");
+        assert_eq!(error.code(), "ERR-BUNDLE-6115");
+        assert!(
+            error.to_string().contains("regular file"),
+            "the refusal should say what is wrong with the target: {error}"
+        );
+        assert!(
+            !error
+                .to_string()
+                .contains(&world.path().display().to_string()),
+            "a host path leaked: {error}"
+        );
+    }
+
+    /// §C's timing half, and the reason this is a safety rule rather than a nicety: a link can be re-pointed
+    /// after the preview hashed it. What ships then is not what was judged, so the export re-observation —
+    /// which follows the link again — must refuse rather than carry the old verdict over.
+    #[test]
+    fn a_source_symlink_re_pointed_after_the_preview_cannot_ship_under_the_old_verdict() {
+        let mut world = World::new("u2r1-m11-repoint", ATTACHING_CONFIG);
+        let first = world.dir.join("build/attached/one.bin");
+        let second = world.dir.join("build/attached/two.bin");
+        std::fs::write(&first, b"first image bytes").expect("the first target is written");
+        std::fs::write(&second, b"second image bytes, deliberately longer")
+            .expect("the second target is written");
+        let link = world.dir.join("build/attached/current.bin");
+        std::os::unix::fs::symlink(&first, &link)
+            .expect("symlink creation is permitted on this runner");
+
+        world.attach(&link, ArtifactKind::Bin);
+        world.attach(&world.hex.clone(), ArtifactKind::IntelHex);
+        let plan = prepare_with_attachments(&world.request(), &world.attachments)
+            .expect("the release is prepared");
+
+        std::fs::remove_file(&link).expect("the link is removable");
+        std::os::unix::fs::symlink(&second, &link).expect("the re-point is permitted");
+
+        let error = plan
+            .publish_with_attachments(
+                &world.request(),
+                &world.attachments,
+                &world.parent("m11rp"),
+                false,
+            )
+            .expect_err("the preview hashed the other target");
+        assert_eq!(error.code(), "ERR-BUNDLE-6103", "{error}");
+        assert!(
+            !world
+                .parent("m11rp")
+                .join(plan.proposed_directory_name())
+                .exists(),
+            "a stale plan wrote a bundle"
+        );
+    }
+}
+
+/// §C on the host this round actually ran on. This Windows box refuses link creation with
+/// `ERROR_PRIVILEGE_NOT_HELD` (WinError 1314), measured before the test was written rather than assumed after
+/// it, so the honest outcome here is a loud skip. If a future host permits it, the same three facts are
+/// asserted: the target's bytes ship, the shipped entry is a regular file, and the bundle still verifies.
+#[cfg(windows)]
+#[test]
+fn a_source_symlink_on_windows_ships_its_target_bytes_when_the_host_permits_links() {
+    let mut world = World::new("u2r1-m11-windows", ATTACHING_CONFIG);
+    let target = world.dir.join("build/attached/real-image.bin");
+    std::fs::write(&target, b"BIN\xff\x00behind the link").expect("the target is written");
+    let link = world.dir.join("build/attached/linked.bin");
+    if let Err(error) = std::os::windows::fs::symlink_file(&target, &link) {
+        eprintln!(
+            "SKIPPED (M11 on Windows): this host refused symlink creation (raw OS error {:?}); the rule is \
+             asserted by the POSIX module and stays NOT_VERIFIED here",
+            error.raw_os_error()
+        );
+        return;
+    }
+
+    world.attach(&link, ArtifactKind::Bin);
+    world.attach(&world.hex.clone(), ArtifactKind::IntelHex);
+    world.select_stored_run();
+    let (bundle, _) = world.publish_attached("m11w");
+    let shipped = bundle.join("artifacts").join("linked.bin");
+    assert_eq!(
+        digest_of(&shipped),
+        digest_of(&target),
+        "the link shipped, not the bytes behind it"
+    );
+    let metadata = std::fs::symlink_metadata(&shipped).expect("the shipped entry is statable");
+    assert!(
+        metadata.is_file() && !metadata.file_type().is_symlink(),
+        "a bundle holds a symlink"
+    );
+    verify_bundle(&bundle).expect("the bundle verifies against its own bytes");
 }
