@@ -5,12 +5,13 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-09"
+last_updated: "2026-10-10"
 ---
 
 # Current State
 
-- Date: 2026-10-08
+- Date: 2026-10-10 *(the live state is the C1-U2 entry below; the U1 entry it superseded keeps its own 2026-10-08 dates
+  inside that bullet)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - **Active task: `NONE`.** Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
@@ -167,6 +168,12 @@ last_updated: "2026-10-09"
   cohort stays `11573661113` at `41bb6a36` with 0 eligible sessions. Durable record:
   `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` (with its dated §14 as-executed reconciliation) and
   `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md`; machine state: `BASELINE.yaml` `c1_u2_gate_and_bundle`.
+  *(Dated 2026-10-10 by the closeout, on two dates it should not blur. The authorization and most of the work carry
+  2026-10-09; the product commit `facf287` (`2026-10-10T00:45:10-07:00`), the docs-only successor `2859bb2`
+  (`01:56:39-07:00`) and both CI runs — #96 created `2026-10-10T08:18:23Z`, #97 `09:55:15Z` — carry 2026-10-10, so
+  where a C1-U2 document says "ran on 2026-10-09", read the day the unit opened. #97 is the run taken at the head a
+  reader now holds: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
+  lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs.)*
 - **A0 PRODUCT TRUTHFULNESS CORRECTIVE ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE` throughout and
   is `NONE` now.** *FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0* was delivered as a file,
   archived verbatim at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt` (18,845 bytes, 252

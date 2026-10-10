@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-08"
+last_updated: "2026-10-10"
 ---
 
 # FirmwareSight v0.6.0
@@ -767,7 +767,9 @@ compatible upgrade exists inside that pin.
 12. `.ai/ACTIVE_TASK.md` — currently `NONE`: G2 closed `PASS` on 2026-10-01 and P5 productization closed
     `PASS_COMPLETE` on 2026-10-06, so the MVP engineering candidate is complete and productized to P5's
     engineering scope. **No next track is authorized by either closure**; V1 own-artifact validation, B1, RC
-    and GA each need their own architect decision
+    and GA each need their own architect decision *(dated 2026-10-10: three more authorities ran since that
+    sentence was written — A0, the `ADR-0030` / `04_TECH/28` freeze and the two `C1` library units — the
+    pointer returned to `NONE` after each, and the first entry under Next work is that record)*
 13. `G2_VALIDATION/G2_EXIT_CHECKLIST.md` — the whole-MVP verdict, box by box
 13a. `POST_G2_E2E_REMEDIATION/EXIT_CHECKLIST.md` — the three real-desktop findings, each box settled by
      the test, mutation proof or desktop measurement that closed it
@@ -804,6 +806,33 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 `10_AUDIT/SOURCE_PROMPTS/README.md`.
 
 ## Next work
+
+**`active_task: NONE`, and the C1 track is two library units deep — with no user entry.** Two authorities arrived on
+2026-10-09. 《A0 Truthfulness Corrective》 (`A0_PRODUCT_TRUTHFULNESS_CORRECTIVE`) closed **4 / 4 FIXED** at
+`c674617` + `d41284e`, read 10 of 10 on CI run #90 (`37922697253`), making four user-facing claims match what the
+pipeline actually proves: object attribution, unsupported-format remediation copy, Compare's ranking basis, and
+Overview's real rule id. The second authority answered the long-open BIN/HEX range question: **`ADR-0030` accepts
+Option C1**, release-attached byte evidence, with `04_TECH/28` freezing the design — an attached `.bin` or Intel HEX
+file is recorded as raw bytes, size and SHA-256 under a *declared* kind, bound into the Gate run identity and the
+release identity, and verified into the bundle, while Analyze stays ELF-plus-optional-MAP, an attachment's build
+provenance stays permanently `Unknown`, and the Intel HEX address-span promise is **withdrawn, not deferred**. Two
+units then ran: `C1-U1` (attachment data + Gate identity + migration `0006`, `SCHEMA_VERSION` 6) is **`COMPLETE`** at
+`8e2aab9` + `b9cc3e2` + `1b33bbc`, and `C1-U2` (attachments satisfying Gate rules and entering a verified Release
+Bundle, the six-link byte chain L-1…L-6) is **`READY_FOR_ARCHITECT_REVIEW`** at `facf287` + its docs-only successor
+`2859bb2`, each read **10 of 10** on CI runs #96 (`38037417546`) and #97 (`38043088870`) with every job green on its
+first attempt. **None of it is reachable by a person:** no UI control, no `--attach`, no IPC command, so
+`BIN_HEX_RELEASE_ATTACH` is `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1-U3` (portable contract) and `C1-U4` (every
+surface a person touches) stay `NOT_AUTHORIZED / NOT_STARTED`, and both rounds stay `NOT_RUNTIME_VERIFIED` — green CI
+on a library build is not installed verification, and no artifact from either run was downloaded or launched. Figures
+at the current head `2859bb2`, taken from run #97's own job logs: **953 Rust on the Windows job and 952 on the Ubuntu
+one** across the same 48 `test result:` lines (one U2 case is `#[cfg(windows)]`), **295 UI in 9 files** on both UI
+jobs, gate 17 of 17 with drift 8/8, deny 1/1 and package 4/4, and the ADR-0029 baseline verifier `RESULT PASS` at
+917 tree lines / 787 entries / 789 tracked paths. Unchanged elsewhere, and unchanged by all of the above: `P5
+PASS_COMPLETE`, `G2 PASS`, stage `U1` closed with its guarded 25-item tally, V1 paused at **0 eligible external
+sessions** with the cohort still `11573661113` at `41bb6a36` (every CI artifact after it is validation output, not the
+cohort), product `0.6.0 MVP_CANDIDATE`, licence `PENDING_OWNER_CONFIRMATION`, and B1 / RC / GA / signing / distribution
+still unauthorized. The single current answer is `.ai/ACTIVE_TASK.md`'s live pointer and `.ai/CURRENT_STATE.md`; the
+open questions that belong to the Architect rather than to an implementer are the four findings in `04_TECH/28` §14.
 
 **`active_task: NONE`, and V1's cohort build is re-frozen.** Later on 2026-10-08 the owner delivered
 *FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0* inline, granting **only** `V1_COHORT_REFREEZE`:

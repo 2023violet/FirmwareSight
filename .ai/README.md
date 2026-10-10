@@ -165,7 +165,8 @@ the newer artifact's bytes (NSIS 3,896,257 bytes `9a51e86a…`) because the reco
 read. **Dated later on 2026-10-08:** the separate authority that recommendation asked for then arrived, and the cohort
 build did move to that re-verified artifact — the sentence in this entry that said "the F3 artifact is still the frozen
 cohort build" was true of the recording round and is superseded by the re-freeze entry above it, not by this one.
-**Dated 2026-10-09, and this is the live pointer for the two test figures:** the A0 truthfulness corrective ran under its
+**Dated 2026-10-09, and this is a dated record rather than the live pointer — the `C1-U2` clause further down this
+chain carries the live figures:** the A0 truthfulness corrective ran under its
 own owner-authorized prompt and moved the counts to **870 Rust across the same 47 result lines / 295 UI in 9 files**, on
 the same 17-step gate with no `SKIP` — the +2 Rust are A0-01's and A0-02's regressions in
 `crates/firmwaresight-artifact/tests/p0_acceptance.rs`, the +4 UI are A0-03's in `compare.test.tsx` and A0-04's three in
@@ -173,7 +174,8 @@ the same 17-step gate with no `SKIP` — the +2 Rust are A0-01's and A0-02's reg
 Rust / 225 UI in 8 files" and "Counts unmoved at 868 / 291", is that round's own dated record and is kept as written.
 A0 opened no stage: `active_task` was `NONE` before it and is `NONE` now, and its report is
 `A0_TRUTHFULNESS_VALIDATION/A0_CORRECTIVE_REPORT.md` ·
-**Dated later on 2026-10-09, and this is the live pointer for the BIN/HEX range question:** the Owner delivered
+**Dated later on 2026-10-09, and this is a dated record rather than the live pointer — the `C1-U2` clause further down
+this chain carries the live state word:** the Owner delivered
 《FirmwareSight — Option C1 / Release-Attached Byte Evidence｜产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权
 v1.0》 and asked for it to be executed, which its §0 makes into exactly two decisions —
 `OWNER_PRODUCT_DIRECTION = OPTION_C1` and `OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY`. `ADR-0030`
@@ -186,16 +188,17 @@ ELF-plus-optional-MAP and an attachment's provenance to the build stays `Unknown
 compatibility matrix keeps `UNSUPPORTED`, none of `C1-U1`…`C1-U4` was run, nothing was installed so the round is
 `NOT_RUNTIME_VERIFIED`, and V1's cohort build is still `11573661113` at `41bb6a36`. No product byte moved, so **the two
 test figures above are unchanged by this round**, and `active_task` was `NONE` when it arrived and is `NONE` now ·
-**Dated later on 2026-10-09, and this is the live state of the BIN/HEX range question:** the Owner then authorized
+**Dated later on 2026-10-09, and this was the live state of the BIN/HEX range question until `C1-U2` landed two
+paragraphs below:** the Owner then authorized
 C1-U1 — 《C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权 v1.0》, archived with its ERR-BUNDLE
 continuation — and it was executed, so attachment facts, the `/1`-frozen `/2`-when-non-empty Gate identity,
 `observe_attachment()` with three typed refusals and migration `0006_release_attachments.sql` (`SCHEMA_VERSION` 6) now
 exist in code. **Identity is not a feature and not satisfaction:** no UI, CLI flag or IPC command offers a file, so
 `required = ["bin"] / ["hex"]` still `BLOCK`s and a bundle still cannot ship BIN or HEX.
 `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1_U2_U3_U4 = NOT_AUTHORIZED / NOT_STARTED`,
-`BIN_HEX_ANALYSIS` stays `UNSUPPORTED`, and the matrix keeps its status column. **The present counts are 900 Rust across
+`BIN_HEX_ANALYSIS` stays `UNSUPPORTED`, and the matrix keeps its status column. **The counts at that head were 900 Rust across
 48 result lines / 295 UI in 9 files** on a 17-of-17 gate, and `active_task` is `NONE` ·
-**Dated later on 2026-10-09, and this is the live pointer for the two test figures:** the Owner then authorized the second
+**Dated 2026-10-09 into 2026-10-10, and this is the live pointer for the two test figures:** the Owner then authorized the second
 unit and it was executed — 《FirmwareSight — C1-U2｜Gate + Bundle Attachment Safety Chain, Architect execution
 authorization v1.0》 (`CANONICAL_UNIT: C1_U2_GATE_BUNDLE_ATTACHED_BYTE_CONSISTENCY`), archived at
 `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt` as a **reconstruction** whose

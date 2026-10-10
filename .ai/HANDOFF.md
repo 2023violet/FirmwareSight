@@ -422,8 +422,8 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
 
 ## What the code does and how it is proven
 
-- **Present figures, measured on 2026-10-06 at the Commit F3 tree: 868 Rust tests across 47 executables and
-  225 UI tests in 8 files**, on a gate of **17 steps** (`rust` 3 + `frontend` 5 + `drift` 8 + `deny` 1) plus
+- **Figures on the Commit F3 tree, measured on 2026-10-06 — a dated record, the live ones being the next bullet:
+  868 Rust tests across 47 executables and 225 UI tests in 8 files**, on a gate of **17 steps** (`rust` 3 + `frontend` 5 + `drift` 8 + `deny` 1) plus
   3 under `--only core-smoke` and 4 under `--only package`, all green locally with **no `SKIP`**. Rust has not
   moved since Commit E; the UI line is 210 → 217 (Commit E) → 219 (F1's two L15 caption cases) → **225**
   (F2R1's three contracts and their guards: 1 in `details.test.tsx`, 2 in `history.test.tsx`, 1 in
@@ -436,7 +436,10 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   `FAIL`, plus 3 under `--only core-smoke` and 4 under `--only package`. **This 953 is a Windows-host figure, and remote
   CI proved the qualifier:** at product head `facf287` run `38037417546` (#96, attempt 1, 10 of 10 jobs green
   individually) the `Rust (windows-latest)` job printed **953 across 48 lines** and `Rust (ubuntu-latest)` printed
-  **952 across 48 lines**, 0 failed on both, while both `Desktop UI` jobs printed **295 in 9 files**. One test explains
+  **952 across 48 lines**, 0 failed on both, while both `Desktop UI` jobs printed **295 in 9 files**. Run #97
+  (`38043088870`) reprints all of it at the docs-only successor head `2859bb2` — 953 and 952 across the same 48 lines,
+  295 in 9 files on both UI jobs, read from that run's own job logs — so the head a reader holds now is a head these
+  numbers were measured on, not only its predecessor. One test explains
   the whole difference — `one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice` is
   `#[cfg(windows)]` (`bundle_builder.rs:2324`), so that target reports 78 on Windows and 77 on Ubuntu — and no
   `#[cfg(unix)]` test exists, so nothing runs only on Linux. Say "953 on Windows / 952 on POSIX", never "953 everywhere";

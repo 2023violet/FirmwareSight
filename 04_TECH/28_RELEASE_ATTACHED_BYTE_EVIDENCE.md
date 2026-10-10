@@ -23,6 +23,19 @@ behaviour a C1 unit must inherit or extend, never one it may quietly drop. Statu
 **`BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_IMPLEMENTED`**, and this document is `NOT_RUNTIME_VERIFIED`: no
 build, install or UI run was performed to write it.
 
+*(Dated 2026-10-10, added by the closeout that reconciled this file with the tree — the four lines above are the freeze
+day's own words and are kept unrewritten, but they are no longer the current state and a reader who stops here will
+act on them wrongly.* §14 is the addendum: `C1-U1` is `COMPLETE` and `C1-U2` is `READY_FOR_ARCHITECT_REVIEW`, so at
+head `2859bb2` attachment facts exist in storage, carry the Gate run identity, can satisfy a Gate requirement and can
+enter a verified Release Bundle. The live state word is therefore
+**`DESIGN_APPROVED / NOT_USER_AVAILABLE`**, not `NOT_IMPLEMENTED`, and the two things this paragraph still gets right
+are narrower than they look: no person can reach any of it, and nothing was built, installed or launched, so
+`NOT_RUNTIME_VERIFIED` stands in exactly the sense written here. *One more consequence of the same two units: every
+path and line number above was read at head `d41284e`, and `C1-U1`/`C1-U2` rewrote large regions of
+`firmwaresight-core/src/domain/gate.rs`, `firmwaresight-project/src/bundle.rs`, `.../src/evidence.rs` and
+`firmwaresight-report/src/release.rs`, so a citation into those four files must be re-verified at the current head
+before anyone relies on its line number.)*
+
 Two vocabulary notes carried forward deliberately:
 
 - The four implementation units are named **`C1-U1`…`C1-U4`**. The Owner's authorization named them U1–U4; the `C1-`

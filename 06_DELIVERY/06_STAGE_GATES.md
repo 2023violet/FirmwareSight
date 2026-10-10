@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Delivery"
-last_updated: "2026-10-08"
+last_updated: "2026-10-10"
 ---
 
 # Stage Gates
@@ -301,6 +301,32 @@ U1 UI Productization Convergence — CLOSED 2026-10-08 by the Architect: PASS_CO
                               `U1_VALIDATION/`; machine state at `BASELINE.yaml`
                               `u1_execution.architect_final_verdict`. This line is not G3, B1, RC1 or GA1, and
                               closing U1 did not make it one
+C1 Release-Attached Byte Evidence — a product-scope RANGE DECISION registered here because its identifier and its
+                              unit names are used by automation and by Agents, not a stage gate. On 2026-10-09 the
+                              owner decided the long-open BIN/HEX range question: `ADR-0030` accepts Option C1 and
+                              `04_TECH/28` freezes the design, while `ADR-0006` receives a 限定性
+                              supersession of its "BIN/Intel HEX 基础 metadata" clause only — its ELF, MAP and Git
+                              provenance decisions stand unchanged — and the Intel HEX address-span promise is
+                              withdrawn.
+                              Two of its four units have run: `C1-U1` Data+Identity is `COMPLETE` (8e2aab9 + b9cc3e2
+                              + 1b33bbc) and `C1-U2` Gate+Bundle is `READY_FOR_ARCHITECT_REVIEW` (facf287 + 2859bb2,
+                              remote runs #96 and #97 each 10 of 10 jobs, attempt 1). `C1-U3` Contract+Regression and
+                              `C1-U4` UI+CLI are `NOT_AUTHORIZED / NOT_STARTED`, so this line describes a library
+                              capability no person can reach: no UI control, no `--attach`, no IPC command,
+                              `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`, `BIN_HEX_ANALYSIS`
+                              still `UNSUPPORTED`, and the P5 compatibility matrix keeps its `UNSUPPORTED` status
+                              column. It is not G3, P6, B1, RC1 or GA1; it closes no stage, resumes no V1, and
+                              authorizes no next unit — `04_TECH/28` §13's readiness matrix and each unit's own
+                              Architect prompt are the only sources of authorization. Its units carry the `C1-`
+                              prefix because bare `U1` is already the closed stage above — `04_TECH/28` §1 says so
+                              in its own vocabulary note. Evidence `C1_VALIDATION/`, machine state `BASELINE.yaml`
+                              `c1_direction_and_design_freeze` / `c1_u1_data_and_identity` /
+                              `c1_u2_gate_and_bundle`; the live state word is `.ai/ACTIVE_TASK.md`'s opening pointer
+                              and `.ai/CURRENT_STATE.md`. The owner decision that opened this range also closed the
+                              four A0 truthfulness items (`A0_TRUTHFULNESS_VALIDATION/`,
+                              `BASELINE.yaml` `a0_truthfulness_corrective`, 4 / 4 `FIXED`), and that corrective's
+                              cohort consequence stands: the frozen V1 bytes predate A0, so participants will still
+                              see the pre-A0 refusal copy.
 B1 Private Beta
 RC1 Release Candidate
 GA1 General Availability
