@@ -807,8 +807,11 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 
 ## Next work
 
-**`active_task: NONE`, and the C1 track is two library units deep — with no user entry.** Two authorities arrived on
-2026-10-09. 《A0 Truthfulness Corrective》 (`A0_PRODUCT_TRUTHFULNESS_CORRECTIVE`) closed **4 / 4 FIXED** at
+**`active_task: NONE`, and the C1 track is two library units deep — with no user entry.** Four separate authorities
+arrived on 2026-10-09, in this order: the A0 corrective, the C1 direction decision, `C1-U1`, then `C1-U2` (a fifth
+2026-10-09 entry sits in `10_AUDIT/SOURCE_PROMPTS/README.md` and says of itself that it is an in-flight continuation,
+"explicitly not a new authorization").
+《A0 Truthfulness Corrective》 (`A0_PRODUCT_TRUTHFULNESS_CORRECTIVE`) closed **4 / 4 FIXED** at
 `c674617` + `d41284e`, read 10 of 10 on CI run #90 (`37922697253`), making four user-facing claims match what the
 pipeline actually proves: object attribution, unsupported-format remediation copy, Compare's ranking basis, and
 Overview's real rule id. The second authority answered the long-open BIN/HEX range question: **`ADR-0030` accepts

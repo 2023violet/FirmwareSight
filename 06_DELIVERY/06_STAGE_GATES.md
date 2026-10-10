@@ -322,11 +322,11 @@ C1 Release-Attached Byte Evidence — a product-scope RANGE DECISION registered 
                               in its own vocabulary note. Evidence `C1_VALIDATION/`, machine state `BASELINE.yaml`
                               `c1_direction_and_design_freeze` / `c1_u1_data_and_identity` /
                               `c1_u2_gate_and_bundle`; the live state word is `.ai/ACTIVE_TASK.md`'s opening pointer
-                              and `.ai/CURRENT_STATE.md`. The owner decision that opened this range also closed the
-                              four A0 truthfulness items (`A0_TRUTHFULNESS_VALIDATION/`,
-                              `BASELINE.yaml` `a0_truthfulness_corrective`, 4 / 4 `FIXED`), and that corrective's
-                              cohort consequence stands: the frozen V1 bytes predate A0, so participants will still
-                              see the pre-A0 refusal copy.
+                              and `.ai/CURRENT_STATE.md`. Earlier the same day, under a separate authority, the A0
+                              truthfulness corrective closed 4 / 4 `FIXED` (`A0_TRUTHFULNESS_VALIDATION/`,
+                              `BASELINE.yaml` `a0_truthfulness_corrective`); it is recorded here because the C1 line
+                              and the A0 line share one cohort consequence that outlasts both: the frozen V1 bytes
+                              predate A0, so participants will still see the pre-A0 refusal copy.
 B1 Private Beta
 RC1 Release Candidate
 GA1 General Availability
