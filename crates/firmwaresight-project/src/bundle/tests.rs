@@ -6,6 +6,9 @@
 
 use std::path::{Path, PathBuf};
 
+use firmwaresight_core::domain::gate::{GateGitFacts, GateUnknownEvidence};
+use firmwaresight_core::domain::identity::Fact;
+
 use super::*;
 
 /// A throwaway directory, removed when the test ends.
@@ -49,6 +52,7 @@ impl Drop for Temp {
 
 fn row(kind: ArtifactKind, raw_path: &str, marker: char) -> VerifiedRow {
     VerifiedRow {
+        class: SourceClass::Snapshot,
         kind,
         sha256: Sha256::parse(&format!("{marker}{}", "f".repeat(63))).expect("a test digest"),
         byte_size: 4_096,
@@ -267,13 +271,13 @@ fn a_staled_plan_names_what_moved_and_never_a_source_path() {
         run_id: "gate-1".to_owned(),
         policy_sha256: "policy".to_owned(),
         acceptances_sha256: "acceptances".to_owned(),
-        sources: vec![(r"C:\work\build\firmware.elf".to_owned(), "1".repeat(64), 1)],
+        sources: vec![snapshot_row(r"C:\work\build\firmware.elf", "1", 1)],
         notes: None,
     };
 
     // A source whose bytes moved keeps its own code, because the remediation is about the file.
     let moved = InputChecks {
-        sources: vec![(r"C:\work\build\firmware.elf".to_owned(), "2".repeat(64), 2)],
+        sources: vec![snapshot_row(r"C:\work\build\firmware.elf", "2", 2)],
         ..planned.clone()
     };
     let error = planned
@@ -340,4 +344,212 @@ fn a_staled_plan_names_what_moved_and_never_a_source_path() {
         "{error}"
     );
     assert_eq!(error.code(), "ERR-BUNDLE-6104");
+}
+
+/// One staleness row, spelled the way the engine builds them.
+fn snapshot_row(path: &str, digest: &str, size: u64) -> SourceRow {
+    source_row(SourceClass::Snapshot, path, digest, size)
+}
+
+fn source_row(class: SourceClass, path: &str, digest: &str, size: u64) -> SourceRow {
+    SourceRow {
+        class,
+        path: path.to_owned(),
+        digest: digest.repeat(8),
+        size,
+    }
+}
+
+#[test]
+fn a_set_change_is_named_as_one_and_never_as_a_file_whose_bytes_moved() {
+    let preview = vec![
+        source_row(SourceClass::Snapshot, "build/firmware.elf", "1", 1),
+        source_row(SourceClass::Attachment, "build/attached/app.bin", "2", 2),
+        source_row(SourceClass::Attachment, "build/attached/boot.hex", "3", 3),
+    ];
+
+    // One attached file withdrawn: every remaining row is byte-for-byte the same, so the only fact is that the
+    // set lost a member. The reading this replaced compared rows by position and named a file that had not
+    // moved.
+    let export: Vec<SourceRow> = preview
+        .iter()
+        .filter(|r| r.path != "build/attached/boot.hex")
+        .cloned()
+        .collect();
+    assert_eq!(
+        attachment_set_change(&preview, &export),
+        Some(("removed", "boot.hex".to_owned()))
+    );
+
+    // One added, in the order the engine lists it.
+    let mut longer = preview.clone();
+    longer.push(source_row(
+        SourceClass::Attachment,
+        "build/attached/x.bin",
+        "4",
+        4,
+    ));
+    assert_eq!(
+        attachment_set_change(&preview, &longer),
+        Some(("added", "x.bin".to_owned()))
+    );
+
+    // Same bytes, new path: a rename, which moves no verdict.
+    let renamed: Vec<SourceRow> = preview
+        .iter()
+        .map(|r| {
+            if r.path == "build/attached/app.bin" {
+                source_row(
+                    SourceClass::Attachment,
+                    "build/attached/renamed.bin",
+                    "2",
+                    2,
+                )
+            } else {
+                r.clone()
+            }
+        })
+        .collect();
+    assert_eq!(
+        attachment_set_change(&preview, &renamed),
+        Some(("renamed", "renamed.bin".to_owned()))
+    );
+
+    // Nothing came or went: the set rule has no story to tell, and the bytes rule keeps its own.
+    let rewritten: Vec<SourceRow> = preview
+        .iter()
+        .map(|r| {
+            if r.class == SourceClass::Attachment {
+                SourceRow {
+                    digest: "9".repeat(64),
+                    ..r.clone()
+                }
+            } else {
+                r.clone()
+            }
+        })
+        .collect();
+    assert_eq!(attachment_set_change(&preview, &rewritten), None);
+    assert_eq!(
+        changed_leaf(&preview, &rewritten),
+        "app.bin".to_owned(),
+        "the first file whose bytes moved is the one to name"
+    );
+}
+
+#[test]
+fn a_snapshot_row_is_never_read_as_a_set_change() {
+    // A run's snapshot is fixed, so its rows cannot come or go. Counted as set members, one rewritten artifact
+    // would look like the release owner changing their mind about what ships.
+    let preview = vec![
+        source_row(SourceClass::Snapshot, "build/firmware.elf", "1", 1),
+        source_row(SourceClass::Attachment, "build/attached/app.bin", "2", 2),
+    ];
+    let withdrawn = vec![source_row(
+        SourceClass::Snapshot,
+        "build/firmware.elf",
+        "1",
+        1,
+    )];
+    assert_eq!(
+        attachment_set_change(&preview, &withdrawn),
+        Some(("removed", "app.bin".to_owned())),
+        "the attachment that went is the one to name"
+    );
+    // Two lists whose only difference is that a snapshot row is gone or rewritten: no attachment came or went,
+    // so the set rule has nothing to say and the bytes rule keeps its own code.
+    let rewritten_snapshot = vec![
+        source_row(SourceClass::Snapshot, "build/firmware.elf", "5", 1),
+        source_row(SourceClass::Attachment, "build/attached/app.bin", "2", 2),
+    ];
+    assert_eq!(
+        attachment_set_change(&preview, &rewritten_snapshot),
+        None,
+        "one rewritten artifact is not the release owner changing what ships"
+    );
+    // The renamed pair is keyed by path, so a file that came or went cannot shift the blame onto its neighbour.
+    let shifted: Vec<SourceRow> = preview.iter().skip(1).cloned().collect();
+    assert_eq!(changed_leaf(&preview, &shifted), "a shipped artifact");
+}
+
+#[test]
+fn an_attachment_the_judged_context_does_not_carry_is_refused() {
+    // The three guards in `verify_attachments` are structural: no public call can hand it an attached row the
+    // context never bound, a kind a release cannot attach, or a basis no observation writes. They are tested
+    // here because the refusal they carry is what proves L-2 and L-4 still hold if a later caller wires the two
+    // halves together in a different order.
+    let temp = Temp::new("verify-attachments");
+    let path = temp.child("app.bin");
+    std::fs::write(&path, b"attached bytes").expect("the file is written");
+    let digest = fingerprint::file_sha256(&path).expect("the file is hashed");
+    let attachment = ReleaseAttachment {
+        file_name: "app.bin".to_owned(),
+        kind: ArtifactKind::Bin,
+        sha256: Fact::known(digest.clone()),
+        byte_size: 12,
+        kind_basis: KindBasis::Declared,
+    };
+    let attached = vec![AttachedSource {
+        path: path.clone(),
+        attachment: attachment.clone(),
+    }];
+    let bound = GateContext {
+        attachments: vec![attachment.as_gate_fact()],
+        ..empty_context()
+    };
+    let rows =
+        verify_attachments(&attached, &bound).expect("the row the context carries is verified");
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].class, SourceClass::Attachment);
+    assert_eq!(rows[0].sha256.hex(), digest);
+    assert_eq!(rows[0].source, path);
+
+    // The same row against a context that never saw it.
+    let error = verify_attachments(&attached, &empty_context())
+        .expect_err("an unbound attachment is not evidence");
+    assert_eq!(error.code(), "ERR-INTERNAL-9004");
+    assert!(error.to_string().contains("no such row"), "{error}");
+    assert!(
+        !error.to_string().contains(path.to_string_lossy().as_ref()),
+        "the refusal carried a host path: {error}"
+    );
+
+    // A kind a release cannot attach, and a basis nothing here writes, are refused the same way.
+    let elf_kind = ReleaseAttachment {
+        kind: ArtifactKind::Elf,
+        ..attachment.clone()
+    };
+    let derived = ReleaseAttachment {
+        kind_basis: KindBasis::DerivedFromLeadingBytes("MZ".to_owned()),
+        ..attachment.clone()
+    };
+    for altered in [&elf_kind, &derived] {
+        let rows = vec![AttachedSource {
+            path: path.clone(),
+            attachment: altered.clone(),
+        }];
+        let context = GateContext {
+            attachments: vec![altered.as_gate_fact()],
+            ..empty_context()
+        };
+        let error = verify_attachments(&rows, &context)
+            .expect_err("a fact no observation can produce is refused");
+        assert_eq!(error.code(), "ERR-INTERNAL-9004", "{error}");
+    }
+}
+
+/// The smallest context this module accepts, with no attachment rows in it.
+fn empty_context() -> GateContext {
+    GateContext {
+        snapshot_id: "snap-test".to_owned(),
+        artifacts: Vec::new(),
+        attachments: Vec::new(),
+        memory: None,
+        git: GateGitFacts::unavailable("no repository was read for this test"),
+        version: None,
+        release_notes: None,
+        growth: GateGrowthFacts::without_baseline(),
+        unknown_evidence: GateUnknownEvidence::default(),
+        policy: GatePolicy::default(),
+    }
 }

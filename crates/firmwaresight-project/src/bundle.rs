@@ -41,7 +41,7 @@ use firmwaresight_core::domain::build_snapshot::BuildSnapshot;
 use firmwaresight_core::domain::diff::DiffResult;
 use firmwaresight_core::domain::gate::{
     EffectiveSeverity, FindingState, GateContext, GateEvaluation, GateFileStatus, GateGrowthFacts,
-    GatePolicy, GateRuleId,
+    GatePolicy, GateRuleId, KindBasis,
 };
 use firmwaresight_core::domain::identity::{ArtifactKind, Sha256};
 use firmwaresight_core::domain::release::{
@@ -57,7 +57,9 @@ use firmwaresight_report::diff::DiffResultDto;
 use firmwaresight_report::gate::{
     ACCEPTANCE_ORIGINAL_STATE, AcceptanceDto, AcceptedReviewsDto, GateResultsDto,
 };
-use firmwaresight_report::release::{ManifestError, ManifestFileDto, ReleaseManifestDto};
+use firmwaresight_report::release::{
+    ManifestAttachmentDto, ManifestError, ManifestFileDto, ReleaseManifestDto,
+};
 use firmwaresight_report::release_render::{
     self, CompareSummary, REPORT_GROWTH_ROWS, ReleaseBundleReport,
 };
@@ -65,7 +67,9 @@ use firmwaresight_report::render::document_json;
 use firmwaresight_report::schemas;
 
 use crate::config::LoadedProject;
-use crate::evidence::{self, SnapshotFacts};
+use crate::evidence::{
+    self, AttachmentError, AttachmentSelection, ReleaseAttachment, SnapshotFacts,
+};
 use crate::fingerprint;
 use crate::git::GitObservation;
 
@@ -129,6 +133,18 @@ pub enum BundleError {
     #[error("the source of `{name}` is not the bytes the build recorded: {detail}")]
     SourceArtifactChanged { name: String, detail: String },
 
+    /// A release attachment could not be admitted: E-1, E-2 or E-3 as `observe_attachment` refused them.
+    /// Carried through rather than re-described, because the refusal a person acts on is the observation's
+    /// own, and its code is already registered (`04_TECH/28` §4.3).
+    #[error(transparent)]
+    Attachment(#[from] AttachmentError),
+
+    /// The set of attachments moved between the preview and the export (§28's other half): a file was added,
+    /// removed, or renamed with its bytes intact. `SourceArtifactChanged` cannot say this, because it blames
+    /// one file for a change in the *set* — and the preview named no such file.
+    #[error("the release attachment set changed after the preview: `{name}` was {change}")]
+    AttachmentSetChanged { name: String, change: &'static str },
+
     /// The Release Notes are not the bytes the recomputed context observed (§24).
     #[error("the Release Notes are not the bytes the Gate observed: {detail}")]
     ReleaseNotesChanged { detail: String },
@@ -171,6 +187,8 @@ impl BundleError {
             Self::Index(_) | Self::VerificationFailed { .. } => "ERR-BUNDLE-6109",
             Self::GateContextChanged { .. } => "ERR-BUNDLE-6102",
             Self::SourceArtifactChanged { .. } => "ERR-BUNDLE-6103",
+            Self::Attachment(error) => error.code(),
+            Self::AttachmentSetChanged { .. } => "ERR-BUNDLE-6118",
             Self::ReleaseNotesChanged { .. } => "ERR-BUNDLE-6104",
             Self::PlanStale { .. } => "ERR-BUNDLE-6105",
             Self::DestinationExists { .. } => "ERR-BUNDLE-6106",
@@ -201,6 +219,12 @@ impl BundleError {
             Self::SourceArtifactChanged { .. } => {
                 "re-analyze the intended artifact, or restore the exact bytes. A snapshot's hash is never \
                  updated to match a file that moved"
+            }
+            Self::Attachment(error) => error.remediation(),
+            Self::AttachmentSetChanged { .. } => {
+                "prepare the bundle again over the files this release actually ships, and recheck what was \
+                 attached: a preview is a statement about a set of bytes, and a set that moved is not that \
+                 preview"
             }
             Self::ReleaseNotesChanged { .. } => {
                 "restore the notes the Gate read, or run the Gate again over the new ones"
@@ -362,6 +386,10 @@ impl BundlePlan {
     /// existing bundle directory (§30), honored only for a directory recognizable as a FirmwareSight release
     /// bundle (§32).
     ///
+    /// This is the attachment-free entry point; a release that ships attached bytes calls
+    /// [`BundlePlan::publish_with_attachments`] with the same selections it previewed with. Both go through one
+    /// `observe`, so a rule cannot be stated for preview and forgotten at export.
+    ///
     /// # Errors
     ///
     /// [`BundleError::PlanStale`], [`BundleError::SourceArtifactChanged`],
@@ -374,7 +402,29 @@ impl BundlePlan {
         parent: &Path,
         overwrite: bool,
     ) -> Result<BundleOutcome, BundleError> {
-        let again = observe(fresh)?;
+        self.publish_with_attachments(fresh, &[], parent, overwrite)
+    }
+
+    /// Write a bundle that ships release attachments, re-collecting the same selection list the preview used.
+    ///
+    /// The attachment half of `fresh` is re-observed here exactly as it was in [`prepare_with_attachments`]:
+    /// the same `observe_attachment`, the same `verify_attachments`, the same `InputChecks` comparison. What a
+    /// person previewed and what appears in their folder are therefore produced by one set of rules, and an
+    /// attachment that was added, removed, renamed or rewritten in between stops the export before a byte is
+    /// written.
+    ///
+    /// # Errors
+    ///
+    /// Every error [`BundlePlan::publish`] can return, plus [`BundleError::Attachment`] and
+    /// [`BundleError::AttachmentSetChanged`].
+    pub fn publish_with_attachments(
+        &self,
+        fresh: &BundleRequest<'_>,
+        attachments: &[AttachmentSelection],
+        parent: &Path,
+        overwrite: bool,
+    ) -> Result<BundleOutcome, BundleError> {
+        let again = observe(fresh, attachments)?;
         self.checks.compare_with(&again.checks)?;
 
         let display = self.content.directory_name.clone();
@@ -484,7 +534,26 @@ pub struct BundleVerification {
 ///
 /// Any [`BundleError`] except the destination-dependent ones: preparation has not looked at a folder yet.
 pub fn prepare(request: &BundleRequest<'_>) -> Result<BundlePlan, BundleError> {
-    let observed = observe(request)?;
+    prepare_with_attachments(request, &[])
+}
+
+/// Prepare a bundle that also ships release attachments (`04_TECH/28` §3's planning row).
+///
+/// One function with this crate's attachment-free sibling: the selection list is observed by
+/// [`evidence::observe_attachment`], bound into the context the Gate verdict is computed from, verified by
+/// [`BundlePlan::publish_with_attachments`]'s own re-read, and shipped under the collision-safe leaf
+/// `bundle_names` gives it. There is no second planning path, so there is no second set of rules.
+///
+/// # Errors
+///
+/// Every error [`prepare`] can return, plus [`BundleError::Attachment`] when a chosen file cannot be admitted
+/// and [`BundleError::Index`] when the attachment disclosure would not validate against the manifest's
+/// contract.
+pub fn prepare_with_attachments(
+    request: &BundleRequest<'_>,
+    attachments: &[AttachmentSelection],
+) -> Result<BundlePlan, BundleError> {
+    let observed = observe(request, attachments)?;
     Ok(BundlePlan {
         preview: observed.content.preview(next_plan_id()),
         content: observed.content,
@@ -507,10 +576,30 @@ struct InputChecks {
     run_id: String,
     policy_sha256: String,
     acceptances_sha256: String,
-    /// `(source path as recorded, digest, size)` for every shipped row, in snapshot order.
-    sources: Vec<(String, String, u64)>,
+    /// Every shipped file: the snapshot's rows in snapshot order, then the attachments in the order their
+    /// recorded paths sort into. A caller that hands the same set over in a different order is describing the
+    /// same release, so the order here is a property of the engine and not of the caller.
+    sources: Vec<SourceRow>,
     /// `(project-relative notes path, digest, size)`, when the policy asked for notes at all.
     notes: Option<(String, String, u64)>,
+}
+
+/// One shipped file as the staleness rule knows it: which evidence class it came from, and the three facts
+/// that identify its bytes. The class matters because a *set* can only gain or lose members on one side of
+/// that line — a snapshot's rows are fixed by the snapshot the plan was built from.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct SourceRow {
+    class: SourceClass,
+    /// The path as the snapshot or the caller recorded it. Never leaves this crate.
+    path: String,
+    digest: String,
+    size: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SourceClass {
+    Snapshot,
+    Attachment,
 }
 
 impl InputChecks {
@@ -518,6 +607,12 @@ impl InputChecks {
     /// its own §51 code, because its remediation is about the file rather than about the plan.
     fn compare_with(&self, now: &Self) -> Result<(), BundleError> {
         if self.sources != now.sources {
+            // A file that came or went is not a file whose bytes moved, and saying which of the two happened
+            // is the whole content of E-4: the pairwise reading this replaced answered a set change with
+            // `SourceArtifactChanged`, blaming a name that had not changed at all.
+            if let Some((change, name)) = attachment_set_change(&self.sources, &now.sources) {
+                return Err(BundleError::AttachmentSetChanged { name, change });
+            }
             return Err(BundleError::SourceArtifactChanged {
                 name: changed_leaf(&self.sources, &now.sources),
                 detail: "the file was read again at export and is no longer the bytes the preview hashed"
@@ -550,19 +645,76 @@ fn stale(label: &str, now: &str) -> BundleError {
     }
 }
 
-/// The leaf of the shipped file whose bytes moved, for an error a person reads. Never its path.
-fn changed_leaf(earlier: &[(String, String, u64)], now: &[(String, String, u64)]) -> String {
-    earlier
-        .iter()
-        .zip(now)
-        .find(|(was, is)| was != is)
-        .map_or_else(
-            || "a shipped artifact".to_owned(),
-            |(was, _)| sanitize_leaf_name(&was.0),
-        )
+/// Whether the attachment *set* changed, as opposed to one attachment's bytes moving: the rows that gained or
+/// lost a member, and the one word that says which happened.
+///
+/// `None` means every path is on both sides and only bytes differ, which is `SourceArtifactChanged`'s story to
+/// tell. Snapshot rows are excluded from both sides by construction: a run's snapshot is fixed, so its rows
+/// cannot come or go, and reading them as members of a set would let one rewritten artifact look like a change
+/// of mind about what the release ships.
+///
+/// When several rows moved, the removal is named first and the addition next, each taken in the engine's own
+/// row order — snapshot order, then resolved-path order — so the same two calls always say the same word about
+/// the same pair of lists. A removal is the larger fact: the release owner is holding one file fewer than the
+/// preview promised, and no added file explains it away.
+/// The attachment rows of `rows` whose path has no partner of the same class in `other`.
+fn unpaired_attachments<'a>(rows: &'a [SourceRow], other: &[SourceRow]) -> Vec<&'a SourceRow> {
+    rows.iter()
+        .filter(|row| row.class == SourceClass::Attachment)
+        .filter(|row| {
+            !other
+                .iter()
+                .any(|candidate| candidate.class == row.class && candidate.path == row.path)
+        })
+        .collect()
 }
 
-fn observe(request: &BundleRequest<'_>) -> Result<Observation, BundleError> {
+fn attachment_set_change(
+    earlier: &[SourceRow],
+    now: &[SourceRow],
+) -> Option<(&'static str, String)> {
+    let gone = unpaired_attachments(earlier, now);
+    let arrived = unpaired_attachments(now, earlier);
+    if gone.is_empty() && arrived.is_empty() {
+        return None;
+    }
+    // One path gone and one path new, holding the same bytes, is the release owner renaming a file. The bytes
+    // the Gate judged are unchanged, which is why this is a stale *preview* and not a different verdict.
+    if let ([was], [is]) = (gone.as_slice(), arrived.as_slice())
+        && was.digest == is.digest
+        && was.size == is.size
+    {
+        return Some(("renamed", sanitize_leaf_name(&is.path)));
+    }
+    if let Some(was) = gone.first() {
+        return Some(("removed", sanitize_leaf_name(&was.path)));
+    }
+    arrived
+        .first()
+        .map(|is| ("added", sanitize_leaf_name(&is.path)))
+}
+
+/// The leaf of the shipped file whose bytes moved, for an error a person reads. Never its path.
+///
+/// Keyed by path rather than by position: an attachment list is a *set* the caller assembles, and a file that
+/// came or went shifts every row after it, so the position-for-position reading this replaced named whichever
+/// two files happened to line up — a file whose bytes had not moved at all.
+fn changed_leaf(earlier: &[SourceRow], now: &[SourceRow]) -> String {
+    earlier
+        .iter()
+        .find_map(|was| {
+            now.iter()
+                .find(|is| is.path == was.path)
+                .filter(|is| is.digest != was.digest || is.size != was.size)
+                .map(|_| sanitize_leaf_name(&was.path))
+        })
+        .unwrap_or_else(|| "a shipped artifact".to_owned())
+}
+
+fn observe(
+    request: &BundleRequest<'_>,
+    selections: &[AttachmentSelection],
+) -> Result<Observation, BundleError> {
     let policy = request.project.policy.clone();
     let target = SnapshotFacts::from_snapshot(request.snapshot);
 
@@ -585,13 +737,21 @@ fn observe(request: &BundleRequest<'_>) -> Result<Observation, BundleError> {
         }
         None => GateGrowthFacts::without_baseline(),
     };
-    let context = evidence::build_context(&evidence::GateRunRequest {
-        target: &target,
-        growth,
-        git: request.git,
-        policy: policy.clone(),
-        release_notes: notes.clone(),
-    });
+    let attached = observe_attachments(&request.project.root, selections)?;
+    let attachment_rows: Vec<ReleaseAttachment> = attached
+        .iter()
+        .map(|source| source.attachment.clone())
+        .collect();
+    let context = evidence::build_context_with_attachments(
+        &evidence::GateRunRequest {
+            target: &target,
+            growth,
+            git: request.git,
+            policy: policy.clone(),
+            release_notes: notes.clone(),
+        },
+        &attachment_rows,
+    );
 
     let run_id = fingerprint::run_id(&context);
     if let Some(selected) = request.selected_run_id
@@ -646,28 +806,44 @@ fn observe(request: &BundleRequest<'_>) -> Result<Observation, BundleError> {
 
     let (version, version_source) = resolve_version(&policy, &context, &evaluation)?;
 
-    // §22 then §23: read and check every source file, then name it safely inside the bundle.
-    let shipped = verify_sources(&request.project.root, request.snapshot, &context)?;
+    // §22 then §23: read and check every source file, then name it safely inside the bundle. The attachments
+    // are verified by a sibling of the same rule, not by a looser one, and both classes are named from one
+    // collision check, so `artifacts/app.bin` and `artifacts/firmware.bin` cannot overwrite each other.
+    let mut shipped = verify_sources(&request.project.root, request.snapshot, &context)?;
+    shipped.extend(verify_attachments(&attached, &context)?);
     let leaves = bundle_names(&shipped);
-    let mut artifacts = shipped
+    // Each row is paired with the leaf it ships under *before* the canonical sort, and the pair is what the
+    // index is written from later. Looking a row up by digest after the sort would match whichever copy of
+    // identical bytes came first, which is how one file's path could be written beside another's digest.
+    let mut paired: Vec<(ReleaseArtifact, usize)> = shipped
         .iter()
         .zip(&leaves)
-        .map(|(row, leaf)| ReleaseArtifact {
-            kind: row.kind,
-            file_name: leaf.clone(),
-            sha256: row.sha256.clone(),
-            byte_size: row.byte_size,
+        .enumerate()
+        .map(|(index, (row, leaf))| {
+            (
+                ReleaseArtifact {
+                    kind: row.kind,
+                    file_name: leaf.clone(),
+                    sha256: row.sha256.clone(),
+                    byte_size: row.byte_size,
+                },
+                index,
+            )
         })
-        .collect::<Vec<_>>();
+        .collect();
     // §52.11: canonical order is a property of the model, and the write order and the manifest both follow
     // it, so pairing a row with a leaf later cannot depend on which directory listing came first.
-    artifacts.sort_by(|left, right| {
+    paired.sort_by(|(left, _), (right, _)| {
         ReleaseArtifact::kind_word(left.kind)
             .cmp(ReleaseArtifact::kind_word(right.kind))
             .then_with(|| left.sha256.hex().cmp(right.sha256.hex()))
             .then_with(|| left.byte_size.cmp(&right.byte_size))
             .then_with(|| left.file_name.cmp(&right.file_name))
     });
+    let artifacts: Vec<ReleaseArtifact> = paired
+        .iter()
+        .map(|(artifact, _)| artifact.clone())
+        .collect();
 
     // §24: the notes copy is byte-for-byte, identified by the digest the recomputed context already carries.
     let notes_copy = notes.as_ref().map(|fact| match &fact.status {
@@ -785,11 +961,8 @@ fn observe(request: &BundleRequest<'_>) -> Result<Observation, BundleError> {
 
     // §41's order. Copied files carry the digest of the bytes that were verified; generated documents carry
     // the digest of the bytes composed here and never recomputed again.
-    for artifact in &model.artifacts {
-        let row = shipped
-            .iter()
-            .find(|row| row.sha256 == artifact.sha256)
-            .expect("the shipped list was built from these rows");
+    for (artifact, index) in &paired {
+        let row = &shipped[*index];
         content.push_copied(
             &format!("{ARTIFACTS_DIR}/{}", artifact.file_name),
             FileRole::ShippedArtifact,
@@ -866,11 +1039,31 @@ fn observe(request: &BundleRequest<'_>) -> Result<Observation, BundleError> {
         &content.sums_sha256,
         content.sums.len() as u64,
     ));
-    let manifest = ReleaseManifestDto::from_parts(
+    // The attachments are disclosed with their own rows, because the manifest's `files` list cannot tell a
+    // reader which entries the engine hashed and which entries it also analyzed (`ADR-0030` D-3). A row here
+    // names the same path, digest and length as the index entry above it, and the report layer refuses the
+    // document if the three ever disagree.
+    let disclosure: Vec<ManifestAttachmentDto> = paired
+        .iter()
+        .filter(|(_, index)| shipped[*index].class == SourceClass::Attachment)
+        .map(|(artifact, _)| {
+            ManifestAttachmentDto::new(
+                format!("{ARTIFACTS_DIR}/{}", artifact.file_name),
+                ReleaseArtifact::kind_word(artifact.kind),
+                artifact.sha256.hex().to_owned(),
+                artifact.byte_size,
+                // `verify_attachments` refused any other basis, so a row that reached here was declared by
+                // whoever chose the file and inferred from nothing.
+                KindBasis::Declared.word(),
+            )
+        })
+        .collect();
+    let manifest = ReleaseManifestDto::from_parts_with_attachments(
         &model,
         &content.release_id,
         &manifest_files,
         &content.policy_sha256,
+        &disclosure,
     )?;
     content.manifest_json = release_render::render_json(&manifest);
     content.manifest_sha256 = fingerprint::sha256_hex(content.manifest_json.as_bytes());
@@ -879,16 +1072,7 @@ fn observe(request: &BundleRequest<'_>) -> Result<Observation, BundleError> {
         run_id,
         policy_sha256: request.project.policy_sha256.clone(),
         acceptances_sha256,
-        sources: shipped
-            .iter()
-            .map(|row| {
-                (
-                    row.raw_path.clone(),
-                    row.sha256.hex().to_owned(),
-                    row.byte_size,
-                )
-            })
-            .collect(),
+        sources: shipped.iter().map(SourceRow::of_verified).collect(),
         notes: notes_copy
             .as_ref()
             .map(|copy| (copy.relative.clone(), copy.sha256.clone(), copy.byte_size)),
@@ -910,12 +1094,28 @@ struct GrowthRows {
 /// One verified source row, as §22 requires it to be known before anything is copied.
 #[derive(Debug, Clone)]
 struct VerifiedRow {
+    /// Which of the two evidence classes the file came from. The class is what the attachment disclosure and
+    /// the set-change rule read, and it cannot be inferred from `kind`: a `bin` row is only an attachment
+    /// because somebody attached it.
+    class: SourceClass,
     kind: ArtifactKind,
     sha256: Sha256,
     byte_size: u64,
-    /// The path as the snapshot recorded it, for revalidation only.
+    /// The path as the snapshot recorded it, or as this module resolved the selection, for revalidation only.
     raw_path: String,
     source: PathBuf,
+}
+
+impl SourceRow {
+    /// The staleness row for one verified file. Same three facts, plus the class the set rule needs.
+    fn of_verified(row: &VerifiedRow) -> Self {
+        Self {
+            class: row.class,
+            path: row.raw_path.clone(),
+            digest: row.sha256.hex().to_owned(),
+            size: row.byte_size,
+        }
+    }
 }
 
 /// A Release Notes file to copy, as the recomputed context described it (§24).
@@ -1002,6 +1202,7 @@ fn verify_sources(
             });
         }
         rows.push(VerifiedRow {
+            class: SourceClass::Snapshot,
             kind: artifact.kind,
             sha256: artifact.sha256.clone(),
             byte_size: artifact.byte_size,
@@ -1013,6 +1214,133 @@ fn verify_sources(
         return Err(BundleError::Release(ReleaseError::NoReleaseArtifacts));
     }
     Ok(rows)
+}
+
+/// Observe every attached file, in the order the resolved paths sort into.
+///
+/// One call to [`evidence::observe_attachment`] per selection and no second observation path: the same
+/// function the Gate run uses produces the rows, so the digest a bundle ships and the digest the verdict was
+/// computed from cannot be two measurements of the same file.
+///
+/// The same file offered twice is dropped rather than refused. The identity binds an exact `(kind, digest)`
+/// pair once (`GateAttachmentFact::canonicalized`), the file ships once, and a second copy of it under the
+/// same leaf is not a second fact about the release — it is the caller repeating themselves, which the
+/// engine answers by shipping what they meant.
+fn observe_attachments(
+    root: &Path,
+    selections: &[AttachmentSelection],
+) -> Result<Vec<AttachedSource>, BundleError> {
+    let mut resolved: Vec<(PathBuf, ArtifactKind)> = Vec::with_capacity(selections.len());
+    for selection in selections {
+        let path = resolve_selection(root, &selection.path);
+        if !resolved.iter().any(|(seen, _)| *seen == path) {
+            resolved.push((path, selection.declared_kind));
+        }
+    }
+    resolved.sort_by(|left, right| left.0.cmp(&right.0));
+    resolved
+        .into_iter()
+        .map(|(path, kind)| {
+            evidence::observe_attachment(&path, kind)
+                .map(|attachment| AttachedSource { path, attachment })
+                .map_err(BundleError::from)
+        })
+        .collect()
+}
+
+/// One attached file: where it was read from and what the read established. The path is kept beside the fact
+/// rather than inside it because [`ReleaseAttachment`] deliberately holds no host path — a name is
+/// release identity, and a path is the caller's, so only this module's private staging list joins the two.
+struct AttachedSource {
+    path: PathBuf,
+    attachment: ReleaseAttachment,
+}
+
+/// Check every attached file against the context the Gate judged, in the order its paths sort into (§22's
+/// sibling rule for the second evidence class).
+///
+/// The bytes were hashed by [`observe_attachments`], which is the same observation a Gate run performs, and
+/// the rows below are the ones that were bound into `context`. What this function proves is the link between
+/// them: each file this bundle will copy is a file the verdict was computed over, of a kind a release may
+/// attach, with a kind nobody inferred from its bytes. A row that failed one of those three would be a file
+/// shipped on the strength of a Gate run that never saw it — the mismatch §6's L-1 and L-2 exist to prevent.
+///
+/// It does not re-hash. Re-reading a file the same call already hashed would double the I/O on the release
+/// owner's largest files and prove nothing the first hash did not; what changes between this call and the
+/// next is caught by [`InputChecks::compare_with`] at export.
+fn verify_attachments(
+    attached: &[AttachedSource],
+    context: &GateContext,
+) -> Result<Vec<VerifiedRow>, BundleError> {
+    let mut rows = Vec::with_capacity(attached.len());
+    for source in attached {
+        let row = &source.attachment;
+        let leaf = row.file_name.clone();
+        if !matches!(
+            row.kind,
+            ArtifactKind::Bin | ArtifactKind::IntelHex | ArtifactKind::Unknown
+        ) {
+            return Err(BundleError::Internal {
+                detail: format!(
+                    "`{leaf}` is a `{}` attachment, and a release attaches no artifact of that kind",
+                    ReleaseArtifact::kind_word(row.kind)
+                ),
+            });
+        }
+        if row.kind_basis != KindBasis::Declared {
+            return Err(BundleError::Internal {
+                detail: format!(
+                    "`{leaf}` carries a kind that was read out of its bytes, and nothing in this build \
+                     analyzes an attached file"
+                ),
+            });
+        }
+        let digest = row.sha256.value().ok_or_else(|| BundleError::Internal {
+            detail: format!("`{leaf}` was observed with no digest to ship against"),
+        })?;
+        if !context
+            .attachments
+            .iter()
+            .any(|fact| fact.kind == row.kind && fact.sha256.value() == Some(digest))
+        {
+            return Err(BundleError::Internal {
+                detail: format!(
+                    "`{leaf}` is attached, and the Gate context assembled from it holds no such row"
+                ),
+            });
+        }
+        rows.push(VerifiedRow {
+            class: SourceClass::Attachment,
+            kind: row.kind,
+            sha256: Sha256::parse(digest).map_err(|_| BundleError::Internal {
+                detail: format!("the observed digest of `{leaf}` is not lowercase hex"),
+            })?,
+            byte_size: row.byte_size,
+            raw_path: source.path.to_string_lossy().into_owned(),
+            source: source.path.clone(),
+        });
+    }
+    Ok(rows)
+}
+
+/// A selection resolved the one way this module allows a caller's path: absolute as it was given, otherwise
+/// relative to the project root, and never outside it. A relative path that tries to step out with `..`
+/// resolves to a name that cannot exist, so it is refused by the same `observe_attachment` that refuses a
+/// missing file rather than by a second error surface with a second set of words for the same event.
+fn resolve_selection(root: &Path, path: &Path) -> PathBuf {
+    if path.is_absolute() {
+        return path.to_path_buf();
+    }
+    let mut joined = root.to_path_buf();
+    for component in path.components() {
+        match component {
+            std::path::Component::Normal(name) => joined.push(name),
+            std::path::Component::CurDir => {}
+            // `ParentDir`, `RootDir` on a relative path, and the prefix forms are all refused here.
+            _ => return root.join("firmwaresight-unresolvable-path"),
+        }
+    }
+    joined
 }
 
 /// A snapshot's recorded source path, resolved the one way this module allows: absolute as it was given,
@@ -1893,9 +2221,106 @@ fn check_document_contract(name: &str, value: &serde_json::Value) -> Result<(), 
     )))
 }
 
-/// Rebuild the semantic inputs from the bundle's own documents, so a release id is checked against the bytes
-/// rather than against the plan that produced them.
+/// The three kinds a release may attach, read back through Core's own spelling so the manifest, the stored
+/// rows and this decoder cannot drift apart.
 ///
+/// `unknown` is attachable (`04_TECH/28` §2.2) and is deliberately absent from [`ArtifactKind::from_word`],
+/// which reads the kinds a bundle ships from an analysis it actually ran. A reader of the attachment
+/// disclosure needs the wider set, and needs it from one vocabulary rather than from a string match that
+/// could accept a word nothing writes.
+fn attached_kind(word: &str) -> Option<ArtifactKind> {
+    [
+        ArtifactKind::Bin,
+        ArtifactKind::IntelHex,
+        ArtifactKind::Unknown,
+    ]
+    .into_iter()
+    .find(|kind| kind.word() == word)
+}
+
+/// The attachment disclosure read out of a bundle's own manifest, as `(leaf, kind, digest, size)`.
+///
+/// A bundle that carries no `attachments` key is not a malformed one: the disclosure is written only when a
+/// release attaches a file, so every bundle published before `C1-U1` reads back as an empty list here and its
+/// bytes are untouched by this unit (`ADR-0030` D-4's compatibility rule, applied on the reader's side).
+///
+/// What is refused is a key that is present and is not what this build writes. `kind_basis` and `provenance`
+/// are checked rather than ignored because they are the two claims an attached file can honestly make about
+/// itself: a bundle that says its bytes were derived from a header, or that their origin was established, is
+/// claiming something no engine here knows, and reading it as though it were true would repeat the exact
+/// defect `ADR-0030` D-7 and D-8 exist to keep out of a release record.
+fn disclosed_attachments(
+    manifest: &serde_json::Value,
+) -> Result<Vec<(String, ArtifactKind, String, u64)>, BundleError> {
+    let Some(rows) = manifest
+        .get("extensions")
+        .and_then(|ext| ext.get("attachments"))
+    else {
+        return Ok(Vec::new());
+    };
+    let rows = rows.as_array().ok_or_else(|| {
+        fail(
+            "`extensions.attachments` is not the list of attached files a release can disclose"
+                .to_owned(),
+        )
+    })?;
+    let mut out = Vec::with_capacity(rows.len());
+    for (index, row) in rows.iter().enumerate() {
+        let pointer = format!("/extensions/attachments/{index}");
+        let string_field = |name: &str| {
+            row.get(name)
+                .and_then(serde_json::Value::as_str)
+                .map(str::to_owned)
+        };
+        let path = string_field("path").ok_or_else(|| {
+            fail(format!(
+                "`{pointer}` carries no `path` for the attached file it discloses"
+            ))
+        })?;
+        let leaf = path.strip_prefix(&format!("{ARTIFACTS_DIR}/")).ok_or_else(|| {
+            fail(format!(
+                "`{pointer}` discloses `{path}`, and an attached file ships under `{ARTIFACTS_DIR}/` like \
+                 every other artifact"
+            ))
+        })?;
+        let kind = string_field("kind")
+            .and_then(|word| attached_kind(&word))
+            .ok_or_else(|| {
+                fail(format!(
+                    "`{pointer}` discloses a kind a release cannot attach, so nothing here can say what \
+                     evidence class `{leaf}` belongs to"
+                ))
+            })?;
+        let digest = string_field("sha256")
+            .ok_or_else(|| fail(format!("`{pointer}` carries no digest for `{leaf}`")))?;
+        Sha256::parse(&digest).map_err(|_| {
+            fail(format!(
+                "`{pointer}` discloses a digest for `{leaf}` that is not 64 lowercase hex"
+            ))
+        })?;
+        let size = row
+            .get("size")
+            .and_then(serde_json::Value::as_u64)
+            .ok_or_else(|| fail(format!("`{pointer}` carries no byte length for `{leaf}`")))?;
+        if string_field("kind_basis").as_deref() != Some(KindBasis::Declared.word()) {
+            return Err(fail(format!(
+                "`{pointer}` says `{leaf}` was given its kind by something other than the person who chose \
+                 it, and no attached file's kind is established any other way in this build"
+            )));
+        }
+        if string_field("provenance").as_deref() != Some(ManifestAttachmentDto::PROVENANCE) {
+            return Err(fail(format!(
+                "`{pointer}` discloses `{leaf}` without the one provenance an attached file can state, \
+                 which is `unknown`"
+            )));
+        }
+        out.push((leaf.to_owned(), kind, digest, size));
+    }
+    Ok(out)
+}
+
+/// Rebuild the semantic inputs from the bundle's own documents, so a release id is checked against the bytes
+/// rather than against the plan that produced them.///
 /// Every field comes out of a file: the manifest for the identity, version source and workspace facts, the
 /// analysis document for which kind of artifact each shipped leaf is, the file list for the digests, and the
 /// acceptance document's own bytes for the digest that binds them.
@@ -1957,6 +2382,18 @@ fn model_from_documents(
             }
         }
     }
+    // The attached files are keyed by the same leaf, out of the disclosure `extensions` carries. A shipped
+    // `app.bin` whose kind appears nowhere in the bundle would be read back as whatever this loop happened to
+    // match, so an unmatched entry is refused below rather than guessed at here.
+    let attached = disclosed_attachments(manifest)?;
+    for (leaf, _, _, _) in &attached {
+        if kinds.iter().any(|(name, _)| name == leaf) {
+            return Err(fail(format!(
+                "`{ARTIFACTS_DIR}/{leaf}` is disclosed both as an analyzed artifact and as a release \
+                 attachment, and a reader cannot tell which evidence class its bytes belong to"
+            )));
+        }
+    }
     let artifacts = indexed
         .iter()
         .filter_map(|(path, digest, size)| {
@@ -1968,11 +2405,28 @@ fn model_from_documents(
                 .iter()
                 .find(|(name, _)| name == leaf)
                 .map(|(_, kind)| *kind)
+                .or_else(|| {
+                    attached
+                        .iter()
+                        .find(|(name, _, _, _)| name == leaf)
+                        .map(|(_, kind, _, _)| *kind)
+                })
                 .ok_or_else(|| {
                     fail(format!(
                         "`{ARTIFACTS_DIR}/{leaf}` ships, and no document says what kind of artifact it is"
                     ))
                 })?;
+            // A disclosed row names the same entry `files` does, so the two have to agree. Checked rather than
+            // trusted, because the release id recomputed below is built from this digest and a silent
+            // disagreement would still verify line by line against `SHA256SUMS`.
+            if let Some(row) = attached.iter().find(|(name, _, _, _)| name == leaf)
+                && (row.2 != *digest || row.3 != *size)
+            {
+                return Err(fail(format!(
+                    "`{ARTIFACTS_DIR}/{leaf}` is disclosed as a release attachment with bytes the \
+                     bundle's own index does not carry"
+                )));
+            }
             Ok(ReleaseArtifact {
                 kind,
                 file_name: leaf.to_owned(),
@@ -1981,6 +2435,19 @@ fn model_from_documents(
             })
         })
         .collect::<Result<Vec<_>, BundleError>>()?;
+    // Read in the other direction too: a disclosure that names a file the bundle does not ship is a document
+    // describing a bundle that is not there.
+    for (leaf, _, _, _) in &attached {
+        if !indexed
+            .iter()
+            .any(|(path, _, _)| path == &format!("{ARTIFACTS_DIR}/{leaf}"))
+        {
+            return Err(fail(format!(
+                "`{ARTIFACTS_DIR}/{leaf}` is disclosed as a release attachment but no shipped file carries \
+                 that path"
+            )));
+        }
+    }
 
     let notes = indexed
         .iter()

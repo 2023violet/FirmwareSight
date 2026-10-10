@@ -430,7 +430,22 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
   `intake.test.tsx`, 2 in `release.test.tsx`). **F2, F2R2 and F3 were each required to hold both numbers
   still** — F3 §5 states the rule in its sharpest form, because a docs-only head that moves a count is a
   product change wearing a documentation diff, and the round must stop rather than explain it.
-- **Figures on the C1-U1 tree, measured 2026-10-09 — these are the present ones, and the bullets below are dated
+- **Figures on the C1-U2 tree, measured 2026-10-09 — these are the present ones, and the bullets below are dated
+  history:** the gate's own `rust/test` step reports **953 Rust tests** (0 failed) across the **same 48 `test result:`
+  lines** and the frontend still reports **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP` and no
+  `FAIL`, plus 3 under `--only core-smoke` and 4 under `--only package`. The +53 Rust are C1-U2's, and their arithmetic is
+  counted from the staged diff rather than recalled (`git diff -U0 | awk '/^diff --git/{f=$0}
+  /^\+[[:space:]]*#\[test\]/{c[f]++}'`): 34 in `crates/firmwaresight-project/tests/bundle_builder.rs`, 8 in
+  `crates/firmwaresight-core/src/domain/gate.rs`, 6 in `crates/firmwaresight-report/tests/release_schema_contract.rs`,
+  3 in `crates/firmwaresight-project/src/bundle/tests.rs`, 1 in
+  `crates/firmwaresight-project/tests/release_attachments.rs`, 1 in `crates/firmwaresight-storage/tests/gate_history.rs`
+  = 53. **The line count did not move with the figure**, because no new test binary was created — every one of those 53
+  went into a target that already existed at C1-U1, which is why both rounds report 48 lines. No test was deleted to get
+  there; one (`an_attachment_added_between_preview_and_publish_names_itself_as_added`) was dropped by accident during a
+  scripted region rewrite and re-added when a mutation's filter answered `77 filtered out`, and that accident is recorded
+  in `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` §14 rather than smoothed over.
+- **Figures on the C1-U1 tree, measured 2026-10-09 — these were the present ones when C1-U1 closed, and the bullet above
+  is dated
   history:** the gate's own `rust/test` step reports **900 Rust tests** (0 failed) across **48 `test result:` lines**
   (the 48th is the new `crates/firmwaresight-project/tests/release_attachments.rs` target) and the frontend still reports
   **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP` and no `FAIL`. The +30 Rust are C1-U1's, and
@@ -579,11 +594,15 @@ CI duplication    two jobs install the same ten apt lines on purpose
 Format scope      the BIN / Intel HEX range conflict between ADR-0006, the PRD,
                   07_MVP_COHORT_AND_CLI_POLICY, 04_TECH/03 and P5's matrix is DECIDED as product
                   direction on 2026-10-09 — ADR-0030 accepts Option C1, release-attached byte
-                  evidence, and 04_TECH/28 freezes the design. C1-U1 (data + identity) ran the same
-                  day: attachment facts, the /1-frozen /2-when-non-empty Gate identity and migration
-                  0006 exist in code, and no person can attach a file yet. required = [bin] / [hex]
-                  still BLOCK and a bundle still cannot ship BIN/HEX, so the compatibility row stays
-                  UNSUPPORTED and C1-U2 / U3 / U4 are NOT_AUTHORIZED. The Intel HEX address-span
+                  evidence, and 04_TECH/28 freezes the design. Two implementation units ran the same
+                  day: C1-U1 (facts + Gate identity + storage) is COMPLETE and C1-U2 (Gate rules +
+                  Release Bundle, the six-link byte chain) is READY_FOR_ARCHITECT_REVIEW, so at
+                  library level required = [bin] / [hex] is now satisfiable and a bundle can ship and
+                  self-verify an attached BIN or HEX file. Still no user-facing capability: no UI
+                  control, no --attach, no IPC command, so the compatibility matrix keeps UNSUPPORTED
+                  and BIN_HEX_RELEASE_ATTACH reads DESIGN_APPROVED / NOT_USER_AVAILABLE. C1-U3
+                  (portable-contract closure) and C1-U4 (every surface a person touches) are
+                  NOT_AUTHORIZED / NOT_STARTED. The Intel HEX address-span
                   promise is withdrawn by that decision, not deferred.
 ```
 

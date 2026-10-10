@@ -1,0 +1,632 @@
+FirmwareSight — C1-U2｜Gate + Bundle Attachment Safety Chain
+Architect execution authorization v1.0
+Repository: https://github.com/2023violet/FirmwareSight
+CANONICAL_UNIT: C1_U2_GATE_BUNDLE_ATTACHED_BYTE_CONSISTENCY
+
+MISSION
+Complete exactly the second implementation unit frozen by ADR-0030 and
+04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md §13. C1-U1 has shipped the
+attachment fact type, /1 vs /2 Gate identity, and SQLite v6 append-only
+attachment rows, but has NOT made attachments capable of satisfying a Gate
+requirement or entering a verified Release Bundle. U2 closes that gap at
+Core and project/library layers only.
+
+The objective is not simply "include BIN/HEX in a ZIP". The objective is
+that the very bytes judged by a Gate run are the very bytes shipped, and
+that preview, export and subsequent bundle verification cannot silently
+substitute an attachment. Every one of the six design proof links must be
+evidenced by its own negative and positive tests where applicable.
+
+No UI/CLI user access, no BIN/HEX analysis, no public-release assertion.
+This is an explicit authorization of C1-U2 ONLY. C1-U3 / C1-U4 require
+separate future Architect instructions.
+
+════════════════════════════════════════════════════════════════════
+0. INDEPENDENTLY VERIFIED START AUTHORITY
+════════════════════════════════════════════════════════════════════
+
+Architect read-only live GitHub inspection at issue time:
+origin/main:
+1b33bbcb52b441efc4e63d7b6c91e829dc232d76
+
+C1-U1 product head:
+8e2aab94c1d1b39347497aaae0683157036aaf25
+Run #93, 37976937227, attempt 1, ten of ten SUCCESS.
+
+C1-U1 evidence successor:
+b9cc3e22fa573892857273ca1f98b118b00ff0dc
+Run #94, 37979066889, attempt 1, ten of ten SUCCESS.
+
+Current C1-U1 closure/evidence head:
+1b33bbcb52b441efc4e63d7b6c91e829dc232d76
+Run #95, 37980851040, attempt 1, ten of ten SUCCESS.
+
+All ten jobs individually returned success on each of these runs:
+Rust Windows/Ubuntu; Desktop UI Windows/Ubuntu; Generated output drift;
+Dependency policy; macOS Core Smoke; Package Windows/Ubuntu/macOS.
+
+Latest measured product tests, per U1 report:
+Rust = 900 passed / zero failed / 48 test-result lines.
+UI = 295 passed / nine files.
+Full gate = 17/17; drift = 8/8; deny = 1/1;
+core-smoke = 3/3; package = 4/4; baseline verifier PASS.
+
+C1_PRODUCT_DIRECTION = OWNER_APPROVED
+C1_ADR_AND_DESIGN_FREEZE = COMPLETE
+C1_U1_DATA_AND_IDENTITY = COMPLETE
+C1_U2 = NOT_STARTED at this head, now authorized by THIS prompt
+C1_U3 / C1_U4 = NOT_AUTHORIZED
+SCHEMA_VERSION = 6, migrations 0001–0006
+BIN_HEX_ANALYSIS = UNSUPPORTED
+BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE
+P5 = PASS_COMPLETE; G2 = PASS; product 0.6.0 MVP_CANDIDATE
+V1 = IN_PROGRESS / RECRUITMENT_READY; 0 eligible external sessions
+V1 frozen study artifact = 11573661113, Run #85 37828673549,
+  head 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177
+V1 study artifact is NOT to be replaced, tested on participants or touched.
+B1 / Private Beta / RC / GA = NOT_AUTHORIZED
+active_task at start = NONE.
+
+Confirm every one of these locally and re-read authority before acting.
+This section is an observation at issuance, not permission to assume the
+remote is still unchanged during execution.
+
+════════════════════════════════════════════════════════════════════
+1. HARD PREFLIGHT — STOP BEFORE ANY WRITE IF FALSE
+════════════════════════════════════════════════════════════════════
+
+Run:
+  git fetch --prune origin
+  git rev-parse --show-toplevel
+  git branch --show-current
+  git rev-parse HEAD
+  git rev-parse origin/main
+  git ls-remote origin refs/heads/main
+  git status --short
+  git diff
+  git diff --cached
+  git worktree list
+  git log --oneline --decorate -8
+
+Require:
+HEAD = origin/main = remote main =
+1b33bbcb52b441efc4e63d7b6c91e829dc232d76
+Clean worktree, expected branch/worktrees and no unexplained local changes.
+If any discrepancy: STOP, preserve work, report exact SHA/path/impact.
+Never use reset --hard, clean -fd, stash, rebase published history,
+amend published commit, push --force or push --force-with-lease.
+
+Pre-read and archive this EXACT delivered prompt under
+10_AUDIT/SOURCE_PROMPTS/ with actual source file bytes and both transport
+and Git-index provenance as appropriate. Use the project's ADR-0029
+stage-0-index-blob SHA256SUMS workflow; do not hand-edit checksums or
+invent a delivered digest. Do not start C1-U3 merely because U2 lands.
+
+════════════════════════════════════════════════════════════════════
+2. AUTHORITATIVE READ SET AND DESIGN PRECEDENCE
+════════════════════════════════════════════════════════════════════
+
+Read first:
+  AGENTS.md
+  BASELINE.yaml
+  .ai/README.md
+  .ai/ACTIVE_TASK.md
+  .ai/CURRENT_STATE.md
+  .ai/DECISIONS.md
+  .ai/HANDOFF.md
+  09_ADR/ADR-0030-release-attached-byte-evidence.md
+  09_ADR/ADR-0023-gate-five-state-semantics.md
+  09_ADR/ADR-0028-release-identity-bytes-as-evidence.md
+  09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
+  04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md (FULL, §§2–13)
+  04_TECH/17_RELEASE_PACKAGING_UPDATE.md
+  04_TECH/24_BUILD_IDENTITY_EVIDENCE.md
+  04_TECH/26_PORTABLE_SCHEMA_POLICY.md
+  04_TECH/15_STORAGE_DATABASE_BASELINE.md
+  04_TECH/02_DOMAIN_MODEL.md
+  C1_VALIDATION/C1_U1_DATA_AND_IDENTITY_PLAN.md
+  C1_VALIDATION/C1_U1_EXECUTION_REPORT.md
+  05_ENGINEERING/03_ERROR_MODEL.md
+
+Read live implementation and its tests (not assumed old line numbers):
+  crates/firmwaresight-core/src/domain/gate.rs
+  crates/firmwaresight-core/src/domain/release.rs
+  crates/firmwaresight-project/src/evidence.rs
+  crates/firmwaresight-project/src/bundle.rs
+  crates/firmwaresight-project/src/fingerprint.rs
+  crates/firmwaresight-storage/src/gate.rs
+  crates/firmwaresight-project/tests/release_attachments.rs
+  crates/firmwaresight-storage/tests/gate_history.rs
+  existing bundle/verify/release integration tests (discover real paths)
+  existing golden/reports/p4-release/**
+  schemas/gate-results.schema.json / release-manifest.schema.json
+  and any actual directly referenced code required to follow one round trip.
+
+Repository truth overrides earlier Agent wording. Frozen ADR-0030 and
+04_TECH/28 are scope authority. If the two contradict, STOP with the
+precise quotations; do not design around a contradiction by guessing.
+
+════════════════════════════════════════════════════════════════════
+3. SOURCE PRECONDITION: MEASURE THE U1 GAP
+════════════════════════════════════════════════════════════════════
+
+Current GitHub source at U1 closure shows:
+- ReleaseAttachment with observed kind/size/hash in project/evidence.rs;
+- AttachmentError E-1, E-2, E-3 diagnostics 6115/6116/6117;
+- GateRunRequest currently has no attachments field;
+- build_context currently forces attachments: Vec::new();
+- BundleRequest currently has no attachments field;
+- Bundle observe() recomputes Gate context only from snapshot facts;
+- Gate rule_required_artifacts only examines context.artifacts;
+- Gate rule_artifact_hashes only examines context.artifacts;
+- verify_sources only ships/analyzes ELF+MAP rows;
+- InputChecks sources hold source path/digest/size for snapshot rows;
+- changed_leaf compares tuples by position, not attachment membership;
+- bundle_names already disambiguates colliding names by content;
+- one U1 test deliberately asserts attached BIN does NOT yet satisfy
+  artifacts.required. U2 MUST replace that boundary lock with its now-real
+  opposite rather than deleting it without a new positive test.
+
+Independent inspect every statement; if the source has drifted, re-plan
+and STOP where the drift changes the frozen design or permissions.
+
+Write C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md BEFORE CODE.
+It must include: actual call graph, exact touched paths, public API choices,
+old-vs-new state table, six link proof map, error code registry scan,
+release id/manifest impact, test map, existing golden preservation, staging
+and STOP decisions. Do not use stale line numbers as implementation guides.
+
+════════════════════════════════════════════════════════════════════
+4. ABSOLUTE IDENTITY AND EVIDENCE INVARIANTS
+════════════════════════════════════════════════════════════════════
+
+I1. No attachments => canonical input /1 exactly byte-for-byte as before.
+    No empty attachments block, no change to prior Gate run ids/findings.
+I2. One or more attachments => /2, their identities from U1's observed
+    GateAttachmentFact, stable set order (kind word, lower-hex digest),
+    duplicates deduplicated for Gate only, without mutating SnapshotId.
+I3. A filename/host path/mtime is NOT Gate identity, but filename IS
+    release identity and bundle planning identity.
+I4. SnapshotId::compose, analysis:1 and diff:1 must not move.
+I5. `unknown.count` is snapshot evidence only; attachment provenance Unknown
+    must not change `evidence.unknown_review` rule or its severity.
+I6. A declared `hex` is evidence of raw bytes, NOT proof of valid Intel HEX.
+    No address span, record checksum, parsed content, symbols, sections,
+    memory footprint, build-from-commit, or generated-by-this-build claim.
+I7. `elf`/`map` required kinds are satisfied ONLY by analyzed snapshot rows;
+    `bin`/`hex` ONLY by attachment rows; `unknown` satisfies none.
+I8. Stored Gate run is immutable; if run id would bind a different answer,
+    return invariant instead of overwriting old rows.
+I9. A verified bundle may not contain attachment bytes unbound by its
+    judged Gate; no stale PASS carries a different set/byte string.
+I10. Project config policy fingerprint is independent of the transient
+     attachment list; no new config schema or vocabulary change.
+I11. Existing portable major versions stay at :1. U3 owns the complete
+     public extension schema + compatibility/golden regression closure.
+     U2 may only add the minimum *honest* serialization necessary for a
+     bundle containing attachments, with explicit U3-deferred findings.
+I12. No file is a Gate attachment merely because it has extension `.bin`
+     or `.hex`: attachment kind is Declared and bytes/size are Observed.
+I13. No attachment file bytes in SQLite; no arbitrary-path error or
+     portable-document leakage; host paths remain private to validation.
+I14. No duplicate Gate or Bundle logic for preview and export.
+
+════════════════════════════════════════════════════════════════════
+5. U2 CORE GATE CONTRACT — TWO EVIDENCE CLASSES
+════════════════════════════════════════════════════════════════════
+
+Implement the frozen two-source Gate semantics in Core:
+
+A. `artifacts.required` reads both snapshot and attachments, with D-3
+   kind separation. Positive fixture policy required=['elf','bin','hex']
+   must PASS only when ELF analyzed and BIN/HEX attachment facts bound.
+   Missing attachment BLOCK. Unknown attachment cannot satisfy bin/hex.
+   An attached `elf` or `map` may not masquerade as analyzed input (U1's
+   observation refusal stays in force).
+
+B. `artifacts.hashes` verifies hash facts for both classes and records
+   `artifact:<kind>:<sha256>` or `attachment:<kind>:<sha256>` locator
+   appropriately. Preserve snapshot locator strings and meaning.
+   Attachment explanation must explicitly say bytes verified and origin
+   or build provenance NOT verified. No invented structural claims.
+
+C. All Gate findings retain ADR-0023 five-state semantics and effective
+   severity; do not turn a Declared kind into a structural PASS.
+
+D. Attachments must reach Gate via the one sanctioned `GateRunRequest` →
+   `build_context()` path; eliminate the artificial Vec::new() cap only
+   through typed request facts from `ReleaseAttachment::as_gate_fact()`.
+   Do not introduce a second canonicalization or independently hash the
+   attachment on the frontend.
+
+E. The U1/old-golden no-attachment route must remain unchanged.
+   Before rewriting U1 boundary tests, show RED on new required rule tests.
+
+F. Do not implement UI, CLI, new IPC, new Gate state, or additional rule
+   categories in this unit.
+
+════════════════════════════════════════════════════════════════════
+6. U2 BUNDLE CONTRACT — THE SIX PROOF LINKS
+════════════════════════════════════════════════════════════════════
+
+Implement ONLY the one project/Bundle path frozen in §3 and §6.
+
+L-1 VERDICT SUBJECT:
+  Gate evaluation must run on the exact GateContext bearing the same
+  attachment set that gets planned. A library-level positive scenario
+  proves a run with required BIN/HEX can PASS; no-attachment remains BLOCK
+  when policy requires them. No empty hardcoded vector in the path.
+
+L-2 IDENTITY:
+  Gate run id is computed from `/2` canonical text when attachments
+  exist. Mutate only one attached byte: run id changes; snapshot id does
+  not. Rename byte-identical file: Gate run id remains stable.
+
+L-3 STORED RUN RECOMPUTE:
+  Bundle preparation with selected stored Gate run MUST recompute its
+  context using its selected attachment facts. Missing, added, changed,
+  re-declared attachments must not match stale Gate run silently. Under
+  original stored run, re-judging without source files uses stored facts;
+  building a NEW bundle when files are absent is correctly refused.
+
+L-4 MEMBERSHIP AND BYTE VERIFICATION:
+  Introduce one `verify_attachments` sibling to `verify_sources`:
+  stat, regular-file check, nonempty, streamed SHA-256, digest equality,
+  size equality, membership in `GateContext.attachments` by kind+digest
+  and any other necessary frozen fact. Attachment not in judged set =>
+  refusal BEFORE destination write. Do not accept a file only because
+  its leaf/path or extension matches. Context selection is not permission
+  to ship an arbitrary byte sequence.
+
+L-5 PREVIEW/EXPORT STALENESS:
+  Attachments contribute to InputChecks.sources in the same canonical,
+  deterministic source row set used during preview and export.
+  Source modified (same pathname, new digest or size) => refuse.
+  New or removed attachment between preview and export => E-4 typed
+  `AttachmentSetChanged{name,change}`, not a misleading pairwise file
+  change. A rename with unchanged bytes invalidates the plan but leaves
+  the Gate run id unchanged, and changes release identity.
+  `changed_leaf()` must be set/membership-aware; no zip-by-index bug.
+  Preview and publish MUST call the same attachment validation function
+  and same core observation path, not two subtly different validators.
+
+L-6 SELF-VERIFYING OUTPUT:
+  Bundle includes the exactly selected files with collision-safe
+  `artifacts/<name>` path, full manifest files[] hash/size and
+  SHA256SUMS entries. `verify_bundle()` recomputes release identity using
+  the actual shipped list and refuses after tampering with an attachment.
+  Old P4 release inputs, goldens and verification behavior unchanged.
+
+Six separate proof rows in the report, each with real named tests and a
+negative control. A single broad happy-path bundle test is NOT enough.
+
+════════════════════════════════════════════════════════════════════
+7. E-1…E-4 ERROR REGISTER / NO INVENTED IDs
+════════════════════════════════════════════════════════════════════
+
+U1 already allocated (and tested collision-free):
+E-1 AttachmentUnreadable = ERR-BUNDLE-6115
+E-2 AttachmentKindNotAttaching = ERR-BUNDLE-6116
+E-3 AttachmentEmpty = ERR-BUNDLE-6117
+
+U2 must add E-4 AttachmentSetChanged { name, change } only if no current
+source already implements it. BEFORE choosing a stable ERR-BUNDLE number,
+scan every live code() variant in Core release.rs, project bundle.rs,
+desktop bundle.rs and desktop lib.rs. Do not assume a markdown code
+registry exists. Prefer the next vacant number only after proving vacancy;
+record exact chosen number and add a live collision test calling real
+code() branches. Do not allocate or renumber other errors. Keep E-4
+stable once released. No absolute source path in error envelope, only
+sanitized leaf/name, and remediation must say re-preview/recheck.
+
+Use SourceArtifactChanged and GateContextChanged where already correct.
+The U1 AttachmentError refusals must keep their own code/remediation;
+bridge those errors into BundleError with an explicit typed mapping as
+required, never a catch-all string or fabricated `Unknown` finding.
+
+A missing/empty/nonregular/unreadable or modified attachment must never
+produce a partial bundle or silently update persisted attachment facts.
+
+════════════════════════════════════════════════════════════════════
+8. ATTACHMENT MULTIPLICITY, NAMING AND PATH-SAFETY TEST MATRIX
+════════════════════════════════════════════════════════════════════
+
+M1: one BIN, one HEX, both included and both bound.
+M2: same kind/digest chosen twice: Gate fact dedup once, bundle may ship
+    distinct file occurrences as separately named files, each verified.
+M3: same kind, different bytes: Gate binds both; both ship.
+M4: file name same as current ELF or MAP: deterministic collision-safe
+    disambiguation, case-insensitive collision prevention, both survive.
+M5: names differ only by case, including Windows semantics.
+M6: rename same bytes: Gate run identity stable, preview stale and
+    release id changed on re-preview.
+M7: same bytes but changed declared kind: Gate run id moves, no fake
+    content-derived proof.
+M8: file deletion between judging and preview; between preview and
+    publish; refusal without mutating stored run.
+M9: bytes or size mutate between preview and publish; refusal before
+    writing, no partial export.
+M10: added/removed members between preview and export; explicit E-4.
+M11: directory, symlink, missing, zero byte, unreadable, traversal,
+     absolute-path leakage attempt: deny per actual frozen path rules.
+M12: large attachment: streaming read bounded in memory, never invoke
+     full-buffer parser; no fixed <512 MiB assumption borrowed from ELF.
+M13: policy `required=['hex']` + declared non-HEX bytes still satisfies
+     raw-byte presence with explicit declared/unverified limitation,
+     NEVER claims records/checksums/address validity.
+M14: `unknown` attached row satisfies neither bin nor hex.
+M15: empty attachment set: P4 old golden remains byte-identical.
+M16: installed artifact not required; this is library/code acceptance,
+     not UI or production-user workflow. Real regular-file fixtures and
+     SQLite file tests are required instead of mocked observations.
+
+Do not strengthen requirements into implementation of a HEX parser.
+Where cross-OS symlink/permission tests need platform guards, report
+precisely what ran where and what remained untested.
+
+════════════════════════════════════════════════════════════════════
+9. PUBLIC CONTRACT OWNERSHIP / U3 HANDOFF
+════════════════════════════════════════════════════════════════════
+
+Frozen authoritative split:
+U2: Gate and bundle mechanics; file admission, verification, shipping,
+    membership, staleness, stable error semantics and file-level
+    manifest/SHA256SUMS/release identity.
+U3: full `gate-results:1` disclosure in `extensions.canonical_input_label`
+    + `extensions.attachments` and contract/golden regression; complete
+    release-manifest:1 attachment extension disclosure, exact public
+    schema checks and old corpus compatibility proofs.
+U4: UI Release attachment section and CLI --attach, user-visible wording,
+    IPC integration and installed screenshots.
+
+U2 may need small additive serialization to make a library-level bundle
+complete and verifiable; if so limit it to existing declared extension
+points, preserve major :1, and document which C1-U3 contract assertions
+remain NOT_VERIFIED. Do NOT pretend U3's full public-contract matrix is
+passed because a single U2 bundle validates.
+
+Explicitly evaluate T-C1-09, T-C1-10, T-C1-14, T-C1-15 at U2's scope;
+for any part that truly needs U3's extension pair, mark its precise
+subcondition NOT_VERIFIED and keep U2 status bounded. Do not silently
+fill missing portable fields with fake claims.
+
+Do not alter old P4 golden files just to make tests green. No schema
+major bump, SnapshotId change, new release canonical label or
+new `release-manifest:1` mandatory top-level field.
+
+════════════════════════════════════════════════════════════════════
+10. TDD, MUTATION AND BACKWARD-COMPATIBILITY PROOF
+════════════════════════════════════════════════════════════════════
+
+First RED on original U1 product code for:
+- attachments satisfy `artifacts.required` by correct kind mapping;
+- hashes and `attachment:` locators;
+- attachment-bearing BundleRequest reaches real observe/prepare/publish;
+- membership/refusal including stale-preview membership change;
+- unmodified old no-attachment behavior.
+
+Then GREEN. Keep original tests; revise U1's explicit "U2 not yet
+implemented" boundary test into a regression that now requires positive
+binding, while retaining the old negative case for missing attachments.
+Do not delete tests to hide changed requirements.
+
+At least five targeted mutations killed by relevant tests:
+- wrongly satisfy `bin` from snapshot or `elf` from attachment;
+- bypass verify_attachments membership;
+- bypass fresh digest check;
+- treat add/remove membership as pairwise rename;
+- emit changed /1 canonical text for empty attachments OR omit release
+  name from release id.
+
+Restore mutated sources byte-identically; compare hashes and prove no
+residual change. Mutation tests should be actual red results, not a plan.
+
+Retest:
+T-C1-07 extended: stored attachment-bearing Gate run can be re-judged
+without physical original file; bundle export needs the bytes and refuses.
+T-C1-08 acceptance review bound to different set cannot be carried.
+T-C1-09 attachment manifest validates within currently implemented major
+         :1 shape (only when U3-owned disclosure does not block this).
+T-C1-10 SHA256SUMS verifies all attachment bytes shipped.
+T-C1-14 verify_bundle re-derives correct release id including attachments.
+T-C1-15 collision identical leaf incl ELF/MAP, case-insensitive.
+
+Also preserve and explicitly verify T-C1-01, 02, 03, 05 U1 subset, 16;
+all pre-C1 Gate run IDs and unchanged P4 goldens. No extra migrations;
+SCHEMA_VERSION remains 6, table immutability intact.
+
+════════════════════════════════════════════════════════════════════
+11. CODE SCOPE / STOP-ON-DIFF BOUNDARY
+════════════════════════════════════════════════════════════════════
+
+Expected authorized product files (after source review, change minimally):
+  crates/firmwaresight-core/src/domain/gate.rs
+  crates/firmwaresight-project/src/evidence.rs
+  crates/firmwaresight-project/src/bundle.rs
+  crates/firmwaresight-project/tests/**
+  relevant existing Core tests and specific release/verifier tests
+  a narrow storage read-back test, only if needed to prove immutable runs
+
+Allowed docs/evidence:
+  C1_VALIDATION/**
+  04_TECH/17_RELEASE_PACKAGING_UPDATE.md
+  04_TECH/24_BUILD_IDENTITY_EVIDENCE.md
+  04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md status-only truthful addendum
+  10_AUDIT/SOURCE_PROMPTS/** for exact prompt archive
+  necessary .ai/ pointers, README/INDEX and ADR-0029 baseline index files.
+
+Forbidden without a new Architect decision:
+  apps/desktop/ui/**
+  apps/desktop/src-tauri/**
+  apps/cli/**
+  migrations/** (0006 is already complete)
+  schemas/** and schema major versions
+  golden/reports/p4-release/** (immutable goldens)
+  fixtures/** unrelated to U2 (test scratch fixtures allowed)
+  any changes to SnapshotId::compose or ELF parser
+  build_snapshot source and analysis/diff identity
+  Cargo.toml / Cargo.lock, package or pnpm lockfiles
+  .github/**, scripts/**, toolchains/**
+  assets/design-tokens.json and shared token values
+  automatic updater, signing, public distribution, license selection.
+
+If an otherwise necessary change touches a forbidden path (e.g. the
+current desktop GateRunRequest literal fails after a new field is added),
+do NOT quietly patch desktop. STOP with precise compile failure and
+minimum compatibility proposal. Prefer a backward-compatible library
+constructor / default that preserves current callers where feasible.
+
+No redefinition of U1 closed test results or archived histories.
+
+════════════════════════════════════════════════════════════════════
+12. ACTUAL LOCAL VALIDATION — FULL AUTHORITY
+════════════════════════════════════════════════════════════════════
+
+Run after implementation:
+  git diff --check
+  cargo fmt --all -- --check
+  cargo clippy --workspace --all-targets --all-features -- -D warnings
+  cargo test --workspace
+  corepack pnpm install --frozen-lockfile
+  corepack pnpm typecheck
+  corepack pnpm lint
+  corepack pnpm test
+  corepack pnpm build
+  python scripts/check.py
+  python scripts/check.py --only drift
+  python scripts/check.py --only deny
+  python scripts/check.py --only core-smoke
+  python scripts/check.py --only package
+  python scripts/verify_baseline_artifacts.py
+
+Pre-U2 direct Rust baseline = 900 passed / 0 failed (48 result lines).
+U2 should add meaningful Rust tests, report ACTUAL new direct count.
+Frontend MUST stay = 295 passed / nine files; any variation STOP.
+Full gate = 17/17; drift 8/8; deny 1/1; core-smoke 3/3;
+package 4/4; baseline PASS; no required SKIP.
+
+A failed validation step is a failed gate; do not mark "all passed"
+while skipped or incomplete. Rust direct `cargo test --workspace` is the
+authoritative Rust tally; internal repeats under check.py are NOT added.
+No hardcoded expected U2 Rust count. Record actual green/failed numbers.
+
+════════════════════════════════════════════════════════════════════
+13. COMMIT, REMOTE CI, EVIDENCE SUCCESSOR
+════════════════════════════════════════════════════════════════════
+
+After review, tests and complete local gates pass:
+- create one narrow U2 product commit with code/tests/plan, archival
+  prompt and required baseline artifacts;
+- show full staged changed-path audit and all forbidden-class checks;
+- only ordinary fast-forward `git push origin main` after direct user
+  authorization, honoring Coding Agent's shared-branch approval policy.
+  An Architect-issued attachment is not an override of user confirmation;
+- do NOT use --force, --force-with-lease or erroneous force-with-lease
+  forms; no amend, squash, rebase or reset.
+- find the CI run by exact U2 product HEAD and read every one of ten jobs
+  individually; success of an overall workflow alone is insufficient;
+- confirm exact head SHA, run id, run number, attempt history, Rust/UI
+  counts and clean-checkout baseline integrity.
+- repository/content failures => STOP for Architect; pure infra failures
+  classified and retried only under existing exact-SHA runner policy.
+
+Once product head and CI are accepted, do a truthful evidence/known-gap
+reconciliation. At most ONE docs-only successor as needed; a failed
+self-description is not a reason to make endless docs corrective commits.
+Evidence-only successor has no product paths, identical Rust/UI counts,
+full local gate, normal authorized fast-forward and exact successor CI.
+Do not create another commit to record its own CI result.
+
+Each round report must distinguish:
+CODE IMPLEMENTED / TESTED LIBRARY API / PRODUCT USER ENTRY AVAILABLE /
+PORTABLE CONTRACT COMPLETE / INSTALLED VERIFICATION / V1 SESSIONS.
+The first two may be true here; the rest remain false unless separately
+and actually measured and authorized.
+
+════════════════════════════════════════════════════════════════════
+14. C1-U2 ACCEPTANCE MATRIX — NO FALSE PASS
+════════════════════════════════════════════════════════════════════
+
+Report a matrix with item, expected, actual, test name, evidence path,
+PASS / FAIL / NOT_VERIFIED / NOT_STARTED and exact limitation.
+
+Mandatory:
+AC-01 No attachment /1 bytes and old run IDs unchanged.
+AC-02 Bound BIN/HEX satisfy required rule, snapshot-only ELF/MAP.
+AC-03 Both sources counted and located by hashes rule.
+AC-04 Six chain links L-1–L-6 individually proved.
+AC-05 Every verify_sources check has an attachment counterpart.
+AC-06 Preview/publish share one validation and one source model.
+AC-07 Digest, size, rename, delete and set membership stale refusals.
+AC-08 Collision-free shipping, casefold-safe bundle names.
+AC-09 SHA256SUMS and manifest files[] verify actual shipped bytes.
+AC-10 Verify_bundle release id survives genuine round-trip.
+AC-11 Pre-C1 P4 goldens and /1 identity unchanged.
+AC-12 Stored run immutability & no file needed for stored rejudging.
+AC-13 E-1/E-2/E-3 preserved, E-4 collision-free and typed.
+AC-14 Attaching a HEX with arbitrary bytes never implies HEX validity.
+AC-15 Unknown provenance neither false PASS nor unknown.count drift.
+AC-16 No path/private data leaked in error/portable documents.
+AC-17 No new UI/CLI/IPC and no new library dependency by surprise.
+AC-18 Rust and UI regression gates + baseline/remote CI green.
+AC-19 U3/U4 contract and user-workflow boundaries reported honestly.
+AC-20 No runtime installation / participant evidence fabricated.
+
+Critical failures: any mismatch between Gate judged bytes and shipped
+bytes, possibility to mutate stored Gate row under same ID, old /1 drift,
+old P4 golden change, missing attachment safety link, or misclassified
+provenance is an automatic U2 NOT_COMPLETE / STOP. Do not "accept risk"
+without new written Architect authorization.
+
+════════════════════════════════════════════════════════════════════
+15. EXPLICIT STOP AND FUTURE STAGE BOUNDARIES
+════════════════════════════════════════════════════════════════════
+
+This prompt DOES NOT authorize:
+- C1-U3 portable-contract/full golden/schema regression implementation;
+- C1-U4 GUI Attach/Ship, CLI --attach or new IPC;
+- BIN/HEX as analyzeable builds or comparison inputs;
+- V1 participant sessions, recruitment, metric evaluation, or cohort
+  installer re-freeze; no replacement of artifact 11573661113;
+- B1, Private Beta, RC, GA, tag, GitHub Release, signing, notarizing,
+  update distribution, licensing or pricing;
+- an installed acceptance or customer-use claim.
+
+No post-U2 fabricated `BIN_HEX_RELEASE_ATTACH = USER_AVAILABLE`.
+Strongest possible U2 conclusion:
+C1_U2_GATE_BUNDLE = READY_FOR_ARCHITECT_REVIEW
+with U2 implementation and tests green, but no U3/U4 completion.
+Agent cannot sign architect final C1 completion; U2 must be reviewed on
+its own evidence and exact CI readback.
+
+If a real design conflict or hard STOP is encountered, do not invent a
+new scope, product API, schema major or missing authorization to continue.
+Report the blocking evidence and the smallest possible decision needed.
+
+════════════════════════════════════════════════════════════════════
+16. FINAL REPORT FORMAT
+════════════════════════════════════════════════════════════════════
+
+# FirmwareSight C1-U2 Gate + Bundle Execution Report
+
+1. Preflight SHA, tree status, authority read and prompt SHA/archive.
+2. Current U1 implementation boundary proven from source.
+3. C1-U2 plan with exact permitted/forbidden path audit.
+4. Gate two-class required/hashes semantics, locators, no fake claims.
+5. Library request → build_context → stored run → BundleRequest journey.
+6. Six-link L-1…L-6 matrix (real positive and negative tests each).
+7. E-1/E-2/E-3 preserved; E-4 code allocation & live collision proof.
+8. Byte, kind, rename, path, dedup and collision adversarial matrix.
+9. RED/GREEN/mutation logs; Rust direct count and test names.
+10. U1 golden, /1, SnapshotId and policy fingerprint non-regression.
+11. U3 public-contract deferred scope, actual document shape achieved.
+12. Local fmt/clippy/Rust/UI/gate/drift/deny/core-smoke/package/baseline.
+13. Product commit SHA, changed paths, normal push and CI attempt/jobs.
+14. Evidence successor SHA, docs-only proof and CI if created.
+15. Every T-C1 item: PASS / NOT_VERIFIED / NOT_STARTED as appropriate.
+16. What is NOT user-available and what U3/U4 must still implement.
+17. V1 frozen cohort unchanged, 0 eligible sessions, no B1/RC/GA.
+18. U2 recommendation: READY_FOR_ARCHITECT_REVIEW / BLOCKED.
+19. STOP; no C1-U3/U4 work or new unauthorized UI/CLI scope.
+
+END OF PROMPT

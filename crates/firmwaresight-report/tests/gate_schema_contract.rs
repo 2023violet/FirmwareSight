@@ -36,8 +36,9 @@ const ACCEPTED_AT: &str = "2026-09-30T07:14:52Z";
 
 /// The locator schemes Core cites as evidence. Each names a fact about this build, so none of them can
 /// become a path on the machine that ran the Gate.
-const STABLE_LOCATOR_SCHEMES: [&str; 6] = [
+const STABLE_LOCATOR_SCHEMES: [&str; 7] = [
     "artifact:",
+    "attachment:",
     "diff:",
     "evidence:",
     "file:",

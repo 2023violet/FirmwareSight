@@ -33,12 +33,13 @@ use firmwaresight_core::domain::release::is_safe_bundle_relative_path;
 use firmwaresight_core::domain::section::{Section, SectionFlags, SectionRole};
 use firmwaresight_project::bundle::{
     self, BundleAcceptance, BundleError, BundleRequest, FileRole, is_recognizable_bundle, prepare,
-    verify_bundle,
+    prepare_with_attachments, verify_bundle,
 };
-use firmwaresight_project::evidence::{GateRunRequest, growth_facts, observe_release_notes};
-use firmwaresight_project::{
-    GitObservation, LoadedProject, SnapshotFacts, build_context, policy_sha256, run_id,
+use firmwaresight_project::evidence::{
+    AttachmentError, AttachmentSelection, GateRunRequest, ReleaseAttachment, build_context,
+    build_context_with_attachments, growth_facts, observe_attachment, observe_release_notes,
 };
+use firmwaresight_project::{GitObservation, LoadedProject, SnapshotFacts, policy_sha256, run_id};
 
 const TARGET_ELF: &str = "fixtures/elf/p2-diff/target/firmware.elf";
 const TARGET_MAP: &str = "fixtures/elf/p2-diff/target/firmware.map";
@@ -77,6 +78,29 @@ const REVIEWING_CONFIG: &str = "schema_version = 1\n\n[project]\nname = \"motor-
 const NOTES: &str = "# 1.4.2\n\n- the modem driver is now in the image\n";
 const HEAD: &str = "8d2f1c4a5b6e7f8091a2b3c4d5e6f708192a3b4c";
 
+/// A release whose policy demands the two attached kinds beside the two analyzed ones. The separation is the
+/// whole point of the config: `elf` and `map` can only be satisfied by the build that was analyzed, `bin` and
+/// `hex` only by a file the release owner attached (`ADR-0030` D-3), so a bundle for this project cannot be
+/// published unless both evidence classes are present and bound.
+const ATTACHING_CONFIG: &str = r#"schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+required = ["elf", "map", "bin", "hex"]
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = true
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"
+expected_version = "1.4.2"
+"#;
+
 fn repo_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
@@ -96,12 +120,21 @@ struct World {
     loaded: LoadedProject,
     git: GitObservation,
     snapshot: BuildSnapshot,
+    /// The snapshot's Gate facts, kept beside it because `gate_request` borrows them.
+    target: SnapshotFacts,
     comparison: Option<DiffResult>,
     acceptances: Vec<BundleAcceptance>,
     selected_run_id: Option<String>,
     elf: PathBuf,
     map: PathBuf,
     notes: PathBuf,
+    /// The three files this release may attach, written when the world is built so every test starts from the
+    /// same bytes on disk.
+    bin: PathBuf,
+    hex: PathBuf,
+    mystery: PathBuf,
+    /// The selection list the release owner has chosen, in the order they chose it.
+    attachments: Vec<AttachmentSelection>,
 }
 
 impl World {
@@ -127,17 +160,38 @@ impl World {
 
         let loaded = LoadedProject::load(&dir).expect("the project config loads");
         let snapshot = sealed_snapshot(&dir, &elf, &map);
+        let target = SnapshotFacts::from_snapshot(&snapshot);
+
+        // The attached files are real regular files with distinct bytes, because what is under test is that
+        // the bundle ships the bytes a hash was taken of — a mocked observation would prove nothing about that.
+        // Under `build/`, beside the real build output, and not in a new top-level entry: the tests that
+        // prove a refusal leaves the project folder alone read that folder's listing.
+        let attached = dir.join("build/attached");
+        std::fs::create_dir_all(&attached).expect("the attachment folder exists");
+        let bin = attached.join("app.bin");
+        let hex = attached.join("boot.hex");
+        let mystery = attached.join("mystery.dat");
+        std::fs::write(&bin, b"BIN\xff\x00image bytes").expect("the BIN is written");
+        std::fs::write(&hex, b":020000000100FA\r\n:00000001FF\r\n").expect("the HEX is written");
+        std::fs::write(&mystery, b"what this is, nobody says")
+            .expect("the unknown file is written");
+
         Self {
             dir,
             loaded,
             git: observation("v1.4.2", false),
             snapshot,
+            target,
             comparison: None,
             acceptances: Vec::new(),
             selected_run_id: None,
             elf,
             map,
             notes,
+            bin,
+            hex,
+            mystery,
+            attachments: Vec::new(),
         }
     }
 
@@ -184,21 +238,54 @@ impl World {
     }
 
     /// The context the P3 adapter builds from exactly this state — the reuse §9 asks for, in the test too.
+    ///
+    /// Whatever this world has attached is bound into it, so a test that compares a run id against the one the
+    /// bundle computes is comparing the same two things the release owner is.
     fn context(&self) -> GateContext {
-        let target = SnapshotFacts::from_snapshot(&self.snapshot);
+        build_context_with_attachments(&self.gate_request(), &self.attachment_rows())
+    }
+
+    /// The same request the bundle assembles its context from, with this world's attachments in it.
+    fn gate_request(&self) -> GateRunRequest<'_> {
         let growth = match self.comparison.as_ref() {
             Some(diff) => growth_facts(diff),
             None => GateGrowthFacts::without_baseline(),
         };
         let notes =
             observe_release_notes(&self.loaded.root, &self.loaded.policy.release_notes_path);
-        build_context(&GateRunRequest {
-            target: &target,
+        GateRunRequest {
+            target: &self.target,
             growth,
             git: &self.git,
             policy: self.loaded.policy.clone(),
             release_notes: Some(notes),
-        })
+        }
+    }
+
+    /// One attached file, chosen the way a release owner chooses it: a path and a declared kind.
+    fn attach(&mut self, path: &Path, kind: ArtifactKind) {
+        self.attachments.push(AttachmentSelection {
+            path: path.to_path_buf(),
+            declared_kind: kind,
+        });
+    }
+
+    /// This world's attachments as this crate's own observation produces them. The engine calls the same
+    /// function, so a run id a test computes is the run id the bundle will recompute rather than an
+    /// independently assembled look-alike.
+    fn attachment_rows(&self) -> Vec<ReleaseAttachment> {
+        self.attachments
+            .iter()
+            .map(|selection| {
+                observe_attachment(&selection.path, selection.declared_kind)
+                    .expect("an attached file is a readable regular file")
+            })
+            .collect()
+    }
+
+    /// The run id an attachment-free context would produce, for the tests that prove an attachment moves it.
+    fn unattached_run_id(&self) -> String {
+        run_id(&build_context(&self.gate_request()))
     }
 
     /// The run id this state produces, which is what the desktop would have stored a run under.
@@ -246,6 +333,19 @@ impl World {
         let outcome = plan
             .publish(&self.request(), &parent, false)
             .expect("the bundle is published");
+        (parent.join(&outcome.directory_name), outcome)
+    }
+
+    /// The same two calls with this world's attachment list handed to both, which is what a release owner who
+    /// attached files does: one selection, previewed and exported.
+    fn publish_attached(&self, label: &str) -> (PathBuf, bundle::BundleOutcome) {
+        let parent = self.parent(label);
+        std::fs::create_dir_all(&parent).expect("the destination parent exists");
+        let plan = prepare_with_attachments(&self.request(), &self.attachments)
+            .expect("the attached release is prepared");
+        let outcome = plan
+            .publish_with_attachments(&self.request(), &self.attachments, &parent, false)
+            .expect("the attached bundle is published");
         (parent.join(&outcome.directory_name), outcome)
     }
 
@@ -1833,6 +1933,23 @@ fn every_refusal_a_caller_can_branch_on_has_a_code_and_a_remediation() {
         BundleError::Internal {
             detail: "a row was not in the context".to_owned(),
         },
+        // The two attachment arms, each with the code its own layer registered. A caller that branches on a
+        // refusal must be able to tell "this file could not be admitted" from "the set moved after the
+        // preview", and both of those from the six codes that predate attachments.
+        BundleError::from(AttachmentError::Unreadable {
+            name: "app.bin".to_owned(),
+            detail: "the chosen path is not a regular file".to_owned(),
+        }),
+        BundleError::from(AttachmentError::KindNotAttaching {
+            kind: ArtifactKind::Elf,
+        }),
+        BundleError::from(AttachmentError::Empty {
+            name: "app.bin".to_owned(),
+        }),
+        BundleError::AttachmentSetChanged {
+            name: "app.bin".to_owned(),
+            change: "added",
+        },
     ];
     let codes: Vec<&str> = cases.iter().map(BundleError::code).collect();
     assert_eq!(
@@ -1847,10 +1964,1159 @@ fn every_refusal_a_caller_can_branch_on_has_a_code_and_a_remediation() {
             "ERR-BUNDLE-6108",
             "ERR-BUNDLE-6109",
             "ERR-INTERNAL-9004",
+            "ERR-BUNDLE-6115",
+            "ERR-BUNDLE-6116",
+            "ERR-BUNDLE-6117",
+            "ERR-BUNDLE-6118",
         ]
     );
     for error in &cases {
         assert!(!error.remediation().is_empty(), "{error}");
         assert!(!error.to_string().is_empty());
+    }
+}
+
+// ------------------------------------------------------------------ C1-U2: attached bytes in a bundle
+//
+// Everything above proves a bundle of analyzed artifacts. Everything below proves the second evidence class
+// travels through the same engine on the same terms: the file a person attached is hashed by the same
+// observation a Gate run performs, bound into the same identity, judged by the same rules, copied into the
+// same `artifacts/` folder, indexed by both hash lists, disclosed for what it is, and refused — before a byte
+// is written — when any of those stops being true (`04_TECH/28` §3, `ADR-0030` D-3/D-4/D-7/D-8).
+
+/// One release that needs both attached kinds, with both chosen, as a release owner would.
+fn attached_world(label: &str) -> World {
+    let mut world = World::new(label, ATTACHING_CONFIG);
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world
+}
+
+fn read_document(bundle: &Path, name: &str) -> serde_json::Value {
+    let text = std::fs::read_to_string(bundle.join(name)).expect("the document is there");
+    serde_json::from_str(&text).expect("the document is one JSON document")
+}
+
+/// The paths one bundle's manifest indexes.
+fn manifest_files(bundle: &Path) -> Vec<String> {
+    read_manifest(bundle)["files"]
+        .as_array()
+        .expect("files is a list")
+        .iter()
+        .filter_map(|row| row["path"].as_str().map(str::to_owned))
+        .collect()
+}
+
+/// The `artifacts/` leaves a bundle holds.
+fn shipped_artifacts(bundle: &Path) -> Vec<String> {
+    std::fs::read_dir(bundle.join("artifacts"))
+        .expect("the artifacts folder is there")
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.file_name().to_string_lossy().into_owned())
+        .collect()
+}
+
+/// L-1, the link that makes the other five matter: a BIN requirement is satisfied by the attached file's
+/// bytes, and the bundle that ships is the one that judgement produced.
+#[test]
+fn a_release_that_requires_bin_and_hex_passes_only_when_both_are_attached_and_bound() {
+    let mut world = attached_world("u2-l1-pass");
+    world.select_stored_run();
+    let (bundle, outcome) = world.publish_attached("l1");
+
+    let evaluation = world.evaluate();
+    let required = evaluation
+        .finding(GateRuleId::RequiredArtifacts)
+        .expect("the rule always answers");
+    assert_eq!(required.state, FindingState::Pass, "{}", required.summary);
+    // Each requirement is cited by the class that answers it, in the scheme that names that class.
+    let bin_digest = digest_of(&world.bin);
+    let hex_digest = digest_of(&world.hex);
+    assert!(
+        required
+            .evidence_refs
+            .iter()
+            .any(|r| r == &format!("attachment:bin:{}", bin_digest.hex())),
+        "{:?}",
+        required.evidence_refs
+    );
+    assert!(
+        required
+            .evidence_refs
+            .iter()
+            .any(|r| r == &format!("attachment:hex:{}", hex_digest.hex())),
+        "{:?}",
+        required.evidence_refs
+    );
+
+    // The verdict the document carries is the verdict the run computed, and the shipped folder holds both
+    // attached files beside the analyzed pair.
+    let gate = read_document(&bundle, "gate-results.json");
+    assert_eq!(gate["run_id"].as_str(), Some(outcome.gate_run_id.as_str()));
+    let mut names = shipped_artifacts(&bundle);
+    names.sort();
+    assert_eq!(
+        names,
+        vec!["app.bin", "boot.hex", "firmware.elf", "firmware.map"]
+    );
+
+    // And the shipped bytes are the attached bytes, not a copy of something the engine re-read later.
+    for (name, source) in [
+        ("app.bin", &world.bin),
+        ("boot.hex", &world.hex),
+        ("firmware.elf", &world.elf),
+    ] {
+        assert_eq!(
+            digest_of(&bundle.join("artifacts").join(name)),
+            digest_of(source),
+            "`{name}` is not the file it was judged from"
+        );
+    }
+}
+
+/// L-1's negative half, and the reason the positive one means anything: the same policy with the attached
+/// kinds unavailable produces no bundle at all.
+#[test]
+fn a_required_bin_with_nothing_attached_produces_no_bundle_at_all() {
+    let world = World::new("u2-l1-block", ATTACHING_CONFIG);
+    let error = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("nothing supplies the BIN or the HEX");
+    assert_eq!(error.code(), "ERR-BUNDLE-6101");
+    assert!(
+        !world.parent("l1block").exists(),
+        "a refused release created a destination folder"
+    );
+}
+
+/// L-2: the attached bytes are part of the run identity, so a release cannot ship a verdict computed over a
+/// different set of files.
+#[test]
+fn attaching_a_file_moves_the_run_id_and_leaves_the_snapshot_alone() {
+    let mut world = World::new("u2-l2-identity", ATTACHING_CONFIG);
+    let before = world.recomputed_run_id();
+    assert_eq!(before, world.unattached_run_id());
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    let after = world.recomputed_run_id();
+
+    assert_ne!(before, after, "an attached file changed no identity");
+    assert_eq!(
+        world.snapshot.id().as_str(),
+        world.target.snapshot_id.as_str(),
+        "attaching a file is not re-analyzing a build"
+    );
+    world.select_stored_run();
+    let (_, outcome) = world.publish_attached("l2");
+    assert_eq!(outcome.gate_run_id, after);
+    assert_ne!(outcome.gate_run_id, before);
+}
+
+/// L-2's determinism half: two paths holding the same bytes are one row in the identity and two files in the
+/// bundle. The identity binds a `(kind, digest)` pair once; the bundle ships each occurrence it was given,
+/// verified on its own path (M2).
+#[test]
+fn identical_bytes_at_two_paths_are_one_identity_row_and_two_shipped_files() {
+    let mut world = World::new("u2-m2-duplicate", ATTACHING_CONFIG);
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    let copy = world.dir.join("build/attached/boot-copy.hex");
+    std::fs::copy(&hex, &copy).expect("the second path holds the same bytes");
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world.attach(&copy, ArtifactKind::IntelHex);
+
+    let mut once = World::new("u2-m2-once", ATTACHING_CONFIG);
+    let other_bin = once.bin.clone();
+    let other_hex = once.hex.clone();
+    once.attach(&other_bin, ArtifactKind::Bin);
+    once.attach(&other_hex, ArtifactKind::IntelHex);
+    assert_eq!(
+        world.recomputed_run_id(),
+        once.recomputed_run_id(),
+        "a second copy of the same bytes moved an identity that binds each (kind, digest) pair once"
+    );
+
+    world.select_stored_run();
+    let (bundle, _) = world.publish_attached("m2");
+    let mut names = shipped_artifacts(&bundle);
+    names.sort();
+    assert_eq!(
+        names,
+        vec![
+            "app.bin",
+            "boot-copy.hex",
+            "boot.hex",
+            "firmware.elf",
+            "firmware.map"
+        ],
+        "both occurrences of the same bytes ship, each verified on its own path"
+    );
+}
+
+/// M2's other half: the same file offered twice is the caller repeating themselves, and the engine ships what
+/// they meant — once, with the one name it would give that path.
+#[test]
+fn the_same_path_offered_twice_ships_once() {
+    let mut world = World::new("u2-m2-twice-same-path", ATTACHING_CONFIG);
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world.attach(&bin, ArtifactKind::Bin);
+    world.select_stored_run();
+
+    let (bundle, _) = world.publish_attached("m2twice");
+    let mut names = shipped_artifacts(&bundle);
+    names.sort();
+    assert_eq!(
+        names,
+        vec!["app.bin", "boot.hex", "firmware.elf", "firmware.map"],
+        "one file offered twice shipped twice, or collided, or was refused — none of which is what the \
+         release owner asked for"
+    );
+}
+
+/// M3: the same kind with different bytes is two rows in the identity and two files in the bundle.
+#[test]
+fn two_attachments_of_one_kind_with_different_bytes_both_bind_and_both_ship() {
+    let mut world = World::new("u2-m3-two-bins", ATTACHING_CONFIG);
+    let hex = world.hex.clone();
+    let other = world.dir.join("build/attached/second.bin");
+    std::fs::write(&other, b"Different bytes entirely").expect("the second BIN is written");
+    world.attach(&world.bin.clone(), ArtifactKind::Bin);
+    world.attach(&other, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+
+    let mut one = World::new("u2-m3-one-bin", ATTACHING_CONFIG);
+    let first_bin = one.bin.clone();
+    let one_hex = one.hex.clone();
+    one.attach(&first_bin, ArtifactKind::Bin);
+    one.attach(&one_hex, ArtifactKind::IntelHex);
+    assert_ne!(
+        world.recomputed_run_id(),
+        one.recomputed_run_id(),
+        "a second set of bytes under a kind already bound was not bound"
+    );
+
+    world.select_stored_run();
+    let (bundle, _) = world.publish_attached("m3");
+    let mut names = shipped_artifacts(&bundle);
+    names.sort();
+    assert_eq!(
+        names,
+        vec![
+            "app.bin",
+            "boot.hex",
+            "firmware.elf",
+            "firmware.map",
+            "second.bin"
+        ]
+    );
+    assert_eq!(
+        digest_of(&bundle.join("artifacts/second.bin")),
+        digest_of(&other)
+    );
+}
+
+/// M4: an attachment named like the analyzed ELF is disambiguated by content, and both files survive. The
+/// analyzed artifact keeps its plain name only because the pair is deterministic, not because it arrived
+/// first in a directory listing.
+#[test]
+fn an_attachment_named_like_the_elf_is_disambiguated_and_both_survive() {
+    let mut world = World::new("u2-m4-collision", ATTACHING_CONFIG);
+    let clone = world.dir.join("build/attached/firmware.elf");
+    std::fs::write(&clone, b"not an elf, named like one").expect("the colliding name is written");
+    let hex = world.hex.clone();
+    world.attach(&clone, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world.select_stored_run();
+
+    let (bundle, _) = world.publish_attached("m4");
+    let mut names = shipped_artifacts(&bundle);
+    names.sort();
+    // Neither file wins by arriving first: `bundle_names` renames *both* halves of a collision to Core's
+    // content-keyed form, so the analyzed ELF keeps a name that says it is an ELF and the attached one says
+    // it is a BIN, and neither is silently overwritten by the other.
+    let attached_leaf = format!("bin-{}-firmware.elf", &digest_of(&clone).hex()[..8]);
+    let analyzed_leaf = format!("elf-{}-firmware.elf", &digest_of(&world.elf).hex()[..8]);
+    assert_eq!(
+        names,
+        vec![
+            attached_leaf.clone(),
+            "boot.hex".to_owned(),
+            analyzed_leaf.clone(),
+            "firmware.map".to_owned(),
+        ],
+        "{names:?}"
+    );
+    assert_eq!(
+        digest_of(&bundle.join("artifacts").join(&attached_leaf)),
+        digest_of(&clone),
+        "the attached bytes were not the attached file"
+    );
+    assert_eq!(
+        digest_of(&bundle.join("artifacts").join(&analyzed_leaf)),
+        digest_of(&world.elf),
+        "the analyzed bytes were not the analyzed file"
+    );
+}
+
+/// M5, the portable half: two attached files in two directories whose leaves differ only in case both ship,
+/// named apart by content, so a Windows reader that folds the two together still gets two distinct entries.
+///
+/// `disambiguated_name` keys on `(kind, digest, leaf)`, so the pair cannot fold into one name unless the two
+/// files also share their bytes — which is the other half, tested below on the host where it is reachable.
+#[test]
+fn two_attachment_leaves_differing_only_in_case_are_named_apart_by_content() {
+    let mut world = World::new("u2-m5-case", ATTACHING_CONFIG);
+    let second = world.dir.join("build/attached/other/APP.BIN");
+    std::fs::create_dir_all(second.parent().expect("the folder has a parent"))
+        .expect("the second folder exists");
+    std::fs::write(&second, b"uppercase path bytes").expect("the second BIN is written");
+    let hex = world.hex.clone();
+    let first = world.bin.clone();
+    world.attach(&first, ArtifactKind::Bin);
+    world.attach(&second, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world.select_stored_run();
+
+    assert_ne!(
+        digest_of(&first),
+        digest_of(&second),
+        "the two host files are one file, so this test would prove nothing"
+    );
+    let (bundle, _) = world.publish_attached("m5");
+    let mut names = shipped_artifacts(&bundle);
+    names.sort();
+    let bins: Vec<&String> = names
+        .iter()
+        .filter(|name| name.to_lowercase().ends_with(".bin"))
+        .collect();
+    assert_eq!(bins.len(), 2, "{names:?}");
+    // No two entries fold together, and each holds the bytes of the file it was chosen from.
+    let folded: std::collections::BTreeSet<String> =
+        names.iter().map(|name| name.to_lowercase()).collect();
+    assert_eq!(folded.len(), names.len(), "{names:?}");
+    for name in &bins {
+        let shipped = digest_of(&bundle.join("artifacts").join(name));
+        let from = if name.contains("APP.BIN") {
+            &second
+        } else {
+            &first
+        };
+        assert_eq!(shipped, digest_of(from), "`{name}` is not its own file");
+    }
+}
+
+/// M5, the Windows half: two selections that differ only in case name **one** file on this host, and the
+/// engine says so by refusing rather than by writing the same bytes into the bundle twice under one name.
+///
+/// This is the case the POSIX half cannot reach: the resolved paths are different strings, so the duplicate
+/// selection is not caught as a repeated path, and the two rows carry the same digest. What stops the bundle
+/// is the manifest's own case-folded duplicate rule — which refuses before a destination is chosen, so
+/// nothing is written and no file is silently dropped. The remediation it offers is the integrity-failure
+/// sentence rather than a naming sentence, and that is recorded as a finding for the Architect rather than
+/// patched here, since changing it is a portable-contract decision (`04_TECH/28` §4.3 owns the register).
+#[cfg(windows)]
+#[test]
+fn one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice() {
+    let mut world = World::new("u2-m5-ntfs", ATTACHING_CONFIG);
+    let upper = world.dir.join("build/attached/APP.BIN");
+    let hex = world.hex.clone();
+    let lower = world.bin.clone();
+    world.attach(&lower, ArtifactKind::Bin);
+    world.attach(&upper, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+
+    assert_eq!(
+        digest_of(&lower),
+        digest_of(&upper),
+        "NTFS no longer folds these two names, so this test's premise has moved"
+    );
+    let error = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("one bundle cannot hold the same file twice under two spellings");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        !world.parent("m5ntfs").exists(),
+        "a refused plan still created a destination"
+    );
+}
+
+/// L-3: a stored run that no longer recomputes because the attached set moved is refused before any file is
+/// read for shipping, and the refusal says the context moved rather than naming a file that did not.
+#[test]
+fn a_stored_run_that_no_longer_recomputes_is_refused_before_any_write() {
+    let mut world = World::new("u2-l3-stale", ATTACHING_CONFIG);
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world.select_stored_run();
+    let plan = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect("the release is prepared");
+
+    // The release owner withdraws one attached file from the selection and exports.
+    let without_hex: Vec<AttachmentSelection> = world
+        .attachments
+        .iter()
+        .filter(|selection| selection.path != hex)
+        .cloned()
+        .collect();
+    let error = plan
+        .publish_with_attachments(&world.request(), &without_hex, &world.parent("l3"), false)
+        .expect_err("the set the verdict was computed over is not the set being shipped");
+    assert_eq!(error.code(), "ERR-BUNDLE-6102", "{error}");
+    assert!(
+        !world
+            .parent("l3")
+            .join(plan.proposed_directory_name())
+            .exists(),
+        "a refused plan wrote a bundle"
+    );
+}
+
+/// L-4: the bytes a bundle ships are the bytes the judged context carries. Every attachment in the folder has
+/// its own row in the context the run id was computed over, with the kind it was declared as.
+#[test]
+fn every_shipped_attachment_is_a_row_the_judged_context_carries() {
+    let mut world = World::new("u2-l4-membership", ATTACHING_CONFIG);
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    let mystery = world.mystery.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world.attach(&mystery, ArtifactKind::Unknown);
+    world.select_stored_run();
+    let (bundle, _) = world.publish_attached("l4");
+
+    let context = world.context();
+    for row in &context.attachments {
+        let digest = row
+            .sha256
+            .value()
+            .expect("an attachment the engine hashed has a digest");
+        let leaf = match row.kind {
+            ArtifactKind::Bin => "app.bin",
+            ArtifactKind::IntelHex => "boot.hex",
+            ArtifactKind::Unknown => "mystery.dat",
+            other => panic!("a release attached a kind it cannot attach: {other:?}"),
+        };
+        assert_eq!(
+            digest_of(&bundle.join("artifacts").join(leaf)).hex(),
+            digest,
+            "`{leaf}` ships as bytes the Gate never bound"
+        );
+    }
+    assert_eq!(context.attachments.len(), 3);
+}
+
+/// M11, and L-4 from the other side: a file that cannot be observed is refused by the observation's own code,
+/// bridged rather than re-described, and nothing reaches the destination.
+#[test]
+fn a_directory_or_an_empty_file_offered_as_an_attachment_is_refused_before_any_write() {
+    let mut world = World::new("u2-m11-notregular", ATTACHING_CONFIG);
+    let folder = world.dir.join("build/attached/package.bin");
+    std::fs::create_dir_all(&folder).expect("a directory stands in for the BIN");
+    let empty = world.dir.join("build/attached/empty.hex");
+    std::fs::write(&empty, b"").expect("an empty file stands in for the HEX");
+    world.attach(&folder, ArtifactKind::Bin);
+    world.attach(&empty, ArtifactKind::IntelHex);
+
+    let error = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("neither a folder nor an empty file is firmware");
+    // The rows are observed in resolved-path order, so the empty file is met first and is refused as E-3.
+    assert_eq!(error.code(), "ERR-BUNDLE-6117", "{error}");
+    assert!(error.to_string().contains("empty.hex"), "{error}");
+    assert!(
+        !world.parent("m11").exists(),
+        "a release that could not be observed still made a destination"
+    );
+
+    // The directory alone is E-1, and it says so in the words that name what is wrong with a folder.
+    let mut folder_only = World::new("u2-m11-folder", ATTACHING_CONFIG);
+    let other_hex = folder_only.hex.clone();
+    let bin = folder_only.bin.clone();
+    let package = folder_only.dir.join("build/attached/package.bin");
+    std::fs::create_dir_all(&package).expect("a directory stands in for the BIN");
+    folder_only.attach(&bin, ArtifactKind::Bin);
+    folder_only.attach(&other_hex, ArtifactKind::IntelHex);
+    folder_only.attach(&package, ArtifactKind::Bin);
+    let error = prepare_with_attachments(&folder_only.request(), &folder_only.attachments)
+        .expect_err("a directory is not firmware");
+    assert_eq!(error.code(), "ERR-BUNDLE-6115", "{error}");
+    assert!(error.to_string().contains("package.bin"), "{error}");
+    assert!(error.to_string().contains("not a regular file"), "{error}");
+}
+
+/// M11's path half: a selection that tries to step outside the project root is refused by the same
+/// observation that refuses a missing file, and no host path of the caller's appears in the message.
+#[test]
+fn a_selection_that_tries_to_leave_the_project_root_is_refused_without_naming_it() {
+    let mut world = World::new("u2-m11-traversal", ATTACHING_CONFIG);
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    let mut selections = world.attachments.clone();
+    selections.push(AttachmentSelection {
+        path: Path::new("..").join("..").join("outside.bin"),
+        declared_kind: ArtifactKind::Bin,
+    });
+
+    let error = prepare_with_attachments(&world.request(), &selections)
+        .expect_err("a release cannot attach a file outside the project it describes");
+    assert_eq!(error.code(), "ERR-BUNDLE-6115", "{error}");
+    let message = error.to_string();
+    assert!(
+        !message.contains(".."),
+        "the refusal quoted the traversal back: {message}"
+    );
+    assert!(
+        !message.contains(&world.dir.to_string_lossy().to_string()),
+        "the refusal carried a host path: {message}"
+    );
+    assert!(
+        message.contains("outside.bin") || message.contains("firmwaresight"),
+        "{message}"
+    );
+}
+
+/// M11's declared-kind half: an ELF or a MAP cannot be attached, because an unanalyzed file must not stand in
+/// for the build a release is about (`ADR-0030` D-3), and the refusal names no file.
+#[test]
+fn an_elf_offered_as_an_attachment_is_refused_as_an_analysis_input() {
+    let mut world = World::new("u2-m11-elf-attached", ATTACHING_CONFIG);
+    let elf = world.elf.clone();
+    let hex = world.hex.clone();
+    world.attach(&elf, ArtifactKind::Elf);
+    world.attach(&world.bin.clone(), ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+
+    let error = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("the analyzed ELF is not something one attaches");
+    assert_eq!(error.code(), "ERR-BUNDLE-6116", "{error}");
+    assert!(
+        !error.to_string().contains("firmware.elf"),
+        "a refusal about a declaration should not read like a refusal about a file: {error}"
+    );
+}
+
+/// M13: a declared HEX whose bytes are not Intel HEX still answers a `hex` requirement — as raw bytes under a
+/// declared kind — and the bundle says so instead of hiding it. Nothing in this unit parses it.
+#[test]
+fn a_declared_hex_whose_bytes_are_not_hex_is_shipped_and_disclosed_as_declared() {
+    let mut world = World::new("u2-m13-declared", ATTACHING_CONFIG);
+    let not_hex = world.dir.join("build/attached/not-hex.hex");
+    std::fs::write(&not_hex, b"plain text, no records, no checksum").expect("the file is written");
+    let bin = world.bin.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&not_hex, ArtifactKind::IntelHex);
+    world.select_stored_run();
+    let (bundle, _) = world.publish_attached("m13");
+
+    let manifest = read_manifest(&bundle);
+    let rows = manifest["extensions"]["attachments"]
+        .as_array()
+        .expect("a release with attachments discloses them");
+    let row = rows
+        .iter()
+        .find(|row| row["path"].as_str() == Some("artifacts/not-hex.hex"))
+        .expect("the file is disclosed");
+    assert_eq!(row["kind"].as_str(), Some("hex"));
+    assert_eq!(row["kind_basis"].as_str(), Some("declared"));
+    assert_eq!(row["provenance"].as_str(), Some("unknown"));
+    let shipped_digest = digest_of(&not_hex);
+    assert_eq!(
+        row["sha256"].as_str(),
+        Some(shipped_digest.hex()),
+        "the disclosure names bytes other than the ones shipped"
+    );
+
+    // And the bundle makes no structural claim: the analysis document describes the files it read as a
+    // container, and an attached file was never read that way.
+    let analysis = read_document(&bundle, "analysis.json");
+    let names: Vec<&str> = analysis["artifacts"]
+        .as_array()
+        .expect("the analysis lists the artifacts it read")
+        .iter()
+        .filter_map(|row| row["fileName"].as_str())
+        .collect();
+    assert!(!names.contains(&"not-hex.hex"), "{names:?}");
+}
+
+/// M14: an `unknown` attachment is honest about what it is and satisfies no kind requirement, so a release
+/// that needs a BIN cannot close the gap by attaching something it declined to classify.
+#[test]
+fn an_unknown_attachment_satisfies_no_bin_requirement() {
+    let mut world = World::new("u2-m14-unknown", ATTACHING_CONFIG);
+    let mystery = world.mystery.clone();
+    let hex = world.hex.clone();
+    world.attach(&mystery, ArtifactKind::Unknown);
+    world.attach(&hex, ArtifactKind::IntelHex);
+
+    let error = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect_err("an unclassified file is not a BIN");
+    assert_eq!(error.code(), "ERR-BUNDLE-6101", "{error}");
+}
+
+/// M12: an attachment large enough to leave no doubt about how it was read. `fingerprint::file_sha256` streams
+/// a 64 KiB buffer, so a 1 MiB file is hashed and shipped without being held in memory. The >512 MiB case the
+/// design mentions is not created here, and is reported as not verified rather than assumed.
+#[test]
+fn a_large_attachment_is_hashed_and_shipped_by_the_same_streaming_read() {
+    let mut world = World::new("u2-m12-large", ATTACHING_CONFIG);
+    let big = world.dir.join("build/attached/big.bin");
+    let bytes: Vec<u8> = (0..1_048_576u64).map(|i| (i % 251) as u8).collect();
+    std::fs::write(&big, &bytes).expect("the 1 MiB attachment is written");
+    let hex = world.hex.clone();
+    let small = world.bin.clone();
+    world.attach(&big, ArtifactKind::Bin);
+    world.attach(&small, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    world.select_stored_run();
+
+    let (bundle, _) = world.publish_attached("m12");
+    assert_eq!(
+        digest_of(&bundle.join("artifacts/big.bin")),
+        digest_of(&big),
+        "a streamed hash of a large file did not match the file"
+    );
+    assert_eq!(
+        std::fs::read(bundle.join("artifacts/big.bin"))
+            .expect("the large file is in the bundle")
+            .len(),
+        1_048_576
+    );
+    // Two BINs of different sizes both bind: the identity is not a count of files.
+    assert_eq!(world.context().attachments.len(), 3);
+}
+
+/// M7: the same bytes under a different declared kind move the identity, because what the Gate bound is the
+/// pair, not the digest alone — and nothing here re-derives a kind from the content to argue with the owner.
+#[test]
+fn the_same_bytes_declared_as_a_different_kind_move_the_run_id() {
+    let mut as_bin = World::new("u2-m7-bin", ATTACHING_CONFIG);
+    let mut as_hex = World::new("u2-m7-hex", ATTACHING_CONFIG);
+    let bin = as_bin.bin.clone();
+    let other = as_hex.bin.clone();
+    as_bin.attach(&bin, ArtifactKind::Bin);
+    as_hex.attach(&other, ArtifactKind::IntelHex);
+
+    assert_ne!(
+        as_bin.recomputed_run_id(),
+        as_hex.recomputed_run_id(),
+        "a declared kind is not part of the identity that binds it"
+    );
+    assert_eq!(
+        digest_of(&bin),
+        digest_of(&other),
+        "the two worlds do not hold the same bytes, so the comparison proved nothing"
+    );
+}
+
+/// M9: an attachment whose bytes move between the preview and the export is refused by name, with the code that
+/// says a file is no longer what it was, and the destination stays empty.
+#[test]
+fn a_changed_attachment_between_preview_and_publish_is_refused_by_name() {
+    let world = attached_world("u2-m9-changed");
+    let plan = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect("the release is prepared");
+    append(&world.bin, b" one more byte in the image");
+
+    let error = plan
+        .publish_with_attachments(
+            &world.request(),
+            &world.attachments,
+            &world.parent("m9"),
+            false,
+        )
+        .expect_err("the preview hashed different bytes");
+    assert_eq!(error.code(), "ERR-BUNDLE-6103", "{error}");
+    assert!(error.to_string().contains("app.bin"), "{error}");
+    assert!(
+        !world
+            .parent("m9")
+            .join(plan.proposed_directory_name())
+            .exists(),
+        "a stale plan wrote a bundle"
+    );
+}
+
+/// M9's size half: an attachment that grew while the release owner was reading the preview is refused on the
+/// same row, whichever fact the filesystem reported first.
+#[test]
+fn an_attachment_that_changed_size_after_the_preview_is_refused_too() {
+    let world = attached_world("u2-m9-size");
+    let plan = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect("the release is prepared");
+    std::fs::write(&world.hex, b":020000000100FA\r\n").expect("the HEX is rewritten shorter");
+
+    let error = plan
+        .publish_with_attachments(
+            &world.request(),
+            &world.attachments,
+            &world.parent("m9s"),
+            false,
+        )
+        .expect_err("the attached bytes are not the previewed ones");
+    assert_eq!(error.code(), "ERR-BUNDLE-6103", "{error}");
+    assert!(error.to_string().contains("boot.hex"), "{error}");
+}
+
+/// M8/M10: an attachment withdrawn from the *selection* between preview and export is not a file whose bytes
+/// moved. Saying which of the two happened is E-4's whole content, and the refusal names the file that went.
+///
+/// The world's policy needs an ELF and a MAP, so the withdrawn file is the one whose kind no requirement reads:
+/// the verdict is unchanged and the only fact is that the set moved. What a withdrawn file *does* change about a
+/// verdict is the next test's subject, and both are refusals.
+#[test]
+fn an_attachment_removed_between_preview_and_publish_names_itself_as_removed() {
+    let mut world = World::new("u2-m10-removed", PASSING_CONFIG);
+    let bin = world.bin.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    let plan = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect("the release is prepared");
+
+    let error = plan
+        .publish_with_attachments(&world.request(), &[], &world.parent("m10r"), false)
+        .expect_err("one fewer attached file is a different release");
+    assert_eq!(error.code(), "ERR-BUNDLE-6118", "{error}");
+    assert_eq!(
+        error.to_string(),
+        "the release attachment set changed after the preview: `app.bin` was removed",
+        "{error}"
+    );
+    assert!(
+        !world
+            .parent("m10r")
+            .join(plan.proposed_directory_name())
+            .exists(),
+        "a set change still wrote a bundle"
+    );
+    // The remediation is the owner's next step, stated as theirs, and it names no path.
+    let remediation = error.remediation();
+    assert!(
+        remediation.contains("prepare the bundle again"),
+        "{remediation}"
+    );
+    assert!(remediation.contains("recheck"), "{remediation}");
+    assert!(
+        !remediation.contains(&world.dir.to_string_lossy().to_string()),
+        "the remediation carried a host path: {remediation}"
+    );
+}
+
+/// M8's other half, and the precedence that follows from recomputing the verdict at export: when the withdrawn
+/// attachment is one the policy *requires*, the Gate's own refusal is what answers. Nothing is written either
+/// way, and nothing persisted is touched — the stored run keeps its row and its attachment facts.
+#[test]
+fn a_withdrawn_attachment_the_policy_requires_is_refused_by_the_gate_first() {
+    let world = attached_world("u2-m8-required");
+    let plan = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect("the release is prepared");
+    let hex = world.hex.clone();
+    let without_hex: Vec<AttachmentSelection> = world
+        .attachments
+        .iter()
+        .filter(|selection| selection.path != hex)
+        .cloned()
+        .collect();
+
+    let error = plan
+        .publish_with_attachments(&world.request(), &without_hex, &world.parent("m8"), false)
+        .expect_err("a release that no longer meets its own policy is not a release");
+    assert_eq!(error.code(), "ERR-BUNDLE-6101", "{error}");
+    assert!(
+        !world
+            .parent("m8")
+            .join(plan.proposed_directory_name())
+            .exists(),
+        "a refused export left a bundle behind"
+    );
+}
+
+/// M10's other direction: a file added to the selection after the preview is named as added, not blamed on a
+/// file that did not move.
+#[test]
+fn an_attachment_added_between_preview_and_publish_names_itself_as_added() {
+    let mut world = World::new("u2-m10-added", PASSING_CONFIG);
+    let bin = world.bin.clone();
+    let hex = world.hex.clone();
+    world.attach(&bin, ArtifactKind::Bin);
+    world.attach(&hex, ArtifactKind::IntelHex);
+    let plan = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect("the release is prepared");
+    let mut longer = world.attachments.clone();
+    longer.push(AttachmentSelection {
+        path: world.mystery.clone(),
+        declared_kind: ArtifactKind::Unknown,
+    });
+
+    let error = plan
+        .publish_with_attachments(&world.request(), &longer, &world.parent("m10a"), false)
+        .expect_err("one more attached file is a different release");
+    assert_eq!(error.code(), "ERR-BUNDLE-6118", "{error}");
+    assert!(
+        error.to_string().contains("`mystery.dat` was added"),
+        "{error}"
+    );
+    assert!(
+        !world
+            .parent("m10a")
+            .join(plan.proposed_directory_name())
+            .exists(),
+        "an added file still wrote a bundle"
+    );
+}
+
+/// M6: a rename with the bytes intact moves no identity — the Gate bound the digest, not the name — while the
+/// release it identifies is a different one, because a name is release identity. Between those two facts the
+/// preview is stale, and E-4 says `renamed` rather than blaming a file that never changed.
+#[test]
+fn an_attachment_renamed_between_preview_and_publish_names_itself_as_renamed() {
+    let world = attached_world("u2-m10-renamed");
+    let plan = prepare_with_attachments(&world.request(), &world.attachments)
+        .expect("the release is prepared");
+    let renamed: Vec<AttachmentSelection> = world
+        .attachments
+        .iter()
+        .map(|selection| {
+            if selection.path == world.hex {
+                AttachmentSelection {
+                    path: world.dir.join("build/attached/flash.hex"),
+                    declared_kind: selection.declared_kind,
+                }
+            } else {
+                selection.clone()
+            }
+        })
+        .collect();
+    std::fs::copy(&world.hex, &renamed[1].path).expect("the same bytes appear under the new name");
+
+    let error = plan
+        .publish_with_attachments(&world.request(), &renamed, &world.parent("m10n"), false)
+        .expect_err("a renamed file is not the file the preview named");
+    assert_eq!(error.code(), "ERR-BUNDLE-6118", "{error}");
+    assert!(error.to_string().contains("was renamed"), "{error}");
+    assert!(
+        error.to_string().contains("flash.hex") || error.to_string().contains("boot.hex"),
+        "the rename named neither side of itself: {error}"
+    );
+}
+
+/// M6's identity half, run against the same rename: the run id is the bytes, and the release id is the bytes
+/// plus the names. One moves and the other does not, which is the distinction `04_TECH/28` §5 rules 4 and 5
+/// draw and the reason a renamed attachment is a stale *preview* rather than a stale *verdict*.
+#[test]
+fn a_renamed_attachment_keeps_the_run_id_and_moves_the_release_id() {
+    let before = attached_world("u2-m6-before");
+    let (bundle_before, outcome_before) = before.publish_attached("m6a");
+
+    let mut after = World::new("u2-m6-after", ATTACHING_CONFIG);
+    let bin = after.bin.clone();
+    let hex = after.hex.clone();
+    let moved = after.dir.join("build/attached/flash.hex");
+    std::fs::copy(&hex, &moved).expect("the bytes are copied to the new name");
+    after.attach(&bin, ArtifactKind::Bin);
+    after.attach(&moved, ArtifactKind::IntelHex);
+    after.select_stored_run();
+    let (bundle_after, outcome_after) = after.publish_attached("m6b");
+
+    assert_eq!(
+        outcome_after.gate_run_id, outcome_before.gate_run_id,
+        "a rename changed a verdict that reads only digests"
+    );
+    assert_ne!(
+        outcome_after.release_id, outcome_before.release_id,
+        "a rename left a release record that cannot name its own files"
+    );
+    assert!(
+        shipped_artifacts(&bundle_after).contains(&"flash.hex".to_owned()),
+        "the renamed file is not what shipped"
+    );
+    assert!(shipped_artifacts(&bundle_before).contains(&"boot.hex".to_owned()));
+}
+
+/// L-6, the link a reader depends on: the bundle the person ends up with verifies against itself, with both
+/// attached files counted as shipped artifacts and both hash layers naming them.
+#[test]
+fn a_bundle_that_ships_attachments_verifies_and_re_derives_its_release_id() {
+    let world = attached_world("u2-l6-verify");
+    let (bundle, outcome) = world.publish_attached("l6");
+
+    let verification =
+        verify_bundle(&bundle).expect("the attached bundle verifies from its own bytes");
+    assert_eq!(verification.release_id, outcome.release_id);
+    assert_eq!(
+        verification.artifact_count, 4,
+        "both classes are shipped artifacts"
+    );
+    assert_eq!(
+        verification.file_count,
+        world.tree(&bundle).len(),
+        "the verifier counted a different set of files than the folder holds"
+    );
+    // Every attached file is named by both hash layers, which is what `artifact_count` alone cannot say.
+    let sums =
+        std::fs::read_to_string(bundle.join("SHA256SUMS")).expect("the checksum index is there");
+    for name in ["artifacts/app.bin", "artifacts/boot.hex"] {
+        assert!(
+            sums.contains(name),
+            "`{name}` is not in SHA256SUMS:
+{sums}"
+        );
+        assert!(
+            manifest_files(&bundle).iter().any(|row| row == name),
+            "`{name}` is not in the manifest"
+        );
+    }
+    // The report the release owner opens is not a summary of the old bundle: it names the attached files too.
+    let html =
+        std::fs::read_to_string(bundle.join("release-report.html")).expect("the report is there");
+    assert!(
+        html.contains("app.bin") && html.contains("boot.hex"),
+        "the report named neither attached file"
+    );
+}
+
+/// L-6 from the reader's side: a relocated bundle is verifiable with the project that produced it gone, which
+/// is the property §45 promises a reviewer, and the attachments are part of what survives the move.
+#[test]
+fn a_relocated_bundle_with_attachments_verifies_with_its_sources_deleted() {
+    let world = attached_world("u2-l6-relocated");
+    let (bundle, outcome) = world.publish_attached("l6r");
+
+    let relocated = std::env::temp_dir().join(format!(
+        "firmwaresight-u2-relocated-{}-{}",
+        std::process::id(),
+        nanos()
+    ));
+    std::fs::create_dir_all(&relocated).expect("the second root exists");
+    copy_tree(&bundle, &relocated.join("bundle")).expect("the bundle was copied");
+    let copy = relocated.join("bundle");
+
+    // Every file the release was assembled from is withdrawn: the analyzed pair, the notes, and both
+    // attached files. What verifies now is the folder, not the workspace behind it.
+    for source in [&world.elf, &world.map, &world.notes, &world.bin, &world.hex] {
+        std::fs::remove_file(source).expect("a source is withdrawn");
+    }
+
+    let verification = verify_bundle(&copy).expect("the relocated bundle verifies on its own");
+    assert_eq!(verification.release_id, outcome.release_id);
+    assert_eq!(
+        verification.artifact_count, 4,
+        "both classes survive the move"
+    );
+    assert_eq!(verification.file_count, world.tree(&copy).len());
+    let html =
+        std::fs::read_to_string(copy.join("release-report.html")).expect("the report is there");
+    assert!(
+        !html.contains(&world.dir.to_string_lossy().as_ref().to_string()),
+        "the report leaked the project path"
+    );
+    let _ = std::fs::remove_dir_all(&relocated);
+}
+
+/// L-6's teeth: one byte changed in a shipped attachment breaks the bundle, because the digest the disclosure,
+/// the index and the release fingerprint all carry is a claim about those bytes.
+#[test]
+fn tampering_with_a_shipped_attachment_breaks_the_bundle_it_sits_in() {
+    let world = attached_world("u2-l6-tamper");
+    let (bundle, _) = world.publish_attached("l6t");
+    append(&bundle.join("artifacts/app.bin"), b"one more byte");
+
+    let error = verify_bundle(&bundle).expect_err("the bytes no longer match their own digest");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+}
+
+/// L-6, the disclosure's own proof: an attached file the manifest does not disclose is refused, because a
+/// reader then holds a shipped file whose evidence class nothing in the bundle states.
+#[test]
+fn an_attached_file_the_manifest_never_disclosed_is_refused() {
+    let world = attached_world("u2-l6-undisclosed");
+    let (bundle, _) = world.publish_attached("l6d");
+    let mut manifest = read_manifest(&bundle);
+    let rows = manifest["extensions"]["attachments"]
+        .as_array_mut()
+        .expect("the release discloses its attachments")
+        .iter()
+        .filter(|row| row["path"].as_str() != Some("artifacts/app.bin"))
+        .cloned()
+        .collect::<Vec<_>>();
+    manifest["extensions"]["attachments"] = serde_json::Value::Array(rows);
+    write_document(&bundle, "release-manifest.json", &manifest);
+
+    let error =
+        verify_bundle(&bundle).expect_err("`app.bin` ships and no document says what it is");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error.to_string().contains("no document says what kind"),
+        "{error}"
+    );
+}
+
+/// L-6 in the other direction: a disclosure that names a file the bundle does not ship is a document
+/// describing a bundle that is not there.
+#[test]
+fn a_disclosed_attachment_the_bundle_does_not_ship_is_refused() {
+    let world = attached_world("u2-l6-ghost");
+    let (bundle, _) = world.publish_attached("l6g");
+    let mut manifest = read_manifest(&bundle);
+    let ghost = serde_json::json!({
+        "path": "artifacts/ghost.bin",
+        "kind": "bin",
+        "sha256": digest_of(&world.bin).hex(),
+        "size": world.bin.metadata().expect("the BIN is there").len(),
+        "kind_basis": "declared",
+        "provenance": "unknown",
+    });
+    manifest["extensions"]["attachments"]
+        .as_array_mut()
+        .expect("the release discloses its attachments")
+        .push(ghost);
+    write_document(&bundle, "release-manifest.json", &manifest);
+
+    let error = verify_bundle(&bundle).expect_err("nothing named `ghost.bin` was shipped");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(error.to_string().contains("ghost.bin"), "{error}");
+}
+
+/// L-6's honesty check: a disclosure that disagrees with the index it sits beside, or that claims more than an
+/// attached file can state about itself, is refused rather than read as fact.
+#[test]
+fn a_disclosure_that_overstates_itself_is_refused() {
+    type Overstate = (&'static str, fn(&mut serde_json::Value), &'static str);
+    let cases: [Overstate; 4] = [
+        (
+            "u2-l6-digest",
+            |row: &mut serde_json::Value| {
+                row["sha256"] = serde_json::Value::String("0".repeat(64));
+            },
+            "does not carry",
+        ),
+        (
+            "u2-l6-size",
+            |row: &mut serde_json::Value| {
+                row["size"] = serde_json::Value::from(1u64);
+            },
+            "does not carry",
+        ),
+        (
+            "u2-l6-basis",
+            |row: &mut serde_json::Value| {
+                row["kind_basis"] =
+                    serde_json::Value::String("derived_from_leading_bytes".to_owned());
+            },
+            "given its kind",
+        ),
+        (
+            "u2-l6-provenance",
+            |row: &mut serde_json::Value| {
+                row["provenance"] = serde_json::Value::String("built-by-this-project".to_owned());
+            },
+            "provenance",
+        ),
+    ];
+    for (name, edit, fragment) in cases {
+        let world = attached_world(name);
+        let (bundle, _) = world.publish_attached(name);
+        let mut manifest = read_manifest(&bundle);
+        let rows = manifest["extensions"]["attachments"]
+            .as_array_mut()
+            .expect("the release discloses its attachments");
+        edit(&mut rows[0]);
+        write_document(&bundle, "release-manifest.json", &manifest);
+
+        let error =
+            verify_bundle(&bundle).expect_err("a disclosure that overstates itself is refused");
+        assert_eq!(error.code(), "ERR-BUNDLE-6109", "{name}: {error}");
+        assert!(error.to_string().contains(fragment), "{name}: {error}");
+    }
+}
+
+/// L-6's cross-check, in the direction the two indexes cannot catch: one shipped file claimed by both
+/// documents, so a reader would have to guess which evidence class its bytes belong to.
+#[test]
+fn a_shipped_file_claimed_as_both_analyzed_and_attached_is_refused() {
+    let world = attached_world("u2-l6-double");
+    let (bundle, _) = world.publish_attached("l6x");
+    let mut analysis = read_document(&bundle, "analysis.json");
+    let rows = analysis["artifacts"]
+        .as_array_mut()
+        .expect("the analysis lists the artifacts it read");
+    let mut claimed = rows[0].clone();
+    claimed["fileName"] = serde_json::Value::String("app.bin".to_owned());
+    claimed["kind"] = serde_json::Value::String("bin".to_owned());
+    claimed["sha256"] = serde_json::Value::String(digest_of(&world.bin).hex().to_owned());
+    rows.push(claimed);
+    write_document(&bundle, "analysis.json", &analysis);
+    reindex(&bundle, "analysis.json");
+
+    let error = verify_bundle(&bundle).expect_err("one file cannot be both classes at once");
+    assert_eq!(error.code(), "ERR-BUNDLE-6109", "{error}");
+    assert!(
+        error.to_string().contains("both as an analyzed artifact"),
+        "{error}"
+    );
+}
+
+/// M15 and the compatibility half of every link above: a release that attaches nothing writes no disclosure
+/// key at all, so its bundle's bytes are the bytes this engine wrote before `C1-U1` existed.
+#[test]
+fn an_attachment_free_bundle_carries_no_disclosure_key_at_all() {
+    let world = World::new("u2-m15-nokey", PASSING_CONFIG);
+    let (bundle, _) = world.publish("m15");
+    let manifest = read_manifest(&bundle);
+    assert!(
+        manifest["extensions"].get("attachments").is_none(),
+        "an empty list would still be a change in the bytes every old reader parses"
+    );
+    verify_bundle(&bundle).expect("the attachment-free bundle still verifies");
+}
+
+/// §5.D's one sanctioned path, named from `release_attachments.rs`: the rows a context binds are the facts
+/// `observe_attachment` produced, and nothing between the two re-derives a digest.
+#[test]
+fn the_attachment_rows_a_context_binds_are_the_facts_the_observation_produced() {
+    let world = attached_world("u2-sanctioned-path");
+    let observed = world.attachment_rows();
+    let context = world.context();
+
+    assert_eq!(context.attachments.len(), observed.len());
+    for row in &observed {
+        let fact = row.as_gate_fact();
+        assert!(
+            context
+                .attachments
+                .iter()
+                .any(|bound| bound.kind == fact.kind && bound.sha256 == fact.sha256),
+            "an observed attachment was not the row the context bound"
+        );
+    }
+
+    // The same facts, one layer down: what the bundle discloses is the digest the observation wrote, and the
+    // bytes on disk inside the bundle still match it.
+    let (bundle, _) = world.publish_attached("path");
+    let manifest = read_manifest(&bundle);
+    for row in observed {
+        let disclosed = manifest["extensions"]["attachments"]
+            .as_array()
+            .expect("the release discloses its attachments")
+            .iter()
+            .find(|disclosed| {
+                disclosed["kind"].as_str() == Some(row.kind.word())
+                    && disclosed["sha256"].as_str() == row.sha256.value().map(String::as_str)
+            })
+            .unwrap_or_else(|| panic!("`{}` is not disclosed", row.file_name));
+        let path = disclosed["path"].as_str().expect("a disclosed path");
+        assert_eq!(
+            digest_of(&bundle.join(path)).hex(),
+            disclosed["sha256"].as_str().expect("a disclosed digest"),
+            "`{path}` is disclosed with bytes it does not hold"
+        );
     }
 }

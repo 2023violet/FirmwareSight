@@ -1059,10 +1059,13 @@ impl GateContext {
         }
     }
 
-    /// `artifacts.required` — every configured requirement present in the snapshot. A BIN or HEX file
-    /// that FirmwareSight cannot yet analyze is still required when the config says so (prompt §19).
+    /// `artifacts.required` — every configured requirement present in the evidence that carries its kind.
+    /// `elf` and `map` are satisfied only by an analyzed snapshot row and `bin` and `hex` only by a release
+    /// attachment row, because an attachment is bytes nobody parsed (`ADR-0030` D-3). A required BIN that
+    /// was attached is therefore a real answer; a required BIN nobody attached is still a `BLOCK`.
     fn rule_required_artifacts(&self) -> RawFinding {
         let rule = GateRuleId::RequiredArtifacts;
+        let attachments = self.canonical_attachments();
         let mut refs = vec![format!(
             "policy:artifacts.required={}",
             canonical_list(&self.policy.required_artifact_kinds)
@@ -1070,79 +1073,153 @@ impl GateContext {
         for artifact in &self.artifacts {
             refs.push(artifact_ref(artifact));
         }
-        let missing: Vec<&str> = self
-            .policy
-            .required_artifact_kinds
-            .iter()
-            .filter(|kind| {
-                let wanted = requirement_kind(kind);
-                !self.artifacts.iter().any(|a| Some(a.kind) == wanted)
-            })
-            .map(String::as_str)
-            .collect();
+        let mut from_build: Vec<&str> = Vec::new();
+        let mut from_attachments: Vec<&str> = Vec::new();
+        let mut missing: Vec<&str> = Vec::new();
+        let mut cited: Vec<GateAttachmentFact> = Vec::new();
+        for word in &self.policy.required_artifact_kinds {
+            match requirement_kind(word) {
+                Some(kind @ (ArtifactKind::Elf | ArtifactKind::Map)) => {
+                    if self.artifacts.iter().any(|a| a.kind == kind) {
+                        from_build.push(word);
+                    } else {
+                        missing.push(word);
+                    }
+                }
+                Some(kind @ (ArtifactKind::Bin | ArtifactKind::IntelHex)) => {
+                    let rows: Vec<&GateAttachmentFact> =
+                        attachments.iter().filter(|row| row.kind == kind).collect();
+                    if rows.is_empty() {
+                        missing.push(word);
+                    } else {
+                        from_attachments.push(word);
+                        cited.extend(rows.into_iter().cloned());
+                    }
+                }
+                // `unknown` attaches but satisfies nothing (D-3), and a word outside the requirement
+                // vocabulary matches no kind at all, which is what this rule already reported.
+                Some(ArtifactKind::Unknown) | None => missing.push(word),
+            }
+        }
+        // One order for the cited rows regardless of the order the requirements listed them in.
+        for row in GateAttachmentFact::canonicalized(&cited) {
+            refs.push(attachment_ref(&row));
+        }
         if missing.is_empty() {
-            RawFinding::deterministic(
-                rule,
-                FindingState::Pass,
+            let summary = if from_attachments.is_empty() {
                 format!(
                     "Every required artifact kind is present in the snapshot ({}).",
                     self.policy.required_artifact_kinds.join(", ")
-                ),
-                refs.as_slice(),
-                None,
-            )
+                )
+            } else if from_build.is_empty() {
+                format!(
+                    "Every required artifact kind is present: {} from release attachments (bytes verified, \
+                     provenance not verified).",
+                    from_attachments.join(" and ")
+                )
+            } else {
+                format!(
+                    "Every required artifact kind is present: {} from the analyzed build; {} from release \
+                     attachments (bytes verified, provenance not verified).",
+                    from_build.join(" and "),
+                    from_attachments.join(" and ")
+                )
+            };
+            RawFinding::deterministic(rule, FindingState::Pass, summary, refs.as_slice(), None)
         } else {
+            let (summary, remediation) = if attachments.is_empty() {
+                (
+                    format!(
+                        "Required artifact kind(s) missing from the snapshot: {}.",
+                        missing.join(", ")
+                    ),
+                    "Add the missing artifact to this build, or remove it from `[artifacts] required` if \
+                     this release does not ship it.",
+                )
+            } else {
+                (
+                    format!(
+                        "Required artifact kind(s) are in neither the analyzed build nor the release \
+                         attachments: {}.",
+                        missing.join(", ")
+                    ),
+                    "Add the missing artifact to this build, or attach a file of that kind, or remove it \
+                     from `[artifacts] required` if this release does not ship it.",
+                )
+            };
             RawFinding::deterministic(
                 rule,
                 FindingState::Block,
-                format!(
-                    "Required artifact kind(s) missing from the snapshot: {}.",
-                    missing.join(", ")
-                ),
+                summary,
                 refs.as_slice(),
-                Some(
-                    "Add the missing artifact to this build, or remove it from `[artifacts] required` if \
-                     this release does not ship it.",
-                ),
+                Some(remediation),
             )
         }
     }
 
-    /// `artifacts.hashes` — the snapshot digest invariant, read from the immutable snapshot rather than
-    /// recomputed from the original files (prompt §20).
+    /// `artifacts.hashes` — the digest invariant over both evidence classes. A snapshot row is read from the
+    /// immutable snapshot rather than recomputed from the original file (prompt §20), and an attachment row
+    /// carries the digest of the bytes `observe_attachment` actually streamed; what neither class ever
+    /// establishes is where those bytes came from.
     fn rule_artifact_hashes(&self) -> RawFinding {
         let rule = GateRuleId::ArtifactHashes;
-        let unhashed: Vec<String> = self
+        let attachments = self.canonical_attachments();
+        let mut unhashed: Vec<String> = self
             .artifacts
             .iter()
             .filter(|artifact| artifact.sha256.value().is_none())
             .map(|artifact| artifact_kind_label(artifact.kind).to_owned())
             .collect();
+        for row in &attachments {
+            if row.sha256.value().is_none() {
+                unhashed.push(format!("attachment {}", artifact_kind_label(row.kind)));
+            }
+        }
         let mut refs: Vec<String> = self.artifacts.iter().map(artifact_ref).collect();
+        for row in &attachments {
+            refs.push(attachment_ref(row));
+        }
         refs.push("policy:artifacts.hashes".to_owned());
         if unhashed.is_empty() {
-            RawFinding::deterministic(
-                rule,
-                FindingState::Pass,
+            let summary = if attachments.is_empty() {
                 format!(
                     "All {} snapshot artifact(s) carry a SHA-256 digest.",
                     self.artifacts.len()
-                ),
-                refs.as_slice(),
-                None,
-            )
+                )
+            } else {
+                format!(
+                    "All {} input(s) carry a SHA-256 digest: {} analyzed artifact(s) plus {} release \
+                     attachment(s) whose bytes were hashed and whose origin or build provenance was not \
+                     verified.",
+                    self.artifacts.len() + attachments.len(),
+                    self.artifacts.len(),
+                    attachments.len()
+                )
+            };
+            RawFinding::deterministic(rule, FindingState::Pass, summary, refs.as_slice(), None)
         } else {
-            RawFinding::deterministic(
-                rule,
-                FindingState::Block,
+            let summary = if attachments.is_empty() {
                 format!(
                     "Snapshot artifact(s) without a valid SHA-256 digest: {}.",
                     unhashed.join(", ")
-                ),
+                )
+            } else {
+                format!(
+                    "Artifact or attachment(s) without a valid SHA-256 digest: {}.",
+                    unhashed.join(", ")
+                )
+            };
+            RawFinding::deterministic(
+                rule,
+                FindingState::Block,
+                summary,
                 refs.as_slice(),
-                Some(
-                    "Re-analyze the build so the snapshot records a digest for every artifact it holds.",
-                ),
+                Some(if attachments.is_empty() {
+                    "Re-analyze the build so the snapshot records a digest for every artifact it holds."
+                } else {
+                    "Re-analyze the build, or attach the file again, so every input this run binds carries \
+                     the digest of bytes that were actually read."
+                }),
             )
         }
     }
@@ -1581,6 +1658,18 @@ fn artifact_ref(artifact: &GateArtifactFact) -> String {
     )
 }
 
+/// The stable `attachment:<kind>:<sha256>` locator (`04_TECH/28` §5 rule 7). It is deliberately a different
+/// scheme from `artifact:`: an attachment is a file nobody analyzed, and citing it with the locator that
+/// means "a row of the analyzed snapshot" would be the prose form of the defect `ADR-0030` D-4 refuses.
+/// The same rule keeps the host path out — a kind and a digest name the bytes, and nothing else does.
+fn attachment_ref(attachment: &GateAttachmentFact) -> String {
+    format!(
+        "attachment:{}:{}",
+        artifact_kind_label(attachment.kind),
+        attachment.sha256.value().map(String::as_str).unwrap_or("-")
+    )
+}
+
 /// The v1 requirement vocabulary maps onto artifact kinds. A word outside the vocabulary matches no
 /// artifact, which the required-artifacts rule reports as missing; the config loader rejects it long
 /// before a Gate sees it (prompt §10, §19).
@@ -1791,6 +1880,17 @@ mod tests {
             !tail.starts_with('/'),
             "ref {reference} carries an absolute path"
         );
+    }
+
+    /// One bound attachment, in the only shape `C1-U1`'s observation can produce: observed bytes with a
+    /// kind the release owner declared (`04_TECH/28` §2, §5 rule 3).
+    fn attached(kind: ArtifactKind, digest: &str, byte_size: u64) -> GateAttachmentFact {
+        GateAttachmentFact {
+            kind,
+            sha256: Fact::known(digest.to_owned()),
+            byte_size,
+            kind_basis: KindBasis::Declared,
+        }
     }
 
     #[test]
@@ -2112,6 +2212,242 @@ mod tests {
             FindingState::Block,
             "not analyzing BIN/HEX does not make a configured requirement pass"
         );
+    }
+
+    /// C1-U2's two-source rule (`04_TECH/28` §5 rule 7, `ADR-0030` D-3): the attachment classes are
+    /// satisfiable, and the finding says which set satisfied what.
+    #[test]
+    fn a_bound_bin_and_hex_attachment_pair_satisfies_their_own_requirements() {
+        let mut context = context();
+        context.policy.required_artifact_kinds =
+            vec!["elf".to_owned(), "bin".to_owned(), "hex".to_owned()];
+        context.attachments = vec![
+            attached(ArtifactKind::IntelHex, &"d".repeat(64), 683_214),
+            attached(ArtifactKind::Bin, &"c".repeat(64), 245_760),
+        ];
+        let finding = rule_finding(&context, GateRuleId::RequiredArtifacts);
+        assert_eq!(
+            finding.state,
+            FindingState::Pass,
+            "a bound BIN and HEX must satisfy their kinds: {}",
+            finding.summary
+        );
+        assert_eq!(finding.effective_severity, EffectiveSeverity::Pass);
+        assert_eq!(
+            finding.summary,
+            "Every required artifact kind is present: elf from the analyzed build; bin and hex from \
+             release attachments (bytes verified, provenance not verified).",
+            "the summary names which set satisfied each kind, and never implies the bytes were analyzed"
+        );
+        // Canonical order is `(kind word, digest)`, so the BIN row is cited before the HEX row even though
+        // the context received them the other way round.
+        assert_eq!(
+            finding.evidence_refs,
+            [
+                "policy:artifacts.required=elf,bin,hex".to_owned(),
+                format!("artifact:elf:{}", "b".repeat(64)),
+                format!("attachment:bin:{}", "c".repeat(64)),
+                format!("attachment:hex:{}", "d".repeat(64)),
+            ],
+            "{finding:?}"
+        );
+        for reference in &finding.evidence_refs {
+            assert_locator_not_host_path(reference);
+        }
+    }
+
+    /// The retained negative half of the boundary `C1-U1` locked: a required BIN with nothing attached is
+    /// still a `BLOCK`, so making the kind satisfiable did not make it optional.
+    #[test]
+    fn a_required_bin_with_no_attachment_still_blocks() {
+        let mut context = context();
+        context.policy.required_artifact_kinds = vec!["elf".to_owned(), "bin".to_owned()];
+        let finding = rule_finding(&context, GateRuleId::RequiredArtifacts);
+        assert_eq!(finding.state, FindingState::Block, "{finding:?}");
+        assert_eq!(
+            finding.summary, "Required artifact kind(s) missing from the snapshot: bin.",
+            "with no attachment bound the rule says what it said before this unit"
+        );
+        assert_eq!(
+            finding.remediation.as_deref(),
+            Some(
+                "Add the missing artifact to this build, or remove it from `[artifacts] required` if this \
+                 release does not ship it."
+            ),
+            "{finding:?}"
+        );
+    }
+
+    /// `ADR-0030` D-3 in the direction a person would try first: an attached ELF is not the analyzed ELF.
+    #[test]
+    fn an_attachment_never_satisfies_a_snapshot_only_kind() {
+        let mut context = context();
+        context.policy.required_artifact_kinds = vec!["map".to_owned()];
+        // Hand-built on purpose: `observe_attachment` refuses an `elf` or `map` before a fact exists, so the
+        // only way this row can reach a context is a caller that assembled one without observing it. The
+        // rule must still refuse it.
+        context.attachments = vec![attached(ArtifactKind::Map, &"e".repeat(64), 4_096)];
+        let finding = rule_finding(&context, GateRuleId::RequiredArtifacts);
+        assert_eq!(
+            finding.state,
+            FindingState::Block,
+            "a MAP-shaped attachment is not the MAP a build was analyzed with: {}",
+            finding.summary
+        );
+        assert!(
+            !finding
+                .evidence_refs
+                .iter()
+                .any(|reference| reference.starts_with("attachment:")),
+            "an unsatisfying attachment was cited as if it did: {:?}",
+            finding.evidence_refs
+        );
+        assert!(
+            finding
+                .remediation
+                .as_deref()
+                .unwrap_or_default()
+                .contains("attach a file of that kind"),
+            "a block with an attachment bound still tells the owner about the analyzed build only: {:?}",
+            finding.remediation
+        );
+    }
+
+    /// `ADR-0030` D-3 and §8's M14: an `unknown` row satisfies neither kind.
+    #[test]
+    fn an_unknown_attachment_satisfies_no_required_kind() {
+        for word in ["bin", "hex"] {
+            let mut context = context();
+            context.policy.required_artifact_kinds = vec![word.to_owned(), "elf".to_owned()];
+            context.attachments = vec![attached(ArtifactKind::Unknown, &"f".repeat(64), 512)];
+            let finding = rule_finding(&context, GateRuleId::RequiredArtifacts);
+            assert_eq!(
+                finding.state,
+                FindingState::Block,
+                "an unidentified file cannot stand in for a required `{word}`: {}",
+                finding.summary
+            );
+        }
+        // And it is not cited when a real attachment does the satisfying.
+        let mut context = context();
+        context.policy.required_artifact_kinds = vec!["bin".to_owned()];
+        context.attachments = vec![
+            attached(ArtifactKind::Unknown, &"f".repeat(64), 512),
+            attached(ArtifactKind::Bin, &"c".repeat(64), 512),
+        ];
+        let finding = rule_finding(&context, GateRuleId::RequiredArtifacts);
+        assert_eq!(finding.state, FindingState::Pass, "{finding:?}");
+        assert!(
+            !finding
+                .evidence_refs
+                .iter()
+                .any(|reference| reference.starts_with("attachment:unknown:")),
+            "the unknown row was cited as evidence of a satisfied requirement: {:?}",
+            finding.evidence_refs
+        );
+    }
+
+    /// §5.B: both classes are counted and located, and the attachment half of the sentence says what was
+    /// verified and what was not.
+    #[test]
+    fn the_hashes_rule_counts_both_classes_and_cites_each_by_its_own_scheme() {
+        let mut context = context();
+        context.attachments = vec![
+            attached(ArtifactKind::Bin, &"c".repeat(64), 245_760),
+            attached(ArtifactKind::IntelHex, &"d".repeat(64), 683_214),
+        ];
+        let finding = rule_finding(&context, GateRuleId::ArtifactHashes);
+        assert_eq!(finding.state, FindingState::Pass, "{finding:?}");
+        assert_eq!(
+            finding.summary,
+            "All 3 input(s) carry a SHA-256 digest: 1 analyzed artifact(s) plus 2 release attachment(s) \
+             whose bytes were hashed and whose origin or build provenance was not verified.",
+            "the counts are per class and the limitation travels with the count"
+        );
+        assert_eq!(
+            finding.evidence_refs,
+            [
+                format!("artifact:elf:{}", "b".repeat(64)),
+                format!("attachment:bin:{}", "c".repeat(64)),
+                format!("attachment:hex:{}", "d".repeat(64)),
+                "policy:artifacts.hashes".to_owned(),
+            ],
+            "{finding:?}"
+        );
+        for reference in &finding.evidence_refs {
+            assert_locator_not_host_path(reference);
+        }
+    }
+
+    /// An attachment row with no digest is unreachable through observation — an attachment that could not be
+    /// hashed stopped at E-1 — so a context that carries one blocks rather than counting it as hashed.
+    #[test]
+    fn an_attachment_row_without_a_digest_blocks_the_hashes_rule() {
+        let mut context = context();
+        context.attachments = vec![GateAttachmentFact {
+            kind: ArtifactKind::Bin,
+            sha256: Fact::unknown("no read happened"),
+            byte_size: 1,
+            kind_basis: KindBasis::Declared,
+        }];
+        let finding = rule_finding(&context, GateRuleId::ArtifactHashes);
+        assert_eq!(finding.state, FindingState::Block, "{finding:?}");
+        assert_eq!(
+            finding.summary,
+            "Artifact or attachment(s) without a valid SHA-256 digest: attachment bin.",
+            "{finding:?}"
+        );
+    }
+
+    /// I1, AC-01 and AC-11 in one place: with nothing attached, both rules produce the words and the refs
+    /// they produced before this unit existed. Summaries are not hashed into a run id, but they are what a
+    /// reviewer reads, and a frozen golden and a stored record must keep them.
+    #[test]
+    fn the_two_artifact_rules_say_exactly_what_they_said_when_nothing_is_attached() {
+        let context = context();
+        let required = rule_finding(&context, GateRuleId::RequiredArtifacts);
+        assert_eq!(
+            required.summary,
+            "Every required artifact kind is present in the snapshot (elf)."
+        );
+        assert_eq!(
+            required.evidence_refs,
+            [
+                "policy:artifacts.required=elf".to_owned(),
+                format!("artifact:elf:{}", "b".repeat(64)),
+            ]
+        );
+        let hashes = rule_finding(&context, GateRuleId::ArtifactHashes);
+        assert_eq!(
+            hashes.summary,
+            "All 1 snapshot artifact(s) carry a SHA-256 digest."
+        );
+        assert_eq!(
+            hashes.evidence_refs,
+            [
+                format!("artifact:elf:{}", "b".repeat(64)),
+                "policy:artifacts.hashes".to_owned(),
+            ]
+        );
+    }
+
+    /// `ADR-0030` D-7 and I5: the Unknown this unit introduces is a permanent statement about provenance,
+    /// not a snapshot evidence gap, so it must not move `unknown.count` or its rule.
+    #[test]
+    fn attaching_a_file_never_moves_the_unknown_evidence_rule() {
+        let mut base = context();
+        base.unknown_evidence = GateUnknownEvidence {
+            count: 3,
+            sample_refs: vec!["evidence:section-count".to_owned()],
+        };
+        base.policy.unknown_evidence_review_count = Some(2);
+        let without = rule_finding(&base, GateRuleId::UnknownEvidenceReview);
+        base.attachments = vec![attached(ArtifactKind::Bin, &"c".repeat(64), 245_760)];
+        let with = rule_finding(&base, GateRuleId::UnknownEvidenceReview);
+        assert_eq!(without.state, with.state, "{without:?} vs {with:?}");
+        assert_eq!(without.summary, with.summary);
+        assert_eq!(without.evidence_refs, with.evidence_refs);
+        assert_eq!(with.effective_severity, without.effective_severity);
     }
 
     #[test]

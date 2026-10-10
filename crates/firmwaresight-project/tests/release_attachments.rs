@@ -287,27 +287,53 @@ fn the_projects_own_policy_fingerprint_and_the_recorded_run_id_are_untouched() {
     );
 }
 
+/// The boundary `C1-U1` locked is now the rule it locked against: an attached BIN satisfies a required BIN
+/// (`ADR-0030` D-3), and the missing-attachment half of that boundary is kept as its negative rather than
+/// deleted with it.
 #[test]
-fn an_attachment_still_satisfies_nothing_because_the_rules_do_not_read_it_yet() {
-    // C1-U1's boundary as a test: `artifacts.required` is `C1-U2`'s work. A required BIN with only an
-    // attachment bound must still be refused, so this unit cannot be mistaken for a shipped capability.
+fn a_bound_bin_attachment_satisfies_a_required_bin_and_an_unbound_one_still_blocks() {
     let policy = GatePolicy {
         required_artifact_kinds: vec!["elf".to_owned(), "bin".to_owned()],
         ..Default::default()
     };
+
     let mut bound = context(vec![attachment(ArtifactKind::Bin, &sha('1'), 4_096)]);
-    bound.policy = policy;
-    let evaluation = bound.evaluate(&run_id(&bound));
-    let finding = evaluation
+    bound.policy = policy.clone();
+    let satisfied = bound.evaluate(&run_id(&bound));
+    let finding = satisfied
+        .finding(GateRuleId::RequiredArtifacts)
+        .expect("every rule answers");
+    assert_eq!(
+        finding.state,
+        FindingState::Pass,
+        "C1-U2 makes a required BIN satisfiable by the bytes that ship it: {}",
+        finding.summary
+    );
+    assert!(
+        finding
+            .evidence_refs
+            .iter()
+            .any(|reference| reference.starts_with("attachment:bin:")),
+        "the satisfied kind is cited by the scheme that satisfied it: {:?}",
+        finding.evidence_refs
+    );
+
+    let mut unbound = context(Vec::new());
+    unbound.policy = policy;
+    let refused = unbound.evaluate(&run_id(&unbound));
+    let finding = refused
         .finding(GateRuleId::RequiredArtifacts)
         .expect("every rule answers");
     assert_eq!(
         finding.state,
         FindingState::Block,
-        "an attached BIN must not yet satisfy the rule: {}",
+        "the same requirement with nothing attached is still a refusal: {}",
         finding.summary
     );
 }
+
+// §5.D's one sanctioned path is proven where a real snapshot lives:
+// `bundle_builder.rs::the_attachment_rows_a_context_binds_are_the_facts_the_observation_produced`.
 
 // ── observation and its typed refusals: U1-01 and U1-02, `04_TECH/28` §3 and §4.3 E-1/E-2/E-3 ──
 
@@ -565,6 +591,12 @@ fn the_new_codes_take_no_number_that_an_existing_refusal_already_uses() {
             name: "firmware.bin".to_owned(),
         }
         .code(),
+        // C1-U2's E-4, taken from the same live `code()` the engine answers with.
+        BundleError::AttachmentSetChanged {
+            name: "firmware.bin".to_owned(),
+            change: "added",
+        }
+        .code(),
     ];
     for code in added {
         assert!(
@@ -578,8 +610,74 @@ fn the_new_codes_take_no_number_that_an_existing_refusal_already_uses() {
     }
     assert_eq!(
         added,
-        ["ERR-BUNDLE-6115", "ERR-BUNDLE-6116", "ERR-BUNDLE-6117"]
+        [
+            "ERR-BUNDLE-6115",
+            "ERR-BUNDLE-6116",
+            "ERR-BUNDLE-6117",
+            "ERR-BUNDLE-6118"
+        ]
     );
+}
+
+/// §7: the observation refusals cross into the bundle surface with their own code and next step, and E-4
+/// names a membership change instead of blaming a file that did not move.
+#[test]
+fn the_bundle_surface_reports_each_attachment_refusal_as_its_own_code() {
+    let unreadable = BundleError::from(AttachmentError::Unreadable {
+        name: "app.bin".to_owned(),
+        detail: "the file disappeared during the read".to_owned(),
+    });
+    let not_attaching = BundleError::from(AttachmentError::KindNotAttaching {
+        kind: ArtifactKind::Elf,
+    });
+    let empty = BundleError::from(AttachmentError::Empty {
+        name: "app.bin".to_owned(),
+    });
+    let bridged: Vec<(&BundleError, &str)> = vec![
+        (&unreadable, "ERR-BUNDLE-6115"),
+        (&not_attaching, "ERR-BUNDLE-6116"),
+        (&empty, "ERR-BUNDLE-6117"),
+    ];
+    for (error, code) in bridged {
+        assert_eq!(error.code(), code, "{error}");
+        // E-1..E-3 keep the remediation the observation wrote, not a bundle-side re-wording of it.
+        assert!(
+            !error.remediation().trim().is_empty(),
+            "{error} lost its next step"
+        );
+        assert!(
+            !error.to_string().contains('/') && !error.to_string().contains('\\'),
+            "a bridged refusal carried a path: {error}"
+        );
+    }
+
+    let changed = BundleError::AttachmentSetChanged {
+        name: "app.bin".to_owned(),
+        change: "added",
+    };
+    assert_eq!(changed.code(), "ERR-BUNDLE-6118");
+    assert_eq!(
+        changed.to_string(),
+        "the release attachment set changed after the preview: `app.bin` was added"
+    );
+    assert!(
+        changed.remediation().contains("prepare the bundle again"),
+        "{}",
+        changed.remediation()
+    );
+    assert!(
+        changed.remediation().contains("recheck"),
+        "the next step must also say what to look at: {}",
+        changed.remediation()
+    );
+    for form in ["added", "removed", "renamed"] {
+        let error = BundleError::AttachmentSetChanged {
+            name: "app.bin".to_owned(),
+            change: form,
+        };
+        assert_eq!(error.code(), "ERR-BUNDLE-6118", "{error}");
+        assert!(error.to_string().contains(form), "{error}");
+    }
 }
 
 #[test]

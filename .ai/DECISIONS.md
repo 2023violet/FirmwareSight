@@ -2467,3 +2467,64 @@ and `an_attachment_still_satisfies_nothing_because_the_rules_do_not_read_it_yet`
 can mistake identity for satisfaction. `BIN_HEX_RELEASE_ATTACH` therefore moves from
 `DESIGN_APPROVED / NOT_IMPLEMENTED` to `DESIGN_APPROVED / NOT_USER_AVAILABLE`: implemented, tested, and unreachable.
 No installed store was upgraded, so the installed path stays `NOT_RUNTIME_VERIFIED` at this head.
+
+## C1-U2 (2026-10-09) — the design's field became a sibling parameter, because a forbidden path owned the field
+
+The Owner's 《FirmwareSight — C1-U2｜Gate + Bundle Attachment Safety Chain, Architect execution authorization v1.0》
+authorized one unit and bounded it in its own words: "This is an explicit authorization of C1-U2 ONLY", "No UI/CLI user
+access, no BIN/HEX analysis, no public-release assertion", "Do not start C1-U3 merely because U2 lands". Its §11 then
+forbade `apps/desktop/ui/**`, `apps/desktop/src-tauri/**` and `apps/cli/**` without a new Architect decision, and told the
+round what to do if that boundary bit: "do NOT quietly patch desktop. STOP with precise compile failure and minimum
+compatibility proposal." Everything below is a place where the frozen design and that authorization had to be reconciled,
+so the reconciliation is written down instead of being left inside the diff.
+
+**§3's field is delivered as four siblings, and a reviewer should know it is looking for the wrong thing.**
+`04_TECH/28` §3 names the judging path as a `GateRunRequest.attachments` field. `GateRunRequest` literals are built in
+`apps/desktop/src-tauri/**` and `apps/cli/**`, so adding the field is a forbidden edit; adding it *with a default* is the
+backwards-compatibility shim this repository's rules reject. The unit therefore added
+`build_context_with_attachments`, `prepare_with_attachments`,
+`BundleRequest::publish_with_attachments` and `ReleaseManifestDto::from_parts_with_attachments`, each of which *is* what
+the field would have become, with the pre-existing `build_context` / `prepare` / `publish` / `from_parts` delegating to it
+over `&[]`. No `apps/**` byte was edited, and no `apps/**` compile failure ever appeared, so §11's STOP branch never
+fired. **The consequence to accept or overturn is stated in `04_TECH/28` §14: the semantics are exactly §3's, the carrier
+is not.**
+
+**A new document shape was avoided by using the extension point that already existed.** L-6 needs a reader to tell
+"hashed and shipped" from "hashed, shipped, and also analyzed", and `release-manifest:1` cannot say that today. Adding a
+top-level field is a contract change and §9 forbids one; `schemas/release-manifest.schema.json` already declares
+`extensions` as `additionalProperties: true`, so the disclosure went there as `extensions.attachments`, written **only
+when a release attaches something** — which is what keeps every pre-C1 manifest's bytes unchanged and makes
+`a_release_with_nothing_attached_writes_no_disclosure_key_at_all` the test that protects old bundles rather than new
+ones. Identity needed nothing similar: an attachment rides the existing `artifact=<kind>:<sha256>:<size>:<file_name>`
+row, so **the release-id grammar did not move**, and that is why a rename moves the release id and leaves the run id
+alone without any new rule.
+
+**One row set, one class tag, and a refusal order that was chosen rather than discovered.** §4.2's staleness table and
+§3's recompute-at-export rule can both be honoured, but not simultaneously for the same input: withdrawing an
+attachment the policy requires changes the *verdict* and changes the *file set*. `publish_with_attachments` recomputes
+before it compares, so the answer is `ERR-BUNDLE-6101` (`ReleaseError::GateNotReady`) and not E-4 — the release that no
+longer passes is not packageable however its members moved. That precedence is now a sentence in `bundle.rs`, a numbered
+finding in `04_TECH/28` §14, and an assertion in
+`a_withdrawn_attachment_the_policy_requires_is_refused_by_the_gate_first`. Two latent defects surfaced on the way and were
+fixed with their own tests rather than folded into the feature: a shipped file was looked up by **digest** when its index
+row was written, which after the canonical sort matches whichever copy of identical bytes came first — one file's path
+beside another's digest — so each row is now paired with its leaf *before* the sort and the pair is what the index is
+written from (`identical_bytes_at_two_paths_are_one_identity_row_and_two_shipped_files`); and `changed_leaf`'s positional
+zip blamed whatever sat at the moved position (now keyed by path, and `a_snapshot_row_is_never_read_as_a_set_change`
+refuses the old behaviour by name).
+
+**Three things this round deliberately did not decide.** A selection that folds to one host file on a case-insensitive
+filesystem is refused through the manifest's `DuplicatePath` mapped onto `ERR-BUNDLE-6109`, whose sentence blames a
+manifest the caller never wrote — true, not useful, and a portable-contract question, so it belongs to `C1-U3`. The
+frozen design specifies symlink refusal for bundle *contents* (§4.4) and says nothing about a symlink offered as a
+*source*, and a `std::fs` read follows one; writing a `#[cfg(unix)]` test would have fixed one behaviour by inventing a
+rule that §15 forbids inventing, so M11's symlink half is reported `NOT_VERIFIED` on every platform instead. And no
+>512 MiB fixture was created, so M12 proves the streaming path at 1 MiB and leaves the upper bound unmeasured.
+
+**A process failure worth keeping in the record.** While adding M10's third case, a scripted region rewrite of
+`bundle_builder.rs` matched zero tests and silently deleted
+`an_attachment_added_between_preview_and_publish_names_itself_as_added`. The suite stayed green at 77, which is precisely
+how a lost test hides from a green gate; it was found only because a later mutation's own filter printed
+`77 filtered out`. The test was re-added and the file count verified from the staged diff rather than from memory.
+Prompt §10's rule — "Do not delete tests to hide changed requirements" — was nearly broken by an accident, not by intent,
+and the difference is not visible in the final diff.

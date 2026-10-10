@@ -154,6 +154,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt
 │   │   ├── FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt
 │   │   ├── FirmwareSight_C1_U1_ERR_BUNDLE_Code_Check_And_TDD_Continuation_v1.0.txt
+│   │   ├── FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt
 │   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
@@ -448,7 +449,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── design-tokens.json
 ├── C1_VALIDATION/
 │   ├── C1_U1_DATA_AND_IDENTITY_PLAN.md
-│   └── C1_U1_EXECUTION_REPORT.md
+│   ├── C1_U1_EXECUTION_REPORT.md
+│   ├── C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md
+│   └── C1_U2_GATE_BUNDLE_PLAN.md
 ├── crates/
 │   ├── firmwaresight-artifact/
 │   │   ├── src/

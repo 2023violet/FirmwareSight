@@ -33,11 +33,13 @@ last_updated: "2026-10-09"
   `ENGINEERING_COMPLETE`, `G2 PASS`, product **`MVP_CANDIDATE`** at `0.6.0`. B1 / RC / GA / public release / signing /
   notarization / updater / commercial distribution stay `NOT_AUTHORIZED`; licence `PENDING_OWNER_CONFIRMATION`;
   **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. **The present counts are
-  900 Rust / 295 UI in 9 files** on gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
-  `94336906…14d4`: C1-U1 moved the Rust figure **870 → 900 across 48 `test result:` lines** (the 48th line is the new
+  953 Rust / 295 UI in 9 files** on gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
+  `94336906…14d4`: C1-U2 moved the Rust figure **900 → 953 across the same 48 `test result:` lines** (no new test binary
+  was created — its 52 tests went into two existing project integration targets, the inline `bundle` module, the core
+  `gate` module and two contract suites), C1-U1 moved **870 → 900 across 48 lines** (the 48th line is that round's new
   `release_attachments` test binary), and the earlier figures below are their rounds' dated records — A0 moved
   **868 → 870 across 47 lines** and the C1 freeze moved nothing. A standalone `cargo test --workspace` re-run at this
-  head prints 48 such lines and reports the identical 900, so the gate log and the ad-hoc run agree here; cite either,
+  head prints 48 such lines and reports the identical 953, so the gate log and the ad-hoc run agree here; cite either,
   but cite a measurement. What is blocked is blocked on a person: recruitment needs real
   firmware engineers (§47/§48), the cohort bytes need private archival before they expire on 2026-10-22, and any UI
   follow-up needs its own prompt. Read `.ai/ACTIVE_TASK.md`'s top block, then
@@ -105,6 +107,57 @@ last_updated: "2026-10-09"
   against real SQLite files, but no store of a user's was upgraded. Durable record:
   `C1_VALIDATION/C1_U1_EXECUTION_REPORT.md`, the plan's dated §11 and §12, the two register entries, and `BASELINE.yaml`
   `c1_u1_data_and_identity`.
+- **`C1-U2` (Gate + Bundle attached byte consistency) ran on 2026-10-09 and is `READY_FOR_ARCHITECT_REVIEW`; the pointer
+  was `NONE` throughout and is `NONE` now.** The Owner delivered
+  《FirmwareSight — C1-U2｜Gate + Bundle Attachment Safety Chain, Architect execution authorization v1.0》 as a file
+  (`CANONICAL_UNIT: C1_U2_GATE_BUNDLE_ATTACHED_BYTE_CONSISTENCY`), archived at
+  `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt` (36,363 bytes, 632 lines,
+  0 `CR`, sha256 `30fa1957…15ae59`, staged blob `8779dc52…5ea2491` with the same digest). **That archive is a
+  reconstruction, and its provenance is weaker than every entry above it**: the delivered path was already gone when the
+  archive was written (`ls` of the exact path returned `No such file or directory`), so the bytes come from this session's
+  first `Read` of it and the sha256 above is the *archived copy's* digest, not a delivered-transport digest — which is
+  what §1's "do not … invent a delivered digest" requires, and it is stated in the register entry rather than buried.
+  Preflight met the handover head `1b33bbcb…232d76` with `origin/main` and the remote ref equal to it and a clean tree.
+  **What now exists in code** — and it is the unit §13 of `04_TECH/28` says must be proved link by link: Core's
+  `artifacts.required` and `artifacts.hashes` read **two evidence classes** (`elf`/`map` only from analyzed snapshot rows,
+  `bin`/`hex` only from attachment rows, `unknown` from neither) and cite each by its own locator scheme, so a bound BIN
+  now answers a `required = ["bin"]` policy with `attachment:<kind>:<sha256>` beside `artifact:…`; the project layer gained
+  the one sanctioned attachment path — `prepare_with_attachments` and `BundleRequest::publish_with_attachments`, which
+  observe with `evidence::observe_attachment`, bind through `build_context_with_attachments`, re-verify through a
+  `verify_attachments` **sibling of `verify_sources`** — it does *not* re-hash, it refuses a row whose kind a release may
+  not attach, whose kind was read out of its bytes instead of declared, whose observation left no digest, or which the
+  judged context does not carry as a `(kind, digest)` pair; the stat → regular file → non-empty → streamed digest → size
+  chain belongs to `observe_attachment`, which publish runs again through `observe()` before
+  `InputChecks::compare_with` meets the preview — and refuse **before any destination write**; the preview/export staleness
+  rule is now one typed row set carrying its evidence class, so a same-path byte move stays `ERR-BUNDLE-6103` while an
+  added, removed or renamed member answers the new E-4 `AttachmentSetChanged` at **`ERR-BUNDLE-6118`** (vacancy proved by
+  `git grep` before allocation, collision disproved by a live `code()` test); and a bundle that ships attachments is
+  self-verifying — `artifacts/<leaf>` beside `files[]` and `SHA256SUMS`, the minimum honest
+  `release-manifest.json` `extensions.attachments` disclosure (`kind_basis: "declared"`, `provenance: "unknown"`, written
+  only when something is attached), and `verify_bundle` enforcing it in both directions and re-deriving the release id
+  from the bundle's own bytes. Six links L-1…L-6 each carry their own positive **and** negative test;
+  **953 Rust / 295 UI in 9 files**, `check.py` 17/17 with no `SKIP`, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4,
+  baseline verifier PASS, fmt and `clippy -D warnings` clean, seven mutations run and each killed by a named real test with
+  every mutated file restored byte-identically.
+  **What does not exist is the feature, and no contract is closed.** No UI control, no `--attach`, no IPC command: the
+  only caller that can attach a file is a library caller, so `BIN_HEX_RELEASE_ATTACH` stays
+  **`DESIGN_APPROVED / NOT_USER_AVAILABLE`** and `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`. No schema major moved,
+  `SCHEMA_VERSION` stays 6 with no new migration, `SnapshotId` is untouched, the `/1` canonical text and every pre-C1 run
+  id are byte-identical, the P4 goldens are unchanged, and the attachment disclosure sits in `extensions`, which
+  `schemas/release-manifest.schema.json` already allows through `additionalProperties: true`. `C1-U3` (the full
+  `gate-results:1` extension pair, the complete manifest disclosure, the pre-C1 corpus re-validation, golden closure) and
+  `C1-U4` (every surface a person touches) are `NOT_AUTHORIZED / NOT_STARTED`, and §9's deferral is written into the code
+  rather than assumed. **One deviation from `04_TECH/28` §3 is the Architect's to accept or overturn**: §3 names a
+  `GateRunRequest.attachments` *field*, whose literals live in `apps/**` — forbidden without a new decision — so U2 added
+  four `*_with_attachments` siblings and left every existing caller compiling untouched. Four findings are reported rather
+  than fixed by invention (§14 of that document): the folded-case selection is refused with a manifest-shaped
+  `ERR-BUNDLE-6109` message that is true but not useful; the source-side symlink policy is unspecified and so its test was
+  **not** written, leaving M11's symlink half `NOT_VERIFIED` everywhere; the export precedence (Gate refusal before E-4) is
+  now documented and asserted; and no >512 MiB fixture exists, so M12's upper bound is `NOT_VERIFIED`. Installed behaviour
+  is `NOT_RUNTIME_VERIFIED` at this head: nothing was built, installed or screenshot, no store was upgraded, and the V1
+  cohort stays `11573661113` at `41bb6a36` with 0 eligible sessions. Durable record:
+  `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` (with its dated §14 as-executed reconciliation) and
+  `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md`; machine state: `BASELINE.yaml` `c1_u2_gate_and_bundle`.
 - **A0 PRODUCT TRUTHFULNESS CORRECTIVE ran on 2026-10-09 and closed `COMPLETE`; the pointer was `NONE` throughout and
   is `NONE` now.** *FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0* was delivered as a file,
   archived verbatim at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt` (18,845 bytes, 252

@@ -251,3 +251,41 @@ WebKitGTK expectation §2 tells us to document is documented here rather than en
 nobody has installed. `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md` carries each of these as a numbered
 disposition.
 
+
+## C1-U2: a Release Bundle may now carry release attachments (2026-10-09)
+
+`ADR-0030` froze Option C1 and `04_TECH/28` specified it; `C1-U1` stored its facts; this section records what changed
+in the **bundle** when `C1-U2` landed. It changes no clause above it: §2's targets, §3's CLI archive convention, §4/§5's
+updater boundary and P5's packaging rules all stand as written.
+
+**What a bundle with attachments contains.** Each attached file the Gate judged is copied to `artifacts/<leaf>` by the
+same collision rule the analyzed artifacts already use — a leaf that would land beside a file of different bytes is
+disambiguated as `<kind>-<sha8>-<leaf>` for **both** halves, so no file silently overwrites another — and each one
+gains an entry in the bundle's own `SHA256SUMS` and in `release-manifest.json`'s `files[]`. Nothing new is invented for
+the identity: an attachment rides the existing `ReleaseArtifact` row shape
+(`artifact=<kind>:<sha256>:<size>:<file_name>`), so **the release-id grammar did not move**, and a rename of an
+attached file moves the release id while leaving the Gate run id alone, because the run bound the bytes and the release
+named the file.
+
+**The claim the bundle makes, and the one it does not.** `release-manifest.json` gains
+`extensions.attachments`, one row per attached file with `path`, `kind`, `sha256`, `size`, `kind_basis: "declared"` and
+`provenance: "unknown"`. It is written **only when a release attaches something** — a bundle that attaches nothing
+carries no such key at all, so every pre-C1 manifest's bytes are unchanged. The row states what was verified (these
+bytes, this digest, this length) and what was not (that the file came from this build, or that a declared `.hex` is
+valid Intel HEX). `verify_bundle` reads that disclosure **in both directions**: a shipped file no one discloses is
+refused, a disclosed file that is not shipped is refused, and a disclosure whose digest or size disagrees with the
+index entry beside it is refused. A relocated bundle therefore still verifies with its sources deleted, and one altered
+byte in a shipped attachment breaks it.
+
+**Who can produce such a bundle.** A library caller only. `prepare_with_attachments` and
+`BundleRequest::publish_with_attachments` are the attachment-aware entries; `prepare` and `publish` keep delegating to
+them with an empty selection, so the desktop shell, the CLI and every existing caller compile and behave exactly as
+before. No UI control, no `--attach` flag and no IPC command exists, so **nothing here reaches a user** — that is
+`C1-U4`'s, and the full portable-contract closure (the `gate-results:1` extension pair, the complete
+`release-manifest:1` disclosure, the pre-C1 corpus re-validation, the goldens) is `C1-U3`'s. `04_TECH/28` §13 owns
+that boundary; this document does not restate it.
+
+**The two checksum indexes stay separate**, exactly as P5's section above requires: the distribution
+`SHA256SUMS.txt` describes FirmwareSight's own packaged artifacts, while a Release Bundle's `SHA256SUMS` describes the
+firmware a release owner ships. C1-U2 widened only the second one, and it did so by adding files, not by changing what
+a line means.

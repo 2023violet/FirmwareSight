@@ -36,7 +36,8 @@ pub mod version;
 
 pub use bundle::{
     BundleAcceptance, BundleError, BundleOutcome, BundlePlan, BundlePreview, BundleRequest,
-    BundleVerification, FileRole, PlannedFile, is_recognizable_bundle, prepare, verify_bundle,
+    BundleVerification, FileRole, PlannedFile, is_recognizable_bundle, prepare,
+    prepare_with_attachments, verify_bundle,
 };
 pub use config::{
     CONFIG_FILE_NAME, LoadedProject, ProjectConfig, REQUIRED_ARTIFACT_VOCABULARY,
@@ -44,8 +45,9 @@ pub use config::{
 };
 pub use error::ProjectError;
 pub use evidence::{
-    AttachmentError, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, ReleaseAttachment, SnapshotFacts,
-    build_context, footprint_evidence_id, observe_attachment, observe_release_notes,
+    AttachmentError, AttachmentSelection, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest,
+    ReleaseAttachment, SnapshotFacts, build_context, build_context_with_attachments,
+    footprint_evidence_id, observe_attachment, observe_release_notes,
 };
 pub use fingerprint::{policy_sha256, run_id};
 pub use git::{GitObservation, GitProbe};

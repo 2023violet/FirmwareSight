@@ -195,6 +195,19 @@ exist in code. **Identity is not a feature and not satisfaction:** no UI, CLI fl
 `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1_U2_U3_U4 = NOT_AUTHORIZED / NOT_STARTED`,
 `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`, and the matrix keeps its status column. **The present counts are 900 Rust across
 48 result lines / 295 UI in 9 files** on a 17-of-17 gate, and `active_task` is `NONE` ·
+**Dated later on 2026-10-09, and this is the live pointer for the two test figures:** the Owner then authorized the second
+unit and it was executed — 《FirmwareSight — C1-U2｜Gate + Bundle Attachment Safety Chain, Architect execution
+authorization v1.0》 (`CANONICAL_UNIT: C1_U2_GATE_BUNDLE_ATTACHED_BYTE_CONSISTENCY`), archived at
+`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt` as a **reconstruction** whose
+provenance is stated in that register entry rather than papered over. Attachments can now satisfy a Gate rule and enter a
+verified Release Bundle: two evidence classes in `artifacts.required` / `artifacts.hashes` with `attachment:` locators,
+one sanctioned library path (`prepare_with_attachments`, `publish_with_attachments`) whose export re-verifies through a
+`verify_attachments` sibling of `verify_sources` before any destination write, staleness over one typed row set with the
+new E-4 at `ERR-BUNDLE-6118`, and a self-verifying bundle that re-derives its release id with its sources deleted.
+**The counts are now 953 Rust across the same 48 result lines / 295 UI in 9 files** on a 17-of-17 gate; the +53 Rust are
+U2's, in six files, with no new test binary. Identity is still not a feature: no UI control, no `--attach`, no IPC
+command, so `BIN_HEX_RELEASE_ATTACH` stays `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1_U3` / `C1_U4` stay
+`NOT_AUTHORIZED / NOT_STARTED`, and `active_task` is `NONE` ·
 Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
 stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
 and its continuation round installed the CI-built product and inspected it, so **U1 was

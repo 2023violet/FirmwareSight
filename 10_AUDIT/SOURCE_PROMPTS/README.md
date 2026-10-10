@@ -1472,6 +1472,61 @@ text with no source file; each says so in its own entry instead of standing for 
   `PARTIAL / IN_PROGRESS` if only the code search had finished; the code search, the allocation, the regression tests
   and the remaining C1-U1 steps all finished, so the round reports `C1_U1_DATA_AND_IDENTITY = COMPLETE` and nothing else.
 
+## C1-U2 Gate + Bundle Attached Byte Consistency / Architect execution authorization v1.0 — EXECUTED, `READY_FOR_ARCHITECT_REVIEW` (2026-10-09)
+
+- File: `FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt` — 36,363 bytes, 632 lines (632 `LF`, ends with
+  a newline), **0 `CR`**, sha256 `30fa19579f5d676f65256f51cabd8a2d3e41866d85b1e593f1e75088db15ae59`, staged as blob
+  `8779dc528b1363010d469212f321d528b5ea2491` with **the same digest**: `cmp` of the stage-0 index blob against the
+  working copy returned identical, and `git check-attr text eol --` reports `text: set`, `eol: lf`. So archived bytes
+  = staged bytes for this file; what is *not* equal is the archive and the delivery, addressed next.
+- **This archived copy is a reconstruction, and its provenance is weaker than every entry above it.** §1 asked for the
+  delivered prompt "with actual source file bytes and both transport" provenance. The delivered path
+  `C:\Users\16429\Downloads\FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt` **was gone before the
+  archive was written**: `ls -l` of that exact path returned `No such file or directory`, `ls` of the folder lists only
+  six entries, all from another project, `find /c/Users/16429 -maxdepth 4 -iname '*Six_Link*' -o -iname '*C1_U2*'`
+  returned nothing, and a content grep of the CLI temp cache for `CANONICAL_UNIT: C1_U2` returned nothing. A content
+  grep over Desktop and Documents was attempted and timed out, so it is not evidence either way — the claim made here
+  is only that the delivered file was not found where the owner's message pointed to it. The bytes archived here come
+  from the `Read` tool result this session recorded when it first read that
+  path. The sha256 above is therefore the digest of the *archived copy* and **not** a delivered-transport digest, and
+  §1's own instruction — "do not hand-edit checksums or" / "invent a delivered digest." — is honoured by recording no
+  delivery-side hash at all rather than by asserting one that was never measured. Two byte-level properties cannot be
+  proven from a reconstruction: that the delivered file was LF-only (the recorded text carries no `CR`, but whether the
+  read path would have surfaced one was never calibrated), and that it ended with exactly one newline — the reader
+  numbers the empty trailing piece of a newline-terminated file, that artifact line was removed, and `wc -l` on the
+  archive returns 632. If the owner re-supplies the original, a `cmp` result belongs in this entry and the
+  transport half stops being a gap.
+- Canonical unit, as the file writes it: `CANONICAL_UNIT: C1_U2_GATE_BUNDLE_ATTACHED_BYTE_CONSISTENCY`, in the same
+  breath as "This is an explicit authorization of C1-U2 ONLY" and "No UI/CLI user access, no BIN/HEX analysis, no
+  public-release assertion". §15 keeps `C1-U3` and `C1-U4` outside it, and §1 closes the preflight with "Do not start
+  C1-U3 merely because U2 lands".
+- §1's hard preflight measured rather than assumed: `git rev-parse HEAD`, `git rev-parse origin/main` and
+  `git ls-remote origin refs/heads/main` each returned `1b33bbcb52b441efc4e63d7b6c91e829dc232d76`, `git status --short`
+  was empty, `git worktree list` showed one worktree, and §0's local marks were re-read at those bytes — migrations
+  `0001`–`0006` with `pub const SCHEMA_VERSION: i64 = 6;`, `ACTIVE_TASK` `NONE.`, the frozen V1 cohort
+  `11573661113`, `BIN_HEX_ANALYSIS = UNSUPPORTED`. §1 also forbids the destructive forms by name: "Never use reset
+  --hard, clean -fd, stash", and no rebase or amend of published history, and no force push.
+- What it authorizes, and only this: §5's two-evidence-class Gate semantics — `artifacts.required` and
+  `artifacts.hashes` reading snapshot rows *and* attachment rows, with `attachment:` locators kept distinguishable
+  from `artifact:` — and §6's six proof links L-1…L-6 through the one project-layer Bundle path, including a
+  `verify_attachments` sibling to `verify_sources`, membership-aware preview/export staleness with the new E-4
+  `AttachmentSetChanged{name,change}`, and a `verify_bundle` that re-derives a release id over a bundle that carries
+  attachments. §6 states the acceptance shape itself: "A single broad happy-path bundle test is NOT enough".
+- §2's precedence rule was exercised before planning, per "Repository truth overrides earlier Agent wording": §3's
+  twelve source premises were each re-read at `1b33bbc` and all twelve hold, and §3's own order — "Write
+  C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md BEFORE CODE" — is the order this round started in.
+- Outcome: **executed, and recommended to the Architect as `C1_U2_GATE_BUNDLE = READY_FOR_ARCHITECT_REVIEW`.** State
+  words at the end of this round: `C1_U1_DATA_AND_IDENTITY = COMPLETE`, `C1_U2_GATE_BUNDLE = READY_FOR_ARCHITECT_REVIEW`,
+  `C1_U3 / C1_U4 = NOT_AUTHORIZED / NOT_STARTED`, `BIN_HEX_ANALYSIS = UNSUPPORTED`,
+  `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`, `CODE_IMPLEMENTED = yes`,
+  `TESTED_LIBRARY_API = yes`, `PRODUCT_USER_ENTRY_AVAILABLE = no`, `PORTABLE_CONTRACT_COMPLETE = no`,
+  `INSTALLED_VERIFICATION = no`, `V1 = 0 eligible external sessions`, `ACTIVE_TASK = NONE`. Counts: **953 Rust across 48
+  result lines / 295 UI in 9 files**, full gate 17/17 with no `SKIP`, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4,
+  baseline verifier PASS. The evidence is `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` (with its dated §14 as-executed
+  reconciliation) and `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md`, whose nineteen parts answer §16; that report
+  deliberately leaves its own parts 13 and 14 (the product commit and the ten-job CI read-back) to the docs-only successor,
+  because a commit cannot record the run its own push produces. This entry records the authorization and its provenance.
+
 ## Supersession note on the V0 Batch A activation entry
 
 The section "V0 Batch A External Validation Activation and Interim Review" above records a round that

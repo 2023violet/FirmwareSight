@@ -119,6 +119,59 @@ pub struct ManifestExtensionsDto {
     pub gate_schema_version: u32,
     pub accepted_reviews_schema_version: u32,
     pub integrity_model: IntegrityModelDto,
+    /// The shipped files whose bytes the engine hashed but never analyzed (`ADR-0030` D-3, D-7, D-8).
+    /// Omitted entirely when the release ships none, so a bundle that predates attachments keeps the exact
+    /// bytes it had before.
+    ///
+    /// `C1-U3` owns the complete disclosure — the `gate-results:1` extension pair and the old-corpus
+    /// compatibility read. What is here is the minimum a reader needs not to mistake an attached file for an
+    /// analyzed one: which entry it is, what kind its owner declared, how that kind was established, and that
+    /// its provenance is not established at all.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub attachments: Vec<ManifestAttachmentDto>,
+}
+
+/// One attached file, disclosed beside the index entry that names its bytes.
+///
+/// The two extra fields are the point of the row. `kind_basis` says the kind was declared by whoever chose
+/// the file rather than read out of it, and `provenance` is permanently `unknown` because nothing here knows
+/// which build produced these bytes (`ADR-0030` D-7). A reader that saw only `path`, `sha256` and `size`
+/// would have no way to tell an attached `.bin` from an analyzed artifact's `.bin`, which is the distinction
+/// the whole release depends on.
+#[derive(Debug, Clone, Serialize)]
+pub struct ManifestAttachmentDto {
+    /// Bundle-relative, `/`-separated — the same spelling as the entry in `files` it describes.
+    pub path: String,
+    pub kind: &'static str,
+    pub sha256: String,
+    pub size: u64,
+    pub kind_basis: &'static str,
+    pub provenance: &'static str,
+}
+
+impl ManifestAttachmentDto {
+    /// The one provenance an attached file can carry: the bytes are verified, their origin is not.
+    pub const PROVENANCE: &'static str = "unknown";
+
+    /// A disclosure row for a file staged under `path`. The digest is the same one `files` carries, which is
+    /// what [`validate_attachments`] checks rather than assumes.
+    #[must_use]
+    pub fn new(
+        path: impl Into<String>,
+        kind: &'static str,
+        sha256: impl Into<String>,
+        size: u64,
+        kind_basis: &'static str,
+    ) -> Self {
+        Self {
+            path: path.into(),
+            kind,
+            sha256: sha256.into(),
+            size,
+            kind_basis,
+            provenance: Self::PROVENANCE,
+        }
+    }
 }
 
 /// The exact §20 coverage rule, written into the bundle it describes.
@@ -195,12 +248,33 @@ impl ReleaseManifestDto {
         files: &[ManifestFileDto],
         policy_sha256: &str,
     ) -> Result<Self, ManifestError> {
+        Self::from_parts_with_attachments(model, release_id, files, policy_sha256, &[])
+    }
+
+    /// The same document with the release's attached files disclosed.
+    ///
+    /// Kept as a sibling rather than a fifth parameter on [`Self::from_parts`] so every caller that ships only
+    /// analyzed artifacts keeps calling the function it always called, with the same result: the emitted bytes
+    /// are identical when `attachments` is empty, because the field is skipped rather than written as `[]`.
+    ///
+    /// # Errors
+    ///
+    /// Everything [`Self::from_parts`] refuses, plus a disclosure that names no shipped entry, names one with
+    /// the wrong bytes, or names one twice.
+    pub fn from_parts_with_attachments(
+        model: &ReleaseModel,
+        release_id: &str,
+        files: &[ManifestFileDto],
+        policy_sha256: &str,
+        attachments: &[ManifestAttachmentDto],
+    ) -> Result<Self, ManifestError> {
         let release_id = ReleaseId::parse(release_id)?;
         Sha256::parse(policy_sha256).map_err(|_| ManifestError::MalformedDigest {
             value: "policy_sha256".to_owned(),
         })?;
 
         let entries = validate_entries(model, files)?;
+        let attachments = validate_attachments(&entries, attachments)?;
 
         Ok(Self {
             schema_version: RELEASE_MANIFEST_SCHEMA_VERSION,
@@ -239,6 +313,7 @@ impl ReleaseManifestDto {
                 gate_schema_version: GATE_SCHEMA_VERSION,
                 accepted_reviews_schema_version: ACCEPTED_REVIEWS_SCHEMA_VERSION,
                 integrity_model: IntegrityModelDto::standard(),
+                attachments,
             },
         })
     }
@@ -379,6 +454,46 @@ fn validate_entries(
     Ok(entries)
 }
 
+/// Check the attachment disclosure against the index it sits beside, and return it ordered.
+///
+/// The disclosure is the only place a reader learns which shipped entries the engine never analyzed, so a row
+/// that names no file, names the wrong bytes, or names one file twice is refused here rather than written.
+/// `SHA256SUMS` would still verify over such a bundle and the report would still read as a clean one whose
+/// attached bytes are indistinguishable from analyzed ones — which is `ADR-0030` D-3's refusal, expressed as a
+/// document rather than as a rule.
+///
+/// The digests are not re-validated: every row is compared with the index entry it names, and the index was
+/// checked for lowercase hex above, so a disclosure that would carry a malformed digest cannot match one that
+/// does not.
+fn validate_attachments(
+    entries: &[ManifestFileDto],
+    attachments: &[ManifestAttachmentDto],
+) -> Result<Vec<ManifestAttachmentDto>, ManifestError> {
+    let mut ordered = attachments.to_vec();
+    ordered.sort_by(|left, right| bundle_path_order(&left.path, &right.path));
+    for pair in ordered.windows(2) {
+        if pair[0].path == pair[1].path {
+            return Err(ManifestError::DuplicateAttachment {
+                value: pair[1].path.clone(),
+            });
+        }
+    }
+    for attachment in &ordered {
+        let found = entries.iter().find(|entry| entry.path == attachment.path);
+        let Some(found) = found else {
+            return Err(ManifestError::AttachmentNotShipped {
+                value: attachment.path.clone(),
+            });
+        };
+        if found.sha256 != attachment.sha256 || found.size != attachment.size {
+            return Err(ManifestError::AttachmentEntryMismatch {
+                value: attachment.path.clone(),
+            });
+        }
+    }
+    Ok(ordered)
+}
+
 /// Why a manifest could not be written.
 ///
 /// These are refusals about *content*. The `ERR-BUNDLE-61xx` family (§51) is about destinations, sources
@@ -416,4 +531,14 @@ pub enum ManifestError {
     ShippedEntryMismatch { value: String },
     #[error("`{value}` sits in `artifacts/` but is not part of the release fingerprint")]
     UnfingerprintedEntry { value: String },
+    #[error("`{value}` is disclosed as a release attachment but no shipped file carries that path")]
+    AttachmentNotShipped { value: String },
+    #[error(
+        "`{value}` is disclosed as a release attachment with a digest or size its bundle entry does not carry"
+    )]
+    AttachmentEntryMismatch { value: String },
+    #[error(
+        "`{value}` is disclosed as a release attachment twice, and a manifest cannot disclose one file twice"
+    )]
+    DuplicateAttachment { value: String },
 }

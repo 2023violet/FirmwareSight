@@ -516,3 +516,51 @@ Documents each unit owns, so that "docs match behavior" (`AGENTS.md` §10) stays
 | `C1-U2` | `04_TECH/17_RELEASE_PACKAGING_UPDATE.md`, `04_TECH/24_BUILD_IDENTITY_EVIDENCE.md` (attachment provenance is permanently Unknown), this document's status line |
 | `C1-U3` | `04_TECH/26_PORTABLE_SCHEMA_POLICY.md` (the two `extensions` entries, in the same style as its P3 and P4 landing sections) |
 | `C1-U4` | `04_TECH/07_CLI_SPEC.md` (`--attach`), `04_TECH/14_IPC_DATA_CONTRACTS.md`, `P5_VALIDATION/P5_COMPATIBILITY_MATRIX.md` (only with runtime evidence), `01_PRODUCT/01_PRD_MVP.md` and `04_TECH/03_FORMAT_SUPPORT.md` status sentences, plus `templates/DESIGN_CHECKLIST_TEMPLATE.md`'s answers in the round's own evidence root |
+
+## 14. Status addendum — `C1-U1` and `C1-U2` have landed (2026-10-09)
+
+Status only. §§1–13 above are the frozen specification as the Owner approved it on 2026-10-09 and are not edited here;
+this section says which of it is code, which is not, and which statements in §1 are now the freeze round's answer rather
+than the current one.
+
+**The live capability word.** §1's
+`BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_IMPLEMENTED`
+and its "Nothing here is built" sentence describe the head `b5f732d` this document was written at. After two authorized
+implementation units the word is
+**`BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`**,
+and `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`: two units of library code and one migration exist, no surface reaches a
+person, and the compatibility matrix column is untouched.
+
+| unit | state | what is now true in code | what it still does not give |
+| --- | --- | --- | --- |
+| `C1-U1` | `COMPLETE` (2026-10-09, head `8e2aab9`) | `GateAttachmentFact` / `KindBasis`, `GateContext.attachments`, the `/1`-while-empty / `/2`-when-not canonical rule, `ReleaseAttachment` + `observe_attachment()` with E-1/E-2/E-3 at `ERR-BUNDLE-6115`/`6116`/`6117`, migration `0006` and its stored-run re-read | nothing satisfies a rule yet; no bundle path reads the set |
+| `C1-U2` | `READY_FOR_ARCHITECT_REVIEW` (this round) | §5's two-evidence-class `artifacts.required` / `artifacts.hashes` with `attachment:` locators; §6's six links L-1…L-6 each carried by its own positive and negative test; `verify_attachments` as a sibling of `verify_sources` refusing before any destination write; §4.2's staleness over one typed row set with E-4 at `ERR-BUNDLE-6118`; `verify_bundle` re-deriving a release id over a bundle that ships attachments; §7.5's minimum honest `extensions.attachments` disclosure | §9's sentences to a user (no UI, no `--attach`, no IPC); §7.3's `gate-results:1` extension pair; §12's worked example as a document; the pre-C1 corpus re-validation and golden closure — all `C1-U3` / `C1-U4` |
+| `C1-U3` | `NOT_AUTHORIZED / NOT_STARTED` | — | — |
+| `C1-U4` | `NOT_AUTHORIZED / NOT_STARTED` | — | — |
+
+**One deviation from §3, chosen because §11 of the unit's authorization outranks it.** §3 names the judging path as a
+`GateRunRequest.attachments` **field**. That struct is built by literal in `apps/desktop/src-tauri/**` and `apps/cli/**`,
+both of which C1-U2's prompt forbids touching without a new Architect decision, and its §11 instructs "do NOT quietly
+patch desktop". `C1-U2` therefore added siblings instead of fields —
+`build_context_with_attachments`, `prepare_with_attachments`, `BundleRequest::publish_with_attachments`,
+`ReleaseManifestDto::from_parts_with_attachments` — each of which is what §3's field would have become with an empty
+list, and the pre-existing entry points delegate to them with `&[]`. The consequence the Architect should accept or
+overturn: **a reviewer reading §3 will look for a field that does not exist.** The semantics §3 specifies are unchanged;
+only the carrier differs. Nothing in `apps/**` was edited and no `apps/**` compile failure was seen, so §11's STOP-with-
+compatibility-proposal branch never fired.
+
+**Four findings §§4–§6 did not decide, left open rather than closed by an implementation choice.**
+
+1. §4.3's E-1…E-4 all reach a caller as branchable codes, but a selection that folds to one host file on a
+   case-insensitive filesystem is refused by the manifest's `DuplicatePath`, mapped onto
+   `ERR-BUNDLE-6109 VERIFY_FAILED`, with a message about a manifest the caller never wrote. True, not useful. Whether it
+   deserves its own code is a portable-contract question and therefore `C1-U3`'s.
+2. §4.4 states symlink refusal for what is *inside* a bundle. It says nothing about a symlink offered as a *source*
+   selection, and a `std::fs` read follows one. `C1-U2` wrote no test here rather than fixing behaviour by inventing a
+   rule, so §8's M11 symlink half is `NOT_VERIFIED` on every platform.
+3. §4.2's staleness table and §3's recompute-at-export rule can both be satisfied at once, and the order matters: the
+   verdict is recomputed *before* the preview comparison, so withdrawing a policy-required attachment answers
+   `ERR-BUNDLE-6101` (`ReleaseError::GateNotReady` — "the Gate disposition is BLOCK…") rather than E-4. `C1-U2` documented this in code and asserts it in
+   `a_withdrawn_attachment_the_policy_requires_is_refused_by_the_gate_first`; §4.2 as frozen does not name the precedence.
+4. §8's M12 asks that a large attachment be read without loading it. A 1 MiB case proves the streaming path; no >512 MiB
+   fixture was created, so that size is `NOT_VERIFIED` rather than assumed.

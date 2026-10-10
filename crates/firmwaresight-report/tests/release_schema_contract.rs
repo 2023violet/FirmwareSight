@@ -35,7 +35,9 @@ use firmwaresight_report::gate::{
     AcceptanceDto, AcceptedReviewsDto, AcceptedReviewsExtensionsDto, GateExtensionsDto,
     GateFindingDto, GateResultsDto,
 };
-use firmwaresight_report::release::{ManifestError, ManifestFileDto, ReleaseManifestDto};
+use firmwaresight_report::release::{
+    ManifestAttachmentDto, ManifestError, ManifestFileDto, ReleaseManifestDto,
+};
 use firmwaresight_report::release_render::{
     CompareSummary, ReleaseBundleReport, render_html, render_json, render_sums,
 };
@@ -1294,4 +1296,207 @@ fn the_notes_section_names_the_file_it_shipped_and_refuses_to_embed_it() {
     let html = without.html();
     assert!(html.contains("observed no release notes"), "{html}");
     assert!(!html.contains(NOTES_HEX));
+}
+
+// --------------------------------------------------------------- C1-U2: the attachment disclosure
+//
+// `extensions.attachments` is the one place a reader learns which shipped entries the engine hashed without
+// ever analyzing. What the report layer checks is the disclosure's agreement with the index it sits beside —
+// not which kinds are attachable, a policy the project layer owns.
+
+const BIN_HEX: &str = "8fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+const HEX_HEX: &str = "9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
+
+fn attached_artifact() -> ReleaseArtifact {
+    artifact(ArtifactKind::Bin, "app.bin", BIN_HEX, 7_104)
+}
+
+/// The fixture release with one attached file beside the analyzed pair.
+fn attached_model() -> ReleaseModel {
+    let mut model = model();
+    model.artifacts.push(attached_artifact());
+    model
+        .validated()
+        .expect("a release with one attached file is still a release")
+}
+
+fn attached_staged() -> Vec<ManifestFileDto> {
+    let mut files = staged(true, true);
+    files.push(ManifestFileDto::shipped_artifact(&attached_artifact()));
+    files
+}
+
+fn disclosure(path: &str, kind: &'static str, hex: &str, size: u64) -> ManifestAttachmentDto {
+    ManifestAttachmentDto::new(path, kind, hex.to_owned(), size, "declared")
+}
+
+fn attached_manifest(
+    attachments: &[ManifestAttachmentDto],
+) -> Result<ReleaseManifestDto, ManifestError> {
+    ReleaseManifestDto::from_parts_with_attachments(
+        &attached_model(),
+        &release_id(),
+        &attached_staged(),
+        POLICY_HEX,
+        attachments,
+    )
+}
+
+#[test]
+fn an_attachment_disclosure_names_the_entry_it_ships_and_states_its_limits() {
+    let rows = [disclosure("artifacts/app.bin", "bin", BIN_HEX, 7_104)];
+    let document =
+        attached_manifest(&rows).expect("a disclosure beside its shipped entry assembles");
+    let value = serde_json::to_value(&document).expect("the document serializes");
+    let row = &value["extensions"]["attachments"][0];
+    assert_eq!(
+        row["path"],
+        serde_json::Value::String("artifacts/app.bin".to_owned())
+    );
+    assert_eq!(row["kind"], serde_json::Value::String("bin".to_owned()));
+    assert_eq!(
+        row["kind_basis"],
+        serde_json::Value::String("declared".to_owned())
+    );
+    assert_eq!(
+        row["provenance"],
+        serde_json::Value::String(ManifestAttachmentDto::PROVENANCE.to_owned()),
+        "an attached file's origin is stated as unknown, never left for a reader to infer"
+    );
+    assert_eq!(row["sha256"], serde_json::Value::String(BIN_HEX.to_owned()));
+    assert_eq!(row["size"], serde_json::Value::from(7_104u64));
+
+    // T-C1-18's document half: the disclosure states six facts and no structural one. A later field that reported
+    // an address span, a record checksum or a section count for an attached file would fail here, because this
+    // schema persists no such reading and nothing parsed the file.
+    let mut fields: Vec<&str> = row
+        .as_object()
+        .expect("a row is an object")
+        .keys()
+        .map(String::as_str)
+        .collect();
+    fields.sort_unstable();
+    assert_eq!(
+        fields,
+        ["kind", "kind_basis", "path", "provenance", "sha256", "size"],
+        "the disclosure carries exactly the facts that were observed or declared"
+    );
+}
+
+#[test]
+fn a_manifest_that_discloses_attachments_still_validates_against_the_unmodified_v1_schema() {
+    // T-C1-09: the disclosure is carried by `extensions`, which `release-manifest:1` already opens, so the major
+    // stays 1 and an old reader keeps accepting the document. The rejecting case beside it is the alternative
+    // `04_TECH/28` §7.5 names and refuses: the same fact pushed into `files[]`, whose items are
+    // `additionalProperties: false`, which is a schema change and must fail here rather than silently pass.
+    let rows = [disclosure("artifacts/app.bin", "bin", BIN_HEX, 7_104)];
+    let document =
+        attached_manifest(&rows).expect("a disclosure beside its shipped entry assembles");
+    let doc = serde_json::to_value(&document).expect("a typed document serializes");
+    let errors = validate(&doc);
+    assert!(errors.is_empty(), "{errors:?}");
+    assert_eq!(
+        doc["schema_version"], 1,
+        "a bundle that ships attachments is still a `release-manifest:1` document"
+    );
+
+    let mut widened = doc.clone();
+    widened["files"]
+        .as_array_mut()
+        .expect("the index is an array")
+        .iter_mut()
+        .find(|entry| entry["path"] == serde_json::Value::String("artifacts/app.bin".to_owned()))
+        .expect("the attached file is in the index")["kind"] =
+        serde_json::Value::String("bin".to_owned());
+    assert!(
+        !validate(&widened).is_empty(),
+        "the validator is awake on this document, so the assertion above proves something"
+    );
+}
+
+#[test]
+fn a_release_with_nothing_attached_writes_no_disclosure_key_at_all() {
+    // The compatibility property every old bundle depends on: an empty list is skipped rather than written, so
+    // the bytes a reader already accepted do not move because this build learned a new field.
+    let without = manifest();
+    let value = serde_json::to_value(&without).expect("the document serializes");
+    assert!(
+        value["extensions"].get("attachments").is_none(),
+        "{}",
+        value["extensions"]
+    );
+    let empty = attached_manifest(&[]).expect("an empty disclosure assembles");
+    let text = firmwaresight_report::release_render::render_json(&empty);
+    assert!(!text.contains("\"attachments\""), "{text}");
+}
+
+#[test]
+fn a_disclosure_that_names_a_file_the_bundle_does_not_ship_is_refused() {
+    let rows = [disclosure("artifacts/ghost.bin", "bin", BIN_HEX, 7_104)];
+    let error = attached_manifest(&rows).expect_err("nothing named `ghost.bin` was staged");
+    assert!(
+        matches!(&error, ManifestError::AttachmentNotShipped { value } if value == "artifacts/ghost.bin"),
+        "{error}"
+    );
+    // A path outside `artifacts/` names no shipped entry either, and is refused the same way rather than by a
+    // second rule that could disagree with the first.
+    let elsewhere = [disclosure("app.bin", "bin", BIN_HEX, 7_104)];
+    assert!(
+        matches!(
+            attached_manifest(&elsewhere),
+            Err(ManifestError::AttachmentNotShipped { .. })
+        ),
+        "a disclosure outside `artifacts/` was accepted"
+    );
+}
+
+#[test]
+fn a_disclosure_that_disagrees_with_its_index_entry_is_refused() {
+    for (label, altered) in [
+        (
+            "digest",
+            disclosure("artifacts/app.bin", "bin", HEX_HEX, 7_104),
+        ),
+        (
+            "size",
+            disclosure("artifacts/app.bin", "bin", BIN_HEX, 8_104),
+        ),
+    ] {
+        let error = attached_manifest(&[altered])
+            .expect_err("a disclosure that contradicts the index is not a fact about the bundle");
+        assert!(
+            matches!(&error, ManifestError::AttachmentEntryMismatch { value } if value == "artifacts/app.bin"),
+            "{label}: {error}"
+        );
+    }
+}
+
+#[test]
+fn the_same_file_disclosed_twice_is_refused_and_the_rows_are_written_in_bundle_order() {
+    let row = disclosure("artifacts/app.bin", "bin", BIN_HEX, 7_104);
+    let error =
+        attached_manifest(&[row.clone(), row]).expect_err("one file cannot be disclosed twice");
+    assert!(
+        matches!(&error, ManifestError::DuplicateAttachment { value } if value == "artifacts/app.bin"),
+        "{error}"
+    );
+
+    // Order is a property of the document, not of the caller: two rows handed over reversed are written sorted,
+    // so two engines agreeing on the same set agree on the same bytes.
+    let second = disclosure("artifacts/firmware.elf", "elf", ELF_HEX, 148_240);
+    let first = disclosure("artifacts/app.bin", "bin", BIN_HEX, 7_104);
+    let document = attached_manifest(&[second.clone(), first.clone()])
+        .expect("both rows name shipped entries");
+    let value = serde_json::to_value(&document).expect("the document serializes");
+    let paths: Vec<&str> = value["extensions"]["attachments"]
+        .as_array()
+        .expect("the disclosure is a list")
+        .iter()
+        .map(|row| row["path"].as_str().expect("a path"))
+        .collect();
+    assert_eq!(
+        paths,
+        vec!["artifacts/app.bin", "artifacts/firmware.elf"],
+        "the disclosure came out in the order the caller handed it over"
+    );
 }

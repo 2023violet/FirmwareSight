@@ -214,6 +214,7 @@ fn looks_utc(stamp: &str) -> bool {
 fn is_stable_locator(reference: &str) -> bool {
     [
         "artifact:",
+        "attachment:",
         "diff:",
         "evidence:",
         "file:",
@@ -1412,4 +1413,91 @@ fn a_derived_basis_row_is_reported_rather_than_read_back_as_more_than_it_states(
         .gate_run_by_id(&id)
         .expect_err("the read refuses to invent a byte sample");
     assert!(matches!(err, StorageError::Invariant { .. }), "got {err:?}");
+}
+
+/// T-C1-07 extended: the verdict a stored run recorded is a verdict over its stored attachment rows, not over
+/// the files someone has since moved or deleted. `C1-U2` made those rows able to satisfy a requirement, so a
+/// re-judgement that read the filesystem again would answer a different question than the one that was stored.
+#[test]
+fn a_stored_run_that_bound_attachments_rejudges_from_its_own_rows() {
+    let (_file, mut db) = seeded("attach-rejudge");
+    let rows = vec![
+        attached(ArtifactKind::Bin, &hex64("b2"), 245_760),
+        attached(ArtifactKind::IntelHex, &hex64("h2"), 118_400),
+    ];
+    let id = run_id("u2-rejudge");
+    let mut context = review_context();
+    context.policy.required_artifact_kinds =
+        vec!["elf".to_owned(), "bin".to_owned(), "hex".to_owned()];
+    context.attachments = rows.clone();
+    let evaluation = evaluate_run(&context, &id);
+    let required = evaluation
+        .finding(GateRuleId::RequiredArtifacts)
+        .expect("the rule always answers");
+    assert_eq!(required.state, FindingState::Pass, "{}", required.summary);
+    assert!(
+        required
+            .evidence_refs
+            .iter()
+            .any(|reference| reference.starts_with("attachment:bin:")),
+        "{:?}",
+        required.evidence_refs
+    );
+    db.persist_gate_run(&attached_draft(&id, &evaluation, &rows))
+        .expect("a run that judged attachments is stored");
+
+    // The files behind those rows are gone, and nothing here can reach one: the only facts left are the stored
+    // columns, read back through Core's own types.
+    let stored = db
+        .gate_run_by_id(&id)
+        .expect("query")
+        .expect("the run is there");
+    let rebuilt = GateContext {
+        attachments: stored
+            .attachments
+            .iter()
+            .map(|row| row.as_gate_fact())
+            .collect(),
+        ..context.clone()
+    };
+    assert_eq!(rebuilt.canonical_input(), context.canonical_input());
+    let again = evaluate_run(&rebuilt, &stored.run_id);
+    assert_eq!(
+        again
+            .findings
+            .iter()
+            .map(|finding| (finding.rule_id.as_str(), finding.state.as_str()))
+            .collect::<Vec<_>>(),
+        evaluation
+            .findings
+            .iter()
+            .map(|finding| (finding.rule_id.as_str(), finding.state.as_str()))
+            .collect::<Vec<_>>(),
+        "a re-judgement changed a state the stored run recorded"
+    );
+    assert_eq!(
+        again.findings, evaluation.findings,
+        "the cited evidence moved"
+    );
+    assert_eq!(
+        again.overall_effective_severity,
+        evaluation.overall_effective_severity
+    );
+
+    // And with the rows withdrawn — the set a later reader would rebuild from a bundle that dropped an
+    // attachment — the same requirement no longer passes, which is the difference the rows are stored to keep.
+    let without = GateContext {
+        attachments: Vec::new(),
+        ..context.clone()
+    };
+    let blocked = evaluate_run(&without, &id);
+    assert_eq!(
+        blocked
+            .finding(GateRuleId::RequiredArtifacts)
+            .expect("the rule always answers")
+            .state,
+        FindingState::Block,
+        "an empty attachment set satisfies the requirements the stored rows satisfied"
+    );
+    assert_ne!(without.canonical_input(), context.canonical_input());
 }

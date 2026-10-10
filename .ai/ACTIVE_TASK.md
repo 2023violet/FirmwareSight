@@ -19,11 +19,74 @@ ON 2026-10-09 THE OWNER DECIDED THE BIN/HEX RANGE QUESTION. ADR-0030 accepts Opt
 evidence — as product direction, and 04_TECH/28 freezes its design. That is a decision and a specification, not a
 feature; BIN_HEX_ANALYSIS stays UNSUPPORTED and the compatibility matrix keeps UNSUPPORTED. The same day the owner
 authorized the first unit of that design and it was executed: C1-U1 (attachment data + Gate identity + storage proof)
-is COMPLETE at 04_TECH/28 §9's U1 row. C1_U2 / C1_U3 / C1_U4 remain NOT_AUTHORIZED / NOT_STARTED, no person can attach
-a file yet, and this pointer stayed NONE before, during and after each round.
+is COMPLETE at 04_TECH/28 §9's U1 row. On the same day the owner authorized the second unit, and it was executed too:
+C1-U2 (attachments satisfying Gate rules, entering a verified Release Bundle, and the six-link byte-consistency chain)
+is READY_FOR_ARCHITECT_REVIEW — code implemented and a tested library API, with the gate green at 953 Rust / 295 UI.
+That is still not a feature: no UI control, no CLI --attach and no IPC command exists, so no person can attach a file.
+C1_U3 / C1_U4 remain NOT_AUTHORIZED / NOT_STARTED, and this pointer stayed NONE before, during and after each round.
 
 THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
 stopped, kept because this project does not rewrite history, and they are not instructions for the next round.
+
+On 2026-10-09, after C1-U1 had closed earlier the same day, the owner delivered 《FirmwareSight — C1-U2｜Gate + Bundle
+Attachment Safety Chain, Architect execution authorization v1.0》 as a file and asked for it to be executed. Its
+CANONICAL_UNIT is C1_U2_GATE_BUNDLE_ATTACHED_BYTE_CONSISTENCY and its own words bound the scope: "This is an explicit
+authorization of C1-U2 ONLY", "No UI/CLI user access, no BIN/HEX analysis, no public-release assertion", and "Do not
+start C1-U3 merely because U2 lands". It is archived at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt (36,363 bytes, 632 lines, 0 CR,
+sha256 30fa19579f5d676f65256f51cabd8a2d3e41866d85b1e593f1e75088db15ae59, staged blob 8779dc528b1363010d469212f321d528b5ea2491
+with the same digest) — and that archive is a RECONSTRUCTION: the delivered file was already gone from the path the owner
+pointed at when the archive was written, the bytes come from this session's first read of it, and no delivered-transport
+digest is claimed anywhere. The register entry says so at length; that disclosure, not a clean cmp, is the honest state of
+this round's provenance. Preflight met the expected handover head 1b33bbcb52b441efc4e63d7b6c91e829dc232d76 with
+origin/main and the remote ref equal to it and a clean tree.
+
+What C1-U2 built, at Core and library level only. Core's artifacts.required and artifacts.hashes now read TWO evidence
+classes with ADR-0030 D-3's kind separation (elf/map from analyzed snapshot rows only, bin/hex from attachment rows only,
+unknown from neither) and cite each row by its own locator, so attachment:<kind>:<sha256> appears beside artifact:… and the
+hashes rule's summary counts both classes with the limitation sentence travelling with the count. The project layer gained
+the one sanctioned attachment path: prepare_with_attachments and BundleRequest::publish_with_attachments, which observe
+through evidence::observe_attachment, bind through build_context_with_attachments, re-verify on export through
+verify_attachments — a SIBLING of verify_sources that does NOT re-hash, refusing a row whose kind a release may not
+attach, whose kind was read out of bytes instead of declared, whose observation left no digest, or which the judged
+context does not carry as a (kind, digest) pair, while the stat / regular-file / non-empty / streamed-SHA-256 /
+size chain belongs to observe_attachment and publish re-runs it through observe() before InputChecks::compare_with
+meets the preview — and refuse before any destination write, so a refusal leaves no
+directory behind and no stored row moves. Preview staleness is now one typed row set carrying its evidence class: a
+same-path byte or size change keeps ERR-BUNDLE-6103 with a leaf named from the path rather than from position, while an
+added, removed or renamed member answers the new E-4 BundleError::AttachmentSetChanged{name, change} at
+ERR-BUNDLE-6118, allocated after git grep proved the number vacant and protected by a live code() collision test that
+also re-asserts E-1/E-2/E-3 at 6115/6116/6117 through the bridged bundle surface. A bundle that ships attachments is
+self-verifying: artifacts/<leaf> under the existing collision rule, an entry in the bundle's own SHA256SUMS and
+release-manifest files[], the minimum honest extensions.attachments disclosure written only when something is attached
+(kind_basis declared, provenance unknown), and verify_bundle enforcing that disclosure in both directions and re-deriving
+the release id from the bundle's bytes with the sources deleted. Six links L-1 to L-6 each carry their own positive and
+negative test, per §6's "A single broad happy-path bundle test is NOT enough".
+
+What it does NOT do, and the four things this round refused to decide by itself. No UI control, no --attach, no IPC
+command: the only caller able to attach a file is a library caller, so BIN_HEX_RELEASE_ATTACH stays
+DESIGN_APPROVED / NOT_USER_AVAILABLE, BIN_HEX_ANALYSIS stays UNSUPPORTED, and the compatibility matrix keeps its status
+column. No schema major moved, SCHEMA_VERSION stays 6 with no new migration, SnapshotId is untouched, the /1 canonical
+text and every pre-C1 run id are byte-identical, the P4 goldens are unchanged, and the disclosure sits inside the
+extensions object that schemas/release-manifest.schema.json already opens with additionalProperties: true. C1-U3 (the
+gate-results:1 extension pair, the full manifest disclosure, the pre-C1 corpus re-validation, golden closure) and C1-U4
+(every surface a person touches) are NOT_AUTHORIZED / NOT_STARTED. One deviation is the Architect's to accept or overturn:
+04_TECH/28 §3 names a GateRunRequest.attachments FIELD whose literals live in apps/**, which §11 forbids touching without
+a new decision and whose §11 instruction is "do NOT quietly patch desktop" — so U2 added four *_with_attachments siblings
+and left every existing caller compiling untouched, rather than patching a forbidden path. Four findings are reported
+instead of fixed by invention (04_TECH/28 §14): a selection that folds to one host file on a case-insensitive filesystem
+is refused with a true-but-unhelpful manifest DuplicatePath at ERR-BUNDLE-6109; the frozen design specifies symlink refusal
+only for bundle CONTENTS, so no source-side symlink test was written and M11's symlink half stays NOT_VERIFIED on every
+platform; the export precedence is Gate-refusal-before-staleness, now documented and asserted rather than inferred; and no
+>512 MiB fixture exists, so M12's upper bound is NOT_VERIFIED rather than assumed. Nothing was built, installed or
+screenshotted and no real store was touched, so installed behaviour stays NOT_RUNTIME_VERIFIED at this head, and V1, its
+frozen cohort 11573661113 at 41bb6a36, P5, U1's verdict and guarded 25-item tally, G2 and the licence question are
+untouched. Validation: 953 Rust tests across the same 48 result lines (900 at handover) and 295 UI in 9 files, check.py
+17 of 17 PASS with no SKIP and no FAIL, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4, baseline verifier PASS, fmt and
+clippy -D warnings clean, seven mutations each killed by a named test and every mutated file restored byte-identically.
+Record: C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md with its dated §14 as-executed reconciliation,
+C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md, 04_TECH/17, 04_TECH/24 and 04_TECH/28 §14; machine state
+BASELINE.yaml c1_u2_gate_and_bundle.
 
 On 2026-10-09 the owner delivered 《FirmwareSight — C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权
 v1.0》 as a file and asked for it to be executed, then delivered a mid-turn continuation for the ERR-BUNDLE stable-code

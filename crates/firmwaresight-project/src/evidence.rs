@@ -333,8 +333,9 @@ impl ReleaseAttachment {
 
 /// Why one chosen file could not become an attachment. Every arm is a refusal a release owner can act
 /// on, so none is filed as an internal error, and none names a host path: the `name` carried is a
-/// sanitized leaf (`04_TECH/28` §4.3 E-1, E-2 and E-3). E-4 `AttachmentSetChanged` is a preview-to-export
-/// concern and belongs to `C1-U2`, so it is not represented here.
+/// sanitized leaf (`04_TECH/28` §4.3 E-1, E-2 and E-3). E-4 `AttachmentSetChanged` is the preview-to-export
+/// refusal `C1-U2` put on [`crate::bundle::BundleError`], because a set only changes between two bundle calls,
+/// so it is not one of these three.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum AttachmentError {
     /// E-1: the stat failed, the path is not a regular file, or the streamed read failed.
@@ -357,9 +358,11 @@ pub enum AttachmentError {
 impl AttachmentError {
     /// The stable diagnostics code, continuing the release family the engine registers in
     /// `crates/firmwaresight-project/src/bundle.rs` and `crates/firmwaresight-core/src/domain/release.rs`
-    /// (`ERR-BUNDLE-6101`..`6114`). The observation refusal is not a `BundleError` variant: an
-    /// attachment is observed long before any bundle is planned, and coupling it to the export path
-    /// would make a `C1-U1` refusal depend on `C1-U2` code.
+    /// (`ERR-BUNDLE-6101`..`6114`, then `6115`..`6117` here and `6118` for the bundle-side attachment-set
+    /// refusal). The observation refusal is not a `BundleError` variant of its own: an attachment is observed
+    /// long before any bundle is planned, and `C1-U2`'s export path carries it through
+    /// [`crate::bundle::BundleError::Attachment`] rather than re-describing it, so one refusal keeps one code
+    /// and one next step wherever a person meets it.
     #[must_use]
     pub fn code(&self) -> &'static str {
         match self {
@@ -516,8 +519,26 @@ impl<'a> GateRunRequest<'a> {
 }
 
 /// Assemble the context the Gate evaluates: facts in, nothing interpreted.
+///
+/// This is the attachment-free entry point every surface already uses; the release path that ships files
+/// calls [`build_context_with_attachments`] with the rows it observed, so one function assembles one context
+/// and no caller can present a set the Gate did not bind.
 #[must_use]
 pub fn build_context(request: &GateRunRequest) -> GateContext {
+    build_context_with_attachments(request, &[])
+}
+
+/// The same assembly with the release attachments bound into it (`04_TECH/28` §3's judging row, §5.D of the
+/// `C1-U2` authorization). The rows enter as `ReleaseAttachment::as_gate_fact()` and nowhere else: a second
+/// projection would be a second place a digest could be re-derived and disagree with the first.
+///
+/// An empty slice keeps the canonical input byte-identical to the `/1` every stored run already carries,
+/// which is what makes an old run id survive this unit (`ADR-0030` D-4).
+#[must_use]
+pub fn build_context_with_attachments(
+    request: &GateRunRequest,
+    attachments: &[ReleaseAttachment],
+) -> GateContext {
     let version = request.policy.version.as_ref().map(|policy| {
         version::evaluate_tag(
             &policy.pattern,
@@ -527,9 +548,10 @@ pub fn build_context(request: &GateRunRequest) -> GateContext {
     GateContext {
         snapshot_id: request.target.snapshot_id.clone(),
         artifacts: request.target.artifacts.clone(),
-        // Empty by construction this unit: no surface attaches a file yet, so no observation feeds
-        // this set, and every run a person has already stored keeps its `/1` identity.
-        attachments: Vec::new(),
+        attachments: attachments
+            .iter()
+            .map(ReleaseAttachment::as_gate_fact)
+            .collect(),
         memory: request.target.memory.clone(),
         git: request.git.facts.clone(),
         version,
@@ -538,6 +560,21 @@ pub fn build_context(request: &GateRunRequest) -> GateContext {
         unknown_evidence: request.target.unknown_evidence.clone(),
         policy: request.policy.clone(),
     }
+}
+
+/// One file the release owner chose to ship, as they chose it: a path and the kind they declared for it.
+///
+/// Deliberately not a `ReleaseAttachment`. The attachment's digest, length and sanitized leaf are what
+/// `observe_attachment` establishes, and the bundle re-establishes them at export; a caller that handed the
+/// engine a finished fact would have decided in advance what the engine was about to measure. The path is
+/// the caller's own string and stays inside this crate's private re-check structures, never a portable
+/// document or an error message (`04_TECH/28` §4.4).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AttachmentSelection {
+    pub path: PathBuf,
+    /// Declared, never inferred from the bytes (`ADR-0030` D-8): an extension does not make a file an
+    /// attachment of a kind, and nothing here reads the file as a container.
+    pub declared_kind: ArtifactKind,
 }
 
 /// The disposition table a config omits entirely, exposed so the desktop's "no config yet" screen can

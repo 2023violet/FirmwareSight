@@ -214,6 +214,32 @@ CLI `--attach`, no IPC command, no `attachment:` locator and no bundle verificat
 `C1_VALIDATION/C1_U1_EXECUTION_REPORT.md` and the plan `C1_VALIDATION/C1_U1_DATA_AND_IDENTITY_PLAN.md`; state
 `BASELINE.yaml` `c1_u1_data_and_identity`; the pointer was `NONE` before, during and after this round.
 
+**Dated later on 2026-10-09, and this is the sentence that supersedes the "no `attachment:` locator and no bundle
+verification" clause above.** The Owner then authorized the second unit — 《FirmwareSight — C1-U2｜Gate + Bundle
+Attachment Safety Chain, Architect execution authorization v1.0》
+(`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt`, 36,363 bytes / 632 lines /
+0 `CR` / SHA-256 `30fa1957…15ae59`, staged blob `8779dc52…5ea2491`) — and it was executed, so **the six-link chain the
+design specified is now code with a test at every link**: Core's `artifacts.required` / `artifacts.hashes` read two
+evidence classes under `ADR-0030` D-3's kind separation and cite an attached file as `attachment:<kind>:<sha256>`; the
+project layer's `prepare_with_attachments` / `publish_with_attachments` observe, bind, re-verify through a
+`verify_attachments` sibling of `verify_sources` and refuse before any destination write; staleness reads one typed row
+set carrying its evidence class, so a byte move keeps `ERR-BUNDLE-6103` while an added, removed or renamed member answers
+the new E-4 at `ERR-BUNDLE-6118`; and a bundle that ships attachments verifies from its own bytes, with the minimum
+honest `extensions.attachments` disclosure in `release-manifest.json` enforced in both directions by `verify_bundle`.
+**What this still is not:** a capability a person can reach. No UI control, no `--attach`, no IPC command, so
+`BIN_HEX_RELEASE_ATTACH` stays `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`, and the
+compatibility matrix keeps its status column. No schema major moved, `SCHEMA_VERSION` stays 6 with no new migration,
+`SnapshotId` is untouched, the `/1` text and every pre-C1 run id are byte-identical, and the P4 goldens are unchanged.
+One deviation from `04_TECH/28` §3 is the Architect's to accept or overturn — the design names a
+`GateRunRequest.attachments` *field*, whose literals live in `apps/**`, and the unit delivered four
+`*_with_attachments` siblings instead of touching a forbidden path; `04_TECH/28` §14 also carries four findings the
+frozen design did not decide, including M11's symlink half and M12's >512 MiB upper bound, both `NOT_VERIFIED`.
+`C1-U3` / `C1-U4` are `NOT_AUTHORIZED / NOT_STARTED`, and nothing was installed, so installed behaviour stays
+`NOT_RUNTIME_VERIFIED` at this head. Counts: **953 Rust across the same 48 result lines / 295 UI in 9 files** on a
+17-of-17 gate. Reports `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md` and the plan
+`C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` with its dated §14; state `BASELINE.yaml` `c1_u2_gate_and_bundle`; the pointer
+was `NONE` before, during and after this round.
+
 ## Primary reading path
 
 1. `README.md`
