@@ -204,7 +204,10 @@ verified Release Bundle: two evidence classes in `artifacts.required` / `artifac
 one sanctioned library path (`prepare_with_attachments`, `publish_with_attachments`) whose export re-verifies through a
 `verify_attachments` sibling of `verify_sources` before any destination write, staleness over one typed row set with the
 new E-4 at `ERR-BUNDLE-6118`, and a self-verifying bundle that re-derives its release id with its sources deleted.
-**The counts are now 953 Rust across the same 48 result lines / 295 UI in 9 files** on a 17-of-17 gate; the +53 Rust are
+**The counts are now 953 Rust across the same 48 result lines / 295 UI in 9 files** on a 17-of-17 gate — 953 on a Windows
+host and **952 on a POSIX one**, because one U2 case is `#[cfg(windows)]`, which is exactly what remote CI printed at the
+product head (`facf287`, run `38037417546`, #96, attempt 1, ten of ten jobs individually green: windows Rust 953,
+ubuntu Rust 952, both Desktop UI jobs 295 in 9 files); the +53 Rust are
 U2's, in six files, with no new test binary. Identity is still not a feature: no UI control, no `--attach`, no IPC
 command, so `BIN_HEX_RELEASE_ATTACH` stays `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1_U3` / `C1_U4` stay
 `NOT_AUTHORIZED / NOT_STARTED`, and `active_task` is `NONE` ·

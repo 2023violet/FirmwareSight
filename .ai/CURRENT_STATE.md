@@ -35,12 +35,16 @@ last_updated: "2026-10-09"
   **L11 stays `CARRIED_FORWARD`** — a visual acceptance of the UI is not a research pass. **The present counts are
   953 Rust / 295 UI in 9 files** on gate 17 of 17, 30 IPC commands, `assets/design-tokens.json` at
   `94336906…14d4`: C1-U2 moved the Rust figure **900 → 953 across the same 48 `test result:` lines** (no new test binary
-  was created — its 52 tests went into two existing project integration targets, the inline `bundle` module, the core
+  was created — its 53 tests went into two existing project integration targets, the inline `bundle` module, the core
   `gate` module and two contract suites), C1-U1 moved **870 → 900 across 48 lines** (the 48th line is that round's new
   `release_attachments` test binary), and the earlier figures below are their rounds' dated records — A0 moved
   **868 → 870 across 47 lines** and the C1 freeze moved nothing. A standalone `cargo test --workspace` re-run at this
   head prints 48 such lines and reports the identical 953, so the gate log and the ad-hoc run agree here; cite either,
-  but cite a measurement. What is blocked is blocked on a person: recruitment needs real
+  but cite a measurement. **The 953 is host-dependent by exactly one test:** remote CI at `facf287` printed **953 on the
+  Windows Rust job and 952 on the Ubuntu one across the same 48 lines**, and the difference is
+  `one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice`, which is `#[cfg(windows)]` at
+  `crates/firmwaresight-project/tests/bundle_builder.rs:2324`; no `#[cfg(unix)]` test exists, so no case runs only on
+  Ubuntu. Cite 953 for a Windows host and 952 for a POSIX one, never "953 on every platform". What is blocked is blocked on a person: recruitment needs real
   firmware engineers (§47/§48), the cohort bytes need private archival before they expire on 2026-10-22, and any UI
   follow-up needs its own prompt. Read `.ai/ACTIVE_TASK.md`'s top block, then
   stop — AGENTS.md 1 forbids lifting the next track off the roadmap.
@@ -136,9 +140,14 @@ last_updated: "2026-10-09"
   `release-manifest.json` `extensions.attachments` disclosure (`kind_basis: "declared"`, `provenance: "unknown"`, written
   only when something is attached), and `verify_bundle` enforcing it in both directions and re-deriving the release id
   from the bundle's own bytes. Six links L-1…L-6 each carry their own positive **and** negative test;
-  **953 Rust / 295 UI in 9 files**, `check.py` 17/17 with no `SKIP`, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4,
+  **953 Rust / 295 UI in 9 files** (952 on a POSIX runner — see the platform sentence above), `check.py` 17/17 with no
+  `SKIP`, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4,
   baseline verifier PASS, fmt and `clippy -D warnings` clean, seven mutations run and each killed by a named real test with
-  every mutated file restored byte-identically.
+  every mutated file restored byte-identically. Pushed as `facf287` on the ordinary fast-forward `1b33bbc..facf287` after
+  the operator confirmed it; remote run `38037417546` (#96, attempt 1) concluded **success with all ten jobs green
+  individually**, the two Rust jobs printing 953 and 952 across 48 `test result:` lines with 0 failed, both Desktop UI
+  jobs printing 295 in 9 files, and `Generated output drift` verifying the committed baseline on a clean checkout at
+  789 tracked paths / 787 entries / 917 tree lines. No artifact was downloaded and nothing was installed from that run.
   **What does not exist is the feature, and no contract is closed.** No UI control, no `--attach`, no IPC command: the
   only caller that can attach a file is a library caller, so `BIN_HEX_RELEASE_ATTACH` stays
   **`DESIGN_APPROVED / NOT_USER_AVAILABLE`** and `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`. No schema major moved,

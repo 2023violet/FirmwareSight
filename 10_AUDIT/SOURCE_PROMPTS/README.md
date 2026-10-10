@@ -1521,11 +1521,18 @@ text with no source file; each says so in its own entry instead of standing for 
   `BIN_HEX_RELEASE_ATTACH = DESIGN_APPROVED / NOT_USER_AVAILABLE`, `CODE_IMPLEMENTED = yes`,
   `TESTED_LIBRARY_API = yes`, `PRODUCT_USER_ENTRY_AVAILABLE = no`, `PORTABLE_CONTRACT_COMPLETE = no`,
   `INSTALLED_VERIFICATION = no`, `V1 = 0 eligible external sessions`, `ACTIVE_TASK = NONE`. Counts: **953 Rust across 48
-  result lines / 295 UI in 9 files**, full gate 17/17 with no `SKIP`, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4,
-  baseline verifier PASS. The evidence is `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` (with its dated §14 as-executed
-  reconciliation) and `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md`, whose nineteen parts answer §16; that report
-  deliberately leaves its own parts 13 and 14 (the product commit and the ten-job CI read-back) to the docs-only successor,
-  because a commit cannot record the run its own push produces. This entry records the authorization and its provenance.
+  result lines on a Windows host, 952 on a POSIX one** (the difference is a single `#[cfg(windows)]` case) **/ 295 UI in
+  9 files**, full gate 17/17 with no `SKIP`, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4,
+  baseline verifier PASS. Remote CI at the product head `facf2874a8039bb14fced13e6a11d985305cb415` — pushed as the
+  ordinary fast-forward `1b33bbc..facf287` only after the operator confirmed it — is run `38037417546` (number 96,
+  attempt 1, event `push`), `conclusion success` with all **ten** jobs read individually and green: the two Rust jobs
+  printing 953 and 952 across 48 lines, both Desktop UI jobs 295 in 9 files, and `Generated output drift` reporting
+  `RESULT PASS` at 789 tracked paths / 787 entries / 917 tree lines on a clean checkout. Nothing was downloaded or
+  installed. The evidence is `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` (with its dated §14 as-executed
+  reconciliation) and `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md`, whose nineteen parts answer §16; that
+  report's parts 13 and 14 name the commit, the push and that ten-job read-back, and both were written by this round's
+  single docs-only successor, because a commit cannot record the run its own push produces.
+  This entry records the authorization and its provenance.
 
 ## Supersession note on the V0 Batch A activation entry
 

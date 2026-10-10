@@ -236,7 +236,13 @@ One deviation from `04_TECH/28` §3 is the Architect's to accept or overturn —
 frozen design did not decide, including M11's symlink half and M12's >512 MiB upper bound, both `NOT_VERIFIED`.
 `C1-U3` / `C1-U4` are `NOT_AUTHORIZED / NOT_STARTED`, and nothing was installed, so installed behaviour stays
 `NOT_RUNTIME_VERIFIED` at this head. Counts: **953 Rust across the same 48 result lines / 295 UI in 9 files** on a
-17-of-17 gate. Reports `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md` and the plan
+17-of-17 gate, where the Rust figure is host-dependent by one `#[cfg(windows)]` case — remote CI at the product head
+printed **953 on `Rust (windows-latest)` and 952 on `Rust (ubuntu-latest)`**, both with 0 failed. That head is
+`facf2874a8039bb14fced13e6a11d985305cb415`, pushed as the ordinary fast-forward `1b33bbc..facf287` after the operator
+confirmed it, and its run `38037417546` (#96, attempt 1) concluded **success with all ten jobs green individually**,
+`Generated output drift` verifying the committed baseline on a clean checkout at 789 tracked paths / 787 entries /
+917 tree lines. No artifact was downloaded and nothing was installed.
+Reports `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md` and the plan
 `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` with its dated §14; state `BASELINE.yaml` `c1_u2_gate_and_bundle`; the pointer
 was `NONE` before, during and after this round.
 

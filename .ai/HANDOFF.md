@@ -433,7 +433,15 @@ Pricing / commercial research   DEFERRED_POST_MVP; the price-anchor prompt was w
 - **Figures on the C1-U2 tree, measured 2026-10-09 — these are the present ones, and the bullets below are dated
   history:** the gate's own `rust/test` step reports **953 Rust tests** (0 failed) across the **same 48 `test result:`
   lines** and the frontend still reports **295 UI tests in 9 files**, on the same **17-step** gate with no `SKIP` and no
-  `FAIL`, plus 3 under `--only core-smoke` and 4 under `--only package`. The +53 Rust are C1-U2's, and their arithmetic is
+  `FAIL`, plus 3 under `--only core-smoke` and 4 under `--only package`. **This 953 is a Windows-host figure, and remote
+  CI proved the qualifier:** at product head `facf287` run `38037417546` (#96, attempt 1, 10 of 10 jobs green
+  individually) the `Rust (windows-latest)` job printed **953 across 48 lines** and `Rust (ubuntu-latest)` printed
+  **952 across 48 lines**, 0 failed on both, while both `Desktop UI` jobs printed **295 in 9 files**. One test explains
+  the whole difference — `one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice` is
+  `#[cfg(windows)]` (`bundle_builder.rs:2324`), so that target reports 78 on Windows and 77 on Ubuntu — and no
+  `#[cfg(unix)]` test exists, so nothing runs only on Linux. Say "953 on Windows / 952 on POSIX", never "953 everywhere";
+  note the coincidence that 77 is both the Ubuntu target's honest count and the count this round's accidentally deleted
+  test produced locally on Windows. The +53 Rust are C1-U2's, and their arithmetic is
   counted from the staged diff rather than recalled (`git diff -U0 | awk '/^diff --git/{f=$0}
   /^\+[[:space:]]*#\[test\]/{c[f]++}'`): 34 in `crates/firmwaresight-project/tests/bundle_builder.rs`, 8 in
   `crates/firmwaresight-core/src/domain/gate.rs`, 6 in `crates/firmwaresight-report/tests/release_schema_contract.rs`,

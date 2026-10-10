@@ -21,7 +21,9 @@ feature; BIN_HEX_ANALYSIS stays UNSUPPORTED and the compatibility matrix keeps U
 authorized the first unit of that design and it was executed: C1-U1 (attachment data + Gate identity + storage proof)
 is COMPLETE at 04_TECH/28 §9's U1 row. On the same day the owner authorized the second unit, and it was executed too:
 C1-U2 (attachments satisfying Gate rules, entering a verified Release Bundle, and the six-link byte-consistency chain)
-is READY_FOR_ARCHITECT_REVIEW — code implemented and a tested library API, with the gate green at 953 Rust / 295 UI.
+is READY_FOR_ARCHITECT_REVIEW — code implemented and a tested library API, with the gate green at 953 Rust / 295 UI
+(952 on an Ubuntu runner, because one C1-U2 case is `#[cfg(windows)]`), pushed as `facf287` and read 10 of 10 on
+remote CI run #96, all ten jobs on attempt 1.
 That is still not a feature: no UI control, no CLI --attach and no IPC command exists, so no person can attach a file.
 C1_U3 / C1_U4 remain NOT_AUTHORIZED / NOT_STARTED, and this pointer stayed NONE before, during and after each round.
 
@@ -81,11 +83,19 @@ platform; the export precedence is Gate-refusal-before-staleness, now documented
 >512 MiB fixture exists, so M12's upper bound is NOT_VERIFIED rather than assumed. Nothing was built, installed or
 screenshotted and no real store was touched, so installed behaviour stays NOT_RUNTIME_VERIFIED at this head, and V1, its
 frozen cohort 11573661113 at 41bb6a36, P5, U1's verdict and guarded 25-item tally, G2 and the licence question are
-untouched. Validation: 953 Rust tests across the same 48 result lines (900 at handover) and 295 UI in 9 files, check.py
+untouched. Validation: 953 Rust tests across the same 48 result lines (900 at handover; 952 on an Ubuntu runner, the
+difference being the single `#[cfg(windows)]` NTFS case-fold refusal at bundle_builder.rs:2324, which cannot compile on
+POSIX) and 295 UI in 9 files, check.py
 17 of 17 PASS with no SKIP and no FAIL, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4, baseline verifier PASS, fmt and
 clippy -D warnings clean, seven mutations each killed by a named test and every mutated file restored byte-identically.
+Remote CI at the product head: `git push origin main` returned the fast-forward `1b33bbc..facf287`, run 38037417546
+(number 96, attempt 1, event push, headSha facf2874a8039bb14fced13e6a11d985305cb415) concluded success with all TEN jobs
+green individually — Rust windows 953 and Rust ubuntu 952 across 48 lines each with 0 failed, both Desktop UI jobs
+295 in 9 files, Dependency policy, Generated output drift (clean-checkout verifier PASS at 789 tracked / 787 entries /
+917 tree lines), macOS Core Smoke and the three Package jobs. Nothing was downloaded or installed from that run.
 Record: C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md with its dated §14 as-executed reconciliation,
-C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md, 04_TECH/17, 04_TECH/24 and 04_TECH/28 §14; machine state
+C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md with its §13 CI read-back written by this round's single docs-only
+successor, 04_TECH/17, 04_TECH/24 and 04_TECH/28 §14; machine state
 BASELINE.yaml c1_u2_gate_and_bundle.
 
 On 2026-10-09 the owner delivered 《FirmwareSight — C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权

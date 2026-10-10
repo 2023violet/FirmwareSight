@@ -352,7 +352,7 @@ document's own file.
 | whitespace | `git diff --check` | clean (no output, exit 0) |
 | format | `cargo fmt --all -- --check` | clean |
 | lint | `cargo clippy --workspace --all-targets --all-features -- -D warnings` | clean, exit 0 |
-| Rust | `cargo test --workspace` | **953 passed / 0 failed**, 48 `test result:` lines |
+| Rust | `cargo test --workspace` | **953 passed / 0 failed**, 48 `test result:` lines — on this Windows host. One of the 953 is `#[cfg(windows)]`, so an Ubuntu run of the identical tree counts **952**; §13 carries both CI figures |
 | frontend install | `corepack pnpm install --frozen-lockfile` (in `apps/desktop/ui`) | clean: "Lockfile is up to date, resolution step is skipped" |
 | typecheck | `corepack pnpm typecheck` | `tsc --noEmit`, no diagnostics |
 | lint | `corepack pnpm lint` | `eslint .`, no diagnostics |
@@ -380,18 +380,76 @@ tree-OID paragraph was added) returned those same figures, which is the only dif
 
 ## 13. Product commit, push, and remote CI
 
-*Not knowable at this writing, and deliberately left unfilled rather than guessed:* this file is committed inside the
-product commit it reports. §13 orders the sequence — one narrow U2 product commit, a full staged changed-path audit,
-**then** an ordinary fast-forward `git push origin main` **only after direct user authorization** (an Architect-issued
-attachment is explicitly not an override of that confirmation), then all ten CI jobs read individually at the exact
-product HEAD. The successor's part 13 of `C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md` carries the commit SHA, the staged path
-list, the push result, the run id and number, the attempt history, the Rust/UI counts as the runner printed them, and
-clean-checkout baseline integrity.
+*Written by the single docs-only successor this file's §13 foretold; the product commit itself could not carry these
+lines, because a commit cannot record the run its own push produces.*
+
+**The commit.** `facf2874a8039bb14fced13e6a11d985305cb415` (short `facf287`), "C1-U2: let an attached file answer a Gate
+rule and ship inside a verified bundle", **27 paths, 5,058 insertions, 161 deletions**, on `main`. Its parent is the
+handover head `1b33bbcb52b441efc4e63d7b6c91e829dc232d76`. The staged changed-path audit printed before the commit is
+§3's list plus the two ADR-0029 artifacts and this round's three new documents; nothing else is in it.
+
+**The push.** `git push origin main` returned `1b33bbc..facf287  main -> main` — an ordinary fast-forward, one commit
+ahead and zero behind, no `--force`, no `--force-with-lease`, no lease option of any kind, after the operator confirmed
+it directly. `git rev-parse origin/main` after the push equals `git rev-parse HEAD`.
+
+**The run.** `38037417546`, workflow run **number 96**, event `push`, `headSha` `facf2874a8039bb14fced13e6a11d985305cb415`,
+**attempt 1**, `status completed`, `conclusion success`, created `2026-10-10T08:18:23Z`, updated `2026-10-10T08:37:10Z`.
+No job was cancelled, no attempt 2 exists, and nothing was re-run. Read with
+`gh run view 38037417546 --json headSha,attempt,status,conclusion,jobs` and
+`gh api repos/2023violet/FirmwareSight/actions/jobs/<id>/logs` rather than from the run page.
+
+| # | job | job id | conclusion | started | completed |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Rust (ubuntu-latest) | `114170655071` | success | 08:18:27Z | 08:23:00Z |
+| 2 | Rust (windows-latest) | `114170655047` | success | 08:18:27Z | 08:26:10Z |
+| 3 | Desktop UI (ubuntu-latest) | `114170655057` | success | 08:18:27Z | 08:19:03Z |
+| 4 | Desktop UI (windows-latest) | `114170655011` | success | 08:18:26Z | 08:19:19Z |
+| 5 | Dependency policy | `114170655056` | success | 08:18:27Z | 08:20:46Z |
+| 6 | Generated output drift | `114170654933` | success | 08:18:27Z | 08:21:20Z |
+| 7 | macOS Core Smoke | `114170655035` | success | 08:18:31Z | 08:19:33Z |
+| 8 | Package Ubuntu | `114170655001` | success | 08:18:27Z | 08:28:57Z |
+| 9 | Package macOS | `114170655033` | success | 08:18:31Z | 08:33:56Z |
+| 10 | Package Windows | `114170655092` | success | 08:18:27Z | 08:37:09Z |
+
+**Counts as the runner printed them, and the one figure that is platform-dependent.** The Windows Rust job sums to
+**953 passed across 48 `test result:` lines with 0 failed**; the Ubuntu Rust job sums to **952 across the same 48 lines
+with 0 failed**. The difference is exactly one test and it is named:
+`one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice` is `#[cfg(windows)]` at
+`crates/firmwaresight-project/tests/bundle_builder.rs:2324`, so it compiles and runs on the Windows job (where
+`tests/bundle_builder.rs` reports 78) and is absent from the Ubuntu job (77 there). It is the NTFS case-folding refusal,
+which no POSIX host can execute — the same asymmetry §8's M11 row and finding 3 already disclose, now measured on the
+runner instead of asserted. There is no `#[cfg(unix)]` counterpart, so no case runs only on Ubuntu. Both jobs ran
+`cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --all-features -- -D warnings` and
+`cargo test --workspace` to completion. Both Desktop UI jobs print `Test Files 9 passed (9)` and
+`Tests 295 passed (295)`.
+
+**Clean-checkout baseline integrity.** The `Generated output drift` job on a fresh checkout of `facf287` printed
+`tracked files 789`, `sum entries 787`, `index blob mismatch 0`, `tracked but unlisted 0`, `tree lines 917`,
+`RESULT PASS` — the same triple the local verifier reported at the staged state, which is the ADR-0029 proof that the
+manifest committed with the round describes the round and was not hand-edited.
+
+**What the green run does not buy.** No artifact was downloaded, nothing was installed, no store was opened, and no
+V1 session exists. `C1_U2_GATE_BUNDLE` stays **`READY_FOR_ARCHITECT_REVIEW`**: the strongest conclusion §15 allows for
+this unit, because the portable contract (U3) and the user surfaces (U4) are not built and the Architect reviews U2 on
+this evidence rather than the agent signing it complete.
 
 ## 14. Evidence successor
 
-Same: recorded by the successor commit itself. §13 allows **at most one** docs-only successor and forbids a commit that
-exists only to record its own CI result, so the successor carries this round's CI read-back and no third commit follows it.
+This section *is* that successor: the one docs-only commit §13 allows at most of, carrying part 13 above and no code.
+**Eleven paths move — ten documents plus re-hashed `SHA256SUMS`** — and `DIRECTORY_TREE.txt` regenerated
+byte-identical, because no path was added or removed. The docs-only claim is proved by tree OID, not by assertion: over
+`git write-tree` of the staged index, `crates` is still `5979f1c6…`, `apps` `5cf38bbe…`, `assets` `da1f6d16…`, `schemas`
+`a8e7e542…`, `golden` `99352bef…`, `fixtures` `0fcc2114…`, `templates` `d34358ec…`, `scripts` `76c1e1cb…`, `.github`
+`174bd58f…`, `DESIGN.md` `5961d40b…`, `assets/design-tokens.json` `b818d113…`, `Cargo.toml` `0d096b38…`, `Cargo.lock`
+`c5f6a38b…`, `deny.toml` `913072c4…` and `rust-toolchain.toml` `2c2595fc…` — each identical to `HEAD`'s, so no source,
+schema, golden, fixture, dependency or token byte can have changed. The successor ran the full gate at its own staged
+state (`target/u2_successor_gate.txt`): **17 of 17** with no `SKIP`, the rust group summing to **953 passed / 0 failed
+across 48 `test result:` lines**, the frontend group to **295 in 9 files**, and `verify_baseline_artifacts.py`
+`RESULT PASS` at 789 tracked paths / 787 entries / 917 tree lines. This paragraph necessarily altered bytes that run
+hashes, which is exactly why every figure quoted here is a count or a path set rather than a digest.
+
+The successor's own CI is read after its push and reported to the Architect in the round's final message rather than
+committed by a third head, which §13 forbids ("do not create another commit to record its own CI result").
 
 ## 15. `T-C1-01` … `T-C1-19`, item by item
 
@@ -431,8 +489,9 @@ checklist. `C1-U4` owns that list, and `04_TECH/28` §9's wording is still the s
 V1 stays paused at `RECRUITMENT_READY` with **0 eligible external sessions** and `M1–M6 NOT_MEASURED`. Its cohort build
 is unchanged: artifact `11573661113` at product head `41bb6a36`, NSIS `3,896,257` bytes `9a51e86a…c87d93`, unsigned.
 This round produced no recruitment, no session, no install, no screenshot, no distribution, no tag, no GitHub Release, no
-signing, no notarization, no updater work, no licence decision, and no B1 / RC / GA statement. The CI artifact this
-round's push will produce is validation output for the repository, not the cohort, and is not to be re-frozen into it.
+signing, no notarization, no updater work, no licence decision, and no B1 / RC / GA statement. The CI artifacts run #96
+produced at `facf287` are validation output for the repository, not the cohort, were not downloaded, and are not to be
+re-frozen into it.
 U1's verdict and its guarded 25-item tally (`23 PASS / 1 FAIL / 1 NOT_VERIFIED / 0 NOT_CAPTURED`, 2
 `MISMATCH_PROVED` flags inside the 23), P5's `PASS_COMPLETE`, G2's `PASS`, `0.6.0 MVP_CANDIDATE`, the licence
 `PENDING_OWNER_CONFIRMATION` and L11 / L15 `CARRIED_FORWARD` are all untouched.
@@ -443,7 +502,8 @@ U1's verdict and its guarded 25-item tally (`23 PASS / 1 FAIL / 1 NOT_VERIFIED /
 
 Six links each carry their own positive and negative test; the error family is allocated with a live collision proof;
 M1–M16 ran as recorded, including two platform-specific rows and two `NOT_VERIFIED` rows this round refused to close by
-invention; the whole gate is green at 953 Rust / 295 UI with the baseline regenerated by script; and no historical
+invention; the whole local gate is green at 953 Rust (952 on a POSIX runner — part 13 states why) / 295 UI with the
+baseline regenerated by script, and remote CI at the product head read 10 of 10 on the first attempt; and no historical
 identity, golden, schema major, migration, dependency or frontend byte moved. The Architect is asked to decide three
 things this round deliberately did not: the sibling-versus-field carrier (part 11), the folded-case refusal's wording
 (part 8, M5), and the source-side symlink rule (part 8, M11). An agent cannot sign C1 completion, and this report does
@@ -452,7 +512,7 @@ not attempt to.
 | classification | value |
 | --- | --- |
 | CODE IMPLEMENTED | yes |
-| TESTED LIBRARY API | yes — 53 new Rust tests, six mutation proofs |
+| TESTED LIBRARY API | yes — 53 new Rust tests, seven mutation proofs |
 | PRODUCT USER ENTRY AVAILABLE | no |
 | PORTABLE CONTRACT COMPLETE | no — `gate-results:1` pair and corpus closure are U3 |
 | INSTALLED VERIFICATION | no — nothing was built or installed this round |

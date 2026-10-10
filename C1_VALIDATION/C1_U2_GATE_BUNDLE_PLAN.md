@@ -369,7 +369,8 @@ any source was edited; they are not corrected in place, because a plan that is e
 nothing. This section is the diff between the two.
 
 **Counts, measured.** `cargo test --workspace` **953 passed / 0 failed across 48 `test result:` lines** at the pre-U2
-head `1b33bbc`'s 900. The +53 is per file, counted from the staged diff
+head `1b33bbc`'s 900 — on this Windows host; the Ubuntu runner prints 952 for the same tree, as §14's closing paragraph
+records. The +53 is per file, counted from the staged diff
 (`git diff -U0 | awk '/^diff --git/{f=$0} /^\+[[:space:]]*#\[test\]/{c[f]++}'`):
 34 `crates/firmwaresight-project/tests/bundle_builder.rs` + 8 `crates/firmwaresight-core/src/domain/gate.rs`
 + 6 `crates/firmwaresight-report/tests/release_schema_contract.rs` + 3
@@ -483,3 +484,19 @@ lines; `corepack pnpm install --frozen-lockfile` / `typecheck` / `lint` clean; `
 files** (the required figure, unmoved); `corepack pnpm build` clean; `python scripts/check.py` **17/17**;
 `--only drift` **8/8**; `--only deny` **1/1**; `--only core-smoke` **3/3**; `--only package` **4/4** with no `SKIP`;
 `python scripts/verify_baseline_artifacts.py` PASS.
+
+**Added by the docs-only successor: the remote read-back, and one count this plan had no right to state flat.** The
+product commit is `facf2874a8039bb14fced13e6a11d985305cb415` on parent `1b33bbc`, 27 paths;
+`git push origin main` returned `1b33bbc..facf287` — ordinary fast-forward, no force, no lease option — only after the
+operator confirmed it. Run `38037417546` (#96, attempt 1) concluded `success` with all ten jobs green individually, and
+reading those logs is what found the error in the sentence above. **953 is a Windows figure.** The same tree on the
+Ubuntu runner prints **952 across the same 48 `test result:` lines**, and the difference is exactly
+`one_host_file_offered_under_two_cases_is_refused_rather_than_shipped_twice`, which is `#[cfg(windows)]` at
+`bundle_builder.rs:2324`: `tests/bundle_builder.rs` reports 78 on Windows and 77 on Ubuntu. The plan and this §14 wrote
+"953 passed / 0 failed" as though a count could be host-free; it cannot, and the round that spent its effort refusing
+false passes in code owed the same discipline to its own headline number. Both numbers are now carried in
+`BASELINE.yaml` (`verification.rust`, `verification.remote_ci`), the report's §12 and §13, `.ai/CURRENT_STATE.md`,
+`.ai/HANDOFF.md`, `.ai/README.md`, `.ai/ACTIVE_TASK.md` and `INDEX.md`. There is no `#[cfg(unix)]` test, so nothing runs
+only on Linux, and no case this round claimed is silently absent from a platform. The other nine jobs agree with the
+local state: both Desktop UI jobs print 295 in 9 files, and `Generated output drift` verifies the committed baseline on a
+clean checkout at 789 tracked paths / 787 entries / 917 tree lines with `RESULT PASS`.
