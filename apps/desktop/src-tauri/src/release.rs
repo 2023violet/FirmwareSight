@@ -26,9 +26,10 @@ use std::sync::Arc;
 
 use firmwaresight_core::domain::diff::{BudgetState, compare};
 use firmwaresight_core::domain::gate::{
-    EffectiveSeverity, FindingState, GateArtifactFact, GateBudgetFact, GateFileFact,
-    GateFileStatus, GateFinding, GateGitFacts, GateGrowthFacts, GateMemoryFacts, GatePolicy,
-    GateRuleId, GateStateCounts, UnknownDisposition, UnknownPolicy, VersionPolicy, aggregate,
+    EffectiveSeverity, FindingState, GateArtifactFact, GateAttachmentFact, GateBudgetFact,
+    GateFileFact, GateFileStatus, GateFinding, GateGitFacts, GateGrowthFacts, GateMemoryFacts,
+    GatePolicy, GateRuleId, GateStateCounts, RequirementSource, UnknownDisposition, UnknownPolicy,
+    VersionPolicy, aggregate, requirement_evidence,
 };
 use firmwaresight_core::domain::identity::{ArtifactKind, Fact};
 use firmwaresight_project::LoadedProject;
@@ -290,7 +291,14 @@ impl Session {
             request.baseline_snapshot_id.clone(),
             git_dto(&git.facts),
             Some(&policy),
-            Some(tables(&findings, &policy, &target, &growth, notes.as_ref())),
+            Some(tables(
+                &findings,
+                &policy,
+                &target,
+                &judged,
+                &growth,
+                notes.as_ref(),
+            )),
             None,
         ))
     }
@@ -599,11 +607,12 @@ fn tables(
     findings: &[GateFinding],
     policy: &GatePolicy,
     target: &SnapshotFacts,
+    attachments: &[GateAttachmentFact],
     growth: &GateGrowthFacts,
     notes: Option<&GateFileFact>,
 ) -> GateTablesDto {
     GateTablesDto {
-        artifacts: artifact_rows(policy, target),
+        artifacts: artifact_rows(policy, target, attachments),
         budgets: budget_rows(findings, policy, target),
         growth: growth_rows(findings, policy, growth),
         notes: notes_dto(findings, policy, notes),
@@ -612,21 +621,48 @@ fn tables(
 
 /// Required first, then whatever else the build holds, so a `Required · Missing` row is never hidden by
 /// the list's length (prompt §51).
-fn artifact_rows(policy: &GatePolicy, target: &SnapshotFacts) -> Vec<GateArtifactRowDto> {
+///
+/// Each row says which set satisfied its kind, and it says so through the same predicate the rule read
+/// (`requirement_evidence`): `attachments` are the rows this run judged, so a required BIN an owner
+/// attached cannot be reported here as `Missing` while the verdict above it counts it as present.
+fn artifact_rows(
+    policy: &GatePolicy,
+    target: &SnapshotFacts,
+    attachments: &[GateAttachmentFact],
+) -> Vec<GateArtifactRowDto> {
     let mut rows: Vec<GateArtifactRowDto> = policy
         .required_artifact_kinds
         .iter()
         .map(|kind| {
-            let found = target
-                .artifacts
-                .iter()
-                .find(|artifact| kind_word(artifact.kind) == *kind);
+            let (found, satisfied_by) = match requirement_evidence(kind) {
+                Some((_, RequirementSource::Analyzed)) => (
+                    target
+                        .artifacts
+                        .iter()
+                        .find(|artifact| kind_word(artifact.kind) == *kind)
+                        .map(|artifact| (artifact.sha256.value().cloned(), artifact.byte_size)),
+                    "analyzed",
+                ),
+                Some((_, RequirementSource::Attachment)) => (
+                    attachments
+                        .iter()
+                        .find(|row| kind_word(row.kind) == *kind)
+                        .map(|row| (row.sha256.value().cloned(), row.byte_size)),
+                    "attachment",
+                ),
+                None => (None, "none"),
+            };
             GateArtifactRowDto {
                 kind: kind.clone(),
                 required: true,
                 present: found.is_some(),
-                sha256: found.and_then(|artifact| artifact.sha256.value().cloned()),
-                byte_size: found.map(|artifact| artifact.byte_size),
+                satisfied_by: if found.is_some() {
+                    satisfied_by.to_owned()
+                } else {
+                    "none".to_owned()
+                },
+                sha256: found.as_ref().and_then(|(digest, _)| digest.clone()),
+                byte_size: found.map(|(_, size)| size),
             }
         })
         .collect();
@@ -636,6 +672,7 @@ fn artifact_rows(policy: &GatePolicy, target: &SnapshotFacts) -> Vec<GateArtifac
                 kind: kind_word(artifact.kind).to_owned(),
                 required: false,
                 present: true,
+                satisfied_by: "analyzed".to_owned(),
                 sha256: artifact.sha256.value().cloned(),
                 byte_size: Some(artifact.byte_size),
             });

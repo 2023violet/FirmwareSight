@@ -1021,6 +1021,11 @@ pub struct GateArtifactRowDto {
     pub kind: String,
     pub required: bool,
     pub present: bool,
+    /// Which set satisfied this kind, in the same words the rule used: `analyzed` for a row the analysis
+    /// produced, `attachment` for a release attachment whose bytes were hashed but nobody parsed, and
+    /// `none` when nothing did. A table that decided this for itself could print `Missing` under a
+    /// `PASS` that named an attachment, which is what `04_TECH/28` §9 forbids.
+    pub satisfied_by: String,
     pub sha256: Option<String>,
     #[ts(type = "number | null")]
     pub byte_size: Option<u64>,

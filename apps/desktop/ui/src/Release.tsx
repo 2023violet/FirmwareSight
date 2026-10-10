@@ -853,6 +853,16 @@ function FindingRow({
  * Every figure is Rust&rsquo;s. The unit switch only re-labels a byte count, and a row whose state is
  * Unknown shows the word `Unknown` with its reason rather than a number that was never measured.
  */
+/**
+ * The three words Rust uses for which set satisfied a required kind (`GateArtifactRowDto.satisfiedBy`).
+ * A label map, not a decision: the screen never works out satisfaction from `present`.
+ */
+const SATISFIED_BY: Readonly<Record<string, string>> = {
+  analyzed: 'Analyzed build',
+  attachment: 'Release attachment',
+  none: 'Missing',
+};
+
 function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: SizeUnit }) {
   const tables = run.tables;
   if (tables === null) {
@@ -867,14 +877,15 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
         <ScrollArea label="Required artifact table">
           <table className={styles['table']}>
             <caption className={styles['caption']}>
-              Policy requirement against what this build holds. Required bin/hex are satisfied by release
-              files you attach; FirmwareSight records their bytes and SHA-256 and does not analyze them.
+              Policy requirement against the evidence that carries each kind. Required bin/hex are
+              satisfied by release files you attach; FirmwareSight records their bytes and SHA-256 and
+              does not analyze them.
             </caption>
             <thead>
               <tr>
                 <th scope="col">Kind</th>
                 <th scope="col">Policy</th>
-                <th scope="col">Build</th>
+                <th scope="col">Satisfied by</th>
                 <th scope="col">SHA-256</th>
                 <th scope="col">Size</th>
               </tr>
@@ -886,7 +897,7 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
                     {row.kind}
                   </th>
                   <td>{row.required ? 'Required' : 'Not required'}</td>
-                  <td>{row.present ? 'Present' : 'Missing'}</td>
+                  <td>{SATISFIED_BY[row.satisfiedBy] ?? row.satisfiedBy}</td>
                   <td className={styles['monoSmall']}>
                     {row.sha256 === null ? '—' : truncateMiddle(row.sha256, 8)}
                   </td>

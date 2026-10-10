@@ -10,4 +10,11 @@ export type GateArtifactRowDto = {
 /**
  * `elf`, `map`, `bin`, `hex` or `unknown`.
  */
-kind: string, required: boolean, present: boolean, sha256: string | null, byteSize: number | null, };
+kind: string, required: boolean, present: boolean, 
+/**
+ * Which set satisfied this kind, in the same words the rule used: `analyzed` for a row the analysis
+ * produced, `attachment` for a release attachment whose bytes were hashed but nobody parsed, and
+ * `none` when nothing did. A table that decided this for itself could print `Missing` under a
+ * `PASS` that named an attachment, which is what `04_TECH/28` §9 forbids.
+ */
+satisfiedBy: string, sha256: string | null, byteSize: number | null, };

@@ -806,6 +806,7 @@ fn a_required_kind_the_build_does_not_hold_is_listed_without_an_invented_hash() 
         .find(|row| row.kind == "bin")
         .expect("the required BIN row");
     assert!(bin.required && !bin.present);
+    assert_eq!(bin.satisfied_by, "none", "nothing carried this kind");
     assert!(bin.sha256.is_none() && bin.byte_size.is_none());
     assert_eq!(finding(&gate, "artifacts.required").state, "BLOCK");
     assert!(finding(&gate, "artifacts.required").summary.contains("bin"));
@@ -819,6 +820,18 @@ fn a_required_kind_the_build_does_not_hold_is_listed_without_an_invented_hash() 
         .find(|row| row.kind == "map")
         .expect("the MAP row");
     assert!(!map.required && map.present);
+    assert_eq!(map.satisfied_by, "analyzed");
+    // The ELF row names the set that carried it, in the same words the rule used: a table that decided
+    // for itself is how `Missing` ends up printed under a `PASS`.
+    let elf = gate
+        .tables
+        .as_ref()
+        .expect("tables")
+        .artifacts
+        .iter()
+        .find(|row| row.kind == "elf")
+        .expect("the required ELF row");
+    assert_eq!(elf.satisfied_by, "analyzed");
 }
 
 #[test]

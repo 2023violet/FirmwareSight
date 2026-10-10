@@ -317,8 +317,30 @@ function gateRun(overrides: Partial<GateRunDto> = {}): GateRunDto {
     policy: policy(),
     tables: {
       artifacts: [
-        { kind: 'elf', required: true, present: true, sha256: 'b'.repeat(64), byteSize: 8192 },
-        { kind: 'map', required: true, present: false, sha256: null, byteSize: null },
+        {
+          kind: 'elf',
+          required: true,
+          present: true,
+          satisfiedBy: 'analyzed',
+          sha256: 'b'.repeat(64),
+          byteSize: 8192,
+        },
+        {
+          kind: 'map',
+          required: true,
+          present: false,
+          satisfiedBy: 'none',
+          sha256: null,
+          byteSize: null,
+        },
+        {
+          kind: 'bin',
+          required: true,
+          present: true,
+          satisfiedBy: 'attachment',
+          sha256: 'c'.repeat(64),
+          byteSize: 4096,
+        },
       ],
       budgets: [
         {
@@ -929,7 +951,7 @@ describe('Findings', () => {
 });
 
 describe('The numbers behind the findings', () => {
-  it('shows required artifacts as required, present or missing', async () => {
+  it('names the set that carried each required kind, beside the one nothing carried', async () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
@@ -938,8 +960,21 @@ describe('The numbers behind the findings', () => {
       throw new Error('the artifact table is missing');
     }
     expect(within(table).getByText('map')).toBeDefined();
-    expect(within(table).getAllByText('Required').length).toBe(2);
+    expect(within(table).getAllByText('Required').length).toBe(3);
     expect(within(table).getByText('Missing')).toBeDefined();
+    // The row that started this: an attached BIN satisfies the requirement, so the table has to say
+    // where its bytes came from instead of calling it `Missing` under a verdict that counted it.
+    expect(within(table).getByText('Release attachment')).toBeDefined();
+    expect(within(table).getByText('Analyzed build')).toBeDefined();
+    const cells = (kind: string): string[] => {
+      const row = within(table).getByText(kind).closest('tr');
+      if (row === null) {
+        throw new Error(`the ${kind} row is missing`);
+      }
+      return Array.from(row.querySelectorAll('td')).map((td) => td.textContent ?? '');
+    };
+    expect(cells('bin')).toEqual(['Required', 'Release attachment', expect.stringMatching(/^c{8}/), '4,096 bytes']);
+    expect(cells('map')[1]).toBe('Missing');
   });
 
   it('does not advertise analysis it has not done', async () => {

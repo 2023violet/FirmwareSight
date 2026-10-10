@@ -1074,10 +1074,8 @@ impl GateContext {
         }
     }
 
-    /// `artifacts.required` — every configured requirement present in the evidence that carries its kind.
-    /// `elf` and `map` are satisfied only by an analyzed snapshot row and `bin` and `hex` only by a release
-    /// attachment row, because an attachment is bytes nobody parsed (`ADR-0030` D-3). A required BIN that
-    /// was attached is therefore a real answer; a required BIN nobody attached is still a `BLOCK`.
+    /// `artifacts.required` — every configured requirement present in the evidence that carries its kind,
+    /// which [`requirement_evidence`] says for each word.
     fn rule_required_artifacts(&self) -> RawFinding {
         let rule = GateRuleId::RequiredArtifacts;
         let attachments = self.canonical_attachments();
@@ -1093,15 +1091,15 @@ impl GateContext {
         let mut missing: Vec<&str> = Vec::new();
         let mut cited: Vec<GateAttachmentFact> = Vec::new();
         for word in &self.policy.required_artifact_kinds {
-            match requirement_kind(word) {
-                Some(kind @ (ArtifactKind::Elf | ArtifactKind::Map)) => {
+            match requirement_evidence(word) {
+                Some((kind, RequirementSource::Analyzed)) => {
                     if self.artifacts.iter().any(|a| a.kind == kind) {
                         from_build.push(word);
                     } else {
                         missing.push(word);
                     }
                 }
-                Some(kind @ (ArtifactKind::Bin | ArtifactKind::IntelHex)) => {
+                Some((kind, RequirementSource::Attachment)) => {
                     let rows: Vec<&GateAttachmentFact> =
                         attachments.iter().filter(|row| row.kind == kind).collect();
                     if rows.is_empty() {
@@ -1111,9 +1109,9 @@ impl GateContext {
                         cited.extend(rows.into_iter().cloned());
                     }
                 }
-                // `unknown` attaches but satisfies nothing (D-3), and a word outside the requirement
-                // vocabulary matches no kind at all, which is what this rule already reported.
-                Some(ArtifactKind::Unknown) | None => missing.push(word),
+                // A word outside the requirement vocabulary names no kind at all, which is what this
+                // rule already reported as missing.
+                None => missing.push(word),
             }
         }
         // One order for the cited rows regardless of the order the requirements listed them in.
@@ -1685,15 +1683,30 @@ fn attachment_ref(attachment: &GateAttachmentFact) -> String {
     )
 }
 
-/// The v1 requirement vocabulary maps onto artifact kinds. A word outside the vocabulary matches no
-/// artifact, which the required-artifacts rule reports as missing; the config loader rejects it long
+/// Which set of evidence a `[artifacts] required` word is satisfied from (`ADR-0030` D-3).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RequirementSource {
+    /// A row the analysis produced, with the format's own structure behind it.
+    Analyzed,
+    /// A release attachment: one read of the bytes hashed it, and nobody parsed it.
+    Attachment,
+}
+
+/// The v1 requirement vocabulary maps onto artifact kinds, and onto the one evidence class each kind is
+/// satisfied from. A word outside the vocabulary names no kind at all; the config loader rejects it long
 /// before a Gate sees it (prompt §10, §19).
-fn requirement_kind(word: &str) -> Option<ArtifactKind> {
+///
+/// `elf` and `map` are satisfied by an analyzed snapshot row and `bin` and `hex` by a release attachment
+/// row, so a required BIN somebody attached is a real answer while a required BIN nobody attached is
+/// still a `BLOCK` (`ADR-0030` D-3). This is the one place that pairing is written down: the rule reads
+/// it here and the Release page's readiness table reads it here too, because a table that decided for
+/// itself could contradict the verdict printed above it (`04_TECH/28` §9's `artifacts.required` row).
+pub fn requirement_evidence(word: &str) -> Option<(ArtifactKind, RequirementSource)> {
     match word {
-        "elf" => Some(ArtifactKind::Elf),
-        "map" => Some(ArtifactKind::Map),
-        "bin" => Some(ArtifactKind::Bin),
-        "hex" => Some(ArtifactKind::IntelHex),
+        "elf" => Some((ArtifactKind::Elf, RequirementSource::Analyzed)),
+        "map" => Some((ArtifactKind::Map, RequirementSource::Analyzed)),
+        "bin" => Some((ArtifactKind::Bin, RequirementSource::Attachment)),
+        "hex" => Some((ArtifactKind::IntelHex, RequirementSource::Attachment)),
         _ => None,
     }
 }
@@ -1822,6 +1835,23 @@ mod tests {
         } else {
             Fact::unknown("git is not installed")
         }
+    }
+
+    #[test]
+    fn each_required_word_names_the_one_set_that_can_satisfy_it() {
+        // `ADR-0030` D-3, in one table: the analyzed formats and the attachable formats are disjoint, and
+        // the Release page's readiness row and this crate's rule both read this pairing rather than
+        // deciding it twice.
+        for (word, kind, source) in [
+            ("elf", ArtifactKind::Elf, RequirementSource::Analyzed),
+            ("map", ArtifactKind::Map, RequirementSource::Analyzed),
+            ("bin", ArtifactKind::Bin, RequirementSource::Attachment),
+            ("hex", ArtifactKind::IntelHex, RequirementSource::Attachment),
+        ] {
+            assert_eq!(requirement_evidence(word), Some((kind, source)));
+        }
+        assert_eq!(requirement_evidence("unknown"), None);
+        assert_eq!(requirement_evidence(""), None);
     }
 
     /// A context where nothing is required, nothing is configured and Git can answer: the baseline for

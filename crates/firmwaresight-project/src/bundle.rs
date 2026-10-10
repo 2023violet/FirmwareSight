@@ -310,6 +310,11 @@ pub struct BundleRequest<'a> {
 pub enum FileRole {
     /// A current firmware artifact, shipped under `artifacts/` (§23).
     ShippedArtifact,
+    /// A release attachment, shipped under `artifacts/` beside the analyzed rows. It gets its own word
+    /// because the preview is where a person authorizes the export, and `artifact` alone cannot tell them
+    /// which of these bytes this engine analyzed and which it only hashed (`04_TECH/28` §9's preview row,
+    /// `ADR-0030` D-3).
+    ReleaseAttachment,
     Analysis,
     Comparison,
     GateResults,
@@ -327,6 +332,7 @@ impl FileRole {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::ShippedArtifact => "artifact",
+            Self::ReleaseAttachment => "release-attachment",
             Self::Analysis => "analysis",
             Self::Comparison => "comparison",
             Self::GateResults => "gate-results",
@@ -984,7 +990,10 @@ fn observe(
         let row = &shipped[*index];
         content.push_copied(
             &format!("{ARTIFACTS_DIR}/{}", artifact.file_name),
-            FileRole::ShippedArtifact,
+            match row.class {
+                SourceClass::Snapshot => FileRole::ShippedArtifact,
+                SourceClass::Attachment => FileRole::ReleaseAttachment,
+            },
             row.source.clone(),
             artifact.sha256.hex().to_owned(),
             artifact.byte_size,

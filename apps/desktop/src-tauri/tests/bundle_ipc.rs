@@ -134,6 +134,16 @@ expected_version = "1.2.3"
     text
 }
 
+/// The same policy with a different `[artifacts] required` line, for a run whose requirements can only be
+/// satisfied by something other than the analyzed build.
+fn policy_requiring(kinds: &[&str]) -> String {
+    let quoted: Vec<String> = kinds.iter().map(|kind| format!("\"{kind}\"")).collect();
+    release_policy().replace(
+        r#"required = ["elf", "map"]"#,
+        &format!("required = [{}]", quoted.join(", ")),
+    )
+}
+
 /// One release subject: a repository holding a policy and its notes, and the folder the release owner would
 /// have chosen in the dialog.
 struct Release {
@@ -394,6 +404,11 @@ fn a_passing_run_prepares_a_bounded_preview_and_writes_nothing() {
         assert_eq!(row.sha256.chars().count(), 64, "{}", row.path);
         assert!(row.byte_size > 0, "{}", row.path);
         assert!(!row.role.is_empty(), "{}", row.path);
+        // Nothing here was attached, so no row may borrow the attachment's word: the new role exists to
+        // separate the two classes, and a leak into an attachment-free release would be its own lie.
+        if row.path.starts_with("artifacts/") {
+            assert_eq!(row.role, "artifact", "{}", row.path);
+        }
         assert!(
             !row.path.starts_with('/') && !row.path.contains(':') && !row.path.contains("\\"),
             "{} is not a bundle-relative path",
@@ -868,6 +883,38 @@ fn an_attached_bin_and_hex_are_judged_stored_shipped_and_verified_from_their_byt
         "the set the page holds is the set this run judged"
     );
 
+    // The two rows this policy requires name where each came from, in the same words the rule used.
+    let tables = run.tables.as_ref().expect("a fresh run carries its tables");
+    for kind in ["elf", "map"] {
+        let row = tables
+            .artifacts
+            .iter()
+            .find(|row| row.kind == kind)
+            .unwrap_or_else(|| panic!("the {kind} row is listed"));
+        assert_eq!(row.satisfied_by, "analyzed", "{kind}");
+    }
+
+    // The preview is where a person authorizes the export, so it has to say which of these bytes were
+    // analyzed and which were only hashed. Both ship under `artifacts/`, and one word for both would ask
+    // the release owner to guess.
+    let preview = world.prepare().expect("a passing run previews");
+    let role = |path: &str| {
+        preview
+            .files
+            .iter()
+            .find(|row| row.path == path)
+            .unwrap_or_else(|| panic!("{path} is listed in the preview"))
+            .role
+            .clone()
+    };
+    assert_eq!(role("artifacts/firmware.elf"), "artifact");
+    assert_eq!(
+        role("artifacts/app.bin"),
+        "release-attachment",
+        "the attached bytes are named for what they are"
+    );
+    assert_eq!(role("artifacts/boot.hex"), "release-attachment");
+
     let outcome = world.publish(false);
     let bundle = world.bundle_dir(&outcome);
     let verification =
@@ -910,6 +957,48 @@ fn an_attached_bin_and_hex_are_judged_stored_shipped_and_verified_from_their_byt
         report.contains("2 release attachment(s) ship as byte evidence"),
         "the limits section has to say what was not analyzed: {report}"
     );
+}
+
+#[test]
+fn a_required_kind_an_attachment_carries_is_listed_as_carried_and_not_as_missing() {
+    // The measured defect, from the installed walk: with `bin` and `hex` required and both attached,
+    // the verdict read `PASS ... bin and hex from release attachments` while the table under it read
+    // `Missing`, because the table looked only at the analyzed snapshot. Both now ask the one
+    // predicate that decides which set carries which kind (`requirement_evidence`), so the table
+    // cannot disagree with the finding it is there to explain (`04_TECH/28` §9).
+    let world = World::new("attach-table", &policy_requiring(&["elf", "bin", "hex"]));
+    let chosen = ChosenFiles::new("attach-table");
+    let bin = chosen.write("app.bin", b"APP-BYTES");
+    let hex = chosen.write("boot.hex", b":00000001FF");
+    attach(&world.session, &bin);
+    attach(&world.session, &hex);
+
+    let run = world.gate_run();
+    assert_eq!(run.counts.block, 0, "both kinds were attached");
+    let tables = run.tables.as_ref().expect("a fresh run carries its tables");
+    let row = |kind: &str| {
+        tables
+            .artifacts
+            .iter()
+            .find(|row| row.kind == kind)
+            .cloned()
+            .unwrap_or_else(|| panic!("the {kind} row is listed"))
+    };
+    for (kind, bytes) in [
+        ("bin", b"APP-BYTES".as_slice()),
+        ("hex", b":00000001FF".as_slice()),
+    ] {
+        let attached = row(kind);
+        assert!(attached.required && attached.present, "{kind} was attached");
+        assert_eq!(attached.satisfied_by, "attachment", "{kind}");
+        assert_eq!(
+            attached.sha256.as_deref(),
+            Some(fingerprint::sha256_hex(bytes).as_str()),
+            "{kind} carries the digest of the attached bytes rather than a placeholder"
+        );
+        assert_eq!(attached.byte_size, Some(bytes.len() as u64), "{kind}");
+    }
+    assert_eq!(row("elf").satisfied_by, "analyzed");
 }
 
 #[test]
