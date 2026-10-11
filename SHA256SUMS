@@ -424,7 +424,7 @@ a96c172239ed9c497ab9f045aaf4bd4d9f5143f3cd154a5703c18ea3832d5d82  apps/desktop/s
 703ff571725f5c963f1a8ac0f1ac06595f91b20959dfaad791a421f2bdbd872d  apps/desktop/src-tauri/src/ipc.rs
 7b4219acc06721f00fb10876d136cde89b61c348c88acecdd931260bc6a04398  apps/desktop/src-tauri/src/lib.rs
 21b4533af9637f1379a3810c0d92504924b80dab4048433e4127418732ad4d02  apps/desktop/src-tauri/src/main.rs
-134fa93d04a841dbb3ef83fe2c176bc225b8948ee34f510e88f343cc21cf3541  apps/desktop/src-tauri/src/preferences.rs
+6fb6c253ceba66d61d5ebb0d372dbde806c5eb1d1ac42994a8f9ac8327a74e71  apps/desktop/src-tauri/src/preferences.rs
 e5631c944092c382d030717712f7506505f211d2c14d1e1e465671100c087032  apps/desktop/src-tauri/src/release.rs
 773c730a6529b7e09eff0402301a0e5fa60667e6c8b0b574f16e64d3860e30cf  apps/desktop/src-tauri/src/service.rs
 b3d5a69ba491b6c4e337bf3a8c0bc61a91e9b7a553ffad6c4df9aaf4ef6c6f71  apps/desktop/src-tauri/src/startup.rs
@@ -593,7 +593,7 @@ d8d3856bee30450aa83be869c83ea330363e3dbbcfec5bb19fcb8d4b16e6b8b7  apps/desktop/u
 015b1dfc00f7f7e302f5e867c50cec0cb3ccd0a0894e1a1170539494b94e9f7b  apps/desktop/ui/src/main.tsx
 7376a44e4015c5a6156fffcbab10fff99f3562a61506294ac8502897c36268c7  apps/desktop/ui/src/overview.test.tsx
 272e00084cbcee864b08deb40ee88e61c71aae40341d9733bea1bf8451235b2f  apps/desktop/ui/src/release.test.tsx
-d31372d7ef65c4fd78e536687c88fa11b17b2eaf234a089e83c818614c7c8a76  apps/desktop/ui/src/settings.test.tsx
+1fd515b87e4d5045799783968b56e08e96251c712e717787de1c067472039f6e  apps/desktop/ui/src/settings.test.tsx
 55c20efb3f340c7bf6a3ff54959d6ba7beae32c3a5004090c5caf73ea6e7bb6d  apps/desktop/ui/src/stateWords.ts
 bf1cd350addd18d4cced383c06d8c04a61395beeb07de14025df61d0c01473da  apps/desktop/ui/src/styles/classnames.ts
 df9e9fdf27ccb7c1d8ea052db019e23fd42e1b50f2a90184195e67a74e655073  apps/desktop/ui/src/styles/global.css

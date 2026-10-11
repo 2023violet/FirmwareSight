@@ -530,10 +530,14 @@ pub(crate) fn reset_application_preferences(
 }
 
 /// A preference refusal, in the envelope every command in this shell answers with.
+///
+/// The colon, not a full stop, joins the two halves: `PreferenceError` renders the way Rust errors
+/// do, from a lowercase clause, and a sentence boundary before it put a lowercase word in the middle
+/// of a person's message.
 fn preference_envelope(error: &PreferenceError, operation_id: &str) -> ErrorEnvelopeDto {
     ErrorEnvelopeDto {
         code: error.code().to_owned(),
-        message: format!("Your preferences were not saved. {error}"),
+        message: format!("Your preferences were not saved: {error}"),
         operation_id: operation_id.to_owned(),
         details: None,
         remediation: Some(error.remediation().to_owned()),

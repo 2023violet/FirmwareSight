@@ -103,7 +103,7 @@ function prefs(over: Partial<PreferencesDto> = {}): PreferencesDto {
 
 const SAVE_REFUSED: ErrorEnvelopeDto = {
   code: 'ERR-PREFS-8002',
-  message: 'Your preferences were not saved. the preferences could not be written: disk full',
+  message: 'Your preferences were not saved: the preferences could not be written: disk full',
   operationId: 'op-prefs-1',
   details: null,
   remediation:
