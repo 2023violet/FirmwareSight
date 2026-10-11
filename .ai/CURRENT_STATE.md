@@ -10,11 +10,14 @@ last_updated: "2026-10-11"
 
 # Current State
 
-- Date: 2026-10-10 *(the live state is the `B1-U1` entry below; the `C1-U4` entry it follows, the `C1-U3` entry that
+- Date: 2026-10-11 *(the live state is the `NEXT-03` + `ADR-0031` entry below and the `B1-U2` unit it opens; the
+  `B1-U1` entry those follow, the `C1-U4` entry it follows, the `C1-U3` entry that
   follows it, the `C1-U2R1` entry that round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
   inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `NONE`.** Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
+- **Active task: `B1_U2_SYSTEM_LIGHT_DARK_THEME`** — dispatched by `NEXT-04` and authorized by the Owner on
+  2026-10-11; the `ADR-0018` D3 light-only rule that held this pointer at `NONE` is superseded by `ADR-0031`.
+  Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
   `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`; the machine state is `BASELINE.yaml`
   `u1_execution.architect_final_verdict`. The scope sentence is part of the verdict, not commentary: **visual
@@ -176,6 +179,24 @@ last_updated: "2026-10-11"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
+- **`NEXT-03` + `ADR-0031` (2026-10-11) — B1-U1 accepted independently, pushed, and the theme blocker lifted by a
+  person.** `NEXT-03` re-read B1-U1 as a read-only independent acceptance and returned
+  **`ACCEPT_WITH_EXPLICIT_LIMITS`**, not the coder's own `ARCHITECT_REVIEW_PENDING`: the first-launch auto-write that
+  the coding round could not attribute is **`NOT_REPRODUCED`** across two clean cold starts, and no call path reaches a
+  write without a person acting. The Settings contract was then driven in a real Tauri window — click, keyboard,
+  cross-page, cross-restart, Reset, and all three damaged-document cases, including the `ERR-PREFS-8004` refusal that
+  left a hand-written `schema_version: 2` file untouched — at exactly 1024×720 and 1440×900 by a real Win32 resize, so
+  the evidence is `DEV_RUNTIME_VERIFIED` (dev binary; no CI-built artifact of this head was installed, so not
+  `INSTALLED_VERIFIED`). One real defect surfaced and took the minimal corrective the round allows:
+  **`2cff702`**, a refusal message that joined a sentence to a lowercase Rust error clause with a full stop. The Owner
+  authorized the push after the acceptance: **`47fde34..2cff702`**, plain fast-forward, three commits rather than the
+  two `NEXT-03` predicted because of that corrective, read back as CI run **`38124118299`** — ten jobs success,
+  **1,043 Rust on Windows / 1,044 on Ubuntu** (three Windows-only symlink cases out, four `source_symlink_posix` cases
+  in), **319 UI in 10 files on both platforms**, drift **8/8**, `cargo-deny` ok. `ADR-0031` then superseded the single
+  clause of `ADR-0018` **D3** that read `theme: MVP Light only`, scoped to the Developer Preview's desktop shell, and
+  corrected `NEXT-04`'s citation of "D4" (that is the five-state set) while doing so; `DESIGN.md` §4/§9, `AGENTS.md` 11
+  and `BASELINE.yaml` `design.theme` moved with it. **The pointer is now `B1_U2_SYSTEM_LIGHT_DARK_THEME`.** No C1
+  status word moved, and `BIN_HEX_ANALYSIS` is still `UNSUPPORTED`.
 - **`B1-U1` (application preferences + Settings, the first unit of the Owner-approved v0.2 plan) ran on
   2026-10-10 and is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is
   `NONE` now. Its commit landed one minute past the date boundary, at **2026-10-11T00:01:14-07:00** as `2c47213`,

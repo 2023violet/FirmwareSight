@@ -1,0 +1,39 @@
+FirmwareSight｜NEXT-03 — B1-U1 独立验收、实机证据补齐与推送前裁决
+版本 v1.0｜2026-10-11｜READ-ONLY INDEPENDENT REVIEW｜不推送｜不修改 tracked 文件
+
+【背景与不可替代的事实】
+- 仓库：2023violet/FirmwareSight；GitHub origin/main 经架构师于 2026-10-11 核对为 47fde34af74c2a221a83f8a317238192326f87ee；Actions #98 / run 38114423754 已成功：十个 job 全部 success，Ubuntu 四个 source_symlink_posix 实名测试 ok，Windows source symlink 实名测试 ok。不得重复声称 C1 尚未推送。
+- B1-U1 编码者报告本地两个新提交：2c47213（功能）、2e4d08b（文档）；本地 clean / not pushed；17/17 / GATE_EXIT=0；Rust 1,043 passed / UI 319 passed；偏好存储 schema_version=1，37 个 Tauri commands。上述是报告，不是本审查者已独立验证的事实。
+- 执行者明确报告：T09 真实窗口交互未验；第一次启动出现 Settings 页“Preferences saved.”且 settings.json 被写入，无法归因，第二次清洁启动未复现；T05 权限受限目录、T07 跨进程竞争未直接验证。任何数字和 verdict 必须注明实测与转述分界。
+
+【任务目标】
+独立复核 B1-U1，不重新开发 Settings，不创建另一套架构，不开展美术/UI 视觉改版。集中关闭原 NEXT-02 T01–T10 中“自动化绿但真人使用尚无证据”的缺口，给 Owner 一份可核验的验收裁决及是否允许 normal fast-forward push 的建议。
+
+【一、只读预检：有异常即 STOP】
+1) 阅读 AGENTS.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、DESIGN.md、相关 B1 验收记录、原 NEXT-02 TXT、v0.2 规划、03_DESIGN、ADR-0018。识别当前顶层 live pointer，历史叙述不能代替 live authority；本任务的 Owner 交付只授权只读验收。
+2) git status --porcelain=v1 -uall；git rev-parse HEAD origin/main；git ls-remote origin refs/heads/main；git log --reverse origin/main..HEAD；git diff --name-status origin/main..HEAD；工作树必须干净、远端祖先关系必须清楚。若 local commits 或 remote SHA 与报告不符，描述真实差异并 STOP，不自行 rebase/amend/reset/cherry-pick。
+3) 不触碰 V1 冻结构建、不覆盖真实用户偏好或 SQLite 数据库；测试仅使用 gitignored 临时沙箱和隔离 config dir。无需大规模文档清理。
+
+【二、独立实现核查】
+A. 读 apps/desktop/src-tauri/src/preferences.rs、相关 integration tests、lib.rs command 注册、UI Settings.tsx/Settings tests、App.tsx/Bridge、实际 binding、生成器及设计修订；逐路径确认确实只有 APP 偏好；没有污染 firmwaresight.toml、GateContext、SnapshotId、policy_sha256、runId、releaseId、CLI JSON、manifest、portable reports、goldens。
+B. 实读 JSON 类型与 schema_version=1 的默认、未知枚举、future version、畸形内容的处理。禁止 silent destructive overwrite；备份 .unreadable 的触发条件和保留失败路径须能证明。未来版本不能被旧程序悄悄降级覆盖。
+C. 实读完整写链：单次写入序列化、sibling temp、Windows 替换已有文件、read-back、崩溃/权限拒绝后旧成功文件保留、无临时文件误读/泄漏；枚举真实 ERR-PREFS-8001..8005 与 path-free diagnostics。两次快速修改必须有可证明的 last-successful-write 语义；跨进程只能宣称测到的范围。
+D. 实读设置启动流程，确认读取已有 prefs 时与 Missing/default 时都没有自动写盘、不会在未操作时显示 “Preferences saved.”，且失败不会误报成功。确认 About/Diagnostics 没有把 settings.json 当 SQLite migration 文件处理。
+E. 确认 T03 的实际隔离测试覆盖同一输入保存偏好前后的 Gate 指纹、判定、旧 release 证据；谨防仅比较同一缓存对象造成伪阳性。
+
+【三、实机重点验证——不能由 jsdom 取代】
+在 Windows 真实 Tauri 窗口，优先干净安装件；若仅 dev binary 可用，明确标 DEV_RUNTIME_VERIFIED 而非 INSTALLED_VERIFIED。
+1. 以独立空配置目录进行至少两轮冷启动：启动到 Analyze，settings.json 不因启动而新建，无“Preferences saved.”；标记所用 exe/commit/config dir 的身份。若首次自动写入能复现，直接 REWORK REQUIRED，并找到调用路径；若未复现，记录 NOT_REPRODUCED 而非宣称根因已消失。
+2. Analyze 改 KiB → Settings 反映 KiB → Compare/History/Release 同步 → Settings 改 Bytes → 所有页面同步；关闭进程、重启、断言持久化；测试 Reset（弹出确认，重启后默认值），确保 SQLite build/gate/release 未更改。
+3. 实际 Tab/Shift+Tab/Space/Enter 操作，焦点可见；1024×720 / 1440×900（尽可能附带 125% Windows 缩放）查看文字、设置行为、保存反馈及错误态，不允许控件被遮挡。
+4. 配置文件损坏、非法枚举、未来版本：保留原字节，按合同出现明确回退/禁止覆盖；模拟写失败必须限定到可恢复沙箱，恢复文件 ACL 后清理沙箱，不能扰动真实用户路径。若无法安全实施，只报告 T05 NOT_VERIFIED。
+5. 如果 OS GUI automation 不可用，允许经过实际屏幕观察与键鼠手工操作的逐步记录；不可仅因窗口启动、accessibility tree 或 jsdom 测试绿就标 T09 PASS。若无法执行实机交互，则 T09 NOT_VERIFIED，阶段不能无条件 ACCEPT。
+
+【四、回归复测与裁决】
+- 重点复测权限、损坏恢复、快速切换、Windows 原子替换、重启、Preferences→Core 身份隔离及 Settings 交互；此外至少 fmt/clippy/Rust tests、UI typecheck/lint/test/build、generated IPC、drift、scripts/check.py --only drift。保留原始 exit codes；不把已有 CI #98 当作 B1-U1 的 CI。
+- 如果原编译/测试工作必须产生 gitignored target/，允许；不得更改 tracked，严禁 push、commit、修改记忆库或大范围文档。
+- 标注 T01–T10 每项 PASS / FAIL / NOT_VERIFIED，说明实际命令/环境。验收结论四选一：LOCAL_INDEPENDENT_ACCEPT；ACCEPT_WITH_EXPLICIT_LIMITS（仅不影响原合同必验项的非阻断证据缺口）；REWORK_REQUIRED（附最小缺陷重现）；INSUFFICIENT_EVIDENCE。不得凭编码者 self-review 判 PASS。
+- 若独立 PASS，建议 Owner 单独批准 git push origin main（只能普通 fast-forward）；推送前实时核对 remote=47fde34、clean、仅 2 个 B1 commits、祖先关系；推送后新 CI 十 jobs、两平台 Rust/UI 计数和 drift 实读。没有 Owner push 授权，就只报告建议。
+
+【最终交付】
+输出简明验收表、HEAD 与 2 个提交的实值、真实窗口与跨重启证据位置、未验证项、影响 B1-U2 的依赖、一句 Owner 决策请求。除非确有安全缺陷，严禁借机扩大到 UI 重设计、B1-U2 主题或 B1-U3 国际化。

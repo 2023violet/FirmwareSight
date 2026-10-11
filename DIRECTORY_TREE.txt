@@ -147,10 +147,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0027-project-policy-and-provenance-adapter.md
 │   ├── ADR-0028-release-identity-bytes-as-evidence.md
 │   ├── ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
-│   └── ADR-0030-release-attached-byte-evidence.md
+│   ├── ADR-0030-release-attached-byte-evidence.md
+│   └── ADR-0031-developer-preview-theme.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
+│   │   ├── FirmwareSight_B1U1_Review_Decision_And_Next_Prompts_2026-10-11.txt
 │   │   ├── FirmwareSight_C1_Continuous_Delivery_Read_First_v1.0.txt
 │   │   ├── FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt
 │   │   ├── FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt
@@ -162,6 +164,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_NEXT_01_C1_Independent_Acceptance_v1.0.txt
 │   │   ├── FirmwareSight_NEXT_02_B1U1_Application_Preferences_Settings_v1.0.txt
+│   │   ├── FirmwareSight_NEXT_03_B1U1_Independent_Acceptance_2026-10-11.txt
+│   │   ├── FirmwareSight_NEXT_04_B1U2_System_Light_Dark_Theme_2026-10-11.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P5_CommitD_Continue_v1.2.txt

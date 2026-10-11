@@ -1,0 +1,43 @@
+FirmwareSight｜NEXT-04 — B1-U2 System / Light / Dark 三态主题
+版本 v1.0｜2026-10-11｜CONDITIONAL IMPLEMENTATION｜TDD｜仅在 Owner 与阶段条件满足后执行
+
+【最高优先级的启动闸门：未满足必须 STOP】
+1) B1-U1 有独立 ACCEPT（特别是 Settings 实机交互、跨重启、异常写入不能未验证冒充通过），且经过 Owner 授权完成正常 fast-forward 推送和相应的新 CI 读回；若发生修复，须对最后新 head 重新核查。
+2) Owner 必须明确作出“允许 Developer Preview 阶段实现 System/Light/Dark，定向 supersede ADR-0018 D4 及 DESIGN.md 内 MVP Light only 禁令”的设计决定。产品讨论 v0.2 是候选方向，不自动凌驾于冻结 ADR。只可新增最小新 ADR/设计决策，引用旧文档并限定替代内容；不得篡改 ADR-0018 既有历史结论。更新 DESIGN.md 的 current 规范只能在该决定正式通过之后实施。
+3) Owner 必须单独授权本轮 B1-U2 代码实施；prompt 生成/预阅读不视为授权。若缺 Owner 决定或 live pointer=NONE 且无新的明确实施授权，仅提交一页冲突/选项/建议，不编辑代码、不偷跑。
+4) 不启动 B1-U3 国际化，不修改 Core/Gate/Release/CLI 产品语义，不引入网络/遥测/账号/插件。
+
+【产品目标】
+以现有 instrument-grade clarity 风格为前提，实现应用级三态主题选择（system 默认；light；dark），系统切换即时同步，用户覆盖可持久化。仅改善不同光照条件的可读性，绝不重构 FirmwareSight 为 SaaS dashboard、营销页、卡片堆叠。浅色模式的已有布局/语义/视觉回归要得到独立保护。
+
+【权威与预检】
+读 AGENTS.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、已批准的替代 ADR、DESIGN.md、03_DESIGN/*、assets/design-tokens.json、scripts/generate_design_tokens.py、apps/desktop/ui/src/styles/tokens.css/global.css、现有 B1-U1 preferences.rs/Settings.tsx/App.tsx/IPC、UI/TS tests、Tauri window/platform compatibility、Help/About/diagnostics、报告/Bundle HTML 的隔离规则。提交 implementation whitelist 与 theme token schema 方案；发现既有状态 token 不足需先找语义角色，不能自行定出一组随意色值。
+
+【严格工作范围】
+A. 偏好：在已经实现的单一 App Preferences 机制里加入 appearance.theme = system|light|dark，默认 system；与 B1-U1 的 display.size_unit 并存。必须考察旧 settings.json 的 schema_version=1 兼容性；选择“可选新增字段+受控默认”或显式 v1→v2 迁移并写明后向前向读行为。绝不造成旧文件被清空、重置、历史 Gate 变更、未知未来版本被覆盖。单一偏好更新顺序需抗快速切换、状态反复覆盖。
+B. System：优先使用 Tauri WebView 平台可用的 prefers-color-scheme 事件（如选择其他平台 API，必须说明许可证/权限影响）；仅在 user preference=system 时响应 OS 主题变化；明确无法获取 OS 偏好时的 light fallback。测试 event 注册/注销、冷启动和从 system→light→system 的状态同步；防 first-paint 明暗闪烁，避免初始状态覆盖已保存选择。
+C. Tokens：assets/design-tokens.json 仍是唯一权威，保留现有浅色语义原值；为 dark 补齐真正成体系的 background / surface / text / border / accent / status / diff / chart / focus / disabled / overlay 等角色，并更新生成器与衍生 tokens.css，不在页面私造散落常量。新增类别前比较现有 roles，严禁 CSS 全局 invert、透明叠片遮掩或渐变装饰；不引入完整 UI 库。
+D. 组件：按“shell、nav、PageHeader、Button、Panel、StateBadge、Settings、Analyze、Compare、Release、History、Evidence Inspector、Help、Error/Empty/Loading、dialog/toast、表格 hover/selected/sort、scrollbar”清查 hardcoded light colors 与灰色对比度问题，只做主题必要改动。桌面主题不改变独立自包含 HTML 导出、portable report、CLI JSON、哈希、runId、releaseId、Gate verdict、UI 文案的证据分类。
+E. UI：在已有 Settings→Appearance 增加三选一真实控件（System/Light/Dark）；沿用左侧 224px rail 和现有紧凑表格，勿加入顶部多余 toggle 或尚未实现的语言选项。切换无数据丢失、无历史 Gate 误刷新、无滚动/筛选丢失；保存失败立即告知并按经验证的 UI/store 一致性策略处理，不能说 Saved 却没写成功。
+
+【严谨验收矩阵，按真正风险排序】
+T01 系统偏好 light/dark 两种启动；system 状态下 OS 改变立即跟随；用户选择 light/dark 后忽略系统变化；回 system 恢复跟随。
+T02 Settings 在三态间切换后，跨页面和重启偏好保持；缺失旧配置/旧 schema/损坏配置/未来版本都按明确恢复合同工作。
+T03 Light 模式旧版像素/布局关键区域回归（样例：Analyze/Compare/Release/Settings）；Dark 模式相同业务状态和数据显示一致；1024×720 / 1440×900、125%/150% 系统缩放。实机截图/操作，不用 jsdom 冒充。
+T04 状态 PASS/REVIEW/BLOCK/UNKNOWN/N/A 均有文字+图标；UNKNOWN 中性，不被误作 PASS；diff 正负是变化不是自动好坏；old/new/delta/缺失符号准确。选中行、禁用按钮、focus-visible、弹窗和 toast 在双主题可识别。
+T05 WCAG 2.2 对比度基线：普通正文≥4.5:1、大号文字≥3:1，关键 UI 非文字视觉信息≥3:1；用可复现脚本/采样表测真实 tokens 和关键控件，不以软件截图凭眼看代替。Forced-colors/High Contrast、prefers-reduced-motion 不可破坏可读性与焦点，且记录局限。
+T06 改变 theme 不改变已有真实 ELF 分析结果、内存值/单位、Compare Delta、Gate 所有 finding、policy hash、runId、Release ID、Bundle 文件字节、portable golden；使用确定的 fixture 做跨主题相同输出/身份断言。不要只比 React 文案。
+T07 旧 settings 文件能在新的版本正常读取/升级（如需要），连续快速切换没有成功写入结果丢失；配置目录拒绝写入时 UI 不假报持久化成功，也不损坏最后成功文件。
+T08 执行 cargo fmt/test/clippy、UI test/typecheck/lint/build、全 scripts/check.py（包含 design-token generator / drift/bindings/schema/golden），最终 staged tree 17/17 或对应当前权威 checklist 全 PASS；若发现新的已有测试失败，不得藏匿。
+T09 真正安装件或明确标记的开发 Tauri 窗口，人工或可靠自动化真实点击主题切换/窗口重启/系统主题响应。UI 自动化不可用时标 NOT_VERIFIED；禁止把未运行的暗色截图声称运行态验收。
+
+【实施顺序】
+Step 0 preflight + Owner/ADR 许可核对；任何必要 Owner 授权缺失即 STOP。
+Step 1 用最小的设计样张/视觉 token 对比确认保留原有工程仪器气质，列白名单；这只是实现选色工作，不开展七组 UI 创意重绘。
+Step 2 TDD：先写 system preference、跨重启、theme isolation、contrast token tests 的 RED → 实现 store/bridge/App Context → tokens generator → Settings 控件和 CSS scoped corrections。
+Step 3 真实桌面 1024/1440 实测 + 自动化回归；保存前后 CLI 和 Bundle/报告 identity 完全一致。
+Step 4 更新与本单元直接相关的 ADR/state/token 生成登记，不做额外治理清理；生成一份真实可核查的主题验证记录。两个 commits 以内为优先，但不为凑提交数量牺牲清晰历史。
+Step 5 完成后 git status clean，本地提交，不推送；报告准确 HEAD、base/remote、测试原始数字、暗色实际覆盖范围、NOT_VERIFIED 项与下一步 B1-U3 的建议。执行者不能自授 Architect ACCEPT。
+
+【强制 STOP】
+无法证明已获得目标 ADR 覆盖授权；配置迁移或保存导致偏好原文件损坏/历史数据风险；需要借主题加入任意 network/telemetry、新 platform permission；必须改变原有 PASS/UNKNOWN 语义或导出契约；无方法验证暗色最基础文字与焦点对比；企图将纸面设计图/生成图当作真实桌面运行证据。

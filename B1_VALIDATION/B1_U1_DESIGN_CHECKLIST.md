@@ -124,3 +124,17 @@ lines are **N/A** because the page shows no state, no table and no chart; one li
 rather than newly proven; and the real-window keyboard/zoom/layout walkthrough is **NOT VERIFIED** with the reason
 stated. The page is therefore inside `ADR-0018` and `AGENTS.md` 11 for what it adds, and adds nothing to what was
 already frozen.
+
+## 修正案：本清单的 No Dark theme 行已被 ADR-0031 定向取代（2026-10-11，B1-U2）
+
+上方 "⚙ No Dark theme" 一行写于 2026-10-11 凌晨，当时它是正确的：`ADR-0018` D3 仍规定 MVP 只有浅色，所以 B1-U1 的
+页面一个主题控件都不渲染，并用一条测试断言 `Theme`/`Dark`/`Light` 三个词不出现。
+
+`ADR-0031`（2026-10-11）只取代 D3 的那一句 `theme: MVP Light only`，取代范围是 Developer Preview 的桌面外壳。因此：
+
+- 该测试中禁止的三个主题词由 B1-U2 收窄为仍然不存在的设置（语言、字号、密度），而不是删除整条测试。断言"没有控件
+  通向没有功能的开关"这一条规则不变。
+- 本清单其余结论（token 唯一数值真源、无阴影/渐变、状态非纯颜色、Unknown 中性）在两种主题下继续生效，B1-U2 需要
+  在暗色下重新证明一遍，而不是继承。
+- 导出面不变：Release Bundle HTML、portable report、CLI JSON 仍为浅色，主题不进入任何字节产物、hash、runId 或判定。
+

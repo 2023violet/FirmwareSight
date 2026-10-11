@@ -2528,3 +2528,46 @@ how a lost test hides from a green gate; it was found only because a later mutat
 `77 filtered out`. The test was re-added and the file count verified from the staged diff rather than from memory.
 Prompt §10's rule — "Do not delete tests to hide changed requirements" — was nearly broken by an accident, not by intent,
 and the difference is not visible in the final diff.
+
+## ADR-0031 (2026-10-11) — a frozen design rule is lifted by a person, and the version field turns out to have a floor
+
+The Owner's 《FirmwareSight｜架构师接手判定｜2026-10-11》 authorized one design change: "Owner 明确允许以新增、小范围
+superseding ADR 覆盖 ADR-0018 的 MVP Light only 约束，授权 NEXT-04 实施 System/Light/Dark". `ADR-0031` is that record.
+Three things in it are decisions rather than mechanics, and each is written down because the diff would not show it.
+
+**The prompt that dispatched the change cited the wrong clause, and following it literally would have changed nothing.**
+`NEXT-04` §启动闸门 2 asks for a supersession of "ADR-0018 D4 及 DESIGN.md 内 MVP Light only 禁令". `ADR-0018` D4 is the
+five-state set `PASS / REVIEW / BLOCK / UNKNOWN / N/A`; the theme rule is the last bullet of **D3**. An ADR that named
+D4 would have purported to lift a prohibition it never touched while leaving the real one in force, and the five states
+would have been the thing up for revision. `ADR-0031` names D3, quotes it, and leaves D1-D6 otherwise unedited —
+`ADR-0018`'s own text is not modified, because it is a historical record and its Revisit trigger already listed "MVP
+Dark theme" as a door.
+
+**`SCHEMA_VERSION` has a floor nobody had needed yet, and raising it alone would have been a data-loss event.** The
+plan read as: add `theme`, bump the version, the `FutureVersion` machinery handles the rest. Reading `read_document`
+first showed the machinery is narrower than the name suggests:
+
+```rust
+Some(seen) if seen > SCHEMA_VERSION => Err(Unreadable::Future { seen }),
+Some(seen) if seen != SCHEMA_VERSION => Err(Unreadable::Damaged),
+```
+
+Any version below this build's own is `Damaged`, not "older but understood". So a v2 build would have opened every
+existing user's v1 file as corrupt — defaults on screen, a "could not be read" sentence, and on the next save their
+working preferences demoted to `settings.json.unreadable`. Nothing is destroyed, which is exactly why it is easy to
+miss: the failure presents as a recovery path that works. `ADR-0031` D2 therefore fixes the reader before the writer
+changes: accept 1 and 2, resolve a missing `theme` to `system` without rewriting, write v2 only on a real save, and
+leave `seen > SCHEMA_VERSION` meaning "do not touch". The downgrade direction needed no code at all, because B1-U1's
+`Future` path already refuses `ERR-PREFS-8004` without writing — `NEXT-03` drove that in a real window against a
+hand-written `schema_version: 2` file and watched the bytes stay.
+
+**The document key stays flat, and the reason is a precedent rather than a preference.** v0.2 writes `appearance.theme`
+and `display.size_unit`; B1-U1 put `size_unit` at the top level, because a one-field nested group is a shape with no
+second instance. `theme` follows it, and the ADR records the mapping so a later round does not "correct" the file into
+a nested object and break the reader for both versions.
+
+What did not move: the token file remains the only numeric authority, dark is authorized as a sibling of `color.light`
+with the same 30 role names and no new role, no global invert or overlay film, the five states keep their meaning in
+both themes, and every exported artefact — Release Bundle HTML, portable report, CLI JSON — stays light, because a
+person's reading comfort is not a fact about their firmware.
+

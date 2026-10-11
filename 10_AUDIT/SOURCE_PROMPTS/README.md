@@ -1671,3 +1671,41 @@ to `P1_ANALYZE_DETAILS` - which completed the same day, leaving `active_task: NO
 session count gates any engineering stage any more. The
 recruitment-ready pack, the frozen `v0.1.0` prototype and the protocol files stay in place for a later,
 non-blocking feedback round.
+
+## B1-U1 Independent Acceptance and the B1 Second Unit — `NEXT-03` + `NEXT-04` + the Owner's hand-over note / Owner-delivered task prompts v1.0 — `NEXT-03` EXECUTED, `NEXT-04` AUTHORIZED (2026-10-11)
+
+- Files, all three archived verbatim in this directory:
+  - `FirmwareSight_NEXT_03_B1U1_Independent_Acceptance_2026-10-11.txt` — 6,914 bytes, 39 lines, **0 `CR`**,
+    sha256 `0b6a7863d83ea725b694f39a475c784de3831789265d67dda38a07a74fca7382`
+  - `FirmwareSight_NEXT_04_B1U2_System_Light_Dark_Theme_2026-10-11.txt` — 8,193 bytes, 43 lines, **0 `CR`**,
+    sha256 `122469aa78adca3b24d1ae8101354ee797fd683f3c0e7772da818e937431dd92`
+  - `FirmwareSight_B1U1_Review_Decision_And_Next_Prompts_2026-10-11.txt` — 1,786 bytes, 17 lines, **0 `CR`**,
+    sha256 `52118f91c02d071263615867afee7f1ccda4a6440e39ea1feab342da1f81adb6`
+- Delivered in
+  `C:\Users\16429\Downloads\FirmwareSight_B1U1_Review_To_B1U2_2026-10-11\`, still at that path when the archive was
+  written. Each archived copy is `cmp`-identical to its delivered file, so the three digests above are the digests of
+  the delivered bytes and no normalization happened; all three were LF-only as delivered.
+- Authority. The third file is the Owner's own接手判定, not a task prompt: it records what the architect had
+  independently confirmed (`origin/main = 47fde34`, run #98 ten jobs, the four `source_symlink_posix` tests read by
+  name on Ubuntu), marks the coding agent's B1-U1 report as `Agent-reported / NOT INDEPENDENTLY SOURCE VERIFIED`,
+  and sets the sequence this round followed — read-only acceptance first, then a push the Owner authorizes
+  separately, then the theme decision, then B1-U2. `NEXT-03` is READ-ONLY by its own header and carries its own STOP
+  rule (a SHA that disagrees with the report is described and ends the round). `NEXT-04` is CONDITIONAL: its §启动闸门
+  withholds implementation until (1) B1-U1 holds an independent ACCEPT behind an authorized push and a new CI
+  read-back, (2) the Owner has made the theme decision as a document, and (3) the Owner authorizes the unit itself.
+- **`NEXT-04` §启动闸门 2 cites the wrong clause, and the correction belongs in the record.** It asks for a new ADR to
+  supersede "ADR-0018 D4 及 DESIGN.md 内 MVP Light only 禁令". `ADR-0018` D4 is the five-state set
+  (`PASS / REVIEW / BLOCK / UNKNOWN / N/A`), which this round does not touch; the theme rule is inside **D3**
+  (`theme: MVP Light only`). `ADR-0031` supersedes that one clause of D3 and leaves D1-D6 otherwise intact, so the
+  supersession points at the text it actually changes.
+- Outcome, 2026-10-11: `NEXT-03` executed to its full four phases. Its verdict is
+  **`ACCEPT_WITH_EXPLICIT_LIMITS`**, with the real-window evidence in
+  `B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md` §10: two clean cold starts wrote nothing, so the reported
+  first-launch auto-write is `NOT_REPRODUCED`; the click, keyboard, cross-page, cross-restart, Reset, and the three
+  damaged-document cases were all driven in a real Tauri window at 1024×720 and 1440×900. One genuine defect surfaced
+  and took the minimal correction `NEXT-03` allows: a refusal message joined a sentence to a lowercase Rust error
+  clause with a full stop. The Owner's dispatch authorized that correction, which is the one place this round departed
+  from `NEXT-03`'s read-only header; the pushed range is therefore three commits, not two — `2c47213`, `2e4d08b`,
+  `2cff702` — fast-forwarded over `47fde34` and read back as run `38124118299` with ten jobs green, 1,043 Rust tests
+  on Windows and 1,044 on Ubuntu, 319 UI tests on both, and drift 8/8.
+

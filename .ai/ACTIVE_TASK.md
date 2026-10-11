@@ -405,6 +405,23 @@ carried as findings instead of becoming a fifth C1 round.
 forbid a Dark MVP theme — that is an ADR-level decision for a person, not a field to add — and B1-U3 (i18n) needs its
 own dispatch. If you were sent here to "continue B1": the next unit needs an Owner prompt, and inventing one is what
 `AGENTS.md` 1 forbids. Read, then stop.
+
+Dated 2026-10-11, and it is the newest paragraph in this fence. That last blocker is now removed, by a person.
+`NEXT-03` re-opened B1-U1 as an independent read-only acceptance and closed it `ACCEPT_WITH_EXPLICIT_LIMITS`: the
+first-launch auto-write the coder could not attribute is `NOT_REPRODUCED` across two clean cold starts and has no
+call path, and the whole Settings contract was driven in a real window — click, keyboard, cross-page, cross-restart,
+Reset, and the three damaged-document cases including the `ERR-PREFS-8004` refusal that left a `schema_version: 2`
+document untouched. One genuine defect surfaced and took the minimal corrective `2cff702`: a refusal message joined a
+sentence to a lowercase Rust error clause with a full stop. The Owner authorized the push after that acceptance, so
+`47fde34..2cff702` went up as a plain fast-forward — three commits, not the two `NEXT-03` predicted, because of that
+corrective — and came back as CI run `38124118299` with ten jobs green: 1,043 Rust on Windows, 1,044 on Ubuntu (three
+Windows-only symlink cases out, four `source_symlink_posix` cases in), 319 UI in 10 files on both, drift 8/8.
+`ADR-0031` then superseded the one clause of `ADR-0018` D3 that read `theme: MVP Light only`, scoped to the Developer
+Preview's desktop shell, and corrected `NEXT-04`'s citation of "D4" (D4 is the five-state set) on the way. `DESIGN.md`
+§4/§9, `AGENTS.md` 11 and `BASELINE.yaml` `design.theme` moved with it, in that ADR's own words.
+**The pointer is now `B1_U2_SYSTEM_LIGHT_DARK_THEME`, dispatched by `NEXT-04` and authorized by the Owner on
+2026-10-11.** B1-U3 (i18n) still needs its own dispatch, and no C1 word moved in any of this.
+
 ```
 
 ## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do

@@ -2,10 +2,10 @@
 title: "FirmwareSight Design Authority"
 doc_id: "FS-DESIGN-ROOT"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Design"
-last_updated: "2026-09-27"
+last_updated: "2026-10-11"
 ---
 
 # FirmwareSight DESIGN.md
@@ -43,7 +43,8 @@ FirmwareSight 应像一台可靠的工程仪器：精确、克制、可检查、
 
 ## 4. 布局与密度
 
-- Light theme 是 MVP 唯一主题。
+- 主题：Developer Preview 提供 System / Light / Dark 三态，默认 system（`ADR-0031`）。浅色是既有基准，其数值不因加入暗色而改变；两种主题都只引用同一组语义角色。
+- 导出产物不随主题变化：Release Bundle HTML、portable report、CLI JSON 恒为浅色呈现。
 - 左侧 navigation rail 使用布局 token。
 - Evidence Inspector 使用自适应宽度 token；默认宽度是基准，不是硬锁。
 - 表格是核心工作面：紧凑、可扫描、可排序、可聚焦。
@@ -112,6 +113,7 @@ Treemap 只用于 size composition。禁止 3D、装饰 donut、无 baseline spa
 - Unknown 是一等状态
 - 状态 icon + label
 - focus-visible 清晰
+- 两种主题都达到 WCAG 2.2 AA：正文 4.5:1，大号文字与非文字状态信息 3:1（`ADR-0031` D6）
 - 键盘路径与视觉顺序一致
 - 错误包含 What happened / Why we know / What to do / Diagnostics ID
 
@@ -123,7 +125,6 @@ Treemap 只用于 size composition。禁止 3D、装饰 donut、无 baseline spa
 - 卡片/面板/表格行阴影
 - 营销 Hero/CTA/装饰插画模式
 - 仅用颜色表达状态
-- MVP Dark theme
 - UI 复刻 parser/diff/gate 逻辑
 - 把 “Can we ship now?” 表述为法律、网络安全或合规认证结论
 

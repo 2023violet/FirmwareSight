@@ -145,7 +145,8 @@ gate:
 design:
   tokens_version: "0.2.1"
   accepted_ui_png_count: 7
-  theme: light_only_mvp
+  theme: system_light_dark_developer_preview  # ADR-0031 (2026-10-11) supersedes ADR-0018 D3's light-only clause; exported artefacts stay light
+  theme_authority: 09_ADR/ADR-0031-developer-preview-theme.md
   authority: "governance > frozen_assets_and_adrs > DESIGN.md > accepted_mockups > upstream_reference"
 
 research:

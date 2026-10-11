@@ -2,10 +2,10 @@
 title: "Coding Agent Operating Rules"
 doc_id: "FS-GOV-AGENTS"
 product: "FirmwareSight"
-version: "0.5.1"
+version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-09-26"
+last_updated: "2026-10-11"
 ---
 
 # AGENTS.md
@@ -135,12 +135,13 @@ last_updated: "2026-09-26"
 
 ## 11. UI Rules
 
-由 ADR-0018 设立。对桌面 React UI、Release Bundle HTML 等用户可见输出生效。
+由 ADR-0018 设立，主题条款由 ADR-0031 定向修订。对桌面 React UI、Release Bundle HTML 等用户可见输出生效。
 
 - UI 任务必读：根 `DESIGN.md` + `assets/design-tokens.json`。
 - 冲突裁决：治理红线 > 冻结资产/ADR/tokens > DESIGN.md > accepted screenshots > upstream reference。
 - 数值必须来自 token；禁止 magic colors/spacing/radius/motion。
-- MUST NOT：渐变、玻璃拟态、霓虹/发光、紫色系、面板/表格阴影、营销 Hero/CTA、纯颜色状态、MVP Dark theme。
+- 主题：Developer Preview 提供 System / Light / Dark（默认 system，`ADR-0031`）；两种主题都只引用同一组语义角色，禁止全局 invert 或叠片；导出产物恒为浅色。
+- MUST NOT：渐变、玻璃拟态、霓虹/发光、紫色系、面板/表格阴影、营销 Hero/CTA、纯颜色状态。
 - 五态：PASS / REVIEW / BLOCK / UNKNOWN / N/A = icon + label (+ optional count)。
 - Unknown：中性灰、空心图标、事实句、下一步，不复用 accent。
 - 数字/hash/version/timestamp/path 使用 mono。

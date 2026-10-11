@@ -1,0 +1,17 @@
+FirmwareSight｜架构师接手判定｜2026-10-11
+
+当前已独立确认：GitHub remote main = 47fde34af74c2a221a83f8a317238192326f87ee；run #98（38114423754）十个 jobs success；Ubuntu Rust job 实读四个 source_symlink_posix 测试 ok，Windows 符号链接测试 ok。
+
+Coding Agent 的 B1-U1 本地报告：2c47213 + 2e4d08b，未 push，clean，1,043 Rust passed、319 UI passed、17/17 final gate、37 IPC commands；本轮不能直接获取未推送的 blob，以上标记为 Agent-reported / NOT INDEPENDENTLY SOURCE VERIFIED。
+
+初步裁决：LOCAL_IMPLEMENTATION_REPORTED；INDEPENDENT_ACCEPTANCE_PENDING。不得将其升级为 FINAL_ACCEPTED。
+
+可取：1. app preferences 与 firmwaresight.toml、Gate/Release identity 严格隔离；2. 错误与数据保全有明确契约；3. Settings 真正可操作，未在本轮预置 theme/i18n 空开关；4. 已有 T03 deterministic run id 不变量测试；5. 编码者诚实说明早期 gate 失败与最终 staged 通过。
+
+必须补的证据：真实 Settings→Analyze→Compare 点击/键盘/保存/重启/T09；settings.json 首次异常自写的复现调查；只读目录和配置异常的 Windows 安全沙箱测试；快速写入序列化、旧版本/损坏字节保留。代码本身如被证实有缺陷才做最小 REWORK。
+
+执行：首先交付 NEXT-03 只读独立验收 prompt；通过后 Owner 单独批准普通 FF push，取得新 CI。然后 Owner 明确允许以新增、小范围 superseding ADR 覆盖 ADR-0018 的 MVP Light only 约束，授权 NEXT-04 实施 System/Light/Dark。不额外启动独立 UI 美术改版、不提前开始 B1-U3。
+
+文件：
+- FirmwareSight_NEXT_03_B1U1_Independent_Acceptance_2026-10-11.txt
+- FirmwareSight_NEXT_04_B1U2_System_Light_Dark_Theme_2026-10-11.txt
