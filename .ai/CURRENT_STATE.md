@@ -186,7 +186,9 @@ last_updated: "2026-10-11"
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
 - **`B1-U2` (System / Light / Dark, `NEXT-04`) ran on 2026-10-11 and is `LOCAL_B1_U2_GATE_PASS /
-  ARCHITECT_REVIEW_PENDING` — proposed by the executor, not granted, and nothing of it is pushed.** Its record is
+  ARCHITECT_REVIEW_PENDING` — proposed by the executor, not granted, and nothing of it is pushed.** The round is two
+  local commits, `bf3d494` (the authority) under `bd62289` (the unit), on top of `2cff702`, which is still `origin/main`.
+  Its record is
   `B1_VALIDATION/B1_U2_THEME_REPORT.md` with `B1_VALIDATION/B1_U2_THEME_DESIGN_CHECKLIST.md` beside it and the
   machine-readable block `b1_u2_system_light_dark_theme` in `BASELINE.yaml`. What shipped is the third preference on
   the mechanism B1-U1 had already built, not a second mechanism: `ThemePref { System, Light, Dark }` with `System`

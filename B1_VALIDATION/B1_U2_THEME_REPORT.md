@@ -116,9 +116,29 @@ density; `ADR-0031` D8 narrows what they are authoritative for, in writing.
 ## 7. git
 
 - Base: `2cff702` (B1-U1's reviewed head, pushed and CI-green as run `38124118299`).
-- This round: **one commit, local, not pushed.** `git status --porcelain=v1` clean after it.
-- Manifests regenerated from the staged index in `ADR-0029` order; `scripts/verify_baseline_artifacts.py` → PASS.
-- `SHA256SUMS` and `DIRECTORY_TREE.txt` updated for the two new source files and every edited path.
+- This round is **two local commits, and neither is pushed**: `bf3d494` carries the authority — `ADR-0031` plus the
+  current-spec surfaces it authorizes (`DESIGN.md` §4/§9, `AGENTS.md` 11, `BASELINE.yaml` `design.theme`) and the three
+  archived prompts — and `bd62289` carries the unit: 21 source/token/generator paths and every report and governance
+  record in this file. `NEXT-04` preferred at most two commits and that is what it got, with the ADR deliberately
+  first: no theme code landed under a rule the documents still forbade.
+- This paragraph names `bd62289` from inside `bd62289`, which is impossible, so it was written after: **the first
+  version of this section said "one commit", and that was already false when it was written.** The correction is a
+  docs-only successor of its own rather than an amend, because the alternative to stating a mistake is rewriting the
+  commit that made it.
+- Manifests regenerated from the staged index in `ADR-0029` order; `scripts/verify_baseline_artifacts.py` → **PASS at
+  820 tracked / 818 sum entries / 949 tree lines**, against the 812 / 810 / 941 recorded at B1-U1's closure. The +8 in
+  all three is exactly this round's eight new files — three archived prompts, `ADR-0031`, `theme.ts`,
+  `theme.test.ts`, this report and its checklist — with `index blob mismatch`, `tracked but unlisted` and
+  `listed but unindexed` all at 0.
+- `origin/main` is still `2cff702`. The Owner's push authorization covered B1-U1's range and nothing beyond it, so this
+  round has no remote CI of its own to read back, and none is claimed.
+- **The raw evidence is not in the baseline.** Every screenshot and log this report cites — `target/n04_shots/*.png`,
+  `target/n04_check_final.log`, `target/n04_check_docs_final.log`, the CDP driver and the resized-window PowerShell
+  script — lives under `target/`, which `.gitignore` already excludes from the tracked set. They are reproducible by
+  the tests named in §4, not downloadable from this repository, and the report does not claim otherwise.
+- The gate was re-run on the amended tree before this sentence was committed, and it is the same 17 of 17 with the same
+  1,050 / 334: a docs-only successor moves digests, not behaviour. That successor is the commit which contains this
+  paragraph; its own hash cannot appear in the paragraph it creates, and no hash is invented for it here.
 
 ## 8. next
 

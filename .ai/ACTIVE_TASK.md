@@ -429,7 +429,9 @@ Preview's desktop shell, and corrected `NEXT-04`'s citation of "D4" (D4 is the f
 Dated 2026-10-11 again, and it is the newest paragraph in this fence: **`B1-U2` RAN, and it is CLOSED LOCALLY AND NOT
 PUSHED.** The live word, which the executor proposes and cannot grant, is `LOCAL_B1_U2_GATE_PASS /
 ARCHITECT_REVIEW_PENDING`; the record is `B1_VALIDATION/B1_U2_THEME_REPORT.md` with its design checklist beside it and
-the `b1_u2_system_light_dark_theme` block in `BASELINE.yaml`. What shipped is a third preference on the mechanism
+the `b1_u2_system_light_dark_theme` block in `BASELINE.yaml`. The round is two local commits on top of `2cff702` —
+`bf3d494`, which is the authority (`ADR-0031` plus the current-spec surfaces it authorizes), then `bd62289`, which is
+the unit. What shipped is a third preference on the mechanism
 B1-U1 built rather than a second mechanism: `ThemePref { System, Light, Dark }` in the same `settings.json`, behind
 the same command, with `SCHEMA_VERSION` 1 → 2 and the reader widened BEFORE the writer moved — the order matters,
 because `read_document` refused any version but its own, so a bare version bump would have opened every existing
