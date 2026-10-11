@@ -1,0 +1,135 @@
+/*
+ * The application's own settings page.
+ *
+ * A reading-and-choosing page, so it takes Help's rhythm: one measured column, hairlines between
+ * sections, mono for the file name, and no accent fill anywhere - the accent belongs to the workflow
+ * pages' actions (DESIGN.md 5). Every control here is neutral, because a settings screen that outshouts
+ * the tables it labels has the emphasis backwards.
+ *
+ * Every length, colour and radius is a token.
+ */
+
+.page {
+  max-width: var(--fs-layout-design-target-width);
+  margin: 0 auto;
+  padding: var(--fs-space-8) var(--fs-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.subhead {
+  color: var(--fs-color-text-secondary);
+  max-width: 80ch;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding-top: var(--fs-space-4);
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.section h2 {
+  margin: 0;
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+}
+
+.section h3 {
+  margin: 0;
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+  /* Keyword weight: the frozen token file defines no weight scale (global.css h1 note). */
+  font-weight: bold;
+}
+
+.section p {
+  margin: 0;
+  max-width: 80ch;
+}
+
+/* The sentence that explains a value rather than offering a choice. Secondary colour, never a box:
+   it is context, not a state. */
+.note {
+  color: var(--fs-color-text-secondary);
+}
+
+.facts {
+  color: var(--fs-color-text-secondary);
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-font-size-metadata);
+}
+
+.radios {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-6);
+  padding: var(--fs-space-2) 0;
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+/* The neutral control, the same one Help's export and the workflow pages use. */
+.control {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font: inherit;
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: border-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.control:hover:not(:disabled) {
+  border-color: var(--fs-color-text-disabled);
+}
+
+.control:disabled {
+  color: var(--fs-color-text-secondary);
+  background: var(--fs-color-bg-subtle);
+  border-color: var(--fs-color-border-default);
+  cursor: default;
+}
+
+/* A decision asked in place, so the page never leaves the section it was standing in. The hairline
+   is the same review treatment Compare and Release use for a pending choice - no shadow, no dialog
+   that hides the rest of the screen. */
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  padding: var(--fs-space-4);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.status {
+  margin: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}

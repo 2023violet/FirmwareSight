@@ -33,6 +33,7 @@ import type {
   HistoryPageRequestDto,
   HistoryReleasePageDto,
   MainWindowPage,
+  PreferencesDto,
   ProjectContextDto,
   ProjectPolicyDto,
   ReleaseAttachmentDto,
@@ -79,6 +80,9 @@ const LIST_HISTORY_GATE_RUNS = 'list_history_gate_runs';
 const LIST_HISTORY_RELEASES = 'list_history_releases';
 const GET_APP_IDENTITY = 'get_app_identity';
 const SET_WINDOW_TITLE = 'set_window_title';
+const GET_APPLICATION_PREFERENCES = 'get_application_preferences';
+const UPDATE_APPLICATION_PREFERENCES = 'update_application_preferences';
+const RESET_APPLICATION_PREFERENCES = 'reset_application_preferences';
 const COLLECT_DIAGNOSTICS = 'collect_diagnostics';
 const EXPORT_DIAGNOSTICS = 'export_diagnostics';
 
@@ -466,6 +470,46 @@ export async function getAppIdentity(): Promise<IpcOutcome<AppIdentityDto>> {
  */
 export async function setWindowTitle(page: MainWindowPage): Promise<IpcOutcome<null>> {
   return await call<null>(SET_WINDOW_TITLE, { page });
+}
+
+/**
+ * Ask what this application's own settings are, and why they are what they are.
+ *
+ * The answer always arrives: a missing file, an unreadable one or a host with no place to store
+ * settings all come back as the defaults plus a `recovery` that names which. So a Settings page can
+ * open on a machine whose preferences are broken instead of failing with it. Nothing is sent, and
+ * the reply carries a file's name rather than a directory (`AGENTS.md` 7).
+ */
+export async function getApplicationPreferences(): Promise<IpcOutcome<PreferencesDto>> {
+  return await call<PreferencesDto>(GET_APPLICATION_PREFERENCES);
+}
+
+/**
+ * Store the two words the page is offering.
+ *
+ * They travel as text and are matched against the closed sets in Rust, so an option the screen does
+ * not list is refused with a code and a next step rather than being written down. A refusal resolves
+ * with `ok: false` and changes nothing on disk: the page keeps showing what it had, and never a
+ * saved confirmation it did not earn.
+ */
+export async function updateApplicationPreferences(
+  sizeUnit: string,
+  startupPage: string,
+): Promise<IpcOutcome<PreferencesDto>> {
+  return await call<PreferencesDto>(UPDATE_APPLICATION_PREFERENCES, {
+    sizeUnit,
+    startupPage,
+  });
+}
+
+/**
+ * Put the stored preferences back to this build's defaults, and only those.
+ *
+ * The shell's own document is the whole scope: builds, Gate runs, release records, the project's
+ * policy and every file the reader chose are not opened by this call.
+ */
+export async function resetApplicationPreferences(): Promise<IpcOutcome<PreferencesDto>> {
+  return await call<PreferencesDto>(RESET_APPLICATION_PREFERENCES);
 }
 
 /**

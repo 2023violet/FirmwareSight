@@ -1,0 +1,57 @@
+FirmwareSight｜NEXT-01 — C1 本地八提交独立验收与推送前裁决
+版本：v1.0 | 2026-10-10 | 模式：READ-ONLY SOURCE / TEST EVIDENCE ONLY
+
+【角色、目标与授权边界】
+你是独立 Architect Reviewer，不是 C1 原 Coding Agent，不得将其 SELF-REVIEW 当作自己的证据。本任务是 Owner 请求的“验收检查”，不授权推送、不授权重写代码、不授权改 ADR、不授权 B1 编码。不制造新治理专项。
+
+【输入锚点（仅用于定位，不代表已被独立验证）】
+Repo: 2023violet/FirmwareSight
+用户提交的执行报告：
+  local HEAD = 47fde34af74c2a221a83f8a317238192326f87ee
+  reported origin/main = 2859bb2a7335b8cdea5be2f817a5b848dce126a1
+  reported clean tree; ahead 8 commits; 17/17 final gate, GATE_EXIT=0
+  reported checkpoints: U2R1 LOCAL_CORRECTIVE_GATE_PASS;
+    U3 LOCAL_CONTRACT_GATE_PASS;
+    U4 LOCAL_USER_WORKFLOW_GATE_PASS.
+  all 3: ARCHITECT_REVIEW_PENDING
+  Stage 3 installed runtime evidence comes from local intermediary commit 073c83c.
+  No new CI for this eight-commit sequence. POSIX/M11 symlink status unknown.
+  §14.3 ambiguity: frozen “exactly as for analyzed rows” interpreted by executor as same columns but NOT same evidence roles.
+
+远端独立核查（2026-10-10）：main 仍为 2859bb2...，最近 CI #97 SUCCESS 仅对应旧 head；远端尚看不到 47fde34。
+本任务必须自行重查实际本地 HEAD、完整 SHA、分支、远端 refs 和源代码，不把上列数字当事实的替代。
+
+【强制接手】
+严格按 AGENTS.md §1 读取 README.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、04_TECH/09_TECH_DECISION_MATRIX.md；再读 ADR-0030、04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md (§§4–9、13、14，尤其本地 §14.3)、C1_VALIDATION 的 U2R1/U3/U4 实际新增文件、正式源 Prompt、当前执行报告及相关测试。以实际文件名为准，不猜测。
+
+【Phase A｜预检，失败即 STOP】
+1. git status --porcelain=v1 -uall；git rev-parse HEAD；git rev-parse origin/main；git ls-remote origin refs/heads/main；git merge-base --is-ancestor origin/main HEAD；git rev-list --count origin/main..HEAD；git log --format='%H %s' --reverse origin/main..HEAD。
+2. 逐项核对 HEAD=47fde34...、干净工作树、origin/main=2859bb2...、整条八提交祖先链；远端发生变化或存在额外本地修改立即 STOP，不能擅自 rebase/reset/merge/amend/cherry-pick/force。
+3. git diff --stat origin/main..HEAD；git diff --name-status origin/main..HEAD；识别所有更改及落在哪个 C1 工作单元，核查发布附件、安全路径、CLI、IPC、schema、goldens、migrations、UI/测试/文档变更。不得凭提交标题忽略代码。
+4. 只读审核源文件；执行测试允许写入被忽略的 target/ 等测试产物，不得修改 tracked code/docs，不得创建新提交，不得改变 memory 文件。
+
+【Phase B｜不重复原 Agent 自测的独立重点】
+A. U2R1：真实审查 Gate 附件集 A→B 不继承 accepted review；canonical_input /1 空集合完全向后兼容、/2 绑定附件 digest；安全路径、输入 symlink、名称折叠碰撞、6109 误导性修复、growth/unknown 不因附件增加而被污染；所有拒绝发生在目标写入前。注意 Git 追踪的附件被修改后可能先被 git.clean 以 6102 拒绝，不得把它虚报成证明附件 staleness 分支。
+B. U3：对比 04_TECH/28 §7：gate-results:1 的 extensions 及反向可复算性、release-manifest:1 的 extensions/files[]、pre-C1 fixture 和 goldens；保证 major 不变、旧文档能读、无附件仍 byte-identical，SHA256SUMS 包括每个实际文件；旧 verifier 可读性具体注明边界。禁止用“测试总数增加”代替独立合同断言。
+C. U4：CLI 实际 --attach help/parse/成功/失败路径；desktop 原生逐文件选择而非任意路径读取；IPC 避免宿主绝对路径泄露；Gate→Review→Bundle→Verify 贯通；中文/空格路径、Declared kind 与 Observed bytes 的非等价提示、空态/错误态；UI 不自行计算 hash/verdict。检查 34 条 IPC 命令实际声明和测试，而不是只看执行报告。
+D. 专项歧义 04_TECH/28 本地 §14.3：必须引述本地真实冻结原句及上下文、列出数据库/DTO/CLI/manifest 的实际字段与 evidence role。裁决原则："列形状相同"可以不等于"证据角色相同"；ELF/MAP analyzed rows 与 BIN/HEX release-attached byte rows 应保持独立角色/locator，不能因为共享列而宣称附件已经经过 ELF 分析。若语义严格保持且用户表述真实，可做 ACCEPTED_WITH_NOTED_CARRIER_CLARIFICATION；若未保持，给出最小反例并判 REWORK REQUIRED。禁止凭措辞含糊直接大规模改合同。
+E. 本地安装态：核验 073c83c 的安装包哈希、安装/启动/选择文件/导出实际证据；用 git diff 073c83c..47fde34 判定安装证据是否仍覆盖最后 head，凡二进制行为改变而未重测的必须标 NOT_RUNTIME_VERIFIED。Windows Win32 截屏可作为实机观察证据，工具意外断连不能假装未发生。
+F. M11 POSIX symlink：没有 POSIX runner 时如实标 POSIX_NOT_VERIFIED；不能因 Windows 测试 PASS 推论 Unix；准备 CI 后精准需要的测试检查。M12 >512MiB 如果没有专门跑过则 NOT_VERIFIED，不得拿 1 MiB 替代。
+
+【Phase C｜最小独立测试】
+实际运行与本地环境适配的 cargo fmt --check、cargo clippy、cargo test（选取与 C1 相关测试并提供完整名称及计数）、UI typecheck/lint/test/build、schema/golden/fixture/contract/drift 检查。优先复测至少一个篡改或换附件导致失败、不覆盖输出目录的端到端路径，以及一个无附件旧发行回归。命令失败时记录退出码、复现条件，STOP 或 REWORK。
+
+【Phase D｜输出单页式结论，不改仓库】
+输出：
+1. Verified facts：HEAD/origin/main/8 commits/clean/tree diff；每条附命令或实际文件锚点。
+2. 四类判定：SOURCE_PRESENT、LOCAL_TEST_PROVEN、WINDOWS_INSTALLED_VERIFIED、REMOTE_CI_PROVEN（该项预计 PENDING）；不得聚合成一个假 PASS。
+3. C1-U2R1、U3、U4 分别 verdict，且对 §14.3 给明确的 ACCEPT / REWORK，说明证据角色区别。
+4. 未测项：POSIX M11、>512MiB M12、末端 HEAD 安装态与原 073c83c 之间可能的范围差异；标 BLOCKING / NON_BLOCKING 与理由。
+5. 若本地所有必须项 PASS：结论 = LOCAL_INDEPENDENT_ACCEPT / PUSH_AUTHORIZATION_REQUIRED / REMOTE_CI_PENDING。不得叫 C1 COMPLETE。
+6. 若有安全、身份、schema、发布字节一致性或 UI/CLI 假能力问题：结论 = REWORK REQUIRED，给最小范围及复现；不得自行实施。
+7. 给 Owner 一句简明建议：是否可以批准普通 fast-forward push；必须提供当前远端 HEAD 不变的前置条件。永不自行 push；永不 force，包括 --force-with-lease。
+
+【推送与后续限制】
+本 Prompt 不授权 push。独立本地评审通过后必须停在 PUSH_AUTHORIZATION_REQUIRED，等 Owner 明确批准。推送后必须对实际远端 head 的 CI 全工作项和 POSIX 定向证据逐项读回，最终是否接受再由 Architect 裁决；不得提前开发 B1，不得动 V1 冻结样本、许可证、发布标签或公共 Release。
+
+时间效率：本任务禁止超过一份精简报告和一份可执行缺口清单；没有必要就不新建 ADR、TASK、记忆整理、归档清理。不做额外 UI 设计。

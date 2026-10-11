@@ -51,6 +51,42 @@ vi.mock('./ipc/bridge', () => ({
   querySymbols: vi.fn(),
   queryEvidence: vi.fn(),
   setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
+  getApplicationPreferences: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'analyze',
+        recovery: 'missing',
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    }),
+  ),
+  updateApplicationPreferences: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'analyze',
+        recovery: 'read',
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    }),
+  ),
+  resetApplicationPreferences: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'analyze',
+        recovery: 'read',
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    }),
+  ),
   getAppIdentity: vi.fn(() => Promise.resolve({ ok: true, value: {} })),
   listHistoryBuilds: vi.fn(),
   listHistoryGateRuns: vi.fn(),

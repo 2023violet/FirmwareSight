@@ -213,7 +213,10 @@ impl Error for StartupFailure {}
 /// `attempt to open /home/user/.local/share/firmwaresight/p0.sqlite failed` arrives as
 /// `attempt to open p0.sqlite failed` — the part that helps still reads, and the part that names a machine
 /// and a user is gone. The result is bounded, because a startup line is not a log.
-fn without_directories(text: &str) -> String {
+///
+/// The preferences store reuses this for the same reason: an operating-system sentence may name a
+/// person's profile directory, and no sentence that crosses to the WebView should.
+pub(crate) fn without_directories(text: &str) -> String {
     let mut kept = String::new();
     for word in text.split_whitespace() {
         // `rsplit` always yields at least one item; a word ending in a separator reduces to nothing, which

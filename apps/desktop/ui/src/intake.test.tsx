@@ -67,6 +67,42 @@ vi.mock('./ipc/bridge', () => ({
   // The shell names the window, so mounting <App/> at all calls this one. An outcome-shaped promise
   // keeps the title fix out of what this file claims without pretending the page asked for nothing.
   setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
+  getApplicationPreferences: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'analyze',
+        recovery: 'missing',
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    }),
+  ),
+  updateApplicationPreferences: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'analyze',
+        recovery: 'read',
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    }),
+  ),
+  resetApplicationPreferences: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'analyze',
+        recovery: 'read',
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    }),
+  ),
   getAppIdentity: vi.fn(() => Promise.resolve({ ok: true, value: {} })),
   listHistoryBuilds: vi.fn(() =>
     Promise.resolve({
@@ -612,8 +648,13 @@ describe('P1-A0 intake screen', () => {
     ]);
     // Help is a description of the product and not a stage of the workflow, so it is listed under its
     // own heading instead of after Release, where it would read as a fifth step (prompt §14).
+    // B1-U1 adds Settings to the same group: it is a surface that exists today - two stored
+    // preferences, read and written by the shell - and the rail still lists nothing that does not.
     const about = screen.getByRole('navigation', { name: 'Help and about' });
-    expect(within(about).getAllByRole('button').map((item) => item.textContent)).toEqual(['Help']);
+    expect(within(about).getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Help',
+      'Settings',
+    ]);
     expect(document.querySelectorAll('a')).toHaveLength(0);
 
     fireEvent.click(within(rail).getByRole('button', { name: 'Compare page' }));

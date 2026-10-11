@@ -18,10 +18,12 @@
  * moves, this shell tells the shell which page moved, and Rust composes the text from a closed set
  * (`MainWindowPage`).
  *
- * Six pieces of state live here because they outlive a page switch:
+ * The state that outlives a page switch lives here, because a page is unmounted on every navigation:
  *
  * - the size unit, which is one answer to one question and must not differ between two tables the same
- *   reader is comparing (US-001, prompt §39);
+ *   reader is comparing (US-001, prompt §39); and with it the application's own preferences, which are
+ *   where that unit is remembered between starts (`NEXT-02`) - the shell holds the stored document, this
+ *   shell only ever asks it for the two words, and no workflow page is given a path to write one;
  * - what Analyze currently holds, so navigating to Compare and back does not make the session forget the
  *   build it just analyzed;
  * - the last summary Analyze proved, which Compare and Release are allowed to *prefer* as their choice -
@@ -42,7 +44,7 @@
  *   survive a trip to History and back without coming back on its own (prompt §13).
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import styles from './App.module.css';
 import { Analyze } from './Analyze';
@@ -50,14 +52,28 @@ import { Compare, EMPTY_COMPARISON, type ComparisonSession } from './Compare';
 import type { SizeUnit } from './format';
 import { Help } from './Help';
 import { History } from './History';
-import type { AnalysisSummaryDto, GateRunDto, MainWindowPage, ProjectContextDto, SelectionDto } from './ipc/types';
-import { setWindowTitle } from './ipc/bridge';
+import type {
+  AnalysisSummaryDto,
+  ErrorEnvelopeDto,
+  GateRunDto,
+  MainWindowPage,
+  PreferencesDto,
+  ProjectContextDto,
+  SelectionDto,
+} from './ipc/types';
+import {
+  getApplicationPreferences,
+  resetApplicationPreferences,
+  setWindowTitle,
+  updateApplicationPreferences,
+} from './ipc/bridge';
 import { Overview } from './Overview';
 import { Release } from './Release';
+import { Settings } from './Settings';
 import { cx } from './styles/classnames';
 import { TopBar } from './components/TopBar';
 
-type Page = 'overview' | 'analyze' | 'compare' | 'release' | 'history' | 'help';
+type Page = 'overview' | 'analyze' | 'compare' | 'release' | 'history' | 'help' | 'settings';
 
 /**
  * The workflow pages, in the order the product flow runs them.
@@ -84,7 +100,10 @@ const AUXILIARY: readonly {
   readonly key: Page;
   readonly label: string;
   readonly title: MainWindowPage;
-}[] = [{ key: 'help', label: 'Help', title: 'Help' }];
+}[] = [
+  { key: 'help', label: 'Help', title: 'Help' },
+  { key: 'settings', label: 'Settings', title: 'Settings' },
+];
 
 function navItem(
   page: Page,
@@ -106,6 +125,18 @@ function navItem(
       {entry.label}
     </button>
   );
+}
+
+/**
+ * The unit word the shell sent, as the one this window can apply.
+ *
+ * The shell only ever answers with `bytes` or `kib` - Rust reads the closed set and refuses anything
+ * else - so this is a narrowing for TypeScript rather than a guess about a value that could arrive.
+ * Anything unrecognized becomes the default instead of a third option, which is what the store itself
+ * does with a damaged value.
+ */
+function asSizeUnit(word: string): SizeUnit {
+  return word === 'kib' ? 'kib' : 'bytes';
 }
 
 export function App() {
@@ -134,6 +165,97 @@ export function App() {
   const [comparison, setComparison] = useState<ComparisonSession>(EMPTY_COMPARISON);
   /** Hidden for the session by the reader, not by the application deciding they have read it. */
   const [gettingStartedHidden, setGettingStartedHidden] = useState(false);
+  /**
+   * This application's own settings, as the shell reported them. `null` until the shell answers, which
+   * is why every page still opens on a stated default rather than waiting on a reply.
+   */
+  const [preferences, setPreferences] = useState<PreferencesDto | null>(null);
+  /** A refusal to store, shown rather than swallowed: a page that looks saved is the failure here. */
+  const [preferencesError, setPreferencesError] = useState<ErrorEnvelopeDto | null>(null);
+  const [preferencesNote, setPreferencesNote] = useState<string | null>(null);
+  /**
+   * Whether the reader has named a page themselves since the window opened.
+   *
+   * The stored start page is applied once, from the shell's first answer. Without this, a reader who
+   * clicked Compare while that read was in flight would be carried off it a moment later by a
+   * preference they set yesterday - the page they chose is the newer fact.
+   */
+  const readerChosePage = useRef(false);
+
+  const open = (target: Page) => {
+    readerChosePage.current = true;
+    setPage(target);
+  };
+
+  /**
+   * Ask the shell once, and let the answer move what it owns.
+   *
+   * The unit and the start page come from the stored document; the window's own data is untouched by
+   * either. A read that fails is shown as a refusal on the Settings page, and the defaults stay in
+   * effect - the workflow does not depend on a preference file to open.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    void getApplicationPreferences().then((outcome) => {
+      if (cancelled) {
+        return;
+      }
+      if (!outcome.ok) {
+        setPreferencesError(outcome.envelope);
+        return;
+      }
+      const stored = outcome.value;
+      setPreferences(stored);
+      setUnit(asSizeUnit(stored.sizeUnit));
+      if (!readerChosePage.current && stored.startupPage === 'history') {
+        setPage('history');
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /** Store both words together: the document is one file, and a half-stored pair is not a setting. */
+  const persist = async (nextUnit: SizeUnit, nextStartPage: string) => {
+    const outcome = await updateApplicationPreferences(nextUnit, nextStartPage);
+    if (outcome.ok) {
+      setPreferences(outcome.value);
+      setPreferencesError(null);
+      setPreferencesNote('Preferences saved.');
+    } else {
+      setPreferencesError(outcome.envelope);
+      setPreferencesNote(null);
+    }
+  };
+
+  /**
+   * Change the unit in this window and store the change.
+   *
+   * The label moves first and the save follows: what a person sees on the screen is what the window is
+   * doing, and a failed save says so on the page instead of leaving a table that quietly reverted.
+   */
+  const chooseUnit = (next: SizeUnit) => {
+    setUnit(next);
+    void persist(next, preferences?.startupPage ?? 'analyze');
+  };
+
+  const chooseStartPage = (word: string) => {
+    void persist(unit, word);
+  };
+
+  const resetPreferences = async () => {
+    const outcome = await resetApplicationPreferences();
+    if (outcome.ok) {
+      setPreferences(outcome.value);
+      setPreferencesError(null);
+      setPreferencesNote('Preferences reset to this version’s defaults.');
+      setUnit(asSizeUnit(outcome.value.sizeUnit));
+    } else {
+      setPreferencesError(outcome.envelope);
+      setPreferencesNote(null);
+    }
+  };
 
   /**
    * The page names the window, in the shell that owns the page.
@@ -153,10 +275,10 @@ export function App() {
       <div className={styles['shell']}>
         <div className={styles['rail']}>
           <nav className={styles['nav']} aria-label="Pages">
-            {PAGES.map((entry) => navItem(page, setPage, entry))}
+            {PAGES.map((entry) => navItem(page, open, entry))}
           </nav>
           <nav className={styles['nav']} aria-label="Help and about">
-            {AUXILIARY.map((entry) => navItem(page, setPage, entry))}
+            {AUXILIARY.map((entry) => navItem(page, open, entry))}
           </nav>
         </div>
 
@@ -170,13 +292,13 @@ export function App() {
               project={project}
               unit={unit}
               onOpen={(target) => {
-                setPage(target);
+                open(target);
               }}
             />
           ) : page === 'analyze' ? (
             <Analyze
               unit={unit}
-              onUnitChange={setUnit}
+              onUnitChange={chooseUnit}
               selection={selection}
               onSelectionChange={setSelection}
               analyzedSelectionId={analyzedSelectionId}
@@ -193,29 +315,44 @@ export function App() {
           ) : page === 'compare' ? (
             <Compare
               unit={unit}
-              onUnitChange={setUnit}
+              onUnitChange={chooseUnit}
               lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
               session={comparison}
               onSessionChange={setComparison}
               onGoToAnalyze={() => {
-                setPage('analyze');
+                open('analyze');
               }}
             />
           ) : page === 'release' ? (
             <Release
               unit={unit}
-              onUnitChange={setUnit}
+              onUnitChange={chooseUnit}
               lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
               project={project}
               onProjectChange={setProject}
               run={gateRun}
               onRunChange={setGateRun}
               onGoToAnalyze={() => {
-                setPage('analyze');
+                open('analyze');
               }}
             />
           ) : page === 'history' ? (
-            <History unit={unit} onUnitChange={setUnit} />
+            <History unit={unit} onUnitChange={chooseUnit} />
+          ) : page === 'settings' ? (
+            <Settings
+              preferences={preferences}
+              error={preferencesError}
+              note={preferencesNote}
+              unit={unit}
+              onUnitChange={chooseUnit}
+              onStartPageChange={chooseStartPage}
+              onReset={() => {
+                void resetPreferences();
+              }}
+              onGoToHelp={() => {
+                open('help');
+              }}
+            />
           ) : (
             <Help />
           )}

@@ -1318,6 +1318,7 @@ pub enum MainWindowPage {
     Release,
     History,
     Help,
+    Settings,
 }
 
 impl MainWindowPage {
@@ -1332,6 +1333,7 @@ impl MainWindowPage {
             Self::Release => "FirmwareSight - Release Gate",
             Self::History => "FirmwareSight - Bundle & History",
             Self::Help => "FirmwareSight - Help",
+            Self::Settings => "FirmwareSight - Settings",
         }
     }
 }
@@ -1594,4 +1596,46 @@ pub struct DiagnosticsPolicyDto {
     pub require_clean_git: bool,
     pub require_clean_git_note: String,
     pub require_release_notes: bool,
+}
+
+// ------------------------------------------------------------- Application preferences (B1-U1)
+
+/// Why the values on the Settings page are what they are.
+///
+/// A page that silently shows defaults is indistinguishable from a page whose settings were never
+/// chosen, so the reason travels with the values (`NEXT-02` T01, T04).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum PreferenceRecoveryDto {
+    /// The document was read as this build's document.
+    Read,
+    /// Nothing is stored yet — a first start, not a fault.
+    Missing,
+    /// Bytes were there and are not this build's document.
+    Corrupted,
+    /// A newer version wrote them; they are not re-interpreted here.
+    FutureVersion,
+    /// This host gave the application no configuration folder, so nothing can be stored at all.
+    NowhereToStore,
+}
+
+/// The preferences this application is running with, as the Settings page sees them.
+///
+/// `size_unit` and `startup_page` carry the same words the stored document carries, so one string is
+/// both what the page shows and what the file says — and the UI's `SizeUnit` union needs no second
+/// translation. The directory is not here: only [`crate::preferences::SETTINGS_FILE_NAME`] crosses,
+/// the same way the store's name crosses and its path does not (`AGENTS.md` 7, prompt §19).
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct PreferencesDto {
+    pub size_unit: String,
+    pub startup_page: String,
+    pub recovery: PreferenceRecoveryDto,
+    /// Whether a copy of bytes this build could not interpret is on hand beside the document. It
+    /// describes the folder rather than this one load, which is what makes "the earlier settings can
+    /// still be recovered" a promise instead of a hope.
+    pub kept_unreadable_copy: bool,
+    pub file_name: String,
 }

@@ -1,0 +1,58 @@
+FirmwareSight｜NEXT-02 — B1-U1 Application Preferences + Settings 基础实现
+版本：v1.0 | 2026-10-10 | 模式：BOUNDED IMPLEMENTATION / TDD
+
+【执行授权条件——不可跳过】
+这是 NEXT-01 独立验收通过、Owner 明确批准普通 FF push、远端 47fde34… 对应的实际最终提交（或经核验的后续 head）CI 包括 POSIX 必需检查完成、Architect 宣告 C1 ACCEPTED 之后，才可由 Owner 明确交付执行的 B1 第一开发单元。
+本文件本身是候选执行 Prompt，不因已生成即授权改代码。若 C1 仍 ARCHITECT_REVIEW_PENDING / REMOTE_CI_PENDING，或者 .ai/ACTIVE_TASK.md live pointer 为 NONE 而 Owner 未明确授权 B1-U1，输出 BLOCKED 与缺项并停止；不要先写代码。
+
+【总体任务】
+在现有 Tauri 2 + React + Rust 结构内实现“应用偏好与 Settings 的最小可靠基础”，作为 v0.2 功能规划 B1 的首个有边界的开发单元。只做真实生效的设置，不伪装已完成双主题/多语言。保持 FirmwareSight 现有 instrument-grade clarity UI；不进行 UI 视觉重设计、不加 SaaS 元素、不修改 Gate/Release 核心语义。
+
+【权威读取】
+依 AGENTS.md §1；复核本地正确 head 和最新 ADR/C1 源码；读用户批准的《FirmwareSight｜完整产品能力、基础体验与专业工作流决策 v0.2》§§2–4、8–9，读取 03_DESIGN/**、DESIGN.md、assets/design-tokens.json、现有 App.tsx/SizeUnitSwitch/format.ts、apps/desktop/src-tauri、Help/About/diagnostics、Tauri permission/config、现有用户配置/持久化机制。不同文件间权限冲突则先提交小型技术决策给 Owner，不要靠改历史权威文件绕过。
+
+【严格范围】
+1. 明确隔离三种状态：Application Preferences（本机 UI）、Project Policy（firmwaresight.toml，保持现有）、Session State（临时当前页/筛选等）。偏好不得进入 CLI 机读输出、Gate policy fingerprint/run id、release id、portable manifest/JSON、SnapshotId、Bundle。
+2. 基于真实现有代码决定最小的 schema_version=1 偏好存储路径；优先操作系统标准 application-config directory；本地不上传、不联网、不记录固件原始字节。偏好读写必须校验类型/枚举、未知或未来版本处理、安全默认值、损坏文件可恢复且不静默销毁原字节、受控原子写入/失败可见、两次保存竞争有确定语义。Windows 文件替换语义要实际测试；不要仅用 UNIX rename 假设宣称跨平台原子性。
+3. B1-U1 首版必须至少真正支持：
+   A) display.size_unit: bytes（默认）/KiB；直接复用已有 SizeUnitSwitch、format.ts 与 App 的 unit 状态。设置与任何页面的单位切换双向同步；重启保持；不重算分析数据。
+   B) General 中只读 Local-first/无云账号能力事实、About/诊断入口（复用现有页面）；如功能源事实未证则不宣称“零网络/零遥测”。
+   C) Reset application preferences: 清楚的确认及恢复，不能影响现有 SQLite build/gate/release 历史、文件、项目策略。保存失败不得假装成功。
+   D) 任选一个当前可独立验证且不侵入 Core 的第二项真实偏好，例如启动页 Analyze/Last page（仅当可安全保留页面状态，且不复活旧 Gate 判定）。若复杂度/隐私超过限定范围，可放弃第二项并在报告说明，不得为了凑数加占位开关。
+4. 在现有导航低调增加真实 Settings 页；至少有 General、Appearance（单位选择）和 About/Diagnostics 访问。仅显示本轮真实生效的控件。主题 System/Light/Dark 与语言 System/zh-CN/en 属于后续 B1-U2 / B1-U3：此轮不实现，不显示不可用开关。注意已有设计文档“Settings 仅项目级”与 v0.2 的“用户偏好独立于项目 Policy”存在设计边界变化；须先按治理规则明确采纳新版应用偏好信息架构，使用最小范围正式设计决策（如必要，Owner 确认），绝不直接改写已 Accepted ADR。
+5. 所有设置经受键盘 Tab/Space/Enter、焦点可见、缩放、长英文/中文路径、屏幕最小窗口 1024x720 验收。遵守现有 semantic tokens、左侧导航、配色、组件；不引入深色设计、不引入新视觉体系。
+6. 设计为后续主题/语言自然接入的单一偏好读取与更新机制，但不得提前批量加入未用字段和 i18n/theme 第三方依赖；新增依赖必须按 AGENTS.md §4 审查并说明为何现有库不足。
+
+【强制非目标】
+- 不触碰 C1 附件编码、Gate/Release 判断、schema/迁移、portable goldens、CLI 行为；
+- 不新建第二个 project policy，不把 UI 设置写入 firmwaresight.toml；
+- 不做当前 UI 的整体重构、重做导航、卡片设计、导出 PDF、自动更新、账号/网络/遥测、UI 字体/暗色/中英文全量翻译；
+- 不增加自定义主题、可修改 Gate 状态色、万能缓存清理、任意文件 IO，或不需要的新的插件权限；
+- 不清理旧日志/项目 memory，不修改 V1 冻结 cohort，不添加开源 LICENSE。
+
+【测试驱动的验收】
+T01 首次启动、配置缺失 → bytes 与安全默认值生效，Settings 控件一致。
+T02 在 Analyze 或 Compare 选择 KiB → Settings 同步，跨页面、重启仍 KiB；反向设置 bytes 同步。
+T03 在 Settings 修改单位不更改 Rust Core 事实、SnapshotId/Gate run id、policy sha、release id、CLI JSON、goldens；有自动化回归证明。
+T04 非法枚举、损坏 JSON、未知 schema_version → 不崩溃、不覆盖原数据、显示可恢复解释并安全回退。
+T05 配置目录不可写、保存中断/失败 → 不显示“已保存”，不会损坏旧有效配置；按实际平台实现测试。
+T06 Reset 只清偏好、不删 SQLite Gate/Build/Release、用户工程文件及导出；重启后保持默认。
+T07 快速连续修改偏好、重启/多页面交错修改不丢最近一次成功保存的数据。
+T08 无通用 WebView 文件读取 API、新网络/账号插件/遥测，路径不流入 Portable Bundle。
+T09 键盘操作、焦点、1024x720 截图/实机观察、Long-label 测试通过，导航无死入口。
+T10 cargo fmt/clippy/test + UI typecheck/lint/test/build + IPC binding drift + contract/schema golden/drift，保留 CI 以前的所有关键测试；说明本机/CI/实机证据界限。
+
+【实施顺序】
+Step 0 明确 C1 完成与 B1-U1 已授权；核对 HEAD、live task、脏工作树与源文件。
+Step 1 小型架构方案与白名单，指出存储路径/API/错误策略/不变量；如触及 ADR 边界，STOP 请 Owner 决议。
+Step 2 RED 测试先行，然后最小实现：偏好类型与 IO→状态管理/IPC（如必要）→现有单位控件同步→真实 Settings UI。
+Step 3 实测，录制或者记录至少 Settings×Analyze×Compare 的交互，以及关闭重启配置保留。无需装饰性页面截图，只证明 UI 功能。
+Step 4 最小文档和测试登记，独立 commit；不 push（Owner 单独审批），不自己给 Architect 最终 ACCEPTED。
+
+【输出格式】
+- changes: 精确路径和意图；prefs storage 语义；本轮真实可用设置清单；明确未做 theme/i18n。
+- evidence: T01–T10 每项 PASS/FAIL/NOT_VERIFIED + 命令/结果；真实 UI 和跨重启证据；Core/CLI 不变比较。
+- git: HEAD、origin/main、工作树、commit SHA、是否 push（应为 NO）。
+- next: B1-U2 主题与 B1-U3 i18n 的最小依赖提示，不越权开始。
+
+STOP 原则：任何无法保证偏好数据恢复、会把 app prefs 混入 release 或 project policy、破坏已证 C1、需要隐式改变 permission/ADR/冻结身份的情况，立即停止并提出最小可验证选项。

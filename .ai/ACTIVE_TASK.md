@@ -384,6 +384,25 @@ section that says why re-reading an artifact is not resuming V1. If you were sen
 authorized the instrument and withheld the cohort — §三's allowed list has no recruitment, no session, no install and
 no distribution in it, and §五 requires the session count to still read 0 when this round ends. With active_task NONE,
 AGENTS.md 1 forbids creating business functionality or lifting the next track off the roadmap. Read, then stop.
+
+Dated 2026-10-10, and it is the newest paragraph in this fence. Three rounds ran in one day after the C1 packet's three
+stages had landed locally: `NEXT-01` read the packet as an independent acceptance (read-only, no commit, four
+non-blocking experience gaps and a §14.3 `ACCEPT`); the Owner then approved an ordinary fast-forward push, and
+`2859bb2..47fde34` went up and came back green across ten CI jobs read per job — which closed M11's POSIX question the
+two local rounds could not, and did so from CI logs rather than from a projection; then `NEXT-02` ran
+`B1-U1`, the first development unit of the v0.2 product plan. B1-U1 shipped the three-state split — application
+preferences in a versioned `settings.json`, project policy left alone in `firmwaresight.toml`, session state never
+persisted — with two settings that actually do something, a Settings page, and a Gate-boundary proof
+(`B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md`, block `b1_u1_preferences_and_settings`).
+Its status word is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and it upgraded no C1 word.
+The Owner's dispatch instruction for that round was explicit — no further C1 document-organising stage, and no
+delaying the base feature set over non-safety-blocking experience issues — which is why `NEXT-01`'s N01-F01..F04 are
+carried as findings instead of becoming a fifth C1 round.
+**The pointer is still NONE, and it stayed NONE through all three.** `NEXT-02` reserves both the push and the final
+`ACCEPTED` word, and this round asked for neither. B1-U2 (theme) cannot begin while `ADR-0018` and `AGENTS.md` 11
+forbid a Dark MVP theme — that is an ADR-level decision for a person, not a field to add — and B1-U3 (i18n) needs its
+own dispatch. If you were sent here to "continue B1": the next unit needs an Owner prompt, and inventing one is what
+`AGENTS.md` 1 forbids. Read, then stop.
 ```
 
 ## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do

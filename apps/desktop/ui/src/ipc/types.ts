@@ -68,6 +68,8 @@ export type { IdentityDto } from './generated/IdentityDto';
 export type { MainWindowPage } from './generated/MainWindowPage';
 export type { MemorySummaryDto } from './generated/MemorySummaryDto';
 export type { ObjectAttributionDto } from './generated/ObjectAttributionDto';
+export type { PreferencesDto } from './generated/PreferencesDto';
+export type { PreferenceRecoveryDto } from './generated/PreferenceRecoveryDto';
 export type { ProjectContextDto } from './generated/ProjectContextDto';
 export type { ProjectPolicyDto } from './generated/ProjectPolicyDto';
 export type { ReleaseAttachmentDto } from './generated/ReleaseAttachmentDto';

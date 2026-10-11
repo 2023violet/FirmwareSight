@@ -160,6 +160,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_C1_U3_Portable_Contract_And_Regression_v1.0.txt
 │   │   ├── FirmwareSight_C1_U4_Desktop_CLI_Installed_Acceptance_v1.0.txt
 │   │   ├── FirmwareSight_G2_Product_MVP_Engineering_Closure_Audit_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
+│   │   ├── FirmwareSight_NEXT_01_C1_Independent_Acceptance_v1.0.txt
+│   │   ├── FirmwareSight_NEXT_02_B1U1_Application_Preferences_Settings_v1.0.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P5_CommitD_Continue_v1.2.txt
@@ -260,6 +262,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── ipc.rs
 │       │   │   ├── lib.rs
 │       │   │   ├── main.rs
+│       │   │   ├── preferences.rs
 │       │   │   ├── release.rs
 │       │   │   ├── service.rs
 │       │   │   ├── startup.rs
@@ -271,6 +274,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── desktop_parity.rs
 │       │   │   ├── diagnostics.rs
 │       │   │   ├── history_reads.rs
+│       │   │   ├── preferences.rs
 │       │   │   ├── real_artifact_intake.rs
 │       │   │   └── release_gate.rs
 │       │   ├── build.rs
@@ -367,6 +371,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── MainWindowPage.ts
 │           │   │   │   ├── MemorySummaryDto.ts
 │           │   │   │   ├── ObjectAttributionDto.ts
+│           │   │   │   ├── PreferenceRecoveryDto.ts
+│           │   │   │   ├── PreferencesDto.ts
 │           │   │   │   ├── ProjectContextDto.ts
 │           │   │   │   ├── ProjectPolicyDto.ts
 │           │   │   │   ├── ReleaseAttachmentDto.ts
@@ -433,6 +439,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── Release.module.css
 │           │   ├── release.test.tsx
 │           │   ├── Release.tsx
+│           │   ├── Settings.module.css
+│           │   ├── settings.test.tsx
+│           │   ├── Settings.tsx
 │           │   └── stateWords.ts
 │           ├── .npmrc
 │           ├── eslint.config.js
@@ -453,6 +462,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FS-UI-07-Unknown-Dependency.png
 │   │   └── README.md
 │   └── design-tokens.json
+├── B1_VALIDATION/
+│   ├── B1_U1_DESIGN_CHECKLIST.md
+│   └── B1_U1_PREFERENCES_SETTINGS_REPORT.md
 ├── C1_VALIDATION/
 │   ├── C1_U1_DATA_AND_IDENTITY_PLAN.md
 │   ├── C1_U1_EXECUTION_REPORT.md

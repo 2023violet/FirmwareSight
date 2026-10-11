@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-10-09"
+last_updated: "2026-10-10"
 ---
 
 # Execution Prompt Register
@@ -1615,6 +1615,48 @@ text with no source file; each says so in its own entry instead of standing for 
   and `04_TECH/28` §8's kind-conflict sentence, which is still not implemented on the attach path. **Stage 3
   (`C1-U4`) is authorized by this packet and has not started**, and no stage of it has been executed at the time of
   this entry.
+
+## C1 Independent Acceptance and the B1 First Unit — `NEXT-01` + `NEXT-02` / Owner-delivered task prompts v1.0 — BOTH EXECUTED (2026-10-10)
+
+- Files, both archived verbatim in this directory:
+  - `FirmwareSight_NEXT_01_C1_Independent_Acceptance_v1.0.txt` — 7,514 bytes, 57 lines, **0 `CR`**,
+    sha256 `802e6fa8df213b1ebcd6208c517d0a56020b43ac24152939a0b398bf742afd23`
+  - `FirmwareSight_NEXT_02_B1U1_Application_Preferences_Settings_v1.0.txt` — 7,755 bytes, 58 lines, **0 `CR`**,
+    sha256 `455eee697144f475eb56e80a43f5627a8bec9d45b308d9441d469fb343ddcd15`
+- Delivered in
+  `C:\Users\16429\Downloads\FirmwareSight_C1_Acceptance_To_B1U1_2026-10-10\`, still at that path when the archive was
+  written. Each archived copy is `cmp`-identical to its delivered file, so the two digests above are the digests of the
+  delivered bytes and no normalization happened — `git check-attr text eol` on an archived copy reports `text: set`,
+  `eol: lf`, and both files were LF-only as delivered (`0 CR`).
+- **A third authority was read but is not archived here, and the difference is a decision rather than an omission.**
+  《FirmwareSight｜完整产品能力、基础体验与专业工作流决策 v0.2》 is what `NEXT-02` §权威读取 names as its product
+  authority (its §§2-4, 8-9). It was measured where it stands
+  (`C:\Users\16429\Downloads\FirmwareSight｜完整产品能力、基础体验与专业工作流决策 v0.2.md`: 21,877 bytes, 187 lines,
+  **0 `CR`**, sha256 `5c67349ddb2abc80fe4c54664fe8bd72e6eb307ba04330ceeb9ba33bbdd79e54`) and read in full, and it is
+  cited by digest in `B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md`. It stays outside this directory because it
+  is a product decision document, and this register is an execution-prompt register; a third copy of a document the
+  Owner owns would be a second place for its wording to drift.
+- Authority: `NEXT-01` is a READ-ONLY independent acceptance of the C1 packet, with its own STOP rule (Phase A
+  preflight failure ends the round) and its own limit ("no more than one concise report and one actionable gap list;
+  no new ADR, TASK, memory tidy or archive cleanup unless needed"). It created no commit and changed no tracked file.
+  `NEXT-02` is the first B1 development unit and is *conditional*: its opening paragraph makes it executable only after
+  `NEXT-01` passes, the Owner approves an ordinary fast-forward push, remote CI including the POSIX-required checks is
+  read back, and the Architect declares C1 accepted — "this file is a candidate execution prompt, and generating it is
+  not authority to change code."
+- **What the Owner decided between them, because it changed the shape of the work.** After `NEXT-01` returned four
+  non-blocking experience gaps, the instruction that dispatched `NEXT-02` was: finish one ordinary push and CI
+  acceptance, go straight into `NEXT-02`, add **no further C1 document-organising stage**, and do not delay the base
+  feature set over non-safety-blocking experience issues. That is why `NEXT-01`'s N01-F01..F04 are carried as recorded
+  findings in `BASELINE.yaml` and in the B1 report rather than opened as a fifth C1 round, and why the five entry-point
+  document drifts it also found were not re-organised.
+- Outcome of `NEXT-01`: the independent acceptance record for the C1 packet, plus the push and CI read-back that its
+  own precondition named. Findings are in that round's report; the packet's §14.3 ambiguity was adjudicated `ACCEPT`.
+- Outcome of `NEXT-02`: **`LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`**, recorded in
+  `B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md` and `B1_VALIDATION/B1_U1_DESIGN_CHECKLIST.md`, with the
+  machine-readable block `b1_u1_preferences_and_settings` in `BASELINE.yaml`. Two settings are real
+  (`display.size_unit`, `startup_page`), the Settings page exists, and the boundary to the Gate is proven on this host
+  by a test rather than asserted. The round pushed nothing, did not upgrade any C1 status word, and did not begin B1-U2
+  or B1-U3; `NEXT-02`'s own closing rule reserves both the push and the final `ACCEPTED` word, and both were respected.
 
 
 

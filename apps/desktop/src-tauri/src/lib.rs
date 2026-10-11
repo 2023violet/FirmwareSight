@@ -38,6 +38,7 @@ pub mod diagnostics;
 pub mod history;
 pub mod intake;
 pub mod ipc;
+pub mod preferences;
 pub mod release;
 pub mod service;
 pub mod startup;
@@ -357,6 +358,11 @@ pub struct Session {
     /// (prompt §17 asks that a backup's existence be explainable), and prompt §7 puts a database path
     /// outside every payload. The name crosses; the parent never does.
     store_path: PathBuf,
+    /// This application's own settings, in the host's configuration folder.
+    ///
+    /// Held apart from every field above on purpose: nothing in the Gate, the store, a bundle or a
+    /// release reads it, and it is why a preference change cannot move a verdict or a hash.
+    preferences: preferences::Store,
     selections: Mutex<SelectionStore>,
     diffs: Mutex<DiffStore>,
     project: Mutex<Option<LoadedProject>>,
@@ -369,12 +375,17 @@ pub struct Session {
 impl Session {
     /// Open the catalog and database a run needs. Split from Tauri so the parity tests build a
     /// session against a temporary database with no window, runtime or event loop involved.
+    ///
+    /// Such a session has no configuration folder, which is the honest starting point rather than a
+    /// placeholder: its preferences answer with the defaults and a save refuses instead of claiming a
+    /// write that went nowhere. `run`'s setup gives the real one through [`Session::use_preferences`].
     pub fn open(catalog: FixtureCatalog, db_path: impl AsRef<Path>) -> Result<Self, StorageError> {
         let db_path = db_path.as_ref().to_path_buf();
         Ok(Self {
             catalog,
             db: Mutex::new(Database::open(&db_path)?),
             store_path: db_path,
+            preferences: preferences::Store::new(None),
             selections: Mutex::new(SelectionStore::default()),
             diffs: Mutex::new(DiffStore::default()),
             project: Mutex::new(None),
@@ -383,6 +394,20 @@ impl Session {
             destinations: Mutex::new(DestinationStore::default()),
             attachments: Mutex::new(AttachmentStore::default()),
         })
+    }
+
+    /// Point the preferences at the folder this host gave the application.
+    ///
+    /// `pub` for the same reason [`Session::open`] is: a test builds a session against a temporary
+    /// database with no runtime, and one has to be able to give it a temporary settings folder too —
+    /// that is how `release_gate.rs` proves a saved preference moves no Gate identity.
+    pub fn use_preferences(&mut self, store: preferences::Store) {
+        self.preferences = store;
+    }
+
+    #[must_use]
+    pub fn preferences(&self) -> &preferences::Store {
+        &self.preferences
     }
 
     /// The store's logical name (prompt §8): a file name, with no directory attached to it.
@@ -1320,6 +1345,17 @@ pub fn run() {
                 Ok(session) => session,
                 Err(err) => startup::StartupFailure::from_storage(&err, &store_path).abort(),
             };
+            // This application's own settings live in the host's configuration folder, which on the
+            // desktop is `config_dir()/<identifier>` (`tauri-2.12.0/src/path/desktop.rs:239-245`) — the
+            // same folder the store is in on Windows, and a different one on Linux and macOS.
+            //
+            // Failing to resolve it is not a startup failure. A missing settings folder cannot damage
+            // anyone's data, and exiting over it would make a person's firmware analysis depend on a
+            // preference file: the session then runs on the defaults, the page says so, and a save
+            // refuses with `ERR-PREFS-8001` instead of reporting a write that landed nowhere. The
+            // folder itself is created by the first save, whose failure that code reports.
+            let mut session = session;
+            session.use_preferences(preferences::Store::new(app.path().app_config_dir().ok()));
             app.manage(Arc::new(session));
             Ok(())
         })
@@ -1356,6 +1392,9 @@ pub fn run() {
             history::list_history_releases,
             support::get_app_identity,
             support::set_window_title,
+            preferences::get_application_preferences,
+            preferences::update_application_preferences,
+            preferences::reset_application_preferences,
             diagnostics::collect_diagnostics,
             diagnostics::export_diagnostics
         ]);

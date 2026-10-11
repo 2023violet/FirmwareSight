@@ -10,8 +10,8 @@ last_updated: "2026-10-10"
 
 # Current State
 
-- Date: 2026-10-10 *(the live state is the `C1-U4` entry below; the `C1-U3` entry it follows, the `C1-U2R1` entry that
-  round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
+- Date: 2026-10-10 *(the live state is the `B1-U1` entry below; the `C1-U4` entry it follows, the `C1-U3` entry that
+  follows it, the `C1-U2R1` entry that round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
   inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
 - **Active task: `NONE`.** Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
@@ -176,6 +176,62 @@ last_updated: "2026-10-10"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
+- **`B1-U1` (application preferences + Settings, the first unit of the Owner-approved v0.2 plan) ran on 2026-10-10
+  and is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.**
+  Its record is `B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md` with
+  `B1_VALIDATION/B1_U1_DESIGN_CHECKLIST.md` beside it, and the machine-readable block
+  `b1_u1_preferences_and_settings` in `BASELINE.yaml`. What shipped is the three-state split v0.2 §3 asks for:
+  application preferences in a versioned `settings.json` under the host's application-config folder, project policy
+  still alone in `firmwaresight.toml`, and session state still never persisted. Two settings are real —
+  `display.size_unit` (bytes/KiB, the existing `SizeUnitSwitch` and `format.ts` reused unchanged, synced in both
+  directions across every page and kept across a restart) and `startup_page` (Analyze / Bundle & History). The Settings
+  page carries a recovery sentence for each of `missing`, `corrupted`, `futureVersion` and `nowhereToStore`, because a
+  page that silently shows defaults cannot be told apart from one whose settings were never offered. **No theme switch
+  and no language switch is rendered**, since B1-U2 and B1-U3 have not shipped one, and a test asserts those words
+  never appear.
+- Three things this round learned by measurement rather than by reading, and each is recorded because it changes what
+  a later round should assume. **(1)** On Windows, `app_config_dir()` and `app_data_dir()` resolve to the *same*
+  directory (`%APPDATA%\com.firmwaresight.desktop`), so `settings.json` lives beside the SQLite store; it is harmless
+  only because `diagnostics.rs:287-308` lists siblings by the `pre-migration-` prefix, and that was read from the file
+  rather than assumed. **(2)** A Gate run id is the SHA-256 of the canonical input with a `gate-` prefix
+  (`crates/firmwaresight-project/src/fingerprint.rs:31-38`), never a clock or a uuid — so the T03 isolation test
+  asserts the two runs' ids are **equal**, which is the sharp form of "a preference cannot reach the Gate". **(3)** The
+  desktop crate has no `thiserror`, so the first draft's `#[derive(thiserror::Error)]` could not compile, and adding a
+  dependency for a derive is exactly what `AGENTS.md` §4 refuses: the error type carries a hand-written `Display` in
+  the shape `startup.rs:191-208` already uses, and `Cargo.toml`/`Cargo.lock` are not in the diff.
+- **The first full gate run was 13 of 14 with `GATE_EXIT=1`, and that is reported rather than hidden.**
+  `drift/ipc bindings unchanged` compares the working tree to the index, and this round's regenerated `.ts` bindings
+  were not yet staged; `drift_steps()` returns at its first failure, so the remaining drift steps never executed. That
+  is `ADR-0029`'s ordering rule, not a defect, and the staged sequence is what the `BASELINE.yaml` final-state block
+  records. **POSIX is still NOT MEASURED on this host** — and the two cases most likely to differ there are precisely
+  the Windows replace-semantics and directory-obstruction tests, which will first execute in CI.
+- **The real-window walkthrough is PARTIAL and is stated as partial, not as passed.** The actual shell was launched
+  twice against the dev server: the second instance booted on Analyze, wrote nothing, and its accessibility tree
+  confirmed the rail entry, all four sections, both radio groups and the reset verb on the real surface. Every
+  screenshot, activate and invoke request to the OS automation provider timed out at 120s in that window, so
+  changed-value-through-a-real-restart, the focus ring's rendering, 1024×720 and 200% zoom stay `NOT_VERIFIED`
+  instead of being claimed from jsdom.
+- **The run that the unit stands on is the second one: `python scripts/check.py` 17 of 17, `GATE_EXIT=0`, no SKIP, no
+  FAIL** — after staging this round's 30 paths and regenerating `DIRECTORY_TREE.txt` and `SHA256SUMS` in the order
+  `ADR-0029` prescribes. The verifier then reads **812 tracked / 810 sum entries / 941 tree lines**, against
+  801 / 799 / 929 at `47fde34`. One observation the round refuses to tidy: the *first* instance was found
+  already on the Settings page with a real `settings.json` written, before any input had been sent to it; it did not
+  reproduce, the no-input control instance wrote nothing, and no cause is attributed.
+- Counts, as measured on this host: **1,043 Rust across 49 `test result:` lines** (1,020 across 48 at `47fde34`),
+  attributed completely — +18 in the new `tests/preferences.rs` binary, +4 in the desktop lib (98 → 102: two unit tests
+  plus two ts-rs export tests for the two new DTOs), +1 in `release_gate` (29 → 30); **319 UI tests in 10 files**
+  (305 in 9); **37 registered IPC commands** (34), counted from the `generate_handler!` list rather than by grep;
+  `typecheck`/`lint`/`build` clean, `deny` clean, goldens and `p4_golden` unmoved. Two deviations from v0.2's wording
+  are recorded in the report and in the register: `startup_destination: analyze|last_page` shipped as a static
+  `startup_page: analyze|history`, because a restored page can resurrect the *appearance* of a Gate run whose session
+  state is gone; and none of v0.2 §3's other preference fields (language, theme, density, font scale, address format,
+  recent history) is implemented or pre-declared, because no surface honours them yet.
+- **Push: NO. `NEXT-02` reserves it for the Owner, and this round asked for nothing.** No C1 status word was upgraded,
+  `NEXT-01`'s four non-blocking gaps were carried as findings rather than re-opened as a fifth C1 round, and neither
+  B1-U2 (theme, which also needs an ADR-level decision while `ADR-0018` and `AGENTS.md` 11 forbid a Dark MVP theme) nor
+  B1-U3 (i18n) was begun. The V1 cohort stays `11573661113` at `41bb6a36` with 0 eligible sessions, and its
+  2026-10-22 private-archival deadline is untouched. Read `.ai/ACTIVE_TASK.md`'s top block, then stop — the next unit
+  needs its own Owner dispatch.
 - **`C1-U4` (desktop + CLI + installed acceptance, stage 3 of the same packet) ran on 2026-10-10 and is
   `LOCAL_USER_WORKFLOW_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.**
   Its record is `C1_VALIDATION/C1_U4_USER_WORKFLOW_INSTALLED_REPORT.md`; the product word it proposes and does not

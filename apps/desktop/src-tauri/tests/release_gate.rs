@@ -27,6 +27,9 @@ use firmwaresight_desktop::ipc::{
     AcceptReviewRequestDto, GateFindingRowDto, GateRunDto, GateRunRequestDto, ProjectContextDto,
     ProjectPolicyDto, UnknownPolicyDto,
 };
+use firmwaresight_desktop::preferences::{
+    ApplicationPreferences, SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store,
+};
 use firmwaresight_desktop::release::snapshot_facts;
 use firmwaresight_desktop::service;
 use firmwaresight_desktop::{Session, service::FixtureCatalog};
@@ -367,6 +370,21 @@ fn json(value: &impl serde::Serialize) -> Value {
 /// A `Vec<String>` as the words a test expects, so a required-kind list reads as `["elf", "map"]`.
 fn words(values: &[String]) -> Vec<&str> {
     values.iter().map(String::as_str).collect()
+}
+
+/// The same run's JSON with the moment it was stored taken out.
+///
+/// `createdAt` says when FirmwareSight wrote the record and is the only field two runs of one input
+/// may legitimately differ in — the run id is a digest of the input, not a draw. Comparing everything
+/// else is therefore a real test: a preference that reached the Gate's input, its policy or its
+/// verdict would show up here.
+fn apart_from_when_it_was_stored(value: &Value) -> Value {
+    let mut stripped = value.clone();
+    stripped
+        .as_object_mut()
+        .expect("a Gate run serializes as an object")
+        .remove("createdAt");
+    stripped
 }
 
 /// The form an operator touches before any config exists: every field states nothing, so the shell
@@ -1494,4 +1512,59 @@ fn a_cancelled_save_writes_no_file_and_leaves_the_session_without_a_project() {
     let target = store(&session, "target");
     let gate = run(&session, &target, None);
     assert!(gate.policy_source.contains("default"));
+}
+
+/// T03 (`NEXT-02`): what the Settings page changes is how a number is labelled, and nothing the
+/// product judges.
+///
+/// One session, one project, one fixture pair, two Gate runs — the only difference between them is a
+/// preference stored in between. The identity fields (`snapshotId`, `policySha256`, `policySource`)
+/// and every finding and count have to come back as the same bytes, because a preference is not
+/// evidence and must not become part of an identity (`04_TECH/28` D-6's rule in a different register).
+#[test]
+fn a_stored_preference_moves_no_gate_identity_no_verdict_and_no_policy_fingerprint() {
+    let (_db, mut session) = session("prefs-isolation");
+    let prefs_dir = temp_name("prefs-isolation", "-settings");
+    std::fs::create_dir_all(&prefs_dir).expect("a temporary settings folder");
+    session.use_preferences(Store::new(Some(prefs_dir.clone())));
+
+    let project = TempProject::new("prefs-isolation", &Config::permissive());
+    load(&session, &project);
+    let base = store(&session, "base");
+    let target = store(&session, "target");
+
+    let before = json(&run(&session, &target, Some(&base)));
+    session
+        .preferences()
+        .save(&ApplicationPreferences {
+            size_unit: SizeUnitPref::Kib,
+            startup_page: StartupPagePref::History,
+        })
+        .expect("the preference is stored");
+    // The save has to have been a save, or the comparison below proves nothing.
+    let stored =
+        std::fs::read(prefs_dir.join(SETTINGS_FILE_NAME)).expect("the document the session wrote");
+    assert!(
+        String::from_utf8(stored).expect("utf-8").contains("kib"),
+        "the preference did not reach the document"
+    );
+    let after = json(&run(&session, &target, Some(&base)));
+
+    // A run id is the digest of the canonical Gate input, never a clock or a random uuid
+    // (`firmwaresight-project/src/fingerprint.rs:2-40`), which makes it the sharpest check this
+    // round has: a preference that reached the input the Gate hashes would move it.
+    assert_eq!(
+        before["runId"], after["runId"],
+        "a saved preference moved the Gate run id, so it entered the canonical input"
+    );
+    assert_eq!(
+        apart_from_when_it_was_stored(&before),
+        apart_from_when_it_was_stored(&after),
+        "a saved preference changed what the Gate said"
+    );
+    // And the runs are about the fixtures, so the comparison above is not two identical errors.
+    assert_eq!(after["snapshotId"], target);
+    assert_eq!(after["policySource"], "firmwaresight.toml");
+    assert_eq!(after["policySha256"], before["policySha256"]);
+    let _ = std::fs::remove_dir_all(&prefs_dir);
 }
