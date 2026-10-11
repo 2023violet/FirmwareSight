@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Audit"
-last_updated: "2026-10-10"
+last_updated: "2026-10-11"
 ---
 
 # Execution Prompt Register

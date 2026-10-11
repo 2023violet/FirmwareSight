@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-10"
+last_updated: "2026-10-11"
 ---
 
 # ACTIVE TASK
@@ -394,7 +394,9 @@ two local rounds could not, and did so from CI logs rather than from a projectio
 preferences in a versioned `settings.json`, project policy left alone in `firmwaresight.toml`, session state never
 persisted — with two settings that actually do something, a Settings page, and a Gate-boundary proof
 (`B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md`, block `b1_u1_preferences_and_settings`).
-Its status word is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and it upgraded no C1 word.
+Its status word is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and it upgraded no C1 word. Its commit is `2c47213`,
+dated 2026-10-11T00:01:14-07:00 — the round measured everything on 2026-10-10 and crossed the date boundary by one
+minute, which is stated because this file's own rule is that two dates on one round should not be blurred.
 The Owner's dispatch instruction for that round was explicit — no further C1 document-organising stage, and no
 delaying the base feature set over non-safety-blocking experience issues — which is why `NEXT-01`'s N01-F01..F04 are
 carried as findings instead of becoming a fifth C1 round.

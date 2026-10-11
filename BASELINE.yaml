@@ -1849,6 +1849,7 @@ b1_u1_preferences_and_settings:
     - "no cleanup of old logs, project memory, or the pre-migration siblings that already live in the application folder"
   final_state:
     B1_U1_PREFERENCES_SETTINGS: "LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING"
+    B1_U1_CLOSED_AT: "commit 2c47213a1a1ecab29e7891b2c8aa1c4624f768a4, dated 2026-10-11T00:01:14-07:00, child of 47fde34. Every figure this block records was measured on the evening of 2026-10-10 local; the round crossed the date boundary by one minute, and the two dates are stated separately rather than blurred. The docs-only successor that amends this sentence cannot move a test count, by the rule already written for 2859bb2."
     APP_PREFERENCES_MECHANISM: "one read and write path exists; two settings are real (display.size_unit, startup_page), both are stored, synced across pages, and recovered with a stated reason when the document is not readable"
     SETTINGS_PAGE: "SHIPPED_ON_WINDOWS_DEV_BUILD / NOT_ARCHITECT_ACCEPTED - the page exists on the real surface and its controls are confirmed present through the accessibility tree; the interactive real-window walkthrough is NOT_VERIFIED because the automation provider timed out"
     BOUNDARY_TO_GATE_AND_RELEASE: "PROVEN_ON_WINDOWS - a saved preference moves no Gate run id, no policy sha, no snapshot id, no finding and no count; goldens and CLI bytes did not move"

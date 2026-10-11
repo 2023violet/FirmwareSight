@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "REPORT"
 owner: "Engineering"
-last_updated: "2026-10-10"
+last_updated: "2026-10-11"
 ---
 
 # B1-U1 — Application Preferences + Settings 基础实现
@@ -185,10 +185,15 @@ both happened, and the unit stands on the second — 17 of 17, `GATE_EXIT=0` —
   `SHA256SUMS`, which the regeneration rewrote). Nothing unrelated is in it, no tracked file was deleted, no stash was
   created, and the run's own logs went to `target/`, which `.gitignore` already excludes from the tracked set.
   `git status --porcelain -uall` before staging printed exactly the 30 unit paths and nothing else.
-- This round's commit is the child of `47fde34`. It is not named here because a file cannot contain the hash of the
-  commit that contains it; `BASELINE.yaml`'s `b1_u1_preferences_settings` entry and `.ai/CURRENT_STATE.md` carry the
-  SHA, and `SHA256SUMS`/`DIRECTORY_TREE.txt` were regenerated in the prescribed order for the tree that includes this
-  report.
+- **This round closed across a date boundary, and the two dates are not the same fact.** Every measurement in §4 and
+  §7 was taken on the evening of **2026-10-10** local; the commit that carries this report is dated
+  **2026-10-11T00:01:14-07:00** — one minute past midnight. That commit is
+  `2c47213a1a1ecab29e7891b2c8aa1c4624f768a4`, the child of `47fde34`. It is named here because this file was amended
+  after it landed, and a commit's own hash still cannot live in the bytes that commit carries: `BASELINE.yaml`'s
+  `b1_u1_preferences_and_settings` block and `.ai/CURRENT_STATE.md` record it, and `SHA256SUMS` /
+  `DIRECTORY_TREE.txt` were regenerated in the prescribed order for the tree holding this report. That regeneration
+  belongs to a docs-only successor of `2c47213`, which — by the rule this repository already wrote for its earlier
+  docs-only head `2859bb2` — cannot move a test count.
 - **Push: NO.** `NEXT-02` §Step 4 reserves that for the Owner, and this round asked for nothing.
 - No tag, release, licence, signing, updater, V1 or cohort action. The V1 cohort stays `11573661113` at `41bb6a36`;
   its 2026-10-22 archival deadline is untouched by this unit.

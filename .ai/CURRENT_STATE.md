@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-10"
+last_updated: "2026-10-11"
 ---
 
 # Current State
@@ -176,8 +176,11 @@ last_updated: "2026-10-10"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
-- **`B1-U1` (application preferences + Settings, the first unit of the Owner-approved v0.2 plan) ran on 2026-10-10
-  and is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is `NONE` now.**
+- **`B1-U1` (application preferences + Settings, the first unit of the Owner-approved v0.2 plan) ran on
+  2026-10-10 and is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`; the pointer was `NONE` throughout and is
+  `NONE` now. Its commit landed one minute past the date boundary, at **2026-10-11T00:01:14-07:00** as `2c47213`,
+  and every figure in this entry was measured on 2026-10-10 local — the two dates are stated separately rather than
+  blurred, because the round opened and closed on either side of midnight.**
   Its record is `B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md` with
   `B1_VALIDATION/B1_U1_DESIGN_CHECKLIST.md` beside it, and the machine-readable block
   `b1_u1_preferences_and_settings` in `BASELINE.yaml`. What shipped is the three-state split v0.2 §3 asks for:

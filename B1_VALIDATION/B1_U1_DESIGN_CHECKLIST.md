@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "REPORT"
 owner: "Design"
-last_updated: "2026-10-10"
+last_updated: "2026-10-11"
 ---
 
 # B1-U1 — design checklist for the Settings surface
