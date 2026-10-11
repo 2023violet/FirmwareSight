@@ -16,9 +16,10 @@
  * twice across a saved preference and compares the payloads, because a run id is the digest of the
  * canonical input and a preference that got near it would move it.
  *
- * Only controls that do something today are rendered. Theme and language are not here, because this
- * build has no second theme to switch to and one language on screen; a disabled switch that goes
- * nowhere would teach the reader that nothing on this page works (`AGENTS.md` 11, `DESIGN.md` 5).
+ * Only controls that do something today are rendered. The theme is here because `ADR-0031` gave
+ * this build a second palette to switch to, and the language is not, because there is still one
+ * language on screen; a disabled switch that goes nowhere would teach the reader that nothing on
+ * this page works (`AGENTS.md` 11, `DESIGN.md` 5).
  */
 
 import { useState } from 'react';
@@ -27,6 +28,7 @@ import type { SizeUnit } from './format';
 import styles from './Settings.module.css';
 import { ErrorPanel } from './components/ErrorPanel';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
+import { THEME_CHOICES, type ResolvedTheme, type Theme } from './theme';
 import type { ErrorEnvelopeDto, PreferenceRecoveryDto, PreferencesDto } from './ipc/types';
 
 /**
@@ -59,12 +61,34 @@ function recoveryNote(recovery: PreferenceRecoveryDto, keptCopy: boolean): strin
   }
 }
 
+/**
+ * What the theme choice is actually doing, said as a fact about this window.
+ *
+ * The parenthetical belongs here rather than inside the "System" label because it describes the
+ * desktop, not the choice: a window set to `light` on a dark desktop must not tell the reader that
+ * System is currently light. And where the desktop cannot be read at all, saying so beats the
+ * default wearing a confident name (`ADR-0031` D4).
+ */
+function themeFact(theme: Theme, platform: ResolvedTheme | null): string {
+  if (theme !== 'system') {
+    return platform === null
+      ? `This window is ${theme} because you chose it, and no desktop setting is being read.`
+      : `This window is ${theme} because you chose it; your desktop is set to ${platform}, and that is ignored until you choose System again.`;
+  }
+  return platform === null
+    ? 'System is set to follow your desktop, but this window cannot read that setting, so it is light. Choosing Light or Dark overrides it.'
+    : `System is following your desktop, which is set to ${platform}.`;
+}
+
 export function Settings({
   preferences,
   error,
   note,
   unit,
   onUnitChange,
+  theme,
+  platformPalette,
+  onThemeChange,
   onStartPageChange,
   onReset,
   onGoToHelp,
@@ -75,6 +99,11 @@ export function Settings({
   readonly note: string | null;
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
+  /** The stored choice, which for `system` is not a palette. */
+  readonly theme: Theme;
+  /** What the desktop says, or `null` when this window cannot ask it. */
+  readonly platformPalette: ResolvedTheme | null;
+  readonly onThemeChange: (theme: Theme) => void;
   readonly onStartPageChange: (word: string) => void;
   readonly onReset: () => void;
   readonly onGoToHelp: () => void;
@@ -151,6 +180,28 @@ export function Settings({
             onUnitChange(next);
           }}
         />
+        <p className={styles['note']}>
+          The theme recolours this window only. It changes no analysis, no Gate finding, no run
+          identity and no exported file — a Release Bundle and a portable report open the same way
+          for everyone, whatever this screen looks like to you.
+        </p>
+        <div className={styles['radios']} role="radiogroup" aria-label="Theme">
+          {THEME_CHOICES.map((entry) => (
+            <span key={entry.word} className={styles['radio']}>
+              <input
+                id={`fs-theme-${entry.word}`}
+                type="radio"
+                name="fs-theme"
+                checked={theme === entry.word}
+                onChange={() => {
+                  onThemeChange(entry.word);
+                }}
+              />
+              <label htmlFor={`fs-theme-${entry.word}`}>{entry.label}</label>
+            </span>
+          ))}
+        </div>
+        <p className={styles['note']}>{themeFact(theme, platformPalette)}</p>
       </section>
 
       <section className={styles['section']} aria-label="Start page">
@@ -180,15 +231,16 @@ export function Settings({
       <section className={styles['section']} aria-label="Reset">
         <h2>Reset application preferences</h2>
         <p className={styles['note']}>
-          Puts the two settings above back to this version’s defaults. It touches only the
+          Puts every setting above back to this version’s defaults. It touches only the
           application’s own settings file: analyzed builds, Gate runs and release records stay in the
           data store, and the files you chose stay where they are.
         </p>
         {confirming ? (
           <div className={styles['confirm']} role="group" aria-labelledby="fs-reset-confirm">
-            <h3 id="fs-reset-confirm">Reset both settings to their defaults?</h3>
+            <h3 id="fs-reset-confirm">Reset all three settings to their defaults?</h3>
             <p className={styles['note']}>
-              Size units go back to bytes and the start page goes back to Analyze.
+              Size units go back to bytes, the theme goes back to System, and the start page goes
+              back to Analyze.
             </p>
             <div className={styles['actions']}>
               <button

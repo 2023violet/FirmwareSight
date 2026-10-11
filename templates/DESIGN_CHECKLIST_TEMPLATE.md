@@ -24,7 +24,7 @@ last_updated: "2026-09-27"
 - [ ] ⚙ 无投影越界：卡片 / 面板 / 表格行无 box-shadow（阴影仅 overlay-sm / overlay-lg 两级浮层）
 - [ ] 无营销面：无 hero band / CTA banner / 案例卡片 / 装饰插画
 - [ ] 状态非纯颜色编码：任何状态均有 icon + label，颜色只作辅助
-- [ ] 无 Dark 主题实现（MVP 仅 Light）
+- [ ] ⚙ 双主题合规（ADR-0031）：System/Light/Dark 只引用同一组语义角色，无全局 invert、无叠片遮罩、无渐变；导出产物仍为浅色；`python scripts/generate_design_tokens.py --contrast` 无新增 FAIL 且无失效豁免
 - [ ] 无数值私造：样式值均来自 design-tokens.json，无魔法数（token 缺口须走升版，不许就地造值）
 - [ ] UI 未复刻 parser / diff / gate 逻辑（业务事实只来自 Core）
 - [ ] 禁词合规：无 guaranteed / fully compliant / zero risk / intelligent detection（若实为规则）等语调禁词

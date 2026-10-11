@@ -12,7 +12,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 use firmwaresight_desktop::preferences::{
     ApplicationPreferences, Loaded, PRESERVED_FILE_NAME, PreferenceError, Recovery, SCHEMA_VERSION,
-    SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store,
+    SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store, ThemePref,
 };
 
 static COUNTER: AtomicU32 = AtomicU32::new(0);
@@ -48,12 +48,26 @@ fn kept_bytes(dir: &Path) -> Option<Vec<u8>> {
     std::fs::read(dir.join(PRESERVED_FILE_NAME)).ok()
 }
 
+/// A preference pair with no opinion about the theme, which is what most of these cases want.
 fn prefs(size_unit: SizeUnitPref, startup_page: StartupPagePref) -> ApplicationPreferences {
+    prefs_all(size_unit, startup_page, ThemePref::System)
+}
+
+fn prefs_all(
+    size_unit: SizeUnitPref,
+    startup_page: StartupPagePref,
+    theme: ThemePref,
+) -> ApplicationPreferences {
     ApplicationPreferences {
         size_unit,
         startup_page,
+        theme,
     }
 }
+
+/// The document text a v1 build would have left, written by hand so the reader's own serializer
+/// cannot be the thing that makes the case pass.
+const V1_DOCUMENT: &[u8] = br#"{"schema_version":1,"size_unit":"kib","startup_page":"history"}"#;
 
 fn listing(dir: &Path) -> Vec<String> {
     let mut names: Vec<String> = std::fs::read_dir(dir)
@@ -520,4 +534,160 @@ fn the_preference_family_is_five_distinct_codes_and_nothing_else() {
             "`{other}` belongs to another family"
         );
     }
+}
+
+// --- `B1-U2`: the document takes a third choice, and version one stays readable -------------
+
+/// `ADR-0031` D2 fixes the order on purpose: the reader is widened before the writer moves. Raising
+/// `SCHEMA_VERSION` alone would make every real user's file read as damage, which presents as a
+/// recovery path that works — defaults on screen, nothing lost — while quietly demoting the
+/// person's own settings to `.unreadable` on their next save.
+#[test]
+fn a_version_one_document_still_reads_and_gains_the_default_theme() {
+    let dir = temp_dir("v1-read", false);
+    std::fs::write(settings(&dir), V1_DOCUMENT).expect("the older document is placed");
+    let loaded = Store::new(Some(dir.clone())).load();
+    assert_eq!(
+        loaded.preferences,
+        prefs_all(
+            SizeUnitPref::Kib,
+            StartupPagePref::History,
+            ThemePref::System
+        ),
+        "a v1 document is complete, and the theme it never mentions is this build's default"
+    );
+    assert_eq!(
+        loaded.recovery, None,
+        "an older document reads cleanly: {loaded:?}"
+    );
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// Reading is reading. A build that understands two versions still creates nothing and changes
+/// nothing, which is the invariant the cold-start evidence in a real window depends on.
+#[test]
+fn opening_an_older_document_writes_nothing() {
+    let dir = temp_dir("v1-no-write", false);
+    std::fs::write(settings(&dir), V1_DOCUMENT).expect("the older document is placed");
+    let store = Store::new(Some(dir.clone()));
+    let first = store.load();
+    let second = store.load();
+    assert_eq!(
+        first, second,
+        "two reads of the same file are the same answer, so neither can be a write in disguise"
+    );
+    assert_eq!(bytes(&dir).as_deref(), Some(V1_DOCUMENT));
+    assert_eq!(listing(&dir), vec![SETTINGS_FILE_NAME.to_owned()]);
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// The save is what moves a document forward, and it says so with all three choices present.
+#[test]
+fn the_first_save_after_an_older_document_writes_version_two_with_three_choices() {
+    let dir = temp_dir("v1-to-v2", false);
+    std::fs::write(settings(&dir), V1_DOCUMENT).expect("the older document is placed");
+    let store = Store::new(Some(dir.clone()));
+    assert_eq!(
+        store.load().preferences.theme,
+        ThemePref::System,
+        "the window opens on the platform before anything is stored"
+    );
+    store
+        .save(&prefs_all(
+            SizeUnitPref::Kib,
+            StartupPagePref::History,
+            ThemePref::Dark,
+        ))
+        .expect("saving over a document this build reads is a normal save");
+    assert_eq!(
+        bytes(&dir).as_deref(),
+        Some(
+            br#"{"schema_version":2,"size_unit":"kib","startup_page":"history","theme":"dark"}
+"#
+            .as_slice()
+        ),
+        "the v2 document is one object with the theme beside the other two, not a nested group"
+    );
+    assert_eq!(listing(&dir), vec![SETTINGS_FILE_NAME.to_owned()]);
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// All three words survive the round trip, including the default, because a default that cannot be
+/// stored is a preference that resets every time the window opens.
+#[test]
+fn every_theme_word_round_trips_through_the_document() {
+    for theme in [ThemePref::System, ThemePref::Light, ThemePref::Dark] {
+        let dir = temp_dir("theme-round-trip", false);
+        let store = Store::new(Some(dir.clone()));
+        store
+            .save(&prefs_all(
+                SizeUnitPref::Bytes,
+                StartupPagePref::Analyze,
+                theme,
+            ))
+            .expect("a save is a save");
+        let loaded = Store::new(Some(dir.clone())).load();
+        assert_eq!(
+            loaded.preferences.theme, theme,
+            "{theme:?} did not come back"
+        );
+        assert_eq!(
+            loaded.recovery, None,
+            "an older document reads cleanly: {loaded:?}"
+        );
+        std::fs::remove_dir_all(&dir).ok();
+    }
+}
+
+/// The floor moved up, the ceiling did not. A document two versions ahead is still "do not touch",
+/// and the refusal still quotes the version it saw.
+#[test]
+fn a_document_from_two_versions_ahead_is_refused_and_left_alone() {
+    let written =
+        br#"{"schema_version":3,"size_unit":"kib","startup_page":"analyze","theme":"dark"}"#;
+    let dir = temp_dir("v3", false);
+    std::fs::write(settings(&dir), written).expect("the newer document is placed");
+    let store = Store::new(Some(dir.clone()));
+    let loaded = store.load();
+    assert_eq!(
+        loaded.recovery,
+        Some(Recovery::FutureVersion { seen: 3 }),
+        "a version above this build's is future, not damage"
+    );
+    assert_eq!(
+        loaded.preferences,
+        ApplicationPreferences::default(),
+        "the defaults are what this window runs on, and they are said to be defaults"
+    );
+    let error = store
+        .save(&prefs(SizeUnitPref::Kib, StartupPagePref::Analyze))
+        .expect_err("a v2 build must not downgrade a v3 document");
+    assert_eq!(
+        error,
+        PreferenceError::FutureVersionOnDisk {
+            seen: 3,
+            current: SCHEMA_VERSION,
+        }
+    );
+    assert_eq!(bytes(&dir).as_deref(), Some(written.as_slice()));
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// A v1 document that already carries a theme is a disagreement about which build wrote it, not a
+/// hint to guess: the shape is chosen by the version, so the extra key is still unknown to v1.
+#[test]
+fn a_version_one_document_carrying_a_theme_is_still_not_partially_understood() {
+    let dir = temp_dir("v1-with-theme", false);
+    std::fs::write(
+        settings(&dir),
+        br#"{"schema_version":1,"size_unit":"kib","startup_page":"analyze","theme":"dark"}"#,
+    )
+    .expect("the document is placed");
+    let loaded = Store::new(Some(dir.clone())).load();
+    assert_eq!(loaded.preferences.size_unit, SizeUnitPref::Bytes);
+    assert!(
+        matches!(loaded.recovery, Some(Recovery::Corrupted { .. })),
+        "{loaded:?}"
+    );
+    std::fs::remove_dir_all(&dir).ok();
 }

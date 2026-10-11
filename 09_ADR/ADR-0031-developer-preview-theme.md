@@ -142,13 +142,32 @@ light role is dropped. Rules:
 - The five semantic states stay five, and `UNKNOWN` keeps its neutral hollow treatment in both themes. A dark
   surface is not a licence to make "we do not know" look like "this passed".
 
-### D6 — Contrast becomes measurable in both themes
+### D6 — Contrast becomes measurable in both themes, with one named exception
 
 `DESIGN.md` has always required a clear `focus-visible` ring and forbidden colour-only status. From this ADR, both
 themes must hold WCAG 2.2 AA on the roles that carry meaning: 4.5:1 for body text, 3:1 for large text and for the
 non-text visual information that carries state, focus or selection. The numbers come from a script that reads the
 token file, not from looking at a screenshot; where a ratio is only achievable by changing a value, the change goes
 into the token file.
+
+Eighteen rendered pairs are measured per theme. Seventeen pass in both palettes. The eighteenth is carried, and
+carried out loud:
+
+> **light · `diff.removed` on `diff.removed.bg` = 4.4974:1** against a 4.5 floor.
+
+It fails by 0.0026, and it is not a new failure — the pair shipped in `B1-U1`'s predecessor and nobody had measured
+it. The value that clears it is `#FBECEA` → `#FCEEEC`, and `#FBECEA` is already printed into
+`golden/reports/p2-diff.html` and `golden/reports/p4-release/release-report.html`: the same byte belongs to two
+committed report artefacts, and D7 (and `NEXT-04` §D) puts those outside this round. `crates/firmwaresight-report`'s
+own contract test, `html_export_colours_come_from_the_frozen_token_set`, is what proved that on the first attempt —
+it failed the gate when this round tried to move the token, which is the check working rather than a rule being
+worked around.
+
+So the floor stays at 4.5, the exception is enumerated in `scripts/generate_design_tokens.py` with its measurement
+and its reason, and the generator makes the *exception* itself a checked fact: if the pair ever passes, the stale
+exemption fails the build. Clearing it is a separate decision about two goldens, not a detail of a theme unit. The
+chip that carries the sub-floor pair reads "Removed" in words beside its colour, which is what `DESIGN.md` §5
+requires of a state in any case.
 
 ### D7 — Desktop chrome only. Every exported artefact stays light
 

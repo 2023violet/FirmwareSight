@@ -495,10 +495,12 @@ export async function getApplicationPreferences(): Promise<IpcOutcome<Preference
 export async function updateApplicationPreferences(
   sizeUnit: string,
   startupPage: string,
+  theme: string,
 ): Promise<IpcOutcome<PreferencesDto>> {
   return await call<PreferencesDto>(UPDATE_APPLICATION_PREFERENCES, {
     sizeUnit,
     startupPage,
+    theme,
   });
 }
 

@@ -71,6 +71,14 @@ import { Overview } from './Overview';
 import { Release } from './Release';
 import { Settings } from './Settings';
 import { cx } from './styles/classnames';
+import {
+  applyTheme,
+  asTheme,
+  platformTheme,
+  resolveTheme,
+  type ResolvedTheme,
+  type Theme,
+} from './theme';
 import { TopBar } from './components/TopBar';
 
 type Page = 'overview' | 'analyze' | 'compare' | 'release' | 'history' | 'help' | 'settings';
@@ -151,6 +159,10 @@ export function App() {
    */
   const [page, setPage] = useState<Page>('analyze');
   const [unit, setUnit] = useState<SizeUnit>('bytes');
+  /** The stored choice, not the palette: `system` stays `system` until the platform answers. */
+  const [theme, setTheme] = useState<Theme>('system');
+  /** What the desktop says right now, re-read while the window is open. `null` says it cannot know. */
+  const [platform, setPlatform] = useState<ResolvedTheme | null>(platformTheme);
   const [selection, setSelection] = useState<SelectionDto | null>(null);
   const [lastGood, setLastGood] = useState<AnalysisSummaryDto | null>(null);
   /** Which selection produced `lastGood`. It moves with the summary and never on its own. */
@@ -207,6 +219,7 @@ export function App() {
       const stored = outcome.value;
       setPreferences(stored);
       setUnit(asSizeUnit(stored.sizeUnit));
+      setTheme(asTheme(stored.theme));
       if (!readerChosePage.current && stored.startupPage === 'history') {
         setPage('history');
       }
@@ -216,9 +229,42 @@ export function App() {
     };
   }, []);
 
-  /** Store both words together: the document is one file, and a half-stored pair is not a setting. */
-  const persist = async (nextUnit: SizeUnit, nextStartPage: string) => {
-    const outcome = await updateApplicationPreferences(nextUnit, nextStartPage);
+  /**
+   * Follow the desktop while the window is open, and only on the shell's own question.
+   *
+   * The listener is added here and removed here, so a `system` window that is closed stops being
+   * told, and a window whose preference is `light` or `dark` has the subscription but ignores it —
+   * `ADR-0031` D4's "the OS is consulted only while the stored value is system".
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (event: MediaQueryListEvent) => {
+      setPlatform(event.matches ? 'dark' : 'light');
+    };
+    query.addEventListener('change', onChange);
+    return () => {
+      query.removeEventListener('change', onChange);
+    };
+  }, []);
+
+  /**
+   * The palette on the document, in the same commit that paints it.
+   *
+   * This runs before the reader sees a frame of the new palette because React applies the DOM
+   * attribute in the same pass as the re-render, and every colour in the app comes from the
+   * selector this attribute selects. What it cannot promise is the WebView's own first paint before
+   * React mounts, which is `color-scheme` in the stylesheet doing that part.
+   */
+  useEffect(() => {
+    applyTheme(document.documentElement, resolveTheme(theme, platform));
+  }, [theme, platform]);
+
+  /** Store all three words together: the document is one file, and a half-stored set is not a setting. */
+  const persist = async (nextUnit: SizeUnit, nextStartPage: string, nextTheme: Theme) => {
+    const outcome = await updateApplicationPreferences(nextUnit, nextStartPage, nextTheme);
     if (outcome.ok) {
       setPreferences(outcome.value);
       setPreferencesError(null);
@@ -237,11 +283,23 @@ export function App() {
    */
   const chooseUnit = (next: SizeUnit) => {
     setUnit(next);
-    void persist(next, preferences?.startupPage ?? 'analyze');
+    void persist(next, preferences?.startupPage ?? 'analyze', theme);
   };
 
   const chooseStartPage = (word: string) => {
-    void persist(unit, word);
+    void persist(unit, word, theme);
+  };
+
+  /**
+   * Change the palette in this window and store the change.
+   *
+   * The theme is applied from state, so the window changes colour on the click and the save follows,
+   * the same order the unit uses. A refused save leaves the window in the palette it now shows and
+   * says the choice did not stick — the alternative is a page that reverts under the reader's hand.
+   */
+  const chooseTheme = (next: Theme) => {
+    setTheme(next);
+    void persist(unit, preferences?.startupPage ?? 'analyze', next);
   };
 
   const resetPreferences = async () => {
@@ -250,7 +308,12 @@ export function App() {
       setPreferences(outcome.value);
       setPreferencesError(null);
       setPreferencesNote('Preferences reset to this version’s defaults.');
+      // Every field the shell just wrote is re-applied here, not just the ones this page happens to
+      // render first. The round's own test caught the shape of this bug: the unit was restored and
+      // the theme was not, so a reset left the document on `system` while the window stayed dark
+      // until the next start - a page reporting a state it was no longer in.
       setUnit(asSizeUnit(outcome.value.sizeUnit));
+      setTheme(asTheme(outcome.value.theme));
     } else {
       setPreferencesError(outcome.envelope);
       setPreferencesNote(null);
@@ -345,6 +408,9 @@ export function App() {
               note={preferencesNote}
               unit={unit}
               onUnitChange={chooseUnit}
+              theme={theme}
+              platformPalette={platform}
+              onThemeChange={chooseTheme}
               onStartPageChange={chooseStartPage}
               onReset={() => {
                 void resetPreferences();

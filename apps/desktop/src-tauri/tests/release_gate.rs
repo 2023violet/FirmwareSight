@@ -28,7 +28,7 @@ use firmwaresight_desktop::ipc::{
     ProjectPolicyDto, UnknownPolicyDto,
 };
 use firmwaresight_desktop::preferences::{
-    ApplicationPreferences, SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store,
+    ApplicationPreferences, SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store, ThemePref,
 };
 use firmwaresight_desktop::release::snapshot_facts;
 use firmwaresight_desktop::service;
@@ -1514,8 +1514,8 @@ fn a_cancelled_save_writes_no_file_and_leaves_the_session_without_a_project() {
     assert!(gate.policy_source.contains("default"));
 }
 
-/// T03 (`NEXT-02`): what the Settings page changes is how a number is labelled, and nothing the
-/// product judges.
+/// T03 (`NEXT-02`) and T06 (`NEXT-04`): what the Settings page changes is how a number is labelled,
+/// how the window is coloured and which page a start opens on — and nothing the product judges.
 ///
 /// One session, one project, one fixture pair, two Gate runs — the only difference between them is a
 /// preference stored in between. The identity fields (`snapshotId`, `policySha256`, `policySource`)
@@ -1539,15 +1539,21 @@ fn a_stored_preference_moves_no_gate_identity_no_verdict_and_no_policy_fingerpri
         .save(&ApplicationPreferences {
             size_unit: SizeUnitPref::Kib,
             startup_page: StartupPagePref::History,
+            theme: ThemePref::Dark,
         })
         .expect("the preference is stored");
-    // The save has to have been a save, or the comparison below proves nothing.
+    // The save has to have been a save, or the comparison below proves nothing. Every changed field
+    // is checked for, because the one that silently failed to land is the one that would leave this
+    // test comparing a run to itself and calling that isolation.
     let stored =
         std::fs::read(prefs_dir.join(SETTINGS_FILE_NAME)).expect("the document the session wrote");
-    assert!(
-        String::from_utf8(stored).expect("utf-8").contains("kib"),
-        "the preference did not reach the document"
-    );
+    let text = String::from_utf8(stored).expect("utf-8");
+    for word in ["\"kib\"", "\"history\"", "\"dark\"", "\"schema_version\":2"] {
+        assert!(
+            text.contains(word),
+            "`{word}` is not in the document: {text}"
+        );
+    }
     let after = json(&run(&session, &target, Some(&base)));
 
     // A run id is the digest of the canonical Gate input, never a clock or a random uuid

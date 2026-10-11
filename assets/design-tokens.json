@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "meta": {
     "product": "FirmwareSight",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "status": "baseline-authoritative",
     "baseline": "0.5.0",
     "governed_by": "ADR-0018",
@@ -83,7 +83,7 @@
   },
   "focus": {
     "ring": {
-      "color": "{color.light.accent.primary}",
+      "color": "{color.accent.primary}",
       "width": 2,
       "offset": 2
     }
@@ -124,6 +124,38 @@
       "chart.blue.4": "#4F7BE8",
       "chart.blue.5": "#1D4ED8",
       "chart.other": "#F1F3F5"
+    },
+    "dark": {
+      "bg.canvas": "#15171B",
+      "bg.surface": "#1E2126",
+      "bg.subtle": "#262B32",
+      "text.primary": "#E9ECEF",
+      "text.secondary": "#A9B1BC",
+      "text.disabled": "#737B87",
+      "text.on-accent": "#0C1424",
+      "text.on-status": "#15171B",
+      "border.default": "#3A414B",
+      "accent.primary": "#6BA1F5",
+      "accent.hover": "#8AB8F8",
+      "accent.pressed": "#5590EE",
+      "accent.disabled": "#4A5568",
+      "status.pass": "#4CC38A",
+      "status.review": "#E3B341",
+      "status.review.strong": "#F2C55C",
+      "status.block": "#F2705F",
+      "status.unknown": "#98A2B3",
+      "diff.added": "#4CC38A",
+      "diff.added.bg": "#16341F",
+      "diff.removed": "#F2705F",
+      "diff.removed.bg": "#3A1A15",
+      "diff.changed": "#6BA1F5",
+      "diff.changed.bg": "#16294A",
+      "chart.blue.1": "#1C2B45",
+      "chart.blue.2": "#26406B",
+      "chart.blue.3": "#345C99",
+      "chart.blue.4": "#4F7BE8",
+      "chart.blue.5": "#84A9F3",
+      "chart.other": "#3A414B"
     }
   },
   "changelog": [
@@ -138,6 +170,12 @@
       "to": "0.2.1",
       "date": "2026-09-28",
       "change": "Close the frozen design-contract gap by adding the semantic 1px hairline border width already required by 03_DESIGN/03_VISUAL_SYSTEM.md and already used by the P0 UI. No color, spacing, radius, typography, layout, motion, shadow or status semantics change."
+    },
+    {
+      "from": "0.2.1",
+      "to": "0.3.0",
+      "date": "2026-10-11",
+      "change": "ADR-0031 lifts ADR-0018 D3's light-only rule for the Developer Preview. color.dark is added as a sibling of color.light carrying the same 30 role names, no more and no fewer; the generator emits both and measures WCAG 2.2 AA on 18 rendered pairs per theme, with one named exemption. No light value moves: light diff.removed on diff.removed.bg measures 4.4974:1, a hair under the floor, and the byte that would clear it is already printed into golden/reports/p2-diff.html and golden/reports/p4-release/release-report.html, so changing it here would move an exported artefact under a round that promised not to. The exemption is recorded in the generator and in ADR-0031 D6, not in a lowered floor. No spacing, radius, typography, layout, table, motion, focus, shadow or status-semantics value changes."
     }
   ]
 }

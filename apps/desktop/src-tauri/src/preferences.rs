@@ -36,7 +36,13 @@ pub const SETTINGS_FILE_NAME: &str = "settings.json";
 /// Where bytes this build could not read are kept before a save replaces them.
 pub const PRESERVED_FILE_NAME: &str = "settings.json.unreadable";
 /// The only schema version this build writes.
-pub const SCHEMA_VERSION: u32 = 1;
+///
+/// It went 1 → 2 with `ADR-0031` to add `theme`. The version moved rather than the field being
+/// slipped into a v1 document, because the document is `deny_unknown_fields`: an older build meeting
+/// a newer key would have called it damage, and "this file is corrupt" is both false and the prelude
+/// to overwriting it. `read_document` still accepts version 1, so the floor is one version down and
+/// the ceiling is still "anything above this build is not mine to interpret".
+pub const SCHEMA_VERSION: u32 = 2;
 
 /// How sizes are written out. Reuses the `bytes` / `kib` pair the existing switch and `format.ts`
 /// already speak; it relabels text and never re-derives a number.
@@ -56,11 +62,28 @@ pub enum StartupPagePref {
     History,
 }
 
+/// How the window is coloured. `ADR-0031` D1: three values, one default, no theme editor.
+///
+/// `system` is not a third palette — it is the instruction to ask the platform, which is why the
+/// resolved palette is never stored. Writing the resolved value would turn every OS change into a
+/// preference write, and would make a person who chose "follow the system" lose that choice the
+/// first time their OS flips after dark.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ThemePref {
+    /// Follow `prefers-color-scheme`, and follow it while the window is open.
+    #[default]
+    System,
+    Light,
+    Dark,
+}
+
 /// The preferences a person holds right now.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ApplicationPreferences {
     pub size_unit: SizeUnitPref,
     pub startup_page: StartupPagePref,
+    pub theme: ThemePref,
 }
 
 impl Default for ApplicationPreferences {
@@ -68,6 +91,7 @@ impl Default for ApplicationPreferences {
         Self {
             size_unit: SizeUnitPref::Bytes,
             startup_page: StartupPagePref::Analyze,
+            theme: ThemePref::System,
         }
     }
 }
@@ -117,10 +141,51 @@ impl StartupPagePref {
     }
 }
 
-/// The document on disk: the two values plus the version that says how to read them.
+impl ThemePref {
+    /// The closed set, in the order the Settings page lists it: the default first.
+    pub const WORDS: &'static [(&'static str, Self)] = &[
+        ("system", Self::System),
+        ("light", Self::Light),
+        ("dark", Self::Dark),
+    ];
+
+    #[must_use]
+    pub fn word(self) -> &'static str {
+        match self {
+            Self::System => "system",
+            Self::Light => "light",
+            Self::Dark => "dark",
+        }
+    }
+
+    #[must_use]
+    pub fn from_word(word: &str) -> Option<Self> {
+        Self::WORDS
+            .iter()
+            .find(|(w, _)| *w == word)
+            .map(|(_, v)| *v)
+    }
+}
+
+/// The document on disk at this build's own version: three values plus the version that says how to
+/// read them.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SettingsFile {
+    schema_version: u32,
+    size_unit: SizeUnitPref,
+    startup_page: StartupPagePref,
+    theme: ThemePref,
+}
+
+/// The document as `B1-U1` wrote it: the same object with no theme.
+///
+/// It is a separate shape rather than `theme: Option<ThemePref>` on the one struct because the
+/// version decides which keys are legal. A v1 document that carried a `theme` key is a disagreement
+/// about which build wrote it, and `deny_unknown_fields` on this shape is what refuses to guess.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SettingsFileV1 {
     schema_version: u32,
     size_unit: SizeUnitPref,
     startup_page: StartupPagePref,
@@ -269,16 +334,33 @@ enum Unreadable {
 
 /// The versioned read. One path is used by the load and by the save's check, so the two can never
 /// disagree about whether a file is readable.
-fn read_document(raw: &[u8]) -> Result<SettingsFile, Unreadable> {
+///
+/// Two shapes are understood. The version picks which keys are legal, so a v1 document is read whole
+/// and gains this build's default theme, while a v1 document carrying a v2 key is still a
+/// disagreement rather than a hint. Above this build's own version nothing is interpreted at all.
+fn read_document(raw: &[u8]) -> Result<ApplicationPreferences, Unreadable> {
     let Ok(probe) = serde_json::from_slice::<VersionProbe>(raw) else {
         return Err(Unreadable::Damaged);
     };
     match probe.schema_version {
         None => Err(Unreadable::Damaged),
         Some(seen) if seen > SCHEMA_VERSION => Err(Unreadable::Future { seen }),
-        // A version below this build's own is not a document this build was given a contract for.
-        Some(seen) if seen != SCHEMA_VERSION => Err(Unreadable::Damaged),
-        Some(_) => serde_json::from_slice(raw).map_err(|_| Unreadable::Damaged),
+        Some(1) => serde_json::from_slice::<SettingsFileV1>(raw)
+            .map(|document| ApplicationPreferences {
+                size_unit: document.size_unit,
+                startup_page: document.startup_page,
+                theme: ThemePref::default(),
+            })
+            .map_err(|_| Unreadable::Damaged),
+        Some(2) => serde_json::from_slice::<SettingsFile>(raw)
+            .map(|document| ApplicationPreferences {
+                size_unit: document.size_unit,
+                startup_page: document.startup_page,
+                theme: document.theme,
+            })
+            .map_err(|_| Unreadable::Damaged),
+        // Version 0 and anything else below the oldest readable document: no contract to honour.
+        Some(_) => Err(Unreadable::Damaged),
     }
 }
 
@@ -326,11 +408,8 @@ impl Store {
                 }),
             },
             Ok(raw) => match read_document(&raw) {
-                Ok(document) => Loaded {
-                    preferences: ApplicationPreferences {
-                        size_unit: document.size_unit,
-                        startup_page: document.startup_page,
-                    },
+                Ok(preferences) => Loaded {
+                    preferences,
                     recovery: None,
                 },
                 Err(Unreadable::Future { seen }) => Loaded {
@@ -454,6 +533,7 @@ impl Store {
         PreferencesDto {
             size_unit: loaded.preferences.size_unit.word().to_owned(),
             startup_page: loaded.preferences.startup_page.word().to_owned(),
+            theme: loaded.preferences.theme.word().to_owned(),
             recovery,
             kept_unreadable_copy: self.has_preserved_copy(),
             file_name: SETTINGS_FILE_NAME.to_owned(),
@@ -483,6 +563,7 @@ pub(crate) fn get_application_preferences(state: State<'_, Arc<Session>>) -> Pre
 pub(crate) fn update_application_preferences(
     size_unit: String,
     startup_page: String,
+    theme: String,
     state: State<'_, Arc<Session>>,
 ) -> Result<PreferencesDto, ErrorEnvelopeDto> {
     let store = state.preferences();
@@ -502,6 +583,15 @@ pub(crate) fn update_application_preferences(
                 &PreferenceError::InvalidValue {
                     key: "start page",
                     value: startup_page.clone(),
+                },
+                &operation_id,
+            )
+        })?,
+        theme: ThemePref::from_word(&theme).ok_or_else(|| {
+            preference_envelope(
+                &PreferenceError::InvalidValue {
+                    key: "theme",
+                    value: theme.clone(),
                 },
                 &operation_id,
             )
@@ -544,15 +634,17 @@ fn preference_envelope(error: &PreferenceError, operation_id: &str) -> ErrorEnve
     }
 }
 
-/// The document's text. Serialization of an integer and two closed-set words cannot fail; `expect`
+/// The document's text. Serialization of an integer and three closed-set words cannot fail; `expect`
 /// states that instead of inventing a fifth refusal for it. Writing through `SettingsFile` rather
 /// than a format string means a field added to the document cannot be silently left out of the text
-/// it declares.
+/// it declares — which is the trap this function exists to close, since a document that writes two
+/// of its three fields still parses.
 fn render(preferences: &ApplicationPreferences) -> String {
     let document = SettingsFile {
         schema_version: SCHEMA_VERSION,
         size_unit: preferences.size_unit,
         startup_page: preferences.startup_page,
+        theme: preferences.theme,
     };
     let mut text =
         serde_json::to_string(&document).expect("the settings document always serializes");
@@ -619,16 +711,47 @@ mod tests {
         }
     }
 
-    /// The render and the strict read are the same contract seen from both ends.
+    /// The render and the strict read are the same contract seen from both ends, and the text names
+    /// all three choices: a document that wrote two of them would still parse into this build's
+    /// struct, which is exactly how a field goes silently missing.
     #[test]
     fn a_rendered_document_is_exactly_what_the_reader_accepts() {
         let text = render(&ApplicationPreferences {
             size_unit: SizeUnitPref::Kib,
             startup_page: StartupPagePref::History,
+            theme: ThemePref::Dark,
         });
-        let document = read_document(text.as_bytes()).expect("the written form is readable");
-        assert_eq!(document.schema_version, SCHEMA_VERSION);
-        assert_eq!(document.size_unit, SizeUnitPref::Kib);
-        assert_eq!(document.startup_page, StartupPagePref::History);
+        assert_eq!(
+            text,
+            "{\"schema_version\":2,\"size_unit\":\"kib\",\"startup_page\":\"history\",\"theme\":\"dark\"}\n"
+        );
+        assert_eq!(
+            read_document(text.as_bytes()),
+            Ok(ApplicationPreferences {
+                size_unit: SizeUnitPref::Kib,
+                startup_page: StartupPagePref::History,
+                theme: ThemePref::Dark,
+            })
+        );
+    }
+
+    /// The theme set is three words and nothing else, and the default is the one that asks the
+    /// platform rather than picking a palette.
+    #[test]
+    fn the_theme_offers_three_words_and_defaults_to_following_the_platform() {
+        assert_eq!(ThemePref::default(), ThemePref::System);
+        assert_eq!(ThemePref::from_word("system"), Some(ThemePref::System));
+        assert_eq!(ThemePref::from_word("light"), Some(ThemePref::Light));
+        assert_eq!(ThemePref::from_word("dark"), Some(ThemePref::Dark));
+        for word in ["System", "DARK", "auto", "follow", "", " system", "sepia"] {
+            assert_eq!(ThemePref::from_word(word), None, "`{word}` is not offered");
+        }
+        for (word, value) in ThemePref::WORDS {
+            assert_eq!(
+                &value.word(),
+                word,
+                "a word that does not round trip is a second name"
+            );
+        }
     }
 }

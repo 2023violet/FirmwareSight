@@ -446,7 +446,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── Settings.module.css
 │           │   ├── settings.test.tsx
 │           │   ├── Settings.tsx
-│           │   └── stateWords.ts
+│           │   ├── stateWords.ts
+│           │   ├── theme.test.ts
+│           │   └── theme.ts
 │           ├── .npmrc
 │           ├── eslint.config.js
 │           ├── index.html
@@ -468,7 +470,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── design-tokens.json
 ├── B1_VALIDATION/
 │   ├── B1_U1_DESIGN_CHECKLIST.md
-│   └── B1_U1_PREFERENCES_SETTINGS_REPORT.md
+│   ├── B1_U1_PREFERENCES_SETTINGS_REPORT.md
+│   ├── B1_U2_THEME_DESIGN_CHECKLIST.md
+│   └── B1_U2_THEME_REPORT.md
 ├── C1_VALIDATION/
 │   ├── C1_U1_DATA_AND_IDENTITY_PLAN.md
 │   ├── C1_U1_EXECUTION_REPORT.md

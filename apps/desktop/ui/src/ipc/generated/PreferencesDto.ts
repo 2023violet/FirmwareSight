@@ -4,12 +4,15 @@ import type { PreferenceRecoveryDto } from "./PreferenceRecoveryDto";
 /**
  * The preferences this application is running with, as the Settings page sees them.
  *
- * `size_unit` and `startup_page` carry the same words the stored document carries, so one string is
- * both what the page shows and what the file says — and the UI's `SizeUnit` union needs no second
- * translation. The directory is not here: only [`crate::preferences::SETTINGS_FILE_NAME`] crosses,
- * the same way the store's name crosses and its path does not (`AGENTS.md` 7, prompt §19).
+ * `size_unit`, `startup_page` and `theme` carry the same words the stored document carries, so one
+ * string is both what the page shows and what the file says — and the UI's `SizeUnit` union needs
+ * no second translation. `theme` is the *chosen* value, which for `system` is not a palette: the
+ * palette a `system` choice resolves to belongs to the WebView's media query and is never stored,
+ * because storing it would answer a question the person did not ask. The directory is not here:
+ * only [`crate::preferences::SETTINGS_FILE_NAME`] crosses, the same way the store's name crosses
+ * and its path does not (`AGENTS.md` 7, prompt §19).
  */
-export type PreferencesDto = { sizeUnit: string, startupPage: string, recovery: PreferenceRecoveryDto, 
+export type PreferencesDto = { sizeUnit: string, startupPage: string, theme: string, recovery: PreferenceRecoveryDto, 
 /**
  * Whether a copy of bytes this build could not interpret is on hand beside the document. It
  * describes the folder rather than this one load, which is what makes "the earlier settings can

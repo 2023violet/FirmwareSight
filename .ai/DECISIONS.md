@@ -2571,3 +2571,17 @@ with the same 30 role names and no new role, no global invert or overlay film, t
 both themes, and every exported artefact — Release Bundle HTML, portable report, CLI JSON — stays light, because a
 person's reading comfort is not a fact about their firmware.
 
+**The contrast floor and the frozen export collided, and the export won this round by design.** Putting the token
+file under measurement found one pair already below AA in the shipped light palette: `diff.removed` on
+`diff.removed.bg` at **4.4974:1** against 4.5, rendered today as Compare's "Removed" chip. The value that clears it is
+`#FCEEEC`. This round changed it, and `crates/firmwaresight-report`'s own contract test
+`html_export_colours_come_from_the_frozen_token_set` failed the gate: `#FBECEA` is printed into
+`golden/reports/p2-diff.html` and `golden/reports/p4-release/release-report.html`, so the accessibility fix moves two
+committed report artefacts — exactly what `ADR-0031` D7 and `NEXT-04` §D put outside a theme unit. The token was
+reverted, the floor stayed at 4.5, and the shortfall is now an enumerated exemption in the generator carrying its
+measurement and its reason, with a check that fails the build if the pair ever passes and the exemption is left
+behind. Two things follow, and both are deliberate: a gate that catches a frozen artefact is worth more than a green
+checklist, and **the exemption is an open question for the Architect, not a closed one** — clearing it means deciding
+what may move in the report goldens, which is not a theme decision.
+
+

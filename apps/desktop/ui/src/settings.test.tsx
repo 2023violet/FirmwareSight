@@ -21,7 +21,7 @@
  */
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
 import {
@@ -89,11 +89,12 @@ function ok<T>(value: T): IpcOutcome<T> {
   return { ok: true, value };
 }
 
-/** One stored document, with the four fields the page reads spelled out. */
+/** One stored document, with the fields the page reads spelled out. */
 function prefs(over: Partial<PreferencesDto> = {}): PreferencesDto {
   return {
     sizeUnit: 'bytes',
     startupPage: 'analyze',
+    theme: 'system',
     recovery: 'read',
     keptUnreadableCopy: false,
     fileName: 'settings.json',
@@ -113,8 +114,9 @@ preferences are still in place',
 
 beforeEach(() => {
   preferencesMock.mockResolvedValue(ok(prefs({ recovery: 'missing' })));
-  updateMock.mockImplementation(async (sizeUnit: string, startupPage: string) =>
-    ok(prefs({ sizeUnit, startupPage })),
+  updateMock.mockImplementation(
+    async (sizeUnit: string, startupPage: string, theme: string) =>
+      ok(prefs({ sizeUnit, startupPage, theme })),
   );
   resetMock.mockResolvedValue(ok(prefs()));
   // History answers with empty pages, so the second surface a unit can be chosen on opens at all.
@@ -164,9 +166,10 @@ describe('the Settings page', () => {
     await openSettings();
 
     const words = document.body.textContent ?? '';
-    // Theme and language are B1-U2 and B1-U3. A switch that goes nowhere would teach the reader that
-    // nothing here works, which is worse than an empty stretch of page.
-    for (const absent of ['Theme', 'Dark', 'Light', 'Language', 'Chinese', 'English', 'Font', 'Density']) {
+    // Language, font scale and density are still not honoured by any surface. Theme is not on this
+    // list because `ADR-0031` gave this build a second palette, so the control is real; the rule
+    // the list protects - no switch that goes nowhere - is unchanged, only what goes nowhere moved.
+    for (const absent of ['Language', 'Chinese', 'English', 'Font', 'Density']) {
       expect(words).not.toContain(absent);
     }
     expect(screen.queryByRole('combobox')).toBeNull();
@@ -187,7 +190,7 @@ describe('the Settings page', () => {
 
     fireEvent.click(unitRadio('Bytes'));
 
-    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'history'));
+    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'history', 'system'));
     // Both words travel together: the document is one file, and a half-stored pair is not a setting.
     expect(screen.getByText('Preferences saved.')).toBeDefined();
     expect(unitRadio('Bytes').checked).toBe(true);
@@ -198,7 +201,7 @@ describe('the Settings page', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
     const switchOnHistory = await screen.findByRole('group', { name: 'Size units' });
     fireEvent.click(within(switchOnHistory).getByRole('radio', { name: 'KiB' }) as HTMLInputElement);
-    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('kib', 'analyze'));
+    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('kib', 'analyze', 'system'));
 
     fireEvent.click(screen.getByRole('button', { name: 'Settings page' }));
     await screen.findByRole('heading', { level: 1, name: 'Settings' });
@@ -211,7 +214,7 @@ describe('the Settings page', () => {
 
     fireEvent.click(startRadio('Bundle & History'));
 
-    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'history'));
+    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'history', 'system'));
     expect(startRadio('Bundle & History').checked).toBe(true);
     expect(
       screen.getByText(/takes effect the next time this window is opened/),
@@ -264,13 +267,22 @@ describe('the Settings page', () => {
   });
 
   it('asks before a reset, and only stores the defaults once the answer is yes', async () => {
-    preferencesMock.mockResolvedValue(ok(prefs({ sizeUnit: 'kib', startupPage: 'history' })));
+    preferencesMock.mockResolvedValue(
+      ok(prefs({ sizeUnit: 'kib', startupPage: 'history', theme: 'dark' })),
+    );
     await openSettings();
     await waitFor(() => expect(unitRadio('KiB').checked).toBe(true));
 
     fireEvent.click(screen.getByRole('button', { name: 'Reset application preferences' }));
-    // The question is on screen and nothing has been sent yet.
-    await screen.findByRole('group', { name: 'Reset both settings to their defaults?' });
+    // The question is on screen and nothing has been sent yet. It names three settings and lists the
+    // theme among them, because a confirmation that under-promises what it is about to discard is
+    // the copy defect this round would otherwise have shipped.
+    await screen.findByRole('group', { name: 'Reset all three settings to their defaults?' });
+    expect(
+      screen.getByText(
+        'Size units go back to bytes, the theme goes back to System, and the start page goes back to Analyze.',
+      ),
+    ).toBeDefined();
     expect(resetMock).not.toHaveBeenCalled();
     expect(document.activeElement?.textContent).toBe('Reset preferences');
 
@@ -278,10 +290,14 @@ describe('the Settings page', () => {
 
     await waitFor(() => expect(resetMock).toHaveBeenCalledTimes(1));
     expect(unitRadio('Bytes').checked).toBe(true);
+    expect(startRadio('Analyze').checked).toBe(true);
+    expect(themeRadio('System').checked).toBe(true);
     expect(
       screen.getByText('Preferences reset to this version’s defaults.'),
     ).toBeDefined();
-    expect(screen.queryByRole('group', { name: 'Reset both settings to their defaults?' })).toBeNull();
+    expect(
+      screen.queryByRole('group', { name: 'Reset all three settings to their defaults?' }),
+    ).toBeNull();
   });
 
   it('leaves the reset alone when the answer is no', async () => {
@@ -318,6 +334,9 @@ describe('the Settings page', () => {
       'input',
       'input',
       'input',
+      'input',
+      'input',
+      'input',
       'button',
     ]);
     const named = controls.map((element) =>
@@ -331,6 +350,9 @@ describe('the Settings page', () => {
       'Open Help and About',
       'Bytes',
       'KiB',
+      'System',
+      'Light',
+      'Dark',
       'Analyze',
       'Bundle & History',
       'Reset application preferences',
@@ -340,5 +362,159 @@ describe('the Settings page', () => {
       expect(element.tabIndex).toBeGreaterThanOrEqual(0);
     }
     expect(document.querySelectorAll('main [role=button]')).toHaveLength(0);
+  });
+});
+
+/**
+ * Make the window believe the desktop is in this palette.
+ *
+ * `window.matchMedia` is what `ADR-0031` D4 reads, and a test that leaves it to the host cannot say
+ * which way the platform answered. The returned `change` is the OS flipping while the window is
+ * open, which is the half of the contract a cold-start test cannot reach.
+ */
+function platformIs(dark: boolean) {
+  const listeners = new Set<(event: MediaQueryListEvent) => void>();
+  const query = {
+    matches: dark,
+    media: '(prefers-color-scheme: dark)',
+    addEventListener: (_type: string, callback: (event: MediaQueryListEvent) => void) => {
+      listeners.add(callback);
+    },
+    removeEventListener: (_type: string, callback: (event: MediaQueryListEvent) => void) => {
+      listeners.delete(callback);
+    },
+  };
+  vi.stubGlobal('matchMedia', () => query);
+  return {
+    change(next: boolean) {
+      query.matches = next;
+      for (const callback of listeners) {
+        callback({ matches: next, media: query.media } as MediaQueryListEvent);
+      }
+    },
+  };
+}
+
+function themeRadio(label: string): HTMLInputElement {
+  return screen.getByRole('radio', { name: label }) as HTMLInputElement;
+}
+
+/** The attribute is the whole mechanism: its presence is dark, its absence is light. */
+function paintedPalette(): string | null {
+  return document.documentElement.getAttribute('data-fs-theme');
+}
+
+describe('the theme', () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute('data-fs-theme');
+    vi.unstubAllGlobals();
+  });
+
+  it('paints the palette the document already holds, before anything is clicked', async () => {
+    platformIs(false);
+    preferencesMock.mockResolvedValue(ok(prefs({ theme: 'dark', recovery: 'read' })));
+    await openSettings();
+
+    expect(paintedPalette()).toBe('dark');
+    expect(themeRadio('Dark').checked).toBe(true);
+    expect(themeRadio('System').checked).toBe(false);
+  });
+
+  it('follows the desktop while the choice is System', () => {
+    platformIs(false);
+    render(<App />);
+    expect(paintedPalette()).toBeNull();
+  });
+
+  it('keeps following after the desktop changes, and says what it is following', async () => {
+    const platform = platformIs(false);
+    await openSettings();
+    expect(paintedPalette()).toBeNull();
+
+    platform.change(true);
+    await waitFor(() => expect(paintedPalette()).toBe('dark'));
+    expect(themeRadio('System').checked).toBe(true);
+    // The sentence names the desktop's answer rather than the window's, so a reader who sets the
+    // OS back to light sees the claim change, and is not told a thing about this window that is
+    // really a thing about their desktop.
+    expect(
+      await screen.findByText('System is following your desktop, which is set to dark.'),
+    ).toBeDefined();
+  });
+
+  it('says so when the desktop cannot be read, instead of calling the fallback System', async () => {
+    vi.stubGlobal('matchMedia', undefined);
+    await openSettings();
+
+    expect(paintedPalette()).toBeNull();
+    expect(
+      await screen.findByText(
+        'System is set to follow your desktop, but this window cannot read that setting, so it is light. Choosing Light or Dark overrides it.',
+      ),
+    ).toBeDefined();
+  });
+
+  it('stops following the desktop the moment the reader names a palette', async () => {
+    const platform = platformIs(false);
+    await openSettings();
+
+    fireEvent.click(themeRadio('Light'));
+    await waitFor(() => expect(updateMock).toHaveBeenCalled());
+    expect(paintedPalette()).toBeNull();
+
+    platform.change(true);
+    await waitFor(() => expect(themeRadio('Light').checked).toBe(true));
+    // `light` was chosen, so the desktop going dark is not this window's business. The stored word
+    // is still `light`, which is the part a restart has to honour.
+    expect(paintedPalette()).toBeNull();
+    const lastCall = updateMock.mock.calls.at(-1);
+    expect(lastCall?.[2]).toBe('light');
+  });
+
+  it('stores the theme beside the other two and claims it only when the shell agrees', async () => {
+    platformIs(false);
+    await openSettings();
+
+    fireEvent.click(themeRadio('Dark'));
+
+    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'analyze', 'dark'));
+    expect(paintedPalette()).toBe('dark');
+    expect(await screen.findByText('Preferences saved.')).toBeDefined();
+  });
+
+  it('says a refused theme did not stick, without pretending the window reverted', async () => {
+    platformIs(false);
+    updateMock.mockResolvedValue({ ok: false, envelope: SAVE_REFUSED });
+    await openSettings();
+
+    fireEvent.click(themeRadio('Dark'));
+
+    await waitFor(() => expect(screen.getByText('The preferences were not stored')).toBeDefined());
+    // The palette on screen is the one the reader asked for, and the page says the save failed. The
+    // alternative - snapping the window back under their hand - would report a store the shell
+    // never accepted. This is the same policy the unit switch already runs on.
+    expect(paintedPalette()).toBe('dark');
+    expect(screen.queryByText('Preferences saved.')).toBeNull();
+  });
+
+  it('comes back with the rest of the defaults on a reset', async () => {
+    const platform = platformIs(true);
+    preferencesMock.mockResolvedValue(ok(prefs({ theme: 'dark', recovery: 'read' })));
+    updateMock.mockImplementation(async (sizeUnit: string, startupPage: string, theme: string) =>
+      ok(prefs({ sizeUnit, startupPage, theme })),
+    );
+    resetMock.mockResolvedValue(ok(prefs()));
+    await openSettings();
+    expect(paintedPalette()).toBe('dark');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset application preferences' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset preferences' }));
+
+    await waitFor(() => expect(paintedPalette()).toBe('dark'));
+    // Reset stores `system`; with the desktop dark, `system` still paints dark - which is the
+    // point: the choice went back to following, not to light.
+    expect(themeRadio('System').checked).toBe(true);
+    platform.change(false);
+    await waitFor(() => expect(paintedPalette()).toBeNull());
   });
 });

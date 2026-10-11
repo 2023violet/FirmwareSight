@@ -11,6 +11,10 @@ last_updated: "2026-10-11"
 # ACTIVE TASK
 
 ```text
+LIVE POINTER — READ THIS FIRST, THEN JUMP TO THE LAST PARAGRAPH OF THIS FENCE. This file is append-only, so the first
+line below is the pointer as it stood on 2026-10-08 and it is kept unedited because the project does not rewrite
+history. As of 2026-10-11 that line is FALSE: the pointer is not NONE. The live word is at the end of this fence, and
+`.ai/CURRENT_STATE.md`'s "Active task" bullet carries the same sentence.
 NONE.  Stage U1 is CLOSED: PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS, on the Architect's own authority.
 V1's cohort build is now REFROZEN_TO_U1_CANDIDATE (owner authority, later on 2026-10-08; see the block below the
 pointer note). V1 itself stays paused-at-recruitment with 0 eligible external sessions — a build identity is not a
@@ -421,6 +425,39 @@ Preview's desktop shell, and corrected `NEXT-04`'s citation of "D4" (D4 is the f
 §4/§9, `AGENTS.md` 11 and `BASELINE.yaml` `design.theme` moved with it, in that ADR's own words.
 **The pointer is now `B1_U2_SYSTEM_LIGHT_DARK_THEME`, dispatched by `NEXT-04` and authorized by the Owner on
 2026-10-11.** B1-U3 (i18n) still needs its own dispatch, and no C1 word moved in any of this.
+
+Dated 2026-10-11 again, and it is the newest paragraph in this fence: **`B1-U2` RAN, and it is CLOSED LOCALLY AND NOT
+PUSHED.** The live word, which the executor proposes and cannot grant, is `LOCAL_B1_U2_GATE_PASS /
+ARCHITECT_REVIEW_PENDING`; the record is `B1_VALIDATION/B1_U2_THEME_REPORT.md` with its design checklist beside it and
+the `b1_u2_system_light_dark_theme` block in `BASELINE.yaml`. What shipped is a third preference on the mechanism
+B1-U1 built rather than a second mechanism: `ThemePref { System, Light, Dark }` in the same `settings.json`, behind
+the same command, with `SCHEMA_VERSION` 1 → 2 and the reader widened BEFORE the writer moved — the order matters,
+because `read_document` refused any version but its own, so a bare version bump would have opened every existing
+person's file as corrupted and quietly demoted their settings to `.unreadable` on the next save. `color.dark` joins
+`color.light` in the token file as 30 matching roles, `scripts/generate_design_tokens.py` now emits both palettes and
+fails the build on a WCAG AA miss, a role-set divergence, or an exemption that no longer needs to exist, and
+`color-scheme` is set beside the `data-fs-theme` attribute so the WebView paints the right palette before React's
+first commit. No dependency, no plugin, no capability change, no network; 37 commands; one regenerated binding.
+Gate on the staged tree: **17 of 17, exit 0, no SKIP — 1,050 Rust (1,043 at `2cff702`; +7, none `cfg`-gated, so 1,050
+is the projected POSIX figure and POSIX remains NOT MEASURED on this host) / 334 UI in 11 files.** The boundary was
+proven where it could actually break: the same Gate run answered `gate-d19c48891d79…` with REVIEW 7 / UNKNOWN 2 /
+PASS 13 / N/A 8 in both palettes in the running window, goldens unchanged, and the isolation test now stores
+`kib + history + dark` and checks all three words landed before it compares two runs. Two defects were caught by
+tests this round wrote: a reset restored two of three settings, leaving the window dark while the document said
+System, and the Reset copy still promised "two settings" after this change had made that false.
+Three things this paragraph will not pretend. (1) **One AA shortfall is open and is an Architect decision, not a
+theme detail**: light `diff.removed` on `diff.removed.bg` measures 4.4974:1 against a 4.5 floor, and the value that
+clears it is already printed into two committed report goldens, so moving it means deciding what may move in the
+export — `crates/firmwaresight-report`'s own colour contract test is what refused it, and the token was reverted
+rather than the rule being worked around. (2) The real-window evidence is `DEV_RUNTIME_VERIFIED` on
+`target/debug/firmwaresight-desktop.exe` at this head; it is **not** `INSTALLED_VERIFIED`, because no CI build of any
+B1 head has been installed, and that pass is still owed. `NOT_VERIFIED` and listed as such: a live desktop-theme flip
+(refused — it would change the Owner's desktop for a screenshot), 125% and 150% display scaling, `forced-colors`, an
+ACL-read-only config folder as an automated test, and cross-process contention. (3) Nothing here is pushed:
+**`origin/main` stays `2cff702`**, and the Owner's authorization covered B1-U1's range only.
+If you were sent here to "continue B1": the next unit is **B1-U3 (zh/en)**, the Owner has already said no further UI
+concept art or visual redesign pass, and B1-U3 still needs its own dispatch prompt. Inventing one is what `AGENTS.md` 1
+forbids. Read, then stop.
 
 ```
 

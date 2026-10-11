@@ -10,13 +10,19 @@ last_updated: "2026-10-11"
 
 # Current State
 
-- Date: 2026-10-11 *(the live state is the `NEXT-03` + `ADR-0031` entry below and the `B1-U2` unit it opens; the
+- Date: 2026-10-11 *(the live state is the `B1-U2` entry below, which closes the `NEXT-03` + `ADR-0031` round it
+  follows; the
   `B1-U1` entry those follow, the `C1-U4` entry it follows, the `C1-U3` entry that
   follows it, the `C1-U2R1` entry that round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
   inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `B1_U2_SYSTEM_LIGHT_DARK_THEME`** — dispatched by `NEXT-04` and authorized by the Owner on
+- **Active task: `B1_U2_SYSTEM_LIGHT_DARK_THEME` — RUN, LOCALLY GATE-PASS AND CLOSED ON 2026-10-11, NOT PUSHED**
+  — dispatched by `NEXT-04` and authorized by the Owner on
   2026-10-11; the `ADR-0018` D3 light-only rule that held this pointer at `NONE` is superseded by `ADR-0031`.
+  The status word the executor proposes and does not grant is `LOCAL_B1_U2_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and
+  the record is `B1_VALIDATION/B1_U2_THEME_REPORT.md` below. **`origin/main` is still `2cff702`** — the Owner's push
+  authorization covered B1-U1's range and nothing beyond it. `B1-U3` (zh/en) is the next unit in that same instruction
+  and still needs its own dispatch.
   Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
   `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`; the machine state is `BASELINE.yaml`
@@ -179,6 +185,62 @@ last_updated: "2026-10-11"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
+- **`B1-U2` (System / Light / Dark, `NEXT-04`) ran on 2026-10-11 and is `LOCAL_B1_U2_GATE_PASS /
+  ARCHITECT_REVIEW_PENDING` — proposed by the executor, not granted, and nothing of it is pushed.** Its record is
+  `B1_VALIDATION/B1_U2_THEME_REPORT.md` with `B1_VALIDATION/B1_U2_THEME_DESIGN_CHECKLIST.md` beside it and the
+  machine-readable block `b1_u2_system_light_dark_theme` in `BASELINE.yaml`. What shipped is the third preference on
+  the mechanism B1-U1 had already built, not a second mechanism: `ThemePref { System, Light, Dark }` with `System`
+  the default, stored as the flat document key `theme` beside the other two, `SCHEMA_VERSION` **1 → 2**, and
+  `apps/desktop/ui/src/theme.ts` holding the choice/palette split (a named palette ignores the desktop, `system`
+  follows it, no answer falls back to light) with `color-scheme` set alongside the `data-fs-theme` attribute so the
+  WebView paints the right palette before React's first commit. `ADR-0031` D2 is the part a reader should not skip:
+  `read_document` refused any version that was not exactly its own, so **raising the version alone would have opened
+  every existing person's file as corrupted** — defaults on screen, a recovery message that looks like it is working,
+  and their real settings demoted to `settings.json.unreadable` on their next save. The reader is widened first
+  (accepts 1 and 2, resolves the absent `theme` to `system`, rewrites nothing on read) and the writer moves only
+  after; both halves are tested, including `opening_an_older_document_writes_nothing` and a hand-written 55-byte v1
+  document that stayed 55 bytes and stayed v1 in the real window until a save produced v2. The ceiling still refuses a
+  downgrade with `ERR-PREFS-8004` without touching the bytes.
+- **Contrast turned out to be owned by an export, and the export won this round by design.** `assets/design-tokens.json`
+  0.2.1 → 0.3.0 adds `color.dark` as a sibling carrying the same 30 role names as `color.light`; no light value moved.
+  `scripts/generate_design_tokens.py` is now the only writer of `tokens.css` for both palettes and measures **18
+  rendered colour pairs per theme** at WCAG 2.2 AA floors inside the existing drift step — it fails the build on a new
+  miss, on a palette whose role set diverges, and on an exemption whose pair has since started passing. **Light
+  passes 17 of 18; dark passes 18 of 18.** The carried pair is `diff.removed` on `diff.removed.bg` at **4.4974:1**
+  against the 4.5 floor — 0.0026 short, pre-existing, and never measured before this round tried. The value that
+  clears it is already printed into `golden/reports/p2-diff.html` and
+  `golden/reports/p4-release/release-report.html`, so `crates/firmwaresight-report`'s
+  `html_export_colours_come_from_the_frozen_token_set` failed the gate when the token was moved. The token was
+  reverted, the floor stayed, and the exception is enumerated with its measurement and its reason. **This is an open
+  item for the Architect, not a closed one: clearing it is a decision about two report goldens, which `ADR-0031` D7
+  and `NEXT-04` §D both put outside a theme unit.**
+- **The boundary held because it was tested in the running window, not asserted in a document.** `drift/goldens
+  unchanged` is green and no renderer was touched, and the same Gate run answered
+  **`gate-d19c48891d7931118d3cee622f7cf7ccaed02467d0a62b17ec3d770b25245d74`** with REVIEW 7 / UNKNOWN 2 / PASS 13 /
+  N/A 8 in the light palette and again in the dark one while the stored document really changed;
+  `release_gate.rs`'s isolation case now stores `kib + history + dark` and asserts all three words landed before it
+  compares the two runs. No dependency was added (`prefers-color-scheme` is a media query in the WebView that is
+  already embedded), no plugin, no capability change, no network; the command count stays 37 and exactly one
+  generated binding changed. Five states, hollow `UNKNOWN` included, were photographed in dark at 1024×720 and
+  1440×900 by real Win32 resizes.
+- **Two defects surfaced, and both were caught by tests this round wrote before shipping the fix.**
+  `resetPreferences` re-applied `sizeUnit` and forgot `theme`, so a reset left the document on `system` while the
+  window stayed dark until the next start — a page reporting a state it was not in; and the Reset section still read
+  "Puts the **two** settings above…" with a confirmation asking about "**both**", copy this very change had made
+  false. Both are now asserted, so the copy is load-bearing. `python scripts/check.py` is **17 of 17, exit 0, no SKIP**
+  on the staged tree: **1,050 Rust passed / 0 failed** (1,043 at `2cff702`; the seven new cases are not `cfg`-gated, so
+  1,050 is the projected POSIX figure as well — **still not measured on this host, which has no POSIX runner**) and
+  **334 UI in 11 files** (319 in 10). The verifier on this round's final tree reads **820 tracked / 818 sum entries /
+  949 tree lines**.
+- **What is `NOT_VERIFIED`, stated as the list it is.** T01's live desktop flip (changing the Owner's actual Windows
+  theme for a screenshot was refused), display scaling at 125% and 150%, `forced-colors`/high-contrast mode, an
+  ACL-read-only config folder as an automated test (the Windows refusal itself was re-confirmed out-of-band with
+  `icacls /deny` in a gitignored sandbox and then reset), and cross-process contention. The real-window evidence is
+  `DEV_RUNTIME_VERIFIED` on `target/debug/firmwaresight-desktop.exe` at this head — every B1 unit is, because no
+  CI-built installer exists for any B1 head, and that installed pass is still owed. Two carried UI gaps are
+  unchanged by this round and stay open: focus falls to `<body>` when the inline reset confirmation is dismissed and
+  `Escape` does not dismiss it, and `tauri.conf.json`'s 720×480 window minimum is below the 1024×720 floor v0.2
+  states.
 - **`NEXT-03` + `ADR-0031` (2026-10-11) — B1-U1 accepted independently, pushed, and the theme blocker lifted by a
   person.** `NEXT-03` re-read B1-U1 as a read-only independent acceptance and returned
   **`ACCEPT_WITH_EXPLICIT_LIMITS`**, not the coder's own `ARCHITECT_REVIEW_PENDING`: the first-launch auto-write that

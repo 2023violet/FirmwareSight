@@ -1,9 +1,16 @@
-/* FirmwareSight P0 desktop UI. Light theme only (DESIGN.md 4).
+/* FirmwareSight desktop UI. Light is `:root`, dark is the sibling palette in tokens.css (ADR-0031).
    Every length, colour and duration here comes from tokens.css, which is generated from
    assets/design-tokens.json. A number that is not in that file does not belong here. */
 
 :root {
+  /* `color-scheme` is a keyword, not a value, and it is the only thing that can paint the
+     WebView's own background and scrollbars before this stylesheet's colours are ever consulted -
+     which is what keeps a dark user from getting a white frame on the way in. */
   color-scheme: light;
+}
+
+[data-fs-theme='dark'] {
+  color-scheme: dark;
 }
 
 *,
