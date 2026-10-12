@@ -778,6 +778,15 @@ fn observe(
     );
 
     let run_id = fingerprint::run_id(&context);
+    // Which refusal a person gets for one changed attachment is decided here, by the shape of the request,
+    // not by anything about the file (`N01-F04`). A surface that selected a stored run — the desktop, whose
+    // Release page exports against the run on screen — has something to disagree with, and this check runs
+    // before the verdict is computed and before any file is compared, so the answer is `6102` and it names
+    // two run ids. A surface that carries none — the command line, which judges the inputs in front of it
+    // and stores nothing — falls through to `evaluate` and meets the same change at export as `6103` or
+    // `6118`, which name the file. Both refuse, both leave the destination empty, and neither order is an
+    // accident: `bundle_builder.rs`'s `a_withdrawn_attachment_is_refused_by_the_surface_that_holds_a_selected_run`
+    // runs one change through both shapes and pins the pair.
     if let Some(selected) = request.selected_run_id
         && selected != run_id
     {

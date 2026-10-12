@@ -113,10 +113,15 @@ struct ReleasePrepareArgs {
 
     /// A BIN or Intel HEX file to ship inside the bundle as byte evidence. Repeatable, one per file.
     ///
-    /// The same rule and the same single observation path as `gate --attach`: the file's bytes are hashed,
-    /// shipped under `artifacts/` and indexed, its kind is the one its name declares, and its build
-    /// provenance stays unestablished. Re-observed before the write, so a file that changed after the
-    /// preview stops the export instead of shipping two answers.
+    /// A relative path is read against the project directory named by `--project`, not against the
+    /// directory this command runs in, and it stays inside that directory: a name carrying `..` is refused
+    /// rather than resolved above the project root. `gate --attach` reads the same flag from the current
+    /// working directory instead, so one relative name reaches two different files depending on the verb.
+    ///
+    /// One observation rule covers both: the file's bytes are hashed, shipped under `artifacts/` and
+    /// indexed, its kind is the one its name declares, and its build provenance stays unestablished.
+    /// Re-observed before the write, so a file that changed after the preview stops the export instead of
+    /// shipping two answers.
     #[arg(long, value_name = "FILE")]
     attach: Vec<PathBuf>,
 
@@ -205,6 +210,11 @@ struct GateArgs {
     baseline_map: Option<PathBuf>,
 
     /// A BIN or Intel HEX file this release ships as byte evidence. Repeatable, one per file.
+    ///
+    /// A relative path is read against the current working directory, not against the project directory
+    /// named by `--project`: the attachment is observed before any project-relative path is built.
+    /// `release prepare --attach` reads the same flag from the project directory instead, so one relative
+    /// name reaches two different files depending on the verb.
     ///
     /// FirmwareSight records the file's size and SHA-256 under a kind its name declares, and does not
     /// analyze it. A `.bin` is declared `bin`, a `.hex` is declared `hex`, in any letter case, and any other
@@ -645,6 +655,9 @@ fn report_bundle_error(error: &BundleError, code: u8, json: bool, operation_id: 
         "error: {} (code {}, operation {operation_id})",
         envelope.message, envelope.code
     );
+    if matches!(error, BundleError::Attachment(_)) {
+        eprintln!("{ATTACH_BASE_HINT_RELEASE}");
+    }
     tracing::error!(operation_id, code = error.code(), "release bundle refused");
     ExitCode::from(code)
 }
@@ -697,6 +710,15 @@ fn observe_selections(
         .collect()
 }
 
+/// Which directory a relative `--attach` was read against, stated by role. `N01-F01` measured that the two
+/// verbs differ, and neither an error code nor a leaf name tells a release owner which one applied to the
+/// name they just typed. Neither line quotes the directory: a host path stays out of CLI output, which
+/// `gate_cli.rs` pins for the refusal this hint travels with.
+const ATTACH_BASE_HINT_GATE: &str =
+    "hint: `gate` read that path from the current working directory";
+const ATTACH_BASE_HINT_RELEASE: &str =
+    "hint: `release prepare` read that path from the project directory named by --project";
+
 /// Refuse an attachment the engine could not observe, in the engine's words and under the engine's code.
 ///
 /// A file that cannot be read is an input this run could not take, which is the parse/import half of the
@@ -713,6 +735,7 @@ fn report_attachment_error(error: &AttachmentError, json: bool, operation_id: &s
         "error: {} (code {}, operation {operation_id})",
         envelope.message, envelope.code
     );
+    eprintln!("{}", ATTACH_BASE_HINT_GATE);
     tracing::error!(
         operation_id,
         code = error.code(),

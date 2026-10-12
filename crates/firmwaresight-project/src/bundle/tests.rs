@@ -484,6 +484,7 @@ fn an_attachment_the_judged_context_does_not_carry_is_refused() {
     let digest = fingerprint::file_sha256(&path).expect("the file is hashed");
     let attachment = ReleaseAttachment {
         file_name: "app.bin".to_owned(),
+        display_name: "app.bin".to_owned(),
         kind: ArtifactKind::Bin,
         sha256: Fact::known(digest.clone()),
         byte_size: 12,

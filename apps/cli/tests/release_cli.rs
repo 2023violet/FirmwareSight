@@ -816,6 +816,65 @@ fn attachable(world: &World, folder: &str, name: &str, bytes: &[u8]) -> String {
     path.to_string_lossy().into_owned()
 }
 
+/// `ATTACHING` with the clean-repository rule lifted. `N01-F01` puts bytes under the project root on purpose,
+/// so the release has to be able to answer for a dirty workspace; without this the run would fail for a
+/// reason that has nothing to do with which directory a relative path starts from.
+const ATTACHING_DIRTY: &str = r#"schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+required = ["elf", "map", "bin", "hex"]
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = false
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"
+expected_version = "1.4.2"
+"#;
+
+/// The process started in `current_dir` rather than in this repository, which is the whole question: whose
+/// directory does a relative `--attach` read against.
+fn run_from(current_dir: &Path, args: &[&str]) -> Output {
+    let output = Command::new(env!("CARGO_BIN_EXE_fwsight"))
+        .args(args)
+        .current_dir(current_dir)
+        .output()
+        .expect("the fwsight binary is built for its own tests");
+    let stderr = String::from_utf8_lossy(&output.stderr).to_lowercase();
+    assert!(!stderr.contains("panicked"), "the CLI panicked:\n{stderr}");
+    output
+}
+
+/// §33's invocation run from `current_dir`, with every path but the attachment's named absolutely.
+fn prepare_from(world: &World, current_dir: &Path, out: &Path, extra: &[&str]) -> Output {
+    let mut args = vec![
+        "release".to_owned(),
+        "prepare".to_owned(),
+        "--project".to_owned(),
+        world.project.to_string_lossy().into_owned(),
+        "--artifact".to_owned(),
+        absolute(TARGET_ELF),
+        "--map".to_owned(),
+        absolute(TARGET_MAP),
+        "--out".to_owned(),
+        out.to_string_lossy().into_owned(),
+    ];
+    args.extend(extra.iter().map(|arg| (*arg).to_owned()));
+    let refs: Vec<&str> = args.iter().map(String::as_str).collect();
+    run_from(current_dir, &refs)
+}
+
+/// Help text wraps at the terminal's width, so a phrase is looked for with the line breaks folded away.
+fn flattened(body: &str) -> String {
+    body.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
 /// One document read out of a written bundle.
 fn bundle_document(bundle: &Path, name: &str) -> serde_json::Value {
     let bytes = std::fs::read(bundle.join(name))
@@ -984,6 +1043,126 @@ fn two_attachments_that_fold_onto_one_leaf_and_carry_one_digest_are_refused_and_
 }
 
 #[test]
+fn a_relative_attach_is_read_against_the_project_directory_and_not_the_current_one() {
+    // `N01-F01`, the other half of the pair `gate_cli.rs` pins: the same flag spelled the same way starts
+    // from the project here, so the file a release owner shipped is the one under their `--project`.
+    let world = World::new("attach-base", ATTACHING_DIRTY);
+    let scratch = world
+        .project
+        .parent()
+        .expect("the project sits in a scratch folder");
+    let out = scratch.join("out-relative");
+    let under_project = world.project.join("app.bin");
+    let decoy_bin = scratch.join("app.bin");
+    std::fs::write(&under_project, b"UNDER-THE-PROJECT-ROOT").expect("under the project");
+    // The same leaf name one level up, in the directory the process runs in, holding different bytes.
+    std::fs::write(&decoy_bin, b"UNDER-THE-CURRENT-DIRECTORY").expect("beside the project");
+    let hex = attachable(&world, "build", "boot.hex", b":00000001FF");
+
+    let output = prepare_from(
+        &world,
+        scratch,
+        &out,
+        &["--attach", "app.bin", "--attach", &hex],
+    );
+    assert_eq!(code(&output), Some(0), "{}", errors(&output));
+    let rows =
+        bundle_document(&only_bundle(&out), "release-manifest.json")["extensions"]["attachments"]
+            .as_array()
+            .expect("the manifest lists what it shipped")
+            .clone();
+    let sizes: Vec<u64> = rows.iter().filter_map(|row| row["size"].as_u64()).collect();
+    let project_copy: u64 = b"UNDER-THE-PROJECT-ROOT".len() as u64;
+    let workdir_copy: u64 = b"UNDER-THE-CURRENT-DIRECTORY".len() as u64;
+    assert!(
+        sizes.contains(&project_copy),
+        "the bytes under the project root were not the ones shipped: {rows:?}"
+    );
+    assert!(
+        !sizes.contains(&workdir_copy),
+        "the current directory's copy was shipped instead: {rows:?}"
+    );
+
+    // A name that only the current directory holds is refused, which is the same fact seen from the other
+    // side, and the refusal writes nothing.
+    let decoy = scratch.join("solo.hex");
+    std::fs::write(&decoy, b":00000001FF").expect("a file only the current directory holds");
+    let under_project_text = under_project.to_string_lossy().into_owned();
+    let refused = prepare_from(
+        &world,
+        scratch,
+        &scratch.join("out-decoy"),
+        &["--attach", &under_project_text, "--attach", "solo.hex"],
+    );
+    assert_eq!(code(&refused), Some(6), "{}", errors(&refused));
+    assert!(
+        errors(&refused).contains("ERR-BUNDLE-6115"),
+        "{}",
+        errors(&refused)
+    );
+    assert!(
+        !scratch.join("out-decoy").exists(),
+        "a refused relative path created a destination folder"
+    );
+
+    // A relative name that climbs out of the project is refused too, rather than shipping a file from
+    // above the release the policy describes.
+    let escaped = prepare_from(
+        &world,
+        scratch,
+        &scratch.join("out-escaped"),
+        &["--attach", "../solo.hex", "--attach", &hex],
+    );
+    assert_eq!(code(&escaped), Some(6), "{}", errors(&escaped));
+    assert!(
+        errors(&escaped).contains("ERR-BUNDLE-6115"),
+        "{}",
+        errors(&escaped)
+    );
+    assert!(
+        !scratch.join("out-escaped").exists(),
+        "a path outside the project left a destination folder behind"
+    );
+    assert!(
+        !errors(&escaped).contains(scratch.to_string_lossy().as_ref()),
+        "the refusal quoted the host directory it refused in: {}",
+        errors(&escaped)
+    );
+}
+
+#[test]
+fn the_release_surface_says_which_directory_a_relative_attach_starts_from() {
+    let help = run(&["release", "prepare", "--help"]);
+    assert_eq!(code(&help), Some(0), "{}", errors(&help));
+    let body = flattened(&text(&help));
+    assert!(
+        body.contains("--attach <FILE>"),
+        "the flag is not in the help:\n{body}"
+    );
+    assert!(
+        body.contains("A relative path is read against the project directory named by `--project`"),
+        "the help does not name this command's base:\n{body}"
+    );
+    assert!(
+        !body.contains("the same single observation path as `gate --attach`"),
+        "the help still claims the two verbs share one path, which `N01-F01` measured as false:\n{body}"
+    );
+
+    let world = World::new("attach-base-hint", ATTACHING);
+    let output = world.prepare(&["--attach", "nowhere.bin"]);
+    assert_eq!(code(&output), Some(6), "{}", errors(&output));
+    let stderr = errors(&output);
+    assert!(
+        stderr.contains("hint: `release prepare` read that path from the project directory"),
+        "{stderr}"
+    );
+    assert!(
+        !stderr.contains(&world.project.to_string_lossy().to_string()),
+        "the hint carried the host directory: {stderr}"
+    );
+}
+
+#[test]
 fn an_attachment_that_cannot_be_read_refuses_the_release_with_the_export_code() {
     let world = World::new("attach-absent", ATTACHING);
     let absent = world
@@ -1006,6 +1185,76 @@ fn an_attachment_that_cannot_be_read_refuses_the_release_with_the_export_code() 
         "an unreadable attachment left a bundle behind: {:?}",
         tree(&world.out)
     );
+}
+
+#[test]
+fn a_chosen_name_that_a_portable_folder_cannot_carry_ships_under_a_safe_one_and_keeps_its_own_bytes()
+ {
+    // `N01-F02`'s archive half, measured through the real CLI: the leaf a release owner chose in Chinese is
+    // what they read on the Release page, and what crosses into the folder is the name `sanitize_leaf_name`
+    // allows. Two roles, one file, and no document that was not already written before this test existed.
+    let world = World::new("attach-unicode", ATTACHING);
+    let bin = attachable(&world, "build", "固件镜像.bin", b"APP-BYTES");
+    let hex = attachable(&world, "build", "boot.hex", b":00000001FF");
+    let output = world.prepare(&["--attach", &bin, "--attach", &hex]);
+    assert_eq!(code(&output), Some(0), "{}", errors(&output));
+
+    let bundle = world.published();
+    let rows = bundle_document(&bundle, "release-manifest.json")["extensions"]["attachments"]
+        .as_array()
+        .expect("the manifest lists what it shipped")
+        .clone();
+    let paths: Vec<&str> = rows.iter().filter_map(|row| row["path"].as_str()).collect();
+    assert!(
+        paths.contains(&"artifacts/bin"),
+        "the chosen `固件镜像.bin` is filed under its archive name: {rows:?}"
+    );
+    assert!(
+        std::fs::metadata(bundle.join("artifacts").join("bin")).is_ok(),
+        "the folder carries no file at the name the manifest names: {:?}",
+        tree(&bundle)
+    );
+
+    // The two names are two roles, so the one that only ever lived on this machine stays out of every
+    // document a stranger can read — the report and the manifest included.
+    for name in tree(&bundle) {
+        if name.starts_with("artifacts/") {
+            continue;
+        }
+        let body = std::fs::read(bundle.join(&name)).expect("the file the tree just listed");
+        assert!(
+            !String::from_utf8_lossy(&body).contains("固件镜像"),
+            "`{name}` carries the host's chosen leaf"
+        );
+    }
+}
+
+#[test]
+fn two_chosen_names_that_fold_onto_one_archive_name_ship_as_two_entries_the_reader_can_tell_apart()
+{
+    // The collision rule already existed for ASCII leaves that fold (`FIRMWARE.BIN` and `firmware.bin`);
+    // a Chinese pair reaches it far more often, and the bundle must still carry both files.
+    let world = World::new("attach-unicode-pair", ATTACH_TWO_BINS);
+    let first = attachable(&world, "build", "固件.bin", b"FIRST-IMAGE");
+    let second = attachable(&world, "build", "镜像.bin", b"SECOND-IMAGE");
+    let output = world.prepare(&["--attach", &first, "--attach", &second]);
+    assert_eq!(code(&output), Some(0), "{}", errors(&output));
+
+    let bundle = world.published();
+    let rows = bundle_document(&bundle, "release-manifest.json")["extensions"]["attachments"]
+        .as_array()
+        .expect("the manifest lists what it shipped")
+        .clone();
+    let paths: Vec<&str> = rows.iter().filter_map(|row| row["path"].as_str()).collect();
+    assert_eq!(paths.len(), 2, "{rows:?}");
+    assert_ne!(paths[0], paths[1], "one entry per folded name: {rows:?}");
+    for path in &paths {
+        assert!(
+            std::fs::metadata(bundle.join(path)).is_ok(),
+            "`{path}` is indexed but not shipped: {:?}",
+            tree(&bundle)
+        );
+    }
 }
 
 #[test]

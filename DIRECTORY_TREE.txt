@@ -155,6 +155,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
 │   │   ├── FirmwareSight_B1U1_Review_Decision_And_Next_Prompts_2026-10-11.txt
 │   │   ├── FirmwareSight_B1U2_Architect_Review_2026-10-11.md
+│   │   ├── FirmwareSight_B1U2_B1U3_Architect_Review_2026-10-11.md
 │   │   ├── FirmwareSight_C1_Continuous_Delivery_Read_First_v1.0.txt
 │   │   ├── FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt
 │   │   ├── FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt
@@ -170,6 +171,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_NEXT_04_B1U2_System_Light_Dark_Theme_2026-10-11.txt
 │   │   ├── FirmwareSight_NEXT_05_B1U2_Independent_Acceptance_2026-10-11.txt
 │   │   ├── FirmwareSight_NEXT_06_B1U3_ZH_EN_Internationalization_2026-10-11.txt
+│   │   ├── FirmwareSight_NEXT_07_B1U3_Independent_Acceptance_2026-10-11.txt
+│   │   ├── FirmwareSight_NEXT_08_B2U1_File_Workflow_Integrity_2026-10-11.txt
+│   │   ├── FirmwareSight_NEXT_08_v1.1_B2U1_Owner_Dispatch_2026-10-11.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P5_CommitD_Continue_v1.2.txt

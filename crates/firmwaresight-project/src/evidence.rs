@@ -311,6 +311,11 @@ pub struct ReleaseAttachment {
     /// The sanitized leaf name. A name is release identity and never Gate identity (§5 rules 4 and 5),
     /// so this field is what a person recognizes, not what a run id binds.
     pub file_name: String,
+    /// The leaf the release owner chose, with only its directory removed (`N01-F02`). [`Self::file_name`]
+    /// is the name a portable folder may carry; this is the name the person who picked the file reads back,
+    /// so `固件镜像.bin` is not shown to them as `bin`. It is session-local by construction: no bundle
+    /// document is built from it, and the directory it came from is dropped here rather than carried.
+    pub display_name: String,
     pub kind: ArtifactKind,
     pub sha256: Fact<String>,
     pub byte_size: u64,
@@ -426,7 +431,7 @@ pub fn observe_attachment(
     let name = attachment_leaf_name(path);
     let metadata = std::fs::metadata(path).map_err(|error| AttachmentError::Unreadable {
         name: name.clone(),
-        detail: io_reason(&error),
+        detail: selection_reason(&error),
     })?;
     if !metadata.is_file() {
         return Err(AttachmentError::Unreadable {
@@ -443,6 +448,7 @@ pub fn observe_attachment(
     })?;
     Ok(ReleaseAttachment {
         file_name: name,
+        display_name: attachment_display_name(path),
         kind: declared_kind,
         sha256: Fact::known(digest),
         byte_size: metadata.len(),
@@ -460,6 +466,16 @@ fn attachment_leaf_name(path: &Path) -> String {
         .map(|leaf| leaf.to_string_lossy().into_owned())
         .unwrap_or_default();
     sanitize_leaf_name(&raw)
+}
+
+/// The leaf the release owner chose, as they chose it (`N01-F02`). Only the directory is dropped, so
+/// `固件镜像.bin` keeps the name it has on disk instead of becoming the archive-safe `bin`. A leaf that is
+/// not valid UTF-8 arrives lossily: a display name is there to show the file, not to refuse the release,
+/// and the bytes that carry identity are the digest and the length, never this string.
+fn attachment_display_name(path: &Path) -> String {
+    path.file_name()
+        .map(|leaf| leaf.to_string_lossy().into_owned())
+        .unwrap_or_default()
 }
 
 /// Join a validated relative path onto a root, component by component. `..` cannot escape because the
@@ -483,14 +499,25 @@ pub fn join_project_relative(root: &Path, relative_path: &str) -> PathBuf {
     joined
 }
 
-/// A short, path-free description of an I/O failure. `std::io::Error`'s `Display` can name the file, so
-/// only the kind is carried into a fact, a run record or a UI.
+/// A short, path-free description of an I/O failure met *after* the path was already seen. `std::io::Error`'s
+/// `Display` can name the file, so only the kind is carried into a fact, a run record or a UI.
 fn io_reason(error: &std::io::Error) -> String {
     match error.kind() {
         std::io::ErrorKind::PermissionDenied => "permission denied".to_owned(),
         std::io::ErrorKind::NotFound => "the file disappeared during the read".to_owned(),
         kind => format!("a filesystem error occurred ({kind:?})"),
     }
+}
+
+/// Why the *first* `stat` of a file a person chose failed. [`io_reason`] speaks for a failure that follows a
+/// successful `stat`, which really is a file that moved; here nothing was ever confirmed to exist, so
+/// saying it disappeared would describe an event that did not happen (`N01-F01`). Every other kind keeps the
+/// one wording, because a permission denial is the same statement whichever call met it.
+fn selection_reason(error: &std::io::Error) -> String {
+    if error.kind() == std::io::ErrorKind::NotFound {
+        return "no file exists at the path chosen".to_owned();
+    }
+    io_reason(error)
 }
 
 /// Everything needed to assemble one Gate run, in the shape both surfaces can produce.

@@ -1,0 +1,35 @@
+FirmwareSight｜NEXT-07 — B1-U3 zh-CN/en 国际化独立验收
+版本 v1.0｜2026-10-11｜READ-ONLY ARCHITECT REVIEW｜不得自行 Push / 修改 tracked 文件 / 开始 B2
+
+一、角色、授权与边界
+你是本单元编码执行者之外的独立 Reviewer，独立验收 B1-U3，绝不使用执行者的 self-review 代替测试证据。此任务仅授权读取、在 gitignored 独立沙箱运行测试和必要的运行态观测。不修改 tracked 文件、不提交、不 Push、不重整历史。权限不包括 B2 开发。
+
+二、预期状态（必须现地测量；不符则 STOP，不靠记忆补齐）
+Repo: 2023violet/FirmwareSight。
+远端预期：origin/main=e0b8fc4687aefadfc76c2e64bfbdf6ab6389d2dc；CI #100 run 38160046797 十项成功（仅覆盖 B1-U2）。
+本地候选提交：9ccd3f0（B1-U3 产品，报告称 67 paths）、40ce0b6、a0b5c88（两份 docs-only）。预期：HEAD=a0b5c88，clean、ahead=3、fast-forward-capable、未推送。验证 git rev-parse HEAD、git status --porcelain=v1 -uall、git ls-remote origin refs/heads/main、git merge-base --is-ancestor、git log --reverse、git diff --name-status。若本地 HEAD/远端已变更，先准确报告，不自动 reset、rebase、stash、fetch 后覆写或越权执行。
+
+三、必须阅读的权威资料
+AGENTS.md，.ai/{README,CURRENT_STATE,DECISIONS,ACTIVE_TASK}.md（识别 live pointer，不能只信早期记录），ADR-0018、ADR-0031、候选 ADR-0032、DESIGN.md、03_DESIGN 相关文件、v0.2 产品能力决策、原始 NEXT-06 Prompt、B1-U1/U2 Preferences 的合同、候选 B1-U3 报告、9 namespace Catalog、schema v1/v2/v3。以本地实际代码与文件为准，不能凭原报告的行号或计数。
+
+四、Phase A：变更面和静态架构独立审查
+1. 逐提交核对 67 个 product/doc 路径及后两份 docs-only；归类 Rust preferences/IPC、generated TS、React Catalog/Context、各页面、UI 测试、Core tests、docs/ADR。是否触及任何 Core/Gate/Report 业务算法、CLI、migrations、portable schemas、goldens、插件权限、network、Cargo.lock？若有，说明原因并审查兼容，禁止假称零变更。
+2. 核查 LanguagePref System/ZhCn/En 唯一受控入口，运行时切换、跨页传播、保存/Reset/快速切换/启动解析；系统语言检测的真正 API 和 fallback；不可把 zh-TW/zh-HK 说成繁体全支持。
+3. 验证 schema v1/v2/v3 read-first 升级、v1/v2 首次启动完全不改文件；保存时才写 v3；未来版本 fail-closed，损坏文件保留/恢复，失败不伪称已保存。Rust Core 和 CLI 不读取应用偏好。
+4. 验证 catalog 恰好 9 namespaces、两语言 keys/params 覆盖；tsc 是否真正拒绝缺失 key / 错插值。抽样共同组件、ErrorPanel、Table/Pager、Help、History、Release 附件、About/Diagnostics、非 TSX 呈现工具（format.ts、evidenceBasis.ts）及中英文句式；测试不知道的稳定错误码应有明确 fallback；禁止把法定 English 常量、Symbol/Section/fileName 误判成 UI 泄露。
+5. 重点关注翻译时是否改变状态词 PASS/REVIEW/BLOCK/UNKNOWN/N/A 与证据分类 Observed/Derived/Declared/Unknown 的数据语义。不得通过 UI 对 Core 错误句子截取拼接而引入不实中文判断。
+
+五、Phase B：真实测试和证据隔离
+1. 分别重跑 cargo fmt --all -- --check；cargo clippy --workspace --all-targets --all-features -- -D warnings；cargo test --workspace；pnpm test/typecheck/lint/build；python scripts/check.py（权威当前步数，以实际结果为准）和 baseline verifier。单独记录 Rust 49 result lines 的不重复计数，避免把 drift 再执行的 Rust 计入主 Rust 总量。
+2. 定向负面测试：删除一条翻译 key / 参数不匹配是否使 typecheck 失败（在 gitignored scratch 或可恢复的隔离工作树，严禁破坏 Owner 工作树）；v1/v2 保存升级；future v4 refusal；损坏恢复；语言切换后 Gate 相同 runId、policy hash、五态结果，Bundle 文件 SHA、report/golden、CLI JSON 均稳定；语言中英、theme light/dark 组合至少抽样。
+3. 真实 Tauri dev window：按步骤打开七页面，切中文→英文→System，并操作关键表格、状态、错误与文件名，记录 1024×720 与 1440×900 目标窗口内可见区的真实尺寸（现有执行者的 inner window 证据是 1024×721/1440×901）；保存→真正退出→重启；读回偏好，并只声称 DEV_RUNTIME_VERIFIED。无法验证 DPI/OS 语言实时改变/forced-colors 就写 NOT_VERIFIED。没有经过 CI 安装件实际走查不得写 INSTALLED_VERIFIED。
+4. 保护 Owner 电脑：前次执行者报告将用户真实 settings.json byte-exact 恢复，但向真实 DEV SQLite store 写了一条 Gate run。下一轮不得删除、清理或再修改该库；如果 Tauri app_config_dir 无法按进程隔离，需沙盒账户/VM/另外进程隔离办法；不可假称 APPDATA 环境变量能重定向 Windows Known Folder。实在做不到，STOP 对实机存储验收项目并如实降级，不影响纯代码只读检查。
+5. 不用 OCR 充当真实界面审查，保留截图路径、实际尺寸、应用版本/commit 的可检查记录。
+
+六、裁决与 STOP 条件
+每类分别给 SOURCE_PRESENT、LOCAL_TEST_PROVEN、DEV_RUNTIME_VERIFIED、MIGRATION_VERIFIED、MACHINE_IDENTITY_UNCHANGED、INSTALLED_VERIFIED、REMOTE_CI_PROVEN：PASS/FAIL/NOT_VERIFIED 和执行命令与结果。总裁决只用 ACCEPT、ACCEPT_WITH_EXPLICIT_LIMITS、REWORK_REQUIRED、EVIDENCE_INSUFFICIENT。
+STOP 并报 REWORK：中文重要操作文本缺漏；v1/v2 配置被误判损坏；future config 被覆盖；Gate/Release/CLI JSON 随语言改变；错误诊断不真实；越过本阶段改业务算法/Schema；键匹配检查实际失效。对非关键文案瑕疵、小规模显示问题可记明确修正范围，不必让 67-path 单元无限重做。
+独立 ACCEPT 后，只能**建议** Owner 对 e0b8fc4..a0b5c88 单独批准普通 fast-forward push。绝不以此 Prompt 自行推送。要在批准推送并远端 CI 对新 head 十项成功后，才满足 B2 开发的前置条件。不得把 AI 自评写成 Architect ACCEPT。
+
+七、交付
+单一精简独立报告，包含 HEAD、变更路径、测试真实数字、所有残留非阻断限制、是否可以推送、对 NEXT-08 的准入条件判断。STOP；不得执行 NEXT-08、C1 颜色修正或 V1 归档。

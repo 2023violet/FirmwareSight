@@ -638,6 +638,7 @@ function attachment(over: Partial<ReleaseAttachmentDto> = {}): ReleaseAttachment
   return {
     attachmentId: 'att-1',
     fileName: 'app.bin',
+    displayName: 'app.bin',
     byteSize: 960,
     sha256: 'a'.repeat(64),
     kind: 'bin',
@@ -1819,7 +1820,11 @@ describe('Release attachments', () => {
 
   it('names no folder on the attachment row, in either direction', async () => {
     readAttachmentsMock.mockResolvedValue(
-      ok(attachmentSet([attachment({ fileName: 'motor-controller.bin' })])),
+      ok(
+        attachmentSet([
+          attachment({ fileName: 'motor-controller.bin', displayName: 'motor-controller.bin' }),
+        ]),
+      ),
     );
     await openRelease();
     const region = await screen.findByRole('region', { name: 'Release attachments' });
@@ -1832,6 +1837,25 @@ describe('Release attachments', () => {
     expect(words).not.toContain('\\');
     expect(words).not.toMatch(/[A-Za-z]:[\\/]/);
     expect(words).not.toContain('fwsight');
+  });
+
+  it('shows an attachment by the name its owner chose, not by the name the bundle files it under', async () => {
+    // `N01-F02`: `sanitize_leaf_name` is what a portable folder may carry, and it folds `固件镜像.bin` to
+    // `bin`. The row is the owner's, so it shows the leaf they picked; the archive name keeps its role in
+    // the bundle, where a path has to be safe before it can be copied.
+    readAttachmentsMock.mockResolvedValue(
+      ok(attachmentSet([attachment({ fileName: 'bin', displayName: '固件镜像.bin' })])),
+    );
+    await openRelease();
+    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const cell = region.querySelector('tbody th[scope="row"]');
+    expect(cell?.textContent).toBe('固件镜像.bin');
+    expect(region.textContent ?? '').not.toContain('motor-controller');
+
+    // The two names are two roles, so a screen reader asking which file a picker belongs to is asking
+    // about the one the person sees, not the one the archive chose for them.
+    const picker = within(region).getByLabelText('Declared kind for 固件镜像.bin');
+    expect(picker).toBeDefined();
   });
 
   it('says what an empty set means, in words the release owner can act on', async () => {

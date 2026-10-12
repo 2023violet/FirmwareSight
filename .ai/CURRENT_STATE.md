@@ -16,14 +16,31 @@ last_updated: "2026-10-11"
   follows it, the `C1-U2R1` entry that round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
   inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `B1_U3_ZH_EN_INTERNATIONALIZATION` — RUN, LOCALLY GATE-PASS AND CLOSED ON 2026-10-11, NOT PUSHED**
+- **Active task: `B2_U1_FILE_WORKFLOW_INTEGRITY` — DISPATCHED AND IN PROGRESS ON 2026-10-11, LOCAL COMMIT ONLY**
+  — `NEXT-08` v1.1, the Owner's own dispatch, after B1-U3 was accepted and pushed. Scope is exactly `N01-F01`…`F04`:
+  the two bases `--attach` resolves against, a Unicode leaf name collapsing to `bin` on screen, the portable verifier
+  failing on a legal no-baseline bundle, and the CLI/desktop refusal-order difference. No parser growth, no new Gate
+  or bundle contract, no golden/schema change, no B1-U4, no B2-U2, no V1 work, no push. Its status word when it
+  closes is at most `LOCAL_B2_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`.
+- **Remote state, measured rather than restated: `origin/main` = `a0b5c886051a6b10042ea26f52809baea713d7af`** — the
+  Owner authorized the fast-forward of `e0b8fc4..a0b5c88` in the exact words `NEXT-07` required, and GitHub Actions
+  run **#101** (`38207073344`) read back green on all ten jobs over that head: Rust 1,056 (Windows) and 1,057
+  (Ubuntu) across 49 `test result:` lines, UI 379 in 13 files on both platforms, drift 8/8 at 852 tracked / 850 sum
+  entries / 984 tree lines, dependency policy clean, three packages, macOS core smoke. The one-test platform
+  difference is a pre-existing `cfg` split, not this round's. `REMOTE_CI_PROVEN` is therefore true for B1-U3;
+  `INSTALLED_VERIFIED` is not, for any B1 unit, because no CI-built B1 installer has been installed and operated.
+  B1-U3's independent acceptance is `ACCEPT_WITH_EXPLICIT_LIMITS` with nine named non-blocking defects (D1–D9), of
+  which D1 and D2 make one sentence of its own report false as written; they remain open, tracked, and unfixed here.
+- **Earlier same-day record, superseded above on push state: `B1_U3_ZH_EN_INTERNATIONALIZATION` — RUN, LOCALLY
+  GATE-PASS AND CLOSED ON 2026-10-11, NOT PUSHED AT THE TIME OF WRITING**
   — dispatched by `NEXT-06` and authorized by the Owner's four-step instruction of 2026-10-11 (accept B1-U2, push it,
   execute B1-U3 directly with no product-direction study and no UI art pass, then B1/B2's remaining professional
   work). The status word the executor proposes and does not grant is
   `LOCAL_B1_U3_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and the record is `B1_VALIDATION/B1_U3_LANGUAGE_REPORT.md`
   below. **`origin/main` is `e0b8fc4`** — B1-U2's three commits were fast-forwarded on the Owner's own authorization
   and read back as remote run `38160046797`, ten jobs green; nothing of B1-U3 is pushed, and the Owner's authorization
-  did not extend to it.
+  did not extend to it — *both of those last clauses described that moment only, and the two bullets above carry
+  what happened after it.*
   Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
   `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`; the machine state is `BASELINE.yaml`

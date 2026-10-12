@@ -444,7 +444,16 @@ fn a_directory_or_a_missing_file_is_refused_as_unreadable_without_naming_its_hos
     let missing = root.join("gone.bin");
     let root_text = root.to_string_lossy().to_string();
 
-    for (path, leaf) in [(&directory, "not-a-file.bin"), (&missing, "gone.bin")] {
+    // `N01-F01`: each refusal states which of the two it met. A path that never held a file is not a file
+    // that left, and the release owner's next step differs: one is a wrong name, the other is a moved file.
+    for (path, leaf, reason) in [
+        (
+            &directory,
+            "not-a-file.bin",
+            "the chosen path is not a regular file",
+        ),
+        (&missing, "gone.bin", "no file exists at the path chosen"),
+    ] {
         let error = observe_attachment(path, ArtifactKind::Bin)
             .expect_err("neither path is a readable regular file");
         assert_eq!(error.code(), "ERR-BUNDLE-6115", "{error:?}");
@@ -461,7 +470,89 @@ fn a_directory_or_a_missing_file_is_refused_as_unreadable_without_naming_its_hos
             shown.contains(leaf),
             "the refusal lost the name a person can act on: {shown}"
         );
+        assert!(shown.contains(reason), "{shown} does not state {reason:?}");
+        if path == &missing {
+            assert!(
+                !shown.contains("disappeared"),
+                "a file that was never here was reported as one that left: {shown}"
+            );
+        }
     }
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn the_name_a_person_chose_is_kept_beside_the_name_a_bundle_is_allowed_to_use() {
+    // `N01-F02`: `artifacts/<sanitized leaf>` is what a portable folder may carry, and it is what a person
+    // who chose `固件镜像.bin` was shown — a name that is not the one they typed. The two roles need two
+    // fields: the archive name stays exactly where `04_TECH/28` §4.3 E-1 put it, and the display name is
+    // the chosen leaf, with its directory and its drive letter left behind.
+    let root = temp_root("observe-display-name");
+    let root_text = root.to_string_lossy().into_owned();
+    for (chosen, archive, display) in [
+        ("固件镜像.bin", "bin", "固件镜像.bin"),
+        ("固件.bin", "bin", "固件.bin"),
+        ("镜像.bin", "bin", "镜像.bin"),
+        ("my image.bin", "my-image.bin", "my image.bin"),
+        ("UPPER.BIN", "UPPER.BIN", "UPPER.BIN"),
+        ("app.bin", "app.bin", "app.bin"),
+    ] {
+        let path = write_scratch(&root, chosen, b"BYTES");
+        let observed = observe_attachment(&path, ArtifactKind::Bin)
+            .unwrap_or_else(|error| panic!("`{chosen}` is a readable BIN: {error}"));
+        assert_eq!(
+            observed.file_name, archive,
+            "the archive name moved: {chosen}"
+        );
+        assert_eq!(
+            observed.display_name, display,
+            "the name the person chose was not kept: {chosen}"
+        );
+        assert!(
+            !observed.display_name.contains(&root_text),
+            "the display name carried the folder it was read from: {}",
+            observed.display_name
+        );
+        assert!(
+            !observed.display_name.contains('/') && !observed.display_name.contains('\\'),
+            "the display name carried a separator: {}",
+            observed.display_name
+        );
+        let _ = std::fs::remove_file(&path);
+    }
+
+    // Two leaves that fold onto one archive name are still two files a person can tell apart, and the
+    // collision rule that ships them as two entries is unchanged by any of this.
+    let first = observe_attachment(&write_scratch(&root, "固件.bin", b"ONE"), ArtifactKind::Bin)
+        .expect("a readable BIN");
+    let second = observe_attachment(&write_scratch(&root, "镜像.bin", b"TWO"), ArtifactKind::Bin)
+        .expect("a readable BIN");
+    assert_eq!(first.file_name, second.file_name);
+    assert_ne!(first.display_name, second.display_name);
+
+    // And the identity rule `04_TECH/28` §5 froze survives the new field: two attachments carrying the same
+    // bytes under different leaves project to one Gate row, so one run id either way.
+    let same_bytes = observe_attachment(
+        &write_scratch(&root, "copy.bin", b"BYTES"),
+        ArtifactKind::Bin,
+    )
+    .expect("a readable BIN");
+    let unicode = observe_attachment(
+        &write_scratch(&root, "固件副本.bin", b"BYTES"),
+        ArtifactKind::Bin,
+    )
+    .expect("a readable BIN");
+    assert_eq!(
+        same_bytes.as_gate_fact(),
+        unicode.as_gate_fact(),
+        "a leaf name reached the row the Gate binds"
+    );
+    let context_of = |row: &GateAttachmentFact| context(vec![row.clone()]);
+    assert_eq!(
+        run_id(&context_of(&same_bytes.as_gate_fact())),
+        run_id(&context_of(&unicode.as_gate_fact())),
+        "renaming an attachment moved its run id"
+    );
     let _ = std::fs::remove_dir_all(&root);
 }
 

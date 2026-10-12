@@ -495,6 +495,37 @@ interpretation of the data rather than more settings switches. This round propos
 unit is what `AGENTS.md` 1 forbids. **Separately and not to be lost behind this unit: the old V1 cohort build's GitHub
 Artifact records expire 2026-10-22 and still need their own private archival.** Read, then stop.
 
+ON 2026-10-11 THE OWNER ACCEPTED B1-U3, AUTHORIZED ITS PUSH, AND DISPATCHED NEXT-08. The paragraph above was true
+when it was written and is kept unedited; this is the live pointer. `NEXT-07` reviewed B1-U3 read-only and returned
+`ACCEPT_WITH_EXPLICIT_LIMITS` on re-measurement — 17/17 gate, 1,056 Rust across 49 result lines, 379 UI in 13 files,
+918 keys per language with zero asymmetric keys, Core and CLI holding zero references to the preferences file, the
+v1→v3 upgrade and both the future-version and damaged-document refusals proved on the Owner's own `settings.json`,
+and the dev store left with no new row — while naming nine non-blocking defects, two of which (D1 `format.ts`'s
+`ABSENT = 'Not present'` inside Chinese captions, D2 `RankBar`'s `'no magnitude'` fallback) make the round's own
+"zero hardcoded text nodes in any non-test `.tsx`" sentence false as written. The Owner then supplied the push
+authorization in the exact words the review round demanded, and `e0b8fc4..a0b5c88` went up as an ordinary
+fast-forward: **`origin/main` is `a0b5c886051a6b10042ea26f52809baea713d7af`**, read back through the GitHub API and
+`git ls-remote`, and run **#101 (`38207073344`)** is green on all ten jobs — Rust **1,056** on Windows and **1,057**
+on Ubuntu (49 result lines each), UI **379 in 13 files** on both, drift 8/8 at 852 tracked / 850 sums / 984 tree
+lines, dependency policy clean, three packages, macOS core smoke. **The Windows/Ubuntu difference of one is a
+pre-existing `cfg` split — four `source_symlink_posix::*` cases against three Windows-only ones — so no later round
+may write "POSIX will equal Windows" as a projection; measure it or say NOT_VERIFIED.** `REMOTE_CI_PROVEN` is now
+true for B1-U3 and `INSTALLED_VERIFIED` is still not claimed for any B1 unit, because nobody has installed and
+operated a CI-built B1 installer.
+
+**The live word is `B2_U1_FILE_WORKFLOW_INTEGRITY`, dispatched by `NEXT-08` v1.1 on 2026-10-11** (archived with its
+v1.0 contract, `NEXT-07` and the B1-U2/B1-U3 review, digests measured against the delivered bytes in
+`10_AUDIT/SOURCE_PROMPTS/README.md`). Its scope is exactly the four reproducible gaps `NEXT-01` recorded —
+N01-F01 the two different bases `--attach` resolves against, N01-F02 a chosen Unicode file name collapsing to `bin`
+on screen, N01-F03 `verify_bundle_portability.py` failing on a legal no-baseline bundle, N01-F04 the CLI's 6103/6118
+versus the desktop's 6102 for one changed attachment — and nothing else: no parser growth, no new Gate or bundle
+contract, no golden or schema change, no UI redesign, no B1-U4, no B2-U2, no V1 work. It commits locally only. The
+Owner's v1.1 grants one narrow exception to its own pointer-conflict STOP rule, which is the correction of the
+stale live-state records in these three files, and it does not relax any other `AGENTS.md` rule. B1-U3's D1–D9, the
+`NEXT-05` correctives C1/C2/C3, and light `diff.removed` at 4.4974:1 against a 4.5 floor stay on the register and
+are not folded into this unit. **Separately and not to be lost behind it: the old V1 cohort build's GitHub Artifact
+records expire 2026-10-22 and still need their own private archival.** Read, then start Step 0.
+
 ```
 
 ## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do

@@ -2530,6 +2530,81 @@ fn a_stored_run_that_no_longer_recomputes_is_refused_before_any_write() {
     );
 }
 
+/// `N01-F04`: one withdrawn attachment, two surfaces, two codes, and the reason is the request shape rather
+/// than anything about the file. The command line holds no stored run (`selected_run_id: None`), so there is
+/// no verdict for the set to disagree with and the change surfaces as the file-level refusal `6118`; the
+/// desktop exports against the run a person selected (`Some`), and the recomputed context stops that first,
+/// at `6102`, before any file is compared. Both refuse, both leave the destination empty, and neither surface
+/// is allowed to be the one that ships.
+#[test]
+fn a_withdrawn_attachment_is_refused_by_the_surface_that_holds_a_selected_run_and_by_the_one_that_does_not()
+ {
+    // Both halves start from the same world and the same withdrawal. The policy asks the analyzed build for
+    // its own kinds and nothing of the attachments, so the verdict is not what moves: only the set is (`M10`
+    // established that reading, and a policy that required the withdrawn kind would answer `6101` here).
+    let mut cli = World::new("n01-f04-cli", PASSING_CONFIG);
+    let cli_bin = cli.bin.clone();
+    let cli_hex = cli.hex.clone();
+    cli.attach(&cli_bin, ArtifactKind::Bin);
+    cli.attach(&cli_hex, ArtifactKind::IntelHex);
+    let cli_plan = prepare_with_attachments(&cli.request(), &cli.attachments)
+        .expect("the release is prepared");
+    let withdrawn: Vec<AttachmentSelection> = cli
+        .attachments
+        .iter()
+        .filter(|selection| selection.path != cli_hex)
+        .cloned()
+        .collect();
+    let cli_error = cli_plan
+        .publish_with_attachments(&cli.request(), &withdrawn, &cli.parent("f04-cli"), false)
+        .expect_err("one fewer attached file is a different release");
+    assert_eq!(cli_error.code(), "ERR-BUNDLE-6118", "{cli_error}");
+    assert!(
+        cli_error.to_string().contains("boot.hex"),
+        "the file-level refusal lost the name a person can act on: {cli_error}"
+    );
+
+    // The desktop's shape: the same world, the same withdrawal, and the run the page is showing named.
+    let mut desktop = World::new("n01-f04-desktop", PASSING_CONFIG);
+    let desktop_bin = desktop.bin.clone();
+    let desktop_hex = desktop.hex.clone();
+    desktop.attach(&desktop_bin, ArtifactKind::Bin);
+    desktop.attach(&desktop_hex, ArtifactKind::IntelHex);
+    desktop.select_stored_run();
+    let desktop_plan = prepare_with_attachments(&desktop.request(), &desktop.attachments)
+        .expect("the preview is built against the selected run");
+    let desktop_withdrawn: Vec<AttachmentSelection> = desktop
+        .attachments
+        .iter()
+        .filter(|selection| selection.path != desktop_hex)
+        .cloned()
+        .collect();
+    let desktop_error = desktop_plan
+        .publish_with_attachments(
+            &desktop.request(),
+            &desktop_withdrawn,
+            &desktop.parent("f04-desktop"),
+            false,
+        )
+        .expect_err("the selected run does not recompute from this set");
+    assert_eq!(desktop_error.code(), "ERR-BUNDLE-6102", "{desktop_error}");
+
+    // Two codes, one rule: neither refusal wrote anything.
+    assert!(
+        !cli.parent("f04-cli")
+            .join(cli_plan.proposed_directory_name())
+            .exists(),
+        "the surface with no selected run shipped a bundle"
+    );
+    assert!(
+        !desktop
+            .parent("f04-desktop")
+            .join(desktop_plan.proposed_directory_name())
+            .exists(),
+        "the surface with a selected run shipped a bundle"
+    );
+}
+
 /// L-4: the bytes a bundle ships are the bytes the judged context carries. Every attachment in the folder has
 /// its own row in the context the run id was computed over, with the kind it was declared as.
 #[test]

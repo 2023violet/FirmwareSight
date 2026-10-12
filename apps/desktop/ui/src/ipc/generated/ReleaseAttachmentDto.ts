@@ -6,13 +6,26 @@
  * Every field here is something Rust measured or a thing the person declared: the digest and the length
  * come from one read of the file, the kind is the owner's declaration, and `provenance` is the word
  * `unknown` because an attached file's build origin is permanently unestablished (`ADR-0030` D-7). The
- * path does not cross, and neither does its directory: `file_name` is the sanitized leaf.
+ * path does not cross, and neither does its directory: `file_name` is the sanitized leaf and
+ * `display_name` is the chosen leaf with its directory dropped.
  */
 export type ReleaseAttachmentDto = { 
 /**
  * Session-local handle, in the shape of every other id here: not portable, not written to a document.
  */
-attachmentId: string, fileName: string, 
+attachmentId: string, 
+/**
+ * The name the bundle is allowed to carry (`04_TECH/28` §4.3 E-1): ASCII-safe, collision-folded, and
+ * the string `artifacts/…` is built from. Not what the release owner typed.
+ */
+fileName: string, 
+/**
+ * What the release owner typed (`N01-F02`): the leaf of the file they chose, in its own characters, so
+ * `固件镜像.bin` is shown as itself rather than as the archive name `bin`. Session-local like every
+ * other field on this boundary — no document in a portable folder is built from it, and its directory
+ * never crossed.
+ */
+displayName: string, 
 /**
  * Byte counts of an attached image are far below 2^53, for the same reason `BundleFileRowDto` states
  * for a shipped row: `number` is exact there, and `bigint` would claim a precision the payload does

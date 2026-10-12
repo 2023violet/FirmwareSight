@@ -1,0 +1,39 @@
+FirmwareSight｜NEXT-08 — B2-U1 真实文件工作流与发布体验纠偏
+版本 v1.0｜2026-10-11｜CONDITIONAL CODING AUTHORIZATION REQUIRED｜TDD｜不重做 C1/B1
+
+一、严格准入：未满足就 STOP
+(1) B1-U3 在 NEXT-07 得到独立 Architect ACCEPT / ACCEPT_WITH_EXPLICIT_LIMITS，且任何阻断问题已被针对性修复并重新验收。
+(2) Owner 独立授权普通 fast-forward 推送 B1-U3 的精确已审查提交范围；远端 HEAD 是已审查 SHA，十项 CI 全通过；工作树干净、无竞态更新。未授权则不得 push、不得进入本单元。
+(3) Owner **明确下发本 NEXT-08 作为新的 B2-U1 实施授权**，不是仅仅看过下一步建议；如 .ai/ACTIVE_TASK.md 的 live pointer 与该授权冲突，报告并 STOP。
+(4) 阅读 AGENTS.md、.ai/README/CURRENT_STATE/DECISIONS/ACTIVE_TASK、ADR-0030、04_TECH/28 §4/§5/§6/§9、04_TECH/07_CLI_SPEC.md、2026-10-10 NEXT-01 独立审查发现 N01-F01～F04、已接受的 C1 实现及 B1 国际化/三态主题设计。重新读取实际代码位置，不沿用历史行号。
+
+二、目标与范围
+提升固件工程师实际使用 Release 附件和便携包时的可理解性与工具可靠性。不是扩充 BIN/HEX 解析，也不是重新设计 Settings/UI，更不引入新的分析/发布契约。只处理有可复现证据的四项缺口：
+
+N01-F01 — `fwsight gate --attach` 的相对路径按 CWD，而 `fwsight release prepare --attach` 的相对路径按 `--project` 根解析；失败时 E-1 错误文案把“按另一个相对基准查找”误写成“文件消失”。
+N01-F02 — 中文文件名如 `固件镜像.bin` 通过安全清洗后可能以 `bin` 出现在 UI；两个中文来源名称可能 UI 同名，而 bundle 归档名被消歧。需要区分“本机选中的显示名”和“便携包内的安全路径”。
+N01-F03 — `scripts/verify_bundle_portability.py` 默认要求 `diff.json`，遇到**合法无 baseline** 的单构建 Bundle 直接 `FileNotFoundError`，而 bundle 自身 SHA256SUMS 与 manifest 可能全合法。
+N01-F04 — 同一附件字节变化在 CLI 的 selected_run_id=None 路径可报告 6103/6118，在 Desktop 的 selected_run_id=Some 路径先报告 6102；两个代码不能被错误宣称完全一致。改善诊断解释，不改变身份、安全拒绝次序及错误码。
+
+三、实施前的最小技术决策（写在单元报告，不要额外开长规划包）
+A. F01 先把 `gate`、`release prepare`、`--project`、`--artifact`、`--attach` 的现有路径解析规则表格化并写出绝对路径与两种相对调用的直接实测。如果统一路径基准会改变既有 CLI 参数行为，**不要自行作破坏兼容的选择**。优先以明确、准确、可操作的 CLI Help/文档与拒绝文本解决本轮诊断问题；如果能证明一种一致规则符合既有 CLI 合同且没有可观察兼容破坏，才可在此单元统一并添加回归测试。若需要 CLI breaking semantics 或新版参数，STOP 那一分项并交 Owner 最小决策；其余独立任务继续。
+B. F02 本机 UI 使用尽可能忠于用户所选文件的叶名（含 Unicode），绝对宿主路径不得进入 portable 文件、错误及诊断。bundle 内安全 `artifacts/` leaf、collision、SHA256SUMS、manifest、Release ID、runId 的字节合同保持完全不变。展示名与最终包内相对路径是不同字段/角色，不能用“重命名 bundle 内文件”掩盖 UI 问题。若缺少合法安全的显示名 Carrier，给出最窄 DTO 改动及兼容证据。至少 `固件镜像.bin`、`固件.bin`/`镜像.bin` 同时存在、`my image.bin` 三组测试，比较本机显示与归档名。
+C. F03 无 baseline 是合法情形，先确定到底哪些文件对这种发行是必需的；只有 `diff.json` 缺席属于合法才跳过相应对比检查，**不得允许有 baseline 但损坏或丢失 diff.json 的 Bundle 误过**。其余 SHA256SUMS、Manifest、schema 及原有安全检查必须如常失败或通过。使用真实由 CLI 生成的有/无 baseline bundles 做正负测试；脚本退出码、PASS/SKIP/FAIL 需如实反映，而不是 traceback。
+D. F04 公开说明目前 Gate 重新判断早于 Bundle staleness/refusal 的分支次序；至少各有一个直接测试覆盖 CLI 6103 与 Desktop 6102，明确两端不同但均 fail-closed、无意外落盘。不要改 Core、稳定 error code、有效性顺序或身份以求表面统一。
+
+四、代码实施与测试顺序
+Step 0 只读 preflight：origin/main、HEAD、clean、live pointer、旧 C1/B1 tests 全绿；确认没有 B1-U3 语言/主题残余改动。冻结本阶段真实文件 whitelist，严格说明每个修改路径。
+Step 1 TDD RED：新增原始 Unicode basename/碰撞差异证明、单构建 Bundle portable verifier 失败证明、路径冲突诊断证明、双侧错误顺序证明；可使用隔离临时工程、固定 Fixture、脚本标准库。对于被归类为本轮不兼容的 F01 分项，可以只新增“行为明示”验证，不主动修改根语义。
+Step 2 最窄 GREEN：必要的 GUI 展示 DTO、文件名投影、CLI 错误解释、portable verifier 脚本与专项测试。只修改相关代码，原则上不碰 Core parser/diff/gate policy、migrations、portable schema/golden、design tokens、ADR-0031/0032、Settings/catalog 新语言。若改中文/英文 UI 字句，必须同时维护已落地 Catalog 的对应 key/param 与覆盖测试。
+Step 3 End-to-end：中文/空格/长名称、相对与绝对路径、case-folded 重名、只读/文件丢失、hash/size 变化、无 baseline/baseline，以及真实桌面附件列表；确认在两主题和两语言显示正确、按钮可操作，必要时保存 dev screenshots。显示原始 basename 绝不作为 Portable Manifest 的 source path 泄露。
+Step 4 回归：cargo fmt/test/clippy、pnpm test/typecheck/lint/build、generator/ipc/schema/golden drift、scripts/check.py 全部当前权威步骤、baseline verifier；记录真值。此前 C1 Gate+Bundle 六链及 B1 语言、主题、偏好身份隔离不能回归。
+Step 5 提交：stage 精确白名单→完整检查针对 staged tree→本地提交→clean，不 push；简短交付报告（改动/实测/风险/不触碰项）。状态 `LOCAL_B2_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`，严禁自授 Architect ACCEPT。
+
+五、STOP 边界
+发现任务需要改不兼容 CLI flag 语义、Snapshot/Gate/Release fingerprint grammar、portable schema major、黄金字节、UI 权限/网络、BIN/HEX parser、临时全盘文件读取、不同于旧项目的新设置项时，不得默默实施；保留此分项未完成，给 Owner 一条具有具体影响的窄裁决，继续其他独立分项或按安全边界停止。
+有 baseline 但 diff 损坏不允许被当合法缺席；拒绝之后不允许产生半成品；同一个附件集合在两端的 Gate/Bundle 身份必须保持一致。
+
+六、完成标准与后续
+最少交付 4 条直接可执行的故障复现/回归；U3 的中英主界面没有重要文案回退；C1 其余解释和字节身份没有改变；独立架构审查、远端 CI、实际安装验证仍分别待确认。
+通过后可规划 B2-U2：基于 GCC/Clang ELF + GNU ld MAP 与真实 Fixture 的 Flash load / RAM runtime / VMA/LMA / Region / NOLOAD 解释和证据层级评审；不在本 B2-U1 里顺手开始解析器扩张。
+旧 V1 cohort 的 GitHub artifact 11573661113 于 2026-10-22 到期，须独立私有归档，不用 B2 新构建替换旧 cohort。

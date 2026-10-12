@@ -1020,6 +1020,7 @@ fn release_attachment_dto(id: &str, row: &ReleaseAttachment) -> ReleaseAttachmen
     ReleaseAttachmentDto {
         attachment_id: id.to_owned(),
         file_name: row.file_name.clone(),
+        display_name: row.display_name.clone(),
         byte_size: row.byte_size,
         sha256: row
             .sha256

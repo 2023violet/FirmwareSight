@@ -1,0 +1,48 @@
+FirmwareSight｜NEXT-08 v1.1 — B2-U1 正式下发：真实文件工作流与发布体验纠偏
+2026-10-11｜OWNER DISPATCH TEXT｜受控实施｜TDD｜不重新开发 C1/B1｜不自动推送
+
+【使用与授权边界】
+本文件是供 Owner 显式下发的执行指令；仅当 Owner 将其作为新任务发送给 Coding Agent 并明确批准时，才构成 B2-U1 的实施授权。它以《FirmwareSight_NEXT_08_B2U1_File_Workflow_Integrity_2026-10-11.txt》v1.0 为技术合同，保留其中 F01–F04、技术决策 A–D、Step 0–5、STOP 与验收要求；v1.1 仅对“已完成 B1-U3 推送/CI 后，过期项目指针导致自相矛盾的 STOP”作一次明确、受限的 Owner 裁决，补充准确的远端证据记录方式。除这里明示的覆盖点外，原 NEXT-08 的规则完全继续有效。若原文件未提供，应在继续前索取其准确文本，禁止依赖摘要冒充全合同。
+
+一、Owner 本次决定（不是 Agent 的自授权）
+1. 接受 B1-U3 为 ACCEPT_WITH_EXPLICIT_LIMITS：已验证范围包含 Settings 语言偏好、旧版本设置迁移、英文/简体中文界面及 Gate/Bundle 机器事实不变；D1/D8 等遗留项继续登记为非阻断或待具体分类，不宣称语言质量完美，更不宣称 B1 的 CI 安装包已完成安装操作验收。
+2. 确认 B1-U3 已经按单独批准完成普通 fast-forward push：a0b5c886051a6b10042ea26f52809baea713d7af 目前是 origin/main 的审核基准。GitHub Actions #101 / run 38207073344 在该 SHA 上 completed/success，十项 Job 全部 success。必须重新读回，不能仅复述此处。
+3. **明确授权启动 NEXT-08 / B2-U1 实施。** 仅限原合同四个缺口 N01-F01～F04。禁止以此自行启动 B1-U4、B2-U2、全局 UI 改版、Golden/Schema/指纹更改、BIN/HEX 解析、V1 招募或商业发行。
+4. **不授权另开、单独提交及推送一轮 DOCS-ONLY 收尾。** 把当前 live pointer 的过期语句修正与 B2-U1 的实施放进同一受控开发轮次，合并在本轮本地提交和最终 staged-tree 检查中。不得为了同步文档反复产生“修正上一提交描述”的无限后继提交；若报告中的后续 SHA 只能在提交后得知，采用诚实的 post-commit readback 摘要，不为追求仓库文件自指最新哈希再创建一轮提交。
+5. 对原 NEXT-08 §一(3) 仅作如下窄覆盖：**已验证的 B1-U3 已推送、而 .ai/ACTIVE_TASK.md/.ai/CURRENT_STATE.md/BASELINE.yaml 仍以现在时声称未推送或建议 B1-U4/NEXT-05，是已知的滞后文档，不再触发立即 STOP；可先现场查明并在本轮的 Step 0.5 以最小追加式状态记录矫正，再进入代码。** 任何其他未识别的 LIVE pointer 冲突、未知 ACTIVE_TASK、HEAD 漂移或新增未授权工作，仍立即 STOP。此例外不解除 AGENTS.md 的接手规则。
+6. 本轮仅可本地提交，不可 push、改 tag、删分支、force、修改 Owner 现有 store/settings 文件、删 V1 冻结工件。B2-U1 完成后等独立验收与 Owner 再授权。
+
+二、不可跳过的 Step 0：真实状态预检
+A. 在仓库上运行 git rev-parse HEAD、git rev-parse origin/main、git ls-remote origin refs/heads/main、git status --porcelain=v1 -uall、git rev-list --count origin/main..HEAD、git merge-base --is-ancestor。预期 HEAD==origin/main==远端 refs/heads/main==a0b5c886051a6b10042ea26f52809baea713d7af，工作树空，ahead=0。任一不符 STOP，报告差异，不自行 rebase/pull/push。
+B. 读回 GitHub Actions run 38207073344 的 head_sha、十 Job 结论及各测试日志。已知用于比对的实测是：Windows Rust 1,056/49 suites，Ubuntu Rust 1,057/49 suites，UI 双平台 379/13 files，drift 8/8；任何新事实以本次读回为准。平台差 1 来自既有 cfg 分裂，不得再写“POSIX 与 Windows 预计相同”。
+C. 依 AGENTS.md 顺序读 README.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、04_TECH/09_TECH_DECISION_MATRIX.md，并读 ADR-0030、04_TECH/28 §4/§5/§6/§9、04_TECH/07_CLI_SPEC.md、ADR-0031/0032、原 NEXT-08 v1.0、2026-10-10 NEXT-01 审查的 F01-F04 与所需真实代码。禁止继承历史行号。
+D. 确认到的冲突仅为已经陈旧的 B1-U3 未推送状态、旧的下一任务候选、POSIX 测量投影；若看到别的活动任务、新 HEAD 或产品边界冲突，则 STOP。
+
+三、Step 0.5：最小“活状态”修正，不能变成新项目
+允许修改且只为修正活状态的文件：.ai/ACTIVE_TASK.md、.ai/CURRENT_STATE.md、BASELINE.yaml。变更规则：
+- 在 ACTIVE_TASK 首个 live-pointer fence 的末端附加新的带日期 CURRENT POINTER，明确 B1-U3 的已审查远端状态、Owner 本次选择 NEXT-08/B2-U1 为当前授权实施单元及其不推送界限。之前记述的历史文字留存，不抹除。
+- 在 CURRENT_STATE 的最上方当前状态处追加/更新当前有效指针，明显标出早先“NOT PUSHED”是截至当时的历史记录，现已经由 GitHub #101 的实测取代。不得继续让过期语句成为第一处醒目结论。
+- 在 BASELINE.yaml 添加一个 **post-push live closeout / remote CI** 新记录（或与现有版本治理相容的 successor 字段），记录准确 full SHA、#101/run id、十 Job success、Windows 1056、Ubuntu 1057、UI 379/379、drift 8/8；本地历史记录中“推送之前 NOT PUSHED / POSIX PROJECTED”的字句当时为真，不要倒写成曾经远端已通过，也不要将投影冒充实测。验证 YAML 结构与现有 baseline verifier。
+- 不改 ADR 历史结论，不碰 V1 frozen artifacts，不凭执行者的自评擅写 INSTALLED_VERIFIED。把 NEXT-07/NEXT-08 prompt 文件归档进 10_AUDIT/SOURCE_PROMPTS 仅当当前轮次确有可验证原始字节；计算 SHA256/行数/CR 并如实记录，不能重建后冒称 transport-identical。未经授权不得扩大治理文件白名单。
+- 将这三处状态变更保留在同一开发轮次，连同 B2-U1 的源代码一起作最终 staged gate 与本地提交。Step 0.5 完成后，再进入 RED 测试。
+
+四、B2-U1 功能实现边界（严格继承原 NEXT-08）
+N01-F01 — gate --attach 相对路径按 CWD，而 release prepare --attach 相对路径按 --project；先分别实测绝对路径和相对路径，记录现有行为。禁止擅改 CLI 兼容语义。若一致化需要 breaking change，则 F01 暂停该子项并向 Owner 交窄决策；可优先修正使用说明与路径诊断，确保用户知道哪个基准目录在生效。错误不得错误地说“文件消失”，但错误码/身份/refusal 顺序要保持。
+N01-F02 — Release 附件的本地展示名保存所选文件原始 Unicode 叶名，不泄露绝对主机路径。需要区分“原始显示名”和“Bundle 中合法安全相对路径”。不变更 bundle 内安全命名、碰撞、manifest、SHA256SUMS、Release ID、runId。至少覆盖 固件镜像.bin、固件.bin/镜像.bin 同时存在、my image.bin，测试 UI 展示和归档名角色差异。
+N01-F03 — scripts/verify_bundle_portability.py 必须接受真正合法的无 baseline 单构建 Bundle；仅在无 diff 是合同允许的场景跳过与 diff 有关的核验。有 baseline 而损坏/丢失 diff.json 必须 FAIL，manifest/SHA256SUMS/schema/路径防御照常检查。真 CLI 生成的有/无 baseline bundle 正反测试，不能只有自行手工制造的假 bundle。
+N01-F04 — 在不改变 Gate-before-staleness、输入身份、ERR-* 语义和 fail-closed 行为的前提下说明 CLI selected_run_id=None 和桌面 Some 对同一附件变化出现 6103/6118 与 6102 的先后分支。使用实名 CLI/desktop regression assert 两端分别按实际规则拒绝，并检查拒绝没有留下不完整目的目录。
+
+五、实施与验证
+- 对每个独立缺陷按 TDD：先最小 RED / 有效非空断言，后最小 GREEN；不可通过改旧断言或不运行测试掩盖行为变化。
+- 修改文件仅限相关 CLI、project evidence/bundle、IPC/desktop UI DTO、i18n 已有目录中的对应 zh/en 键、便携 verifier 脚本、对应测试和 Step 0.5 三项治理文件。精确列出 whitelist；遇到新增文件需先说明必要性。
+- 复测双语言、双主题、Windows 实机可交互的 Release 附件界面；验证中文/空格/长叶名与 case-folded 重名、基线有无、文件丢失/变动、正常和异常导出。
+- 固件 ELF/MAP 的计算、Gate 五态、证据等级、BIN/HEX 仍只是 Release-Attached Byte Evidence、CLI JSON/退出码、Error Code、canonical fingerprint、project 配置和所有 portable contract/goldens 不得产生未经批准的语义变化。
+- 全量 cargo fmt/test/clippy、UI test/typecheck/lint/build、IPC/generated、baseline verifier、python scripts/check.py。记录完整 staged-tree 17/17 退出码，Windows/POSIX 未测就标 NOT_VERIFIED，不伪造实际安装验证。
+- 只做本地提交，git status clean；向 Owner 交 F01-F04 各项 PASS/限额/未完成判定、具体复现命令、技术债列表和下次所需的人工裁决。状态最多 LOCAL_B2_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING；不可签 Architect ACCEPT，也不可 push。
+
+六、额外边界与时间事项
+- B1-U3 的 D1（Compare 内 Not present）和 RankBar no magnitude、D8 英文残留归类、浅色 diff.removed 4.4974:1 的旧 AA 缺口，继续单列追踪；本 B2-U1 不进行全局 i18n 清扫，不改两份 report golden（未经专门授权）。如这次实际触及某个界面文案，则同步更改 zh/en 对应词条，并添加回归证明，范围不能蔓延。
+- V1 cohort GitHub artifact 11573661113 的 2026-10-22 到期私有归档仍是独立 Owner 事务。本单元不得重新冻结、替换、发布或删除该 cohort 构建。
+- 若发现某条修复依赖破坏兼容、改变可移植格式、改变身份/安全或需要新增权限，停下该子项并给出影响矩阵和最小选择，仍可继续不相依的安全子项。
+
+最终要求：以对嵌入式工程师的真实可用性提升为导向，完成四项可复现修复，给出充分而不过度的证据，阶段完成即停下等下一次人工验收。

@@ -92,6 +92,35 @@ fn gate(project: &TempProject, extra: &[&str]) -> Output {
     run(&args)
 }
 
+/// The same process started somewhere that is not the repository root (`N01-F01` is about which directory a
+/// relative `--attach` is read against, and `run` pins one directory for every other case in this file).
+fn run_from(current_dir: &Path, args: &[&str]) -> Output {
+    let output = Command::new(env!("CARGO_BIN_EXE_fwsight"))
+        .args(args)
+        .current_dir(current_dir)
+        .output()
+        .expect("the fwsight binary is built for its own tests");
+    let stderr = String::from_utf8_lossy(&output.stderr).to_lowercase();
+    assert!(!stderr.contains("panicked"), "the CLI panicked:\n{stderr}");
+    output
+}
+
+/// `gate` run from `current_dir` with the artifact named absolutely, so the only path whose base is under
+/// test is the attachment's.
+fn gate_from(current_dir: &Path, project: &TempProject, extra: &[&str]) -> Output {
+    let dir = project.path().to_string_lossy().into_owned();
+    let artifact = repo_root().join(ARTIFACT).to_string_lossy().into_owned();
+    let mut args = vec!["gate", "--project", &dir, "--artifact", &artifact];
+    args.extend_from_slice(extra);
+    run_from(current_dir, &args)
+}
+
+/// Help text is wrapped at whatever width the terminal reports, so a phrase is searched with the line
+/// breaks folded away rather than assumed to sit on one line.
+fn flattened(body: &str) -> String {
+    body.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
 fn state_of(document: &serde_json::Value, rule: &str) -> String {
     document["findings"]
         .as_array()
@@ -817,6 +846,101 @@ fn an_elf_pointed_at_by_attach_is_recorded_as_declared_and_never_as_an_analyzed_
         state_of(&document, "artifacts.required"),
         "PASS",
         "and the requirement is still met by the analyzed artifact, not by the attached copy"
+    );
+}
+
+#[test]
+fn a_relative_attach_reaches_the_current_directory_and_not_the_project_root() {
+    // `N01-F01`, measured rather than reasoned about: `gate` observes `--attach` where the process stands,
+    // while `release prepare` reads the same flag from the project directory. One leaf name, two bytes.
+    let project = TempProject::new("attach-base", BIN_HEX_POLICY);
+    let hex = attachable(&project, "boot.hex", b":00000001FF");
+    let under_project = attachable(&project, "app.bin", b"UNDER-THE-PROJECT-ROOT");
+    let workdir = project.path().join("elsewhere");
+    std::fs::create_dir_all(&workdir).expect("a directory that is not the project root");
+
+    // Named from a directory that does not hold it, the project root's own file is not what the run sees.
+    let missed = gate_from(
+        &workdir,
+        &project,
+        &["--attach", "app.bin", "--attach", &hex, "--json"],
+    );
+    assert_eq!(missed.status.code(), Some(3), "{}", errors(&missed));
+    assert!(
+        errors(&missed).contains("ERR-BUNDLE-6115"),
+        "{}",
+        errors(&missed)
+    );
+
+    // The same name holding different bytes in the directory the process runs in is the file attached.
+    std::fs::write(workdir.join("app.bin"), b"UNDER-THE-CURRENT-DIRECTORY")
+        .expect("an attachment beside the process");
+    let hit = gate_from(
+        &workdir,
+        &project,
+        &["--attach", "app.bin", "--attach", &hex, "--json"],
+    );
+    assert_eq!(hit.status.code(), Some(0), "{}", errors(&hit));
+    let rows = json_document(&hit)["extensions"]["attachments"]
+        .as_array()
+        .expect("rows")
+        .clone();
+    let sizes: Vec<u64> = rows
+        .iter()
+        .filter_map(|row| row["byte_size"].as_u64())
+        .collect();
+    let project_copy: u64 = b"UNDER-THE-PROJECT-ROOT".len() as u64;
+    let workdir_copy: u64 = b"UNDER-THE-CURRENT-DIRECTORY".len() as u64;
+    assert!(
+        sizes.contains(&workdir_copy),
+        "the bytes under the current directory were not the ones bound: {rows:?}"
+    );
+    assert!(
+        !sizes.contains(&project_copy),
+        "the project root's copy was bound instead: {rows:?}"
+    );
+    // The absolute spelling reaches the same file from either directory, which is why every other case in
+    // this file uses it.
+    let absolute = gate_from(
+        &workdir,
+        &project,
+        &["--attach", &under_project, "--attach", &hex, "--json"],
+    );
+    assert_eq!(absolute.status.code(), Some(0), "{}", errors(&absolute));
+}
+
+#[test]
+fn the_gate_surface_says_which_directory_a_relative_attach_starts_from() {
+    // Help first: the base is a property of the verb, and a release owner choosing between `gate` and
+    // `release prepare` has to be able to see it before the refusal arrives.
+    let help = run(&["gate", "--help"]);
+    assert_eq!(help.status.code(), Some(0), "{}", errors(&help));
+    let body = flattened(&text(&help));
+    assert!(
+        body.contains("--attach <FILE>"),
+        "the flag is not in the help:\n{body}"
+    );
+    assert!(
+        body.contains("A relative path is read against the current working directory"),
+        "the help does not name this command's base:\n{body}"
+    );
+
+    // Then the refusal, which must repeat the base it applied without quoting the directory itself.
+    let project = TempProject::new("attach-base-hint", BIN_HEX_POLICY);
+    let output = gate_from(
+        project.path(),
+        &project,
+        &["--attach", "nowhere.bin", "--attach", "also-nowhere.hex"],
+    );
+    assert_eq!(output.status.code(), Some(3), "{}", errors(&output));
+    let stderr = errors(&output);
+    assert!(
+        stderr.contains("hint: `gate` read that path from the current working directory"),
+        "{stderr}"
+    );
+    assert!(
+        !stderr.contains(&project.path().to_string_lossy().to_string()),
+        "the hint carried the host directory: {stderr}"
     );
 }
 

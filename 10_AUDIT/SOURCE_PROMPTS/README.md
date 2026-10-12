@@ -1741,3 +1741,46 @@ non-blocking feedback round.
   `38160046797` with ten jobs green before dispatching `NEXT-06`. The reviewing agent was the same process that had
   implemented B1-U2 one round earlier; that is stated here rather than hidden, and it is why `NEXT-06` §强制STOP
   names passing an internal AI self-review off as an Architect `ACCEPT`.
+
+
+## NEXT-07 / NEXT-08 — B1-U3 acceptance, its push, and the B2-U1 dispatch (2026-10-11, third batch)
+
+- Files, all four archived verbatim in this directory:
+  - `FirmwareSight_NEXT_07_B1U3_Independent_Acceptance_2026-10-11.txt` — 6,442 bytes, 35 lines, **0 `CR`**,
+    sha256 `182e4329aeb5a8f12295641039cf919c2ca89fcc85207c566d22339f95673ae4`
+  - `FirmwareSight_NEXT_08_B2U1_File_Workflow_Integrity_2026-10-11.txt` — 7,558 bytes, 39 lines, **0 `CR`**,
+    sha256 `7961d0f127796906e941441b705dd87d0578d226def25ae9ec1dc54007487e71`
+  - `FirmwareSight_B1U2_B1U3_Architect_Review_2026-10-11.md` — 4,866 bytes, 39 lines, **0 `CR`**,
+    sha256 `050278e288bc2ffb80e82d9b4971aabfc18f5bfdd6776272951e5e3c7ded0b87`
+  - `FirmwareSight_NEXT_08_v1.1_B2U1_Owner_Dispatch_2026-10-11.txt` — 10,195 bytes, 48 lines, **0 `CR`**,
+    sha256 `3b302840a44e708d3829506a88d31fe44056554ccdf45bd478e6ade164f33dd3`
+- Delivered in `C:\Users\16429\Downloads\FirmwareSight_B1U3_Review_To_B2U1_Prompts_2026-10-11\` (the first three) and
+  as a single file at `C:\Users\16429\Downloads\` (v1.1, which arrived later as the Owner's own dispatch). Each
+  archived copy was `cmp`-verified against its delivered bytes when it was written here, so the digests above are the
+  digests of what was delivered and not of anything reconstructed; all four were LF-only as delivered.
+- Authority. `NEXT-07` is **READ-ONLY ARCHITECT REVIEW** — read, run tests in a gitignored sandbox, observe the
+  running app, and nothing else: no push, no tracked-file modification, no B2 development, and it forbids writing an
+  internal AI self-review off as an Architect `ACCEPT`. `NEXT-08` v1.0 is the **technical contract** for B2-U1
+  (F01–F04, decisions A–D, Steps 0–5, its STOP list) and grants nothing by itself; v1.1 is not a rewrite of it but a
+  single narrow Owner ruling on top: after B1-U3 was verified pushed, the stale live-state text in
+  `.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md` and `BASELINE.yaml` no longer triggers v1.0 §一(3)'s immediate STOP,
+  and those three files may be corrected inside the B2-U1 round instead of by a separate docs commit. v1.1 §三 also
+  authorizes this prompt archive, with measured digests, and nothing beyond it — the whitelist is those three files
+  plus this directory, which is why `04_TECH/07_CLI_SPEC.md`'s "同一处观测函数" sentence (readable as "same path base",
+  which F01 shows it is not) is reported as debt rather than edited here.
+- What `NEXT-07` settled that a later round must not re-litigate: a contrast ratio below 4.5 is not rounded up and a
+  frozen golden is not a WCAG exception; `Emulation.setEmulatedMedia` is 模拟媒体查询事件 and never a real OS switch;
+  `%APPDATA%` redirection does **not** move the Windows Known Folder (measured — `GetFolderPath('ApplicationData')`
+  ignores it), so there is no per-process isolation of `app_config_dir()` and the honest response is to downgrade
+  those checks, not to fake them; and a cross-language comparison must assert the language actually changed, because
+  the first attempt at it compared Chinese to Chinese and reported a vacuous pass.
+- Outcome, 2026-10-11. `NEXT-07` returned **`ACCEPT_WITH_EXPLICIT_LIMITS`** on re-measurement (17/17 gate, 1,056 Rust
+  across 49 result lines, 379 UI in 13 files, 918 keys per language, Core and CLI holding zero references to the
+  preferences file, v1→v3 plus the future-version and damaged-document refusals proved on the Owner's real
+  `settings.json`, the dev store left with no new row) and named nine non-blocking defects, two of which — `format.ts`'s
+  `ABSENT = 'Not present'` inside Chinese captions and `RankBar`'s `'no magnitude'` fallback — make B1-U3's own
+  "zero hardcoded text nodes in any non-test `.tsx`" sentence false as written. The Owner then gave the push
+  authorization in the exact words §六 required; `e0b8fc4..a0b5c88` went up as an ordinary fast-forward and remote run
+  **#101** (`38207073344`) read back green over ten jobs, with Rust 1,056 on Windows and **1,057** on Ubuntu — a
+  pre-existing `cfg` split, which is why no later round may present a POSIX projection as a measurement.
+  `INSTALLED_VERIFIED` remains unclaimed for every B1 unit.

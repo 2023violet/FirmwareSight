@@ -1095,6 +1095,11 @@ const ATTACHMENT_KINDS: readonly string[] = ['bin', 'hex', 'unknown'];
  * attached file's build origin is permanently unestablished (`ADR-0030` D-7). Nothing is hashed, sized or
  * classified on this side of the boundary (`AGENTS.md` 3).
  *
+ * The file cell shows `displayName`, the leaf as its owner chose it. `fileName` is the same file's
+ * archive-safe name, and it is a different string whenever the chosen name carries characters a portable
+ * folder will not hold — `固件镜像.bin` files itself as `bin`, and showing that back to the person who
+ * picked the file would be a name they never typed (`N01-F02`).
+ *
  * The verbs are **Attach** and **Withdraw** beside the **Ship** flow, never Analyze, and §9's limitation
  * sentence sits in the caption — where a reader is forming the expectation — rather than in a tooltip.
  *
@@ -1201,12 +1206,12 @@ function Attachments({
               rows.map((row) => (
                 <tr key={row.attachmentId}>
                   <th scope="row" className={styles['mono']}>
-                    {row.fileName}
+                    {row.displayName}
                   </th>
                   <td>
                     <select
                       className={styles['select']}
-                      aria-label={t('release', 'attachments.kindPicker', { name: row.fileName })}
+                      aria-label={t('release', 'attachments.kindPicker', { name: row.displayName })}
                       value={row.kind}
                       disabled={busy}
                       onChange={(event) => {
