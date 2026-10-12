@@ -108,6 +108,48 @@ fn memory_golden_records_evidence_and_not_only_numbers() {
 }
 
 #[test]
+fn human_memory_report_explains_each_section_against_both_budgets() {
+    let root = repo_root();
+    let request = AnalysisRequest::new(root.join("fixtures/elf/p0-dual-region/firmware.elf"))
+        .with_map(root.join("fixtures/elf/p0-dual-region/firmware.map"));
+    let analysis = pipeline::analyze(&request).expect("real linked fixture must analyze");
+    let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, "firmware.elf");
+    let report = render::render_human(&dto);
+
+    assert!(
+        report.contains("Section contributions (nonvolatile / runtime RAM bytes; evidence basis)")
+    );
+    assert!(report.contains(
+        ".data (elf.section_header[3]): 4 / 4 bytes [observed; map-memory-configuration+elf-load]"
+    ));
+    assert!(report.contains(
+        ".bss (elf.section_header[4]): 0 / 4 bytes [observed; map-memory-configuration+elf-load]"
+    ));
+    assert!(report.contains(
+        ".ota (elf.section_header[5]): 64 / 64 bytes [observed; map-memory-configuration+elf-load]"
+    ));
+}
+
+#[test]
+fn human_memory_report_keeps_unattributed_ram_unknown_without_a_map() {
+    let root = repo_root();
+    let request = AnalysisRequest::new(root.join("fixtures/elf/p0-basic/firmware.elf"));
+    let analysis = pipeline::analyze(&request).expect("real ELF fixture must analyze");
+    let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, "firmware.elf");
+    let report = render::render_human(&dto);
+
+    assert!(report.contains(
+        "Runtime RAM:              72 bytes or more, 2 section(s) unattributed [derived]"
+    ));
+    assert!(report.contains(
+        ".persistent (elf.section_header[5]): 0 / unknown bytes [observed; elf-address-and-flags]"
+    ));
+    assert!(report.contains(
+        ".noinit (elf.section_header[7]): 0 / unknown bytes [observed; elf-address-and-flags]"
+    ));
+}
+
+#[test]
 fn without_region_evidence_the_same_source_is_reported_as_weaker_evidence() {
     // The two fixtures compile the same source. What differs is the available load evidence,
     // and the model must report that difference rather than producing identical claims.

@@ -113,6 +113,27 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
             value.memory.dual_accounted_sections.join(", ")
         ));
     }
+    if !value.memory.contributions.is_empty() {
+        out.push_str("  Section contributions (nonvolatile / runtime RAM bytes; evidence basis)\n");
+        for contribution in &value.memory.contributions {
+            let name = contribution
+                .section_name
+                .as_deref()
+                .unwrap_or("unknown section");
+            out.push_str(&format!(
+                "    {name} ({}): {} / {} bytes [{}; {}]\n",
+                contribution.section_locator,
+                contribution
+                    .nonvolatile_bytes
+                    .map_or_else(|| "unknown".to_owned(), |bytes| bytes.to_string()),
+                contribution
+                    .runtime_ram_bytes
+                    .map_or_else(|| "unknown".to_owned(), |bytes| bytes.to_string()),
+                contribution.classification,
+                contribution.evidence_basis,
+            ));
+        }
+    }
 
     out.push_str("\nCounts\n");
     out.push_str(&format!(
