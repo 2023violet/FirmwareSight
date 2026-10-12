@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Product / Delivery"
-last_updated: "2026-10-10"
+last_updated: "2026-10-12"
 ---
 
 # Stage Gates
@@ -334,6 +334,14 @@ GA1 General Availability
 
 自然语言 `Problem Validation / Technical Validation / Product MVP / Productization / Beta / RC / GA`
 只作描述；自动化、任务、交付和 Agent 必须使用上述 identifier。
+
+**澄清（2026-10-12，docs-only closeout）：identifier `B1` 现在有两种用法，读到的时候必须分辨。** 上表里 `B1 = Private
+Beta`，是一个尚未开启的阶段门；`.ai/`、`B1_VALIDATION/`、`BASELINE.yaml` 里的 `B1_U1` / `B1_U2` / `B1_U3` 是 Owner
+v0.2 计划里 **界面可读性 track** 的三个单元编号，与这个阶段门无关。2026-10-06 到 2026-10-09 那些行写的"This line is
+not G3, B1, RC1 or GA1"用的是第一个含义，那句话仍然成立：Track B1 的三个单元 CLOSED、已推送，都**没有**开启 Private
+Beta 阶段，`B1 Private Beta` 依旧是 UNREACHED，开启它需要它自己的 Owner 授权。同理 `B2_U1` 系列是文件工作流 track 的
+单元，不是阶段门。本轮只登记这个歧义并给出读法，不重命名任何已提交的记录——把 track 改名还是把阶段阶梯改号，是
+Owner 的决定。
 
 ### Pre-G1 条件实现（ADR-0025，2026-09-28 登记；sequencing 已被 ADR-0026 取代）
 
