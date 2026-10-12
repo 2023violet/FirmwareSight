@@ -312,3 +312,68 @@ fn memory_accounting_golden_passes_on_both_fixtures() {
         check(&format!("golden/core/{fixture}-memory.json"), &memory);
     }
 }
+
+#[test]
+fn cli_human_report_shows_map_backed_regions_and_never_invents_free_space() {
+    let root = repo_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_fwsight"))
+        .arg("analyze")
+        .arg(root.join("fixtures/elf/p0-dual-region/firmware.elf"))
+        .arg("--map")
+        .arg(root.join("fixtures/elf/p0-dual-region/firmware.map"))
+        .output()
+        .expect("CLI analysis runs");
+    assert!(output.status.success());
+    let report = String::from_utf8(output.stdout).expect("human report is UTF-8");
+
+    assert!(report.contains("Memory regions (mapped section ranges; not contiguous free space)"));
+    assert!(report.contains("ROM (nonvolatile / load image) [map: map.line7]"));
+    assert!(report.contains("Capacity: 1048576 bytes [declared]"));
+    assert!(report.contains("Mapped section ranges: 160 bytes [exact]"));
+    assert!(report.contains("RAM (runtime RAM) [map: map.line8]"));
+    assert!(report.contains("Capacity: 262144 bytes [declared]"));
+    assert!(report.contains("Mapped section ranges: 72 bytes [exact]"));
+    assert!(report.contains(
+        ".data (elf.section_header[3]) VMA 0x20000000; LMA 0x0800005c: 4 bytes [map-memory-configuration+elf-load]"
+    ));
+    assert!(report.contains(".bss (elf.section_header[4]) VMA 0x20000004"));
+    assert!(report.contains(".ota (elf.section_header[5]) VMA 0x20000008"));
+    assert!(report.contains("Remaining contiguous space: unknown"));
+    assert!(report.contains("padding or reserved memory"));
+}
+
+#[test]
+fn cli_human_report_without_a_region_table_states_unknown() {
+    let root = repo_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_fwsight"))
+        .arg("analyze")
+        .arg(root.join("fixtures/elf/p0-basic/firmware.elf"))
+        .output()
+        .expect("CLI analysis runs");
+    assert!(output.status.success());
+    let report = String::from_utf8(output.stdout).expect("human report is UTF-8");
+    assert!(
+        report.contains("Unknown: no supported memory-region table is available (layout: none)")
+    );
+}
+
+#[test]
+fn human_region_names_are_control_safe_and_keep_unicode_readable() {
+    let root = repo_root();
+    let request = AnalysisRequest::new(root.join("fixtures/elf/p0-dual-region/firmware.elf"))
+        .with_map(root.join("fixtures/elf/p0-dual-region/firmware.map"));
+    let analysis = pipeline::analyze(&request).expect("fixture analyzes");
+    let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, "firmware.elf");
+    let mut regions = analysis.memory.region_usage.clone();
+    regions[0].name = "模块\u{1b}[2J\r\nROM".to_owned();
+
+    let report = render::render_human_with_region_usage(&dto, &regions);
+
+    assert!(!report.chars().any(|ch| ch.is_control() && ch != '\n'));
+    assert!(report.contains("模块"));
+    assert!(report.contains(r"\u{1b}[2J\r\nROM"));
+    let json: serde_json::Value =
+        serde_json::from_str(&render::render_json(&dto)).expect("JSON remains valid");
+    assert_eq!(json["memory"]["layoutSource"], "map");
+    assert!(json["memory"].get("regions").is_none());
+}

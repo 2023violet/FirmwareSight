@@ -3,6 +3,8 @@
 
 use serde::Serialize;
 
+use firmwaresight_core::domain::memory::{MemoryRegionUsage, RegionUsageRisk, RegionUsageState};
+
 use crate::dto::AnalyzeResultDto;
 
 /// Compact machine-readable form.
@@ -63,6 +65,20 @@ pub fn document_json<T: Serialize + ?Sized>(value: &T) -> String {
 
 /// The default human-readable rendering. Diagnostics never go here; they go to stderr.
 pub fn render_human(value: &AnalyzeResultDto) -> String {
+    render_human_inner(value, None)
+}
+
+/// Human CLI rendering with Core-computed region evidence. The portable `analysis:1` document is
+/// intentionally unchanged; this is a presentation projection over the same immutable analysis.
+#[must_use]
+pub fn render_human_with_region_usage(
+    value: &AnalyzeResultDto,
+    regions: &[MemoryRegionUsage],
+) -> String {
+    render_human_inner(value, Some(regions))
+}
+
+fn render_human_inner(value: &AnalyzeResultDto, regions: Option<&[MemoryRegionUsage]>) -> String {
     let mut out = String::new();
     out.push_str(&format!(
         "{}\n\n",
@@ -144,6 +160,9 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
             ));
         }
     }
+    if let Some(regions) = regions {
+        render_memory_regions(&mut out, value.memory.layout_source, regions);
+    }
 
     out.push_str("\nCounts\n");
     out.push_str(&format!(
@@ -165,6 +184,118 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
     }
 
     out
+}
+
+fn render_memory_regions(out: &mut String, layout_source: &str, regions: &[MemoryRegionUsage]) {
+    out.push_str("\nMemory regions (mapped section ranges; not contiguous free space)\n");
+    if regions.is_empty() {
+        out.push_str(&format!(
+            "  Unknown: no supported memory-region table is available (layout: {layout_source})\n"
+        ));
+        return;
+    }
+
+    for region in regions {
+        let kind = match region.kind {
+            firmwaresight_core::domain::memory::RegionKind::Nonvolatile => {
+                "nonvolatile / load image"
+            }
+            firmwaresight_core::domain::memory::RegionKind::VolatileRam => "runtime RAM",
+            firmwaresight_core::domain::memory::RegionKind::Unknown => "unknown memory kind",
+        };
+        out.push_str(&format!(
+            "  {} ({kind}) [{}: {}]\n",
+            safe_display_text(&region.name),
+            region.evidence_source,
+            safe_display_text(&region.evidence_id)
+        ));
+        let address_range = region
+            .capacity_bytes
+            .and_then(|capacity| {
+                region
+                    .origin
+                    .checked_add(capacity)
+                    .map(|end| (capacity, end))
+            })
+            .map_or_else(
+                || format!("{} .. unknown", address_text(region.origin)),
+                |(_, end)| format!("{} .. {}", address_text(region.origin), address_text(end)),
+            );
+        out.push_str(&format!("    Address range: {address_range}\n"));
+        match region.capacity_bytes {
+            Some(capacity) => out.push_str(&format!("    Capacity: {capacity} bytes [declared]\n")),
+            None => out.push_str("    Capacity: unknown\n"),
+        }
+        let used = match (region.used_bytes, region.state) {
+            (Some(bytes), RegionUsageState::Exact) => format!("{bytes} bytes [exact]"),
+            (Some(bytes), RegionUsageState::Partial) => format!("at least {bytes} bytes [partial]"),
+            _ => "unknown".to_owned(),
+        };
+        out.push_str(&format!("    Mapped section ranges: {used}\n"));
+        out.push_str(&format!(
+            "    Remaining contiguous space: unknown ({})\n",
+            region.remaining_reason
+        ));
+        let risk = match region.risk {
+            RegionUsageRisk::WithinCapacity => {
+                "no observed section range exceeds the declared limit; this is not a free-space claim"
+            }
+            RegionUsageRisk::Exceeded => "observed section range exceeds the declared capacity",
+            RegionUsageRisk::Review => "review required; attribution is partial or ambiguous",
+            RegionUsageRisk::Unknown => "unknown",
+        };
+        out.push_str(&format!("    Capacity check: {risk}\n"));
+        if !region.sections.is_empty() {
+            out.push_str("    Section evidence:\n");
+            for section in &region.sections {
+                let name = section.section_name.value().map_or_else(
+                    || "unknown section".to_owned(),
+                    |name| safe_display_text(name),
+                );
+                let vma = section
+                    .virtual_address
+                    .value()
+                    .map_or_else(|| "unknown".to_owned(), |value| address_text(*value));
+                let lma = section
+                    .load_address
+                    .value()
+                    .map_or_else(|| "unknown".to_owned(), |value| address_text(*value));
+                out.push_str(&format!(
+                    "      {name} ({}) VMA {vma}; LMA {lma}: {} bytes [{}]\n",
+                    safe_display_text(&section.section_locator),
+                    section.bytes,
+                    evidence_basis_text(section.evidence_basis)
+                ));
+            }
+        }
+        for reason in &region.reasons {
+            out.push_str(&format!("    Review: {}\n", safe_display_text(reason)));
+        }
+    }
+}
+
+fn address_text(address: u64) -> String {
+    format!("0x{address:08x}")
+}
+
+const fn evidence_basis_text(
+    basis: firmwaresight_core::domain::memory::MemoryEvidenceBasis,
+) -> &'static str {
+    match basis {
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::RegionConfigAndElfLoad => {
+            "region-config+elf-load"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::MapRegionAndElfLoad => {
+            "map-memory-configuration+elf-load"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::ElfAddressAndFlags => {
+            "elf-address-and-flags"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::SectionNameHeuristic => {
+            "section-name-heuristic"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::Insufficient => "unattributed",
+    }
 }
 
 fn safe_display_text(value: &str) -> String {

@@ -285,7 +285,10 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
                 // stdout carries nothing but the JSON document.
                 print!("{}", render::render_json(&dto));
             } else {
-                print!("{}", render::render_human(&dto));
+                print!(
+                    "{}",
+                    render::render_human_with_region_usage(&dto, &analysis.memory.region_usage)
+                );
                 eprintln!("diagnostics: map {}", map_state(&analysis));
                 eprintln!(
                     "diagnostics: hash {} ms, read {} ms, parse {} ms, normalize {} ms, operation {operation_id}",

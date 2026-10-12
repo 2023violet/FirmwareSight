@@ -9,6 +9,8 @@
 //! load image and its live copy in RAM. Whether that happened is decided by load evidence,
 //! never by the section being called `.data`.
 
+use std::collections::HashMap;
+
 use crate::domain::evidence::EvidenceClass;
 use crate::domain::identity::Fact;
 use crate::domain::section::{Section, SectionRole};
@@ -277,6 +279,58 @@ impl MemoryContribution {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegionUsageState {
+    Exact,
+    Partial,
+    Unknown,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegionUsageRisk {
+    WithinCapacity,
+    Exceeded,
+    Review,
+    Unknown,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegionAddressKind {
+    Load,
+    Virtual,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RegionSectionUsage {
+    pub section_locator: String,
+    pub section_name: Fact<String>,
+    pub address_kind: RegionAddressKind,
+    pub address: u64,
+    pub bytes: u64,
+    pub virtual_address: Fact<u64>,
+    pub load_address: Fact<u64>,
+    pub evidence_basis: MemoryEvidenceBasis,
+}
+
+/// Region occupancy covers observed allocated section intervals; it does not claim allocator space.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MemoryRegionUsage {
+    pub name: String,
+    pub kind: RegionKind,
+    pub origin: u64,
+    pub capacity_bytes: Option<u64>,
+    pub used_bytes: Option<u64>,
+    pub remaining_bytes: Option<u64>,
+    pub remaining_reason: &'static str,
+    pub state: RegionUsageState,
+    pub risk: RegionUsageRisk,
+    pub evidence_source: &'static str,
+    pub evidence_id: String,
+    pub address_kind: RegionAddressKind,
+    pub sections: Vec<RegionSectionUsage>,
+    pub reasons: Vec<String>,
+}
+
 /// The two separate budgets of ADR-0021.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MemoryFootprint {
@@ -287,6 +341,7 @@ pub struct MemoryFootprint {
     /// Weakest basis among all counted contributions; caps the whole report.
     pub weakest_basis: Option<MemoryEvidenceBasis>,
     pub layout_source: LayoutSource,
+    pub region_usage: Vec<MemoryRegionUsage>,
 }
 
 impl MemoryFootprint {
@@ -314,6 +369,8 @@ impl MemoryFootprint {
             contributions.push(contribution);
         }
 
+        let region_usage = calculate_region_usage(sections, &contributions, layout);
+
         Self {
             nonvolatile: total(&contributions, ChargeSide::Nonvolatile),
             runtime_ram: total(&contributions, ChargeSide::Runtime),
@@ -321,6 +378,7 @@ impl MemoryFootprint {
             excluded_metadata_bytes,
             weakest_basis: weakest,
             layout_source: layout.source,
+            region_usage,
         }
     }
 
@@ -339,6 +397,239 @@ impl MemoryFootprint {
             .is_some_and(MemoryEvidenceBasis::may_support_hard_block)
             && self.nonvolatile.is_exact()
             && self.runtime_ram.is_exact()
+    }
+}
+
+const REMAINING_UNKNOWN_REASON: &str = "the region table and section intervals do not prove contiguous allocatable space; gaps may contain padding or reserved memory";
+
+fn calculate_region_usage(
+    sections: &[Section],
+    contributions: &[MemoryContribution],
+    layout: &MemoryLayout,
+) -> Vec<MemoryRegionUsage> {
+    let contributions_by_index: HashMap<usize, &MemoryContribution> = contributions
+        .iter()
+        .map(|contribution| (contribution.section_index, contribution))
+        .collect();
+    layout
+        .regions
+        .iter()
+        .filter(|region| region.name != "*default*")
+        .map(|region| {
+            let address_kind = match region.kind {
+                RegionKind::Nonvolatile => RegionAddressKind::Load,
+                RegionKind::VolatileRam | RegionKind::Unknown => RegionAddressKind::Virtual,
+            };
+            let capacity_bytes =
+                (layout.source != LayoutSource::None && region.length > 0).then_some(region.length);
+            let mut usage = MemoryRegionUsage {
+                name: region.name.clone(),
+                kind: region.kind,
+                origin: region.origin,
+                capacity_bytes,
+                used_bytes: None,
+                remaining_bytes: None,
+                remaining_reason: REMAINING_UNKNOWN_REASON,
+                state: RegionUsageState::Unknown,
+                risk: RegionUsageRisk::Unknown,
+                evidence_source: layout.source.as_label(),
+                evidence_id: region.evidence_id.clone(),
+                address_kind,
+                sections: Vec::new(),
+                reasons: Vec::new(),
+            };
+
+            let Some(region_end) = (region.length > 0)
+                .then(|| region.origin.checked_add(region.length))
+                .flatten()
+            else {
+                usage.reasons.push(
+                    "region origin plus capacity overflows the supported address range".to_owned(),
+                );
+                return usage;
+            };
+            if region.kind == RegionKind::Unknown {
+                usage
+                    .reasons
+                    .push("region attributes do not identify Flash or runtime RAM".to_owned());
+                return usage;
+            }
+
+            let mut ranges = Vec::new();
+            let mut unresolved = false;
+            let mut exceeded = false;
+
+            for section in sections
+                .iter()
+                .filter(|section| section.flags.alloc && !section.role.is_device_metadata())
+            {
+                let Some(contribution) = contributions_by_index.get(&section.index).copied() else {
+                    continue;
+                };
+                let charge = match region.kind {
+                    RegionKind::Nonvolatile => &contribution.nonvolatile_bytes,
+                    RegionKind::VolatileRam => &contribution.runtime_ram_bytes,
+                    RegionKind::Unknown => unreachable!(),
+                };
+                let address_fact = match region.kind {
+                    RegionKind::Nonvolatile => &section.load_address,
+                    RegionKind::VolatileRam => &section.virtual_address,
+                    RegionKind::Unknown => unreachable!(),
+                };
+                let address = address_fact.value().copied().or_else(|| {
+                    (region.kind == RegionKind::Nonvolatile)
+                        .then(|| section.virtual_address.value().copied())
+                        .flatten()
+                        .filter(|address| {
+                            region.contains(*address) && section.load_address.value().is_none()
+                        })
+                });
+
+                match charge {
+                    Fact::Known(0) => continue,
+                    Fact::Known(bytes) => {
+                        let Some(address) = address else {
+                            unresolved = true;
+                            usage.reasons.push(format!(
+                                "{} has a known charge but no {} address",
+                                contribution.section_locator,
+                                match address_kind {
+                                    RegionAddressKind::Load => "load",
+                                    RegionAddressKind::Virtual => "runtime",
+                                }
+                            ));
+                            continue;
+                        };
+                        if address >= region_end || address.saturating_add(*bytes) <= region.origin
+                        {
+                            continue;
+                        }
+                        let Some(section_end) = address.checked_add(*bytes) else {
+                            unresolved = true;
+                            usage.reasons.push(format!(
+                                "{} address plus size overflows the supported address range",
+                                contribution.section_locator
+                            ));
+                            if address < region_end {
+                                ranges.push((address.max(region.origin), region_end));
+                            }
+                            usage.sections.push(region_section_usage(
+                                section,
+                                contribution,
+                                address_kind,
+                                address,
+                                *bytes,
+                            ));
+                            continue;
+                        };
+                        let intersects = address < region_end && section_end > region.origin;
+                        if !intersects {
+                            continue;
+                        }
+                        if address < region.origin || section_end > region_end {
+                            unresolved = true;
+                            if address >= region.origin && address < region_end {
+                                exceeded = true;
+                            }
+                            usage.reasons.push(format!(
+                                "{} range crosses the declared region boundary",
+                                contribution.section_locator
+                            ));
+                        }
+                        let start = address.max(region.origin);
+                        let end = section_end.min(region_end);
+                        ranges.push((start, end));
+                        usage.sections.push(region_section_usage(
+                            section,
+                            contribution,
+                            address_kind,
+                            address,
+                            *bytes,
+                        ));
+                    }
+                    Fact::Unknown { .. } => {
+                        let could_be_in_region = address
+                            .is_none_or(|address| address < region_end && address >= region.origin);
+                        if could_be_in_region {
+                            unresolved = true;
+                            usage.reasons.push(format!(
+                                "{} charge or placement is unknown",
+                                contribution.section_locator
+                            ));
+                        }
+                    }
+                }
+            }
+
+            ranges.sort_unstable();
+            let mut merged: Vec<(u64, u64)> = Vec::new();
+            let mut overlap = false;
+            for (start, end) in ranges {
+                if let Some((_, previous_end)) = merged.last_mut() {
+                    if start < *previous_end {
+                        overlap = true;
+                        *previous_end = (*previous_end).max(end);
+                        continue;
+                    }
+                    if start == *previous_end {
+                        *previous_end = end;
+                        continue;
+                    }
+                }
+                merged.push((start, end));
+            }
+            if overlap {
+                unresolved = true;
+                usage
+                    .reasons
+                    .push("allocated section ranges overlap; the union is shown once".to_owned());
+            }
+
+            let mapped_bytes = merged.iter().fold(0_u64, |sum, (start, end)| {
+                sum.saturating_add(end.saturating_sub(*start))
+            });
+            usage.used_bytes = if unresolved && merged.is_empty() {
+                None
+            } else {
+                Some(mapped_bytes)
+            };
+            usage.state = if unresolved {
+                if usage.used_bytes.is_some() {
+                    RegionUsageState::Partial
+                } else {
+                    RegionUsageState::Unknown
+                }
+            } else {
+                RegionUsageState::Exact
+            };
+            usage.risk = if exceeded {
+                RegionUsageRisk::Exceeded
+            } else if unresolved {
+                RegionUsageRisk::Review
+            } else {
+                RegionUsageRisk::WithinCapacity
+            };
+            usage
+        })
+        .collect()
+}
+
+fn region_section_usage(
+    section: &Section,
+    contribution: &MemoryContribution,
+    address_kind: RegionAddressKind,
+    address: u64,
+    bytes: u64,
+) -> RegionSectionUsage {
+    RegionSectionUsage {
+        section_locator: contribution.section_locator.clone(),
+        section_name: contribution.section_name.clone(),
+        address_kind,
+        address,
+        bytes,
+        virtual_address: section.virtual_address.clone(),
+        load_address: section.load_address.clone(),
+        evidence_basis: contribution.basis,
     }
 }
 
@@ -650,6 +941,184 @@ mod tests {
         assert_eq!(footprint.nonvolatile, ByteTotal::Exact { bytes: 4 });
         assert_eq!(footprint.runtime_ram, ByteTotal::Exact { bytes: 4 });
         assert!(footprint.admissible_for_hard_block());
+    }
+
+    #[test]
+    fn region_usage_keeps_load_image_and_runtime_ranges_separate() {
+        let sections = [
+            make(
+                1,
+                ".data",
+                SectionRole::InitializedData,
+                Fact::known(0x2000_0000),
+                Fact::known(0x0800_0060),
+                4,
+                Fact::known(4),
+                true,
+            ),
+            make(
+                2,
+                ".bss",
+                SectionRole::UninitializedData,
+                Fact::known(0x2000_0004),
+                Fact::unknown("NOBITS"),
+                0,
+                Fact::known(4),
+                true,
+            ),
+        ];
+
+        let footprint = MemoryFootprint::compute(&sections, &layout());
+        let flash = footprint
+            .region_usage
+            .iter()
+            .find(|region| region.name == "ROM")
+            .expect("ROM usage");
+        let ram = footprint
+            .region_usage
+            .iter()
+            .find(|region| region.name == "RAM")
+            .expect("RAM usage");
+
+        assert_eq!(flash.capacity_bytes, Some(0x0010_0000));
+        assert_eq!(flash.used_bytes, Some(4));
+        assert_eq!(flash.state, RegionUsageState::Exact);
+        assert!(flash.sections.iter().any(|section| {
+            section
+                .section_name
+                .value()
+                .is_some_and(|name| name == ".data")
+                && section.address_kind == RegionAddressKind::Load
+                && section.address == 0x0800_0060
+        }));
+        assert_eq!(ram.capacity_bytes, Some(0x0004_0000));
+        assert_eq!(ram.used_bytes, Some(8));
+        assert_eq!(ram.state, RegionUsageState::Exact);
+        assert!(ram.sections.iter().any(|section| {
+            section
+                .section_name
+                .value()
+                .is_some_and(|name| name == ".bss")
+                && section.address_kind == RegionAddressKind::Virtual
+                && section.address == 0x2000_0004
+        }));
+        assert_eq!(flash.remaining_bytes, None);
+        assert_eq!(ram.remaining_bytes, None);
+    }
+
+    #[test]
+    fn overlapping_sections_are_unioned_and_remaining_stays_unknown() {
+        let sections = [
+            make(
+                1,
+                ".one",
+                SectionRole::UninitializedData,
+                Fact::known(0x2000_0000),
+                Fact::unknown("NOBITS"),
+                0,
+                Fact::known(8),
+                true,
+            ),
+            make(
+                2,
+                ".two",
+                SectionRole::UninitializedData,
+                Fact::known(0x2000_0004),
+                Fact::unknown("NOBITS"),
+                0,
+                Fact::known(8),
+                true,
+            ),
+        ];
+
+        let footprint = MemoryFootprint::compute(&sections, &layout());
+        let ram = footprint
+            .region_usage
+            .iter()
+            .find(|region| region.name == "RAM")
+            .expect("RAM usage");
+
+        assert_eq!(ram.used_bytes, Some(12), "overlapping bytes count once");
+        assert_eq!(ram.state, RegionUsageState::Partial);
+        assert_eq!(ram.risk, RegionUsageRisk::Review);
+        assert!(ram.reasons.iter().any(|reason| reason.contains("overlap")));
+        assert_eq!(ram.remaining_bytes, None);
+    }
+
+    #[test]
+    fn section_crossing_region_end_is_flagged_without_claiming_free_space() {
+        let mut small = MemoryLayout {
+            regions: vec![MemoryRegion::new(
+                "SMALL",
+                0x2000_0000,
+                8,
+                "rw",
+                "map.line4",
+            )],
+            source: LayoutSource::MapMemoryConfiguration,
+        };
+        small.regions[0].kind = RegionKind::VolatileRam;
+        let section = make(
+            1,
+            ".overflow",
+            SectionRole::UninitializedData,
+            Fact::known(0x2000_0004),
+            Fact::unknown("NOBITS"),
+            0,
+            Fact::known(8),
+            true,
+        );
+
+        let footprint = MemoryFootprint::compute(&[section], &small);
+        let usage = &footprint.region_usage[0];
+
+        assert_eq!(usage.used_bytes, Some(4));
+        assert_eq!(usage.risk, RegionUsageRisk::Exceeded);
+        assert_eq!(usage.state, RegionUsageState::Partial);
+        assert!(
+            usage
+                .reasons
+                .iter()
+                .any(|reason| reason.contains("boundary"))
+        );
+        assert_eq!(usage.remaining_bytes, None);
+    }
+
+    #[test]
+    fn address_overflow_and_unknown_region_evidence_degrade_to_unknown() {
+        let overflow_layout = MemoryLayout {
+            regions: vec![MemoryRegion::new("TOP", u64::MAX - 7, 7, "rw", "map.line4")],
+            source: LayoutSource::MapMemoryConfiguration,
+        };
+        let section = make(
+            1,
+            ".wrap",
+            SectionRole::UninitializedData,
+            Fact::known(u64::MAX - 3),
+            Fact::unknown("NOBITS"),
+            0,
+            Fact::known(8),
+            true,
+        );
+
+        let overflow = MemoryFootprint::compute(&[section], &overflow_layout);
+        assert_eq!(overflow.region_usage[0].state, RegionUsageState::Partial);
+        assert_eq!(overflow.region_usage[0].risk, RegionUsageRisk::Review);
+        assert!(
+            overflow.region_usage[0]
+                .reasons
+                .iter()
+                .any(|reason| reason.contains("overflow"))
+        );
+
+        let unknown_layout = MemoryLayout {
+            regions: vec![MemoryRegion::new("MYSTERY", 0x1000, 0x100, "", "map.line4")],
+            source: LayoutSource::MapMemoryConfiguration,
+        };
+        let unknown = MemoryFootprint::compute(&[], &unknown_layout);
+        assert_eq!(unknown.region_usage[0].state, RegionUsageState::Unknown);
+        assert_eq!(unknown.region_usage[0].risk, RegionUsageRisk::Unknown);
+        assert_eq!(unknown.region_usage[0].used_bytes, None);
     }
 
     #[test]
