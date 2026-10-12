@@ -5,6 +5,8 @@
 //! having a golden (`05_ENGINEERING/02_TEST_STRATEGY.md`).
 
 use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use firmwaresight_artifact::pipeline::{self, AnalysisRequest};
 use firmwaresight_report::{AnalyzeResultDto, render};
@@ -147,6 +149,124 @@ fn human_memory_report_keeps_unattributed_ram_unknown_without_a_map() {
     assert!(report.contains(
         ".noinit (elf.section_header[7]): 0 / unknown bytes [observed; elf-address-and-flags]"
     ));
+}
+
+#[test]
+fn human_memory_report_escapes_untrusted_text_without_changing_json_facts() {
+    let root = repo_root();
+    let request = AnalysisRequest::new(root.join("fixtures/elf/p0-dual-region/firmware.elf"))
+        .with_map(root.join("fixtures/elf/p0-dual-region/firmware.map"));
+    let analysis = pipeline::analyze(&request).expect("real linked fixture must analyze");
+    let mut dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, "firmware.elf");
+    let hostile = "模块\u{1b}[2J\u{1b}[31m\r\n\t\u{7f}\u{85}\u{202e}";
+    dto.artifact.file_name = hostile.to_owned();
+    dto.memory.contributions[2].section_name = Some(hostile.to_owned());
+    dto.memory.contributions[2].section_locator = hostile.to_owned();
+    dto.memory.dual_accounted_sections[0] = hostile.to_owned();
+
+    let report = render::render_human(&dto);
+    assert!(!report.chars().any(|ch| ch.is_control() && ch != '\n'));
+    assert!(report.contains("模块"));
+    assert!(report.contains("\\u{1b}[2J\\u{1b}[31m\\r\\n\\t\\u{7f}\\u{85}\\u{202e}"));
+
+    let json: serde_json::Value =
+        serde_json::from_str(&render::to_json_pretty(&dto)).expect("DTO JSON remains valid");
+    assert_eq!(json["artifact"]["fileName"], hostile);
+    assert_eq!(json["memory"]["contributions"][2]["sectionName"], hostile);
+    assert_eq!(
+        json["memory"]["contributions"][2]["sectionLocator"],
+        hostile
+    );
+    assert_eq!(json["memory"]["dualAccountedSections"][0], hostile);
+}
+
+#[test]
+fn mutated_elf_section_control_is_escaped_on_cli_and_preserved_in_json() {
+    let root = repo_root();
+    let mutant = mutated_ota_elf(&root);
+    let elf = mutant.0.to_string_lossy().into_owned();
+    let map = root.join("fixtures/elf/p0-dual-region/firmware.map");
+    let run = |json: bool| {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_fwsight"));
+        command.arg("analyze").arg(&elf).arg("--map").arg(&map);
+        if json {
+            command.arg("--json");
+        }
+        command.output().expect("isolated CLI invocation succeeds")
+    };
+
+    let human = run(false);
+    assert!(human.status.success());
+    assert!(!human.stdout.contains(&0x1b));
+    assert!(String::from_utf8_lossy(&human.stdout).contains(r"\u{1b}[2J"));
+
+    let machine = run(true);
+    assert!(machine.status.success());
+    let json: serde_json::Value = serde_json::from_slice(&machine.stdout).expect("valid JSON");
+    let contribution = json["memory"]["contributions"]
+        .as_array()
+        .expect("contributions")
+        .iter()
+        .find(|row| row["sectionLocator"] == "elf.section_header[5]")
+        .expect("mutated OTA contribution");
+    assert_eq!(contribution["sectionName"], "\u{1b}[2J");
+    assert_eq!(contribution["nonvolatileBytes"], serde_json::Value::Null);
+    assert_eq!(contribution["runtimeRamBytes"], 64);
+    assert_eq!(
+        json["memory"]["nonvolatileImageFootprint"]["state"],
+        "partial"
+    );
+}
+
+struct TemporaryElf(PathBuf);
+
+impl Drop for TemporaryElf {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_file(&self.0);
+    }
+}
+
+fn mutated_ota_elf(root: &Path) -> TemporaryElf {
+    static NEXT_ID: AtomicUsize = AtomicUsize::new(0);
+    let source = std::fs::read(root.join("fixtures/elf/p0-dual-region/firmware.elf"))
+        .expect("fixture ELF is readable");
+    assert_eq!(&source[..4], b"\x7fELF");
+    assert_eq!(source[4], 1, "fixture is ELF32");
+    assert_eq!(source[5], 1, "fixture is little-endian");
+
+    let section_table = u32::from_le_bytes(source[0x20..0x24].try_into().unwrap()) as usize;
+    let section_entry_size = u16::from_le_bytes(source[0x2e..0x30].try_into().unwrap()) as usize;
+    let section_count = u16::from_le_bytes(source[0x30..0x32].try_into().unwrap()) as usize;
+    let names_index = u16::from_le_bytes(source[0x32..0x34].try_into().unwrap()) as usize;
+    assert!(section_entry_size >= 40 && names_index < section_count);
+    let names_header = section_table + names_index * section_entry_size;
+    let names_offset = u32::from_le_bytes(
+        source[names_header + 16..names_header + 20]
+            .try_into()
+            .unwrap(),
+    ) as usize;
+    let names_size = u32::from_le_bytes(
+        source[names_header + 20..names_header + 24]
+            .try_into()
+            .unwrap(),
+    ) as usize;
+
+    let mut bytes = source;
+    let names_end = names_offset + names_size;
+    let name_at = bytes[names_offset..names_end]
+        .windows(5)
+        .position(|window| window == b".ota\0")
+        .expect("fixture section-name table contains .ota")
+        + names_offset;
+    bytes[name_at..name_at + 5].copy_from_slice(b"\x1b[2J\0");
+
+    let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
+    let path = std::env::temp_dir().join(format!(
+        "firmwaresight-next17-{}-{id}.elf",
+        std::process::id()
+    ));
+    std::fs::write(&path, bytes).expect("write isolated mutated ELF");
+    TemporaryElf(path)
 }
 
 #[test]

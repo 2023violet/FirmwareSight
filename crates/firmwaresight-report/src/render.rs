@@ -64,7 +64,10 @@ pub fn document_json<T: Serialize + ?Sized>(value: &T) -> String {
 /// The default human-readable rendering. Diagnostics never go here; they go to stderr.
 pub fn render_human(value: &AnalyzeResultDto) -> String {
     let mut out = String::new();
-    out.push_str(&format!("{}\n\n", value.artifact.file_name));
+    out.push_str(&format!(
+        "{}\n\n",
+        safe_display_text(&value.artifact.file_name)
+    ));
     out.push_str(&format!("  SHA-256      {}\n", value.artifact.sha256));
     out.push_str(&format!(
         "  Size         {} bytes\n",
@@ -110,7 +113,13 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
     if !value.memory.dual_accounted_sections.is_empty() {
         out.push_str(&format!(
             "  Dual-accounted sections:  {}\n",
-            value.memory.dual_accounted_sections.join(", ")
+            value
+                .memory
+                .dual_accounted_sections
+                .iter()
+                .map(|locator| safe_display_text(locator))
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
     }
     if !value.memory.contributions.is_empty() {
@@ -119,10 +128,11 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
             let name = contribution
                 .section_name
                 .as_deref()
-                .unwrap_or("unknown section");
+                .map(safe_display_text)
+                .unwrap_or_else(|| "unknown section".to_owned());
             out.push_str(&format!(
                 "    {name} ({}): {} / {} bytes [{}; {}]\n",
-                contribution.section_locator,
+                safe_display_text(&contribution.section_locator),
                 contribution
                     .nonvolatile_bytes
                     .map_or_else(|| "unknown".to_owned(), |bytes| bytes.to_string()),
@@ -155,6 +165,10 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
     }
 
     out
+}
+
+fn safe_display_text(value: &str) -> String {
+    value.chars().flat_map(char::escape_debug).collect()
 }
 
 fn budget_line(budget: &crate::dto::BudgetDto) -> String {
