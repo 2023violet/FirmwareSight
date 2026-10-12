@@ -1832,3 +1832,38 @@ non-blocking feedback round.
   `python -m unittest discover -s scripts/tests` at 6 of 6. POSIX remains **NOT_MEASURED** — no POSIX runner exists
   on this host, and `cfg(unix)` cases neither compiled nor ran.
 
+
+## NEXT-11 / NEXT-12 — the independent review, the Architect's ruling, and the corrective it authorized (2026-10-12, fifth batch)
+
+- Files, all archived verbatim in this directory:
+  - `FirmwareSight_NEXT_11_B2U1R1_Independent_Security_Review_2026-10-12.txt` — 5,144 bytes, 35 newline-terminated
+    lines, **0 `CR`**, sha256 `450862f413522b1a748606deade2986badca399f435673adb2d87bb4fcb764e1`
+  - `FirmwareSight_NEXT_12_B2U1R2_Notes_Path_Binding_Python_Gate_2026-10-12.txt` — 6,728 bytes, 34 newlines,
+    **0 `CR`**, sha256 `e5edc05c7bd235452b4888b940400231401c685cf2723b8d051a1186d55ae079`
+  - `FirmwareSight_NEXT_11_Architect_Decision_2026-10-12.md` — 2,582 bytes, 19 newlines, **0 `CR`**, sha256
+    `8e8b77473780f03480f74bde3f9a1b55ce4b55e7ee53acaa32d31395e4b9c637`
+  - `FirmwareSight_NEXT_12_v1.1_B2U1R2_Notes_Path_Binding_Gate_2026-10-12.txt` — 10,179 bytes, 41 newlines,
+    **0 `CR`**, sha256 `ab2facdf4ffd4d680776eb3545aaef55ef0ee4d53dd1a451641bbb377d35a9c4`
+- Delivered as two folders in `C:\Users\16429\Downloads\`: the review round arrived as `NEXT-11` plus a `NEXT-12` v1.0
+  draft, and the Owner's decision arrived with `NEXT-12` v1.1. Every archived copy was `cmp`-verified against its
+  delivered bytes at the moment it was written here — `cmp OK` for all four — and the digests above were measured on the
+  delivered file and on the archive copy, which are equal. All four were LF-only.
+- Why the first two are archived only now. `NEXT-11` was **strictly read-only**: it may not write a tracked file, so it
+  could not archive its own prompt. Filing a delivered prompt here is the standing `10_AUDIT` obligation every writing
+  round before it has met (`NEXT-09`/`NEXT-10` did exactly this), and `NEXT-12` is the first round after the review that
+  may write: the review prompt, the superseded v1.0 draft, the ruling and the v1.1 contract are all filed here.
+- Authority. `NEXT-11` is an **independent acceptance review** of `a21a987…` with five mandatory re-tests and a special
+  adjudication of `D-N10-1`; it grants no merge, no push, no B2-U2, and forbids operating the Owner's SQLite store,
+  `-wal`/`-shm`, `settings.json` or any backup. `NEXT-12` v1.0 was the draft corrective the Owner asked to see before
+  deciding; **v1.1 supersedes it**, and where they conflict v1.1's split of `D-N10-1` from `D-N11-1` governs. The
+  Architect's decision file is the ruling that converted `NEXT-11`'s findings into instructions. `NEXT-12 v1.1` is the
+  contract actually executed: `D-N10-1` fixed, the six Python regressions promoted into the gate, `D-N11-1` measured and
+  registered but **not** changed, TDD, full gate, local commit only.
+- What the ruling binds a later round to. `D-N10-1` must be repaired with one typed refusal and no readable sentinel, and
+  it must keep `require_project_relative`'s accepted set. C1's accepted attachment rulings survive intact: an explicitly
+  chosen symlink may still be followed, and an absolutely named attachment may still live outside the project — the
+  configured-notes repair must not be generalised into a rule over all attachments. `D-N11-1` (a project-relative path
+  reaching outside the root through a junction, symlink or hard link) is a separate physical-containment contract question
+  needing its own Owner authorization, and **a one-shot `canonicalize` plus `starts_with` must not be reported as
+  TOCTOU-safe**. `NEXT-10`'s two fixes were accepted, with the note that the first identity comparison in that round was
+  voided and rebuilt from separate target directories.

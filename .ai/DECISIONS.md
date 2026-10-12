@@ -2688,3 +2688,50 @@ replay command and the step-count question is left to the Owner. What was *not* 
 screenshot — is answered by a test that builds its own subject from the committed golden bundle in a temporary
 directory and never writes into `golden/`.
 
+
+## B2-U1R2 (2026-10-12) — an identity is spent on purpose, and a refusal stops being a place
+
+**The same fix was withheld in one round and bought in the next, and the difference is who decided.** `NEXT-10`
+measured `D-N10-1`, stopped, and recorded it, because reading the notes a release owner actually configured changes
+the Gate notes fact, which sits inside the canonical input and therefore moves a stored `run_id`. `NEXT-11` reproduced
+it end to end — including the part that matters: with a file named `firmwaresight-unresolvable-path` present, the Gate
+hashed those bytes, passed, and the bundle shipped them as somebody's Release Notes while the portable §61 reader still
+scored the bundle 53 of 53. The Architect then ruled it must be fixed, the Owner authorized the fix, and only then did
+code change. Identity is not spent by whoever notices a bug; it is spent by a person, and the round that spends it
+measures what moved and says so case by case. The measurement here: two pinned binaries over the same committed
+projects keep `gate-5ebc21bb1f3434ae…` for `RELEASE_NOTES.md` and `gate-fd1ce7d303fb2122…` for `docs/NOTES.md`
+byte-for-byte, and change the id only for the spelling that had been binding the wrong bytes.
+
+**A refusal that is also a readable path is the defect class; the fallback name was just where it lived twice.**
+`D-N09-2` (attachment selections) and `D-N10-1` (the configured notes path) came from the same leaf: an unplaceable
+component resolved onto a file name the crate invented, and a file name is something a project can own. Both repairs
+have the same shape — decide from the structure of the input before the first `stat`, and return a refusal that carries
+a sentence rather than a location. `config::UnplaceableProjectPath` holds a `&'static str` and no path, so there is
+nothing for a caller to open, and the invented name is gone from the product: a file called
+`firmwaresight-unresolvable-path` is now just a file, chosen or unchosen like any other.
+
+**Two lists that agreed had already drifted apart.** `require_project_relative` accepted a climb that comes back
+inside the root; the joiner had no `..` rule and sent it to the fallback. That is not a missing test, it is the shape
+two independent implementations of one rule take over time. Now there is one walk — `config::place_project_relative` —
+and both the validator and the resolver are wrappers over it, with a test
+(`the_validator_and_the_resolver_agree_on_every_path_this_round_measured`) that fails if they ever answer differently
+for the same string. Where a security rule is enforced twice, the drift is not hypothetical; it has already happened.
+
+**Lexical containment and physical containment are different questions, and this round answered only the first.**
+Every guard in the crate is lexical, and the filesystem is not: a directory junction inside the project, or a hard link
+to a file outside it, is placed, read, hashed and shipped — measured with both the pre-fix and the post-fix binary
+returning the identical `gate-8d349728452c4e2…4ff21a` over the junction's target bytes. `D-N11-1` therefore stays
+`OPEN / NOT PHYSICALLY CONTAINED`, and a real symlink is `NOT_MEASURED` on this host (`ERROR_PRIVILEGE_NOT_HELD`) and
+`NOT_MEASURED` on POSIX for want of a runner. Two refusals follow from that: this round did not add a physical rule,
+and it did not touch C1's accepted attachment capability — an explicitly chosen symlink may still be followed and an
+absolutely named attachment may still live outside the project, because a notes-path repair must not quietly become a
+restriction on every release file. A one-shot `canonicalize` plus `starts_with` is also not a guarantee: it cannot see
+a hard link, and the target can be retargeted between the check and the read.
+
+**A gate step whose only condition is a process exit code can pass on nothing at all.** The six stdlib regressions are
+now a named drift step, and the condition is the unittest summary: `Ran N tests` with `N >= 6`, a verdict line starting
+`OK`, and exit 0. The reason is measured, not theoretical — `unittest discover` exits 5 on the interpreter CI pins when
+it collects nothing and 0 on older ones, so the same repository state would be red here and green there. Three
+mutations were run and reverted: the suite file renamed away from `test_*.py` fails with `collected 0 … NO TESTS RAN`;
+one case renamed out of the suite fails with `5 tests collected, below the 6`; and moving the portability reader's
+notes sentence fails with `FAILED (failures=1)`. The drift group went 8 → 9 and the default gate 17 → 18.

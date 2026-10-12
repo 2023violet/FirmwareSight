@@ -2,7 +2,7 @@
 title: "CLI Specification"
 doc_id: "FS-TECH-008"
 product: "FirmwareSight"
-version: "0.5.2"
+version: "0.5.3"
 status: "BASELINE"
 owner: "Project"
 last_updated: "2026-10-12"
@@ -155,3 +155,23 @@ Gate identity 或 bundle 字节，也不统一任何一边的解析规则。
   于是 Gate 把存在的笔记报成不存在（BLOCK），而那份名字被占用的文件真存在时又把它当笔记读成 PASS。它落在
   `evidence.rs` 的解析函数上，且修它会改动 Gate canonical input 里的笔记事实，属于会移动 run identity 的变更，
   按 `NEXT-10` §40 停止并上报；复现、影响与最小改法记在 `04_TECH/28` §14.4。
+
+## 澄清（2026-10-12，`B2-U1R2`）：配置路径只有一个解析入口，拒绝不再是可读位置
+
+上一节里「一处同类问题**没有**在本轮修」的那条已经由本轮关闭；那段文字保留原样，以下是现在的事实。
+
+- `release.release_notes_path` 的**合法集合一个字都没动**：`require_project_relative` 自 `f1516b8` 起就接受不越过
+  项目根的 `..`，也照旧拒绝对外上溢、绝对路径、盘符/冒号前缀、反斜杠、空串与归一到项目根本身的写法。改的是
+  「验证」与「落地」不再是两套算法：两者都走 `config::place_project_relative` 这一次词法走步，组件栈消费 `.` 与
+  `..`，所以 `docs/../RELEASE_NOTES.md` 归一化到根内的 `RELEASE_NOTES.md`，而 `docs/../../escape.md` 放不进根内。
+- 放不进去时返回的是**带类型的拒绝**（`config::UnplaceableProjectPath`，只含一句固定理由，不含任何路径），
+  `evidence::observe_release_notes`、Bundle 侧的 notes 复制与 `resolve_source` 都必须在 `Ok` 之后才 `stat`/读/哈希。
+  旧实现在项目根下拼出一个「假定不存在」的文件名 `firmwaresight-unresolvable-path` 作为落点，于是拒绝本身成了一个
+  可被占用的位置；那个名字现在在产品里没有任何特殊含义，同名文件只是普通文件。
+- CLI 可见结果：非法写法的码与句子照旧是 `ERR-CONFIG-7005` 加原来那句理由，仍不写目的目录、不打印宿主目录；
+  `gate` 与 `release prepare` 对合法写法的退出码、错误码、bundle 结构与 canonical input 文法都没变。被纠正的那种
+  写法（`docs/../…`）观测到的字节变了，因此它的 run id 会变——这是观测事实变了，不是协议变了；合法普通路径的
+  run id 前后逐字节相同，实测行与两个二进制见 `04_TECH/28` §14.5。
+- **没有**做的事：本轮不引入物理包含规则。项目内的 junction / symlink / hard link 指向根外时，配置路径照旧跟随，
+  `D-N11-1` 仍是 `OPEN / NOT PHYSICALLY CONTAINED`；显式选中的 Release 附件照 `04_TECH/28` §14 裁决 C 继续可用，
+  绝对路径附件仍可位于项目根外，bundle 内仍不输出符号链接。

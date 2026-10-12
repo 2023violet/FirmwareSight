@@ -176,6 +176,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── FirmwareSight_NEXT_08_v1.1_B2U1_Owner_Dispatch_2026-10-11.txt
 │   │   ├── FirmwareSight_NEXT_09_B2U1_Independent_Review_And_Safe_Store_Recovery_2026-10-12.txt
 │   │   ├── FirmwareSight_NEXT_10_B2U1R1_Narrow_Corrective_2026-10-12.txt
+│   │   ├── FirmwareSight_NEXT_11_Architect_Decision_2026-10-12.md
+│   │   ├── FirmwareSight_NEXT_11_B2U1R1_Independent_Security_Review_2026-10-12.txt
+│   │   ├── FirmwareSight_NEXT_12_B2U1R2_Notes_Path_Binding_Python_Gate_2026-10-12.txt
+│   │   ├── FirmwareSight_NEXT_12_v1.1_B2U1R2_Notes_Path_Binding_Gate_2026-10-12.txt
 │   │   ├── FirmwareSight_P0_Technical_Vertical_Slice_EXECUTION_PROMPT_v1.1_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P4_Release_Bundle_MVP_Implementation_EXECUTION_PROMPT_v1.0_ARCHITECT_REVIEWED.txt
 │   │   ├── FirmwareSight_P5_CommitD_Continue_v1.2.txt

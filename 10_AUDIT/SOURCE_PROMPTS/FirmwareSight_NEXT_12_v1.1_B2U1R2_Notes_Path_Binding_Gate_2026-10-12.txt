@@ -1,0 +1,41 @@
+FirmwareSight | NEXT-12 v1.1 — B2-U1R2 Release Notes 真实文件绑定纠偏 + Python 回归门禁
+2026-10-12 | OWNER DISPATCH REQUIRED | TDD | LOCAL COMMIT ONLY | NO OWNER DATA
+
+【身份与权威】
+仓库 2023violet/FirmwareSight。NEXT-11 独立只读复核报告为本轮输入，实际本地预期 HEAD=a21a987db3233499c7b7109182e6b7946754c3e9，parent=4eb46b58f22420916e613318ecfd252883d06aa2；预期 origin/main=a0b5c886051a6b10042ea26f52809baea713d7af（CI #101 green，仅覆盖远端 B1-U3）。本文件是原 NEXT-12 v1.0 的定向增补：保留其 TDD、安全、测试、禁止自动推送约束；如有冲突，以本文对于 D-N11-1 边界的明确分工为准。所列 HEAD 与路径仅作 preflight 预期，必须现场重测。Owner 实际向 Coding Agent 下发本文件及具体授权句之前，不得写代码；独立评审员或 Coding Agent 自己不得代替 Owner 授权。
+
+一、最先执行的只读检查；任何意外不自动“修正”
+1. git rev-parse HEAD、git status --porcelain=v1 -uall、git ls-remote origin refs/heads/main、git rev-parse origin/main、git merge-base --is-ancestor origin/main HEAD、git log --oneline origin/main..HEAD、git worktree list、git stash list；不一致或陌生修改 => STOP。
+2. 阅读 AGENTS.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/ACTIVE_TASK.md、.ai/DECISIONS.md、ADR-0028/0030、04_TECH/05、04_TECH/07、04_TECH/28 §14.x 和 NEXT-11 报告；重读真实生产源而非继承旧行号。独立定位 config::require_project_relative、evidence::join_project_relative、observe_release_notes、Bundle notes_copy、source attachment handling、Gate fingerprint、scripts/check.py 以及 scripts/tests/test_verify_bundle_portability.py。
+3. 全部实验只用独立 temp project / 可识别的 dummy bytes；严禁读取、删除、写入 Owner 的真实 SQLite 主库/-wal/-shm、settings.json、备份、quarantine、真实发布目录；禁用真实文件对话框，避免键盘事件落到主窗口。测试文件要在 gitignored sandbox，不制造数据污染。
+
+二、Architect 本轮约束（特别注意 D-N11-1，不能混为一个 root-escape 问题）
+A. CONFIGURED NOTES：release.release_notes_path 属于项目配置的项目相对路径，现行 require_project_relative 明确允许不越过项目根的 `..`，并拒绝绝对路径、盘符/冒号、反斜杠、上溢、空路径和归一化到根目录本身。D-N10-1 已由 NEXT-11 在 a0b5c88 重现：合法 `docs/../RELEASE_NOTES.md` 被 join 到固定哨兵文件名，可能错误地 hash/ship 无关字节；本轮必须修复，任何可读取的“哨兵路径”都是不允许的。
+B. EXPLICIT ATTACHMENTS：04_TECH/28 §14 的 source-side symlink 裁决 C 已明确允许*用户显式选中的*符号链接源跟随到可读、非空、普通文件；链接失效、变成目录、重指向/字节改变则拒绝，便携包中绝不输出 symlink。绝对路径附件本来可以在项目根外。**不得因为 D-N11-1 而笼统给所有附件加“必须物理包含于项目根内”的新限制、取消现有 symlink 测试，或修改 Gate/Release 身份。** Windows junction/source directory redirect 仍需记录具体行为与风险，不得把“所有 root escape 已关闭”写进报告。
+C. D-N11-1 CONFIGURED NOTES：NEXT-11 在 Windows junction 下证实项目内配置路径可物理解析到项目根外，现有注释“no caller can reach outside the root”因此不准确；这是独立的物理 containment / 兼容性问题，不是 `..` 词法 bug。本轮的默认授权 **不允许悄悄改变链接/junction 的既有受理范围**。Architect 推荐的未来安全策略是：配置的 Release Notes 在读取时应真正对应 Owner 意图中的项目内文件；如果要把“realpath 必须处于 project root”改为强制规则，须独立、明确的 Owner 合同授权，并评估 Windows junction、POSIX symlink、同根内链接、reparse races、Gate ID 改变、兼容风险。只有 canonicalize+starts_with 的一次性检查不能自称已根除 TOCTOU。如果本轮没有这项单独授权：只重现实验、登记 D-N11-1=OPEN / NOT PHYSICALLY CONTAINED；不修改符号链接处理策略。
+D. 不改变早已冻结的 C1 附件字节链、`gate-`/`release-` canonical grammar、旧已存 run/review、便携 schema major、golden、错误码、CLI 稳定退出码。对于 D-N10-1 原先错误读到的 notes，纠正真实摘要后可能出现新的 run id：逐例证实是 hash 的事实变化，而非算法和协议变化；绝不回写旧历史。
+
+三、D-N10-1 的 RED / GREEN / 回归：必须由代码执行证明
+1. RED：同一隔离项目、同一快照/政策，`release_notes_path="docs/../RELEASE_NOTES.md"`，分别创建/删除有独特字节的根下 `firmwaresight-unresolvable-path`。旧代码中一个 BLOCK、一个错误 PASS 并发出错误 notes SHA 和包内 release-notes.md；记录真实输入内容哈希、错误包哈希与 run id，不引用人为猜测的结果。还要有 `docs/notes.md` 与根 `RELEASE_NOTES.md` 正常样本。
+2. 最小 GREEN：消除 join_project_relative 对非法输入返回“假定不存在的可读文件路径”的行为，采用统一的 fail-closed `Result` 类型入口。合法 project-relative 用组件栈词法归一化：`docs/../RELEASE_NOTES.md` -> root/RELEASE_NOTES.md；真越界 `../x`、`docs/../../x` 直接拒绝。`config::require_project_relative` 与观测/拷贝不得出现两套不一致的合法性算法；如需保持原签名给内部调用者，必须确保所有 stat/open/hash 前已检查结果，代码不会把拒绝转换成路径。
+3. Gate 的 observe_release_notes 与 Bundle preview/publish 的 notes_copy 使用同一解析语义；重做 before/after 的同输入 fingerprint 对照和真正 bundle 的 hash 验证。若无法保证 preview 观察的摘要与 shipped 字节一致，拒绝，不输出目标目录。
+4. 负例涵盖 parent traversal、绝对路径、Windows drive/backslash、空路径、目录、哨兵同名、输入源变化；正例包括合法包含 `..`、根下正常 notes、子目录 notes。必须保留原始配置字段进入 Gate canonical input 的形式（如既有文法如此），不把归一化字符串悄悄写进 Gate identity。每个 rejected case 断言 no unintended writes、no host path leak。
+5. D-N11-1 实验限额：一个 Windows junction 指向外部文件 + 一个真正内部符号链接（若该 host 可建）；Linux CI 中补可移植 symlink 的直接回归或记录未跑。按照 §二 C，默认仅作测量和事实披露，不能把其变化混入 D-N10-1。
+
+四、六项 Python 标准库测试进入正式门禁
+1. 把 `scripts/tests/test_verify_bundle_portability.py` 作为默认 scripts/check.py 的 drift 子检查，且 `--only drift` 跑到它；在 CI 对应 Generated output drift job 自动执行。目标是 drift 8→9、全门禁 17→18，必须以真实输出为准。
+2. **不得只信 unittest discover 的进程退出码**：捕获 unittest 总结并明确检查 `Ran N tests`、N>=6、`OK`、returncode 0；空测试、文件丢失、测试重命名、测试减少、语法异常、模拟引入回归均不能绿。若日志可以明确显示真实计数并防止空收集，复用现有 gate.run 风格即可；绝不制造虚假的 PASS。
+3. 不增依赖。仍使用 `sys.executable -m unittest discover -s scripts/tests -p test_*.py` 或语义等价的固定解释器命令。`jsonschema` 仍是可选的外部 portability 合同检查，不应该变成六项 unit tests 的隐式强制依赖。
+4. 实测一次 NEGATIVE MUTATION 并恢复，证明有意使某单测失败或减少收集数量时门禁 FAIL。
+
+五、文件范围、检查与交付
+允许的直接源码面：`crates/firmwaresight-project/src/config.rs`、`crates/firmwaresight-project/src/evidence.rs`、`crates/firmwaresight-project/src/bundle.rs`（仅 notes 的路径解析 / 真实绑定）、它们既有 Rust tests；`scripts/check.py`、必要的 `scripts/tests/` 相关测试；必要的事实文档 `04_TECH/28` 附录、`04_TECH/07`、B2 阶段报告、.ai live pointer、BASELINE.yaml 与生成的根 SHA256SUMS。不得改变 attachments source symlink 既有裁决。任何 crate/API 额外扩张、dependency、permission、network、platform privilege、schema/golden/fixture 重写、Core Gate/Release grammar 改动需要 STOP 并单独申请授权。
+按仓库 ADR-0029 先 stage 精确 whitelist，再重生 staged-tree 派生工件，再跑权威全门禁（fmt/clippy/test、前端 typecheck/lint/test/build、drift/deny、Python unittest、baseline integrity）。准确记录 Windows/Ubuntu 的编译与实际运行之别；Developer Preview 安装态一律 NOT_VERIFIED，除非真实执行安装验收。
+完成只提交 LOCAL commit（允许为真实必要的 docs-only successor），clean tree，NO PUSH/NO FORCE/NO NEW B2-U2。报告状态为 `LOCAL_B2_U1R2_GATE_PASS / ARCHITECT_REVIEW_PENDING`，附：代码与测试路径、RED/GREEN 命令、前后合法/拒绝矩阵、旧误绑定的 id 变化原因、Python 测试收集数和新增门禁数、D-N11-1 物理边界仍未关闭的范围、Owner 数据从未碰触的证明。发现 D-N11-1 已可从 junction 链条读任何未经显式选中的文件时，单独给出风险与最小决策项；不得在此单元擅自把附件变成 only-root。
+
+六、完成或 STOP 的出口
+- D-N10-1 lexical misbinding CLOSED：同一 notes 文件被 Gate 判定且被 Bundle 包装，哨兵不再影响结果。
+- Python 0-test FAIL-CLOSED：六项回归真实进入默认+drift 门禁；CI 未运行时不得声称 REMOTE_PROVEN。
+- D-N11-1=OPEN，除非 Owner 针对 notes physical containment 另行明确授权且达成平台/竞态/兼容性合同；NEXT-12 默认不宣称整个 project-root physical boundary 已关闭。
+- D-N10-1 和 D-N11-1 不得以“相同配置下 run_id 改变”直接定成回归；必须对比原始配置、SHA、canonical bytes 来解释。
+- B2-U1 合并/推送、C1/B1 安装态验收、B2-U2、V1 artifact 私有归档，均无此轮自动权限。

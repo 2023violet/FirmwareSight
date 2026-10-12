@@ -58,6 +58,9 @@ CORE_PACKAGES = (
     "firmwaresight-report",
     "fwsight",
 )
+# How many Python cases `scripts/tests` holds. Measured, not decorative: the gate below refuses a collection
+# that came in under it, so shrinking the suite is a decision someone has to make out loud.
+MINIMUM_PYTHON_TESTS = 6
 
 
 def resolve(name: str) -> str:
@@ -260,6 +263,55 @@ def version_identity_reasons(root: Path) -> list[str]:
     return problems
 
 
+def python_regressions_reasons(root: Path) -> list[str]:
+    """Run the stdlib regressions under `scripts/tests/` and read their summary, not just their exit code.
+
+    `unittest discover` is not a reliable pass/fail signal on its own: with nothing collected it exits 5 on the
+    interpreter this repository's CI pins (3.13) and 0 on older ones, so a step that trusted the exit code
+    alone could go green on an empty folder on half the machines. The count is the guard — the suite that
+    exists today holds `MINIMUM_PYTHON_TESTS` cases, and a deleted file, a renamed file, an emptied module or a
+    collection error all land below it.
+    """
+    argv = [
+        sys.executable,
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts/tests",
+        "-p",
+        "test_*.py",
+        "-v",
+    ]
+    completed = subprocess.run(argv, cwd=root, capture_output=True, check=False)
+    log = (completed.stdout + completed.stderr).decode("utf-8", "replace")
+    summary = re.search(r"^Ran (\d+) tests?[^\r\n]*", log, re.MULTILINE)
+    if summary is None:
+        print(
+            f"  no `Ran N tests` line at all (exit {completed.returncode}), so nothing was shown to run",
+            flush=True,
+        )
+        return [
+            "`scripts/tests` produced no unittest summary line, which is not evidence that any test ran"
+        ]
+    collected = int(summary.group(1))
+    rest = log[summary.end():].splitlines()
+    verdict = next((line for line in rest if line.strip()), "")
+    print(f"  collected {collected}, summary {summary.group(0)!r}, verdict {verdict!r}", flush=True)
+
+    problems: list[str] = []
+    if collected < MINIMUM_PYTHON_TESTS:
+        problems.append(
+            f"{collected} tests collected, below the {MINIMUM_PYTHON_TESTS} this suite holds: a file is "
+            "missing, renamed away from `test_*.py`, or emptied"
+        )
+    if not verdict.startswith("OK"):
+        problems.append(f"the suite did not report OK: {verdict or 'no verdict line'}")
+    if completed.returncode != 0:
+        problems.append(f"`{' '.join(argv)}` exited {completed.returncode}")
+    return problems
+
+
 def drift_steps(gate: Gate) -> None:
     py = sys.executable
     checks = (
@@ -304,6 +356,15 @@ def drift_steps(gate: Gate) -> None:
         "Cargo.toml, tauri.conf.json, ui/package.json and BASELINE.yaml agree, and every crate "
         "inherits `version.workspace = true`",
         lambda: version_identity_reasons(ROOT),
+    ):
+        return
+    # The portability reader's own regressions, which is the one surface a review round can silently break.
+    if not gate.inline(
+        "drift",
+        "python regressions",
+        f"{sys.executable} -m unittest discover -s scripts/tests -p test_*.py -v, "
+        f"requiring at least {MINIMUM_PYTHON_TESTS} cases and an OK verdict",
+        lambda: python_regressions_reasons(ROOT),
     ):
         return
     gate.run("drift", "goldens unchanged", [resolve("git"), "diff", "--exit-code", "--", "golden"])

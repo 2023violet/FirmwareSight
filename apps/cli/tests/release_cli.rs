@@ -44,6 +44,29 @@ release_notes_path = "RELEASE_NOTES.md"
 expected_version = "1.4.2"
 "#;
 
+/// `D-N10-1`. The same release, its notes reached through a `..` that comes straight back inside the
+/// project: `config::require_project_relative` has accepted this spelling since `f1516b8`, and it names the
+/// very file `PASSING` names. Cleanliness is not required here because one case writes an untracked file
+/// into the project on purpose, and the workspace-state rule is a separate fact from the notes rule.
+const CLIMBING_NOTES: &str = r#"schema_version = 1
+
+[project]
+name = "motor-controller"
+
+[artifacts]
+required = ["elf", "map"]
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = false
+require_release_notes = true
+release_notes_path = "docs/../RELEASE_NOTES.md"
+expected_version = "1.4.2"
+"#;
+
 /// The same policy with a growth threshold the fixture pair is over: one REVIEW finding, which the command
 /// line has no way to accept (§33).
 const REVIEWING: &str = r#"schema_version = 1
@@ -1463,4 +1486,118 @@ fn a_bundle_that_ships_attachments_says_so_in_the_report_it_ships() {
         !report.contains("BIN and Intel HEX are analyzed"),
         "the report must not promise the analysis this release does not do"
     );
+}
+
+// ------------------------------------------------------ D-N10-1: the configured notes path binds the file it names
+
+/// The crate's own fallback leaf. A configured path the resolver could not place used to land here, which
+/// made the refusal itself a readable file — so a project holding any file of this name could have its
+/// bytes read as somebody's Release Notes.
+const FALLBACK_LEAF: &str = "firmwaresight-unresolvable-path";
+
+fn shipped_notes(bundle: &Path) -> Vec<u8> {
+    std::fs::read(bundle.join("release-notes.md"))
+        .unwrap_or_else(|error| panic!("`release-notes.md` is not in the bundle: {error}"))
+}
+
+/// A release owner may spell their notes `docs/../RELEASE_NOTES.md`, and it is the same file as
+/// `RELEASE_NOTES.md`. The resolver used to have no `..` rule at all: it fell through to the fallback leaf,
+/// found nothing there, and reported existing notes as missing — a `BLOCK` no edit to the notes can fix.
+#[test]
+fn a_configured_notes_path_that_climbs_and_returns_is_read_at_the_file_it_names() {
+    let world = World::new("notes-climb", CLIMBING_NOTES);
+    let output = world.prepare(&[]);
+    assert_eq!(code(&output), Some(0), "{}", errors(&output));
+
+    let bundle = world.published();
+    assert_eq!(
+        shipped_notes(&bundle),
+        NOTES.as_bytes(),
+        "the bundle ships the notes the config named, which live at the project root"
+    );
+    verify_bundle(&bundle).expect("a bundle bound to the real notes still verifies");
+}
+
+/// The adversarial half, and the reason this was a correctness defect rather than a wording one: with a file
+/// of the fallback name sitting in the project, the same configuration hashed *that* file, passed, and
+/// shipped its bytes as the release's Release Notes. The project's own commit is untouched here, so the two
+/// runs differ only by the presence of a file nobody configured.
+#[test]
+fn the_internal_fallback_name_never_becomes_the_configured_release_notes() {
+    let world = World::new("notes-fallback", CLIMBING_NOTES);
+    std::fs::write(
+        world.project.join(FALLBACK_LEAF),
+        "bytes no release ever configured\n",
+    )
+    .expect("the fallback-named file is written");
+
+    let held = world.export_to(&world.out.join("fallback-held"), &[]);
+    assert_eq!(code(&held), Some(0), "{}", errors(&held));
+    let held_bundle = only_bundle(&world.out.join("fallback-held"));
+    assert_eq!(
+        shipped_notes(&held_bundle),
+        NOTES.as_bytes(),
+        "a file of the fallback name must not become the release's Release Notes"
+    );
+
+    // The same project, the same commit, the fallback name now free: the answer has to be identical.
+    std::fs::remove_file(world.project.join(FALLBACK_LEAF))
+        .expect("the fallback-named file is removed");
+    let free = world.export_to(&world.out.join("fallback-free"), &[]);
+    assert_eq!(code(&free), Some(0), "{}", errors(&free));
+    assert_eq!(
+        shipped_notes(&only_bundle(&world.out.join("fallback-free"))),
+        shipped_notes(&held_bundle),
+        "the presence of a file the release did not choose cannot change which bytes are the Release Notes"
+    );
+    verify_bundle(&held_bundle).expect("the bundle over the occupied fallback name verifies too");
+}
+
+/// The refused half of the matrix, at the surface a release owner hits it. Each of these was refused before
+/// this round and is refused after — by the same walk the resolver uses, so there is no second list of legal
+/// shapes to fall out of step. What is asserted is that a refusal writes nothing and quotes neither the
+/// host's directory nor an internal fallback name.
+#[test]
+fn a_configured_notes_path_that_cannot_be_placed_writes_nothing_and_leaks_no_path() {
+    for (index, configured) in [
+        "../escape.md",
+        "docs/../../escape.md",
+        "/etc/passwd",
+        // Written the way TOML has to spell it: the value the config ends up holding is
+        // `C:\Windows\win.ini`, and an unescaped backslash is a parse error rather than a path.
+        "C:\\\\Windows\\\\win.ini",
+        "C:/Windows/win.ini",
+        "docs/..",
+        "",
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let config = CLIMBING_NOTES.replace("docs/../RELEASE_NOTES.md", configured);
+        let world = World::new(&format!("notes-refused-{index}"), &config);
+        let output = world.prepare(&[]);
+        let shown = format!("{}{}", text(&output), errors(&output));
+        assert_ne!(
+            code(&output),
+            Some(0),
+            "`{configured}` cannot be placed, so no release may be built on it: {shown}"
+        );
+        assert!(
+            shown.contains("is not project-relative"),
+            "`{configured}` was not refused as a path problem, so something else answered it: {shown}"
+        );
+        assert!(
+            wrote_nothing(&world.out),
+            "a refused notes path still exported a bundle: {:?}",
+            tree(&world.out)
+        );
+        assert!(
+            !shown.contains(FALLBACK_LEAF),
+            "the refusal for `{configured}` named the internal fallback: {shown}"
+        );
+        assert!(
+            !shown.contains(&world.project.to_string_lossy().into_owned()),
+            "the refusal for `{configured}` quoted the host directory it refused to read: {shown}"
+        );
+    }
 }

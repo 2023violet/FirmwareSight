@@ -2,7 +2,7 @@
 title: "Release Attached Byte Evidence"
 doc_id: "FS-TECH-029"
 product: "FirmwareSight"
-version: "0.6.1"
+version: "0.6.2"
 status: "BASELINE"
 owner: "Architecture"
 last_updated: "2026-10-12"
@@ -811,5 +811,88 @@ inside the root deserve to be read?) settled by the Architect first. Recorded as
 **What did not move.** No schema file, no schema major, no golden, no migration, no `ERR-BUNDLE-61xx` allocation, no
 Tauri capability, no dependency, no network, no token; the Gate canonical label, the `attachment:<kind>:<sha256>`
 locator and the six links of §6 are untouched. `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`.
+
+### 14.5 Executed 2026-10-12 by `B2-U1R2` — one walk places a configured path, and `D-N10-1` closes
+
+The Architect's ruling accepted `NEXT-11`'s reproduction and ordered the fix; `NEXT-12 v1.1` authorized it, with the
+physical question explicitly left open (§14.5's last block). What changed is the resolution entry, nothing else.
+
+`config::place_project_relative` is now the single lexical walk: it consumes `.` and `..` against a component stack,
+returns the normalized relative placement, and refuses a string that cannot be placed. `config::require_project_relative`
+is a wrapper over it — the same accepted set, the same sentences, one implementation rather than two that can drift —
+and `evidence::resolve_project_relative` is the other wrapper, returning `Result<PathBuf, config::UnplaceableProjectPath>`.
+`join_project_relative` and its fallback leaf are gone: a refusal is now a type that holds a `&'static str` reason and no
+path, so there is nothing left for a project to occupy. All three production consumers take the refusal path before the
+first `stat`: `evidence::observe_release_notes`, the notes copy in `bundle.rs`, and `bundle.rs::resolve_source` (which
+keeps its own rule that an absolute recorded path is used as given).
+
+| `release.release_notes_path` | placement | measured result |
+| --- | --- | --- |
+| `RELEASE_NOTES.md` | `root/RELEASE_NOTES.md` | `PASS`, the owner's digest |
+| `docs/NOTES.md` | `root/docs/NOTES.md` | `PASS`, that file's digest |
+| `docs/../RELEASE_NOTES.md` | `root/RELEASE_NOTES.md` | `PASS`, the owner's digest — was `BLOCK`, or a `PASS` on the fallback file |
+| `./RELEASE_NOTES.md` | `root/RELEASE_NOTES.md` | `PASS` |
+| `docs/./../build/NOTES.md` | `root/build/NOTES.md` | `PASS` |
+| `../escape.md`, `docs/../../escape.md` | none | refused: "`..` escapes the project root" |
+| `/etc/passwd`, `C:/Windows/win.ini` | none | refused: "an absolute path cannot be project-relative" |
+| `C:\Windows\win.ini` | none | refused: a project-relative path is written with `/` |
+| `docs/..`, `..` | none | refused: "the path resolves to the project root itself" |
+| `` (empty) | none | refused: "the path is empty" |
+
+Every refused row is `ERR-CONFIG-7005` with the same detail sentence this table carried before the fix, no bundle and no
+host directory in the output; the accepted rows are held by
+`evidence::tests::a_project_relative_path_lands_where_its_components_normalize_to`,
+`a_path_that_cannot_be_placed_is_refused_rather_than_resolved`,
+`a_refused_notes_path_is_the_same_evidence_gap_it_always_was` and
+`the_validator_and_the_resolver_agree_on_every_path_this_round_measured`, and the shipped-bytes claim is held at the
+process level by `release_cli.rs`'s
+`a_configured_notes_path_that_climbs_and_returns_is_read_at_the_file_it_names` and
+`the_internal_fallback_name_never_becomes_the_configured_release_notes`.
+
+**The identity boundary, measured rather than asserted.** `gate.rs` was not touched: the canonical input still carries
+`release.release_notes_path=` with the string as typed — never a normalized form — and the notes line still carries the
+observed fact. Two pinned binaries, `a21a987`'s `469cc5c5c792c529…` and this tree's `5c67fc04f3e62329…`, over the *same*
+committed projects give:
+
+| project | pre-fix run id | post-fix run id | what the notes bound |
+| --- | --- | --- | --- |
+| `RELEASE_NOTES.md` | `gate-5ebc21bb1f3434ae…` | the same | `6e03bb14113f0e8e…` on both |
+| `docs/NOTES.md` | `gate-fd1ce7d303fb2122…` | the same | `95428da20348a496…` on both |
+| `docs/../RELEASE_NOTES.md`, fallback name free | `gate-32a6b4edb612d4bd…` (`BLOCK`) | `gate-4041d554e728ca64…` (`PASS`) | nothing before; `6e03bb14113f0e8e…` after |
+| `docs/../RELEASE_NOTES.md`, fallback name occupied | `gate-fd2a02e7b1ddbaec…` (`PASS`) | `gate-01543c674585b62c…` (`PASS`) | `d9708e6c19936193…`, the fallback file, before; `6e03bb14113f0e8e…` after |
+
+So the ids that moved are exactly the ids whose *observed notes bytes* were wrong, which is the correction rather than a
+protocol change; `snapshot_id` is `snap-4b4087e1407ceddcb1e1…-p0-normalize-1` in all eight rows, and no old run, review
+or portable document is rewritten. Legal spellings keep their ids byte-for-byte.
+
+**`D-N11-1` is measured here and remains OPEN — `NOT PHYSICALLY CONTAINED`.** The guards are lexical; the filesystem is
+not. With one isolated project per row and the same two binaries:
+
+- a directory **junction** inside the root (`mklink /J`, no elevation needed) under
+  `release_notes_path = "notes/RELEASE_NOTES.md"`: both binaries return the identical
+  `gate-8d349728452c4e2…4ff21a` and bind the outside file's `6c4e5e59f00e7b58…`. The corrected walk changes nothing
+  about it — including when the same junction is reached through a legal climb, where the pre-fix binary reported
+  `BLOCK` and the fixed one reads the junction's target.
+- the bundle over that project ships `release-notes.md` as a **plain regular file** holding the target's bytes
+  (`6c4e5e59…`, 51 bytes, `is_symlink: false`), with the project-relative locator `file:notes/RELEASE_NOTES.md`. No host
+  path and no symlink leave the machine.
+- a **hard link** to a file outside the project: both binaries identical again. It carries no reparse marker, so a future
+  `canonicalize`-and-`starts_with` rule would not see it either; the rule has to say which of the two names it means.
+- a real **symbolic link**: refused by this host (`ERROR_PRIVILEGE_NOT_HELD`), so that row is `NOT_MEASURED` here, and
+  POSIX is `NOT_MEASURED` for want of a runner. A `canonicalize` check is also not a TOCTOU guarantee: the target can be
+  swapped between the check and the read.
+
+Nothing in this round adds a physical rule, and §14's adjudication C is untouched: an explicitly chosen attachment may
+still be a symlink or live outside the root when named absolutely, and the existing `M11`-shaped cases still describe
+it. Making the configured Release Notes physically root-contained needs its own Owner decision, with the Windows,
+POSIX, retarget-race and run-id consequences stated — `unreadable:{reason}` is itself bound into the run id, so even the
+wording of a future refusal moves identity.
+
+**`D-N09-1`'s regression suite is now a gate step.** `scripts/tests/test_verify_bundle_portability.py` runs inside the
+default gate as `drift/python regressions`, which asserts the unittest summary (`Ran N tests`, `N >= 6`, verdict `OK`,
+exit 0) instead of trusting `discover`'s exit code — 3.13 exits 5 on an empty collection and older interpreters exit 0,
+so the count is the guard. Measured mutations: the suite file renamed away from `test_*.py` fails it with
+`collected 0 … NO TESTS RAN`; one case renamed out fails it with `5 tests collected, below the 6`; and moving the
+reader's notes sentence fails it with `FAILED (failures=1)`. The drift group went 8 → 9 and the default gate 17 → 18.
 
 

@@ -526,56 +526,94 @@ pub fn validate(config: &ProjectConfig) -> Result<Vec<String>, ProjectError> {
     Ok(warnings)
 }
 
-/// A configured relative path must resolve inside the project root. Absolute paths and `..` escapes are
-/// refused, so a config cannot make the Gate read outside the project (prompt §10, `AGENTS.md` 7).
-pub fn require_project_relative(path: &str, field: &str) -> Result<(), ProjectError> {
+/// A configured relative path that cannot be placed inside a project root. Everything it holds is a fixed
+/// sentence: a refusal must never be convertible into a location something can be read from, which is the
+/// shape `D-N10-1` had when the fallback for an unplaceable path was itself a path.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UnplaceableProjectPath {
+    reason: &'static str,
+}
+
+impl UnplaceableProjectPath {
+    /// The sentence this crate quotes for the refusal. It names no path and no component, because the only
+    /// thing a caller may do with a refusal is report it.
+    #[must_use]
+    pub fn reason(&self) -> &'static str {
+        self.reason
+    }
+}
+
+/// The one lexical walk behind every project-relative path this crate accepts, returned as the normalized
+/// relative components that stay inside the root: `docs/../RELEASE_NOTES.md` places at `RELEASE_NOTES.md`,
+/// `docs/../../escape.md` places nowhere.
+///
+/// Both `require_project_relative` and `evidence::resolve_project_relative` are wrappers over this single
+/// call, so a config can never pass a validation whose resolver then places somewhere else. Containment is
+/// *lexical*: a link inside the project whose target sits outside it is still placed at the link, which is
+/// the open question `D-N11-1` records and this function deliberately does not answer.
+pub(crate) fn place_project_relative(path: &str) -> Result<PathBuf, UnplaceableProjectPath> {
+    let reject = |reason: &'static str| Err(UnplaceableProjectPath { reason });
     let candidate = Path::new(path);
-    let reject = |detail: String| {
-        Err(ProjectError::UnsafeConfigPath {
-            path: path.to_owned(),
-            detail: format!("`{field}`: {detail}"),
-        })
-    };
     if path.is_empty() {
-        return reject("the path is empty".to_owned());
+        return reject("the path is empty");
     }
     if candidate.is_absolute() || path.starts_with('/') || path.starts_with('\\') {
-        return reject("an absolute path cannot be project-relative".to_owned());
+        return reject("an absolute path cannot be project-relative");
     }
     if path.contains(':') {
-        return reject("the path carries a drive or scheme prefix".to_owned());
+        return reject("the path carries a drive or scheme prefix");
     }
     if path.contains('\\') {
         // On Windows this is a separator, so the path is not the `/`-joined relative form the rest of
         // the product quotes. A configured path also becomes a `file:` evidence locator, and a locator
         // may never carry the one shape a host path always has (`04_TECH/27`, `AGENTS.md` 7).
         return reject(
-            "a project-relative path is written with `/`; a backslash is a Windows separator"
-                .to_owned(),
+            "a project-relative path is written with `/`; a backslash is a Windows separator",
         );
     }
+    let mut placed = PathBuf::new();
     let mut depth = 0usize;
     for component in candidate.components() {
         match component {
-            Component::Normal(_) => depth += 1,
+            Component::Normal(name) => {
+                placed.push(name);
+                depth += 1;
+            }
             Component::CurDir => {}
             Component::ParentDir => {
                 let Some(next) = depth.checked_sub(1) else {
-                    return reject("`..` escapes the project root".to_owned());
+                    return reject("`..` escapes the project root");
                 };
                 depth = next;
+                // The leaf pushed above it is resolved away. A climb that returns inside the root is the
+                // legal case this walk exists for; a climb out of it was refused one line earlier.
+                placed.pop();
             }
+            // Unreachable for the strings checked above — a root or a prefix is either absolute or carries
+            // a colon, both refused before the walk. Kept as a refusal rather than a guess, and quoted
+            // without the component's `Debug` so no host shape can enter a refusal sentence.
             other => {
-                return reject(format!(
-                    "the path carries an unexpected component: {other:?}"
-                ));
+                let _ = other;
+                return reject("the path carries a component a project-relative path may not have");
             }
         }
     }
     if depth == 0 {
-        return reject("the path resolves to the project root itself".to_owned());
+        return reject("the path resolves to the project root itself");
     }
-    Ok(())
+    Ok(placed)
+}
+
+/// A configured relative path must resolve inside the project root. Absolute paths and `..` escapes are
+/// refused, so a config cannot make the Gate read outside the project (prompt §10, `AGENTS.md` 7). The
+/// placement it checks against is the same walk the resolver uses, not a second copy of it.
+pub fn require_project_relative(path: &str, field: &str) -> Result<(), ProjectError> {
+    place_project_relative(path)
+        .map(|_| ())
+        .map_err(|refusal| ProjectError::UnsafeConfigPath {
+            path: path.to_owned(),
+            detail: format!("`{field}`: {}", refusal.reason()),
+        })
 }
 
 /// `release.expected_commit` must be a full Git object id: 40 hex (SHA-1) or 64 hex (SHA-256),

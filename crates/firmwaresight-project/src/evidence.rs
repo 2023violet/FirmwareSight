@@ -265,9 +265,11 @@ pub fn growth_facts(diff: &DiffResult) -> GateGrowthFacts {
 
 /// Observe the configured Release Notes file inside a project root.
 ///
-/// A path the config declares is validated again here, so no caller can reach outside the root by
-/// skipping `config::validate`. Absence and an unreadable file are different facts: only the first is
-/// a policy failure.
+/// The configured string is placed by the same walk `config::validate` checks it against, so a caller that
+/// skipped validation is still handed nothing outside the root, and a string the walk refuses is refused
+/// before a `stat`, a read or a hash. Absence and an unreadable file are different facts: only the first is
+/// a policy failure. Containment here is **lexical**: a link that sits inside the root and points outside it
+/// is read at its target, which is the open question `D-N11-1` records.
 #[must_use]
 pub fn observe_release_notes(root: &Path, relative_path: &str) -> GateFileFact {
     let missing = |reason: &str| GateFileFact {
@@ -276,10 +278,12 @@ pub fn observe_release_notes(root: &Path, relative_path: &str) -> GateFileFact {
             reason: reason.to_owned(),
         },
     };
-    if config::require_project_relative(relative_path, "release.release_notes_path").is_err() {
-        return missing("the configured path is not project-relative, so it was not read");
-    }
-    let path = join_project_relative(root, relative_path);
+    let path = match resolve_project_relative(root, relative_path) {
+        Ok(path) => path,
+        Err(_) => {
+            return missing("the configured path is not project-relative, so it was not read");
+        }
+    };
     match std::fs::metadata(&path) {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => GateFileFact {
             relative_path: relative_path.to_owned(),
@@ -478,25 +482,22 @@ fn attachment_display_name(path: &Path) -> String {
         .unwrap_or_default()
 }
 
-/// Join a validated relative path onto a root, component by component. `..` cannot escape because the
-/// path was already refused by `config::require_project_relative`; the loop makes that a property of
-/// this function too rather than only of its caller.
-#[must_use]
-pub fn join_project_relative(root: &Path, relative_path: &str) -> PathBuf {
-    let mut joined = root.to_path_buf();
-    for component in Path::new(relative_path).components() {
-        match component {
-            std::path::Component::Normal(name) => joined.push(name),
-            std::path::Component::CurDir => {}
-            other => {
-                // Unreachable for a validated path; if it ever is reached, resolve nothing rather than
-                // resolve outside the root.
-                let _ = other;
-                return root.join("firmwaresight-unresolvable-path");
-            }
-        }
-    }
-    joined
+/// Place a validated relative path onto a project root, or refuse it. One walk, shared with
+/// `config::require_project_relative` through [`config::place_project_relative`], so the answer to "is this
+/// legal" and the answer to "where does it land" cannot drift apart.
+///
+/// A refusal is a typed refusal, not a path: it holds a fixed sentence and nothing about it can be opened,
+/// hashed or shipped. Before this, a path the walk did not understand resolved onto a fallback *file name*
+/// inside the root — and a file name is something a project can own, which is `D-N10-1`.
+///
+/// The containment this guarantees is lexical. Whether a link that sits inside the root and points outside
+/// it should be followed is `D-N11-1`, an open contract question this function deliberately does not decide.
+#[must_use = "a refusal is not a path: nothing may be read, hashed or shipped from it"]
+pub fn resolve_project_relative(
+    root: &Path,
+    relative_path: &str,
+) -> Result<PathBuf, config::UnplaceableProjectPath> {
+    config::place_project_relative(relative_path).map(|placed| root.join(placed))
 }
 
 /// A short, path-free description of an I/O failure met *after* the path was already seen. `std::io::Error`'s
@@ -786,16 +787,164 @@ mod tests {
         let _ = std::fs::remove_dir_all(&root);
     }
 
+    /// Every spelling the config accepts, and the one place the shared walk puts it. A `..` that comes back
+    /// inside the root is the legal case `D-N10-1` was refusing to place.
     #[test]
-    fn an_absolute_root_never_appears_in_a_join_of_a_validated_relative_path() {
-        let joined = join_project_relative(Path::new("/project"), "docs/RELEASE_NOTES.md");
-        assert_eq!(joined, PathBuf::from("/project/docs/RELEASE_NOTES.md"));
-        let escaped = join_project_relative(Path::new("/project"), "../escape.md");
+    fn a_project_relative_path_lands_where_its_components_normalize_to() {
+        let root = Path::new("/project");
+        for (configured, expected) in [
+            ("RELEASE_NOTES.md", "/project/RELEASE_NOTES.md"),
+            ("docs/NOTES.md", "/project/docs/NOTES.md"),
+            ("docs/../RELEASE_NOTES.md", "/project/RELEASE_NOTES.md"),
+            ("docs/release/../NOTES.md", "/project/docs/NOTES.md"),
+            ("./RELEASE_NOTES.md", "/project/RELEASE_NOTES.md"),
+            ("docs/./../build/NOTES.md", "/project/build/NOTES.md"),
+        ] {
+            let placed = resolve_project_relative(root, configured)
+                .unwrap_or_else(|refusal| panic!("`{configured}` is legal: {}", refusal.reason()));
+            assert_eq!(
+                placed,
+                PathBuf::from(expected),
+                "`{configured}` places at the file it names"
+            );
+        }
+    }
+
+    /// What the walk refuses, it refuses as a sentence. There is no returned path to open, so a refusal
+    /// cannot be occupied by a file somebody else wrote — the property the fallback name did not have.
+    #[test]
+    fn a_path_that_cannot_be_placed_is_refused_rather_than_resolved() {
+        for configured in [
+            "../escape.md",
+            "docs/../../escape.md",
+            "/etc/passwd",
+            "C:\\Windows\\win.ini",
+            "C:/Windows/win.ini",
+            "",
+            "docs/..",
+            "..",
+        ] {
+            let outcome = resolve_project_relative(Path::new("/project"), configured);
+            let error = match outcome {
+                Ok(placed) => panic!(
+                    "`{configured}` resolved to {}, which is a place to read from",
+                    placed.display()
+                ),
+                Err(error) => error,
+            };
+            assert!(
+                !error.reason().is_empty(),
+                "a refusal still says why nothing was placed"
+            );
+            assert!(
+                config::require_project_relative(configured, "release.release_notes_path").is_err(),
+                "`{configured}` is refused by the validator too: the two must not disagree"
+            );
+        }
+    }
+
+    /// The adversarial case, run against a real folder: the project owns a file whose name used to be where
+    /// an unplaceable path landed. It is somebody's file, and it is not these notes.
+    #[test]
+    fn a_file_named_like_the_old_fallback_never_becomes_the_configured_notes() {
+        let root = std::env::temp_dir().join(format!(
+            "firmwaresight-notes-fallback-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|value| value.as_nanos())
+                .unwrap_or(0)
+        ));
+        std::fs::create_dir_all(&root).expect("the temporary root exists");
+        std::fs::write(root.join("RELEASE_NOTES.md"), "# the owner's notes\n")
+            .expect("the configured notes are written");
+        std::fs::write(
+            root.join("firmwaresight-unresolvable-path"),
+            "bytes nobody configured\n",
+        )
+        .expect("the fallback-named file is written");
+
+        let configured = fingerprint::file_sha256(&root.join("RELEASE_NOTES.md"))
+            .expect("the configured notes are readable");
+        let fallback = fingerprint::file_sha256(&root.join("firmwaresight-unresolvable-path"))
+            .expect("the fallback-named file is readable");
         assert_ne!(
-            escaped,
-            PathBuf::from("/escape.md"),
-            "a path that was not validated resolves to nothing usable rather than outside"
+            configured, fallback,
+            "the fixture is only a fixture if they differ"
         );
+
+        let fact = observe_release_notes(&root, "docs/../RELEASE_NOTES.md");
+        assert!(
+            matches!(&fact.status, GateFileStatus::Present { sha256: Some(digest) } if *digest == configured),
+            "the notes fact carries the configured file's digest, not the fallback's: {:?}",
+            fact.status
+        );
+        assert_eq!(
+            fact.relative_path, "docs/../RELEASE_NOTES.md",
+            "the fact quotes the path as configured"
+        );
+
+        // The same answer with the fallback name free: only the file that was never chosen is missing.
+        std::fs::remove_file(root.join("firmwaresight-unresolvable-path"))
+            .expect("the fallback-named file is removed");
+        let free = observe_release_notes(&root, "docs/../RELEASE_NOTES.md");
+        assert_eq!(
+            free, fact,
+            "the fallback name is not part of what the Gate reads"
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Every way a configured path can be unusable, and the one sentence the Gate records for all of them.
+    /// The reason did not change with `D-N10-1`: a refused path was an evidence gap before and is one after,
+    /// and in neither case was anything read.
+    #[test]
+    fn a_refused_notes_path_is_the_same_evidence_gap_it_always_was() {
+        for configured in [
+            "../escape.md",
+            "docs/../../escape.md",
+            "/etc/passwd",
+            "C:\\Windows\\win.ini",
+            "C:/Windows/win.ini",
+            "",
+            "docs/..",
+        ] {
+            let fact = observe_release_notes(Path::new("/project"), configured);
+            assert_eq!(
+                fact.status,
+                GateFileStatus::Unreadable {
+                    reason: "the configured path is not project-relative, so it was not read"
+                        .to_owned()
+                },
+                "`{configured}` is refused before anything is read"
+            );
+            assert_eq!(
+                fact.relative_path, configured,
+                "the fact quotes what was configured, not a normalized stand-in"
+            );
+        }
+    }
+
+    #[test]
+    fn the_validator_and_the_resolver_agree_on_every_path_this_round_measured() {
+        for configured in [
+            "RELEASE_NOTES.md",
+            "docs/NOTES.md",
+            "docs/../RELEASE_NOTES.md",
+            "../escape.md",
+            "docs/../../escape.md",
+            "C:\\escape.md",
+            "",
+        ] {
+            let legal =
+                config::require_project_relative(configured, "release.release_notes_path").is_ok();
+            let placed = resolve_project_relative(Path::new("/project"), configured).is_ok();
+            assert_eq!(
+                legal, placed,
+                "`{configured}` cannot be accepted by one and refused by the other"
+            );
+        }
     }
 
     #[test]

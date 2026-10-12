@@ -1,0 +1,35 @@
+FirmwareSight | NEXT-11 — B2-U1R1 独立安全与契约验收（READ-ONLY）
+版本 1.0 · 2026-10-12
+仓库：2023violet/FirmwareSight
+期望本地 HEAD：a21a987db3233499c7b7109182e6b7946754c3e9
+期望 parent：4eb46b58f22420916e613318ecfd252883d06aa2
+已核远端 origin/main：a0b5c886051a6b10042ea26f52809baea713d7af（CI #101 10/10 SUCCESS）
+
+身份与权限：你是独立 Reviewer，不是 NEXT-10 的开发者。只读本地仓库和权威源码；允许在 gitignored 的 target/n11/ 或独立临时目录中创建测试夹具及记录。不得修改任何 tracked 文件、不得提交/推送、不得操作 Owner 的 SQLite/settings.json/备份/回滚点，不得执行可能调用真实应用商店的 UI 动作。预检不符合则 STOP。
+
+一、权威预检（实测，不信执行摘要）
+1. 读取 README.md、AGENTS.md、.ai/README.md、CURRENT_STATE.md、DECISIONS.md、ACTIVE_TASK.md、ADR-0030、04_TECH/28（尤其 §5/§6/§9/§14.4）、NEXT-08 v1.1、NEXT-09、NEXT-10，以及真实本地源码。
+2. git rev-parse HEAD / parent / origin/main；git ls-remote origin refs/heads/main；git status --porcelain -uall；git log origin/main..HEAD。确认无新增未授权提交、正常 fast-forward 关系。若远端变动，STOP 并报告。
+3. git diff --name-status a0b5c88..a21a987。对照 N01-F01～F04、D-N09-1/2 的修改白名单，确认 Core Gate、run-id grammar、SnapshotId、release-id grammar、portable schema/golden、migration、capability、依赖未被静默改变。必要时检查确切代码，不沿用旧报告行号。
+
+二、NEXT-10 的独立验收（必测，不接受 self-review 代替）
+R1. 固定哨兵名文件的碰撞反例：在完全隔离项目中，放入非空 firmwaresight-unresolvable-path，然后尝试 release prepare --attach ../escape.bin；观察 ERR-BUNDLE-6115、exit 6、未读哨兵字节、未形成 bundle。和 parent 版本的 RED 复现对照，测试不能因手工构造的文件不存在而空过。
+R2. 项目内合法相对路径/绝对路径、显式合法选择名为 firmwaresight-unresolvable-path 的文件均可使用；名字碰撞、中文 basename、相同字节或不同字节的旧 C1 拒绝约束不回归。出错消息不泄漏宿主绝对路径。
+R3. 便携性校验器：在真实 CLI 生成的有无 baseline、有无 notes 的 bundle 上检查。合法缺席用 SKIP 而不是 PASS；manifest 承诺 notes 但文件被删时应 FAIL、非零退出、有总账、无未捕获 traceback；承诺 diff 但缺失/损坏也同理。核对 SHA256SUMS、manifest 和 schemas 不被绕过。运行 scripts/tests/test_verify_bundle_portability.py，独立确认真正执行六个测试，而不是 0 tests。
+R4. 对 N01-F01/F02/F04 的变更做契约回归：gate CWD vs release project-relative 语义不变；原始 Unicode 显示名不进入便携字节；CLI / Desktop 不同的错误码及拒绝次序均 fail-closed。审查证据实际所属角色而非只读文案。
+R5. fmt、clippy、cargo test、前端 test/typecheck/lint/build、check.py 全门禁及 baseline verifier 再跑；完整记录 Windows 实测，Ubuntu/POSIX 若无 runner 记 NOT_MEASURED，不做推算。
+
+三、D-N10-1 专项安全裁决（尚未授权修复，必须只读）
+源头：config::require_project_relative() 允许合法、不越界的 docs/../RELEASE_NOTES.md；evidence::join_project_relative() 当前对 ParentDir 转向 root/firmwaresight-unresolvable-path；observe_release_notes() 随后可能对该真实路径 stat 和 SHA；bundle 也复用该路径。
+1. 在独立临时工程重现三组：配置合法非规范路径、真正目标 notes 存在但哨兵不存在；哨兵为非空其他字节；合法普通 notes 路径。核对 Gate 的 observed/missing/hash、生成的 run id 及 Bundle 结果；不得读取 Owner 数据。
+2. 核对政策边界：`..` 只在归一化后仍位于项目根内才合法；越界路径必须拒绝，禁止用实体哨兵实现拒绝。明确指出旧行为导致的身份变化是否仅来自纠正错误事实；不得修改既存 run。
+3. 同时确认配置指向项目内 symlink（其目标在根外）时的现行行为与现行规格是否相符。若发现更广泛的安全漏洞，单独列为阻断裁决项，不在本轮擅自修复。
+4. 判断新增问题对将 a21a987 推送至 main 的阻断级别。不得因为本轮其余修复已 PASS 就掩盖该问题。
+
+四、独立裁决与交付
+写出一个报告到 target/n11/（只读轮次不改 tracked），包含精确命令/输出/退出码、反例、前后状态哈希、已证/未证边界，并明确分别裁决：
+- NEXT-10 修复：ACCEPT / REWORK / EVIDENCE_GAP。
+- D-N10-1：BLOCK_PUSH_UNTIL_CORRECTED 或有明确证据的其它判断。
+- 是否可在原有协议语法不变的条件下做 B2-U1R2 窄修；需新 ADR/Owner 决策之处列明。
+- scripts/tests 六个标准库测试是否独立有效、是否建议接入默认 gate。
+不允许自授合并/发布资格，不允许推送，不允许进入 B2-U2。审查通过也要将 D-N10-1 的结果作为独立条件，不将 ACCEPT 偷换成可推送。

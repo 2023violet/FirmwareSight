@@ -10,14 +10,31 @@ last_updated: "2026-10-12"
 
 # Current State
 
-- Date: 2026-10-12 *(the live state is the `B2_U1R1` entry below, which closes the `NEXT-10` round it follows; the
-  `B1-U2` entry those follow, the
+- Date: 2026-10-12 *(the live state is the `B2_U1R2` entry below, which closes the `NEXT-12 v1.1` round it follows; the
+  `B2_U1R1` entry those follow, the `B1-U2` entry those follow, the
   `B1-U1` entry those follow, the `C1-U4` entry it follows, the `C1-U3` entry that
   follows it, the `C1-U2R1` entry that round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
   inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `B2_U1R1_NARROW_CORRECTIVE` — EXECUTED UNDER `NEXT-10` ON 2026-10-12, LOCAL COMMIT ONLY, STATUS
-  `LOCAL_B2_U1R1_GATE_PASS / ARCHITECT_REVIEW_PENDING`** — the Owner's order of 2026-10-12 authorized exactly
+- **Active task: `B2_U1R2_NOTES_PATH_BINDING_AND_PYTHON_GATE` — EXECUTED UNDER `NEXT-12 v1.1` ON 2026-10-12, LOCAL
+  COMMIT ONLY, STATUS `LOCAL_B2_U1R2_GATE_PASS / ARCHITECT_REVIEW_PENDING`** — the Owner's dispatch authorized exactly
+  three things: repair `D-N10-1` so the Gate and the Bundle bind the Release Notes the configuration names, with one
+  fail-closed resolution entry and no readable sentinel; promote the six stdlib Python regressions into the default gate
+  with a guard that cannot pass on an empty collection; and measure and register `D-N11-1` **without** changing what
+  links are accepted. It authorized no push, no Owner data, no B2-U2, no dependency, no canonical-grammar or schema or
+  golden change. `D-N10-1` is **closed**: `config::place_project_relative` is now the one lexical walk,
+  `require_project_relative` and `evidence::resolve_project_relative` are its two wrappers, the refusal type carries a
+  sentence and no path, and `join_project_relative` with its invented leaf is gone. Measured with two pinned binaries over
+  the same committed projects, legal spellings keep their run ids byte-for-byte and only the two previously misbound
+  spellings move, because the digest they bind moved. `D-N11-1` is **open**: a junction or a hard link inside the project
+  still resolves outside it, identically before and after this round, and no physical rule was added. The gate at close:
+  **1,075 Rust passed / 0 failed / 0 ignored across 49 result lines** (+7 cases), **380 UI in 13 files** with no UI file
+  touched, fmt/clippy/typecheck/lint/build clean, `python scripts/check.py` **18/18 steps passed, no SKIP** (drift 8 → 9),
+  baseline verifier PASS at 863 / 861 / 996, all recorded in `BASELINE.yaml`
+  `b2_u1r2_next12_notes_path_binding_and_python_gate`. POSIX remains **NOT_MEASURED**; desktop runtime
+  `NOT_RUNTIME_VERIFIED`; the Owner's app-data tree hashed twice with an empty diff.
+- **`B2_U1R1_NARROW_CORRECTIVE` — EXECUTED UNDER `NEXT-10` ON 2026-10-12, LOCAL COMMIT ONLY** — the Owner's order of
+  2026-10-12 authorized exactly
   `D-N09-1`, `D-N09-2`, one fail-open audit and two `04_TECH` clarifications, TDD-first, with the C1/B1/B2-U1 business
   contracts to be kept, the full gate to be run and only a local commit allowed. It authorized **no** push, no force,
   no B2-U2, no further UI redesign and no other product feature, and it forbade touching the Owner's database, settings
@@ -25,7 +42,8 @@ last_updated: "2026-10-12"
   The gate at close: 1,068 Rust passed / 0 failed / 0 ignored across 49 result lines, 380 UI in 13 files, fmt and
   clippy `-D warnings` clean, UI typecheck/lint/build clean, `python -m unittest discover -s scripts/tests` 6 of 6,
   `scripts/check.py` and the baseline verifier as recorded in `BASELINE.yaml`
-  `b2_u1_local_closeout_next09_recovery_and_next10_dispatch`. POSIX remains **NOT_MEASURED** on this host.
+  `b2_u1_local_closeout_next09_recovery_and_next10_dispatch`. `NEXT-11` reviewed that head independently and returned
+  **`ACCEPT`** on both fixes; `NEXT-12 v1.1` then closed the one defect it stopped on.
 - **`B2_U1` CLOSED LOCALLY, `NEXT-09` ACCEPTED IT WITH EXPLICIT LIMITS, AND THE OWNER'S STORE WAS RESTORED —
   2026-10-12** — B2-U1 landed as `4eb46b58f22420916e613318ecfd252883d06aa2` (parent `a0b5c88`), F01–F04 implemented
   TDD-first, not pushed; `NEXT-09` re-measured that head and returned **`ACCEPT_WITH_EXPLICIT_LIMITS`**, naming
@@ -41,15 +59,29 @@ last_updated: "2026-10-12"
   **Stated as logical equivalence across 14 tables, not byte-exact restoration.** `NEXT-10` then produced zero
   Owner-data side effects: no store connection, no settings write, no dialog automation, no GUI — and the desktop
   surface is `NOT_RUNTIME_VERIFIED` for this round, because no isolated account or store exists on this host.
-- **Open by decision, not by oversight: `D-N10-1`** — the configured-notes path still resolves through
-  `evidence::join_project_relative`, which shares the same fallback name, and `config::require_project_relative` has
-  accepted a climb-and-come-back spelling since `f1516b8`. Measured with the real CLI: `release_notes_path =
-  "docs/../RELEASE_NOTES.md"` in a project whose notes exist at the root returns Gate **BLOCK** ("does not exist in
-  the project") when the fallback name is free and **PASS** ("is present", reading bytes nobody configured) when a file
-  of that name exists; the plain spelling passes either way. Not fixed: the site is outside `NEXT-10` §12's whitelist,
-  and reading the configured notes changes the Gate notes fact, which is part of the canonical input and therefore
-  moves a stored `run_id` — the stop condition `NEXT-10` §40 names. Repro, impact and the narrow fix are recorded in
-  `04_TECH/28` §14.4 and in `BASELINE.yaml`; the Architect decides.
+- **`D-N10-1` — CLOSED by `B2-U1R2` on 2026-10-12, and here is what was true before it was** — the configured-notes path
+  resolved through `evidence::join_project_relative`, which shared the attachment side's fallback name, while
+  `config::require_project_relative` has accepted a climb-and-come-back spelling since `f1516b8`. Measured with the real
+  CLI: `release_notes_path = "docs/../RELEASE_NOTES.md"` in a project whose notes exist at the root returned Gate
+  **BLOCK** ("does not exist in the project") when the fallback name was free, and **PASS** ("is present", reading bytes
+  nobody configured) when a file of that name existed — and the bundle then shipped that file as `release-notes.md`. It
+  was repaired only after the Architect ruled on it and the Owner authorized the identity it costs, because the notes
+  fact is part of the Gate canonical input. Now one walk places the path, refusals are typed and carry no path, and the
+  invented leaf is gone: legal spellings keep their stored run ids, and only the misbound spellings change — with the
+  reason measured, not asserted. Full matrix, both binaries and the run ids are in `04_TECH/28` §14.5 and
+  `BASELINE.yaml`.
+- **`D-N11-1` — OPEN, `NOT PHYSICALLY CONTAINED`, and no round may call it closed** — every guard in this crate is
+  lexical and the filesystem is not. A Windows directory **junction** inside the project (created here with
+  `mklink /J`, which needs no elevation) passes validation, so a configured path can be read, hashed and shipped from
+  bytes that live outside the root; measured identical on the pre-fix and post-fix binary
+  (`gate-8d349728…4ff21a`, the outside file's `6c4e5e59…`), so `NEXT-12` neither opened nor closed it. A **hard link** to
+  an outside file is identical across both binaries too and carries no reparse marker, which a
+  `canonicalize`-plus-`starts_with` rule would not see; and such a check is not a TOCTOU guarantee, because the target
+  can move between the check and the read. A real symlink is `NOT_MEASURED` on this host (`ERROR_PRIVILEGE_NOT_HELD`)
+  and POSIX is `NOT_MEASURED` for want of a runner. Deciding it needs its own Owner contract authorization covering
+  platform semantics, races, compatibility and the fact that `unreadable:{reason}` is bound into the run id. C1's
+  accepted attachment behaviour is deliberately untouched: an explicitly chosen symlink may still be followed, an
+  absolutely named attachment may still live outside the project, and a bundle still never emits a symlink.
 - **Remote state, measured rather than restated: `origin/main` = `a0b5c886051a6b10042ea26f52809baea713d7af`** — the
   Owner authorized the fast-forward of `e0b8fc4..a0b5c88` in the exact words `NEXT-07` required, and GitHub Actions
   run **#101** (`38207073344`) read back green on all ten jobs over that head: Rust 1,056 (Windows) and 1,057

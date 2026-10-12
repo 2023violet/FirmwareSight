@@ -883,8 +883,16 @@ fn observe(
         GateFileStatus::Present {
             sha256: Some(digest),
         } => {
-            let source =
-                evidence::join_project_relative(&request.project.root, &policy.release_notes_path);
+            let source = evidence::resolve_project_relative(
+                &request.project.root,
+                &policy.release_notes_path,
+            )
+            .map_err(|refusal| BundleError::ReleaseNotesChanged {
+                detail: format!(
+                    "the configured Release Notes path is not a place inside the project: {}",
+                    refusal.reason()
+                ),
+            })?;
             std::fs::metadata(&source)
                 .map(|metadata| NotesCopy {
                     source,
@@ -1188,7 +1196,7 @@ fn verify_sources(
                 ),
             });
         }
-        let path = resolve_source(root, &artifact.path);
+        let path = resolve_source(root, &artifact.path)?;
         let metadata =
             std::fs::metadata(&path).map_err(|error| BundleError::SourceArtifactChanged {
                 name: leaf.clone(),
@@ -1402,15 +1410,23 @@ fn unplaceable_selection(path: &Path) -> BundleError {
 }
 
 /// A snapshot's recorded source path, resolved the one way this module allows: absolute as it was given,
-/// relative to the project root. That is the directory the analysis ran from, so a build whose artifact
-/// lives elsewhere has to name it absolutely, and anything unresolvable fails closed in
-/// [`verify_sources`] rather than shipping a guess.
-fn resolve_source(root: &Path, raw: &str) -> PathBuf {
+/// relative to the project root through the same walk a configured path takes. That is the directory the
+/// analysis ran from, so a build whose artifact lives elsewhere has to name it absolutely, and anything that
+/// cannot be placed is refused here rather than read.
+fn resolve_source(root: &Path, raw: &str) -> Result<PathBuf, BundleError> {
     let path = Path::new(raw);
     if path.is_absolute() {
-        return path.to_path_buf();
+        return Ok(path.to_path_buf());
     }
-    evidence::join_project_relative(root, raw)
+    evidence::resolve_project_relative(root, raw).map_err(|refusal| {
+        BundleError::SourceArtifactChanged {
+            name: sanitize_leaf_name(raw),
+            detail: format!(
+                "the path the build recorded is not a place inside the project: {}",
+                refusal.reason()
+            ),
+        }
+    })
 }
 
 /// The bundle leaves for the verified rows (§23), collision-free even on a case-insensitive filesystem.

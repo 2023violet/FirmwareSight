@@ -592,6 +592,62 @@ ELF/MAP evidence interpretation, the professional centre of the product — whic
 `diff.removed` 4.4974:1 and the old V1 cohort artifact `11573661113` (expires 2026-10-22, still its own archival task)
 all stay on the register. Read, then stop.
 
+**The live word is `B2_U1R2_NOTES_PATH_BINDING_AND_PYTHON_GATE`, executed under `NEXT-12 v1.1` on 2026-10-12.** The
+paragraph above was the pointer when `B2-U1R1` closed and is kept unedited; this is what has happened since.
+
+`NEXT-11` reviewed that head independently, read-only, with three rebuilt binaries after voiding its own first identity
+comparison, and returned **`ACCEPT`** on `D-N09-1` and `D-N09-2`. It also reproduced `D-N10-1` end to end and proved
+something the register had not said: the defect is **already on `origin/main`** — the same three configurations measured
+over `6efd2c73…`, including a bundle that shipped a `release-notes.md` whose bytes were the fallback file's
+(`cb467479…` against the owner's `027d04e2…`) while the portable §61 reader still scored that bundle 53 of 53. It found
+one thing nobody had reported, `D-N11-1`: every path guard in this crate is lexical, and a Windows directory **junction**
+inside the project — creatable without any elevation — passes them all, so a configured path can be read and shipped from
+outside the root. The Architect's ruling of 2026-10-12 then separated the two: fix `D-N10-1`, spend the identity it costs,
+and do **not** silently change what links are accepted here.
+
+`NEXT-12 v1.1` executed that. `config::place_project_relative` is now the one lexical walk, with
+`config::require_project_relative` and `evidence::resolve_project_relative` as its two wrappers and
+`config::UnplaceableProjectPath` as a refusal that holds a fixed sentence and **no path**; `join_project_relative` and
+the invented leaf `firmwaresight-unresolvable-path` are gone from the product. `docs/../RELEASE_NOTES.md` now places at
+the root file it names, and all three consumers — the Gate's `observe_release_notes`, the byte-for-byte notes copy, and
+`resolve_source` — refuse before the first `stat`. The accepted set did not move: the same strings are legal, the same
+strings are refused, and every refusal keeps its `ERR-CONFIG-7005` sentence. Measured with two pinned binaries over the
+same committed projects, legal spellings keep their run ids byte-for-byte (`gate-5ebc21bb…` for `RELEASE_NOTES.md`,
+`gate-fd1ce7d3…` for `docs/NOTES.md`) and only the two misbound spellings move, because the digest they bound changed
+from the fallback file's `d9708e6c…` to the owner's `6e03bb14…`; `snapshot_id` moved in no row. Nothing was rewritten
+and no old run was re-issued. **`D-N10-1` is CLOSED.**
+
+**`D-N11-1` is measured and registered, and it is NOT closed.** With the junction inside the project, the pre-fix and
+post-fix binaries return the identical `gate-8d349728…4ff21a` and bind the outside bytes `6c4e5e59…`, so this round
+neither widened nor narrowed the escape; the shipped `release-notes.md` is a plain regular file of the target's bytes
+with a project-relative locator. A hard link is identical across both binaries too and carries no reparse marker, so a
+one-shot `canonicalize` plus `starts_with` would not see it — and such a check is not a TOCTOU guarantee in any case.
+A real symlink is refused by this host (`ERROR_PRIVILEGE_NOT_HELD`) and POSIX is `NOT_MEASURED`. Making configured paths
+physically root-contained is a separate Owner contract decision with its own identity consequences
+(`unreadable:{reason}` is bound into the run id, so even a refusal's wording moves it), and C1's accepted attachment
+capability was deliberately not touched: an explicitly chosen symlink may still be followed and an absolutely named
+attachment may still live outside the project.
+
+**The six Python regressions are now a gate step.** `scripts/check.py` gained a named `drift/python regressions` step
+that reads the unittest summary — `Ran N tests` with `N >= 6`, a verdict line starting `OK`, exit 0 — instead of trusting
+`discover`'s exit code, which is 5 on the interpreter CI pins and 0 on older ones when it collects nothing. Drift went
+8 → 9 and the default gate 17 → 18, counted from the executed output. Four mutations were measured and reverted:
+renamed suite file (`collected 0 … NO TESTS RAN`), one case removed (`5 tests collected, below the 6`), the reader's notes
+sentence moved (`FAILED (failures=1)`), and the resolver put back onto the invented leaf — which kills six unit tests and
+two CLI tests.
+
+**Boundary held.** Gate at close: **1,075 Rust passed / 0 failed / 0 ignored across 49 result lines** (1,068 before the
+seven new cases), **380 UI in 13 files** with no UI file touched, fmt/clippy `-D warnings`/typecheck/lint/build clean,
+`python scripts/check.py` **18/18 steps passed, no SKIP**, baseline verifier PASS at 863 / 861 / 996. Nothing is pushed:
+`origin/main` stays `a0b5c886051a6b10042ea26f52809baea713d7af`. All 23 files under the Owner's app-data directory were
+hashed before the first command and re-hashed mid-round with an empty diff — live store `5315f6a3…`, `settings.json`
+`eccee644…`, and the backup / rollback / quarantine directories untouched. **POSIX is `NOT_MEASURED`**, desktop runtime is
+`NOT_RUNTIME_VERIFIED`, and `INSTALLED_VERIFIED` is claimed for no B1 or B2 unit.
+
+**Status word: `LOCAL_B2_U1R2_GATE_PASS / ARCHITECT_REVIEW_PENDING`.** A developer may not self-sign the `ACCEPT`. The
+order the Owner set is: independent acceptance of this head → the ordinary fast-forward push and its ten-job CI read-back
+→ the separate `D-N11-1` containment round → **B2-U2**, which nothing here authorizes. Read, then stop.
+
 ```
 
 ## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do
