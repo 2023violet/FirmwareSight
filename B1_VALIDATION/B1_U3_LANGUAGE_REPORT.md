@@ -26,7 +26,7 @@ Status word this round proposes, and does not grant: **`LOCAL_B1_U3_GATE_PASS / 
 
 ## 1. changes — exact paths and intent
 
-67 paths, +6,239 / −1,392 — the code, the catalog, the tests, `ADR-0032`, the three archived prompts, this report and its checklist, and the three governance documents. Nothing in `crates/` was touched: no Core, CLI, Gate, parser, diff, storage-schema,
+67 paths, +6,259 / −1,392 — the code, the catalog, the tests, `ADR-0032`, the three archived prompts, this report and its checklist, and the three governance documents. Nothing in `crates/` was touched: no Core, CLI, Gate, parser, diff, storage-schema,
 fixture, golden or migration file moved (§2 boundary, verified in §4 below).
 
 ### The store and the wire
