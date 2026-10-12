@@ -1270,7 +1270,8 @@ fn observe_attachments(
 ) -> Result<Vec<AttachedSource>, BundleError> {
     let mut resolved: Vec<(PathBuf, ArtifactKind)> = Vec::with_capacity(selections.len());
     for selection in selections {
-        let path = resolve_selection(root, &selection.path);
+        let path = resolve_selection(root, &selection.path)
+            .ok_or_else(|| unplaceable_selection(&selection.path))?;
         if !resolved.iter().any(|(seen, _)| *seen == path) {
             resolved.push((path, selection.declared_kind));
         }
@@ -1362,12 +1363,17 @@ fn verify_attachments(
 }
 
 /// A selection resolved the one way this module allows a caller's path: absolute as it was given, otherwise
-/// relative to the project root, and never outside it. A relative path that tries to step out with `..`
-/// resolves to a name that cannot exist, so it is refused by the same `observe_attachment` that refuses a
-/// missing file rather than by a second error surface with a second set of words for the same event.
-fn resolve_selection(root: &Path, path: &Path) -> PathBuf {
+/// relative to the project root, and never outside it.
+///
+/// `None` is a selection this function cannot place: it carries a component that does not name a directory
+/// entry below the root (`ParentDir`, a `RootDir` or a prefix on a relative path). The refusal is returned
+/// rather than mapped onto a physical path, because mapping it was the defect (`D-N09-2`): the old code
+/// resolved every illegal component onto one name it assumed could not exist, and a project that happened to
+/// hold a file of that name shipped bytes no release owner ever chose. Whether the component is illegal is a
+/// fact about the selection, provable before the first `stat`.
+fn resolve_selection(root: &Path, path: &Path) -> Option<PathBuf> {
     if path.is_absolute() {
-        return path.to_path_buf();
+        return Some(path.to_path_buf());
     }
     let mut joined = root.to_path_buf();
     for component in path.components() {
@@ -1375,10 +1381,24 @@ fn resolve_selection(root: &Path, path: &Path) -> PathBuf {
             std::path::Component::Normal(name) => joined.push(name),
             std::path::Component::CurDir => {}
             // `ParentDir`, `RootDir` on a relative path, and the prefix forms are all refused here.
-            _ => return root.join("firmwaresight-unresolvable-path"),
+            _ => return None,
         }
     }
-    joined
+    Some(joined)
+}
+
+/// The refusal for a selection that cannot be placed inside the project. It carries the leaf the release
+/// owner typed, sanitized the way every attachment name is, so the sentence names their choice and quotes no
+/// directory (`04_TECH/28` §4.4). The engine's own observation code is kept: one refusal, one code, wherever a
+/// person meets it.
+fn unplaceable_selection(path: &Path) -> BundleError {
+    BundleError::Attachment(AttachmentError::Unreadable {
+        name: sanitize_leaf_name(&path.to_string_lossy()),
+        detail:
+            "the chosen path steps out of the project directory, and a release attaches no file \
+                 from outside it"
+                .to_owned(),
+    })
 }
 
 /// A snapshot's recorded source path, resolved the one way this module allows: absolute as it was given,

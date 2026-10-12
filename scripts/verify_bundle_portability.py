@@ -303,13 +303,26 @@ def answer_the_nine_questions(
             "(extensions.baseline_snapshot_id is null)"
         )
     notes = manifest.get("release", {}).get("notes")
+    notes_file = bundle / NOTES
     if notes is None:
         notes_answer = (
             "none: release.notes is null, so this release shipped no notes file "
             "(its policy does not require one)"
         )
+        if not notes_file.is_file():
+            report.skip(
+                f"{NOTES} is absent, and that is legal here: release.notes is null, so this release "
+                "promises no notes"
+            )
     else:
-        notes_answer = f"{(bundle / NOTES).stat().st_size} bytes, shipped verbatim"
+        # A promise the bundle broke is stated as an unreadable answer, which the check below fails, rather
+        # than as a `stat` of a file that is not there. The reviewer keeps their exit code and their tally,
+        # and no other document's checks are lost with it (`D-N09-1`).
+        notes_answer = (
+            f"{notes_file.stat().st_size} bytes, shipped verbatim"
+            if notes_file.is_file()
+            else f"{UNANSWERABLE}release.notes promises {NOTES} and this bundle does not carry it"
+        )
     answers = {
         "what release is this": f"{manifest['release']['id']} version {manifest['release']['version']}",
         "what firmware artifact ships": ", ".join(

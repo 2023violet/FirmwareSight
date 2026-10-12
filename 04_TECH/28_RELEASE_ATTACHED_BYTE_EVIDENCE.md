@@ -2,10 +2,10 @@
 title: "Release Attached Byte Evidence"
 doc_id: "FS-TECH-029"
 product: "FirmwareSight"
-version: "0.6.0"
+version: "0.6.1"
 status: "BASELINE"
 owner: "Architecture"
-last_updated: "2026-10-10"
+last_updated: "2026-10-12"
 ---
 
 # Release-Attached Byte Evidence — the C1 design baseline
@@ -730,5 +730,86 @@ exposed — `ERR-BUNDLE-6114` naming the current build and then, after that buil
 **baseline** — is a `C1-U2` composition rule that §4 never stated in words: a bundle carrying a comparison needs
 both sides of it analyzed since the app was launched. It is reported in §14.3's own terms and left to the
 Architect to place in §4 or accept as unstated.
+
+### 14.4 Dated clarification 2026-10-12 by `B2-U1R1` — §9's "file name" is two names, and a refusal moves before the first `stat`
+
+Status and reconciliation only. §§1–13 stay as the Owner froze them, and §14, §14.1 and §14.2 stay as their own
+rounds wrote them; §14.3 is corrected where it was wrong and the correction stays visible. This section adds the
+two distinctions `NEXT-09` found the design had left implicit, and records one defect the same root cause still owns
+that this round was stopped rather than allowed to fix.
+
+**§9's Release-page row says an attachment is listed by "file name", and `N01-F02` measured that a release has two
+file names for one file.** The clarification splits them by role rather than choosing one:
+
+| name | where it lives | rules it obeys | what it may never do |
+| --- | --- | --- | --- |
+| `display_name` | this machine only: the IPC DTO, the Release page's row and the desktop's `kindPicker` label | the leaf the owner chose, with **only** the directory removed, so `固件镜像.bin` and `my image.bin` survive as written, spaces and Unicode included | enter a Gate canonical input or a Release ID, appear in `release-manifest.json`, `analysis.json`, `gate-results.json`, `diff.json`, `accepted-reviews.json`, `release-report.html` or `SHA256SUMS`, become a bundle path, or carry any directory component |
+| bundle leaf | inside the bundle, under `artifacts/` | §5's frozen rule, unchanged: `sanitize_leaf_name` keeps `[A-Za-z0-9._-]`, truncates at 96, falls back to `artifact`, and a case-folded collision sends **both** rows to the content-keyed form | stand in for the owner's chosen name on a local surface |
+
+The isolation is proved rather than asserted. `release_attachments.rs`'s
+`the_name_a_person_chose_is_kept_beside_the_name_a_bundle_is_allowed_to_use` holds both names for one observation.
+`release_cli.rs` runs the pair that matters on a real release: `固件镜像.bin` ships under an archive-safe leaf with
+its own bytes and with the chosen name absent from every document the bundle carries
+(`a_chosen_name_that_a_portable_folder_cannot_carry_ships_under_a_safe_one_and_keeps_its_own_bytes`), and the pair
+`固件.bin` / `镜像.bin`, whose sanitized leaves fold onto one name, still ships as two indexed entries a reader can
+tell apart (`two_chosen_names_that_fold_onto_one_archive_name_ship_as_two_entries_the_reader_can_tell_apart`). On the
+surface side, `release.test.tsx` renders an attachment by the name its owner chose rather than by the leaf the bundle
+files it under, and refuses a row that names a folder in either direction. A release exported with a chosen name of
+`固件&镜像'版本[2].bin` hashes, sorts and identifies exactly like the same bytes named `payload.bin`: the Gate block
+of §5 is `(kind, digest)` rows, and `ReleaseAttachment::as_gate_fact()` drops **every** name, which is why
+`display_name` could not move a run id even though it is a new field on a DTO the page reads. `FileRole` and the
+evidence class still distinguish an attachment from an analyzed row everywhere §9 requires it; nothing here says a
+BIN or a HEX was parsed, and provenance is still not verified.
+
+**§4.3's E-1 refusal is now reached two ways, and only one of them touches a file.** A selection whose components
+cannot be placed inside the project root — `ParentDir`, a `RootDir` or a prefix on a relative path — used to be
+resolved onto `root.join("firmwaresight-unresolvable-path")` and then handed to `observe_attachment` as if it were a
+path. The design intended that name to be impossible to hold, so the refusal would reuse E-1's words and code. It
+did, until a project held a file of that name: `NEXT-10` measured `--attach ../escape.bin` against a scratch project
+containing `firmwaresight-unresolvable-path` **exit 0**, shipping that file's bytes (`8ff38045…`) as the release's
+BIN attachment while the file the owner actually named sat outside the project untouched. This is an input-mapping
+defect, not a wording defect. `resolve_selection` now returns the refusal itself, before the first `stat`, the first
+hash, the preview and the publish, so nothing is read at all:
+
+- stable code and exit are unchanged: `ERR-BUNDLE-6115`, `6`, and no destination directory is created;
+- the sentence names the leaf the owner typed and the fact that it steps out of the project directory, and quotes
+  neither a host path nor the internal name — `release_cli.rs`'s
+  `a_refused_climb_out_of_the_project_names_neither_the_host_directory_nor_an_internal_marker` pins that;
+- no legal input was narrowed: a project-relative path, an absolute path, and a real file that happens to be named
+  `firmwaresight-unresolvable-path` and is chosen by its owner all still work, the last of them proved by
+  `a_file_legitimately_named_like_the_internal_marker_is_still_attachable`;
+- the accepted-versus-refused split moved in one direction only — the case that used to be wrongly *accepted*
+  (an illegal component landing on an existing same-named file) is now refused.
+
+**`scripts/verify_bundle_portability.py` is the §61 reader, and §14.4 records what it now says about notes.** A
+release whose `release.notes` names a document it does not carry answers `unanswerable:`, which the reader counts as
+a FAIL and exits 1 on; a release whose policy asked for no notes reports that document as skipped, not as passed.
+Neither answer is bought by skipping the rest of the review: `SHA256SUMS` and the manifest are still indexed
+beforehand, and the run still prints its tally. `D-N09-1` was the unguarded `stat()` of the promised file, which
+raised `FileNotFoundError` and ended the review with a traceback instead of a verdict.
+
+**One same-named-file risk remains open, and it is stopped here rather than fixed.** The notes path resolves through
+`evidence::join_project_relative`, which shared the same fallback. `require_project_relative` (since `f1516b8`, long
+before C1) *accepts* a spelling that climbs and comes back, so `release_notes_path = "docs/../RELEASE_NOTES.md"`
+passes the guard and then lands on the fallback name. Measured on a scratch project whose `RELEASE_NOTES.md` exists
+at the root, with `docs/` present:
+
+| `release.release_notes_path` | a file of the fallback name exists | Gate `release.notes` |
+| --- | --- | --- |
+| `docs/../RELEASE_NOTES.md` | no | `BLOCK` — "Required Release Notes `docs/../RELEASE_NOTES.md` does not exist in the project." |
+| `docs/../RELEASE_NOTES.md` | yes | `PASS` — "Release Notes `docs/../RELEASE_NOTES.md` is present." (the fallback file's bytes were read) |
+| `RELEASE_NOTES.md` | either | `PASS` — present |
+
+So one release owner's notes are reported missing when the fallback name is free and are reported satisfied by bytes
+they never configured when it is held. It is **not** fixed in this round for two reasons the contract states: the
+site is outside the file whitelist `NEXT-10` §12 grants, and the notes fact is part of the Gate canonical input, so
+turning that `BLOCK` into a `PASS` moves a stored run's `run_id` — the class of change §40 says to stop and report.
+The narrow fix is to make `join_project_relative` refuse the same way `resolve_selection` now does and give
+`observe_release_notes` its own stated reason, with the identity question (does a configured path that normalizes
+inside the root deserve to be read?) settled by the Architect first. Recorded as `D-N10-1`.
+
+**What did not move.** No schema file, no schema major, no golden, no migration, no `ERR-BUNDLE-61xx` allocation, no
+Tauri capability, no dependency, no network, no token; the Gate canonical label, the `attachment:<kind>:<sha256>`
+locator and the six links of §6 are untouched. `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`.
 
 

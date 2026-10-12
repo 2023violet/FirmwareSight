@@ -1,0 +1,41 @@
+FirmwareSight | NEXT-09 — B2-U1 Independent Acceptance & Controlled Store Recovery
+版本 v1.0 | 2026-10-12 | READ-ONLY REVIEW FIRST | NO PUSH | DATA RESTORATION REQUIRES EXPLICIT OWNER APPROVAL
+
+【任务与权限】
+你是 FirmwareSight B2-U1 (NEXT-08 v1.1) 的独立审查者。当前执行者报告本地 HEAD 为 4eb46b58f22420916e613318ecfd252883d06aa2，origin/main 为 a0b5c886051a6b10042ea26f52809baea713d7af（前次 GitHub Actions #101 10/10 success），工作树干净、ahead 1、尚未推送。前述为待现场核验的输入，不是审查结论。
+B2-U1 的既有交付在 gitignored target/b2u1/n08_report.md。本轮优先读取报告和真实提交内容，而不是复述 Coding Agent 自评。
+只读阶段可以立即执行。未经 Owner 对实际恢复的单独明确批准，严禁修改/删除/替换 Owner 当前 SQLite 数据、设置文件、WAL/SHM；即便收到 B 恢复授权，也必须通过本 prompt 的恢复前置检查。不得 push、force、开 B2-U2、改不相干源代码或把自审改写为 Architect ACCEPT。
+
+【Architecture 定向裁决（不得暗改）】
+R1. N01-F01：本轮保留现有路径语义：gate --attach 相对 CWD；release prepare --attach 相对 --project 根。改变任何一方默认解析属可观察的 CLI 行为变化，需新的 Owner 决策。诊断与 Help 必须准确说明基准，不得把首次 NotFound 谎称“read 中途消失”，不在可移植文档或错误消息中打印宿主绝对路径。针对被拒绝的 ../ 前缀，仍需 fail-closed；对用户不得暴露内部哨兵名 firmwaresight-unresolvable-path，如当前修复没有处理，记录为一项有测试可复现的窄修正，不借机改解析规则。
+R2. N01-F02：本地显示名 display_name 允许 Unicode/空格，应与 bundle 安全文件名严格区分；不得进入 Gate/Release 指纹、portable manifest/JSON/HTML 或 bundle 字节路径；不得泄露目录；必须验证中文重名、casefold、同内容/不同内容边界、HTML/JS 注入样式文件名。被选择的本机 basename 与包内 artifacts 名称须能正确说明。
+R3. N01-F03：无 baseline 且 manifest 不承诺 diff 时，缺 diff.json 是合法缺席并显示 SKIP；manifest 承诺 baseline/diff 时，diff.json 缺席、损坏、摘要不符一律 FAIL。是否需要 release-notes.md 也以权威 manifest/contract 为准，不因检查器改动而豁免安全校验。校验器退出码、PASS/FAIL/SKIP 和测试要一致。
+R4. N01-F04：CLI selected_run_id=None 与 Desktop selected_run_id=Some 导致 6118/6102 等不同拒绝分支；保存这一由请求形状决定的先后次序，不改 Gate/Release 身份或稳定错误码。对外诊断应说清，拒绝时两端均无残留目的目录。
+R5. 文档纠偏：04_TECH/07_CLI_SPEC.md 中“同一处观测函数”可以成立，但不意味着同一相对路径基准。04_TECH/28 §9 的 file name/leaf 必须区分本机所选 basename 与包内安全 leaf。若本轮修改这些权威文档或源码，须申请窄修正授权与新增针对性测试，不得在只读审查阶段改写。
+
+【Phase A — 独立预检与变更范围，严格只读】
+A1. 重读 AGENTS.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、ADR-0030、04_TECH/28 §4-§9、04_TECH/07、NEXT-08 v1.1、target/b2u1/n08_report.md。记录现行 task live pointer 与 Owner B2-U1 授权，不重复关闭已由 NEXT-08 Step 0.5 解决的过期指针。
+A2. git rev-parse HEAD; git status --porcelain=v1 -uall; git ls-remote origin refs/heads/main; git merge-base --is-ancestor origin/main HEAD; git rev-list --count origin/main..HEAD; git diff --name-status origin/main..HEAD; git show --stat --oneline HEAD。必须证实只有已报告的一提交；若 remote 移动、工作树污染、无授权变更或缺少既有备份证据，STOP 并报告，不推测。
+A3. 逐模块检查 F01～F04 的代码、测试与调用点；核对真实变更未触碰 SnapshotId / Gate canonical input / Release ID 语法、schema major、portable golden、migration、Tauri capability、联网与依赖。特别对 F02 的 DTO、序列化输出和本机/portable 字段逐项证明隔离。
+
+【Phase B — 实测：尽量隔离，严禁污染 Owner 的应用数据库】
+B1. 用 gitignored 临时工程与 CLI 验证 F01：同一相对路径的 gate/release prepare 不同基准、绝对路径、`..` 拒绝、安全错误文本、既有退出码 3/6、无目录泄漏。不要为“统一体验”替换文件寻址合同。
+B2. 测 F02 的固件镜像.bin、固件.bin/镜像.bin 同时存在、my image.bin、长中文名与含标记字符名称（如 < > & 引号）；验证本地 display_name 保留所选叶名、HTML 正确转义、不影响 C1 的哈希、规则、release id 或便携包文件名，且 manifest/report 不漏宿主路径或 UI 专用标识。原有两个同字节成员的冲突规则不能被绕过。
+B3. 以真实 CLI 构造无 baseline、有 baseline、承诺 diff 但移除/损坏 diff、损坏 digest、notes 合法缺席与非法缺席案例；核对独立 portability verifier 不将合法 SKIP 当 PASS，也不吞掉真正的 FAIL。
+B4. 按生产接线检查并复测 CLI/Desktop 的 selected_run_id 分支，拒绝后输出目录不存在；不修改生产用户的数据。若实际桌面操作必须用有风险的文件对话框和真实 Gate 运行，只允许使用隔离账户/隔离配置存储，否则仅报告 NOT_RUNTIME_VERIFIED。
+B5. 复核 cargo fmt/test/clippy、UI test/typecheck/lint/build、drift、schemas/goldens、scripts/check.py、baseline verify 的真实输出。记录精确 head、测试环境、测试总数、未执行项；Windows 本地测试不称为 POSIX 实测，未经安装的 dev binary 不称 INSTALLED_VERIFIED。
+
+【Phase C — Owner 数据误写的专项判定；没有授权则只读】
+C0. 已知误写：测试时一次意外 Enter 触发运行 Gate，新增 gate_runs 1、gate_findings 10、gate_finding_evidence 20、gate_run_attachments 4，其余表计数不变；对应 Run ID 为 gate-31d2e5179062f04a1734542a7049d402e6e7f86cf355179a7f8c17cb54221623。原始目录级备份：target/b2u1/store-backup-20261012-005925/。这些均属执行者报告，必须现场验证。Owner 的 settings.json 已报告字节恢复，不能再借题修改。
+C1. Architect 推荐 B：如备份可证明一致且没有其他新交易，恢复到误触前状态；但这不自动构成 Owner 授权。若 Owner 未另行明文批准“B 条件性恢复”，只读测量后 STOP 于恢复门槛，明确列出风险与结果。
+C2. 即使 Owner 批准，执行恢复前也必须确认所有 FirmwareSight/CLI/测试/SQLite 连接完全退出；原始备份来源可靠并可在隔离拷贝上以 SQLite PRAGMA integrity_check 和业务表/Run ID/记录计数验证；备份捕获时机、-wal 与 -shm 的一致性可证明；目前文件相比备份只包含这次误触副作用，没有用户后续写入。主库 SHA 没变化不能作为 WAL 安全的证明。
+C3. 在执行恢复之前，将当前数据库文件组另存到独立可回滚目录并记录哈希。不得以简单“覆盖主 .sqlite 一文件”代替 WAL 恢复。优先由隔离的、已验证一致的备份副本通过 SQLite Backup API 生成单个一致的恢复候选数据库；候选验证通过，再在所有连接关闭的前提下以可回滚方式切换数据库文件组、让 SQLite 自行重建临时 -shm，恢复后再验证完整性和表计数。具体步骤须适配仓库应用配置路径及现有 SQLite journaling。若任何前置条件失败，放弃 B，保留当前数据库（方案 A 暂存），不写入、不删除、不猜测如何删特定 row。
+C4. 报告选择 B 的目标状态、实际是否获得单独授权、是否实施、修改前后摘要、所有表计数、sqlite integrity_check 以及可回滚备份路径。绝不宣称“byte-exact restoration”除非真的逐文件核验完全一致。
+C5. 防复发：记录误触的用户交互因果，不在本轮擅自改变 Gate 键盘快捷键或主库路径。建议后续真实桌面自动化只使用独立 Windows 用户/VM 或被权限隔离的配置及 store，不要相信仅设置 APPDATA 就可重定向 Tauri 的 Windows known-folder。
+
+【Phase D — 最终裁决输出】
+对 B2-U1 单独输出 ACCEPT / ACCEPT_WITH_EXPLICIT_LIMITS / REWORK REQUIRED，证据分 SOURCE_PRESENT / TEST_PROVEN / DEV_RUNTIME_VERIFIED / CI_PENDING / INSTALLED_NOT_VERIFIED。区分实际测量与原执行者报告。列出四项 F01～F04 是否关闭、所有未覆盖的边界、任何超合同改动以及最小纠偏建议。
+如发现真实缺陷：只写最窄 corrective proposal；没有 Owner 新授权不改代码。独立审核 ACCEPT 不等于批准推送：范围  a0b5c88..4eb46b58  的 normal fast-forward push 与随后新 head 十项 CI 应由 Owner 另行授权。B2-U2 尚未授权，不得开始。旧 V1 cohort artifact 到期日 2026-10-22，仍应保留私有归档任务。
+
+【STOP】
+不得暗中更改 owner data、snapshot/gate/release identity、error codes、CLI breaking path semantics、portable schemas/goldens、旧 cohort、release policy。不能证明备份一致或出现未预期新交易，立刻 STOP 数据恢复而非鲁莽删除。

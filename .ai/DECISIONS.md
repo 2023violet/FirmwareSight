@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-09"
+last_updated: "2026-10-12"
 ---
 
 # Decisions — v0.6.0
@@ -2633,3 +2633,58 @@ re-authoring Rust's remediation table in a second language — recorded as a lim
 D2's rule repeats here: widen the reader to accept 1 and 2 before any writer emits 3, because a reader that is raised
 first resolves every existing user's file to `Damaged` and demotes it to `settings.json.unreadable` on their next
 save. `NEXT-06` §18 forbade guessing the number for exactly that reason.
+
+## B2-U1 close, the Owner's store recovery, and B2-U1R1 (2026-10-12) — an accepted limit, a dataset restored under an explicit authorization, and a refusal that turned out to be a fail-open
+
+`NEXT-09` reviewed B2-U1 and `NEXT-10` repaired what it found. Four rulings came out of that pair, and each of them is
+a decision rather than a detail, so they are written here instead of only in a commit message.
+
+**The two `--attach` bases stay two, and the temptation to "unify the experience" was refused on purpose.** `R1` of
+the review states it as a boundary: `gate --attach` resolves against the process working directory, `release prepare
+--attach` against the `--project` root, and changing either default is an observable CLI behaviour change that needs a
+new Owner decision. So B2-U1R1 did not touch resolution semantics — it made the *documentation*, the *diagnosis* and
+the *determinism of the refusal* tell the truth about the split. `04_TECH/07` now says plainly that "同一处观测函数" is
+about the reading code being one function and never about one shared base, and that an absolute path is the spelling
+with no ambiguity. The frozen sentence itself was left in place with a dated clarification attached, because a silently
+improved baseline sentence is how a later reader loses the argument that decided it.
+
+**An executor's report is not evidence, and the Owner's data is the reason.** The accidental Gate run left a report
+saying 35 rows were added; what authorized the restore was a row-level diff — `+35 / -0` against the backup, every
+added row naming the one run — which is the only measurement that can prove no user write followed the mistake. The
+precondition list came before the action, and the method came out of the failure mode rather than out of convenience:
+a single consistent candidate built from the verified backup through the SQLite Backup API, then the live file group
+**moved** aside to a quarantine directory, never overwritten under a live WAL, and SQLite left to rebuild its own
+`-shm`. The direction of `backup()` was got wrong first, on a throwaway copy, and the pristine backup was re-hashed
+afterwards to prove nothing of it had been touched. **The claim recorded is logical equivalence across 14 tables, not
+"byte-exact restoration"** — a Backup-API copy folds the WAL and repacks pages, so the main file's bytes differ from
+the backup's by construction. The rollback point and the quarantine both stay on disk, so the decision is reversible
+even though it is done.
+
+**A same-named-file test is what separated a wording defect from a safety defect, and it was run first for exactly
+that reason.** The Owner's own instruction prioritized it: it answers whether `firmwaresight-unresolvable-path` is
+only ugly text or whether a wrong file can be accepted. It can. `release prepare --attach ../escape.bin` against a
+scratch project holding a non-empty file of that name returned **exit 0** and shipped that file's bytes as the
+release's BIN attachment. The old code answered every illegal relative component by resolving it onto a name it
+assumed nobody could hold, and then statted and hashed whatever was there. The repair keeps the contract instead of
+inventing one: the same `ERR-BUNDLE-6115`, the same exit 6, still no destination directory, no identity movement —
+and the refusal is decided by the shape of the selection before the first `stat`, so the fallback name stops being a
+path at all. One refusal, one code, wherever a person meets it. The set of *legal* inputs did not narrow: a project-
+relative path, an absolute path and a genuine file whose owner chose that name all still work, the last of them pinned
+by a test that would fail if someone later "hardened" the check by matching on the name.
+
+**A correct-looking fix was withheld because it would have moved a Gate run identity.** The same fallback still owns
+the configured-notes path, and it is measurably wrong in both directions: a legal-but-climbing `release_notes_path`
+reports existing notes as missing, and if the fallback name happens to be occupied it reports *those* bytes as present.
+Repairing it turns a `BLOCK` into a `PASS`, which changes the notes fact inside the Gate canonical input and therefore
+a stored `run_id`. That is `NEXT-10` §40's stop condition, and it was taken: recorded as `D-N10-1` with its repro in
+`04_TECH/28` §14.4, no code changed, the Architect to decide. Identity is not this round's to spend, however obvious
+the repair looks.
+
+**The new Python suite is replayable by command and deliberately not a gate step.** `NEXT-10` §12's whitelist names
+`scripts/verify_bundle_portability.py` and its targeted tests; it does not name `scripts/check.py`, and adding a step
+would move the gate from 17 steps to 18, change `BASELINE.yaml`'s drift counts and rewrite every CI expectation for a
+verifier the project has always run by hand. So `python -m unittest discover -s scripts/tests` is recorded as the
+replay command and the step-count question is left to the Owner. What was *not* acceptable — a single console
+screenshot — is answered by a test that builds its own subject from the committed golden bundle in a temporary
+directory and never writes into `golden/`.
+

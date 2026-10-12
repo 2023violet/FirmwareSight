@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-11"
+last_updated: "2026-10-12"
 ---
 
 # ACTIVE TASK
@@ -525,6 +525,72 @@ stale live-state records in these three files, and it does not relax any other `
 `NEXT-05` correctives C1/C2/C3, and light `diff.removed` at 4.4974:1 against a 4.5 floor stay on the register and
 are not folded into this unit. **Separately and not to be lost behind it: the old V1 cohort build's GitHub Artifact
 records expire 2026-10-22 and still need their own private archival.** Read, then start Step 0.
+
+**The live word is `B2_U1R1_NARROW_CORRECTIVE`, executed under `NEXT-10` on 2026-10-12.** The paragraph above was the
+pointer when B2-U1 was dispatched and is kept unedited; this is what has happened since, in order.
+
+`B2-U1` closed locally as `4eb46b58f22420916e613318ecfd252883d06aa2` (parent `a0b5c88`), all four `N01` gaps
+implemented TDD-first with the gate green at 1,064 Rust / 380 UI, and nothing was pushed. `NEXT-09` reviewed that head
+independently and returned **`ACCEPT_WITH_EXPLICIT_LIMITS`** — re-measured 17/17, the same Rust and UI totals, the
+boundary filter showing no change to `SnapshotId`, the Gate canonical input, the Release ID grammar, schema majors,
+goldens, migrations, capabilities, dependencies or network — while naming two defects and one limit that this round
+then answered. It also recorded the thing the unit had to disclose: a real-desktop walk pressed Enter one time too
+many and ran Gate against the Owner's own development store, adding 35 rows. The Owner authorized recovery in the
+words 「我选择 **方案 B**：有条件恢复测试前状态」, scoped to that run's side effects alone. All four preconditions were
+proven first — no live connection, the directory backup self-consistent and free of the accidental run, a row-level
+diff of `+35 / -0` with every added row naming that run, and a rollback point hashed before anything moved — and the
+restore went through a Backup-API candidate rather than a single-file overwrite under a live WAL, the live file group
+being **moved** to `target/b2u1/store-quarantine-20261012/`. Post-recovery the store reads `integrity_check ok` with
+`gate_runs 2 / gate_findings 20 / gate_finding_evidence 30 / gate_run_attachments 0` and the Owner's own rows intact
+(`projects 1 builds 2 sections 34 symbols 64 evidence 21 artifacts 3`); `settings.json` still hashes
+`eccee644…`, untouched. **This is logical equivalence across all 14 tables, not byte-exact restoration** — a
+Backup-API copy folds the WAL and repacks pages — and the claim is written that way on purpose.
+
+`NEXT-10` then closed the two named defects and answered the one question `NEXT-09` left open. `D-N09-1` was a real
+crash: `scripts/verify_bundle_portability.py` answered the notes question by `stat`-ing a document the manifest
+promised, so a promised-but-absent `release-notes.md` ended a stranger's review with a `FileNotFoundError` traceback.
+The read is conditional now, the absence is stated as an `unanswerable:` FAIL (measured: 56 of 59 checks passed,
+3 FAILED, exit 1, no traceback, both indexes still verified first), and a release that never promised notes now prints
+a real SKIP instead of a pass. The behaviour is held by `scripts/tests/test_verify_bundle_portability.py`, a stdlib
+`unittest` suite replayable with `python -m unittest discover -s scripts/tests`, six of six, whose subject is a copy of
+the committed golden bundle — and three of those six were RED on `4eb46b5`. `D-N09-2` turned out **not** to be a
+wording defect. `release_cli.rs` measured that a project holding a non-empty file named
+`firmwaresight-unresolvable-path` let `release prepare --attach ../escape.bin` **succeed** (exit 0) and ship that
+file's bytes (`8ff38045…`) as the release's BIN attachment: the refusal was a fallback path, and a fallback path can be
+occupied. `resolve_selection` now returns the refusal itself, before the first `stat`, the first hash, the preview and
+the publish, with `ERR-BUNDLE-6115`, exit 6, no destination directory and no identity change all kept, and no legal
+input narrowed — a real file of that name, chosen by its owner, still ships. `04_TECH/07` and `04_TECH/28` §14.4 carry
+the two clarifications this round was authorized to write: the two `--attach` verbs have **two relative bases** and
+always will until the Owner decides otherwise, "the same observation function" was never "the same resolution entry",
+and §9's "file name" is two names — `display_name`, local and Unicode, never in a fingerprint, a portable document or a
+bundle path, and the sanitized bundle leaf, whose rules did not move.
+
+**One same-named-file risk is still open and was stopped rather than fixed.** The configured-notes path resolves
+through `evidence::join_project_relative`, which shares that fallback, and `config::require_project_relative` has
+accepted a climb-and-come-back spelling since `f1516b8`. Measured: `release_notes_path = "docs/../RELEASE_NOTES.md"`
+against a project whose notes exist at the root returns Gate **BLOCK** — "does not exist in the project" — when the
+fallback name is free, and **PASS** — "is present", reading bytes nobody configured — when a file of that name exists.
+It is `D-N10-1`, and no round may quietly repair it: reading the notes the owner actually configured changes the Gate
+notes fact, which is part of the canonical input and therefore moves a stored `run_id`. That is `NEXT-10` §40's stop
+condition, so the repro, the impact and the narrow fix are recorded in `04_TECH/28` §14.4 and `BASELINE.yaml` for the
+Architect to decide.
+
+**Boundary held.** Nothing was pushed: `origin/main` stays `a0b5c886051a6b10042ea26f52809baea713d7af` and this head is
+one ordinary fast-forward ahead of it, which is the Owner's decision and not this round's. No Owner data was touched in
+`NEXT-10`: no connection to the store, no settings write, no dialog automation, no GUI — every test ran in a gitignored
+temp project, and the desktop surface stays `NOT_RUNTIME_VERIFIED` for this round because no isolated account or store
+exists on this host. F01–F04 were not redone, no golden, fixture, portable schema, migration, token, dependency or
+capability moved, and the V1 cohort build identity is untouched. Gate at the close: **1,068 Rust passed / 0 failed /
+0 ignored across 49 result lines**, **380 UI in 13 files**, fmt/clippy/typecheck/lint/build clean, `check.py` and the
+baseline verifier as recorded in `BASELINE.yaml`. **POSIX is `NOT_MEASURED`** — there is no POSIX runner here, the
+`cfg(unix)` symlink modules neither compiled nor ran, and no projection stands in for a measurement.
+
+**Status word: `LOCAL_B2_U1R1_GATE_PASS / ARCHITECT_REVIEW_PENDING`.** The order from here is the Owner's: an
+independent review of this head, then the push and its CI read-back, then B2-U2 — Flash/RAM, VMA/LMA, Region and
+ELF/MAP evidence interpretation, the professional centre of the product — which nothing in this paragraph authorizes.
+`D-N10-1` needs an Architect ruling before any round fixes it. B1's D1/D8, the `NEXT-05` C1/C2/C3, the light
+`diff.removed` 4.4974:1 and the old V1 cohort artifact `11573661113` (expires 2026-10-22, still its own archival task)
+all stay on the register. Read, then stop.
 
 ```
 

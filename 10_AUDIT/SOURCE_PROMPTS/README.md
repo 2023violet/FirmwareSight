@@ -1784,3 +1784,51 @@ non-blocking feedback round.
   **#101** (`38207073344`) read back green over ten jobs, with Rust 1,056 on Windows and **1,057** on Ubuntu — a
   pre-existing `cfg` split, which is why no later round may present a POSIX projection as a measurement.
   `INSTALLED_VERIFIED` remains unclaimed for every B1 unit.
+
+## NEXT-09 / NEXT-10 — B2-U1 acceptance with the Owner's store recovery, then the narrow corrective (2026-10-12, fourth batch)
+
+- Files, both archived verbatim in this directory:
+  - `FirmwareSight_NEXT_09_B2U1_Independent_Review_And_Safe_Store_Recovery_2026-10-12.txt` — 9,343 bytes,
+    41 newline-terminated lines, **0 `CR`**, sha256
+    `00a9541552e46e357d7e1210c12ea740c329ed2317cc1d1ebba43afcd19c9120`
+  - `FirmwareSight_NEXT_10_B2U1R1_Narrow_Corrective_2026-10-12.txt` — 8,709 bytes, 43 newlines (its last line
+    carries no terminator, so an editor shows 44), **0 `CR`**, sha256
+    `b3f8ca8b74c0a66756801da4fd347810a391e7bc5351d376f5355207df5c3eef`
+- Delivered as two separate files in `C:\Users\16429\Downloads\`, one per round. Each archived copy was
+  `cmp`-verified against its delivered bytes at the moment it was written here (`cmp OK` for both), and the digests
+  above were measured with `certutil -hashfile … SHA256` on the delivered file and on the archive copy, which are
+  equal — so these are the digests of what was delivered, not of anything reconstructed. Both were LF-only.
+- Authority. `NEXT-09` is **independent acceptance plus a conditional data-restoration gate**: its read-only phases
+  A and B could run immediately, and phase C could run only on the Owner's own separate approval, which arrived as
+  「我选择 **方案 B**：有条件恢复测试前状态」 scoped to the side effects of the one accidental Gate run — no other
+  history cleaned, no settings reset, no business code touched, every precondition provable or the round stops and
+  keeps the current data. It grants no push, no B2-U2 and no CLI path-semantics change, and it forbids an executor's
+  self-review being written up as an Architect `ACCEPT`. `NEXT-10` is a **narrow corrective contract**: close
+  `D-N09-1` and `D-N09-2`, audit one suspected fail-open, and clarify two technical-document sentences that a reader
+  can take the wrong way — TDD-first, full gate, local commit only, with `04_TECH/07` and a dated `04_TECH/28`
+  addendum named inside its whitelist and B2-U1's own F01–F04 explicitly out of scope for a redo.
+- What `NEXT-09` settled, and what a later round must not re-litigate. `4eb46b58…` was accepted
+  `ACCEPT_WITH_EXPLICIT_LIMITS` and **not pushed** — an independent review's `ACCEPT` is not push permission, and the
+  prompt says so in its own words. The Owner's store was restored by the route the prompt required: a
+  Backup-API-built candidate from the verified directory-level backup, the live file group moved out rather than
+  overwritten under a live WAL, and the states recorded in `BASELINE.yaml`
+  `b2_u1_local_closeout_next09_recovery_and_next10_dispatch`. Two rulings bind here: `R1` keeps the two `--attach`
+  bases as they are because unifying either one is an observable CLI behaviour change needing a new Owner decision,
+  and `R5` allows the two `04_TECH` clarifications only as dated additions, never as a silent rewrite of frozen text.
+  Real desktop dialogs stay forbidden against the Owner's configuration: with no isolated account or store, the
+  honest word is `NOT_RUNTIME_VERIFIED`.
+- Outcome, 2026-10-12. `NEXT-10` closed `D-N09-1` (a reader's `FileNotFoundError` became a stated FAIL with its exit
+  code and tally intact, and a legally absent notes document became a real SKIP rather than a pass) and `D-N09-2`,
+  which turned out **not** to be a wording defect: a selection carrying `..` resolved onto the crate's own fallback
+  name, and `release_cli.rs` measured that a project holding a file of that name let `--attach ../escape.bin`
+  **succeed** (exit 0) and ship those bytes. The refusal now happens before the first `stat`, under the same
+  `ERR-BUNDLE-6115` and exit 6, with no destination written and no legal input narrowed. The same fallback name is
+  still reachable on the configured-notes path (`D-N10-1`, measured both ways), and it was **stopped rather than
+  fixed**: the site is outside this round's whitelist, and reading the notes the owner configured would change the
+  Gate notes fact and therefore a stored `run_id` — `NEXT-10` §40's own stop condition. Gate at the close of this
+  round: **1,068 Rust passed / 0 failed / 0 ignored across 49 `test result:` lines** on this Windows host, **380 UI
+  tests in 13 files**, `cargo fmt`/`clippy -D warnings` clean, UI typecheck/lint/build clean, `python
+  scripts/check.py` and `scripts/verify_baseline_artifacts.py` as recorded in `BASELINE.yaml`, plus the new
+  `python -m unittest discover -s scripts/tests` at 6 of 6. POSIX remains **NOT_MEASURED** — no POSIX runner exists
+  on this host, and `cfg(unix)` cases neither compiled nor ran.
+

@@ -5,23 +5,51 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-11"
+last_updated: "2026-10-12"
 ---
 
 # Current State
 
-- Date: 2026-10-11 *(the live state is the `B1-U2` entry below, which closes the `NEXT-03` + `ADR-0031` round it
-  follows; the
+- Date: 2026-10-12 *(the live state is the `B2_U1R1` entry below, which closes the `NEXT-10` round it follows; the
+  `B1-U2` entry those follow, the
   `B1-U1` entry those follow, the `C1-U4` entry it follows, the `C1-U3` entry that
   follows it, the `C1-U2R1` entry that round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
   inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `B2_U1_FILE_WORKFLOW_INTEGRITY` — DISPATCHED AND IN PROGRESS ON 2026-10-11, LOCAL COMMIT ONLY**
-  — `NEXT-08` v1.1, the Owner's own dispatch, after B1-U3 was accepted and pushed. Scope is exactly `N01-F01`…`F04`:
-  the two bases `--attach` resolves against, a Unicode leaf name collapsing to `bin` on screen, the portable verifier
-  failing on a legal no-baseline bundle, and the CLI/desktop refusal-order difference. No parser growth, no new Gate
-  or bundle contract, no golden/schema change, no B1-U4, no B2-U2, no V1 work, no push. Its status word when it
-  closes is at most `LOCAL_B2_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`.
+- **Active task: `B2_U1R1_NARROW_CORRECTIVE` — EXECUTED UNDER `NEXT-10` ON 2026-10-12, LOCAL COMMIT ONLY, STATUS
+  `LOCAL_B2_U1R1_GATE_PASS / ARCHITECT_REVIEW_PENDING`** — the Owner's order of 2026-10-12 authorized exactly
+  `D-N09-1`, `D-N09-2`, one fail-open audit and two `04_TECH` clarifications, TDD-first, with the C1/B1/B2-U1 business
+  contracts to be kept, the full gate to be run and only a local commit allowed. It authorized **no** push, no force,
+  no B2-U2, no further UI redesign and no other product feature, and it forbade touching the Owner's database, settings
+  file, recovery backup or rollback point again — `NEXT-09`'s restoration is closed and was not re-opened here.
+  The gate at close: 1,068 Rust passed / 0 failed / 0 ignored across 49 result lines, 380 UI in 13 files, fmt and
+  clippy `-D warnings` clean, UI typecheck/lint/build clean, `python -m unittest discover -s scripts/tests` 6 of 6,
+  `scripts/check.py` and the baseline verifier as recorded in `BASELINE.yaml`
+  `b2_u1_local_closeout_next09_recovery_and_next10_dispatch`. POSIX remains **NOT_MEASURED** on this host.
+- **`B2_U1` CLOSED LOCALLY, `NEXT-09` ACCEPTED IT WITH EXPLICIT LIMITS, AND THE OWNER'S STORE WAS RESTORED —
+  2026-10-12** — B2-U1 landed as `4eb46b58f22420916e613318ecfd252883d06aa2` (parent `a0b5c88`), F01–F04 implemented
+  TDD-first, not pushed; `NEXT-09` re-measured that head and returned **`ACCEPT_WITH_EXPLICIT_LIMITS`**, naming
+  `D-N09-1` (the portable reader crashed on a promised-but-absent `release-notes.md`) and `D-N09-2` (the internal
+  fallback path name was user-visible — which this round then proved is a real fail-open, not a wording problem).
+  The unit also disclosed that a real-desktop walk had run Gate against the Owner's development store, adding 35 rows
+  under one run id. The Owner authorized option B explicitly and narrowly; all four preconditions were proven and the
+  restore used a SQLite Backup-API candidate with the live file group **moved** to
+  `target/b2u1/store-quarantine-20261012/` rather than overwritten under a live WAL. Read back afterwards:
+  `integrity_check ok`, `gate_runs 2 / gate_findings 20 / gate_finding_evidence 30 / gate_run_attachments 0`, the
+  accidental run gone, `projects 1 builds 2 sections 34 symbols 64 evidence 21 artifacts 3` intact, live main file
+  `282,624 B / 5315f6a3…`, `settings.json` `eccee644…` never touched, rollback point and backup both retained.
+  **Stated as logical equivalence across 14 tables, not byte-exact restoration.** `NEXT-10` then produced zero
+  Owner-data side effects: no store connection, no settings write, no dialog automation, no GUI — and the desktop
+  surface is `NOT_RUNTIME_VERIFIED` for this round, because no isolated account or store exists on this host.
+- **Open by decision, not by oversight: `D-N10-1`** — the configured-notes path still resolves through
+  `evidence::join_project_relative`, which shares the same fallback name, and `config::require_project_relative` has
+  accepted a climb-and-come-back spelling since `f1516b8`. Measured with the real CLI: `release_notes_path =
+  "docs/../RELEASE_NOTES.md"` in a project whose notes exist at the root returns Gate **BLOCK** ("does not exist in
+  the project") when the fallback name is free and **PASS** ("is present", reading bytes nobody configured) when a file
+  of that name exists; the plain spelling passes either way. Not fixed: the site is outside `NEXT-10` §12's whitelist,
+  and reading the configured notes changes the Gate notes fact, which is part of the canonical input and therefore
+  moves a stored `run_id` — the stop condition `NEXT-10` §40 names. Repro, impact and the narrow fix are recorded in
+  `04_TECH/28` §14.4 and in `BASELINE.yaml`; the Architect decides.
 - **Remote state, measured rather than restated: `origin/main` = `a0b5c886051a6b10042ea26f52809baea713d7af`** — the
   Owner authorized the fast-forward of `e0b8fc4..a0b5c88` in the exact words `NEXT-07` required, and GitHub Actions
   run **#101** (`38207073344`) read back green on all ten jobs over that head: Rust 1,056 (Windows) and 1,057

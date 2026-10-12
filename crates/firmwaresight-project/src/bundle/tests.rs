@@ -539,6 +539,67 @@ fn an_attachment_the_judged_context_does_not_carry_is_refused() {
     }
 }
 
+/// The one refusal `resolve_selection` answers with, and the code it carries.
+#[test]
+fn a_selection_that_cannot_be_placed_inside_the_project_resolves_to_nothing() {
+    // `D-N09-2`. This function used to answer an illegal component with a physical path — the project root
+    // plus one name it assumed no one held — and the observation downstream then statted and hashed
+    // whatever turned out to live there. The set of accepted selections is unchanged: every spelling that
+    // used to resolve still resolves, and every spelling that used to fail closed still fails closed. What
+    // changed is that a refusal is now decided by the shape of the selection, before any file is touched.
+    let root = Path::new("/project");
+
+    // A climb out of the root, and a climb that would come back down: both met `ParentDir` before and do
+    // again, so neither is placed on disk at all.
+    for climbing in [
+        "../escape.bin",
+        "build/../../escape.bin",
+        "build/../x/../y.bin",
+    ] {
+        assert_eq!(
+            resolve_selection(root, Path::new(climbing)),
+            None,
+            "`{climbing}` climbs out of the project and must resolve to nothing"
+        );
+    }
+
+    // What a release owner may still choose, including a file named after the marker the old code used.
+    // An absolute selection is kept as it was given too, but which spellings count as absolute is shaped by
+    // the host, so that half is pinned by `release_cli.rs`, which runs the real binary on its own platform.
+    assert_eq!(
+        resolve_selection(root, Path::new("build/app.bin")),
+        Some(PathBuf::from("/project/build/app.bin"))
+    );
+    assert_eq!(
+        resolve_selection(root, Path::new("./build/app.bin")),
+        Some(PathBuf::from("/project/build/app.bin"))
+    );
+    assert_eq!(
+        resolve_selection(root, Path::new("firmwaresight-unresolvable-path")),
+        Some(PathBuf::from("/project/firmwaresight-unresolvable-path")),
+        "a file whose owner chose it is not refused for its name"
+    );
+
+    // The sentence a refusal earns: the leaf the owner typed, no directory, and no marker name — under the
+    // observation code the contract froze.
+    let error = unplaceable_selection(Path::new("../escape.bin"));
+    assert_eq!(error.code(), "ERR-BUNDLE-6115", "{error}");
+    let stated = error.to_string();
+    assert!(stated.contains("`escape.bin`"), "{stated}");
+    assert!(
+        stated.contains("steps out of the project directory"),
+        "{stated}"
+    );
+    assert!(
+        !stated.contains("firmwaresight-unresolvable-path"),
+        "the internal marker name reached a person's error message: {stated}"
+    );
+    assert!(
+        !stated.contains("/project"),
+        "the refusal quoted the root it refused against: {stated}"
+    );
+}
+
 /// The smallest context this module accepts, with no attachment rows in it.
 fn empty_context() -> GateContext {
     GateContext {

@@ -1131,6 +1131,186 @@ fn a_relative_attach_is_read_against_the_project_directory_and_not_the_current_o
 }
 
 #[test]
+fn a_selection_that_climbs_out_of_the_project_is_refused_when_a_file_of_the_fallback_name_exists() {
+    // `D-N09-2`'s safety question, which is not about wording. The engine used to answer an illegal relative
+    // component by resolving it onto one name it assumed could never exist. A project that happens to hold a
+    // file of that name therefore shipped bytes nobody chose, so the refusal has to come from the selection
+    // itself, before anything is stat-ed, hashed or packed.
+    let world = World::new("attach-marker-present", ATTACHING_DIRTY);
+    let scratch = world
+        .project
+        .parent()
+        .expect("the project sits in a scratch folder");
+    std::fs::write(scratch.join("escape.bin"), b"OUTSIDE-THE-PROJECT")
+        .expect("a file one level above the project");
+    let hex = attachable(&world, "build", "boot.hex", b":00000001FF");
+    let marker = world.project.join("firmwaresight-unresolvable-path");
+    std::fs::write(&marker, b"MARKER-BYTES-NEVER-CHOSEN")
+        .expect("the fallback name exists on disk");
+    let marker_digest = fingerprint::file_sha256(&marker).expect("the fallback file hashes");
+    let out = scratch.join("out-marker");
+
+    let refused = prepare_from(
+        &world,
+        scratch,
+        &out,
+        &["--attach", "../escape.bin", "--attach", &hex],
+    );
+    let shipped = shipped_digests(&out);
+    assert_eq!(
+        code(&refused),
+        Some(6),
+        "an illegal climb out of the project was accepted, and it shipped {} as the release's \
+         attachment: {}",
+        if shipped.contains(&marker_digest) {
+            "the bytes of the file nobody chose"
+        } else {
+            "bytes that are not the fallback file's"
+        },
+        shipped.join(", ")
+    );
+    assert!(
+        errors(&refused).contains("ERR-BUNDLE-6115"),
+        "the refusal keeps the frozen observation code: {}",
+        errors(&refused)
+    );
+    assert!(
+        !out.exists(),
+        "an illegal selection wrote a destination directory: {:?}",
+        tree(&out)
+    );
+
+    // The bytes that were almost shipped are still the file the owner never named, sitting where it was.
+    let written: Vec<u8> = std::fs::read(&marker).expect("the fallback file is left alone");
+    assert_eq!(
+        written, b"MARKER-BYTES-NEVER-CHOSEN",
+        "the refusal modified the file it was refusing to read"
+    );
+    assert!(
+        !shipped_digests(&out).contains(&marker_digest),
+        "the fallback file was packed into a bundle"
+    );
+}
+
+#[test]
+fn a_refused_climb_out_of_the_project_names_neither_the_host_directory_nor_an_internal_marker() {
+    // The same selection with nothing at the fallback name: the refusal is still correct, and it is the
+    // *sentence* that is on trial. A release owner reads this in a terminal and pastes it into a report, so
+    // it may not quote a directory (`04_TECH/28` §4.4) and may not name a marker that only exists inside
+    // this crate's source (`D-N09-2`).
+    let world = World::new("attach-marker-absent", ATTACHING_DIRTY);
+    let scratch = world
+        .project
+        .parent()
+        .expect("the project sits in a scratch folder");
+    std::fs::write(scratch.join("escape.bin"), b"OUTSIDE-THE-PROJECT")
+        .expect("a file one level above the project");
+    let hex = attachable(&world, "build", "boot.hex", b":00000001FF");
+    let out = scratch.join("out-marker-absent");
+
+    let refused = prepare_from(
+        &world,
+        scratch,
+        &out,
+        &["--attach", "../escape.bin", "--attach", &hex],
+    );
+    assert_eq!(code(&refused), Some(6), "{}", errors(&refused));
+    let stderr = errors(&refused);
+    assert!(stderr.contains("ERR-BUNDLE-6115"), "{stderr}");
+    assert!(
+        !stderr.contains(&scratch.to_string_lossy().into_owned()),
+        "the refusal quoted the host directory it refused in: {stderr}"
+    );
+    assert!(
+        !stderr.contains("firmwaresight-unresolvable-path"),
+        "the refusal quoted this crate's internal fallback name to the release owner: {stderr}"
+    );
+    assert!(
+        !out.exists(),
+        "a refused selection left a destination behind"
+    );
+}
+
+#[test]
+fn a_file_legitimately_named_like_the_internal_marker_is_still_attachable() {
+    // The other half of the fix: refusing a component a person never typed must not turn the marker into a
+    // banned file name. A project may hold a file of that exact name, and its owner may choose it.
+    let world = World::new("attach-marker-legal", ATTACHING_DIRTY);
+    let marker = world.project.join("firmwaresight-unresolvable-path");
+    std::fs::write(&marker, b"CHOSEN-ON-PURPOSE").expect("a file whose owner named it that");
+    let bin = attachable(&world, "build", "app.bin", b"APP-BYTES");
+    let hex = attachable(&world, "build", "boot.hex", b":00000001FF");
+    let marker_text = marker.to_string_lossy().into_owned();
+
+    // Project-relative, the spelling most likely to be caught by a refusal that matches on the name.
+    let relative = prepare_from(
+        &world,
+        &world.project,
+        &world.out,
+        &[
+            "--attach",
+            "firmwaresight-unresolvable-path",
+            "--attach",
+            &bin,
+            "--attach",
+            &hex,
+        ],
+    );
+    assert_eq!(code(&relative), Some(0), "{}", errors(&relative));
+    let bundle = world.published();
+    let shipped = bundle_document(&bundle, "release-manifest.json")["extensions"]["attachments"]
+        .as_array()
+        .expect("the manifest discloses what it shipped")
+        .clone();
+    assert_eq!(
+        shipped
+            .iter()
+            .filter(|row| row["kind"] == "unknown")
+            .count(),
+        1,
+        "the chosen file was not shipped as the unidentified attachment it is: {shipped:?}"
+    );
+    std::fs::remove_dir_all(&bundle).expect("the first bundle is cleared for the second run");
+
+    let absolute = prepare_from(
+        &world,
+        &world.project,
+        &world.out,
+        &["--attach", &marker_text, "--attach", &bin, "--attach", &hex],
+    );
+    assert_eq!(code(&absolute), Some(0), "{}", errors(&absolute));
+    verify_bundle(&world.published())
+        .expect("a bundle carrying the marker-named file still verifies");
+}
+
+/// Every digest one release shipped, so a test can prove a file was packed rather than merely refused. A
+/// destination that never became a bundle ships none.
+fn shipped_digests(out: &Path) -> Vec<String> {
+    let bundle = match std::fs::read_dir(out) {
+        Ok(entries) => {
+            let dirs: Vec<PathBuf> = entries
+                .filter_map(|entry| entry.ok())
+                .map(|entry| entry.path())
+                .filter(|path| path.is_dir())
+                .collect();
+            match dirs.as_slice() {
+                [only] => only.clone(),
+                _ => return Vec::new(),
+            }
+        }
+        Err(_) => return Vec::new(),
+    };
+    bundle_document(&bundle, "release-manifest.json")["extensions"]["attachments"]
+        .as_array()
+        .map(|rows| {
+            rows.iter()
+                .filter_map(|row| row["sha256"].as_str().map(str::to_owned))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[test]
 fn the_release_surface_says_which_directory_a_relative_attach_starts_from() {
     let help = run(&["release", "prepare", "--help"]);
     assert_eq!(code(&help), Some(0), "{}", errors(&help));

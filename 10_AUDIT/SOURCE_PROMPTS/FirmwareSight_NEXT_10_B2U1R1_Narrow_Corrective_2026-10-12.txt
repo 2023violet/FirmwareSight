@@ -1,0 +1,43 @@
+FirmwareSight｜NEXT-10 — B2-U1R1 窄范围纠偏、契约澄清与本地验收
+版本 v1.0｜2026-10-12｜CONDITIONAL OWNER DISPATCH｜TDD｜禁止擅自 push
+
+【授权边界】
+本文是可供 Owner 下发的执行合同；仅在 Owner 明确发送并授权 NEXT-10 时生效。它不追认新的数据恢复权限、不授权任何用户数据写入或删除，也不包含 B2-U2 的开发授权。
+目标：在已验收的 B2-U1 之上，仅关闭 D-N09-1、D-N09-2，审查后一项潜在 fail-open，修订两处易误导的技术文案。不得重做 F01—F04 或扩张产品范围。
+
+0. 开始前必须现场重读并证明
+- 仓库 2023violet/FirmwareSight；读取 AGENTS.md、.ai/README.md、.ai/CURRENT_STATE.md、.ai/DECISIONS.md、.ai/ACTIVE_TASK.md、ADR-0030、04_TECH/28 §4/§5/§6/§9、04_TECH/07_CLI_SPEC.md、NEXT-08 v1.1、NEXT-09 审查报告 target/b2u1/n09_report.md（若文件缺失，报告并按可证范围推进，不假设报告内容）。
+- 预期本地 main HEAD = 4eb46b58f22420916e613318ecfd252883d06aa2；本地工作树 clean，origin/main 与 git ls-remote 应为 a0b5c886051a6b10042ea26f52809baea713d7af，本地领先 1 且可正常 fast-forward。任何不匹配先 STOP 报告，不自行 rebase/merge/reset。
+- 独立确认用户 SQLite 数据恢复已完成：只允许只读检查现有报告，禁止启动连接或 GUI 去改变 Owner 配置。原样保留 target/b2u1/store-backup-*、store-rollback-*、store-quarantine-*。不得删除、checkpoint、vacuum、重新切换用户数据库 journal_mode，也不得在普通真实窗口中驱动文件对话框。所有新测试只用 gitignored temp project / temp DB，保证与 Owner 应用数据完全隔离。
+- 保持 NEXT-09 对 B2-U1 的 ACCEPT_WITH_EXPLICIT_LIMITS 范围，不把执行者自评上升为 Architect 最终 ACCEPT。建立精确文件白名单，尽量只涉及 scripts/verify_bundle_portability.py、其针对性测试、crates/firmwaresight-project/src/bundle.rs / 定向测试、必要的 CLI/UI 诊断测试、04_TECH/07_CLI_SPEC.md、04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md 的 dated addendum，以及本轮审计登记文件。未授权更改 Core parser/diff/gate、fingerprint、bundle portable schema、goldens、migrations、token、依赖、Tauri capabilities、网络或 Settings/i18n 行为。
+
+1. D-N09-1：真实存在的 Release Notes 缺失不能触发未捕获 traceback
+- 先在本地源码定位 notes 的条件判定和 scripts/verify_bundle_portability.py 对 release-notes.md 的所有使用点；先写 RED 测试：从合法 Bundle 出发，移除 manifest 与索引实际承诺的 release-notes.md，脚本必须输出明确 FAIL、非零退出码、最终报告包含错误，无 Python traceback；同时验证 manifest/SHA256SUMS 不因此被跳过检查。
+- 对「manifest/索引根本没有承诺 notes，且 Bundle 按当前合法合同允许无 notes」单列测试：应显示真实 SKIP/NOT APPLICABLE，不冒充 PASS，不制造缺失文件错误。只有合同明确认定可选时才允许此分支。
+- 对 notes 实际存在的有/无 baseline Bundle 保留既有 PASS 行为；负面数据包括缺失、无效索引、文件篡改或大小不符，任何承诺了 notes 的损坏都不能被当作合法缺席。
+- 只修条件化读取、报告与退出状态；不要把 all exceptions 统统吞掉或将所有 FileNotFoundError 都降级为 SKIP。保持相关 schema/golden 完全不动。
+
+2. D-N09-2：不只是隐藏哨兵名；先排查潜在 fail-open
+- 当前远端旧源码（截至 a0b5c88）有：resolve_selection() 遇到 ParentDir/RootDir/Prefix 等非法相对分量，返回 root.join("firmwaresight-unresolvable-path")；下游 observe_attachment() 再对该真实路径执行 metadata 和 hash。此事实必须在本地 4eb46b58 上重新读取核对。
+- 先写 RED 负面测试：在独立临时项目根目录人工创建非空的真实文件 firmwaresight-unresolvable-path，再以 ../escape.bin、含 ParentDir/平台非法分量的 --attach 参数调用 release prepare 的有关路径。无论哨兵同名文件存在与否、内容是什么，都必须无条件拒绝，且不得创建 bundle 或把该哨兵文件当作附件打包。保留可审计证据，不能只断言 UI 文案不存在。
+- 若复现原本会接受哨兵文件，则分类为「实际 fail-open 输入映射缺陷」，优先安全修复：拒绝必须基于原始选择的不合法分量，在发生任何 stat/hash/preview/publish 之前阻断，而不是回退到可存在的替代物理路径。不要改变合法绝对路径、合法项目内相对路径的含义。
+- 应将非法路径错误转为明确、可理解、不携带绝对宿主路径、也不暴露内部哨兵名的诊断。优先沿用冻结的 ERR-BUNDLE-6115 / exit 6 / 无目的目录副作用，且不改变 Gate identity / Release ID。如果安全修复不可避免地修改稳定的错误码或可移植合同，停下该分项报告最小兼容性裁决，不准悄然破坏已有合同。
+- 同时覆盖普通路径不存在和文件在首次观测后变更两个独立错误原因，避免将“非法路径”误报为“读取中消失”；对真正合法的名为 firmwaresight-unresolvable-path 的显式附件，不能被新逻辑无端禁止。
+
+3. 文档澄清（最小、追加式）
+- 04_TECH/07_CLI_SPEC.md：准确说明 gate --attach 现按 process CWD、release prepare --attach 现按 --project root；不要写“统一相对基准”。同一 observe_attachment 函数不意味着同一解析入口。明确旧行为继续存在，用户可用绝对路径避免歧义；保持现有 exit 3/6 和内层错误码口径。
+- 04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md §9：冻结段落作为历史基线不得默默改写。使用 dated clarification/addendum 区分用户本地选择的 display_name（支持 Unicode）、portable artifacts/ 安全 leaf（仍按已验证规则 sanitize/collision）、附件证据角色与 analyzed rows。不能声称 BIN/HEX 被分析、验证 provenance 或把本机完整路径放进便携文档。若本文件已有当前 addendum，追加至合适位置而非重写批准原文。
+- 仅同步与真实代码结果有关的本轮状态登记；禁止为填档而生成大量无关审核文档。不修 B1 D1/D8、4.4974:1 主题对比度，也不碰 V1 cohort 构建身份。
+
+4. TDD 与验证纪律
+- Step RED：至少留下 D-N09-1 承诺 notes 缺失、D-N09-1 合法无 notes、D-N09-2 同名哨兵存在时仍非法拒绝、D-N09-2 合法同名文件不受误伤四类明确命名的测试及失败证据；如果某负例在当前代码已能通过，则报告其未暴露漏洞，不得人为制造失败。
+- Step GREEN：修到最窄；首选不新增三方依赖。保持原 F01—F04 全部测试通过。真实 CLI 的有/无 baseline、附件中文/空格名、bundle manifest/SHA256SUMS 验证、两端 6102/6103/6118 分支各复测，不创建 Owner 数据。
+- Phase verify：cargo fmt --all -- --check；cargo test --workspace；cargo clippy --workspace --all-targets --all-features -- -D warnings；前端 pnpm test/typecheck/lint/build；python scripts/check.py 及 baseline verifier 的权威脚本；记录每项完整真实数字。是否有 cfg(unix) 测试未实际运行，必须明确 NOT_VERIFIED，不能使用投影代替测量。
+- 必须为新脚本行为提供可重放的标准库负例测试；避免仅靠 grep 或一次控制台手工输出判断 PASS。
+- 精确 stage 白名单 → 对最后 staged tree 完整检查/记数 → 本地 commit → 最终 git status clean；不得 push、不得开启 B2-U2。若 docs-only 后继修改导致 staged tree 改变，重新测，不复用旧 PASS。
+
+5. 终止条件与交付
+- 任何测试发现所需改变 SnapshotId / Gate run identity / Release fingerprint 语法、portable schema major、goldens、网络能力、许可、额外真实用户数据库写入，立即停止相关修改并报告，不得隐瞒。
+- 交付：HEAD/parent、变更路径清单、四类 RED/GREEN 测试与命令、脚本 FAIL/SKIP/PASS 实际表现、哨兵存在/不存在的安全负例、完整门禁结果、是否产生用户数据副作用（目标必须为零），可复核的简洁评审报告。
+- 合格结论最多写 LOCAL_B2_U1R1_GATE_PASS / ARCHITECT_REVIEW_PENDING。后续独立审核、Owner 普通 fast-forward 推送、对应远端 CI、安装态验证和 B2-U2 授权分别保留；不得自动领取。
+- V1 frozen cohort GitHub Artifact 11573661113 的到期日 2026-10-22：本任务不得改动其 build identity，归档需独立授权执行，且不能以当前安装包替换原始 cohort。
