@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-09"
+last_updated: "2026-10-12"
 ---
 
 
@@ -246,15 +246,35 @@ Reports `C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md` and the plan
 `C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md` with its dated §14; state `BASELINE.yaml` `c1_u2_gate_and_bundle`; the pointer
 was `NONE` before, during and after this round.
 
+**Dated 2026-10-12, and this clause carries the chain from C1's last stage through the two rounds the index above does
+not name.** `C1-U3` and `C1-U4` ran on 2026-10-10 under the Architect's three-stage packet (`ADR-0030`,
+`04_TECH/28` §14), so `BIN_HEX_RELEASE_ATTACH` is `DESIGN_APPROVED / USER_VERIFIED_ON_WINDOWS` while
+`BIN_HEX_ANALYSIS` stays `UNSUPPORTED` and no analysis of attached bytes exists. The Owner's v0.2 plan then opened
+**B1** (interface readability) and then **B2** (the file workflow): `B1-U1` application preferences and the Settings
+page, `B1-U2` System / Light / Dark under `ADR-0031` — which supersedes exactly one clause of `ADR-0018` — and
+`B1-U3` the zh-CN / en interface catalog under `ADR-0032`, whose push is the last remote CI this index names:
+origin/main `a0b5c88…`, run `38207073344` (#101), ten of ten. **B2-U1** F01–F04, its `B2-U1R1` narrow corrective
+(`D-N09-1`, `D-N09-2`) and its `B2-U1R2` notes-path corrective are **local only** at `1fb2ddc`, three commits ahead of
+`origin/main`, and `NEXT-12 v1.1`'s own status word is `LOCAL_B2_U1R2_GATE_PASS / ARCHITECT_REVIEW_PENDING`. Two things
+a newcomer must not infer from the green gate: `D-N11-1` is **open** — every path guard in
+`firmwaresight-project` is lexical, so a junction or a hard link inside a project still resolves outside the root, and
+no round has changed what links are accepted — and `INSTALLED_VERIFIED` is claimed for no B1 or B2 unit (desktop
+runtime `NOT_RUNTIME_VERIFIED`, POSIX `NOT_MEASURED`). Live figures, state words and the ordered next steps are
+`.ai/CURRENT_STATE.md`'s first bullets and `BASELINE.yaml`'s `b2_u1r2_next12_notes_path_binding_and_python_gate`;
+this index keeps the chain, not the current number.
+
 ## Primary reading path
 
 1. `README.md`
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
 4. `.ai/CURRENT_STATE.md`
-5. `.ai/ACTIVE_TASK.md` — **`NONE` since 2026-10-08**. The pointer has moved four times since G2 closed `PASS` on
-   2026-10-01, each move under a prompt or verdict of its own, which is the only way a stage opens or closes here:
-   `P5_PRODUCTIZATION` (opened 2026-10-03) → `NONE` (P5's Commit F3, 2026-10-06) →
+5. `.ai/ACTIVE_TASK.md` — **the live word as of 2026-10-12 is `B2_U1R2_NOTES_PATH_BINDING_AND_PYTHON_GATE`, status
+   `LOCAL_B2_U1R2_GATE_PASS / ARCHITECT_REVIEW_PENDING`** (local head `1fb2ddc`, three ordinary commits ahead of
+   `origin/main` `a0b5c88`, nothing pushed). The file is append-only: its first pointer line still reads the `NONE`
+   that stood on 2026-10-08 and is kept because the project does not rewrite history, so read the **last paragraph of
+   its fenced block**, which `.ai/CURRENT_STATE.md`'s "Active task" bullet carries in the same words. The chain that
+   claim recorded was: `P5_PRODUCTIZATION` (opened 2026-10-03) → `NONE` (P5's Commit F3, 2026-10-06) →
    `V1_OWN_ARTIFACT_EXTERNAL_VALIDATION` (2026-10-06) → `U1_UI_PRODUCTIZATION_CONVERGENCE` (2026-10-07) → `NONE`
    (the Architect's U1 visual acceptance record, 2026-10-08). With a live task the pointer names exactly one stage;
    with `NONE` it authorizes none, and the file's top block names what is blocked and by whom. No agent lifts a
@@ -569,7 +589,7 @@ disk, in a checksum domain that is deliberately not this one.
 | `.ai/ACTIVE_TASK.md` | ACTIVE TASK |
 | `.ai/CURRENT_STATE.md` | Current State |
 | `.ai/DECISIONS.md` | Decisions — v0.6.0 |
-| `.ai/HANDOFF.md` | Handoff — FirmwareSight v0.6.0 / P0 closed PASS. No active task. Do not invent one. |
+| `.ai/HANDOFF.md` | Handoff — the accumulated ledger of every stage from P0 to P5 with its runs, verdicts and boundaries. Its figures and state words are the dated record of the round that wrote them; the live answer is `.ai/CURRENT_STATE.md`'s first bullets and `.ai/ACTIVE_TASK.md`'s last fenced paragraph. Do not invent a task. |
 | `.ai/README.md` | AI Entry Point |
 | `00_GOVERNANCE/00_DOCUMENT_CONTROL.md` | 文档控制规范 |
 | `00_GOVERNANCE/01_PROJECT_CHARTER.md` | 项目章程 |
@@ -692,6 +712,8 @@ disk, in a checksum domain that is deliberately not this one.
 | `09_ADR/ADR-0028-release-identity-bytes-as-evidence.md` | ADR-0028 — Release Identity Uses the Exact Bytes Observed on Disk (P5; decides L22) |
 | `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` | ADR-0029 — Repository Baseline Checksums Are the Canonical Git Stage-0 Index Blob Bytes (P5 Commit F1; decides L26, distinct from ADR-0028 by evidence domain) |
 | `09_ADR/ADR-0030-release-attached-byte-evidence.md` | ADR-0030 — BIN and Intel HEX Ship as Release-Attached Byte Evidence, Not as Analyzed Builds (Owner product direction 2026-10-09; qualified supersession of ADR-0006's BIN/HEX clause; design approved, not implemented) |
+| `09_ADR/ADR-0031-developer-preview-theme.md` | ADR-0031 — Developer Preview Theme: System / Light / Dark with `System` the default, and the token rule that follows (B1-U2, 2026-10-11; supersedes exactly one clause of `ADR-0018` — its MVP "Light only" constraint — and nothing else) |
+| `09_ADR/ADR-0032-desktop-ui-language.md` | ADR-0032 — Desktop UI Interface Language: the zh-CN / en catalog, `LanguagePref { System, ZhCn, En }`, the preferences document at `schema_version: 3`, and the rule that no judgement, identity or exported byte depends on who is reading the screen (B1-U3, 2026-10-11) |
 | `10_AUDIT/00_V0.3_AUDIT_RESOLUTION.md` | v0.3.0 Audit Resolution |
 | `10_AUDIT/01_UI_BASELINE_REVIEW.md` | UI Baseline Review |
 | `10_AUDIT/02_V0.5_EXPERT_REVIEW_RESOLUTION.md` | v0.5.0 Expert Review Resolution |
@@ -732,6 +754,12 @@ disk, in a checksum domain that is deliberately not this one.
 | `README.md` | FirmwareSight v0.6.0 |
 | `A0_TRUTHFULNESS_VALIDATION/A0_DESIGN_CHECKLIST.md` | A0 Design Checklist — the `AGENTS.md` 11 answer for the two surfaces the corrective made user-visible (FS-A0-DESIGN-001) |
 | `A0_TRUTHFULNESS_VALIDATION/A0_CORRECTIVE_REPORT.md` | A0 Truthfulness Corrective — the four bounded fixes, the identity STOP clause measured and not triggered, each subitem's red→green proof, the golden table and the remaining limitations (FS-A0-CORRECTIVE-001) |
+| `B1_VALIDATION/B1_U1_DESIGN_CHECKLIST.md` | B1-U1 Design Checklist — the `AGENTS.md` 11 answer for the Settings surface the unit opened (FS-B1-U1-DESIGN-001) |
+| `B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md` | B1-U1 Application Preferences and Settings — Execution Report: the exact paths and their intent, the preference-storage semantics stated plainly, what is genuinely working and what is not, and the evidence rows (FS-B1-U1-REPORT-001) |
+| `B1_VALIDATION/B1_U2_THEME_DESIGN_CHECKLIST.md` | B1-U2 Design Checklist — System / Light / Dark against `DESIGN.md` and `assets/design-tokens.json`, including the contrast measurements (FS-B1-U2-DESIGN-001) |
+| `B1_VALIDATION/B1_U2_THEME_REPORT.md` | B1-U2 System / Light / Dark Theme — Execution Report: `ThemePref`, the resolver and the persisted selection, the exact change paths, what the round could not verify on this host, and its handoff (FS-B1-U2-REPORT-001) |
+| `B1_VALIDATION/B1_U3_LANGUAGE_DESIGN_CHECKLIST.md` | B1-U3 Design Checklist — the translated pages against `DESIGN.md` and `ADR-0032` (FS-B1-U3-DESIGN-001) |
+| `B1_VALIDATION/B1_U3_LANGUAGE_REPORT.md` | B1-U3 zh-CN / en Interface Language — Execution Report: the exact paths and intent, the decisions that were not mechanical, the verification, the STOP list item by item, and the round's limits (FS-B1-U3-REPORT-001) |
 | `P0_TECHNICAL_VALIDATION/README.md` | P0 Technical Validation |
 | `P0_TECHNICAL_VALIDATION/P0_ARCHITECTURE_CHECK.md` | P0 Architecture Check |
 | `P0_TECHNICAL_VALIDATION/P0_CI_REMEDIATION_REPORT.md` | P0 CI Remediation Report |

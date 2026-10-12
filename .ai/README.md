@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-10"
+last_updated: "2026-10-12"
 ---
 
 # AI Entry Point
@@ -251,6 +251,24 @@ reverted, with `schemas/` proven byte-identical to `HEAD`. Identity is still not
 surface: no UI control, no `--attach`, no IPC command, so `BIN_HEX_RELEASE_ATTACH` stays
 `DESIGN_APPROVED / NOT_USER_AVAILABLE`, `C1_U4` is authorized as stage 3 and is `NOT_STARTED`, neither `C1-U2R1` nor
 `C1-U3` is accepted yet, and `active_task` is `NONE` ·
+**Dated 2026-10-12, and this is the live pointer for the state word and the two test figures — every "live" label
+further up this chain, including `the live pointer for the two test figures` and `the live C1 clause`, is now a dated
+record of the round that wrote it:** two tracks have run since C1's packet. **B1** (interface readability) closed
+three units — `B1-U1` application preferences and the Settings page, `B1-U2` System / Light / Dark under `ADR-0031`
+(superseding exactly one clause of `ADR-0018`), `B1-U3` the zh-CN / en catalog under `ADR-0032` — and `B1-U3` is
+**pushed**: `origin/main` `a0b5c886051a6b10042ea26f52809baea713d7af`, run `38207073344` (#101) green on all ten jobs.
+**B2** (the file workflow) has run three heads **locally only**: `4eb46b5` (`B2-U1`, F01–F04, `NEXT-09`
+`ACCEPT_WITH_EXPLICIT_LIMITS`), `a21a987` (`B2-U1R1`, `D-N09-1` + `D-N09-2`, `NEXT-11` `ACCEPT`) and `1fb2ddc`
+(`B2-U1R2`, `NEXT-12 v1.1`), which closed `D-N10-1` with one lexical walk and a typed refusal that carries no path, and
+made the six stdlib Python regressions a real gate step (`drift/python regressions`; drift 8 → 9, default gate 17 →
+**18 steps**). Counts at that head, measured on this Windows host: **1,075 Rust passed / 0 failed / 0 ignored across 49
+`test result:` lines**, **380 UI in 13 files**, `check.py` **18 of 18 with no `SKIP`**, baseline verifier PASS at
+**863 / 861 / 996**; POSIX stays **`NOT_MEASURED`** and desktop runtime `NOT_RUNTIME_VERIFIED` for every B1 and B2
+unit. `D-N11-1` is **open** — the containment this crate guarantees is lexical, and a junction or hard link inside a
+project still resolves outside the root — and the Owner's order is independent acceptance → the push and its CI
+read-back → that containment decision → **B2-U2**, which nothing here authorizes. The live word is in
+`.ai/CURRENT_STATE.md`'s "Active task" bullet and `ACTIVE_TASK.md`'s last fenced paragraph; this entry keeps the
+chain ·
 Counts unmoved at **868 Rust across 47 result lines / 291 UI in 9 files** · *(dated record of where the track
 stood two rounds earlier: the UI productization track that ran on 2026-10-07 — the first round closed at first round,
 and its continuation round installed the CI-built product and inspected it, so **U1 was

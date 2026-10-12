@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Project Lead"
-last_updated: "2026-10-10"
+last_updated: "2026-10-12"
 ---
 
 # FirmwareSight v0.6.0
@@ -807,6 +807,29 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 `10_AUDIT/SOURCE_PROMPTS/README.md`.
 
 ## Next work
+
+**Dated 2026-10-12, and this is the live clause; the C1 paragraph under it is the record of 2026-10-10 as written.**
+The pointer is not `NONE` and the C1 packet is not the current round. Two tracks have run since: **B1** — interface
+readability — closed its three units (`B1-U1` preferences and Settings, `B1-U2` System / Light / Dark under
+`ADR-0031`, `B1-U3` the zh-CN / en catalog under `ADR-0032`), and `B1-U3` is **pushed**: `origin/main`
+`a0b5c886051a6b10042ea26f52809baea713d7af`, read back green on run `38207073344` (#101) over all ten jobs. **B2** —
+the file workflow — has run three heads **locally only**: `B2-U1` F01–F04 (`4eb46b5`, `NEXT-09`
+`ACCEPT_WITH_EXPLICIT_LIMITS`), `B2-U1R1` (`a21a987`, `NEXT-11` `ACCEPT` on `D-N09-1` and `D-N09-2`), and
+`B2-U1R2` (`1fb2ddc`) under `NEXT-12 v1.1`, whose status word is
+**`LOCAL_B2_U1R2_GATE_PASS / ARCHITECT_REVIEW_PENDING`**: `D-N10-1` closed by one lexical walk with a typed refusal
+that carries no path, and the six stdlib Python regressions promoted into the default gate as
+`drift/python regressions` (drift 8 → 9, the gate 17 → 18 steps). Measured at that head: **1,075 Rust passed / 0
+failed across 49 `test result:` lines**, **380 UI in 13 files**, `python scripts/check.py` **18 of 18 with no `SKIP`**,
+baseline verifier PASS at 863 / 861 / 996, POSIX `NOT_MEASURED`, desktop runtime `NOT_RUNTIME_VERIFIED`.
+
+**What is owed and who owes it.** An independent acceptance of `1fb2ddc` (a developer may not self-sign it), then the
+ordinary fast-forward push and its ten-job CI read-back, then the **separate `D-N11-1` containment decision** — every
+path guard in `firmwaresight-project` is lexical, so a junction or a hard link inside a project still resolves to
+bytes outside the root, measured identically before and after `NEXT-12`, and no round has changed what links are
+accepted — and only then **B2-U2** (Flash/RAM, VMA/LMA, Region and ELF/MAP interpretation), which nothing in this
+section authorizes. `ADR-0030` still holds: `BIN_HEX_RELEASE_ATTACH` is `DESIGN_APPROVED / USER_VERIFIED_ON_WINDOWS`
+and `BIN_HEX_ANALYSIS` stays `UNSUPPORTED`. Read `.ai/CURRENT_STATE.md` and `.ai/ACTIVE_TASK.md` for the live
+word in its own words; the rest of this section is the dated record it replaces.
 
 **`active_task: NONE`, and the C1 track is four rounds deep — still with no user entry.** Stage 2 of the 2026-10-10
 continuous packet ran the same day, starting from `920e764`, as **`C1-U3`** — the portable contract for
