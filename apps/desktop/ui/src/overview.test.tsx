@@ -7,7 +7,9 @@
  * numbers must appear as Unknown rather than as zero.
  */
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
+import { render } from './test/render';
+import { clearFallbacks, fallbacks } from './i18n';
 import { describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
 
@@ -213,13 +215,16 @@ function selection(over: Partial<SelectionDto> = {}): SelectionDto {
 }
 
 /** The `App`-shaped props, with the defaults `App` itself starts from. */
-function renderOverview(over: {
-  readonly summary?: AnalysisSummaryDto | null;
-  readonly gateRun?: GateRunDto | null;
-  readonly selection?: SelectionDto | null;
-  readonly analyzedSelectionId?: string | null;
-  readonly project?: ProjectContextDto | null;
-} = {}) {
+function renderOverview(
+  over: {
+    readonly summary?: AnalysisSummaryDto | null;
+    readonly gateRun?: GateRunDto | null;
+    readonly selection?: SelectionDto | null;
+    readonly analyzedSelectionId?: string | null;
+    readonly project?: ProjectContextDto | null;
+  } = {},
+  options: { readonly language?: 'en' | 'zh-CN' } = {},
+) {
   const onOpen = vi.fn<(target: OverviewTarget) => void>();
   render(
     <Overview
@@ -231,6 +236,7 @@ function renderOverview(over: {
       unit="bytes"
       onOpen={onOpen}
     />,
+    { language: options.language ?? 'en' },
   );
   return onOpen;
 }
@@ -1227,5 +1233,42 @@ describe('A0 the open findings are named by the rules the run evaluated', () => 
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });
     expect(ship.textContent).not.toContain('evidence:ev-');
     expect(ship.textContent).toContain('Judged snapshot');
+  });
+});
+
+describe('the same overview read in Chinese', () => {
+  it('states an empty session in Chinese, and offers the same next step', () => {
+    clearFallbacks();
+    const onOpen = renderOverview({}, { language: 'zh-CN' });
+
+    expect(screen.getByRole('heading', { level: 1, name: '总览' })).toBeDefined();
+    expect(screen.getByText('本次会话还没有分析任何内容，因此没有可汇总的事实。')).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: '选择镜像文件' }));
+    expect(onOpen).toHaveBeenCalledWith('analyze');
+    fireEvent.click(screen.getByRole('button', { name: '打开发布门禁' }));
+    expect(onOpen).toHaveBeenCalledWith('release');
+    // The ship question is asked in Chinese, and no key reached English on the way.
+    expect(screen.getByText('现在可以发布吗？')).toBeDefined();
+    expect(fallbacks()).toEqual([]);
+  });
+
+  it('answers the ship question in Chinese over the same run id, counts and state words', () => {
+    clearFallbacks();
+    renderOverview(
+      { summary: summary(), gateRun: passRun('snap-7f3a-2') },
+      { language: 'zh-CN' },
+    );
+
+    expect(screen.getByRole('group', { name: '输入能力' })).toBeDefined();
+    // The verdict sentence is the same builder the gate page uses, in Chinese (`gate.verdict.pass`).
+    expect(screen.getByText(/通过 —— 8 条规则通过/)).toBeDefined();
+    expect(screen.queryByText(/Clear — 8 rule\(s\) pass/)).toBeNull();
+
+    // What the sentence is about did not move: the run's own id, its severity word and its count are
+    // Core's, and a Chinese screen shows them exactly as the English one does.
+    expect(screen.getAllByText('PASS').length).toBeGreaterThan(0);
+    // The id is shown shortened, exactly as the English page shortens it.
+    expect(screen.getAllByText(/run/).length).toBeGreaterThan(0);
+    expect(fallbacks()).toEqual([]);
   });
 });

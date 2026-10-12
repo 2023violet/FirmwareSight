@@ -16,8 +16,12 @@
  * - reset is asked before it is done, and it is stated as the one narrow thing it is (T06);
  * - the unit is one state shared by every surface that shows it, so a choice made on History is what
  *   Settings then lists as current, whichever way the reader moved (T02);
- * - and no control is rendered for a setting this build does not have. There is no theme switch and no
- *   language switch, because B1-U2 and B1-U3 have not shipped one (T01, and `AGENTS.md` 11).
+ * - the language is a fourth stored word, and it is the only preference that repaints the page that
+ *   sets it (`ADR-0032` D8). What the reader is shown is the catalog, so a broken switch here is
+ *   visible here rather than only in a Rust assertion;
+ * - and no control is rendered for a setting this build does not have. Unit, theme, language and
+ *   start page are all honoured by something; font scale and density are not, so they are not on the
+ *   page (T01, and `AGENTS.md` 11).
  */
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -95,6 +99,7 @@ function prefs(over: Partial<PreferencesDto> = {}): PreferencesDto {
     sizeUnit: 'bytes',
     startupPage: 'analyze',
     theme: 'system',
+    language: 'system',
     recovery: 'read',
     keptUnreadableCopy: false,
     fileName: 'settings.json',
@@ -115,8 +120,8 @@ preferences are still in place',
 beforeEach(() => {
   preferencesMock.mockResolvedValue(ok(prefs({ recovery: 'missing' })));
   updateMock.mockImplementation(
-    async (sizeUnit: string, startupPage: string, theme: string) =>
-      ok(prefs({ sizeUnit, startupPage, theme })),
+    async (sizeUnit: string, startupPage: string, theme: string, language: string) =>
+      ok(prefs({ sizeUnit, startupPage, theme, language })),
   );
   resetMock.mockResolvedValue(ok(prefs()));
   // History answers with empty pages, so the second surface a unit can be chosen on opens at all.
@@ -133,17 +138,35 @@ async function openSettings() {
 }
 
 /**
- * A radio, as the input rather than as a generic element.
+ * A radio inside the group that offers it, as the input rather than as a generic element.
  *
  * This project registers no jest-dom matchers (`src/test/setup.ts` only tears the tree down), so a
  * control's state is read from the DOM the same way the other page tests read it: `.checked`.
+ *
+ * The group is no longer optional. "System" is a theme and a language, and an unscoped name lookup
+ * would return both — which is not a test finding a bug, it is a test asking a question the page
+ * cannot answer. A group label is what makes the name unique, and it is the same label a screen
+ * reader announces before the choice.
  */
+function radio(role: 'group' | 'radiogroup', groupLabel: string, label: string): HTMLInputElement {
+  const group = screen.getByRole(role, { name: groupLabel });
+  return within(group).getByRole('radio', { name: label }) as HTMLInputElement;
+}
+
 function unitRadio(label: string): HTMLInputElement {
-  return screen.getByRole('radio', { name: label }) as HTMLInputElement;
+  return radio('group', 'Size units', label);
 }
 
 function startRadio(label: string): HTMLInputElement {
-  return screen.getByRole('radio', { name: label }) as HTMLInputElement;
+  return radio('radiogroup', 'Start page', label);
+}
+
+function themeRadio(label: string): HTMLInputElement {
+  return radio('radiogroup', 'Theme', label);
+}
+
+function languageRadio(label: string): HTMLInputElement {
+  return radio('radiogroup', 'Language', label);
 }
 
 describe('the Settings page', () => {
@@ -157,22 +180,34 @@ describe('the Settings page', () => {
     ).toBeDefined();
     // The page names the document it writes, and names no folder: a settings screen has no reason to
     // print where the person's profile lives.
+    // The page names the document it writes, and names no folder: a settings screen has no reason to
+    // print where the person's profile lives. The shape checked for is a path, not the character —
+    // `N/A` is a Gate word the catalog carries, and a slash inside a word is not a directory.
     const page = document.body.querySelector('main');
     expect(page?.textContent).toContain('settings.json');
-    expect(page?.textContent).not.toMatch(/[\\/]/);
+    expect(page?.textContent).not.toContain('\\');
+    expect(page?.textContent).not.toMatch(/[A-Za-z]:[\\/]/);
+    expect(page?.textContent).not.toMatch(/[\\/][\w.-]+[\\/]/);
   });
 
   it('offers no control for a setting this build does not have', async () => {
     await openSettings();
 
     const words = document.body.textContent ?? '';
-    // Language, font scale and density are still not honoured by any surface. Theme is not on this
-    // list because `ADR-0031` gave this build a second palette, so the control is real; the rule
-    // the list protects - no switch that goes nowhere - is unchanged, only what goes nowhere moved.
-    for (const absent of ['Language', 'Chinese', 'English', 'Font', 'Density']) {
+    // Font scale and density are still not honoured by any surface, and no catalog claims to be
+    // Traditional Chinese (`ADR-0032` D1 refuses that claim, so the page must not imply it either).
+    // Language and theme are not on this list because both are real now: `ADR-0031` gave this build a
+    // second palette and `ADR-0032` a second catalog. The rule is unchanged; only what goes nowhere
+    // moved.
+    for (const absent of ['Font', 'Density', '繁體', 'Traditional']) {
       expect(words).not.toContain(absent);
     }
     expect(screen.queryByRole('combobox')).toBeNull();
+    // And the four choices that are honoured are all on screen.
+    expect(unitRadio('Bytes')).toBeDefined();
+    expect(themeRadio('System')).toBeDefined();
+    expect(languageRadio('System')).toBeDefined();
+    expect(startRadio('Analyze')).toBeDefined();
   });
 
   it('applies the unit the document holds before the reader touches anything', async () => {
@@ -190,7 +225,9 @@ describe('the Settings page', () => {
 
     fireEvent.click(unitRadio('Bytes'));
 
-    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'history', 'system'));
+    await waitFor(() =>
+      expect(updateMock).toHaveBeenCalledWith('bytes', 'history', 'system', 'system'),
+    );
     // Both words travel together: the document is one file, and a half-stored pair is not a setting.
     expect(screen.getByText('Preferences saved.')).toBeDefined();
     expect(unitRadio('Bytes').checked).toBe(true);
@@ -201,7 +238,7 @@ describe('the Settings page', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
     const switchOnHistory = await screen.findByRole('group', { name: 'Size units' });
     fireEvent.click(within(switchOnHistory).getByRole('radio', { name: 'KiB' }) as HTMLInputElement);
-    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('kib', 'analyze', 'system'));
+    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('kib', 'analyze', 'system', 'system'));
 
     fireEvent.click(screen.getByRole('button', { name: 'Settings page' }));
     await screen.findByRole('heading', { level: 1, name: 'Settings' });
@@ -214,7 +251,9 @@ describe('the Settings page', () => {
 
     fireEvent.click(startRadio('Bundle & History'));
 
-    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'history', 'system'));
+    await waitFor(() =>
+      expect(updateMock).toHaveBeenCalledWith('bytes', 'history', 'system', 'system'),
+    );
     expect(startRadio('Bundle & History').checked).toBe(true);
     expect(
       screen.getByText(/takes effect the next time this window is opened/),
@@ -274,13 +313,13 @@ describe('the Settings page', () => {
     await waitFor(() => expect(unitRadio('KiB').checked).toBe(true));
 
     fireEvent.click(screen.getByRole('button', { name: 'Reset application preferences' }));
-    // The question is on screen and nothing has been sent yet. It names three settings and lists the
-    // theme among them, because a confirmation that under-promises what it is about to discard is
-    // the copy defect this round would otherwise have shipped.
-    await screen.findByRole('group', { name: 'Reset all three settings to their defaults?' });
+    // The question is on screen and nothing has been sent yet. It names four settings and lists the
+    // theme and the language among them, because a confirmation that under-promises what it is about
+    // to discard is the copy defect this round would otherwise have shipped.
+    await screen.findByRole('group', { name: 'Reset all four settings to their defaults?' });
     expect(
       screen.getByText(
-        'Size units go back to bytes, the theme goes back to System, and the start page goes back to Analyze.',
+        'Size units go back to bytes, the theme goes back to System, the language goes back to System, and the start page goes back to Analyze.',
       ),
     ).toBeDefined();
     expect(resetMock).not.toHaveBeenCalled();
@@ -292,11 +331,12 @@ describe('the Settings page', () => {
     expect(unitRadio('Bytes').checked).toBe(true);
     expect(startRadio('Analyze').checked).toBe(true);
     expect(themeRadio('System').checked).toBe(true);
+    expect(languageRadio('System').checked).toBe(true);
     expect(
       screen.getByText('Preferences reset to this version’s defaults.'),
     ).toBeDefined();
     expect(
-      screen.queryByRole('group', { name: 'Reset all three settings to their defaults?' }),
+      screen.queryByRole('group', { name: 'Reset all four settings to their defaults?' }),
     ).toBeNull();
   });
 
@@ -337,6 +377,9 @@ describe('the Settings page', () => {
       'input',
       'input',
       'input',
+      'input',
+      'input',
+      'input',
       'button',
     ]);
     const named = controls.map((element) =>
@@ -350,9 +393,15 @@ describe('the Settings page', () => {
       'Open Help and About',
       'Bytes',
       'KiB',
+      // The palette and the language are separate groups, and "System" appears in both because it
+      // means the same thing in both: follow the desktop. A group label is what tells the reader
+      // which one they are tabbing through, which is why the list above asks for a group.
       'System',
       'Light',
       'Dark',
+      'System',
+      '简体中文',
+      'English',
       'Analyze',
       'Bundle & History',
       'Reset application preferences',
@@ -393,10 +442,6 @@ function platformIs(dark: boolean) {
       }
     },
   };
-}
-
-function themeRadio(label: string): HTMLInputElement {
-  return screen.getByRole('radio', { name: label }) as HTMLInputElement;
 }
 
 /** The attribute is the whole mechanism: its presence is dark, its absence is light. */
@@ -471,13 +516,15 @@ describe('the theme', () => {
     expect(lastCall?.[2]).toBe('light');
   });
 
-  it('stores the theme beside the other two and claims it only when the shell agrees', async () => {
+  it('stores the theme beside the other three and claims it only when the shell agrees', async () => {
     platformIs(false);
     await openSettings();
 
     fireEvent.click(themeRadio('Dark'));
 
-    await waitFor(() => expect(updateMock).toHaveBeenCalledWith('bytes', 'analyze', 'dark'));
+    await waitFor(() =>
+      expect(updateMock).toHaveBeenCalledWith('bytes', 'analyze', 'dark', 'system'),
+    );
     expect(paintedPalette()).toBe('dark');
     expect(await screen.findByText('Preferences saved.')).toBeDefined();
   });
@@ -500,8 +547,9 @@ describe('the theme', () => {
   it('comes back with the rest of the defaults on a reset', async () => {
     const platform = platformIs(true);
     preferencesMock.mockResolvedValue(ok(prefs({ theme: 'dark', recovery: 'read' })));
-    updateMock.mockImplementation(async (sizeUnit: string, startupPage: string, theme: string) =>
-      ok(prefs({ sizeUnit, startupPage, theme })),
+    updateMock.mockImplementation(
+      async (sizeUnit: string, startupPage: string, theme: string, language: string) =>
+        ok(prefs({ sizeUnit, startupPage, theme, language })),
     );
     resetMock.mockResolvedValue(ok(prefs()));
     await openSettings();
@@ -516,5 +564,201 @@ describe('the theme', () => {
     expect(themeRadio('System').checked).toBe(true);
     platform.change(false);
     await waitFor(() => expect(paintedPalette()).toBeNull());
+  });
+});
+
+/**
+ * What the desktop reports, as the only thing the window can ask it.
+ *
+ * `navigator.languages` is the whole host interface here — no command, no permission, no host path
+ * (`AGENTS.md` 7). It is set rather than left to the runner because a test that resolved from an
+ * unset property would pass or fail depending on the machine running it, which is the opposite of
+ * what a resolver is for.
+ */
+function desktopSpeaks(languages: readonly string[] | undefined) {
+  Object.defineProperty(window.navigator, 'languages', {
+    value: languages,
+    configurable: true,
+  });
+  Object.defineProperty(window.navigator, 'language', {
+    value: languages === undefined || languages.length === 0 ? '' : (languages[0] ?? ''),
+    configurable: true,
+  });
+}
+
+/** The language a document declares, which is what a screen reader picks its voice from. */
+function declaredLanguage(): string | null {
+  return document.documentElement.getAttribute('lang');
+}
+
+describe('the language', () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute('lang');
+    // Delete the own property so the prototype's own answer comes back, rather than restoring a
+    // hard-coded guess about what the next test's host will say.
+    delete (window.navigator as unknown as Record<string, unknown>)['languages'];
+    delete (window.navigator as unknown as Record<string, unknown>)['language'];
+  });
+
+  it('opens in the language the document already holds', async () => {
+    desktopSpeaks(['en-US']);
+    preferencesMock.mockResolvedValue(ok(prefs({ language: 'zh-CN', recovery: 'read' })));
+    render(<App />);
+
+    // The nav is in the stored catalog too, so the entry is named in Chinese from the first frame —
+    // a shell that stayed English around a Chinese page would be two products in one window.
+    fireEvent.click(await screen.findByRole('button', { name: '设置 页面' }));
+    expect(await screen.findByRole('heading', { level: 1, name: '设置' })).toBeDefined();
+    expect(declaredLanguage()).toBe('zh-CN');
+  });
+
+  it('follows the desktop while the choice is System, and says which language it followed', async () => {
+    desktopSpeaks(['zh-CN', 'en-US']);
+    preferencesMock.mockResolvedValue(ok(prefs({ language: 'system', recovery: 'read' })));
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: '设置 页面' }));
+    await screen.findByRole('heading', { level: 1, name: '设置' });
+
+    expect(
+      (
+        within(screen.getByRole('radiogroup', { name: '语言' })).getByRole('radio', {
+          // The three language names are not translated, in either catalog: a reader who cannot parse
+          // the screen in front of them has to recognise the way out. Only the group is localised.
+          name: 'System',
+        }) as HTMLInputElement
+      ).checked,
+    ).toBe(true);
+    expect(declaredLanguage()).toBe('zh-CN');
+    // The sentence names the desktop's own answer, not the window's, and it is read out of the
+    // Chinese catalog because that is the catalog on screen.
+    expect(screen.getByText('界面跟随你的桌面语言，当前为简体中文。')).toBeDefined();
+  });
+
+  it('keeps a named language whatever the desktop says', async () => {
+    desktopSpeaks(['zh-CN']);
+    preferencesMock.mockResolvedValue(ok(prefs({ language: 'en', recovery: 'read' })));
+    await openSettings();
+
+    expect(languageRadio('English').checked).toBe(true);
+    expect(declaredLanguage()).toBe('en');
+    expect(
+      screen.getByText(
+        'The interface is English because you chose it, and that is kept whatever your desktop says.',
+      ),
+    ).toBeDefined();
+  });
+
+  it('does not call a German desktop English', async () => {
+    desktopSpeaks(['de-DE']);
+    preferencesMock.mockResolvedValue(ok(prefs({ language: 'system', recovery: 'read' })));
+    await openSettings();
+
+    // English is what the window runs in, and that is a fact about this build's catalog set, not a
+    // claim about the reader's machine. The false sentence would be "your desktop language is
+    // English"; the true one says which of the two it is.
+    expect(declaredLanguage()).toBe('en');
+    expect(screen.getByText(/no catalog for, so the interface is in English/)).toBeDefined();
+    expect(screen.queryByText(/follows your desktop language, which is English/)).toBeNull();
+  });
+
+  it('says so when the desktop cannot be read at all', async () => {
+    desktopSpeaks(undefined);
+    preferencesMock.mockResolvedValue(ok(prefs({ language: 'system', recovery: 'read' })));
+    await openSettings();
+
+    expect(declaredLanguage()).toBe('en');
+    expect(
+      screen.getByText(
+        'System is set to follow your desktop, but this window cannot read that setting, so it is English.',
+      ),
+    ).toBeDefined();
+  });
+
+  it('switches the words under the reader’s hand and stores the fourth word', async () => {
+    desktopSpeaks(['en-US']);
+    await openSettings();
+
+    fireEvent.click(languageRadio('简体中文'));
+
+    await waitFor(() =>
+      expect(updateMock).toHaveBeenCalledWith('bytes', 'analyze', 'system', 'zh-CN'),
+    );
+    // This page is itself rendered from the catalog, so the click is visible on the control that took
+    // it. A settings screen that stayed in English while reporting a language change would be showing
+    // a state it is not in.
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: '设置' })).toBeDefined(),
+    );
+    expect(declaredLanguage()).toBe('zh-CN');
+    expect(await screen.findByText('设置已保存。')).toBeDefined();
+    // The three choices keep their own names in both catalogs: a reader who cannot parse the
+    // interface on screen still has to be able to leave it.
+    const group = screen.getByRole('radiogroup', { name: '语言' });
+    expect(
+      within(group)
+        .getAllByRole('radio')
+        .map((input) => (input as HTMLInputElement).labels?.[0]?.textContent),
+    ).toEqual(['System', '简体中文', 'English']);
+    expect(within(group).getByRole('radio', { name: '简体中文' })).toBeDefined();
+  });
+
+  it('says a refused language did not stick, without pulling the words back', async () => {
+    desktopSpeaks(['en-US']);
+    updateMock.mockResolvedValue({ ok: false, envelope: SAVE_REFUSED });
+    await openSettings();
+
+    fireEvent.click(languageRadio('简体中文'));
+
+    await waitFor(() => expect(screen.getByText('设置没有保存')).toBeDefined());
+    expect(declaredLanguage()).toBe('zh-CN');
+    expect(screen.queryByText('设置已保存。')).toBeNull();
+    // The words on screen are the ones the reader asked for; the stored document is what did not
+    // change. The same policy the unit and the theme already run on, for the same reason.
+    expect(await screen.findByRole('alert')).toBeDefined();
+  });
+
+  it('leaves the machine vocabulary alone in either catalog', async () => {
+    desktopSpeaks(['en-US']);
+    updateMock.mockResolvedValue({ ok: false, envelope: SAVE_REFUSED });
+    await openSettings();
+
+    fireEvent.click(languageRadio('简体中文'));
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: '设置' })).toBeDefined());
+
+    const words = document.body.textContent ?? '';
+    // A product name, a file name and an error code are how this tool and its failures are
+    // identified. Translating any of them in one language would make the two languages two different
+    // products (`ADR-0032` D5). The code is the one Rust emitted, in a panel whose every label around
+    // it has just become Chinese.
+    for (const kept of ['FirmwareSight', 'settings.json', 'ERR-PREFS-8002']) {
+      expect(words).toContain(kept);
+    }
+    expect(words).toContain('设置没有保存');
+  });
+
+  it('comes back with the rest of the defaults on a reset', async () => {
+    desktopSpeaks(['zh-CN']);
+    preferencesMock.mockResolvedValue(ok(prefs({ language: 'zh-CN', recovery: 'read' })));
+    resetMock.mockResolvedValue(ok(prefs({ language: 'system' })));
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: '设置 页面' }));
+    await screen.findByRole('heading', { level: 1, name: '设置' });
+
+    fireEvent.click(screen.getByRole('button', { name: '重置应用设置' }));
+    fireEvent.click(screen.getByRole('button', { name: '重置设置' }));
+
+    await waitFor(() => expect(resetMock).toHaveBeenCalledTimes(1));
+    // Reset stores `system`; on a Chinese desktop `system` still answers Chinese — which is the point.
+    // A reset that silently switched the interface to English would be a fifth thing the reader never
+    // asked for, and the confirm sentence promises only the four it names.
+    expect(declaredLanguage()).toBe('zh-CN');
+    expect(
+      (
+        within(screen.getByRole('radiogroup', { name: '语言' })).getByRole('radio', {
+          name: 'System',
+        }) as HTMLInputElement
+      ).checked,
+    ).toBe(true);
+    expect(await screen.findByText('设置已恢复为本版本的默认值。')).toBeDefined();
   });
 });

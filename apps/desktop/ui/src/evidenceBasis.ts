@@ -10,21 +10,32 @@
  *
  * Presentation only: no enum is renamed, no basis is recomputed, nothing here is serialized, and each
  * surface keeps its own wording for a basis that was never recorded.
+ *
+ * B1-U3 moved the six sentences into the `common` catalog (`ADR-0032` D5) and left this file as the
+ * routing table only. That is deliberate: a caption is reader-facing prose, so a Chinese screen has to
+ * read it in Chinese, while the identifiers above it stay exactly as Core wrote them. A value outside
+ * the list still surfaces, now as the catalog's own sentence for "not recognized".
  */
 
-const EVIDENCE_BASIS_CAPTIONS = new Map<string, string>([
-  ['MapRegionAndElfLoad', 'MAP regions + ELF load evidence'],
-  ['map-memory-configuration+elf-load', 'MAP regions + ELF load evidence'],
-  ['RegionConfigAndElfLoad', 'configured regions + ELF load evidence'],
-  ['region-config+elf-load', 'configured regions + ELF load evidence'],
-  ['ElfAddressAndFlags', 'ELF address/flags evidence'],
-  ['elf-address-and-flags', 'ELF address/flags evidence'],
-  ['SectionNameHeuristic', 'section-name heuristic'],
-  ['section-name-heuristic', 'section-name heuristic'],
-  ['Insufficient', 'insufficient evidence'],
-  ['unattributed', 'insufficient evidence'],
+import type { Translate } from './i18n';
+import type { Catalog } from './i18n/en';
+
+type BasisKey = keyof Catalog['common'];
+
+const EVIDENCE_BASIS_KEYS = new Map<string, BasisKey>([
+  ['MapRegionAndElfLoad', 'evidenceBasis.mapElf'],
+  ['map-memory-configuration+elf-load', 'evidenceBasis.mapElf'],
+  ['RegionConfigAndElfLoad', 'evidenceBasis.regionElf'],
+  ['region-config+elf-load', 'evidenceBasis.regionElf'],
+  ['ElfAddressAndFlags', 'evidenceBasis.addressFlags'],
+  ['elf-address-and-flags', 'evidenceBasis.addressFlags'],
+  ['SectionNameHeuristic', 'evidenceBasis.sectionName'],
+  ['section-name-heuristic', 'evidenceBasis.sectionName'],
+  ['Insufficient', 'evidenceBasis.insufficient'],
+  ['unattributed', 'evidenceBasis.insufficient'],
 ]);
 
-export function evidenceBasisCaption(basis: string): string {
-  return EVIDENCE_BASIS_CAPTIONS.get(basis) ?? 'Unrecognized evidence basis';
+export function evidenceBasisCaption(basis: string, t: Translate): string {
+  const key = EVIDENCE_BASIS_KEYS.get(basis);
+  return t('common', key ?? 'evidenceBasis.unrecognized');
 }

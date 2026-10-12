@@ -26,6 +26,10 @@ use firmwaresight_desktop::ipc::{
     AcceptReviewRequestDto, BundleDestinationDto, BundleExportDto, BundlePlanRequestDto,
     BundlePreviewDto, ErrorEnvelopeDto, GateFindingRowDto, GateRunDto, GateRunRequestDto,
 };
+use firmwaresight_desktop::preferences::{
+    ApplicationPreferences, LanguagePref, SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store,
+    ThemePref,
+};
 use firmwaresight_desktop::service::FixtureCatalog;
 use firmwaresight_project::{fingerprint, verify_bundle};
 use firmwaresight_storage::{
@@ -1229,4 +1233,89 @@ fn document(bundle: &Path, name: &str) -> Value {
     let bytes = std::fs::read(bundle.join(name))
         .unwrap_or_else(|error| panic!("`{name}` is not in the bundle: {error}"));
     serde_json::from_slice(&bytes).unwrap_or_else(|error| panic!("`{name}` is not JSON: {error}"))
+}
+
+/// `NEXT-06` §E and T05 asked for this comparison in bytes rather than in UI assertions: the same release,
+/// exported again after a language has been stored, must arrive at the same bundle.
+///
+/// `SHA256SUMS` is the file that makes one assertion cover the whole contract. Core writes it over every
+/// other entry in `PREVIEW_ORDER`, so it names the digest of the analysis JSON, the diff JSON, the
+/// gate-results JSON, the Release Notes and the self-contained `release-report.html`; comparing its bytes
+/// therefore compares theirs, and a person's interface language reaching any exported document would show
+/// up here as a different sums file rather than as a claim in a report.
+#[test]
+fn a_stored_language_moves_no_bundle_byte_no_manifest_digest_and_no_release_id() {
+    let mut world = World::new("lang-identity", &release_policy());
+    let prefs_dir = temp_name("lang-identity", "-settings");
+    std::fs::create_dir_all(&prefs_dir).expect("a temporary settings folder");
+    world
+        .session
+        .use_preferences(Store::new(Some(prefs_dir.clone())));
+
+    let first = world.publish(false);
+    let bundle = world.bundle_dir(&first);
+    let sums = std::fs::read(bundle.join("SHA256SUMS")).expect("`SHA256SUMS` is in the bundle");
+    let manifest =
+        std::fs::read(bundle.join("release-manifest.json")).expect("the manifest is in the bundle");
+    let report =
+        std::fs::read(bundle.join("release-report.html")).expect("the report is in the bundle");
+    let gate_results = std::fs::read(bundle.join("gate-results.json"))
+        .expect("the gate results are in the bundle");
+
+    // All four words move together, because a preference that changed a bundle would most plausibly do it
+    // through the one this unit is about — and the other three are already covered by the Gate test.
+    world
+        .session
+        .preferences()
+        .save(&ApplicationPreferences {
+            size_unit: SizeUnitPref::Kib,
+            startup_page: StartupPagePref::History,
+            theme: ThemePref::Dark,
+            language: LanguagePref::ZhCn,
+        })
+        .expect("the four preferences are stored");
+    let stored = std::fs::read_to_string(prefs_dir.join(SETTINGS_FILE_NAME))
+        .expect("the document the session wrote");
+    assert!(
+        stored.contains("\"zh-CN\""),
+        "the language never reached the document, so the comparison below proves nothing: {stored}"
+    );
+
+    // The same release, re-exported over the bundle this engine wrote a moment ago.
+    let second = world.publish(true);
+    assert_eq!(
+        second.release_id, first.release_id,
+        "a stored language moved the release id"
+    );
+    assert_eq!(
+        second.manifest_sha256, first.manifest_sha256,
+        "a stored language moved the manifest digest"
+    );
+
+    let reborn = world.bundle_dir(&second);
+    assert_eq!(
+        std::fs::read(reborn.join("SHA256SUMS")).expect("`SHA256SUMS` after the second export"),
+        sums,
+        "a stored language moved a digest inside the bundle"
+    );
+    assert_eq!(
+        std::fs::read(reborn.join("release-manifest.json"))
+            .expect("the manifest after the second export"),
+        manifest,
+        "a stored language moved the release manifest"
+    );
+    assert_eq!(
+        std::fs::read(reborn.join("release-report.html"))
+            .expect("the report after the second export"),
+        report,
+        "a stored language moved the self-contained report another person receives"
+    );
+    assert_eq!(
+        std::fs::read(reborn.join("gate-results.json"))
+            .expect("the gate results after the second export"),
+        gate_results,
+        "a stored language moved the stored gate results"
+    );
+
+    let _ = std::fs::remove_dir_all(&prefs_dir);
 }

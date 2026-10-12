@@ -34,6 +34,7 @@ import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { ABSENT, formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
+import { useI18n, type Translate } from './i18n';
 import {
   compareSnapshots,
   exportCompareHtml,
@@ -83,15 +84,24 @@ type Additions = {
   readonly symbols: readonly ContributorDto[];
 };
 
-/** All, Added, Removed, Changed - the four views prompt §25 asks the full lists to offer. */
+/**
+ * All, Added, Removed, Changed - the four views prompt §25 asks the full lists to offer.
+ *
+ * `key` is the catalog entry naming the label; `token` is a stable, language-independent id used for the
+ * radio's DOM id and React key, because those must not move with the interface language. `Added`,
+ * `Removed` and `Changed` are the diff's own change-kind words (`ADR-0032` D5): the catalog keeps them
+ * spelled exactly as the shell emits them in both languages, while `All` - a filter state with no diff
+ * counterpart - is translated.
+ */
 const KIND_FILTERS: readonly {
-  readonly label: string;
+  readonly key: 'filter.all' | 'filter.added' | 'filter.removed' | 'filter.changed';
+  readonly token: string;
   readonly value: ChangeKindFilterDto | null;
 }[] = [
-  { label: 'All', value: null },
-  { label: 'Added', value: 'added' },
-  { label: 'Removed', value: 'removed' },
-  { label: 'Changed', value: 'changed' },
+  { key: 'filter.all', token: 'all', value: null },
+  { key: 'filter.added', token: 'added', value: 'added' },
+  { key: 'filter.removed', token: 'removed', value: 'removed' },
+  { key: 'filter.changed', token: 'changed', value: 'changed' },
 ];
 
 /**
@@ -127,6 +137,7 @@ export function Compare({
   ) => void;
   readonly onGoToAnalyze: () => void;
 }) {
+  const { t } = useI18n();
   const [candidates, setCandidates] = useState<CandidatePageDto | null>(null);
   const [candidateError, setCandidateError] = useState<ErrorEnvelopeDto | null>(null);
   // The pair and the result are the shell's, so leaving the page cannot throw them away (U1P-R3 F1).
@@ -336,9 +347,9 @@ export function Compare({
         return;
       }
       setExportError(null);
-      setExportNote(exportWords(outcome.value));
+      setExportNote(exportWords(outcome.value, t));
     },
-    [summary],
+    [summary, t],
   );
 
   const rows = candidates?.rows ?? [];
@@ -359,21 +370,21 @@ export function Compare({
   return (
     <Page>
       <PageHeader
-        title="Compare"
-        subhead="Pick two builds FirmwareSight has already analyzed and stored, and it reports what moved between those recorded facts."
+        title={t('compare', 'title')}
+        subhead={t('compare', 'subhead')}
       />
 
       {candidateError === null ? null : (
         <ErrorPanel
           envelope={candidateError}
-          label="Build list error"
-          heading="The stored builds would not load"
+          label={t('compare', 'buildListError.label')}
+          heading={t('compare', 'buildListError.heading')}
         />
       )}
 
       {candidates === null ? (
         <p className={styles['status']} role="status" aria-live="polite">
-          Reading the stored builds…
+          {t('compare', 'status.readingBuilds')}
         </p>
       ) : null}
 
@@ -381,17 +392,17 @@ export function Compare({
         // Fewer than two builds is a fact about the session, and the screen says so instead of
         // inventing a comparison out of one build (prompt §19).
         <EmptyState
-          label="Nothing to compare yet"
-          message="Analyze another firmware build before comparing."
-          nextStep={<Button onClick={onGoToAnalyze}>Go to Analyze</Button>}
+          label={t('compare', 'empty.label')}
+          message={t('compare', 'empty.message')}
+          nextStep={<Button onClick={onGoToAnalyze}>{t('compare', 'empty.action')}</Button>}
         />
       )}
 
       {candidates === null || !hasTwoBuilds ? null : (
-        <section className={styles['selectors']} aria-label="Build selection">
+        <section className={styles['selectors']} aria-label={t('compare', 'selectors.region')}>
           <SnapshotPicker
             id="fs-base"
-            label="Old / Base"
+            label={t('compare', 'picker.baseLabel')}
             rows={rows}
             selected={baseId}
             lastAnalyzedSnapshotId={lastAnalyzedSnapshotId}
@@ -404,7 +415,7 @@ export function Compare({
           </span>
           <SnapshotPicker
             id="fs-target"
-            label="New / Target"
+            label={t('compare', 'picker.targetLabel')}
             rows={rows}
             selected={targetId}
             lastAnalyzedSnapshotId={lastAnalyzedSnapshotId}
@@ -420,11 +431,11 @@ export function Compare({
                 }}
                 disabled={comparing}
               >
-                Show more builds
+                {t('compare', 'picker.showMore')}
               </Button>
             )}
             <Button onClick={swap} disabled={!bothChosen || samePair || comparing}>
-              Swap
+              {t('compare', 'picker.swap')}
             </Button>
             <Button
               variant="primary"
@@ -433,7 +444,7 @@ export function Compare({
               }}
               disabled={!bothChosen || samePair || comparing}
             >
-              Compare
+              {t('compare', 'picker.compareAction')}
             </Button>
           </div>
         </section>
@@ -443,21 +454,24 @@ export function Compare({
         // Refusing is not a failure to report: the pair is named, and the action stays locked until
         // the reader changes it (prompt §18).
         <p className={styles['warning']} role="note">
-          Both sides name the same build
-          {base === null ? '.' : `: ${buildLabel(base)}.`} A build compared with itself reports
-          nothing, which is not the same as nothing having changed. Choose a different Old / Base or
-          New / Target.
+          {base === null
+            ? t('compare', 'refusal.sameBuildNoLabel')
+            : t('compare', 'refusal.sameBuild', { label: buildLabel(base) })}
         </p>
       ) : null}
 
       {comparing ? (
         <p className={styles['status']} role="status" aria-live="polite">
-          Comparing…
+          {t('compare', 'status.comparing')}
         </p>
       ) : null}
 
       {error === null ? null : (
-        <ErrorPanel envelope={error} label="Comparison error" heading="Comparison failed" />
+        <ErrorPanel
+          envelope={error}
+          label={t('compare', 'comparisonError.label')}
+          heading={t('compare', 'comparisonError.heading')}
+        />
       )}
 
       {/* Two stored builds and no comparison is the state every re-entry of this page used to land in, and
@@ -466,9 +480,9 @@ export function Compare({
           for that fact (U1P-R3 F1). It claims no numbers, no delta and no verdict, because a promise of a
           result is not one, and it does not replace the Compare action it describes. */}
       {candidates === null || !hasTwoBuilds || summary !== null || comparing ? null : (
-        <Panel title="Ready to compare">
+        <Panel title={t('compare', 'ready.title')}>
           <p className={styles['readyMessage']}>
-            Choose Old / Base and New / Target, then select Compare.
+            {t('compare', 'ready.message')}
           </p>
         </Panel>
       )}
@@ -481,13 +495,19 @@ export function Compare({
       {summary === null ? null : (
         <section
           className={styles['report']}
-          aria-label={stale ? 'Last good comparison' : 'Build comparison'}
+          aria-label={stale ? t('compare', 'report.regionStale') : t('compare', 'report.regionFresh')}
         >
           {stale ? (
             <p className={styles['stale']} role="note">
               {error === null
-                ? `This is the comparison of ${buildLabel(summary.base)} and ${buildLabel(summary.target)} that you asked for. The pair selected above is a different one; press Compare to move to it.`
-                : `Previous comparison of ${buildLabel(summary.base)} and ${buildLabel(summary.target)}. The attempt above produced no result, so nothing here was replaced.`}
+                ? t('compare', 'report.staleMoved', {
+                    base: buildLabel(summary.base),
+                    target: buildLabel(summary.target),
+                  })
+                : t('compare', 'report.staleFailed', {
+                    base: buildLabel(summary.base),
+                    target: buildLabel(summary.target),
+                  })}
             </p>
           ) : null}
 
@@ -537,18 +557,22 @@ export function Compare({
 
           <footer className={styles['footer']}>
             <span className={styles['monoSmall']}>
-              Base {summary.base.snapshotId} · {truncateMiddle(summary.base.sha256, 8)}
+              {t('compare', 'footer.baseLine', {
+                id: summary.base.snapshotId,
+                hash: truncateMiddle(summary.base.sha256, 8),
+              })}
             </span>
             <span className={styles['monoSmall']}>
-              Target {summary.target.snapshotId} · {truncateMiddle(summary.target.sha256, 8)}
+              {t('compare', 'footer.targetLine', {
+                id: summary.target.snapshotId,
+                hash: truncateMiddle(summary.target.sha256, 8),
+              })}
             </span>
             <span>
-              The diff id is this session&rsquo;s handle for the computed comparison: not stored, not
-              portable, and not part of what the diff proves.
+              {t('compare', 'footer.diffIdNote')}
             </span>
             <span>
-              A comparison reads the records this application stored for these two builds. It does not
-              re-read the original files, and nothing here writes to them.
+              {t('compare', 'footer.storageNote')}
             </span>
           </footer>
         </section>
@@ -586,6 +610,7 @@ function SnapshotPicker({
   readonly disabled: boolean;
   readonly onSelect: (snapshotId: string | null) => void;
 }) {
+  const { t } = useI18n();
   const chosen = rows.find((row) => row.snapshotId === selected) ?? null;
 
   return (
@@ -602,7 +627,7 @@ function SnapshotPicker({
           onSelect(event.target.value === '' ? null : event.target.value);
         }}
       >
-        <option value="">Choose a build</option>
+        <option value="">{t('compare', 'picker.chooseOption')}</option>
         {rows.map((row) => (
           <option
             key={row.snapshotId}
@@ -610,24 +635,24 @@ function SnapshotPicker({
             title={`${row.fileName} · sha256 ${row.sha256} · imported ${row.importedAt}`}
           >
             {buildLabel(row)}
-            {row.snapshotId === lastAnalyzedSnapshotId ? ' · last analyzed' : ''}
+            {row.snapshotId === lastAnalyzedSnapshotId ? t('compare', 'picker.lastAnalyzedSuffix') : ''}
           </option>
         ))}
       </select>
 
       {chosen === null ? (
-        <p className={styles['sideFacts']}>No build named yet.</p>
+        <p className={styles['sideFacts']}>{t('compare', 'picker.noBuildNamed')}</p>
       ) : (
         <p className={styles['sideFacts']}>
           <span className={styles['mono']}>{formatSize(chosen.byteSize, unit)}</span>
           <span>{chosen.architecture}</span>
           <span>
-            Nonvolatile {budgetWords(chosen.nonvolatile.state, chosen.nonvolatile.bytes, unit)}
+            {t('compare', 'picker.nonvolatilePrefix')} {budgetWords(chosen.nonvolatile.state, chosen.nonvolatile.bytes, unit)}
           </span>
           <span>
-            Runtime RAM {budgetWords(chosen.runtimeRam.state, chosen.runtimeRam.bytes, unit)}
+            {t('compare', 'picker.runtimeRamPrefix')} {budgetWords(chosen.runtimeRam.state, chosen.runtimeRam.bytes, unit)}
           </span>
-          <span className={styles['monoSmall']}>imported {chosen.importedAt}</span>
+          <span className={styles['monoSmall']}>{t('compare', 'picker.importedLine', { date: chosen.importedAt })}</span>
         </p>
       )}
     </div>
@@ -652,30 +677,29 @@ function MemoryComparison({
   readonly memory: DiffMemoryDto;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   return (
-    <section className={styles['section']} aria-label="Memory comparison">
+    <section className={styles['section']} aria-label={t('compare', 'memory.region')}>
       <div className={styles['sectionHead']}>
-        <h2>Memory</h2>
+        <h2>{t('compare', 'memory.heading')}</h2>
         <p className={styles['caption']}>
-          Delta = target &minus; base. A positive delta is growth. Unknown and{' '}
-          &ldquo;{ABSENT}&rdquo; are never written as 0.
+          {t('compare', 'memory.caption', { absent: ABSENT })}
         </p>
       </div>
       <div className={styles['rows']}>
-        <MemoryRow term="Nonvolatile / load image" change={memory.nonvolatile} unit={unit} />
-        <MemoryRow term="Runtime RAM" change={memory.runtimeRam} unit={unit} />
+        <MemoryRow term={t('compare', 'memory.nonvolatileTerm')} change={memory.nonvolatile} unit={unit} />
+        <MemoryRow term={t('compare', 'memory.runtimeRamTerm')} change={memory.runtimeRam} unit={unit} />
         <div className={styles['row']}>
-          <span className={styles['term']}>Pair comparability</span>
+          <span className={styles['term']}>{t('compare', 'memory.comparabilityTerm')}</span>
           <span className={styles['value']}>
             <Comparability value={memory.comparability} />
             <span className={styles['note']}>
-              The weaker side caps the pair, so this is the strength of the delta, not of either
-              build alone.
+              {t('compare', 'memory.comparabilityNote')}
             </span>
           </span>
         </div>
-        <SideEvidenceRow label="Base evidence" side={memory.base} />
-        <SideEvidenceRow label="Target evidence" side={memory.target} />
+        <SideEvidenceRow label={t('compare', 'evidence.baseLabel')} side={memory.base} />
+        <SideEvidenceRow label={t('compare', 'evidence.targetLabel')} side={memory.target} />
       </div>
     </section>
   );
@@ -690,12 +714,13 @@ function MemoryRow({
   readonly change: ByteDeltaDto;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   return (
     <div className={styles['row']}>
       <span className={styles['term']}>{term}</span>
       <span className={styles['value']}>
-        <Figure axis="Old" text={formatSize(change.base, unit)} />
-        <Figure axis="New" text={formatSize(change.target, unit)} />
+        <Figure axis={t('compare', 'axis.old')} text={formatSize(change.base, unit)} />
+        <Figure axis={t('compare', 'axis.new')} text={formatSize(change.target, unit)} />
         <DeltaFigure change={change} unit={unit} />
       </span>
     </div>
@@ -747,9 +772,10 @@ function DeltaFigure({
   readonly change: ByteDeltaDto;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   return (
     <Figure
-      axis="Delta"
+      axis={t('compare', 'axis.delta')}
       text={formatDelta(change.delta, unit)}
       delta={change.delta}
       reason={change.delta === null ? change.reason : null}
@@ -760,12 +786,13 @@ function DeltaFigure({
 /// What Compare adds to the shared evidence-basis caption: its own word for a side that recorded none.
 ///
 /// The mapping of the five bases the memory model can name lives in `evidenceBasis.ts`, in the
-/// vocabulary Analyze already uses, so this page and Release cannot drift apart.
-function basisCaption(basis: string | null): string {
+/// vocabulary Analyze already uses, so this page and Release cannot drift apart. A missing basis gets
+/// Compare's own word from the catalog rather than a hardcoded English string.
+function basisCaption(basis: string | null, t: Translate): string {
   if (basis === null) {
-    return 'unknown';
+    return t('compare', 'evidence.unknownBasis');
   }
-  return evidenceBasisCaption(basis);
+  return evidenceBasisCaption(basis, t);
 }
 
 function SideEvidenceRow({
@@ -775,20 +802,23 @@ function SideEvidenceRow({
   readonly label: string;
   readonly side: DiffSideMemoryDto;
 }) {
+  const { t } = useI18n();
   return (
     <div className={styles['row']}>
       <span className={styles['term']}>{label}</span>
       <span className={styles['value']}>
         <StateBadge
           state={side.mapBacked ? 'PASS' : 'UNKNOWN'}
-          label={side.mapBacked ? 'Linker MAP used' : 'No linker MAP'}
+          label={side.mapBacked ? t('compare', 'evidence.linkerMapUsed') : t('compare', 'evidence.noLinkerMap')}
         />
-        <span className={styles['monoSmall']}>layout {side.layoutSource}</span>
-        <span className={styles['monoSmall']}>weakest basis {basisCaption(side.weakestEvidenceBasis)}</span>
+        <span className={styles['monoSmall']}>{t('compare', 'evidence.layoutPrefix')} {side.layoutSource}</span>
+        <span className={styles['monoSmall']}>
+          {t('compare', 'evidence.weakestBasisPrefix')} {basisCaption(side.weakestEvidenceBasis, t)}
+        </span>
         <span className={styles['note']}>
           {side.footprintRowPresent
-            ? 'a footprint row was recorded'
-            : 'no footprint row was recorded, which is not a record of zero'}
+            ? t('compare', 'evidence.footprintRecorded')
+            : t('compare', 'evidence.footprintMissing')}
         </span>
       </span>
     </div>
@@ -803,6 +833,7 @@ function SideEvidenceRow({
  * stored facts do not support one.
  */
 function EvidenceNotice({ summary }: { readonly summary: CompareSummaryDto }) {
+  const { t } = useI18n();
   const { memory, warnings, objectChanges } = summary;
   const lines: readonly string[] = [
     ...(memory.evidenceWarning === null ? [] : [memory.evidenceWarning]),
@@ -810,10 +841,10 @@ function EvidenceNotice({ summary }: { readonly summary: CompareSummaryDto }) {
   ];
 
   return (
-    <section className={styles['section']} aria-label="Capability and evidence">
-      <h2>Capability and evidence</h2>
+    <section className={styles['section']} aria-label={t('compare', 'notice.region')}>
+      <h2>{t('compare', 'notice.heading')}</h2>
       {lines.length === 0 ? (
-        <p className={styles['status']}>No evidence warning was recorded for this pair.</p>
+        <p className={styles['status']}>{t('compare', 'notice.noWarning')}</p>
       ) : (
         <ul className={styles['noticeList']}>
           {lines.map((line) => (
@@ -826,11 +857,11 @@ function EvidenceNotice({ summary }: { readonly summary: CompareSummaryDto }) {
       <div className={styles['row']}>
         {/* L19: this page answers "did any object file change between the two builds", which is not
             the question Analyze's capability row answers. The two labels must stay distinct. */}
-        <span className={styles['term']}>Object-level change attribution</span>
+        <span className={styles['term']}>{t('compare', 'notice.objectTerm')}</span>
         <span className={styles['value']}>
           <StateBadge
             state={objectChanges.available ? 'PASS' : 'N/A'}
-            label={objectChanges.available ? 'available' : 'unavailable'}
+            label={objectChanges.available ? t('compare', 'notice.attributionAvailable') : t('compare', 'notice.attributionUnavailable')}
             note={objectChanges.available ? undefined : objectChanges.reason}
           />
         </span>
@@ -858,15 +889,16 @@ function WhatMoved({
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
 }) {
+  const { t } = useI18n();
   return (
-    <section className={styles['section']} aria-label="What moved">
+    <section className={styles['section']} aria-label={t('compare', 'moved.region')}>
       <div className={styles['sectionHead']}>
-        <h2>What moved</h2>
+        <h2>{t('compare', 'moved.heading')}</h2>
         <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
       </div>
       <div className={styles['rows']}>
-        <CountRow term="Sections" counts={counts.sections} unchanged={counts.unchangedSections} />
-        <CountRow term="Symbols" counts={counts.symbols} unchanged={counts.unchangedSymbols} />
+        <CountRow term={t('compare', 'moved.sectionsTerm')} counts={counts.sections} unchanged={counts.unchangedSections} />
+        <CountRow term={t('compare', 'moved.symbolsTerm')} counts={counts.symbols} unchanged={counts.unchangedSymbols} />
       </div>
     </section>
   );
@@ -881,6 +913,7 @@ function CountRow({
   readonly counts: ChangeKindCountsDto;
   readonly unchanged: number;
 }) {
+  const { t } = useI18n();
   return (
     <div className={styles['row']}>
       <span className={styles['term']}>{term}</span>
@@ -888,12 +921,12 @@ function CountRow({
         <Kind kind="Added" count={counts.added} />
         <Kind kind="Removed" count={counts.removed} />
         <Kind kind="Changed" count={counts.changed} />
-        <span className={styles['note']}>{String(unchanged)} unchanged</span>
+        <span className={styles['note']}>{t('compare', 'moved.unchanged', { count: unchanged })}</span>
         {counts.ambiguous === 0 ? null : (
           <span className={styles['unknown']}>
-            {String(counts.ambiguous)} unpaired
+            {t('compare', 'moved.unpaired', { count: counts.ambiguous })}
             <span className={styles['note']}>
-              the name repeats, or there is no name to match on
+              {t('compare', 'moved.unpairedNote')}
             </span>
           </span>
         )}
@@ -944,60 +977,55 @@ function Ranking({
   readonly onPickSection: (key: string) => void;
   readonly onPickSymbol: (key: string) => void;
 }) {
+  const { t } = useI18n();
   return (
-    <section className={styles['section']} aria-label="Top growth and largest additions">
-      <h2>Top growth and largest additions</h2>
+    <section className={styles['section']} aria-label={t('compare', 'ranking.region')}>
+      <h2>{t('compare', 'ranking.heading')}</h2>
       <p className={styles['hint']}>
-        These lists are navigation aids. The Section Changes and Symbol Changes tables below hold
-        every changed row, and choosing an entry filters that table to the row it names. Neither list
-        sums to the &ldquo;Nonvolatile / load image&rdquo; delta above: that is the whole
-        image&rsquo;s change, while these are only the top few rows ranked by runtime size, so a
-        shortfall is a basis difference and a cut-off, not a missing row.
+        {t('compare', 'ranking.basisHint')}
       </p>
       <div className={styles['ranking']}>
         <div className={styles['list']}>
-          <h3>Top growth</h3>
+          <h3>{t('compare', 'ranking.growthHeading')}</h3>
           <p className={styles['hint']}>
-            Changed rows only, ranked by the runtime-size delta. An added row is not growth from zero,
-            so it never appears here.
+            {t('compare', 'ranking.growthHint')}
           </p>
           <Contributors
-            noun="sections"
+            nounKey="contributors.sections"
             rows={summary.topSections}
             unit={unit}
-            empty="No section grew by a known amount."
+            emptyKey="contributors.emptySectionsGrowth"
             onPick={onPickSection}
           />
           <Contributors
-            noun="symbols"
+            nounKey="contributors.symbols"
             rows={summary.topSymbols}
             unit={unit}
-            empty="No symbol grew by a known amount."
+            emptyKey="contributors.emptySymbolsGrowth"
             onPick={onPickSymbol}
           />
         </div>
         <div className={styles['list']}>
-          <h3>Largest additions</h3>
+          <h3>{t('compare', 'ranking.additionsHeading')}</h3>
           <p className={styles['hint']}>
-            Added rows, ranked by their runtime size in the target build. Old is{' '}
-            &ldquo;{ABSENT}&rdquo; because the row did not exist in the base build.
+            {t('compare', 'ranking.additionsHint', { absent: ABSENT })}
           </p>
           {additions === null ? (
-            <p className={styles['status']}>Reading the added rows…</p>
+            <p className={styles['status']}>{t('compare', 'ranking.readingAdded')}</p>
           ) : (
             <>
               <Contributors
-                noun="sections"
+                nounKey="contributors.sections"
                 rows={additions.sections}
                 unit={unit}
-                empty="No section was added."
+                emptyKey="contributors.emptySectionsAdded"
                 onPick={onPickSection}
               />
               <Contributors
-                noun="symbols"
+                nounKey="contributors.symbols"
                 rows={additions.symbols}
                 unit={unit}
-                empty="No symbol was added."
+                emptyKey="contributors.emptySymbolsAdded"
                 onPick={onPickSymbol}
               />
             </>
@@ -1009,23 +1037,29 @@ function Ranking({
 }
 
 function Contributors({
-  noun,
+  nounKey,
   rows,
   unit,
-  empty,
+  emptyKey,
   onPick,
 }: {
-  readonly noun: string;
+  readonly nounKey: 'contributors.sections' | 'contributors.symbols';
   readonly rows: readonly ContributorDto[];
   readonly unit: SizeUnit;
-  readonly empty: string;
+  readonly emptyKey:
+    | 'contributors.emptySectionsGrowth'
+    | 'contributors.emptySymbolsGrowth'
+    | 'contributors.emptySectionsAdded'
+    | 'contributors.emptySymbolsAdded';
   readonly onPick: (key: string) => void;
 }) {
+  const { t } = useI18n();
+  const noun = t('compare', nounKey);
   return (
     <div className={styles['contribGroup']}>
       <span className={styles['contribNoun']}>{noun}</span>
       {rows.length === 0 ? (
-        <p className={styles['status']}>{empty}</p>
+        <p className={styles['status']}>{t('compare', emptyKey)}</p>
       ) : (
         <ol className={styles['contribList']}>
           {rows.map((row, index) => (
@@ -1033,7 +1067,7 @@ function Contributors({
               <button
                 type="button"
                 className={styles['pick']}
-                aria-label={`Show ${noun} changes for ${row.key}`}
+                aria-label={t('compare', 'contributors.pickAria', { noun, key: row.key })}
                 onClick={() => {
                   onPick(row.key);
                 }}
@@ -1071,6 +1105,7 @@ function SectionChanges({
   readonly unit: SizeUnit;
   readonly focus: Focus | null;
 }) {
+  const { t } = useI18n();
   const [offset, setOffset] = useState(0);
   const [filter, setFilter] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -1147,10 +1182,10 @@ function SectionChanges({
   );
 
   return (
-    <section className={styles['area']} ref={area} tabIndex={-1} aria-label="Section Changes">
-      <h2>Section Changes</h2>
+    <section className={styles['area']} ref={area} tabIndex={-1} aria-label={t('compare', 'section.region')}>
+      <h2>{t('compare', 'section.heading')}</h2>
       <ChangeFilters
-        noun="sections"
+        nounKey="contributors.sections"
         kind={kind}
         draft={draft}
         onKind={
@@ -1168,67 +1203,67 @@ function SectionChanges({
       />
       {loading ? (
         <p className={styles['status']} role="status" aria-live="polite">
-          Loading section changes…
+          {t('compare', 'section.loading')}
         </p>
       ) : null}
       {error === null ? null : (
         <ErrorPanel
           envelope={error}
-          label="Section change query failed"
-          heading="The section changes would not load"
+          label={t('compare', 'section.errorLabel')}
+          heading={t('compare', 'section.errorHeading')}
         />
       )}
 
       {page === null ? null : (
         <>
-          <ScrollArea label="Section changes table">
+          <ScrollArea label={t('compare', 'section.tableLabel')}>
             <table className={styles['table']}>
               <caption className={styles['caption']}>
-                Every section the diff lists as changed, filtered and ordered by the shell
+                {t('compare', 'section.caption')}
               </caption>
               <thead>
                 <tr>
                   <Sortable
-                    label="Change"
+                    label={t('compare', 'col.change')}
                     column="changeKind"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
                   <Sortable
-                    label="Name"
+                    label={t('compare', 'col.name')}
                     column="key"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
-                  <SortHeader label="Old file" sortable={false} direction={direction} />
-                  <SortHeader label="New file" sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.oldFile')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.newFile')} sortable={false} direction={direction} />
                   <Sortable
-                    label="Delta file"
+                    label={t('compare', 'col.deltaFile')}
                     column="delta"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
-                  <SortHeader label="Old RAM" sortable={false} direction={direction} />
-                  <SortHeader label="New RAM" sortable={false} direction={direction} />
-                  <SortHeader label="Delta RAM" sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.oldRam')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.newRam')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.deltaRam')} sortable={false} direction={direction} />
                   <Sortable
-                    label="RAM size"
+                    label={t('compare', 'col.ramSize')}
                     column="memorySize"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
                   <Sortable
-                    label="File size"
+                    label={t('compare', 'col.fileSize')}
                     column="fileSize"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
-                  <SortHeader label="Also differs" sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.alsoDiffers')} sortable={false} direction={direction} />
                 </tr>
               </thead>
               <tbody>
@@ -1240,10 +1275,10 @@ function SectionChanges({
                     <td className={styles['wrap']}>
                       {row.key}
                       {row.nameKnown ? null : (
-                        <span className={styles['note']}> no name was recorded for this row</span>
+                        <span className={styles['note']}>{t('compare', 'section.noNameNote')}</span>
                       )}
                       {row.ambiguous ? (
-                        <span className={styles['note']}> the name repeats, so this row is unpaired</span>
+                        <span className={styles['note']}>{t('compare', 'section.ambiguousNote')}</span>
                       ) : null}
                     </td>
                     <td className={styles['mono']}>
@@ -1298,7 +1333,7 @@ function SectionChanges({
             offset={page.offset}
             shown={page.rows.length}
             nextOffset={page.nextOffset}
-            label="sections"
+            label={t('compare', 'section.pagerLabel')}
             onOffset={setOffset}
           />
         </>
@@ -1317,6 +1352,7 @@ function SymbolChanges({
   readonly unit: SizeUnit;
   readonly focus: Focus | null;
 }) {
+  const { t } = useI18n();
   const [offset, setOffset] = useState(0);
   const [filter, setFilter] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -1390,10 +1426,10 @@ function SymbolChanges({
   );
 
   return (
-    <section className={styles['area']} ref={area} tabIndex={-1} aria-label="Symbol Changes">
-      <h2>Symbol Changes</h2>
+    <section className={styles['area']} ref={area} tabIndex={-1} aria-label={t('compare', 'symbol.region')}>
+      <h2>{t('compare', 'symbol.heading')}</h2>
       <ChangeFilters
-        noun="symbols"
+        nounKey="contributors.symbols"
         kind={kind}
         draft={draft}
         onKind={
@@ -1411,61 +1447,61 @@ function SymbolChanges({
       />
       {loading ? (
         <p className={styles['status']} role="status" aria-live="polite">
-          Loading symbol changes…
+          {t('compare', 'symbol.loading')}
         </p>
       ) : null}
       {error === null ? null : (
         <ErrorPanel
           envelope={error}
-          label="Symbol change query failed"
-          heading="The symbol changes would not load"
+          label={t('compare', 'symbol.errorLabel')}
+          heading={t('compare', 'symbol.errorHeading')}
         />
       )}
 
       {page === null ? null : (
         <>
-          <ScrollArea label="Symbol changes table">
+          <ScrollArea label={t('compare', 'symbol.tableLabel')}>
             <table className={styles['table']}>
               <caption className={styles['caption']}>
-                Every symbol the diff lists as changed, filtered and ordered by the shell
+                {t('compare', 'symbol.caption')}
               </caption>
               <thead>
                 <tr>
                   <Sortable
-                    label="Change"
+                    label={t('compare', 'col.change')}
                     column="changeKind"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
                   <Sortable
-                    label="Name"
+                    label={t('compare', 'col.name')}
                     column="name"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
-                  <SortHeader label="Kind / binding" sortable={false} direction={direction} />
-                  <SortHeader label="Old address" sortable={false} direction={direction} />
-                  <SortHeader label="New address" sortable={false} direction={direction} />
-                  <SortHeader label="Old size" sortable={false} direction={direction} />
-                  <SortHeader label="New size" sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.kindBinding')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.oldAddress')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.newAddress')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.oldSize')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.newSize')} sortable={false} direction={direction} />
                   <Sortable
-                    label="Delta size"
+                    label={t('compare', 'col.deltaSize')}
                     column="sizeDelta"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
                   <Sortable
-                    label="Size"
+                    label={t('compare', 'col.size')}
                     column="size"
                     sort={sort}
                     direction={direction}
                     onSort={chooseSort}
                   />
-                  <SortHeader label="Section" sortable={false} direction={direction} />
-                  <SortHeader label="Also differs" sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.section')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.alsoDiffers')} sortable={false} direction={direction} />
                 </tr>
               </thead>
               <tbody>
@@ -1477,10 +1513,7 @@ function SymbolChanges({
                     <td className={styles['wrap']}>
                       {row.name}
                       {row.ambiguous ? (
-                        <span className={styles['note']}>
-                          {' '}
-                          this name repeats, so the rows were left unpaired
-                        </span>
+                        <span className={styles['note']}>{t('compare', 'symbol.ambiguousNote')}</span>
                       ) : null}
                     </td>
                     <td>
@@ -1517,7 +1550,7 @@ function SymbolChanges({
             offset={page.offset}
             shown={page.rows.length}
             nextOffset={page.nextOffset}
-            label="symbols"
+            label={t('compare', 'symbol.pagerLabel')}
             onOffset={setOffset}
           />
         </>
@@ -1544,12 +1577,12 @@ function Exports({
   readonly exporting: boolean;
   readonly onExport: (format: 'json' | 'html') => void;
 }) {
+  const { t } = useI18n();
   return (
-    <section className={styles['block']} aria-label="Export">
-      <h2>Export</h2>
+    <section className={styles['block']} aria-label={t('compare', 'export.region')}>
+      <h2>{t('compare', 'export.heading')}</h2>
       <p className={styles['hint']}>
-        Both formats carry the same facts as this screen: JSON is the portable diff document, HTML is
-        one self-contained file. Neither carries a timestamp, a host path or a script.
+        {t('compare', 'export.hint')}
       </p>
       <div className={styles['exports']}>
         <Button
@@ -1558,7 +1591,7 @@ function Exports({
             onExport('json');
           }}
         >
-          Export JSON
+          {t('compare', 'export.json')}
         </Button>
         <Button
           disabled={exporting}
@@ -1566,11 +1599,11 @@ function Exports({
             onExport('html');
           }}
         >
-          Export HTML
+          {t('compare', 'export.html')}
         </Button>
         {exporting ? (
           <p className={styles['status']} role="status" aria-live="polite">
-            Waiting for the save dialog…
+            {t('compare', 'export.waiting')}
           </p>
         ) : null}
         {note === null ? null : (
@@ -1580,23 +1613,26 @@ function Exports({
         )}
       </div>
       {error === null ? null : (
-        <ErrorPanel envelope={error} label="Export error" heading="The export failed" />
+        <ErrorPanel envelope={error} label={t('compare', 'export.errorLabel')} heading={t('compare', 'export.errorHeading')} />
       )}
     </section>
   );
 }
 
-function exportWords(outcome: ExportOutcomeDto): string {
+function exportWords(outcome: ExportOutcomeDto, t: Translate): string {
   switch (outcome.status) {
     case 'written':
-      return `Wrote ${outcome.fileName ?? 'the export'} (${outcome.format.toUpperCase()}).`;
+      return t('compare', 'export.written', {
+        name: outcome.fileName ?? t('compare', 'export.fallbackName'),
+        format: outcome.format.toUpperCase(),
+      });
     case 'cancelled':
-      return 'Export cancelled. No file was written.';
+      return t('compare', 'export.cancelled');
     case 'kept-existing':
-      return 'Kept the file that was already there. Nothing was written.';
+      return t('compare', 'export.keptExisting');
     default:
       // An outcome this build does not know is reported as what it is, not as a guess.
-      return `The export reported an outcome this build does not know: ${outcome.status}`;
+      return t('compare', 'export.unknownOutcome', { status: outcome.status });
   }
 }
 
@@ -1627,36 +1663,38 @@ function Sortable<S extends string>({
 }
 
 function ChangeFilters({
-  noun,
+  nounKey,
   kind,
   draft,
   onKind,
   onDraftChange,
   onApply,
 }: {
-  readonly noun: string;
+  readonly nounKey: 'contributors.sections' | 'contributors.symbols';
   readonly kind: ChangeKindFilterDto | null;
   readonly draft: string;
   readonly onKind: (kind: ChangeKindFilterDto | null) => void;
   readonly onDraftChange: (value: string) => void;
   readonly onApply: (value: string) => void;
 }) {
+  const { t } = useI18n();
+  const noun = t('compare', nounKey);
   const inputId = `fs-change-filter-${noun}`;
 
   return (
     <form
       className={styles['filters']}
-      aria-label={`Filter ${noun}`}
+      aria-label={t('compare', 'filter.formAria', { noun })}
       onSubmit={(event) => {
         event.preventDefault();
         onApply(draft);
       }}
     >
-      <span className={styles['radioGroup']} role="group" aria-label={`Filter ${noun} by change kind`}>
+      <span className={styles['radioGroup']} role="group" aria-label={t('compare', 'filter.groupAria', { noun })}>
         {KIND_FILTERS.map((entry) => (
-          <span key={entry.label} className={styles['radio']}>
+          <span key={entry.token} className={styles['radio']}>
             <input
-              id={`fs-change-${noun}-${entry.label}`}
+              id={`fs-change-${noun}-${entry.token}`}
               type="radio"
               name={`fs-change-${noun}`}
               checked={kind === entry.value}
@@ -1664,12 +1702,12 @@ function ChangeFilters({
                 onKind(entry.value);
               }}
             />
-            <label htmlFor={`fs-change-${noun}-${entry.label}`}>{entry.label}</label>
+            <label htmlFor={`fs-change-${noun}-${entry.token}`}>{t('compare', entry.key)}</label>
           </span>
         ))}
       </span>
       <label className={styles['filterLabel']} htmlFor={inputId}>
-        Filter {noun} by name
+        {t('compare', 'filter.byName', { noun })}
       </label>
       <input
         id={inputId}
@@ -1681,7 +1719,7 @@ function ChangeFilters({
           onDraftChange(event.target.value);
         }}
       />
-      <Button type="submit">Apply filter</Button>
+      <Button type="submit">{t('compare', 'filter.apply')}</Button>
     </form>
   );
 }
@@ -1738,6 +1776,7 @@ function isAbsentSide(kind: string, side: Side): boolean {
 
 /** What else the diff saw, and what it refused to call a change. */
 function Differs({ row }: { readonly row: SectionChangeRowDto | SymbolChangeRowDto }) {
+  const { t } = useI18n();
   return (
     <>
       {row.differingFields.length === 0 ? null : (
@@ -1746,7 +1785,7 @@ function Differs({ row }: { readonly row: SectionChangeRowDto | SymbolChangeRowD
       {row.indeterminateFields.length === 0 ? null : (
         <span className={styles['note']}>
           {row.differingFields.length === 0 ? '' : ' '}
-          not decidable: {row.indeterminateFields.join(', ')}
+          {t('compare', 'differs.notDecidable')} {row.indeterminateFields.join(', ')}
         </span>
       )}
     </>

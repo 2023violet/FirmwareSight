@@ -24,6 +24,8 @@ import { RankBar } from './components/RankBar';
 import { Pager, SortHeader } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { formatSize, formatOptional, type SizeUnit } from './format';
+import { useI18n } from './i18n';
+import type { Catalog } from './i18n/en';
 import { queryEvidence, querySections, querySymbols } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type {
@@ -43,6 +45,20 @@ import type { ErrorEnvelopeDto } from './ipc/types';
 import { cx } from './styles/classnames';
 
 type Tab = 'sections' | 'symbols' | 'evidence';
+
+/**
+ * The keys this page owns. Details writes into the `analyze` namespace rather than opening a tenth
+ * one (`ADR-0032` D4): it is the same analysis's rows, and a reader switching between the report
+ * above and these tables must not meet two vocabularies for one artifact.
+ */
+type DetailsKey = keyof Catalog['analyze'];
+
+/** The population a pager line counts, in the reader's language. */
+const PAGER_NOUN: Readonly<Record<Tab, DetailsKey>> = {
+  sections: 'details.filter.noun.sections',
+  symbols: 'details.filter.noun.symbols',
+  evidence: 'details.filter.noun.evidence',
+};
 
 /**
  * A page together with the tab it answers.
@@ -65,10 +81,10 @@ function tagged<K extends Loaded['tab']>(
   return outcome.ok ? { ok: true, value: { tab, page: outcome.value } as Loaded } : outcome;
 }
 
-const TABS: readonly { readonly key: Tab; readonly label: string }[] = [
-  { key: 'sections', label: 'Sections' },
-  { key: 'symbols', label: 'Symbols' },
-  { key: 'evidence', label: 'Evidence' },
+const TABS: readonly { readonly key: Tab; readonly labelKey: DetailsKey }[] = [
+  { key: 'sections', labelKey: 'details.tab.sections' },
+  { key: 'symbols', labelKey: 'details.tab.symbols' },
+  { key: 'evidence', labelKey: 'details.tab.evidence' },
 ];
 
 /** The contributors list is one small page of the same table, ordered by what it measures. */
@@ -198,16 +214,17 @@ export function Details({
     [direction, sort],
   );
 
+  const { t } = useI18n();
   const tabId = (key: Tab) => `fs-tab-${key}`;
 
   return (
     <section
       className={styles['area']}
-      aria-label={stale ? 'Snapshot details of the last good analysis' : 'Snapshot details'}
+      aria-label={t('analyze', stale ? 'details.region.stale' : 'details.region.live')}
     >
       <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
 
-      <div role="tablist" aria-label="Analyze details" className={styles['tabs']}>
+      <div role="tablist" aria-label={t('analyze', 'details.tablist')} className={styles['tabs']}>
         {TABS.map((entry) => (
           <button
             key={entry.key}
@@ -227,14 +244,14 @@ export function Details({
               setInspected(null);
             }}
           >
-            {entry.label}
+            {t('analyze', entry.labelKey)}
           </button>
         ))}
       </div>
 
       {loading ? (
         <p className={styles['status']} role="status" aria-live="polite">
-          Loading…
+          {t('analyze', 'details.loading')}
         </p>
       ) : null}
 
@@ -293,7 +310,7 @@ export function Details({
             offset={loaded.page.offset}
             shown={loaded.page.rows.length}
             nextOffset={loaded.page.nextOffset}
-            label={tab}
+            label={t('analyze', PAGER_NOUN[tab])}
             onOffset={setOffset}
           />
         </div>
@@ -320,13 +337,13 @@ function Contributors({
   // The bar is a ratio against the largest row in this same list, so it says "half of the biggest",
   // never "half of the image". The number beside it is the fact; the bar only accelerates it, which is
   // why it carries no colour-only meaning and is hidden from the accessibility tree.
+  const { t } = useI18n();
   const largest = Math.max(...rows.map((row) => row.fileSize));
   return (
-    <section className={styles['contributors']} aria-label="Largest stored payload">
-      <h2>Largest stored payload</h2>
+    <section className={styles['contributors']} aria-label={t('analyze', 'details.contributors.title')}>
+      <h2>{t('analyze', 'details.contributors.title')}</h2>
       <p className={styles['hint']}>
-        The {rows.length} sections holding the most bytes in the file. This counts stored bytes,
-        which is not the same question as what a device budget charges.
+        {t('analyze', 'details.contributors.hint', { count: String(rows.length) })}
       </p>
       <ol className={styles['contributorList']}>
         {rows.map((row) => (
@@ -334,7 +351,7 @@ function Contributors({
             <RankBar
               label={
                 <>
-                  {row.name ?? 'Unknown'}
+                  {row.name ?? t('analyze', 'details.unknown')}
                   <span className={styles['role']}>{row.role}</span>
                 </>
               }
@@ -363,21 +380,24 @@ function FilterForm({
   readonly onApply: (value: string, classification: EvidenceClassDto | null) => void;
   readonly onClassification: (classification: EvidenceClassDto | null) => void;
 }) {
-  const noun = tab === 'sections' ? 'sections' : tab === 'symbols' ? 'symbols' : 'evidence';
-  const subject = tab === 'evidence' ? 'field' : 'name';
+  const { t } = useI18n();
+  const noun = t('analyze', PAGER_NOUN[tab]);
+  const subject = t('analyze', tab === 'evidence' ? 'details.filter.subject.field' : 'details.filter.subject.name');
+  // The id is built from the tab key, not from the translated noun: a DOM id does not move with the
+  // language, and no reader sees it.
   const id = `fs-filter-${tab}`;
 
   return (
     <form
       className={styles['filter']}
-      aria-label={`Filter ${noun}`}
+      aria-label={t('analyze', 'details.filter.aria', { noun })}
       onSubmit={(event) => {
         event.preventDefault();
         onApply(draft, classification);
       }}
     >
       <label className={styles['filterLabel']} htmlFor={id}>
-        Filter {noun} by {subject}
+        {t('analyze', 'details.filter.label', { noun, subject })}
       </label>
       <input
         id={id}
@@ -392,18 +412,21 @@ function FilterForm({
       {tab === 'evidence' ? (
         <span className={styles['class']}>
           <label className={styles['filterLabel']} htmlFor="fs-evidence-class">
-            Evidence class
+            {t('analyze', 'details.filter.class')}
           </label>
           <select
             id="fs-evidence-class"
-            aria-label="Evidence class"
+            aria-label={t('analyze', 'details.filter.class')}
             value={classification ?? ''}
             onChange={(event) => {
               const value = event.target.value;
               onClassification(value === '' ? null : (value as EvidenceClassDto));
             }}
           >
-            <option value="">All classes</option>
+            {/* observed / derived / declared / unknown are Core's own evidence classes, and the
+                option's value is that word, so translating the label would make the control read one
+                thing and send another. They are deliberately not in the catalog (`ADR-0032` D5). */}
+            <option value="">{t('analyze', 'details.filter.allClasses')}</option>
             <option value="observed">observed</option>
             <option value="derived">derived</option>
             <option value="declared">declared</option>
@@ -412,7 +435,7 @@ function FilterForm({
         </span>
       ) : null}
       <button type="submit" className={styles['apply']}>
-        Apply filter
+        {t('analyze', 'details.filter.apply')}
       </button>
     </form>
   );
@@ -420,9 +443,10 @@ function FilterForm({
 
 /** A fact that was stored unknown, rendered as the word and its reason - never as `0`. */
 function Unknown({ reason }: { readonly reason?: string | null }) {
+  const { t } = useI18n();
   return (
     <span className={styles['unknown']}>
-      Unknown
+      {t('analyze', 'details.unknown')}
       {reason === undefined || reason === null || reason.length === 0 ? null : (
         <span className={styles['note']}>{reason}</span>
       )}
@@ -443,45 +467,46 @@ function SectionTable({
   readonly direction: SortDirDto;
   readonly onSort: (column: SectionSortDto) => void;
 }) {
+  const { t } = useI18n();
   return (
-    <ScrollArea label="Sections table">
+    <ScrollArea label={t('analyze', 'details.sections.table')}>
       <table className={styles['table']}>
         <caption className={styles['caption']}>
-          Sections of the analyzed artifact, as the parser recorded them
+          {t('analyze', 'details.sections.caption')}
         </caption>
         <thead>
           <tr>
-            <SortHeader label="Index" sortable direction={direction} active={sort === 'index'} onSort={() => onSort('index')} />
-            <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
+            <SortHeader label={t('analyze', 'details.col.index')} sortable direction={direction} active={sort === 'index'} onSort={() => onSort('index')} />
+            <SortHeader label={t('analyze', 'details.col.name')} sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
             <SortHeader
-                label="Role"
+                label={t('analyze', 'details.col.role')}
                 sortable={false}
                 direction={direction}
               />
             <SortHeader
-                label="Flags"
+                label={t('analyze', 'details.col.flags')}
                 sortable={false}
                 direction={direction}
               />
             <SortHeader
-                label="Virtual address"
+                label={t('analyze', 'details.col.virtualAddress')}
                 sortable={false}
                 direction={direction}
               />
             <SortHeader
-                label="Load address"
+                label={t('analyze', 'details.col.loadAddress')}
                 sortable={false}
                 direction={direction}
               />
             <SortHeader
-                label="File offset"
+                label={t('analyze', 'details.col.fileOffset')}
                 sortable={false}
                 direction={direction}
               />
-            <SortHeader label="File size" sortable direction={direction} active={sort === 'fileSize'} onSort={() => onSort('fileSize')} />
-            <SortHeader label="Memory size" sortable direction={direction} active={sort === 'memorySize'} onSort={() => onSort('memorySize')} />
+            <SortHeader label={t('analyze', 'details.col.fileSize')} sortable direction={direction} active={sort === 'fileSize'} onSort={() => onSort('fileSize')} />
+            <SortHeader label={t('analyze', 'details.col.memorySize')} sortable direction={direction} active={sort === 'memorySize'} onSort={() => onSort('memorySize')} />
             <SortHeader
-                label="Region"
+                label={t('analyze', 'details.col.region')}
                 sortable={false}
                 direction={direction}
               />
@@ -541,30 +566,31 @@ function SymbolTable({
   readonly direction: SortDirDto;
   readonly onSort: (column: SymbolSortDto) => void;
 }) {
+  const { t } = useI18n();
   return (
-    <ScrollArea label="Symbols table">
+    <ScrollArea label={t('analyze', 'details.symbols.table')}>
       <table className={styles['table']}>
         <caption className={styles['caption']}>
-          Symbols, ordered and filtered by the shell rather than by this page
+          {t('analyze', 'details.symbols.caption')}
         </caption>
         <thead>
           <tr>
-            <SortHeader label="Ordinal" sortable direction={direction} active={sort === 'ordinal'} onSort={() => onSort('ordinal')} />
-            <SortHeader label="Name" sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
-            <SortHeader label="Address" sortable direction={direction} active={sort === 'address'} onSort={() => onSort('address')} />
-            <SortHeader label="Size" sortable direction={direction} active={sort === 'size'} onSort={() => onSort('size')} />
+            <SortHeader label={t('analyze', 'details.col.ordinal')} sortable direction={direction} active={sort === 'ordinal'} onSort={() => onSort('ordinal')} />
+            <SortHeader label={t('analyze', 'details.col.name')} sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
+            <SortHeader label={t('analyze', 'details.col.address')} sortable direction={direction} active={sort === 'address'} onSort={() => onSort('address')} />
+            <SortHeader label={t('analyze', 'details.col.size')} sortable direction={direction} active={sort === 'size'} onSort={() => onSort('size')} />
             <SortHeader
-                label="Kind"
+                label={t('analyze', 'details.col.kind')}
                 sortable={false}
                 direction={direction}
               />
             <SortHeader
-                label="Binding"
+                label={t('analyze', 'details.col.binding')}
                 sortable={false}
                 direction={direction}
               />
             <SortHeader
-                label="Section"
+                label={t('analyze', 'details.col.section')}
                 sortable={false}
                 direction={direction}
               />
@@ -573,7 +599,7 @@ function SymbolTable({
         <tbody>
           {rows.map((row) => (
             <tr key={row.ordinal}>
-              <td className={styles['mono']} title="A row position in this build, not an identity">
+              <td className={styles['mono']} title={t('analyze', 'details.ordinalHint')}>
                 {row.ordinal}
               </td>
               <td>{row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}</td>
@@ -613,37 +639,38 @@ function EvidenceTable({
   readonly inspected: EvidenceRowDto | null;
   readonly onInspect: (row: EvidenceRowDto) => void;
 }) {
+  const { t } = useI18n();
   return (
     <>
       {inspected === null ? null : <Inspector row={inspected} />}
 
-      <ScrollArea label="Evidence table">
+      <ScrollArea label={t('analyze', 'details.evidence.table')}>
         <table className={styles['table']}>
           <caption className={styles['caption']}>
-            Recorded facts and the class each one belongs to
+            {t('analyze', 'details.evidence.caption')}
           </caption>
           <thead>
             <tr>
               <SortHeader
-                label="Detail"
+                label={t('analyze', 'details.col.detail')}
                 sortable={false}
                 direction={direction}
               />
-              <SortHeader label="Field" sortable direction={direction} active={sort === 'field'} onSort={() => onSort('field')} />
+              <SortHeader label={t('analyze', 'details.col.field')} sortable direction={direction} active={sort === 'field'} onSort={() => onSort('field')} />
               <SortHeader
-                label="Classification"
+                label={t('analyze', 'details.col.classification')}
                 sortable
                 direction={direction}
                 active={sort === 'classification'}
                 onSort={() => onSort('classification')}
               />
               <SortHeader
-                label="Value"
+                label={t('analyze', 'details.col.value')}
                 sortable={false}
                 direction={direction}
               />
               <SortHeader
-                label="Source"
+                label={t('analyze', 'details.col.source')}
                 sortable={false}
                 direction={direction}
               />
@@ -656,12 +683,12 @@ function EvidenceTable({
                   <button
                     type="button"
                     className={styles['inspect']}
-                    aria-label={`Inspect ${row.field}`}
+                    aria-label={t('analyze', 'details.inspectAria', { field: row.field })}
                     onClick={() => {
                       onInspect(row);
                     }}
                   >
-                    Inspect
+                    {t('analyze', 'details.inspect')}
                   </button>
                 </td>
                 <td>{row.field}</td>
@@ -686,9 +713,9 @@ function EvidenceTable({
  * inaccuracy is bounded here instead of being renamed: no stored value, DTO field, exported JSON or golden
  * changes, and a value outside this table stays on screen exactly as it is stored.
  */
-const SOURCE_TYPE_CAPTIONS = new Map<string, string>([
-  ['ElfProgramHeader', 'ELF address + flags evidence'],
-  ['elf.program-header', 'ELF address + flags evidence'],
+const SOURCE_TYPE_CAPTIONS = new Map<string, DetailsKey>([
+  ['ElfProgramHeader', 'details.source.programHeader'],
+  ['elf.program-header', 'details.source.programHeader'],
 ]);
 
 /**
@@ -699,39 +726,40 @@ const SOURCE_TYPE_CAPTIONS = new Map<string, string>([
  * painted above the table because a table taller than the window buries the answer below it.
  */
 function Inspector({ row }: { readonly row: EvidenceRowDto }) {
+  const { t } = useI18n();
   const sourceCaption = SOURCE_TYPE_CAPTIONS.get(row.sourceType);
   return (
-    <section className={styles['inspector']} aria-label="Evidence detail">
+    <section className={styles['inspector']} aria-label={t('analyze', 'details.inspector.aria')}>
       <h2>{row.field}</h2>
       <dl className={styles['inspectorList']}>
         <div>
-          <dt>Classification</dt>
+          <dt>{t('analyze', 'details.col.classification')}</dt>
           <dd>{row.classification}</dd>
         </div>
         <div>
-          <dt>Source</dt>
+          <dt>{t('analyze', 'details.col.source')}</dt>
           <dd className={sourceCaption === undefined ? styles['mono'] : undefined}>
-            {sourceCaption ?? row.sourceType}
+            {sourceCaption === undefined ? row.sourceType : t('analyze', sourceCaption)}
           </dd>
         </div>
         <div>
-          <dt>Locator</dt>
+          <dt>{t('analyze', 'details.col.locator')}</dt>
           <dd className={styles['mono']}>{row.sourceLocator}</dd>
         </div>
         <div>
-          <dt>Value</dt>
+          <dt>{t('analyze', 'details.col.value')}</dt>
           <dd className={styles['mono']}>{row.rawValue}</dd>
         </div>
         <div>
-          <dt>Rule</dt>
+          <dt>{t('analyze', 'details.col.rule')}</dt>
           <dd className={styles['mono']}>{row.rule}</dd>
         </div>
         <div>
-          <dt>Confidence</dt>
+          <dt>{t('analyze', 'details.col.confidence')}</dt>
           <dd>{formatOptional(row.confidence)}</dd>
         </div>
         <div>
-          <dt>Evidence id</dt>
+          <dt>{t('analyze', 'details.inspector.evidenceId')}</dt>
           <dd className={styles['mono']}>{row.id}</dd>
         </div>
       </dl>
@@ -740,14 +768,15 @@ function Inspector({ row }: { readonly row: EvidenceRowDto }) {
 }
 
 function DetailError({ envelope }: { readonly envelope: ErrorEnvelopeDto }) {
+  const { t } = useI18n();
   return (
-    <section className={styles['error']} role="alert" aria-label="Detail query failed">
-      <h2>The details would not load</h2>
+    <section className={styles['error']} role="alert" aria-label={t('analyze', 'details.error.aria')}>
+      <h2>{t('analyze', 'details.error.heading')}</h2>
       <p>{envelope.message}</p>
       <p className={styles['monoSmall']}>{envelope.code}</p>
       {envelope.details === null ? null : <p className={styles['monoSmall']}>{envelope.details}</p>}
       {envelope.remediation === null ? null : <p>{envelope.remediation}</p>}
-      <p className={styles['monoSmall']}>Diagnostics ID {envelope.operationId}</p>
+      <p className={styles['monoSmall']}>{t('common', 'error.diagnosticsId')} {envelope.operationId}</p>
     </section>
   );
 }

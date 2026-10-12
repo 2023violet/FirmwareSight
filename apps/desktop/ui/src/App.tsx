@@ -79,6 +79,15 @@ import {
   type ResolvedTheme,
   type Theme,
 } from './theme';
+import {
+  asLanguage,
+  documentLanguage,
+  pickPlatformLanguage,
+  platformLanguages,
+  resolveLanguage,
+  type Language,
+} from './i18n/language';
+import { I18nProvider, translate, type Translate } from './i18n';
 import { TopBar } from './components/TopBar';
 
 type Page = 'overview' | 'analyze' | 'compare' | 'release' | 'history' | 'help' | 'settings';
@@ -114,23 +123,27 @@ const AUXILIARY: readonly {
 ];
 
 function navItem(
+  t: Translate,
   page: Page,
   setPage: (page: Page) => void,
   entry: { readonly key: Page; readonly label: string },
 ) {
   const active = page === entry.key;
+  // The catalog owns the words; `entry.label` stays because it is what the Rust `title` mapping and
+  // the existing tests refer to, and a label that drifted from the catalog would be a second name.
+  const label = t('common', `page.${entry.key}`);
   return (
     <button
       key={entry.key}
       type="button"
-      aria-label={`${entry.label} page`}
+      aria-label={t('common', 'nav.pageAria', { label })}
       aria-current={active ? 'page' : undefined}
       className={cx(styles['navItem'], active ? styles['navItemActive'] : undefined)}
       onClick={() => {
         setPage(entry.key);
       }}
     >
-      {entry.label}
+      {label}
     </button>
   );
 }
@@ -161,6 +174,20 @@ export function App() {
   const [unit, setUnit] = useState<SizeUnit>('bytes');
   /** The stored choice, not the palette: `system` stays `system` until the platform answers. */
   const [theme, setTheme] = useState<Theme>('system');
+
+  /**
+   * The stored language choice, and the tags the platform reported.
+   *
+   * Unlike the palette, a desktop language has no change signal a page can subscribe to — there is
+   * no `navigator.languages` event to listen for. So the honest contract, stated in `ADR-0032` D8
+   * rather than implied: the platform is asked when this window mounts and when the choice returns
+   * to `system`, and a person who changes their desktop language sees the interface follow at the
+   * next start. `system` is not claimed to be live for language when it is live for colour.
+   */
+  const [language, setLanguage] = useState<Language>('system');
+  const [platformTags, setPlatformTags] = useState<readonly string[]>(() =>
+    platformLanguages(typeof navigator === 'undefined' ? undefined : navigator),
+  );
   /** What the desktop says right now, re-read while the window is open. `null` says it cannot know. */
   const [platform, setPlatform] = useState<ResolvedTheme | null>(platformTheme);
   const [selection, setSelection] = useState<SelectionDto | null>(null);
@@ -184,7 +211,15 @@ export function App() {
   const [preferences, setPreferences] = useState<PreferencesDto | null>(null);
   /** A refusal to store, shown rather than swallowed: a page that looks saved is the failure here. */
   const [preferencesError, setPreferencesError] = useState<ErrorEnvelopeDto | null>(null);
-  const [preferencesNote, setPreferencesNote] = useState<string | null>(null);
+  /**
+   * What the shell agreed to, held as a catalog key rather than as a sentence.
+   *
+   * A note kept as text would be written in the language the window was in when the save landed and
+   * stay there: switch to Chinese one click later and the page would report `Preferences saved.` under
+   * Chinese headings, which is two products in one window. Held as a key, it is read out of whatever
+   * catalog the reader is looking at.
+   */
+  const [preferencesNote, setPreferencesNote] = useState<'savedNote' | 'resetNote' | null>(null);
   /**
    * Whether the reader has named a page themselves since the window opened.
    *
@@ -220,6 +255,7 @@ export function App() {
       setPreferences(stored);
       setUnit(asSizeUnit(stored.sizeUnit));
       setTheme(asTheme(stored.theme));
+      setLanguage(asLanguage(stored.language));
       if (!readerChosePage.current && stored.startupPage === 'history') {
         setPage('history');
       }
@@ -258,17 +294,44 @@ export function App() {
    * selector this attribute selects. What it cannot promise is the WebView's own first paint before
    * React mounts, which is `color-scheme` in the stylesheet doing that part.
    */
-  useEffect(() => {
-    applyTheme(document.documentElement, resolveTheme(theme, platform));
-  }, [theme, platform]);
+  const resolvedTheme = resolveTheme(theme, platform);
+  const resolvedLanguage = resolveLanguage(language, platformTags);
+  // The shell needs the words the pages get from the provider, and a component cannot read a context
+  // it is the one rendering. `translate` is the same lookup the provider hands down, bound here.
+  const navLabel = translate(resolvedLanguage);
 
-  /** Store all three words together: the document is one file, and a half-stored set is not a setting. */
-  const persist = async (nextUnit: SizeUnit, nextStartPage: string, nextTheme: Theme) => {
-    const outcome = await updateApplicationPreferences(nextUnit, nextStartPage, nextTheme);
+  useEffect(() => {
+    applyTheme(document.documentElement, resolvedTheme);
+  }, [resolvedTheme]);
+
+  /**
+   * The language the document declares itself in.
+   *
+   * `lang` is what a screen reader uses to pick a voice and what a translation tool uses to decide
+   * what is already localized, so a Chinese window that declares `en` is a defect the reader meets
+   * immediately even though nothing looks wrong.
+   */
+  useEffect(() => {
+    document.documentElement.lang = documentLanguage(resolvedLanguage);
+  }, [resolvedLanguage]);
+
+  /** Store all four words together: the document is one file, and a half-stored set is not a setting. */
+  const persist = async (
+    nextUnit: SizeUnit,
+    nextStartPage: string,
+    nextTheme: Theme,
+    nextLanguage: Language,
+  ) => {
+    const outcome = await updateApplicationPreferences(
+      nextUnit,
+      nextStartPage,
+      nextTheme,
+      nextLanguage,
+    );
     if (outcome.ok) {
       setPreferences(outcome.value);
       setPreferencesError(null);
-      setPreferencesNote('Preferences saved.');
+      setPreferencesNote('savedNote');
     } else {
       setPreferencesError(outcome.envelope);
       setPreferencesNote(null);
@@ -283,11 +346,11 @@ export function App() {
    */
   const chooseUnit = (next: SizeUnit) => {
     setUnit(next);
-    void persist(next, preferences?.startupPage ?? 'analyze', theme);
+    void persist(next, preferences?.startupPage ?? 'analyze', theme, language);
   };
 
   const chooseStartPage = (word: string) => {
-    void persist(unit, word, theme);
+    void persist(unit, word, theme, language);
   };
 
   /**
@@ -299,7 +362,24 @@ export function App() {
    */
   const chooseTheme = (next: Theme) => {
     setTheme(next);
-    void persist(unit, preferences?.startupPage ?? 'analyze', next);
+    void persist(unit, preferences?.startupPage ?? 'analyze', next, language);
+  };
+
+  /**
+   * Change the interface language and store the change.
+   *
+   * Returning to `system` re-asks the platform, which is the only moment a re-read is possible: no
+   * browser signal reports a desktop language change while the window is open. A named language
+   * ignores the platform entirely, exactly as a named palette does.
+   */
+  const chooseLanguage = (next: Language) => {
+    setLanguage(next);
+    if (next === 'system') {
+      setPlatformTags(
+        platformLanguages(typeof navigator === 'undefined' ? undefined : navigator),
+      );
+    }
+    void persist(unit, preferences?.startupPage ?? 'analyze', theme, next);
   };
 
   const resetPreferences = async () => {
@@ -307,13 +387,14 @@ export function App() {
     if (outcome.ok) {
       setPreferences(outcome.value);
       setPreferencesError(null);
-      setPreferencesNote('Preferences reset to this version’s defaults.');
+      setPreferencesNote('resetNote');
       // Every field the shell just wrote is re-applied here, not just the ones this page happens to
       // render first. The round's own test caught the shape of this bug: the unit was restored and
       // the theme was not, so a reset left the document on `system` while the window stayed dark
       // until the next start - a page reporting a state it was no longer in.
       setUnit(asSizeUnit(outcome.value.sizeUnit));
       setTheme(asTheme(outcome.value.theme));
+      setLanguage(asLanguage(outcome.value.language));
     } else {
       setPreferencesError(outcome.envelope);
       setPreferencesNote(null);
@@ -333,19 +414,24 @@ export function App() {
   }, [page]);
 
   return (
-    <div className={styles['app']}>
-      <TopBar project={project?.projectName ?? null} />
-      <div className={styles['shell']}>
-        <div className={styles['rail']}>
-          <nav className={styles['nav']} aria-label="Pages">
-            {PAGES.map((entry) => navItem(page, open, entry))}
-          </nav>
-          <nav className={styles['nav']} aria-label="Help and about">
-            {AUXILIARY.map((entry) => navItem(page, open, entry))}
-          </nav>
-        </div>
+    <I18nProvider
+      language={language}
+      resolved={resolvedLanguage}
+      platform={platformTags}
+    >
+      <div className={styles['app']}>
+        <TopBar project={project?.projectName ?? null} />
+        <div className={styles['shell']}>
+          <div className={styles['rail']}>
+            <nav className={styles['nav']} aria-label={navLabel('common', 'nav.pages')}>
+              {PAGES.map((entry) => navItem(navLabel, page, open, entry))}
+            </nav>
+            <nav className={styles['nav']} aria-label={navLabel('common', 'nav.helpAndAbout')}>
+              {AUXILIARY.map((entry) => navItem(navLabel, page, open, entry))}
+            </nav>
+          </div>
 
-        <div className={styles['workspace']}>
+          <div className={styles['workspace']}>
           {page === 'overview' ? (
             <Overview
               summary={lastGood}
@@ -405,12 +491,15 @@ export function App() {
             <Settings
               preferences={preferences}
               error={preferencesError}
-              note={preferencesNote}
+              note={preferencesNote === null ? null : navLabel('settings', preferencesNote)}
               unit={unit}
               onUnitChange={chooseUnit}
               theme={theme}
               platformPalette={platform}
               onThemeChange={chooseTheme}
+              language={language}
+              desktopLanguage={pickPlatformLanguage(platformTags)}
+              onLanguageChange={chooseLanguage}
               onStartPageChange={chooseStartPage}
               onReset={() => {
                 void resetPreferences();
@@ -422,8 +511,9 @@ export function App() {
           ) : (
             <Help />
           )}
+          </div>
         </div>
       </div>
-    </div>
+    </I18nProvider>
   );
 }

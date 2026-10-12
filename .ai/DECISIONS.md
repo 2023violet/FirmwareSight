@@ -2585,3 +2585,51 @@ checklist, and **the exemption is an open question for the Architect, not a clos
 what may move in the report goldens, which is not a theme decision.
 
 
+
+## ADR-0032 (2026-10-11) — a catalog is chosen on measured numbers, and `system` turns out to be two different promises
+
+`NEXT-06` authorized B1-U3: Simplified Chinese / English for the whole desktop interface. `ADR-0032` is the record.
+Its §17 explicitly refused two ways of arriving at the design — "零依赖" as a slogan, and "必须是 i18next" as a
+precedent — so the chosen option is written down against the numbers that decided it, and the version number it
+stores is read from the file rather than guessed.
+
+**The dependency comparison, measured at this head.** `i18next@26.4.3` (MIT) itself takes no dependency; the cost is
+`react-i18next@17.0.16`, which pulls `@babel/runtime`, `html-parse-stringify` and `use-sync-external-store`. The UI
+carries three runtime packages today (React, React DOM, `@tauri-apps/api`), so the honest statement of the trade is
+three-to-seven, not "a dependency" versus "none". What actually decided it was two other facts: missing-key detection
+is stronger as a compile error — `CatalogFor<'ns'>` typing plus `tsc --noEmit`, already gate step 5 — than as a
+runtime fallback that logs, and `html-parse-stringify` exists to turn strings into DOM, which is the one thing
+`AGENTS.md` 11 and this ADR forbid. The accepted cost is recorded in D2 rather than glossed: no plural engine, no
+ICU, no date or number formatting owned by a library. `KiB` and `bytes` stay the only unit vocabulary because
+`format.ts` already owns it.
+
+**A tenth namespace was proposed, and refused for the reason the rule exists.** `Overview` needed a home, and the
+same argument was about to be made for the evidence inspector: a page large enough to want its own file. It does not
+get one. `analyze` and `gate` already say what an inspector and a summary mean, and a namespace that duplicates two
+strings is precisely how two screens start disagreeing about one word. `Details.tsx` reads `analyze`; Overview reads
+`common` plus the `gate` vocabulary it already borrows from Core.
+
+**`system` is live for colour and not live for language, and the two had to be promised separately.** A palette has a
+host signal a window can subscribe to; `matchMedia` emits when the desktop theme flips, so B1-U2 could honestly say
+"follows while the choice is system". No browser event reports a `navigator.languages` change. D8 therefore states
+the real contract — the platform is read at mount and again when the choice returns to `system`, and a person who
+changes their desktop language sees the interface follow at the next start — and the Settings sentence describes the
+language this window resolved to instead of implying it is tracking the desktop. This is the `NEXT-05` lesson applied
+deliberately: `ADR-0031` D4 claimed a palette lands before first paint, and the independent review measured 176 ms
+and six light frames. This record makes no timing claim at all.
+
+**Error copy is keyed by code, and the boundary was drawn one line short of "everything is translated".** Rust owns
+one table per code and both surfaces read it — `crates/firmwaresight-artifact/src/error.rs` says a second copy in the
+UI "is how a parse failure starts meaning two different things". So the catalog adds a diagnosis line in the reader's
+language and leaves the engine's message, details and remediation on screen under labels that name them; a divergence
+between the two is then visible on the panel rather than silent. Coverage is a counted fact, not a claim: 59 codes are
+produced anywhere under `crates/` plus `apps/desktop/src-tauri/src`, and `en/errors.ts` carries those same 59 keys
+with nothing in one list and missing from the other, plus `errors.unknown` for a code this build has never seen. What
+is deliberately **not** localized is the engine's remedy sentence, because translating it would mean the UI
+re-authoring Rust's remediation table in a second language — recorded as a limit in D6, not as a finished item.
+
+**The schema number came from the file, and the reader still moves first.** `preferences.rs` carried
+`SCHEMA_VERSION = 2` at this head, so language persistence is 2 → 3 rather than a guessed integer, and `ADR-0031`
+D2's rule repeats here: widen the reader to accept 1 and 2 before any writer emits 3, because a reader that is raised
+first resolves every existing user's file to `Damaged` and demotes it to `settings.json.unreadable` on their next
+save. `NEXT-06` §18 forbade guessing the number for exactly that reason.

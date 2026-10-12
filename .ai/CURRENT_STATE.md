@@ -16,13 +16,14 @@ last_updated: "2026-10-11"
   follows it, the `C1-U2R1` entry that round reworks, the C1-U2 entry that round reworks, and the U1 entry all of those supersede keep their own dates
   inside their own bullets)*
 - Baseline: **v0.6.0 — P0 Technical Foundation Baseline**
-- **Active task: `B1_U2_SYSTEM_LIGHT_DARK_THEME` — RUN, LOCALLY GATE-PASS AND CLOSED ON 2026-10-11, NOT PUSHED**
-  — dispatched by `NEXT-04` and authorized by the Owner on
-  2026-10-11; the `ADR-0018` D3 light-only rule that held this pointer at `NONE` is superseded by `ADR-0031`.
-  The status word the executor proposes and does not grant is `LOCAL_B1_U2_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and
-  the record is `B1_VALIDATION/B1_U2_THEME_REPORT.md` below. **`origin/main` is still `2cff702`** — the Owner's push
-  authorization covered B1-U1's range and nothing beyond it. `B1-U3` (zh/en) is the next unit in that same instruction
-  and still needs its own dispatch.
+- **Active task: `B1_U3_ZH_EN_INTERNATIONALIZATION` — RUN, LOCALLY GATE-PASS AND CLOSED ON 2026-10-11, NOT PUSHED**
+  — dispatched by `NEXT-06` and authorized by the Owner's four-step instruction of 2026-10-11 (accept B1-U2, push it,
+  execute B1-U3 directly with no product-direction study and no UI art pass, then B1/B2's remaining professional
+  work). The status word the executor proposes and does not grant is
+  `LOCAL_B1_U3_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and the record is `B1_VALIDATION/B1_U3_LANGUAGE_REPORT.md`
+  below. **`origin/main` is `e0b8fc4`** — B1-U2's three commits were fast-forwarded on the Owner's own authorization
+  and read back as remote run `38160046797`, ten jobs green; nothing of B1-U3 is pushed, and the Owner's authorization
+  did not extend to it.
   Stage **U1 is `CLOSED` — `PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS`**,
   issued 2026-10-08 by the Architect's own independent visual acceptance record and filed at
   `U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md`; the machine state is `BASELINE.yaml`
@@ -185,6 +186,54 @@ last_updated: "2026-10-11"
   docs-only head `2859bb2`: its own job logs print **953 across the same 48 lines** on `Rust (windows-latest)`, **952 across 48
   lines** on `Rust (ubuntu-latest)`, and **295 in 9 files** on both Desktop UI jobs. Both dates are measurement points,
   not a claim about a reader's checkout — `git rev-parse HEAD` answers that, and a docs-only head cannot move a count.)*
+- **`B1-U3` (zh-CN / en interface language, `NEXT-06`) ran on 2026-10-11 and is `LOCAL_B1_U3_GATE_PASS /
+  ARCHITECT_REVIEW_PENDING` — proposed by the executor, not granted, and nothing of it is pushed.** Its record is
+  `B1_VALIDATION/B1_U3_LANGUAGE_REPORT.md` with `B1_VALIDATION/B1_U3_LANGUAGE_DESIGN_CHECKLIST.md` beside it and the
+  machine-readable block `b1_u3_zh_en_interface_language` in `BASELINE.yaml`. Like B1-U2 this is the fourth preference
+  on the mechanism B1-U1 built, not a second mechanism: `LanguagePref { System, ZhCn, En }`, the flat document key
+  `language`, `SCHEMA_VERSION` **2 → 3** with the reader widened to accept 1, 2 and 3 **before** the writer moved, and
+  a `PreferencesDto.language` that carries the chosen word rather than the language the desktop answered with. Two
+  hybrid documents are refused whole — an older `schema_version` carrying `language` is not partially understood — and
+  the refusal is what `a_version_one_document_carrying_a_language_is_refused_whole` exists to keep.
+- **The catalog decision was made on numbers, because `NEXT-06` forbade both slogans.** A typed in-repo catalog was
+  chosen over `i18next` for one measurable reason: `zh/<ns>.ts` is typed `CatalogFor<'ns'>` against the English file,
+  so a missing or extra Chinese key fails `tsc --noEmit`, which is gate step 5 — while a runtime resolver turns the
+  same event into a log line nobody reads. Nine namespaces, **918 keys in each language**, 59 of the 59 error codes
+  measured out of Rust and catalogued in both, one `{placeholder}` mechanism and no markup in any value. A tenth
+  namespace for `Details` was proposed mid-round and refused: it reads `analyze`, because it is the same analysis's
+  rows.
+- **`system` turned out to be two different promises, and the code now says so.** Colour has a change signal; language
+  has none — there is no `navigator.languages` event. So the palette follows the desktop live while the words are
+  resolved at mount and when the choice returns to `system`, and the Settings sentence states that a desktop language
+  change applies at the next start. `ADR-0032` D8 records the asymmetry precisely so a later round cannot ship the
+  false claim. In the real window the first cold start resolved `system` to `zh-CN` from this desktop, and two later
+  cold starts came back in the explicitly stored `en` and then `zh-CN`.
+- **The boundary was tested where it could actually break.** `bundle_ipc.rs`'s new case exports the same release twice
+  with only the stored language different and compares artifact bytes, `SHA256SUMS`, the manifest digest and the
+  release id. In the running window one Gate answer — `gate-b64afd679c0e3d81f7b7b033c546647602f918415524e1300785c45979c0d0c3`
+  — kept its id, its digests and its badge tally (REVIEW 1 / UNKNOWN 2 / PASS 2 / N/A 8) across a live language switch
+  while only the sentence around it changed language. `grep` finds `LanguagePref` only in `apps/desktop/src-tauri/src/preferences.rs` and that crate's own tests, and nowhere under `crates/`; no golden, fixture, migration or Core byte
+  moved, and no dependency, command, capability or plugin was added.
+- **The leak `NEXT-06` named is measured, not hoped away.** Zero hardcoded text nodes remain in any non-test `.tsx`
+  (the only hits left are `Promise<…>` annotations), every page's chrome is a catalog read — 867 `t()` calls across the
+  migrated files — and the Chinese DOM tests assert the fallback recorder is empty, so a missing key cannot quietly
+  render English. `components/Table.tsx`'s pager sentence had to be split from the noun its callers supply, and
+  `evidenceBasis.ts`'s six captions had to move into `common`, because those two were the last shared prose that would
+  have put two languages in one line. The five states, the four evidence classes, `KiB`, `SHA-256`, rule ids and error
+  codes stay exactly as Core wrote them in both languages, including the two places where that is a decision a reader
+  will question: Compare's filter chips mirror the untranslated cells they filter, and the evidence-class option
+  labels are the words sent to Rust.
+- **python scripts/check.py on the final staged tree: **17 of 17, exit 0, no SKIP** — **1,056 Rust passed / 0 failed / 0 ignored across 49 `test result:` lines** (1,050 at `e0b8fc4`; the six new cases are not `cfg`-gated, so 1,056 is the projected POSIX figure too — **POSIX remains NOT MEASURED on this host, which has no POSIX runner**), **379 UI tests in 13 files** (334 in 11), clippy and fmt clean, 37 commands, baseline verifier PASS at **852 tracked / 850 sum entries / 984 tree lines** (820 / 818 / 949 at B1-U2's close; the +32 are this round's catalog, ADR, prompts, report and checklist)** The Owner's own `settings.json` was `schema_version: 1` when this round started; the window
+  read it, kept both words, wrote version 3 with all four choices, created no `.unreadable` sibling, and the file was
+  restored byte-for-byte afterwards from gitignored scratch.
+- **What this round states as `NOT_VERIFIED`.** No installed proof exists for any B1 head, so this is
+  `DEV_RUNTIME_VERIFIED` on `target/debug/firmwaresight-desktop.exe`. No screen-reader pass was run in Chinese — the
+  accessible names were measured in the DOM, not by a reader. Display scaling and `forced-colors` remain unverified
+  from B1-U2 and were not attempted. At the 1024 floor the History builds table keeps its wrapper-level horizontal
+  scroll in both languages, which is the behaviour its own test protects, and Chinese makes two of its cells taller.
+  One scratch-instrument artifact is recorded so nobody chases it as a product bug: the page-walk driver's
+  `stateWords` field disagreed between the two language captures while a direct count on the same page reports the
+  identical tally.
 - **`B1-U2` (System / Light / Dark, `NEXT-04`) ran on 2026-10-11 and is `LOCAL_B1_U2_GATE_PASS /
   ARCHITECT_REVIEW_PENDING` — proposed by the executor, not granted, and nothing of it is pushed.** The round is two
   local commits, `bf3d494` (the authority) under `bd62289` (the unit), on top of `2cff702`, which is still `origin/main`.

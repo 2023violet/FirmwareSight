@@ -11,91 +11,102 @@
  * above its own empty state while nothing has been analyzed; Help shows the same seven items with no
  * dismissal, because "where is Getting Started" is a question with a second reading. One array feeds
  * both, so the two surfaces cannot give two different answers.
+ *
+ * The words come from the `analyze` catalog (`ADR-0032`), and the two inline elements the sentences are
+ * built around — the button's own name in an `em`, the project's file name in a `code` — stay elements
+ * rather than catalog text, so the sentence is split into the parts on either side of them. A catalog
+ * value never holds markup, and the file name and the button label are not prose to translate: the
+ * first is a name and the second is the label of the control the reader is being pointed at.
  */
 
 import styles from './GettingStarted.module.css';
 import { StateBadge, type StateName } from './components/StateBadge';
+import { useI18n } from './i18n';
+import type { Catalog } from './i18n/en';
 
-/** The five state words the product uses, with the sentence each one carries (DESIGN.md 5). */
-const STATES: readonly { readonly name: StateName; readonly label: string; readonly meaning: string }[] = [
-  { name: 'PASS', label: 'PASS', meaning: 'the rule was evaluated and is satisfied' },
-  { name: 'REVIEW', label: 'REVIEW', meaning: 'evaluated, and a person has to dispose of it' },
-  { name: 'BLOCK', label: 'BLOCK', meaning: 'evaluated and failed in a blocking way' },
-  { name: 'UNKNOWN', label: 'UNKNOWN', meaning: 'the evidence to evaluate it never arrived' },
-  { name: 'N/A', label: 'N/A', meaning: 'the rule does not apply to this configuration' },
+/** A key the `analyze` namespace actually holds, so a typo is a compile error rather than a runtime hole. */
+type AnalyzeKey = keyof Catalog['analyze'] & string;
+
+/** The five state words the product uses, with the catalog key of the sentence each one carries (DESIGN.md 5). */
+const STATES: readonly {
+  readonly name: StateName;
+  readonly label: string;
+  readonly meaning: AnalyzeKey;
+}[] = [
+  { name: 'PASS', label: 'PASS', meaning: 'gettingStarted.statePass' },
+  { name: 'REVIEW', label: 'REVIEW', meaning: 'gettingStarted.stateReview' },
+  { name: 'BLOCK', label: 'BLOCK', meaning: 'gettingStarted.stateBlock' },
+  { name: 'UNKNOWN', label: 'UNKNOWN', meaning: 'gettingStarted.stateUnknown' },
+  { name: 'N/A', label: 'N/A', meaning: 'gettingStarted.stateNa' },
 ];
 
-/** The flow a reader is being oriented towards: four steps, one direction. */
-const FLOW: readonly string[] = ['Analyze', 'Compare', 'Release', 'Bundle'];
+/** The flow a reader is being oriented towards: four steps, one direction, named by the pages they are. */
+const FLOW: readonly AnalyzeKey[] = [
+  'gettingStarted.stepAnalyze',
+  'gettingStarted.stepCompare',
+  'gettingStarted.stepRelease',
+  'gettingStarted.stepBundle',
+];
 
 export function GettingStartedList() {
+  const { t } = useI18n();
   return (
     <dl className={styles['list']}>
       <div>
-        <dt>What FirmwareSight does</dt>
+        <dt>{t('analyze', 'gettingStarted.whatTitle')}</dt>
+        <dd>{t('analyze', 'gettingStarted.whatBody')}</dd>
+      </div>
+      <div>
+        <dt>{t('analyze', 'gettingStarted.firstActionTitle')}</dt>
         <dd>
-          It reads one firmware artifact on this machine and reports the size and symbol facts that
-          can be proved from it: &ldquo;Know exactly what ships.&rdquo;
+          {t('analyze', 'gettingStarted.firstActionBefore')}
+          <em>{t('analyze', 'intake.chooseArtifact')}</em>
+          {t('analyze', 'gettingStarted.firstActionAfter')}
         </dd>
       </div>
       <div>
-        <dt>First action</dt>
-        <dd>
-          On Analyze, choose an ELF artifact with <em>Choose firmware artifact</em>. The file stays
-          where it is; nothing is copied into a project folder.
-        </dd>
+        <dt>{t('analyze', 'gettingStarted.mapTitle')}</dt>
+        <dd>{t('analyze', 'gettingStarted.mapBody')}</dd>
       </div>
       <div>
-        <dt>What a MAP file changes</dt>
-        <dd>
-          A GNU ld MAP next to the artifact is optional, and it improves region and layout evidence.
-          Without it, some facts stay UNKNOWN instead of being guessed at.
-        </dd>
-      </div>
-      <div>
-        <dt>The product flow</dt>
+        <dt>{t('analyze', 'gettingStarted.flowTitle')}</dt>
         <dd>
           <ol className={styles['flow']}>
             {FLOW.map((step, index) => (
               <li key={step}>
-                {index === 0 ? null : <span className={styles['arrow']}>then </span>}
-                {step}
+                {index === 0 ? null : (
+                  <span className={styles['arrow']}>{t('analyze', 'gettingStarted.stepThen')}</span>
+                )}
+                {t('analyze', step)}
               </li>
             ))}
           </ol>
-          Analyze proves one build, Compare measures two, Release judges them against a policy, and
-          Bundle writes the result out as a folder a release owner can hand to somebody else. A BIN or
-          Intel HEX file belongs to Release, not to Analyze: attach it there and its bytes ship as
-          evidence, unanalyzed (`ADR-0030`).
+          {t('analyze', 'gettingStarted.flowBody')}
         </dd>
       </div>
       <div>
-        <dt>The state words</dt>
+        <dt>{t('analyze', 'gettingStarted.statesTitle')}</dt>
         <dd>
           <ul className={styles['states']}>
             {STATES.map((state) => (
               <li key={state.name}>
                 <StateBadge state={state.name} label={state.label} />
-                <span>{state.meaning}</span>
+                <span>{t('analyze', state.meaning)}</span>
               </li>
             ))}
           </ul>
         </dd>
       </div>
       <div>
-        <dt>Local first</dt>
-        <dd>
-          Firmware files are analyzed locally. The MVP requires no upload, no account and no internet
-          connection: there is no service to send anything to.
-        </dd>
+        <dt>{t('analyze', 'gettingStarted.localTitle')}</dt>
+        <dd>{t('analyze', 'gettingStarted.localBody')}</dd>
       </div>
       <div>
-        <dt>Where a project&rsquo;s policy enters</dt>
+        <dt>{t('analyze', 'gettingStarted.policyTitle')}</dt>
         <dd>
-          A project keeps its rules in <code>firmwaresight.toml</code>. Opening that file is what the
-          Release page does first: its budgets, required artifacts and review rules are what the Gate
-          judges the stored build against, and the policy&rsquo;s own digest is recorded in the Gate
-          run the release stands on.
+          {t('analyze', 'gettingStarted.policyBefore')}
+          <code>firmwaresight.toml</code>
+          {t('analyze', 'gettingStarted.policyAfter')}
         </dd>
       </div>
     </dl>
@@ -106,22 +117,20 @@ export function GettingStartedList() {
  * The panel Analyze shows while it holds nothing: the same seven facts, plus the way out.
  *
  * Dismissing is one click and hides the list for the session; it never blocks the page, and no
- * control on Analyze waits for it to be answered (§13&rsquo;s &ldquo;no modal trap&rdquo;, no
+ * control on Analyze waits for it to be answered (§13’s “no modal trap”, no
  * compulsory wizard).
  */
 export function GettingStartedPanel({ onDismiss }: { readonly onDismiss: () => void }) {
+  const { t } = useI18n();
   return (
-    <section className={styles['panel']} aria-label="Getting started">
+    <section className={styles['panel']} aria-label={t('analyze', 'gettingStarted.title')}>
       <header className={styles['head']}>
-        <h2>Getting started</h2>
+        <h2>{t('analyze', 'gettingStarted.title')}</h2>
         <button type="button" className={styles['dismiss']} onClick={onDismiss}>
-          Hide this
+          {t('analyze', 'gettingStarted.dismiss')}
         </button>
       </header>
-      <p className={styles['lede']}>
-        Seven facts that answer what a first run usually asks. Hiding them does not hide anything
-        else: Help repeats them, and nothing here has to be read before Analyze works.
-      </p>
+      <p className={styles['lede']}>{t('analyze', 'gettingStarted.lede')}</p>
       <GettingStartedList />
     </section>
   );

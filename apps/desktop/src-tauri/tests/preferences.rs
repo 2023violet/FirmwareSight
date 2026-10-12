@@ -11,8 +11,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use firmwaresight_desktop::preferences::{
-    ApplicationPreferences, Loaded, PRESERVED_FILE_NAME, PreferenceError, Recovery, SCHEMA_VERSION,
-    SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store, ThemePref,
+    ApplicationPreferences, LanguagePref, Loaded, PRESERVED_FILE_NAME, PreferenceError, Recovery,
+    SCHEMA_VERSION, SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store, ThemePref,
 };
 
 static COUNTER: AtomicU32 = AtomicU32::new(0);
@@ -58,16 +58,31 @@ fn prefs_all(
     startup_page: StartupPagePref,
     theme: ThemePref,
 ) -> ApplicationPreferences {
+    prefs_every(size_unit, startup_page, theme, LanguagePref::System)
+}
+
+fn prefs_every(
+    size_unit: SizeUnitPref,
+    startup_page: StartupPagePref,
+    theme: ThemePref,
+    language: LanguagePref,
+) -> ApplicationPreferences {
     ApplicationPreferences {
         size_unit,
         startup_page,
         theme,
+        language,
     }
 }
 
 /// The document text a v1 build would have left, written by hand so the reader's own serializer
 /// cannot be the thing that makes the case pass.
 const V1_DOCUMENT: &[u8] = br#"{"schema_version":1,"size_unit":"kib","startup_page":"history"}"#;
+
+/// The same, as the `ADR-0031` round left it. Hand-written for the same reason: the file that has to
+/// survive is one this build did not write.
+const V2_DOCUMENT: &[u8] =
+    br#"{"schema_version":2,"size_unit":"kib","startup_page":"history","theme":"dark"}"#;
 
 fn listing(dir: &Path) -> Vec<String> {
     let mut names: Vec<String> = std::fs::read_dir(dir)
@@ -167,6 +182,21 @@ fn the_closed_sets_refuse_every_other_word() {
             StartupPagePref::from_word(word),
             None,
             "`{word}` is not an offered start page"
+        );
+    }
+    assert_eq!(LanguagePref::from_word("zh-CN"), Some(LanguagePref::ZhCn));
+    assert_eq!(LanguagePref::from_word("en"), Some(LanguagePref::En));
+    // The words a platform reports are not the words this document stores. `en-US` and `zh` are
+    // normalized by the UI resolver before they reach here, and a document that stored them would
+    // describe a setting the Settings page cannot offer.
+    for word in [
+        "zh", "ZH-CN", "zh-cn", "zh_CN", "zh-TW", "zh-HK", "en-US", "en-us", "japanese", "",
+        "system ",
+    ] {
+        assert_eq!(
+            LanguagePref::from_word(word),
+            None,
+            "`{word}` is not an offered language"
         );
     }
 }
@@ -543,7 +573,7 @@ fn the_preference_family_is_five_distinct_codes_and_nothing_else() {
 /// recovery path that works — defaults on screen, nothing lost — while quietly demoting the
 /// person's own settings to `.unreadable` on their next save.
 #[test]
-fn a_version_one_document_still_reads_and_gains_the_default_theme() {
+fn a_version_one_document_still_reads_and_gains_the_default_theme_and_language() {
     let dir = temp_dir("v1-read", false);
     std::fs::write(settings(&dir), V1_DOCUMENT).expect("the older document is placed");
     let loaded = Store::new(Some(dir.clone())).load();
@@ -554,7 +584,12 @@ fn a_version_one_document_still_reads_and_gains_the_default_theme() {
             StartupPagePref::History,
             ThemePref::System
         ),
-        "a v1 document is complete, and the theme it never mentions is this build's default"
+        "a v1 document is complete, and the theme and language it never mentions are this build's defaults"
+    );
+    assert_eq!(
+        loaded.preferences.language,
+        LanguagePref::System,
+        "a document written before there was a language setting follows the platform, which is what it did all along"
     );
     assert_eq!(
         loaded.recovery, None,
@@ -563,53 +598,105 @@ fn a_version_one_document_still_reads_and_gains_the_default_theme() {
     std::fs::remove_dir_all(&dir).ok();
 }
 
+/// The second floor. A `ADR-0031` document has a theme and no language, and reading it must not
+/// cost the person the theme they chose.
+#[test]
+fn a_version_two_document_still_reads_and_keeps_its_theme_and_gains_the_default_language() {
+    let dir = temp_dir("v2-read", false);
+    std::fs::write(settings(&dir), V2_DOCUMENT).expect("the older document is placed");
+    let loaded = Store::new(Some(dir.clone())).load();
+    assert_eq!(
+        loaded.preferences,
+        prefs_every(
+            SizeUnitPref::Kib,
+            StartupPagePref::History,
+            ThemePref::Dark,
+            LanguagePref::System
+        ),
+        "the stored theme survives the upgrade read, and only the missing key takes a default"
+    );
+    assert_eq!(loaded.recovery, None, "{loaded:?}");
+    std::fs::remove_dir_all(&dir).ok();
+}
+
 /// Reading is reading. A build that understands two versions still creates nothing and changes
 /// nothing, which is the invariant the cold-start evidence in a real window depends on.
 #[test]
 fn opening_an_older_document_writes_nothing() {
-    let dir = temp_dir("v1-no-write", false);
-    std::fs::write(settings(&dir), V1_DOCUMENT).expect("the older document is placed");
-    let store = Store::new(Some(dir.clone()));
-    let first = store.load();
-    let second = store.load();
-    assert_eq!(
-        first, second,
-        "two reads of the same file are the same answer, so neither can be a write in disguise"
-    );
-    assert_eq!(bytes(&dir).as_deref(), Some(V1_DOCUMENT));
-    assert_eq!(listing(&dir), vec![SETTINGS_FILE_NAME.to_owned()]);
-    std::fs::remove_dir_all(&dir).ok();
+    for older in [V1_DOCUMENT, V2_DOCUMENT] {
+        let dir = temp_dir("older-no-write", false);
+        std::fs::write(settings(&dir), older).expect("the older document is placed");
+        let store = Store::new(Some(dir.clone()));
+        let first = store.load();
+        let second = store.load();
+        assert_eq!(
+            first, second,
+            "two reads of the same file are the same answer, so neither can be a write in disguise"
+        );
+        assert_eq!(bytes(&dir).as_deref(), Some(older));
+        assert_eq!(listing(&dir), vec![SETTINGS_FILE_NAME.to_owned()]);
+        std::fs::remove_dir_all(&dir).ok();
+    }
 }
 
-/// The save is what moves a document forward, and it says so with all three choices present.
+/// The save is what moves a document forward, and it says so with all four choices present.
 #[test]
-fn the_first_save_after_an_older_document_writes_version_two_with_three_choices() {
-    let dir = temp_dir("v1-to-v2", false);
-    std::fs::write(settings(&dir), V1_DOCUMENT).expect("the older document is placed");
-    let store = Store::new(Some(dir.clone()));
-    assert_eq!(
-        store.load().preferences.theme,
-        ThemePref::System,
-        "the window opens on the platform before anything is stored"
-    );
-    store
-        .save(&prefs_all(
-            SizeUnitPref::Kib,
-            StartupPagePref::History,
-            ThemePref::Dark,
-        ))
-        .expect("saving over a document this build reads is a normal save");
-    assert_eq!(
-        bytes(&dir).as_deref(),
-        Some(
-            br#"{"schema_version":2,"size_unit":"kib","startup_page":"history","theme":"dark"}
+fn the_first_save_after_an_older_document_writes_version_three_with_four_choices() {
+    for older in [V1_DOCUMENT, V2_DOCUMENT] {
+        let dir = temp_dir("older-to-v3", false);
+        std::fs::write(settings(&dir), older).expect("the older document is placed");
+        let store = Store::new(Some(dir.clone()));
+        assert_eq!(
+            store.load().preferences.language,
+            LanguagePref::System,
+            "the window opens on the platform's language before anything is stored"
+        );
+        store
+            .save(&prefs_every(
+                SizeUnitPref::Kib,
+                StartupPagePref::History,
+                ThemePref::Dark,
+                LanguagePref::ZhCn,
+            ))
+            .expect("saving over a document this build reads is a normal save");
+        assert_eq!(
+            bytes(&dir).as_deref(),
+            Some(
+                br#"{"schema_version":3,"size_unit":"kib","startup_page":"history","theme":"dark","language":"zh-CN"}
 "#
-            .as_slice()
-        ),
-        "the v2 document is one object with the theme beside the other two, not a nested group"
-    );
-    assert_eq!(listing(&dir), vec![SETTINGS_FILE_NAME.to_owned()]);
-    std::fs::remove_dir_all(&dir).ok();
+                .as_slice()
+            ),
+            "the v3 document is one object with the language beside the other three, not a nested group"
+        );
+        assert_eq!(listing(&dir), vec![SETTINGS_FILE_NAME.to_owned()]);
+        std::fs::remove_dir_all(&dir).ok();
+    }
+}
+
+/// Every word the Settings page can send comes back unchanged, including the one with a hyphen and
+/// a capital in it: `zh-CN` is the document's text, and a serializer that quietly lowercases it
+/// would make the value the UI reads differ from the value the person chose.
+#[test]
+fn every_language_word_round_trips_through_the_document() {
+    for language in [LanguagePref::System, LanguagePref::ZhCn, LanguagePref::En] {
+        let dir = temp_dir("language-round-trip", false);
+        let store = Store::new(Some(dir.clone()));
+        store
+            .save(&prefs_every(
+                SizeUnitPref::Bytes,
+                StartupPagePref::Analyze,
+                ThemePref::System,
+                language,
+            ))
+            .expect("a save is a save");
+        let loaded = Store::new(Some(dir.clone())).load();
+        assert_eq!(
+            loaded.preferences.language, language,
+            "{language:?} did not come back"
+        );
+        assert_eq!(loaded.recovery, None, "{loaded:?}");
+        std::fs::remove_dir_all(&dir).ok();
+    }
 }
 
 /// All three words survive the round trip, including the default, because a default that cannot be
@@ -641,17 +728,19 @@ fn every_theme_word_round_trips_through_the_document() {
 
 /// The floor moved up, the ceiling did not. A document two versions ahead is still "do not touch",
 /// and the refusal still quotes the version it saw.
+/// The floor moved up again, the ceiling moved with the build and nowhere else. A document one
+/// version ahead is still "do not touch", and the refusal still quotes the version it saw.
 #[test]
-fn a_document_from_two_versions_ahead_is_refused_and_left_alone() {
+fn a_document_from_one_version_ahead_is_refused_and_left_alone() {
     let written =
-        br#"{"schema_version":3,"size_unit":"kib","startup_page":"analyze","theme":"dark"}"#;
-    let dir = temp_dir("v3", false);
+        br#"{"schema_version":4,"size_unit":"kib","startup_page":"analyze","theme":"dark","language":"en"}"#;
+    let dir = temp_dir("v4", false);
     std::fs::write(settings(&dir), written).expect("the newer document is placed");
     let store = Store::new(Some(dir.clone()));
     let loaded = store.load();
     assert_eq!(
         loaded.recovery,
-        Some(Recovery::FutureVersion { seen: 3 }),
+        Some(Recovery::FutureVersion { seen: 4 }),
         "a version above this build's is future, not damage"
     );
     assert_eq!(
@@ -661,15 +750,54 @@ fn a_document_from_two_versions_ahead_is_refused_and_left_alone() {
     );
     let error = store
         .save(&prefs(SizeUnitPref::Kib, StartupPagePref::Analyze))
-        .expect_err("a v2 build must not downgrade a v3 document");
+        .expect_err("a v3 build must not downgrade a v4 document");
     assert_eq!(
         error,
         PreferenceError::FutureVersionOnDisk {
-            seen: 3,
+            seen: 4,
             current: SCHEMA_VERSION,
         }
     );
     assert_eq!(bytes(&dir).as_deref(), Some(written.as_slice()));
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// A v2 document that already carries a language is a disagreement about which build wrote it, not
+/// a hint to guess: the version picks the shape, so the extra key is still unknown to v2.
+#[test]
+fn a_version_two_document_carrying_a_language_is_still_not_partially_understood() {
+    let dir = temp_dir("v2-with-language", false);
+    std::fs::write(
+        settings(&dir),
+        br#"{"schema_version":2,"size_unit":"kib","startup_page":"analyze","theme":"dark","language":"en"}"#,
+    )
+    .expect("the document is placed");
+    let loaded = Store::new(Some(dir.clone())).load();
+    assert_eq!(loaded.preferences.size_unit, SizeUnitPref::Bytes);
+    assert_eq!(loaded.preferences.theme, ThemePref::System);
+    assert!(
+        matches!(loaded.recovery, Some(Recovery::Corrupted { .. })),
+        "{loaded:?}"
+    );
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// And the same refusal one floor down: a v1 document that claims a language belongs to no shape
+/// this build knows, so nothing in it is trusted.
+#[test]
+fn a_version_one_document_carrying_a_language_is_refused_whole() {
+    let dir = temp_dir("v1-with-language", false);
+    std::fs::write(
+        settings(&dir),
+        br#"{"schema_version":1,"size_unit":"kib","startup_page":"analyze","language":"zh-CN"}"#,
+    )
+    .expect("the document is placed");
+    let loaded = Store::new(Some(dir.clone())).load();
+    assert!(
+        matches!(loaded.recovery, Some(Recovery::Corrupted { .. })),
+        "{loaded:?}"
+    );
+    assert_eq!(loaded.preferences, ApplicationPreferences::default());
     std::fs::remove_dir_all(&dir).ok();
 }
 

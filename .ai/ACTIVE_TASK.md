@@ -461,6 +461,40 @@ If you were sent here to "continue B1": the next unit is **B1-U3 (zh/en)**, the 
 concept art or visual redesign pass, and B1-U3 still needs its own dispatch prompt. Inventing one is what `AGENTS.md` 1
 forbids. Read, then stop.
 
+ON 2026-10-11 THE OWNER DISPATCHED B1-U3 AND IT RAN THE SAME DAY. `NEXT-06` (archived, 8,797 bytes, 57 lines, 0 `CR`,
+sha256 `5d6bde626f63ecf280d275998c113b209ef1de5ceb4269d42f445c99ac6b2dca`) opened only after its four gates closed in
+order: `NEXT-05`'s independent `ACCEPT_WITH_EXPLICIT_LIMITS` on B1-U2 with limits L1–L5 — held in gitignored scratch at
+`target/n05_next05_report.md`, because `NEXT-05` forbade modifying a tracked file — the Owner-authorized fast-forward
+`2cff702..e0b8fc4` read back as remote run `38160046797` with ten jobs green, the Owner's own adjudication now archived
+at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_B1U2_Architect_Review_2026-10-11.md`, and `ADR-0032` for the design decision.
+The interface now speaks two languages. `LanguagePref { System, ZhCn, En }` is the fourth stored choice,
+`SCHEMA_VERSION` went 2 → 3 with the reader widened to accept 1, 2 and 3 before the writer moved, and a document that
+claims an older version while carrying the newer field is refused whole rather than half-understood. The catalog is
+typed in-repo — nine namespaces, **918 keys in English and the same 918 in Chinese**, `zh` typed against `en` so a
+missing key is a `tsc` failure at gate step 5 rather than a log line — and `NEXT-06`'s ban on resting that choice on
+"zero dependency" or on "must be i18next" is answered with that measurement. `system` is live for colour and **not**
+live for language, because `navigator.languages` has no event; the Settings sentence says so and `ADR-0032` D8 records
+it. Zero hardcoded text nodes remain in any non-test `.tsx`; the five Gate states, the four evidence classes, units,
+ids, digests, paths and error codes stay exactly as Core wrote them in both languages; and all 59 error codes measured
+out of Rust have a Chinese and an English diagnosis keyed by the code, with the engine's own words left visible beside
+them. python scripts/check.py on the final staged tree: 17 of 17, exit 0, no SKIP — 1,056 Rust passed / 0 failed / 0 ignored across 49 `test result:` lines (1,050 at `e0b8fc4`; the six new cases are not `cfg`-gated, so 1,056 is the projected POSIX figure too — POSIX remains NOT MEASURED on this host, which has no POSIX runner), 379 UI tests in 13 files (334 in 11), clippy and fmt clean, 37 commands, baseline verifier PASS at 852 tracked / 850 sum entries / 984 tree lines (820 / 818 / 949 at B1-U2's close; the +32 are this round's catalog, ADR, prompts, report and checklist) The boundary was tested where it can break rather than asserted where it is cheap: exporting
+the same release with a different stored language moves no bundle byte, no manifest digest and no release id, and in
+the running window one Gate answer — `gate-b64afd679c0e3d81f7b7b033c546647602f918415524e1300785c45979c0d0c3` — kept its
+id, its digests and its badge tally across a live language switch while only the sentence around it changed. All seven
+pages were walked and photographed in Chinese at inner 1024×721 and 1440×901 by real Win32 resizes, with no overflow in
+either language, and the Owner's own `settings.json` was read at `schema_version: 1`, upgraded to 3 with no
+`.unreadable` copy, and then restored byte-for-byte. `DEV_RUNTIME_VERIFIED`, not `INSTALLED_VERIFIED`: no CI-built
+installer exists for any B1 head, and no B1 unit gets that word. NOT_VERIFIED and listed as such: a screen-reader pass
+in Chinese (accessible names were measured in the DOM, not read), 125% and 150% display scaling, `forced-colors`, and
+any second writing system. **Nothing here is pushed: `origin/main` stays `e0b8fc4`**, and the Owner's authorization
+covered B1-U2's range only. The `NEXT-05` correctives C1 (needs the Owner's word, because clearing it moves two report
+goldens), C2 and C3 remain open and untouched.
+If you were sent here to "continue B1": the next unit is **B1-U4 or the three `NEXT-05` correctives, at the Owner's
+choice**, and the Owner's own ordering says the remaining B1/B2 work should go at real file handling and professional
+interpretation of the data rather than more settings switches. This round proposes nothing beyond that, and inventing a
+unit is what `AGENTS.md` 1 forbids. **Separately and not to be lost behind this unit: the old V1 cohort build's GitHub
+Artifact records expire 2026-10-22 and still need their own private archival.** Read, then stop.
+
 ```
 
 ## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do
@@ -540,6 +574,7 @@ OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT; it did not resume V1, run a session or re-b
 did not open B1, Private Beta, RC, GA, a tag, a GitHub Release, a public installer, signing, notarization, an
 updater, a licence choice or pricing. If you were sent here to "continue U1" or "finish the UI": the next word is
 the Architect's visual verdict on the two screenshot packs, not another code round.
+
 ```
 
 CURRENT STATUS OF THIS TRACK, as of the fourth and fifth U1 rounds on 2026-10-08 (this block supersedes the

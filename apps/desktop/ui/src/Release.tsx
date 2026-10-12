@@ -36,6 +36,8 @@ import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
+import { useI18n, type Translate } from './i18n';
+import type { Catalog } from './i18n/en';
 import { gateVerdictSentence, severityState } from './stateWords';
 import {
   acceptReview,
@@ -88,38 +90,37 @@ const UNKNOWN_RULES: readonly {
   { key: 'releaseNotes', label: 'release.notes' },
 ];
 
-/** Findings are grouped and read in this order: what blocks, then what asks, then what is unknown. */
+/** A key the `gate` namespace actually holds, so a typo is a compile error rather than a runtime hole. */
+type GateKey = keyof Catalog['gate'];
+
+/**
+ * Findings are grouped and read in this order: what blocks, then what asks, then what is unknown.
+ *
+ * The order lives here and the words live in the catalog: the five states are Core's, but the plain-language
+ * label beside each badge and the sentence under each group heading are interface copy (`ADR-0032` D5).
+ */
 const STATE_GROUPS: readonly {
   readonly state: StateName;
-  readonly heading: string;
-  readonly hint: string;
+  readonly labelKey: GateKey;
+  readonly hintKey: GateKey;
 }[] = [
-  {
-    state: 'BLOCK',
-    heading: 'Block',
-    hint: 'The rule evaluated and failed in a way that stops this run.',
-  },
-  {
-    state: 'REVIEW',
-    heading: 'Review',
-    hint: 'The rule evaluated and needs a named person to answer it.',
-  },
-  {
-    state: 'UNKNOWN',
-    heading: 'Unknown',
-    hint: 'The evidence this rule needs is missing, so it could not be evaluated.',
-  },
-  {
-    state: 'PASS',
-    heading: 'Pass',
-    hint: 'The rule evaluated and is satisfied.',
-  },
-  {
-    state: 'N/A',
-    heading: 'Not applicable',
-    hint: 'The policy or this build puts this rule outside the run.',
-  },
+  { state: 'BLOCK', labelKey: 'group.block.label', hintKey: 'group.block.hint' },
+  { state: 'REVIEW', labelKey: 'group.review.label', hintKey: 'group.review.hint' },
+  { state: 'UNKNOWN', labelKey: 'group.unknown.label', hintKey: 'group.unknown.hint' },
+  { state: 'PASS', labelKey: 'group.pass.label', hintKey: 'group.pass.hint' },
+  { state: 'N/A', labelKey: 'group.na.label', hintKey: 'group.na.hint' },
 ];
+
+/** The same five groups, in the same order, with this screen's words attached. */
+function stateGroups(
+  t: Translate,
+): readonly { readonly state: StateName; readonly heading: string; readonly hint: string }[] {
+  return STATE_GROUPS.map((group) => ({
+    state: group.state,
+    heading: t('gate', group.labelKey),
+    hint: t('gate', group.hintKey),
+  }));
+}
 
 /** The five Gate words, so a stored value outside them is shown rather than dropped. */
 const STATE_NAMES: readonly string[] = ['BLOCK', 'REVIEW', 'UNKNOWN', 'PASS', 'N/A'];
@@ -146,6 +147,7 @@ export function Release({
   readonly onRunChange: (run: GateRunDto | null) => void;
   readonly onGoToAnalyze: () => void;
 }) {
+  const { t } = useI18n();
   const [candidates, setCandidates] = useState<CandidatePageDto | null>(null);
   const [candidateError, setCandidateError] = useState<ErrorEnvelopeDto | null>(null);
   const [snapshotId, setSnapshotId] = useState<string | null>(null);
@@ -212,12 +214,12 @@ export function Release({
       if (outcome.value !== null) {
         onProjectChange(outcome.value);
         setPolicyError(null);
-        setPolicyNote(`Loaded ${outcome.value.configFileName}`);
+        setPolicyNote(t('release', 'policy.loaded', { file: outcome.value.configFileName }));
       }
       return;
     }
     setPolicyError(outcome.envelope);
-  }, [onProjectChange]);
+  }, [onProjectChange, t]);
 
   const save = useCallback(async () => {
     if (draft === null) {
@@ -230,13 +232,13 @@ export function Release({
     if (outcome.ok) {
       if (outcome.value !== null) {
         onProjectChange(outcome.value);
-        setPolicyNote(`Saved ${outcome.value.configFileName}`);
+        setPolicyNote(t('release', 'policy.saved', { file: outcome.value.configFileName }));
         setDraft(null);
       }
       return;
     }
     setPolicyError(outcome.envelope);
-  }, [draft, onProjectChange]);
+  }, [draft, onProjectChange, t]);
 
   /**
    * Judge the chosen build, and keep the previous run on the failure path.
@@ -331,8 +333,8 @@ export function Release({
   return (
     <Page>
       <PageHeader
-        title="Release Gate"
-        subhead="FirmwareSight policy readiness for one stored build, judged against one project policy. The answer below is that policy’s verdict and nothing more: no claim on this page reaches beyond the rules the project itself wrote."
+        title={t('gate', 'title')}
+        subhead={t('gate', 'subhead')}
       />
 
       {/* U1 §B.5: the verdict used to sit below the policy editor and the build picker, so a reader had
@@ -351,8 +353,7 @@ export function Release({
         <>
           {error === null ? null : (
             <p className={styles['stale']} role="status">
-              The record below is the last run that succeeded ({truncateMiddle(run.runId, 10)}). It is not
-              the result of the attempt that failed.
+              {t('gate', 'staleRun', { id: truncateMiddle(run.runId, 10) })}
             </p>
           )}
           <Findings run={run} onAccept={accept} />
@@ -378,21 +379,18 @@ export function Release({
         className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
         aria-labelledby="fs-policy-heading"
       >
-        <h2 id="fs-policy-heading">5 · Project policy</h2>
+        <h2 id="fs-policy-heading">{'5 · '}{t('release', 'policy.heading')}</h2>
         <div className={styles['row']}>
-          <span className={styles['term']}>Config</span>
+          <span className={styles['term']}>{t('release', 'policy.configTerm')}</span>
           <span className={styles['value']}>
             {project === null ? (
-              <span>
-                No project policy is loaded. A run judges FirmwareSight&rsquo;s stated default policy, and
-                the run below shows which values those were.
-              </span>
+              <span>{t('release', 'policy.noProject')}</span>
             ) : (
               <>
                 <span>{project.projectName}</span>
                 <span className={styles['monoSmall']}>{project.configFileName}</span>
                 <span className={styles['note']}>
-                  schema_version {project.configSchemaVersion} · policy{' '}
+                  {t('release', 'policy.schemaLine', { version: project.configSchemaVersion })}{' '}
                   <span className={styles['mono']}>{project.policySha256}</span>
                 </span>
               </>
@@ -401,46 +399,53 @@ export function Release({
         </div>
         {project !== null && project.unknownKeys.length > 0 ? (
           <p className={styles['warning']} role="status">
-            This config holds keys this build does not understand: {project.unknownKeys.join(', ')}. They
-            are listed rather than dropped, and a save to this file is refused until they are resolved.
+            {t('release', 'policy.unknownKeys', { keys: project.unknownKeys.join(', ') })}
           </p>
         ) : null}
         {project !== null && project.warnings.length > 0 ? (
-          <ul className={styles['noticeList']} aria-label="Config warnings">
+          <ul className={styles['noticeList']} aria-label={t('release', 'warnings.configList')}>
             {project.warnings.map((warning) => (
               <li className={styles['noticeItem']} key={warning}>
-                Warning: {warning}
+                {t('release', 'warnings.item', { warning })}
               </li>
             ))}
           </ul>
         ) : null}
         <div className={styles['actions']}>
-          <Button onClick={() => void open()}>Open project config</Button>
+          <Button onClick={() => void open()}>{t('release', 'policy.open')}</Button>
           <Button
             onClick={() => {
               setDraft(draft === null ? (seed ?? blankPolicy(project?.projectName ?? '')) : null);
             }}
             ariaExpanded={draft !== null}
           >
-            {draft === null ? 'Edit policy' : 'Close policy editor'}
+            {draft === null ? t('release', 'policy.edit') : t('release', 'policy.close')}
           </Button>
           <Button
             variant="primary"
             disabled={draft === null || saving}
             onClick={() => void save()}
           >
-            {saving ? 'Saving…' : project === null ? 'Save as firmwaresight.toml' : 'Save policy'}
+            {saving
+              ? t('release', 'policy.saving')
+              : project === null
+                ? t('release', 'policy.saveAs', { file: 'firmwaresight.toml' })
+                : t('release', 'policy.save')}
           </Button>
           {policyNote === null ? null : <span className={styles['status']}>{policyNote}</span>}
         </div>
         {policyError === null ? null : (
-          <ErrorPanel envelope={policyError} label="Config load or save failed" heading="Policy error" />
+          <ErrorPanel
+            envelope={policyError}
+            label={t('release', 'policy.errorLabel')}
+            heading={t('release', 'policy.errorHeading')}
+          />
         )}
         {draft === null ? (
           <p className={styles['hint']}>
             {project === null
-              ? 'Open a config to edit its policy, or choose Edit policy to write one for this project.'
-              : `Editing writes to ${project.configFileName} in the project folder.`}
+              ? t('release', 'policy.hintNoProject')
+              : t('release', 'policy.hintEdit', { file: project.configFileName })}
           </p>
         ) : (
           <PolicyForm draft={draft} onChange={setDraft} />
@@ -451,20 +456,25 @@ export function Release({
         className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
         aria-labelledby="fs-builds-heading"
       >
-        <h2 id="fs-builds-heading">6 · Build and baseline</h2>
+        <h2 id="fs-builds-heading">{'6 · '}{t('release', 'builds.heading')}</h2>
         {candidateError === null ? null : (
-          <ErrorPanel envelope={candidateError} label="Build list failed" heading="Build list error" />
+          <ErrorPanel
+            envelope={candidateError}
+            label={t('release', 'builds.errorLabel')}
+            heading={t('release', 'builds.errorHeading')}
+          />
         )}
         {candidates !== null && candidates.rows.length === 0 ? (
           <p className={styles['empty']}>
-            Nothing is stored yet, so there is nothing to gate.{' '}
-            <LinkButton onClick={onGoToAnalyze}>Analyze a build</LinkButton> first, then come back.
+            {t('release', 'builds.emptyBefore')}{' '}
+            <LinkButton onClick={onGoToAnalyze}>{t('release', 'builds.emptyLink')}</LinkButton>{' '}
+            {t('release', 'builds.emptyAfter')}
           </p>
         ) : (
           <div className={styles['selectors']}>
             <div className={styles['picker']}>
               <label className={styles['pickerLabel']} htmlFor="fs-gate-current">
-                Current build
+                {t('release', 'builds.currentLabel')}
               </label>
               <select
                 id="fs-gate-current"
@@ -474,7 +484,7 @@ export function Release({
                   setSnapshotId(event.target.value === '' ? null : event.target.value);
                 }}
               >
-                <option value="">Choose a build</option>
+                <option value="">{t('release', 'builds.chooseOption')}</option>
                 {candidates?.rows.map((row) => (
                   <option key={row.snapshotId} value={row.snapshotId}>
                     {row.fileName} · {truncateMiddle(row.snapshotId, 8)}
@@ -485,7 +495,7 @@ export function Release({
             </div>
             <div className={styles['picker']}>
               <label className={styles['pickerLabel']} htmlFor="fs-gate-baseline">
-                Baseline (optional)
+                {t('release', 'builds.baselineLabel')}
               </label>
               <select
                 id="fs-gate-baseline"
@@ -495,7 +505,7 @@ export function Release({
                   setBaselineId(event.target.value === '' ? null : event.target.value);
                 }}
               >
-                <option value="">No baseline</option>
+                <option value="">{t('release', 'builds.noneOption')}</option>
                 {candidates?.rows
                   .filter((row) => row.snapshotId !== snapshotId)
                   .map((row) => (
@@ -506,10 +516,7 @@ export function Release({
               </select>
               <BuildFacts row={chosen(baselineId ?? null)} unit={unit} />
               {baselineId === null ? (
-                <span className={styles['hint']}>
-                  With growth thresholds configured and no baseline, the growth rule answers Unknown and
-                  the run still happens.
-                </span>
+                <span className={styles['hint']}>{t('release', 'builds.baselineHint')}</span>
               ) : null}
             </div>
             <div className={styles['pickerActions']}>
@@ -518,7 +525,7 @@ export function Release({
                 disabled={snapshotId === null || running}
                 onClick={() => void gate()}
               >
-                {running ? 'Judging…' : 'Run Gate'}
+                {running ? t('release', 'builds.judging') : t('release', 'builds.run')}
               </Button>
               <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
             </div>
@@ -527,7 +534,11 @@ export function Release({
       </section>
 
       {error === null ? null : (
-        <ErrorPanel envelope={error} label="Gate run failed" heading="Gate run error" />
+        <ErrorPanel
+          envelope={error}
+          label={t('gate', 'run.errorLabel')}
+          heading={t('gate', 'run.errorHeading')}
+        />
       )}
     </Page>
   );
@@ -546,45 +557,46 @@ function Readiness({
   readonly restored: boolean;
   readonly onReload: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <section className={styles['section']} aria-labelledby="fs-readiness-heading">
-      <h2 id="fs-readiness-heading">2 · FirmwareSight policy readiness</h2>
+      <h2 id="fs-readiness-heading">{'2 · '}{t('gate', 'readiness.heading')}</h2>
       <div className={styles['states']}>
         <StateBadge
           state={stateName(run.dispositionEffectiveSeverity)}
-          label={`Disposition: ${run.dispositionEffectiveSeverity}`}
-          note="The aggregate with this run's accepted reviews counted."
+          label={t('gate', 'readiness.disposition', { severity: run.dispositionEffectiveSeverity })}
+          note={t('gate', 'readiness.dispositionNote')}
         />
         <StateBadge
           state={stateName(run.overallEffectiveSeverity)}
-          label={`As computed: ${run.overallEffectiveSeverity}`}
-          note="The aggregate before any review was accepted."
+          label={t('gate', 'readiness.asComputed', { severity: run.overallEffectiveSeverity })}
+          note={t('gate', 'readiness.asComputedNote')}
         />
       </div>
-      <div className={styles['counts']} role="group" aria-label="Findings by state">
-        <StateBadge state="BLOCK" label="Block" count={run.counts.block} />
-        <StateBadge state="REVIEW" label="Review" count={run.counts.review} />
-        <StateBadge state="UNKNOWN" label="Unknown" count={run.counts.unknown} />
-        <StateBadge state="PASS" label="Pass" count={run.counts.pass} />
-        <StateBadge state="N/A" label="Not applicable" count={run.counts.notApplicable} />
+      <div className={styles['counts']} role="group" aria-label={t('gate', 'readiness.countsGroup')}>
+        <StateBadge state="BLOCK" label={t('gate', 'group.block.label')} count={run.counts.block} />
+        <StateBadge state="REVIEW" label={t('gate', 'group.review.label')} count={run.counts.review} />
+        <StateBadge state="UNKNOWN" label={t('gate', 'group.unknown.label')} count={run.counts.unknown} />
+        <StateBadge state="PASS" label={t('gate', 'group.pass.label')} count={run.counts.pass} />
+        <StateBadge state="N/A" label={t('gate', 'group.na.label')} count={run.counts.notApplicable} />
       </div>
       <dl className={styles['rows']}>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Run</dt>
+          <dt className={styles['term']}>{t('gate', 'readiness.runTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{run.runId}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Build</dt>
+          <dt className={styles['term']}>{t('gate', 'readiness.buildTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{run.snapshotId}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Baseline</dt>
+          <dt className={styles['term']}>{t('gate', 'readiness.baselineTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>
-            {run.baselineSnapshotId ?? 'None'}
+            {run.baselineSnapshotId ?? t('gate', 'readiness.none')}
           </dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Policy</dt>
+          <dt className={styles['term']}>{t('gate', 'readiness.policyTerm')}</dt>
           <dd className={styles['value']}>
             <span>{run.policySource}</span>
             {run.projectName === null ? null : <span>{run.projectName}</span>}
@@ -592,11 +604,11 @@ function Readiness({
           </dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Stored</dt>
+          <dt className={styles['term']}>{t('gate', 'readiness.storedTerm')}</dt>
           <dd className={cx(styles['value'], styles['monoSmall'])}>{run.createdAt}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Workspace</dt>
+          <dt className={styles['term']}>{t('gate', 'readiness.workspaceTerm')}</dt>
           <dd className={styles['value']}>
             <span>{run.git.summary}</span>
             {run.git.headCommit === null ? null : (
@@ -606,11 +618,11 @@ function Readiness({
             )}
             {run.git.exactTag === null ? null : (
               <span className={styles['monoSmall']}>
-                exact tag {run.git.exactTag} on workspace HEAD
+                {t('gate', 'readiness.exactTag', { tag: run.git.exactTag })}
               </span>
             )}
             {run.git.dirty === null ? null : (
-              <span>{run.git.dirty ? 'dirty' : 'clean'} (workspace, not artifact)</span>
+              <span>{t('gate', run.git.dirty ? 'readiness.dirtyLine' : 'readiness.cleanLine')}</span>
             )}
             {run.git.reason === null ? null : (
               <span className={styles['note']}>{run.git.reason}</span>
@@ -618,36 +630,28 @@ function Readiness({
           </dd>
         </div>
       </dl>
-      <p className={styles['hint']}>
-        Git facts describe the workspace FirmwareSight read. They are not proof of how this artifact was
-        built, and nothing here says it was built from a commit.
-      </p>
+      <p className={styles['hint']}>{t('gate', 'readiness.gitHint')}</p>
       {run.recordNote === null ? null : (
         <p className={styles['stale']} role="status">
           {run.recordNote}
         </p>
       )}
       {run.warnings.length === 0 ? null : (
-        <ul className={styles['noticeList']} aria-label="Run warnings">
+        <ul className={styles['noticeList']} aria-label={t('gate', 'warnings.runList')}>
           {run.warnings.map((warning) => (
             <li className={styles['noticeItem']} key={warning}>
-              Warning: {warning}
+              {t('gate', 'warnings.item', { warning })}
             </li>
           ))}
         </ul>
       )}
       <div className={styles['actions']}>
         {restored ? (
-          <span className={styles['status']}>Showing the record as history stores it.</span>
+          <span className={styles['status']}>{t('gate', 'readiness.historyStatus')}</span>
         ) : (
-          <Button onClick={onReload}>
-            Read the stored record
-          </Button>
+          <Button onClick={onReload}>{t('gate', 'readiness.reload')}</Button>
         )}
-        <span className={styles['status']}>
-          A stored record keeps findings, evidence and accepted reviews. The numbers a policy produced
-          stay inside each finding.
-        </span>
+        <span className={styles['status']}>{t('gate', 'readiness.storedRecordNote')}</span>
       </div>
     </section>
   );
@@ -661,13 +665,14 @@ function Findings({
   readonly run: GateRunDto;
   readonly onAccept: (request: AcceptReviewRequestDto) => Promise<ErrorEnvelopeDto | null>;
 }) {
+  const { t } = useI18n();
   return (
     <section className={styles['section']} aria-labelledby="fs-findings-heading">
-      <h2 id="fs-findings-heading">1 · Findings by state</h2>
+      <h2 id="fs-findings-heading">{'1 · '}{t('gate', 'findings.heading')}</h2>
       {run.findings.length === 0 ? (
-        <p className={styles['hint']}>This run returned no findings.</p>
+        <p className={styles['hint']}>{t('gate', 'findings.empty')}</p>
       ) : null}
-      {STATE_GROUPS.map((group) => {
+      {stateGroups(t).map((group) => {
         const rows = run.findings.filter((finding) => finding.state === group.state);
         if (rows.length === 0) {
           return null;
@@ -706,6 +711,7 @@ function FindingRow({
   readonly runId: string;
   readonly onAccept: (request: AcceptReviewRequestDto) => Promise<ErrorEnvelopeDto | null>;
 }) {
+  const { t } = useI18n();
   const [openForm, setOpenForm] = useState(false);
   const [actor, setActor] = useState('');
   const [reason, setReason] = useState('');
@@ -731,18 +737,20 @@ function FindingRow({
       <div className={styles['findingHead']}>
         <span className={styles['mono']}>{finding.ruleId}</span>
         <StateBadge state={stateName(finding.state)} label={finding.state} />
-        <span className={styles['severity']}>effective severity: {finding.effectiveSeverity}</span>
+        <span className={styles['severity']}>
+          {t('gate', 'findings.effectiveSeverity', { severity: finding.effectiveSeverity })}
+        </span>
       </div>
       <p className={styles['summary']}>{finding.summary}</p>
       {finding.remediation === null ? null : (
         <p className={styles['remediation']}>
-          <span className={styles['axis']}>Next step</span> {finding.remediation}
+          <span className={styles['axis']}>{t('gate', 'findings.nextStep')}</span> {finding.remediation}
         </p>
       )}
       {finding.evidenceRefs.length === 0 ? (
-        <p className={styles['note']}>This finding quotes no evidence locator.</p>
+        <p className={styles['note']}>{t('gate', 'findings.noEvidence')}</p>
       ) : (
-        <ul className={styles['refs']} aria-label={`Evidence for ${finding.ruleId}`}>
+        <ul className={styles['refs']} aria-label={t('gate', 'findings.evidenceList', { rule: finding.ruleId })}>
           {finding.evidenceRefs.map((ref) => (
             <li className={styles['monoSmall']} key={ref}>
               {ref}
@@ -752,28 +760,27 @@ function FindingRow({
       )}
       {finding.acceptance === null ? null : (
         <div className={styles['accepted']} role="status">
-          <span className={styles['axis']}>Accepted</span>
+          <span className={styles['axis']}>{t('release', 'accept.recordTitle')}</span>
           <dl className={styles['audit']}>
             <div>
-              <dt>By</dt>
+              <dt>{t('release', 'accept.by')}</dt>
               <dd>{finding.acceptance.actor}</dd>
             </div>
             <div>
-              <dt>When</dt>
+              <dt>{t('release', 'accept.when')}</dt>
               <dd className={styles['monoSmall']}>{finding.acceptance.acceptedAt}</dd>
             </div>
             <div>
-              <dt>Reason</dt>
+              <dt>{t('release', 'accept.reason')}</dt>
               <dd>{finding.acceptance.reason}</dd>
             </div>
             <div>
-              <dt>Accepted state</dt>
+              <dt>{t('release', 'accept.state')}</dt>
               <dd>{finding.acceptance.originalState}</dd>
             </div>
           </dl>
           <p className={styles['note']}>
-            An acceptance is a record: it cannot be edited or deleted, and this row stays{' '}
-            {finding.acceptance.originalState}.
+            {t('release', 'accept.recordNote', { state: finding.acceptance.originalState })}
           </p>
         </div>
       )}
@@ -782,7 +789,7 @@ function FindingRow({
           {openForm ? (
             <div className={styles['acceptForm']}>
               <label className={styles['field']} htmlFor={`fs-actor-${finding.id}`}>
-                <span className={styles['pickerLabel']}>Who accepts this review</span>
+                <span className={styles['pickerLabel']}>{t('release', 'accept.actorLabel')}</span>
                 <input
                   id={`fs-actor-${finding.id}`}
                   className={styles['input']}
@@ -793,7 +800,7 @@ function FindingRow({
                 />
               </label>
               <label className={styles['field']} htmlFor={`fs-reason-${finding.id}`}>
-                <span className={styles['pickerLabel']}>Why it is acceptable</span>
+                <span className={styles['pickerLabel']}>{t('release', 'accept.reasonLabel')}</span>
                 <textarea
                   id={`fs-reason-${finding.id}`}
                   className={styles['input']}
@@ -810,24 +817,22 @@ function FindingRow({
                   disabled={busy || actor.trim().length === 0 || reason.trim().length === 0}
                   onClick={() => void submit()}
                 >
-                  {busy ? 'Recording…' : 'Record acceptance'}
+                  {busy ? t('release', 'accept.recording') : t('release', 'accept.record')}
                 </Button>
                 <Button
                   onClick={() => {
                     setOpenForm(false);
                   }}
                 >
-                  Cancel
+                  {t('release', 'accept.cancel')}
                 </Button>
-                <span className={styles['status']}>
-                  Both are required. An acceptance without a name and a reason is not an audit record.
-                </span>
+                <span className={styles['status']}>{t('release', 'accept.requiredNote')}</span>
               </div>
               {error === null ? null : (
                 <ErrorPanel
                   envelope={error}
-                  label={`Acceptance of ${finding.ruleId} failed`}
-                  heading="Acceptance refused"
+                  label={t('release', 'accept.errorLabel', { rule: finding.ruleId })}
+                  heading={t('release', 'accept.errorHeading')}
                 />
               )}
             </div>
@@ -837,7 +842,7 @@ function FindingRow({
                 setOpenForm(true);
               }}
             >
-              Accept review
+              {t('release', 'accept.button')}
             </Button>
           )}
         </div>
@@ -857,37 +862,40 @@ function FindingRow({
  * The three words Rust uses for which set satisfied a required kind (`GateArtifactRowDto.satisfiedBy`).
  * A label map, not a decision: the screen never works out satisfaction from `present`.
  */
-const SATISFIED_BY: Readonly<Record<string, string>> = {
-  analyzed: 'Analyzed build',
-  attachment: 'Release attachment',
-  none: 'Missing',
+const SATISFIED_BY: Readonly<Record<string, GateKey>> = {
+  analyzed: 'evidence.satisfiedAnalyzed',
+  attachment: 'evidence.satisfiedAttachment',
+  none: 'evidence.satisfiedNone',
 };
 
+/** The same three words in the language on screen; a value outside the map is shown as Rust sent it. */
+function satisfiedBy(value: string, t: Translate): string {
+  const key = SATISFIED_BY[value];
+  return key === undefined ? value : t('gate', key);
+}
+
 function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: SizeUnit }) {
+  const { t } = useI18n();
   const tables = run.tables;
   if (tables === null) {
     return null;
   }
   return (
     <section className={styles['section']} aria-labelledby="fs-evidence-heading">
-      <h2 id="fs-evidence-heading">3 · What the findings were judged on</h2>
+      <h2 id="fs-evidence-heading">{'3 · '}{t('gate', 'evidence.heading')}</h2>
 
       <div className={styles['block']}>
-        <h3>Required artifacts</h3>
-        <ScrollArea label="Required artifact table">
+        <h3>{t('gate', 'evidence.artifactsHeading')}</h3>
+        <ScrollArea label={t('gate', 'evidence.artifactsTable')}>
           <table className={styles['table']}>
-            <caption className={styles['caption']}>
-              Policy requirement against the evidence that carries each kind. Required bin/hex are
-              satisfied by release files you attach; FirmwareSight records their bytes and SHA-256 and
-              does not analyze them.
-            </caption>
+            <caption className={styles['caption']}>{t('gate', 'evidence.artifactsCaption')}</caption>
             <thead>
               <tr>
-                <th scope="col">Kind</th>
-                <th scope="col">Policy</th>
-                <th scope="col">Satisfied by</th>
-                <th scope="col">SHA-256</th>
-                <th scope="col">Size</th>
+                <th scope="col">{t('gate', 'evidence.colKind')}</th>
+                <th scope="col">{t('gate', 'evidence.colPolicy')}</th>
+                <th scope="col">{t('gate', 'evidence.colSatisfiedBy')}</th>
+                <th scope="col">{t('gate', 'evidence.colSha')}</th>
+                <th scope="col">{t('gate', 'evidence.colSize')}</th>
               </tr>
             </thead>
             <tbody>
@@ -896,8 +904,10 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
                   <th scope="row" className={styles['mono']}>
                     {row.kind}
                   </th>
-                  <td>{row.required ? 'Required' : 'Not required'}</td>
-                  <td>{SATISFIED_BY[row.satisfiedBy] ?? row.satisfiedBy}</td>
+                  <td>
+                    {t('gate', row.required ? 'evidence.required' : 'evidence.notRequired')}
+                  </td>
+                  <td>{satisfiedBy(row.satisfiedBy, t)}</td>
                   <td className={styles['monoSmall']}>
                     {row.sha256 === null ? '—' : truncateMiddle(row.sha256, 8)}
                   </td>
@@ -910,26 +920,21 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
       </div>
 
       <div className={styles['block']}>
-        <h3>Memory budgets</h3>
+        <h3>{t('gate', 'evidence.budgetsHeading')}</h3>
         {tables.budgets.length === 0 ? (
-          <p className={styles['hint']}>
-            No FLASH or RAM budget is configured, so neither rule has anything to measure against.
-          </p>
+          <p className={styles['hint']}>{t('gate', 'evidence.noBudgets')}</p>
         ) : (
-          <ScrollArea label="Memory budget table">
+          <ScrollArea label={t('gate', 'evidence.budgetsTable')}>
             <table className={styles['table']}>
-              <caption className={styles['caption']}>
-                Actual against budget, with the evidence the actual figure rests on. A floor is not a
-                measurement of the whole, so a partial total never blocks.
-              </caption>
+              <caption className={styles['caption']}>{t('gate', 'evidence.budgetsCaption')}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Side</th>
-                  <th scope="col">Actual</th>
-                  <th scope="col">Budget</th>
-                  <th scope="col">Headroom / over</th>
-                  <th scope="col">State</th>
-                  <th scope="col">Evidence basis</th>
+                  <th scope="col">{t('gate', 'evidence.colSide')}</th>
+                  <th scope="col">{t('gate', 'evidence.colActual')}</th>
+                  <th scope="col">{t('gate', 'evidence.colBudget')}</th>
+                  <th scope="col">{t('gate', 'evidence.colMargin')}</th>
+                  <th scope="col">{t('gate', 'evidence.colState')}</th>
+                  <th scope="col">{t('gate', 'evidence.colEvidenceBasis')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -943,26 +948,21 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
       </div>
 
       <div className={styles['block']}>
-        <h3>Growth against the baseline</h3>
+        <h3>{t('gate', 'evidence.growthHeading')}</h3>
         {tables.growth.length === 0 ? (
-          <p className={styles['hint']}>
-            No `[diff]` growth threshold is configured, so nothing is compared with a baseline here.
-          </p>
+          <p className={styles['hint']}>{t('gate', 'evidence.noGrowth')}</p>
         ) : (
-          <ScrollArea label="Growth against the baseline table">
+          <ScrollArea label={t('gate', 'evidence.growthTable')}>
             <table className={styles['table']}>
-              <caption className={styles['caption']}>
-                The deltas are the same ones Compare shows: Core computed them once and this page moves
-                them.
-              </caption>
+              <caption className={styles['caption']}>{t('gate', 'evidence.growthCaption')}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Side</th>
-                  <th scope="col">Old</th>
-                  <th scope="col">New</th>
-                  <th scope="col">Delta</th>
-                  <th scope="col">Review threshold</th>
-                  <th scope="col">State</th>
+                  <th scope="col">{t('gate', 'evidence.colSide')}</th>
+                  <th scope="col">{t('gate', 'evidence.colOld')}</th>
+                  <th scope="col">{t('gate', 'evidence.colNew')}</th>
+                  <th scope="col">{t('gate', 'evidence.colDelta')}</th>
+                  <th scope="col">{t('gate', 'evidence.colReviewThreshold')}</th>
+                  <th scope="col">{t('gate', 'evidence.colState')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -976,52 +976,54 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
       </div>
 
       <div className={styles['block']}>
-        <h3>Release notes</h3>
+        <h3>{t('gate', 'evidence.notesHeading')}</h3>
         <div className={styles['row']}>
-          <span className={styles['term']}>Path</span>
+          <span className={styles['term']}>{t('gate', 'evidence.notesPathTerm')}</span>
           <span className={cx(styles['value'], styles['mono'])}>
-            {tables.notes.relativePath ?? 'No notes path is required'}
+            {tables.notes.relativePath ?? t('gate', 'evidence.noNotesPath')}
           </span>
         </div>
         <div className={styles['row']}>
-          <span className={styles['term']}>State</span>
+          <span className={styles['term']}>{t('gate', 'evidence.colState')}</span>
           <span className={styles['value']}>
             <StateBadge
               state={stateName(tables.notes.state)}
               label={
                 tables.notes.required
-                  ? `Required · ${notesPresence(tables.notes.present)}`
-                  : 'Not required'
+                  ? t('gate', 'evidence.notesRequired', {
+                      presence: notesPresence(tables.notes.present, t),
+                    })
+                  : t('gate', 'evidence.notRequired')
               }
             />
             <span className={styles['severity']}>
-              effective severity: {tables.notes.effectiveSeverity}
+              {t('gate', 'findings.effectiveSeverity', {
+                severity: tables.notes.effectiveSeverity,
+              })}
             </span>
           </span>
         </div>
         {tables.notes.sha256 === null ? null : (
           <div className={styles['row']}>
-            <span className={styles['term']}>SHA-256</span>
+            <span className={styles['term']}>{t('gate', 'evidence.colSha')}</span>
             <span className={cx(styles['value'], styles['monoSmall'])}>{tables.notes.sha256}</span>
           </div>
         )}
         {tables.notes.reason === null ? null : <p className={styles['note']}>{tables.notes.reason}</p>}
-        <p className={styles['hint']}>
-          The path is relative to the project folder, and the folder itself is never shown. There is no
-          editor here: FirmwareSight reads the notes file, it does not write one.
-        </p>
+        <p className={styles['hint']}>{t('gate', 'evidence.notesHint')}</p>
       </div>
     </section>
   );
 }
 
 function BudgetRow({ row, unit }: { readonly row: GateBudgetRowDto; readonly unit: SizeUnit }) {
+  const { t } = useI18n();
   const margin =
     row.headroomBytes !== null
-      ? `${formatSize(row.headroomBytes, unit)} headroom`
+      ? t('gate', 'evidence.headroom', { value: formatSize(row.headroomBytes, unit) })
       : row.overBytes !== null
-        ? `${formatSize(row.overBytes, unit)} over`
-        : 'Unknown';
+        ? t('gate', 'evidence.over', { value: formatSize(row.overBytes, unit) })
+        : t('gate', 'evidence.unknownValue');
   return (
     <tr>
       <th scope="row">{row.label}</th>
@@ -1030,15 +1032,20 @@ function BudgetRow({ row, unit }: { readonly row: GateBudgetRowDto; readonly uni
       <td className={styles['mono']}>{margin}</td>
       <td>
         <StateBadge state={stateName(row.state)} label={row.state} />
-        <span className={styles['note']}> effective {row.effectiveSeverity}</span>
+        <span className={styles['note']}>
+          {' '}
+          {t('gate', 'evidence.effective', { severity: row.effectiveSeverity })}
+        </span>
       </td>
       <td className={styles['wrap']}>
-        <span>{row.basis === null ? 'no basis recorded' : evidenceBasisCaption(row.basis)}</span>
+        <span>
+          {row.basis === null ? t('gate', 'evidence.noBasis') : evidenceBasisCaption(row.basis, t)}
+        </span>
         <span className={styles['note']}>
           {' · '}
-          {row.exact ? 'complete attribution' : 'floor'}
+          {t('gate', row.exact ? 'evidence.completeAttribution' : 'evidence.floor')}
           {' · '}
-          {row.admissible ? 'may support a hard verdict' : 'cannot block on this evidence'}
+          {t('gate', row.admissible ? 'evidence.maySupport' : 'evidence.cannotBlock')}
         </span>
         {row.reason === null ? null : <span className={styles['note']}>{' · ' + row.reason}</span>}
       </td>
@@ -1104,6 +1111,7 @@ function Attachments({
   readonly unit: SizeUnit;
   readonly onSetChanged: () => void;
 }) {
+  const { t } = useI18n();
   const [set, setSet] = useState<ReleaseAttachmentsDto | null>(null);
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [busy, setBusy] = useState(false);
@@ -1168,29 +1176,25 @@ function Attachments({
   const rows = set?.attachments ?? [];
   return (
     <section className={styles['section']} aria-labelledby="fs-attachments-heading">
-      <h2 id="fs-attachments-heading">Release attachments</h2>
-      <ScrollArea label="Release attachment table">
+      <h2 id="fs-attachments-heading">{t('release', 'attachments.heading')}</h2>
+      <ScrollArea label={t('release', 'attachments.table')}>
         <table className={styles['table']}>
-          <caption className={styles['caption']}>
-            Bytes verified; build provenance not verified. BIN/HEX contents are not analyzed.
-          </caption>
+          <caption className={styles['caption']}>{t('release', 'attachments.caption')}</caption>
           <thead>
             <tr>
-              <th scope="col">File</th>
-              <th scope="col">Kind</th>
-              <th scope="col">Size</th>
-              <th scope="col">SHA-256</th>
-              <th scope="col">Evidence</th>
-              <th scope="col">Action</th>
+              <th scope="col">{t('release', 'attachments.colFile')}</th>
+              <th scope="col">{t('release', 'attachments.colKind')}</th>
+              <th scope="col">{t('release', 'attachments.colSize')}</th>
+              <th scope="col">{t('release', 'attachments.colSha')}</th>
+              <th scope="col">{t('release', 'attachments.colEvidence')}</th>
+              <th scope="col">{t('release', 'attachments.colAction')}</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
                 <td colSpan={6} className={styles['empty']}>
-                  Nothing is attached. A required BIN or HEX is satisfied only by a file you attach here, and
-                  an attached file ships as bytes: its size and SHA-256 are recorded, and it is not
-                  analyzed.
+                  {t('release', 'attachments.empty')}
                 </td>
               </tr>
             ) : (
@@ -1202,7 +1206,7 @@ function Attachments({
                   <td>
                     <select
                       className={styles['select']}
-                      aria-label={`Declared kind for ${row.fileName}`}
+                      aria-label={t('release', 'attachments.kindPicker', { name: row.fileName })}
                       value={row.kind}
                       disabled={busy}
                       onChange={(event) => {
@@ -1219,11 +1223,14 @@ function Attachments({
                   <td className={styles['monoSmall']}>{formatSize(row.byteSize, unit)}</td>
                   <td className={styles['monoSmall']}>{row.sha256}</td>
                   <td>
-                    {`Bytes observed · kind ${row.kindBasis} · provenance ${row.provenance}`}
+                    {t('release', 'attachments.bytesLine', {
+                      basis: row.kindBasis,
+                      provenance: row.provenance,
+                    })}
                   </td>
                   <td>
                     <Button disabled={busy} onClick={() => void withdraw(row.attachmentId)}>
-                      Withdraw
+                      {t('release', 'attachments.withdraw')}
                     </Button>
                   </td>
                 </tr>
@@ -1234,28 +1241,30 @@ function Attachments({
       </ScrollArea>
       <div className={styles['actions']}>
         <Button disabled={busy} onClick={() => void attach()}>
-          Attach
+          {t('release', 'attachments.attach')}
         </Button>
       </div>
-      <p className={styles['hint']}>
-        Attach takes the file chosen in the native dialog exactly as it stands. Its kind is the one its name
-        states, and a name that states nothing is recorded as unknown — which satisfies no required kind. Its
-        build provenance stays unestablished, and nothing here reads the file as a container.
-      </p>
+      <p className={styles['hint']}>{t('release', 'attachments.hint')}</p>
       {set?.matchesGateRun === false ? (
         <p className={styles['stale']} role="status">
-          The set on this page is not the set{' '}
-          {truncateMiddle(set.gateRunId ?? '', 10)} judged. Run the Gate again to judge these bytes.
+          {t('release', 'attachments.stale', {
+            id: truncateMiddle(set.gateRunId ?? '', 10),
+          })}
         </p>
       ) : null}
       {error === null ? null : (
-        <ErrorPanel envelope={error} label="Attachment step failed" heading="Attachment error" />
+        <ErrorPanel
+          envelope={error}
+          label={t('release', 'attachments.errorLabel')}
+          heading={t('release', 'attachments.errorHeading')}
+        />
       )}
     </section>
   );
 }
 
 function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit: SizeUnit }) {
+  const { t } = useI18n();
   const [preview, setPreview] = useState<BundlePreviewDto | null>(null);
   const [destination, setDestination] = useState<BundleDestinationDto | null>(null);
   const [outcome, setOutcome] = useState<BundleExportDto | null>(null);
@@ -1331,14 +1340,14 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
     }
     // Cancel is a decision, not a failure: the preview stays and the screen says what happened.
     if (result.value === null) {
-      setNote('No folder was chosen. The bundle has not been written.');
+      setNote(t('release', 'bundle.noFolder'));
       return;
     }
     setNote(null);
     setDestination(result.value);
     setOutcome(null);
     setConfirm(null);
-  }, [preview]);
+  }, [preview, t]);
 
   const exportBundle = useCallback(
     async (overwrite: boolean) => {
@@ -1378,19 +1387,12 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
 
   return (
     <section className={styles['section']} aria-labelledby="fs-bundle-heading">
-      <h2 id="fs-bundle-heading">4 · Release Bundle</h2>
+      <h2 id="fs-bundle-heading">{'4 · '}{t('release', 'bundleHeading')}</h2>
       {ready ? (
-        <p className={styles['hint']}>
-          This run&rsquo;s disposition is PASS, so the release can be packaged into a folder you choose.
-          The bundle is the analysis, the comparison, the Gate result, the accepted reviews, the Release
-          Notes and the current artifacts — readable without FirmwareSight and checkable against its own
-          SHA256SUMS.
-        </p>
+        <p className={styles['hint']}>{t('release', 'bundle.readyHint')}</p>
       ) : (
         <p className={styles['stale']} role="status">
-          No bundle is prepared: the disposition is {run.dispositionEffectiveSeverity}. A release bundle is
-          written only for a PASS disposition, so resolve what the findings above report, accept what a
-          named reviewer accepts, and run the Gate again.
+          {t('release', 'bundle.notReady', { severity: run.dispositionEffectiveSeverity })}
         </p>
       )}
       <div className={styles['actions']}>
@@ -1399,34 +1401,33 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
           disabled={!ready || busy}
           onClick={() => void prepare()}
         >
-          {busy && preview === null ? 'Preparing…' : 'Prepare bundle'}
+          {busy && preview === null
+            ? t('release', 'bundle.preparing')
+            : t('release', 'bundle.prepare')}
         </Button>
         <Button
           disabled={preview === null || busy}
           onClick={() => void choose()}
         >
           {busy && preview !== null && destination === null
-            ? 'Choosing…'
-            : 'Choose destination folder'}
+            ? t('release', 'bundle.choosing')
+            : t('release', 'bundle.choose')}
         </Button>
         <Button
           disabled={preview === null || destination === null || busy || foreignOccupied}
           onClick={() => void exportBundle(false)}
         >
-          {busy && outcome === null ? 'Writing…' : 'Export bundle'}
+          {busy && outcome === null ? t('release', 'bundle.writing') : t('release', 'bundle.export')}
         </Button>
       </div>
       {foreignOccupied && destination !== null ? (
         <p className={styles['stale']} role="status">
-          <span className={styles['mono']}>{destination.bundleFolderName}</span> is already there, and
-          it is not a bundle this engine wrote, so nothing will be replaced and Export is disabled.
-          Choose another destination folder to export.
+          <span className={styles['mono']}>{destination.bundleFolderName}</span>{' '}
+          {t('release', 'bundle.foreignOccupied')}
         </p>
       ) : null}
       {!ready && !busy && preview === null ? (
-        <p className={styles['hint']}>
-          Prepare is disabled because of the disposition above, not because of anything this page decided.
-        </p>
+        <p className={styles['hint']}>{t('release', 'bundle.prepareDisabledWhy')}</p>
       ) : null}
       {note === null ? null : (
         <p className={styles['status']} role="status">
@@ -1434,15 +1435,18 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
         </p>
       )}
       {error === null ? null : (
-        <ErrorPanel envelope={error} label="Bundle step failed" heading="Release bundle error" />
+        <ErrorPanel
+          envelope={error}
+          label={t('release', 'bundle.errorLabel')}
+          heading={t('release', 'bundle.errorHeading')}
+        />
       )}
       {confirm === null ? null : (
         <div className={styles['block']} role="group" aria-labelledby="fs-bundle-confirm">
-          <h3 id="fs-bundle-confirm">Replace the existing bundle?</h3>
+          <h3 id="fs-bundle-confirm">{t('release', 'bundle.replaceTitle')}</h3>
           <p className={styles['hint']}>
-            <span className={styles['mono']}>{confirm}</span> already holds a FirmwareSight release bundle.
-            Replacing it moves that bundle aside and removes it only once the new one is written and
-            verified; keeping it writes nothing.
+            <span className={styles['mono']}>{confirm}</span>{' '}
+            {t('release', 'bundle.replaceWhy')}
           </p>
           <div className={styles['actions']}>
             <Button
@@ -1452,16 +1456,16 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
               disabled={busy}
               onClick={() => void exportBundle(true)}
             >
-              Replace the existing bundle named {confirm}
+              {t('release', 'bundle.replaceButton', { name: confirm })}
             </Button>
             <Button
               onClick={() => {
                 setConfirm(null);
                 setError(null);
-                setNote('Kept the bundle that was there. Nothing was written.');
+                setNote(t('release', 'bundle.kept'));
               }}
             >
-              Keep it
+              {t('release', 'bundle.keep')}
             </Button>
           </div>
         </div>
@@ -1469,14 +1473,17 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
       {preview === null ? null : <BundlePreview preview={preview} unit={unit} />}
       {destination === null || preview === null ? null : (
         <p className={styles['status']} role="status">
-          Destination chosen for <span className={styles['mono']}>{destination.bundleFolderName}</span>.
+          {t('release', 'bundle.destChosen')}{' '}
+          <span className={styles['mono']}>{destination.bundleFolderName}</span>
+          {'. '}
           {destination.exists
-            ? ` A folder of that name is already there${
+            ? t(
+                'release',
                 destination.recognizableBundle
-                  ? ', and it reads as a FirmwareSight bundle.'
-                  : ', and it is not a bundle this engine wrote — it will not be replaced.'
-              }`
-            : ' Nothing of that name is there yet.'}
+                  ? 'bundle.destOccupiedBundle'
+                  : 'bundle.destOccupiedForeign',
+              )
+            : t('release', 'bundle.destFresh')}
         </p>
       )}
       {outcome === null ? null : <BundleResult outcome={outcome} />}
@@ -1499,53 +1506,51 @@ function BundlePreview({
   readonly preview: BundlePreviewDto;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   return (
     <div className={styles['block']}>
-      <h3>Bundle preview</h3>
+      <h3>{t('release', 'bundle.previewHeading')}</h3>
       <dl className={styles['rows']}>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Release</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.releaseTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{preview.releaseId}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Version</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.versionTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{preview.releaseVersion}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Current build</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.currentBuildTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{preview.snapshotId}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Baseline</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.baselineTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>
-            {preview.baselineSnapshotId ?? 'None'}
+            {preview.baselineSnapshotId ?? t('release', 'bundle.noBaseline')}
           </dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Gate run</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.gateRunTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{preview.gateRunId}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Accepted reviews</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.acceptedReviewsTerm')}</dt>
           <dd className={styles['value']}>{preview.acceptedReviewCount}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Proposed folder</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.proposedFolderTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{preview.bundleFolderName}</dd>
         </div>
       </dl>
-      <ScrollArea label="Bundle file list">
+      <ScrollArea label={t('release', 'bundle.fileList')}>
         <table className={styles['table']}>
-          <caption className={styles['caption']}>
-            Every file the bundle will hold, named as it will appear inside it. The digests are the ones the
-            plan computed before anything was written, and SHA256SUMS and the manifest repeat them.
-          </caption>
+          <caption className={styles['caption']}>{t('release', 'bundle.filesCaption')}</caption>
           <thead>
             <tr>
-              <th scope="col">File</th>
-              <th scope="col">Role</th>
-              <th scope="col">Size</th>
-              <th scope="col">SHA-256</th>
+              <th scope="col">{t('release', 'bundle.colFile')}</th>
+              <th scope="col">{t('release', 'bundle.colRole')}</th>
+              <th scope="col">{t('release', 'bundle.colSize')}</th>
+              <th scope="col">{t('release', 'bundle.colSha')}</th>
             </tr>
           </thead>
           <tbody>
@@ -1563,10 +1568,10 @@ function BundlePreview({
         </table>
       </ScrollArea>
       {preview.warnings.length === 0 ? null : (
-        <ul className={styles['noticeList']} aria-label="Plan warnings">
+        <ul className={styles['noticeList']} aria-label={t('release', 'warnings.planList')}>
           {preview.warnings.map((warning) => (
             <li className={styles['noticeItem']} key={warning}>
-              Warning: {warning}
+              {t('release', 'warnings.item', { warning })}
             </li>
           ))}
         </ul>
@@ -1577,45 +1582,48 @@ function BundlePreview({
 
 /** What an export produced (§50): the bundle&rsquo;s own name and digest, and what is in it. */
 function BundleResult({ outcome }: { readonly outcome: BundleExportDto }) {
+  const { t } = useI18n();
   return (
     <div className={styles['block']}>
-      <h3>Bundle created</h3>
+      <h3>{t('release', 'bundle.resultHeading')}</h3>
       <dl className={styles['rows']}>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Release</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.releaseTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{outcome.releaseId}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Folder</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.folderTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{outcome.folderDisplayName}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Manifest SHA-256</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.manifestTerm')}</dt>
           <dd className={cx(styles['value'], styles['mono'])}>{outcome.manifestSha256}</dd>
         </div>
         <div className={styles['row']}>
-          <dt className={styles['term']}>Files</dt>
+          <dt className={styles['term']}>{t('release', 'bundle.filesTerm')}</dt>
           <dd className={styles['value']}>
-            {outcome.fileCount} ({outcome.artifactCount} artifact
-            {outcome.artifactCount === 1 ? '' : 's'})
+            {outcome.artifactCount === 1
+              ? t('release', 'bundle.filesOne', { count: outcome.fileCount })
+              : t('release', 'bundle.filesMany', {
+                  count: outcome.fileCount,
+                  artifacts: outcome.artifactCount,
+                })}
           </dd>
         </div>
       </dl>
       <p className={styles['hint']} role="status">
-        {outcome.replaced
-          ? 'This export replaced the bundle that was there, under your confirmation. '
-          : ''}
-        The written folder was verified against its own SHA256SUMS and manifest before it was put in
-        place.{' '}
+        {outcome.replaced ? `${t('release', 'bundle.replacedNote')} ` : ''}
+        {t('release', 'bundle.verifiedNote')}{' '}
         {outcome.recordWritten
-          ? 'The release is recorded in this database.'
-          : 'The release record was not written; the bundle itself is complete.'}
+          ? t('release', 'bundle.recordWrittenNote')
+          : t('release', 'bundle.recordMissingNote')}
       </p>
     </div>
   );
 }
 
 function GrowthRow({ row, unit }: { readonly row: GateGrowthRowDto; readonly unit: SizeUnit }) {
+  const { t } = useI18n();
   return (
     <tr>
       <th scope="row">{row.label}</th>
@@ -1625,10 +1633,13 @@ function GrowthRow({ row, unit }: { readonly row: GateGrowthRowDto; readonly uni
       <td className={styles['mono']}>{formatSize(row.thresholdBytes, unit)}</td>
       <td className={styles['wrap']}>
         <StateBadge state={stateName(row.state)} label={row.state} />
-        <span className={styles['note']}> effective {row.effectiveSeverity}</span>
         <span className={styles['note']}>
-          {' · delta '}
-          {row.comparability}
+          {' '}
+          {t('gate', 'evidence.effective', { severity: row.effectiveSeverity })}
+        </span>
+        <span className={styles['note']}>
+          {' '}
+          {t('gate', 'evidence.deltaComparability', { comparability: row.comparability })}
           {row.reason === null ? '' : `: ${row.reason}`}
         </span>
       </td>
@@ -1650,6 +1661,7 @@ function PolicyForm({
   readonly draft: ProjectPolicyDto;
   readonly onChange: (draft: ProjectPolicyDto) => void;
 }) {
+  const { t } = useI18n();
   const patch = (part: Partial<ProjectPolicyDto>): void => {
     onChange({ ...draft, ...part });
   };
@@ -1672,9 +1684,9 @@ function PolicyForm({
       }}
     >
       <fieldset className={styles['fields']}>
-        <legend>Policy fields</legend>
+        <legend>{t('release', 'form.fieldsLegend')}</legend>
         <label className={styles['field']} htmlFor="fs-policy-name">
-          <span className={styles['pickerLabel']}>Project name</span>
+          <span className={styles['pickerLabel']}>{t('release', 'form.projectName')}</span>
           <input
             id="fs-policy-name"
             className={styles['input']}
@@ -1686,7 +1698,7 @@ function PolicyForm({
         </label>
 
         <fieldset className={styles['nested']}>
-          <legend>Required artifacts</legend>
+          <legend>{t('release', 'form.requiredArtifacts')}</legend>
           {ARTIFACT_KINDS.map((kind) => {
             const checked = draft.requiredArtifactKinds?.includes(kind) ?? false;
             return (
@@ -1708,20 +1720,17 @@ function PolicyForm({
               </label>
             );
           })}
-          <p className={styles['hint']}>
-            Leaving none checked states nothing, and the documented default applies: a build must hold an
-            ELF file. A required kind the build does not hold blocks the run.
-          </p>
+          <p className={styles['hint']}>{t('release', 'form.requiredHint')}</p>
         </fieldset>
 
         <div className={styles['grid']}>
           <label className={styles['field']} htmlFor="fs-flash-budget">
-            <span className={styles['pickerLabel']}>FLASH budget (bytes)</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.flashBudget')}</span>
             <input
               id="fs-flash-budget"
               className={styles['input']}
               inputMode="numeric"
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.flashBudget ?? ''}
               onChange={(event) => {
                 patch({ flashBudget: bytes(event.target.value) });
@@ -1729,12 +1738,12 @@ function PolicyForm({
             />
           </label>
           <label className={styles['field']} htmlFor="fs-ram-budget">
-            <span className={styles['pickerLabel']}>RAM budget (bytes)</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.ramBudget')}</span>
             <input
               id="fs-ram-budget"
               className={styles['input']}
               inputMode="numeric"
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.ramBudget ?? ''}
               onChange={(event) => {
                 patch({ ramBudget: bytes(event.target.value) });
@@ -1742,12 +1751,12 @@ function PolicyForm({
             />
           </label>
           <label className={styles['field']} htmlFor="fs-flash-growth">
-            <span className={styles['pickerLabel']}>FLASH growth review threshold (bytes)</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.flashGrowth')}</span>
             <input
               id="fs-flash-growth"
               className={styles['input']}
               inputMode="numeric"
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.flashGrowthReviewBytes ?? ''}
               onChange={(event) => {
                 patch({ flashGrowthReviewBytes: bytes(event.target.value) });
@@ -1755,12 +1764,12 @@ function PolicyForm({
             />
           </label>
           <label className={styles['field']} htmlFor="fs-ram-growth">
-            <span className={styles['pickerLabel']}>RAM growth review threshold (bytes)</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.ramGrowth')}</span>
             <input
               id="fs-ram-growth"
               className={styles['input']}
               inputMode="numeric"
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.ramGrowthReviewBytes ?? ''}
               onChange={(event) => {
                 patch({ ramGrowthReviewBytes: bytes(event.target.value) });
@@ -1768,12 +1777,12 @@ function PolicyForm({
             />
           </label>
           <label className={styles['field']} htmlFor="fs-unknown-count">
-            <span className={styles['pickerLabel']}>Unknown evidence review count</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.unknownCount')}</span>
             <input
               id="fs-unknown-count"
               className={styles['input']}
               inputMode="numeric"
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.unknownEvidenceReviewCount ?? ''}
               onChange={(event) => {
                 patch({ unknownEvidenceReviewCount: bytes(event.target.value) });
@@ -1785,7 +1794,7 @@ function PolicyForm({
         <div className={styles['grid']}>
           <TriSelect
             id="fs-clean-git"
-            label="Require a clean workspace (git.clean)"
+            label={t('release', 'form.requireClean')}
             value={toTri(draft.requireCleanGit)}
             onChange={(value) => {
               patch({ requireCleanGit: fromTri(value) });
@@ -1793,18 +1802,18 @@ function PolicyForm({
           />
           <TriSelect
             id="fs-require-notes"
-            label="Require release notes"
+            label={t('release', 'form.requireNotes')}
             value={toTri(draft.requireReleaseNotes)}
             onChange={(value) => {
               patch({ requireReleaseNotes: fromTri(value) });
             }}
           />
           <label className={styles['field']} htmlFor="fs-notes-path">
-            <span className={styles['pickerLabel']}>Release notes path (relative to the project)</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.notesPath')}</span>
             <input
               id="fs-notes-path"
               className={styles['input']}
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.releaseNotesPath ?? ''}
               onChange={(event) => {
                 patch({ releaseNotesPath: event.target.value === '' ? null : event.target.value });
@@ -1815,7 +1824,7 @@ function PolicyForm({
 
         <div className={styles['grid']}>
           <label className={styles['field']} htmlFor="fs-version-source">
-            <span className={styles['pickerLabel']}>Version source</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.versionSource')}</span>
             <select
               id="fs-version-source"
               className={styles['select']}
@@ -1825,16 +1834,16 @@ function PolicyForm({
                 patch({ versionSource: value === 'unset' ? null : value });
               }}
             >
-              <option value="unset">Not stated (no [version] section)</option>
-              <option value="git_tag">Git tag on workspace HEAD</option>
+              <option value="unset">{t('release', 'form.versionSourceUnset')}</option>
+              <option value="git_tag">{t('release', 'form.versionSourceGitTag')}</option>
             </select>
           </label>
           <label className={styles['field']} htmlFor="fs-version-pattern">
-            <span className={styles['pickerLabel']}>Version pattern (regular expression)</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.versionPattern')}</span>
             <input
               id="fs-version-pattern"
               className={styles['input']}
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.versionPattern ?? ''}
               onChange={(event) => {
                 patch({ versionPattern: event.target.value === '' ? null : event.target.value });
@@ -1842,11 +1851,11 @@ function PolicyForm({
             />
           </label>
           <label className={styles['field']} htmlFor="fs-expected-version">
-            <span className={styles['pickerLabel']}>Expected version</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.expectedVersion')}</span>
             <input
               id="fs-expected-version"
               className={styles['input']}
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.expectedVersion ?? ''}
               onChange={(event) => {
                 patch({ expectedVersion: event.target.value === '' ? null : event.target.value });
@@ -1854,11 +1863,11 @@ function PolicyForm({
             />
           </label>
           <label className={styles['field']} htmlFor="fs-expected-commit">
-            <span className={styles['pickerLabel']}>Expected commit</span>
+            <span className={styles['pickerLabel']}>{t('release', 'form.expectedCommit')}</span>
             <input
               id="fs-expected-commit"
               className={styles['input']}
-              placeholder="not stated"
+              placeholder={t('release', 'form.notStated')}
               value={draft.expectedCommit ?? ''}
               onChange={(event) => {
                 patch({ expectedCommit: event.target.value === '' ? null : event.target.value });
@@ -1868,14 +1877,14 @@ function PolicyForm({
         </div>
 
         <fieldset className={styles['nested']}>
-          <legend>When evidence is missing (on_unknown)</legend>
+          <legend>{t('release', 'form.onUnknownLegend')}</legend>
           {UNKNOWN_RULES.map((rule) => (
             <div className={styles['unknownRow']} key={rule.key}>
               <span className={styles['monoSmall']}>{rule.label}</span>
               <select
                 id={`fs-unknown-${rule.key}`}
                 className={styles['select']}
-                aria-label={`What ${rule.label} becomes when its evidence is missing`}
+                aria-label={t('release', 'form.onUnknownPicker', { rule: rule.label })}
                 value={draft.onUnknown[rule.key] ?? 'unset'}
                 onChange={(event) => {
                   const value = event.target.value;
@@ -1888,16 +1897,13 @@ function PolicyForm({
                   });
                 }}
               >
-                <option value="unset">Not stated (the documented default applies)</option>
-                <option value="review">Review</option>
-                <option value="block">Block</option>
+                <option value="unset">{t('release', 'form.notStatedDefault')}</option>
+                <option value="review">{t('release', 'form.dispositionReview')}</option>
+                <option value="block">{t('release', 'form.dispositionBlock')}</option>
               </select>
             </div>
           ))}
-          <p className={styles['hint']}>
-            A missing fact never becomes a pass. It becomes a review or a block, and that choice is
-            recorded here rather than assumed by the screen.
-          </p>
+          <p className={styles['hint']}>{t('release', 'form.onUnknownHint')}</p>
         </fieldset>
       </fieldset>
     </form>
@@ -1915,6 +1921,7 @@ function TriSelect({
   readonly value: TriState;
   readonly onChange: (value: TriState) => void;
 }) {
+  const { t } = useI18n();
   return (
     <label className={styles['field']} htmlFor={id}>
       <span className={styles['pickerLabel']}>{label}</span>
@@ -1926,9 +1933,9 @@ function TriSelect({
           onChange(event.target.value as TriState);
         }}
       >
-        <option value="unset">Not stated (the documented default applies)</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
+        <option value="unset">{t('release', 'form.notStatedDefault')}</option>
+        <option value="yes">{t('release', 'form.yes')}</option>
+        <option value="no">{t('release', 'form.no')}</option>
       </select>
     </label>
   );
@@ -1945,31 +1952,38 @@ function BuildFacts({
   readonly row: CompareCandidateDto | undefined;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   if (row === undefined) {
-    return <span className={styles['hint']}>No build is chosen.</span>;
+    return <span className={styles['hint']}>{t('release', 'builds.noChosen')}</span>;
   }
   return (
     <span className={styles['sideFacts']}>
       <span className={styles['monoSmall']}>SHA-256 {truncateMiddle(row.sha256, 8)}</span>
       <span className={styles['mono']}>{formatSize(row.byteSize, unit)}</span>
       <span>
-        nonvolatile {formatSize(row.nonvolatile.bytes, unit)} ({row.nonvolatile.state}) · runtime{' '}
-        {formatSize(row.runtimeRam.bytes, unit)} ({row.runtimeRam.state})
+        {t('release', 'builds.nonvolatile', {
+          value: formatSize(row.nonvolatile.bytes, unit),
+          state: row.nonvolatile.state,
+        })}{' · '}
+        {t('release', 'builds.runtime', {
+          value: formatSize(row.runtimeRam.bytes, unit),
+          state: row.runtimeRam.state,
+        })}
       </span>
-      <span>stored {row.importedAt}</span>
+      <span>{t('release', 'builds.stored', { at: row.importedAt })}</span>
     </span>
   );
 }
 
 /** The three ways the notes rule can have seen a file, in the words prompt §53 asks for. */
-function notesPresence(present: boolean | null): string {
+function notesPresence(present: boolean | null, t: Translate): string {
   if (present === true) {
-    return 'Present';
+    return t('gate', 'evidence.notesPresent');
   }
   if (present === false) {
-    return 'Missing';
+    return t('gate', 'evidence.notesMissing');
   }
-  return 'Not observed';
+  return t('gate', 'evidence.notesUnobserved');
 }
 
 /**
@@ -1982,12 +1996,13 @@ function notesPresence(present: boolean | null): string {
  * believe the build cleared on its own.
  */
 function Verdict({ run }: { readonly run: GateRunDto }) {
+  const { t } = useI18n();
   const severity = severityState(run.dispositionEffectiveSeverity);
 
   return (
-    <section className={styles['verdict']} aria-label="Gate verdict">
+    <section className={styles['verdict']} aria-label={t('gate', 'verdict.group')}>
       <StateBadge variant="chip" state={severity} label={severity} />
-      <p className={styles['verdictSentence']}>{gateVerdictSentence(run)}</p>
+      <p className={styles['verdictSentence']}>{gateVerdictSentence(run, t)}</p>
       <StatusStrip
         counts={{
           PASS: run.counts.pass,
@@ -1996,7 +2011,7 @@ function Verdict({ run }: { readonly run: GateRunDto }) {
           UNKNOWN: run.counts.unknown,
           'N/A': run.counts.notApplicable,
         }}
-        label="Findings by state in this run"
+        label={t('gate', 'verdict.strip')}
       />
     </section>
   );

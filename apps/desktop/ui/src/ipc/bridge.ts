@@ -485,7 +485,7 @@ export async function getApplicationPreferences(): Promise<IpcOutcome<Preference
 }
 
 /**
- * Store the two words the page is offering.
+ * Store the four words the page is offering.
  *
  * They travel as text and are matched against the closed sets in Rust, so an option the screen does
  * not list is refused with a code and a next step rather than being written down. A refusal resolves
@@ -496,11 +496,13 @@ export async function updateApplicationPreferences(
   sizeUnit: string,
   startupPage: string,
   theme: string,
+  language: string,
 ): Promise<IpcOutcome<PreferencesDto>> {
   return await call<PreferencesDto>(UPDATE_APPLICATION_PREFERENCES, {
     sizeUnit,
     startupPage,
     theme,
+    language,
   });
 }
 

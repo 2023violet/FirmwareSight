@@ -8,6 +8,7 @@
  */
 
 import styles from './table.module.css';
+import { useI18n } from '../i18n';
 import type { SortDirDto } from '../ipc/types';
 
 export function SortHeader({
@@ -25,6 +26,7 @@ export function SortHeader({
   /** Which column this header orders by; the caller closes over it. */
   readonly onSort?: () => void;
 }) {
+  const { t } = useI18n();
   if (!sortable || onSort === undefined) {
     return <th scope="col" className={styles['head']}>{label}</th>;
   }
@@ -37,7 +39,7 @@ export function SortHeader({
       <button
         type="button"
         className={styles['sort']}
-        aria-label={`Sort by ${label}`}
+        aria-label={t('common', 'sort.by', { label })}
         onClick={onSort}
       >
         {label}
@@ -52,6 +54,11 @@ export function SortHeader({
  *
  * The next offset is the one the shell reported, not one this page computed: a page size the
  * boundary clamped would otherwise silently skip rows.
+ *
+ * The sentence is this component's and the noun is the caller's: `label` arrives already translated
+ * from the page's own namespace, because only that page knows what its rows are called in the
+ * reader's language. A previous draft wrote the English sentence here and glued a translated noun into
+ * it, which is how one line ended up in two languages (`ADR-0032` D4).
  */
 export function Pager({
   total,
@@ -69,12 +76,18 @@ export function Pager({
   readonly label: string;
   readonly onOffset: (offset: number) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className={styles['pager']}>
       <p className={styles['status']} role="status" aria-live="polite">
         {shown === 0
-          ? `No ${label} in this page of ${String(total)}`
-          : `Showing ${String(offset + 1)} to ${String(offset + shown)} of ${String(total)} ${label}`}
+          ? t('common', 'pager.empty', { noun: label, total: String(total) })
+          : t('common', 'pager.showing', {
+              from: String(offset + 1),
+              to: String(offset + shown),
+              total: String(total),
+              noun: label,
+            })}
       </p>
       <button
         type="button"
@@ -84,7 +97,7 @@ export function Pager({
           onOffset(0);
         }}
       >
-        Previous page
+        {t('common', 'pager.previous')}
       </button>
       <button
         type="button"
@@ -94,7 +107,7 @@ export function Pager({
           onOffset(nextOffset ?? offset);
         }}
       >
-        Next page
+        {t('common', 'pager.next')}
       </button>
     </div>
   );

@@ -13,6 +13,7 @@ import type { ReactNode } from 'react';
 import type { StateName } from './StateBadge';
 import { StateIcon } from './StateBadge';
 import { cx } from '../styles/classnames';
+import { useI18n } from '../i18n';
 
 export function Chip({
   children,
@@ -50,17 +51,24 @@ export function StatusStrip({
   readonly counts: Readonly<Partial<Record<StateName, number>>>;
   readonly label: string;
 }) {
+  const { t } = useI18n();
   const order: readonly StateName[] = ['BLOCK', 'REVIEW', 'UNKNOWN', 'PASS', 'N/A'];
   const spoken = order
     .filter((state) => (counts[state] ?? 0) > 0)
-    .map((state) => `${String(counts[state] ?? 0)} ${SPOKEN[state]}`)
-    .join(', ');
+    .map((state) =>
+      t('common', 'strip.item', { count: counts[state] ?? 0, state: t('common', SPOKEN[state]) }),
+    )
+    .join(t('common', 'strip.join'));
 
   return (
     <span
       className={styles['strip']}
       role="img"
-      aria-label={spoken === '' ? `${label}: none` : `${label}: ${spoken}`}
+      aria-label={
+        spoken === ''
+          ? t('common', 'chip.none', { label })
+          : t('common', 'chip.spoken', { label, value: spoken })
+      }
     >
       {order.map((state) => (
         <span key={state} className={cx(styles['stripItem'], styles[classFor(state)])}>
@@ -72,12 +80,21 @@ export function StatusStrip({
   );
 }
 
-const SPOKEN: Readonly<Record<StateName, string>> = {
-  PASS: 'pass',
-  REVIEW: 'review',
-  BLOCK: 'block',
-  UNKNOWN: 'unknown',
-  'N/A': 'not applicable',
+/**
+ * The state word as it is read out, per catalog.
+ *
+ * These are the Gate's own vocabulary, so the Chinese entry keeps `PASS` / `REVIEW` / `BLOCK` /
+ * `UNKNOWN` / `N/A` exactly as the engine writes them (`ADR-0032` D5): a screen reader that announced
+ * 通过 for a REVIEW row would be renaming a verdict, which is the one thing this product's whole
+ * state model forbids. English keeps the lowercase prose it has always announced, so nothing a test or
+ * a reader depended on moves.
+ */
+const SPOKEN: Readonly<Record<StateName, 'strip.pass' | 'strip.review' | 'strip.block' | 'strip.unknown' | 'strip.na'>> = {
+  PASS: 'strip.pass',
+  REVIEW: 'strip.review',
+  BLOCK: 'strip.block',
+  UNKNOWN: 'strip.unknown',
+  'N/A': 'strip.na',
 };
 
 function classFor(state: StateName): string {

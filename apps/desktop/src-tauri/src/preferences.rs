@@ -37,12 +37,15 @@ pub const SETTINGS_FILE_NAME: &str = "settings.json";
 pub const PRESERVED_FILE_NAME: &str = "settings.json.unreadable";
 /// The only schema version this build writes.
 ///
-/// It went 1 → 2 with `ADR-0031` to add `theme`. The version moved rather than the field being
-/// slipped into a v1 document, because the document is `deny_unknown_fields`: an older build meeting
-/// a newer key would have called it damage, and "this file is corrupt" is both false and the prelude
-/// to overwriting it. `read_document` still accepts version 1, so the floor is one version down and
-/// the ceiling is still "anything above this build is not mine to interpret".
-pub const SCHEMA_VERSION: u32 = 2;
+/// It went 1 → 2 with `ADR-0031` to add `theme`, and 2 → 3 with `ADR-0032` to add `language`. The
+/// version moves rather than a field being slipped into an older document, because the document is
+/// `deny_unknown_fields`: an older build meeting a newer key would have called it damage, and "this
+/// file is corrupt" is both false and the prelude to overwriting it. `read_document` accepts every
+/// version from 1 up to this one, so the floor is two versions down and the ceiling is still
+/// "anything above this build is not mine to interpret" — which is the order `ADR-0031` D2 fixes and
+/// `ADR-0032` D3 repeats, because raising the number before widening the reader turns every existing
+/// person's settings into a recovery story that ends in `.unreadable`.
+pub const SCHEMA_VERSION: u32 = 3;
 
 /// How sizes are written out. Reuses the `bytes` / `kib` pair the existing switch and `format.ts`
 /// already speak; it relabels text and never re-derives a number.
@@ -78,12 +81,32 @@ pub enum ThemePref {
     Dark,
 }
 
+/// Which words the interface is written in. `ADR-0032` D1: three values, one default, no language
+/// editor and no fourth option.
+///
+/// `system` is the instruction to ask the platform, and the resolved language is never stored —
+/// storing it would turn every desktop language change into a preference write and would silently
+/// replace a choice the person made. The document's word for Simplified Chinese is `zh-CN`, spelled
+/// exactly as the Settings page sends it: `ADR-0032` D1 refuses to claim Traditional support, so
+/// `zh-TW` and `zh-HK` are not offered here and the UI resolver maps them to this catalog rather
+/// than inventing a fourth value that would promise a second one.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub enum LanguagePref {
+    #[default]
+    System,
+    #[serde(rename = "zh-CN")]
+    ZhCn,
+    #[serde(rename = "en")]
+    En,
+}
+
 /// The preferences a person holds right now.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ApplicationPreferences {
     pub size_unit: SizeUnitPref,
     pub startup_page: StartupPagePref,
     pub theme: ThemePref,
+    pub language: LanguagePref,
 }
 
 impl Default for ApplicationPreferences {
@@ -92,6 +115,7 @@ impl Default for ApplicationPreferences {
             size_unit: SizeUnitPref::Bytes,
             startup_page: StartupPagePref::Analyze,
             theme: ThemePref::System,
+            language: LanguagePref::System,
         }
     }
 }
@@ -167,11 +191,48 @@ impl ThemePref {
     }
 }
 
-/// The document on disk at this build's own version: three values plus the version that says how to
+impl LanguagePref {
+    /// The closed set, in the order the Settings page lists it: the default first.
+    pub const WORDS: &'static [(&'static str, Self)] = &[
+        ("system", Self::System),
+        ("zh-CN", Self::ZhCn),
+        ("en", Self::En),
+    ];
+
+    #[must_use]
+    pub fn word(self) -> &'static str {
+        match self {
+            Self::System => "system",
+            Self::ZhCn => "zh-CN",
+            Self::En => "en",
+        }
+    }
+
+    #[must_use]
+    pub fn from_word(word: &str) -> Option<Self> {
+        Self::WORDS
+            .iter()
+            .find(|(w, _)| *w == word)
+            .map(|(_, v)| *v)
+    }
+}
+
+/// The document on disk at this build's own version: four values plus the version that says how to
 /// read them.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SettingsFile {
+    schema_version: u32,
+    size_unit: SizeUnitPref,
+    startup_page: StartupPagePref,
+    theme: ThemePref,
+    language: LanguagePref,
+}
+
+/// The document as the `ADR-0031` round wrote it: the same object with no language.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SettingsFileV2 {
     schema_version: u32,
     size_unit: SizeUnitPref,
     startup_page: StartupPagePref,
@@ -335,9 +396,10 @@ enum Unreadable {
 /// The versioned read. One path is used by the load and by the save's check, so the two can never
 /// disagree about whether a file is readable.
 ///
-/// Two shapes are understood. The version picks which keys are legal, so a v1 document is read whole
-/// and gains this build's default theme, while a v1 document carrying a v2 key is still a
-/// disagreement rather than a hint. Above this build's own version nothing is interpreted at all.
+/// Three shapes are understood. The version picks which keys are legal, so a v1 document is read
+/// whole and gains this build's default theme and language, a v2 document gains only the language,
+/// and a v1 document carrying a v2 key is still a disagreement rather than a hint. Above this
+/// build's own version nothing is interpreted at all.
 fn read_document(raw: &[u8]) -> Result<ApplicationPreferences, Unreadable> {
     let Ok(probe) = serde_json::from_slice::<VersionProbe>(raw) else {
         return Err(Unreadable::Damaged);
@@ -350,13 +412,23 @@ fn read_document(raw: &[u8]) -> Result<ApplicationPreferences, Unreadable> {
                 size_unit: document.size_unit,
                 startup_page: document.startup_page,
                 theme: ThemePref::default(),
+                language: LanguagePref::default(),
             })
             .map_err(|_| Unreadable::Damaged),
-        Some(2) => serde_json::from_slice::<SettingsFile>(raw)
+        Some(2) => serde_json::from_slice::<SettingsFileV2>(raw)
             .map(|document| ApplicationPreferences {
                 size_unit: document.size_unit,
                 startup_page: document.startup_page,
                 theme: document.theme,
+                language: LanguagePref::default(),
+            })
+            .map_err(|_| Unreadable::Damaged),
+        Some(3) => serde_json::from_slice::<SettingsFile>(raw)
+            .map(|document| ApplicationPreferences {
+                size_unit: document.size_unit,
+                startup_page: document.startup_page,
+                theme: document.theme,
+                language: document.language,
             })
             .map_err(|_| Unreadable::Damaged),
         // Version 0 and anything else below the oldest readable document: no contract to honour.
@@ -534,6 +606,7 @@ impl Store {
             size_unit: loaded.preferences.size_unit.word().to_owned(),
             startup_page: loaded.preferences.startup_page.word().to_owned(),
             theme: loaded.preferences.theme.word().to_owned(),
+            language: loaded.preferences.language.word().to_owned(),
             recovery,
             kept_unreadable_copy: self.has_preserved_copy(),
             file_name: SETTINGS_FILE_NAME.to_owned(),
@@ -564,6 +637,7 @@ pub(crate) fn update_application_preferences(
     size_unit: String,
     startup_page: String,
     theme: String,
+    language: String,
     state: State<'_, Arc<Session>>,
 ) -> Result<PreferencesDto, ErrorEnvelopeDto> {
     let store = state.preferences();
@@ -592,6 +666,15 @@ pub(crate) fn update_application_preferences(
                 &PreferenceError::InvalidValue {
                     key: "theme",
                     value: theme.clone(),
+                },
+                &operation_id,
+            )
+        })?,
+        language: LanguagePref::from_word(&language).ok_or_else(|| {
+            preference_envelope(
+                &PreferenceError::InvalidValue {
+                    key: "language",
+                    value: language.clone(),
                 },
                 &operation_id,
             )
@@ -645,6 +728,7 @@ fn render(preferences: &ApplicationPreferences) -> String {
         size_unit: preferences.size_unit,
         startup_page: preferences.startup_page,
         theme: preferences.theme,
+        language: preferences.language,
     };
     let mut text =
         serde_json::to_string(&document).expect("the settings document always serializes");
@@ -712,7 +796,7 @@ mod tests {
     }
 
     /// The render and the strict read are the same contract seen from both ends, and the text names
-    /// all three choices: a document that wrote two of them would still parse into this build's
+    /// all four choices: a document that wrote three of them would still parse into this build's
     /// struct, which is exactly how a field goes silently missing.
     #[test]
     fn a_rendered_document_is_exactly_what_the_reader_accepts() {
@@ -720,10 +804,11 @@ mod tests {
             size_unit: SizeUnitPref::Kib,
             startup_page: StartupPagePref::History,
             theme: ThemePref::Dark,
+            language: LanguagePref::ZhCn,
         });
         assert_eq!(
             text,
-            "{\"schema_version\":2,\"size_unit\":\"kib\",\"startup_page\":\"history\",\"theme\":\"dark\"}\n"
+            "{\"schema_version\":3,\"size_unit\":\"kib\",\"startup_page\":\"history\",\"theme\":\"dark\",\"language\":\"zh-CN\"}\n"
         );
         assert_eq!(
             read_document(text.as_bytes()),
@@ -731,8 +816,37 @@ mod tests {
                 size_unit: SizeUnitPref::Kib,
                 startup_page: StartupPagePref::History,
                 theme: ThemePref::Dark,
+                language: LanguagePref::ZhCn,
             })
         );
+    }
+
+    /// The language set is three words, the default asks the platform, and the hyphenated word is
+    /// the document's text exactly as the Settings page sends it — `zh-CN`, not a lowercased or
+    /// underscored variant that the UI would then have to know a second spelling of.
+    #[test]
+    fn the_language_offers_three_words_and_defaults_to_following_the_platform() {
+        assert_eq!(LanguagePref::default(), LanguagePref::System);
+        assert_eq!(
+            LanguagePref::from_word("system"),
+            Some(LanguagePref::System)
+        );
+        assert_eq!(LanguagePref::from_word("zh-CN"), Some(LanguagePref::ZhCn));
+        assert_eq!(LanguagePref::from_word("en"), Some(LanguagePref::En));
+        for word in ["zh", "zh-cn", "ZH-CN", "en-US", "fr", "auto", "", "en "] {
+            assert_eq!(
+                LanguagePref::from_word(word),
+                None,
+                "`{word}` is not offered"
+            );
+        }
+        for (word, value) in LanguagePref::WORDS {
+            assert_eq!(
+                &value.word(),
+                word,
+                "a word that does not round trip is a second name"
+            );
+        }
     }
 
     /// The theme set is three words and nothing else, and the default is the one that asks the

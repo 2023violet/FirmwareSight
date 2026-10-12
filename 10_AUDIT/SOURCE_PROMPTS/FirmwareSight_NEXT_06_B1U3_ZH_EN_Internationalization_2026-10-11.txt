@@ -1,0 +1,57 @@
+FirmwareSight｜NEXT-06 — B1-U3 简体中文 / 英文国际化
+版本 v1.0｜2026-10-11｜CONDITIONAL IMPLEMENTATION｜TDD｜产品 v0.2 基线
+
+【准入门禁：缺一不可，STOP 而不自动补权限】
+A. B1-U2 已有独立 Architect ACCEPT 或经过明确列项与 Owner 批准的 ACCEPT_WITH_EXPLICIT_LIMITS；未解决的普通文字对比度失败不能被假称 PASS。
+B. B1-U2 的 HEAD、提交序列、最终变更清单、工作树均核对；Owner 单独批准普通 fast-forward push，且已经取得对应新 head 的远端完整 CI 成功与代码读回。任何冲突或新增未批准提交 STOP；禁止 force push。
+C. Owner 明确向当前 Coding Agent 下发本 NEXT-06 并授权 B1-U3 代码实施；仅收到“下一步建议”或执行者自己说“预检已开始”不构成授权。
+D. .ai/ACTIVE_TASK.md 顶部若为 NONE，须有本次 Owner 任务授权对应，且不能重用旧任务授权；不要扩大到 B2 或国际化以外的主题重构。
+
+【目标】
+在现有 Rust Core + Tauri 2 + React 桌面架构中，使全主工作流、Help/诊断可见文案、Settings、错误恢复采用离线 zh-CN/en UI 语言。用户偏好 language=system(default)|zh-CN|en，切换即时生效、跨重启保留；系统语言不支持时退回 English。严格保持 FirmwareSight 现有专业工具的紧凑布局、Evidence 分类与稳定发布契约。
+
+【先读权威，禁止根据记忆改码】
+AGENTS.md、.ai/{README,CURRENT_STATE,DECISIONS,ACTIVE_TASK}.md、产品 v0.2 决策文档、已落地 ADR-0031、DESIGN.md、03_DESIGN/*、assets/design-tokens.json、已有 B1-U1/U2 的 preferences.rs、Settings、App、IPC、启动恢复/诊断、全部非 test TSX 页面、CLI spec、Gate 状态语义、Review/Release 报告边界。核对实测代码，不能盲信“436 处字面量”“150 行 Catalog”的估计。
+
+【必须先作出的架构判定】
+1. 比较两种可实现方案：受控 typed Catalog（项目内极小实现）与 i18next/react-i18next。对比 key 可追踪性、语言回退、插值与转义、复数/日期未来扩展、动态错误语句、打包体积、第三方许可证、离线性、单元测试和维护成本。不可直接把“零依赖”当作决定；约 436 处字符串、9 命名空间时“150 行代码”不能覆盖翻译实际维护量。选一条后记录最小决议、替代方案和可测试的理由。
+2. Preferences schema 以实际已落地状态为准。若当前 B1-U2 是 schema_version=2，B1-U3 若需持久化 language，可选择安全的可选字段扩展或显式升级 v2→v3。必要时按现有存储/ADR 规范立一份最小 ADR-0032；先让读取器兼容 v1/v2，再允许新写入，保留后向兼容、未来版本拒绝写入、受损文件隔离/恢复、原子写及 Reset 语义。版本数字不能由 Agent 猜测。
+3. language 不进入 Core、GateContext、Snapshot identity、policy_sha256、Gate run id、Release id、manifest、portable reports、CLI JSON、ErrorCode/exit code；不引入第二套 firmware project policy，不引入联网/遥测/账号。
+4. 错误文本不能通过 Rust 英文句子的 split/replace 或简单断句翻译；使用稳定 code + 受控参数形成 UI 文案，留原始 code 可复制与定位，绝不能泄漏宿主绝对路径；未知码 fallback 保持事实准确。
+
+【具体开发范围】
+A. Language resolver：system 使用系统/桌面公开可用的语言信号，标准化 zh-CN、en；对 zh-HK/zh-TW 不能暗称已完整繁体支持，对不支持语言退回 English。记录 OS 当前语言变化能否实时检测，不能实现时须明确“启动/切回 System 时刷新”的真实合同，而不是空口承诺。
+B. Catalog：至少 common、analyze、compare、gate、release、history、settings、help、errors 九个命名空间；Overview 共用 common 或额外 namespace 需明确。在编译或 CI 中检测英文和中文缺失键、重复键、占位符错位、意外 raw string；禁止句子拼接、HTML 直接注入与未经处理的外部数据插值。
+C. UI：逐页完整覆盖导航、PageHeader、操作按钮、工具提示、空态、加载态、错误、表格标题、筛选/分页、诊断、Settings、Review 接受理由、Bundle 的限制说明。固定状态代码 PASS/REVIEW/BLOCK/UNKNOWN/N/A 和 Observed/Derived/Declared/Unknown 不翻译机器常量；中文可加解释，但不能改变状态含义。Section/Symbol、地址、Hash、文件路径、规则 ID、数值、项目和构建名称原样展示。
+D. Settings 增加真实 language 选择；支持 system/中文/English 三态，保存失败与 Reset 错误语义如实反馈，跨页面语言同步；不渲染未实现的未来设置。RTL 不做虚假承诺。
+E. 报告/数据面：portable analysis/diff/gate-results/release-manifest、稳定 Golden、自包含 release-report.html 维持原有固定语言与 byte identity；桌面 UI 语言不改变 CLI JSON 或 Bundle 的任何文件字节。请对固定 Fixture 实际比较语言切换前后的 digest/runId/golden，不仅 UI 断言。
+F. 交互：避免布局因中文/英文长文案溢出；1024×720/1440×900、100%/125%/150% 可得的实测矩阵；键盘焦点、ARIA 名称、错误恢复、表格操作、深浅色中的中文可读性。主题持久化/语义不得回归。
+
+【TDD 测试合同】
+T01 无设置时按 system 解析；中文系统、英文系统和不支持语言回退；手动 zh/en 覆盖；改变语言后立即更新。
+T02 v1→当前 / v2→当前 升级与未来版本文件拒绝覆盖；损坏隔离；多次快速保存的最终版本一致；偏好写入不会静默触发 Gate 重新判断。
+T03 9 namespaces 的 key/parms 完整性与英文 fallback 的明确监测；动态参数严格保留文件名、原始错误码和真实工程数值；不做错误字符串拼接。
+T04 Analyze / Compare / Release Gate / Bundle & History / Overview / Settings / Help 的中英文主流程至少各一条含状态/空/错误的 React 集成测试，真实 DOM 可读。
+T05 对相同真实 Fixture 在两语言切换前后断言 policy_sha256、runId、Gate 各规则、Snapshot/Release ID、Bundle SHA256SUMS、自包含报告与 CLI JSON 一致。
+T06 非 ASCII/空格输入名称不被翻译、不误变成另一份文件；如受既有 C1 文件名清洗缺陷影响，记明确非本单元范围的回归观察，不能借此扩大修改 Bundle。
+T07 Windows 真实 Tauri UI 点击语言切换、导航、保存/Reset/重启；尝试 1024/1440 与缩放，声明 DEV_RUNTIME_VERIFIED 还是 INSTALLED_VERIFIED；工具不可用标 NOT_VERIFIED。
+T08 cargo fmt/test/clippy、pnpm test/typecheck/lint/build、设计 tokens/IPC drift、scripts/check.py 17/17 或最新权威 gate，final staged-tree 无隐藏失败。记录每个 host 的真实通过量，禁止跨不同版本复制旧数字。
+
+【工作步骤】
+0. 检查上述准入门禁与当前 tracked tree；不满足就 STOP，不要继续 ADR 创建/写代码。
+1. 输出小于 1 页的真实改动白名单、catalog 决策与 schema 兼容矩阵；Owner 若已授权本实施单元，可直接按决策开发，遇架构冲突则 STOP。
+2. 先做 TDD RED：语言 resolver、旧配置兼容、翻译词条缺失/占位符、机器身份隔离，再实现 Rust preferences/IPC 与 React context/catalog，依 namespace 分页迁移。
+3. 跨页面集成、真实 Tauri 窗口操作、错误/Help 覆盖；不要因翻译顺便改动主题或 UI 结构。
+4. 生成源/衍生资产登记、测试日志和一个精简工作报告；检查所有未实现功能没有空壳导航；用 final staged tree 跑完整 gate。
+5. 只本地提交、树 clean、停止；不推送、不启动 B1-U4 / B2 / V1 / Release。报告 HEAD、相对远端 base、所有文件差异、测试原始数字、语言覆盖指标、DEV/INSTALLED 判定、NOT_VERIFIED 与风险。
+
+【强制 STOP】
+- B1-U2 未获独立验收或不存在 Owner 对其推送与本阶段 B1-U3 的授权；
+- 语言改变任何 Core/Gate/Release 数据、证据身份或 portable contract；
+- 旧 settings.json 不可安全恢复、未来版本被覆盖、损坏文件被无条件删除；
+- 无法检测缺失关键翻译，或中文界面实际上依旧大量暴露未经翻译的英文操作文案；
+- 引入网络下载词条、遥测、账户或新越权主机文件访问；
+- 把软件内部“AI self-review”标成 Architect ACCEPT，或用 JSdom 截图冒充真实桌面验收。
+
+【工作完毕】
+只给出精确状态，例如 B1-U3=LOCAL_IMPLEMENTED/ARCHITECT_REVIEW_PENDING。列出首次可安装/可交付的下一阶段 B1-B2 候选，但不自动开发。V1 冻结 artifact 的 2026-10-22 私有归档期限保持单独提醒，不触碰 V1。

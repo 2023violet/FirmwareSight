@@ -10,6 +10,8 @@
 import styles from './SizeUnitSwitch.module.css';
 import type { SizeUnit } from '../format';
 
+import { useI18n } from '../i18n';
+
 export function SizeUnitSwitch({
   unit,
   onSelect,
@@ -17,11 +19,13 @@ export function SizeUnitSwitch({
   readonly unit: SizeUnit;
   readonly onSelect: (unit: SizeUnit) => void;
 }) {
+  const { t } = useI18n();
+  const label = t('common', 'units.label');
   return (
-    <div className={styles['switch']} role="group" aria-label="Size units">
-      <span className={styles['switchLabel']}>Size units</span>
-      <UnitRadio unit="bytes" label="Bytes" checked={unit === 'bytes'} onSelect={onSelect} />
-      <UnitRadio unit="kib" label="KiB" checked={unit === 'kib'} onSelect={onSelect} />
+    <div className={styles['switch']} role="group" aria-label={label}>
+      <span className={styles['switchLabel']}>{label}</span>
+      <UnitRadio unit="bytes" label={t('common', 'units.bytes')} checked={unit === 'bytes'} onSelect={onSelect} />
+      <UnitRadio unit="kib" label={t('common', 'units.kib')} checked={unit === 'kib'} onSelect={onSelect} />
     </div>
   );
 }

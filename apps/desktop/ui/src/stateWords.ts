@@ -11,6 +11,7 @@
  */
 
 import type { StateName } from './components/StateBadge';
+import type { Translate } from './i18n';
 import type { GateRunDto } from './ipc/types';
 
 /** The five Gate state words, exactly. */
@@ -62,42 +63,51 @@ export function capabilityState(value: string): StateName {
 }
 
 /**
- * The verdict sentence a gate run deserves, assembled from that run alone.
+ * The verdict sentence a gate run deserves, assembled from that run alone, in the language on screen.
  *
  * Two pages show a verdict - `Release` where the run was made, `Overview` where the latest one is
  * remembered - and a reader who sees both must not get two wordings of the same fact. The earlier draft
  * of Overview wrote "a blocked build never produces a bundle" while Release had always said "cannot"; the
  * two sentences meant the same thing and only one of them is the product rule, which is precisely the
- * drift this file exists to prevent.
+ * drift this file exists to prevent. That is also why the wording is not a parameter: both pages call
+ * this one builder.
  *
  * The counts are Core's aggregate and the severities are Core's dispositions (`AGENTS.md` 3, 8). What is
  * assembled here is prose over those numbers, plus the one case a bare severity word hides: when accepted
  * reviews moved the aggregate, `overallEffectiveSeverity` and `dispositionEffectiveSeverity` are two
  * different facts about the same findings, and naming only the second would let a reader believe the
  * build cleared on its own.
+ *
+ * The translator arrives as an argument rather than being read from context because this is a `.ts`
+ * module with no React in it, and the sentence it builds has to be the same one on both pages.
  */
-export function gateVerdictSentence(run: GateRunDto): string {
+export function gateVerdictSentence(run: GateRunDto, t: Translate): string {
   const severity = severityState(run.dispositionEffectiveSeverity);
-  const head = verdictHead(severity, run.counts);
+  const head = verdictHead(severity, run.counts, t);
   const accepted = run.findings.filter((finding) => finding.acceptance !== null).length;
   if (accepted === 0 || run.overallEffectiveSeverity === run.dispositionEffectiveSeverity) {
     return head;
   }
-  return `${head} This is the aggregate with ${String(accepted)} accepted review(s) counted; without them the same findings read ${run.overallEffectiveSeverity}.`;
+  return t('gate', 'verdict.accepted', {
+    head,
+    accepted,
+    overall: run.overallEffectiveSeverity,
+  });
 }
 
 function verdictHead(
   severity: StateName,
   counts: GateRunDto['counts'],
+  t: Translate,
 ): string {
   switch (severity) {
     case 'BLOCK':
-      return `Blocked — ${String(counts.block)} rule(s) failed. A blocked build cannot produce a bundle.`;
+      return t('gate', 'verdict.block', { count: counts.block });
     case 'REVIEW':
-      return `Needs a decision — ${String(counts.review)} finding(s) wait on an explicit acceptance, and nothing is blocked.`;
+      return t('gate', 'verdict.review', { count: counts.review });
     case 'UNKNOWN':
-      return `Not evaluated — ${String(counts.unknown)} finding(s) could not be evaluated without more input.`;
+      return t('gate', 'verdict.unknown', { count: counts.unknown });
     default:
-      return `Clear — ${String(counts.pass)} rule(s) pass, nothing is blocked and nothing waits on a review.`;
+      return t('gate', 'verdict.pass', { count: counts.pass });
   }
 }

@@ -31,6 +31,7 @@ import { Pager } from './components/Table';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { formatSize, truncateMiddle, type SizeUnit } from './format';
+import { useI18n, type Translate } from './i18n';
 import { cx } from './styles/classnames';
 import {
   listHistoryBuilds,
@@ -73,11 +74,28 @@ interface PageState<T> {
  */
 type View = 'builds' | 'runs' | 'releases';
 
-const VIEWS: readonly { readonly key: View; readonly label: string }[] = [
-  { key: 'builds', label: 'Builds' },
-  { key: 'runs', label: 'Gate runs' },
-  { key: 'releases', label: 'Release records' },
+/** The catalog key naming one stored population. */
+type ViewKey = 'views.builds' | 'views.runs' | 'views.releases';
+
+const VIEWS: readonly { readonly key: View; readonly labelKey: ViewKey }[] = [
+  { key: 'builds', labelKey: 'views.builds' },
+  { key: 'runs', labelKey: 'views.runs' },
+  { key: 'releases', labelKey: 'views.releases' },
 ];
+
+/**
+ * The three stored populations as the machinery names them, in one fixed English word each.
+ *
+ * This is not reader-facing copy: it builds the filter field's DOM id, so the id a test or a bookmark
+ * depends on does not change when the screen changes language. The word a reader hears in the pager line
+ * comes from the catalog (`pager.noun.*`), because `components/Table.tsx` now writes that sentence in
+ * whichever language the screen resolved to.
+ */
+const POPULATION: Readonly<Record<View, string>> = {
+  builds: 'builds',
+  runs: 'Gate runs',
+  releases: 'release records',
+};
 
 function useBoundedPage<T>(
   fetch: (request: HistoryPageRequestDto) => Promise<IpcOutcome<PageState<T>>>,
@@ -147,30 +165,34 @@ function useBoundedPage<T>(
 }
 
 function FilterForm({
+  population,
   noun,
   subject,
   draft,
   onDraftChange,
   onApply,
 }: {
+  /** The machine word behind the field's DOM id, so a language switch does not move it. */
+  readonly population: string;
   readonly noun: string;
   readonly subject: string;
   readonly draft: string;
   readonly onDraftChange: (value: string) => void;
   readonly onApply: (value: string) => void;
 }) {
-  const id = `fs-history-filter-${noun}`;
+  const { t } = useI18n();
+  const id = `fs-history-filter-${population}`;
   return (
     <form
       className={styles['filter']}
-      aria-label={`Filter ${noun}`}
+      aria-label={t('history', 'filter.formAria', { noun })}
       onSubmit={(event) => {
         event.preventDefault();
         onApply(draft);
       }}
     >
       <label className={styles['filterLabel']} htmlFor={id}>
-        Filter {noun} by {subject}
+        {t('history', 'filter.label', { noun, subject })}
       </label>
       <input
         id={id}
@@ -183,29 +205,32 @@ function FilterForm({
         }}
       />
       <button type="submit" className={styles['filterApply']}>
-        Apply
+        {t('history', 'filter.apply')}
       </button>
       {draft.length === 0 ? (
-        <span className={styles['filterHint']}>Shows every stored row</span>
+        <span className={styles['filterHint']}>{t('history', 'filter.showsAll')}</span>
       ) : (
-        <span className={styles['filterHint']}>Filtering by “{draft}”</span>
+        <span className={styles['filterHint']}>{t('history', 'filter.filteringBy', { draft })}</span>
       )}
     </form>
   );
 }
 
 /** The five-state word a stored disposition uses, with the label a reader needs beside it. */
-function dispositionBadge(state: string): { readonly name: StateName; readonly label: string } {
+function dispositionBadge(
+  state: string,
+  t: Translate,
+): { readonly name: StateName; readonly label: string } {
   switch (state) {
     case 'PASS':
-      return { name: 'PASS', label: 'Passed' };
+      return { name: 'PASS', label: t('history', 'disposition.pass') };
     case 'REVIEW':
-      return { name: 'REVIEW', label: 'Needs review' };
+      return { name: 'REVIEW', label: t('history', 'disposition.review') };
     case 'BLOCK':
-      return { name: 'BLOCK', label: 'Blocked' };
+      return { name: 'BLOCK', label: t('history', 'disposition.block') };
     default:
       // A stored word the reader cannot map is shown as unknown rather than promoted to a verdict.
-      return { name: 'UNKNOWN', label: 'Unknown disposition' };
+      return { name: 'UNKNOWN', label: t('history', 'disposition.unknown') };
   }
 }
 
@@ -216,6 +241,7 @@ export function History({
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState<{ readonly kind: Open; readonly id: string } | null>(null);
   /** Which one of the three stored entities the page is showing. See the view switch below. */
   const [view, setView] = useState<View>('builds');
@@ -245,17 +271,14 @@ export function History({
 
   return (
     <Page>
-      <PageHeader
-        title="Bundle & History"
-        subhead="What this computer has already stored: the builds that were analyzed, the Gate runs that were recorded, and the releases that were published. These are persisted facts, not the artifact currently open on Analyze, and a row stays readable after the firmware file it came from has moved or been deleted. Nothing on this page changes a stored row."
-      />
+      <PageHeader title={t('history', 'title')} subhead={t('history', 'subhead')} />
 
       <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
 
       {/* One list at a time. A button group with `aria-pressed` rather than an ARIA tablist, because each
           list below is a named region a reader may want to navigate to, and a `tabpanel` role would take
           that landmark away to buy a pattern the switch does not need (§22). */}
-      <div className={styles['views']} role="group" aria-label="Stored history">
+      <div className={styles['views']} role="group" aria-label={t('history', 'views.group')}>
         {VIEWS.map((entry) => (
           <button
             key={entry.key}
@@ -267,43 +290,46 @@ export function History({
               setOpen(null);
             }}
           >
-            {entry.label}
+            {t('history', entry.labelKey)}
           </button>
         ))}
       </div>
 
       {view === 'builds' ? (
-      <section className={styles['table']} aria-label="Stored builds">
-        <h2>Builds</h2>
+      <section className={styles['table']} aria-label={t('history', 'builds.region')}>
+        <h2>{t('history', 'views.builds')}</h2>
         <FilterForm
-          noun="builds"
-          subject="build, snapshot, digest or architecture"
+          population={POPULATION.builds}
+          noun={t('history', 'filter.noun.builds')}
+          subject={t('history', 'filter.subject.builds')}
           draft={builds.draft}
           onDraftChange={builds.onDraftChange}
           onApply={builds.applyFilter}
         />
         {builds.loading ? (
           <p className={styles['status']} role="status" aria-live="polite">
-            Loading builds…
+            {t('history', 'builds.loading')}
           </p>
         ) : null}
         {builds.error !== null ? (
-          <ErrorPanel envelope={builds.error} label="Build history error" heading="Builds could not be read" />
+          <ErrorPanel
+            envelope={builds.error}
+            label={t('history', 'builds.errorLabel')}
+            heading={t('history', 'builds.errorHeading')}
+          />
         ) : null}
         {builds.state === null || builds.error !== null ? null : (
           <>
             {builds.state.rows.length === 0 ? (
               <p className={styles['empty']}>
                 {builds.applied.length === 0
-                  ? 'No build has been stored yet. Analyze an artifact and it appears here.'
-                  : `No stored build matches “${builds.applied}”.`}
+                  ? t('history', 'builds.empty')
+                  : t('history', 'builds.noMatch', { term: builds.applied })}
               </p>
             ) : (
-              <ScrollArea label="Stored builds table">
+              <ScrollArea label={t('history', 'builds.table')}>
                 <table className={styles['grid']}>
-                  <caption className={styles['caption']}>
-                    Ordered by when FirmwareSight stored the build, newest first.
-                  </caption>
+                  <caption className={styles['caption']}>{t('history', 'builds.caption')}</caption>
                   <thead>
                     <tr>
                       {/* The action leads its row. A table of stored ids, digests and times is wider
@@ -311,15 +337,15 @@ export function History({
                           that falls off the right edge (F2R-02); the Evidence table already puts its
                           row action first for the same reason. */}
                       <th scope="col">
-                        <span className={styles['srOnly']}>Row actions</span>
+                        <span className={styles['srOnly']}>{t('history', 'row.actions')}</span>
                       </th>
-                      <th scope="col">Artifact</th>
-                      <th scope="col">Snapshot</th>
-                      <th scope="col">SHA-256</th>
-                      <th scope="col">Stored</th>
-                      <th scope="col">Format</th>
-                      <th scope="col">Non-volatile</th>
-                      <th scope="col">RAM</th>
+                      <th scope="col">{t('history', 'builds.col.artifact')}</th>
+                      <th scope="col">{t('history', 'builds.col.snapshot')}</th>
+                      <th scope="col">{t('history', 'builds.col.sha')}</th>
+                      <th scope="col">{t('history', 'col.stored')}</th>
+                      <th scope="col">{t('history', 'builds.col.format')}</th>
+                      <th scope="col">{t('history', 'builds.col.nonvolatile')}</th>
+                      <th scope="col">{t('history', 'builds.col.ram')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -335,7 +361,7 @@ export function History({
                                 toggle('build', row.buildId);
                               }}
                             >
-                              Details
+                              {t('history', 'row.details')}
                             </button>
                           </td>
                           <td title={row.fileName}>{row.fileName}</td>
@@ -355,34 +381,31 @@ export function History({
                             <td colSpan={8}>
                               <dl className={styles['facts']}>
                                 <div>
-                                  <dt>Build id</dt>
+                                  <dt>{t('history', 'detail.buildId')}</dt>
                                   <dd className={styles['mono']}>{row.buildId}</dd>
                                 </div>
                                 <div>
-                                  <dt>Snapshot id</dt>
+                                  <dt>{t('history', 'detail.snapshotId')}</dt>
                                   <dd className={styles['mono']}>{row.snapshotId}</dd>
                                 </div>
                                 <div>
-                                  <dt>Artifact SHA-256</dt>
+                                  <dt>{t('history', 'detail.artifactSha')}</dt>
                                   <dd className={styles['mono']}>{row.sha256}</dd>
                                 </div>
                                 <div>
-                                  <dt>Size</dt>
+                                  <dt>{t('history', 'detail.size')}</dt>
                                   <dd className={styles['mono']}>{formatSize(row.byteSize, unit)}</dd>
                                 </div>
                                 <div>
-                                  <dt>Architecture</dt>
+                                  <dt>{t('history', 'detail.architecture')}</dt>
                                   <dd>{row.architecture}</dd>
                                 </div>
                                 <div>
-                                  <dt>Stored</dt>
+                                  <dt>{t('history', 'col.stored')}</dt>
                                   <dd className={styles['mono']}>{row.importedAt}</dd>
                                 </div>
                               </dl>
-                              <p className={styles['detailNote']}>
-                                The file name is all FirmwareSight keeps visible here. Where the artifact
-                                lives is never shown, and this row does not need the file to still exist.
-                              </p>
+                              <p className={styles['detailNote']}>{t('history', 'builds.note')}</p>
                             </td>
                           </tr>
                         ) : null}
@@ -397,7 +420,7 @@ export function History({
               offset={builds.state.offset}
               shown={builds.state.rows.length}
               nextOffset={builds.state.nextOffset}
-              label="builds"
+              label={t('history', 'pager.noun.builds')}
               onOffset={builds.goToOffset}
             />
           </>
@@ -406,50 +429,51 @@ export function History({
       ) : null}
 
       {view === 'runs' ? (
-      <section className={styles['table']} aria-label="Stored Gate runs">
-        <h2>Gate runs</h2>
+      <section className={styles['table']} aria-label={t('history', 'runs.region')}>
+        <h2>{t('history', 'views.runs')}</h2>
         <FilterForm
-          noun="Gate runs"
-          subject="run, build, policy digest or disposition"
+          population={POPULATION.runs}
+          noun={t('history', 'filter.noun.runs')}
+          subject={t('history', 'filter.subject.runs')}
           draft={runs.draft}
           onDraftChange={runs.onDraftChange}
           onApply={runs.applyFilter}
         />
         {runs.loading ? (
           <p className={styles['status']} role="status" aria-live="polite">
-            Loading Gate runs…
+            {t('history', 'runs.loading')}
           </p>
         ) : null}
         {runs.error !== null ? (
-          <ErrorPanel envelope={runs.error} label="Gate history error" heading="Gate runs could not be read" />
+          <ErrorPanel
+            envelope={runs.error}
+            label={t('history', 'runs.errorLabel')}
+            heading={t('history', 'runs.errorHeading')}
+          />
         ) : null}
         {runs.state === null || runs.error !== null ? null : (
           <>
             {runs.state.rows.length === 0 ? (
               <p className={styles['empty']}>
                 {runs.applied.length === 0
-                  ? 'No Gate run has been recorded yet. Release judges a stored build and writes the run here.'
-                  : `No stored Gate run matches “${runs.applied}”.`}
+                  ? t('history', 'runs.empty')
+                  : t('history', 'runs.noMatch', { term: runs.applied })}
               </p>
             ) : (
-              <ScrollArea label="Stored Gate runs table">
+              <ScrollArea label={t('history', 'runs.table')}>
                 <table className={styles['grid']}>
-                  <caption className={styles['caption']}>
-                    Ordered by when FirmwareSight stored the verdict, newest first. A stored run is
-                    immutable, so this list cannot be edited and a re-run adds a row rather than
-                    replacing one.
-                  </caption>
+                  <caption className={styles['caption']}>{t('history', 'runs.caption')}</caption>
                   <thead>
                     <tr>
                       <th scope="col">
-                        <span className={styles['srOnly']}>Row actions</span>
+                        <span className={styles['srOnly']}>{t('history', 'row.actions')}</span>
                       </th>
-                      <th scope="col">Run</th>
-                      <th scope="col">Build</th>
-                      <th scope="col">Baseline</th>
-                      <th scope="col">Disposition</th>
-                      <th scope="col">Findings by state</th>
-                      <th scope="col">Stored</th>
+                      <th scope="col">{t('history', 'runs.col.run')}</th>
+                      <th scope="col">{t('history', 'col.build')}</th>
+                      <th scope="col">{t('history', 'runs.col.baseline')}</th>
+                      <th scope="col">{t('history', 'runs.col.disposition')}</th>
+                      <th scope="col">{t('history', 'runs.col.findings')}</th>
+                      <th scope="col">{t('history', 'col.stored')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -472,7 +496,7 @@ export function History({
               offset={runs.state.offset}
               shown={runs.state.rows.length}
               nextOffset={runs.state.nextOffset}
-              label="Gate runs"
+              label={t('history', 'pager.noun.runs')}
               onOffset={runs.goToOffset}
             />
           </>
@@ -481,25 +505,26 @@ export function History({
       ) : null}
 
       {view === 'releases' ? (
-      <section className={styles['table']} aria-label="Stored release records">
-        <h2>Release records</h2>
+      <section className={styles['table']} aria-label={t('history', 'releases.region')}>
+        <h2>{t('history', 'views.releases')}</h2>
         <FilterForm
-          noun="release records"
-          subject="release, version, build, Gate run or manifest digest"
+          population={POPULATION.releases}
+          noun={t('history', 'filter.noun.releases')}
+          subject={t('history', 'filter.subject.releases')}
           draft={releases.draft}
           onDraftChange={releases.onDraftChange}
           onApply={releases.applyFilter}
         />
         {releases.loading ? (
           <p className={styles['status']} role="status" aria-live="polite">
-            Loading release records…
+            {t('history', 'releases.loading')}
           </p>
         ) : null}
         {releases.error !== null ? (
           <ErrorPanel
             envelope={releases.error}
-            label="Release history error"
-            heading="Release records could not be read"
+            label={t('history', 'releases.errorLabel')}
+            heading={t('history', 'releases.errorHeading')}
           />
         ) : null}
         {releases.state === null || releases.error !== null ? null : (
@@ -507,27 +532,24 @@ export function History({
             {releases.state.rows.length === 0 ? (
               <p className={styles['empty']}>
                 {releases.applied.length === 0
-                  ? 'No release has been published from this computer yet.'
-                  : `No stored release record matches “${releases.applied}”.`}
+                  ? t('history', 'releases.empty')
+                  : t('history', 'releases.noMatch', { term: releases.applied })}
               </p>
             ) : (
-              <ScrollArea label="Stored release records table">
+              <ScrollArea label={t('history', 'releases.table')}>
                 <table className={styles['grid']}>
-                  <caption className={styles['caption']}>
-                    Ordered by when FirmwareSight recorded the release, newest first. Each row names the
-                    Gate run that qualified it.
-                  </caption>
+                  <caption className={styles['caption']}>{t('history', 'releases.caption')}</caption>
                   <thead>
                     <tr>
                       <th scope="col">
-                        <span className={styles['srOnly']}>Row actions</span>
+                        <span className={styles['srOnly']}>{t('history', 'row.actions')}</span>
                       </th>
-                      <th scope="col">Release</th>
-                      <th scope="col">Version</th>
-                      <th scope="col">Build</th>
-                      <th scope="col">Gate run</th>
-                      <th scope="col">Manifest SHA-256</th>
-                      <th scope="col">Stored</th>
+                      <th scope="col">{t('history', 'releases.col.release')}</th>
+                      <th scope="col">{t('history', 'releases.col.version')}</th>
+                      <th scope="col">{t('history', 'col.build')}</th>
+                      <th scope="col">{t('history', 'releases.col.gateRun')}</th>
+                      <th scope="col">{t('history', 'col.manifestSha')}</th>
+                      <th scope="col">{t('history', 'col.stored')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -550,7 +572,7 @@ export function History({
               offset={releases.state.offset}
               shown={releases.state.rows.length}
               nextOffset={releases.state.nextOffset}
-              label="release records"
+              label={t('history', 'pager.noun.releases')}
               onOffset={releases.goToOffset}
             />
           </>
@@ -571,8 +593,14 @@ function Budget({
   readonly bytes: number | null;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   const name: StateName = state === 'exact' ? 'PASS' : state === 'partial' ? 'REVIEW' : 'UNKNOWN';
-  const label = state === 'exact' ? 'Exact' : state === 'partial' ? 'Partial floor' : 'Unknown';
+  const label =
+    state === 'exact'
+      ? t('history', 'budget.exact')
+      : state === 'partial'
+        ? t('history', 'budget.partial')
+        : t('history', 'budget.unknown');
   return (
     <span className={styles['budget']}>
       <StateBadge state={name} label={label} />
@@ -590,7 +618,8 @@ function GateRows({
   readonly open: boolean;
   readonly onToggle: () => void;
 }) {
-  const badge = dispositionBadge(row.disposition);
+  const { t } = useI18n();
+  const badge = dispositionBadge(row.disposition, t);
   const counts = row.counts;
   return (
     <>
@@ -602,22 +631,22 @@ function GateRows({
             aria-expanded={open}
             onClick={onToggle}
           >
-            Details
+            {t('history', 'row.details')}
           </button>
         </td>
         <td className={styles['mono']}>{truncateMiddle(row.runId, 8)}</td>
         <td title={row.fileName}>{row.fileName}</td>
-        <td>{row.baselineFileName === null ? 'None' : row.baselineFileName}</td>
+        <td>{row.baselineFileName === null ? t('history', 'runs.baseline.none') : row.baselineFileName}</td>
         <td>
           <StateBadge state={badge.name} label={badge.label} />
         </td>
         <td>
           <span className={styles['counts']}>
-            <StateBadge state="PASS" label="Pass" count={counts.pass} />
-            <StateBadge state="REVIEW" label="Review" count={counts.review} />
-            <StateBadge state="BLOCK" label="Block" count={counts.block} />
-            <StateBadge state="UNKNOWN" label="Unknown" count={counts.unknown} />
-            <StateBadge state="N/A" label="Not applicable" count={counts.notApplicable} />
+            <StateBadge state="PASS" label={t('history', 'count.pass')} count={counts.pass} />
+            <StateBadge state="REVIEW" label={t('history', 'count.review')} count={counts.review} />
+            <StateBadge state="BLOCK" label={t('history', 'count.block')} count={counts.block} />
+            <StateBadge state="UNKNOWN" label={t('history', 'count.unknown')} count={counts.unknown} />
+            <StateBadge state="N/A" label={t('history', 'count.na')} count={counts.notApplicable} />
           </span>
         </td>
         <td className={styles['mono']}>{row.storedAt}</td>
@@ -627,29 +656,25 @@ function GateRows({
           <td colSpan={7}>
             <dl className={styles['facts']}>
               <div>
-                <dt>Gate run id</dt>
+                <dt>{t('history', 'detail.gateRunId')}</dt>
                 <dd className={styles['mono']}>{row.runId}</dd>
               </div>
               <div>
-                <dt>Build id</dt>
+                <dt>{t('history', 'detail.buildId')}</dt>
                 <dd className={styles['mono']}>{row.buildId}</dd>
               </div>
               {row.baselineBuildId === null ? null : (
                 <div>
-                  <dt>Baseline build id</dt>
+                  <dt>{t('history', 'detail.baselineBuildId')}</dt>
                   <dd className={styles['mono']}>{row.baselineBuildId}</dd>
                 </div>
               )}
               <div>
-                <dt>Stored</dt>
+                <dt>{t('history', 'col.stored')}</dt>
                 <dd className={styles['mono']}>{row.storedAt}</dd>
               </div>
             </dl>
-            <p className={styles['detailNote']}>
-              The disposition and the counts are what this run stored. Reading history never
-              re-evaluates it, and re-running the Gate is a decision on the Release page against the
-              build you choose there.
-            </p>
+            <p className={styles['detailNote']}>{t('history', 'runs.note')}</p>
           </td>
         </tr>
       ) : null}
@@ -666,6 +691,7 @@ function ReleaseRows({
   readonly open: boolean;
   readonly onToggle: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <>
       <tr>
@@ -676,7 +702,7 @@ function ReleaseRows({
             aria-expanded={open}
             onClick={onToggle}
           >
-            Details
+            {t('history', 'row.details')}
           </button>
         </td>
         <td className={styles['mono']}>{truncateMiddle(row.releaseId, 8)}</td>
@@ -691,30 +717,27 @@ function ReleaseRows({
           <td colSpan={7}>
             <dl className={styles['facts']}>
               <div>
-                <dt>Release id</dt>
+                <dt>{t('history', 'detail.releaseId')}</dt>
                 <dd className={styles['mono']}>{row.releaseId}</dd>
               </div>
               <div>
-                <dt>Gate run id</dt>
+                <dt>{t('history', 'detail.gateRunId')}</dt>
                 <dd className={styles['mono']}>{row.gateRunId}</dd>
               </div>
               <div>
-                <dt>Build id</dt>
+                <dt>{t('history', 'detail.buildId')}</dt>
                 <dd className={styles['mono']}>{row.buildId}</dd>
               </div>
               <div>
-                <dt>Manifest SHA-256</dt>
+                <dt>{t('history', 'col.manifestSha')}</dt>
                 <dd className={styles['mono']}>{row.manifestSha256}</dd>
               </div>
               <div>
-                <dt>Stored</dt>
+                <dt>{t('history', 'col.stored')}</dt>
                 <dd className={styles['mono']}>{row.storedAt}</dd>
               </div>
             </dl>
-            <p className={styles['detailNote']}>
-              A release row records what was published and which Gate run qualified it. Where the
-              bundle folder was written is not part of this record and is never shown here.
-            </p>
+            <p className={styles['detailNote']}>{t('history', 'releases.note')}</p>
           </td>
         </tr>
       ) : null}

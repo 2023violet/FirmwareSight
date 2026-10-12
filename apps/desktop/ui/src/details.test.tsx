@@ -17,8 +17,10 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
+import { clearFallbacks, fallbacks } from './i18n';
 import {
   analyzeSelection,
+  getApplicationPreferences,
   queryEvidence,
   querySections,
   querySymbols,
@@ -53,6 +55,8 @@ vi.mock('./ipc/bridge', () => ({
       value: {
         sizeUnit: 'bytes',
         startupPage: 'analyze',
+        theme: 'system',
+        language: 'system',
         recovery: 'missing',
         keptUnreadableCopy: false,
         fileName: 'settings.json',
@@ -892,5 +896,89 @@ describe('a detail query that fails', () => {
     const requests = evidenceMock.mock.calls.map(([request]) => request);
     expect(requests.every((request) => request.snapshotId === SNAPSHOT_ID)).toBe(true);
     expect(await screen.findByRole('note')).toBeDefined();
+  });
+});
+
+describe('the same rows read in Chinese', () => {
+  /**
+   * The language arrives with the rest of the preferences, exactly as it does on a person's machine.
+   *
+   * There is no language prop on this page and no test-only switch: the catalog is the only thing that
+   * differs, which is the point of the claim these two tests make.
+   */
+  function storedInChinese(): void {
+    vi.mocked(getApplicationPreferences).mockResolvedValueOnce({
+      ok: true,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'analyze',
+        theme: 'system',
+        language: 'zh-CN',
+        recovery: 'read',
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    });
+  }
+
+  /** `analyzeOk` navigates by English labels; this is the same two clicks on the Chinese screen. */
+  async function analyzeInChinese(): Promise<void> {
+    selectMock.mockResolvedValue(ok(selection()));
+    analyzeMock.mockResolvedValue(ok(summary()));
+
+    // The language arrives with the preferences reply, so the first render of this screen is still
+    // English. Waiting for the Chinese label is the same wait a reader does before they can read it.
+    fireEvent.click(await screen.findByRole('button', { name: '选择固件镜像文件' }));
+    await waitFor(() => expect(selectMock).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '分析' }));
+    await waitFor(() => expect(analyzeMock).toHaveBeenCalledTimes(1));
+  }
+
+  it('names the tabs, the columns and the pager in Chinese, and hands the rows over untouched', async () => {
+    clearFallbacks();
+    storedInChinese();
+    sectionsMock.mockResolvedValue(ok(sectionPage({ nextOffset: 10, rows: sectionPage().rows })));
+    render(<App />);
+    await analyzeInChinese();
+
+    expect(await screen.findByRole('tab', { name: '节' })).toBeDefined();
+    expect(screen.getByRole('tab', { name: '符号' })).toBeDefined();
+    // The first column is the active sort, so its header carries the direction arrow beside the word.
+    await screen.findByRole('columnheader', { name: /序号/ });
+    expect(screen.getByRole('button', { name: '按序号排序' })).toBeDefined();
+
+    // The sentence is `components/Table.tsx`'s and the noun is this page's; neither can be English
+    // while the other is Chinese, because the pager line is the shared component's one job.
+    expect(screen.getByText('显示节：第 1 到 2 个，共 17 个')).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: '下一页' }));
+    await waitFor(() => {
+      const requests = sectionsMock.mock.calls.map(([request]) => request);
+      expect(requests.some((request) => request.offset === 10)).toBe(true);
+    });
+
+    // A section name and a byte count are Core's data: the same glyphs in either language.
+    expect(screen.getAllByText('.text').length).toBeGreaterThan(0);
+    expect(screen.getByText('5,432 bytes')).toBeDefined();
+
+    // The one assertion that makes "no English leaks through" a fact rather than a hope: a key that
+    // missed the Chinese catalog would render English AND be recorded here.
+    expect(fallbacks()).toEqual([]);
+  });
+
+  it('translates the control around the evidence classes and leaves the four words as Core wrote them', async () => {
+    storedInChinese();
+    render(<App />);
+    await analyzeInChinese();
+
+    fireEvent.click(await screen.findByRole('tab', { name: '证据' }));
+    const select = await screen.findByLabelText('证据类别');
+    for (const word of ['observed', 'derived', 'declared', 'unknown']) {
+      expect(within(select).getByRole('option', { name: word })).toBeDefined();
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: '应用筛选' }));
+    await waitFor(() => expect(evidenceMock.mock.calls.length).toBeGreaterThan(0));
+    const requests = evidenceMock.mock.calls.map(([request]) => request);
+    expect(requests.at(-1)?.snapshotId).toBe(SNAPSHOT_ID);
   });
 });

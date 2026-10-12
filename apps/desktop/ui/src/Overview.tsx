@@ -40,6 +40,8 @@ import { PageHeader } from './components/PageHeader';
 import { EmptyState, Band, Panel, SummaryCard } from './components/Panel';
 import { StateBadge } from './components/StateBadge';
 import { formatSize, truncateMiddle, type SizeUnit } from './format';
+import { useI18n, type Translate } from './i18n';
+import type { Catalog } from './i18n/en';
 import type {
   AnalysisSummaryDto,
   GateRunDto,
@@ -114,36 +116,53 @@ function readinessScope(
   return { kind: 'current' };
 }
 
-/** The neutral word for the answer this page cannot give, plus the sentence that explains why. */
-const NOT_CURRENT: Record<
-  Exclude<ReadinessScope['kind'], 'current'>,
-  { readonly label: string; readonly headline: string; readonly retained: string }
+/**
+ * The neutral word for the answer this page cannot give, plus the sentence that explains why.
+ *
+ * The three parts are catalog keys rather than strings because a fourth kind would otherwise be a
+ * sentence someone has to remember to translate: the kind is the key, and the type below will not
+ * accept a kind without all three of its words.
+ */
+type NotCurrentKind = Exclude<ReadinessScope['kind'], 'current'>;
+
+/** A key the `common` namespace actually holds, so a typo is a compile error rather than a runtime hole. */
+type CommonKey = keyof Catalog['common'];
+
+const NOT_CURRENT_KEYS: Record<
+  NotCurrentKind,
+  { readonly label: CommonKey; readonly headline: CommonKey; readonly retained: CommonKey }
 > = {
   otherBuild: {
-    label: 'Not assessed for this build',
-    headline:
-      'The latest Gate run judged a different build, so this page has no shipping answer about the build it is describing.',
-    retained: 'Retained run for a different build',
+    label: 'overview.notCurrent.otherBuild.label',
+    headline: 'overview.notCurrent.otherBuild.headline',
+    retained: 'overview.notCurrent.otherBuild.retained',
   },
   selectionPending: {
-    label: 'Not assessed for the selected artifact',
-    headline:
-      'The artifact you selected has not been analyzed, so the run below cannot be its shipping answer.',
-    retained: 'Retained run for the previous build',
+    label: 'overview.notCurrent.selectionPending.label',
+    headline: 'overview.notCurrent.selectionPending.headline',
+    retained: 'overview.notCurrent.selectionPending.retained',
   },
   noAnalysis: {
-    label: 'No analysis in this session',
-    headline:
-      'This session has analyzed nothing, so there is no build here to pair the stored run with.',
-    retained: 'Retained run with no build to compare against',
+    label: 'overview.notCurrent.noAnalysis.label',
+    headline: 'overview.notCurrent.noAnalysis.headline',
+    retained: 'overview.notCurrent.noAnalysis.retained',
   },
   otherPolicy: {
-    label: 'Not assessed under the policy loaded now',
-    headline:
-      'The run below was judged under a different policy fingerprint, so its result does not answer for the policy loaded now.',
-    retained: 'Retained run under a different policy',
+    label: 'overview.notCurrent.otherPolicy.label',
+    headline: 'overview.notCurrent.otherPolicy.headline',
+    retained: 'overview.notCurrent.otherPolicy.retained',
   },
 };
+
+/** One readiness state's three sentences, read out of the catalog on screen. */
+function notCurrentWords(kind: NotCurrentKind, t: Translate) {
+  const keys = NOT_CURRENT_KEYS[kind];
+  return {
+    label: t('common', keys.label),
+    headline: t('common', keys.headline),
+    retained: t('common', keys.retained),
+  };
+}
 
 export function Overview({
   summary,
@@ -165,6 +184,7 @@ export function Overview({
 }) {
   // One derivation, three surfaces: the header, the input band and the figures all answer to the same question,
   // and §4.I is the reason the header cannot keep naming the retained artifact whenever it is not current.
+  const { t } = useI18n();
   const pending = pendingSelectionOf(selection, analyzedSelectionId);
 
   const meta: ReactNode[] = [];
@@ -172,33 +192,49 @@ export function Overview({
     meta.push(<span key="project">{project.projectName}</span>);
   }
   if (summary !== null && pending === null) {
-    meta.push(<span key="artifact">{`artifact ${summary.artifact.fileName}`}</span>);
-    meta.push(<span key="snapshot">snapshot {truncateMiddle(summary.identity.snapshotId, 8)}</span>);
+    meta.push(<span key="artifact">{t('common', 'overview.metaArtifact', { name: summary.artifact.fileName })}</span>);
+    meta.push(
+      <span key="snapshot">
+        {t('common', 'overview.metaSnapshot', { id: truncateMiddle(summary.identity.snapshotId, 8) })}
+      </span>,
+    );
   } else if (selection !== null) {
-    meta.push(<span key="selected">selected {selection.fileName}, not analyzed yet</span>);
+    meta.push(
+      <span key="selected">
+        {t('common', 'overview.metaSelected', { name: selection.fileName })}
+      </span>,
+    );
     if (summary !== null) {
       meta.push(
-        <span key="previous">{`previous analysis ${truncateMiddle(summary.identity.snapshotId, 8)}`}</span>,
+        <span key="previous">
+          {t('common', 'overview.metaPreviousAnalysis', {
+            id: truncateMiddle(summary.identity.snapshotId, 8),
+          })}
+        </span>,
       );
     }
   } else {
-    meta.push(<span key="none">no artifact selected</span>);
+    meta.push(<span key="none">{t('common', 'overview.metaNone')}</span>);
   }
   if (gateRun !== null) {
-    meta.push(<span key="gate">gate run {truncateMiddle(gateRun.runId, 8)}</span>);
+    meta.push(
+      <span key="gate">
+        {t('common', 'overview.metaGateRun', { id: truncateMiddle(gateRun.runId, 8) })}
+      </span>,
+    );
   }
 
   return (
     <Page>
       <PageHeader
-        title="Overview"
+        title={t('common', 'overview.title')}
         meta={meta}
         actions={
           <>
-            <Button onClick={() => onOpen('compare')}>Compare builds</Button>
-            <Button onClick={() => onOpen('history')}>Bundle &amp; History</Button>
+            <Button onClick={() => onOpen('compare')}>{t('common', 'overview.compareButton')}</Button>
+            <Button onClick={() => onOpen('history')}>{t('common', 'page.history')}</Button>
             <Button variant="primary" onClick={() => onOpen('release')}>
-              Open Release Gate
+              {t('common', 'overview.openReleaseButton')}
             </Button>
           </>
         }
@@ -207,10 +243,10 @@ export function Overview({
       {summary === null ? (
         <EmptyState
           role="status"
-          message="Nothing has been analyzed in this session yet, so there is nothing to summarize."
+          message={t('common', 'overview.emptyMessage')}
           nextStep={
             <Button variant="primary" onClick={() => onOpen('analyze')}>
-              Choose an artifact
+              {t('common', 'overview.emptyAction')}
             </Button>
           }
         />
@@ -249,6 +285,7 @@ function capabilityCells(
   summary: AnalysisSummaryDto,
   mapDetail: ReactNode,
   actions: { readonly elf: ReactNode; readonly map: ReactNode },
+  t: Translate,
 ): ReactNode[] {
   const { capabilities, artifact } = summary;
   return [
@@ -284,10 +321,7 @@ function capabilityCells(
           *opened project's* workspace rather than any repository this artifact came from. The cell now names
           the one thing that actually produced the value, and leaves the rule's verdict on the page that
           judged it. */}
-      <p className={styles['inputDetail']}>
-        Core&rsquo;s analysis capability for Git provenance. The <code>git.clean</code> rule is the
-        gate&rsquo;s separate question, about the opened project.
-      </p>
+      <p className={styles['inputDetail']}>{t('common', 'overview.gitDetail')}</p>
     </Panel>,
   ];
 }
@@ -302,6 +336,7 @@ function InputRow({
   readonly selection: SelectionDto | null;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
+  const { t } = useI18n();
   // One band, three cells, hairlines between them - which is what the reference draws and what this
   // component asked for since U1. The cells stay named regions because they are three separate answers a
   // reader may want to jump between, and a band is a layout, not an excuse to flatten semantics.
@@ -313,16 +348,17 @@ function InputRow({
   // touched, so the bands on Analyze, Compare, Release and History are the ones that were approved.
   return (
     <div className={styles['fillBand']}>
-      <Band label="Input capabilities">
+      <Band label={t('common', 'overview.inputsBand')}>
         {capabilityCells(
           summary,
           selection?.mapAttached
-            ? (selection.mapFileName ?? 'attached')
-            : 'Symbol-level analysis depends on it',
+            ? (selection.mapFileName ?? t('common', 'overview.mapAttached'))
+            : t('common', 'overview.mapNeeded'),
           {
-            elf: <LinkButton onClick={() => onOpen('analyze')}>Open Analyze</LinkButton>,
-            map: <LinkButton onClick={() => onOpen('analyze')}>Attach one on Analyze</LinkButton>,
+            elf: <LinkButton onClick={() => onOpen('analyze')}>{t('common', 'overview.openAnalyze')}</LinkButton>,
+            map: <LinkButton onClick={() => onOpen('analyze')}>{t('common', 'overview.attachMap')}</LinkButton>,
           },
+          t,
         )}
       </Band>
     </div>
@@ -344,20 +380,27 @@ function SelectedRow({
   readonly selection: SelectionDto;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
+  const { t } = useI18n();
   return (
-    <Band label="Selected artifact">
-      <Panel bare title="Artifact">
-        <p className={styles['inputDetail']}>{`${selection.fileName} · not analyzed yet`}</p>
-        <LinkButton onClick={() => onOpen('analyze')}>Open Analyze</LinkButton>
+    <Band label={t('common', 'overview.selectedBand')}>
+      <Panel bare title={t('common', 'overview.artifactCell')}>
+        <p className={styles['inputDetail']}>
+          {t('common', 'overview.notAnalyzed', { name: selection.fileName })}
+        </p>
+        <LinkButton onClick={() => onOpen('analyze')}>{t('common', 'overview.openAnalyze')}</LinkButton>
       </Panel>
       <Panel bare title="MAP">
         <p className={styles['inputDetail']}>
           {selection.mapAttached
-            ? `MAP attached: ${selection.mapFileName ?? 'attached'}`
-            : 'No MAP attached to this selection'}
+            ? t('common', 'overview.mapAttachedLine', {
+                name: selection.mapFileName ?? t('common', 'overview.mapAttached'),
+              })
+            : t('common', 'overview.mapMissingLine')}
         </p>
         <LinkButton onClick={() => onOpen('analyze')}>
-          {selection.mapAttached ? 'Change it on Analyze' : 'Attach one on Analyze'}
+          {selection.mapAttached
+            ? t('common', 'overview.changeMap')
+            : t('common', 'overview.attachMap')}
         </LinkButton>
       </Panel>
     </Band>
@@ -382,29 +425,36 @@ function PreviousAnalysis({
   readonly candidate: SelectionDto;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   const { artifact } = summary;
   const sameName = candidate.fileName === artifact.fileName;
   const attribution = sameName
-    ? ' The artifact selected now has the same name and has not been analyzed; nothing here describes it.'
-    : ` It is not an analysis of ${candidate.fileName}: that selection has not been analyzed yet.`;
+    ? t('common', 'overview.previousSameName')
+    : t('common', 'overview.previousOtherName', { name: candidate.fileName });
 
   return (
-    <Panel title="Previous analysis" hint="retained from this session">
+    <Panel
+      title={t('common', 'overview.previousTitle')}
+      hint={t('common', 'overview.previousHint')}
+    >
       <p className={styles['stale']} role="note">
-        {`Previous analysis of ${artifact.fileName}.${attribution}`}
+        {t('common', 'overview.previousOf', { name: artifact.fileName }) + attribution}
       </p>
-      <p className={styles['identity']}>{`Snapshot ${summary.identity.snapshotId}`}</p>
+      <p className={styles['identity']}>
+        {t('common', 'overview.snapshotLine', { id: summary.identity.snapshotId })}
+      </p>
       <div className={styles['fillBand']}>
-        <Band label="Previous input capabilities">
+        <Band label={t('common', 'overview.previousInputsBand')}>
           {capabilityCells(
             summary,
-            `As reported by the analysis of ${artifact.fileName}.`,
+            t('common', 'overview.previousAsReported', { name: artifact.fileName }),
             { elf: null, map: null },
+            t,
           )}
         </Band>
       </div>
-      <Band narrow label="Previous key figures">
-        {figureCells(summary, unit)}
+      <Band narrow label={t('common', 'overview.previousFiguresBand')}>
+        {figureCells(summary, unit, t)}
       </Band>
     </Panel>
   );
@@ -436,14 +486,18 @@ function Readiness({
   readonly project: ProjectContextDto | null;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
+  const { t } = useI18n();
   if (gateRun === null) {
     return (
-      <Panel title="Can we ship now?" hint="no gate run in this session">
+      <Panel
+        title={t('common', 'overview.shipTitle')}
+        hint={t('common', 'overview.shipNoRunHint')}
+      >
         <EmptyState
-          message="FirmwareSight has not run the gate in this session, so there is no verdict to show."
+          message={t('common', 'overview.shipNoRunMessage')}
           nextStep={
             <Button variant="primary" onClick={() => onOpen('release')}>
-              Run it on Release Gate
+              {t('common', 'overview.shipNoRunAction')}
             </Button>
           }
         />
@@ -467,21 +521,27 @@ function CurrentReadiness({
   readonly summary: AnalysisSummaryDto | null;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
+  const { t } = useI18n();
   const state = severityState(gateRun.dispositionEffectiveSeverity);
   const open = gateRun.findings.filter((finding) => finding.state !== 'PASS' && finding.state !== 'N/A');
 
   return (
     <Panel
-      title="Can we ship now?"
+      title={t('common', 'overview.shipTitle')}
       hint={
         <>
-          Latest evidence: run <Chip mono>{truncateMiddle(gateRun.runId, 8)}</Chip> · {gateRun.createdAt}
+          {t('common', 'overview.latestEvidence')}{' '}
+          <Chip mono>{truncateMiddle(gateRun.runId, 8)}</Chip> · {gateRun.createdAt}
         </>
       }
     >
-      <div className={styles['verdict']} role="group" aria-label="Readiness for the build this page describes">
+      <div
+        className={styles['verdict']}
+        role="group"
+        aria-label={t('common', 'overview.readinessGroup')}
+      >
         <StateBadge variant="chip" state={state} label={state} />
-        <p className={styles['verdictSentence']}>{gateVerdictSentence(gateRun)}</p>
+        <p className={styles['verdictSentence']}>{gateVerdictSentence(gateRun, t)}</p>
         {/* The same strip the gate page puts under its verdict: a verdict word without the counts it was
             aggregated from is an assertion, and this page states a verdict from a run it cannot open. */}
         <StatusStrip
@@ -492,19 +552,18 @@ function CurrentReadiness({
             UNKNOWN: gateRun.counts.unknown,
             'N/A': gateRun.counts.notApplicable,
           }}
-          label="Findings by state in this run"
+          label={t('common', 'overview.findingsStrip')}
         />
         {/* U1P-R1 §5.A: the verdict names the build it judged, in full, as text inside the answer itself. A
             truncated value is not an answer a reader can check, and a `title` attribute is not reachable by a
             keyboard reader, so this line is never shortened. */}
-        <p className={styles['identity']}>{`Judged snapshot ${gateRun.snapshotId}`}</p>
+        <p className={styles['identity']}>
+          {t('common', 'overview.judgedSnapshot', { id: gateRun.snapshotId })}
+        </p>
       </div>
 
       {open.length === 0 ? (
-        <p className={styles['quiet']}>
-          No finding is open: every rule that could be evaluated passed, and none is waiting on a
-          disposition.
-        </p>
+        <p className={styles['quiet']}>{t('common', 'overview.noOpenFindings')}</p>
       ) : (
         <ul className={styles['findings']}>
           {open.slice(0, 4).map((finding) => (
@@ -518,28 +577,27 @@ function CurrentReadiness({
           ))}
           {open.length > 4 ? (
             <li className={styles['more']}>
-              {`${String(open.length - 4)} more finding(s) on the Release Gate page.`}
+              {t('common', 'overview.moreFindings', { count: open.length - 4 })}
             </li>
           ) : null}
         </ul>
       )}
 
       <div className={styles['nextSteps']}>
-        <span className={styles['nextLabel']}>Next steps</span>
+        <span className={styles['nextLabel']}>{t('common', 'overview.nextSteps')}</span>
         {/* Both labels name the page rather than repeating the header's `Open Release Gate`: two buttons
             with one accessible name on one screen is a reader's question, not a reader's answer. */}
         <Button variant="primary" onClick={() => onOpen('release')}>
-          {state === 'PASS' ? 'Open the run on Release Gate' : 'Resolve on Release Gate'}
+          {state === 'PASS'
+            ? t('common', 'overview.openRunButton')
+            : t('common', 'overview.resolveButton')}
         </Button>
         {summary !== null && capabilityState(summary.capabilities.map) !== 'PASS' ? (
-          <Button onClick={() => onOpen('analyze')}>Attach a MAP file</Button>
+          <Button onClick={() => onOpen('analyze')}>{t('common', 'overview.attachMapButton')}</Button>
         ) : null}
       </div>
 
-      <p className={styles['scope']}>
-        This is FirmwareSight policy readiness for the run named above. It is not a legal, security or
-        product-compliance conclusion, and it never replaces a person&rsquo;s decision.
-      </p>
+      <p className={styles['scope']}>{t('common', 'overview.scopeNote')}</p>
     </Panel>
   );
 }
@@ -567,40 +625,50 @@ function NotCurrentReadiness({
   readonly project: ProjectContextDto | null;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
-  const words = NOT_CURRENT[scope.kind];
+  const { t } = useI18n();
+  const words = notCurrentWords(scope.kind, t);
 
   return (
     <Panel
-      title="Can we ship now?"
+      title={t('common', 'overview.shipTitle')}
       hint={
         <>
-          Latest evidence: run <Chip mono>{truncateMiddle(gateRun.runId, 8)}</Chip> · {gateRun.createdAt}
+          {t('common', 'overview.latestEvidence')}{' '}
+          <Chip mono>{truncateMiddle(gateRun.runId, 8)}</Chip> · {gateRun.createdAt}
         </>
       }
     >
-      <div className={styles['verdict']} role="group" aria-label="Readiness for the build this page describes">
+      <div
+        className={styles['verdict']}
+        role="group"
+        aria-label={t('common', 'overview.readinessGroup')}
+      >
         <StateBadge variant="chip" state="UNKNOWN" label={words.label} />
         <p className={styles['verdictSentence']}>{words.headline}</p>
       </div>
 
       <div className={styles['pastRun']} role="group" aria-label={words.retained}>
-        <p className={styles['identity']}>{`Judged snapshot ${gateRun.snapshotId}`}</p>
+        <p className={styles['identity']}>
+          {t('common', 'overview.judgedSnapshot', { id: gateRun.snapshotId })}
+        </p>
         {summary === null ? null : (
-          <p className={styles['identity']}>{`Snapshot this page describes ${summary.identity.snapshotId}`}</p>
+          <p className={styles['identity']}>
+            {t('common', 'overview.describedSnapshot', { id: summary.identity.snapshotId })}
+          </p>
         )}
         {scope.kind === 'otherPolicy' && project !== null ? (
           <p className={styles['identity']}>
-            {`Run policy ${gateRun.policySha256} · loaded policy ${project.policySha256}`}
+            {t('common', 'overview.policyPair', {
+              run: gateRun.policySha256,
+              loaded: project.policySha256,
+            })}
           </p>
         ) : null}
-        <p className={styles['quiet']}>
-          Its verdict and its findings stay on the Release Gate page, where the run was made, and nothing here
-          restates them for a build the gate did not judge.
-        </p>
+        <p className={styles['quiet']}>{t('common', 'overview.retainedQuiet')}</p>
       </div>
 
       <div className={styles['nextSteps']}>
-        <span className={styles['nextLabel']}>Next steps</span>
+        <span className={styles['nextLabel']}>{t('common', 'overview.nextSteps')}</span>
         {/* Navigation only in every arm: choosing a build and running the gate is the Release page's work, and
             arriving there must never imply a run happened. §4.H is why the pending case leads with Analyze.
             Its primary control used to read "Choose this build on Release Gate", and the build Release
@@ -609,60 +677,73 @@ function NotCurrentReadiness({
         {scope.kind === 'selectionPending' ? (
           <>
             <Button variant="primary" onClick={() => onOpen('analyze')}>
-              Analyze selected artifact
+              {t('common', 'overview.analyzeSelectedButton')}
             </Button>
-            <Button onClick={() => onOpen('release')}>View previous Gate run</Button>
+            <Button onClick={() => onOpen('release')}>{t('common', 'overview.viewPreviousRunButton')}</Button>
           </>
         ) : (
           <>
             <Button variant="primary" onClick={() => onOpen('release')}>
-              Choose this build on Release Gate
+              {t('common', 'overview.chooseBuildButton')}
             </Button>
             {summary === null ? (
-              <Button onClick={() => onOpen('analyze')}>Analyze an artifact</Button>
+              <Button onClick={() => onOpen('analyze')}>{t('common', 'overview.analyzeArtifactButton')}</Button>
             ) : null}
           </>
         )}
       </div>
 
-      <p className={styles['scope']}>
-        This is FirmwareSight policy readiness for the run named above. It is not a legal, security or
-        product-compliance conclusion, and it never replaces a person&rsquo;s decision.
-      </p>
+      <p className={styles['scope']}>{t('common', 'overview.scopeNote')}</p>
     </Panel>
   );
 }
 
 /** The four figures, always read from one summary; the band around them decides whose figures they are. */
-function figureCells(summary: AnalysisSummaryDto, unit: SizeUnit): ReactNode[] {
+function figureCells(
+  summary: AnalysisSummaryDto,
+  unit: SizeUnit,
+  t: Translate,
+): ReactNode[] {
   const { memory, capabilities, evidenceSummary } = summary;
   const flash = memory.nonvolatileImageFootprint;
   const ram = memory.runtimeRamFootprint;
+  // The context lines are Core's own words about a figure - a classification, a state, a reason - and
+  // `ADR-0032` D5 keeps them as written in both languages. A translated classification would be a
+  // second name for one fact.
+  const footprintContext = (
+    value: { classification: string; state: string; reason: string | null },
+  ) =>
+    `${value.classification} · ${value.state}${value.reason === null ? '' : ` · ${value.reason}`}`;
 
   return [
     <SummaryCard
       key="flash"
-      label="Flash footprint"
-      value={flash.bytes === null ? 'Unknown' : formatSize(flash.bytes, unit)}
-      context={`${flash.classification} · ${flash.state}${flash.reason === null ? '' : ` · ${flash.reason}`}`}
+      label={t('common', 'overview.flashLabel')}
+      value={flash.bytes === null ? t('common', 'overview.unknownValue') : formatSize(flash.bytes, unit)}
+      context={footprintContext(flash)}
     />,
     <SummaryCard
       key="ram"
-      label="Runtime RAM"
-      value={ram.bytes === null ? 'Unknown' : formatSize(ram.bytes, unit)}
-      context={`${ram.classification} · ${ram.state}${ram.reason === null ? '' : ` · ${ram.reason}`}`}
+      label={t('common', 'overview.ramLabel')}
+      value={ram.bytes === null ? t('common', 'overview.unknownValue') : formatSize(ram.bytes, unit)}
+      context={footprintContext(ram)}
     />,
     <SummaryCard
       key="symbols"
-      label="Symbols"
+      label={t('common', 'overview.symbolsLabel')}
       value={String(summary.symbolCount)}
-      context={`capability ${capabilities.symbols}`}
+      context={t('common', 'overview.capabilityLine', { state: capabilities.symbols })}
     />,
     <SummaryCard
       key="evidence"
-      label="Evidence"
+      label={t('common', 'overview.evidenceLabel')}
       value={String(evidenceSummary.total)}
-      context={`${String(evidenceSummary.observed)} observed · ${String(evidenceSummary.derived)} derived · ${String(evidenceSummary.declared)} declared · ${String(evidenceSummary.unknown)} unknown`}
+      context={t('common', 'overview.evidenceLine', {
+        observed: evidenceSummary.observed,
+        derived: evidenceSummary.derived,
+        declared: evidenceSummary.declared,
+        unknown: evidenceSummary.unknown,
+      })}
     />,
   ];
 }
@@ -675,5 +756,6 @@ function Facts({
   readonly summary: AnalysisSummaryDto;
   readonly unit: SizeUnit;
 }) {
-  return <Band narrow label="Key figures">{figureCells(summary, unit)}</Band>;
+  const { t } = useI18n();
+  return <Band narrow label={t('common', 'overview.keyFiguresBand')}>{figureCells(summary, unit, t)}</Band>;
 }

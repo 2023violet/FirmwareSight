@@ -1709,3 +1709,35 @@ non-blocking feedback round.
   `2cff702` — fast-forwarded over `47fde34` and read back as run `38124118299` with ten jobs green, 1,043 Rust tests
   on Windows and 1,044 on Ubuntu, 319 UI tests on both, and drift 8/8.
 
+
+## NEXT-05 / NEXT-06 — B1-U2 acceptance, then B1-U3 (2026-10-11, second batch)
+
+- Files, all three archived verbatim in this directory:
+  - `FirmwareSight_NEXT_05_B1U2_Independent_Acceptance_2026-10-11.txt` — 6,428 bytes, 41 lines, **0 `CR`**,
+    sha256 `18890a80a3ad00eb24a3cac7f50c0eddb008e60a8d3b3dca9eab7b5e8d6ba08c`
+  - `FirmwareSight_NEXT_06_B1U3_ZH_EN_Internationalization_2026-10-11.txt` — 8,797 bytes, 57 lines, **0 `CR`**,
+    sha256 `5d6bde626f63ecf280d275998c113b209ef1de5ceb4269d42f445c99ac6b2dca`
+  - `FirmwareSight_B1U2_Architect_Review_2026-10-11.md` — 2,578 bytes, 29 lines, **0 `CR`**,
+    sha256 `ca2fdac30f68d8a598fa2b701732c110b86ddc1d750326d4e2cf3ac53adae1c8`
+- Delivered in `C:\Users\16429\Downloads\FirmwareSight_B1U2_Review_and_B1U3_Next_Prompts_2026-10-11\`, still at that
+  path when the archive was written. Each archived copy is `cmp`-identical to its delivered file, so the digests above
+  are the digests of the delivered bytes; all three were LF-only as delivered.
+- Authority. `NEXT-05` is **READ-ONLY INDEPENDENT REVIEW**: no push, no tracked-file modification, and it forbids
+  substituting the implementer's own `17/17`, screenshots or self-assessment for independent evidence. `NEXT-06` is
+  **CONDITIONAL IMPLEMENTATION** whose four entry gates (A-D) are answered in `FirmwareSight_NEXT_06`'s own text and
+  whose §工作步骤 5 stops the round at a local commit with a clean tree. The third file is the Owner's 接手判定 for
+  B1-U2, not a task prompt.
+- What `NEXT-05` forbade that a reviewer would otherwise do, recorded here because the round was bound by it: no
+  host-OS global dark mode, forced-contrast or display-scaling changes without the Owner's approval; a CDP
+  `Emulation.setEmulatedMedia` event is to be labelled 模拟媒体查询事件 and may not be presented as a real OS switch;
+  a contrast ratio below 4.5:1 is not to be rounded up; and a frozen golden is not a WCAG exception. Its own
+  §B1-U3 clause kept `NEXT-06` out of this round: until the Owner issues it, B1-U3 is read-only preflight only — no
+  ADR-0032, no preference schema change, no i18n file.
+- Outcome, 2026-10-11. `NEXT-05` ran to all four phases and its verdict is
+  **`ACCEPT_WITH_EXPLICIT_LIMITS`**, itemized as L1-L5 in `B1_VALIDATION/B1_U2_THEME_REPORT.md`; the strongest is L1,
+  a measured light-theme `diff.removed` text ratio of 4.497435:1 on 12 px/400 text, which is a real WCAG 1.4.3 AA
+  non-conformance and is why no "UI meets AA" claim appears in this repository. The Owner accepted those limits,
+  authorized an ordinary fast-forward push of the reviewed range (`2cff702..e0b8fc4`), and read back remote run
+  `38160046797` with ten jobs green before dispatching `NEXT-06`. The reviewing agent was the same process that had
+  implemented B1-U2 one round earlier; that is stated here rather than hidden, and it is why `NEXT-06` §强制STOP
+  names passing an internal AI self-review off as an Architect `ACCEPT`.

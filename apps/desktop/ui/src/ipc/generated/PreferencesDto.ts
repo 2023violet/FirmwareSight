@@ -4,15 +4,23 @@ import type { PreferenceRecoveryDto } from "./PreferenceRecoveryDto";
 /**
  * The preferences this application is running with, as the Settings page sees them.
  *
- * `size_unit`, `startup_page` and `theme` carry the same words the stored document carries, so one
+ * `size_unit`, `startup_page`, `theme` and `language` carry the same words the stored document
+ * carries, so one
  * string is both what the page shows and what the file says — and the UI's `SizeUnit` union needs
  * no second translation. `theme` is the *chosen* value, which for `system` is not a palette: the
  * palette a `system` choice resolves to belongs to the WebView's media query and is never stored,
- * because storing it would answer a question the person did not ask. The directory is not here:
+ * because storing it would answer a question the person did not ask. `language` follows the same
+ * rule for the same reason (`ADR-0032` D1). The directory is not here:
  * only [`crate::preferences::SETTINGS_FILE_NAME`] crosses, the same way the store's name crosses
  * and its path does not (`AGENTS.md` 7, prompt §19).
  */
-export type PreferencesDto = { sizeUnit: string, startupPage: string, theme: string, recovery: PreferenceRecoveryDto, 
+export type PreferencesDto = { sizeUnit: string, startupPage: string, theme: string, 
+/**
+ * The chosen word — `system`, `zh-CN` or `en` — and never the language the platform answered
+ * with. A page that reported the resolved value would claim a choice the person did not make,
+ * and would change what it says whenever the desktop did. `ADR-0032` D1.
+ */
+language: string, recovery: PreferenceRecoveryDto, 
 /**
  * Whether a copy of bytes this build could not interpret is on hand beside the document. It
  * describes the folder rather than this one load, which is what makes "the earlier settings can

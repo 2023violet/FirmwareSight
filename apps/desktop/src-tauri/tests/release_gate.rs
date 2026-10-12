@@ -28,7 +28,8 @@ use firmwaresight_desktop::ipc::{
     ProjectPolicyDto, UnknownPolicyDto,
 };
 use firmwaresight_desktop::preferences::{
-    ApplicationPreferences, SETTINGS_FILE_NAME, SizeUnitPref, StartupPagePref, Store, ThemePref,
+    ApplicationPreferences, LanguagePref, SCHEMA_VERSION, SETTINGS_FILE_NAME, SizeUnitPref,
+    StartupPagePref, Store, ThemePref,
 };
 use firmwaresight_desktop::release::snapshot_facts;
 use firmwaresight_desktop::service;
@@ -1540,6 +1541,7 @@ fn a_stored_preference_moves_no_gate_identity_no_verdict_and_no_policy_fingerpri
             size_unit: SizeUnitPref::Kib,
             startup_page: StartupPagePref::History,
             theme: ThemePref::Dark,
+            language: LanguagePref::ZhCn,
         })
         .expect("the preference is stored");
     // The save has to have been a save, or the comparison below proves nothing. Every changed field
@@ -1548,7 +1550,13 @@ fn a_stored_preference_moves_no_gate_identity_no_verdict_and_no_policy_fingerpri
     let stored =
         std::fs::read(prefs_dir.join(SETTINGS_FILE_NAME)).expect("the document the session wrote");
     let text = String::from_utf8(stored).expect("utf-8");
-    for word in ["\"kib\"", "\"history\"", "\"dark\"", "\"schema_version\":2"] {
+    for word in [
+        "\"kib\"",
+        "\"history\"",
+        "\"dark\"",
+        "\"zh-CN\"",
+        &format!("\"schema_version\":{SCHEMA_VERSION}"),
+    ] {
         assert!(
             text.contains(word),
             "`{word}` is not in the document: {text}"

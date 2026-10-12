@@ -23,7 +23,9 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
+import { clearFallbacks, fallbacks } from './i18n';
 import {
+  getApplicationPreferences,
   listHistoryBuilds,
   listHistoryGateRuns,
   listHistoryReleases,
@@ -804,5 +806,105 @@ describe('U1P Bundle & History hierarchy', () => {
     const again = await buildsRegion();
     const details = await within(again).findByRole('button', { name: 'Details' });
     await waitFor(() => expect(details.getAttribute('aria-expanded')).toBe('false'));
+  });
+});
+
+describe('the same rows read in Chinese', () => {
+  /** The stored choice, in the shape the boundary actually carries. */
+  function preferences(language: 'en' | 'zh-CN') {
+    return {
+      ok: true as const,
+      value: {
+        sizeUnit: 'bytes',
+        startupPage: 'history',
+        theme: 'system',
+        language,
+        recovery: 'read' as const,
+        keptUnreadableCopy: false,
+        fileName: 'settings.json',
+      },
+    };
+  }
+
+  /**
+   * The stored columns of every row: artifact, snapshot, digest, stored time, format.
+   *
+   * Compared by position, because the table has one shape in either language and only two of its
+   * columns hold a word at all. Column 0 is the row's own action (详情 / Open), and the last two pair a
+   * qualifier with a byte count, so those three are the catalog's business rather than this test's.
+   */
+  function dataCells(region: HTMLElement): string[][] {
+    const body = region.querySelector('tbody');
+    return [...(body?.querySelectorAll('tr') ?? [])].map((row) =>
+      [...row.querySelectorAll('th,td')].map(prose).slice(1, 6),
+    );
+  }
+
+  function headOf(region: HTMLElement): string[] {
+    return [...(region.querySelectorAll('thead th') ?? [])].map(prose);
+  }
+
+  /** Open History straight from the stored startup page, in whichever language is asked for. */
+  let view: ReturnType<typeof render>;
+  async function openIn(language: 'en' | 'zh-CN'): Promise<HTMLElement> {
+    vi.mocked(getApplicationPreferences).mockResolvedValueOnce(preferences(language));
+    view = render(<App />);
+    const name = language === 'en' ? 'Stored builds' : '已保存的构建';
+    const region = await screen.findByRole('region', { name });
+    // The region is on screen before its rows are, and an empty table has no headers to compare. The
+    // file name is data, so this wait reads the same in either language.
+    await within(region).findByText(BUILD_FILE);
+    return region;
+  }
+
+  it('names the table, its columns and its pager in Chinese', async () => {
+    clearFallbacks();
+    buildsMock.mockResolvedValue(
+      buildPage([
+        candidate(),
+        candidate({ buildId: BASELINE_ID, snapshotId: `snap-${'q'.repeat(40)}`, fileName: 'next.elf' }),
+      ]),
+    );
+
+    const region = await openIn('zh-CN');
+    expect(headOf(region)).toContain('镜像文件');
+    expect(within(region).getByText('显示构建：第 1 到 2 个，共 2 个')).toBeDefined();
+    expect(within(region).getByRole('button', { name: '上一页' }).hasAttribute('disabled')).toBe(true);
+    // This page's own word for the action, next to the shared component's word for the sentence.
+    expect(within(region).getByRole('button', { name: '应用' })).toBeDefined();
+    expect(fallbacks()).toEqual([]);
+  });
+
+  it('moves no row, no id and no count when the language changes, and changes every column name', async () => {
+    buildsMock.mockResolvedValue(
+      buildPage([
+        candidate(),
+        candidate({ buildId: BASELINE_ID, snapshotId: `snap-${'q'.repeat(40)}`, fileName: 'next.elf' }),
+      ]),
+    );
+
+    const english = await openIn('en');
+    const englishCells = dataCells(english);
+    const englishHead = headOf(english);
+    expect(document.documentElement.lang).toBe('en');
+    view.unmount();
+
+    const chinese = await openIn('zh-CN');
+    expect(document.documentElement.lang).toBe('zh-CN');
+
+    // Five stored columns across two rows, identical in both languages: an id, a digest, a timestamp
+    // and a file name are Core's bytes, and a translation that moved one would be a data bug.
+    const chineseCells = dataCells(chinese);
+    expect(englishCells).toHaveLength(2);
+    expect(chineseCells).toEqual(englishCells);
+    expect(englishCells[0]?.[0]).toBe('app.elf');
+    expect(englishCells[1]?.[0]).toBe('next.elf');
+
+    // Every header moved, so the equality above is not two tables that failed to render.
+    const chineseHead = headOf(chinese);
+    expect(chineseHead).toHaveLength(englishHead.length);
+    expect(chineseHead).not.toEqual(englishHead);
+    expect(chineseHead).toContain('镜像文件');
+    expect(englishHead).toContain('Artifact');
   });
 });

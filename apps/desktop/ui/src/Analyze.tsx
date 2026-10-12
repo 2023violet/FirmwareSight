@@ -23,6 +23,7 @@ import { Details } from './Details';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
 import { GettingStartedPanel } from './GettingStarted';
+import { useI18n, type Translate } from './i18n';
 import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
@@ -54,6 +55,7 @@ export function Analyze({
   readonly onHideGettingStarted: () => void;
   readonly onLastGoodChange: (summary: AnalysisSummaryDto, selectionId: string) => void;
 }) {
+  const { t } = useI18n();
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
 
@@ -154,19 +156,22 @@ export function Analyze({
   return (
     <Page>
       <PageHeader
-        title="Analyze"
+        title={t('analyze', 'title')}
         meta={
           currentSummary === null
-            ? [selection === null ? 'no artifact selected' : `selected ${selection.fileName}`]
+            ? [
+                selection === null
+                  ? t('analyze', 'header.metaNone')
+                  : t('analyze', 'header.metaSelected', { name: selection.fileName }),
+              ]
             : [
-                `artifact ${currentSummary.artifact.fileName}`,
+                t('analyze', 'header.metaArtifact', { name: currentSummary.artifact.fileName }),
                 <span key="sha">sha256 {truncateMiddle(currentSummary.artifact.sha256, 6)}</span>,
-                `${String(currentSummary.sectionCount)} sections`,
-                `${String(currentSummary.symbolCount)} symbols`,
+                t('analyze', 'header.metaSections', { count: currentSummary.sectionCount }),
+                t('analyze', 'header.metaSymbols', { count: currentSummary.symbolCount }),
               ]
         }
-        subhead="Choose a firmware artifact and FirmwareSight reports the Core facts it can prove. Nothing
-          here changes the artifact."
+        subhead={t('analyze', 'header.subhead')}
         actions={
           <>
             <Button
@@ -175,7 +180,7 @@ export function Analyze({
                 void chooseArtifact();
               }}
             >
-              Choose firmware artifact
+              {t('analyze', 'intake.chooseArtifact')}
             </Button>
             <Button
               variant="primary"
@@ -184,7 +189,7 @@ export function Analyze({
                 void analyze();
               }}
             >
-              Analyze
+              {t('analyze', 'intake.analyzeButton')}
             </Button>
           </>
         }
@@ -195,44 +200,42 @@ export function Analyze({
           capability answers mapped to the five states, not a judgement made here. They describe the
           current attempt only — see `currentSummary`. When it has no right to speak, the strip says
           so in neutral words and points at the retained report instead of borrowing its pills. */}
-      <div className={styles['states']} role="group" aria-label="Input capabilities">
+      <div className={styles['states']} role="group" aria-label={t('analyze', 'status.capabilitiesGroup')}>
         {currentSummary === null ? (
           <>
             <Chip>
               {error !== null
-                ? 'Current analysis failed'
+                ? t('analyze', 'status.chipFailed')
                 : selection === null
-                  ? 'No artifact selected yet'
-                  : `${selection.fileName} selected, not analyzed yet`}
+                  ? t('analyze', 'status.chipNoArtifact')
+                  : t('analyze', 'status.chipSelected', { name: selection.fileName })}
             </Chip>
-            {summary === null ? null : <Chip>Previous result retained below</Chip>}
+            {summary === null ? null : <Chip>{t('analyze', 'status.chipRetained')}</Chip>}
           </>
         ) : (
           <>
             <StateBadge
               variant="chip"
               state={capabilityState(currentSummary.capabilities.elf)}
-              label={`ELF ${currentSummary.capabilities.elf}`}
+              label={t('analyze', 'status.capabilityElf', { value: currentSummary.capabilities.elf })}
             />
             <StateBadge
               variant="chip"
               state={capabilityState(currentSummary.capabilities.map)}
-              label={`MAP ${currentSummary.capabilities.map}`}
+              label={t('analyze', 'status.capabilityMap', { value: currentSummary.capabilities.map })}
             />
             <StateBadge
               variant="chip"
               state={capabilityState(currentSummary.capabilities.git)}
-              label={`Git ${currentSummary.capabilities.git}`}
+              label={t('analyze', 'status.capabilityGit', { value: currentSummary.capabilities.git })}
             />
           </>
         )}
       </div>
 
-      <section className={styles['controls']} aria-label="Artifact selection">
+      <section className={styles['controls']} aria-label={t('analyze', 'intake.selectionGroup')}>
         {selection === null ? (
-          <p className={styles['meta']}>
-            No artifact is selected. The Analyze action stays unavailable until one is.
-          </p>
+          <p className={styles['meta']}>{t('analyze', 'intake.noArtifact')}</p>
         ) : (
           <>
             <p className={styles['selected']} title={selection.fileName}>
@@ -240,8 +243,10 @@ export function Analyze({
             </p>
             <p className={styles['meta']}>
               {selection.mapAttached
-                ? `MAP: ${selection.mapFileName ?? 'attached'}`
-                : 'MAP: Not provided'}
+                ? t('analyze', 'intake.mapLine', {
+                    name: selection.mapFileName ?? t('analyze', 'intake.mapAttached'),
+                  })
+                : t('analyze', 'intake.mapNotProvided')}
             </p>
             <div className={styles['actions']}>
               <Button
@@ -250,7 +255,9 @@ export function Analyze({
                   void addMap();
                 }}
               >
-                {selection.mapAttached ? 'Replace MAP' : 'Add MAP'}
+                {selection.mapAttached
+                  ? t('analyze', 'intake.replaceMap')
+                  : t('analyze', 'intake.addMap')}
               </Button>
               {selection.mapAttached ? (
                 <Button
@@ -260,7 +267,7 @@ export function Analyze({
                     void removeMap();
                   }}
                 >
-                  Remove MAP
+                  {t('analyze', 'intake.removeMap')}
                 </Button>
               ) : null}
             </div>
@@ -273,14 +280,14 @@ export function Analyze({
         // users and silent for everyone else, because the button's own disabled state says nothing
         // about when the work finished.
         <p className={styles['status']} role="status" aria-live="polite">
-          Analyzing…
+          {t('analyze', 'status.analyzing')}
         </p>
       ) : null}
       {error === null ? null : (
         <ErrorPanel
           envelope={error}
-          label="Analysis error"
-          heading="Analysis failed"
+          label={t('analyze', 'status.errorRegion')}
+          heading={t('analyze', 'status.errorHeading')}
           action={
             <Button
               variant="primary"
@@ -289,7 +296,7 @@ export function Analyze({
                 void chooseArtifact();
               }}
             >
-              Choose another artifact
+              {t('analyze', 'status.chooseAnother')}
             </Button>
           }
         />
@@ -297,8 +304,8 @@ export function Analyze({
       {summary === null && !analyzing && error === null ? (
         <>
           <EmptyState
-            label="No analysis yet"
-            message="Nothing has been analyzed in this session yet. Choose an artifact and run Analyze."
+            label={t('analyze', 'status.emptyRegion')}
+            message={t('analyze', 'status.emptyMessage')}
           />
           {/* §13's first-use guidance, above the empty state it explains and below the controls that
               answer it. It is a panel, not a gate: every control on this page is reachable with it
@@ -353,8 +360,9 @@ function ResultBand({
   readonly stale: boolean;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   const { memory, evidenceSummary } = summary;
-  const quality = evidenceQuality(memory);
+  const quality = evidenceQuality(memory, t);
   const flash = memory.nonvolatileImageFootprint;
   const ram = memory.runtimeRamFootprint;
 
@@ -364,7 +372,7 @@ function ResultBand({
       state={
         <StateBadge
           state={budgetState(budget)}
-          label={budgetWord(budget.state)}
+          label={budgetWord(budget.state, t)}
           count={budget.state === 'partial' ? budget.unattributed.length : undefined}
           note={budget.reason ?? undefined}
         />
@@ -377,20 +385,27 @@ function ResultBand({
   return (
     <section
       className={styles['result']}
-      aria-label={stale ? 'Last good analysis result' : 'Analysis result'}
+      aria-label={
+        stale ? t('analyze', 'result.groupStale') : t('analyze', 'result.groupCurrent')
+      }
     >
-      <Band narrow label="Result figures">
-        {budgetCell('Flash footprint', flash, memory.accountingRule)}
-        {budgetCell('Runtime RAM', ram, memory.layoutSource)}
+      <Band narrow label={t('analyze', 'result.band')}>
+        {budgetCell(t('analyze', 'result.flashLabel'), flash, memory.accountingRule)}
+        {budgetCell(t('analyze', 'result.ramLabel'), ram, memory.layoutSource)}
         <SummaryCard
-          label="Load evidence"
+          label={t('analyze', 'result.loadEvidenceLabel')}
           state={<StateBadge state={quality.state} label={quality.label} />}
           context={quality.note}
         />
         <SummaryCard
-          label="Evidence recorded"
+          label={t('analyze', 'result.evidenceRecordedLabel')}
           value={<Figure>{String(evidenceSummary.total)}</Figure>}
-          context={`${String(evidenceSummary.observed)} observed · ${String(evidenceSummary.derived)} derived · ${String(evidenceSummary.declared)} declared · ${String(evidenceSummary.unknown)} unknown`}
+          context={t('analyze', 'result.evidenceLine', {
+            observed: evidenceSummary.observed,
+            derived: evidenceSummary.derived,
+            declared: evidenceSummary.declared,
+            unknown: evidenceSummary.unknown,
+          })}
         />
       </Band>
     </section>
@@ -418,6 +433,7 @@ function Report({
   readonly candidateName: string | null;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   const { artifact, memory, capabilities } = summary;
 
   // The second half of the note. Two artifacts can share one leaf name, which is the case this
@@ -427,51 +443,50 @@ function Report({
   const sameName = candidateName === null || candidateName === artifact.fileName;
   const attribution = pending
     ? candidateName === null
-      ? ' The selection now in this row has not been analyzed yet.'
+      ? t('analyze', 'report.previousNotAnalyzed')
       : sameName
-        ? ' The selection now in this row is a different file with the same name, and it has not been analyzed yet.'
-        : ` It is not an analysis of ${candidateName}: that selection has not been analyzed yet.`
+        ? t('analyze', 'report.previousSameName')
+        : t('analyze', 'report.previousOtherName', { name: candidateName })
     : sameName
-      ? ' The failed attempt above produced no result, so nothing here was replaced.'
-      : ` It is not an analysis of ${candidateName}.`;
+      ? t('analyze', 'report.previousNoResult')
+      : t('analyze', 'report.previousNotCandidate', { name: candidateName });
 
   return (
     <section
       className={styles['report']}
-      aria-label={stale ? 'Last good analysis' : 'Analysis summary'}
+      aria-label={stale ? t('analyze', 'report.groupStale') : t('analyze', 'report.groupCurrent')}
     >
       {stale ? (
         <p className={styles['stale']} role="note">
-          Previous analysis of {artifact.fileName}.
-          {attribution}
+          {t('analyze', 'report.previousOf', { name: artifact.fileName }) + attribution}
         </p>
       ) : null}
 
-      <PageSection title="Artifact">
+      <PageSection title={t('analyze', 'report.artifactSection')}>
         <FactList>
-          <FactRow term="File" title={artifact.fileName}>
+          <FactRow term={t('analyze', 'report.fileTerm')} title={artifact.fileName}>
             {artifact.fileName}
           </FactRow>
           <FactRow term="SHA-256" title={artifact.sha256}>
             <Figure>{artifact.sha256}</Figure>
           </FactRow>
-          <FactRow term="Size">
+          <FactRow term={t('analyze', 'report.sizeTerm')}>
             <Figure>{formatSize(artifact.byteSize, unit)}</Figure>
           </FactRow>
-          <FactRow term="Format">
+          <FactRow term={t('analyze', 'report.formatTerm')}>
             {`${artifact.architecture} ${artifact.bitness}-bit ${artifact.endianness}`}
           </FactRow>
-          <FactRow term="Kind">{artifact.kind}</FactRow>
-          <FactRow term="Parser">
+          <FactRow term={t('analyze', 'report.kindTerm')}>{artifact.kind}</FactRow>
+          <FactRow term={t('analyze', 'report.parserTerm')}>
             <Figure>{artifact.parserId}</Figure>
           </FactRow>
-          <FactRow term="Entry">
+          <FactRow term={t('analyze', 'report.entryTerm')}>
             {formatOptional(artifact.entryPoint)}
             {artifact.entryPointUnknownReason === null ? null : (
               <Qualifier>{artifact.entryPointUnknownReason}</Qualifier>
             )}
           </FactRow>
-          <FactRow term="Build ID">
+          <FactRow term={t('analyze', 'report.buildIdTerm')}>
             {truncateMiddle(formatOptional(artifact.buildId), 8)}
             {artifact.buildIdUnknownReason === null ? null : (
               <Qualifier>{artifact.buildIdUnknownReason}</Qualifier>
@@ -482,33 +497,43 @@ function Report({
 
       {/* The two budgets and the strength of the evidence behind them are stated once, in the result band
           above the tables. What stays here is the accounting that explains those figures. */}
-      <PageSection title="Memory">
+      <PageSection title={t('analyze', 'report.memorySection')}>
         <FactList>
-          <FactRow term="Layout source">
+          <FactRow term={t('analyze', 'report.layoutSourceTerm')}>
             {memory.layoutSource}
-            <Qualifier>{`Accounting rule ${memory.accountingRule}`}</Qualifier>
+            <Qualifier>{t('analyze', 'report.accountingRule', { rule: memory.accountingRule })}</Qualifier>
           </FactRow>
-          <FactRow term="Dual-accounted">
+          <FactRow term={t('analyze', 'report.dualAccountedTerm')}>
             {memory.dualAccountedSections.length === 0
-              ? 'none'
+              ? t('analyze', 'report.noneValue')
               : memory.dualAccountedSections.join(', ')}
-            <Qualifier>{`${String(memory.dualAccountedSections.length)} section(s)`}</Qualifier>
+            <Qualifier>
+              {t('analyze', 'report.dualAccountedCount', {
+                count: memory.dualAccountedSections.length,
+              })}
+            </Qualifier>
           </FactRow>
-          <FactRow term="Device metadata excluded">
+          <FactRow term={t('analyze', 'report.excludedMetadataTerm')}>
             <Figure>{formatSize(memory.excludedMetadataBytes, unit)}</Figure>
           </FactRow>
         </FactList>
       </PageSection>
 
-      <PageSection title="Capabilities">
+      <PageSection title={t('analyze', 'report.capabilitiesSection')}>
         <FactList>
           <CapabilityRow term="ELF" value={capabilities.elf} />
-          <CapabilityRow term="Sections" value={capabilities.sections} />
-          <CapabilityRow term="Symbols" value={capabilities.symbols} />
-          <CapabilityRow term="Debug info" value={capabilities.debugInfo} />
+          <CapabilityRow term={t('analyze', 'report.sectionsTerm')} value={capabilities.sections} />
+          <CapabilityRow term={t('analyze', 'report.symbolsTerm')} value={capabilities.symbols} />
+          <CapabilityRow
+            term={t('analyze', 'report.debugInfoTerm')}
+            value={capabilities.debugInfo}
+          />
           <CapabilityRow term="MAP" value={capabilities.map} />
           {/* L19: the scope here is one build's attribution capability, not a delta between builds. */}
-          <CapabilityRow term="Object/module attribution" value={capabilities.objectAttribution} />
+          <CapabilityRow
+            term={t('analyze', 'report.attributionTerm')}
+            value={capabilities.objectAttribution}
+          />
           <CapabilityRow term="Git" value={capabilities.git} />
         </FactList>
       </PageSection>
@@ -532,7 +557,7 @@ function Report({
  * and the dossier has no room for it twice. The words are Core's: the weakest basis is what caps the
  * pair, and admissibility for a hard limit is a property of that evidence, not a mood.
  */
-function evidenceQuality(memory: MemorySummaryDto): {
+function evidenceQuality(memory: MemorySummaryDto, t: Translate): {
   readonly state: StateName;
   readonly label: string;
   readonly note: string;
@@ -541,21 +566,21 @@ function evidenceQuality(memory: MemorySummaryDto): {
   if (basis === null) {
     return {
       state: 'UNKNOWN',
-      label: 'No load evidence',
-      note: 'No allocatable section carried an address and flag pair. Re-run with a linker MAP.',
+      label: t('analyze', 'evidence.noneLabel'),
+      note: t('analyze', 'evidence.noneNote'),
     };
   }
-  const caption = evidenceBasisCaption(basis);
+  const caption = evidenceBasisCaption(basis, t);
   return memory.admissibleForHardBlock
     ? {
         state: 'PASS',
-        label: 'Admissible for a hard limit',
-        note: `Weakest basis ${caption}; region evidence came from the linker.`,
+        label: t('analyze', 'evidence.admissibleLabel'),
+        note: t('analyze', 'evidence.admissibleNote', { basis: caption }),
       }
     : {
         state: 'UNKNOWN',
-        label: 'Not admissible for a hard limit',
-        note: `Weakest basis ${caption} is name- or flag-derived. Supply the linker MAP to strengthen it.`,
+        label: t('analyze', 'evidence.notAdmissibleLabel'),
+        note: t('analyze', 'evidence.notAdmissibleNote', { basis: caption }),
       };
 }
 
@@ -564,14 +589,14 @@ function budgetState(budget: MemorySummaryDto['nonvolatileImageFootprint']): Sta
   return budget.state === 'exact' ? 'PASS' : budget.state === 'partial' ? 'REVIEW' : 'UNKNOWN';
 }
 
-function budgetWord(state: string): string {
+function budgetWord(state: string, t: Translate): string {
   switch (state) {
     case 'exact':
-      return 'Exact';
+      return t('analyze', 'budget.exact');
     case 'partial':
-      return 'Partial';
+      return t('analyze', 'budget.partial');
     default:
-      return 'Unknown';
+      return t('analyze', 'budget.unknown');
   }
 }
 

@@ -22,16 +22,19 @@
 
 import styles from './TopBar.module.css';
 
+import { useI18n } from '../i18n';
+
 export function TopBar({ project }: { readonly project: string | null }) {
+  const { t } = useI18n();
   return (
     <header className={styles['bar']}>
-      <span className={styles['brand']}>FirmwareSight</span>
+      <span className={styles['brand']}>{t('common', 'app.name')}</span>
       {project === null ? null : (
         <span className={styles['context']} title={project}>
           {project}
         </span>
       )}
-      <p className={styles['promise']}>Local workspace — nothing leaves this machine</p>
+      <p className={styles['promise']}>{t('common', 'shell.localWorkspace')}</p>
     </header>
   );
 }

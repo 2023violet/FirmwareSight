@@ -1,0 +1,41 @@
+FirmwareSight｜NEXT-05 — B1-U2 System / Light / Dark 独立验收
+版本 v1.0｜2026-10-11｜READ-ONLY INDEPENDENT REVIEW｜不推送｜不修改 tracked 文件
+
+身份与目标
+你是独立 Architect / Reviewer，不是 B1-U2 的编码执行者。根据真实本地提交与运行证据，裁决三态主题是否可以进入 Owner 推送审批。不得将执行者的 17/17、UI 截图或自评替代独立证据；不得重新设计 UI，不得顺带实现 B1-U3。
+
+已知上下文（都必须现地重新核查，不当作已验证事实）
+- 预期远端 origin/main = 2cff7026f2e2953411b08008b8834424cbf0e9c0（GitHub Actions #99、38124118299、十项成功，在当前读回成立）；预期本地 B1-U2 head = e0b8fc4，祖先提交 bf3d494（ADR-0031）→ bd62289（功能）→ e0b8fc4（报告修正），ahead 3，clean。
+- 执行者声明：最终检查 17/17 exit 0；Rust 1050（49 条测试结果行）、UI 334（11 文件）、37 Tauri commands、verifier 820/818/949；未 push；安装态 NOT_VERIFIED；系统外观真实变更、125%/150%、forced-colors 未验。
+- 已知对比度债务：light diff.removed on diff.removed.bg = 4.4974:1；这低于 WCAG 普通文字 AA 4.5:1，不能向上取整；执行者因 golden 固定而没有修改浅色 token。
+- 现有权威 ADR-0018 D3（不是 D4）禁止 MVP Dark；B1-U2 新增 ADR-0031 必须作为正式定向决议先于改码，且只替代指定的 Light-only 限制。检查 DESIGN.md/AGENTS.md 与冻结历史是否一致。
+
+Phase A｜只读预检与边界
+1. 执行 git status --porcelain=v1 -uall、git rev-parse HEAD、git rev-parse origin/main、git ls-remote origin refs/heads/main、git merge-base --is-ancestor origin/main HEAD、git log --reverse origin/main..HEAD、git diff --name-status origin/main..HEAD。
+2. 预期 head、远端、提交序列/数、clean/单 worktree/Stash 状态不符，先 STOP 并报告实际状态；不要自动 rebase/reset/push。
+3. 阅读 AGENTS.md、.ai/README.md、CURRENT_STATE.md、DECISIONS.md、ACTIVE_TASK.md 顶部 LIVE POINTER、ADR-0018、ADR-0031、DESIGN.md、03_DESIGN/03_VISUAL_SYSTEM.md、07_DESIGN_TOKEN_VALIDATION.md、B1-U1 Preferences 存储合同、v0.2 产品决策、B1-U2 原始 Prompt、提交报告和设计检查表。必要时检查本地最新文件优先于历史编号。
+4. 变更界限：不允许偷改 Core/Gate/Release identity、CLI、portable schemas/goldens、网络/插件/权限或无关设计体系。执行 diff 分类，检查精确生成资产。
+
+Phase B｜独立源代码与真实测试核验
+1. 逐路追踪 system/light/dark preference 的读取、升级、保存、重置、React 状态投影与主题 token 注入；确认单一状态真源，快速多次切换不乱序，没有启动时静默写入或悄悄覆盖未来版本配置。
+2. 检查 matchMedia('(prefers-color-scheme: dark)') 或等效实现：默认 system；进入/退出 system 时是否正确监听/解除；用户覆盖是否真正阻止 OS 变化；冷启动是否有错误闪烁或误报保存。
+3. 核查 assets/design-tokens.json → generator → tokens.css 完整性；真实 Dark roles 与已有所有共用组件（导航、表格、PASS/REVIEW/BLOCK/UNKNOWN/N/A、diff、hover/selected、focus-visible、Dialog、Help、Settings）的覆盖；确保 Report HTML、Golden、CLI JSON 不受桌面主题影响。
+4. 重新运行本任务定向 Rust/UI/设计 token 测试、fmt/clippy/typecheck/lint/build、全脚本 gate；须分开统计一次测试组与被其他步骤重复运行的组，避免把 1050 当作 1314。
+5. 针对同一固定 Fixture，在 Light / Dark / System 确认相同 Gate run id、fingerprint、finding counts、Release/Bundle 输入与输出；避免只从 DTO 结构推断。
+6. 读取原始报告，独立确认 4.4974:1 的前景色、背景色、实际字号/字重及渲染位置。若属于普通可见文本，必须判该验收项 FAIL/REWORK（低于 4.5 不得四舍五入）；若属于 WCAG 例外，须给实证而非把“历史 token 已冻结”当作可访问性豁免。
+7. 如需变更冻结浅色颜色/自包含 HTML 报告 Golden，提出最小 diff、受影响测试、golden 的有意更新证据和明确 Owner 授权申请；本 READ-ONLY 轮不得改码或更新 Goldens。不要把一个反差问题扩大成整套设计重做。
+
+Phase C｜真实运行态
+1. 在安全的本地环境中启动真实 Tauri 程序，记录 HEAD、构建形态（dev/installed/CI artifact）、窗口尺寸、完整主题状态。
+2. 真实操作 System→Light→Dark→System、各页面导航、重启恢复、Reset 确认与取消；对 Settings/Analyze/Compare/Release/History/Help 的必要组件截图。至少 1024×720 与 1440×900；能实测 125%/150% 则测并记录，否则 NOT_VERIFIED。
+3. **不要未经 Owner 批准修改宿主 OS 全局深色、强制高对比度或显示缩放。** 可以在隔离 VM 执行；若仅用 WebView2/CDP 注入 media query，必须将其标作“模拟媒体查询事件”，不能冒称操作系统真实切换。
+4. 真正无法跑的平台/安装包须保留 NOT_VERIFIED，不能用 dev window 代替 installed proof。
+
+Phase D｜独立结论与下一步
+输出单一精简报告，分别列出：SOURCE_PRESENT、LOCAL_TEST_PROVEN、DEV_RUNTIME_VERIFIED、OS_THEME_LIVE_VERIFIED、INSTALLED_VERIFIED、REMOTE_CI_PROVEN。每项 PASS/FAIL/NOT_VERIFIED 与原始命令/文件/行号/截图证据对应。
+独立裁决只用：ACCEPT / ACCEPT_WITH_EXPLICIT_LIMITS / REWORK_REQUIRED / EVIDENCE_INSUFFICIENT。若对比度为真实 AA 普通文字违规，则不得声称“全 UI AA PASS”；若构成原 Prompt T05 未满足，则明确说明是否阻止 B1-U2 单元最终 ACCEPT。
+确认不会导致数据/Gate/Bundle 语义不一致后，可向 Owner 建议单独批准普通 fast-forward push；本 Prompt 没有 push 权限，禁止自动推送、force 或 --force-with-lease。
+如需补丁，给出“最小修复任务”的目标、测试和允许文件面，不实施修复。不要为文档润色建立独立工作包。
+未经 Owner 显式下发，B1-U3 仅允许只读预检，不得创建 ADR-0032、修改偏好 schema 或 i18n 文件。
+
+最终交付：状态表、四个主要风险的结论（系统主题、对比度、升级/重置、数据身份隔离）、原始测试数字、可复核路径，以及推送/B1-U3 是否符合准入条件。停止。

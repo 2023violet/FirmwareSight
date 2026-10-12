@@ -21,6 +21,13 @@
  * down. Two boundaries are the point of that section: the payload is assembled in Rust from a fixed list
  * of fields, and it leaves the machine only when a person names a folder in the native Save dialog the
  * shell owns. Nothing is uploaded, because there is nothing here to upload it to.
+ *
+ * Every sentence on this page is UI prose and comes from the `help` catalog (`ADR-0032` D6), in either
+ * language. What does not come from it is the shell's own answer - the version, the identifier, the
+ * platform, the schema number, the store's file name, the engine's bounded health detail, an error code
+ * and an export outcome word - which is rendered exactly as it arrives, through a placeholder when the
+ * sentence needs one. Two source-tree document paths are kept verbatim for the same reason
+ * (`ADR-0032` D5): a path is not a sentence.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -28,6 +35,7 @@ import { useCallback, useEffect, useState } from 'react';
 import styles from './Help.module.css';
 import { ErrorPanel } from './components/ErrorPanel';
 import { GettingStartedList } from './GettingStarted';
+import { useI18n, type Translate } from './i18n';
 import { exportDiagnostics, getAppIdentity, getDiagnostics } from './ipc/bridge';
 import type {
   AppIdentityDto,
@@ -43,12 +51,42 @@ import type {
  * A desktop package installs a binary. The four documents below are part of the product's source
  * distribution, so an honest Help screen says which folder they are in and says that the installed
  * package does not carry them yet. Claiming otherwise would be a pointer a stranger cannot follow.
+ *
+ * The two entries that live on this screen are pointed at in prose, so their location is a catalog key.
+ * The two that live in the source tree are pointed at by their own path, and a path is machine
+ * vocabulary (`ADR-0032` D5): it is shown in either language exactly as the repository spells it.
  */
-const DOCUMENTS: readonly { readonly name: string; readonly path: string; readonly shipped: boolean }[] = [
-  { name: 'Getting Started', path: 'this screen, and the panel on Analyze', shipped: true },
-  { name: 'Support Matrix', path: '04_TECH/20_PLATFORM_SUPPORT.md', shipped: false },
-  { name: 'Known Limitations', path: 'P5_VALIDATION/P5_KNOWN_LIMITATIONS.md', shipped: false },
-  { name: 'Diagnostics', path: 'this screen, and the file you export from it', shipped: true },
+const DOCUMENTS: readonly {
+  readonly nameKey:
+    | 'documents.name.gettingStarted'
+    | 'documents.name.supportMatrix'
+    | 'documents.name.knownLimitations'
+    | 'documents.name.diagnostics';
+  readonly at:
+    | { readonly kind: 'prose'; readonly key: 'documents.where.onThisScreen' | 'documents.where.exportedHere' }
+    | { readonly kind: 'path'; readonly text: string };
+  readonly shipped: boolean;
+}[] = [
+  {
+    nameKey: 'documents.name.gettingStarted',
+    at: { kind: 'prose', key: 'documents.where.onThisScreen' },
+    shipped: true,
+  },
+  {
+    nameKey: 'documents.name.supportMatrix',
+    at: { kind: 'path', text: '04_TECH/20_PLATFORM_SUPPORT.md' },
+    shipped: false,
+  },
+  {
+    nameKey: 'documents.name.knownLimitations',
+    at: { kind: 'path', text: 'P5_VALIDATION/P5_KNOWN_LIMITATIONS.md' },
+    shipped: false,
+  },
+  {
+    nameKey: 'documents.name.diagnostics',
+    at: { kind: 'prose', key: 'documents.where.exportedHere' },
+    shipped: true,
+  },
 ];
 
 /**
@@ -61,16 +99,18 @@ const DOCUMENTS: readonly { readonly name: string; readonly path: string; readon
 function told(
   identity: AppIdentityDto | null,
   pick: (value: AppIdentityDto) => string,
+  t: Translate,
 ): string {
-  return identity === null ? 'not reported' : pick(identity);
+  return identity === null ? t('help', 'notReported') : pick(identity);
 }
 
 /** The same rule for the Diagnostics rows: the screen holds no default for any of them. */
 function known(
   diagnostics: DiagnosticsDto | null,
   pick: (value: DiagnosticsDto) => string,
+  t: Translate,
 ): string {
-  return diagnostics === null ? 'not reported' : pick(diagnostics);
+  return diagnostics === null ? t('help', 'notReported') : pick(diagnostics);
 }
 
 /**
@@ -83,15 +123,18 @@ function known(
  * same grey every other fact on this page uses, and the sentence under it is what makes a damaged store
  * legible. A health value this build does not know is reported as unknown rather than rounded to
  * healthy.
+ *
+ * Being prose, the three words are the page's own and are catalog-keyed like every other sentence here;
+ * none of them is one of the state or evidence words `ADR-0032` D5 keeps in the engine's spelling.
  */
-function health(store: DiagnosticsStoreDto): string {
+function health(store: DiagnosticsStoreDto, t: Translate): string {
   switch (store.health) {
     case 'healthy':
-      return 'healthy';
+      return t('help', 'health.healthy');
     case 'unhealthy':
-      return 'unhealthy';
+      return t('help', 'health.unhealthy');
     default:
-      return 'unknown';
+      return t('help', 'health.unknown');
   }
 }
 
@@ -103,14 +146,21 @@ function health(store: DiagnosticsStoreDto): string {
  * it finds damaged, so the screen says that instead of offering a button that would. A check that could
  * not be asked shows its stable code and no message, because the message of an open failure can quote
  * the path it failed on (prompt §19).
+ *
+ * The detail and the code are handed to the sentence through a placeholder, so the engine's own words
+ * land inside a translated sentence without that sentence being cut in half to translate them
+ * (`ADR-0032` D6).
  */
-function healthNote(store: DiagnosticsStoreDto): string {
+function healthNote(store: DiagnosticsStoreDto, t: Translate): string {
   if (store.health === 'unhealthy') {
-    return `The store check reported: ${store.healthSummary ?? 'no detail returned'}. FirmwareSight only reads this check; it does not repair, replace or delete the store.`;
+    return store.healthSummary === null
+      ? t('help', 'health.damagedNoDetail')
+      : t('help', 'health.damagedReported', { detail: store.healthSummary });
   }
   if (store.health === 'unknown') {
-    const code = store.healthErrorCode === null ? '' : ` (code ${store.healthErrorCode})`;
-    return `The health check could not be asked${code}. The store is left exactly where it is.`;
+    return store.healthErrorCode === null
+      ? t('help', 'health.notAsked')
+      : t('help', 'health.notAskedWithCode', { code: store.healthErrorCode });
   }
   return '';
 }
@@ -121,22 +171,30 @@ function healthNote(store: DiagnosticsStoreDto): string {
  * Declining to choose a folder, and declining to overwrite a file that was already there, are normal
  * outcomes rather than errors - the Compare export established that contract, and Diagnostics keeps the
  * same words for the same decisions.
+ *
+ * `written` without a file name gets its own sentence rather than a noun phrase dropped into this one,
+ * because a catalog value is a whole sentence and never a fragment of somebody else's
+ * (`ADR-0032` D4). An outcome word this build does not know is the shell's data and is shown as it
+ * arrived.
  */
-function outcomeWords(outcome: ExportOutcomeDto): string {
+function outcomeWords(outcome: ExportOutcomeDto, t: Translate): string {
   switch (outcome.status) {
     case 'written':
-      return `Wrote ${outcome.fileName ?? 'the diagnostics file'}.`;
+      return outcome.fileName === null
+        ? t('help', 'export.wroteUnnamed')
+        : t('help', 'export.wrote', { fileName: outcome.fileName });
     case 'cancelled':
-      return 'Export cancelled. No file was written.';
+      return t('help', 'export.cancelled');
     case 'kept-existing':
-      return 'Kept the file that was already there. Nothing was written.';
+      return t('help', 'export.keptExisting');
     default:
       // An outcome this build does not know is reported as what it is, not as a guess.
-      return `The export reported an outcome this build does not know: ${outcome.status}`;
+      return t('help', 'export.unknownOutcome', { status: outcome.status });
   }
 }
 
 export function Help() {
+  const { t } = useI18n();
   const [identity, setIdentity] = useState<AppIdentityDto | null>(null);
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
 
@@ -156,121 +214,90 @@ export function Help() {
   return (
     <main className={styles['page']}>
       <header className={styles['header']}>
-        <h1>Help</h1>
-        <p className={styles['subhead']}>
-          What this application is, what it can read, and where the documents that bound its claims
-          live. Nothing on this screen needs a browser or a network.
-        </p>
+        <h1>{t('help', 'title')}</h1>
+        <p className={styles['subhead']}>{t('help', 'intro')}</p>
       </header>
 
-      <section className={styles['section']} aria-label="About this application">
-        <h2>About this application</h2>
+      <section className={styles['section']} aria-label={t('help', 'about.heading')}>
+        <h2>{t('help', 'about.heading')}</h2>
         {error !== null ? (
           <ErrorPanel
             envelope={error}
-            label="Application identity error"
-            heading="The application could not describe itself"
+            label={t('help', 'about.errorLabel')}
+            heading={t('help', 'about.errorHeading')}
           />
         ) : null}
         <dl className={styles['facts']}>
           <div>
-            <dt>Product</dt>
-            <dd>{told(identity, (value) => value.productName)}</dd>
+            <dt>{t('help', 'field.product')}</dt>
+            <dd>{told(identity, (value) => value.productName, t)}</dd>
           </div>
           <div>
-            <dt>Version</dt>
-            <dd className={styles['mono']}>{told(identity, (value) => value.appVersion)}</dd>
+            <dt>{t('help', 'field.version')}</dt>
+            <dd className={styles['mono']}>{told(identity, (value) => value.appVersion, t)}</dd>
           </div>
           <div>
-            <dt>Executable</dt>
-            <dd className={styles['mono']}>{told(identity, (value) => value.binaryName)}</dd>
+            <dt>{t('help', 'field.executable')}</dt>
+            <dd className={styles['mono']}>{told(identity, (value) => value.binaryName, t)}</dd>
           </div>
           <div>
-            <dt>Application identifier</dt>
-            <dd className={styles['mono']}>{told(identity, (value) => value.identifier)}</dd>
+            <dt>{t('help', 'field.identifier')}</dt>
+            <dd className={styles['mono']}>{told(identity, (value) => value.identifier, t)}</dd>
           </div>
           <div>
-            <dt>Running on</dt>
-            <dd className={styles['mono']}>{told(identity, (value) => value.platform)}</dd>
+            <dt>{t('help', 'field.runningOn')}</dt>
+            <dd className={styles['mono']}>{told(identity, (value) => value.platform, t)}</dd>
           </div>
           <div>
-            <dt>Store schema</dt>
+            <dt>{t('help', 'field.storeSchema')}</dt>
             <dd className={styles['mono']}>
-              {told(identity, (value) => `v${String(value.storageSchemaVersion)}`)}
+              {told(identity, (value) => `v${String(value.storageSchemaVersion)}`, t)}
             </dd>
           </div>
           <div>
-            <dt>History store</dt>
-            <dd className={styles['mono']}>{told(identity, (value) => value.storeFileName)}</dd>
+            <dt>{t('help', 'field.historyStore')}</dt>
+            <dd className={styles['mono']}>{told(identity, (value) => value.storeFileName, t)}</dd>
           </div>
         </dl>
-        <p className={styles['note']}>
-          The store is named by file, not by folder. Where it sits is not stated here, and not stated in
-          the diagnostics file either: an absolute path stays inside the application.
-        </p>
+        <p className={styles['note']}>{t('help', 'about.storeNote')}</p>
       </section>
 
       <Diagnostics />
 
-      <section className={styles['section']} aria-label="What it can read">
-        <h2>What it can read</h2>
-        <p>
-          FirmwareSight analyzes ELF firmware artifacts and, when one is attached, a GNU ld MAP file
-          beside it. The Format row on Analyze names the architecture, bitness and endianness it found
-          in the file you chose; the Parser row names the parser that read it. A MAP that is not GNU
-          ld output is refused rather than partly believed.
-        </p>
-        <p>
-          Anything outside that set is reported as unsupported. The Support Matrix document is the
-          authoritative list of what is claimed to work, on which platform, and to what depth; this
-          screen is not a substitute for it.
-        </p>
-        <p>
-          A BIN or Intel HEX file is still not something FirmwareSight reads. It is something a release
-          ships: the Release page attaches it, records its size and SHA-256 under the kind its name
-          states, and carries those bytes inside a verified bundle, with its build provenance left
-          unestablished by design (`ADR-0030`).
-        </p>
+      <section className={styles['section']} aria-label={t('help', 'reads.heading')}>
+        <h2>{t('help', 'reads.heading')}</h2>
+        <p>{t('help', 'reads.artifacts')}</p>
+        <p>{t('help', 'reads.matrix')}</p>
+        <p>{t('help', 'reads.binHex')}</p>
       </section>
 
-      <section className={styles['section']} aria-label="Local-first statement">
-        <h2>Local first</h2>
-        <p>
-          Analysis, comparison, the release Gate and the bundle write all happen on this machine. The
-          product has no account, no telemetry, no analytics SDK, no update service and no network
-          listener, so there is nothing to send a firmware file to. Your firmware bytes are never
-          copied into the application&rsquo;s own database: the store keeps the facts derived from
-          them, and the file name.
-        </p>
+      <section className={styles['section']} aria-label={t('help', 'local.ariaLabel')}>
+        <h2>{t('help', 'local.heading')}</h2>
+        <p>{t('help', 'local.boundary')}</p>
       </section>
 
-      <section className={styles['section']} aria-label="Getting started">
-        <h2>Getting started</h2>
-        <p>
-          The same seven answers Analyze shows on a first run. If you hid that panel, everything it
-          said is here.
-        </p>
+      <section className={styles['section']} aria-label={t('help', 'getting.heading')}>
+        <h2>{t('help', 'getting.heading')}</h2>
+        <p>{t('help', 'getting.intro')}</p>
         <GettingStartedList />
       </section>
 
-      <section className={styles['section']} aria-label="Where the documents live">
-        <h2>Where to find the rest</h2>
+      <section className={styles['section']} aria-label={t('help', 'documents.ariaLabel')}>
+        <h2>{t('help', 'documents.heading')}</h2>
         <ul className={styles['documents']}>
           {DOCUMENTS.map((document) => (
-            <li key={document.name}>
-              <span className={styles['documentName']}>{document.name}</span>
-              <span className={styles['mono']}>{document.path}</span>
+            <li key={document.nameKey}>
+              <span className={styles['documentName']}>{t('help', document.nameKey)}</span>
+              <span className={styles['mono']}>
+                {document.at.kind === 'prose' ? t('help', document.at.key) : document.at.text}
+              </span>
               {document.shipped ? null : (
-                <span className={styles['documentFlag']}>not carried inside the installed package</span>
+                <span className={styles['documentFlag']}>{t('help', 'documents.notCarried')}</span>
               )}
             </li>
           ))}
         </ul>
-        <p className={styles['note']}>
-          History is a page of this window, not a document: the builds, Gate runs and release records
-          this computer stored are on the History tab, and they stay readable after the firmware files
-          themselves have gone.
-        </p>
+        <p className={styles['note']}>{t('help', 'documents.historyNote')}</p>
       </section>
     </main>
   );
@@ -286,6 +313,7 @@ export function Help() {
  * into the file.
  */
 function Diagnostics() {
+  const { t } = useI18n();
   const [payload, setPayload] = useState<DiagnosticsDto | null>(null);
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -314,63 +342,62 @@ function Diagnostics() {
       return;
     }
     setExportError(null);
-    setNote(outcomeWords(outcome.value));
-  }, []);
+    setNote(outcomeWords(outcome.value, t));
+  }, [t]);
 
   const store = payload?.store ?? null;
-  const detail = store === null ? '' : healthNote(store);
+  const detail = store === null ? '' : healthNote(store, t);
 
   return (
-    <section className={styles['section']} aria-label="Diagnostics">
-      <h2>Diagnostics</h2>
-      <p>
-        One file that says what this application is and what its own data store can say about itself, so
-        a support conversation can start from facts rather than from a person reading values off a
-        screen. It is written here and goes nowhere else: there is no upload, no telemetry, and no
-        service in this product to send it to.
-      </p>
+    <section className={styles['section']} aria-label={t('help', 'diagnostics.heading')}>
+      <h2>{t('help', 'diagnostics.heading')}</h2>
+      <p>{t('help', 'diagnostics.intro')}</p>
       {error === null ? null : (
         <ErrorPanel
           envelope={error}
-          label="Diagnostics error"
-          heading="The application could not describe its data store"
+          label={t('help', 'diagnostics.errorLabel')}
+          heading={t('help', 'diagnostics.errorHeading')}
         />
       )}
       <dl className={styles['facts']}>
         <div>
-          <dt>Version</dt>
+          <dt>{t('help', 'field.version')}</dt>
           <dd className={styles['mono']}>
-            {known(payload, (value) => value.product.appVersion)}
+            {known(payload, (value) => value.product.appVersion, t)}
           </dd>
         </div>
         <div>
-          <dt>Store schema</dt>
+          <dt>{t('help', 'field.storeSchema')}</dt>
           <dd className={styles['mono']}>
-            {known(payload, (value) =>
-              value.store.schemaVersion === null
-                ? 'not reported'
-                : `v${String(value.store.schemaVersion)}`,
+            {known(
+              payload,
+              (value) =>
+                value.store.schemaVersion === null
+                  ? t('help', 'notReported')
+                  : `v${String(value.store.schemaVersion)}`,
+              t,
             )}
           </dd>
         </div>
         <div>
-          <dt>Store health</dt>
-          <dd className={styles['health']}>
-            {known(payload, (value) => health(value.store))}
-          </dd>
+          <dt>{t('help', 'field.storeHealth')}</dt>
+          <dd className={styles['health']}>{known(payload, (value) => health(value.store, t), t)}</dd>
         </div>
         <div>
-          <dt>Git</dt>
+          <dt>{t('help', 'field.git')}</dt>
           <dd>
-            {known(payload, (value) =>
-              value.git.available ? 'available' : 'not available on this machine',
+            {known(
+              payload,
+              (value) =>
+                value.git.available ? t('help', 'git.available') : t('help', 'git.unavailable'),
+              t,
             )}
           </dd>
         </div>
         <div>
-          <dt>Local FirmwareSight data store</dt>
+          <dt>{t('help', 'field.localStore')}</dt>
           <dd className={styles['mono']}>
-            {known(payload, (value) => value.product.storeFileName)}
+            {known(payload, (value) => value.product.storeFileName, t)}
           </dd>
         </div>
       </dl>
@@ -384,11 +411,11 @@ function Diagnostics() {
             void exportNow();
           }}
         >
-          Export diagnostics
+          {t('help', 'diagnostics.exportButton')}
         </button>
         {exporting ? (
           <p className={styles['status']} role="status" aria-live="polite">
-            Waiting for the save dialog&hellip;
+            {t('help', 'diagnostics.waitingForDialog')}
           </p>
         ) : null}
         {note === null ? null : (
@@ -400,17 +427,11 @@ function Diagnostics() {
       {exportError === null ? null : (
         <ErrorPanel
           envelope={exportError}
-          label="Diagnostics export error"
-          heading="The diagnostics file was not written"
+          label={t('help', 'export.errorLabel')}
+          heading={t('help', 'export.errorHeading')}
         />
       )}
-      <p className={styles['note']}>
-        The file carries these five facts and the ones this screen has no room for: journal mode, bounded
-        row counts, the names of any pre-migration snapshots kept beside the store, the install channel,
-        the loaded release policy, and up to eight stable error codes this run produced. Never a folder,
-        a user name, a firmware byte, a MAP line, a release note, a symbol name, a Git remote, an SQL
-        statement or a stack trace. Codes only, never the message that goes with one.
-      </p>
+      <p className={styles['note']}>{t('help', 'diagnostics.fileContents')}</p>
     </section>
   );
 }
