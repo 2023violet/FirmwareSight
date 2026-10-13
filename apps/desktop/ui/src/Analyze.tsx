@@ -28,6 +28,7 @@ import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bri
 import type {
   AnalysisSummaryDto,
   ErrorEnvelopeDto,
+  MemoryRegionDto,
   MemorySummaryDto,
   SelectionDto,
 } from './ipc/types';
@@ -517,6 +518,7 @@ function Report({
             <Figure>{formatSize(memory.excludedMetadataBytes, unit)}</Figure>
           </FactRow>
         </FactList>
+        <RegionUsageTable regions={memory.regionUsage} />
       </PageSection>
 
       <PageSection title={t('analyze', 'report.capabilitiesSection')}>
@@ -548,6 +550,137 @@ function Report({
       </footer>
     </section>
   );
+}
+
+function RegionUsageTable({ regions }: { readonly regions: readonly MemoryRegionDto[] }) {
+  const { t } = useI18n();
+
+  if (regions.length === 0) {
+    return (
+      <p className={styles['regionUnknown']} role="status">
+        {t('analyze', 'region.none')}
+      </p>
+    );
+  }
+
+  return (
+    <div className={styles['regionTableScroll']}>
+      <table className={styles['regionTable']} aria-label={t('analyze', 'region.title')}>
+        <thead>
+          <tr>
+            <th scope="col">{t('analyze', 'region.name')}</th>
+            <th scope="col">{t('analyze', 'region.kind')}</th>
+            <th scope="col">{t('analyze', 'region.capacity')}</th>
+            <th scope="col">{t('analyze', 'region.mapped')}</th>
+            <th scope="col">{t('analyze', 'region.status')}</th>
+            <th scope="col">{t('analyze', 'region.remaining')}</th>
+            <th scope="col">{t('analyze', 'region.evidence')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {regions.map((region) => (
+            <tr key={region.evidenceId}>
+              <th scope="row" title={region.name}>{region.name}</th>
+              <td>{regionKind(region.kind, t)}</td>
+              <td className={styles['regionMono']}>{regionBytes(region.capacityBytes, t)}</td>
+              <td className={styles['regionMono']}>
+                {region.usedBytes === null
+                  ? t('analyze', 'region.unknown')
+                  : region.state === 'partial'
+                    ? t('analyze', 'region.atLeast', { bytes: region.usedBytes })
+                    : regionBytes(region.usedBytes, t)}
+              </td>
+              <td>
+                <span>{regionState(region.state, t)}</span>
+                <span className={styles['regionStatusDetail']}>{regionRisk(region.risk, t)}</span>
+                {region.reasons.length === 0 ? null : (
+                  <span className={styles['regionStatusDetail']}>{region.reasons.join('; ')}</span>
+                )}
+              </td>
+              <td>
+                {region.remainingBytes === null ? (
+                  <span>
+                    {t('analyze', 'region.unknown')}
+                    <span className={styles['regionStatusDetail']}>{region.remainingReason}</span>
+                  </span>
+                ) : (
+                  regionBytes(region.remainingBytes, t)
+                )}
+              </td>
+              <td>
+                <details>
+                  <summary aria-label={t('analyze', 'region.showEvidence', { name: region.name })}>
+                    {t('analyze', 'region.inspect')}
+                  </summary>
+                  <dl className={styles['regionDetails']}>
+                    <dt>{t('analyze', 'region.origin')}</dt><dd>{region.origin}</dd>
+                    <dt>{t('analyze', 'region.evidenceSource')}</dt><dd>{region.evidenceSource}</dd>
+                    <dt>{t('analyze', 'region.evidenceId')}</dt><dd>{region.evidenceId}</dd>
+                    {region.sections.map((section) => (
+                      <div className={styles['regionSection']} key={section.locator}>
+                        <dt>{section.name ?? t('analyze', 'region.unknown')}</dt>
+                        <dd>
+                          {t('analyze', 'region.sectionAddress', {
+                            kind: addressKind(section.addressKind, t),
+                            address: section.address,
+                            bytes: section.bytes,
+                          })}
+                          <span>{t('analyze', 'region.vmaLma', {
+                            vma: section.virtualAddress ?? t('analyze', 'region.unknown'),
+                            lma: section.loadAddress ?? t('analyze', 'region.unknown'),
+                          })}</span>
+                          {section.virtualAddressUnknownReason === null ? null : (
+                            <span>{t('analyze', 'region.virtualReason', { reason: section.virtualAddressUnknownReason })}</span>
+                          )}
+                          {section.loadAddressUnknownReason === null ? null : (
+                            <span>{t('analyze', 'region.loadReason', { reason: section.loadAddressUnknownReason })}</span>
+                          )}
+                          <span>{section.locator} · {section.evidenceBasis}</span>
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </details>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function regionBytes(value: string | null, t: Translate): string {
+  return value === null ? t('analyze', 'region.unknown') : `${value} ${t('analyze', 'region.bytes')}`;
+}
+
+function regionKind(value: string, t: Translate): string {
+  switch (value) {
+    case 'nonvolatile': return t('analyze', 'region.kindNonvolatile');
+    case 'volatile-ram': return t('analyze', 'region.kindRam');
+    default: return t('analyze', 'region.unknown');
+  }
+}
+
+function regionState(value: string, t: Translate): string {
+  switch (value) {
+    case 'exact': return t('analyze', 'region.stateExact');
+    case 'partial': return t('analyze', 'region.statePartial');
+    default: return t('analyze', 'region.unknown');
+  }
+}
+
+function regionRisk(value: string, t: Translate): string {
+  switch (value) {
+    case 'within-capacity': return t('analyze', 'region.riskWithin');
+    case 'exceeded': return t('analyze', 'region.riskExceeded');
+    case 'review': return t('analyze', 'region.riskReview');
+    default: return t('analyze', 'region.unknown');
+  }
+}
+
+function addressKind(value: string, t: Translate): string {
+  return value === 'load' ? t('analyze', 'region.loadAddress') : t('analyze', 'region.virtualAddress');
 }
 
 /**

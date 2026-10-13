@@ -172,6 +172,7 @@ function summary(overrides: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDt
       },
       dualAccountedSections: ['section:3(.data)'],
       excludedMetadataBytes: 210,
+      regionUsage: [],
     },
     sectionCount: 17,
     symbolCount: 32,

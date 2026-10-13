@@ -1,10 +1,12 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
+import { Analyze } from './Analyze';
 import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type { AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto } from './ipc/types';
+import { render } from './test/render';
 import { precedes } from './test/order';
 
 // The bridge is the boundary; mocking it keeps these tests about what the screen shows rather than
@@ -214,6 +216,7 @@ function summary(overrides: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDt
       },
       dualAccountedSections: ['section:3(.data)'],
       excludedMetadataBytes: 210,
+      regionUsage: [],
     },
     sectionCount: 12,
     symbolCount: 34,
@@ -263,9 +266,11 @@ beforeEach(() => {
   analyzeMock.mockResolvedValue(ok(summary()));
 });
 
-async function chooseArtifact(name = 'app.elf') {
-  render(<App />);
-  fireEvent.click(await screen.findByRole('button', { name: 'Choose firmware artifact' }));
+async function chooseArtifact(name = 'app.elf', language: 'en' | 'zh-CN' = 'en') {
+  render(<App />, { language });
+  fireEvent.click(await screen.findByRole('button', {
+    name: language === 'en' ? 'Choose firmware artifact' : '选择固件镜像文件',
+  }));
   await screen.findByText(name);
 }
 
@@ -351,6 +356,153 @@ describe('P1-A0 intake screen', () => {
     expect(screen.getByText('1,024 bytes')).toBeDefined();
     expect(screen.getByText('section:3(.data)')).toBeDefined();
     expect(screen.getByText('snap-deadbeef-p0-normalize-1')).toBeDefined();
+  });
+
+  it('shows projected Region evidence as exact facts in both catalogs', async () => {
+    const base = summary();
+    const withRegions = {
+      ...base,
+      memory: {
+        ...base.memory,
+        regionUsage: [
+          {
+            name: 'ROM <script>alert(1)</script>',
+            kind: 'nonvolatile',
+            origin: '0x8000000',
+            capacityBytes: '1048576',
+            usedBytes: '160',
+            remainingBytes: null,
+            remainingReason: 'The region table does not prove contiguous allocatable space.',
+            state: 'exact',
+            risk: 'within-capacity',
+            evidenceSource: 'map',
+            evidenceId: 'ev-map-regions',
+            addressKind: 'load',
+            sections: [
+              {
+                locator: 'elf.section_header[3]',
+                name: '.data',
+                bytes: '4',
+                address: '0x20000000',
+                addressKind: 'virtual',
+                virtualAddress: '0x20000000',
+                virtualAddressUnknownReason: null,
+                loadAddress: '0x800005c',
+                loadAddressUnknownReason: null,
+                evidenceBasis: 'map-region-and-elf-load',
+              },
+            ],
+            reasons: [],
+          },
+        ],
+      },
+    } as AnalysisSummaryDto;
+    analyzeMock.mockResolvedValue(ok(withRegions));
+
+    await chooseArtifact();
+    await analyze();
+
+    const table = await screen.findByRole('table', { name: 'Memory regions' });
+    expect(within(table).getByRole('columnheader', { name: 'Mapped ranges' })).toBeDefined();
+    expect(within(table).getByText('1048576 bytes')).toBeDefined();
+    expect(within(table).getByText('160 bytes')).toBeDefined();
+    expect(within(table).getByText(/Unknown/)).toBeDefined();
+    expect(within(table).queryByText(/160 bytes free/)).toBeNull();
+
+    const details = within(table).getByText('Inspect sections');
+    expect(details.tagName).toBe('SUMMARY');
+    details.focus();
+    fireEvent.keyDown(details, { key: 'Enter' });
+    fireEvent.click(details);
+    expect(details.closest('details')?.open).toBe(true);
+    expect(await within(table).findByText(/LMA 0x800005c/)).toBeDefined();
+    expect(within(table).getByRole('rowheader', {
+      name: 'ROM <script>alert(1)</script>',
+    })).toBeDefined();
+    expect(table.querySelector('script')).toBeNull();
+
+  });
+
+  it('localizes Region headings in Chinese', async () => {
+    const base = summary();
+    const withRegions = {
+      ...base,
+      memory: {
+        ...base.memory,
+        regionUsage: [{
+          name: 'ROM',
+          kind: 'nonvolatile',
+          origin: '0x8000000',
+          capacityBytes: '1048576',
+          usedBytes: null,
+          remainingBytes: null,
+          remainingReason: 'unknown',
+          state: 'unknown',
+          risk: 'unknown',
+          evidenceSource: 'none',
+          evidenceId: 'region-rom',
+          addressKind: 'load',
+          sections: [],
+          reasons: [],
+        }],
+      },
+    } as AnalysisSummaryDto;
+    analyzeMock.mockResolvedValue(ok({
+      ...base,
+      memory: withRegions.memory,
+    } as AnalysisSummaryDto));
+
+    render(
+      <Analyze
+        unit="bytes"
+        onUnitChange={() => undefined}
+        selection={null}
+        onSelectionChange={() => undefined}
+        analyzedSelectionId="sel-7f3a-2"
+        lastGood={withRegions}
+        gettingStartedHidden
+        onHideGettingStarted={() => undefined}
+        onLastGoodChange={() => undefined}
+      />,
+      { language: 'zh-CN' },
+    );
+
+    expect(screen.getByRole('table', { name: '内存区域' })).toBeDefined();
+    expect(screen.getByText('声明容量')).toBeDefined();
+  });
+
+  it('keeps last-good Region evidence attached to its previous analysis', async () => {
+    const previous = summary({
+      artifact: { ...summary().artifact, fileName: 'old.elf' },
+      memory: {
+        ...summary().memory,
+        regionUsage: [{
+          name: 'ROM', kind: 'nonvolatile', origin: '0x8000000', capacityBytes: '4096',
+          usedBytes: null, remainingBytes: null, remainingReason: 'unknown', state: 'unknown',
+          risk: 'unknown', evidenceSource: 'map', evidenceId: 'old-region', addressKind: 'load',
+          sections: [], reasons: ['old evidence'],
+        }],
+      },
+    });
+    render(
+      <Analyze
+        unit="bytes"
+        onUnitChange={() => undefined}
+        selection={{ selectionId: 'sel-new', fileName: 'new.elf', mapFileName: null, mapAttached: false }}
+        onSelectionChange={() => undefined}
+        analyzedSelectionId="sel-old"
+        lastGood={previous}
+        gettingStartedHidden
+        onHideGettingStarted={() => undefined}
+        onLastGoodChange={() => undefined}
+      />,
+    );
+
+    const stale = screen.getByRole('region', { name: 'Last good analysis' });
+    expect(within(stale).getByText(/Previous analysis of old\.elf/)).toBeDefined();
+    expect(within(stale).getByRole('table', { name: 'Memory regions' })).toBeDefined();
+    expect(within(stale).getByText('4096 bytes')).toBeDefined();
+    expect(stale.textContent).not.toContain('new-region');
   });
 
   it('labels evidence quality with a word and an icon, never colour alone', async () => {

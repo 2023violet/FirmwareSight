@@ -15,11 +15,14 @@ use std::path::{Path, PathBuf};
 
 use firmwaresight_artifact::ArtifactError;
 use firmwaresight_artifact::pipeline::{self, Analysis, AnalysisRequest};
+use firmwaresight_core::domain::memory::{
+    MemoryRegionUsage, RegionAddressKind, RegionUsageRisk, RegionUsageState,
+};
 use firmwaresight_report::AnalyzeResultDto;
 
 use crate::ipc::{
     AnalysisSummaryDto, ArtifactDto, BudgetDto, CapabilitiesDto, EvidenceSummaryDto, FixtureKey,
-    IdentityDto, MemorySummaryDto,
+    IdentityDto, MemoryRegionDto, MemorySummaryDto, RegionSectionDto,
 };
 
 /// The summary came from a committed fixture the shell chose.
@@ -131,7 +134,11 @@ impl FixtureCatalog {
 /// The projection reads only from `AnalyzeResultDto`, which is the very same type the CLI
 /// renders. No arithmetic is repeated here, so the two surfaces cannot drift by construction.
 #[must_use]
-pub fn summarize(dto: &AnalyzeResultDto, source: &str) -> AnalysisSummaryDto {
+pub fn summarize(
+    dto: &AnalyzeResultDto,
+    source: &str,
+    region_usage: &[MemoryRegionUsage],
+) -> AnalysisSummaryDto {
     let mut counts = EvidenceSummaryDto {
         total: dto.evidence.len(),
         observed: 0,
@@ -182,6 +189,7 @@ pub fn summarize(dto: &AnalyzeResultDto, source: &str) -> AnalysisSummaryDto {
             runtime_ram_footprint: budget(&dto.memory.runtime_ram_footprint),
             dual_accounted_sections: dto.memory.dual_accounted_sections.clone(),
             excluded_metadata_bytes: dto.memory.excluded_metadata_bytes,
+            region_usage: region_usage.iter().map(region).collect(),
         },
         section_count: dto.counts.sections,
         symbol_count: dto.counts.symbols,
@@ -195,6 +203,94 @@ pub fn summarize(dto: &AnalyzeResultDto, source: &str) -> AnalysisSummaryDto {
             git: dto.capabilities.git.to_owned(),
         },
         evidence_summary: counts,
+    }
+}
+
+fn region(source: &MemoryRegionUsage) -> MemoryRegionDto {
+    MemoryRegionDto {
+        name: source.name.clone(),
+        kind: match source.kind {
+            firmwaresight_core::domain::memory::RegionKind::Nonvolatile => "nonvolatile",
+            firmwaresight_core::domain::memory::RegionKind::VolatileRam => "volatile-ram",
+            firmwaresight_core::domain::memory::RegionKind::Unknown => "unknown",
+        }
+        .to_owned(),
+        origin: format!("0x{:x}", source.origin),
+        capacity_bytes: source.capacity_bytes.map(|bytes| bytes.to_string()),
+        used_bytes: source.used_bytes.map(|bytes| bytes.to_string()),
+        remaining_bytes: source.remaining_bytes.map(|bytes| bytes.to_string()),
+        remaining_reason: source.remaining_reason.to_owned(),
+        state: match source.state {
+            RegionUsageState::Exact => "exact",
+            RegionUsageState::Partial => "partial",
+            RegionUsageState::Unknown => "unknown",
+        }
+        .to_owned(),
+        risk: match source.risk {
+            RegionUsageRisk::WithinCapacity => "within-capacity",
+            RegionUsageRisk::Exceeded => "exceeded",
+            RegionUsageRisk::Review => "review",
+            RegionUsageRisk::Unknown => "unknown",
+        }
+        .to_owned(),
+        evidence_source: source.evidence_source.to_owned(),
+        evidence_id: source.evidence_id.clone(),
+        address_kind: address_kind(source.address_kind).to_owned(),
+        sections: source.sections.iter().map(region_section).collect(),
+        reasons: source.reasons.clone(),
+    }
+}
+
+fn region_section(
+    source: &firmwaresight_core::domain::memory::RegionSectionUsage,
+) -> RegionSectionDto {
+    RegionSectionDto {
+        locator: source.section_locator.clone(),
+        name: source.section_name.value().cloned(),
+        bytes: source.bytes.to_string(),
+        address: format!("0x{:x}", source.address),
+        address_kind: address_kind(source.address_kind).to_owned(),
+        virtual_address: source
+            .virtual_address
+            .value()
+            .map(|address| format!("0x{address:x}")),
+        virtual_address_unknown_reason: source
+            .virtual_address
+            .reason_if_unknown()
+            .map(str::to_owned),
+        load_address: source
+            .load_address
+            .value()
+            .map(|address| format!("0x{address:x}")),
+        load_address_unknown_reason: source.load_address.reason_if_unknown().map(str::to_owned),
+        evidence_basis: evidence_basis(source.evidence_basis).to_owned(),
+    }
+}
+
+const fn address_kind(kind: RegionAddressKind) -> &'static str {
+    match kind {
+        RegionAddressKind::Load => "load",
+        RegionAddressKind::Virtual => "virtual",
+    }
+}
+
+const fn evidence_basis(
+    basis: firmwaresight_core::domain::memory::MemoryEvidenceBasis,
+) -> &'static str {
+    match basis {
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::RegionConfigAndElfLoad => {
+            "region-config-and-elf-load"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::MapRegionAndElfLoad => {
+            "map-region-and-elf-load"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::ElfAddressAndFlags => {
+            "elf-address-and-flags"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::SectionNameHeuristic => {
+            "section-name-heuristic"
+        }
+        firmwaresight_core::domain::memory::MemoryEvidenceBasis::Insufficient => "insufficient",
     }
 }
 
@@ -216,7 +312,7 @@ fn budget(source: &firmwaresight_report::dto::BudgetDto) -> BudgetDto {
 #[must_use]
 pub fn project_artifact(file_name: &str, analysis: &Analysis) -> AnalysisSummaryDto {
     let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, file_name);
-    summarize(&dto, SOURCE_ARTIFACT)
+    summarize(&dto, SOURCE_ARTIFACT, &analysis.memory.region_usage)
 }
 /// Project a completed fixture analysis into the bounded IPC summary.
 ///
@@ -230,5 +326,5 @@ pub fn project(
     analysis: &Analysis,
 ) -> AnalysisSummaryDto {
     let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, &catalog.file_name(key));
-    summarize(&dto, SOURCE_FIXTURE)
+    summarize(&dto, SOURCE_FIXTURE, &analysis.memory.region_usage)
 }

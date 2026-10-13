@@ -78,6 +78,7 @@ function summary(over: Partial<AnalysisSummaryDto> = {}): AnalysisSummaryDto {
       },
       dualAccountedSections: ['.data'],
       excludedMetadataBytes: 14_690,
+      regionUsage: [],
     },
     sectionCount: 9,
     symbolCount: 1_284,

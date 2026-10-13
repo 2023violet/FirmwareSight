@@ -493,6 +493,7 @@ function selectionSummary(): AnalysisSummaryDto {
       },
       dualAccountedSections: [],
       excludedMetadataBytes: 0,
+      regionUsage: [],
     },
     sectionCount: 14,
     symbolCount: 30,

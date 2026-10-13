@@ -415,12 +415,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── HistoryReleaseRowDto.ts
 │           │   │   │   ├── IdentityDto.ts
 │           │   │   │   ├── MainWindowPage.ts
+│           │   │   │   ├── MemoryRegionDto.ts
 │           │   │   │   ├── MemorySummaryDto.ts
 │           │   │   │   ├── ObjectAttributionDto.ts
 │           │   │   │   ├── PreferenceRecoveryDto.ts
 │           │   │   │   ├── PreferencesDto.ts
 │           │   │   │   ├── ProjectContextDto.ts
 │           │   │   │   ├── ProjectPolicyDto.ts
+│           │   │   │   ├── RegionSectionDto.ts
 │           │   │   │   ├── ReleaseAttachmentDto.ts
 │           │   │   │   ├── ReleaseAttachmentsDto.ts
 │           │   │   │   ├── SectionChangePageDto.ts

@@ -7,6 +7,11 @@
 
 use std::path::{Path, PathBuf};
 
+use firmwaresight_core::domain::identity::Fact;
+use firmwaresight_core::domain::memory::{
+    MemoryRegionUsage, RegionAddressKind, RegionKind, RegionUsageRisk, RegionUsageState,
+};
+use firmwaresight_desktop::service;
 use firmwaresight_desktop::{FixtureKey, Session, service::FixtureCatalog};
 use serde_json::Value;
 
@@ -146,6 +151,137 @@ fn desktop_and_cli_report_the_same_core_facts_for_the_same_bytes() {
         cli_caps["objectAttribution"].as_str().unwrap()
     );
     assert_eq!(summary.capabilities.git, cli_caps["git"].as_str().unwrap());
+}
+
+#[test]
+fn desktop_summary_projects_memory_regions_from_the_existing_analysis() {
+    let db = TempDb::new("region-summary");
+    let session = session(&db);
+    let summary = session
+        .analyze_and_store(FixtureKey::P0DualRegion, "op-region-summary")
+        .expect("the GNU ld dual-region fixture analyzes");
+    let value = serde_json::to_value(summary).expect("desktop summary serializes");
+    let regions = value["memory"]["regionUsage"]
+        .as_array()
+        .expect("Region evidence is available to the Analyze UI");
+
+    let rom = regions
+        .iter()
+        .find(|region| region["name"] == "ROM")
+        .expect("ROM projection");
+    assert_eq!(rom["kind"], "nonvolatile");
+    assert_eq!(rom["origin"], "0x8000000");
+    assert_eq!(rom["capacityBytes"], "1048576");
+    assert_eq!(rom["usedBytes"], "160");
+    assert_eq!(rom["state"], "exact");
+    assert_eq!(rom["risk"], "within-capacity");
+    assert_eq!(rom["remainingBytes"], serde_json::Value::Null);
+    assert_eq!(
+        rom["remainingReason"],
+        "the region table and section intervals do not prove contiguous allocatable space; gaps may contain padding or reserved memory"
+    );
+
+    let ram = regions
+        .iter()
+        .find(|region| region["name"] == "RAM")
+        .expect("RAM projection");
+    assert_eq!(ram["kind"], "volatile-ram");
+    assert_eq!(ram["capacityBytes"], "262144");
+    assert_eq!(ram["usedBytes"], "72");
+
+    let data = ram["sections"]
+        .as_array()
+        .expect("section evidence")
+        .iter()
+        .find(|section| section["name"] == ".data")
+        .expect(".data evidence");
+    assert_eq!(data["bytes"], "4");
+    assert_eq!(data["virtualAddress"], "0x20000000");
+    assert_eq!(data["loadAddress"], "0x800005c");
+    assert_eq!(data["addressKind"], "virtual");
+}
+
+#[test]
+fn desktop_region_projection_preserves_unknown_zero_partial_and_u64_values() {
+    let section = firmwaresight_core::domain::memory::RegionSectionUsage {
+        section_locator: "elf.section_header[9]".to_owned(),
+        section_name: Fact::known(".wide".to_owned()),
+        address_kind: RegionAddressKind::Load,
+        address: u64::MAX,
+        bytes: 0,
+        virtual_address: Fact::unknown("not mapped"),
+        load_address: Fact::known(u64::MAX),
+        evidence_basis: firmwaresight_core::domain::memory::MemoryEvidenceBasis::Insufficient,
+    };
+    let usages = vec![
+        MemoryRegionUsage {
+            name: "Unknown".to_owned(),
+            kind: RegionKind::Unknown,
+            origin: u64::MAX,
+            capacity_bytes: Some(u64::MAX),
+            used_bytes: None,
+            remaining_bytes: None,
+            remaining_reason: "unknown evidence",
+            state: RegionUsageState::Unknown,
+            risk: RegionUsageRisk::Unknown,
+            evidence_source: "none",
+            evidence_id: "region-unknown".to_owned(),
+            address_kind: RegionAddressKind::Load,
+            sections: Vec::new(),
+            reasons: vec!["missing map".to_owned()],
+        },
+        MemoryRegionUsage {
+            name: "Partial".to_owned(),
+            kind: RegionKind::VolatileRam,
+            origin: 0,
+            capacity_bytes: None,
+            used_bytes: Some(0),
+            remaining_bytes: None,
+            remaining_reason: "partial evidence",
+            state: RegionUsageState::Partial,
+            risk: RegionUsageRisk::Review,
+            evidence_source: "map",
+            evidence_id: "region-partial".to_owned(),
+            address_kind: RegionAddressKind::Virtual,
+            sections: vec![section],
+            reasons: vec!["one interval could not be bounded".to_owned()],
+        },
+    ];
+    let mut analysis = service::analyze_paths(
+        &FixtureCatalog::from_environment().artifact_path(FixtureKey::P0DualRegion),
+        Some(
+            &FixtureCatalog::from_environment()
+                .root()
+                .join("elf/p0-dual-region/firmware.map"),
+        ),
+    )
+    .expect("fixture analysis");
+    analysis.memory.region_usage = usages;
+    let value = serde_json::to_value(service::project_artifact("firmware.elf", &analysis))
+        .expect("projection serializes");
+    let regions = value["memory"]["regionUsage"].as_array().unwrap();
+    assert_eq!(regions[0]["origin"], "0xffffffffffffffff");
+    assert_eq!(regions[0]["capacityBytes"], "18446744073709551615");
+    assert_eq!(regions[0]["usedBytes"], serde_json::Value::Null);
+    assert_eq!(regions[0]["risk"], "unknown");
+    assert_eq!(regions[1]["usedBytes"], "0");
+    assert_eq!(regions[1]["state"], "partial");
+    assert_eq!(regions[1]["risk"], "review");
+    assert_eq!(regions[1]["sections"][0]["address"], "0xffffffffffffffff");
+    assert_eq!(regions[1]["sections"][0]["bytes"], "0");
+    assert_eq!(
+        regions[1]["sections"][0]["virtualAddress"],
+        serde_json::Value::Null
+    );
+}
+
+#[test]
+fn analysis_without_map_has_no_projected_memory_regions() {
+    let catalog = FixtureCatalog::from_environment();
+    let analysis = service::analyze_paths(&catalog.artifact_path(FixtureKey::P0DualRegion), None)
+        .expect("ELF analysis does not require a MAP");
+    let summary = service::project_artifact("firmware.elf", &analysis);
+    assert!(summary.memory.region_usage.is_empty());
 }
 
 #[test]

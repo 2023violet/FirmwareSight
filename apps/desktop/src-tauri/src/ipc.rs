@@ -153,6 +153,44 @@ pub struct MemorySummaryDto {
     pub dual_accounted_sections: Vec<String>,
     #[ts(type = "number")]
     pub excluded_metadata_bytes: u64,
+    pub region_usage: Vec<MemoryRegionDto>,
+}
+
+/// Desktop-only projection of Core's already-computed region evidence.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct MemoryRegionDto {
+    pub name: String,
+    pub kind: String,
+    pub origin: String,
+    pub capacity_bytes: Option<String>,
+    pub used_bytes: Option<String>,
+    pub remaining_bytes: Option<String>,
+    pub remaining_reason: String,
+    pub state: String,
+    pub risk: String,
+    pub evidence_source: String,
+    pub evidence_id: String,
+    pub address_kind: String,
+    pub sections: Vec<RegionSectionDto>,
+    pub reasons: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct RegionSectionDto {
+    pub locator: String,
+    pub name: Option<String>,
+    pub bytes: String,
+    pub address: String,
+    pub address_kind: String,
+    pub virtual_address: Option<String>,
+    pub virtual_address_unknown_reason: Option<String>,
+    pub load_address: Option<String>,
+    pub load_address_unknown_reason: Option<String>,
+    pub evidence_basis: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
