@@ -39,7 +39,8 @@ use firmwaresight_project::evidence::{
 };
 use firmwaresight_project::{
     CONFIG_FILE_NAME, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, GitObservation, GitProbe,
-    build_context_with_attachments, observe_release_notes, policy_sha256,
+    ReadinessNotes, build_context_with_attachments, inspect_project, observe_release_notes,
+    policy_sha256,
 };
 use firmwaresight_storage::{
     AcceptReviewError, AcceptedReview, GateRunDraft, GateSnapshotFacts, StoredBudget,
@@ -54,8 +55,8 @@ use crate::ipc::{
     AcceptReviewOutcomeDto, AcceptReviewRequestDto, AcceptedReviewDto, ErrorEnvelopeDto,
     GateArtifactRowDto, GateBudgetRowDto, GateCountsDto, GateFindingRowDto, GateGitDto,
     GateGrowthRowDto, GateNotesDto, GateRunDto, GateRunRequestDto, GateTablesDto,
-    ProjectContextDto, ProjectPolicyDto, ReleaseAttachmentDto, ReleaseAttachmentsDto,
-    UnknownDispositionDto, UnknownPolicyDto,
+    ProjectContextDto, ProjectPolicyDto, ProjectReadinessDto, ReleaseAttachmentDto,
+    ReleaseAttachmentsDto, UnknownDispositionDto, UnknownPolicyDto,
 };
 use crate::{
     Session, envelope_from_project, envelope_from_storage, next_operation_id, service,
@@ -83,6 +84,65 @@ const RECORD_NOTE: &str = "This run was read back from history. Its findings, ev
                            of that record, so its numbers stay inside each finding.";
 
 impl Session {
+    /// Re-observe the loaded project's config and workspace without judging or persisting a Gate.
+    pub fn inspect_project_readiness(
+        &self,
+        operation_id: &str,
+    ) -> Result<Option<ProjectReadinessDto>, ErrorEnvelopeDto> {
+        let loaded = self.lock_project(operation_id)?.clone();
+        let Some(loaded) = loaded else {
+            return Ok(None);
+        };
+        let report = inspect_project(&loaded.root).map_err(|err| {
+            envelope_from_project(
+                &err,
+                operation_id,
+                &[loaded.path.as_path(), loaded.root.as_path()],
+            )
+        })?;
+        let same_session = self
+            .lock_project(operation_id)?
+            .as_ref()
+            .is_some_and(|current| {
+                current.path == loaded.path && current.policy_sha256 == loaded.policy_sha256
+            });
+        if !same_session {
+            return Ok(None);
+        }
+        let (release_notes_status, release_notes_sha256, release_notes_reason) =
+            match report.release_notes {
+                None => ("not-configured", None, None),
+                Some(ReadinessNotes::Present { sha256 }) => ("present", sha256, None),
+                Some(ReadinessNotes::Missing) => ("missing", None, None),
+                Some(ReadinessNotes::Unreadable { reason }) => ("unreadable", None, Some(reason)),
+            };
+        let matches_loaded_policy = report.policy_sha256 == loaded.policy_sha256
+            && report.project_name == loaded.project_name();
+        Ok(Some(ProjectReadinessDto {
+            scope: "Configuration and workspace observation only; this is not a Gate result."
+                .to_owned(),
+            project_name: report.project_name,
+            schema_version: report.schema_version,
+            matches_loaded_policy,
+            policy_sha256: report.policy_sha256,
+            warnings: report.warnings,
+            unknown_key_count: report.unknown_key_count,
+            git_available: report.git.available,
+            git_head_commit: report.git.head_commit,
+            git_clean: report.git.clean,
+            git_unknown_reason: report.git.unknown_reason,
+            release_notes_status: release_notes_status.to_owned(),
+            release_notes_sha256,
+            release_notes_reason,
+            declared_artifact_requirements: report
+                .required_artifacts
+                .into_iter()
+                .map(|row| row.kind)
+                .collect(),
+            build_evidence_checked: report.build_evidence_checked,
+        }))
+    }
+
     /// Load a project config the dialog produced and make it the session's policy.
     ///
     /// `None` is the Cancel path and is not an error: the Release page keeps the project it already had
@@ -1263,6 +1323,18 @@ pub(crate) async fn open_project_config(
     .map_err(task_join_error)?;
 
     session.load_project_from(picked, &operation_id)
+}
+
+/// Observe the currently loaded project's configuration and workspace without creating a Gate run.
+#[tauri::command]
+pub(crate) async fn inspect_project_readiness(
+    state: State<'_, Arc<Session>>,
+) -> Result<Option<ProjectReadinessDto>, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+    tauri::async_runtime::spawn_blocking(move || session.inspect_project_readiness(&operation_id))
+        .await
+        .map_err(task_join_error)?
 }
 
 /// Save the edited policy. With a project loaded it goes back to that project's own file; without one the

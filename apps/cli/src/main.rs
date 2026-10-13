@@ -29,10 +29,11 @@ use firmwaresight_core::domain::diff::{DiffError, DiffSnapshotInput, compare};
 use firmwaresight_core::domain::gate::{EffectiveSeverity, GateGrowthFacts};
 use firmwaresight_core::domain::release::ReleaseError;
 use firmwaresight_project::evidence::{SnapshotFacts, growth_facts, observe_release_notes};
+use firmwaresight_project::readiness::{ProjectReadiness, ReadinessNotes};
 use firmwaresight_project::{
     AttachmentError, AttachmentSelection, BundleError, BundleRequest, GateRunRequest,
     GitObservation, GitProbe, LoadedProject, ProjectError, ReleaseAttachment,
-    build_context_with_attachments, declared_kind_for_path, observe_attachment,
+    build_context_with_attachments, declared_kind_for_path, inspect_project, observe_attachment,
     prepare_with_attachments, run_id,
 };
 use firmwaresight_report::{
@@ -56,9 +57,7 @@ const EXIT_EXPORT: u8 = 6;
     name = "fwsight",
     version,
     about = "Know exactly what ships.",
-    long_about = "FirmwareSight P0/P1/P2/P3/P4 technical slice.\n\n`analyze`, `diff`, `gate` and \
-                  `release prepare` are implemented; `project doctor` is a later phase and is not \
-                  available."
+    long_about = "FirmwareSight local firmware analysis and release workflow.\n\n`project doctor` observes project configuration and workspace facts; it is not a Gate result."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -75,6 +74,27 @@ enum Commands {
     Gate(GateArgs),
     /// Publish the portable Release Bundle for a Gate that passed.
     Release(ReleaseArgs),
+    /// Inspect local project configuration and workspace facts.
+    Project(ProjectArgs),
+}
+
+#[derive(Debug, Parser)]
+struct ProjectArgs {
+    #[command(subcommand)]
+    command: ProjectCommands,
+}
+
+#[derive(Debug, Subcommand)]
+enum ProjectCommands {
+    /// Observe project readiness without running a Gate or writing project state.
+    Doctor(ProjectDoctorArgs),
+}
+
+#[derive(Debug, Parser)]
+struct ProjectDoctorArgs {
+    /// Directory holding `firmwaresight.toml`.
+    #[arg(value_name = "DIR")]
+    project: PathBuf,
 }
 
 #[derive(Debug, Subcommand)]
@@ -253,7 +273,93 @@ fn main() -> ExitCode {
         Commands::Release(args) => match args.command {
             ReleaseCommands::Prepare(prepare) => run_release_prepare(prepare, &operation_id),
         },
+        Commands::Project(args) => match args.command {
+            ProjectCommands::Doctor(doctor) => run_project_doctor(doctor),
+        },
     }
+}
+
+fn run_project_doctor(args: ProjectDoctorArgs) -> ExitCode {
+    match inspect_project(&args.project) {
+        Ok(readiness) => {
+            print_project_readiness(&readiness);
+            ExitCode::from(EXIT_OK)
+        }
+        Err(error) => {
+            eprintln!(
+                "error: project configuration could not be loaded; correct `firmwaresight.toml` (code {})",
+                error.code()
+            );
+            ExitCode::from(EXIT_USAGE)
+        }
+    }
+}
+
+fn print_project_readiness(readiness: &ProjectReadiness) {
+    println!("Project readiness — configuration and workspace observation; not a Gate result");
+    println!("Project: {}", readiness.project_name);
+    println!(
+        "Schema: {} · policy SHA-256 {}",
+        readiness.schema_version, readiness.policy_sha256
+    );
+    if readiness.warnings.is_empty() {
+        println!("Configuration findings: none reported");
+    } else {
+        println!("Configuration findings: {}", readiness.warnings.len());
+        for warning in &readiness.warnings {
+            println!("  - {warning}");
+        }
+    }
+    if readiness.unknown_key_count > 0 {
+        println!(
+            "Unsupported configuration keys: {} (key values are not displayed)",
+            readiness.unknown_key_count
+        );
+    }
+    match (&readiness.git.head_commit, readiness.git.clean) {
+        (Some(head), Some(clean)) => println!(
+            "Git: available · HEAD {} · workspace {}",
+            &head[..head.len().min(12)],
+            if clean { "clean" } else { "modified" }
+        ),
+        _ => println!(
+            "Git: Unknown · {}",
+            readiness
+                .git
+                .unknown_reason
+                .as_deref()
+                .unwrap_or("workspace facts could not be established")
+        ),
+    }
+    match &readiness.release_notes {
+        None => println!("Release Notes: not configured"),
+        Some(ReadinessNotes::Present { sha256 }) => println!(
+            "Release Notes: present{}",
+            sha256
+                .as_ref()
+                .map(|value| format!(" · SHA-256 {value}"))
+                .unwrap_or_default()
+        ),
+        Some(ReadinessNotes::Missing) => println!("Release Notes: missing"),
+        Some(ReadinessNotes::Unreadable { reason }) => {
+            println!("Release Notes: Unknown · {reason}")
+        }
+    }
+    if readiness.required_artifacts.is_empty() {
+        println!("Required artifacts: none declared");
+    } else {
+        let kinds = readiness
+            .required_artifacts
+            .iter()
+            .map(|artifact| artifact.kind.as_str())
+            .collect::<Vec<_>>()
+            .join(", ");
+        println!(
+            "Required artifacts declared by policy: {kinds}; attached build evidence not checked"
+        );
+    }
+    println!("Build evidence: not checked; select a build and run Analyze/Gate.");
+    println!("Next: run `fwsight gate --project <DIR> --artifact <FILE>` to evaluate policy.");
 }
 
 /// A per-run identifier for diagnostics. It is deliberately never written into the

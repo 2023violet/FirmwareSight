@@ -1377,6 +1377,7 @@ pub fn run() {
             compare::export_compare_json,
             compare::export_compare_html,
             release::open_project_config,
+            release::inspect_project_readiness,
             release::save_project_policy,
             release::run_release_gate,
             release::accept_review,

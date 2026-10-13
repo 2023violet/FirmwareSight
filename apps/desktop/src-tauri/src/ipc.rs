@@ -950,6 +950,31 @@ pub struct ProjectContextDto {
     pub unknown_keys: Vec<String>,
 }
 
+/// Bounded, read-only observations from the currently loaded project's on-disk configuration and workspace.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ProjectReadinessDto {
+    pub scope: String,
+    pub project_name: String,
+    #[ts(type = "number")]
+    pub schema_version: i64,
+    pub policy_sha256: String,
+    pub matches_loaded_policy: bool,
+    pub warnings: Vec<String>,
+    #[ts(type = "number")]
+    pub unknown_key_count: usize,
+    pub git_available: bool,
+    pub git_head_commit: Option<String>,
+    pub git_clean: Option<bool>,
+    pub git_unknown_reason: Option<String>,
+    pub release_notes_status: String,
+    pub release_notes_sha256: Option<String>,
+    pub release_notes_reason: Option<String>,
+    pub declared_artifact_requirements: Vec<String>,
+    pub build_evidence_checked: bool,
+}
+
 /// The two builds one Gate run judges. Snapshot ids and nothing else — no path, no statement, and the
 /// project whose policy applies is the one this session loaded (`AGENTS.md` 7).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]

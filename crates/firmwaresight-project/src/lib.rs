@@ -32,6 +32,7 @@ pub mod error;
 pub mod evidence;
 pub mod fingerprint;
 pub mod git;
+pub mod readiness;
 pub mod version;
 
 pub use bundle::{
@@ -51,6 +52,9 @@ pub use evidence::{
 };
 pub use fingerprint::{policy_sha256, run_id};
 pub use git::{GitObservation, GitProbe};
+pub use readiness::{
+    DeclaredArtifact, ProjectReadiness, ReadinessGit, ReadinessNotes, inspect_project,
+};
 
 #[cfg(test)]
 mod fixtures;

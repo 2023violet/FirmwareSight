@@ -1,0 +1,16 @@
+schema_version = 1
+
+[project]
+name = "readiness-workflow-fixture"
+
+[artifacts]
+required = ["elf", "map"]
+
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+
+[release]
+require_clean_git = true
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"

@@ -73,6 +73,7 @@ export type { ObjectAttributionDto } from './generated/ObjectAttributionDto';
 export type { PreferencesDto } from './generated/PreferencesDto';
 export type { PreferenceRecoveryDto } from './generated/PreferenceRecoveryDto';
 export type { ProjectContextDto } from './generated/ProjectContextDto';
+export type { ProjectReadinessDto } from './generated/ProjectReadinessDto';
 export type { ProjectPolicyDto } from './generated/ProjectPolicyDto';
 export type { ReleaseAttachmentDto } from './generated/ReleaseAttachmentDto';
 export type { RegionSectionDto } from './generated/RegionSectionDto';

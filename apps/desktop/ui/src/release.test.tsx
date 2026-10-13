@@ -41,6 +41,7 @@ import {
   exportReleaseBundle,
   getGateRun,
   getReleaseAttachments,
+  inspectProjectReadiness,
   listCompareCandidates,
   openProjectConfig,
   prepareReleaseBundle,
@@ -71,6 +72,7 @@ import type {
   ProjectPolicyDto,
   ReleaseAttachmentDto,
   ReleaseAttachmentsDto,
+  ProjectReadinessDto,
 } from './ipc/types';
 import { precedes } from './test/order';
 
@@ -95,6 +97,7 @@ vi.mock('./ipc/bridge', () => ({
   getGateRun: vi.fn(),
   attachReleaseFile: vi.fn(),
   getReleaseAttachments: vi.fn(),
+  inspectProjectReadiness: vi.fn(),
   removeReleaseAttachment: vi.fn(),
   setReleaseAttachmentKind: vi.fn(),
   prepareReleaseBundle: vi.fn(),
@@ -154,6 +157,7 @@ const chooseDestinationMock = vi.mocked(chooseBundleDestination);
 const exportBundleMock = vi.mocked(exportReleaseBundle);
 const attachFileMock = vi.mocked(attachReleaseFile);
 const readAttachmentsMock = vi.mocked(getReleaseAttachments);
+const inspectReadinessMock = vi.mocked(inspectProjectReadiness);
 const removeAttachmentMock = vi.mocked(removeReleaseAttachment);
 const declareKindMock = vi.mocked(setReleaseAttachmentKind);
 
@@ -700,6 +704,7 @@ beforeEach(() => {
   // one, and the tests below hand it rows the way the shell would.
   attachFileMock.mockResolvedValue(ok(null));
   readAttachmentsMock.mockResolvedValue(ok(attachmentSet([])));
+  inspectReadinessMock.mockResolvedValue(ok(null));
   removeAttachmentMock.mockResolvedValue(ok([]));
   declareKindMock.mockResolvedValue(ok(attachment()));
 });
@@ -735,6 +740,96 @@ describe('Release navigation', () => {
       expect(words.toLowerCase()).not.toContain(claim);
     }
     expect(words).toContain('FirmwareSight policy readiness');
+  });
+});
+
+describe('project readiness preflight', () => {
+  function readiness(overrides: Partial<ProjectReadinessDto> = {}): ProjectReadinessDto {
+    return {
+      scope: 'Configuration and workspace observation only; this is not a Gate result.',
+      projectName: 'Controller v2',
+      schemaVersion: 1,
+      policySha256: 'e'.repeat(64),
+      matchesLoadedPolicy: true,
+      warnings: [],
+      unknownKeyCount: 0,
+      gitAvailable: false,
+      gitHeadCommit: null,
+      gitClean: null,
+      gitUnknownReason: 'this directory is not a Git repository',
+      releaseNotesStatus: 'missing',
+      releaseNotesSha256: null,
+      releaseNotesReason: null,
+      declaredArtifactRequirements: ['elf', 'bin', 'hex'],
+      buildEvidenceChecked: false,
+      ...overrides,
+    };
+  }
+
+  it('does not label an unloaded project as ready or invoke inspection', async () => {
+    await openRelease();
+    expect(await screen.findByRole('region', { name: 'Project readiness' })).toBeTruthy();
+    expect(screen.getByText('No project is loaded. Open a project config to inspect its workspace.')).toBeTruthy();
+    expect(inspectReadinessMock).not.toHaveBeenCalled();
+  });
+
+  it('shows typed workspace Unknown and declared artifact requirements after loading a project', async () => {
+    openConfigMock.mockResolvedValueOnce(ok(project()));
+    inspectReadinessMock.mockResolvedValueOnce(ok(readiness()));
+    await openRelease();
+    fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
+
+    const region = await screen.findByRole('region', { name: 'Project readiness' });
+    expect(await within(region).findByText('Controller v2')).toBeTruthy();
+    expect(region.textContent).toContain('Unknown');
+    expect(region.textContent).toContain('bin, hex');
+    expect(region.textContent).toContain('attached evidence is not checked');
+    expect(region.textContent).toContain('Build evidence is not checked');
+    expect(region.textContent).not.toContain('D:');
+    expect(region.querySelector('svg[aria-hidden="true"]')).toBeTruthy();
+    expect(region.textContent).not.toContain('PASS');
+  });
+
+  it('keeps earlier observations visible but explicitly stale when a recheck fails', async () => {
+    let finishRefresh!: (outcome: IpcOutcome<ProjectReadinessDto | null>) => void;
+    openConfigMock.mockResolvedValueOnce(ok(project()));
+    inspectReadinessMock
+      .mockResolvedValueOnce(ok(readiness({ projectName: 'previous project' })))
+      .mockImplementationOnce(() => new Promise((resolve) => { finishRefresh = resolve; }));
+    await openRelease();
+    fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
+
+    const region = await screen.findByRole('region', { name: 'Project readiness' });
+    expect(await within(region).findByText('previous project')).toBeTruthy();
+    fireEvent.click(within(region).getByRole('button', { name: 'Recheck project' }));
+    const refreshing = within(region).getByRole('button', { name: 'Rechecking…' }) as HTMLButtonElement;
+    expect(refreshing.disabled).toBe(true);
+    expect(within(region).getByText('Inspecting the loaded project…')).toBeTruthy();
+    finishRefresh(fail(MALFORMED));
+    expect(await within(region).findByText('Recheck failed. Any earlier observations are stale.')).toBeTruthy();
+    expect(within(region).getByText('previous project')).toBeTruthy();
+  });
+
+  it('ignores a late inspection result after the loaded project changes', async () => {
+    const pending: Array<(outcome: IpcOutcome<ProjectReadinessDto | null>) => void> = [];
+    inspectReadinessMock.mockImplementation(
+      () => new Promise((resolve) => pending.push(resolve)),
+    );
+    openConfigMock
+      .mockResolvedValueOnce(ok(project({ projectName: 'first-project' })))
+      .mockResolvedValueOnce(ok(project({ projectName: 'second-project' })));
+    await openRelease();
+    fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
+    await waitFor(() => expect(pending).toHaveLength(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
+    await waitFor(() => expect(pending).toHaveLength(2));
+
+    pending[1]?.(ok(readiness({ projectName: 'second-project' })));
+    const region = screen.getByRole('region', { name: 'Project readiness' });
+    await waitFor(() => expect(within(region).getByText('second-project')).toBeTruthy());
+    pending[0]?.(ok(readiness({ projectName: 'first-project' })));
+    await waitFor(() => expect(within(region).getByText('second-project')).toBeTruthy());
+    expect(within(region).queryByText('first-project')).toBeNull();
   });
 });
 

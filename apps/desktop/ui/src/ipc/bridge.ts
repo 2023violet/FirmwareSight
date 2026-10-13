@@ -35,6 +35,7 @@ import type {
   MainWindowPage,
   PreferencesDto,
   ProjectContextDto,
+  ProjectReadinessDto,
   ProjectPolicyDto,
   ReleaseAttachmentDto,
   ReleaseAttachmentsDto,
@@ -64,6 +65,7 @@ const QUERY_SYMBOL_CHANGES = 'query_symbol_changes';
 const EXPORT_COMPARE_JSON = 'export_compare_json';
 const EXPORT_COMPARE_HTML = 'export_compare_html';
 const OPEN_PROJECT_CONFIG = 'open_project_config';
+const INSPECT_PROJECT_READINESS = 'inspect_project_readiness';
 const SAVE_PROJECT_POLICY = 'save_project_policy';
 const RUN_RELEASE_GATE = 'run_release_gate';
 const ACCEPT_REVIEW = 'accept_review';
@@ -216,6 +218,11 @@ export async function exportCompareHtml(diffId: string): Promise<IpcOutcome<Expo
  */
 export async function openProjectConfig(): Promise<IpcOutcome<ProjectContextDto | null>> {
   return await call<ProjectContextDto | null>(OPEN_PROJECT_CONFIG);
+}
+
+/** Recheck bounded project facts for the currently loaded project. No path crosses the IPC boundary. */
+export async function inspectProjectReadiness(): Promise<IpcOutcome<ProjectReadinessDto | null>> {
+  return await call<ProjectReadinessDto | null>(INSPECT_PROJECT_READINESS);
 }
 
 /**

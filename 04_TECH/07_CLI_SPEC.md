@@ -23,6 +23,14 @@ fwsight release prepare --project . --out dist/release
 fwsight project doctor .
 ```
 
+## Project doctor
+
+`fwsight project doctor <DIR>` reads `<DIR>/firmwaresight.toml` and reports bounded configuration, Git workspace, and configured Release Notes observations. It is read-only and does not run a Gate, inspect or attach build artifacts, write a database record, or create a Release Bundle. A declared BIN/HEX requirement is policy only; artifact satisfaction remains unchecked until an actual build is selected and evaluated.
+
+The command returns `0` when the config loads, including when workspace facts are Unknown or the config has warnings; those facts are observations, not Gate dispositions. Missing, malformed, unreadable, or unsupported-major config returns the existing usage/config code `2` with a safe diagnostic. A missing `<DIR>` follows clap's usage error and does not guess a directory. Example: `fwsight project doctor .` from a project root.
+
+This preflight is not a release verdict. Use `fwsight gate --project <DIR> --artifact <FILE>` to evaluate policy for a selected build; Gate semantics remain defined by `04_TECH/27_GATE_STATE_SEMANTICS.md`.
+
 ## Output rules
 
 默认 human-readable。

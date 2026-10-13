@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import {
   analyzeSelection,
+  inspectProjectReadiness,
   attachMap,
   clearMap,
   queryEvidence,
@@ -71,6 +72,13 @@ describe('error envelope narrowing', () => {
 });
 
 describe('ipc calls', () => {
+  it('inspects the currently loaded project without sending a path', async () => {
+    invokeMock.mockResolvedValue(null);
+    const outcome = await inspectProjectReadiness();
+    expect(outcome).toEqual({ ok: true, value: null });
+    expect(invokeMock).toHaveBeenCalledWith('inspect_project_readiness', undefined);
+  });
+
   it('opens the dialog with no argument at all', async () => {
     invokeMock.mockResolvedValue({
       selectionId: 'sel-1',

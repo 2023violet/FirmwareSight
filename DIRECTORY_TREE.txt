@@ -259,6 +259,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── golden.rs
 │   │   │   ├── p2_golden.rs
 │   │   │   ├── p4_golden.rs
+│   │   │   ├── project_doctor.rs
 │   │   │   └── release_cli.rs
 │   │   └── Cargo.toml
 │   └── desktop/
@@ -294,6 +295,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── diagnostics.rs
 │       │   │   ├── history_reads.rs
 │       │   │   ├── preferences.rs
+│       │   │   ├── project_readiness.rs
 │       │   │   ├── real_artifact_intake.rs
 │       │   │   └── release_gate.rs
 │       │   ├── build.rs
@@ -424,6 +426,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── PreferencesDto.ts
 │           │   │   │   ├── ProjectContextDto.ts
 │           │   │   │   ├── ProjectPolicyDto.ts
+│           │   │   │   ├── ProjectReadinessDto.ts
 │           │   │   │   ├── RegionSectionDto.ts
 │           │   │   │   ├── ReleaseAttachmentDto.ts
 │           │   │   │   ├── ReleaseAttachmentsDto.ts
@@ -582,6 +585,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── fixtures.rs
 │   │   │   ├── git.rs
 │   │   │   ├── lib.rs
+│   │   │   ├── readiness.rs
 │   │   │   └── version.rs
 │   │   ├── tests/
 │   │   │   ├── bundle_builder.rs
@@ -641,6 +645,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   └── unknown_reasons.rs
 │       └── Cargo.toml
 ├── examples/
+│   ├── project-readiness/
+│   │   ├── firmwaresight.toml
+│   │   ├── README.md
+│   │   └── RELEASE_NOTES.md
 │   ├── Cargo.workspace.baseline.toml
 │   ├── firmwaresight.example.toml
 │   ├── firmwaresight.toml

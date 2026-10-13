@@ -46,6 +46,7 @@ import {
   exportReleaseBundle,
   getGateRun,
   getReleaseAttachments,
+  inspectProjectReadiness,
   listCompareCandidates,
   openProjectConfig,
   prepareReleaseBundle,
@@ -67,6 +68,7 @@ import type {
   GateGrowthRowDto,
   GateRunDto,
   ProjectContextDto,
+  ProjectReadinessDto,
   ProjectPolicyDto,
   ReleaseAttachmentsDto,
   UnknownDispositionDto,
@@ -159,6 +161,54 @@ export function Release({
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [running, setRunning] = useState(false);
   const [restored, setRestored] = useState(false);
+  const [projectReadiness, setProjectReadiness] = useState<{
+    readonly status: 'empty' | 'loading' | 'refreshing' | 'available' | 'error';
+    readonly value: ProjectReadinessDto | null;
+    readonly error: ErrorEnvelopeDto | null;
+  }>({ status: 'empty', value: null, error: null });
+  const readinessRequest = useRef(0);
+  const projectIdentity = project === null ? null : `${project.projectName}\u0000${project.policySha256}`;
+  const projectIdentityRef = useRef(projectIdentity);
+  projectIdentityRef.current = projectIdentity;
+
+  const refreshProjectReadiness = useCallback(async () => {
+    const request = ++readinessRequest.current;
+    if (project === null) {
+      setProjectReadiness({ status: 'empty', value: null, error: null });
+      return;
+    }
+    const identity = `${project.projectName}\u0000${project.policySha256}`;
+    setProjectReadiness((previous) => ({
+      status: previous.value === null ? 'loading' : 'refreshing',
+      value: previous.value,
+      error: null,
+    }));
+    const outcome = await inspectProjectReadiness();
+    if (request !== readinessRequest.current || projectIdentityRef.current !== identity) {
+      return;
+    }
+    if (!outcome.ok) {
+      setProjectReadiness((previous) => ({ status: 'error', value: previous.value, error: outcome.envelope }));
+      return;
+    }
+    setProjectReadiness(
+      outcome.value === null
+        ? { status: 'empty', value: null, error: null }
+        : { status: 'available', value: outcome.value, error: null },
+    );
+  }, [project]);
+
+  useEffect(() => {
+    if (project === null) {
+      readinessRequest.current += 1;
+      setProjectReadiness({ status: 'empty', value: null, error: null });
+      return;
+    }
+    void refreshProjectReadiness();
+    return () => {
+      readinessRequest.current += 1;
+    };
+  }, [project, refreshProjectReadiness]);
 
   /**
    * The policy the editor starts from, in the order the facts are known: a loaded config, then the
@@ -375,6 +425,12 @@ export function Release({
         <Attachments gateRunId={null} unit={unit} onSetChanged={invalidateRun} />
       ) : null}
 
+      <ProjectReadinessPanel
+        state={projectReadiness}
+        projectLoaded={project !== null}
+        onRefresh={() => void refreshProjectReadiness()}
+      />
+
       <section
         className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
         aria-labelledby="fs-policy-heading"
@@ -541,6 +597,103 @@ export function Release({
         />
       )}
     </Page>
+  );
+}
+
+function ProjectReadinessPanel({
+  state,
+  projectLoaded,
+  onRefresh,
+}: {
+  readonly state: {
+    readonly status: 'empty' | 'loading' | 'refreshing' | 'available' | 'error';
+    readonly value: ProjectReadinessDto | null;
+    readonly error: ErrorEnvelopeDto | null;
+  };
+  readonly projectLoaded: boolean;
+  readonly onRefresh: () => void;
+}) {
+  const { t } = useI18n();
+  const value = state.value;
+  const busy = state.status === 'loading' || state.status === 'refreshing';
+  return (
+    <section className={styles['section']} aria-labelledby="fs-project-readiness-heading">
+      <h2 id="fs-project-readiness-heading">{t('release', 'projectReadiness.heading')}</h2>
+      <p className={styles['hint']}>{t('release', 'projectReadiness.scope')}</p>
+      {!projectLoaded ? (
+        <p className={styles['status']} role="status">{t('release', 'projectReadiness.noProject')}</p>
+      ) : busy ? (
+        <p className={styles['status']} role="status" aria-live="polite">{t('release', 'projectReadiness.loading')}</p>
+      ) : state.status === 'empty' ? (
+        <p className={styles['status']} role="status">{t('release', 'projectReadiness.sessionChanged')}</p>
+      ) : null}
+      {state.status === 'error' ? (
+        <>
+          <p className={styles['stale']} role="status">{t('release', 'projectReadiness.refreshFailed')}</p>
+          {state.error === null ? null : (
+            <ErrorPanel
+              envelope={state.error}
+              label={t('release', 'projectReadiness.errorLabel')}
+              heading={t('release', 'projectReadiness.errorHeading')}
+            />
+          )}
+        </>
+      ) : null}
+      {value === null ? null : (
+        <>
+          <dl className={styles['rows']}>
+            <div className={styles['row']}>
+              <dt className={styles['term']}>{t('release', 'projectReadiness.project')}</dt>
+              <dd className={styles['value']}>
+                <span>{value.projectName}</span>
+                <span className={styles['monoSmall']}>{value.policySha256}</span>
+              </dd>
+            </div>
+            <div className={styles['row']}>
+              <dt className={styles['term']}>{t('release', 'projectReadiness.git')}</dt>
+              <dd className={styles['value']}>
+                {value.gitAvailable ? <span>{t('release', 'projectReadiness.gitAvailable')}</span> : <StateBadge state="UNKNOWN" label={t('release', 'projectReadiness.unknown')} />}
+                {value.gitHeadCommit === null ? null : <span className={styles['monoSmall']}>HEAD {truncateMiddle(value.gitHeadCommit, 8)}</span>}
+                {value.gitClean === null ? <StateBadge state="UNKNOWN" label={t('release', 'projectReadiness.unknown')} /> : <span>{t('release', value.gitClean ? 'projectReadiness.clean' : 'projectReadiness.modified')}</span>}
+                {value.gitUnknownReason === null ? null : <span className={styles['note']}>{value.gitUnknownReason}</span>}
+              </dd>
+            </div>
+            <div className={styles['row']}>
+              <dt className={styles['term']}>{t('release', 'projectReadiness.notes')}</dt>
+              <dd className={styles['value']}>
+                {value.releaseNotesStatus === 'unreadable' ? (
+                  <StateBadge state="UNKNOWN" label={t('release', 'projectReadiness.notes.unreadable')} />
+                ) : (
+                  <span>{t('release', `projectReadiness.notes.${value.releaseNotesStatus}` as keyof Catalog['release'])}</span>
+                )}
+                {value.releaseNotesSha256 === null ? null : <span className={styles['monoSmall']}>{value.releaseNotesSha256}</span>}
+                {value.releaseNotesReason === null ? null : <span className={styles['note']}>{value.releaseNotesReason}</span>}
+              </dd>
+            </div>
+            <div className={styles['row']}>
+              <dt className={styles['term']}>{t('release', 'projectReadiness.required')}</dt>
+              <dd className={styles['value']}>
+                <span>{value.declaredArtifactRequirements.length === 0 ? t('release', 'projectReadiness.noneDeclared') : value.declaredArtifactRequirements.join(', ')}</span>
+                <span className={styles['note']}>{t('release', 'projectReadiness.declaredOnly')}</span>
+              </dd>
+            </div>
+          </dl>
+          {!value.matchesLoadedPolicy ? <p className={styles['stale']} role="status">{t('release', 'projectReadiness.policyChanged')}</p> : null}
+          {value.unknownKeyCount > 0 ? <p className={styles['warning']} role="status">{t('release', 'projectReadiness.unknownKeys', { count: value.unknownKeyCount })}</p> : null}
+          {value.warnings.length === 0 ? null : (
+            <ul className={styles['noticeList']} aria-label={t('release', 'projectReadiness.warnings')}>
+              {value.warnings.map((warning, index) => <li className={styles['noticeItem']} key={`${index}-${warning}`}>{warning}</li>)}
+            </ul>
+          )}
+          <p className={styles['hint']}>{t('release', 'projectReadiness.buildNotChecked')}</p>
+        </>
+      )}
+      <div className={styles['actions']}>
+        <Button disabled={!projectLoaded || busy} onClick={onRefresh}>
+          {busy ? t('release', 'projectReadiness.refreshing') : t('release', 'projectReadiness.refresh')}
+        </Button>
+      </div>
+    </section>
   );
 }
 
