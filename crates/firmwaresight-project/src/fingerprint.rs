@@ -40,9 +40,11 @@ pub fn run_id(context: &GateContext) -> String {
 
 /// Stream a file's digest without holding the file in memory (`04_TECH/11`, `sha2` rule).
 pub fn file_sha256(path: &std::path::Path) -> std::io::Result<String> {
-    use std::io::Read;
     let file = std::fs::File::open(path)?;
-    let mut reader = std::io::BufReader::new(file);
+    file_sha256_reader(file)
+}
+
+pub(crate) fn file_sha256_reader(mut reader: impl std::io::Read) -> std::io::Result<String> {
     let mut digest = Sha256::new();
     let mut buffer = vec![0u8; 64 * 1024];
     loop {

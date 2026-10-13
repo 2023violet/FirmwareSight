@@ -7,8 +7,9 @@ publish.workspace = true
 license.workspace = true
 description = "Project policy, read-only Git provenance and deterministic Gate fingerprints for FirmwareSight."
 
-# ADR-0027 admits exactly these dependencies and no others. No Tauri, no SQLite, no Tokio, no network:
-# this crate turns the outside world into facts for `firmwaresight-core`, which decides what they mean.
+# ADR-0027 fixes this crate's project-policy boundary; NEXT-27 adds cap-std only for the Release Notes
+# read boundary. No Tauri, no SQLite, no Tokio, no network: this crate turns outside inputs into facts for
+# `firmwaresight-core`, which decides what they mean.
 #
 # P4 adds one edge, and it is first-party: `firmwaresight-report`, whose portable documents this crate
 # stages. P4 prompt §36 places bundle *content* in report and bundle *publication* in the application
@@ -18,6 +19,8 @@ description = "Project policy, read-only Git provenance and deterministic Gate f
 # third-party package enters `Cargo.lock`; `report` was already resolved here as a dev-dependency, so the
 # lock moves only in the graph, not in the crates.
 [dependencies]
+# NEXT-27: capability-bounded project-relative Release Notes reads. No optional features are needed.
+cap-std = { version = "=4.0.3", default-features = false }
 firmwaresight-core = { workspace = true }
 firmwaresight-report = { workspace = true }
 regex = "1.13.1"

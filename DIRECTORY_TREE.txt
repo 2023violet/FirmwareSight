@@ -585,7 +585,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── tests/
 │   │   │   ├── bundle_builder.rs
 │   │   │   ├── config_schema_contract.rs
-│   │   │   └── release_attachments.rs
+│   │   │   ├── release_attachments.rs
+│   │   │   └── release_notes_security.rs
 │   │   └── Cargo.toml
 │   ├── firmwaresight-report/
 │   │   ├── src/

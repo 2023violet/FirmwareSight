@@ -189,3 +189,14 @@ allowed to see which, and two test-only edges:
 
 Dev-dependencies do not enter the shipped graph, so the binary and the portable artifact set are
 unchanged. `cargo deny check licenses bans sources advisories` is re-run at stage close.
+
+### D-N11-1 Release Notes path containment (NEXT-27, 2026-10-13)
+
+`firmwaresight-project` uses `cap-std = 4.0.3` with default features disabled only to open configured Release
+Notes beneath the selected project-root directory handle. This keeps the capability API at the project IO edge;
+it does not enter `firmwaresight-core`, Tauri capabilities, the frontend, or any network/runtime graph.
+`cap-std` is Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT, all allowed by `deny.toml`. The resolved
+cross-platform closure adds 13 lockfile packages; `cargo deny check` reports advisories, bans, licenses and
+sources OK. `rustc 1.98.1` compiled the Windows target locally; the crate publishes no `rust-version`, so this
+is measured compatibility with the pinned workspace toolchain, not a declared upstream MSRV. Binary-size
+impact has not been measured.

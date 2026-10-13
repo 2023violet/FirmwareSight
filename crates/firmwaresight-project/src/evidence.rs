@@ -265,11 +265,9 @@ pub fn growth_facts(diff: &DiffResult) -> GateGrowthFacts {
 
 /// Observe the configured Release Notes file inside a project root.
 ///
-/// The configured string is placed by the same walk `config::validate` checks it against, so a caller that
-/// skipped validation is still handed nothing outside the root, and a string the walk refuses is refused
-/// before a `stat`, a read or a hash. Absence and an unreadable file are different facts: only the first is
-/// a policy failure. Containment here is **lexical**: a link that sits inside the root and points outside it
-/// is read at its target, which is the open question `D-N11-1` records.
+/// The configured string is placed by the same walk `config::validate` checks it against, then opened
+/// relative to a capability for the selected project root. Metadata and hashing use the returned handle.
+/// Absence and an unreadable file are different facts: only the first is a policy failure.
 #[must_use]
 pub fn observe_release_notes(root: &Path, relative_path: &str) -> GateFileFact {
     let missing = |reason: &str| GateFileFact {
@@ -278,23 +276,39 @@ pub fn observe_release_notes(root: &Path, relative_path: &str) -> GateFileFact {
             reason: reason.to_owned(),
         },
     };
-    let path = match resolve_project_relative(root, relative_path) {
+    let path = match config::place_project_relative(relative_path) {
         Ok(path) => path,
         Err(_) => {
             return missing("the configured path is not project-relative, so it was not read");
         }
     };
-    match std::fs::metadata(&path) {
+    let directory = match cap_std::fs::Dir::open_ambient_dir(root, cap_std::ambient_authority()) {
+        Ok(directory) => directory,
+        Err(error) => return missing(&io_reason(&error)),
+    };
+    match directory.open(&path) {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => GateFileFact {
             relative_path: relative_path.to_owned(),
             status: GateFileStatus::Missing,
         },
-        Err(error) => missing(&io_reason(&error)),
-        Ok(metadata) => {
+        Err(error) => {
+            #[cfg(windows)]
+            if error.kind() == std::io::ErrorKind::PermissionDenied
+                && directory.open_dir(&path).is_ok()
+            {
+                return missing("the configured path is not a regular file");
+            }
+            missing(&io_reason(&error))
+        }
+        Ok(file) => {
+            let metadata = match file.metadata() {
+                Ok(metadata) => metadata,
+                Err(error) => return missing(&io_reason(&error)),
+            };
             if !metadata.is_file() {
                 return missing("the configured path is not a regular file");
             }
-            match fingerprint::file_sha256(&path) {
+            match fingerprint::file_sha256_reader(file) {
                 Ok(digest) => GateFileFact {
                     relative_path: relative_path.to_owned(),
                     status: GateFileStatus::Present {
