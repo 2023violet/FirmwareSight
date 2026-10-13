@@ -234,6 +234,11 @@ fn a_summary_is_bounded_and_carries_no_change_table() {
     assert_eq!(summary.memory.nonvolatile.base, Some(256));
     assert_eq!(summary.memory.nonvolatile.target, Some(376));
     assert_eq!(summary.memory.nonvolatile.delta, Some(120));
+    assert_eq!(
+        summary.memory.nonvolatile_percent.value.as_deref(),
+        Some("46.9%")
+    );
+    assert_eq!(summary.memory.nonvolatile_percent.status, "available");
     assert_eq!(summary.memory.runtime_ram.delta, Some(68));
     assert_eq!(summary.memory.comparability, "exact");
     assert!(summary.memory.base.map_backed);

@@ -370,6 +370,8 @@ function comparison(overrides: Partial<CompareSummaryDto> = {}): CompareSummaryD
     memory: {
       nonvolatile: change(4200, 4456, 256),
       runtimeRam: change(1024, 956, -68),
+      nonvolatilePercent: { value: '6.1%', status: 'available' },
+      runtimeRamPercent: { value: '-6.6%', status: 'available' },
       comparability: 'exact',
       base: {
         footprintRowPresent: true,
@@ -416,6 +418,8 @@ function degradedComparison(): CompareSummaryDto {
       ...summary.memory,
       nonvolatile: change(4200, 4456, null, 'partial', 'the target total is a floor'),
       runtimeRam: change(1024, 956, -68, 'partial'),
+      nonvolatilePercent: { value: null, status: 'not_exact' },
+      runtimeRamPercent: { value: null, status: 'not_exact' },
       comparability: 'partial',
       target: {
         ...summary.memory.target,
@@ -751,6 +755,49 @@ describe('the summary and its signs', () => {
     expect(rowOf('Runtime RAM')).toContain('Old 1,024 bytes');
     expect(rowOf('Runtime RAM')).toContain('New 956 bytes');
     expect(rowOf('Runtime RAM')).toContain('Delta -68 bytes');
+    expect(rowOf('Nonvolatile / load image')).toContain('6.1%');
+    expect(rowOf('Runtime RAM')).toContain('-6.6%');
+  });
+
+  it('states that producer compatibility and the unexplained remainder are not proven', async () => {
+    await openCompare();
+    await runCompare();
+
+    const notice = await screen.findByRole('region', { name: 'Capability and evidence' });
+    expect(notice.textContent).toContain('Producer and adapter compatibility cannot be proven from stored facts');
+    expect(notice.textContent).toContain('unexplained memory remainder cannot be reliably quantified');
+  });
+
+  it('does not turn Section and Symbol ranking sums into a memory remainder', async () => {
+    const summary = comparison();
+    const rankedBytes = [...summary.topSections, ...summary.topSymbols].reduce(
+      (total, row) => total + (row.delta ?? 0),
+      0,
+    );
+    expect(rankedBytes).not.toBe(summary.memory.nonvolatile.delta);
+
+    await openCompare(summary);
+    await runCompare();
+
+    const notice = await screen.findByRole('region', { name: 'Capability and evidence' });
+    expect(notice.textContent).toContain('unexplained memory remainder cannot be reliably quantified');
+    expect(notice.textContent).not.toContain(`Remaining ${summary.memory.nonvolatile.delta! - rankedBytes} bytes`);
+  });
+
+  it('renders the Rust percentage string verbatim and names a zero baseline as N/A', async () => {
+    const summary = comparison();
+    await openCompare({
+      ...summary,
+      memory: {
+        ...summary.memory,
+        nonvolatilePercent: { value: '9007199254740992.1%', status: 'available' },
+        runtimeRamPercent: { value: null, status: 'zero_baseline' },
+      },
+    });
+    await runCompare();
+
+    expect(rowOf('Nonvolatile / load image')).toContain('9007199254740992.1%');
+    expect(rowOf('Runtime RAM')).toContain('N/A: the baseline is zero.');
   });
 
   it('says Unknown with the reason when a delta cannot be computed', async () => {
@@ -763,6 +810,7 @@ describe('the summary and its signs', () => {
     expect((await screen.findByRole('region', { name: 'Memory comparison' })).textContent).toContain(
       'partial',
     );
+    expect(rowOf('Nonvolatile / load image')).toContain('Unknown: comparison is partial or unknown.');
   });
 
   it('never writes +0, or a zero where a side is absent or unknown', async () => {

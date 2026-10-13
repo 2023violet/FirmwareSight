@@ -23,8 +23,8 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use firmwaresight_core::domain::diff::{
-    ByteChange, ChangeKind, Contributor, DiffArtifact, DiffError, DiffResult, DiffSection,
-    DiffSideMemory, DiffSymbol, SectionChange, SymbolChange, compare,
+    ByteChange, ChangeKind, Comparability, Contributor, DiffArtifact, DiffError, DiffResult,
+    DiffSection, DiffSideMemory, DiffSymbol, SectionChange, SymbolChange, compare,
 };
 use firmwaresight_report::{DiffResultDto, diff_render};
 use firmwaresight_storage::{
@@ -37,10 +37,10 @@ use crate::ipc::{
     ByteDeltaDto, CandidatePageDto, CandidatePageRequestDto, ChangeKindCountsDto,
     ChangeKindFilterDto, CompareCandidateDto, CompareRequestDto, CompareSummaryDto, ContributorDto,
     DiffCountsDto, DiffMemoryDto, DiffSideDto, DiffSideMemoryDto, DiffWarningDto, ErrorEnvelopeDto,
-    ExportOutcomeDto, ObjectAttributionDto, SectionChangePageDto, SectionChangeQueryDto,
-    SectionChangeRowDto, SectionChangeSortDto, SectionSideDto, SortDirDto, StoredBudgetDto,
-    SymbolChangePageDto, SymbolChangeQueryDto, SymbolChangeRowDto, SymbolChangeSortDto,
-    SymbolSideDto,
+    ExportOutcomeDto, ObjectAttributionDto, PercentageChangeDto, SectionChangePageDto,
+    SectionChangeQueryDto, SectionChangeRowDto, SectionChangeSortDto, SectionSideDto, SortDirDto,
+    StoredBudgetDto, SymbolChangePageDto, SymbolChangeQueryDto, SymbolChangeRowDto,
+    SymbolChangeSortDto, SymbolSideDto,
 };
 use crate::{
     LOCAL_PROJECT_ID, Session, envelope_from_storage, next_operation_id, service, task_join_error,
@@ -612,10 +612,40 @@ fn memory(result: &DiffResult) -> DiffMemoryDto {
     DiffMemoryDto {
         nonvolatile: delta(&memory.nonvolatile),
         runtime_ram: delta(&memory.runtime_ram),
+        nonvolatile_percent: percentage(&memory.nonvolatile),
+        runtime_ram_percent: percentage(&memory.runtime_ram),
         comparability: memory.comparability.label().to_owned(),
         base: side_memory(&memory.base),
         target: side_memory(&memory.target),
         evidence_warning: memory.evidence_warning.clone(),
+    }
+}
+
+fn percentage(change: &ByteChange) -> PercentageChangeDto {
+    let (value, status) = match (
+        change.base,
+        change.target,
+        change.delta,
+        change.comparability,
+    ) {
+        (None, _, _, _) | (_, None, _, _) => (None, "missing_side"),
+        (Some(_), Some(_), _, comparability) if comparability != Comparability::Exact => {
+            (None, "not_exact")
+        }
+        (Some(_), Some(_), None, _) => (None, "delta_unavailable"),
+        (Some(0), Some(_), Some(_), _) => (None, "zero_baseline"),
+        (Some(base), Some(_), Some(delta), _) => {
+            let magnitude = u128::from(delta.unsigned_abs());
+            let denominator = u128::from(base);
+            let tenths = (magnitude * 1_000 + denominator / 2) / denominator;
+            let sign = if delta < 0 && tenths != 0 { "-" } else { "" };
+            let formatted = format!("{sign}{}.{:01}%", tenths / 10, tenths % 10);
+            (Some(formatted), "available")
+        }
+    };
+    PercentageChangeDto {
+        value,
+        status: status.to_owned(),
     }
 }
 
@@ -861,4 +891,87 @@ fn hex_value(value: u64) -> String {
 
 fn first_known(target: Option<u64>, base: Option<u64>) -> Option<u64> {
     target.or(base)
+}
+
+#[cfg(test)]
+mod percentage_tests {
+    use super::percentage;
+    use firmwaresight_core::domain::diff::{ByteChange, Comparability};
+
+    #[test]
+    fn percentage_requires_an_exact_known_change_and_nonzero_base() {
+        let exact = percentage(&ByteChange::between(
+            Some(256),
+            Some(376),
+            Comparability::Exact,
+        ));
+        assert_eq!(exact.value.as_deref(), Some("46.9%"));
+        assert_eq!(exact.status, "available");
+
+        let decrease = percentage(&ByteChange::between(
+            Some(1024),
+            Some(956),
+            Comparability::Exact,
+        ));
+        assert_eq!(decrease.value.as_deref(), Some("-6.6%"));
+
+        let unchanged = percentage(&ByteChange::between(
+            Some(10),
+            Some(10),
+            Comparability::Exact,
+        ));
+        assert_eq!(unchanged.value.as_deref(), Some("0.0%"));
+
+        let zero = percentage(&ByteChange::between(Some(0), Some(5), Comparability::Exact));
+        assert_eq!(zero.value, None);
+        assert_eq!(zero.status, "zero_baseline");
+
+        let partial = percentage(&ByteChange::between(
+            Some(10),
+            Some(12),
+            Comparability::Partial,
+        ));
+        assert_eq!(partial.value, None);
+        assert_eq!(partial.status, "not_exact");
+
+        let unknown_pair = percentage(&ByteChange::between(
+            Some(10),
+            Some(12),
+            Comparability::Unknown,
+        ));
+        assert_eq!(unknown_pair.value, None);
+        assert_eq!(unknown_pair.status, "not_exact");
+
+        let unknown = percentage(&ByteChange::unknown(Some(10), None, "target unknown"));
+        assert_eq!(unknown.value, None);
+        assert_eq!(unknown.status, "missing_side");
+
+        let added = percentage(&ByteChange::added(Some(5)));
+        assert_eq!(added.value, None);
+        assert_eq!(added.status, "missing_side");
+
+        let overflow = percentage(&ByteChange::between(
+            Some(u64::MAX),
+            Some(0),
+            Comparability::Exact,
+        ));
+        assert_eq!(overflow.value, None);
+        assert_eq!(overflow.status, "delta_unavailable");
+    }
+
+    #[test]
+    fn percentage_keeps_large_integer_math_out_of_javascript_precision() {
+        let base = 9_007_199_254_740_993_u64;
+        let target = 18_014_398_509_481_986_u64;
+        let change = ByteChange::between(Some(base), Some(target), Comparability::Exact);
+        let result = percentage(&change);
+        assert_eq!(result.value.as_deref(), Some("100.0%"));
+    }
+
+    #[test]
+    fn percentage_rounds_half_up_to_one_decimal_place() {
+        let change = ByteChange::between(Some(2_000), Some(2_001), Comparability::Exact);
+        let result = percentage(&change);
+        assert_eq!(result.value.as_deref(), Some("0.1%"));
+    }
 }

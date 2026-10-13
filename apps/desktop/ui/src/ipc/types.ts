@@ -36,6 +36,7 @@ export type { DiagnosticsStoreDto } from './generated/DiagnosticsStoreDto';
 export type { DiagnosticsSupportDto } from './generated/DiagnosticsSupportDto';
 export type { DiffCountsDto } from './generated/DiffCountsDto';
 export type { DiffMemoryDto } from './generated/DiffMemoryDto';
+export type { PercentageChangeDto } from './generated/PercentageChangeDto';
 export type { DiffSideDto } from './generated/DiffSideDto';
 export type { DiffSideMemoryDto } from './generated/DiffSideMemoryDto';
 export type { DiffWarningDto } from './generated/DiffWarningDto';

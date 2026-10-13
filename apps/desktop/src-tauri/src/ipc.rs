@@ -589,6 +589,16 @@ pub struct DiffMemoryDto {
     pub base: DiffSideMemoryDto,
     pub target: DiffSideMemoryDto,
     pub evidence_warning: Option<String>,
+    pub nonvolatile_percent: PercentageChangeDto,
+    pub runtime_ram_percent: PercentageChangeDto,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct PercentageChangeDto {
+    pub value: Option<String>,
+    pub status: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

@@ -54,6 +54,7 @@ import type {
   DiffCountsDto,
   DiffMemoryDto,
   DiffSideMemoryDto,
+  PercentageChangeDto,
   ErrorEnvelopeDto,
   ExportOutcomeDto,
   SectionChangePageDto,
@@ -687,8 +688,8 @@ function MemoryComparison({
         </p>
       </div>
       <div className={styles['rows']}>
-        <MemoryRow term={t('compare', 'memory.nonvolatileTerm')} change={memory.nonvolatile} unit={unit} />
-        <MemoryRow term={t('compare', 'memory.runtimeRamTerm')} change={memory.runtimeRam} unit={unit} />
+        <MemoryRow term={t('compare', 'memory.nonvolatileTerm')} change={memory.nonvolatile} percent={memory.nonvolatilePercent} unit={unit} />
+        <MemoryRow term={t('compare', 'memory.runtimeRamTerm')} change={memory.runtimeRam} percent={memory.runtimeRamPercent} unit={unit} />
         <div className={styles['row']}>
           <span className={styles['term']}>{t('compare', 'memory.comparabilityTerm')}</span>
           <span className={styles['value']}>
@@ -708,10 +709,12 @@ function MemoryComparison({
 function MemoryRow({
   term,
   change,
+  percent,
   unit,
 }: {
   readonly term: string;
   readonly change: ByteDeltaDto;
+  readonly percent: PercentageChangeDto;
   readonly unit: SizeUnit;
 }) {
   const { t } = useI18n();
@@ -722,9 +725,27 @@ function MemoryRow({
         <Figure axis={t('compare', 'axis.old')} text={formatSize(change.base, unit)} />
         <Figure axis={t('compare', 'axis.new')} text={formatSize(change.target, unit)} />
         <DeltaFigure change={change} unit={unit} />
+        <span className={styles['note']}>
+          {t('compare', 'memory.percentLabel')} {percent.value ?? percentStatus(percent.status, t)}
+        </span>
       </span>
     </div>
   );
+}
+
+function percentStatus(status: string, t: Translate): string {
+  switch (status) {
+    case 'missing_side':
+      return t('compare', 'memory.percentMissingSide');
+    case 'not_exact':
+      return t('compare', 'memory.percentNotExact');
+    case 'zero_baseline':
+      return t('compare', 'memory.percentZeroBaseline');
+    case 'delta_unavailable':
+      return t('compare', 'memory.percentDeltaUnavailable');
+    default:
+      return t('compare', 'memory.percentUnknown');
+  }
 }
 
 /**
@@ -854,6 +875,8 @@ function EvidenceNotice({ summary }: { readonly summary: CompareSummaryDto }) {
           ))}
         </ul>
       )}
+      <p className={styles['status']}>{t('compare', 'notice.producerCompatibilityUnproven')}</p>
+      <p className={styles['status']}>{t('compare', 'notice.remainderUnknown')}</p>
       <div className={styles['row']}>
         {/* L19: this page answers "did any object file change between the two builds", which is not
             the question Analyze's capability row answers. The two labels must stay distinct. */}

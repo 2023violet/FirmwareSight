@@ -418,6 +418,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── MemoryRegionDto.ts
 │           │   │   │   ├── MemorySummaryDto.ts
 │           │   │   │   ├── ObjectAttributionDto.ts
+│           │   │   │   ├── PercentageChangeDto.ts
 │           │   │   │   ├── PreferenceRecoveryDto.ts
 │           │   │   │   ├── PreferencesDto.ts
 │           │   │   │   ├── ProjectContextDto.ts
