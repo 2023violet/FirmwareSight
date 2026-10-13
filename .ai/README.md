@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
 
 # AI Entry Point
 
+> **Current status first:** read [NOW.md](NOW.md). For current status and evidence boundaries it supersedes stale “live” wording in this accumulated historical entry; it does not rewrite dated decisions or grant task authority. Then read [ACTIVE_TASK.md](ACTIVE_TASK.md), [CURRENT_STATE.md](CURRENT_STATE.md), [DECISIONS.md](DECISIONS.md), and the relevant current ADR/spec. The remainder of this file is a dated handoff record.
+
 Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctness closure ·
 `P1: PASS / COMPLETE` (Analyze, evidence in `P1_VALIDATION/`) ·
 `P2: PASS / COMPLETE` (Compare, evidence in `P2_VALIDATION/`; the round's own gate results are LOCAL PASS,

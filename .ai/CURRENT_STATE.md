@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
 
 # Current State
 
+> **Current pointer — 2026-10-13:** [NOW.md](NOW.md) is the concise, evidence-labelled status index and supersedes stale “live” wording below for current status only. Dated entries are preserved as historical records; their `OPEN` or `NOT_AUTHORIZED` statements describe what was known at the time and are not retroactively changed. `BASELINE.yaml` remains the baseline ledger and its `active_task: NONE` value is not changed by this documentation task.
+
 - Date: 2026-10-12 *(the live state is the `B2_U1R2` entry below, which closes the `NEXT-12 v1.1` round it follows; the
   `B2_U1R1` entry those follow, the `B1-U2` entry those follow, the
   `B1-U1` entry those follow, the `C1-U4` entry it follows, the `C1-U3` entry that

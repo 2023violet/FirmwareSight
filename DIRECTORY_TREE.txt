@@ -4,6 +4,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── CURRENT_STATE.md
 │   ├── DECISIONS.md
 │   ├── HANDOFF.md
+│   ├── NOW.md
 │   └── README.md
 ├── .cargo/
 │   └── config.toml

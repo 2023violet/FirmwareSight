@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
 
 # ACTIVE TASK
 
+> **Current pointer — 2026-10-13:** DOC-1 Wave 1A is being integrated under NEXT-34 in a dedicated worktree based on the security-fixed remote baseline `515a55a1e8c9a4d2b672dbf63b440cab296096a0`. Read Git for the local candidate state; this work is not pushed or independently accepted. NEXT-35 independent review is required. Active product implementation task: `NONE`. [NOW.md](NOW.md) is authoritative for current project status. The large fenced timeline below is preserved historical text; its old `LIVE POINTER` wording is not current.
+
 ```text
 LIVE POINTER — READ THIS FIRST, THEN JUMP TO THE LAST PARAGRAPH OF THIS FENCE. This file is append-only, so the first
 line below is the pointer as it stood on 2026-10-08 and it is kept unedited because the project does not rewrite

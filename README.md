@@ -17,6 +17,22 @@ v0.6.0 is the **P0 Technical Foundation Baseline**: the first version of this re
 source, and the version record of P0 closing `PASS`. It is built on `FirmwareSight_Project_Baseline_v0.5.1`
 and does **not** redefine the product, the architecture, the gate definitions or the design contract.
 
+## Current project entry
+
+Current, evidence-labelled status: [.ai/NOW.md](.ai/NOW.md). It identifies accepted engineering slices, remaining verification limits, licensing/publication boundaries, and the next authorized documentation state. Dated history below is retained as written and is not a current-state pointer.
+
+FirmwareSight's four engineering verbs are **Analyze → Compare → Release Gate → Bundle**. Analyze reports ELF and optional supported MAP evidence; Compare explains changes between persisted snapshots; Release Gate evaluates configured project policy; Bundle exports selected verified release evidence. Unknown or partial evidence stays explicit and is not treated as zero or proof.
+
+- Current status: [.ai/NOW.md](.ai/NOW.md)
+- Full local verification: `python scripts/check.py`
+- CLI Analyze example: `cargo run -q --bin fwsight -- analyze fixtures/elf/p0-dual-region/firmware.elf --map fixtures/elf/p0-dual-region/firmware.map --json`
+- Platform and format boundaries: [04_TECH/20_PLATFORM_SUPPORT.md](04_TECH/20_PLATFORM_SUPPORT.md), [04_TECH/03_FORMAT_SUPPORT.md](04_TECH/03_FORMAT_SUPPORT.md)
+- Governance and design rules: [AGENTS.md](AGENTS.md), [DESIGN.md](DESIGN.md), [assets/design-tokens.json](assets/design-tokens.json)
+
+CI package construction does not establish installed or visually accepted desktop behavior. No public license or B3 Developer Preview is authorized by this entry.
+
+The timeline that follows is the dated project-baseline record, not a current-state pointer.
+
 ```text
 G0      PASS
 P0      PASS — remote CI Runs #3, #4, #5 and #6, 7 of 7 jobs green on each; frozen at v0.6.0
@@ -753,6 +769,8 @@ compatible upgrade exists inside that pin.
 
 ## Read order
 
+The following original read order is preserved as historical baseline guidance. For current status first read [.ai/NOW.md](.ai/NOW.md); this does not remove the required governance and task-specific reads in [AGENTS.md](AGENTS.md).
+
 1. `README.md`
 2. `PRODUCT_BASELINE.md`
 3. `BASELINE.yaml`
@@ -807,6 +825,8 @@ P0 was not authorized by that V0 execution. It was authorized separately, by the
 `10_AUDIT/SOURCE_PROMPTS/README.md`.
 
 ## Next work
+
+> Historical record as written 2026-10-12. Current status and authorization are in [.ai/NOW.md](.ai/NOW.md); the dated claims below are retained as historical evidence.
 
 **Dated 2026-10-12, and this is the live clause; the C1 paragraph under it is the record of 2026-10-10 as written.**
 The pointer is not `NONE` and the C1 packet is not the current round. Two tracks have run since: **B1** — interface
