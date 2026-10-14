@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "git.exe",
+    "ls-remote",
+    "origin",
+    "refs/heads/main"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "exit": 0,
+  "utc": "2026-10-14T16:24:33.302995+00:00",
+  "stdout_sha256": "66b2c74c127928d8948f5d809f6e8cd7f91ce06d9eacda93583487de592992d7"
+}

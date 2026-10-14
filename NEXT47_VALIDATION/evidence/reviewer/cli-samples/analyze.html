@@ -1,0 +1,221 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FirmwareSight Analyze</title><style>:root {
+  --fs-color-bg-canvas: #F7F8FA;
+  --fs-color-bg-surface: #FFFFFF;
+  --fs-color-bg-subtle: #F1F3F5;
+  --fs-color-text-primary: #171A1F;
+  --fs-color-text-secondary: #5D6673;
+  --fs-color-border-default: #D9DEE5;
+  --fs-color-diff-added: #18794E;
+  --fs-color-diff-added-bg: #E7F3EC;
+  --fs-color-diff-removed: #C9372C;
+  --fs-color-diff-removed-bg: #FBECEA;
+  --fs-color-diff-changed: #2563EB;
+  --fs-color-diff-changed-bg: #E9F0FD;
+  --fs-color-status-unknown: #667085;
+  --fs-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --fs-font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --fs-font-size-metadata: 12px;
+  --fs-font-size-body: 13px;
+  --fs-font-size-section: 15px;
+  --fs-font-size-page: 20px;
+  --fs-space-2: 8px;
+  --fs-space-3: 12px;
+  --fs-space-4: 16px;
+  --fs-space-6: 24px;
+  --fs-radius-control: 6px;
+  --fs-radius-panel: 8px;
+  --fs-radius-pill: 999px;
+  --fs-border-width-hairline: 1px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: var(--fs-space-6);
+  background: var(--fs-color-bg-canvas);
+  color: var(--fs-color-text-primary);
+  font-family: var(--fs-font-ui);
+  font-size: var(--fs-font-size-body);
+  line-height: 20px;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 var(--fs-space-2);
+  font-size: var(--fs-font-size-page);
+  line-height: 28px;
+  font-weight: 600;
+}
+
+h2 {
+  margin: var(--fs-space-6) 0 var(--fs-space-3);
+  font-size: var(--fs-font-size-section);
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.brand,
+.meta,
+.empty {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+  margin: 0;
+}
+
+.card {
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  padding: var(--fs-space-4);
+}
+
+.notice {
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  padding: var(--fs-space-3);
+  margin: 0 0 var(--fs-space-2);
+}
+
+.notice ul {
+  margin: var(--fs-space-2) 0 0;
+  padding-left: var(--fs-space-4);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+caption {
+  caption-side: top;
+  text-align: left;
+  padding: 0 0 var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+th,
+td {
+  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  padding: var(--fs-space-2) var(--fs-space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+  background: var(--fs-color-bg-subtle);
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-family: var(--fs-font-mono);
+  white-space: nowrap;
+}
+
+.mono,
+.sha,
+.locator {
+  font-family: var(--fs-font-mono);
+}
+
+.delta.positive::before {
+  content: "+";
+}
+
+.delta.negative {
+  color: var(--fs-color-diff-removed);
+}
+
+.added {
+  color: var(--fs-color-diff-added);
+  background: var(--fs-color-diff-added-bg);
+}
+
+.removed {
+  color: var(--fs-color-diff-removed);
+  background: var(--fs-color-diff-removed-bg);
+}
+
+.changed {
+  color: var(--fs-color-diff-changed);
+  background: var(--fs-color-diff-changed-bg);
+}
+
+.chip {
+  display: inline-block;
+  padding: 0 var(--fs-space-2);
+  border-radius: var(--fs-radius-pill);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.unknown {
+  color: var(--fs-color-status-unknown);
+}
+
+.side {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--fs-space-2) var(--fs-space-3);
+}
+
+.side dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+.side dd {
+  margin: 0;
+}
+
+footer {
+  margin-top: var(--fs-space-6);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+@page { size: A4; margin: 16mm; }
+@media print {
+  body { padding: 0; background: #FFFFFF; }
+  main { max-width: none; }
+  .visual-summary { break-inside: avoid; }
+  table { width: 100%; table-layout: fixed; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+}
+th, td, .mono { overflow-wrap: anywhere; }
+.visual-scene { display: block; width: 100%; height: auto; }
+
+@page { size: A4; margin: 16mm; }
+@media print {
+ body { background: #FFFFFF; padding: 0; }
+ main { max-width: none; }
+ .visual-summary { break-inside: avoid; }
+ table { width: 100%; table-layout: fixed; }
+ thead { display: table-header-group; }
+ tr { break-inside: avoid; }
+ th, td { overflow-wrap: anywhere; }
+ h1, h2, h3 { break-after: avoid; }
+ .visual-scene { width: 100%; height: auto; }
+}
+.visual-scene { display: block; width: 100%; height: auto; }
+td, th, .mono { overflow-wrap: anywhere; }
+</style><body><main><section class="visual-summary"><h2>Analyze visual overview</h2><svg class="visual-scene" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="FirmwareSight Analyze visual summary"><title>FirmwareSight Analyze — firmware.elf</title><rect width="1600" height="900" fill="#FFFFFF"/><text x="48" y="64" font-size="40" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FirmwareSight / Analyze</text><text x="48" y="112" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">firmware.elf</text><text x="48" y="144" font-size="24" fill="#5D6673" font-family="Consolas, Liberation Mono, monospace">Snapshot ID: snap-3f615b6247179d930f59b76dcdba... / Observed artifact SHA-256: 3f615b6247179d930f59...</text><text x="48" y="176" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FLASH / nonvolatile image</text><text x="48" y="224" font-size="40" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">256 bytes</text><text x="48" y="264" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / observed</text><text x="816" y="176" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">RAM / runtime footprint</text><text x="816" y="224" font-size="40" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">8 bytes</text><text x="816" y="264" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / observed</text><text x="48" y="296" font-size="24" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Capacity unknown for footprint budgets. Missing/partial evidence remains qualified.</text><text x="48" y="760" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Summary rows 0 of 0. Full labels, basis and identities in HTML detail.</text><text x="48" y="800" font-size="26" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Mapped occupancy is not footprint utilisation or allocator headroom.</text><text x="48" y="840" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">MAP capability: not-provided. Object attribution: unavailable.</text></svg><p>Visual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.</p></section><h2>Identity and evidence detail</h2><table><thead><tr><th>Identity</th><th>Value</th></tr></thead><tbody><tr><td>Snapshot ID</td><td class="mono">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1</td></tr><tr><td>Observed artifact SHA-256</td><td class="mono">3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f</td></tr><tr><td>FirmwareSight version</td><td class="mono">0.6.0</td></tr></tbody></table><h2>Measurements (exact bytes)</h2><table><thead><tr><th>Fact</th><th>Value</th><th>Basis</th></tr></thead><tbody><tr><td>FLASH / nonvolatile image</td><td>256 bytes</td><td>exact / observed</td></tr><tr><td>RAM / runtime footprint</td><td>8 bytes</td><td>exact / observed</td></tr></tbody></table><h2>Limits and next steps</h2><ul><li>MAP capability: not-provided. Object attribution: unavailable.</li><li>Capacity unknown for footprint budgets; region rows show mapped interval occupancy only.</li><li>Region remaining space does not prove allocator or stack/heap headroom.</li><li>Regions shown: 0 of 0. Full section/symbol evidence remains in analysis JSON.</li></ul><p>Use the original JSON / detailed Compare HTML / verified Release Bundle for complete engineering evidence.</p></main></body></html>

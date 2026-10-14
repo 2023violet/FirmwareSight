@@ -1,0 +1,38 @@
+[
+  {
+    "name": "aarch64-none-elf.o",
+    "class": 2,
+    "endian": 1,
+    "machine": 183,
+    "sha256": "32d9e3ff4545a664b8018d7cfae7e807ef1f9a1dadbdc0c600ea96f48f69a5e7",
+    "regenerated_identical": true,
+    "evidence": "Clang relocatable basic metadata only, not Keil/IAR"
+  },
+  {
+    "name": "aarch64_be-none-elf.o",
+    "class": 2,
+    "endian": 2,
+    "machine": 183,
+    "sha256": "8551e44df171653542431f780266ef45a467a6712126b508fed3d999d84e7c30",
+    "regenerated_identical": true,
+    "evidence": "Clang relocatable basic metadata only, not Keil/IAR"
+  },
+  {
+    "name": "armeb-none-eabi.o",
+    "class": 1,
+    "endian": 2,
+    "machine": 40,
+    "sha256": "753951e2ba8e5b4dbbafa90968696581109a084c2f11567c727d31aa14eb67d4",
+    "regenerated_identical": true,
+    "evidence": "Clang relocatable basic metadata only, not Keil/IAR"
+  },
+  {
+    "name": "armv7-none-eabi.o",
+    "class": 1,
+    "endian": 1,
+    "machine": 40,
+    "sha256": "ca524a226d734e532e1376a6a55f767c38e8d98a42ac40bccadf9d58a8f5ecbe",
+    "regenerated_identical": true,
+    "evidence": "Clang relocatable basic metadata only, not Keil/IAR"
+  }
+]

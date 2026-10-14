@@ -1,0 +1,2 @@
+error: the source of `firmware.elf` is not the bytes the build recorded: the file the build was analyzed from is not there (code ERR-BUNDLE-6103, operation op-440c-18de6fe6a159f9a4)
+2026-10-14T15:45:38.294333Z ERROR fwsight: release bundle refused operation_id="op-440c-18de6fe6a159f9a4" code="ERR-BUNDLE-6103"

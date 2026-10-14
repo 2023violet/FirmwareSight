@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "gh",
+    "run",
+    "view",
+    "38595778036",
+    "--repo",
+    "2023violet/FirmwareSight",
+    "--log"
+  ],
+  "exit_code": 0,
+  "utc": "2026-10-14T16:32:36.701193+00:00"
+}

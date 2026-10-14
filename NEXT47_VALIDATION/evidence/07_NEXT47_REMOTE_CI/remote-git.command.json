@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "git",
+    "ls-remote",
+    "origin",
+    "refs/heads/main"
+  ],
+  "exit_code": 0,
+  "utc": "2026-10-14T16:32:30.924894+00:00"
+}

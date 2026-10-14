@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "gh",
+    "run",
+    "view",
+    "--job",
+    "115962008279",
+    "--repo",
+    "2023violet/FirmwareSight",
+    "--log"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "exit": 0,
+  "utc": "2026-10-14T16:31:58.006896+00:00",
+  "stdout_sha256": "35b2e7090a887aceb742c42c513351c117ac8545d3c220c099c5823cdf5df723"
+}

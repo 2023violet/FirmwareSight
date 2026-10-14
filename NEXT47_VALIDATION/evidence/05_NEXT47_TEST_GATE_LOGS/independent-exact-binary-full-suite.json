@@ -1,0 +1,12 @@
+{
+  "name": "independent-exact-binary-full-suite",
+  "argv": [
+    "target/debug/deps/bundle_builder-0ecea7471c717e52.exe",
+    "--nocapture"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:42:02.357539+00:00",
+  "end_utc": "2026-10-14T15:42:07.564478+00:00",
+  "exit_code": 0,
+  "log_sha256": "d7a98e7d9c0815a7b404305f1db3aab5ce104ca8e8d05fbfee398f53d37bdf35"
+}

@@ -1,0 +1,238 @@
+{
+  "sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "scope": "Scoped engineering integration process; N47-17/18 PASS verify deferral registration, never native AC PASS",
+  "rows": [
+    {
+      "id": "N47-01",
+      "status": "PASS",
+      "rationale": "Exact object/parent/tree, new clean detached worktree; all 894 committed source files clean-filter match their index OIDs.",
+      "evidence": [
+        "reviewer/identity-before.json",
+        "reviewer/identity-artifact-repair.json",
+        "reviewer/source-bytes-artifact-repair.json"
+      ]
+    },
+    {
+      "id": "N47-02",
+      "status": "PASS",
+      "rationale": "Before and final reviewer GitHub REST plus git ls-remote both baseline, including the new external-artifact correction readback. Reviewer performed no remote write.",
+      "evidence": [
+        "reviewer/identity-before.json",
+        "reviewer/identity-artifact-repair.json"
+      ]
+    },
+    {
+      "id": "N47-03",
+      "status": "PASS",
+      "rationale": "Protected HEAD, exact 9 mode/OID entries, 19,794-byte staged patch unchanged, including the new artifact-repair readback. Additional unrelated untracked log explicitly disclosed; contents not read.",
+      "evidence": [
+        "reviewer/identity-before.json",
+        "reviewer/identity-artifact-repair.json"
+      ]
+    },
+    {
+      "id": "N47-04",
+      "status": "PASS",
+      "rationale": "Original historical contracts/report/matrix unchanged. Initial JSON codec and revision2 TSV-layout mistakes were caught before push, preserved and repaired externally. Independent strict UTF-8 audit proves all 1,378 original JSON row values/top-level fields and all 742 original historical TSV cells plus seven-header prefix preserved exactly.",
+      "evidence": [
+        "reviewer/original-field-comparison-audit.json",
+        "reviewer/artifact-correction.json",
+        "reviewer/identity-tsv-repair.json",
+        "reviewer/AC_MATRIX_106_NEXT47.json",
+        "reviewer/AC_MATRIX_106_NEXT47.tsv"
+      ]
+    },
+    {
+      "id": "N47-05",
+      "status": "PASS",
+      "rationale": "Reviewer is a separate dispatched context, new detached worktree, no implementer self-review or candidate editing.",
+      "evidence": [
+        "reviewer/identity-before.json",
+        "reviewer/02_NEXT47_CODE_REVIEW.md"
+      ]
+    },
+    {
+      "id": "N47-06",
+      "status": "PASS",
+      "rationale": "Full 32-path delta reviewed; typed presentation/CLI/refusal/stale scope only; Core/storage/schemas/identities/security/ADR/locks/policy/goldens frozen.",
+      "evidence": [
+        "reviewer/candidate-full.diff",
+        "reviewer/identity-artifact-repair.json"
+      ]
+    },
+    {
+      "id": "N47-07",
+      "status": "PASS",
+      "rationale": "Fresh real-process privacy corpus under RUST_LOG trace and independent actual CLI captures preserve stdout/stderr exit/category/op/remediation.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.log",
+        "reviewer/independent-cli-processes.json"
+      ]
+    },
+    {
+      "id": "N47-08",
+      "status": "PASS",
+      "rationale": "Zero/tiny/full/unknown/u64 SVG/PNG exact-value regression passes; decorative rounded-zero foreground omitted, no minimum area or fictional utilisation; XML/PNG freshly parsed.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.log",
+        "reviewer/independent-artifacts.json"
+      ]
+    },
+    {
+      "id": "N47-09",
+      "status": "PASS",
+      "rationale": "Fresh foreign/mixed/long/invalid MAP refusal and ELF-only recovery tests plus independent CLI process captures pass.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.log",
+        "reviewer/independent-cli-processes.json",
+        "reviewer/fixture-proof.json"
+      ]
+    },
+    {
+      "id": "N47-10",
+      "status": "PASS",
+      "rationale": "Only Clang relocatable metadata proven; Keil/IAR cohorts UNVERIFIED; ArmLink/IAR MAP NOT_SUPPORTED/FIXTURE_BLOCKED and accurately labelled.",
+      "evidence": [
+        "reviewer/fixture-proof.json",
+        "04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md"
+      ]
+    },
+    {
+      "id": "N47-11",
+      "status": "PASS",
+      "rationale": "Final complete invocation: Rust fmt/clippy/test and relevant goldens all pass; nonduplicated 1160/0/2, 56 result lines. First permission event and diagnostic rechecks preserved.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.log",
+        "reviewer/verification-events.md"
+      ]
+    },
+    {
+      "id": "N47-12",
+      "status": "PASS",
+      "rationale": "397 frontend tests/13 files, typecheck/lint/build PASS; two supplemental actual component probes passed separately with 37 pre-existing cases filtered, not added to full count.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.log",
+        "05_NEXT47_TEST_GATE_LOGS/independent-component-probe.log"
+      ]
+    },
+    {
+      "id": "N47-13",
+      "status": "PASS",
+      "rationale": "Fresh final full scripts/check.py: 18/18, 0 SKIP, exit 0; first clean run 19/20 exit1 retained, not combined.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.json",
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.log"
+      ]
+    },
+    {
+      "id": "N47-14",
+      "status": "PASS",
+      "rationale": "Four separately captured online cargo-deny categories plus full gate combined invocation all exit0 under unchanged policy.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-deny-licenses.json",
+        "05_NEXT47_TEST_GATE_LOGS/independent-deny-bans.json",
+        "05_NEXT47_TEST_GATE_LOGS/independent-deny-sources.json",
+        "05_NEXT47_TEST_GATE_LOGS/independent-deny-advisories.json"
+      ]
+    },
+    {
+      "id": "N47-15",
+      "status": "PASS",
+      "rationale": "Explicit independent ADR0029 verifier PASS: 894 tracked,892 sums,0 mismatch/unlisted/duplicate/unmerged/artifact disagreement.",
+      "evidence": [
+        "05_NEXT47_TEST_GATE_LOGS/independent-baseline.log"
+      ]
+    },
+    {
+      "id": "N47-16",
+      "status": "PASS",
+      "rationale": "6 newly generated repeat-identical 1600x900 PNG cohorts decoded with Pillow, SVG XML parsed; actual Edge A4 prints contain all source cells; Compare16p, new CLI Release10p, frozen Release12p, summaries2p. All new detailed pages rasterized/viewed; no native PDF claim.",
+      "evidence": [
+        "reviewer/independent-artifacts.json",
+        "reviewer/print-review.json",
+        "reviewer/new-bundle-print-proof.json",
+        "reviewer/visual-inspection.md"
+      ]
+    },
+    {
+      "id": "N47-17",
+      "status": "PASS",
+      "rationale": "Exactly C1/C2/C3 original MUST native items remain NOT_VERIFIED. Historical full-acceptance prerequisite is a distinct derived FAIL, not a fourth undocumented native gap.",
+      "evidence": [
+        "reviewer/AC_MATRIX_106_NEXT47.json",
+        "04_NEXT47_DEFERRED_NATIVE_QA.json"
+      ]
+    },
+    {
+      "id": "N47-18",
+      "status": "PASS",
+      "rationale": "Full risk register independently assessed; original text/status/rationale match verbatim, impacts/recoverability/environment/14 steps/evidence/closure/pre-distribution deadline complete. Existing English native copy risk explicit.",
+      "evidence": [
+        "04_NEXT47_DEFERRED_NATIVE_QA.md",
+        "04_NEXT47_DEFERRED_NATIVE_QA.json"
+      ]
+    },
+    {
+      "id": "N47-19",
+      "status": "PASS",
+      "rationale": "Both literal YES switches are in current human Owner dispatch transcription with honest provenance; root dispatch/precheck corroborate actual human authority, not contract examples.",
+      "evidence": [
+        "OWNER_DISPATCH_VERBATIM.md",
+        "01_NEXT47_PRECHECK.json"
+      ]
+    },
+    {
+      "id": "N47-20",
+      "status": "PASS",
+      "rationale": "Independent exact-SHA D1 PASS and D2 NOT_VERIFIED are explicit and signed; original historical verdict remains unchanged.",
+      "evidence": [
+        "reviewer/signed-verdict.json",
+        "reviewer/02_NEXT47_CODE_REVIEW.md"
+      ]
+    },
+    {
+      "id": "N47-21",
+      "status": "PASS",
+      "rationale": "No actionable S0/S1 or unaccepted serious data/privacy/permission/reproducible workflow defect found. A nonreproduced Windows rename permission verification event is disclosed; exact original binary3/3 plus100/100 suites and final full gate pass.",
+      "evidence": [
+        "reviewer/verification-events.md",
+        "05_NEXT47_TEST_GATE_LOGS/independent-exact-binary-full-suite.log",
+        "05_NEXT47_TEST_GATE_LOGS/independent-full-gate-recheck.log"
+      ]
+    },
+    {
+      "id": "N47-22",
+      "status": "PASS",
+      "rationale": "Final revision3 independent D1 PASS and exact3 native exceptions, original106 JSON/TSV unchanged, live two-path baseline and protected9 before normal exactSHA FF; exactly one real push, exit0. Failed artifact guards never invoked git push.",
+      "evidence": [
+        "PRE_PUSH_GUARD.json",
+        "push-attempt.json",
+        "push.stdout",
+        "reviewer/signed-verdict.json",
+        "PRE_PUSH_ARTIFACT_GUARD_ABORT.json"
+      ]
+    },
+    {
+      "id": "N47-23",
+      "status": "PASS",
+      "rationale": "New push-triggered run113 attempt1 on exact SHA; ten Jobs and ten CheckRuns completed/success; all-job logs plus actual cargo-deny and baseline verifier/drift logs verified by executor and independent reviewer.",
+      "evidence": [
+        "07_NEXT47_PUSH_CI_PROOF.json",
+        "reviewer/POST_PUSH_CI_REVIEW.json",
+        "07_NEXT47_REMOTE_CI/all-jobs-log.stdout",
+        "07_NEXT47_REMOTE_CI/deny-actual-log.stdout",
+        "07_NEXT47_REMOTE_CI/baseline-drift-actual-log.stdout"
+      ]
+    },
+    {
+      "id": "N47-24",
+      "status": "PASS",
+      "rationale": "Code integration only; native C1-C3 MUST NOT_VERIFIED, actual native/installed QA not claimed; Keil/IAR compiler cohorts and foreign MAP support unverified/unsupported; no public distribution/signing/tag/Release authority.",
+      "evidence": [
+        "08_NEXT47_FINAL_REPORT.md",
+        "04_NEXT47_DEFERRED_NATIVE_QA.md",
+        "reviewer/signed-verdict.json"
+      ]
+    }
+  ]
+}

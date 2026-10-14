@@ -1,0 +1,14 @@
+{
+  "name": "independent-deny-advisories",
+  "argv": [
+    "cargo.exe",
+    "deny",
+    "check",
+    "advisories"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:32:31.268270+00:00",
+  "end_utc": "2026-10-14T15:32:40.332644+00:00",
+  "exit_code": 0,
+  "log_sha256": "799fc05e6513bf365cc7565ea51cc5cb9ca6690b1cd1fe7777339be83437131b"
+}

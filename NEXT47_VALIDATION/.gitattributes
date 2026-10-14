@@ -1,0 +1,4 @@
+evidence/** -text -whitespace
+PUBLIC_EVIDENCE_MANIFEST.json -text
+PUBLIC_ARCHIVE_SHA256.json -text
+*.zip binary

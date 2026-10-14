@@ -1,0 +1,18 @@
+{
+  "name": "independent-samples-generation",
+  "argv": [
+    "cargo.exe",
+    "run",
+    "-p",
+    "firmwaresight-report",
+    "--example",
+    "visual_samples",
+    "--",
+    "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\samples"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:33:46.570132+00:00",
+  "end_utc": "2026-10-14T15:38:41.792247+00:00",
+  "exit_code": 0,
+  "log_sha256": "493a371d35781920ede79c09a15affe57d8f0bcf76fed50dc06c7c5ebeab76f7"
+}

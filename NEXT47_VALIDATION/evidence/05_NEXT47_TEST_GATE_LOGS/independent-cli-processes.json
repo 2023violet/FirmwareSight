@@ -1,0 +1,12 @@
+{
+  "name": "independent-cli-processes",
+  "argv": [
+    "C:\\Program Files\\Python313\\python.exe",
+    "LOCAL_USER/Downloads/FirmwareSight_NEXT47_EVIDENCE_20261014/reviewer/cli-independent.py"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:44:19.048046+00:00",
+  "end_utc": "2026-10-14T15:44:19.145198+00:00",
+  "exit_code": 1,
+  "log_sha256": "4916e185e4b64e3dacb9914e086131bbbe21b6ddda75c38be9240179b15d63ed"
+}

@@ -1,0 +1,9 @@
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\cli-independent.py:17: SyntaxWarning: invalid escape sequence '\d'
+  pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+Traceback (most recent call last):
+  File "LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\cli-independent.py", line 40, in <module>
+    release=invoke('independent-cli-release',['release','prepare','--project',str(project),*artifact,'--out',str(OUT/'new-cli-bundles'),'--json'],0)
+  File "LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\cli-independent.py", line 35, in invoke
+    assert p.returncode==expected,(name,p.returncode,p.stderr.decode(errors='replace'))
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('independent-cli-release', 6, 'error: the source of `firmware.elf` is not the bytes the build recorded: the file the build was analyzed from is not there (code ERR-BUNDLE-6103, operation op-440c-18de6fe6a159f9a4)\n2026-10-14T15:45:38.294333Z ERROR fwsight: release bundle refused operation_id="op-440c-18de6fe6a159f9a4" code="ERR-BUNDLE-6103"\n')

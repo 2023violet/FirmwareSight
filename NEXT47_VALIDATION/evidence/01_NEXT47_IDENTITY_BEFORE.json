@@ -1,0 +1,51 @@
+{
+  "utc": "2026-10-14T15:23:38.847755+00:00",
+  "identity": "PASS",
+  "sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "parent": "4ac1e4f709396fac7a37a1d92b8095a070b3effa",
+  "tree": "55ecc38ae7e45976e60845249dee8830d35e054d",
+  "candidate_clean": true,
+  "review_detached_clean": true,
+  "review_worktree": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "remote_git": "4ac1e4f709396fac7a37a1d92b8095a070b3effa",
+  "remote_rest": "4ac1e4f709396fac7a37a1d92b8095a070b3effa",
+  "protected_main_head": "e34f9e69e515a330a3705470aeba6cfab073634d",
+  "protected_status": "M  .ai/ACTIVE_TASK.md\nM  .ai/CURRENT_STATE.md\nM  .ai/HANDOFF.md\nA  .ai/NOW.md\nM  .ai/README.md\nM  AGENTS.md\nM  DIRECTORY_TREE.txt\nM  README.md\nM  SHA256SUMS\n?? .playwright-mcp/console-2026-10-14T15-22-05-259Z.log\n",
+  "protected_stage0_map": "100644 8a2588c6e1e38e5e88aab9f839a19337a28399ad 0\t.ai/ACTIVE_TASK.md\n100644 86f53b572dedeb4cd93fb7dd50742c737aa88f82 0\t.ai/CURRENT_STATE.md\n100644 cbabdafb6451fba0f592adfbd8edc66c204e5b18 0\t.ai/HANDOFF.md\n100644 04c8a3c75fcdcb6be9a0b11f7c5d8a655f3d3ef3 0\t.ai/NOW.md\n100644 d97b1523d857db84bb8454cfb68e007699e1fe6f 0\t.ai/README.md\n100644 3a4dc2d776eafa2f8fed9dd16f97d0e77eb81bdb 0\tAGENTS.md\n100644 e02a2d279a3933025e74899e59b50f0bdf25c629 0\tDIRECTORY_TREE.txt\n100644 6a0e12260a752d19bb3ec335bf40719d6f280811 0\tREADME.md\n100644 5a58d0aa8fdac52b7b41cca6279fb422c36ebe25 0\tSHA256SUMS\n",
+  "protected_patch_sha256": "05f86c0313040899dca1156f538186d686377906e1a62e755fcb029c1eb96d2b",
+  "protected_patch_bytes": 19794,
+  "worktree_list": "worktree OWNER_WORKSPACE\nHEAD e34f9e69e515a330a3705470aeba6cfab073634d\nbranch refs/heads/main\n\nworktree LOCAL_USER/.codex/worktrees/next46-export-toolchains/FirmwareSight\nHEAD 76b5c2c006f1ca0850af86da6d1e4b957227a025\nbranch refs/heads/codex/next46-export-toolchains\n\nworktree LOCAL_USER/.codex/worktrees/next46-final-review/FirmwareSight\nHEAD 76b5c2c006f1ca0850af86da6d1e4b957227a025\ndetached\n\nworktree LOCAL_USER/.codex/worktrees/next47-engineering-review/FirmwareSight\nHEAD 76b5c2c006f1ca0850af86da6d1e4b957227a025\ndetached\n\nworktree LOCAL_USER/Downloads/FirmwareSight_NEXT41_REVIEW_20261013_01\nHEAD 3706cf0b29e3009b54894ddce6a06068c5f51973\ndetached\n\nworktree OWNER_WORKSPACE_NEXT32_SECURITY\nHEAD 515a55a1e8c9a4d2b672dbf63b440cab296096a0\nbranch refs/heads/security/ruzstd-rustsec-2026-0344\n\nworktree OWNER_WORKSPACE_NEXT34_DOC1_INTEGRATION\nHEAD 4b8df070dde19b586fedc177c5640fdbb44779a2\nbranch refs/heads/docs/doc1-wave1a-next34-20261013\n\nworktree OWNER_WORKSPACE_NEXT35_REVIEW\nHEAD 4b8df070dde19b586fedc177c5640fdbb44779a2\ndetached\n\nworktree OWNER_WORKSPACE_NEXT40_PRODUCT_READINESS\nHEAD 3706cf0b29e3009b54894ddce6a06068c5f51973\nbranch refs/heads/feature/next40-project-readiness\n\nworktree OWNER_WORKSPACE_NEXT42_MUTATION_REVIEW\nHEAD 5eb0a2977324c891748898b4e02586a1a8da49de\ndetached\n\nworktree OWNER_WORKSPACE_NEXT42_PRIVACY_REWORK\nHEAD 5eb0a2977324c891748898b4e02586a1a8da49de\nbranch refs/heads/feature/next42-readiness-privacy-rework\n\nworktree OWNER_WORKSPACE_NEXT42_REVIEW\nHEAD d8edb36e6f0dcd4c4642718b39ba834f4bd10cf6\ndetached\n\nworktree OWNER_WORKSPACE_NEXT42_REVIEW_FINAL\nHEAD 5eb0a2977324c891748898b4e02586a1a8da49de\ndetached\n\nworktree OWNER_WORKSPACE_NEXT43_BATCH_B\nHEAD f2fcabe1393cbb74f308ddf4ccd0fc4b8931f54e\nbranch refs/heads/feature/next43-product-foundation-batch-b\n\nworktree OWNER_WORKSPACE_NEXT43_REVIEW\nHEAD f2fcabe1393cbb74f308ddf4ccd0fc4b8931f54e\ndetached\n\nworktree OWNER_WORKSPACE_NEXT44_VISUAL_REPORT\nHEAD 4ac1e4f709396fac7a37a1d92b8095a070b3effa\nbranch refs/heads/feature/next44-visual-report-export\n\nworktree OWNER_WORKSPACE_NEXT45_REVIEW\nHEAD 4ac1e4f709396fac7a37a1d92b8095a070b3effa\ndetached\n\n",
+  "stashes": "",
+  "Owner_switch_source": "Actual human NEXT47 dispatch in current chat",
+  "OWNER_NEXT47_ENGINEERING_GATE_RECLASSIFICATION": "YES",
+  "OWNER_NEXT47_CONDITIONAL_FF_PUSH": "YES",
+  "required_materials": [
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\NEXT46_INTEGRATED_REPORT.md",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\reviewer\\REVIEW_VERDICT.md",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\reviewer\\AC_MATRIX_106.json",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\reviewer\\AC_MATRIX_106.tsv",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\protected-main-before.json",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_DELIVERY_MANIFEST.json",
+      "exists": false
+    }
+  ],
+  "artifact_gate": "WAITING_FOR_ORIGINAL_EVIDENCE",
+  "push_attempts": 0,
+  "dependent_review_gate": "NOT_RUN"
+}

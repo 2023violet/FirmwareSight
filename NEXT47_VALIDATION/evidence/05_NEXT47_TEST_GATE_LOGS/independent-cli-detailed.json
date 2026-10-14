@@ -1,0 +1,17 @@
+{
+  "name": "independent-cli-detailed",
+  "argv": [
+    "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+    "diff",
+    "fixtures/elf/p2-diff/base/firmware.elf",
+    "fixtures/elf/p2-diff/target/firmware.elf",
+    "--html",
+    "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\detailed-compare.html",
+    "--json"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:40:42.646107+00:00",
+  "end_utc": "2026-10-14T15:40:42.866879+00:00",
+  "exit_code": 0,
+  "log_sha256": "15963d9633aeaf0f415468eaf8d782620f038cdfb4e2de93171422051629d737"
+}

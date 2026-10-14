@@ -1,0 +1,43 @@
+{
+  "events": [
+    {
+      "event": "Initial required NEXT46 evidence files not found; no candidate/protected mutation and no push."
+    },
+    {
+      "event": "Owner said originals restored; NEXT45/NEXT46 source contracts became readable but required reviewer/matrix remained absent at second check."
+    },
+    {
+      "utc": "2026-10-14T15:29:46.278247+00:00",
+      "event": "Owner restored NEXT46 directory. Original reviewer, matrix, integrated report match prior delivery hashes; inner374 file manifest verified. Optional outer delivery manifest absent; not required by contract if nonexistent."
+    },
+    {
+      "event": "Unrelated untracked .playwright-mcp console log observed in protected main; contents not accessed. Exact9 tracked status, HEAD, modes/OIDs and19794byte staged patch match. No deletion or cleanup."
+    }
+  ],
+  "latest_required_materials": [
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\NEXT46_INTEGRATED_REPORT.md",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\reviewer\\REVIEW_VERDICT.md",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\reviewer\\AC_MATRIX_106.json",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\reviewer\\AC_MATRIX_106.tsv",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_EVIDENCE_20261014\\protected-main-before.json",
+      "exists": true
+    },
+    {
+      "path": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT46_DELIVERY_MANIFEST.json",
+      "exists": false
+    }
+  ]
+}

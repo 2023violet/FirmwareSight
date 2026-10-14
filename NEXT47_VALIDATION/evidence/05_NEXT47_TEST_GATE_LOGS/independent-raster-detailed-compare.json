@@ -1,0 +1,16 @@
+{
+  "name": "independent-raster-detailed-compare",
+  "argv": [
+    "pdftoppm.exe",
+    "-scale-to",
+    "800",
+    "-png",
+    "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\detailed-compare-a4.pdf",
+    "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\detailed-compare-page"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:48:17.458266+00:00",
+  "end_utc": "2026-10-14T15:48:19.194353+00:00",
+  "exit_code": 0,
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

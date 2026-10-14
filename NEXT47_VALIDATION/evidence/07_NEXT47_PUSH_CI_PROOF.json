@@ -1,0 +1,249 @@
+{
+  "sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "utc": "2026-10-14T16:32:32.546811+00:00",
+  "push_attempts": 1,
+  "remote_git_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "remote_rest_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "expected_job_names": [
+    "Dependency policy",
+    "Desktop UI (ubuntu-latest)",
+    "Desktop UI (windows-latest)",
+    "Generated output drift",
+    "Package Ubuntu",
+    "Package Windows",
+    "Package macOS",
+    "Rust (ubuntu-latest)",
+    "Rust (windows-latest)",
+    "macOS Core Smoke"
+  ],
+  "native_user_acceptance": "NOT_VERIFIED",
+  "public_release": "NOT_AUTHORIZED",
+  "state": "NEXT47_ENGINEERING_INTEGRATED_REMOTE_CI_PROVEN",
+  "run": {
+    "id": 38595778036,
+    "run_number": 113,
+    "run_attempt": 1,
+    "event": "push",
+    "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "head_branch": "main",
+    "path": ".github/workflows/p0-check.yml",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036",
+    "created_at": "2026-10-14T16:10:21Z",
+    "updated_at": "2026-10-14T16:27:46Z"
+  },
+  "all_jobs_success": true,
+  "all_checks_success": true,
+  "actual_deny_logs_verified": true,
+  "actual_baseline_logs_verified": true,
+  "jobs": [
+    {
+      "id": 115962008130,
+      "name": "Generated output drift",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:13:46Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008130"
+    },
+    {
+      "id": 115962008279,
+      "name": "Dependency policy",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:11:59Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008279"
+    },
+    {
+      "id": 115962008402,
+      "name": "Desktop UI (windows-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:11:54Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008402"
+    },
+    {
+      "id": 115962008461,
+      "name": "Package Windows",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:27Z",
+      "completed_at": "2026-10-14T16:27:25Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008461"
+    },
+    {
+      "id": 115962008471,
+      "name": "Rust (ubuntu-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:15:26Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008471"
+    },
+    {
+      "id": 115962008485,
+      "name": "macOS Core Smoke",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:40Z",
+      "completed_at": "2026-10-14T16:13:16Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008485"
+    },
+    {
+      "id": 115962008499,
+      "name": "Desktop UI (ubuntu-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:11:29Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008499"
+    },
+    {
+      "id": 115962008758,
+      "name": "Package macOS",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:33Z",
+      "completed_at": "2026-10-14T16:27:45Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008758"
+    },
+    {
+      "id": 115962008892,
+      "name": "Package Ubuntu",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:26Z",
+      "completed_at": "2026-10-14T16:20:37Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008892"
+    },
+    {
+      "id": 115962008972,
+      "name": "Rust (windows-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:29Z",
+      "completed_at": "2026-10-14T16:21:08Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008972"
+    }
+  ],
+  "checks": [
+    {
+      "id": 115962008972,
+      "name": "Rust (windows-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:29Z",
+      "completed_at": "2026-10-14T16:21:08Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008972"
+    },
+    {
+      "id": 115962008892,
+      "name": "Package Ubuntu",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:26Z",
+      "completed_at": "2026-10-14T16:20:37Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008892"
+    },
+    {
+      "id": 115962008758,
+      "name": "Package macOS",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:33Z",
+      "completed_at": "2026-10-14T16:27:45Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008758"
+    },
+    {
+      "id": 115962008499,
+      "name": "Desktop UI (ubuntu-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:11:29Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008499"
+    },
+    {
+      "id": 115962008485,
+      "name": "macOS Core Smoke",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:40Z",
+      "completed_at": "2026-10-14T16:13:16Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008485"
+    },
+    {
+      "id": 115962008471,
+      "name": "Rust (ubuntu-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:15:26Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008471"
+    },
+    {
+      "id": 115962008461,
+      "name": "Package Windows",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:27Z",
+      "completed_at": "2026-10-14T16:27:25Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008461"
+    },
+    {
+      "id": 115962008402,
+      "name": "Desktop UI (windows-latest)",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:11:54Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008402"
+    },
+    {
+      "id": 115962008279,
+      "name": "Dependency policy",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:11:59Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008279"
+    },
+    {
+      "id": 115962008130,
+      "name": "Generated output drift",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-14T16:10:25Z",
+      "completed_at": "2026-10-14T16:13:46Z",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008130"
+    }
+  ],
+  "deny_job_id": 115962008279,
+  "deny_log_sha256": "35b2e7090a887aceb742c42c513351c117ac8545d3c220c099c5823cdf5df723",
+  "baseline-drift_job_id": 115962008130,
+  "baseline-drift_log_sha256": "045fcd8053b1a4f745b8e68a538ed84bdcc64c97c15027dbe85862517a5c28f1",
+  "all_jobs_log_sha256": "7e5a1d92506b9b376dc0617909bacb00ee0358edad480952d40638d68d6dccad"
+}

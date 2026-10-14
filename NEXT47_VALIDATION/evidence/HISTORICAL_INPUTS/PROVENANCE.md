@@ -1,0 +1,1 @@
+Historical input copies only. Original NEXT44/45/46 sources, original NEXT46 blocked verdict/matrix/report remain immutable. These are not new acceptance or current CI claims. Copies are byte-exact and hashes are recorded in the new package manifest. Original full submitted NEXT45 final review remains unrecovered; no reconstruction.

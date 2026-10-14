@@ -1,0 +1,14 @@
+{
+  "name": "independent-core-smoke",
+  "argv": [
+    "C:\\Program Files\\Python313\\python.exe",
+    "scripts/check.py",
+    "--only",
+    "core-smoke"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:32:41.134610+00:00",
+  "end_utc": "2026-10-14T15:43:41.258245+00:00",
+  "exit_code": 0,
+  "log_sha256": "cf2b9b21868bcca5bd5adb2120c47a8505ee2faad4734400d97f9340e2539dc2"
+}

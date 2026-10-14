@@ -1,0 +1,362 @@
+{
+  "status": "NEXT47_ENGINEERING_INTEGRATED_REMOTE_CI_PROVEN / NATIVE_GUI_QA_DEFERRED / READY_FOR_ARCHITECT_CLOSE",
+  "scope": "Engineering integration only, not native/installed acceptance, vendor formal compatibility or external product release",
+  "final_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "parent_sha": "4ac1e4f709396fac7a37a1d92b8095a070b3effa",
+  "tree_sha": "55ecc38ae7e45976e60845249dee8830d35e054d",
+  "candidate_sha_changed": false,
+  "new_source_commits": 0,
+  "CODE_INTEGRATION_GATE": "PASS",
+  "NATIVE_USER_ACCEPTANCE_GATE": "NOT_VERIFIED",
+  "native_environment_state": "BLOCKED_BY_ENV",
+  "exact_deferred_set": [
+    "NEXT44-AC24",
+    "NEXT44-AC26",
+    "NEXT45-AC20"
+  ],
+  "risk_register": "04_NEXT47_DEFERRED_NATIVE_QA.md",
+  "risk_register_json": "04_NEXT47_DEFERRED_NATIVE_QA.json",
+  "historical_verdict": "NEXT46 BLOCKED_INSUFFICIENT_EVIDENCE / NO_PUSH unchanged; NEXT46 AC34 original FAIL unchanged",
+  "old106_counts": {
+    "PASS": 96,
+    "NOT_VERIFIED": 3,
+    "FAIL": 1,
+    "CONDITIONAL N/A": 3,
+    "NOT_RUN": 3
+  },
+  "augmented106_counts": {
+    "PASS": 96,
+    "OWNER_ACCEPTED_DEFERRED_NATIVE_QA": 3,
+    "CONDITIONAL N/A": 7
+  },
+  "original_json_values_preserved": 1378,
+  "original_tsv_cells_preserved": 742,
+  "original_tsv_column_prefix_preserved": 7,
+  "signed_review": "02_NEXT47_CODE_REVIEW.md",
+  "signature": "reviewer/signed-verdict.json",
+  "signature_revision": "CORRECTED_EXTERNAL_ARTIFACT_REVISION_3",
+  "test_counts": {
+    "source_log": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\05_NEXT47_TEST_GATE_LOGS\\independent-full-gate-recheck.log",
+    "sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "exit_code": 0,
+    "full_gate_steps": 18,
+    "required_steps_skipped": 0,
+    "workspace": {
+      "passed": 1160,
+      "failed": 0,
+      "ignored": 2,
+      "result_lines": 56,
+      "count_rule": "Only successful full-gate rust/test workspace segment; excludes failed first invocation, core-smoke, IPC drift repeats and external component probe."
+    },
+    "ui_passed": 397,
+    "ui_files": 13,
+    "supplemental_component_probe_passed": 2,
+    "supplemental_copied_old_cases_filtered": 37,
+    "native_observation": "NOT_VERIFIED"
+  },
+  "CI": {
+    "sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "utc": "2026-10-14T16:32:32.546811+00:00",
+    "push_attempts": 1,
+    "remote_git_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "remote_rest_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "expected_job_names": [
+      "Dependency policy",
+      "Desktop UI (ubuntu-latest)",
+      "Desktop UI (windows-latest)",
+      "Generated output drift",
+      "Package Ubuntu",
+      "Package Windows",
+      "Package macOS",
+      "Rust (ubuntu-latest)",
+      "Rust (windows-latest)",
+      "macOS Core Smoke"
+    ],
+    "native_user_acceptance": "NOT_VERIFIED",
+    "public_release": "NOT_AUTHORIZED",
+    "state": "NEXT47_ENGINEERING_INTEGRATED_REMOTE_CI_PROVEN",
+    "run": {
+      "id": 38595778036,
+      "run_number": 113,
+      "run_attempt": 1,
+      "event": "push",
+      "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+      "head_branch": "main",
+      "path": ".github/workflows/p0-check.yml",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036",
+      "created_at": "2026-10-14T16:10:21Z",
+      "updated_at": "2026-10-14T16:27:46Z"
+    },
+    "all_jobs_success": true,
+    "all_checks_success": true,
+    "actual_deny_logs_verified": true,
+    "actual_baseline_logs_verified": true,
+    "jobs": [
+      {
+        "id": 115962008130,
+        "name": "Generated output drift",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:13:46Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008130"
+      },
+      {
+        "id": 115962008279,
+        "name": "Dependency policy",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:11:59Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008279"
+      },
+      {
+        "id": 115962008402,
+        "name": "Desktop UI (windows-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:11:54Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008402"
+      },
+      {
+        "id": 115962008461,
+        "name": "Package Windows",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:27Z",
+        "completed_at": "2026-10-14T16:27:25Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008461"
+      },
+      {
+        "id": 115962008471,
+        "name": "Rust (ubuntu-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:15:26Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008471"
+      },
+      {
+        "id": 115962008485,
+        "name": "macOS Core Smoke",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:40Z",
+        "completed_at": "2026-10-14T16:13:16Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008485"
+      },
+      {
+        "id": 115962008499,
+        "name": "Desktop UI (ubuntu-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:11:29Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008499"
+      },
+      {
+        "id": 115962008758,
+        "name": "Package macOS",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:33Z",
+        "completed_at": "2026-10-14T16:27:45Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008758"
+      },
+      {
+        "id": 115962008892,
+        "name": "Package Ubuntu",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:26Z",
+        "completed_at": "2026-10-14T16:20:37Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008892"
+      },
+      {
+        "id": 115962008972,
+        "name": "Rust (windows-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:29Z",
+        "completed_at": "2026-10-14T16:21:08Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008972"
+      }
+    ],
+    "checks": [
+      {
+        "id": 115962008972,
+        "name": "Rust (windows-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:29Z",
+        "completed_at": "2026-10-14T16:21:08Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008972"
+      },
+      {
+        "id": 115962008892,
+        "name": "Package Ubuntu",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:26Z",
+        "completed_at": "2026-10-14T16:20:37Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008892"
+      },
+      {
+        "id": 115962008758,
+        "name": "Package macOS",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:33Z",
+        "completed_at": "2026-10-14T16:27:45Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008758"
+      },
+      {
+        "id": 115962008499,
+        "name": "Desktop UI (ubuntu-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:11:29Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008499"
+      },
+      {
+        "id": 115962008485,
+        "name": "macOS Core Smoke",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:40Z",
+        "completed_at": "2026-10-14T16:13:16Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008485"
+      },
+      {
+        "id": 115962008471,
+        "name": "Rust (ubuntu-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:15:26Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008471"
+      },
+      {
+        "id": 115962008461,
+        "name": "Package Windows",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:27Z",
+        "completed_at": "2026-10-14T16:27:25Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008461"
+      },
+      {
+        "id": 115962008402,
+        "name": "Desktop UI (windows-latest)",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:11:54Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008402"
+      },
+      {
+        "id": 115962008279,
+        "name": "Dependency policy",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:11:59Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008279"
+      },
+      {
+        "id": 115962008130,
+        "name": "Generated output drift",
+        "head_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-14T16:10:25Z",
+        "completed_at": "2026-10-14T16:13:46Z",
+        "html_url": "https://github.com/2023violet/FirmwareSight/actions/runs/38595778036/job/115962008130"
+      }
+    ],
+    "deny_job_id": 115962008279,
+    "deny_log_sha256": "35b2e7090a887aceb742c42c513351c117ac8545d3c220c099c5823cdf5df723",
+    "baseline-drift_job_id": 115962008130,
+    "baseline-drift_log_sha256": "045fcd8053b1a4f745b8e68a538ed84bdcc64c97c15027dbe85862517a5c28f1",
+    "all_jobs_log_sha256": "7e5a1d92506b9b376dc0617909bacb00ee0358edad480952d40638d68d6dccad"
+  },
+  "independent_post_push_ci_artifact": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\POST_PUSH_CI_REVIEW.json",
+  "owner_protection": {
+    "utc": "2026-10-14T16:32:48.135263+00:00",
+    "head": "e34f9e69e515a330a3705470aeba6cfab073634d",
+    "raw_status": "M  .ai/ACTIVE_TASK.md\nM  .ai/CURRENT_STATE.md\nM  .ai/HANDOFF.md\nA  .ai/NOW.md\nM  .ai/README.md\nM  AGENTS.md\nM  DIRECTORY_TREE.txt\nM  README.md\nM  SHA256SUMS\n?? .playwright-mcp/console-2026-10-14T15-22-05-259Z.log\n",
+    "tracked_status": "M  .ai/ACTIVE_TASK.md\nM  .ai/CURRENT_STATE.md\nM  .ai/HANDOFF.md\nA  .ai/NOW.md\nM  .ai/README.md\nM  AGENTS.md\nM  DIRECTORY_TREE.txt\nM  README.md\nM  SHA256SUMS\n",
+    "staged_entries": "100644 8a2588c6e1e38e5e88aab9f839a19337a28399ad 0\t.ai/ACTIVE_TASK.md\n100644 86f53b572dedeb4cd93fb7dd50742c737aa88f82 0\t.ai/CURRENT_STATE.md\n100644 cbabdafb6451fba0f592adfbd8edc66c204e5b18 0\t.ai/HANDOFF.md\n100644 04c8a3c75fcdcb6be9a0b11f7c5d8a655f3d3ef3 0\t.ai/NOW.md\n100644 d97b1523d857db84bb8454cfb68e007699e1fe6f 0\t.ai/README.md\n100644 3a4dc2d776eafa2f8fed9dd16f97d0e77eb81bdb 0\tAGENTS.md\n100644 e02a2d279a3933025e74899e59b50f0bdf25c629 0\tDIRECTORY_TREE.txt\n100644 6a0e12260a752d19bb3ec335bf40719d6f280811 0\tREADME.md\n100644 5a58d0aa8fdac52b7b41cca6279fb422c36ebe25 0\tSHA256SUMS\n",
+    "staged_count": 9,
+    "patch_sha256": "05f86c0313040899dca1156f538186d686377906e1a62e755fcb029c1eb96d2b",
+    "patch_bytes": 19794,
+    "unstaged": "",
+    "untracked_files_disclosed_without_reading": ".playwright-mcp/console-2026-10-14T15-22-05-259Z.log\n",
+    "candidate_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "candidate_status": "",
+    "review_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "review_status": "",
+    "stashes": "",
+    "push_attempts": 1,
+    "protected_index_head_patch_matches_original": true,
+    "raw_status_default_options": "M  .ai/ACTIVE_TASK.md\nM  .ai/CURRENT_STATE.md\nM  .ai/HANDOFF.md\nA  .ai/NOW.md\nM  .ai/README.md\nM  AGENTS.md\nM  DIRECTORY_TREE.txt\nM  README.md\nM  SHA256SUMS\n?? .playwright-mcp/\n",
+    "raw_status_equal_to_N47_precheck": true,
+    "raw_status_recorded_above_options": "--porcelain=v1 -uall; default-options comparison separately recorded; untracked folder/file formatting differs, no contents accessed",
+    "historical_106_matrix_sha256": "14c242f1a3a17156c81c5653ab0acfb71aeb87af1a2d92cb397a45dfe351d898"
+  },
+  "push_attempt": {
+    "sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+    "argv": [
+      "git",
+      "push",
+      "--porcelain",
+      "origin",
+      "76b5c2c006f1ca0850af86da6d1e4b957227a025:refs/heads/main"
+    ],
+    "push_attempts": 1,
+    "started_utc": "2026-10-14T16:10:14.931306+00:00",
+    "returncode": 0,
+    "no_retry": true,
+    "finished_utc": "2026-10-14T16:10:18.419664+00:00",
+    "stdout_sha256": "5230a18e33c4501acdc1e7b6f1a64f57dc11719138681627f3c38ef55932607d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "compatibility": {
+    "GNU_ld": "Existing verified positive fixtures unchanged",
+    "Clang": "Four ARM/AArch64 LE/BE relocatable objects, basic metadata only",
+    "Keil_IAR_compiler_cohorts": "UNVERIFIED",
+    "ArmLink_IAR_MAP": "NOT_SUPPORTED / FIXTURE_BLOCKED"
+  },
+  "native_deferral_deadline": "Before first external Developer Preview distribution, Private Beta or RC",
+  "public_distribution_authorized": false,
+  "owner_production_data_accessed": false,
+  "native_app_or_VM_launched": false,
+  "FirmwareSight_tags_created": false,
+  "signing_or_public_release_performed": false,
+  "synthetic_Git_tag_scope": "Disposable synthetic test repos only; no FirmwareSight repo tag or public ref",
+  "measurement_and_artifact_corrections": "CALL_CORRECTIONS.md; reviewer/verification-events.md; reviewer/artifact-correction.md; pre-push abort saved, no push was invoked before final successful guard",
+  "generated_utc": "2026-10-14T16:34:52.506557+00:00"
+}

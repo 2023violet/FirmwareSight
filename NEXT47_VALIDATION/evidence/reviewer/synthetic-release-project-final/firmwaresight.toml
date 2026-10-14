@@ -1,0 +1,16 @@
+schema_version = 1
+[project]
+name = "next47-synthetic"
+[artifacts]
+required = ["elf", "map"]
+[memory]
+flash_budget = 512
+ram_budget = 256
+[version]
+source = "git_tag"
+pattern = '^v(?P<version>\d+\.\d+\.\d+)$'
+[release]
+require_clean_git = false
+require_release_notes = true
+release_notes_path = "RELEASE_NOTES.md"
+expected_version = "1.2.3"

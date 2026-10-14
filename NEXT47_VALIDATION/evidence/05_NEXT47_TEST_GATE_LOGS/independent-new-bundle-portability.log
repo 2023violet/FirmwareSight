@@ -1,0 +1,67 @@
+ok    SHA256SUMS lists neither itself nor the manifest (section 20)
+ok    SHA256SUMS describes accepted-reviews.json
+ok    SHA256SUMS describes analysis.json
+ok    SHA256SUMS describes artifacts/firmware.elf
+ok    SHA256SUMS describes artifacts/firmware.map
+ok    SHA256SUMS describes diff.json
+ok    SHA256SUMS describes gate-results.json
+ok    SHA256SUMS describes release-notes.md
+ok    SHA256SUMS describes release-report.html
+ok    the manifest does not hash itself (section 20)
+ok    the manifest covers SHA256SUMS, which the sums index cannot
+ok    release-manifest.json describes SHA256SUMS
+ok    release-manifest.json describes accepted-reviews.json
+ok    release-manifest.json describes analysis.json
+ok    release-manifest.json describes artifacts/firmware.elf
+ok    release-manifest.json describes artifacts/firmware.map
+ok    release-manifest.json describes diff.json
+ok    release-manifest.json describes gate-results.json
+ok    release-manifest.json describes release-notes.md
+ok    release-manifest.json describes release-report.html
+ok    the two indexes differ by the sums file alone, so neither hides a file from the other
+ok    analysis.json states which contract it was written under
+ok    analysis.json declares urn:firmwaresight:schema:analysis:1
+ok    diff.json states which contract it was written under
+ok    diff.json declares urn:firmwaresight:schema:diff:1
+ok    gate-results.json states which contract it was written under
+ok    accepted-reviews.json states which contract it was written under
+ok    release-manifest.json states which contract it was written under
+ok    analysis.json satisfies analysis.schema.json
+ok    diff.json satisfies diff.schema.json
+ok    gate-results.json satisfies gate-results.schema.json
+ok    accepted-reviews.json satisfies accepted-reviews.schema.json
+ok    release-manifest.json satisfies release-manifest.schema.json
+ok    release-report.html is a complete HTML document
+ok    release-report.html embeds its CSS
+ok    release-report.html reaches for nothing (<script absent)
+ok    release-report.html reaches for nothing (http:// absent)
+ok    release-report.html reaches for nothing (https:// absent)
+ok    release-report.html reaches for nothing (<link absent)
+ok    release-report.html reaches for nothing (@import absent)
+ok    release-report.html reaches for nothing (cdn. absent)
+ok    analysis.json names no path on this machine
+ok    diff.json names no path on this machine
+ok    gate-results.json names no path on this machine
+ok    accepted-reviews.json names no path on this machine
+ok    release-manifest.json names no path on this machine
+ok    release-report.html names no path on this machine
+ok    SHA256SUMS names no path on this machine
+ok    analysis.json carries no wall-clock value
+ok    diff.json carries no wall-clock value
+ok    gate-results.json carries no wall-clock value
+ok    release-manifest.json carries no wall-clock value
+ok    SHA256SUMS carries no wall-clock value
+ok    accepted-reviews.json's only dates are the moments its reviews were accepted
+ok    release-report.html prints no date beyond the acceptance record (none)
+----  what a reader can answer from the bundle alone
+ok    what release is this: release-e3b7d5c88b39095f23c8d057e8d257e09e40820598552fe4665e93e239d3bb23 version 1.2.3
+ok    what firmware artifact ships: artifacts/firmware.elf, artifacts/firmware.map
+ok    what are its hashes: 9 digests in the manifest, 8 in SHA256SUMS
+ok    what did analysis say: 19 sections, nonvolatile 376 B (exact)
+ok    what changed from baseline: 1 added, 1 removed, 16 changed
+ok    what did Gate say: 10 rules, overall PASS
+ok    which Reviews were accepted: 0 recorded
+ok    what were Release Notes: 51 bytes, shipped verbatim
+ok    how do I verify files: no file carries its own digest; SHA256SUMS hashes the payload, release-manifest.json hashes the payload plus SHA256SUMS
+
+64 of 64 checks passed

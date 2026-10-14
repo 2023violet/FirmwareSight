@@ -1,0 +1,12 @@
+{
+  "name": "independent-full-gate",
+  "argv": [
+    "C:\\Program Files\\Python313\\python.exe",
+    "scripts/check.py"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:27:57.664406+00:00",
+  "end_utc": "2026-10-14T15:43:48.901916+00:00",
+  "exit_code": 1,
+  "log_sha256": "0dbe9e4081c2241616eeed3c33790fbeef46f19d8d57ff8c3b996c834c8c3d3f"
+}

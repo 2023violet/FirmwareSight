@@ -1,0 +1,35 @@
+{
+  "event": "NEXT47_EXTERNAL_ARTIFACT_ENCODING_CORRECTION",
+  "historical_matrix_sha256": "14c242f1a3a17156c81c5653ab0acfb71aeb87af1a2d92cb397a45dfe351d898",
+  "immutable_source_contract": "FirmwareSight_NEXT_45_Visual_Report_Export_Scoped_License_Admission_Continuous_Completion_2026-10-14.txt",
+  "source_contract_sha256": "7f5b979614761bd9ea9ac1bd639f406d05d67f4a001be97307ef25333df1acae",
+  "source_line_number": 331,
+  "source_line_exact": "AC26  Reviewer independently checks both NEXT-44 AC01–AC40 and NEXT-45 AC01–AC30 on final SHA.",
+  "original_field_exact": "Reviewer independently checks both NEXT-44 AC01–AC40 and NEXT-45 AC01–AC30 on final SHA.",
+  "initial_field_exact": "Reviewer independently checks both NEXT-44 AC01鈥揂C40 and NEXT-45 AC01鈥揂C30 on final SHA.",
+  "original_nonascii_codepoints": [
+    "U+2013",
+    "U+2013"
+  ],
+  "initial_nonascii_codepoints": [
+    "U+9225",
+    "U+63C2",
+    "U+9225",
+    "U+63C2"
+  ],
+  "cause": "Historical UTF-8 JSON read using Windows default GBK; comparison repeated that wrong codec. Canonical fix is explicit strict UTF-8 for all inputs and outputs, never replacement/normalization.",
+  "initial_signature_disposition": "SUPERSEDED_UNAPPROVED",
+  "candidate_sha_unchanged": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "source_change": false,
+  "push_invoked": false,
+  "artifact_only_correction_full_gate_rerun_needed": false,
+  "initial_differences": [
+    {
+      "contract": "NEXT-45",
+      "id": "AC26",
+      "key": "requirement",
+      "original": "Reviewer independently checks both NEXT-44 AC01–AC40 and NEXT-45 AC01–AC30 on final SHA.",
+      "initial_enhanced": "Reviewer independently checks both NEXT-44 AC01鈥揂C40 and NEXT-45 AC01鈥揂C30 on final SHA."
+    }
+  ]
+}

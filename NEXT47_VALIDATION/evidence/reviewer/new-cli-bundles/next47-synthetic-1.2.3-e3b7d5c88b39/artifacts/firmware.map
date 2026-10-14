@@ -1,0 +1,132 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ROM              0x08000000         0x00100000         xr
+RAM              0x20000000         0x00040000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD build/common.o
+LOAD build/payload.o
+
+.text           0x08000000       0xd4
+ *(.text*)
+ .text          0x08000000       0x48 build/common.o
+                0x08000000                boot_check
+                0x08000010                main_entry
+ .text.startup  0x08000048        0xc build/common.o
+                0x08000048                main
+ .text          0x08000054       0x80 build/payload.o
+                0x08000054                calib_apply
+                0x08000056                mqtt_task
+                0x08000084                tls_handshake
+                0x08000094                packet_router
+                0x080000c0                payload_extra
+
+.glue_7         0x080000d4        0x0
+ .glue_7        0x080000d4        0x0 linker stubs
+
+.glue_7t        0x080000d4        0x0
+ .glue_7t       0x080000d4        0x0 linker stubs
+
+.vfp11_veneer   0x080000d4        0x0
+ .vfp11_veneer  0x080000d4        0x0 linker stubs
+
+.v4_bx          0x080000d4        0x0
+ .v4_bx         0x080000d4        0x0 linker stubs
+
+.iplt           0x080000d4        0x0
+ .iplt          0x080000d4        0x0 build/common.o
+
+.rodata         0x080000d4       0x20
+ *(.rodata*)
+ .rodata        0x080000d4       0x20 build/common.o
+                0x080000d4                cfg_table
+
+.settings       0x08010000       0x40
+ *(.settings*)
+ .settings      0x08010000       0x40 build/common.o
+                0x08010000                settings_page
+                0x08010040                        _sidata = LOADADDR (.data)
+
+.rel.dyn        0x08010040        0x0
+ .rel.iplt      0x08010040        0x0 build/common.o
+
+.data           0x20000000        0x4 load address 0x08010040
+ *(.data*)
+ .data          0x20000000        0x4 build/common.o
+                0x20000000                g_threshold
+ .data          0x20000004        0x0 build/payload.o
+
+.igot.plt       0x20000004        0x0 load address 0x08010044
+ .igot.plt      0x20000004        0x0 build/common.o
+
+.bss            0x20000004        0x8 load address 0x08010044
+ *(.bss*)
+ .bss           0x20000004        0x4 build/common.o
+                0x20000004                g_scratch
+ .bss           0x20000008        0x4 build/payload.o
+                0x20000008                g_frame_counter
+ *(COMMON)
+
+.ota            0x2000000c       0x40 load address 0x08010044
+ *(.ota_staging*)
+ .ota_staging   0x2000000c       0x40 build/payload.o
+                0x2000000c                staging_area
+OUTPUT(firmware.elf elf32-littlearm)
+LOAD linker stubs
+
+.debug_info     0x00000000      0x38e
+ .debug_info    0x00000000      0x1db build/common.o
+ .debug_info    0x000001db      0x1b3 build/payload.o
+
+.debug_abbrev   0x00000000      0x206
+ .debug_abbrev  0x00000000      0x10a build/common.o
+ .debug_abbrev  0x0000010a       0xfc build/payload.o
+
+.debug_loclists
+                0x00000000      0x19e
+ .debug_loclists
+                0x00000000       0x50 build/common.o
+ .debug_loclists
+                0x00000050      0x14e build/payload.o
+
+.debug_aranges  0x00000000       0x48
+ .debug_aranges
+                0x00000000       0x28 build/common.o
+ .debug_aranges
+                0x00000028       0x20 build/payload.o
+
+.debug_rnglists
+                0x00000000       0x19
+ .debug_rnglists
+                0x00000000       0x19 build/common.o
+
+.debug_line     0x00000000      0x1a5
+ .debug_line    0x00000000       0xbf build/common.o
+ .debug_line    0x000000bf       0xe6 build/payload.o
+
+.debug_str      0x00000000      0x185
+ .debug_str     0x00000000      0x185 build/common.o
+                                0x156 (size before relaxing)
+ .debug_str     0x00000185      0x143 build/payload.o
+
+.comment        0x00000000       0x46
+ .comment       0x00000000       0x46 build/common.o
+                                 0x47 (size before relaxing)
+ .comment       0x00000046       0x47 build/payload.o
+
+.ARM.attributes
+                0x00000000       0x2e
+ .ARM.attributes
+                0x00000000       0x2e build/common.o
+ .ARM.attributes
+                0x0000002e       0x2e build/payload.o
+
+.debug_frame    0x00000000       0xb4
+ .debug_frame   0x00000000       0x4c build/common.o
+ .debug_frame   0x0000004c       0x68 build/payload.o

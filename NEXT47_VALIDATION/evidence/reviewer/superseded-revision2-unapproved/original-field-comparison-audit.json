@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "decoder": "explicit strict UTF-8 for immutable original and serialized final JSON/TSV",
+  "rows_compared": 106,
+  "row_key_values_compared": 1378,
+  "original_top_level_keys_compared": [
+    "candidate_sha",
+    "parent_sha",
+    "verdict",
+    "push_decision",
+    "count",
+    "source_digests",
+    "counts",
+    "native_gap_ids",
+    "derived_failed_prerequisite",
+    "rows"
+  ],
+  "all_original_top_level_fields_preserved": true,
+  "all_original_row_key_values_preserved": true,
+  "serialized_JSON_checked": true,
+  "serialized_TSV_checked": true,
+  "normalization_or_replacement_used": false,
+  "immutable_original_sha256": "14c242f1a3a17156c81c5653ab0acfb71aeb87af1a2d92cb397a45dfe351d898",
+  "corrected_JSON_sha256": "b1c5d7df1dee12ed648cc2a4927d218baf760e0c8f1d39974f1d8190314673dc",
+  "corrected_TSV_sha256": "756b9aa1687e12c9f787fb9214449ebcf0557b95f19403966c1788a3bacfec5a",
+  "original_projection_sha256": "5c5f8369618b261177a1b8fc5c3f6dc19d0749c8da2d2cfb1c93b56ed17727f3",
+  "correction_record": "reviewer/artifact-correction.json",
+  "historical_files_unchanged": true
+}

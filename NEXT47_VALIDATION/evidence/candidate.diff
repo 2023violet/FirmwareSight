@@ -1,0 +1,1486 @@
+diff --git a/.ai/ACTIVE_TASK.md b/.ai/ACTIVE_TASK.md
+index bbf4d0a737596663b439cbf3150d6cf9d278c48b..8a64cd7ae82a8410cfa1bb65037a29f6678f5489 100644
+--- a/.ai/ACTIVE_TASK.md
++++ b/.ai/ACTIVE_TASK.md
+@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
+ 
+ # ACTIVE TASK
+ 
++> **Current pointer — 2026-10-14:** NEXT-46 is explicitly Owner-authorized in an isolated worktree at baseline `4ac1e4f709396fac7a37a1d92b8095a070b3effa`. Read [NOW.md](NOW.md) and [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md) for current evidence boundaries. Earlier pointers below retain their dated historical meaning. Final candidate acceptance requires fresh independent exact-SHA review; no unconditional push permission is implied.
++
+ > **Current pointer — 2026-10-13:** DOC-1 Wave 1A is being integrated under NEXT-34 in a dedicated worktree based on the security-fixed remote baseline `515a55a1e8c9a4d2b672dbf63b440cab296096a0`. Read Git for the local candidate state; this work is not pushed or independently accepted. NEXT-35 independent review is required. Active product implementation task: `NONE`. [NOW.md](NOW.md) is authoritative for current project status. The large fenced timeline below is preserved historical text; its old `LIVE POINTER` wording is not current.
+ 
+ ```text
+diff --git a/.ai/CURRENT_STATE.md b/.ai/CURRENT_STATE.md
+index 86f53b572dedeb4cd93fb7dd50742c737aa88f82..0f343227299570e90fae5525687a0210c54e8a88 100644
+--- a/.ai/CURRENT_STATE.md
++++ b/.ai/CURRENT_STATE.md
+@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
+ 
+ # Current State
+ 
++> **Current pointer — 2026-10-14:** NEXT-46 is explicitly Owner-authorized in an isolated worktree at baseline `4ac1e4f709396fac7a37a1d92b8095a070b3effa`. Read [NOW.md](NOW.md) and [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md) for current evidence boundaries. Earlier pointers below retain their dated historical meaning. Final candidate acceptance requires fresh independent exact-SHA review; no unconditional push permission is implied.
++
+ > **Current pointer — 2026-10-13:** [NOW.md](NOW.md) is the concise, evidence-labelled status index and supersedes stale “live” wording below for current status only. Dated entries are preserved as historical records; their `OPEN` or `NOT_AUTHORIZED` statements describe what was known at the time and are not retroactively changed. `BASELINE.yaml` remains the baseline ledger and its `active_task: NONE` value is not changed by this documentation task.
+ 
+ - Date: 2026-10-12 *(the live state is the `B2_U1R2` entry below, which closes the `NEXT-12 v1.1` round it follows; the
+diff --git a/.ai/EVIDENCE_LEDGER.md b/.ai/EVIDENCE_LEDGER.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..dc7516f6534c289ef365e2bb144cb87697ec94c7
+--- /dev/null
++++ b/.ai/EVIDENCE_LEDGER.md
+@@ -0,0 +1,35 @@
++# Concise evidence ledger — NEXT-36..46, observed 2026-10-14
++
++Provenance: Git objects, live remote main/Actions, physically present original prompt bytes, and Owner's NEXT-46 dispatch. Code and CI are not independent architectural acceptance. No historical reviewer words or commit messages are rewritten. An unavailable source/report remains unavailable; the table does not infer a closed verdict from a filename or green CI.
++
++| Iteration | Task / exact code SHA | Acceptance / evidence boundary |
++|---|---|---|
++| 36 | DOC-1 Wave 1A, `4b8df070dde19b586fedc177c5640fdbb44779a2` | [Code integrated remotely](https://github.com/2023violet/FirmwareSight/commit/4b8df070dde19b586fedc177c5640fdbb44779a2); independent historic verdict not re-adjudicated here |
++| 37 | V1 private preservation | Original prompt present; execution and private archive deliberately NOT_ASSESSED |
++| 38 | Isolated installed Windows QA | Prompt present; original NEXT-25 environment limitation remains. No installed/runtime PASS inferred |
++| 39 | Source prompt not physically found | UNKNOWN; no fabricated task, SHA or verdict |
++| 40–41 | Project readiness, `3706cf0b29e3009b54894ddce6a06068c5f51973` | [Code](https://github.com/2023violet/FirmwareSight/commit/3706cf0b29e3009b54894ddce6a06068c5f51973), followed by privacy rework; original independent disposition not replaced |
++| 42 | Privacy rework through `5eb0a2977324c891748898b4e02586a1a8da49de` | [Code lineage](https://github.com/2023violet/FirmwareSight/commit/5eb0a2977324c891748898b4e02586a1a8da49de); historic acceptance not re-issued |
++| 43 | Bounded intake/workload, `f2fcabe1393cbb74f308ddf4ccd0fc4b8931f54e` | [Actions #111](https://github.com/2023violet/FirmwareSight/actions/runs/38507903050), remote CI success; two 100K tests are opt-in, not added to default totals |
++| 44–45 | Visual export, `4ac1e4f709396fac7a37a1d92b8095a070b3effa` | [Actions #112](https://github.com/2023violet/FirmwareSight/actions/runs/38535378887), 10 jobs success. Owner: ENGINEERING_DELIVERED / REMOTE_CI_PROVEN / REVIEW_EXCEPTIONS_OPEN. Prior ACCEPT_WITH_LIMITS and conditional-push nonconformance retained |
++| 46 | Export privacy/SVG + ELF/MAP foundation, descendant of exact `4ac1e4f709396fac7a37a1d92b8095a070b3effa` | Isolated LOCAL candidate; final exact SHA, 106-item independent matrix and verdict are external delivery records. New CI NOT_RUN until permitted push. Native dialogue/runtime gaps may bar push |
++
++Original prompt SHA-256, measured from bytes (prompt availability does not grant authority):
++
++| NEXT | SHA-256 |
++|---|---|
++| 36 | `14d308ff417bf388641738e6510e4f65bc6cf79ed68a3ac3ace2309d1a7a8418` |
++| 37 | `9838f142c9ca56bfa9f7a2300e89dac0d4b00fb24c2ed12db4c92ece8ff9ecc8` |
++| 38 | `2c647e80647829413cd76305c5a9573f5f1d7edc9a325c8b92946ac4604b3e86` |
++| 39 | NOT_FOUND |
++| 40 | `a435ecaa88081bd75557820ce0871b1161a00e625c31fbffcaa2dbb50901c77a` |
++| 41 | `c5d62893f56e3b6125c3997141f57330d750d8ed19d06221541a9ffda732a5ca` |
++| 42 | `1fc91db1f28e75a8348011f2ddb9b561e1c9d6491af7a10e70a19c60f1463c8d` |
++| 43 | `ed5c2863f5f8a49f2ab84f21076028a6819a79daeacfe755847564c4b895212f` |
++| 44 | `4b651a2f2487f3b7b1b7c64c9abf69b1962a953bcb27fe1afd6d895ca769a1fd` |
++| 45 | `7f5b979614761bd9ea9ac1bd639f406d05d67f4a001be97307ef25333df1acae` |
++| 46 | `0280db1a8ebe3a739c92615a260a07146a67f0ee8aec9830613f76190996d9fa` |
++
++NEXT-45 count addendum: one complete Windows `cargo test --workspace` invocation returned **1,154 pass / 0 fail / 2 ignored / 54 result lines**. The committed 1,448/68 claim included overlapping runs; it remains historical text, not the current total. Actual NEXT-46 counts are recorded from one fresh final workspace invocation, separately from IPC drift/Core smoke reruns.
++
++Existing historical executor/reviewer test, license-negative-control and print files were located externally. A submitted NEXT-45 final reviewer report/matrix artifact was not physically recovered during scoped search; only its Owner-declared verdict is recorded. All 40 NEXT-44 and 30 NEXT-45 authoritative AC are physically available and must be checked independently on the new final SHA. No missing report is reconstructed as an invented acceptance.
+diff --git a/.ai/NOW.md b/.ai/NOW.md
+index 69ac8ed62743b6d03773927b04c9f28999f4dffd..0304593a64f781344c9af505bd7a5167cda80d9f 100644
+--- a/.ai/NOW.md
++++ b/.ai/NOW.md
+@@ -5,11 +5,23 @@ product: "FirmwareSight"
+ version: "0.6.0"
+ status: "CURRENT_INDEX"
+ owner: "Engineering"
+-last_updated: "2026-10-13"
++last_updated: "2026-10-14"
+ ---
+ 
+ # FirmwareSight Now
+ 
++## Current pointer — 2026-10-14 / NEXT-46
++
++- **Observed remote baseline:** `4ac1e4f709396fac7a37a1d92b8095a070b3effa`, re-read from GitHub and `ls-remote`. [Actions #112](https://github.com/2023violet/FirmwareSight/actions/runs/38535378887) has all 10 Jobs successful on that SHA. Remote evidence proves engineering CI, not native Save-dialog or installed desktop acceptance.
++- **Owner adjudication:** `NEXT45 = ENGINEERING_DELIVERED / REMOTE_CI_PROVEN / REVIEW_EXCEPTIONS_OPEN`. The earlier reviewer `ACCEPT_WITH_LIMITS` and prior conditional-push nonconformance remain historical audit facts. Correct nonduplicated Windows NEXT-45 workspace count: 1,154 passed / 0 failed / 2 opt-in ignored / 54 result lines; the old commit message is not amended.
++- **Active authorized task:** NEXT-46 export output-boundary closure, SVG geometry regression, authoritative NEXT-44/45 acceptance read-back and evidence-based ELF/MAP interoperability foundation. Explicit Owner dispatch authorizes isolated local implementation and conditional single FF push only after fresh independent exact-SHA full mandatory acceptance. Candidate status and verdict are external delivery evidence; this navigation page grants no acceptance.
++- **Code baseline additions since the older snapshot:** DOC-1 navigation integration, project readiness + privacy hardening, bounded intake/100K regression and PNG/SVG/print HTML report export. [Concise evidence ledger](EVIDENCE_LEDGER.md) separates code, CI, Owner verdict and unknown historical evidence.
++- **Compatibility boundary:** [ELF interoperability matrix](../04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md). Keil/IAR compiler cohorts remain UNVERIFIED; ArmLink/IAR MAP remain NOT_SUPPORTED / FIXTURE_BLOCKED. New Clang class/endian fixtures prove basic metadata only.
++- **Protected state:** Original main remains at `e34f9e6` with the same nine staged files; it is intentionally older than remote. No reconciliation or push from that tree is authorized. Owner appdata, private firmware and V1 archives are outside this batch.
++- **Unchanged product limits:** Native dialog/keyboard/theme runtime evidence remains NOT_VERIFIED unless independently measured. V1 external sessions remain unclaimed; product license stays Proprietary. No public release, signing, updater or native PDF claim.
++
++## Historical navigation snapshot — 2026-10-13 (preserved)
++
+ As of 2026-10-13. This is the current status index. Older records retain the status known when written; this page does not rewrite history.
+ 
+ ## Baseline
+diff --git a/.ai/README.md b/.ai/README.md
+index d97b1523d857db84bb8454cfb68e007699e1fe6f..5c403fd0890eb3dec1288848e68a08f104fb098c 100644
+--- a/.ai/README.md
++++ b/.ai/README.md
+@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
+ 
+ # AI Entry Point
+ 
++> **Current pointer — 2026-10-14:** NEXT-46 is explicitly Owner-authorized in an isolated worktree at baseline `4ac1e4f709396fac7a37a1d92b8095a070b3effa`. Read [NOW.md](NOW.md) and [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md) for current evidence boundaries. Earlier pointers below retain their dated historical meaning. Final candidate acceptance requires fresh independent exact-SHA review; no unconditional push permission is implied.
++
+ > **Current status first:** read [NOW.md](NOW.md). For current status and evidence boundaries it supersedes stale “live” wording in this accumulated historical entry; it does not rewrite dated decisions or grant task authority. Then read [ACTIVE_TASK.md](ACTIVE_TASK.md), [CURRENT_STATE.md](CURRENT_STATE.md), [DECISIONS.md](DECISIONS.md), and the relevant current ADR/spec. The remainder of this file is a dated handoff record.
+ 
+ Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctness closure ·
+diff --git a/04_TECH/03_FORMAT_SUPPORT.md b/04_TECH/03_FORMAT_SUPPORT.md
+index 0f30d29bd521b2f24729311fa3b1b29641f54cc5..29303771517ca6502c3fa2f7e5360b72613b82c7 100644
+--- a/04_TECH/03_FORMAT_SUPPORT.md
++++ b/04_TECH/03_FORMAT_SUPPORT.md
+@@ -10,6 +10,8 @@ last_updated: "2026-10-09"
+ 
+ # Format Support Strategy
+ 
++> **Current evidence pointer — 2026-10-14 / NEXT-46:** [ELF interoperability foundation](39_ELF_TOOLCHAIN_INTEROPERABILITY.md) separates container recognition, parsed metadata, memory accounting, verified compiler cohorts and MAP support. ELF32/64 and both byte orders have Clang metadata fixtures; Keil/IAR cohorts remain UNVERIFIED and ArmLink/IAR MAP remain NOT_SUPPORTED / FIXTURE_BLOCKED. The older roadmap table below is retained as dated intent, not a current support claim.
++
+ ## Principle
+ 
+ “能打开”不等于“支持”。
+diff --git a/04_TECH/38_VISUAL_REPORT_EXPORT.md b/04_TECH/38_VISUAL_REPORT_EXPORT.md
+index 178c6a8ea434a466e4ea59585ad71df2406fc37a..45816980ed805eca367c448a3e21625d1834f68e 100644
+--- a/04_TECH/38_VISUAL_REPORT_EXPORT.md
++++ b/04_TECH/38_VISUAL_REPORT_EXPORT.md
+@@ -31,3 +31,13 @@ Labels are bounded and projected for display, never written back to source confi
+ SVG and HTML contain static markup with no scripts, network references, external fonts or user CSS. PNG rasterizes that SVG offline through resvg 0.48.1 with text/system-font support only. Fonts are read locally and not redistributed. Identical inputs in the same font environment produce identical bytes; PNG font fallback and hashes can differ between hosts. A missing font environment causes an explicit error rather than a substituted preview. HTML/PDF appearance depends on browser pagination and installed fonts.
+ 
+ See [third-party renderer notices](../07_COMPLIANCE/THIRD_PARTY_VISUAL_REPORT_NOTICES.md) for the exact arrayref 0.3.9 license admission and redistribution duties. Public distribution, FirmwareSight licensing, signing and installed desktop QA are separate decisions.
++
++## NEXT-46 boundary addendum — 2026-10-14
++
++CLI visual and legacy detailed HTML export failures use a shared output boundary: exit 6, `ERR-EXPORT-6001`, operation ID and recovery advice remain inspectable; destination names and raw OS errors are not emitted. Only FirmwareSight's typed operation tracing reaches CLI stderr, so dependency font-path diagnostics cannot bypass the boundary even under `RUST_LOG=trace`. A visual destination is never replaced implicitly; the legacy `diff --html` replacement behavior is unchanged.
++
++Rounded-zero decorative region/ranking bars are omitted. Exact positive integer bytes remain in the row/table; no 1-pixel minimum or fabricated percentage is introduced. Independent PNG decode, SVG XML checks and browser A4 samples are separate evidence from native desktop Save-dialog interaction. Native dialog/keyboard/theme runtime acceptance remains NOT_VERIFIED unless independently observed; code and DOM tests do not establish it.
++
++Late export outcomes are scoped to the displayed analysis selection/snapshot, comparison handle or Gate run/snapshot. Changing that subject clears the old export state; an older asynchronous response cannot report success or error under the new subject. Dedicated delayed-response UI regressions cover all three surfaces. Existing native-side source/destination rechecks remain unchanged.
++
++NEXT-45's dated engineering/CI record remains intact. Its corrected Windows nonduplicated `cargo test --workspace` total is 1,154 passed, 0 failed, 2 opt-in ignored tests, 54 result lines. The historical commit message's 1,448/68 totals counted overlapping runs and are not amended. Owner's NEXT-46 adjudication is `ENGINEERING_DELIVERED / REMOTE_CI_PROVEN / REVIEW_EXCEPTIONS_OPEN`; the earlier push with reviewer `ACCEPT_WITH_LIMITS` is retained as a conditional-push governance nonconformance. New candidate acceptance and push require the fresh exact-SHA independent matrix.
+diff --git a/04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md b/04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..288d56923a23ad9a95f31add14f64a95f297fa88
+--- /dev/null
++++ b/04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md
+@@ -0,0 +1,46 @@
++# ELF interoperability foundation — NEXT-46, 2026-10-14
++
++This matrix describes measured format evidence, not a vendor endorsement. A filename ending in `.axf` or `.out` does not establish its container, compiler or linker. Analyze accepts ELF magic/class/endianness; an explicitly supplied unsupported MAP fails with `ERR-MAP-3001`. Remove that MAP to analyze compatible ELF alone. It is never silently ignored.
++
++## Evidence levels
++
++| Level | Meaning | Current evidence |
++|---|---|---|
++| RECOGNIZED_CONTAINER | Magic, ELF class and byte order accepted by bounded intake | ELF32/ELF64, little/big endian |
++| PARSED_BASIC_METADATA | `object` parses headers, entry, sections, file offsets/payload, symbols and build-id where present | Four Clang relocatable fixtures in `fixtures/elf/interop-clang`, plus existing linked ARM fixtures |
++| VERIFIED_MEMORY_ACCOUNTING | Existing Core model tested against explicit supported placement evidence | Existing ARM GCC/GNU ld and Clang/GNU ld cohorts; new relocatable fixtures do **not** establish executable accounting |
++| VERIFIED_COMPILER_COHORT | Actual toolchain output, recipe/provenance and independent inspection | GCC + GNU ld; Clang + GNU ld. Keil/armlink and IAR/ILINK: **UNVERIFIED** |
++| LINKER_MAP_SUPPORTED | Dedicated grammar supplies required fields with independently validated fixtures | GNU ld only. ArmLink and IAR ILINK: **NOT_SUPPORTED / FIXTURE_BLOCKED** |
++
++## Parser facts and limits
++
++| Fact | Measured behavior | Boundary |
++|---|---|---|
++| ELF class / byte order | Clang 22.1.8 produced ARM32 LE/BE and AArch64 LE/BE relocatable objects; `llvm-readobj` and raw header checks agree with parser | These are genuine Clang objects, not renamed vendor output |
++| Architecture | ARM, AArch64, x86-64 and MIPS map to existing identity variants; other architectures retain `Other` | This round verifies ARM/AArch64 class and endian combinations; other mappings are code presence, not new cohort verification |
++| Sections | Name, role, alloc/write/execute flags, VMA, file offset, file size, memory size | A section header has no LMA; absent load address stays Unknown |
++| Symbols | Present tables supply name, address, size, kind, binding and section reference | Missing/stripped symbols degrade capability; source/module attribution is not inferred from names |
++| Debug | Known debug-section names produce presence/availability metadata | No DWARF unit/source/type decoder is implemented by `elf.rs`; presence is not decoded attribution |
++| RAM initialization | Supported GNU MAP supplies explicit load address; Core keeps nonvolatile bytes and runtime bytes separate | ELF-only address/flags basis is qualified. No target region capacity, allocator headroom or stack/heap guarantee is invented |
++| Relocatable objects | Basic metadata parses; the new fixture `.data` is 4 stored bytes and `.bss` is 4 memory bytes / 0 stored bytes | Address-zero objects have no linked deployment layout and no vendor/executable utilization claim |
++| Loading | Stat/size guard then bounded same-handle buffer and hash | Default 512 MiB ceiling; bad encoding, oversized, malformed and truncated inputs are tested |
++
++Recipe: `python scripts/gen_interop_fixtures.py <new-fixture-directory> <new-external-evidence-directory>`. The committed provenance records compiler identity, relative commands, bytes and SHA-256. Independent readout logs remain outside Git in the delivery evidence. Tests need no installed toolchain; regeneration requires existing Clang and llvm-readobj. The generator refuses to replace either existing directory.
++
++## MAP admission design and refusal harness
++
++The existing GNU adapter remains the only parser. Detection returns the existing typed `MapUnsupported` error for foreign banners **before** evaluating GNU markers, including mixed/concatenated text and long preambles. Supported GNU positives and frozen fixtures remain unchanged. Detection/refusal is not an ArmLink or IAR parser.
++
++Required normalization facts are memory-region origin and capacity, output-section VMA/size, explicit LMA where provable, and optional object/symbol attribution. A future adapter must validate each field against an independent companion ELF or vendor inspection result. Missing fields must preserve Unknown. No public schema, domain vocabulary or memory-accounting semantic change is authorized here.
++
++| Grammar | Independent semantics | Adapter prerequisite / decision |
++|---|---|---|
++| GNU ld | `Memory Configuration`, column-zero output section, optional `load address`, input-object contributions | Existing `map.rs` retained; positive fixtures/regressions remain authoritative |
++| Arm armlink | Scatter load region contains execution regions; load and execution addresses can differ; compressed initialization prevents equating execution byte size with stored payload | Separate future grammar; pair genuine full MAP + ELF with independent load/execute inspection. **FIXTURE_BLOCKED**, no parser enabled |
++| IAR ILINK | `.icf` placement directives, sections/blocks, initialization table and potentially compressed/shared data | Separate future grammar; pair genuine full MAP + ELF, distinguish initializer ranges from runtime ranges. **FIXTURE_BLOCKED**, no parser enabled |
++
++Primary semantic references: [Arm load/execution region explanation](https://developer.arm.com/community/arm-community-blogs/b/tools-software-ides-blog/posts/building-an-elf-image-for-an-armv8-fixed-virtual-platform-2065554406), [IAR ILINK overview](https://docs.iar.com/ewarm/9.7x/en/iar-c-c---development/linking-using-ilink/linker-overview.html), [IAR MAP option](https://docs.iar.com/ewarm/10.1x/en/iar-c-c---development/linker-options/descriptions-of-linker-options/--map.html). These guide design; they do not replace fixture proof.
++
++Public downstream examples were inspected at [ARMmbed/mbed-os tools/test/memap](https://github.com/ARMmbed/mbed-os/tree/d723bf9e55415433e108124ee6d36337feddf1b8/tools/test/memap), pinned commit `d723bf9e55415433e108124ee6d36337feddf1b8`. They have vendor-style banners but generic substituted paths, abbreviated content and no matching ELF/build recipe proving this cohort. `arm.map` contains compressed load data without a complete RAM execution region; `iar.map` has an incomplete `0x` group total and empty initialization table. These are downstream parser test examples, **not independently validated vendor-generated cohorts**. The project's Apache license was inspected; their exact research copies and hashes remain outside Git, with no redistribution or product-license change. No adequate paired vendor fixture was obtained.
++
++Tests: `crates/firmwaresight-artifact/tests/toolchain_interop.rs` proves metadata, foreign-banner isolation, filename independence, explicit-MAP refusal, ELF-only recovery, UTF-16/invalid bytes, Unicode filenames, long headers, truncation and size guards. `apps/cli/tests/export_privacy.rs` proves actionable refusal on both output modes. Future adapter admission still requires credible samples and any necessary architecture decision; schematic test success cannot promote either vendor row.
+diff --git a/DIRECTORY_TREE.txt b/DIRECTORY_TREE.txt
+index ec7c7b980bc54d7c45be401d3bce50939c817c8f..622d14507726e2860be035388a0554db3f31ff7e 100644
+--- a/DIRECTORY_TREE.txt
++++ b/DIRECTORY_TREE.txt
+@@ -3,6 +3,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
+ │   ├── ACTIVE_TASK.md
+ │   ├── CURRENT_STATE.md
+ │   ├── DECISIONS.md
++│   ├── EVIDENCE_LEDGER.md
+ │   ├── HANDOFF.md
+ │   ├── NOW.md
+ │   └── README.md
+@@ -74,7 +75,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
+ │   ├── 26_PORTABLE_SCHEMA_POLICY.md
+ │   ├── 27_GATE_STATE_SEMANTICS.md
+ │   ├── 28_RELEASE_ATTACHED_BYTE_EVIDENCE.md
+-│   └── 38_VISUAL_REPORT_EXPORT.md
++│   ├── 38_VISUAL_REPORT_EXPORT.md
++│   └── 39_ELF_TOOLCHAIN_INTEROPERABILITY.md
+ ├── 05_ENGINEERING/
+ │   ├── 00_REPO_STRUCTURE.md
+ │   ├── 01_CODING_STANDARDS.md
+@@ -257,6 +259,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
+ │   │   │   └── main.rs
+ │   │   ├── tests/
+ │   │   │   ├── diff_cli.rs
++│   │   │   ├── export_privacy.rs
+ │   │   │   ├── gate_cli.rs
+ │   │   │   ├── golden.rs
+ │   │   │   ├── p2_golden.rs
+@@ -553,7 +556,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
+ │   │   │   ├── map_companion_identity.rs
+ │   │   │   ├── p0_acceptance.rs
+ │   │   │   ├── p2_fixture_pair.rs
+-│   │   │   └── p5_compat_fixtures.rs
++│   │   │   ├── p5_compat_fixtures.rs
++│   │   │   └── toolchain_interop.rs
+ │   │   └── Cargo.toml
+ │   ├── firmwaresight-core/
+ │   │   ├── src/
+@@ -667,6 +671,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
+ │   └── tauri-capability.baseline.json
+ ├── fixtures/
+ │   ├── elf/
++│   │   ├── interop-clang/
++│   │   │   ├── aarch64-none-elf.o
++│   │   │   ├── aarch64_be-none-elf.o
++│   │   │   ├── armeb-none-eabi.o
++│   │   │   ├── armv7-none-eabi.o
++│   │   │   ├── fixture.c
++│   │   │   ├── provenance.json
++│   │   │   └── README.md
+ │   │   ├── p0-basic/
+ │   │   │   ├── source/
+ │   │   │   │   └── main.c
+@@ -875,6 +887,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
+ │   │   └── test_verify_bundle_portability.py
+ │   ├── check.py
+ │   ├── gen_desktop_icons.py
++│   ├── gen_interop_fixtures.py
+ │   ├── gen_p0_fixtures.py
+ │   ├── gen_p0_workload.py
+ │   ├── gen_p2_fixtures.py
+diff --git a/SHA256SUMS b/SHA256SUMS
+index b5db965c066fb45905e8072620b84874a761ba90..6c82ac10331c9c3bd4ab90005a27815536beb9b0 100644
+--- a/SHA256SUMS
++++ b/SHA256SUMS
+@@ -1,9 +1,10 @@
+-d5a2db8149cc4cbc6feee2e3f72a1ffd66b804278cbf4d30d306b647c63985c9  .ai/ACTIVE_TASK.md
+-eda882bbfc059db0269bebcedd9b709d359534fe22a44fff1e368186a3bb9298  .ai/CURRENT_STATE.md
++216f27f21807c65d555d157eaf0fb0f122c1d79b96c3f2e3d2906ebcd6e3a383  .ai/ACTIVE_TASK.md
++b3ad9a37c332fbafb9653d6f239a147f403f05a0b65cc7ab1340e31fb7f2cebd  .ai/CURRENT_STATE.md
+ 6ead1d0110f1b97c7fbf12fa0a51cc8f5b1d58861d852e64a42d1789c7378b8c  .ai/DECISIONS.md
++daed0a1d0314d14d001607f07edd4584c350c1246b0c09234d84738ad7c7a3ff  .ai/EVIDENCE_LEDGER.md
+ da6e39e27595850990af4ac0fd50d67ba9dd448125c525b1c3502029b1dd27d8  .ai/HANDOFF.md
+-53deabbccadd0574e3d0b23d4664baa35eb0c1d8abcb2f908a5bd5d324ff28ea  .ai/NOW.md
+-41bbe487c0e51d1c04e3ff19c78764df5180e8235038765cdc3c3881bdf79cbe  .ai/README.md
++0f0382d4ca0480ac959d152af0de224cf5d8f12ce00755fec387f53d1ecd3ceb  .ai/NOW.md
++15f306ef6c003211d666a7c002dd0a345e89db2f2374b9eb9b260203e603b94e  .ai/README.md
+ dbe7350a322cbcf5a3319951eb18a5b632b02edf8a90cffe1c3d57d0af5a11be  .cargo/config.toml
+ ca76aed5d4cf0d7019cfd8f191d82d0361e4ae823ef83d9b3eea6bffb8ceed75  .gitattributes
+ f624affce42c97fc5020ef035cd392a735565329605a863c914b43a24394fc87  .github/actions/linux-tauri-prereqs/action.yml
+@@ -38,7 +39,7 @@ d3726cb8866eef6d1478e973635105bc6a1c50e2696b63fb11b5774b13b80994  03_DESIGN/08_P
+ 164bdd371bca3a4bd09a155f0eec5582ea772f7c5ced66914ecaacc9535fd12d  04_TECH/00_TECH_STACK.md
+ e9ea82795368a0aa91ca4a64e25dc759acb0e3b27638fbb2690dad09d3c75146  04_TECH/01_SYSTEM_ARCHITECTURE.md
+ f4bafaebc662e6a3ae8f0f182300198610ed5652f9a3b31c28026b4841f445ac  04_TECH/02_DOMAIN_MODEL.md
+-fab519e508041e0f234506f628b4c3fce21aa3d92eb4f4c67471201db9d037c6  04_TECH/03_FORMAT_SUPPORT.md
++f1f4c48aee53f9c368f70f866c31d6740c0911abd31e718e893ddc35754d328b  04_TECH/03_FORMAT_SUPPORT.md
+ d709c9c3b79a7fdd5c14570cb5f0bce47180b8a64e2277dda6fb5d7774718a3f  04_TECH/04_STORAGE_WORKSPACE.md
+ 7843b796491f0b4c0df731dbd99dbb60417900d17c48a4ea2ef88e8305660d8d  04_TECH/05_SECURITY_PRIVACY.md
+ dd6edd2b37b5de7906d24654e98e7a1270135a38d6ca882f6fa1743fd01760bd  04_TECH/06_PERFORMANCE_BUDGETS.md
+@@ -64,7 +65,8 @@ a7e0b9bb619b7915e355a98893b58b204a99cb282002c120646e8e4272873125  04_TECH/25_TYP
+ 08b4596a4ad0f4e2367cb683c01f73c8a40aaf3791cdb36fc8a2ccf0c53a4295  04_TECH/26_PORTABLE_SCHEMA_POLICY.md
+ 1a623aebf4168b5f4386138eec5760e05ef057cee357f39cc7030f0642c08bf2  04_TECH/27_GATE_STATE_SEMANTICS.md
+ da185b1db232314df8237252c31995012d209b5c5cacdb49e4c1d292ce0c655a  04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md
+-760188411f81e88dd5c964e7d9551af7a0fe4c3cb9fb536a308727f77bbb4475  04_TECH/38_VISUAL_REPORT_EXPORT.md
++e526cb03a87ced92064a5345472d2d32073a47a76abe255b4deb246c381e7167  04_TECH/38_VISUAL_REPORT_EXPORT.md
++8a2b145a585ff667f3f9c81033e8adc0d936bd56be8f2ab5ba74759b2aab8494  04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md
+ 740add29238c7630e9f563e1896be647093fe18ed32f0b795c25c7fb9afb15ff  05_ENGINEERING/00_REPO_STRUCTURE.md
+ 789a5f7ba76ff5c4eabda0d53d4f15ffcad000b91b3dd666fc7f13e2f4d47bb7  05_ENGINEERING/01_CODING_STANDARDS.md
+ f83ecb3abb8fded54d9552e241bbf7f6d9598b36debf0aad8060572d29f602dd  05_ENGINEERING/02_TEST_STRATEGY.md
+@@ -252,7 +254,7 @@ dfd7df3f054bfcbf6712ce11574e62191ab9a26122fd705f0b23ee4ee96c5509  C1_VALIDATION/
+ 7e37aa19ada4eadc290457f9dc116eefb7a0688d29bebad059c02e0d02dcbba7  Cargo.lock
+ baa8a4d8ab1cb77c592af1621676d865eab3bf8f20f439f49450ad80f25bbbbd  Cargo.toml
+ 98aac4a54f4a028efb4199c974ca6c4be8daa122f666b96336a3cc317609ffe5  DESIGN.md
+-a33d6ff3e0dcbcf9a2749101f8e3fa5b8539d5ca2143876c1bb780dd24753263  DIRECTORY_TREE.txt
++ef13e6669508ad39ff467b61b2db5484eb957344d9cee37a5da83c6f9d393a91  DIRECTORY_TREE.txt
+ 431b2b552210437385ab38b0e331a58f57995491ab715bb019a8f7d24cdc3c82  G2_VALIDATION/G2_END_TO_END_SMOKE_REPORT.md
+ 6944fa7f597f023a51a9b49fc1326ef9b28287062acd0a09219e9dd069571ff9  G2_VALIDATION/G2_ENGINEERING_CLOSURE_REPORT.md
+ 0543e0f72c069900a72057d21cbbca60d9a5193ffbf00ad92c1dcfbd16d1932a  G2_VALIDATION/G2_EVIDENCE_MATRIX.md
+@@ -425,8 +427,9 @@ d4a4fd93dbad443304dbb010b40a092636545735a1e8d59cdb527bb18c930fc6  V1_VALIDATION/
+ 86743b6de647eb7dc217680b0d454004f21dde2f5a882f9bd217d69177e66f03  V1_VALIDATION/sessions/README.md
+ 859e3cd467155cc446d96ad9fa9be6d2269e02ae50a453b73430865990267338  V1_VALIDATION/sessions/TEMPLATE.md
+ 39030df01de8f6366a55641c2f9da157963163146ee418dea7b1e29bb06aba0a  apps/cli/Cargo.toml
+-23cdb19a0ee1befe9d989ab30a4b7ec77b9384b0760d8b1033f5bf76ed0ef993  apps/cli/src/main.rs
++0809d0c79be0f3c6651f0c663789bf1f3cbe4706bfd2e2ddf8d85d74c4c9f77b  apps/cli/src/main.rs
+ 81a1759b1c2921ec2b3256e22b12d9123887ebaa4ab9ded0359ab0414e6b484b  apps/cli/tests/diff_cli.rs
++0b720bf871824afc42fd600186f998841f513f2001598910cd8a912087087320  apps/cli/tests/export_privacy.rs
+ 982985f26fee4b11405c4e7d8371ab7e504382412c59771702e1f453b00fcc2b  apps/cli/tests/gate_cli.rs
+ 7c1261b2bf3a7abd82f74c680d5080b29c19906b9833f968966e201335b5c061  apps/cli/tests/golden.rs
+ aca805620abcad6857b530cad9299c0968c00a9098c4d5f1dcddc48b5b8d63dd  apps/cli/tests/p2_golden.rs
+@@ -473,11 +476,11 @@ ec27d20e09b5db6c22f3be15bc4bfb1a606ca7f32e8c90125e92fa302348a2d1  apps/desktop/u
+ a9e24504560cdc25a7c702ce31db87d9af6d0e9b3b48d2a593ad225c39b5bc1a  apps/desktop/ui/package.json
+ 7aac74e38f5c58da122bbb25309beec7b2a6521cdf56d4766e9ccb10b0a8bbd1  apps/desktop/ui/pnpm-lock.yaml
+ 240081b11c51585038cbab250e91b31b5bc6d890d83ef89b6bbb5b126e93d462  apps/desktop/ui/src/Analyze.module.css
+-d691b3c83f0ded8adc180afbaac46ac415152a757883d227b2fdf42453cc654f  apps/desktop/ui/src/Analyze.tsx
++886d72094e406626b49a52091e6632cd9f9a68e276a3deabd892d24587d31859  apps/desktop/ui/src/Analyze.tsx
+ 6cd6b2609385a57938315a99312566a98b0ec8f4c5f7590f1eee2ae3dd8ea576  apps/desktop/ui/src/App.module.css
+ 98493399f51e64d0022603c2040b516403de8678ef4f51f9cbd56370e872d534  apps/desktop/ui/src/App.tsx
+ 692e6c65511e0fa8c0db039306b4831fde5ae983c555ffae4b888d31ba53014d  apps/desktop/ui/src/Compare.module.css
+-28178fd5714bb7842db9ef28a5ad35e1eb1cd5935a129e0fb7f4e6a5138890f9  apps/desktop/ui/src/Compare.tsx
++b7f66128a4f416a01086cfa6fd37abe29f21f138aebf9e5da3508cedd9d7ae72  apps/desktop/ui/src/Compare.tsx
+ 74d168ac01be57e8b1b6039f74b375f955ea28b977772a926d0cefa03d2aa723  apps/desktop/ui/src/Details.module.css
+ cfe30aa00f47acfe29f32e6d3a8df1a9e1e9ad0b633dc9d1f83c2818c9546a14  apps/desktop/ui/src/Details.tsx
+ 164ce5c82d72de4de88b63d48a97c5e1b8d2a2eaba26f89a63ce6176bb3079f1  apps/desktop/ui/src/GettingStarted.module.css
+@@ -489,10 +492,10 @@ daad7f8bdb228c8d643949c490c3b910f61f651065325df9361efa7fff3e5722  apps/desktop/u
+ b7f28a08d8ca585d5299a778f28e9bdd71546ec5eed918f95b22e6b19f2c302f  apps/desktop/ui/src/Overview.module.css
+ 568e35b7765c13f010e7d81ff51cda87e46aba1b78afcf7f92304f6749531cef  apps/desktop/ui/src/Overview.tsx
+ d6613cb0b1e805e9133becba3f9315c8b1493f789eedb13a1e7b9a40594f49b9  apps/desktop/ui/src/Release.module.css
+-da18ff6ab77b5ae66e152d7e836dd8f57fe1bc9b2f81615c79950fcddd119d78  apps/desktop/ui/src/Release.tsx
++124d9396512702e70466bc103ea1c373a3d3ea80fba63175781229299d60d491  apps/desktop/ui/src/Release.tsx
+ 4b0cd1a5fa6fb42755329c98a696736b25204fccefddbb10b7d11006ca50e4ae  apps/desktop/ui/src/Settings.module.css
+ 715d49f73274fcfe56dbe1464c5b56341b34ca541b2d127e0967386549c31e1d  apps/desktop/ui/src/Settings.tsx
+-f1644d8b79945a51f45865b46abeba26a9371444de594091116e3524cbb6bbe1  apps/desktop/ui/src/compare.test.tsx
++d42813f5d39aa321ff3a110b092b5c7b28aea0b9752ca53dda3e9702aabd9844  apps/desktop/ui/src/compare.test.tsx
+ b14d87cac9bf6d76db61113313f5a95ac5b034710ad552e1499fead69119643f  apps/desktop/ui/src/components/Button.module.css
+ 0a7766a82f54f2c0366b921ca58b63d5188126d2cd4ea32b2bd0404104f388ab  apps/desktop/ui/src/components/Button.tsx
+ 110c7010003d3a59b9d915f705f659d2bcc671ccef6d272777f63d1ed7bb5dcd  apps/desktop/ui/src/components/Chip.module.css
+@@ -523,7 +526,7 @@ aecc76433738dd6b47f7380b186b61b9058d5730a502d9507950587262a726a9  apps/desktop/u
+ 8117d498bb88efaddbaff4a25f20b8a4b4960a2a049d86fb8c38f6b583fc6f37  apps/desktop/ui/src/history.test.tsx
+ dc681973d074405d66dfe57199d2b54ec9f17e526e7708826ddc76f23122c604  apps/desktop/ui/src/i18n/catalog.test.ts
+ 30cc5d0ae397718834044e9fc9f07223a37700a4e187b896b56147335e45261e  apps/desktop/ui/src/i18n/en.ts
+-5f21a9e47e4e3ee3c12fd4fd15c0d87f6b96ca20d1a4cef31c700295a3163a91  apps/desktop/ui/src/i18n/en/analyze.ts
++570a2794d53dc710bd9198e04ccad42ee5ba359a0cf5c7f6c428444949bfd68d  apps/desktop/ui/src/i18n/en/analyze.ts
+ 9eeff6494487dd05a2a52c35d438cdd182693896d8f818b97b900b7a3f07b220  apps/desktop/ui/src/i18n/en/common.ts
+ 6b741f84d339339a3308102ce4e5dc555141ea36ffc76a0f359cc4ce13960a8f  apps/desktop/ui/src/i18n/en/compare.ts
+ 1be6a3aa80ff82b6a585350821e5a6f46764caec2beb9125f037543760ac79e4  apps/desktop/ui/src/i18n/en/errors.ts
+@@ -537,7 +540,7 @@ ff0307edd103c7e22d5e340641ab326d15bc27466a355d2396f2acffcc881649  apps/desktop/u
+ d19448ddd810b259bf47e34e72f1e5395969773186287e2f88d75547f156c22d  apps/desktop/ui/src/i18n/language.ts
+ ae48596c9818e5806a9e215cfd1c8c89bf5b6a9bc69e0a893ecdd7776819a224  apps/desktop/ui/src/i18n/types.ts
+ 6bce175645734eb1ce189fb991188641245abeb0656f73fd2f6ae871536ec04b  apps/desktop/ui/src/i18n/zh.ts
+-58eeb58043350750d20544aa7fd27d0070f104c97d44dc72a37dfdcb8eb119c0  apps/desktop/ui/src/i18n/zh/analyze.ts
++989e3388555142df5df84424e10d0705e01ef2e13adfee76ce777cc987d7f1de  apps/desktop/ui/src/i18n/zh/analyze.ts
+ cbb956731acd05d169a020c365e0f51296638016183fc88dc68cc9498e101fb4  apps/desktop/ui/src/i18n/zh/common.ts
+ 057e367178ba2281d076084780e4c4df6d70380d2c3298b3cdaf0acdaf3d721c  apps/desktop/ui/src/i18n/zh/compare.ts
+ 73104430f4a644b323dbfe863dc3adacf5aa08bcbc6175b3423ecab252d5fbf2  apps/desktop/ui/src/i18n/zh/errors.ts
+@@ -546,7 +549,7 @@ cbb956731acd05d169a020c365e0f51296638016183fc88dc68cc9498e101fb4  apps/desktop/u
+ d1b4ef6dba71bacd3a59558dfde6eb8851e1a213caea38bed29856095d5be756  apps/desktop/ui/src/i18n/zh/history.ts
+ af854ebf8b92344ff3ef3c3de8a99c4d3009da091bc4b615f4bf1034638aa978  apps/desktop/ui/src/i18n/zh/release.ts
+ 5ad1a02d58c94f4e2a765d60b64ca69186721bdc5ca16f58a615458e6a99b937  apps/desktop/ui/src/i18n/zh/settings.ts
+-3fad0245bf5877395860face75964c4a57b2296f15abdbb1a0cf4fbd8acb10f7  apps/desktop/ui/src/intake.test.tsx
++09997e3d3fcd1303fc50ffa94c077c20d2fecedbf56d17ec94e61ef25a22850b  apps/desktop/ui/src/intake.test.tsx
+ f0cc4c1ed31a8b4328421f34c295183e8065eb40c452cda18e25646d1034bd1f  apps/desktop/ui/src/ipc/bridge.test.ts
+ c4bdcd8e7770299f39be7a4b47ceaeaa415bdbeb293f6ba028a601da51fc88ab  apps/desktop/ui/src/ipc/bridge.ts
+ 1792caa6bde933a63b710db56f7d7466cbe19c867f0f06d760f5a4becfd9bdc4  apps/desktop/ui/src/ipc/generated/AcceptReviewOutcomeDto.ts
+@@ -650,7 +653,7 @@ ed9a47fb1fc23f9b358d2863a079109f73fa73ff649d9ae666017f743c35dffb  apps/desktop/u
+ e97e3c987bb310f79b351a9c81ebddc3fde7e2a9d03848a6a8aee9e56254c00d  apps/desktop/ui/src/ipc/types.ts
+ 015b1dfc00f7f7e302f5e867c50cec0cb3ccd0a0894e1a1170539494b94e9f7b  apps/desktop/ui/src/main.tsx
+ 37185962b51c191cd8ac009318a40c71225e7898be0d0dd57450e1ba65ca4718  apps/desktop/ui/src/overview.test.tsx
+-44b7987afb177bd95db3a33acd3d612a8e08b49a2551111d21b7d96fcfd00bfc  apps/desktop/ui/src/release.test.tsx
++ebd877d73335707e2670d8a591bf9d3af7de16451069ff1b10cd77b979498080  apps/desktop/ui/src/release.test.tsx
+ 4e980107c2ee98b623d5c4641a402666bfb6e01bbb62334681e15b37ed272cab  apps/desktop/ui/src/settings.test.tsx
+ 165a307e08301c99713006e6628287b80b7e0819c023efad15fb188aaf431ee0  apps/desktop/ui/src/stateWords.ts
+ bf1cd350addd18d4cced383c06d8c04a61395beeb07de14025df61d0c01473da  apps/desktop/ui/src/styles/classnames.ts
+@@ -678,12 +681,13 @@ af33ffd1b7fbda2a9808b4baf0cc5c3907e1fcdbca01aff91679be19745ccde6  assets/ui-mock
+ 7a5ee5a9cb088fa944aec3e1f204ea2fb2e6f125e9ca9bd0f07c1949e52e86bf  crates/firmwaresight-artifact/src/error.rs
+ 0586017060e08bf1adfedc84a81f7ec0eceb2cd7a29fa55bc8be8d254c3fec31  crates/firmwaresight-artifact/src/intake.rs
+ 3b32e1744308ac4e2a4e27763d06fc95d00c269eef8fb4109f6018bab437084d  crates/firmwaresight-artifact/src/lib.rs
+-261838798984f714b3eb588dbfa4650461a8be82ce4a9e27adf293d83e80675a  crates/firmwaresight-artifact/src/map.rs
++36e7b28d99c0413dd565daa5805585426d6e9ab8d4c38d56d59dc9d53c1c740d  crates/firmwaresight-artifact/src/map.rs
+ c54c326aa794648a3ee81a71ec25286280390e9b4c083a9b240795629324881c  crates/firmwaresight-artifact/src/pipeline.rs
+ ba7002bad9a23e2749b025318424753be8477f97ece64802d6d8ebb894628acd  crates/firmwaresight-artifact/tests/map_companion_identity.rs
+ d1a6c6193b759f0632854ee74d3c878150d8c4ecd3f42188f585b87a9576a315  crates/firmwaresight-artifact/tests/p0_acceptance.rs
+ 18da958ecbbc67b25333ea5ddec945dc955aa6e39535123e14185076c0816201  crates/firmwaresight-artifact/tests/p2_fixture_pair.rs
+ c8a4a558b544548dbd43a6d018ae8e667b5d4ec0733ff34fab27f23963189872  crates/firmwaresight-artifact/tests/p5_compat_fixtures.rs
++267b19bf815fc4a4f2489be55849735367649723f08bbc0fe191d00efa273ff5  crates/firmwaresight-artifact/tests/toolchain_interop.rs
+ 4fecc9b3d745375afa0fa01c959dc220ff89d63300add36f9eb781b72e304ae3  crates/firmwaresight-core/Cargo.toml
+ b2e4012f7e33da490bff9937479612a4e3acee9ee34d2ba24a00ea13bbbdec36  crates/firmwaresight-core/src/domain/artifact.rs
+ 2465c5b9a104cd374c6c17984ee98d918eca4d1888863edd6b8c8bbed20d6cab  crates/firmwaresight-core/src/domain/build_snapshot.rs
+@@ -731,12 +735,12 @@ d6634bc8da9fec70c12470eedbff0c0c3c25b0d18bba0198a119cfe99e036815  crates/firmwar
+ c6fa90d78ef93fc97fd0e21f6c6cec61db587e27563a05c420fb8ac2767f15ac  crates/firmwaresight-report/src/render.rs
+ 5c70ea6bd4421073c77c4f4f75b2a2b2b17f01a12c748ac1f74d9b81c35a1a6d  crates/firmwaresight-report/src/schema_check.rs
+ 0e5be31fd70be73b2ac711733a8ed910c1908eb61d8194e64434352bb35579e3  crates/firmwaresight-report/src/schemas.rs
+-a458a9e5c733fdeadb1ac34e69110c30d4f951256239f10aada61c05f3028979  crates/firmwaresight-report/src/visual.rs
++e9d93204496f405447ddce90533ea480f5348499c509bef3fda54434aba61850  crates/firmwaresight-report/src/visual.rs
+ 7dca0ba20d3052b1908d95fe12349dc3e904322a7c74fb4eb5185828e6906cad  crates/firmwaresight-report/tests/analysis_schema_contract.rs
+ b13a1851a216f7434ca02f87b27c39f9b08c429f255cadee5e1a3483f0fa763a  crates/firmwaresight-report/tests/diff_schema_contract.rs
+ c4c361b4cd4ea1b7b3a1f99dacc877cd1e28a6d2bf2e2e070fbc9ea6d62e1394  crates/firmwaresight-report/tests/gate_schema_contract.rs
+ 7ff3421e50495a9db3487a697253fd0d59db5abb5e341f513ce255a49cfa76a9  crates/firmwaresight-report/tests/release_schema_contract.rs
+-8e38a635eb969ec997e3fcb147c78ff106343e3dcdefe92f762e04bbc62eb2b0  crates/firmwaresight-report/tests/visual_integration.rs
++f743a719333eb50a9c0b2be955f079c91709ae722b51c5d96211eacdbc7a3ca6  crates/firmwaresight-report/tests/visual_integration.rs
+ 85cd1858967c5ca5deeb16248c31f8b568e8f972f66e6a466077d23764af64b4  crates/firmwaresight-storage/Cargo.toml
+ c50f4c357230d1b9321156d19b167cdd7c0f3635b9191345086d9746be81faea  crates/firmwaresight-storage/migrations/0001_initial.sql
+ 2c0b39de72df0b6549595cf9e547c5991cab6060adfd269e3d2fb531736d9b01  crates/firmwaresight-storage/migrations/0002_evidence_keyed_by_build.sql
+@@ -776,6 +780,13 @@ a1a44ccae7e1dcd7192b9b47781eb1ef20f63e2973252306b60bfe1ec444c7db  examples/proje
+ 36e5d390bf0160aa01fd705347acf7ddd015742e32429f2a7a1ef12ab69b2ce0  examples/release-manifest.example.json
+ 7553618f800829444096beea3dce84c3d07585efda504c19adb6787369bbd9e8  examples/rust-toolchain.baseline.toml
+ 6eacfb9c1203203cc546de2d8344912aac59d331ae5267ddd8070a71af615ab2  examples/tauri-capability.baseline.json
++47643dba950ece8a2ce671515dc538ee10b892e6874c0705d7d8e52aae8fbc30  fixtures/elf/interop-clang/README.md
++32d9e3ff4545a664b8018d7cfae7e807ef1f9a1dadbdc0c600ea96f48f69a5e7  fixtures/elf/interop-clang/aarch64-none-elf.o
++8551e44df171653542431f780266ef45a467a6712126b508fed3d999d84e7c30  fixtures/elf/interop-clang/aarch64_be-none-elf.o
++753951e2ba8e5b4dbbafa90968696581109a084c2f11567c727d31aa14eb67d4  fixtures/elf/interop-clang/armeb-none-eabi.o
++ca524a226d734e532e1376a6a55f767c38e8d98a42ac40bccadf9d58a8f5ecbe  fixtures/elf/interop-clang/armv7-none-eabi.o
++125e4d8e93230c2db976667a228a95e553b34297745f4c11cf22a5465ac221f5  fixtures/elf/interop-clang/fixture.c
++d33f132548076a610434fca03d6f61b9910b7a0245c52cd774c07250043b716b  fixtures/elf/interop-clang/provenance.json
+ 1c0ae94e611497c1635c117834132f23b36799ad651852ba878be421ba20557f  fixtures/elf/p0-basic/firmware.elf
+ 650aca4084a1af12dbfff350ce9cbb700935d8f7f7d96acb35666a52073d6f88  fixtures/elf/p0-basic/fixture.toml
+ e92da4cc7dc1cbf1b93d5aefab0de9a841f610f37569370da988466c040ac584  fixtures/elf/p0-basic/source/main.c
+@@ -860,6 +871,7 @@ cd0316aae282957a8474daa327e5fdb4f912bb48e866ef9996419884ce966c45  schemas/projec
+ 03e5601310f61d5ee0a2abbdc5f3e3e89e4e81d84b5312bcbb1c81000a3715df  schemas/release-manifest.schema.json
+ 880f81bb08cd01b17b19b748a4288ecd5b1ee83b913bd22777628ca1135be644  scripts/check.py
+ 75a6260b4b14b0149e0ba65fd028c8b867b1183677d0108d947f7111459fde31  scripts/gen_desktop_icons.py
++bfbdc0a7aabc3961ff4a673350279edc899486bc0e7f48ee06f0b3423630a0a1  scripts/gen_interop_fixtures.py
+ 2cbec1609182e33fcfb95604a359f44fa9bdbfce306a6ac39ea6adb85eec62dc  scripts/gen_p0_fixtures.py
+ fa1d5b25c8f13bef07cdeacbad3d359c4859f827308edf718e461050cb536444  scripts/gen_p0_workload.py
+ 7d45c3d60cbc2019569770c88bdf8aebcfc260079c8500b75d2ee3696b733e7e  scripts/gen_p2_fixtures.py
+diff --git a/apps/cli/src/main.rs b/apps/cli/src/main.rs
+index 2653f9ed43609810aee3f7b8cbe513c00817fe15..947ffbd29ee3284c5c547b151a9b15c393612fe7 100644
+--- a/apps/cli/src/main.rs
++++ b/apps/cli/src/main.rs
+@@ -20,6 +20,7 @@
+ 
+ use std::path::{Path, PathBuf};
+ use std::process::ExitCode;
++use tracing_subscriber::{Layer, layer::SubscriberExt, util::SubscriberInitExt};
+ 
+ use clap::{Parser, Subcommand};
+ use firmwaresight_artifact::ArtifactError;
+@@ -67,7 +68,7 @@ struct Cli {
+ 
+ #[derive(Debug, Subcommand)]
+ enum Commands {
+-    /// Analyze one artifact and report the facts that were observed.
++    /// Analyze ELF metadata (32/64-bit, either endian); Keil/IAR compiler cohorts remain unverified.
+     Analyze(AnalyzeArgs),
+     /// Compare two artifacts and report what changed between them.
+     Diff(DiffArgs),
+@@ -275,12 +276,20 @@ struct GateArgs {
+ 
+ fn main() -> ExitCode {
+     // Diagnostics belong on stderr so that `--json` stdout stays a single clean document.
+-    tracing_subscriber::fmt()
+-        .with_env_filter(
++    // Dependency diagnostics can contain font/source host paths. Only our typed,
++    // path-free operation events belong on the CLI output boundary, even with RUST_LOG=trace.
++    tracing_subscriber::registry()
++        .with(
+             tracing_subscriber::EnvFilter::try_from_default_env()
+                 .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("warn")),
+         )
+-        .with_writer(std::io::stderr)
++        .with(
++            tracing_subscriber::fmt::layer()
++                .with_writer(std::io::stderr)
++                .with_filter(tracing_subscriber::filter::filter_fn(|metadata| {
++                    metadata.target() == "fwsight"
++                })),
++        )
+         .init();
+ 
+     // Parsing goes through `parse_from` rather than `Cli::parse`, because `parse` exits the
+@@ -458,6 +467,9 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
+                 "error: {} (code {}, operation {operation_id})",
+                 envelope.message, envelope.code
+             );
++            if matches!(err, ArtifactError::MapUnsupported { .. }) {
++                eprintln!("next: {}", err.remediation());
++            }
+             tracing::error!(operation_id, code = err.stable_code(), "analysis failed");
+             ExitCode::from(exit_code_for(&err))
+         }
+@@ -503,8 +515,12 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
+     // asked for must not already have announced success on stdout.
+     if let Some(path) = &args.html {
+         let html = diff_render::render_html(&dto);
+-        if let Err(error) = std::fs::write(path, html) {
+-            return report_export_error(path, &error, args.json, operation_id);
++        if std::fs::write(path, html).is_err() {
++            return report_export_error(
++                "Could not write the detailed HTML export.",
++                args.json,
++                operation_id,
++            );
+         }
+     }
+ 
+@@ -988,29 +1004,25 @@ fn report_diff_error(err: &DiffError, json: bool, operation_id: &str) -> ExitCod
+     ExitCode::from(EXIT_USAGE)
+ }
+ 
+-/// The comparison succeeded; writing its export did not. Exit 6, and the host path stays in
+-/// diagnostics rather than in the machine-readable envelope.
+-fn report_export_error(
+-    path: &Path,
+-    error: &std::io::Error,
+-    json: bool,
+-    operation_id: &str,
+-) -> ExitCode {
++/// One output boundary for export failures. Callers pass trusted static categories,
++/// never destination names or raw OS errors, to either stream or tracing.
++fn report_export_error(message: &'static str, json: bool, operation_id: &str) -> ExitCode {
+     let envelope = render::ErrorEnvelope::new(
+         render::EXPORT_FAILED_CODE,
+-        format!("could not write the HTML export: {error}"),
++        message,
+         operation_id,
+     )
+     .with_remediation(
+-        "Check that the target path exists and is writable, then run the command again.",
++        "Choose a writable destination with an existing parent; for visual exports choose a new file, then retry.",
+     );
+     if json {
+         println!("{}", envelope.to_json());
+     }
+     eprintln!(
+-        "error: could not write {} (code {}, operation {operation_id})",
+-        path.display(),
+-        envelope.code
++        "error: {} (code {}, operation {operation_id}); {}",
++        envelope.message,
++        envelope.code,
++        envelope.remediation.as_deref().unwrap_or_default()
+     );
+     tracing::error!(operation_id, "export failed");
+     ExitCode::from(EXIT_EXPORT)
+@@ -1033,23 +1045,16 @@ fn write_visual_exports(
+         let result =
+             visual::render(report, format).and_then(|bytes| visual::write_new(path, &bytes));
+         if let Err(error) = result {
+-            let envelope = render::ErrorEnvelope::new(
+-                render::EXPORT_FAILED_CODE,
+-                format!("could not create the visual report: {error}"),
+-                operation_id,
+-            )
+-            .with_remediation(
+-                "Check that the target path does not already exist and is writable, then run the command again.",
+-            );
+-            if json {
+-                println!("{}", envelope.to_json());
+-            }
+-            eprintln!(
+-                "error: could not write {} (code {}, operation {operation_id})",
+-                path.display(),
+-                envelope.code
+-            );
+-            tracing::error!(operation_id, "visual export failed");
++            let message = match error {
++                visual::VisualError::Render => {
++                    "Visual rendering failed; check installed local fonts and retry."
++                }
++                visual::VisualError::Exists => "Export destination exists; choose a new file.",
++                visual::VisualError::Write => {
++                    "Export could not be written; choose a writable directory and retry."
++                }
++            };
++            report_export_error(message, json, operation_id);
+             return Some(EXIT_EXPORT);
+         }
+         let label = match format {
+diff --git a/apps/cli/tests/export_privacy.rs b/apps/cli/tests/export_privacy.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..3a8c6275f4f91070c251022ca30b74c87f11ecf4
+--- /dev/null
++++ b/apps/cli/tests/export_privacy.rs
+@@ -0,0 +1,166 @@
++//! Real-process output boundary regressions. Every path/name here is synthetic.
++use std::path::{Path, PathBuf};
++use std::process::Command;
++
++fn root() -> PathBuf {
++    Path::new(env!("CARGO_MANIFEST_DIR"))
++        .parent()
++        .unwrap()
++        .parent()
++        .unwrap()
++        .into()
++}
++
++#[test]
++fn export_refusals_never_echo_destination_or_config_in_either_stream() {
++    let scratch = root()
++        .join("target/cli-tests")
++        .join(format!("privacy-{}", std::process::id()));
++    std::fs::create_dir_all(&scratch).unwrap();
++    let existing = scratch.join("private-canary-existing.svg");
++    std::fs::write(&existing, b"KEEP ORIGINAL").unwrap();
++    let directory = scratch.join("private-canary-directory");
++    std::fs::create_dir_all(&directory).unwrap();
++    let blocked_parent = scratch.join("private-canary-parent-file");
++    std::fs::write(&blocked_parent, b"KEEP PARENT").unwrap();
++    let destinations = [
++        existing.clone(),
++        directory,
++        blocked_parent.join("report.svg"),
++        scratch.join("private-canary-missing/nested/report.svg"),
++        scratch
++            .join("missing")
++            .join("DRIVE_TEXT=C:\\private-canary\\config=PRIVATE_CONFIG_CANARY.svg"),
++        scratch
++            .join("missing")
++            .join("UNC_TEXT=\\\\server\\private-canary\\report.svg"),
++        scratch.join("missing/home/private-canary/report.svg"),
++        scratch.join("missing/固件\u{202e}PRIVATE_CONFIG_CANARY.svg"),
++    ];
++    for verb in ["analyze", "diff"] {
++        for flag in ["--svg", "--png", "--report-html", "--html"] {
++            if verb == "analyze" && flag == "--html" {
++                continue;
++            }
++            for json in [false, true] {
++                for destination in &destinations {
++                    // Legacy detailed HTML permits file replacement; use a directory instead.
++                    if flag == "--html" && destination == &existing {
++                        continue;
++                    }
++                    let mut command = Command::new(env!("CARGO_BIN_EXE_fwsight"));
++                    command
++                        .current_dir(root())
++                        .env("RUST_LOG", "trace,fontdb=trace");
++                    command.args([verb, "fixtures/elf/p2-diff/base/firmware.elf"]);
++                    if verb == "diff" {
++                        command.arg("fixtures/elf/p2-diff/target/firmware.elf");
++                    }
++                    command.arg(flag).arg(destination);
++                    if json {
++                        command.arg("--json");
++                    }
++                    let output = command.output().unwrap();
++                    assert_eq!(output.status.code(), Some(6), "{verb} {flag} must refuse");
++                    for stream in [&output.stdout, &output.stderr] {
++                        let text = String::from_utf8_lossy(stream);
++                        for forbidden in [
++                            "private-canary",
++                            "PRIVATE_CONFIG_CANARY",
++                            "C:\\",
++                            "\\\\server",
++                            "/home/",
++                            "\\WINDOWS\\Fonts\\",
++                            "\u{202e}",
++                        ] {
++                            assert!(
++                                !text.contains(forbidden),
++                                "{verb} {flag} disclosed synthetic input marker"
++                            );
++                        }
++                        assert!(
++                            !text.contains(&scratch.to_string_lossy().to_string()),
++                            "destination parent disclosed"
++                        );
++                    }
++                    let stderr = String::from_utf8_lossy(&output.stderr);
++                    assert!(stderr.contains("ERR-EXPORT-6001"));
++                    assert!(stderr.contains("operation op-"));
++                    assert!(stderr.contains("retry"));
++                    if json {
++                        let error: serde_json::Value =
++                            serde_json::from_slice(&output.stdout).unwrap();
++                        assert_eq!(error["code"], "ERR-EXPORT-6001");
++                        assert!(error["operationId"].as_str().unwrap().starts_with("op-"));
++                        assert!(error["remediation"].as_str().unwrap().contains("retry"));
++                    } else {
++                        assert!(output.stdout.is_empty());
++                    }
++                }
++            }
++        }
++    }
++    assert_eq!(std::fs::read(existing).unwrap(), b"KEEP ORIGINAL");
++    assert_eq!(std::fs::read(blocked_parent).unwrap(), b"KEEP PARENT");
++    std::fs::remove_dir_all(scratch).unwrap();
++}
++
++#[test]
++fn explicit_foreign_map_is_refused_and_elf_only_recovery_is_actionable() {
++    let scratch = root()
++        .join("target/cli-tests")
++        .join(format!("map-privacy-{}", std::process::id()));
++    std::fs::create_dir_all(&scratch).unwrap();
++    let map = scratch.join("private-canary-固件.map");
++    for content in [
++        "IAR ELF Linker synthetic",
++        "Component: ARM Compiler Tool: armlink [synthetic]",
++    ] {
++        std::fs::write(&map, content).unwrap();
++        for json in [false, true] {
++            let mut command = Command::new(env!("CARGO_BIN_EXE_fwsight"));
++            command
++                .current_dir(root())
++                .args([
++                    "analyze",
++                    "fixtures/elf/p5-compat/clang-arm/firmware.elf",
++                    "--map",
++                ])
++                .arg(&map);
++            if json {
++                command.arg("--json");
++            }
++            let output = command.output().unwrap();
++            assert_eq!(output.status.code(), Some(3));
++            let combined = format!(
++                "{}{}",
++                String::from_utf8_lossy(&output.stdout),
++                String::from_utf8_lossy(&output.stderr)
++            );
++            assert!(!combined.contains("private-canary"));
++            assert!(combined.contains("ERR-MAP-3001"));
++            assert!(combined.contains("without a MAP"));
++        }
++    }
++    let alone = Command::new(env!("CARGO_BIN_EXE_fwsight"))
++        .current_dir(root())
++        .args([
++            "analyze",
++            "fixtures/elf/p5-compat/clang-arm/firmware.elf",
++            "--json",
++        ])
++        .output()
++        .unwrap();
++    assert!(alone.status.success());
++    let value: serde_json::Value = serde_json::from_slice(&alone.stdout).unwrap();
++    assert_eq!(value["capabilities"]["map"], "not-provided");
++    let help = Command::new(env!("CARGO_BIN_EXE_fwsight"))
++        .args(["--help"])
++        .output()
++        .unwrap();
++    assert!(
++        String::from_utf8_lossy(&help.stdout)
++            .contains("Keil/IAR compiler cohorts remain unverified")
++    );
++    std::fs::remove_dir_all(scratch).unwrap();
++}
+diff --git a/apps/desktop/ui/src/Analyze.tsx b/apps/desktop/ui/src/Analyze.tsx
+index 147d5c8cb1295a564810687972ee02371a4a9df2..54b15287fb587b7891b3ba26bc2297447e190bd2 100644
+--- a/apps/desktop/ui/src/Analyze.tsx
++++ b/apps/desktop/ui/src/Analyze.tsx
+@@ -9,7 +9,7 @@
+  * the in-flight flag - is this page's own business.
+  */
+ 
+-import { useCallback, useState } from 'react';
++import { useCallback, useEffect, useRef, useState } from 'react';
+ 
+ import styles from './Analyze.module.css';
+ import { Button } from './components/Button';
+@@ -157,14 +157,25 @@ export function Analyze({
+   const currentSummary =
+     summary !== null && error === null && !pendingSelection ? summary : null;
+ 
++  const exportRequest = useRef(0);
++  useEffect(() => {
++    exportRequest.current += 1;
++    setExporting(false);
++    setExportError(null);
++    setExportMessage(null);
++    return () => { exportRequest.current += 1; };
++  }, [selection?.selectionId, currentSummary?.identity.snapshotId]);
++
+   const exportVisual = async (format: 'png' | 'svg' | 'html') => {
+     if (currentSummary === null || selection === null || analyzing || exporting) return;
++    const request = ++exportRequest.current;
+     setExporting(true);
+     const result = await exportAnalysisVisual(
+       selection.selectionId,
+       currentSummary.identity.snapshotId,
+       format,
+     );
++    if (request !== exportRequest.current) return;
+     setExporting(false);
+     if (!result.ok) {
+       setExportError(result.envelope);
+diff --git a/apps/desktop/ui/src/Compare.tsx b/apps/desktop/ui/src/Compare.tsx
+index 4698fbff1ee68368b0c373f455ea43c1bbc79852..68b29a69af77e771edc36e17d2c416afd1100c2f 100644
+--- a/apps/desktop/ui/src/Compare.tsx
++++ b/apps/desktop/ui/src/Compare.tsx
+@@ -175,6 +175,15 @@ export function Compare({
+   const [exportError, setExportError] = useState<ErrorEnvelopeDto | null>(null);
+   const [exporting, setExporting] = useState(false);
+ 
++  const exportRequest = useRef(0);
++  useEffect(() => {
++    exportRequest.current += 1;
++    setExporting(false);
++    setExportNote(null);
++    setExportError(null);
++    return () => { exportRequest.current += 1; };
++  }, [summary?.diffId]);
++
+   const additionsRequest = useRef(0);
+ 
+   /**
+@@ -335,12 +344,14 @@ export function Compare({
+       if (summary === null) {
+         return;
+       }
++      const request = ++exportRequest.current;
+       setExporting(true);
+       const outcome = format === 'json'
+         ? await exportCompareJson(summary.diffId)
+         : format === 'html'
+           ? await exportCompareHtml(summary.diffId)
+           : await exportCompareVisual(summary.diffId, format === 'visual-html' ? 'html' : format);
++      if (request !== exportRequest.current) return;
+       setExporting(false);
+ 
+       if (!outcome.ok) {
+diff --git a/apps/desktop/ui/src/Release.tsx b/apps/desktop/ui/src/Release.tsx
+index 4bf502638afe90653e77ff205b01c16c6475698b..a22e0282500322494c3cccc958b7faed967d01a1 100644
+--- a/apps/desktop/ui/src/Release.tsx
++++ b/apps/desktop/ui/src/Release.tsx
+@@ -416,7 +416,7 @@ export function Release({
+             unit={unit}
+             onSetChanged={invalidateRun}
+           />
+-          <StandaloneVisualExport run={run} />
++          <StandaloneVisualExport key={`${run.runId}:${run.snapshotId}`} run={run} />
+           <BundleSection run={run} unit={unit} />
+         </>
+       )}
+diff --git a/apps/desktop/ui/src/compare.test.tsx b/apps/desktop/ui/src/compare.test.tsx
+index 3454b906775b81b0a08183752efd468ed2467a0f..c4cca817d9fe1eb129afadbc14b84ce1c04e3d51 100644
+--- a/apps/desktop/ui/src/compare.test.tsx
++++ b/apps/desktop/ui/src/compare.test.tsx
+@@ -18,7 +18,7 @@
+  * with rows that are not additions at all.
+  */
+ 
+-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
++import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
+ 
+ import { App } from './App';
+@@ -46,6 +46,7 @@ import type {
+   CompareCandidateDto,
+   CompareSummaryDto,
+   ErrorEnvelopeDto,
++  ExportOutcomeDto,
+   SectionChangePageDto,
+   SectionChangeQueryDto,
+   SectionChangeRowDto,
+@@ -1267,6 +1268,21 @@ describe('the ranking as a way to the full list', () => {
+ });
+ 
+ describe('export', () => {
++  it('does not attach a late visual export outcome to a newer comparison', async () => {
++    await openCompare();
++    await runCompare();
++    const pending = deferred<ExportOutcomeDto>();
++    exportVisualMock.mockReturnValueOnce(pending.promise);
++    fireEvent.click(screen.getByRole('button', { name: 'Export SVG' }));
++    await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
++    compareMock.mockResolvedValueOnce(ok(comparison({ diffId: 'cmp-new-subject' })));
++    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Compare' })); });
++    await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-new-subject')).toBe(true));
++    await act(async () => { pending.resolve(ok({ status: 'written', fileName: 'old-comparison-report.svg', format: 'svg' })); });
++    expect(screen.queryByText(/old-comparison-report/)).toBeNull();
++    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
++  });
++
+   it('offers visual formats beside the existing portable JSON and detailed HTML exports', async () => {
+     await openCompare();
+     await runCompare();
+diff --git a/apps/desktop/ui/src/i18n/en/analyze.ts b/apps/desktop/ui/src/i18n/en/analyze.ts
+index f4850f17650d968f823d4f1a19de2a181a6fb76b..e9074c893a99b15e9d2b88622f1c229b8bbac317 100644
+--- a/apps/desktop/ui/src/i18n/en/analyze.ts
++++ b/apps/desktop/ui/src/i18n/en/analyze.ts
+@@ -135,7 +135,7 @@ export const analyze = {
+   'gettingStarted.firstActionBefore': 'On Analyze, choose an ELF artifact with ',
+   'gettingStarted.firstActionAfter': '. The file stays where it is; nothing is copied into a project folder.',
+   'gettingStarted.mapTitle': 'What a MAP file changes',
+-  'gettingStarted.mapBody': 'A GNU ld MAP next to the artifact is optional, and it improves region and layout evidence. Without it, some facts stay UNKNOWN instead of being guessed at.',
++  'gettingStarted.mapBody': 'ELF metadata parsing is separate from linker MAP support. A GNU ld MAP is optional and improves region evidence. Keil/IAR compiler cohorts are unverified; ArmLink/IAR MAPs are unsupported. Omit an unsupported MAP to analyze compatible ELF alone; capacities and attribution can remain UNKNOWN.',
+   'gettingStarted.flowTitle': 'The product flow',
+   'gettingStarted.stepThen': 'then ',
+   'gettingStarted.stepAnalyze': 'Analyze',
+diff --git a/apps/desktop/ui/src/i18n/zh/analyze.ts b/apps/desktop/ui/src/i18n/zh/analyze.ts
+index bef81a4f25a62b4125cc034d222d89a15c30ac51..dbb07e9f71871c213bad84cee4f87e57c8a0ce9e 100644
+--- a/apps/desktop/ui/src/i18n/zh/analyze.ts
++++ b/apps/desktop/ui/src/i18n/zh/analyze.ts
+@@ -137,7 +137,7 @@ export const analyze: CatalogFor<'analyze'> = {
+   'gettingStarted.firstActionBefore': '在分析页上，用 ',
+   'gettingStarted.firstActionAfter': ' 按钮选择一个 ELF 镜像文件。文件留在原处；不会被复制进任何工程目录。',
+   'gettingStarted.mapTitle': 'MAP 文件会改变什么',
+-  'gettingStarted.mapBody': '镜像文件旁边有一个 GNU ld MAP 是可选的，它会改善区域与布局证据。没有它，一些事实会保持 UNKNOWN，而不是靠猜测填上。',
++  'gettingStarted.mapBody': 'ELF 元数据解析与链接器 MAP 支持是两项能力。GNU ld MAP 可选，可改善区域证据。Keil/IAR 编译器样本群尚未验证，ArmLink/IAR MAP 尚不支持。移除不支持的 MAP 可单独分析兼容 ELF；容量和归属仍可能为 UNKNOWN。',
+   'gettingStarted.flowTitle': '产品流程',
+   'gettingStarted.stepThen': '然后 ',
+   'gettingStarted.stepAnalyze': '分析',
+diff --git a/apps/desktop/ui/src/intake.test.tsx b/apps/desktop/ui/src/intake.test.tsx
+index de0fce65ddb8124125463d4d7acbb25759bb8e01..f564fd8e3cfa2ca4092a142cdc187fd8ea6ac3c4 100644
+--- a/apps/desktop/ui/src/intake.test.tsx
++++ b/apps/desktop/ui/src/intake.test.tsx
+@@ -1,4 +1,4 @@
+-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
++import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
+ 
+ import { App } from './App';
+@@ -730,6 +730,26 @@ describe('P1-A0 intake screen', () => {
+     expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
+   });
+ 
++  it('does not attach a late export outcome to a different successful analysis', async () => {
++    let finish!: (value: Awaited<ReturnType<typeof exportAnalysisVisual>>) => void;
++    exportAnalysisVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
++    const subject = (id: string) => <Analyze
++      unit="bytes" onUnitChange={() => undefined}
++      selection={selection({ selectionId: id })} onSelectionChange={() => undefined}
++      analyzedSelectionId={id}
++      lastGood={summary({ identity: { ...summary().identity, snapshotId: id } })}
++      gettingStartedHidden onHideGettingStarted={() => undefined}
++      onLastGoodChange={() => undefined}
++    />;
++    const mounted = render(subject('old-subject'));
++    fireEvent.click(screen.getByRole('button', { name: 'Export SVG' }));
++    await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalled());
++    mounted.rerender(subject('new-subject'));
++    await act(async () => { finish(ok({ status: 'written', fileName: 'old-subject-report.svg', format: 'svg' })); });
++    expect(screen.queryByText(/old-subject-report/)).toBeNull();
++    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
++  });
++
+   it('never presents the last good analysis as the failed candidate', async () => {
+     await chooseArtifact();
+     await analyze();
+diff --git a/apps/desktop/ui/src/release.test.tsx b/apps/desktop/ui/src/release.test.tsx
+index a66d11d8994a722a243103f47f9c55bf4702ea8f..b19bdc1e252355d78c4ad61e517c3f70bbf77cde 100644
+--- a/apps/desktop/ui/src/release.test.tsx
++++ b/apps/desktop/ui/src/release.test.tsx
+@@ -24,7 +24,7 @@
+  * here checks a number the shell did not send, because the page computes none of them.
+  */
+ 
+-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
++import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
+ 
+ import { App } from './App';
+@@ -713,6 +713,21 @@ beforeEach(() => {
+ });
+ 
+ describe('Release navigation', () => {
++  it('does not attach a late visual export outcome to a newer Gate run', async () => {
++    await openRelease();
++    await runGate();
++    const region = await screen.findByRole('region', { name: 'Standalone visual report' });
++    let finish!: (value: Awaited<ReturnType<typeof exportGateVisual>>) => void;
++    exportGateVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
++    fireEvent.click(within(region).getByRole('button', { name: 'Export SVG' }));
++    await waitFor(() => expect(exportGateVisualMock).toHaveBeenCalled());
++    runGateMock.mockResolvedValueOnce(ok(gateRun({ runId: 'gate-new-subject' })));
++    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run Gate' })); });
++    await act(async () => { finish(ok({ status: 'written', fileName: 'old-gate-report.svg', format: 'svg' })); });
++    expect(screen.queryByText(/old-gate-report/)).toBeNull();
++    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
++  });
++
+   it('offers a standalone visual report for a current Gate run without changing Bundle export', async () => {
+     await openRelease();
+     await runGate();
+diff --git a/crates/firmwaresight-artifact/src/map.rs b/crates/firmwaresight-artifact/src/map.rs
+index ebc9b441c857b40e3bddca00f5d7a5d1c0c41023..44f6e57d3b75a43e73d2a3bfdce02896be3999dc 100644
+--- a/crates/firmwaresight-artifact/src/map.rs
++++ b/crates/firmwaresight-artifact/src/map.rs
+@@ -78,12 +78,11 @@ impl MapEvidence {
+ /// `Ok(false)` when nothing identifies it at all. A negative answer is never a silent partial
+ /// parse.
+ pub fn detect(text: &str) -> Result<bool, ArtifactError> {
+-    if is_gnu_ld(text) {
+-        return Ok(true);
+-    }
+     let foreign = [
+         "ARM Linker map information",
++        "Tool: armlink",
+         "*** MAP FILE",
++        "IAR ELF Linker",
+         "IAR Linker",
+         "RN32/RN42",
+         "Linker Map File",
+@@ -95,7 +94,9 @@ pub fn detect(text: &str) -> Result<bool, ArtifactError> {
+             });
+         }
+     }
+-    Ok(false)
++    // A foreign header outranks incidental GNU words in scripts, notes or a
++    // concatenated file. Refusal is safer than attributing foreign placement as GNU.
++    Ok(is_gnu_ld(text))
+ }
+ 
+ /// Whether this text carries a GNU ld banner.
+diff --git a/crates/firmwaresight-artifact/tests/toolchain_interop.rs b/crates/firmwaresight-artifact/tests/toolchain_interop.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..8fb85f9f104144b48d97567a906ebd82a1815f4c
+--- /dev/null
++++ b/crates/firmwaresight-artifact/tests/toolchain_interop.rs
+@@ -0,0 +1,167 @@
++//! Schematic banners prove refusal, never vendor compiler compatibility.
++use firmwaresight_artifact::{ArtifactError, map};
++use firmwaresight_artifact::{
++    elf,
++    intake::{GuardConfig, GuardedInput},
++    pipeline::{self, AnalysisRequest},
++};
++use firmwaresight_core::domain::identity::{Architecture, Bitness, Endianness};
++use std::path::{Path, PathBuf};
++
++fn root() -> PathBuf {
++    Path::new(env!("CARGO_MANIFEST_DIR"))
++        .parent()
++        .unwrap()
++        .parent()
++        .unwrap()
++        .into()
++}
++
++#[test]
++fn foreign_linker_banners_cannot_fall_through_to_gnu_even_with_gnu_text() {
++    for banner in [
++        "ARM Linker map information",
++        "Component: ARM Compiler 5.06 Tool: armlink [synthetic]",
++        "IAR ELF Linker V7.80.1.28/LNX for ARM",
++        "IAR Linker",
++    ] {
++        for suffix in [
++            "",
++            "\nMemory Configuration\nFLASH 0x08000000 0x1000 xr\nLinker script and memory map",
++        ] {
++            let text = format!("{}\n{banner}{suffix}", "synthetic preamble\n".repeat(5000));
++            assert!(
++                matches!(map::parse(&text), Err(ArtifactError::MapUnsupported { .. })),
++                "foreign format must not be parsed as GNU"
++            );
++        }
++    }
++}
++
++#[test]
++fn clang_objects_prove_32_64_and_both_endian_metadata_without_vendor_claims() {
++    for (target, class, endian, architecture) in [
++        (
++            "armv7-none-eabi",
++            Bitness::Bits32,
++            Endianness::Little,
++            Architecture::Arm,
++        ),
++        (
++            "armeb-none-eabi",
++            Bitness::Bits32,
++            Endianness::Big,
++            Architecture::Arm,
++        ),
++        (
++            "aarch64-none-elf",
++            Bitness::Bits64,
++            Endianness::Little,
++            Architecture::AArch64,
++        ),
++        (
++            "aarch64_be-none-elf",
++            Bitness::Bits64,
++            Endianness::Big,
++            Architecture::AArch64,
++        ),
++    ] {
++        let input = GuardedInput::load(
++            &root().join(format!("fixtures/elf/interop-clang/{target}.o")),
++            GuardConfig::default(),
++        )
++        .unwrap();
++        assert_eq!(&input.bytes[..4], b"\x7fELF");
++        assert_eq!(input.bytes[4], if class == Bitness::Bits32 { 1 } else { 2 });
++        assert_eq!(
++            input.bytes[5],
++            if endian == Endianness::Little { 1 } else { 2 }
++        );
++        let parsed = elf::parse(&input.bytes, &input.sha256).unwrap();
++        assert_eq!(
++            (parsed.bitness, parsed.endianness, parsed.architecture),
++            (class, endian, architecture)
++        );
++        assert!(parsed.symbol_table_present);
++        assert!(
++            !parsed.debug_sections_present,
++            "recipe uses -g0, not DWARF decoding proof"
++        );
++        assert!(
++            parsed
++                .symbols
++                .iter()
++                .any(|s| s.name.value().map(String::as_str) == Some("fixture_function"))
++        );
++        let data = parsed
++            .sections
++            .iter()
++            .find(|s| s.name.value().map(String::as_str) == Some(".data"))
++            .unwrap();
++        assert_eq!(data.memory_size.value(), Some(&4));
++        assert_eq!(data.file_size, 4);
++        let offset = *data.file_offset.value().unwrap() as usize;
++        let raw: [u8; 4] = input.bytes[offset..offset + 4].try_into().unwrap();
++        assert_eq!(
++            if endian == Endianness::Little {
++                u32::from_le_bytes(raw)
++            } else {
++                u32::from_be_bytes(raw)
++            },
++            7
++        );
++        let bss = parsed
++            .sections
++            .iter()
++            .find(|s| s.name.value().map(String::as_str) == Some(".bss"))
++            .unwrap();
++        assert_eq!((bss.memory_size.value(), bss.file_size), (Some(&4), 0));
++    }
++}
++
++#[test]
++fn compatible_elf_only_works_while_explicit_foreign_or_invalid_map_is_refused() {
++    let scratch = root()
++        .join("target/interop-tests")
++        .join(format!("固件-{}", std::process::id()));
++    std::fs::create_dir_all(&scratch).unwrap();
++    let fixture = root().join("fixtures/elf/p5-compat/clang-arm/firmware.elf");
++    let expected = pipeline::analyze(&AnalysisRequest::new(&fixture)).unwrap();
++    for extension in ["axf", "out"] {
++        let renamed = scratch.join(format!("固件.{extension}"));
++        std::fs::copy(&fixture, &renamed).unwrap();
++        let alone = pipeline::analyze(&AnalysisRequest::new(&renamed)).unwrap();
++        assert_eq!(alone.input.sha256, expected.input.sha256);
++        assert!(alone.map_input.is_none() && alone.map_evidence.is_none());
++        // This is a renamed Clang fixture, never a Keil/IAR-produced file.
++        for bytes in [
++            b"IAR ELF Linker synthetic\nMemory Configuration".as_slice(),
++            b"Component: ARM Compiler Tool: armlink [synthetic]",
++            b"\xff\xfe\0I\0A\0R",
++            b"\x7fELF",
++        ] {
++            let path = scratch.join("foreign.map");
++            std::fs::write(&path, bytes).unwrap();
++            let err =
++                pipeline::analyze(&AnalysisRequest::new(&renamed).with_map(&path)).unwrap_err();
++            assert!(matches!(err, ArtifactError::MapUnsupported { .. }));
++            assert!(err.remediation().contains("without a MAP"));
++            assert_eq!(err.stable_code(), "ERR-MAP-3001");
++        }
++        std::fs::write(&renamed, b"NOT ELF").unwrap();
++        assert!(matches!(
++            pipeline::analyze(&AnalysisRequest::new(&renamed)),
++            Err(ArtifactError::UnsupportedFormat { .. })
++        ));
++    }
++    let malformed = scratch.join("truncated.axf");
++    std::fs::write(&malformed, b"\x7fELF\x01\x01\x01").unwrap();
++    assert!(pipeline::analyze(&AnalysisRequest::new(&malformed)).is_err());
++    let oversized = scratch.join("large.map");
++    std::fs::write(&oversized, vec![b' '; 8192]).unwrap();
++    assert!(matches!(
++        GuardedInput::load(&oversized, GuardConfig::with_limit(4096)),
++        Err(ArtifactError::ArtifactTooLarge { .. })
++    ));
++    std::fs::remove_dir_all(scratch).unwrap();
++}
+diff --git a/crates/firmwaresight-report/src/visual.rs b/crates/firmwaresight-report/src/visual.rs
+index 7899de4bab956b0a1538a9534e3394e6977f5085..816b5613a55fad74fe82812e20a1bab0093edccc 100644
+--- a/crates/firmwaresight-report/src/visual.rs
++++ b/crates/firmwaresight-report/src/visual.rs
+@@ -630,7 +630,18 @@ fn svg(report: &VisualReport) -> String {
+         }
+         if let Some((n, d)) = row.bar {
+             let width = ((n as f64 / d as f64).clamp(0.0, 1.0) * 144.0).round();
+-            out.push_str(&format!("<rect x=\"1392\" y=\"{}\" width=\"144\" height=\"16\" fill=\"#F1F3F5\"/><rect x=\"1392\" y=\"{}\" width=\"{width}\" height=\"16\" fill=\"#2563EB\"/>", y+12, y+12));
++            out.push_str(&format!(
++                "<rect x=\"1392\" y=\"{}\" width=\"144\" height=\"16\" fill=\"#F1F3F5\"/>",
++                y + 12
++            ));
++            // Exact integers remain in the row; a rounded-zero decorative bar
++            // has no area and must not be clamped into a misleading positive area.
++            if width > 0.0 {
++                out.push_str(&format!(
++                    "<rect x=\"1392\" y=\"{}\" width=\"{width}\" height=\"16\" fill=\"#2563EB\"/>",
++                    y + 12
++                ));
++            }
+         }
+         svg_text(
+             &mut out,
+diff --git a/crates/firmwaresight-report/tests/visual_integration.rs b/crates/firmwaresight-report/tests/visual_integration.rs
+index 692f51f52a7660f647d6e571a0e80a79cf7970d7..4f20ce6736a25bc66da8cda17c3b222ea08b1e74 100644
+--- a/crates/firmwaresight-report/tests/visual_integration.rs
++++ b/crates/firmwaresight-report/tests/visual_integration.rs
+@@ -447,3 +447,33 @@ fn untrusted_markup_host_paths_unicode_and_huge_region_inputs_are_bounded() {
+     }
+     assert!(html.contains("label withheld"));
+ }
++
++#[test]
++fn zero_and_subpixel_occupancy_omit_only_the_decorative_foreground() {
++    let dto = analysis(&snapshot('a', "firmware.elf", 1024, None), "firmware.elf");
++    for (used, capacity, state, foreground) in [
++        (Some(0), Some(8192), RegionUsageState::Exact, false),
++        (Some(1), Some(u64::MAX), RegionUsageState::Exact, false),
++        (Some(8192), Some(8192), RegionUsageState::Exact, true),
++        (Some(1), None, RegionUsageState::Unknown, false),
++        (Some(1), Some(0), RegionUsageState::Exact, false),
++    ] {
++        let report = VisualReport::analyze(&dto, &[region("FLASH", used, capacity, state)]);
++        let svg = String::from_utf8(visual::render(&report, VisualFormat::Svg).unwrap()).unwrap();
++        assert!(
++            !svg.contains("width=\"0\""),
++            "zero-width decoration is invalid geometry"
++        );
++        assert!(!svg.contains("NaN") && !svg.contains("Infinity"));
++        assert_eq!(
++            svg.contains("width=\"144\" height=\"16\" fill=\"#2563EB\""),
++            foreground
++        );
++        let html = String::from_utf8(visual::render(&report, VisualFormat::Html).unwrap()).unwrap();
++        assert!(html.contains(&format!("{} bytes", used.unwrap())));
++        assert!(!html.contains("100% occupancy") && !html.contains("0% occupancy"));
++        let png = visual::render(&report, VisualFormat::Png).unwrap();
++        let decoded = resvg::tiny_skia::Pixmap::decode_png(&png).unwrap();
++        assert_eq!((decoded.width(), decoded.height()), (WIDTH, HEIGHT));
++    }
++}
+diff --git a/fixtures/elf/interop-clang/README.md b/fixtures/elf/interop-clang/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..374b900aabf94a28f699142541fa7a5b88d4da80
+--- /dev/null
++++ b/fixtures/elf/interop-clang/README.md
+@@ -0,0 +1,5 @@
++# Clang ELF metadata fixtures
++
++Four genuine Clang 22.1.8 relocatable objects, produced from the synthetic `fixture.c` by the exact relative commands in `provenance.json`. Targets cover ARM ELF32 LE/BE and AArch64 ELF64 LE/BE. Independent llvm-readobj header/section/symbol logs are kept in the external delivery evidence. No private firmware, vendor IDE or commercial toolchain was used.
++
++Regenerate into **new** directories with `python scripts/gen_interop_fixtures.py <fixture-directory> <external-evidence-directory>`. Compare binary SHA-256 values with the committed provenance. Object bytes are deterministic for this recorded compiler/environment. These fixtures prove metadata parsing; they are not linked memory-layout or Keil/IAR compatibility evidence. They must not be relabelled as vendor-generated `.axf`/`.out` files.
+diff --git a/fixtures/elf/interop-clang/aarch64-none-elf.o b/fixtures/elf/interop-clang/aarch64-none-elf.o
+new file mode 100644
+index 0000000000000000000000000000000000000000..24f03c81d3f3a531a87c4a8c23393336a23b2af7
+GIT binary patch
+literal 1480
+zcmbVMy^hmB5FRH1oI51Mj}XmCDN=C7ZOEUJP#`xz6VV~jMH}xX@!{B!y*cGhNOuJ#
+z#fg_ebUXtEqU05Lf@9X+iJe7}5L4_o^X)ggvpZ{Fz8t@*I1Z3G@CAy9SOB+L_+I9E
+zaEMA5;M#S(uXV&@MAxYw8h-@nf2&S@IF)Mcj?VEz9?ctPGD(9tYIHiR&4!Jq3#C@+
+z^HysfsKt89{CL?4!?S!iStaqQ^i{*>gHg9Ddjrws-Cn;fhHW|MaKAn134hw>yfd8k
+zN1}b4)wX{)#i<(nzOfbgnJYF8^NgwO;cxBXZ|~u=TiBU9!sr1M`!>z&81X(7>r(~q
+zGQL=!_({f7q|dl(5AlH5tF6)ek;Rin>#>hpyK6kHFY}KKuk{C8HNX?&KeqS-w+_t>
+zutbKODY;Rg8@`kgI@2_TS+G&-L{4Vw$XEDEfJL#A?Dd<sC#mB8dtmx)Ot=vEh~^MP
+zfeLsSTu1>IGKmpZ{5*`gfTp0um=7#fiQ-el^JRufEV$ypvawY6|GEkjOP|PgnbfrQ
+z^OngSyp|o)cdEIfv-z}_12hd1Q2)xY<~$+{{xTa~n^^ZqmqdN0K7B+^ON*C?0h-9+
+zulHov{|R-Pv+rQBC*Q7L*P&~&^TU74zlS=#|1+Z}p!^vT2C05RhCKOY>GyI_@@?%4
+ooU4v+VuY)b3|8hs>0I=U*!dqY$-aBN&QG(LYZ5f*zlhzxKX`a=U;qFB
+
+literal 0
+HcmV?d00001
+
+diff --git a/fixtures/elf/interop-clang/aarch64_be-none-elf.o b/fixtures/elf/interop-clang/aarch64_be-none-elf.o
+new file mode 100644
+index 0000000000000000000000000000000000000000..6d54814227f32cb40c1dce40456c776fdf6aa6f4
+GIT binary patch
+literal 1480
+zcmbtU&2G~`5FR^)CM^=;N2r%dIpjbO-QfHv2?vx5<q~m2;ufvFo5aPjBYRV&6%rgc
+za;SJ2#Eoa*fO_mJ^a;w0vm309K}d|WJ2T&YGdted^@o?E6W4WMBMy8;y8vuf(5O^%
+zZ>Z;ea1gkxI>T=@)JLeRPHkV?13>$GW&G1|D?1pm3qi!=Y5h#5S(wE2R*QM8Uw=AN
+zYLPu}Hm9MQEqxXw^JWyCt*7Hfnw-i&)dSuewA-@N6K&q^bUo4cWUs{ouh$WQ-{rj3
+z_qzk(9p$C{bvoUF+nW*weY0DFPZ6W~Z6W-Q4Wdu@-9O;FCHUdP?R^`_8$H<0Pj$RS
+z+|Ez<7;(GKqK~a|9$EX-I^l;FPJPBUZt?GF+~z+<e6NImpz$ZDbJ?rbps@m$%7`;1
+zR|=@%a~Y%IXBkYwm0G59JXywp!dn6?PLyP?UcWic6c643qq{NYLf|EuLKufC<WYDb
+z1zgB9LABuLQNjf@gh|E%V3|r4_fenEbDbuFD-JB5O>zIH6^2*JQ@EMNzgX+VcZTP^
+zd3SbyhdQod#TWZaw($*L)17N=T%yK4ZSFbsnS}cE35Ti2eg}d`C?@~f`^_i+GY%7P
+zpTkTC*zrZ5YB2TK@zFoT-!JU{O!JL0@e>1RZR#b>a2VgB!4DhIev$toxgF(of7~Lw
+g3k}gaoxhP{{CfoLb2q%JwL!nzyhigMG3Ryg3oX`fVE_OC
+
+literal 0
+HcmV?d00001
+
+diff --git a/fixtures/elf/interop-clang/armeb-none-eabi.o b/fixtures/elf/interop-clang/armeb-none-eabi.o
+new file mode 100644
+index 0000000000000000000000000000000000000000..b8edab0d7656d4c124a6a1b3b33b27b8ac9386e9
+GIT binary patch
+literal 1196
+zcma)6O^Xvj5Urkk?!hIytQZ$rf-Vxp?R=9&P+UYsSUm_HJS{!bo$Tl&6J|O~HV7^Y
+zo?TBKbJUCAPw*&s^6E(s`2qfdST!>p;>`!u^{V<!^>o!RZyp>xWEO)Z7?hE(B&^pN
+z+H6LOGOPoe&)~}Z9AG{x6zA^?@avRvg~I$t%zsxFJCXX|g)u9Y##9a*PYnB|V-<w1
+zKP=Vjyv94F@{!h~@OGurclFWO=8iw8c;0cm?2Q8drE+x15$$fHp_*;k5RGQ5COb9N
+zt_!EuZc4{)2~qFZt*)%yfPFmbj!?pOquVs@*Lk%I84(QHS`J*uT6wm{)?tHfrnlHd
+zxRffg%WT`)$zFx)EB9Ys;;mt6So|@Zd<wuq_jx5p@fq4~lB2kj@akr)?<aA3gL(oG
+zuEcrd)0H@j9BXB%4$db>{uV%<Ji@w}&*p#!%H#Xbo^UmB<s=TZnrNV24%85d9flA|
+zgw}y;kF^S+=T7uEP=~$o(9t*$;6q<4{^;rRy-*A16>u8Ep^y^i)dzRzYFBvfR7ses
+zz(+R{C!Q}P>`GINJHSI7Xknv28ALwtrO*O+wC;-d&Hr<KhdOMt0sD^Zi;2*id2J<}
+z`bD6xwi>Z`q3@4SKwCq*hlXIEa4Di)K%<_Lj%JV<#kJ3n6C@htlfFkf%G3F)^}b?E
+zI;uytOuZR$(wgVJWDi{gbB~W05jS_n*I1rKLaIl&hDPTYokni<kS_T)a;j%~LAoBA
+z0qv1JPQ1zgG$iq)A(Zij%$XFE?k<r8M)$&B9HdT77T7nW^c?ktV00glo1RdbW^tbE
+K)9;7wRQL<FV2%_3
+
+literal 0
+HcmV?d00001
+
+diff --git a/fixtures/elf/interop-clang/armv7-none-eabi.o b/fixtures/elf/interop-clang/armv7-none-eabi.o
+new file mode 100644
+index 0000000000000000000000000000000000000000..55b3ed370bf74e40cf8900cf988ce2a69735aff3
+GIT binary patch
+literal 1196
+zcma)4&ubGw6n>MWNn2`3OGPbGf{H|IC(VzNq^A~95vm8lgD08You;eXY}lQYv<Mc@
+z9u#`?=t=Ou@F<8^PfF<@;9pR`x7lg8Hy^xt-#71@H?!~U+Xq_@g%D&-P?gRZ(VJY7
+znP?@UO0(naG0_J6!wHq?n99KAk0*i-f1mT8312#`{o$irQ{?i65)(I2{a$5HN3kFF
+zD~*P%%TA@bW6U64uhn|K*%><04R>onus2>-22uD*yQbo*cDLEot+v-x&DL7o>(q6-
+zq1<}A<+;w9QjLzY*7fRlXtRr(lva*Uq6T=sAy>OpoGxunimBXmen!mFoR}{xh|6>(
+ze^p!)i@BxZ4RJgB`TSaXm#pKZKz~m&l=76LFWC+7PRdsi=fQg^FCflQiQ)@<k`6BL
+zV#1auh**CQaRzZ2+hyj6*O{Y{73N7piSA-frHLZRNC$HB*%PTpzBd|Eqeq6gpS!vb
+z;KVT{5@k%}J42&m+V)3g80nYW!@g@U6q5bWX!+>r^Oe{r_cci##Y^RRm|2hfzHfXL
+z_y^jf109731GOK7%CnWEOENZ*Q4Zq%ZW5!=Q$~?Y)>{g%|37;VSw18EfeC%ha67OC
+z>@gm9kcj_To`E&)CmZ*13cdknJHjE>U4rxP&bmoBTF><ccK%+v&l)yckMGRZ`-TlZ
+z&-GYi>wN-dtvw&4IfTSG$MzY{*naZ>*xm(rhHnD%JyvHjIlwdBA~4spy<puo+#2WD
+zAE(jo|FR&BtYNFdaVI}3G1jf8n1j{50M2inh6smn`i=y@mHWbGbw|LqC%nIa#33T*
+J`McT6@PE<yj8Fgo
+
+literal 0
+HcmV?d00001
+
+diff --git a/fixtures/elf/interop-clang/fixture.c b/fixtures/elf/interop-clang/fixture.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..f6bd4468f49cc11db73dc021054307f407bc4d86
+--- /dev/null
++++ b/fixtures/elf/interop-clang/fixture.c
+@@ -0,0 +1,5 @@
++/* Synthetic public test facts; no device/customer code. */
++const unsigned char payload[4] = {1, 2, 3, 4};
++volatile unsigned int initialized = 7;
++volatile unsigned int zeroed;
++unsigned int fixture_function(void) { return initialized + zeroed + payload[0]; }
+diff --git a/fixtures/elf/interop-clang/provenance.json b/fixtures/elf/interop-clang/provenance.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..30858b8827054683522af10480cbc606f8148914
+--- /dev/null
++++ b/fixtures/elf/interop-clang/provenance.json
+@@ -0,0 +1,82 @@
++{
++  "compiler": "clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)",
++  "independent_reader": "LLVM (http://llvm.org/):",
++  "files": [
++    {
++      "file": "armv7-none-eabi.o",
++      "target": "armv7-none-eabi",
++      "sha256": "ca524a226d734e532e1376a6a55f767c38e8d98a42ac40bccadf9d58a8f5ecbe",
++      "bytes": 1196,
++      "command": [
++        "clang",
++        "--target=armv7-none-eabi",
++        "-c",
++        "-O0",
++        "-g0",
++        "fixture.c",
++        "-o",
++        "armv7-none-eabi.o"
++      ],
++      "container": "ELF",
++      "evidence": "CLANG_RELOCATABLE_BASIC_METADATA_ONLY",
++      "vendor_cohort": "NOT_KEIL_OR_IAR"
++    },
++    {
++      "file": "armeb-none-eabi.o",
++      "target": "armeb-none-eabi",
++      "sha256": "753951e2ba8e5b4dbbafa90968696581109a084c2f11567c727d31aa14eb67d4",
++      "bytes": 1196,
++      "command": [
++        "clang",
++        "--target=armeb-none-eabi",
++        "-c",
++        "-O0",
++        "-g0",
++        "fixture.c",
++        "-o",
++        "armeb-none-eabi.o"
++      ],
++      "container": "ELF",
++      "evidence": "CLANG_RELOCATABLE_BASIC_METADATA_ONLY",
++      "vendor_cohort": "NOT_KEIL_OR_IAR"
++    },
++    {
++      "file": "aarch64-none-elf.o",
++      "target": "aarch64-none-elf",
++      "sha256": "32d9e3ff4545a664b8018d7cfae7e807ef1f9a1dadbdc0c600ea96f48f69a5e7",
++      "bytes": 1480,
++      "command": [
++        "clang",
++        "--target=aarch64-none-elf",
++        "-c",
++        "-O0",
++        "-g0",
++        "fixture.c",
++        "-o",
++        "aarch64-none-elf.o"
++      ],
++      "container": "ELF",
++      "evidence": "CLANG_RELOCATABLE_BASIC_METADATA_ONLY",
++      "vendor_cohort": "NOT_KEIL_OR_IAR"
++    },
++    {
++      "file": "aarch64_be-none-elf.o",
++      "target": "aarch64_be-none-elf",
++      "sha256": "8551e44df171653542431f780266ef45a467a6712126b508fed3d999d84e7c30",
++      "bytes": 1480,
++      "command": [
++        "clang",
++        "--target=aarch64_be-none-elf",
++        "-c",
++        "-O0",
++        "-g0",
++        "fixture.c",
++        "-o",
++        "aarch64_be-none-elf.o"
++      ],
++      "container": "ELF",
++      "evidence": "CLANG_RELOCATABLE_BASIC_METADATA_ONLY",
++      "vendor_cohort": "NOT_KEIL_OR_IAR"
++    }
++  ]
++}
+diff --git a/scripts/gen_interop_fixtures.py b/scripts/gen_interop_fixtures.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..00203ede378464add912329f5c43e65871d8560a
+--- /dev/null
++++ b/scripts/gen_interop_fixtures.py
+@@ -0,0 +1,50 @@
++#!/usr/bin/env python3
++"""Generate compiler-produced ELF format fixtures, NOT Keil/IAR vendor fixtures.
++
++Requires existing clang and llvm-readobj. No IDE installation or user project build.
++Invoke with NEW fixture and external evidence directories; builds use relative paths.
++These relocatable objects prove metadata parsing, not executable memory accounting.
++"""
++import hashlib
++import json
++from pathlib import Path
++import subprocess
++import sys
++
++TARGETS = ("armv7-none-eabi", "armeb-none-eabi", "aarch64-none-elf", "aarch64_be-none-elf")
++SOURCE = """/* Synthetic public test facts; no device/customer code. */
++const unsigned char payload[4] = {1, 2, 3, 4};
++volatile unsigned int initialized = 7;
++volatile unsigned int zeroed;
++unsigned int fixture_function(void) { return initialized + zeroed + payload[0]; }
++"""
++
++
++def main():
++    output = Path(sys.argv[1])
++    evidence = Path(sys.argv[2])
++    output.mkdir(parents=True, exist_ok=False)
++    evidence.mkdir(parents=True, exist_ok=False)
++    (output / "fixture.c").write_text(SOURCE, encoding="utf-8", newline="\n")
++    compiler = subprocess.check_output(["clang", "--version"], text=True).splitlines()[0]
++    reader = subprocess.check_output(["llvm-readobj", "--version"], text=True).splitlines()[0]
++    records = []
++    for target in TARGETS:
++        filename = f"{target}.o"
++        command = ["clang", f"--target={target}", "-c", "-O0", "-g0", "fixture.c", "-o", filename]
++        subprocess.run(command, cwd=output, check=True, capture_output=True)
++        inspected = subprocess.check_output(
++            ["llvm-readobj", "--file-headers", "--sections", "--symbols", filename], cwd=output
++        )
++        (evidence / f"{target}.readobj.txt").write_bytes(inspected)
++        data = (output / filename).read_bytes()
++        records.append({"file": filename, "target": target, "sha256": hashlib.sha256(data).hexdigest(),
++                        "bytes": len(data), "command": command, "container": "ELF",
++                        "evidence": "CLANG_RELOCATABLE_BASIC_METADATA_ONLY", "vendor_cohort": "NOT_KEIL_OR_IAR"})
++    (output / "provenance.json").write_text(json.dumps(
++        {"compiler": compiler, "independent_reader": reader, "files": records}, indent=2
++    ) + "\n", encoding="utf-8", newline="\n")
++
++
++if __name__ == "__main__":
++    main()

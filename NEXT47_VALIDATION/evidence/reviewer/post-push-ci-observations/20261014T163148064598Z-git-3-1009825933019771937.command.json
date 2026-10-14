@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "git.exe",
+    "status",
+    "--porcelain=v1",
+    "-uall"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "exit": 0,
+  "utc": "2026-10-14T16:32:00.715141+00:00",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

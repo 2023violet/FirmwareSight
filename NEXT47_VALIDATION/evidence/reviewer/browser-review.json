@@ -1,0 +1,1421 @@
+[
+  {
+    "name": "analyze-known",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\samples\\analyze-known\\analyze-known.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 6,
+      "text": "Analyze visual overview\nFirmwareSight / Analyze\n固件-controller.elf\nSnapshot ID: snap-aaaaaaaaaaaaaaaaaaaaaaaaaaaa... / Observed artifact SHA-256: aaaaaaaaaaaaaaaaaaaa...\nFLASH / nonvolatile image\n1536 bytes\nexact / observed\nRAM / runtime footprint\n0 bytes\nexact / observed\nCapacity unknown for footprint budgets. Missing/partial evidence remains qualified.\nFLASH\nMapped 1536 bytes / capacity 262144 bytes\nExact / Load / project-config / WithinCapacity\nSummary rows 1 of 1. Full labels, basis and identities in HTML detail.\nMapped occupancy is not footprint utilisation or allocator headroom.\nMAP capability: not-provided. Object attribution: unavailable.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\nIdentity and evidence detail\nIdentity\tValue\nSnapshot ID\tsnap-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-p0-normalize-1\nObserved artifact SHA-256\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nFirmwareSight version\t0.6.0-visual-sample\nMeasurements (exact bytes)\nFact\tValue\tBasis\nFLASH / nonvolatile image\t1536 bytes\texact / observed\nRAM / runtime footprint\t0 bytes\texact / observed\nFLASH\tMapped 1536 bytes / capacity 262144 bytes\tExact / Load / project-config / WithinCapacity\nLimits and next steps\nMAP capability: not-provided. Object attribution: unavailable.\nCapacity unknown for footprint budgets; region rows show mapped interval occupancy only.\nRegion remaining space does not prove allocator or stack/heap headroom.\nRegions shown: 1 of 1. Full section/symbol evidence remains in analysis JSON.\n\nUse the original JSON / detailed Compare HTML / verified Release Bundle for complete engineering evidence.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        },
+        {
+          "w": 144,
+          "h": 16
+        },
+        {
+          "w": 1,
+          "h": 16
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 426.68182373046875,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Analyze"
+        },
+        {
+          "x": 48,
+          "y": 80,
+          "w": 240.27218627929688,
+          "h": 39.272727966308594,
+          "text": "固件-controller.elf"
+        },
+        {
+          "x": 48,
+          "y": 122.18182373046875,
+          "w": 1345.931884765625,
+          "h": 27.636363983154297,
+          "text": "Snapshot ID: snap-aaaaaaaaaaaaaaaaaaaaaaaaaaaa... / Observed artifact SHA-256: aaaaaaaaaaaaaaaaaaaa..."
+        },
+        {
+          "x": 48,
+          "y": 144,
+          "w": 350.9283142089844,
+          "h": 39.272727966308594,
+          "text": "FLASH / nonvolatile image"
+        },
+        {
+          "x": 48,
+          "y": 187.63636779785156,
+          "w": 219.93182373046875,
+          "h": 46.54545593261719,
+          "text": "1536 bytes"
+        },
+        {
+          "x": 48,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 816,
+          "y": 144,
+          "w": 321.04864501953125,
+          "h": 39.272727966308594,
+          "text": "RAM / runtime footprint"
+        },
+        {
+          "x": 816,
+          "y": 187.63636779785156,
+          "w": 153.9545440673828,
+          "h": 46.54545593261719,
+          "text": "0 bytes"
+        },
+        {
+          "x": 816,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 48,
+          "y": 269.81817626953125,
+          "w": 887.7244873046875,
+          "h": 32,
+          "text": "Capacity unknown for footprint budgets. Missing/partial evidence remains qualified."
+        },
+        {
+          "x": 48,
+          "y": 292.3636474609375,
+          "w": 74.7272720336914,
+          "h": 33.45454788208008,
+          "text": "FLASH"
+        },
+        {
+          "x": 480,
+          "y": 301.0909118652344,
+          "w": 450.8409118652344,
+          "h": 23.272727966308594,
+          "text": "Mapped 1536 bytes / capacity 262144 bytes"
+        },
+        {
+          "x": 48,
+          "y": 321.81817626953125,
+          "w": 484.5245056152344,
+          "h": 32,
+          "text": "Exact / Load / project-config / WithinCapacity"
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 778.8472290039062,
+          "h": 33.45454788208008,
+          "text": "Summary rows 1 of 1. Full labels, basis and identities in HTML detail."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 792.1990356445312,
+          "h": 33.45454788208008,
+          "text": "Mapped occupancy is not footprint utilisation or allocator headroom."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 700.0061645507812,
+          "h": 33.45454788208008,
+          "text": "MAP capability: not-provided. Object attribution: unavailable."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  },
+  {
+    "name": "compare-ranked-growth",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\samples\\compare-ranked-growth\\compare-ranked-growth.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 9,
+      "text": "Compare visual overview\nFirmwareSight / Compare\nA ranked-base.elf -> B ranked-target.elf\nA Snapshot ID: ranked-base / B Snapshot ID: ranked-target\nFLASH image\nA 10000 bytes\nB 10800 bytes\nDelta +800 bytes\nexact / A exact (observed) / B exact (observed)\nRAM runtime\nA Unknown\nB Unknown\nDelta Unknown\nunknown / A unknown (unknown) / B unknown (unknown)\nscheduler\n+48 bytes\nCore Top 5 changed-symbol size growth (not footprint attribution)\nstartup\n+32 bytes\nCore Top 5 changed-symbol size growth (not footprint attribution)\nprotocol\n+16 bytes\nCore Top 5 changed-symbol size growth (not footprint attribution)\nChanged symbols 3. Added 0. Removed 0. Ambiguous 0.\nCore symbol ranking is not FLASH/RAM attribution. Unknown is not zero.\nCore comparability: unknown. A -> B; delta = B minus A.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\nIdentity and evidence detail\nIdentity\tValue\nA Snapshot ID\tranked-base\nB Snapshot ID\tranked-target\nA observed SHA-256\t6666666666666666666666666666666666666666666666666666666666666666\nB observed SHA-256\t7777777777777777777777777777777777777777777777777777777777777777\nMeasurements (exact bytes)\nFact\tValue\tBasis\nFLASH image\tA 10000 bytes | B 10800 bytes | Delta +800 bytes\texact / A exact (observed) / B exact (observed)\nRAM runtime\tA Unknown | B Unknown | Delta Unknown\tunknown / A unknown (unknown) / B unknown (unknown)\nscheduler\t+48 bytes\tCore Top 5 changed-symbol size growth (not footprint attribution)\nstartup\t+32 bytes\tCore Top 5 changed-symbol size growth (not footprint attribution)\nprotocol\t+16 bytes\tCore Top 5 changed-symbol size growth (not footprint attribution)\nLimits and next steps\nCore comparability: unknown. A -> B; delta = B minus A.\nCapacity unknown. Missing sides are absent, not measured zero.\nSymbol/section size changes are navigation evidence; their sum does not explain FLASH/RAM growth.\nUnattributed footprint remainder is not reliably quantifiable; object/module attribution unavailable.\nChanged symbols 3. Added 0. Removed 0. Ambiguous 0.\nthe base budget stores no number and the target budget stores no number, so no delta is claimed\n\nUse the original JSON / detailed Compare HTML / verified Release Bundle for complete engineering evidence.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        },
+        {
+          "w": 144,
+          "h": 16
+        },
+        {
+          "w": 144,
+          "h": 16
+        },
+        {
+          "w": 144,
+          "h": 16
+        },
+        {
+          "w": 96,
+          "h": 16
+        },
+        {
+          "w": 144,
+          "h": 16
+        },
+        {
+          "w": 48,
+          "h": 16
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 451.2045593261719,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Compare"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 80,
+          "w": 529.77685546875,
+          "h": 39.272727966308594,
+          "text": "A ranked-base.elf -> B ranked-target.elf"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 122.18182373046875,
+          "w": 753.5909423828125,
+          "h": 27.636363983154297,
+          "text": "A Snapshot ID: ranked-base / B Snapshot ID: ranked-target"
+        },
+        {
+          "x": 48,
+          "y": 164.3636474609375,
+          "w": 152.65908813476562,
+          "h": 33.45454788208008,
+          "text": "FLASH image"
+        },
+        {
+          "x": 478.54547119140625,
+          "y": 173.09091186523438,
+          "w": 144.40908813476562,
+          "h": 23.272727966308594,
+          "text": "A 10000 bytes"
+        },
+        {
+          "x": 832,
+          "y": 173.09091186523438,
+          "w": 142.9545440673828,
+          "h": 23.272727966308594,
+          "text": "B 10800 bytes"
+        },
+        {
+          "x": 1184,
+          "y": 173.09091186523438,
+          "w": 175.9545440673828,
+          "h": 23.272727966308594,
+          "text": "Delta +800 bytes"
+        },
+        {
+          "x": 48,
+          "y": 193.8181915283203,
+          "w": 489.3821105957031,
+          "h": 32,
+          "text": "exact / A exact (observed) / B exact (observed)"
+        },
+        {
+          "x": 48,
+          "y": 228.3636474609375,
+          "w": 152.3181915283203,
+          "h": 33.45454788208008,
+          "text": "RAM runtime"
+        },
+        {
+          "x": 478.54547119140625,
+          "y": 237.09091186523438,
+          "w": 100.43182373046875,
+          "h": 23.272727966308594,
+          "text": "A Unknown"
+        },
+        {
+          "x": 832,
+          "y": 237.09091186523438,
+          "w": 98.9772720336914,
+          "h": 23.272727966308594,
+          "text": "B Unknown"
+        },
+        {
+          "x": 1184,
+          "y": 237.09091186523438,
+          "w": 142.9545440673828,
+          "h": 23.272727966308594,
+          "text": "Delta Unknown"
+        },
+        {
+          "x": 48,
+          "y": 257.81817626953125,
+          "w": 617.8547973632812,
+          "h": 32,
+          "text": "unknown / A unknown (unknown) / B unknown (unknown)"
+        },
+        {
+          "x": 48,
+          "y": 292.3636474609375,
+          "w": 111.42389678955078,
+          "h": 33.45454788208008,
+          "text": "scheduler"
+        },
+        {
+          "x": 480,
+          "y": 301.0909118652344,
+          "w": 98.9772720336914,
+          "h": 23.272727966308594,
+          "text": "+48 bytes"
+        },
+        {
+          "x": 48,
+          "y": 321.81817626953125,
+          "w": 702.0305786132812,
+          "h": 32,
+          "text": "Core Top 5 changed-symbol size growth (not footprint attribution)"
+        },
+        {
+          "x": 48,
+          "y": 356.3636474609375,
+          "w": 80.90909576416016,
+          "h": 33.45454788208008,
+          "text": "startup"
+        },
+        {
+          "x": 480,
+          "y": 365.0909118652344,
+          "w": 98.9772720336914,
+          "h": 23.272727966308594,
+          "text": "+32 bytes"
+        },
+        {
+          "x": 48,
+          "y": 385.8182067871094,
+          "w": 702.0305786132812,
+          "h": 32,
+          "text": "Core Top 5 changed-symbol size growth (not footprint attribution)"
+        },
+        {
+          "x": 48,
+          "y": 420.3636474609375,
+          "w": 97.13636779785156,
+          "h": 33.45454788208008,
+          "text": "protocol"
+        },
+        {
+          "x": 480,
+          "y": 429.0909118652344,
+          "w": 98.9772720336914,
+          "h": 23.272727966308594,
+          "text": "+16 bytes"
+        },
+        {
+          "x": 48,
+          "y": 449.8182067871094,
+          "w": 702.0305786132812,
+          "h": 32,
+          "text": "Core Top 5 changed-symbol size growth (not footprint attribution)"
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 647.8432006835938,
+          "h": 33.45454788208008,
+          "text": "Changed symbols 3. Added 0. Removed 0. Ambiguous 0."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 837.990966796875,
+          "h": 33.45454788208008,
+          "text": "Core symbol ranking is not FLASH/RAM attribution. Unknown is not zero."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 645.2412719726562,
+          "h": 33.45454788208008,
+          "text": "Core comparability: unknown. A -> B; delta = B minus A."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  },
+  {
+    "name": "compare-unknown",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\samples\\compare-unknown\\compare-unknown.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 6,
+      "text": "Compare visual overview\nFirmwareSight / Compare\nA base.elf -> B target.elf\nA Snapshot ID: base / B Snapshot ID: target\nFLASH image\nA 1200 bytes\nB Unknown\nDelta Unknown\nunknown / A partial (derived) / B unknown (unknown)\nRAM runtime\nA Unknown\nB Unknown\nDelta Unknown\nunknown / A unknown (unknown) / B unknown (unknown)\nChanged symbols 0. Added 0. Removed 0. Ambiguous 0.\nCore symbol ranking is not FLASH/RAM attribution. Unknown is not zero.\nCore comparability: unknown. A -> B; delta = B minus A.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\nIdentity and evidence detail\nIdentity\tValue\nA Snapshot ID\tbase\nB Snapshot ID\ttarget\nA observed SHA-256\tbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\nB observed SHA-256\tcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\nMeasurements (exact bytes)\nFact\tValue\tBasis\nFLASH image\tA 1200 bytes | B Unknown | Delta Unknown\tunknown / A partial (derived) / B unknown (unknown)\nRAM runtime\tA Unknown | B Unknown | Delta Unknown\tunknown / A unknown (unknown) / B unknown (unknown)\nLimits and next steps\nCore comparability: unknown. A -> B; delta = B minus A.\nCapacity unknown. Missing sides are absent, not measured zero.\nSymbol/section size changes are navigation evidence; their sum does not explain FLASH/RAM growth.\nUnattributed footprint remainder is not reliably quantifiable; object/module attribution unavailable.\nChanged symbols 0. Added 0. Removed 0. Ambiguous 0.\nthe base budget is a partially accounted total and the target budget stores no number, so no delta is claimed\nthe base budget stores no number and the target budget stores no number, so no delta is claimed\n\nUse the original JSON / detailed Compare HTML / verified Release Bundle for complete engineering evidence.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 451.2045593261719,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Compare"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 80,
+          "w": 323.9576721191406,
+          "h": 39.272727966308594,
+          "text": "A base.elf -> B target.elf"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 122.18182373046875,
+          "w": 568.8636474609375,
+          "h": 27.636363983154297,
+          "text": "A Snapshot ID: base / B Snapshot ID: target"
+        },
+        {
+          "x": 48,
+          "y": 164.3636474609375,
+          "w": 152.65908813476562,
+          "h": 33.45454788208008,
+          "text": "FLASH image"
+        },
+        {
+          "x": 478.54547119140625,
+          "y": 173.09091186523438,
+          "w": 133.40908813476562,
+          "h": 23.272727966308594,
+          "text": "A 1200 bytes"
+        },
+        {
+          "x": 832,
+          "y": 173.09091186523438,
+          "w": 98.9772720336914,
+          "h": 23.272727966308594,
+          "text": "B Unknown"
+        },
+        {
+          "x": 1184,
+          "y": 173.09091186523438,
+          "w": 142.9545440673828,
+          "h": 23.272727966308594,
+          "text": "Delta Unknown"
+        },
+        {
+          "x": 48,
+          "y": 193.8181915283203,
+          "w": 568.1790161132812,
+          "h": 32,
+          "text": "unknown / A partial (derived) / B unknown (unknown)"
+        },
+        {
+          "x": 48,
+          "y": 228.3636474609375,
+          "w": 152.3181915283203,
+          "h": 33.45454788208008,
+          "text": "RAM runtime"
+        },
+        {
+          "x": 478.54547119140625,
+          "y": 237.09091186523438,
+          "w": 100.43182373046875,
+          "h": 23.272727966308594,
+          "text": "A Unknown"
+        },
+        {
+          "x": 832,
+          "y": 237.09091186523438,
+          "w": 98.9772720336914,
+          "h": 23.272727966308594,
+          "text": "B Unknown"
+        },
+        {
+          "x": 1184,
+          "y": 237.09091186523438,
+          "w": 142.9545440673828,
+          "h": 23.272727966308594,
+          "text": "Delta Unknown"
+        },
+        {
+          "x": 48,
+          "y": 257.81817626953125,
+          "w": 617.8547973632812,
+          "h": 32,
+          "text": "unknown / A unknown (unknown) / B unknown (unknown)"
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 647.8432006835938,
+          "h": 33.45454788208008,
+          "text": "Changed symbols 0. Added 0. Removed 0. Ambiguous 0."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 837.990966796875,
+          "h": 33.45454788208008,
+          "text": "Core symbol ranking is not FLASH/RAM attribution. Unknown is not zero."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 645.2412719726562,
+          "h": 33.45454788208008,
+          "text": "Core comparability: unknown. A -> B; delta = B minus A."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  },
+  {
+    "name": "large-u64-cjk-region",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\samples\\large-u64-cjk-region\\large-u64-cjk-region.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 6,
+      "text": "Analyze visual overview\nFirmwareSight / Analyze\nlarge-u64.elf\nSnapshot ID: snap-ffffffffffffffffffffffffffff... / Observed artifact SHA-256: ffffffffffffffffffff...\nFLASH / nonvolatile image\n18446744073709551615 bytes\nexact / observed\nRAM / runtime footprint\n0 bytes\nexact / observed\nCapacity unknown for footprint budgets. Missing/partial evidence remains qualified.\n闪存区域-配置空间配置空间...\nMapped 262144 bytes / capacity 262144 bytes\nPartial / Load / project-config / Review\nSummary rows 1 of 1. Full labels, basis and identities in HTML detail.\nMapped occupancy is not footprint utilisation or allocator headroom.\nMAP capability: not-provided. Object attribution: unavailable.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\nIdentity and evidence detail\nIdentity\tValue\nSnapshot ID\tsnap-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-p0-normalize-1\nObserved artifact SHA-256\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\nFirmwareSight version\t0.6.0-visual-sample\nMeasurements (exact bytes)\nFact\tValue\tBasis\nFLASH / nonvolatile image\t18446744073709551615 bytes\texact / observed\nRAM / runtime footprint\t0 bytes\texact / observed\n闪存区域-配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间配置空间...\tMapped 262144 bytes / capacity 262144 bytes\tPartial / Load / project-config / Review\nLimits and next steps\nMAP capability: not-provided. Object attribution: unavailable.\nCapacity unknown for footprint budgets; region rows show mapped interval occupancy only.\nRegion remaining space does not prove allocator or stack/heap headroom.\nelf.section_header[1] address plus size overflows the supported address range\nRegions shown: 1 of 1. Full section/symbol evidence remains in analysis JSON.\n\nUse the original JSON / detailed Compare HTML / verified Release Bundle for complete engineering evidence.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 426.68182373046875,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Analyze"
+        },
+        {
+          "x": 48,
+          "y": 80,
+          "w": 168.68801879882812,
+          "h": 39.272727966308594,
+          "text": "large-u64.elf"
+        },
+        {
+          "x": 48,
+          "y": 122.18182373046875,
+          "w": 1345.931884765625,
+          "h": 27.636363983154297,
+          "text": "Snapshot ID: snap-ffffffffffffffffffffffffffff... / Observed artifact SHA-256: ffffffffffffffffffff..."
+        },
+        {
+          "x": 48,
+          "y": 144,
+          "w": 350.9283142089844,
+          "h": 39.272727966308594,
+          "text": "FLASH / nonvolatile image"
+        },
+        {
+          "x": 48,
+          "y": 187.63636779785156,
+          "w": 571.8181762695312,
+          "h": 46.54545593261719,
+          "text": "18446744073709551615 bytes"
+        },
+        {
+          "x": 48,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 816,
+          "y": 144,
+          "w": 321.04864501953125,
+          "h": 39.272727966308594,
+          "text": "RAM / runtime footprint"
+        },
+        {
+          "x": 816,
+          "y": 187.63636779785156,
+          "w": 153.9545440673828,
+          "h": 46.54545593261719,
+          "text": "0 bytes"
+        },
+        {
+          "x": 816,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 48,
+          "y": 269.81817626953125,
+          "w": 887.7244873046875,
+          "h": 32,
+          "text": "Capacity unknown for footprint budgets. Missing/partial evidence remains qualified."
+        },
+        {
+          "x": 48,
+          "y": 292.3636474609375,
+          "w": 339.3955993652344,
+          "h": 33.45454788208008,
+          "text": "闪存区域-配置空间配置空间..."
+        },
+        {
+          "x": 480,
+          "y": 301.0909118652344,
+          "w": 472.8409118652344,
+          "h": 23.272727966308594,
+          "text": "Mapped 262144 bytes / capacity 262144 bytes"
+        },
+        {
+          "x": 48,
+          "y": 321.81817626953125,
+          "w": 409.2020568847656,
+          "h": 32,
+          "text": "Partial / Load / project-config / Review"
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 778.8472290039062,
+          "h": 33.45454788208008,
+          "text": "Summary rows 1 of 1. Full labels, basis and identities in HTML detail."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 792.1990356445312,
+          "h": 33.45454788208008,
+          "text": "Mapped occupancy is not footprint utilisation or allocator headroom."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 700.0061645507812,
+          "h": 33.45454788208008,
+          "text": "MAP capability: not-provided. Object attribution: unavailable."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  },
+  {
+    "name": "privacy-cjk-long-label",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\samples\\privacy-cjk-long-label\\privacy-cjk-long-label.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 6,
+      "text": "Analyze visual overview\nFirmwareSight / Analyze\n[label withheld: unsafe or private text]\nSnapshot ID: snap-aaaaaaaaaaaaaaaaaaaaaaaaaaaa... / Observed artifact SHA-256: aaaaaaaaaaaaaaaaaaaa...\nFLASH / nonvolatile image\n1536 bytes\nexact / observed\nRAM / runtime footprint\n0 bytes\nexact / observed\nCapacity unknown for footprint budgets. Missing/partial evidence remains qualified.\nFLASH\nMapped 1536 bytes / capacity 262144 bytes\nExact / Load / project-config / WithinCapacity\nSummary rows 1 of 1. Full labels, basis and identities in HTML detail.\nMapped occupancy is not footprint utilisation or allocator headroom.\nMAP capability: not-provided. Object attribution: unavailable.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\nIdentity and evidence detail\nIdentity\tValue\nSnapshot ID\tsnap-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-p0-normalize-1\nObserved artifact SHA-256\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nFirmwareSight version\t0.6.0-visual-sample\nMeasurements (exact bytes)\nFact\tValue\tBasis\nFLASH / nonvolatile image\t1536 bytes\texact / observed\nRAM / runtime footprint\t0 bytes\texact / observed\nFLASH\tMapped 1536 bytes / capacity 262144 bytes\tExact / Load / project-config / WithinCapacity\nLimits and next steps\nMAP capability: not-provided. Object attribution: unavailable.\nCapacity unknown for footprint budgets; region rows show mapped interval occupancy only.\nRegion remaining space does not prove allocator or stack/heap headroom.\nRegions shown: 1 of 1. Full section/symbol evidence remains in analysis JSON.\n\nUse the original JSON / detailed Compare HTML / verified Release Bundle for complete engineering evidence.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        },
+        {
+          "w": 144,
+          "h": 16
+        },
+        {
+          "w": 1,
+          "h": 16
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 426.68182373046875,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Analyze"
+        },
+        {
+          "x": 48,
+          "y": 80,
+          "w": 498.04547119140625,
+          "h": 39.272727966308594,
+          "text": "[label withheld: unsafe or private text]"
+        },
+        {
+          "x": 48,
+          "y": 122.18182373046875,
+          "w": 1345.931884765625,
+          "h": 27.636363983154297,
+          "text": "Snapshot ID: snap-aaaaaaaaaaaaaaaaaaaaaaaaaaaa... / Observed artifact SHA-256: aaaaaaaaaaaaaaaaaaaa..."
+        },
+        {
+          "x": 48,
+          "y": 144,
+          "w": 350.9283142089844,
+          "h": 39.272727966308594,
+          "text": "FLASH / nonvolatile image"
+        },
+        {
+          "x": 48,
+          "y": 187.63636779785156,
+          "w": 219.93182373046875,
+          "h": 46.54545593261719,
+          "text": "1536 bytes"
+        },
+        {
+          "x": 48,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 816,
+          "y": 144,
+          "w": 321.04864501953125,
+          "h": 39.272727966308594,
+          "text": "RAM / runtime footprint"
+        },
+        {
+          "x": 816,
+          "y": 187.63636779785156,
+          "w": 153.9545440673828,
+          "h": 46.54545593261719,
+          "text": "0 bytes"
+        },
+        {
+          "x": 816,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 48,
+          "y": 269.81817626953125,
+          "w": 887.7244873046875,
+          "h": 32,
+          "text": "Capacity unknown for footprint budgets. Missing/partial evidence remains qualified."
+        },
+        {
+          "x": 48,
+          "y": 292.3636474609375,
+          "w": 74.7272720336914,
+          "h": 33.45454788208008,
+          "text": "FLASH"
+        },
+        {
+          "x": 480,
+          "y": 301.0909118652344,
+          "w": 450.8409118652344,
+          "h": 23.272727966308594,
+          "text": "Mapped 1536 bytes / capacity 262144 bytes"
+        },
+        {
+          "x": 48,
+          "y": 321.81817626953125,
+          "w": 484.5245056152344,
+          "h": 32,
+          "text": "Exact / Load / project-config / WithinCapacity"
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 778.8472290039062,
+          "h": 33.45454788208008,
+          "text": "Summary rows 1 of 1. Full labels, basis and identities in HTML detail."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 792.1990356445312,
+          "h": 33.45454788208008,
+          "text": "Mapped occupancy is not footprint utilisation or allocator headroom."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 700.0061645507812,
+          "h": 33.45454788208008,
+          "text": "MAP capability: not-provided. Object attribution: unavailable."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  },
+  {
+    "name": "release-review-block-unknown",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\samples\\release-review-block-unknown\\release-review-block-unknown.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 18,
+      "text": "Release visual overview\nFirmwareSight / Release\n1.7.0\nSnapshot ID: snap-aaaaaaaaaaaaaaaaaaaaaaaaaaaa... / Gate Run ID: gate-synthetic-review-block\nFLASH / nonvolatile image\n1536 bytes\nexact / observed\nRAM / runtime footprint\n0 bytes\nexact / observed\nCapacity unknown for footprint budgets. Missing/partial evidence remains qualified.\ngit.clean\n+ PASS / severity PASS\nWorkspace has no uncommitted changes at Gate evaluation time.\nrelease.commit_matches_ex...\n- N/A / severity PASS\nNo `release.expected_commit` is declared for this release.\nrelease.version_matches_p...\n- N/A / severity PASS\nNo `[version]` policy is configured, so no tag has to match.\nartifacts.required\nx BLOCK / severity BLOCK\nRequired artifact kind(s) missing from the snapshot: map.\nartifacts.hashes\n+ PASS / severity PASS\nAll 1 snapshot artifact(s) carry a SHA-256 digest.\nmemory.flash_budget\n- N/A / severity PASS\nNo `policy:memory.flash_budget` budget is configured.\nmemory.ram_budget\n- N/A / severity PASS\nNo `policy:memory.ram_budget` budget is configured.\nSummary rows 7 of 10. Full labels, basis and identities in HTML detail.\nPASS is not shipping permission. SHA-256 checks bytes, not publisher identity.\nOriginal Gate effective severity: BLOCK. Findings retain their original states.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\nIdentity and evidence detail\nIdentity\tValue\nSnapshot ID\tsnap-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-p0-normalize-1\nGate Run ID\tgate-synthetic-review-block\nFirmwareSight version\t0.6.0-visual-sample\nRelease ID\trelease-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\nProject release version\t1.7.0\nObserved 4096 bytes: 固件-controller.elf\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nMeasurements (exact bytes)\nFact\tValue\tBasis\nFLASH / nonvolatile image\t1536 bytes\texact / observed\nRAM / runtime footprint\t0 bytes\texact / observed\ngit.clean\t+ PASS / severity PASS\tWorkspace has no uncommitted changes at Gate evaluation time.\nrelease.commit_matches_expected\t- N/A / severity PASS\tNo `release.expected_commit` is declared for this release.\nrelease.version_matches_policy\t- N/A / severity PASS\tNo `[version]` policy is configured, so no tag has to match.\nartifacts.required\tx BLOCK / severity BLOCK\tRequired artifact kind(s) missing from the snapshot: map.\nartifacts.hashes\t+ PASS / severity PASS\tAll 1 snapshot artifact(s) carry a SHA-256 digest.\nmemory.flash_budget\t- N/A / severity PASS\tNo `policy:memory.flash_budget` budget is configured.\nmemory.ram_budget\t- N/A / severity PASS\tNo `policy:memory.ram_budget` budget is configured.\ndiff.growth\t- N/A / severity PASS\tNo `[diff]` growth threshold is configured.\nrelease.notes\to UNKNOWN / severity REVIEW\tNo observation was recorded for `release.release_notes_path` (RELEASE_NOTES.md).\nevidence.unknown_review\t! REVIEW / severity REVIEW\t1 snapshot evidence item(s) are Unknown, at or above the review threshold of 0. The items stay Unknown; this finding asks a person to look.\nLimits and next steps\nOriginal Gate effective severity: BLOCK. Findings retain their original states.\nPASS is a policy result, not shipping permission or security certification.\nSHA-256 checks bytes, not publisher identity or build provenance.\nCapacity unknown. Workspace Git facts are not proof of the shipped firmware build.\nFindings shown: 10 of 10. Read gate-results JSON for full evidence and remediation.\n\nUse the original JSON / detailed Compare HTML / verified Release Bundle for complete engineering evidence.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 422.3636474609375,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Release"
+        },
+        {
+          "x": 48,
+          "y": 80,
+          "w": 61.522727966308594,
+          "h": 39.272727966308594,
+          "text": "1.7.0"
+        },
+        {
+          "x": 48,
+          "y": 122.18182373046875,
+          "w": 1215.3189697265625,
+          "h": 27.636363983154297,
+          "text": "Snapshot ID: snap-aaaaaaaaaaaaaaaaaaaaaaaaaaaa... / Gate Run ID: gate-synthetic-review-block"
+        },
+        {
+          "x": 48,
+          "y": 144,
+          "w": 350.9283142089844,
+          "h": 39.272727966308594,
+          "text": "FLASH / nonvolatile image"
+        },
+        {
+          "x": 48,
+          "y": 187.63636779785156,
+          "w": 219.93182373046875,
+          "h": 46.54545593261719,
+          "text": "1536 bytes"
+        },
+        {
+          "x": 48,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 816,
+          "y": 144,
+          "w": 321.04864501953125,
+          "h": 39.272727966308594,
+          "text": "RAM / runtime footprint"
+        },
+        {
+          "x": 816,
+          "y": 187.63636779785156,
+          "w": 153.9545440673828,
+          "h": 46.54545593261719,
+          "text": "0 bytes"
+        },
+        {
+          "x": 816,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 48,
+          "y": 269.81817626953125,
+          "w": 887.7244873046875,
+          "h": 32,
+          "text": "Capacity unknown for footprint budgets. Missing/partial evidence remains qualified."
+        },
+        {
+          "x": 48,
+          "y": 292.3636474609375,
+          "w": 95.88636779785156,
+          "h": 33.45454788208008,
+          "text": "git.clean"
+        },
+        {
+          "x": 480,
+          "y": 301.0909118652344,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 321.81817626953125,
+          "w": 695.5149536132812,
+          "h": 32,
+          "text": "Workspace has no uncommitted changes at Gate evaluation time."
+        },
+        {
+          "x": 48,
+          "y": 356.3636474609375,
+          "w": 333.06219482421875,
+          "h": 33.45454788208008,
+          "text": "release.commit_matches_ex..."
+        },
+        {
+          "x": 480,
+          "y": 365.0909118652344,
+          "w": 231.55824279785156,
+          "h": 23.272727966308594,
+          "text": "- N/A / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 385.8182067871094,
+          "w": 604.7283325195312,
+          "h": 32,
+          "text": "No `release.expected_commit` is declared for this release."
+        },
+        {
+          "x": 48,
+          "y": 420.3636474609375,
+          "w": 318.0478820800781,
+          "h": 33.45454788208008,
+          "text": "release.version_matches_p..."
+        },
+        {
+          "x": 480,
+          "y": 429.0909118652344,
+          "w": 231.55824279785156,
+          "h": 23.272727966308594,
+          "text": "- N/A / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 449.8182067871094,
+          "w": 615.6736450195312,
+          "h": 32,
+          "text": "No `[version]` policy is configured, so no tag has to match."
+        },
+        {
+          "x": 48,
+          "y": 484.3636474609375,
+          "w": 193.09091186523438,
+          "h": 33.45454788208008,
+          "text": "artifacts.required"
+        },
+        {
+          "x": 480,
+          "y": 493.0909118652344,
+          "w": 264.5465393066406,
+          "h": 23.272727966308594,
+          "text": "x BLOCK / severity BLOCK"
+        },
+        {
+          "x": 48,
+          "y": 513.8181762695312,
+          "w": 603.6384887695312,
+          "h": 32,
+          "text": "Required artifact kind(s) missing from the snapshot: map."
+        },
+        {
+          "x": 48,
+          "y": 548.3636474609375,
+          "w": 175.10604858398438,
+          "h": 33.45454788208008,
+          "text": "artifacts.hashes"
+        },
+        {
+          "x": 480,
+          "y": 557.0909423828125,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 577.8181762695312,
+          "w": 509.9250793457031,
+          "h": 32,
+          "text": "All 1 snapshot artifact(s) carry a SHA-256 digest."
+        },
+        {
+          "x": 48,
+          "y": 612.3636474609375,
+          "w": 248.0454559326172,
+          "h": 33.45454788208008,
+          "text": "memory.flash_budget"
+        },
+        {
+          "x": 480,
+          "y": 621.0909423828125,
+          "w": 231.55824279785156,
+          "h": 23.272727966308594,
+          "text": "- N/A / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 641.8181762695312,
+          "w": 581.1502075195312,
+          "h": 32,
+          "text": "No `policy:memory.flash_budget` budget is configured."
+        },
+        {
+          "x": 48,
+          "y": 676.3636474609375,
+          "w": 239.2954559326172,
+          "h": 33.45454788208008,
+          "text": "memory.ram_budget"
+        },
+        {
+          "x": 480,
+          "y": 685.0909423828125,
+          "w": 231.55824279785156,
+          "h": 23.272727966308594,
+          "text": "- N/A / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 705.8181762695312,
+          "w": 573.0759887695312,
+          "h": 32,
+          "text": "No `policy:memory.ram_budget` budget is configured."
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 792.8589477539062,
+          "h": 33.45454788208008,
+          "text": "Summary rows 7 of 10. Full labels, basis and identities in HTML detail."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 895.7001342773438,
+          "h": 33.45454788208008,
+          "text": "PASS is not shipping permission. SHA-256 checks bytes, not publisher identity."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 853.728515625,
+          "h": 33.45454788208008,
+          "text": "Original Gate effective severity: BLOCK. Findings retain their original states."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  },
+  {
+    "name": "detailed-compare",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\detailed-compare.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 96,
+      "text": "Build diff\n\nFirmwareSight 0.6.0 · urn:firmwaresight:schema:diff:1 schema version 1\n\nBuilds compared\nBase (old)\nArtifact\nfirmware.elf\nSHA-256\n3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f\nSize\n16820 bytes\nSnapshot\nsnap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1\nLayout\nnone · ElfAddressAndFlags\nMAP\nno MAP stored for this build\nTarget (new)\nArtifact\nfirmware.elf\nSHA-256\n4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374\nSize\n17464 bytes\nSnapshot\nsnap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1\nLayout\nnone · ElfAddressAndFlags\nMAP\nno MAP stored for this build\nCompare visual overview\nFirmwareSight / Compare\nA firmware.elf -> B firmware.elf\nA Snapshot ID: snap-3f615b6247179d930f59b76dcdba... / B Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd9...\nFLASH image\nA 256 bytes\nB 376 bytes\nDelta +120 bytes\nexact / A exact (observed) / B exact (observed)\nRAM runtime\nA 8 bytes\nB 76 bytes\nDelta +68 bytes\nexact / A exact (observed) / B exact (observed)\nChanged symbols 5. Added 38. Removed 33. Ambiguous 67.\nCore symbol ranking is not FLASH/RAM attribution. Unknown is not zero.\nCore comparability: exact. A -> B; delta = B minus A.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\nMemory totals\n\nComparability: exact — the weaker side caps both budgets.\n\nDelta = target − base. A dash is an absence, not a zero.\nBudget\tBase\tTarget\tDelta\tReading\nNonvolatile / load image\t256\t376\t120\texact on both sides\nRuntime RAM\t8\t76\t68\texact on both sides\n\nBase side: nonvolatile 256 bytes (exact) · runtime RAM 8 bytes (exact)\n\nTarget side: nonvolatile 376 bytes (exact) · runtime RAM 76 bytes (exact)\n\nRead this before the tables\n\nMAP-EVIDENCE — memory change is based on weaker layout evidence for one or both snapshots: neither build has a stored GNU ld MAP, so the weaker side is charged from ELF section address and flags rather than from a linker region table\nSYMBOL-AMBIGUOUS — 67 symbol row(s) repeat a name, kind and binding combination on one or both sides and were left unpaired; a row position is not an identity\nWhat moved\n\nSections: 1 added, 1 removed, 16 changed, 0 left unpaired because the name repeats. Symbols: 38 added, 33 removed, 5 changed, 67 left unpaired because the key repeats.\n\nFound identical and left out of the tables: 2 section(s), 9 symbol(s).\n\nSection changes\nEvery changed row, not a truncated top list.\nChange\tSection\tBase size\tTarget size\tDelta\tFields\tWhere to check\n~ Changed\t.ARM.attributes\t46\t46\t0\tdiffers: file_offset\tbase row 15 / target row 15\n~ Changed\t.bss\t0\t0\t0\tdiffers: memory_size\tbase row 5 / target row 5\n− Removed\t.calib\t32\t—\t—\tno recorded field differs\tbase row 6\n~ Changed\t.comment\t70\t70\t0\tdiffers: file_offset\tbase row 14 / target row 14\n~ Changed\t.debug_abbrev\t470\t518\t48\tdiffers: file_offset, file_size, memory_size\tbase row 8 / target row 8\n~ Changed\t.debug_aranges\t72\t72\t0\tdiffers: file_offset\tbase row 10 / target row 10\n~ Changed\t.debug_frame\t156\t180\t24\tdiffers: file_offset, file_size, memory_size\tbase row 16 / target row 16\n~ Changed\t.debug_info\t798\t910\t112\tdiffers: file_offset, file_size, memory_size\tbase row 7 / target row 7\n~ Changed\t.debug_line\t314\t421\t107\tdiffers: file_offset, file_size, memory_size\tbase row 12 / target row 12\n~ Changed\t.debug_loclists\t193\t414\t221\tdiffers: file_offset, file_size, memory_size\tbase row 9 / target row 9\n~ Changed\t.debug_rnglists\t25\t25\t0\tdiffers: file_offset\tbase row 11 / target row 11\n~ Changed\t.debug_str\t350\t389\t39\tdiffers: file_offset, file_size, memory_size\tbase row 13 / target row 13\n+ Added\t.ota\t—\t64\t—\tno recorded field differs\ttarget row 6\n~ Changed\t.rodata\t32\t32\t0\tdiffers: virtual_address, file_offset\tbase row 2 / target row 2\n~ Changed\t.shstrtab\t203\t201\t-2\tdiffers: file_offset, file_size, memory_size\tbase row 19 / target row 19\n~ Changed\t.strtab\t163\t200\t37\tdiffers: file_offset, file_size, memory_size\tbase row 18 / target row 18\n~ Changed\t.symtab\t768\t848\t80\tdiffers: file_offset, file_size, memory_size\tbase row 17 / target row 17\n~ Changed\t.text\t124\t212\t88\tdiffers: file_size, memory_size\tbase row 1 / target row 1\nSymbol changes\nEvery changed row. Growth ranking never replaces this list.\nChange\tSymbol\tBase size\tTarget size\tDelta\tFields\tWhere to check\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 18\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 20\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 22\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 23\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 24\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 25\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 28\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 30\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 32\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 34\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 35\n+ Added\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 36\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 18\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 20\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 22\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 23\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 24\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 25\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 28\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 30\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 32\n− Removed\t$d (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 33\n+ Added\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 17\n+ Added\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 19\n+ Added\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 21\n+ Added\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 27\n+ Added\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 29\n+ Added\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 31\n+ Added\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 33\n− Removed\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 17\n− Removed\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 19\n− Removed\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 21\n− Removed\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 27\n− Removed\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 29\n− Removed\t$t (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 31\n− Removed\tcalib\t32\t—\t—\tno recorded field differs\tbase row 34\n~ Changed\tcalib_apply\t16\t2\t-14\tdiffers: size\tbase row 39 / target row 43\n~ Changed\tcfg_table\t32\t32\t0\tdiffers: address\tbase row 43 / target row 48\n+ Added\tg_frame_counter\t—\t4\t—\tno recorded field differs\ttarget row 45\n~ Changed\tmqtt_task\t4\t46\t42\tdiffers: address, size\tbase row 38 / target row 41\n+ Added\tpacket_router\t—\t44\t—\tno recorded field differs\ttarget row 42\n~ Changed\tpayload_extra\t4\t20\t16\tdiffers: address, size\tbase row 42 / target row 47\n+ Added\tstaging_area\t—\t64\t—\tno recorded field differs\ttarget row 37\n~ Changed\ttls_handshake\t16\t16\t0\tdiffers: address\tbase row 35 / target row 38\n+ Added\tunnamed symbol 0 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 0\n− Removed\tunnamed symbol 0 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 0\n+ Added\tunnamed symbol 1 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 1\n− Removed\tunnamed symbol 1 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 1\n+ Added\tunnamed symbol 10 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 10\n− Removed\tunnamed symbol 10 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 10\n+ Added\tunnamed symbol 11 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 11\n− Removed\tunnamed symbol 11 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 11\n+ Added\tunnamed symbol 12 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 12\n− Removed\tunnamed symbol 12 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 12\n+ Added\tunnamed symbol 13 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 13\n− Removed\tunnamed symbol 13 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 13\n+ Added\tunnamed symbol 14 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 14\n− Removed\tunnamed symbol 14 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 14\n+ Added\tunnamed symbol 15 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 15\n− Removed\tunnamed symbol 15 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 15\n+ Added\tunnamed symbol 2 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 2\n− Removed\tunnamed symbol 2 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 2\n+ Added\tunnamed symbol 3 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 3\n− Removed\tunnamed symbol 3 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 3\n+ Added\tunnamed symbol 4 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 4\n− Removed\tunnamed symbol 4 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 4\n+ Added\tunnamed symbol 5 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 5\n− Removed\tunnamed symbol 5 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 5\n+ Added\tunnamed symbol 6 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 6\n− Removed\tunnamed symbol 6 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 6\n+ Added\tunnamed symbol 7 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 7\n− Removed\tunnamed symbol 7 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 7\n+ Added\tunnamed symbol 8 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 8\n− Removed\tunnamed symbol 8 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 8\n+ Added\tunnamed symbol 9 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\ttarget row 9\n− Removed\tunnamed symbol 9 (name repeats on one or both sides)\t—\t—\t—\tno recorded field differs\tbase row 9\nObject and module changes\n\nNot claimable here: the persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build\n\nDeterministic export: no timestamp, no scripts, no network requests. FirmwareSight 0.6.0.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 451.2045593261719,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Compare"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 80,
+          "w": 415.2098693847656,
+          "h": 39.272727966308594,
+          "text": "A firmware.elf -> B firmware.elf"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 122.18182373046875,
+          "w": 1347.3863525390625,
+          "h": 27.636363983154297,
+          "text": "A Snapshot ID: snap-3f615b6247179d930f59b76dcdba... / B Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd9..."
+        },
+        {
+          "x": 48,
+          "y": 164.3636474609375,
+          "w": 152.65908813476562,
+          "h": 33.45454788208008,
+          "text": "FLASH image"
+        },
+        {
+          "x": 478.54547119140625,
+          "y": 173.09091186523438,
+          "w": 122.43182373046875,
+          "h": 23.272727966308594,
+          "text": "A 256 bytes"
+        },
+        {
+          "x": 832,
+          "y": 173.09091186523438,
+          "w": 120.97727966308594,
+          "h": 23.272727966308594,
+          "text": "B 376 bytes"
+        },
+        {
+          "x": 1184,
+          "y": 173.09091186523438,
+          "w": 175.9545440673828,
+          "h": 23.272727966308594,
+          "text": "Delta +120 bytes"
+        },
+        {
+          "x": 48,
+          "y": 193.8181915283203,
+          "w": 489.3821105957031,
+          "h": 32,
+          "text": "exact / A exact (observed) / B exact (observed)"
+        },
+        {
+          "x": 48,
+          "y": 228.3636474609375,
+          "w": 152.3181915283203,
+          "h": 33.45454788208008,
+          "text": "RAM runtime"
+        },
+        {
+          "x": 478.54547119140625,
+          "y": 237.09091186523438,
+          "w": 100.43182373046875,
+          "h": 23.272727966308594,
+          "text": "A 8 bytes"
+        },
+        {
+          "x": 832,
+          "y": 237.09091186523438,
+          "w": 109.97727966308594,
+          "h": 23.272727966308594,
+          "text": "B 76 bytes"
+        },
+        {
+          "x": 1184,
+          "y": 237.09091186523438,
+          "w": 164.9545440673828,
+          "h": 23.272727966308594,
+          "text": "Delta +68 bytes"
+        },
+        {
+          "x": 48,
+          "y": 257.81817626953125,
+          "w": 489.3821105957031,
+          "h": 32,
+          "text": "exact / A exact (observed) / B exact (observed)"
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 689.8782958984375,
+          "h": 33.45454788208008,
+          "text": "Changed symbols 5. Added 38. Removed 33. Ambiguous 67."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 837.990966796875,
+          "h": 33.45454788208008,
+          "text": "Core symbol ranking is not FLASH/RAM attribution. Unknown is not zero."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 599.0305786132812,
+          "h": 33.45454788208008,
+          "text": "Core comparability: exact. A -> B; delta = B minus A."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  },
+  {
+    "name": "detailed-release",
+    "file": "LOCAL_USER/.codex/worktrees/next47-engineering-review/FirmwareSight/golden/reports/p4-release/release-report.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 85,
+      "text": "Release Bundle\n\nFirmwareSight 0.6.0 · release release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5\n\n1. Release identity\nFour different identities, named separately on purpose.\nRelease id\trelease-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5\nProject release version\t1.2.3 — resolved from release.expected_version\nFirmwareSight app version\t0.6.0\nSnapshot analyzed\tsnap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\nAnalysis normalization rule\tp0-normalize-1\nWorkspace HEAD observed by the Release Gate\t585dafd3eb59592563923818cdfec4e9a370a83b\nWorkspace tag observed by the Release Gate\tv1.2.3\nWorkspace dirty observed by the Release Gate\tfalse\nThese Git facts describe the workspace the Release Gate ran in. They are not evidence about how the shipped bytes were compiled, and no claim of that kind is made here.\nRelease visual overview\nFirmwareSight / Release\n1.2.3\nSnapshot ID: snap-4b4087e1407ceddcb1e1cfcd978e... / Gate Run ID: gate-a17e9861ce643da5e7061ac34979...\nFLASH / nonvolatile image\n376 bytes\nexact / observed\nRAM / runtime footprint\n76 bytes\nexact / observed\nCapacity unknown for footprint budgets. Missing/partial evidence remains qualified.\ngit.clean\n+ PASS / severity PASS\nWorkspace has no uncommitted changes at Gate evaluation time.\nrelease.commit_matches_ex...\n- N/A / severity PASS\nNo `release.expected_commit` is declared for this release.\nrelease.version_matches_p...\n+ PASS / severity PASS\nWorkspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared releas...\nartifacts.required\n+ PASS / severity PASS\nEvery required artifact kind is present in the snapshot (elf, map).\nartifacts.hashes\n+ PASS / severity PASS\nAll 2 snapshot artifact(s) carry a SHA-256 digest.\nmemory.flash_budget\n+ PASS / severity PASS\nNonvolatile footprint 376 B is within the 512 B budget (136 B headroom).\nmemory.ram_budget\n+ PASS / severity PASS\nRuntime RAM footprint 76 B is within the 256 B budget (180 B headroom).\nDisposition after 0 recorded acceptances: PASS. Original findings unchanged.\nPASS is not shipping permission. SHA-256 checks bytes, not publisher identity.\nOriginal Gate effective severity: PASS. Findings retain their original states.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\n2. Shipped artifacts\n\n2 file(s) under artifacts/. The baseline build is never shipped: it exists only to explain the comparison in section 4.\n\nThe bytes this release consists of, in the order the release fingerprint lists them.\nBundle path\tKind\tSHA-256\tBytes\nartifacts/firmware.elf\telf\t4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374\t17464\nartifacts/firmware.map\tmap\ta38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\t4664\n3. Analysis summary\nWhat was read off the build, per input file.\nFile\tFormat\tEntry point\tBuild id\nfirmware.elf\tArm 32-bit little · elf\t0x8000049\tno .note.gnu.build-id section is present\nfirmware.map\tUnknown unknown-bit unknown · map\ta linker MAP records addresses, not an entry point\ta linker MAP carries no build-id\nMemory budgets\nAbsence is printed as absence. A budget that is not a number was not measured, and is never shown as zero.\nNonvolatile / load image\t376 bytes (exact)\nRuntime RAM\t76 bytes (exact)\nAccounting rule\tadr-0021-dual-budget\nLayout source\tmap\nWeakest evidence basis\tmap-memory-configuration+elf-load\nAdmissible for a hard block\ttrue\nDevice metadata held out of both budgets\t4294 bytes\nCoverage of this build\nRows carried in the analysis document\t19 section(s), 52 symbol(s), 11 evidence record(s)\nELF support\tsupported\nSections\tavailable\nSymbols\tavailable\nDebug info\tavailable\nMAP companion\tprovided\nObject attribution\tunavailable\nGit facts\tunknown\n4. Compare summary\nTotals moved between the two builds. The full row-by-row comparison is in diff.json.\nBase (old) snapshot\tsnap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e\nTarget (new) snapshot\tsnap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\nNonvolatile / load image\t256 bytes → 376 bytes · delta +120 (exact)\nRuntime RAM\t8 bytes → 76 bytes · delta +68 (exact)\nComparability of the pair\texact\nRows that differ\tsections: 1 added, 1 removed, 16 changed, 0 unpaired · symbols: 38 added, 33 removed, 5 changed, 67 unpaired\nIdentical, so left out of the tables\t2 section(s), 9 symbol(s)\nTop growth, as Core ranked it\nTop section growth\nDelta\tRow\tBytes\tChange\n+221\t.debug_loclists\t414\tChanged\n+112\t.debug_info\t910\tChanged\n+107\t.debug_line\t421\tChanged\n+88\t.text\t212\tChanged\n+80\t.symtab\t848\tChanged\nTop symbol growth\nDelta\tRow\tBytes\tChange\n+42\tmqtt_task\t46\tChanged\n+16\tpayload_extra\t20\tChanged\n\nThe complete comparison ships as diff.json under schema urn:firmwaresight:schema:diff:1 version 1.\n\n5. Release Gate\n\n✓ PASS — the disposition that made this bundle possible. A bundle is written only for a PASS after accepted reviews; a REVIEW or a BLOCK produces no release, and an evidence gap never becomes a review.\n\nRun id\tgate-a17e9861ce643da5e7061ac349793f80d1be87736ad52b2daf3433dc8cb8bc26\nSnapshot\tsnap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\nBaseline\tsnap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e\nPolicy digest\tb87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98\nProject config schema\t1\nSeverity before reviews\t✓ PASS\nSeverity after accepted reviews\t✓ PASS\nFindings by state\nCore's counts for this run, carried rather than recounted.\nState\tCount\n✕ BLOCK\t0\n▲ REVIEW\t0\n? UNKNOWN\t0\n✓ PASS\t8\n– N/A\t2\nAll findings\nIn the order a release owner reads them: what blocks, what needs a decision, what is unknown, what passed. Every finding of the run is listed, not a truncated top list.\nRule\tState\tEffective severity\tFinding\tEvidence\tNext step\ngit.clean\t✓ PASS\tsame as state\tWorkspace has no uncommitted changes at Gate evaluation time.\tgit:status · git:head\tnone recorded\nrelease.version_matches_policy\t✓ PASS\tsame as state\tWorkspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared release version.\tpolicy:version.source · policy:version.pattern · git:exact-tag=v1.2.3 · policy:release.expected_version\tnone recorded\nartifacts.required\t✓ PASS\tsame as state\tEvery required artifact kind is present in the snapshot (elf, map).\tpolicy:artifacts.required=elf,map · artifact:elf:4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374 · artifact:map:a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\tnone recorded\nartifacts.hashes\t✓ PASS\tsame as state\tAll 2 snapshot artifact(s) carry a SHA-256 digest.\tartifact:elf:4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374 · artifact:map:a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6 · policy:artifacts.hashes\tnone recorded\nmemory.flash_budget\t✓ PASS\tsame as state\tNonvolatile footprint 376 B is within the 512 B budget (136 B headroom).\tpolicy:memory.flash_budget=512 · evidence:ev-memory-nonvolatile_image_footprint_bytes\tnone recorded\nmemory.ram_budget\t✓ PASS\tsame as state\tRuntime RAM footprint 76 B is within the 256 B budget (180 B headroom).\tpolicy:memory.ram_budget=256 · evidence:ev-memory-runtime_ram_footprint_bytes\tnone recorded\ndiff.growth\t✓ PASS\tsame as state\tGrowth against the baseline stays within every configured threshold.\tpolicy:diff.flash_growth_review_bytes=200 · diff:snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e:snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6:nonvolatile\tnone recorded\nrelease.notes\t✓ PASS\tsame as state\tRelease Notes `docs/RELEASE_NOTES.md` is present.\tpolicy:release.require_release_notes · file:docs/RELEASE_NOTES.md · file:docs/RELEASE_NOTES.md#sha256=d547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d\tnone recorded\nrelease.commit_matches_expected\t– N/A\t✓ PASS\tNo `release.expected_commit` is declared for this release.\tpolicy:release.expected_commit\tnone recorded\nevidence.unknown_review\t– N/A\t✓ PASS\t`gate.unknown_evidence_review_count` is not configured.\tpolicy:gate.unknown_evidence_review_count\tnone recorded\n6. Accepted reviews\n\nNo review was accepted for this run, so the disposition in section 5 is the one Core computed with nothing set aside. An empty list is a fact, not a missing export.\n\n7. Release notes\nIncluded\tyes, as release-notes.md\nSHA-256 of the shipped copy\td547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d\nBytes\t151\nThe notes ship as their own file and are not reproduced inside this report. Markdown a reader wrote is never parsed, rewritten or embedded as raw HTML by the bundle, which is what keeps this document free of markup a note could carry.\n8. Bundle integrity\n\nTwo layers of SHA-256 lists cover this bundle. SHA256SUMS hashes every payload file except itself and the manifest. release-manifest.json hashes every file except itself, that list included.\n\nEvery file a digest can be named for here. This report is payload: it is written before both index files, so it cannot print their digests, or its own.\nBundle path\tSHA-256\tBytes\naccepted-reviews.json\t50afd7fab31bbd69f5fb91a5357f3128544e76696b5e3562081acd58e23e0076\t170\nanalysis.json\tba20d979db4c92fd98780f8afc5186e0e51d7a8dfef8f40eb8ad6c3786bf199a\t26963\nartifacts/firmware.elf\t4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374\t17464\nartifacts/firmware.map\ta38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\t4664\ndiff.json\t1930cdb6a098c67456297ec321910315d21aeb3ce79ef7264fcc4037e148242a\t64355\ngate-results.json\t278a1a63c5cd81f86319f9393762a17de8ad69d374fa52649ab403738d86ba23\t4803\nrelease-notes.md\td547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d\t151\nrelease-report.html\tindexed by release-manifest.json, which is written after this report\nSHA256SUMS\tindexed by release-manifest.json, which is written after this report\nrelease-manifest.json\tindexed by release-manifest.json, which is written after this report\nThe self-reference rule\nSHA256SUMS covers\tevery bundle file except itself and the manifest\nSHA256SUMS excludes\tSHA256SUMS, release-manifest.json\nrelease-manifest.json covers\tevery bundle file except itself, SHA256SUMS included\nrelease-manifest.json excludes\trelease-manifest.json\nA file cannot contain its own cryptographic hash without a fixed-point scheme, so no self-digest is faked: self_digest_written is false. no file carries its own digest; SHA256SUMS hashes the payload, release-manifest.json hashes the payload plus SHA256SUMS\nVerifying this bundle without FirmwareSight\n\nEvery file here is a plain file. Any SHA-256 tool and any text editor is enough. The check below proves that the bytes match the lists — an integrity and consistency statement about the bundle as written. It says nothing about who wrote it, and nothing in this bundle is a signature.\n\nList the directory. It must contain exactly the files release-manifest.json indexes, plus that manifest itself, and no temporary or hidden file.\nRecompute the SHA-256 of every file named in SHA256SUMS and compare it with the digest on that line. On a POSIX host one command does the whole list: sha256sum -c SHA256SUMS.\nOn Windows, Get-FileHash -Algorithm SHA256 <path> prints the same digest in upper case; lower-case it before comparing, because both lists are written in lowercase hex.\nCompare every line of SHA256SUMS with the entry of the same path in the files[] array of release-manifest.json. Digests and sizes must agree, and the manifest must additionally carry an entry for SHA256SUMS itself.\nConfirm that neither list contains a blank digest, an all-zero digest, or the digest of the file it sits in. There should be none of those, and looking for them is what makes the rule in the table above checkable rather than a claim.\nOpen analysis.json, gate-results.json and accepted-reviews.json as plain JSON. Each names the schema it is an instance of, and the manifest's extensions block states which schema majors this bundle was written against.\n9. Known capability limits of this release\n\nWhat the inputs of this build did not allow FirmwareSight to establish. A limit is stated as a limit instead of being left as an empty cell.\n\nCapability reporting, taken from the analysis document in this bundle.\nCapability\tReported\tWhat that means for this release\nObject attribution\tunavailable\tTotals are reported per section and per symbol only. No per-object-file or per-module total is claimed here, and none should be inferred from the section rows.\nGit facts\tunknown\tThis capability is reported at less than full coverage by the analysis document in this bundle.\n\nObject and module attribution\n\nthe persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build\n\nComparison warnings\n\nSYMBOL-AMBIGUOUS — 67 symbol row(s) repeat a name, kind and binding combination on one or both sides and were left unpaired; a row position is not an identity\nDeterministic export: no timestamp, no scripts, no network requests. Written by FirmwareSight 0.6.0 over the documents in this bundle.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 422.3636474609375,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Release"
+        },
+        {
+          "x": 48,
+          "y": 80,
+          "w": 61.522727966308594,
+          "h": 39.272727966308594,
+          "text": "1.2.3"
+        },
+        {
+          "x": 48,
+          "y": 122.18182373046875,
+          "w": 1332.727294921875,
+          "h": 27.636363983154297,
+          "text": "Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd978e... / Gate Run ID: gate-a17e9861ce643da5e7061ac34979..."
+        },
+        {
+          "x": 48,
+          "y": 144,
+          "w": 350.9283142089844,
+          "h": 39.272727966308594,
+          "text": "FLASH / nonvolatile image"
+        },
+        {
+          "x": 48,
+          "y": 187.63636779785156,
+          "w": 197.93182373046875,
+          "h": 46.54545593261719,
+          "text": "376 bytes"
+        },
+        {
+          "x": 48,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 816,
+          "y": 144,
+          "w": 321.04864501953125,
+          "h": 39.272727966308594,
+          "text": "RAM / runtime footprint"
+        },
+        {
+          "x": 816,
+          "y": 187.63636779785156,
+          "w": 175.9545440673828,
+          "h": 46.54545593261719,
+          "text": "76 bytes"
+        },
+        {
+          "x": 816,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 48,
+          "y": 269.81817626953125,
+          "w": 887.7244873046875,
+          "h": 32,
+          "text": "Capacity unknown for footprint budgets. Missing/partial evidence remains qualified."
+        },
+        {
+          "x": 48,
+          "y": 292.3636474609375,
+          "w": 95.88636779785156,
+          "h": 33.45454788208008,
+          "text": "git.clean"
+        },
+        {
+          "x": 480,
+          "y": 301.0909118652344,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 321.81817626953125,
+          "w": 695.5149536132812,
+          "h": 32,
+          "text": "Workspace has no uncommitted changes at Gate evaluation time."
+        },
+        {
+          "x": 48,
+          "y": 356.3636474609375,
+          "w": 333.06219482421875,
+          "h": 33.45454788208008,
+          "text": "release.commit_matches_ex..."
+        },
+        {
+          "x": 480,
+          "y": 365.0909118652344,
+          "w": 231.55824279785156,
+          "h": 23.272727966308594,
+          "text": "- N/A / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 385.8182067871094,
+          "w": 604.7283325195312,
+          "h": 32,
+          "text": "No `release.expected_commit` is declared for this release."
+        },
+        {
+          "x": 48,
+          "y": 420.3636474609375,
+          "w": 318.0478820800781,
+          "h": 33.45454788208008,
+          "text": "release.version_matches_p..."
+        },
+        {
+          "x": 480,
+          "y": 429.0909118652344,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 449.8182067871094,
+          "w": 1014.4172973632812,
+          "h": 32,
+          "text": "Workspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared releas..."
+        },
+        {
+          "x": 48,
+          "y": 484.3636474609375,
+          "w": 193.09091186523438,
+          "h": 33.45454788208008,
+          "text": "artifacts.required"
+        },
+        {
+          "x": 480,
+          "y": 493.0909118652344,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 513.8181762695312,
+          "w": 673.7634887695312,
+          "h": 32,
+          "text": "Every required artifact kind is present in the snapshot (elf, map)."
+        },
+        {
+          "x": 48,
+          "y": 548.3636474609375,
+          "w": 175.10604858398438,
+          "h": 33.45454788208008,
+          "text": "artifacts.hashes"
+        },
+        {
+          "x": 480,
+          "y": 557.0909423828125,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 577.8181762695312,
+          "w": 509.9250793457031,
+          "h": 32,
+          "text": "All 2 snapshot artifact(s) carry a SHA-256 digest."
+        },
+        {
+          "x": 48,
+          "y": 612.3636474609375,
+          "w": 248.0454559326172,
+          "h": 33.45454788208008,
+          "text": "memory.flash_budget"
+        },
+        {
+          "x": 480,
+          "y": 621.0909423828125,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 641.8181762695312,
+          "w": 772.9275512695312,
+          "h": 32,
+          "text": "Nonvolatile footprint 376 B is within the 512 B budget (136 B headroom)."
+        },
+        {
+          "x": 48,
+          "y": 676.3636474609375,
+          "w": 239.2954559326172,
+          "h": 33.45454788208008,
+          "text": "memory.ram_budget"
+        },
+        {
+          "x": 480,
+          "y": 685.0909423828125,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 705.8181762695312,
+          "w": 785.1502075195312,
+          "h": 32,
+          "text": "Runtime RAM footprint 76 B is within the 256 B budget (180 B headroom)."
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 879.8610229492188,
+          "h": 33.45454788208008,
+          "text": "Disposition after 0 recorded acceptances: PASS. Original findings unchanged."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 895.7001342773438,
+          "h": 33.45454788208008,
+          "text": "PASS is not shipping permission. SHA-256 checks bytes, not publisher identity."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 833.8786010742188,
+          "h": 33.45454788208008,
+          "text": "Original Gate effective severity: PASS. Findings retain their original states."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  }
+]

@@ -1,0 +1,397 @@
+FIRMWARESIGHT | NEXT-44 | INTEGRATED PRODUCT BATCH C
+VISUAL REPORT EXPORT — ANALYZE / COMPARE / RELEASE
+长周期连续开发、独立复审、Owner 有条件普通 FF Push 与精确 SHA 远端 CI
+Architecture Contract v1.0 | 2026-10-14
+
+====================================================================
+0. 执行身份、产品目的与授权边界
+====================================================================
+
+你是 FirmwareSight 的 Principal Engineer / Coding Agent。另由独立 Reviewer 承担最终复审。此合同是 Owner 在聊天中选择转发后才生效的工程授权，附件本身不是 GitHub 写权限，也不使上一次会话的口头权限自动续期。
+
+OWNER PRODUCT DECISION：实现“Visual Report Export / 可视化报告交付”的连续产品增量。
+
+根本用户问题：嵌入式工程师完成固件版本构建后，能把可信的 FLASH/RAM、Memory Region、版本差异、增长贡献者、发布 Gate 状态等事实制成专业、可分享、可打印、非技术人员也能看懂的图表报告。这些报告必须与既有 Analyze → Compare → Gate → Release 计算完全一致。它们是工程证据的可读表示，不是新的 Gate，也不是对合法性、安全性、发货许可的认证。
+
+当前仓库：2023violet/FirmwareSight
+当前精确授权起点（先独立读取确认）：
+  origin/main = f2fcabe1393cbb74f308ddf4ccd0fc4b8931f54e
+  NEXT-43 = ACCEPTED_REMOTE_CI_PROVEN / CLOSED
+  Actions #111 run_id = 38507903050, attempt 1, 10/10 Jobs SUCCESS
+
+历史受保护原 main 工作树（执行前必须重新确认其真实状态）：
+  HEAD = e34f9e69e515a330a3705470aeba6cfab073634d
+  原九个 staged 文件必须保留；历史 staged patch SHA-256：
+  05F86C0313040899DCA1156F538186D686377906E1A62E755FCB029C1EB96D2B
+  路径：.ai/ACTIVE_TASK.md, .ai/CURRENT_STATE.md, .ai/HANDOFF.md,
+        .ai/NOW.md, .ai/README.md, AGENTS.md, README.md,
+        DIRECTORY_TREE.txt, SHA256SUMS
+
+注意：原暂存 index 快照具体文件 SHA 与检出状态须由本机实时只读核查并逐字节保存，绝不把历史摘要作为直接代替。若旧工作树的合法 Owner 改动已变化，标注差异并先保护，不能 reset/checkout/stash/restore/commit/push 此树。
+
+授权：
+- 在另建隔离 worktree + feature branch 中连续完成本合同 A–H 单元；可自行设计、实现、测试、修复、有限重构、编写用户文档、更新受影响金样并创建合理数量的本地阶段提交。
+- 对低风险、可逆、局部实现选择自主决策；不必按单元等待 Owner 再发一个 Prompt。
+- 可以增加必要的局部内部 DTO/渲染器/受控导出命令/CLI 输出模式；必须保留既有公开 v1 contract 和原有用户行为。
+- 完成后对最终精确 SHA 开启独立审查。独立审查未完整通过不能自行宣称关闭。
+
+有条件远端推送授权不随附件默认开启。只有 Owner 向执行 Agent 发出的调度语中明确包含：
+  OWNER_NEXT44_CONDITIONAL_FF_PUSH=YES
+才可在 I 单元全部条件成立后进行一次普通非强制 fast-forward push。若 Owner 未明确写 YES，必须停在本地候选/独立复审，不推送；不能从 NEXT-42/NEXT-43 的历史授权类推。
+
+明确不授权：修改 Owner 日常数据或其 SQLite 实库；修改原 main 工作树/index；删除历史 worktree/分支；force push/rebase 远端 main；签名/发行/升级；正式 V1 用户会话；修改公共 schema major、Gate/Bundle 身份计算、数据库语义、依赖安全策略或 Tauri shell/filesystem/net capability；扩展 Keil/IAR MAP 解析器；将 BIN/HEX 宣称为内部分析输入；以视觉设计借口加入云端、账号、监控、AI、网络字体/CDN。
+
+====================================================================
+1. 本轮交付是“产品功能”，不是报表 CSS 修饰
+====================================================================
+
+必须交付五个用户可察觉结果：
+(1) Analyze 一份单构建可视化概览：显示可信 Memory 指标、已知 Region、capability 和证据限制；允许导出一张清晰分享图与打印报告。
+(2) Compare 一份双构建可视化概览：A/B/Delta、增长贡献者、同口径/不可比说明；导出图和可打印报告；保留原 JSON 与自包含 HTML。
+(3) Release 一份审查友好概览：明确区分 Gate 判定、真实附件字节、Unknown、Release身份；不把 PASS 画成“可发布/安全认证”。保留现有完整 Bundle/Manifest/Verify 和原 release-report.html；在合法契约内提升打印可读性与图表。
+(4) 可独立交付的 PNG 与 SVG 图像（真实可打开的文件，不是将 HTML 改名），在 PowerPoint、微信/钉钉、文档和邮件中可使用。PNG 的图像像素、尺寸和字体须经检查；SVG 自包含无外部资源。
+(5) A4 Print-ready HTML（Summary + Detail）：可用本机浏览器“打印/保存为 PDF”；必须有针对纸张的分页与可读性设计。注意这与“软件原生直接生成 .pdf”不是一回事，不能误标功能名称。
+
+P0 / MUST：PNG、SVG、独立 HTML + A4 print CSS、桌面可发现导出入口、验证与独立样张。
+P1 / NICE-TO-HAVE：用户明确提及的原生 PDF 文件导出，只有已有安全无依赖路径能够可靠完成并有证据时才纳入。否则保持 PRINT_TO_PDF_VIA_BROWSER 而不是假装 NATIVE_PDF_EXPORT。不要为了“原生 PDF”引入 shell、Chromium 打包、打印机驱动依赖或网络服务。
+
+产品定位：图表是可信表格和证据的“放大镜”，不是另一个数值真相源。工程完整详细报告和面向非技术读者的一页摘要并存；不因为做成领导版而隐去 Unknown、Review、来源限制或 Snapshot 与 Git 的身份区别。
+
+====================================================================
+2. 启动时的真源与防护 Preflight（先读、后写）
+====================================================================
+
+A. 用真实仓库读取（必须按 AGENTS.md 接手顺序）：
+- .ai/NOW.md（仅导航，不是执行授权）
+- AGENTS.md, README.md, .ai/README.md, .ai/CURRENT_STATE.md,
+  .ai/DECISIONS.md, .ai/ACTIVE_TASK.md,
+  04_TECH/09_TECH_DECISION_MATRIX.md，相关 ADR
+- DESIGN.md, assets/design-tokens.json,
+  03_DESIGN/08_POST_MVP_PRESENTATION_RULES.md, 
+  09_ADR/ADR-0018*, 09_ADR/ADR-0031*,
+  04_TECH/23_MEMORY_ACCOUNTING_MODEL.md,
+  04_TECH/26_PORTABLE_SCHEMA_POLICY.md,
+  04_TECH/07_CLI_SPEC.md,
+  04_TECH/17_RELEASE_PACKAGING_UPDATE.md,
+  04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md,
+  06_DELIVERY/07_POST_MVP_CANDIDATE_ROADMAP.md,
+  P5_VALIDATION/P5_KNOWN_LIMITATIONS.md.
+- Read live actual source (and tests) in crates/firmwaresight-report/src/*,
+  crates/firmwaresight-core/src/domain/*,
+  apps/desktop/src-tauri/src/{compare,release,bundle,ipc,service}.rs as present,
+  apps/desktop/ui/src/{Analyze,Compare,Release}.tsx and their CSS/tests,
+  apps/cli/src/main.rs, golden/reports/*, scripts/check.py and baseline scripts.
+- Do not blindly trust historical documentation that may say `project doctor` absent: inspect actual compiled CLI dispatch.
+
+B. Assert external baseline exact SHA, repository reachability, expected 10-job CI; record command, SHA and UTC observation time. Unexpected remote head => STOP / BASELINE_MOVED; never silently rebase or integrate a moved remote head.
+
+C. Record all currently managed worktrees, branches, indexes, original main status and all nine stage-0 (path, mode, blob OID) entries, patch raw bytes hash, and stash presence without altering them. Store evidence OUTSIDE repository/worktrees and any Owner application-data folder.
+
+D. Create named independent worktree from exact baseline only. Recommended naming:
+  feature/next44-visual-report-export
+  FirmwareSight_NEXT44_VISUAL_REPORT (path unique and independent)
+If existing path/branch collides, inspect rather than force overwrite.
+
+E. Baseline sanity: run targeted old report tests and current CLI/UI gate as practical; gather named baseline properties and expected golden bytes before touching renderers.
+
+F. Record an internal implementation plan with acceptance mapping, then autonomously execute. A plan alone is not deliverable. Do not spend a separate review round seeking approval for trivial render layout decisions.
+
+====================================================================
+3. A 单元：统一可信 Presentation Model（事实投影）
+====================================================================
+
+Implement a small, explicit, typed visual-report projection inside report/application layer, not Core truth logic.
+
+Inputs may include existing AnalysisDocumentDto / analyzed snapshot projection, DiffResultDto, GateResultsDto, ReleaseBundleReport, or existing typed output. No reimplementing parser/diff/Graph/Gate/Release identity in TS/renderer. If existing DTO misses a fact, take it from the proper trusted domain boundary without altering public persistent schemas. Avoid creating a second giant persistent report format.
+
+Semantic invariants:
+1) byte counts always come from trusted Core state; KiB = bytes/1024 solely for display. Show actual bytes or accessible exact value. Do not round displayed 0.2 KiB into 0 when bytes are nonzero.
+2) FLASH / Nonvolatile image footprint differs from RAM / Runtime RAM footprint; never combine them as a single used-memory figure, never claim region free space merely by subtracting summed sections from region end addresses.
+3) capacity utilisation (%) is allowed ONLY when reliable matching region capacity exists, relevant footprint comparison is valid, capacity>0, and the current accounting model actually licenses it. Otherwise show `Capacity unknown`/`Usage not established` instead of a made-up progress bar. Must not treat sum(section sizes) as device flash capacity.
+4) Build A / Build B/Delta must retain sign and comparability class. A missing side is absent, not 0. A newly added symbol isn't “grew from 0” without that definition in Core.
+5) Growth contributors come from Core approved ranking and its source/basis; no renderer-side alternate sort that changes top-N meaning. If object/module attribution is not supported, don't invent named modules from symbol substrings.
+6) Snapshot ID, firmware project release version, FirmwareSight app version, Git workspace HEAD, observed file hash and release ID are different identities and remain distinctly labelled; don't say Git commit built shipped bytes unless specific evidence proves it.
+7) Gate states PASS/REVIEW/BLOCK/UNKNOWN/N/A have immutable meaning; visual status includes icon/word and supporting text, not colour alone; PASS is not ship authorisation or security certification.
+8) Unknown/Declared/Observed/Derived classification survives projection. Missing MAP is a limitation, not a hidden success. No giant red “failure” graphic for unsupported inputs as if proven bad firmware.
+9) Preserve original Rust config identity, file source and session state; no sanitized display value written back into DB/config.
+10) All user-controlled names, symbols, paths, project strings, warnings, metadata and notes must pass an approved bounded safe-display projection BEFORE entering HTML/SVG/PNG or serialized DTO; escape correctly per context. Reject control chars, embedded host paths and markup tricks; preserve safe meaningful names when practical.
+
+Deliver a compact internal chart-source model with documented invariants and tests that compare its numerical data 1:1 with existing DTO/CLI results across known/unknown/partial/mixed states. No opaque `serde_json::Value` soup for stable internal structure.
+
+====================================================================
+4. B 单元：图表设计与静态安全渲染
+====================================================================
+
+Design mandate: DESIGN.md “instrument-grade clarity”; frozen tokens are numerical truth source. Read them, don't mint colours/spacing. Chart priority table > ranked bars > compact stacked bar > treemap. No gradient, donut, 3D, neon, shadow, marketing hero, rainbow classification or colour-only status.
+
+Required content and composition:
+- One-page SHARE CARD suitable for 16:9 PPT / messaging: default image canvas 1600×900 px and SVG viewBox `0 0 1600 900` or an independently justified stable equivalent. This canvas is not the same artifact as A4 paper layout.
+- Clear hierarchy: product / report type / case identity (sanitized), main FLASH and RAM facts, optional capacity when established, main Compare change (when comparable), up to five genuine growth contributors when established, evidence/provenance/capability qualification and a readable footer.
+- Known/Unknown and N/A visual treatment must be unambiguous; every bar has numeric value, label, units, and valid measurement basis. No deceptive axis truncation or tiny-token placeholder graphs.
+- For Compare, explicitly say A→B and use signed deltas. If rank limited, state Top N and include context for total changed counts.
+- Release one-page card must give policy readiness without turning it into release approval. It may not imply authenticity from SHA-only integrity checks.
+- Keep high contrast and CJK/ASCII readability where feasible with locally available system fonts; never download remote fonts. If binary SVG/PNG cannot faithfully render locale, explicitly restrict exported title language and document the limitation rather than outputting tofu without notice. Desktop bilingual controls still mandatory.
+
+SVG:
+- Real standalone well-formed SVG, with all styles and paths embedded, escaped XML, no <script>, foreignObject, remote href/url(), external images, embedded user input as CSS, event attributes, data exfiltration, external fonts, raw host paths or private project contents.
+- Deterministic for identical fact input, locale, viewBox and renderer version (no wall-clock, random IDs, generated-at, temp filenames, absolute paths).
+- Long symbol names and malicious labels clipped/ellipsized with accessible full numeric fact in a separate human-usable detail report; do not let overlap/hide disclaimers.
+
+PNG:
+- Actual standards-conformant PNG at documented px dimensions, not SVG renamed or screenshot stored in arbitrary content type. Prefer using same chart layout/scene graph as SVG to avoid divergent facts and designs.
+- Evaluate existing crates and platform capabilities first. If a new small offline graphics/raster library is genuinely necessary, document precise why, feature surface, license, maintenance, dependency tree delta, size, trust boundary, why existing std/libs insufficient; run online cargo-deny four categories. NO uncontrolled shell/plugin/webview screenshot hack.
+- Ensure geometry parity with SVG, legible text, safe handling of Unicode, long strings, unknown state. Decode exported PNG in an independent test to assert width/height/pixels and nonempty meaningful regions. Non-duplicated content semantics must be proven by a shared projection/scene model.
+- If new dependency needs a frozen ADR/trust/security rule change, STOP that part for Owner decision; do not evade governance by pasting an unreviewed large PNG encoder.
+
+Evidence:
+- At least three representative synthetic variants with different states: single-build known, Compare mixed/unknown, Release with REVIEW/BLOCK distinctions; plus long/CJK/markup/Windows path canary. Test report fixture data only, never owner projects or confidential firmware.
+- Use actual rendered visual previews/screenshots when environment supports a safe headless browser or SVG renderer. Test clipping, chart labels, whitespace, status icon clarity, print margins. If no viewer available, say VISUAL_NOT_VERIFIED and show programmatic proof separately; never fabricate screenshot evidence.
+
+====================================================================
+5. C 单元：独立 HTML 与 A4 打印体验
+====================================================================
+
+Current reality:
+- Compare already supports desktop Export JSON/HTML, CLI `diff --html` and self-contained `p2-diff.html`.
+- Bundle already produces `release-report.html` in verified output, controlled by frozen contracts.
+- Existing HTML is deterministic, light-mode, embedded CSS, no JS/CDN/telemetry.
+
+Build on existing code; do not replace it with an incompatible export format.
+
+Required:
+- A standalone one-page Visual Summary HTML for Analyze and Compare (and Release context when available), separate from full Evidence/Bundle report; do not pretend a one-page executive summary contains every source fact.
+- Full Compare HTML and Release report must gain coherent visual overview where trusted data permits, and print CSS targeted at A4: `@page size: A4; margin: ...`, `@media print`, paper-safe colours, `break-inside`, repeatable table headers where browser supports, explicit overflow policy for symbols/hashes, no clipped growth bars or orphan status qualifiers. Ensure printed reports can span multiple pages without truncating fact tables; one-page executive overview is a separate layout.
+- Browser route “Print / Save as PDF” must be presented truthfully in help/UI. Printing from a self-contained HTML opened by the user via their browser and choosing “Save as PDF” is acceptable and low dependency. This is *not* native in-app `.pdf` generation; never label a button `Export PDF` unless an actual PDF file is directly generated and validated.
+- HTML must remain offline single file and open without a development server. No remote images/fonts/scripts; if embedding SVG charts, embed safe static markup from the same renderer, not new executable JS.
+- English and Chinese affordances: UI wording bilingual as applicable; exported HTML should render project/user labels safely and clearly; at minimum layout must not corrupt Chinese filenames. Avoid external font assets and do not redistribute font files.
+- Preserve deterministic rendering, portable path-free reports, release identity semantics and frozen v1 schemas. A presentation-only HTML change will legitimately move HTML golden; update only affected golden with approved generator and verify old JSON/manifest truths byte identical where their contract requires it.
+- For bundle output, avoid adding new sidecar files into the frozen Bundle file set without separate authority: that can affect manifest, self-indexing, hash set and Release identity. Offer explicitly user-selected standalone visual exports outside the immutable Bundle as needed. The old bundle verifier must continue to pass.
+
+Printed artifact proof: in safe local fixture environment produce printable preview to PDF via browser if available and inspect A4 page(s), final page absence, details not clipped. If tooling unavailable, mark PRINT_VISUAL_NOT_VERIFIED; no arbitrary machine installs or virtual machines. Independently inspect print CSS and output markup programmatically in any case.
+
+====================================================================
+6. D 单元：桌面 UX 真正可发现、可操作
+====================================================================
+
+Analyze:
+- Add a context-correct “Export visual report” action only when a confirmed current successful analysis exists; never export a previous lastGood result labelled as the current selected file after a failed/new selection.
+- Provide PNG / SVG / Print-ready HTML paths with clear labels (may be grouped into a compact menu). Expose format, current sample subject, last known fact class and export result. Preserve native save-dialog trust boundary.
+
+Compare:
+- Keep existing `Export JSON` / `Export HTML` working; add PNG / SVG / Visual Summary HTML routes and avoid multiple confusing identical “HTML” options. Clear difference between “Detailed HTML” and “One-page report”.
+- Async stale-result guards: export must refer to the session/diff ID displayed when user started action; selection changes/cancellation/errors must not silently switch report to different build; existing comparison does not disappear on file export failure.
+
+Release:
+- Add explicit on-demand “Shareable summary” output for already observed Gate/Release context, using real existing typed IPC/session facts. Show Gate status and Unknown limitations even if a REVIEW acceptance exists. No new Gate or ship judgement, no inferred build provenance.
+- Keep Bundle Export existing flow untouched and distinct; do NOT silently bundle a chart/png/svg, alter manifest or add overwrite behavior.
+
+UX flows:
+- all three surfaces use existing native OS save dialog; no arbitrary user-supplied JS path, generic filesystem IPC, shell/clipboard permissions, drag-and-drop opening arbitrary files, network use or new Tauri capability.
+- format-specific suggested names containing only sanitized leaf tokens or hash short IDs, e.g. `firmwaresight-compare-<base8>-<target8>.png`; no host directory or project secret.
+- cancel = success-neutral and no file written; denied overwrite = existing file bit-identical; error = typed envelope/code, in-place explanation, retries possible, previous report state intact.
+- export should run off WebView render thread if expensive, display busy/progress if warranted, avoid unlimited memory usage; choose safe upper bounds and document.
+- test keyboard focus, screenreader names, light/dark desktop while exported artifact remains light theme; no status conveyed by colour only; 1024x720 baseline usability.
+- Do not enable a generic `read_file(path)` or `write_file(path)` capability; file access must be app-side and purpose-specific.
+
+CLI:
+- Reuse trusted rendering APIs. Provide at least one directly useful reproducible CLI path for visual report generation (Analyze and Compare) with clear `--help` names and examples; additive flags may be designed as long as existing `analyze --json`, `diff --json`, `diff --html`, `gate`, `release` exit codes/output remain compatible.
+- stdout JSON stays exactly JSON where promised; image binary must be saved only to a chosen explicit file path; do not print binary to terminal. Existing CLI never writes arbitrary unrequested files.
+- no leakage of input absolute paths or raw config/project names in stdout/stderr on failures or success; redaction protections from NEXT-42 must be tested.
+
+====================================================================
+7. E 单元：回归、对抗、格式正确性与性能
+====================================================================
+
+Implement tests before or alongside code (test-driven, not test-count theatre). Required families:
+
+Facts/correctness:
+- Exact bytes, KiB formatting, zero/missing/unknown, overflow extremes, no divide-by-zero, no percentage when capacity not proven, no invented percentages/paths/provenance.
+- Compare addition/removal/changed semantics and ambiguous symbols. Core DTO == visual projection == CLI/Desktop visible labels.
+- Gate PASS/REVIEW/BLOCK/UNKNOWN/N/A truthfulness; a ready summary is not a shipping instruction.
+- Source trust: path & symbol strings `<script>`, `<`, `&`, quotes, `]]>`, CSS url(), `onload`, nested unicode bidi/control; Windows absolute `C:\Users\canary-private\workspace` embedded in innocuous project name; Unix `/home/canary-private/...`; no matching canary appears in portable outputs. Tricky CJK labels remain readable or state limitation explicitly.
+
+Serialization and robustness:
+- Standalone offline SVG and HTML parse successfully, no external script/style/font/network; SVG no risky tags/attrs; links disabled; deterministic byte output across 2 runs.
+- PNG magic + independently decoded dimensions (chosen default 1600×900) + representative nonuniform pixels, correct alpha/background, sane file size and stress with 100k symbol input (bounded visualization, no 100k text labels).
+- CLI one-page reports saved and compared to trusted Rust library output; no changes to existing `--json` payloads/exit statuses.
+- Desktop IPC typed contract, stale async race, cancellation, overwrite refusal, write failure, destination disappearing after dialog, success and error states; privacy tests against stdout/stderr and exported report content.
+- Atomic write of save-as image and report, canary existing file untouched after denial/failure.
+- Release verifier on old golden bundle still works; no new file in bundle without authorization, no schema-major bump, no change to Release ID implementation, accepted reviews unchanged.
+
+Visual/print:
+- At least 3 render fixtures/images and independent view at 1600×900, at min-width UI and one A4 page case; retain screenshots or image measurements outside repository if visual snapshots are temporary. Contrast in output, icon+word for states, rank bars faithful to numbers; no clipping/disclaimer missing.
+- Test local HTML print CSS presence, text overflow, table page break strategy. A browser/PDF print test is strongest; classify unexecuted accurately.
+
+Reliability:
+- Multi-megabyte report/growth data bounded to few ranked items and tables paginated/understood. Timing and peak memory *if actually measured* separate from not-measured. No WebView hang evidence claim from Rust-only tests.
+- Sensible error reporting for unsupported export target/filesystem, no partial artifact, no Owner real data.
+
+Mutation / negative control:
+- Intentionally bypass safe display projection on disposable test worktree and demonstrate that at least one named privacy test fails; restore original bytes and verify tree clean before ending. Also demonstrate one changed chart input or gate state produces a failing expected-output assertion; no mutation enters candidate.
+
+====================================================================
+8. F 单元：设计证据、兼容文档与用户说明
+====================================================================
+
+Deliver narrow, high-quality docs, not policy-volume expansion:
+- How to export PNG, SVG, offline HTML; how to print/save PDF from A4 HTML; naming and expected dimensions.
+- Clarify “Print to PDF through browser” vs “native PDF generation unavailable”.
+- Explain what metric is measured vs unknown; numerical bar/percentage conditions; how to read Core/Compare/Gate meaning.
+- One example workflow with tracked synthetic ELF/MAP or generated fixtures; no real firmware/customer data, no new proprietary files. A recipient must open the HTML/SVG/PNG offline and see meaningful visual content.
+- No remote assets; proof of light-mode print output independent from desktop theme.
+- Appropriate design checklist from `templates/DESIGN_CHECKLIST_TEMPLATE.md`; token roles referenced; no magic styling.
+- Keep `README` and Help updates minimal. If a dated historical doc is inconsistent, don't rewrite history as live truth; use a precise current entry or note where governance allows.
+- If new crates or licensing issues, produce a compact dependency admission table and run `cargo deny check advisories bans licenses sources` online where available.
+
+====================================================================
+9. G 单元：Build / Gate / Baseline / Failure Recovery
+====================================================================
+
+After code reaches a candidate:
+1. Run `cargo fmt --all -- --check`, `cargo clippy` and all relevant Rust tests, frontend tests/typecheck/lint/build, and full `python scripts/check.py` on clean isolated worktree (count actual steps, 18 vs 20 depends on generated frontend assets). No SKIP disguised as PASS.
+2. Independently execute targeted Analyze/Compare CLI visual reports against committed synthetic fixtures. Verify exact file signatures, dimension, deterministic SHA across rerun, privacy canary absent, report contains known data and honest Unknown.
+3. Run online `cargo deny check advisories bans licenses sources` (four independent verdicts), on-source dependencies and Cargo.lock unchanged if none required. Do not add waiver silently.
+4. `ADR-0029` Git stage-0 canonical baseline generation order is authoritative. Read generator/verifier source and ADR; regenerate `DIRECTORY_TREE.txt`, root `SHA256SUMS` only as appropriate through approved tools. Verify tracked-index canonical blobs, not Windows working-tree hashes.
+5. Show diff stats, intent map, new dependency inventory, generated files, negative tests and no changes in frozen schemas/identities/security. Any changed golden file must be explained by user-visible report evolution, not automatic mass-update.
+6. Local commits allowed on only dedicated feature branch; write stage evidence outside repo; no rebase/force/delete. Save final commit SHA, ancestry chain, candidate tree clean status, original main unchanged proof.
+7. If tests reveal ordinary local defects, autonomously fix, re-run, and continue. Do not ask Owner for every flaky test or CSS detail; only stop for forbidden redesign, integrity/privacy/security issue beyond authorized scope, or sustained unreproducible environment blocker.
+
+====================================================================
+10. H 单元：真正独立复审（同一份任务合同）
+====================================================================
+
+Separate implementer/reviewer context required. If no independent reviewer can be run, stop in:
+  LOCAL_BATCH_IMPLEMENTED_GATE_PASS / READY_FOR_INDEPENDENT_REVIEW
+not ACCEPTED, and no push.
+
+Reviewer must inspect EXACT final candidate Git object from fresh clean detached review worktree, not candidate's dirty workspace, and rerun essential verification, not repeat implementer's prose. Independent reviewer is READ-ONLY and cannot alter candidate. It must audit:
+- Entire changed path allowlist vs product objective;
+- Trusted fact projection from existing DTO without duplicate calculations;
+- SVG/PNG safety and actual raster decode, malicious name/path canary;
+- Comparability, unknown/capacity semantics, release/Gate truthfulness;
+- A4 print-ready output and actual rendered sample evidence classification;
+- Desktop workflow, CLI flags, privacy, save dialog and overwrite safety;
+- Bundle schema and Release identity compatibility;
+- Full gate / online deny / ADR-0029;
+- Original main index patch OIDs and actual remote SHA;
+- No Owner data, no V1 cohort artifact changes, no hidden framework/network use.
+
+Reviewer verdict MUST be only:
+  ACCEPT_LOCAL_CANDIDATE / READY_FOR_OWNER_PUSH_DECISION
+  REWORK_REQUIRED
+  BLOCKED_INSUFFICIENT_EVIDENCE
+  STOP_SECURITY_OR_STATE_MISMATCH
+
+If REWORK_REQUIRED: implementer may autonomously make a new local corrective SHA, but all reviewer checks must be repeated independently on that new SHA. Do not let reviewer author code or self-review fixes; avoid endless micro-prompts by batching its defects into one local correction cycle. Reviewer cannot pass on inherited green run from previous candidate.
+
+For print/PDF: No installed desktop QA required this round. Independent rendered SVG/PNG and browser print evidence SHOULD be actually observed in an isolated synthetic environment. If no visual proof exists, mark VISUAL_ARTIFACT_NOT_VERIFIED; do not claim full visual acceptance. Do not turn this into a VM-building project; if blocked, report facts, and stop before any optional push that explicitly requires full acceptance.
+
+====================================================================
+11. I 单元：OWNER 有条件普通 FF Push + 远端 CI（仅授权开关 YES）
+====================================================================
+
+Push is forbidden unless all prerequisites hold at action time:
+- dispatch from Owner literally includes OWNER_NEXT44_CONDITIONAL_FF_PUSH=YES;
+- independent exact-SHA review on latest final SHA gives ACCEPT_LOCAL_CANDIDATE and all hard AC PASS;
+- `origin/main` still equals starting SHA f2fcabe1393cbb74f308ddf4ccd0fc4b8931f54e according to fresh `git ls-remote` AND GitHub REST, with no conflict;
+- final candidate descends from starting SHA by normal fast-forward, has no unexpected unreviewed commit, changed scope within this task, no unstaged/untracked source changes;
+- original main nine staged files, stage-0 index manifest/status/patch raw hash unchanged against entry snapshot;
+- complete local gate PASS with 0 SKIP, online deny PASS, ADR-0029 PASS, privacy/visual/print safety acceptance proved;
+- candidate not already present remotely.
+
+Then precisely once use normal `git push --porcelain origin <reviewed-final-SHA>:refs/heads/main` (NO force/lease trick, no direct main checkout, no other refs). Record stdout, exit and timestamp. If transport reports uncertainty, read remote first and STOP; no blind retry.
+
+After success compare actual remote SHA via two independent read paths; collect newly triggered push Actions run whose head_sha EXACTLY matches final SHA. Verify latest attempt, all expected Jobs and check-runs completed/success, actual Dep Policy four-category evidence, Generated output drift baseline PASS, and Windows Package success; don't assume run count if CI workflow changed — enumerate actual jobs.
+
+If remote run fails or remains pending, report REMOTE_CI_FAILED/PENDING and STOP. No automatic repair/revert/re-push. Do not produce GitHub Releases, tags, signing or official distribution.
+
+If Owner did not specify YES: preserve final candidate locally, complete independent acceptance and report PUSH_NOT_AUTHORIZED. No extra authorisation implied.
+
+====================================================================
+12. Acceptance Contract — AC01–AC40
+====================================================================
+
+Preflight, architecture and data provenance:
+AC01 [MUST] exact baseline/branch isolation/original 9-stage protection witnessed before/after.
+AC02 [MUST] governance/design/token/ADR/reports read against live source, no unauthorized ADR/schema/security changes.
+AC03 [MUST] projection does not duplicate Core/parser/diff/Gate decisions; fact parity tests prove it.
+AC04 [MUST] Unknown/Declared/Observed/Derived preserved; missing capacity never shown as measured utilisation.
+AC05 [MUST] Diff signed A/B/delta with genuine comparability and correct symbol attribution; no absent-as-zero.
+AC06 [MUST] Gate visual words/icons/semantics exact, no implied permission to ship.
+AC07 [MUST] release/Git/snapshot/artifact identities disambiguated, no provenance overclaim.
+
+Visual export and print:
+AC08 [MUST] one-page Analyze share image uses actual trusted build facts.
+AC09 [MUST] one-page Compare share image uses real pair, contributor rankings/limits truthful.
+AC10 [MUST] Release Gate summary report accurate, honest limitations, no stale version/Gate.
+AC11 [MUST] deterministic standalone SVG valid, safe and without external resources.
+AC12 [MUST] real PNG independently decoded with advertised pixels and substantial graphics.
+AC13 [MUST] PNG/SVG facts/labels grounded in same shared model (not separately recomputed).
+AC14 [MUST] min 3 synthetic visual proof fixtures, including Unknown and Gate REVIEW/BLOCK.
+AC15 [MUST] independent privacy canary and markup/XSS escaping for SVG/HTML/renderers.
+AC16 [MUST] self-contained HTML report opens offline and retains current Compare detailed HTML semantics.
+AC17 [MUST] A4 print stylesheet with honest paper layout; if actual print preview unavailable, limitation recorded, not fake.
+AC18 [MUST] print-to-PDF workflow documented honestly, no native PDF export claim unless actual PDF artifact tested.
+AC19 [MUST] long/CJK labels do not hide evidence caveat or overflow report; CJK coverage evidenced or limited honestly.
+
+UI/CLI and permissions:
+AC20 [MUST] Analyze current-vs-lastGood selection export race covered; no wrong artifact report.
+AC21 [MUST] Compare old JSON/HTML exports unchanged; new visual format choices unambiguous.
+AC22 [MUST] Release existing Bundle/export unchanged; standalone visual export never silently enters Bundle.
+AC23 [MUST] typed, purpose-scoped desktop IPC; no new generic filesystem/shell/network capability.
+AC24 [MUST] save dialog cancel, overwrite denied, write failure, stale session, retry recover correctly.
+AC25 [MUST] meaningful CLI Analyze+Compare image/report path; legacy flags/exits/JSON compatible.
+AC26 [MUST] desktop bilingual labels and accessibility: keyboard, icon+word statuses, light/dark controls.
+AC27 [MUST] safe deterministic sanitized file names, no user host path or raw config name in portable output.
+
+Verification/development:
+AC28 [MUST] actual synthetic fixtures and reproducible recipe committed; no Owner firmware used.
+AC29 [MUST] targeted Rust/CLI/desktop frontend test coverage and negative mutation proof.
+AC30 [MUST] actual `python scripts/check.py` full local PASS with 0 SKIP; step count sourced from run, not guessed.
+AC31 [MUST] online cargo-deny 4 categories PASS; any new dep justified and permitted.
+AC32 [MUST] ADR-0029 baseline index verifier PASS, no mismatch/unlisted/duplicate.
+AC33 [MUST] release-manifest/gate-results/analysis/diff v1 public schemas unchanged and old goldens valid except narrowly approved HTML refresh.
+AC34 [MUST] frozen Gate/Release semantics, SQLite schema, signing/update/security boundaries unchanged.
+AC35 [MUST] clean final candidate on independent branch, exact SHA/parents/files recorded.
+AC36 [MUST] independent reviewer verifies final SHA, delivers all AC verdicts not self-attestation.
+AC37 [MUST] original main staged patch/index manifest and HEAD unchanged; owner data/V1 archive untouched.
+AC38 [MUST] report supplies final downloadable SVG/PNG/HTML example paths or manifests and visual evidence provenance; no claim if not rendered.
+AC39 [CONDITIONAL] iff push flag YES and all preceding gates true, single non-force FF push exact reviewed SHA; otherwise PUSH_NOT_AUTHORIZED.
+AC40 [CONDITIONAL] iff push occurred, exact SHA Actions run / jobs / checks / dependency/drift verified; else REMOTE_CI_NOT_RUN.
+
+No fake 40/40 PASS: conditional AC39/AC40 N/A when Owner no push; any MUST not run = NOT_VERIFIED, not PASS. If title/preview visual acceptance unsupported, status remains bounded accurately. A better local-but-honest candidate is preferable to a falsely reported completed deliverable.
+
+====================================================================
+13. Final handoff — ONE integrated report, no micro-review churn
+====================================================================
+
+Output report to evidence directory OUTSIDE repository/worktrees. Name:
+  NEXT44_FINAL_REPORT.md
+  NEXT44_FINAL_REPORT.json
+  NEXT44_AC_MATRIX.tsv
+  and example rendered output paths / hashes / command log references.
+
+Contents required:
+- Executive verdict, implemented vs not implemented feature checklist;
+- exact baseline, branch/worktree, final SHA, diff files/commits, any dependency changes;
+- trustworthy visual report samples: sample type, resolution, bytes/hash, screenshot/print evidence location and what was physically inspected;
+- source-of-truth parity and privacy test details; negative controls and false-fact prevention;
+- all AC01–AC40 evidence and explicit NOT_RUN/UNKNOWN semantics;
+- tests actually executed, full gate count, deny per category, baseline verifier;
+- original staged worktree protection proof, Owner data state, V1 cohort unchanged;
+- whether conditional push authorization was present (the literal YES), actual push count, exact remote SHA, Actions run ID/jobs/checks if applicable;
+- remaining limitations: native PDF vs print-to-PDF, visual screenshot, hardware/software platform, font rendering, genuine user research;
+- next recommended *product* direction, not an unsolicited wave of cosmetic governance tasks.
+
+Hard STOP conditions:
+- hidden path/user secret leakage, XSS/external SVG requests, fabricated capacity/Gate conclusion;
+- any overwrite/source-data loss, modified Owner application data or protected original index;
+- security/capability/license/schema/identity/migration change not authorised here;
+- independent reviewer unavailable for push, incorrect SHA, moved upstream remote;
+- failed full required gate or no proof of intended export format.
+
+Allowed autonomous recovery: ordinary correctable tests, approved UI polish, renderer escaping, CLI argument plumbing, deterministic golden refresh with explained byte diff. Fix and continue locally without new micro-prompt until MUST criteria pass or a hard STOP triggers.
+
+Priority reminder: deliver user-visible visual export, not just backend abstraction; don't spend days recreating an engineering governance dashboard. The win is that an engineer can export a trustworthy, legible picture or a print-ready report and hand it to a non-technical stakeholder.
+
+END OF NEXT-44 CONTRACT v1.0

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\cli-independent.py", line 31, in <module>
+    gate=invoke('independent-cli-gate',['gate','--project',str(project),*artifact,'--json'],0)
+  File "LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\cli-independent.py", line 28, in invoke
+    assert p.returncode==expected,(name,p.returncode,p.stderr.decode(errors='replace'))
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('independent-cli-gate', 2, 'error: invalid configuration value for `release.expected_version`: an expected version needs a `[version]` policy; without one there is no tag pattern to read a version from (code ERR-CONFIG-7004, operation op-16cc-18de6fd43f0afaf8)\n2026-10-14T15:44:19.122174Z ERROR fwsight: project config rejected operation_id="op-16cc-18de6fd43f0afaf8" code="ERR-CONFIG-7004"\n')

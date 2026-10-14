@@ -1,0 +1,110 @@
+[
+  {
+    "file": "samples\\analyze-known\\analyze-known.html",
+    "bytes": 9797,
+    "sha256": "bd429d3c84de872bebf40af310dd960b553705a208215b398a3adcab1b0d4bef",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\analyze-known\\analyze-known.png",
+    "bytes": 80666,
+    "sha256": "f600c2192edbdae2a437e527134659d10c32048fb4e207cab0f37abbc7a48e7e",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\analyze-known\\analyze-known.svg",
+    "bytes": 3088,
+    "sha256": "c17630cd4201e610619f8e43ae04b947a1cc889667e40334db9801dd32349e5a",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\compare-ranked-growth\\compare-ranked-growth.html",
+    "bytes": 11808,
+    "sha256": "143f4a582bc8291d2921eb94f2afac39da8ecb9a0e74cea600172c4a73ec10fb",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\compare-ranked-growth\\compare-ranked-growth.png",
+    "bytes": 97057,
+    "sha256": "878dbbdcae3256a9236fbe0af1fdb578a92811d712d2136acca03126eeed48f9",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\compare-ranked-growth\\compare-ranked-growth.svg",
+    "bytes": 4551,
+    "sha256": "63e90015f3c38276f554735e438127d086acdf8c922dbb7f2d49295cac54557f",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\compare-unknown\\compare-unknown.html",
+    "bytes": 9746,
+    "sha256": "367f2f0f35437b5236326667cfc48bfa6484543afd1a49da61c836cf2702e347",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\compare-unknown\\compare-unknown.png",
+    "bytes": 64501,
+    "sha256": "3bdff3544c0f1d9b2e81f5bdc7fdada76ae8944da9631db3736e81a0e5e13d7f",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\compare-unknown\\compare-unknown.svg",
+    "bytes": 2743,
+    "sha256": "7a5efd50bc68d0f55561b2fff6a97d6f5dbda67907bd0d32f20f80730c1b7536",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\large-u64-cjk-region\\large-u64-cjk-region.html",
+    "bytes": 10269,
+    "sha256": "30ea4da0212496bdc4500c3202f1224e44be418fca492ec70c642b464fa7315b",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\large-u64-cjk-region\\large-u64-cjk-region.png",
+    "bytes": 83149,
+    "sha256": "8010f8e3aed9465eaeb06cc922a8e3031aa5a7698f4b3752ac2fd1819e3691a5",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\large-u64-cjk-region\\large-u64-cjk-region.svg",
+    "bytes": 2995,
+    "sha256": "fea2f41036cc791580c9a7fe463993b8b848bc6bfd356297d762c3ea0c5b2945",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\privacy-cjk-long-label\\privacy-cjk-long-label.html",
+    "bytes": 9835,
+    "sha256": "b30d42185604fdba710eddef4288a423f3d5481f4c0443e4182ee656d55ea352",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\privacy-cjk-long-label\\privacy-cjk-long-label.png",
+    "bytes": 82886,
+    "sha256": "2d185a386e4c5b060915948ed893db25ffc6f901069f8c4b279feb22d247bdfe",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\privacy-cjk-long-label\\privacy-cjk-long-label.svg",
+    "bytes": 3126,
+    "sha256": "2eabfa18de91a48ab5a10950752366d54f8a3daae2670fb74968b5559c6b2b44",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\release-review-block-unknown\\release-review-block-unknown.html",
+    "bytes": 14201,
+    "sha256": "07f3d5a56c43f261849af2c2182b1cf5a76dc7071de19302fdec67352a975d1c",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\release-review-block-unknown\\release-review-block-unknown.png",
+    "bytes": 143935,
+    "sha256": "23942f2705be50334485f2e2d133a50ba0bb793b80b8a558d3d0296ef6bd3ac7",
+    "repeat_identical": true
+  },
+  {
+    "file": "samples\\release-review-block-unknown\\release-review-block-unknown.svg",
+    "bytes": 5815,
+    "sha256": "b61cdab76f299848299696303b5eca382ec41716754f097106b90cddf87d89f9",
+    "repeat_identical": true
+  }
+]

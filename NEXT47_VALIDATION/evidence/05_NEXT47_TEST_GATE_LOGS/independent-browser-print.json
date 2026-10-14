@@ -1,0 +1,12 @@
+{
+  "name": "independent-browser-print",
+  "argv": [
+    "node.exe",
+    "LOCAL_USER/Downloads/FirmwareSight_NEXT47_EVIDENCE_20261014/reviewer/render-review.cjs"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "start_utc": "2026-10-14T15:40:49.628176+00:00",
+  "end_utc": "2026-10-14T15:41:46.325818+00:00",
+  "exit_code": 0,
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-14T16:08:28.258738+00:00",
+  "candidate_sha": "76b5c2c006f1ca0850af86da6d1e4b957227a025",
+  "parent_sha": "4ac1e4f709396fac7a37a1d92b8095a070b3effa",
+  "clean": true,
+  "source_code_changes": false,
+  "ls_remote": "4ac1e4f709396fac7a37a1d92b8095a070b3effa\trefs/heads/main",
+  "github_rest_sha": "4ac1e4f709396fac7a37a1d92b8095a070b3effa",
+  "protected_HEAD_stage0_status_patch_unchanged": true,
+  "staged_count": 9,
+  "patch_bytes": 19794,
+  "patch_sha256": "05f86c0313040899dca1156f538186d686377906e1a62e755fcb029c1eb96d2b",
+  "all_historical_hashes_unchanged": true,
+  "original_TSV_sha256": "d5a83e0357fe7e89ead90cb42bd7615f52921f09e30075b55b9ed379e0b17ca4",
+  "prior_full_894_source_byte_readback": "reviewer/source-bytes-artifact-repair.json",
+  "reviewer_push_attempts": 0
+}

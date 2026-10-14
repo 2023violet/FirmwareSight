@@ -1,0 +1,74 @@
+[
+  {
+    "svg": "samples\\analyze-known\\analyze-known.svg",
+    "png": "samples\\analyze-known\\analyze-known.png",
+    "size": [
+      1600,
+      900
+    ],
+    "nonwhite_pixels": 52909,
+    "sha256": "f600c2192edbdae2a437e527134659d10c32048fb4e207cab0f37abbc7a48e7e",
+    "xml_parse": true,
+    "decoder": "Pillow 12.3.0"
+  },
+  {
+    "svg": "samples\\compare-ranked-growth\\compare-ranked-growth.svg",
+    "png": "samples\\compare-ranked-growth\\compare-ranked-growth.png",
+    "size": [
+      1600,
+      900
+    ],
+    "nonwhite_pixels": 62858,
+    "sha256": "878dbbdcae3256a9236fbe0af1fdb578a92811d712d2136acca03126eeed48f9",
+    "xml_parse": true,
+    "decoder": "Pillow 12.3.0"
+  },
+  {
+    "svg": "samples\\compare-unknown\\compare-unknown.svg",
+    "png": "samples\\compare-unknown\\compare-unknown.png",
+    "size": [
+      1600,
+      900
+    ],
+    "nonwhite_pixels": 36147,
+    "sha256": "3bdff3544c0f1d9b2e81f5bdc7fdada76ae8944da9631db3736e81a0e5e13d7f",
+    "xml_parse": true,
+    "decoder": "Pillow 12.3.0"
+  },
+  {
+    "svg": "samples\\large-u64-cjk-region\\large-u64-cjk-region.svg",
+    "png": "samples\\large-u64-cjk-region\\large-u64-cjk-region.png",
+    "size": [
+      1600,
+      900
+    ],
+    "nonwhite_pixels": 55603,
+    "sha256": "8010f8e3aed9465eaeb06cc922a8e3031aa5a7698f4b3752ac2fd1819e3691a5",
+    "xml_parse": true,
+    "decoder": "Pillow 12.3.0"
+  },
+  {
+    "svg": "samples\\privacy-cjk-long-label\\privacy-cjk-long-label.svg",
+    "png": "samples\\privacy-cjk-long-label\\privacy-cjk-long-label.png",
+    "size": [
+      1600,
+      900
+    ],
+    "nonwhite_pixels": 54823,
+    "sha256": "2d185a386e4c5b060915948ed893db25ffc6f901069f8c4b279feb22d247bdfe",
+    "xml_parse": true,
+    "decoder": "Pillow 12.3.0"
+  },
+  {
+    "svg": "samples\\release-review-block-unknown\\release-review-block-unknown.svg",
+    "png": "samples\\release-review-block-unknown\\release-review-block-unknown.png",
+    "size": [
+      1600,
+      900
+    ],
+    "nonwhite_pixels": 89537,
+    "sha256": "23942f2705be50334485f2e2d133a50ba0bb793b80b8a558d3d0296ef6bd3ac7",
+    "xml_parse": true,
+    "decoder": "Pillow 12.3.0"
+  }
+]

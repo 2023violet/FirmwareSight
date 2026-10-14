@@ -10,7 +10,14 @@ last_updated: "2026-10-14"
 
 # FirmwareSight Now
 
-## Current pointer — 2026-10-14 / NEXT-46
+## Current pointer — 2026-10-14 / NEXT-47
+
+- **Observed integrated code SHA:** `76b5c2c006f1ca0850af86da6d1e4b957227a025`, the unchanged NEXT-46 candidate, integrated by one ordinary FF push under the explicit NEXT-47 authorization. [Actions #113](https://github.com/2023violet/FirmwareSight/actions/runs/38595778036), attempt 1, has all 10 Jobs and 10 Check Runs successful on that exact code SHA; actual cargo-deny and baseline/drift logs were independently verified.
+- **Independent scoped decision:** `CODE_INTEGRATION_GATE = PASS`; `NATIVE_USER_ACCEPTANCE_GATE = NOT_VERIFIED / BLOCKED_BY_ENV`. NEXT-44 AC24/AC26 and NEXT-45 AC20 remain MUST / NOT_VERIFIED with Owner-accepted deferred native QA. Close them before the earliest external Developer Preview distribution, Private Beta or RC. No native/installed acceptance, vendor formal compatibility or public product release is inferred.
+- **Repository evidence upload:** the Owner subsequently requested uploading the delivery to main. [NEXT47_VALIDATION](../NEXT47_VALIDATION/README.md) contains a public derivative with host-path redaction and original/published digest mapping. Local originals, original historical judgments and the protected main's nine staged files remain unchanged. The upload is a later documentation/evidence commit; run #113 certifies the code SHA above, not this new documentation commit. Read Git/Actions for the upload's current SHA and CI state.
+- **Compatibility:** Keil/IAR compiler cohorts remain UNVERIFIED; ArmLink/IAR MAP remain NOT_SUPPORTED / FIXTURE_BLOCKED. Clang class/endian fixtures establish basic ELF metadata only.
+
+## Historical pointer — 2026-10-14 / NEXT-46 (preserved)
 
 - **Observed remote baseline:** `4ac1e4f709396fac7a37a1d92b8095a070b3effa`, re-read from GitHub and `ls-remote`. [Actions #112](https://github.com/2023violet/FirmwareSight/actions/runs/38535378887) has all 10 Jobs successful on that SHA. Remote evidence proves engineering CI, not native Save-dialog or installed desktop acceptance.
 - **Owner adjudication:** `NEXT45 = ENGINEERING_DELIVERED / REMOTE_CI_PROVEN / REVIEW_EXCEPTIONS_OPEN`. The earlier reviewer `ACCEPT_WITH_LIMITS` and prior conditional-push nonconformance remain historical audit facts. Correct nonduplicated Windows NEXT-45 workspace count: 1,154 passed / 0 failed / 2 opt-in ignored / 54 result lines; the old commit message is not amended.

@@ -1,0 +1,179 @@
+[
+  {
+    "name": "independent-cli-gate-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "gate",
+      "--project",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-release-project-final",
+      "--artifact",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\target\\firmware.elf",
+      "--map",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\target\\firmware.map",
+      "--baseline",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\base\\firmware.elf",
+      "--baseline-map",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\base\\firmware.map",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 0,
+    "stdout_sha256": "329a8ee37ab3eb16843803fd024553df9c82e4a7f2c501647ac7e0122a198e55",
+    "stderr_sha256": "f4474587086e02e250a074e6c5ff1ef57228a6e21ac35bf8c8764ef8b6bce994"
+  },
+  {
+    "name": "independent-cli-release-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "release",
+      "prepare",
+      "--project",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-release-project-final",
+      "--artifact",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\target\\firmware.elf",
+      "--map",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\target\\firmware.map",
+      "--baseline",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\base\\firmware.elf",
+      "--baseline-map",
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\fixtures\\elf\\p2-diff\\base\\firmware.map",
+      "--out",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\new-cli-bundles-corrected",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 0,
+    "stdout_sha256": "73fa7600fcee7facf4d57bfdd81ddedbf0ec9c88fac378d0bab047a87cf12552",
+    "stderr_sha256": "ab46c66a99c6965b76168d8e3166016fa3a275df1d9a8e7ee7167fc83fc9a837"
+  },
+  {
+    "name": "independent-privacy-svg-False-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p0-dual-region/firmware.elf",
+      "--svg",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.svg"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 6,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "7bd39dcb64cd6dbc059e39f57cf90c2812b6e4895dfecc54863b87a5356c77a2"
+  },
+  {
+    "name": "independent-privacy-svg-True-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p0-dual-region/firmware.elf",
+      "--svg",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.svg",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 6,
+    "stdout_sha256": "c1f1e47d5119bb36f39db14c1ad10e278bef0df402060b4a7b79a1a58c98f1d0",
+    "stderr_sha256": "4736f358c8aa70b29e72f56a8d67943d056736f43918d59a5c915725e357be25"
+  },
+  {
+    "name": "independent-privacy-png-False-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p0-dual-region/firmware.elf",
+      "--png",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.svg"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 6,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "0c8a98522db45555792b4cf44e27cff5f09a606ccb978edf117388c72994d2e5"
+  },
+  {
+    "name": "independent-privacy-png-True-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p0-dual-region/firmware.elf",
+      "--png",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.svg",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 6,
+    "stdout_sha256": "0ef4806d8f195d17d331e27623338785c6a53fa270f188fca549f876cacfe2c1",
+    "stderr_sha256": "ac0af85030bc7cd8e575821fc00f1db99dc81e7f2f79632db3e12be864f5edc3"
+  },
+  {
+    "name": "independent-privacy-report-html-False-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p0-dual-region/firmware.elf",
+      "--report-html",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.svg"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 6,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "22d8c658e697064b183a5e395bd1338517d6a5ef095320e5643d094150ac0aaf"
+  },
+  {
+    "name": "independent-privacy-report-html-True-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p0-dual-region/firmware.elf",
+      "--report-html",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.svg",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 6,
+    "stdout_sha256": "82a3e1a8e689c47ff550265d84afad8b2c419f013ae87f1a9c8e78989d477437",
+    "stderr_sha256": "dcdcdf854bf499928b2999f3356604a20d0b463e3c958093a207744510c4a2ea"
+  },
+  {
+    "name": "independent-foreign-map-8-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p5-compat/clang-arm/firmware.elf",
+      "--map",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.map",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 3,
+    "stdout_sha256": "a190a8fb635ea6ae905cb168f8a57d7f9834ea2128d4b1580bf27b6d9ea25e05",
+    "stderr_sha256": "3772fb2703778c58d1a9e57670d8c80febfab100121046622be0b816582acda9"
+  },
+  {
+    "name": "independent-foreign-map-9-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p5-compat/clang-arm/firmware.elf",
+      "--map",
+      "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\synthetic-privacy-corrected\\PRIVATE_NEXT47_CANARY.map",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 3,
+    "stdout_sha256": "6e4debefcbf263ff4441472dd41a878c60c418ad29d5edb2d2026335f84a2672",
+    "stderr_sha256": "5635badea195d43d629a20b6a03d8646ea1db11f0cff5b9fecbffbef4df00a30"
+  },
+  {
+    "name": "independent-elf-only-corrected",
+    "argv": [
+      "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight\\target\\debug\\fwsight.exe",
+      "analyze",
+      "fixtures/elf/p5-compat/clang-arm/firmware.elf",
+      "--json"
+    ],
+    "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+    "exit_code": 0,
+    "stdout_sha256": "7cc888e9df44f40c9b4f3f200984a7d8dbb4381d61a0ba614aa946f6d117318e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

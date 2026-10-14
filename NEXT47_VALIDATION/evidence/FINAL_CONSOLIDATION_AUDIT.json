@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-14T16:35:25.475972+00:00",
+  "historical_manifest_files_verified": 374,
+  "historical_files_byte_unchanged": true,
+  "all_original_json_values_preserved": true,
+  "original_106_tsv_rows_and_seven_column_prefix_preserved": true,
+  "risk_authorization_signature_hashes_unchanged": true,
+  "independent_postphase_hashes_verified": true,
+  "NEXT47_process_rows": 24,
+  "engineering_process_all_PASS": true,
+  "native_QA": "NOT_VERIFIED"
+}

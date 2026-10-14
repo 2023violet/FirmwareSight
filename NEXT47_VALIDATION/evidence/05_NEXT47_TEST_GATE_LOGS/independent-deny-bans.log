@@ -1,0 +1,3372 @@
+warning[duplicate]: found 3 duplicate entries for crate 'base64'
+   ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:17:1
+   │  
+17 │ ╭ base64 0.21.7 registry+https://github.com/rust-lang/crates.io-index
+18 │ │ base64 0.22.1 registry+https://github.com/rust-lang/crates.io-index
+19 │ │ base64 0.23.1 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰───────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ base64 v0.21.7
+     └── swift-rs v1.0.8
+         └── tauri-utils v2.10.0
+             ├── tauri v2.12.0
+             │   ├── firmwaresight-desktop v0.6.0
+             │   ├── tauri-plugin-dialog v2.8.0
+             │   │   └── firmwaresight-desktop v0.6.0 (*)
+             │   └── tauri-plugin-fs v2.6.0
+             │       └── tauri-plugin-dialog v2.8.0 (*)
+             ├── tauri-build v2.7.0
+             │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+             │   └── (build) tauri v2.12.0 (*)
+             ├── tauri-codegen v2.7.0
+             │   └── tauri-macros v2.7.0
+             │       └── tauri v2.12.0 (*)
+             ├── tauri-macros v2.7.0 (*)
+             ├── tauri-plugin v2.7.0
+             │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+             │   └── (build) tauri-plugin-fs v2.6.0 (*)
+             ├── (build) tauri-plugin-fs v2.6.0 (*)
+             ├── tauri-runtime v2.12.0
+             │   ├── tauri v2.12.0 (*)
+             │   └── tauri-runtime-wry v2.12.0
+             │       └── tauri v2.12.0 (*)
+             └── tauri-runtime-wry v2.12.0 (*)
+   ├ base64 v0.22.1
+     └── tauri-codegen v2.7.0
+         └── tauri-macros v2.7.0
+             └── tauri v2.12.0
+                 ├── firmwaresight-desktop v0.6.0
+                 ├── tauri-plugin-dialog v2.8.0
+                 │   └── firmwaresight-desktop v0.6.0 (*)
+                 └── tauri-plugin-fs v2.6.0
+                     └── tauri-plugin-dialog v2.8.0 (*)
+   ├ base64 v0.23.1
+     ├── plist v1.10.1
+     │   ├── tauri v2.12.0
+     │   │   ├── firmwaresight-desktop v0.6.0
+     │   │   ├── tauri-plugin-dialog v2.8.0
+     │   │   │   └── firmwaresight-desktop v0.6.0 (*)
+     │   │   └── tauri-plugin-fs v2.6.0
+     │   │       └── tauri-plugin-dialog v2.8.0 (*)
+     │   ├── tauri-codegen v2.7.0
+     │   │   └── tauri-macros v2.7.0
+     │   │       └── tauri v2.12.0 (*)
+     │   ├── tauri-plugin v2.7.0
+     │   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+     │   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+     │   └── tauri-utils v2.10.0
+     │       ├── tauri v2.12.0 (*)
+     │       ├── tauri-build v2.7.0
+     │       │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+     │       │   └── (build) tauri v2.12.0 (*)
+     │       ├── tauri-codegen v2.7.0 (*)
+     │       ├── tauri-macros v2.7.0 (*)
+     │       ├── tauri-plugin v2.7.0 (*)
+     │       ├── (build) tauri-plugin-fs v2.6.0 (*)
+     │       ├── tauri-runtime v2.12.0
+     │       │   ├── tauri v2.12.0 (*)
+     │       │   └── tauri-runtime-wry v2.12.0
+     │       │       └── tauri v2.12.0 (*)
+     │       └── tauri-runtime-wry v2.12.0 (*)
+     └── usvg v0.48.1
+         └── resvg v0.48.1
+             └── firmwaresight-report v0.6.0
+                 ├── firmwaresight-desktop v0.6.0 (*)
+                 ├── firmwaresight-project v0.6.0
+                 │   ├── firmwaresight-desktop v0.6.0 (*)
+                 │   └── fwsight v0.6.0
+                 └── (dev) fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
+   ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:22:1
+   │  
+22 │ ╭ bitflags 1.3.2 registry+https://github.com/rust-lang/crates.io-index
+23 │ │ bitflags 2.13.2 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ bitflags v1.3.2
+     ├── javascriptcore-rs v1.1.2
+     │   ├── webkit2gtk v2.0.2
+     │   │   ├── tauri v2.12.0
+     │   │   │   ├── firmwaresight-desktop v0.6.0
+     │   │   │   ├── tauri-plugin-dialog v2.8.0
+     │   │   │   │   └── firmwaresight-desktop v0.6.0 (*)
+     │   │   │   └── tauri-plugin-fs v2.6.0
+     │   │   │       └── tauri-plugin-dialog v2.8.0 (*)
+     │   │   ├── tauri-runtime v2.12.0
+     │   │   │   ├── tauri v2.12.0 (*)
+     │   │   │   └── tauri-runtime-wry v2.12.0
+     │   │   │       └── tauri v2.12.0 (*)
+     │   │   ├── tauri-runtime-wry v2.12.0 (*)
+     │   │   └── wry v0.57.0
+     │   │       └── tauri-runtime-wry v2.12.0 (*)
+     │   └── wry v0.57.0 (*)
+     ├── png v0.17.16
+     │   └── ico v0.5.0
+     │       └── tauri-codegen v2.7.0
+     │           └── tauri-macros v2.7.0
+     │               └── tauri v2.12.0 (*)
+     ├── webkit2gtk v2.0.2 (*)
+     └── webkit2gtk-sys v2.0.2
+         ├── webkit2gtk v2.0.2 (*)
+         └── wry v0.57.0 (*)
+   ├ bitflags v2.13.2
+     ├── cairo-rs v0.18.5
+     │   ├── gdk v0.18.2
+     │   │   ├── gdkx11 v0.18.2
+     │   │   │   └── wry v0.57.0
+     │   │   │       └── tauri-runtime-wry v2.12.0
+     │   │   │           └── tauri v2.12.0
+     │   │   │               ├── firmwaresight-desktop v0.6.0
+     │   │   │               ├── tauri-plugin-dialog v2.8.0
+     │   │   │               │   └── firmwaresight-desktop v0.6.0 (*)
+     │   │   │               └── tauri-plugin-fs v2.6.0
+     │   │   │                   └── tauri-plugin-dialog v2.8.0 (*)
+     │   │   ├── gtk v0.18.2
+     │   │   │   ├── muda v0.20.0
+     │   │   │   │   └── tauri v2.12.0 (*)
+     │   │   │   ├── tao v0.37.1
+     │   │   │   │   └── tauri-runtime-wry v2.12.0 (*)
+     │   │   │   ├── tauri v2.12.0 (*)
+     │   │   │   ├── tauri-runtime v2.12.0
+     │   │   │   │   ├── tauri v2.12.0 (*)
+     │   │   │   │   └── tauri-runtime-wry v2.12.0 (*)
+     │   │   │   ├── tauri-runtime-wry v2.12.0 (*)
+     │   │   │   ├── webkit2gtk v2.0.2
+     │   │   │   │   ├── tauri v2.12.0 (*)
+     │   │   │   │   ├── tauri-runtime v2.12.0 (*)
+     │   │   │   │   ├── tauri-runtime-wry v2.12.0 (*)
+     │   │   │   │   └── wry v0.57.0 (*)
+     │   │   │   └── wry v0.57.0 (*)
+     │   │   └── webkit2gtk v2.0.2 (*)
+     │   ├── gtk v0.18.2 (*)
+     │   └── webkit2gtk v2.0.2 (*)
+     ├── core-graphics v0.25.0
+     │   └── tao v0.37.1 (*)
+     ├── core-graphics-types v0.2.0
+     │   └── core-graphics v0.25.0 (*)
+     ├── dispatch2 v0.3.1
+     │   ├── rfd v0.16.0
+     │   │   └── tauri-plugin-dialog v2.8.0 (*)
+     │   └── tao v0.37.1 (*)
+     ├── glib v0.18.5
+     │   ├── atk v0.18.2
+     │   │   └── gtk v0.18.2 (*)
+     │   ├── cairo-rs v0.18.5 (*)
+     │   ├── gdk v0.18.2 (*)
+     │   ├── gdk-pixbuf v0.18.5
+     │   │   ├── gdk v0.18.2 (*)
+     │   │   └── gtk v0.18.2 (*)
+     │   ├── gdkx11 v0.18.2 (*)
+     │   ├── gio v0.18.4
+     │   │   ├── gdk v0.18.2 (*)
+     │   │   ├── gdk-pixbuf v0.18.5 (*)
+     │   │   ├── gdkx11 v0.18.2 (*)
+     │   │   ├── gtk v0.18.2 (*)
+     │   │   ├── pango v0.18.3
+     │   │   │   ├── gdk v0.18.2 (*)
+     │   │   │   └── gtk v0.18.2 (*)
+     │   │   ├── soup3 v0.5.0
+     │   │   │   ├── webkit2gtk v2.0.2 (*)
+     │   │   │   └── wry v0.57.0 (*)
+     │   │   └── webkit2gtk v2.0.2 (*)
+     │   ├── gtk v0.18.2 (*)
+     │   ├── javascriptcore-rs v1.1.2
+     │   │   ├── webkit2gtk v2.0.2 (*)
+     │   │   └── wry v0.57.0 (*)
+     │   ├── pango v0.18.3 (*)
+     │   ├── soup3 v0.5.0 (*)
+     │   └── webkit2gtk v2.0.2 (*)
+     ├── harfrust v0.12.0
+     │   └── usvg v0.48.1
+     │       └── resvg v0.48.1
+     │           └── firmwaresight-report v0.6.0
+     │               ├── firmwaresight-desktop v0.6.0 (*)
+     │               ├── firmwaresight-project v0.6.0
+     │               │   ├── firmwaresight-desktop v0.6.0 (*)
+     │               │   └── fwsight v0.6.0
+     │               └── (dev) fwsight v0.6.0 (*)
+     ├── keyboard-types v0.8.3
+     │   └── muda v0.20.0 (*)
+     ├── objc2-app-kit v0.3.2
+     │   ├── muda v0.20.0 (*)
+     │   ├── objc2-web-kit v0.3.2
+     │   │   ├── tauri v2.12.0 (*)
+     │   │   ├── tauri-runtime v2.12.0 (*)
+     │   │   └── wry v0.57.0 (*)
+     │   ├── rfd v0.16.0 (*)
+     │   ├── tao v0.37.1 (*)
+     │   ├── tauri v2.12.0 (*)
+     │   ├── tauri-runtime-wry v2.12.0 (*)
+     │   ├── window-vibrancy v0.8.1
+     │   │   └── tauri v2.12.0 (*)
+     │   └── wry v0.57.0 (*)
+     ├── objc2-core-foundation v0.3.2
+     │   ├── muda v0.20.0 (*)
+     │   ├── objc2-app-kit v0.3.2 (*)
+     │   ├── objc2-core-graphics v0.3.2
+     │   │   └── softbuffer v0.4.8
+     │   │       └── tauri-runtime-wry v2.12.0 (*)
+     │   ├── objc2-foundation v0.3.2
+     │   │   ├── muda v0.20.0 (*)
+     │   │   ├── objc2-app-kit v0.3.2 (*)
+     │   │   ├── objc2-quartz-core v0.3.2
+     │   │   │   ├── objc2-app-kit v0.3.2 (*)
+     │   │   │   ├── softbuffer v0.4.8 (*)
+     │   │   │   └── window-vibrancy v0.8.1 (*)
+     │   │   ├── objc2-web-kit v0.3.2 (*)
+     │   │   ├── rfd v0.16.0 (*)
+     │   │   ├── softbuffer v0.4.8 (*)
+     │   │   ├── tao v0.37.1 (*)
+     │   │   ├── tauri v2.12.0 (*)
+     │   │   ├── window-vibrancy v0.8.1 (*)
+     │   │   └── (build) wry v0.57.0 (*)
+     │   ├── objc2-quartz-core v0.3.2 (*)
+     │   ├── objc2-web-kit v0.3.2 (*)
+     │   ├── rfd v0.16.0 (*)
+     │   ├── softbuffer v0.4.8 (*)
+     │   ├── window-vibrancy v0.8.1 (*)
+     │   └── wry v0.57.0 (*)
+     ├── objc2-core-graphics v0.3.2 (*)
+     ├── objc2-foundation v0.3.2 (*)
+     ├── objc2-quartz-core v0.3.2 (*)
+     ├── objc2-web-kit v0.3.2 (*)
+     ├── png v0.18.1
+     │   ├── muda v0.20.0 (*)
+     │   ├── tauri-codegen v2.7.0
+     │   │   └── tauri-macros v2.7.0
+     │   │       └── tauri v2.12.0 (*)
+     │   └── tiny-skia v0.12.0
+     │       └── resvg v0.48.1 (*)
+     ├── rusqlite v0.40.2
+     │   └── firmwaresight-storage v0.6.0
+     │       └── firmwaresight-desktop v0.6.0 (*)
+     ├── rustix v1.1.5
+     │   ├── cap-primitives v4.0.3
+     │   │   └── cap-std v4.0.3
+     │   │       └── firmwaresight-project v0.6.0 (*)
+     │   ├── cap-std v4.0.3 (*)
+     │   ├── fs-set-times v0.20.3
+     │   │   └── cap-primitives v4.0.3 (*)
+     │   └── rustix-linux-procfs v0.1.1
+     │       └── cap-primitives v4.0.3 (*)
+     ├── selectors v0.38.0
+     │   └── dom_query v0.28.0
+     │       └── tauri-utils v2.10.0
+     │           ├── tauri v2.12.0 (*)
+     │           ├── tauri-build v2.7.0
+     │           │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+     │           │   └── (build) tauri v2.12.0 (*)
+     │           ├── tauri-codegen v2.7.0 (*)
+     │           ├── tauri-macros v2.7.0 (*)
+     │           ├── tauri-plugin v2.7.0
+     │           │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+     │           │   └── (build) tauri-plugin-fs v2.6.0 (*)
+     │           ├── (build) tauri-plugin-fs v2.6.0 (*)
+     │           ├── tauri-runtime v2.12.0 (*)
+     │           └── tauri-runtime-wry v2.12.0 (*)
+     ├── tao v0.37.1 (*)
+     └── winx v0.36.4
+         └── cap-primitives v4.0.3 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'block-buffer'
+   ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:24:1
+   │  
+24 │ ╭ block-buffer 0.10.4 registry+https://github.com/rust-lang/crates.io-index
+25 │ │ block-buffer 0.12.1 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ block-buffer v0.10.4
+     └── digest v0.10.7
+         └── sha2 v0.10.9
+             └── tauri-codegen v2.7.0
+                 └── tauri-macros v2.7.0
+                     └── tauri v2.12.0
+                         ├── firmwaresight-desktop v0.6.0
+                         ├── tauri-plugin-dialog v2.8.0
+                         │   └── firmwaresight-desktop v0.6.0 (*)
+                         └── tauri-plugin-fs v2.6.0
+                             └── tauri-plugin-dialog v2.8.0 (*)
+   ├ block-buffer v0.12.1
+     └── digest v0.11.3
+         └── sha2 v0.11.0
+             ├── firmwaresight-artifact v0.6.0
+             │   ├── firmwaresight-desktop v0.6.0
+             │   ├── (dev) firmwaresight-storage v0.6.0
+             │   │   └── firmwaresight-desktop v0.6.0 (*)
+             │   └── fwsight v0.6.0
+             └── firmwaresight-project v0.6.0
+                 ├── firmwaresight-desktop v0.6.0 (*)
+                 └── fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'cpufeatures'
+   ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:56:1
+   │  
+56 │ ╭ cpufeatures 0.2.17 registry+https://github.com/rust-lang/crates.io-index
+57 │ │ cpufeatures 0.3.1 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰───────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ cpufeatures v0.2.17
+     └── sha2 v0.10.9
+         └── tauri-codegen v2.7.0
+             └── tauri-macros v2.7.0
+                 └── tauri v2.12.0
+                     ├── firmwaresight-desktop v0.6.0
+                     ├── tauri-plugin-dialog v2.8.0
+                     │   └── firmwaresight-desktop v0.6.0 (*)
+                     └── tauri-plugin-fs v2.6.0
+                         └── tauri-plugin-dialog v2.8.0 (*)
+   ├ cpufeatures v0.3.1
+     └── sha2 v0.11.0
+         ├── firmwaresight-artifact v0.6.0
+         │   ├── firmwaresight-desktop v0.6.0
+         │   ├── (dev) firmwaresight-storage v0.6.0
+         │   │   └── firmwaresight-desktop v0.6.0 (*)
+         │   └── fwsight v0.6.0
+         └── firmwaresight-project v0.6.0
+             ├── firmwaresight-desktop v0.6.0 (*)
+             └── fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'crypto-common'
+   ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:61:1
+   │  
+61 │ ╭ crypto-common 0.1.7 registry+https://github.com/rust-lang/crates.io-index
+62 │ │ crypto-common 0.2.2 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ crypto-common v0.1.7
+     └── digest v0.10.7
+         └── sha2 v0.10.9
+             └── tauri-codegen v2.7.0
+                 └── tauri-macros v2.7.0
+                     └── tauri v2.12.0
+                         ├── firmwaresight-desktop v0.6.0
+                         ├── tauri-plugin-dialog v2.8.0
+                         │   └── firmwaresight-desktop v0.6.0 (*)
+                         └── tauri-plugin-fs v2.6.0
+                             └── tauri-plugin-dialog v2.8.0 (*)
+   ├ crypto-common v0.2.2
+     └── digest v0.11.3
+         └── sha2 v0.11.0
+             ├── firmwaresight-artifact v0.6.0
+             │   ├── firmwaresight-desktop v0.6.0
+             │   ├── (dev) firmwaresight-storage v0.6.0
+             │   │   └── firmwaresight-desktop v0.6.0 (*)
+             │   └── fwsight v0.6.0
+             └── firmwaresight-project v0.6.0
+                 ├── firmwaresight-desktop v0.6.0 (*)
+                 └── fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'digest'
+   ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:74:1
+   │  
+74 │ ╭ digest 0.10.7 registry+https://github.com/rust-lang/crates.io-index
+75 │ │ digest 0.11.3 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰───────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ digest v0.10.7
+     └── sha2 v0.10.9
+         └── tauri-codegen v2.7.0
+             └── tauri-macros v2.7.0
+                 └── tauri v2.12.0
+                     ├── firmwaresight-desktop v0.6.0
+                     ├── tauri-plugin-dialog v2.8.0
+                     │   └── firmwaresight-desktop v0.6.0 (*)
+                     └── tauri-plugin-fs v2.6.0
+                         └── tauri-plugin-dialog v2.8.0 (*)
+   ├ digest v0.11.3
+     └── sha2 v0.11.0
+         ├── firmwaresight-artifact v0.6.0
+         │   ├── firmwaresight-desktop v0.6.0
+         │   ├── (dev) firmwaresight-storage v0.6.0
+         │   │   └── firmwaresight-desktop v0.6.0 (*)
+         │   └── fwsight v0.6.0
+         └── firmwaresight-project v0.6.0
+             ├── firmwaresight-desktop v0.6.0 (*)
+             └── fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:133:1
+    │  
+133 │ ╭ getrandom 0.3.4 registry+https://github.com/rust-lang/crates.io-index
+134 │ │ getrandom 0.4.3 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰─────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ getrandom v0.3.4
+      └── tauri v2.12.0
+          ├── firmwaresight-desktop v0.6.0
+          ├── tauri-plugin-dialog v2.8.0
+          │   └── firmwaresight-desktop v0.6.0 (*)
+          └── tauri-plugin-fs v2.6.0
+              └── tauri-plugin-dialog v2.8.0 (*)
+    ├ getrandom v0.4.3
+      └── uuid v1.26.1
+          ├── cfb v0.14.0
+          │   └── infer v0.22.0
+          │       └── tauri-utils v2.10.0
+          │           ├── tauri v2.12.0
+          │           │   ├── firmwaresight-desktop v0.6.0
+          │           │   ├── tauri-plugin-dialog v2.8.0
+          │           │   │   └── firmwaresight-desktop v0.6.0 (*)
+          │           │   └── tauri-plugin-fs v2.6.0
+          │           │       └── tauri-plugin-dialog v2.8.0 (*)
+          │           ├── tauri-build v2.7.0
+          │           │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+          │           │   └── (build) tauri v2.12.0 (*)
+          │           ├── tauri-codegen v2.7.0
+          │           │   └── tauri-macros v2.7.0
+          │           │       └── tauri v2.12.0 (*)
+          │           ├── tauri-macros v2.7.0 (*)
+          │           ├── tauri-plugin v2.7.0
+          │           │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+          │           │   └── (build) tauri-plugin-fs v2.6.0 (*)
+          │           ├── (build) tauri-plugin-fs v2.6.0 (*)
+          │           ├── tauri-runtime v2.12.0
+          │           │   ├── tauri v2.12.0 (*)
+          │           │   └── tauri-runtime-wry v2.12.0
+          │           │       └── tauri v2.12.0 (*)
+          │           └── tauri-runtime-wry v2.12.0 (*)
+          ├── schemars v0.8.22
+          │   ├── tauri-build v2.7.0 (*)
+          │   ├── tauri-plugin v2.7.0 (*)
+          │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+          │   └── tauri-utils v2.10.0 (*)
+          ├── tauri-codegen v2.7.0 (*)
+          └── tauri-utils v2.10.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'hashbrown'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:146:1
+    │  
+146 │ ╭ hashbrown 0.12.3 registry+https://github.com/rust-lang/crates.io-index
+147 │ │ hashbrown 0.17.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ hashbrown v0.12.3
+      └── indexmap v1.9.3
+          └── schemars v0.8.22
+              ├── tauri-build v2.7.0
+              │   ├── (build) firmwaresight-desktop v0.6.0
+              │   └── (build) tauri v2.12.0
+              │       ├── firmwaresight-desktop v0.6.0 (*)
+              │       ├── tauri-plugin-dialog v2.8.0
+              │       │   └── firmwaresight-desktop v0.6.0 (*)
+              │       └── tauri-plugin-fs v2.6.0
+              │           └── tauri-plugin-dialog v2.8.0 (*)
+              ├── tauri-plugin v2.7.0
+              │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+              │   └── (build) tauri-plugin-fs v2.6.0 (*)
+              ├── (build) tauri-plugin-fs v2.6.0 (*)
+              └── tauri-utils v2.10.0
+                  ├── tauri v2.12.0 (*)
+                  ├── tauri-build v2.7.0 (*)
+                  ├── tauri-codegen v2.7.0
+                  │   └── tauri-macros v2.7.0
+                  │       └── tauri v2.12.0 (*)
+                  ├── tauri-macros v2.7.0 (*)
+                  ├── tauri-plugin v2.7.0 (*)
+                  ├── (build) tauri-plugin-fs v2.6.0 (*)
+                  ├── tauri-runtime v2.12.0
+                  │   ├── tauri v2.12.0 (*)
+                  │   └── tauri-runtime-wry v2.12.0
+                  │       └── tauri v2.12.0 (*)
+                  └── tauri-runtime-wry v2.12.0 (*)
+    ├ hashbrown v0.17.1
+      ├── hashlink v0.12.2
+      │   └── rusqlite v0.40.2
+      │       └── firmwaresight-storage v0.6.0
+      │           └── firmwaresight-desktop v0.6.0
+      └── indexmap v2.14.2
+          ├── plist v1.10.1
+          │   ├── tauri v2.12.0
+          │   │   ├── firmwaresight-desktop v0.6.0 (*)
+          │   │   ├── tauri-plugin-dialog v2.8.0
+          │   │   │   └── firmwaresight-desktop v0.6.0 (*)
+          │   │   └── tauri-plugin-fs v2.6.0
+          │   │       └── tauri-plugin-dialog v2.8.0 (*)
+          │   ├── tauri-codegen v2.7.0
+          │   │   └── tauri-macros v2.7.0
+          │   │       └── tauri v2.12.0 (*)
+          │   ├── tauri-plugin v2.7.0
+          │   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+          │   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+          │   └── tauri-utils v2.10.0
+          │       ├── tauri v2.12.0 (*)
+          │       ├── tauri-build v2.7.0
+          │       │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+          │       │   └── (build) tauri v2.12.0 (*)
+          │       ├── tauri-codegen v2.7.0 (*)
+          │       ├── tauri-macros v2.7.0 (*)
+          │       ├── tauri-plugin v2.7.0 (*)
+          │       ├── (build) tauri-plugin-fs v2.6.0 (*)
+          │       ├── tauri-runtime v2.12.0
+          │       │   ├── tauri v2.12.0 (*)
+          │       │   └── tauri-runtime-wry v2.12.0
+          │       │       └── tauri v2.12.0 (*)
+          │       └── tauri-runtime-wry v2.12.0 (*)
+          ├── toml_edit v0.19.15
+          │   └── proc-macro-crate v1.3.1
+          │       └── gtk3-macros v0.18.2
+          │           └── gtk v0.18.2
+          │               ├── muda v0.20.0
+          │               │   └── tauri v2.12.0 (*)
+          │               ├── tao v0.37.1
+          │               │   └── tauri-runtime-wry v2.12.0 (*)
+          │               ├── tauri v2.12.0 (*)
+          │               ├── tauri-runtime v2.12.0 (*)
+          │               ├── tauri-runtime-wry v2.12.0 (*)
+          │               ├── webkit2gtk v2.0.2
+          │               │   ├── tauri v2.12.0 (*)
+          │               │   ├── tauri-runtime v2.12.0 (*)
+          │               │   ├── tauri-runtime-wry v2.12.0 (*)
+          │               │   └── wry v0.57.0
+          │               │       └── tauri-runtime-wry v2.12.0 (*)
+          │               └── wry v0.57.0 (*)
+          └── toml_edit v0.20.2
+              ├── proc-macro-crate v2.0.2
+              │   └── glib-macros v0.18.5
+              │       └── glib v0.18.5
+              │           ├── atk v0.18.2
+              │           │   └── gtk v0.18.2 (*)
+              │           ├── cairo-rs v0.18.5
+              │           │   ├── gdk v0.18.2
+              │           │   │   ├── gdkx11 v0.18.2
+              │           │   │   │   └── wry v0.57.0 (*)
+              │           │   │   ├── gtk v0.18.2 (*)
+              │           │   │   └── webkit2gtk v2.0.2 (*)
+              │           │   ├── gtk v0.18.2 (*)
+              │           │   └── webkit2gtk v2.0.2 (*)
+              │           ├── gdk v0.18.2 (*)
+              │           ├── gdk-pixbuf v0.18.5
+              │           │   ├── gdk v0.18.2 (*)
+              │           │   └── gtk v0.18.2 (*)
+              │           ├── gdkx11 v0.18.2 (*)
+              │           ├── gio v0.18.4
+              │           │   ├── gdk v0.18.2 (*)
+              │           │   ├── gdk-pixbuf v0.18.5 (*)
+              │           │   ├── gdkx11 v0.18.2 (*)
+              │           │   ├── gtk v0.18.2 (*)
+              │           │   ├── pango v0.18.3
+              │           │   │   ├── gdk v0.18.2 (*)
+              │           │   │   └── gtk v0.18.2 (*)
+              │           │   ├── soup3 v0.5.0
+              │           │   │   ├── webkit2gtk v2.0.2 (*)
+              │           │   │   └── wry v0.57.0 (*)
+              │           │   └── webkit2gtk v2.0.2 (*)
+              │           ├── gtk v0.18.2 (*)
+              │           ├── javascriptcore-rs v1.1.2
+              │           │   ├── webkit2gtk v2.0.2 (*)
+              │           │   └── wry v0.57.0 (*)
+              │           ├── pango v0.18.3 (*)
+              │           ├── soup3 v0.5.0 (*)
+              │           └── webkit2gtk v2.0.2 (*)
+              └── toml v0.8.2
+                  └── system-deps v6.2.2
+                      ├── (build) atk-sys v0.18.2
+                      │   ├── atk v0.18.2 (*)
+                      │   └── gtk-sys v0.18.2
+                      │       ├── gtk v0.18.2 (*)
+                      │       ├── rfd v0.16.0
+                      │       │   └── tauri-plugin-dialog v2.8.0 (*)
+                      │       ├── webkit2gtk v2.0.2 (*)
+                      │       └── webkit2gtk-sys v2.0.2
+                      │           ├── webkit2gtk v2.0.2 (*)
+                      │           └── wry v0.57.0 (*)
+                      ├── (build) cairo-sys-rs v0.18.2
+                      │   ├── cairo-rs v0.18.5 (*)
+                      │   ├── gdk-sys v0.18.2
+                      │   │   ├── gdk v0.18.2 (*)
+                      │   │   ├── gdkwayland-sys v0.18.2
+                      │   │   │   └── tao v0.37.1 (*)
+                      │   │   ├── gdkx11-sys v0.18.2
+                      │   │   │   ├── gdkx11 v0.18.2 (*)
+                      │   │   │   └── tao v0.37.1 (*)
+                      │   │   ├── gtk-sys v0.18.2 (*)
+                      │   │   ├── webkit2gtk v2.0.2 (*)
+                      │   │   └── webkit2gtk-sys v2.0.2 (*)
+                      │   ├── gtk-sys v0.18.2 (*)
+                      │   └── webkit2gtk-sys v2.0.2 (*)
+                      ├── (build) gdk-pixbuf-sys v0.18.0
+                      │   ├── gdk-pixbuf v0.18.5 (*)
+                      │   ├── gdk-sys v0.18.2 (*)
+                      │   └── gtk-sys v0.18.2 (*)
+                      ├── (build) gdk-sys v0.18.2 (*)
+                      ├── (build) gdkwayland-sys v0.18.2 (*)
+                      ├── (build) gdkx11-sys v0.18.2 (*)
+                      ├── (build) gio-sys v0.18.1
+                      │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                      │   ├── gdk-sys v0.18.2 (*)
+                      │   ├── gio v0.18.4 (*)
+                      │   ├── glib v0.18.5 (*)
+                      │   ├── gtk-sys v0.18.2 (*)
+                      │   ├── soup3-sys v0.5.0
+                      │   │   ├── soup3 v0.5.0 (*)
+                      │   │   └── webkit2gtk-sys v2.0.2 (*)
+                      │   ├── webkit2gtk v2.0.2 (*)
+                      │   └── webkit2gtk-sys v2.0.2 (*)
+                      ├── (build) glib-sys v0.18.1
+                      │   ├── atk-sys v0.18.2 (*)
+                      │   ├── cairo-sys-rs v0.18.2 (*)
+                      │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                      │   ├── gdk-sys v0.18.2 (*)
+                      │   ├── gdkwayland-sys v0.18.2 (*)
+                      │   ├── gdkx11-sys v0.18.2 (*)
+                      │   ├── gio-sys v0.18.1 (*)
+                      │   ├── glib v0.18.5 (*)
+                      │   ├── gobject-sys v0.18.0
+                      │   │   ├── atk-sys v0.18.2 (*)
+                      │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                      │   │   ├── gdk-sys v0.18.2 (*)
+                      │   │   ├── gdkwayland-sys v0.18.2 (*)
+                      │   │   ├── gio-sys v0.18.1 (*)
+                      │   │   ├── glib v0.18.5 (*)
+                      │   │   ├── gtk-sys v0.18.2 (*)
+                      │   │   ├── javascriptcore-rs-sys v1.1.1
+                      │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+                      │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+                      │   │   ├── pango-sys v0.18.0
+                      │   │   │   ├── gdk-sys v0.18.2 (*)
+                      │   │   │   ├── gtk-sys v0.18.2 (*)
+                      │   │   │   └── pango v0.18.3 (*)
+                      │   │   ├── rfd v0.16.0 (*)
+                      │   │   ├── soup3-sys v0.5.0 (*)
+                      │   │   ├── webkit2gtk v2.0.2 (*)
+                      │   │   └── webkit2gtk-sys v2.0.2 (*)
+                      │   ├── gtk-sys v0.18.2 (*)
+                      │   ├── javascriptcore-rs-sys v1.1.1 (*)
+                      │   ├── pango-sys v0.18.0 (*)
+                      │   ├── rfd v0.16.0 (*)
+                      │   ├── soup3-sys v0.5.0 (*)
+                      │   ├── webkit2gtk v2.0.2 (*)
+                      │   └── webkit2gtk-sys v2.0.2 (*)
+                      ├── (build) gobject-sys v0.18.0 (*)
+                      ├── (build) gtk-sys v0.18.2 (*)
+                      ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+                      ├── (build) pango-sys v0.18.0 (*)
+                      ├── (build) soup3-sys v0.5.0 (*)
+                      └── (build) webkit2gtk-sys v2.0.2 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'heck'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:149:1
+    │  
+149 │ ╭ heck 0.4.1 registry+https://github.com/rust-lang/crates.io-index
+150 │ │ heck 0.5.0 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ heck v0.4.1
+      └── glib-macros v0.18.5
+          └── glib v0.18.5
+              ├── atk v0.18.2
+              │   └── gtk v0.18.2
+              │       ├── muda v0.20.0
+              │       │   └── tauri v2.12.0
+              │       │       ├── firmwaresight-desktop v0.6.0
+              │       │       ├── tauri-plugin-dialog v2.8.0
+              │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+              │       │       └── tauri-plugin-fs v2.6.0
+              │       │           └── tauri-plugin-dialog v2.8.0 (*)
+              │       ├── tao v0.37.1
+              │       │   └── tauri-runtime-wry v2.12.0
+              │       │       └── tauri v2.12.0 (*)
+              │       ├── tauri v2.12.0 (*)
+              │       ├── tauri-runtime v2.12.0
+              │       │   ├── tauri v2.12.0 (*)
+              │       │   └── tauri-runtime-wry v2.12.0 (*)
+              │       ├── tauri-runtime-wry v2.12.0 (*)
+              │       ├── webkit2gtk v2.0.2
+              │       │   ├── tauri v2.12.0 (*)
+              │       │   ├── tauri-runtime v2.12.0 (*)
+              │       │   ├── tauri-runtime-wry v2.12.0 (*)
+              │       │   └── wry v0.57.0
+              │       │       └── tauri-runtime-wry v2.12.0 (*)
+              │       └── wry v0.57.0 (*)
+              ├── cairo-rs v0.18.5
+              │   ├── gdk v0.18.2
+              │   │   ├── gdkx11 v0.18.2
+              │   │   │   └── wry v0.57.0 (*)
+              │   │   ├── gtk v0.18.2 (*)
+              │   │   └── webkit2gtk v2.0.2 (*)
+              │   ├── gtk v0.18.2 (*)
+              │   └── webkit2gtk v2.0.2 (*)
+              ├── gdk v0.18.2 (*)
+              ├── gdk-pixbuf v0.18.5
+              │   ├── gdk v0.18.2 (*)
+              │   └── gtk v0.18.2 (*)
+              ├── gdkx11 v0.18.2 (*)
+              ├── gio v0.18.4
+              │   ├── gdk v0.18.2 (*)
+              │   ├── gdk-pixbuf v0.18.5 (*)
+              │   ├── gdkx11 v0.18.2 (*)
+              │   ├── gtk v0.18.2 (*)
+              │   ├── pango v0.18.3
+              │   │   ├── gdk v0.18.2 (*)
+              │   │   └── gtk v0.18.2 (*)
+              │   ├── soup3 v0.5.0
+              │   │   ├── webkit2gtk v2.0.2 (*)
+              │   │   └── wry v0.57.0 (*)
+              │   └── webkit2gtk v2.0.2 (*)
+              ├── gtk v0.18.2 (*)
+              ├── javascriptcore-rs v1.1.2
+              │   ├── webkit2gtk v2.0.2 (*)
+              │   └── wry v0.57.0 (*)
+              ├── pango v0.18.3 (*)
+              ├── soup3 v0.5.0 (*)
+              └── webkit2gtk v2.0.2 (*)
+    ├ heck v0.5.0
+      ├── clap_derive v4.6.7
+      │   └── clap v4.6.7
+      │       └── fwsight v0.6.0
+      ├── system-deps v6.2.2
+      │   ├── (build) atk-sys v0.18.2
+      │   │   ├── atk v0.18.2
+      │   │   │   └── gtk v0.18.2
+      │   │   │       ├── muda v0.20.0
+      │   │   │       │   └── tauri v2.12.0
+      │   │   │       │       ├── firmwaresight-desktop v0.6.0
+      │   │   │       │       ├── tauri-plugin-dialog v2.8.0
+      │   │   │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │   │   │       │       └── tauri-plugin-fs v2.6.0
+      │   │   │       │           └── tauri-plugin-dialog v2.8.0 (*)
+      │   │   │       ├── tao v0.37.1
+      │   │   │       │   └── tauri-runtime-wry v2.12.0
+      │   │   │       │       └── tauri v2.12.0 (*)
+      │   │   │       ├── tauri v2.12.0 (*)
+      │   │   │       ├── tauri-runtime v2.12.0
+      │   │   │       │   ├── tauri v2.12.0 (*)
+      │   │   │       │   └── tauri-runtime-wry v2.12.0 (*)
+      │   │   │       ├── tauri-runtime-wry v2.12.0 (*)
+      │   │   │       ├── webkit2gtk v2.0.2
+      │   │   │       │   ├── tauri v2.12.0 (*)
+      │   │   │       │   ├── tauri-runtime v2.12.0 (*)
+      │   │   │       │   ├── tauri-runtime-wry v2.12.0 (*)
+      │   │   │       │   └── wry v0.57.0
+      │   │   │       │       └── tauri-runtime-wry v2.12.0 (*)
+      │   │   │       └── wry v0.57.0 (*)
+      │   │   └── gtk-sys v0.18.2
+      │   │       ├── gtk v0.18.2 (*)
+      │   │       ├── rfd v0.16.0
+      │   │       │   └── tauri-plugin-dialog v2.8.0 (*)
+      │   │       ├── webkit2gtk v2.0.2 (*)
+      │   │       └── webkit2gtk-sys v2.0.2
+      │   │           ├── webkit2gtk v2.0.2 (*)
+      │   │           └── wry v0.57.0 (*)
+      │   ├── (build) cairo-sys-rs v0.18.2
+      │   │   ├── cairo-rs v0.18.5
+      │   │   │   ├── gdk v0.18.2
+      │   │   │   │   ├── gdkx11 v0.18.2
+      │   │   │   │   │   └── wry v0.57.0 (*)
+      │   │   │   │   ├── gtk v0.18.2 (*)
+      │   │   │   │   └── webkit2gtk v2.0.2 (*)
+      │   │   │   ├── gtk v0.18.2 (*)
+      │   │   │   └── webkit2gtk v2.0.2 (*)
+      │   │   ├── gdk-sys v0.18.2
+      │   │   │   ├── gdk v0.18.2 (*)
+      │   │   │   ├── gdkwayland-sys v0.18.2
+      │   │   │   │   └── tao v0.37.1 (*)
+      │   │   │   ├── gdkx11-sys v0.18.2
+      │   │   │   │   ├── gdkx11 v0.18.2 (*)
+      │   │   │   │   └── tao v0.37.1 (*)
+      │   │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   ├── (build) gdk-pixbuf-sys v0.18.0
+      │   │   ├── gdk-pixbuf v0.18.5
+      │   │   │   ├── gdk v0.18.2 (*)
+      │   │   │   └── gtk v0.18.2 (*)
+      │   │   ├── gdk-sys v0.18.2 (*)
+      │   │   └── gtk-sys v0.18.2 (*)
+      │   ├── (build) gdk-sys v0.18.2 (*)
+      │   ├── (build) gdkwayland-sys v0.18.2 (*)
+      │   ├── (build) gdkx11-sys v0.18.2 (*)
+      │   ├── (build) gio-sys v0.18.1
+      │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │   │   ├── gdk-sys v0.18.2 (*)
+      │   │   ├── gio v0.18.4
+      │   │   │   ├── gdk v0.18.2 (*)
+      │   │   │   ├── gdk-pixbuf v0.18.5 (*)
+      │   │   │   ├── gdkx11 v0.18.2 (*)
+      │   │   │   ├── gtk v0.18.2 (*)
+      │   │   │   ├── pango v0.18.3
+      │   │   │   │   ├── gdk v0.18.2 (*)
+      │   │   │   │   └── gtk v0.18.2 (*)
+      │   │   │   ├── soup3 v0.5.0
+      │   │   │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │   └── wry v0.57.0 (*)
+      │   │   │   └── webkit2gtk v2.0.2 (*)
+      │   │   ├── glib v0.18.5
+      │   │   │   ├── atk v0.18.2 (*)
+      │   │   │   ├── cairo-rs v0.18.5 (*)
+      │   │   │   ├── gdk v0.18.2 (*)
+      │   │   │   ├── gdk-pixbuf v0.18.5 (*)
+      │   │   │   ├── gdkx11 v0.18.2 (*)
+      │   │   │   ├── gio v0.18.4 (*)
+      │   │   │   ├── gtk v0.18.2 (*)
+      │   │   │   ├── javascriptcore-rs v1.1.2
+      │   │   │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │   └── wry v0.57.0 (*)
+      │   │   │   ├── pango v0.18.3 (*)
+      │   │   │   ├── soup3 v0.5.0 (*)
+      │   │   │   └── webkit2gtk v2.0.2 (*)
+      │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   ├── soup3-sys v0.5.0
+      │   │   │   ├── soup3 v0.5.0 (*)
+      │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   ├── (build) glib-sys v0.18.1
+      │   │   ├── atk-sys v0.18.2 (*)
+      │   │   ├── cairo-sys-rs v0.18.2 (*)
+      │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │   │   ├── gdk-sys v0.18.2 (*)
+      │   │   ├── gdkwayland-sys v0.18.2 (*)
+      │   │   ├── gdkx11-sys v0.18.2 (*)
+      │   │   ├── gio-sys v0.18.1 (*)
+      │   │   ├── glib v0.18.5 (*)
+      │   │   ├── gobject-sys v0.18.0
+      │   │   │   ├── atk-sys v0.18.2 (*)
+      │   │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │   │   │   ├── gdk-sys v0.18.2 (*)
+      │   │   │   ├── gdkwayland-sys v0.18.2 (*)
+      │   │   │   ├── gio-sys v0.18.1 (*)
+      │   │   │   ├── glib v0.18.5 (*)
+      │   │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   ├── javascriptcore-rs-sys v1.1.1
+      │   │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+      │   │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   ├── pango-sys v0.18.0
+      │   │   │   │   ├── gdk-sys v0.18.2 (*)
+      │   │   │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   │   └── pango v0.18.3 (*)
+      │   │   │   ├── rfd v0.16.0 (*)
+      │   │   │   ├── soup3-sys v0.5.0 (*)
+      │   │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   ├── javascriptcore-rs-sys v1.1.1 (*)
+      │   │   ├── pango-sys v0.18.0 (*)
+      │   │   ├── rfd v0.16.0 (*)
+      │   │   ├── soup3-sys v0.5.0 (*)
+      │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   ├── (build) gobject-sys v0.18.0 (*)
+      │   ├── (build) gtk-sys v0.18.2 (*)
+      │   ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+      │   ├── (build) pango-sys v0.18.0 (*)
+      │   ├── (build) soup3-sys v0.5.0 (*)
+      │   └── (build) webkit2gtk-sys v2.0.2 (*)
+      ├── (build) tauri v2.12.0 (*)
+      ├── tauri-build v2.7.0
+      │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+      │   └── (build) tauri v2.12.0 (*)
+      └── tauri-macros v2.7.0
+          └── tauri v2.12.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'indexmap'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:166:1
+    │  
+166 │ ╭ indexmap 1.9.3 registry+https://github.com/rust-lang/crates.io-index
+167 │ │ indexmap 2.14.2 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰─────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ indexmap v1.9.3
+      └── schemars v0.8.22
+          ├── tauri-build v2.7.0
+          │   ├── (build) firmwaresight-desktop v0.6.0
+          │   └── (build) tauri v2.12.0
+          │       ├── firmwaresight-desktop v0.6.0 (*)
+          │       ├── tauri-plugin-dialog v2.8.0
+          │       │   └── firmwaresight-desktop v0.6.0 (*)
+          │       └── tauri-plugin-fs v2.6.0
+          │           └── tauri-plugin-dialog v2.8.0 (*)
+          ├── tauri-plugin v2.7.0
+          │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+          │   └── (build) tauri-plugin-fs v2.6.0 (*)
+          ├── (build) tauri-plugin-fs v2.6.0 (*)
+          └── tauri-utils v2.10.0
+              ├── tauri v2.12.0 (*)
+              ├── tauri-build v2.7.0 (*)
+              ├── tauri-codegen v2.7.0
+              │   └── tauri-macros v2.7.0
+              │       └── tauri v2.12.0 (*)
+              ├── tauri-macros v2.7.0 (*)
+              ├── tauri-plugin v2.7.0 (*)
+              ├── (build) tauri-plugin-fs v2.6.0 (*)
+              ├── tauri-runtime v2.12.0
+              │   ├── tauri v2.12.0 (*)
+              │   └── tauri-runtime-wry v2.12.0
+              │       └── tauri v2.12.0 (*)
+              └── tauri-runtime-wry v2.12.0 (*)
+    ├ indexmap v2.14.2
+      ├── plist v1.10.1
+      │   ├── tauri v2.12.0
+      │   │   ├── firmwaresight-desktop v0.6.0
+      │   │   ├── tauri-plugin-dialog v2.8.0
+      │   │   │   └── firmwaresight-desktop v0.6.0 (*)
+      │   │   └── tauri-plugin-fs v2.6.0
+      │   │       └── tauri-plugin-dialog v2.8.0 (*)
+      │   ├── tauri-codegen v2.7.0
+      │   │   └── tauri-macros v2.7.0
+      │   │       └── tauri v2.12.0 (*)
+      │   ├── tauri-plugin v2.7.0
+      │   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+      │   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+      │   └── tauri-utils v2.10.0
+      │       ├── tauri v2.12.0 (*)
+      │       ├── tauri-build v2.7.0
+      │       │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+      │       │   └── (build) tauri v2.12.0 (*)
+      │       ├── tauri-codegen v2.7.0 (*)
+      │       ├── tauri-macros v2.7.0 (*)
+      │       ├── tauri-plugin v2.7.0 (*)
+      │       ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │       ├── tauri-runtime v2.12.0
+      │       │   ├── tauri v2.12.0 (*)
+      │       │   └── tauri-runtime-wry v2.12.0
+      │       │       └── tauri v2.12.0 (*)
+      │       └── tauri-runtime-wry v2.12.0 (*)
+      ├── toml_edit v0.19.15
+      │   └── proc-macro-crate v1.3.1
+      │       └── gtk3-macros v0.18.2
+      │           └── gtk v0.18.2
+      │               ├── muda v0.20.0
+      │               │   └── tauri v2.12.0 (*)
+      │               ├── tao v0.37.1
+      │               │   └── tauri-runtime-wry v2.12.0 (*)
+      │               ├── tauri v2.12.0 (*)
+      │               ├── tauri-runtime v2.12.0 (*)
+      │               ├── tauri-runtime-wry v2.12.0 (*)
+      │               ├── webkit2gtk v2.0.2
+      │               │   ├── tauri v2.12.0 (*)
+      │               │   ├── tauri-runtime v2.12.0 (*)
+      │               │   ├── tauri-runtime-wry v2.12.0 (*)
+      │               │   └── wry v0.57.0
+      │               │       └── tauri-runtime-wry v2.12.0 (*)
+      │               └── wry v0.57.0 (*)
+      └── toml_edit v0.20.2
+          ├── proc-macro-crate v2.0.2
+          │   └── glib-macros v0.18.5
+          │       └── glib v0.18.5
+          │           ├── atk v0.18.2
+          │           │   └── gtk v0.18.2 (*)
+          │           ├── cairo-rs v0.18.5
+          │           │   ├── gdk v0.18.2
+          │           │   │   ├── gdkx11 v0.18.2
+          │           │   │   │   └── wry v0.57.0 (*)
+          │           │   │   ├── gtk v0.18.2 (*)
+          │           │   │   └── webkit2gtk v2.0.2 (*)
+          │           │   ├── gtk v0.18.2 (*)
+          │           │   └── webkit2gtk v2.0.2 (*)
+          │           ├── gdk v0.18.2 (*)
+          │           ├── gdk-pixbuf v0.18.5
+          │           │   ├── gdk v0.18.2 (*)
+          │           │   └── gtk v0.18.2 (*)
+          │           ├── gdkx11 v0.18.2 (*)
+          │           ├── gio v0.18.4
+          │           │   ├── gdk v0.18.2 (*)
+          │           │   ├── gdk-pixbuf v0.18.5 (*)
+          │           │   ├── gdkx11 v0.18.2 (*)
+          │           │   ├── gtk v0.18.2 (*)
+          │           │   ├── pango v0.18.3
+          │           │   │   ├── gdk v0.18.2 (*)
+          │           │   │   └── gtk v0.18.2 (*)
+          │           │   ├── soup3 v0.5.0
+          │           │   │   ├── webkit2gtk v2.0.2 (*)
+          │           │   │   └── wry v0.57.0 (*)
+          │           │   └── webkit2gtk v2.0.2 (*)
+          │           ├── gtk v0.18.2 (*)
+          │           ├── javascriptcore-rs v1.1.2
+          │           │   ├── webkit2gtk v2.0.2 (*)
+          │           │   └── wry v0.57.0 (*)
+          │           ├── pango v0.18.3 (*)
+          │           ├── soup3 v0.5.0 (*)
+          │           └── webkit2gtk v2.0.2 (*)
+          └── toml v0.8.2
+              └── system-deps v6.2.2
+                  ├── (build) atk-sys v0.18.2
+                  │   ├── atk v0.18.2 (*)
+                  │   └── gtk-sys v0.18.2
+                  │       ├── gtk v0.18.2 (*)
+                  │       ├── rfd v0.16.0
+                  │       │   └── tauri-plugin-dialog v2.8.0 (*)
+                  │       ├── webkit2gtk v2.0.2 (*)
+                  │       └── webkit2gtk-sys v2.0.2
+                  │           ├── webkit2gtk v2.0.2 (*)
+                  │           └── wry v0.57.0 (*)
+                  ├── (build) cairo-sys-rs v0.18.2
+                  │   ├── cairo-rs v0.18.5 (*)
+                  │   ├── gdk-sys v0.18.2
+                  │   │   ├── gdk v0.18.2 (*)
+                  │   │   ├── gdkwayland-sys v0.18.2
+                  │   │   │   └── tao v0.37.1 (*)
+                  │   │   ├── gdkx11-sys v0.18.2
+                  │   │   │   ├── gdkx11 v0.18.2 (*)
+                  │   │   │   └── tao v0.37.1 (*)
+                  │   │   ├── gtk-sys v0.18.2 (*)
+                  │   │   ├── webkit2gtk v2.0.2 (*)
+                  │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   ├── gtk-sys v0.18.2 (*)
+                  │   └── webkit2gtk-sys v2.0.2 (*)
+                  ├── (build) gdk-pixbuf-sys v0.18.0
+                  │   ├── gdk-pixbuf v0.18.5 (*)
+                  │   ├── gdk-sys v0.18.2 (*)
+                  │   └── gtk-sys v0.18.2 (*)
+                  ├── (build) gdk-sys v0.18.2 (*)
+                  ├── (build) gdkwayland-sys v0.18.2 (*)
+                  ├── (build) gdkx11-sys v0.18.2 (*)
+                  ├── (build) gio-sys v0.18.1
+                  │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                  │   ├── gdk-sys v0.18.2 (*)
+                  │   ├── gio v0.18.4 (*)
+                  │   ├── glib v0.18.5 (*)
+                  │   ├── gtk-sys v0.18.2 (*)
+                  │   ├── soup3-sys v0.5.0
+                  │   │   ├── soup3 v0.5.0 (*)
+                  │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   ├── webkit2gtk v2.0.2 (*)
+                  │   └── webkit2gtk-sys v2.0.2 (*)
+                  ├── (build) glib-sys v0.18.1
+                  │   ├── atk-sys v0.18.2 (*)
+                  │   ├── cairo-sys-rs v0.18.2 (*)
+                  │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                  │   ├── gdk-sys v0.18.2 (*)
+                  │   ├── gdkwayland-sys v0.18.2 (*)
+                  │   ├── gdkx11-sys v0.18.2 (*)
+                  │   ├── gio-sys v0.18.1 (*)
+                  │   ├── glib v0.18.5 (*)
+                  │   ├── gobject-sys v0.18.0
+                  │   │   ├── atk-sys v0.18.2 (*)
+                  │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                  │   │   ├── gdk-sys v0.18.2 (*)
+                  │   │   ├── gdkwayland-sys v0.18.2 (*)
+                  │   │   ├── gio-sys v0.18.1 (*)
+                  │   │   ├── glib v0.18.5 (*)
+                  │   │   ├── gtk-sys v0.18.2 (*)
+                  │   │   ├── javascriptcore-rs-sys v1.1.1
+                  │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+                  │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   │   ├── pango-sys v0.18.0
+                  │   │   │   ├── gdk-sys v0.18.2 (*)
+                  │   │   │   ├── gtk-sys v0.18.2 (*)
+                  │   │   │   └── pango v0.18.3 (*)
+                  │   │   ├── rfd v0.16.0 (*)
+                  │   │   ├── soup3-sys v0.5.0 (*)
+                  │   │   ├── webkit2gtk v2.0.2 (*)
+                  │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   ├── gtk-sys v0.18.2 (*)
+                  │   ├── javascriptcore-rs-sys v1.1.1 (*)
+                  │   ├── pango-sys v0.18.0 (*)
+                  │   ├── rfd v0.16.0 (*)
+                  │   ├── soup3-sys v0.5.0 (*)
+                  │   ├── webkit2gtk v2.0.2 (*)
+                  │   └── webkit2gtk-sys v2.0.2 (*)
+                  ├── (build) gobject-sys v0.18.0 (*)
+                  ├── (build) gtk-sys v0.18.2 (*)
+                  ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+                  ├── (build) pango-sys v0.18.0 (*)
+                  ├── (build) soup3-sys v0.5.0 (*)
+                  └── (build) webkit2gtk-sys v2.0.2 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'io-lifetimes'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:170:1
+    │  
+170 │ ╭ io-lifetimes 2.0.4 registry+https://github.com/rust-lang/crates.io-index
+171 │ │ io-lifetimes 3.0.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ io-lifetimes v2.0.4
+      └── fs-set-times v0.20.3
+          └── cap-primitives v4.0.3
+              └── cap-std v4.0.3
+                  └── firmwaresight-project v0.6.0
+                      ├── firmwaresight-desktop v0.6.0
+                      └── fwsight v0.6.0
+    ├ io-lifetimes v3.0.1
+      ├── cap-primitives v4.0.3
+      │   └── cap-std v4.0.3
+      │       └── firmwaresight-project v0.6.0
+      │           ├── firmwaresight-desktop v0.6.0
+      │           └── fwsight v0.6.0
+      ├── cap-std v4.0.3 (*)
+      └── io-extras v0.19.0
+          ├── cap-primitives v4.0.3 (*)
+          └── cap-std v4.0.3 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'miniz_oxide'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:195:1
+    │  
+195 │ ╭ miniz_oxide 0.8.9 registry+https://github.com/rust-lang/crates.io-index
+196 │ │ miniz_oxide 0.9.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰───────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ miniz_oxide v0.8.9
+      ├── png v0.17.16
+      │   └── ico v0.5.0
+      │       └── tauri-codegen v2.7.0
+      │           └── tauri-macros v2.7.0
+      │               └── tauri v2.12.0
+      │                   ├── firmwaresight-desktop v0.6.0
+      │                   ├── tauri-plugin-dialog v2.8.0
+      │                   │   └── firmwaresight-desktop v0.6.0 (*)
+      │                   └── tauri-plugin-fs v2.6.0
+      │                       └── tauri-plugin-dialog v2.8.0 (*)
+      └── png v0.18.1
+          ├── muda v0.20.0
+          │   └── tauri v2.12.0 (*)
+          ├── tauri-codegen v2.7.0 (*)
+          └── tiny-skia v0.12.0
+              └── resvg v0.48.1
+                  └── firmwaresight-report v0.6.0
+                      ├── firmwaresight-desktop v0.6.0 (*)
+                      ├── firmwaresight-project v0.6.0
+                      │   ├── firmwaresight-desktop v0.6.0 (*)
+                      │   └── fwsight v0.6.0
+                      └── (dev) fwsight v0.6.0 (*)
+    ├ miniz_oxide v0.9.1
+      └── flate2 v1.1.10
+          ├── object v0.40.0
+          │   └── firmwaresight-artifact v0.6.0
+          │       ├── firmwaresight-desktop v0.6.0
+          │       ├── (dev) firmwaresight-storage v0.6.0
+          │       │   └── firmwaresight-desktop v0.6.0 (*)
+          │       └── fwsight v0.6.0
+          ├── png v0.17.16
+          │   └── ico v0.5.0
+          │       └── tauri-codegen v2.7.0
+          │           └── tauri-macros v2.7.0
+          │               └── tauri v2.12.0
+          │                   ├── firmwaresight-desktop v0.6.0 (*)
+          │                   ├── tauri-plugin-dialog v2.8.0
+          │                   │   └── firmwaresight-desktop v0.6.0 (*)
+          │                   └── tauri-plugin-fs v2.6.0
+          │                       └── tauri-plugin-dialog v2.8.0 (*)
+          └── png v0.18.1
+              ├── muda v0.20.0
+              │   └── tauri v2.12.0 (*)
+              ├── tauri-codegen v2.7.0 (*)
+              └── tiny-skia v0.12.0
+                  └── resvg v0.48.1
+                      └── firmwaresight-report v0.6.0
+                          ├── firmwaresight-desktop v0.6.0 (*)
+                          ├── firmwaresight-project v0.6.0
+                          │   ├── firmwaresight-desktop v0.6.0 (*)
+                          │   └── fwsight v0.6.0 (*)
+                          └── (dev) fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'png'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:228:1
+    │  
+228 │ ╭ png 0.17.16 registry+https://github.com/rust-lang/crates.io-index
+229 │ │ png 0.18.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ png v0.17.16
+      └── ico v0.5.0
+          └── tauri-codegen v2.7.0
+              └── tauri-macros v2.7.0
+                  └── tauri v2.12.0
+                      ├── firmwaresight-desktop v0.6.0
+                      ├── tauri-plugin-dialog v2.8.0
+                      │   └── firmwaresight-desktop v0.6.0 (*)
+                      └── tauri-plugin-fs v2.6.0
+                          └── tauri-plugin-dialog v2.8.0 (*)
+    ├ png v0.18.1
+      ├── muda v0.20.0
+      │   └── tauri v2.12.0
+      │       ├── firmwaresight-desktop v0.6.0
+      │       ├── tauri-plugin-dialog v2.8.0
+      │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │       └── tauri-plugin-fs v2.6.0
+      │           └── tauri-plugin-dialog v2.8.0 (*)
+      ├── tauri-codegen v2.7.0
+      │   └── tauri-macros v2.7.0
+      │       └── tauri v2.12.0 (*)
+      └── tiny-skia v0.12.0
+          └── resvg v0.48.1
+              └── firmwaresight-report v0.6.0
+                  ├── firmwaresight-desktop v0.6.0 (*)
+                  ├── firmwaresight-project v0.6.0
+                  │   ├── firmwaresight-desktop v0.6.0 (*)
+                  │   └── fwsight v0.6.0
+                  └── (dev) fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'proc-macro-crate'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:234:1
+    │  
+234 │ ╭ proc-macro-crate 1.3.1 registry+https://github.com/rust-lang/crates.io-index
+235 │ │ proc-macro-crate 2.0.2 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ proc-macro-crate v1.3.1
+      └── gtk3-macros v0.18.2
+          └── gtk v0.18.2
+              ├── muda v0.20.0
+              │   └── tauri v2.12.0
+              │       ├── firmwaresight-desktop v0.6.0
+              │       ├── tauri-plugin-dialog v2.8.0
+              │       │   └── firmwaresight-desktop v0.6.0 (*)
+              │       └── tauri-plugin-fs v2.6.0
+              │           └── tauri-plugin-dialog v2.8.0 (*)
+              ├── tao v0.37.1
+              │   └── tauri-runtime-wry v2.12.0
+              │       └── tauri v2.12.0 (*)
+              ├── tauri v2.12.0 (*)
+              ├── tauri-runtime v2.12.0
+              │   ├── tauri v2.12.0 (*)
+              │   └── tauri-runtime-wry v2.12.0 (*)
+              ├── tauri-runtime-wry v2.12.0 (*)
+              ├── webkit2gtk v2.0.2
+              │   ├── tauri v2.12.0 (*)
+              │   ├── tauri-runtime v2.12.0 (*)
+              │   ├── tauri-runtime-wry v2.12.0 (*)
+              │   └── wry v0.57.0
+              │       └── tauri-runtime-wry v2.12.0 (*)
+              └── wry v0.57.0 (*)
+    ├ proc-macro-crate v2.0.2
+      └── glib-macros v0.18.5
+          └── glib v0.18.5
+              ├── atk v0.18.2
+              │   └── gtk v0.18.2
+              │       ├── muda v0.20.0
+              │       │   └── tauri v2.12.0
+              │       │       ├── firmwaresight-desktop v0.6.0
+              │       │       ├── tauri-plugin-dialog v2.8.0
+              │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+              │       │       └── tauri-plugin-fs v2.6.0
+              │       │           └── tauri-plugin-dialog v2.8.0 (*)
+              │       ├── tao v0.37.1
+              │       │   └── tauri-runtime-wry v2.12.0
+              │       │       └── tauri v2.12.0 (*)
+              │       ├── tauri v2.12.0 (*)
+              │       ├── tauri-runtime v2.12.0
+              │       │   ├── tauri v2.12.0 (*)
+              │       │   └── tauri-runtime-wry v2.12.0 (*)
+              │       ├── tauri-runtime-wry v2.12.0 (*)
+              │       ├── webkit2gtk v2.0.2
+              │       │   ├── tauri v2.12.0 (*)
+              │       │   ├── tauri-runtime v2.12.0 (*)
+              │       │   ├── tauri-runtime-wry v2.12.0 (*)
+              │       │   └── wry v0.57.0
+              │       │       └── tauri-runtime-wry v2.12.0 (*)
+              │       └── wry v0.57.0 (*)
+              ├── cairo-rs v0.18.5
+              │   ├── gdk v0.18.2
+              │   │   ├── gdkx11 v0.18.2
+              │   │   │   └── wry v0.57.0 (*)
+              │   │   ├── gtk v0.18.2 (*)
+              │   │   └── webkit2gtk v2.0.2 (*)
+              │   ├── gtk v0.18.2 (*)
+              │   └── webkit2gtk v2.0.2 (*)
+              ├── gdk v0.18.2 (*)
+              ├── gdk-pixbuf v0.18.5
+              │   ├── gdk v0.18.2 (*)
+              │   └── gtk v0.18.2 (*)
+              ├── gdkx11 v0.18.2 (*)
+              ├── gio v0.18.4
+              │   ├── gdk v0.18.2 (*)
+              │   ├── gdk-pixbuf v0.18.5 (*)
+              │   ├── gdkx11 v0.18.2 (*)
+              │   ├── gtk v0.18.2 (*)
+              │   ├── pango v0.18.3
+              │   │   ├── gdk v0.18.2 (*)
+              │   │   └── gtk v0.18.2 (*)
+              │   ├── soup3 v0.5.0
+              │   │   ├── webkit2gtk v2.0.2 (*)
+              │   │   └── wry v0.57.0 (*)
+              │   └── webkit2gtk v2.0.2 (*)
+              ├── gtk v0.18.2 (*)
+              ├── javascriptcore-rs v1.1.2
+              │   ├── webkit2gtk v2.0.2 (*)
+              │   └── wry v0.57.0 (*)
+              ├── pango v0.18.3 (*)
+              ├── soup3 v0.5.0 (*)
+              └── webkit2gtk v2.0.2 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'roxmltree'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:249:1
+    │  
+249 │ ╭ roxmltree 0.20.0 registry+https://github.com/rust-lang/crates.io-index
+250 │ │ roxmltree 0.21.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ roxmltree v0.20.0
+      └── fontconfig-parser v0.5.8
+          └── fontdb v0.24.0
+              └── usvg v0.48.1
+                  └── resvg v0.48.1
+                      └── firmwaresight-report v0.6.0
+                          ├── firmwaresight-desktop v0.6.0
+                          ├── firmwaresight-project v0.6.0
+                          │   ├── firmwaresight-desktop v0.6.0 (*)
+                          │   └── fwsight v0.6.0
+                          └── (dev) fwsight v0.6.0 (*)
+    ├ roxmltree v0.21.1
+      └── usvg v0.48.1
+          └── resvg v0.48.1
+              └── firmwaresight-report v0.6.0
+                  ├── firmwaresight-desktop v0.6.0
+                  ├── firmwaresight-project v0.6.0
+                  │   ├── firmwaresight-desktop v0.6.0 (*)
+                  │   └── fwsight v0.6.0
+                  └── (dev) fwsight v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'serde_spanned'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:270:1
+    │  
+270 │ ╭ serde_spanned 0.6.9 registry+https://github.com/rust-lang/crates.io-index
+271 │ │ serde_spanned 1.1.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰─────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ serde_spanned v0.6.9
+      ├── toml v0.8.2
+      │   └── system-deps v6.2.2
+      │       ├── (build) atk-sys v0.18.2
+      │       │   ├── atk v0.18.2
+      │       │   │   └── gtk v0.18.2
+      │       │   │       ├── muda v0.20.0
+      │       │   │       │   └── tauri v2.12.0
+      │       │   │       │       ├── firmwaresight-desktop v0.6.0
+      │       │   │       │       ├── tauri-plugin-dialog v2.8.0
+      │       │   │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │       │   │       │       └── tauri-plugin-fs v2.6.0
+      │       │   │       │           └── tauri-plugin-dialog v2.8.0 (*)
+      │       │   │       ├── tao v0.37.1
+      │       │   │       │   └── tauri-runtime-wry v2.12.0
+      │       │   │       │       └── tauri v2.12.0 (*)
+      │       │   │       ├── tauri v2.12.0 (*)
+      │       │   │       ├── tauri-runtime v2.12.0
+      │       │   │       │   ├── tauri v2.12.0 (*)
+      │       │   │       │   └── tauri-runtime-wry v2.12.0 (*)
+      │       │   │       ├── tauri-runtime-wry v2.12.0 (*)
+      │       │   │       ├── webkit2gtk v2.0.2
+      │       │   │       │   ├── tauri v2.12.0 (*)
+      │       │   │       │   ├── tauri-runtime v2.12.0 (*)
+      │       │   │       │   ├── tauri-runtime-wry v2.12.0 (*)
+      │       │   │       │   └── wry v0.57.0
+      │       │   │       │       └── tauri-runtime-wry v2.12.0 (*)
+      │       │   │       └── wry v0.57.0 (*)
+      │       │   └── gtk-sys v0.18.2
+      │       │       ├── gtk v0.18.2 (*)
+      │       │       ├── rfd v0.16.0
+      │       │       │   └── tauri-plugin-dialog v2.8.0 (*)
+      │       │       ├── webkit2gtk v2.0.2 (*)
+      │       │       └── webkit2gtk-sys v2.0.2
+      │       │           ├── webkit2gtk v2.0.2 (*)
+      │       │           └── wry v0.57.0 (*)
+      │       ├── (build) cairo-sys-rs v0.18.2
+      │       │   ├── cairo-rs v0.18.5
+      │       │   │   ├── gdk v0.18.2
+      │       │   │   │   ├── gdkx11 v0.18.2
+      │       │   │   │   │   └── wry v0.57.0 (*)
+      │       │   │   │   ├── gtk v0.18.2 (*)
+      │       │   │   │   └── webkit2gtk v2.0.2 (*)
+      │       │   │   ├── gtk v0.18.2 (*)
+      │       │   │   └── webkit2gtk v2.0.2 (*)
+      │       │   ├── gdk-sys v0.18.2
+      │       │   │   ├── gdk v0.18.2 (*)
+      │       │   │   ├── gdkwayland-sys v0.18.2
+      │       │   │   │   └── tao v0.37.1 (*)
+      │       │   │   ├── gdkx11-sys v0.18.2
+      │       │   │   │   ├── gdkx11 v0.18.2 (*)
+      │       │   │   │   └── tao v0.37.1 (*)
+      │       │   │   ├── gtk-sys v0.18.2 (*)
+      │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   ├── gtk-sys v0.18.2 (*)
+      │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │       ├── (build) gdk-pixbuf-sys v0.18.0
+      │       │   ├── gdk-pixbuf v0.18.5
+      │       │   │   ├── gdk v0.18.2 (*)
+      │       │   │   └── gtk v0.18.2 (*)
+      │       │   ├── gdk-sys v0.18.2 (*)
+      │       │   └── gtk-sys v0.18.2 (*)
+      │       ├── (build) gdk-sys v0.18.2 (*)
+      │       ├── (build) gdkwayland-sys v0.18.2 (*)
+      │       ├── (build) gdkx11-sys v0.18.2 (*)
+      │       ├── (build) gio-sys v0.18.1
+      │       │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │       │   ├── gdk-sys v0.18.2 (*)
+      │       │   ├── gio v0.18.4
+      │       │   │   ├── gdk v0.18.2 (*)
+      │       │   │   ├── gdk-pixbuf v0.18.5 (*)
+      │       │   │   ├── gdkx11 v0.18.2 (*)
+      │       │   │   ├── gtk v0.18.2 (*)
+      │       │   │   ├── pango v0.18.3
+      │       │   │   │   ├── gdk v0.18.2 (*)
+      │       │   │   │   └── gtk v0.18.2 (*)
+      │       │   │   ├── soup3 v0.5.0
+      │       │   │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │   │   │   └── wry v0.57.0 (*)
+      │       │   │   └── webkit2gtk v2.0.2 (*)
+      │       │   ├── glib v0.18.5
+      │       │   │   ├── atk v0.18.2 (*)
+      │       │   │   ├── cairo-rs v0.18.5 (*)
+      │       │   │   ├── gdk v0.18.2 (*)
+      │       │   │   ├── gdk-pixbuf v0.18.5 (*)
+      │       │   │   ├── gdkx11 v0.18.2 (*)
+      │       │   │   ├── gio v0.18.4 (*)
+      │       │   │   ├── gtk v0.18.2 (*)
+      │       │   │   ├── javascriptcore-rs v1.1.2
+      │       │   │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │   │   │   └── wry v0.57.0 (*)
+      │       │   │   ├── pango v0.18.3 (*)
+      │       │   │   ├── soup3 v0.5.0 (*)
+      │       │   │   └── webkit2gtk v2.0.2 (*)
+      │       │   ├── gtk-sys v0.18.2 (*)
+      │       │   ├── soup3-sys v0.5.0
+      │       │   │   ├── soup3 v0.5.0 (*)
+      │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   ├── webkit2gtk v2.0.2 (*)
+      │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │       ├── (build) glib-sys v0.18.1
+      │       │   ├── atk-sys v0.18.2 (*)
+      │       │   ├── cairo-sys-rs v0.18.2 (*)
+      │       │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │       │   ├── gdk-sys v0.18.2 (*)
+      │       │   ├── gdkwayland-sys v0.18.2 (*)
+      │       │   ├── gdkx11-sys v0.18.2 (*)
+      │       │   ├── gio-sys v0.18.1 (*)
+      │       │   ├── glib v0.18.5 (*)
+      │       │   ├── gobject-sys v0.18.0
+      │       │   │   ├── atk-sys v0.18.2 (*)
+      │       │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │       │   │   ├── gdk-sys v0.18.2 (*)
+      │       │   │   ├── gdkwayland-sys v0.18.2 (*)
+      │       │   │   ├── gio-sys v0.18.1 (*)
+      │       │   │   ├── glib v0.18.5 (*)
+      │       │   │   ├── gtk-sys v0.18.2 (*)
+      │       │   │   ├── javascriptcore-rs-sys v1.1.1
+      │       │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+      │       │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   │   ├── pango-sys v0.18.0
+      │       │   │   │   ├── gdk-sys v0.18.2 (*)
+      │       │   │   │   ├── gtk-sys v0.18.2 (*)
+      │       │   │   │   └── pango v0.18.3 (*)
+      │       │   │   ├── rfd v0.16.0 (*)
+      │       │   │   ├── soup3-sys v0.5.0 (*)
+      │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   ├── gtk-sys v0.18.2 (*)
+      │       │   ├── javascriptcore-rs-sys v1.1.1 (*)
+      │       │   ├── pango-sys v0.18.0 (*)
+      │       │   ├── rfd v0.16.0 (*)
+      │       │   ├── soup3-sys v0.5.0 (*)
+      │       │   ├── webkit2gtk v2.0.2 (*)
+      │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │       ├── (build) gobject-sys v0.18.0 (*)
+      │       ├── (build) gtk-sys v0.18.2 (*)
+      │       ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+      │       ├── (build) pango-sys v0.18.0 (*)
+      │       ├── (build) soup3-sys v0.5.0 (*)
+      │       └── (build) webkit2gtk-sys v2.0.2 (*)
+      └── toml_edit v0.20.2
+          ├── proc-macro-crate v2.0.2
+          │   └── glib-macros v0.18.5
+          │       └── glib v0.18.5 (*)
+          └── toml v0.8.2 (*)
+    ├ serde_spanned v1.1.1
+      └── toml v1.1.6+spec-1.1.0
+          ├── cargo_toml v1.0.1
+          │   └── tauri-build v2.7.0
+          │       ├── (build) firmwaresight-desktop v0.6.0
+          │       └── (build) tauri v2.12.0
+          │           ├── firmwaresight-desktop v0.6.0 (*)
+          │           ├── tauri-plugin-dialog v2.8.0
+          │           │   └── firmwaresight-desktop v0.6.0 (*)
+          │           └── tauri-plugin-fs v2.6.0
+          │               └── tauri-plugin-dialog v2.8.0 (*)
+          ├── embed-resource v3.0.11
+          │   └── tauri-winres v0.3.6
+          │       └── tauri-build v2.7.0 (*)
+          ├── firmwaresight-project v0.6.0
+          │   ├── firmwaresight-desktop v0.6.0 (*)
+          │   └── fwsight v0.6.0
+          ├── (build) tauri-plugin-fs v2.6.0 (*)
+          ├── tauri-utils v2.10.0
+          │   ├── tauri v2.12.0 (*)
+          │   ├── tauri-build v2.7.0 (*)
+          │   ├── tauri-codegen v2.7.0
+          │   │   └── tauri-macros v2.7.0
+          │   │       └── tauri v2.12.0 (*)
+          │   ├── tauri-macros v2.7.0 (*)
+          │   ├── tauri-plugin v2.7.0
+          │   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+          │   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+          │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+          │   ├── tauri-runtime v2.12.0
+          │   │   ├── tauri v2.12.0 (*)
+          │   │   └── tauri-runtime-wry v2.12.0
+          │   │       └── tauri v2.12.0 (*)
+          │   └── tauri-runtime-wry v2.12.0 (*)
+          └── tauri-winres v0.3.6 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'sha2'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:277:1
+    │  
+277 │ ╭ sha2 0.10.9 registry+https://github.com/rust-lang/crates.io-index
+278 │ │ sha2 0.11.0 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰─────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ sha2 v0.10.9
+      └── tauri-codegen v2.7.0
+          └── tauri-macros v2.7.0
+              └── tauri v2.12.0
+                  ├── firmwaresight-desktop v0.6.0
+                  ├── tauri-plugin-dialog v2.8.0
+                  │   └── firmwaresight-desktop v0.6.0 (*)
+                  └── tauri-plugin-fs v2.6.0
+                      └── tauri-plugin-dialog v2.8.0 (*)
+    ├ sha2 v0.11.0
+      ├── firmwaresight-artifact v0.6.0
+      │   ├── firmwaresight-desktop v0.6.0
+      │   ├── (dev) firmwaresight-storage v0.6.0
+      │   │   └── firmwaresight-desktop v0.6.0 (*)
+      │   └── fwsight v0.6.0
+      └── firmwaresight-project v0.6.0
+          ├── firmwaresight-desktop v0.6.0 (*)
+          └── fwsight v0.6.0 (*)
+
+warning[duplicate]: found 3 duplicate entries for crate 'syn'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:298:1
+    │  
+298 │ ╭ syn 1.0.109 registry+https://github.com/rust-lang/crates.io-index
+299 │ │ syn 2.0.119 registry+https://github.com/rust-lang/crates.io-index
+300 │ │ syn 3.0.6 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰───────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ syn v1.0.109
+      └── proc-macro-error v1.0.4
+          ├── glib-macros v0.18.5
+          │   └── glib v0.18.5
+          │       ├── atk v0.18.2
+          │       │   └── gtk v0.18.2
+          │       │       ├── muda v0.20.0
+          │       │       │   └── tauri v2.12.0
+          │       │       │       ├── firmwaresight-desktop v0.6.0
+          │       │       │       ├── tauri-plugin-dialog v2.8.0
+          │       │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+          │       │       │       └── tauri-plugin-fs v2.6.0
+          │       │       │           └── tauri-plugin-dialog v2.8.0 (*)
+          │       │       ├── tao v0.37.1
+          │       │       │   └── tauri-runtime-wry v2.12.0
+          │       │       │       └── tauri v2.12.0 (*)
+          │       │       ├── tauri v2.12.0 (*)
+          │       │       ├── tauri-runtime v2.12.0
+          │       │       │   ├── tauri v2.12.0 (*)
+          │       │       │   └── tauri-runtime-wry v2.12.0 (*)
+          │       │       ├── tauri-runtime-wry v2.12.0 (*)
+          │       │       ├── webkit2gtk v2.0.2
+          │       │       │   ├── tauri v2.12.0 (*)
+          │       │       │   ├── tauri-runtime v2.12.0 (*)
+          │       │       │   ├── tauri-runtime-wry v2.12.0 (*)
+          │       │       │   └── wry v0.57.0
+          │       │       │       └── tauri-runtime-wry v2.12.0 (*)
+          │       │       └── wry v0.57.0 (*)
+          │       ├── cairo-rs v0.18.5
+          │       │   ├── gdk v0.18.2
+          │       │   │   ├── gdkx11 v0.18.2
+          │       │   │   │   └── wry v0.57.0 (*)
+          │       │   │   ├── gtk v0.18.2 (*)
+          │       │   │   └── webkit2gtk v2.0.2 (*)
+          │       │   ├── gtk v0.18.2 (*)
+          │       │   └── webkit2gtk v2.0.2 (*)
+          │       ├── gdk v0.18.2 (*)
+          │       ├── gdk-pixbuf v0.18.5
+          │       │   ├── gdk v0.18.2 (*)
+          │       │   └── gtk v0.18.2 (*)
+          │       ├── gdkx11 v0.18.2 (*)
+          │       ├── gio v0.18.4
+          │       │   ├── gdk v0.18.2 (*)
+          │       │   ├── gdk-pixbuf v0.18.5 (*)
+          │       │   ├── gdkx11 v0.18.2 (*)
+          │       │   ├── gtk v0.18.2 (*)
+          │       │   ├── pango v0.18.3
+          │       │   │   ├── gdk v0.18.2 (*)
+          │       │   │   └── gtk v0.18.2 (*)
+          │       │   ├── soup3 v0.5.0
+          │       │   │   ├── webkit2gtk v2.0.2 (*)
+          │       │   │   └── wry v0.57.0 (*)
+          │       │   └── webkit2gtk v2.0.2 (*)
+          │       ├── gtk v0.18.2 (*)
+          │       ├── javascriptcore-rs v1.1.2
+          │       │   ├── webkit2gtk v2.0.2 (*)
+          │       │   └── wry v0.57.0 (*)
+          │       ├── pango v0.18.3 (*)
+          │       ├── soup3 v0.5.0 (*)
+          │       └── webkit2gtk v2.0.2 (*)
+          └── gtk3-macros v0.18.2
+              └── gtk v0.18.2 (*)
+    ├ syn v2.0.119
+      ├── derive_more-impl v2.1.1
+      │   └── derive_more v2.1.1
+      │       └── selectors v0.38.0
+      │           └── dom_query v0.28.0
+      │               └── tauri-utils v2.10.0
+      │                   ├── tauri v2.12.0
+      │                   │   ├── firmwaresight-desktop v0.6.0
+      │                   │   ├── tauri-plugin-dialog v2.8.0
+      │                   │   │   └── firmwaresight-desktop v0.6.0 (*)
+      │                   │   └── tauri-plugin-fs v2.6.0
+      │                   │       └── tauri-plugin-dialog v2.8.0 (*)
+      │                   ├── tauri-build v2.7.0
+      │                   │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+      │                   │   └── (build) tauri v2.12.0 (*)
+      │                   ├── tauri-codegen v2.7.0
+      │                   │   └── tauri-macros v2.7.0
+      │                   │       └── tauri v2.12.0 (*)
+      │                   ├── tauri-macros v2.7.0 (*)
+      │                   ├── tauri-plugin v2.7.0
+      │                   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+      │                   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+      │                   ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │                   ├── tauri-runtime v2.12.0
+      │                   │   ├── tauri v2.12.0 (*)
+      │                   │   └── tauri-runtime-wry v2.12.0
+      │                   │       └── tauri v2.12.0 (*)
+      │                   └── tauri-runtime-wry v2.12.0 (*)
+      ├── dlopen2_derive v0.4.3
+      │   └── dlopen2 v0.8.2
+      │       └── tao v0.37.1
+      │           └── tauri-runtime-wry v2.12.0 (*)
+      ├── glib-macros v0.18.5
+      │   └── glib v0.18.5
+      │       ├── atk v0.18.2
+      │       │   └── gtk v0.18.2
+      │       │       ├── muda v0.20.0
+      │       │       │   └── tauri v2.12.0 (*)
+      │       │       ├── tao v0.37.1 (*)
+      │       │       ├── tauri v2.12.0 (*)
+      │       │       ├── tauri-runtime v2.12.0 (*)
+      │       │       ├── tauri-runtime-wry v2.12.0 (*)
+      │       │       ├── webkit2gtk v2.0.2
+      │       │       │   ├── tauri v2.12.0 (*)
+      │       │       │   ├── tauri-runtime v2.12.0 (*)
+      │       │       │   ├── tauri-runtime-wry v2.12.0 (*)
+      │       │       │   └── wry v0.57.0
+      │       │       │       └── tauri-runtime-wry v2.12.0 (*)
+      │       │       └── wry v0.57.0 (*)
+      │       ├── cairo-rs v0.18.5
+      │       │   ├── gdk v0.18.2
+      │       │   │   ├── gdkx11 v0.18.2
+      │       │   │   │   └── wry v0.57.0 (*)
+      │       │   │   ├── gtk v0.18.2 (*)
+      │       │   │   └── webkit2gtk v2.0.2 (*)
+      │       │   ├── gtk v0.18.2 (*)
+      │       │   └── webkit2gtk v2.0.2 (*)
+      │       ├── gdk v0.18.2 (*)
+      │       ├── gdk-pixbuf v0.18.5
+      │       │   ├── gdk v0.18.2 (*)
+      │       │   └── gtk v0.18.2 (*)
+      │       ├── gdkx11 v0.18.2 (*)
+      │       ├── gio v0.18.4
+      │       │   ├── gdk v0.18.2 (*)
+      │       │   ├── gdk-pixbuf v0.18.5 (*)
+      │       │   ├── gdkx11 v0.18.2 (*)
+      │       │   ├── gtk v0.18.2 (*)
+      │       │   ├── pango v0.18.3
+      │       │   │   ├── gdk v0.18.2 (*)
+      │       │   │   └── gtk v0.18.2 (*)
+      │       │   ├── soup3 v0.5.0
+      │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │   │   └── wry v0.57.0 (*)
+      │       │   └── webkit2gtk v2.0.2 (*)
+      │       ├── gtk v0.18.2 (*)
+      │       ├── javascriptcore-rs v1.1.2
+      │       │   ├── webkit2gtk v2.0.2 (*)
+      │       │   └── wry v0.57.0 (*)
+      │       ├── pango v0.18.3 (*)
+      │       ├── soup3 v0.5.0 (*)
+      │       └── webkit2gtk v2.0.2 (*)
+      ├── gtk3-macros v0.18.2
+      │   └── gtk v0.18.2 (*)
+      ├── phf_macros v0.13.1
+      │   └── phf v0.13.1
+      │       ├── cssparser v0.37.0
+      │       │   ├── dom_query v0.28.0 (*)
+      │       │   └── selectors v0.38.0 (*)
+      │       ├── selectors v0.38.0 (*)
+      │       ├── tauri-utils v2.10.0 (*)
+      │       └── web_atoms v0.2.6
+      │           └── markup5ever v0.39.0
+      │               └── html5ever v0.39.0
+      │                   └── dom_query v0.28.0 (*)
+      ├── schemars_derive v0.8.22
+      │   └── schemars v0.8.22
+      │       ├── tauri-build v2.7.0 (*)
+      │       ├── tauri-plugin v2.7.0 (*)
+      │       ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │       └── tauri-utils v2.10.0 (*)
+      ├── serde_derive_internals v0.29.1
+      │   └── schemars_derive v0.8.22 (*)
+      ├── serialize-to-javascript-impl v0.1.2
+      │   └── serialize-to-javascript v0.1.2
+      │       └── tauri v2.12.0 (*)
+      ├── tauri-codegen v2.7.0 (*)
+      ├── tauri-macros v2.7.0 (*)
+      ├── thiserror-impl v1.0.69
+      │   └── thiserror v1.0.69
+      │       ├── cairo-rs v0.18.5 (*)
+      │       ├── gio v0.18.4 (*)
+      │       └── glib v0.18.5 (*)
+      ├── tracing-attributes v0.1.31
+      │   └── tracing v0.1.44
+      │       ├── firmwaresight-storage v0.6.0
+      │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │       ├── fwsight v0.6.0
+      │       ├── softbuffer v0.4.8
+      │       │   └── tauri-runtime-wry v2.12.0 (*)
+      │       └── tracing-subscriber v0.3.23
+      │           └── fwsight v0.6.0 (*)
+      ├── ts-rs-macros v12.0.1
+      │   └── ts-rs v12.0.1
+      │       └── firmwaresight-desktop v0.6.0 (*)
+      ├── webview2-com-macros v0.8.1
+      │   └── webview2-com v0.39.1
+      │       ├── tauri v2.12.0 (*)
+      │       ├── tauri-runtime v2.12.0 (*)
+      │       ├── tauri-runtime-wry v2.12.0 (*)
+      │       └── wry v0.57.0 (*)
+      ├── windows-implement v0.60.2
+      │   └── windows-core v0.62.2
+      │       ├── tao v0.37.1 (*)
+      │       ├── webview2-com v0.39.1 (*)
+      │       ├── webview2-com-sys v0.39.1
+      │       │   └── webview2-com v0.39.1 (*)
+      │       ├── windows v0.62.2
+      │       │   ├── tao v0.37.1 (*)
+      │       │   ├── tauri v2.12.0 (*)
+      │       │   ├── tauri-runtime v2.12.0 (*)
+      │       │   ├── tauri-runtime-wry v2.12.0 (*)
+      │       │   ├── webview2-com v0.39.1 (*)
+      │       │   ├── webview2-com-sys v0.39.1 (*)
+      │       │   └── wry v0.57.0 (*)
+      │       ├── windows-collections v0.3.2
+      │       │   └── windows v0.62.2 (*)
+      │       ├── windows-future v0.3.2
+      │       │   └── windows v0.62.2 (*)
+      │       ├── windows-numerics v0.3.1
+      │       │   └── windows v0.62.2 (*)
+      │       └── wry v0.57.0 (*)
+      └── windows-interface v0.59.3
+          └── windows-core v0.62.2 (*)
+    ├ syn v3.0.6
+      ├── bytemuck_derive v1.12.1
+      │   └── bytemuck v1.25.2
+      │       ├── font-types v0.12.6
+      │       │   └── read-fonts v0.41.0
+      │       │       ├── harfrust v0.12.0
+      │       │       │   └── usvg v0.48.1
+      │       │       │       └── resvg v0.48.1
+      │       │       │           └── firmwaresight-report v0.6.0
+      │       │       │               ├── firmwaresight-desktop v0.6.0
+      │       │       │               ├── firmwaresight-project v0.6.0
+      │       │       │               │   ├── firmwaresight-desktop v0.6.0 (*)
+      │       │       │               │   └── fwsight v0.6.0
+      │       │       │               └── (dev) fwsight v0.6.0 (*)
+      │       │       └── skrifa v0.44.0
+      │       │           └── usvg v0.48.1 (*)
+      │       ├── harfrust v0.12.0 (*)
+      │       ├── read-fonts v0.41.0 (*)
+      │       ├── resvg v0.48.1 (*)
+      │       ├── rgb v0.8.53
+      │       │   └── resvg v0.48.1 (*)
+      │       ├── skrifa v0.44.0 (*)
+      │       ├── tiny-skia v0.12.0
+      │       │   └── resvg v0.48.1 (*)
+      │       └── tiny-skia-path v0.12.0
+      │           ├── tiny-skia v0.12.0 (*)
+      │           └── usvg v0.48.1 (*)
+      ├── clap_derive v4.6.7
+      │   └── clap v4.6.7
+      │       └── fwsight v0.6.0 (*)
+      ├── cssparser-macros v0.7.1
+      │   └── cssparser v0.37.0
+      │       ├── dom_query v0.28.0
+      │       │   └── tauri-utils v2.10.0
+      │       │       ├── tauri v2.12.0
+      │       │       │   ├── firmwaresight-desktop v0.6.0 (*)
+      │       │       │   ├── tauri-plugin-dialog v2.8.0
+      │       │       │   │   └── firmwaresight-desktop v0.6.0 (*)
+      │       │       │   └── tauri-plugin-fs v2.6.0
+      │       │       │       └── tauri-plugin-dialog v2.8.0 (*)
+      │       │       ├── tauri-build v2.7.0
+      │       │       │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+      │       │       │   └── (build) tauri v2.12.0 (*)
+      │       │       ├── tauri-codegen v2.7.0
+      │       │       │   └── tauri-macros v2.7.0
+      │       │       │       └── tauri v2.12.0 (*)
+      │       │       ├── tauri-macros v2.7.0 (*)
+      │       │       ├── tauri-plugin v2.7.0
+      │       │       │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+      │       │       │   └── (build) tauri-plugin-fs v2.6.0 (*)
+      │       │       ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │       │       ├── tauri-runtime v2.12.0
+      │       │       │   ├── tauri v2.12.0 (*)
+      │       │       │   └── tauri-runtime-wry v2.12.0
+      │       │       │       └── tauri v2.12.0 (*)
+      │       │       └── tauri-runtime-wry v2.12.0 (*)
+      │       └── selectors v0.38.0
+      │           └── dom_query v0.28.0 (*)
+      ├── darling_core v0.24.1
+      │   ├── darling v0.24.1
+      │   │   └── serde_with_macros v3.24.0
+      │   │       └── serde_with v3.24.0
+      │   │           └── tauri-utils v2.10.0 (*)
+      │   └── darling_macro v0.24.1
+      │       └── darling v0.24.1 (*)
+      ├── darling_macro v0.24.1 (*)
+      ├── displaydoc v0.2.7
+      │   ├── icu_collections v2.3.0
+      │   │   ├── icu_normalizer v2.3.0
+      │   │   │   └── idna_adapter v1.2.2
+      │   │   │       └── idna v1.1.0
+      │   │   │           └── url v2.5.8
+      │   │   │               ├── schemars v0.8.22
+      │   │   │               │   ├── tauri-build v2.7.0 (*)
+      │   │   │               │   ├── tauri-plugin v2.7.0 (*)
+      │   │   │               │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │   │   │               │   └── tauri-utils v2.10.0 (*)
+      │   │   │               ├── tao v0.37.1
+      │   │   │               │   └── tauri-runtime-wry v2.12.0 (*)
+      │   │   │               ├── tauri v2.12.0 (*)
+      │   │   │               ├── tauri-codegen v2.7.0 (*)
+      │   │   │               ├── tauri-plugin-dialog v2.8.0 (*)
+      │   │   │               ├── tauri-plugin-fs v2.6.0 (*)
+      │   │   │               ├── tauri-runtime v2.12.0 (*)
+      │   │   │               ├── tauri-runtime-wry v2.12.0 (*)
+      │   │   │               ├── tauri-utils v2.10.0 (*)
+      │   │   │               ├── urlpattern v0.6.0
+      │   │   │               │   └── tauri-utils v2.10.0 (*)
+      │   │   │               └── wry v0.57.0
+      │   │   │                   └── tauri-runtime-wry v2.12.0 (*)
+      │   │   └── icu_properties v2.3.0
+      │   │       ├── idna_adapter v1.2.2 (*)
+      │   │       └── urlpattern v0.6.0 (*)
+      │   ├── icu_locale_core v2.3.0
+      │   │   ├── icu_properties v2.3.0 (*)
+      │   │   └── icu_provider v2.3.1
+      │   │       ├── icu_normalizer v2.3.0 (*)
+      │   │       └── icu_properties v2.3.0 (*)
+      │   ├── icu_properties v2.3.0 (*)
+      │   ├── icu_provider v2.3.1 (*)
+      │   ├── tinystr v0.8.4
+      │   │   └── icu_locale_core v2.3.0 (*)
+      │   └── zerotrie v0.2.5
+      │       ├── icu_properties v2.3.0 (*)
+      │       └── icu_provider v2.3.1 (*)
+      ├── foreign-types-macros v0.2.4
+      │   └── foreign-types v0.5.0
+      │       └── core-graphics v0.25.0
+      │           └── tao v0.37.1 (*)
+      ├── futures-macro v0.3.34
+      │   └── futures-util v0.3.34
+      │       ├── futures-executor v0.3.34
+      │       │   └── glib v0.18.5
+      │       │       ├── atk v0.18.2
+      │       │       │   └── gtk v0.18.2
+      │       │       │       ├── muda v0.20.0
+      │       │       │       │   └── tauri v2.12.0 (*)
+      │       │       │       ├── tao v0.37.1 (*)
+      │       │       │       ├── tauri v2.12.0 (*)
+      │       │       │       ├── tauri-runtime v2.12.0 (*)
+      │       │       │       ├── tauri-runtime-wry v2.12.0 (*)
+      │       │       │       ├── webkit2gtk v2.0.2
+      │       │       │       │   ├── tauri v2.12.0 (*)
+      │       │       │       │   ├── tauri-runtime v2.12.0 (*)
+      │       │       │       │   ├── tauri-runtime-wry v2.12.0 (*)
+      │       │       │       │   └── wry v0.57.0 (*)
+      │       │       │       └── wry v0.57.0 (*)
+      │       │       ├── cairo-rs v0.18.5
+      │       │       │   ├── gdk v0.18.2
+      │       │       │   │   ├── gdkx11 v0.18.2
+      │       │       │   │   │   └── wry v0.57.0 (*)
+      │       │       │   │   ├── gtk v0.18.2 (*)
+      │       │       │   │   └── webkit2gtk v2.0.2 (*)
+      │       │       │   ├── gtk v0.18.2 (*)
+      │       │       │   └── webkit2gtk v2.0.2 (*)
+      │       │       ├── gdk v0.18.2 (*)
+      │       │       ├── gdk-pixbuf v0.18.5
+      │       │       │   ├── gdk v0.18.2 (*)
+      │       │       │   └── gtk v0.18.2 (*)
+      │       │       ├── gdkx11 v0.18.2 (*)
+      │       │       ├── gio v0.18.4
+      │       │       │   ├── gdk v0.18.2 (*)
+      │       │       │   ├── gdk-pixbuf v0.18.5 (*)
+      │       │       │   ├── gdkx11 v0.18.2 (*)
+      │       │       │   ├── gtk v0.18.2 (*)
+      │       │       │   ├── pango v0.18.3
+      │       │       │   │   ├── gdk v0.18.2 (*)
+      │       │       │   │   └── gtk v0.18.2 (*)
+      │       │       │   ├── soup3 v0.5.0
+      │       │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │       │   │   └── wry v0.57.0 (*)
+      │       │       │   └── webkit2gtk v2.0.2 (*)
+      │       │       ├── gtk v0.18.2 (*)
+      │       │       ├── javascriptcore-rs v1.1.2
+      │       │       │   ├── webkit2gtk v2.0.2 (*)
+      │       │       │   └── wry v0.57.0 (*)
+      │       │       ├── pango v0.18.3 (*)
+      │       │       ├── soup3 v0.5.0 (*)
+      │       │       └── webkit2gtk v2.0.2 (*)
+      │       ├── gio v0.18.4 (*)
+      │       └── glib v0.18.5 (*)
+      ├── serde_derive v1.0.229
+      │   ├── serde v1.0.229
+      │   │   ├── cargo-platform v0.1.9
+      │   │   │   └── cargo_metadata v0.19.2
+      │   │   │       └── tauri-utils v2.10.0 (*)
+      │   │   ├── cargo_metadata v0.19.2 (*)
+      │   │   ├── cargo_toml v1.0.1
+      │   │   │   └── tauri-build v2.7.0 (*)
+      │   │   ├── dpi v0.1.2
+      │   │   │   ├── muda v0.20.0 (*)
+      │   │   │   ├── tao v0.37.1 (*)
+      │   │   │   ├── tauri-runtime v2.12.0 (*)
+      │   │   │   └── wry v0.57.0 (*)
+      │   │   ├── firmwaresight-desktop v0.6.0 (*)
+      │   │   ├── firmwaresight-project v0.6.0 (*)
+      │   │   ├── firmwaresight-report v0.6.0 (*)
+      │   │   ├── indexmap v1.9.3
+      │   │   │   └── schemars v0.8.22 (*)
+      │   │   ├── json-patch v4.2.0
+      │   │   │   ├── tauri-build v2.7.0 (*)
+      │   │   │   ├── tauri-codegen v2.7.0 (*)
+      │   │   │   └── tauri-utils v2.10.0 (*)
+      │   │   ├── jsonptr v0.7.1
+      │   │   │   └── json-patch v4.2.0 (*)
+      │   │   ├── keyboard-types v0.8.3
+      │   │   │   └── muda v0.20.0 (*)
+      │   │   ├── muda v0.20.0 (*)
+      │   │   ├── plist v1.10.1
+      │   │   │   ├── tauri v2.12.0 (*)
+      │   │   │   ├── tauri-codegen v2.7.0 (*)
+      │   │   │   ├── tauri-plugin v2.7.0 (*)
+      │   │   │   └── tauri-utils v2.10.0 (*)
+      │   │   ├── schemars v0.8.22 (*)
+      │   │   ├── serde_spanned v0.6.9
+      │   │   │   ├── toml v0.8.2
+      │   │   │   │   └── system-deps v6.2.2
+      │   │   │   │       ├── (build) atk-sys v0.18.2
+      │   │   │   │       │   ├── atk v0.18.2 (*)
+      │   │   │   │       │   └── gtk-sys v0.18.2
+      │   │   │   │       │       ├── gtk v0.18.2 (*)
+      │   │   │   │       │       ├── rfd v0.16.0
+      │   │   │   │       │       │   └── tauri-plugin-dialog v2.8.0 (*)
+      │   │   │   │       │       ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │       │       └── webkit2gtk-sys v2.0.2
+      │   │   │   │       │           ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │       │           └── wry v0.57.0 (*)
+      │   │   │   │       ├── (build) cairo-sys-rs v0.18.2
+      │   │   │   │       │   ├── cairo-rs v0.18.5 (*)
+      │   │   │   │       │   ├── gdk-sys v0.18.2
+      │   │   │   │       │   │   ├── gdk v0.18.2 (*)
+      │   │   │   │       │   │   ├── gdkwayland-sys v0.18.2
+      │   │   │   │       │   │   │   └── tao v0.37.1 (*)
+      │   │   │   │       │   │   ├── gdkx11-sys v0.18.2
+      │   │   │   │       │   │   │   ├── gdkx11 v0.18.2 (*)
+      │   │   │   │       │   │   │   └── tao v0.37.1 (*)
+      │   │   │   │       │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   │       │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   │       ├── (build) gdk-pixbuf-sys v0.18.0
+      │   │   │   │       │   ├── gdk-pixbuf v0.18.5 (*)
+      │   │   │   │       │   ├── gdk-sys v0.18.2 (*)
+      │   │   │   │       │   └── gtk-sys v0.18.2 (*)
+      │   │   │   │       ├── (build) gdk-sys v0.18.2 (*)
+      │   │   │   │       ├── (build) gdkwayland-sys v0.18.2 (*)
+      │   │   │   │       ├── (build) gdkx11-sys v0.18.2 (*)
+      │   │   │   │       ├── (build) gio-sys v0.18.1
+      │   │   │   │       │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │   │   │   │       │   ├── gdk-sys v0.18.2 (*)
+      │   │   │   │       │   ├── gio v0.18.4 (*)
+      │   │   │   │       │   ├── glib v0.18.5 (*)
+      │   │   │   │       │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   │       │   ├── soup3-sys v0.5.0
+      │   │   │   │       │   │   ├── soup3 v0.5.0 (*)
+      │   │   │   │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   │       │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   │       ├── (build) glib-sys v0.18.1
+      │   │   │   │       │   ├── atk-sys v0.18.2 (*)
+      │   │   │   │       │   ├── cairo-sys-rs v0.18.2 (*)
+      │   │   │   │       │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │   │   │   │       │   ├── gdk-sys v0.18.2 (*)
+      │   │   │   │       │   ├── gdkwayland-sys v0.18.2 (*)
+      │   │   │   │       │   ├── gdkx11-sys v0.18.2 (*)
+      │   │   │   │       │   ├── gio-sys v0.18.1 (*)
+      │   │   │   │       │   ├── glib v0.18.5 (*)
+      │   │   │   │       │   ├── gobject-sys v0.18.0
+      │   │   │   │       │   │   ├── atk-sys v0.18.2 (*)
+      │   │   │   │       │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │   │   │   │       │   │   ├── gdk-sys v0.18.2 (*)
+      │   │   │   │       │   │   ├── gdkwayland-sys v0.18.2 (*)
+      │   │   │   │       │   │   ├── gio-sys v0.18.1 (*)
+      │   │   │   │       │   │   ├── glib v0.18.5 (*)
+      │   │   │   │       │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   │       │   │   ├── javascriptcore-rs-sys v1.1.1
+      │   │   │   │       │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+      │   │   │   │       │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   │       │   │   ├── pango-sys v0.18.0
+      │   │   │   │       │   │   │   ├── gdk-sys v0.18.2 (*)
+      │   │   │   │       │   │   │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   │       │   │   │   └── pango v0.18.3 (*)
+      │   │   │   │       │   │   ├── rfd v0.16.0 (*)
+      │   │   │   │       │   │   ├── soup3-sys v0.5.0 (*)
+      │   │   │   │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   │       │   ├── gtk-sys v0.18.2 (*)
+      │   │   │   │       │   ├── javascriptcore-rs-sys v1.1.1 (*)
+      │   │   │   │       │   ├── pango-sys v0.18.0 (*)
+      │   │   │   │       │   ├── rfd v0.16.0 (*)
+      │   │   │   │       │   ├── soup3-sys v0.5.0 (*)
+      │   │   │   │       │   ├── webkit2gtk v2.0.2 (*)
+      │   │   │   │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │   │   │   │       ├── (build) gobject-sys v0.18.0 (*)
+      │   │   │   │       ├── (build) gtk-sys v0.18.2 (*)
+      │   │   │   │       ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+      │   │   │   │       ├── (build) pango-sys v0.18.0 (*)
+      │   │   │   │       ├── (build) soup3-sys v0.5.0 (*)
+      │   │   │   │       └── (build) webkit2gtk-sys v2.0.2 (*)
+      │   │   │   └── toml_edit v0.20.2
+      │   │   │       ├── proc-macro-crate v2.0.2
+      │   │   │       │   └── glib-macros v0.18.5
+      │   │   │       │       └── glib v0.18.5 (*)
+      │   │   │       └── toml v0.8.2 (*)
+      │   │   ├── serialize-to-javascript v0.1.2
+      │   │   │   └── tauri v2.12.0 (*)
+      │   │   ├── swift-rs v1.0.8
+      │   │   │   └── tauri-utils v2.10.0 (*)
+      │   │   ├── tauri v2.12.0 (*)
+      │   │   ├── tauri-build v2.7.0 (*)
+      │   │   ├── tauri-codegen v2.7.0 (*)
+      │   │   ├── tauri-plugin v2.7.0 (*)
+      │   │   ├── tauri-plugin-dialog v2.8.0 (*)
+      │   │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │   │   ├── tauri-runtime v2.12.0 (*)
+      │   │   ├── tauri-utils v2.10.0 (*)
+      │   │   ├── toml v0.8.2 (*)
+      │   │   ├── toml_datetime v0.6.3
+      │   │   │   ├── proc-macro-crate v2.0.2 (*)
+      │   │   │   ├── toml v0.8.2 (*)
+      │   │   │   ├── toml_edit v0.19.15
+      │   │   │   │   └── proc-macro-crate v1.3.1
+      │   │   │   │       └── gtk3-macros v0.18.2
+      │   │   │   │           └── gtk v0.18.2 (*)
+      │   │   │   └── toml_edit v0.20.2 (*)
+      │   │   ├── toml_edit v0.20.2 (*)
+      │   │   ├── url v2.5.8 (*)
+      │   │   └── urlpattern v0.6.0 (*)
+      │   └── url v2.5.8 (*)
+      ├── serde_repr v0.1.21
+      │   ├── tauri v2.12.0 (*)
+      │   └── tauri-plugin-fs v2.6.0 (*)
+      ├── serde_with_macros v3.24.0 (*)
+      ├── synstructure v0.14.0
+      │   ├── yoke-derive v0.8.4
+      │   │   └── yoke v0.8.3
+      │   │       ├── icu_collections v2.3.0 (*)
+      │   │       ├── icu_provider v2.3.1 (*)
+      │   │       ├── zerotrie v0.2.5 (*)
+      │   │       └── zerovec v0.11.8
+      │   │           ├── icu_collections v2.3.0 (*)
+      │   │           ├── icu_locale_core v2.3.0 (*)
+      │   │           ├── icu_normalizer v2.3.0 (*)
+      │   │           ├── icu_properties v2.3.0 (*)
+      │   │           ├── icu_provider v2.3.1 (*)
+      │   │           ├── potential_utf v0.1.6
+      │   │           │   └── icu_collections v2.3.0 (*)
+      │   │           └── tinystr v0.8.4 (*)
+      │   └── zerofrom-derive v0.1.8
+      │       └── zerofrom v0.1.8
+      │           ├── icu_collections v2.3.0 (*)
+      │           ├── icu_provider v2.3.1 (*)
+      │           ├── yoke v0.8.3 (*)
+      │           ├── zerotrie v0.2.5 (*)
+      │           └── zerovec v0.11.8 (*)
+      ├── thiserror-impl v2.0.21
+      │   └── thiserror v2.0.21
+      │       ├── cargo_metadata v0.19.2 (*)
+      │       ├── firmwaresight-artifact v0.6.0
+      │       │   ├── firmwaresight-desktop v0.6.0 (*)
+      │       │   ├── (dev) firmwaresight-storage v0.6.0
+      │       │   │   └── firmwaresight-desktop v0.6.0 (*)
+      │       │   └── fwsight v0.6.0 (*)
+      │       ├── firmwaresight-project v0.6.0 (*)
+      │       ├── firmwaresight-report v0.6.0 (*)
+      │       ├── firmwaresight-storage v0.6.0 (*)
+      │       ├── json-patch v4.2.0 (*)
+      │       ├── muda v0.20.0 (*)
+      │       ├── tauri v2.12.0 (*)
+      │       ├── tauri-codegen v2.7.0 (*)
+      │       ├── tauri-plugin-dialog v2.8.0 (*)
+      │       ├── tauri-plugin-fs v2.6.0 (*)
+      │       ├── tauri-runtime v2.12.0 (*)
+      │       ├── tauri-utils v2.10.0 (*)
+      │       ├── ts-rs v12.0.1
+      │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │       ├── (build) webview2-com-sys v0.39.1
+      │       │   └── webview2-com v0.39.1
+      │       │       ├── tauri v2.12.0 (*)
+      │       │       ├── tauri-runtime v2.12.0 (*)
+      │       │       ├── tauri-runtime-wry v2.12.0 (*)
+      │       │       └── wry v0.57.0 (*)
+      │       └── wry v0.57.0 (*)
+      ├── yoke-derive v0.8.4 (*)
+      ├── zerofrom-derive v0.1.8 (*)
+      └── zerovec-derive v0.11.6
+          └── zerovec v0.11.8 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'thiserror'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:318:1
+    │  
+318 │ ╭ thiserror 1.0.69 registry+https://github.com/rust-lang/crates.io-index
+319 │ │ thiserror 2.0.21 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ thiserror v1.0.69
+      ├── cairo-rs v0.18.5
+      │   ├── gdk v0.18.2
+      │   │   ├── gdkx11 v0.18.2
+      │   │   │   └── wry v0.57.0
+      │   │   │       └── tauri-runtime-wry v2.12.0
+      │   │   │           └── tauri v2.12.0
+      │   │   │               ├── firmwaresight-desktop v0.6.0
+      │   │   │               ├── tauri-plugin-dialog v2.8.0
+      │   │   │               │   └── firmwaresight-desktop v0.6.0 (*)
+      │   │   │               └── tauri-plugin-fs v2.6.0
+      │   │   │                   └── tauri-plugin-dialog v2.8.0 (*)
+      │   │   ├── gtk v0.18.2
+      │   │   │   ├── muda v0.20.0
+      │   │   │   │   └── tauri v2.12.0 (*)
+      │   │   │   ├── tao v0.37.1
+      │   │   │   │   └── tauri-runtime-wry v2.12.0 (*)
+      │   │   │   ├── tauri v2.12.0 (*)
+      │   │   │   ├── tauri-runtime v2.12.0
+      │   │   │   │   ├── tauri v2.12.0 (*)
+      │   │   │   │   └── tauri-runtime-wry v2.12.0 (*)
+      │   │   │   ├── tauri-runtime-wry v2.12.0 (*)
+      │   │   │   ├── webkit2gtk v2.0.2
+      │   │   │   │   ├── tauri v2.12.0 (*)
+      │   │   │   │   ├── tauri-runtime v2.12.0 (*)
+      │   │   │   │   ├── tauri-runtime-wry v2.12.0 (*)
+      │   │   │   │   └── wry v0.57.0 (*)
+      │   │   │   └── wry v0.57.0 (*)
+      │   │   └── webkit2gtk v2.0.2 (*)
+      │   ├── gtk v0.18.2 (*)
+      │   └── webkit2gtk v2.0.2 (*)
+      ├── gio v0.18.4
+      │   ├── gdk v0.18.2 (*)
+      │   ├── gdk-pixbuf v0.18.5
+      │   │   ├── gdk v0.18.2 (*)
+      │   │   └── gtk v0.18.2 (*)
+      │   ├── gdkx11 v0.18.2 (*)
+      │   ├── gtk v0.18.2 (*)
+      │   ├── pango v0.18.3
+      │   │   ├── gdk v0.18.2 (*)
+      │   │   └── gtk v0.18.2 (*)
+      │   ├── soup3 v0.5.0
+      │   │   ├── webkit2gtk v2.0.2 (*)
+      │   │   └── wry v0.57.0 (*)
+      │   └── webkit2gtk v2.0.2 (*)
+      └── glib v0.18.5
+          ├── atk v0.18.2
+          │   └── gtk v0.18.2 (*)
+          ├── cairo-rs v0.18.5 (*)
+          ├── gdk v0.18.2 (*)
+          ├── gdk-pixbuf v0.18.5 (*)
+          ├── gdkx11 v0.18.2 (*)
+          ├── gio v0.18.4 (*)
+          ├── gtk v0.18.2 (*)
+          ├── javascriptcore-rs v1.1.2
+          │   ├── webkit2gtk v2.0.2 (*)
+          │   └── wry v0.57.0 (*)
+          ├── pango v0.18.3 (*)
+          ├── soup3 v0.5.0 (*)
+          └── webkit2gtk v2.0.2 (*)
+    ├ thiserror v2.0.21
+      ├── cargo_metadata v0.19.2
+      │   └── tauri-utils v2.10.0
+      │       ├── tauri v2.12.0
+      │       │   ├── firmwaresight-desktop v0.6.0
+      │       │   ├── tauri-plugin-dialog v2.8.0
+      │       │   │   └── firmwaresight-desktop v0.6.0 (*)
+      │       │   └── tauri-plugin-fs v2.6.0
+      │       │       └── tauri-plugin-dialog v2.8.0 (*)
+      │       ├── tauri-build v2.7.0
+      │       │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+      │       │   └── (build) tauri v2.12.0 (*)
+      │       ├── tauri-codegen v2.7.0
+      │       │   └── tauri-macros v2.7.0
+      │       │       └── tauri v2.12.0 (*)
+      │       ├── tauri-macros v2.7.0 (*)
+      │       ├── tauri-plugin v2.7.0
+      │       │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+      │       │   └── (build) tauri-plugin-fs v2.6.0 (*)
+      │       ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │       ├── tauri-runtime v2.12.0
+      │       │   ├── tauri v2.12.0 (*)
+      │       │   └── tauri-runtime-wry v2.12.0
+      │       │       └── tauri v2.12.0 (*)
+      │       └── tauri-runtime-wry v2.12.0 (*)
+      ├── firmwaresight-artifact v0.6.0
+      │   ├── firmwaresight-desktop v0.6.0 (*)
+      │   ├── (dev) firmwaresight-storage v0.6.0
+      │   │   └── firmwaresight-desktop v0.6.0 (*)
+      │   └── fwsight v0.6.0
+      ├── firmwaresight-project v0.6.0
+      │   ├── firmwaresight-desktop v0.6.0 (*)
+      │   └── fwsight v0.6.0 (*)
+      ├── firmwaresight-report v0.6.0
+      │   ├── firmwaresight-desktop v0.6.0 (*)
+      │   ├── firmwaresight-project v0.6.0 (*)
+      │   └── (dev) fwsight v0.6.0 (*)
+      ├── firmwaresight-storage v0.6.0 (*)
+      ├── json-patch v4.2.0
+      │   ├── tauri-build v2.7.0 (*)
+      │   ├── tauri-codegen v2.7.0 (*)
+      │   └── tauri-utils v2.10.0 (*)
+      ├── muda v0.20.0
+      │   └── tauri v2.12.0 (*)
+      ├── tauri v2.12.0 (*)
+      ├── tauri-codegen v2.7.0 (*)
+      ├── tauri-plugin-dialog v2.8.0 (*)
+      ├── tauri-plugin-fs v2.6.0 (*)
+      ├── tauri-runtime v2.12.0 (*)
+      ├── tauri-utils v2.10.0 (*)
+      ├── ts-rs v12.0.1
+      │   └── firmwaresight-desktop v0.6.0 (*)
+      ├── (build) webview2-com-sys v0.39.1
+      │   └── webview2-com v0.39.1
+      │       ├── tauri v2.12.0 (*)
+      │       ├── tauri-runtime v2.12.0 (*)
+      │       ├── tauri-runtime-wry v2.12.0 (*)
+      │       └── wry v0.57.0
+      │           └── tauri-runtime-wry v2.12.0 (*)
+      └── wry v0.57.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'thiserror-impl'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:320:1
+    │  
+320 │ ╭ thiserror-impl 1.0.69 registry+https://github.com/rust-lang/crates.io-index
+321 │ │ thiserror-impl 2.0.21 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰───────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ thiserror-impl v1.0.69
+      └── thiserror v1.0.69
+          ├── cairo-rs v0.18.5
+          │   ├── gdk v0.18.2
+          │   │   ├── gdkx11 v0.18.2
+          │   │   │   └── wry v0.57.0
+          │   │   │       └── tauri-runtime-wry v2.12.0
+          │   │   │           └── tauri v2.12.0
+          │   │   │               ├── firmwaresight-desktop v0.6.0
+          │   │   │               ├── tauri-plugin-dialog v2.8.0
+          │   │   │               │   └── firmwaresight-desktop v0.6.0 (*)
+          │   │   │               └── tauri-plugin-fs v2.6.0
+          │   │   │                   └── tauri-plugin-dialog v2.8.0 (*)
+          │   │   ├── gtk v0.18.2
+          │   │   │   ├── muda v0.20.0
+          │   │   │   │   └── tauri v2.12.0 (*)
+          │   │   │   ├── tao v0.37.1
+          │   │   │   │   └── tauri-runtime-wry v2.12.0 (*)
+          │   │   │   ├── tauri v2.12.0 (*)
+          │   │   │   ├── tauri-runtime v2.12.0
+          │   │   │   │   ├── tauri v2.12.0 (*)
+          │   │   │   │   └── tauri-runtime-wry v2.12.0 (*)
+          │   │   │   ├── tauri-runtime-wry v2.12.0 (*)
+          │   │   │   ├── webkit2gtk v2.0.2
+          │   │   │   │   ├── tauri v2.12.0 (*)
+          │   │   │   │   ├── tauri-runtime v2.12.0 (*)
+          │   │   │   │   ├── tauri-runtime-wry v2.12.0 (*)
+          │   │   │   │   └── wry v0.57.0 (*)
+          │   │   │   └── wry v0.57.0 (*)
+          │   │   └── webkit2gtk v2.0.2 (*)
+          │   ├── gtk v0.18.2 (*)
+          │   └── webkit2gtk v2.0.2 (*)
+          ├── gio v0.18.4
+          │   ├── gdk v0.18.2 (*)
+          │   ├── gdk-pixbuf v0.18.5
+          │   │   ├── gdk v0.18.2 (*)
+          │   │   └── gtk v0.18.2 (*)
+          │   ├── gdkx11 v0.18.2 (*)
+          │   ├── gtk v0.18.2 (*)
+          │   ├── pango v0.18.3
+          │   │   ├── gdk v0.18.2 (*)
+          │   │   └── gtk v0.18.2 (*)
+          │   ├── soup3 v0.5.0
+          │   │   ├── webkit2gtk v2.0.2 (*)
+          │   │   └── wry v0.57.0 (*)
+          │   └── webkit2gtk v2.0.2 (*)
+          └── glib v0.18.5
+              ├── atk v0.18.2
+              │   └── gtk v0.18.2 (*)
+              ├── cairo-rs v0.18.5 (*)
+              ├── gdk v0.18.2 (*)
+              ├── gdk-pixbuf v0.18.5 (*)
+              ├── gdkx11 v0.18.2 (*)
+              ├── gio v0.18.4 (*)
+              ├── gtk v0.18.2 (*)
+              ├── javascriptcore-rs v1.1.2
+              │   ├── webkit2gtk v2.0.2 (*)
+              │   └── wry v0.57.0 (*)
+              ├── pango v0.18.3 (*)
+              ├── soup3 v0.5.0 (*)
+              └── webkit2gtk v2.0.2 (*)
+    ├ thiserror-impl v2.0.21
+      └── thiserror v2.0.21
+          ├── cargo_metadata v0.19.2
+          │   └── tauri-utils v2.10.0
+          │       ├── tauri v2.12.0
+          │       │   ├── firmwaresight-desktop v0.6.0
+          │       │   ├── tauri-plugin-dialog v2.8.0
+          │       │   │   └── firmwaresight-desktop v0.6.0 (*)
+          │       │   └── tauri-plugin-fs v2.6.0
+          │       │       └── tauri-plugin-dialog v2.8.0 (*)
+          │       ├── tauri-build v2.7.0
+          │       │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+          │       │   └── (build) tauri v2.12.0 (*)
+          │       ├── tauri-codegen v2.7.0
+          │       │   └── tauri-macros v2.7.0
+          │       │       └── tauri v2.12.0 (*)
+          │       ├── tauri-macros v2.7.0 (*)
+          │       ├── tauri-plugin v2.7.0
+          │       │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+          │       │   └── (build) tauri-plugin-fs v2.6.0 (*)
+          │       ├── (build) tauri-plugin-fs v2.6.0 (*)
+          │       ├── tauri-runtime v2.12.0
+          │       │   ├── tauri v2.12.0 (*)
+          │       │   └── tauri-runtime-wry v2.12.0
+          │       │       └── tauri v2.12.0 (*)
+          │       └── tauri-runtime-wry v2.12.0 (*)
+          ├── firmwaresight-artifact v0.6.0
+          │   ├── firmwaresight-desktop v0.6.0 (*)
+          │   ├── (dev) firmwaresight-storage v0.6.0
+          │   │   └── firmwaresight-desktop v0.6.0 (*)
+          │   └── fwsight v0.6.0
+          ├── firmwaresight-project v0.6.0
+          │   ├── firmwaresight-desktop v0.6.0 (*)
+          │   └── fwsight v0.6.0 (*)
+          ├── firmwaresight-report v0.6.0
+          │   ├── firmwaresight-desktop v0.6.0 (*)
+          │   ├── firmwaresight-project v0.6.0 (*)
+          │   └── (dev) fwsight v0.6.0 (*)
+          ├── firmwaresight-storage v0.6.0 (*)
+          ├── json-patch v4.2.0
+          │   ├── tauri-build v2.7.0 (*)
+          │   ├── tauri-codegen v2.7.0 (*)
+          │   └── tauri-utils v2.10.0 (*)
+          ├── muda v0.20.0
+          │   └── tauri v2.12.0 (*)
+          ├── tauri v2.12.0 (*)
+          ├── tauri-codegen v2.7.0 (*)
+          ├── tauri-plugin-dialog v2.8.0 (*)
+          ├── tauri-plugin-fs v2.6.0 (*)
+          ├── tauri-runtime v2.12.0 (*)
+          ├── tauri-utils v2.10.0 (*)
+          ├── ts-rs v12.0.1
+          │   └── firmwaresight-desktop v0.6.0 (*)
+          ├── (build) webview2-com-sys v0.39.1
+          │   └── webview2-com v0.39.1
+          │       ├── tauri v2.12.0 (*)
+          │       ├── tauri-runtime v2.12.0 (*)
+          │       ├── tauri-runtime-wry v2.12.0 (*)
+          │       └── wry v0.57.0
+          │           └── tauri-runtime-wry v2.12.0 (*)
+          └── wry v0.57.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'toml'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:331:1
+    │  
+331 │ ╭ toml 0.8.2 registry+https://github.com/rust-lang/crates.io-index
+332 │ │ toml 1.1.6+spec-1.1.0 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰───────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ toml v0.8.2
+      └── system-deps v6.2.2
+          ├── (build) atk-sys v0.18.2
+          │   ├── atk v0.18.2
+          │   │   └── gtk v0.18.2
+          │   │       ├── muda v0.20.0
+          │   │       │   └── tauri v2.12.0
+          │   │       │       ├── firmwaresight-desktop v0.6.0
+          │   │       │       ├── tauri-plugin-dialog v2.8.0
+          │   │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+          │   │       │       └── tauri-plugin-fs v2.6.0
+          │   │       │           └── tauri-plugin-dialog v2.8.0 (*)
+          │   │       ├── tao v0.37.1
+          │   │       │   └── tauri-runtime-wry v2.12.0
+          │   │       │       └── tauri v2.12.0 (*)
+          │   │       ├── tauri v2.12.0 (*)
+          │   │       ├── tauri-runtime v2.12.0
+          │   │       │   ├── tauri v2.12.0 (*)
+          │   │       │   └── tauri-runtime-wry v2.12.0 (*)
+          │   │       ├── tauri-runtime-wry v2.12.0 (*)
+          │   │       ├── webkit2gtk v2.0.2
+          │   │       │   ├── tauri v2.12.0 (*)
+          │   │       │   ├── tauri-runtime v2.12.0 (*)
+          │   │       │   ├── tauri-runtime-wry v2.12.0 (*)
+          │   │       │   └── wry v0.57.0
+          │   │       │       └── tauri-runtime-wry v2.12.0 (*)
+          │   │       └── wry v0.57.0 (*)
+          │   └── gtk-sys v0.18.2
+          │       ├── gtk v0.18.2 (*)
+          │       ├── rfd v0.16.0
+          │       │   └── tauri-plugin-dialog v2.8.0 (*)
+          │       ├── webkit2gtk v2.0.2 (*)
+          │       └── webkit2gtk-sys v2.0.2
+          │           ├── webkit2gtk v2.0.2 (*)
+          │           └── wry v0.57.0 (*)
+          ├── (build) cairo-sys-rs v0.18.2
+          │   ├── cairo-rs v0.18.5
+          │   │   ├── gdk v0.18.2
+          │   │   │   ├── gdkx11 v0.18.2
+          │   │   │   │   └── wry v0.57.0 (*)
+          │   │   │   ├── gtk v0.18.2 (*)
+          │   │   │   └── webkit2gtk v2.0.2 (*)
+          │   │   ├── gtk v0.18.2 (*)
+          │   │   └── webkit2gtk v2.0.2 (*)
+          │   ├── gdk-sys v0.18.2
+          │   │   ├── gdk v0.18.2 (*)
+          │   │   ├── gdkwayland-sys v0.18.2
+          │   │   │   └── tao v0.37.1 (*)
+          │   │   ├── gdkx11-sys v0.18.2
+          │   │   │   ├── gdkx11 v0.18.2 (*)
+          │   │   │   └── tao v0.37.1 (*)
+          │   │   ├── gtk-sys v0.18.2 (*)
+          │   │   ├── webkit2gtk v2.0.2 (*)
+          │   │   └── webkit2gtk-sys v2.0.2 (*)
+          │   ├── gtk-sys v0.18.2 (*)
+          │   └── webkit2gtk-sys v2.0.2 (*)
+          ├── (build) gdk-pixbuf-sys v0.18.0
+          │   ├── gdk-pixbuf v0.18.5
+          │   │   ├── gdk v0.18.2 (*)
+          │   │   └── gtk v0.18.2 (*)
+          │   ├── gdk-sys v0.18.2 (*)
+          │   └── gtk-sys v0.18.2 (*)
+          ├── (build) gdk-sys v0.18.2 (*)
+          ├── (build) gdkwayland-sys v0.18.2 (*)
+          ├── (build) gdkx11-sys v0.18.2 (*)
+          ├── (build) gio-sys v0.18.1
+          │   ├── gdk-pixbuf-sys v0.18.0 (*)
+          │   ├── gdk-sys v0.18.2 (*)
+          │   ├── gio v0.18.4
+          │   │   ├── gdk v0.18.2 (*)
+          │   │   ├── gdk-pixbuf v0.18.5 (*)
+          │   │   ├── gdkx11 v0.18.2 (*)
+          │   │   ├── gtk v0.18.2 (*)
+          │   │   ├── pango v0.18.3
+          │   │   │   ├── gdk v0.18.2 (*)
+          │   │   │   └── gtk v0.18.2 (*)
+          │   │   ├── soup3 v0.5.0
+          │   │   │   ├── webkit2gtk v2.0.2 (*)
+          │   │   │   └── wry v0.57.0 (*)
+          │   │   └── webkit2gtk v2.0.2 (*)
+          │   ├── glib v0.18.5
+          │   │   ├── atk v0.18.2 (*)
+          │   │   ├── cairo-rs v0.18.5 (*)
+          │   │   ├── gdk v0.18.2 (*)
+          │   │   ├── gdk-pixbuf v0.18.5 (*)
+          │   │   ├── gdkx11 v0.18.2 (*)
+          │   │   ├── gio v0.18.4 (*)
+          │   │   ├── gtk v0.18.2 (*)
+          │   │   ├── javascriptcore-rs v1.1.2
+          │   │   │   ├── webkit2gtk v2.0.2 (*)
+          │   │   │   └── wry v0.57.0 (*)
+          │   │   ├── pango v0.18.3 (*)
+          │   │   ├── soup3 v0.5.0 (*)
+          │   │   └── webkit2gtk v2.0.2 (*)
+          │   ├── gtk-sys v0.18.2 (*)
+          │   ├── soup3-sys v0.5.0
+          │   │   ├── soup3 v0.5.0 (*)
+          │   │   └── webkit2gtk-sys v2.0.2 (*)
+          │   ├── webkit2gtk v2.0.2 (*)
+          │   └── webkit2gtk-sys v2.0.2 (*)
+          ├── (build) glib-sys v0.18.1
+          │   ├── atk-sys v0.18.2 (*)
+          │   ├── cairo-sys-rs v0.18.2 (*)
+          │   ├── gdk-pixbuf-sys v0.18.0 (*)
+          │   ├── gdk-sys v0.18.2 (*)
+          │   ├── gdkwayland-sys v0.18.2 (*)
+          │   ├── gdkx11-sys v0.18.2 (*)
+          │   ├── gio-sys v0.18.1 (*)
+          │   ├── glib v0.18.5 (*)
+          │   ├── gobject-sys v0.18.0
+          │   │   ├── atk-sys v0.18.2 (*)
+          │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+          │   │   ├── gdk-sys v0.18.2 (*)
+          │   │   ├── gdkwayland-sys v0.18.2 (*)
+          │   │   ├── gio-sys v0.18.1 (*)
+          │   │   ├── glib v0.18.5 (*)
+          │   │   ├── gtk-sys v0.18.2 (*)
+          │   │   ├── javascriptcore-rs-sys v1.1.1
+          │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+          │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+          │   │   ├── pango-sys v0.18.0
+          │   │   │   ├── gdk-sys v0.18.2 (*)
+          │   │   │   ├── gtk-sys v0.18.2 (*)
+          │   │   │   └── pango v0.18.3 (*)
+          │   │   ├── rfd v0.16.0 (*)
+          │   │   ├── soup3-sys v0.5.0 (*)
+          │   │   ├── webkit2gtk v2.0.2 (*)
+          │   │   └── webkit2gtk-sys v2.0.2 (*)
+          │   ├── gtk-sys v0.18.2 (*)
+          │   ├── javascriptcore-rs-sys v1.1.1 (*)
+          │   ├── pango-sys v0.18.0 (*)
+          │   ├── rfd v0.16.0 (*)
+          │   ├── soup3-sys v0.5.0 (*)
+          │   ├── webkit2gtk v2.0.2 (*)
+          │   └── webkit2gtk-sys v2.0.2 (*)
+          ├── (build) gobject-sys v0.18.0 (*)
+          ├── (build) gtk-sys v0.18.2 (*)
+          ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+          ├── (build) pango-sys v0.18.0 (*)
+          ├── (build) soup3-sys v0.5.0 (*)
+          └── (build) webkit2gtk-sys v2.0.2 (*)
+    ├ toml v1.1.6+spec-1.1.0
+      ├── cargo_toml v1.0.1
+      │   └── tauri-build v2.7.0
+      │       ├── (build) firmwaresight-desktop v0.6.0
+      │       └── (build) tauri v2.12.0
+      │           ├── firmwaresight-desktop v0.6.0 (*)
+      │           ├── tauri-plugin-dialog v2.8.0
+      │           │   └── firmwaresight-desktop v0.6.0 (*)
+      │           └── tauri-plugin-fs v2.6.0
+      │               └── tauri-plugin-dialog v2.8.0 (*)
+      ├── embed-resource v3.0.11
+      │   └── tauri-winres v0.3.6
+      │       └── tauri-build v2.7.0 (*)
+      ├── firmwaresight-project v0.6.0
+      │   ├── firmwaresight-desktop v0.6.0 (*)
+      │   └── fwsight v0.6.0
+      ├── (build) tauri-plugin-fs v2.6.0 (*)
+      ├── tauri-utils v2.10.0
+      │   ├── tauri v2.12.0 (*)
+      │   ├── tauri-build v2.7.0 (*)
+      │   ├── tauri-codegen v2.7.0
+      │   │   └── tauri-macros v2.7.0
+      │   │       └── tauri v2.12.0 (*)
+      │   ├── tauri-macros v2.7.0 (*)
+      │   ├── tauri-plugin v2.7.0
+      │   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+      │   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+      │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │   ├── tauri-runtime v2.12.0
+      │   │   ├── tauri v2.12.0 (*)
+      │   │   └── tauri-runtime-wry v2.12.0
+      │   │       └── tauri v2.12.0 (*)
+      │   └── tauri-runtime-wry v2.12.0 (*)
+      └── tauri-winres v0.3.6 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'toml_datetime'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:333:1
+    │  
+333 │ ╭ toml_datetime 0.6.3 registry+https://github.com/rust-lang/crates.io-index
+334 │ │ toml_datetime 1.1.1+spec-1.1.0 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ toml_datetime v0.6.3
+      ├── proc-macro-crate v2.0.2
+      │   └── glib-macros v0.18.5
+      │       └── glib v0.18.5
+      │           ├── atk v0.18.2
+      │           │   └── gtk v0.18.2
+      │           │       ├── muda v0.20.0
+      │           │       │   └── tauri v2.12.0
+      │           │       │       ├── firmwaresight-desktop v0.6.0
+      │           │       │       ├── tauri-plugin-dialog v2.8.0
+      │           │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │           │       │       └── tauri-plugin-fs v2.6.0
+      │           │       │           └── tauri-plugin-dialog v2.8.0 (*)
+      │           │       ├── tao v0.37.1
+      │           │       │   └── tauri-runtime-wry v2.12.0
+      │           │       │       └── tauri v2.12.0 (*)
+      │           │       ├── tauri v2.12.0 (*)
+      │           │       ├── tauri-runtime v2.12.0
+      │           │       │   ├── tauri v2.12.0 (*)
+      │           │       │   └── tauri-runtime-wry v2.12.0 (*)
+      │           │       ├── tauri-runtime-wry v2.12.0 (*)
+      │           │       ├── webkit2gtk v2.0.2
+      │           │       │   ├── tauri v2.12.0 (*)
+      │           │       │   ├── tauri-runtime v2.12.0 (*)
+      │           │       │   ├── tauri-runtime-wry v2.12.0 (*)
+      │           │       │   └── wry v0.57.0
+      │           │       │       └── tauri-runtime-wry v2.12.0 (*)
+      │           │       └── wry v0.57.0 (*)
+      │           ├── cairo-rs v0.18.5
+      │           │   ├── gdk v0.18.2
+      │           │   │   ├── gdkx11 v0.18.2
+      │           │   │   │   └── wry v0.57.0 (*)
+      │           │   │   ├── gtk v0.18.2 (*)
+      │           │   │   └── webkit2gtk v2.0.2 (*)
+      │           │   ├── gtk v0.18.2 (*)
+      │           │   └── webkit2gtk v2.0.2 (*)
+      │           ├── gdk v0.18.2 (*)
+      │           ├── gdk-pixbuf v0.18.5
+      │           │   ├── gdk v0.18.2 (*)
+      │           │   └── gtk v0.18.2 (*)
+      │           ├── gdkx11 v0.18.2 (*)
+      │           ├── gio v0.18.4
+      │           │   ├── gdk v0.18.2 (*)
+      │           │   ├── gdk-pixbuf v0.18.5 (*)
+      │           │   ├── gdkx11 v0.18.2 (*)
+      │           │   ├── gtk v0.18.2 (*)
+      │           │   ├── pango v0.18.3
+      │           │   │   ├── gdk v0.18.2 (*)
+      │           │   │   └── gtk v0.18.2 (*)
+      │           │   ├── soup3 v0.5.0
+      │           │   │   ├── webkit2gtk v2.0.2 (*)
+      │           │   │   └── wry v0.57.0 (*)
+      │           │   └── webkit2gtk v2.0.2 (*)
+      │           ├── gtk v0.18.2 (*)
+      │           ├── javascriptcore-rs v1.1.2
+      │           │   ├── webkit2gtk v2.0.2 (*)
+      │           │   └── wry v0.57.0 (*)
+      │           ├── pango v0.18.3 (*)
+      │           ├── soup3 v0.5.0 (*)
+      │           └── webkit2gtk v2.0.2 (*)
+      ├── toml v0.8.2
+      │   └── system-deps v6.2.2
+      │       ├── (build) atk-sys v0.18.2
+      │       │   ├── atk v0.18.2 (*)
+      │       │   └── gtk-sys v0.18.2
+      │       │       ├── gtk v0.18.2 (*)
+      │       │       ├── rfd v0.16.0
+      │       │       │   └── tauri-plugin-dialog v2.8.0 (*)
+      │       │       ├── webkit2gtk v2.0.2 (*)
+      │       │       └── webkit2gtk-sys v2.0.2
+      │       │           ├── webkit2gtk v2.0.2 (*)
+      │       │           └── wry v0.57.0 (*)
+      │       ├── (build) cairo-sys-rs v0.18.2
+      │       │   ├── cairo-rs v0.18.5 (*)
+      │       │   ├── gdk-sys v0.18.2
+      │       │   │   ├── gdk v0.18.2 (*)
+      │       │   │   ├── gdkwayland-sys v0.18.2
+      │       │   │   │   └── tao v0.37.1 (*)
+      │       │   │   ├── gdkx11-sys v0.18.2
+      │       │   │   │   ├── gdkx11 v0.18.2 (*)
+      │       │   │   │   └── tao v0.37.1 (*)
+      │       │   │   ├── gtk-sys v0.18.2 (*)
+      │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   ├── gtk-sys v0.18.2 (*)
+      │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │       ├── (build) gdk-pixbuf-sys v0.18.0
+      │       │   ├── gdk-pixbuf v0.18.5 (*)
+      │       │   ├── gdk-sys v0.18.2 (*)
+      │       │   └── gtk-sys v0.18.2 (*)
+      │       ├── (build) gdk-sys v0.18.2 (*)
+      │       ├── (build) gdkwayland-sys v0.18.2 (*)
+      │       ├── (build) gdkx11-sys v0.18.2 (*)
+      │       ├── (build) gio-sys v0.18.1
+      │       │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │       │   ├── gdk-sys v0.18.2 (*)
+      │       │   ├── gio v0.18.4 (*)
+      │       │   ├── glib v0.18.5 (*)
+      │       │   ├── gtk-sys v0.18.2 (*)
+      │       │   ├── soup3-sys v0.5.0
+      │       │   │   ├── soup3 v0.5.0 (*)
+      │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   ├── webkit2gtk v2.0.2 (*)
+      │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │       ├── (build) glib-sys v0.18.1
+      │       │   ├── atk-sys v0.18.2 (*)
+      │       │   ├── cairo-sys-rs v0.18.2 (*)
+      │       │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │       │   ├── gdk-sys v0.18.2 (*)
+      │       │   ├── gdkwayland-sys v0.18.2 (*)
+      │       │   ├── gdkx11-sys v0.18.2 (*)
+      │       │   ├── gio-sys v0.18.1 (*)
+      │       │   ├── glib v0.18.5 (*)
+      │       │   ├── gobject-sys v0.18.0
+      │       │   │   ├── atk-sys v0.18.2 (*)
+      │       │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+      │       │   │   ├── gdk-sys v0.18.2 (*)
+      │       │   │   ├── gdkwayland-sys v0.18.2 (*)
+      │       │   │   ├── gio-sys v0.18.1 (*)
+      │       │   │   ├── glib v0.18.5 (*)
+      │       │   │   ├── gtk-sys v0.18.2 (*)
+      │       │   │   ├── javascriptcore-rs-sys v1.1.1
+      │       │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+      │       │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   │   ├── pango-sys v0.18.0
+      │       │   │   │   ├── gdk-sys v0.18.2 (*)
+      │       │   │   │   ├── gtk-sys v0.18.2 (*)
+      │       │   │   │   └── pango v0.18.3 (*)
+      │       │   │   ├── rfd v0.16.0 (*)
+      │       │   │   ├── soup3-sys v0.5.0 (*)
+      │       │   │   ├── webkit2gtk v2.0.2 (*)
+      │       │   │   └── webkit2gtk-sys v2.0.2 (*)
+      │       │   ├── gtk-sys v0.18.2 (*)
+      │       │   ├── javascriptcore-rs-sys v1.1.1 (*)
+      │       │   ├── pango-sys v0.18.0 (*)
+      │       │   ├── rfd v0.16.0 (*)
+      │       │   ├── soup3-sys v0.5.0 (*)
+      │       │   ├── webkit2gtk v2.0.2 (*)
+      │       │   └── webkit2gtk-sys v2.0.2 (*)
+      │       ├── (build) gobject-sys v0.18.0 (*)
+      │       ├── (build) gtk-sys v0.18.2 (*)
+      │       ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+      │       ├── (build) pango-sys v0.18.0 (*)
+      │       ├── (build) soup3-sys v0.5.0 (*)
+      │       └── (build) webkit2gtk-sys v2.0.2 (*)
+      ├── toml_edit v0.19.15
+      │   └── proc-macro-crate v1.3.1
+      │       └── gtk3-macros v0.18.2
+      │           └── gtk v0.18.2 (*)
+      └── toml_edit v0.20.2
+          ├── proc-macro-crate v2.0.2 (*)
+          └── toml v0.8.2 (*)
+    ├ toml_datetime v1.1.1+spec-1.1.0
+      └── toml v1.1.6+spec-1.1.0
+          ├── cargo_toml v1.0.1
+          │   └── tauri-build v2.7.0
+          │       ├── (build) firmwaresight-desktop v0.6.0
+          │       └── (build) tauri v2.12.0
+          │           ├── firmwaresight-desktop v0.6.0 (*)
+          │           ├── tauri-plugin-dialog v2.8.0
+          │           │   └── firmwaresight-desktop v0.6.0 (*)
+          │           └── tauri-plugin-fs v2.6.0
+          │               └── tauri-plugin-dialog v2.8.0 (*)
+          ├── embed-resource v3.0.11
+          │   └── tauri-winres v0.3.6
+          │       └── tauri-build v2.7.0 (*)
+          ├── firmwaresight-project v0.6.0
+          │   ├── firmwaresight-desktop v0.6.0 (*)
+          │   └── fwsight v0.6.0
+          ├── (build) tauri-plugin-fs v2.6.0 (*)
+          ├── tauri-utils v2.10.0
+          │   ├── tauri v2.12.0 (*)
+          │   ├── tauri-build v2.7.0 (*)
+          │   ├── tauri-codegen v2.7.0
+          │   │   └── tauri-macros v2.7.0
+          │   │       └── tauri v2.12.0 (*)
+          │   ├── tauri-macros v2.7.0 (*)
+          │   ├── tauri-plugin v2.7.0
+          │   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+          │   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+          │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+          │   ├── tauri-runtime v2.12.0
+          │   │   ├── tauri v2.12.0 (*)
+          │   │   └── tauri-runtime-wry v2.12.0
+          │   │       └── tauri v2.12.0 (*)
+          │   └── tauri-runtime-wry v2.12.0 (*)
+          └── tauri-winres v0.3.6 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'toml_edit'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:335:1
+    │  
+335 │ ╭ toml_edit 0.19.15 registry+https://github.com/rust-lang/crates.io-index
+336 │ │ toml_edit 0.20.2 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ toml_edit v0.19.15
+      └── proc-macro-crate v1.3.1
+          └── gtk3-macros v0.18.2
+              └── gtk v0.18.2
+                  ├── muda v0.20.0
+                  │   └── tauri v2.12.0
+                  │       ├── firmwaresight-desktop v0.6.0
+                  │       ├── tauri-plugin-dialog v2.8.0
+                  │       │   └── firmwaresight-desktop v0.6.0 (*)
+                  │       └── tauri-plugin-fs v2.6.0
+                  │           └── tauri-plugin-dialog v2.8.0 (*)
+                  ├── tao v0.37.1
+                  │   └── tauri-runtime-wry v2.12.0
+                  │       └── tauri v2.12.0 (*)
+                  ├── tauri v2.12.0 (*)
+                  ├── tauri-runtime v2.12.0
+                  │   ├── tauri v2.12.0 (*)
+                  │   └── tauri-runtime-wry v2.12.0 (*)
+                  ├── tauri-runtime-wry v2.12.0 (*)
+                  ├── webkit2gtk v2.0.2
+                  │   ├── tauri v2.12.0 (*)
+                  │   ├── tauri-runtime v2.12.0 (*)
+                  │   ├── tauri-runtime-wry v2.12.0 (*)
+                  │   └── wry v0.57.0
+                  │       └── tauri-runtime-wry v2.12.0 (*)
+                  └── wry v0.57.0 (*)
+    ├ toml_edit v0.20.2
+      ├── proc-macro-crate v2.0.2
+      │   └── glib-macros v0.18.5
+      │       └── glib v0.18.5
+      │           ├── atk v0.18.2
+      │           │   └── gtk v0.18.2
+      │           │       ├── muda v0.20.0
+      │           │       │   └── tauri v2.12.0
+      │           │       │       ├── firmwaresight-desktop v0.6.0
+      │           │       │       ├── tauri-plugin-dialog v2.8.0
+      │           │       │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │           │       │       └── tauri-plugin-fs v2.6.0
+      │           │       │           └── tauri-plugin-dialog v2.8.0 (*)
+      │           │       ├── tao v0.37.1
+      │           │       │   └── tauri-runtime-wry v2.12.0
+      │           │       │       └── tauri v2.12.0 (*)
+      │           │       ├── tauri v2.12.0 (*)
+      │           │       ├── tauri-runtime v2.12.0
+      │           │       │   ├── tauri v2.12.0 (*)
+      │           │       │   └── tauri-runtime-wry v2.12.0 (*)
+      │           │       ├── tauri-runtime-wry v2.12.0 (*)
+      │           │       ├── webkit2gtk v2.0.2
+      │           │       │   ├── tauri v2.12.0 (*)
+      │           │       │   ├── tauri-runtime v2.12.0 (*)
+      │           │       │   ├── tauri-runtime-wry v2.12.0 (*)
+      │           │       │   └── wry v0.57.0
+      │           │       │       └── tauri-runtime-wry v2.12.0 (*)
+      │           │       └── wry v0.57.0 (*)
+      │           ├── cairo-rs v0.18.5
+      │           │   ├── gdk v0.18.2
+      │           │   │   ├── gdkx11 v0.18.2
+      │           │   │   │   └── wry v0.57.0 (*)
+      │           │   │   ├── gtk v0.18.2 (*)
+      │           │   │   └── webkit2gtk v2.0.2 (*)
+      │           │   ├── gtk v0.18.2 (*)
+      │           │   └── webkit2gtk v2.0.2 (*)
+      │           ├── gdk v0.18.2 (*)
+      │           ├── gdk-pixbuf v0.18.5
+      │           │   ├── gdk v0.18.2 (*)
+      │           │   └── gtk v0.18.2 (*)
+      │           ├── gdkx11 v0.18.2 (*)
+      │           ├── gio v0.18.4
+      │           │   ├── gdk v0.18.2 (*)
+      │           │   ├── gdk-pixbuf v0.18.5 (*)
+      │           │   ├── gdkx11 v0.18.2 (*)
+      │           │   ├── gtk v0.18.2 (*)
+      │           │   ├── pango v0.18.3
+      │           │   │   ├── gdk v0.18.2 (*)
+      │           │   │   └── gtk v0.18.2 (*)
+      │           │   ├── soup3 v0.5.0
+      │           │   │   ├── webkit2gtk v2.0.2 (*)
+      │           │   │   └── wry v0.57.0 (*)
+      │           │   └── webkit2gtk v2.0.2 (*)
+      │           ├── gtk v0.18.2 (*)
+      │           ├── javascriptcore-rs v1.1.2
+      │           │   ├── webkit2gtk v2.0.2 (*)
+      │           │   └── wry v0.57.0 (*)
+      │           ├── pango v0.18.3 (*)
+      │           ├── soup3 v0.5.0 (*)
+      │           └── webkit2gtk v2.0.2 (*)
+      └── toml v0.8.2
+          └── system-deps v6.2.2
+              ├── (build) atk-sys v0.18.2
+              │   ├── atk v0.18.2 (*)
+              │   └── gtk-sys v0.18.2
+              │       ├── gtk v0.18.2 (*)
+              │       ├── rfd v0.16.0
+              │       │   └── tauri-plugin-dialog v2.8.0 (*)
+              │       ├── webkit2gtk v2.0.2 (*)
+              │       └── webkit2gtk-sys v2.0.2
+              │           ├── webkit2gtk v2.0.2 (*)
+              │           └── wry v0.57.0 (*)
+              ├── (build) cairo-sys-rs v0.18.2
+              │   ├── cairo-rs v0.18.5 (*)
+              │   ├── gdk-sys v0.18.2
+              │   │   ├── gdk v0.18.2 (*)
+              │   │   ├── gdkwayland-sys v0.18.2
+              │   │   │   └── tao v0.37.1 (*)
+              │   │   ├── gdkx11-sys v0.18.2
+              │   │   │   ├── gdkx11 v0.18.2 (*)
+              │   │   │   └── tao v0.37.1 (*)
+              │   │   ├── gtk-sys v0.18.2 (*)
+              │   │   ├── webkit2gtk v2.0.2 (*)
+              │   │   └── webkit2gtk-sys v2.0.2 (*)
+              │   ├── gtk-sys v0.18.2 (*)
+              │   └── webkit2gtk-sys v2.0.2 (*)
+              ├── (build) gdk-pixbuf-sys v0.18.0
+              │   ├── gdk-pixbuf v0.18.5 (*)
+              │   ├── gdk-sys v0.18.2 (*)
+              │   └── gtk-sys v0.18.2 (*)
+              ├── (build) gdk-sys v0.18.2 (*)
+              ├── (build) gdkwayland-sys v0.18.2 (*)
+              ├── (build) gdkx11-sys v0.18.2 (*)
+              ├── (build) gio-sys v0.18.1
+              │   ├── gdk-pixbuf-sys v0.18.0 (*)
+              │   ├── gdk-sys v0.18.2 (*)
+              │   ├── gio v0.18.4 (*)
+              │   ├── glib v0.18.5 (*)
+              │   ├── gtk-sys v0.18.2 (*)
+              │   ├── soup3-sys v0.5.0
+              │   │   ├── soup3 v0.5.0 (*)
+              │   │   └── webkit2gtk-sys v2.0.2 (*)
+              │   ├── webkit2gtk v2.0.2 (*)
+              │   └── webkit2gtk-sys v2.0.2 (*)
+              ├── (build) glib-sys v0.18.1
+              │   ├── atk-sys v0.18.2 (*)
+              │   ├── cairo-sys-rs v0.18.2 (*)
+              │   ├── gdk-pixbuf-sys v0.18.0 (*)
+              │   ├── gdk-sys v0.18.2 (*)
+              │   ├── gdkwayland-sys v0.18.2 (*)
+              │   ├── gdkx11-sys v0.18.2 (*)
+              │   ├── gio-sys v0.18.1 (*)
+              │   ├── glib v0.18.5 (*)
+              │   ├── gobject-sys v0.18.0
+              │   │   ├── atk-sys v0.18.2 (*)
+              │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+              │   │   ├── gdk-sys v0.18.2 (*)
+              │   │   ├── gdkwayland-sys v0.18.2 (*)
+              │   │   ├── gio-sys v0.18.1 (*)
+              │   │   ├── glib v0.18.5 (*)
+              │   │   ├── gtk-sys v0.18.2 (*)
+              │   │   ├── javascriptcore-rs-sys v1.1.1
+              │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+              │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+              │   │   ├── pango-sys v0.18.0
+              │   │   │   ├── gdk-sys v0.18.2 (*)
+              │   │   │   ├── gtk-sys v0.18.2 (*)
+              │   │   │   └── pango v0.18.3 (*)
+              │   │   ├── rfd v0.16.0 (*)
+              │   │   ├── soup3-sys v0.5.0 (*)
+              │   │   ├── webkit2gtk v2.0.2 (*)
+              │   │   └── webkit2gtk-sys v2.0.2 (*)
+              │   ├── gtk-sys v0.18.2 (*)
+              │   ├── javascriptcore-rs-sys v1.1.1 (*)
+              │   ├── pango-sys v0.18.0 (*)
+              │   ├── rfd v0.16.0 (*)
+              │   ├── soup3-sys v0.5.0 (*)
+              │   ├── webkit2gtk v2.0.2 (*)
+              │   └── webkit2gtk-sys v2.0.2 (*)
+              ├── (build) gobject-sys v0.18.0 (*)
+              ├── (build) gtk-sys v0.18.2 (*)
+              ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+              ├── (build) pango-sys v0.18.0 (*)
+              ├── (build) soup3-sys v0.5.0 (*)
+              └── (build) webkit2gtk-sys v2.0.2 (*)
+
+warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:386:1
+    │  
+386 │ ╭ windows-sys 0.59.0 registry+https://github.com/rust-lang/crates.io-index
+387 │ │ windows-sys 0.60.2 registry+https://github.com/rust-lang/crates.io-index
+388 │ │ windows-sys 0.61.2 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ windows-sys v0.59.0
+      ├── fs-set-times v0.20.3
+      │   └── cap-primitives v4.0.3
+      │       └── cap-std v4.0.3
+      │           └── firmwaresight-project v0.6.0
+      │               ├── firmwaresight-desktop v0.6.0
+      │               └── fwsight v0.6.0
+      ├── winreg v0.55.0
+      │   └── embed-resource v3.0.11
+      │       └── tauri-winres v0.3.6
+      │           └── tauri-build v2.7.0
+      │               ├── (build) firmwaresight-desktop v0.6.0 (*)
+      │               └── (build) tauri v2.12.0
+      │                   ├── firmwaresight-desktop v0.6.0 (*)
+      │                   ├── tauri-plugin-dialog v2.8.0
+      │                   │   └── firmwaresight-desktop v0.6.0 (*)
+      │                   └── tauri-plugin-fs v2.6.0
+      │                       └── tauri-plugin-dialog v2.8.0 (*)
+      └── winx v0.36.4
+          └── cap-primitives v4.0.3 (*)
+    ├ windows-sys v0.60.2
+      ├── io-extras v0.19.0
+      │   ├── cap-primitives v4.0.3
+      │   │   └── cap-std v4.0.3
+      │   │       └── firmwaresight-project v0.6.0
+      │   │           ├── firmwaresight-desktop v0.6.0
+      │   │           └── fwsight v0.6.0
+      │   └── cap-std v4.0.3 (*)
+      └── rfd v0.16.0
+          └── tauri-plugin-dialog v2.8.0
+              └── firmwaresight-desktop v0.6.0 (*)
+    ├ windows-sys v0.61.2
+      ├── anstyle-query v1.1.5
+      │   └── anstream v1.0.0
+      │       └── clap_builder v4.6.7
+      │           └── clap v4.6.7
+      │               └── fwsight v0.6.0
+      ├── anstyle-wincon v3.0.11
+      │   └── anstream v1.0.0 (*)
+      ├── cap-primitives v4.0.3
+      │   └── cap-std v4.0.3
+      │       └── firmwaresight-project v0.6.0
+      │           ├── firmwaresight-desktop v0.6.0
+      │           └── fwsight v0.6.0 (*)
+      ├── dbus v0.9.12
+      │   └── tao v0.37.1
+      │       └── tauri-runtime-wry v2.12.0
+      │           └── tauri v2.12.0
+      │               ├── firmwaresight-desktop v0.6.0 (*)
+      │               ├── tauri-plugin-dialog v2.8.0
+      │               │   └── firmwaresight-desktop v0.6.0 (*)
+      │               └── tauri-plugin-fs v2.6.0
+      │                   └── tauri-plugin-dialog v2.8.0 (*)
+      ├── dirs-sys v0.5.0
+      │   └── dirs v7.0.0
+      │       ├── tauri v2.12.0 (*)
+      │       ├── tauri-build v2.7.0
+      │       │   ├── (build) firmwaresight-desktop v0.6.0 (*)
+      │       │   └── (build) tauri v2.12.0 (*)
+      │       └── wry v0.57.0
+      │           └── tauri-runtime-wry v2.12.0 (*)
+      ├── errno v0.3.14
+      │   └── rustix v1.1.5
+      │       ├── cap-primitives v4.0.3 (*)
+      │       ├── cap-std v4.0.3 (*)
+      │       ├── fs-set-times v0.20.3
+      │       │   └── cap-primitives v4.0.3 (*)
+      │       └── rustix-linux-procfs v0.1.1
+      │           └── cap-primitives v4.0.3 (*)
+      ├── muda v0.20.0
+      │   └── tauri v2.12.0 (*)
+      ├── nu-ansi-term v0.50.3
+      │   └── tracing-subscriber v0.3.23
+      │       └── fwsight v0.6.0 (*)
+      ├── rustix v1.1.5 (*)
+      ├── softbuffer v0.4.8
+      │   └── tauri-runtime-wry v2.12.0 (*)
+      ├── winapi-util v0.1.11
+      │   ├── same-file v1.0.6
+      │   │   └── walkdir v2.5.0
+      │   │       ├── tauri-build v2.7.0 (*)
+      │   │       ├── tauri-codegen v2.7.0
+      │   │       │   └── tauri-macros v2.7.0
+      │   │       │       └── tauri v2.12.0 (*)
+      │   │       ├── tauri-plugin v2.7.0
+      │   │       │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+      │   │       │   └── (build) tauri-plugin-fs v2.6.0 (*)
+      │   │       └── tauri-utils v2.10.0
+      │   │           ├── tauri v2.12.0 (*)
+      │   │           ├── tauri-build v2.7.0 (*)
+      │   │           ├── tauri-codegen v2.7.0 (*)
+      │   │           ├── tauri-macros v2.7.0 (*)
+      │   │           ├── tauri-plugin v2.7.0 (*)
+      │   │           ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │   │           ├── tauri-runtime v2.12.0
+      │   │           │   ├── tauri v2.12.0 (*)
+      │   │           │   └── tauri-runtime-wry v2.12.0 (*)
+      │   │           └── tauri-runtime-wry v2.12.0 (*)
+      │   ├── termcolor v1.4.1
+      │   │   └── ts-rs-macros v12.0.1
+      │   │       └── ts-rs v12.0.1
+      │   │           └── firmwaresight-desktop v0.6.0 (*)
+      │   └── walkdir v2.5.0 (*)
+      └── window-vibrancy v0.8.1
+          └── tauri v2.12.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'windows-targets'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:389:1
+    │  
+389 │ ╭ windows-targets 0.52.6 registry+https://github.com/rust-lang/crates.io-index
+390 │ │ windows-targets 0.53.5 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ windows-targets v0.52.6
+      └── windows-sys v0.59.0
+          ├── fs-set-times v0.20.3
+          │   └── cap-primitives v4.0.3
+          │       └── cap-std v4.0.3
+          │           └── firmwaresight-project v0.6.0
+          │               ├── firmwaresight-desktop v0.6.0
+          │               └── fwsight v0.6.0
+          ├── winreg v0.55.0
+          │   └── embed-resource v3.0.11
+          │       └── tauri-winres v0.3.6
+          │           └── tauri-build v2.7.0
+          │               ├── (build) firmwaresight-desktop v0.6.0 (*)
+          │               └── (build) tauri v2.12.0
+          │                   ├── firmwaresight-desktop v0.6.0 (*)
+          │                   ├── tauri-plugin-dialog v2.8.0
+          │                   │   └── firmwaresight-desktop v0.6.0 (*)
+          │                   └── tauri-plugin-fs v2.6.0
+          │                       └── tauri-plugin-dialog v2.8.0 (*)
+          └── winx v0.36.4
+              └── cap-primitives v4.0.3 (*)
+    ├ windows-targets v0.53.5
+      └── windows-sys v0.60.2
+          ├── io-extras v0.19.0
+          │   ├── cap-primitives v4.0.3
+          │   │   └── cap-std v4.0.3
+          │   │       └── firmwaresight-project v0.6.0
+          │   │           ├── firmwaresight-desktop v0.6.0
+          │   │           └── fwsight v0.6.0
+          │   └── cap-std v4.0.3 (*)
+          └── rfd v0.16.0
+              └── tauri-plugin-dialog v2.8.0
+                  └── firmwaresight-desktop v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'windows_x86_64_gnu'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:393:1
+    │  
+393 │ ╭ windows_x86_64_gnu 0.52.6 registry+https://github.com/rust-lang/crates.io-index
+394 │ │ windows_x86_64_gnu 0.53.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰───────────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ windows_x86_64_gnu v0.52.6
+      └── windows-targets v0.52.6
+          └── windows-sys v0.59.0
+              ├── fs-set-times v0.20.3
+              │   └── cap-primitives v4.0.3
+              │       └── cap-std v4.0.3
+              │           └── firmwaresight-project v0.6.0
+              │               ├── firmwaresight-desktop v0.6.0
+              │               └── fwsight v0.6.0
+              ├── winreg v0.55.0
+              │   └── embed-resource v3.0.11
+              │       └── tauri-winres v0.3.6
+              │           └── tauri-build v2.7.0
+              │               ├── (build) firmwaresight-desktop v0.6.0 (*)
+              │               └── (build) tauri v2.12.0
+              │                   ├── firmwaresight-desktop v0.6.0 (*)
+              │                   ├── tauri-plugin-dialog v2.8.0
+              │                   │   └── firmwaresight-desktop v0.6.0 (*)
+              │                   └── tauri-plugin-fs v2.6.0
+              │                       └── tauri-plugin-dialog v2.8.0 (*)
+              └── winx v0.36.4
+                  └── cap-primitives v4.0.3 (*)
+    ├ windows_x86_64_gnu v0.53.1
+      └── windows-targets v0.53.5
+          └── windows-sys v0.60.2
+              ├── io-extras v0.19.0
+              │   ├── cap-primitives v4.0.3
+              │   │   └── cap-std v4.0.3
+              │   │       └── firmwaresight-project v0.6.0
+              │   │           ├── firmwaresight-desktop v0.6.0
+              │   │           └── fwsight v0.6.0
+              │   └── cap-std v4.0.3 (*)
+              └── rfd v0.16.0
+                  └── tauri-plugin-dialog v2.8.0
+                      └── firmwaresight-desktop v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'windows_x86_64_msvc'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:395:1
+    │  
+395 │ ╭ windows_x86_64_msvc 0.52.6 registry+https://github.com/rust-lang/crates.io-index
+396 │ │ windows_x86_64_msvc 0.53.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰────────────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ windows_x86_64_msvc v0.52.6
+      └── windows-targets v0.52.6
+          └── windows-sys v0.59.0
+              ├── fs-set-times v0.20.3
+              │   └── cap-primitives v4.0.3
+              │       └── cap-std v4.0.3
+              │           └── firmwaresight-project v0.6.0
+              │               ├── firmwaresight-desktop v0.6.0
+              │               └── fwsight v0.6.0
+              ├── winreg v0.55.0
+              │   └── embed-resource v3.0.11
+              │       └── tauri-winres v0.3.6
+              │           └── tauri-build v2.7.0
+              │               ├── (build) firmwaresight-desktop v0.6.0 (*)
+              │               └── (build) tauri v2.12.0
+              │                   ├── firmwaresight-desktop v0.6.0 (*)
+              │                   ├── tauri-plugin-dialog v2.8.0
+              │                   │   └── firmwaresight-desktop v0.6.0 (*)
+              │                   └── tauri-plugin-fs v2.6.0
+              │                       └── tauri-plugin-dialog v2.8.0 (*)
+              └── winx v0.36.4
+                  └── cap-primitives v4.0.3 (*)
+    ├ windows_x86_64_msvc v0.53.1
+      └── windows-targets v0.53.5
+          └── windows-sys v0.60.2
+              ├── io-extras v0.19.0
+              │   ├── cap-primitives v4.0.3
+              │   │   └── cap-std v4.0.3
+              │   │       └── firmwaresight-project v0.6.0
+              │   │           ├── firmwaresight-desktop v0.6.0
+              │   │           └── fwsight v0.6.0
+              │   └── cap-std v4.0.3 (*)
+              └── rfd v0.16.0
+                  └── tauri-plugin-dialog v2.8.0
+                      └── firmwaresight-desktop v0.6.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'winnow'
+    ┌─ LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight/Cargo.lock:397:1
+    │  
+397 │ ╭ winnow 0.5.40 registry+https://github.com/rust-lang/crates.io-index
+398 │ │ winnow 1.0.4 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ winnow v0.5.40
+      ├── toml_edit v0.19.15
+      │   └── proc-macro-crate v1.3.1
+      │       └── gtk3-macros v0.18.2
+      │           └── gtk v0.18.2
+      │               ├── muda v0.20.0
+      │               │   └── tauri v2.12.0
+      │               │       ├── firmwaresight-desktop v0.6.0
+      │               │       ├── tauri-plugin-dialog v2.8.0
+      │               │       │   └── firmwaresight-desktop v0.6.0 (*)
+      │               │       └── tauri-plugin-fs v2.6.0
+      │               │           └── tauri-plugin-dialog v2.8.0 (*)
+      │               ├── tao v0.37.1
+      │               │   └── tauri-runtime-wry v2.12.0
+      │               │       └── tauri v2.12.0 (*)
+      │               ├── tauri v2.12.0 (*)
+      │               ├── tauri-runtime v2.12.0
+      │               │   ├── tauri v2.12.0 (*)
+      │               │   └── tauri-runtime-wry v2.12.0 (*)
+      │               ├── tauri-runtime-wry v2.12.0 (*)
+      │               ├── webkit2gtk v2.0.2
+      │               │   ├── tauri v2.12.0 (*)
+      │               │   ├── tauri-runtime v2.12.0 (*)
+      │               │   ├── tauri-runtime-wry v2.12.0 (*)
+      │               │   └── wry v0.57.0
+      │               │       └── tauri-runtime-wry v2.12.0 (*)
+      │               └── wry v0.57.0 (*)
+      └── toml_edit v0.20.2
+          ├── proc-macro-crate v2.0.2
+          │   └── glib-macros v0.18.5
+          │       └── glib v0.18.5
+          │           ├── atk v0.18.2
+          │           │   └── gtk v0.18.2 (*)
+          │           ├── cairo-rs v0.18.5
+          │           │   ├── gdk v0.18.2
+          │           │   │   ├── gdkx11 v0.18.2
+          │           │   │   │   └── wry v0.57.0 (*)
+          │           │   │   ├── gtk v0.18.2 (*)
+          │           │   │   └── webkit2gtk v2.0.2 (*)
+          │           │   ├── gtk v0.18.2 (*)
+          │           │   └── webkit2gtk v2.0.2 (*)
+          │           ├── gdk v0.18.2 (*)
+          │           ├── gdk-pixbuf v0.18.5
+          │           │   ├── gdk v0.18.2 (*)
+          │           │   └── gtk v0.18.2 (*)
+          │           ├── gdkx11 v0.18.2 (*)
+          │           ├── gio v0.18.4
+          │           │   ├── gdk v0.18.2 (*)
+          │           │   ├── gdk-pixbuf v0.18.5 (*)
+          │           │   ├── gdkx11 v0.18.2 (*)
+          │           │   ├── gtk v0.18.2 (*)
+          │           │   ├── pango v0.18.3
+          │           │   │   ├── gdk v0.18.2 (*)
+          │           │   │   └── gtk v0.18.2 (*)
+          │           │   ├── soup3 v0.5.0
+          │           │   │   ├── webkit2gtk v2.0.2 (*)
+          │           │   │   └── wry v0.57.0 (*)
+          │           │   └── webkit2gtk v2.0.2 (*)
+          │           ├── gtk v0.18.2 (*)
+          │           ├── javascriptcore-rs v1.1.2
+          │           │   ├── webkit2gtk v2.0.2 (*)
+          │           │   └── wry v0.57.0 (*)
+          │           ├── pango v0.18.3 (*)
+          │           ├── soup3 v0.5.0 (*)
+          │           └── webkit2gtk v2.0.2 (*)
+          └── toml v0.8.2
+              └── system-deps v6.2.2
+                  ├── (build) atk-sys v0.18.2
+                  │   ├── atk v0.18.2 (*)
+                  │   └── gtk-sys v0.18.2
+                  │       ├── gtk v0.18.2 (*)
+                  │       ├── rfd v0.16.0
+                  │       │   └── tauri-plugin-dialog v2.8.0 (*)
+                  │       ├── webkit2gtk v2.0.2 (*)
+                  │       └── webkit2gtk-sys v2.0.2
+                  │           ├── webkit2gtk v2.0.2 (*)
+                  │           └── wry v0.57.0 (*)
+                  ├── (build) cairo-sys-rs v0.18.2
+                  │   ├── cairo-rs v0.18.5 (*)
+                  │   ├── gdk-sys v0.18.2
+                  │   │   ├── gdk v0.18.2 (*)
+                  │   │   ├── gdkwayland-sys v0.18.2
+                  │   │   │   └── tao v0.37.1 (*)
+                  │   │   ├── gdkx11-sys v0.18.2
+                  │   │   │   ├── gdkx11 v0.18.2 (*)
+                  │   │   │   └── tao v0.37.1 (*)
+                  │   │   ├── gtk-sys v0.18.2 (*)
+                  │   │   ├── webkit2gtk v2.0.2 (*)
+                  │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   ├── gtk-sys v0.18.2 (*)
+                  │   └── webkit2gtk-sys v2.0.2 (*)
+                  ├── (build) gdk-pixbuf-sys v0.18.0
+                  │   ├── gdk-pixbuf v0.18.5 (*)
+                  │   ├── gdk-sys v0.18.2 (*)
+                  │   └── gtk-sys v0.18.2 (*)
+                  ├── (build) gdk-sys v0.18.2 (*)
+                  ├── (build) gdkwayland-sys v0.18.2 (*)
+                  ├── (build) gdkx11-sys v0.18.2 (*)
+                  ├── (build) gio-sys v0.18.1
+                  │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                  │   ├── gdk-sys v0.18.2 (*)
+                  │   ├── gio v0.18.4 (*)
+                  │   ├── glib v0.18.5 (*)
+                  │   ├── gtk-sys v0.18.2 (*)
+                  │   ├── soup3-sys v0.5.0
+                  │   │   ├── soup3 v0.5.0 (*)
+                  │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   ├── webkit2gtk v2.0.2 (*)
+                  │   └── webkit2gtk-sys v2.0.2 (*)
+                  ├── (build) glib-sys v0.18.1
+                  │   ├── atk-sys v0.18.2 (*)
+                  │   ├── cairo-sys-rs v0.18.2 (*)
+                  │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                  │   ├── gdk-sys v0.18.2 (*)
+                  │   ├── gdkwayland-sys v0.18.2 (*)
+                  │   ├── gdkx11-sys v0.18.2 (*)
+                  │   ├── gio-sys v0.18.1 (*)
+                  │   ├── glib v0.18.5 (*)
+                  │   ├── gobject-sys v0.18.0
+                  │   │   ├── atk-sys v0.18.2 (*)
+                  │   │   ├── gdk-pixbuf-sys v0.18.0 (*)
+                  │   │   ├── gdk-sys v0.18.2 (*)
+                  │   │   ├── gdkwayland-sys v0.18.2 (*)
+                  │   │   ├── gio-sys v0.18.1 (*)
+                  │   │   ├── glib v0.18.5 (*)
+                  │   │   ├── gtk-sys v0.18.2 (*)
+                  │   │   ├── javascriptcore-rs-sys v1.1.1
+                  │   │   │   ├── javascriptcore-rs v1.1.2 (*)
+                  │   │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   │   ├── pango-sys v0.18.0
+                  │   │   │   ├── gdk-sys v0.18.2 (*)
+                  │   │   │   ├── gtk-sys v0.18.2 (*)
+                  │   │   │   └── pango v0.18.3 (*)
+                  │   │   ├── rfd v0.16.0 (*)
+                  │   │   ├── soup3-sys v0.5.0 (*)
+                  │   │   ├── webkit2gtk v2.0.2 (*)
+                  │   │   └── webkit2gtk-sys v2.0.2 (*)
+                  │   ├── gtk-sys v0.18.2 (*)
+                  │   ├── javascriptcore-rs-sys v1.1.1 (*)
+                  │   ├── pango-sys v0.18.0 (*)
+                  │   ├── rfd v0.16.0 (*)
+                  │   ├── soup3-sys v0.5.0 (*)
+                  │   ├── webkit2gtk v2.0.2 (*)
+                  │   └── webkit2gtk-sys v2.0.2 (*)
+                  ├── (build) gobject-sys v0.18.0 (*)
+                  ├── (build) gtk-sys v0.18.2 (*)
+                  ├── (build) javascriptcore-rs-sys v1.1.1 (*)
+                  ├── (build) pango-sys v0.18.0 (*)
+                  ├── (build) soup3-sys v0.5.0 (*)
+                  └── (build) webkit2gtk-sys v2.0.2 (*)
+    ├ winnow v1.0.4
+      ├── toml v1.1.6+spec-1.1.0
+      │   ├── cargo_toml v1.0.1
+      │   │   └── tauri-build v2.7.0
+      │   │       ├── (build) firmwaresight-desktop v0.6.0
+      │   │       └── (build) tauri v2.12.0
+      │   │           ├── firmwaresight-desktop v0.6.0 (*)
+      │   │           ├── tauri-plugin-dialog v2.8.0
+      │   │           │   └── firmwaresight-desktop v0.6.0 (*)
+      │   │           └── tauri-plugin-fs v2.6.0
+      │   │               └── tauri-plugin-dialog v2.8.0 (*)
+      │   ├── embed-resource v3.0.11
+      │   │   └── tauri-winres v0.3.6
+      │   │       └── tauri-build v2.7.0 (*)
+      │   ├── firmwaresight-project v0.6.0
+      │   │   ├── firmwaresight-desktop v0.6.0 (*)
+      │   │   └── fwsight v0.6.0
+      │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │   ├── tauri-utils v2.10.0
+      │   │   ├── tauri v2.12.0 (*)
+      │   │   ├── tauri-build v2.7.0 (*)
+      │   │   ├── tauri-codegen v2.7.0
+      │   │   │   └── tauri-macros v2.7.0
+      │   │   │       └── tauri v2.12.0 (*)
+      │   │   ├── tauri-macros v2.7.0 (*)
+      │   │   ├── tauri-plugin v2.7.0
+      │   │   │   ├── (build) tauri-plugin-dialog v2.8.0 (*)
+      │   │   │   └── (build) tauri-plugin-fs v2.6.0 (*)
+      │   │   ├── (build) tauri-plugin-fs v2.6.0 (*)
+      │   │   ├── tauri-runtime v2.12.0
+      │   │   │   ├── tauri v2.12.0 (*)
+      │   │   │   └── tauri-runtime-wry v2.12.0
+      │   │   │       └── tauri v2.12.0 (*)
+      │   │   └── tauri-runtime-wry v2.12.0 (*)
+      │   └── tauri-winres v0.3.6 (*)
+      └── toml_parser v1.1.3+spec-1.1.0
+          └── toml v1.1.6+spec-1.1.0 (*)
+
+bans ok

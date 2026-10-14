@@ -1,0 +1,22 @@
+    Blocking waiting for file lock on build directory
+   Compiling firmwaresight-report v0.6.0 (LOCAL_USER\.codex\worktrees\next47-engineering-review\FirmwareSight\crates\firmwaresight-report)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 36s
+     Running `target\debug\examples\visual_samples.exe LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat`
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\analyze-known\analyze-known.svg
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\analyze-known\analyze-known.png
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\analyze-known\analyze-known.html
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\privacy-cjk-long-label\privacy-cjk-long-label.svg
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\privacy-cjk-long-label\privacy-cjk-long-label.png
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\privacy-cjk-long-label\privacy-cjk-long-label.html
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\large-u64-cjk-region\large-u64-cjk-region.svg
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\large-u64-cjk-region\large-u64-cjk-region.png
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\large-u64-cjk-region\large-u64-cjk-region.html
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\compare-unknown\compare-unknown.svg
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\compare-unknown\compare-unknown.png
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\compare-unknown\compare-unknown.html
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\compare-ranked-growth\compare-ranked-growth.svg
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\compare-ranked-growth\compare-ranked-growth.png
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\compare-ranked-growth\compare-ranked-growth.html
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\release-review-block-unknown\release-review-block-unknown.svg
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\release-review-block-unknown\release-review-block-unknown.png
+LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\samples-repeat\release-review-block-unknown\release-review-block-unknown.html

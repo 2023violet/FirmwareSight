@@ -1,0 +1,52 @@
+{
+  "status": "SUPERSEDED_UNAPPROVED_REVISION2",
+  "reason": "Historical TSV original seven-column prefix/cells were not preserved: the previous TSV was built from JSON fields. Root guard rejected it before any push.",
+  "utc": "2026-10-14T16:08:23.566342+00:00",
+  "files": [
+    {
+      "file": "signed-verdict.json",
+      "bytes": 12023,
+      "sha256": "266b129aa8e2b2f77209d0fddf81a8e2305bd47d689d4b689cdf3d53d077150d"
+    },
+    {
+      "file": "02_NEXT47_CODE_REVIEW.md",
+      "bytes": 12678,
+      "sha256": "74f15ae0627298e02a8dbb61274cb21409f5707a8166eab0031fec5fa4d44ce7"
+    },
+    {
+      "file": "AC_MATRIX_106_NEXT47.json",
+      "bytes": 212069,
+      "sha256": "b1c5d7df1dee12ed648cc2a4927d218baf760e0c8f1d39974f1d8190314673dc"
+    },
+    {
+      "file": "AC_MATRIX_106_NEXT47.tsv",
+      "bytes": 139235,
+      "sha256": "756b9aa1687e12c9f787fb9214449ebcf0557b95f19403966c1788a3bacfec5a"
+    },
+    {
+      "file": "original-field-comparison-audit.json",
+      "bytes": 1138,
+      "sha256": "67cb10d550458c0874de5e6e70ae29eec209937af35548aa7bf41e307016298c"
+    },
+    {
+      "file": "artifact-correction.json",
+      "bytes": 1802,
+      "sha256": "f8a0d7d9057d9e1389037a87ea7e6d7e929ef12cc91c971c92086b70a93545bd"
+    },
+    {
+      "file": "artifact-correction.md",
+      "bytes": 1558,
+      "sha256": "22ad261464ce2a8841f1b19365e2b812973ff24eea71acc32b180d195cf75154"
+    },
+    {
+      "file": "N47_REVIEW_01_21.json",
+      "bytes": 8324,
+      "sha256": "e22e8015665e31b5e3b75ed0d9da568bec2f2ef9e47f6f0f3e3092c361978767"
+    },
+    {
+      "file": "sign-review.py",
+      "bytes": 18634,
+      "sha256": "cb029317d37713d088cd74b91f64d90b5b9fd2760596a7ca0c4ad26957cd631c"
+    }
+  ]
+}

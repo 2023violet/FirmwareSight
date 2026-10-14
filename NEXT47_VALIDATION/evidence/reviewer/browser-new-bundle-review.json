@@ -1,0 +1,261 @@
+[
+  {
+    "name": "new-detailed-release",
+    "file": "LOCAL_USER\\Downloads\\FirmwareSight_NEXT47_EVIDENCE_20261014\\reviewer\\new-detailed-release.html",
+    "requests": [],
+    "errors": [],
+    "layout": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "rows": 85,
+      "text": "Release Bundle\n\nFirmwareSight 0.6.0 · release release-e3b7d5c88b39095f23c8d057e8d257e09e40820598552fe4665e93e239d3bb23\n\n1. Release identity\nFour different identities, named separately on purpose.\nRelease id\trelease-e3b7d5c88b39095f23c8d057e8d257e09e40820598552fe4665e93e239d3bb23\nProject release version\t1.2.3 — resolved from release.expected_version\nFirmwareSight app version\t0.6.0\nSnapshot analyzed\tsnap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\nAnalysis normalization rule\tp0-normalize-1\nWorkspace HEAD observed by the Release Gate\t8bc3d25b99a5b739b42ad97d14041608212c91d1\nWorkspace tag observed by the Release Gate\tv1.2.3\nWorkspace dirty observed by the Release Gate\tfalse\nThese Git facts describe the workspace the Release Gate ran in. They are not evidence about how the shipped bytes were compiled, and no claim of that kind is made here.\nRelease visual overview\nFirmwareSight / Release\n1.2.3\nSnapshot ID: snap-4b4087e1407ceddcb1e1cfcd978e... / Gate Run ID: gate-e8c307e670d73a059eeb62145a3c...\nFLASH / nonvolatile image\n376 bytes\nexact / observed\nRAM / runtime footprint\n76 bytes\nexact / observed\nCapacity unknown for footprint budgets. Missing/partial evidence remains qualified.\ngit.clean\n- N/A / severity PASS\n`release.require_clean_git` is false, so a clean workspace is not required.\nrelease.commit_matches_ex...\n- N/A / severity PASS\nNo `release.expected_commit` is declared for this release.\nrelease.version_matches_p...\n+ PASS / severity PASS\nWorkspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared releas...\nartifacts.required\n+ PASS / severity PASS\nEvery required artifact kind is present in the snapshot (elf, map).\nartifacts.hashes\n+ PASS / severity PASS\nAll 2 snapshot artifact(s) carry a SHA-256 digest.\nmemory.flash_budget\n+ PASS / severity PASS\nNonvolatile footprint 376 B is within the 512 B budget (136 B headroom).\nmemory.ram_budget\n+ PASS / severity PASS\nRuntime RAM footprint 76 B is within the 256 B budget (180 B headroom).\nDisposition after 0 recorded acceptances: PASS. Original findings unchanged.\nPASS is not shipping permission. SHA-256 checks bytes, not publisher identity.\nOriginal Gate effective severity: PASS. Findings retain their original states.\n\nVisual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.\n\n2. Shipped artifacts\n\n2 file(s) under artifacts/. The baseline build is never shipped: it exists only to explain the comparison in section 4.\n\nThe bytes this release consists of, in the order the release fingerprint lists them.\nBundle path\tKind\tSHA-256\tBytes\nartifacts/firmware.elf\telf\t4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374\t17464\nartifacts/firmware.map\tmap\ta38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\t4664\n3. Analysis summary\nWhat was read off the build, per input file.\nFile\tFormat\tEntry point\tBuild id\nfirmware.elf\tArm 32-bit little · elf\t0x8000049\tno .note.gnu.build-id section is present\nfirmware.map\tUnknown unknown-bit unknown · map\ta linker MAP records addresses, not an entry point\ta linker MAP carries no build-id\nMemory budgets\nAbsence is printed as absence. A budget that is not a number was not measured, and is never shown as zero.\nNonvolatile / load image\t376 bytes (exact)\nRuntime RAM\t76 bytes (exact)\nAccounting rule\tadr-0021-dual-budget\nLayout source\tmap\nWeakest evidence basis\tmap-memory-configuration+elf-load\nAdmissible for a hard block\ttrue\nDevice metadata held out of both budgets\t4294 bytes\nCoverage of this build\nRows carried in the analysis document\t19 section(s), 52 symbol(s), 11 evidence record(s)\nELF support\tsupported\nSections\tavailable\nSymbols\tavailable\nDebug info\tavailable\nMAP companion\tprovided\nObject attribution\tunavailable\nGit facts\tunknown\n4. Compare summary\nTotals moved between the two builds. The full row-by-row comparison is in diff.json.\nBase (old) snapshot\tsnap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e\nTarget (new) snapshot\tsnap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\nNonvolatile / load image\t256 bytes → 376 bytes · delta +120 (exact)\nRuntime RAM\t8 bytes → 76 bytes · delta +68 (exact)\nComparability of the pair\texact\nRows that differ\tsections: 1 added, 1 removed, 16 changed, 0 unpaired · symbols: 38 added, 33 removed, 5 changed, 67 unpaired\nIdentical, so left out of the tables\t2 section(s), 9 symbol(s)\nTop growth, as Core ranked it\nTop section growth\nDelta\tRow\tBytes\tChange\n+221\t.debug_loclists\t414\tChanged\n+112\t.debug_info\t910\tChanged\n+107\t.debug_line\t421\tChanged\n+88\t.text\t212\tChanged\n+80\t.symtab\t848\tChanged\nTop symbol growth\nDelta\tRow\tBytes\tChange\n+42\tmqtt_task\t46\tChanged\n+16\tpayload_extra\t20\tChanged\n\nThe complete comparison ships as diff.json under schema urn:firmwaresight:schema:diff:1 version 1.\n\n5. Release Gate\n\n✓ PASS — the disposition that made this bundle possible. A bundle is written only for a PASS after accepted reviews; a REVIEW or a BLOCK produces no release, and an evidence gap never becomes a review.\n\nRun id\tgate-e8c307e670d73a059eeb62145a3cfd5024ca7c67dc2fc2c2689ecc0bb92f88c1\nSnapshot\tsnap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\nBaseline\tsnap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e\nPolicy digest\tf65f9c921158ee615c5efcccdacd30106b4897dab1257a83b70311ae66609bab\nProject config schema\t1\nSeverity before reviews\t✓ PASS\nSeverity after accepted reviews\t✓ PASS\nFindings by state\nCore's counts for this run, carried rather than recounted.\nState\tCount\n✕ BLOCK\t0\n▲ REVIEW\t0\n? UNKNOWN\t0\n✓ PASS\t6\n– N/A\t4\nAll findings\nIn the order a release owner reads them: what blocks, what needs a decision, what is unknown, what passed. Every finding of the run is listed, not a truncated top list.\nRule\tState\tEffective severity\tFinding\tEvidence\tNext step\nrelease.version_matches_policy\t✓ PASS\tsame as state\tWorkspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared release version.\tpolicy:version.source · policy:version.pattern · git:exact-tag=v1.2.3 · policy:release.expected_version\tnone recorded\nartifacts.required\t✓ PASS\tsame as state\tEvery required artifact kind is present in the snapshot (elf, map).\tpolicy:artifacts.required=elf,map · artifact:elf:4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374 · artifact:map:a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\tnone recorded\nartifacts.hashes\t✓ PASS\tsame as state\tAll 2 snapshot artifact(s) carry a SHA-256 digest.\tartifact:elf:4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374 · artifact:map:a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6 · policy:artifacts.hashes\tnone recorded\nmemory.flash_budget\t✓ PASS\tsame as state\tNonvolatile footprint 376 B is within the 512 B budget (136 B headroom).\tpolicy:memory.flash_budget=512 · evidence:ev-memory-nonvolatile_image_footprint_bytes\tnone recorded\nmemory.ram_budget\t✓ PASS\tsame as state\tRuntime RAM footprint 76 B is within the 256 B budget (180 B headroom).\tpolicy:memory.ram_budget=256 · evidence:ev-memory-runtime_ram_footprint_bytes\tnone recorded\nrelease.notes\t✓ PASS\tsame as state\tRelease Notes `RELEASE_NOTES.md` is present.\tpolicy:release.require_release_notes · file:RELEASE_NOTES.md · file:RELEASE_NOTES.md#sha256=1169e4af5e3daec77ab9b6967e24436c704286e2638468f9efc2ea8ca83a8414\tnone recorded\ngit.clean\t– N/A\t✓ PASS\t`release.require_clean_git` is false, so a clean workspace is not required.\tpolicy:release.require_clean_git\tnone recorded\nrelease.commit_matches_expected\t– N/A\t✓ PASS\tNo `release.expected_commit` is declared for this release.\tpolicy:release.expected_commit\tnone recorded\ndiff.growth\t– N/A\t✓ PASS\tNo `[diff]` growth threshold is configured.\tpolicy:diff.flash_growth_review_bytes · policy:diff.ram_growth_review_bytes\tnone recorded\nevidence.unknown_review\t– N/A\t✓ PASS\t`gate.unknown_evidence_review_count` is not configured.\tpolicy:gate.unknown_evidence_review_count\tnone recorded\n6. Accepted reviews\n\nNo review was accepted for this run, so the disposition in section 5 is the one Core computed with nothing set aside. An empty list is a fact, not a missing export.\n\n7. Release notes\nIncluded\tyes, as release-notes.md\nSHA-256 of the shipped copy\t1169e4af5e3daec77ab9b6967e24436c704286e2638468f9efc2ea8ca83a8414\nBytes\t51\nThe notes ship as their own file and are not reproduced inside this report. Markdown a reader wrote is never parsed, rewritten or embedded as raw HTML by the bundle, which is what keeps this document free of markup a note could carry.\n8. Bundle integrity\n\nTwo layers of SHA-256 lists cover this bundle. SHA256SUMS hashes every payload file except itself and the manifest. release-manifest.json hashes every file except itself, that list included.\n\nEvery file a digest can be named for here. This report is payload: it is written before both index files, so it cannot print their digests, or its own.\nBundle path\tSHA-256\tBytes\naccepted-reviews.json\t155d39d698a4ef3239cdbc29c93ccef651a1994f44f3ac78e01b3ed0295f4109\t170\nanalysis.json\tba20d979db4c92fd98780f8afc5186e0e51d7a8dfef8f40eb8ad6c3786bf199a\t26963\nartifacts/firmware.elf\t4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374\t17464\nartifacts/firmware.map\ta38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6\t4664\ndiff.json\t1930cdb6a098c67456297ec321910315d21aeb3ce79ef7264fcc4037e148242a\t64355\ngate-results.json\t329a8ee37ab3eb16843803fd024553df9c82e4a7f2c501647ac7e0122a198e55\t4501\nrelease-notes.md\t1169e4af5e3daec77ab9b6967e24436c704286e2638468f9efc2ea8ca83a8414\t51\nrelease-report.html\tindexed by release-manifest.json, which is written after this report\nSHA256SUMS\tindexed by release-manifest.json, which is written after this report\nrelease-manifest.json\tindexed by release-manifest.json, which is written after this report\nThe self-reference rule\nSHA256SUMS covers\tevery bundle file except itself and the manifest\nSHA256SUMS excludes\tSHA256SUMS, release-manifest.json\nrelease-manifest.json covers\tevery bundle file except itself, SHA256SUMS included\nrelease-manifest.json excludes\trelease-manifest.json\nA file cannot contain its own cryptographic hash without a fixed-point scheme, so no self-digest is faked: self_digest_written is false. no file carries its own digest; SHA256SUMS hashes the payload, release-manifest.json hashes the payload plus SHA256SUMS\nVerifying this bundle without FirmwareSight\n\nEvery file here is a plain file. Any SHA-256 tool and any text editor is enough. The check below proves that the bytes match the lists — an integrity and consistency statement about the bundle as written. It says nothing about who wrote it, and nothing in this bundle is a signature.\n\nList the directory. It must contain exactly the files release-manifest.json indexes, plus that manifest itself, and no temporary or hidden file.\nRecompute the SHA-256 of every file named in SHA256SUMS and compare it with the digest on that line. On a POSIX host one command does the whole list: sha256sum -c SHA256SUMS.\nOn Windows, Get-FileHash -Algorithm SHA256 <path> prints the same digest in upper case; lower-case it before comparing, because both lists are written in lowercase hex.\nCompare every line of SHA256SUMS with the entry of the same path in the files[] array of release-manifest.json. Digests and sizes must agree, and the manifest must additionally carry an entry for SHA256SUMS itself.\nConfirm that neither list contains a blank digest, an all-zero digest, or the digest of the file it sits in. There should be none of those, and looking for them is what makes the rule in the table above checkable rather than a claim.\nOpen analysis.json, gate-results.json and accepted-reviews.json as plain JSON. Each names the schema it is an instance of, and the manifest's extensions block states which schema majors this bundle was written against.\n9. Known capability limits of this release\n\nWhat the inputs of this build did not allow FirmwareSight to establish. A limit is stated as a limit instead of being left as an empty cell.\n\nCapability reporting, taken from the analysis document in this bundle.\nCapability\tReported\tWhat that means for this release\nObject attribution\tunavailable\tTotals are reported per section and per symbol only. No per-object-file or per-module total is claimed here, and none should be inferred from the section rows.\nGit facts\tunknown\tThis capability is reported at less than full coverage by the analysis document in this bundle.\n\nObject and module attribution\n\nthe persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build\n\nComparison warnings\n\nSYMBOL-AMBIGUOUS — 67 symbol row(s) repeat a name, kind and binding combination on one or both sides and were left unpaired; a row position is not an identity\nDeterministic export: no timestamp, no scripts, no network requests. Written by FirmwareSight 0.6.0 over the documents in this bundle.",
+      "rects": [
+        {
+          "w": 1600,
+          "h": 900
+        }
+      ],
+      "textBounds": [
+        {
+          "x": 48,
+          "y": 20.363636016845703,
+          "w": 422.3636474609375,
+          "h": 53.81818389892578,
+          "text": "FirmwareSight / Release"
+        },
+        {
+          "x": 48,
+          "y": 80,
+          "w": 61.522727966308594,
+          "h": 39.272727966308594,
+          "text": "1.2.3"
+        },
+        {
+          "x": 48,
+          "y": 122.18182373046875,
+          "w": 1332.727294921875,
+          "h": 27.636363983154297,
+          "text": "Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd978e... / Gate Run ID: gate-e8c307e670d73a059eeb62145a3c..."
+        },
+        {
+          "x": 48,
+          "y": 144,
+          "w": 350.9283142089844,
+          "h": 39.272727966308594,
+          "text": "FLASH / nonvolatile image"
+        },
+        {
+          "x": 48,
+          "y": 187.63636779785156,
+          "w": 197.93182373046875,
+          "h": 46.54545593261719,
+          "text": "376 bytes"
+        },
+        {
+          "x": 48,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 816,
+          "y": 144,
+          "w": 321.04864501953125,
+          "h": 39.272727966308594,
+          "text": "RAM / runtime footprint"
+        },
+        {
+          "x": 816,
+          "y": 187.63636779785156,
+          "w": 175.9545440673828,
+          "h": 46.54545593261719,
+          "text": "76 bytes"
+        },
+        {
+          "x": 816,
+          "y": 236.3636474609375,
+          "w": 189.4545440673828,
+          "h": 33.45454788208008,
+          "text": "exact / observed"
+        },
+        {
+          "x": 48,
+          "y": 269.81817626953125,
+          "w": 887.7244873046875,
+          "h": 32,
+          "text": "Capacity unknown for footprint budgets. Missing/partial evidence remains qualified."
+        },
+        {
+          "x": 48,
+          "y": 292.3636474609375,
+          "w": 95.88636779785156,
+          "h": 33.45454788208008,
+          "text": "git.clean"
+        },
+        {
+          "x": 480,
+          "y": 301.0909118652344,
+          "w": 231.55824279785156,
+          "h": 23.272727966308594,
+          "text": "- N/A / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 321.81817626953125,
+          "w": 750.0291137695312,
+          "h": 32,
+          "text": "`release.require_clean_git` is false, so a clean workspace is not required."
+        },
+        {
+          "x": 48,
+          "y": 356.3636474609375,
+          "w": 333.06219482421875,
+          "h": 33.45454788208008,
+          "text": "release.commit_matches_ex..."
+        },
+        {
+          "x": 480,
+          "y": 365.0909118652344,
+          "w": 231.55824279785156,
+          "h": 23.272727966308594,
+          "text": "- N/A / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 385.8182067871094,
+          "w": 604.7283325195312,
+          "h": 32,
+          "text": "No `release.expected_commit` is declared for this release."
+        },
+        {
+          "x": 48,
+          "y": 420.3636474609375,
+          "w": 318.0478820800781,
+          "h": 33.45454788208008,
+          "text": "release.version_matches_p..."
+        },
+        {
+          "x": 480,
+          "y": 429.0909118652344,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 449.8182067871094,
+          "w": 1014.4172973632812,
+          "h": 32,
+          "text": "Workspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared releas..."
+        },
+        {
+          "x": 48,
+          "y": 484.3636474609375,
+          "w": 193.09091186523438,
+          "h": 33.45454788208008,
+          "text": "artifacts.required"
+        },
+        {
+          "x": 480,
+          "y": 493.0909118652344,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 513.8181762695312,
+          "w": 673.7634887695312,
+          "h": 32,
+          "text": "Every required artifact kind is present in the snapshot (elf, map)."
+        },
+        {
+          "x": 48,
+          "y": 548.3636474609375,
+          "w": 175.10604858398438,
+          "h": 33.45454788208008,
+          "text": "artifacts.hashes"
+        },
+        {
+          "x": 480,
+          "y": 557.0909423828125,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 46.54545593261719,
+          "y": 577.8181762695312,
+          "w": 509.9250793457031,
+          "h": 32,
+          "text": "All 2 snapshot artifact(s) carry a SHA-256 digest."
+        },
+        {
+          "x": 48,
+          "y": 612.3636474609375,
+          "w": 248.0454559326172,
+          "h": 33.45454788208008,
+          "text": "memory.flash_budget"
+        },
+        {
+          "x": 480,
+          "y": 621.0909423828125,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 641.8181762695312,
+          "w": 772.9275512695312,
+          "h": 32,
+          "text": "Nonvolatile footprint 376 B is within the 512 B budget (136 B headroom)."
+        },
+        {
+          "x": 48,
+          "y": 676.3636474609375,
+          "w": 239.2954559326172,
+          "h": 33.45454788208008,
+          "text": "memory.ram_budget"
+        },
+        {
+          "x": 480,
+          "y": 685.0909423828125,
+          "w": 242.55433654785156,
+          "h": 23.272727966308594,
+          "text": "+ PASS / severity PASS"
+        },
+        {
+          "x": 48,
+          "y": 705.8181762695312,
+          "w": 785.1502075195312,
+          "h": 32,
+          "text": "Runtime RAM footprint 76 B is within the 256 B budget (180 B headroom)."
+        },
+        {
+          "x": 48,
+          "y": 732.3636474609375,
+          "w": 879.8610229492188,
+          "h": 33.45454788208008,
+          "text": "Disposition after 0 recorded acceptances: PASS. Original findings unchanged."
+        },
+        {
+          "x": 48,
+          "y": 772.3636474609375,
+          "w": 895.7001342773438,
+          "h": 33.45454788208008,
+          "text": "PASS is not shipping permission. SHA-256 checks bytes, not publisher identity."
+        },
+        {
+          "x": 48,
+          "y": 812.3636474609375,
+          "w": 833.8786010742188,
+          "h": 33.45454788208008,
+          "text": "Original Gate effective severity: PASS. Findings retain their original states."
+        }
+      ]
+    },
+    "print": "Actual headless Edge A4 browser print, not native app PDF"
+  }
+]

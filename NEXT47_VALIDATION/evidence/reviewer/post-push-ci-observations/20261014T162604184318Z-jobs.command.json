@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "gh",
+    "api",
+    "repos/2023violet/FirmwareSight/actions/runs/38595778036/attempts/1/jobs?per_page=100"
+  ],
+  "cwd": "LOCAL_USER\\.codex\\worktrees\\next47-engineering-review\\FirmwareSight",
+  "exit": 0,
+  "utc": "2026-10-14T16:26:06.259713+00:00",
+  "stdout_sha256": "932b2b6a9cc70bca61905e35474a30a8d3d3170e6e1545ebc7bc9ae7d5c25ca4"
+}
