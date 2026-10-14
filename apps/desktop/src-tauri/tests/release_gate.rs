@@ -490,7 +490,9 @@ fn gate_and_policy_dtos_redact_embedded_host_paths_without_changing_gate_identit
     assert_eq!(context.policy.project_name, "[project name hidden]");
     assert_eq!(gate.project_name.as_deref(), Some("[project name hidden]"));
     assert_eq!(
-        gate.policy.as_ref().map(|policy| policy.project_name.as_str()),
+        gate.policy
+            .as_ref()
+            .map(|policy| policy.project_name.as_str()),
         Some("[project name hidden]")
     );
     let serialized = serde_json::to_string(&gate).expect("serialize gate DTO");
