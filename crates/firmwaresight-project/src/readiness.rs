@@ -1,5 +1,6 @@
 //! Bounded, read-only project observations shared by the CLI and desktop.
 
+use std::fmt;
 use std::path::Path;
 
 use firmwaresight_core::domain::gate::GateFileStatus;
@@ -12,8 +13,10 @@ use crate::git::GitProbe;
 
 pub const MAX_READINESS_ROWS: usize = 32;
 pub const MAX_READINESS_TEXT_CHARS: usize = 160;
+pub const MAX_PROJECT_DISPLAY_CHARS: usize = 64;
+pub const HIDDEN_PROJECT_DISPLAY_NAME: &str = "[project name hidden]";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct ProjectReadiness {
     pub scope: &'static str,
     pub project_name: String,
@@ -25,6 +28,31 @@ pub struct ProjectReadiness {
     pub release_notes: Option<ReadinessNotes>,
     pub required_artifacts: Vec<DeclaredArtifact>,
     pub build_evidence_checked: bool,
+    raw_project_name: String,
+}
+
+impl fmt::Debug for ProjectReadiness {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ProjectReadiness")
+            .field("scope", &self.scope)
+            .field("project_name", &self.project_name)
+            .field("schema_version", &self.schema_version)
+            .field("policy_sha256", &self.policy_sha256)
+            .field("warnings", &self.warnings)
+            .field("unknown_key_count", &self.unknown_key_count)
+            .field("git", &self.git)
+            .field("release_notes", &self.release_notes)
+            .field("required_artifacts", &self.required_artifacts)
+            .field("build_evidence_checked", &self.build_evidence_checked)
+            .finish()
+    }
+}
+
+impl ProjectReadiness {
+    pub fn project_name_matches(&self, expected: &str) -> bool {
+        self.raw_project_name == expected
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -79,10 +107,11 @@ pub fn inspect_project_with_probe(
     }
     warnings.sort();
     warnings.truncate(MAX_READINESS_ROWS);
+    let raw_project_name = loaded.project_name().to_owned();
 
     Ok(ProjectReadiness {
         scope: "Configuration and workspace observation only; this is not a Gate result.",
-        project_name: safe_project_name(loaded.project_name()),
+        project_name: safe_project_display_name(loaded.project_name()),
         schema_version: loaded.config.schema_version,
         policy_sha256: loaded.policy_sha256,
         warnings,
@@ -112,6 +141,7 @@ pub fn inspect_project_with_probe(
             })
             .collect(),
         build_evidence_checked: false,
+        raw_project_name,
     })
 }
 
@@ -127,17 +157,26 @@ fn safe_text(value: impl AsRef<str>) -> String {
     safe.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
-fn safe_project_name(value: &str) -> String {
-    let text = safe_text(value);
-    let bytes = text.as_bytes();
-    let windows_absolute = bytes.len() >= 3
-        && bytes[0].is_ascii_alphabetic()
-        && bytes[1] == b':'
-        && matches!(bytes[2], b'\\' | b'/');
-    if Path::new(&text).is_absolute() || windows_absolute || text.starts_with("\\\\") {
-        "Unnamed project".to_owned()
+/// Convert config-controlled text into a bounded label safe for terminals and WebViews.
+///
+/// The config value remains unchanged for policy identity and persistence. A conservative
+/// allowlist avoids trying to recognize every possible path or secret embedded in prose.
+pub fn safe_project_display_name(value: &str) -> String {
+    let valid = !value.is_empty()
+        && value.chars().count() <= MAX_PROJECT_DISPLAY_CHARS
+        && !value.chars().next().is_some_and(char::is_whitespace)
+        && !value.chars().next_back().is_some_and(char::is_whitespace)
+        && value != "."
+        && value != ".."
+        && value.chars().all(|character| {
+            character.is_alphanumeric()
+                || character == ' '
+                || matches!(character, '.' | '-' | '_' | '(' | ')')
+        });
+    if valid {
+        value.to_owned()
     } else {
-        text
+        HIDDEN_PROJECT_DISPLAY_NAME.to_owned()
     }
 }
 
@@ -148,7 +187,10 @@ mod tests {
     use crate::fixtures::{self, VALID_CONFIG};
     use crate::git::GitProbe;
 
-    use super::{ReadinessNotes, inspect_project_with_probe};
+    use super::{
+        HIDDEN_PROJECT_DISPLAY_NAME, ReadinessNotes, inspect_project_with_probe,
+        safe_project_display_name,
+    };
 
     fn write_config(root: &Path, text: &str) {
         std::fs::write(root.join("firmwaresight.toml"), text).expect("write fixture config");
@@ -251,7 +293,7 @@ mod tests {
     }
 
     #[test]
-    fn absolute_project_name_is_not_projected() {
+    fn unsafe_project_names_are_not_projected() {
         let root = fixtures::temp_project("readiness-project-name-path");
         write_config(
             &root,
@@ -260,9 +302,52 @@ mod tests {
         let report =
             inspect_project_with_probe(&root, &GitProbe::with_program("missing-git-next40"))
                 .expect("valid config is inspectable");
-        assert_eq!(report.project_name, "Unnamed project");
+        assert_eq!(report.project_name, HIDDEN_PROJECT_DISPLAY_NAME);
         assert!(!format!("{report:?}").contains("private"));
         std::fs::remove_dir_all(root).expect("remove disposable fixture");
+    }
+
+    #[test]
+    fn display_name_allowlist_preserves_benign_labels_and_hides_embedded_paths() {
+        for (input, expected) in [
+            ("MotorController", "MotorController"),
+            ("Motor Control v2", "Motor Control v2"),
+            ("Firmware_2026", "Firmware_2026"),
+            ("电机控制器 V2", "电机控制器 V2"),
+            (
+                "sample at C:\\Users\\canary-private\\workspace",
+                HIDDEN_PROJECT_DISPLAY_NAME,
+            ),
+            ("prefix /home/user suffix", HIDDEN_PROJECT_DISPLAY_NAME),
+            ("\\\\server\\share", HIDDEN_PROJECT_DISPLAY_NAME),
+            ("%5CUsers%5Cprivate", HIDDEN_PROJECT_DISPLAY_NAME),
+            ("file://private", HIDDEN_PROJECT_DISPLAY_NAME),
+            ("line\nfeed", HIDDEN_PROJECT_DISPLAY_NAME),
+            ("\u{202e}hidden", HIDDEN_PROJECT_DISPLAY_NAME),
+        ] {
+            assert_eq!(
+                safe_project_display_name(input),
+                expected,
+                "input={input:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn display_name_projection_is_bounded_and_has_only_safe_output_chars() {
+        for seed in 0u32..512 {
+            let input: String = (0..(seed % 90))
+                .map(|offset| char::from_u32(0x20 + ((seed + offset * 37) % 0x500)).unwrap())
+                .collect();
+            let output = safe_project_display_name(&input);
+            assert!(output.chars().count() <= super::MAX_PROJECT_DISPLAY_CHARS);
+            assert!(
+                output == input || output == HIDDEN_PROJECT_DISPLAY_NAME,
+                "unexpected projection for seed {seed}: {output:?}"
+            );
+            assert!(!output.chars().any(char::is_control));
+            assert!(!output.contains('/') && !output.contains('\\'));
+        }
     }
 
     #[test]

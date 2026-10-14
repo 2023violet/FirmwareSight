@@ -53,7 +53,8 @@ pub use evidence::{
 pub use fingerprint::{policy_sha256, run_id};
 pub use git::{GitObservation, GitProbe};
 pub use readiness::{
-    DeclaredArtifact, ProjectReadiness, ReadinessGit, ReadinessNotes, inspect_project,
+    DeclaredArtifact, HIDDEN_PROJECT_DISPLAY_NAME, MAX_PROJECT_DISPLAY_CHARS, ProjectReadiness,
+    ReadinessGit, ReadinessNotes, inspect_project, safe_project_display_name,
 };
 
 #[cfg(test)]

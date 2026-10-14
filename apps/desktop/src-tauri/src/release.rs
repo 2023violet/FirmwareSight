@@ -40,7 +40,7 @@ use firmwaresight_project::evidence::{
 use firmwaresight_project::{
     CONFIG_FILE_NAME, FOOTPRINT_EVIDENCE_FIELDS, GateRunRequest, GitObservation, GitProbe,
     ReadinessNotes, build_context_with_attachments, inspect_project, observe_release_notes,
-    policy_sha256,
+    policy_sha256, safe_project_display_name,
 };
 use firmwaresight_storage::{
     AcceptReviewError, AcceptedReview, GateRunDraft, GateSnapshotFacts, StoredBudget,
@@ -109,6 +109,8 @@ impl Session {
         if !same_session {
             return Ok(None);
         }
+        let matches_loaded_policy = report.policy_sha256 == loaded.policy_sha256
+            && report.project_name_matches(loaded.project_name());
         let (release_notes_status, release_notes_sha256, release_notes_reason) =
             match report.release_notes {
                 None => ("not-configured", None, None),
@@ -116,8 +118,6 @@ impl Session {
                 Some(ReadinessNotes::Missing) => ("missing", None, None),
                 Some(ReadinessNotes::Unreadable { reason }) => ("unreadable", None, Some(reason)),
             };
-        let matches_loaded_policy = report.policy_sha256 == loaded.policy_sha256
-            && report.project_name == loaded.project_name();
         Ok(Some(ProjectReadinessDto {
             scope: "Configuration and workspace observation only; this is not a Gate result."
                 .to_owned(),
@@ -573,7 +573,7 @@ fn gate_run_dto(
         run_id: run.run_id.clone(),
         snapshot_id: snapshot_id.to_owned(),
         baseline_snapshot_id,
-        project_name: label.project_name.clone(),
+        project_name: label.project_name.as_deref().map(safe_project_display_name),
         policy_source: label.source.clone(),
         policy_sha256: run.policy_sha256.clone(),
         created_at: run.created_at.clone(),
@@ -1040,7 +1040,7 @@ fn kind_word(kind: ArtifactKind) -> &'static str {
 /// The loaded project, reduced to the facts a UI may hold. The config path appears here as a *name*.
 fn project_dto(loaded: &LoadedProject) -> ProjectContextDto {
     ProjectContextDto {
-        project_name: loaded.project_name().to_owned(),
+        project_name: safe_project_display_name(loaded.project_name()),
         config_file_name: loaded
             .path
             .file_name()
@@ -1056,7 +1056,7 @@ fn project_dto(loaded: &LoadedProject) -> ProjectContextDto {
 
 fn policy_dto(policy: &GatePolicy, project_name: &str) -> ProjectPolicyDto {
     ProjectPolicyDto {
-        project_name: project_name.to_owned(),
+        project_name: safe_project_display_name(project_name),
         required_artifact_kinds: Some(policy.required_artifact_kinds.clone()),
         flash_budget: policy.flash_budget,
         ram_budget: policy.ram_budget,

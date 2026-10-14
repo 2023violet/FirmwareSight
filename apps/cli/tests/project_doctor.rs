@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use firmwaresight_project::verify_bundle;
+use firmwaresight_project::{HIDDEN_PROJECT_DISPLAY_NAME, verify_bundle};
 
 const CONFIG: &str = r#"schema_version = 1
 
@@ -126,6 +126,26 @@ fn doctor_config_refusal_uses_exit_two_without_echoing_path_or_config_contents()
     assert!(stderr.contains("ERR-CONFIG"));
     assert!(!stderr.contains(dir.to_str().expect("path")));
     assert!(!stderr.contains("sentinel-secret"));
+    std::fs::remove_dir_all(dir).expect("remove isolated fixture");
+}
+
+#[test]
+fn doctor_hides_embedded_host_paths_in_project_names_but_keeps_valid_observation() {
+    let dir = project("embedded-name");
+    let config = CONFIG.replace(
+        "motor-controller",
+        "sample at C:\\\\Users\\\\canary-private\\\\workspace",
+    );
+    std::fs::write(dir.join("firmwaresight.toml"), config).expect("write config");
+    let output = run(&["project", "doctor", dir.to_str().expect("path is UTF-8")]);
+    let stdout = String::from_utf8(output.stdout).expect("doctor output is UTF-8");
+    let stderr = String::from_utf8(output.stderr).expect("doctor diagnostics are UTF-8");
+
+    assert_eq!(output.status.code(), Some(0), "{stderr}");
+    assert!(stdout.contains(HIDDEN_PROJECT_DISPLAY_NAME));
+    assert!(!stdout.contains("sample at C:"));
+    assert!(!stdout.contains("canary-private"));
+    assert!(!stderr.contains("canary-private"));
     std::fs::remove_dir_all(dir).expect("remove isolated fixture");
 }
 

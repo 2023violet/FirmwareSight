@@ -91,3 +91,34 @@ fn readiness_is_typed_path_free_and_keeps_loaded_gate_policy_unchanged() {
     assert!(error.contains("ERR-CONFIG-7003"));
     assert!(!error.contains(&world.0.to_string_lossy().to_string()));
 }
+
+#[test]
+fn context_and_policy_dtos_redact_untrusted_project_names_before_ipc() {
+    let world = TempWorld::new("hidden-project-name");
+    let project = world.0.join("project");
+    std::fs::create_dir(&project).expect("create project");
+    let config_path = project.join("firmwaresight.toml");
+    let config = CONFIG.replace(
+        "bench controller",
+        "sample at C:\\\\Users\\\\canary-private\\\\workspace",
+    );
+    std::fs::write(&config_path, config).expect("write project config");
+    std::fs::write(project.join("RELEASE_NOTES.md"), "notes\n").expect("write notes");
+    let session = session(&world);
+    let context = session
+        .load_project_from(Some(config_path), "op-load-hidden")
+        .expect("load project")
+        .expect("context");
+
+    assert_eq!(context.project_name, "[project name hidden]");
+    assert_eq!(context.policy.project_name, "[project name hidden]");
+    let serialized = serde_json::to_string(&context).expect("serialize context");
+    assert!(!serialized.contains("canary-private"));
+
+    let readiness = session
+        .inspect_project_readiness("op-readiness-hidden")
+        .expect("inspect")
+        .expect("readiness");
+    assert_eq!(readiness.project_name, "[project name hidden]");
+    assert!(readiness.matches_loaded_policy);
+}

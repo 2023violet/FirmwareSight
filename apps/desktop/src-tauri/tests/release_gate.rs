@@ -177,6 +177,11 @@ impl Config {
         self
     }
 
+    fn named(mut self, name: &'static str) -> Self {
+        self.name = name;
+        self
+    }
+
     fn with_unknown_release_key(mut self, line: &'static str) -> Self {
         self.extra_release_keys.push(line);
         self
@@ -470,6 +475,27 @@ fn a_gate_run_answers_every_rule_and_names_the_policy_it_used() {
         + gate.counts.not_applicable;
     assert_eq!(counted, gate.findings.len());
     assert_eq!(context.policy_sha256, gate.policy_sha256);
+}
+
+#[test]
+fn gate_and_policy_dtos_redact_embedded_host_paths_without_changing_gate_identity() {
+    let config = Config::permissive().named("sample at C:\\\\Users\\\\canary-private\\\\workspace");
+    let project = TempProject::new("hidden-gate-name", &config);
+    let (_db, session) = session("hidden-gate-name");
+    let context = load(&session, &project);
+    let target = store(&session, "target");
+    let gate = run(&session, &target, None);
+
+    assert_eq!(context.project_name, "[project name hidden]");
+    assert_eq!(context.policy.project_name, "[project name hidden]");
+    assert_eq!(gate.project_name.as_deref(), Some("[project name hidden]"));
+    assert_eq!(
+        gate.policy.as_ref().map(|policy| policy.project_name.as_str()),
+        Some("[project name hidden]")
+    );
+    let serialized = serde_json::to_string(&gate).expect("serialize gate DTO");
+    assert!(!serialized.contains("canary-private"));
+    assert_eq!(gate.policy_sha256.len(), 64);
 }
 
 #[test]
