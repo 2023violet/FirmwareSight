@@ -17,7 +17,8 @@ use std::path::{Path, PathBuf};
 use firmwaresight_artifact::pipeline::{self, AnalysisRequest};
 use firmwaresight_core::domain::build_snapshot::BuildSnapshot;
 use firmwaresight_core::domain::evidence::EvidenceClass;
-use firmwaresight_core::domain::identity::Fact;
+use firmwaresight_core::domain::identity::{Fact, Sha256};
+use firmwaresight_core::domain::symbol::{Symbol, SymbolBinding, SymbolKind, SymbolSectionRef};
 use firmwaresight_storage::{
     DEFAULT_QUERY_LIMIT, Database, EvidenceQuery, EvidenceSort, MAX_QUERY_LIMIT, SectionQuery,
     SectionSort, SortDir, StorageError, SymbolQuery, SymbolSort,
@@ -265,6 +266,103 @@ fn a_limit_above_the_hard_maximum_is_clamped_in_rust_and_cannot_carry_the_whole_
         "the table is bigger than one page and stays that big"
     );
     assert_eq!(page.next_offset, Some(MAX_QUERY_LIMIT));
+}
+
+#[test]
+#[ignore = "opt-in 100k SQLite + Compare workload for NEXT-43 performance evidence"]
+fn one_hundred_thousand_symbols_page_hydrate_and_compare() {
+    use firmwaresight_core::domain::build_snapshot::SnapshotBuilder;
+    use firmwaresight_core::domain::diff::compare;
+
+    let db_file = TempDb::new("100k");
+    let mut db = Database::open(db_file.path()).expect("open synthetic store");
+    let template = dual_region_snapshot();
+
+    let make_snapshot = |name: &str, hex: char, target: bool| {
+        let mut artifacts = template.artifacts().to_vec();
+        let digest = Sha256::parse(&hex.to_string().repeat(64)).expect("synthetic digest");
+        artifacts[0].id = format!("art-{}", digest.hex());
+        artifacts[0].sha256 = digest;
+        let symbols = (0..100_000_i64)
+            .map(|ordinal| {
+                let renamed = target && ordinal == 99_999;
+                Symbol {
+                    name: Fact::known(format!(
+                        "synthetic_{:06}",
+                        if renamed { 100_000 } else { ordinal }
+                    )),
+                    address: Fact::known(0x0800_0000 + ordinal as u64 * 4),
+                    size: Fact::known(if target && ordinal == 12_345 { 24 } else { 16 }),
+                    kind: SymbolKind::Function,
+                    binding: SymbolBinding::Global,
+                    section: SymbolSectionRef::Index(1),
+                }
+            })
+            .collect();
+        SnapshotBuilder::new(template.created_by_fwsight_version())
+            .project_id("synthetic-100k")
+            .artifact(artifacts[0].clone())
+            .artifact(artifacts[1].clone())
+            .memory(template.memory().expect("fixture footprint").clone())
+            .sections(template.sections().to_vec())
+            .symbols(symbols)
+            .evidence(template.evidence().to_vec())
+            .capabilities(template.capabilities().clone())
+            .seal()
+            .unwrap_or_else(|error| panic!("build {name}: {error:?}"))
+    };
+
+    let build_started = std::time::Instant::now();
+    let base = make_snapshot("base", 'a', false);
+    let target = make_snapshot("target", 'b', true);
+    let build_ms = build_started.elapsed().as_millis();
+    assert_eq!(base.symbol_count(), 100_000);
+    assert_eq!(target.symbol_count(), 100_000);
+
+    let import_started = std::time::Instant::now();
+    db.import_snapshot("synthetic-100k", "Synthetic 100k", &base)
+        .expect("import base snapshot");
+    db.import_snapshot("synthetic-100k", "Synthetic 100k", &target)
+        .expect("import target snapshot");
+    let import_ms = import_started.elapsed().as_millis();
+
+    let query_started = std::time::Instant::now();
+    let filtered = symbol_page(&db, &target, |query| {
+        query.name_contains = Some("synthetic_09".to_owned());
+        query.sort_by = SymbolSort::Name;
+        query.direction = SortDir::Asc;
+        query.limit = 100_000;
+    });
+    let query_ms = query_started.elapsed().as_millis();
+    assert_eq!(filtered.total, 9_999);
+    assert_eq!(filtered.rows.len(), MAX_QUERY_LIMIT as usize);
+    assert_eq!(
+        filtered.rows[0].name.value().map(String::as_str),
+        Some("synthetic_090000")
+    );
+    assert_eq!(filtered.next_offset, Some(MAX_QUERY_LIMIT));
+
+    let hydrate_started = std::time::Instant::now();
+    let base_input = db
+        .load_diff_input(base.id().as_str())
+        .expect("hydrate base");
+    let target_input = db
+        .load_diff_input(target.id().as_str())
+        .expect("hydrate target");
+    let hydrate_ms = hydrate_started.elapsed().as_millis();
+    assert_eq!(base_input.symbols.len(), 100_000);
+    assert_eq!(target_input.symbols.len(), 100_000);
+
+    let compare_started = std::time::Instant::now();
+    let diff = compare(&base_input, &target_input).expect("compare persisted facts");
+    let compare_ms = compare_started.elapsed().as_millis();
+    assert_eq!(diff.counts.symbols_changed, 1);
+    assert_eq!(diff.counts.symbols_added, 1);
+    assert_eq!(diff.counts.symbols_removed, 1);
+    println!(
+        "symbols_per_snapshot=100000 build_ms={build_ms} import_ms={import_ms} filtered_query_ms={query_ms} hydrate_both_ms={hydrate_ms} core_compare_ms={compare_ms} page_limit={} total_filtered={}",
+        filtered.limit, filtered.total
+    );
 }
 
 #[test]

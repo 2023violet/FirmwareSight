@@ -6,7 +6,7 @@
 //! allocation rather than after.
 
 use std::fs::File;
-use std::io::{Read, Seek, Write};
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use sha2::{Digest, Sha256 as Sha2Digest};
@@ -95,7 +95,7 @@ pub struct GuardedInput {
 }
 
 impl GuardedInput {
-    /// stat -> guard -> streaming SHA-256 -> detect -> immutable read.
+    /// stat -> guard -> bounded read and SHA-256 -> detect.
     pub fn load(path: &Path, guard: GuardConfig) -> Result<Self, ArtifactError> {
         let metadata = std::fs::metadata(path).map_err(|err| match err.kind() {
             std::io::ErrorKind::NotFound => crate::error::not_found(path),
@@ -118,50 +118,38 @@ impl GuardedInput {
             });
         }
 
-        let hash_start = std::time::Instant::now();
         let mut file = File::open(path).map_err(|err| crate::error::unreadable(path, err))?;
-        let mut hasher = Sha2Digest::new();
-        let mut chunk = vec![0_u8; HASH_CHUNK_BYTES];
-        loop {
-            let read = file
-                .read(&mut chunk)
-                .map_err(|err| crate::error::unreadable(path, err))?;
-            if read == 0 {
-                break;
-            }
-            hasher.update(&chunk[..read]);
-        }
-        let hash_ms = hash_start.elapsed().as_millis();
-
-        // Second pass from the same open handle: the file is small enough by now, and reading
-        // once for hashing and once for content keeps the hash streaming rather than forcing a
-        // full read up front.
-        let read_start = std::time::Instant::now();
-        let mut bytes = Vec::with_capacity(
-            usize::try_from(byte_size)
-                .unwrap_or(usize::try_from(guard.max_full_buffer_bytes).unwrap_or(usize::MAX)),
-        );
-        file.rewind()
-            .map_err(|err| crate::error::unreadable(path, err))?;
-        file.read_to_end(&mut bytes)
-            .map_err(|err| crate::error::unreadable(path, err))?;
-        let read_ms = read_start.elapsed().as_millis();
-
-        if bytes.len() as u64 != byte_size {
-            return Err(ArtifactError::MalformedArtifact {
+        // Hash the exact bytes handed to the parser. The initial stat bounds the buffer, and a
+        // same-handle metadata check after the read detects size changes without reading past it.
+        let (bytes, digest, hash_ms, read_ms) = read_after_stat(
+            &mut file,
+            byte_size,
+            guard.max_full_buffer_bytes,
+        )
+        .map_err(|error| match error {
+            ReadAfterStatError::Io(err) => crate::error::unreadable(path, err),
+            ReadAfterStatError::Changed { expected, actual } => ArtifactError::MalformedArtifact {
                 detail: format!(
-                    "file changed while being read: stat said {byte_size} bytes, read {}",
-                    bytes.len()
+                    "file changed while being read: stat said {expected} bytes, read {actual}"
                 ),
-            });
-        }
+            },
+        })?;
+        let final_size = file
+            .metadata()
+            .map_err(|err| crate::error::unreadable(path, err))?
+            .len();
+        verify_size(byte_size, final_size).map_err(|_| ArtifactError::MalformedArtifact {
+            detail: format!(
+                "file changed while being read: stat said {byte_size} bytes, now {final_size}"
+            ),
+        })?;
 
         let format = detect_format(&bytes);
 
         Ok(Self {
             path: path.to_path_buf(),
             byte_size,
-            sha256: Sha256::parse(&lowercase_hex(&hasher.finalize())).map_err(|_| {
+            sha256: Sha256::parse(&lowercase_hex(&digest)).map_err(|_| {
                 ArtifactError::InternalBug {
                     detail: "digest produced non-hex output".to_owned(),
                 }
@@ -171,6 +159,56 @@ impl GuardedInput {
             hash_ms,
             read_ms,
         })
+    }
+}
+
+#[derive(Debug)]
+enum ReadAfterStatError {
+    Io(std::io::Error),
+    Changed { expected: u64, actual: u64 },
+}
+
+fn read_after_stat<R: Read>(
+    reader: &mut R,
+    expected_size: u64,
+    limit_bytes: u64,
+) -> Result<(Vec<u8>, [u8; 32], u128, u128), ReadAfterStatError> {
+    let cap = expected_size.min(limit_bytes);
+    let mut limited = reader.take(cap);
+    let mut bytes = Vec::with_capacity(usize::try_from(cap).unwrap_or(usize::MAX));
+    let mut chunk = [0_u8; HASH_CHUNK_BYTES];
+    let mut hasher = Sha2Digest::new();
+    let mut hash_time = std::time::Duration::ZERO;
+    let mut read_time = std::time::Duration::ZERO;
+
+    loop {
+        let started = std::time::Instant::now();
+        let read = limited.read(&mut chunk).map_err(ReadAfterStatError::Io)?;
+        read_time += started.elapsed();
+        if read == 0 {
+            break;
+        }
+        let started = std::time::Instant::now();
+        hasher.update(&chunk[..read]);
+        bytes.extend_from_slice(&chunk[..read]);
+        hash_time += started.elapsed();
+    }
+
+    verify_size(expected_size, bytes.len() as u64)?;
+
+    Ok((
+        bytes,
+        hasher.finalize().into(),
+        hash_time.as_millis(),
+        read_time.as_millis(),
+    ))
+}
+
+fn verify_size(expected: u64, actual: u64) -> Result<(), ReadAfterStatError> {
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(ReadAfterStatError::Changed { expected, actual })
     }
 }
 
@@ -228,7 +266,75 @@ pub fn write_sparse_workload(path: &Path, size_bytes: u64, prefix: &[u8]) -> std
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Cursor;
 
+    #[test]
+    fn bounded_read_rejects_growth_after_stat_without_reading_past_limit() {
+        let mut source = CountingReader::new(b"0123456789");
+
+        let result = read_after_stat(&mut source, 2, 4);
+
+        let (bytes, _, _, _) = result.unwrap();
+        assert_eq!(bytes, b"01");
+        assert_eq!(source.bytes_read, 2, "the stat size is a hard read limit");
+        assert!(matches!(
+            verify_size(2, 10),
+            Err(ReadAfterStatError::Changed {
+                expected: 2,
+                actual: 10
+            })
+        ));
+    }
+
+    #[test]
+    fn bounded_read_rejects_short_read() {
+        let mut source = Cursor::new(b"abc".as_slice());
+
+        let result = read_after_stat(&mut source, 4, 8);
+
+        assert!(matches!(
+            result,
+            Err(ReadAfterStatError::Changed {
+                expected: 4,
+                actual: 3
+            })
+        ));
+    }
+
+    #[test]
+    fn digest_is_computed_from_the_same_bytes_returned_for_parsing() {
+        let observed = b"changed after stat";
+        let mut source = Cursor::new(observed.as_slice());
+
+        let (bytes, digest, _, _) =
+            read_after_stat(&mut source, observed.len() as u64, 64).unwrap();
+
+        assert_eq!(bytes, observed);
+        assert_eq!(digest.as_slice(), Sha2Digest::digest(observed).as_slice());
+    }
+
+    struct CountingReader<'a> {
+        bytes: &'a [u8],
+        bytes_read: usize,
+    }
+
+    impl<'a> CountingReader<'a> {
+        fn new(bytes: &'a [u8]) -> Self {
+            Self {
+                bytes,
+                bytes_read: 0,
+            }
+        }
+    }
+
+    impl Read for CountingReader<'_> {
+        fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
+            let count = buffer.len().min(self.bytes.len() - self.bytes_read);
+            buffer[..count].copy_from_slice(&self.bytes[self.bytes_read..self.bytes_read + count]);
+            self.bytes_read += count;
+            Ok(count)
+        }
+    }
     #[test]
     fn lowercase_hex_is_stable_and_lower_case() {
         assert_eq!(lowercase_hex(&[0x00, 0x0f, 0xff]), "000fff");

@@ -1055,6 +1055,61 @@ fn a_huge_symbol_table_is_diffed_without_pairwise_work_and_stays_correct() {
 }
 
 #[test]
+#[ignore = "opt-in 100k comparison workload for NEXT-43 performance evidence"]
+fn one_hundred_thousand_symbols_diff_deterministically() {
+    let side = |id: &str, target: bool| {
+        let symbols = (0..100_000_i64)
+            .map(|ordinal| {
+                let renamed = target && ordinal == 99_999;
+                symbol(
+                    ordinal,
+                    known(&format!(
+                        "task_{:06}",
+                        if renamed { 100_000 } else { ordinal }
+                    )),
+                    Some(0x0800_0000 + ordinal as u64 * 4),
+                    size(if target && ordinal == 12_345 { 24 } else { 16 }),
+                    "Index(1)",
+                )
+            })
+            .collect();
+        snapshot(
+            id,
+            budget(10_000_000),
+            budget(2_000_000),
+            map_backed(),
+            vec![],
+            symbols,
+        )
+    };
+    let base = side("snap-100k-base", false);
+    let target = side("snap-100k-target", true);
+    assert_eq!(base.symbols.len(), 100_000);
+    assert_eq!(target.symbols.len(), 100_000);
+
+    let started = std::time::Instant::now();
+    let first = compare(&base, &target).expect("different snapshots compare");
+    let first_elapsed = started.elapsed();
+    let started = std::time::Instant::now();
+    let second = compare(&base, &target).expect("same inputs compare again");
+    let second_elapsed = started.elapsed();
+
+    assert_eq!(first, second, "the same 100k inputs have a stable diff");
+    println!(
+        "symbols_per_side=100000 changed={} added={} removed={} first_diff_ms={} repeat_diff_ms={}",
+        first.counts.symbols_changed,
+        first.counts.symbols_added,
+        first.counts.symbols_removed,
+        first_elapsed.as_millis(),
+        second_elapsed.as_millis()
+    );
+    assert_eq!(first.counts.symbols_changed, 1);
+    assert_eq!(first.counts.symbols_added, 1);
+    assert_eq!(first.counts.symbols_removed, 1);
+    assert_eq!(first.unchanged.symbols, 99_998);
+}
+
+#[test]
 fn a_repeated_symbol_name_across_both_sides_still_completes_and_marks_every_row_ambiguous() {
     let repeated = |id: &str| -> DiffSnapshotInput {
         let symbols: Vec<DiffSymbol> = (0..2_000_i64)
