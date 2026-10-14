@@ -38,6 +38,7 @@ use firmwaresight_project::{
 };
 use firmwaresight_report::{
     AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, render,
+    visual::{self, VisualFormat, VisualReport},
 };
 
 /// Exit codes frozen by 04_TECH/07_CLI_SPEC.md. `1` is intentionally not defined.
@@ -177,6 +178,18 @@ struct AnalyzeArgs {
     #[arg(long)]
     json: bool,
 
+    /// Write a standalone visual SVG summary without replacing an existing file.
+    #[arg(long, value_name = "FILE")]
+    svg: Option<PathBuf>,
+
+    /// Write a standalone visual PNG summary without replacing an existing file.
+    #[arg(long, value_name = "FILE")]
+    png: Option<PathBuf>,
+
+    /// Write a self-contained print-ready HTML report without replacing an existing file.
+    #[arg(long, value_name = "FILE")]
+    report_html: Option<PathBuf>,
+
     /// Full-buffer size ceiling in bytes. Defaults to the baseline 512 MiB.
     #[arg(long, value_name = "BYTES")]
     max_bytes: Option<u64>,
@@ -205,6 +218,18 @@ struct DiffArgs {
     /// Write the deterministic self-contained HTML report to this file.
     #[arg(long, value_name = "FILE")]
     html: Option<PathBuf>,
+
+    /// Write a standalone visual SVG summary without replacing an existing file.
+    #[arg(long, value_name = "FILE")]
+    svg: Option<PathBuf>,
+
+    /// Write a standalone visual PNG summary without replacing an existing file.
+    #[arg(long, value_name = "FILE")]
+    png: Option<PathBuf>,
+
+    /// Write a self-contained print-ready HTML report without replacing an existing file.
+    #[arg(long, value_name = "FILE")]
+    report_html: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
@@ -387,6 +412,20 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
         Ok(analysis) => {
             let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, &file_name(&args.path));
 
+            if args.svg.is_some() || args.png.is_some() || args.report_html.is_some() {
+                let report = VisualReport::analyze(&dto, &analysis.memory.region_usage);
+                if let Some(code) = write_visual_exports(
+                    &report,
+                    &args.svg,
+                    &args.png,
+                    &args.report_html,
+                    args.json,
+                    operation_id,
+                ) {
+                    return ExitCode::from(code);
+                }
+            }
+
             if args.json {
                 // stdout carries nothing but the JSON document.
                 print!("{}", render::render_json(&dto));
@@ -445,6 +484,20 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
         Err(err) => return report_diff_error(&err, args.json, operation_id),
     };
     let dto = DiffResultDto::from_diff(&result);
+
+    if args.svg.is_some() || args.png.is_some() || args.report_html.is_some() {
+        let report = VisualReport::compare(&dto, &result);
+        if let Some(code) = write_visual_exports(
+            &report,
+            &args.svg,
+            &args.png,
+            &args.report_html,
+            args.json,
+            operation_id,
+        ) {
+            return ExitCode::from(code);
+        }
+    }
 
     // The export is written before anything is printed: a run that cannot produce the file the user
     // asked for must not already have announced success on stdout.
@@ -963,6 +1016,52 @@ fn report_export_error(
     ExitCode::from(EXIT_EXPORT)
 }
 
+fn write_visual_exports(
+    report: &VisualReport,
+    svg: &Option<PathBuf>,
+    png: &Option<PathBuf>,
+    html: &Option<PathBuf>,
+    json: bool,
+    operation_id: &str,
+) -> Option<u8> {
+    for (path, format) in [
+        (svg.as_ref(), VisualFormat::Svg),
+        (png.as_ref(), VisualFormat::Png),
+        (html.as_ref(), VisualFormat::Html),
+    ] {
+        let Some(path) = path else { continue };
+        let result =
+            visual::render(report, format).and_then(|bytes| visual::write_new(path, &bytes));
+        if let Err(error) = result {
+            let envelope = render::ErrorEnvelope::new(
+                render::EXPORT_FAILED_CODE,
+                format!("could not create the visual report: {error}"),
+                operation_id,
+            )
+            .with_remediation(
+                "Check that the target path does not already exist and is writable, then run the command again.",
+            );
+            if json {
+                println!("{}", envelope.to_json());
+            }
+            eprintln!(
+                "error: could not write {} (code {}, operation {operation_id})",
+                path.display(),
+                envelope.code
+            );
+            tracing::error!(operation_id, "visual export failed");
+            return Some(EXIT_EXPORT);
+        }
+        let label = match format {
+            VisualFormat::Svg => "SVG",
+            VisualFormat::Png => "PNG",
+            VisualFormat::Html => "print HTML",
+        };
+        eprintln!("diagnostics: visual {label} export written");
+    }
+    None
+}
+
 fn map_state(analysis: &pipeline::Analysis) -> &'static str {
     match (&analysis.map_input, &analysis.map_evidence) {
         (Some(_), Some(_)) => "parsed with the gnu_ld adapter",
@@ -1319,6 +1418,58 @@ mod tests {
         assert_eq!(diff.new_map, Some(PathBuf::from("b.map")));
         assert!(diff.json);
         assert_eq!(diff.html, Some(PathBuf::from("out.html")));
+    }
+
+    #[test]
+    fn visual_export_options_parse_for_analyze_and_diff() {
+        let analyze_args: Vec<OsString> = [
+            "fwsight",
+            "analyze",
+            "firmware.elf",
+            "--svg",
+            "out/analyze.svg",
+            "--png",
+            "out/analyze.png",
+            "--report-html",
+            "out/analyze.html",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        let Commands::Analyze(analyze) = parse_from(analyze_args)
+            .expect("analyze visual export options parse")
+            .command
+        else {
+            panic!("analyze must route to AnalyzeArgs");
+        };
+        assert_eq!(analyze.svg, Some(PathBuf::from("out/analyze.svg")));
+        assert_eq!(analyze.png, Some(PathBuf::from("out/analyze.png")));
+        assert_eq!(analyze.report_html, Some(PathBuf::from("out/analyze.html")));
+
+        let diff_args: Vec<OsString> = [
+            "fwsight",
+            "diff",
+            "old.elf",
+            "new.elf",
+            "--svg",
+            "out/diff.svg",
+            "--png",
+            "out/diff.png",
+            "--report-html",
+            "out/diff.html",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        let Commands::Diff(diff) = parse_from(diff_args)
+            .expect("diff visual export options parse")
+            .command
+        else {
+            panic!("diff must route to DiffArgs");
+        };
+        assert_eq!(diff.svg, Some(PathBuf::from("out/diff.svg")));
+        assert_eq!(diff.png, Some(PathBuf::from("out/diff.png")));
+        assert_eq!(diff.report_html, Some(PathBuf::from("out/diff.html")));
     }
 
     #[test]

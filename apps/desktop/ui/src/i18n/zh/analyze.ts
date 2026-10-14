@@ -1,6 +1,20 @@
 import type { CatalogFor } from '../types';
 
 export const analyze: CatalogFor<'analyze'> = {
+  'export.region': '可视化报告导出',
+  'export.hint': 'PNG 是 1600 × 900 的分享图片。SVG 是同一场景的可编辑矢量标记。HTML 是可打印概览：打开后在浏览器中使用“打印 → 另存为 PDF”。FirmwareSight 不生成 PDF 文件，导出的报告也不包含主机路径或脚本。',
+  'export.heading': '分享此分析',
+  'export.png': '导出 PNG',
+  'export.svg': '导出 SVG',
+  'export.html': '导出可打印 HTML',
+  'export.waiting': '正在等待保存对话框…',
+  'export.written': '已写入 {name}。',
+  'export.fallbackName': '报告',
+  'export.cancelled': '已取消导出。未写入任何文件。',
+  'export.keptExisting': '保留了已经存在的文件。未写入任何内容。',
+  'export.unknownOutcome': '导出的结果状态是本版本无法识别的：{status}',
+  'export.errorLabel': '可视化报告导出错误',
+  'export.errorHeading': '无法导出报告',
   'title': '分析',
 
   'header.subhead': '选择一个固件镜像文件，FirmwareSight 就报告 Core 能够证明的事实。这里的任何操作都不会改动那个镜像文件。',

@@ -210,6 +210,18 @@ footer {
   font-size: var(--fs-font-size-metadata);
   line-height: 18px;
 }
+@page { size: A4; margin: 16mm; }
+@media print {
+  body { padding: 0; background: #FFFFFF; }
+  main { max-width: none; }
+  .visual-summary { break-inside: avoid; }
+  table { width: 100%; table-layout: fixed; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+}
+th, td, .mono { overflow-wrap: anywhere; }
+.visual-scene { display: block; width: 100%; height: auto; }
 "#;
 
 /// The `--json` contract: exactly one JSON document on stdout, nothing else.
@@ -240,6 +252,9 @@ pub fn render_html(dto: &DiffResultDto) -> String {
     ));
 
     render_sides(dto, &mut out);
+    out.push_str(&crate::visual::summary_html(
+        &crate::visual::VisualReport::diff(dto),
+    ));
     render_memory(dto, &mut out);
     render_warnings(dto, &mut out);
     render_counts(dto, &mut out);

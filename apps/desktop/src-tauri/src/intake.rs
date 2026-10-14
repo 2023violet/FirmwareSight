@@ -21,7 +21,9 @@ use std::sync::Arc;
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
 
-use crate::ipc::{AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto};
+use crate::ipc::{
+    AnalysisSummaryDto, ErrorEnvelopeDto, ExportOutcomeDto, SelectionDto, VisualFormatDto,
+};
 use crate::{Session, next_operation_id, task_join_error};
 
 /// Open the native file dialog and report what came back.
@@ -129,6 +131,67 @@ pub(crate) async fn analyze_selection(
 
     tauri::async_runtime::spawn_blocking(move || {
         session.analyze_selection(&selection_id, &operation_id)
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+#[tauri::command]
+pub(crate) async fn export_analysis_visual(
+    app: AppHandle,
+    selection_id: String,
+    snapshot_id: String,
+    format: VisualFormatDto,
+    state: State<'_, Arc<Session>>,
+) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+
+    tauri::async_runtime::spawn_blocking(move || {
+        let bytes =
+            session.render_analysis_visual(&selection_id, &snapshot_id, format, &operation_id)?;
+        let suggested = format!(
+            "firmwaresight-analyze-report.{}",
+            crate::compare::visual_format_label(format)
+        );
+        let picked = crate::compare::save_visual_path(
+            &app,
+            "Export analysis visual report",
+            format,
+            &suggested,
+        );
+        if !session.analysis_export_is_current(&selection_id, &snapshot_id, &operation_id)? {
+            return Err(crate::export_stale(&operation_id));
+        }
+        let current_session = Arc::clone(&session);
+        let current_selection = selection_id.clone();
+        let current_snapshot = snapshot_id.clone();
+        let current_operation = operation_id.clone();
+        let ensure_current = move || {
+            current_session
+                .analysis_export_is_current(
+                    &current_selection,
+                    &current_snapshot,
+                    &current_operation,
+                )
+                .and_then(|current| {
+                    current
+                        .then_some(())
+                        .ok_or_else(|| crate::export_stale(&current_operation))
+                })
+        };
+        crate::compare::write_visual_export(
+            picked,
+            &bytes,
+            format,
+            |path| {
+                crate::compare::confirm_visual_replacement(
+                    &app,
+                    &crate::service::display_name(path),
+                )
+            },
+            ensure_current,
+        )
     })
     .await
     .map_err(task_join_error)?

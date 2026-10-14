@@ -218,6 +218,80 @@ fn mutated_elf_section_control_is_escaped_on_cli_and_preserved_in_json() {
     );
 }
 
+#[test]
+fn analyze_visual_export_writes_svg_png_and_print_html_with_json() {
+    let root = repo_root();
+    static NEXT_VISUAL_ID: AtomicUsize = AtomicUsize::new(0);
+    let id = NEXT_VISUAL_ID.fetch_add(1, Ordering::Relaxed);
+    let dir = root.join(format!(
+        "target/cli-tests/analyze-visual-exports-{}-{id}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&dir).expect("scratch directory");
+    let svg = dir.join("analyze.svg");
+    let png = dir.join("analyze.png");
+    let html = dir.join("analyze-report.html");
+    let output = Command::new(env!("CARGO_BIN_EXE_fwsight"))
+        .arg("analyze")
+        .arg(root.join("fixtures/elf/p0-dual-region/firmware.elf"))
+        .arg("--map")
+        .arg(root.join("fixtures/elf/p0-dual-region/firmware.map"))
+        .arg("--json")
+        .arg("--svg")
+        .arg(&svg)
+        .arg("--png")
+        .arg(&png)
+        .arg("--report-html")
+        .arg(&html)
+        .current_dir(&root)
+        .output()
+        .expect("CLI process starts");
+    assert_eq!(
+        output.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("one JSON document");
+    assert!(json["snapshotId"].as_str().is_some());
+    let legacy = Command::new(env!("CARGO_BIN_EXE_fwsight"))
+        .arg("analyze")
+        .arg(root.join("fixtures/elf/p0-dual-region/firmware.elf"))
+        .arg("--map")
+        .arg(root.join("fixtures/elf/p0-dual-region/firmware.map"))
+        .arg("--json")
+        .current_dir(&root)
+        .output()
+        .expect("legacy CLI process starts");
+    assert_eq!(
+        legacy.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&legacy.stderr)
+    );
+    assert_eq!(
+        output.stdout, legacy.stdout,
+        "visual flags changed Analyze JSON bytes"
+    );
+    assert!(
+        std::fs::read_to_string(svg)
+            .expect("SVG exists")
+            .starts_with("<svg")
+    );
+    assert!(
+        std::fs::read(png)
+            .expect("PNG exists")
+            .starts_with(b"\x89PNG\r\n\x1a\n")
+    );
+    assert!(
+        std::fs::read_to_string(html)
+            .expect("report HTML exists")
+            .starts_with("<!doctype html>")
+    );
+    std::fs::remove_dir_all(&dir).ok();
+}
+
 struct TemporaryElf(PathBuf);
 
 impl Drop for TemporaryElf {

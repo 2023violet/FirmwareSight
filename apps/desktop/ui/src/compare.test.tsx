@@ -29,6 +29,7 @@ import {
   compareSnapshots,
   exportCompareHtml,
   exportCompareJson,
+  exportCompareVisual,
   listCompareCandidates,
   queryEvidence,
   querySectionChanges,
@@ -69,6 +70,7 @@ vi.mock('./ipc/bridge', () => ({
   querySymbolChanges: vi.fn(),
   exportCompareJson: vi.fn(),
   exportCompareHtml: vi.fn(),
+  exportCompareVisual: vi.fn(),
   setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
   getApplicationPreferences: vi.fn(() =>
     Promise.resolve({
@@ -131,6 +133,7 @@ const sectionChangesMock = vi.mocked(querySectionChanges);
 const symbolChangesMock = vi.mocked(querySymbolChanges);
 const exportJsonMock = vi.mocked(exportCompareJson);
 const exportHtmlMock = vi.mocked(exportCompareHtml);
+const exportVisualMock = vi.mocked(exportCompareVisual);
 
 function ok<T>(value: T): IpcOutcome<T> {
   return { ok: true, value };
@@ -1264,6 +1267,25 @@ describe('the ranking as a way to the full list', () => {
 });
 
 describe('export', () => {
+  it('offers visual formats beside the existing portable JSON and detailed HTML exports', async () => {
+    await openCompare();
+    await runCompare();
+
+    const exports = screen.getByRole('region', { name: 'Export' });
+    expect(within(exports).getByRole('button', { name: 'Export JSON' })).toBeDefined();
+    expect(within(exports).getByRole('button', { name: 'Export HTML' })).toBeDefined();
+    expect(within(exports).getByRole('button', { name: 'Export PNG' })).toBeDefined();
+    expect(within(exports).getByRole('button', { name: 'Export SVG' })).toBeDefined();
+    expect(within(exports).getByRole('button', { name: 'Export print-ready HTML' })).toBeDefined();
+
+    exportVisualMock.mockResolvedValue(ok({ status: 'written', fileName: 'firmwaresight-compare.png', format: 'png' }));
+    fireEvent.click(within(exports).getByRole('button', { name: 'Export PNG' }));
+    await waitFor(() => expect(exportVisualMock).toHaveBeenCalledWith('cmp-7f3a-1', 'png'));
+    fireEvent.click(within(exports).getByRole('button', { name: 'Export print-ready HTML' }));
+    await waitFor(() => expect(exportVisualMock).toHaveBeenCalledWith('cmp-7f3a-1', 'html'));
+    expect(exportHtmlMock).not.toHaveBeenCalled();
+  });
+
   it('names the file it wrote, and nothing about where it lives', async () => {
     await openCompare();
     await runCompare();

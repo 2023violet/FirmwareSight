@@ -21,11 +21,13 @@
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use firmwaresight_core::domain::diff::{
     ByteChange, ChangeKind, Comparability, Contributor, DiffArtifact, DiffError, DiffResult,
     DiffSection, DiffSideMemory, DiffSymbol, SectionChange, SymbolChange, compare,
 };
+use firmwaresight_report::visual::{self, VisualFormat};
 use firmwaresight_report::{DiffResultDto, diff_render};
 use firmwaresight_storage::{
     CandidateQuery, CompareCandidate, DEFAULT_CANDIDATE_LIMIT, MAX_CANDIDATE_LIMIT, StoredBudget,
@@ -243,6 +245,45 @@ impl Session {
             (text, suggested_file_name(result, format))
         })
     }
+
+    pub(crate) fn render_visual_export(
+        &self,
+        diff_id: &str,
+        format: VisualFormat,
+        operation_id: &str,
+    ) -> Result<(Vec<u8>, String), ErrorEnvelopeDto> {
+        self.with_diff(diff_id, operation_id, |result| {
+            let dto = DiffResultDto::from_diff(result);
+            let report = visual::VisualReport::compare(&dto, result);
+            let bytes =
+                visual::render(&report, format).map_err(|_| visual_export_error(operation_id))?;
+            Ok((bytes, suggested_visual_name(result, format)))
+        })?
+    }
+}
+
+fn suggested_visual_name(result: &DiffResult, format: VisualFormat) -> String {
+    let ext = match format {
+        VisualFormat::Png => "png",
+        VisualFormat::Svg => "svg",
+        VisualFormat::Html => "html",
+    };
+    format!(
+        "firmwaresight-compare-{}-{}.{}",
+        short(&result.base_artifact.sha256),
+        short(&result.target_artifact.sha256),
+        ext
+    )
+}
+
+pub(crate) fn visual_export_error(operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: firmwaresight_report::render::EXPORT_FAILED_CODE.to_owned(),
+        message: "The visual report could not be rendered.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: None,
+        remediation: Some("Check local font availability or try another format.".to_owned()),
+    }
 }
 
 /// Turn a Core refusal into the envelope the shell presents.
@@ -343,6 +384,171 @@ pub fn write_export(
         Some(service::display_name(&path)),
         format,
     ))
+}
+
+pub(crate) fn write_visual_export(
+    picked: Option<PathBuf>,
+    bytes: &[u8],
+    format: crate::ipc::VisualFormatDto,
+    mut confirm_overwrite: impl FnMut(&Path) -> bool,
+    mut validate_current: impl FnMut() -> Result<(), ErrorEnvelopeDto>,
+) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
+    let label = visual_format_label(format);
+    let Some(path) = picked else {
+        return Ok(visual_outcome("cancelled", None, label));
+    };
+
+    let identity_before = target_identity(&path).map_err(|_| {
+        visual_write_error(&path, "The selected export target is no longer available.")
+    })?;
+    let existed = identity_before.is_some();
+    if existed && !confirm_overwrite(&path) {
+        return Ok(visual_outcome("kept-existing", None, label));
+    }
+    validate_current()?;
+    let identity_now = target_identity(&path)
+        .map_err(|_| visual_write_error(&path, REPLACEMENT_CHANGED_MESSAGE))?;
+    if identity_now != identity_before {
+        return Err(visual_write_error(&path, REPLACEMENT_CHANGED_MESSAGE));
+    }
+
+    let result = if existed {
+        replace_existing(&path, bytes)
+    } else {
+        visual::write_new(&path, bytes)
+            .map_err(|_| std::io::Error::other("destination unavailable"))
+    };
+    result.map_err(|error| visual_write_error(&path, &error.to_string()))?;
+
+    Ok(visual_outcome(
+        "written",
+        Some(visual::safe_label(&service::display_name(&path))),
+        label,
+    ))
+}
+
+const REPLACEMENT_CHANGED_MESSAGE: &str =
+    "The selected export target changed while replacement was being confirmed.";
+
+/// What one export destination looked like at one instant. Size and modification time are the
+/// identity `std` exposes on every supported platform; an inode- or handle-level identity would need
+/// an unstable `std` feature or a new `windows` dependency, so a same-second replacement by another
+/// process is not provable here. The write itself is therefore one rename, and a destination that
+/// changed size or timestamp between the confirmation and the write is refused rather than clobbered.
+#[derive(Debug, PartialEq, Eq)]
+struct TargetIdentity {
+    len: u64,
+    modified: Option<std::time::SystemTime>,
+}
+
+fn target_identity(path: &Path) -> std::io::Result<Option<TargetIdentity>> {
+    let metadata = match std::fs::metadata(path) {
+        Ok(metadata) if metadata.is_file() => metadata,
+        Ok(_) => return Err(std::io::Error::other("destination is not a file")),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(error),
+    };
+    Ok(Some(TargetIdentity {
+        len: metadata.len(),
+        modified: metadata.modified().ok(),
+    }))
+}
+
+fn visual_write_error(path: &Path, detail: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: firmwaresight_report::render::EXPORT_FAILED_CODE.to_owned(),
+        message: "The export could not be written.".to_owned(),
+        operation_id: next_operation_id(),
+        details: Some(format!("{}: {detail}", visual::safe_label(&service::display_name(path)))),
+        remediation: Some("Check that the folder exists and is writable, then export again. Any file that was already there is unchanged.".to_owned()),
+    }
+}
+
+fn replace_existing(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
+    static NEXT_VISUAL_TEMP: AtomicU64 = AtomicU64::new(0);
+    let parent = path
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+    let temp = parent.join(format!(
+        ".fws-visual-{}-{}.tmp",
+        std::process::id(),
+        NEXT_VISUAL_TEMP.fetch_add(1, Ordering::Relaxed)
+    ));
+    replace_existing_with_temp(path, bytes, &temp)
+}
+
+fn replace_existing_with_temp(path: &Path, bytes: &[u8], temp: &Path) -> std::io::Result<()> {
+    use std::io::Write;
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(temp)?;
+    let result = file.write_all(bytes).and_then(|()| file.sync_all());
+    drop(file);
+    let result = result.and_then(|()| std::fs::rename(temp, path));
+    if result.is_err() {
+        let _ = std::fs::remove_file(temp);
+    }
+    result
+}
+
+fn visual_outcome(status: &str, file_name: Option<String>, format: &str) -> ExportOutcomeDto {
+    ExportOutcomeDto {
+        status: status.to_owned(),
+        file_name,
+        format: format.to_owned(),
+    }
+}
+
+pub(crate) const fn visual_format_label(format: crate::ipc::VisualFormatDto) -> &'static str {
+    match format {
+        crate::ipc::VisualFormatDto::Png => "png",
+        crate::ipc::VisualFormatDto::Svg => "svg",
+        crate::ipc::VisualFormatDto::Html => "html",
+    }
+}
+
+pub(crate) fn visual_format(format: crate::ipc::VisualFormatDto) -> VisualFormat {
+    match format {
+        crate::ipc::VisualFormatDto::Png => VisualFormat::Png,
+        crate::ipc::VisualFormatDto::Svg => VisualFormat::Svg,
+        crate::ipc::VisualFormatDto::Html => VisualFormat::Html,
+    }
+}
+
+pub(crate) fn save_visual_path(
+    app: &AppHandle,
+    title: &str,
+    format: crate::ipc::VisualFormatDto,
+    suggested: &str,
+) -> Option<PathBuf> {
+    app.dialog()
+        .file()
+        .set_title(title)
+        .add_filter(
+            format!(
+                "FirmwareSight {} report",
+                visual_format_label(format).to_uppercase()
+            ),
+            &[visual_format_label(format)],
+        )
+        .set_file_name(suggested)
+        .blocking_save_file()
+        .and_then(|picked| picked.into_path().ok())
+}
+
+pub(crate) fn confirm_visual_replacement(app: &AppHandle, file_name: &str) -> bool {
+    app.dialog()
+        .message(format!(
+            "{file_name} already exists. Replacing it overwrites the file you have."
+        ))
+        .title("Replace existing file?")
+        .buttons(MessageDialogButtons::OkCancelCustom(
+            "Replace it".to_owned(),
+            "Keep mine".to_owned(),
+        ))
+        .blocking_show()
 }
 
 fn outcome(status: &str, file_name: Option<String>, format: ExportFormat) -> ExportOutcomeDto {
@@ -529,6 +735,41 @@ pub(crate) async fn export_compare_html(
             ExportFormat::Html,
             "Export the build diff as HTML",
             &operation_id,
+        )
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+#[tauri::command]
+pub(crate) async fn export_compare_visual(
+    app: AppHandle,
+    diff_id: String,
+    format: crate::ipc::VisualFormatDto,
+    state: State<'_, Arc<Session>>,
+) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+    tauri::async_runtime::spawn_blocking(move || {
+        let (bytes, suggested) =
+            session.render_visual_export(&diff_id, visual_format(format), &operation_id)?;
+        let picked = save_visual_path(&app, "Export comparison visual report", format, &suggested);
+        let current_session = Arc::clone(&session);
+        let current_diff_id = diff_id.clone();
+        let current_operation_id = operation_id.clone();
+        let ensure_current = move || {
+            current_session
+                .with_diff(&current_diff_id, &current_operation_id, |_| ())
+                .map(|_| ())
+                .map_err(|_| crate::export_stale(&current_operation_id))
+        };
+        ensure_current()?;
+        write_visual_export(
+            picked,
+            &bytes,
+            format,
+            |path| confirm_visual_replacement(&app, &service::display_name(path)),
+            ensure_current,
         )
     })
     .await
@@ -973,5 +1214,135 @@ mod percentage_tests {
         let change = ByteChange::between(Some(2_000), Some(2_001), Comparability::Exact);
         let result = percentage(&change);
         assert_eq!(result.value.as_deref(), Some("0.1%"));
+    }
+}
+
+#[cfg(test)]
+mod visual_export_tests {
+    use super::{replace_existing_with_temp, write_visual_export};
+    use crate::ipc::VisualFormatDto;
+    use std::fs;
+    use std::path::PathBuf;
+    use std::sync::atomic::{AtomicU64, Ordering};
+
+    fn scratch() -> PathBuf {
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let root = std::env::temp_dir().join(format!(
+            "fws-visual-export-test-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::create_dir(&root).expect("scratch directory");
+        root
+    }
+
+    #[test]
+    fn visual_export_cancel_and_denied_overwrite_preserve_existing_file() {
+        let root = scratch();
+        let destination = root.join("report.svg");
+        fs::write(&destination, b"original").expect("original file");
+
+        let cancelled =
+            write_visual_export(None, b"new", VisualFormatDto::Svg, |_| true, || Ok(()))
+                .expect("cancel is a normal outcome");
+        assert_eq!(cancelled.status, "cancelled");
+        let kept = write_visual_export(
+            Some(destination.clone()),
+            b"new",
+            VisualFormatDto::Svg,
+            |_| false,
+            || Ok(()),
+        )
+        .expect("declined overwrite is normal");
+        assert_eq!(kept.status, "kept-existing");
+        assert_eq!(
+            fs::read(&destination).expect("destination remains"),
+            b"original"
+        );
+
+        fs::remove_dir_all(root).expect("clean scratch directory");
+    }
+
+    #[test]
+    fn a_target_another_process_replaced_while_the_dialog_was_open_is_not_clobbered() {
+        let root = scratch();
+        let destination = root.join("report.svg");
+        fs::write(&destination, b"original").expect("original file");
+
+        let refused = write_visual_export(
+            Some(destination.clone()),
+            b"replacement",
+            VisualFormatDto::Svg,
+            |_| {
+                fs::write(&destination, b"another writer").expect("another process writes");
+                true
+            },
+            || Ok(()),
+        )
+        .expect_err("a target that changed is refused");
+        assert_eq!(
+            refused.code,
+            firmwaresight_report::render::EXPORT_FAILED_CODE
+        );
+        assert_eq!(
+            fs::read(&destination).expect("the other writer's bytes remain"),
+            b"another writer"
+        );
+
+        fs::remove_dir_all(root).expect("clean scratch directory");
+    }
+
+    #[test]
+    fn failed_open_does_not_delete_a_temp_file_owned_by_someone_else() {
+        let root = scratch();
+        let destination = root.join("report.svg");
+        let temp = root.join(".canary.tmp");
+        fs::write(&destination, b"original").expect("original file");
+        fs::write(&temp, b"canary").expect("temp canary");
+
+        assert!(replace_existing_with_temp(&destination, b"new", &temp).is_err());
+        assert_eq!(
+            fs::read(&destination).expect("destination remains"),
+            b"original"
+        );
+        assert_eq!(fs::read(&temp).expect("unowned temp remains"), b"canary");
+
+        fs::remove_dir_all(root).expect("clean scratch directory");
+    }
+
+    #[test]
+    fn a_missing_destination_folder_fails_cleanly_and_a_retry_can_replace() {
+        let root = scratch();
+        let missing = root.join("gone").join("report.svg");
+        let failure = write_visual_export(
+            Some(missing),
+            b"new",
+            VisualFormatDto::Svg,
+            |_| true,
+            || Ok(()),
+        )
+        .expect_err("missing destination folder");
+        assert_eq!(
+            failure.code,
+            firmwaresight_report::render::EXPORT_FAILED_CODE
+        );
+
+        let destination = root.join("report.svg");
+        fs::write(&destination, b"original").expect("original file");
+        let retried = write_visual_export(
+            Some(destination.clone()),
+            b"replacement",
+            VisualFormatDto::Svg,
+            |_| true,
+            || Ok(()),
+        )
+        .expect("retry succeeds");
+        assert_eq!(retried.status, "written");
+        assert_eq!(
+            fs::read(&destination).expect("replacement exists"),
+            b"replacement"
+        );
+
+        fs::remove_dir_all(root).expect("clean scratch directory");
     }
 }

@@ -195,6 +195,9 @@ pub fn render_html(report: &ReleaseBundleReport<'_>) -> String {
     ));
 
     render_identity(report, &mut out);
+    out.push_str(&crate::visual::summary_html(
+        &crate::visual::VisualReport::release(report),
+    ));
     render_shipped(report, &mut out);
     render_analysis(report, &mut out);
     render_compare(report, &mut out);

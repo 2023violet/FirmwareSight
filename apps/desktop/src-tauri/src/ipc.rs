@@ -858,6 +858,16 @@ pub struct ExportOutcomeDto {
     pub format: String,
 }
 
+/// Closed set of visual export formats accepted by purpose-scoped report commands.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "lowercase")]
+#[ts(export)]
+pub enum VisualFormatDto {
+    Png,
+    Svg,
+    Html,
+}
+
 // --------------------------------------------------------------------------- Release Gate (P3)
 
 /// What may be done with an `UNKNOWN` rule, as the release owner's policy says (ADR-0023).

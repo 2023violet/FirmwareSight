@@ -1,4 +1,18 @@
 export const analyze = {
+  'export.region': 'Visual report export',
+  'export.hint': 'PNG is a 1600 × 900 share image. SVG is the same scene as editable vector markup. HTML is a print-ready overview: open it and use Print → Save as PDF in the browser. FirmwareSight does not write PDF files, and no exported report carries a host path or a script.',
+  'export.heading': 'Share this analysis',
+  'export.png': 'Export PNG',
+  'export.svg': 'Export SVG',
+  'export.html': 'Export print-ready HTML',
+  'export.waiting': 'Waiting for the save dialog…',
+  'export.written': 'Wrote {name}.',
+  'export.fallbackName': 'the report',
+  'export.cancelled': 'Export cancelled. No file was written.',
+  'export.keptExisting': 'Kept the file that was already there. Nothing was written.',
+  'export.unknownOutcome': 'The export reported an outcome this build does not know: {status}',
+  'export.errorLabel': 'Visual report export error',
+  'export.errorHeading': 'The report could not be exported',
   'title': 'Analyze',
 
   'header.subhead': 'Choose a firmware artifact and FirmwareSight reports the Core facts it can prove. Nothing here changes the artifact.',

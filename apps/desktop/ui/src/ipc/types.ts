@@ -48,6 +48,7 @@ export type { EvidenceRowDto } from './generated/EvidenceRowDto';
 export type { EvidenceSortDto } from './generated/EvidenceSortDto';
 export type { EvidenceSummaryDto } from './generated/EvidenceSummaryDto';
 export type { ExportOutcomeDto } from './generated/ExportOutcomeDto';
+export type { VisualFormatDto } from './generated/VisualFormatDto';
 export type { FixtureKey } from './generated/FixtureKey';
 export type { FixtureOptionDto } from './generated/FixtureOptionDto';
 export type { GateArtifactRowDto } from './generated/GateArtifactRowDto';

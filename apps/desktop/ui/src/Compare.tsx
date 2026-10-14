@@ -39,6 +39,7 @@ import {
   compareSnapshots,
   exportCompareHtml,
   exportCompareJson,
+  exportCompareVisual,
   listCompareCandidates,
   querySectionChanges,
   querySymbolChanges,
@@ -330,15 +331,16 @@ export function Compare({
   }, [summary]);
 
   const exportAs = useCallback(
-    async (format: 'json' | 'html') => {
+    async (format: 'json' | 'html' | 'png' | 'svg' | 'visual-html') => {
       if (summary === null) {
         return;
       }
       setExporting(true);
-      const outcome =
-        format === 'json'
-          ? await exportCompareJson(summary.diffId)
-          : await exportCompareHtml(summary.diffId);
+      const outcome = format === 'json'
+        ? await exportCompareJson(summary.diffId)
+        : format === 'html'
+          ? await exportCompareHtml(summary.diffId)
+          : await exportCompareVisual(summary.diffId, format === 'visual-html' ? 'html' : format);
       setExporting(false);
 
       if (!outcome.ok) {
@@ -1598,7 +1600,7 @@ function Exports({
   readonly note: string | null;
   readonly error: ErrorEnvelopeDto | null;
   readonly exporting: boolean;
-  readonly onExport: (format: 'json' | 'html') => void;
+  readonly onExport: (format: 'json' | 'html' | 'png' | 'svg' | 'visual-html') => void;
 }) {
   const { t } = useI18n();
   return (
@@ -1624,6 +1626,9 @@ function Exports({
         >
           {t('compare', 'export.html')}
         </Button>
+        <Button disabled={exporting} onClick={() => onExport('png')}>{t('compare', 'export.png')}</Button>
+        <Button disabled={exporting} onClick={() => onExport('svg')}>{t('compare', 'export.svg')}</Button>
+        <Button disabled={exporting} onClick={() => onExport('visual-html')}>{t('compare', 'export.printHtml')}</Button>
         {exporting ? (
           <p className={styles['status']} role="status" aria-live="polite">
             {t('compare', 'export.waiting')}

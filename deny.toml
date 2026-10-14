@@ -123,6 +123,13 @@ allow = [
 ]
 private = { ignore = true }
 
+# Owner NEXT-45: precise admission for the offline SVG-to-PNG renderer dependency.
+# BSD-2-Clause is not globally allowed. Redistribution notice: 07_COMPLIANCE/THIRD_PARTY_VISUAL_REPORT_NOTICES.md.
+[[licenses.exceptions]]
+name = "arrayref"
+version = "=0.3.9"
+allow = ["BSD-2-Clause"]
+
 # Five entries were deleted from the list above, and this is the evidence that deleting them cost
 # nothing: `Apache-2.0 / MIT`, `Apache-2.0/MIT`, `BSD-3-Clause/MIT`, `MIT/Apache-2.0` and
 # `Unlicense/MIT` are legacy Cargo metadata strings, not SPDX, which is why 0.20.2 rejected them as

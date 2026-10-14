@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
 import { Analyze } from './Analyze';
-import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
+import { analyzeSelection, attachMap, clearMap, exportAnalysisVisual, selectArtifact } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type { AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto } from './ipc/types';
 import { render } from './test/render';
@@ -23,6 +23,7 @@ vi.mock('./ipc/bridge', () => ({
   attachMap: vi.fn(),
   clearMap: vi.fn(),
   analyzeSelection: vi.fn(),
+  exportAnalysisVisual: vi.fn(() => Promise.resolve({ ok: true, value: { status: 'cancelled', fileName: null, format: 'svg' } })),
   querySections: vi.fn(() =>
     Promise.resolve({
       ok: true,
@@ -130,6 +131,7 @@ const selectMock = vi.mocked(selectArtifact);
 const attachMock = vi.mocked(attachMap);
 const clearMock = vi.mocked(clearMap);
 const analyzeMock = vi.mocked(analyzeSelection);
+const exportAnalysisVisualMock = vi.mocked(exportAnalysisVisual);
 
 function ok<T>(value: T): IpcOutcome<T> {
   return { ok: true, value };
@@ -709,6 +711,23 @@ describe('P1-A0 intake screen', () => {
     const lastGood = await screen.findByRole('region', { name: 'Last good analysis' });
     expect(within(lastGood).getByText('5,432 bytes')).toBeDefined();
     expect(within(lastGood).getByText('app.elf')).toBeDefined();
+    expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
+  });
+
+  it('exports only the successful current selection', async () => {
+    await chooseArtifact();
+    await analyze();
+    const exports = await screen.findByRole('region', { name: 'Visual report export' });
+    fireEvent.click(within(exports).getByRole('button', { name: 'Export SVG' }));
+    await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalledWith(
+      'sel-7f3a-2',
+      'snap-deadbeef-p0-normalize-1',
+      'svg',
+    ));
+    selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
+    await screen.findByText('other.elf');
+    expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
   });
 
   it('never presents the last good analysis as the failed candidate', async () => {

@@ -7,6 +7,9 @@
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static NEXT_TEMP: AtomicUsize = AtomicUsize::new(0);
 
 const BASE: &str = "fixtures/elf/p2-diff/base/firmware.elf";
 const BASE_MAP: &str = "fixtures/elf/p2-diff/base/firmware.map";
@@ -252,9 +255,12 @@ fn html_mode_writes_one_self_contained_file_and_prints_no_document_body() {
     assert!(html.starts_with("<!doctype html>"), "{html}");
     assert!(html.contains("urn:firmwaresight:schema:diff:1"));
     assert!(html.contains("Base (old)") && html.contains("Target (new)"));
+    let without_svg_namespace = html.replace("http://www.w3.org/2000/svg", "");
     for forbidden in ["<script", "http://", "https://", "<link", "@import"] {
         assert!(
-            !html.to_ascii_lowercase().contains(forbidden),
+            !without_svg_namespace
+                .to_ascii_lowercase()
+                .contains(forbidden),
             "the export references {forbidden}"
         );
     }
@@ -290,6 +296,131 @@ fn json_and_html_together_put_json_on_stdout_and_html_in_the_file() {
             .starts_with("<!doctype html>")
     );
 
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn visual_exports_write_real_formats_and_keep_json_on_stdout() {
+    let dir = temp_dir("visual-formats");
+    let svg = dir.join("diff.svg");
+    let png = dir.join("diff.png");
+    let html = dir.join("diff-report.html");
+    let output = run(&[
+        "diff",
+        BASE,
+        TARGET,
+        "--json",
+        "--svg",
+        svg.to_str().expect("svg path"),
+        "--png",
+        png.to_str().expect("png path"),
+        "--report-html",
+        html.to_str().expect("html path"),
+    ]);
+    assert_eq!(output.status.code(), Some(0), "{}", errors(&output));
+    let json: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("one JSON document");
+    assert_eq!(json["schemaVersion"], 1);
+    let legacy_json = run(&["diff", BASE, TARGET, "--json"]);
+    assert_eq!(
+        legacy_json.status.code(),
+        Some(0),
+        "{}",
+        errors(&legacy_json)
+    );
+    assert_eq!(
+        output.stdout, legacy_json.stdout,
+        "visual flags changed Diff JSON bytes"
+    );
+    let diagnostics = errors(&output);
+    for status in [
+        "visual SVG export written",
+        "visual PNG export written",
+        "visual print HTML export written",
+    ] {
+        assert!(diagnostics.contains(status), "{diagnostics}");
+    }
+    assert!(!diagnostics.contains(&dir.display().to_string()));
+    let svg = std::fs::read_to_string(svg).expect("SVG export exists");
+    assert!(svg.starts_with("<svg"), "{svg}");
+    let png = std::fs::read(png).expect("PNG export exists");
+    assert!(png.starts_with(b"\x89PNG\r\n\x1a\n"), "not a PNG file");
+    let html = std::fs::read_to_string(html).expect("HTML report exists");
+    assert!(html.starts_with("<!doctype html>"), "{html}");
+    assert!(html.contains("A Snapshot ID") && html.contains("B Snapshot ID"));
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn visual_export_refuses_to_overwrite_existing_files() {
+    let dir = temp_dir("visual-no-overwrite");
+    let svg = dir.join("existing.svg");
+    std::fs::write(&svg, b"keep this file").expect("seed existing output");
+    let output = run(&[
+        "diff",
+        BASE,
+        TARGET,
+        "--svg",
+        svg.to_str().expect("svg path"),
+    ]);
+    assert_eq!(output.status.code(), Some(6), "{}", errors(&output));
+    assert!(text(&output).is_empty());
+    assert!(errors(&output).contains("ERR-EXPORT-6001"));
+    assert_eq!(
+        std::fs::read(&svg).expect("original remains"),
+        b"keep this file"
+    );
+
+    let json_output = run(&[
+        "diff",
+        BASE,
+        TARGET,
+        "--json",
+        "--svg",
+        svg.to_str().expect("svg path"),
+    ]);
+    assert_eq!(json_output.status.code(), Some(6));
+    let envelope: serde_json::Value =
+        serde_json::from_slice(&json_output.stdout).expect("one error envelope");
+    assert_eq!(envelope["code"], "ERR-EXPORT-6001");
+    assert_eq!(
+        std::fs::read(&svg).expect("original remains after JSON failure"),
+        b"keep this file"
+    );
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn visual_export_to_missing_parent_exits_six_without_success_output() {
+    let dir = temp_dir("visual-missing-parent");
+    let output_path = dir.join("missing").join("report.svg");
+    let output = run(&[
+        "diff",
+        BASE,
+        TARGET,
+        "--svg",
+        output_path.to_str().expect("SVG path"),
+    ]);
+    assert_eq!(output.status.code(), Some(6), "{}", errors(&output));
+    assert!(text(&output).is_empty());
+    assert!(errors(&output).contains("ERR-EXPORT-6001"));
+    assert!(!output_path.exists());
+
+    let json = run(&[
+        "diff",
+        BASE,
+        TARGET,
+        "--json",
+        "--report-html",
+        dir.join("missing")
+            .join("report.html")
+            .to_str()
+            .expect("HTML path"),
+    ]);
+    assert_eq!(json.status.code(), Some(6));
+    let envelope: serde_json::Value =
+        serde_json::from_slice(&json.stdout).expect("one error envelope");
+    assert_eq!(envelope["code"], "ERR-EXPORT-6001");
     std::fs::remove_dir_all(&dir).ok();
 }
 
@@ -431,7 +562,8 @@ fn diff_writes_no_host_path_into_the_html_it_exports() {
 /// test leaves no residue in the repository.
 fn temp_dir(tag: &str) -> PathBuf {
     let root = repo_root().join("target").join("cli-tests");
-    let dir = root.join(format!("{tag}-{}", std::process::id()));
+    let id = NEXT_TEMP.fetch_add(1, Ordering::Relaxed);
+    let dir = root.join(format!("{tag}-{}-{id}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("scratch directory");
     dir
 }

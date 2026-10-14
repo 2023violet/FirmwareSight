@@ -31,6 +31,7 @@ pub mod release_render;
 pub mod render;
 pub mod schema_check;
 pub mod schemas;
+pub mod visual;
 
 pub use analysis::{
     ANALYSIS_SCHEMA_ID, ANALYSIS_SCHEMA_VERSION, AnalysisDocumentDto, PortableArtifactDto,

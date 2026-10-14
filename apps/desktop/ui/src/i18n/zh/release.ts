@@ -1,6 +1,20 @@
 import type { CatalogFor } from '../types';
 
 export const release: CatalogFor<'release'> = {
+  'visualExport.region': '独立可视化报告',
+  'visualExport.heading': '分享 Gate 复核',
+  'visualExport.hint': '此 Gate 运行的独立可视化摘要。它不会进入发布包，也不会更改本次运行。PNG 为 1600 × 900 的分享图片，SVG 是可编辑矢量标记，HTML 通过浏览器的“打印 → 另存为 PDF”按 A4 打印；FirmwareSight 不生成 PDF 文件。',
+  'visualExport.png': '导出 PNG',
+  'visualExport.svg': '导出 SVG',
+  'visualExport.html': '导出可打印 HTML',
+  'visualExport.waiting': '正在等待保存对话框…',
+  'visualExport.written': '已写入 {name}。',
+  'visualExport.fallbackName': '报告',
+  'visualExport.cancelled': '已取消导出。未写入任何文件。',
+  'visualExport.keptExisting': '保留了已经存在的文件。未写入任何内容。',
+  'visualExport.unknownOutcome': '导出的结果状态是本版本无法识别的：{status}',
+  'visualExport.errorLabel': '可视化报告导出错误',
+  'visualExport.errorHeading': '无法导出报告',
   'projectReadiness.heading': '项目准备情况',
   'projectReadiness.scope': '这里只观察配置与工作区事实，不是 Gate 结果。',
   'projectReadiness.noProject': '尚未加载项目。打开项目配置后即可检查工作区。',

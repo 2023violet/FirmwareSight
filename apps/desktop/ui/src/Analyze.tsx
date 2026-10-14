@@ -24,7 +24,7 @@ import { evidenceBasisCaption } from './evidenceBasis';
 import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
 import { GettingStartedPanel } from './GettingStarted';
 import { useI18n, type Translate } from './i18n';
-import { analyzeSelection, attachMap, clearMap, selectArtifact } from './ipc/bridge';
+import { analyzeSelection, attachMap, clearMap, exportAnalysisVisual, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
   ErrorEnvelopeDto,
@@ -59,6 +59,9 @@ export function Analyze({
   const { t } = useI18n();
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<ErrorEnvelopeDto | null>(null);
 
   /**
    * Every dialog is the shell's, so the UI only ever learns the name and the handle. A cancelled
@@ -153,6 +156,30 @@ export function Analyze({
    */
   const currentSummary =
     summary !== null && error === null && !pendingSelection ? summary : null;
+
+  const exportVisual = async (format: 'png' | 'svg' | 'html') => {
+    if (currentSummary === null || selection === null || analyzing || exporting) return;
+    setExporting(true);
+    const result = await exportAnalysisVisual(
+      selection.selectionId,
+      currentSummary.identity.snapshotId,
+      format,
+    );
+    setExporting(false);
+    if (!result.ok) {
+      setExportError(result.envelope);
+      setExportMessage(null);
+      return;
+    }
+    setExportError(null);
+    setExportMessage(result.value.status === 'written'
+      ? t('analyze', 'export.written', { name: result.value.fileName ?? t('analyze', 'export.fallbackName') })
+      : result.value.status === 'cancelled'
+        ? t('analyze', 'export.cancelled')
+        : result.value.status === 'kept-existing'
+          ? t('analyze', 'export.keptExisting')
+          : t('analyze', 'export.unknownOutcome', { status: result.value.status }));
+  };
 
   return (
     <Page>
@@ -324,6 +351,18 @@ export function Analyze({
           the U1R contract, restated in a new position rather than loosened. */}
       {summary === null ? null : (
         <div className={error === null && !pendingSelection ? undefined : styles['retained']}>
+          {currentSummary === null ? null : (
+            <section className={styles['exports']} aria-label={t('analyze', 'export.region')}>
+              <h2>{t('analyze', 'export.heading')}</h2>
+              <p className={styles['meta']}>{t('analyze', 'export.hint')}</p>
+              <Button disabled={exporting} onClick={() => void exportVisual('png')}>{t('analyze', 'export.png')}</Button>
+              <Button disabled={exporting} onClick={() => void exportVisual('svg')}>{t('analyze', 'export.svg')}</Button>
+              <Button disabled={exporting} onClick={() => void exportVisual('html')}>{t('analyze', 'export.html')}</Button>
+              {exporting ? <p role="status" aria-live="polite">{t('analyze', 'export.waiting')}</p> : null}
+              {exportMessage === null ? null : <p role="status" aria-live="polite">{exportMessage}</p>}
+              {exportError === null ? null : <ErrorPanel envelope={exportError} label={t('analyze', 'export.errorLabel')} heading={t('analyze', 'export.errorHeading')} />}
+            </section>
+          )}
           <ResultBand summary={summary} stale={error !== null || pendingSelection} unit={unit} />
           <Details
             snapshotId={summary.identity.snapshotId}

@@ -95,6 +95,7 @@ struct StagedSelection {
 #[derive(Debug, Default)]
 struct SelectionStore {
     next: u64,
+    current: Option<String>,
     staged: HashMap<String, StagedSelection>,
 }
 
@@ -102,6 +103,7 @@ impl SelectionStore {
     fn insert(&mut self, artifact: PathBuf, map: Option<PathBuf>) -> String {
         self.next += 1;
         let id = format!("sel-{:x}-{:x}", std::process::id(), self.next);
+        self.current = Some(id.clone());
         self.staged
             .insert(id.clone(), StagedSelection { artifact, map });
         id
@@ -364,10 +366,12 @@ pub struct Session {
     /// release reads it, and it is why a preference change cannot move a verdict or a hash.
     preferences: preferences::Store,
     selections: Mutex<SelectionStore>,
+    analysis_exports: Mutex<HashMap<String, String>>,
     diffs: Mutex<DiffStore>,
     project: Mutex<Option<LoadedProject>>,
     analyses: Mutex<AnalysisStore>,
     bundles: Mutex<BundleStore>,
+    current_gate_run: Mutex<Option<(String, String)>>,
     destinations: Mutex<DestinationStore>,
     attachments: Mutex<AttachmentStore>,
 }
@@ -387,10 +391,12 @@ impl Session {
             store_path: db_path,
             preferences: preferences::Store::new(None),
             selections: Mutex::new(SelectionStore::default()),
+            analysis_exports: Mutex::new(HashMap::new()),
             diffs: Mutex::new(DiffStore::default()),
             project: Mutex::new(None),
             analyses: Mutex::new(AnalysisStore::default()),
             bundles: Mutex::new(BundleStore::default()),
+            current_gate_run: Mutex::new(None),
             destinations: Mutex::new(DestinationStore::default()),
             attachments: Mutex::new(AttachmentStore::default()),
         })
@@ -492,9 +498,14 @@ impl Session {
     ) -> Result<SelectionDto, ErrorEnvelopeDto> {
         let map = map.as_ref();
         require_readable(map, operation_id)?;
-        self.with_selection(selection_id, operation_id, |staged| {
+        let selection = self.with_selection(selection_id, operation_id, |staged| {
             staged.map = Some(map.to_path_buf())
-        })
+        })?;
+        self.analysis_exports
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the analysis export lock was poisoned"))?
+            .remove(selection_id);
+        Ok(selection)
     }
 
     /// Detach the MAP. The artifact selection stays staged.
@@ -507,7 +518,13 @@ impl Session {
         selection_id: &str,
         operation_id: &str,
     ) -> Result<SelectionDto, ErrorEnvelopeDto> {
-        self.with_selection(selection_id, operation_id, |staged| staged.map = None)
+        let selection =
+            self.with_selection(selection_id, operation_id, |staged| staged.map = None)?;
+        self.analysis_exports
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the analysis export lock was poisoned"))?
+            .remove(selection_id);
+        Ok(selection)
     }
 
     /// Mutate one selection under a single lock and return its new projection.
@@ -563,6 +580,10 @@ impl Session {
         selection_id: &str,
         operation_id: &str,
     ) -> Result<AnalysisSummaryDto, ErrorEnvelopeDto> {
+        self.analysis_exports
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the analysis export lock was poisoned"))?
+            .remove(selection_id);
         let (artifact, map) = self
             .lock_selections(operation_id)?
             .staged_paths(selection_id)
@@ -583,7 +604,91 @@ impl Session {
             LOCAL_PROJECT_NAME,
             operation_id,
         )?;
+        self.analysis_exports
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the analysis export lock was poisoned"))?
+            .insert(
+                selection_id.to_owned(),
+                summary.identity.snapshot_id.clone(),
+            );
         Ok(summary)
+    }
+
+    /// Render only the successful analysis currently bound to the latest selected artifact.
+    pub fn render_analysis_visual(
+        &self,
+        selection_id: &str,
+        snapshot_id: &str,
+        format: ipc::VisualFormatDto,
+        operation_id: &str,
+    ) -> Result<Vec<u8>, ErrorEnvelopeDto> {
+        let current = self
+            .selections
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the selection lock was poisoned"))?
+            .current
+            .clone();
+        let recorded = self
+            .analysis_exports
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the analysis export lock was poisoned"))?
+            .get(selection_id)
+            .cloned();
+        if current.as_deref() != Some(selection_id) || recorded.as_deref() != Some(snapshot_id) {
+            return Err(export_stale(operation_id));
+        }
+        let snapshot = self
+            .held_snapshot(snapshot_id, operation_id)?
+            .ok_or_else(|| export_stale(operation_id))?;
+        let summary = firmwaresight_report::AnalyzeResultDto::from_snapshot(
+            &snapshot,
+            &service::display_name(&self.selection_path(selection_id, operation_id)?),
+        );
+        let memory = snapshot.memory().ok_or_else(|| {
+            internal_error(
+                operation_id,
+                "the sealed snapshot carries no memory footprint",
+            )
+        })?;
+        let report =
+            firmwaresight_report::visual::VisualReport::analyze(&summary, &memory.region_usage);
+        firmwaresight_report::visual::render(&report, crate::compare::visual_format(format))
+            .map_err(|_| visual_export_error(operation_id))
+    }
+
+    pub fn analysis_export_is_current(
+        &self,
+        selection_id: &str,
+        snapshot_id: &str,
+        operation_id: &str,
+    ) -> Result<bool, ErrorEnvelopeDto> {
+        let current = self
+            .selections
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the selection lock was poisoned"))?
+            .current
+            .as_deref()
+            == Some(selection_id);
+        let recorded = self
+            .analysis_exports
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the analysis export lock was poisoned"))?
+            .get(selection_id)
+            .is_some_and(|recorded| recorded == snapshot_id);
+        Ok(current && recorded)
+    }
+
+    fn selection_path(
+        &self,
+        selection_id: &str,
+        operation_id: &str,
+    ) -> Result<PathBuf, ErrorEnvelopeDto> {
+        self.selections
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the selection lock was poisoned"))?
+            .staged_paths(selection_id)
+            .map(|(path, _)| path)
+            .ok_or_else(|| export_stale(operation_id))
     }
 
     /// Import a snapshot unless its content is already in history. Shared by both source paths,
@@ -953,6 +1058,34 @@ impl Session {
         Ok(self.lock_bundles(operation_id)?.insert(bundle))
     }
 
+    pub fn mark_current_gate_run(
+        &self,
+        run_id: &str,
+        snapshot_id: &str,
+        operation_id: &str,
+    ) -> Result<(), ErrorEnvelopeDto> {
+        *self
+            .current_gate_run
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the Gate selection lock was poisoned"))? =
+            Some((run_id.to_owned(), snapshot_id.to_owned()));
+        Ok(())
+    }
+
+    pub fn gate_run_is_current(
+        &self,
+        run_id: &str,
+        snapshot_id: &str,
+        operation_id: &str,
+    ) -> Result<bool, ErrorEnvelopeDto> {
+        Ok(self
+            .current_gate_run
+            .lock()
+            .map_err(|_| internal_error(operation_id, "the Gate selection lock was poisoned"))?
+            .as_ref()
+            .is_some_and(|current| current.0 == run_id && current.1 == snapshot_id))
+    }
+
     /// Remember a folder the native dialog produced and return the token that names it (§29).
     pub(crate) fn remember_destination(
         &self,
@@ -994,6 +1127,49 @@ fn selection_missing(_selection_id: &str, operation_id: &str) -> ErrorEnvelopeDt
         operation_id: operation_id.to_owned(),
         details: Some("the shell holds paths for the current run only; this session never issued, or no longer holds, the handle given".to_owned()),
         remediation: Some("Choose the artifact in the file dialog again.".to_owned()),
+    }
+}
+
+fn internal_error(operation_id: &str, details: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: "ERR-INTERNAL-9003".to_owned(),
+        message: "An internal error prevented the export.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: Some(details.to_owned()),
+        remediation: Some(
+            "Retry the operation. If it continues, report the operation id.".to_owned(),
+        ),
+    }
+}
+
+pub(crate) fn export_stale(operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: "ERR-EXPORT-6002".to_owned(),
+        message: "The displayed result is no longer available for export.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: None,
+        remediation: Some("Run the analysis again, then export its current result.".to_owned()),
+    }
+}
+
+/// The Gate surface refuses a run the shell no longer displays. The remedy is named for this
+/// surface: a Gate run is re-run, not re-analyzed.
+pub(crate) fn gate_export_stale(operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        remediation: Some(
+            "Run the Gate again on this build, then export its current result.".to_owned(),
+        ),
+        ..export_stale(operation_id)
+    }
+}
+
+fn visual_export_error(operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        code: firmwaresight_report::render::EXPORT_FAILED_CODE.to_owned(),
+        message: "The visual report could not be rendered.".to_owned(),
+        operation_id: operation_id.to_owned(),
+        details: None,
+        remediation: Some("Check local font availability or try another format.".to_owned()),
     }
 }
 
@@ -1367,6 +1543,7 @@ pub fn run() {
             intake::attach_map,
             intake::clear_map,
             intake::analyze_selection,
+            intake::export_analysis_visual,
             details::query_sections,
             details::query_symbols,
             details::query_evidence,
@@ -1376,12 +1553,14 @@ pub fn run() {
             compare::query_symbol_changes,
             compare::export_compare_json,
             compare::export_compare_html,
+            compare::export_compare_visual,
             release::open_project_config,
             release::inspect_project_readiness,
             release::save_project_policy,
             release::run_release_gate,
             release::accept_review,
             release::get_gate_run,
+            release::export_gate_visual,
             release::attach_release_file,
             release::set_release_attachment_kind,
             release::remove_release_attachment,

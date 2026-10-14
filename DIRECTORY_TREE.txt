@@ -73,7 +73,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 25_TYPED_IPC_BINDINGS.md
 │   ├── 26_PORTABLE_SCHEMA_POLICY.md
 │   ├── 27_GATE_STATE_SEMANTICS.md
-│   └── 28_RELEASE_ATTACHED_BYTE_EVIDENCE.md
+│   ├── 28_RELEASE_ATTACHED_BYTE_EVIDENCE.md
+│   └── 38_VISUAL_REPORT_EXPORT.md
 ├── 05_ENGINEERING/
 │   ├── 00_REPO_STRUCTURE.md
 │   ├── 01_CODING_STANDARDS.md
@@ -99,7 +100,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
 │   ├── 02_CRA_CONTEXT.md
-│   └── 03_LICENSE_POLICY.md
+│   ├── 03_LICENSE_POLICY.md
+│   └── THIRD_PARTY_VISUAL_REPORT_NOTICES.md
 ├── 08_RESEARCH/
 │   ├── SOURCE_REPORTS/
 │   │   ├── 01_RUST_PRODUCT_DESKTOP_STACK_INVESTIGATION.txt
@@ -297,7 +299,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── preferences.rs
 │       │   │   ├── project_readiness.rs
 │       │   │   ├── real_artifact_intake.rs
-│       │   │   └── release_gate.rs
+│       │   │   ├── release_gate.rs
+│       │   │   └── visual_export.rs
 │       │   ├── build.rs
 │       │   ├── Cargo.toml
 │       │   └── tauri.conf.json
@@ -452,7 +455,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── SymbolSideDto.ts
 │           │   │   │   ├── SymbolSortDto.ts
 │           │   │   │   ├── UnknownDispositionDto.ts
-│           │   │   │   └── UnknownPolicyDto.ts
+│           │   │   │   ├── UnknownPolicyDto.ts
+│           │   │   │   └── VisualFormatDto.ts
 │           │   │   ├── bridge.test.ts
 │           │   │   ├── bridge.ts
 │           │   │   └── types.ts
@@ -594,6 +598,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   └── release_notes_security.rs
 │   │   └── Cargo.toml
 │   ├── firmwaresight-report/
+│   │   ├── examples/
+│   │   │   └── visual_samples.rs
 │   │   ├── src/
 │   │   │   ├── analysis.rs
 │   │   │   ├── diff.rs
@@ -606,12 +612,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── release_render.rs
 │   │   │   ├── render.rs
 │   │   │   ├── schema_check.rs
-│   │   │   └── schemas.rs
+│   │   │   ├── schemas.rs
+│   │   │   └── visual.rs
 │   │   ├── tests/
 │   │   │   ├── analysis_schema_contract.rs
 │   │   │   ├── diff_schema_contract.rs
 │   │   │   ├── gate_schema_contract.rs
-│   │   │   └── release_schema_contract.rs
+│   │   │   ├── release_schema_contract.rs
+│   │   │   └── visual_integration.rs
 │   │   └── Cargo.toml
 │   └── firmwaresight-storage/
 │       ├── migrations/

@@ -27,6 +27,7 @@ import type {
   EvidencePageDto,
   EvidenceRequestDto,
   ExportOutcomeDto,
+  VisualFormatDto,
   GateRunDto,
   GateRunRequestDto,
   HistoryGateRunPageDto,
@@ -64,6 +65,9 @@ const QUERY_SECTION_CHANGES = 'query_section_changes';
 const QUERY_SYMBOL_CHANGES = 'query_symbol_changes';
 const EXPORT_COMPARE_JSON = 'export_compare_json';
 const EXPORT_COMPARE_HTML = 'export_compare_html';
+const EXPORT_COMPARE_VISUAL = 'export_compare_visual';
+const EXPORT_ANALYSIS_VISUAL = 'export_analysis_visual';
+const EXPORT_GATE_VISUAL = 'export_gate_visual';
 const OPEN_PROJECT_CONFIG = 'open_project_config';
 const INSPECT_PROJECT_READINESS = 'inspect_project_readiness';
 const SAVE_PROJECT_POLICY = 'save_project_policy';
@@ -207,6 +211,29 @@ export async function exportCompareJson(diffId: string): Promise<IpcOutcome<Expo
 /** Export the comparison as one self-contained HTML file. */
 export async function exportCompareHtml(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
   return await call<ExportOutcomeDto>(EXPORT_COMPARE_HTML, { diffId });
+}
+
+export async function exportCompareVisual(
+  diffId: string,
+  format: VisualFormatDto,
+): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await call<ExportOutcomeDto>(EXPORT_COMPARE_VISUAL, { diffId, format });
+}
+
+export async function exportAnalysisVisual(
+  selectionId: string,
+  snapshotId: string,
+  format: VisualFormatDto,
+): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await call<ExportOutcomeDto>(EXPORT_ANALYSIS_VISUAL, { selectionId, snapshotId, format });
+}
+
+export async function exportGateVisual(
+  runId: string,
+  snapshotId: string,
+  format: VisualFormatDto,
+): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await call<ExportOutcomeDto>(EXPORT_GATE_VISUAL, { runId, snapshotId, format });
 }
 
 /**

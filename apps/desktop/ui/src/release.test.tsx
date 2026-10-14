@@ -39,6 +39,7 @@ import {
   exportCompareHtml,
   exportCompareJson,
   exportReleaseBundle,
+  exportGateVisual,
   getGateRun,
   getReleaseAttachments,
   inspectProjectReadiness,
@@ -103,6 +104,7 @@ vi.mock('./ipc/bridge', () => ({
   prepareReleaseBundle: vi.fn(),
   chooseBundleDestination: vi.fn(),
   exportReleaseBundle: vi.fn(),
+  exportGateVisual: vi.fn(),
   setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
   getApplicationPreferences: vi.fn(() =>
     Promise.resolve({
@@ -155,6 +157,7 @@ const getRunMock = vi.mocked(getGateRun);
 const prepareBundleMock = vi.mocked(prepareReleaseBundle);
 const chooseDestinationMock = vi.mocked(chooseBundleDestination);
 const exportBundleMock = vi.mocked(exportReleaseBundle);
+const exportGateVisualMock = vi.mocked(exportGateVisual);
 const attachFileMock = vi.mocked(attachReleaseFile);
 const readAttachmentsMock = vi.mocked(getReleaseAttachments);
 const inspectReadinessMock = vi.mocked(inspectProjectReadiness);
@@ -710,6 +713,19 @@ beforeEach(() => {
 });
 
 describe('Release navigation', () => {
+  it('offers a standalone visual report for a current Gate run without changing Bundle export', async () => {
+    await openRelease();
+    await runGate();
+    const region = await screen.findByRole('region', { name: 'Standalone visual report' });
+    expect(within(region).getByRole('button', { name: 'Export PNG' })).toBeDefined();
+    expect(within(region).getByRole('button', { name: 'Export SVG' })).toBeDefined();
+    expect(within(region).getByRole('button', { name: 'Export print-ready HTML' })).toBeDefined();
+    exportGateVisualMock.mockResolvedValue(ok({ status: 'written', fileName: 'firmwaresight-gate.png', format: 'png' }));
+    fireEvent.click(within(region).getByRole('button', { name: 'Export PNG' }));
+    await waitFor(() => expect(exportGateVisualMock).toHaveBeenCalledWith(`gate-${'a'.repeat(64)}`, 'snap-target', 'png'));
+    expect(exportBundleMock).not.toHaveBeenCalled();
+  });
+
   it('lists the five stages this build has and no others', async () => {
     await openRelease();
     const rail = screen.getByRole('navigation', { name: 'Pages' });

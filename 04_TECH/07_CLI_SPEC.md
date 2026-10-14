@@ -42,6 +42,28 @@ stdout：
 stderr：
 - diagnostics/progress/errors。
 
+## Visual report exports (NEXT-44)
+
+`analyze` and `diff` can write an independent visual summary in SVG, PNG, or a self-contained print-ready
+HTML report. These files are rendered from the same report projection used for the chart; they do not alter
+the JSON contract or the human-readable stdout result.
+
+```bash
+fwsight analyze firmware.elf --svg out/analyze.svg --png out/analyze.png --report-html out/analyze.html
+fwsight diff old.elf new.elf --svg out/compare.svg --png out/compare.png --report-html out/compare.html
+```
+
+- `--svg <FILE>` and `--png <FILE>` create standalone image files; these are real SVG and PNG documents,
+  not renamed HTML.
+- `--report-html <FILE>` creates the visual report intended for offline viewing and browser print-to-PDF.
+  It is not native PDF export.
+- `diff --html <FILE>` remains the existing detailed Diff HTML export with its prior output and overwrite
+  behavior. It is distinct from `diff --report-html <FILE>`.
+- New visual export paths are created without replacing existing files. A rendering or write failure exits
+  `6`; when `--json` is also present, stdout remains one JSON document on success or one error envelope on
+  export failure. Successful formats are named on stderr without echoing the selected host paths. Without
+  `--json`, stdout stays the original Analyze or Diff result.
+
 ## Exit codes
 
 - `0` success / gate pass

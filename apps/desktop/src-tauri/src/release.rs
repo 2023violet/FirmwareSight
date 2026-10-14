@@ -42,6 +42,8 @@ use firmwaresight_project::{
     ReadinessNotes, build_context_with_attachments, inspect_project, observe_release_notes,
     policy_sha256, safe_project_display_name,
 };
+use firmwaresight_report::gate::GateExtensionsDto;
+use firmwaresight_report::{AnalysisDocumentDto, GateFindingDto, GateResultsDto};
 use firmwaresight_storage::{
     AcceptReviewError, AcceptedReview, GateRunDraft, GateSnapshotFacts, StoredBudget,
     StoredGateFinding, StoredGateRun,
@@ -84,6 +86,40 @@ const RECORD_NOTE: &str = "This run was read back from history. Its findings, ev
                            of that record, so its numbers stay inside each finding.";
 
 impl Session {
+    pub fn render_gate_visual(
+        &self,
+        run_id: &str,
+        snapshot_id: &str,
+        format: crate::ipc::VisualFormatDto,
+        operation_id: &str,
+    ) -> Result<Vec<u8>, ErrorEnvelopeDto> {
+        let run = self
+            .gate_run(run_id, operation_id)?
+            .filter(|run| run.snapshot_id == snapshot_id)
+            .ok_or_else(|| crate::gate_export_stale(operation_id))?;
+        let snapshot = self
+            .held_snapshot(snapshot_id, operation_id)?
+            .ok_or_else(|| crate::gate_export_stale(operation_id))?;
+        let analysis = AnalysisDocumentDto::from_snapshot(&snapshot, &[]);
+        let projection = GateResultsDto {
+            schema_version: firmwaresight_report::GATE_SCHEMA_VERSION,
+            run_id: run.run_id.clone(),
+            snapshot_id: run.snapshot_id.clone(),
+            findings: run.findings.iter().map(visual_finding).collect(),
+            extensions: GateExtensionsDto {
+                policy_sha256: run.policy_sha256,
+                project_config_schema_version: 0,
+                baseline_snapshot_id: run.baseline_snapshot_id,
+                overall_effective_severity: severity_word(&run.overall_effective_severity),
+                canonical_input_label: None,
+                attachments: Vec::new(),
+            },
+        };
+        let report = firmwaresight_report::visual::VisualReport::gate(&analysis, &projection, None);
+        firmwaresight_report::visual::render(&report, crate::compare::visual_format(format))
+            .map_err(|_| crate::compare::visual_export_error(operation_id))
+    }
+
     /// Re-observe the loaded project's config and workspace without judging or persisting a Gate.
     pub fn inspect_project_readiness(
         &self,
@@ -342,7 +378,7 @@ impl Session {
         let run = self.stored_run(&generated, operation_id)?;
         let acceptances = self.acceptances_for(&generated, operation_id)?;
         let findings = stored_findings(&run, operation_id)?;
-        Ok(gate_run_dto(
+        let dto = gate_run_dto(
             &run,
             &findings,
             &acceptances,
@@ -360,7 +396,9 @@ impl Session {
                 notes.as_ref(),
             )),
             None,
-        ))
+        );
+        self.mark_current_gate_run(&dto.run_id, &dto.snapshot_id, operation_id)?;
+        Ok(dto)
     }
 
     /// Record that a named person accepted one `REVIEW` finding, and report what that did to the run.
@@ -550,6 +588,37 @@ impl Session {
         let db = self.lock_db(operation_id)?;
         db.accepted_reviews_for_run(id)
             .map_err(|err| envelope_from_storage(&err, operation_id))
+    }
+}
+
+fn visual_finding(finding: &GateFindingRowDto) -> GateFindingDto {
+    GateFindingDto {
+        id: finding.id.clone(),
+        rule_id: finding.rule_id.clone(),
+        state: state_word(&finding.state),
+        effective_severity: severity_word(&finding.effective_severity),
+        summary: finding.summary.clone(),
+        evidence_refs: finding.evidence_refs.clone(),
+        remediation: finding.remediation.clone(),
+    }
+}
+
+fn state_word(value: &str) -> &'static str {
+    match value {
+        "PASS" => "PASS",
+        "REVIEW" => "REVIEW",
+        "BLOCK" => "BLOCK",
+        "N/A" => "N/A",
+        _ => "UNKNOWN",
+    }
+}
+
+fn severity_word(value: &str) -> &'static str {
+    match value {
+        "PASS" => "PASS",
+        "REVIEW" => "REVIEW",
+        "BLOCK" => "BLOCK",
+        _ => "UNKNOWN",
     }
 }
 
@@ -1488,7 +1557,66 @@ pub(crate) async fn get_gate_run(
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
 
-    tauri::async_runtime::spawn_blocking(move || session.gate_run(&run_id, &operation_id))
-        .await
-        .map_err(task_join_error)?
+    tauri::async_runtime::spawn_blocking(move || {
+        let run = session.gate_run(&run_id, &operation_id)?;
+        if let Some(run) = run.as_ref() {
+            session.mark_current_gate_run(&run.run_id, &run.snapshot_id, &operation_id)?;
+        }
+        Ok(run)
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+#[tauri::command]
+pub(crate) async fn export_gate_visual(
+    app: AppHandle,
+    run_id: String,
+    snapshot_id: String,
+    format: crate::ipc::VisualFormatDto,
+    state: State<'_, Arc<Session>>,
+) -> Result<crate::ipc::ExportOutcomeDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+    tauri::async_runtime::spawn_blocking(move || {
+        let bytes = session.render_gate_visual(&run_id, &snapshot_id, format, &operation_id)?;
+        let suggested = format!(
+            "firmwaresight-gate-review.{}",
+            crate::compare::visual_format_label(format)
+        );
+        let picked = crate::compare::save_visual_path(
+            &app,
+            "Export Gate review visual report",
+            format,
+            &suggested,
+        );
+        let current_session = Arc::clone(&session);
+        let current_run = run_id.clone();
+        let current_snapshot = snapshot_id.clone();
+        let current_operation = operation_id.clone();
+        let ensure_current = move || {
+            current_session
+                .gate_run_is_current(&current_run, &current_snapshot, &current_operation)
+                .and_then(|current| {
+                    current
+                        .then_some(())
+                        .ok_or_else(|| crate::gate_export_stale(&current_operation))
+                })
+        };
+        ensure_current()?;
+        crate::compare::write_visual_export(
+            picked,
+            &bytes,
+            format,
+            |path| {
+                crate::compare::confirm_visual_replacement(
+                    &app,
+                    &crate::service::display_name(path),
+                )
+            },
+            ensure_current,
+        )
+    })
+    .await
+    .map_err(task_join_error)?
 }

@@ -44,6 +44,7 @@ import {
   attachReleaseFile,
   chooseBundleDestination,
   exportReleaseBundle,
+  exportGateVisual,
   getGateRun,
   getReleaseAttachments,
   inspectProjectReadiness,
@@ -72,6 +73,7 @@ import type {
   ProjectPolicyDto,
   ReleaseAttachmentsDto,
   UnknownDispositionDto,
+  VisualFormatDto,
 } from './ipc/types';
 import { cx } from './styles/classnames';
 
@@ -414,6 +416,7 @@ export function Release({
             unit={unit}
             onSetChanged={invalidateRun}
           />
+          <StandaloneVisualExport run={run} />
           <BundleSection run={run} unit={unit} />
         </>
       )}
@@ -597,6 +600,46 @@ export function Release({
         />
       )}
     </Page>
+  );
+}
+
+function StandaloneVisualExport({ run }: { readonly run: GateRunDto }) {
+  const { t } = useI18n();
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
+  const exportAs = async (format: VisualFormatDto) => {
+    if (busy) return;
+    setBusy(true);
+    const outcome = await exportGateVisual(run.runId, run.snapshotId, format);
+    setBusy(false);
+    if (!outcome.ok) {
+      setError(outcome.envelope);
+      setMessage(null);
+      return;
+    }
+    setError(null);
+    setMessage(outcome.value.status === 'written'
+      ? t('release', 'visualExport.written', { name: outcome.value.fileName ?? t('release', 'visualExport.fallbackName') })
+      : outcome.value.status === 'cancelled'
+        ? t('release', 'visualExport.cancelled')
+        : outcome.value.status === 'kept-existing'
+          ? t('release', 'visualExport.keptExisting')
+          : t('release', 'visualExport.unknownOutcome', { status: outcome.value.status }));
+  };
+  return (
+    <section className={styles['section']} aria-label={t('release', 'visualExport.region')}>
+      <h2>{t('release', 'visualExport.heading')}</h2>
+      <p className={styles['note']}>{t('release', 'visualExport.hint')}</p>
+      <div className={styles['row']}>
+        <Button disabled={busy} onClick={() => void exportAs('png')}>{t('release', 'visualExport.png')}</Button>
+        <Button disabled={busy} onClick={() => void exportAs('svg')}>{t('release', 'visualExport.svg')}</Button>
+        <Button disabled={busy} onClick={() => void exportAs('html')}>{t('release', 'visualExport.html')}</Button>
+      </div>
+      {busy ? <p role="status" aria-live="polite">{t('release', 'visualExport.waiting')}</p> : null}
+      {message === null ? null : <p role="status" aria-live="polite">{message}</p>}
+      {error === null ? null : <ErrorPanel envelope={error} label={t('release', 'visualExport.errorLabel')} heading={t('release', 'visualExport.errorHeading')} />}
+    </section>
   );
 }
 
