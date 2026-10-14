@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
 
 # ACTIVE TASK
 
+> **Current pointer — 2026-10-14:** NEXT-46 is explicitly Owner-authorized in an isolated worktree at baseline `4ac1e4f709396fac7a37a1d92b8095a070b3effa`. Read [NOW.md](NOW.md) and [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md) for current evidence boundaries. Earlier pointers below retain their dated historical meaning. Final candidate acceptance requires fresh independent exact-SHA review; no unconditional push permission is implied.
+
 > **Current pointer — 2026-10-13:** DOC-1 Wave 1A is being integrated under NEXT-34 in a dedicated worktree based on the security-fixed remote baseline `515a55a1e8c9a4d2b672dbf63b440cab296096a0`. Read Git for the local candidate state; this work is not pushed or independently accepted. NEXT-35 independent review is required. Active product implementation task: `NONE`. [NOW.md](NOW.md) is authoritative for current project status. The large fenced timeline below is preserved historical text; its old `LIVE POINTER` wording is not current.
 
 ```text

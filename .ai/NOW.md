@@ -5,10 +5,22 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "CURRENT_INDEX"
 owner: "Engineering"
-last_updated: "2026-10-13"
+last_updated: "2026-10-14"
 ---
 
 # FirmwareSight Now
+
+## Current pointer — 2026-10-14 / NEXT-46
+
+- **Observed remote baseline:** `4ac1e4f709396fac7a37a1d92b8095a070b3effa`, re-read from GitHub and `ls-remote`. [Actions #112](https://github.com/2023violet/FirmwareSight/actions/runs/38535378887) has all 10 Jobs successful on that SHA. Remote evidence proves engineering CI, not native Save-dialog or installed desktop acceptance.
+- **Owner adjudication:** `NEXT45 = ENGINEERING_DELIVERED / REMOTE_CI_PROVEN / REVIEW_EXCEPTIONS_OPEN`. The earlier reviewer `ACCEPT_WITH_LIMITS` and prior conditional-push nonconformance remain historical audit facts. Correct nonduplicated Windows NEXT-45 workspace count: 1,154 passed / 0 failed / 2 opt-in ignored / 54 result lines; the old commit message is not amended.
+- **Active authorized task:** NEXT-46 export output-boundary closure, SVG geometry regression, authoritative NEXT-44/45 acceptance read-back and evidence-based ELF/MAP interoperability foundation. Explicit Owner dispatch authorizes isolated local implementation and conditional single FF push only after fresh independent exact-SHA full mandatory acceptance. Candidate status and verdict are external delivery evidence; this navigation page grants no acceptance.
+- **Code baseline additions since the older snapshot:** DOC-1 navigation integration, project readiness + privacy hardening, bounded intake/100K regression and PNG/SVG/print HTML report export. [Concise evidence ledger](EVIDENCE_LEDGER.md) separates code, CI, Owner verdict and unknown historical evidence.
+- **Compatibility boundary:** [ELF interoperability matrix](../04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md). Keil/IAR compiler cohorts remain UNVERIFIED; ArmLink/IAR MAP remain NOT_SUPPORTED / FIXTURE_BLOCKED. New Clang class/endian fixtures prove basic metadata only.
+- **Protected state:** Original main remains at `e34f9e6` with the same nine staged files; it is intentionally older than remote. No reconciliation or push from that tree is authorized. Owner appdata, private firmware and V1 archives are outside this batch.
+- **Unchanged product limits:** Native dialog/keyboard/theme runtime evidence remains NOT_VERIFIED unless independently measured. V1 external sessions remain unclaimed; product license stays Proprietary. No public release, signing, updater or native PDF claim.
+
+## Historical navigation snapshot — 2026-10-13 (preserved)
 
 As of 2026-10-13. This is the current status index. Older records retain the status known when written; this page does not rewrite history.
 

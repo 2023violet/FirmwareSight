@@ -175,6 +175,15 @@ export function Compare({
   const [exportError, setExportError] = useState<ErrorEnvelopeDto | null>(null);
   const [exporting, setExporting] = useState(false);
 
+  const exportRequest = useRef(0);
+  useEffect(() => {
+    exportRequest.current += 1;
+    setExporting(false);
+    setExportNote(null);
+    setExportError(null);
+    return () => { exportRequest.current += 1; };
+  }, [summary?.diffId]);
+
   const additionsRequest = useRef(0);
 
   /**
@@ -335,12 +344,14 @@ export function Compare({
       if (summary === null) {
         return;
       }
+      const request = ++exportRequest.current;
       setExporting(true);
       const outcome = format === 'json'
         ? await exportCompareJson(summary.diffId)
         : format === 'html'
           ? await exportCompareHtml(summary.diffId)
           : await exportCompareVisual(summary.diffId, format === 'visual-html' ? 'html' : format);
+      if (request !== exportRequest.current) return;
       setExporting(false);
 
       if (!outcome.ok) {

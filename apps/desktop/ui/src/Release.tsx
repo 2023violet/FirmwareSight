@@ -416,7 +416,7 @@ export function Release({
             unit={unit}
             onSetChanged={invalidateRun}
           />
-          <StandaloneVisualExport run={run} />
+          <StandaloneVisualExport key={`${run.runId}:${run.snapshotId}`} run={run} />
           <BundleSection run={run} unit={unit} />
         </>
       )}

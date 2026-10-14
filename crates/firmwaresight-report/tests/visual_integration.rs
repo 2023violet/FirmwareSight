@@ -447,3 +447,33 @@ fn untrusted_markup_host_paths_unicode_and_huge_region_inputs_are_bounded() {
     }
     assert!(html.contains("label withheld"));
 }
+
+#[test]
+fn zero_and_subpixel_occupancy_omit_only_the_decorative_foreground() {
+    let dto = analysis(&snapshot('a', "firmware.elf", 1024, None), "firmware.elf");
+    for (used, capacity, state, foreground) in [
+        (Some(0), Some(8192), RegionUsageState::Exact, false),
+        (Some(1), Some(u64::MAX), RegionUsageState::Exact, false),
+        (Some(8192), Some(8192), RegionUsageState::Exact, true),
+        (Some(1), None, RegionUsageState::Unknown, false),
+        (Some(1), Some(0), RegionUsageState::Exact, false),
+    ] {
+        let report = VisualReport::analyze(&dto, &[region("FLASH", used, capacity, state)]);
+        let svg = String::from_utf8(visual::render(&report, VisualFormat::Svg).unwrap()).unwrap();
+        assert!(
+            !svg.contains("width=\"0\""),
+            "zero-width decoration is invalid geometry"
+        );
+        assert!(!svg.contains("NaN") && !svg.contains("Infinity"));
+        assert_eq!(
+            svg.contains("width=\"144\" height=\"16\" fill=\"#2563EB\""),
+            foreground
+        );
+        let html = String::from_utf8(visual::render(&report, VisualFormat::Html).unwrap()).unwrap();
+        assert!(html.contains(&format!("{} bytes", used.unwrap())));
+        assert!(!html.contains("100% occupancy") && !html.contains("0% occupancy"));
+        let png = visual::render(&report, VisualFormat::Png).unwrap();
+        let decoded = resvg::tiny_skia::Pixmap::decode_png(&png).unwrap();
+        assert_eq!((decoded.width(), decoded.height()), (WIDTH, HEIGHT));
+    }
+}

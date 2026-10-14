@@ -20,6 +20,7 @@
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+use tracing_subscriber::{Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use clap::{Parser, Subcommand};
 use firmwaresight_artifact::ArtifactError;
@@ -67,7 +68,7 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Analyze one artifact and report the facts that were observed.
+    /// Analyze ELF metadata (32/64-bit, either endian); Keil/IAR compiler cohorts remain unverified.
     Analyze(AnalyzeArgs),
     /// Compare two artifacts and report what changed between them.
     Diff(DiffArgs),
@@ -275,12 +276,20 @@ struct GateArgs {
 
 fn main() -> ExitCode {
     // Diagnostics belong on stderr so that `--json` stdout stays a single clean document.
-    tracing_subscriber::fmt()
-        .with_env_filter(
+    // Dependency diagnostics can contain font/source host paths. Only our typed,
+    // path-free operation events belong on the CLI output boundary, even with RUST_LOG=trace.
+    tracing_subscriber::registry()
+        .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("warn")),
         )
-        .with_writer(std::io::stderr)
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_writer(std::io::stderr)
+                .with_filter(tracing_subscriber::filter::filter_fn(|metadata| {
+                    metadata.target() == "fwsight"
+                })),
+        )
         .init();
 
     // Parsing goes through `parse_from` rather than `Cli::parse`, because `parse` exits the
@@ -458,6 +467,9 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
                 "error: {} (code {}, operation {operation_id})",
                 envelope.message, envelope.code
             );
+            if matches!(err, ArtifactError::MapUnsupported { .. }) {
+                eprintln!("next: {}", err.remediation());
+            }
             tracing::error!(operation_id, code = err.stable_code(), "analysis failed");
             ExitCode::from(exit_code_for(&err))
         }
@@ -503,8 +515,12 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
     // asked for must not already have announced success on stdout.
     if let Some(path) = &args.html {
         let html = diff_render::render_html(&dto);
-        if let Err(error) = std::fs::write(path, html) {
-            return report_export_error(path, &error, args.json, operation_id);
+        if std::fs::write(path, html).is_err() {
+            return report_export_error(
+                "Could not write the detailed HTML export.",
+                args.json,
+                operation_id,
+            );
         }
     }
 
@@ -988,29 +1004,25 @@ fn report_diff_error(err: &DiffError, json: bool, operation_id: &str) -> ExitCod
     ExitCode::from(EXIT_USAGE)
 }
 
-/// The comparison succeeded; writing its export did not. Exit 6, and the host path stays in
-/// diagnostics rather than in the machine-readable envelope.
-fn report_export_error(
-    path: &Path,
-    error: &std::io::Error,
-    json: bool,
-    operation_id: &str,
-) -> ExitCode {
+/// One output boundary for export failures. Callers pass trusted static categories,
+/// never destination names or raw OS errors, to either stream or tracing.
+fn report_export_error(message: &'static str, json: bool, operation_id: &str) -> ExitCode {
     let envelope = render::ErrorEnvelope::new(
         render::EXPORT_FAILED_CODE,
-        format!("could not write the HTML export: {error}"),
+        message,
         operation_id,
     )
     .with_remediation(
-        "Check that the target path exists and is writable, then run the command again.",
+        "Choose a writable destination with an existing parent; for visual exports choose a new file, then retry.",
     );
     if json {
         println!("{}", envelope.to_json());
     }
     eprintln!(
-        "error: could not write {} (code {}, operation {operation_id})",
-        path.display(),
-        envelope.code
+        "error: {} (code {}, operation {operation_id}); {}",
+        envelope.message,
+        envelope.code,
+        envelope.remediation.as_deref().unwrap_or_default()
     );
     tracing::error!(operation_id, "export failed");
     ExitCode::from(EXIT_EXPORT)
@@ -1033,23 +1045,16 @@ fn write_visual_exports(
         let result =
             visual::render(report, format).and_then(|bytes| visual::write_new(path, &bytes));
         if let Err(error) = result {
-            let envelope = render::ErrorEnvelope::new(
-                render::EXPORT_FAILED_CODE,
-                format!("could not create the visual report: {error}"),
-                operation_id,
-            )
-            .with_remediation(
-                "Check that the target path does not already exist and is writable, then run the command again.",
-            );
-            if json {
-                println!("{}", envelope.to_json());
-            }
-            eprintln!(
-                "error: could not write {} (code {}, operation {operation_id})",
-                path.display(),
-                envelope.code
-            );
-            tracing::error!(operation_id, "visual export failed");
+            let message = match error {
+                visual::VisualError::Render => {
+                    "Visual rendering failed; check installed local fonts and retry."
+                }
+                visual::VisualError::Exists => "Export destination exists; choose a new file.",
+                visual::VisualError::Write => {
+                    "Export could not be written; choose a writable directory and retry."
+                }
+            };
+            report_export_error(message, json, operation_id);
             return Some(EXIT_EXPORT);
         }
         let label = match format {

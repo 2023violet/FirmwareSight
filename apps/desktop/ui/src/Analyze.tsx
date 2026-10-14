@@ -9,7 +9,7 @@
  * the in-flight flag - is this page's own business.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './Analyze.module.css';
 import { Button } from './components/Button';
@@ -157,14 +157,25 @@ export function Analyze({
   const currentSummary =
     summary !== null && error === null && !pendingSelection ? summary : null;
 
+  const exportRequest = useRef(0);
+  useEffect(() => {
+    exportRequest.current += 1;
+    setExporting(false);
+    setExportError(null);
+    setExportMessage(null);
+    return () => { exportRequest.current += 1; };
+  }, [selection?.selectionId, currentSummary?.identity.snapshotId]);
+
   const exportVisual = async (format: 'png' | 'svg' | 'html') => {
     if (currentSummary === null || selection === null || analyzing || exporting) return;
+    const request = ++exportRequest.current;
     setExporting(true);
     const result = await exportAnalysisVisual(
       selection.selectionId,
       currentSummary.identity.snapshotId,
       format,
     );
+    if (request !== exportRequest.current) return;
     setExporting(false);
     if (!result.ok) {
       setExportError(result.envelope);

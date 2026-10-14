@@ -3,6 +3,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ACTIVE_TASK.md
 │   ├── CURRENT_STATE.md
 │   ├── DECISIONS.md
+│   ├── EVIDENCE_LEDGER.md
 │   ├── HANDOFF.md
 │   ├── NOW.md
 │   └── README.md
@@ -74,7 +75,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 26_PORTABLE_SCHEMA_POLICY.md
 │   ├── 27_GATE_STATE_SEMANTICS.md
 │   ├── 28_RELEASE_ATTACHED_BYTE_EVIDENCE.md
-│   └── 38_VISUAL_REPORT_EXPORT.md
+│   ├── 38_VISUAL_REPORT_EXPORT.md
+│   └── 39_ELF_TOOLCHAIN_INTEROPERABILITY.md
 ├── 05_ENGINEERING/
 │   ├── 00_REPO_STRUCTURE.md
 │   ├── 01_CODING_STANDARDS.md
@@ -257,6 +259,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   └── main.rs
 │   │   ├── tests/
 │   │   │   ├── diff_cli.rs
+│   │   │   ├── export_privacy.rs
 │   │   │   ├── gate_cli.rs
 │   │   │   ├── golden.rs
 │   │   │   ├── p2_golden.rs
@@ -553,7 +556,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── map_companion_identity.rs
 │   │   │   ├── p0_acceptance.rs
 │   │   │   ├── p2_fixture_pair.rs
-│   │   │   └── p5_compat_fixtures.rs
+│   │   │   ├── p5_compat_fixtures.rs
+│   │   │   └── toolchain_interop.rs
 │   │   └── Cargo.toml
 │   ├── firmwaresight-core/
 │   │   ├── src/
@@ -667,6 +671,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── tauri-capability.baseline.json
 ├── fixtures/
 │   ├── elf/
+│   │   ├── interop-clang/
+│   │   │   ├── aarch64-none-elf.o
+│   │   │   ├── aarch64_be-none-elf.o
+│   │   │   ├── armeb-none-eabi.o
+│   │   │   ├── armv7-none-eabi.o
+│   │   │   ├── fixture.c
+│   │   │   ├── provenance.json
+│   │   │   └── README.md
 │   │   ├── p0-basic/
 │   │   │   ├── source/
 │   │   │   │   └── main.c
@@ -875,6 +887,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── test_verify_bundle_portability.py
 │   ├── check.py
 │   ├── gen_desktop_icons.py
+│   ├── gen_interop_fixtures.py
 │   ├── gen_p0_fixtures.py
 │   ├── gen_p0_workload.py
 │   ├── gen_p2_fixtures.py

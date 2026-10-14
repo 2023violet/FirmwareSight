@@ -24,7 +24,7 @@
  * here checks a number the shell did not send, because the page computes none of them.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
@@ -713,6 +713,21 @@ beforeEach(() => {
 });
 
 describe('Release navigation', () => {
+  it('does not attach a late visual export outcome to a newer Gate run', async () => {
+    await openRelease();
+    await runGate();
+    const region = await screen.findByRole('region', { name: 'Standalone visual report' });
+    let finish!: (value: Awaited<ReturnType<typeof exportGateVisual>>) => void;
+    exportGateVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    fireEvent.click(within(region).getByRole('button', { name: 'Export SVG' }));
+    await waitFor(() => expect(exportGateVisualMock).toHaveBeenCalled());
+    runGateMock.mockResolvedValueOnce(ok(gateRun({ runId: 'gate-new-subject' })));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run Gate' })); });
+    await act(async () => { finish(ok({ status: 'written', fileName: 'old-gate-report.svg', format: 'svg' })); });
+    expect(screen.queryByText(/old-gate-report/)).toBeNull();
+    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it('offers a standalone visual report for a current Gate run without changing Bundle export', async () => {
     await openRelease();
     await runGate();

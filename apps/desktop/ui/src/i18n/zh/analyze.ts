@@ -137,7 +137,7 @@ export const analyze: CatalogFor<'analyze'> = {
   'gettingStarted.firstActionBefore': '在分析页上，用 ',
   'gettingStarted.firstActionAfter': ' 按钮选择一个 ELF 镜像文件。文件留在原处；不会被复制进任何工程目录。',
   'gettingStarted.mapTitle': 'MAP 文件会改变什么',
-  'gettingStarted.mapBody': '镜像文件旁边有一个 GNU ld MAP 是可选的，它会改善区域与布局证据。没有它，一些事实会保持 UNKNOWN，而不是靠猜测填上。',
+  'gettingStarted.mapBody': 'ELF 元数据解析与链接器 MAP 支持是两项能力。GNU ld MAP 可选，可改善区域证据。Keil/IAR 编译器样本群尚未验证，ArmLink/IAR MAP 尚不支持。移除不支持的 MAP 可单独分析兼容 ELF；容量和归属仍可能为 UNKNOWN。',
   'gettingStarted.flowTitle': '产品流程',
   'gettingStarted.stepThen': '然后 ',
   'gettingStarted.stepAnalyze': '分析',

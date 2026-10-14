@@ -135,7 +135,7 @@ export const analyze = {
   'gettingStarted.firstActionBefore': 'On Analyze, choose an ELF artifact with ',
   'gettingStarted.firstActionAfter': '. The file stays where it is; nothing is copied into a project folder.',
   'gettingStarted.mapTitle': 'What a MAP file changes',
-  'gettingStarted.mapBody': 'A GNU ld MAP next to the artifact is optional, and it improves region and layout evidence. Without it, some facts stay UNKNOWN instead of being guessed at.',
+  'gettingStarted.mapBody': 'ELF metadata parsing is separate from linker MAP support. A GNU ld MAP is optional and improves region evidence. Keil/IAR compiler cohorts are unverified; ArmLink/IAR MAPs are unsupported. Omit an unsupported MAP to analyze compatible ELF alone; capacities and attribution can remain UNKNOWN.',
   'gettingStarted.flowTitle': 'The product flow',
   'gettingStarted.stepThen': 'then ',
   'gettingStarted.stepAnalyze': 'Analyze',

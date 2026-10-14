@@ -630,7 +630,18 @@ fn svg(report: &VisualReport) -> String {
         }
         if let Some((n, d)) = row.bar {
             let width = ((n as f64 / d as f64).clamp(0.0, 1.0) * 144.0).round();
-            out.push_str(&format!("<rect x=\"1392\" y=\"{}\" width=\"144\" height=\"16\" fill=\"#F1F3F5\"/><rect x=\"1392\" y=\"{}\" width=\"{width}\" height=\"16\" fill=\"#2563EB\"/>", y+12, y+12));
+            out.push_str(&format!(
+                "<rect x=\"1392\" y=\"{}\" width=\"144\" height=\"16\" fill=\"#F1F3F5\"/>",
+                y + 12
+            ));
+            // Exact integers remain in the row; a rounded-zero decorative bar
+            // has no area and must not be clamped into a misleading positive area.
+            if width > 0.0 {
+                out.push_str(&format!(
+                    "<rect x=\"1392\" y=\"{}\" width=\"{width}\" height=\"16\" fill=\"#2563EB\"/>",
+                    y + 12
+                ));
+            }
         }
         svg_text(
             &mut out,

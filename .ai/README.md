@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
 
 # AI Entry Point
 
+> **Current pointer — 2026-10-14:** NEXT-46 is explicitly Owner-authorized in an isolated worktree at baseline `4ac1e4f709396fac7a37a1d92b8095a070b3effa`. Read [NOW.md](NOW.md) and [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md) for current evidence boundaries. Earlier pointers below retain their dated historical meaning. Final candidate acceptance requires fresh independent exact-SHA review; no unconditional push permission is implied.
+
 > **Current status first:** read [NOW.md](NOW.md). For current status and evidence boundaries it supersedes stale “live” wording in this accumulated historical entry; it does not rewrite dated decisions or grant task authority. Then read [ACTIVE_TASK.md](ACTIVE_TASK.md), [CURRENT_STATE.md](CURRENT_STATE.md), [DECISIONS.md](DECISIONS.md), and the relevant current ADR/spec. The remainder of this file is a dated handoff record.
 
 Baseline `0.6.0` · `P0: PASS` (frozen) · `P1-A0: COMPLETE` with its correctness closure ·

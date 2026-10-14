@@ -10,6 +10,8 @@ last_updated: "2026-10-09"
 
 # Format Support Strategy
 
+> **Current evidence pointer — 2026-10-14 / NEXT-46:** [ELF interoperability foundation](39_ELF_TOOLCHAIN_INTEROPERABILITY.md) separates container recognition, parsed metadata, memory accounting, verified compiler cohorts and MAP support. ELF32/64 and both byte orders have Clang metadata fixtures; Keil/IAR cohorts remain UNVERIFIED and ArmLink/IAR MAP remain NOT_SUPPORTED / FIXTURE_BLOCKED. The older roadmap table below is retained as dated intent, not a current support claim.
+
 ## Principle
 
 “能打开”不等于“支持”。

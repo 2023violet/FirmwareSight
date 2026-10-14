@@ -78,12 +78,11 @@ impl MapEvidence {
 /// `Ok(false)` when nothing identifies it at all. A negative answer is never a silent partial
 /// parse.
 pub fn detect(text: &str) -> Result<bool, ArtifactError> {
-    if is_gnu_ld(text) {
-        return Ok(true);
-    }
     let foreign = [
         "ARM Linker map information",
+        "Tool: armlink",
         "*** MAP FILE",
+        "IAR ELF Linker",
         "IAR Linker",
         "RN32/RN42",
         "Linker Map File",
@@ -95,7 +94,9 @@ pub fn detect(text: &str) -> Result<bool, ArtifactError> {
             });
         }
     }
-    Ok(false)
+    // A foreign header outranks incidental GNU words in scripts, notes or a
+    // concatenated file. Refusal is safer than attributing foreign placement as GNU.
+    Ok(is_gnu_ld(text))
 }
 
 /// Whether this text carries a GNU ld banner.

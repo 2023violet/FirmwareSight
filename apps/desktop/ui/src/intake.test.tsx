@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
@@ -728,6 +728,26 @@ describe('P1-A0 intake screen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
     await screen.findByText('other.elf');
     expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
+  });
+
+  it('does not attach a late export outcome to a different successful analysis', async () => {
+    let finish!: (value: Awaited<ReturnType<typeof exportAnalysisVisual>>) => void;
+    exportAnalysisVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    const subject = (id: string) => <Analyze
+      unit="bytes" onUnitChange={() => undefined}
+      selection={selection({ selectionId: id })} onSelectionChange={() => undefined}
+      analyzedSelectionId={id}
+      lastGood={summary({ identity: { ...summary().identity, snapshotId: id } })}
+      gettingStartedHidden onHideGettingStarted={() => undefined}
+      onLastGoodChange={() => undefined}
+    />;
+    const mounted = render(subject('old-subject'));
+    fireEvent.click(screen.getByRole('button', { name: 'Export SVG' }));
+    await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalled());
+    mounted.rerender(subject('new-subject'));
+    await act(async () => { finish(ok({ status: 'written', fileName: 'old-subject-report.svg', format: 'svg' })); });
+    expect(screen.queryByText(/old-subject-report/)).toBeNull();
+    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('never presents the last good analysis as the failed candidate', async () => {

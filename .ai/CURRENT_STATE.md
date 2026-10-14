@@ -10,6 +10,8 @@ last_updated: "2026-10-12"
 
 # Current State
 
+> **Current pointer — 2026-10-14:** NEXT-46 is explicitly Owner-authorized in an isolated worktree at baseline `4ac1e4f709396fac7a37a1d92b8095a070b3effa`. Read [NOW.md](NOW.md) and [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md) for current evidence boundaries. Earlier pointers below retain their dated historical meaning. Final candidate acceptance requires fresh independent exact-SHA review; no unconditional push permission is implied.
+
 > **Current pointer — 2026-10-13:** [NOW.md](NOW.md) is the concise, evidence-labelled status index and supersedes stale “live” wording below for current status only. Dated entries are preserved as historical records; their `OPEN` or `NOT_AUTHORIZED` statements describe what was known at the time and are not retroactively changed. `BASELINE.yaml` remains the baseline ledger and its `active_task: NONE` value is not changed by this documentation task.
 
 - Date: 2026-10-12 *(the live state is the `B2_U1R2` entry below, which closes the `NEXT-12 v1.1` round it follows; the

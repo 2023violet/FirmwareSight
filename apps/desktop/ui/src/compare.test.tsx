@@ -18,7 +18,7 @@
  * with rows that are not additions at all.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
@@ -46,6 +46,7 @@ import type {
   CompareCandidateDto,
   CompareSummaryDto,
   ErrorEnvelopeDto,
+  ExportOutcomeDto,
   SectionChangePageDto,
   SectionChangeQueryDto,
   SectionChangeRowDto,
@@ -1267,6 +1268,21 @@ describe('the ranking as a way to the full list', () => {
 });
 
 describe('export', () => {
+  it('does not attach a late visual export outcome to a newer comparison', async () => {
+    await openCompare();
+    await runCompare();
+    const pending = deferred<ExportOutcomeDto>();
+    exportVisualMock.mockReturnValueOnce(pending.promise);
+    fireEvent.click(screen.getByRole('button', { name: 'Export SVG' }));
+    await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
+    compareMock.mockResolvedValueOnce(ok(comparison({ diffId: 'cmp-new-subject' })));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Compare' })); });
+    await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-new-subject')).toBe(true));
+    await act(async () => { pending.resolve(ok({ status: 'written', fileName: 'old-comparison-report.svg', format: 'svg' })); });
+    expect(screen.queryByText(/old-comparison-report/)).toBeNull();
+    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it('offers visual formats beside the existing portable JSON and detailed HTML exports', async () => {
     await openCompare();
     await runCompare();
