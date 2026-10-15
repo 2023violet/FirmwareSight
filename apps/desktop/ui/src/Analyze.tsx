@@ -66,6 +66,8 @@ export function Analyze({
   const [analyzing, setAnalyzing] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  /** Shown outside the export region, which is hidden while a newer selection waits to be analyzed. */
+  const [staleExportNote, setStaleExportNote] = useState(false);
   const [exportError, setExportError] = useState<ErrorEnvelopeDto | null>(null);
 
   /**
@@ -124,6 +126,7 @@ export function Analyze({
       return;
     }
     setAnalyzing(true);
+    setStaleExportNote(false);
     const outcome = await analyzeSelection(selection.selectionId);
     setAnalyzing(false);
 
@@ -185,6 +188,7 @@ export function Analyze({
     if (currentSummary === null || selection === null || analyzing || exporting) return;
     const request = ++exportRequest.current;
     setExporting(true);
+    setStaleExportNote(false);
     const result = await exportAnalysisVisual(
       selection.selectionId,
       currentSummary.identity.snapshotId,
@@ -194,7 +198,7 @@ export function Analyze({
       // The analysis on screen changed while the Save dialog was open; Rust refused to write the old one
       // (M1, AC24). Say so rather than stay silent.
       if (!result.ok && result.envelope.code === 'ERR-EXPORT-6002') {
-        setExportMessage(t('analyze', 'export.staleNote'));
+        setStaleExportNote(true);
       }
       return;
     }
@@ -336,6 +340,11 @@ export function Analyze({
         )}
       </section>
 
+      {staleExportNote ? (
+        <p className={styles['status']} role="status" aria-live="polite">
+          {t('analyze', 'export.staleNote')}
+        </p>
+      ) : null}
       {analyzing ? (
         // The only asynchronous fact on the screen. Without a live region it is visible to sighted
         // users and silent for everyone else, because the button's own disabled state says nothing

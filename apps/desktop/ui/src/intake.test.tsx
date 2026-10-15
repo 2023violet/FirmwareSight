@@ -779,6 +779,22 @@ describe('P1-A0 intake screen', () => {
     expect(screen.getByText(/analysis changed while the Save dialog was open, so nothing was written/)).toBeDefined();
   });
 
+  it('keeps the stale-export note visible when the new selection hides the export region', async () => {
+    let finish!: (value: Awaited<ReturnType<typeof exportAnalysisVisual>>) => void;
+    exportAnalysisVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+    fireEvent.click(screen.getByRole('button', { name: 'Export PNG' }));
+    await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalled());
+    selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
+    await screen.findByText('other.elf');
+    expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
+    await act(async () => { finish(fail({ code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null })); });
+    expect(screen.getByText(/analysis changed while the Save dialog was open/)).toBeDefined();
+  });
+
   it('never presents the last good analysis as the failed candidate', async () => {
     await chooseArtifact();
     await analyze();

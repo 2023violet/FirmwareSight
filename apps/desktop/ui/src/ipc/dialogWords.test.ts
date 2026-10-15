@@ -74,4 +74,21 @@ describe('focus after a native dialog', () => {
     expect(document.activeElement).toBe(button);
     button.remove();
   });
+
+  it('waits for a control that is disabled while its dialog is open', async () => {
+    const { invoke } = await import('@tauri-apps/api/core');
+    const bridge = await import('./bridge');
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    button.focus();
+    vi.mocked(invoke).mockImplementationOnce(async () => {
+      button.disabled = true; // the page disables it, which drops focus to the body
+      setTimeout(() => { button.disabled = false; }, 40); // and re-enables it a render later
+      return null;
+    });
+    await bridge.selectArtifact();
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    expect(document.activeElement).toBe(button);
+    button.remove();
+  });
 });

@@ -418,10 +418,27 @@ async function dialogCall<T>(
   try {
     return await call<T>(command, args);
   } finally {
-    const now = typeof document === 'undefined' ? null : document.activeElement;
-    if (origin !== null && origin.isConnected && (now === null || now === document.body)) {
-      origin.focus();
+    if (origin !== null) {
+      restoreFocus(origin);
     }
+  }
+}
+
+/**
+ * Put focus back on `origin` once it can take it. A page usually disables the control while its dialog
+ * is open and re-enables it a render after the call returns, so the first attempt can meet a disabled
+ * button; a few short retries cover that without fighting a reader who has moved focus on purpose.
+ */
+function restoreFocus(origin: HTMLElement, attempt = 0): void {
+  const now = document.activeElement;
+  if (!origin.isConnected || (now !== null && now !== document.body && now !== origin)) {
+    return;
+  }
+  if (now !== origin) {
+    origin.focus();
+  }
+  if (document.activeElement !== origin && attempt < 5) {
+    setTimeout(() => restoreFocus(origin, attempt + 1), 30);
   }
 }
 
