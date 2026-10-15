@@ -4,10 +4,107 @@
   "generators": [
     "scripts/gen_p0_fixtures.py",
     "scripts/gen_p2_fixtures.py",
-    "scripts/gen_p5_compat_fixtures.py"
+    "scripts/gen_p5_compat_fixtures.py",
+    "scripts/gen_m2_object_fixtures.py"
   ],
   "note": "Tests verify these hashes before trusting any golden. Each value is the SHA-256 of the committed blob, so it must also equal the bytes a fresh checkout yields on any platform; .gitattributes is what makes that true.",
   "files": [
+    {
+      "path": "fixtures/elf/m2-objects/base/firmware.elf",
+      "sha256": "85ae4fc4e2b8d460522ede8a00db1e1ea4cb5c3efe689962a707ae2f90c89724",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-artifact"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/base/firmware.map",
+      "sha256": "4220fd07b1011a0b6ea0844f344e075544411505c5e2b91bb3d02950f69c6941",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-artifact"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/base/fixture.toml",
+      "sha256": "c6ca892bb39ff611c4808672fd384bdc581e66ebef978b89bc81e54ffab9bf03",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/base/objects.ld",
+      "sha256": "980ee13edac50b778e3f2ab2139f7ca67aad0ece515db2708d05585d784a1ee0",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/base/source/app/main.c",
+      "sha256": "2c6a3155e1f822c055c2ea7812515105e6421a596d8299fa3c23bd3cb4e5f936",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/base/source/app/sensors/imu.c",
+      "sha256": "6d32a5c425d9049be25ff8e88adec75402292c1e09fa5281eb9932e59598dcb2",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/base/source/drv/spi.c",
+      "sha256": "9907dfce116fd5d60203a8b929e950639399f1d81da9a28b06bd59d6ee012d76",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/base/source/drv/uart.c",
+      "sha256": "5f5bca62c85bb10c76b9cc88316c9c51be3dfce819aafce4338336f6572e2f78",
+      "fixture": "m2-objects-base",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/firmware.elf",
+      "sha256": "3c9daa4f7c09febe8e6350dded6b701ae2b95587a45db421393e42295903d9fc",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-artifact"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/firmware.map",
+      "sha256": "db509ef8fd7be6ceb5b0c852aa24b864312110fd9361207236d142d9f0be943e",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-artifact"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/fixture.toml",
+      "sha256": "c600590baa5a3baee06c2cd8280d9d973092b2542b5aab5f69825712fdff144a",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/objects.ld",
+      "sha256": "980ee13edac50b778e3f2ab2139f7ca67aad0ece515db2708d05585d784a1ee0",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/source/app/main.c",
+      "sha256": "f7494c17ac1beb2830bd97fcd46e9f42bb54e2b01ed70f69e0d2ea5c04881519",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/source/app/sensors/imu.c",
+      "sha256": "af7fda12ec61e10a30026109c70dedce7553a24727cc755bb4a0def80e7e6a6a",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/source/drv/spi.c",
+      "sha256": "9907dfce116fd5d60203a8b929e950639399f1d81da9a28b06bd59d6ee012d76",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-support"
+    },
+    {
+      "path": "fixtures/elf/m2-objects/target/source/drv/uart.c",
+      "sha256": "5f5bca62c85bb10c76b9cc88316c9c51be3dfce819aafce4338336f6572e2f78",
+      "fixture": "m2-objects-target",
+      "purpose": "fixture-support"
+    },
     {
       "path": "fixtures/elf/p0-basic/firmware.elf",
       "sha256": "1c0ae94e611497c1635c117834132f23b36799ad651852ba878be421ba20557f",

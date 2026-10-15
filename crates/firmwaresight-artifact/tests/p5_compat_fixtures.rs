@@ -235,9 +235,10 @@ fn the_clang_fixture_names_clang_in_its_own_bytes_and_the_gcc_fixtures_name_gcc(
         vec!["fixtures/elf/p5-compat/clang-arm/firmware.elf".to_owned()],
         "the cohort carries exactly one Clang-produced ELF, and it is the one built for that purpose"
     );
+    // M2 (ADR-0033) adds two GCC builds under fixtures/elf/m2-objects.
     assert_eq!(
         gcc_built.len(),
-        10,
+        12,
         "ten ELF files must carry the Arm GCC banner, got {}",
         gcc_built.len()
     );
@@ -691,8 +692,8 @@ fn the_reported_image_footprint_equals_the_bytes_the_file_claims_are_loaded() {
     let elfs = committed_elfs();
     assert_eq!(
         elfs.len(),
-        11,
-        "the manifest records eleven ELF fixtures; a different count means a fixture went missing,          not that this assertion is stale"
+        13,
+        "the manifest records thirteen ELF fixtures (two added by M2, ADR-0033); a different count means a fixture went missing,          not that this assertion is stale"
     );
 
     for relative in &elfs {
