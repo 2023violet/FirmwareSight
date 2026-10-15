@@ -11,14 +11,13 @@ last_updated: "2026-10-14"
 # Active Task
 
 ```text
-NONE
+M1_FIRST_USE_EXPERIENCE
 ```
 
-No product implementation task is authorized. Do not pick work from the roadmap on your own (AGENTS.md §1).
+- **Authorized by:** the Owner, in chat on 2026-10-14.
+- **Scope:** copy and jargon cut, drag-and-drop intake, Overview memory bars, Release step order, table overflow, native dialog localization, and native QA for NEXT44-AC24, NEXT44-AC26 and NEXT45-AC20.
+- **Base:** `cee270c`. **Branch:** `feature/m1-first-use`.
+- **Spec and acceptance criteria:** [06_DELIVERY/10_M1_FIRST_USE_EXPERIENCE.md](../06_DELIVERY/10_M1_FIRST_USE_EXPERIENCE.md).
+- **Not authorized:** new formats, object attribution, signing, Core parser, diff or Gate logic changes, schema changes, new runtime dependencies, visual restyling, or a push without Owner approval.
 
-Most recently completed:
-
-- NEXT-47 engineering integration of `76b5c2c`. Native QA is deferred; see [NOW.md](NOW.md).
-- 2026-10-14 lean batch: local disk cleanup (Phase A), plus this repository and context slimdown (Phase B). Documentation only, no product code changed.
-
-When the Owner authorizes a task, overwrite the block above with the task ID, scope, authorization source and acceptance criteria, and keep it under one page. Long specs belong in their own document; link to it from here. The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).
+The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).
