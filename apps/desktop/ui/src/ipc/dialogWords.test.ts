@@ -1,4 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
 
 import { dialogWords, setDialogLanguage, withDialog, type DialogKind } from './dialogWords';
 
@@ -54,4 +56,22 @@ describe('native dialog words', () => {
       }
     });
   }
+});
+
+describe('focus after a native dialog', () => {
+  it('returns focus to the control that opened the dialog', async () => {
+    const { invoke } = await import('@tauri-apps/api/core');
+    const bridge = await import('./bridge');
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    button.focus();
+    vi.mocked(invoke).mockImplementationOnce(async () => {
+      // What Windows does when a native dialog closes: focus goes to the window, not the button.
+      button.blur();
+      return null;
+    });
+    await bridge.selectArtifact();
+    expect(document.activeElement).toBe(button);
+    button.remove();
+  });
 });

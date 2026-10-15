@@ -105,7 +105,7 @@ export type IpcOutcome<T> =
  * the screen keeps whatever it was showing.
  */
 export async function selectArtifact(): Promise<IpcOutcome<SelectionDto | null>> {
-  return await call<SelectionDto | null>(SELECT_ARTIFACT, withDialog('pickArtifact'));
+  return await dialogCall<SelectionDto | null>(SELECT_ARTIFACT, withDialog('pickArtifact'));
 }
 
 /**
@@ -116,7 +116,7 @@ export async function selectArtifact(): Promise<IpcOutcome<SelectionDto | null>>
 export async function attachMap(
   selectionId: string,
 ): Promise<IpcOutcome<SelectionDto | null>> {
-  return await call<SelectionDto | null>(ATTACH_MAP, withDialog('pickMap', { selectionId }));
+  return await dialogCall<SelectionDto | null>(ATTACH_MAP, withDialog('pickMap', { selectionId }));
 }
 
 /** Detach the MAP from a selection. The artifact itself stays selected. */
@@ -207,19 +207,19 @@ export async function querySymbolChanges(
  * boundary, and nothing here sends one out (prompt §35, §36).
  */
 export async function exportCompareJson(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_COMPARE_JSON, withDialog('saveCompareJson', { diffId }));
+  return await dialogCall<ExportOutcomeDto>(EXPORT_COMPARE_JSON, withDialog('saveCompareJson', { diffId }));
 }
 
 /** Export the comparison as one self-contained HTML file. */
 export async function exportCompareHtml(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_COMPARE_HTML, withDialog('saveCompareHtml', { diffId }));
+  return await dialogCall<ExportOutcomeDto>(EXPORT_COMPARE_HTML, withDialog('saveCompareHtml', { diffId }));
 }
 
 export async function exportCompareVisual(
   diffId: string,
   format: VisualFormatDto,
 ): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_COMPARE_VISUAL, withDialog('saveCompareVisual', { diffId, format }));
+  return await dialogCall<ExportOutcomeDto>(EXPORT_COMPARE_VISUAL, withDialog('saveCompareVisual', { diffId, format }));
 }
 
 export async function exportAnalysisVisual(
@@ -227,7 +227,7 @@ export async function exportAnalysisVisual(
   snapshotId: string,
   format: VisualFormatDto,
 ): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(
+  return await dialogCall<ExportOutcomeDto>(
     EXPORT_ANALYSIS_VISUAL,
     withDialog('saveAnalysisVisual', { selectionId, snapshotId, format }),
   );
@@ -238,7 +238,7 @@ export async function exportGateVisual(
   snapshotId: string,
   format: VisualFormatDto,
 ): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_GATE_VISUAL, withDialog('saveGateVisual', { runId, snapshotId, format }));
+  return await dialogCall<ExportOutcomeDto>(EXPORT_GATE_VISUAL, withDialog('saveGateVisual', { runId, snapshotId, format }));
 }
 
 /**
@@ -249,7 +249,7 @@ export async function exportGateVisual(
  * in, which the WebView has no use for (prompt §40).
  */
 export async function openProjectConfig(): Promise<IpcOutcome<ProjectContextDto | null>> {
-  return await call<ProjectContextDto | null>(OPEN_PROJECT_CONFIG, withDialog('pickProjectConfig'));
+  return await dialogCall<ProjectContextDto | null>(OPEN_PROJECT_CONFIG, withDialog('pickProjectConfig'));
 }
 
 /** Recheck bounded project facts for the currently loaded project. No path crosses the IPC boundary. */
@@ -267,7 +267,7 @@ export async function inspectProjectReadiness(): Promise<IpcOutcome<ProjectReadi
 export async function saveProjectPolicy(
   policy: ProjectPolicyDto,
 ): Promise<IpcOutcome<ProjectContextDto | null>> {
-  return await call<ProjectContextDto | null>(SAVE_PROJECT_POLICY, withDialog('savePolicy', { policy }));
+  return await dialogCall<ProjectContextDto | null>(SAVE_PROJECT_POLICY, withDialog('savePolicy', { policy }));
 }
 
 /**
@@ -314,7 +314,7 @@ export async function getGateRun(runId: string): Promise<IpcOutcome<GateRunDto |
  * `04_TECH/28` §4.4).
  */
 export async function attachReleaseFile(): Promise<IpcOutcome<ReleaseAttachmentDto | null>> {
-  return await call<ReleaseAttachmentDto | null>(ATTACH_RELEASE_FILE, withDialog('pickReleaseFile'));
+  return await dialogCall<ReleaseAttachmentDto | null>(ATTACH_RELEASE_FILE, withDialog('pickReleaseFile'));
 }
 
 /**
@@ -380,7 +380,7 @@ export async function prepareReleaseBundle(
 export async function chooseBundleDestination(
   planId: string,
 ): Promise<IpcOutcome<BundleDestinationDto | null>> {
-  return await call<BundleDestinationDto | null>(CHOOSE_BUNDLE_DESTINATION, withDialog('pickBundleFolder', { planId }));
+  return await dialogCall<BundleDestinationDto | null>(CHOOSE_BUNDLE_DESTINATION, withDialog('pickBundleFolder', { planId }));
 }
 
 /**
@@ -400,6 +400,29 @@ export async function exportReleaseBundle(
     destinationToken,
     overwrite,
   });
+}
+
+/**
+ * A command that opens a native dialog. The dialog takes keyboard focus from the WebView; when it closes,
+ * Windows hands focus back to the window rather than to the control that opened it, so a keyboard user
+ * lands on the page body. M1 native QA (AC26) found that; this puts focus back where it started.
+ */
+async function dialogCall<T>(
+  command: string,
+  args?: Record<string, unknown>,
+): Promise<IpcOutcome<T>> {
+  const origin =
+    typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+  try {
+    return await call<T>(command, args);
+  } finally {
+    const now = typeof document === 'undefined' ? null : document.activeElement;
+    if (origin !== null && origin.isConnected && (now === null || now === document.body)) {
+      origin.focus();
+    }
+  }
 }
 
 async function call<T>(
@@ -573,5 +596,5 @@ export async function getDiagnostics(): Promise<IpcOutcome<DiagnosticsDto>> {
  * back as outcomes rather than errors, exactly as the Compare export reports them.
  */
 export async function exportDiagnostics(): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_DIAGNOSTICS, withDialog('saveDiagnostics'));
+  return await dialogCall<ExportOutcomeDto>(EXPORT_DIAGNOSTICS, withDialog('saveDiagnostics'));
 }
