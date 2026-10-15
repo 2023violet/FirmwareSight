@@ -89,6 +89,8 @@ import {
 } from './i18n/language';
 import { I18nProvider, translate, type Translate } from './i18n';
 import { TopBar } from './components/TopBar';
+import { ErrorPanel } from './components/ErrorPanel';
+import { acceptDroppedFiles, subscribeToDrops } from './ipc/dropEvents';
 
 type Page = 'overview' | 'analyze' | 'compare' | 'release' | 'history' | 'help' | 'settings';
 
@@ -233,6 +235,66 @@ export function App() {
     readerChosePage.current = true;
     setPage(target);
   };
+
+  /**
+   * Drag and drop (M1). The window keeps the dropped paths in Rust; this side hears names, a reason word or
+   * a single-use token. A successful drop stages the files exactly as the dialog would, opens Analyze and
+   * asks it to analyze that selection once, so dropping an ELF ends with its facts on screen.
+   */
+  const [dragging, setDragging] = useState(false);
+  const [dropRefusal, setDropRefusal] = useState<
+    'directory' | 'too_many' | 'ambiguous' | 'map_without_artifact' | null
+  >(null);
+  const [dropError, setDropError] = useState<ErrorEnvelopeDto | null>(null);
+  const [autoAnalyzeId, setAutoAnalyzeId] = useState<string | null>(null);
+  const selectionRef = useRef<SelectionDto | null>(null);
+  selectionRef.current = selection;
+
+  useEffect(
+    () =>
+      subscribeToDrops((event) => {
+        if (event.phase === 'hover') {
+          setDragging(true);
+          return;
+        }
+        setDragging(false);
+        if (event.phase === 'refused') {
+          const reason = event.refusal;
+          setDropError(null);
+          setDropRefusal(
+            reason === 'directory' || reason === 'too_many' || reason === 'ambiguous' ? reason : 'ambiguous',
+          );
+          return;
+        }
+        if (event.phase !== 'dropped' || event.token === null) {
+          return;
+        }
+        const mapOnly = event.artifactName === null && event.mapName !== null;
+        const current = selectionRef.current;
+        if (mapOnly && current === null) {
+          setDropError(null);
+          setDropRefusal('map_without_artifact');
+          return;
+        }
+        const token = event.token;
+        void acceptDroppedFiles(token, mapOnly && current !== null ? current.selectionId : null).then(
+          (outcome) => {
+            if (!outcome.ok) {
+              setDropRefusal(null);
+              setDropError(outcome.envelope);
+              return;
+            }
+            setDropRefusal(null);
+            setDropError(null);
+            setSelection(outcome.value);
+            setAutoAnalyzeId(outcome.value.selectionId);
+            readerChosePage.current = true;
+            setPage('analyze');
+          },
+        );
+      }),
+    [],
+  );
 
   /**
    * Ask the shell once, and let the answer move what it owns.
@@ -431,7 +493,27 @@ export function App() {
             </nav>
           </div>
 
-          <div className={styles['workspace']}>
+          <div className={cx(styles['workspace'], dragging ? styles['dropping'] : undefined)}>
+          {dragging ? (
+            <div className={styles['dropTarget']} role="status">
+              {navLabel('common', 'drop.target')}
+            </div>
+          ) : null}
+          {dropRefusal === null ? null : (
+            <div className={styles['dropNotice']} role="alert">
+              <span>{navLabel('common', `drop.refused.${dropRefusal}`)}</span>
+              <button type="button" className={styles['dropDismiss']} onClick={() => setDropRefusal(null)}>
+                {navLabel('common', 'drop.dismiss')}
+              </button>
+            </div>
+          )}
+          {dropError === null ? null : (
+            <ErrorPanel
+              envelope={dropError}
+              label={navLabel('common', 'drop.errorLabel')}
+              heading={navLabel('common', 'drop.errorHeading')}
+            />
+          )}
           {page === 'overview' ? (
             <Overview
               summary={lastGood}
@@ -459,6 +541,10 @@ export function App() {
               onLastGoodChange={(summary, selectionId) => {
                 setLastGood(summary);
                 setAnalyzedSelectionId(selectionId);
+              }}
+              autoAnalyzeId={autoAnalyzeId}
+              onAutoAnalyzeStarted={() => {
+                setAutoAnalyzeId(null);
               }}
             />
           ) : page === 'compare' ? (

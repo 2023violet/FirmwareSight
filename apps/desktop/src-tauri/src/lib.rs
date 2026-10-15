@@ -36,6 +36,7 @@ pub mod compare;
 pub mod details;
 pub mod diagnostics;
 pub mod dialog_text;
+pub mod drop_intake;
 pub mod history;
 pub mod intake;
 pub mod ipc;
@@ -375,6 +376,8 @@ pub struct Session {
     current_gate_run: Mutex<Option<(String, String)>>,
     destinations: Mutex<DestinationStore>,
     attachments: Mutex<AttachmentStore>,
+    /// The last drag-and-drop the window received, held until the UI accepts it (`drop_intake`).
+    drops: Mutex<drop_intake::PendingDrop>,
 }
 
 impl Session {
@@ -398,6 +401,7 @@ impl Session {
             analyses: Mutex::new(AnalysisStore::default()),
             bundles: Mutex::new(BundleStore::default()),
             current_gate_run: Mutex::new(None),
+            drops: Mutex::new(drop_intake::PendingDrop::default()),
             destinations: Mutex::new(DestinationStore::default()),
             attachments: Mutex::new(AttachmentStore::default()),
         })
@@ -1537,10 +1541,33 @@ pub fn run() {
             app.manage(Arc::new(session));
             Ok(())
         })
+        // Drag and drop: the paths stay here; the WebView hears names, roles and a single-use token
+        // (`drop_intake`). Hover phases are reported so the window can show where a drop will land.
+        .on_window_event(|window, event| {
+            use tauri::{DragDropEvent, Emitter, Manager, WindowEvent};
+
+            let WindowEvent::DragDrop(drag) = event else {
+                return;
+            };
+            let payload = match drag {
+                DragDropEvent::Enter { .. } => Some(drop_intake::DropEventDto::hover()),
+                DragDropEvent::Leave => Some(drop_intake::DropEventDto::leave()),
+                DragDropEvent::Drop { paths, .. } => window
+                    .try_state::<Arc<Session>>()
+                    .and_then(|session| session.hold_drop(paths)),
+                _ => None,
+            };
+            if let Some(payload) = payload {
+                // A window that cannot be reached has nobody to tell; the held drop simply expires
+                // when the next one replaces it.
+                let _ = window.emit(drop_intake::DROP_EVENT, payload);
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             list_fixtures,
             get_analysis_summary,
             intake::select_artifact,
+            drop_intake::accept_dropped_files,
             intake::attach_map,
             intake::clear_map,
             intake::analyze_selection,

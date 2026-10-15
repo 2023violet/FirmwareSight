@@ -44,6 +44,8 @@ export function Analyze({
   gettingStartedHidden,
   onHideGettingStarted,
   onLastGoodChange,
+  autoAnalyzeId = null,
+  onAutoAnalyzeStarted,
 }: {
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
@@ -55,6 +57,9 @@ export function Analyze({
   readonly gettingStartedHidden: boolean;
   readonly onHideGettingStarted: () => void;
   readonly onLastGoodChange: (summary: AnalysisSummaryDto, selectionId: string) => void;
+  /** A selection the shell staged from a drop and wants analyzed once, as if Analyze had been pressed. */
+  readonly autoAnalyzeId?: string | null;
+  readonly onAutoAnalyzeStarted?: () => void;
 }) {
   const { t } = useI18n();
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
@@ -129,6 +134,16 @@ export function Analyze({
     }
     setError(outcome.envelope);
   }, [onLastGoodChange, selection]);
+
+  // A drop asks for one analysis of the selection it staged. The request is consumed when it starts, so a
+  // re-render or a later selection never repeats it.
+  useEffect(() => {
+    if (autoAnalyzeId === null || selection?.selectionId !== autoAnalyzeId || analyzing) {
+      return;
+    }
+    onAutoAnalyzeStarted?.();
+    void analyze();
+  }, [autoAnalyzeId, selection, analyzing, analyze, onAutoAnalyzeStarted]);
 
   const summary = lastGood;
 

@@ -8,6 +8,13 @@ import type { IpcOutcome } from './ipc/bridge';
 import type { AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto } from './ipc/types';
 import { render } from './test/render';
 import { precedes } from './test/order';
+import { acceptDroppedFiles, subscribeToDrops } from './ipc/dropEvents';
+import type { DropEventDto } from './ipc/types';
+
+vi.mock('./ipc/dropEvents', () => ({
+  subscribeToDrops: vi.fn(() => () => undefined),
+  acceptDroppedFiles: vi.fn(),
+}));
 
 // The bridge is the boundary; mocking it keeps these tests about what the screen shows rather than
 // about Tauri's invoke plumbing, which `ipc/bridge.test.ts` covers.
@@ -1066,5 +1073,80 @@ describe('U1P page hierarchy', () => {
     expect(
       screen.getByRole('region', { name: 'Snapshot details of the last good analysis' }),
     ).toBeDefined();
+  });
+});
+
+
+describe('M1 drag-and-drop intake', () => {
+  const subscribeMock = vi.mocked(subscribeToDrops);
+  const acceptMock = vi.mocked(acceptDroppedFiles);
+  let emit: (event: DropEventDto) => void = () => undefined;
+
+  function dropEvent(over: Partial<DropEventDto>): DropEventDto {
+    return { phase: 'dropped', token: null, artifactName: null, mapName: null, refusal: null, ...over };
+  }
+
+  beforeEach(() => {
+    acceptMock.mockReset();
+    subscribeMock.mockImplementation((handler) => {
+      emit = handler;
+      return () => undefined;
+    });
+  });
+
+  it('shows where a drop will land while files are over the window', async () => {
+    render(<App />);
+    await screen.findByRole('heading', { level: 1 });
+    act(() => emit(dropEvent({ phase: 'hover' })));
+    expect(screen.getByText('Drop an ELF, its MAP, or both to analyze')).toBeDefined();
+    act(() => emit(dropEvent({ phase: 'leave' })));
+    expect(screen.queryByText('Drop an ELF, its MAP, or both to analyze')).toBeNull();
+  });
+
+  it('stages a dropped ELF and MAP like the dialog and analyzes them once', async () => {
+    acceptMock.mockResolvedValue(ok(WITH_MAP));
+    render(<App />);
+    await screen.findByRole('heading', { level: 1 });
+
+    act(() => emit(dropEvent({ token: 'drop-1', artifactName: 'app.elf', mapName: 'app.map' })));
+
+    await waitFor(() => expect(analyzeMock).toHaveBeenCalledTimes(1));
+    expect(acceptMock).toHaveBeenCalledWith('drop-1', null);
+    expect(analyzeMock).toHaveBeenCalledWith(WITH_MAP.selectionId);
+    expect((await screen.findAllByText('app.elf')).length).toBeGreaterThan(0);
+    expect(document.body.textContent).not.toContain(MACHINE_PATH);
+  });
+
+  it('attaches a lone MAP to the selection on screen', async () => {
+    acceptMock.mockResolvedValue(ok(WITH_MAP));
+    await chooseArtifact();
+    act(() => emit(dropEvent({ token: 'drop-2', mapName: 'app.map' })));
+    await waitFor(() => expect(acceptMock).toHaveBeenCalledWith('drop-2', selection().selectionId));
+  });
+
+  it('refuses a lone MAP when nothing is selected, without staging anything', async () => {
+    render(<App />);
+    await screen.findByRole('heading', { level: 1 });
+    act(() => emit(dropEvent({ token: 'drop-3', mapName: 'app.map' })));
+    expect(screen.getByRole('alert').textContent).toContain('A MAP needs a firmware file');
+    expect(acceptMock).not.toHaveBeenCalled();
+  });
+
+  it('says why a drop was refused and can be dismissed', async () => {
+    render(<App />);
+    await screen.findByRole('heading', { level: 1 });
+    act(() => emit(dropEvent({ phase: 'refused', refusal: 'directory' })));
+    expect(screen.getByRole('alert').textContent).toContain('Folders can’t be dropped');
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('keeps a staging failure on screen with its diagnostics id', async () => {
+    acceptMock.mockResolvedValue(fail(PARSE_FAILURE));
+    render(<App />);
+    await screen.findByRole('heading', { level: 1 });
+    act(() => emit(dropEvent({ token: 'drop-4', artifactName: 'bad.elf' })));
+    expect(await screen.findByText('The dropped files could not be opened')).toBeDefined();
+    expect(analyzeMock).not.toHaveBeenCalled();
   });
 });

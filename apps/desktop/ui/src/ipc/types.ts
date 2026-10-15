@@ -90,6 +90,7 @@ export type { SectionRowDto } from './generated/SectionRowDto';
 export type { SectionSideDto } from './generated/SectionSideDto';
 export type { SectionSortDto } from './generated/SectionSortDto';
 export type { SelectionDto } from './generated/SelectionDto';
+export type { DropEventDto } from './generated/DropEventDto';
 export type { SortDirDto } from './generated/SortDirDto';
 export type { StoredBudgetDto } from './generated/StoredBudgetDto';
 export type { SymbolChangePageDto } from './generated/SymbolChangePageDto';

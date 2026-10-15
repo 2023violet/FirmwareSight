@@ -69,6 +69,61 @@
 
 /* The one scroll axis a page has. Everything a page overflows, overflows here. */
 .workspace {
+  position: relative;
   min-width: 0;
   overflow-y: auto;
+}
+
+/* Drag and drop (M1): a hairline accent outline and one status line while files are over the window.
+   Productive motion only - the outline fades in on the micro duration - and none under reduced motion. */
+.dropping {
+  outline: var(--fs-focus-ring-width) dashed var(--fs-color-accent-primary);
+  outline-offset: calc(-1 * var(--fs-space-2));
+  transition: outline-color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.dropTarget {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  padding: var(--fs-space-3) var(--fs-space-4);
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border-block-end: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  text-align: center;
+}
+
+.dropNotice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fs-space-2) var(--fs-space-4);
+  margin: var(--fs-space-4) var(--fs-space-6) 0;
+  padding: var(--fs-space-3) var(--fs-space-4);
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-subtle);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+.dropDismiss {
+  padding: var(--fs-space-1) var(--fs-space-3);
+  font: inherit;
+  color: inherit;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.dropDismiss:focus-visible {
+  outline: var(--fs-focus-ring-width) solid var(--fs-focus-ring-color);
+  outline-offset: var(--fs-focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropping {
+    transition: none;
+  }
 }
