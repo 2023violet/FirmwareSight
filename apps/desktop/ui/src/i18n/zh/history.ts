@@ -9,7 +9,7 @@ import type { CatalogFor } from '../types';
  */
 export const history: CatalogFor<'history'> = {
   'title': '发布包与历史',
-  'subhead': '这台电脑上保存的构建、门禁运行和发布记录，而不是“分析”页当前打开的文件。即使原始文件已移动或删除，记录仍可查看。这里不会修改任何已保存的记录。',
+  'subhead': '已保存的构建、门禁运行和发布记录，而非“分析”页打开的文件。文件移动后仍可查看，这里不改动任何记录。',
   'views.group': '已保存的历史',
   'views.builds': '构建',
   'views.runs': 'Gate 运行',

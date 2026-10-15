@@ -330,10 +330,10 @@ describe('History states what a row is', () => {
       'header',
     );
     const words = prose(header ?? null);
-    expect(words).toContain('stored on this computer');
+    expect(words).toContain('Stored builds, Gate runs and releases');
     expect(words).toContain('not the file open on Analyze');
-    expect(words).toContain('Rows stay readable after the original files move');
-    expect(words).toContain('Nothing here changes a stored row.');
+    expect(words).toContain('Rows outlive moved files');
+    expect(words).toContain('nothing here edits them');
   });
 
   it('lists the three stored populations the shell returned', async () => {

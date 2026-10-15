@@ -3,7 +3,7 @@ title: "M1 First-Use Experience"
 doc_id: "FS-DEL-010"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "ACTIVE"
+status: "DELIVERED_PENDING_REVIEW"
 owner: "Engineering"
 last_updated: "2026-10-14"
 ---
@@ -89,3 +89,7 @@ Authorization: the Owner approved M1 in chat on 2026-10-14, covering copy and ja
 ## Done when
 
 All of T1–T8 are accepted, the gate is green, the review has no S0/S1 findings, and the Owner has approved the push.
+
+## Outcome
+
+Delivered on `feature/m1-first-use`; see [evidence/M1](../evidence/M1/README.md). T1–T7 accepted except native drag-and-drop (NOT_RUN) and the independent native sign-off, which are both still open.

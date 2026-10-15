@@ -1,0 +1,28 @@
+case	verdict	title	expected	actual	utc
+C01	PASS	Native picker title follows UI language (zh)	#32770 选择要分析的固件文件	#32770 None 选择要分析的固件文件	2026-10-15T05:16:17+00:00
+C02	PASS	Cancel picker: no selection, no error	0 alerts, nothing selected	alerts=0 selectedLines=0	2026-10-15T05:16:20+00:00
+C03	PASS	Choose ELF and MAP in native dialogs, analyze	MAP picker titled in zh; analysis shows evidence quality	mapPicker=[#32770 None 选择这个固件的链接器 MAP 文件] result=[MAP provided 可用于硬性预算 ]	2026-10-15T05:16:37+00:00
+C04	PASS	Overview memory bars, tiny usage not shown as 0.0%	ROM and RAM meters, '<0.1%'	ROM 占用=已用 <0.1%，256 bytes / 1,048,576 bytes，容量内 | RAM 占用=已用 <0.1%，8 bytes / 262,144 bytes，容量内	2026-10-15T05:16:39+00:00
+C05	PASS	Compare two analyzed builds; wide table scrolls in its own box	table wider than box (true), page not wider (false)	true/false	2026-10-15T05:17:02+00:00
+C06	PASS	Native Save writes a valid JSON with no host path	zh title+filter, schema present, 0 path hits, written note	dialog=[#32770 None 将构建差异保存为 JSON ComboBox 0 FirmwareSight JSON 导出文件 (*.json) ] schema=urn:firmwaresight:schema:diff:1 pathHits=0 note=已写入 diff.json（JSON）。	2026-10-15T05:17:09+00:00
+C07	PASS	Cancel Save writes nothing	no new files; cancelled note	newFiles=0 note=取消导出。未写入任何文件。	2026-10-15T05:17:14+00:00
+C08	PASS	Refuse overwrite at the OS prompt	OS prompt shown; sentinel bytes unchanged	osPrompt=1 same=yes	2026-10-15T05:17:25+00:00
+C09	PASS	Refuse overwrite at the app's localized confirmation	zh title/buttons; sentinel unchanged; kept note	confirm=[#32770 None 替换已有文件？ Button 0 替换 Button 0 保留原文件 ] same=yes note=保留了已经存在的文件。未写入任何内容。	2026-10-15T05:17:39+00:00
+C10	PASS	Confirm overwrite replaces only the target	target is the diff JSON; neighbour unchanged; no temp file	head={"schema":"urn:firmw neighbourSame=yes temps=0	2026-10-15T05:17:52+00:00
+C11	FAIL	A write failure is reported, the target is untouched, no temp is left	ERR-EXPORT-6001 with diagnostics id; bytes unchanged; no temp	alert=导出失败 | 发生了什么 | 分析本身没有问题，但你要求写入的文件没能写出。 | 代码 | ERR-EXPORT-6001 | 判断依据 | s11.json: 拒绝访问。 (os error 5) | 下一步 | Check that the folder exists and is writable, then export again. Any file that was already there is unchanged. | 来自 FirmwareSight 的技术细节 | The export cou same=yes temps=0	2026-10-15T05:18:32+00:00
+C12	PASS	Retry after failure succeeds and clears the error	0 alerts; written note	alerts=0 note=已写入 retry.json（JSON）。	2026-10-15T05:18:39+00:00
+C13	PASS	Compare changed while Save was open: refused, and the screen says so	file absent; 'nothing was written' note	file=absent note=没有写入任何文件。请从当前对比重新导出。	2026-10-15T05:18:51+00:00
+C14	PASS	Analysis changed while Save was open: refused, and the screen says so	file absent; note	file=absent note=没有写入任何文件。请从当前分析重新导出。	2026-10-15T05:19:06+00:00
+C15	PASS	Run Gate with a real mouse click; focus moves to the verdict	button on top; focus on the verdict region	button=on top focus=门禁结论	2026-10-15T05:19:18+00:00
+C16	PASS	Gate run changed while Save was open: refused, and the screen says so	file absent; note	file=absent note=保存对话框打开期间门禁运行发生了变化，因此没有写入任何文件。请从当前运行重新导出。	2026-10-15T05:19:30+00:00
+C17	PASS	Gate print-ready HTML via native Save	zh title/filter; no script; no path	dialog=[#32770 None 保存发布门禁审查报告 ComboBox 0 FirmwareSight HTML 报告 (*.html) ] scripts=0 paths=0 bytes=14515	2026-10-15T05:19:39+00:00
+C18	PASS	Visual exports decode independently	PNG 1600x900 CRC ok; SVG parses; no script	png 1600x900 crc=True svg-parsed script=False	2026-10-15T05:19:55+00:00
+C19	PASS	Keyboard: Enter opens the native Save, Esc cancels, focus returns to the control	dialog opened; closed; focus on 导出 SVG; cancelled note	opened=1 openAfterEsc=0 focus=导出 SVG note=取消导出。未写入任何文件。	2026-10-15T05:20:03+00:00
+C20	FAIL	Windows UI Automation sees the focused control's role and name	ControlType.Button | 导出 SVG | True	ControlType.Pane |  | False	2026-10-15T05:20:08+00:00
+C21	PASS	English UI: native Save title and filter in English	Save the build diff as JSON; FirmwareSight JSON export	#32770 None Save the build diff as JSON ComboBox 0 FirmwareSight JSON export (*.json) 	2026-10-15T05:20:19+00:00
+C22	PASS	Dark theme at 1024x720: no page scrolls sideways (screenshots kept)	every page false	 overview=False analyze=False compare=False release=False history=False settings=False	2026-10-15T05:20:38+00:00
+C11-rerun	PASS	Write failure, re-run with full capture (first capture truncated by the script)	ERR-EXPORT-6001 + diagnostics id; bytes unchanged; no temp	ERR-EXPORT-6001 op-213c-18de9c723d007bf0; same=yes; temps=0	2026-10-15T05:22:42+00:00
+C20-rerun	PASS	UI Automation, re-run after bringing the window to the foreground (first attempt: harness could not take foreground)	ControlType.Button | 导出 SVG | True	ControlType.Button | 导出 SVG | True | pid 23972 (WebView2)	2026-10-15T05:22:42+00:00
+C23	PASS	Restart the same QA build: stored builds and runs are still listed	>0 history rows	historyRows=2	2026-10-15T05:22:54+00:00
+C24	PASS	Owner app data untouched by the whole QA (separate identifier)	identical file list and SHA-256	23 files compared, diff lines=0	2026-10-15T05:23:07+00:00
+C25	NOT_RUN	Native drag-and-drop from Explorer	dropped ELF+MAP staged and analyzed	NOT_RUN: synthetic OLE drag could not be driven by automation on this host (3 attempts); Rust classification/token tests and UI event tests pass	2026-10-15T05:23:07+00:00

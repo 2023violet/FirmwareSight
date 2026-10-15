@@ -23,7 +23,7 @@ FirmwareSight is a local-first desktop workbench and CLI (`fwsight`) for embedde
 | Release Gate | Five-state evaluation of configured project policy: PASS / REVIEW / BLOCK / UNKNOWN / N/A | Shipped (P3) |
 | Bundle | Exports verified release evidence, including release-attached byte evidence (ADR-0030) | Shipped (P4, C1) |
 
-The desktop app also has project readiness and release preflight, local History, Diagnostics, theme (System / Light / Dark), interface language (English / Chinese), and PNG, SVG and print-HTML visual report export for Analyze, Compare and Gate.
+The desktop app also has project readiness and release preflight, local History, Diagnostics, theme (System / Light / Dark), interface language (English / Chinese, including native dialog titles), and PNG, SVG and print-HTML visual report export for Analyze, Compare and Gate. M1 (on its branch until merged) adds drag-and-drop of an ELF and its MAP, per-region memory usage bars on Overview, and a numbered Release setup.
 
 Unknown or partial evidence stays explicit. It is never shown as zero or as proof.
 

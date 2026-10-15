@@ -14,7 +14,7 @@
 
 export const history = {
   'title': 'Bundle & History',
-  'subhead': 'Builds, Gate runs and releases stored on this computer — not the file open on Analyze. Rows stay readable after the original files move or are deleted. Nothing here changes a stored row.',
+  'subhead': 'Stored builds, Gate runs and releases — not the file open on Analyze. Rows outlive moved files; nothing here edits them.',
   'views.group': 'Stored history',
   'views.builds': 'Builds',
   'views.runs': 'Gate runs',

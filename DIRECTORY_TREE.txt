@@ -106,7 +106,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 06_STAGE_GATES.md
 │   ├── 07_POST_MVP_CANDIDATE_ROADMAP.md
 │   ├── 08_MILESTONE_DELIVERABLE_MATRIX.md
-│   └── 09_USER_INTERVIEW_QUESTION_BANK.md
+│   ├── 09_USER_INTERVIEW_QUESTION_BANK.md
+│   └── 10_M1_FIRST_USE_EXPERIENCE.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -291,6 +292,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── compare.rs
 │       │   │   ├── details.rs
 │       │   │   ├── diagnostics.rs
+│       │   │   ├── dialog_text.rs
+│       │   │   ├── drop_intake.rs
 │       │   │   ├── history.rs
 │       │   │   ├── intake.rs
 │       │   │   ├── ipc.rs
@@ -307,6 +310,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── compare_ipc.rs
 │       │   │   ├── desktop_parity.rs
 │       │   │   ├── diagnostics.rs
+│       │   │   ├── drop_intake.rs
 │       │   │   ├── history_reads.rs
 │       │   │   ├── preferences.rs
 │       │   │   ├── project_readiness.rs
@@ -327,6 +331,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   ├── ErrorPanel.tsx
 │           │   │   ├── Layout.module.css
 │           │   │   ├── Layout.tsx
+│           │   │   ├── MemoryUsage.module.css
+│           │   │   ├── MemoryUsage.tsx
 │           │   │   ├── PageHeader.module.css
 │           │   │   ├── PageHeader.tsx
 │           │   │   ├── Panel.module.css
@@ -401,11 +407,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── DiagnosticsRuntimeDto.ts
 │           │   │   │   ├── DiagnosticsStoreDto.ts
 │           │   │   │   ├── DiagnosticsSupportDto.ts
+│           │   │   │   ├── DialogTextDto.ts
 │           │   │   │   ├── DiffCountsDto.ts
 │           │   │   │   ├── DiffMemoryDto.ts
 │           │   │   │   ├── DiffSideDto.ts
 │           │   │   │   ├── DiffSideMemoryDto.ts
 │           │   │   │   ├── DiffWarningDto.ts
+│           │   │   │   ├── DropEventDto.ts
 │           │   │   │   ├── ErrorEnvelopeDto.ts
 │           │   │   │   ├── EvidenceClassDto.ts
 │           │   │   │   ├── EvidencePageDto.ts
@@ -471,6 +479,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   └── VisualFormatDto.ts
 │           │   │   ├── bridge.test.ts
 │           │   │   ├── bridge.ts
+│           │   │   ├── dialogWords.test.ts
+│           │   │   ├── dialogWords.ts
+│           │   │   ├── dropEvents.ts
 │           │   │   └── types.ts
 │           │   ├── styles/
 │           │   │   ├── classnames.ts
@@ -665,6 +676,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── storage.rs
 │       │   └── unknown_reasons.rs
 │       └── Cargo.toml
+├── evidence/
+│   └── M1/
+│       ├── .gitattributes
+│       ├── AC_MATRIX.tsv
+│       ├── M1_NATIVE_QA_EVIDENCE.zip
+│       └── README.md
 ├── examples/
 │   ├── project-readiness/
 │   │   ├── firmwaresight.toml

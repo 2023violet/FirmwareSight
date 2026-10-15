@@ -16,6 +16,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 
 - **Last integrated code:** `76b5c2c` (NEXT-46 export privacy and stale-result fixes, integrated by NEXT-47). [Actions #113](https://github.com/2023violet/FirmwareSight/actions/runs/38595778036): 10/10 Jobs and 10/10 Check Runs.
 - **Later documentation-only commits:** `71978d8` (NEXT-47 evidence upload, [Actions #114](https://github.com/2023violet/FirmwareSight/actions/runs/38602220781) 10/10). The 2026-10-14 lean batch follows; read Git for its SHA and CI.
+- **M1 first-use round (branch `feature/m1-first-use`, not yet on `main`):** copy cut, drag-and-drop intake, Overview memory bars, Release step order, table scrolling, native dialog language, and six native-QA fixes. Evidence: [evidence/M1](../evidence/M1/README.md).
 - **Local gate at `76b5c2c`:** `python scripts/check.py` 18/18 steps, 0 SKIP. Rust workspace 1,160 passed / 0 failed / 2 opt-in ignored. Frontend 397 tests in 13 files.
 
 ## Gates
@@ -23,16 +24,14 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 | Gate | State |
 |---|---|
 | Code integration (NEXT-47) | PASS |
-| Native desktop user acceptance | **NOT_VERIFIED / BLOCKED_BY_ENV** |
+| Native desktop user acceptance | **OBSERVED PASS (automated driver, M1), independent sign-off pending**; native drag-and-drop NOT_RUN |
 | Public release, signing, updater, open-source license | NOT_AUTHORIZED |
 
 ## Open risks (must close before the first external Developer Preview, Private Beta or RC, whichever comes first)
 
-- NEXT-44 AC24: native Save, cancel, overwrite refusal, write failure, and stale/retry flows.
-- NEXT-44 AC26: native keyboard, focus, accessibility, Light/Dark theme and minimum window size.
-- NEXT-45 AC20: localized native save and overwrite flow.
-
-Retest steps and exit conditions: [deferred native QA register](../NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md).
+- NEXT-44 AC24, NEXT-44 AC26, NEXT-45 AC20: all applicable cases observed PASS on the real Windows desktop in M1 ([evidence/M1](../evidence/M1/README.md)). They stay open until an independent reviewer signs, as the [deferred register](../NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md) requires.
+- Native drag-and-drop from Explorer: NOT_RUN (automation could not synthesize an OS drag); one human drag is needed.
+- Screen-reader check: not run; UI Automation exposure was checked.
 
 ## Compatibility boundary
 
