@@ -767,14 +767,6 @@ impl Session {
         Ok(store.insert(result))
     }
 
-    /// Read one page or projection out of a diff this session holds.
-    ///
-    /// The closure runs while the store is locked, so a page never reflects a diff that was evicted
-    /// between the lookup and the read.
-    ///
-    /// # Errors
-    ///
-    /// `ERR-DIFF-5002` when the id was never issued or has already been dropped.
     /// Whether `diff_id` is still the comparison on screen. An export that waited on a Save dialog
     /// while the reader compared again must not write the comparison they moved away from (M1, AC24).
     pub fn diff_is_current(
@@ -785,6 +777,14 @@ impl Session {
         Ok(self.lock_diffs(operation_id)?.latest() == Some(diff_id))
     }
 
+    /// Read one page or projection out of a diff this session holds.
+    ///
+    /// The closure runs while the store is locked, so a page never reflects a diff that was evicted
+    /// between the lookup and the read.
+    ///
+    /// # Errors
+    ///
+    /// `ERR-DIFF-5002` when the id was never issued or has already been dropped.
     pub(crate) fn with_diff<R>(
         &self,
         diff_id: &str,

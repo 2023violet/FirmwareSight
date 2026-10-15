@@ -17,7 +17,7 @@
 
 use std::path::{Path, PathBuf};
 
-use firmwaresight_desktop::compare::{ExportFormat, write_export};
+use firmwaresight_desktop::compare::{ExportFormat, write_export, write_export_checked};
 use firmwaresight_desktop::ipc::{
     CandidatePageRequestDto, ChangeKindFilterDto, CompareRequestDto, SectionChangeQueryDto,
     SectionChangeSortDto, SortDirDto, SymbolChangeQueryDto, SymbolChangeSortDto,
@@ -905,4 +905,48 @@ fn only_the_comparison_computed_last_is_current_for_export() {
             .diff_is_current("cmp-never-issued", "op-4")
             .expect("reads")
     );
+}
+
+#[test]
+fn a_comparison_redone_while_the_replace_confirmation_is_open_is_not_written() {
+    // M1 review F1: the reader can leave "Replace existing file?" open, compare again, then press
+    // Replace. The currency check has to run after that confirmation, not only before it.
+    let (session, _db, base, target) = session_with_pair("replace-window");
+    let first = compare(&session, &base, &target);
+    let scratch = Scratch::new("replace-window");
+    let file = scratch.file("diff.json");
+    std::fs::write(&file, "SENTINEL").expect("sentinel");
+
+    let err = write_export_checked(
+        Some(file.clone()),
+        "superseded comparison",
+        ExportFormat::Json,
+        |_| {
+            compare(&session, &target, &base); // the reader compares again while the dialog is open
+            true // and then presses Replace
+        },
+        || match session.diff_is_current(&first.diff_id, "op-f1") {
+            Ok(true) => Ok(()),
+            _ => Err(firmwaresight_desktop::ipc::ErrorEnvelopeDto {
+                code: "ERR-EXPORT-6002".to_owned(),
+                message: "stale".to_owned(),
+                operation_id: "op-f1".to_owned(),
+                details: None,
+                remediation: None,
+            }),
+        },
+    )
+    .expect_err("a stale comparison is refused after the confirmation");
+    assert_eq!(err.code, "ERR-EXPORT-6002");
+    assert_eq!(
+        std::fs::read_to_string(&file).expect("read"),
+        "SENTINEL",
+        "nothing was written"
+    );
+    let leftovers: Vec<_> = std::fs::read_dir(&scratch.0)
+        .expect("list")
+        .filter_map(Result::ok)
+        .filter(|e| e.file_name().to_string_lossy().contains(".tmp-"))
+        .collect();
+    assert!(leftovers.is_empty(), "no temporary file is left");
 }

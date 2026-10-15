@@ -255,10 +255,19 @@ pub(crate) fn usage_percent(
         (Some(_), Some(0), _) => (None, "zero_capacity"),
         (Some(used), Some(capacity), state) => {
             let denominator = u128::from(capacity);
-            let tenths = (u128::from(used) * 1_000 + denominator / 2) / denominator;
-            // A region in use is never shown as 0.0%: under a tenth of a percent says so.
+            let scaled = u128::from(used) * 1_000;
+            // A partial figure is a lower bound, so it rounds down: "at least 0.2%" must not claim more
+            // than was proven (M1 review F5). An exact figure rounds half up.
+            let tenths = if state == RegionUsageState::Exact {
+                (scaled + denominator / 2) / denominator
+            } else {
+                scaled / denominator
+            };
+            // A region in use is never shown as 0.0%, and a region that is not full never as 100.0%.
             let formatted = if tenths == 0 && used > 0 {
                 "<0.1%".to_owned()
+            } else if tenths == 1_000 && used < capacity {
+                ">99.9%".to_owned()
             } else {
                 format!("{}.{:01}%", tenths / 10, tenths % 10)
             };
@@ -399,6 +408,22 @@ mod usage_percent_tests {
         assert_eq!(
             render(Some(2), Some(3), RegionUsageState::Exact),
             (Some("66.7%".to_owned()), "available".to_owned())
+        );
+    }
+
+    #[test]
+    fn a_lower_bound_rounds_down_and_a_region_not_full_never_reads_full() {
+        assert_eq!(
+            render(Some(1_999), Some(1_000_000), RegionUsageState::Partial),
+            (Some("0.1%".to_owned()), "lower_bound".to_owned())
+        );
+        assert_eq!(
+            render(Some(9_996), Some(10_000), RegionUsageState::Exact),
+            (Some(">99.9%".to_owned()), "available".to_owned())
+        );
+        assert_eq!(
+            render(Some(10_000), Some(10_000), RegionUsageState::Exact),
+            (Some("100.0%".to_owned()), "available".to_owned())
         );
     }
 

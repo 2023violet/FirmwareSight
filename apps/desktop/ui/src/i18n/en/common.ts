@@ -77,7 +77,7 @@ export const common = {
   'overview.openRunButton': 'Open the run on Release Gate',
   'overview.resolveButton': 'Resolve on Release Gate',
   'overview.attachMapButton': 'Attach a MAP file',
-  'overview.scopeNote': 'This reflects your project policy only. It is not a legal, security or compliance certification and does not replace a person’s decision.',
+  'overview.scopeNote': 'This reflects your project policy only. It is not a legal, security or product-compliance conclusion and does not replace a person’s decision.',
   'overview.retainedQuiet': 'Its verdict and its findings stay on the Release Gate page, where the run was made, and nothing here restates them for a build the gate did not judge.',
   'overview.analyzeSelectedButton': 'Analyze selected artifact',
   'overview.viewPreviousRunButton': 'View previous Gate run',

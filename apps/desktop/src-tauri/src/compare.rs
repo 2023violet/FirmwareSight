@@ -351,7 +351,25 @@ pub fn write_export(
     picked: Option<PathBuf>,
     text: &str,
     format: ExportFormat,
+    confirm_overwrite: impl FnMut(&Path) -> bool,
+) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
+    write_export_checked(picked, text, format, confirm_overwrite, || Ok(()))
+}
+
+/// [`write_export`], plus a currency check that runs after the replace confirmation and before any
+/// byte is written. The confirmation is a native dialog the reader can leave open while comparing
+/// again, so a check made only before it can be out of date by the time Replace is pressed (M1 review
+/// F1). `validate_current` mirrors the visual export's.
+///
+/// # Errors
+///
+/// Whatever `validate_current` returns, or `ERR-EXPORT-6001` when the file cannot be written.
+pub fn write_export_checked(
+    picked: Option<PathBuf>,
+    text: &str,
+    format: ExportFormat,
     mut confirm_overwrite: impl FnMut(&Path) -> bool,
+    mut validate_current: impl FnMut() -> Result<(), ErrorEnvelopeDto>,
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let Some(path) = picked else {
         return Ok(outcome("cancelled", None, format));
@@ -360,6 +378,7 @@ pub fn write_export(
     if path.exists() && !confirm_overwrite(&path) {
         return Ok(outcome("kept-existing", None, format));
     }
+    validate_current()?;
 
     let temp = temporary_next_to(&path);
     std::fs::write(&temp, text)
@@ -627,12 +646,20 @@ fn export_now(
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let (text, suggested) = session.render_export(diff_id, format, operation_id)?;
     let picked = save_path(app, words, title, format, &suggested);
-    if picked.is_some() && !session.diff_is_current(diff_id, operation_id)? {
-        return Err(crate::compare_export_stale(operation_id));
+    let ensure_current = || match session.diff_is_current(diff_id, operation_id) {
+        Ok(true) => Ok(()),
+        _ => Err(crate::compare_export_stale(operation_id)),
+    };
+    if picked.is_some() {
+        ensure_current()?;
     }
-    write_export(picked, &text, format, |path| {
-        confirm_replacement(app, words, &service::display_name(path))
-    })
+    write_export_checked(
+        picked,
+        &text,
+        format,
+        |path| confirm_replacement(app, words, &service::display_name(path)),
+        ensure_current,
+    )
 }
 
 /// The builds a comparison can start from, one bounded page at a time.

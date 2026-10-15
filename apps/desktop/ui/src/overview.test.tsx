@@ -312,7 +312,7 @@ describe('Overview with a real analysis and a real run', () => {
     // DESIGN.md 9: "Can we ship now?" is policy readiness, never a legal, security or compliance
     // conclusion. The sentence has to be findable in the same region as the verdict.
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });
-    expect(ship.textContent).toContain('not a legal, security or compliance certification');
+    expect(ship.textContent).toContain('not a legal, security or product-compliance conclusion');
   });
 
   it('says so when accepted reviews moved the aggregate, and names the aggregate without them', () => {

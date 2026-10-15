@@ -144,7 +144,7 @@ export const analyze: CatalogFor<'analyze'> = {
   'gettingStarted.firstActionBefore': '在分析页上，用 ',
   'gettingStarted.firstActionAfter': ' 按钮选择一个 ELF 镜像文件。文件留在原处；不会被复制进任何工程目录。',
   'gettingStarted.mapTitle': 'MAP 文件会改变什么',
-  'gettingStarted.mapBody': 'GNU ld MAP 是可选的，它会补充内存区域信息。Keil 和 IAR 的产物尚未验证，它们的 MAP 文件不受支持：只分析 ELF 即可，容量会显示为 UNKNOWN。',
+  'gettingStarted.mapBody': 'GNU ld MAP 是可选的，它会补充内存区域信息。Keil 和 IAR 的产物尚未验证，它们的 MAP 文件不受支持：只分析 ELF 即可，容量可能显示为 UNKNOWN。',
   'gettingStarted.flowTitle': '产品流程',
   'gettingStarted.stepThen': '然后 ',
   'gettingStarted.stepAnalyze': '分析',

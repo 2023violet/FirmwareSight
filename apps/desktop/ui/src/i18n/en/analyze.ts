@@ -142,7 +142,7 @@ export const analyze = {
   'gettingStarted.firstActionBefore': 'On Analyze, choose an ELF artifact with ',
   'gettingStarted.firstActionAfter': '. The file stays where it is; nothing is copied into a project folder.',
   'gettingStarted.mapTitle': 'What a MAP file changes',
-  'gettingStarted.mapBody': 'A GNU ld MAP is optional and adds memory-region detail. Keil and IAR output is unverified, and their MAP files are not supported: analyze the ELF alone, and capacities stay UNKNOWN.',
+  'gettingStarted.mapBody': 'A GNU ld MAP is optional and adds memory-region detail. Keil and IAR output is unverified, and their MAP files are not supported: analyze the ELF alone, and capacities can remain UNKNOWN.',
   'gettingStarted.flowTitle': 'The product flow',
   'gettingStarted.stepThen': 'then ',
   'gettingStarted.stepAnalyze': 'Analyze',

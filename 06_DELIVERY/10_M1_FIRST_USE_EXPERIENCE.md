@@ -92,4 +92,4 @@ All of T1–T8 are accepted, the gate is green, the review has no S0/S1 findings
 
 ## Outcome
 
-Delivered on `feature/m1-first-use`; see [evidence/M1](../evidence/M1/README.md). T1–T7 accepted except native drag-and-drop (NOT_RUN) and the independent native sign-off, which are both still open.
+Delivered on `feature/m1-first-use`; see [evidence/M1](../evidence/M1/README.md). Accepted: T1, T2 (native drag-and-drop NOT_RUN), T4, T5 (1440×900 not captured), T6. T3 partly: the memory bars shipped, but **the latest Compare delta on Overview was not built** and is carried to a later round. T7: the independent review rated AC24, AC26 and AC20 PASS_WITH_LIMITS, and they remain open; the gaps are listed in the evidence.

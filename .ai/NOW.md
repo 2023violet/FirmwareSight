@@ -24,12 +24,12 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 | Gate | State |
 |---|---|
 | Code integration (NEXT-47) | PASS |
-| Native desktop user acceptance | **OBSERVED PASS (automated driver, M1), independent sign-off pending**; native drag-and-drop NOT_RUN |
+| Native desktop user acceptance | **PASS_WITH_LIMITS** (M1, automated driver; independent review); gaps listed in [evidence/M1](../evidence/M1/README.md); native drag-and-drop NOT_RUN |
 | Public release, signing, updater, open-source license | NOT_AUTHORIZED |
 
 ## Open risks (must close before the first external Developer Preview, Private Beta or RC, whichever comes first)
 
-- NEXT-44 AC24, NEXT-44 AC26, NEXT-45 AC20: all applicable cases observed PASS on the real Windows desktop in M1 ([evidence/M1](../evidence/M1/README.md)). They stay open until an independent reviewer signs, as the [deferred register](../NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md) requires.
+- NEXT-44 AC24, NEXT-44 AC26, NEXT-45 AC20: rated PASS_WITH_LIMITS by the independent review of M1 and still open. Not yet observed: deny, confirm, failure and retry on a visual export; the English replace confirmation; recorded Tab order; a screen reader; 1440×900; the non-Owner profile and human operator the [deferred register](../NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md) asks for. See [evidence/M1](../evidence/M1/README.md).
 - Native drag-and-drop from Explorer: NOT_RUN (automation could not synthesize an OS drag); one human drag is needed.
 - Screen-reader check: not run; UI Automation exposure was checked.
 
