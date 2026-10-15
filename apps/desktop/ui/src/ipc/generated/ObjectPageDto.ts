@@ -8,7 +8,11 @@ export type ObjectPageDto = {
 /**
  * False when the build stored no object rows; `reason` then says why and `rows` is empty.
  */
-available: boolean, reason: string | null, rows: Array<ObjectRowDto>, total: number, offset: number, limit: number, nextOffset: number | null, 
+available: boolean, 
+/**
+ * Whether a GNU ld MAP was stored with the build; with `available: false` it decides the next step.
+ */
+mapPresent: boolean, reason: string | null, rows: Array<ObjectRowDto>, total: number, offset: number, limit: number, nextOffset: number | null, 
 /**
  * The build's budget totals, only when exact; a share is never read against a floor.
  */

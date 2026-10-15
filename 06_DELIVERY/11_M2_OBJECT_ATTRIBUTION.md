@@ -102,3 +102,22 @@ Found while building, for the Owner (not changed here):
    lines are escaped). The analyze renderer escapes region names since `5f6a630`.
 3. M2's desktop surfaces have unit, IPC and component tests but no native QA pass yet; section 6 applies to them too.
 4. The first full `check.py` run failed `drift/fixtures tracked`: `**/target/` in `.gitignore` had hidden the fixture's `target/` side from 1bd0f3c. The local tests passed on the files on disk. Fixed in A10 with the same narrow exception P2 uses; the second run is the gate of record.
+
+## 8. Independent review of 3eae003 and what changed
+
+The review verdict was **FAIL**, with one S1 item. It was reproduced with the CLI. The review ran `cargo test --workspace` (1223 passed) and `vitest` (428 passed).
+
+| Finding | Disposition |
+|---|---|
+| **S1** A host path survived as the object key when the build's objects shared no common directory (a toolchain `crti.o` beside the project; case-different drive letters; one drive with `Program Files`) | **Fixed.** `map.rs` `normalize_contributions`: absolute and `..` paths are cut at the shallowest directory that itself holds an object of the link, so only directories below an object directory survive. Five regression tests cover the reviewer's three reproductions, an empty common root, and a same-name collision. |
+| S2.1 A build stored before 0007 never gains rows, because re-analysis reuses the stored snapshot | **Owner decision, not changed.** The options are a backfill on re-import (an additive INSERT; rows stay immutable) or keeping the current behaviour. The page now says which absence it is (next row), so it no longer tells such a user to do something that cannot help. |
+| S2.2 Two objects with one file name merged silently | **Fixed** by S1's collision rule (`app/main.o`, `boot/main.o`). |
+| S2.3 No A4 test (store migrated from 0006 reads Unavailable) | **Fixed.** `a_build_stored_before_0007_reads_unavailable_after_the_migration`. |
+| S2.4 One generic reason instead of D6's distinct ones | **Fixed for what storage can tell.** `snapshot_has_map` separates "no MAP" from "a MAP but no rows", with a different next step for each. "Stored before 0007" and "a MAP without input sections" stay one reason, because nothing stored tells them apart. |
+| S3 Remainder dropped a known side when the other was Unknown | **Fixed** in the CLI and the UI, which now show each side on its own. |
+| S3 Misplaced doc comment; stale "ten" assertion message | **Fixed.** |
+| S3 Diff reason overstated what the CLI text lists | **Fixed**: counts and largest changes. Goldens regenerated (reason text and dependent digests only). |
+| S3 O(rows × objects) aggregation, recomputed per page | **Not changed.** Fixture-scale builds have tens of objects. Recorded for when a large real MAP is measured. |
+| S3 Attributed bytes above the total make the remainder Unknown with no signal | **Not changed.** Unknown is the honest value. A diagnostic is a follow-up. |
+| S3 Per-object comparability is always `Exact` | **No change, by reasoning.** A row's charge is either a MAP-stated size or Unknown, and Unknown already yields no delta. A partial budget total does not make one row's MAP size a floor. If the Owner reads D8 more strictly, this is one line in `diff.rs` `usage_change`. |
+

@@ -552,7 +552,7 @@ impl ObjectAttribution {
         let (libraries, unchanged_libraries) = diff_usages(&from.libraries, &to.libraries);
         Self {
             available: true,
-            reason: "both builds stored object rows from a GNU ld MAP, each charged like its output section; the per-object and per-library rows are listed by the desktop Compare view and the CLI text report, not by this portable document (ADR-0033 D7)".to_owned(),
+            reason: "both builds stored object rows from a GNU ld MAP, each charged like its output section; the per-object and per-library rows are listed by the desktop Compare view, and the CLI text report gives their counts and largest changes; this portable document carries neither (ADR-0033 D7)".to_owned(),
             objects,
             libraries,
             unchanged_objects,

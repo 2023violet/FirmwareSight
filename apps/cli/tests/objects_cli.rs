@@ -48,7 +48,10 @@ fn objects_lists_each_object_and_library_with_the_remainder() {
     assert!(text.contains("  Objects (4)"), "{text}");
     assert!(text.contains("libdrv.a(spi.o)"), "{text}");
     assert!(text.contains("  Libraries (1)"), "{text}");
-    assert!(text.contains("Not attributed to an object: "), "{text}");
+    assert!(
+        text.contains("Not attributed to an object: 20 bytes Flash, 0 bytes RAM"),
+        "{text}"
+    );
     assert!(!text.contains("build/app"), "no host or build path: {text}");
 }
 

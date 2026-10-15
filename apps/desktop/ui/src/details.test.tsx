@@ -320,6 +320,7 @@ function evidencePage(overrides: Partial<EvidencePageDto> = {}): EvidencePageDto
 function objectPage(overrides: Partial<ObjectPageDto> = {}): ObjectPageDto {
   return {
     available: true,
+    mapPresent: true,
     reason: null,
     rows: [
       {
@@ -934,6 +935,7 @@ describe('objects and libraries (ADR-0033)', () => {
       ok(
         objectPage({
           available: false,
+          mapPresent: false,
           reason: 'this build stored no object rows',
           rows: [],
           total: 0,
@@ -953,6 +955,38 @@ describe('objects and libraries (ADR-0033)', () => {
     expect(within(panel).getByText('this build stored no object rows')).toBeDefined();
     expect(within(panel).getByText(/GNU ld \.map file/u)).toBeDefined();
     expect(within(panel).queryByRole('table')).toBeNull();
+  });
+
+  it('names the other remedy when the build has a MAP but no object rows (ADR-0033 D6)', async () => {
+    objectsMock.mockResolvedValue(
+      ok(
+        objectPage({
+          available: false,
+          mapPresent: true,
+          reason: 'stored with a MAP but without object rows',
+          rows: [],
+          total: 0,
+          limit: 0,
+        }),
+      ),
+    );
+    render(<App />);
+    await analyzeOk();
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Objects' }));
+    const panel = await screen.findByRole('tabpanel', { name: 'Objects' });
+    expect(within(panel).getByText(/input-section lines of a GNU ld MAP/u)).toBeDefined();
+    expect(within(panel).queryByText(/Analyze the build again/u)).toBeNull();
+  });
+
+  it('keeps a known remainder side when the other is Unknown', async () => {
+    objectsMock.mockResolvedValue(ok(objectPage({ unattributedRuntimeRam: null })));
+    render(<App />);
+    await analyzeOk();
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Objects' }));
+    const panel = await screen.findByRole('tabpanel', { name: 'Objects' });
+    expect(within(panel).getByText(/Not attributed to an object: 12 bytes Flash and Unknown RAM/u)).toBeDefined();
   });
 });
 

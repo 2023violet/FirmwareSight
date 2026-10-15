@@ -38,19 +38,30 @@ impl Session {
         request: &ObjectRequestDto,
         operation_id: &str,
     ) -> Result<ObjectPageDto, ErrorEnvelopeDto> {
-        let attribution = {
+        let (attribution, map_present) = {
             let db = self.lock_db(operation_id)?;
-            db.object_attribution(&request.snapshot_id)
-                .map_err(|err| envelope_from_storage(&err, operation_id))?
+            let attribution = db
+                .object_attribution(&request.snapshot_id)
+                .map_err(|err| envelope_from_storage(&err, operation_id))?;
+            let map_present = db
+                .snapshot_has_map(&request.snapshot_id)
+                .map_err(|err| envelope_from_storage(&err, operation_id))?;
+            (attribution, map_present)
         };
         let Some(attribution) = attribution else {
+            // ADR-0033 D6: the two absences have different remedies, so they are not one sentence.
+            let reason = if map_present {
+                "this build was stored with a GNU ld MAP but without object rows: the MAP lists no \
+                 input sections, or the build was stored by a FirmwareSight version that did not keep \
+                 them (analyzing the same files again reuses that stored build)"
+            } else {
+                "this build was analyzed without a GNU ld MAP, and only a MAP names the object file \
+                 behind each byte"
+            };
             return Ok(ObjectPageDto {
                 available: false,
-                reason: Some(
-                    "this build stored no object rows: it was analyzed without a GNU ld MAP, the MAP \
-                     lists no input sections, or it was stored before FirmwareSight kept them"
-                        .to_owned(),
-                ),
+                map_present,
+                reason: Some(reason.to_owned()),
                 rows: Vec::new(),
                 total: 0,
                 offset: 0,
@@ -93,6 +104,7 @@ impl Session {
 
         Ok(ObjectPageDto {
             available: true,
+            map_present,
             reason: None,
             rows: window.rows,
             total: window.total,

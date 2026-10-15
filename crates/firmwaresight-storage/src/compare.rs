@@ -333,6 +333,29 @@ impl Database {
             })
     }
 
+    /// Whether a GNU ld MAP was stored with this snapshot. ADR-0033 D6 names "no MAP" apart from
+    /// "a MAP that gave no object rows", because the two have different remedies.
+    ///
+    /// # Errors
+    ///
+    /// As [`Database::load_diff_input`].
+    pub fn snapshot_has_map(&self, snapshot_id: &str) -> Result<bool, StorageError> {
+        let build_id =
+            self.build_id_for_snapshot(snapshot_id)?
+                .ok_or_else(|| StorageError::NotFound {
+                    id: snapshot_id.to_owned(),
+                })?;
+        Ok(self
+            .connection()
+            .query_row(
+                "SELECT COUNT(*) FROM artifacts WHERE build_id = ?1 AND kind = 'Map'",
+                params![build_id],
+                |row| row.get::<_, i64>(0),
+            )
+            .map_err(read_err)?
+            > 0)
+    }
+
     /// The object and library usage of one stored snapshot (ADR-0033), with the exact budget
     /// totals a share is read against. `None` when the build kept no object rows, which is not a
     /// build with zero bytes per object.
@@ -448,8 +471,6 @@ impl Database {
 /// SQLite's compile-time variable limit on the pinned `rusqlite + bundled` build.
 const SQLITE_MAX_VARIABLES: usize = 999;
 
-/// Map a stored budget back onto the diff's three-state model. A state string this build does not
-/// recognize is treated as unknown rather than promoted to exact.
 /// A stored total, only when it is exact: a partial total is a floor, and no share or remainder is
 /// read against a floor.
 fn exact_bytes(stored: &StoredBudget) -> Option<u64> {
@@ -458,6 +479,8 @@ fn exact_bytes(stored: &StoredBudget) -> Option<u64> {
         .flatten()
 }
 
+/// Map a stored budget back onto the diff's three-state model. A state string this build does not
+/// recognize is treated as unknown rather than promoted to exact.
 fn budget(stored: &StoredBudget) -> DiffBudget {
     let state = BudgetState::parse(&stored.state);
     DiffBudget {

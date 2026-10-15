@@ -239,6 +239,6 @@ export const analyze: CatalogFor<'analyze'> = {
   'details.objects.noShare': '没有可对照的精确 Flash 总量',
   'details.objects.unavailable': '此构建没有对象归因',
   'details.objects.nextStep': '附上该构建的 GNU ld .map 文件重新分析，即可查看哪些目标文件和库占用了内存。',
-  'details.objects.remainder': '未归属于任何对象：Flash {flash}，RAM {ram}（填充、链接器桩代码，以及没有对象记录的节）。',
-  'details.objects.remainderUnknown': '未归属于对象的字节数为 Unknown，因为某个预算总量或对象数值并不精确。',
+  'details.objects.nextStepRows': '对象记录来自 GNU ld MAP（链接器的 -Map 输出）中的输入节行。为一个此前未保存过的构建提供列出这些行的 MAP，即可得到此表。',
+  'details.objects.remainder': '未归属于任何对象：Flash {flash}，RAM {ram}（填充、链接器桩代码，以及没有对象记录的节；总量或对象数值不精确时为 Unknown）。',
 };

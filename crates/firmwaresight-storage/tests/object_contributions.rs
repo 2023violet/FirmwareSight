@@ -116,3 +116,44 @@ fn a_build_without_a_map_has_no_rows_rather_than_zero_rows_of_something() {
     let build = db.import_snapshot("p", "P", &snapshot).expect("imports");
     assert!(db.object_contributions(&build).expect("reads").is_empty());
 }
+
+#[test]
+fn a_build_stored_before_0007_reads_unavailable_after_the_migration() {
+    // Plan A4: a store at schema 6 holding a MAP-backed build migrates to 7, and that build has no
+    // object rows to show, so it reads "none recorded" rather than zero bytes per object.
+    let file = TempDb::new("from-0006");
+    let snapshot = snapshot(
+        "m2-objects/target/firmware.elf",
+        Some("m2-objects/target/firmware.map"),
+    );
+    let snapshot_id = snapshot.id().as_str().to_owned();
+    {
+        let mut db = Database::open(&file.0).expect("opens");
+        db.import_snapshot("p", "P", &snapshot).expect("imports");
+        // Step the store back to what migration 0006 left: no object table, no 0007 record.
+        db.connection()
+            .execute_batch(
+                "DROP TABLE object_contributions;
+                 DELETE FROM schema_migrations WHERE version >= 7;",
+            )
+            .expect("stepped down to 6");
+    }
+
+    let db = Database::open(&file.0).expect("migrates 6 -> 7");
+    let version: i64 = db
+        .connection()
+        .query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
+            row.get(0)
+        })
+        .expect("reads");
+    assert_eq!(version, 7);
+    assert_eq!(
+        db.object_attribution(&snapshot_id).expect("reads"),
+        None,
+        "an old build is unavailable, never zero"
+    );
+    assert!(
+        db.snapshot_has_map(&snapshot_id).expect("reads"),
+        "its MAP is still on record, which is what names the other remedy (D6)"
+    );
+}

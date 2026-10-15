@@ -103,6 +103,7 @@ fn a_build_without_a_map_is_not_available_rather_than_all_zero() {
         .query_objects(&objects(&snapshot, false), "op-objects")
         .expect("the query answers");
     assert!(!page.available);
+    assert!(!page.map_present, "D6: no MAP is its own reason");
     assert!(
         page.reason
             .as_deref()
@@ -123,6 +124,7 @@ fn a_map_backed_build_pages_ranked_objects_that_add_up_to_its_budget() {
         .query_objects(&objects(&snapshot, false), "op-objects")
         .expect("the query answers");
     assert!(page.available, "{:?}", page.reason);
+    assert!(page.map_present);
     assert!(page.rows.len() >= 3, "two app objects and library members");
     assert!(page.rows.iter().all(|row| !is_host_path(&row.key)));
     assert!(

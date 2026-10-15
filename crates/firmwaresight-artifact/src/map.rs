@@ -509,57 +509,116 @@ fn file_name(parts: &[String]) -> String {
     parts.last().cloned().unwrap_or_default()
 }
 
-/// ADR-0033 D2: no host path survives. Archives keep their file name; other objects keep the path below
-/// the directory every non-archive object shares, or their file name when that leaves them absolute.
+/// The longest run of leading components every path in `paths` shares.
+fn common_prefix(paths: &[&[String]]) -> usize {
+    let Some((first, rest)) = paths.split_first() else {
+        return 0;
+    };
+    let mut length = first.len();
+    for other in rest {
+        length = first
+            .iter()
+            .zip(other.iter())
+            .take(length)
+            .take_while(|(a, b)| a == b)
+            .count();
+    }
+    length
+}
+
+/// ADR-0033 D2: no host path survives.
+///
+/// - An archive member is `archive(member)`, both reduced to their file names.
+/// - A relative object path without `..` keeps its directories below the directory every such path
+///   shares (`build/app/sensors/imu.o` next to `build/app/main.o` becomes `sensors/imu.o`). A relative
+///   path names nothing outside the link's own working directory.
+/// - Any other path (absolute on either host, or climbing out with `..`) is cut at the shallowest
+///   directory above it that itself directly holds an object file of this link, so only directories
+///   *below* an object directory survive. A project under `C:/Users/<name>/proj/build/app` keeps
+///   `sensors/imu.o`; a toolchain `crti.o` under `/usr/lib/gcc/...` becomes `crti.o`. The two never
+///   share a root, so neither keeps the other's machine directories (the review S1 failure: one common
+///   root over both collapsed to empty and the whole path survived).
+/// - When two objects still end with the same key, each keeps the trailing directories below the prefix
+///   the colliding paths share, so two objects are never silently merged into one row.
 fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContribution> {
-    let directories: Vec<Vec<String>> = raw
+    // Split every non-archive object once, and classify it.
+    let split: Vec<Option<(bool, Vec<String>)>> = raw
         .iter()
-        .filter(|row| split_archive(&row.object).0.is_none())
         .map(|row| {
-            let (_, mut parts) = components(&row.object);
-            parts.pop();
-            parts
+            if split_archive(&row.object).0.is_some() {
+                return None;
+            }
+            let (absolute, parts) = components(&row.object);
+            let outside = absolute || parts.iter().any(|part| part == "..");
+            Some((outside, parts))
         })
         .collect();
-    let common: Vec<String> = match directories.split_first() {
-        None => Vec::new(),
-        Some((first, rest)) => {
-            let mut length = first.len();
-            for other in rest {
-                length = length.min(other.len());
-                length = first
-                    .iter()
-                    .zip(other)
-                    .take(length)
-                    .take_while(|(a, b)| a == b)
-                    .count();
+
+    // The directory every relative, in-tree object shares.
+    let relative_dirs: Vec<&[String]> = split
+        .iter()
+        .flatten()
+        .filter(|(outside, _)| !outside)
+        .map(|(_, parts)| &parts[..parts.len().saturating_sub(1)])
+        .collect();
+    let relative_root = common_prefix(&relative_dirs);
+
+    // Directories that directly hold an out-of-tree object: the only places a key may start below.
+    let anchors: Vec<&[String]> = split
+        .iter()
+        .flatten()
+        .filter(|(outside, _)| *outside)
+        .map(|(_, parts)| &parts[..parts.len().saturating_sub(1)])
+        .collect();
+    let anchored = |parts: &[String]| -> String {
+        let dir = &parts[..parts.len().saturating_sub(1)];
+        let cut = anchors
+            .iter()
+            .filter(|anchor| dir.starts_with(anchor))
+            .map(|anchor| anchor.len())
+            .min()
+            .unwrap_or(dir.len());
+        parts[cut..].join("/")
+    };
+
+    // Out-of-tree objects grouped by their anchored key, so a collision can be told apart.
+    let mut by_key: std::collections::BTreeMap<String, Vec<&[String]>> =
+        std::collections::BTreeMap::new();
+    for (_, parts) in split.iter().flatten().filter(|(outside, _)| *outside) {
+        let list = by_key.entry(anchored(parts)).or_default();
+        if !list.iter().any(|known| *known == &parts[..]) {
+            list.push(parts);
+        }
+    }
+    let outside_key = |parts: &[String]| -> String {
+        let key = anchored(parts);
+        match by_key.get(&key) {
+            Some(group) if group.len() > 1 => {
+                let shared = common_prefix(group).min(parts.len().saturating_sub(1));
+                parts[shared..].join("/")
             }
-            first[..length].to_vec()
+            _ => key,
         }
     };
 
     raw.into_iter()
-        .map(|row| {
-            let (archive, member) = split_archive(&row.object);
-            let (archive, member, key) = match archive {
-                Some(archive) => {
-                    let archive = file_name(&components(archive).1);
+        .zip(split.iter())
+        .map(|(row, split)| {
+            let (archive, member, key) = match split {
+                None => {
+                    let (archive, member) = split_archive(&row.object);
+                    let archive = file_name(&components(archive.unwrap_or_default()).1);
                     let member = file_name(&components(member).1);
                     let key = format!("{archive}({member})");
                     (Some(archive), member, key)
                 }
-                None => {
-                    let (absolute, parts) = components(member);
-                    let relative =
-                        if parts.len() > common.len() && parts[..common.len()] == common[..] {
-                            parts[common.len()..].join("/")
-                        } else if absolute {
-                            file_name(&parts)
-                        } else {
-                            parts.join("/")
-                        };
-                    let member = file_name(&parts);
-                    (None, member, relative)
+                Some((outside, parts)) => {
+                    let key = if *outside {
+                        outside_key(parts)
+                    } else {
+                        parts[relative_root.min(parts.len().saturating_sub(1))..].join("/")
+                    };
+                    (None, file_name(parts), key)
                 }
             };
             MapObjectContribution {
@@ -778,5 +837,102 @@ Linker script and memory map
             .map(|c| c.object.as_str())
             .collect();
         assert_eq!(keys, ["a/x.o", "b/y.o"]);
+    }
+
+    /// A minimal MAP whose `.text` rows name `objects`, one 0x10-byte row each.
+    fn map_with(objects: &[&str]) -> String {
+        let mut text = String::from(
+            "Memory Configuration\n\nName             Origin             Length             Attributes\nFLASH            0x08000000         0x00100000         xr\n\nLinker script and memory map\n\n.text           0x08000000      0x100\n",
+        );
+        for (index, object) in objects.iter().enumerate() {
+            text.push_str(&format!(
+                " .text.f{index}     0x{:08x}       0x10 {object}\n",
+                0x0800_0000 + index * 0x10
+            ));
+        }
+        text
+    }
+
+    fn keys_of(objects: &[&str]) -> Vec<String> {
+        parse(&map_with(objects))
+            .expect("parses")
+            .object_contributions
+            .into_iter()
+            .map(|c| c.object)
+            .collect()
+    }
+
+    fn assert_no_host_directory(keys: &[String], forbidden: &[&str]) {
+        for key in keys {
+            for word in forbidden {
+                assert!(
+                    !key.to_ascii_lowercase()
+                        .contains(&word.to_ascii_lowercase()),
+                    "{key} leaks {word}: {keys:?}"
+                );
+            }
+            assert!(
+                !key.contains(':') && !key.starts_with('/'),
+                "{key} is a path"
+            );
+        }
+    }
+
+    // Review S1 (3eae003): a toolchain object outside the project left the common root empty, and the
+    // whole host path survived as the key. Each case below reproduced it.
+
+    #[test]
+    fn a_posix_project_beside_a_usr_toolchain_keeps_no_host_directory() {
+        let keys = keys_of(&[
+            "/home/alice/proj/build/app/main.o",
+            "/home/alice/proj/build/app/sensors/imu.o",
+            "/usr/lib/gcc/arm-none-eabi/14.3.1/thumb/v7e-m/crti.o",
+        ]);
+        assert_eq!(keys, ["main.o", "sensors/imu.o", "crti.o"]);
+        assert_no_host_directory(&keys, &["home", "alice", "usr", "proj", "build"]);
+    }
+
+    #[test]
+    fn windows_drive_letters_that_differ_in_case_keep_no_host_directory() {
+        let keys = keys_of(&[
+            "C:/Users/alice/proj/build/app/main.o",
+            "c:/program files/arm/lib/thumb/crti.o",
+        ]);
+        assert_eq!(keys, ["main.o", "crti.o"]);
+        assert_no_host_directory(&keys, &["users", "alice", "program files"]);
+    }
+
+    #[test]
+    fn the_same_windows_drive_keeps_no_user_directory() {
+        let keys = keys_of(&[
+            "C:\\Users\\alice\\proj\\build\\app\\main.o",
+            "C:\\Users\\alice\\proj\\build\\app\\drv\\uart.o",
+            "C:\\Program Files\\Arm GNU Toolchain\\lib\\gcc\\arm-none-eabi\\14.3.1\\crtbegin.o",
+        ]);
+        assert_eq!(keys, ["main.o", "drv/uart.o", "crtbegin.o"]);
+        assert_no_host_directory(&keys, &["users", "alice", "program files", "proj"]);
+    }
+
+    #[test]
+    fn an_empty_common_root_never_keeps_an_absolute_path() {
+        let keys = keys_of(&[
+            "/a/b/one.o",
+            "/c/d/two.o",
+            "D:/e/three.o",
+            "../../outside/four.o",
+        ]);
+        assert_eq!(keys, ["one.o", "two.o", "three.o", "four.o"]);
+    }
+
+    #[test]
+    fn two_objects_with_one_file_name_stay_two_rows() {
+        // Review S2: reducing to file names must not merge `app/main.o` and `boot/main.o` silently.
+        let keys = keys_of(&[
+            "/home/alice/proj/build/app/main.o",
+            "/home/alice/proj/build/boot/main.o",
+            "/usr/lib/gcc/crti.o",
+        ]);
+        assert_eq!(keys, ["app/main.o", "boot/main.o", "crti.o"]);
+        assert_no_host_directory(&keys, &["home", "alice", "proj"]);
     }
 }

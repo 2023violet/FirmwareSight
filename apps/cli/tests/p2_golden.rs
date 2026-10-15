@@ -178,7 +178,7 @@ fn object_attribution_is_available_and_says_where_the_rows_are() {
         document["objectChanges"]["reason"]
             .as_str()
             .expect("reason")
-            .contains("not by this portable document (ADR-0033 D7)")
+            .contains("this portable document carries neither (ADR-0033 D7)")
     );
 }
 

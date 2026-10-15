@@ -237,6 +237,6 @@ export const analyze = {
   'details.objects.noShare': 'No exact Flash total to compare against',
   'details.objects.unavailable': 'Object attribution is not available for this build',
   'details.objects.nextStep': 'Analyze the build again with its GNU ld .map file attached to see which object files and libraries use the memory.',
-  'details.objects.remainder': 'Not attributed to an object: {flash} Flash and {ram} RAM (padding, linker stubs, and sections without object rows).',
-  'details.objects.remainderUnknown': 'The bytes not attributed to an object are Unknown, because a budget total or an object figure is not exact.',
+  'details.objects.nextStepRows': 'Object rows come from the input-section lines of a GNU ld MAP (the linker’s -Map output). A MAP that lists them, for a build not stored before, gives this table.',
+  'details.objects.remainder': 'Not attributed to an object: {flash} Flash and {ram} RAM (padding, linker stubs, and sections without object rows; Unknown where a total or an object figure is not exact).',
 } as const;

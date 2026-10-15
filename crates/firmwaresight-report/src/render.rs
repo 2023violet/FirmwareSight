@@ -111,17 +111,12 @@ pub fn render_objects(summary: Option<&AttributionSummary>) -> String {
     } else {
         table(&mut out, "Libraries", &summary.libraries);
     }
-    match (
-        summary.unattributed_nonvolatile,
-        summary.unattributed_runtime_ram,
-    ) {
-        (Some(flash), Some(ram)) => out.push_str(&format!(
-            "  Not attributed to an object: {flash} bytes Flash, {ram} bytes RAM (padding, linker stubs, sections without object rows)\n"
-        )),
-        _ => out.push_str(
-            "  Not attributed to an object: unknown (a budget total or an object charge is not exact)\n",
-        ),
-    }
+    // Each side on its own: an exact Flash remainder stays visible when the RAM one is Unknown.
+    out.push_str(&format!(
+        "  Not attributed to an object: {} Flash, {} RAM (padding, linker stubs, sections without object rows; unknown where a budget total or an object charge is not exact)\n",
+        bytes(summary.unattributed_nonvolatile),
+        bytes(summary.unattributed_runtime_ram)
+    ));
     out
 }
 
@@ -486,7 +481,7 @@ mod tests {
         assert!(text.contains("0 bytes"), "a known zero is a zero");
         assert!(text.contains("unknown"), "an unknown charge is not a zero");
         assert!(
-            text.contains("Not attributed to an object: unknown"),
+            text.contains("Not attributed to an object: unknown Flash, 4 bytes RAM"),
             "{text}"
         );
         assert!(text.contains("Libraries (0)"), "{text}");

@@ -298,7 +298,7 @@ export function Details({
           loaded.tab === 'libraries') &&
         !loaded.page.available ? (
         <div role="tabpanel" id={`fs-panel-${tab}`} aria-labelledby={tabId(tab)} tabIndex={0}>
-          <ObjectsUnavailable reason={loaded.page.reason} />
+          <ObjectsUnavailable reason={loaded.page.reason} mapPresent={loaded.page.mapPresent} />
         </div>
       ) : (
         <div role="tabpanel" id={`fs-panel-${tab}`} aria-labelledby={tabId(tab)} tabIndex={0}>
@@ -681,12 +681,20 @@ function SymbolTable({
  * A build without object rows. UNKNOWN, not N/A: the question applies to every image, and a MAP
  * would answer it. The sentence says what is missing, and the hint says how to get it.
  */
-function ObjectsUnavailable({ reason }: { readonly reason: string | null }) {
+function ObjectsUnavailable({
+  reason,
+  mapPresent,
+}: {
+  readonly reason: string | null;
+  readonly mapPresent: boolean;
+}) {
   const { t } = useI18n();
   return (
     <div className={styles['objectsUnavailable']}>
       <StateBadge state="UNKNOWN" label={t('analyze', 'details.objects.unavailable')} note={reason ?? undefined} />
-      <p className={styles['hint']}>{t('analyze', 'details.objects.nextStep')}</p>
+      <p className={styles['hint']}>
+        {t('analyze', mapPresent ? 'details.objects.nextStepRows' : 'details.objects.nextStep')}
+      </p>
     </div>
   );
 }
@@ -767,12 +775,16 @@ function ObjectTable({
         </table>
       </ScrollArea>
       <p className={styles['hint']}>
-        {page.unattributedNonvolatile === null || page.unattributedRuntimeRam === null
-          ? t('analyze', 'details.objects.remainderUnknown')
-          : t('analyze', 'details.objects.remainder', {
-              flash: formatSize(page.unattributedNonvolatile, unit),
-              ram: formatSize(page.unattributedRuntimeRam, unit),
-            })}
+        {t('analyze', 'details.objects.remainder', {
+          flash:
+            page.unattributedNonvolatile === null
+              ? t('analyze', 'details.unknown')
+              : formatSize(page.unattributedNonvolatile, unit),
+          ram:
+            page.unattributedRuntimeRam === null
+              ? t('analyze', 'details.unknown')
+              : formatSize(page.unattributedRuntimeRam, unit),
+        })}
       </p>
     </>
   );

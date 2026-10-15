@@ -239,7 +239,7 @@ fn the_clang_fixture_names_clang_in_its_own_bytes_and_the_gcc_fixtures_name_gcc(
     assert_eq!(
         gcc_built.len(),
         12,
-        "ten ELF files must carry the Arm GCC banner, got {}",
+        "twelve ELF files must carry the Arm GCC banner, got {}",
         gcc_built.len()
     );
 }

@@ -770,6 +770,8 @@ pub struct ObjectRowDto {
 pub struct ObjectPageDto {
     /// False when the build stored no object rows; `reason` then says why and `rows` is empty.
     pub available: bool,
+    /// Whether a GNU ld MAP was stored with the build; with `available: false` it decides the next step.
+    pub map_present: bool,
     pub reason: Option<String>,
     pub rows: Vec<ObjectRowDto>,
     pub total: usize,
