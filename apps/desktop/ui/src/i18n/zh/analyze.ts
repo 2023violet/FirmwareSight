@@ -2,6 +2,7 @@ import type { CatalogFor } from '../types';
 
 export const analyze: CatalogFor<'analyze'> = {
   'export.region': '可视化报告导出',
+  'export.staleNote': '保存对话框打开期间分析结果发生了变化，因此没有写入任何文件。请从当前分析重新导出。',
   'export.hint': 'PNG 适合分享，SVG 可编辑，HTML 可在浏览器中打印为 PDF（FirmwareSight 本身不生成 PDF）。报告不含文件路径和脚本。',
   'export.heading': '分享此分析',
   'export.png': '导出 PNG',

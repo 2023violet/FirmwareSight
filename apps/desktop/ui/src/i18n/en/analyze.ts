@@ -1,5 +1,6 @@
 export const analyze = {
   'export.region': 'Visual report export',
+  'export.staleNote': 'The analysis changed while the Save dialog was open, so nothing was written. Export again from this analysis.',
   'export.hint': 'PNG is a share image, SVG is editable, and HTML prints to PDF from your browser (FirmwareSight writes no PDF itself). Reports carry no file paths or scripts.',
   'export.heading': 'Share this analysis',
   'export.png': 'Export PNG',

@@ -299,6 +299,7 @@ export function Release({
    * travel inside its own payload (prompt §49).
    */
   const verdictRef = useRef<HTMLElement | null>(null);
+  const [gateExportStale, setGateExportStale] = useState(false);
   const focusVerdict = useRef(false);
 
   const gate = useCallback(async () => {
@@ -313,6 +314,7 @@ export function Release({
     });
     setRunning(false);
     if (outcome.ok) {
+      setGateExportStale(false);
       focusVerdict.current = true;
       onRunChange(outcome.value);
       setRestored(false);
@@ -608,7 +610,14 @@ export function Release({
           <Findings run={run} onAccept={accept} />
           <Readiness run={run} restored={restored} onReload={() => void reload()} />
           {run.tables === null ? null : <Evidence run={run} unit={unit} />}
-          <StandaloneVisualExport key={`${run.runId}:${run.snapshotId}`} run={run} />
+          {gateExportStale ? (
+            <p className={styles['stale']} role="status">{t('release', 'visualExport.staleNote')}</p>
+          ) : null}
+          <StandaloneVisualExport
+            key={`${run.runId}:${run.snapshotId}`}
+            run={run}
+            onStaleRefused={() => setGateExportStale(true)}
+          />
           <BundleSection run={run} unit={unit} />
         </>
       )}
@@ -618,7 +627,14 @@ export function Release({
   );
 }
 
-function StandaloneVisualExport({ run }: { readonly run: GateRunDto }) {
+function StandaloneVisualExport({
+  run,
+  onStaleRefused,
+}: {
+  readonly run: GateRunDto;
+  /** The run changed while the Save dialog was open and Rust refused the old one (M1, AC24). */
+  readonly onStaleRefused: () => void;
+}) {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -628,6 +644,10 @@ function StandaloneVisualExport({ run }: { readonly run: GateRunDto }) {
     setBusy(true);
     const outcome = await exportGateVisual(run.runId, run.snapshotId, format);
     setBusy(false);
+    if (!outcome.ok && outcome.envelope.code === 'ERR-EXPORT-6002') {
+      onStaleRefused();
+      return;
+    }
     if (!outcome.ok) {
       setError(outcome.envelope);
       setMessage(null);

@@ -190,7 +190,14 @@ export function Analyze({
       currentSummary.identity.snapshotId,
       format,
     );
-    if (request !== exportRequest.current) return;
+    if (request !== exportRequest.current) {
+      // The analysis on screen changed while the Save dialog was open; Rust refused to write the old one
+      // (M1, AC24). Say so rather than stay silent.
+      if (!result.ok && result.envelope.code === 'ERR-EXPORT-6002') {
+        setExportMessage(t('analyze', 'export.staleNote'));
+      }
+      return;
+    }
     setExporting(false);
     if (!result.ok) {
       setExportError(result.envelope);

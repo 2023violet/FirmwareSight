@@ -3,6 +3,7 @@ export const release = {
   'stepLabel': 'Step {n}',
   'runNeedsBuild': 'Choose a build in step 1 to run the Gate.',
   'visualExport.heading': 'Share Gate review',
+  'visualExport.staleNote': 'The Gate run changed while the Save dialog was open, so nothing was written. Export again from this run.',
   'visualExport.hint': 'A visual summary of this run; it is not part of the Release Bundle. HTML prints to PDF from your browser (FirmwareSight writes no PDF).',
   'visualExport.png': 'Export PNG',
   'visualExport.svg': 'Export SVG',

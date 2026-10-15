@@ -5,6 +5,7 @@ export const release: CatalogFor<'release'> = {
   'stepLabel': '第 {n} 步',
   'runNeedsBuild': '先在第 1 步选择一个构建，才能运行门禁。',
   'visualExport.heading': '分享 Gate 复核',
+  'visualExport.staleNote': '保存对话框打开期间门禁运行发生了变化，因此没有写入任何文件。请从当前运行重新导出。',
   'visualExport.hint': '这次运行的可视化摘要，不属于发布包。HTML 可在浏览器中打印为 PDF（FirmwareSight 本身不生成 PDF）。',
   'visualExport.png': '导出 PNG',
   'visualExport.svg': '导出 SVG',

@@ -728,6 +728,15 @@ describe('Release navigation', () => {
     expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it('says nothing was written when the Gate run changed while the Save dialog was open', async () => {
+    await openRelease();
+    await runGate();
+    const region = await screen.findByRole('region', { name: 'Standalone visual report' });
+    exportGateVisualMock.mockResolvedValueOnce({ ok: false, envelope: { code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null } });
+    fireEvent.click(within(region).getByRole('button', { name: 'Export PNG' }));
+    expect(await screen.findByText(/Gate run changed while the Save dialog was open, so nothing was written/)).toBeDefined();
+  });
+
   it('offers a standalone visual report for a current Gate run without changing Bundle export', async () => {
     await openRelease();
     await runGate();
