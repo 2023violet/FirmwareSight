@@ -190,6 +190,15 @@
   border-radius: var(--fs-radius-panel);
 }
 
+/* M1 T4: the one action that judges the attempt, after the last setup step. It stays at the bottom edge
+   of the viewport while the steps scroll, so the reader never hunts for it. */
+.runBar {
+  position: sticky;
+  inset-block-end: 0;
+  padding-bottom: var(--fs-space-4);
+  background: var(--fs-color-bg-canvas);
+}
+
 .pickerActions {
   grid-column: 1 / -1;
   display: flex;

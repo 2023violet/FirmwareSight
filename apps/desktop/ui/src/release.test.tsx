@@ -1429,7 +1429,7 @@ describe('Release bundle', () => {
 
   it('attaches the bundle under Release and adds no navigation verb', async () => {
     await prepared();
-    const heading = screen.getByRole('heading', { level: 2, name: '4 · Release Bundle' });
+    const heading = screen.getByRole('heading', { level: 2, name: 'Release Bundle' });
     // §58: the rail is still the workflow stages. A bundle is a section of Release, not a fifth
     // doorway, so the only new verb this page has is the one inside it.
     const rail = screen.getByRole('navigation', { name: 'Pages' });
@@ -1880,22 +1880,33 @@ describe('U1P Release hierarchy', () => {
     await runGate();
 
     const verdict = await screen.findByRole('region', { name: 'Gate verdict' });
-    const findings = screen.getByRole('region', { name: '1 · Findings by state' });
-    const readiness = screen.getByRole('region', { name: '2 · FirmwareSight policy readiness' });
-    const evidence = screen.getByRole('region', { name: '3 · What the findings were judged on' });
-    const bundle = screen.getByRole('region', { name: '4 · Release Bundle' });
-    const policy = screen.getByRole('region', { name: '5 · Project policy' });
-    const builds = screen.getByRole('region', { name: '6 · Build and baseline' });
+    const findings = screen.getByRole('region', { name: 'Findings by state' });
+    const readiness = screen.getByRole('region', { name: 'FirmwareSight policy readiness' });
+    const evidence = screen.getByRole('region', { name: 'What the findings were judged on' });
+    const bundle = screen.getByRole('region', { name: 'Release Bundle' });
+    const policy = screen.getByRole('region', { name: 'Step 2 · Project policy' });
+    const builds = screen.getByRole('region', { name: 'Step 1 · Build and baseline' });
+    const attachments = screen.getByRole('region', { name: 'Step 3 · Release attachments' });
+    const runBar = screen.getByRole('region', { name: 'Run Gate' });
 
     // §11: once a run exists, the run is the page. The verdict leads, the findings follow it
-    // immediately, and the two sections that configured the attempt drop below in a quieter surface.
-    // The numbers now read in the order a reader meets them, which they did not before this round.
+    // immediately, and the setup drops below in a quieter surface. M1 T4: the setup reads as three
+    // numbered steps in the order a person does them, and the action that judges follows the last one.
     expect(precedes(verdict, findings)).toBe(true);
     expect(precedes(findings, readiness)).toBe(true);
     expect(precedes(readiness, evidence)).toBe(true);
     expect(precedes(evidence, bundle)).toBe(true);
-    expect(precedes(bundle, policy)).toBe(true);
-    expect(precedes(policy, builds)).toBe(true);
+    expect(precedes(bundle, builds)).toBe(true);
+    expect(precedes(builds, policy)).toBe(true);
+    expect(precedes(policy, attachments)).toBe(true);
+    expect(precedes(attachments, runBar)).toBe(true);
+  });
+
+  it('moves focus to the verdict after a run the reader asked for', async () => {
+    await openRelease();
+    await runGate();
+    const verdict = await screen.findByRole('region', { name: 'Gate verdict' });
+    await waitFor(() => expect(document.activeElement).toBe(verdict));
   });
 
   it('keeps both configuration sections open and labelled after a run, instead of hiding them', async () => {
@@ -1904,11 +1915,12 @@ describe('U1P Release hierarchy', () => {
     await screen.findByRole('region', { name: 'Gate verdict' });
 
     // §11D forbids demoting a control to invisible: quieter surface, same access.
-    const policy = screen.getByRole('region', { name: '5 · Project policy' });
-    const builds = screen.getByRole('region', { name: '6 · Build and baseline' });
+    const policy = screen.getByRole('region', { name: 'Step 2 · Project policy' });
+    const builds = screen.getByRole('region', { name: 'Step 1 · Build and baseline' });
     expect(within(policy).getByRole('button', { name: 'Edit policy' })).toBeDefined();
     expect(within(builds).getByRole('combobox', { name: 'Current build' })).toBeDefined();
-    expect(within(builds).getByRole('button', { name: 'Run Gate' })).toBeDefined();
+    const runBar = screen.getByRole('region', { name: 'Run Gate' });
+    expect(within(runBar).getByRole('button', { name: 'Run Gate' })).toBeDefined();
   });
 
   it('leads with the settings it has to be given, while there is no run to report', async () => {
@@ -1918,9 +1930,12 @@ describe('U1P Release hierarchy', () => {
     // actually be used. Asserting the empty case is what keeps the reordering from becoming a claim
     // that the verdict is always on screen.
     expect(screen.queryByRole('region', { name: 'Gate verdict' })).toBeNull();
-    const policy = screen.getByRole('region', { name: '5 · Project policy' });
-    const builds = screen.getByRole('region', { name: '6 · Build and baseline' });
-    expect(precedes(policy, builds)).toBe(true);
+    const policy = screen.getByRole('region', { name: 'Step 2 · Project policy' });
+    const builds = screen.getByRole('region', { name: 'Step 1 · Build and baseline' });
+    const attachments = screen.getByRole('region', { name: 'Step 3 · Release attachments' });
+    expect(precedes(builds, policy)).toBe(true);
+    expect(precedes(policy, attachments)).toBe(true);
+    expect(screen.getByText('Choose a build in step 1 to run the Gate.')).toBeDefined();
   });
 });
 
@@ -1929,7 +1944,7 @@ describe('Release attachments', () => {
     readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
     await openRelease();
 
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     expect(within(region).getByText('app.bin')).toBeDefined();
     expect(within(region).getByText('960 bytes')).toBeDefined();
     // §9 asks for the full SHA-256 on this surface, so nothing here truncates it the way a run id is.
@@ -1953,7 +1968,7 @@ describe('Release attachments', () => {
       ),
     );
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     const words = region.textContent ?? '';
     expect(words).toContain('motor-controller.bin');
     // A leaf is what a person recognizes. A folder on the row would be the shell's leak, not the owner's
@@ -1973,7 +1988,7 @@ describe('Release attachments', () => {
       ok(attachmentSet([attachment({ fileName: 'bin', displayName: '固件镜像.bin' })])),
     );
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     const cell = region.querySelector('tbody th[scope="row"]');
     expect(cell?.textContent).toBe('固件镜像.bin');
     expect(region.textContent ?? '').not.toContain('motor-controller');
@@ -1986,7 +2001,7 @@ describe('Release attachments', () => {
 
   it('says what an empty set means, in words the release owner can act on', async () => {
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     expect(region.textContent).toContain('Nothing is attached.');
     expect(region.textContent).toContain('it is not analyzed');
   });
@@ -1997,7 +2012,7 @@ describe('Release attachments', () => {
       .mockResolvedValueOnce(ok(attachmentSet([attachment()])));
     attachFileMock.mockResolvedValue(ok(attachment()));
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
 
     fireEvent.click(within(region).getByRole('button', { name: 'Attach' }));
     await waitFor(() => expect(attachFileMock).toHaveBeenCalledTimes(1));
@@ -2006,7 +2021,7 @@ describe('Release attachments', () => {
 
   it('treats a cancelled dialog as no change at all', async () => {
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     const readsBefore = readAttachmentsMock.mock.calls.length;
 
     attachFileMock.mockResolvedValue(ok(null));
@@ -2023,11 +2038,11 @@ describe('Release attachments', () => {
     await openRelease();
     await runGate();
     await screen.findByRole('region', { name: 'Gate verdict' });
-    expect(screen.getByRole('region', { name: '1 · Findings by state' })).toBeDefined();
+    expect(screen.getByRole('region', { name: 'Findings by state' })).toBeDefined();
 
     readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
     attachFileMock.mockResolvedValue(ok(attachment()));
-    const attached = await screen.findByRole('region', { name: 'Release attachments' });
+    const attached = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     fireEvent.click(within(attached).getByRole('button', { name: 'Attach' }));
 
     // §4.2's order, on the surface a person stands at: a run that bound no file cannot be a verdict about
@@ -2035,7 +2050,7 @@ describe('Release attachments', () => {
     await waitFor(() =>
       expect(screen.queryByRole('region', { name: 'Gate verdict' })).toBeNull(),
     );
-    const again = await screen.findByRole('region', { name: 'Release attachments' });
+    const again = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     await waitFor(() => expect(within(again).getByText('app.bin')).toBeDefined());
   });
 
@@ -2044,7 +2059,7 @@ describe('Release attachments', () => {
       ok(attachmentSet([attachment()], 'gate-0123456789abcdef', false)),
     );
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     const stale = within(region).getByRole('status');
     expect(stale.textContent).toContain('is not the set');
     expect(stale.textContent).toContain('Run the Gate again');
@@ -2053,7 +2068,7 @@ describe('Release attachments', () => {
   it('offers only the three kinds a release may declare, and sends the owner’s choice to the shell', async () => {
     readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     const picker = within(region).getByRole('combobox', {
       name: 'Declared kind for app.bin',
     }) as HTMLSelectElement;
@@ -2074,7 +2089,7 @@ describe('Release attachments', () => {
       .mockResolvedValueOnce(ok(attachmentSet([attachment()])))
       .mockResolvedValueOnce(ok(attachmentSet([])));
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     fireEvent.click(within(region).getByRole('button', { name: 'Withdraw' }));
     await waitFor(() => expect(removeAttachmentMock).toHaveBeenCalledWith('att-1'));
     await waitFor(() => expect(region.textContent).toContain('Nothing is attached.'));
@@ -2086,7 +2101,7 @@ describe('Release attachments', () => {
       fail(ENVELOPE('ERR-INPUT-0001', 'That kind cannot be declared for an attachment.')),
     );
     await openRelease();
-    const region = await screen.findByRole('region', { name: 'Release attachments' });
+    const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     fireEvent.change(within(region).getByRole('combobox', { name: 'Declared kind for app.bin' }), {
       target: { value: 'unknown' },
     });

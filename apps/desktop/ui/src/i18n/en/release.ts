@@ -1,5 +1,7 @@
 export const release = {
   'visualExport.region': 'Standalone visual report',
+  'stepLabel': 'Step {n}',
+  'runNeedsBuild': 'Choose a build in step 1 to run the Gate.',
   'visualExport.heading': 'Share Gate review',
   'visualExport.hint': 'A separate visual summary of this Gate run. It does not enter the Release Bundle or change the run. PNG is a 1600 × 900 share image, SVG is editable vector markup, and HTML prints to A4 through Print → Save as PDF in the browser; FirmwareSight does not write PDF files.',
   'visualExport.png': 'Export PNG',

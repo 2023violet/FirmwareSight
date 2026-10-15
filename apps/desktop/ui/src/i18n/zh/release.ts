@@ -2,6 +2,8 @@ import type { CatalogFor } from '../types';
 
 export const release: CatalogFor<'release'> = {
   'visualExport.region': '独立可视化报告',
+  'stepLabel': '第 {n} 步',
+  'runNeedsBuild': '先在第 1 步选择一个构建，才能运行门禁。',
   'visualExport.heading': '分享 Gate 复核',
   'visualExport.hint': '此 Gate 运行的独立可视化摘要。它不会进入发布包，也不会更改本次运行。PNG 为 1600 × 900 的分享图片，SVG 是可编辑矢量标记，HTML 通过浏览器的“打印 → 另存为 PDF”按 A4 打印；FirmwareSight 不生成 PDF 文件。',
   'visualExport.png': '导出 PNG',

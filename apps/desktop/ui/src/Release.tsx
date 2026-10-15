@@ -24,7 +24,7 @@
  *    drives (prompt §48, §35).
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 
 import styles from './Release.module.css';
 import { Button, LinkButton } from './components/Button';
@@ -298,6 +298,9 @@ export function Release({
    * A config warning is not a failure and never reaches here: the run still completes and its warnings
    * travel inside its own payload (prompt §49).
    */
+  const verdictRef = useRef<HTMLElement | null>(null);
+  const focusVerdict = useRef(false);
+
   const gate = useCallback(async () => {
     if (snapshotId === null) {
       return;
@@ -310,12 +313,21 @@ export function Release({
     });
     setRunning(false);
     if (outcome.ok) {
+      focusVerdict.current = true;
       onRunChange(outcome.value);
       setRestored(false);
       return;
     }
     setError(outcome.envelope);
   }, [baselineId, onRunChange, snapshotId]);
+
+  // A run a person just asked for moves focus to its verdict, so the keyboard lands where the eye does.
+  useEffect(() => {
+    if (run !== null && focusVerdict.current) {
+      focusVerdict.current = false;
+      verdictRef.current?.focus();
+    }
+  }, [run]);
 
   /**
    * Accept one review. The finding keeps its own state; the row gains an acceptance and the aggregate is
@@ -382,63 +394,87 @@ export function Release({
     setRestored(false);
   }, [onRunChange]);
 
-  return (
-    <Page>
-      <PageHeader
-        title={t('gate', 'title')}
-        subhead={t('gate', 'subhead')}
-      />
-
-      {/* U1 §B.5: the verdict used to sit below the policy editor and the build picker, so a reader had
-          to scroll past both to find out whether the build can ship. The counts below are
-          `GateCountsDto` verbatim and the severity is Core's disposition aggregate; this band displays
-          both and decides neither. */}
-      {run === null ? null : <Verdict run={run} />}
-
-      {/* U1P §11: once a run exists, the run's own content is the page. The grouped findings follow the
-          verdict immediately, the run record and the evidence tables follow them, and the two sections
-          that configured the attempt drop below in a quieter surface - still open, still labelled, still
-          the only way to change the build or judge again (§11D forbids hiding a control a reader needs).
-          Nothing inside these regions changed: the same components, the same Core words, the same order
-          of the five state groups. */}
-      {run === null ? null : (
-        <>
-          {error === null ? null : (
-            <p className={styles['stale']} role="status">
-              {t('gate', 'staleRun', { id: truncateMiddle(run.runId, 10) })}
-            </p>
-          )}
-          <Findings run={run} onAccept={accept} />
-          <Readiness run={run} restored={restored} onReload={() => void reload()} />
-          {run.tables === null ? null : <Evidence run={run} unit={unit} />}
-          <Attachments
-            gateRunId={run.runId}
-            unit={unit}
-            onSetChanged={invalidateRun}
+  // M1 T4: the attempt is set up in the order a person does it - which build, which policy, which files -
+  // numbered from 1, and judged by one action after the last step. Once a run exists its verdict and
+  // findings still lead the page (U1P §11), and the three steps follow in the same order and numbering.
+  const setup = (
+    <>
+      <section
+        className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
+        aria-labelledby="fs-builds-heading"
+      >
+        <h2 id="fs-builds-heading">{t('release', 'stepLabel', { n: 1 })}{' · '}{t('release', 'builds.heading')}</h2>
+        {candidateError === null ? null : (
+          <ErrorPanel
+            envelope={candidateError}
+            label={t('release', 'builds.errorLabel')}
+            heading={t('release', 'builds.errorHeading')}
           />
-          <StandaloneVisualExport key={`${run.runId}:${run.snapshotId}`} run={run} />
-          <BundleSection run={run} unit={unit} />
-        </>
-      )}
-
-      {/* The same region before any run exists, because attaching is something a person does *before*
-          judging: a policy that requires a BIN is not satisfiable from this page until a file is chosen,
-          and a control that only appears after the verdict it feeds would be a dead end. */}
-      {run === null ? (
-        <Attachments gateRunId={null} unit={unit} onSetChanged={invalidateRun} />
-      ) : null}
-
-      <ProjectReadinessPanel
-        state={projectReadiness}
-        projectLoaded={project !== null}
-        onRefresh={() => void refreshProjectReadiness()}
-      />
+        )}
+        {candidates !== null && candidates.rows.length === 0 ? (
+          <p className={styles['empty']}>
+            {t('release', 'builds.emptyBefore')}{' '}
+            <LinkButton onClick={onGoToAnalyze}>{t('release', 'builds.emptyLink')}</LinkButton>{' '}
+            {t('release', 'builds.emptyAfter')}
+          </p>
+        ) : (
+          <div className={styles['selectors']}>
+            <div className={styles['picker']}>
+              <label className={styles['pickerLabel']} htmlFor="fs-gate-current">
+                {t('release', 'builds.currentLabel')}
+              </label>
+              <select
+                id="fs-gate-current"
+                className={styles['select']}
+                value={snapshotId ?? ''}
+                onChange={(event) => {
+                  setSnapshotId(event.target.value === '' ? null : event.target.value);
+                }}
+              >
+                <option value="">{t('release', 'builds.chooseOption')}</option>
+                {candidates?.rows.map((row) => (
+                  <option key={row.snapshotId} value={row.snapshotId}>
+                    {row.fileName} · {truncateMiddle(row.snapshotId, 8)}
+                  </option>
+                ))}
+              </select>
+              <BuildFacts row={chosen(snapshotId ?? null)} unit={unit} />
+            </div>
+            <div className={styles['picker']}>
+              <label className={styles['pickerLabel']} htmlFor="fs-gate-baseline">
+                {t('release', 'builds.baselineLabel')}
+              </label>
+              <select
+                id="fs-gate-baseline"
+                className={styles['select']}
+                value={baselineId ?? ''}
+                onChange={(event) => {
+                  setBaselineId(event.target.value === '' ? null : event.target.value);
+                }}
+              >
+                <option value="">{t('release', 'builds.noneOption')}</option>
+                {candidates?.rows
+                  .filter((row) => row.snapshotId !== snapshotId)
+                  .map((row) => (
+                    <option key={row.snapshotId} value={row.snapshotId}>
+                      {row.fileName} · {truncateMiddle(row.snapshotId, 8)}
+                    </option>
+                  ))}
+              </select>
+              <BuildFacts row={chosen(baselineId ?? null)} unit={unit} />
+              {baselineId === null ? (
+                <span className={styles['hint']}>{t('release', 'builds.baselineHint')}</span>
+              ) : null}
+            </div>
+          </div>
+        )}
+      </section>
 
       <section
         className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
         aria-labelledby="fs-policy-heading"
       >
-        <h2 id="fs-policy-heading">{'5 · '}{t('release', 'policy.heading')}</h2>
+        <h2 id="fs-policy-heading">{t('release', 'stepLabel', { n: 2 })}{' · '}{t('release', 'policy.heading')}</h2>
         <div className={styles['row']}>
           <span className={styles['term']}>{t('release', 'policy.configTerm')}</span>
           <span className={styles['value']}>
@@ -511,87 +547,37 @@ export function Release({
         )}
       </section>
 
-      <section
-        className={cx(styles['section'], run === null ? undefined : styles['secondary'])}
-        aria-labelledby="fs-builds-heading"
-      >
-        <h2 id="fs-builds-heading">{'6 · '}{t('release', 'builds.heading')}</h2>
-        {candidateError === null ? null : (
-          <ErrorPanel
-            envelope={candidateError}
-            label={t('release', 'builds.errorLabel')}
-            heading={t('release', 'builds.errorHeading')}
-          />
-        )}
-        {candidates !== null && candidates.rows.length === 0 ? (
-          <p className={styles['empty']}>
-            {t('release', 'builds.emptyBefore')}{' '}
-            <LinkButton onClick={onGoToAnalyze}>{t('release', 'builds.emptyLink')}</LinkButton>{' '}
-            {t('release', 'builds.emptyAfter')}
-          </p>
-        ) : (
-          <div className={styles['selectors']}>
-            <div className={styles['picker']}>
-              <label className={styles['pickerLabel']} htmlFor="fs-gate-current">
-                {t('release', 'builds.currentLabel')}
-              </label>
-              <select
-                id="fs-gate-current"
-                className={styles['select']}
-                value={snapshotId ?? ''}
-                onChange={(event) => {
-                  setSnapshotId(event.target.value === '' ? null : event.target.value);
-                }}
-              >
-                <option value="">{t('release', 'builds.chooseOption')}</option>
-                {candidates?.rows.map((row) => (
-                  <option key={row.snapshotId} value={row.snapshotId}>
-                    {row.fileName} · {truncateMiddle(row.snapshotId, 8)}
-                  </option>
-                ))}
-              </select>
-              <BuildFacts row={chosen(snapshotId ?? null)} unit={unit} />
-            </div>
-            <div className={styles['picker']}>
-              <label className={styles['pickerLabel']} htmlFor="fs-gate-baseline">
-                {t('release', 'builds.baselineLabel')}
-              </label>
-              <select
-                id="fs-gate-baseline"
-                className={styles['select']}
-                value={baselineId ?? ''}
-                onChange={(event) => {
-                  setBaselineId(event.target.value === '' ? null : event.target.value);
-                }}
-              >
-                <option value="">{t('release', 'builds.noneOption')}</option>
-                {candidates?.rows
-                  .filter((row) => row.snapshotId !== snapshotId)
-                  .map((row) => (
-                    <option key={row.snapshotId} value={row.snapshotId}>
-                      {row.fileName} · {truncateMiddle(row.snapshotId, 8)}
-                    </option>
-                  ))}
-              </select>
-              <BuildFacts row={chosen(baselineId ?? null)} unit={unit} />
-              {baselineId === null ? (
-                <span className={styles['hint']}>{t('release', 'builds.baselineHint')}</span>
-              ) : null}
-            </div>
-            <div className={styles['pickerActions']}>
-              <Button
-                variant="primary"
-                disabled={snapshotId === null || running}
-                onClick={() => void gate()}
-              >
-                {running ? t('release', 'builds.judging') : t('release', 'builds.run')}
-              </Button>
-              <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
-            </div>
-          </div>
-        )}
-      </section>
+      <ProjectReadinessPanel
+        state={projectReadiness}
+        projectLoaded={project !== null}
+        onRefresh={() => void refreshProjectReadiness()}
+      />
 
+      <Attachments
+        gateRunId={run?.runId ?? null}
+        unit={unit}
+        step={3}
+        onSetChanged={invalidateRun}
+      />
+
+      <section
+        className={cx(styles['section'], styles['runBar'], run === null ? undefined : styles['secondary'])}
+        aria-label={t('release', 'builds.run')}
+      >
+        <div className={styles['pickerActions']}>
+          <Button
+            variant="primary"
+            disabled={snapshotId === null || running}
+            onClick={() => void gate()}
+          >
+            {running ? t('release', 'builds.judging') : t('release', 'builds.run')}
+          </Button>
+          <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
+          {snapshotId === null ? (
+            <span className={styles['hint']}>{t('release', 'runNeedsBuild')}</span>
+          ) : null}
+        </div>
+      </section>
       {error === null ? null : (
         <ErrorPanel
           envelope={error}
@@ -599,6 +585,35 @@ export function Release({
           heading={t('gate', 'run.errorHeading')}
         />
       )}
+    </>
+  );
+
+  return (
+    <Page>
+      <PageHeader
+        title={t('gate', 'title')}
+        subhead={t('gate', 'subhead')}
+      />
+
+      {/* U1 §B.5 / U1P §11: once a run exists, its verdict and findings lead the page, and the setup steps
+          follow in a quieter surface. The counts are `GateCountsDto` verbatim; this page decides nothing. */}
+      {run === null ? null : (
+        <>
+          <Verdict run={run} focusRef={verdictRef} />
+          {error === null ? null : (
+            <p className={styles['stale']} role="status">
+              {t('gate', 'staleRun', { id: truncateMiddle(run.runId, 10) })}
+            </p>
+          )}
+          <Findings run={run} onAccept={accept} />
+          <Readiness run={run} restored={restored} onReload={() => void reload()} />
+          {run.tables === null ? null : <Evidence run={run} unit={unit} />}
+          <StandaloneVisualExport key={`${run.runId}:${run.snapshotId}`} run={run} />
+          <BundleSection run={run} unit={unit} />
+        </>
+      )}
+
+      {setup}
     </Page>
   );
 }
@@ -756,7 +771,7 @@ function Readiness({
   const { t } = useI18n();
   return (
     <section className={styles['section']} aria-labelledby="fs-readiness-heading">
-      <h2 id="fs-readiness-heading">{'2 · '}{t('gate', 'readiness.heading')}</h2>
+      <h2 id="fs-readiness-heading">{t('gate', 'readiness.heading')}</h2>
       <div className={styles['states']}>
         <StateBadge
           state={stateName(run.dispositionEffectiveSeverity)}
@@ -864,7 +879,7 @@ function Findings({
   const { t } = useI18n();
   return (
     <section className={styles['section']} aria-labelledby="fs-findings-heading">
-      <h2 id="fs-findings-heading">{'1 · '}{t('gate', 'findings.heading')}</h2>
+      <h2 id="fs-findings-heading">{t('gate', 'findings.heading')}</h2>
       {run.findings.length === 0 ? (
         <p className={styles['hint']}>{t('gate', 'findings.empty')}</p>
       ) : null}
@@ -1078,7 +1093,7 @@ function Evidence({ run, unit }: { readonly run: GateRunDto; readonly unit: Size
   }
   return (
     <section className={styles['section']} aria-labelledby="fs-evidence-heading">
-      <h2 id="fs-evidence-heading">{'3 · '}{t('gate', 'evidence.heading')}</h2>
+      <h2 id="fs-evidence-heading">{t('gate', 'evidence.heading')}</h2>
 
       <div className={styles['block']}>
         <h3>{t('gate', 'evidence.artifactsHeading')}</h3>
@@ -1306,10 +1321,13 @@ const ATTACHMENT_KINDS: readonly string[] = ['bin', 'hex', 'unknown'];
 function Attachments({
   gateRunId,
   unit,
+  step,
   onSetChanged,
 }: {
   readonly gateRunId: string | null;
   readonly unit: SizeUnit;
+  /** The setup step this section is, when it is shown as one. */
+  readonly step?: number;
   readonly onSetChanged: () => void;
 }) {
   const { t } = useI18n();
@@ -1377,7 +1395,15 @@ function Attachments({
   const rows = set?.attachments ?? [];
   return (
     <section className={styles['section']} aria-labelledby="fs-attachments-heading">
-      <h2 id="fs-attachments-heading">{t('release', 'attachments.heading')}</h2>
+      <h2 id="fs-attachments-heading">
+        {step === undefined ? null : (
+          <>
+            {t('release', 'stepLabel', { n: step })}
+            {' · '}
+          </>
+        )}
+        {t('release', 'attachments.heading')}
+      </h2>
       <ScrollArea label={t('release', 'attachments.table')}>
         <table className={styles['table']}>
           <caption className={styles['caption']}>{t('release', 'attachments.caption')}</caption>
@@ -1588,7 +1614,7 @@ function BundleSection({ run, unit }: { readonly run: GateRunDto; readonly unit:
 
   return (
     <section className={styles['section']} aria-labelledby="fs-bundle-heading">
-      <h2 id="fs-bundle-heading">{'4 · '}{t('release', 'bundleHeading')}</h2>
+      <h2 id="fs-bundle-heading">{t('release', 'bundleHeading')}</h2>
       {ready ? (
         <p className={styles['hint']}>{t('release', 'bundle.readyHint')}</p>
       ) : (
@@ -2196,12 +2222,23 @@ function notesPresence(present: boolean | null, t: Translate): string {
  * aggregate, the two severities are different facts, and showing only one of them would let a reader
  * believe the build cleared on its own.
  */
-function Verdict({ run }: { readonly run: GateRunDto }) {
+function Verdict({
+  run,
+  focusRef,
+}: {
+  readonly run: GateRunDto;
+  readonly focusRef?: RefObject<HTMLElement | null>;
+}) {
   const { t } = useI18n();
   const severity = severityState(run.dispositionEffectiveSeverity);
 
   return (
-    <section className={styles['verdict']} aria-label={t('gate', 'verdict.group')}>
+    <section
+      ref={focusRef}
+      tabIndex={-1}
+      className={styles['verdict']}
+      aria-label={t('gate', 'verdict.group')}
+    >
       <StateBadge variant="chip" state={severity} label={severity} />
       <p className={styles['verdictSentence']}>{gateVerdictSentence(run, t)}</p>
       <StatusStrip
