@@ -17,6 +17,7 @@ import { Overview, type OverviewTarget } from './Overview';
 import { TopBar } from './components/TopBar';
 import type {
   AnalysisSummaryDto,
+  CompareSummaryDto,
   GateFindingRowDto,
   GateRunDto,
   ProjectContextDto,
@@ -223,6 +224,7 @@ function renderOverview(
     readonly selection?: SelectionDto | null;
     readonly analyzedSelectionId?: string | null;
     readonly project?: ProjectContextDto | null;
+    readonly comparison?: CompareSummaryDto | null;
   } = {},
   options: { readonly language?: 'en' | 'zh-CN' } = {},
 ) {
@@ -234,6 +236,7 @@ function renderOverview(
       analyzedSelectionId={over.analyzedSelectionId ?? null}
       gateRun={over.gateRun ?? null}
       project={over.project ?? null}
+      comparison={over.comparison ?? null}
       unit="bytes"
       onOpen={onOpen}
     />,
@@ -241,6 +244,79 @@ function renderOverview(
   );
   return onOpen;
 }
+
+/** A finished comparison as the Compare page holds it: Flash grew, RAM is Unknown. */
+function latestComparison(): CompareSummaryDto {
+  const side = (fileName: string, marker: string) => ({
+    snapshotId: `snap-${marker}`,
+    fileName,
+    sha256: marker.repeat(64),
+  });
+  const budget = { state: 'exact', bytes: 1000 };
+  const sideMemory = {
+    footprintRowPresent: true,
+    nonvolatile: budget,
+    runtimeRam: budget,
+    mapBacked: true,
+    layoutSource: 'map',
+    weakestEvidenceBasis: null,
+  };
+  return {
+    diffId: 'cmp-1',
+    base: side('old.elf', 'a'),
+    target: side('new.elf', 'b'),
+    memory: {
+      nonvolatile: { base: 1000, target: 1120, delta: 120, comparability: 'exact', reason: null },
+      runtimeRam: { base: null, target: 76, delta: null, comparability: 'unknown', reason: 'no base number is recorded' },
+      nonvolatilePercent: { status: 'available', value: '+12.0%' },
+      runtimeRamPercent: { status: 'unavailable', value: null },
+      comparability: 'unknown',
+      base: sideMemory,
+      target: sideMemory,
+      evidenceWarning: null,
+    },
+    counts: {
+      sections: { added: 0, removed: 0, changed: 1, ambiguous: 0 },
+      symbols: { added: 0, removed: 0, changed: 1, ambiguous: 0 },
+      unchangedSections: 3,
+      unchangedSymbols: 9,
+    },
+    objectChanges: {
+      available: true,
+      reason: 'both builds stored object rows',
+      objects: { changed: 1, added: 0, removed: 0, unchanged: 2 },
+      libraries: { changed: 0, added: 0, removed: 0, unchanged: 1 },
+      topObjects: [{ key: 'imu.o', changeKind: 'Changed', delta: 40, bytes: 120 }],
+      addedObjects: [],
+      topLibraries: [],
+    },
+    topSections: [],
+    topSymbols: [],
+    warnings: [],
+  } as unknown as CompareSummaryDto;
+}
+
+describe('the latest comparison (M1 F2)', () => {
+  it('shows nothing when this session has not compared', () => {
+    renderOverview({ summary: summary() });
+    expect(screen.queryByText('Latest comparison')).toBeNull();
+  });
+
+  it('shows the pair, the signed Flash change, Unknown RAM with its reason, and opens Compare', () => {
+    const onOpen = renderOverview({ comparison: latestComparison() });
+    expect(screen.getByText('Latest comparison')).toBeDefined();
+    expect(screen.getByText(/old\.elf .* → new\.elf/u)).toBeDefined();
+    expect(screen.getByText('+120 bytes')).toBeDefined();
+    const ram = screen.getByText('RAM change').nextElementSibling;
+    expect(ram?.textContent).toContain('Unknown');
+    expect(ram?.textContent).toContain('no base number is recorded');
+    expect(ram?.textContent).not.toContain('0 bytes');
+    expect(screen.getByText('imu.o +40 bytes')).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Compare' }));
+    expect(onOpen).toHaveBeenCalledWith('compare');
+  });
+});
 
 describe('Overview before there is anything to overview', () => {
   it('says the session has produced nothing, and invents no numbers to fill the space', () => {
@@ -1326,6 +1402,21 @@ describe('M1 memory usage bars', () => {
       summary: withRegions([region({ usedPercent: { value: '40.0%', status: 'lower_bound' }, state: 'partial' })]),
     });
     expect(screen.getByText('at least 40.0%')).toBeDefined();
+  });
+
+  it('never writes "at least" in front of a figure that is already a bound', () => {
+    // M1 review N2: `<0.1%` already bounds the counted share from above, so "at least <0.1%" said two
+    // contradictory things; `>99.9%` is already a lower bound and needs no second one.
+    renderOverview({
+      summary: withRegions([
+        region({ name: 'FLASH', usedPercent: { value: '<0.1%', status: 'lower_bound' }, state: 'partial' }),
+        region({ name: 'RAM', usedPercent: { value: '>99.9%', status: 'lower_bound' }, state: 'partial' }),
+      ]),
+    });
+    expect(screen.queryByText(/at least </u)).toBeNull();
+    expect(screen.queryByText(/at least >/u)).toBeNull();
+    expect(screen.getByText('a little, at least (<0.1% counted so far)')).toBeDefined();
+    expect(screen.getByText('>99.9%')).toBeDefined();
   });
 
   it('never draws Unknown as an empty or zero bar', () => {

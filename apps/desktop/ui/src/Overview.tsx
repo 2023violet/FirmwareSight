@@ -40,11 +40,13 @@ import { PageHeader } from './components/PageHeader';
 import { MemoryUsage } from './components/MemoryUsage';
 import { EmptyState, Band, Panel, SummaryCard } from './components/Panel';
 import { StateBadge } from './components/StateBadge';
-import { formatSize, truncateMiddle, type SizeUnit } from './format';
+import { formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
 import { useI18n, type Translate } from './i18n';
 import type { Catalog } from './i18n/en';
 import type {
   AnalysisSummaryDto,
+  ByteDeltaDto,
+  CompareSummaryDto,
   GateRunDto,
   ProjectContextDto,
   SelectionDto,
@@ -171,6 +173,7 @@ export function Overview({
   analyzedSelectionId,
   gateRun,
   project,
+  comparison = null,
   unit,
   onOpen,
 }: {
@@ -180,6 +183,8 @@ export function Overview({
   readonly analyzedSelectionId: string | null;
   readonly gateRun: GateRunDto | null;
   readonly project: ProjectContextDto | null;
+  /** The comparison this session computed last (M1 F2), or `null` when none was run. */
+  readonly comparison?: CompareSummaryDto | null;
   readonly unit: SizeUnit;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
@@ -269,6 +274,9 @@ export function Overview({
       {summary === null || pending !== null ? null : <Facts summary={summary} unit={unit} />}
       {summary === null || pending === null ? null : (
         <PreviousAnalysis summary={summary} candidate={pending} unit={unit} />
+      )}
+      {comparison === null ? null : (
+        <LatestComparison comparison={comparison} unit={unit} onOpen={onOpen} />
       )}
     </Page>
   );
@@ -457,6 +465,70 @@ function PreviousAnalysis({
       <Band narrow label={t('common', 'overview.previousFiguresBand')}>
         {figureCells(summary, unit, t)}
       </Band>
+    </Panel>
+  );
+}
+
+/**
+ * M1 F2: the comparison this session computed last, in one row, so a reader who compared and came
+ * back sees what moved without re-running it.
+ *
+ * Every figure is the Compare summary's own (a signed delta from Rust, or Unknown with its reason);
+ * nothing is recomputed here. The comparison lives for the session, like the diff handle behind it,
+ * and the row says so.
+ */
+function LatestComparison({
+  comparison,
+  unit,
+  onOpen,
+}: {
+  readonly comparison: CompareSummaryDto;
+  readonly unit: SizeUnit;
+  readonly onOpen: (target: OverviewTarget) => void;
+}) {
+  const { t } = useI18n();
+  const { base, target, memory, objectChanges } = comparison;
+  const delta = (change: ByteDeltaDto) =>
+    change.delta === null ? (
+      <span className={styles['stale']}>
+        {t('common', 'memory.unknown')}
+        {change.reason === null ? null : ` (${change.reason})`}
+      </span>
+    ) : (
+      <span className={styles['identity']}>{formatDelta(change.delta, unit)}</span>
+    );
+  const topObject = objectChanges.available ? (objectChanges.topObjects[0] ?? null) : null;
+
+  return (
+    <Panel
+      title={t('common', 'overview.compareTitle')}
+      hint={t('common', 'overview.compareHint')}
+    >
+      <p className={styles['identity']}>
+        {t('common', 'overview.comparePair', {
+          base: `${base.fileName} · ${truncateMiddle(base.sha256, 6)}`,
+          target: `${target.fileName} · ${truncateMiddle(target.sha256, 6)}`,
+        })}
+      </p>
+      <dl className={styles['compareFacts']}>
+        <dt>{t('common', 'overview.compareFlash')}</dt>
+        <dd>{delta(memory.nonvolatile)}</dd>
+        <dt>{t('common', 'overview.compareRam')}</dt>
+        <dd>{delta(memory.runtimeRam)}</dd>
+        <dt>{t('common', 'overview.compareComparability')}</dt>
+        <dd className={styles['identity']}>{memory.comparability}</dd>
+        {topObject === null || topObject.delta === null ? null : (
+          <>
+            <dt>{t('common', 'overview.compareTopObject')}</dt>
+            <dd className={styles['identity']}>
+              {`${topObject.key} ${formatDelta(topObject.delta, unit)}`}
+            </dd>
+          </>
+        )}
+      </dl>
+      <div>
+        <Button onClick={() => onOpen('compare')}>{t('common', 'overview.compareOpen')}</Button>
+      </div>
     </Panel>
   );
 }

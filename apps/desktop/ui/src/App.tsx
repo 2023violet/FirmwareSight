@@ -521,6 +521,7 @@ export function App() {
               analyzedSelectionId={analyzedSelectionId}
               gateRun={gateRun}
               project={project}
+              comparison={comparison.summary}
               unit={unit}
               onOpen={(target) => {
                 open(target);

@@ -646,10 +646,7 @@ fn export_now(
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let (text, suggested) = session.render_export(diff_id, format, operation_id)?;
     let picked = save_path(app, words, title, format, &suggested);
-    let ensure_current = || match session.diff_is_current(diff_id, operation_id) {
-        Ok(true) => Ok(()),
-        _ => Err(crate::compare_export_stale(operation_id)),
-    };
+    let ensure_current = || session.compare_export_guard(diff_id, operation_id);
     if picked.is_some() {
         ensure_current()?;
     }

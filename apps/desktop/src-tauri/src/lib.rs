@@ -778,6 +778,26 @@ impl Session {
         Ok(self.lock_diffs(operation_id)?.latest() == Some(diff_id))
     }
 
+    /// The check a Compare export runs before it writes, and again after a replace confirmation:
+    /// only the comparison computed last may be written (M1 AC24, review F1).
+    ///
+    /// # Errors
+    ///
+    /// `ERR-EXPORT-6002` when `diff_id` is no longer the latest comparison, and the internal
+    /// envelope for a poisoned lock (never folded into "stale", so a broken session is not
+    /// reported as a reader who moved on).
+    pub fn compare_export_guard(
+        &self,
+        diff_id: &str,
+        operation_id: &str,
+    ) -> Result<(), ErrorEnvelopeDto> {
+        if self.diff_is_current(diff_id, operation_id)? {
+            Ok(())
+        } else {
+            Err(compare_export_stale(operation_id))
+        }
+    }
+
     /// Read one page or projection out of a diff this session holds.
     ///
     /// The closure runs while the store is locked, so a page never reflects a diff that was evicted

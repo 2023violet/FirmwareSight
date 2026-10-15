@@ -150,3 +150,21 @@
   line-height: var(--fs-line-height-metadata);
   max-width: 80ch;
 }
+
+/* M1 F2: the latest comparison's facts, as a term / value grid. */
+.compareFacts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--fs-space-1) var(--fs-space-3);
+  margin: 0;
+}
+
+.compareFacts dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.compareFacts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

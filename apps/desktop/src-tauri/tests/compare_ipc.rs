@@ -908,6 +908,23 @@ fn only_the_comparison_computed_last_is_current_for_export() {
             .diff_is_current("cmp-never-issued", "op-4")
             .expect("reads")
     );
+
+    // The export guard is the same answer as a typed refusal with the comparison-specific remedy.
+    session
+        .compare_export_guard(&second.diff_id, "op-5")
+        .expect("the latest comparison may be written");
+    let stale = session
+        .compare_export_guard(&first.diff_id, "op-6")
+        .expect_err("a superseded comparison may not");
+    assert_eq!(stale.code, "ERR-EXPORT-6002");
+    assert_eq!(stale.operation_id, "op-6");
+    assert!(
+        stale
+            .remediation
+            .as_deref()
+            .is_some_and(|text| text.contains("comparison now on screen")),
+        "{stale:?}"
+    );
 }
 
 #[test]
@@ -928,16 +945,8 @@ fn a_comparison_redone_while_the_replace_confirmation_is_open_is_not_written() {
             compare(&session, &target, &base); // the reader compares again while the dialog is open
             true // and then presses Replace
         },
-        || match session.diff_is_current(&first.diff_id, "op-f1") {
-            Ok(true) => Ok(()),
-            _ => Err(firmwaresight_desktop::ipc::ErrorEnvelopeDto {
-                code: "ERR-EXPORT-6002".to_owned(),
-                message: "stale".to_owned(),
-                operation_id: "op-f1".to_owned(),
-                details: None,
-                remediation: None,
-            }),
-        },
+        // M1 review N1: the guard under test is the one `export_now` runs, not a copy of it.
+        || session.compare_export_guard(&first.diff_id, "op-f1"),
     )
     .expect_err("a stale comparison is refused after the confirmation");
     assert_eq!(err.code, "ERR-EXPORT-6002");

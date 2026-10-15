@@ -72,6 +72,21 @@ function missingReason(status: string, t: Translate): string {
   }
 }
 
+/**
+ * A partial figure is a lower bound, but Rust's two end words already carry a bound of their own.
+ * `>99.9%` is itself a lower bound and is shown as it is; `<0.1%` is an upper bound on the share
+ * counted so far, and "at least <0.1%" would say both at once (M1 review N2).
+ */
+function boundText(percent: string, status: string, t: Translate): string {
+  if (status !== 'lower_bound' || percent.startsWith('>')) {
+    return percent;
+  }
+  if (percent.startsWith('<')) {
+    return t('common', 'memory.atLeastTrace', { percent });
+  }
+  return t('common', 'memory.atLeast', { percent });
+}
+
 function UsageRow({ region, unit }: { readonly region: MemoryRegionDto; readonly unit: SizeUnit }) {
   const { t } = useI18n();
   const percent = region.usedPercent.value;
@@ -80,7 +95,7 @@ function UsageRow({ region, unit }: { readonly region: MemoryRegionDto; readonly
   // `<0.1%` and `>99.9%` are Rust's words for the two ends; the bar draws them at the bound they name.
   const numeric = known ? Number.parseFloat(percent.replace(/[<>]/, '')) : 0;
   const width = Math.min(Math.max(numeric, 0), 100);
-  const shown = region.usedPercent.status === 'lower_bound' ? t('common', 'memory.atLeast', { percent: percent ?? '' }) : percent;
+  const shown = percent === null ? null : boundText(percent, region.usedPercent.status, t);
 
   return (
     <li className={styles['row']}>
