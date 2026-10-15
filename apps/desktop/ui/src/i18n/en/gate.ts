@@ -1,6 +1,6 @@
 export const gate = {
   'title': 'Release Gate',
-  'subhead': 'FirmwareSight policy readiness for one stored build, judged against one project policy. The answer below is that policy’s verdict and nothing more: no claim on this page reaches beyond the rules the project itself wrote.',
+  'subhead': 'Checks one stored build against your project policy. The verdict is that policy’s answer, nothing more.',
   'verdict.block': 'Blocked — {count} rule(s) failed. A blocked build cannot produce a bundle.',
   'verdict.review': 'Needs a decision — {count} finding(s) wait on an explicit acceptance, and nothing is blocked.',
   'verdict.unknown': 'Not evaluated — {count} finding(s) could not be evaluated without more input.',

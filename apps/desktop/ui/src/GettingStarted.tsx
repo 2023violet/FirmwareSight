@@ -120,6 +120,11 @@ export function GettingStartedList() {
  * control on Analyze waits for it to be answered (§13’s “no modal trap”, no
  * compulsory wizard).
  */
+/**
+ * The first-use panel above Analyze's empty state (M1 T1): three actions, not an essay. The seven reference
+ * facts live in Help, which is where a reader who wants the why goes; this panel only gets the first run
+ * done.
+ */
 export function GettingStartedPanel({ onDismiss }: { readonly onDismiss: () => void }) {
   const { t } = useI18n();
   return (
@@ -130,8 +135,21 @@ export function GettingStartedPanel({ onDismiss }: { readonly onDismiss: () => v
           {t('analyze', 'gettingStarted.dismiss')}
         </button>
       </header>
-      <p className={styles['lede']}>{t('analyze', 'gettingStarted.lede')}</p>
-      <GettingStartedList />
+      <ol className={styles['steps']}>
+        <li>
+          <strong>{t('analyze', 'gettingStarted.step1Title')}</strong>
+          <span>{t('analyze', 'gettingStarted.step1Body')}</span>
+        </li>
+        <li>
+          <strong>{t('analyze', 'gettingStarted.step2Title')}</strong>
+          <span>{t('analyze', 'gettingStarted.step2Body')}</span>
+        </li>
+        <li>
+          <strong>{t('analyze', 'gettingStarted.step3Title')}</strong>
+          <span>{t('analyze', 'gettingStarted.step3Body')}</span>
+        </li>
+      </ol>
+      <p className={styles['lede']}>{t('analyze', 'gettingStarted.moreInHelp')}</p>
     </section>
   );
 }

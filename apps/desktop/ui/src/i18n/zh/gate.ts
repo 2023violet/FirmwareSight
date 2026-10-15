@@ -2,7 +2,7 @@ import type { CatalogFor } from '../types';
 
 export const gate: CatalogFor<'gate'> = {
   'title': '发布门禁',
-  'subhead': 'FirmwareSight 针对某一个已保存构建的策略就绪状态，依据一份工程策略作出判断。下面的回答只是这份策略的结论，不含其它含义：本页没有任何说法超出工程自己写下的规则。',
+  'subhead': '用项目策略检查一个已保存的构建。结论只代表这份策略的判断。',
   'verdict.block': '受阻 —— {count} 条规则未通过。受阻的构建无法生成发布包。',
   'verdict.review': '需要决定 —— {count} 条 finding 在等待一次明确的接受，且没有任何一项被阻断。',
   'verdict.unknown': '未评估 —— {count} 条 finding 缺少更多输入，无法评估。',

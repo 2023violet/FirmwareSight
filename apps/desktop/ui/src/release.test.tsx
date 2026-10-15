@@ -2002,8 +2002,8 @@ describe('Release attachments', () => {
   it('says what an empty set means, in words the release owner can act on', async () => {
     await openRelease();
     const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
-    expect(region.textContent).toContain('Nothing is attached.');
-    expect(region.textContent).toContain('it is not analyzed');
+    expect(region.textContent).toContain('Nothing attached.');
+    expect(region.textContent).toContain('is not analyzed');
   });
 
   it('asks the shell for a file when Attach is pressed, and shows the row the shell measured', async () => {
@@ -2031,7 +2031,7 @@ describe('Release attachments', () => {
     // Cancel is a decision: no re-read, no invalidation, no error, and the empty row list stays as it was.
     expect(readAttachmentsMock.mock.calls.length).toBe(readsBefore);
     expect(within(region).queryByRole('alert')).toBeNull();
-    expect(region.textContent).toContain('Nothing is attached.');
+    expect(region.textContent).toContain('Nothing attached.');
   });
 
   it('drops the verdict the moment the set it judged is no longer the set on the page', async () => {
@@ -2092,7 +2092,7 @@ describe('Release attachments', () => {
     const region = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     fireEvent.click(within(region).getByRole('button', { name: 'Withdraw' }));
     await waitFor(() => expect(removeAttachmentMock).toHaveBeenCalledWith('att-1'));
-    await waitFor(() => expect(region.textContent).toContain('Nothing is attached.'));
+    await waitFor(() => expect(region.textContent).toContain('Nothing attached.'));
   });
 
   it('reports a refused attachment step with the shell’s sentence and keeps the rows it had', async () => {

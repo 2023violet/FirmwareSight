@@ -521,12 +521,12 @@ describe('P1-A0 intake screen', () => {
     await chooseArtifact();
     await analyze();
 
-    expect(await screen.findByText('Admissible for a hard limit')).toBeDefined();
+    expect(await screen.findByText('Can enforce a hard budget')).toBeDefined();
     expect(screen.getAllByText('Exact').length).toBe(2);
     expect(screen.getByText('Git')).toBeDefined();
   });
 
-  it('names the weakest basis in the words a reader needs, not the identifier behind it', async () => {
+  it('names the based on in the words a reader needs, not the identifier behind it', async () => {
     // `weakestEvidenceBasis` is a portable wire value, and a wire value in a sentence is the shape L20
     // closed on Compare and F2 found again on Release. The shell still sends what it sends; this page
     // stops quoting it.
@@ -535,7 +535,7 @@ describe('P1-A0 intake screen', () => {
 
     expect(
       await screen.findByText(
-        'Weakest basis MAP regions + ELF load evidence; region evidence came from the linker.',
+        'Based on MAP regions + ELF load evidence; memory regions come from the linker.',
       ),
     ).toBeDefined();
     expect(document.body.textContent).not.toContain('map-memory-configuration+elf-load');
@@ -554,8 +554,8 @@ describe('P1-A0 intake screen', () => {
     const row = screen.getByText('MAP').closest('div');
     expect(row?.textContent).toContain('not-provided');
     expect(row?.textContent).not.toContain('BLOCK');
-    expect(screen.getByText('Not admissible for a hard limit')).toBeDefined();
-    expect(screen.getByText(/Supply the linker MAP to strengthen it/)).toBeDefined();
+    expect(screen.getByText('Not strong enough for a hard budget')).toBeDefined();
+    expect(screen.getByText(/Add the linker MAP to strengthen it/)).toBeDefined();
   });
 
   it('attaches a MAP through the shell and names the file it holds', async () => {
@@ -827,7 +827,7 @@ describe('P1-A0 intake screen', () => {
     render(<App />);
 
     const empty = await screen.findByRole('region', { name: 'No analysis yet' });
-    expect(empty.textContent).toContain('Nothing has been analyzed in this session yet.');
+    expect(empty.textContent).toContain('Nothing has been analyzed yet.');
     expect(screen.queryByRole('region', { name: 'Analysis summary' })).toBeNull();
   });
 

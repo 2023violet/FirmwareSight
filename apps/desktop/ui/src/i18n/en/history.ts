@@ -14,7 +14,7 @@
 
 export const history = {
   'title': 'Bundle & History',
-  'subhead': 'What this computer has already stored: the builds that were analyzed, the Gate runs that were recorded, and the releases that were published. These are persisted facts, not the artifact currently open on Analyze, and a row stays readable after the firmware file it came from has moved or been deleted. Nothing on this page changes a stored row.',
+  'subhead': 'Builds, Gate runs and releases stored on this computer — not the file open on Analyze. Rows stay readable after the original files move or are deleted. Nothing here changes a stored row.',
   'views.group': 'Stored history',
   'views.builds': 'Builds',
   'views.runs': 'Gate runs',

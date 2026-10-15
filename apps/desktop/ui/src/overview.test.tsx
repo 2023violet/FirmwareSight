@@ -246,7 +246,7 @@ describe('Overview before there is anything to overview', () => {
   it('says the session has produced nothing, and invents no numbers to fill the space', () => {
     renderOverview();
 
-    expect(screen.getByText(/Nothing has been analyzed in this session yet/)).toBeDefined();
+    expect(screen.getByText(/Nothing has been analyzed yet/)).toBeDefined();
     expect(screen.queryByText('Flash footprint')).toBeNull();
     expect(screen.queryByText('497,840')).toBeNull();
     // A verdict with no run behind it is the one thing this page must never render.
@@ -312,7 +312,7 @@ describe('Overview with a real analysis and a real run', () => {
     // DESIGN.md 9: "Can we ship now?" is policy readiness, never a legal, security or compliance
     // conclusion. The sentence has to be findable in the same region as the verdict.
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });
-    expect(ship.textContent).toContain('not a legal, security or product-compliance conclusion');
+    expect(ship.textContent).toContain('not a legal, security or compliance certification');
   });
 
   it('says so when accepted reviews moved the aggregate, and names the aggregate without them', () => {
@@ -1013,7 +1013,7 @@ describe('U1P-R2 a pending selection may not wear the previous build’s facts',
   it('R2-T11 says plainly when there is neither a selection nor an analysis', () => {
     renderOverview({ summary: null, selection: null, analyzedSelectionId: null, gateRun: null });
 
-    expect(screen.getByText(/Nothing has been analyzed in this session yet/)).toBeDefined();
+    expect(screen.getByText(/Nothing has been analyzed yet/)).toBeDefined();
     expect(screen.queryByRole('group', { name: /Key figures/ })).toBeNull();
     expect(screen.queryByRole('group', { name: /Previous/ })).toBeNull();
     expect(screen.getByRole('button', { name: 'Choose an artifact' })).toBeDefined();
@@ -1243,7 +1243,7 @@ describe('the same overview read in Chinese', () => {
     const onOpen = renderOverview({}, { language: 'zh-CN' });
 
     expect(screen.getByRole('heading', { level: 1, name: '总览' })).toBeDefined();
-    expect(screen.getByText('本次会话还没有分析任何内容，因此没有可汇总的事实。')).toBeDefined();
+    expect(screen.getByText('还没有分析结果。选择或拖入 ELF 后，这里会显示摘要。')).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: '选择镜像文件' }));
     expect(onOpen).toHaveBeenCalledWith('analyze');
     fireEvent.click(screen.getByRole('button', { name: '打开发布门禁' }));

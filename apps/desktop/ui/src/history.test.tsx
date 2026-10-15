@@ -330,10 +330,10 @@ describe('History states what a row is', () => {
       'header',
     );
     const words = prose(header ?? null);
-    expect(words).toContain('What this computer has already stored');
-    expect(words).toContain('not the artifact currently open on Analyze');
-    expect(words).toContain('a row stays readable after the firmware file it came from has moved');
-    expect(words).toContain('Nothing on this page changes a stored row.');
+    expect(words).toContain('stored on this computer');
+    expect(words).toContain('not the file open on Analyze');
+    expect(words).toContain('Rows stay readable after the original files move');
+    expect(words).toContain('Nothing here changes a stored row.');
   });
 
   it('lists the three stored populations the shell returned', async () => {

@@ -844,7 +844,7 @@ describe('the summary and its signs', () => {
 
     const memory = await screen.findByRole('region', { name: 'Memory comparison' });
     expect(memory.textContent).toContain('No linker MAP');
-    expect(memory.textContent).toContain('weakest basis ELF address/flags evidence');
+    expect(memory.textContent).toContain('based on ELF address/flags evidence');
   });
 
   // L20: `weakest_basis` crosses IPC as the Core enum's own identity, formatted with `{:?}` in
@@ -857,8 +857,8 @@ describe('the summary and its signs', () => {
     await runCompare();
 
     const memory = await screen.findByRole('region', { name: 'Memory comparison' });
-    expect(memory.textContent).toContain('weakest basis MAP regions + ELF load evidence');
-    expect(memory.textContent).toContain('weakest basis configured regions + ELF load evidence');
+    expect(memory.textContent).toContain('based on MAP regions + ELF load evidence');
+    expect(memory.textContent).toContain('based on configured regions + ELF load evidence');
     expect(memory.textContent).not.toContain('MapRegionAndElfLoad');
     expect(memory.textContent).not.toContain('RegionConfigAndElfLoad');
   });
@@ -868,8 +868,8 @@ describe('the summary and its signs', () => {
     await runCompare();
 
     const memory = await screen.findByRole('region', { name: 'Memory comparison' });
-    expect(memory.textContent).toContain('weakest basis ELF address/flags evidence');
-    expect(memory.textContent).toContain('weakest basis section-name heuristic');
+    expect(memory.textContent).toContain('based on ELF address/flags evidence');
+    expect(memory.textContent).toContain('based on section-name heuristic');
     expect(memory.textContent).not.toContain('SectionNameHeuristic');
   });
 
@@ -878,8 +878,8 @@ describe('the summary and its signs', () => {
     await runCompare();
 
     const memory = await screen.findByRole('region', { name: 'Memory comparison' });
-    expect(memory.textContent).toContain('weakest basis insufficient evidence');
-    expect(memory.textContent).toContain('weakest basis Unrecognized evidence basis');
+    expect(memory.textContent).toContain('based on insufficient evidence');
+    expect(memory.textContent).toContain('based on Unrecognized evidence basis');
     expect(memory.textContent).not.toContain('SomeBasisNoBuildHasEverSent');
   });
 
@@ -888,7 +888,7 @@ describe('the summary and its signs', () => {
     await runCompare();
 
     const memory = await screen.findByRole('region', { name: 'Memory comparison' });
-    expect(memory.textContent).toContain('weakest basis unknown');
+    expect(memory.textContent).toContain('based on unknown');
   });
 
   it('labels object attribution as the two different questions the pages answer', async () => {
@@ -1197,11 +1197,10 @@ describe('the ranking as a way to the full list', () => {
     // headline, and the reason is a difference of basis as well as a cut-off. The screen has to say
     // so next to the lists rather than leave the gap to be guessed at.
     const ranking = await screen.findByRole('region', { name: 'Top growth and largest additions' });
-    const basis = within(ranking).getByText(/load image[\s\S]*delta/i);
+    const basis = within(ranking).getByText(/whole-image change/i);
     // Which headline the sentence points at, what each side is measured over, and that a shortfall
     // is neither a bug nor a row the table is hiding.
-    expect(basis.textContent).toMatch(/neither/i);
-    expect(basis.textContent).toMatch(/whole image/i);
+    expect(basis.textContent).toMatch(/will not add up/i);
     expect(basis.textContent).toMatch(/runtime size/i);
     expect(basis.textContent).toMatch(/not a missing row/i);
   });

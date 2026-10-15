@@ -422,23 +422,30 @@ describe('Help repeats what Analyze shows on a first run', () => {
       .map((term) => term.textContent);
   }
 
-  it('answers all seven, in the same words Analyze uses', async () => {
+  // M1 T1: Analyze keeps three numbered actions; the seven reference answers live in Help.
+  async function helpPanel(): Promise<HTMLElement> {
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Help page' }));
+    await screen.findByRole('heading', { level: 1, name: 'Help' });
+    return await screen.findByRole('region', { name: 'Getting started' });
+  }
+
+  it('gets the first run done in three steps on Analyze, and keeps all seven answers in Help', async () => {
     render(<App />);
     const panel = await screen.findByRole('region', { name: 'Getting started' });
-    const onAnalyze = terms(panel);
+    const steps = [...panel.querySelectorAll('ol li strong')].map((item) => item.textContent);
+    expect(steps).toEqual(['Choose or drop your ELF', 'Add the GNU ld MAP (optional)', 'Press Analyze']);
+    expect(within(panel).queryAllByRole('term')).toHaveLength(0);
+    expect(prose(panel)).toContain('explained in Help');
 
     fireEvent.click(screen.getByRole('button', { name: 'Help page' }));
     await screen.findByRole('heading', { level: 1, name: 'Help' });
     const help = await screen.findByRole('region', { name: 'Getting started' });
-
-    // One array feeds both surfaces, so two different answers to one question is a bug this catches.
-    expect(onAnalyze).toEqual(ANSWERS);
     expect(terms(help)).toEqual(ANSWERS);
   });
 
   it('explains the five state words it will show', async () => {
-    render(<App />);
-    const panel = await screen.findByRole('region', { name: 'Getting started' });
+    const panel = await helpPanel();
 
     for (const word of ['PASS', 'REVIEW', 'BLOCK', 'UNKNOWN', 'N/A']) {
       // A state is icon plus label, so the word itself has to be readable text, not a colour (DESIGN.md 5).
@@ -449,8 +456,7 @@ describe('Help repeats what Analyze shows on a first run', () => {
   });
 
   it('names the project file a policy lives in, and where it enters the flow', async () => {
-    render(<App />);
-    const panel = await screen.findByRole('region', { name: 'Getting started' });
+    const panel = await helpPanel();
 
     expect(within(panel).getByText('firmwaresight.toml')).toBeDefined();
     expect(prose(panel)).toContain('the policy\u2019s own digest is recorded in the Gate run');

@@ -97,3 +97,26 @@
 .arrow {
   color: var(--fs-color-text-secondary);
 }
+
+/* M1 T1: the Analyze panel's three numbered actions. */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  margin: 0;
+  padding-inline-start: var(--fs-space-6);
+}
+
+.steps li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-1) var(--fs-space-2);
+}
+
+.steps strong {
+  font-weight: 600;
+}
+
+.steps span {
+  color: var(--fs-color-text-secondary);
+}
