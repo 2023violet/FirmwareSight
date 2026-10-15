@@ -135,6 +135,7 @@ export const compare = {
   'objects.errorHeading': 'The object changes would not load',
   'objects.tableLabel': 'Object changes table',
   'objects.caption': 'Objects or libraries whose Flash or RAM differs, or cannot be compared, filtered and ordered by the shell',
+  'objects.ambiguousNote': ' the name repeats in a build, so this row is unpaired',
   'col.object': 'Object',
   'col.library': 'Library',
   'col.oldFlash': 'Old Flash',

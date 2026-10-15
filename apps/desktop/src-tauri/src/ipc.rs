@@ -700,6 +700,8 @@ pub struct ObjectChangeRowDto {
     pub archive: Option<String>,
     pub nonvolatile: ByteDeltaDto,
     pub runtime_ram: ByteDeltaDto,
+    /// True when the name repeats in either build, so the row was left unpaired (never Changed).
+    pub ambiguous: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

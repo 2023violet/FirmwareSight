@@ -1613,7 +1613,12 @@ function ObjectChanges({
                     <td>
                       <Kind kind={row.changeKind} />
                     </td>
-                    <td className={cx(styles['mono'], styles['wrap'])}>{row.key}</td>
+                    <td className={cx(styles['mono'], styles['wrap'])}>
+                      {row.key}
+                      {row.ambiguous ? (
+                        <span className={styles['note']}>{t('compare', 'objects.ambiguousNote')}</span>
+                      ) : null}
+                    </td>
                     <td className={styles['mono']}>
                       <SideValue change={row.nonvolatile} side="base" kind={row.changeKind} unit={unit} />
                     </td>

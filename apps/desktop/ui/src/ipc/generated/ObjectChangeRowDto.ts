@@ -12,4 +12,8 @@ changeKind: string,
 /**
  * A normalized object key such as `libdrv.a(uart.o)`; never a host path.
  */
-key: string, archive: string | null, nonvolatile: ByteDeltaDto, runtimeRam: ByteDeltaDto, };
+key: string, archive: string | null, nonvolatile: ByteDeltaDto, runtimeRam: ByteDeltaDto, 
+/**
+ * True when the name repeats in either build, so the row was left unpaired (never Changed).
+ */
+ambiguous: boolean, };

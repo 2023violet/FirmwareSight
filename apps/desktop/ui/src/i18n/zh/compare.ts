@@ -137,6 +137,7 @@ export const compare: CatalogFor<'compare'> = {
   'objects.errorHeading': '对象变化无法加载',
   'objects.tableLabel': '对象变化表',
   'objects.caption': 'Flash 或 RAM 有差异、或无法比较的对象或库，由外壳完成筛选和排序',
+  'objects.ambiguousNote': ' 该名称在某个构建中重复出现，因此这一行未配对',
   'col.object': '对象',
   'col.library': '库',
   'col.oldFlash': '旧 Flash',

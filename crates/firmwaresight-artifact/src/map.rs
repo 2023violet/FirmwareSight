@@ -495,6 +495,32 @@ fn components(path: &str) -> (bool, Vec<String>) {
     (absolute, parts)
 }
 
+/// How many leading components of `parts` are the root itself rather than directories: a drive
+/// (`C:`), a UNC `server/share`, or a `\\?\` device prefix with what it names. POSIX `/` is not a
+/// component at all, so it counts zero. Re-review 2 S2-1: counting `C:` or `server/share` as directories
+/// made `C:/Users` as shallow as `/home` looked deep enough to anchor a key.
+fn root_len(path: &str, parts: &[String]) -> usize {
+    let drive = |part: &String| {
+        part.len() == 2 && part.ends_with(':') && part.as_bytes()[0].is_ascii_alphabetic()
+    };
+    let unified = path.replace('\\', "/");
+    let length = if unified.starts_with("//") {
+        match parts.first().map(String::as_str) {
+            Some("?" | ".") => match parts.get(1) {
+                Some(part) if drive(part) => 2,
+                Some(part) if part.eq_ignore_ascii_case("UNC") => 4,
+                _ => 2,
+            },
+            _ => 2,
+        }
+    } else if parts.first().is_some_and(drive) {
+        1
+    } else {
+        0
+    };
+    length.min(parts.len())
+}
+
 /// `dir/libx.a(member.o)` splits into the archive path and the member; anything else has no archive.
 fn split_archive(object: &str) -> (Option<&str>, &str) {
     if let (Some(open), true) = (object.rfind('('), object.ends_with(')'))
@@ -548,7 +574,7 @@ fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContributi
     const MIN_ANCHOR_DEPTH: usize = 2;
 
     // Split every non-archive object once, and classify it.
-    let split: Vec<Option<(bool, Vec<String>)>> = raw
+    let split: Vec<Option<(bool, Vec<String>, usize)>> = raw
         .iter()
         .map(|row| {
             if split_archive(&row.object).0.is_some() {
@@ -556,7 +582,8 @@ fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContributi
             }
             let (absolute, parts) = components(&row.object);
             let outside = absolute || parts.iter().any(|part| part == "..");
-            Some((outside, parts))
+            let root = root_len(&row.object, &parts);
+            Some((outside, parts, root))
         })
         .collect();
 
@@ -564,8 +591,8 @@ fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContributi
     let relative_dirs: Vec<&[String]> = split
         .iter()
         .flatten()
-        .filter(|(outside, _)| !outside)
-        .map(|(_, parts)| &parts[..parts.len().saturating_sub(1)])
+        .filter(|(outside, _, _)| !outside)
+        .map(|(_, parts, _)| &parts[..parts.len().saturating_sub(1)])
         .collect();
     let relative_root = common_prefix(&relative_dirs);
 
@@ -573,9 +600,10 @@ fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContributi
     let anchors: Vec<&[String]> = split
         .iter()
         .flatten()
-        .filter(|(outside, _)| *outside)
-        .map(|(_, parts)| &parts[..parts.len().saturating_sub(1)])
-        .filter(|dir| dir.len() >= MIN_ANCHOR_DEPTH)
+        .filter(|(outside, _, _)| *outside)
+        .map(|(_, parts, root)| (&parts[..parts.len().saturating_sub(1)], *root))
+        .filter(|(dir, root)| dir.len() >= root + MIN_ANCHOR_DEPTH)
+        .map(|(dir, _)| dir)
         .collect();
     let anchored = |parts: &[String]| -> String {
         let dir = &parts[..parts.len().saturating_sub(1)];
@@ -607,7 +635,7 @@ fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContributi
                 let key = format!("{archive}({member})");
                 (Some(archive), member, key)
             }
-            Some((outside, parts)) => {
+            Some((outside, parts, _)) => {
                 let key = if *outside {
                     anchored(parts)
                 } else {
@@ -629,18 +657,32 @@ fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContributi
         }
     }
 
+    // The suffixed key for each later owner, skipping any key another row already has: a real file
+    // named `main.o#2` keeps its name, and the generated one moves on to `main.o#3` (re-review 2 S3).
+    let mut taken: std::collections::BTreeSet<String> = owners.keys().cloned().collect();
+    let mut renamed: std::collections::BTreeMap<(String, String), String> =
+        std::collections::BTreeMap::new();
+    for (key, list) in &owners {
+        let mut next = 2_usize;
+        for object in list.iter().skip(1) {
+            let mut candidate = format!("{key}#{next}");
+            while taken.contains(&candidate) {
+                next += 1;
+                candidate = format!("{key}#{next}");
+            }
+            taken.insert(candidate.clone());
+            renamed.insert((key.clone(), object.clone()), candidate);
+            next += 1;
+        }
+    }
+
     raw.into_iter()
         .zip(base_keys)
         .map(|(row, (archive, member, key))| {
-            let rank = owners
-                .get(&key)
-                .and_then(|list| list.iter().position(|object| *object == row.object))
-                .unwrap_or(0);
-            let key = if rank == 0 {
-                key
-            } else {
-                format!("{key}#{}", rank + 1)
-            };
+            let key = renamed
+                .get(&(key.clone(), row.object.clone()))
+                .cloned()
+                .unwrap_or(key);
             MapObjectContribution {
                 input_section: row.input_section,
                 output_section: row.output_section,
@@ -996,6 +1038,29 @@ Linker script and memory map
     fn a_relative_and_an_absolute_object_with_one_name_stay_two_rows() {
         let keys = keys_of(&["build/app/imu.o", "build/app/main.o", "/usr/lib/imu.o"]);
         assert_eq!(keys, ["imu.o", "main.o", "imu.o#2"]);
+    }
+
+    #[test]
+    fn a_drive_or_unc_root_is_not_a_directory_level() {
+        // Re-review 2 S2-1: an object directly in `C:/Users` or a share root anchored the others.
+        let keys = keys_of(&[
+            "C:/Users/stray.o",
+            "C:/Users/alice/proj/build/app/main.o",
+            "//server/share/stray2.o",
+            "//server/share/alice/proj/imu.o",
+            "\\\\?\\C:\\Users\\stray3.o",
+        ]);
+        assert_eq!(keys, ["stray.o", "main.o", "stray2.o", "imu.o", "stray3.o"]);
+        assert_no_host_directory(&keys, &["users", "alice", "server", "share", "proj"]);
+    }
+
+    #[test]
+    fn a_generated_suffix_never_takes_a_real_file_name() {
+        // Re-review 2 S3: a real `main.o#2` keeps its name; the generated one moves on.
+        let keys = keys_of(&["/opt/a/x/main.o", "/opt/b/y/main.o", "/opt/c/z/main.o#2"]);
+        assert_eq!(keys, ["main.o", "main.o#3", "main.o#2"]);
+        let distinct: std::collections::BTreeSet<&String> = keys.iter().collect();
+        assert_eq!(distinct.len(), 3, "three objects, three rows");
     }
 
     #[test]

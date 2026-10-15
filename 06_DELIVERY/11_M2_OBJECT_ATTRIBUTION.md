@@ -135,3 +135,14 @@ The verdict was **FAIL** again. The three original reproductions, UNC paths and 
 
 Six tests cover these cases (end of `map.rs` `attribution_tests`).
 
+### 8.2 Second re-review of 86bcbc4
+
+The verdict was **PASS_WITH_FINDINGS**, with no S1. All 19 constructed MAPs were clean, and `cargo test --workspace` passed 1234 tests. The findings were fixed in the next commit:
+
+| Finding | Disposition |
+|---|---|
+| S2-1 A drive letter or UNC `server/share` counted as a directory level, so an object directly in `C:/Users` or a share root anchored the others | **Fixed.** `root_len` counts the drive, the UNC `server/share` and the `\\?\` prefix as root, not depth. One test covers drive, UNC and device paths. |
+| S2-2 `#N` follows link order, so Compare could pair two unrelated `main.o#2` files | **Fixed with the reviewer's option 3**, the existing section rule: a name that repeats in either build (`main.o`, `main.o#2`) is left unpaired as Removed and Added with `ambiguous`, never Changed, and never ranked as growth. The desktop row says why, and the CLI text counts such rows. Options 1 (borrow a trailing directory below a qualifying anchor) and 2 (number by sorted path) remain open for the Owner if paired same-name objects are wanted. |
+| S3 A generated suffix could take a real file's name (`main.o#2`) | **Fixed.** Generated suffixes skip every key another row already has. Covered by a test. |
+| S3 §8.1 did not state the Compare effect | Stated above. |
+

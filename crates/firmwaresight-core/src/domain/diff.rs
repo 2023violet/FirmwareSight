@@ -526,6 +526,10 @@ pub struct ObjectChange {
     pub archive: Option<String>,
     pub nonvolatile: ByteChange,
     pub runtime_ram: ByteChange,
+    /// True when the name repeats in either build (`main.o`, `main.o#2`), so the row was left
+    /// unpaired: the `#N` order follows the link order, and pairing by it could match two unrelated
+    /// files. The same rule as an ambiguous section name.
+    pub ambiguous: bool,
 }
 
 impl ObjectAttribution {
@@ -572,13 +576,54 @@ fn usage_change(base: Option<u64>, target: Option<u64>, budget: &str) -> ByteCha
     }
 }
 
+/// The name an object key was disambiguated from: `main.o#3` -> `main.o`.
+fn key_stem(key: &str) -> &str {
+    match key.rsplit_once('#') {
+        Some((stem, n))
+            if !stem.is_empty() && !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit()) =>
+        {
+            stem
+        }
+        _ => key,
+    }
+}
+
+/// Stems that name more than one object in one build.
+fn repeated_stems(
+    usages: &[crate::domain::attribution::ObjectUsage],
+) -> std::collections::BTreeSet<&str> {
+    let mut seen = std::collections::BTreeSet::new();
+    let mut repeated = std::collections::BTreeSet::new();
+    for usage in usages {
+        let stem = key_stem(&usage.key);
+        if !seen.insert(stem) {
+            repeated.insert(stem);
+        }
+    }
+    repeated
+}
+
 fn diff_usages(
     base: &[crate::domain::attribution::ObjectUsage],
     target: &[crate::domain::attribution::ObjectUsage],
 ) -> (Vec<ObjectChange>, usize) {
     let mut rows = Vec::new();
     let mut unchanged = 0_usize;
+    let mut ambiguous_stems = repeated_stems(base);
+    ambiguous_stems.extend(repeated_stems(target));
+    let ambiguous = |key: &str| ambiguous_stems.contains(key_stem(key));
     for from in base {
+        if ambiguous(&from.key) {
+            rows.push(ObjectChange {
+                change: ChangeKind::Removed,
+                key: from.key.clone(),
+                archive: from.archive.clone(),
+                nonvolatile: ByteChange::removed(from.nonvolatile),
+                runtime_ram: ByteChange::removed(from.runtime_ram),
+                ambiguous: true,
+            });
+            continue;
+        }
         match target.iter().find(|to| to.key == from.key) {
             Some(to) => {
                 let nonvolatile = usage_change(from.nonvolatile, to.nonvolatile, "Flash");
@@ -592,6 +637,7 @@ fn diff_usages(
                         archive: to.archive.clone(),
                         nonvolatile,
                         runtime_ram,
+                        ambiguous: false,
                     });
                 }
             }
@@ -601,12 +647,13 @@ fn diff_usages(
                 archive: from.archive.clone(),
                 nonvolatile: ByteChange::removed(from.nonvolatile),
                 runtime_ram: ByteChange::removed(from.runtime_ram),
+                ambiguous: false,
             }),
         }
     }
     for to in target
         .iter()
-        .filter(|to| !base.iter().any(|from| from.key == to.key))
+        .filter(|to| ambiguous(&to.key) || !base.iter().any(|from| from.key == to.key))
     {
         rows.push(ObjectChange {
             change: ChangeKind::Added,
@@ -614,6 +661,7 @@ fn diff_usages(
             archive: to.archive.clone(),
             nonvolatile: ByteChange::added(to.nonvolatile),
             runtime_ram: ByteChange::added(to.runtime_ram),
+            ambiguous: ambiguous(&to.key),
         });
     }
     rows.sort_by(|a, b| a.key.cmp(&b.key).then_with(|| a.change.cmp(&b.change)));

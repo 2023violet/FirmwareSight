@@ -690,11 +690,22 @@ fn push_objects(out: &mut String, result: &DiffResult) {
         )
     };
     out.push_str("\nObject / library attribution (GNU ld MAP rows)\n");
+    let unpaired = attribution
+        .objects
+        .iter()
+        .chain(&attribution.libraries)
+        .filter(|row| row.ambiguous)
+        .count();
     out.push_str(&format!(
         "  Objects    {}\n  Libraries  {}\n",
         tally(&attribution.objects, attribution.unchanged_objects),
         tally(&attribution.libraries, attribution.unchanged_libraries)
     ));
+    if unpaired > 0 {
+        out.push_str(&format!(
+            "  {unpaired} row(s) repeat a name in a build (main.o, main.o#2) and were left unpaired rather than matched by link order\n"
+        ));
+    }
     // Object keys come from a user-supplied MAP and reach a terminal, so they are escaped first.
     let escaped = |rows: Vec<Contributor>| -> Vec<Contributor> {
         rows.into_iter()

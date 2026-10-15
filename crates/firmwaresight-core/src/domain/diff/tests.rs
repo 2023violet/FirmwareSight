@@ -961,6 +961,58 @@ fn objects_match_by_key_with_the_same_added_removed_changed_rules_as_sections() 
 }
 
 #[test]
+fn a_repeated_object_name_is_left_unpaired_rather_than_matched_by_link_order() {
+    // Re-review 2 S2-2: `main.o#2` is numbered by link order, so the two builds' `main.o#2` may be
+    // different files. Like an ambiguous section name, such rows are Removed and Added, never Changed.
+    let mut base = simple_side("snap-a");
+    base.attribution = Some(attributed(
+        vec![
+            usage("main.o", None, Some(100), Some(0)),
+            usage("main.o#2", None, Some(40), Some(0)),
+            usage("uart.o", None, Some(8), Some(0)),
+        ],
+        vec![],
+    ));
+    let mut target = simple_side("snap-b");
+    target.attribution = Some(attributed(
+        vec![
+            usage("main.o", None, Some(40), Some(0)),
+            usage("main.o#2", None, Some(100), Some(0)),
+            usage("uart.o", None, Some(12), Some(0)),
+        ],
+        vec![],
+    ));
+
+    let diff = compare(&base, &target).expect("comparable");
+    let objects = &diff.attribution.objects;
+    let mains: Vec<_> = objects
+        .iter()
+        .filter(|row| row.key.starts_with("main.o"))
+        .collect();
+    assert_eq!(mains.len(), 4, "two removed, two added: {mains:?}");
+    assert!(
+        mains
+            .iter()
+            .all(|row| row.ambiguous && row.change != ChangeKind::Changed)
+    );
+    assert!(mains.iter().all(|row| row.nonvolatile.delta.is_none()));
+
+    let uart = objects
+        .iter()
+        .find(|row| row.key == "uart.o")
+        .expect("listed");
+    assert_eq!(uart.change, ChangeKind::Changed);
+    assert!(!uart.ambiguous);
+    assert_eq!(uart.nonvolatile.delta, Some(4));
+    assert!(
+        diff.top_object_growth(false, 5)
+            .iter()
+            .all(|row| !row.key.starts_with("main.o")),
+        "no unpaired row is called growth"
+    );
+}
+
+#[test]
 fn a_missing_map_never_blocks_the_comparison_but_always_shows_the_downgrade() {
     let base = snapshot(
         "snap-a",

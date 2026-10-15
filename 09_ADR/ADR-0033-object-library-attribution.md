@@ -49,7 +49,7 @@ Totals are never forced to reconcile. Section bytes not covered by object rows (
 
 **D7 — Portable documents.** The `analysis:1` and `diff:1` schemas are unchanged. Only the existing capability values move, and the affected goldens are regenerated on purpose. Per-object rows in portable JSON need a schema version step under ADR-0022 and are a separate decision.
 
-**D8 — Compare.** A per-object and per-library delta is offered only when both builds carry attribution. Rows are matched by key, and the Added/Removed/Changed rules are the same as for sections. A row that exists on one side is never written as 0 on the other ("Not present"). Comparability follows the weaker side.
+**D8 — Compare.** A per-object and per-library delta is offered only when both builds carry attribution. Rows are matched by key, and the Added/Removed/Changed rules are the same as for sections. A row that exists on one side is never written as 0 on the other ("Not present"). Comparability follows the weaker side. *(Implementation note, 2026-10-15: D2 keys are made unique within a build by a `#N` suffix in link order. Because that order is not an identity, a name that repeats in either build is left unpaired (Removed and Added, flagged ambiguous), the same rule as an ambiguous section name.)*
 
 ## Consequences
 

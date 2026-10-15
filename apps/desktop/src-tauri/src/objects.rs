@@ -237,6 +237,7 @@ fn change_row(row: &ObjectChange) -> ObjectChangeRowDto {
         archive: row.archive.clone(),
         nonvolatile: delta(&row.nonvolatile),
         runtime_ram: delta(&row.runtime_ram),
+        ambiguous: row.ambiguous,
     }
 }
 

@@ -942,6 +942,7 @@ describe('the summary and its signs', () => {
           archive: null,
           nonvolatile: change(80, 120, 40),
           runtimeRam: change(16, 96, 80),
+          ambiguous: false,
         },
         {
           changeKind: 'Added',
@@ -949,6 +950,7 @@ describe('the summary and its signs', () => {
           archive: 'libdrv.a',
           nonvolatile: { base: null, target: 56, delta: null, comparability: 'unknown', reason: 'present only in the target build' },
           runtimeRam: { base: null, target: 0, delta: null, comparability: 'unknown', reason: 'present only in the target build' },
+          ambiguous: true,
         },
       ],
       total: 2,
@@ -974,6 +976,7 @@ describe('the summary and its signs', () => {
     const added = within(table).getByText('libdrv.a(spi.o)').closest('tr');
     expect(added?.textContent).toContain('Added');
     expect(added?.textContent).toContain('Not present');
+    expect(added?.textContent).toContain('the name repeats in a build, so this row is unpaired');
     expect(added?.textContent).not.toMatch(/(^|\D)0 bytes → 56/u);
 
     // A shortlist entry filters the authoritative table through the shell.
