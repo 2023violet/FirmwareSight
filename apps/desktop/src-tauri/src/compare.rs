@@ -35,6 +35,8 @@ use firmwaresight_storage::{
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 
+use crate::dialog_text::{DialogTextDto, REPLACE_MESSAGE_EN};
+
 use crate::ipc::{
     ByteDeltaDto, CandidatePageDto, CandidatePageRequestDto, ChangeKindCountsDto,
     ChangeKindFilterDto, CompareCandidateDto, CompareRequestDto, CompareSummaryDto, ContributorDto,
@@ -519,18 +521,17 @@ pub(crate) fn visual_format(format: crate::ipc::VisualFormatDto) -> VisualFormat
 
 pub(crate) fn save_visual_path(
     app: &AppHandle,
-    title: &str,
+    text: &DialogTextDto,
+    fallback_title: &str,
     format: crate::ipc::VisualFormatDto,
     suggested: &str,
 ) -> Option<PathBuf> {
+    let label = visual_format_label(format).to_uppercase();
     app.dialog()
         .file()
-        .set_title(title)
+        .set_title(text.title_or(fallback_title))
         .add_filter(
-            format!(
-                "FirmwareSight {} report",
-                visual_format_label(format).to_uppercase()
-            ),
+            text.filter_or(&label, format!("FirmwareSight {label} report")),
             &[visual_format_label(format)],
         )
         .set_file_name(suggested)
@@ -538,17 +539,12 @@ pub(crate) fn save_visual_path(
         .and_then(|picked| picked.into_path().ok())
 }
 
-pub(crate) fn confirm_visual_replacement(app: &AppHandle, file_name: &str) -> bool {
-    app.dialog()
-        .message(format!(
-            "{file_name} already exists. Replacing it overwrites the file you have."
-        ))
-        .title("Replace existing file?")
-        .buttons(MessageDialogButtons::OkCancelCustom(
-            "Replace it".to_owned(),
-            "Keep mine".to_owned(),
-        ))
-        .blocking_show()
+pub(crate) fn confirm_visual_replacement(
+    app: &AppHandle,
+    text: &DialogTextDto,
+    file_name: &str,
+) -> bool {
+    confirm_replacement(app, text, file_name)
 }
 
 fn outcome(status: &str, file_name: Option<String>, format: ExportFormat) -> ExportOutcomeDto {
@@ -586,15 +582,19 @@ fn short(sha: &str) -> &str {
 /// Open the native save dialog. Modal, so it only ever runs on a blocking thread.
 pub(crate) fn save_path(
     app: &AppHandle,
-    title: &str,
+    text: &DialogTextDto,
+    fallback_title: &str,
     format: ExportFormat,
     suggested: &str,
 ) -> Option<PathBuf> {
     app.dialog()
         .file()
-        .set_title(title)
+        .set_title(text.title_or(fallback_title))
         .add_filter(
-            format!("FirmwareSight {} export", format.label()),
+            text.filter_or(
+                format.label(),
+                format!("FirmwareSight {} export", format.label()),
+            ),
             &[format.extension()],
         )
         .set_file_name(suggested)
@@ -603,15 +603,14 @@ pub(crate) fn save_path(
 }
 
 /// Ask, in a person's words, whether an existing file may be replaced.
-pub(crate) fn confirm_replacement(app: &AppHandle, file_name: &str) -> bool {
+pub(crate) fn confirm_replacement(app: &AppHandle, text: &DialogTextDto, file_name: &str) -> bool {
+    let words = text.replace_for(file_name, REPLACE_MESSAGE_EN);
     app.dialog()
-        .message(format!(
-            "{file_name} already exists. Replacing it overwrites the file you have."
-        ))
-        .title("Replace existing file?")
+        .message(words.message)
+        .title(words.title)
         .buttons(MessageDialogButtons::OkCancelCustom(
-            "Replace it".to_owned(),
-            "Keep mine".to_owned(),
+            words.confirm,
+            words.keep,
         ))
         .blocking_show()
 }
@@ -622,13 +621,14 @@ fn export_now(
     session: &Session,
     diff_id: &str,
     format: ExportFormat,
+    words: &DialogTextDto,
     title: &str,
     operation_id: &str,
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let (text, suggested) = session.render_export(diff_id, format, operation_id)?;
-    let picked = save_path(app, title, format, &suggested);
+    let picked = save_path(app, words, title, format, &suggested);
     write_export(picked, &text, format, |path| {
-        confirm_replacement(app, &service::display_name(path))
+        confirm_replacement(app, words, &service::display_name(path))
     })
 }
 
@@ -700,16 +700,19 @@ pub(crate) async fn query_symbol_changes(
 pub(crate) async fn export_compare_json(
     app: AppHandle,
     diff_id: String,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let words = dialog.unwrap_or_default();
     tauri::async_runtime::spawn_blocking(move || {
         export_now(
             &app,
             &session,
             &diff_id,
             ExportFormat::Json,
+            &words,
             "Export the build diff as JSON",
             &operation_id,
         )
@@ -723,16 +726,19 @@ pub(crate) async fn export_compare_json(
 pub(crate) async fn export_compare_html(
     app: AppHandle,
     diff_id: String,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let words = dialog.unwrap_or_default();
     tauri::async_runtime::spawn_blocking(move || {
         export_now(
             &app,
             &session,
             &diff_id,
             ExportFormat::Html,
+            &words,
             "Export the build diff as HTML",
             &operation_id,
         )
@@ -746,14 +752,22 @@ pub(crate) async fn export_compare_visual(
     app: AppHandle,
     diff_id: String,
     format: crate::ipc::VisualFormatDto,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let words = dialog.unwrap_or_default();
     tauri::async_runtime::spawn_blocking(move || {
         let (bytes, suggested) =
             session.render_visual_export(&diff_id, visual_format(format), &operation_id)?;
-        let picked = save_visual_path(&app, "Export comparison visual report", format, &suggested);
+        let picked = save_visual_path(
+            &app,
+            &words,
+            "Export comparison visual report",
+            format,
+            &suggested,
+        );
         let current_session = Arc::clone(&session);
         let current_diff_id = diff_id.clone();
         let current_operation_id = operation_id.clone();
@@ -768,7 +782,7 @@ pub(crate) async fn export_compare_visual(
             picked,
             &bytes,
             format,
-            |path| confirm_visual_replacement(&app, &service::display_name(path)),
+            |path| confirm_visual_replacement(&app, &words, &service::display_name(path)),
             ensure_current,
         )
     })

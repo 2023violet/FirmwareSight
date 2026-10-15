@@ -51,6 +51,8 @@ use firmwaresight_storage::{
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 
+use crate::dialog_text::DialogTextDto;
+
 use crate::compare::envelope_from_diff;
 use crate::intake::pick_path;
 use crate::ipc::{
@@ -1348,28 +1350,29 @@ fn envelope_from_acceptance(err: &AcceptReviewError, operation_id: &str) -> Erro
 
 /// Open the native save dialog for a project that has no config yet, confirming before an existing file
 /// would be replaced. `None` is Cancel, which is a decision rather than a failure (prompt §41).
-fn choose_config_path(app: &AppHandle) -> Option<PathBuf> {
+fn choose_config_path(app: &AppHandle, text: &DialogTextDto) -> Option<PathBuf> {
     let picked = app
         .dialog()
         .file()
-        .set_title("Save the project policy as firmwaresight.toml")
-        .add_filter("TOML", &["toml"])
+        .set_title(text.title_or("Save the project policy as firmwaresight.toml"))
+        .add_filter(text.filter_or("TOML", "TOML".to_owned()), &["toml"])
         .set_file_name(CONFIG_FILE_NAME)
         .blocking_save_file()
         .and_then(|picked| picked.into_path().ok())?;
     if !picked.exists() {
         return Some(picked);
     }
+    let words = text.replace_for(
+        &service::display_name(&picked),
+        "{file} already exists. Replacing it overwrites the policy file you have.",
+    );
     let replace = app
         .dialog()
-        .message(format!(
-            "{} already exists. Replacing it overwrites the policy file you have.",
-            service::display_name(&picked)
-        ))
-        .title("Replace existing file?")
+        .message(words.message)
+        .title(words.title)
         .buttons(MessageDialogButtons::OkCancelCustom(
-            "Replace it".to_owned(),
-            "Keep mine".to_owned(),
+            words.confirm,
+            words.keep,
         ))
         .blocking_show();
     if replace { Some(picked) } else { None }
@@ -1380,16 +1383,18 @@ fn choose_config_path(app: &AppHandle) -> Option<PathBuf> {
 #[tauri::command]
 pub(crate) async fn open_project_config(
     app: AppHandle,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<Option<ProjectContextDto>, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let title = dialog
+        .unwrap_or_default()
+        .title_or("Choose the project's firmwaresight.toml");
 
-    let picked = tauri::async_runtime::spawn_blocking(move || {
-        pick_path(&app, "Choose the project's firmwaresight.toml")
-    })
-    .await
-    .map_err(task_join_error)?;
+    let picked = tauri::async_runtime::spawn_blocking(move || pick_path(&app, &title))
+        .await
+        .map_err(task_join_error)?;
 
     session.load_project_from(picked, &operation_id)
 }
@@ -1414,6 +1419,7 @@ pub(crate) async fn inspect_project_readiness(
 pub(crate) async fn save_project_policy(
     app: AppHandle,
     policy: ProjectPolicyDto,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<Option<ProjectContextDto>, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
@@ -1427,7 +1433,8 @@ pub(crate) async fn save_project_policy(
         .map_err(task_join_error)?;
     }
 
-    let picked = tauri::async_runtime::spawn_blocking(move || choose_config_path(&app))
+    let text = dialog.unwrap_or_default();
+    let picked = tauri::async_runtime::spawn_blocking(move || choose_config_path(&app, &text))
         .await
         .map_err(task_join_error)?;
     tauri::async_runtime::spawn_blocking(move || {
@@ -1475,19 +1482,18 @@ pub(crate) async fn accept_review(
 #[tauri::command]
 pub(crate) async fn attach_release_file(
     app: AppHandle,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<Option<ReleaseAttachmentDto>, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let title = dialog
+        .unwrap_or_default()
+        .title_or("Choose a BIN or Intel HEX file to ship with this release");
 
-    let picked = tauri::async_runtime::spawn_blocking(move || {
-        pick_path(
-            &app,
-            "Choose a BIN or Intel HEX file to ship with this release",
-        )
-    })
-    .await
-    .map_err(task_join_error)?;
+    let picked = tauri::async_runtime::spawn_blocking(move || pick_path(&app, &title))
+        .await
+        .map_err(task_join_error)?;
 
     session.attach_release_file(picked, &operation_id)
 }
@@ -1574,10 +1580,12 @@ pub(crate) async fn export_gate_visual(
     run_id: String,
     snapshot_id: String,
     format: crate::ipc::VisualFormatDto,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<crate::ipc::ExportOutcomeDto, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let text = dialog.unwrap_or_default();
     tauri::async_runtime::spawn_blocking(move || {
         let bytes = session.render_gate_visual(&run_id, &snapshot_id, format, &operation_id)?;
         let suggested = format!(
@@ -1586,6 +1594,7 @@ pub(crate) async fn export_gate_visual(
         );
         let picked = crate::compare::save_visual_path(
             &app,
+            &text,
             "Export Gate review visual report",
             format,
             &suggested,
@@ -1611,6 +1620,7 @@ pub(crate) async fn export_gate_visual(
             |path| {
                 crate::compare::confirm_visual_replacement(
                     &app,
+                    &text,
                     &crate::service::display_name(path),
                 )
             },

@@ -17,6 +17,7 @@ import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { en, type Catalog, type Namespace } from './en';
 import type { CatalogShape } from './types';
 import { zh } from './zh';
+import { setDialogLanguage } from '../ipc/dialogWords';
 import type { Language, ResolvedLanguage } from './language';
 
 /** Parameters for one interpolation. Values are shown exactly as given. */
@@ -138,10 +139,11 @@ export function I18nProvider({
   readonly platform: readonly string[];
   readonly children: ReactNode;
 }) {
-  const value = useMemo<I18n>(
-    () => ({ t: translate(resolved), language, resolved, platform }),
-    [language, resolved, platform],
-  );
+  const value = useMemo<I18n>(() => {
+    // Native dialogs speak the language on screen too; see `ipc/dialogWords.ts`.
+    setDialogLanguage(resolved);
+    return { t: translate(resolved), language, resolved, platform };
+  }, [language, resolved, platform]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

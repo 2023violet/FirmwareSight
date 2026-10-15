@@ -35,6 +35,7 @@ pub mod bundle;
 pub mod compare;
 pub mod details;
 pub mod diagnostics;
+pub mod dialog_text;
 pub mod history;
 pub mod intake;
 pub mod ipc;

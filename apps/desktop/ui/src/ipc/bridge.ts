@@ -9,6 +9,8 @@
 
 import { invoke } from '@tauri-apps/api/core';
 
+import { withDialog } from './dialogWords';
+
 import type {
   AcceptReviewOutcomeDto,
   AcceptReviewRequestDto,
@@ -103,7 +105,7 @@ export type IpcOutcome<T> =
  * the screen keeps whatever it was showing.
  */
 export async function selectArtifact(): Promise<IpcOutcome<SelectionDto | null>> {
-  return await call<SelectionDto | null>(SELECT_ARTIFACT);
+  return await call<SelectionDto | null>(SELECT_ARTIFACT, withDialog('pickArtifact'));
 }
 
 /**
@@ -114,7 +116,7 @@ export async function selectArtifact(): Promise<IpcOutcome<SelectionDto | null>>
 export async function attachMap(
   selectionId: string,
 ): Promise<IpcOutcome<SelectionDto | null>> {
-  return await call<SelectionDto | null>(ATTACH_MAP, { selectionId });
+  return await call<SelectionDto | null>(ATTACH_MAP, withDialog('pickMap', { selectionId }));
 }
 
 /** Detach the MAP from a selection. The artifact itself stays selected. */
@@ -205,19 +207,19 @@ export async function querySymbolChanges(
  * boundary, and nothing here sends one out (prompt §35, §36).
  */
 export async function exportCompareJson(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_COMPARE_JSON, { diffId });
+  return await call<ExportOutcomeDto>(EXPORT_COMPARE_JSON, withDialog('saveCompareJson', { diffId }));
 }
 
 /** Export the comparison as one self-contained HTML file. */
 export async function exportCompareHtml(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_COMPARE_HTML, { diffId });
+  return await call<ExportOutcomeDto>(EXPORT_COMPARE_HTML, withDialog('saveCompareHtml', { diffId }));
 }
 
 export async function exportCompareVisual(
   diffId: string,
   format: VisualFormatDto,
 ): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_COMPARE_VISUAL, { diffId, format });
+  return await call<ExportOutcomeDto>(EXPORT_COMPARE_VISUAL, withDialog('saveCompareVisual', { diffId, format }));
 }
 
 export async function exportAnalysisVisual(
@@ -225,7 +227,10 @@ export async function exportAnalysisVisual(
   snapshotId: string,
   format: VisualFormatDto,
 ): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_ANALYSIS_VISUAL, { selectionId, snapshotId, format });
+  return await call<ExportOutcomeDto>(
+    EXPORT_ANALYSIS_VISUAL,
+    withDialog('saveAnalysisVisual', { selectionId, snapshotId, format }),
+  );
 }
 
 export async function exportGateVisual(
@@ -233,7 +238,7 @@ export async function exportGateVisual(
   snapshotId: string,
   format: VisualFormatDto,
 ): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_GATE_VISUAL, { runId, snapshotId, format });
+  return await call<ExportOutcomeDto>(EXPORT_GATE_VISUAL, withDialog('saveGateVisual', { runId, snapshotId, format }));
 }
 
 /**
@@ -244,7 +249,7 @@ export async function exportGateVisual(
  * in, which the WebView has no use for (prompt §40).
  */
 export async function openProjectConfig(): Promise<IpcOutcome<ProjectContextDto | null>> {
-  return await call<ProjectContextDto | null>(OPEN_PROJECT_CONFIG);
+  return await call<ProjectContextDto | null>(OPEN_PROJECT_CONFIG, withDialog('pickProjectConfig'));
 }
 
 /** Recheck bounded project facts for the currently loaded project. No path crosses the IPC boundary. */
@@ -262,7 +267,7 @@ export async function inspectProjectReadiness(): Promise<IpcOutcome<ProjectReadi
 export async function saveProjectPolicy(
   policy: ProjectPolicyDto,
 ): Promise<IpcOutcome<ProjectContextDto | null>> {
-  return await call<ProjectContextDto | null>(SAVE_PROJECT_POLICY, { policy });
+  return await call<ProjectContextDto | null>(SAVE_PROJECT_POLICY, withDialog('savePolicy', { policy }));
 }
 
 /**
@@ -309,7 +314,7 @@ export async function getGateRun(runId: string): Promise<IpcOutcome<GateRunDto |
  * `04_TECH/28` §4.4).
  */
 export async function attachReleaseFile(): Promise<IpcOutcome<ReleaseAttachmentDto | null>> {
-  return await call<ReleaseAttachmentDto | null>(ATTACH_RELEASE_FILE);
+  return await call<ReleaseAttachmentDto | null>(ATTACH_RELEASE_FILE, withDialog('pickReleaseFile'));
 }
 
 /**
@@ -375,7 +380,7 @@ export async function prepareReleaseBundle(
 export async function chooseBundleDestination(
   planId: string,
 ): Promise<IpcOutcome<BundleDestinationDto | null>> {
-  return await call<BundleDestinationDto | null>(CHOOSE_BUNDLE_DESTINATION, { planId });
+  return await call<BundleDestinationDto | null>(CHOOSE_BUNDLE_DESTINATION, withDialog('pickBundleFolder', { planId }));
 }
 
 /**
@@ -568,5 +573,5 @@ export async function getDiagnostics(): Promise<IpcOutcome<DiagnosticsDto>> {
  * back as outcomes rather than errors, exactly as the Compare export reports them.
  */
 export async function exportDiagnostics(): Promise<IpcOutcome<ExportOutcomeDto>> {
-  return await call<ExportOutcomeDto>(EXPORT_DIAGNOSTICS);
+  return await call<ExportOutcomeDto>(EXPORT_DIAGNOSTICS, withDialog('saveDiagnostics'));
 }

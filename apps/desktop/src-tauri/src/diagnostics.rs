@@ -228,21 +228,24 @@ pub(crate) async fn collect_diagnostics(
 #[tauri::command]
 pub(crate) async fn export_diagnostics(
     app: AppHandle,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let words = dialog.unwrap_or_default();
     tauri::async_runtime::spawn_blocking(move || {
         let product = product_facts(&app);
         let text = session.diagnostics_json(&product, &webview_version(), &operation_id)?;
         let picked = save_path(
             &app,
+            &words,
             "Export the diagnostics file",
             ExportFormat::Json,
             EXPORT_FILE_NAME,
         );
         write_export(picked, &text, ExportFormat::Json, |path| {
-            confirm_replacement(&app, &display_name(path))
+            confirm_replacement(&app, &words, &display_name(path))
         })
     })
     .await

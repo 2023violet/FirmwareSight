@@ -47,6 +47,7 @@ export type { EvidenceRequestDto } from './generated/EvidenceRequestDto';
 export type { EvidenceRowDto } from './generated/EvidenceRowDto';
 export type { EvidenceSortDto } from './generated/EvidenceSortDto';
 export type { EvidenceSummaryDto } from './generated/EvidenceSummaryDto';
+export type { DialogTextDto } from './generated/DialogTextDto';
 export type { ExportOutcomeDto } from './generated/ExportOutcomeDto';
 export type { VisualFormatDto } from './generated/VisualFormatDto';
 export type { FixtureKey } from './generated/FixtureKey';

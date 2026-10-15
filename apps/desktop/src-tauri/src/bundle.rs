@@ -416,10 +416,10 @@ fn short_id(snapshot_id: &str) -> String {
 ///
 /// A folder rather than a file, and chosen by a person: the WebView never names a directory, which is what
 /// lets §31 promise that no bundle is ever written somewhere nobody pointed at.
-fn choose_destination_folder(app: &AppHandle) -> Option<PathBuf> {
+fn choose_destination_folder(app: &AppHandle, title: &str) -> Option<PathBuf> {
     app.dialog()
         .file()
-        .set_title("Choose the folder to create the release bundle in")
+        .set_title(title)
         .blocking_pick_folder()
         .and_then(|picked| picked.into_path().ok())
 }
@@ -444,14 +444,19 @@ pub(crate) async fn prepare_release_bundle(
 pub(crate) async fn choose_bundle_destination(
     app: AppHandle,
     plan_id: String,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<Option<BundleDestinationDto>, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let title = dialog
+        .unwrap_or_default()
+        .title_or("Choose the folder to create the release bundle in");
 
-    let picked = tauri::async_runtime::spawn_blocking(move || choose_destination_folder(&app))
-        .await
-        .map_err(task_join_error)?;
+    let picked =
+        tauri::async_runtime::spawn_blocking(move || choose_destination_folder(&app, &title))
+            .await
+            .map_err(task_join_error)?;
 
     session.choose_bundle_destination(&plan_id, picked, &operation_id)
 }

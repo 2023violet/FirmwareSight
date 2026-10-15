@@ -78,16 +78,18 @@ pub fn on_map_picked(
 #[tauri::command]
 pub(crate) async fn select_artifact(
     app: AppHandle,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<Option<SelectionDto>, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let title = dialog
+        .unwrap_or_default()
+        .title_or("Choose the firmware artifact to analyze");
 
-    let picked = tauri::async_runtime::spawn_blocking(move || {
-        pick_path(&app, "Choose the firmware artifact to analyze")
-    })
-    .await
-    .map_err(task_join_error)?;
+    let picked = tauri::async_runtime::spawn_blocking(move || pick_path(&app, &title))
+        .await
+        .map_err(task_join_error)?;
 
     on_artifact_picked(&session, picked, &operation_id)
 }
@@ -97,16 +99,18 @@ pub(crate) async fn select_artifact(
 pub(crate) async fn attach_map(
     app: AppHandle,
     selection_id: String,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<Option<SelectionDto>, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let title = dialog
+        .unwrap_or_default()
+        .title_or("Choose the linker MAP for this artifact");
 
-    let picked = tauri::async_runtime::spawn_blocking(move || {
-        pick_path(&app, "Choose the linker MAP for this artifact")
-    })
-    .await
-    .map_err(task_join_error)?;
+    let picked = tauri::async_runtime::spawn_blocking(move || pick_path(&app, &title))
+        .await
+        .map_err(task_join_error)?;
 
     on_map_picked(&session, &selection_id, picked, &operation_id)
 }
@@ -142,10 +146,12 @@ pub(crate) async fn export_analysis_visual(
     selection_id: String,
     snapshot_id: String,
     format: VisualFormatDto,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
     state: State<'_, Arc<Session>>,
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let session = Arc::clone(&state);
     let operation_id = next_operation_id();
+    let text = dialog.unwrap_or_default();
 
     tauri::async_runtime::spawn_blocking(move || {
         let bytes =
@@ -156,6 +162,7 @@ pub(crate) async fn export_analysis_visual(
         );
         let picked = crate::compare::save_visual_path(
             &app,
+            &text,
             "Export analysis visual report",
             format,
             &suggested,
@@ -187,6 +194,7 @@ pub(crate) async fn export_analysis_visual(
             |path| {
                 crate::compare::confirm_visual_replacement(
                     &app,
+                    &text,
                     &crate::service::display_name(path),
                 )
             },
