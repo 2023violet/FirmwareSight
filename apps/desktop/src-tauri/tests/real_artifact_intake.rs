@@ -773,6 +773,9 @@ fn the_selection_path_adds_no_schema_migration() {
             // 0006 is C1-U1's additive `gate_run_attachments` table. Named for its stage on the same
             // terms as the others, and written by no path this test covers.
             "0006_release_attachments".to_owned(),
+            // 0007 is M2's additive `object_contributions` table (ADR-0033); the import path writes it,
+            // the selection path does not.
+            "0007_object_contributions".to_owned(),
         ],
         "every migration belongs to a named stage, and none of them is the selection path's"
     );

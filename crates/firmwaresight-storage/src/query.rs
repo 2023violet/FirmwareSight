@@ -528,7 +528,7 @@ pub(crate) fn bytes_or_unknown(value: Option<i64>, reason: Option<String>) -> Fa
     }
 }
 
-fn read_err(source: rusqlite::Error) -> StorageError {
+pub(crate) fn read_err(source: rusqlite::Error) -> StorageError {
     StorageError::Write {
         detail: format!("read: {source}"),
     }

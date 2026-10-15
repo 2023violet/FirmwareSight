@@ -969,7 +969,10 @@ fn a_v4_store_holding_a_gate_run_gains_the_attachment_table_and_keeps_the_run_re
         SCHEMA_VERSION,
         "the v4 store reached this build's schema"
     );
-    assert_eq!(SCHEMA_VERSION, 6, "C1-U1 added exactly one migration");
+    assert_eq!(
+        SCHEMA_VERSION, 7,
+        "C1-U1 added version 6 and M2 (ADR-0033) version 7"
+    );
 
     let name: String = db
         .connection()

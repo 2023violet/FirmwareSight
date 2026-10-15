@@ -641,6 +641,7 @@ fn compare_added_no_schema_change() {
             "0004_release_records.sql",
             "0005_unknown_reasons.sql",
             "0006_release_attachments.sql",
+            "0007_object_contributions.sql",
         ],
         "every migration belongs to a named stage"
     );

@@ -2,6 +2,7 @@
 //! `04_TECH/02_DOMAIN_MODEL.md`.
 
 pub mod artifact;
+pub mod attribution;
 pub mod build_snapshot;
 pub mod capability;
 pub mod diff;

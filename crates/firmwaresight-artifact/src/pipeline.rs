@@ -181,6 +181,7 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
         .symbols(facts.symbols.clone())
         .evidence(evidence)
         .capabilities(capabilities.clone())
+        .objects(object_rows(map_evidence.as_ref()))
         .seal()
         .map_err(|err| ArtifactError::InternalBug {
             detail: format!("{err:?}"),
@@ -225,6 +226,32 @@ fn apply_map_evidence(sections: &mut [Section], evidence: &MapEvidence) {
     }
 }
 
+/// The MAP's object rows as Core records them (ADR-0033). Keys are already free of host paths.
+fn object_rows(
+    map_evidence: Option<&MapEvidence>,
+) -> Vec<firmwaresight_core::domain::attribution::ObjectContribution> {
+    map_evidence
+        .map(|evidence| {
+            evidence
+                .object_contributions
+                .iter()
+                .map(
+                    |row| firmwaresight_core::domain::attribution::ObjectContribution {
+                        object: row.object.clone(),
+                        archive: row.archive.clone(),
+                        member: row.member.clone(),
+                        input_section: row.input_section.clone(),
+                        output_section: row.output_section.clone(),
+                        address: row.address,
+                        size: row.size,
+                        map_line: row.line as u64,
+                    },
+                )
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
 fn build_capabilities(facts: &elf::ElfFacts, map_evidence: Option<&MapEvidence>) -> Capabilities {
     Capabilities::elf_only()
         .with_symbols(if facts.symbol_table_present {
@@ -239,11 +266,14 @@ fn build_capabilities(facts: &elf::ElfFacts, map_evidence: Option<&MapEvidence>)
             } else {
                 Provision::NotProvided
             },
-            // A MAP is the input an object attribution would one day be built from, not the result.
-            // `map::parse` collects input-section-to-object rows and nothing carries them into the
-            // snapshot, so the only honest answer on every path today is `Unavailable` — which is also
-            // what `domain::diff::ObjectAttribution` tells Compare for the same build.
-            Availability::Unavailable,
+            // ADR-0033 D6: attribution exists exactly when the MAP named at least one object row, and
+            // those rows travel in the snapshot (`object_rows`). A MAP with no rows, or no MAP, is
+            // Unavailable rather than an empty success.
+            if map_evidence.is_some_and(|evidence| !evidence.object_contributions.is_empty()) {
+                Availability::Available
+            } else {
+                Availability::Unavailable
+            },
         )
 }
 

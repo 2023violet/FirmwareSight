@@ -6,6 +6,7 @@
 //! mutator.
 
 use crate::domain::artifact::Artifact;
+use crate::domain::attribution::ObjectContribution;
 use crate::domain::capability::Capabilities;
 use crate::domain::evidence::EvidenceItem;
 use crate::domain::identity::{BuildIdentity, Sha256};
@@ -57,6 +58,8 @@ pub struct SnapshotBuilder {
     symbols: Vec<Symbol>,
     evidence: Vec<EvidenceItem>,
     capabilities: Capabilities,
+    /// ADR-0033 object rows from the GNU ld MAP; empty when the build had none.
+    objects: Vec<ObjectContribution>,
     created_by_fwsight_version: String,
 }
 
@@ -118,6 +121,12 @@ impl SnapshotBuilder {
         self
     }
 
+    #[must_use]
+    pub fn objects(mut self, objects: Vec<ObjectContribution>) -> Self {
+        self.objects = objects;
+        self
+    }
+
     /// Freeze the facts. A snapshot with no artifact is not a description of anything, so it
     /// is rejected rather than emitted empty.
     pub fn seal(self) -> Result<BuildSnapshot, CoreError> {
@@ -145,6 +154,7 @@ impl SnapshotBuilder {
             symbols: self.symbols,
             evidence: self.evidence,
             capabilities: self.capabilities,
+            objects: self.objects,
             created_by_fwsight_version: self.created_by_fwsight_version,
         })
     }
@@ -162,10 +172,18 @@ pub struct BuildSnapshot {
     symbols: Vec<Symbol>,
     evidence: Vec<EvidenceItem>,
     capabilities: Capabilities,
+    /// ADR-0033 object rows from the GNU ld MAP; empty when the build had none.
+    objects: Vec<ObjectContribution>,
     created_by_fwsight_version: String,
 }
 
 impl BuildSnapshot {
+    /// ADR-0033 object rows, in MAP order.
+    #[must_use]
+    pub fn objects(&self) -> &[ObjectContribution] {
+        &self.objects
+    }
+
     #[must_use]
     pub fn id(&self) -> &SnapshotId {
         &self.id

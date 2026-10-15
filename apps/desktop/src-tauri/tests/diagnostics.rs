@@ -917,6 +917,7 @@ fn a_snapshot_this_store_forced_is_named_and_never_located() {
                  ALTER TABLE sections DROP COLUMN file_offset_unknown;
                  ALTER TABLE symbols DROP COLUMN address_unknown;
                  DROP TABLE gate_run_attachments;
+                 DROP TABLE object_contributions;
                  DELETE FROM schema_migrations WHERE version >= 5;
                  INSERT INTO projects (id, name) VALUES ('proj-s', 'Snapshot project');
                  INSERT INTO builds (id, project_id, snapshot_id, normalization_version,
@@ -933,7 +934,7 @@ fn a_snapshot_this_store_forced_is_named_and_never_located() {
 
     assert_eq!(
         payload.store.backup_files,
-        vec!["firmwaresight-p0.pre-migration-v4-to-v6.sqlite".to_owned()],
+        vec!["firmwaresight-p0.pre-migration-v4-to-v7.sqlite".to_owned()],
         "the snapshot this transition owed is reported by name: {:?}",
         payload.store.backup_files
     );
@@ -941,7 +942,7 @@ fn a_snapshot_this_store_forced_is_named_and_never_located() {
         store
             .parent()
             .expect("the store has a directory")
-            .join("firmwaresight-p0.pre-migration-v4-to-v6.sqlite")
+            .join("firmwaresight-p0.pre-migration-v4-to-v7.sqlite")
             .exists(),
         "the file the payload names is the file that exists"
     );

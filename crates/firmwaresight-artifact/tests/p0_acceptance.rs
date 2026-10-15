@@ -295,16 +295,26 @@ fn without_a_map_the_model_reports_weaker_evidence_not_false_confidence() {
 }
 
 #[test]
-fn a_map_supplies_region_evidence_without_becoming_an_object_attribution_claim() {
+fn a_map_with_object_rows_supplies_region_evidence_and_an_object_attribution() {
     let analysis =
         pipeline::analyze(&AnalysisRequest::new(dual_region_elf()).with_map(dual_region_map()))
             .expect("ELF plus a GNU ld MAP analyzes");
 
     assert_eq!(analysis.capabilities.map, Provision::Provided);
+    // ADR-0033 D6: the MAP's object rows now reach the snapshot, so the capability says so - and the
+    // claim is exactly as wide as the rows it rests on.
     assert_eq!(
         analysis.capabilities.object_attribution,
-        Availability::Unavailable,
-        "no object or module result reaches the snapshot, so a MAP must not be reported as one"
+        Availability::Available,
+        "object rows reach the snapshot, so attribution is available"
+    );
+    assert!(!analysis.snapshot.objects().is_empty());
+    assert!(
+        analysis
+            .snapshot
+            .objects()
+            .iter()
+            .all(|row| row.object == "main.o")
     );
     // The MAP still does the work it genuinely does, and none of it is withdrawn with the claim.
     assert_eq!(analysis.capabilities.sections, Availability::Available);

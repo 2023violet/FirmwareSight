@@ -11,7 +11,7 @@ use firmwaresight_core::domain::identity::Fact;
 use firmwaresight_core::domain::memory::ByteTotal;
 
 /// The schema version this build writes.
-pub const SCHEMA_VERSION: i64 = 6;
+pub const SCHEMA_VERSION: i64 = 7;
 
 const MIGRATION_0001: &str = include_str!("../migrations/0001_initial.sql");
 const MIGRATION_0002: &str = include_str!("../migrations/0002_evidence_keyed_by_build.sql");
@@ -19,6 +19,7 @@ const MIGRATION_0003: &str = include_str!("../migrations/0003_gate_history.sql")
 const MIGRATION_0004: &str = include_str!("../migrations/0004_release_records.sql");
 const MIGRATION_0005: &str = include_str!("../migrations/0005_unknown_reasons.sql");
 const MIGRATION_0006: &str = include_str!("../migrations/0006_release_attachments.sql");
+const MIGRATION_0007: &str = include_str!("../migrations/0007_object_contributions.sql");
 
 /// Applied in version order, each in its own transaction, so a failed upgrade leaves the previous
 /// schema and every row in it exactly as they were.
@@ -29,6 +30,7 @@ const MIGRATIONS: &[(i64, &str, &str)] = &[
     (4, "0004_release_records", MIGRATION_0004),
     (5, "0005_unknown_reasons", MIGRATION_0005),
     (6, "0006_release_attachments", MIGRATION_0006),
+    (7, "0007_object_contributions", MIGRATION_0007),
 ];
 
 /// Everything the P0 round-trip test compares against the in-memory snapshot.
@@ -250,6 +252,7 @@ impl Database {
         write_symbols(&tx, &build_id, snapshot)?;
         write_evidence(&tx, &build_id, snapshot)?;
         write_memory(&tx, &build_id, snapshot)?;
+        write_objects(&tx, &build_id, snapshot)?;
 
         // Last write inside the transaction: nothing can observe COMPLETE with partial content.
         tx.execute(
@@ -399,6 +402,74 @@ fn write_artifacts(
         .map_err(write_err)?;
     }
     Ok(())
+}
+
+/// ADR-0033 D5: the MAP's object rows, in MAP order. Keys are already normalized (no host path).
+fn write_objects(
+    tx: &rusqlite::Transaction<'_>,
+    build_id: &str,
+    snapshot: &BuildSnapshot,
+) -> Result<(), StorageError> {
+    let mut stmt = tx
+        .prepare(
+            "INSERT INTO object_contributions
+                 (build_id, ordinal, object_key, archive, member, input_section, output_section,
+                  address, size, map_line)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)",
+        )
+        .map_err(write_err)?;
+    for (ordinal, row) in snapshot.objects().iter().enumerate() {
+        stmt.execute(params![
+            build_id,
+            ordinal as i64,
+            row.object,
+            row.archive,
+            row.member,
+            row.input_section,
+            row.output_section,
+            row.address as i64,
+            row.size as i64,
+            row.map_line as i64,
+        ])
+        .map_err(write_err)?;
+    }
+    Ok(())
+}
+
+impl Database {
+    /// The object rows stored for a build, in MAP order (ADR-0033). Empty means no attribution was
+    /// recorded: no MAP, a MAP without object rows, or a build stored before migration 0007.
+    pub fn object_contributions(
+        &self,
+        build_id: &str,
+    ) -> Result<Vec<firmwaresight_core::domain::attribution::ObjectContribution>, StorageError>
+    {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT object_key, archive, member, input_section, output_section, address, size, map_line
+                   FROM object_contributions WHERE build_id = ?1 ORDER BY ordinal ASC",
+            )
+            .map_err(crate::query::read_err)?;
+        let rows = stmt
+            .query_map(params![build_id], |row| {
+                Ok(
+                    firmwaresight_core::domain::attribution::ObjectContribution {
+                        object: row.get(0)?,
+                        archive: row.get(1)?,
+                        member: row.get(2)?,
+                        input_section: row.get(3)?,
+                        output_section: row.get(4)?,
+                        address: row.get::<_, i64>(5)? as u64,
+                        size: row.get::<_, i64>(6)? as u64,
+                        map_line: row.get::<_, i64>(7)? as u64,
+                    },
+                )
+            })
+            .map_err(crate::query::read_err)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(crate::query::read_err)
+    }
 }
 
 fn write_sections(
