@@ -26,4 +26,16 @@
    As a table it keeps its intrinsic minimum, and this element owns whatever scroll is left. */
 .viewport {
   overflow-x: auto;
+  /* M1 T5: a long table used to put its horizontal scrollbar a page-length below the rows a reader was
+     looking at, so wide columns read as clipped. Bounding the box to what fits inside the smallest
+     supported window keeps both scrollbars in view, and the header row stays put while rows scroll. */
+  overflow-y: auto;
+  max-block-size: calc(var(--fs-layout-desktop-min-height) - 3 * var(--fs-space-16));
+}
+
+.viewport thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  background: var(--fs-color-bg-canvas);
 }
