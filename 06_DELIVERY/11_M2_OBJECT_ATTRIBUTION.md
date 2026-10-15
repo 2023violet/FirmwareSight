@@ -121,3 +121,17 @@ The review verdict was **FAIL**, with one S1 item. It was reproduced with the CL
 | S3 Attributed bytes above the total make the remainder Unknown with no signal | **Not changed.** Unknown is the honest value. A diagnostic is a follow-up. |
 | S3 Per-object comparability is always `Exact` | **No change, by reasoning.** A row's charge is either a MAP-stated size or Unknown, and Unknown already yields no delta. A partial budget total does not make one row's MAP size a floor. If the Owner reads D8 more strictly, this is one line in `diff.rs` `usage_change`. |
 
+### 8.1 Re-review of aa00d2b
+
+The verdict was **FAIL** again. The three original reproductions, UNC paths and `..` paths passed. The re-review ran `cargo test --workspace` (1229 passed), `vitest` (430 passed) and 13 constructed MAPs through `fwsight analyze --objects`.
+
+| Finding | Disposition |
+|---|---|
+| **S1** The collision fallback kept a full host path when two same-named objects shared no prefix (`C:/Users/alice/.../main.o` and `D:/sdk/obj/main.o`) | **Fixed.** A collision never borrows directories: the first object in MAP order keeps the key and later ones become `key#2`, `key#3`. A final guard reduces any key that still reads as a path (drive, leading `/`, `\`, `..`) to its file name. |
+| S2 Same-named objects differing only above the project (`/home/alice/projA`, `/home/bob/projB`) kept the user directory | **Fixed** by the same rule: `main.o`, `main.o#2`. |
+| S2 An object at a drive root or `/` became an anchor, so other keys kept `Users/alice/...` | **Fixed.** A directory anchors only at depth two or more. |
+| S2 A relative and an out-of-tree object with one name merged silently | **Fixed.** Collisions are checked across all rows; distinct objects are told apart by the text the linker printed. |
+| §8's S2.2 row overstated the earlier fix | Superseded by this table. In-project same-name objects under absolute paths now read `main.o` / `main.o#2` rather than `app/main.o` / `boot/main.o`: readability is traded for a guarantee. Relative-path builds keep their directories. |
+
+Six tests cover these cases (end of `map.rs` `attribution_tests`).
+
