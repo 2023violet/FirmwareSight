@@ -592,8 +592,8 @@ pub(crate) fn save_path(
         .set_title(text.title_or(fallback_title))
         .add_filter(
             text.filter_or(
-                format.label(),
-                format!("FirmwareSight {} export", format.label()),
+                &format.label().to_uppercase(),
+                format!("FirmwareSight {} export", format.label().to_uppercase()),
             ),
             &[format.extension()],
         )
@@ -627,6 +627,9 @@ fn export_now(
 ) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
     let (text, suggested) = session.render_export(diff_id, format, operation_id)?;
     let picked = save_path(app, words, title, format, &suggested);
+    if picked.is_some() && !session.diff_is_current(diff_id, operation_id)? {
+        return Err(crate::compare_export_stale(operation_id));
+    }
     write_export(picked, &text, format, |path| {
         confirm_replacement(app, words, &service::display_name(path))
     })
@@ -771,11 +774,11 @@ pub(crate) async fn export_compare_visual(
         let current_session = Arc::clone(&session);
         let current_diff_id = diff_id.clone();
         let current_operation_id = operation_id.clone();
-        let ensure_current = move || {
-            current_session
-                .with_diff(&current_diff_id, &current_operation_id, |_| ())
-                .map(|_| ())
-                .map_err(|_| crate::export_stale(&current_operation_id))
+        let ensure_current = move || match current_session
+            .diff_is_current(&current_diff_id, &current_operation_id)
+        {
+            Ok(true) => Ok(()),
+            _ => Err(crate::compare_export_stale(&current_operation_id)),
         };
         ensure_current()?;
         write_visual_export(

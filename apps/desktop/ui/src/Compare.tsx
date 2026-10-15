@@ -351,7 +351,15 @@ export function Compare({
         : format === 'html'
           ? await exportCompareHtml(summary.diffId)
           : await exportCompareVisual(summary.diffId, format === 'visual-html' ? 'html' : format);
-      if (request !== exportRequest.current) return;
+      if (request !== exportRequest.current) {
+        // The comparison changed while the Save dialog was open. Rust refuses that export rather than
+        // writing the comparison the reader moved away from (M1, AC24); the screen says so instead of
+        // staying silent. Any other late outcome belongs to the old comparison and is not shown here.
+        if (!outcome.ok && outcome.envelope.code === 'ERR-EXPORT-6002') {
+          setExportNote(t('compare', 'export.staleNote'));
+        }
+        return;
+      }
       setExporting(false);
 
       if (!outcome.ok) {

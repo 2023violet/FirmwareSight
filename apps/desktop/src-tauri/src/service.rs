@@ -256,7 +256,12 @@ pub(crate) fn usage_percent(
         (Some(used), Some(capacity), state) => {
             let denominator = u128::from(capacity);
             let tenths = (u128::from(used) * 1_000 + denominator / 2) / denominator;
-            let formatted = format!("{}.{:01}%", tenths / 10, tenths % 10);
+            // A region in use is never shown as 0.0%: under a tenth of a percent says so.
+            let formatted = if tenths == 0 && used > 0 {
+                "<0.1%".to_owned()
+            } else {
+                format!("{}.{:01}%", tenths / 10, tenths % 10)
+            };
             let status = if state == RegionUsageState::Exact {
                 "available"
             } else {
@@ -377,6 +382,10 @@ mod usage_percent_tests {
     fn exact_usage_rounds_half_up_to_one_decimal_place() {
         assert_eq!(
             render(Some(256), Some(1_048_576), RegionUsageState::Exact),
+            (Some("<0.1%".to_owned()), "available".to_owned())
+        );
+        assert_eq!(
+            render(Some(0), Some(1_048_576), RegionUsageState::Exact),
             (Some("0.0%".to_owned()), "available".to_owned())
         );
         assert_eq!(

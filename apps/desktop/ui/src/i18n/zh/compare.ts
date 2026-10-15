@@ -140,6 +140,7 @@ export const compare: CatalogFor<'compare'> = {
   'filter.apply': '应用筛选',
   'export.region': '导出',
   'export.heading': '导出',
+  'export.staleNote': '保存对话框打开期间对比结果发生了变化，因此没有写入任何文件。请从当前对比重新导出。',
   'export.hint': 'JSON 和 HTML 包含完整差异；PNG、SVG 和可打印 HTML 是可视化概览（在浏览器中打印为 PDF，FirmwareSight 本身不生成 PDF）。导出文件不含文件路径。',
   'export.json': '导出 JSON',
   'export.html': '导出 HTML',

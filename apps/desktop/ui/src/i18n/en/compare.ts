@@ -138,6 +138,7 @@ export const compare = {
   'filter.apply': 'Apply filter',
   'export.region': 'Export',
   'export.heading': 'Export',
+  'export.staleNote': 'The comparison changed while the Save dialog was open, so nothing was written. Export again from this comparison.',
   'export.hint': 'JSON and HTML hold the full diff; PNG, SVG and print-ready HTML are a visual overview (print to PDF from your browser — FirmwareSight writes no PDF). Exports carry no file paths.',
   'export.json': 'Export JSON',
   'export.html': 'Export HTML',

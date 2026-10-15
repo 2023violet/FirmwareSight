@@ -153,6 +153,11 @@ impl DiffStore {
         id
     }
 
+    /// The comparison computed last: the only one the Compare screen can be showing.
+    fn latest(&self) -> Option<&str> {
+        self.order.back().map(String::as_str)
+    }
+
     fn get(&self, id: &str) -> Option<&DiffResult> {
         self.results.get(id)
     }
@@ -770,6 +775,16 @@ impl Session {
     /// # Errors
     ///
     /// `ERR-DIFF-5002` when the id was never issued or has already been dropped.
+    /// Whether `diff_id` is still the comparison on screen. An export that waited on a Save dialog
+    /// while the reader compared again must not write the comparison they moved away from (M1, AC24).
+    pub fn diff_is_current(
+        &self,
+        diff_id: &str,
+        operation_id: &str,
+    ) -> Result<bool, ErrorEnvelopeDto> {
+        Ok(self.lock_diffs(operation_id)?.latest() == Some(diff_id))
+    }
+
     pub(crate) fn with_diff<R>(
         &self,
         diff_id: &str,
@@ -1164,6 +1179,14 @@ pub(crate) fn gate_export_stale(operation_id: &str) -> ErrorEnvelopeDto {
         remediation: Some(
             "Run the Gate again on this build, then export its current result.".to_owned(),
         ),
+        ..export_stale(operation_id)
+    }
+}
+
+/// The Compare surface refuses a comparison the screen has moved past.
+pub(crate) fn compare_export_stale(operation_id: &str) -> ErrorEnvelopeDto {
+    ErrorEnvelopeDto {
+        remediation: Some("Export again from the comparison now on screen.".to_owned()),
         ..export_stale(operation_id)
     }
 }

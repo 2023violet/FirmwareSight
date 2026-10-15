@@ -77,7 +77,8 @@ function UsageRow({ region, unit }: { readonly region: MemoryRegionDto; readonly
   const percent = region.usedPercent.value;
   const known = percent !== null;
   const state: StateName = known ? riskState(region.risk) : 'UNKNOWN';
-  const numeric = known ? Number.parseFloat(percent) : 0;
+  // `<0.1%` is Rust's word for in use but under a tenth of a percent; the bar draws it at that tenth.
+  const numeric = known ? Number.parseFloat(percent.replace('<', '')) : 0;
   const width = Math.min(Math.max(numeric, 0), 100);
   const shown = region.usedPercent.status === 'lower_bound' ? t('common', 'memory.atLeast', { percent: percent ?? '' }) : percent;
 

@@ -1282,6 +1282,25 @@ describe('export', () => {
     expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it('says nothing was written when the comparison changed while the Save dialog was open', async () => {
+    await openCompare();
+    await runCompare();
+    const pending = deferred<ExportOutcomeDto>();
+    exportVisualMock.mockReturnValueOnce(pending.promise);
+    fireEvent.click(screen.getByRole('button', { name: 'Export PNG' }));
+    await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
+    compareMock.mockResolvedValueOnce(ok(comparison({ diffId: 'cmp-moved-on' })));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Compare' })); });
+    await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-moved-on')).toBe(true));
+    await act(async () => {
+      pending.resolve({
+        ok: false,
+        envelope: { code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null },
+      });
+    });
+    expect(screen.getByText(/changed while the Save dialog was open, so nothing was written/)).toBeDefined();
+  });
+
   it('offers visual formats beside the existing portable JSON and detailed HTML exports', async () => {
     await openCompare();
     await runCompare();

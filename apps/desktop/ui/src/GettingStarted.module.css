@@ -105,12 +105,15 @@
   gap: var(--fs-space-2);
   margin: 0;
   padding-inline-start: var(--fs-space-6);
+  list-style: decimal;
 }
 
 .steps li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--fs-space-1) var(--fs-space-2);
+  display: list-item;
+}
+
+.steps li > span {
+  margin-inline-start: var(--fs-space-2);
 }
 
 .steps strong {

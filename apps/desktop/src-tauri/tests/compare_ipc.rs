@@ -876,3 +876,33 @@ fn no_compare_command_accepts_a_path_a_table_name_or_a_statement() {
     keys.sort_unstable();
     assert_eq!(keys, vec!["baseSnapshotId", "targetSnapshotId"]);
 }
+
+#[test]
+fn only_the_comparison_computed_last_is_current_for_export() {
+    // M1 / AC24: an export that waited on a Save dialog while the reader compared again must not
+    // write the comparison they moved away from.
+    let (session, _db, base, target) = session_with_pair("current");
+    let first = compare(&session, &base, &target);
+    assert!(
+        session
+            .diff_is_current(&first.diff_id, "op-1")
+            .expect("reads")
+    );
+
+    let second = compare(&session, &target, &base);
+    assert!(
+        !session
+            .diff_is_current(&first.diff_id, "op-2")
+            .expect("reads")
+    );
+    assert!(
+        session
+            .diff_is_current(&second.diff_id, "op-3")
+            .expect("reads")
+    );
+    assert!(
+        !session
+            .diff_is_current("cmp-never-issued", "op-4")
+            .expect("reads")
+    );
+}

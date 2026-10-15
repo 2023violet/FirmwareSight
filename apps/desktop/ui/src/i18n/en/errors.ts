@@ -25,6 +25,7 @@ export const errors = {
   'ERR-DIFF-5001': 'Both sides of the comparison name the same build, so there is nothing to compare.',
   'ERR-DIFF-5002': 'That comparison is no longer held by this session.',
   'ERR-EXPORT-6001': 'The analysis is sound, but the file you asked to write could not be written.',
+  'ERR-EXPORT-6002': 'The result on screen changed before the file was written, so nothing was exported.',
   'ERR-STORAGE-4001': "FirmwareSight's own data store could not be opened.",
   'ERR-STORAGE-4002': 'The data store opened, but could not be prepared for use.',
   'ERR-STORAGE-4003': 'A migration of the data store failed, so nothing was read or written.',

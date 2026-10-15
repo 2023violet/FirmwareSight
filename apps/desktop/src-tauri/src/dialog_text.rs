@@ -78,14 +78,23 @@ impl DialogTextDto {
         let message = clean(self.replace_message.as_ref(), MAX_MESSAGE_CHARS)
             .filter(|message| message.matches(FILE_TOKEN).count() == 1)
             .unwrap_or_else(|| fallback_message.to_owned());
+        let confirm = clean(self.replace_confirm.as_ref(), MAX_LINE_CHARS);
+        let keep = clean(self.replace_keep.as_ref(), MAX_LINE_CHARS);
+        // `tauri-plugin-dialog` decides "confirmed" by comparing the pressed button's label with the
+        // confirm label (`show`, lib.rs:350). Two equal labels would turn Keep into Replace, so a pair
+        // that is not clearly two different buttons falls back to the English pair as a whole.
+        let (confirm, keep) = match (confirm, keep) {
+            (Some(confirm), Some(keep)) if confirm.to_lowercase() != keep.to_lowercase() => {
+                (confirm, keep)
+            }
+            _ => ("Replace it".to_owned(), "Keep mine".to_owned()),
+        };
         ReplaceText {
             title: clean(self.replace_title.as_ref(), MAX_LINE_CHARS)
                 .unwrap_or_else(|| "Replace existing file?".to_owned()),
             message: message.replace(FILE_TOKEN, file_name),
-            confirm: clean(self.replace_confirm.as_ref(), MAX_LINE_CHARS)
-                .unwrap_or_else(|| "Replace it".to_owned()),
-            keep: clean(self.replace_keep.as_ref(), MAX_LINE_CHARS)
-                .unwrap_or_else(|| "Keep mine".to_owned()),
+            confirm,
+            keep,
         }
     }
 }
@@ -187,6 +196,31 @@ mod tests {
             ..DialogTextDto::default()
         };
         assert_eq!(text.title_or("fallback"), exact);
+    }
+
+    #[test]
+    fn equal_button_labels_can_never_turn_keep_into_replace() {
+        for (confirm, keep) in [("替换", "替换"), ("Replace", "replace"), ("OK", "")] {
+            let text = DialogTextDto {
+                replace_confirm: Some(confirm.to_owned()),
+                replace_keep: Some(keep.to_owned()),
+                ..DialogTextDto::default()
+            };
+            let words = text.replace_for("a.png", REPLACE_MESSAGE_EN);
+            assert_eq!(
+                (words.confirm.as_str(), words.keep.as_str()),
+                ("Replace it", "Keep mine")
+            );
+        }
+        let half = DialogTextDto {
+            replace_confirm: Some("替换".to_owned()),
+            ..DialogTextDto::default()
+        };
+        let words = half.replace_for("a.png", REPLACE_MESSAGE_EN);
+        assert_eq!(
+            (words.confirm.as_str(), words.keep.as_str()),
+            ("Replace it", "Keep mine")
+        );
     }
 
     #[test]
