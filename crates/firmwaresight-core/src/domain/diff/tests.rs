@@ -1010,6 +1010,12 @@ fn a_repeated_object_name_is_left_unpaired_rather_than_matched_by_link_order() {
             .all(|row| !row.key.starts_with("main.o")),
         "no unpaired row is called growth"
     );
+    assert!(
+        diff.largest_added_objects(false, 5)
+            .iter()
+            .all(|row| !row.key.starts_with("main.o")),
+        "no unpaired row is called an addition either"
+    );
 }
 
 #[test]

@@ -146,3 +146,13 @@ The verdict was **PASS_WITH_FINDINGS**, with no S1. All 19 constructed MAPs were
 | S3 A generated suffix could take a real file's name (`main.o#2`) | **Fixed.** Generated suffixes skip every key another row already has. Covered by a test. |
 | S3 §8.1 did not state the Compare effect | Stated above. |
 
+### 8.3 Final check of 18a0f63
+
+The verdict was **PASS_WITH_FINDINGS**, with no S1 or S2. The ambiguity rule matches D8, checked end to end by `fwsight diff` with swapped `main.o` / `main.o#2`, which gave 0 changed, 2 added, 2 removed and "4 row(s) left unpaired". `cargo test --workspace` passed 1237 tests. `vitest` passed 430 in three of four runs; the first run had one unidentified failure while `cargo test` loaded the CPU, which is the known UI race class (`L23`) and not attributed to this commit.
+
+| Finding | Disposition |
+|---|---|
+| S3-1 Ambiguous rows appeared in "largest added objects" | **Fixed.** `largest_added_objects` skips `ambiguous` rows. Tested. |
+| S3-2 Two same-named archives in different directories merge in the Libraries view (members stay distinct via `#N`) | **Not changed; rare.** Recorded for the Owner. |
+| S3-3 The desktop added/removed counts include ambiguous rows without saying so (the CLI says so) | **Not changed; small.** Each such row carries its note in the table. |
+

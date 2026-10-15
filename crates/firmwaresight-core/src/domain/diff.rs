@@ -1423,12 +1423,14 @@ impl DiffResult {
         )
     }
 
-    /// Objects or libraries present only in the target build, by their Flash charge.
+    /// Objects or libraries present only in the target build, by their Flash charge. A row left
+    /// unpaired because its name repeats is not an addition the evidence supports, so it is not listed
+    /// (final review S3-1); it stays in the full table with its note.
     #[must_use]
     pub fn largest_added_objects(&self, libraries: bool, limit: usize) -> Vec<Contributor> {
         additions(
             self.object_rows(libraries)
-                .filter(|row| row.change == ChangeKind::Added)
+                .filter(|row| row.change == ChangeKind::Added && !row.ambiguous)
                 .map(|row| Contributor {
                     key: row.key.clone(),
                     change: ChangeKind::Added,
