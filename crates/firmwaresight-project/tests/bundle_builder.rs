@@ -258,6 +258,10 @@ impl World {
             attribution: ObjectAttribution {
                 available: false,
                 reason: "the persisted rows carry no object-file attribution".to_owned(),
+                objects: Vec::new(),
+                libraries: Vec::new(),
+                unchanged_objects: 0,
+                unchanged_libraries: 0,
             },
             warnings: Vec::new(),
         });

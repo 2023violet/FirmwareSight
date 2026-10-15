@@ -127,6 +127,7 @@ fn diff_input(id: &str, marker: char, bytes: Option<u64>, state: BudgetState) ->
         }),
         sections: Vec::new(),
         symbols: Vec::new(),
+        attribution: None,
     }
 }
 

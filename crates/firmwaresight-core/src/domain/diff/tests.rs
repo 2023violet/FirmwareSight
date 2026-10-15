@@ -1,6 +1,7 @@
 //! Diff semantics, each test named for the claim it protects.
 
 use super::*;
+use crate::domain::attribution::{AttributionSummary, ObjectUsage};
 use crate::domain::identity::Fact;
 
 fn known(name: &str) -> Fact<String> {
@@ -119,6 +120,7 @@ fn snapshot(
         }),
         sections,
         symbols,
+        attribution: None,
     }
 }
 
@@ -836,10 +838,126 @@ fn object_attribution_is_reported_unavailable_with_the_reason_that_is_true() {
     assert!(
         diff.attribution
             .reason
-            .contains("no object-file or module attribution"),
+            .starts_with("neither build stored object rows"),
         "the reason names what is missing rather than hedging: {}",
         diff.attribution.reason
     );
+    assert!(diff.attribution.objects.is_empty());
+}
+
+fn usage(key: &str, archive: Option<&str>, flash: Option<u64>, ram: Option<u64>) -> ObjectUsage {
+    ObjectUsage {
+        key: key.to_owned(),
+        archive: archive.map(str::to_owned),
+        nonvolatile: flash,
+        runtime_ram: ram,
+        rows: 1,
+    }
+}
+
+fn attributed(objects: Vec<ObjectUsage>, libraries: Vec<ObjectUsage>) -> AttributionSummary {
+    AttributionSummary {
+        objects,
+        libraries,
+        unattributed_nonvolatile: None,
+        unattributed_runtime_ram: None,
+    }
+}
+
+#[test]
+fn one_side_without_object_rows_makes_the_delta_unavailable_not_zero() {
+    let base = simple_side("snap-a");
+    let mut target = simple_side("snap-b");
+    target.attribution = Some(attributed(
+        vec![usage("main.o", None, Some(64), Some(0))],
+        vec![],
+    ));
+
+    let diff = compare(&base, &target).expect("comparable");
+    assert!(!diff.attribution.available);
+    assert!(
+        diff.attribution.reason.starts_with("the base build"),
+        "{}",
+        diff.attribution.reason
+    );
+    assert!(diff.attribution.objects.is_empty(), "no row is invented");
+}
+
+#[test]
+fn objects_match_by_key_with_the_same_added_removed_changed_rules_as_sections() {
+    let mut base = simple_side("snap-a");
+    base.attribution = Some(attributed(
+        vec![
+            usage("main.o", None, Some(100), Some(8)),
+            usage("libdrv.a(uart.o)", Some("libdrv.a"), Some(40), Some(0)),
+            usage("old.o", None, Some(12), Some(4)),
+            usage("odd.o", None, Some(4), Some(0)),
+        ],
+        vec![usage("libdrv.a", None, Some(40), Some(0))],
+    ));
+    let mut target = simple_side("snap-b");
+    target.attribution = Some(attributed(
+        vec![
+            usage("main.o", None, Some(164), Some(8)),
+            usage("libdrv.a(uart.o)", Some("libdrv.a"), Some(40), Some(0)),
+            usage("libdrv.a(spi.o)", Some("libdrv.a"), Some(56), Some(32)),
+            usage("odd.o", None, None, Some(0)),
+        ],
+        vec![usage("libdrv.a", None, Some(96), Some(32))],
+    ));
+
+    let diff = compare(&base, &target).expect("comparable");
+    let objects = &diff.attribution;
+    assert!(objects.available);
+    assert_eq!(objects.unchanged_objects, 1, "uart.o did not move");
+
+    let row = |key: &str| {
+        objects
+            .objects
+            .iter()
+            .find(|row| row.key == key)
+            .unwrap_or_else(|| panic!("{key} is listed"))
+    };
+    assert_eq!(row("main.o").change, ChangeKind::Changed);
+    assert_eq!(row("main.o").nonvolatile.delta, Some(64));
+    assert_eq!(row("main.o").runtime_ram.delta, Some(0));
+
+    let added = row("libdrv.a(spi.o)");
+    assert_eq!(added.change, ChangeKind::Added);
+    assert_eq!(
+        added.nonvolatile.base, None,
+        "an addition is not growth from zero"
+    );
+    assert_eq!(added.nonvolatile.delta, None);
+    assert_eq!(added.archive.as_deref(), Some("libdrv.a"));
+
+    let removed = row("old.o");
+    assert_eq!(removed.change, ChangeKind::Removed);
+    assert_eq!(removed.nonvolatile.target, None);
+
+    let unknown = row("odd.o");
+    assert_eq!(
+        unknown.change,
+        ChangeKind::Changed,
+        "an unknown side is shown, not hidden"
+    );
+    assert_eq!(unknown.nonvolatile.delta, None);
+    assert_eq!(unknown.nonvolatile.comparability, Comparability::Unknown);
+
+    assert_eq!(objects.libraries.len(), 1);
+    assert_eq!(objects.libraries[0].nonvolatile.delta, Some(56));
+
+    let growth = diff.top_object_growth(false, 5);
+    assert_eq!(
+        growth.len(),
+        1,
+        "only Changed rows with a positive delta are growth"
+    );
+    assert_eq!(growth[0].key, "main.o");
+    let additions = diff.largest_added_objects(false, 5);
+    assert_eq!(additions[0].key, "libdrv.a(spi.o)");
+    assert_eq!(additions[0].bytes, Some(56));
+    assert_eq!(diff.top_object_growth(true, 5)[0].delta, Some(56));
 }
 
 #[test]

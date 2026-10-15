@@ -69,7 +69,11 @@ fn diff_of_two_builds_exits_zero_and_shows_old_new_and_delta() {
         stdout.contains("8 bytes → 76 bytes   delta +68"),
         "{stdout}"
     );
-    assert!(stdout.contains("Object / module attribution"), "{stdout}");
+    assert!(
+        stdout.contains("Object / library attribution (GNU ld MAP rows)"),
+        "{stdout}"
+    );
+    assert!(stdout.contains("Top object growth, Flash"), "{stdout}");
 }
 
 #[test]

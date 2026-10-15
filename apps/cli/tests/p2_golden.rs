@@ -168,15 +168,17 @@ fn absence_is_never_recorded_as_zero_in_the_golden() {
 }
 
 #[test]
-fn object_attribution_is_unavailable_and_says_why() {
+fn object_attribution_is_available_and_says_where_the_rows_are() {
+    // ADR-0033: both P2 builds carry a GNU ld MAP with object rows, so the delta exists. D7 keeps
+    // the rows out of `diff:1`; the reason says so instead of leaving a reader to look for them.
     let document: serde_json::Value =
         serde_json::from_str(&read("golden/core/p2-diff.json")).expect("the golden is JSON");
-    assert_eq!(document["objectChanges"]["available"], false);
+    assert_eq!(document["objectChanges"]["available"], true);
     assert!(
         document["objectChanges"]["reason"]
             .as_str()
             .expect("reason")
-            .contains("object-file")
+            .contains("not by this portable document (ADR-0033 D7)")
     );
 }
 

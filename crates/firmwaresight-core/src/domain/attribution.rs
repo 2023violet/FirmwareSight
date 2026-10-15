@@ -108,9 +108,72 @@ fn rank(usages: &mut [ObjectUsage]) {
     });
 }
 
+/// Each row with what it costs, in MAP order. Without a footprint every charge is Unknown: the rows
+/// are still evidence of where bytes came from, but not of what they cost.
+#[must_use]
+pub fn charged(
+    rows: &[ObjectContribution],
+    footprint: Option<&MemoryFootprint>,
+) -> Vec<(ObjectContribution, Charge)> {
+    rows.iter()
+        .map(|row| {
+            let cost = footprint.map_or(
+                Charge {
+                    nonvolatile: None,
+                    runtime_ram: None,
+                },
+                |footprint| charge(row, footprint),
+            );
+            (row.clone(), cost)
+        })
+        .collect()
+}
+
+fn exact_total(total: &super::memory::ByteTotal) -> Option<u64> {
+    if total.is_exact() {
+        total.bytes()
+    } else {
+        None
+    }
+}
+
 /// Aggregate rows per object and per library, and state the remainder the rows leave uncovered.
 #[must_use]
 pub fn summarize(rows: &[ObjectContribution], footprint: &MemoryFootprint) -> AttributionSummary {
+    aggregate(
+        &charged(rows, Some(footprint)),
+        exact_total(&footprint.nonvolatile),
+        exact_total(&footprint.runtime_ram),
+    )
+}
+
+fn accumulate(usages: &mut Vec<ObjectUsage>, key: &str, archive: Option<&String>, cost: Charge) {
+    let entry = match usages.iter().position(|u| u.key == key) {
+        Some(index) => &mut usages[index],
+        None => {
+            usages.push(ObjectUsage {
+                key: key.to_owned(),
+                archive: archive.cloned(),
+                nonvolatile: Some(0),
+                runtime_ram: Some(0),
+                rows: 0,
+            });
+            usages.last_mut().expect("just pushed")
+        }
+    };
+    entry.nonvolatile = add(entry.nonvolatile, cost.nonvolatile);
+    entry.runtime_ram = add(entry.runtime_ram, cost.runtime_ram);
+    entry.rows += 1;
+}
+
+/// [`summarize`] for rows whose charges were already decided, as storage keeps them. The totals are
+/// the footprint budgets, passed only when they are exact; otherwise no remainder is claimed.
+#[must_use]
+pub fn aggregate(
+    rows: &[(ObjectContribution, Charge)],
+    exact_nonvolatile: Option<u64>,
+    exact_runtime_ram: Option<u64>,
+) -> AttributionSummary {
     let mut objects: Vec<ObjectUsage> = Vec::new();
     let mut libraries: Vec<ObjectUsage> = Vec::new();
     let mut attributed = Charge {
@@ -118,67 +181,26 @@ pub fn summarize(rows: &[ObjectContribution], footprint: &MemoryFootprint) -> At
         runtime_ram: Some(0),
     };
 
-    for row in rows {
-        let cost = charge(row, footprint);
+    for (row, cost) in rows {
         attributed.nonvolatile = add(attributed.nonvolatile, cost.nonvolatile);
         attributed.runtime_ram = add(attributed.runtime_ram, cost.runtime_ram);
-
-        let entry = match objects.iter_mut().find(|u| u.key == row.object) {
-            Some(entry) => entry,
-            None => {
-                objects.push(ObjectUsage {
-                    key: row.object.clone(),
-                    archive: row.archive.clone(),
-                    nonvolatile: Some(0),
-                    runtime_ram: Some(0),
-                    rows: 0,
-                });
-                objects.last_mut().expect("just pushed")
-            }
-        };
-        entry.nonvolatile = add(entry.nonvolatile, cost.nonvolatile);
-        entry.runtime_ram = add(entry.runtime_ram, cost.runtime_ram);
-        entry.rows += 1;
-
+        accumulate(&mut objects, &row.object, row.archive.as_ref(), *cost);
         if let Some(archive) = &row.archive {
-            let library = match libraries.iter_mut().find(|u| &u.key == archive) {
-                Some(library) => library,
-                None => {
-                    libraries.push(ObjectUsage {
-                        key: archive.clone(),
-                        archive: None,
-                        nonvolatile: Some(0),
-                        runtime_ram: Some(0),
-                        rows: 0,
-                    });
-                    libraries.last_mut().expect("just pushed")
-                }
-            };
-            library.nonvolatile = add(library.nonvolatile, cost.nonvolatile);
-            library.runtime_ram = add(library.runtime_ram, cost.runtime_ram);
-            library.rows += 1;
+            accumulate(&mut libraries, archive, None, *cost);
         }
     }
     rank(&mut objects);
     rank(&mut libraries);
 
-    let remainder = |total: Option<u64>, exact: bool, covered: Option<u64>| match (total, covered) {
-        (Some(total), Some(covered)) if exact && covered <= total => Some(total - covered),
+    let remainder = |total: Option<u64>, covered: Option<u64>| match (total, covered) {
+        (Some(total), Some(covered)) if covered <= total => Some(total - covered),
         _ => None,
     };
     AttributionSummary {
         objects,
         libraries,
-        unattributed_nonvolatile: remainder(
-            footprint.nonvolatile.bytes(),
-            footprint.nonvolatile.is_exact(),
-            attributed.nonvolatile,
-        ),
-        unattributed_runtime_ram: remainder(
-            footprint.runtime_ram.bytes(),
-            footprint.runtime_ram.is_exact(),
-            attributed.runtime_ram,
-        ),
+        unattributed_nonvolatile: remainder(exact_nonvolatile, attributed.nonvolatile),
+        unattributed_runtime_ram: remainder(exact_runtime_ram, attributed.runtime_ram),
     }
 }
 

@@ -9,7 +9,9 @@
 //! fetch, no telemetry, and no generated timestamp. It is therefore byte-stable, which makes the
 //! golden in `golden/reports/` a real check instead of a fuzzy one.
 
-use firmwaresight_core::domain::diff::{ByteChange, Contributor, DiffResult};
+use firmwaresight_core::domain::diff::{
+    ByteChange, ChangeKind, Contributor, DiffResult, ObjectChange,
+};
 
 use crate::diff::{ByteChangeDto, DiffResultDto, ObjectChangesDto};
 
@@ -563,7 +565,10 @@ fn locator_text(base_index: Option<i64>, target_index: Option<i64>) -> String {
 fn render_objects(attribution: &ObjectChangesDto, out: &mut String) {
     out.push_str("<h2>Object and module changes</h2>\n");
     if attribution.available {
-        out.push_str("<p class=\"meta\">Attribution is available for these builds.</p>\n");
+        out.push_str(&format!(
+            "<p class=\"meta\">{}</p>\n",
+            escape_html(&attribution.reason)
+        ));
         return;
     }
     out.push_str(&format!(
@@ -653,9 +658,7 @@ pub fn render_human(result: &DiffResult) -> String {
         &result.largest_added_symbols(5),
     );
 
-    if !result.attribution.available {
-        out.push_str("\nObject / module attribution\n  unavailable\n");
-    }
+    push_objects(&mut out, result);
 
     if !result.warnings.is_empty() {
         out.push_str("\nWarnings\n");
@@ -665,6 +668,48 @@ pub fn render_human(result: &DiffResult) -> String {
     }
 
     out
+}
+
+/// ADR-0033 D8: the per-object and per-library delta, or the one line that says why there is none.
+fn push_objects(out: &mut String, result: &DiffResult) {
+    let attribution = &result.attribution;
+    if !attribution.available {
+        out.push_str(&format!(
+            "\nObject / library attribution\n  unavailable: {}\n",
+            attribution.reason
+        ));
+        return;
+    }
+    let tally = |rows: &[ObjectChange], unchanged: usize| {
+        let count = |kind: ChangeKind| rows.iter().filter(|row| row.change == kind).count();
+        format!(
+            "{} changed, {} added, {} removed, {unchanged} unchanged",
+            count(ChangeKind::Changed),
+            count(ChangeKind::Added),
+            count(ChangeKind::Removed)
+        )
+    };
+    out.push_str("\nObject / library attribution (GNU ld MAP rows)\n");
+    out.push_str(&format!(
+        "  Objects    {}\n  Libraries  {}\n",
+        tally(&attribution.objects, attribution.unchanged_objects),
+        tally(&attribution.libraries, attribution.unchanged_libraries)
+    ));
+    push_contributors(
+        out,
+        "Top object growth, Flash (Changed rows)",
+        &result.top_object_growth(false, 5),
+    );
+    push_contributors(
+        out,
+        "Largest added objects, Flash (absence, never 0)",
+        &result.largest_added_objects(false, 5),
+    );
+    push_contributors(
+        out,
+        "Top library growth, Flash (Changed rows)",
+        &result.top_object_growth(true, 5),
+    );
 }
 
 fn push_contributors(out: &mut String, title: &str, rows: &[Contributor]) {

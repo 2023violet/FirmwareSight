@@ -250,7 +250,10 @@ fn a_summary_is_bounded_and_carries_no_change_table() {
         summary.memory.evidence_warning, None,
         "both sides have a MAP"
     );
-    assert!(!summary.object_changes.available);
+    assert!(
+        summary.object_changes.available,
+        "both stored builds carry MAP object rows (ADR-0033)"
+    );
     assert_eq!(summary.counts.sections.added, 1);
     assert_eq!(summary.counts.sections.removed, 1);
     assert_eq!(summary.counts.sections.ambiguous, 0);

@@ -139,6 +139,7 @@ fn input(
         }),
         sections,
         symbols,
+        attribution: None,
     }
 }
 
@@ -455,7 +456,7 @@ fn object_attribution_is_reported_as_unavailable_with_its_reason() {
         doc["objectChanges"]["reason"]
             .as_str()
             .expect("reason")
-            .contains("object-file"),
+            .contains("stored object rows"),
         "the reason must name the missing evidence"
     );
 }
@@ -596,7 +597,7 @@ fn the_human_default_names_old_new_and_delta_and_carries_the_warnings() {
     assert!(text.contains("Target  snap-target.elf"));
     assert!(text.contains("delta +100"));
     assert!(text.contains("[partial]"));
-    assert!(text.contains("Object / module attribution"));
+    assert!(text.contains("Object / library attribution\n  unavailable: neither build"));
     assert!(text.contains("MAP-EVIDENCE"));
     assert!(text.contains("SECTION-AMBIGUOUS"));
     assert!(

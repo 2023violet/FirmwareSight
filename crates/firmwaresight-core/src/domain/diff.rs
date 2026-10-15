@@ -365,6 +365,9 @@ pub struct DiffSnapshotInput {
     pub memory: Option<DiffMemory>,
     pub sections: Vec<DiffSection>,
     pub symbols: Vec<DiffSymbol>,
+    /// Per-object and per-library usage (ADR-0033). `None` when the build stored no object rows:
+    /// no MAP, a MAP without rows, or a build stored before the rows were kept.
+    pub attribution: Option<crate::domain::attribution::AttributionSummary>,
 }
 
 impl DiffSnapshotInput {
@@ -416,8 +419,22 @@ impl DiffSnapshotInput {
                 .enumerate()
                 .map(|(ordinal, symbol)| diff_symbol(symbol, ordinal as i64))
                 .collect(),
+            attribution: attribution_of(snapshot),
         }
     }
+}
+
+fn attribution_of(
+    snapshot: &crate::domain::build_snapshot::BuildSnapshot,
+) -> Option<crate::domain::attribution::AttributionSummary> {
+    use crate::domain::attribution::{aggregate, charged, summarize};
+    if snapshot.objects().is_empty() {
+        return None;
+    }
+    Some(match snapshot.memory() {
+        Some(footprint) => summarize(snapshot.objects(), footprint),
+        None => aggregate(&charged(snapshot.objects(), None), None, None),
+    })
 }
 
 /// The last component of a stored or supplied path, on either separator.
@@ -482,27 +499,125 @@ fn diff_symbol(symbol: &crate::domain::symbol::Symbol, ordinal: i64) -> DiffSymb
     }
 }
 
-/// Whether object or module attribution can be compared.
+/// Whether object or library attribution can be compared, and the delta when it can (ADR-0033 D8).
 ///
-/// `symbols` persists name, address, size, kind, binding and section reference, and `sections`
-/// persists name, role, flags, addresses, sizes and region. Neither carries an object-file or
-/// module field, so there is nothing on either side to attribute a change to and the honest answer
-/// is that attribution is unavailable. `01_PRODUCT/01_PRD_MVP.md` P0-3 asks for this delta only
-/// "when evidence is sufficient".
+/// Attribution comes from the GNU ld MAP's input-section rows, stored with each build. It is
+/// offered only when both builds carry those rows; a build without them is never treated as
+/// owning zero bytes per object. Rows are matched by key, and a row present on one side only is
+/// Added or Removed, never a change from or to zero, exactly as for sections.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ObjectAttribution {
     pub available: bool,
     pub reason: String,
+    /// Objects whose figures differ or cannot be compared, by key. Unchanged objects are counted.
+    pub objects: Vec<ObjectChange>,
+    /// The same for libraries (archives).
+    pub libraries: Vec<ObjectChange>,
+    pub unchanged_objects: usize,
+    pub unchanged_libraries: usize,
+}
+
+/// One object's or library's change between the two builds.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ObjectChange {
+    pub change: ChangeKind,
+    pub key: String,
+    /// The library an object came from; `None` for an application object and for a library row.
+    pub archive: Option<String>,
+    pub nonvolatile: ByteChange,
+    pub runtime_ram: ByteChange,
 }
 
 impl ObjectAttribution {
     #[must_use]
-    pub fn from_inputs(_base: &DiffSnapshotInput, _target: &DiffSnapshotInput) -> Self {
+    pub fn from_inputs(base: &DiffSnapshotInput, target: &DiffSnapshotInput) -> Self {
+        let (Some(from), Some(to)) = (&base.attribution, &target.attribution) else {
+            let missing = match (&base.attribution, &target.attribution) {
+                (None, None) => "neither build",
+                (None, Some(_)) => "the base build",
+                _ => "the target build",
+            };
+            return Self {
+                available: false,
+                reason: format!(
+                    "{missing} stored object rows from a GNU ld MAP, so no object or library delta is claimable; a build without rows is not a build with zero bytes per object"
+                ),
+                objects: Vec::new(),
+                libraries: Vec::new(),
+                unchanged_objects: 0,
+                unchanged_libraries: 0,
+            };
+        };
+        let (objects, unchanged_objects) = diff_usages(&from.objects, &to.objects);
+        let (libraries, unchanged_libraries) = diff_usages(&from.libraries, &to.libraries);
         Self {
-            available: false,
-            reason: "the persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build".to_owned(),
+            available: true,
+            reason: "both builds stored object rows from a GNU ld MAP, each charged like its output section; the per-object and per-library rows are listed by the desktop Compare view and the CLI text report, not by this portable document (ADR-0033 D7)".to_owned(),
+            objects,
+            libraries,
+            unchanged_objects,
+            unchanged_libraries,
         }
     }
+}
+
+fn usage_change(base: Option<u64>, target: Option<u64>, budget: &str) -> ByteChange {
+    match (base, target) {
+        (Some(_), Some(_)) => ByteChange::between(base, target, Comparability::Exact),
+        _ => ByteChange::unknown(
+            base,
+            target,
+            format!("at least one side charges this object's {budget} as unknown"),
+        ),
+    }
+}
+
+fn diff_usages(
+    base: &[crate::domain::attribution::ObjectUsage],
+    target: &[crate::domain::attribution::ObjectUsage],
+) -> (Vec<ObjectChange>, usize) {
+    let mut rows = Vec::new();
+    let mut unchanged = 0_usize;
+    for from in base {
+        match target.iter().find(|to| to.key == from.key) {
+            Some(to) => {
+                let nonvolatile = usage_change(from.nonvolatile, to.nonvolatile, "Flash");
+                let runtime_ram = usage_change(from.runtime_ram, to.runtime_ram, "RAM");
+                if nonvolatile.delta == Some(0) && runtime_ram.delta == Some(0) {
+                    unchanged += 1;
+                } else {
+                    rows.push(ObjectChange {
+                        change: ChangeKind::Changed,
+                        key: from.key.clone(),
+                        archive: to.archive.clone(),
+                        nonvolatile,
+                        runtime_ram,
+                    });
+                }
+            }
+            None => rows.push(ObjectChange {
+                change: ChangeKind::Removed,
+                key: from.key.clone(),
+                archive: from.archive.clone(),
+                nonvolatile: ByteChange::removed(from.nonvolatile),
+                runtime_ram: ByteChange::removed(from.runtime_ram),
+            }),
+        }
+    }
+    for to in target
+        .iter()
+        .filter(|to| !base.iter().any(|from| from.key == to.key))
+    {
+        rows.push(ObjectChange {
+            change: ChangeKind::Added,
+            key: to.key.clone(),
+            archive: to.archive.clone(),
+            nonvolatile: ByteChange::added(to.nonvolatile),
+            runtime_ram: ByteChange::added(to.runtime_ram),
+        });
+    }
+    rows.sort_by(|a, b| a.key.cmp(&b.key).then_with(|| a.change.cmp(&b.change)));
+    (rows, unchanged)
 }
 
 /// A section row in the diff, with both sides visible wherever both exist.
@@ -1241,6 +1356,47 @@ impl DiffResult {
             }),
             limit,
         )
+    }
+
+    /// Objects (`libraries == false`) or libraries whose Flash grew most, among those present on
+    /// both sides. Empty when attribution is unavailable.
+    #[must_use]
+    pub fn top_object_growth(&self, libraries: bool, limit: usize) -> Vec<Contributor> {
+        growth(
+            self.object_rows(libraries).filter_map(|row| {
+                growth_entry(
+                    &row.key,
+                    row.change,
+                    row.nonvolatile.delta,
+                    row.nonvolatile.target,
+                )
+            }),
+            limit,
+        )
+    }
+
+    /// Objects or libraries present only in the target build, by their Flash charge.
+    #[must_use]
+    pub fn largest_added_objects(&self, libraries: bool, limit: usize) -> Vec<Contributor> {
+        additions(
+            self.object_rows(libraries)
+                .filter(|row| row.change == ChangeKind::Added)
+                .map(|row| Contributor {
+                    key: row.key.clone(),
+                    change: ChangeKind::Added,
+                    delta: None,
+                    bytes: row.nonvolatile.target,
+                }),
+            limit,
+        )
+    }
+
+    fn object_rows(&self, libraries: bool) -> std::slice::Iter<'_, ObjectChange> {
+        if libraries {
+            self.attribution.libraries.iter()
+        } else {
+            self.attribution.objects.iter()
+        }
     }
 
     #[must_use]

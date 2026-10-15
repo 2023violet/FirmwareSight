@@ -54,8 +54,8 @@
     }
   },
   "objectChanges": {
-    "available": false,
-    "reason": "the persisted symbol and section records carry no object-file or module attribution, so no object or module delta is claimable for either build"
+    "available": true,
+    "reason": "both builds stored object rows from a GNU ld MAP, each charged like its output section; the per-object and per-library rows are listed by the desktop Compare view and the CLI text report, not by this portable document (ADR-0033 D7)"
   },
   "schema": "urn:firmwaresight:schema:diff:1",
   "schemaVersion": 1,

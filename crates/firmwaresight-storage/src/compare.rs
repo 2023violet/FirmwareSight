@@ -299,6 +299,7 @@ impl Database {
                 detail: format!("build {build_id} has no stored footprint row"),
             })?;
 
+        let attribution = self.read_attribution(&build_id, &footprint)?;
         Ok(DiffSnapshotInput {
             snapshot_id: snapshot_id.to_owned(),
             artifact: DiffArtifact {
@@ -318,7 +319,31 @@ impl Database {
             }),
             sections: self.read_diff_sections(&build_id)?,
             symbols: self.read_diff_symbols(&build_id)?,
+            attribution,
         })
+    }
+
+    /// The stored object rows as a summary, or `None` when the build kept none (ADR-0033 D8).
+    fn read_attribution(
+        &self,
+        build_id: &str,
+        footprint: &FootprintRow,
+    ) -> Result<Option<firmwaresight_core::domain::attribution::AttributionSummary>, StorageError>
+    {
+        let rows = self.object_contributions(build_id)?;
+        if rows.is_empty() {
+            return Ok(None);
+        }
+        let exact = |stored: &StoredBudget| {
+            (BudgetState::parse(&stored.state) == BudgetState::Exact)
+                .then_some(stored.bytes)
+                .flatten()
+        };
+        Ok(Some(firmwaresight_core::domain::attribution::aggregate(
+            &rows,
+            exact(&footprint.nonvolatile),
+            exact(&footprint.runtime_ram),
+        )))
     }
 
     fn read_diff_sections(&self, build_id: &str) -> Result<Vec<DiffSection>, StorageError> {

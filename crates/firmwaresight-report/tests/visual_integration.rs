@@ -203,6 +203,7 @@ fn diff_input(
                 }]
             })
             .unwrap_or_default(),
+        attribution: None,
     }
 }
 

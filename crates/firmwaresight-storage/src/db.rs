@@ -414,11 +414,13 @@ fn write_objects(
         .prepare(
             "INSERT INTO object_contributions
                  (build_id, ordinal, object_key, archive, member, input_section, output_section,
-                  address, size, map_line)
-             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)",
+                  address, size, map_line, nonvolatile_bytes, runtime_ram_bytes)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12)",
         )
         .map_err(write_err)?;
-    for (ordinal, row) in snapshot.objects().iter().enumerate() {
+    let rows =
+        firmwaresight_core::domain::attribution::charged(snapshot.objects(), snapshot.memory());
+    for (ordinal, (row, cost)) in rows.iter().enumerate() {
         stmt.execute(params![
             build_id,
             ordinal as i64,
@@ -430,6 +432,8 @@ fn write_objects(
             row.address as i64,
             row.size as i64,
             row.map_line as i64,
+            cost.nonvolatile.map(|bytes| bytes as i64),
+            cost.runtime_ram.map(|bytes| bytes as i64),
         ])
         .map_err(write_err)?;
     }
@@ -437,23 +441,30 @@ fn write_objects(
 }
 
 impl Database {
-    /// The object rows stored for a build, in MAP order (ADR-0033). Empty means no attribution was
-    /// recorded: no MAP, a MAP without object rows, or a build stored before migration 0007.
+    /// The object rows stored for a build, in MAP order, each with the charge decided at import
+    /// (ADR-0033). Empty means no attribution was recorded: no MAP, a MAP without object rows, or a
+    /// build stored before migration 0007.
     pub fn object_contributions(
         &self,
         build_id: &str,
-    ) -> Result<Vec<firmwaresight_core::domain::attribution::ObjectContribution>, StorageError>
-    {
+    ) -> Result<
+        Vec<(
+            firmwaresight_core::domain::attribution::ObjectContribution,
+            firmwaresight_core::domain::attribution::Charge,
+        )>,
+        StorageError,
+    > {
         let mut stmt = self
             .conn
             .prepare(
-                "SELECT object_key, archive, member, input_section, output_section, address, size, map_line
+                "SELECT object_key, archive, member, input_section, output_section, address, size, map_line,
+                        nonvolatile_bytes, runtime_ram_bytes
                    FROM object_contributions WHERE build_id = ?1 ORDER BY ordinal ASC",
             )
             .map_err(crate::query::read_err)?;
         let rows = stmt
             .query_map(params![build_id], |row| {
-                Ok(
+                Ok((
                     firmwaresight_core::domain::attribution::ObjectContribution {
                         object: row.get(0)?,
                         archive: row.get(1)?,
@@ -464,7 +475,11 @@ impl Database {
                         size: row.get::<_, i64>(6)? as u64,
                         map_line: row.get::<_, i64>(7)? as u64,
                     },
-                )
+                    firmwaresight_core::domain::attribution::Charge {
+                        nonvolatile: row.get::<_, Option<i64>>(8)?.map(|bytes| bytes as u64),
+                        runtime_ram: row.get::<_, Option<i64>>(9)?.map(|bytes| bytes as u64),
+                    },
+                ))
             })
             .map_err(crate::query::read_err)?;
         rows.collect::<Result<Vec<_>, _>>()

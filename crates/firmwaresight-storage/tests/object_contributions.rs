@@ -61,8 +61,13 @@ fn object_rows_round_trip_in_map_order_with_no_host_path() {
     let read = db.object_contributions(&build).expect("reads");
     assert_eq!(
         read,
-        snapshot.objects(),
-        "every field and the MAP order come back unchanged"
+        firmwaresight_core::domain::attribution::charged(snapshot.objects(), snapshot.memory()),
+        "every field, the import-time charge and the MAP order come back unchanged"
+    );
+    assert!(
+        read.iter()
+            .any(|(_, cost)| cost.nonvolatile.is_some_and(|b| b > 0)),
+        "a MAP-backed fixture charges real Flash bytes to its objects"
     );
 
     let paths: i64 = db

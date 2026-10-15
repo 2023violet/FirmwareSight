@@ -7,6 +7,10 @@
 -- No host path is stored (AGENTS.md §7): `object_key`, `archive` and `member` are the ADR-0033 D2
 -- normalized names the MAP adapter produced, never the path the linker printed.
 --
+-- `nonvolatile_bytes` and `runtime_ram_bytes` are what the row costs each budget, decided at import
+-- from the charge of its output section (ADR-0033 D3), so a later Compare reads a stored fact and
+-- never re-derives it. NULL is Unknown and is kept apart from 0.
+--
 -- `ordinal` keeps the MAP's own row order, so a re-read rebuilds the same sequence without sorting.
 -- Rows follow their build: an edit is refused like every other stored fact, and deleting a build
 -- cascades.
@@ -22,6 +26,8 @@ CREATE TABLE object_contributions (
     address        INTEGER NOT NULL,
     size           INTEGER NOT NULL CHECK (size > 0),
     map_line       INTEGER NOT NULL CHECK (map_line > 0),
+    nonvolatile_bytes INTEGER CHECK (nonvolatile_bytes >= 0),
+    runtime_ram_bytes INTEGER CHECK (runtime_ram_bytes >= 0),
     PRIMARY KEY (build_id, ordinal)
 );
 
