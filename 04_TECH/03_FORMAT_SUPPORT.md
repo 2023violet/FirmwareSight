@@ -58,6 +58,16 @@ last_updated: "2026-10-09"
 >   recorded there. The earlier line in this bullet — "design approved, not implemented" — described the state
 >   before those units ran, and is kept here as what changed rather than deleted.
 
+> **Dated 2026-10-15 (M2, `ADR-0033`, PROPOSED) — the GNU ld `.map` row's "object/archive contribution".**
+> On branch `feature/m2-object-attribution` until it merges: the GNU ld MAP's input-section rows (after
+> `Linker script and memory map`, wrapped rows joined, `COMMON` included, `*fill*` and linker stubs kept as
+> unattributed linker bytes, the discarded block skipped) are stored per build with a normalized key such as
+> `libdrv.a(uart.o)` — never a host path — and each row is charged like its output section (ADR-0021), so
+> Unknown stays Unknown. The desktop Analyze page lists objects and libraries, Compare lists their changes,
+> and `fwsight analyze --objects` / `fwsight diff` print them as text. The capability `Object attribution`
+> reads `available` only when such rows exist. **Portable JSON is unchanged** (`analysis:1` / `diff:1` carry no
+> per-object rows; `ADR-0033` D7), and no other MAP grammar is read.
+
 ## Capability reporting
 
 每次 import 必须给出：

@@ -107,7 +107,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 07_POST_MVP_CANDIDATE_ROADMAP.md
 │   ├── 08_MILESTONE_DELIVERABLE_MATRIX.md
 │   ├── 09_USER_INTERVIEW_QUESTION_BANK.md
-│   └── 10_M1_FIRST_USE_EXPERIENCE.md
+│   ├── 10_M1_FIRST_USE_EXPERIENCE.md
+│   └── 11_M2_OBJECT_ATTRIBUTION.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -164,7 +165,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0029-repository-baseline-checksums-use-git-index-blobs.md
 │   ├── ADR-0030-release-attached-byte-evidence.md
 │   ├── ADR-0031-developer-preview-theme.md
-│   └── ADR-0032-desktop-ui-language.md
+│   ├── ADR-0032-desktop-ui-language.md
+│   └── ADR-0033-object-library-attribution.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
@@ -272,6 +274,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── export_privacy.rs
 │   │   │   ├── gate_cli.rs
 │   │   │   ├── golden.rs
+│   │   │   ├── objects_cli.rs
 │   │   │   ├── p2_golden.rs
 │   │   │   ├── p4_golden.rs
 │   │   │   ├── project_doctor.rs
@@ -299,6 +302,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── ipc.rs
 │       │   │   ├── lib.rs
 │       │   │   ├── main.rs
+│       │   │   ├── objects.rs
 │       │   │   ├── preferences.rs
 │       │   │   ├── release.rs
 │       │   │   ├── service.rs
@@ -312,6 +316,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── diagnostics.rs
 │       │   │   ├── drop_intake.rs
 │       │   │   ├── history_reads.rs
+│       │   │   ├── object_attribution_ipc.rs
 │       │   │   ├── preferences.rs
 │       │   │   ├── project_readiness.rs
 │       │   │   ├── real_artifact_intake.rs
@@ -444,6 +449,15 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── MemoryRegionDto.ts
 │           │   │   │   ├── MemorySummaryDto.ts
 │           │   │   │   ├── ObjectAttributionDto.ts
+│           │   │   │   ├── ObjectChangeCountsDto.ts
+│           │   │   │   ├── ObjectChangePageDto.ts
+│           │   │   │   ├── ObjectChangeQueryDto.ts
+│           │   │   │   ├── ObjectChangeRowDto.ts
+│           │   │   │   ├── ObjectChangeSortDto.ts
+│           │   │   │   ├── ObjectPageDto.ts
+│           │   │   │   ├── ObjectRequestDto.ts
+│           │   │   │   ├── ObjectRowDto.ts
+│           │   │   │   ├── ObjectSortDto.ts
 │           │   │   │   ├── PercentageChangeDto.ts
 │           │   │   │   ├── PreferenceRecoveryDto.ts
 │           │   │   │   ├── PreferencesDto.ts
@@ -573,6 +587,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── map.rs
 │   │   │   └── pipeline.rs
 │   │   ├── tests/
+│   │   │   ├── m2_object_fixtures.rs
 │   │   │   ├── map_companion_identity.rs
 │   │   │   ├── p0_acceptance.rs
 │   │   │   ├── p2_fixture_pair.rs
@@ -585,6 +600,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   │   ├── diff/
 │   │   │   │   │   └── tests.rs
 │   │   │   │   ├── artifact.rs
+│   │   │   │   ├── attribution.rs
 │   │   │   │   ├── build_snapshot.rs
 │   │   │   │   ├── capability.rs
 │   │   │   │   ├── diff.rs
@@ -652,7 +668,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── 0003_gate_history.sql
 │       │   ├── 0004_release_records.sql
 │       │   ├── 0005_unknown_reasons.sql
-│       │   └── 0006_release_attachments.sql
+│       │   ├── 0006_release_attachments.sql
+│       │   └── 0007_object_contributions.sql
 │       ├── src/
 │       │   ├── backup.rs
 │       │   ├── compare.rs
@@ -672,16 +689,19 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── history_reads.rs
 │       │   ├── integrity_and_backup.rs
 │       │   ├── map_companion_persistence.rs
+│       │   ├── object_contributions.rs
 │       │   ├── release_records.rs
 │       │   ├── storage.rs
 │       │   └── unknown_reasons.rs
 │       └── Cargo.toml
 ├── evidence/
-│   └── M1/
-│       ├── .gitattributes
-│       ├── AC_MATRIX.tsv
-│       ├── M1_NATIVE_QA_EVIDENCE.zip
-│       └── README.md
+│   ├── M1/
+│   │   ├── .gitattributes
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── M1_NATIVE_QA_EVIDENCE.zip
+│   │   └── README.md
+│   └── M2/
+│       └── DESIGN_CHECKLIST.md
 ├── examples/
 │   ├── project-readiness/
 │   │   ├── firmwaresight.toml
@@ -705,6 +725,33 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── fixture.c
 │   │   │   ├── provenance.json
 │   │   │   └── README.md
+│   │   ├── m2-objects/
+│   │   │   ├── base/
+│   │   │   │   ├── source/
+│   │   │   │   │   ├── app/
+│   │   │   │   │   │   ├── sensors/
+│   │   │   │   │   │   │   └── imu.c
+│   │   │   │   │   │   └── main.c
+│   │   │   │   │   └── drv/
+│   │   │   │   │       ├── spi.c
+│   │   │   │   │       └── uart.c
+│   │   │   │   ├── firmware.elf
+│   │   │   │   ├── firmware.map
+│   │   │   │   ├── fixture.toml
+│   │   │   │   └── objects.ld
+│   │   │   └── target/
+│   │   │       ├── source/
+│   │   │       │   ├── app/
+│   │   │       │   │   ├── sensors/
+│   │   │       │   │   │   └── imu.c
+│   │   │       │   │   └── main.c
+│   │   │       │   └── drv/
+│   │   │       │       ├── spi.c
+│   │   │       │       └── uart.c
+│   │   │       ├── firmware.elf
+│   │   │       ├── firmware.map
+│   │   │       ├── fixture.toml
+│   │   │       └── objects.ld
 │   │   ├── p0-basic/
 │   │   │   ├── source/
 │   │   │   │   └── main.c
@@ -937,6 +984,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── check.py
 │   ├── gen_desktop_icons.py
 │   ├── gen_interop_fixtures.py
+│   ├── gen_m2_object_fixtures.py
 │   ├── gen_p0_fixtures.py
 │   ├── gen_p0_workload.py
 │   ├── gen_p2_fixtures.py

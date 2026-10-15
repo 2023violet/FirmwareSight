@@ -64,6 +64,23 @@ fwsight diff old.elf new.elf --svg out/compare.svg --png out/compare.png --repor
   export failure. Successful formats are named on stderr without echoing the selected host paths. Without
   `--json`, stdout stays the original Analyze or Diff result.
 
+## Object and library attribution (M2, `ADR-0033`)
+
+```bash
+fwsight analyze firmware.elf --map firmware.map --objects
+fwsight diff old.elf new.elf --old-map old.map --new-map new.map
+```
+
+- `analyze --objects` appends a text table: each object file and each static library with its Flash and RAM
+  charge, the number of MAP rows behind it, and the bytes no object accounts for (padding, linker stubs,
+  sections without rows). An Unknown charge prints as `unknown`, never `0`. Without a GNU ld MAP that lists
+  input sections, the section says `unavailable` and names the missing input.
+- `--objects` is text only and conflicts with `--json` (usage error, exit `2`); the `analysis:1` document does
+  not change shape.
+- `diff` text gains an "Object / library attribution" block (counts, top Flash growth, largest additions,
+  top library growth) when both sides carry rows, and one `unavailable:` line naming the side that does not.
+- Object names come from a user-supplied MAP and are terminal-escaped before printing.
+
 ## Exit codes
 
 - `0` success / gate pass

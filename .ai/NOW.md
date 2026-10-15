@@ -5,18 +5,19 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "CURRENT_INDEX"
 owner: "Engineering"
-last_updated: "2026-10-14"
+last_updated: "2026-10-15"
 ---
 
 # FirmwareSight Now
 
-This file is overwritten, never appended. History lives in [archive/](archive/2026-10-14/INDEX.md). Read Git and Actions for the live HEAD before making any claim. The SHAs below were last verified on 2026-10-14.
+This file is overwritten, never appended. History lives in [archive/](archive/2026-10-14/INDEX.md). Read Git and Actions for the live HEAD before making any claim. The SHAs below were last verified on 2026-10-15.
 
 ## Code and CI
 
 - **Last integrated code:** `76b5c2c` (NEXT-46 export privacy and stale-result fixes, integrated by NEXT-47). [Actions #113](https://github.com/2023violet/FirmwareSight/actions/runs/38595778036): 10/10 Jobs and 10/10 Check Runs.
 - **Later documentation-only commits:** `71978d8` (NEXT-47 evidence upload, [Actions #114](https://github.com/2023violet/FirmwareSight/actions/runs/38602220781) 10/10). The 2026-10-14 lean batch follows; read Git for its SHA and CI.
-- **M1 first-use round (branch `feature/m1-first-use`, not yet on `main`):** copy cut, drag-and-drop intake, Overview memory bars, Release step order, table scrolling, native dialog language, and six native-QA fixes. Evidence: [evidence/M1](../evidence/M1/README.md).
+- **M1 first-use round:** on `main` at `6804ae7` (Actions #116, 10/10). Copy cut, drag-and-drop intake, Overview memory bars, Release step order, table scrolling, native dialog language, and six native-QA fixes. Evidence: [evidence/M1](../evidence/M1/README.md).
+- **M2 object and library attribution (branch `feature/m2-object-attribution`, not yet on `main`):** GNU ld MAP object rows stored per build (migration 0007) and shown on Analyze, Compare, Overview and CLI text; M1 leftovers F2, N1, N2 closed. `ADR-0033` is PROPOSED. Plan and status: [06_DELIVERY/11](../06_DELIVERY/11_M2_OBJECT_ATTRIBUTION.md). Independent review and push await the Owner.
 - **Local gate at `76b5c2c`:** `python scripts/check.py` 18/18 steps, 0 SKIP. Rust workspace 1,160 passed / 0 failed / 2 opt-in ignored. Frontend 397 tests in 13 files.
 
 ## Gates

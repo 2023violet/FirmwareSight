@@ -1,0 +1,120 @@
+Archive member included to satisfy reference by file (symbol)
+
+build/libdrv.a(uart.o)        build/app/main.o (uart_send)
+build/libdrv.a(spi.o)         build/app/main.o (spi_flush)
+
+Allocating common symbols
+Common symbol       size              file
+
+g_samples           0x4               build/app/main.o
+
+Discarded input sections
+
+ .text          0x00000000        0x0 build/app/main.o
+ .data          0x00000000        0x0 build/app/main.o
+ .bss           0x00000000        0x0 build/app/main.o
+ .text.unused_helper
+                0x00000000        0x6 build/app/main.o
+ .text          0x00000000        0x0 build/app/sensors/imu.o
+ .data          0x00000000        0x0 build/app/sensors/imu.o
+ .bss           0x00000000        0x0 build/app/sensors/imu.o
+ .text          0x00000000        0x0 build/libdrv.a(uart.o)
+ .data          0x00000000        0x0 build/libdrv.a(uart.o)
+ .bss           0x00000000        0x0 build/libdrv.a(uart.o)
+ .text          0x00000000        0x0 build/libdrv.a(spi.o)
+ .data          0x00000000        0x0 build/libdrv.a(spi.o)
+ .bss           0x00000000        0x0 build/libdrv.a(spi.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+FLASH            0x08000000         0x00010000         xr
+RAM              0x20000000         0x00004000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+
+.text           0x08000000       0xc0
+ *(.text.Reset_Handler)
+ .text.Reset_Handler
+                0x08000000       0x34 build/app/main.o
+                0x08000000                Reset_Handler
+                0x08000040                        . = ALIGN (0x40)
+ *fill*         0x08000034        0xc 
+ *(.text*)
+ .text.imu_read_with_a_name_long_enough_to_make_gnu_ld_wrap_the_input_section_row
+                0x08000040       0x1c build/app/sensors/imu.o
+                0x08000040                imu_read_with_a_name_long_enough_to_make_gnu_ld_wrap_the_input_section_row
+ .text.imu_read
+                0x0800005c        0x4 build/app/sensors/imu.o
+                0x0800005c                imu_read
+ .text.uart_send
+                0x08000060        0xc build/libdrv.a(uart.o)
+                0x08000060                uart_send
+ .text.spi_flush
+                0x0800006c       0x1c build/libdrv.a(spi.o)
+                0x0800006c                spi_flush
+ *(.rodata*)
+ .rodata.imu_calibration
+                0x08000088       0x30 build/app/sensors/imu.o
+                0x080000c0                        . = ALIGN (0x10)
+ *fill*         0x080000b8        0x8 
+
+.glue_7         0x080000c0        0x0
+ .glue_7        0x080000c0        0x0 linker stubs
+
+.glue_7t        0x080000c0        0x0
+ .glue_7t       0x080000c0        0x0 linker stubs
+
+.vfp11_veneer   0x080000c0        0x0
+ .vfp11_veneer  0x080000c0        0x0 linker stubs
+
+.v4_bx          0x080000c0        0x0
+ .v4_bx         0x080000c0        0x0 linker stubs
+
+.iplt           0x080000c0        0x0
+ .iplt          0x080000c0        0x0 build/app/main.o
+
+.rel.dyn        0x080000c0        0x0
+ .rel.iplt      0x080000c0        0x0 build/app/main.o
+
+.data           0x20000000        0x4 load address 0x080000c0
+ *(.data*)
+ .data.g_threshold
+                0x20000000        0x4 build/app/main.o
+
+.igot.plt       0x20000004        0x0 load address 0x080000c4
+ .igot.plt      0x20000004        0x0 build/app/main.o
+
+.bss            0x20000004       0x28 load address 0x080000c4
+ *(.bss*)
+ .bss.uart_tx   0x20000004        0x4 build/libdrv.a(uart.o)
+ .bss.spi_buffer
+                0x20000008       0x20 build/libdrv.a(spi.o)
+ *(COMMON)
+ COMMON         0x20000028        0x4 build/app/main.o
+                0x20000028                g_samples
+LOAD build/app/main.o
+LOAD build/app/sensors/imu.o
+LOAD build/libdrv.a
+OUTPUT(firmware.elf elf32-littlearm)
+LOAD linker stubs
+
+.comment        0x00000000       0x46
+ .comment       0x00000000       0x46 build/app/main.o
+                                 0x47 (size before relaxing)
+ .comment       0x00000046       0x47 build/app/sensors/imu.o
+ .comment       0x00000046       0x47 build/libdrv.a(uart.o)
+ .comment       0x00000046       0x47 build/libdrv.a(spi.o)
+
+.ARM.attributes
+                0x00000000       0x2e
+ .ARM.attributes
+                0x00000000       0x2e build/app/main.o
+ .ARM.attributes
+                0x0000002e       0x2e build/app/sensors/imu.o
+ .ARM.attributes
+                0x0000005c       0x2e build/libdrv.a(uart.o)
+ .ARM.attributes
+                0x0000008a       0x2e build/libdrv.a(spi.o)

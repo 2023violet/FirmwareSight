@@ -326,3 +326,22 @@ backup name records the step this build actually takes.
 Nothing here makes an attachment usable by a person: no UI control, CLI flag or IPC command offers a file
 yet, and `artifacts.required` / `artifacts.hashes` still judge only the analyzed artifacts. Those are
 C1-U2 and later.
+
+## M2 object contributions (2026-10-15, `ADR-0033` D5)
+
+`SCHEMA_VERSION` moves 6 → 7 with one additive migration, `migrations/0007_object_contributions.sql`. It creates
+one table and touches nothing else; a build stored before it has no rows and reads as "attribution unavailable",
+never as zero bytes per object.
+
+| column | what it fixes |
+| --- | --- |
+| `build_id` | `builds(id)` `ON DELETE CASCADE` |
+| `ordinal` | the MAP's own row order, so a re-read rebuilds the same sequence without sorting |
+| `object_key`, `archive`, `member` | the `ADR-0033` D2 normalized names (`main.o`, `libdrv.a(uart.o)`); never a host path |
+| `input_section`, `output_section` | the MAP row's two section names; `output_section` is NULL when the MAP gave none |
+| `address`, `size`, `map_line` | the row's evidence locator; `size > 0` (zero-size rows are skipped at parse time) |
+| `nonvolatile_bytes`, `runtime_ram_bytes` | what the row costs each budget, decided at import from its output section's charge (`ADR-0021`); NULL is Unknown and is kept apart from 0 |
+
+Storing the charge rather than re-deriving it is what lets Compare read stored facts only: a later diff never needs
+the original ELF or MAP. `object_contributions_are_immutable` refuses UPDATE like every other stored fact. The
+pre-migration backup of a v4 store is now named `…pre-migration-v4-to-v7.sqlite`.

@@ -19,6 +19,8 @@ Good:
 - `import_artifact`
 - `get_analysis_summary`
 - `query_symbols`
+- `query_objects` / `query_object_changes`（M2 `ADR-0033`：一个已存构建的对象/库分页、一次比较的对象/库变化分页；
+  请求只带 snapshot id 或 diff id，不带路径）
 - `compare_builds`
 - `run_release_gate`
 - `prepare_release_bundle`

@@ -10,6 +10,8 @@ dist/
 # checkout in CI failed on the missing half. This un-ignores exactly that path; every other
 # `target/` stays a build directory. `drift/fixtures tracked` guards it from then on.
 !fixtures/elf/p2-diff/target/
+# M2 (ADR-0033) repeated the same pair naming and the same gate caught it before any push.
+!fixtures/elf/m2-objects/target/
 
 # Generated performance workloads are never committed.
 /fixtures/generated/

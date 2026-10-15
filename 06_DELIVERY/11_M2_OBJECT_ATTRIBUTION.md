@@ -80,3 +80,25 @@ The automated pass cannot supply three things: a person, a separate Windows prof
 6. Windows at 1440×900 and 1024×720, light and dark.
 
 The register's evidence format applies.
+
+## 7. Status (2026-10-15)
+
+| # | State | Commit |
+|---|---|---|
+| A1–A2 | Done | `1bd0f3c` |
+| A3–A5 | Done; migration 0007 extended in A6 with the stored charge (unpushed, so still additive) | `15dcb7f` |
+| A6 | Done | `f95b208` |
+| A7 | Done | `50b8857` |
+| A8 | Done | `7546086` |
+| A9 | Done (F2, N1, N2) | `742edcd` |
+| A10 | Gate and docs in this commit; independent review and push pending the Owner | — |
+
+Found while building, for the Owner (not changed here):
+
+1. `schemas/diff.schema.json`'s description of `objectChanges` still says "today available is false". D7 keeps the
+   schema bytes unchanged, so the description is now stale; correcting a description is a schema edit and is left
+   to an `ADR-0022` decision.
+2. The `fwsight diff` text prints section and symbol names without terminal escaping (pre-existing; the new object
+   lines are escaped). The analyze renderer escapes region names since `5f6a630`.
+3. M2's desktop surfaces have unit, IPC and component tests but no native QA pass yet; section 6 applies to them too.
+4. The first full `check.py` run failed `drift/fixtures tracked`: `**/target/` in `.gitignore` had hidden the fixture's `target/` side from 1bd0f3c. The local tests passed on the files on disk. Fixed in A10 with the same narrow exception P2 uses; the second run is the gate of record.
