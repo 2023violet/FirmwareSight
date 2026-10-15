@@ -1,9 +1,0 @@
-
- RUN  v5.0.2 LOCAL_USER/.codex/worktrees/next47-engineering-review/FirmwareSight/apps/desktop/ui
-
-
- Test Files  1 passed (1)
-      Tests  2 passed | 37 skipped (39)
-   Start at  08:37:44
-   Duration  4.90s (environment 40%, transform 35%, tests 14%, setup 7%, import 3%)
-

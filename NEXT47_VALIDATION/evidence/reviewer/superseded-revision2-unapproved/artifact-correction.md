@@ -1,7 +1,0 @@
-# External review artifact correction
-
-The root pre-push guard rejected the initial enhanced 106 matrix before any Git push was invoked. One original field, NEXT45 AC26 requirement, changed through a default-GBK read of UTF-8 bytes. Strict UTF-8 inspection proves the immutable original contains U+2013 en dashes; the initial enhanced JSON instead contains U+9225/U+63C2 mojibake. Terminal/default-decoding presentations are not canonical Unicode evidence. `artifact-correction.json` preserves both exact strings, code points, original/source hashes and original contract source line.
-
-All initial reviewer signed artifacts are preserved byte-identically in `superseded-initial-unapproved/`, with a hash manifest; that signature is superseded and unapproved. The corrected enhanced matrix must copy every original key/value directly from strict UTF-8 decoding of the immutable original. Source-contract wording is added only in a new column. A distinct field-comparison audit checks all 106 rows, their full old field sets, the serialized corrected JSON and the TSV. Final corrected JSON/TSV/report/audit hashes are bound into the replacement signature.
-
-Historical NEXT44/45/46 files remain unchanged. No candidate source byte, Git ref, test or permission changed and no push was invoked by the reviewer. This correction affects external evidence only; the same-SHA successful 18/18 gate remains applicable and is not represented as rerun. Live identity, source bytes, remote baseline and protected main are rechecked before the corrected signature.

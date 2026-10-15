@@ -1,3 +1,0 @@
-error: That MAP file is not from a supported linker. (code ERR-MAP-3001, operation op-5a88-18de6ffa1f9933d0)
-next: Import the ELF without a MAP, or supply a GNU ld MAP; other toolchain MAPs are not supported yet.
-2026-10-14T15:47:01.803676Z ERROR fwsight: analysis failed operation_id="op-5a88-18de6ffa1f9933d0" code="ERR-MAP-3001"

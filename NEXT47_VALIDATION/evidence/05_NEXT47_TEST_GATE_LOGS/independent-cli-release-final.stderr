@@ -1,6 +1,0 @@
-diagnostics: map parsed with the gnu_ld adapter
-diagnostics: baseline firmware.elf
-diagnostics: git clean, tag v1.2.3
-diagnostics: integrity verified against the bundle's own SHA256SUMS and manifest
-diagnostics: this run is not stored; the desktop Release page writes the release record
-diagnostics: operation op-3408-18de6fee8dfce738

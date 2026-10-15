@@ -1,0 +1,1385 @@
+---
+title: "Active Task"
+doc_id: "FS-AI-005"
+product: "FirmwareSight"
+version: "0.6.0"
+status: "ACTIVE_TASK"
+owner: "Engineering"
+last_updated: "2026-10-12"
+---
+
+# ACTIVE TASK
+
+> **Current pointer — 2026-10-14:** NEXT-46 is explicitly Owner-authorized in an isolated worktree at baseline `4ac1e4f709396fac7a37a1d92b8095a070b3effa`. Read [NOW.md](NOW.md) and [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md) for current evidence boundaries. Earlier pointers below retain their dated historical meaning. Final candidate acceptance requires fresh independent exact-SHA review; no unconditional push permission is implied.
+
+> **Current pointer — 2026-10-13:** DOC-1 Wave 1A is being integrated under NEXT-34 in a dedicated worktree based on the security-fixed remote baseline `515a55a1e8c9a4d2b672dbf63b440cab296096a0`. Read Git for the local candidate state; this work is not pushed or independently accepted. NEXT-35 independent review is required. Active product implementation task: `NONE`. [NOW.md](NOW.md) is authoritative for current project status. The large fenced timeline below is preserved historical text; its old `LIVE POINTER` wording is not current.
+
+```text
+LIVE POINTER — READ THIS FIRST, THEN JUMP TO THE LAST PARAGRAPH OF THIS FENCE. This file is append-only, so the first
+line below is the pointer as it stood on 2026-10-08 and it is kept unedited because the project does not rewrite
+history. As of 2026-10-11 that line is FALSE: the pointer is not NONE. The live word is at the end of this fence, and
+`.ai/CURRENT_STATE.md`'s "Active task" bullet carries the same sentence.
+NONE.  Stage U1 is CLOSED: PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS, on the Architect's own authority.
+V1's cohort build is now REFROZEN_TO_U1_CANDIDATE (owner authority, later on 2026-10-08; see the block below the
+pointer note). V1 itself stays paused-at-recruitment with 0 eligible external sessions — a build identity is not a
+verdict, and re-freezing the instrument measures nothing.
+ON 2026-10-09 THE OWNER DECIDED THE BIN/HEX RANGE QUESTION. ADR-0030 accepts Option C1 — release-attached byte
+evidence — as product direction, and 04_TECH/28 freezes its design. That is a decision and a specification, not a
+feature; BIN_HEX_ANALYSIS stays UNSUPPORTED and the compatibility matrix keeps UNSUPPORTED. The same day the owner
+authorized the first unit of that design and it was executed: C1-U1 (attachment data + Gate identity + storage proof)
+is COMPLETE at 04_TECH/28 §9's U1 row. On the same day the owner authorized the second unit, and it was executed too:
+C1-U2 (attachments satisfying Gate rules, entering a verified Release Bundle, and the six-link byte-consistency chain)
+is READY_FOR_ARCHITECT_REVIEW — code implemented and a tested library API, with the gate green at 953 Rust / 295 UI
+(952 on an Ubuntu runner, because one C1-U2 case is `#[cfg(windows)]`), pushed as `facf287` and read 10 of 10 on
+remote CI run #96, all ten jobs on attempt 1.
+ON 2026-10-10 THE ARCHITECT RETURNED `REWORK REQUIRED` ON THAT ROUND and delivered a three-stage continuous packet
+(`10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Continuous_Delivery_Read_First_v1.0.txt` and its three unit prompts, all
+four archived with digests proven against the received zip). Stage 1 ran the same day as `C1-U2R1`, a narrow
+corrective and nothing else: `T-C1-08`'s acceptance pairing is now proved against a changed attachment set at BOTH
+the store (`ERR-STORAGE-4007`) and the bundle, `T-C1-13`'s exact with/without growth comparison exists as a test, the
+folded-case refusal names the owner's duplicate selection instead of a manifest nobody wrote (still
+`ERR-BUNDLE-6109`, still an invariant refusal, nothing written), and the source-side symlink rule is now held by
+tests. Adjudication A closed the §3 field-versus-siblings question as ACCEPTED; adjudication D left the
+Gate-before-staleness order alone. Gate at **960 Rust / 48 lines on this Windows host (961 projected for POSIX, NOT
+measured — no POSIX runner exists here) / 295 UI in 9 files**, 17 of 17 with no SKIP, verifier PASS at
+795 / 793 / 923, four mutations each killed by a named test and reverted byte-identically.
+Status word: `C1_U2R1 = LOCAL_CORRECTIVE_GATE_PASS / ARCHITECT_REVIEW_PENDING`. **M11 is stated and tested but
+`NOT_VERIFIED` as executed evidence on this host in both directions**: Windows refuses link creation
+(`ERROR_PRIVILEGE_NOT_HELD`, 1314) so the Windows case prints a declared SKIP, and the `#[cfg(unix)]` module neither
+compiled nor ran, because `docker` is absent and `wsl` holds no distribution. It closes on one Linux run, which
+needs the push this packet withholds.
+STAGE 2 OF THAT PACKET RAN THE SAME DAY AS `C1-U3`, the portable-contract and regression unit, and it changed what a
+document says rather than what a person can do. `04_TECH/28` §7.3's `gate-results:1` extension pair is now code:
+`extensions.canonical_input_label = "firmwaresight-gate-input/2"` and `extensions.attachments =
+[{kind, sha256, byte_size}]`, written together and only for a run that bound attached bytes, in the identity's
+`(kind, digest)` order — an attachment-free document still carries neither key, which the untouched
+`apps/cli/tests/p4_golden.rs` byte comparison proves independently. `verify_bundle` now enforces the pairing and,
+for the first time, ties the Gate document's `run_id` to the manifest's `extensions.gate_run_id`; before this round
+a bundle could ship one run's verdict beside another run's gate and still self-verify. No schema file moved, no
+major moved, no new `ERR-BUNDLE-61xx` code was allocated, and the five JSON documents in P4's frozen bundle all
+validate against today's contracts — with its two committed artifacts copied back in, that pre-C1 bundle verifies
+under the stricter reader and re-derives its own `release-e400a8ac…`. All nineteen T-C1 rows now have a named test,
+and `C1-U3` had to write the one §7.3 cited as already existing (`the_run_is_judged_from_stored_rows_after_the_files_are_gone`)
+because no such test had ever been written. Gate at **987 Rust / 48 lines on this Windows host (988 projected for
+POSIX, NOT measured — still no POSIX runner here) / 295 UI in 9 files**, 17 of 17 with no SKIP, verifier PASS at
+797 / 795 / 925, seven mutations each killed by a named test and reverted byte-identically.
+Status word: `C1_U3 = LOCAL_CONTRACT_GATE_PASS / ARCHITECT_REVIEW_PENDING`.
+At stage 2's close that was still not a feature: no UI control, no CLI --attach and no IPC command existed, so no
+person could attach a file, and `C1_U4` was authorized as stage 3 but NOT_STARTED. C1-U3's own entry condition was
+C1-U2R1's objective gate, which was green locally, and the packet — not this round's self-assessment — is what
+authorized the work.
+STAGE 3 OF THAT PACKET RAN THE SAME DAY AS `C1-U4`, and it is the stage that made the thing usable. The CLI gained a
+repeatable `--attach <FILE>` on `gate` and `release prepare` with every exit code unchanged; the desktop gained four
+use-case IPC commands (30 registered commands to 34) behind session-local `att-<pid>-<n>` handles, so no host path
+crosses to the WebView; the Release page gained the §9 "Release attachments" section with leaf, declared kind, byte
+size, full SHA-256 and evidence class; `release-report.html` gained its limits line **conditionally**, which is what
+kept `p4_golden.rs` and `drift/goldens unchanged` green; and the storage invariant sentence now names the attachment
+set. The declared kind is read from the file name and never from the bytes, so `image.bin` yields
+`attachment:bin:3080a363…` while the same bytes named `payload.img` yield `attachment:unknown:3080a363…` and satisfy
+nothing — ADR-0030 D-3, observed at a surface a person drives.
+THEN THE INSTALLED WALK FOUND TWO DEFECTS THAT NO TEST HAD FOUND. On a build packaged from `d95acea`, the Gate's own
+"Required artifacts" table printed `bin Required Missing` underneath an `artifacts.required` PASS that cited
+`attachment:bin:3080a363…`, and the bundle preview labelled `artifacts/image.bin` with role `artifact` — the same role
+the analyzed ELF and MAP carry. Both surfaces had re-decided a question Core had already answered. `073c83c` moved the
+answer to one place: Core's new `RequirementSource::{Analyzed, Attachment}` and `requirement_evidence(word)` now feed
+both the rule and the table (via `GateArtifactRowDto.satisfied_by` and a "Satisfied by" column reading *Analyzed
+build* / *Release attachment* / *Missing*), and `FileRole::ReleaseAttachment` gives a shipped attachment its own role
+in the preview while an attachment-free guard proves nothing leaks. Neither fix touched a schema, a golden or a
+digest.
+The walk was then repeated on a build packaged from `073c83c` (`3d9a3512…`, 0 dirty paths) and both fixes were read
+back off the installed binary. All four verbs ran on the installed app against a disposable project; three refusals
+were observed rather than staged — `ERR-BUNDLE-6114` twice (once naming the current build, then, after that build was
+re-analyzed, naming the **baseline**, so the session boundary is per-side) and `ERR-BUNDLE-6102` once, when
+`image.bin` was mutated after the preview: it refused on **Gate-run identity**, because the file is tracked and
+mutating it dirtied the workspace, and the destination folder was empty before and empty after. The bundle the
+installed app wrote passed `sha256sum -c` on 10 of 10 indexed files and `verify_bundle_portability.py` at 63 of 63,
+which also closes `C1-U3` §12.1's outstanding item. The CLI and the desktop computed the **same** Gate run id
+`gate-a6cb8e84…d47239`, the same policy sha, the same release id `release-acdd6e7193df…` and the same proposed folder,
+from different edges.
+Gate at **1,020 Rust / 48 lines on this Windows host (POSIX NOT MEASURED — still no runner here) / 305 UI in 9
+files**, 17 of 17 with no SKIP, core-smoke 3/3, package 4/4, drift 8/8 including goldens and IPC bindings unchanged.
+Status words: `C1_U4 = LOCAL_USER_WORKFLOW_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and the product word this round may
+propose but not grant is `C1_U4 = READY_FOR_ARCHITECT_PRODUCT_ACCEPTANCE`. `BIN_HEX_RELEASE_ATTACH` moved to
+`DESIGN_APPROVED / USER_VERIFIED_ON_WINDOWS`; `BIN_HEX_ANALYSIS` stayed `UNSUPPORTED` and nothing parsed a BIN or a
+HEX; macOS and Linux installed acceptance stays `NOT_RUNTIME_VERIFIED`.
+The machine was put back: uninstalled through the uninstaller's own UI with "Delete the application data" left
+unchecked, the test store moved into the evidence root, and the owner's store restored to the three digests it had
+before it was parked. Neither `C1-U2R1`, `C1-U3` nor `C1-U4` is accepted yet: all three read ARCHITECT_REVIEW_PENDING,
+and no push has happened — `origin/main` is still `2859bb2`, with `99a1bfd`, `7a6af54`, `268440a`, `920e764`,
+`3cfbc03`, `d95acea`, `073c83c` and this round's records on top of it locally. This pointer stayed NONE before, during
+and after each round.
+
+THE LIVE POINTER IS THE LINE ABOVE. The blocks that follow are dated records of what each round knew when it
+stopped, kept because this project does not rewrite history, and they are not instructions for the next round.
+
+On 2026-10-09, after C1-U1 had closed earlier the same day, the owner delivered 《FirmwareSight — C1-U2｜Gate + Bundle
+Attachment Safety Chain, Architect execution authorization v1.0》 as a file and asked for it to be executed. Its
+CANONICAL_UNIT is C1_U2_GATE_BUNDLE_ATTACHED_BYTE_CONSISTENCY and its own words bound the scope: "This is an explicit
+authorization of C1-U2 ONLY", "No UI/CLI user access, no BIN/HEX analysis, no public-release assertion", and "Do not
+start C1-U3 merely because U2 lands". It is archived at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U2_Gate_Bundle_Six_Link_Consistency_v1.0.txt (36,363 bytes, 632 lines, 0 CR,
+sha256 30fa19579f5d676f65256f51cabd8a2d3e41866d85b1e593f1e75088db15ae59, staged blob 8779dc528b1363010d469212f321d528b5ea2491
+with the same digest) — and that archive is a RECONSTRUCTION: the delivered file was already gone from the path the owner
+pointed at when the archive was written, the bytes come from this session's first read of it, and no delivered-transport
+digest is claimed anywhere. The register entry says so at length; that disclosure, not a clean cmp, is the honest state of
+this round's provenance. Preflight met the expected handover head 1b33bbcb52b441efc4e63d7b6c91e829dc232d76 with
+origin/main and the remote ref equal to it and a clean tree.
+
+What C1-U2 built, at Core and library level only. Core's artifacts.required and artifacts.hashes now read TWO evidence
+classes with ADR-0030 D-3's kind separation (elf/map from analyzed snapshot rows only, bin/hex from attachment rows only,
+unknown from neither) and cite each row by its own locator, so attachment:<kind>:<sha256> appears beside artifact:… and the
+hashes rule's summary counts both classes with the limitation sentence travelling with the count. The project layer gained
+the one sanctioned attachment path: prepare_with_attachments and BundleRequest::publish_with_attachments, which observe
+through evidence::observe_attachment, bind through build_context_with_attachments, re-verify on export through
+verify_attachments — a SIBLING of verify_sources that does NOT re-hash, refusing a row whose kind a release may not
+attach, whose kind was read out of bytes instead of declared, whose observation left no digest, or which the judged
+context does not carry as a (kind, digest) pair, while the stat / regular-file / non-empty / streamed-SHA-256 /
+size chain belongs to observe_attachment and publish re-runs it through observe() before InputChecks::compare_with
+meets the preview — and refuse before any destination write, so a refusal leaves no
+directory behind and no stored row moves. Preview staleness is now one typed row set carrying its evidence class: a
+same-path byte or size change keeps ERR-BUNDLE-6103 with a leaf named from the path rather than from position, while an
+added, removed or renamed member answers the new E-4 BundleError::AttachmentSetChanged{name, change} at
+ERR-BUNDLE-6118, allocated after git grep proved the number vacant and protected by a live code() collision test that
+also re-asserts E-1/E-2/E-3 at 6115/6116/6117 through the bridged bundle surface. A bundle that ships attachments is
+self-verifying: artifacts/<leaf> under the existing collision rule, an entry in the bundle's own SHA256SUMS and
+release-manifest files[], the minimum honest extensions.attachments disclosure written only when something is attached
+(kind_basis declared, provenance unknown), and verify_bundle enforcing that disclosure in both directions and re-deriving
+the release id from the bundle's bytes with the sources deleted. Six links L-1 to L-6 each carry their own positive and
+negative test, per §6's "A single broad happy-path bundle test is NOT enough".
+
+What it does NOT do, and the four things this round refused to decide by itself. No UI control, no --attach, no IPC
+command: the only caller able to attach a file is a library caller, so BIN_HEX_RELEASE_ATTACH stays
+DESIGN_APPROVED / NOT_USER_AVAILABLE, BIN_HEX_ANALYSIS stays UNSUPPORTED, and the compatibility matrix keeps its status
+column. No schema major moved, SCHEMA_VERSION stays 6 with no new migration, SnapshotId is untouched, the /1 canonical
+text and every pre-C1 run id are byte-identical, the P4 goldens are unchanged, and the disclosure sits inside the
+extensions object that schemas/release-manifest.schema.json already opens with additionalProperties: true. C1-U3 (the
+gate-results:1 extension pair, the full manifest disclosure, the pre-C1 corpus re-validation, golden closure) and C1-U4
+(every surface a person touches) are NOT_AUTHORIZED / NOT_STARTED. One deviation is the Architect's to accept or overturn:
+04_TECH/28 §3 names a GateRunRequest.attachments FIELD whose literals live in apps/**, which §11 forbids touching without
+a new decision and whose §11 instruction is "do NOT quietly patch desktop" — so U2 added four *_with_attachments siblings
+and left every existing caller compiling untouched, rather than patching a forbidden path. Four findings are reported
+instead of fixed by invention (04_TECH/28 §14): a selection that folds to one host file on a case-insensitive filesystem
+is refused with a true-but-unhelpful manifest DuplicatePath at ERR-BUNDLE-6109; the frozen design specifies symlink refusal
+only for bundle CONTENTS, so no source-side symlink test was written and M11's symlink half stays NOT_VERIFIED on every
+platform; the export precedence is Gate-refusal-before-staleness, now documented and asserted rather than inferred; and no
+>512 MiB fixture exists, so M12's upper bound is NOT_VERIFIED rather than assumed. Nothing was built, installed or
+screenshotted and no real store was touched, so installed behaviour stays NOT_RUNTIME_VERIFIED at this head, and V1, its
+frozen cohort 11573661113 at 41bb6a36, P5, U1's verdict and guarded 25-item tally, G2 and the licence question are
+untouched. Validation: 953 Rust tests across the same 48 result lines (900 at handover; 952 on an Ubuntu runner, the
+difference being the single `#[cfg(windows)]` NTFS case-fold refusal at bundle_builder.rs:2324, which cannot compile on
+POSIX) and 295 UI in 9 files, check.py
+17 of 17 PASS with no SKIP and no FAIL, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4, baseline verifier PASS, fmt and
+clippy -D warnings clean, seven mutations each killed by a named test and every mutated file restored byte-identically.
+Remote CI at the product head: `git push origin main` returned the fast-forward `1b33bbc..facf287`, run 38037417546
+(number 96, attempt 1, event push, headSha facf2874a8039bb14fced13e6a11d985305cb415) concluded success with all TEN jobs
+green individually — Rust windows 953 and Rust ubuntu 952 across 48 lines each with 0 failed, both Desktop UI jobs
+295 in 9 files, Dependency policy, Generated output drift (clean-checkout verifier PASS at 789 tracked / 787 entries /
+917 tree lines), macOS Core Smoke and the three Package jobs. Nothing was downloaded or installed from that run.
+Record: C1_VALIDATION/C1_U2_GATE_BUNDLE_PLAN.md with its dated §14 as-executed reconciliation,
+C1_VALIDATION/C1_U2_GATE_BUNDLE_EXECUTION_REPORT.md with its §13 CI read-back written by this round's single docs-only
+successor, 04_TECH/17, 04_TECH/24 and 04_TECH/28 §14; machine state
+BASELINE.yaml c1_u2_gate_and_bundle.
+
+On 2026-10-09 the owner delivered 《FirmwareSight — C1-U1 / Release Attachment Data & Identity, Coding Agent 实施授权
+v1.0》 as a file and asked for it to be executed, then delivered a mid-turn continuation for the ERR-BUNDLE stable-code
+check. Both are archived: 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U1_Data_And_Identity_Implementation_v1.0.txt
+(15,072 bytes, 132 LF, 0 CR, sha256 61a33d5381eca5828f8e6c979c25e58db6c2289b88fddccb37cdc71a0c484b65, blob
+76ecf114c46311803c30dc322fc81aa0c3c28ac9) and
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_U1_ERR_BUNDLE_Code_Check_And_TDD_Continuation_v1.0.txt (10,162 bytes, 84 LF,
+0 CR, sha256 79a91df69ff80dbd19fcb12c724b52630a9c52dda92e6a49db0dee3418ec3c0a, blob c49c589d8c0955612e4fa2d8ccbf24273bd020b6,
+cmp identical to the delivered file, which had arrived under a percent-encoded name). Preflight met the expected handover
+head 114a84e3cb3e9e5fb7f23ee17f044f8d46337bc7 with a clean tree, and the architecture the prompt described matched source.
+
+What C1-U1 built, all of it behind a surface nobody can reach: GateAttachmentFact / KindBasis and a separate
+GateContext.attachments set in Core; the canonical rule — /1 byte-frozen while the set is empty, /2 with an
+attachments[ … ] block sorted by (kind word, digest) and one exact (kind, digest) pair bound once when it is not;
+ReleaseAttachment and observe_attachment() in firmwaresight-project (stat, regular-file check, refuse zero bytes,
+streaming SHA-256, length; ELF and MAP refused by kind before any filesystem access, no whole-file buffering, no
+GuardedInput::load); three typed refusals carrying ERR-BUNDLE-6115 / 6116 / 6117 after a read-only registry scan
+established that the Rust code() matches are the only registry in the repository; and migration
+0006_release_attachments.sql (SCHEMA_VERSION 5 → 6) with gate_run_attachments, its five CHECKs, its
+PRIMARY KEY (run_id, ordinal), its UNIQUE (run_id, kind, sha256) and an immutability trigger. persist_gate_run now
+refuses a non-canonical row set or an unobserved digest before any statement runs, writes the rows in the run's own
+transaction, and refuses a repeated run id over different attachment facts as an invariant rather than an overwrite.
+
+The protections held, and were attacked to prove it. The /1 text is 1,044 bytes with sha256
+72d5c108e9f5b362e2f108b112389a04abfa10934207045926e1a02bd8c5da00 and is now carried by a committed test; the untouched
+p4-release golden (run id gate-a17e9861ce643da5e7061ac349793f80d1be87736ad52b2daf3433dc8cb8bc26, extensions.policy_sha256
+b87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98) still reproduces byte-for-byte, and it fails the moment
+an empty block is emitted. Four mutations were run and each was caught or exposed a weak assertion that was then fixed:
+dropping the kind word from the sort key initially passed, so the order test now spells the expected sequence out with
+digests chosen to make the two keys disagree; removing the dedupe, relaxing byte_size > 0 and emitting an empty
+attachments block each failed the test that owns that rule. Every mutated file was restored to its pre-mutation checksum
+and the whole suite re-run green. Validation: 17/17 check.py steps PASS, 900 Rust tests across 48 result lines (870 at
+handover), UI 295 tests across 9 files, unchanged — this unit touched no frontend path.
+
+What it does NOT do: no UI control, no CLI --attach, no IPC command and no user-facing attach flow, so a person still
+cannot attach a file; artifacts.required / artifacts.hashes still judge only analyzed artifacts and no attachment
+satisfies a rule yet; no attachment: locator, no verify_attachments, no bundle file inclusion, no preview staleness and
+no E-4 (and E-4 has no allocated number); no new extensions output, no public schema change and no golden edit, so the
+external documents of gate-results, analysis, diff and release-bundle are byte-identical; SnapshotId::compose, the
+five-state and effective-severity model, Unknown aggregation, the policy hash and the release id grammar are untouched;
+C1-U2 / C1-U3 / C1-U4 are NOT_AUTHORIZED / NOT_STARTED; V1, the frozen cohort 11573661113 at 41bb6a36, P5, U1P, G2 and
+the licence question are untouched; nothing was installed or run against a real store, so the installed migration path
+stays NOT_RUNTIME_VERIFIED at this head.
+
+On 2026-10-09, after A0 had closed earlier the same day, the owner delivered 《FirmwareSight — Option C1 /
+Release-Attached Byte Evidence｜产品方向裁决与 ADR + 技术规格定稿｜Coding Agent 执行授权 v1.0》 as a file and asked for it
+to be executed. Its §0 makes that act exactly two decisions and no more: OWNER_PRODUCT_DIRECTION = OPTION_C1 and
+OWNER_AUTHORIZED_UNIT = C1_ADR_AND_DESIGN_FREEZE_DOCS_ONLY. The file is archived at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_C1_Product_Direction_Adr_Specification_Freeze_v1.0.txt (15,545 bytes, 185 lines,
+0 CR, sha256 3dbd878181655271d95df4f283102853c5996081b0a06df911e6c46ff7e8f9c5, cmp clean against the delivered bytes).
+It is DOCS-ONLY in its own words — "这是一项产品方向与文档设计的授权，不是实现授权，也不是批准升级或替换任何 V1 cohort
+构建" — so the round wrote ADR-0030, 04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md, dated clarification notes on the
+eight live documents that disagreed, and the governance pointers. No path under apps/, crates/, schemas/, migrations/,
+fixtures/, golden/, assets/, templates/ or scripts/ was touched, and no dependency, lockfile, DESIGN.md or token moved.
+
+What C1 decides, stated once: Analyze stays ELF-plus-optional-MAP; a .bin or Intel HEX file becomes a RELEASE
+ATTACHMENT carrying raw bytes, byte_size, SHA-256 and a declared kind; attachment bytes bind into the Gate identity, so
+required = ["bin"] / ["hex"] finally has a satisfiable path instead of a permanent BLOCK; the release identity and the
+bundle byte checks already covered exactly this and are inherited, not rewritten; and an attachment's provenance to the
+analyzed build is Unknown permanently — never promoted to Observed, and never counted into unknown.count, which is why
+attaching a file cannot move evidence.unknown_review. The Intel HEX address-span promise in 04_TECH/03 is withdrawn,
+not deferred, and no parser is added.
+
+The contract ruling, which its §3 called the highest-risk gate: NO schema major moves. gate-results:1 and
+release-manifest:1 keep version 1 and every existing field's meaning, and the new disclosure rides in their declared
+extensions point — the same technique P3 used for policy_sha256 and P4 used for integrity_model. Discriminability is
+carried by the Gate canonical label, not by an optional field: firmwaresight-gate-input/1 is byte-frozen and is emitted
+whenever the attachment set is empty, so every existing run id, golden and stored row keeps reproducing exactly as it
+does today; a non-empty attachment set is canonicalized under /2 with its own attachments[ ... ] block and must declare
+both extensions entries. SnapshotId and SnapshotId::compose are untouched, and no BIN/HEX row can enter a snapshot —
+the artifacts table's NOT NULL parser_id / architecture / bitness / endianness columns are the structural proof that
+putting one there would mean inventing analysis data.
+
+Its six hard stops were each checked before anything was written and none was triggered: the Owner's choice is the file
+itself and is displayed in the report; the tree was clean at the reference head d41284e54f723d74687cf351d85f1f2fc0b0be2a
+with no worktree or stash residue; the preflight premises were re-verified against source, and the one refinement found
+(attachments need their own GateContext field, their own canonical block and their own attachment: locator, because
+gate.rs:405-413 and the two rule summaries bind the existing vector to the snapshot) is recorded in ADR-0030 D-4
+instead of being smoothed over; the strict stale/export proof is written as a six-link chain; no analysis data or
+evidence grade is fabricated; and no security, path-authority or network boundary moved.
+
+What it does NOT do: implement C1 — the four units are specified as C1-U1 Data+Identity, C1-U2 Gate+Bundle,
+C1-U3 Contract+Regression and C1-U4 UI+CLI, and none is authorized; the C1- prefix exists because U1 already names the
+closed UI productization stage. It starts no V1 work, resumes nothing, recruits nobody, and does not re-freeze anything:
+the cohort build stays 11573661113 at product head 41bb6a36, NSIS 3,896,257 bytes 9a51e86a…c87d93, and that round's
+known consequence is left on the record rather than fixed by swapping the instrument — the cohort bytes predate A0, so
+participants will still see the pre-A0 refusal copy. U1's verdict and its guarded 25-item tally, P5 PASS_COMPLETE,
+G2 PASS, 0.6.0 MVP_CANDIDATE, licence PENDING_OWNER_CONFIRMATION, L11 and L15 CARRIED_FORWARD and
+B1 / RC / GA NOT_AUTHORIZED are untouched. Nothing was built, installed or run, so the round is NOT_RUNTIME_VERIFIED.
+Report: §6 step 9 asks for a closeout report, and §4 names no report path among the five kinds of document change it
+allows, so the report was delivered in conversation to the owner and is not written into the tree; the durable record
+is ADR-0030, 04_TECH/28_RELEASE_ATTACHED_BYTE_EVIDENCE.md and this file's register entry at
+10_AUDIT/SOURCE_PROMPTS/README.md. Machine state: BASELINE.yaml c1_direction_and_design_freeze. The pointer was NONE
+when the authorization arrived and is NONE now, and §6 step 9 ends the round here: a C1-U* implementation needs a new,
+separate authorization.
+
+On 2026-10-09 the owner delivered 《FirmwareSight — A0 Truthfulness Corrective / Coding Agent 执行授权 v1.0》 as a
+file, granting only A0_PRODUCT_TRUTHFULNESS_CORRECTIVE: four bounded truthfulness fixes, eleven named exclusions, and
+no other stage. It ran and closed the same day at head 19dcf88 with all four subitems FIXED — the Object Attribution
+capability declaration, the unsupported-format next-step copy, one Compare ranking-versus-total basis sentence, and
+Overview regression coverage threaded on real rule ids instead of mockup names. The §三 STOP clause was measured, not
+assumed, and was NOT TRIGGERED: golden gate-results.json regenerated byte-identical and the bundle manifest kept the
+same release.id, build.snapshot_id and gate_run_id across the correction. Counts moved 868 → 870 Rust and 291 → 295
+UI; five goldens changed through scripts/update_goldens.py and eight did not; no public contract, schema, field,
+dependency or IPC binding moved; nothing was installed, so the round is NOT_RUNTIME_VERIFIED and claims no screenshot.
+What it deliberately left open is still open: object attribution itself (GAP-02), the BIN/HEX range conflict between
+ADR-0006, the PRD, the cohort documents and the Compatibility Matrix (D07/Owner), and the other D07-1…D07-6
+decisions. The pointer did not move: it was NONE when the authorization arrived and it is NONE now, and §十 forbids
+entering Stage A, Stage B, V1, B1, RC or GA on this round's authority. Report
+A0_TRUTHFULNESS_VALIDATION/A0_CORRECTIVE_REPORT.md; machine state BASELINE.yaml a0_truthfulness_corrective.
+
+On 2026-10-08, after the pointer had returned to NONE from U1's closure, the owner delivered
+《FirmwareSight — V1 Cohort Re-freeze / Execution Authorization v1.0》 inline, granting only V1_COHORT_REFREEZE.
+It moved the formal research build off P5 Commit F3's artifact 11419727517 (NSIS 3,888,432 bytes, 182506f2...63d12,
+run 37475580080 at head 08fdfcb7) onto the build the Architect's visual acceptance was actually granted over:
+run 37828673549 (#85, attempt 1, 10 of 10 jobs), product head 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177, artifact
+11573661113, container 5,544,133 bytes (330e83af...4f3fb4), NSIS FirmwareSight-0.6.0-windows-x86_64-nsis.exe
+3,896,257 bytes, SHA-256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93, CLI companion 1,668,149
+bytes (924f3a71...1d8373), payload 5026c47b...0ddaae, version 0.6.0, unsigned, not expired, GitHub expiry
+2026-10-22T19:18:25Z. Both builds were downloaded and hashed again before anything was written about either; the F3
+block in BASELINE.yaml is left intact and dated as superseded; and no session, install, recruitment or external
+distribution was started. A third authority sits beside the local bytes and the container's manifest: GitHub publishes
+`digest` = `sha256:330e83af…4f3fb4` for the live build and `sha256:40cb5c99…37850e` for the superseded one, each equal
+to the container hash measured from the downloaded bytes. Dated erratum, later on 2026-10-08: the block below the
+re-freeze one, and the rounds above it, said "GitHub's `sha256_digest` is null" — that was a missing key read through
+`jq`, not a published null. The field is named `digest`, and it matches. Record:
+V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md; protocol: V1_VALIDATION/README.md.
+The swap is defensible rather than convenient because F3→41bb6a36 is 44 product paths, all of them the presentation
+layer (42 under apps/desktop/ui/src, plus ipc.rs's additive MainWindowPage::Overview variant and two window-title
+strings, plus that test): crates/, assets/, schemas/, fixtures/, golden/, .github/, scripts/, 09_ADR/ and templates/
+are byte-identical subtrees, the same 30 IPC commands are registered at both heads, both runs report 868 Rust tests
+across 47 result lines, and both lockfile digests match — so not one M1–M6 metric, denominator or threshold is
+touched, while the interface a participant reads genuinely changed, which is the reason the accepted build and the
+frozen build have to be the same bytes. The docs-only head's own artifact 11592690212 (run 37874177649, #87) is
+named here only to be refused: §二 forbids treating a rebuild, a documentation package or any other product as the
+frozen research version.
+
+On 2026-10-08 the Architect delivered an independent visual acceptance record —
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Architect_Final_Verdict_2026-10-08.txt, 5,159 bytes, 52 logical lines,
+0 CR, delivered SHA-256 8634321c5a289f68b83202c2016465fb21133afc7e23ca1d3a558e6bc036c619, stored blob
+f16f0e7ef1279883d62d909d5161d42ab756d74b, `cmp` clean against the delivered bytes. It is an authority record, not an
+execution prompt: it authorizes no work, and it is the first document in that directory that closes a track instead
+of opening one. Eight U1 units ran; four of them closed on `READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` and none got
+past it, while the rest stopped at `READY_FOR_ARCHITECT_VISUAL_REVIEW` and `REQUIRES_ARCHITECT_POLISH_REVIEW` — the
+same ceiling in different words. This word came from outside them, which is why every `never_self_issued` list in
+BASELINE.yaml is left exactly as written.
+
+The verdict, with its scope sentence attached to it rather than below it:
+  U1 = PASS_COMPLETE / VISUAL_ACCEPTED_WITH_KNOWN_LIMITATIONS
+  Scope: visual productization readiness for a controlled V1 external-user study, NOT GA quality, feature
+         completeness, or public distribution approval.
+  "This is an ARCHITECT waiver of specifically enumerated cosmetic/interaction residuals, not a claim that every
+   Agent acceptance box passed."
+
+The tally is unchanged and is guarded by name: 25 items — 23 PASS, 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED, with 2
+MISMATCH_PROVED flags inside the 23 PASS items. The record re-counted it independently and says "DO NOT rewrite this
+tally to 25/25 or to 100%." Four residuals stay enumerated under that record's own heading
+`ACCEPTED DEVIATIONS / MUST NOT BE SILENTLY CLOSED`: (A) Analyze's metric band leaves the empty grey track at
+1024x720 — the round's FAIL box, now a U1 visual known issue and a V1 UX observation, prioritised from the first
+four participant reports or from layout impact, and NOT a mandatory pre-V1 engineering gate; (B) Compare's Section
+Changes first actual data row sits below the 1440x900 viewport while the aggregate counts and real deltas are above
+it — one-scroll-detail accepted for V1 only, which is not literal satisfaction of the stricter aspiration; (C) the
+Release Gate's baseline picker loses its draft selection on navigation — recorded as a study usability ambiguity,
+with the persisted GateRunDto carrying its own baselineSnapshotId, snapshotId and policySha256 so nothing saved is
+rewritten; (D) R3 never re-captured Overview's Previous-analysis panel — the round's NOT_VERIFIED box, where R2's
+images plus unchanged scoped-source behaviour are contextual evidence and not a substitute. None of the four may be
+closed by an agent. Deviation (E), a document defect in this very file, is corrected in the record block below with
+this update rather than by a stand-alone CI-loop commit, exactly as the verdict routed it.
+
+Nothing else in the governance state moved. P5 remains PASS_COMPLETE, Productization ENGINEERING_COMPLETE, G2 PASS,
+the product 0.6.0 MVP_CANDIDATE. V1 remains stage_status IN_PROGRESS / research_state RECRUITMENT_READY with 0
+eligible external sessions until separate authority is granted. B1 private beta, RC, GA, public release, signing,
+notarization, the updater and commercial distribution remain NOT_AUTHORIZED; the open-source licence stays
+PENDING_OWNER_CONFIRMATION; L11 stays CARRIED_FORWARD because a visual acceptance of the UI is not a research pass,
+and L15 stays CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER. This round changed no product byte, no test, no token, no
+schema and no Gate rule: 868 Rust across 47 result lines and 291 UI in 9 files on the 17-step gate, 30 IPC commands,
+assets/design-tokens.json at 94336906...14d4.
+
+The record's last section is titled `NEXT ACTION RECOMMENDATION, NOT EXECUTED`, and this pointer treats that title as
+binding. It recommends, before participant #1, a SEPARATE V1 cohort re-freeze from the F3 research artifact
+(11419727517, NSIS 3,888,432 bytes, 182506f2...63d12) to this product's CI artifact 11573661113 (run 37828673549,
+#85, product head 41bb6a36...), with the bytes independently re-verified first, the F3 source and all historical
+immutable research records preserved, and no automatic start of participants. What this round did is the read the
+record conditions its own document changes on: it downloaded and hashed artifact 11573661113 again and confirmed
+every figure — NSIS FirmwareSight-0.6.0-windows-x86_64-nsis.exe 3,896,257 bytes,
+SHA-256 9a51e86aa5c571e43a8e1598ca64efb9c47d85e7c826e2cfa4a2faa8f3c87d93, container 5,544,133 bytes 330e83af...4f3fb4,
+the container's internal SHA256SUMS verified entry by entry, toolchain.git_commit 41bb6a36..., the artifact not
+expired, and nothing installed or launched. One subtraction stated plainly: GitHub's `sha256_digest` is null for this
+artifact, so the second authority is the internal manifest plus the metadata commit, not a self-referential digest.
+(Dated erratum, later on 2026-10-08, owned by the re-freeze round: that subtraction is withdrawn. These endpoints
+expose `digest`, not `sha256_digest`, and for 11573661113 it reads `sha256:330e83af…4f3fb4` — the same value as the
+container hash measured from the downloaded bytes, so GitHub is a second authority after all. The verdict it qualifies
+is unchanged: the tally, the waiver and the recommendation all still stand. Evidence: this round's evidence root,
+00_authority/GITHUB_ARTIFACT_DIGEST_FIELD.json, and the values are reprinted in the record §3.)
+What it did NOT do: touch V1_VALIDATION/, move `v1_execution.cohort_build_frozen`, amend the protocol, or begin
+recruitment. Re-verifying bytes is evidence about a candidate; it is not a stage transition, and the F3 artifact
+stays the frozen cohort build in every authority document until a separate authority says otherwise.
+Dated later the same day, in this file's own words: a separate authority did say otherwise. The paragraph above is
+kept as the verdict recording round's own boundary — that round executed nothing, and the block at the top of this
+fence is the round the owner authorized to do it. The two are different rounds on different authorities, which is why
+the verdict's section title reads `NEXT ACTION RECOMMENDATION, NOT EXECUTED`.
+
+So the pointer is NONE, and what is blocked below it is blocked on a person rather than on a task. Recruitment and
+consent need real firmware engineers and human moderation (V1_VALIDATION/sessions/README.md's intake path, §47/§48) —
+an agent cannot produce either, and inventing one is the single thing this track exists to forbid. The build a session
+will run is now named and verified, and its bytes still have to be privately archived before 2026-10-22T19:18:25Z,
+which is an owner action no agent may take. Any UI follow-up, including A and C, needs its own prompt and is
+prioritised by the Architect from participant evidence. If you were sent here to "continue U1": it is closed, by the
+Architect's judgment of the uploaded evidence, and U1_VALIDATION/U1P_R3_ARCHITECT_FINAL_VERDICT_RECORD.md §8 is the
+section that says why re-reading an artifact is not resuming V1. If you were sent here to "start V1": the re-freeze
+authorized the instrument and withheld the cohort — §三's allowed list has no recruitment, no session, no install and
+no distribution in it, and §五 requires the session count to still read 0 when this round ends. With active_task NONE,
+AGENTS.md 1 forbids creating business functionality or lifting the next track off the roadmap. Read, then stop.
+
+Dated 2026-10-10, and it is the newest paragraph in this fence. Three rounds ran in one day after the C1 packet's three
+stages had landed locally: `NEXT-01` read the packet as an independent acceptance (read-only, no commit, four
+non-blocking experience gaps and a §14.3 `ACCEPT`); the Owner then approved an ordinary fast-forward push, and
+`2859bb2..47fde34` went up and came back green across ten CI jobs read per job — which closed M11's POSIX question the
+two local rounds could not, and did so from CI logs rather than from a projection; then `NEXT-02` ran
+`B1-U1`, the first development unit of the v0.2 product plan. B1-U1 shipped the three-state split — application
+preferences in a versioned `settings.json`, project policy left alone in `firmwaresight.toml`, session state never
+persisted — with two settings that actually do something, a Settings page, and a Gate-boundary proof
+(`B1_VALIDATION/B1_U1_PREFERENCES_SETTINGS_REPORT.md`, block `b1_u1_preferences_and_settings`).
+Its status word is `LOCAL_B1_U1_GATE_PASS / ARCHITECT_REVIEW_PENDING`, and it upgraded no C1 word. Its commit is `2c47213`,
+dated 2026-10-11T00:01:14-07:00 — the round measured everything on 2026-10-10 and crossed the date boundary by one
+minute, which is stated because this file's own rule is that two dates on one round should not be blurred.
+The Owner's dispatch instruction for that round was explicit — no further C1 document-organising stage, and no
+delaying the base feature set over non-safety-blocking experience issues — which is why `NEXT-01`'s N01-F01..F04 are
+carried as findings instead of becoming a fifth C1 round.
+**The pointer is still NONE, and it stayed NONE through all three.** `NEXT-02` reserves both the push and the final
+`ACCEPTED` word, and this round asked for neither. B1-U2 (theme) cannot begin while `ADR-0018` and `AGENTS.md` 11
+forbid a Dark MVP theme — that is an ADR-level decision for a person, not a field to add — and B1-U3 (i18n) needs its
+own dispatch. If you were sent here to "continue B1": the next unit needs an Owner prompt, and inventing one is what
+`AGENTS.md` 1 forbids. Read, then stop.
+
+Dated 2026-10-11, and it is the newest paragraph in this fence. That last blocker is now removed, by a person.
+`NEXT-03` re-opened B1-U1 as an independent read-only acceptance and closed it `ACCEPT_WITH_EXPLICIT_LIMITS`: the
+first-launch auto-write the coder could not attribute is `NOT_REPRODUCED` across two clean cold starts and has no
+call path, and the whole Settings contract was driven in a real window — click, keyboard, cross-page, cross-restart,
+Reset, and the three damaged-document cases including the `ERR-PREFS-8004` refusal that left a `schema_version: 2`
+document untouched. One genuine defect surfaced and took the minimal corrective `2cff702`: a refusal message joined a
+sentence to a lowercase Rust error clause with a full stop. The Owner authorized the push after that acceptance, so
+`47fde34..2cff702` went up as a plain fast-forward — three commits, not the two `NEXT-03` predicted, because of that
+corrective — and came back as CI run `38124118299` with ten jobs green: 1,043 Rust on Windows, 1,044 on Ubuntu (three
+Windows-only symlink cases out, four `source_symlink_posix` cases in), 319 UI in 10 files on both, drift 8/8.
+`ADR-0031` then superseded the one clause of `ADR-0018` D3 that read `theme: MVP Light only`, scoped to the Developer
+Preview's desktop shell, and corrected `NEXT-04`'s citation of "D4" (D4 is the five-state set) on the way. `DESIGN.md`
+§4/§9, `AGENTS.md` 11 and `BASELINE.yaml` `design.theme` moved with it, in that ADR's own words.
+**The pointer is now `B1_U2_SYSTEM_LIGHT_DARK_THEME`, dispatched by `NEXT-04` and authorized by the Owner on
+2026-10-11.** B1-U3 (i18n) still needs its own dispatch, and no C1 word moved in any of this.
+
+Dated 2026-10-11 again, and it is the newest paragraph in this fence: **`B1-U2` RAN, and it is CLOSED LOCALLY AND NOT
+PUSHED.** The live word, which the executor proposes and cannot grant, is `LOCAL_B1_U2_GATE_PASS /
+ARCHITECT_REVIEW_PENDING`; the record is `B1_VALIDATION/B1_U2_THEME_REPORT.md` with its design checklist beside it and
+the `b1_u2_system_light_dark_theme` block in `BASELINE.yaml`. The round is two local commits on top of `2cff702` —
+`bf3d494`, which is the authority (`ADR-0031` plus the current-spec surfaces it authorizes), then `bd62289`, which is
+the unit. What shipped is a third preference on the mechanism
+B1-U1 built rather than a second mechanism: `ThemePref { System, Light, Dark }` in the same `settings.json`, behind
+the same command, with `SCHEMA_VERSION` 1 → 2 and the reader widened BEFORE the writer moved — the order matters,
+because `read_document` refused any version but its own, so a bare version bump would have opened every existing
+person's file as corrupted and quietly demoted their settings to `.unreadable` on the next save. `color.dark` joins
+`color.light` in the token file as 30 matching roles, `scripts/generate_design_tokens.py` now emits both palettes and
+fails the build on a WCAG AA miss, a role-set divergence, or an exemption that no longer needs to exist, and
+`color-scheme` is set beside the `data-fs-theme` attribute so the WebView paints the right palette before React's
+first commit. No dependency, no plugin, no capability change, no network; 37 commands; one regenerated binding.
+Gate on the staged tree: **17 of 17, exit 0, no SKIP — 1,050 Rust (1,043 at `2cff702`; +7, none `cfg`-gated, so 1,050
+is the projected POSIX figure and POSIX remains NOT MEASURED on this host) / 334 UI in 11 files.** The boundary was
+proven where it could actually break: the same Gate run answered `gate-d19c48891d79…` with REVIEW 7 / UNKNOWN 2 /
+PASS 13 / N/A 8 in both palettes in the running window, goldens unchanged, and the isolation test now stores
+`kib + history + dark` and checks all three words landed before it compares two runs. Two defects were caught by
+tests this round wrote: a reset restored two of three settings, leaving the window dark while the document said
+System, and the Reset copy still promised "two settings" after this change had made that false.
+Three things this paragraph will not pretend. (1) **One AA shortfall is open and is an Architect decision, not a
+theme detail**: light `diff.removed` on `diff.removed.bg` measures 4.4974:1 against a 4.5 floor, and the value that
+clears it is already printed into two committed report goldens, so moving it means deciding what may move in the
+export — `crates/firmwaresight-report`'s own colour contract test is what refused it, and the token was reverted
+rather than the rule being worked around. (2) The real-window evidence is `DEV_RUNTIME_VERIFIED` on
+`target/debug/firmwaresight-desktop.exe` at this head; it is **not** `INSTALLED_VERIFIED`, because no CI build of any
+B1 head has been installed, and that pass is still owed. `NOT_VERIFIED` and listed as such: a live desktop-theme flip
+(refused — it would change the Owner's desktop for a screenshot), 125% and 150% display scaling, `forced-colors`, an
+ACL-read-only config folder as an automated test, and cross-process contention. (3) Nothing here is pushed:
+**`origin/main` stays `2cff702`**, and the Owner's authorization covered B1-U1's range only.
+If you were sent here to "continue B1": the next unit is **B1-U3 (zh/en)**, the Owner has already said no further UI
+concept art or visual redesign pass, and B1-U3 still needs its own dispatch prompt. Inventing one is what `AGENTS.md` 1
+forbids. Read, then stop.
+
+ON 2026-10-11 THE OWNER DISPATCHED B1-U3 AND IT RAN THE SAME DAY. `NEXT-06` (archived, 8,797 bytes, 57 lines, 0 `CR`,
+sha256 `5d6bde626f63ecf280d275998c113b209ef1de5ceb4269d42f445c99ac6b2dca`) opened only after its four gates closed in
+order: `NEXT-05`'s independent `ACCEPT_WITH_EXPLICIT_LIMITS` on B1-U2 with limits L1–L5 — held in gitignored scratch at
+`target/n05_next05_report.md`, because `NEXT-05` forbade modifying a tracked file — the Owner-authorized fast-forward
+`2cff702..e0b8fc4` read back as remote run `38160046797` with ten jobs green, the Owner's own adjudication now archived
+at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_B1U2_Architect_Review_2026-10-11.md`, and `ADR-0032` for the design decision.
+The interface now speaks two languages. `LanguagePref { System, ZhCn, En }` is the fourth stored choice,
+`SCHEMA_VERSION` went 2 → 3 with the reader widened to accept 1, 2 and 3 before the writer moved, and a document that
+claims an older version while carrying the newer field is refused whole rather than half-understood. The catalog is
+typed in-repo — nine namespaces, **918 keys in English and the same 918 in Chinese**, `zh` typed against `en` so a
+missing key is a `tsc` failure at gate step 5 rather than a log line — and `NEXT-06`'s ban on resting that choice on
+"zero dependency" or on "must be i18next" is answered with that measurement. `system` is live for colour and **not**
+live for language, because `navigator.languages` has no event; the Settings sentence says so and `ADR-0032` D8 records
+it. Zero hardcoded text nodes remain in any non-test `.tsx`; the five Gate states, the four evidence classes, units,
+ids, digests, paths and error codes stay exactly as Core wrote them in both languages; and all 59 error codes measured
+out of Rust have a Chinese and an English diagnosis keyed by the code, with the engine's own words left visible beside
+them. python scripts/check.py on the final staged tree: 17 of 17, exit 0, no SKIP — 1,056 Rust passed / 0 failed / 0 ignored across 49 `test result:` lines (1,050 at `e0b8fc4`; the six new cases are not `cfg`-gated, so 1,056 is the projected POSIX figure too — POSIX remains NOT MEASURED on this host, which has no POSIX runner), 379 UI tests in 13 files (334 in 11), clippy and fmt clean, 37 commands, baseline verifier PASS at 852 tracked / 850 sum entries / 984 tree lines (820 / 818 / 949 at B1-U2's close; the +32 are this round's catalog, ADR, prompts, report and checklist) The boundary was tested where it can break rather than asserted where it is cheap: exporting
+the same release with a different stored language moves no bundle byte, no manifest digest and no release id, and in
+the running window one Gate answer — `gate-b64afd679c0e3d81f7b7b033c546647602f918415524e1300785c45979c0d0c3` — kept its
+id, its digests and its badge tally across a live language switch while only the sentence around it changed. All seven
+pages were walked and photographed in Chinese at inner 1024×721 and 1440×901 by real Win32 resizes, with no overflow in
+either language, and the Owner's own `settings.json` was read at `schema_version: 1`, upgraded to 3 with no
+`.unreadable` copy, and then restored byte-for-byte. `DEV_RUNTIME_VERIFIED`, not `INSTALLED_VERIFIED`: no CI-built
+installer exists for any B1 head, and no B1 unit gets that word. NOT_VERIFIED and listed as such: a screen-reader pass
+in Chinese (accessible names were measured in the DOM, not read), 125% and 150% display scaling, `forced-colors`, and
+any second writing system. **Nothing here is pushed: `origin/main` stays `e0b8fc4`**, and the Owner's authorization
+covered B1-U2's range only. The `NEXT-05` correctives C1 (needs the Owner's word, because clearing it moves two report
+goldens), C2 and C3 remain open and untouched.
+If you were sent here to "continue B1": the next unit is **B1-U4 or the three `NEXT-05` correctives, at the Owner's
+choice**, and the Owner's own ordering says the remaining B1/B2 work should go at real file handling and professional
+interpretation of the data rather than more settings switches. This round proposes nothing beyond that, and inventing a
+unit is what `AGENTS.md` 1 forbids. **Separately and not to be lost behind this unit: the old V1 cohort build's GitHub
+Artifact records expire 2026-10-22 and still need their own private archival.** Read, then stop.
+
+ON 2026-10-11 THE OWNER ACCEPTED B1-U3, AUTHORIZED ITS PUSH, AND DISPATCHED NEXT-08. The paragraph above was true
+when it was written and is kept unedited; this is the live pointer. `NEXT-07` reviewed B1-U3 read-only and returned
+`ACCEPT_WITH_EXPLICIT_LIMITS` on re-measurement — 17/17 gate, 1,056 Rust across 49 result lines, 379 UI in 13 files,
+918 keys per language with zero asymmetric keys, Core and CLI holding zero references to the preferences file, the
+v1→v3 upgrade and both the future-version and damaged-document refusals proved on the Owner's own `settings.json`,
+and the dev store left with no new row — while naming nine non-blocking defects, two of which (D1 `format.ts`'s
+`ABSENT = 'Not present'` inside Chinese captions, D2 `RankBar`'s `'no magnitude'` fallback) make the round's own
+"zero hardcoded text nodes in any non-test `.tsx`" sentence false as written. The Owner then supplied the push
+authorization in the exact words the review round demanded, and `e0b8fc4..a0b5c88` went up as an ordinary
+fast-forward: **`origin/main` is `a0b5c886051a6b10042ea26f52809baea713d7af`**, read back through the GitHub API and
+`git ls-remote`, and run **#101 (`38207073344`)** is green on all ten jobs — Rust **1,056** on Windows and **1,057**
+on Ubuntu (49 result lines each), UI **379 in 13 files** on both, drift 8/8 at 852 tracked / 850 sums / 984 tree
+lines, dependency policy clean, three packages, macOS core smoke. **The Windows/Ubuntu difference of one is a
+pre-existing `cfg` split — four `source_symlink_posix::*` cases against three Windows-only ones — so no later round
+may write "POSIX will equal Windows" as a projection; measure it or say NOT_VERIFIED.** `REMOTE_CI_PROVEN` is now
+true for B1-U3 and `INSTALLED_VERIFIED` is still not claimed for any B1 unit, because nobody has installed and
+operated a CI-built B1 installer.
+
+**The live word is `B2_U1_FILE_WORKFLOW_INTEGRITY`, dispatched by `NEXT-08` v1.1 on 2026-10-11** (archived with its
+v1.0 contract, `NEXT-07` and the B1-U2/B1-U3 review, digests measured against the delivered bytes in
+`10_AUDIT/SOURCE_PROMPTS/README.md`). Its scope is exactly the four reproducible gaps `NEXT-01` recorded —
+N01-F01 the two different bases `--attach` resolves against, N01-F02 a chosen Unicode file name collapsing to `bin`
+on screen, N01-F03 `verify_bundle_portability.py` failing on a legal no-baseline bundle, N01-F04 the CLI's 6103/6118
+versus the desktop's 6102 for one changed attachment — and nothing else: no parser growth, no new Gate or bundle
+contract, no golden or schema change, no UI redesign, no B1-U4, no B2-U2, no V1 work. It commits locally only. The
+Owner's v1.1 grants one narrow exception to its own pointer-conflict STOP rule, which is the correction of the
+stale live-state records in these three files, and it does not relax any other `AGENTS.md` rule. B1-U3's D1–D9, the
+`NEXT-05` correctives C1/C2/C3, and light `diff.removed` at 4.4974:1 against a 4.5 floor stay on the register and
+are not folded into this unit. **Separately and not to be lost behind it: the old V1 cohort build's GitHub Artifact
+records expire 2026-10-22 and still need their own private archival.** Read, then start Step 0.
+
+**The live word is `B2_U1R1_NARROW_CORRECTIVE`, executed under `NEXT-10` on 2026-10-12.** The paragraph above was the
+pointer when B2-U1 was dispatched and is kept unedited; this is what has happened since, in order.
+
+`B2-U1` closed locally as `4eb46b58f22420916e613318ecfd252883d06aa2` (parent `a0b5c88`), all four `N01` gaps
+implemented TDD-first with the gate green at 1,064 Rust / 380 UI, and nothing was pushed. `NEXT-09` reviewed that head
+independently and returned **`ACCEPT_WITH_EXPLICIT_LIMITS`** — re-measured 17/17, the same Rust and UI totals, the
+boundary filter showing no change to `SnapshotId`, the Gate canonical input, the Release ID grammar, schema majors,
+goldens, migrations, capabilities, dependencies or network — while naming two defects and one limit that this round
+then answered. It also recorded the thing the unit had to disclose: a real-desktop walk pressed Enter one time too
+many and ran Gate against the Owner's own development store, adding 35 rows. The Owner authorized recovery in the
+words 「我选择 **方案 B**：有条件恢复测试前状态」, scoped to that run's side effects alone. All four preconditions were
+proven first — no live connection, the directory backup self-consistent and free of the accidental run, a row-level
+diff of `+35 / -0` with every added row naming that run, and a rollback point hashed before anything moved — and the
+restore went through a Backup-API candidate rather than a single-file overwrite under a live WAL, the live file group
+being **moved** to `target/b2u1/store-quarantine-20261012/`. Post-recovery the store reads `integrity_check ok` with
+`gate_runs 2 / gate_findings 20 / gate_finding_evidence 30 / gate_run_attachments 0` and the Owner's own rows intact
+(`projects 1 builds 2 sections 34 symbols 64 evidence 21 artifacts 3`); `settings.json` still hashes
+`eccee644…`, untouched. **This is logical equivalence across all 14 tables, not byte-exact restoration** — a
+Backup-API copy folds the WAL and repacks pages — and the claim is written that way on purpose.
+
+`NEXT-10` then closed the two named defects and answered the one question `NEXT-09` left open. `D-N09-1` was a real
+crash: `scripts/verify_bundle_portability.py` answered the notes question by `stat`-ing a document the manifest
+promised, so a promised-but-absent `release-notes.md` ended a stranger's review with a `FileNotFoundError` traceback.
+The read is conditional now, the absence is stated as an `unanswerable:` FAIL (measured: 56 of 59 checks passed,
+3 FAILED, exit 1, no traceback, both indexes still verified first), and a release that never promised notes now prints
+a real SKIP instead of a pass. The behaviour is held by `scripts/tests/test_verify_bundle_portability.py`, a stdlib
+`unittest` suite replayable with `python -m unittest discover -s scripts/tests`, six of six, whose subject is a copy of
+the committed golden bundle — and three of those six were RED on `4eb46b5`. `D-N09-2` turned out **not** to be a
+wording defect. `release_cli.rs` measured that a project holding a non-empty file named
+`firmwaresight-unresolvable-path` let `release prepare --attach ../escape.bin` **succeed** (exit 0) and ship that
+file's bytes (`8ff38045…`) as the release's BIN attachment: the refusal was a fallback path, and a fallback path can be
+occupied. `resolve_selection` now returns the refusal itself, before the first `stat`, the first hash, the preview and
+the publish, with `ERR-BUNDLE-6115`, exit 6, no destination directory and no identity change all kept, and no legal
+input narrowed — a real file of that name, chosen by its owner, still ships. `04_TECH/07` and `04_TECH/28` §14.4 carry
+the two clarifications this round was authorized to write: the two `--attach` verbs have **two relative bases** and
+always will until the Owner decides otherwise, "the same observation function" was never "the same resolution entry",
+and §9's "file name" is two names — `display_name`, local and Unicode, never in a fingerprint, a portable document or a
+bundle path, and the sanitized bundle leaf, whose rules did not move.
+
+**One same-named-file risk is still open and was stopped rather than fixed.** The configured-notes path resolves
+through `evidence::join_project_relative`, which shares that fallback, and `config::require_project_relative` has
+accepted a climb-and-come-back spelling since `f1516b8`. Measured: `release_notes_path = "docs/../RELEASE_NOTES.md"`
+against a project whose notes exist at the root returns Gate **BLOCK** — "does not exist in the project" — when the
+fallback name is free, and **PASS** — "is present", reading bytes nobody configured — when a file of that name exists.
+It is `D-N10-1`, and no round may quietly repair it: reading the notes the owner actually configured changes the Gate
+notes fact, which is part of the canonical input and therefore moves a stored `run_id`. That is `NEXT-10` §40's stop
+condition, so the repro, the impact and the narrow fix are recorded in `04_TECH/28` §14.4 and `BASELINE.yaml` for the
+Architect to decide.
+
+**Boundary held.** Nothing was pushed: `origin/main` stays `a0b5c886051a6b10042ea26f52809baea713d7af` and this head is
+one ordinary fast-forward ahead of it, which is the Owner's decision and not this round's. No Owner data was touched in
+`NEXT-10`: no connection to the store, no settings write, no dialog automation, no GUI — every test ran in a gitignored
+temp project, and the desktop surface stays `NOT_RUNTIME_VERIFIED` for this round because no isolated account or store
+exists on this host. F01–F04 were not redone, no golden, fixture, portable schema, migration, token, dependency or
+capability moved, and the V1 cohort build identity is untouched. Gate at the close: **1,068 Rust passed / 0 failed /
+0 ignored across 49 result lines**, **380 UI in 13 files**, fmt/clippy/typecheck/lint/build clean, `check.py` and the
+baseline verifier as recorded in `BASELINE.yaml`. **POSIX is `NOT_MEASURED`** — there is no POSIX runner here, the
+`cfg(unix)` symlink modules neither compiled nor ran, and no projection stands in for a measurement.
+
+**Status word: `LOCAL_B2_U1R1_GATE_PASS / ARCHITECT_REVIEW_PENDING`.** The order from here is the Owner's: an
+independent review of this head, then the push and its CI read-back, then B2-U2 — Flash/RAM, VMA/LMA, Region and
+ELF/MAP evidence interpretation, the professional centre of the product — which nothing in this paragraph authorizes.
+`D-N10-1` needs an Architect ruling before any round fixes it. B1's D1/D8, the `NEXT-05` C1/C2/C3, the light
+`diff.removed` 4.4974:1 and the old V1 cohort artifact `11573661113` (expires 2026-10-22, still its own archival task)
+all stay on the register. Read, then stop.
+
+**The live word is `B2_U1R2_NOTES_PATH_BINDING_AND_PYTHON_GATE`, executed under `NEXT-12 v1.1` on 2026-10-12.** The
+paragraph above was the pointer when `B2-U1R1` closed and is kept unedited; this is what has happened since.
+
+`NEXT-11` reviewed that head independently, read-only, with three rebuilt binaries after voiding its own first identity
+comparison, and returned **`ACCEPT`** on `D-N09-1` and `D-N09-2`. It also reproduced `D-N10-1` end to end and proved
+something the register had not said: the defect is **already on `origin/main`** — the same three configurations measured
+over `6efd2c73…`, including a bundle that shipped a `release-notes.md` whose bytes were the fallback file's
+(`cb467479…` against the owner's `027d04e2…`) while the portable §61 reader still scored that bundle 53 of 53. It found
+one thing nobody had reported, `D-N11-1`: every path guard in this crate is lexical, and a Windows directory **junction**
+inside the project — creatable without any elevation — passes them all, so a configured path can be read and shipped from
+outside the root. The Architect's ruling of 2026-10-12 then separated the two: fix `D-N10-1`, spend the identity it costs,
+and do **not** silently change what links are accepted here.
+
+`NEXT-12 v1.1` executed that. `config::place_project_relative` is now the one lexical walk, with
+`config::require_project_relative` and `evidence::resolve_project_relative` as its two wrappers and
+`config::UnplaceableProjectPath` as a refusal that holds a fixed sentence and **no path**; `join_project_relative` and
+the invented leaf `firmwaresight-unresolvable-path` are gone from the product. `docs/../RELEASE_NOTES.md` now places at
+the root file it names, and all three consumers — the Gate's `observe_release_notes`, the byte-for-byte notes copy, and
+`resolve_source` — refuse before the first `stat`. The accepted set did not move: the same strings are legal, the same
+strings are refused, and every refusal keeps its `ERR-CONFIG-7005` sentence. Measured with two pinned binaries over the
+same committed projects, legal spellings keep their run ids byte-for-byte (`gate-5ebc21bb…` for `RELEASE_NOTES.md`,
+`gate-fd1ce7d3…` for `docs/NOTES.md`) and only the two misbound spellings move, because the digest they bound changed
+from the fallback file's `d9708e6c…` to the owner's `6e03bb14…`; `snapshot_id` moved in no row. Nothing was rewritten
+and no old run was re-issued. **`D-N10-1` is CLOSED.**
+
+**`D-N11-1` is measured and registered, and it is NOT closed.** With the junction inside the project, the pre-fix and
+post-fix binaries return the identical `gate-8d349728…4ff21a` and bind the outside bytes `6c4e5e59…`, so this round
+neither widened nor narrowed the escape; the shipped `release-notes.md` is a plain regular file of the target's bytes
+with a project-relative locator. A hard link is identical across both binaries too and carries no reparse marker, so a
+one-shot `canonicalize` plus `starts_with` would not see it — and such a check is not a TOCTOU guarantee in any case.
+A real symlink is refused by this host (`ERROR_PRIVILEGE_NOT_HELD`) and POSIX is `NOT_MEASURED`. Making configured paths
+physically root-contained is a separate Owner contract decision with its own identity consequences
+(`unreadable:{reason}` is bound into the run id, so even a refusal's wording moves it), and C1's accepted attachment
+capability was deliberately not touched: an explicitly chosen symlink may still be followed and an absolutely named
+attachment may still live outside the project.
+
+**The six Python regressions are now a gate step.** `scripts/check.py` gained a named `drift/python regressions` step
+that reads the unittest summary — `Ran N tests` with `N >= 6`, a verdict line starting `OK`, exit 0 — instead of trusting
+`discover`'s exit code, which is 5 on the interpreter CI pins and 0 on older ones when it collects nothing. Drift went
+8 → 9 and the default gate 17 → 18, counted from the executed output. Four mutations were measured and reverted:
+renamed suite file (`collected 0 … NO TESTS RAN`), one case removed (`5 tests collected, below the 6`), the reader's notes
+sentence moved (`FAILED (failures=1)`), and the resolver put back onto the invented leaf — which kills six unit tests and
+two CLI tests.
+
+**Boundary held.** Gate at close: **1,075 Rust passed / 0 failed / 0 ignored across 49 result lines** (1,068 before the
+seven new cases), **380 UI in 13 files** with no UI file touched, fmt/clippy `-D warnings`/typecheck/lint/build clean,
+`python scripts/check.py` **18/18 steps passed, no SKIP**, baseline verifier PASS at 863 / 861 / 996. Nothing is pushed:
+`origin/main` stays `a0b5c886051a6b10042ea26f52809baea713d7af`. All 23 files under the Owner's app-data directory were
+hashed before the first command and re-hashed mid-round with an empty diff — live store `5315f6a3…`, `settings.json`
+`eccee644…`, and the backup / rollback / quarantine directories untouched. **POSIX is `NOT_MEASURED`**, desktop runtime is
+`NOT_RUNTIME_VERIFIED`, and `INSTALLED_VERIFIED` is claimed for no B1 or B2 unit.
+
+**Status word: `LOCAL_B2_U1R2_GATE_PASS / ARCHITECT_REVIEW_PENDING`.** A developer may not self-sign the `ACCEPT`. The
+order the Owner set is: independent acceptance of this head → the ordinary fast-forward push and its ten-job CI read-back
+→ the separate `D-N11-1` containment round → **B2-U2**, which nothing here authorizes. Read, then stop.
+
+```
+
+## The U1 track, as it opened on 2026-10-07 — the record of what the first round was authorized to do
+
+```text
+U1_UI_PRODUCTIZATION_CONVERGENCE — stage U1, a UI productization track, opened 2026-10-07.
+Authorized by 《FirmwareSight B1 — UI Productization / Design Convergence》 v1.0 — Architect prompt, delivered
+INLINE as message text (no file, so no owner-side byte stream to hash). The owner re-registered the track as
+`U1` because `B1` is the canonical Private Beta identifier in 06_DELIVERY/06_STAGE_GATES.md and F3 §37 and V1 §40
+both record it NOT AUTHORIZED. The transcription the agent archived lives at
+U1_VALIDATION/00_authority/SOURCE_PROMPT_U1_transcription.md (503 lines, 16,762 bytes, SHA-256
+67067dce624a6dc458055dd79e21b6ed4e983c7ac665426561e72b939de52865) and that digest is the transcription's, never
+the prompt's.
+Start authority: HEAD = origin/main = f481b78059c14e1c83d3ba18e082004b7de72ee2 (V1's activation commit), tree
+clean, one worktree, and its run 37508243514 (#73, attempt 1) is 10 of 10 authoritative jobs.
+Goal: converge the desktop React UI toward the frozen seven-screen reference set — one shared design-system
+layer, then Overview, Analyze, Compare, Release Gate and Bundle & History — without touching Core semantics,
+evidence classes, schema, migrations, storage, the analysis wire format, release identity, ADR-0028 or ADR-0029.
+The reference images are direction authority for structure, hierarchy and density. They are NOT a functional
+contract: no backend is faked for them, and the frozen precedence chain (治理红线 > frozen assets / ADRs /
+assets/design-tokens.json > DESIGN.md > accepted screenshots) still decides what may enter the tree.
+Deliverables: U1_VALIDATION/U1_UI_GAP_AUDIT.md (§6, written before code), U1_DESIGN_CONVERGENCE_PLAN.md (§12 B),
+the UI code itself, and U1_VALIDATION/U1_VALIDATION_REPORT.md (§12 D, §11 validation, §13 honesty).
+V1 IS PAUSED, NOT CLOSED: stage_status IN_PROGRESS, research_state RECRUITMENT_READY, eligible external
+sessions 0, cohort build still frozen at the F3 artifact, and `v1_execution.paused_for` names this track.
+P5 stays PASS_COMPLETE, Productization stays ENGINEERING_COMPLETE, G2 stays PASS, the product stays
+MVP_CANDIDATE at baseline 0.6.0. Signing READY_NOT_EXECUTED, Notarization READY_NOT_EXECUTED, update
+MANUAL_UPGRADE_READY, licence PENDING_OWNER_CONFIRMATION, public distribution NOT_AUTHORIZED, tag NOT_CREATED,
+GitHub Release NOT_CREATED.
+U1 may never self-issue a stage, a beta, an RC or a GA, may not resume V1 by itself, and its own §16 ends with
+STOP. If you were sent here to "continue U1": the round closed; read
+U1_VALIDATION/U1_VALIDATION_REPORT.md §6 for what it explicitly did not reach.
+
+CURRENT STATUS OF THIS TRACK, as of the second U1 round on 2026-10-07:
+U1 = READY_FOR_ARCHITECT_VISUAL_REVIEW.  participant execution = PAUSED_FOR_ARCHITECT_UI_REVIEW.
+The continuation unit U1_PUSH_CI_AND_INSTALLED_VISUAL_ACCEPTANCE (prompt v1.1, Architect authorized; v1.0 is its
+prior revision) pushed 8efe9c8 + 7dc2ca8, read its own remote CI at 10 of 10 (run 37609108402, #74, attempt 1),
+installed the Windows artifact THAT run produced (artifact 11477857379, installer sha256 372631c367b34dc5…,
+installed executable sha256 afdc528b97dcdce1…), and looked at it on a real screen: six primary states at
+1440x900, nine responsive captures at 1024x720 and 1056x799, and a functional smoke pass on the same bytes.
+Evidence and verdict: U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md, with the review pack outside Git at
+%TEMP%\FirmwareSight-U1-Visual-Acceptance-20261007T1037Z\14_review_pack\U1_VISUAL_REVIEW_PACK.
+One U1-V2 presentation finding is open and NOT self-waived (stale capability chips during a failed parse); no
+U1-V3 or U1-V4 was observed. The owner's store was parked for the round and is restored byte-exact
+(ORIGINAL_DB_RESTORED = YES, ORIGINAL_DB_SHA_MATCH = YES, OWNER_STORE_OPENED_BY_U1 = NO), and the machine is
+back to uninstalled, which is how it was found.
+This status is not visual approval, not PASS_COMPLETE, not DESIGN_COMPLETE and not MOCKUP_MATCHED; those belong
+to the Architect. V1 stays paused with 0 eligible sessions and its frozen cohort build untouched.
+
+CURRENT STATUS OF THIS TRACK, as of the third U1 round on 2026-10-07 (this block supersedes the line above it
+that says "One U1-V2 presentation finding is open"; the earlier block is kept because it is a dated record of
+what that round knew):
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1-V2-06 = CLOSED_BY_U1R.  participant execution stays
+PAUSED_FOR_ARCHITECT_UI_REVIEW.
+The corrective unit U1R_STALE_CAPABILITY_CORRECTIVE_AND_FINAL_RECHECK (prompt v1.0, Architect authorized,
+archived at 10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1R_Stale_Capability_Corrective_Final_Recheck_v1.0.txt,
+delivered 28,659 bytes / SHA-256 0ff7b3f6495fb29b73ff5aaed03895f47ce0a133762b0e737718118008b650bb, 1,302 logical
+lines) fixed the one material presentation defect the installed pass raised. The Analyze page resolved its
+visible summary as the stored last-good one and rendered the top capability strip from it whenever any summary
+existed, so a failed attempt or an unanalyzed selection showed the previous file's green "ELF supported /
+MAP provided" pills above a row naming a different file. Retention was not the bug and was not removed: the
+header and the strip now read from a derived presentation value that is populated only when the current attempt
+earned it, the retained report and Details keep reading from the last good summary and keep saying whose they
+are, no domain state was defined, no Gate verdict moved, and assets/design-tokens.json is byte-identical.
+Three product paths changed (Analyze.tsx, Details.tsx, intake.test.tsx) and no Rust source did: 868 Rust tests
+unchanged, 242 UI tests in 9 files (six added, none deleted), gate 17 of 17 with no SKIP, drift 8/8, deny 1/1,
+core-smoke 3/3, package 4/4, baseline verifier PASS at 755 tracked files / 753 sum entries. Product commit
+4d36f103d2a8fd103e8e3b466e4d2b2010a0a4ef, pushed 6f35b14..4d36f10 as a normal fast-forward; remote run
+37637056980 (#76, attempt 1) 10 of 10; Windows artifact 11491960105 built from that commit installed and
+re-checked on a real screen in the success, pending, failed-at-1440x900/1056x799/1024x720 and recovered states.
+The owner's store was parked and restored byte-exact (OWNER_STORE_PARKED = YES, OWNER_BACKUP_HASH_MATCH = YES,
+ORIGINAL_DB_RESTORED = YES, ORIGINAL_DB_SHA_MATCH = YES, OWNER_STORE_OPENED_BY_U1R = NO) and the machine is
+uninstalled again, as it was found. Evidence: U1_VALIDATION/U1R_CAPABILITY_STATE_DESIGN.md,
+U1_VALIDATION/U1R_CORRECTIVE_REPORT.md and %TEMP%\FirmwareSight-U1R-Visual-Recheck-20261007T145124Z\.
+What U1R did NOT do: it did not implement the seven U1-V1 minor gaps or U1-V0-09, which stay
+OPEN_FOR_ARCHITECT_VISUAL_JUDGEMENT; it did not resume V1, run a session or re-baseline V1's cohort artifact; it
+did not open B1, Private Beta, RC, GA, a tag, a GitHub Release, a public installer, signing, notarization, an
+updater, a licence choice or pricing. If you were sent here to "continue U1" or "finish the UI": the next word is
+the Architect's visual verdict on the two screenshot packs, not another code round.
+
+```
+
+CURRENT STATUS OF THIS TRACK, as of the fourth and fifth U1 rounds on 2026-10-08 (this block supersedes the
+`READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT` line above; its own opening status lines are superseded in turn by the
+sixth round's block below it. Both are kept, because dated records are not rewritten here — each is what that round
+knew when it stopped):
+
+```text
+U1 = REQUIRES_ARCHITECT_POLISH_REVIEW.  U1-V2-06 stays CLOSED_BY_U1R.  U1P-V2-01 is OPEN and NOT self-waived.
+Participant execution stays PAUSED_FOR_ARCHITECT_UI_REVIEW.
+
+The fourth round, U1P_FINAL_VISUAL_POLISH_AND_INFORMATION_HIERARCHY_CONVERGENCE, changed no capability and no
+semantic surface. It recomposed the shell and five pages so the first viewport answers the page's own question:
+the rail became a sibling of an independently scrolling main rather than a sticky element inside it; Overview
+puts the ship verdict above the key figures and the ELF/MAP/Git facts became one compact band; Analyze leads
+with the result band and the Sections/Symbols tables and drops the identity dossier below them; Compare reads as
+a pair bar with the direction between the pickers and reports what moved before what it cost; Release Gate puts
+the run's own sections directly after the verdict and numbers them in the order a reader meets them; Bundle &
+History shows one stored entity at a time behind an aria-pressed button group, with the page heading finally
+equal to the rail label. 253 UI tests in the same 9 files (was 242; eleven structural tests added, none deleted
+or skipped), 868 Rust unchanged, 30 registered commands unchanged, assets/design-tokens.json byte-identical,
+gate 17/17 with drift 8/8 including baseline integrity, deny 1/1, core-smoke 3/3, package 4/4. Five reversals
+were run to prove the new hierarchy tests bite: each fails the guarding test with the mutation and passes after
+the undo, and the tree came back byte-for-byte. Product commit
+6a071c51c81a00b7a35facaefa5849e9975e715c, pushed as a normal fast-forward.
+
+The fifth round, U1P_INSTALLED_ACCEPTANCE_AFTER_CI_RERUN, took those exact bytes to a real screen. Run
+37668291893 (#79) is 10 of 10 on attempt 2, and the attempt history is part of the record rather than something
+the rerun erased: attempt 1 left eight jobs green and cancelled Generated output drift and Package Ubuntu at the
+six-hour runner ceiling while each was still executing the Linux prerequisite apt-get update, with no
+repository-specific step started in either. That is the one class P5_VALIDATION/P5_CI_AUTHORITY.md lets a single
+same-SHA rerun answer, and the owner authorized exactly one gh run rerun --failed. In attempt 2 only those two
+jobs re-executed (drift 04:12:25Z->04:15:07Z, Package Ubuntu 04:13:01Z->04:24:51Z); the other eight carry
+attempt 1's execution window to the second and are not described as newly run. No attempt 3 was issued. Windows
+artifact 11504871803 (zip 5,538,316 bytes sha256 57651a3e...c1bb equal to its own API digest, NSIS 3,890,447
+bytes f69cda6c..., installed executable 15,366,656 bytes 7327d374..., toolchain.git_commit 6a071c5...) was
+installed with real input after the owner's store was parked. Sixteen captures were taken with the client size
+re-read from the live window each time: P01-P06 at 1440x900, R01-R06 at 1024x720, R07-R10 at 1056x799. All six
+first-viewport contracts came back PASS and the readiness verdict is still visible at 1024x720; the shell is
+SHELL_PASS, proved by comparing before/after captures across six real single wheel notches (rail band
+identical, main band and scrollbar strip both move) rather than by reading CSS. A thirteen-step functional smoke
+found no S0/S1/S2 regression, and Prepare bundle was stopped at its preview so nothing was exported to disk.
+The owner's store came back byte-exact with OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED
+and ORIGINAL_DB_SHA_MATCH all YES, OWNER_STORE_OPENED_BY_U1P = NO, and the fourteen unrelated entries in the
+application-data folder compare identical on kind, size and digest. The machine had no install before the round,
+so the round uninstalled, and the uninstaller's Delete-the-application-data option was never pressed.
+
+Why the status moved down and not up: U1P-V2-01 is open. Overview's ship verdict does not name the build it
+judges, and the page's own subject line can name a different one - the captured pair shows snapshot
+snap-3f6...64ed363e with that build's 256 bytes and 47 symbols beside a PASS belonging to run
+gate-deb...b202fdd6, whose subject build is snap-4b4087e1407c... as that row's own Details confirms. Nothing
+stated is false: the run id is printed and the panel scopes its claim to the run named. The gap is that the
+reader cannot check the pairing from Overview, because App.tsx holds the gate run and the last analysis as
+independent state and clears nothing when a different build becomes current. U1P did not create that ownership;
+promoting the verdict to the dominant element is what made the mismatch material. A narrow correction would name
+the run's subject build in the panel, or suppress the verdict when it does not belong to the named snapshot.
+Three lesser items are recorded with it: U1P-V1-01 (a wrapped band leaves an empty filled cell at 1024),
+U1P-V1-02 (the Compare result does not survive navigation) and note U1P-V0-01 (the Analyze table header sits at
+the fold at 1024x720). No U1P-V3 and no U1P-V4, and U1R's truthfulness holds in both failure captures.
+
+Evidence: U1_VALIDATION/U1P_VISUAL_POLISH_PLAN.md, U1_VALIDATION/U1P_VISUAL_ACCEPTANCE_REPORT.md, the raw set
+under %TEMP%\FirmwareSight-U1P-Visual-Acceptance-20261008T001110Z\, and the uploadable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_Final_Visual_Review.zip (4,727,314 bytes, sha256
+0f59f4cee90bd31e388e90e0b2097a621ab0c26811fbf50162b84f0f17f3881b). The BEFORE/ material came from the retained
+Temp roots, not from Downloads, because the U1 review folder and its ZIP are no longer in Downloads; both roots
+were verified against their own manifests first (28/28 and 51/51) and the seven mockups match the digests the
+accepted U1 pack recorded.
+
+What these two rounds did NOT do: they issued no stage - not PASS_COMPLETE, not VISUAL_ACCEPTED, not
+MOCKUP_MATCHED, not U1_PRODUCTIZATION_COMPLETE; they did not resume V1, run a session, contact a participant or
+re-baseline V1's frozen cohort artifact; they did not open B1, Private Beta, RC, GA, a tag, a GitHub Release, a
+public installer, signing, notarization, an updater, a licence choice or pricing; and no product code was edited
+after the screenshots, which is the condition that makes those screenshots evidence about these bytes.
+If you were sent here to "continue U1": the next word is the Architect's on U1P-V2-01 and the three lesser
+items, not another code round.
+
+CURRENT STATUS OF THIS TRACK, as of the sixth U1 round on 2026-10-08 (this block supersedes the "Why the status
+moved down and not up" paragraph above; that paragraph is kept because it is the dated record of what U1P-A1
+knew, and it is the finding this unit was issued to close):
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 = CLOSED_BY_U1P_R1.  participant execution stays
+PAUSED_FOR_ARCHITECT_UI_REVIEW.
+The corrective unit U1P_R1_OVERVIEW_GATE_SUBJECT_CONSISTENCY (prompt v1.0, Architect authorized, delivered as a
+file and archived byte-exact at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R1_Overview_Gate_Subject_Consistency_v1.0.txt, 33,484 bytes /
+SHA-256 0263e0fe92b7065fcc6a8cf1280630ff753eb2e4415ecb07fd40c72bd8e8d024, blob df5b2d0dcc28e2438861c26e00ae5b0369a3e8a3)
+bound the subject instead of restyling the page. App now hands Overview the selection handle that earned its
+last-good analysis - the same handle Analyze has used for its own pending badge since before this round - and
+Overview asks whether GateRunDto.snapshotId is the snapshot it is describing. Four states answer NEUTRAL: a run
+that judged another build, a selection never analyzed, a stored run with no analysis in the session, and a loaded
+policy whose fingerprint is not the one a run was judged under. Each names both full identities as text rather
+than truncated-with-title, because a title attribute is unreachable by a keyboard reader, and each stops
+restating the other subject's aggregate. Only the matching state shows the run's own sentence and counts, and it
+now prints the judged snapshot in full. The no-run panel and the scope disclaimer are byte-for-byte what U1P
+shipped. Truncated ids, file names, timestamps, commits, byte sizes and the run's baseline were all rejected as
+substitutes, because any of them can agree while the subjects differ.
+Four product paths changed (Overview.tsx, App.tsx, Overview.module.css, overview.test.tsx) and no Rust source
+did: 868 Rust tests unchanged, 266 UI tests in 9 files (thirteen added, none deleted), gate 17 of 17 with no
+SKIP, drift 8/8, deny 1/1, core-smoke 3/3, package 4/4, baseline verifier PASS at 889 tree lines / 762 sum
+entries over 764 tracked paths, assets/design-tokens.json byte-identical. Five of the thirteen new tests failed
+against a2e6b30's unmodified Overview.tsx before any code was written; with only the subject dispatch deleted
+afterwards eight fail; removing the prop from App's Overview call breaks the authoritative typecheck with TS2741.
+Product commit 42f75a7d2d90a4c25ca1a3c5c91f6ece16c2d5bf, pushed a2e6b30..42f75a7 as a normal fast-forward under
+the operator's separate direct authorization. Its message was amended once, before any push, to replace a wrong
+file count, with the tree identical before and after - both reflog entries remain, and nothing published was
+rewritten.
+Run 37753793004 (#81, attempt 1) is 10 of 10, read job by job with each job's own execution window checked.
+Windows artifact 11539359554 (zip 5,539,797 bytes 45922e90..., NSIS 3,891,883 bytes dd5c8de8..., installed
+executable 15,367,168 bytes 3bf541bb..., toolchain.git_commit 42f75a7...) was installed with real mouse input
+after the owner's store was parked. Five scenarios ran on that screen: matched, mismatched, unanalyzed
+selection, matched again after a new run, and a real policy swap that was EXECUTED rather than recorded
+unsupported - with two analyzed builds, two stored runs and two loaded policy fingerprints, all of them named in
+the evidence. A 1056x799 mismatch capture, a keyboard-only traversal that lands a visible focus ring inside the
+readiness card, and a five-page regression glance came with them; U1R's stale-capability contract still holds in
+both the pending and the ERR-FORMAT-0001 parse-failure states. Fifteen captures, sixteen log lines, one of them
+a superseded mis-click kept in the log rather than edited out.
+The owner's store came back byte-exact: OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED,
+ORIGINAL_DB_SHA_MATCH and UNRELATED_SIBLING_STORES_UNTOUCHED all YES, OWNER_STORE_OPENED_BY_U1P_R1 = NO, and the
+seventeen application-data entries compare identical on kind, size and digest. The app ran against a disposable
+store it created itself, hashed and then moved out by name rather than deleted; the round uninstalled as the
+machine was found, and the uninstaller's Delete-the-application-data option was read through BM_GETCHECK, found
+unticked, and never activated.
+Two things are stated rather than smoothed. The NSIS uninstaller re-launches itself as Un.exe, so the borrowed
+pid-waiting driver could not see its window and the wizard was finished through the handle it actually owns.
+And one pre-existing Core behaviour was observed: capabilities.git renders "unknown" on Analyze while the Gate's
+git.clean rule returns a definite BLOCK from real git evidence for the same snapshot, because
+Capabilities::with_git() has no production caller. It is reported for the Architect's judgement, not filed as a
+new U1P-V2/V3/V4 and not fixed, because Core is outside this unit's boundary.
+U1P-V1-01, U1P-V1-02 and note U1P-V0-01 stay OPEN_FOR_ARCHITECT_JUDGEMENT exactly as U1P recorded them; this
+unit neither fixed nor waived them. Evidence: U1_VALIDATION/U1P_R1_SUBJECT_CONSISTENCY_PLAN.md (written before
+the code), U1_VALIDATION/U1P_R1_OVERVIEW_SUBJECT_CORRECTIVE_REPORT.md, the raw set under
+%TEMP%\FirmwareSight-U1P-R1-Subject-Recheck-20261008T090319Z\, and the uploadable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_R1_Overview_Subject_Review.zip (1,381,951 bytes, sha256
+342fb89be6baf9f4e1670edba901ace57576112ec680af5e0e1f6cb3dee299a6).
+This is still not visual approval: PASS_COMPLETE, VISUAL_ACCEPTED and MOCKUP_MATCHED remain states no UI round
+may issue, V1 stays paused at 0 eligible sessions with its frozen cohort untouched, and B1 stays not authorized.
+If you were sent here to "continue U1": the next word is the Architect's on the final visual verdict, and on the
+three lesser items plus the git-capability observation above - not another code round.
+```
+
+The seventh U1 round, run the same day, is the current word on this track:
+
+```text
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 stays CLOSED_BY_U1P_R1.  U1P-V2-02 is CLOSED_BY_U1P_R2.
+U1-V2-06 stays CLOSED_BY_U1R.  Participant execution stays PAUSED_FOR_ARCHITECT_UI_REVIEW.
+
+Unit U1P_R2_OVERVIEW_PENDING_SELECTION_EVIDENCE_SCOPE ran under 《FirmwareSight — U1P-R2, Overview
+Pending-Selection Evidence Scope + Evidence-ID Consistency Audit, Architect execution prompt v1.0》 (delivered as a
+file: 21,194 bytes, 449 logical lines, 448 CRLF pairs, SHA-256
+3b6108b6e61582f9e31004d41e9768ba1a0daaaee1150b345c194a7e52b6221e; archived byte-exact at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R2_Overview_Pending_Selection_Evidence_Scope_v1.0.txt, stored blob
+aea814d62902b78cd9a98ba164807abe3b0b7e95 = 20,746 bytes, SHA-256
+fd8d28aafe411ac76dbf7262852f22a125c4b12ec3cadafbebc42b35f7a35102 — the 448-byte gap is the CRLF terminators Git
+normalises out of the blob, measured rather than assumed). Start authority HEAD = origin/main =
+60f10a6473ef446dc933c94a5edbab8e9b662ad1, tree clean, that head's run 37765205830 10 of 10.
+What was wrong was scope, not wording. On a selection the user had not analyzed, Overview rendered its capability
+band and its four figures from the RETAINED analysis while the MAP sentence described the NEW selection — the pair
+the Architect saw, `MAP provided` beside `Symbol-level analysis depends on it`. U1P-R1 had already bound the VERDICT
+to its judged snapshot; the bands around it were still speaking in one voice. Overview now derives every current
+band from `selection.selectionId === analyzedSelectionId`: a pending selection is named `firmware.elf · not analyzed
+yet` with its own MAP state and no pill and no figure, the Gate card stays neutral, the primary action is
+`Analyze selected artifact` with `View previous Gate run` beside it, and the retained work sits under
+`Previous analysis` inside bands named `Previous input capabilities` and `Previous key figures`, attributed in
+audible text (a `role="note"`, not a `title`) — including the case where the new selection has the SAME file name as
+the analyzed one, which is exactly why `selectionId` and not `fileName` is the handle. Nothing was hidden, no
+retained value was deleted, and no Unknown was turned into a zero.
+Three product paths changed (Overview.tsx +233/-71, Overview.module.css +13/0, overview.test.tsx +260/0) and no Rust
+source did: 278 UI tests in 9 files (twelve added, R2-T1..T12, none deleted), 868 Rust tests unchanged across 47
+result lines, gate 17 of 17 with no SKIP and no FAIL, drift 8/8, deny 1/1, assets/design-tokens.json byte-identical
+at 94336906…, and the generate_handler! list is the same 30 named entries at both heads (counting `module::` pairs
+under-reads it as 28 because list_fixtures and get_analysis_summary have no module prefix). Six of the twelve new tests fail on
+60f10a6's unmodified Overview.tsx (6 failed / 29 passed) and all 35 pass after it; five bounded mutations each kill
+at least one test and every one was undone by digest, the restored files re-hashing equal to the committed
+implementation.
+Product commit 2e2e21997ae01f035ac72b97658b3a0b329da362, pushed 60f10a6..2e2e219 as a normal fast-forward — the
+authorization is the prompt's own §14 ("Push normal fast-forward (authorized if gates pass)") and the gate had just
+come back 17 of 17 locally; no force, no history rewrite, no tag, no release. Run 37783219031 is 10 of 10, read job by job from GitHub's own API. Windows
+artifact 11554271914 (zip 5,542,981 bytes 94f16ab5…, NSIS 3,895,064 bytes fd2d4935…, installed executable
+15,367,680 bytes 196036e2…, toolchain.git_commit == 2e2e219) was installed with real mouse input AFTER the owner's
+store was parked; the two artifacts this round must not use (11539359554, 11504871803) and any local build are named
+in the report. Seven installed scenarios ran on that screen — matched, other-build, pending, pending-without-MAP,
+parse failure after a good result, genuine recovery, and a real policy swap EXECUTED by loading a second project
+whose policy differs by one committed line — with three 1024x720 captures, one 1056x799 capture, seven regression
+glances and a keyboard-only traversal. Twenty-one capture rows and twenty observation rows: two grabs were
+mis-scoped by the shared main scroll container, are labelled VOID in the log rather than edited out, and the gate
+filters them from adjudication. All eleven identities the captures carry are length-checked against the product's own
+SQLite rows and the committed fixture digests (69-character run ids, 149-character snapshots).
+The acceptance gate 09_acceptance/ACCEPTANCE_GATE.json holds: 20 boxes PASS and 1 box MISMATCH_PROVED,
+all_boxes_hold true, conclusion "U1P-V2-02 is closed by this round's installed evidence". The owner's store came
+back byte-exact — OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED, ORIGINAL_DB_SHA_MATCH and
+UNRELATED_SIBLING_STORES_UNTOUCHED all YES, OWNER_STORE_OPENED_BY_U1P_R2 = NO — with the 14 unrelated application-data
+entries identical on kind, size and digest across the 17-entry before and after inventories; this round's own
+disposable store was hashed first and moved by name, never deleted; the machine was found uninstalled and is
+uninstalled again; and the uninstaller's delete-the-application-data option was read through BM_GETCHECK as unchecked
+and never activated.
+Three things are stated rather than smoothed. The §7 identity audit did NOT confirm its own prompt's premise: the
+U1P-R1 report's run A and snapshot B had each been transcribed one character short (68 where a SHA-256 forces 69,
+148 where it forces 149) and the prompt's own expected strings carry the same short forms, so no document-to-document
+comparison can see the defect. Both authorities — sha256sum of the committed fixtures, and the installed product's
+own gate_runs/builds rows — say the same thing, so the minimum documented location was corrected with its exact
+before/after bytes inside this unit's single docs-only successor; the already-hashed U1P-R1 pack was not rewritten or
+repacked, and no separate audit commit was made. Second: the build-time note predicting ERR-PARSE-2002 for the junk
+input was wrong; the installed product answers ERR-FORMAT-0001, and the original sentence is quoted unmodified beside
+the correction. Third: both earlier delivery archives had left Downloads by pack time — a read-only check found them
+in the Recycle Bin re-hashed to exactly the digests BASELINE.yaml records — so this pack's historical images are the
+delivered bytes rather than a regeneration, but whether a moved delivery copy is itself a §13 gap is the Architect's
+call, and one installed link is honestly missing: no press-then-window-title pair was recorded for Overview's two
+pending actions, so their destination rests on R2-T5 and mutation M3 rather than on a pixel.
+U1P-V1-01, U1P-V1-02 and note U1P-V0-01 stay OPEN_FOR_ARCHITECT_JUDGEMENT exactly as U1P recorded them, the
+1024 wrapped-band empty cell and the git-capability question stay with the Architect, and this unit neither fixed nor
+waived any of them. Evidence: U1_VALIDATION/U1P_R2_PENDING_SELECTION_CORRECTIVE_REPORT.md, the raw set under
+%TEMP%\FirmwareSight-U1P-R2-Pending-Selection-20261008T132730Z\, and the single shareable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_R2_Final_Visual_Review.zip (4,113,494 bytes, sha256
+d3674569a0c4237452332b76ecda9b9a03b7ff9ece068f7a9d4a93d0441bb34c; 87 entries, CRC clean, 87/87 extraction round
+trip, 0 missing / 0 unlisted / 0 invalid SHA entries, four composites labelled DERIVED with their raw originals
+retained, forbidden-content scan clean). This is the SECOND build of that pack: the first (4,111,505 bytes, sha256
+d74f6ee34f28fdede0c59b8ee40293ed9ea9068dcdbd8b2fd690fd5565e212e7, 86 entries) carried the same evidence but stated
+28 registered commands in the report inside it where the list holds 30, and it was moved aside with an explanatory
+note rather than deleted - see 09_review_pack\superseded\ in the evidence root.
+This is still not visual approval: PASS_COMPLETE, VISUAL_ACCEPTED and MOCKUP_MATCHED remain states no UI round may
+issue, V1 stays paused at 0 eligible sessions with its frozen cohort untouched, and B1 stays not authorized. If you
+were sent here to "continue U1": the next word is the Architect's on the single U1P-R2 pack above — which contains
+the U1P six-page baseline, the U1P-R1 before-images and this round's after-images in one archive — and on the four
+open items listed above. There is no code round left for an agent to run.
+```
+
+The eighth U1 round, closed on 2026-10-08, was the current word on this track until the Architect's final verdict
+record arrived the same day and closed it — read the NONE block at the top of this file for the live pointer:
+
+```text
+U1 = READY_FOR_ARCHITECT_FINAL_VISUAL_VERDICT.  U1P-V2-01 stays CLOSED_BY_U1P_R1.  U1P-V2-02 stays CLOSED_BY_U1P_R2.
+U1P-V1-01 and U1P-V1-02 are CLOSED_BY_U1P_R3, on installed bytes.  U1-V2-06 stays CLOSED_BY_U1R.
+Participant execution stays PAUSED_FOR_ARCHITECT_UI_REVIEW.
+
+Unit U1P_R3_FINAL_NARROW_CORRECTIVE_AND_INSTALLED_VISUAL_REVIEW ran under 《FirmwareSight — U1P-R3 Final Narrow
+Corrective and Visual Closure, Execution Prompt v1.0》, delivered as a file: 32,849 bytes, 745 logical lines, 0 CR,
+SHA-256 a185890edd043344a4332dfcc048fd63add1f8a5226dead4af373cc1ceab4de9; archived byte-exact at
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_U1P_R3_Final_Narrow_Corrective_and_Visual_Closure_v1.0.txt (blob
+384e8ca42db8d8238d263c18111d58e5d8da1ab1, the same 32,849 bytes — this prompt was delivered with LF terminators, so
+nothing was normalised away, measured rather than assumed). Start authority HEAD = origin/main =
+f01eec110c76591c741d283e4ee862566e211a2f, tree clean, as recorded in
+U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md before any code was written. That head's own CI was not read at round
+start and is not claimed to have been: it was read at this closeout, job by job from GitHub's API — run
+37801519343 (#84, attempt 1), 10 jobs, all success.
+Three deliverables, and only three: Compare's unexplained blank, Overview's empty capability-band cell at 1024, and
+an evidence pack whose totals are computed from its own acceptance record. No capability was added.
+What was wrong in Compare was ownership, not rendering. App.tsx renders one page at a time, so Compare's own
+useState died the moment the user navigated away, and the page came back showing its action above nothing. The
+comparison session now lives in the shell — six pieces of state App owns and passes down as session/onSessionChange
+— writes go through functional updaters so two writes in one render cannot clobber each other and an obsolete async
+answer cannot resurrect a stale pair, a first session with two candidates and no result says "Ready to compare" and
+names the next step, and a brand-new process does not resurrect an ephemeral diffId. The diffId is in-process only:
+no SQLite row, no IPC call, no localStorage, no schema change.
+What was wrong in Overview at 1024 was a track nothing filled. The shared band is an auto-fit grid whose gap is
+painted in the border colour, so a wrapped line with three cells leaves a fourth cell-shaped rectangle of grey. A
+local .fillBand class (display:flex, flex-wrap:wrap, children flex:1 1 the inspector-min token) fills the line
+instead. components/Panel.tsx and Panel.module.css are NOT in the commit: a shared fill prop was implemented,
+reviewed and reverted to its HEAD digest, because §10 prefers a local class and "provably inert on the other four
+pages" is a weaker claim than "not touched". The bands the Architect already approved stayed untouched.
+Thirteen tests came with it (compare.test.tsx T1-T9, overview.test.tsx T10-T12), 291 UI tests in 9 files, up from
+278 with none deleted; 868 Rust tests unchanged in 47 result lines; gate 17 of 17 with no SKIP and no FAIL, drift
+8/8 including baseline integrity, deny 1/1; assets/design-tokens.json byte-identical; generate_handler! still the
+same 30 named entries. The RED run against the untouched tree reported seven failures — T1, T3, T4, T5, T6, T8, T9 —
+and T3b, written after that run, is RED in its own separately recorded run, so eight of the thirteen are RED on the
+old bytes and all thirteen pass at the head. T2 and T7 are recorded as locks rather than as RED, and so is the
+Overview trio T10-T12: re-measured with HEAD copies of Overview.tsx, components/Panel.tsx and Panel.module.css
+written back over the working copies, all 38 tests in that file pass against the unchanged product code, because
+jsdom lays nothing out and a DOM test cannot see an empty band track — that question is answered only by the
+installed screenshot. An earlier draft of the report claimed the trio was RED; that claim was wrong and the report
+says so. Three mutation records, described as the log has them: M2 removes the Ready to compare panel (2 failed,
+T1 and T9), M3 hard-wires the stale rule to false (4 failed — T5 and T6 plus two pre-existing U1P tests, which is
+the proof the rule is load-bearing across rounds), and M1 is not a separate edit at all: page-local state IS
+f01eec1, so the RED run is the retention measurement and recording it again would count one measurement twice. Each
+measurement restored its files and re-checked their digests. Three self-corrections are in the report rather than smoothed over: a stray brace had made overview.test.tsx
+collect zero tests while a header asserted three of them had passed; the historical U1P Compare baseline image
+carries the Windows taskbar in its bottom 33 px, so the capture harness now refuses any grab whose client bottom
+falls below the work area and every R3 capture records client_inside_work_area: true; and an earlier draft of the
+report's own §4 described the three mutations from memory and got them wrong — it made M2 the shell-ownership
+removal, M3 the ready-panel removal and M1 a do-nothing negative control, and claimed eight RED failures where the
+log reports seven, T3b having been measured in a second run because it was written after the first.
+(Dated correction, 2026-10-08: this sentence read "Two self-corrections" until the Architect's final verdict record
+routed the fix into the next already authorized governance update — deviation E, and not by a stand-alone CI-loop
+commit. The omitted third is the report §5's own item 3, and it is the round correcting its own reporting rather
+than a measurement of the product.)
+Product commit 41bb6a36dd6e1ce40d4ae9e3c5e706d7f8544177 (12 files, +1,532/-58), pushed f01eec1..41bb6a36 as a
+normal fast-forward under the owner's written authorization for this round; no force, no rewrite, no tag, no
+release. Run 37828673549 (#85, attempt 1) is 10 of 10 read job by job from GitHub's own API. Windows artifact
+11573661113 (zip 5,544,133 bytes 330e83af…, NSIS 3,896,257 bytes 9a51e86a…, installed executable 15,368,192 bytes
+5c828ecf…, toolchain.git_commit == the product head) was downloaded from that run and installed with real mouse and
+keyboard input after the owner's store was parked; the artifacts this round must not use (11539359554,
+11504871803) and any local build are named in the report. Twenty-six capture rows and twenty-four observation rows:
+the named matrix P01-P10 at 1440x900 and R01-R10 at 1024x720 / 1056x799 is complete, with C6's refusal sequence, the
+Git cross-surface trace, the baseline-picker observation and a keyboard traversal beside it. One grab was discarded
+for a misclick and ships in the pack labelled discarded, because a pack that only keeps flattering frames is not
+evidence.
+09_acceptance/ACCEPTANCE_GATE.json: 25 items — 23 PASS, 1 FAIL, 1 NOT_VERIFIED, 0 NOT_CAPTURED, and 2 of the 23 PASS
+items flagged MISMATCH_PROVED (the stale policy fingerprint Overview names, and the refused same-build compare).
+MISMATCH_PROVED is not a fifth verdict and not extra success: it marks PASS items whose subject IS a mismatch the
+product proved, and none of them says the build is ready. The two findings this round measured and did NOT fix are
+reported, not waived: Analyze's metric band leaves the same unfilled track at 1024 (126 wide rows, identical on the
+R2-era image, so it predates this commit and is outside §7's scope and §10's allowlist), and the gate's baseline
+picker resets on navigation. The §8 read-only trace found no false Gate PASS — git.clean is the gate's true
+statement about a genuinely clean opened project while Analyze's Git UNKNOWN is about the artifact — so §8 produced
+no STOP; the wrong-source sentence it did surface in Overview.tsx was repaired inside the authorized scope.
+Owner data: OWNER_STORE_PARKED, OWNER_BACKUP_HASH_MATCH, ORIGINAL_DB_RESTORED, ORIGINAL_DB_SHA_MATCH and
+UNRELATED_SIBLING_STORES_UNTOUCHED all YES, OWNER_STORE_OPENED_BY_R3 = NO, 12 unrelated digest-bearing application-
+data files identical across the 17-entry before and after inventories, this round's disposable store hashed and moved
+out whole rather than deleted, the uninstaller's delete-the-application-data box read as unticked and never clicked,
+and the machine uninstalled again as it was found.
+Evidence: U1_VALIDATION/U1P_R3_NARROW_CORRECTIVE_PLAN.md (written before the code),
+U1_VALIDATION/U1P_R3_FINAL_NARROW_CORRECTIVE_REPORT.md, the raw set under
+%TEMP%\FirmwareSight-U1P-R3-Narrow-Corrective-20261008T190057Z\, and the uploadable pack
+C:\Users\16429\Downloads\FirmwareSight_U1P_R3_Final_Visual_Review.zip (4,224,650 bytes, sha256
+4de07c7669574955493f2fd31594539422662415c14d8c5d378e2126ac831e52, 102 members, CRC clean, 102/102 extraction
+round trip, 101 manifest entries with the manifest itself and the post-hoc verification record documented as
+exclusions, 104 checks on the pack all passed, 8 composites labelled DERIVED over native-size unaltered originals,
+forbidden-content scan clean). Its README counts are generated by summing the acceptance JSON's boxes array and the
+builder refuses to finish when README and JSON disagree — including a negative control that alters one count and
+requires the checker to reject it. The R2 archive is preserved untouched at its own digest and its stale
+"MISMATCH_PROVED=0, PASS=0" README line is documented there as historical only. This is the SECOND build of the R3
+pack: the first (4,223,656 bytes, sha256 b2e787cf411d808f6dcd21601bb3473976db1f2b2f3c2b263d766fd244b0ab45) had the
+right counts but interleaved the negative control's intended rejection among its own checks, and it was moved aside
+to 08_pack\superseded_first_build\ in the evidence root rather than deleted.
+Three governance ordinals were wrong and are corrected by this successor, with the dated narrative around each left
+intact: CURRENT_STATE.md called U1P-R1 "a fourth U1 unit" (it is the sixth) and U1P-R2 "a sixth U1 unit" (it is the
+seventh), and ACTIVE_TASK.md introduced the U1P-R2 block as "the sixth U1 round". By the enumeration those documents
+themselves give — U1, the continuation push, U1R, then the U1P product round and its installed acceptance as the
+fourth and fifth — U1P-R1 is the sixth, U1P-R2 the seventh and this unit the eighth.
+This is still not visual approval: PASS_COMPLETE, VISUAL_ACCEPTED and MOCKUP_MATCHED remain states no UI round may
+issue, V1 stays IN_PROGRESS / RECRUITMENT_READY at 0 eligible sessions with its frozen F3 cohort artifact untouched,
+and B1 stays not authorized. If you were sent here to "continue U1": the next word is the Architect's, on
+FirmwareSight_U1P_R3_Final_Visual_Review.zip and on what it chooses to do with the two findings above and the
+C2-first-viewport reading. There is no code round left for an agent to run, and §19 of the R3 prompt says do not
+invent an R4.
+```
+
+## The V1 pointer that was live before U1, kept as the record of 2026-10-06
+
+```text
+V1_OWN_ARTIFACT_EXTERNAL_VALIDATION — stage V1, state IN_PROGRESS, research_state RECRUITMENT_READY,
+opened 2026-10-06.
+Authorized by FirmwareSight — V1 Own-artifact External Validation, Execution Prompt v1.0 — Architect
+Authorized (file, SHA-256 48768ff025e3d6351b7b1d8d593ea8bfb18a7930a0a21a101af3093bbec10a0f, 46,207 delivered
+CRLF bytes, 1,697 CRLF pairs, 1,698 logical lines), archived as
+10_AUDIT/SOURCE_PROMPTS/FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt (Git blob
+d5e8d4575581bd656b568eed97090e7130a51774, SHA-256 c62314fee5032ca5ffdbcfe95f51cf3bdb783e7d55a42a165ea526686690c34e,
+44,510 LF bytes) and registered in that directory's README.
+Start authority: HEAD = origin/main = 08fdfcb710f78f8084bfcf614dc508c8b6e7e25b (P5 Commit F3), tree clean, and
+F3's Run 37475580080 (#72, attempt 1) is 10 of 10 authoritative jobs.
+Goal: measure whether real, external firmware/embedded engineers, using THEIR OWN real artifacts on the frozen
+F3 build, can independently use Analyze / Compare / Gate, discover real new information, and intend to come
+back. Report actual numerator / denominator for M1–M6 at N >= 8 eligible unique participants.
+Discipline: REAL PEOPLE / REAL OWN ARTIFACTS / NO SIMULATED USERS / NO INTERNAL TEAM AS FORMAL PARTICIPANTS /
+NO LEADING MODERATION / NO SECRET PRODUCT PATCHES DURING A COHORT / REPORT ACTUAL NUMERATOR / DENOMINATOR /
+PRESERVE PRIVACY / CANDIDATE != TASK.
+
+The cohort build is frozen and named (§1): run 37475580080, head 08fdfcb, artifact id 11419727517, NSIS installer
+FirmwareSight-0.6.0-windows-x86_64-nsis.exe, 3,888,432 bytes, SHA-256
+182506f213383cfe00865f199fcec4fb17079535e8ea370f954fc15097263d12, internal SHA256SUMS.txt verified OK on
+download. NOT a substitute: F2R1's artifact, a local rebuild, cargo run, Vite, a later docs-only CI artifact, or
+the V1 activation commit's own package. It is UNSIGNED, and public distribution stays NOT_AUTHORIZED: the build
+moves one-to-one to named, consenting participants only.
+
+THIS ROUND RAN §5's BRANCH, NOT §23 ONWARD. There were no real eligible participants and no session evidence,
+so the round wrote the Recruitment Ready pack, opened the track, set research_state = RECRUITMENT_READY, and
+stopped. Eligible external sessions = 0. Nothing was simulated, no LLM stood in for a person, no internal member
+was counted, no quote or completion was invented, and no session file was created.
+
+What V1 may not do (§4, §32, §33, §40): no feature implementation, no redesign from participant preference, no
+schema / migration / dependency change, no cloud / account / network / telemetry, no updater, no signing, no
+notarization, no licence selection, no pricing model or paid plans or invented anchors, no E1/E2/E3/GX, no B1 or
+Private Beta, no RC, no GA, no public release. Product code is frozen for the length of a formal cohort, and an
+S0/S1 finding stops sessions and returns to the Architect. This round changed no product byte: 868 Rust /
+225 UI in 8 files and a 17-step gate must stay exactly as they are, or the round stops (§45).
+
+P5 stays PASS_COMPLETE, Productization stays ENGINEERING_COMPLETE, G2 stays PASS, the product stays
+MVP_CANDIDATE at baseline 0.6.0, and the release-readiness states are untouched: Signing READY_NOT_EXECUTED,
+Notarization READY_NOT_EXECUTED, Update MANUAL_UPGRADE_READY, licence PENDING_OWNER_CONFIRMATION, public
+distribution NOT_AUTHORIZED, tag NOT_CREATED, GitHub Release NOT_CREATED.
+
+V1 may never self-issue V1_PASS_COMPLETE, B1_READY or PRIVATE_BETA (§39, §54), and even a full pass does not
+open B1 (§40). AGENTS.md 1 still binds: this pointer names V1 and nothing beyond it.
+
+If you were sent here to "continue V1": read V1_VALIDATION/README.md, then V1_PLAN.md, V1_METRICS.md and the
+five protocol documents. If no real session has happened since the activation commit, there is nothing for an
+agent to do — recruitment, consent and moderation are the human operator's (§48) — and writing a session file
+for a session that did not happen is the one thing this track exists to forbid. When a real transcript or set of
+notes arrives, follow V1_VALIDATION/sessions/README.md's sixteen-step intake path.
+
+DATED 2026-10-08, ADDED TO A RECORD THAT IS NOT OTHERWISE CHANGED: "the frozen F3 build" and the artifact
+11419727517 / 182506f2...63d12 identification above are what this pointer knew on 2026-10-06, and they are kept as
+written. The owner's V1 Cohort Re-freeze / Execution Authorization v1.0 then moved the cohort build to artifact
+11573661113 of run 37828673549 at product head 41bb6a36, with F3's block preserved and dated as superseded rather
+than rewritten. Read the build a session runs from V1_VALIDATION/README.md, not from this record; read the reason
+from V1_VALIDATION/V1_COHORT_REFREEZE_RECORD.md. Nothing else above moves: the build identity changed, and
+sessions, metrics, thresholds and every forbidden list did not.
+```
+
+## The P5 closure sentence, kept as the record of 2026-10-06
+
+P5 (Productization) closed on 2026-10-06 as **`PASS_COMPLETE`**, written by Commit F3 — the only head its prompt
+reserved the closure sentence for — after F3 §6 re-audited every P5 exit criterion and found no required
+engineering item `BLOCKED`. It was opened by *FirmwareSight — P5 Productization, Execution Prompt v1.0* (file,
+SHA-256 `722125f5…71e0ae`, 73,722 bytes, 3,442 lines) and closed under *FirmwareSight — P5 Commit F3 Final
+Governance Closure, Execution Prompt v1.0* (file, SHA-256 `860e0097…64514c`, 36,458 delivered CRLF bytes), both
+archived in `10_AUDIT/SOURCE_PROMPTS/`. Machine state at that head: stage P5 = `PASS_COMPLETE` · Productization =
+`ENGINEERING_COMPLETE` · product = `MVP_CANDIDATE` · narrative = *FirmwareSight Productized MVP Candidate* ·
+`baseline_version` = `0.6.0` · G2 = `PASS`, with P0/P1/P2/P3/P4 keeping their existing states.
+
+What F3 wrote into `active_task` at its own head was `NONE`, and the sentence it attached — "V1 = NOT AUTHORIZED
+BY P5" — was true of that commit: no file in that tree authorized V1. The pointer moved off `NONE` only when the
+architect issued the V1 prompt itself, which is the same way P5, P4 and G2 each arrived. V1 arriving does not
+retroactively authorize anything P5 declined: B1 / Private Beta, RC, GA, commercialization, licensing, signing,
+notarization and an updater are still unauthorized, G3 is still not started, and V1's own §40 closes its door the
+same way.
+
+
+## What is already true when P5 opens
+
+The product is **not** in question: G2 is PASS, Product MVP is ENGINEERING COMPLETE, the state is
+**MVP CANDIDATE**, the baseline is **0.6.0**, and the three post-G2 findings were closed on 2026-10-02 in
+`e816dcb` and `971015f`. What moved is the tree, so the G2 numbers are the history of a different commit: the
+tree at that point read **775 Rust tests, 160 UI in 6 files, and `scripts/check.py` 16 steps** (the drift group
+gained `version identity` when packaging landed). **Nothing in this paragraph is the present total** — the
+present total is in the last ledger row above and in `.ai/HANDOFF.md`: **868 Rust / 225 UI in 8 files** on a
+**17-step** gate.
+
+`P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md` is written and answers §4 A–H from commands run at `d83175a`
+(HEAD = `origin/main`, tree clean, Run `37101619245` 7 of 7). It found no package has ever been produced
+(`bundle.active: false`, no CI packaging step, no `.icns`), that every artifact version is `0.1.0` while
+`0.6.0` is document-only, that History needs read APIs rather than tables, that migration `0005` is
+required for the L6/L7 numeric-Unknown reasons and not for History, that `PRAGMA integrity_check` and any
+database backup appear nowhere, and that the committed fixtures are all `arm-none-eabi-gcc` + GNU ld with
+zero Clang-produced evidence despite the cohort claim.
+
+## What has landed since the audit
+
+| Commit | What it did | Gate run | Result |
+| --- | --- | --- | --- |
+| `4cc8d93` | §5 governance opened + the audit + the archived prompt | `37125456689` | success, 7 of 7 |
+| `812b472` | `P5_MIGRATION_DECISION.md`, then migration `0005` and its write/query/IPC/UI path | `37127791999` | success, 7 of 7 |
+| `9e3b1de` | artifact versions unified on `0.6.0`; seven goldens regenerated | `37128593254` | **failure, 6 of 7** |
+| `20b03e3` | test-only repair of the pre-existing race that run lost | `37129900728` | success, 7 of 7 |
+| `0c031cd` | `bundle.active`, three CI package jobs, `scripts/verify_package_artifacts.py`, `drift/version identity` | `37133706214` | **failure, 7 of 10** |
+| `1055242` | the package group finds `cargo-tauri` through `cargo tauri`, a `SKIP` can no longer read as a pass, and the step runs from `apps/desktop` | `37138881977` | success, **10 of 10** — and the first run to attach a built package on all three platforms |
+| `53578e9` | a `.app` indexed file by file, so the index §41 asks for is readable by `sha256sum -c`, plus each payload's own digest in the metadata | `37143046338` | success, **10 of 10** — and its darwin set, downloaded and checked, closed the index row it was fixing |
+| `a674774` | the read-back written into `P5_PACKAGING_REPORT.md` §5d/§5e and §9, `P5_CI_AUTHORITY.md`, the audit, and `04_TECH/17`'s stale sentence about the CLI companion corrected — the CI sets do archive it, and all three were listed | `37145302229` | success, **10 of 10** |
+| `9ab089f` | `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`: §38 A–L and §39 measured on this host with the owner's store parked, hashed and restored | `37147434366`, `37147577288` | success, **10 of 10** each — and §38 C stayed unimplemented, because onboarding did not exist yet |
+| `e863d0c` | §13 first-run onboarding + §14 Help/About (with L21's window title fixed in Rust over a closed page enum) + §15–§18 local History over three new bounded storage **read** APIs and **no new migration**. 19 storage + 11 desktop + 40 UI tests, seven mutation proofs, `P5_ONBOARDING_HISTORY_REPORT.md` and its design checklist | `37154946484` | success, **10 of 10**, first attempt — locally too: **16 of 16** steps, **812 Rust / 200 UI** |
+| `e070508` | documentation only: wrote Commit C's run back into `P5_CI_AUTHORITY.md` and corrected four governance sentences that had said the read-back had not happened | `37156287999` | success, **10 of 10**, first attempt |
+| `111fe32` | two things, in one gate: §32's L22 item — `P5_RELEASE_IDENTITY_ADR_DRAFT.md` (options costed, option C is today's bytes-as-evidence semantics, four questions for the Architect, then STOP) with its premise pinned by `a_notes_file_that_differs_only_in_line_endings_is_a_different_release` — **and** the test-only repair of L23's sixth instance, which the **local** gate lost while verifying it and CI never saw | `37158606478` | success, **10 of 10**, first attempt — preceded by a local `python scripts/check.py` **16 of 16** at **813 Rust / 201 UI**, three mutation proofs and 20 clean fresh-process runs of the changed suite |
+
+| `3400981` | Commit D: storage-owned `PRAGMA integrity_check`, a WAL-safe online-backup snapshot before any older store is migrated, the migration matrix re-run against it, a closed 41-key Diagnostics allowlist with a native-dialog export and positive-control privacy tests, the typed startup refusal, and §32's L22 answer as `ADR-0028` — `P5_COMMIT_D_DESIGN.md`, `P5_DIAGNOSTICS_RECOVERY_REPORT.md` and its design checklist. 131 storage / 222 desktop Rust, 210 UI, eight mutation proofs | `37200245520` | **failure, 8 of 10**, first attempt: `macOS Core Smoke` and `Rust (ubuntu-latest)` both panicked at `integrity_and_backup.rs:814`, on a test this commit added. Its `assert_ne!` compared two snapshot files whose only available difference was the second-granular `applied_at` default, so the claim was a race with the clock and it passed on Windows and lost on the other two runners. The product took no blame — `Rust (windows-latest)`, both UI jobs, drift, deny and all three package jobs were green on the head — and the **eighth** mutation proof (an un-replaced snapshot reddens the repaired assertion on its own) plus 20 fresh-process runs are the repair's evidence. Landed as the test-only commit `bccea88`, named in the row below |
+| `bccea88` + `90aa69d` + `956e250` | the test-only repair of that race, then the record of it (§0a's third red run, L26 added to the disposition table), then §32's read-back successor — report §8 with the twelve facts, and the "31-field" allowlist figure corrected to the **41** keys `ALLOWED_KEYS` actually names | `37202016141`, `37202301591`, `37204847474` | success, **10 of 10** each, first attempt, every job read individually — including the two runners that had lost the race. **COMMIT_D = COMPLETE**, `P5 = IN_PROGRESS`, §34's STOP in force; `956e250` is the head these rows were written from and the closeout that follows records its run rather than this commit doing it |
+| the head these rows describe is `59d85c3` (E2) over `859648e` (E1); `bfbc1aa` is the base they started from | **Commit E**, in two commits. E1: the compatibility cohort — 6 new fixture directories and 31 new files under `fixtures/elf/p5-compat/` (manifest 25 → 56 entries), built by this host's real `arm-none-eabi-gcc 14.3.1` (Arm GNU Toolchain 14.3.Rel1) and `clang 22.1.8`, both final-linked by GNU `ld 2.44.0.20250616`, and committed as bytes, covering §13's cases B/C/D/E/G, the Clang arm of case F, and per-fixture `PT_LOAD` counts for case H; `p5_compat_fixtures.rs` (14 tests) reads every recorded hash, proves each compiler identity from the ELF's own `.comment`, and holds the product to image/RAM expectations derived independently from `readelf` + the MAP region attributes rather than from the model's own arithmetic. Those expectations found the round's one product defect: clang's `.ARM.exidx.text.main` has `sh_type` `0x70000001`, which the parser read as "no role", which it read as "not allocated", so 8 real FLASH bytes entered neither budget while the total still printed `Exact`. Fixed the narrow way the owner approved — `SHF_ALLOC` read from the section header, as `04_TECH/23_MEMORY_ACCOUNTING_MODEL.md` §3 and §4 item 3 already require — proven by five mutations (A, B, C, E and F, where A and E target the fix, B and C the fixture bytes, and F the one UI test the sweep rewrote). E2: the supportability sweep over §48's fourteen rows — L14, L16, L19, L20 and L24 **CLOSED** on measurement (L14 by revalidation, L24 closed-and-not-reproduced), L4, L5, L17 and L23 **REDUCED** with their residue named (L23's seventh instance repaired test-only, then 20/20 fresh-process runs), L25 **NOT_REPRODUCED** (30 legitimate Apply activations), L8 and L12 **CARRIED_FORWARD** with what was measured about them, and L15 written up as the three-namespace serialized-contract question it actually is and **STOPPED for the Architect** under §42 — a stop the Architect has since answered, see the next row | `37228929762` at `59d85c3`, attempt 1 — and `859648e` has **no run of its own**: the round was one `git push` of two commits, GitHub starts one run per push at the tip head, and `gh run list --json headSha` confirms it. That is recorded rather than papered over, and E1's bytes are verified by the tip run plus the clean detached worktree | **868 Rust / 217 UI in 8 files** (854 → 868, the +14 all in the new fixture target; 210 → 217, +6 in `compare.test.tsx` and +1 in `details.test.tsx`, while `history.test.tsx` changed a test without adding one), local gate **16 of 16**, `--only package` **4 of 4** with no `SKIP`, `core-smoke` 3/3, drift 7/7, deny 1/1, UI reliability campaign **20 runs / 217 tests / 0 failing**, worktree gate **18 of 18** — and the remote agreed: **10 of 10**, every job and every step read individually |
+| `6981625` | Commit E's §59 read-back successor: the candidate's run written into `P5_CI_AUTHORITY.md` and the governance entry points, the "last head that changed a line of Rust" sentence dated instead of left to mislead, and §7a added to the fixture report for the clean detached worktree. Documentation only | `37230689636` | success, **10 of 10**, attempt 1, every job and every step read — this head is the first Commit E row that can carry its own run, because the run it needs belongs to the head after it |
+| `80b47c4` | **Commit E closure normalization**, documentation-only under §1 of its own prompt: the matrix status column normalized to the five canonical values (38 cells, 0 outside the vocabulary — the old `BEST_EFFORT_NO_CLAIM`, `DEFERRED_NO_MVP`, `NOT_CLAIMED`, `MEASURED, NOT INFERRED`, `BUILT_AND_VERIFIED_IN_CI` and the half-sentence cells all moved to the evidence column, and release readiness moved to a `state` column so `READY_NOT_EXECUTED` / `UPDATE_READY_MANUAL` stop pretending to be compatibility statuses); the A–H disposition column normalized to the four canonical words with the architect's mapping — **A, F, H existing; B, C, D, E, G new**, because a new assertion on an old fixture is not a new fixture; **L15 answered** as Option E and rewritten from a stop into a decision (`RESOLVED_BY_ARCHITECT`), with `04_TECH/23` §7 documenting the legacy identifier's meaning and the supportability row now `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`; the prompt archived with both hashes recorded | its run is now a read-back fact: `37262147348` (#67) went **9 of 10 on attempt 1**, the single red being `Generated output drift` at rustup on the Ubuntu runner ("recovering from a partially installed toolchain", then `failed to install component: 'clippy-preview-x86_64-unknown-linux-gnu', detected conflict: 'bin/cargo-clippy'`, rolled back ~0.5 s in before compiling anything) — provisioning, corroborated by the same SHA's green `Rust (ubuntu-latest)` — and **10 of 10 success on attempt 2** after one `gh run rerun --failed`, which re-executed that one job and carried the other nine attempt-1 executions forward. Two attempts, stated as two attempts; §27 still forbids a further commit merely to record it | direct counts unchanged and required to stay unchanged: **868 Rust / 217 UI in 8 files**, gate **16 of 16**, `core-smoke` 3/3, drift 7/7, deny 1/1, package 4 of 4 with no `SKIP`. Zero paths under `crates/`, `apps/`, `scripts/`, `fixtures/`, `schemas/`, `golden/`, `.github/`; `Cargo.lock` and `pnpm-lock.yaml` untouched; owner's store never opened |
+| `57a904e` | the documentation closeout after Commit D: the handoff entry points reconciled with the tree the round left — P3-era `556 / 135 / 15` figures labelled as a snapshot beside the measured `854 / 210`, the P5 head chain added to the `.ai/HANDOFF.md` ledger, `.ai/README.md`'s stage block rewritten, the install report's "not built" claims dated, `P5_MIGRATION_DECISION.md` moved to `DECIDED_AND_IMPLEMENTED`. No product source in the diff | `37212546755` | success, **10 of 10**, first attempt, every job read individually. Two sentences it shipped were false the moment it was committed — `.ai/README.md` and `.ai/HANDOFF.md` each called `956e250` the "current HEAD" — and this row's own commit, `bfbc1aa`, is that correction — which is also Commit E's base, so its run belongs to the head after it under the same rule |
+| the head that lands this row | **Commit F1** — L26, decided and implemented. `09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md` settles that the root `SHA256SUMS` records the SHA-256 of each path's **canonical Git stage-0 index blob**, not its working-directory bytes, and is deliberately distinct from `ADR-0028` because a repository baseline and a release identity are different evidence domains. The generator now digests one batched `git cat-file --batch` fed by `git ls-files -s -z` — bytes end to end, so the non-ASCII paths survive — refuses any stage ≠ 0, and refuses to write while a tracked path carries an unstaged **semantic** change, which is what makes the recorded order (tree → stage → sums → stage) self-enforcing rather than a habit. The verifier shares no helper with it, reads both artifacts *from the index*, resolves content through `:<path>`, and fails closed on an unmerged entry or worktree/blob drift. It runs in the authoritative gate as `drift/baseline integrity`, so all three CI platforms prove it. L15's user-visible residue closes display-only: `Details.tsx` captions the legacy `ElfProgramHeader` / `elf.program-header` token as **ELF address + flags evidence** while the stored value, the DTO, `analysis:1`, the goldens and the bundle keep carrying the identifier — and the new test asserts both halves. Plus `P5_COMMIT_F_DESIGN.md` written before the code (§19), the prompt archived with its measured digest, and proofs A–G | its own run is external evidence, read with `gh run list --json headSha` | **868 Rust / 219 UI in 8 files** (the +2 are the caption regression's two cases), gate **17 of 17** — 16 → 17 because the drift group gained a step — with drift **8 of 8**, `core-smoke` 3/3, deny 1/1, package 4/4 and no `SKIP`, and a clean detached worktree at **19 of 19**. No schema, migration, dependency, capability, workflow, fixture or golden change; `ADR-0028` and `.gitattributes` untouched; §64 unrun; the owner's store never opened |
+
+| the head that carries this row | **Commit F2 — installed productization acceptance.** Documentation, evidence and governance only: **zero** paths under `crates/`, `apps/`, `scripts/`, `fixtures/`, `schemas/`, `migrations/`, `.github/`, and no change to `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json` or `deny.toml` — §3/§35 forbid them because any one invalidates the F1 installer as the candidate under test, and three product findings were therefore recorded rather than patched. Ran the whole §64 journey once, contiguously, on the exact CI-built F1 Windows artifact (artifact id `11337963032` of run `37293381181`, 3,885,631 B, `a1152ef3…3c076b`, installed as downloaded), driven by real `SendInput` with read-only SQL used only as independent evidence. Proved the installed synthetic **v4 → v5** migration on 34 measured checks; proved retention semantically rather than by file digest, because a WAL database churns bytes legitimately; parked and restored the owner's store **twice** with the §26 gates satisfied before any commit. Wrote §28's eight-document closure pack, §29's user-doc audit — which found that `Help.tsx:50` already points readers at `P5_VALIDATION/P5_KNOWN_LIMITATIONS.md`, a path that **did not exist until F2 created it**, fixed without touching product code — §30's user-facing uninstall/retention wording, and §31's coverage boundary. **Two boundaries were written down instead of being smoothed over:** installed migration is one path and the owner's real store is at **schema v2**, so the chained v2 → v5 installed upgrade remains unexecuted; and the uninstaller's "Delete the application data" option was **never exercised**, because that folder holds unrelated historical stores from earlier phases. Also recorded against itself: three harness defects found and owned, one of which had been silently delivering installer clicks to a browser window for most of the round, and the F2 prompt file vanishing from `Downloads` after it was read — the archived copy is a transcript reconstruction, verified contiguous over lines 1–1,044 and matching the 19,040 bytes the directory listing recorded, and the register says so | its own run is external evidence, read with `gh run view <sha> --json headSha,conclusion,jobs` | **868 Rust / 219 UI in 8 files — both unchanged from F1, which is the check §37 names**: a docs-only round that moved either count would be a product change wearing a documentation diff. Full gate **17 of 17**, drift **8 of 8**, deny 1/1, `core-smoke` 3/3, package 4/4 with no `SKIP`. `F2 = COMPLETE`, `P5 = IN_PROGRESS`, `F3 = READY_FOR_ARCHITECT_REVIEW`. Not set: `P5 PASS_COMPLETE`, `active_task NONE`, a tag, a GitHub Release, a signature, a notarization, an updater, or a licence |
+| `fb5f628` | **Commit F2R1 — the narrow installed-UI corrective the Architect inserted between F2 and F3.** Three F2 real-desktop findings, all of them display-layer, fixed inside §16's only allowed product path `apps/desktop/ui/src/**`: **F2R-01 / S2**, Analyze → Sections laid its prose column out one character per line, because `Details.module.css` put `display: block` on the `<table>` — which pins the box to the pane and lets its columns sit *below their own minimum* — while `overflow-wrap: anywhere` on the reason made that minimum one character, so the column absorbed the whole deficit; **F2R-02 / S3**, History's `Details` was the last cell of a table wider than the frozen minimum window, so the only action on the row was the thing that fell off the right edge; **F2R-03 / S3**, Release printed the Core enum `MapRegionAndElfLoad` at a person. The mechanism was measured before it was changed: `P5_F2R_UI_CORRECTIVE_DESIGN.md` §3 keeps the probe numbers, including the negative control showing that a wrapper alone does not fix it and the 195 px / 163 px occlusion that is why sticky pinning was rejected. The repair is what §5 asks for first — a `.viewport` wrapper owns `overflow-x: auto`, the tables are tables again and so keep their intrinsic minimum, prose cells take a `24ch` measure with `break-word`, an Unknown reason sits on its own line under the word, and the History action moves to the **leading** cell, the placement the Evidence table already uses. F2R-03 routes Compare, Release and the Analyze weakest-basis sentence through one new `evidenceBasis.ts` holding the captions Compare used to inline, because §11 forbids divergent wording for the same evidence and §13 authorizes the extra surfaces that share the helper. **No token changed, no pixel constant invented, no dependency, no capability, no contract move**: `assets/design-tokens.json` is byte-identical and `analysis:1`, `diff:1`, `gate-results:1`, `accepted-reviews:1`, `release-manifest:1`, SQLite schema 5, migrations 0001–0005, ADR-0028, ADR-0029 and `elf.program-header` all stay as they are — this round is display/layout only | run `37431977428` (#70), attempt 1 — read back in `P5_CI_AUTHORITY.md`, all ten jobs and every step read individually as §41 requires; §25 forbids borrowing F2's run, and this head has its own | **868 Rust unchanged / 225 UI in the same 8 files** (219 → 225: the three contracts and their guards), full gate **17 of 17** with drift **8 of 8**, deny **1 of 1**, `core-smoke` **3 of 3**, package **4 of 4** and no `SKIP`; §20's four mutation proofs each reddened their own test; §21 re-run on the tree actually committed and §22 reliability **20 repetitions / 20 green / 0 failing / 7 min 25 s**, both re-taken after three comment-only lines moved (the superseded runs are kept, not deleted, and §9 of the design record says why). **Not done and not claimed here:** §26's exact F2R1 artifact download and §30–§33's focused installed revalidation at 1024×720 / 1056×799 / 1440×900, so no F2 finding is closed by this head — §36 requires the installed artifact first. **F2R2 below is the head that ran it and closed them.** `P5 = IN_PROGRESS`; no `P5 PASS_COMPLETE`, no `active_task NONE`, no F3 state |
+| the head that lands this row | **Commit F2R2 — the installed round F2R1 was forbidden to claim.** §26's artifact and §30–§33's focused revalidation ran on **run #70's own Windows package**: artifact id `11397938806`, `FirmwareSight_0.6.0_x64-setup.exe` 3,886,598 B `efbc45a3…d5fd4`, installed `firmwaresight-desktop.exe` 15,362,048 B `2cf01a6d…670b` — not F1's `11337963032`, not F2's binary, no local `cargo`/`tauri` build, and the artifact set's own `SHA256SUMS.txt` verified before it was run. The harness was hardened **before** any installed action (`require_app()` refuses `NO_PROCESS`/`NO_WINDOW` instead of falling back to another application's window — the first probe had matched a window titled "Claude"), and every click still passes the pixel-ownership guard that refused one real click this round (`POINT_OWNED_BY_OTHER_WINDOW`, pid 26036 owned the pixel, no input sent). **All three findings CLOSED** at 1024×720 / 1056×799 / 1440×900: Sections prose wraps at a readable measure with the table area owning the scroll, `Details` leads every History row and survives `SPACE` close/reopen with a visible focus ring, and Release reads "ELF address/flags evidence" / **"MAP regions + ELF load evidence"** where F2 captured `MapRegionAndElfLoad`. The 1440×900 trade is recorded rather than glossed: content ≈1.06× the pane, a contained scroll where the pre-fix layout fitted the pane by rendering one character per line. §33 smoke green (Analyze, Compare, Gate ×2, History, Diagnostics; no crash, no new path leak), §34 `P5_DESIGN_ACCESSIBILITY = PASS_FOR_FROZEN_DESKTOP_SCOPE` with `WCAG_CERTIFICATION = NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED`, `SECOND_WINDOWS_HOST = NOT_TESTED` unchanged, §35 **L20 = CLOSED ACROSS VERIFIED HUMAN-FACING MEMORY-BASIS SURFACES** without rewriting Commit E's text, and the owner's store restored byte-exact with `OWNER_STORE_OPENED_BY_F2R = NO`. F2R2 itself is **docs/evidence/governance only** (§42), writing `P5_F2R_UI_CORRECTIVE_REPORT.md` with §37's twenty parts plus the §38 addenda to `P5_KNOWN_LIMITATIONS.md` §8, `P5_EXIT_CHECKLIST.md` §4–§6, `P5_DESKTOP_ACCEPTANCE_REPORT.md` §9, `P5_CI_AUTHORITY.md` (F2's heads and F2R1's run, attempts read individually) and these entry documents | its own run is external evidence, read with `gh run list --json headSha,runAttempt` after the push — a head cannot certify the worktree and archive proofs of its own SHA, and §44 forbids a further head written only to record it | **868 Rust / 225 UI in 8 files — both identical to F2R1, which is exactly the check §43 names**: a docs-only round that moved either count would be a product change wearing a documentation diff. Full gate **17 of 17** with drift **8 of 8**, deny **1 of 1**, `core-smoke` **3 of 3**, package **4 of 4** and no `SKIP`, and the baseline verifier **RESULT PASS** at the identical staged state (tracked **708**, entries **706**, every mismatch counter 0). This row first carried F2R1's figures (707 / 705) and a worktree figure it had not yet earned; the head that lands it corrects them to the measured ones, because §23's order generates `SHA256SUMS` from the stage-0 blobs and only then counts them. The two proofs that can only address a SHA that exists — the clean detached worktree and `git archive` extracted outside the repository — stay §3's asymmetry: executed after this head, reported to the Architect, and not self-certified inside the commit they prove, which is also why §44 forbids a further head written only to record them. `F2R = FINAL PASS / COMPLETE`, `F2 = PASS`, `P5 = IN_PROGRESS`, product **MVP CANDIDATE**. `F3 = READY_FOR_ARCHITECT_REVIEW` is this round's conclusion **and** is gated on that external run reading 10 of 10; F3 is *not authorized here*, no F3 work was started, and no P5 closure token, `active_task NONE`, tag, GitHub Release, signature, notarization or updater appears in any of it |
+| the head that lands this row | **Commit F3 — final governance closure: the last authorized unit of P5, and the only head that may write the stage's verdict.** Authorized by *FirmwareSight — P5 Commit F3 Final Governance Closure, Execution Prompt v1.0 — Architect Authorized*, archived at `10_AUDIT/SOURCE_PROMPTS/FirmwareSight_P5_CommitF3_Final_Governance_Closure_v1.0.txt` with **both** digests because transport moves them: delivered bytes SHA-256 `860e00976b242f15de1473455941140599a8a5cd639409521e7c38a28a64514c` (36,458 B, 1,821 CRLF lines, no final newline) and stored Git blob `f00751304ebf789f67b8b5355864a5ca3eefcd5c` → SHA-256 `6cacd10ee1eff4a6c4ab90b4f9d51df987bad16cf94fe142961c0d37fd749c66` (34,637 B, 1,821 LF). The delta is exactly the 1,821 carriage returns and the line-by-line comparison returns identical text on all 1,822 logical lines with zero differing lines; `cmp` proves the archive is the delivered file, so nothing was reconstructed, and `.gitattributes` was not touched to make the hashes agree (`AGENTS.md` 9). **Order was not negotiable: §6's exit re-audit ran before any closure sentence.** All nineteen areas were re-read against measurements and **no required engineering item came back `BLOCKED`** (`P5_EXIT_CHECKLIST.md` §7) — Design/Accessibility carried F2R's `PASS_FOR_FROZEN_DESKTOP_SCOPE` **exactly**, with `WCAG_CERTIFICATION = NOT_PERFORMED`, `MULTI_DPI_125_150 = NOT_TESTED` and `SECOND_WINDOWS_HOST = NOT_TESTED` untouched (§7), and Security/supportability stayed at the bounded sentence, never "security clean". The re-audit's one real find was in this repository's own paperwork: the checklist asserted every L1–L26 row was accounted for while `P5_KNOWN_LIMITATIONS.md` held **25 of 26 — L12 had no row**, though the two accepted RustSec advisories it covers were carried honestly in `P5_SUPPORTABILITY_REPORT.md` §2 and `P5_SECURITY_SUPPORTABILITY_REVIEW.md` §2. F3 added the row and corrected the assertion instead of deleting the claim, then §11's rule held the rest: **no limitation became `CLOSED` merely because P5 closed** — L3, L4, L5, L8, L11, L12, L13, L15, L17, L23 and L25 all keep their carried dispositions. L15 stays split (presentation `CLOSED`, wire `CARRIED_FORWARD — LEGACY_WIRE_IDENTIFIER`, no enum rename, no `analysis:2`), L26 is `CLOSED — ADR-0029` kept deliberately distinct from `ADR-0028` with no new checksum semantic, L20's reopen/reclose is reconciled **with dates** rather than by rewriting Commit E's measurement (§8/§23), and §12's performance truth is quoted unchanged: 519,179,252 bytes, ~2,020,073 symbols, warm ~4.73–4.89 s, cold first read ~68.7 s, ~1,428 MB peak observed working set, never "Not Responding" — near-500-MiB UI `MEASURED`, first-use-under-60 s **not proved at this workload**, and no claim that performance was optimized, that a 500 MB target was achieved or that every large file finishes inside a stated window appears in the tree. §13 froze all ten release-readiness states and §14 wrote the consequence rather than resolving it: **`PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE DECISION`**. §24 kept this round off the machine entirely: **nothing installed, no owner app-data store opened, no parking needed** — installed authority remains F2R1's `fb5f628` / run `37431977428` / artifact `11397938806`. **Canonical state written (§15–§18):** `P5 = PASS_COMPLETE` · Productization `ENGINEERING_COMPLETE` · `active_task = NONE` · product `MVP_CANDIDATE` · narrative **FirmwareSight Productized MVP Candidate** · `baseline_version` `0.6.0` · `G2 = PASS` with P0–P4 untouched — in `BASELINE.yaml` using only that file's existing vocabulary (`stage_status`, `closed_on`, `tests_at_close`, `product_state`, `gates_at_close`, `remote_ci`, `next_stage_after_this_one`; **no key invented for prose, no new machine enum**), and in `.ai/ACTIVE_TASK.md`, `.ai/CURRENT_STATE.md`, `.ai/HANDOFF.md`, `.ai/README.md`, `.ai/DECISIONS.md`, `README.md`, `INDEX.md` and `06_DELIVERY/06_STAGE_GATES.md`, with every stale `IN_PROGRESS` / `F3 READY_FOR_ARCHITECT_REVIEW` current claim replaced by a dated state and each round's own words preserved beside it. §19–§22 finalized the lineage with every red and interrupted run kept (`3400981` 8/10; #67 attempt 1 infra-then-attempt 2; #69 attempts 1–2 zero-step cancellations then 3; #70 and #71 attempt 1, 10 of 10), added F2R2's external row while preserving `31f10c7`'s no-run row, and created `P5_VALIDATION/P5_FINAL_CLOSURE_REPORT.md` | **its own run is external evidence and cannot be certified from inside the commit that waits for it** — `F3 remote CI = PENDING_EXTERNAL_EVIDENCE`, read after the push by exact SHA with all ten jobs enumerated individually, and §34 forbids a further commit whose only content is the number. The predecessor `a5ce7c4` is green: run `37453402452` (#71), attempt 1, 10 of 10, re-read with `gh api` on 2026-10-06 | **868 Rust / 225 UI in 8 files — both exactly as §5 requires them to stand still**, which is the check that proves this is documentation and not a product change wearing a documentation diff: `cargo test --workspace` 868 passed / 0 failed across 47 test-result lines, `pnpm test` 225 passed in 8 files, `cargo fmt --check` 0, `clippy -D warnings` 0, full gate **17 of 17** (rust 3, frontend 5, drift 8 including `drift/baseline integrity`, deny 1) with **no `SKIP`**, `--only drift` 8/8, `--only deny` 1/1, `--only core-smoke` 3/3, `--only package` 4/4, and `verify_baseline_artifacts.py` **RESULT PASS** at the final staged state (710 tracked paths, 708 entries — the two new paths are the archived F3 prompt and the new closure report, and no product path is among the 30 changed). §25's allowlist is proved from the staged diff: **zero** paths under `apps/` `crates/` `scripts/` `fixtures/` `schemas/` `golden/` `migrations/` `.github/`, and no `Cargo.toml`, `Cargo.lock`, `package.json`, `pnpm-lock.yaml`, `tauri.conf.json`, `deny.toml`, `rust-toolchain.toml` or `assets/design-tokens.json` byte — stronger still, every one of those **tree OIDs is identical** between `a5ce7c4` and the staged F3 tree, so `apps` `dd8cccf…`, `crates` `0c93332…`, `apps/desktop/ui/src` `8e893af3…`, `scripts` `76c1e1c…`, `.github` `174bd58…` and the token file `b818d11…` cannot have moved. `P5 = PASS_COMPLETE`, `Productization = ENGINEERING_COMPLETE`, `active_task = NONE`, product **MVP CANDIDATE**, narrative **FirmwareSight Productized MVP Candidate**. **And §37 stops the stage: V1, B1, private beta, RC, GA, commercialization, licensing, signing, notarization, an updater and new feature development are all unauthorized, and final external acceptance requires F3 remote CI** |
+| the head that lands this row | **V1 activation — the Recruitment Ready pack, and deliberately nothing more.** Authorized by *FirmwareSight — V1 Own-artifact External Validation, Execution Prompt v1.0 — Architect Authorized* (delivered file SHA-256 `48768ff0…ec10a0f`, 46,207 bytes, 1,697 CRLF pairs, 1,698 logical lines), archived as `FirmwareSight_V1_Own_Artifact_External_Validation_v1.0.txt` (Git blob `d5e8d457…51774`, SHA-256 `c62314fe…90c34e`, 44,510 LF bytes — the two digests differ by exactly the 1,697 removed `CR` bytes and split into the same 1,698 lines). §3 preflight confirmed `HEAD = origin/main = 08fdfcb` with a clean tree and one worktree, so there was no remote delta to classify. §1 then froze and **preserved the cohort build**: run `37475580080`, head `08fdfcb`, artifact id `11419727517`, ZIP container 5,536,303 bytes (which §1 insists is *not* the installer size), NSIS `FirmwareSight_0.6.0_x64-setup.exe` delivered as `FirmwareSight-0.6.0-windows-x86_64-nsis.exe`, 3,888,432 bytes, SHA-256 `182506f2…63d12`, internal `SHA256SUMS.txt` verified `OK` on both entries with exit 0, payload executable `6598880d…10646`, `expired: false` at activation, and the set preserved **outside Git** because §1 forbids committing the installer. **§5 is the branch this round took:** there were no real eligible external participants and no session evidence, so the round wrote the pack instead of running a cohort — §13's sixteen files (`V1_VALIDATION/README.md`, `V1_PLAN.md`, `V1_METRICS.md`, `V1_PARTICIPANT_REGISTER.md`, five `protocol/` documents, `sessions/README.md` and `TEMPLATE.md`, three `analysis/` registers, two `deliverables/`), every register at zero, the report a skeleton, and **no fabricated session, participant, quote, timing or completion** — which is the whole point of the branch. V0's M01–M17 taxonomy, its exclusion rules and its neutral-task discipline are carried forward rather than reinvented; the three deliberate changes (the installed product instead of a prototype, thresholds fixed before any data, and C6–C8 added to V0's C1–C5) are named in `README.md`'s comparison table. §43's boundary held: `V1_VALIDATION/**`, the archived prompt, `BASELINE.yaml`, `.ai/*.md`, `README.md`, `INDEX.md`, `06_DELIVERY/06_STAGE_GATES.md` (whose V1 line was materially stale — it carried no state while every other stage did) and the two regenerated baseline artifacts, with **zero** forbidden product paths. §14 activated `active_task = V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`, `V1 = IN_PROGRESS`, `research_state = RECRUITMENT_READY` while **P5 stays PASS_COMPLETE** and the product stays `MVP_CANDIDATE` at `0.6.0`; `v1_execution` is the opening record, and `product.status` / `validation.current_gate` deliberately do **not** mention V1 — at `4cc8d93` neither mentioned P5 either, because those strings carry verdicts and V1 has earned none. Release readiness, signing, notarization, updater, licence, tag and GitHub Release are untouched; `PUBLIC_DISTRIBUTION` stays `NOT_AUTHORIZED` and the research build stays unsigned and one-to-one. **V1 = IN_PROGRESS / RECRUITMENT_READY, eligible external sessions = 0, and the round stops there (§5 step 9).** | its own run is external evidence, read with `gh run view <sha> --json headSha,conclusion,jobs` | **868 Rust / 225 UI in 8 files — both required to stay exactly where F3 left them (§45)**, on the same **17-step** gate: drift **8 of 8** with `baseline integrity` inside it, deny 1 of 1, `core-smoke` 3 of 3, package 4 of 4 with no `SKIP`. A docs-only round that moved either count would be a product change wearing a documentation diff. The owner's FirmwareSight store was never opened, no installer was run on this host, and no participant data exists yet. |
+| the head that lands this row | **U1 — UI productization convergence, the round that paused V1.** Authorized by 《FirmwareSight B1 — UI Productization / Design Convergence》 v1.0, **delivered inline** (no file, so `10_AUDIT/SOURCE_PROMPTS/README.md` records `File: none (delivered inline)` the way the three inline P0 precedents are recorded, and the agent's labelled transcription is archived at `U1_VALIDATION/00_authority/` — 503 lines, 16,762 B, SHA-256 `67067dce624a6dc458055dd79e21b6ed4e983c7ac665426561e72b939de52865`, which is that transcription's digest and never the prompt's). §2A preflight measured `HEAD = origin/main = f481b78`, clean tree, one worktree, and it **reported the §0 start-state difference instead of smoothing it over**: the prompt said `active_task = NONE`, which was true at F3's head and had been overtaken by V1. The owner then decided three things before any file was written — the track is `U1` and not `B1` (Private Beta stays reserved and unauthorized), V1 pauses with every state field intact and gains only `paused_for`, and the frozen ADR-0018 precedence chain outranks the mockups. §6's gap audit ran **before** any code, as delivered, and wrote down the twelve measured gaps plus the dispositions. What converged: seven shared components (`Button`, `Chip`, `Layout`, `PageHeader`, `Panel`, `RankBar`, `TopBar`) replacing five page dialects of the same grammar — 373 lines of duplicated page CSS deleted, 0 added token values, `styles/tokens.css` and `assets/design-tokens.json` untouched and proved so by `drift/design tokens` — a new **Overview** page assembled only from DTOs the shell already returns with every action a navigation rather than a performed verb, the **Release verdict moved to the top of its page** with `GateCountsDto` as a strip and one shared `gateVerdictSentence` so the same run cannot read two ways on two pages, Analyze/Compare/History/Details onto the shared header, buttons, empty state and `RankBar`, and the **F2R-01 block-table defect closed on the two pages that still carried it** (Compare and Release), with all ten table wrappers now one `ScrollArea` and two new universal layout-contract tests. The single non-CSS change was declared before it was made: `MainWindowPage` gains an additive `Overview` variant because the window title is Rust's (AGENTS.md 7) — pinned by `history_reads.rs`, binding regenerated, and no DTO, schema, migration, storage, wire, release-identity, ADR-0028 or ADR-0029 surface moved; **no new IPC command** (30 before, 30 after, read from `generate_handler!`; the 27 written here at the time was
+wrong — `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md` §2). `SplitPanel`/`DetailPanel` were drafted for the references' detail column and **deleted at close** rather than shipped unused, because no page holds a selection to fill it; the six things the round did not reach are §6 of the report, and `visual_evidence` is honestly `STRUCTURAL_CONTRACTS_ONLY` — the real-desktop before/after pass needs the owner's store parked, which was not authorized, so **no screenshot was taken and no pixel claim is made**. `V1 = IN_PROGRESS / RECRUITMENT_READY` **paused** with 0 sessions and its frozen cohort build; `P5`, G2, product state and all ten release-readiness states unchanged; U1 self-issues no stage. | its own run is external evidence, read with `gh run view <sha> --json headSha,conclusion,jobs` | **868 Rust unchanged / 236 UI in 9 files** (was 225 in 8: +9 `overview.test.tsx`, +1 `compare.test.tsx`, +1 `release.test.tsx`, none deleted; five pre-existing test files had assertions reworded for the new markup and every one is named in the report §5), `cargo fmt --check` 0, `clippy --workspace --all-targets -D warnings` 0, `tsc --noEmit` clean, `eslint .` clean, `pnpm build` through, `pnpm exec vitest run` 236/236. The authoritative `python scripts/check.py` before staging reached **13 of the 14 steps it ran** — the one red being `drift/ipc bindings unchanged`, which is the unstaged ts-rs regeneration and nothing else — and the closeout run at the fully staged state is the authoritative number: **17 of 17 steps PASS with no SKIP** (rust 3, frontend 5, drift 8 with `baseline integrity`, deny 1), with `scripts/verify_baseline_artifacts.py` `RESULT PASS` at 750 tracked paths and 748 manifest entries and every mismatch counter 0. `core-smoke` was not claimed here because every package it selects is already inside `cargo test --workspace`, and `package` was not run at all — it builds a release installer for this host, so no package figure appeared in the first round's documents. **Both groups were run in the continuation round at the same head: `--only core-smoke` 3 of 3 and `--only package` 4 of 4 with no SKIP**, recorded in `U1_VALIDATION/U1_VISUAL_ACCEPTANCE_REPORT.md` §3.
+
+The failure is recorded rather than re-run until a green attempt appeared: `Desktop UI (windows-latest)`
+lost a race in `compare.test.tsx` that predates P5 (`055b54e` closed the same shape at the pager and said
+it had left the rest). Reproduced here without CI — 1 of 30 fresh runs, and 3 of 3 under injected mock
+latency — and repaired by awaiting the one synchronous read, no production source touched. `P5_VALIDATION/
+P5_PRODUCTIZATION_AUDIT.md` §0a carries the evidence. **The sweep that paragraph asked for has now been done,
+in bounded form**, because the same file produced the class's sixth instance — lost by the *local* full gate,
+not by CI, on the tree that came after `20b03e3`. §0a records the repair, three mutation proofs, 20 clean
+fresh-process repetitions, the one chained IPC wave the sweep found, and the five top-level synchronous reads
+that remained after it. What is still open is the honest residue: absence assertions settle by timing, and a
+wave whose shape differs from the one just closed may still exist.
+
+`37133706214` is the second red run and the more instructive of the two, because nothing about the product
+was wrong. All seven gate jobs passed; the three package jobs installed `tauri-cli@2.12.1`, looked for a
+binary named `tauri` — `cargo install` leaves `cargo-tauri`, run as `cargo tauri` — reported a skip, and
+printed `4/4 steps passed` with exit 0. What made them red was their own `if-no-files-found: error` upload
+step, i.e. the failure surfaced one step after the verification lied. The repair is the rule, not the
+filename: `check.py` distinguishes `SKIP` from `PASS` in its summary and totals, and exits non-zero when a
+skip happens in CI, where every tool the gate needs is installed by the job itself. Three local proofs are
+in `P5_VALIDATION/P5_PACKAGING_REPORT.md` §5, including a stand-in `cargo-tauri` that measured cargo's
+argument forwarding and then failed verification for building nothing.
+
+Installing the pinned CLI on this host then turned the group from a probe into a build, and it found the
+second defect: run from `apps/desktop/src-tauri`, the CLI's own `beforeBuildCommand` hook executed in a
+directory with no `package.json` (`ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND`), because the CLI resolves its
+frontend from the **process cwd** (`tauri-cli-2.12.1/src/helpers/app_paths.rs:148,153-174`) and this
+repository keeps `ui/` and `src-tauri/` as siblings. The package step now runs from `apps/desktop`, and from
+there it produced this repository's first installer — `FirmwareSight_0.6.0_x64-setup.exe`, 3,811,140 bytes,
+`c5c8cf23…` in `target/dist-package/SHA256SUMS.txt`, verified with `sha256sum -c`. That head then went
+**10 of 10 green** on Run `37138881977` — the first run in this repository to attach a built package on all
+three platforms — and reading those artifacts back found the third defect (§5d of `P5_PACKAGING_REPORT.md`):
+the darwin index gave the `.app` one line naming a directory, so `sha256sum -c` answered
+`FAILED open or read` on a correct build. The next run fixed it and was read back the same way: Run
+`37143046338` at head `53578e9`, **10 of 10**, five darwin index lines all `OK` with exit 0, and one flipped
+byte in a copied `Contents/Info.plist` making the index exit 1 and name the file. Built is now installed:
+§38 A–L and §39 ran on this host against the packaged installer, with the owner's store parked, hashed and
+restored byte-identically, and are transcribed in `P5_VALIDATION/P5_INSTALL_RECOVERY_REPORT.md`. §38 C —
+first-run onboarding — has since been **built** (Commit C, with L21's title fix that same round found on the
+packaged build), but not yet **operated in an installed binary**, so §64's full journey stays open. Commit D is
+now **COMPLETE** and its prompt's §34 STOP is in force. That STOP is what the Architect's next prompt
+answered: *FirmwareSight — P5 Commit E — Compatibility Fixtures, Support Matrix & Supportability Closure,
+Execution Prompt v1.0* (archived with its digest in `10_AUDIT/SOURCE_PROMPTS/`) authorizes the fixture
+cohort, the compatibility matrix and the §48 dispositions — and explicitly not the §64 full journey, not
+L26 and not a general source-control linter, so the installed-binary walk and Commit F stay behind a
+further return to the Architect rather than in the next free pair of hands. *(That return happened: Commit E
+closed, the Architect issued Commit F, and F1–F3 all landed. See the ledger rows above and
+`P5_VALIDATION/P5_EXECUTION_REPORT.md` §7 for the head-by-head record; this paragraph is kept as what was true
+when it was written, dated rather than deleted.)*
+
+Commit E is since **FINAL PASS / COMPLETE**, and the Architect did return: *FirmwareSight — P5 Commit F —
+Final Productization Closure, Execution Prompt v1.0 — Architect Reviewed* (archived with its measured digest
+in `10_AUDIT/SOURCE_PROMPTS/`) authorizes exactly two things this stage had left undone — L26 as repository
+tooling semantics under a new `ADR-0029`, and the §64 installed journey against the CI-built F1 artifact —
+in three commits, F1 (product/tooling), F2 (installed evidence) and F3 (the only head allowed to write
+`P5 = PASS_COMPLETE`). It forbids §64 inside F1, and it forbids a fourth commit merely to record a run. What
+decides the order of the last two is the owner's own answer, given on 2026-10-05: **land F1 first, then
+confirm**. So F1 is this head, no installer has been run, and no file of the owner's has moved; the §64 walk
+stays behind that confirmation, not behind a free pair of hands. *(The owner then released F2, and F2 ran the
+whole §64 journey on F1's own CI-built artifact with the owner's store parked, hashed and restored twice; the
+Architect inserted F2R between F2 and F3 for the three findings that walk produced, and F3 closed the stage on
+2026-10-06. This paragraph is F1's own state of play, kept as written and dated here rather than deleted.)*
+
+## What the owner decided at the checkpoint
+
+The cadence the owner set was: audit first, then a checkpoint before any product code. That checkpoint ran
+on 2026-10-03 and settled four questions.
+
+| Question | Answer |
+| --- | --- |
+| Which version identity wins | **Unify the artifacts on `0.6.0`**, with the workspace version as the single source; `baseline_version` stays `0.6.0` and nothing is tagged or released |
+| Migration `0005` for L6/L7 | **Write `P5_MIGRATION_DECISION.md` first, then add it** — additive columns for the two numeric `Unknown` reasons plus the `builds.created_at` index |
+| How far the package matrix goes | **Windows with a real install here, macOS and Ubuntu `CI_BUILD_ONLY`** — those two rows may never be written as `SUPPORTED` |
+| The store named `firmwaresight-p0.sqlite` | **Keep it.** No rename, no data move; the path becomes visible in Diagnostics instead |
+
+Two questions are not this round's: §32 sends L22 (release identity versus line endings) to the Architect
+as `P5_VALIDATION/P5_RELEASE_IDENTITY_ADR_DRAFT.md` followed by a STOP — **written, and it changes no
+behaviour**: it documents that the notes digest is the file's bytes (`evidence.rs:291` →
+`fingerprint.rs:42`), lays out the normalization and Git-blob options with their costs, names the one
+residual risk the G2 row did not state (`require_clean_git = false` makes the id move with nothing on screen
+saying why), and stops. The premise is now tested rather than argued
+(`crates/firmwaresight-project/tests/bundle_builder.rs`,
+`a_notes_file_that_differs_only_in_line_endings_is_a_different_release`, with the normalization mutation
+shown to redden it). And §54 forbids this agent from choosing a
+licence, so `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION` stands in every P5 document.
+
+## What P5 must not write
+
+*(This is the discipline list the P5 prompt §5/§11/§12/§72 wrote on 2026-10-03, and it is what the round
+obeyed for eleven heads. One item of it has since been earned rather than lifted: F3 §5 permitted
+`P5 = PASS_COMPLETE` only after §6's re-audit found no required engineering item `BLOCKED`, and that re-audit
+is `P5_VALIDATION/P5_EXIT_CHECKLIST.md` §7. Everything else below still binds after closure, and none of it
+was touched by F3.)*
+
+No `B1 READY`, `BETA`, `RC` or `GA` — closure did not produce any of them. No tag, GitHub Release or published
+installer (§72). No signing or notarization executed — those statuses stay `READY_NOT_EXECUTED` (§11) — and
+updates stay `UPDATE_READY_MANUAL` (§12): no updater, no endpoint, no certificate, no committed private key.
+No "security clean"; the permitted sentence is "dependency policy passes with documented accepted risks". No
+new network capability, telemetry, analytics SDK, generic shell or filesystem permission, and native dialogs
+stay Rust-side. No licence decision: `PUBLIC OPEN-SOURCE REDISTRIBUTION CLAIM = BLOCKED BY OWNER LICENSE
+DECISION`, and that sentence is §14's, not a defect to repair. And no next track: V1, G3 and B1 each need
+their own architect prompt.
+
+## What closed before P5
+
+`G2_ENGINEERING_CLOSURE_AUDIT`, authorized by *FirmwareSight — G2 Product MVP Engineering Closure Audit,
+Execution Prompt v1.0 — Architect Reviewed* (file, SHA-256
+`3c6ab83e11ce6a4c91a609dd0a6bc318e700dc0cbbccd3d4493eaf65c3e2bac9`, archived in
+`10_AUDIT/SOURCE_PROMPTS/`) and *G2 Storage Path Semantics Clarification Addendum v1.0* (inline).
+
+| Document | Holds |
+| --- | --- |
+| `G2_VALIDATION/G2_EXIT_CHECKLIST.md` | the §34 checklist, persistence rows as the addendum corrected them, and the verdict |
+| `G2_VALIDATION/G2_EVIDENCE_MATRIX.md` | every requirement classified and cited; the 17-point path boundary; the findings; the PRD metrics |
+| `G2_VALIDATION/G2_END_TO_END_SMOKE_REPORT.md` | the CLI chain, the shipping window S1–S43, parity, failure and recovery, fail-closed inputs |
+| `G2_VALIDATION/G2_ENGINEERING_CLOSURE_REPORT.md` | what was done and decided, including the remote closure |
+| `G2_VALIDATION/G2_KNOWN_LIMITATIONS.md` | the one canonical list, 25 rows, none blocking |
+
+Measured on the audited tree: one `cargo test --workspace` **769 / 0 / 0**; UI **155 in 6 files**;
+`check.py` **15/15**, and **17/17** in a clean detached worktree; CLI and desktop byte-identical on Diff
+JSON, Diff HTML and the whole bundle; independent reader 64/64, relocated 59/59. Remote: the product tree
+`e35cfe7` on Run `36906482900` and the evidence head `f75cbc5` on Run `36948719972`, each 7 of 7 on the
+first attempt. Findings: G2-F1 closed (test-only), G2-F2 adjudicated as expected local-only storage, G2-F3
+recorded (tooling).
+
+`NOT MEASURED`: peak RSS and a 500 MB working set in the window — not G2 blockers under the prompt's §27,
+and not claimed. `NOT RUN`: fuzzing, a macOS or Linux window, a second Windows host, any DPI other than
+100%.
+
+**The closing commit's own CI run is not written into it.** Prompt §43 allows exactly one successor and
+makes its run external evidence, read with `gh run list` and reported, not chased into another commit.
+
+## What G2 PASS does not mean
+
+Not G3 productization, private beta, release candidate or GA; not production-ready, signed or installable;
+not real-user validated (V0 stays `0 / 8`) or commercially validated; not security-clean (two accepted
+RustSec advisories). And not a licensed open-source release: `license = "Proprietary"` stands in the root
+`Cargo.toml`, there is no root `LICENSE`, and `OPEN_SOURCE_LICENSE_DECISION_PENDING_OWNER_CONFIRMATION`
+remains — `AGENTS.md` 9 puts that decision in front of the owner. Baseline stays `0.6.0`; no tag, GitHub
+Release, installer or `v0.7.0` was created.
+
+## What closed after G2, and what that changes here
+
+Those two rounds did not move the pointer: `active_task` stayed `NONE`, G2 stayed `PASS`, and the product
+stayed an MVP CANDIDATE. What moved was the tree, so the numbers in the section above are the history of a
+different commit rather than the present: the remediation round left **770 Rust / 159 UI**, P5's early
+commits moved it to **775 Rust / 160 UI / `check.py` 16 steps** (migration `0005`'s five storage tests, the
+Details reason test, and the `version identity` drift step), and **Commit C moved it again to 812 Rust /
+200 UI in 8 files** on those same 16 steps — 19 storage History reads, 11 desktop boundary tests, 40 UI
+tests over the two new screens. §32's identity test and L23's contract test made that **813 / 201**, and
+**Commit D made that 854 Rust / 210 UI in 8 files** — storage at 131 (5 unit, 126 integration,
+of which 13 are the new `integrity_and_backup.rs`), desktop at 222 (96 unit including the 7 `startup.rs`
+mappings, 126 integration including 8 in `tests/diagnostics.rs`), and 9 new UI tests over the section that
+makes 210 — with the local gate at **16 of 16** and the package group at **4 of 4**.
+**Commit E moved that to 868 Rust / 217 UI in 8 files** — the 14 new Rust tests all in
+`crates/firmwaresight-artifact/tests/p5_compat_fixtures.rs` and the 7 new UI tests in `compare.test.tsx` (6)
+and `details.test.tsx` (1) — on a gate that stayed at **16 of 16** because that round added no step, with
+`core-smoke` 3/3, drift 7/7, deny 1/1 and package 4/4 holding and no `SKIP`.
+**Commit F1's total was 868 Rust / 219 UI in 8 files** — no Rust test moved (F1 changes repository
+tooling, not the product), and `details.test.tsx` gained the two L15 inspector cases — while the gate moved
+**16 → 17 steps** because the drift group gained `baseline integrity`, so drift is **8 of 8**, `core-smoke`
+3/3, deny 1/1 and package 4/4, all with no `SKIP`.
+**The present total, as Commit F3 closed the stage on 2026-10-06, is 868 Rust / 225 UI in 8 files** — F2 held
+both numbers as its own docs-only proof, **F2R1 took UI 219 → 225** with the three installed-UI contracts and
+their guards (Rust unchanged), and F2R2 and F3 each held 868 / 225 still for the same reason F2 did. The gate
+has been **17 steps** since F1: drift **8 of 8** with `baseline integrity` inside it, deny 1 of 1,
+`core-smoke` 3 of 3, package 4 of 4, no `SKIP`, and the cold detached worktree at 19. The evidence
+directory the post-G2 real-desktop remediation round added is `POST_G2_E2E_REMEDIATION/`.
+
+On 2026-10-02 a real-desktop acceptance round drove the shipping binary through 283 black-box cases and
+closed `PASS_WITH_FINDINGS` — three product defects, no S0, no S1 — and a follow-on round fixed exactly
+those three (`e816dcb`, `971015f`), each with a regression written first, a mutation proof after, and a
+focused real-desktop re-check against a rebuilt binary. Neither round widened anything: no P5 surface, no
+parser performance work, no schema, migration or dependency change, and no licence decision.
+
+The rule above bound, and both rounds obeyed it: with no active task, no agent may create business
+functionality or pick the next track. P5 has since been picked the only legitimate way — an architect
+prompt of its own, archived with its hash, which is what opened this task. V1 still has no prompt and stays
+unauthorized. *(Dated correction: that sentence was true of the tree P5's F3 closure left, and it stopped
+being true on 2026-10-06, when the architect issued the V1 prompt as a file and this pointer moved to
+`V1_OWN_ARTIFACT_EXTERNAL_VALIDATION`. It is kept as written because it records what was knowable at that
+head; the live state is the block at the top of this file and `v1_execution` in `BASELINE.yaml`.)* The carried
+forward list — large-file latency, peak RSS, 125/150 % DPI, mouse-wheel, `update_goldens`, the E2E harness —
+was carried into P5 as a disposition to answer (§60), not as a licence to widen scope, and P5 answered what it
+could: the ones real-user validation owns are now L11's and V1's, which is exactly the hand-off
+`V1_VALIDATION/deliverables/V1_GATE_RECOMMENDATION.md` records.

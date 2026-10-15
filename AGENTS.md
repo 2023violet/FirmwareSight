@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Engineering"
-last_updated: "2026-10-11"
+last_updated: "2026-10-14"
 ---
 
 # AGENTS.md
@@ -14,19 +14,18 @@ last_updated: "2026-10-11"
 
 ## 1. 接手顺序
 
-开始阅读历史状态和任务记录前，先读 `.ai/NOW.md` 获取当前状态与证据边界。它是导航索引，不替代下列必读文件，也不改变任何任务授权规则。
+开始任何任务前必须读取（2026-10-14 起每份均为短文件，只记录当前事实）：
 
-开始任何任务前必须读取：
-
-1. `README.md`
-2. `.ai/README.md`
-3. `.ai/CURRENT_STATE.md`
-4. `.ai/DECISIONS.md`
-5. `.ai/ACTIVE_TASK.md`
-6. `04_TECH/09_TECH_DECISION_MATRIX.md`
-7. 与任务相关 ADR / spec
+1. `.ai/NOW.md`：当前 SHA、门禁、未关闭风险
+2. `.ai/ACTIVE_TASK.md`
+3. `.ai/DECISIONS.md`：ADR 索引与常设 Owner 规则
+4. `.ai/CURRENT_STATE.md`
+5. `04_TECH/09_TECH_DECISION_MATRIX.md`
+6. 与任务相关 ADR / spec
 
 若 `ACTIVE_TASK.md` 为 `NONE`，不得自行创建业务功能。
+
+2026-10-14 之前的完整历史冻结在 `.ai/archive/2026-10-14/`。这些归档对其记录的事实仍然权威，但只在任务需要时按需读取，不是必读材料。`.ai/` 当前文件采用覆盖更新，不再追加。
 
 ## 2. 技术基线不可静默改变
 
@@ -149,3 +148,12 @@ last_updated: "2026-10-11"
 - 数字/hash/version/timestamp/path 使用 mono。
 - UI 不得复刻 parser/diff/gate 逻辑。
 - UI PR 必须通过 `templates/DESIGN_CHECKLIST_TEMPLATE.md`。
+
+## 12. 工作区与证据卫生
+
+由 Owner 于 2026-10-14 确立。
+
+- 审查用 worktree 在结论签署、证据打包后立即删除：先归档其中非 Cargo 的内容，再执行 `git -c core.longpaths=true worktree remove`。
+- 临时脚本、日志、截图、备份一律不写入任何 `target/`；需要保留的放仓库外 `FirmwareSight_LOCAL_ARCHIVE/<任务>/`。
+- 不设置全局 `CARGO_TARGET_DIR`，因为 `scripts/verify_package_artifacts.py` 读取 `target/release/bundle`。
+- 仓库内的任务证据只提交摘要、AC 矩阵和带哈希的 ZIP，不提交展开的原始日志；发布前去除本机路径。

@@ -13,6 +13,10 @@ Native user acceptance: **NOT_VERIFIED / BLOCKED_BY_ENV**.
 - [Public evidence archive](FirmwareSight_NEXT47_PUBLIC_EVIDENCE_20261014.zip) / [archive digest](PUBLIC_ARCHIVE_SHA256.json)
 - [Published file integrity and original provenance](PUBLIC_EVIDENCE_MANIFEST.json)
 
+## Repository copy vs. archive (2026-10-14 deduplication)
+
+`evidence/` in the repository keeps only the 15 files linked above or from the integrated report. All 527 published files, those 15 included, are in the ZIP. The manifest's `files` list describes the ZIP contents. Before the deduplication commit, each of the 512 files removed from `evidence/` was re-hashed from the ZIP and matched its `published_sha256`. Commit `71978d8` still holds the fully expanded copy. Nothing was rewritten: the 15 kept files are byte-identical to their manifest entries.
+
 ## Public copy and original identity
 
 The Owner explicitly requested uploading this delivery to main after the engineering integration completed. The local original evidence archive remains unchanged and is not uploaded. This directory is a public repository derivative: local user and protected-checkout prefixes become `LOCAL_USER` and `OWNER_WORKSPACE`; execution helpers, protected staged patches and original-only package manifests are omitted. Test outputs, failures, correction history and compatibility/native limitations remain visible. The public manifest records every original payload hash, current published payload hash, redaction and omission.

@@ -1,9 +1,0 @@
-{
-  "argv": [
-    "gh",
-    "api",
-    "repos/2023violet/FirmwareSight/actions/runs/38595778036/attempts/1/jobs?per_page=100"
-  ],
-  "exit_code": 0,
-  "utc": "2026-10-14T16:32:33.735270+00:00"
-}

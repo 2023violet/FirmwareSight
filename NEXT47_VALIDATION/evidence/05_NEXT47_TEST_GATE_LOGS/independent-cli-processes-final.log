@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\cli-independent.py", line 45, in <module>
-    invoke('independent-cli-verify',['release','verify',str(bundles[0].parent),'--json'],0)
-    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "LOCAL_USER\Downloads\FirmwareSight_NEXT47_EVIDENCE_20261014\reviewer\cli-independent.py", line 36, in invoke
-    assert p.returncode==expected,(name,p.returncode,p.stderr.decode(errors='replace'))
-           ^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: ('independent-cli-verify-final', 2, "error: unrecognized subcommand 'verify'\n\nUsage: fwsight.exe release <COMMAND>\n\nFor more information, try '--help'.\n")
