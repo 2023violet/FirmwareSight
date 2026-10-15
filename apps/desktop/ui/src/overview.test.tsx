@@ -1273,3 +1273,83 @@ describe('the same overview read in Chinese', () => {
     expect(fallbacks()).toEqual([]);
   });
 });
+
+describe('M1 memory usage bars', () => {
+  function region(over: Partial<AnalysisSummaryDto['memory']['regionUsage'][number]> = {}) {
+    return {
+      name: 'FLASH',
+      kind: 'nonvolatile',
+      origin: '0x8000000',
+      capacityBytes: '1048576',
+      usedBytes: '819200',
+      remainingBytes: null,
+      remainingReason: 'not proven',
+      usedPercent: { value: '78.1%', status: 'available' },
+      state: 'exact',
+      risk: 'within-capacity',
+      evidenceSource: 'map',
+      evidenceId: 'region-flash',
+      addressKind: 'load',
+      sections: [],
+      reasons: [],
+      ...over,
+    };
+  }
+
+  function withRegions(regions: ReturnType<typeof region>[]): AnalysisSummaryDto {
+    const base = summary();
+    return { ...base, memory: { ...base.memory, regionUsage: regions } };
+  }
+
+  it('shows Rust’s percentage, the bytes and the risk word for each region', () => {
+    renderOverview({ summary: withRegions([region()]), analyzedSelectionId: null });
+    const meter = screen.getByRole('meter', { name: 'FLASH usage' });
+    expect(meter.getAttribute('aria-valuenow')).toBe('78.1');
+    expect(screen.getByText('78.1%')).toBeDefined();
+    expect(screen.getByText('819,200 bytes of 1,048,576 bytes')).toBeDefined();
+    expect(screen.getByText('Within capacity')).toBeDefined();
+  });
+
+  it('keeps an over-capacity figure true while the bar stays inside its track', () => {
+    renderOverview({
+      summary: withRegions([region({ usedPercent: { value: '150.0%', status: 'available' }, risk: 'exceeded' })]),
+    });
+    const meter = screen.getByRole('meter', { name: 'FLASH usage' });
+    expect(meter.getAttribute('aria-valuenow')).toBe('100');
+    expect(meter.getAttribute('data-state')).toBe('BLOCK');
+    expect(screen.getByText('150.0%')).toBeDefined();
+    expect(screen.getByText('Over capacity')).toBeDefined();
+  });
+
+  it('marks a partial figure as a lower bound', () => {
+    renderOverview({
+      summary: withRegions([region({ usedPercent: { value: '40.0%', status: 'lower_bound' }, state: 'partial' })]),
+    });
+    expect(screen.getByText('at least 40.0%')).toBeDefined();
+  });
+
+  it('never draws Unknown as an empty or zero bar', () => {
+    renderOverview({
+      summary: withRegions([
+        region({ capacityBytes: null, usedPercent: { value: null, status: 'capacity_unknown' }, risk: 'unknown' }),
+      ]),
+    });
+    const meter = screen.getByRole('meter', { name: 'FLASH usage' });
+    expect(meter.getAttribute('aria-valuenow')).toBeNull();
+    expect(meter.getAttribute('data-state')).toBe('UNKNOWN');
+    expect(meter.querySelector('span')).toBeNull();
+    expect(screen.getByText('Capacity unknown: the MAP gave no region length')).toBeDefined();
+    expect(screen.queryByText('0.0%')).toBeNull();
+  });
+
+  it('asks for the MAP when there are no regions', () => {
+    renderOverview({ summary: withRegions([]) });
+    expect(screen.getByText(/Add the GNU ld MAP for this build/)).toBeDefined();
+  });
+
+  it('speaks Chinese from the same facts', () => {
+    renderOverview({ summary: withRegions([region()]) }, { language: 'zh-CN' });
+    expect(screen.getByRole('meter', { name: 'FLASH 占用' })).toBeDefined();
+    expect(screen.getByText('容量内')).toBeDefined();
+  });
+});

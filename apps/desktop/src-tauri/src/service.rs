@@ -22,7 +22,7 @@ use firmwaresight_report::AnalyzeResultDto;
 
 use crate::ipc::{
     AnalysisSummaryDto, ArtifactDto, BudgetDto, CapabilitiesDto, EvidenceSummaryDto, FixtureKey,
-    IdentityDto, MemoryRegionDto, MemorySummaryDto, RegionSectionDto,
+    IdentityDto, MemoryRegionDto, MemorySummaryDto, PercentageChangeDto, RegionSectionDto,
 };
 
 /// The summary came from a committed fixture the shell chose.
@@ -220,6 +220,7 @@ fn region(source: &MemoryRegionUsage) -> MemoryRegionDto {
         used_bytes: source.used_bytes.map(|bytes| bytes.to_string()),
         remaining_bytes: source.remaining_bytes.map(|bytes| bytes.to_string()),
         remaining_reason: source.remaining_reason.to_owned(),
+        used_percent: usage_percent(source.used_bytes, source.capacity_bytes, source.state),
         state: match source.state {
             RegionUsageState::Exact => "exact",
             RegionUsageState::Partial => "partial",
@@ -238,6 +239,35 @@ fn region(source: &MemoryRegionUsage) -> MemoryRegionDto {
         address_kind: address_kind(source.address_kind).to_owned(),
         sections: source.sections.iter().map(region_section).collect(),
         reasons: source.reasons.clone(),
+    }
+}
+
+/// The share of a region's capacity in use, rounded half-up to one decimal place in integer
+/// arithmetic so a large region never meets JavaScript's float precision.
+pub(crate) fn usage_percent(
+    used: Option<u64>,
+    capacity: Option<u64>,
+    state: RegionUsageState,
+) -> PercentageChangeDto {
+    let (value, status) = match (used, capacity, state) {
+        (_, None, _) => (None, "capacity_unknown"),
+        (None, Some(_), _) | (_, Some(_), RegionUsageState::Unknown) => (None, "usage_unknown"),
+        (Some(_), Some(0), _) => (None, "zero_capacity"),
+        (Some(used), Some(capacity), state) => {
+            let denominator = u128::from(capacity);
+            let tenths = (u128::from(used) * 1_000 + denominator / 2) / denominator;
+            let formatted = format!("{}.{:01}%", tenths / 10, tenths % 10);
+            let status = if state == RegionUsageState::Exact {
+                "available"
+            } else {
+                "lower_bound"
+            };
+            (Some(formatted), status)
+        }
+    };
+    PercentageChangeDto {
+        value,
+        status: status.to_owned(),
     }
 }
 
@@ -327,4 +357,83 @@ pub fn project(
 ) -> AnalysisSummaryDto {
     let dto = AnalyzeResultDto::from_snapshot(&analysis.snapshot, &catalog.file_name(key));
     summarize(&dto, SOURCE_FIXTURE, &analysis.memory.region_usage)
+}
+
+#[cfg(test)]
+mod usage_percent_tests {
+    use super::usage_percent;
+    use firmwaresight_core::domain::memory::RegionUsageState;
+
+    fn render(
+        used: Option<u64>,
+        capacity: Option<u64>,
+        state: RegionUsageState,
+    ) -> (Option<String>, String) {
+        let dto = usage_percent(used, capacity, state);
+        (dto.value, dto.status)
+    }
+
+    #[test]
+    fn exact_usage_rounds_half_up_to_one_decimal_place() {
+        assert_eq!(
+            render(Some(256), Some(1_048_576), RegionUsageState::Exact),
+            (Some("0.0%".to_owned()), "available".to_owned())
+        );
+        assert_eq!(
+            render(Some(1), Some(2_000), RegionUsageState::Exact),
+            (Some("0.1%".to_owned()), "available".to_owned())
+        );
+        assert_eq!(
+            render(Some(819), Some(1_000), RegionUsageState::Exact),
+            (Some("81.9%".to_owned()), "available".to_owned())
+        );
+        assert_eq!(
+            render(Some(2), Some(3), RegionUsageState::Exact),
+            (Some("66.7%".to_owned()), "available".to_owned())
+        );
+    }
+
+    #[test]
+    fn over_capacity_is_reported_not_clamped() {
+        assert_eq!(
+            render(Some(1_500), Some(1_000), RegionUsageState::Exact),
+            (Some("150.0%".to_owned()), "available".to_owned())
+        );
+    }
+
+    #[test]
+    fn partial_usage_is_a_lower_bound() {
+        assert_eq!(
+            render(Some(500), Some(1_000), RegionUsageState::Partial),
+            (Some("50.0%".to_owned()), "lower_bound".to_owned())
+        );
+    }
+
+    #[test]
+    fn unknown_inputs_never_produce_a_number() {
+        assert_eq!(
+            render(Some(5), None, RegionUsageState::Exact),
+            (None, "capacity_unknown".to_owned())
+        );
+        assert_eq!(
+            render(None, Some(10), RegionUsageState::Exact),
+            (None, "usage_unknown".to_owned())
+        );
+        assert_eq!(
+            render(Some(5), Some(10), RegionUsageState::Unknown),
+            (None, "usage_unknown".to_owned())
+        );
+        assert_eq!(
+            render(Some(5), Some(0), RegionUsageState::Exact),
+            (None, "zero_capacity".to_owned())
+        );
+    }
+
+    #[test]
+    fn large_regions_stay_in_integer_arithmetic() {
+        assert_eq!(
+            render(Some(u64::MAX / 2), Some(u64::MAX), RegionUsageState::Exact),
+            (Some("50.0%".to_owned()), "available".to_owned())
+        );
+    }
 }

@@ -1,0 +1,120 @@
+/*
+ * Region usage bars.
+ *
+ * The same track as RankBar - one spacing token tall, `chart-other` behind a single fill - so the two bar
+ * kinds read as one system. The fill is the chart blue for a region within capacity and takes the status
+ * colour only when Core already called the region Review or Exceeded; the icon and the word beside it say
+ * the same thing, so colour is never the only signal (DESIGN.md 5). An Unknown row draws no fill at all.
+ */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  min-width: 0;
+}
+
+.head,
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-1) var(--fs-space-3);
+}
+
+.name {
+  font-family: var(--fs-font-mono);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.kind {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}
+
+.figure {
+  margin-inline-start: auto;
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  display: block;
+  height: var(--fs-space-2);
+  overflow: hidden;
+  background: var(--fs-color-chart-other);
+  border-radius: var(--fs-radius-control);
+}
+
+.track[data-state='UNKNOWN'] {
+  background: none;
+  border: var(--fs-border-width-hairline) dashed var(--fs-color-status-unknown);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--fs-color-chart-blue-4);
+  border-radius: var(--fs-radius-control);
+}
+
+.track[data-state='REVIEW'] .fill {
+  background: var(--fs-color-status-review);
+}
+
+.track[data-state='BLOCK'] .fill {
+  background: var(--fs-color-status-block);
+}
+
+.foot {
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+}
+
+.row:has(.track[data-state='PASS']) .state {
+  color: var(--fs-color-status-pass);
+}
+
+.row:has(.track[data-state='REVIEW']) .state {
+  color: var(--fs-color-status-review-strong);
+}
+
+.row:has(.track[data-state='BLOCK']) .state {
+  color: var(--fs-color-status-block);
+}
+
+.row:has(.track[data-state='UNKNOWN']) .state,
+.none {
+  color: var(--fs-color-status-unknown);
+}
+
+.bytes {
+  margin-inline-start: auto;
+  color: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.none {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+  margin: 0;
+}

@@ -37,6 +37,7 @@ import { Button, LinkButton } from './components/Button';
 import { Chip, StatusStrip } from './components/Chip';
 import { Page } from './components/Layout';
 import { PageHeader } from './components/PageHeader';
+import { MemoryUsage } from './components/MemoryUsage';
 import { EmptyState, Band, Panel, SummaryCard } from './components/Panel';
 import { StateBadge } from './components/StateBadge';
 import { formatSize, truncateMiddle, type SizeUnit } from './format';
@@ -757,5 +758,12 @@ function Facts({
   readonly unit: SizeUnit;
 }) {
   const { t } = useI18n();
-  return <Band narrow label={t('common', 'overview.keyFiguresBand')}>{figureCells(summary, unit, t)}</Band>;
+  return (
+    <>
+      <Band narrow label={t('common', 'overview.keyFiguresBand')}>{figureCells(summary, unit, t)}</Band>
+      <Panel title={t('common', 'memory.title')} hint={t('common', 'memory.hint')}>
+        <MemoryUsage regions={summary.memory.regionUsage} unit={unit} />
+      </Panel>
+    </>
+  );
 }

@@ -168,6 +168,10 @@ pub struct MemoryRegionDto {
     pub used_bytes: Option<String>,
     pub remaining_bytes: Option<String>,
     pub remaining_reason: String,
+    /// `used / capacity` as Rust computes it, one decimal place. Status: `available` (exact usage),
+    /// `lower_bound` (partial usage, so the true share is at least this), `capacity_unknown`,
+    /// `usage_unknown` or `zero_capacity`. The UI never divides these numbers itself.
+    pub used_percent: PercentageChangeDto,
     pub state: String,
     pub risk: String,
     pub evidence_source: String,
