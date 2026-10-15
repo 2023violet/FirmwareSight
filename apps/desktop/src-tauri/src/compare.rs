@@ -41,10 +41,10 @@ use crate::ipc::{
     ByteDeltaDto, CandidatePageDto, CandidatePageRequestDto, ChangeKindCountsDto,
     ChangeKindFilterDto, CompareCandidateDto, CompareRequestDto, CompareSummaryDto, ContributorDto,
     DiffCountsDto, DiffMemoryDto, DiffSideDto, DiffSideMemoryDto, DiffWarningDto, ErrorEnvelopeDto,
-    ExportOutcomeDto, ObjectAttributionDto, PercentageChangeDto, SectionChangePageDto,
-    SectionChangeQueryDto, SectionChangeRowDto, SectionChangeSortDto, SectionSideDto, SortDirDto,
-    StoredBudgetDto, SymbolChangePageDto, SymbolChangeQueryDto, SymbolChangeRowDto,
-    SymbolChangeSortDto, SymbolSideDto,
+    ExportOutcomeDto, PercentageChangeDto, SectionChangePageDto, SectionChangeQueryDto,
+    SectionChangeRowDto, SectionChangeSortDto, SectionSideDto, SortDirDto, StoredBudgetDto,
+    SymbolChangePageDto, SymbolChangeQueryDto, SymbolChangeRowDto, SymbolChangeSortDto,
+    SymbolSideDto,
 };
 use crate::{
     LOCAL_PROJECT_ID, Session, envelope_from_storage, next_operation_id, service, task_join_error,
@@ -859,10 +859,7 @@ fn summary(diff_id: &str, result: &DiffResult) -> CompareSummaryDto {
         target: side(&result.target_snapshot_id, &result.target_artifact),
         memory: memory(result),
         counts: counts(result),
-        object_changes: ObjectAttributionDto {
-            available: result.attribution.available,
-            reason: result.attribution.reason.clone(),
-        },
+        object_changes: crate::objects::attribution_summary(result),
         top_sections: result
             .top_section_growth(MAX_TOP_SECTIONS)
             .into_iter()
@@ -951,7 +948,7 @@ fn side_memory(side: &DiffSideMemory) -> DiffSideMemoryDto {
     }
 }
 
-fn delta(change: &ByteChange) -> ByteDeltaDto {
+pub(crate) fn delta(change: &ByteChange) -> ByteDeltaDto {
     ByteDeltaDto {
         base: change.base,
         target: change.target,
@@ -980,7 +977,7 @@ fn counts(result: &DiffResult) -> DiffCountsDto {
     }
 }
 
-fn contributor(row: Contributor) -> ContributorDto {
+pub(crate) fn contributor(row: Contributor) -> ContributorDto {
     ContributorDto {
         key: row.key,
         change_kind: row.change.label().to_owned(),
@@ -1005,7 +1002,7 @@ fn accepts_symbol(row: &SymbolChange, request: &SymbolChangeQueryDto) -> bool {
             .is_none_or(|needle| contains_case_insensitive(&row.name, needle))
 }
 
-fn matches_kind(change: ChangeKind, filter: Option<ChangeKindFilterDto>) -> bool {
+pub(crate) fn matches_kind(change: ChangeKind, filter: Option<ChangeKindFilterDto>) -> bool {
     let Some(wanted) = filter else {
         return true;
     };
@@ -1019,7 +1016,7 @@ fn matches_kind(change: ChangeKind, filter: Option<ChangeKindFilterDto>) -> bool
 
 /// SQLite's `LIKE` is case-insensitive for ASCII, which is how the Analyze detail filters behave. The
 /// change filters match that, so one substring means the same thing on both screens.
-fn contains_case_insensitive(haystack: &str, needle: &str) -> bool {
+pub(crate) fn contains_case_insensitive(haystack: &str, needle: &str) -> bool {
     haystack.to_lowercase().contains(&needle.to_lowercase())
 }
 
@@ -1027,7 +1024,7 @@ fn contains_case_insensitive(haystack: &str, needle: &str) -> bool {
 /// field from those that do not, so a descending sort cannot pull an unknown to the top: an absent
 /// number is not a small number.
 #[derive(Debug)]
-struct RowKey {
+pub(crate) struct RowKey {
     measured: bool,
     value: i128,
     text: String,
@@ -1035,7 +1032,7 @@ struct RowKey {
 
 impl RowKey {
     /// A text ordering: every row is placed, and the tie-break is the text itself.
-    fn text(text: &str) -> Self {
+    pub(crate) fn text(text: &str) -> Self {
         Self {
             measured: true,
             value: 0,
@@ -1044,7 +1041,7 @@ impl RowKey {
     }
 
     /// A signed quantity ordering, with the row name as tie-break.
-    fn optional(value: Option<i64>, tie: &str) -> Self {
+    pub(crate) fn optional(value: Option<i64>, tie: &str) -> Self {
         Self {
             measured: value.is_some(),
             value: i128::from(value.unwrap_or(0)),
@@ -1053,7 +1050,7 @@ impl RowKey {
     }
 
     /// An unsigned quantity ordering. A row the diff has no number for on either side sorts last.
-    fn optional_u64(value: Option<u64>, tie: &str) -> Self {
+    pub(crate) fn optional_u64(value: Option<u64>, tie: &str) -> Self {
         Self {
             measured: value.is_some(),
             value: value.map_or(0, i128::from),
@@ -1064,19 +1061,19 @@ impl RowKey {
 
 /// The page geometry after ordering.
 #[derive(Debug)]
-struct Window<T> {
-    rows: Vec<T>,
-    total: usize,
-    offset: usize,
-    limit: usize,
-    next_offset: Option<usize>,
+pub(crate) struct Window<T> {
+    pub(crate) rows: Vec<T>,
+    pub(crate) total: usize,
+    pub(crate) offset: usize,
+    pub(crate) limit: usize,
+    pub(crate) next_offset: Option<usize>,
 }
 
 /// Order the rows by a projected key, then cut the requested page out of them.
 ///
 /// The ordering is total and independent of the input order, so the same query twice returns the same
 /// page, and a requested limit is clamped to the boundary rather than honoured.
-fn sort_and_split<T>(
+pub(crate) fn sort_and_split<T>(
     rows: &mut Vec<T>,
     direction: SortDirDto,
     offset: usize,

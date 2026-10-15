@@ -42,7 +42,8 @@ pub use firmwaresight_core::domain::gate::{GateAttachmentFact, KindBasis};
 pub use firmwaresight_core::domain::identity::{ArtifactKind, Fact};
 // Compare reads persisted facts only; the diff itself is decided in `firmwaresight-core`.
 pub use compare::{
-    CandidateQuery, CompareCandidate, DEFAULT_CANDIDATE_LIMIT, MAX_CANDIDATE_LIMIT, StoredBudget,
+    BuildAttribution, CandidateQuery, CompareCandidate, DEFAULT_CANDIDATE_LIMIT,
+    MAX_CANDIDATE_LIMIT, StoredBudget,
 };
 pub use gate::{
     AcceptReviewError, AcceptedReview, GateArtifactRow, GateEvidenceGaps, GateFootprintRow,

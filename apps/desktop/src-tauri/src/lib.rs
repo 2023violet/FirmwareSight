@@ -40,6 +40,7 @@ pub mod drop_intake;
 pub mod history;
 pub mod intake;
 pub mod ipc;
+pub mod objects;
 pub mod preferences;
 pub mod release;
 pub mod service;
@@ -1598,10 +1599,12 @@ pub fn run() {
             details::query_sections,
             details::query_symbols,
             details::query_evidence,
+            objects::query_objects,
             compare::list_compare_candidates,
             compare::compare_snapshots,
             compare::query_section_changes,
             compare::query_symbol_changes,
+            objects::query_object_changes,
             compare::export_compare_json,
             compare::export_compare_html,
             compare::export_compare_visual,

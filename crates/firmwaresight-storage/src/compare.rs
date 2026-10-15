@@ -100,6 +100,14 @@ impl StoredBudget {
     }
 }
 
+/// One stored build's object attribution, with the exact totals a share is read against.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BuildAttribution {
+    pub summary: firmwaresight_core::domain::attribution::AttributionSummary,
+    pub exact_nonvolatile: Option<u64>,
+    pub exact_runtime_ram: Option<u64>,
+}
+
 /// One selectable, already-persisted build.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompareCandidate {
@@ -276,29 +284,7 @@ impl Database {
             .map_err(read_err)?
             > 0;
 
-        let footprint = self
-            .connection()
-            .query_row(
-                "SELECT layout_source, weakest_basis, nonvolatile_state, nonvolatile_bytes,
-                        runtime_state, runtime_bytes, excluded_metadata
-                   FROM memory_footprints WHERE build_id = ?1",
-                params![build_id],
-                |row| {
-                    Ok(FootprintRow {
-                        layout_source: row.get(0)?,
-                        weakest_basis: row.get(1)?,
-                        nonvolatile: StoredBudget::from_parts(row.get(2)?, row.get(3)?),
-                        runtime_ram: StoredBudget::from_parts(row.get(4)?, row.get(5)?),
-                        excluded_metadata: row.get::<_, i64>(6)? as u64,
-                    })
-                },
-            )
-            .optional()
-            .map_err(read_err)?
-            .ok_or_else(|| StorageError::Invariant {
-                detail: format!("build {build_id} has no stored footprint row"),
-            })?;
-
+        let footprint = self.read_footprint(&build_id)?;
         let attribution = self.read_attribution(&build_id, &footprint)?;
         Ok(DiffSnapshotInput {
             snapshot_id: snapshot_id.to_owned(),
@@ -323,6 +309,56 @@ impl Database {
         })
     }
 
+    fn read_footprint(&self, build_id: &str) -> Result<FootprintRow, StorageError> {
+        self.connection()
+            .query_row(
+                "SELECT layout_source, weakest_basis, nonvolatile_state, nonvolatile_bytes,
+                        runtime_state, runtime_bytes, excluded_metadata
+                   FROM memory_footprints WHERE build_id = ?1",
+                params![build_id],
+                |row| {
+                    Ok(FootprintRow {
+                        layout_source: row.get(0)?,
+                        weakest_basis: row.get(1)?,
+                        nonvolatile: StoredBudget::from_parts(row.get(2)?, row.get(3)?),
+                        runtime_ram: StoredBudget::from_parts(row.get(4)?, row.get(5)?),
+                        excluded_metadata: row.get::<_, i64>(6)? as u64,
+                    })
+                },
+            )
+            .optional()
+            .map_err(read_err)?
+            .ok_or_else(|| StorageError::Invariant {
+                detail: format!("build {build_id} has no stored footprint row"),
+            })
+    }
+
+    /// The object and library usage of one stored snapshot (ADR-0033), with the exact budget
+    /// totals a share is read against. `None` when the build kept no object rows, which is not a
+    /// build with zero bytes per object.
+    ///
+    /// # Errors
+    ///
+    /// As [`Database::load_diff_input`].
+    pub fn object_attribution(
+        &self,
+        snapshot_id: &str,
+    ) -> Result<Option<BuildAttribution>, StorageError> {
+        let build_id =
+            self.build_id_for_snapshot(snapshot_id)?
+                .ok_or_else(|| StorageError::NotFound {
+                    id: snapshot_id.to_owned(),
+                })?;
+        let footprint = self.read_footprint(&build_id)?;
+        Ok(self
+            .read_attribution(&build_id, &footprint)?
+            .map(|summary| BuildAttribution {
+                summary,
+                exact_nonvolatile: exact_bytes(&footprint.nonvolatile),
+                exact_runtime_ram: exact_bytes(&footprint.runtime_ram),
+            }))
+    }
+
     /// The stored object rows as a summary, or `None` when the build kept none (ADR-0033 D8).
     fn read_attribution(
         &self,
@@ -334,15 +370,10 @@ impl Database {
         if rows.is_empty() {
             return Ok(None);
         }
-        let exact = |stored: &StoredBudget| {
-            (BudgetState::parse(&stored.state) == BudgetState::Exact)
-                .then_some(stored.bytes)
-                .flatten()
-        };
         Ok(Some(firmwaresight_core::domain::attribution::aggregate(
             &rows,
-            exact(&footprint.nonvolatile),
-            exact(&footprint.runtime_ram),
+            exact_bytes(&footprint.nonvolatile),
+            exact_bytes(&footprint.runtime_ram),
         )))
     }
 
@@ -419,6 +450,14 @@ const SQLITE_MAX_VARIABLES: usize = 999;
 
 /// Map a stored budget back onto the diff's three-state model. A state string this build does not
 /// recognize is treated as unknown rather than promoted to exact.
+/// A stored total, only when it is exact: a partial total is a floor, and no share or remainder is
+/// read against a floor.
+fn exact_bytes(stored: &StoredBudget) -> Option<u64> {
+    (BudgetState::parse(&stored.state) == BudgetState::Exact)
+        .then_some(stored.bytes)
+        .flatten()
+}
+
 fn budget(stored: &StoredBudget) -> DiffBudget {
     let state = BudgetState::parse(&stored.state);
     DiffBudget {

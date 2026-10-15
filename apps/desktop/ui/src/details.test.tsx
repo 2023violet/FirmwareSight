@@ -22,6 +22,7 @@ import {
   analyzeSelection,
   getApplicationPreferences,
   queryEvidence,
+  queryObjects,
   querySections,
   querySymbols,
   selectArtifact,
@@ -33,6 +34,7 @@ import type {
   EvidenceRequestDto,
   EvidenceRowDto,
   ErrorEnvelopeDto,
+  ObjectPageDto,
   SectionPageDto,
   SectionRequestDto,
   SelectionDto,
@@ -48,6 +50,7 @@ vi.mock('./ipc/bridge', () => ({
   querySections: vi.fn(),
   querySymbols: vi.fn(),
   queryEvidence: vi.fn(),
+  queryObjects: vi.fn(),
   setWindowTitle: vi.fn(() => Promise.resolve({ ok: true, value: null })),
   getApplicationPreferences: vi.fn(() =>
     Promise.resolve({
@@ -98,6 +101,7 @@ const analyzeMock = vi.mocked(analyzeSelection);
 const sectionsMock = vi.mocked(querySections);
 const symbolsMock = vi.mocked(querySymbols);
 const evidenceMock = vi.mocked(queryEvidence);
+const objectsMock = vi.mocked(queryObjects);
 
 function ok<T>(value: T): IpcOutcome<T> {
   return { ok: true, value };
@@ -312,6 +316,41 @@ function evidencePage(overrides: Partial<EvidencePageDto> = {}): EvidencePageDto
   };
 }
 
+/** A MAP-backed build: two objects, one of them a library member, and one Unknown charge. */
+function objectPage(overrides: Partial<ObjectPageDto> = {}): ObjectPageDto {
+  return {
+    available: true,
+    reason: null,
+    rows: [
+      {
+        key: 'main.o',
+        archive: null,
+        nonvolatileBytes: 3000,
+        runtimeRamBytes: 64,
+        nonvolatileShareBasisPoints: 7142,
+        mapRows: 9,
+      },
+      {
+        key: 'libdrv.a(uart.o)',
+        archive: 'libdrv.a',
+        nonvolatileBytes: null,
+        runtimeRamBytes: 0,
+        nonvolatileShareBasisPoints: null,
+        mapRows: 2,
+      },
+    ],
+    total: 2,
+    offset: 0,
+    limit: 100,
+    nextOffset: null,
+    nonvolatileTotal: 4200,
+    runtimeRamTotal: null,
+    unattributedNonvolatile: 12,
+    unattributedRuntimeRam: 0,
+    ...overrides,
+  };
+}
+
 /** Drive the screen to a last-good summary, then hand control back to the test. */
 async function analyzeOk(overrides: Partial<AnalysisSummaryDto> = {}) {
   selectMock.mockResolvedValue(ok(selection()));
@@ -332,6 +371,8 @@ beforeEach(() => {
   sectionsMock.mockResolvedValue(ok(sectionPage()));
   symbolsMock.mockResolvedValue(ok(symbolPage()));
   evidenceMock.mockResolvedValue(ok(evidencePage()));
+  objectsMock.mockReset();
+  objectsMock.mockResolvedValue(ok(objectPage()));
 });
 
 describe('before anything has been analyzed', () => {
@@ -370,6 +411,8 @@ describe('after a summary exists', () => {
       'Sections',
       'Symbols',
       'Evidence',
+      'Objects',
+      'Libraries',
     ]);
   });
 
@@ -848,6 +891,68 @@ describe('the table layout contract', () => {
       'Memory size',
       'Region',
     ]);
+  });
+});
+
+describe('objects and libraries (ADR-0033)', () => {
+  it('asks the shell for objects ranked by Flash and shows each charge, share and the remainder', async () => {
+    render(<App />);
+    await analyzeOk();
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Objects' }));
+    const panel = await screen.findByRole('tabpanel', { name: 'Objects' });
+    expect(objectsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ snapshotId: SNAPSHOT_ID, libraries: false, sort: 'flash', direction: 'desc' }),
+    );
+
+    const main = within(panel).getByText('main.o').closest('tr');
+    expect(main?.textContent).toContain('Application');
+    expect(main?.textContent).toContain('3,000 bytes');
+    expect(main?.textContent).toContain('71.42%');
+
+    // An Unknown charge is the word and never 0; its share is Unknown too, with the reason.
+    const uart = within(panel).getByText('libdrv.a(uart.o)').closest('tr');
+    expect(uart?.textContent).toContain('libdrv.a');
+    expect(uart?.textContent).toContain('Unknown');
+    expect(uart?.textContent).not.toContain('0.00%');
+    expect(uart?.textContent).toContain('No exact Flash total to compare against');
+
+    expect(within(panel).getByText(/Not attributed to an object: 12 bytes Flash and 0 bytes RAM/u)).toBeDefined();
+  });
+
+  it('pages libraries through the same command, never by grouping rows itself', async () => {
+    render(<App />);
+    await analyzeOk();
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Libraries' }));
+    await screen.findByRole('tabpanel', { name: 'Libraries' });
+    expect(objectsMock).toHaveBeenLastCalledWith(expect.objectContaining({ libraries: true }));
+  });
+
+  it('says a build without a MAP has no attribution and how to get it, with no table of zeros', async () => {
+    objectsMock.mockResolvedValue(
+      ok(
+        objectPage({
+          available: false,
+          reason: 'this build stored no object rows',
+          rows: [],
+          total: 0,
+          limit: 0,
+          nonvolatileTotal: null,
+          unattributedNonvolatile: null,
+          unattributedRuntimeRam: null,
+        }),
+      ),
+    );
+    render(<App />);
+    await analyzeOk();
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Objects' }));
+    const panel = await screen.findByRole('tabpanel', { name: 'Objects' });
+    expect(within(panel).getByText('Object attribution is not available for this build')).toBeDefined();
+    expect(within(panel).getByText('this build stored no object rows')).toBeDefined();
+    expect(within(panel).getByText(/GNU ld \.map file/u)).toBeDefined();
+    expect(within(panel).queryByRole('table')).toBeNull();
   });
 });
 

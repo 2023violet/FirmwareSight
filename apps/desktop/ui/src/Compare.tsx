@@ -41,6 +41,7 @@ import {
   exportCompareJson,
   exportCompareVisual,
   listCompareCandidates,
+  queryObjectChanges,
   querySectionChanges,
   querySymbolChanges,
 } from './ipc/bridge';
@@ -58,6 +59,10 @@ import type {
   PercentageChangeDto,
   ErrorEnvelopeDto,
   ExportOutcomeDto,
+  ObjectChangeCountsDto,
+  ObjectChangePageDto,
+  ObjectChangeRowDto,
+  ObjectChangeSortDto,
   SectionChangePageDto,
   SectionChangeRowDto,
   SectionChangeSortDto,
@@ -565,6 +570,8 @@ export function Compare({
             unit={unit}
             focus={symbolFocus}
           />
+
+          <ObjectChanges summary={summary} unit={unit} />
 
           <EvidenceNotice summary={summary} />
 
@@ -1080,6 +1087,12 @@ function Ranking({
   );
 }
 
+type ContributorNoun =
+  | 'contributors.sections'
+  | 'contributors.symbols'
+  | 'contributors.objects'
+  | 'contributors.libraries';
+
 function Contributors({
   nounKey,
   rows,
@@ -1087,14 +1100,17 @@ function Contributors({
   emptyKey,
   onPick,
 }: {
-  readonly nounKey: 'contributors.sections' | 'contributors.symbols';
+  readonly nounKey: ContributorNoun;
   readonly rows: readonly ContributorDto[];
   readonly unit: SizeUnit;
   readonly emptyKey:
     | 'contributors.emptySectionsGrowth'
     | 'contributors.emptySymbolsGrowth'
     | 'contributors.emptySectionsAdded'
-    | 'contributors.emptySymbolsAdded';
+    | 'contributors.emptySymbolsAdded'
+    | 'contributors.emptyObjectsGrowth'
+    | 'contributors.emptyLibrariesGrowth'
+    | 'contributors.emptyObjectsAdded';
   readonly onPick: (key: string) => void;
 }) {
   const { t } = useI18n();
@@ -1378,6 +1394,255 @@ function SectionChanges({
             shown={page.rows.length}
             nextOffset={page.nextOffset}
             label={t('compare', 'section.pagerLabel')}
+            onOffset={setOffset}
+          />
+        </>
+      )}
+    </section>
+  );
+}
+
+/**
+ * ADR-0033 D8: which object files and libraries the change came from.
+ *
+ * Shown only when both builds stored GNU ld MAP object rows; otherwise the evidence notice below says
+ * which side lacks them. The shortlist is Core's ranking and the table is the authoritative list,
+ * paged by the shell like the section and symbol tables. An object present on one side only reads
+ * "Not present" on the other, never 0.
+ */
+function ObjectChanges({
+  summary,
+  unit,
+}: {
+  readonly summary: CompareSummaryDto;
+  readonly unit: SizeUnit;
+}) {
+  const { t } = useI18n();
+  const attribution = summary.objectChanges;
+  const diffId = summary.diffId;
+  const [libraries, setLibraries] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [filter, setFilter] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+  const [kind, setKind] = useState<ChangeKindFilterDto | null>(null);
+  const [sort, setSort] = useState<ObjectChangeSortDto>('flashDelta');
+  const [direction, setDirection] = useState<SortDirDto>('desc');
+  const [page, setPage] = useState<ObjectChangePageDto | null>(null);
+  const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
+  const request = useRef(0);
+  const area = useRef<HTMLElement | null>(null);
+  const [seenDiffId, setSeenDiffId] = useState(diffId);
+
+  if (seenDiffId !== diffId) {
+    setSeenDiffId(diffId);
+    setLibraries(false);
+    setFilter(null);
+    setDraft('');
+    setKind(null);
+    setOffset(0);
+  }
+
+  useEffect(() => {
+    if (!attribution.available) {
+      return;
+    }
+    const id = ++request.current;
+    setPage(null);
+    void queryObjectChanges({
+      diffId,
+      libraries,
+      filter,
+      changeKind: kind,
+      sort,
+      direction,
+      offset,
+      limit: null,
+    }).then((outcome) => {
+      if (request.current !== id) {
+        return;
+      }
+      if (outcome.ok) {
+        setPage(outcome.value);
+        setError(null);
+      } else {
+        setError(outcome.envelope);
+      }
+    });
+  }, [attribution.available, diffId, libraries, filter, kind, sort, direction, offset]);
+
+  const chooseSort = useCallback(
+    (column: ObjectChangeSortDto) => {
+      setOffset(0);
+      if (sort === column) {
+        setDirection(direction === 'asc' ? 'desc' : 'asc');
+        return;
+      }
+      setSort(column);
+      setDirection(column === 'key' || column === 'changeKind' ? 'asc' : 'desc');
+    },
+    [direction, sort],
+  );
+
+  if (!attribution.available) {
+    return null;
+  }
+
+  const pick = (asLibrary: boolean) => (key: string) => {
+    setLibraries(asLibrary);
+    setFilter(key);
+    setDraft(key);
+    setKind(null);
+    setOffset(0);
+    area.current?.focus();
+  };
+  const tally = (counts: ObjectChangeCountsDto) =>
+    t('compare', 'objects.tally', {
+      changed: String(counts.changed),
+      added: String(counts.added),
+      removed: String(counts.removed),
+      unchanged: String(counts.unchanged),
+    });
+
+  return (
+    <section className={styles['area']} ref={area} tabIndex={-1} aria-label={t('compare', 'objects.region')}>
+      <h2>{t('compare', 'objects.heading')}</h2>
+      <p className={styles['hint']}>{t('compare', 'objects.basisHint')}</p>
+      <p className={styles['status']}>
+        {t('compare', 'objects.objectsLine', { tally: tally(attribution.objects) })}
+        {' · '}
+        {t('compare', 'objects.librariesLine', { tally: tally(attribution.libraries) })}
+      </p>
+
+      <div className={styles['ranking']}>
+        <div className={styles['list']}>
+          <h3>{t('compare', 'ranking.growthHeading')}</h3>
+          <Contributors
+            nounKey="contributors.objects"
+            rows={attribution.topObjects}
+            unit={unit}
+            emptyKey="contributors.emptyObjectsGrowth"
+            onPick={pick(false)}
+          />
+          <Contributors
+            nounKey="contributors.libraries"
+            rows={attribution.topLibraries}
+            unit={unit}
+            emptyKey="contributors.emptyLibrariesGrowth"
+            onPick={pick(true)}
+          />
+        </div>
+        <div className={styles['list']}>
+          <h3>{t('compare', 'ranking.additionsHeading')}</h3>
+          <Contributors
+            nounKey="contributors.objects"
+            rows={attribution.addedObjects}
+            unit={unit}
+            emptyKey="contributors.emptyObjectsAdded"
+            onPick={pick(false)}
+          />
+        </div>
+      </div>
+
+      <div role="group" aria-label={t('compare', 'objects.viewGroup')} className={styles['row']}>
+        {([false, true] as const).map((value) => (
+          <Button
+            key={String(value)}
+            variant={libraries === value ? 'primary' : 'secondary'}
+            aria-pressed={libraries === value}
+            onClick={() => {
+              setLibraries(value);
+              setFilter(null);
+              setDraft('');
+              setKind(null);
+              setOffset(0);
+            }}
+          >
+            {t('compare', value ? 'objects.viewLibraries' : 'objects.viewObjects')}
+          </Button>
+        ))}
+      </div>
+
+      <ChangeFilters
+        nounKey={libraries ? 'contributors.libraries' : 'contributors.objects'}
+        kind={kind}
+        draft={draft}
+        onKind={(value) => {
+          setKind(value);
+          setOffset(0);
+        }}
+        onDraftChange={setDraft}
+        onApply={(value) => {
+          setDraft(value);
+          setFilter(value.length === 0 ? null : value);
+          setOffset(0);
+        }}
+      />
+      {error === null ? null : (
+        <ErrorPanel
+          envelope={error}
+          label={t('compare', 'objects.errorLabel')}
+          heading={t('compare', 'objects.errorHeading')}
+        />
+      )}
+      {page === null ? null : (
+        <>
+          <ScrollArea label={t('compare', 'objects.tableLabel')}>
+            <table className={styles['table']}>
+              <caption className={styles['caption']}>{t('compare', 'objects.caption')}</caption>
+              <thead>
+                <tr>
+                  <Sortable label={t('compare', 'col.change')} column="changeKind" sort={sort} direction={direction} onSort={chooseSort} />
+                  <Sortable
+                    label={t('compare', libraries ? 'col.library' : 'col.object')}
+                    column="key"
+                    sort={sort}
+                    direction={direction}
+                    onSort={chooseSort}
+                  />
+                  <SortHeader label={t('compare', 'col.oldFlash')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.newFlash')} sortable={false} direction={direction} />
+                  <Sortable label={t('compare', 'col.deltaFlash')} column="flashDelta" sort={sort} direction={direction} onSort={chooseSort} />
+                  <SortHeader label={t('compare', 'col.oldRam')} sortable={false} direction={direction} />
+                  <SortHeader label={t('compare', 'col.newRam')} sortable={false} direction={direction} />
+                  <Sortable label={t('compare', 'col.deltaRam')} column="ramDelta" sort={sort} direction={direction} onSort={chooseSort} />
+                </tr>
+              </thead>
+              <tbody>
+                {page.rows.map((row: ObjectChangeRowDto) => (
+                  <tr key={`${row.changeKind}:${row.key}`}>
+                    <td>
+                      <Kind kind={row.changeKind} />
+                    </td>
+                    <td className={cx(styles['mono'], styles['wrap'])}>{row.key}</td>
+                    <td className={styles['mono']}>
+                      <SideValue change={row.nonvolatile} side="base" kind={row.changeKind} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue change={row.nonvolatile} side="target" kind={row.changeKind} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <DeltaFigure change={row.nonvolatile} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue change={row.runtimeRam} side="base" kind={row.changeKind} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <SideValue change={row.runtimeRam} side="target" kind={row.changeKind} unit={unit} />
+                    </td>
+                    <td className={styles['mono']}>
+                      <DeltaFigure change={row.runtimeRam} unit={unit} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollArea>
+          <Pager
+            total={page.total}
+            offset={page.offset}
+            shown={page.rows.length}
+            nextOffset={page.nextOffset}
+            label={t('compare', libraries ? 'contributors.libraries' : 'contributors.objects')}
             onOffset={setOffset}
           />
         </>
@@ -1717,7 +1982,7 @@ function ChangeFilters({
   onDraftChange,
   onApply,
 }: {
-  readonly nounKey: 'contributors.sections' | 'contributors.symbols';
+  readonly nounKey: ContributorNoun;
   readonly kind: ChangeKindFilterDto | null;
   readonly draft: string;
   readonly onKind: (kind: ChangeKindFilterDto | null) => void;

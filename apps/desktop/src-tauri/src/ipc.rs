@@ -633,6 +633,160 @@ pub struct DiffCountsDto {
 pub struct ObjectAttributionDto {
     pub available: bool,
     pub reason: String,
+    pub objects: ObjectChangeCountsDto,
+    pub libraries: ObjectChangeCountsDto,
+    /// Core's own rankings (ADR-0033 D8), capped: Flash growth among objects present on both
+    /// sides, the largest additions, and library growth. Navigation only; the paged
+    /// `query_object_changes` table is the authoritative list.
+    pub top_objects: Vec<ContributorDto>,
+    pub added_objects: Vec<ContributorDto>,
+    pub top_libraries: Vec<ContributorDto>,
+}
+
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectChangeCountsDto {
+    pub changed: usize,
+    pub added: usize,
+    pub removed: usize,
+    pub unchanged: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum ObjectChangeSortDto {
+    /// Flash delta. Rows with no delta (added, removed, unknown) sort last in both directions.
+    #[default]
+    FlashDelta,
+    RamDelta,
+    Key,
+    ChangeKind,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectChangeQueryDto {
+    pub diff_id: String,
+    /// `false` pages objects, `true` pages libraries (archives).
+    #[serde(default)]
+    pub libraries: bool,
+    /// A literal substring of the object or library key.
+    #[serde(default)]
+    pub filter: Option<String>,
+    #[serde(default)]
+    pub change_kind: Option<ChangeKindFilterDto>,
+    #[serde(default)]
+    pub sort: ObjectChangeSortDto,
+    #[serde(default)]
+    pub direction: SortDirDto,
+    #[serde(default)]
+    pub offset: usize,
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+/// One object's or library's change. A side the object is absent from is `null`, never `0`.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectChangeRowDto {
+    /// `Added`, `Removed` or `Changed`.
+    pub change_kind: String,
+    /// A normalized object key such as `libdrv.a(uart.o)`; never a host path.
+    pub key: String,
+    pub archive: Option<String>,
+    pub nonvolatile: ByteDeltaDto,
+    pub runtime_ram: ByteDeltaDto,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectChangePageDto {
+    pub rows: Vec<ObjectChangeRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum ObjectSortDto {
+    /// Flash charge, the ranking the Analyze tab opens with. Unknown sorts last in both directions.
+    #[default]
+    Flash,
+    Ram,
+    Name,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectRequestDto {
+    pub snapshot_id: String,
+    /// `false` pages objects, `true` pages libraries (archives).
+    #[serde(default)]
+    pub libraries: bool,
+    #[serde(default)]
+    pub filter: Option<String>,
+    #[serde(default)]
+    pub sort: ObjectSortDto,
+    #[serde(default)]
+    pub direction: SortDirDto,
+    #[serde(default)]
+    pub offset: usize,
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+/// One object's or library's charge in a stored build (ADR-0033). `null` is Unknown, not zero.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectRowDto {
+    pub key: String,
+    /// The library an object came from; `null` for an application object and for a library row.
+    pub archive: Option<String>,
+    #[ts(type = "number | null")]
+    pub nonvolatile_bytes: Option<u64>,
+    #[ts(type = "number | null")]
+    pub runtime_ram_bytes: Option<u64>,
+    /// The object's share of the build's exact Flash total in hundredths of a percent, rounded
+    /// down. `null` when either number is Unknown or the total is not exact: no share of a floor.
+    pub nonvolatile_share_basis_points: Option<u32>,
+    /// How many MAP input-section rows the figure is built from.
+    pub map_rows: usize,
+}
+
+/// One page of a build's object or library table, with what the rows do not cover.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectPageDto {
+    /// False when the build stored no object rows; `reason` then says why and `rows` is empty.
+    pub available: bool,
+    pub reason: Option<String>,
+    pub rows: Vec<ObjectRowDto>,
+    pub total: usize,
+    pub offset: usize,
+    pub limit: usize,
+    pub next_offset: Option<usize>,
+    /// The build's budget totals, only when exact; a share is never read against a floor.
+    #[ts(type = "number | null")]
+    pub nonvolatile_total: Option<u64>,
+    #[ts(type = "number | null")]
+    pub runtime_ram_total: Option<u64>,
+    /// Footprint bytes no object row accounts for (padding, linker stubs, sections without rows).
+    /// `null` when either side of that subtraction is not exact.
+    #[ts(type = "number | null")]
+    pub unattributed_nonvolatile: Option<u64>,
+    #[ts(type = "number | null")]
+    pub unattributed_runtime_ram: Option<u64>,
 }
 
 /// A ranked contributor. Navigation only: the paged change tables are the authoritative list

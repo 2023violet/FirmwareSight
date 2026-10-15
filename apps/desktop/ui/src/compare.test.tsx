@@ -32,6 +32,7 @@ import {
   exportCompareVisual,
   listCompareCandidates,
   queryEvidence,
+  queryObjectChanges,
   querySectionChanges,
   querySections,
   querySymbolChanges,
@@ -47,6 +48,8 @@ import type {
   CompareSummaryDto,
   ErrorEnvelopeDto,
   ExportOutcomeDto,
+  ObjectChangePageDto,
+  ObjectChangeQueryDto,
   SectionChangePageDto,
   SectionChangeQueryDto,
   SectionChangeRowDto,
@@ -69,6 +72,7 @@ vi.mock('./ipc/bridge', () => ({
   compareSnapshots: vi.fn(),
   querySectionChanges: vi.fn(),
   querySymbolChanges: vi.fn(),
+  queryObjectChanges: vi.fn(),
   exportCompareJson: vi.fn(),
   exportCompareHtml: vi.fn(),
   exportCompareVisual: vi.fn(),
@@ -132,6 +136,7 @@ const candidatesMock = vi.mocked(listCompareCandidates);
 const compareMock = vi.mocked(compareSnapshots);
 const sectionChangesMock = vi.mocked(querySectionChanges);
 const symbolChangesMock = vi.mocked(querySymbolChanges);
+const objectChangesMock = vi.mocked(queryObjectChanges);
 const exportJsonMock = vi.mocked(exportCompareJson);
 const exportHtmlMock = vi.mocked(exportCompareHtml);
 const exportVisualMock = vi.mocked(exportCompareVisual);
@@ -404,7 +409,12 @@ function comparison(overrides: Partial<CompareSummaryDto> = {}): CompareSummaryD
     // The honest state of this build: no stored fact attributes a row to an object file.
     objectChanges: {
       available: false,
-      reason: 'no stored fact attributes a section or symbol to an object file',
+      reason: 'neither build stored object rows from a GNU ld MAP',
+      objects: { changed: 0, added: 0, removed: 0, unchanged: 0 },
+      libraries: { changed: 0, added: 0, removed: 0, unchanged: 0 },
+      topObjects: [],
+      addedObjects: [],
+      topLibraries: [],
     },
     topSections: [{ key: '.text', changeKind: 'Changed', delta: 32, bytes: 92 }],
     topSymbols: [{ key: 'decode_packet', changeKind: 'Changed', delta: 128, bytes: 640 }],
@@ -838,7 +848,7 @@ describe('the summary and its signs', () => {
     expect(notice.textContent).toContain('SECTION-AMBIGUOUS');
     expect(notice.textContent).toContain('2 section rows share a name and were left unpaired');
     expect(notice.textContent).toContain(
-      'no stored fact attributes a section or symbol to an object file',
+      'neither build stored object rows from a GNU ld MAP',
     );
     expect(within(notice).getByText('unavailable')).toBeDefined();
 
@@ -902,6 +912,80 @@ describe('the summary and its signs', () => {
     expect(within(notice).getByText('Object-level change attribution')).toBeDefined();
     expect(notice.textContent).not.toContain('Object attribution');
     expect(within(notice).getByText('unavailable')).toBeDefined();
+  });
+
+  it('shows no object table when either build lacks MAP object rows', async () => {
+    await openCompare();
+    await runCompare();
+
+    expect(screen.queryByRole('region', { name: 'Changes by object and library' })).toBeNull();
+    expect(objectChangesMock).not.toHaveBeenCalled();
+  });
+
+  it('lists object and library changes from the shell, with absence never written as zero', async () => {
+    const attributed = comparison({
+      objectChanges: {
+        available: true,
+        reason: 'both builds stored object rows from a GNU ld MAP',
+        objects: { changed: 1, added: 1, removed: 0, unchanged: 3 },
+        libraries: { changed: 1, added: 0, removed: 0, unchanged: 0 },
+        topObjects: [{ key: 'imu.o', changeKind: 'Changed', delta: 40, bytes: 120 }],
+        addedObjects: [{ key: 'libdrv.a(spi.o)', changeKind: 'Added', delta: null, bytes: 56 }],
+        topLibraries: [{ key: 'libdrv.a', changeKind: 'Changed', delta: 56, bytes: 96 }],
+      },
+    });
+    const page: ObjectChangePageDto = {
+      rows: [
+        {
+          changeKind: 'Changed',
+          key: 'imu.o',
+          archive: null,
+          nonvolatile: change(80, 120, 40),
+          runtimeRam: change(16, 96, 80),
+        },
+        {
+          changeKind: 'Added',
+          key: 'libdrv.a(spi.o)',
+          archive: 'libdrv.a',
+          nonvolatile: { base: null, target: 56, delta: null, comparability: 'unknown', reason: 'present only in the target build' },
+          runtimeRam: { base: null, target: 0, delta: null, comparability: 'unknown', reason: 'present only in the target build' },
+        },
+      ],
+      total: 2,
+      offset: 0,
+      limit: 100,
+      nextOffset: null,
+    };
+    objectChangesMock.mockImplementation(async (request: ObjectChangeQueryDto) =>
+      ok(request.filter === null || request.filter === undefined ? page : { ...page, rows: page.rows.filter((row) => row.key === request.filter), total: 1 }),
+    );
+    await openCompare(attributed);
+    await runCompare();
+
+    const region = await screen.findByRole('region', { name: 'Changes by object and library' });
+    expect(region.textContent).toContain('Objects: 1 changed, 1 added, 0 removed, 3 unchanged');
+    await waitFor(() =>
+      expect(objectChangesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ diffId: attributed.diffId, libraries: false, sort: 'flashDelta', direction: 'desc' }),
+      ),
+    );
+
+    const table = await within(region).findByRole('table');
+    const added = within(table).getByText('libdrv.a(spi.o)').closest('tr');
+    expect(added?.textContent).toContain('Added');
+    expect(added?.textContent).toContain('Not present');
+    expect(added?.textContent).not.toMatch(/(^|\D)0 bytes → 56/u);
+
+    // A shortlist entry filters the authoritative table through the shell.
+    fireEvent.click(within(region).getByRole('button', { name: /imu\.o/u }));
+    await waitFor(() =>
+      expect(objectChangesMock).toHaveBeenLastCalledWith(expect.objectContaining({ filter: 'imu.o', libraries: false })),
+    );
+
+    fireEvent.click(within(region).getByRole('button', { name: 'Libraries' }));
+    await waitFor(() =>
+      expect(objectChangesMock).toHaveBeenLastCalledWith(expect.objectContaining({ libraries: true, filter: null })),
+    );
   });
 
   it('re-labels the same figures in KiB and asks the shell for nothing', async () => {

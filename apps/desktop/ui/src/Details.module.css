@@ -12,6 +12,13 @@
   gap: var(--fs-space-4);
 }
 
+.objectsUnavailable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
+  padding: var(--fs-space-3) 0;
+}
+
 .contributors {
   display: flex;
   flex-direction: column;

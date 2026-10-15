@@ -35,6 +35,10 @@ import type {
   HistoryGateRunPageDto,
   HistoryPageRequestDto,
   HistoryReleasePageDto,
+  ObjectChangePageDto,
+  ObjectChangeQueryDto,
+  ObjectPageDto,
+  ObjectRequestDto,
   MainWindowPage,
   PreferencesDto,
   ProjectContextDto,
@@ -61,10 +65,12 @@ const ANALYZE_SELECTION = 'analyze_selection';
 const QUERY_SECTIONS = 'query_sections';
 const QUERY_SYMBOLS = 'query_symbols';
 const QUERY_EVIDENCE = 'query_evidence';
+const QUERY_OBJECTS = 'query_objects';
 const LIST_COMPARE_CANDIDATES = 'list_compare_candidates';
 const COMPARE_SNAPSHOTS = 'compare_snapshots';
 const QUERY_SECTION_CHANGES = 'query_section_changes';
 const QUERY_SYMBOL_CHANGES = 'query_symbol_changes';
+const QUERY_OBJECT_CHANGES = 'query_object_changes';
 const EXPORT_COMPARE_JSON = 'export_compare_json';
 const EXPORT_COMPARE_HTML = 'export_compare_html';
 const EXPORT_COMPARE_VISUAL = 'export_compare_visual';
@@ -160,6 +166,11 @@ export async function queryEvidence(
   return await call<EvidencePageDto>(QUERY_EVIDENCE, { request });
 }
 
+/** Ask for one bounded page of a build's objects or libraries (ADR-0033). */
+export async function queryObjects(request: ObjectRequestDto): Promise<IpcOutcome<ObjectPageDto>> {
+  return await call<ObjectPageDto>(QUERY_OBJECTS, { request });
+}
+
 /**
  * Ask for one bounded page of builds Compare may start from.
  *
@@ -197,6 +208,13 @@ export async function querySymbolChanges(
   request: SymbolChangeQueryDto,
 ): Promise<IpcOutcome<SymbolChangePageDto>> {
   return await call<SymbolChangePageDto>(QUERY_SYMBOL_CHANGES, { request });
+}
+
+/** Ask for one bounded page of object or library changes (ADR-0033). */
+export async function queryObjectChanges(
+  request: ObjectChangeQueryDto,
+): Promise<IpcOutcome<ObjectChangePageDto>> {
+  return await call<ObjectChangePageDto>(QUERY_OBJECT_CHANGES, { request });
 }
 
 /**
