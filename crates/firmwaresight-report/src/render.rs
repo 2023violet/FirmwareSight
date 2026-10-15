@@ -6,6 +6,7 @@ use serde::Serialize;
 use firmwaresight_core::domain::memory::{MemoryRegionUsage, RegionUsageRisk, RegionUsageState};
 
 use crate::dto::AnalyzeResultDto;
+use firmwaresight_core::domain::attribution::{AttributionSummary, ObjectUsage};
 
 /// Compact machine-readable form.
 ///
@@ -66,6 +67,62 @@ pub fn document_json<T: Serialize + ?Sized>(value: &T) -> String {
 /// The default human-readable rendering. Diagnostics never go here; they go to stderr.
 pub fn render_human(value: &AnalyzeResultDto) -> String {
     render_human_inner(value, None)
+}
+
+/// `fwsight analyze --objects`: the per-object and per-library table of one build (ADR-0033).
+///
+/// The figures are Core's: each MAP row is charged like its output section, and the ranking is
+/// [`AttributionSummary`]'s own. An Unknown charge is printed as `unknown`, never `0`, and a build
+/// without object rows says so instead of printing an empty table. Every key is escaped, because a
+/// MAP is user input and its names reach a terminal (the same rule as the region names).
+#[must_use]
+pub fn render_objects(summary: Option<&AttributionSummary>) -> String {
+    let mut out = String::from(
+        "\nObjects and libraries (GNU ld MAP rows, charged like their output section)\n",
+    );
+    let Some(summary) = summary else {
+        out.push_str(
+            "  unavailable: this build has no GNU ld MAP object rows; pass --map FILE with the linker's .map\n",
+        );
+        return out;
+    };
+    let bytes = |value: Option<u64>| {
+        value.map_or_else(|| "unknown".to_owned(), |bytes| format!("{bytes} bytes"))
+    };
+    let table = |out: &mut String, title: &str, rows: &[ObjectUsage]| {
+        out.push_str(&format!("  {title} ({})\n", rows.len()));
+        out.push_str(&format!(
+            "    {:>14}  {:>14}  {:>5}  Name\n",
+            "Flash", "RAM", "Rows"
+        ));
+        for row in rows {
+            out.push_str(&format!(
+                "    {:>14}  {:>14}  {:>5}  {}\n",
+                bytes(row.nonvolatile),
+                bytes(row.runtime_ram),
+                row.rows,
+                safe_display_text(&row.key)
+            ));
+        }
+    };
+    table(&mut out, "Objects", &summary.objects);
+    if summary.libraries.is_empty() {
+        out.push_str("  Libraries (0): no row came from a static library\n");
+    } else {
+        table(&mut out, "Libraries", &summary.libraries);
+    }
+    match (
+        summary.unattributed_nonvolatile,
+        summary.unattributed_runtime_ram,
+    ) {
+        (Some(flash), Some(ram)) => out.push_str(&format!(
+            "  Not attributed to an object: {flash} bytes Flash, {ram} bytes RAM (padding, linker stubs, sections without object rows)\n"
+        )),
+        _ => out.push_str(
+            "  Not attributed to an object: unknown (a budget total or an object charge is not exact)\n",
+        ),
+    }
+    out
 }
 
 /// Human CLI rendering with Core-computed region evidence. The portable `analysis:1` document is
@@ -298,7 +355,7 @@ const fn evidence_basis_text(
     }
 }
 
-fn safe_display_text(value: &str) -> String {
+pub(crate) fn safe_display_text(value: &str) -> String {
     value.chars().flat_map(char::escape_debug).collect()
 }
 
@@ -402,5 +459,36 @@ mod tests {
         assert!(json.contains("linker ELF output"));
         // Absent optional fields must not appear as null noise.
         assert!(!json.contains("null"), "unexpected null in {json}");
+    }
+
+    #[test]
+    fn the_object_table_escapes_map_names_and_keeps_unknown_apart_from_zero() {
+        use firmwaresight_core::domain::attribution::{AttributionSummary, ObjectUsage};
+
+        let summary = AttributionSummary {
+            objects: vec![ObjectUsage {
+                key: "evil\u{1b}[2J.o".to_owned(),
+                archive: None,
+                nonvolatile: Some(0),
+                runtime_ram: None,
+                rows: 1,
+            }],
+            libraries: Vec::new(),
+            unattributed_nonvolatile: None,
+            unattributed_runtime_ram: Some(4),
+        };
+        let text = super::render_objects(Some(&summary));
+        assert!(
+            !text.contains('\u{1b}'),
+            "no raw escape reaches a terminal: {text:?}"
+        );
+        assert!(text.contains("evil\\u{1b}[2J.o"), "{text}");
+        assert!(text.contains("0 bytes"), "a known zero is a zero");
+        assert!(text.contains("unknown"), "an unknown charge is not a zero");
+        assert!(
+            text.contains("Not attributed to an object: unknown"),
+            "{text}"
+        );
+        assert!(text.contains("Libraries (0)"), "{text}");
     }
 }

@@ -194,6 +194,11 @@ struct AnalyzeArgs {
     /// Full-buffer size ceiling in bytes. Defaults to the baseline 512 MiB.
     #[arg(long, value_name = "BYTES")]
     max_bytes: Option<u64>,
+
+    /// Also print which object files and libraries use Flash and RAM (needs --map). Text only:
+    /// the JSON document's shape does not change (ADR-0033 D7).
+    #[arg(long, conflicts_with = "json")]
+    objects: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -443,6 +448,12 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
                     "{}",
                     render::render_human_with_region_usage(&dto, &analysis.memory.region_usage)
                 );
+                if args.objects {
+                    print!(
+                        "{}",
+                        render::render_objects(object_summary(&analysis).as_ref())
+                    );
+                }
                 eprintln!("diagnostics: map {}", map_state(&analysis));
                 eprintln!(
                     "diagnostics: hash {} ms, read {} ms, parse {} ms, normalize {} ms, operation {operation_id}",
@@ -943,6 +954,13 @@ fn git_state(git: &GitObservation) -> String {
         ""
     };
     format!("{dirty}, {tag}{ambiguous}")
+}
+
+/// The build's object and library usage, or `None` when its MAP supplied no object rows.
+fn object_summary(
+    analysis: &pipeline::Analysis,
+) -> Option<firmwaresight_core::domain::attribution::AttributionSummary> {
+    DiffSnapshotInput::from_snapshot(&analysis.snapshot).attribution
 }
 
 /// Analyze one side of a comparison. A failure here is an import failure, so no partial diff is

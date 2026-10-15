@@ -695,20 +695,29 @@ fn push_objects(out: &mut String, result: &DiffResult) {
         tally(&attribution.objects, attribution.unchanged_objects),
         tally(&attribution.libraries, attribution.unchanged_libraries)
     ));
+    // Object keys come from a user-supplied MAP and reach a terminal, so they are escaped first.
+    let escaped = |rows: Vec<Contributor>| -> Vec<Contributor> {
+        rows.into_iter()
+            .map(|row| Contributor {
+                key: crate::render::safe_display_text(&row.key),
+                ..row
+            })
+            .collect()
+    };
     push_contributors(
         out,
         "Top object growth, Flash (Changed rows)",
-        &result.top_object_growth(false, 5),
+        &escaped(result.top_object_growth(false, 5)),
     );
     push_contributors(
         out,
         "Largest added objects, Flash (absence, never 0)",
-        &result.largest_added_objects(false, 5),
+        &escaped(result.largest_added_objects(false, 5)),
     );
     push_contributors(
         out,
         "Top library growth, Flash (Changed rows)",
-        &result.top_object_growth(true, 5),
+        &escaped(result.top_object_growth(true, 5)),
     );
 }
 
