@@ -223,3 +223,13 @@ the desktop Analyze and Compare pages and CLI text. L8 is therefore **REDUCED** 
 other than GNU ld is read. The status moves on `main` only when the branch merges.
 
 *Dated 2026-10-15, later the same day: the branch merged as `04d800c` and `ADR-0033` is BASELINE, so L8 is **REDUCED on `main`** on the same terms (portable JSON still open).*
+
+## Dated 2026-10-15 — L23, eighth instance (`release.test.tsx`)
+
+The rows above count seven instances and stay as written. An eighth was lost on CI, not locally: [Actions #118](https://github.com/2023violet/FirmwareSight/actions/runs/38843969109) on `81e1345` (documentation only; its code is identical to `04d800c`, which was green on #117), job `Desktop UI (ubuntu-latest)`, **attempt 1 failed** and **attempt 2 passed**. The rerun's green does not close the flake; the repair below does, as far as its mutation proof reaches.
+
+- **Test:** `U1P Release hierarchy` › "leads with the settings it has to be given, while there is no run to report". It awaited the Release heading and then read `Choose a build in step 1 to run the Gate.` synchronously.
+- **Shape, inverted from the earlier seven:** the hint is not state that arrives late but state that **leaves**. With the default two stored builds the page names one by itself (a passive effect after the stored list commits), and the hint goes with it. The test passed only while it read inside that window. CI's DOM dump shows `snap-target` already chosen and Run Gate enabled. Waiting for the hint (`findByText`) does not repair this: under the mutation below it waits the full second and fails the same way.
+- **Fix (test only):** the test now uses an empty store, so no build is ever chosen, and awaits the empty-store sentence before reading. No production source, timeout constant or assertion was weakened. The step-region reads in the same test render with the heading and were not racing.
+- **Mutation proof:** (M1) a 20 ms hold after `openRelease()` makes the old test fail with CI's error verbatim and leaves the new one green; (M2) the candidate IPC delayed 50 ms leaves the new test green; (M3) the hint rendered only before the stored list arrives reddens the new test, so it still guards the hint. All three were reverted. The changed file then passed 20 of 20 fresh-process runs.
+- **Sweep:** the synchronous reads that directly follow an awaited open or find in the 14 UI test files were listed and read. None other reads a state that IPC or a passive effect replaces without the test holding that IPC open. L23 stays **REDUCED**: an instance that no run has lost yet may still exist. The M2 report's unidentified local `vitest` failure (`06_DELIVERY/11` §8) is not attributed to this instance.

@@ -1933,7 +1933,12 @@ describe('U1P Release hierarchy', () => {
   });
 
   it('leads with the settings it has to be given, while there is no run to report', async () => {
+    // An empty store, so no build is ever chosen. With the default two builds the page names one as soon
+    // as the stored list arrives, and the run hint below goes with it: a read that found the hint was
+    // reading the page before that list landed (L23).
+    candidatesMock.mockResolvedValue(ok(candidatePage([])));
     await openRelease();
+    await screen.findByText(/^Nothing is stored yet, so there is nothing to gate\./);
 
     // With no run the verdict band renders nothing, so the page's first block is the one that can
     // actually be used. Asserting the empty case is what keeps the reordering from becoming a claim
