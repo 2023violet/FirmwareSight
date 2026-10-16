@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "CURRENT_INDEX"
 owner: "Engineering"
-last_updated: "2026-10-15"
+last_updated: "2026-10-16"
 ---
 
 # FirmwareSight Now
@@ -24,7 +24,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
   - `fwsight diff` text now escapes control characters from user files.
   - Automated native QA of the M2 screens: 11 cases, all PASS ([evidence/D2C](../evidence/D2C/README.md)).
   - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
-- **Local gate at `76b5c2c`:** `python scripts/check.py` 18/18 steps, 0 SKIP. Rust workspace 1,160 passed / 0 failed / 2 opt-in ignored. Frontend 397 tests in 13 files.
+- **Latest `main`:** `f4b3a12` ([Actions #119](https://github.com/2023violet/FirmwareSight/actions/runs/38852134515), 10/10 on the first attempt). Read Git for anything later.
 
 ## Gates
 

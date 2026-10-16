@@ -751,20 +751,40 @@ fn push_contributors(out: &mut String, title: &str, rows: &[Contributor]) {
     }
 }
 
-/// D2C C1: a name read from a user's ELF or MAP may carry control characters. Only those are escaped,
-/// as `\u{1b}` and the like, so a crafted name cannot move the cursor or recolour the terminal, while
-/// quotes, spaces and non-ASCII names print as they are. One place for every value the human report
-/// takes from a file: artifact file names, section, symbol, object and library keys, warning text.
+/// D2C C1: a name read from a user's ELF or MAP may carry characters that drive or mislead a terminal.
+/// One place for every value the human report takes from a file: artifact file names, section, symbol,
+/// object and library keys, and warning text. Escaped:
+///
+/// - C0/C1 controls and DEL (`\u{1b}`…), so a name cannot move the cursor or recolour the screen;
+/// - bidi overrides, isolates and marks (U+200E/F, U+202A–E, U+2066–9) and zero-width or line-breaking
+///   format characters (U+200B–D, U+2028/9, U+2060–5, U+FEFF), so a name cannot reorder or hide the
+///   text around it (review S2-1 of `4cbdf74`: the M2 object escaping covered these, and C1 must not
+///   lose them);
+/// - the backslash itself, so the literal text `\u{1b}` in a name cannot pass for an escaped ESC.
+///
+/// Quotes, spaces and other non-ASCII names (CJK, accents) print as they are.
 fn terminal_safe(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     for c in value.chars() {
-        if c.is_control() {
+        if c == '\\' {
+            out.push_str("\\\\");
+        } else if c.is_control() {
             out.extend(c.escape_debug());
+        } else if is_invisible_format(c) {
+            out.extend(c.escape_unicode());
         } else {
             out.push(c);
         }
     }
     out
+}
+
+/// Bidi controls and invisible format characters a terminal draws without a glyph.
+fn is_invisible_format(c: char) -> bool {
+    matches!(
+        c,
+        '\u{200b}'..='\u{200f}' | '\u{2028}'..='\u{202e}' | '\u{2060}'..='\u{2069}' | '\u{feff}'
+    )
 }
 
 fn short_sha(sha: &str) -> &str {
@@ -834,5 +854,19 @@ mod tests {
             ".text \"quoted\" 'x'"
         );
         assert_eq!(terminal_safe("固件 main.o"), "固件 main.o");
+    }
+
+    #[test]
+    fn bidi_and_invisible_characters_and_the_backslash_are_escaped() {
+        // Review S2-1 of 4cbdf74.
+        assert_eq!(terminal_safe("lib\u{202e}o.a"), r"lib\u{202e}o.a");
+        assert_eq!(terminal_safe("a\u{200b}b\u{feff}"), r"a\u{200b}b\u{feff}");
+        assert_eq!(terminal_safe("x\u{2066}y\u{2069}"), r"x\u{2066}y\u{2069}");
+        assert_eq!(terminal_safe("p\u{2028}q"), r"p\u{2028}q");
+        assert_eq!(
+            terminal_safe(r"fake\u{1b}"),
+            r"fake\\u{1b}",
+            "a literal backslash cannot pass for an escaped ESC"
+        );
     }
 }

@@ -27,6 +27,7 @@ Add one sentence to the consent: *"This is an early exploratory session; taking 
 ## 3. Build under test
 
 - One Windows installer, built from a named `main` commit at or after the D2C merge, verified like the V1 builds (installer SHA-256, `toolchain.git_commit`). The session record names it.
+- **Entry condition:** no Pilot build is handed to anyone until the human native-QA pass (`evidence/D2C/HUMAN_NATIVE_QA_RUNBOOK.md`) has closed AC24, AC26 and AC20 on that build or an earlier one with the same desktop code, or until the Owner has explicitly accepted the remaining limits for Pilot use. This is the deadline in `NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md`, and the same condition the V1 re-freeze request applies.
 - The same bytes for every Pilot session. A new build starts a new Pilot round with its own register section.
 - This is **not** the V1 cohort build. The V1 re-freeze (route R3) is a separate Owner-authorized round.
 
@@ -38,7 +39,7 @@ The moderator reads the wording as written. A hint is an intervention and is log
 |---|---|---|---|
 | **PT1** First look | "Please open your own build in this tool and tell me what you learn about it." | "Analyze", "choose ELF", "add MAP" | First action, path, stalls, whether a MAP is added unprompted, the first fact they read aloud |
 | **PT2** Growth source | "Suppose this build is bigger than you expected. Use the tool to find where the size comes from." | "Objects", "Libraries", "Details" | Whether they reach object/library rows; whether they trust the share and the "not attributed" line; what they would do next |
-| **PT3** Two builds (only with a second build) | "Here is an older build of the same project. What changed between the two?" | "Compare", "baseline" | How they choose base and target; whether they'd want to keep a fixed baseline; whether the object changes answer the question |
+| **PT3** Two builds (only with a second build) | "If you have brought an older build of the same project, please open it too. What changed between the two?" | "Compare", "baseline" | How they choose base and target; whether they'd want to keep a fixed baseline; whether the object changes answer the question |
 | **PT4** Hand-off | "If you had to send what you found to a teammate, what would you do?" | "export", "report", "Bundle" | What they look for; which format they expect (HTML, CSV, Markdown, a screenshot) |
 
 Record per task: outcome (`completed unassisted` / `completed after intervention` / `not completed` / `not applicable`), first path, wrong turns, interventions, and quotes kept verbatim and separate from interpretation.

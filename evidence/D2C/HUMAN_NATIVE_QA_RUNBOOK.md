@@ -37,6 +37,8 @@ The detailed steps for AC24, AC26 and AC20 are in the deferred register (C1 step
 | H10 | The same ELF without a MAP → Objects tab | M2 | UNKNOWN badge, the no-MAP reason, the attach-MAP next step; no table of zeros |
 | H11 | Compare `m2-objects` base → target → "By object and library": switch to Libraries, click a shortlist entry | M2 | `libdrv.a(spi.o)` Added with base "Not present"; the drill-down filters the table |
 | H12 | Overview after H11: "Latest comparison" → Open Compare | M2 / M1 F2 | Shows the same pair and the Flash change as Compare |
+| H13 | Repeat H01's Save, deny and write-failure flows across System, Light and Dark × English and Chinese × 1024×720 and 1440×900 (the M1 pass did these once) | AC24 / AC26 / AC20 | The same outcomes in every combination; no clipped dialog text; error panel readable |
+| H14 | While doing H01 and H02, watch for any write while two prompts are open and no button has been pressed: M1's unexplained sentinel overwrite (`evidence/M1/README.md`, "One unexplained event") | AC24 | No write happens without a confirmed Replace; if one does, stop and keep the screen recording |
 
 ## Evidence (Standing Owner rule 4)
 

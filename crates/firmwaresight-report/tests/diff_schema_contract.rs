@@ -762,7 +762,45 @@ fn the_human_report_escapes_control_characters_taken_from_user_files() {
     for warning in &mut result.warnings {
         warning.message.push_str(" \u{1b}[31mred");
     }
+    // Review S2-1 of 4cbdf74: bidi overrides in the target name, a symbol key and an object key.
+    result.target_artifact.file_name = "tgt\u{202e}fle.elf".to_owned();
+    for row in &mut result.symbol_changes {
+        row.name = format!("{}\u{202e}rev", row.name);
+    }
+    result.attribution.available = true;
+    result
+        .attribution
+        .objects
+        .push(firmwaresight_core::domain::diff::ObjectChange {
+            change: firmwaresight_core::domain::diff::ChangeKind::Changed,
+            key: "evil\u{202e}o.o".to_owned(),
+            archive: None,
+            nonvolatile: firmwaresight_core::domain::diff::ByteChange::between(
+                Some(8),
+                Some(24),
+                firmwaresight_core::domain::diff::Comparability::Exact,
+            ),
+            runtime_ram: firmwaresight_core::domain::diff::ByteChange::between(
+                Some(0),
+                Some(0),
+                firmwaresight_core::domain::diff::Comparability::Exact,
+            ),
+            ambiguous: false,
+        });
     let text = diff_render::render_human(&result);
+    assert!(
+        !text.contains('\u{202e}'),
+        "no raw bidi override reaches stdout: {text:?}"
+    );
+    assert!(text.contains(r"tgt\u{202e}fle.elf"), "{text}");
+    assert!(
+        text.contains(r"evil\u{202e}o.o"),
+        "the object key is escaped once: {text}"
+    );
+    assert!(
+        !text.contains(r"\\u{202e}"),
+        "nothing is escaped twice: {text}"
+    );
     assert!(
         !text.contains('\u{1b}'),
         "no raw ESC reaches stdout: {text:?}"

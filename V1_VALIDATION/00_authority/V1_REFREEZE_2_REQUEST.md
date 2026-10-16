@@ -24,7 +24,13 @@ Route decision R3 (`06_DELIVERY/12`) chose option (b). The frozen U1 build preda
 
    Running V1 on a build with open native risks would put participants in front of known defects.
 2. **Verify both builds the same way as 2026-10-08:** installer and payload hashes, `toolchain.git_commit`, the old→new delta.
-3. **Move one pointer:** the cohort build named in `V1_PLAN.md`, `protocol/TASK_SCRIPT.md` (T0 hash) and `sessions/TEMPLATE.md` (cohort head, CI run).
+3. **Move one pointer, everywhere it is written.** The 2026-10-08 round reconciled eleven files under `V1_VALIDATION/`, each keeping the old identity beside the new one as superseded (`V1_COHORT_REFREEZE_RECORD.md`, "Protocol documents now name the frozen bytes"):
+   - `README.md`, `V1_PLAN.md`, `V1_PARTICIPANT_REGISTER.md`;
+   - `protocol/TASK_SCRIPT.md` (T0 hash) and `protocol/MODERATOR_GUIDE.md`. The guide treats any other installer hash as an early-stop trigger, so missing it would stop every session on the new build;
+   - `sessions/README.md` and `sessions/TEMPLATE.md` (cohort head, CI run);
+   - `analysis/FINDINGS.md`, `analysis/METRICS.md`, `deliverables/V1_GATE_RECOMMENDATION.md`, `deliverables/V1_VALIDATION_REPORT.md`.
+
+   In `BASELINE.yaml`: a new `v1_execution` block beside `cohort_build_refreeze`, recording the new installer and payload hashes and the authorization, plus `cohort_build_state`. The earlier blocks stay as written, marked superseded. `V1_METRICS.md` is not touched. The round's own record and the authorization transcription are new files, as in 2026-10-08.
 
 ## What the round would not change
 

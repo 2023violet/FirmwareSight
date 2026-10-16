@@ -18,7 +18,7 @@ last_updated: "2026-10-16"
 |---|---|
 | Session ID | `PL-XX` |
 | Entry rules A, B, C, D, E, F | |
-| Pool decision recorded (permanently out of formal V1) | YES |
+| Pool decision recorded (permanently out of formal V1) | YES / NO (NO = do not hold the session) |
 | Cohort | `IN_COHORT` (GCC/Clang + GNU ld) / `OUT_OF_COHORT` (toolchain named) |
 | Role family · experience band · team-size band | |
 | Current way of comparing builds | |
@@ -36,8 +36,8 @@ last_updated: "2026-10-16"
 
 | Field | Value |
 |---|---|
-| Consent (V1 items + the Pilot sentence) obtained before the session | YES |
-| Unsigned-build disclosure given | YES |
+| Consent (V1 items + the Pilot sentence) obtained before the session | YES / NO (NO = do not hold the session) |
+| Unsigned-build disclosure given | YES / NO |
 | Recording | AUDIO / SCREEN / VIDEO / NOTES_ONLY |
 | Build commit · installer SHA-256 | |
 | Install friction (T0-style notes) | |
@@ -67,9 +67,9 @@ Keep quotes verbatim and in quotation marks. Mark anything else `MODERATOR_NOTE 
 | Question | YES / NO / UNCLEAR | Evidence line |
 |---|---|---|
 | Repeat comparison (D3) | | |
-| Attribution useful (M2) | | |
+| Object/library view answered the growth question | | |
 | Toolchain outside GNU ld (D4) | | |
-| Deeper evidence asked for unprompted (D5) | | |
+| Deeper evidence wanted (D5): say whether it came up unprompted during the tasks or only at debrief question 5 | | |
 
 ## Defects found (filed without participant data)
 
