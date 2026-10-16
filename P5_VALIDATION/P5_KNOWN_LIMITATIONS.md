@@ -221,3 +221,5 @@ the feature decision L8 was waiting for exists as `ADR-0033`: GNU ld MAP object 
 the desktop Analyze and Compare pages and CLI text. L8 is therefore **REDUCED** there, not closed: the portable
 `analysis:1` / `diff:1` documents still carry no per-object rows (D7, a schema-version decision), and no MAP grammar
 other than GNU ld is read. The status moves on `main` only when the branch merges.
+
+*Dated 2026-10-15, later the same day: the branch merged as `04d800c` and `ADR-0033` is BASELINE, so L8 is **REDUCED on `main`** on the same terms (portable JSON still open).*

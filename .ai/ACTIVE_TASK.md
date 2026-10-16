@@ -5,19 +5,16 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-14"
+last_updated: "2026-10-15"
 ---
 
 # Active Task
 
 ```text
-M2_OBJECT_LIBRARY_ATTRIBUTION
+NONE
 ```
 
-- **Authorized by:** the Owner, in chat on 2026-10-15 ("review the route, write the full plan, then implement it").
-- **Scope:** GNU ld MAP object/library attribution through Core, storage, capability, Compare, desktop and CLI text (ADR-0033, PROPOSED), plus the M1 leftovers F2, N1 and N2.
-- **Base:** `6804ae7`. **Branch:** `feature/m2-object-attribution`.
-- **Plan and acceptance criteria:** [06_DELIVERY/11_M2_OBJECT_ATTRIBUTION.md](../06_DELIVERY/11_M2_OBJECT_ATTRIBUTION.md).
-- **Not authorized:** Keil/IAR adapters, portable schema changes, new runtime dependencies, or a push without Owner approval.
+- **Last task:** `M2_OBJECT_LIBRARY_ATTRIBUTION`, done. It reached `main` as `04d800c` ([Actions #117](https://github.com/2023violet/FirmwareSight/actions/runs/38826237431), 10/10), after three independent review rounds; `ADR-0033` is BASELINE.
+- **Next candidate:** batch **D2C** (M2 closeout and Pilot preparation) of [06_DELIVERY/12_POST_M2_ROUTE.md](../06_DELIVERY/12_POST_M2_ROUTE.md). It needs the Owner to name it here before any work starts. Several of its items are Owner or human-operator actions: native QA, decision R4, the V1 re-freeze authorization.
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

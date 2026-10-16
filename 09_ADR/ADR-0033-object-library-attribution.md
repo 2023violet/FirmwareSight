@@ -3,7 +3,7 @@ title: "ADR-0033 Object and Library Attribution from the GNU ld MAP"
 doc_id: "ADR-0033"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "PROPOSED"
+status: "BASELINE"
 owner: "Architecture"
 last_updated: "2026-10-15"
 ---
@@ -12,7 +12,7 @@ last_updated: "2026-10-15"
 
 ## Status
 
-**PROPOSED**, implemented on `feature/m2-object-attribution` at the Owner's request of 2026-10-15 ("review, plan, then implement"). It becomes BASELINE when the Owner approves the merge after independent review. Until then, nothing here is on `main`.
+**BASELINE** (2026-10-15). Implemented on `feature/m2-object-attribution` at the Owner's request of 2026-10-15 ("review, plan, then implement"). It went through three independent review rounds (`06_DELIVERY/11` §8–8.3) and reached `main` as `04d800c` on the Owner's push approval ([Actions #117](https://github.com/2023violet/FirmwareSight/actions/runs/38826237431), 10/10). The Owner confirmed the status move with the post-M2 route (`06_DELIVERY/12` R2). It was PROPOSED until then.
 
 ## Context
 

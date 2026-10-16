@@ -148,6 +148,8 @@ The verdict was **PASS_WITH_FINDINGS**, with no S1. All 19 constructed MAPs were
 
 ### 8.3 Final check of 18a0f63
 
+*Outcome: pushed to `main` as `04d800c` on Owner approval (Actions #117, 10/10); `ADR-0033` BASELINE. Next steps: `06_DELIVERY/12`.*
+
 The verdict was **PASS_WITH_FINDINGS**, with no S1 or S2. The ambiguity rule matches D8, checked end to end by `fwsight diff` with swapped `main.o` / `main.o#2`, which gave 0 changed, 2 added, 2 removed and "4 row(s) left unpaired". `cargo test --workspace` passed 1237 tests. `vitest` passed 430 in three of four runs; the first run had one unidentified failure while `cargo test` loaded the CPU, which is the known UI race class (`L23`) and not attributed to this commit.
 
 | Finding | Disposition |

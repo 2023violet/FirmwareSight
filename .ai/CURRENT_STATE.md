@@ -23,14 +23,14 @@ FirmwareSight is a local-first desktop workbench and CLI (`fwsight`) for embedde
 | Release Gate | Five-state evaluation of configured project policy: PASS / REVIEW / BLOCK / UNKNOWN / N/A | Shipped (P3) |
 | Bundle | Exports verified release evidence, including release-attached byte evidence (ADR-0030) | Shipped (P4, C1) |
 
-The desktop app also has project readiness and release preflight, local History, Diagnostics, theme (System / Light / Dark), interface language (English / Chinese, including native dialog titles), and PNG, SVG and print-HTML visual report export for Analyze, Compare and Gate. M1 (on `main` since `6804ae7`) added drag-and-drop of an ELF and its MAP, per-region memory usage bars on Overview, and a numbered Release setup. M2 (branch `feature/m2-object-attribution` until merged, `ADR-0033` PROPOSED) adds per-object and per-library Flash/RAM attribution from GNU ld MAP rows on Analyze, Compare and CLI text, and the latest comparison on Overview.
+The desktop app also has project readiness and release preflight, local History, Diagnostics, theme (System / Light / Dark), interface language (English / Chinese, including native dialog titles), and PNG, SVG and print-HTML visual report export for Analyze, Compare and Gate. M1 (on `main` since `6804ae7`) added drag-and-drop of an ELF and its MAP, per-region memory usage bars on Overview, and a numbered Release setup. M2 (on `main` since `04d800c`, `ADR-0033` BASELINE) added per-object and per-library Flash/RAM attribution from GNU ld MAP rows on Analyze, Compare and CLI text, and the latest comparison on Overview. The route after M2 is [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md).
 
 Unknown or partial evidence stays explicit. It is never shown as zero or as proof.
 
 ## Formats
 
 - ELF32 and ELF64, little and big endian: parsed. Verified memory-accounting cohorts are GCC + GNU ld and Clang + GNU ld.
-- GNU ld `.map`: the only supported MAP grammar. On the M2 branch its input-section rows also give object and library attribution; portable JSON does not carry those rows.
+- GNU ld `.map`: the only supported MAP grammar. Its input-section rows also give object and library attribution; portable JSON does not carry those rows (`ADR-0033` D7).
 - Keil (armlink) and IAR (ILINK) output: UNVERIFIED. ArmLink and IAR MAP: NOT_SUPPORTED / FIXTURE_BLOCKED.
 - `.bin` and Intel HEX: can be attached as release byte evidence. Content analysis is UNSUPPORTED.
 

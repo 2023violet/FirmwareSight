@@ -17,7 +17,8 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 - **Last integrated code:** `76b5c2c` (NEXT-46 export privacy and stale-result fixes, integrated by NEXT-47). [Actions #113](https://github.com/2023violet/FirmwareSight/actions/runs/38595778036): 10/10 Jobs and 10/10 Check Runs.
 - **Later documentation-only commits:** `71978d8` (NEXT-47 evidence upload, [Actions #114](https://github.com/2023violet/FirmwareSight/actions/runs/38602220781) 10/10). The 2026-10-14 lean batch follows; read Git for its SHA and CI.
 - **M1 first-use round:** on `main` at `6804ae7` (Actions #116, 10/10). Copy cut, drag-and-drop intake, Overview memory bars, Release step order, table scrolling, native dialog language, and six native-QA fixes. Evidence: [evidence/M1](../evidence/M1/README.md).
-- **M2 object and library attribution (branch `feature/m2-object-attribution`, not yet on `main`):** GNU ld MAP object rows stored per build (migration 0007) and shown on Analyze, Compare, Overview and CLI text; M1 leftovers F2, N1, N2 closed. `ADR-0033` is PROPOSED. Plan and status: [06_DELIVERY/11](../06_DELIVERY/11_M2_OBJECT_ATTRIBUTION.md). Independent review and push await the Owner.
+- **M2 object and library attribution:** on `main` at `04d800c` ([Actions #117](https://github.com/2023violet/FirmwareSight/actions/runs/38826237431), 10/10). GNU ld MAP object rows are stored per build (migration 0007) and shown on Analyze, Compare, Overview and CLI text; M1 leftovers F2, N1 and N2 are closed. `ADR-0033` is BASELINE. Three independent review rounds; dispositions in [06_DELIVERY/11](../06_DELIVERY/11_M2_OBJECT_ATTRIBUTION.md) §8. Local gate at `04d800c`: `check.py` 18/18, 0 SKIP.
+- **Route after M2:** batches D2C, D3–D6 with entry conditions in [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md). `ACTIVE_TASK` is `NONE` until the Owner names the next batch.
 - **Local gate at `76b5c2c`:** `python scripts/check.py` 18/18 steps, 0 SKIP. Rust workspace 1,160 passed / 0 failed / 2 opt-in ignored. Frontend 397 tests in 13 files.
 
 ## Gates
@@ -33,6 +34,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 - NEXT-44 AC24, NEXT-44 AC26, NEXT-45 AC20: rated PASS_WITH_LIMITS by the independent review of M1 and still open. Not yet observed: deny, confirm, failure and retry on a visual export; the English replace confirmation; recorded Tab order; a screen reader; 1440×900; the non-Owner profile and human operator the [deferred register](../NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md) asks for. See [evidence/M1](../evidence/M1/README.md).
 - Native drag-and-drop from Explorer: NOT_RUN (automation could not synthesize an OS drag); one human drag is needed.
 - Screen-reader check: not run; UI Automation exposure was checked.
+- M2's desktop surfaces (Objects/Libraries tabs, Compare "By object and library", Overview "Latest comparison"): unit, IPC and component tests only; no native QA yet (`06_DELIVERY/12` D2C item 1).
 
 ## Compatibility boundary
 

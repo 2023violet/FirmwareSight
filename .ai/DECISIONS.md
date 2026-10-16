@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "CURRENT"
 owner: "Engineering"
-last_updated: "2026-10-14"
+last_updated: "2026-10-15"
 ---
 
 # Decisions Index
@@ -48,6 +48,7 @@ Durable decisions live in ADRs. This page indexes them and lists the standing Ow
 | [0030](../09_ADR/ADR-0030-release-attached-byte-evidence.md) | Release-attached byte evidence (BIN/HEX) |
 | [0031](../09_ADR/ADR-0031-developer-preview-theme.md) | Developer Preview theme: System / Light / Dark |
 | [0032](../09_ADR/ADR-0032-desktop-ui-language.md) | Desktop UI language |
+| [0033](../09_ADR/ADR-0033-object-library-attribution.md) | Object and library attribution from the GNU ld MAP (BASELINE 2026-10-15) |
 
 ## Standing Owner rules
 
@@ -57,3 +58,4 @@ Durable decisions live in ADRs. This page indexes them and lists the standing Ow
 4. **Evidence in the repository (2026-10-14):** commit a short summary, the AC matrix and a hashed ZIP. Do not commit expanded raw logs. Strip local paths before publishing.
 5. **Worktree hygiene (2026-10-14):** delete review worktrees once their verdict is signed and evidence is packed. Archive any non-Cargo content first. Never write scratch files into `target/`. No global `CARGO_TARGET_DIR`, because `scripts/verify_package_artifacts.py` reads `target/release/bundle`.
 6. **Protected checkout:** the Owner's original `main` checkout and its nine staged files stay untouched without an explicit decision.
+7. **Post-M2 route (2026-10-15):** delivery batches after M2 are named D2C, D3–D6, never M3–M6, because `V1_VALIDATION/V1_METRICS.md` owns M1–M6. The sequence and entry conditions are in [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md). Formal V1 is to be re-frozen to an M2-era build (option b), in its own authorized round. M2 review S2.1 (backfill of pre-0007 builds) is open.
