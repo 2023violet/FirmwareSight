@@ -44,20 +44,28 @@ p {
 h1 {
   font-size: var(--fs-font-size-page);
   line-height: var(--fs-line-height-page);
-  /* Keyword weights, not numeric: the frozen token file defines no weight scale, so inventing
-     550 vs 600 here would be an untracked value. */
-  font-weight: bold;
+  /* Tokens 0.4.0 (ADR-0034 D3) gave the product a weight scale; `bold` (700) is no longer used. */
+  font-weight: var(--fs-font-weight-semibold);
 }
 
 h2 {
   font-size: var(--fs-font-size-section);
   line-height: var(--fs-line-height-section);
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
 }
 
 :focus-visible {
   outline: var(--fs-focus-ring-width) solid var(--fs-focus-ring-color);
   outline-offset: var(--fs-focus-ring-offset);
+}
+
+/* The one lead figure a page or report may carry (ADR-0034 D3: once per page, in the LeadAnswer). */
+.figure {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-figure);
+  line-height: var(--fs-line-height-figure);
+  font-weight: var(--fs-font-weight-semibold);
+  font-variant-numeric: tabular-nums;
 }
 
 code,

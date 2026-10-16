@@ -3,7 +3,7 @@ title: "ADR-0034 Instrument Ledger Design Language (R-Series Redesign)"
 doc_id: "ADR-0034"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "PROPOSED"
+status: "BASELINE"
 owner: "Architecture / Design"
 last_updated: "2026-10-16"
 ---
@@ -12,7 +12,7 @@ last_updated: "2026-10-16"
 
 ## Status
 
-**PROPOSED** (R0, 2026-10-16). It becomes BASELINE when the Owner accepts the R0 prototype. Until then no token value, product file or golden changes. It extends ADR-0018 and amends ADR-0031 D6 (see D3).
+**BASELINE** (2026-10-16). Proposed in R0. The Owner accepted the R0 prototype's visual direction in chat on 2026-10-16 and authorized R1, which lands D3 (tokens 0.4.0). It extends ADR-0018 and amends ADR-0031 D6 (see D3).
 
 ## Context
 

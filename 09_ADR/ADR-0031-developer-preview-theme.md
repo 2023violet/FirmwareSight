@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Architecture"
-last_updated: "2026-10-11"
+last_updated: "2026-10-16"
 ---
 
 # ADR-0031 — System / Light / Dark Ships in the Developer Preview, and the Preference Document Takes a Version
@@ -143,6 +143,8 @@ light role is dropped. Rules:
   surface is not a licence to make "we do not know" look like "this passed".
 
 ### D6 — Contrast becomes measurable in both themes, with one named exception
+
+> **Amended 2026-10-16 by ADR-0034 D3.** The one named exception below is retired: light `diff.removed` is now `#C7372C` (4.5592:1 on `#FBECEA`), `CONTRAST_EXEMPT` is empty, and the two report goldens that printed the old value were regenerated on purpose in R1. The rest of D6 stands.
 
 `DESIGN.md` has always required a clear `focus-visible` ring and forbidden colour-only status. From this ADR, both
 themes must hold WCAG 2.2 AA on the roles that carry meaning: 4.5:1 for body text, 3:1 for large text and for the

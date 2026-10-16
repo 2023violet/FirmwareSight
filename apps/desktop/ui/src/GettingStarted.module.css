@@ -117,7 +117,7 @@
 }
 
 .steps strong {
-  font-weight: 600;
+  font-weight: var(--fs-font-weight-semibold);
 }
 
 .steps span {

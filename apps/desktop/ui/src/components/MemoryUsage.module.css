@@ -33,7 +33,7 @@
 
 .name {
   font-family: var(--fs-font-mono);
-  font-weight: 600;
+  font-weight: var(--fs-font-weight-semibold);
   overflow-wrap: anywhere;
 }
 

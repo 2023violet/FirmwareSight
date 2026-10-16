@@ -147,13 +147,13 @@
 
 .regionTable thead th {
   color: var(--fs-color-text-secondary);
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
 }
 
 .regionTable tbody th {
   max-width: 260px;
   overflow-wrap: anywhere;
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
 }
 
 .regionMono {

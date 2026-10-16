@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.5.1"
 status: "BASELINE"
 owner: "Design"
-last_updated: "2026-09-26"
+last_updated: "2026-10-16"
 ---
 
 # Visual System
@@ -48,6 +48,17 @@ Mono:
 - Table: 12–13/18
 - Metadata: 12/18
 - Numeric mono: 12–13/18
+
+### Tokens 0.4.0 additions (ADR-0034 D3)
+
+| Token | Value | Use |
+|---|---|---|
+| `typography.size.figure` / `line_height.figure` | 28 / 36 | The one lead figure per page (LeadAnswer) or report |
+| `typography.weight.regular` / `semibold` | 400 / 600 | The only two weights; replaces the CSS `bold` keyword |
+| `layout.topbar` / `layout.subject_bar` / `layout.rail_collapsed` | 40 / 44 / 56 | Shell bands and the collapsed rail |
+| `layout.breakpoint.rail_collapse` / `inspector_dock` | 1180 / 1280 | Rail auto-collapse; Inspector docked vs sheet |
+| `icon.size.sm` / `md`, `icon.stroke` | 16 / 20, 1.5 | The in-repo icon set |
+| `color.light.diff.removed` | `#C7372C` (was `#C9372C`) | 4.56:1 on `diff.removed.bg`; no contrast exemption remains |
 
 ## 2. Color roles
 

@@ -11,15 +11,14 @@ last_updated: "2026-10-16"
 # Active Task
 
 ```text
-R0_REDESIGN_SPEC_AND_PROTOTYPE
+R1_FOUNDATION
 ```
 
-- **Authorized by:** the Owner, in chat on 2026-10-16 (the `/design` redesign request, the four decisions RD2–RD5, and the export scope added at plan approval). See `.ai/DECISIONS.md` RD1–RD6.
-- **Scope:** design documents and a prototype only: [03_DESIGN/09_R_REDESIGN_SPEC.md](../03_DESIGN/09_R_REDESIGN_SPEC.md), [ADR-0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md) (PROPOSED), the tokens 0.4.0 draft (text only), and [03_DESIGN/prototype/](../03_DESIGN/prototype/README.md).
-- **Base:** `e4d7f8b`. **Branch:** `feature/r0-redesign-spec`.
-- **Exit:** the Owner reviews the prototype and accepts or amends ADR-0034. Only then may R1 be named here.
-- **Not authorized:** changing `assets/design-tokens.json`, product UI, report renderers or goldens; R1–R7; a push without Owner approval.
+- **Authorized by:** the Owner, in chat on 2026-10-16 ("授权开始 R1 基础层：ADR-0034 转 BASELINE，tokens 0.4.0 与 diff.removed 改值并有意重生成 golden，实现外壳与核心组件。先出 R1 执行计划再实施。"). DECISIONS RD7.
+- **Plan and status:** [06_DELIVERY/15_R1_FOUNDATION.md](../06_DELIVERY/15_R1_FOUNDATION.md).
+- **Base:** `71109b3`. **Branch:** `feature/r1-foundation`.
+- **Not authorized:** moving pages onto the new components, nav renames, the command palette, D3, report redesign or Markdown export (R2–R6); a push without Owner approval.
 
-- **Last task:** `D2C_CLOSEOUT_AND_PILOT_PREP`, agent items C1–C6 on `main` at `e4d7f8b` (Actions #120). C7–C9 still wait on the Owner or a human operator ([06_DELIVERY/13](../06_DELIVERY/13_D2C_CLOSEOUT_AND_PILOT.md)).
+- **Last task:** `R0_REDESIGN_SPEC_AND_PROTOTYPE`, on `main` at `71109b3` (Actions #121, 10/10). The Owner accepted the prototype's visual direction.
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

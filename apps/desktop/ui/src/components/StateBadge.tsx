@@ -1,5 +1,6 @@
 import styles from './StateBadge.module.css';
 import { cx } from '../styles/classnames';
+import { Icon, type IconName } from './Icon';
 
 /** The only semantic state set in this product (DESIGN.md 5). */
 export type StateName = 'PASS' | 'REVIEW' | 'BLOCK' | 'UNKNOWN' | 'N/A';
@@ -41,7 +42,8 @@ export function StateBadge({ state, label, count, note, variant = 'inline' }: Pr
  * five paths is five chances for one state to stop matching its own icon elsewhere in the product.
  */
 export function StateIcon({ state }: { readonly state: StateName }) {
-  return <Icon state={state} />;
+  // `inline` keeps the glyph on the type scale of the label beside it (ADR-0034 D4 draws the shapes).
+  return <Icon name={glyph(state)} size="inline" />;
 }
 
 function stateClass(state: StateName): string {
@@ -59,69 +61,17 @@ function stateClass(state: StateName): string {
   }
 }
 
-function Icon({ state }: { readonly state: StateName }) {
-  // 1em sizing keeps the glyph on the type scale instead of inventing a pixel size that no
-  // token defines.
-  const svg = {
-    viewBox: '0 0 12 12',
-    width: '1em',
-    height: '1em',
-    'aria-hidden': true,
-    focusable: false,
-  } as const;
-
+function glyph(state: StateName): IconName {
   switch (state) {
     case 'PASS':
-      return (
-        <svg {...svg} className={cx(styles['solid'])}>
-          <circle cx="6" cy="6" r="5.5" fill="currentColor" />
-          <path
-            d="M3.4 6.2 5.1 7.9 8.6 4.4"
-            fill="none"
-            stroke="var(--fs-color-text-on-status)"
-            strokeWidth="1.4"
-          />
-        </svg>
-      );
+      return 'pass';
     case 'REVIEW':
-      return (
-        <svg {...svg} className={cx(styles['solid'])}>
-          <path d="M6 1 11 10.5H1Z" fill="currentColor" />
-          <path
-            d="M6 4.4v3"
-            stroke="var(--fs-color-text-on-status)"
-            strokeWidth="1.4"
-            strokeLinecap="butt"
-          />
-          <circle cx="6" cy="9" r="0.75" fill="var(--fs-color-text-on-status)" />
-        </svg>
-      );
+      return 'review';
     case 'BLOCK':
-      return (
-        <svg {...svg} className={cx(styles['solid'])}>
-          <circle cx="6" cy="6" r="5.5" fill="currentColor" />
-          <path d="M3.2 8.8 8.8 3.2" stroke="var(--fs-color-text-on-status)" strokeWidth="1.4" />
-        </svg>
-      );
+      return 'block';
     case 'UNKNOWN':
-      return (
-        <svg {...svg} className={cx(styles['hollow'])}>
-          <circle
-            cx="6"
-            cy="6"
-            r="5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeDasharray="2 1.6"
-          />
-        </svg>
-      );
+      return 'unknown';
     case 'N/A':
-      return (
-        <svg {...svg} className={cx(styles['hollow'])}>
-          <path d="M2.5 6h7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-        </svg>
-      );
+      return 'na';
   }
 }

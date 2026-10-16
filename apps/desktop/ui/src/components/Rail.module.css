@@ -1,0 +1,92 @@
+/*
+ * The rail owns its own width, so the shell grid only has to say "the rail, then the workspace". The
+ * active page is marked by position, weight, `aria-current` and an accent rule: colour never carries the
+ * state alone (DESIGN.md 4, 9).
+ */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+  width: var(--fs-layout-nav-rail);
+  min-height: 0;
+  padding: var(--fs-space-4) var(--fs-space-2);
+  overflow-y: auto;
+  background: var(--fs-color-bg-surface);
+  border-right: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  transition: width var(--fs-motion-duration-panel) var(--fs-motion-ease);
+}
+
+.collapsed {
+  width: var(--fs-layout-rail-collapsed);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-3);
+  width: 100%;
+  min-height: var(--fs-row-default);
+  padding: 0 var(--fs-space-2);
+  font: inherit;
+  text-align: left;
+  color: var(--fs-color-text-secondary);
+  background: none;
+  border: 0;
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: color var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.item:hover {
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-subtle);
+}
+
+.active {
+  color: var(--fs-color-text-primary);
+  font-weight: var(--fs-font-weight-semibold);
+  background: var(--fs-color-bg-subtle);
+}
+
+/* The accent rule sits on the rail's own edge, so it does not move when the rail collapses. */
+.active::before {
+  content: '';
+  position: absolute;
+  inset-block: var(--fs-space-2);
+  inset-inline-start: calc(-1 * var(--fs-space-2));
+  width: var(--fs-focus-ring-width);
+  background: var(--fs-color-accent-primary);
+}
+
+.word {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.toggle {
+  margin-top: auto;
+}
+
+/* Collapsed: the word leaves the screen but stays in the accessibility tree via the button's name. */
+.collapsed .item {
+  justify-content: center;
+  padding: 0;
+}
+
+.collapsed .word {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

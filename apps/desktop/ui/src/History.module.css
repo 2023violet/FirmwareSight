@@ -56,7 +56,7 @@
 
 .grid th {
   color: var(--fs-color-text-secondary);
-  font-weight: normal;
+  font-weight: var(--fs-font-weight-regular);
   font-size: var(--fs-font-size-metadata);
 }
 
@@ -228,6 +228,6 @@
 
 .viewActive {
   color: var(--fs-color-text-primary);
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
   border-bottom-color: var(--fs-color-accent-primary);
 }

@@ -24,8 +24,8 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
   - `fwsight diff` text now escapes control characters from user files.
   - Automated native QA of the M2 screens: 11 cases, all PASS ([evidence/D2C](../evidence/D2C/README.md)).
   - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
-- **R-series redesign (branch `feature/r0-redesign-spec`, not yet on `main`):** R0 spec, ADR-0034 (PROPOSED) and an interactive prototype in [03_DESIGN/prototype](../03_DESIGN/prototype/README.md). No product, token or golden change. Owner decisions RD1–RD6 in [DECISIONS](DECISIONS.md).
-- **Latest `main`:** `e4d7f8b` (Actions #120, 10/10). Read Git for anything later.
+- **R-series redesign:** R0 (spec, ADR-0034, prototype) is on `main` at `71109b3` (Actions #121, 10/10). R1 foundation (branch `feature/r1-foundation`, not yet on `main`): ADR-0034 BASELINE, tokens 0.4.0, light `diff.removed` `#C7372C` with regenerated report goldens, window minimum 1024×720, icon set and shell/core components. Plan: [06_DELIVERY/15](../06_DELIVERY/15_R1_FOUNDATION.md).
+- **Latest `main`:** `71109b3` (Actions #121, 10/10). Read Git for anything later.
 
 ## Gates
 

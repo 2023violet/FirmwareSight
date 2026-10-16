@@ -5,7 +5,7 @@
 
 .head {
   color: var(--fs-color-text-secondary);
-  font-weight: normal;
+  font-weight: var(--fs-font-weight-regular);
 }
 
 .sort {

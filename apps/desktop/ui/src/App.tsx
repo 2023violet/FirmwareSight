@@ -89,6 +89,8 @@ import {
 } from './i18n/language';
 import { I18nProvider, translate, type Translate } from './i18n';
 import { TopBar } from './components/TopBar';
+import { Rail, type RailGroup } from './components/Rail';
+import type { IconName } from './components/Icon';
 import { ErrorPanel } from './components/ErrorPanel';
 import { acceptDroppedFiles, subscribeToDrops } from './ipc/dropEvents';
 
@@ -106,12 +108,13 @@ const PAGES: readonly {
   readonly key: Page;
   readonly label: string;
   readonly title: MainWindowPage;
+  readonly icon: IconName;
 }[] = [
-  { key: 'overview', label: 'Overview', title: 'Overview' },
-  { key: 'analyze', label: 'Analyze', title: 'Analyze' },
-  { key: 'compare', label: 'Compare', title: 'Compare' },
-  { key: 'release', label: 'Release Gate', title: 'Release' },
-  { key: 'history', label: 'Bundle & History', title: 'History' },
+  { key: 'overview', label: 'Overview', title: 'Overview', icon: 'overview' },
+  { key: 'analyze', label: 'Analyze', title: 'Analyze', icon: 'analyze' },
+  { key: 'compare', label: 'Compare', title: 'Compare', icon: 'compare' },
+  { key: 'release', label: 'Release Gate', title: 'Release', icon: 'release' },
+  { key: 'history', label: 'Bundle & History', title: 'History', icon: 'history' },
 ];
 
 /** The surfaces that describe the product rather than move work along. */
@@ -119,35 +122,27 @@ const AUXILIARY: readonly {
   readonly key: Page;
   readonly label: string;
   readonly title: MainWindowPage;
+  readonly icon: IconName;
 }[] = [
-  { key: 'help', label: 'Help', title: 'Help' },
-  { key: 'settings', label: 'Settings', title: 'Settings' },
+  { key: 'help', label: 'Help', title: 'Help', icon: 'help' },
+  { key: 'settings', label: 'Settings', title: 'Settings', icon: 'settings' },
 ];
 
-function navItem(
-  t: Translate,
-  page: Page,
-  setPage: (page: Page) => void,
-  entry: { readonly key: Page; readonly label: string },
-) {
-  const active = page === entry.key;
-  // The catalog owns the words; `entry.label` stays because it is what the Rust `title` mapping and
-  // the existing tests refer to, and a label that drifted from the catalog would be a second name.
-  const label = t('common', `page.${entry.key}`);
-  return (
-    <button
-      key={entry.key}
-      type="button"
-      aria-label={t('common', 'nav.pageAria', { label })}
-      aria-current={active ? 'page' : undefined}
-      className={cx(styles['navItem'], active ? styles['navItemActive'] : undefined)}
-      onClick={() => {
-        setPage(entry.key);
-      }}
-    >
-      {label}
-    </button>
-  );
+/**
+ * One rail entry per page. The catalog owns the words; `entry.label` stays because it is what the Rust
+ * `title` mapping and the existing tests refer to, and a label that drifted from the catalog would be a
+ * second name.
+ */
+function railGroups(t: Translate): readonly RailGroup<Page>[] {
+  const entry = (item: (typeof PAGES)[number]) => ({
+    key: item.key,
+    label: t('common', `page.${item.key}`),
+    icon: item.icon,
+  });
+  return [
+    { label: t('common', 'nav.pages'), entries: PAGES.map(entry) },
+    { label: t('common', 'nav.helpAndAbout'), entries: AUXILIARY.map(entry) },
+  ];
 }
 
 /**
@@ -484,14 +479,7 @@ export function App() {
       <div className={styles['app']}>
         <TopBar project={project?.projectName ?? null} />
         <div className={styles['shell']}>
-          <div className={styles['rail']}>
-            <nav className={styles['nav']} aria-label={navLabel('common', 'nav.pages')}>
-              {PAGES.map((entry) => navItem(navLabel, page, open, entry))}
-            </nav>
-            <nav className={styles['nav']} aria-label={navLabel('common', 'nav.helpAndAbout')}>
-              {AUXILIARY.map((entry) => navItem(navLabel, page, open, entry))}
-            </nav>
-          </div>
+          <Rail groups={railGroups(navLabel)} current={page} onOpen={open} />
 
           <div className={cx(styles['workspace'], dragging ? styles['dropping'] : undefined)}>
           {dragging ? (

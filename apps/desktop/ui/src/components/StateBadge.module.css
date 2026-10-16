@@ -6,12 +6,6 @@
   line-height: var(--fs-line-height-body);
 }
 
-.solid,
-.hollow {
-  flex: none;
-  display: block;
-}
-
 .pass {
   color: var(--fs-color-status-pass);
 }

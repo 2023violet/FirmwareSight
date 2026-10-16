@@ -19,52 +19,10 @@
 
 .shell {
   display: grid;
-  grid-template-columns: var(--fs-layout-nav-rail) minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: stretch;
   flex: 1;
   min-height: 0;
-}
-
-.rail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-6);
-  min-height: 0;
-  padding: var(--fs-space-6) var(--fs-space-3);
-  overflow-y: auto;
-  background: var(--fs-color-bg-surface);
-  border-right: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
-
-/* The pages this build has. A stage that does not exist gets no entry, so an empty shell can
-   never be mistaken for a feature that is only hidden (prompt §18, §37). */
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-}
-
-.navItem {
-  padding: var(--fs-space-2) var(--fs-space-3);
-  font: inherit;
-  text-align: left;
-  color: var(--fs-color-text-secondary);
-  background: none;
-  border: 0;
-  border-left: var(--fs-focus-ring-width) solid transparent;
-  cursor: pointer;
-  transition: color var(--fs-motion-duration-micro) var(--fs-motion-ease);
-}
-
-.navItem:hover {
-  color: var(--fs-color-text-primary);
-  background: var(--fs-color-bg-subtle);
-}
-
-.navItemActive {
-  color: var(--fs-color-text-primary);
-  font-weight: bold;
-  border-left-color: var(--fs-color-accent-primary);
 }
 
 /* The one scroll axis a page has. Everything a page overflows, overflows here. */

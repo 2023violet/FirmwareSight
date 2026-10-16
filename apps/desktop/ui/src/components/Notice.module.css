@@ -1,0 +1,85 @@
+/* A hairline box with one icon. The tone is the icon's shape and colour plus the border, never fill. */
+
+.notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--fs-space-3);
+  padding: var(--fs-space-3) var(--fs-space-4);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+.icon {
+  margin-top: var(--fs-space-1);
+}
+
+.info .icon {
+  color: var(--fs-color-text-secondary);
+}
+
+.stale {
+  border-color: var(--fs-color-status-review);
+}
+
+.stale .icon {
+  color: var(--fs-color-status-review-strong);
+}
+
+.unknown {
+  border-style: dashed;
+}
+
+.unknown .icon {
+  color: var(--fs-color-status-unknown);
+}
+
+.error {
+  border-color: var(--fs-color-status-block);
+}
+
+.error .icon {
+  color: var(--fs-color-status-block);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--fs-font-size-body);
+  line-height: var(--fs-line-height-body);
+  font-weight: var(--fs-font-weight-semibold);
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--fs-space-1) var(--fs-space-3);
+  margin: var(--fs-space-1) 0 0;
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}
+
+.pair {
+  display: contents;
+}
+
+.details dt {
+  color: var(--fs-color-text-secondary);
+}
+
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-2);
+  margin-top: var(--fs-space-2);
+}

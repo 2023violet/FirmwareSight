@@ -1,0 +1,26 @@
+/* One stroke width and two sizes, all from the token file (ADR-0034 D3). Fills are opt-in per glyph. */
+
+.icon {
+  display: block;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--fs-icon-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sm {
+  width: var(--fs-icon-size-sm);
+  height: var(--fs-icon-size-sm);
+}
+
+.md {
+  width: var(--fs-icon-size-md);
+  height: var(--fs-icon-size-md);
+}
+
+.inline {
+  width: 1em;
+  height: 1em;
+}

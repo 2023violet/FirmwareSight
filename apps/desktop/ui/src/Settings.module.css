@@ -48,7 +48,7 @@
   font-size: var(--fs-font-size-section);
   line-height: var(--fs-line-height-section);
   /* Keyword weight: the frozen token file defines no weight scale (global.css h1 note). */
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
 }
 
 .section p {

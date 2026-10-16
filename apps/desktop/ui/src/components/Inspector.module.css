@@ -1,0 +1,161 @@
+/*
+ * Docked: a hairline column at the default Inspector width. Sheet: the same column over a scrim, with
+ * the overlay shadow, which DESIGN.md allows for overlays and forbids for panels and tables.
+ */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: var(--fs-layout-evidence-inspector-default);
+  min-width: var(--fs-layout-evidence-inspector-min);
+  max-width: var(--fs-layout-evidence-inspector-max);
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--fs-color-bg-surface);
+  border-left: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.docked {
+  height: 100%;
+}
+
+.sheet {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  max-width: 100%;
+  box-shadow: var(--fs-shadow-overlay-lg);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  /* No tint: the token file has no scrim colour, and the overlay shadow already lifts the sheet. The
+     layer exists to catch a click outside the sheet. */
+  background: transparent;
+}
+
+.head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+  padding: var(--fs-space-3) var(--fs-space-4);
+  background: var(--fs-color-bg-surface);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.title {
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+}
+
+.close,
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+  padding: var(--fs-space-1) var(--fs-space-2);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  background: none;
+  border: var(--fs-border-width-hairline) solid transparent;
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.close {
+  margin-inline-start: auto;
+}
+
+.close:hover,
+.copy:hover {
+  background: var(--fs-color-bg-subtle);
+}
+
+.copy {
+  border-color: var(--fs-color-border-default);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
+  padding: var(--fs-space-4);
+}
+
+.field {
+  color: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  overflow-wrap: anywhere;
+}
+
+.value {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+  font-weight: var(--fs-font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--fs-space-1) var(--fs-space-4);
+  margin: 0;
+}
+
+.pair {
+  display: contents;
+}
+
+.facts dt {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.facts dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.rawBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.raw {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--fs-color-bg-subtle);
+  border-radius: var(--fs-radius-control);
+  user-select: all;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-3);
+}
+
+.copyStatus {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}

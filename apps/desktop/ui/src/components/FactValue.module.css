@@ -1,0 +1,65 @@
+/* A value that reads like text until it is pointed at; the mark is the only hint it opens something. */
+
+.fact {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+  margin: 0;
+  padding: 0 var(--fs-space-1);
+  color: inherit;
+  font: inherit;
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: inherit;
+  background: none;
+  border: 0;
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+  transition: background var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.fact:hover {
+  background: var(--fs-color-bg-subtle);
+}
+
+.selected {
+  background: var(--fs-color-diff-changed-bg);
+}
+
+.value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mark {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  width: var(--fs-space-2);
+  height: var(--fs-space-2);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-text-secondary);
+  border-radius: var(--fs-radius-pill);
+}
+
+.observed {
+  background: var(--fs-color-text-secondary);
+}
+
+/* Half filled: measured inputs, computed result. A pseudo-element, because the design forbids gradients. */
+.derived::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 50%;
+  background: var(--fs-color-text-secondary);
+}
+
+.declared {
+  background: transparent;
+}
+
+.unknown {
+  border-style: dashed;
+  border-color: var(--fs-color-status-unknown);
+}

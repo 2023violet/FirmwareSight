@@ -16,7 +16,7 @@
 
 /* One Primary per region, and it is the only level that wears the accent. */
 .primary {
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
   color: var(--fs-color-text-on-accent);
   background: var(--fs-color-accent-primary);
   border: var(--fs-border-width-hairline) solid var(--fs-color-accent-primary);

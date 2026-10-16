@@ -1,0 +1,182 @@
+/*
+ * The table is the core work surface (DESIGN.md 4): hairlines, token row heights, sticky secondary-text
+ * headers, numbers right-aligned in tabular mono. The wrapper owns the horizontal scroll, never the page.
+ */
+
+.wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.caption {
+  padding: var(--fs-space-2) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+  text-align: left;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.table th,
+.table td {
+  padding: 0 var(--fs-space-3);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.default th,
+.default td {
+  height: var(--fs-row-default);
+}
+
+.compact th,
+.compact td {
+  height: var(--fs-row-compact);
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  font-weight: var(--fs-font-weight-semibold);
+  white-space: nowrap;
+  background: var(--fs-color-bg-surface);
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover th,
+.table tbody tr:hover td {
+  background: var(--fs-color-bg-subtle);
+}
+
+.rowHead {
+  font-weight: var(--fs-font-weight-regular);
+}
+
+.num {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.table th.num,
+.table td.num {
+  text-align: right;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.arrow {
+  color: var(--fs-color-accent-primary);
+}
+
+.actionHead,
+.actionCell {
+  width: var(--fs-row-default);
+  text-align: right;
+}
+
+.rowAction {
+  display: inline-grid;
+  place-items: center;
+  width: var(--fs-row-compact);
+  height: var(--fs-row-compact);
+  padding: 0;
+  color: var(--fs-color-text-secondary);
+  background: none;
+  border: 0;
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.rowAction:hover {
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+}
+
+.empty {
+  padding: var(--fs-space-4) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  text-align: left;
+}
+
+.spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Filter row */
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.filterLabel {
+  display: inline-flex;
+  color: var(--fs-color-text-secondary);
+}
+
+.input {
+  min-width: 0;
+  width: calc(var(--fs-layout-nav-rail) + var(--fs-space-12));
+  max-width: 100%;
+  min-height: var(--fs-row-compact);
+  padding: 0 var(--fs-space-2);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.clear {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  color: var(--fs-color-accent-primary);
+  font: inherit;
+  background: none;
+  border: 0;
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.count {
+  color: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.extra {
+  display: flex;
+  gap: var(--fs-space-2);
+  margin-inline-start: auto;
+}

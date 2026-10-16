@@ -51,6 +51,9 @@ FirmwareSight 应像一台可靠的工程仪器：精确、克制、可检查、
 - Dense, not crowded：靠对齐、分组、发丝边框和排版建立层级，不靠卡片阴影。
 - 一屏一个主焦点；首屏不堆 KPI。
 - 数字、hash、版本、时间戳、路径使用 mono stack。
+- 外壳（`ADR-0034` D2，tokens 0.4.0）：TopBar 40 · Rail 224（窄于 1180 自动收为 56，读者可切换）· SubjectBar 44 · 工作区 · Inspector 340（≥1280 并排停靠，以下为模态 Sheet）。窗口最小 1024×720。
+- 五条原则（`ADR-0034` D1）：每页一个答案（LeadAnswer）；任何数字可追到证据（FactValue → Inspector）；主体常驻（SubjectBar）；变化是事实不是评判（delta 中性色 + ▲▼，状态色只属于 Gate）；一件事一种做法。
+- 字重只用 `font.weight.regular` 400 / `semibold` 600；`font.size.figure` 28/36 每页只在 LeadAnswer 出现一次。
 
 ## 5. 组件铁律
 
@@ -71,6 +74,12 @@ Primary / Secondary / Ghost 三层；一个区域默认最多一个 Primary。
 
 ### Evidence Inspector
 所有重要结论一键可追溯 Evidence。显示 classification/source/location/parser/raw value 等真实可得字段。
+
+### Icons
+仓库内一套 SVG（`components/Icon.tsx`，viewBox 20，描边 `icon.stroke`，尺寸 `icon.size.sm/md`，`currentColor`），不引入图标库（`ADR-0011`）。五态各有不同形状：PASS 实心圆+勾、REVIEW 三角+竖线、BLOCK 八边形+×、UNKNOWN 虚线空心圆+?、N/A 圆+斜线。
+
+### 共享组件（R1 起）
+`Rail`、`SubjectBar`、`Inspector`、`LeadAnswer`、`FactValue`、`DeltaValue`/`Absent`、`Tabs`、`Notice`（info / stale / unknown / error）、`DataTable` + `FilterBar`、`BuildPicker`。页面在 R2–R5 迁入；新代码不得再手写同类实现。
 
 ### Dialog / Toast
 Dialog 只处理真正中断流程的决策；Toast 仅处理短暂确认，错误必须在可恢复位置保留。
@@ -113,7 +122,7 @@ Treemap 只用于 size composition。禁止 3D、装饰 donut、无 baseline spa
 - Unknown 是一等状态
 - 状态 icon + label
 - focus-visible 清晰
-- 两种主题都达到 WCAG 2.2 AA：正文 4.5:1，大号文字与非文字状态信息 3:1（`ADR-0031` D6）
+- 两种主题都达到 WCAG 2.2 AA：正文 4.5:1，大号文字与非文字状态信息 3:1（`ADR-0031` D6）；自 tokens 0.4.0 起无豁免（`ADR-0034` D3）
 - 键盘路径与视觉顺序一致
 - 错误包含 What happened / Why we know / What to do / Diagnostics ID
 

@@ -38,7 +38,7 @@ use crate::release::{ManifestFileDto, ReleaseManifestDto, version_source_word};
 /// with a word and a glyph as well as a colour (`AGENTS.md` 11 forbids a colour-only state), and the two
 /// sub-heading levels the nine sections need.
 ///
-/// Every value below is a frozen `assets/design-tokens.json` (0.2.1, light theme) value restated as a
+/// Every value below is a frozen `assets/design-tokens.json` (0.4.0, light theme) value restated as a
 /// variable, and the three `status.*` names are the ones the diff export had no use for — `status.review`
 /// (#9A6700) in particular has no equivalent anywhere in the shared block, so declaring it here is what
 /// makes the REVIEW chip a colour rather than an unset custom property. No new token is minted, and

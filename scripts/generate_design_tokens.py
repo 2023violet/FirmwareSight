@@ -45,6 +45,7 @@ GROUPS = (
     ("border", "border", "px"),
     ("layout", "layout", "px"),
     ("table", "row", "px"),
+    ("icon", "icon", "px"),
     ("motion", "motion", "ms"),
     ("focus", "focus", "px"),
     ("shadow", "shadow", ""),
@@ -82,6 +83,9 @@ def typography_entries(pairs) -> list[tuple[str, str]]:
             name, unit = "--fs-font-size-" + rest[1], "px"
         elif rest[0] == "line_height":
             name, unit = "--fs-line-height-" + rest[1].replace("_", "-"), "px"
+        elif rest[0] == "weight":
+            # ADR-0034 D3: a numeric weight scale replaces the CSS `bold` keyword.
+            name, unit = "--fs-font-weight-" + rest[1], ""
         elif rest[0] in ("ui", "mono"):
             name, unit = "--fs-font-" + rest[0], ""
         else:
@@ -174,7 +178,7 @@ def render(tokens: dict, source_sha: str) -> str:
         ":root {",
     ]
     labels = {css: label.title() for (_s, css, _u), label in zip(GROUPS, (
-        "Color", "Spacing", "Radius", "Border", "Layout", "Table density", "Motion", "Focus",
+        "Color", "Spacing", "Radius", "Border", "Layout", "Table density", "Icon", "Motion", "Focus",
         "Shadow",
     ))}
     labels["font"] = TYPOGRAPHY_LABEL
@@ -250,19 +254,10 @@ CONTRAST_REPORTED = (
 # both directions: the pair must still fail (a fix that landed makes the stale exemption an error),
 # and the reason must still be true of the tree. Clearing one is its own change, with its own
 # review, because the reason here is a frozen artefact and not a preference.
-CONTRAST_EXEMPT = (
-    (
-        "light",
-        "diff.removed",
-        "diff.removed.bg",
-        4.5,
-        "4.4974:1 measured. #FBECEA is already printed into "
-        "golden/reports/p2-diff.html and golden/reports/p4-release/release-report.html, so the "
-        "value that clears the floor also moves two committed report artefacts, which "
-        "ADR-0031 D7 puts outside this round. The chip that fails it reads \"Removed\" in words "
-        "beside the colour, which is what DESIGN.md 5 requires of a state in the first place.",
-    ),
-)
+#
+# Empty since tokens 0.4.0: ADR-0034 D3 moved light diff.removed to #C7372C (4.5592:1), which
+# retired ADR-0031 D6's only exemption and regenerated the two report goldens that print it.
+CONTRAST_EXEMPT: tuple[tuple[str, str, str, float, str], ...] = ()
 
 
 def _channel(byte: float) -> float:

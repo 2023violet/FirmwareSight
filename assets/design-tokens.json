@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "meta": {
     "product": "FirmwareSight",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "status": "baseline-authoritative",
     "baseline": "0.5.0",
-    "governed_by": "ADR-0018",
+    "governed_by": "ADR-0018, ADR-0031, ADR-0034",
     "upstream_reference": {
       "repository": "VoltAgent/awesome-design-md",
       "path": "design-md/ibm/DESIGN.md",
@@ -41,17 +41,26 @@
       "metadata": 12,
       "body": 13,
       "section": 15,
-      "page": 20
+      "page": 20,
+      "figure": 28
     },
     "line_height": {
       "metadata": 18,
       "body": 20,
       "section": 22,
-      "page": 28
+      "page": 28,
+      "figure": 36
+    },
+    "weight": {
+      "regular": 400,
+      "semibold": 600
     }
   },
   "layout": {
     "nav_rail": 224,
+    "rail_collapsed": 56,
+    "topbar": 40,
+    "subject_bar": 44,
     "evidence_inspector": {
       "min": 320,
       "default": 340,
@@ -64,6 +73,10 @@
     "design_target": {
       "width": 1440,
       "height": 900
+    },
+    "breakpoint": {
+      "rail_collapse": 1180,
+      "inspector_dock": 1280
     }
   },
   "table": {
@@ -72,6 +85,13 @@
       "default": 36,
       "max": 40
     }
+  },
+  "icon": {
+    "size": {
+      "sm": 16,
+      "md": 20
+    },
+    "stroke": 1.5
   },
   "motion": {
     "duration": {
@@ -114,7 +134,7 @@
       "status.unknown": "#667085",
       "diff.added": "#18794E",
       "diff.added.bg": "#E7F3EC",
-      "diff.removed": "#C9372C",
+      "diff.removed": "#C7372C",
       "diff.removed.bg": "#FBECEA",
       "diff.changed": "#2563EB",
       "diff.changed.bg": "#E9F0FD",
@@ -176,6 +196,12 @@
       "to": "0.3.0",
       "date": "2026-10-11",
       "change": "ADR-0031 lifts ADR-0018 D3's light-only rule for the Developer Preview. color.dark is added as a sibling of color.light carrying the same 30 role names, no more and no fewer; the generator emits both and measures WCAG 2.2 AA on 18 rendered pairs per theme, with one named exemption. No light value moves: light diff.removed on diff.removed.bg measures 4.4974:1, a hair under the floor, and the byte that would clear it is already printed into golden/reports/p2-diff.html and golden/reports/p4-release/release-report.html, so changing it here would move an exported artefact under a round that promised not to. The exemption is recorded in the generator and in ADR-0031 D6, not in a lowered floor. No spacing, radius, typography, layout, table, motion, focus, shadow or status-semantics value changes."
+    },
+    {
+      "from": "0.3.0",
+      "to": "0.4.0",
+      "date": "2026-10-16",
+      "change": "ADR-0034 (Instrument Ledger). Additive: typography.size.figure 28 / line_height.figure 36 for the one lead figure per page or report; typography.weight regular 400 / semibold 600 replacing the CSS bold keyword; layout.topbar 40, layout.subject_bar 44, layout.rail_collapsed 56; layout.breakpoint rail_collapse 1180 / inspector_dock 1280; icon.size sm 16 / md 20 and icon.stroke 1.5. One value moves: light diff.removed #C9372C -> #C7372C, 4.5592:1 on diff.removed.bg, which retires ADR-0031 D6's only contrast exemption; the two report goldens that print it are regenerated on purpose. No palette, spacing, radius, density, motion, focus or shadow value moves."
     }
   ]
 }

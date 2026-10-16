@@ -1,0 +1,31 @@
+/* Neutral on purpose: primary text, a secondary glyph, no status colour (ADR-0034 D1 principle 4). */
+
+.delta {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--fs-space-1);
+  color: var(--fs-color-text-primary);
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.glyph {
+  color: var(--fs-color-text-secondary);
+}
+
+.absent {
+  color: var(--fs-color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Read by assistive technology, invisible on screen. */
+.spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

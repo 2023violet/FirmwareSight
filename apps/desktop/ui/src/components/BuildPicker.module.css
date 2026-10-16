@@ -1,0 +1,105 @@
+/* A control-height button and a popover list; the list is an overlay, so it may carry overlay-sm. */
+
+.picker {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  min-width: 0;
+}
+
+.label {
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fs-space-2);
+  min-height: var(--fs-row-compact);
+  padding: 0 var(--fs-space-2);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  text-align: left;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.button:disabled {
+  color: var(--fs-color-text-disabled);
+  background: var(--fs-color-bg-subtle);
+  cursor: not-allowed;
+}
+
+.value {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.list {
+  position: absolute;
+  top: 100%;
+  inset-inline-start: 0;
+  z-index: 5;
+  min-width: 100%;
+  max-height: calc(var(--fs-row-max) * 8);
+  margin: var(--fs-space-1) 0 0;
+  padding: var(--fs-space-1);
+  overflow-y: auto;
+  list-style: none;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  box-shadow: var(--fs-shadow-overlay-sm);
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: var(--fs-space-1) var(--fs-space-2);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.active {
+  background: var(--fs-color-bg-subtle);
+}
+
+.option[aria-selected='true'] .name {
+  font-weight: var(--fs-font-weight-semibold);
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.name {
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+  white-space: nowrap;
+}
+
+.pin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.meta {
+  color: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+}

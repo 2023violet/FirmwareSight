@@ -93,7 +93,7 @@
 }
 
 .documentName {
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
   min-width: var(--fs-layout-evidence-inspector-min);
 }
 
@@ -115,7 +115,7 @@
  * legible, and the word is always there for a reader who cannot see the difference.
  */
 .health {
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
 }
 
 /* The one action on the page. Same neutral control as the workflow pages, without their accent. */

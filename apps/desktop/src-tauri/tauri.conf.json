@@ -15,8 +15,8 @@
         "title": "FirmwareSight - Analyze",
         "width": 1040,
         "height": 760,
-        "minWidth": 720,
-        "minHeight": 480,
+        "minWidth": 1024,
+        "minHeight": 720,
         "resizable": true,
         "fullscreen": false
       }

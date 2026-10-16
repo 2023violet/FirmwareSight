@@ -56,7 +56,7 @@
   margin: 0;
   font-size: var(--fs-font-size-page);
   line-height: var(--fs-line-height-page);
-  font-weight: bold;
+  font-weight: var(--fs-font-weight-semibold);
   min-width: 0;
   overflow-wrap: anywhere;
 }

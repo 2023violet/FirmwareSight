@@ -15,7 +15,7 @@ use firmwaresight_core::domain::diff::{
 
 use crate::diff::{ByteChangeDto, DiffResultDto, ObjectChangesDto};
 
-/// Every colour, size and radius below is a value from `assets/design-tokens.json` (0.2.1, light
+/// Every colour, size and radius below is a value from `assets/design-tokens.json` (0.4.0, light
 /// theme), restated here because a standalone file cannot read the desktop's `tokens.css`.
 /// `html_export_colours_come_from_the_frozen_token_set` re-checks that against the token file, so
 /// this block cannot quietly drift into magic values.
@@ -28,7 +28,7 @@ pub(crate) const EMBEDDED_STYLE: &str = r#":root {
   --fs-color-border-default: #D9DEE5;
   --fs-color-diff-added: #18794E;
   --fs-color-diff-added-bg: #E7F3EC;
-  --fs-color-diff-removed: #C9372C;
+  --fs-color-diff-removed: #C7372C;
   --fs-color-diff-removed-bg: #FBECEA;
   --fs-color-diff-changed: #2563EB;
   --fs-color-diff-changed-bg: #E9F0FD;

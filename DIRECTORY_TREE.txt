@@ -115,7 +115,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 11_M2_OBJECT_ATTRIBUTION.md
 │   ├── 12_POST_M2_ROUTE.md
 │   ├── 13_D2C_CLOSEOUT_AND_PILOT.md
-│   └── 14_D4_ARMCLANG_SAMPLE_REQUEST.md
+│   ├── 14_D4_ARMCLANG_SAMPLE_REQUEST.md
+│   └── 15_R1_FOUNDATION.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -336,28 +337,51 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       └── ui/
 │           ├── src/
 │           │   ├── components/
+│           │   │   ├── BuildPicker.module.css
+│           │   │   ├── BuildPicker.tsx
 │           │   │   ├── Button.module.css
 │           │   │   ├── Button.tsx
 │           │   │   ├── Chip.module.css
 │           │   │   ├── Chip.tsx
+│           │   │   ├── DataTable.module.css
+│           │   │   ├── DataTable.tsx
+│           │   │   ├── DeltaValue.module.css
+│           │   │   ├── DeltaValue.tsx
 │           │   │   ├── ErrorPanel.module.css
 │           │   │   ├── ErrorPanel.tsx
+│           │   │   ├── FactValue.module.css
+│           │   │   ├── FactValue.tsx
+│           │   │   ├── foundation.test.tsx
+│           │   │   ├── Icon.module.css
+│           │   │   ├── Icon.tsx
+│           │   │   ├── Inspector.module.css
+│           │   │   ├── Inspector.tsx
 │           │   │   ├── Layout.module.css
 │           │   │   ├── Layout.tsx
+│           │   │   ├── LeadAnswer.module.css
+│           │   │   ├── LeadAnswer.tsx
 │           │   │   ├── MemoryUsage.module.css
 │           │   │   ├── MemoryUsage.tsx
+│           │   │   ├── Notice.module.css
+│           │   │   ├── Notice.tsx
 │           │   │   ├── PageHeader.module.css
 │           │   │   ├── PageHeader.tsx
 │           │   │   ├── Panel.module.css
 │           │   │   ├── Panel.tsx
+│           │   │   ├── Rail.module.css
+│           │   │   ├── Rail.tsx
 │           │   │   ├── RankBar.module.css
 │           │   │   ├── RankBar.tsx
 │           │   │   ├── SizeUnitSwitch.module.css
 │           │   │   ├── SizeUnitSwitch.tsx
 │           │   │   ├── StateBadge.module.css
 │           │   │   ├── StateBadge.tsx
+│           │   │   ├── SubjectBar.module.css
+│           │   │   ├── SubjectBar.tsx
 │           │   │   ├── table.module.css
 │           │   │   ├── Table.tsx
+│           │   │   ├── Tabs.module.css
+│           │   │   ├── Tabs.tsx
 │           │   │   ├── TopBar.module.css
 │           │   │   └── TopBar.tsx
 │           │   ├── i18n/
