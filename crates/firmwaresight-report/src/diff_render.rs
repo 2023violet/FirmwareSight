@@ -587,9 +587,9 @@ pub fn render_human(result: &DiffResult) -> String {
     let mut out = String::new();
     out.push_str(&format!(
         "Base    {}  {}\nTarget  {}  {}\n\n",
-        result.base_artifact.file_name,
+        terminal_safe(&result.base_artifact.file_name),
         short_sha(&result.base_artifact.sha256),
-        result.target_artifact.file_name,
+        terminal_safe(&result.target_artifact.file_name),
         short_sha(&result.target_artifact.sha256),
     ));
 
@@ -663,7 +663,11 @@ pub fn render_human(result: &DiffResult) -> String {
     if !result.warnings.is_empty() {
         out.push_str("\nWarnings\n");
         for warning in &result.warnings {
-            out.push_str(&format!("  [{}] {}\n", warning.code, warning.message));
+            out.push_str(&format!(
+                "  [{}] {}\n",
+                warning.code,
+                terminal_safe(&warning.message)
+            ));
         }
     }
 
@@ -706,29 +710,20 @@ fn push_objects(out: &mut String, result: &DiffResult) {
             "  {unpaired} row(s) repeat a name in a build (main.o, main.o#2) and were left unpaired rather than matched by link order\n"
         ));
     }
-    // Object keys come from a user-supplied MAP and reach a terminal, so they are escaped first.
-    let escaped = |rows: Vec<Contributor>| -> Vec<Contributor> {
-        rows.into_iter()
-            .map(|row| Contributor {
-                key: crate::render::safe_display_text(&row.key),
-                ..row
-            })
-            .collect()
-    };
     push_contributors(
         out,
         "Top object growth, Flash (Changed rows)",
-        &escaped(result.top_object_growth(false, 5)),
+        &result.top_object_growth(false, 5),
     );
     push_contributors(
         out,
         "Largest added objects, Flash (absence, never 0)",
-        &escaped(result.largest_added_objects(false, 5)),
+        &result.largest_added_objects(false, 5),
     );
     push_contributors(
         out,
         "Top library growth, Flash (Changed rows)",
-        &escaped(result.top_object_growth(true, 5)),
+        &result.top_object_growth(true, 5),
     );
 }
 
@@ -750,10 +745,26 @@ fn push_contributors(out: &mut String, title: &str, rows: &[Contributor]) {
             .unwrap_or_else(|| "-".to_owned());
         out.push_str(&format!(
             "  {delta:>9}  {:<28} {bytes}  [{}]\n",
-            row.key,
+            terminal_safe(&row.key),
             row.change.label()
         ));
     }
+}
+
+/// D2C C1: a name read from a user's ELF or MAP may carry control characters. Only those are escaped,
+/// as `\u{1b}` and the like, so a crafted name cannot move the cursor or recolour the terminal, while
+/// quotes, spaces and non-ASCII names print as they are. One place for every value the human report
+/// takes from a file: artifact file names, section, symbol, object and library keys, warning text.
+fn terminal_safe(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for c in value.chars() {
+        if c.is_control() {
+            out.extend(c.escape_debug());
+        } else {
+            out.push(c);
+        }
+    }
+    out
 }
 
 fn short_sha(sha: &str) -> &str {
@@ -803,4 +814,25 @@ pub fn escape_html(raw: &str) -> String {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::terminal_safe;
+
+    #[test]
+    fn control_characters_are_escaped_and_printable_text_is_left_alone() {
+        assert_eq!(terminal_safe("evil\u{1b}[2J.elf"), "evil\\u{1b}[2J.elf");
+        assert_eq!(terminal_safe("a\nb\tc\u{7f}"), "a\\nb\\tc\\u{7f}");
+        assert_eq!(
+            terminal_safe("\u{9b}31m"),
+            "\\u{9b}31m",
+            "a C1 CSI is a control too"
+        );
+        assert_eq!(
+            terminal_safe(".text \"quoted\" 'x'"),
+            ".text \"quoted\" 'x'"
+        );
+        assert_eq!(terminal_safe("固件 main.o"), "固件 main.o");
+    }
 }

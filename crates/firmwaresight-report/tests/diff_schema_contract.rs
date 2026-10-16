@@ -750,3 +750,31 @@ fn a_name_that_carries_markup_cannot_inject_into_the_export() {
     };
     assert!(!warned.contains("<script>alert("));
 }
+
+#[test]
+fn the_human_report_escapes_control_characters_taken_from_user_files() {
+    // D2C C1: names come from a user's ELF and MAP. A crafted one must not drive the terminal.
+    let mut result = rich_diff();
+    result.base_artifact.file_name = "base\u{1b}]0;owned\u{7}.elf".to_owned();
+    for row in &mut result.section_changes {
+        row.key = format!("{}\u{1b}[2J", row.key);
+    }
+    for warning in &mut result.warnings {
+        warning.message.push_str(" \u{1b}[31mred");
+    }
+    let text = diff_render::render_human(&result);
+    assert!(
+        !text.contains('\u{1b}'),
+        "no raw ESC reaches stdout: {text:?}"
+    );
+    assert!(!text.contains('\u{7}'), "no raw BEL reaches stdout");
+    assert!(text.contains(r"base\u{1b}]0;owned\u{7}.elf"), "{text}");
+    assert!(
+        text.contains(r"\u{1b}[2J"),
+        "the escaped key is still shown: {text}"
+    );
+    assert!(
+        text.contains(r"\u{1b}[31mred"),
+        "warning text is escaped too"
+    );
+}
