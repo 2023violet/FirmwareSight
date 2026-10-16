@@ -1,0 +1,994 @@
+<meta charset="utf-8">
+<title>FirmwareSight Instrument Ledger</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: desktop workbench — TopBar 40 / Rail 224 (56 collapsed) / SubjectBar 44 / Workspace / Inspector 340.
+   Every value below is a FirmwareSight design token (assets/design-tokens.json v0.3.0) or a v0.4.0 addition
+   proposed by ADR-0034 (marked "v0.4"). Nothing here is invented outside that set. */
+:root {
+  /* colour roles — light (tokens v0.3.0; diff.removed uses the v0.4 value #C7372C) */
+  --bg-canvas:#F7F8FA; --bg-surface:#FFFFFF; --bg-subtle:#F1F3F5;
+  --text:#171A1F; --text-2:#5D6673; --text-dis:#98A2B3; --on-accent:#FFFFFF;
+  --border:#D9DEE5;
+  --accent:#2563EB; --accent-hover:#1D4ED8; --accent-press:#1E40AF;
+  --pass:#18794E; --review:#9A6700; --review-strong:#7A5200; --block:#C9372C; --unknown:#667085;
+  --added:#18794E; --added-bg:#E7F3EC; --removed:#C7372C; --removed-bg:#FBECEA; --changed:#2563EB; --changed-bg:#E9F0FD;
+  --c1:#DCE7FB; --c2:#B8CDF7; --c3:#84A9F3; --c4:#4F7BE8; --c5:#1D4ED8; --c-other:#F1F3F5;
+  --scrim:rgba(23,26,31,0.32);
+  --shadow-sm:0 1px 2px rgba(23,26,31,0.08),0 4px 10px rgba(23,26,31,0.06);
+  --shadow-lg:0 8px 24px rgba(23,26,31,0.12),0 2px 6px rgba(23,26,31,0.08);
+  /* spacing / radius / motion */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px; --s12:48px;
+  --r-control:6px; --r-panel:8px; --r-modal:10px; --r-pill:999px;
+  --m-micro:120ms; --m-std:150ms; --m-panel:180ms; --ease:cubic-bezier(0,0,0.2,1);
+  /* type — system stacks only (ADR-0018 D3); figure 28/36 and weights are v0.4 */
+  --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",Roboto,Arial,"Microsoft YaHei UI",sans-serif;
+  --font-mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --fs-meta:12px; --lh-meta:18px; --fs-body:13px; --lh-body:20px; --fs-section:15px; --lh-section:22px;
+  --fs-page:20px; --lh-page:28px; --fs-figure:28px; --lh-figure:36px; --w-regular:400; --w-semi:600;
+  /* layout — v0.4 shell sizes */
+  --rail:224px; --rail-c:56px; --topbar:40px; --subject:44px; --inspector:340px;
+  --row:36px; --row-c:28px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg-canvas:#15171B; --bg-surface:#1E2126; --bg-subtle:#262B32;
+  --text:#E9ECEF; --text-2:#A9B1BC; --text-dis:#737B87; --on-accent:#0C1424; --border:#3A414B;
+  --accent:#6BA1F5; --accent-hover:#8AB8F8; --accent-press:#5590EE;
+  --pass:#4CC38A; --review:#E3B341; --review-strong:#F2C55C; --block:#F2705F; --unknown:#98A2B3;
+  --added:#4CC38A; --added-bg:#16341F; --removed:#F2705F; --removed-bg:#3A1A15; --changed:#6BA1F5; --changed-bg:#16294A;
+  --c1:#1C2B45; --c2:#26406B; --c3:#345C99; --c4:#4F7BE8; --c5:#84A9F3; --c-other:#3A414B;
+  --scrim:rgba(0,0,0,0.5); color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg-canvas:#15171B; --bg-surface:#1E2126; --bg-subtle:#262B32;
+  --text:#E9ECEF; --text-2:#A9B1BC; --text-dis:#737B87; --on-accent:#0C1424; --border:#3A414B;
+  --accent:#6BA1F5; --accent-hover:#8AB8F8; --accent-press:#5590EE;
+  --pass:#4CC38A; --review:#E3B341; --review-strong:#F2C55C; --block:#F2705F; --unknown:#98A2B3;
+  --added:#4CC38A; --added-bg:#16341F; --removed:#F2705F; --removed-bg:#3A1A15; --changed:#6BA1F5; --changed-bg:#16294A;
+  --c1:#1C2B45; --c2:#26406B; --c3:#345C99; --c4:#4F7BE8; --c5:#84A9F3; --c-other:#3A414B;
+  --scrim:rgba(0,0,0,0.5); color-scheme:dark; }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg-canvas);color:var(--text);font:var(--w-regular) var(--fs-body)/var(--lh-body) var(--font-ui);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:var(--s4)}
+button,input,select{font:inherit;color:inherit}
+.mono,code,kbd{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-size:var(--fs-page);line-height:var(--lh-page);font-weight:var(--w-semi)}
+h2{font-size:var(--fs-section);line-height:var(--lh-section);font-weight:var(--w-semi)}
+h3{font-size:var(--fs-body);line-height:var(--lh-body);font-weight:var(--w-semi)}
+p{margin:0}
+.meta{font-size:var(--fs-meta);line-height:var(--lh-meta);color:var(--text-2)}
+.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icon.md{width:20px;height:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* ---- review toolbar (not part of the product) ---- */
+.review{max-width:1440px;margin:0 auto var(--s3);display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center;font-size:var(--fs-meta);color:var(--text-2)}
+.review b{color:var(--text);font-weight:var(--w-semi)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--r-control);overflow:hidden;background:var(--bg-surface)}
+.seg button{border:0;background:transparent;padding:2px var(--s2);cursor:pointer;color:var(--text-2);min-height:24px}
+.seg button[aria-pressed="true"]{background:var(--bg-subtle);color:var(--text);font-weight:var(--w-semi)}
+.seg button+button{border-left:1px solid var(--border)}
+
+/* ---- the app frame ---- */
+.app{max-width:1440px;height:min(900px,calc(100vh - 80px));min-height:640px;margin:0 auto;background:var(--bg-canvas);border:1px solid var(--border);border-radius:var(--r-panel);overflow:hidden;
+  display:grid;grid-template-columns:var(--rail) minmax(0,1fr) auto;grid-template-rows:var(--topbar) var(--subject) minmax(0,1fr);
+  grid-template-areas:"top top top" "rail subject subject" "rail main insp"}
+.app.rail-collapsed{grid-template-columns:var(--rail-c) minmax(0,1fr) auto}
+.topbar{grid-area:top;display:flex;align-items:center;gap:var(--s4);padding:0 var(--s4);background:var(--bg-surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:var(--s2);font-weight:var(--w-semi)}
+.brand .mark{width:20px;height:20px;border-radius:var(--r-control);background:var(--text);display:grid;place-items:center}
+.brand .mark svg{stroke:var(--bg-surface)}
+.project{display:flex;align-items:center;gap:var(--s1);border:1px solid var(--border);border-radius:var(--r-control);padding:2px var(--s2);background:var(--bg-surface);cursor:pointer}
+.localnote{color:var(--text-2);font-size:var(--fs-meta);display:flex;gap:var(--s1);align-items:center}
+.cmdk{margin-left:auto;display:flex;align-items:center;gap:var(--s2);border:1px solid var(--border);border-radius:var(--r-control);padding:3px var(--s2);background:var(--bg-canvas);color:var(--text-2);cursor:pointer;min-width:200px}
+kbd{font-size:11px;border:1px solid var(--border);border-radius:4px;padding:0 4px;background:var(--bg-surface);color:var(--text-2)}
+.cmdk kbd{margin-left:auto}
+
+.rail{grid-area:rail;background:var(--bg-surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:var(--s3) var(--s2);gap:var(--s1);min-width:0}
+.rail .group{font-size:var(--fs-meta);color:var(--text-2);padding:var(--s2) var(--s2) var(--s1);letter-spacing:.02em}
+.navbtn{display:flex;align-items:center;gap:var(--s3);width:100%;border:0;background:transparent;border-radius:var(--r-control);padding:6px var(--s2);cursor:pointer;color:var(--text-2);text-align:left;min-height:32px;position:relative}
+.navbtn:hover{background:var(--bg-subtle);color:var(--text)}
+.navbtn[aria-current="page"]{background:var(--bg-subtle);color:var(--text);font-weight:var(--w-semi)}
+.navbtn[aria-current="page"]::before{content:"";position:absolute;left:-8px;top:6px;bottom:6px;width:2px;border-radius:2px;background:var(--accent)}
+.rail .spacer{flex:1}
+.collapse{color:var(--text-2)}
+.rail-collapsed .navbtn span,.rail-collapsed .rail .group{display:none}
+.rail-collapsed .navbtn{justify-content:center}
+
+.subject{grid-area:subject;display:flex;align-items:center;gap:var(--s3);padding:0 var(--s4);background:var(--bg-surface);border-bottom:1px solid var(--border);min-width:0;overflow-x:auto;white-space:nowrap}
+.subj-build{display:flex;align-items:center;gap:var(--s2);min-width:0}
+.subj-label{font-size:var(--fs-meta);color:var(--text-2)}
+.chip{display:inline-flex;align-items:center;gap:var(--s1);font-size:var(--fs-meta);line-height:var(--lh-meta);padding:1px var(--s2);border-radius:var(--r-pill);border:1px solid var(--border);color:var(--text-2);background:var(--bg-surface)}
+.chip.ok{color:var(--pass)} .chip.unk{color:var(--unknown);border-style:dashed}
+.chip.stale{color:var(--review-strong);border-color:var(--review)}
+.subject .push{margin-left:auto;display:flex;gap:var(--s2)}
+
+main{grid-area:main;overflow:auto;min-width:0;background:var(--bg-canvas)}
+.page{padding:var(--s6) var(--s8) var(--s12);display:flex;flex-direction:column;gap:var(--s6);max-width:1120px}
+.page-head{display:flex;align-items:flex-start;gap:var(--s4);flex-wrap:wrap}
+.page-head .actions{margin-left:auto;display:flex;gap:var(--s2);flex-wrap:wrap}
+
+/* LeadAnswer — the one figure per page */
+.lead{display:flex;flex-direction:column;gap:var(--s2);padding-bottom:var(--s6);border-bottom:1px solid var(--border)}
+.lead-row{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap}
+.figure{font:var(--w-semi) var(--fs-figure)/var(--lh-figure) var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.lead-sentence{font-size:var(--fs-section);line-height:var(--lh-section);color:var(--text)}
+.lead-ref{color:var(--text-2)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:var(--s2);border:1px solid var(--border);background:var(--bg-surface);border-radius:var(--r-control);padding:5px var(--s3);cursor:pointer;min-height:32px;white-space:nowrap}
+.btn:hover{background:var(--bg-subtle)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:var(--w-semi)}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--bg-subtle)}
+.btn.sm{min-height:24px;padding:1px var(--s2);font-size:var(--fs-meta)}
+.btn[disabled]{color:var(--text-dis);cursor:not-allowed;background:var(--bg-subtle)}
+
+/* tabs */
+.tabs{display:flex;gap:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden}
+.tab{border:0;background:transparent;padding:var(--s2) var(--s3);cursor:pointer;color:var(--text-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--accent);font-weight:var(--w-semi)}
+.tab .count{font-family:var(--font-mono);font-size:var(--fs-meta);color:var(--text-2);margin-left:var(--s1)}
+
+/* state badges */
+.st{display:inline-flex;align-items:center;gap:var(--s1);font-weight:var(--w-semi);white-space:nowrap}
+.st.pass{color:var(--pass)} .st.review{color:var(--review-strong)} .st.block{color:var(--block)} .st.unknown{color:var(--unknown)} .st.na{color:var(--text-2)}
+.st.zero{color:var(--text-2);font-weight:var(--w-regular)}
+.st .n{font-family:var(--font-mono);font-weight:var(--w-regular);color:var(--text-2)}
+
+/* FactValue — a number you can trace */
+.fact{border:0;background:transparent;padding:0 2px;margin:0 -2px;border-radius:4px;cursor:pointer;font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:inherit;display:inline-flex;align-items:center;gap:6px;text-align:inherit}
+.fact:hover{background:var(--bg-subtle)}
+.fact .ev{width:7px;height:7px;border-radius:50%;flex:none;border:1.5px solid var(--text-2)}
+.ev.observed{background:var(--text-2)} .ev.derived{background:var(--bg-surface);box-shadow:inset 3.5px 0 0 var(--text-2)}
+.ev.declared{background:transparent} .ev.unknown{border-style:dashed;border-color:var(--unknown)}
+.fact.selected{background:var(--changed-bg)}
+
+/* DeltaValue — neutral, glyph-carried */
+.delta{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.delta .g{color:var(--text-2);margin-right:2px}
+.absent{color:var(--text-2);font-family:var(--font-ui)}
+
+/* surfaces & tables */
+.section{display:flex;flex-direction:column;gap:var(--s3)}
+.section-head{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap}
+.section-head .meta{margin-left:auto}
+.surface{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-panel)}
+.tablewrap{overflow-x:auto;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-panel)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+caption{text-align:left;padding:var(--s2) var(--s3);font-size:var(--fs-meta);color:var(--text-2);border-bottom:1px solid var(--border)}
+th,td{padding:0 var(--s3);height:var(--row);text-align:left;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font-size:var(--fs-meta);font-weight:var(--w-semi);color:var(--text-2);background:var(--bg-surface);position:sticky;top:0;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--bg-subtle)}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+td.name{font-family:var(--font-mono)}
+tr.row-added td:first-child{box-shadow:inset 3px 0 0 var(--added)}
+tr.row-removed td:first-child{box-shadow:inset 3px 0 0 var(--removed)}
+tr.row-changed td:first-child{box-shadow:inset 3px 0 0 var(--changed)}
+.kind{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-meta);font-weight:var(--w-semi);padding:0 6px;border-radius:4px}
+.kind.added{color:var(--added);background:var(--added-bg)} .kind.removed{color:var(--removed);background:var(--removed-bg)} .kind.changed{color:var(--changed);background:var(--changed-bg)}
+.note{font-size:var(--fs-meta);color:var(--text-2);margin-left:var(--s2)}
+
+.filterbar{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.filterbar input{border:1px solid var(--border);border-radius:var(--r-control);padding:4px var(--s2);background:var(--bg-surface);min-width:220px;min-height:32px}
+
+/* bars (chart.blue only; status only from Gate) */
+.bar{height:8px;background:var(--c-other);border-radius:2px;overflow:hidden;display:flex}
+.bar>i{display:block;height:100%;background:var(--c4)}
+.compo{display:flex;height:12px;border-radius:2px;overflow:hidden;background:var(--c-other);gap:1px}
+.compo>i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s3);font-size:var(--fs-meta);color:var(--text-2)}
+.legend span{display:inline-flex;align-items:center;gap:var(--s1)}
+.legend b{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+.meter-row{display:grid;grid-template-columns:120px minmax(0,1fr) auto;align-items:center;gap:var(--s3);padding:var(--s2) 0}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:var(--s1) var(--s4);align-items:baseline}
+.kv dt{color:var(--text-2);font-size:var(--fs-meta)} .kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:var(--s6)}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+
+/* Notice */
+.notice{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s1) var(--s3);padding:var(--s3) var(--s4);border:1px solid var(--border);border-radius:var(--r-panel);background:var(--bg-surface)}
+.notice .icon{margin-top:2px}
+.notice.unknown{border-style:dashed} .notice.unknown .icon{color:var(--unknown)}
+.notice.stale{border-color:var(--review)} .notice.stale .icon{color:var(--review-strong)}
+.notice.error{border-color:var(--block)} .notice.error .icon{color:var(--block)}
+.notice.info .icon{color:var(--text-2)}
+.notice dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:2px var(--s3);margin:var(--s1) 0 0;font-size:var(--fs-meta)}
+.notice dt{color:var(--text-2)} .notice dd{margin:0}
+.notice .acts{display:flex;gap:var(--s2);margin-top:var(--s2);flex-wrap:wrap}
+
+/* Inspector */
+.insp{grid-area:insp;width:var(--inspector);background:var(--bg-surface);border-left:1px solid var(--border);display:flex;flex-direction:column;min-width:0;overflow:auto}
+.insp[hidden]{display:none}
+.insp-head{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s4);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-surface)}
+.insp-head .x{margin-left:auto}
+.insp-body{padding:var(--s4);display:flex;flex-direction:column;gap:var(--s4)}
+.insp .bigval{font:var(--w-semi) var(--fs-section)/var(--lh-section) var(--font-mono);overflow-wrap:anywhere}
+.raw{font-family:var(--font-mono);font-size:var(--fs-meta);background:var(--bg-subtle);border-radius:var(--r-control);padding:var(--s2) var(--s3);overflow-wrap:anywhere;white-space:pre-wrap}
+
+/* steps (Release setup) */
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--border);align-items:start}
+.step:last-child{border-bottom:0}
+.step .num{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;font:var(--fs-meta) var(--font-mono);color:var(--text-2)}
+.step.done .num{border-color:var(--pass);color:var(--pass)}
+.setup-line{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center;padding:var(--s2) var(--s3);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-panel);font-size:var(--fs-meta);color:var(--text-2)}
+.setup-line .btn{margin-left:auto}
+
+.finding{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--s1) var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--border);align-items:start}
+.finding:last-child{border-bottom:0}
+.finding .rule{font-family:var(--font-mono);font-weight:var(--w-semi)}
+.group-head{display:flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s4);background:var(--bg-subtle);border-bottom:1px solid var(--border);cursor:pointer;width:100%;border-left:0;border-right:0;border-top:0;text-align:left}
+details.group>summary{list-style:none}
+details.group>summary::-webkit-details-marker{display:none}
+
+/* empty */
+.empty{display:flex;flex-direction:column;gap:var(--s4);padding:var(--s8);border:1px dashed var(--border);border-radius:var(--r-panel);background:var(--bg-surface);align-items:flex-start}
+.empty ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:var(--s2)}
+
+/* command palette & sheet overlays */
+.scrim{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:start center;padding-top:12vh;z-index:10}
+.scrim[hidden]{display:none}
+.palette{width:min(560px,92vw);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-modal);box-shadow:var(--shadow-lg);overflow:hidden}
+.palette input{width:100%;border:0;border-bottom:1px solid var(--border);padding:var(--s3) var(--s4);background:transparent;font-size:var(--fs-section)}
+.palette input:focus{outline:none}
+.palette ul{list-style:none;margin:0;padding:var(--s1);max-height:320px;overflow:auto}
+.palette li{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-radius:var(--r-control);cursor:pointer}
+.palette li[aria-selected="true"]{background:var(--bg-subtle)}
+.palette li .meta{margin-left:auto}
+
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));background:var(--text);color:var(--bg-surface);padding:var(--s2) var(--s4);border-radius:var(--r-control);box-shadow:var(--shadow-sm);font-size:var(--fs-meta);z-index:20}
+.toast[hidden]{display:none}
+
+/* exports page */
+.paper{background:#FFFFFF;color:#171A1F;border:1px solid #D9DEE5;border-radius:var(--r-panel);padding:var(--s8);max-width:794px;font-family:var(--font-ui)}
+.paper table{min-width:0}
+.paper th{color:#5D6673;background:#FFFFFF;border-bottom-color:#D9DEE5}
+.paper td{border-bottom-color:#D9DEE5}
+.paper tbody tr:hover td{background:transparent}
+.paper .meta{color:#5D6673}
+.paper .absent{color:#5D6673}
+.paper .kind.added{color:#18794E;background:#E7F3EC}.paper .kind.removed{color:#C7372C;background:#FBECEA}.paper .kind.changed{color:#2563EB;background:#E9F0FD}
+.paper .st.block{color:#C9372C}.paper .st.pass{color:#18794E}
+.paper .delta .g{color:#5D6673}
+.mast{display:flex;justify-content:space-between;gap:var(--s4);border-bottom:2px solid #171A1F;padding-bottom:var(--s2);margin-bottom:var(--s4);font-size:var(--fs-meta)}
+.code{font-family:var(--font-mono);font-size:var(--fs-meta);line-height:var(--lh-meta);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-panel);padding:var(--s4);overflow-x:auto;white-space:pre;margin:0}
+.svgbox{background:#FFFFFF;border:1px solid var(--border);border-radius:var(--r-panel);overflow:hidden}
+.svgbox svg{display:block;width:100%;height:auto}
+
+/* components page */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--s2)}
+.sw{border:1px solid var(--border);border-radius:var(--r-panel);overflow:hidden;background:var(--bg-surface);font-size:var(--fs-meta)}
+.sw i{display:block;height:36px}
+.sw div{padding:var(--s1) var(--s2)}
+.iconset{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:var(--s2)}
+.iconset div{display:flex;align-items:center;gap:var(--s2);padding:var(--s2);border:1px solid var(--border);border-radius:var(--r-control);background:var(--bg-surface);font-size:var(--fs-meta)}
+
+/* responsive: the prototype shell also reflows to phone width */
+@media (max-width:1279px){ .insp{position:fixed;top:0;right:0;bottom:0;z-index:9;box-shadow:var(--shadow-sm);width:min(var(--inspector),92vw)} }
+@media (max-width:1179px){ .app:not(.rail-open){grid-template-columns:var(--rail-c) minmax(0,1fr) auto} .app:not(.rail-open) .navbtn span,.app:not(.rail-open) .rail .group{display:none} .app:not(.rail-open) .navbtn{justify-content:center} }
+@media (max-width:700px){
+  .app{height:auto;min-height:0;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto auto;grid-template-areas:"top" "rail" "subject" "main"}
+  .rail{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--border);padding:var(--s1)}
+  .rail .group,.rail .spacer,.collapse{display:none!important}
+  .navbtn{width:auto;flex:none}
+  .navbtn span{display:inline!important}
+  .navbtn[aria-current="page"]::before{display:none}
+  .localnote,.cmdk span{display:none} .cmdk{min-width:0}
+  .page{padding:var(--s4)}
+  main{overflow:visible}
+}
+</style>
+
+<div class="review" role="region" aria-label="Prototype review controls">
+  <b id="rv-title">评审控制（不属于产品）</b>
+  <span id="rv-theme-l">主题</span>
+  <span class="seg" id="rv-theme"><button data-v="system" aria-pressed="true">System</button><button data-v="light" aria-pressed="false">Light</button><button data-v="dark" aria-pressed="false">Dark</button></span>
+  <span id="rv-lang-l">语言</span>
+  <span class="seg" id="rv-lang"><button data-v="zh" aria-pressed="true">简体中文</button><button data-v="en" aria-pressed="false">English</button></span>
+  <span id="rv-scn-l">场景</span>
+  <span class="seg" id="rv-scn"></span>
+</div>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand"><span class="mark"><svg class="icon" viewBox="0 0 20 20"><path d="M4 15V5h7M4 10h5"/></svg></span>FirmwareSight</div>
+    <button class="project" id="project-btn"><span class="mono">brake-node</span><svg class="icon" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4"/></svg></button>
+    <span class="localnote"><svg class="icon" viewBox="0 0 20 20"><rect x="4" y="9" width="12" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 016 0V9"/></svg><span id="local-txt"></span></span>
+    <button class="cmdk" id="cmdk" aria-haspopup="dialog"><svg class="icon" viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><path d="M13 13l4 4"/></svg><span id="cmdk-txt"></span><kbd>Ctrl K</kbd></button>
+  </header>
+  <nav class="rail" id="rail" aria-label="Pages"></nav>
+  <div class="subject" id="subject" role="region"></div>
+  <main id="main" tabindex="-1"></main>
+  <aside class="insp" id="insp" hidden aria-labelledby="insp-title"></aside>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input id="pal-input" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list" autocomplete="off">
+    <ul id="pal-list" role="listbox"></ul>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* ===== Real data: fixtures/elf/m2-objects (base→target) + fixtures/project/p4-release policy ===== */
+const D = {
+  project: 'brake-node',
+  policy: { flash: 512, ram: 256, growth: 200, sha: 'b87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98', file: 'firmwaresight.toml' },
+  base: { name: 'firmware.elf', sha: '85ae4fc4e2b8d460522ede8a00db1e1ea4cb5c3efe689962a707ae2f90c89724', flash: 132, ram: 12, imported: '09:12' },
+  target: { name: 'firmware.elf', sha: '3c9daa4f7c09febe8e6350dded6b701ae2b95587a45db421393e42295903d9fc', size: 9480, arch: 'Arm · 32-bit · little', entry: '0x08000001',
+            flash: 196, ram: 44, sections: 8, symbols: 32, evidence: 10, imported: '09:14', map: 'firmware.map' },
+  regions: [
+    { name: 'FLASH', kind: 'nv', range: '0x08000000–0x08010000', cap: 65536, used: 196, loc: 'map.line31' },
+    { name: 'RAM', kind: 'ram', range: '0x20000000–0x20004000', cap: 16384, used: 44, loc: 'map.line32' } ],
+  sections: [
+    { i: 1, name: '.text', role: 'Code', flags: 'AX', vma: '0x08000000', lma: '0x08000000', file: 192, mem: 192, region: 'FLASH', fl: 192, ram: 0 },
+    { i: 2, name: '.data', role: 'InitializedData', flags: 'WA', vma: '0x20000000', lma: '0x080000c0', file: 4, mem: 4, region: 'RAM', fl: 4, ram: 4, dual: true },
+    { i: 3, name: '.bss', role: 'UninitializedData', flags: 'WA', vma: '0x20000004', lma: '0x080000c4', file: 0, mem: 40, region: 'RAM', fl: 0, ram: 40 },
+    { i: 4, name: '.comment', role: 'Metadata', flags: 'MS', vma: null, lma: null, file: 70, mem: null, region: null },
+    { i: 5, name: '.ARM.attributes', role: 'Metadata', flags: '', vma: null, lma: null, file: 46, mem: null, region: null },
+    { i: 6, name: '.symtab', role: 'SymbolTable', flags: '', vma: null, lma: null, file: 528, mem: null, region: null },
+    { i: 7, name: '.strtab', role: 'StringTable', flags: '', vma: null, lma: null, file: 208, mem: null, region: null },
+    { i: 8, name: '.shstrtab', role: 'StringTable', flags: '', vma: null, lma: null, file: 69, mem: null, region: null } ],
+  symbols: [
+    { name: 'Reset_Handler', kind: 'Function', bind: 'Global', addr: '0x08000001', size: 52, sec: '.text' },
+    { name: 'imu_calibration', kind: 'Object', bind: 'Local', addr: '0x08000088', size: 48, sec: '.text' },
+    { name: 'spi_buffer', kind: 'Object', bind: 'Local', addr: '0x20000008', size: 32, sec: '.bss' },
+    { name: 'spi_flush', kind: 'Function', bind: 'Global', addr: '0x0800006d', size: 28, sec: '.text' },
+    { name: 'imu_read_with_a_name_long_enough_to_make_gnu_ld_wrap_the_input_section_row', kind: 'Function', bind: 'Global', addr: '0x08000041', size: 28, sec: '.text' },
+    { name: 'uart_send', kind: 'Function', bind: 'Global', addr: '0x08000061', size: 12, sec: '.text' },
+    { name: 'imu_read', kind: 'Function', bind: 'Global', addr: '0x0800005d', size: 4, sec: '.text' },
+    { name: 'g_samples', kind: 'Object', bind: 'Global', addr: '0x20000028', size: 4, sec: '.bss' },
+    { name: 'uart_tx', kind: 'Object', bind: 'Local', addr: '0x20000004', size: 4, sec: '.bss' },
+    { name: 'g_threshold', kind: 'Object', bind: 'Local', addr: '0x20000000', size: 4, sec: '.data' } ],
+  objects: [
+    { key: 'sensors/imu.o', lib: null, fl: 80, ram: 0, rows: 5, bp: 4081 },
+    { key: 'main.o', lib: null, fl: 56, ram: 8, rows: 5, bp: 2857 },
+    { key: 'libdrv.a(spi.o)', lib: 'libdrv.a', fl: 28, ram: 32, rows: 4, bp: 1428 },
+    { key: 'libdrv.a(uart.o)', lib: 'libdrv.a', fl: 12, ram: 4, rows: 4, bp: 612 } ],
+  libraries: [ { key: 'libdrv.a', fl: 40, ram: 36, rows: 8, bp: 2040 } ],
+  unattributed: { fl: 20, ram: 0 },
+  evidence: [
+    { cls: 'observed', field: 'sha256', value: '3c9daa4f7c09febe8e6350dded6b701ae2b95587a45db421393e42295903d9fc', src: 'filesystem', loc: 'file:firmware.elf', rule: 'streaming-sha256/64KiB' },
+    { cls: 'observed', field: 'byte_size', value: '9480', src: 'filesystem', loc: 'stat:firmware.elf', rule: 'fs::metadata.len' },
+    { cls: 'observed', field: 'architecture', value: 'Arm', src: 'elf.file-header', loc: 'elf.e_machine', rule: 'object-elf/0.40' },
+    { cls: 'observed', field: 'bitness', value: 'Bits32', src: 'elf.file-header', loc: 'elf.e_ident[EI_CLASS]', rule: 'object-elf/0.40' },
+    { cls: 'observed', field: 'endianness', value: 'Little', src: 'elf.file-header', loc: 'elf.e_ident[EI_DATA]', rule: 'object-elf/0.40' },
+    { cls: 'observed', field: 'entry_point', value: '0x08000001', src: 'elf.file-header', loc: 'elf.e_entry', rule: 'object-elf/0.40' },
+    { cls: 'observed', field: 'nonvolatile_image_footprint_bytes', value: '196', src: 'map', loc: 'memory-accounting/totals', rule: 'map-memory-configuration+elf-load' },
+    { cls: 'observed', field: 'runtime_ram_footprint_bytes', value: '44', src: 'map', loc: 'memory-accounting/totals', rule: 'map-memory-configuration+elf-load' },
+    { cls: 'observed', field: 'dual_accounted', value: 'nonvolatile=4 runtime=4', src: 'map', loc: 'elf.section_header[2] + map:load-address', rule: 'map-memory-configuration+elf-load' },
+    { cls: 'observed', field: 'memory_regions', value: 'FLASH@0x8000000+0x10000, RAM@0x20000000+0x4000', src: 'map', loc: 'map:Memory Configuration', rule: 'gnu_ld' } ],
+  objChanges: [
+    { k: 'Changed', key: 'sensors/imu.o', fl: [44, 80, 36], ram: [0, 0, 0] },
+    { k: 'Added', key: 'libdrv.a(spi.o)', fl: [null, 28, null], ram: [null, 32, null] },
+    { k: 'Changed', key: 'main.o', fl: [52, 56, 4], ram: [8, 8, 0] } ],
+  libChanges: [ { k: 'Changed', key: 'libdrv.a', fl: [12, 40, 28], ram: [4, 36, 32] } ],
+  secChanges: [
+    { k: 'Changed', key: '.text', a: [128, 192, 64], m: [128, 192, 64] },
+    { k: 'Changed', key: '.bss', a: [0, 0, 0], m: [8, 40, 32] },
+    { k: 'Changed', key: '.symtab', a: [432, 528, 96], m: [null, null, null] },
+    { k: 'Changed', key: '.strtab', a: [181, 208, 27], m: [null, null, null] },
+    { k: 'Changed', key: '.data', a: [4, 4, 0], m: [4, 4, 0], note: 'lma' },
+    { k: 'Changed', key: '.shstrtab', a: [69, 69, 0], m: [null, null, null], note: 'offset' } ],
+  symChanges: [
+    { k: 'Changed', key: 'imu_calibration', s: [8, 48, 40] },
+    { k: 'Changed', key: 'Reset_Handler', s: [48, 52, 4] },
+    { k: 'Changed', key: 'imu_read_with_a_name_long_enough_to_make_gnu_ld_wrap_the_input_section_row', s: [32, 28, -4] },
+    { k: 'Added', key: 'spi_buffer', s: [null, 32, null] },
+    { k: 'Added', key: 'spi_flush', s: [null, 28, null] },
+    { k: 'Added', key: 'spi.c', s: [null, null, null], unk: true } ],
+  gate: {
+    run: 'gate-42b84f56f0cd5388af28be13633e6df805208030ae6b345b9add2f2058b2180b',
+    counts: { BLOCK: 1, REVIEW: 0, UNKNOWN: 0, PASS: 7, 'N/A': 2 },
+    block: [ { rule: 'release.version_matches_policy', zh: 'HEAD 上没有符合策略的精确版本 tag，因此无法满足版本策略。', en: 'No exact tag points at workspace HEAD, so the version policy cannot be met.',
+      nextZh: '为本次发布的 HEAD 打上符合 [version] pattern 的 tag，然后重新运行 Gate。', nextEn: 'Tag HEAD with a name that matches [version] pattern, then rerun the Gate.', refs: 'policy:version.source · policy:version.pattern · git:exact-tag' } ],
+    pass: [
+      { rule: 'git.clean', zh: '评估时工作区没有未提交的修改。', en: 'Workspace has no uncommitted changes at Gate evaluation time.' },
+      { rule: 'artifacts.required', zh: '快照包含策略要求的全部工件类型（elf, map）。', en: 'Every required artifact kind is present (elf, map).' },
+      { rule: 'artifacts.hashes', zh: '2 个工件都带有 SHA-256 摘要。', en: 'All 2 artifacts carry a SHA-256 digest.' },
+      { rule: 'memory.flash_budget', zh: '非易失占用 196 B，在 512 B 预算内（余 316 B）。', en: 'Nonvolatile footprint 196 B is within the 512 B budget (316 B headroom).' },
+      { rule: 'memory.ram_budget', zh: '运行时 RAM 44 B，在 256 B 预算内（余 212 B）。', en: 'Runtime RAM 44 B is within the 256 B budget (212 B headroom).' },
+      { rule: 'diff.growth', zh: '相对基线的增长（Flash ▲64 B）低于全部阈值（200 B）。', en: 'Growth against the baseline (Flash ▲64 B) stays within every threshold (200 B).' },
+      { rule: 'release.notes', zh: '发布说明 docs/RELEASE_NOTES.md 存在。', en: 'Release notes docs/RELEASE_NOTES.md are present.' } ],
+    na: [
+      { rule: 'release.commit_matches_expected', zh: '本次发布没有声明 release.expected_commit。', en: 'No release.expected_commit is declared.' },
+      { rule: 'evidence.unknown_review', zh: '未配置 gate.unknown_evidence_review_count。', en: 'gate.unknown_evidence_review_count is not configured.' } ] }
+};
+const short = s => s.slice(0, 12);
+const B = n => n == null ? null : n.toLocaleString('en-US') + ' B';
+
+/* ===== i18n (zh / en). State words, evidence words and Added/Removed/Changed stay untranslated (ADR-0032 D5). ===== */
+const T = {
+  zh: {
+    rv: '评审控制（不属于产品）', theme: '主题', lang: '语言', scnLabel: '场景',
+    local: '本机工作区 · 不会离开这台机器', cmd: '搜索命令或跳转…',
+    nav: { overview: '总览', analyze: '分析', compare: '对比', release: '发布', history: '历史', help: '帮助', settings: '设置', exports: '导出样张', components: '组件' },
+    grpWork: '工作区', grpTool: '工具', grpProto: '原型附录', collapse: '收起导航',
+    subj: '当前构建', base: '基线', target: '目标', latest: '最新', retained: '已保留上一次结果 · 当前选择未分析', change: '更换', swap: '交换', pin: '固定为基线', pinned: '固定基线', mapOk: 'MAP', mapNone: '无 MAP', evObs: 'observed',
+    scn: { normal: '正常', empty: '空', error: '分析失败', stale: '过期', nomap: '无 MAP', norun: '未运行 Gate' },
+    // overview
+    ovTitle: '总览', ovBlock: '项规则阻止本次发布', ovBlockWhy: 'release.version_matches_policy：HEAD 上没有符合策略的精确版本 tag。', notCert: '这是项目策略的判定，不是发布许可，也不是认证。',
+    goRelease: '前往发布', ovNoRun: '尚未运行发布检查', ovNoRunWhy: '已分析 firmware.elf 3c9daa4f7c09，但还没有用项目策略检查过。', runGate: '运行发布检查',
+    ovEmpty: '先给 FirmwareSight 一个固件', ovEmpty1: '选择或拖入一个 ELF 文件', ovEmpty2: '附上同一次构建的 GNU ld .map（可选，但能说明每个字节来自哪里）', ovEmpty3: '分析完成后，与上一个构建对比或运行发布检查', choose: '选择固件', dropHint: '或把 ELF 和 MAP 一起拖到这里',
+    budget: '内存余量 · 项目策略预算', budgetNote: '策略预算不等于芯片容量；芯片区域见“分析 › 内存”。', left: '余', since: '自固定基线以来', biggest: '最大来源', viewCompare: '查看对比', currentBuild: '当前构建', gateRun: 'Gate 运行',
+    // analyze
+    anTitle: '分析', anLead: (p) => `Flash 已用`, anRef: '策略预算 512 B 的 38.3% · FLASH 区域 65,536 B 的 0.3% · 最大对象 sensors/imu.o 80 B',
+    views: { memory: '内存', sections: '节', symbols: '符号', objects: '对象', evidence: '证据', summary: '概要', findings: '结论', bundle: '发布包', builds: '构建', runs: 'Gate 运行', releases: '发布记录' },
+    region: '区域', declared: 'declared', composition: '构成（按对象，单一蓝阶；以下表为准）', unattr: '未归属', name: '名称', share: '份额', ev: '证据', rows: 'MAP 行',
+    flash: 'Flash', ram: 'RAM', role: '角色', flags: '标志', vma: '虚拟地址', lma: '加载地址', fileSize: '文件大小', memSize: '内存大小', size: '大小', kind: '类型', bind: '绑定', section: '节',
+    filterName: '按名称筛选（/）', objects: '对象', libraries: '库', app: '应用',
+    remainder: '未归属于对象：Flash 20 B、RAM 0 B（填充、链接器桩代码、没有对象行的节）。',
+    nomapTitle: '这个构建没有对象归因', nomapWhy: '分析时没有附上 GNU ld MAP。只有 MAP 能说明每个字节来自哪个目标文件或库。', attachMap: '附加 MAP',
+    errTitle: '无法分析 build/app.elf', errWhat: '发生了什么', errWhy: '依据', errNext: '下一步', errId: '诊断 ID',
+    errWhatV: '文件不是 ELF：开头 4 个字节是 7F 45 4C 00，而不是 7F 45 4C 46。', errWhyV: '尝试的适配器 object-elf/0.40 拒绝了文件头。上一次成功的分析仍然保留。', errNextV: '确认选择的是链接器输出的 .elf/.axf，而不是 .bin 或 .hex。', copyDiag: '复制诊断信息',
+    cls: '分类', field: '字段', value: '值', src: '来源', loc: '定位', rule: '规则',
+    // compare
+    cmTitle: '对比', cmRef: '132 → 196 B · +48.5% · 最大来源 sensors/imu.o ▲36 B · 可比性 exact',
+    srcRank: '变化来源', byObj: '对象', byLib: '库', bySec: '节', evComp: '证据与可比性', exact: '两侧都有 GNU ld MAP，Flash 与 RAM 精确可比。', exactT: '可比性 exact', ambigT: '33 行符号未配对', ambig: '33 行符号的名称、类型和绑定重复，未配对；不当作变化。',
+    old: '旧', new: '新', change: '变化', notPresent: '不存在', export: '导出', exportMenu: 'JSON · HTML · 视觉报告 · Markdown',
+    unpaired: '名称重复，未配对', otherField: '其他字段变化（{f}）', noSize: '无大小',
+    // release
+    rlTitle: '发布', setup: '运行设置', edit: '编辑', setupBuild: '构建与基线', setupPolicy: '项目策略', setupAttach: '附件', attachNone: '无附件（策略未要求 bin/hex）',
+    policySum: 'Flash ≤ 512 B · RAM ≤ 256 B · 增长复核 200 B · 需要干净的 Git · 需要发布说明', editPolicy: '在面板中编辑策略',
+    next: '下一步', basis: '查看依据', expand: '展开', collapse2: '收起', blockedBundle: '存在 BLOCK，不能生成发布包。先解决上面的 1 项。', bundleFiles: '发布包将包含',
+    // history
+    hiTitle: '历史', pinnedLine: '固定基线：firmware.elf · 85ae4fc4e2b8', unpin: '取消固定', imported: '导入时间（示例）', compareNow: '与当前对比', compareSel: '对比所选', selected: '已选 {n} 项', noReleases: '还没有发布记录。在“发布 › 发布包”中生成第一个。', verdict: '判定', policy: '策略',
+    // settings/help
+    stTitle: '设置', stAppearance: '外观', stTheme: '主题', stLang: '界面语言', stData: '数据显示', stUnit: '容量单位', stStart: '启动页', stReset: '恢复默认设置', stResetWhy: '把主题、语言、单位和启动页恢复为默认值。项目策略和已存的构建不受影响。',
+    hpTitle: '帮助', hpAbout: '关于', hpFormats: '可读取的格式', hpLocal: '本机优先', hpKeys: '快捷键', hpDiag: '诊断',
+    hpFormatsV: 'ELF32/ELF64（GCC、Clang 已验证）· GNU ld .map · BIN/Intel HEX 仅作为发布附件（只记录字节与 SHA-256）。Keil/IAR 输出未验证。',
+    hpLocalV: '固件只在本机分析。没有账号、没有上传，也没有可以把数据发送出去的服务。', exportDiag: '导出诊断包',
+    keys: [['Ctrl K','命令面板'],['Ctrl O','选择固件'],['/','聚焦筛选框'],['[  ]','切换视图'],['I','打开/关闭 Inspector'],['Esc','关闭浮层']],
+    // inspector
+    inspTitle: '证据', close: '关闭', provenance: '出处', raw: '原始值', copy: '复制', copied: '已复制',
+    // palette
+    palGo: '跳转', palAct: '操作', palCompare: '与固定基线对比', palChoose: '选择固件…', palMap: '附加 MAP…', palUnit: '切换单位 B / KiB', palTheme: '切换主题', palLang: '切换语言', palExport: '导出 Markdown…',
+    exportsTitle: '导出样张', exportsLead: '同一份数据在每种导出物中讲同一个故事', compTitle: '组件与视觉系统'
+  },
+  en: {
+    rv: 'Review controls (not part of the product)', theme: 'Theme', lang: 'Language', scnLabel: 'Scenario',
+    local: 'Local workspace · nothing leaves this machine', cmd: 'Search commands or jump to…',
+    nav: { overview: 'Overview', analyze: 'Analyze', compare: 'Compare', release: 'Release', history: 'History', help: 'Help', settings: 'Settings', exports: 'Export samples', components: 'Components' },
+    grpWork: 'Workspace', grpTool: 'Tools', grpProto: 'Prototype appendix', collapse: 'Collapse navigation',
+    subj: 'Current build', base: 'Base', target: 'Target', latest: 'Latest', retained: 'Previous result kept · current selection not analyzed', change: 'Change', swap: 'Swap', pin: 'Pin as baseline', pinned: 'Pinned baseline', mapOk: 'MAP', mapNone: 'No MAP', evObs: 'observed',
+    scn: { normal: 'Normal', empty: 'Empty', error: 'Parse error', stale: 'Stale', nomap: 'No MAP', norun: 'No Gate run' },
+    ovTitle: 'Overview', ovBlock: 'rule blocks this release', ovBlockWhy: 'release.version_matches_policy: no exact version tag that matches the policy points at HEAD.', notCert: 'This is a project-policy verdict, not a release permit and not a certification.',
+    goRelease: 'Go to Release', ovNoRun: 'Release check not run yet', ovNoRunWhy: 'firmware.elf 3c9daa4f7c09 is analyzed but has not been checked against the project policy.', runGate: 'Run release check',
+    ovEmpty: 'Give FirmwareSight a firmware build', ovEmpty1: 'Choose or drop an ELF file', ovEmpty2: 'Add the GNU ld .map from the same build (optional; it says where every byte came from)', ovEmpty3: 'Then compare with an earlier build or run the release check', choose: 'Choose firmware', dropHint: 'or drop the ELF and its MAP here together',
+    budget: 'Memory headroom · project policy budgets', budgetNote: 'A policy budget is not chip capacity; chip regions are in Analyze › Memory.', left: 'left', since: 'Since pinned baseline', biggest: 'largest source', viewCompare: 'View comparison', currentBuild: 'Current build', gateRun: 'Gate run',
+    anTitle: 'Analyze', anLead: () => 'Flash used', anRef: '38.3% of the 512 B policy budget · 0.3% of the 65,536 B FLASH region · largest object sensors/imu.o 80 B',
+    views: { memory: 'Memory', sections: 'Sections', symbols: 'Symbols', objects: 'Objects', evidence: 'Evidence', summary: 'Summary', findings: 'Findings', bundle: 'Bundle', builds: 'Builds', runs: 'Gate runs', releases: 'Releases' },
+    region: 'Region', declared: 'declared', composition: 'Composition by object (one blue scale; the table is authoritative)', unattr: 'Not attributed', name: 'Name', share: 'Share', ev: 'Evidence', rows: 'MAP rows',
+    flash: 'Flash', ram: 'RAM', role: 'Role', flags: 'Flags', vma: 'Virtual address', lma: 'Load address', fileSize: 'File size', memSize: 'Memory size', size: 'Size', kind: 'Kind', bind: 'Binding', section: 'Section',
+    filterName: 'Filter by name (/)', objects: 'Objects', libraries: 'Libraries', app: 'Application',
+    remainder: 'Not attributed to an object: Flash 20 B, RAM 0 B (padding, linker stubs, sections without object rows).',
+    nomapTitle: 'This build has no object attribution', nomapWhy: 'It was analyzed without a GNU ld MAP. Only a MAP names the object file or library behind each byte.', attachMap: 'Attach MAP',
+    errTitle: 'Could not analyze build/app.elf', errWhat: 'What happened', errWhy: 'Why we know', errNext: 'What to do', errId: 'Diagnostics ID',
+    errWhatV: 'The file is not an ELF: its first four bytes are 7F 45 4C 00, not 7F 45 4C 46.', errWhyV: 'The object-elf/0.40 adapter refused the header. The last good analysis is kept.', errNextV: 'Check that you chose the linker output (.elf/.axf), not a .bin or .hex.', copyDiag: 'Copy diagnostics',
+    cls: 'Class', field: 'Field', value: 'Value', src: 'Source', loc: 'Locator', rule: 'Rule',
+    cmTitle: 'Compare', cmRef: '132 → 196 B · +48.5% · largest source sensors/imu.o ▲36 B · comparability exact',
+    srcRank: 'Where the change came from', byObj: 'Objects', byLib: 'Libraries', bySec: 'Sections', evComp: 'Evidence and comparability', exact: 'Both builds have a GNU ld MAP; Flash and RAM compare exactly.', exactT: 'Comparability exact', ambigT: '33 symbol rows unpaired', ambig: '33 symbol rows repeat a name, kind and binding and are left unpaired; they are not counted as changes.',
+    old: 'Old', new: 'New', change: 'Change', notPresent: 'not present', export: 'Export', exportMenu: 'JSON · HTML · Visual report · Markdown',
+    unpaired: 'name repeats, unpaired', otherField: 'other field changed ({f})', noSize: 'no size',
+    rlTitle: 'Release', setup: 'Run setup', edit: 'Edit', setupBuild: 'Build and baseline', setupPolicy: 'Project policy', setupAttach: 'Attachments', attachNone: 'No attachments (the policy requires no bin/hex)',
+    policySum: 'Flash ≤ 512 B · RAM ≤ 256 B · growth review 200 B · clean Git required · release notes required', editPolicy: 'Edit policy in a panel',
+    next: 'Next', basis: 'View basis', expand: 'Expand', collapse2: 'Collapse', blockedBundle: 'A BLOCK is open, so no bundle can be produced. Resolve the 1 item above first.', bundleFiles: 'The bundle will contain',
+    hiTitle: 'History', pinnedLine: 'Pinned baseline: firmware.elf · 85ae4fc4e2b8', unpin: 'Unpin', imported: 'Imported (example)', compareNow: 'Compare with current', compareSel: 'Compare selected', selected: '{n} selected', noReleases: 'No release records yet. Produce the first one in Release › Bundle.', verdict: 'Verdict', policy: 'Policy',
+    stTitle: 'Settings', stAppearance: 'Appearance', stTheme: 'Theme', stLang: 'Interface language', stData: 'Data display', stUnit: 'Size unit', stStart: 'Start page', stReset: 'Restore defaults', stResetWhy: 'Restores theme, language, unit and start page. Project policy and stored builds are not touched.',
+    hpTitle: 'Help', hpAbout: 'About', hpFormats: 'What it can read', hpLocal: 'Local first', hpKeys: 'Keyboard', hpDiag: 'Diagnostics',
+    hpFormatsV: 'ELF32/ELF64 (GCC and Clang verified) · GNU ld .map · BIN/Intel HEX as release attachments only (bytes and SHA-256). Keil/IAR output is unverified.',
+    hpLocalV: 'Firmware is analyzed on this machine only. No account, no upload, and no service that could send anything out.', exportDiag: 'Export diagnostics',
+    keys: [['Ctrl K','Command palette'],['Ctrl O','Choose firmware'],['/','Focus the filter'],['[  ]','Switch views'],['I','Open/close the Inspector'],['Esc','Close the overlay']],
+    inspTitle: 'Evidence', close: 'Close', provenance: 'Provenance', raw: 'Raw value', copy: 'Copy', copied: 'Copied',
+    palGo: 'Go to', palAct: 'Actions', palCompare: 'Compare with pinned baseline', palChoose: 'Choose firmware…', palMap: 'Attach MAP…', palUnit: 'Switch unit B / KiB', palTheme: 'Switch theme', palLang: 'Switch language', palExport: 'Export Markdown…',
+    exportsTitle: 'Export samples', exportsLead: 'One dataset tells the same story in every export', compTitle: 'Components and visual system'
+  }
+};
+
+/* ===== Icons (20px grid, 1.5 stroke, currentColor) ===== */
+const I = {
+  overview: '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/>',
+  analyze: '<path d="M3 16h14"/><path d="M5 13V8M9 13V4M13 13v-3"/>',
+  compare: '<path d="M4 7h10l-3-3M16 13H6l3 3"/>',
+  release: '<path d="M10 3l6 3v4c0 4-3 6-6 7-3-1-6-3-6-7V6z"/><path d="M7.5 10l2 2 3.5-4"/>',
+  history: '<circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/>',
+  help: '<circle cx="10" cy="10" r="7"/><path d="M8 8a2 2 0 113 1.7c-.7.4-1 .8-1 1.6M10 14h.01"/>',
+  settings: '<circle cx="10" cy="10" r="2.5"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>',
+  exports: '<path d="M10 3v9M6.5 8.5L10 12l3.5-3.5M4 15h12"/>',
+  components: '<path d="M10 3l2 4 4 .5-3 3 .8 4.5L10 13l-3.8 2 .8-4.5-3-3 4-.5z"/>',
+  pass: '<circle cx="10" cy="10" r="7" fill="currentColor" stroke="none"/><path d="M6.8 10.2l2.2 2.2 4.3-4.6" stroke="var(--bg-surface)" stroke-width="1.8"/>',
+  review: '<path d="M10 3l7.5 13h-15z"/><path d="M10 8v3.5M10 14h.01"/>',
+  block: '<path d="M7 3h6l4 4v6l-4 4H7l-4-4V7z"/><path d="M7.8 7.8l4.4 4.4M12.2 7.8l-4.4 4.4"/>',
+  unknown: '<circle cx="10" cy="10" r="7" stroke-dasharray="2.6 2.2"/><path d="M8.3 8.2a1.8 1.8 0 112.6 1.6c-.6.3-.9.7-.9 1.3M10 13.6h.01"/>',
+  na: '<circle cx="10" cy="10" r="7"/><path d="M5.2 14.8l9.6-9.6"/>',
+  swap: '<path d="M5 7h10l-3-3M15 13H5l3 3"/>', pin: '<path d="M8 3h4l-.5 5 3 2.5H5.5l3-2.5z"/><path d="M10 10.5V17"/>',
+  copy: '<rect x="7" y="7" width="9" height="9" rx="1.5"/><path d="M4 13V5.5A1.5 1.5 0 015.5 4H13"/>', close: '<path d="M5 5l10 10M15 5L5 15"/>',
+  chevron: '<path d="M7 5l5 5-5 5"/>', down: '<path d="M6 8l4 4 4-4"/>', filter: '<path d="M3 5h14l-5.5 6v4.5l-3 1.5v-6z"/>', export: '<path d="M10 3v9M6.5 8.5L10 12l3.5-3.5M4 15h12"/>',
+  evidence: '<circle cx="9" cy="9" r="5"/><path d="M13 13l4 4M9 7v4M7 9h4"/>', file: '<path d="M5 3h6l4 4v10H5z"/><path d="M11 3v4h4"/>', info: '<circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5h.01"/>',
+  panel: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><path d="M8 4v12"/>'
+};
+const ic = (n, cls = '') => `<svg class="icon ${cls}" viewBox="0 0 20 20" aria-hidden="true">${I[n]}</svg>`;
+const ST = { PASS: 'pass', REVIEW: 'review', BLOCK: 'block', UNKNOWN: 'unknown', 'N/A': 'na' };
+const st = (s, n) => `<span class="st ${ST[s]}${n === 0 ? ' zero' : ''}">${ic(ST[s])}${s}${n != null ? ` <span class="n">${n}</span>` : ''}</span>`;
+
+/* ===== State ===== */
+const S = { page: 'overview', lang: 'zh', theme: 'system', scn: 'normal', view: {}, insp: null, objMode: 'obj', srcMode: 'obj', histSel: new Set(), groups: { PASS: false, 'N/A': false }, railCollapsed: false, palIdx: 0 };
+const t = () => T[S.lang];
+const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => o[k]);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ===== FactValue / DeltaValue ===== */
+let factSeq = 0; const FACTS = {};
+function fact(text, info, cls = 'observed') {
+  const id = 'f' + (++factSeq); FACTS[id] = { text, cls, ...info };
+  const sel = S.insp && S.insp.text === text && S.insp.field === info.field ? ' selected' : '';
+  return `<button class="fact${sel}" data-fact="${id}" aria-label="${esc(text)}, ${cls}">${esc(text)}<span class="ev ${cls}" aria-hidden="true"></span></button>`;
+}
+function delta(d) {
+  if (d == null) return `<span class="absent">—</span>`;
+  if (d === 0) return `<span class="delta">0</span>`;
+  return `<span class="delta"><span class="g">${d > 0 ? '▲' : '▼'}</span>${Math.abs(d).toLocaleString('en-US')}</span>`;
+}
+const side = v => v == null ? `<span class="absent" title="${t().notPresent}">— <span class="meta">${t().notPresent}</span></span>` : B(v);
+const kind = k => `<span class="kind ${k.toLowerCase()}">${k}</span>`;
+
+/* ===== Shell ===== */
+function renderRail() {
+  const L = t();
+  const item = p => `<button class="navbtn" data-nav="${p}" ${S.page === p ? 'aria-current="page"' : ''} title="${L.nav[p]}">${ic(p, 'md')}<span>${L.nav[p]}</span></button>`;
+  document.getElementById('rail').innerHTML =
+    `<div class="group">${L.grpWork}</div>${['overview', 'analyze', 'compare', 'release', 'history'].map(item).join('')}
+     <div class="spacer"></div><div class="group">${L.grpTool}</div>${['help', 'settings'].map(item).join('')}
+     <div class="group">${L.grpProto}</div>${['exports', 'components'].map(item).join('')}
+     <button class="navbtn collapse" data-act="rail" title="${L.collapse}">${ic('panel', 'md')}<span>${L.collapse}</span></button>`;
+}
+function renderSubject() {
+  const L = t(), el = document.getElementById('subject');
+  el.setAttribute('aria-label', L.subj);
+  const map = S.scn === 'nomap' ? `<span class="chip unk">${ic('unknown')}${L.mapNone}</span>` : `<span class="chip ok">${ic('pass')}${L.mapOk}</span>`;
+  const fresh = S.scn === 'stale' || S.scn === 'error' ? `<span class="chip stale">${ic('review')}${L.retained}</span>` : `<span class="chip">${L.latest}</span>`;
+  if (S.scn === 'empty' && S.page !== 'compare') { el.innerHTML = `<span class="subj-label">${L.subj}</span><span class="meta">—</span>`; return; }
+  if (S.page === 'compare' || S.page === 'history') {
+    el.innerHTML = `<span class="subj-label">${L.base}</span><span class="subj-build"><span class="mono">firmware.elf · ${short(D.base.sha)}</span><span class="chip">${ic('pin')}${L.pinned}</span></span>
+      <button class="btn sm" data-toast="${L.swap}">${ic('swap')}${L.swap}</button>
+      <span class="subj-label">${L.target}</span><span class="subj-build"><span class="mono">firmware.elf · ${short(D.target.sha)}</span>${map}</span>${fresh}
+      <span class="push"><button class="btn sm" data-toast="${L.change}">${L.change}</button></span>`;
+  } else {
+    el.innerHTML = `<span class="subj-label">${L.subj}</span><span class="subj-build"><span class="mono">firmware.elf · ${short(D.target.sha)}</span>${map}<span class="chip">${ic('evidence')}${L.evObs}</span></span>${fresh}
+      <span class="push"><button class="btn sm" data-toast="${L.change}">${L.change}</button></span>`;
+  }
+}
+const tabs = (key, list, counts = {}) => `<div class="tabs" role="tablist">${list.map(v => `<button class="tab" role="tab" data-view="${key}:${v}" aria-selected="${(S.view[key] || list[0]) === v}">${t().views[v]}${counts[v] != null ? `<span class="count">${counts[v]}</span>` : ''}</button>`).join('')}</div>`;
+const curView = (key, list) => S.view[key] || list[0];
+
+/* ===== Pages ===== */
+function pageOverview() {
+  const L = t();
+  if (S.scn === 'empty') return `<div class="page"><h1>${L.ovTitle}</h1>${emptyBlock()}</div>`;
+  const norun = S.scn === 'norun';
+  const lead = norun
+    ? `<div class="lead"><div class="lead-row">${st('UNKNOWN')}<span class="lead-sentence">${L.ovNoRun}</span></div><p class="lead-ref">${L.ovNoRunWhy}</p><div><button class="btn primary" data-nav="release">${ic('release')}${L.runGate}</button></div></div>`
+    : `<div class="lead"><div class="lead-row">${st('BLOCK')}<span class="figure">1</span><span class="lead-sentence">${L.ovBlock}</span><span class="push" style="margin-left:auto"><button class="btn primary" data-nav="release">${L.goRelease}${ic('chevron')}</button></span></div>
+       <p class="lead-ref mono">${L.ovBlockWhy}</p><p class="meta">${L.notCert} · ${st('PASS', 7)} · ${st('N/A', 2)}</p></div>`;
+  const meter = (label, used, cap, field) => `<div class="meter-row"><span>${label}</span><div class="bar" role="meter" aria-valuemin="0" aria-valuemax="${cap}" aria-valuenow="${used}" aria-label="${label}"><i style="width:${(used / cap * 100).toFixed(1)}%"></i></div>
+      <span class="mono">${fact(`${used} / ${cap} B`, { field, value: String(used), src: 'map', loc: 'memory-accounting/totals', rule: 'map-memory-configuration+elf-load', note: `policy:memory.${field.includes('ram') ? 'ram' : 'flash'}_budget=${cap}` })} <span class="meta">${L.left} ${cap - used} B</span></span></div>`;
+  return `<div class="page"><h1>${L.ovTitle}</h1>${lead}
+    <div class="grid2">
+      <section class="section"><div class="section-head"><h2>${L.budget}</h2></div>
+        <div class="surface" style="padding:var(--s2) var(--s4)">${meter('Flash', 196, 512, 'nonvolatile_image_footprint_bytes')}${meter('RAM', 44, 256, 'runtime_ram_footprint_bytes')}<p class="meta" style="padding-bottom:var(--s2)">${L.budgetNote}</p></div></section>
+      <section class="section"><div class="section-head"><h2>${L.since}</h2></div>
+        <div class="surface" style="padding:var(--s4);display:flex;flex-direction:column;gap:var(--s3)">
+          <p class="mono meta">firmware.elf · ${short(D.base.sha)} → ${short(D.target.sha)}</p>
+          <dl class="kv"><dt>Flash</dt><dd>${delta(64)} B <span class="meta">132 → 196 B</span></dd><dt>RAM</dt><dd>${delta(32)} B <span class="meta">12 → 44 B</span></dd><dt>${L.biggest}</dt><dd class="mono">sensors/imu.o ${delta(36)} B</dd></dl>
+          <div><button class="btn" data-nav="compare">${L.viewCompare}${ic('chevron')}</button></div></div></section>
+    </div>
+    <section class="section"><div class="section-head"><h2>${L.currentBuild}</h2><span class="meta mono">${L.gateRun} ${D.gate.run.slice(0, 17)}…</span></div>
+      <div class="surface" style="padding:var(--s4)"><dl class="kv">
+        <dt>SHA-256</dt><dd>${fact(D.target.sha, { field: 'sha256', value: D.target.sha, src: 'filesystem', loc: 'file:firmware.elf', rule: 'streaming-sha256/64KiB' })}</dd>
+        <dt>Format</dt><dd class="mono">${D.target.arch} · entry ${D.target.entry}</dd>
+        <dt>${L.policy}</dt><dd class="mono">${D.policy.file} · sha256 ${D.policy.sha.slice(0, 12)}…</dd></dl></div></section></div>`;
+}
+function emptyBlock() {
+  const L = t();
+  return `<div class="empty" role="note"><h2>${L.ovEmpty}</h2><ol><li>${L.ovEmpty1}</li><li>${L.ovEmpty2}</li><li>${L.ovEmpty3}</li></ol>
+    <div style="display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap"><button class="btn primary" data-toast="${L.choose}">${ic('file')}${L.choose}</button><span class="meta">${L.dropHint} · <kbd>Ctrl O</kbd></span></div></div>`;
+}
+function notice(kind, iconName, title, body, dl, acts) {
+  return `<div class="notice ${kind}" role="${kind === 'error' ? 'alert' : 'status'}">${ic(iconName)}<div><h3>${title}</h3>${body ? `<p class="meta" style="color:var(--text)">${body}</p>` : ''}${dl ? `<dl>${dl.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>` : ''}${acts ? `<div class="acts">${acts}</div>` : ''}</div></div>`;
+}
+function pageAnalyze() {
+  const L = t(), views = ['memory', 'sections', 'symbols', 'objects', 'evidence'];
+  if (S.scn === 'empty') return `<div class="page"><h1>${L.anTitle}</h1>${emptyBlock()}</div>`;
+  const v = curView('an', views);
+  let err = '';
+  if (S.scn === 'error') err = notice('error', 'block', L.errTitle, '', [[L.errWhat, L.errWhatV], [L.errWhy, L.errWhyV], [L.errNext, L.errNextV], [L.errId, '<span class="mono">op-47e8-18def476e17bebf4</span>']], `<button class="btn sm" data-toast="${L.copyDiag}">${ic('copy')}${L.copyDiag}</button><button class="btn sm primary" data-toast="${L.choose}">${L.choose}</button>`);
+  const lead = `<div class="lead"><div class="lead-row"><span class="lead-sentence">${L.anLead()}</span><span class="figure">${fact('196 B', { field: 'nonvolatile_image_footprint_bytes', value: '196', src: 'map', loc: 'memory-accounting/totals', rule: 'map-memory-configuration+elf-load' })}</span></div><p class="lead-ref">${L.anRef}</p></div>`;
+  let body = '';
+  if (v === 'memory') body = memoryView();
+  if (v === 'sections') body = sectionsView();
+  if (v === 'symbols') body = symbolsView();
+  if (v === 'objects') body = objectsView();
+  if (v === 'evidence') body = evidenceView();
+  return `<div class="page"><div class="page-head"><h1>${L.anTitle}</h1><div class="actions"><button class="btn" data-toast="${L.attachMap}">${L.attachMap}</button><button class="btn primary" data-toast="${L.choose}">${ic('file')}${L.choose}</button></div></div>${err}${lead}
+    ${tabs('an', views, { sections: 8, symbols: 32, objects: S.scn === 'nomap' ? null : 4, evidence: 10 })}<div role="tabpanel">${body}</div></div>`;
+}
+function memoryView() {
+  const L = t(), objs = D.objects, total = 196;
+  const shades = ['var(--c5)', 'var(--c4)', 'var(--c3)', 'var(--c2)'];
+  const compo = S.scn === 'nomap' ? '' : `<div class="compo" aria-hidden="true">${objs.map((o, i) => `<i style="width:${o.fl / total * 100}%;background:${shades[i]}"></i>`).join('')}<i style="width:${20 / total * 100}%;background:var(--c1)"></i></div>
+     <div class="legend">${objs.map((o, i) => `<span><b style="background:${shades[i]}"></b><span class="mono">${o.key}</span> ${o.fl} B</span>`).join('')}<span><b style="background:var(--c1)"></b>${L.unattr} 20 B</span></div>`;
+  const reg = r => {
+    const secs = D.sections.filter(s => s.region === r.name || (r.name === 'FLASH' && s.dual));
+    return `<section class="section"><div class="section-head"><h2 class="mono">${r.name}</h2><span class="meta mono">${r.range} · ${fact(B(r.cap), { field: 'memory_regions', value: r.name + ' capacity ' + r.cap, src: 'map', loc: r.loc, rule: 'gnu_ld' }, 'declared')} ${L.declared}</span></div>
+      <div class="surface" style="padding:var(--s4);display:flex;flex-direction:column;gap:var(--s3)">
+      <div class="meter-row" style="grid-template-columns:minmax(0,1fr) auto;padding:0"><div class="bar"><i style="width:${Math.max(r.used / r.cap * 100, 0.6)}%"></i></div><span class="mono">${B(r.used)} <span class="meta">${(r.used / r.cap * 100).toFixed(1)}%</span></span></div>
+      ${r.name === 'FLASH' ? `<p class="meta">${L.composition}</p>${compo}` : ''}</div>
+      <div class="tablewrap"><table><caption>${r.name} · ${L.views.sections}</caption><thead><tr><th>${L.name}</th><th>${L.role}</th><th>${L.vma}</th><th>${L.lma}</th><th class="num">${r.kind === 'nv' ? 'Flash' : 'RAM'}</th><th>${L.ev}</th></tr></thead><tbody>
+      ${secs.map(s => `<tr><td class="name">${s.name}${s.dual ? `<span class="note">dual-accounted</span>` : ''}</td><td>${s.role}</td><td class="mono">${s.vma}</td><td class="mono">${s.lma}</td><td class="num">${fact(B(r.kind === 'nv' ? s.fl : s.ram), { field: 'section ' + s.name, value: String(r.kind === 'nv' ? s.fl : s.ram), src: 'elf.section_header[' + s.i + ']', loc: 'map ' + r.loc, rule: 'map-memory-configuration+elf-load' })}</td><td><span class="meta">observed</span></td></tr>`).join('')}
+      </tbody></table></div></section>`;
+  };
+  return `<div style="display:flex;flex-direction:column;gap:var(--s6);padding-top:var(--s4)">${D.regions.map(reg).join('')}</div>`;
+}
+function filterbar(extra = '') { return `<div class="filterbar"><label class="meta" for="flt">${ic('filter')}</label><input id="flt" placeholder="${t().filterName}" autocomplete="off">${extra}</div>`; }
+function sectionsView() {
+  const L = t();
+  return `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar()}<div class="tablewrap"><table><caption>${L.views.sections} · 8</caption><thead><tr><th class="num">#</th><th>${L.name}</th><th>${L.role}</th><th>${L.flags}</th><th>${L.vma}</th><th>${L.lma}</th><th class="num">${L.fileSize}</th><th class="num">${L.memSize}</th><th>${L.region}</th></tr></thead><tbody>
+  ${D.sections.map(s => `<tr><td class="num">${s.i}</td><td class="name">${s.name}</td><td>${s.role}</td><td class="mono">${s.flags || '—'}</td><td class="mono">${s.vma || '<span class="absent">—</span>'}</td><td class="mono">${s.lma || '<span class="absent">—</span>'}</td><td class="num">${fact(B(s.file), { field: 'section ' + s.name + ' file size', value: String(s.file), src: 'elf.section_header[' + s.i + ']', loc: 'sh_size', rule: 'object-elf/0.40' })}</td><td class="num">${s.mem == null ? '<span class="absent">—</span>' : B(s.mem)}</td><td>${s.region || '<span class="meta">—</span>'}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+function symbolsView() {
+  const L = t();
+  return `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar()}<div class="tablewrap"><table><caption>${L.views.symbols} · 10 / 32 (size &gt; 0)</caption><thead><tr><th>${L.name}</th><th>${L.kind}</th><th>${L.bind}</th><th>${L.section}</th><th>Address</th><th class="num">${L.size}</th></tr></thead><tbody>
+  ${D.symbols.map(s => `<tr><td class="name" style="max-width:320px;overflow-wrap:anywhere">${s.name}</td><td>${s.kind}</td><td>${s.bind}</td><td class="mono">${s.sec}</td><td class="mono">${s.addr}</td><td class="num">${fact(B(s.size), { field: 'symbol ' + s.name, value: String(s.size), src: 'elf.symtab', loc: 'st_size', rule: 'object-elf/0.40' })}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+function objectsView() {
+  const L = t();
+  if (S.scn === 'nomap') return `<div style="padding-top:var(--s4)">${notice('unknown', 'unknown', L.nomapTitle, L.nomapWhy, null, `<button class="btn sm primary" data-toast="${L.attachMap}">${L.attachMap}</button>`)}</div>`;
+  const list = S.objMode === 'obj' ? D.objects : D.libraries;
+  return `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar(`<span class="seg" style="margin-left:auto"><button data-obj="obj" aria-pressed="${S.objMode === 'obj'}">${L.objects}</button><button data-obj="lib" aria-pressed="${S.objMode === 'lib'}">${L.libraries}</button></span>`)}
+  <div class="tablewrap"><table><caption>${S.objMode === 'obj' ? L.objects : L.libraries}</caption><thead><tr><th>${L.name}</th>${S.objMode === 'obj' ? `<th>${L.libraries}</th>` : ''}<th class="num">Flash</th><th class="num">RAM</th><th class="num">${L.share}</th><th class="num">${L.rows}</th></tr></thead><tbody>
+  ${list.map(o => `<tr><td class="name">${o.key}</td>${S.objMode === 'obj' ? `<td class="mono">${o.lib || `<span class="meta">${L.app}</span>`}</td>` : ''}<td class="num">${fact(B(o.fl), { field: 'object ' + o.key + ' Flash', value: String(o.fl), src: 'map', loc: 'input-section rows ×' + o.rows, rule: 'ADR-0033 charge = output section charge' })}</td><td class="num">${B(o.ram)}</td><td class="num">${(o.bp / 100).toFixed(2)}%</td><td class="num">${o.rows}</td></tr>`).join('')}
+  </tbody></table></div><p class="meta">${L.remainder}</p></div>`;
+}
+function evidenceView() {
+  const L = t();
+  return `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar()}<div class="tablewrap"><table><caption>${L.views.evidence} · 10</caption><thead><tr><th>${L.cls}</th><th>${L.field}</th><th>${L.value}</th><th>${L.src}</th><th>${L.rule}</th></tr></thead><tbody>
+  ${D.evidence.map(e => `<tr><td><span class="meta">${e.cls}</span></td><td class="mono">${e.field}</td><td style="max-width:260px;overflow-wrap:anywhere">${fact(e.value.length > 24 ? e.value.slice(0, 24) + '…' : e.value, { field: e.field, value: e.value, src: e.src, loc: e.loc, rule: e.rule }, e.cls)}</td><td class="mono">${e.src}</td><td class="mono meta">${e.rule}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+function diffRows(rows, cols) {
+  const L = t();
+  return rows.map(r => `<tr class="row-${r.k.toLowerCase()}"><td>${kind(r.k)}</td><td class="name" style="max-width:300px;overflow-wrap:anywhere">${r.key}${r.unk ? `<span class="note">${L.noSize}</span>` : ''}${r.note ? `<span class="note">${fmt(L.otherField, { f: r.note })}</span>` : ''}</td>${cols.map(c => `<td class="num">${side(r[c][0])}</td><td class="num">${side(r[c][1])}</td><td class="num">${r[c][2] == null ? '<span class="absent">—</span>' : delta(r[c][2])}</td>`).join('')}</tr>`).join('');
+}
+function pageCompare() {
+  const L = t(), views = ['summary', 'sections', 'symbols', 'objects'];
+  const v = curView('cm', views);
+  const lead = `<div class="lead"><div class="lead-row"><span class="lead-sentence">Flash</span><span class="figure">${fact('▲64 B', { field: 'nonvolatile delta', value: '132 → 196 (+64)', src: 'diff', loc: 'memory.nonvolatile', rule: 'exact comparability (both sides MAP-backed)' })}</span></div><p class="lead-ref">${L.cmRef} · RAM ${delta(32)} B</p></div>`;
+  let body = '';
+  const head2 = (a, b) => `<th>${L.change}</th><th>${L.name}</th>` + [a, b].filter(Boolean).map(x => `<th class="num">${L.old} ${x}</th><th class="num">${L.new} ${x}</th><th class="num">Δ ${x}</th>`).join('');
+  if (v === 'summary') {
+    const src = S.srcMode === 'obj' ? D.objChanges : S.srcMode === 'lib' ? D.libChanges : D.secChanges.filter(r => r.m[2]).map(r => ({ ...r, fl: r.m, ram: null }));
+    const max = Math.max(...src.map(r => Math.abs(r.fl[2] ?? r.fl[1] ?? 0)));
+    body = `<div class="grid2" style="padding-top:var(--s4)"><section class="section"><div class="section-head"><h2>${L.srcRank}</h2><span class="seg"><button data-src="obj" aria-pressed="${S.srcMode === 'obj'}">${L.byObj}</button><button data-src="lib" aria-pressed="${S.srcMode === 'lib'}">${L.byLib}</button><button data-src="sec" aria-pressed="${S.srcMode === 'sec'}">${L.bySec}</button></span></div>
+      <div class="tablewrap"><table style="min-width:420px"><caption>${L.srcRank} · Flash</caption><thead><tr><th>${L.name}</th><th class="num">${L.old} → ${L.new}</th><th class="num">Δ</th><th style="width:30%"><span class="sr" aria-hidden="true"></span></th></tr></thead><tbody>
+      ${src.map(r => `<tr class="row-${r.k.toLowerCase()}"><td class="name">${r.key}</td><td class="num"><span class="mono">${r.fl[0] == null ? '—' : r.fl[0]} → ${r.fl[1]} B</span></td><td class="num">${r.k === 'Added' ? kind('Added') : delta(r.fl[2])}</td><td><div class="bar" aria-hidden="true"><i style="width:${(Math.abs(r.fl[2] ?? r.fl[1]) / max * 100).toFixed(0)}%"></i></div></td></tr>`).join('')}
+      </tbody></table></div></section>
+      <section class="section"><div class="section-head"><h2>${L.evComp}</h2></div>${notice('info', 'pass', L.exactT, L.exact)}${notice('unknown', 'unknown', L.ambigT, L.ambig)}</section></div>`;
+  }
+  if (v === 'sections') body = `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar()}<div class="tablewrap"><table><caption>${L.views.sections} · 6 Changed · 2 unchanged</caption><thead><tr>${head2('file', 'mem')}</tr></thead><tbody>${diffRows(D.secChanges, ['a', 'm'])}</tbody></table></div></div>`;
+  if (v === 'symbols') body = `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar()}${notice('unknown', 'unknown', L.ambigT, L.ambig)}<div class="tablewrap"><table><caption>${L.views.symbols} · +21 −15 ~6</caption><thead><tr>${head2(L.size)}</tr></thead><tbody>${diffRows(D.symChanges, ['s'])}</tbody></table></div></div>`;
+  if (v === 'objects') body = `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar(`<span class="seg" style="margin-left:auto"><button data-obj="obj" aria-pressed="${S.objMode === 'obj'}">${L.objects}</button><button data-obj="lib" aria-pressed="${S.objMode === 'lib'}">${L.libraries}</button></span>`)}<div class="tablewrap"><table><caption>${S.objMode === 'obj' ? L.objects + ' · 2 Changed · 1 Added · 1 unchanged' : L.libraries}</caption><thead><tr>${head2('Flash', 'RAM')}</tr></thead><tbody>${diffRows(S.objMode === 'obj' ? D.objChanges : D.libChanges, ['fl', 'ram'])}</tbody></table></div></div>`;
+  return `<div class="page"><div class="page-head"><h1>${L.cmTitle}</h1><div class="actions"><button class="btn" data-toast="${L.exportMenu}">${ic('export')}${L.export}${ic('down')}</button><button class="btn" data-toast="${L.pin}">${ic('pin')}${L.pin}</button></div></div>${S.scn === 'stale' ? notice('stale', 'review', L.retained, '') : ''}${lead}
+    ${tabs('cm', views, { sections: 6, symbols: 42, objects: 3 })}<div role="tabpanel">${body}</div></div>`;
+}
+function pageRelease() {
+  const L = t(), views = ['findings', 'evidence', 'bundle'];
+  const policyStep = `<button class="btn sm" data-toast="${L.editPolicy}">${L.edit}</button>`;
+  if (S.scn === 'norun' || S.scn === 'empty') {
+    return `<div class="page"><h1>${L.rlTitle}</h1><div class="lead"><div class="lead-row">${st('UNKNOWN')}<span class="lead-sentence">${L.ovNoRun}</span></div><p class="lead-ref">${L.notCert}</p></div>
+      <section class="section"><h2>${L.setup}</h2><div class="surface" style="padding:0 var(--s4)"><div class="steps">
+        <div class="step done"><span class="num">1</span><div><h3>${L.setupBuild}</h3><p class="meta mono">${L.target} firmware.elf · ${short(D.target.sha)} · ${L.base} ${short(D.base.sha)} (${L.pinned})</p></div><button class="btn sm" data-toast="${L.change}">${L.change}</button></div>
+        <div class="step done"><span class="num">2</span><div><h3>${L.setupPolicy}</h3><p class="meta">${L.policySum}</p><p class="meta mono">${D.policy.file} · sha256 ${D.policy.sha.slice(0, 12)}…</p></div>${policyStep}</div>
+        <div class="step"><span class="num">3</span><div><h3>${L.setupAttach}</h3><p class="meta">${L.attachNone}</p></div><button class="btn sm" data-toast="${L.setupAttach}">+</button></div></div></div>
+        <div><button class="btn primary" data-scn="normal">${ic('release')}${L.runGate}</button></div></section></div>`;
+  }
+  const v = curView('rl', views);
+  const c = D.gate.counts;
+  const lead = `<div class="lead"><div class="lead-row">${st('BLOCK')}<span class="figure">1</span><span class="lead-sentence">${L.ovBlock}</span></div>
+     <p class="lead-ref">${['REVIEW', 'UNKNOWN', 'PASS', 'N/A'].map(s => st(s, c[s])).join(' · ')}</p><p class="meta">${L.notCert}</p></div>`;
+  const setupLine = `<div class="setup-line"><b style="color:var(--text)">${L.setup}</b><span class="mono">${L.target} ${short(D.target.sha)}</span><span class="mono">${L.base} ${short(D.base.sha)}</span><span class="mono">${L.policy} ${D.policy.sha.slice(0, 8)}…</span><span>${L.setupAttach} 0</span><button class="btn sm" data-scn="norun">${L.edit}</button></div>`;
+  let body = '';
+  if (v === 'findings') {
+    const grp = (name, items, open) => `<details class="group" ${open ? 'open' : ''} data-grp="${name}"><summary class="group-head">${st(name, items.length)}<span class="meta" style="margin-left:auto">${open ? L.collapse2 : L.expand}</span></summary>
+      ${items.map(f => `<div class="finding">${ic(ST[name])}<div><div class="rule">${f.rule}</div><p>${S.lang === 'zh' ? f.zh : f.en}</p>${f.nextZh ? `<p class="meta"><b>${L.next}：</b>${S.lang === 'zh' ? f.nextZh : f.nextEn}</p><p class="meta mono">refs: ${f.refs}</p>` : ''}</div><button class="btn sm ghost" data-fact-rule="${f.rule}">${L.basis}</button></div>`).join('')}</details>`;
+    body = `<div class="surface" style="overflow:hidden;margin-top:var(--s4)">${grp('BLOCK', D.gate.block, true)}${grp('PASS', D.gate.pass, S.groups.PASS)}${grp('N/A', D.gate.na, S.groups['N/A'])}</div>`;
+  }
+  if (v === 'evidence') body = `<div class="tablewrap" style="margin-top:var(--s4)"><table><caption>${L.views.evidence} · ${L.rule}</caption><thead><tr><th>${L.rule}</th><th>${L.verdict}</th><th>${L.value}</th><th>${L.policy}</th></tr></thead><tbody>
+    <tr><td class="mono">memory.flash_budget</td><td>${st('PASS')}</td><td class="mono">${fact('196 B', { field: 'nonvolatile_image_footprint_bytes', value: '196', src: 'map', loc: 'memory-accounting/totals', rule: 'map-memory-configuration+elf-load' })}</td><td class="mono">≤ 512 B</td></tr>
+    <tr><td class="mono">memory.ram_budget</td><td>${st('PASS')}</td><td class="mono">${fact('44 B', { field: 'runtime_ram_footprint_bytes', value: '44', src: 'map', loc: 'memory-accounting/totals', rule: 'map-memory-configuration+elf-load' })}</td><td class="mono">≤ 256 B</td></tr>
+    <tr><td class="mono">diff.growth</td><td>${st('PASS')}</td><td class="mono">${delta(64)} B</td><td class="mono">review ≥ 200 B</td></tr>
+    <tr><td class="mono">release.version_matches_policy</td><td>${st('BLOCK')}</td><td class="mono">git:exact-tag = —</td><td class="mono">^v(\\d+\\.\\d+\\.\\d+)$</td></tr></tbody></table></div>`;
+  if (v === 'bundle') body = `<div style="display:flex;flex-direction:column;gap:var(--s3);margin-top:var(--s4)">${notice('error', 'block', L.blockedBundle, '')}
+    <div class="tablewrap"><table><caption>${L.bundleFiles}</caption><thead><tr><th>${L.name}</th><th>${L.kind}</th></tr></thead><tbody>
+    ${['analysis.json', 'diff.json', 'gate-results.json', 'accepted-reviews.json', 'release-manifest.json', 'release-report.html', 'release-notes.md', 'SHA256SUMS', 'artifacts/firmware.elf', 'artifacts/firmware.map'].map(f => `<tr><td class="mono">${f}</td><td class="meta">${f.startsWith('artifacts') ? 'artifact' : f.endsWith('.json') ? 'JSON' : f.split('.').pop()}</td></tr>`).join('')}</tbody></table></div>
+    <div><button class="btn primary" disabled>${L.views.bundle}</button></div></div>`;
+  return `<div class="page"><h1>${L.rlTitle}</h1>${lead}${setupLine}${tabs('rl', views, { findings: 10 })}<div role="tabpanel">${body}</div></div>`;
+}
+function pageHistory() {
+  const L = t(), views = ['builds', 'runs', 'releases'];
+  const v = curView('hi', views);
+  let body = '';
+  if (v === 'builds') {
+    const rows = [{ sha: D.base.sha, fl: 132, ram: 12, time: '2026-10-16 ' + D.base.imported, pinned: true }, { sha: D.target.sha, fl: 196, ram: 44, time: '2026-10-16 ' + D.target.imported }];
+    const n = S.histSel.size;
+    body = `<div style="display:flex;flex-direction:column;gap:var(--s3);padding-top:var(--s4)">${filterbar(`<span style="margin-left:auto" class="meta">${fmt(L.selected, { n })}</span><button class="btn sm ${n === 2 ? 'primary' : ''}" ${n === 2 ? '' : 'disabled'} data-nav="compare">${L.compareSel}</button>`)}
+    <div class="tablewrap"><table><caption>${L.views.builds} · 2</caption><thead><tr><th style="width:36px"><span class="meta">✓</span></th><th>${L.name}</th><th>${L.imported}</th><th class="num">Flash</th><th class="num">RAM</th><th>MAP</th><th></th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td><input type="checkbox" id="hs-${short(r.sha)}" data-hsel="${r.sha}" ${S.histSel.has(r.sha) ? 'checked' : ''} aria-label="${short(r.sha)}"></td><td class="name">${r.pinned ? `<span class="chip">${ic('pin')}${L.pinned}</span> ` : ''}firmware.elf · ${short(r.sha)}</td><td class="mono meta">${r.time}</td><td class="num">${B(r.fl)}</td><td class="num">${B(r.ram)}</td><td>${st('PASS').replace('PASS', 'MAP')}</td><td style="text-align:right;white-space:nowrap">${r.pinned ? `<button class="btn sm" data-toast="${L.unpin}">${L.unpin}</button>` : `<button class="btn sm" data-toast="${L.pin}">${ic('pin')}${L.pin}</button>`} <button class="btn sm" data-nav="compare">${L.compareNow}</button></td></tr>`).join('')}
+    </tbody></table></div></div>`;
+  }
+  if (v === 'runs') body = `<div class="tablewrap" style="margin-top:var(--s4)"><table><caption>${L.views.runs} · 1</caption><thead><tr><th>Run</th><th>${L.verdict}</th><th>${L.target}</th><th>${L.policy}</th></tr></thead><tbody><tr><td class="mono">${D.gate.run.slice(0, 22)}…</td><td>${st('BLOCK', 1)}</td><td class="mono">${short(D.target.sha)}</td><td class="mono">${D.policy.sha.slice(0, 12)}…</td></tr></tbody></table></div>`;
+  if (v === 'releases') body = `<div class="empty" style="margin-top:var(--s4)" role="note"><p>${L.noReleases}</p><button class="btn" data-nav="release">${L.goRelease}</button></div>`;
+  return `<div class="page"><h1>${L.hiTitle}</h1><div class="lead"><div class="lead-row">${ic('pin', 'md')}<span class="lead-sentence mono">${L.pinnedLine}</span><span style="margin-left:auto"><button class="btn sm" data-toast="${L.unpin}">${L.unpin}</button></span></div></div>${tabs('hi', views, { builds: 2, runs: 1, releases: 0 })}<div role="tabpanel">${body}</div></div>`;
+}
+function pageSettings() {
+  const L = t();
+  const row = (label, help, control) => `<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s4);padding:var(--s3) var(--s4);border-bottom:1px solid var(--border);align-items:center"><div><h3>${label}</h3>${help ? `<p class="meta">${help}</p>` : ''}</div>${control}</div>`;
+  const seg = (opts, cur) => `<span class="seg">${opts.map(([v, l]) => `<button aria-pressed="${v === cur}">${l}</button>`).join('')}</span>`;
+  return `<div class="page"><h1>${L.stTitle}</h1>
+    <section class="section"><h2>${L.stAppearance}</h2><div class="surface">${row(L.stTheme, '', seg([['system', 'System'], ['light', 'Light'], ['dark', 'Dark']], S.theme))}${row(L.stLang, '', seg([['zh', '简体中文'], ['en', 'English']], S.lang))}</div></section>
+    <section class="section"><h2>${L.stData}</h2><div class="surface">${row(L.stUnit, '', seg([['b', 'B'], ['k', 'KiB']], 'b'))}${row(L.stStart, '', seg([['an', L.nav.analyze], ['ov', L.nav.overview], ['hi', L.nav.history]], 'an'))}</div></section>
+    <section class="section"><div class="surface">${row(L.stReset, L.stResetWhy, `<button class="btn" data-toast="${L.stReset}">${L.stReset}</button>`)}</div></section></div>`;
+}
+function pageHelp() {
+  const L = t();
+  return `<div class="page"><h1>${L.hpTitle}</h1>
+    <section class="section"><h2>${L.hpAbout}</h2><div class="surface" style="padding:var(--s4)"><dl class="kv"><dt>Version</dt><dd class="mono">FirmwareSight 0.6.0</dd><dt>Build</dt><dd class="mono">e4d7f8b</dd></dl></div></section>
+    <section class="section"><h2>${L.hpFormats}</h2><p>${L.hpFormatsV}</p></section>
+    <section class="section"><h2>${L.hpLocal}</h2><p>${L.hpLocalV}</p></section>
+    <section class="section"><h2>${L.hpKeys}</h2><div class="tablewrap"><table style="min-width:0"><tbody>${L.keys.map(([k, d]) => `<tr><td style="width:120px"><kbd>${k}</kbd></td><td>${d}</td></tr>`).join('')}</tbody></table></div></section>
+    <section class="section"><h2>${L.hpDiag}</h2><div><button class="btn" data-toast="${L.exportDiag}">${ic('export')}${L.exportDiag}</button></div></section></div>`;
+}
+
+/* ===== Export samples (light only, as every export is) ===== */
+function svgSummary() {
+  const rows = [['sensors/imu.o', 44, 80, 36], ['libdrv.a(spi.o)', null, 28, null], ['main.o', 52, 56, 4]];
+  const bar = (v, max) => Math.round(v / max * 520);
+  const mono = 'font-family="Consolas, Liberation Mono, monospace"', ui = 'font-family="Segoe UI, Arial, Microsoft YaHei, sans-serif"';
+  return `<svg viewBox="0 0 1600 900" role="img" aria-labelledby="sv-t sv-d" xmlns="http://www.w3.org/2000/svg">
+  <title id="sv-t">FirmwareSight Compare — firmware.elf 85ae4fc4e2b8 → 3c9daa4f7c09</title>
+  <desc id="sv-d">Flash grew by 64 bytes, from 132 to 196 bytes (+48.5%), exact comparability. RAM grew by 32 bytes, from 12 to 44. Largest source: sensors/imu.o, up 36 bytes. libdrv.a(spi.o) was added with 28 bytes.</desc>
+  <rect width="1600" height="900" fill="#FFFFFF"/>
+  <g ${ui}><text x="80" y="76" font-size="15" font-weight="600" fill="#171A1F">FirmwareSight · Compare</text>
+  <text x="1520" y="76" font-size="13" fill="#5D6673" text-anchor="end" ${mono}>brake-node · 85ae4fc4e2b8 → 3c9daa4f7c09</text>
+  <line x1="80" y1="96" x2="1520" y2="96" stroke="#171A1F" stroke-width="2"/>
+  <text x="80" y="160" font-size="20" fill="#171A1F">Flash</text>
+  <text x="160" y="164" font-size="28" font-weight="600" fill="#171A1F" ${mono}>▲64 B</text>
+  <text x="80" y="196" font-size="15" fill="#5D6673">132 → 196 B · +48.5% · largest source sensors/imu.o ▲36 B · comparability exact · RAM ▲32 B (12 → 44 B)</text>
+  <line x1="80" y1="232" x2="1520" y2="232" stroke="#D9DEE5"/>
+  <text x="80" y="276" font-size="15" font-weight="600" fill="#171A1F">Where the change came from · objects · Flash</text>
+  ${rows.map((r, i) => { const y = 320 + i * 56; return `<text x="80" y="${y + 6}" font-size="15" fill="#171A1F" ${mono}>${r[0]}</text>
+    <text x="560" y="${y + 6}" font-size="15" fill="#5D6673" text-anchor="end" ${mono}>${r[1] == null ? '—' : r[1]} → ${r[2]} B</text>
+    <rect x="600" y="${y - 6}" width="520" height="12" fill="#F1F3F5"/><rect x="600" y="${y - 6}" width="${bar(r[3] ?? r[2], 36)}" height="12" fill="#4F7BE8"/>
+    <text x="1160" y="${y + 6}" font-size="15" fill="#171A1F" ${mono}>${r[3] == null ? 'Added' : '▲' + r[3] + ' B'}</text>`; }).join('')}
+  <line x1="80" y1="520" x2="1520" y2="520" stroke="#D9DEE5"/>
+  <text x="80" y="560" font-size="15" font-weight="600" fill="#171A1F">Memory</text>
+  <text x="80" y="596" font-size="13" fill="#5D6673">Nonvolatile 132 → 196 B ▲64 · Runtime RAM 12 → 44 B ▲32 · both sides MAP-backed (observed)</text>
+  <text x="80" y="640" font-size="15" font-weight="600" fill="#171A1F">Limitations</text>
+  <text x="80" y="676" font-size="13" fill="#5D6673">33 symbol rows repeat a name and are left unpaired. Bars magnify the table; they do not replace it.</text>
+  <line x1="80" y1="812" x2="1520" y2="812" stroke="#D9DEE5"/>
+  <text x="80" y="844" font-size="12" fill="#5D6673" ${mono}>base 85ae4fc4e2b8d460522ede8a00db1e1ea4cb5c3efe689962a707ae2f90c89724 · target 3c9daa4f7c09febe8e6350dded6b701ae2b95587a45db421393e42295903d9fc</text>
+  <text x="80" y="866" font-size="12" fill="#5D6673">FirmwareSight 0.6.0 · deterministic for the same input · PNG text uses installed system fonts</text></g></svg>`;
+}
+const MD = `## FirmwareSight · Compare
+
+**Flash ▲64 B** (132 → 196 B, +48.5%) · RAM ▲32 B (12 → 44 B) · comparability **exact**
+
+| | Build |
+|---|---|
+| Base | \`firmware.elf\` \`85ae4fc4e2b8\` |
+| Target | \`firmware.elf\` \`3c9daa4f7c09\` |
+
+### Where the change came from (objects, Flash)
+
+| Change | Object | Old | New | Δ |
+|---|---|--:|--:|--:|
+| Changed | \`sensors/imu.o\` | 44 B | 80 B | ▲36 |
+| Added | \`libdrv.a(spi.o)\` | — (not present) | 28 B | — |
+| Changed | \`main.o\` | 52 B | 56 B | ▲4 |
+
+Libraries: \`libdrv.a\` 12 → 40 B (▲28) · 1 object unchanged.
+
+### Limitations
+
+- 33 symbol rows repeat a name, kind and binding and are left unpaired; they are not counted as changes.
+- Per-object rows come from the GNU ld MAP of each build; the portable \`diff.json\` does not carry them.
+
+<sub>FirmwareSight 0.6.0 · base 85ae4fc4e2b8… · target 3c9daa4f7c09…</sub>`;
+const CLI_DIFF = `FirmwareSight · Compare                                    brake-node
+────────────────────────────────────────────────────────────────────────────────
+Base     firmware.elf  85ae4fc4e2b8
+Target   firmware.elf  3c9daa4f7c09
+
+Flash ▲64 B   132 → 196 B   +48.5%   exact
+RAM   ▲32 B    12 →  44 B            exact
+
+Where the change came from · objects · Flash
+  Changed  sensors/imu.o          44 →  80 B    ▲36
+  Added    libdrv.a(spi.o)         — →  28 B    (not present in base)
+  Changed  main.o                 52 →  56 B     ▲4
+  Libraries  libdrv.a  12 → 40 B ▲28 · 1 object unchanged
+
+Notes
+  33 symbol rows repeat a name and were left unpaired (not counted as changes)
+────────────────────────────────────────────────────────────────────────────────`;
+const CLI_GATE = `FirmwareSight · Release Gate                               brake-node
+────────────────────────────────────────────────────────────────────────────────
+[BLOCK] 1 rule blocks this release      REVIEW 0 · UNKNOWN 0 · PASS 7 · N/A 2
+        This is a project-policy verdict, not a release permit or certification.
+
+BLOCK
+  release.version_matches_policy
+    No exact tag points at workspace HEAD, so the version policy cannot be met.
+    Next: tag HEAD with a name that matches [version] pattern, then rerun.
+
+PASS (7)   git.clean · artifacts.required · artifacts.hashes ·
+           memory.flash_budget 196/512 B · memory.ram_budget 44/256 B ·
+           diff.growth ▲64 B < 200 B · release.notes
+N/A (2)    release.commit_matches_expected · evidence.unknown_review
+────────────────────────────────────────────────────────────────────────────────
+Run gate-42b84f56f0cd…   Policy sha256 b87aa057854d…`;
+function htmlReport() {
+  return `<article class="paper" aria-label="HTML report sample">
+    <div class="mast"><span><b>FirmwareSight</b> · Compare report</span><span class="mono">brake-node · 2 pages, A4</span></div>
+    <p style="font-size:15px;line-height:22px;margin-bottom:4px">Flash</p>
+    <p><span class="figure" style="font-size:28px">▲64 B</span></p>
+    <p class="meta" style="margin:4px 0 16px">132 → 196 B · +48.5% · largest source sensors/imu.o ▲36 B · comparability exact · RAM ▲32 B</p>
+    <table><caption>Where the change came from · objects · Flash</caption><thead><tr><th>Change</th><th>Object</th><th class="num">Old</th><th class="num">New</th><th class="num">Δ</th></tr></thead><tbody>
+      <tr><td>${kind('Changed')}</td><td class="name">sensors/imu.o</td><td class="num">44 B</td><td class="num">80 B</td><td class="num">${delta(36)}</td></tr>
+      <tr><td>${kind('Added')}</td><td class="name">libdrv.a(spi.o)</td><td class="num"><span class="absent">— not present</span></td><td class="num">28 B</td><td class="num"><span class="absent">—</span></td></tr>
+      <tr><td>${kind('Changed')}</td><td class="name">main.o</td><td class="num">52 B</td><td class="num">56 B</td><td class="num">${delta(4)}</td></tr></tbody></table>
+    <h3 style="margin-top:16px">Evidence</h3><p class="meta">Both builds: ELF + GNU ld MAP (observed). Charges follow each row's output section (ADR-0021, ADR-0033).</p>
+    <h3 style="margin-top:12px">Limitations</h3><p class="meta">33 symbol rows repeat a name and are left unpaired.</p>
+    <p class="meta mono" style="margin-top:16px;border-top:1px solid #D9DEE5;padding-top:8px;overflow-wrap:anywhere">base 85ae4fc4e2b8d460522ede8a00db1e1e… · target 3c9daa4f7c09febe8e6350dded6b701a… · FirmwareSight 0.6.0</p></article>`;
+}
+function pageExports() {
+  const L = t(), views = ['html', 'svg', 'md', 'cli'];
+  T.zh.views.html = 'HTML 报告'; T.en.views.html = 'HTML report'; T.zh.views.svg = 'SVG / PNG'; T.en.views.svg = 'SVG / PNG'; T.zh.views.md = 'Markdown'; T.en.views.md = 'Markdown'; T.zh.views.cli = 'CLI 文本'; T.en.views.cli = 'CLI text';
+  const v = curView('ex', views);
+  let body = '';
+  if (v === 'html') body = htmlReport();
+  if (v === 'svg') body = `<div class="svgbox">${svgSummary()}</div>`;
+  if (v === 'md') body = `<div class="grid2"><pre class="code">${esc(MD)}</pre><div class="paper" style="padding:var(--s6)">${mdRender()}</div></div>`;
+  if (v === 'cli') body = `<pre class="code">${esc(CLI_DIFF)}</pre><pre class="code">${esc(CLI_GATE)}</pre>`;
+  return `<div class="page"><h1>${L.exportsTitle}</h1><p class="lead-ref">${L.exportsLead}</p>${tabs('ex', views)}<div role="tabpanel" style="display:flex;flex-direction:column;gap:var(--s4);padding-top:var(--s4)">${body}</div></div>`;
+}
+function mdRender() {
+  return `<h2>FirmwareSight · Compare</h2><p><b>Flash ▲64 B</b> (132 → 196 B, +48.5%) · RAM ▲32 B · comparability <b>exact</b></p>
+  <h3 style="margin-top:12px">Where the change came from (objects, Flash)</h3>
+  <table style="min-width:0"><thead><tr><th>Change</th><th>Object</th><th class="num">Old</th><th class="num">New</th><th class="num">Δ</th></tr></thead><tbody>
+  <tr><td>Changed</td><td class="name">sensors/imu.o</td><td class="num">44 B</td><td class="num">80 B</td><td class="num">▲36</td></tr>
+  <tr><td>Added</td><td class="name">libdrv.a(spi.o)</td><td class="num">— (not present)</td><td class="num">28 B</td><td class="num">—</td></tr>
+  <tr><td>Changed</td><td class="name">main.o</td><td class="num">52 B</td><td class="num">56 B</td><td class="num">▲4</td></tr></tbody></table>
+  <p class="meta" style="margin-top:8px">GitHub/GitLab rendering preview</p>`;
+}
+function pageComponents() {
+  const L = t();
+  const sw = [['bg.canvas', '--bg-canvas'], ['bg.surface', '--bg-surface'], ['bg.subtle', '--bg-subtle'], ['text.primary', '--text'], ['text.secondary', '--text-2'], ['border.default', '--border'], ['accent.primary', '--accent'], ['status.pass', '--pass'], ['status.review', '--review'], ['status.block', '--block'], ['status.unknown', '--unknown'], ['diff.removed (v0.4)', '--removed'], ['chart.blue.4', '--c4']];
+  return `<div class="page"><h1>${L.compTitle}</h1>
+    <section class="section"><h2>States</h2><div style="display:flex;gap:var(--s4);flex-wrap:wrap">${['PASS', 'REVIEW', 'BLOCK', 'UNKNOWN', 'N/A'].map(s => st(s, 1)).join('')}</div></section>
+    <section class="section"><h2>Type</h2><div class="surface" style="padding:var(--s4);display:flex;flex-direction:column;gap:var(--s2)"><span class="figure">196 B</span><span class="meta">Figure 28/36 · once per page (v0.4)</span><h1>Page 20/28</h1><h2>Section 15/22</h2><p>Body 13/20 — 正文 13/20</p><p class="meta">Meta 12/18 · mono <span class="mono">0x08000001 3c9daa4f7c09</span></p></div></section>
+    <section class="section"><h2>FactValue · DeltaValue · Diff kinds</h2><div class="surface" style="padding:var(--s4);display:flex;gap:var(--s6);flex-wrap:wrap;align-items:center">
+      ${fact('196 B', { field: 'observed sample', value: '196', src: 'map', loc: '—', rule: '—' }, 'observed')}${fact('40 B', { field: 'derived sample', value: '40', src: 'diff', loc: '—', rule: '—' }, 'derived')}${fact('65,536 B', { field: 'declared sample', value: '65536', src: 'map', loc: '—', rule: '—' }, 'declared')}${fact('Unknown', { field: 'unknown sample', value: '—', src: '—', loc: '—', rule: '—' }, 'unknown')}
+      <span>${delta(64)} B</span><span>${delta(-4)} B</span><span>${side(null)}</span>${kind('Added')}${kind('Removed')}${kind('Changed')}</div></section>
+    <section class="section"><h2>Notice</h2>${notice('info', 'info', 'info', 'Both builds have a GNU ld MAP.')}${notice('unknown', 'unknown', 'unknown', L.nomapWhy)}${notice('stale', 'review', 'stale', L.retained)}</section>
+    <section class="section"><h2>Buttons</h2><div style="display:flex;gap:var(--s2);flex-wrap:wrap"><button class="btn primary">Primary</button><button class="btn">Secondary</button><button class="btn ghost">Ghost</button><button class="btn" disabled>Disabled</button></div></section>
+    <section class="section"><h2>Icons (20 · 1.5 stroke)</h2><div class="iconset">${Object.keys(I).map(k => `<div>${ic(k, 'md')}<span class="mono">${k}</span></div>`).join('')}</div></section>
+    <section class="section"><h2>Colour roles (current theme)</h2><div class="swatches">${sw.map(([n, v]) => `<div class="sw"><i style="background:var(${v})"></i><div class="mono">${n}</div></div>`).join('')}</div></section></div>`;
+}
+
+/* ===== Inspector ===== */
+function renderInspector() {
+  const el = document.getElementById('insp'), L = t();
+  if (!S.insp) { el.hidden = true; return; }
+  const f = S.insp;
+  el.hidden = false;
+  el.innerHTML = `<div class="insp-head">${ic('evidence')}<h2 id="insp-title">${L.inspTitle}</h2><button class="btn sm ghost x" data-act="insp-close" aria-label="${L.close}">${ic('close')}</button></div>
+    <div class="insp-body"><div><p class="meta mono">${esc(f.field)}</p><p class="bigval">${esc(f.text)}</p></div>
+      <dl class="kv"><dt>${L.cls}</dt><dd><span class="fact" style="cursor:default">${f.cls}<span class="ev ${f.cls}"></span></span></dd><dt>${L.src}</dt><dd class="mono">${esc(f.src || '—')}</dd><dt>${L.loc}</dt><dd class="mono">${esc(f.loc || '—')}</dd><dt>${L.rule}</dt><dd class="mono">${esc(f.rule || '—')}</dd>${f.note ? `<dt>${L.policy}</dt><dd class="mono">${esc(f.note)}</dd>` : ''}</dl>
+      <div><p class="meta">${L.raw}</p><div class="raw">${esc(f.value)}</div></div>
+      <div><button class="btn sm" data-act="copy">${ic('copy')}${L.copy}</button></div></div>`;
+}
+
+/* ===== Render ===== */
+function render() {
+  factSeq = 0; for (const k in FACTS) delete FACTS[k];
+  const L = t();
+  document.documentElement.lang = S.lang === 'zh' ? 'zh-CN' : 'en';
+  document.getElementById('rv-title').textContent = L.rv; document.getElementById('rv-theme-l').textContent = L.theme; document.getElementById('rv-lang-l').textContent = L.lang; document.getElementById('rv-scn-l').textContent = L.scnLabel;
+  document.getElementById('rv-scn').innerHTML = Object.keys(L.scn).map(k => `<button data-v="${k}" aria-pressed="${S.scn === k}">${L.scn[k]}</button>`).join('');
+  document.getElementById('local-txt').textContent = L.local; document.getElementById('cmdk-txt').textContent = L.cmd;
+  document.getElementById('app').classList.toggle('rail-collapsed', S.railCollapsed);
+  renderRail(); renderSubject();
+  const P = { overview: pageOverview, analyze: pageAnalyze, compare: pageCompare, release: pageRelease, history: pageHistory, settings: pageSettings, help: pageHelp, exports: pageExports, components: pageComponents };
+  document.getElementById('main').innerHTML = P[S.page]();
+  renderInspector();
+  document.title = `${L.nav[S.page]} — FirmwareSight Instrument Ledger`;
+}
+function go(page) { S.page = page; S.insp = null; render(); const h = document.querySelector('main h1'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } document.getElementById('main').scrollTop = 0; }
+let toastTimer;
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 1800); }
+
+/* ===== Events ===== */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button,input[type=checkbox],summary'); if (!b) return;
+  if (b.closest('#rv-theme')) { S.theme = b.dataset.v; if (S.theme === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', S.theme); document.querySelectorAll('#rv-theme button').forEach(x => x.setAttribute('aria-pressed', x === b)); render(); return; }
+  if (b.closest('#rv-lang')) { S.lang = b.dataset.v; document.querySelectorAll('#rv-lang button').forEach(x => x.setAttribute('aria-pressed', x === b)); render(); return; }
+  if (b.closest('#rv-scn')) { S.scn = b.dataset.v; render(); return; }
+  if (b.dataset.nav) { go(b.dataset.nav); return; }
+  if (b.dataset.view) { const [k, v] = b.dataset.view.split(':'); S.view[k] = v; render(); document.querySelector(`[data-view="${k}:${v}"]`)?.focus(); return; }
+  if (b.dataset.fact) { const f = FACTS[b.dataset.fact]; S.insp = f; render(); document.querySelector('#insp .x')?.focus(); return; }
+  if (b.dataset.factRule) { S.insp = { text: b.dataset.factRule, field: 'gate rule', cls: 'derived', value: b.dataset.factRule, src: 'gate-results.json', loc: D.gate.run.slice(0, 22) + '…', rule: 'policy ' + D.policy.sha.slice(0, 12) + '…' }; render(); return; }
+  if (b.dataset.obj) { S.objMode = b.dataset.obj; render(); return; }
+  if (b.dataset.src) { S.srcMode = b.dataset.src; render(); return; }
+  if (b.dataset.scn) { S.scn = b.dataset.scn; render(); return; }
+  if (b.dataset.hsel) { if (b.checked) S.histSel.add(b.dataset.hsel); else S.histSel.delete(b.dataset.hsel); render(); return; }
+  if (b.dataset.toast) { toast(b.dataset.toast); return; }
+  if (b.dataset.act === 'insp-close') { S.insp = null; render(); return; }
+  if (b.dataset.act === 'rail') { S.railCollapsed = !S.railCollapsed; render(); return; }
+  if (b.dataset.act === 'copy') { const v = S.insp?.value || ''; (navigator.clipboard?.writeText(v) || Promise.reject()).then(() => toast(t().copied), () => toast(t().copied)); return; }
+  if (b.id === 'cmdk') { openPalette(); return; }
+  if (b.id === 'project-btn') { toast('brake-node'); return; }
+});
+document.addEventListener('toggle', e => { const d = e.target; if (d.dataset && d.dataset.grp) S.groups[d.dataset.grp] = d.open; }, true);
+
+/* command palette */
+const CMDS = () => { const L = t(); return [
+  ...['overview', 'analyze', 'compare', 'release', 'history', 'help', 'settings', 'exports'].map(p => ({ g: L.palGo, label: L.nav[p], run: () => go(p) })),
+  { g: L.palAct, label: L.palCompare, run: () => go('compare') }, { g: L.palAct, label: L.palChoose, kbd: 'Ctrl O', run: () => toast(L.palChoose) },
+  { g: L.palAct, label: L.palMap, run: () => toast(L.palMap) }, { g: L.palAct, label: L.palUnit, run: () => toast(L.palUnit) },
+  { g: L.palAct, label: L.palTheme, run: () => { const order = ['system', 'light', 'dark']; const n = order[(order.indexOf(S.theme) + 1) % 3]; document.querySelector(`#rv-theme [data-v="${n}"]`).click(); } },
+  { g: L.palAct, label: L.palLang, run: () => document.querySelector(`#rv-lang [data-v="${S.lang === 'zh' ? 'en' : 'zh'}"]`).click() },
+  { g: L.palAct, label: L.palExport, run: () => toast(L.palExport) } ]; };
+let palOpener = null;
+function openPalette() { palOpener = document.activeElement; const s = document.getElementById('scrim'); s.hidden = false; const i = document.getElementById('pal-input'); i.placeholder = t().cmd; i.value = ''; S.palIdx = 0; drawPalette(); i.focus(); }
+function closePalette() { document.getElementById('scrim').hidden = true; palOpener?.focus?.(); }
+function palMatches() { const q = document.getElementById('pal-input').value.trim().toLowerCase(); return CMDS().filter(c => !q || c.label.toLowerCase().includes(q)); }
+function drawPalette() {
+  const m = palMatches(); S.palIdx = Math.min(S.palIdx, Math.max(m.length - 1, 0));
+  document.getElementById('pal-list').innerHTML = m.map((c, i) => `<li role="option" id="po-${i}" aria-selected="${i === S.palIdx}" data-pi="${i}">${esc(c.label)}<span class="meta">${c.kbd ? `<kbd>${c.kbd}</kbd>` : esc(c.g)}</span></li>`).join('');
+  document.getElementById('pal-input').setAttribute('aria-activedescendant', 'po-' + S.palIdx);
+}
+document.getElementById('pal-input').addEventListener('input', () => { S.palIdx = 0; drawPalette(); });
+document.getElementById('pal-list').addEventListener('click', e => { const li = e.target.closest('li'); if (!li) return; const c = palMatches()[+li.dataset.pi]; closePalette(); c?.run(); });
+document.getElementById('scrim').addEventListener('click', e => { if (e.target.id === 'scrim') closePalette(); });
+document.addEventListener('keydown', e => {
+  const pal = !document.getElementById('scrim').hidden;
+  if (pal) {
+    if (e.key === 'Escape') { e.preventDefault(); closePalette(); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); S.palIdx = Math.min(S.palIdx + 1, palMatches().length - 1); drawPalette(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); S.palIdx = Math.max(S.palIdx - 1, 0); drawPalette(); }
+    if (e.key === 'Enter') { e.preventDefault(); const c = palMatches()[S.palIdx]; closePalette(); c?.run(); }
+    if (e.key === 'Tab') e.preventDefault();
+    return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(); return; }
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
+  if (e.key === 'Escape' && S.insp) { S.insp = null; render(); return; }
+  if (typing) return;
+  if (e.key === '/') { const f = document.getElementById('flt'); if (f) { e.preventDefault(); f.focus(); } }
+  if (e.key === '[' || e.key === ']') { const tabsEl = [...document.querySelectorAll('.tab')]; const cur = tabsEl.findIndex(x => x.getAttribute('aria-selected') === 'true'); const n = tabsEl[cur + (e.key === ']' ? 1 : -1)]; n?.click(); }
+  if (e.key.toLowerCase() === 'i' && !e.ctrlKey) { if (S.insp) { S.insp = null; render(); } else { const f = document.querySelector('.fact[data-fact]'); f?.click(); } }
+  if (e.target.classList?.contains('tab') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { const list = [...e.target.parentElement.children]; const i = list.indexOf(e.target); list[(i + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length].click(); }
+});
+render();
+</script>

@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "CURRENT"
 owner: "Engineering"
-last_updated: "2026-10-15"
+last_updated: "2026-10-16"
 ---
 
 # Decisions Index
@@ -49,6 +49,27 @@ Durable decisions live in ADRs. This page indexes them and lists the standing Ow
 | [0031](../09_ADR/ADR-0031-developer-preview-theme.md) | Developer Preview theme: System / Light / Dark |
 | [0032](../09_ADR/ADR-0032-desktop-ui-language.md) | Desktop UI language |
 | [0033](../09_ADR/ADR-0033-object-library-attribution.md) | Object and library attribution from the GNU ld MAP (BASELINE 2026-10-15) |
+
+### Proposed ADRs
+
+| ADR | Decision | Status |
+|---|---|---|
+| [0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md) | Instrument Ledger: one design language for the app and every export (tokens v0.4.0) | PROPOSED; BASELINE when the Owner accepts the R0 prototype |
+
+## Owner decisions 2026-10-16: R-series redesign
+
+The Owner redirected the next round from closeout to product building with a complete UI/UX redesign of the desktop app and every export (HTML, SVG, PNG, Markdown, CLI text). The Owner's B1 "Quiet Canvas" package is reference only. Plan: [03_DESIGN/09](../03_DESIGN/09_R_REDESIGN_SPEC.md); phases R0–R7 in ADR-0034 D7.
+
+| # | Decision |
+|---|---|
+| RD1 | The redesign overrides the "large UI reworks" exclusion in [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md) §4 for the R series only. |
+| RD2 | Targeted token bump to v0.4.0 under ADR-0034. Palette, spacing, radius, motion and the no-shadow rule do not move. |
+| RD3 | Spec and prototype first (R0). R1–R7 start only after the Owner accepts the R0 prototype, each named in ACTIVE_TASK. |
+| RD4 | D3 (History baseline pin, compare from History) folds into R5. This is the written Owner exception to ADR-0024's "V1/user signal" entry condition that route §2 asks for. |
+| RD5 | Light `color.diff.removed` becomes `#C7372C` (4.56:1 on `#FBECEA`); ADR-0031 D6's contrast exemption is retired and the goldens that print it are regenerated on purpose in R1. |
+| RD6 | A human-readable Markdown report (Analyze, Compare, Gate) is added in R6 as candidate E1-B by Owner exception. It is a presentation format, not an interchange schema; it is not in the release bundle. Whether it may list per-object rows is settled in R6 against ADR-0033 D7 / ADR-0022 before that code lands. |
+
+D2C's open items (R4, human native QA, Pilot approval, V1 re-freeze authorization, ArmClang samples) stay open; the redesign does not close them.
 
 ## Standing Owner rules
 

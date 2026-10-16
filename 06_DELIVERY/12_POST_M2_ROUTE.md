@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "BASELINE"
 owner: "Product / Delivery"
-last_updated: "2026-10-15"
+last_updated: "2026-10-16"
 ---
 
 # Post-M2 Delivery Route
@@ -47,7 +47,7 @@ D4 may move ahead of D3 if real ArmClang samples arrive first and a user is wait
 
 ## 4. Kept out of this route
 
-- Large UI reworks, treemaps, watch mode, XLSX and DWARF ABI detail (`E3`, conditional).
+- Large UI reworks, treemaps, watch mode, XLSX and DWARF ABI detail (`E3`, conditional). **Amended 2026-10-16:** the Owner redirected the next round to the R-series UI/UX redesign ([ADR-0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md), `.ai/DECISIONS.md` RD1–RD6). That redesign, D3 (folded into R5) and a Markdown report (R6) are no longer excluded; treemaps, watch mode, XLSX and DWARF ABI detail still are.
 - IAR, until real samples and a user pull exist (`E3`).
 - CSV/Markdown export of object rows. It is a new interchange format for per-object data, which `ADR-0033` D7 sends to an `ADR-0022` decision. It is a D3 follow-up candidate, not part of D3.
 - A new acceptance framework for each small feature: batches keep the existing plan, acceptance and review pattern used in M1 and M2.

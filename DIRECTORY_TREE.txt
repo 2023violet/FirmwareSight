@@ -45,6 +45,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 01_BRAND_FOUNDATION.md
 │   └── 02_VOICE_MESSAGING.md
 ├── 03_DESIGN/
+│   ├── prototype/
+│   │   ├── instrument-ledger.html
+│   │   └── README.md
 │   ├── 00_DESIGN_PHILOSOPHY.md
 │   ├── 01_INFORMATION_ARCHITECTURE.md
 │   ├── 02_UX_FLOWS.md
@@ -53,7 +56,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 05_ACCESSIBILITY.md
 │   ├── 06_UI_REFERENCE_SCREENS.md
 │   ├── 07_DESIGN_TOKEN_VALIDATION.md
-│   └── 08_POST_MVP_PRESENTATION_RULES.md
+│   ├── 08_POST_MVP_PRESENTATION_RULES.md
+│   └── 09_R_REDESIGN_SPEC.md
 ├── 04_TECH/
 │   ├── 00_TECH_STACK.md
 │   ├── 01_SYSTEM_ARCHITECTURE.md
@@ -169,7 +173,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0030-release-attached-byte-evidence.md
 │   ├── ADR-0031-developer-preview-theme.md
 │   ├── ADR-0032-desktop-ui-language.md
-│   └── ADR-0033-object-library-attribution.md
+│   ├── ADR-0033-object-library-attribution.md
+│   └── ADR-0034-instrument-ledger-design-language.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt

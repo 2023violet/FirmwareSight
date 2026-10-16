@@ -20,11 +20,12 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 - **M2 object and library attribution:** on `main` at `04d800c` ([Actions #117](https://github.com/2023violet/FirmwareSight/actions/runs/38826237431), 10/10). GNU ld MAP object rows are stored per build (migration 0007) and shown on Analyze, Compare, Overview and CLI text; M1 leftovers F2, N1 and N2 are closed. `ADR-0033` is BASELINE. Three independent review rounds; dispositions in [06_DELIVERY/11](../06_DELIVERY/11_M2_OBJECT_ATTRIBUTION.md) §8. Local gate at `04d800c`: `check.py` 18/18, 0 SKIP.
 - **Actions #118 on `81e1345` (docs only):** `Desktop UI (ubuntu-latest)` failed on attempt 1 and passed on attempt 2. The failure is L23's eighth instance, repaired test-only with a mutation proof; a green rerun alone would not have closed it. See [P5_KNOWN_LIMITATIONS](../P5_VALIDATION/P5_KNOWN_LIMITATIONS.md), last section.
 - **Route after M2:** batches D2C, D3–D6 with entry conditions in [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md).
-- **D2C (branch `feature/d2c-closeout`, not yet on `main`):**
+- **D2C (on `main` at `e4d7f8b`, Actions #120):**
   - `fwsight diff` text now escapes control characters from user files.
   - Automated native QA of the M2 screens: 11 cases, all PASS ([evidence/D2C](../evidence/D2C/README.md)).
   - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
-- **Latest `main`:** `f4b3a12` ([Actions #119](https://github.com/2023violet/FirmwareSight/actions/runs/38852134515), 10/10 on the first attempt). Read Git for anything later.
+- **R-series redesign (branch `feature/r0-redesign-spec`, not yet on `main`):** R0 spec, ADR-0034 (PROPOSED) and an interactive prototype in [03_DESIGN/prototype](../03_DESIGN/prototype/README.md). No product, token or golden change. Owner decisions RD1–RD6 in [DECISIONS](DECISIONS.md).
+- **Latest `main`:** `e4d7f8b` (Actions #120, 10/10). Read Git for anything later.
 
 ## Gates
 
