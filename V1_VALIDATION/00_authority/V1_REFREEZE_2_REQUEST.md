@@ -30,7 +30,13 @@ Route decision R3 (`06_DELIVERY/12`) chose option (b). The frozen U1 build preda
    - `sessions/README.md` and `sessions/TEMPLATE.md` (cohort head, CI run);
    - `analysis/FINDINGS.md`, `analysis/METRICS.md`, `deliverables/V1_GATE_RECOMMENDATION.md`, `deliverables/V1_VALIDATION_REPORT.md`.
 
-   In `BASELINE.yaml`: a new `v1_execution` block beside `cohort_build_refreeze`, recording the new installer and payload hashes and the authorization, plus `cohort_build_state`. The earlier blocks stay as written, marked superseded. `V1_METRICS.md` is not touched. The round's own record and the authorization transcription are new files, as in 2026-10-08.
+   In `BASELINE.yaml`, everything goes **inside the existing `v1_execution` mapping**. A second top-level `v1_execution` key would silently replace the first one, the duplicate-key fault fixed in `fe420d1`. Follow the 2026-10-08 pattern:
+   - a new dated entry beside `cohort_build_refreeze`, carrying the authorization and the new installer and payload hashes;
+   - the pointer itself, `cohort_build_frozen`, moved to the new bytes, with its current value kept under `cohort_build_frozen_previous` as that round did;
+   - `cohort_build_state`;
+   - `refrozen_guard`, re-pointed at the new build.
+
+   Every earlier value stays as history. `V1_METRICS.md` is not touched. The round's own record and the authorization transcription are new files, as in 2026-10-08.
 
 ## What the round would not change
 

@@ -73,4 +73,17 @@ The two remaining small items from the route (§3 item 6) stay out of D2C. The s
 | C6 | Written; **awaiting samples** | `06_DELIVERY/14_D4_ARMCLANG_SAMPLE_REQUEST.md` |
 | C7–C9 | Waiting on the Owner or a human operator | — |
 
-Independent review of `4cbdf74`: PASS_WITH_FINDINGS (0 S1, 4 S2, 9 S3). All four S2s and seven of the S3s are fixed in the next commit (C1 now also escapes bidi, zero-width and backslash characters; Pilot naming, entry condition and wording; the full re-freeze file list; runbook H13 and H14; README counts). Two S3s are recorded and not changed: the O(rows × objects) cost noted in M2, and the desktop counts that include ambiguous rows (`06_DELIVERY/11` §8.3).
+Independent review of `4cbdf74`: PASS_WITH_FINDINGS (0 S1, 4 S2, 9 S3). All four S2s and all nine S3s are fixed in `dc58c21`. The fixes:
+- C1 also escapes bidi, zero-width and backslash characters.
+- Pilot naming, entry condition and wording.
+- The full re-freeze file list.
+- Runbook cases H13 and H14.
+- The evidence README counts.
+- NOW's date and gate line.
+
+The re-review of `dc58c21` found three new S3s, all fixed in the commit after it:
+- C1 now escapes everything `char::escape_debug` treats as non-printable, which adds U+061C, U+00AD and U+180E. That is the same table `analyze --objects` uses.
+- The re-freeze request now places its `BASELINE.yaml` changes inside the existing `v1_execution` mapping and names `cohort_build_frozen`, `cohort_build_frozen_previous` and `refrozen_guard`.
+- This note is corrected.
+
+Two M2 items stay recorded, not changed, in `06_DELIVERY/11` §8.3 (same-named archives merging in the Libraries view; desktop counts that include ambiguous rows). Neither came from this review.

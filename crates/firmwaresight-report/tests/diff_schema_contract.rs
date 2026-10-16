@@ -801,6 +801,11 @@ fn the_human_report_escapes_control_characters_taken_from_user_files() {
         !text.contains(r"\\u{202e}"),
         "nothing is escaped twice: {text}"
     );
+    // Re-review of dc58c21: assert the escaped symbol key itself, not only the absence of raw text.
+    assert!(
+        text.contains(r"\u{202e}rev"),
+        "a rendered symbol key carries its escape: {text}"
+    );
     assert!(
         !text.contains('\u{1b}'),
         "no raw ESC reaches stdout: {text:?}"

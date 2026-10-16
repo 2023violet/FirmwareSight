@@ -755,36 +755,25 @@ fn push_contributors(out: &mut String, title: &str, rows: &[Contributor]) {
 /// One place for every value the human report takes from a file: artifact file names, section, symbol,
 /// object and library keys, and warning text. Escaped:
 ///
-/// - C0/C1 controls and DEL (`\u{1b}`…), so a name cannot move the cursor or recolour the screen;
-/// - bidi overrides, isolates and marks (U+200E/F, U+202A–E, U+2066–9) and zero-width or line-breaking
-///   format characters (U+200B–D, U+2028/9, U+2060–5, U+FEFF), so a name cannot reorder or hide the
-///   text around it (review S2-1 of `4cbdf74`: the M2 object escaping covered these, and C1 must not
-///   lose them);
-/// - the backslash itself, so the literal text `\u{1b}` in a name cannot pass for an escaped ESC.
+/// - everything Rust's `char::escape_debug` treats as non-printable: C0/C1 controls and DEL, every
+///   bidi control and mark (U+061C, U+200E/F, U+202A–E, U+2066–9), and the zero-width, soft-hyphen and
+///   line-separator format characters (U+00AD, U+180E, U+200B–D, U+2028/9, U+FEFF…). A name therefore
+///   cannot move the cursor, recolour the screen, or reorder or hide the text around it (review S2-1 of
+///   `4cbdf74` and R1 of `dc58c21`). This is the same table `analyze --objects` uses, so the two reports
+///   escape the same characters;
+/// - the backslash, so the literal text `\u{1b}` in a name cannot pass for an escaped ESC.
 ///
-/// Quotes, spaces and other non-ASCII names (CJK, accents) print as they are.
+/// Quotes print as they are (`escape_debug` alone would escape them), and so do spaces, CJK and accents.
 fn terminal_safe(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     for c in value.chars() {
-        if c == '\\' {
-            out.push_str("\\\\");
-        } else if c.is_control() {
-            out.extend(c.escape_debug());
-        } else if is_invisible_format(c) {
-            out.extend(c.escape_unicode());
-        } else {
+        if c == '"' || c == '\'' {
             out.push(c);
+        } else {
+            out.extend(c.escape_debug());
         }
     }
     out
-}
-
-/// Bidi controls and invisible format characters a terminal draws without a glyph.
-fn is_invisible_format(c: char) -> bool {
-    matches!(
-        c,
-        '\u{200b}'..='\u{200f}' | '\u{2028}'..='\u{202e}' | '\u{2060}'..='\u{2069}' | '\u{feff}'
-    )
 }
 
 fn short_sha(sha: &str) -> &str {
@@ -863,6 +852,11 @@ mod tests {
         assert_eq!(terminal_safe("a\u{200b}b\u{feff}"), r"a\u{200b}b\u{feff}");
         assert_eq!(terminal_safe("x\u{2066}y\u{2069}"), r"x\u{2066}y\u{2069}");
         assert_eq!(terminal_safe("p\u{2028}q"), r"p\u{2028}q");
+        // Re-review R1 of dc58c21: the Arabic letter mark, the soft hyphen and the Mongolian vowel
+        // separator are format characters too.
+        assert_eq!(terminal_safe("a\u{61c}b"), r"a\u{61c}b");
+        assert_eq!(terminal_safe("soft\u{ad}hy"), r"soft\u{ad}hy");
+        assert_eq!(terminal_safe("m\u{180e}n"), r"m\u{180e}n");
         assert_eq!(
             terminal_safe(r"fake\u{1b}"),
             r"fake\\u{1b}",
