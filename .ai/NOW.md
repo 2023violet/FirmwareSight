@@ -19,7 +19,11 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 - **M1 first-use round:** on `main` at `6804ae7` (Actions #116, 10/10). Copy cut, drag-and-drop intake, Overview memory bars, Release step order, table scrolling, native dialog language, and six native-QA fixes. Evidence: [evidence/M1](../evidence/M1/README.md).
 - **M2 object and library attribution:** on `main` at `04d800c` ([Actions #117](https://github.com/2023violet/FirmwareSight/actions/runs/38826237431), 10/10). GNU ld MAP object rows are stored per build (migration 0007) and shown on Analyze, Compare, Overview and CLI text; M1 leftovers F2, N1 and N2 are closed. `ADR-0033` is BASELINE. Three independent review rounds; dispositions in [06_DELIVERY/11](../06_DELIVERY/11_M2_OBJECT_ATTRIBUTION.md) §8. Local gate at `04d800c`: `check.py` 18/18, 0 SKIP.
 - **Actions #118 on `81e1345` (docs only):** `Desktop UI (ubuntu-latest)` failed on attempt 1 and passed on attempt 2. The failure is L23's eighth instance, repaired test-only with a mutation proof; a green rerun alone would not have closed it. See [P5_KNOWN_LIMITATIONS](../P5_VALIDATION/P5_KNOWN_LIMITATIONS.md), last section.
-- **Route after M2:** batches D2C, D3–D6 with entry conditions in [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md). `ACTIVE_TASK` is `NONE` until the Owner names the next batch.
+- **Route after M2:** batches D2C, D3–D6 with entry conditions in [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md).
+- **D2C (branch `feature/d2c-closeout`, not yet on `main`):**
+  - `fwsight diff` text now escapes control characters from user files.
+  - Automated native QA of the M2 screens: 11 cases, all PASS ([evidence/D2C](../evidence/D2C/README.md)).
+  - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
 - **Local gate at `76b5c2c`:** `python scripts/check.py` 18/18 steps, 0 SKIP. Rust workspace 1,160 passed / 0 failed / 2 opt-in ignored. Frontend 397 tests in 13 files.
 
 ## Gates
@@ -35,7 +39,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 - NEXT-44 AC24, NEXT-44 AC26, NEXT-45 AC20: rated PASS_WITH_LIMITS by the independent review of M1 and still open. Not yet observed: deny, confirm, failure and retry on a visual export; the English replace confirmation; recorded Tab order; a screen reader; 1440×900; the non-Owner profile and human operator the [deferred register](../NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md) asks for. See [evidence/M1](../evidence/M1/README.md).
 - Native drag-and-drop from Explorer: NOT_RUN (automation could not synthesize an OS drag); one human drag is needed.
 - Screen-reader check: not run; UI Automation exposure was checked.
-- M2's desktop surfaces (Objects/Libraries tabs, Compare "By object and library", Overview "Latest comparison"): unit, IPC and component tests only; no native QA yet (`06_DELIVERY/12` D2C item 1).
+- M2's desktop surfaces (Objects/Libraries tabs, Compare "By object and library", Overview "Latest comparison"): automated native QA only (D2C C2). The human pass in [the runbook](../evidence/D2C/HUMAN_NATIVE_QA_RUNBOOK.md) has not run.
 
 ## Compatibility boundary
 

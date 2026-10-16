@@ -65,10 +65,10 @@ The two remaining small items from the route (§3 item 6) stay out of D2C. The s
 
 | # | State | Commit / evidence |
 |---|---|---|
-| C1 | In progress | — |
-| C2 | Pending | — |
-| C3 | Pending | — |
-| C4 | Pending | — |
-| C5 | Pending | — |
-| C6 | Pending | — |
+| C1 | Done | `02b88e1` |
+| C2 | Done: 11 cases, all PASS; A09 failed once on a driver selector and was re-run, both results kept | `evidence/D2C/README.md`, ZIP `5b431aed…064a` |
+| C3 | Written; **NOT_RUN** (C8) | `evidence/D2C/HUMAN_NATIVE_QA_RUNBOOK.md` |
+| C4 | Written; **awaiting Owner approval**; register at 0 | `PILOT_VALIDATION/` |
+| C5 | Written; **not authorized, not executed** | `V1_VALIDATION/00_authority/V1_REFREEZE_2_REQUEST.md` |
+| C6 | Written; **awaiting samples** | `06_DELIVERY/14_D4_ARMCLANG_SAMPLE_REQUEST.md` |
 | C7–C9 | Waiting on the Owner or a human operator | — |

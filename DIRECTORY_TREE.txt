@@ -109,7 +109,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 09_USER_INTERVIEW_QUESTION_BANK.md
 │   ├── 10_M1_FIRST_USE_EXPERIENCE.md
 │   ├── 11_M2_OBJECT_ATTRIBUTION.md
-│   └── 12_POST_M2_ROUTE.md
+│   ├── 12_POST_M2_ROUTE.md
+│   ├── 13_D2C_CLOSEOUT_AND_PILOT.md
+│   └── 14_D4_ARMCLANG_SAMPLE_REQUEST.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -696,6 +698,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   └── unknown_reasons.rs
 │       └── Cargo.toml
 ├── evidence/
+│   ├── D2C/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── D2C_NATIVE_QA_EVIDENCE.zip
+│   │   ├── HUMAN_NATIVE_QA_RUNBOOK.md
+│   │   └── README.md
 │   ├── M1/
 │   │   ├── .gitattributes
 │   │   ├── AC_MATRIX.tsv
@@ -968,6 +975,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── P5_RELEASE_READINESS.md
 │   ├── P5_SECURITY_SUPPORTABILITY_REVIEW.md
 │   └── P5_SUPPORTABILITY_REPORT.md
+├── PILOT_VALIDATION/
+│   ├── sessions/
+│   │   └── TEMPLATE.md
+│   ├── PILOT_PROTOCOL.md
+│   ├── PILOT_REGISTER.md
+│   └── README.md
 ├── POST_G2_E2E_REMEDIATION/
 │   ├── EXIT_CHECKLIST.md
 │   ├── FOCUSED_REVALIDATION_REPORT.md
@@ -1088,7 +1101,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── V0_TAKEOVER_REPORT.md
 ├── V1_VALIDATION/
 │   ├── 00_authority/
-│   │   └── SOURCE_PROMPT_V1_REFREEZE_transcription.md
+│   │   ├── SOURCE_PROMPT_V1_REFREEZE_transcription.md
+│   │   └── V1_REFREEZE_2_REQUEST.md
 │   ├── analysis/
 │   │   ├── FINDINGS.md
 │   │   ├── METRICS.md
