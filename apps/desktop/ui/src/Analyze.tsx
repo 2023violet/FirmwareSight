@@ -9,7 +9,7 @@
  * the in-flight flag - is this page's own business.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import styles from './Analyze.module.css';
 import { Button } from './components/Button';
@@ -184,7 +184,11 @@ export function Analyze({
     summary !== null && error === null && !pendingSelection ? summary : null;
 
   const exportRequest = useRef(0);
-  useEffect(() => {
+  // A layout effect, not a passive one: it runs in the same commit that shows the new selection or analysis.
+  // A passive effect left a window - the new subject on screen, the counter not yet moved - in which a late
+  // Save-dialog answer was taken as current and its ERR-EXPORT-6002 shown as an error instead of the stale
+  // note (CI #123, Windows). The counter must move before anything else can be awaited.
+  useLayoutEffect(() => {
     exportRequest.current += 1;
     setExporting(false);
     setExportError(null);
@@ -211,6 +215,14 @@ export function Analyze({
       return;
     }
     setExporting(false);
+    if (!result.ok && result.envelope.code === 'ERR-EXPORT-6002') {
+      // Rust is the authority on whether the subject changed: ERR-EXPORT-6002 says it did, even when the
+      // answer arrives before this page has rendered the new subject. It is the stale note, never an error.
+      setExportError(null);
+      setExportMessage(null);
+      setStaleExportNote(true);
+      return;
+    }
     if (!result.ok) {
       setExportError(result.envelope);
       setExportMessage(null);

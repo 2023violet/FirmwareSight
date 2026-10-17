@@ -111,3 +111,15 @@ An independent review of `19bd5b9` ran in its own session and worktree. Verdict:
 | S3: about 15 i18n keys were unused | 35 keys were removed from both catalogs. The dynamically built `page.*`, `drop.refused.*` and `evidenceClass.*` keys were kept. |
 | S3: the retained lead was named "Flash used" | It is now "Flash used · previous analysis". |
 | S3: decision order; stale Overview comment | Both fixed. |
+
+## 7. CI #123 on `4963c51` (2026-10-16)
+
+`Desktop UI (windows-latest)` failed one test: *keeps the stale-export note visible when the new selection hides the export region*. The other nine jobs passed.
+
+**Cause.** This was a product race, not only a test race. Analyze decided whether a Save-dialog answer was stale by a request counter, and the counter was bumped in a passive effect. R2 rendered more per selection change, which widened the window. In that window a late ERR-EXPORT-6002 was taken as the current subject's answer and shown as an error rather than as the stale note.
+
+**Fix.** Two changes:
+- ERR-EXPORT-6002 is the stale note on both paths, because Rust is the authority that the subject changed.
+- The counter moves in a layout effect, in the same commit as the new subject.
+
+**Proof.** A new deterministic test lands the answer in the same tick as the new subject. It failed before the fix and passes after it (mutation proof). A green rerun alone was not taken as a fix. The full suite ran three times locally with 475/475.

@@ -802,6 +802,30 @@ describe('P1-A0 intake screen', () => {
     expect(screen.getByText(/analysis changed while the Save dialog was open, so nothing was written/)).toBeDefined();
   });
 
+  it('takes a Save answer that lands in the same tick as the new subject as stale (CI #123)', async () => {
+    // The race CI #123 hit on Windows: the new selection is on screen, and the dialog's answer arrives
+    // before a passive effect would have moved the request counter. It must still read as stale.
+    let finish!: (value: Awaited<ReturnType<typeof exportAnalysisVisual>>) => void;
+    exportAnalysisVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    const subject = (id: string) => <Analyze
+      unit="bytes" onUnitChange={() => undefined}
+      selection={selection({ selectionId: id })} onSelectionChange={() => undefined}
+      analyzedSelectionId={id}
+      lastGood={summary({ identity: { ...summary().identity, snapshotId: id } })}
+      gettingStartedHidden onHideGettingStarted={() => undefined}
+      onLastGoodChange={() => undefined}
+    />;
+    const mounted = render(subject('old-subject'));
+    fireEvent.click(exportButton('Export PNG'));
+    await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalled());
+    await act(async () => {
+      mounted.rerender(subject('new-subject'));
+      finish(fail({ code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null }));
+    });
+    expect(screen.getByText(/analysis changed while the Save dialog was open/)).toBeDefined();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
   it('keeps the stale-export note visible when the new selection hides the export region', async () => {
     let finish!: (value: Awaited<ReturnType<typeof exportAnalysisVisual>>) => void;
     exportAnalysisVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
