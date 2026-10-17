@@ -59,7 +59,7 @@ pub fn render_human(evaluation: &GateEvaluation, policy_sha256: &str) -> String 
     let mut out = masthead("Release Gate report");
     out.push_str(&wrap(
         &verdict_sentence(evaluation),
-        &format!("{}", state_tag(&verdict.to_string())),
+        &state_tag(&verdict.to_string()),
         "          ",
     ));
     out.push_str(&format!(

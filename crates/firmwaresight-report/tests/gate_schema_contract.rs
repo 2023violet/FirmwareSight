@@ -732,7 +732,7 @@ fn the_human_report_orders_the_states_for_a_reader_and_shows_both_words_when_the
     for rule in GateRuleId::ALL {
         assert!(
             out.lines().any(|line| line.starts_with("  [")
-                && line.contains(&format!("] "))
+                && line.contains("] ")
                 && line.contains(rule.as_str())),
             "`{}` must appear under its group, after its state tag:\n{out}",
             rule.as_str()

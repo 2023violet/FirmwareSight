@@ -202,7 +202,9 @@ fn contributors(out: &mut String, title: &str, rows: &[Contributor]) {
         // the row never recorded is unknown, unless the row is the one that is gone.
         let delta = match (row.delta, row.change) {
             (Some(_), _) => delta_text(row.delta),
-            (None, ChangeKind::Added | ChangeKind::Removed) => "— (one side not present)".to_owned(),
+            (None, ChangeKind::Added | ChangeKind::Removed) => {
+                "— (one side not present)".to_owned()
+            }
             (None, ChangeKind::Changed) => "unknown".to_owned(),
         };
         let size = match (row.bytes, row.change) {

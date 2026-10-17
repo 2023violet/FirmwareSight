@@ -102,11 +102,19 @@ fn a_comparison_report_reads_in_the_report_grammar_without_html() {
             .unwrap_or_else(|| panic!("`{marker}` missing after {from}:\n{doc}"));
         from += at + marker.len();
     }
-    assert!(doc.contains("| Nonvolatile / load image | 132 bytes | 196 bytes | ▲64 bytes | exact |"));
+    assert!(
+        doc.contains("| Nonvolatile / load image | 132 bytes | 196 bytes | ▲64 bytes | exact |")
+    );
     // An added row has no delta, and says why instead of saying unknown or 0.
-    assert!(doc.contains("| Added | — (one side not present) |"), "{doc}");
+    assert!(
+        doc.contains("| Added | — (one side not present) |"),
+        "{doc}"
+    );
     // No HTML anywhere: a tag-shaped run of text would be an inline element in a GFM renderer.
-    assert!(!doc.contains("</") && !doc.contains("<br") && !doc.contains("<span"), "{doc}");
+    assert!(
+        !doc.contains("</") && !doc.contains("<br") && !doc.contains("<span"),
+        "{doc}"
+    );
     // Names from the file are inert: an underscore cannot start emphasis.
     assert!(doc.contains("imu\\_calibration"), "{doc}");
     // No path of the machine that ran it.
@@ -125,7 +133,11 @@ fn the_same_input_writes_the_same_bytes_and_an_existing_file_is_never_replaced()
     let refused = diff_markdown(&first);
     assert_eq!(refused.status.code(), Some(6));
     assert!(String::from_utf8_lossy(&refused.stderr).contains("ERR-EXPORT-6001"));
-    assert_eq!(read(&first), read(&second), "the existing file is untouched");
+    assert_eq!(
+        read(&first),
+        read(&second),
+        "the existing file is untouched"
+    );
 }
 
 #[test]
@@ -142,5 +154,7 @@ fn an_analysis_report_names_the_build_and_writes_unknown_and_limits_in_words() {
     assert!(doc.contains("A mapped section range is not free space"));
     assert!(doc.contains("## Limits"));
     // The text report still goes to stdout; the Markdown file is a second, separate document.
-    assert!(String::from_utf8_lossy(&output.stdout).starts_with("FirmwareSight · Analysis report\n"));
+    assert!(
+        String::from_utf8_lossy(&output.stdout).starts_with("FirmwareSight · Analysis report\n")
+    );
 }

@@ -546,15 +546,15 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
 
     // The export is written before anything is printed: a run that cannot produce the file the user
     // asked for must not already have announced success on stdout.
-    if let Some(path) = &args.markdown {
-        if let Some(code) = write_markdown(
+    if let Some(path) = &args.markdown
+        && let Some(code) = write_markdown(
             path,
             &markdown::comparison(&result),
             args.json,
             operation_id,
-        ) {
-            return ExitCode::from(code);
-        }
+        )
+    {
+        return ExitCode::from(code);
     }
     if let Some(path) = &args.html {
         let html = diff_render::render_html(&dto);
