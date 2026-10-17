@@ -44,7 +44,7 @@ export function FactValue({
       type="button"
       className={cx(styles['fact'], selected ? styles['selected'] : undefined)}
       aria-label={t('common', 'fact.open', { value: evidence.value, class: word })}
-      aria-pressed={selected}
+      aria-current={selected ? 'true' : undefined}
       onClick={(event) => {
         onInspect(evidence, event.currentTarget);
       }}

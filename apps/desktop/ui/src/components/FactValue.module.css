@@ -23,7 +23,11 @@
 }
 
 .selected {
-  background: var(--fs-color-diff-changed-bg);
+  /* Weight of a rule, not just a tint: the selection must survive greyscale. */
+  background: var(--fs-color-bg-subtle);
+  text-decoration-line: underline;
+  text-decoration-color: var(--fs-color-accent-primary);
+  text-decoration-thickness: var(--fs-focus-ring-width);
 }
 
 .value {

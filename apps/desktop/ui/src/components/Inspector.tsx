@@ -21,7 +21,7 @@ import type { FactEvidence } from './FactValue';
 import { Icon } from './Icon';
 
 /** `layout.breakpoint.inspector_dock` is 1280: from there up the Inspector is a column. */
-const DOCK_QUERY = '(min-width: 1280px)';
+export const DOCK_QUERY = '(width >= 1280px)';
 
 function dockedNow(): boolean {
   return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
@@ -48,6 +48,9 @@ export function Inspector({
   const panel = useRef<HTMLElement | null>(null);
   const closeButton = useRef<HTMLButtonElement | null>(null);
   const open = evidence !== null;
+  /** Read at close time, so a trigger that changed while open is the one focus returns to. */
+  const trigger = useRef(returnFocus);
+  trigger.current = returnFocus;
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -71,18 +74,62 @@ export function Inspector({
     }
   }, [open, evidence]);
 
+  // However it closes - its own button, Esc, or the page clearing the evidence - focus goes back to the
+  // value that opened it, unless the reader has already moved focus somewhere else on purpose.
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+    const host = panel.current;
+    return () => {
+      const active = document.activeElement;
+      if (active === null || active === document.body || (host !== null && host.contains(active)) || !active.isConnected) {
+        trigger.current?.focus();
+      }
+    };
+  }, [open]);
+
+  // The sheet is modal. Its keydown handler only hears keys while focus is inside it, so a click on plain
+  // text in the sheet (focus falls to <body>) would let Tab leave and Esc stop working. Watching the
+  // document closes both holes: Esc closes from anywhere, and focus that lands outside is sent back.
+  useEffect(() => {
+    if (!open || docked) {
+      return undefined;
+    }
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+    const onFocusIn = (event: FocusEvent) => {
+      const host = panel.current;
+      if (host !== null && event.target instanceof Node && !host.contains(event.target)) {
+        closeButton.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('focusin', onFocusIn);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('focusin', onFocusIn);
+    };
+  }, [open, docked, onClose]);
+
   if (evidence === null) {
     return null;
   }
 
   const close = () => {
     onClose();
-    returnFocus?.focus();
+    trigger.current?.focus();
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
+      // The document listener handles the sheet; this one covers the docked column.
       event.stopPropagation();
+      event.nativeEvent.stopImmediatePropagation();
       close();
       return;
     }
@@ -118,6 +165,7 @@ export function Inspector({
       role={docked ? 'complementary' : 'dialog'}
       aria-modal={docked ? undefined : true}
       aria-labelledby="fs-inspector-title"
+      tabIndex={-1}
       onKeyDown={onKeyDown}
     >
       <div className={styles['head']}>
@@ -190,14 +238,13 @@ export function Inspector({
     </aside>
   );
 
-  if (docked) {
-    return body;
-  }
+  // One outer element in both modes: crossing 1280 px while open must not remount the panel, or focus
+  // inside it would be lost (R1 review S2-2). Docked, the host is layout-transparent.
   return (
     <div
-      className={styles['scrim']}
+      className={docked ? styles['host'] : styles['scrim']}
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
+        if (!docked && event.target === event.currentTarget) {
           close();
         }
       }}

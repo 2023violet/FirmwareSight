@@ -24,20 +24,38 @@ import { StateBadge } from './StateBadge';
 import { SubjectBar } from './SubjectBar';
 import { Tabs, tabPanelProps } from './Tabs';
 
-/** jsdom has no `matchMedia`; this answers one query the way a window of `width` px would. */
-function stubWidth(width: number) {
-  vi.stubGlobal('matchMedia', (query: string) => {
-    const max = /max-width:\s*(\d+)px/.exec(query);
-    const min = /min-width:\s*(\d+)px/.exec(query);
-    const matches =
-      (max === null || width <= Number(max[1])) && (min === null || width >= Number(min[1]));
-    return {
-      matches,
-      media: query,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-    };
-  });
+/**
+ * jsdom has no `matchMedia`. This answers the two range queries the shell uses the way a window of
+ * `width` px would, and `resize` moves the width and fires `change` like a real window crossing a
+ * breakpoint.
+ */
+let resize: (width: number) => void = () => undefined;
+function stubWidth(initial: number) {
+  let width = initial;
+  const listeners = new Set<() => void>();
+  const evaluate = (query: string) => {
+    const below = /width\s*<\s*(\d+)px/.exec(query);
+    const atLeast = /width\s*>=\s*(\d+)px/.exec(query);
+    return (
+      (below === null || width < Number(below[1])) && (atLeast === null || width >= Number(atLeast[1]))
+    );
+  };
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    get matches() {
+      return evaluate(query);
+    },
+    media: query,
+    addEventListener: (_type: string, listener: () => void) => listeners.add(listener),
+    removeEventListener: (_type: string, listener: () => void) => listeners.delete(listener),
+  }));
+  resize = (next: number) => {
+    width = next;
+    act(() => {
+      for (const listener of listeners) {
+        listener();
+      }
+    });
+  };
 }
 
 afterEach(() => {
@@ -119,22 +137,29 @@ describe('Rail', () => {
   it('starts collapsed below 1180 px and keeps every accessible name', () => {
     stubWidth(1100);
     render(<Rail groups={groups} current="overview" onOpen={() => undefined} />);
-    const toggle = screen.getByRole('button', { name: 'Expand navigation' });
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    const toggle = () => screen.getByRole('button', { name: 'Page names' });
+    expect(toggle().getAttribute('aria-pressed')).toBe('false');
     const overview = screen.getByRole('button', { name: 'Overview page' });
     expect(overview.getAttribute('title')).toBe('Overview');
-    fireEvent.click(toggle);
-    expect(screen.getByRole('button', { name: 'Collapse navigation' }).getAttribute('aria-expanded')).toBe(
-      'true',
-    );
+    fireEvent.click(toggle());
+    expect(toggle().getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: 'Overview page' }).getAttribute('title')).toBeNull();
+    // The reader's choice outlives a resize across the breakpoint.
+    resize(1000);
+    expect(toggle().getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('starts expanded at the design width and lets the reader collapse it', () => {
+  it('follows the window across 1180 px until the reader chooses', () => {
     stubWidth(1440);
     render(<Rail groups={groups} current="overview" onOpen={() => undefined} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Collapse navigation' }));
-    expect(screen.getByRole('button', { name: 'Expand navigation' })).toBeTruthy();
+    const toggle = () => screen.getByRole('button', { name: 'Page names' });
+    expect(toggle().getAttribute('aria-pressed')).toBe('true');
+    resize(1179);
+    expect(toggle().getAttribute('aria-pressed')).toBe('false');
+    resize(1180);
+    expect(toggle().getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(toggle());
+    expect(toggle().getAttribute('aria-pressed')).toBe('false');
   });
 });
 
@@ -212,6 +237,45 @@ describe('Inspector', () => {
     copy.focus();
     fireEvent.keyDown(copy, { key: 'Tab' });
     expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Close evidence panel' }));
+  });
+
+  it('keeps Esc and the focus trap when focus has fallen to the page body', () => {
+    stubWidth(1100);
+    const onClose = vi.fn();
+    render(<Inspector evidence={FLASH} returnFocus={null} onClose={onClose} />);
+    const close = screen.getByRole('button', { name: 'Close evidence panel' });
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    outside.focus();
+    expect(document.activeElement).toBe(close);
+    close.blur();
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    outside.remove();
+  });
+
+  it('does not remount, and keeps focus, when the window crosses 1280 px while open', () => {
+    stubWidth(1440);
+    render(<Inspector evidence={FLASH} returnFocus={null} onClose={() => undefined} />);
+    const panel = screen.getByRole('complementary', { name: 'Evidence' });
+    const copy = within(panel).getByRole('button', { name: 'Copy raw value' });
+    copy.focus();
+    resize(1100);
+    expect(screen.getByRole('dialog', { name: 'Evidence' })).toBe(panel);
+    expect(document.activeElement).toBe(copy);
+  });
+
+  it('returns focus to the trigger when the page clears the evidence', () => {
+    stubWidth(1440);
+    const trigger = document.createElement('button');
+    document.body.append(trigger);
+    const { rerender } = render(
+      <Inspector evidence={FLASH} returnFocus={trigger} onClose={() => undefined} />,
+    );
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close evidence panel' }));
+    rerender(<Inspector evidence={null} returnFocus={trigger} onClose={() => undefined} />);
+    expect(document.activeElement).toBe(trigger);
+    trigger.remove();
   });
 
   it('leaves out fields the evidence does not carry', () => {
@@ -318,10 +382,10 @@ describe('DataTable and FilterBar', () => {
       '.bss',
       '.data',
     ]);
-    fireEvent.click(screen.getByRole('button', { name: 'Sort by Size' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Size' }));
     const size = within(table).getAllByRole('columnheader')[1]!;
     expect(size.getAttribute('aria-sort')).toBe('descending');
-    fireEvent.click(screen.getByRole('button', { name: 'Sort by Size' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Size' }));
     expect(size.getAttribute('aria-sort')).toBe('ascending');
     expect(within(table).getAllByRole('rowheader').map((cell) => cell.textContent)).toEqual([
       '.data',
@@ -335,7 +399,7 @@ describe('DataTable and FilterBar', () => {
     render(
       <DataTable caption="Symbols" columns={columns} rows={rows} rowKey={(row) => row.name} sort={null} onSort={onSort} />,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Sort by Name' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Name' }));
     expect(onSort).toHaveBeenCalledWith({ key: 'name', direction: 'desc' });
     expect(screen.getAllByRole('rowheader')[0]!.textContent).toBe('.text');
   });

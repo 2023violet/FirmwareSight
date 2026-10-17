@@ -48,6 +48,13 @@ h1 {
   font-weight: var(--fs-font-weight-semibold);
 }
 
+/* Browser defaults would draw these at 700, a weight the token scale does not have (ADR-0034 D3). */
+strong,
+b,
+th {
+  font-weight: var(--fs-font-weight-semibold);
+}
+
 h2 {
   font-size: var(--fs-font-size-section);
   line-height: var(--fs-line-height-section);

@@ -19,7 +19,7 @@ export type NoticeTone = 'info' | 'stale' | 'unknown' | 'error';
 
 const GLYPH: Record<NoticeTone, IconName> = {
   info: 'info',
-  stale: 'review',
+  stale: 'history',
   unknown: 'unknown',
   error: 'block',
 };
@@ -30,6 +30,7 @@ export function Notice({
   children,
   details,
   actions,
+  level = 3,
 }: {
   readonly tone: NoticeTone;
   readonly title: string;
@@ -39,12 +40,15 @@ export function Notice({
   readonly details?: readonly (readonly [string, ReactNode])[];
   /** The next step, as one or two buttons. */
   readonly actions?: ReactNode;
+  /** The heading level that fits where the notice sits in the page outline. */
+  readonly level?: 2 | 3 | 4;
 }) {
+  const Heading = `h${level}` as const;
   return (
     <div className={cx(styles['notice'], styles[tone])} role={tone === 'error' ? 'alert' : 'status'}>
       <Icon name={GLYPH[tone]} className={styles['icon']} />
       <div className={styles['content']}>
-        <h3 className={styles['title']}>{title}</h3>
+        <Heading className={styles['title']}>{title}</Heading>
         {children === undefined ? null : <div className={styles['text']}>{children}</div>}
         {details === undefined || details.length === 0 ? null : (
           <dl className={styles['details']}>

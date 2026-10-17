@@ -32,7 +32,7 @@ export interface RailGroup<K extends string> {
 }
 
 /** `layout.breakpoint.rail_collapse` is 1180: below it, the rail starts collapsed. */
-const NARROW_QUERY = '(max-width: 1179px)';
+export const NARROW_QUERY = '(width < 1180px)';
 
 function narrowNow(): boolean {
   return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
@@ -99,15 +99,15 @@ export function Rail<K extends string>({
         type="button"
         className={cx(styles['item'], styles['toggle'])}
         aria-controls="fs-rail"
-        aria-expanded={!collapsed}
-        aria-label={t('common', collapsed ? 'nav.expand' : 'nav.collapse')}
-        title={collapsed ? t('common', 'nav.expand') : undefined}
+        aria-pressed={!collapsed}
+        title={collapsed ? t('common', 'nav.labels') : undefined}
         onClick={() => {
           setChoice(!collapsed);
         }}
       >
         <Icon name="panel" size="md" />
-        <span className={styles['word']}>{t('common', 'nav.collapse')}</span>
+        {/* One fixed name; the pressed state says whether the names are showing, so it is announced once. */}
+        <span className={styles['word']}>{t('common', 'nav.labels')}</span>
       </button>
     </div>
   );

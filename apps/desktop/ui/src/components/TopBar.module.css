@@ -45,3 +45,12 @@
   font-size: var(--fs-font-size-metadata);
   line-height: var(--fs-line-height-metadata);
 }
+
+.command {
+  display: flex;
+  margin-inline-start: auto;
+}
+
+.command + .promise {
+  margin-inline-start: 0;
+}

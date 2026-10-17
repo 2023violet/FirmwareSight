@@ -1,0 +1,11 @@
+id	check	verdict	observation
+A01	Default window opens at the 1280 width with the rail expanded	PASS	innerWidth 1280, aria-pressed true, rail 224px
+A02	Every rail entry opens its page with the unchanged accessible name	PASS	7/7 pages, aria-current and h1 match
+A03	Below 1180 px the rail collapses on its own	PASS	innerWidth 1084, rail 56px, aria-pressed false
+A04	Above 1180 px it expands again	PASS	innerWidth 1440, rail 224px
+A05	The reader toggle collapses the rail at 1440	PASS	rail 56px, aria-pressed false
+A06	The five state glyphs render (Help page)	PASS	pass, review, block, unknown, na each present
+A07	Tokens 0.4.0 are live in the shipped CSS	PASS	h1 weight 600, diff.removed #C7372C, figure 28px
+A08	Dark theme follows the system preference	PASS	data-fs-theme dark, body rgb(21,23,27), diff.removed #F2705F
+A09	Owner app data untouched	PASS	23 files, identical SHA-256 before and after
+A10	Window cannot be dragged smaller than 1024x720	NOT_RUN	programmatic MoveWindow bypasses the minimum; one human drag-resize needed

@@ -58,3 +58,29 @@ R1 builds the parts. Pages move onto them in R2–R5. R1 changes **no page behav
 - The state-icon tests may change their path assertions, but not the label or the count.
 - The token-file tests in the report crate may change their version string.
 - Any other test edit is a scope violation and must be listed in the review.
+
+## 6. Review and smoke (2026-10-16)
+
+An independent review of `ecfc26f` ran in its own session and worktree. Verdict: **PASS_WITH_FIXES**, with no S1 findings. The dispositions:
+
+| Finding | Disposition |
+|---|---|
+| S2-1: the Inspector sheet's focus trap could be escaped when focus fell to `<body>` | Fixed. Document-level `focusin` and Esc listeners run while the sheet is open, and the panel takes `tabIndex=-1`. Test added. |
+| S2-2: focus was lost when the window crossed 1280 px while open, or when the page cleared the evidence | Fixed. The outer element is now the same in both modes (`display: contents` when docked), and focus returns in an effect cleanup. Two tests added. |
+| S2-3: no record of the desktop smoke run; the default 1040 window opened with the rail collapsed | Fixed. The default window width is now 1280, so the rail opens expanded. The native smoke ran on the fixed build: 9 PASS, 1 NOT_RUN (the minimum-size clamp needs a human drag). See [evidence/R1](../evidence/R1/README.md). |
+| S3: breakpoints and the window minimum were copied by hand | Range queries `(width < 1180px)` / `(width >= 1280px)`. `tokenDrift.test.ts` ties them and `tauri.conf.json` to the token file, and a mutation proved the test fails on drift. |
+| S3: the rail toggle announced its state twice | It now has one fixed name, "Page names", with `aria-pressed`. |
+| S3: state glyphs used a 1.8 stroke; duplicate glyphs | The token stroke is used. `evidence` gains a plus sign; `swap` is now vertical. |
+| S3: FactValue used `aria-pressed`, and its selection was shown by colour only | It now uses `aria-current`, plus an accent underline on `bg.subtle`. |
+| S3: LeadAnswer was named twice; DataTable used a "Sort by" name and a duplicate group name | Fixed: `aria-labelledby`, the header text as the button name, and no group wrapper name. |
+| S3: FilterBar comment vs `useId` | Fixed. The input carries `data-fs-filter`, which R2's `/` key uses. |
+| S3: BuildPicker highlight reset, no scroll into view, focusable list | All three fixed. |
+| S3: Tabs `aria-controls` pointed at unrendered panels | It is now set only on the selected tab. |
+| S3: Notice heading level was hard-coded | A `level` prop (2–4), default 3. |
+| S3: Gate glyphs used for non-Gate facts | The stale Notice and the retained chip use the `history` glyph, and the MAP chip uses `file`. The error Notice keeps the BLOCK shape because it blocks the action. The Owner may revisit this in R2. |
+| S3: Inspector shadow | `overlay-sm`, per spec 09. |
+| S3: TopBar had no command slot | A `command` slot was added; R5 fills it. |
+| S3: stale weight comment; `th`/`strong` at 700 | The comment was removed. `strong`, `b` and `th` use the semibold token. |
+| S3: ADR-0034 said R1 revises all of DESIGN.md | The ADR's Consequences now say which sections R1 revised and which phases revise the rest. |
+
+Only `components/foundation.test.tsx` (new in R1) and the new `components/tokenDrift.test.ts` changed. Existing page tests are untouched (§5).

@@ -62,7 +62,7 @@ export function SubjectBar({
         <span className={styles['chip']}>{t('common', 'subject.latest')}</span>
       ) : (
         <span className={cx(styles['chip'], styles['retained'])}>
-          <Icon name="review" size="inline" />
+          <Icon name="history" size="inline" />
           {t('common', 'subject.retained')}
         </span>
       )}
@@ -91,7 +91,7 @@ function Build({ build }: { readonly build: SubjectBuild }) {
         </span>
       ) : build.map ? (
         <span className={styles['chip']}>
-          <Icon name="pass" size="inline" className={styles['ok']} />
+          <Icon name="file" size="inline" />
           {t('common', 'subject.map')}
         </span>
       ) : (

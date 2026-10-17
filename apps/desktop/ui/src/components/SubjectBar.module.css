@@ -46,10 +46,6 @@
   border-radius: var(--fs-radius-pill);
 }
 
-.ok {
-  color: var(--fs-color-status-pass);
-}
-
 .unknown {
   color: var(--fs-color-status-unknown);
   border-style: dashed;

@@ -105,7 +105,7 @@ export function DataTable<T>({
   const hasAction = onRowAction !== undefined;
 
   return (
-    <div className={styles['wrap']} role="group" aria-label={caption}>
+    <div className={styles['wrap']}>
       <table className={cx(styles['table'], styles[density])}>
         <caption className={styles['caption']}>{caption}</caption>
         <thead>
@@ -130,10 +130,11 @@ export function DataTable<T>({
                   {column.sortValue === undefined ? (
                     column.header
                   ) : (
+                    // The header's own words are its name: a "Sort by" label here would be read as the
+                    // column header of every cell. `aria-sort` on the th already says it is sortable.
                     <button
                       type="button"
                       className={styles['sort']}
-                      aria-label={t('common', 'sort.by', { label: column.header })}
                       onClick={() => {
                         choose(column.key);
                       }}
@@ -202,7 +203,8 @@ export function DataTable<T>({
 
 /**
  * The filter row. It reports what the reader typed, and the table or the page applies it. `/` focuses
- * it from anywhere on the page (R2 wires the key), so the input carries a stable id per page.
+ * it from anywhere on the page (R2 wires the key) by finding `[data-fs-filter]`, so the input needs no
+ * page-chosen id.
  */
 export function FilterBar({
   label,
@@ -232,6 +234,7 @@ export function FilterBar({
       <input
         id={id}
         type="search"
+        data-fs-filter=""
         className={styles['input']}
         placeholder={label}
         value={value}

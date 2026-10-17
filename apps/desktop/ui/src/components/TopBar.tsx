@@ -22,9 +22,21 @@
 
 import styles from './TopBar.module.css';
 
+import type { ReactNode } from 'react';
+
 import { useI18n } from '../i18n';
 
-export function TopBar({ project }: { readonly project: string | null }) {
+/**
+ * `command` is the slot for the command-palette entry (ADR-0034 D2), which R5 fills. It sits between the
+ * project chip and the local-first promise, so adding it moves neither.
+ */
+export function TopBar({
+  project,
+  command,
+}: {
+  readonly project: string | null;
+  readonly command?: ReactNode;
+}) {
   const { t } = useI18n();
   return (
     <header className={styles['bar']}>
@@ -34,6 +46,7 @@ export function TopBar({ project }: { readonly project: string | null }) {
           {project}
         </span>
       )}
+      {command === undefined ? null : <div className={styles['command']}>{command}</div>}
       <p className={styles['promise']}>{t('common', 'shell.localWorkspace')}</p>
     </header>
   );

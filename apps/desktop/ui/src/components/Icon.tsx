@@ -59,20 +59,20 @@ const GLYPHS = {
   pass: (
     <>
       <circle cx="10" cy="10" r="7.5" fill="currentColor" stroke="none" />
-      <path d="M6.6 10.2l2.3 2.3 4.4-4.8" stroke={ON_STATUS} strokeWidth="1.8" />
+      <path d="M6.6 10.2l2.3 2.3 4.4-4.8" stroke={ON_STATUS} />
     </>
   ),
   review: (
     <>
       <path d="M10 2.5l8 14H2z" fill="currentColor" />
-      <path d="M10 8v3.6" stroke={ON_STATUS} strokeWidth="1.8" />
+      <path d="M10 8v3.6" stroke={ON_STATUS} />
       <circle cx="10" cy="14" r="1" fill={ON_STATUS} stroke="none" />
     </>
   ),
   block: (
     <>
       <path d="M7 2.5h6l4.5 4.5v6L13 17.5H7L2.5 13V7z" fill="currentColor" />
-      <path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8" stroke={ON_STATUS} strokeWidth="1.8" />
+      <path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8" stroke={ON_STATUS} />
     </>
   ),
   unknown: (
@@ -88,7 +88,7 @@ const GLYPHS = {
     </>
   ),
   // Actions
-  swap: <path d="M5 7h10l-3-3M15 13H5l3 3" />,
+  swap: <path d="M7 16V4L4 7M13 4v12l3-3" />,
   pin: <path d="M8 3h4l-.5 5 3 2.5h-9l3-2.5zM10 10.5V17" />,
   copy: (
     <>
@@ -104,7 +104,7 @@ const GLYPHS = {
   evidence: (
     <>
       <circle cx="9" cy="9" r="5" />
-      <path d="M13 13l4 4" />
+      <path d="M13 13l4 4M9 7v4M7 9h4" />
     </>
   ),
   file: <path d="M5 3h6l4 4v10H5zM11 3v4h4" />,

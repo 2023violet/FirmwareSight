@@ -24,7 +24,11 @@
   inset-block: 0;
   inset-inline-end: 0;
   max-width: 100%;
-  box-shadow: var(--fs-shadow-overlay-lg);
+  box-shadow: var(--fs-shadow-overlay-sm);
+}
+
+.host {
+  display: contents;
 }
 
 .scrim {

@@ -45,12 +45,22 @@ export function BuildPicker({
   const button = useRef<HTMLButtonElement | null>(null);
   const chosen = options.find((option) => option.id === value) ?? null;
 
+  // The highlight starts on the current choice when the list opens, and only then: a parent that passes a
+  // fresh options array on every render must not snap the reader's highlight back.
+  const latest = useRef({ options, value });
+  latest.current = { options, value };
   useEffect(() => {
     if (open) {
-      const index = options.findIndex((option) => option.id === value);
+      const index = latest.current.options.findIndex((option) => option.id === latest.current.value);
       setActive(index < 0 ? 0 : index);
     }
-  }, [open, options, value]);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      document.getElementById(`${base}-option-${active}`)?.scrollIntoView?.({ block: 'nearest' });
+    }
+  }, [open, active, base]);
 
   const pick = (index: number) => {
     const option = options[index];
@@ -133,7 +143,7 @@ export function BuildPicker({
         <Icon name="chevronDown" />
       </button>
       {open ? (
-        <ul className={styles['list']} role="listbox" id={`${base}-list`} aria-labelledby={`${base}-label`} tabIndex={-1}>
+        <ul className={styles['list']} role="listbox" id={`${base}-list`} aria-labelledby={`${base}-label`}>
           {options.map((option, index) => (
             <li
               key={option.id}

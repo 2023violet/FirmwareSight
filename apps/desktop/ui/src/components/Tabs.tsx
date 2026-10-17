@@ -4,7 +4,8 @@
  * The shipped pages switch views three ways: a tablist, a row of `aria-pressed` buttons and the rail
  * itself. This is the WAI-ARIA tabs pattern, with automatic activation: arrow keys move and select,
  * Home and End jump to the ends, and only the selected tab is in the Tab order (roving tabindex). The
- * panel is the caller's; `tabPanelProps` gives it the matching id and label.
+ * panel is the caller's; `tabPanelProps` gives it the matching id and label. Only the selected panel is
+ * rendered, so only the selected tab points at one with `aria-controls`.
  */
 
 import { useRef, type KeyboardEvent } from 'react';
@@ -87,7 +88,7 @@ export function Tabs<K extends string>({
             role="tab"
             id={tabId(idBase, item.key)}
             aria-selected={selected}
-            aria-controls={tabPanelProps(idBase, item.key).id}
+            aria-controls={selected ? tabPanelProps(idBase, item.key).id : undefined}
             tabIndex={selected ? 0 : -1}
             className={styles['tab']}
             onClick={() => {

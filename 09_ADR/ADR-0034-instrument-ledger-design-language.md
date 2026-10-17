@@ -75,7 +75,7 @@ Exports stay light-only and deterministic and load nothing from the network. HTM
 ## Consequences
 
 - Tests that pin accessible names change in R2–R5. Each phase carries a name-mapping table and updates the tests in the same commit.
-- `DESIGN.md` §4–§10 and `03_DESIGN/00–06` are revised in R1 to match this ADR. The accepted screenshot register (`06_UI_REFERENCE_SCREENS.md`) is replaced after R7.
+- R1 revises `DESIGN.md` §4, §5 and §9 and `03_DESIGN/03_VISUAL_SYSTEM.md` (tokens, icons, shell and shared components). The remaining sections of `DESIGN.md` and `03_DESIGN/00–06` are revised by the phase that moves the matching pages (R2–R6). The accepted screenshot register (`06_UI_REFERENCE_SCREENS.md`) is replaced after R7.
 - Golden HTML, SVG, PNG and CLI outputs change in R6, plus the `diff.removed` change in R1. Both are regenerated deliberately with `scripts/update_goldens.py --confirm` and reviewed diff by diff.
 - D2C's open human items (native QA, Pilot, V1 re-freeze) are not closed by this work. The native-QA runbook gains the new screens in R7.
 

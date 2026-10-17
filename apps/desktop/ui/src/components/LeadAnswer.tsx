@@ -7,7 +7,7 @@
  * page (ADR-0034 D3).
  */
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 
 import styles from './LeadAnswer.module.css';
 
@@ -31,12 +31,13 @@ export function LeadAnswer({
   /** A standing qualification, such as "this is not a certification". */
   readonly note?: ReactNode;
 }) {
+  const id = useId();
   return (
-    <section className={styles['lead']} aria-label={sentence}>
+    <section className={styles['lead']} aria-labelledby={id}>
       <div className={styles['row']}>
         {state}
         {figure === undefined ? null : <span className="figure">{figure}</span>}
-        <p className={styles['sentence']}>{sentence}</p>
+        <p id={id} className={styles['sentence']}>{sentence}</p>
         {action === undefined ? null : <div className={styles['action']}>{action}</div>}
       </div>
       {reference === undefined ? null : <p className={styles['reference']}>{reference}</p>}

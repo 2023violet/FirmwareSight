@@ -382,6 +382,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   ├── Table.tsx
 │           │   │   ├── Tabs.module.css
 │           │   │   ├── Tabs.tsx
+│           │   │   ├── tokenDrift.test.ts
 │           │   │   ├── TopBar.module.css
 │           │   │   └── TopBar.tsx
 │           │   ├── i18n/
@@ -737,8 +738,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── AC_MATRIX.tsv
 │   │   ├── M1_NATIVE_QA_EVIDENCE.zip
 │   │   └── README.md
-│   └── M2/
-│       └── DESIGN_CHECKLIST.md
+│   ├── M2/
+│   │   └── DESIGN_CHECKLIST.md
+│   └── R1/
+│       ├── AC_MATRIX.tsv
+│       ├── R1_NATIVE_SMOKE_EVIDENCE.zip
+│       └── README.md
 ├── examples/
 │   ├── project-readiness/
 │   │   ├── firmwaresight.toml
