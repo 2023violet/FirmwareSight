@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>FirmwareSight build diff</title>
+<title>FirmwareSight comparison report</title>
 <style>
 :root {
   --fs-color-bg-canvas: #F7F8FA;
@@ -139,12 +139,49 @@ th.num {
   font-family: var(--fs-font-mono);
 }
 
-.delta.positive::before {
-  content: "+";
+/* R6: a delta is a fact, not a judgement. It is primary text with a glyph, and the words for a screen
+   reader; only a policy's state ever carries colour (ADR-0034 D1.4). */
+.delta {
+  font-variant-numeric: tabular-nums;
 }
 
-.delta.negative {
-  color: var(--fs-color-diff-removed);
+.spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The report grammar (R6): a masthead that names the report and its subject, then the answer. */
+.masthead {
+  padding-bottom: var(--fs-space-3);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.masthead .kind {
+  margin: 0 0 var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+.lead {
+  margin: var(--fs-space-4) 0;
+  font-size: var(--fs-font-size-section);
+  line-height: 22px;
+}
+
+.lead strong {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.limits {
+  margin: 0;
+  padding-left: var(--fs-space-4);
+  color: var(--fs-color-text-secondary);
 }
 
 .added {
@@ -213,8 +250,12 @@ th, td, .mono { overflow-wrap: anywhere; }
 </head>
 <body>
 <main>
-<h1>Build diff</h1>
+<header class="masthead">
+<p class="kind">FirmwareSight &middot; Comparison report</p>
+<h1>firmware.elf <span class="mono">3f615b624717</span> &rarr; firmware.elf <span class="mono">4b4087e1407c</span></h1>
 <p class="brand">FirmwareSight 0.6.0 &middot; <span class="mono">urn:firmwaresight:schema:diff:1</span> schema version 1</p>
+</header>
+<p class="lead">Nonvolatile / load image <strong><span aria-hidden="true">▲120</span><span class="spoken">increase of 120</span> bytes</strong> (256 &rarr; 376 bytes); runtime RAM <strong><span aria-hidden="true">▲68</span><span class="spoken">increase of 68</span> bytes</strong> (8 &rarr; 76 bytes). Comparability: exact.</p>
 <h2>Builds compared</h2>
 <div class="card">
 <h3>Base (old)</h3>
@@ -236,14 +277,14 @@ th, td, .mono { overflow-wrap: anywhere; }
 <dt>MAP</dt><dd>stored for this build</dd>
 </dl>
 </div>
-<section class="visual-summary"><h2>Compare visual overview</h2><svg class="visual-scene" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="FirmwareSight Compare visual summary"><title>FirmwareSight Compare — A firmware.elf -&gt; B firmware.elf</title><rect width="1600" height="900" fill="#FFFFFF"/><text x="48" y="64" font-size="40" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FirmwareSight / Compare</text><text x="48" y="112" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">A firmware.elf -&gt; B firmware.elf</text><text x="48" y="144" font-size="24" fill="#5D6673" font-family="Consolas, Liberation Mono, monospace">A Snapshot ID: snap-3f615b6247179d930f59b76dcdba... / B Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd9...</text><text x="48" y="192" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FLASH image</text><text x="480" y="192" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">A 256 bytes</text><text x="832" y="192" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">B 376 bytes</text><text x="1184" y="192" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">Delta +120 bytes</text><text x="48" y="220" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / A exact (observed) / B exact (observed)</text><text x="48" y="256" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">RAM runtime</text><text x="480" y="256" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">A 8 bytes</text><text x="832" y="256" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">B 76 bytes</text><text x="1184" y="256" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">Delta +68 bytes</text><text x="48" y="284" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / A exact (observed) / B exact (observed)</text><text x="48" y="760" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Changed symbols 5. Added 38. Removed 33. Ambiguous 67.</text><text x="48" y="800" font-size="26" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Core symbol ranking is not FLASH/RAM attribution. Unknown is not zero.</text><text x="48" y="840" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Core comparability: exact. A -&gt; B; delta = B minus A.</text></svg><p>Visual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.</p></section><h2>Memory totals</h2>
+<section class="visual-summary"><h2>Compare visual overview</h2><svg class="visual-scene" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="FirmwareSight Compare visual summary"><title>FirmwareSight Compare — A firmware.elf -&gt; B firmware.elf</title><desc>A firmware.elf -&gt; B firmware.elf. Core comparability: exact. A -&gt; B; delta = B minus A.</desc><rect width="1600" height="900" fill="#FFFFFF"/><text x="48" y="64" font-size="40" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FirmwareSight · Compare summary</text><line x1="48" y1="160" x2="1552" y2="160" stroke="#D9DEE5" stroke-width="2"/><text x="48" y="112" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">A firmware.elf -&gt; B firmware.elf</text><text x="48" y="144" font-size="24" fill="#5D6673" font-family="Consolas, Liberation Mono, monospace">A Snapshot ID: snap-3f615b6247179d930f59b76dcdba... / B Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd9...</text><text x="48" y="192" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FLASH image</text><text x="480" y="192" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">A 256 bytes</text><text x="832" y="192" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">B 376 bytes</text><text x="1184" y="192" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">Delta +120 bytes</text><text x="48" y="220" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / A exact (observed) / B exact (observed)</text><text x="48" y="256" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">RAM runtime</text><text x="480" y="256" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">A 8 bytes</text><text x="832" y="256" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">B 76 bytes</text><text x="1184" y="256" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">Delta +68 bytes</text><text x="48" y="284" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / A exact (observed) / B exact (observed)</text><text x="48" y="760" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Changed symbols 5. Added 38. Removed 33. Ambiguous 67.</text><text x="48" y="800" font-size="26" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Core symbol ranking is not FLASH/RAM attribution. Unknown is not zero.</text><text x="48" y="840" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Core comparability: exact. A -&gt; B; delta = B minus A.</text><text x="48" y="884" font-size="20" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Generated by FirmwareSight 0.6.0. PNG text uses this computer&#39;s installed fonts.</text></svg><p>Visual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.</p></section><h2>Memory totals</h2>
 <p class="meta">Comparability: exact &mdash; the weaker side caps both budgets.</p>
 <table>
 <caption>Delta = target &minus; base. A dash is an absence, not a zero.</caption>
 <thead><tr><th>Budget</th><th class="num">Base</th><th class="num">Target</th><th class="num">Delta</th><th>Reading</th></tr></thead>
 <tbody>
-<tr><th>Nonvolatile / load image</th><td class="num">256</td><td class="num">376</td><td class="num delta positive">120</td><td>exact on both sides</td></tr>
-<tr><th>Runtime RAM</th><td class="num">8</td><td class="num">76</td><td class="num delta positive">68</td><td>exact on both sides</td></tr>
+<tr><th>Nonvolatile / load image</th><td class="num">256</td><td class="num">376</td><td class="num delta"><span aria-hidden="true">▲120</span><span class="spoken">increase of 120</span></td><td>exact on both sides</td></tr>
+<tr><th>Runtime RAM</th><td class="num">8</td><td class="num">76</td><td class="num delta"><span aria-hidden="true">▲68</span><span class="spoken">increase of 68</span></td><td>exact on both sides</td></tr>
 </tbody>
 </table>
 <p class="meta">Base side: nonvolatile 256 bytes (exact) &middot; runtime RAM 8 bytes (exact)</p>
@@ -261,24 +302,24 @@ th, td, .mono { overflow-wrap: anywhere; }
 <caption>Every changed row, not a truncated top list.</caption>
 <thead><tr><th>Change</th><th>Section</th><th class="num">Base size</th><th class="num">Target size</th><th class="num">Delta</th><th>Fields</th><th>Where to check</th></tr></thead>
 <tbody>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.ARM.attributes</td><td class="num">46</td><td class="num">46</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 15 / target row 15</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.bss</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td>differs: memory_size</td><td class="locator">base row 5 / target row 5</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.ARM.attributes</td><td class="num">46</td><td class="num">46</td><td class="num delta">0</td><td>differs: file_offset</td><td class="locator">base row 15 / target row 15</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.bss</td><td class="num">0</td><td class="num">0</td><td class="num delta">0</td><td>differs: memory_size</td><td class="locator">base row 5 / target row 5</td></tr>
 <tr><td><span class="chip removed">− Removed</span></td><td class="mono">.calib</td><td class="num">32</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 6</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.comment</td><td class="num">70</td><td class="num">70</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 14 / target row 14</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_abbrev</td><td class="num">470</td><td class="num">518</td><td class="num delta positive">48</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 8 / target row 8</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_aranges</td><td class="num">72</td><td class="num">72</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 10 / target row 10</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_frame</td><td class="num">156</td><td class="num">180</td><td class="num delta positive">24</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 16 / target row 16</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_info</td><td class="num">798</td><td class="num">910</td><td class="num delta positive">112</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 7 / target row 7</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_line</td><td class="num">314</td><td class="num">421</td><td class="num delta positive">107</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 12 / target row 12</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_loclists</td><td class="num">193</td><td class="num">414</td><td class="num delta positive">221</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 9 / target row 9</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_rnglists</td><td class="num">25</td><td class="num">25</td><td class="num">0</td><td>differs: file_offset</td><td class="locator">base row 11 / target row 11</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_str</td><td class="num">350</td><td class="num">389</td><td class="num delta positive">39</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 13 / target row 13</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.comment</td><td class="num">70</td><td class="num">70</td><td class="num delta">0</td><td>differs: file_offset</td><td class="locator">base row 14 / target row 14</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_abbrev</td><td class="num">470</td><td class="num">518</td><td class="num delta"><span aria-hidden="true">▲48</span><span class="spoken">increase of 48</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 8 / target row 8</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_aranges</td><td class="num">72</td><td class="num">72</td><td class="num delta">0</td><td>differs: file_offset</td><td class="locator">base row 10 / target row 10</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_frame</td><td class="num">156</td><td class="num">180</td><td class="num delta"><span aria-hidden="true">▲24</span><span class="spoken">increase of 24</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 16 / target row 16</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_info</td><td class="num">798</td><td class="num">910</td><td class="num delta"><span aria-hidden="true">▲112</span><span class="spoken">increase of 112</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 7 / target row 7</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_line</td><td class="num">314</td><td class="num">421</td><td class="num delta"><span aria-hidden="true">▲107</span><span class="spoken">increase of 107</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 12 / target row 12</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_loclists</td><td class="num">193</td><td class="num">414</td><td class="num delta"><span aria-hidden="true">▲221</span><span class="spoken">increase of 221</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 9 / target row 9</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_rnglists</td><td class="num">25</td><td class="num">25</td><td class="num delta">0</td><td>differs: file_offset</td><td class="locator">base row 11 / target row 11</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.debug_str</td><td class="num">350</td><td class="num">389</td><td class="num delta"><span aria-hidden="true">▲39</span><span class="spoken">increase of 39</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 13 / target row 13</td></tr>
 <tr><td><span class="chip added">+ Added</span></td><td class="mono">.ota</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">64</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 6</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.rodata</td><td class="num">32</td><td class="num">32</td><td class="num">0</td><td>differs: virtual_address, load_address, file_offset</td><td class="locator">base row 2 / target row 2</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.shstrtab</td><td class="num">203</td><td class="num">201</td><td class="num delta negative">-2</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 19 / target row 19</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.strtab</td><td class="num">163</td><td class="num">200</td><td class="num delta positive">37</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 18 / target row 18</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.symtab</td><td class="num">768</td><td class="num">848</td><td class="num delta positive">80</td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 17 / target row 17</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.text</td><td class="num">124</td><td class="num">212</td><td class="num delta positive">88</td><td>differs: file_size, memory_size</td><td class="locator">base row 1 / target row 1</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.rodata</td><td class="num">32</td><td class="num">32</td><td class="num delta">0</td><td>differs: virtual_address, load_address, file_offset</td><td class="locator">base row 2 / target row 2</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.shstrtab</td><td class="num">203</td><td class="num">201</td><td class="num delta"><span aria-hidden="true">▼2</span><span class="spoken">decrease of 2</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 19 / target row 19</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.strtab</td><td class="num">163</td><td class="num">200</td><td class="num delta"><span aria-hidden="true">▲37</span><span class="spoken">increase of 37</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 18 / target row 18</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.symtab</td><td class="num">768</td><td class="num">848</td><td class="num delta"><span aria-hidden="true">▲80</span><span class="spoken">increase of 80</span></td><td>differs: file_offset, file_size, memory_size</td><td class="locator">base row 17 / target row 17</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">.text</td><td class="num">124</td><td class="num">212</td><td class="num delta"><span aria-hidden="true">▲88</span><span class="spoken">increase of 88</span></td><td>differs: file_size, memory_size</td><td class="locator">base row 1 / target row 1</td></tr>
 </tbody>
 </table>
 <h2>Symbol changes</h2>
@@ -322,14 +363,14 @@ th, td, .mono { overflow-wrap: anywhere; }
 <tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 29</td></tr>
 <tr><td><span class="chip removed">− Removed</span></td><td class="mono">$t <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 31</td></tr>
 <tr><td><span class="chip removed">− Removed</span></td><td class="mono">calib</td><td class="num">32</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 34</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">calib_apply</td><td class="num">16</td><td class="num">2</td><td class="num delta negative">-14</td><td>differs: size</td><td class="locator">base row 39 / target row 43</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">cfg_table</td><td class="num">32</td><td class="num">32</td><td class="num">0</td><td>differs: address</td><td class="locator">base row 43 / target row 48</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">calib_apply</td><td class="num">16</td><td class="num">2</td><td class="num delta"><span aria-hidden="true">▼14</span><span class="spoken">decrease of 14</span></td><td>differs: size</td><td class="locator">base row 39 / target row 43</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">cfg_table</td><td class="num">32</td><td class="num">32</td><td class="num delta">0</td><td>differs: address</td><td class="locator">base row 43 / target row 48</td></tr>
 <tr><td><span class="chip added">+ Added</span></td><td class="mono">g_frame_counter</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">4</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 45</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">mqtt_task</td><td class="num">4</td><td class="num">46</td><td class="num delta positive">42</td><td>differs: address, size</td><td class="locator">base row 38 / target row 41</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">mqtt_task</td><td class="num">4</td><td class="num">46</td><td class="num delta"><span aria-hidden="true">▲42</span><span class="spoken">increase of 42</span></td><td>differs: address, size</td><td class="locator">base row 38 / target row 41</td></tr>
 <tr><td><span class="chip added">+ Added</span></td><td class="mono">packet_router</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">44</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 42</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">payload_extra</td><td class="num">4</td><td class="num">20</td><td class="num delta positive">16</td><td>differs: address, size</td><td class="locator">base row 42 / target row 47</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">payload_extra</td><td class="num">4</td><td class="num">20</td><td class="num delta"><span aria-hidden="true">▲16</span><span class="spoken">increase of 16</span></td><td>differs: address, size</td><td class="locator">base row 42 / target row 47</td></tr>
 <tr><td><span class="chip added">+ Added</span></td><td class="mono">staging_area</td><td class="num unknown" aria-label="not recorded">—</td><td class="num">64</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 37</td></tr>
-<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">tls_handshake</td><td class="num">16</td><td class="num">16</td><td class="num">0</td><td>differs: address</td><td class="locator">base row 35 / target row 38</td></tr>
+<tr><td><span class="chip changed">~ Changed</span></td><td class="mono">tls_handshake</td><td class="num">16</td><td class="num">16</td><td class="num delta">0</td><td>differs: address</td><td class="locator">base row 35 / target row 38</td></tr>
 <tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 0 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 0</td></tr>
 <tr><td><span class="chip removed">− Removed</span></td><td class="mono">unnamed symbol 0 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">base row 0</td></tr>
 <tr><td><span class="chip added">+ Added</span></td><td class="mono">unnamed symbol 1 <span class="unknown">(name repeats on one or both sides)</span></td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="not recorded">—</td><td class="num unknown" aria-label="no delta">—</td><td>no recorded field differs</td><td class="locator">target row 1</td></tr>
@@ -366,6 +407,12 @@ th, td, .mono { overflow-wrap: anywhere; }
 </table>
 <h2>Object and module changes</h2>
 <p class="meta">both builds stored object rows from a GNU ld MAP, each charged like its output section; the per-object and per-library rows are listed by the desktop Compare view, and the CLI text report gives their counts and largest changes; this portable document carries neither (ADR-0033 D7)</p>
+<h2>Limits</h2>
+<ul class="limits">
+<li>A dash is an absence, never a zero: a side that does not exist has no size and no delta.</li>
+<li>A row whose name repeats is left unpaired and is never counted as a change.</li>
+<li>Every delta, comparability and ranking here is Core&rsquo;s; this report decides nothing.</li>
+</ul>
 <footer>Deterministic export: no timestamp, no scripts, no network requests. FirmwareSight 0.6.0.</footer>
 </main>
 </body>

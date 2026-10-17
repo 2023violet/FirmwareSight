@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>FirmwareSight Release Bundle</title>
+<title>FirmwareSight release report</title>
 <style>
 :root {
   --fs-color-bg-canvas: #F7F8FA;
@@ -139,12 +139,49 @@ th.num {
   font-family: var(--fs-font-mono);
 }
 
-.delta.positive::before {
-  content: "+";
+/* R6: a delta is a fact, not a judgement. It is primary text with a glyph, and the words for a screen
+   reader; only a policy's state ever carries colour (ADR-0034 D1.4). */
+.delta {
+  font-variant-numeric: tabular-nums;
 }
 
-.delta.negative {
-  color: var(--fs-color-diff-removed);
+.spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The report grammar (R6): a masthead that names the report and its subject, then the answer. */
+.masthead {
+  padding-bottom: var(--fs-space-3);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.masthead .kind {
+  margin: 0 0 var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+.lead {
+  margin: var(--fs-space-4) 0;
+  font-size: var(--fs-font-size-section);
+  line-height: 22px;
+}
+
+.lead strong {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.limits {
+  margin: 0;
+  padding-left: var(--fs-space-4);
+  color: var(--fs-color-text-secondary);
 }
 
 .added {
@@ -271,8 +308,12 @@ h4 {
 </head>
 <body>
 <main>
-<h1>Release Bundle</h1>
+<header class="masthead">
+<p class="kind">FirmwareSight &middot; Release report</p>
+<h1>Release <span class="mono">1.2.3</span></h1>
 <p class="brand">FirmwareSight 0.6.0 &middot; release <span class="mono">release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5</span></p>
+</header>
+<p class="lead">Disposition <span class="chip pass">✓ <span class="state">PASS</span></span> &mdash; BLOCK 0 &middot; REVIEW 0 &middot; UNKNOWN 0 &middot; PASS 8 &middot; N/A 2. This bundle is integrity-checkable with its SHA256SUMS and manifest; it is not a certification and not a permission beyond the project&rsquo;s own policy.</p>
 <h2>1. Release identity</h2>
 <table>
 <caption>Four different identities, named separately on purpose.</caption>
@@ -288,7 +329,7 @@ h4 {
 <tr><td colspan="2" class="meta">These Git facts describe the workspace the Release Gate ran in. They are not evidence about how the shipped bytes were compiled, and no claim of that kind is made here.</td></tr>
 </tbody>
 </table>
-<section class="visual-summary"><h2>Release visual overview</h2><svg class="visual-scene" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="FirmwareSight Release visual summary"><title>FirmwareSight Release — 1.2.3</title><rect width="1600" height="900" fill="#FFFFFF"/><text x="48" y="64" font-size="40" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FirmwareSight / Release</text><text x="48" y="112" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">1.2.3</text><text x="48" y="144" font-size="24" fill="#5D6673" font-family="Consolas, Liberation Mono, monospace">Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd978e... / Gate Run ID: gate-a17e9861ce643da5e7061ac34979...</text><text x="48" y="176" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FLASH / nonvolatile image</text><text x="48" y="224" font-size="40" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">376 bytes</text><text x="48" y="264" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / observed</text><text x="816" y="176" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">RAM / runtime footprint</text><text x="816" y="224" font-size="40" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">76 bytes</text><text x="816" y="264" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / observed</text><text x="48" y="296" font-size="24" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Capacity unknown for footprint budgets. Missing/partial evidence remains qualified.</text><text x="48" y="320" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">git.clean</text><text x="480" y="320" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="348" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Workspace has no uncommitted changes at Gate evaluation time.</text><text x="48" y="384" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">release.commit_matches_ex...</text><text x="480" y="384" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">- N/A / severity PASS</text><text x="48" y="412" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">No `release.expected_commit` is declared for this release.</text><text x="48" y="448" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">release.version_matches_p...</text><text x="480" y="448" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="476" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Workspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared releas...</text><text x="48" y="512" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">artifacts.required</text><text x="480" y="512" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="540" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Every required artifact kind is present in the snapshot (elf, map).</text><text x="48" y="576" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">artifacts.hashes</text><text x="480" y="576" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="604" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">All 2 snapshot artifact(s) carry a SHA-256 digest.</text><text x="48" y="640" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">memory.flash_budget</text><text x="480" y="640" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="668" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Nonvolatile footprint 376 B is within the 512 B budget (136 B headroom).</text><text x="48" y="704" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">memory.ram_budget</text><text x="480" y="704" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="732" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Runtime RAM footprint 76 B is within the 256 B budget (180 B headroom).</text><text x="48" y="760" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Disposition after 0 recorded acceptances: PASS. Original findings unchanged.</text><text x="48" y="800" font-size="26" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">PASS is not shipping permission. SHA-256 checks bytes, not publisher identity.</text><text x="48" y="840" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Original Gate effective severity: PASS. Findings retain their original states.</text></svg><p>Visual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.</p></section><h2>2. Shipped artifacts</h2>
+<section class="visual-summary"><h2>Release visual overview</h2><svg class="visual-scene" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="FirmwareSight Release visual summary"><title>FirmwareSight Release — 1.2.3</title><desc>1.2.3. FLASH / nonvolatile image: 376 bytes (exact / observed). RAM / runtime footprint: 76 bytes (exact / observed). Original Gate effective severity: PASS. Findings retain their original states.</desc><rect width="1600" height="900" fill="#FFFFFF"/><text x="48" y="64" font-size="40" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FirmwareSight · Release summary</text><line x1="48" y1="160" x2="1552" y2="160" stroke="#D9DEE5" stroke-width="2"/><text x="48" y="112" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">1.2.3</text><text x="48" y="144" font-size="24" fill="#5D6673" font-family="Consolas, Liberation Mono, monospace">Snapshot ID: snap-4b4087e1407ceddcb1e1cfcd978e... / Gate Run ID: gate-a17e9861ce643da5e7061ac34979...</text><text x="48" y="176" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">FLASH / nonvolatile image</text><text x="48" y="224" font-size="40" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">376 bytes</text><text x="48" y="264" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / observed</text><text x="816" y="176" font-size="30" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">RAM / runtime footprint</text><text x="816" y="224" font-size="40" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">76 bytes</text><text x="816" y="264" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">exact / observed</text><text x="48" y="296" font-size="24" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Capacity unknown for footprint budgets. Missing/partial evidence remains qualified.</text><text x="48" y="320" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">git.clean</text><text x="480" y="320" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="348" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Workspace has no uncommitted changes at Gate evaluation time.</text><text x="48" y="384" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">release.commit_matches_ex...</text><text x="480" y="384" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">- N/A</text><text x="48" y="412" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">No `release.expected_commit` is declared for this release.</text><text x="48" y="448" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">release.version_matches_p...</text><text x="480" y="448" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="476" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Workspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared releas...</text><text x="48" y="512" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">artifacts.required</text><text x="480" y="512" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="540" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Every required artifact kind is present in the snapshot (elf, map).</text><text x="48" y="576" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">artifacts.hashes</text><text x="480" y="576" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="604" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">All 2 snapshot artifact(s) carry a SHA-256 digest.</text><text x="48" y="640" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">memory.flash_budget</text><text x="480" y="640" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="668" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Nonvolatile footprint 376 B is within the 512 B budget (136 B headroom).</text><text x="48" y="704" font-size="26" fill="#171A1F" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">memory.ram_budget</text><text x="480" y="704" font-size="20" fill="#171A1F" font-family="Consolas, Liberation Mono, monospace">+ PASS / severity PASS</text><text x="48" y="732" font-size="24" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Runtime RAM footprint 76 B is within the 256 B budget (180 B headroom).</text><text x="48" y="760" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Disposition after 0 recorded acceptances: PASS. Original findings unchanged.</text><text x="48" y="800" font-size="26" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">PASS is not shipping permission. SHA-256 checks bytes, not publisher identity.</text><text x="48" y="840" font-size="26" fill="#5D6673" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Original Gate effective severity: PASS. Findings retain their original states.</text><text x="48" y="884" font-size="20" fill="#667085" font-family="Segoe UI, Arial, Microsoft YaHei, Noto Sans CJK SC, sans-serif">Generated by FirmwareSight 0.6.0. PNG text uses this computer&#39;s installed fonts.</text></svg><p>Visual summary only. Detailed evidence follows. Browser Print / Save as PDF; native PDF export is unavailable.</p></section><h2>2. Shipped artifacts</h2>
 <p class="meta">2 file(s) under <span class="mono">artifacts/</span>. The baseline build is never shipped: it exists only to explain the comparison in section 4.</p>
 <table>
 <caption>The bytes this release consists of, in the order the release fingerprint lists them.</caption>

@@ -181,17 +181,33 @@ pub fn render_html(report: &ReleaseBundleReport<'_>) -> String {
     let mut out = String::new();
     out.push_str("<!doctype html>\n<html lang=\"en\">\n<head>\n");
     out.push_str("<meta charset=\"utf-8\">\n");
-    out.push_str("<title>FirmwareSight Release Bundle</title>\n");
+    out.push_str("<title>FirmwareSight release report</title>\n");
     out.push_str("<style>\n");
     out.push_str(EMBEDDED_STYLE);
     out.push_str(RELEASE_EXTRA_STYLE);
     out.push_str("</style>\n</head>\n<body>\n<main>\n");
 
-    out.push_str("<h1>Release Bundle</h1>\n");
+    // R6 report grammar: the masthead names the report and the release, and the answer comes first.
+    out.push_str("<header class=\"masthead\">\n<p class=\"kind\">FirmwareSight &middot; Release report</p>\n");
     out.push_str(&format!(
-        "<p class=\"brand\">FirmwareSight {} &middot; release <span class=\"mono\">{}</span></p>\n",
+        "<h1>Release <span class=\"mono\">{}</span></h1>\n",
+        escape_html(report.model.version.as_str())
+    ));
+    out.push_str(&format!(
+        "<p class=\"brand\">FirmwareSight {} &middot; release <span class=\"mono\">{}</span></p>\n</header>\n",
         escape_html(&report.model.fwsight_version),
         escape_html(report.release_id)
+    ));
+    out.push_str(&format!(
+        "<p class=\"lead\">Disposition {} &mdash; BLOCK {} &middot; REVIEW {} &middot; UNKNOWN {} &middot; PASS {} &middot; N/A {}. \
+         This bundle is integrity-checkable with its SHA256SUMS and manifest; it is not a certification \
+         and not a permission beyond the project&rsquo;s own policy.</p>\n",
+        chip(report.reviews.extensions.overall_effective_severity),
+        report.gate_counts.block,
+        report.gate_counts.review,
+        report.gate_counts.unknown,
+        report.gate_counts.pass,
+        report.gate_counts.not_applicable
     ));
 
     render_identity(report, &mut out);

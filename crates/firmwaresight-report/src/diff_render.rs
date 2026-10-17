@@ -154,12 +154,49 @@ th.num {
   font-family: var(--fs-font-mono);
 }
 
-.delta.positive::before {
-  content: "+";
+/* R6: a delta is a fact, not a judgement. It is primary text with a glyph, and the words for a screen
+   reader; only a policy's state ever carries colour (ADR-0034 D1.4). */
+.delta {
+  font-variant-numeric: tabular-nums;
 }
 
-.delta.negative {
-  color: var(--fs-color-diff-removed);
+.spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The report grammar (R6): a masthead that names the report and its subject, then the answer. */
+.masthead {
+  padding-bottom: var(--fs-space-3);
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.masthead .kind {
+  margin: 0 0 var(--fs-space-2);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: 18px;
+}
+
+.lead {
+  margin: var(--fs-space-4) 0;
+  font-size: var(--fs-font-size-section);
+  line-height: 22px;
+}
+
+.lead strong {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.limits {
+  margin: 0;
+  padding-left: var(--fs-space-4);
+  color: var(--fs-color-text-secondary);
 }
 
 .added {
@@ -240,17 +277,31 @@ pub fn render_html(dto: &DiffResultDto) -> String {
     let mut out = String::new();
     out.push_str("<!doctype html>\n<html lang=\"en\">\n<head>\n");
     out.push_str("<meta charset=\"utf-8\">\n");
-    out.push_str("<title>FirmwareSight build diff</title>\n");
+    out.push_str("<title>FirmwareSight comparison report</title>\n");
     out.push_str("<style>\n");
     out.push_str(EMBEDDED_STYLE);
     out.push_str("</style>\n</head>\n<body>\n<main>\n");
 
-    out.push_str("<h1>Build diff</h1>\n");
+    // R6 report grammar: the masthead names the report and the pair, and the answer comes before any table.
+    out.push_str("<header class=\"masthead\">\n<p class=\"kind\">FirmwareSight &middot; Comparison report</p>\n");
     out.push_str(&format!(
-        "<p class=\"brand\">FirmwareSight {} &middot; <span class=\"mono\">{}</span> schema version {}</p>\n",
+        "<h1>{} <span class=\"mono\">{}</span> &rarr; {} <span class=\"mono\">{}</span></h1>\n",
+        escape_html(&dto.base.artifact.file_name),
+        escape_html(short_sha(&dto.base.artifact.sha256)),
+        escape_html(&dto.target.artifact.file_name),
+        escape_html(short_sha(&dto.target.artifact.sha256)),
+    ));
+    out.push_str(&format!(
+        "<p class=\"brand\">FirmwareSight {} &middot; <span class=\"mono\">{}</span> schema version {}</p>\n</header>\n",
         env!("CARGO_PKG_VERSION"),
         escape_html(dto.schema),
         dto.schema_version
+    ));
+    out.push_str(&format!(
+        "<p class=\"lead\">Nonvolatile / load image {}; runtime RAM {}. Comparability: {}.</p>\n",
+        lead_change(&dto.memory.nonvolatile),
+        lead_change(&dto.memory.runtime_ram),
+        escape_html(dto.memory.comparability)
     ));
 
     render_sides(dto, &mut out);
@@ -264,6 +315,13 @@ pub fn render_html(dto: &DiffResultDto) -> String {
     render_symbols(dto, &mut out);
     render_objects(&dto.object_changes, &mut out);
 
+    out.push_str(
+        "<h2>Limits</h2>\n<ul class=\"limits\">\n\
+<li>A dash is an absence, never a zero: a side that does not exist has no size and no delta.</li>\n\
+<li>A row whose name repeats is left unpaired and is never counted as a change.</li>\n\
+<li>Every delta, comparability and ranking here is Core&rsquo;s; this report decides nothing.</li>\n\
+</ul>\n",
+    );
     out.push_str(&format!(
         "<footer>Deterministic export: no timestamp, no scripts, no network requests. \
 FirmwareSight {}.</footer>\n",
@@ -381,13 +439,37 @@ fn num_cell(value: Option<u64>) -> String {
 
 fn delta_cell(delta: Option<i64>) -> String {
     match delta {
-        Some(0) => "<td class=\"num\">0</td>".to_owned(),
-        Some(value) if value > 0 => {
-            format!("<td class=\"num delta positive\">{}</td>", value.abs())
-        }
-        Some(value) => format!("<td class=\"num delta negative\">{value}</td>"),
         None => "<td class=\"num unknown\" aria-label=\"no delta\">\u{2014}</td>".to_owned(),
+        Some(value) => format!("<td class=\"num delta\">{}</td>", delta_words(value)),
     }
+}
+
+/// A delta as neutral text: a glyph, the magnitude, and the words for a screen reader (R6).
+fn delta_words(value: i64) -> String {
+    match value {
+        0 => "0".to_owned(),
+        v if v > 0 => format!(
+            "<span aria-hidden=\"true\">\u{25B2}{v}</span><span class=\"spoken\">increase of {v}</span>"
+        ),
+        v => format!(
+            "<span aria-hidden=\"true\">\u{25BC}{m}</span><span class=\"spoken\">decrease of {m}</span>",
+            m = v.unsigned_abs()
+        ),
+    }
+}
+
+/// One side of the lead: the delta in figure type, and what it moved between.
+fn lead_change(change: &ByteChangeDto) -> String {
+    let delta = match change.delta {
+        Some(value) => format!("<strong>{} bytes</strong>", delta_words(value)),
+        None => "<strong>no delta</strong>".to_owned(),
+    };
+    let side = |bytes: Option<u64>| bytes.map_or_else(|| "\u{2014}".to_owned(), |b| b.to_string());
+    format!(
+        "{delta} ({} &rarr; {} bytes)",
+        side(change.base),
+        side(change.target)
+    )
 }
 
 fn render_warnings(dto: &DiffResultDto, out: &mut String) {

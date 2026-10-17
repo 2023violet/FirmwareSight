@@ -83,3 +83,16 @@ It is staged in three parts.
   - CLI: `markdown_cli.rs`, 3 tests;
   - shell: `markdown_export.rs`, 2 tests;
   - UI: 3 export tests (529/529).
+- **R6c** covers:
+  - **The detailed comparison HTML:**
+    - a masthead naming the report and the pair (`<title>` "FirmwareSight comparison report");
+    - the answer line before any table;
+    - deltas as neutral ▲▼ text with spoken words (the coloured negative and the CSS "+" are gone);
+    - a Limits section before the footer.
+  - **The release report HTML:** the same masthead and an answer line with the disposition and the five counts, plus a "not a certification" sentence.
+  - **The SVG/PNG summary:**
+    - `<desc>` repeats the subject, the figures and the first limit in words;
+    - a "FirmwareSight · <kind> summary" masthead ruled with the border token;
+    - a footer naming the generator and the PNG font dependency;
+    - N/A rows no longer carry "severity PASS".
+  - **Goldens:** `p2-diff.html`, the `p4-release` report, and its `SHA256SUMS` and manifest were regenerated on purpose with `update_goldens.py --confirm` and reviewed. The bundle's file set and manifest format are unchanged; only the report file inside it, and therefore its digest, changed.
