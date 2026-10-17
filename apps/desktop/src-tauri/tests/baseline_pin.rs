@@ -49,14 +49,10 @@ impl Drop for TempDb {
 fn store_side(session: &Session, side: &str) -> String {
     let root = repo_root().join(format!("fixtures/elf/p2-diff/{side}"));
     let selection = session
-        .stage_artifact(&root.join("firmware.elf"), "op-stage")
+        .stage_artifact(root.join("firmware.elf"), "op-stage")
         .expect("the committed fixture stages");
     session
-        .stage_map(
-            &selection.selection_id,
-            &root.join("firmware.map"),
-            "op-map",
-        )
+        .stage_map(&selection.selection_id, root.join("firmware.map"), "op-map")
         .expect("the fixture MAP stages");
     session
         .analyze_selection(&selection.selection_id, "op-analyze")

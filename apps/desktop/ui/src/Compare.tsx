@@ -299,13 +299,12 @@ export function Compare({
       candidates.rows.find((row) => row.snapshotId === lastAnalyzedSnapshotId) ?? mostRecent;
     // The pinned baseline is the measurement reference, so it is the default base whenever it is a different
     // build from the target (D-R5-3); otherwise the next distinct build is.
-    const pinned =
-      pin === null || pin.snapshotId === preferred.snapshotId
-        ? null
-        : (candidates.rows.find((row) => row.snapshotId === pin.snapshotId) ?? null);
-    const other = pinned ?? candidates.rows.find((row) => row.snapshotId !== preferred.snapshotId) ?? null;
+    // It is used even when it is not on the loaded page of candidates (R5 review S2-2): the comparison needs
+    // only its id, and the picker names it from the pin itself.
+    const pinnedId = pin === null || pin.snapshotId === preferred.snapshotId ? null : pin.snapshotId;
+    const other = candidates.rows.find((row) => row.snapshotId !== preferred.snapshotId) ?? null;
     setPair({
-      baseId: other === null ? null : other.snapshotId,
+      baseId: pinnedId ?? (other === null ? null : other.snapshotId),
       targetId: preferred.snapshotId,
     });
   }, [baseId, candidates, lastAnalyzedSnapshotId, pin, setPair, targetId]);
@@ -478,9 +477,22 @@ export function Compare({
   );
 
   const rows = candidates?.rows ?? [];
+  // Builds this page can name although they are not on the loaded page of candidates: the pin, and the two
+  // sides of the comparison on screen (R5 review S2-2). Each is named by file and digest only.
+  const known: readonly KnownBuild[] = [
+    ...(pin === null ? [] : [{ id: pin.snapshotId, fileName: pin.fileName, sha256: pin.sha256, meta: t('compare', 'picker.knownPinned', { at: pin.pinnedAt }) }]),
+    ...(summary === null
+      ? []
+      : [summary.base, summary.target].map((side) => ({
+          id: side.snapshotId,
+          fileName: side.fileName,
+          sha256: side.sha256,
+          meta: t('compare', 'picker.knownCompared'),
+        }))),
+  ];
   const base = rows.find((row) => row.snapshotId === baseId) ?? null;
-  const target = rows.find((row) => row.snapshotId === targetId) ?? null;
-  const bothChosen = base !== null && target !== null;
+  // The ids decide, not the loaded page: a pinned or compared build off the page is still a chosen build.
+  const bothChosen = baseId !== null && targetId !== null;
   const samePair = bothChosen && baseId === targetId;
   const hasTwoBuilds = (candidates?.total ?? 0) >= 2;
   // The report answers for the pair it was computed from, not for the pair the selectors happen to
@@ -566,6 +578,7 @@ export function Compare({
             <PairSide
               label={t('compare', 'picker.baseLabel')}
               rows={rows}
+              known={known}
               pinnedId={pin?.snapshotId ?? null}
               selected={baseId}
               lastAnalyzedSnapshotId={lastAnalyzedSnapshotId}
@@ -581,6 +594,7 @@ export function Compare({
             <PairSide
               label={t('compare', 'picker.targetLabel')}
               rows={rows}
+              known={known}
               pinnedId={pin?.snapshotId ?? null}
               selected={targetId}
               lastAnalyzedSnapshotId={lastAnalyzedSnapshotId}
@@ -823,9 +837,18 @@ function pairSubject(summary: CompareSummaryDto, pinnedId: string | null): Subje
 }
 
 /** One selector, with the recorded facts of the build it currently names. */
+/** A build named by file and digest, for a picker that does not hold its candidate row. */
+interface KnownBuild {
+  readonly id: string;
+  readonly fileName: string;
+  readonly sha256: string;
+  readonly meta: string;
+}
+
 function PairSide({
   label,
   rows,
+  known,
   pinnedId,
   selected,
   lastAnalyzedSnapshotId,
@@ -835,6 +858,7 @@ function PairSide({
 }: {
   readonly label: string;
   readonly rows: readonly CompareCandidateDto[];
+  readonly known: readonly KnownBuild[];
   readonly pinnedId: string | null;
   readonly selected: string | null;
   readonly lastAnalyzedSnapshotId: string | null;
@@ -856,13 +880,28 @@ function PairSide({
             ? `${row.importedAt}${t('compare', 'picker.lastAnalyzedSuffix')}`
             : row.importedAt,
           pinned: row.snapshotId === pinnedId,
-        }))}
+        })).concat(
+          known
+            .filter((build, index, all) => !rows.some((row) => row.snapshotId === build.id) && all.findIndex((other) => other.id === build.id) === index)
+            .map((build) => ({
+              id: build.id,
+              fileName: build.fileName,
+              sha256: build.sha256,
+              importedAt: '',
+              meta: build.meta,
+              pinned: build.id === pinnedId,
+            })),
+        )}
         value={selected}
         disabled={disabled}
         onChange={onSelect}
       />
       {chosen === null ? (
-        <p className={styles['sideFacts']}>{t('compare', 'picker.noBuildNamed')}</p>
+        <p className={styles['sideFacts']}>
+          {selected !== null && known.some((build) => build.id === selected)
+            ? t('compare', 'picker.knownFacts')
+            : t('compare', 'picker.noBuildNamed')}
+        </p>
       ) : (
         <p className={styles['sideFacts']}>
           <span className={styles['mono']}>{formatSize(chosen.byteSize, unit)}</span>

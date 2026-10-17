@@ -82,7 +82,7 @@ New tests:
   - Compare: 2 tests;
   - Help: 1 test.
 
-UI tests: 522/522. Three tests were mutation-checked: the pinned default base, the auto-compare-once rule, and the typing guard on single-key shortcuts.
+UI tests: 526/526 after the review fixes (§6). Three tests were mutation-checked: the pinned default base, the auto-compare-once rule, and the typing guard on single-key shortcuts.
 
 The existing migration-list and schema-version assertions now name 0008 / version 8 (storage `compare_candidates`, `map_companion_persistence`, `release_records`, `integrity_and_backup`, `unknown_reasons`, `object_contributions`; shell `real_artifact_intake`, `diagnostics`). Each step-down helper also drops the new table.
 
@@ -105,3 +105,26 @@ The existing migration-list and schema-version assertions now name 0008 / versio
 The final QA build passed 13 checks; 1 is NOT_RUN (the human drag check). See [evidence/R5](../evidence/R5/README.md).
 
 The first run found three visual defects, now fixed: values wrapping mid-value, row buttons repeating the build name, and the palette's width. For the palette width the token file has no dialog size, so it is the evidence-column maximum plus the rail width; recorded for R7's token review.
+
+## 6. Independent review (2026-10-17)
+
+An independent review of `66ec11a` returned **PASS_WITH_FIXES**, with no S1 findings. Its read-only checks were all green and showed no ts-rs binding drift:
+- storage and shell tests;
+- UI tests 522/522;
+- type check and lint.
+
+| Finding | Disposition |
+|---|---|
+| S2-1: a failed pin read was shown as "No baseline is pinned" | Fixed. The read failure is its own state: History shows an Unknown sentence, the typed error and **Read the pin again**, and the palette names the reason. Tested, including the retry. |
+| S2-2: a pin not on the first candidate page was dropped as the default base, and the picker went blank | Fixed. The pin is the default base by id. The pickers also list the pin, and the two sides of a computed comparison, when they are off the loaded page, named by file and digest with a note. "Both chosen" now reads the ids. Tested with an off-page pin. |
+| S2-3: `Ctrl+K` / `Ctrl+O` acted over an open modal | Fixed. No shortcut acts while any modal is open. Tested with the reset Sheet open. |
+| S3: a late startup read could overwrite a newer pin | Fixed (a version counter). Tested. |
+| S3: palette keys were lost after a click inside it; the active row did not scroll | Fixed. Keys are heard on the dialog, a press outside the input keeps focus in it, and the active option scrolls into view. |
+| S3: the pin read-then-append was not atomic | Fixed. `BEGIN IMMEDIATE` around each. |
+| S3: project scope was enforced only in code | Fixed. A `BEFORE INSERT` trigger in migration 0008 (not yet released). Tested. |
+| S3: the pin time was not mono | Fixed. |
+| S3: the "compare the two selected" test did not prove the order rule | Fixed. It ticks the older build first. |
+| S3: comment rot (App doc comment, renamed-page comments, schema messages) | Fixed. |
+| S3: the History privacy note was lost | Restored as an Inspector detail. |
+
+**Found while fixing.** A flake in the full UI run exposed a real race on Release: R4's clearing effect for the policy draft could still be pending when **Edit policy** was pressed, wipe the new draft and close its Sheet. The draft now carries the identity of the project it was seeded from and is derived in render, so no effect is involved.

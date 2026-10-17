@@ -201,4 +201,7 @@ export const compare: CatalogFor<'compare'> = {
   'picker.pinBase': '把“旧/基线”固定为项目基线',
   'pin.errorLabel': '固定基线失败',
   'pin.errorHeading': '基线未更改',
+  'picker.knownPinned': '自 {at} 起为固定基线 · 不在已加载的页中',
+  'picker.knownCompared': '属于当前显示的对比 · 不在已加载的页中',
+  'picker.knownFacts': '以文件名和摘要标识；记录的数值见“历史”页。',
 };

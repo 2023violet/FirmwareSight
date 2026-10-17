@@ -152,6 +152,8 @@ export function History({
   unit,
   onUnitChange,
   pin,
+  pinReadError = null,
+  onRetryPinRead,
   onPinChange,
   currentSnapshotId,
   onCompare,
@@ -160,6 +162,9 @@ export function History({
   readonly onUnitChange: (unit: SizeUnit) => void;
   /** The project's pinned baseline, as the shell last reported it. */
   readonly pin: BaselinePinDto | null;
+  /** The pin could not be read: it is Unknown, not "none" (R5 review S2-1). */
+  readonly pinReadError?: ErrorEnvelopeDto | null;
+  readonly onRetryPinRead?: () => void;
   readonly onPinChange: (pin: BaselinePinDto | null) => void;
   /** The build Analyze last proved, which "the current build" means here. */
   readonly currentSnapshotId: string | null;
@@ -373,14 +378,25 @@ export function History({
 
         <section className={styles['pin']} aria-label={t('history', 'pin.region')}>
           <Icon name="pin" />
-          {pin === null ? (
+          {pinReadError !== null ? (
+            <>
+              <p className={styles['pinText']}>
+                <StateBadge state="UNKNOWN" label={t('history', 'pin.unknown')} /> {t('history', 'pin.unknownFact')}
+              </p>
+              <span className={styles['pinActions']}>
+                <Button onClick={() => onRetryPinRead?.()}>{t('history', 'pin.retry')}</Button>
+              </span>
+            </>
+          ) : pin === null ? (
             <p className={styles['pinText']}>{t('history', 'pin.none')}</p>
           ) : (
             <>
               <p className={styles['pinText']}>
                 <span className={styles['axis']}>{t('history', 'pin.label')}</span>{' '}
                 <span className={styles['mono']}>{buildName(pin)}</span>{' '}
-                <span className={styles['note']}>{t('history', 'pin.since', { at: pin.pinnedAt })}</span>
+                <span className={styles['note']}>
+                  {t('history', 'pin.sinceLabel')} <span className={styles['mono']}>{pin.pinnedAt}</span>
+                </span>
               </p>
               <span className={styles['pinActions']}>
                 <Button
@@ -405,6 +421,9 @@ export function History({
         </section>
         {pinError === null ? null : (
           <ErrorPanel envelope={pinError} label={t('history', 'pin.errorLabel')} heading={t('history', 'pin.errorHeading')} />
+        )}
+        {pinReadError === null ? null : (
+          <ErrorPanel envelope={pinReadError} label={t('history', 'pin.readErrorLabel')} heading={t('history', 'pin.errorHeading')} />
         )}
 
         <Tabs
@@ -616,6 +635,7 @@ function buildEvidence(row: CompareCandidateDto, unit: SizeUnit, t: Translate): 
       [t('history', 'detail.size'), formatSize(row.byteSize, unit)],
       [t('history', 'detail.architecture'), row.architecture],
       [t('history', 'col.stored'), row.importedAt],
+      [t('history', 'detail.note'), t('history', 'builds.note')],
     ],
   };
 }

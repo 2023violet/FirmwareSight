@@ -795,7 +795,7 @@ describe('Release navigation', () => {
     const words = document.body.textContent ?? '';
     // P4 makes `Bundle` a word this build has earned, so it is no longer banned here: §48 attaches the
     // bundle *under* Release, and what §58 forbids is a navigation verb for a stage that does not exist.
-    // U1 renames this page's rail entry to "Release" and P5's to "History", and adds
+    // R5 names this page "Release" and the stored-history page "History" (spec §3.2), and U1 added
     // Overview, which summarizes runs this build already stores. What is still not built gets none of its
     // words.
     for (const stage of ['Settings', 'Pricing', 'Cloud']) {
@@ -1514,8 +1514,8 @@ describe('Release bundle', () => {
       'History',
     ]);
     // §58's claim is about actions, not nouns: the rail holds pages, never the bundle verbs that live
-    // inside Release. U1 renamed History to "History", so the old `/bundle/i` check would now
-    // fail on a page name that is legitimately there; what must stay absent is a doorway that *does*
+    // inside Release. The old `/bundle/i` check was dropped when the history page carried "Bundle" in its
+    // name (U1); it is "History" since R5, and what must stay absent is still a doorway that *does*
     // something.
     expect(within(rail).queryByRole('button', { name: /build|export|prepare/i })).toBeNull();
     expect(heading.closest('nav')).toBeNull();

@@ -199,4 +199,7 @@ export const compare = {
   'picker.pinBase': 'Pin “Old / Base” as the project baseline',
   'pin.errorLabel': 'Baseline pin failed',
   'pin.errorHeading': 'The baseline was not changed',
+  'picker.knownPinned': 'Pinned baseline since {at} · not on the loaded page',
+  'picker.knownCompared': 'In the comparison on screen · not on the loaded page',
+  'picker.knownFacts': 'Named by file and digest; its recorded figures are on History.',
 } as const;

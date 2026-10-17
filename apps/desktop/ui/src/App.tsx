@@ -209,7 +209,32 @@ export function App() {
    * The build this project measures against (R5 / D3). Read once at start and moved only by a pin or an
    * unpin the shell confirmed, so Compare's default base and History's pin line can never disagree.
    */
-  const [baselinePin, setBaselinePin] = useState<BaselinePinDto | null>(null);
+  const [baselinePin, setBaselinePinState] = useState<BaselinePinDto | null>(null);
+  /** A failed read of the pin: the pin is then Unknown, never "none" (R5 review S2-1, AGENTS.md 8). */
+  const [pinReadError, setPinReadError] = useState<ErrorEnvelopeDto | null>(null);
+  /** Moves on every pin or unpin, so a read that started earlier cannot overwrite a newer answer. */
+  const pinVersion = useRef(0);
+  const setBaselinePin = (pin: BaselinePinDto | null) => {
+    pinVersion.current += 1;
+    setPinReadError(null);
+    setBaselinePinState(pin);
+  };
+  const readPin = () => {
+    const version = pinVersion.current;
+    void getBaselinePin().then((outcome) => {
+      if (version !== pinVersion.current) {
+        return;
+      }
+      if (outcome.ok) {
+        setPinReadError(null);
+        setBaselinePinState(outcome.value);
+      } else {
+        setPinReadError(outcome.envelope);
+      }
+    });
+  };
+  const readPinRef = useRef(readPin);
+  readPinRef.current = readPin;
   /** A comparison another page asked for, which Compare runs once when it mounts (D-R5-4). */
   const [autoCompare, setAutoCompare] = useState(false);
   /** The command palette (spec §3.3), and a firmware chooser the shell asked Analyze to open once. */
@@ -307,25 +332,10 @@ export function App() {
     [],
   );
 
-  /**
-   * Ask the shell once, and let the answer move what it owns.
-   *
-   * The unit and the start page come from the stored document; the window's own data is untouched by
-   * either. A read that fails is shown as a refusal on the Settings page, and the defaults stay in
-   * effect - the workflow does not depend on a preference file to open.
-   */
+  // The pinned baseline is read once at start. A failure is kept as its own fact and History offers a
+  // retry; a pin or unpin made meanwhile wins over the late answer (R5 review S2-1, S3).
   useEffect(() => {
-    let cancelled = false;
-    void getBaselinePin().then((outcome) => {
-      // A failed read leaves the project with no default base, which is the state before any pin; the
-      // History page reads and reports the pin's own errors when a person acts on it.
-      if (!cancelled && outcome.ok) {
-        setBaselinePin(outcome.value);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
+    readPinRef.current();
   }, []);
 
   /** Open Compare on a named pair and run it once: the History rows and the palette start comparisons. */
@@ -352,6 +362,11 @@ export function App() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const command = event.ctrlKey || event.metaKey;
+      // An open modal (a Sheet, the undocked Inspector, the palette itself) owns the keyboard: no shortcut
+      // opens another layer over it or navigates under it (R5 review S2-3).
+      if (document.querySelector('[aria-modal="true"]') !== null) {
+        return;
+      }
       if (command && !event.altKey && (event.key === 'k' || event.key === 'K')) {
         event.preventDefault();
         setPaletteOpen(true);
@@ -369,7 +384,7 @@ export function App() {
       const typing =
         target instanceof HTMLElement &&
         (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
-      if (typing || document.querySelector('[aria-modal="true"]') !== null) {
+      if (typing) {
         return;
       }
       if (event.key === '/') {
@@ -398,6 +413,13 @@ export function App() {
     };
   }, []);
 
+  /**
+   * Ask the shell once, and let the answer move what it owns.
+   *
+   * The unit and the start page come from the stored document; the window's own data is untouched by
+   * either. A read that fails is shown as a refusal on the Settings page, and the defaults stay in
+   * effect - the workflow does not depend on a preference file to open.
+   */
   useEffect(() => {
     let cancelled = false;
     void getApplicationPreferences().then((outcome) => {
@@ -575,7 +597,9 @@ export function App() {
     const t = navLabel;
     const current = lastGood?.identity.snapshotId ?? null;
     const pinReason =
-      baselinePin === null
+      pinReadError !== null
+        ? t('common', 'palette.pinUnknown')
+        : baselinePin === null
         ? t('common', 'palette.noPin')
         : current === null
           ? t('common', 'palette.noCurrent')
@@ -761,6 +785,8 @@ export function App() {
               unit={unit}
               onUnitChange={chooseUnit}
               pin={baselinePin}
+              pinReadError={pinReadError}
+              onRetryPinRead={readPin}
               onPinChange={setBaselinePin}
               currentSnapshotId={lastGood?.identity.snapshotId ?? null}
               onCompare={startComparison}

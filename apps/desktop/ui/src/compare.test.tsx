@@ -2130,6 +2130,23 @@ describe('R5 pinned baseline on Compare', () => {
     expect(screen.queryByRole('button', { name: /project baseline$/ })).toBeNull();
   });
 
+  it('starts from the pin even when it is not on the loaded page of builds (R5 review S2-2)', async () => {
+    const offPage = { buildId: 'build-far', snapshotId: 'snap-far', fileName: 'release-1.0.elf', sha256: 'e'.repeat(64), pinnedAt: '2026-01-02T03:04:05Z' };
+    vi.mocked(getBaselinePin).mockResolvedValueOnce(ok(offPage));
+    await openCompare();
+    const [base] = pair();
+    await waitFor(() => expect(base.value).toBe('snap-far'));
+    expect(base.element.textContent).toContain('release-1.0.elf');
+    fireEvent.click(base.element);
+    const option = document.querySelector('[role="option"][data-value="snap-far"]');
+    expect(option?.textContent).toContain('not on the loaded page');
+    expect(option?.textContent).toContain('Pinned baseline');
+    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
+    await waitFor(() =>
+      expect(compareMock).toHaveBeenCalledWith({ baseSnapshotId: 'snap-far', targetSnapshotId: 'snap-new' }),
+    );
+  });
+
   it('pins the base on screen as the project baseline', async () => {
     vi.mocked(pinBaseline).mockResolvedValue(ok(pinOf(candidate())));
     await openCompare();

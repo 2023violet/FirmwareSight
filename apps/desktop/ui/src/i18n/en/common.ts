@@ -233,4 +233,5 @@ export const common = {
   'palette.theme.light': 'Light',
   'palette.theme.dark': 'Dark',
   'palette.languageSystem': 'Follow the system language',
+  'palette.pinUnknown': 'The pinned baseline could not be read. Read it again on History.',
 } as const;

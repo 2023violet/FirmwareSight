@@ -23,6 +23,8 @@ export interface BuildOption {
   readonly sha256: string;
   readonly importedAt: string;
   readonly pinned?: boolean;
+  /** Replaces the "imported" line, for a build named here that is not on the loaded page (R5 review S2-2). */
+  readonly meta?: string;
 }
 
 export function BuildPicker({
@@ -193,7 +195,7 @@ export function BuildPicker({
                       </span>
                     ) : null}
                   </span>
-                  <span className={styles['meta']}>{t('common', 'picker.imported', { date: option.importedAt })}</span>
+                  <span className={styles['meta']}>{option.meta ?? t('common', 'picker.imported', { date: option.importedAt })}</span>
                 </>
               )}
             </li>

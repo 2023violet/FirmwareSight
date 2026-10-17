@@ -27,6 +27,7 @@ import { clearFallbacks, fallbacks } from './i18n';
 import {
   compareSnapshots,
   getApplicationPreferences,
+  getBaselinePin,
   listCompareCandidates,
   listHistoryBuilds,
   listHistoryGateRuns,
@@ -785,8 +786,8 @@ describe('U1P History hierarchy', () => {
   it('names the page once, then shows the one stored list the reader asked for', async () => {
     await openHistory();
 
-    // §12: one canonical heading. The page used to answer to "History" here and "History" in
-    // the rail, which left the window title and the screen disagreeing about the same place.
+    // §12: one canonical heading. The page once answered to one name here and another in the rail (R5 names it
+    // "History" in both), so the window title and the screen no longer disagree about the same place.
     expect(screen.getByRole('heading', { level: 1, name: 'History' })).toBeDefined();
 
     const views = screen.getByRole('tablist', { name: 'Stored history' });
@@ -993,8 +994,10 @@ describe('R5 pinned baseline and comparisons from History', () => {
     await openHistory();
     const compare = screen.getByRole('button', { name: /^Compare the two selected/ }) as HTMLButtonElement;
     expect(compare.disabled).toBe(true);
-    fireEvent.click(screen.getByRole('checkbox', { name: `Select ${BUILD_FILE} · ${SHA256.slice(0, 12)} for comparison` }));
+    // The older build is ticked first and the newer second, so neither tick order rule could pass for the
+    // earlier-stored-is-base rule (R5 review S3).
     fireEvent.click(screen.getByRole('checkbox', { name: /^Select old\.elf/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: `Select ${BUILD_FILE} · ${SHA256.slice(0, 12)} for comparison` }));
     expect(compare.disabled).toBe(false);
     fireEvent.click(compare);
 
@@ -1113,5 +1116,50 @@ describe('R5 command palette and keyboard shortcuts', () => {
       expect(vi.mocked(updateApplicationPreferences)).toHaveBeenLastCalledWith('bytes', 'analyze', 'dark', 'system'),
     );
     expect(document.documentElement.getAttribute('data-fs-theme')).toBe('dark');
+  });
+});
+
+describe('R5 review fixes', () => {
+  it('says the pin is Unknown when it cannot be read, never that none is pinned, and reads it again on request', async () => {
+    vi.mocked(getBaselinePin)
+      .mockResolvedValueOnce(fail(READ_REFUSED))
+      .mockResolvedValueOnce(
+        ok({ buildId: BUILD_ID, snapshotId: SNAPSHOT_ID, fileName: BUILD_FILE, sha256: SHA256, pinnedAt: '2026-10-17T09:00:00Z' }),
+      );
+    await openHistory();
+    const line = screen.getByRole('region', { name: 'Pinned baseline' });
+    expect(line.textContent).toContain('could not be read');
+    expect(line.textContent).not.toContain('No baseline is pinned');
+    expect(screen.getByRole('alert', { name: 'Reading the pinned baseline failed' })).toBeDefined();
+    fireEvent.click(within(line).getByRole('button', { name: 'Read the pin again' }));
+    await waitFor(() => expect(line.textContent).toContain(`${BUILD_FILE} · ${SHA256.slice(0, 12)}`));
+    expect(screen.queryByRole('alert', { name: 'Reading the pinned baseline failed' })).toBeNull();
+  });
+
+  it('keeps a pin made while the first read was still in flight', async () => {
+    let finish!: (value: IpcOutcome<null>) => void;
+    vi.mocked(getBaselinePin).mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    vi.mocked(pinBaseline).mockResolvedValue(
+      ok({ buildId: BUILD_ID, snapshotId: SNAPSHOT_ID, fileName: BUILD_FILE, sha256: SHA256, pinnedAt: '2026-10-17T09:00:00Z' }),
+    );
+    await openHistory();
+    fireEvent.click(screen.getByRole('button', { name: /as baseline$/ }));
+    const line = screen.getByRole('region', { name: 'Pinned baseline' });
+    await waitFor(() => expect(line.textContent).toContain(BUILD_FILE));
+    await act(async () => {
+      finish(ok(null));
+    });
+    expect(line.textContent).toContain(BUILD_FILE);
+  });
+
+  it('opens no palette over an open Sheet', async () => {
+    await openHistory();
+    fireEvent.click(screen.getByRole('button', { name: 'Settings page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Reset application preferences' }));
+    await screen.findByRole('dialog', { name: 'Reset all four settings to their defaults?' });
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    expect(screen.queryByRole('dialog', { name: 'Command palette' })).toBeNull();
+    fireEvent.keyDown(document, { key: 'o', ctrlKey: true });
+    expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeDefined();
   });
 });

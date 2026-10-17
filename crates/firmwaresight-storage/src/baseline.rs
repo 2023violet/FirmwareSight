@@ -99,6 +99,14 @@ impl Database {
         project_id: &str,
         snapshot_id: &str,
     ) -> Result<BaselinePin, StorageError> {
+        self.immediate(|| self.pin_baseline_unlocked(project_id, snapshot_id))
+    }
+
+    fn pin_baseline_unlocked(
+        &self,
+        project_id: &str,
+        snapshot_id: &str,
+    ) -> Result<BaselinePin, StorageError> {
         let build_id = self
             .connection()
             .query_row(
@@ -136,15 +144,43 @@ impl Database {
     ///
     /// [`StorageError::Write`] when the read or the append fails.
     pub fn unpin_baseline(&self, project_id: &str) -> Result<bool, StorageError> {
-        if self.current_baseline_pin(project_id)?.is_none() {
-            return Ok(false);
-        }
+        self.immediate(|| {
+            if self.current_baseline_pin(project_id)?.is_none() {
+                return Ok(false);
+            }
+            self.connection()
+                .execute(
+                    "INSERT INTO baseline_pin_events (project_id, action, build_id) VALUES (?1, 'unpin', NULL)",
+                    params![project_id],
+                )
+                .map_err(write_err)?;
+            Ok(true)
+        })
+    }
+
+    /// Run a read-then-append as one `BEGIN IMMEDIATE` transaction, so a second writer on the same file
+    /// (the CLI beside the desktop) cannot interleave between "what is pinned now" and the new row (R5
+    /// review S3). A failure rolls the append back.
+    fn immediate<T>(
+        &self,
+        work: impl FnOnce() -> Result<T, StorageError>,
+    ) -> Result<T, StorageError> {
         self.connection()
-            .execute(
-                "INSERT INTO baseline_pin_events (project_id, action, build_id) VALUES (?1, 'unpin', NULL)",
-                params![project_id],
-            )
+            .execute_batch("BEGIN IMMEDIATE")
             .map_err(write_err)?;
-        Ok(true)
+        match work() {
+            Ok(value) => {
+                self.connection()
+                    .execute_batch("COMMIT")
+                    .map_err(write_err)?;
+                Ok(value)
+            }
+            Err(err) => {
+                // The original error is the one worth reporting; a failed rollback leaves SQLite to undo
+                // the open transaction when the connection closes.
+                let _ = self.connection().execute_batch("ROLLBACK");
+                Err(err)
+            }
+        }
     }
 }

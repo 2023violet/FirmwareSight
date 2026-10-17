@@ -2,7 +2,7 @@
 
 Plan: [06_DELIVERY/19_R5_HISTORY.md](../../06_DELIVERY/19_R5_HISTORY.md) §4.
 
-- **Build:** the QA-identifier build (`com.firmwaresight.desktop.qa`) of the final R5 code. Binary SHA-256 `e32a49c632fa3e200f3cec918c2780fe20380ad98cb05c41b32b3b926b1959ef`.
+- **Build:** the QA-identifier build (`com.firmwaresight.desktop.qa`) of the final R5 code, including the fixes from the independent review of `66ec11a`. Binary SHA-256 `91df7f0bf170fceeffeb3a8f2c67d2265ccea19aae58a54e15a4ee7cedef052f`.
 - **Operator:** Claude, as an automated driver on the Owner's Windows 10 host (zh-CN, WebView2). Page input went through the WebView2 DevTools protocol. The native Open dialogs were driven with Win32 messages, against the QA process only.
 - **Input:** `fixtures/elf/m2-objects/{base,target}`, each an ELF plus its MAP, both analyzed.
 
@@ -20,8 +20,9 @@ Plan: [06_DELIVERY/19_R5_HISTORY.md](../../06_DELIVERY/19_R5_HISTORY.md) §4.
 
 **QA stores.** Kept, none deleted (Standing Owner rule):
 - `com.firmwaresight.desktop.qa.r5-kept-065552`
-- `com.firmwaresight.desktop.qa.r5-kept-070304` (final run)
+- `com.firmwaresight.desktop.qa.r5-kept-070304`
+- `com.firmwaresight.desktop.qa.r5-kept-074432` (final run, after the review fixes)
 
 The Owner's store was only hashed (H13).
 
-**Evidence ZIP.** `R5_NATIVE_SMOKE_EVIDENCE.zip` holds eight screenshots, `results.tsv` and the four driver scripts, with no local paths. SHA-256 `b50123a65074d52bb30fcf7723a5237eeef8f565f92dc3995557b0fba4f32d7a`.
+**Evidence ZIP.** `R5_NATIVE_SMOKE_EVIDENCE.zip` holds eight screenshots, `results.tsv` and the four driver scripts, with no local paths. SHA-256 `4eaee29505f0cce954a4c61bbc59e9491e949c608ce8269df671380f2d9a130a`.

@@ -25,6 +25,16 @@ CREATE TABLE baseline_pin_events (
 
 CREATE INDEX idx_baseline_pin_events_project ON baseline_pin_events(project_id, seq);
 
+-- A pin stays inside its project: the build it names must belong to the same project (R5 review S3). The
+-- storage API checks this too; the schema says it so no other writer can skip it.
+CREATE TRIGGER baseline_pin_events_stay_in_their_project
+BEFORE INSERT ON baseline_pin_events
+WHEN NEW.build_id IS NOT NULL
+ AND (SELECT project_id FROM builds WHERE id = NEW.build_id) IS NOT NEW.project_id
+BEGIN
+    SELECT RAISE(ABORT, 'a baseline pin must name a build of the same project');
+END;
+
 CREATE TRIGGER baseline_pin_events_cannot_be_edited
 BEFORE UPDATE ON baseline_pin_events
 BEGIN

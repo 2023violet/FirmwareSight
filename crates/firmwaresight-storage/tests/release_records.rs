@@ -331,10 +331,9 @@ fn the_schema_is_at_this_builds_version_and_the_release_table_starts_empty() {
     let (db, _run) = seeded(&file, "fresh");
 
     assert_eq!(
-        SCHEMA_VERSION,
-        8, // R5 added the baseline pin log (D3, migration 0008)
+        SCHEMA_VERSION, 8,
         "P4 raised the schema to version 4, P5 to version 5, C1-U1's additive attachment table to \
-         version 6 and M2's additive object table (ADR-0033) to version 7"
+         version 6, M2's additive object table (ADR-0033) to version 7 and R5's baseline pin log to 8"
     );
     assert_eq!(schema_version(&db), SCHEMA_VERSION);
     assert_eq!(count(&db, "release_records"), 0);

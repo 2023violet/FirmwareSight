@@ -64,6 +64,13 @@ export function CommandPalette({
     };
   }, [open]);
 
+  // The active command stays in view while the arrows move through a list longer than the panel.
+  useEffect(() => {
+    if (open) {
+      document.getElementById(`${base}-option-${active}`)?.scrollIntoView?.({ block: 'nearest' });
+    }
+  }, [open, active, base]);
+
   if (!open) {
     return null;
   }
@@ -115,7 +122,20 @@ export function CommandPalette({
         }
       }}
     >
-      <div className={styles['palette']} role="dialog" aria-modal="true" aria-label={t('common', 'palette.title')}>
+      <div
+        className={styles['palette']}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('common', 'palette.title')}
+        // Keys are heard on the dialog, and a press on its padding or list keeps focus in the input, so Esc
+        // and the arrows never stop working (R5 review S3).
+        onKeyDown={onKeyDown}
+        onMouseDown={(event) => {
+          if (event.target !== input.current) {
+            event.preventDefault();
+          }
+        }}
+      >
         <input
           ref={input}
           className={styles['input']}
@@ -131,7 +151,6 @@ export function CommandPalette({
             setQuery(event.target.value);
             setActive(0);
           }}
-          onKeyDown={onKeyDown}
         />
         <ul className={styles['list']} role="listbox" id={`${base}-list`} aria-label={t('common', 'palette.list')}>
           {shown.length === 0 ? (

@@ -183,7 +183,14 @@ export function Release({
   // does not read as "the settings moved" for a run the reader never moved away from (R4 D-R4-7).
   const [snapshotId, setSnapshotId] = useState<string | null>(() => run?.snapshotId ?? null);
   const [baselineId, setBaselineId] = useState<string | null>(() => run?.baselineSnapshotId ?? null);
-  const [draft, setDraft] = useState<ProjectPolicyDto | null>(null);
+  // A draft carries the identity of the project it was seeded from and counts only while that project is
+  // still the one loaded. Derived in render rather than cleared by an effect: a clearing effect still
+  // pending when Edit policy is pressed would wipe the new draft and close its Sheet (a race the R5 suite
+  // hit under load).
+  const [draftState, setDraftState] = useState<{
+    readonly identity: string | null;
+    readonly policy: ProjectPolicyDto;
+  } | null>(null);
   // The sheet and the draft are separate: closing the sheet (Esc, a click beside it) keeps every edited
   // field, and only a save or a different project retires the draft (R4 review S2-2).
   const [policyOpen, setPolicyOpen] = useState(false);
@@ -218,10 +225,13 @@ export function Release({
   const projectIdentity = project === null ? null : `${project.projectName}\u0000${project.policySha256}`;
   const projectIdentityRef = useRef(projectIdentity);
   projectIdentityRef.current = projectIdentity;
-  // A draft belongs to the project it was seeded from.
-  useEffect(() => {
-    setDraft(null);
-  }, [projectIdentity]);
+  const draft = draftState !== null && draftState.identity === projectIdentity ? draftState.policy : null;
+  const setDraft = useCallback(
+    (policy: ProjectPolicyDto | null) => {
+      setDraftState(policy === null ? null : { identity: projectIdentity, policy });
+    },
+    [projectIdentity],
+  );
 
   const refreshProjectReadiness = useCallback(async () => {
     const request = ++readinessRequest.current;
@@ -631,7 +641,7 @@ export function Release({
             onClick={() => {
               setPolicyError(null);
               setInspected(null);
-              setDraft((kept) => kept ?? seed ?? blankPolicy(project?.projectName ?? ''));
+              setDraft(draft ?? seed ?? blankPolicy(project?.projectName ?? ''));
               setPolicyOpen(true);
             }}
           >

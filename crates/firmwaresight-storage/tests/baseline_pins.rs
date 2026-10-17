@@ -212,3 +212,32 @@ fn the_log_refuses_an_edit_or_a_delete() {
     assert!(delete.is_err(), "a delete is refused");
     assert_eq!(events(&db).len(), 1);
 }
+
+#[test]
+fn the_schema_refuses_a_pin_that_names_another_projects_build() {
+    let store = TempDb::new("cross-project");
+    let mut db = store.open();
+    two_builds(&mut db);
+    db.connection()
+        .execute(
+            "INSERT OR IGNORE INTO projects (id, name) VALUES (?1, 'Other')",
+            params![OTHER],
+        )
+        .expect("another project exists");
+    let local_build: String = db
+        .connection()
+        .query_row(
+            "SELECT id FROM builds WHERE project_id = ?1 LIMIT 1",
+            params![LOCAL],
+            |row| row.get(0),
+        )
+        .expect("a local build");
+    let refused = db.connection().execute(
+        "INSERT INTO baseline_pin_events (project_id, action, build_id) VALUES (?1, 'pin', ?2)",
+        params![OTHER, local_build],
+    );
+    assert!(
+        refused.is_err(),
+        "a pin cannot cross projects, whoever writes it"
+    );
+}
