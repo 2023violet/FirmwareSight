@@ -120,7 +120,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 16_R2_ANALYZE_OVERVIEW.md
 │   ├── 17_R3_COMPARE.md
 │   ├── 18_R4_RELEASE.md
-│   └── 19_R5_HISTORY.md
+│   ├── 19_R5_HISTORY.md
+│   └── 20_R6_REPORTS.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -287,6 +288,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── export_privacy.rs
 │   │   │   ├── gate_cli.rs
 │   │   │   ├── golden.rs
+│   │   │   ├── markdown_cli.rs
 │   │   │   ├── objects_cli.rs
 │   │   │   ├── p2_golden.rs
 │   │   │   ├── p4_golden.rs
@@ -694,11 +696,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── gate.rs
 │   │   │   ├── gate_render.rs
 │   │   │   ├── lib.rs
+│   │   │   ├── markdown.rs
 │   │   │   ├── release.rs
 │   │   │   ├── release_render.rs
 │   │   │   ├── render.rs
 │   │   │   ├── schema_check.rs
 │   │   │   ├── schemas.rs
+│   │   │   ├── text.rs
 │   │   │   └── visual.rs
 │   │   ├── tests/
 │   │   │   ├── analysis_schema_contract.rs

@@ -77,8 +77,8 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
 /// MAP is user input and its names reach a terminal (the same rule as the region names).
 #[must_use]
 pub fn render_objects(summary: Option<&AttributionSummary>) -> String {
-    let mut out = String::from(
-        "\nObjects and libraries (GNU ld MAP rows, charged like their output section)\n",
+    let mut out = crate::text::heading(
+        "Objects and libraries (GNU ld MAP rows, charged like their output section)",
     );
     let Some(summary) = summary else {
         out.push_str(
@@ -131,9 +131,23 @@ pub fn render_human_with_region_usage(
 }
 
 fn render_human_inner(value: &AnalyzeResultDto, regions: Option<&[MemoryRegionUsage]>) -> String {
-    let mut out = String::new();
+    use crate::text::{heading, masthead, wrap};
+
+    // R6 report grammar: masthead, the answer, then the facts by section.
+    let mut out = masthead("Analysis report");
+    out.push_str(&wrap(
+        &format!(
+            "{}: nonvolatile / load image {}; runtime RAM {}.",
+            safe_display_text(&value.artifact.file_name),
+            budget_line(&value.memory.nonvolatile_image_footprint),
+            budget_line(&value.memory.runtime_ram_footprint)
+        ),
+        "",
+        "  ",
+    ));
+    out.push_str(&heading("Build"));
     out.push_str(&format!(
-        "{}\n\n",
+        "  File         {}\n",
         safe_display_text(&value.artifact.file_name)
     ));
     out.push_str(&format!("  SHA-256      {}\n", value.artifact.sha256));
@@ -161,7 +175,7 @@ fn render_human_inner(value: &AnalyzeResultDto, regions: Option<&[MemoryRegionUs
             ))
     ));
 
-    out.push_str("\nMemory\n");
+    out.push_str(&heading("Memory"));
     out.push_str(&format!(
         "  Nonvolatile / load image: {}\n",
         budget_line(&value.memory.nonvolatile_image_footprint)
@@ -216,13 +230,13 @@ fn render_human_inner(value: &AnalyzeResultDto, regions: Option<&[MemoryRegionUs
         render_memory_regions(&mut out, value.memory.layout_source, regions);
     }
 
-    out.push_str("\nCounts\n");
+    out.push_str(&heading("Counts"));
     out.push_str(&format!(
         "  Sections {}   Symbols {}   Evidence {}\n",
         value.counts.sections, value.counts.symbols, value.counts.evidence
     ));
 
-    out.push_str("\nCapabilities\n");
+    out.push_str(&heading("Capabilities"));
     for (label, field) in [
         ("ELF", value.capabilities.elf),
         ("Sections", value.capabilities.sections),
@@ -235,11 +249,19 @@ fn render_human_inner(value: &AnalyzeResultDto, regions: Option<&[MemoryRegionUs
         out.push_str(&format!("  {label:<20} {field}\n"));
     }
 
+    out.push_str(&heading("Limits"));
+    out.push_str(&wrap(
+        "Every figure comes from the ELF and, when given, the GNU ld MAP. A mapped section range is not free space, and BIN or HEX files are not analyzed.",
+        "  ",
+        "  ",
+    ));
     out
 }
 
 fn render_memory_regions(out: &mut String, layout_source: &str, regions: &[MemoryRegionUsage]) {
-    out.push_str("\nMemory regions (mapped section ranges; not contiguous free space)\n");
+    out.push_str(&crate::text::heading(
+        "Memory regions (mapped section ranges; not contiguous free space)",
+    ));
     if regions.is_empty() {
         out.push_str(&format!(
             "  Unknown: no supported memory-region table is available (layout: {layout_source})\n"
@@ -354,7 +376,7 @@ pub(crate) fn safe_display_text(value: &str) -> String {
     value.chars().flat_map(char::escape_debug).collect()
 }
 
-fn budget_line(budget: &crate::dto::BudgetDto) -> String {
+pub(crate) fn budget_line(budget: &crate::dto::BudgetDto) -> String {
     match (budget.state, budget.bytes) {
         ("exact", Some(bytes)) => format!("{bytes} bytes [{}]", budget.classification),
         ("partial", Some(bytes)) => format!(

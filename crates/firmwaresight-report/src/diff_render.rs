@@ -584,16 +584,29 @@ fn render_objects(attribution: &ObjectChangesDto, out: &mut String) {
 /// itself would be a second definition of "major contributor" (`AGENTS.md` 3).
 #[must_use]
 pub fn render_human(result: &DiffResult) -> String {
-    let mut out = String::new();
+    use crate::text::{heading, masthead, wrap};
+
+    // R6 report grammar: masthead, the answer, the subject, then the facts.
+    let mut out = masthead("Comparison report");
+    out.push_str(&wrap(
+        &format!(
+            "Nonvolatile / load image {}; runtime RAM {}.",
+            human_change(&result.memory.nonvolatile),
+            human_change(&result.memory.runtime_ram)
+        ),
+        "",
+        "  ",
+    ));
+    out.push_str(&heading("Subject"));
     out.push_str(&format!(
-        "Base    {}  {}\nTarget  {}  {}\n\n",
+        "  Base    {}  {}\n  Target  {}  {}\n",
         terminal_safe(&result.base_artifact.file_name),
         short_sha(&result.base_artifact.sha256),
         terminal_safe(&result.target_artifact.file_name),
         short_sha(&result.target_artifact.sha256),
     ));
 
-    out.push_str("Memory\n");
+    out.push_str(&heading("Memory"));
     out.push_str(&format!(
         "  Nonvolatile / load image: {}\n",
         human_change(&result.memory.nonvolatile)
@@ -612,12 +625,12 @@ pub fn render_human(result: &DiffResult) -> String {
         result.memory.base.runtime_ram.state.as_str()
     ));
     out.push_str(&format!(
-        "  Target side states:       nonvolatile {} / RAM {}\n\n",
+        "  Target side states:       nonvolatile {} / RAM {}\n",
         result.memory.target.nonvolatile.state.as_str(),
         result.memory.target.runtime_ram.state.as_str()
     ));
 
-    out.push_str("Counts\n");
+    out.push_str(&heading("Counts"));
     out.push_str(&format!(
         "  Sections  +{} -{} ~{} ({} rows whose name repeats)\n",
         result.counts.sections_added,
@@ -661,7 +674,7 @@ pub fn render_human(result: &DiffResult) -> String {
     push_objects(&mut out, result);
 
     if !result.warnings.is_empty() {
-        out.push_str("\nWarnings\n");
+        out.push_str(&heading("Warnings"));
         for warning in &result.warnings {
             out.push_str(&format!(
                 "  [{}] {}\n",
@@ -728,7 +741,7 @@ fn push_objects(out: &mut String, result: &DiffResult) {
 }
 
 fn push_contributors(out: &mut String, title: &str, rows: &[Contributor]) {
-    out.push_str(&format!("\n{title}\n"));
+    out.push_str(&crate::text::heading(title));
     if rows.is_empty() {
         out.push_str("  none\n");
         return;
@@ -764,7 +777,7 @@ fn push_contributors(out: &mut String, title: &str, rows: &[Contributor]) {
 /// - the backslash, so the literal text `\u{1b}` in a name cannot pass for an escaped ESC.
 ///
 /// Quotes print as they are (`escape_debug` alone would escape them), and so do spaces, CJK and accents.
-fn terminal_safe(value: &str) -> String {
+pub(crate) fn terminal_safe(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     for c in value.chars() {
         if c == '"' || c == '\'' {
@@ -787,7 +800,7 @@ fn bytes_or_absence(bytes: Option<u64>) -> String {
     }
 }
 
-fn human_change(change: &ByteChange) -> String {
+pub(crate) fn human_change(change: &ByteChange) -> String {
     let base = bytes_or_absence(change.base);
     let target = bytes_or_absence(change.target);
     let delta = match change.delta {

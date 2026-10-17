@@ -38,7 +38,7 @@ use firmwaresight_project::{
     prepare_with_attachments, run_id,
 };
 use firmwaresight_report::{
-    AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, render,
+    AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, markdown, render,
     visual::{self, VisualFormat, VisualReport},
 };
 
@@ -199,6 +199,11 @@ struct AnalyzeArgs {
     /// the JSON document's shape does not change (ADR-0033 D7).
     #[arg(long, conflicts_with = "json")]
     objects: bool,
+
+    /// Write a Markdown report (GFM, no HTML) for a pull request or a review record, without replacing an
+    /// existing file. It is a reading copy and never part of a release bundle.
+    #[arg(long, value_name = "FILE")]
+    markdown: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
@@ -236,6 +241,11 @@ struct DiffArgs {
     /// Write a self-contained print-ready HTML report without replacing an existing file.
     #[arg(long, value_name = "FILE")]
     report_html: Option<PathBuf>,
+
+    /// Write a Markdown report (GFM, no HTML) for a pull request or a review record, without replacing an
+    /// existing file. It is a reading copy and never part of a release bundle.
+    #[arg(long, value_name = "FILE")]
+    markdown: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
@@ -277,6 +287,11 @@ struct GateArgs {
     /// Emit exactly one gate-results JSON document on stdout.
     #[arg(long)]
     json: bool,
+
+    /// Write a Markdown report (GFM, no HTML) for a pull request or a review record, without replacing an
+    /// existing file. It is a reading copy and never part of a release bundle.
+    #[arg(long, value_name = "FILE")]
+    markdown: Option<PathBuf>,
 }
 
 fn main() -> ExitCode {
@@ -440,6 +455,13 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
                 }
             }
 
+            if let Some(path) = &args.markdown {
+                let text = markdown::analysis(&dto, &analysis.memory.region_usage);
+                if let Some(code) = write_markdown(path, &text, args.json, operation_id) {
+                    return ExitCode::from(code);
+                }
+            }
+
             if args.json {
                 // stdout carries nothing but the JSON document.
                 print!("{}", render::render_json(&dto));
@@ -524,6 +546,16 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
 
     // The export is written before anything is printed: a run that cannot produce the file the user
     // asked for must not already have announced success on stdout.
+    if let Some(path) = &args.markdown {
+        if let Some(code) = write_markdown(
+            path,
+            &markdown::comparison(&result),
+            args.json,
+            operation_id,
+        ) {
+            return ExitCode::from(code);
+        }
+    }
     if let Some(path) = &args.html {
         let html = diff_render::render_html(&dto);
         if std::fs::write(path, html).is_err() {
@@ -626,6 +658,13 @@ fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
         &project.policy_sha256,
         project.config.schema_version,
     );
+
+    if let Some(path) = &args.markdown {
+        let text = markdown::gate(&evaluation, &project.policy_sha256);
+        if let Some(code) = write_markdown(path, &text, args.json, operation_id) {
+            return ExitCode::from(code);
+        }
+    }
 
     if args.json {
         // stdout carries nothing but the Gate document.
@@ -1082,6 +1121,21 @@ fn write_visual_exports(
         };
         eprintln!("diagnostics: visual {label} export written");
     }
+    None
+}
+
+/// Write one Markdown report without replacing an existing file (R6). The same refusal words and exit code
+/// as the visual exports, because one failure has one code (`ERR-EXPORT-6001`).
+fn write_markdown(path: &Path, text: &str, json: bool, operation_id: &str) -> Option<u8> {
+    if let Err(error) = visual::write_new(path, text.as_bytes()) {
+        let message = match error {
+            visual::VisualError::Exists => "Export destination exists; choose a new file.",
+            _ => "Export could not be written; choose a writable directory and retry.",
+        };
+        report_export_error(message, json, operation_id);
+        return Some(EXIT_EXPORT);
+    }
+    eprintln!("diagnostics: Markdown export written");
     None
 }
 

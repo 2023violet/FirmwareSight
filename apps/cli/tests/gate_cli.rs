@@ -623,7 +623,12 @@ fn the_human_report_reads_as_a_verdict_and_the_json_carries_the_same_states() {
         serde_json::from_str(&text(&gate(&project, &machine_args))).expect("one document");
     let stdout = text(&human);
 
-    assert!(stdout.starts_with("Release Gate: REVIEW"), "{stdout}");
+    // R6 report grammar: the masthead, then the verdict as a state tag and a sentence.
+    assert!(
+        stdout.starts_with("FirmwareSight · Release Gate report\n"),
+        "{stdout}"
+    );
+    assert!(stdout.contains("\n[REVIEW]  Needs a decision:"), "{stdout}");
     assert!(stdout.contains("diff.growth"), "{stdout}");
     assert_eq!(
         state_of(&machine, "diff.growth"),

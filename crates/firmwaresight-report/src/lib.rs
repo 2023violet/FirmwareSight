@@ -26,11 +26,13 @@ pub mod diff_render;
 pub mod dto;
 pub mod gate;
 pub mod gate_render;
+pub mod markdown;
 pub mod release;
 pub mod release_render;
 pub mod render;
 pub mod schema_check;
 pub mod schemas;
+pub mod text;
 pub mod visual;
 
 pub use analysis::{
