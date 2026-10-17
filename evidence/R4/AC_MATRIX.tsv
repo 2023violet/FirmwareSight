@@ -1,0 +1,16 @@
+id	check	verdict	observation
+R01	With no run, the settings are three numbered steps; BuildPicker chooses a baseline	PASS	Step 1 Build and baseline, Step 2 Project policy, Step 3 Release attachments; baseline chosen from the listbox
+R02	A run leads with the verdict, the SubjectBar names the judged build, focus lands on the verdict	PASS	REVIEW, "2 finding(s) wait on an explicit acceptance, 2 of them because their evidence is missing"; not-a-certification note; SubjectBar firmware.elf 3c9daa4f7c09, Latest; focus on "Gate verdict"
+R03	After a run the settings fold into one line; three views	PASS	Build firmware.elf 3c9daa4f7c09, Baseline firmware.elf 85ae4fc4e2b8, stated default policy, 0 attachments, Edit settings, Run Gate; tabs Findings, Evidence, Bundle
+R04	Show basis opens the docked Inspector with the finding's evidence	PASS	git.clean UNKNOWN, class Unknown, effective severity REVIEW, evidence git:status
+R05	Below 1280 px the open Inspector is a modal sheet	PASS	role dialog, aria-modal true at 1100 px
+R06	Evidence view: run record and the evidence tables	PASS	run record present; required artifacts and growth tables; budgets say none configured
+R07	Bundle view: disabled with its reason unless PASS	PASS	Prepare disabled; notice names disposition REVIEW
+R08	Policy editor in a modal Sheet; Esc closes and returns focus	PASS	24 fields; after Esc no dialog and focus on Edit policy
+R09	Moving the baseline marks the run on screen as kept	PASS	"Previous run kept · current settings not judged"
+R10	Choosing the judged baseline again reads Latest	PASS	Latest
+R11	Export PNG from the header menu, cancelled in the native Save dialog	PASS	"Export cancelled. No file was written."; no alert
+R12	Dark theme	PASS	data-fs-theme dark, background rgb(21, 23, 27)
+R13	English	PASS	lead and tabs Findings, Evidence, Bundle in English
+R14	Owner app data unchanged	PASS	23 files, identical SHA-256 before and after
+R15	Window minimum 1024x720 by a human drag	NOT_RUN	carried from R1 A10

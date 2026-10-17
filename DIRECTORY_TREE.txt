@@ -118,7 +118,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 14_D4_ARMCLANG_SAMPLE_REQUEST.md
 │   ├── 15_R1_FOUNDATION.md
 │   ├── 16_R2_ANALYZE_OVERVIEW.md
-│   └── 17_R3_COMPARE.md
+│   ├── 17_R3_COMPARE.md
+│   └── 18_R4_RELEASE.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -376,6 +377,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   ├── Rail.tsx
 │           │   │   ├── RankBar.module.css
 │           │   │   ├── RankBar.tsx
+│           │   │   ├── Sheet.module.css
+│           │   │   ├── Sheet.tsx
 │           │   │   ├── SizeUnitSwitch.module.css
 │           │   │   ├── SizeUnitSwitch.tsx
 │           │   │   ├── StateBadge.module.css
@@ -753,10 +756,15 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── DESIGN_CHECKLIST.md
 │   │   ├── R2_NATIVE_SMOKE_EVIDENCE.zip
 │   │   └── README.md
-│   └── R3/
+│   ├── R3/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── DESIGN_CHECKLIST.md
+│   │   ├── R3_NATIVE_SMOKE_EVIDENCE.zip
+│   │   └── README.md
+│   └── R4/
 │       ├── AC_MATRIX.tsv
 │       ├── DESIGN_CHECKLIST.md
-│       ├── R3_NATIVE_SMOKE_EVIDENCE.zip
+│       ├── R4_NATIVE_SMOKE_EVIDENCE.zip
 │       └── README.md
 ├── examples/
 │   ├── project-readiness/

@@ -640,6 +640,36 @@ function findingRow(rule: string): HTMLElement {
   return row;
 }
 
+/** R4: a run's findings, evidence and bundle are three views of the page. */
+function openView(name: 'Findings' | 'Evidence' | 'Bundle'): void {
+  fireEvent.click(screen.getByRole('tab', { name }));
+}
+
+/** R4: the Gate visual exports are one menu in the page header; open it and return one format. */
+async function exportItem(name: string): Promise<HTMLButtonElement> {
+  const menu = await screen.findByRole('group', { name: 'Standalone visual report' });
+  fireEvent.click(within(menu).getByRole('button', { name: 'Export' }));
+  return within(menu).getByRole('button', { name }) as HTMLButtonElement;
+}
+
+/** R4: PASS and N/A start collapsed; open every collapsed group so each row can be read. */
+function expandAll(): void {
+  for (const button of screen.queryAllByRole('button', { name: /^Show \d+ .* finding\(s\)$/ })) {
+    fireEvent.click(button);
+  }
+}
+
+/** The build a BuildPicker names, by snapshot id (`data-value`; empty for none). */
+function pickerValue(label: string): string | null {
+  return screen.getByRole('combobox', { name: label }).getAttribute('data-value');
+}
+
+/** Open a BuildPicker and choose the option whose text matches. */
+function choose(label: string, option: RegExp): void {
+  fireEvent.click(screen.getByRole('combobox', { name: label }));
+  fireEvent.click(screen.getByRole('option', { name: option }));
+}
+
 /** One attachment row, exactly as the shell sends it: measured bytes, declared kind, unknown provenance. */
 function attachment(over: Partial<ReleaseAttachmentDto> = {}): ReleaseAttachmentDto {
   return {
@@ -716,36 +746,34 @@ describe('Release navigation', () => {
   it('does not attach a late visual export outcome to a newer Gate run', async () => {
     await openRelease();
     await runGate();
-    const region = await screen.findByRole('region', { name: 'Standalone visual report' });
     let finish!: (value: Awaited<ReturnType<typeof exportGateVisual>>) => void;
     exportGateVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
-    fireEvent.click(within(region).getByRole('button', { name: 'Export SVG' }));
+    fireEvent.click(await exportItem('Export SVG'));
     await waitFor(() => expect(exportGateVisualMock).toHaveBeenCalled());
     runGateMock.mockResolvedValueOnce(ok(gateRun({ runId: 'gate-new-subject' })));
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run Gate' })); });
     await act(async () => { finish(ok({ status: 'written', fileName: 'old-gate-report.svg', format: 'svg' })); });
     expect(screen.queryByText(/old-gate-report/)).toBeNull();
-    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
+    expect((await exportItem('Export SVG')).disabled).toBe(false);
   });
 
   it('says nothing was written when the Gate run changed while the Save dialog was open', async () => {
     await openRelease();
     await runGate();
-    const region = await screen.findByRole('region', { name: 'Standalone visual report' });
     exportGateVisualMock.mockResolvedValueOnce({ ok: false, envelope: { code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null } });
-    fireEvent.click(within(region).getByRole('button', { name: 'Export PNG' }));
+    fireEvent.click(await exportItem('Export PNG'));
     expect(await screen.findByText(/Gate run changed while the Save dialog was open, so nothing was written/)).toBeDefined();
   });
 
   it('offers a standalone visual report for a current Gate run without changing Bundle export', async () => {
     await openRelease();
     await runGate();
-    const region = await screen.findByRole('region', { name: 'Standalone visual report' });
-    expect(within(region).getByRole('button', { name: 'Export PNG' })).toBeDefined();
+    const png = await exportItem('Export PNG');
+    const region = screen.getByRole('group', { name: 'Standalone visual report' });
     expect(within(region).getByRole('button', { name: 'Export SVG' })).toBeDefined();
     expect(within(region).getByRole('button', { name: 'Export print-ready HTML' })).toBeDefined();
     exportGateVisualMock.mockResolvedValue(ok({ status: 'written', fileName: 'firmwaresight-gate.png', format: 'png' }));
-    fireEvent.click(within(region).getByRole('button', { name: 'Export PNG' }));
+    fireEvent.click(png);
     await waitFor(() => expect(exportGateVisualMock).toHaveBeenCalledWith(`gate-${'a'.repeat(64)}`, 'snap-target', 'png'));
     expect(exportBundleMock).not.toHaveBeenCalled();
   });
@@ -988,14 +1016,14 @@ describe('Build and baseline', () => {
   it('prefers the build Analyze last proved, else the newest stored one', async () => {
     await openRelease();
     // The name arrives with the stored list, so the page is waited on rather than assumed (prompt §44).
-    const current = (await screen.findByLabelText('Current build')) as HTMLSelectElement;
-    await waitFor(() => expect(current.value).toBe('snap-target'));
+    await screen.findByRole('combobox', { name: 'Current build' });
+    await waitFor(() => expect(pickerValue('Current build')).toBe('snap-target'));
   });
 
   it('offers no baseline at all until one is asked for', async () => {
     await openRelease();
-    const baseline = (await screen.findByLabelText('Baseline (optional)')) as HTMLSelectElement;
-    expect(baseline.value).toBe('');
+    await screen.findByRole('combobox', { name: 'Baseline (optional)' });
+    expect(pickerValue('Baseline (optional)')).toBe('');
     expect(document.body.textContent).toContain('the growth rule answers Unknown');
     await runGate();
     expect(runGateMock.mock.calls[0]?.[0]).toEqual({
@@ -1006,18 +1034,19 @@ describe('Build and baseline', () => {
 
   it('will not offer the current build as its own baseline', async () => {
     await openRelease();
-    const current = (await screen.findByLabelText('Current build')) as HTMLSelectElement;
-    await waitFor(() => expect(current.value).toBe('snap-target'));
-    const baseline = screen.getByLabelText('Baseline (optional)');
-    expect(within(baseline).queryByRole('option', { name: /app\.elf/ })).toBeNull();
-    expect(within(baseline).getByRole('option', { name: /app-old\.elf/ })).toBeDefined();
+    await screen.findByRole('combobox', { name: 'Current build' });
+    await waitFor(() => expect(pickerValue('Current build')).toBe('snap-target'));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Baseline (optional)' }));
+    expect(screen.queryByRole('option', { name: /app\.elf/ })).toBeNull();
+    expect(screen.getByRole('option', { name: /app-old\.elf/ })).toBeDefined();
+    // R4 D-R4-3: "no baseline" is a choice in the list, and the one shown while none is chosen.
+    expect(screen.getByRole('option', { name: 'No baseline' }).getAttribute('aria-selected')).toBe('true');
   });
 
   it('sends the pair the reader chose', async () => {
     await openRelease();
-    fireEvent.change(await screen.findByLabelText('Baseline (optional)'), {
-      target: { value: 'snap-base' },
-    });
+    await screen.findByRole('combobox', { name: 'Baseline (optional)' });
+    choose('Baseline (optional)', /app-old\.elf/);
     await runGate();
     expect(runGateMock.mock.calls[0]?.[0]).toEqual({
       snapshotId: 'snap-target',
@@ -1033,11 +1062,12 @@ describe('Findings', () => {
     await screen.findByText('memory.flash_budget');
     // The group headings are the order the reader is asked to read in, and they come before the number
     // blocks, which are detail rather than verdicts (prompt §47, §43).
-    const headings = screen
-      .getAllByRole('heading', { level: 3 })
-      .map((node) => (node.textContent ?? '').replace(/\d+$/, ''));
-    expect(headings.slice(0, 5)).toEqual(['Block', 'Review', 'Unknown', 'Pass', 'Not applicable']);
-    expect(headings.slice(5)).toEqual([
+    const headings = () =>
+      screen.getAllByRole('heading', { level: 3 }).map((node) => (node.textContent ?? '').replace(/\d+$/, ''));
+    expect(headings()).toEqual(['Block', 'Review', 'Unknown', 'Pass', 'Not applicable']);
+    // R4: the number blocks are the Evidence view, in the same order as before.
+    openView('Evidence');
+    expect(headings()).toEqual([
       'Required artifacts',
       'Memory budgets',
       'Growth against the baseline',
@@ -1053,8 +1083,11 @@ describe('Findings', () => {
     expect(within(row).getByText('BLOCK')).toBeDefined();
     expect(within(row).getByText('effective severity: BLOCK')).toBeDefined();
     expect(within(row).getByText('FLASH footprint 4608 B exceeds the 4096 B budget.')).toBeDefined();
-    expect(within(row).getByText('policy:memory.flash_budget=4096')).toBeDefined();
     expect(within(row).getByText(/Reduce the footprint/)).toBeDefined();
+    // R4: the evidence locators are the finding's basis, in the Inspector.
+    fireEvent.click(within(row).getByRole('button', { name: 'Show the basis for memory.flash_budget' }));
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getAllByText('policy:memory.flash_budget=4096').length).toBeGreaterThan(0);
   });
 
   it('states an UNKNOWN as a gap with a next step, and never as a pass', async () => {
@@ -1071,6 +1104,8 @@ describe('Findings', () => {
   it('shows the aggregate both as computed and as dispositioned', async () => {
     await openRelease();
     await runGate();
+    await screen.findByRole('tab', { name: 'Evidence' });
+    openView('Evidence');
     expect(await screen.findByText('Disposition: BLOCK')).toBeDefined();
     expect(screen.getByText('As computed: BLOCK')).toBeDefined();
   });
@@ -1091,6 +1126,8 @@ describe('Findings', () => {
   it('uses the workspace wording Rust sent and never over-claims it', async () => {
     await openRelease();
     await runGate();
+    await screen.findByRole('tab', { name: 'Evidence' });
+    openView('Evidence');
     expect(await screen.findByText('Workspace dirty')).toBeDefined();
     expect(screen.getByText('exact tag v2.1.0 on workspace HEAD')).toBeDefined();
     expect(screen.getByText('dirty (workspace, not artifact)')).toBeDefined();
@@ -1116,6 +1153,8 @@ describe('Findings', () => {
     );
     await openRelease();
     await runGate();
+    await screen.findByRole('tab', { name: 'Evidence' });
+    openView('Evidence');
     expect(await screen.findByText('No workspace facts were observed')).toBeDefined();
     expect(screen.getByText('git is not installed')).toBeDefined();
     expect(document.body.textContent).not.toContain('Workspace HEAD');
@@ -1127,6 +1166,7 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     const table = block('Required artifacts').querySelector('table');
     if (table === null) {
       throw new Error('the artifact table is missing');
@@ -1153,6 +1193,7 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     // §9's replacement caption: the required BIN/HEX is satisfied by an attached file, and the sentence has
     // to say what that does *not* include. The old words ("checked for presence only") described the rule
     // before an attachment could satisfy it.
@@ -1168,6 +1209,7 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     const table = block('Memory budgets').querySelector('table');
     if (table === null) {
       throw new Error('the budget table is missing');
@@ -1209,6 +1251,7 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     const table = block('Memory budgets').querySelector('table');
     if (table === null) {
       throw new Error('the budget table is missing');
@@ -1226,6 +1269,7 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     const table = block('Memory budgets').querySelector('table');
     if (table === null) {
       throw new Error('the budget table is missing');
@@ -1245,11 +1289,14 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     const table = block('Growth against the baseline').querySelector('table');
     if (table === null) {
       throw new Error('the growth table is missing');
     }
-    expect(within(table).getByText('+512 bytes')).toBeDefined();
+    // R4: a delta is neutral ▲▼ text with its spoken words (ADR-0034 D1.4).
+    expect(table.textContent).toContain('▲512 bytes');
+    expect(within(table).getByText('increase of 512 bytes')).toBeDefined();
     expect(within(table).getByText('4,608 bytes')).toBeDefined();
     expect(within(table).getByText('256 bytes')).toBeDefined();
     expect(within(table).getByText('REVIEW')).toBeDefined();
@@ -1259,6 +1306,7 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     const table = block('Memory budgets').querySelector('table');
     if (table === null) {
       throw new Error('the budget table is missing');
@@ -1274,6 +1322,7 @@ describe('The numbers behind the findings', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     const container = block('Release notes');
     expect(within(container).getByText('docs/RELEASE_NOTES.md')).toBeDefined();
     expect(within(container).getByText('Required · Present')).toBeDefined();
@@ -1287,6 +1336,7 @@ describe('Review acceptance', () => {
     await openRelease();
     await runGate();
     await screen.findByText('diff.growth');
+    expandAll();
     expect(screen.getAllByRole('button', { name: 'Accept review' })).toHaveLength(1);
     for (const rule of [
       'memory.flash_budget',
@@ -1338,7 +1388,10 @@ describe('Review acceptance', () => {
     );
     await openRelease();
     await runGate();
+    await screen.findByRole('tab', { name: 'Evidence' });
+    openView('Evidence');
     expect(await screen.findByText('Disposition: REVIEW')).toBeDefined();
+    openView('Findings');
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept review' }));
     fireEvent.change(screen.getByLabelText('Who accepts this review'), { target: { value: 'rosa' } });
@@ -1363,6 +1416,7 @@ describe('Review acceptance', () => {
     expect(text).toContain('cannot be edited or deleted');
     expect(within(row).queryByRole('button', { name: /edit|delete|remove/i })).toBeNull();
     expect(within(row).queryByRole('button', { name: 'Accept review' })).toBeNull();
+    openView('Evidence');
     await waitFor(() => expect(screen.getByText('Disposition: PASS')).toBeDefined());
     expect(screen.getByText('As computed: REVIEW')).toBeDefined();
   });
@@ -1397,9 +1451,13 @@ describe('Review acceptance', () => {
     await openRelease();
     await runGate();
     await screen.findByText('memory.flash_budget');
+    openView('Evidence');
     fireEvent.click(screen.getByRole('button', { name: 'Read the stored record' }));
     expect(await screen.findByText(/^This run was read back from history/)).toBeDefined();
     expect(screen.queryByRole('heading', { level: 2, name: /What the findings were judged on/ })).toBeNull();
+    // R4: a record without tables says so in an Unknown notice rather than leaving a gap.
+    expect(screen.getByRole('heading', { level: 2, name: 'Evidence tables not stored' })).toBeDefined();
+    openView('Findings');
     expect(screen.getByText('memory.flash_budget')).toBeDefined();
     expect(getRunMock.mock.calls[0]?.[0]).toBe(gateRun().runId);
   });
@@ -1426,6 +1484,8 @@ describe('Release bundle', () => {
     runGateMock.mockResolvedValue(ok(passingRun()));
     await openRelease();
     await runGate();
+    await screen.findByRole('tab', { name: 'Bundle' });
+    openView('Bundle');
     fireEvent.click(await screen.findByRole('button', { name: 'Prepare bundle' }));
     await screen.findByRole('heading', { level: 3, name: 'Bundle preview' });
   }
@@ -1462,6 +1522,8 @@ describe('Release bundle', () => {
     await runGate();
     // The default run's disposition is BLOCK, so nothing here is offerable — and the reason is on the
     // screen rather than inferred from a grey button (prompt §58).
+    await screen.findByRole('tab', { name: 'Bundle' });
+    openView('Bundle');
     await screen.findByRole('button', { name: 'Prepare bundle' });
     expect(namedButton('Prepare bundle').disabled).toBe(true);
     expect(
@@ -1484,8 +1546,11 @@ describe('Release bundle', () => {
     await runGate();
     // The row still reads REVIEW with its acceptance beside it while the disposition reads PASS: the
     // section opens on Core's aggregate, not on a rewritten finding (prompt §48).
-    expect(await screen.findByText('Disposition: PASS')).toBeDefined();
+    await screen.findByText('diff.growth');
     expect(findingRow('diff.growth').querySelector('div')?.textContent).toContain('REVIEW');
+    openView('Evidence');
+    expect(await screen.findByText('Disposition: PASS')).toBeDefined();
+    openView('Bundle');
     await waitFor(() => expect(namedButton('Prepare bundle').disabled).toBe(false));
   });
 
@@ -1527,6 +1592,8 @@ describe('Release bundle', () => {
     );
     await openRelease();
     await runGate();
+    await screen.findByRole('tab', { name: 'Bundle' });
+    openView('Bundle');
     fireEvent.click(await screen.findByRole('button', { name: 'Prepare bundle' }));
     const panel = await screen.findByRole('alert', { name: 'Bundle step failed' });
     expect(within(panel).getByText('ERR-BUNDLE-6114')).toBeDefined();
@@ -1584,7 +1651,7 @@ describe('Release bundle', () => {
     await chosen();
     fireEvent.click(namedButton('Export bundle'));
 
-    const group = await screen.findByRole('group', { name: 'Replace the existing bundle?' });
+    const group = await screen.findByRole('dialog', { name: 'Replace the existing bundle?' });
     expect(within(group).getByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }))
       .toBeDefined();
     // The first press is unambiguous: overwrite false, and nothing on disk has changed.
@@ -1594,7 +1661,7 @@ describe('Release bundle', () => {
     await waitFor(() =>
       expect(document.body.textContent).toContain('Kept the bundle that was there. Nothing was written.'),
     );
-    expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'Replace the existing bundle?' })).toBeNull();
     expect(exportBundleMock).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('heading', { level: 3, name: 'Bundle created' })).toBeNull();
   });
@@ -1607,7 +1674,7 @@ describe('Release bundle', () => {
     await prepared();
     await chosen();
     fireEvent.click(namedButton('Export bundle'));
-    const group = await screen.findByRole('group', { name: 'Replace the existing bundle?' });
+    const group = await screen.findByRole('dialog', { name: 'Replace the existing bundle?' });
     fireEvent.click(
       within(group).getByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }),
     );
@@ -1634,7 +1701,7 @@ describe('Release bundle', () => {
     expect(document.body.textContent).toContain('it will not be replaced.');
     // What must never be said about this folder, and what must never be offered.
     expect(document.body.textContent).not.toContain('already holds a FirmwareSight release bundle');
-    expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'Replace the existing bundle?' })).toBeNull();
     expect(
       screen.queryByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }),
     ).toBeNull();
@@ -1681,14 +1748,14 @@ describe('Release bundle', () => {
     await chosen();
     fireEvent.click(namedButton('Export bundle'));
 
-    const group = await screen.findByRole('group', { name: 'Replace the existing bundle?' });
+    const group = await screen.findByRole('dialog', { name: 'Replace the existing bundle?' });
     fireEvent.click(
       within(group).getByRole('button', { name: `Replace the existing bundle named ${BUNDLE_FOLDER}` }),
     );
 
     const panel = await screen.findByRole('alert', { name: 'Bundle step failed' });
     expect(within(panel).getByText('ERR-BUNDLE-6107')).toBeDefined();
-    expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'Replace the existing bundle?' })).toBeNull();
     expect(exportBundleMock.mock.calls).toEqual([
       ['bundle-4021-1', 'dst-4021-1', false],
       ['bundle-4021-1', 'dst-4021-1', true],
@@ -1791,7 +1858,7 @@ describe('Release bundle', () => {
     // is gone, which is what this test exists to catch.
     await waitFor(() => expect(document.activeElement).toBe(replace));
     fireEvent.click(screen.getByRole('button', { name: 'Keep it' }));
-    await waitFor(() => expect(screen.queryByRole('group', { name: 'Replace the existing bundle?' })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Replace the existing bundle?' })).toBeNull());
     expect(namedButton('Export bundle')).toBeDefined();
   });
 
@@ -1804,6 +1871,9 @@ describe('Release bundle', () => {
       ok(passingRun({ runId: `gate-${'b'.repeat(64)}`, snapshotId: 'snap-other' })),
     );
     fireEvent.click(namedButton('Run Gate'));
+    await waitFor(() => expect(runGateMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Findings' }).getAttribute('aria-selected')).toBe('true'));
+    openView('Bundle');
     await waitFor(() => expect(screen.queryByRole('heading', { level: 3, name: 'Bundle preview' })).toBeNull());
     expect(document.body.textContent).not.toContain('Destination chosen for');
   });
@@ -1872,43 +1942,44 @@ describe('the table layout contract', () => {
   it('puts every gate table inside a scroll wrapper and keeps it a table', async () => {
     await openRelease();
     await runGate();
+    await screen.findByRole('tab', { name: 'Evidence' });
+    openView('Evidence');
     await screen.findByRole('heading', { level: 3, name: 'Required artifacts' });
 
+    // R4: the gate tables are the shared DataTable, whose wrapper owns the scroll axis.
     const tables = screen.getAllByRole('table');
-    expect(tables.length).toBeGreaterThan(0);
+    expect(tables.length).toBe(3);
     for (const table of tables) {
       expect(table.tagName).toBe('TABLE');
-      expect(table.parentElement?.className).toContain('viewport');
+      expect(table.parentElement?.className).toContain('wrap');
     }
   });
 });
 
 describe('U1P Release hierarchy', () => {
-  it('gives the verdict, then the run that produced it, then the settings that made it', async () => {
+  it('gives the subject, the verdict, the settings line, then the three views', async () => {
     await openRelease();
     await runGate();
 
+    // R4: the page names the build the run judged, the verdict leads, the settings that made the run are
+    // one line, and the run itself is read in three views (spec §6.4).
     const verdict = await screen.findByRole('region', { name: 'Gate verdict' });
+    const subject = screen.getByRole('region', { name: 'Subject of this page' });
+    const settings = screen.getByRole('region', { name: 'Run settings' });
+    const views = screen.getByRole('tablist', { name: 'Release views' });
     const findings = screen.getByRole('region', { name: 'Findings by state' });
+    expect(precedes(subject, verdict)).toBe(true);
+    expect(precedes(verdict, settings)).toBe(true);
+    expect(precedes(settings, views)).toBe(true);
+    expect(precedes(views, findings)).toBe(true);
+    expect(within(views).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Findings', 'Evidence', 'Bundle']);
+
+    openView('Evidence');
     const readiness = screen.getByRole('region', { name: 'FirmwareSight policy readiness' });
     const evidence = screen.getByRole('region', { name: 'What the findings were judged on' });
-    const bundle = screen.getByRole('region', { name: 'Release Bundle' });
-    const policy = screen.getByRole('region', { name: 'Step 2 · Project policy' });
-    const builds = screen.getByRole('region', { name: 'Step 1 · Build and baseline' });
-    const attachments = screen.getByRole('region', { name: 'Step 3 · Release attachments' });
-    const runBar = screen.getByRole('region', { name: 'Run Gate' });
-
-    // §11: once a run exists, the run is the page. The verdict leads, the findings follow it
-    // immediately, and the setup drops below in a quieter surface. M1 T4: the setup reads as three
-    // numbered steps in the order a person does them, and the action that judges follows the last one.
-    expect(precedes(verdict, findings)).toBe(true);
-    expect(precedes(findings, readiness)).toBe(true);
     expect(precedes(readiness, evidence)).toBe(true);
-    expect(precedes(evidence, bundle)).toBe(true);
-    expect(precedes(bundle, builds)).toBe(true);
-    expect(precedes(builds, policy)).toBe(true);
-    expect(precedes(policy, attachments)).toBe(true);
-    expect(precedes(attachments, runBar)).toBe(true);
+    openView('Bundle');
+    expect(screen.getByRole('region', { name: 'Release Bundle' })).toBeDefined();
   });
 
   it('moves focus to the verdict after a run the reader asked for', async () => {
@@ -1918,18 +1989,28 @@ describe('U1P Release hierarchy', () => {
     await waitFor(() => expect(document.activeElement).toBe(verdict));
   });
 
-  it('keeps both configuration sections open and labelled after a run, instead of hiding them', async () => {
+  it('folds the settings into one line after a run, and opens them in place', async () => {
     await openRelease();
     await runGate();
     await screen.findByRole('region', { name: 'Gate verdict' });
 
-    // §11D forbids demoting a control to invisible: quieter surface, same access.
+    // R4 (spec §6.4): the line says what the next run will judge, and the steps are one press away.
+    const settings = screen.getByRole('region', { name: 'Run settings' });
+    expect(settings.textContent).toContain('Build app.elf');
+    expect(settings.textContent).toContain('No baseline');
+    expect(settings.textContent).toContain('Stated default policy');
+    expect(settings.textContent).toContain('0 attachment(s)');
+    expect(within(settings).getByRole('button', { name: 'Run Gate' })).toBeDefined();
+    expect(screen.queryByRole('region', { name: 'Step 2 · Project policy' })).toBeNull();
+
+    const edit = within(settings).getByRole('button', { name: 'Edit settings' });
+    expect(edit.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(edit);
     const policy = screen.getByRole('region', { name: 'Step 2 · Project policy' });
     const builds = screen.getByRole('region', { name: 'Step 1 · Build and baseline' });
     expect(within(policy).getByRole('button', { name: 'Edit policy' })).toBeDefined();
     expect(within(builds).getByRole('combobox', { name: 'Current build' })).toBeDefined();
-    const runBar = screen.getByRole('region', { name: 'Run Gate' });
-    expect(within(runBar).getByRole('button', { name: 'Run Gate' })).toBeDefined();
+    expect(within(settings).getByRole('button', { name: 'Hide settings' }).getAttribute('aria-expanded')).toBe('true');
   });
 
   it('leads with the settings it has to be given, while there is no run to report', async () => {
@@ -2056,6 +2137,7 @@ describe('Release attachments', () => {
 
     readAttachmentsMock.mockResolvedValue(ok(attachmentSet([attachment()])));
     attachFileMock.mockResolvedValue(ok(attachment()));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
     const attached = await screen.findByRole('region', { name: 'Step 3 · Release attachments' });
     fireEvent.click(within(attached).getByRole('button', { name: 'Attach' }));
 
@@ -2124,5 +2206,174 @@ describe('Release attachments', () => {
     );
     // The refusal changed nothing: the row is still the one the shell reported.
     expect(within(region).getByText('app.bin')).toBeDefined();
+  });
+});
+
+describe('R4 Release workbench', () => {
+  /** Run the Gate on the pair the fixture run names, so the run on screen and the settings agree. */
+  async function runOnFixturePair(): Promise<void> {
+    await openRelease();
+    await screen.findByRole('combobox', { name: 'Baseline (optional)' });
+    choose('Baseline (optional)', /app-old\.elf/);
+    await runGate();
+    await screen.findByRole('region', { name: 'Gate verdict' });
+  }
+
+  const subjectBar = () => screen.getByRole('region', { name: 'Subject of this page' });
+
+  it('names the judged build in the SubjectBar, and says when the settings have moved past it', async () => {
+    await runOnFixturePair();
+    expect(subjectBar().textContent).toContain('app.elf');
+    expect(subjectBar().textContent).toContain('Latest');
+    // A stored candidate reports no MAP, so the bar makes no MAP claim either way (D-R4-4).
+    expect(subjectBar().textContent).not.toMatch(/MAP/);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
+    choose('Baseline (optional)', /^No baseline$/);
+    expect(subjectBar().textContent).toContain('Previous run kept · current settings not judged');
+    expect(screen.getByText(/now name a different build or baseline than this run judged/)).toBeDefined();
+    // The verdict is still the run's own: moving the settings judges nothing.
+    expect(screen.getByRole('region', { name: 'Gate verdict' })).toBeDefined();
+    expect(runGateMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('says a failed attempt kept the previous run, in the SubjectBar', async () => {
+    await runOnFixturePair();
+    runGateMock.mockResolvedValueOnce(fail(STORAGE_MISS));
+    await runGate();
+    await screen.findByRole('alert', { name: 'Gate run failed' });
+    expect(subjectBar().textContent).toContain('Gate run failed · previous run kept');
+  });
+
+  it('comes back to a run as the latest one, because the settings start from the run (D-R4-7)', async () => {
+    await runOnFixturePair();
+    fireEvent.click(screen.getByRole('button', { name: 'Analyze page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Release Gate page' }));
+    await screen.findByRole('region', { name: 'Gate verdict' });
+    expect(subjectBar().textContent).toContain('Latest');
+    expect(screen.getByRole('region', { name: 'Run settings' }).textContent).toContain('Baseline app-old.elf');
+  });
+
+  it('starts PASS and N/A collapsed with their counts in view, and opens them on request', async () => {
+    await runOnFixturePair();
+    expect(screen.queryByText('git.clean')).toBeNull();
+    const show = screen.getByRole('button', { name: 'Show 1 Pass finding(s)' });
+    expect(show.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.getByRole('heading', { level: 3, name: /Pass/ }).textContent).toContain('1');
+    fireEvent.click(show);
+    expect(screen.getByText('git.clean')).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Hide the Pass findings' }).getAttribute('aria-expanded')).toBe('true');
+    // What asks for a decision is never folded away.
+    expect(screen.getByText('memory.flash_budget')).toBeDefined();
+    expect(screen.getByText('diff.growth')).toBeDefined();
+  });
+
+  it('opens a finding basis in the Inspector and returns focus to the row', async () => {
+    await runOnFixturePair();
+    const button = screen.getByRole('button', { name: 'Show the basis for memory.flash_budget' });
+    button.focus();
+    fireEvent.click(button);
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(inspector.textContent).toContain('Derived');
+    expect(inspector.textContent).toContain('Effective severity');
+    expect(inspector.textContent).toContain('evidence:ev-memory-flash');
+    fireEvent.click(within(inspector).getByRole('button', { name: 'Close evidence panel' }));
+    await waitFor(() => expect(document.activeElement).toBe(button));
+  });
+
+  it('classes an Unknown finding as Unknown in the Inspector, never as derived', async () => {
+    await runOnFixturePair();
+    fireEvent.click(screen.getByRole('button', { name: 'Show the basis for release.notes' }));
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getAllByText('Unknown').length).toBeGreaterThan(0);
+    expect(inspector.textContent).not.toContain('Derived');
+  });
+
+  it('opens a budget row in the Inspector, with Unknown for the figure that was never measured', async () => {
+    await runOnFixturePair();
+    openView('Evidence');
+    fireEvent.click(screen.getByRole('button', { name: 'Show the budget basis for RAM' }));
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(inspector.textContent).toContain('memory.ram_budget');
+    expect(inspector.textContent).toContain('Unknown');
+    expect(inspector.textContent).toContain('2,048 bytes');
+    expect(inspector.textContent).not.toContain('0 bytes');
+  });
+
+  it('writes an unmeasured growth delta as Unknown, never as "not present"', async () => {
+    const run = gateRun();
+    if (run.tables === null) {
+      throw new Error('the fixture run carries no tables');
+    }
+    run.tables.growth = run.tables.growth.map((row) => ({ ...row, deltaBytes: null }));
+    runGateMock.mockResolvedValue(ok(run));
+    await runOnFixturePair();
+    openView('Evidence');
+    const table = block('Growth against the baseline').querySelector('table');
+    if (table === null) {
+      throw new Error('the growth table is missing');
+    }
+    expect(table.textContent).toContain('Unknown');
+    expect(table.textContent).not.toContain('not present');
+  });
+
+  it('edits the policy in a Sheet that Esc closes, returning focus to Edit policy', async () => {
+    await openRelease();
+    const edit = screen.getByRole('button', { name: 'Edit policy' });
+    edit.focus();
+    fireEvent.click(edit);
+    const sheet = await screen.findByRole('dialog', { name: 'Edit project policy' });
+    expect(sheet.getAttribute('aria-modal')).toBe('true');
+    expect(within(sheet).getByLabelText('FLASH budget (bytes)')).toBeDefined();
+    expect(within(sheet).getByRole('button', { name: 'Save as firmwaresight.toml' })).toBeDefined();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit project policy' })).toBeNull());
+    expect(document.activeElement).toBe(edit);
+    expect(savePolicyMock).not.toHaveBeenCalled();
+  });
+
+  it('asks for the acceptance in a Sheet, with focus on the name field', async () => {
+    await runOnFixturePair();
+    fireEvent.click(screen.getByRole('button', { name: 'Accept review' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Accept the review of diff.growth' });
+    await waitFor(() => expect(document.activeElement).toBe(within(sheet).getByLabelText('Who accepts this review')));
+  });
+
+  it('counts the findings that carry a REVIEW disposition, including the unknown ones (R4 smoke)', async () => {
+    // The smoke found "0 findings wait on an explicit acceptance" under a REVIEW verdict: the two rows that
+    // carried it were UNKNOWN, and `[gate.on_unknown]` made them reviews. The sentence counts the rows whose
+    // effective severity is the verdict's word, which is Core's own field on each row.
+    runGateMock.mockResolvedValue(
+      ok(
+        gateRun({
+          overallEffectiveSeverity: 'REVIEW',
+          dispositionEffectiveSeverity: 'REVIEW',
+          counts: { pass: 0, review: 0, block: 0, unknown: 2, notApplicable: 0 },
+          findings: [
+            finding({ id: 'u1', ruleId: 'git.clean', state: 'UNKNOWN', effectiveSeverity: 'REVIEW' }),
+            finding({ id: 'u2', ruleId: 'release.notes', state: 'UNKNOWN', effectiveSeverity: 'REVIEW' }),
+          ],
+        }),
+      ),
+    );
+    await openRelease();
+    await runGate();
+    const verdict = await screen.findByRole('region', { name: 'Gate verdict' });
+    expect(verdict.textContent).toContain('2 finding(s) wait on an explicit acceptance, 2 of them because their evidence is missing');
+    expect(verdict.textContent).not.toContain('0 finding(s)');
+  });
+
+  it('shows the stale note when Rust refuses a late export after the run changed (CI #123 rule)', async () => {
+    await runOnFixturePair();
+    let finish!: (value: Awaited<ReturnType<typeof exportGateVisual>>) => void;
+    exportGateVisualMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    fireEvent.click(await exportItem('Export PNG'));
+    runGateMock.mockResolvedValueOnce(ok(gateRun({ runId: 'gate-newer' })));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run Gate' })); });
+    await act(async () => {
+      finish({ ok: false, envelope: { code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null } });
+    });
+    expect(screen.getByText(/Gate run changed while the Save dialog was open, so nothing was written/)).toBeDefined();
+    expect(screen.queryByRole('alert', { name: 'Visual report export error' })).toBeNull();
   });
 });

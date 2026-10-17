@@ -7,7 +7,7 @@
  * page (ADR-0034 D3).
  */
 
-import { useId, type ReactNode } from 'react';
+import { useId, type ReactNode, type RefObject } from 'react';
 
 import styles from './LeadAnswer.module.css';
 
@@ -18,6 +18,8 @@ export function LeadAnswer({
   reference,
   action,
   note,
+  label,
+  focusRef,
 }: {
   /** A StateBadge, when the answer is a Gate verdict. */
   readonly state?: ReactNode;
@@ -30,10 +32,20 @@ export function LeadAnswer({
   readonly action?: ReactNode;
   /** A standing qualification, such as "this is not a certification". */
   readonly note?: ReactNode;
+  /** A name for the region when the sentence is not one, such as "Gate verdict" (R4 D-R4-5). */
+  readonly label?: string;
+  /** Lets the page move focus to the answer after an action the reader asked for. */
+  readonly focusRef?: RefObject<HTMLElement | null>;
 }) {
   const id = useId();
   return (
-    <section className={styles['lead']} aria-labelledby={id}>
+    <section
+      ref={focusRef}
+      tabIndex={focusRef === undefined ? undefined : -1}
+      className={styles['lead']}
+      aria-label={label}
+      aria-labelledby={label === undefined ? id : undefined}
+    >
       <div className={styles['row']}>
         {state}
         {/* Sentence, then the figure it is about: "Flash used 196 bytes" (spec §6.2). */}

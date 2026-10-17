@@ -19,8 +19,11 @@ export interface SubjectBuild {
   readonly fileName: string;
   /** `null` for a file that has been chosen but not analyzed: no hash has been computed for it yet. */
   readonly sha256: string | null;
-  /** `null` when the build has not reported whether a MAP was attached. */
-  readonly map: boolean | null;
+  /**
+   * `null` when the build has not reported whether a MAP was attached. Left out where the page has no MAP
+   * fact to report at all (Release's stored candidates), so no chip claims one either way (R4 D-R4-4).
+   */
+  readonly map?: boolean | null;
   /** The attached MAP's file name, when the shell reported one. */
   readonly mapFileName?: string | null;
   readonly pinned?: boolean;
@@ -37,7 +40,9 @@ export type SubjectFreshness =
   | 'failed'
   | 'mapChanged'
   | 'pairMoved'
-  | 'compareFailed';
+  | 'compareFailed'
+  | 'settingsMoved'
+  | 'gateFailed';
 
 /** The words for every retained-result freshness, so a new one cannot be added without its sentence. */
 const RETAINED_WORD = {
@@ -46,6 +51,8 @@ const RETAINED_WORD = {
   mapChanged: 'subject.mapChanged',
   pairMoved: 'subject.pairMoved',
   compareFailed: 'subject.compareFailed',
+  settingsMoved: 'subject.settingsMoved',
+  gateFailed: 'subject.gateFailed',
 } as const;
 
 export type Subject =
@@ -114,7 +121,7 @@ function Build({ build }: { readonly build: SubjectBuild }) {
           {t('common', 'subject.pinned')}
         </span>
       ) : null}
-      {build.map === null ? (
+      {build.map === undefined ? null : build.map === null ? (
         <span className={cx(styles['chip'], styles['unknown'])}>
           <Icon name="unknown" size="inline" />
           {t('common', 'subject.mapUnknown')}

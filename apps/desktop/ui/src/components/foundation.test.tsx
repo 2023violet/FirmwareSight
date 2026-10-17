@@ -8,6 +8,7 @@
  */
 
 import { act, fireEvent, screen, within } from '@testing-library/react';
+import { useRef, useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { render } from '../test/render';
@@ -20,6 +21,7 @@ import { Inspector } from './Inspector';
 import { LeadAnswer } from './LeadAnswer';
 import { Notice } from './Notice';
 import { Rail } from './Rail';
+import { Sheet } from './Sheet';
 import { StateBadge } from './StateBadge';
 import { SubjectBar } from './SubjectBar';
 import { Tabs, tabPanelProps } from './Tabs';
@@ -549,5 +551,90 @@ describe('SubjectBar', () => {
     render(<SubjectBar subject={null} freshness="latest" />);
     expect(screen.getByText('No build chosen')).toBeTruthy();
     expect(screen.queryByText('Latest')).toBeNull();
+  });
+});
+
+describe('Sheet (R4)', () => {
+  function Host({ initial }: { readonly initial: boolean }) {
+    const [open, setOpen] = useState(false);
+    const opener = useRef<HTMLButtonElement | null>(null);
+    const field = useRef<HTMLInputElement | null>(null);
+    return (
+      <>
+        <button
+          ref={opener}
+          type="button"
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
+          Open
+        </button>
+        <Sheet
+          open={open}
+          title="Edit things"
+          returnFocus={opener.current}
+          {...(initial ? { initialFocus: field } : {})}
+          onClose={() => {
+            setOpen(false);
+          }}
+          actions={<button type="button">Save</button>}
+        >
+          <input ref={field} aria-label="Name" />
+        </Sheet>
+      </>
+    );
+  }
+
+  it('is a modal dialog that traps Tab, closes on Esc and returns focus to its opener', () => {
+    render(<Host initial={false} />);
+    const opener = screen.getByRole('button', { name: 'Open' });
+    opener.focus();
+    fireEvent.click(opener);
+    const sheet = screen.getByRole('dialog', { name: 'Edit things' });
+    expect(sheet.getAttribute('aria-modal')).toBe('true');
+    const close = within(sheet).getByRole('button', { name: 'Close' });
+    expect(document.activeElement).toBe(close);
+
+    // Tab from the last control wraps to the first, and Shift+Tab from the first wraps to the last.
+    const save = within(sheet).getByRole('button', { name: 'Save' });
+    save.focus();
+    fireEvent.keyDown(save, { key: 'Tab' });
+    expect(document.activeElement).toBe(close);
+    fireEvent.keyDown(close, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(save);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('focuses the decision it asks for when given one', () => {
+    render(<Host initial />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Name' }));
+  });
+});
+
+describe('BuildPicker none entry (R4)', () => {
+  it('lists a none entry first, shows it while nothing is chosen, and reports it as null', () => {
+    const chosen: (string | null)[] = [];
+    const options: BuildOption[] = [{ id: 's1', fileName: 'app.elf', sha256: 'a'.repeat(64), importedAt: '2026-10-17' }];
+    const { rerender } = render(
+      <BuildPicker label="Baseline" noneLabel="No baseline" options={options} value={null} onChange={(id) => chosen.push(id)} />,
+    );
+    const button = screen.getByRole('combobox', { name: 'Baseline' });
+    expect(button.textContent).toContain('No baseline');
+    fireEvent.click(button);
+    const entries = screen.getAllByRole('option');
+    expect(entries.map((entry) => entry.textContent)).toEqual(['No baseline', expect.stringContaining('app.elf')]);
+    expect(entries[0]?.getAttribute('aria-selected')).toBe('true');
+    fireEvent.click(entries[1] as HTMLElement);
+    rerender(
+      <BuildPicker label="Baseline" noneLabel="No baseline" options={options} value="s1" onChange={(id) => chosen.push(id)} />,
+    );
+    fireEvent.click(screen.getByRole('combobox', { name: 'Baseline' }));
+    fireEvent.click(screen.getByRole('option', { name: 'No baseline' }));
+    expect(chosen).toEqual(['s1', null]);
   });
 });

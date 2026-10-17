@@ -5,20 +5,20 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "ACTIVE_TASK"
 owner: "Engineering"
-last_updated: "2026-10-16"
+last_updated: "2026-10-17"
 ---
 
 # Active Task
 
 ```text
-R3_COMPARE_WORKBENCH
+R4_RELEASE_WORKBENCH
 ```
 
-- **Authorized by:** the Owner, in chat on 2026-10-16 ("FirmwareSight｜下一步执行 R3：Compare 对比工作台重构"), after the R2 architecture review (`R2_ENGINEERING_ACCEPTED / READY_FOR_R3`).
-- **Plan and status:** [06_DELIVERY/17_R3_COMPARE.md](../06_DELIVERY/17_R3_COMPARE.md).
-- **Base:** `56d5609`. **Branch:** `feature/r3-compare`.
-- **Not authorized:** Release, History, Settings, Help and the command palette (R4–R5); report redesign (R6); new IPC or storage; deleting data outside an approved scope; a push without Owner approval.
+- **Authorized by:** the Owner, in chat on 2026-10-17 ("执行R4"), after R3 was integrated at `465fe5f` (Actions #125, 10/10).
+- **Plan and status:** [06_DELIVERY/18_R4_RELEASE.md](../06_DELIVERY/18_R4_RELEASE.md).
+- **Base:** `465fe5f`. **Branch:** `feature/r4-release`.
+- **Not authorized:** History, Settings, Help, the command palette and the IA rename (R5); report redesign (R6); new IPC or storage; deleting data outside an approved scope; a push without Owner approval.
 
-- **Last task:** `R2_ANALYZE_OVERVIEW`, on `main` at `56d5609` (Actions #124, 10/10).
+- **Last task:** `R3_COMPARE_WORKBENCH`, on `main` at `465fe5f` (Actions #125, 10/10).
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

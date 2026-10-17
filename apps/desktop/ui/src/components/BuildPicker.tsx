@@ -27,23 +27,37 @@ export interface BuildOption {
 
 export function BuildPicker({
   label,
-  options,
+  options: builds,
   value,
-  onChange,
+  onChange: choose,
   disabled = false,
+  noneLabel,
 }: {
   readonly label: string;
   readonly options: readonly BuildOption[];
   readonly value: string | null;
-  readonly onChange: (id: string) => void;
+  /** The chosen build's id, or `null` when the reader chose the "none" entry. */
+  readonly onChange: (id: string | null) => void;
   readonly disabled?: boolean;
+  /**
+   * When given, the list opens with an entry that names no build, such as "No baseline" (R4 D-R4-3). It is
+   * the choice shown while `value` is `null`.
+   */
+  readonly noneLabel?: string;
 }) {
   const { t } = useI18n();
   const base = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const button = useRef<HTMLButtonElement | null>(null);
-  const chosen = options.find((option) => option.id === value) ?? null;
+  const options: readonly (BuildOption & { readonly none?: true })[] =
+    noneLabel === undefined
+      ? builds
+      : [{ id: '', fileName: noneLabel, sha256: '', importedAt: '', none: true }, ...builds];
+  const chosen = builds.find((option) => option.id === value) ?? null;
+  const onChange = (id: string) => {
+    choose(id === '' ? null : id);
+  };
 
   // The highlight starts on the current choice when the list opens, and only then: a parent that passes a
   // fresh options array on every render must not snap the reader's highlight back.
@@ -51,7 +65,7 @@ export function BuildPicker({
   latest.current = { options, value };
   useEffect(() => {
     if (open) {
-      const index = latest.current.options.findIndex((option) => option.id === latest.current.value);
+      const index = latest.current.options.findIndex((option) => option.id === (latest.current.value ?? ''));
       setActive(index < 0 ? 0 : index);
     }
   }, [open]);
@@ -124,7 +138,7 @@ export function BuildPicker({
         data-value={value ?? ''}
         aria-activedescendant={open ? optionId(active) : undefined}
         className={styles['button']}
-        disabled={disabled || options.length === 0}
+        disabled={disabled || builds.length === 0}
         onClick={() => {
           setOpen((now) => !now);
         }}
@@ -136,11 +150,11 @@ export function BuildPicker({
         }}
       >
         <span id={`${base}-value`} className={styles['value']}>
-          {chosen === null
-            ? options.length === 0
+          {chosen !== null
+            ? `${chosen.fileName} · ${chosen.sha256.slice(0, 12)}`
+            : builds.length === 0
               ? t('common', 'picker.none')
-              : t('common', 'picker.choose')
-            : `${chosen.fileName} · ${chosen.sha256.slice(0, 12)}`}
+              : noneLabel ?? t('common', 'picker.choose')}
         </span>
         <Icon name="chevronDown" />
       </button>
@@ -152,7 +166,7 @@ export function BuildPicker({
               id={optionId(index)}
               role="option"
               data-value={option.id}
-              aria-selected={option.id === value}
+              aria-selected={option.none === true ? value === null : option.id === value}
               className={cx(styles['option'], index === active ? styles['active'] : undefined)}
               onMouseDown={(event) => {
                 // Keep focus on the combobox; the click below makes the choice.
@@ -162,18 +176,26 @@ export function BuildPicker({
                 pick(index);
               }}
             >
-              <span className={styles['line']}>
-                <span className={styles['name']}>
-                  {option.fileName} · {option.sha256.slice(0, 12)}
+              {option.none === true ? (
+                <span className={styles['line']}>
+                  <span className={styles['name']}>{option.fileName}</span>
                 </span>
-                {option.pinned === true ? (
-                  <span className={styles['pin']}>
-                    <Icon name="pin" size="inline" />
-                    {t('common', 'subject.pinned')}
+              ) : (
+                <>
+                  <span className={styles['line']}>
+                    <span className={styles['name']}>
+                      {option.fileName} · {option.sha256.slice(0, 12)}
+                    </span>
+                    {option.pinned === true ? (
+                      <span className={styles['pin']}>
+                        <Icon name="pin" size="inline" />
+                        {t('common', 'subject.pinned')}
+                      </span>
+                    ) : null}
                   </span>
-                ) : null}
-              </span>
-              <span className={styles['meta']}>{t('common', 'picker.imported', { date: option.importedAt })}</span>
+                  <span className={styles['meta']}>{t('common', 'picker.imported', { date: option.importedAt })}</span>
+                </>
+              )}
             </li>
           ))}
         </ul>

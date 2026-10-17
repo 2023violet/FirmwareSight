@@ -83,7 +83,7 @@ export function capabilityState(value: string): StateName {
  */
 export function gateVerdictSentence(run: GateRunDto, t: Translate): string {
   const severity = severityState(run.dispositionEffectiveSeverity);
-  const head = verdictHead(severity, run.counts, t);
+  const head = verdictHead(severity, run, t);
   const accepted = run.findings.filter((finding) => finding.acceptance !== null).length;
   if (accepted === 0 || run.overallEffectiveSeverity === run.dispositionEffectiveSeverity) {
     return head;
@@ -95,16 +95,31 @@ export function gateVerdictSentence(run: GateRunDto, t: Translate): string {
   });
 }
 
-function verdictHead(
-  severity: StateName,
-  counts: GateRunDto['counts'],
-  t: Translate,
-): string {
+/**
+ * The head names the findings that carry the aggregate. Those are the rows whose effective severity is
+ * the aggregate's word, which is Core's own field on each row, so nothing here re-judges a rule. A rule
+ * whose evidence is missing can carry a REVIEW or a BLOCK through `[gate.on_unknown]`, and counting only
+ * REVIEW- or BLOCK-state rows would then read "0 findings wait" under a REVIEW disposition (R4 smoke).
+ */
+function verdictHead(severity: StateName, run: GateRunDto, t: Translate): string {
+  const counts = run.counts;
+  const carrying = (word: string) =>
+    run.findings.filter((finding) => finding.effectiveSeverity === word && finding.acceptance === null);
   switch (severity) {
-    case 'BLOCK':
-      return t('gate', 'verdict.block', { count: counts.block });
-    case 'REVIEW':
-      return t('gate', 'verdict.review', { count: counts.review });
+    case 'BLOCK': {
+      const rows = carrying('BLOCK');
+      const unknown = rows.filter((finding) => finding.state === 'UNKNOWN').length;
+      return unknown === 0
+        ? t('gate', 'verdict.block', { count: rows.length === 0 ? counts.block : rows.length })
+        : t('gate', 'verdict.blockUnknown', { count: rows.length, unknown });
+    }
+    case 'REVIEW': {
+      const rows = carrying('REVIEW');
+      const unknown = rows.filter((finding) => finding.state === 'UNKNOWN').length;
+      return unknown === 0
+        ? t('gate', 'verdict.review', { count: rows.length === 0 ? counts.review : rows.length })
+        : t('gate', 'verdict.reviewUnknown', { count: rows.length, unknown });
+    }
     case 'UNKNOWN':
       return t('gate', 'verdict.unknown', { count: counts.unknown });
     default:

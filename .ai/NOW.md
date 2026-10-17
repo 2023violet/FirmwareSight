@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "CURRENT_INDEX"
 owner: "Engineering"
-last_updated: "2026-10-16"
+last_updated: "2026-10-17"
 ---
 
 # FirmwareSight Now
@@ -24,8 +24,8 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
   - `fwsight diff` text now escapes control characters from user files.
   - Automated native QA of the M2 screens: 11 cases, all PASS ([evidence/D2C](../evidence/D2C/README.md)).
   - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
-- **R-series redesign:** R0, R1 and R2 (Analyze and Overview) are on `main` at `56d5609` (Actions #124, 10/10). R3 Compare workbench (branch `feature/r3-compare`, not yet on `main`): plan [06_DELIVERY/17](../06_DELIVERY/17_R3_COMPARE.md). Open human items: the 1024×720 drag check, and the R2 native smoke ran before the CI #123 fix `56d5609` (that fix is covered by tests and CI only).
-- **Latest `main`:** `56d5609` (Actions #124, 10/10). Read Git for anything later.
+- **R-series redesign:** R0–R3 are on `main` at `465fe5f` (Actions #125, 10/10); R3 plan [06_DELIVERY/17](../06_DELIVERY/17_R3_COMPARE.md). R4 Release workbench (branch `feature/r4-release`, not yet on `main`): plan [06_DELIVERY/18](../06_DELIVERY/18_R4_RELEASE.md). Open human item: the 1024×720 drag check.
+- **Latest `main`:** `465fe5f` (Actions #125, 10/10). Read Git for anything later.
 
 ## Gates
 

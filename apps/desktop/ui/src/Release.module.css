@@ -180,16 +180,6 @@
   overflow-wrap: anywhere;
 }
 
-/* Once a run exists, the inputs that produced it are configuration rather than conclusion. They stay
-   open, labelled and reachable - U1P §11D forbids hiding a control a reader needs - and they take the
-   quiet surface instead. */
-.secondary {
-  background: var(--fs-color-bg-subtle);
-  padding: var(--fs-space-4);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-panel);
-}
-
 /* M1 T4: the one action that judges the attempt, after the last setup step. It stays at the bottom edge
    of the viewport while the steps scroll, so the reader never hunts for it. */
 .runBar {
@@ -210,8 +200,7 @@
   gap: var(--fs-space-4);
 }
 
-.states,
-.counts {
+.states {
   display: flex;
   flex-wrap: wrap;
   gap: var(--fs-space-2) var(--fs-space-6);
@@ -276,16 +265,6 @@
   font-family: var(--fs-font-mono);
 }
 
-.refs {
-  margin: 0;
-  padding-left: var(--fs-space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-  color: var(--fs-color-text-secondary);
-  overflow-wrap: anywhere;
-}
-
 /* The audit block is deliberately plain: it is a record of a decision, not a second verdict, and it
    never carries a state colour of its own (prompt §48). */
 .accepted {
@@ -313,22 +292,6 @@
 .audit dd {
   margin: 0;
   overflow-wrap: anywhere;
-}
-
-.accept,
-.acceptForm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
-  align-items: flex-start;
-}
-
-.acceptForm {
-  width: 100%;
-  max-width: var(--fs-layout-design-target-width);
-  padding: var(--fs-space-3);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-control);
 }
 
 .form,
@@ -374,65 +337,86 @@
   border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  /* The scroll axis belongs to the wrapper, not to the table (F2R-01): a `display: block` table is pinned
-     to the width of its pane and then lays its columns out below their own minimum. `ScrollArea` owns the
-     axis and the table keeps its intrinsic minimum. */
-}
-
-.table th,
-.table td {
-  padding: var(--fs-space-1) var(--fs-space-2);
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  text-align: left;
-  white-space: nowrap;
-  font-weight: var(--fs-font-weight-regular);
-}
-
-.table thead th {
-  color: var(--fs-color-text-secondary);
-  font-size: var(--fs-font-size-metadata);
-}
-
 /* A reason or an evidence basis has no bound, so the cell that carries it wraps rather than the one
    that would push the table sideways. The 24ch measure is the one F2R-01 pinned for a prose column: a
    column that can be squeezed to one character is the defect that round closed. */
 .wrap {
+  display: inline-block;
   white-space: normal;
   overflow-wrap: anywhere;
   min-width: 24ch;
 }
 
-.caption {
-  caption-side: top;
-  text-align: left;
-  padding-bottom: var(--fs-space-1);
-  color: var(--fs-color-text-secondary);
-  font-size: var(--fs-font-size-metadata);
-  max-width: 88ch;
+/* R4: the page and the Inspector side by side, as on Analyze and Compare. */
+.withInspector {
+  display: flex;
+  align-items: stretch;
+  min-height: 100%;
 }
 
-/* The verdict band (U1 §B.5). A surface, a hairline and the counts: the answer is the first thing on the
-   page, and it is still not a banner - no shadow, no accent fill, nothing that would make a policy
-   verdict look like a marketing claim (DESIGN.md 4, 9). */
-.verdict {
+.withInspector > main {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--fs-space-3) var(--fs-space-4);
-  padding: var(--fs-space-3) var(--fs-space-4);
-  background: var(--fs-color-bg-surface);
+  flex-direction: column;
+  gap: var(--fs-space-6);
+  padding-top: var(--fs-space-4);
+}
+
+/* Once a run exists, the settings that made it are one line: what the next run will judge, and the two
+   actions. The steps open under it in place (spec §6.4). */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
+  padding: var(--fs-space-2) var(--fs-space-3);
+  background: var(--fs-color-bg-subtle);
   border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   border-radius: var(--fs-radius-panel);
 }
 
-.verdictSentence {
+.settingsLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-2) var(--fs-space-4);
+}
+
+.settingsFacts {
+  display: flex;
   flex: 1;
-  min-width: min(100%, 40ch);
-  margin: 0;
-  font-size: var(--fs-font-size-section);
-  line-height: var(--fs-line-height-section);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-1) var(--fs-space-4);
+  min-width: 0;
+  color: var(--fs-color-text-secondary);
   overflow-wrap: anywhere;
+}
+
+.settingsActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-2);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
+}
+
+.steps[hidden] {
+  display: none;
+}
+
+/* A group's heading, the sentence that says what the state means, and the control that opens it. */
+.groupLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fs-space-2) var(--fs-space-4);
 }
