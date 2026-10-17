@@ -238,6 +238,54 @@ fn gate_context(snapshot: &BuildSnapshot) -> GateContext {
     }
 }
 
+/// Every horizontal rule's y, and every text's (baseline, font size), read back from the SVG.
+fn svg_geometry(svg: &str) -> (Vec<u32>, Vec<(u32, u32)>) {
+    fn attr(tag: &str, name: &str) -> Option<u32> {
+        let start = tag.find(&format!(" {name}=\""))? + name.len() + 3;
+        tag[start..].split('"').next()?.parse().ok()
+    }
+    let rules = svg
+        .split("<line")
+        .skip(1)
+        .filter_map(|tag| attr(tag, "y1"))
+        .collect();
+    let texts = svg
+        .split("<text")
+        .skip(1)
+        .filter_map(|tag| Some((attr(tag, "y")?, attr(tag, "font-size")?)))
+        .collect();
+    (rules, texts)
+}
+
+#[test]
+fn no_rule_runs_through_a_line_of_text() {
+    // R6 review S2-2: the masthead hairline once sat at y=160, through the metric labels' capitals.
+    let snapshot = snapshot('a', "firmware.elf", 1536, Some(48));
+    let dto = analysis(&snapshot, "firmware.elf");
+    let regions = snapshot
+        .memory()
+        .expect("Core memory facts")
+        .region_usage
+        .clone();
+    let svg = String::from_utf8(
+        visual::render(&VisualReport::analyze(&dto, &regions), VisualFormat::Svg).expect("SVG"),
+    )
+    .expect("UTF-8 SVG");
+    let (rules, texts) = svg_geometry(&svg);
+    assert!(!rules.is_empty(), "the masthead draws its hairline");
+    for rule in rules {
+        for &(baseline, size) in &texts {
+            // A glyph box: cap height above the baseline, descenders below it.
+            let top = baseline.saturating_sub(size * 4 / 5);
+            let bottom = baseline + size / 4;
+            assert!(
+                rule < top || rule > bottom,
+                "the rule at y={rule} crosses text at baseline {baseline} (size {size})"
+            );
+        }
+    }
+}
+
 #[test]
 fn analyze_card_carries_core_bytes_regions_and_unknown_without_inventing_capacity() {
     let snapshot = snapshot('a', "C:\\private-canary\\firmware.elf", 1536, Some(48));

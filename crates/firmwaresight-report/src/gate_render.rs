@@ -13,6 +13,7 @@
 
 use firmwaresight_core::domain::gate::{FindingState, GateEvaluation};
 
+use crate::diff_render::terminal_safe;
 use crate::gate::{AcceptedReviewsDto, GateResultsDto};
 
 /// The `--json` contract: exactly one JSON document on stdout, nothing else.
@@ -115,13 +116,19 @@ pub fn render_human(evaluation: &GateEvaluation, policy_sha256: &str) -> String 
                 finding.rule_id.as_str().to_owned()
             };
             out.push_str(&format!("  {}{rule}\n", state_tag(state.as_str())));
-            out.push_str(&wrap(&finding.summary, INDENT, INDENT));
+            // Summaries, remediations and refs quote policy values and file names, so a control character in
+            // one prints as its escape, never as a terminal instruction (R6 review S3).
+            out.push_str(&wrap(&terminal_safe(&finding.summary), INDENT, INDENT));
             if let Some(remediation) = &finding.remediation {
-                out.push_str(&wrap(&format!("next: {remediation}"), INDENT, INDENT));
+                out.push_str(&wrap(
+                    &format!("next: {}", terminal_safe(remediation)),
+                    INDENT,
+                    INDENT,
+                ));
             }
             if !finding.evidence_refs.is_empty() {
                 out.push_str(&wrap(
-                    &format!("refs: {}", finding.evidence_refs.join(", ")),
+                    &format!("refs: {}", terminal_safe(&finding.evidence_refs.join(", "))),
                     INDENT,
                     INDENT,
                 ));

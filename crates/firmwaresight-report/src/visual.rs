@@ -126,6 +126,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 pub const WIDTH: u32 = 1600;
 pub const HEIGHT: u32 = 900;
+/// Where the masthead hairline is drawn: under the title, above the subject line.
+const MASTHEAD_RULE_Y: u32 = 80;
 const LABEL_LIMIT: usize = 160;
 const MAX_CARD_ROWS: usize = 7;
 /// Punctuation a display label may carry. Everything outside it that is not alphanumeric withholds
@@ -582,10 +584,11 @@ fn svg(report: &VisualReport) -> String {
         "#171A1F",
         false,
     );
-    // The masthead band ends in a hairline, the same rule the HTML and text reports draw under theirs.
-    out.push_str(
-        "<line x1=\"48\" y1=\"160\" x2=\"1552\" y2=\"160\" stroke=\"#D9DEE5\" stroke-width=\"2\"/>",
-    );
+    // The masthead title ends in a hairline, the same rule the HTML and text reports draw under theirs. It
+    // sits between the title (baseline 64) and the subject (cap top ~90), clear of every line below it.
+    out.push_str(&format!(
+        "<line x1=\"48\" y1=\"{MASTHEAD_RULE_Y}\" x2=\"1552\" y2=\"{MASTHEAD_RULE_Y}\" stroke=\"#D9DEE5\" stroke-width=\"2\"/>"
+    ));
     svg_text(
         &mut out,
         48,

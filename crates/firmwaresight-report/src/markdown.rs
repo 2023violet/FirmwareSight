@@ -22,35 +22,63 @@ use firmwaresight_core::domain::memory::{MemoryRegionUsage, RegionUsageState};
 use crate::dto::AnalyzeResultDto;
 use crate::gate::GateResultsDto;
 use crate::gate_render::{STATE_ORDER, sentence_from_words};
-use crate::render::{budget_line, safe_display_text};
+use crate::render::budget_line;
 
 /// Text from an artifact or a policy, made inert for Markdown: control characters are shown escaped,
 /// every character Markdown gives a meaning to is backslash-escaped, and a line break becomes a space so a
 /// value cannot leave its table cell.
 #[must_use]
 pub fn escape(raw: &str) -> String {
-    let safe = safe_display_text(raw);
-    let mut out = String::with_capacity(safe.len());
-    for ch in safe.chars() {
+    let mut out = String::with_capacity(raw.len());
+    for ch in raw.chars() {
         match ch {
+            '\n' | '\r' => out.push(' '),
+            // A control or invisible formatting character (a right-to-left override, a zero-width space)
+            // is shown as its code, never sent. Its backslash is itself escaped so it prints as written.
+            c if hidden(c) => {
+                for part in c.escape_unicode() {
+                    if part == '\\' {
+                        out.push_str("\\\\");
+                    } else {
+                        out.push(part);
+                    }
+                }
+            }
             // Every escaped value sits mid-line or in a table cell, where only these characters can open
-            // emphasis, code, a link, raw HTML, a strikethrough or a new cell. A dot or a dash stays
-            // readable: `firmware.elf`, never `firmware\.elf`.
-            '\\' | '`' | '*' | '_' | '[' | ']' | '<' | '>' | '|' | '~' => {
+            // emphasis, code, a link, raw HTML, an entity, a strikethrough or a new cell. A dot, a dash and
+            // a quote stay as they are: `firmware.elf`, `it's`, never `firmware\.elf` or `it\'s` (R6 review
+            // S2-1). `&` is escaped so `&#x202E;` in a name cannot decode into the character it names.
+            '\\' | '`' | '*' | '_' | '[' | ']' | '<' | '>' | '|' | '~' | '&' => {
                 out.push('\\');
                 out.push(ch);
             }
-            '\n' | '\r' => out.push(' '),
             _ => out.push(ch),
         }
     }
     out
 }
 
+/// A character a reader would not see: a control or an invisible formatting character, by the standard
+/// library's own printable test (the same set the terminal reports escape), quotes and backslashes aside.
+fn hidden(c: char) -> bool {
+    !matches!(c, '"' | '\'' | '\\') && c.escape_debug().nth(1).is_some()
+}
+
 /// A value that is an identifier (a digest, an id, a locator) as inline code. Backticks inside it would
-/// end the span, so they are replaced; nothing else in a code span is interpreted.
+/// end the span, so they are replaced; nothing else in a code span is interpreted, and a hidden character
+/// is shown as its code.
 fn code(raw: &str) -> String {
-    format!("`{}`", safe_display_text(raw).replace('`', "'"))
+    let shown: String = raw
+        .chars()
+        .map(|c| {
+            if hidden(c) {
+                c.escape_unicode().to_string()
+            } else {
+                c.to_string()
+            }
+        })
+        .collect();
+    format!("`{}`", shown.replace('`', "'"))
 }
 
 fn footer(out: &mut String, kind: &str) {
@@ -318,12 +346,37 @@ pub fn comparison(result: &DiffResult) -> String {
     out
 }
 
-/// `fwsight gate --markdown`, and the desktop's Release export.
+/// What a stored desktop run adds to the portable projection: the disposition after the accepted reviews,
+/// and each acceptance as the audit record it is (R6 review S2-3).
+#[derive(Debug, Clone, Default)]
+pub struct GateRecord<'a> {
+    pub disposition: &'a str,
+    pub acceptances: Vec<AcceptanceLine<'a>>,
+}
+
+/// One accepted review: which rule, who accepted it, when, and why.
+#[derive(Debug, Clone)]
+pub struct AcceptanceLine<'a> {
+    pub rule_id: &'a str,
+    pub actor: &'a str,
+    pub accepted_at: &'a str,
+    pub reason: &'a str,
+}
+
+/// `fwsight gate --markdown`: a fresh run, which has no acceptances.
 ///
-/// It reads the portable gate-results projection (`gate:1`), which is what both the CLI's fresh run and
-/// the desktop's stored run can produce, so the two write the same document for the same run.
+/// It reads the portable gate-results projection (`gate:1`), which both the CLI's fresh run and the
+/// desktop's stored run can produce, so the findings read the same for the same run.
 #[must_use]
 pub fn gate(results: &GateResultsDto) -> String {
+    gate_with_record(results, None)
+}
+
+/// The desktop's Release export: the same report, plus the disposition after accepted reviews and the
+/// acceptances themselves. An accepted review stays REVIEW in the findings; only the aggregate moves, and
+/// the answer says both, so a cleared run never reads "needs a decision".
+#[must_use]
+pub fn gate_with_record(results: &GateResultsDto, record: Option<&GateRecord<'_>>) -> String {
     let ext = &results.extensions;
     let verdict = ext.overall_effective_severity;
     let mut out = String::from("# FirmwareSight · Release Gate report\n\n");
@@ -351,10 +404,18 @@ pub fn gate(results: &GateResultsDto) -> String {
             .map(|finding| (finding.state, finding.effective_severity)),
         count("PASS"),
     );
-    out.push_str(&format!(
-        "> **{verdict}** — {}\n>\n> FirmwareSight policy readiness: the answer of this project's policy, not a certification and not a permission to release.\n\n",
-        escape(&sentence)
-    ));
+    match record {
+        Some(record) if record.disposition != verdict => out.push_str(&format!(
+            "> **{}** — the disposition after {} accepted review(s). As computed before any acceptance: **{verdict}** — {}\n>\n> FirmwareSight policy readiness: the answer of this project's policy, not a certification and not a permission to release.\n\n",
+            record.disposition,
+            record.acceptances.len(),
+            escape(&sentence)
+        )),
+        _ => out.push_str(&format!(
+            "> **{verdict}** — {}\n>\n> FirmwareSight policy readiness: the answer of this project's policy, not a certification and not a permission to release.\n\n",
+            escape(&sentence)
+        )),
+    }
 
     out.push_str("## Findings by state\n\n| BLOCK | REVIEW | UNKNOWN | PASS | N/A |\n|---:|---:|---:|---:|---:|\n");
     out.push_str(&format!(
@@ -399,6 +460,22 @@ pub fn gate(results: &GateResultsDto) -> String {
         }
     }
 
+    if let Some(record) = record
+        && !record.acceptances.is_empty()
+    {
+        out.push_str("\n## Accepted reviews\n\n| Rule | By | When | Reason |\n|---|---|---|---|\n");
+        for line in &record.acceptances {
+            out.push_str(&format!(
+                "| {} | {} | {} | {} |\n",
+                code(line.rule_id),
+                escape(line.actor),
+                code(line.accepted_at),
+                escape(line.reason)
+            ));
+        }
+        out.push_str("\nAn acceptance is an audit record: the finding above still reads REVIEW.\n");
+    }
+
     out.push_str("\n## Evidence\n\n");
     for finding in &results.findings {
         if finding.evidence_refs.is_empty() {
@@ -434,6 +511,13 @@ mod tests {
     fn a_name_cannot_become_markup_or_leave_its_cell() {
         assert_eq!(escape("a|b"), "a\\|b");
         assert_eq!(escape("firmware.elf"), "firmware.elf");
+        // R6 review S2-1: quotes and backslashes print as they are written.
+        assert_eq!(escape("it's \"q\""), "it's \"q\"");
+        assert_eq!(escape("^v\\d+$"), "^v\\\\d+$");
+        // A name cannot decode into a hidden character, nor carry one.
+        assert_eq!(escape("&#x202E;"), "\\&#x202E;");
+        assert_eq!(escape("a\u{202E}b"), "a\\\\u{202e}b");
+        assert_eq!(code("x\u{200B}y"), "`x\\u{200b}y`");
         assert_eq!(escape("[x](http://y)"), "\\[x\\](http://y)");
         assert_eq!(escape("*bold* _it_ ~s~"), "\\*bold\\* \\_it\\_ \\~s\\~");
         assert_eq!(escape("<script>"), "\\<script\\>");

@@ -2386,7 +2386,7 @@ describe('R4 Release workbench', () => {
     });
     await screen.findByRole('region', { name: 'Gate verdict' });
     expect(screen.getByText(/Gate run changed while the Save dialog was open, so nothing was written/)).toBeDefined();
-    expect(screen.queryByRole('alert', { name: 'Visual report export error' })).toBeNull();
+    expect(screen.queryByRole('alert', { name: 'Report export error' })).toBeNull();
   });
 
   it('returns focus to the acceptance record once the Accept button it came from is retired (R4 review S2-1)', async () => {
@@ -2471,6 +2471,6 @@ describe('R4 Release workbench', () => {
       finish({ ok: false, envelope: { code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null } });
     });
     expect(screen.getByText(/Gate run changed while the Save dialog was open, so nothing was written/)).toBeDefined();
-    expect(screen.queryByRole('alert', { name: 'Visual report export error' })).toBeNull();
+    expect(screen.queryByRole('alert', { name: 'Report export error' })).toBeNull();
   });
 });

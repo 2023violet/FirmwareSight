@@ -15,7 +15,7 @@ export const release: CatalogFor<'release'> = {
   'visualExport.cancelled': '已取消导出。未写入任何文件。',
   'visualExport.keptExisting': '保留了已经存在的文件。未写入任何内容。',
   'visualExport.unknownOutcome': '导出的结果状态是本版本无法识别的：{status}',
-  'visualExport.errorLabel': '可视化报告导出错误',
+  'visualExport.errorLabel': '报告导出错误',
   'visualExport.errorHeading': '无法导出报告',
   'projectReadiness.heading': '项目准备情况',
   'projectReadiness.scope': '这里只观察配置与工作区事实，不是 Gate 结果。',

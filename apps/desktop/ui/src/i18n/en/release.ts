@@ -13,7 +13,7 @@ export const release = {
   'visualExport.cancelled': 'Export cancelled. No file was written.',
   'visualExport.keptExisting': 'Kept the file that was already there. Nothing was written.',
   'visualExport.unknownOutcome': 'The export reported an outcome this build does not know: {status}',
-  'visualExport.errorLabel': 'Visual report export error',
+  'visualExport.errorLabel': 'Report export error',
   'visualExport.errorHeading': 'The report could not be exported',
   'projectReadiness.heading': 'Project readiness',
   'projectReadiness.scope': 'Configuration and workspace observation only; this is not a Gate result.',

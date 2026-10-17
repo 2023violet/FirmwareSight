@@ -1,5 +1,5 @@
 export const analyze = {
-  'export.region': 'Visual report export',
+  'export.region': 'Report export',
   'export.staleNote': 'The analysis changed while the Save dialog was open, so nothing was written. Export again from this analysis.',
   'export.hint': 'PNG is a share image, SVG is editable, and HTML prints to PDF from your browser (FirmwareSight writes no PDF itself). Reports carry no file paths or scripts.',
   'export.png': 'Export PNG',
@@ -11,7 +11,7 @@ export const analyze = {
   'export.cancelled': 'Export cancelled. No file was written.',
   'export.keptExisting': 'Kept the file that was already there. Nothing was written.',
   'export.unknownOutcome': 'The export reported an outcome this build does not know: {status}',
-  'export.errorLabel': 'Visual report export error',
+  'export.errorLabel': 'Report export error',
   'export.errorHeading': 'The report could not be exported',
   'build.line': 'Build identity',
   'views.label': 'Analyze views',

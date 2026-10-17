@@ -975,3 +975,40 @@ fn changing_only_an_attached_files_bytes_changes_the_run_id() {
         serde_json::json!(b"SECOND-BYTES".len() as u64)
     );
 }
+
+#[test]
+fn gate_markdown_writes_the_report_grammar_and_never_replaces_a_file() {
+    // R6 review S3: `fwsight gate --markdown` had no CLI test of its own.
+    let project = TempProject::new("markdown", &quiet_policy());
+    let out = project.path().join("gate.md");
+    let out_arg = out.to_string_lossy().into_owned();
+
+    let first = gate(&project, &["--markdown", &out_arg]);
+    assert!(
+        matches!(first.status.code(), Some(0 | 4 | 5)),
+        "a completed Gate answers with its verdict: {}",
+        errors(&first)
+    );
+    let doc = std::fs::read_to_string(&out).expect("the report was written");
+    assert!(
+        doc.starts_with("# FirmwareSight · Release Gate report\n"),
+        "{doc}"
+    );
+    assert!(doc.contains("not a certification"));
+    assert!(doc.contains("## Findings by state"));
+    assert!(doc.contains("## Limits"));
+    assert!(!doc.contains('<'), "GFM without HTML: {doc}");
+    assert!(
+        !doc.contains(&project.path().to_string_lossy().into_owned()),
+        "no path in the report"
+    );
+
+    let refused = gate(&project, &["--markdown", &out_arg]);
+    assert_eq!(refused.status.code(), Some(6), "{}", errors(&refused));
+    assert!(errors(&refused).contains("ERR-EXPORT-6001"));
+    assert_eq!(
+        std::fs::read_to_string(&out).expect("still there"),
+        doc,
+        "the existing file is untouched"
+    );
+}

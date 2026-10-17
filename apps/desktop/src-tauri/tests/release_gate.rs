@@ -1158,6 +1158,53 @@ fn an_accepted_review_stays_review_and_moves_only_the_aggregate() {
 }
 
 #[test]
+fn the_gate_markdown_reports_the_disposition_and_the_acceptance_as_an_audit_record() {
+    // R6 review S2-3: the desktop export reads the stored run, so a cleared run must not say "needs a decision".
+    let config = Config::permissive().flash_growth(100);
+    let project = TempProject::new("accept-md", &config);
+    let (_db, session) = session("accept-md");
+    let base = store(&session, "base");
+    let target = store(&session, "target");
+    load(&session, &project);
+    let gate = run(&session, &target, Some(&base));
+    let growth = finding(&gate, "diff.growth");
+
+    let before = session
+        .render_gate_markdown(&gate.run_id, &target, "op-md")
+        .expect("the run on screen renders");
+    assert!(before.contains("> **REVIEW**"), "{before}");
+    assert!(!before.contains("## Accepted reviews"));
+
+    session
+        .accept_gate_review(
+            &AcceptReviewRequestDto {
+                run_id: gate.run_id.clone(),
+                finding_id: growth.id.clone(),
+                actor: "rosa | qa".to_owned(),
+                reason: "the bootloader grew on purpose".to_owned(),
+            },
+            "op-accept",
+        )
+        .expect("the acceptance is recorded");
+
+    let after = session
+        .render_gate_markdown(&gate.run_id, &target, "op-md")
+        .expect("the run on screen renders");
+    assert!(
+        after.contains("> **PASS** — the disposition after 1 accepted review(s). As computed before any acceptance: **REVIEW**"),
+        "{after}"
+    );
+    assert!(after.contains("## Accepted reviews"));
+    assert!(
+        after.contains("| `diff.growth` | rosa \\| qa |"),
+        "the actor cannot break the table: {after}"
+    );
+    assert!(after.contains("the bootloader grew on purpose"));
+    // The finding itself still reads REVIEW.
+    assert!(after.contains("| `diff.growth` | **REVIEW** |"), "{after}");
+}
+
+#[test]
 fn only_a_review_can_be_accepted() {
     let project = TempProject::new("only-review", &Config::permissive());
     let (_db, session) = session("only-review");

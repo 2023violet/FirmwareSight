@@ -53,7 +53,7 @@ It is staged in three parts.
 |---|---|
 | D-R6-1 | No JSON schema, `SHA256SUMS`, manifest or bundle content changes (spec §8.3). `release-notes.md` is the user's and is copied as is. |
 | D-R6-2 | One shared terminal module (`report/src/text.rs`) and one Markdown module (`report/src/markdown.rs`). The answer sentence and the state order are reused from the gate renderer, not re-derived. |
-| D-R6-3 | Markdown escapes only what can open markup mid-line or in a cell (`\` `` ` `` `*` `_` `[` `]` `<` `>` `|` `~`), so `firmware.elf` stays readable. Identifiers are code spans. |
+| D-R6-3 | Markdown escapes only what can open markup mid-line or in a cell (`\` `` ` `` `*` `_` `[` `]` `<` `>` `|` `~` `&`), so `firmware.elf` stays readable; quotes and apostrophes print as written. A control, bidi or zero-width character is written as its `\u{…}` escape in text and in code spans, so a name can neither hide one nor decode into one (`&` is escaped so `&#x202E;` stays literal). Identifiers are code spans. Known limit: a GFM renderer may still autolink a bare `www.` or `https://` string in free text; nothing is fetched, and identifiers in code spans are not linked. |
 | D-R6-4 | The CLI writes the Markdown file before printing, like the HTML export, so a run that could not write it has not announced success. |
 
 ## 3. Verification
@@ -96,3 +96,19 @@ It is staged in three parts.
     - a footer naming the generator and the PNG font dependency;
     - N/A rows no longer carry "severity PASS".
   - **Goldens:** `p2-diff.html`, the `p4-release` report, and its `SHA256SUMS` and manifest were regenerated on purpose with `update_goldens.py --confirm` and reviewed. The bundle's file set and manifest format are unchanged; only the report file inside it, and therefore its digest, changed.
+
+## 5. Independent review and dispositions
+
+The review returned PASS_WITH_FIXES. Every finding was fixed on this branch:
+
+| ID | Finding | Disposition |
+|---|---|---|
+| S2-1 | Markdown escaping printed quotes and backslashes wrongly, and a hidden character could pass through. | `escape` keeps quotes, doubles a backslash once, and writes control/bidi/zero-width characters as `\u{…}`; `code` does the same inside spans. Unit tests cover quotes, `\`, `&#x202E;`, U+202E and U+200B. |
+| S2-2 | The SVG masthead hairline at y=160 ran through the metric labels. | The rule sits at y=80, between the title and the subject (`MASTHEAD_RULE_Y`). `no_rule_runs_through_a_line_of_text` reads every rule and text box back from the SVG; it fails at the old y=160. |
+| S2-3 | The desktop Gate Markdown ignored the stored disposition and the accepted reviews, so a cleared run still read "needs a decision". | `markdown::gate_with_record` takes the disposition and the acceptances; the answer states the disposition and the as-computed verdict, and an "Accepted reviews" table records rule, actor, time and reason. The finding still reads REVIEW. Shell test: `the_gate_markdown_reports_the_disposition_and_the_acceptance_as_an_audit_record`. |
+| S3-1 | `&` was not escaped. | Escaped (D-R6-3). |
+| S3-2 | GFM autolinks were not documented. | Recorded as a known limit in D-R6-3. |
+| S3-3 | No CLI test for `gate --markdown`. | `gate_markdown_writes_the_report_grammar_and_never_replaces_a_file` (`gate_cli.rs`). |
+| S3-4 | `diff --markdown X --html X` let the HTML silently overwrite the Markdown. | Each command refuses two exports naming one file before any work (exit 6, `ERR-EXPORT-6001`); `two_exports_naming_one_file_are_refused_before_anything_is_written`. Paths are compared as given, not canonicalized. |
+| S3-5 | The Analyze export group was still named "Visual report export" though it now holds Markdown. | Renamed "Report export" / "报告导出" (and the error labels on Analyze and Release); UI tests updated. |
+| S3-6 | The gate text printed summaries, remediations and refs without the terminal escaping the other reports use. | They go through `terminal_safe`. |

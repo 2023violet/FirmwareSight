@@ -782,13 +782,13 @@ describe('P1-A0 intake screen', () => {
     const lastGood = await screen.findByRole('region', { name: 'Last good analysis' });
     expect(within(lastGood).getByText('5,432 bytes')).toBeDefined();
     expect(within(lastGood).getByText('app.elf')).toBeDefined();
-    expect(screen.queryByRole('group', { name: 'Visual report export' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Report export' })).toBeNull();
   });
 
   it('exports only the successful current selection', async () => {
     await chooseArtifact();
     await analyze();
-    await screen.findByRole('group', { name: 'Visual report export' });
+    await screen.findByRole('group', { name: 'Report export' });
     fireEvent.click(exportButton('Export SVG'));
     await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalledWith(
       'sel-7f3a-2',
@@ -798,7 +798,7 @@ describe('P1-A0 intake screen', () => {
     selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
     fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
     await screen.findByText('other.elf');
-    expect(screen.queryByRole('group', { name: 'Visual report export' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Report export' })).toBeNull();
   });
 
   it('exports the analysis on screen as a Markdown reading copy (R6)', async () => {
@@ -807,7 +807,7 @@ describe('P1-A0 intake screen', () => {
     );
     await chooseArtifact();
     await analyze();
-    await screen.findByRole('group', { name: 'Visual report export' });
+    await screen.findByRole('group', { name: 'Report export' });
     fireEvent.click(exportButton('Export Markdown'));
     await waitFor(() =>
       expect(vi.mocked(exportAnalysisMarkdown)).toHaveBeenCalledWith('sel-7f3a-2', 'snap-deadbeef-p0-normalize-1'),
@@ -890,7 +890,7 @@ describe('P1-A0 intake screen', () => {
     selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
     fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
     await screen.findByText('other.elf');
-    expect(screen.queryByRole('group', { name: 'Visual report export' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Report export' })).toBeNull();
     await act(async () => { finish(fail({ code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null })); });
     expect(screen.getByText(/analysis changed while the Save dialog was open/)).toBeDefined();
   });

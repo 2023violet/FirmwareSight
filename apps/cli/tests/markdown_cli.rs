@@ -158,3 +158,32 @@ fn an_analysis_report_names_the_build_and_writes_unknown_and_limits_in_words() {
         String::from_utf8_lossy(&output.stdout).starts_with("FirmwareSight · Analysis report\n")
     );
 }
+
+#[test]
+fn two_exports_naming_one_file_are_refused_before_anything_is_written() {
+    // R6 review S3: `--html` replaces its file, so it would silently overwrite the Markdown written first.
+    let dir = TempDir::new();
+    let same = dir.file("report.out");
+    let refused = run(&[
+        "diff",
+        BASE,
+        TARGET,
+        "--old-map",
+        BASE_MAP,
+        "--new-map",
+        TARGET_MAP,
+        "--markdown",
+        &same,
+        "--html",
+        &same,
+    ]);
+    assert_eq!(refused.status.code(), Some(6));
+    let stderr = String::from_utf8_lossy(&refused.stderr);
+    assert!(stderr.contains("ERR-EXPORT-6001"), "{stderr}");
+    assert!(stderr.contains("same file"), "{stderr}");
+    assert!(!Path::new(&same).exists(), "nothing was written");
+
+    let analyze = run(&["analyze", BASE, "--markdown", &same, "--svg", &same]);
+    assert_eq!(analyze.status.code(), Some(6));
+    assert!(!Path::new(&same).exists(), "nothing was written");
+}

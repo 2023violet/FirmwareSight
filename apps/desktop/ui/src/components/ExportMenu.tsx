@@ -29,7 +29,7 @@ export function ExportMenu<K extends string>({
 }: {
   /** The menu button's word, e.g. "Export". */
   readonly label: string;
-  /** The group's accessible name, e.g. "Visual report export". */
+  /** The group's accessible name, e.g. "Report export". */
   readonly regionLabel: string;
   /** One sentence on what the formats are, shown at the top of the open menu. */
   readonly hint?: string;

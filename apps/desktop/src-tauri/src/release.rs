@@ -124,7 +124,29 @@ impl Session {
             .gate_run(run_id, operation_id)?
             .filter(|run| run.snapshot_id == snapshot_id)
             .ok_or_else(|| crate::gate_export_stale(operation_id))?;
-        Ok(firmwaresight_report::markdown::gate(&gate_projection(run)))
+        // The stored run's disposition and acceptances go with it, so an accepted review is reported as the
+        // audit record it is and the answer is the disposition the page shows (R6 review S2-3).
+        let record = firmwaresight_report::markdown::GateRecord {
+            disposition: severity_word(&run.disposition_effective_severity),
+            acceptances: run
+                .findings
+                .iter()
+                .filter_map(|finding| {
+                    finding.acceptance.as_ref().map(|acceptance| {
+                        firmwaresight_report::markdown::AcceptanceLine {
+                            rule_id: &finding.rule_id,
+                            actor: &acceptance.actor,
+                            accepted_at: &acceptance.accepted_at,
+                            reason: &acceptance.reason,
+                        }
+                    })
+                })
+                .collect(),
+        };
+        Ok(firmwaresight_report::markdown::gate_with_record(
+            &gate_projection(run.clone()),
+            Some(&record),
+        ))
     }
 }
 

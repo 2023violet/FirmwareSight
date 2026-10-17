@@ -427,6 +427,9 @@ fn next_operation_id() -> String {
 }
 
 fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
+    if outputs_collide(&[&args.svg, &args.png, &args.report_html, &args.markdown]) {
+        return report_export_error(SAME_DESTINATION, args.json, operation_id);
+    }
     let guard = match args.max_bytes {
         Some(limit) => GuardConfig::with_limit(limit),
         None => GuardConfig::default(),
@@ -512,6 +515,16 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
 /// Compare two artifacts. Each side is analyzed with the same pipeline `analyze` uses, then handed
 /// to Core, which owns every diff rule.
 fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
+    // `--html` replaces its file, so a Markdown or visual export naming the same file would be silently lost.
+    if outputs_collide(&[
+        &args.html,
+        &args.svg,
+        &args.png,
+        &args.report_html,
+        &args.markdown,
+    ]) {
+        return report_export_error(SAME_DESTINATION, args.json, operation_id);
+    }
     let base = match analyze_side(&args.old, args.old_map, "old", args.json, operation_id) {
         Ok(analysis) => analysis,
         Err(code) => return ExitCode::from(code),
@@ -1122,6 +1135,18 @@ fn write_visual_exports(
         eprintln!("diagnostics: visual {label} export written");
     }
     None
+}
+
+const SAME_DESTINATION: &str = "Two exports name the same file; choose a separate file for each.";
+
+/// Whether two of one command's exports name the same file (R6 review S3). Refused before any work, so
+/// one export can never overwrite or block another written a moment earlier in the same run.
+fn outputs_collide(paths: &[&Option<PathBuf>]) -> bool {
+    let named: Vec<&PathBuf> = paths.iter().filter_map(|path| path.as_ref()).collect();
+    named
+        .iter()
+        .enumerate()
+        .any(|(i, path)| named[i + 1..].contains(path))
 }
 
 /// Write one Markdown report without replacing an existing file (R6). The same refusal words and exit code
