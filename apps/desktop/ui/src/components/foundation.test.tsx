@@ -446,6 +446,48 @@ describe('DataTable and FilterBar', () => {
   });
 });
 
+describe('DataTable server mode and FilterBar apply mode (R3)', () => {
+  interface Row {
+    readonly name: string;
+    readonly size: number;
+  }
+  const rows: Row[] = [
+    { name: 'b', size: 1 },
+    { name: 'a', size: 2 },
+  ];
+  const columns: Column<Row>[] = [
+    { key: 'size', header: 'Size', numeric: true, sortable: true, firstDirection: 'asc', cell: (row) => String(row.size) },
+    { key: 'name', header: 'Name', sortable: true, firstDirection: 'asc', cell: (row) => row.name },
+    { key: 'note', header: 'Note', cell: () => '-' },
+  ];
+
+  it('asks the shell for the first direction a column names, never reorders, and names rows by rowHeader', () => {
+    const onSort = vi.fn();
+    render(
+      <DataTable caption="Rows" columns={columns} rows={rows} rowKey={(row) => row.name} rowHeader="name" sort={null} onSort={onSort} />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Name' }));
+    expect(onSort).toHaveBeenLastCalledWith({ key: 'name', direction: 'asc' });
+    expect(screen.getAllByRole('rowheader').map((cell) => cell.textContent)).toEqual(['b', 'a']);
+    expect(screen.queryByRole('button', { name: 'Note' })).toBeNull();
+  });
+
+  it('applies a filter once per decision: typing edits the draft, Apply sends it', () => {
+    const onApply = vi.fn();
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <FilterBar label="Filter rows" formLabel="Filter the rows" value="" onChange={onChange} onApply={onApply} />,
+    );
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Filter rows' }), { target: { value: 'ab' } });
+    expect(onChange).toHaveBeenCalledWith('ab');
+    expect(onApply).not.toHaveBeenCalled();
+    rerender(<FilterBar label="Filter rows" formLabel="Filter the rows" value="ab" onChange={onChange} onApply={onApply} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Apply filter' }));
+    expect(onApply).toHaveBeenCalledWith('ab');
+    expect(screen.getByRole('form', { name: 'Filter the rows' })).toBeDefined();
+  });
+});
+
 describe('BuildPicker', () => {
   const options: BuildOption[] = [
     { id: 'a', fileName: 'firmware.elf', sha256: '85ae4fc4e2b8d460522ede8a00db1e1e', importedAt: '2026-10-16 09:12', pinned: true },

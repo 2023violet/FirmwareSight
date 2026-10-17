@@ -635,7 +635,7 @@ describe('filtering, sorting and paging', () => {
     await analyzeOk();
     await openView('Sections');
 
-    const input = await screen.findByRole('textbox', { name: 'Filter sections by name' });
+    const input = await screen.findByRole('searchbox', { name: 'Filter sections by name' });
     fireEvent.change(input, { target: { value: 'ota' } });
     fireEvent.click(screen.getByRole('button', { name: 'Apply filter' }));
 
@@ -653,7 +653,7 @@ describe('filtering, sorting and paging', () => {
     await analyzeOk();
     fireEvent.click(screen.getByRole('tab', { name: 'Symbols' }));
 
-    const input = await screen.findByRole('textbox', { name: 'Filter symbols by name' });
+    const input = await screen.findByRole('searchbox', { name: 'Filter symbols by name' });
     fireEvent.change(input, { target: { value: 'task' } });
     fireEvent.click(screen.getByRole('button', { name: 'Apply filter' }));
     await waitFor(() => {
@@ -661,7 +661,7 @@ describe('filtering, sorting and paging', () => {
       expect(last.filter).toBe('task');
     });
 
-    fireEvent.change(screen.getByRole('textbox', { name: 'Filter symbols by name' }), {
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Filter symbols by name' }), {
       target: { value: '' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Apply filter' }));
@@ -678,7 +678,7 @@ describe('filtering, sorting and paging', () => {
 
     // Re-queryed from the document each time: a page in flight replaces its own rows, and a node
     // held across that update belongs to the tree that was just removed.
-    fireEvent.click(screen.getByRole('button', { name: 'Sort by Name' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Name' }));
     await waitFor(() => {
       const last = sectionsMock.mock.calls.at(-1)?.[0] as SectionRequestDto;
       expect(last.sort).toBe('name');
@@ -686,7 +686,7 @@ describe('filtering, sorting and paging', () => {
     });
 
     await openView('Sections');
-    fireEvent.click(screen.getByRole('button', { name: 'Sort by Name' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Name' }));
     await waitFor(() => {
       const last = sectionsMock.mock.calls.at(-1)?.[0] as SectionRequestDto;
       expect(last.direction).toBe('desc');
@@ -727,7 +727,7 @@ describe('filtering, sorting and paging', () => {
     await waitFor(() => expect(symbolsMock).toHaveBeenCalled());
 
     const panel = await screen.findByRole('tabpanel', { name: 'Symbols' });
-    fireEvent.click(within(panel).getByRole('button', { name: 'Sort by Size' }));
+    fireEvent.click(within(panel).getByRole('button', { name: 'Size' }));
     await waitFor(() => {
       const last = symbolsMock.mock.calls.at(-1)?.[0] as SymbolRequestDto;
       expect(last.sort).toBe('size');
@@ -888,7 +888,8 @@ describe('the table layout contract', () => {
       fireEvent.click(screen.getByRole('tab', { name: tab }));
       const panel = await screen.findByRole('tabpanel', { name: tab });
       const table = within(panel).getByRole('table');
-      expect(table.parentElement?.className).toContain('viewport');
+      // R3: the shared DataTable's wrapper owns the scroll axis.
+      expect(table.parentElement?.className).toContain('wrap');
       expect(table.tagName).toBe('TABLE');
     }
 
@@ -1021,7 +1022,7 @@ describe('the filter box', () => {
     await analyzeOk();
     await openView('Sections');
 
-    const input = await screen.findByRole('textbox', { name: 'Filter sections by name' });
+    const input = await screen.findByRole('searchbox', { name: 'Filter sections by name' });
     expect(input.getAttribute('autocomplete')).toBe('off');
   });
 });
@@ -1116,7 +1117,7 @@ describe('the same rows read in Chinese', () => {
     fireEvent.click(screen.getByRole('tab', { name: '节' }));
     // The first column is the active sort, so its header carries the direction arrow beside the word.
     await screen.findByRole('columnheader', { name: /序号/ });
-    expect(screen.getByRole('button', { name: '按序号排序' })).toBeDefined();
+    expect(screen.getByRole('button', { name: '序号' })).toBeDefined();
 
     // The sentence is `components/Table.tsx`'s and the noun is this page's; neither can be English
     // while the other is Chinese, because the pager line is the shared component's one job.

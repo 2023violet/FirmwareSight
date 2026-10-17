@@ -438,17 +438,19 @@ describe('P1-A0 intake screen', () => {
     expect(within(table).getByText(/Unknown/)).toBeDefined();
     expect(within(table).queryByText(/160 bytes free/)).toBeNull();
 
-    const details = within(table).getByText('Inspect sections');
-    expect(details.tagName).toBe('SUMMARY');
-    details.focus();
-    fireEvent.keyDown(details, { key: 'Enter' });
-    fireEvent.click(details);
-    expect(details.closest('details')?.open).toBe(true);
-    expect(await within(table).findByText(/LMA 0x800005c/)).toBeDefined();
+    // R3: a region's section evidence opens in the Inspector from the row's own action (D-R2-2 closed).
     expect(within(table).getByRole('rowheader', {
       name: 'ROM <script>alert(1)</script>',
     })).toBeDefined();
+    const action = within(table).getByRole('button', {
+      name: 'Show section evidence for ROM <script>alert(1)</script>',
+    });
+    fireEvent.click(action);
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getByText(/LMA 0x800005c/)).toBeDefined();
+    expect(within(inspector).getByText('ev-map-regions')).toBeDefined();
     expect(table.querySelector('script')).toBeNull();
+    expect(inspector.querySelector('script')).toBeNull();
 
   });
 

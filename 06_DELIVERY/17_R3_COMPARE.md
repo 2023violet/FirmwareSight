@@ -51,9 +51,24 @@ The design sources are [03_DESIGN/09](../03_DESIGN/09_R_REDESIGN_SPEC.md) §6.3 
 | D-R3-7 | The Objects tab is always present. When object attribution is unavailable it shows the Unknown notice with Core's reason, never an empty table. |
 | D-R3-8 | No new i18n namespace (ADR-0032 D4). Dead keys are removed in the same change. |
 
-## 3. Accessible-name mapping
+## 3. Accessible-name and structure mapping (as landed)
 
-This section is filled in as the work lands. The final table is in the commit.
+| Before | After | Tests changed |
+|---|---|---|
+| Compare pickers: native `select` named "Old / Base" / "New / Target" | `BuildPicker` comboboxes with the same names (label only; the build is the content), `data-value` = snapshot id, options in a listbox | `compare.test.tsx` `pair()` / `choose()` helpers |
+| decorative `→` between the pickers | **Swap** sits between the two sides | the arrow test restated as "Swap between them" |
+| one long Compare page (what moved, memory, section table, ranking, symbol table, objects, evidence, export) | SubjectBar "Subject of this page" → lead region "Flash change" → tablist "Compare views" (Summary · Sections · Symbols · Objects); the tables are behind their tabs | `openView()` helper; the hierarchy test restates the R3 order |
+| region "Export" with five buttons | group "Export" with an "Export" disclosure in the header | `exportButton()` helper |
+| coloured `+256 bytes` / `-68 bytes` | neutral `▲256 bytes` / `▼68 bytes`, spoken "increase of 256 bytes" | memory and lead assertions |
+| sort buttons named "Sort by X" (Compare and Details) | the column's own name (`aria-sort` on the header carries the state) | `details.test.tsx`, `compare.test.tsx` |
+| filter `textbox` "Filter sections by name" | `searchbox` with the same name, inside a form named "Filter sections" with an Apply button | both suites |
+| tables wrapped in `ScrollArea` ("viewport") | the shared `DataTable` wrapper ("wrap") | the layout-contract tests |
+| region-table disclosure "Inspect sections" | row action "Show section evidence for {region}" opening the Inspector | `intake.test.tsx` region test |
+| (none) | change-row action "Show the change detail for {name}" opening the Inspector | new R3 tests |
+
+New tests:
+- `compare.test.tsx` "R3 Compare workbench" (7 tests): absent ≠ 0 on the section and symbol tables, unpaired ≠ changed, a ranking pick opening its view filtered, the change-row Inspector, the lead figure Inspector, the SubjectBar's moved and failed words, and the ERR-EXPORT-6002 rule. Two of them are mutation-proven: absent drawn as 0, and 6002 shown as an error.
+- `foundation.test.tsx`: DataTable server mode, FilterBar apply mode.
 
 ## 4. Verification
 

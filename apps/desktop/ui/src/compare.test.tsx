@@ -1403,6 +1403,132 @@ describe('the ranking as a way to the full list', () => {
   });
 });
 
+/**
+ * R3 (`06_DELIVERY/17`): the Compare workbench.
+ *
+ * These pin what the rework must not lose and what it adds. The two principles the Owner named for R3 -
+ * absent is not 0, and an unreliable pairing is not a change - are asserted on every change table, not
+ * on one; the new paths (a ranking pick across views, the Inspector from a row and from the lead, the
+ * SubjectBar's freshness words) each get the case that would break them.
+ */
+describe('R3 Compare workbench', () => {
+  it('never writes an absent side as 0, on the section and the symbol tables', async () => {
+    await openCompare();
+    await runCompare();
+
+    const sections = await openView('Sections', 'Section Changes');
+    const added = (await within(sections).findByText('.noinit')).closest('tr');
+    expect(added?.textContent).toContain('Not present');
+    expect(added?.textContent).toContain('Unknown');
+    expect(added?.textContent).not.toMatch(/(^|\D)0 bytes/u);
+    const removed = within(sections).getByText('.oldboot').closest('tr');
+    expect(removed?.textContent).toContain('Not present');
+    expect(removed?.textContent).not.toMatch(/(^|\D)0 bytes/u);
+
+    const symbols = await openView('Symbols', 'Symbol Changes');
+    const addedSymbol = (await within(symbols).findByText('ota_resume')).closest('tr');
+    expect(addedSymbol?.textContent).toContain('Not present');
+    // A Changed row with one side unrecorded is Unknown with its reason, never "Not present" and never 0.
+    const unrecorded = within(symbols).getByText('g_threshold').closest('tr');
+    expect(unrecorded?.textContent).toContain('at least one side records no size for this symbol');
+    expect(unrecorded?.textContent).not.toContain('Not present');
+  });
+
+  it('keeps an unpaired row unpaired: noted in the row and in its detail, never a Changed row', async () => {
+    const unpaired = sectionRow({
+      changeKind: 'Added',
+      key: '.text',
+      ambiguous: true,
+      fileSize: change(null, 64, null, 'unknown', ADDITION_REASON),
+      memorySize: change(null, 64, null, 'unknown', ADDITION_REASON),
+    });
+    sectionChangesMock.mockResolvedValue(ok(sectionPage([unpaired])));
+    await openCompare();
+    await runCompare();
+
+    const sections = await openView('Sections', 'Section Changes');
+    const row = (await within(sections).findByText('.text')).closest('tr');
+    expect(row?.textContent).toContain('the name repeats, so this row is unpaired');
+    expect(row?.textContent).not.toContain('Changed');
+    fireEvent.click(within(sections).getByRole('button', { name: 'Show the change detail for .text' }));
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getByText('Pairing')).toBeDefined();
+    expect(within(inspector).getByText('Added')).toBeDefined();
+  });
+
+  it('opens a ranking pick in the view that holds it, filtered by the shell', async () => {
+    await openCompare();
+    await runCompare();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show sections changes for .text' }));
+    expect(screen.getByRole('tab', { name: 'Sections' }).getAttribute('aria-selected')).toBe('true');
+    const sections = await screen.findByRole('region', { name: 'Section Changes' });
+    await waitFor(() =>
+      expect(sectionChangesMock).toHaveBeenLastCalledWith(expect.objectContaining({ filter: '.text', offset: 0 })),
+    );
+    expect(
+      (within(sections).getByRole('searchbox', { name: 'Filter sections by name' }) as HTMLInputElement).value,
+    ).toBe('.text');
+  });
+
+  it('opens a change row in the Inspector with its sides, its delta and the diff handle', async () => {
+    await openCompare();
+    await runCompare();
+
+    const sections = await openView('Sections', 'Section Changes');
+    await within(sections).findByText('.noinit');
+    const trigger = within(sections).getByRole('button', { name: 'Show the change detail for .noinit' });
+    fireEvent.click(trigger);
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getByText('.noinit')).toBeDefined();
+    expect(inspector.textContent).toContain('Not present → 256 bytes');
+    expect(inspector.textContent).toContain(comparison().diffId);
+    fireEvent.keyDown(within(inspector).getByRole('button', { name: 'Close evidence panel' }), { key: 'Escape' });
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('answers with the Flash change, a neutral delta that opens its evidence', async () => {
+    await openCompare();
+    await runCompare();
+
+    const lead = screen.getByRole('region', { name: 'Flash change' });
+    expect(lead.textContent).toContain('4,200 bytes → 4,456 bytes');
+    const figure = within(lead).getByRole('button', { name: /^▲256 bytes, Derived evidence/u });
+    fireEvent.click(figure);
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getByText('nonvolatile delta')).toBeDefined();
+  });
+
+  it('says in the SubjectBar when the pair moved and when the newest attempt failed', async () => {
+    await openCompare();
+    await runCompare();
+    const bar = () => screen.getByRole('region', { name: 'Subject of this page' });
+    expect(within(bar()).getByText('Latest')).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    expect(within(bar()).getByText('Previous comparison kept · the chosen pair is not compared yet')).toBeDefined();
+    expect(screen.getByRole('region', { name: 'Flash change · previous comparison' })).toBeDefined();
+
+    compareMock.mockResolvedValue(fail(PAIR_REFUSED));
+    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
+    await screen.findByRole('alert');
+    expect(within(bar()).getByText('Comparison failed · previous result kept')).toBeDefined();
+    expect(within(bar()).queryByText('Latest')).toBeNull();
+  });
+
+  it('takes ERR-EXPORT-6002 as the stale note even when the comparison on screen has not changed yet', async () => {
+    // CI #123's rule, applied to Compare (D-R3-6): Rust is the authority that the subject changed.
+    exportVisualMock.mockResolvedValueOnce(
+      fail({ code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null }),
+    );
+    await openCompare();
+    await runCompare();
+    fireEvent.click(exportButton('Export PNG'));
+    expect(await screen.findByText(/comparison changed while the Save dialog was open/u)).toBeDefined();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
+
 describe('export', () => {
   it('does not attach a late visual export outcome to a newer comparison', async () => {
     await openCompare();

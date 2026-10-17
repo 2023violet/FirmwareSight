@@ -13,6 +13,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 
 import styles from './Analyze.module.css';
 import { Button } from './components/Button';
+import { DataTable, type Column } from './components/DataTable';
 import { ErrorPanel } from './components/ErrorPanel';
 import { ExportMenu } from './components/ExportMenu';
 import { asEvidenceClass, FactValue, type FactEvidence } from './components/FactValue';
@@ -441,7 +442,7 @@ export function Analyze({
             />
             <div {...tabPanelProps('fs-analyze', view)} className={styles['panel']}>
               {view === 'memory' ? (
-                <MemoryView summary={summary} unit={unit} />
+                <MemoryView summary={summary} unit={unit} onInspect={inspect} />
               ) : view === 'evidence' ? (
                 <>
                   <BuildFacts summary={summary} />
@@ -643,13 +644,21 @@ function BuildLine({ summary, unit }: { readonly summary: AnalysisSummaryDto; re
 }
 
 /** Memory: the regions, how the bytes were counted, and where most of them are. */
-function MemoryView({ summary, unit }: { readonly summary: AnalysisSummaryDto; readonly unit: SizeUnit }) {
+function MemoryView({
+  summary,
+  unit,
+  onInspect,
+}: {
+  readonly summary: AnalysisSummaryDto;
+  readonly unit: SizeUnit;
+  readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
+}) {
   const { t } = useI18n();
   const { memory } = summary;
   const quality = evidenceQuality(memory, t);
   return (
     <div className={styles['view']}>
-      <RegionUsageTable regions={memory.regionUsage} />
+      <RegionUsageTable regions={memory.regionUsage} onInspect={onInspect} />
       <PageSection title={t('analyze', 'memory.accounting')}>
         <FactList>
           <FactRow term={t('analyze', 'result.loadEvidenceLabel')}>
@@ -737,7 +746,18 @@ function SnapshotFooter({ summary }: { readonly summary: AnalysisSummaryDto }) {
 }
 
 
-function RegionUsageTable({ regions }: { readonly regions: readonly MemoryRegionDto[] }) {
+/**
+ * The linker's regions as the shared table (R3, D-R2-2 closed). Each row's section evidence - origin, source,
+ * evidence id and every section the region holds, with its addresses and basis - opens in the Inspector
+ * rather than in a disclosure inside the row, so the table keeps one row height and the evidence gets room.
+ */
+function RegionUsageTable({
+  regions,
+  onInspect,
+}: {
+  readonly regions: readonly MemoryRegionDto[];
+  readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
+}) {
   const { t } = useI18n();
 
   if (regions.length === 0) {
@@ -748,91 +768,95 @@ function RegionUsageTable({ regions }: { readonly regions: readonly MemoryRegion
     );
   }
 
+  const columns: Column<MemoryRegionDto>[] = [
+    { key: 'name', header: t('analyze', 'region.name'), cell: (region) => <span title={region.name}>{region.name}</span> },
+    { key: 'kind', header: t('analyze', 'region.kind'), cell: (region) => regionKind(region.kind, t) },
+    { key: 'capacity', header: t('analyze', 'region.capacity'), numeric: true, cell: (region) => regionBytes(region.capacityBytes, t) },
+    {
+      key: 'mapped',
+      header: t('analyze', 'region.mapped'),
+      numeric: true,
+      cell: (region) =>
+        region.usedBytes === null
+          ? t('analyze', 'region.unknown')
+          : region.state === 'partial'
+            ? t('analyze', 'region.atLeast', { bytes: region.usedBytes })
+            : regionBytes(region.usedBytes, t),
+    },
+    {
+      key: 'status',
+      header: t('analyze', 'region.status'),
+      cell: (region) => (
+        <>
+          <span>{regionState(region.state, t)}</span>
+          <span className={styles['regionStatusDetail']}>{regionRisk(region.risk, t)}</span>
+          {region.reasons.length === 0 ? null : (
+            <span className={styles['regionStatusDetail']}>{region.reasons.join('; ')}</span>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'remaining',
+      header: t('analyze', 'region.remaining'),
+      cell: (region) =>
+        region.remainingBytes === null ? (
+          <span>
+            {t('analyze', 'region.unknown')}
+            <span className={styles['regionStatusDetail']}>{region.remainingReason}</span>
+          </span>
+        ) : (
+          regionBytes(region.remainingBytes, t)
+        ),
+    },
+  ];
+
   return (
-    <div className={styles['regionTableScroll']}>
-      <table className={styles['regionTable']} aria-label={t('analyze', 'region.title')}>
-        <thead>
-          <tr>
-            <th scope="col">{t('analyze', 'region.name')}</th>
-            <th scope="col">{t('analyze', 'region.kind')}</th>
-            <th scope="col">{t('analyze', 'region.capacity')}</th>
-            <th scope="col">{t('analyze', 'region.mapped')}</th>
-            <th scope="col">{t('analyze', 'region.status')}</th>
-            <th scope="col">{t('analyze', 'region.remaining')}</th>
-            <th scope="col">{t('analyze', 'region.evidence')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {regions.map((region) => (
-            <tr key={region.evidenceId}>
-              <th scope="row" title={region.name}>{region.name}</th>
-              <td>{regionKind(region.kind, t)}</td>
-              <td className={styles['regionMono']}>{regionBytes(region.capacityBytes, t)}</td>
-              <td className={styles['regionMono']}>
-                {region.usedBytes === null
-                  ? t('analyze', 'region.unknown')
-                  : region.state === 'partial'
-                    ? t('analyze', 'region.atLeast', { bytes: region.usedBytes })
-                    : regionBytes(region.usedBytes, t)}
-              </td>
-              <td>
-                <span>{regionState(region.state, t)}</span>
-                <span className={styles['regionStatusDetail']}>{regionRisk(region.risk, t)}</span>
-                {region.reasons.length === 0 ? null : (
-                  <span className={styles['regionStatusDetail']}>{region.reasons.join('; ')}</span>
-                )}
-              </td>
-              <td>
-                {region.remainingBytes === null ? (
-                  <span>
-                    {t('analyze', 'region.unknown')}
-                    <span className={styles['regionStatusDetail']}>{region.remainingReason}</span>
-                  </span>
-                ) : (
-                  regionBytes(region.remainingBytes, t)
-                )}
-              </td>
-              <td>
-                <details>
-                  <summary aria-label={t('analyze', 'region.showEvidence', { name: region.name })}>
-                    {t('analyze', 'region.inspect')}
-                  </summary>
-                  <dl className={styles['regionDetails']}>
-                    <dt>{t('analyze', 'region.origin')}</dt><dd>{region.origin}</dd>
-                    <dt>{t('analyze', 'region.evidenceSource')}</dt><dd>{region.evidenceSource}</dd>
-                    <dt>{t('analyze', 'region.evidenceId')}</dt><dd>{region.evidenceId}</dd>
-                    {region.sections.map((section) => (
-                      <div className={styles['regionSection']} key={section.locator}>
-                        <dt>{section.name ?? t('analyze', 'region.unknown')}</dt>
-                        <dd>
-                          {t('analyze', 'region.sectionAddress', {
-                            kind: addressKind(section.addressKind, t),
-                            address: section.address,
-                            bytes: section.bytes,
-                          })}
-                          <span>{t('analyze', 'region.vmaLma', {
-                            vma: section.virtualAddress ?? t('analyze', 'region.unknown'),
-                            lma: section.loadAddress ?? t('analyze', 'region.unknown'),
-                          })}</span>
-                          {section.virtualAddressUnknownReason === null ? null : (
-                            <span>{t('analyze', 'region.virtualReason', { reason: section.virtualAddressUnknownReason })}</span>
-                          )}
-                          {section.loadAddressUnknownReason === null ? null : (
-                            <span>{t('analyze', 'region.loadReason', { reason: section.loadAddressUnknownReason })}</span>
-                          )}
-                          <span>{section.locator} · {section.evidenceBasis}</span>
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                </details>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption={t('analyze', 'region.title')}
+      columns={columns}
+      rows={regions}
+      rowKey={(region) => region.evidenceId}
+      rowHeader="name"
+      onRowAction={(region, trigger) => {
+        onInspect(regionEvidence(region, t), trigger);
+      }}
+      rowActionLabel={(region) => t('analyze', 'region.showEvidence', { name: region.name })}
+    />
   );
+}
+
+/** One region's evidence, in the shape the Inspector shows: the region, then each section it holds. */
+function regionEvidence(region: MemoryRegionDto, t: Translate): FactEvidence {
+  return {
+    field: region.name,
+    value: region.usedBytes === null ? t('analyze', 'region.unknown') : regionBytes(region.usedBytes, t),
+    classification: region.evidenceSource === 'none' ? 'unknown' : 'observed',
+    source: region.evidenceSource,
+    locator: region.evidenceId,
+    rule: t('analyze', 'region.origin') + ' ' + region.origin,
+    details: region.sections.map((section): readonly [string, string] => [
+      section.name ?? t('analyze', 'region.unknown'),
+      [
+        t('analyze', 'region.sectionAddress', {
+          kind: addressKind(section.addressKind, t),
+          address: section.address,
+          bytes: section.bytes,
+        }),
+        t('analyze', 'region.vmaLma', {
+          vma: section.virtualAddress ?? t('analyze', 'region.unknown'),
+          lma: section.loadAddress ?? t('analyze', 'region.unknown'),
+        }),
+        ...(section.virtualAddressUnknownReason === null
+          ? []
+          : [t('analyze', 'region.virtualReason', { reason: section.virtualAddressUnknownReason })]),
+        ...(section.loadAddressUnknownReason === null
+          ? []
+          : [t('analyze', 'region.loadReason', { reason: section.loadAddressUnknownReason })]),
+        `${section.locator} · ${section.evidenceBasis}`,
+      ].join(' · '),
+    ]),
+  };
 }
 
 function regionBytes(value: string | null, t: Translate): string {

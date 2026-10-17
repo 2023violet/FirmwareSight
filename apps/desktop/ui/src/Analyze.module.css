@@ -74,51 +74,14 @@
   color: var(--fs-color-text-secondary);
 }
 
-.regionTableScroll {
-  max-width: 100%;
-  margin-top: var(--fs-space-4);
-  overflow-x: auto;
-  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
 
-.regionTable {
-  width: 100%;
-  min-width: 760px;
-  border-collapse: collapse;
-  color: var(--fs-color-text-primary);
-  font-size: var(--fs-font-size-metadata);
-  text-align: left;
-}
 
-.regionTable th,
-.regionTable td {
-  padding: var(--fs-space-2) var(--fs-space-3);
-  vertical-align: top;
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
 
-.regionTable tbody th {
-  white-space: nowrap;
-}
 
-.regionTable thead th {
-  color: var(--fs-color-text-secondary);
-  font-weight: var(--fs-font-weight-semibold);
-}
 
-.regionTable tbody th {
-  max-width: 260px;
-  overflow-wrap: anywhere;
-  font-weight: var(--fs-font-weight-semibold);
-}
 
-.regionMono {
-  font-family: var(--fs-font-mono);
-  white-space: nowrap;
-}
 
-.regionStatusDetail,
-.regionDetails span {
+.regionStatusDetail {
   display: block;
   margin-top: var(--fs-space-1);
   color: var(--fs-color-text-secondary);
@@ -126,41 +89,11 @@
   overflow-wrap: anywhere;
 }
 
-.regionTable summary {
-  min-height: 24px;
-  color: var(--fs-color-text-primary);
-  cursor: pointer;
-}
 
-.regionTable summary:focus-visible {
-  outline: var(--fs-focus-ring-width) solid var(--fs-focus-ring-color);
-  outline-offset: var(--fs-focus-ring-offset);
-}
 
-.regionDetails {
-  display: grid;
-  grid-template-columns: max-content minmax(180px, 1fr);
-  gap: var(--fs-space-1) var(--fs-space-3);
-  min-width: 280px;
-  max-width: 520px;
-  margin: var(--fs-space-2) 0 0;
-  white-space: normal;
-}
 
-.regionDetails dt {
-  color: var(--fs-color-text-secondary);
-}
 
-.regionDetails dd {
-  min-width: 0;
-  margin: 0;
-  font-family: var(--fs-font-mono);
-  overflow-wrap: anywhere;
-}
 
-.regionSection {
-  display: contents;
-}
 
 /* R2: the page and the Inspector side by side. The Inspector docks from 1280 px and is a sheet below. */
 .withInspector {

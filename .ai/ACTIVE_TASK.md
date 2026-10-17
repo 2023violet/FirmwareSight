@@ -11,14 +11,14 @@ last_updated: "2026-10-16"
 # Active Task
 
 ```text
-R2_ANALYZE_OVERVIEW
+R3_COMPARE_WORKBENCH
 ```
 
-- **Authorized by:** the Owner, in chat on 2026-10-16 ("FirmwareSight｜下一步执行 R2：Overview + Analyze 正式重构").
-- **Plan and status:** [06_DELIVERY/16_R2_ANALYZE_OVERVIEW.md](../06_DELIVERY/16_R2_ANALYZE_OVERVIEW.md).
-- **Base:** `be02f5a`. **Branch:** `feature/r2-analyze-overview`.
-- **Not authorized:** Compare, Release, History, Settings, Help and the command palette (R3–R5); report redesign (R6); new IPC or storage; a push without Owner approval.
+- **Authorized by:** the Owner, in chat on 2026-10-16 ("FirmwareSight｜下一步执行 R3：Compare 对比工作台重构"), after the R2 architecture review (`R2_ENGINEERING_ACCEPTED / READY_FOR_R3`).
+- **Plan and status:** [06_DELIVERY/17_R3_COMPARE.md](../06_DELIVERY/17_R3_COMPARE.md).
+- **Base:** `56d5609`. **Branch:** `feature/r3-compare`.
+- **Not authorized:** Release, History, Settings, Help and the command palette (R4–R5); report redesign (R6); new IPC or storage; deleting data outside an approved scope; a push without Owner approval.
 
-- **Last task:** `R1_FOUNDATION`, on `main` at `be02f5a` (Actions #122, 10/10).
+- **Last task:** `R2_ANALYZE_OVERVIEW`, on `main` at `56d5609` (Actions #124, 10/10).
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

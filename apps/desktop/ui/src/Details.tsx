@@ -26,9 +26,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { asEvidenceClass, type FactEvidence } from './components/FactValue';
 
 import styles from './Details.module.css';
-import { ScrollArea } from './components/Layout';
+import { DataTable, FilterBar, type Column, type SortState } from './components/DataTable';
 import { RankBar } from './components/RankBar';
-import { Pager, SortHeader } from './components/Table';
+import { Pager } from './components/Table';
 import { StateBadge } from './components/StateBadge';
 import { formatSize, formatOptional, type SizeUnit } from './format';
 import { useI18n } from './i18n';
@@ -426,6 +426,11 @@ function Contributors({
   );
 }
 
+/**
+ * The filter for one table, sent to the shell on Enter or Apply (`04_TECH/14` §3): the shared `FilterBar` in
+ * apply mode (R3, D-R3-4). The evidence table adds its class select, which applies at once because a class
+ * is a choice, not a draft.
+ */
 function FilterForm({
   tab,
   draft,
@@ -444,32 +449,18 @@ function FilterForm({
   const { t } = useI18n();
   const noun = t('analyze', PAGER_NOUN[tab]);
   const subject = t('analyze', tab === 'evidence' ? 'details.filter.subject.field' : 'details.filter.subject.name');
-  // The id is built from the tab key, not from the translated noun: a DOM id does not move with the
-  // language, and no reader sees it.
-  const id = `fs-filter-${tab}`;
 
   return (
-    <form
-      className={styles['filter']}
-      aria-label={t('analyze', 'details.filter.aria', { noun })}
-      onSubmit={(event) => {
-        event.preventDefault();
-        onApply(draft, classification);
+    <FilterBar
+      label={t('analyze', 'details.filter.label', { noun, subject })}
+      formLabel={t('analyze', 'details.filter.aria', { noun })}
+      applyLabel={t('analyze', 'details.filter.apply')}
+      value={draft}
+      onChange={onDraftChange}
+      onApply={(value) => {
+        onApply(value, classification);
       }}
     >
-      <label className={styles['filterLabel']} htmlFor={id}>
-        {t('analyze', 'details.filter.label', { noun, subject })}
-      </label>
-      <input
-        id={id}
-        className={styles['filterInput']}
-        type="text"
-        autoComplete="off"
-        value={draft}
-        onChange={(event) => {
-          onDraftChange(event.target.value);
-        }}
-      />
       {tab === 'evidence' ? (
         <span className={styles['class']}>
           <label className={styles['filterLabel']} htmlFor="fs-evidence-class">
@@ -495,10 +486,7 @@ function FilterForm({
           </select>
         </span>
       ) : null}
-      <button type="submit" className={styles['apply']}>
-        {t('analyze', 'details.filter.apply')}
-      </button>
-    </form>
+    </FilterBar>
   );
 }
 
@@ -515,6 +503,11 @@ function Unknown({ reason }: { readonly reason?: string | null }) {
   );
 }
 
+/** The shell's sort, as DataTable's controlled state, and back. Details always asks A→Z first on a new column. */
+function sortState(sort: string, direction: SortDirDto): SortState {
+  return { key: sort, direction };
+}
+
 function SectionTable({
   rows,
   unit,
@@ -529,84 +522,64 @@ function SectionTable({
   readonly onSort: (column: SectionSortDto) => void;
 }) {
   const { t } = useI18n();
+  const columns: Column<SectionRowDto>[] = [
+    { key: 'index', header: t('analyze', 'details.col.index'), numeric: true, sortable: true, firstDirection: 'asc', cell: (row) => row.index },
+    {
+      key: 'name',
+      header: t('analyze', 'details.col.name'),
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => (row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name),
+    },
+    { key: 'role', header: t('analyze', 'details.col.role'), cell: (row) => row.role },
+    { key: 'flags', header: t('analyze', 'details.col.flags'), cell: (row) => <span className={styles['mono']}>{flags(row)}</span> },
+    {
+      key: 'virtualAddress',
+      header: t('analyze', 'details.col.virtualAddress'),
+      numeric: true,
+      cell: (row) => row.virtualAddress ?? <Unknown reason={row.virtualAddressUnknownReason} />,
+    },
+    {
+      key: 'loadAddress',
+      header: t('analyze', 'details.col.loadAddress'),
+      numeric: true,
+      cell: (row) => row.loadAddress ?? <Unknown reason={row.loadAddressUnknownReason} />,
+    },
+    {
+      key: 'fileOffset',
+      header: t('analyze', 'details.col.fileOffset'),
+      numeric: true,
+      cell: (row) => row.fileOffset ?? <Unknown reason={row.fileOffsetUnknownReason} />,
+    },
+    { key: 'fileSize', header: t('analyze', 'details.col.fileSize'), numeric: true, sortable: true, firstDirection: 'asc', cell: (row) => formatSize(row.fileSize, unit) },
+    {
+      key: 'memorySize',
+      header: t('analyze', 'details.col.memorySize'),
+      numeric: true,
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) =>
+        row.memorySize === null ? <Unknown reason={row.memorySizeUnknownReason} /> : formatSize(row.memorySize, unit),
+    },
+    {
+      key: 'region',
+      header: t('analyze', 'details.col.region'),
+      cell: (row) => (row.region === null ? <Unknown reason={row.regionUnknownReason} /> : row.region),
+    },
+  ];
   return (
-    <ScrollArea label={t('analyze', 'details.sections.table')}>
-      <table className={styles['table']}>
-        <caption className={styles['caption']}>
-          {t('analyze', 'details.sections.caption')}
-        </caption>
-        <thead>
-          <tr>
-            <SortHeader label={t('analyze', 'details.col.index')} sortable direction={direction} active={sort === 'index'} onSort={() => onSort('index')} />
-            <SortHeader label={t('analyze', 'details.col.name')} sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
-            <SortHeader
-                label={t('analyze', 'details.col.role')}
-                sortable={false}
-                direction={direction}
-              />
-            <SortHeader
-                label={t('analyze', 'details.col.flags')}
-                sortable={false}
-                direction={direction}
-              />
-            <SortHeader
-                label={t('analyze', 'details.col.virtualAddress')}
-                sortable={false}
-                direction={direction}
-              />
-            <SortHeader
-                label={t('analyze', 'details.col.loadAddress')}
-                sortable={false}
-                direction={direction}
-              />
-            <SortHeader
-                label={t('analyze', 'details.col.fileOffset')}
-                sortable={false}
-                direction={direction}
-              />
-            <SortHeader label={t('analyze', 'details.col.fileSize')} sortable direction={direction} active={sort === 'fileSize'} onSort={() => onSort('fileSize')} />
-            <SortHeader label={t('analyze', 'details.col.memorySize')} sortable direction={direction} active={sort === 'memorySize'} onSort={() => onSort('memorySize')} />
-            <SortHeader
-                label={t('analyze', 'details.col.region')}
-                sortable={false}
-                direction={direction}
-              />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.index}>
-              <td className={styles['mono']}>{row.index}</td>
-              <td>
-                {row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}
-              </td>
-              <td>{row.role}</td>
-              <td className={styles['mono']}>{flags(row)}</td>
-              <td className={styles['mono']}>
-                {row.virtualAddress ?? <Unknown reason={row.virtualAddressUnknownReason} />}
-              </td>
-              <td className={styles['mono']}>
-                {row.loadAddress ?? <Unknown reason={row.loadAddressUnknownReason} />}
-              </td>
-              <td className={styles['mono']}>
-                {row.fileOffset ?? <Unknown reason={row.fileOffsetUnknownReason} />}
-              </td>
-              <td className={styles['mono']}>{formatSize(row.fileSize, unit)}</td>
-              <td className={styles['mono']}>
-                {row.memorySize === null ? (
-                  <Unknown reason={row.memorySizeUnknownReason} />
-                ) : (
-                  formatSize(row.memorySize, unit)
-                )}
-              </td>
-              <td>
-                {row.region === null ? <Unknown reason={row.regionUnknownReason} /> : row.region}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </ScrollArea>
+    <DataTable
+      caption={t('analyze', 'details.sections.caption')}
+      columns={columns}
+      rows={rows}
+      rowKey={(row) => String(row.index)}
+      rowHeader="name"
+      density="compact"
+      sort={sortState(sort, direction)}
+      onSort={(next) => {
+        onSort(next.key as SectionSortDto);
+      }}
+    />
   );
 }
 
@@ -628,60 +601,55 @@ function SymbolTable({
   readonly onSort: (column: SymbolSortDto) => void;
 }) {
   const { t } = useI18n();
+  const columns: Column<SymbolRowDto>[] = [
+    {
+      key: 'ordinal',
+      header: t('analyze', 'details.col.ordinal'),
+      numeric: true,
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => <span title={t('analyze', 'details.ordinalHint')}>{row.ordinal}</span>,
+    },
+    {
+      key: 'name',
+      header: t('analyze', 'details.col.name'),
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => (row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name),
+    },
+    {
+      key: 'address',
+      header: t('analyze', 'details.col.address'),
+      numeric: true,
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => row.address ?? <Unknown reason={row.addressUnknownReason} />,
+    },
+    {
+      key: 'size',
+      header: t('analyze', 'details.col.size'),
+      numeric: true,
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => (row.size === null ? <Unknown reason={row.sizeUnknownReason} /> : formatSize(row.size, unit)),
+    },
+    { key: 'kind', header: t('analyze', 'details.col.kind'), cell: (row) => row.kind },
+    { key: 'binding', header: t('analyze', 'details.col.binding'), cell: (row) => row.binding },
+    { key: 'section', header: t('analyze', 'details.col.section'), cell: (row) => <span className={styles['mono']}>{row.sectionRef}</span> },
+  ];
   return (
-    <ScrollArea label={t('analyze', 'details.symbols.table')}>
-      <table className={styles['table']}>
-        <caption className={styles['caption']}>
-          {t('analyze', 'details.symbols.caption')}
-        </caption>
-        <thead>
-          <tr>
-            <SortHeader label={t('analyze', 'details.col.ordinal')} sortable direction={direction} active={sort === 'ordinal'} onSort={() => onSort('ordinal')} />
-            <SortHeader label={t('analyze', 'details.col.name')} sortable direction={direction} active={sort === 'name'} onSort={() => onSort('name')} />
-            <SortHeader label={t('analyze', 'details.col.address')} sortable direction={direction} active={sort === 'address'} onSort={() => onSort('address')} />
-            <SortHeader label={t('analyze', 'details.col.size')} sortable direction={direction} active={sort === 'size'} onSort={() => onSort('size')} />
-            <SortHeader
-                label={t('analyze', 'details.col.kind')}
-                sortable={false}
-                direction={direction}
-              />
-            <SortHeader
-                label={t('analyze', 'details.col.binding')}
-                sortable={false}
-                direction={direction}
-              />
-            <SortHeader
-                label={t('analyze', 'details.col.section')}
-                sortable={false}
-                direction={direction}
-              />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.ordinal}>
-              <td className={styles['mono']} title={t('analyze', 'details.ordinalHint')}>
-                {row.ordinal}
-              </td>
-              <td>{row.name === null ? <Unknown reason={row.nameUnknownReason} /> : row.name}</td>
-              <td className={styles['mono']}>
-                {row.address ?? <Unknown reason={row.addressUnknownReason} />}
-              </td>
-              <td className={styles['mono']}>
-                {row.size === null ? (
-                  <Unknown reason={row.sizeUnknownReason} />
-                ) : (
-                  formatSize(row.size, unit)
-                )}
-              </td>
-              <td>{row.kind}</td>
-              <td>{row.binding}</td>
-              <td className={styles['mono']}>{row.sectionRef}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </ScrollArea>
+    <DataTable
+      caption={t('analyze', 'details.symbols.caption')}
+      columns={columns}
+      rows={rows}
+      rowKey={(row) => String(row.ordinal)}
+      rowHeader="name"
+      density="compact"
+      sort={sortState(sort, direction)}
+      onSort={(next) => {
+        onSort(next.key as SymbolSortDto);
+      }}
+    />
   );
 }
 
@@ -735,53 +703,63 @@ function ObjectTable({
 }) {
   const { t } = useI18n();
   const noShare = t('analyze', 'details.objects.noShare');
+  const columns: Column<ObjectRowDto>[] = [
+    {
+      key: 'name',
+      header: t('analyze', libraries ? 'details.col.library' : 'details.col.object'),
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => <span className={styles['mono']}>{row.key}</span>,
+    },
+    ...(libraries
+      ? []
+      : [
+          {
+            key: 'library',
+            header: t('analyze', 'details.col.library'),
+            cell: (row: ObjectRowDto) => (
+              <span className={styles['mono']}>{row.archive ?? t('analyze', 'details.objects.application')}</span>
+            ),
+          },
+        ]),
+    {
+      key: 'flash',
+      header: t('analyze', 'details.col.flash'),
+      numeric: true,
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => (row.nonvolatileBytes === null ? <Unknown /> : formatSize(row.nonvolatileBytes, unit)),
+    },
+    {
+      key: 'ram',
+      header: t('analyze', 'details.col.ram'),
+      numeric: true,
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => (row.runtimeRamBytes === null ? <Unknown /> : formatSize(row.runtimeRamBytes, unit)),
+    },
+    {
+      key: 'share',
+      header: t('analyze', 'details.col.flashShare'),
+      numeric: true,
+      cell: (row) => share(row.nonvolatileShareBasisPoints, row.nonvolatileBytes) ?? <Unknown reason={noShare} />,
+    },
+    { key: 'mapRows', header: t('analyze', 'details.col.mapRows'), numeric: true, cell: (row) => row.mapRows },
+  ];
   return (
     <>
-      <ScrollArea label={t('analyze', libraries ? 'details.libraries.table' : 'details.objects.table')}>
-        <table className={styles['table']}>
-          <caption className={styles['caption']}>
-            {t('analyze', libraries ? 'details.libraries.caption' : 'details.objects.caption')}
-          </caption>
-          <thead>
-            <tr>
-              <SortHeader
-                label={t('analyze', libraries ? 'details.col.library' : 'details.col.object')}
-                sortable
-                direction={direction}
-                active={sort === 'name'}
-                onSort={() => onSort('name')}
-              />
-              {libraries ? null : (
-                <SortHeader label={t('analyze', 'details.col.library')} sortable={false} direction={direction} />
-              )}
-              <SortHeader label={t('analyze', 'details.col.flash')} sortable direction={direction} active={sort === 'flash'} onSort={() => onSort('flash')} />
-              <SortHeader label={t('analyze', 'details.col.ram')} sortable direction={direction} active={sort === 'ram'} onSort={() => onSort('ram')} />
-              <SortHeader label={t('analyze', 'details.col.flashShare')} sortable={false} direction={direction} />
-              <SortHeader label={t('analyze', 'details.col.mapRows')} sortable={false} direction={direction} />
-            </tr>
-          </thead>
-          <tbody>
-            {page.rows.map((row: ObjectRowDto) => (
-              <tr key={row.key}>
-                <td className={styles['mono']}>{row.key}</td>
-                {libraries ? null : (
-                  <td className={styles['mono']}>{row.archive ?? t('analyze', 'details.objects.application')}</td>
-                )}
-                <td className={styles['mono']}>
-                  {row.nonvolatileBytes === null ? <Unknown /> : formatSize(row.nonvolatileBytes, unit)}
-                </td>
-                <td className={styles['mono']}>
-                  {row.runtimeRamBytes === null ? <Unknown /> : formatSize(row.runtimeRamBytes, unit)}
-                </td>
-                <td className={styles['mono']}>
-                  {share(row.nonvolatileShareBasisPoints, row.nonvolatileBytes) ?? <Unknown reason={noShare} />}
-                </td>
-                <td className={styles['mono']}>{row.mapRows}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </ScrollArea>
+      <DataTable
+        caption={t('analyze', libraries ? 'details.libraries.caption' : 'details.objects.caption')}
+        columns={columns}
+        rows={page.rows}
+        rowKey={(row) => row.key}
+        rowHeader="name"
+        density="compact"
+        sort={sortState(sort, direction)}
+        onSort={(next) => {
+          onSort(next.key as ObjectSortDto);
+        }}
+      />
       <p className={styles['hint']}>
         {t('analyze', 'details.objects.remainder', {
           flash:
@@ -812,65 +790,49 @@ function EvidenceTable({
   readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
 }) {
   const { t } = useI18n();
+  const columns: Column<EvidenceRowDto>[] = [
+    // The Inspect action stays the first column: value and locator columns are wider than the window at the
+    // minimum width, and an action at the far end would hang off it.
+    {
+      key: 'detail',
+      header: t('analyze', 'details.col.detail'),
+      cell: (row) => (
+        <button
+          type="button"
+          className={styles['inspect']}
+          aria-label={t('analyze', 'details.inspectAria', { field: row.field })}
+          onClick={(event) => {
+            onInspect(evidenceOf(row, t), event.currentTarget);
+          }}
+        >
+          {t('analyze', 'details.inspect')}
+        </button>
+      ),
+    },
+    { key: 'field', header: t('analyze', 'details.col.field'), sortable: true, firstDirection: 'asc', cell: (row) => row.field },
+    {
+      key: 'classification',
+      header: t('analyze', 'details.col.classification'),
+      sortable: true,
+      firstDirection: 'asc',
+      cell: (row) => row.classification,
+    },
+    { key: 'value', header: t('analyze', 'details.col.value'), cell: (row) => <span className={cx(styles['mono'], styles['value'])}>{row.rawValue}</span> },
+    { key: 'source', header: t('analyze', 'details.col.source'), cell: (row) => <span className={styles['mono']}>{row.sourceLocator}</span> },
+  ];
   return (
-    <>
-      <ScrollArea label={t('analyze', 'details.evidence.table')}>
-        <table className={styles['table']}>
-          <caption className={styles['caption']}>
-            {t('analyze', 'details.evidence.caption')}
-          </caption>
-          <thead>
-            <tr>
-              <SortHeader
-                label={t('analyze', 'details.col.detail')}
-                sortable={false}
-                direction={direction}
-              />
-              <SortHeader label={t('analyze', 'details.col.field')} sortable direction={direction} active={sort === 'field'} onSort={() => onSort('field')} />
-              <SortHeader
-                label={t('analyze', 'details.col.classification')}
-                sortable
-                direction={direction}
-                active={sort === 'classification'}
-                onSort={() => onSort('classification')}
-              />
-              <SortHeader
-                label={t('analyze', 'details.col.value')}
-                sortable={false}
-                direction={direction}
-              />
-              <SortHeader
-                label={t('analyze', 'details.col.source')}
-                sortable={false}
-                direction={direction}
-              />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id}>
-                <td>
-                  <button
-                    type="button"
-                    className={styles['inspect']}
-                    aria-label={t('analyze', 'details.inspectAria', { field: row.field })}
-                    onClick={(event) => {
-                      onInspect(evidenceOf(row, t), event.currentTarget);
-                    }}
-                  >
-                    {t('analyze', 'details.inspect')}
-                  </button>
-                </td>
-                <td>{row.field}</td>
-                <td>{row.classification}</td>
-                <td className={cx(styles['mono'], styles['value'])}>{row.rawValue}</td>
-                <td className={styles['mono']}>{row.sourceLocator}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </ScrollArea>
-    </>
+    <DataTable
+      caption={t('analyze', 'details.evidence.caption')}
+      columns={columns}
+      rows={rows}
+      rowKey={(row) => row.id}
+      rowHeader="field"
+      density="compact"
+      sort={sortState(sort, direction)}
+      onSort={(next) => {
+        onSort(next.key as EvidenceSortDto);
+      }}
+    />
   );
 }
 
