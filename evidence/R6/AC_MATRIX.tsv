@@ -1,0 +1,6 @@
+id	check	verdict	observation
+M01	Analyze > Export Markdown writes the analysis report	PASS	# FirmwareSight · Analysis report; 3c9daa4f7c09; no HTML; no path
+M02	Compare > Export Markdown writes the comparison report	PASS	▲64 bytes; an added row reads "— (one side not present)"; no HTML
+M03	Release > Export Markdown writes the Gate report	PASS	not-a-certification note; N/A rows show no severity; no HTML
+M04	A cancelled Markdown export writes nothing and is not an error	PASS	Export cancelled; no alert
+M05	Owner app data unchanged	PASS	23 files, identical SHA-256
