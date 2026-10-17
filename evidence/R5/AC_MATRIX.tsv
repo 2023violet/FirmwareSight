@@ -1,0 +1,15 @@
+id	check	verdict	observation
+H01	Navigation names Release and History	PASS	rail 总览|分析|对比|发布|历史|帮助|设置; English Overview|Analyze|Compare|Release|History|Help|Settings
+H02	History says no baseline is pinned; three views are Tabs	PASS	pin line "尚未固定基线…"; tabs 构建|Gate 运行|发布记录
+H03	Pin a build; the pin line names it with its time; the row is marked	PASS	firmware.elf 85ae4fc4e2b8, 固定于 <UTC>
+H04	A stored row opens the Inspector from its first-column action	PASS	complementary; full digest; source "FirmwareSight 存储（只读）"
+H05	Compare with the current build from the pin line runs once, base marked as pinned	PASS	base 85ae4fc4e2b8 固定基线, target 3c9daa4f7c09; lead Flash ▲64 bytes
+H06	Ctrl+K opens the palette with focus in its combobox; a command runs	PASS	17 commands; Go to Settings
+H07	Settings reset asks in a Sheet; Esc keeps the preferences	PASS	dialog with focus on 重置设置; no dialog after Esc
+H08	Help lists the keyboard shortcuts	PASS	Ctrl+K, Ctrl+O, /, [ ], Esc
+H09	] moves to the next view; / focuses the filter	PASS	Gate 运行; searchbox focused
+H10	Unpin returns to no pin	PASS	"尚未固定基线…"
+H11	Dark theme	PASS	data-fs-theme dark
+H12	English	PASS	tabs Builds|Gate runs|Release records
+H13	Owner app data unchanged	PASS	23 files, identical SHA-256
+H14	Window minimum 1024x720 by a human drag	NOT_RUN	carried from R1 A10

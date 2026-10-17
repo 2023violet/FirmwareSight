@@ -345,3 +345,19 @@ never as zero bytes per object.
 Storing the charge rather than re-deriving it is what lets Compare read stored facts only: a later diff never needs
 the original ELF or MAP. `object_contributions_are_immutable` refuses UPDATE like every other stored fact. The
 pre-migration backup of a v4 store is now named `…pre-migration-v4-to-v7.sqlite`.
+
+## R5 baseline pin log (2026-10-17, ADR-0034 D7 / D3)
+
+`SCHEMA_VERSION` moves 7 → 8 with one additive migration, `migrations/0008_baseline_pins.sql`. It creates one table and touches nothing else. A store upgraded to version 8 has no pin until a person sets one.
+
+| column | what it fixes |
+| --- | --- |
+| `seq` | the append order; "newest" is never decided by two timestamps that tie in one second |
+| `project_id` | `projects(id)`; one pin per project at any moment |
+| `action` | `pin` or `unpin`. A `pin` names a build and an `unpin` names none (a table `CHECK`) |
+| `build_id` | `builds(id)`. Storage accepts only a `COMPLETE` build of the same project |
+| `recorded_at` | UTC, when the event was appended |
+
+The table is a log. The current pin is the project's newest row when that row is a `pin`. The triggers `baseline_pin_events_cannot_be_edited` and `baseline_pin_events_cannot_be_deleted` refuse an UPDATE and a DELETE, so an unpin is itself a record and "which build was the reference on that day" stays answerable.
+
+The pre-migration backup of a v4 store is now named `…pre-migration-v4-to-v8.sqlite`.

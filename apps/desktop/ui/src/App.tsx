@@ -54,6 +54,7 @@ import { Help } from './Help';
 import { History } from './History';
 import type {
   AnalysisSummaryDto,
+  BaselinePinDto,
   ErrorEnvelopeDto,
   GateRunDto,
   MainWindowPage,
@@ -63,6 +64,7 @@ import type {
 } from './ipc/types';
 import {
   getApplicationPreferences,
+  getBaselinePin,
   resetApplicationPreferences,
   setWindowTitle,
   updateApplicationPreferences,
@@ -72,6 +74,7 @@ import { Release } from './Release';
 import { Settings } from './Settings';
 import { cx } from './styles/classnames';
 import {
+  THEME_CHOICES,
   applyTheme,
   asTheme,
   platformTheme,
@@ -80,6 +83,7 @@ import {
   type Theme,
 } from './theme';
 import {
+  LANGUAGE_CHOICES,
   asLanguage,
   documentLanguage,
   pickPlatformLanguage,
@@ -92,6 +96,8 @@ import { TopBar } from './components/TopBar';
 import { Rail, type RailGroup } from './components/Rail';
 import type { IconName } from './components/Icon';
 import { ErrorPanel } from './components/ErrorPanel';
+import { Button } from './components/Button';
+import { CommandPalette, type PaletteCommand } from './components/CommandPalette';
 import { acceptDroppedFiles, subscribeToDrops } from './ipc/dropEvents';
 
 type Page = 'overview' | 'analyze' | 'compare' | 'release' | 'history' | 'help' | 'settings';
@@ -113,8 +119,8 @@ const PAGES: readonly {
   { key: 'overview', label: 'Overview', title: 'Overview', icon: 'overview' },
   { key: 'analyze', label: 'Analyze', title: 'Analyze', icon: 'analyze' },
   { key: 'compare', label: 'Compare', title: 'Compare', icon: 'compare' },
-  { key: 'release', label: 'Release Gate', title: 'Release', icon: 'release' },
-  { key: 'history', label: 'Bundle & History', title: 'History', icon: 'history' },
+  { key: 'release', label: 'Release', title: 'Release', icon: 'release' },
+  { key: 'history', label: 'History', title: 'History', icon: 'history' },
 ];
 
 /** The surfaces that describe the product rather than move work along. */
@@ -199,6 +205,16 @@ export function App() {
    * selectors no longer point at.
    */
   const [comparison, setComparison] = useState<ComparisonSession>(EMPTY_COMPARISON);
+  /**
+   * The build this project measures against (R5 / D3). Read once at start and moved only by a pin or an
+   * unpin the shell confirmed, so Compare's default base and History's pin line can never disagree.
+   */
+  const [baselinePin, setBaselinePin] = useState<BaselinePinDto | null>(null);
+  /** A comparison another page asked for, which Compare runs once when it mounts (D-R5-4). */
+  const [autoCompare, setAutoCompare] = useState(false);
+  /** The command palette (spec §3.3), and a firmware chooser the shell asked Analyze to open once. */
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [chooseRequested, setChooseRequested] = useState(false);
   /** Hidden for the session by the reader, not by the application deciding they have read it. */
   const [gettingStartedHidden, setGettingStartedHidden] = useState(false);
   /**
@@ -298,6 +314,90 @@ export function App() {
    * either. A read that fails is shown as a refusal on the Settings page, and the defaults stay in
    * effect - the workflow does not depend on a preference file to open.
    */
+  useEffect(() => {
+    let cancelled = false;
+    void getBaselinePin().then((outcome) => {
+      // A failed read leaves the project with no default base, which is the state before any pin; the
+      // History page reads and reports the pin's own errors when a person acts on it.
+      if (!cancelled && outcome.ok) {
+        setBaselinePin(outcome.value);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /** Open Compare on a named pair and run it once: the History rows and the palette start comparisons. */
+  const startComparison = (baseId: string, targetId: string) => {
+    setComparison({ ...EMPTY_COMPARISON, baseId, targetId });
+    setAutoCompare(true);
+    open('compare');
+  };
+
+  /** Open the firmware chooser on Analyze, as if its button had been pressed. */
+  const chooseFirmware = () => {
+    setChooseRequested(true);
+    open('analyze');
+  };
+  const chooseFirmwareRef = useRef(chooseFirmware);
+  chooseFirmwareRef.current = chooseFirmware;
+
+  /**
+   * The keyboard model (spec §3.3). `Ctrl+K` and `Ctrl+O` work from anywhere. The single keys - `/`, `[`
+   * and `]` - are ignored while a person is typing in a field or a modal dialog is open, so a slash typed
+   * into a filter stays a slash. They act on what is on screen through the same controls a mouse uses: the
+   * page's filter field and its view tabs.
+   */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const command = event.ctrlKey || event.metaKey;
+      if (command && !event.altKey && (event.key === 'k' || event.key === 'K')) {
+        event.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+      if (command && !event.altKey && (event.key === 'o' || event.key === 'O')) {
+        event.preventDefault();
+        chooseFirmwareRef.current();
+        return;
+      }
+      if (command || event.altKey || event.defaultPrevented) {
+        return;
+      }
+      const target = event.target;
+      const typing =
+        target instanceof HTMLElement &&
+        (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+      if (typing || document.querySelector('[aria-modal="true"]') !== null) {
+        return;
+      }
+      if (event.key === '/') {
+        const field = document.querySelector<HTMLInputElement>('main [data-fs-filter]');
+        if (field !== null) {
+          event.preventDefault();
+          field.focus();
+        }
+        return;
+      }
+      if (event.key === '[' || event.key === ']') {
+        const tabs = Array.from(document.querySelectorAll<HTMLElement>('main [role="tablist"] [role="tab"]'));
+        const current = tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+        if (tabs.length === 0 || current < 0) {
+          return;
+        }
+        event.preventDefault();
+        const next = tabs[(current + (event.key === ']' ? 1 : tabs.length - 1)) % tabs.length];
+        next?.click();
+        next?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     void getApplicationPreferences().then((outcome) => {
@@ -470,6 +570,72 @@ export function App() {
     void setWindowTitle(title);
   }, [page]);
 
+  /** Every command the palette offers, in the language on screen. */
+  const paletteCommands = (): readonly PaletteCommand[] => {
+    const t = navLabel;
+    const current = lastGood?.identity.snapshotId ?? null;
+    const pinReason =
+      baselinePin === null
+        ? t('common', 'palette.noPin')
+        : current === null
+          ? t('common', 'palette.noCurrent')
+          : current === baselinePin.snapshotId
+            ? t('common', 'palette.samePin')
+            : undefined;
+    return [
+      ...[...PAGES, ...AUXILIARY].map((entry) => ({
+        id: `go-${entry.key}`,
+        group: t('common', 'palette.groupGo'),
+        label: t('common', `page.${entry.key}`),
+        run: () => {
+          open(entry.key);
+        },
+      })),
+      {
+        id: 'choose',
+        group: t('common', 'palette.groupAction'),
+        label: t('common', 'palette.choose'),
+        shortcut: 'Ctrl+O',
+        run: chooseFirmware,
+      },
+      {
+        id: 'compare-pinned',
+        group: t('common', 'palette.groupAction'),
+        label: t('common', 'palette.comparePinned'),
+        ...(pinReason === undefined ? {} : { unavailable: pinReason }),
+        run: () => {
+          if (baselinePin !== null && current !== null) {
+            startComparison(baselinePin.snapshotId, current);
+          }
+        },
+      },
+      ...(['bytes', 'kib'] as const).map((word) => ({
+        id: `unit-${word}`,
+        group: t('common', 'palette.groupUnit'),
+        label: t('common', word === 'bytes' ? 'palette.unitBytes' : 'palette.unitKib'),
+        run: () => {
+          chooseUnit(word);
+        },
+      })),
+      ...THEME_CHOICES.map((choice) => ({
+        id: `theme-${choice.word}`,
+        group: t('common', 'palette.groupTheme'),
+        label: t('common', `palette.theme.${choice.word}`),
+        run: () => {
+          chooseTheme(choice.word);
+        },
+      })),
+      ...LANGUAGE_CHOICES.map((choice) => ({
+        id: `language-${choice.word}`,
+        group: t('common', 'palette.groupLanguage'),
+        label: choice.word === 'system' ? t('common', 'palette.languageSystem') : choice.label,
+        run: () => {
+          chooseLanguage(choice.word);
+        },
+      })),
+    ];
+  };
+
   return (
     <I18nProvider
       language={language}
@@ -477,7 +643,27 @@ export function App() {
       platform={platformTags}
     >
       <div className={styles['app']}>
-        <TopBar project={project?.projectName ?? null} />
+        <TopBar
+          project={project?.projectName ?? null}
+          command={
+            <Button
+              variant="ghost"
+              ariaHasPopup="dialog"
+              onClick={() => {
+                setPaletteOpen(true);
+              }}
+            >
+              {navLabel('common', 'palette.open')}
+            </Button>
+          }
+        />
+        <CommandPalette
+          open={paletteOpen}
+          commands={paletteCommands()}
+          onClose={() => {
+            setPaletteOpen(false);
+          }}
+        />
         <div className={styles['shell']}>
           <Rail groups={railGroups(navLabel)} current={page} onOpen={open} />
 
@@ -535,6 +721,10 @@ export function App() {
               onAutoAnalyzeStarted={() => {
                 setAutoAnalyzeId(null);
               }}
+              chooseRequested={chooseRequested}
+              onChooseStarted={() => {
+                setChooseRequested(false);
+              }}
             />
           ) : page === 'compare' ? (
             <Compare
@@ -543,6 +733,12 @@ export function App() {
               lastAnalyzedSnapshotId={lastGood?.identity.snapshotId ?? null}
               session={comparison}
               onSessionChange={setComparison}
+              pin={baselinePin}
+              onPinChange={setBaselinePin}
+              autoCompare={autoCompare}
+              onAutoCompareStarted={() => {
+                setAutoCompare(false);
+              }}
               onGoToAnalyze={() => {
                 open('analyze');
               }}
@@ -561,7 +757,14 @@ export function App() {
               }}
             />
           ) : page === 'history' ? (
-            <History unit={unit} onUnitChange={chooseUnit} />
+            <History
+              unit={unit}
+              onUnitChange={chooseUnit}
+              pin={baselinePin}
+              onPinChange={setBaselinePin}
+              currentSnapshotId={lastGood?.identity.snapshotId ?? null}
+              onCompare={startComparison}
+            />
           ) : page === 'settings' ? (
             <Settings
               preferences={preferences}

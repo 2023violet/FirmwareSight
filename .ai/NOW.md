@@ -24,7 +24,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
   - `fwsight diff` text now escapes control characters from user files.
   - Automated native QA of the M2 screens: 11 cases, all PASS ([evidence/D2C](../evidence/D2C/README.md)).
   - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
-- **R-series redesign:** R0–R3 are on `main` at `465fe5f` (Actions #125, 10/10); R3 plan [06_DELIVERY/17](../06_DELIVERY/17_R3_COMPARE.md). R4 Release workbench (branch `feature/r4-release`, not yet on `main`): plan [06_DELIVERY/18](../06_DELIVERY/18_R4_RELEASE.md). Open human item: the 1024×720 drag check.
+- **R-series redesign:** R0–R3 are on `main` at `465fe5f` (Actions #125, 10/10). R4 Release workbench is complete and reviewed on `feature/r4-release` (`2a81d4b`); its push to `main` is waiting on the Owner. R5 (History with the pinned baseline, Settings, Help, the command palette): branch `feature/r5-history`, plan [06_DELIVERY/19](../06_DELIVERY/19_R5_HISTORY.md). Open human item: the 1024×720 drag check.
 - **Latest `main`:** `465fe5f` (Actions #125, 10/10). Read Git for anything later.
 
 ## Gates

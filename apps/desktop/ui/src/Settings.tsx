@@ -24,11 +24,12 @@
  * nothing on this page works (`AGENTS.md` 11, `DESIGN.md` 5).
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { SizeUnit } from './format';
 import styles from './Settings.module.css';
 import { ErrorPanel } from './components/ErrorPanel';
+import { Sheet } from './components/Sheet';
 import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { LANGUAGE_CHOICES, type Language, type ResolvedLanguage } from './i18n/language';
 import { useI18n, type Translate } from './i18n';
@@ -178,6 +179,8 @@ export function Settings({
   const { t, platform } = useI18n();
   /** The reset decision is asked on the page and answered there, in the same shape Release asks a replace. */
   const [confirming, setConfirming] = useState(false);
+  const resetTrigger = useRef<HTMLButtonElement | null>(null);
+  const resetConfirm = useRef<HTMLButtonElement | null>(null);
   const stored = preferences !== null ? preferences.fileName : 'settings.json';
   const startupWord = preferences?.startupPage ?? 'analyze';
 
@@ -310,15 +313,34 @@ export function Settings({
       <section className={styles['section']} aria-label={t('settings', 'reset.heading')}>
         <h2>{t('settings', 'reset.heading')}</h2>
         <p className={styles['note']}>{t('settings', 'reset.fact')}</p>
-        {confirming ? (
-          <div className={styles['confirm']} role="group" aria-labelledby="fs-reset-confirm">
-            <h3 id="fs-reset-confirm">{t('settings', 'reset.confirm')}</h3>
-            <p className={styles['note']}>{t('settings', 'reset.confirmFact')}</p>
-            <div className={styles['actions']}>
+        <div className={styles['actions']}>
+          <button
+            ref={resetTrigger}
+            type="button"
+            className={styles['control']}
+            aria-haspopup="dialog"
+            onClick={() => {
+              setConfirming(true);
+            }}
+          >
+            {t('settings', 'reset.trigger')}
+          </button>
+        </div>
+        {/* R5: the decision is asked in a Sheet, with focus on the answer that does the reset. */}
+        <Sheet
+          open={confirming}
+          title={t('settings', 'reset.confirm')}
+          returnFocus={resetTrigger.current}
+          initialFocus={resetConfirm}
+          onClose={() => {
+            setConfirming(false);
+          }}
+          actions={
+            <>
               <button
+                ref={resetConfirm}
                 type="button"
                 className={styles['control']}
-                autoFocus
                 onClick={() => {
                   setConfirming(false);
                   onReset();
@@ -335,21 +357,11 @@ export function Settings({
               >
                 {t('settings', 'reset.cancel')}
               </button>
-            </div>
-          </div>
-        ) : (
-          <div className={styles['actions']}>
-            <button
-              type="button"
-              className={styles['control']}
-              onClick={() => {
-                setConfirming(true);
-              }}
-            >
-              {t('settings', 'reset.trigger')}
-            </button>
-          </div>
-        )}
+            </>
+          }
+        >
+          <p className={styles['note']}>{t('settings', 'reset.confirmFact')}</p>
+        </Sheet>
       </section>
     </main>
   );

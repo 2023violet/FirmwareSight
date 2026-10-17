@@ -78,6 +78,10 @@ import type {
 import { precedes } from './test/order';
 
 vi.mock('./ipc/bridge', () => ({
+  // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
+  getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  pinBaseline: vi.fn(),
+  unpinBaseline: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -605,8 +609,8 @@ function bundleExport(overrides: Partial<BundleExportDto> = {}): BundleExportDto
 
 async function openRelease(): Promise<void> {
   render(<App />);
-  fireEvent.click(await screen.findByRole('button', { name: 'Release Gate page' }));
-  await screen.findByRole('heading', { level: 1, name: 'Release Gate' });
+  fireEvent.click(await screen.findByRole('button', { name: 'Release page' }));
+  await screen.findByRole('heading', { level: 1, name: 'Release' });
 }
 
 /**
@@ -785,13 +789,13 @@ describe('Release navigation', () => {
       'Overview',
       'Analyze',
       'Compare',
-      'Release Gate',
-      'Bundle & History',
+      'Release',
+      'History',
     ]);
     const words = document.body.textContent ?? '';
     // P4 makes `Bundle` a word this build has earned, so it is no longer banned here: §48 attaches the
     // bundle *under* Release, and what §58 forbids is a navigation verb for a stage that does not exist.
-    // U1 renames this page's rail entry to "Release Gate" and P5's to "Bundle & History", and adds
+    // U1 renames this page's rail entry to "Release" and P5's to "History", and adds
     // Overview, which summarizes runs this build already stores. What is still not built gets none of its
     // words.
     for (const stage of ['Settings', 'Pricing', 'Cloud']) {
@@ -1506,11 +1510,11 @@ describe('Release bundle', () => {
       'Overview',
       'Analyze',
       'Compare',
-      'Release Gate',
-      'Bundle & History',
+      'Release',
+      'History',
     ]);
     // §58's claim is about actions, not nouns: the rail holds pages, never the bundle verbs that live
-    // inside Release. U1 renamed History to "Bundle & History", so the old `/bundle/i` check would now
+    // inside Release. U1 renamed History to "History", so the old `/bundle/i` check would now
     // fail on a page name that is legitimately there; what must stay absent is a doorway that *does*
     // something.
     expect(within(rail).queryByRole('button', { name: /build|export|prepare/i })).toBeNull();
@@ -2248,7 +2252,7 @@ describe('R4 Release workbench', () => {
   it('comes back to a run as the latest one, because the settings start from the run (D-R4-7)', async () => {
     await runOnFixturePair();
     fireEvent.click(screen.getByRole('button', { name: 'Analyze page' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Release Gate page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Release page' }));
     await screen.findByRole('region', { name: 'Gate verdict' });
     expect(subjectBar().textContent).toContain('Latest');
     expect(screen.getByRole('region', { name: 'Run settings' }).textContent).toContain('Baseline app-old.elf');

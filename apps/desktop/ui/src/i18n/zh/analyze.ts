@@ -133,7 +133,7 @@ export const analyze: CatalogFor<'analyze'> = {
   'gettingStarted.stepCompare': '对比',
   'gettingStarted.stepRelease': '发布',
   'gettingStarted.stepBundle': '发布包',
-  'gettingStarted.flowBody': '先分析一个构建，再对比两个，在“发布门禁”中按策略判定，最后把结果打包成可交付的文件夹。BIN 和 Intel HEX 文件在发布页附加，按原始字节随包发布，不做分析（ADR-0030）。',
+  'gettingStarted.flowBody': '先分析一个构建，再对比两个，在“发布”中按策略判定，最后把结果打包成可交付的文件夹。BIN 和 Intel HEX 文件在发布页附加，按原始字节随包发布，不做分析（ADR-0030）。',
   'gettingStarted.statesTitle': '状态词',
   'gettingStarted.statePass': '规则已被评估并且满足',
   'gettingStarted.stateReview': '已经评估，需要由人来处置',

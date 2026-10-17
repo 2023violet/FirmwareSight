@@ -1449,6 +1449,24 @@ pub struct ReleaseAttachmentsDto {
     pub matches_gate_run: Option<bool>,
 }
 
+// --------------------------------------------------------------------------- Baseline pin (R5 / D3)
+
+/// The build this project measures against (R5 / D3, `03_DESIGN/08` §8).
+///
+/// Named by the ids the screen already uses, the artifact's file name and its digest. No path crosses:
+/// storage reduced the stored path to its leaf before this was built (`AGENTS.md` 7).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct BaselinePinDto {
+    pub build_id: String,
+    pub snapshot_id: String,
+    pub file_name: String,
+    pub sha256: String,
+    /// When the current pin was recorded (UTC).
+    pub pinned_at: String,
+}
+
 // --------------------------------------------------------------------------- Release Bundle (P4)
 
 /// The three ids one bundle is assembled from, and nothing else (§26).

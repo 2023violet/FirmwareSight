@@ -332,6 +332,8 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
             // the same reason the others are: the identity closure wrote it neither.
             (6, "0006_release_attachments".to_owned()),
             (7, "0007_object_contributions".to_owned()),
+            // 0008 is R5's baseline pin log (D3), named for the same reason.
+            (8, "0008_baseline_pins".to_owned()),
         ],
         "every migration belongs to a named stage, and none of them is the identity closure's"
     );

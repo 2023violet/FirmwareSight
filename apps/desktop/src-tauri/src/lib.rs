@@ -31,6 +31,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod baseline;
 pub mod bundle;
 pub mod compare;
 pub mod details;
@@ -1645,6 +1646,9 @@ pub fn run() {
             history::list_history_builds,
             history::list_history_gate_runs,
             history::list_history_releases,
+            baseline::get_baseline_pin,
+            baseline::pin_baseline,
+            baseline::unpin_baseline,
             support::get_app_identity,
             support::set_window_title,
             preferences::get_application_preferences,

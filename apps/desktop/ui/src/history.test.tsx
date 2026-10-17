@@ -25,11 +25,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 import { clearFallbacks, fallbacks } from './i18n';
 import {
+  compareSnapshots,
   getApplicationPreferences,
+  listCompareCandidates,
   listHistoryBuilds,
   listHistoryGateRuns,
   listHistoryReleases,
+  pinBaseline,
   setWindowTitle,
+  unpinBaseline,
 } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type {
@@ -45,6 +49,10 @@ import type {
 import { precedes } from './test/order';
 
 vi.mock('./ipc/bridge', () => ({
+  // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
+  getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  pinBaseline: vi.fn(),
+  unpinBaseline: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -93,6 +101,11 @@ vi.mock('./ipc/bridge', () => ({
   listHistoryBuilds: vi.fn(),
   listHistoryGateRuns: vi.fn(),
   listHistoryReleases: vi.fn(),
+  // R5: a comparison started from History opens Compare, which reads its candidates and runs once.
+  listCompareCandidates: vi.fn(),
+  compareSnapshots: vi.fn(),
+  querySectionChanges: vi.fn(),
+  querySymbolChanges: vi.fn(),
 }));
 
 const buildsMock = vi.mocked(listHistoryBuilds);
@@ -238,8 +251,8 @@ function deferred<T>() {
 
 async function openHistory(): Promise<void> {
   render(<App />);
-  fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
-  await screen.findByRole('heading', { level: 1, name: 'Bundle & History' });
+  fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
+  await screen.findByRole('heading', { level: 1, name: 'History' });
   await screen.findByText(BUILD_FILE);
 }
 
@@ -249,7 +262,8 @@ async function openHistory(): Promise<void> {
  * not a tab, so this is the whole of what reaching a table costs.
  */
 async function showView(label: 'Builds' | 'Gate runs' | 'Release records'): Promise<void> {
-  fireEvent.click(screen.getByRole('button', { name: label }));
+  // R5: the three lists are Tabs.
+  fireEvent.click(screen.getByRole('tab', { name: label }));
 }
 
 /** The builds table, once its first page has painted. */
@@ -275,12 +289,17 @@ async function filterForm(noun: string): Promise<HTMLElement> {
   return await screen.findByRole('form', { name: `Filter ${noun}` });
 }
 
-/** Open one table's first row and hand back the control that did it. */
+/** The row action that opens a stored row in the Inspector (R5: replaces the expanding Details row). */
+async function rowAction(region: HTMLElement): Promise<HTMLElement> {
+  return (await within(region).findAllByRole('button', { name: /^Show the stored record of / }))[0] as HTMLElement;
+}
+
+/** Open one table's first row in the Inspector and hand back the control that did it. */
 async function openFirstRow(region: HTMLElement): Promise<HTMLElement> {
-  const details = await within(region).findByRole('button', { name: 'Details' });
-  fireEvent.click(details);
-  await waitFor(() => expect(details.getAttribute('aria-expanded')).toBe('true'));
-  return details;
+  const action = await rowAction(region);
+  fireEvent.click(action);
+  await screen.findByRole('complementary', { name: 'Evidence' });
+  return action;
 }
 
 /**
@@ -300,7 +319,8 @@ function cellOf(row: HTMLElement, header: string): HTMLElement {
   if (index < 0) {
     throw new Error(`no column is named ${header}`);
   }
-  const cell = within(row).getAllByRole('cell')[index];
+  // Row headers and cells together, in column order (the row's own name is a `th`).
+  const cell = Array.from(row.querySelectorAll('th,td'))[index];
   if (cell === undefined) {
     throw new Error(`${header} has no cell in this row`);
   }
@@ -326,7 +346,7 @@ describe('History states what a row is', () => {
     // The whole header, not the heading's own box: `PageHeader` puts the title and the metadata line in
     // one block and the subhead beside it, so the sentence a reader sees under the title lives one level
     // up from the `h1`.
-    const header = (await screen.findByRole('heading', { level: 1, name: 'Bundle & History' })).closest(
+    const header = (await screen.findByRole('heading', { level: 1, name: 'History' })).closest(
       'header',
     );
     const words = prose(header ?? null);
@@ -380,7 +400,7 @@ describe('History filters and pages through the shell', () => {
     );
 
     const form = await filterForm('builds');
-    fireEvent.change(within(form).getByRole('textbox'), { target: { value: 'bootloader' } });
+    fireEvent.change(within(form).getByRole('searchbox'), { target: { value: 'bootloader' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Apply' }));
 
     await screen.findByText('bootloader.elf');
@@ -394,7 +414,7 @@ describe('History filters and pages through the shell', () => {
     await openHistory();
 
     const form = await filterForm('builds');
-    fireEvent.change(within(form).getByRole('textbox'), { target: { value: 'app' } });
+    fireEvent.change(within(form).getByRole('searchbox'), { target: { value: 'app' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Apply' }));
     await waitFor(() => expect(buildsMock).toHaveBeenCalledTimes(2));
 
@@ -409,11 +429,9 @@ describe('History filters and pages through the shell', () => {
     await showView('Gate runs');
 
     const form = await filterForm('Gate runs');
-    fireEvent.change(within(form).getByRole('textbox'), { target: { value: 'gate' } });
+    fireEvent.change(within(form).getByRole('searchbox'), { target: { value: 'gate' } });
 
-    // The hint is the only thing that moved: a half-typed word must not narrow a table the reader was
-    // still reading.
-    expect(within(form).getByText('Filtering by \u201cgate\u201d')).toBeDefined();
+    // A half-typed word must not narrow a table the reader was still reading.
     expect(runsMock).toHaveBeenCalledTimes(1);
 
     fireEvent.click(within(form).getByRole('button', { name: 'Apply' }));
@@ -432,7 +450,7 @@ describe('History filters and pages through the shell', () => {
     );
 
     const form = await filterForm('builds');
-    fireEvent.change(within(form).getByRole('textbox'), { target: { value: 'app' } });
+    fireEvent.change(within(form).getByRole('searchbox'), { target: { value: 'app' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Apply' }));
 
     // Page 25 of a filtered population is not what "filter this" asks for (prompt §17).
@@ -476,7 +494,7 @@ describe('History filters and pages through the shell', () => {
     buildsMock.mockReturnValueOnce(newer.promise);
 
     const form = await filterForm('builds');
-    const box = within(form).getByRole('textbox');
+    const box = within(form).getByRole('searchbox');
     fireEvent.change(box, { target: { value: 'one' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Apply' }));
     fireEvent.change(box, { target: { value: 'two' } });
@@ -505,7 +523,10 @@ describe('History filters and pages through the shell', () => {
     fireEvent.click(within(screen.getByRole('group', { name: 'Size units' })).getByLabelText('KiB'));
 
     // US-001 addendum 3: a unit is a way of writing one number, so no read runs and the figure does
-    // not move - only its rendering.
+    // not move - only its rendering. R5: the Inspector closes on a unit change (its text was written in
+    // the old unit, the R3 rule), and the same row reopened reads in the new one.
+    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Evidence' })).toBeNull());
+    await openFirstRow(builds);
     expect(screen.getByText('5.30 KiB')).toBeDefined();
     expect(screen.queryByText('5,432 bytes')).toBeNull();
     expect(buildsMock).toHaveBeenCalledTimes(1);
@@ -517,8 +538,7 @@ describe('History filters and pages through the shell', () => {
 describe('History shows stored verdicts as stored', () => {
   async function firstGateRow(): Promise<HTMLElement> {
     const runs = await runsRegion();
-    const details = await within(runs).findByRole('button', { name: 'Details' });
-    return details.closest('tr') as HTMLElement;
+    return (await rowAction(runs)).closest('tr') as HTMLElement;
   }
 
   it('gives the disposition a word and an icon, not a colour', async () => {
@@ -557,9 +577,9 @@ describe('History shows stored verdicts as stored', () => {
     await openHistory();
 
     const row = await firstGateRow();
-    // Seven columns, and the baseline is one of them by name rather than by count: no column is
-    // dropped to make the row fit, which is what §6 forbids.
-    expect(within(row).getAllByRole('cell')).toHaveLength(7);
+    // Seven columns (the row action and six stored ones), and the baseline is one of them by name rather
+    // than by count: no column is dropped to make the row fit, which is what §6 forbids.
+    expect(row.querySelectorAll('th,td')).toHaveLength(7);
     expect(cellOf(row, 'Baseline').textContent).toBe('None');
   });
 
@@ -594,8 +614,8 @@ describe('the row action stays reachable', () => {
         'Row actions',
       );
       const row = within(region).getAllByRole('row')[1] as HTMLElement;
-      const first = within(row).getAllByRole('cell')[0] as HTMLElement;
-      expect(within(first).getByRole('button', { name: 'Details' })).toBeDefined();
+      const first = row.querySelector('th,td') as HTMLElement;
+      expect(within(first).getByRole('button', { name: /^Show the stored record of / })).toBeDefined();
     }
   });
 
@@ -608,7 +628,8 @@ describe('the row action stays reachable', () => {
 
     for (const region of [await buildsRegion(), await runsRegion(), await releasesRegion()]) {
       const table = within(region).getByRole('table');
-      expect(table.parentElement?.className).toContain('viewport');
+      // R5: the shared DataTable's wrapper owns the scroll axis.
+      expect(table.parentElement?.className).toContain('wrap');
       expect(table.tagName).toBe('TABLE');
     }
   });
@@ -618,44 +639,42 @@ describe('History opens a row without leaving the table', () => {
   it('gives the whole digest back when the row is opened, and takes it away again', async () => {
     await openHistory();
     const builds = await buildsRegion();
-    const details = await within(builds).findByRole('button', { name: 'Details' });
 
     // A shortened id is a convenience, so before the row is opened the screen holds the shortened text
     // and none of the full one.
-    expect(details.getAttribute('aria-expanded')).toBe('false');
     expect(screen.queryByText(SHA256)).toBeNull();
 
-    fireEvent.click(details);
-    await waitFor(() => expect(details.getAttribute('aria-expanded')).toBe('true'));
-    expect(screen.getByText(SHA256)).toBeDefined();
-    expect(screen.getByText(BUILD_ID)).toBeDefined();
-    expect(screen.getByText(SNAPSHOT_ID)).toBeDefined();
-    expect(within(builds).getByText(/The file name is all FirmwareSight keeps visible here/)).toBeDefined();
+    const action = await openFirstRow(builds);
+    const inspector = screen.getByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getByText(SHA256)).toBeDefined();
+    expect(within(inspector).getByText(BUILD_ID)).toBeDefined();
+    expect(within(inspector).getByText(SNAPSHOT_ID)).toBeDefined();
+    expect(inspector.textContent).toContain('FirmwareSight store (read-only)');
 
-    fireEvent.click(details);
-    await waitFor(() => expect(details.getAttribute('aria-expanded')).toBe('false'));
-    expect(screen.queryByText(SHA256)).toBeNull();
+    fireEvent.click(within(inspector).getByRole('button', { name: 'Close evidence panel' }));
+    await waitFor(() => expect(screen.queryByText(SHA256)).toBeNull());
+    expect(document.activeElement).toBe(action);
   });
 
   it('opens the ids a stored Gate run and a release record are cited by', async () => {
     await openHistory();
 
     const runs = await runsRegion();
-    fireEvent.click(await within(runs).findByRole('button', { name: 'Details' }));
+    await openFirstRow(runs);
     await screen.findByText(RUN_ID);
-    expect(within(runs).getByText(BASELINE_ID)).toBeDefined();
+    expect(screen.getByText(BASELINE_ID)).toBeDefined();
 
     const releases = await releasesRegion();
-    fireEvent.click(await within(releases).findByRole('button', { name: 'Details' }));
+    await openFirstRow(releases);
     await screen.findByText(RELEASE_ID);
-    expect(within(releases).getByText(MANIFEST_SHA)).toBeDefined();
-    expect(within(releases).getByText(BUILD_ID)).toBeDefined();
+    expect(screen.getByText(MANIFEST_SHA)).toBeDefined();
+    expect(screen.getByText(BUILD_ID)).toBeDefined();
   });
 
   it('reaches a row action with the keyboard, because it is a button and not a click target', async () => {
     await openHistory();
     const builds = await buildsRegion();
-    const details = await within(builds).findByRole('button', { name: 'Details' });
+    const details = await rowAction(builds);
 
     expect(details.tagName).toBe('BUTTON');
     expect(details.getAttribute('href')).toBeNull();
@@ -664,8 +683,7 @@ describe('History opens a row without leaving the table', () => {
     expect(document.activeElement).toBe(details);
 
     fireEvent.click(details);
-    await waitFor(() => expect(details.getAttribute('aria-expanded')).toBe('true'));
-    expect(screen.getByText(SHA256)).toBeDefined();
+    expect(await screen.findByText(SHA256)).toBeDefined();
   });
 });
 
@@ -691,7 +709,8 @@ describe('History has no way to change a stored row', () => {
     expect(page.querySelectorAll('a')).toHaveLength(0);
     // The only field on the page is the active view's bounded filter. U1P §12 shows one stored entity at
     // a time, so the three filters that used to sit on screen together are now one per view.
-    expect(within(page).getAllByRole('textbox')).toHaveLength(1);
+    expect(within(page).getAllByRole('searchbox')).toHaveLength(1);
+    // R5: the one write is the pinned baseline, which appends to its own log and changes no stored row.
   });
 
   it('shows no host path anywhere on the page', async () => {
@@ -711,7 +730,7 @@ describe('History when a read has nothing to show or cannot show it', () => {
   it('distinguishes a store that is empty from a filter that matched nothing', async () => {
     buildsMock.mockResolvedValue(buildPage([]));
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
 
     const builds = await screen.findByRole('region', { name: 'Stored builds' });
     expect(
@@ -722,7 +741,7 @@ describe('History when a read has nothing to show or cannot show it', () => {
 
     buildsMock.mockResolvedValueOnce(buildPage([]));
     const form = within(builds).getByRole('form');
-    fireEvent.change(within(form).getByRole('textbox'), { target: { value: 'nope' } });
+    fireEvent.change(within(form).getByRole('searchbox'), { target: { value: 'nope' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Apply' }));
 
     await screen.findByText('No stored build matches \u201cnope\u201d.');
@@ -752,7 +771,7 @@ describe('History when a read has nothing to show or cannot show it', () => {
   it('announces that it is loading before a table has answered', async () => {
     buildsMock.mockReturnValue(new Promise<never>(() => undefined));
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
 
     const builds = await screen.findByRole('region', { name: 'Stored builds' });
     expect(within(builds).getByRole('status').textContent).toContain('Loading builds');
@@ -762,19 +781,19 @@ describe('History when a read has nothing to show or cannot show it', () => {
   });
 });
 
-describe('U1P Bundle & History hierarchy', () => {
+describe('U1P History hierarchy', () => {
   it('names the page once, then shows the one stored list the reader asked for', async () => {
     await openHistory();
 
-    // §12: one canonical heading. The page used to answer to "History" here and "Bundle & History" in
+    // §12: one canonical heading. The page used to answer to "History" here and "History" in
     // the rail, which left the window title and the screen disagreeing about the same place.
-    expect(screen.getByRole('heading', { level: 1, name: 'Bundle & History' })).toBeDefined();
+    expect(screen.getByRole('heading', { level: 1, name: 'History' })).toBeDefined();
 
-    const views = screen.getByRole('group', { name: 'Stored history' });
+    const views = screen.getByRole('tablist', { name: 'Stored history' });
     expect(
       within(views)
-        .getAllByRole('button')
-        .map((button) => [button.textContent, button.getAttribute('aria-pressed')]),
+        .getAllByRole('tab')
+        .map((tab) => [tab.textContent, tab.getAttribute('aria-selected')]),
     ).toEqual([
       ['Builds', 'true'],
       ['Gate runs', 'false'],
@@ -788,7 +807,7 @@ describe('U1P Bundle & History hierarchy', () => {
     expect(screen.queryByRole('region', { name: 'Stored Gate runs' })).toBeNull();
     expect(screen.queryByRole('region', { name: 'Stored release records' })).toBeNull();
 
-    fireEvent.click(within(views).getByRole('button', { name: 'Gate runs' }));
+    fireEvent.click(within(views).getByRole('tab', { name: 'Gate runs' }));
     expect(screen.queryByRole('region', { name: 'Stored builds' })).toBeNull();
     expect(await screen.findByRole('region', { name: 'Stored Gate runs' })).toBeDefined();
   });
@@ -803,9 +822,8 @@ describe('U1P Bundle & History hierarchy', () => {
     expect(screen.queryByText(SHA256)).toBeNull();
 
     await showView('Builds');
-    const again = await buildsRegion();
-    const details = await within(again).findByRole('button', { name: 'Details' });
-    await waitFor(() => expect(details.getAttribute('aria-expanded')).toBe('false'));
+    await buildsRegion();
+    expect(screen.queryByRole('complementary', { name: 'Evidence' })).toBeNull();
   });
 });
 
@@ -836,7 +854,8 @@ describe('the same rows read in Chinese', () => {
   function dataCells(region: HTMLElement): string[][] {
     const body = region.querySelector('tbody');
     return [...(body?.querySelectorAll('tr') ?? [])].map((row) =>
-      [...row.querySelectorAll('th,td')].map(prose).slice(1, 6),
+      // R5: row action, select, then artifact, digest, stored time and format.
+      [...row.querySelectorAll('th,td')].map(prose).slice(2, 6),
     );
   }
 
@@ -906,5 +925,193 @@ describe('the same rows read in Chinese', () => {
     expect(chineseHead).not.toEqual(englishHead);
     expect(chineseHead).toContain('镜像文件');
     expect(englishHead).toContain('Artifact');
+  });
+});
+
+describe('R5 pinned baseline and comparisons from History', () => {
+  const OLDER = candidate({
+    buildId: BASELINE_ID,
+    snapshotId: `snap-${'o'.repeat(40)}`,
+    fileName: 'old.elf',
+    sha256: 'c'.repeat(64),
+    importedAt: '2026-09-01T08:00:00Z',
+  });
+
+  function pinOf(row: CompareCandidateDto) {
+    return {
+      buildId: row.buildId,
+      snapshotId: row.snapshotId,
+      fileName: row.fileName,
+      sha256: row.sha256,
+      pinnedAt: '2026-10-17T09:00:00Z',
+    };
+  }
+
+  it('says no baseline is pinned until a person pins one, then names it with when it was pinned', async () => {
+    vi.mocked(pinBaseline).mockResolvedValue(ok(pinOf(candidate())));
+    await openHistory();
+    const line = screen.getByRole('region', { name: 'Pinned baseline' });
+    expect(line.textContent).toContain('No baseline is pinned');
+
+    fireEvent.click(screen.getByRole('button', { name: `Pin ${BUILD_FILE} · ${SHA256.slice(0, 12)} as baseline` }));
+    await waitFor(() => expect(line.textContent).toContain(`${BUILD_FILE} · ${SHA256.slice(0, 12)}`));
+    expect(line.textContent).toContain('pinned 2026-10-17T09:00:00Z');
+    expect(vi.mocked(pinBaseline)).toHaveBeenCalledWith(SNAPSHOT_ID);
+    // The pinned row is marked, and offers no second pin.
+    const builds = await buildsRegion();
+    expect(within(builds).getByText(/Pinned/)).toBeDefined();
+    expect(within(builds).queryByRole('button', { name: /as baseline$/ })).toBeNull();
+  });
+
+  it('unpins, and says so, without touching a stored row', async () => {
+    vi.mocked(pinBaseline).mockResolvedValue(ok(pinOf(candidate())));
+    vi.mocked(unpinBaseline).mockResolvedValue(ok(true));
+    await openHistory();
+    fireEvent.click(screen.getByRole('button', { name: /as baseline$/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Unpin' }));
+    const line = screen.getByRole('region', { name: 'Pinned baseline' });
+    await waitFor(() => expect(line.textContent).toContain('No baseline is pinned'));
+    expect(buildsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a refused pin as a typed error and keeps the pin it had', async () => {
+    vi.mocked(pinBaseline).mockResolvedValue(fail(READ_REFUSED));
+    await openHistory();
+    fireEvent.click(screen.getByRole('button', { name: /as baseline$/ }));
+    expect(await screen.findByRole('alert', { name: 'Baseline pin failed' })).toBeDefined();
+    expect(screen.getByRole('region', { name: 'Pinned baseline' }).textContent).toContain('No baseline is pinned');
+  });
+
+  it('compares the two selected builds on Compare, the earlier one as the base', async () => {
+    buildsMock.mockResolvedValue(buildPage([candidate(), OLDER]));
+    vi.mocked(listCompareCandidates).mockResolvedValue(
+      ok({ rows: [candidate(), OLDER], total: 2, offset: 0, limit: 25, nextOffset: null }),
+    );
+    vi.mocked(compareSnapshots).mockResolvedValue(
+      fail({ code: 'ERR-DIFF-5001', message: 'stub', operationId: 'op-c', details: null, remediation: null }),
+    );
+    await openHistory();
+    const compare = screen.getByRole('button', { name: /^Compare the two selected/ }) as HTMLButtonElement;
+    expect(compare.disabled).toBe(true);
+    fireEvent.click(screen.getByRole('checkbox', { name: `Select ${BUILD_FILE} · ${SHA256.slice(0, 12)} for comparison` }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /^Select old\.elf/ }));
+    expect(compare.disabled).toBe(false);
+    fireEvent.click(compare);
+
+    await screen.findByRole('heading', { level: 1, name: 'Compare' });
+    await waitFor(() =>
+      expect(vi.mocked(compareSnapshots)).toHaveBeenCalledWith({
+        baseSnapshotId: OLDER.snapshotId,
+        targetSnapshotId: SNAPSHOT_ID,
+      }),
+    );
+    // Once: the request is not repeated on a later render, nor on a later visit to Compare.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(vi.mocked(compareSnapshots)).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'History page' }));
+    await screen.findByRole('heading', { level: 1, name: 'History' });
+    fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
+    await screen.findByRole('heading', { level: 1, name: 'Compare' });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(vi.mocked(compareSnapshots)).toHaveBeenCalledTimes(1);
+  });
+
+  it('cannot compare with the current build before Analyze has proved one, and says why', async () => {
+    await openHistory();
+    expect(
+      (screen.getByRole('button', { name: `Compare ${BUILD_FILE} · ${SHA256.slice(0, 12)} with the current build` }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(screen.getByRole('region', { name: 'Pinned baseline' }).textContent).toContain(
+      'The current build is the one Analyze last proved',
+    );
+  });
+});
+
+describe('R5 command palette and keyboard shortcuts', () => {
+  const palette = () => screen.getByRole('dialog', { name: 'Command palette' });
+
+  it('opens on Ctrl+K and from the product bar, filters as you type, and runs the active command on Enter', async () => {
+    vi.mocked(listCompareCandidates).mockResolvedValue(
+      ok({ rows: [], total: 0, offset: 0, limit: 25, nextOffset: null }),
+    );
+    await openHistory();
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    const input = within(palette()).getByRole('combobox', { name: 'Search commands' });
+    expect(document.activeElement).toBe(input);
+    fireEvent.change(input, { target: { value: 'compare' } });
+    const options = within(palette()).getAllByRole('option');
+    expect(options[0]?.textContent).toContain('Compare');
+    expect(options.every((option) => /compare/i.test(option.textContent ?? ''))).toBe(true);
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(screen.queryByRole('dialog', { name: 'Command palette' })).toBeNull();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Compare' })).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Commands (Ctrl+K)' }));
+    expect(palette()).toBeDefined();
+  });
+
+  it('closes on Esc and gives focus back to where it was', async () => {
+    await openHistory();
+    const tab = screen.getByRole('tab', { name: 'Gate runs' });
+    tab.focus();
+    fireEvent.keyDown(document, { key: 'K', ctrlKey: true });
+    fireEvent.keyDown(within(palette()).getByRole('combobox'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Command palette' })).toBeNull());
+    expect(document.activeElement).toBe(tab);
+  });
+
+  it('lists comparing with the pinned baseline with the reason it cannot run yet, and does nothing on it', async () => {
+    await openHistory();
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    const option = within(palette()).getByRole('option', { name: /Compare the current build with the pinned baseline/ });
+    expect(option.getAttribute('aria-disabled')).toBe('true');
+    expect(option.textContent).toContain('No baseline is pinned. Pin one on History.');
+    fireEvent.click(option);
+    expect(palette()).toBeDefined();
+  });
+
+  it('moves to the filter on "/" and between views on "[" and "]", but never while typing', async () => {
+    await openHistory();
+    await buildsRegion();
+    fireEvent.keyDown(document.body, { key: ']' });
+    expect(screen.getByRole('tab', { name: 'Gate runs' }).getAttribute('aria-selected')).toBe('true');
+    fireEvent.keyDown(document.body, { key: '[' });
+    expect(screen.getByRole('tab', { name: 'Builds' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(document.body, { key: '/' });
+    const field = screen.getByRole('searchbox');
+    expect(document.activeElement).toBe(field);
+    // Typed into the field, the same keys are text.
+    fireEvent.keyDown(field, { key: ']' });
+    expect(screen.getByRole('tab', { name: 'Builds' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('opens the firmware chooser once on Ctrl+O, from any page', async () => {
+    const { selectArtifact } = await import('./ipc/bridge');
+    vi.mocked(selectArtifact).mockResolvedValue({ ok: true, value: null });
+    await openHistory();
+    fireEvent.keyDown(document, { key: 'o', ctrlKey: true });
+    expect(await screen.findByRole('heading', { level: 1, name: 'Analyze' })).toBeDefined();
+    await waitFor(() => expect(vi.mocked(selectArtifact)).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(vi.mocked(selectArtifact)).toHaveBeenCalledTimes(1);
+  });
+
+  it('switches the theme from the palette and stores the choice', async () => {
+    const { updateApplicationPreferences } = await import('./ipc/bridge');
+    await openHistory();
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.click(within(palette()).getByRole('option', { name: /^Theme\s*Dark/ }));
+    await waitFor(() =>
+      expect(vi.mocked(updateApplicationPreferences)).toHaveBeenLastCalledWith('bytes', 'analyze', 'dark', 'system'),
+    );
+    expect(document.documentElement.getAttribute('data-fs-theme')).toBe('dark');
   });
 });

@@ -9,6 +9,7 @@ export type { AcceptReviewRequestDto } from './generated/AcceptReviewRequestDto'
 export type { AcceptedReviewDto } from './generated/AcceptedReviewDto';
 export type { AnalysisSummaryDto } from './generated/AnalysisSummaryDto';
 export type { AppIdentityDto } from './generated/AppIdentityDto';
+export type { BaselinePinDto } from './generated/BaselinePinDto';
 export type { ArtifactDto } from './generated/ArtifactDto';
 export type { BudgetDto } from './generated/BudgetDto';
 export type { BundleDestinationDto } from './generated/BundleDestinationDto';

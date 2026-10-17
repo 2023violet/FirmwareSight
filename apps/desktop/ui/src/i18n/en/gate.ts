@@ -1,5 +1,5 @@
 export const gate = {
-  'title': 'Release Gate',
+  'title': 'Release',
   'subhead': 'Checks one stored build against your project policy. The verdict is that policy’s answer, nothing more.',
   'verdict.block': 'Blocked — {count} rule(s) failed. A blocked build cannot produce a bundle.',
   'verdict.review': 'Needs a decision — {count} finding(s) wait on an explicit acceptance, and nothing is blocked.',

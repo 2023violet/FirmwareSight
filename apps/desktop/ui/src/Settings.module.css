@@ -115,18 +115,6 @@
   cursor: default;
 }
 
-/* A decision asked in place, so the page never leaves the section it was standing in. The hairline
-   is the same review treatment Compare and Release use for a pending choice - no shadow, no dialog
-   that hides the rest of the screen. */
-.confirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-3);
-  padding: var(--fs-space-4);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-control);
-}
-
 .status {
   margin: 0;
   color: var(--fs-color-text-secondary);

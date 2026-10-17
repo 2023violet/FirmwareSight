@@ -33,7 +33,7 @@ export const settings: CatalogFor<'settings'> = {
   'start.fact': '决定下一次启动打开哪个页面。它在下一次打开本窗口时才生效，不会现在跳转，也绝不恢复此前的某一次 Gate 运行。',
   'start.group': '起始页面',
   'start.analyze': '分析',
-  'start.history': '发布包与历史',
+  'start.history': '历史',
   'reset.heading': '重置应用设置',
   'reset.fact': '恢复为本版本的默认设置。已分析的构建、门禁运行和发布记录都会保留。',
   'reset.trigger': '重置应用设置',

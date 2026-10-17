@@ -43,6 +43,10 @@ import type {
 } from './ipc/types';
 
 vi.mock('./ipc/bridge', () => ({
+  // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
+  getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  pinBaseline: vi.fn(),
+  unpinBaseline: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),

@@ -119,7 +119,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 15_R1_FOUNDATION.md
 │   ├── 16_R2_ANALYZE_OVERVIEW.md
 │   ├── 17_R3_COMPARE.md
-│   └── 18_R4_RELEASE.md
+│   ├── 18_R4_RELEASE.md
+│   └── 19_R5_HISTORY.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -303,6 +304,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── icon.ico
 │       │   │   └── icon.png
 │       │   ├── src/
+│       │   │   ├── baseline.rs
 │       │   │   ├── bundle.rs
 │       │   │   ├── compare.rs
 │       │   │   ├── details.rs
@@ -322,6 +324,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   └── support.rs
 │       │   ├── tests/
 │       │   │   ├── analyze_details.rs
+│       │   │   ├── baseline_pin.rs
 │       │   │   ├── bundle_ipc.rs
 │       │   │   ├── compare_ipc.rs
 │       │   │   ├── desktop_parity.rs
@@ -346,6 +349,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   ├── Button.tsx
 │           │   │   ├── Chip.module.css
 │           │   │   ├── Chip.tsx
+│           │   │   ├── CommandPalette.module.css
+│           │   │   ├── CommandPalette.tsx
 │           │   │   ├── DataTable.module.css
 │           │   │   ├── DataTable.tsx
 │           │   │   ├── DeltaValue.module.css
@@ -428,6 +433,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── AnalysisSummaryDto.ts
 │           │   │   │   ├── AppIdentityDto.ts
 │           │   │   │   ├── ArtifactDto.ts
+│           │   │   │   ├── BaselinePinDto.ts
 │           │   │   │   ├── BudgetDto.ts
 │           │   │   │   ├── BundleDestinationDto.ts
 │           │   │   │   ├── BundleExportDto.ts
@@ -709,9 +715,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── 0004_release_records.sql
 │       │   ├── 0005_unknown_reasons.sql
 │       │   ├── 0006_release_attachments.sql
-│       │   └── 0007_object_contributions.sql
+│       │   ├── 0007_object_contributions.sql
+│       │   └── 0008_baseline_pins.sql
 │       ├── src/
 │       │   ├── backup.rs
+│       │   ├── baseline.rs
 │       │   ├── compare.rs
 │       │   ├── counts.rs
 │       │   ├── db.rs
@@ -724,6 +732,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   └── release.rs
 │       ├── tests/
 │       │   ├── analyze_queries.rs
+│       │   ├── baseline_pins.rs
 │       │   ├── compare_candidates.rs
 │       │   ├── gate_history.rs
 │       │   ├── history_reads.rs
@@ -761,10 +770,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── DESIGN_CHECKLIST.md
 │   │   ├── R3_NATIVE_SMOKE_EVIDENCE.zip
 │   │   └── README.md
-│   └── R4/
+│   ├── R4/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── DESIGN_CHECKLIST.md
+│   │   ├── R4_NATIVE_SMOKE_EVIDENCE.zip
+│   │   └── README.md
+│   └── R5/
 │       ├── AC_MATRIX.tsv
-│       ├── DESIGN_CHECKLIST.md
-│       ├── R4_NATIVE_SMOKE_EVIDENCE.zip
+│       ├── R5_NATIVE_SMOKE_EVIDENCE.zip
 │       └── README.md
 ├── examples/
 │   ├── project-readiness/

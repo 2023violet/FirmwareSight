@@ -45,6 +45,10 @@ import type {
 } from './ipc/types';
 
 vi.mock('./ipc/bridge', () => ({
+  // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
+  getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  pinBaseline: vi.fn(),
+  unpinBaseline: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -495,8 +499,8 @@ describe('Help repeats what Analyze shows on a first run', () => {
       expect(screen.queryByRole('region', { name: 'Getting started' })).toBeNull(),
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Bundle & History page' }));
-    await screen.findByRole('heading', { level: 1, name: 'Bundle & History' });
+    fireEvent.click(screen.getByRole('button', { name: 'History page' }));
+    await screen.findByRole('heading', { level: 1, name: 'History' });
     fireEvent.click(screen.getByRole('button', { name: 'Analyze page' }));
     await screen.findByRole('heading', { level: 1, name: 'Analyze' });
 
@@ -668,5 +672,16 @@ describe('Help carries the diagnostics the shell can state', () => {
     expect(words).not.toMatch(/[\\/]/);
     expect(words).not.toContain('AppData');
     expect(words).not.toContain('home');
+  });
+});
+
+describe('Help lists the keyboard shortcuts the shell wires (R5)', () => {
+  it('names each key with what it does, in a table', async () => {
+    await openHelp();
+    const region = screen.getByRole('region', { name: 'Keyboard shortcuts' });
+    const table = within(region).getByRole('table');
+    const keys = within(table).getAllByRole('rowheader').map((cell) => cell.textContent);
+    expect(keys).toEqual(['Ctrl+K', 'Ctrl+O', '/', '[  ]', 'Esc']);
+    expect(region.textContent).toContain('Open the command palette');
   });
 });

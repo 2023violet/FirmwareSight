@@ -11,14 +11,15 @@ last_updated: "2026-10-17"
 # Active Task
 
 ```text
-R4_RELEASE_WORKBENCH
+R5_HISTORY_PIN_PALETTE
 ```
 
-- **Authorized by:** the Owner, in chat on 2026-10-17 ("执行R4"), after R3 was integrated at `465fe5f` (Actions #125, 10/10).
-- **Plan and status:** [06_DELIVERY/18_R4_RELEASE.md](../06_DELIVERY/18_R4_RELEASE.md).
-- **Base:** `465fe5f`. **Branch:** `feature/r4-release`.
-- **Not authorized:** History, Settings, Help, the command palette and the IA rename (R5); report redesign (R6); new IPC or storage; deleting data outside an approved scope; a push without Owner approval.
+- **Authorized by:** the Owner's standing goal in chat on 2026-10-17: carry the plan through to the complete product without intermediate confirmations.
+- **Plan and status:** [06_DELIVERY/19_R5_HISTORY.md](../06_DELIVERY/19_R5_HISTORY.md).
+- **Base:** `feature/r4-release` (`2a81d4b`). **Branch:** `feature/r5-history`.
+- **Waiting on the Owner:** the push of R4 (and of R5 once reviewed) to `main`. The session's permission guard refused the push; it stays an Owner action.
+- **Not in this task:** report redesign (R6); quality pass (R7); deleting data outside an approved scope.
 
-- **Last task:** `R3_COMPARE_WORKBENCH`, on `main` at `465fe5f` (Actions #125, 10/10).
+- **Last task:** `R4_RELEASE_WORKBENCH`, complete on `feature/r4-release` at `2a81d4b`, not yet on `main`.
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

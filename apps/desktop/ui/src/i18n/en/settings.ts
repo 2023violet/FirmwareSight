@@ -31,7 +31,7 @@ export const settings = {
   'start.fact': 'Which page the next start opens on. It takes effect the next time this window is opened, not now, and it never restores an earlier Gate run.',
   'start.group': 'Start page',
   'start.analyze': 'Analyze',
-  'start.history': 'Bundle & History',
+  'start.history': 'History',
   'reset.heading': 'Reset application preferences',
   'reset.fact': 'Restores this version’s default settings. Analyzed builds, Gate runs and releases are kept.',
   'reset.trigger': 'Reset application preferences',

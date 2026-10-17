@@ -13,6 +13,7 @@ import { withDialog } from './dialogWords';
 
 import type {
   AcceptReviewOutcomeDto,
+  BaselinePinDto,
   AcceptReviewRequestDto,
   AnalysisSummaryDto,
   AppIdentityDto,
@@ -92,6 +93,9 @@ const EXPORT_RELEASE_BUNDLE = 'export_release_bundle';
 const LIST_HISTORY_BUILDS = 'list_history_builds';
 const LIST_HISTORY_GATE_RUNS = 'list_history_gate_runs';
 const LIST_HISTORY_RELEASES = 'list_history_releases';
+const GET_BASELINE_PIN = 'get_baseline_pin';
+const PIN_BASELINE = 'pin_baseline';
+const UNPIN_BASELINE = 'unpin_baseline';
 const GET_APP_IDENTITY = 'get_app_identity';
 const SET_WINDOW_TITLE = 'set_window_title';
 const GET_APPLICATION_PREFERENCES = 'get_application_preferences';
@@ -543,6 +547,26 @@ export async function listHistoryReleases(
   request: HistoryPageRequestDto,
 ): Promise<IpcOutcome<HistoryReleasePageDto>> {
   return await call<HistoryReleasePageDto>(LIST_HISTORY_RELEASES, { request });
+}
+
+/**
+ * The build this project measures against (R5 / D3), or `null` when none is pinned.
+ *
+ * The scope is Rust's: the call names no project, and the answer names the build by its ids, file name and
+ * digest, never by a path.
+ */
+export async function getBaselinePin(): Promise<IpcOutcome<BaselinePinDto | null>> {
+  return await call<BaselinePinDto | null>(GET_BASELINE_PIN);
+}
+
+/** Pin one stored build, named by the snapshot id the screen already holds. Returns the pin now current. */
+export async function pinBaseline(snapshotId: string): Promise<IpcOutcome<BaselinePinDto>> {
+  return await call<BaselinePinDto>(PIN_BASELINE, { snapshotId });
+}
+
+/** Unpin the project's baseline. `false` when nothing was pinned; the unpin is itself recorded. */
+export async function unpinBaseline(): Promise<IpcOutcome<boolean>> {
+  return await call<boolean>(UNPIN_BASELINE);
 }
 
 /**

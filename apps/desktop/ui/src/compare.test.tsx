@@ -38,6 +38,8 @@ import {
   querySymbolChanges,
   querySymbols,
   selectArtifact,
+  getBaselinePin,
+  pinBaseline,
 } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type {
@@ -61,6 +63,10 @@ import type {
 import { precedes } from './test/order';
 
 vi.mock('./ipc/bridge', () => ({
+  // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
+  getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  pinBaseline: vi.fn(),
+  unpinBaseline: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -678,8 +684,8 @@ describe('the rail and the pages it lists', () => {
       'Overview',
       'Analyze',
       'Compare',
-      'Release Gate',
-      'Bundle & History',
+      'Release',
+      'History',
     ]);
     expect(screen.getByRole('button', { name: 'Analyze page' }).getAttribute('aria-current')).toBe(
       'page',
@@ -1970,11 +1976,11 @@ describe('U1P-R3 the comparison survives the page it was made on', () => {
     // C2 lists four destinations, and the shell unmounts Compare for every one of them: `App.tsx` renders
     // one page at a time from a single ternary chain. Walking more than one is the difference between
     // proving the retention once and proving it is not a special case of the page the test visited.
-    // Bundle & History is not walked here because the page reads three list commands this file's bridge
+    // History is not walked here because the page reads three list commands this file's bridge
     // mock does not answer, and stubbing them would be a harness change with no bearing on what is under
     // test: the comparison is not stored in the page, so which page the reader went to cannot matter. The
     // installed capture covers that leg on the real shell.
-    const c2Pages = ['Overview page', 'Analyze page', 'Release Gate page'];
+    const c2Pages = ['Overview page', 'Analyze page', 'Release page'];
     for (const page of c2Pages) {
       fireEvent.click(screen.getByRole('button', { name: page }));
       fireEvent.click(screen.getByRole('button', { name: 'Compare page' }));
@@ -2092,5 +2098,46 @@ describe('U1P-R3 the comparison survives the page it was made on', () => {
     // own typing, and it does not hide the controls behind a dialog role.
     expect(screen.queryByRole('alert')).toBeNull();
     expect(screen.queryByRole('status', { name: 'Ready to compare' })).toBeNull();
+  });
+});
+
+describe('R5 pinned baseline on Compare', () => {
+  const OLDEST = candidate({
+    buildId: 'build-oldest',
+    snapshotId: 'snap-oldest',
+    fileName: 'app-oldest.elf',
+    sha256: 'd'.repeat(64),
+  });
+  const pinOf = (row: CompareCandidateDto) => ({
+    buildId: row.buildId,
+    snapshotId: row.snapshotId,
+    fileName: row.fileName,
+    sha256: row.sha256,
+    pinnedAt: '2026-10-17T09:00:00Z',
+  });
+
+  it('starts from the pinned baseline as the base, and marks it in the picker', async () => {
+    candidatesMock.mockResolvedValue(ok(candidatePage([NEWER, candidate(), OLDEST])));
+    vi.mocked(getBaselinePin).mockResolvedValueOnce(ok(pinOf(OLDEST)));
+    await openCompare();
+    const [base, target] = pair();
+    await waitFor(() => expect(base.value).toBe('snap-oldest'));
+    expect(target.value).toBe('snap-new');
+    fireEvent.click(base.element);
+    const pinned = document.querySelector('[role="option"][data-value="snap-oldest"]');
+    expect(pinned?.textContent).toContain('Pinned baseline');
+    // The base on screen is already the pin, so there is nothing to pin.
+    expect(screen.queryByRole('button', { name: /project baseline$/ })).toBeNull();
+  });
+
+  it('pins the base on screen as the project baseline', async () => {
+    vi.mocked(pinBaseline).mockResolvedValue(ok(pinOf(candidate())));
+    await openCompare();
+    fireEvent.click(screen.getByRole('button', { name: 'Pin “Old / Base” as the project baseline' }));
+    await waitFor(() => expect(vi.mocked(pinBaseline)).toHaveBeenCalledWith('snap-old'));
+    await waitFor(() => expect(screen.queryByRole('button', { name: /project baseline$/ })).toBeNull());
+    await runCompare();
+    const bar = screen.getByRole('region', { name: 'Subject of this page' });
+    expect(bar.textContent).toContain('Pinned baseline');
   });
 });

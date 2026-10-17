@@ -33,6 +33,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import styles from './Help.module.css';
+import { DataTable } from './components/DataTable';
 import { ErrorPanel } from './components/ErrorPanel';
 import { GettingStartedList } from './GettingStarted';
 import { useI18n, type Translate } from './i18n';
@@ -193,6 +194,15 @@ function outcomeWords(outcome: ExportOutcomeDto, t: Translate): string {
   }
 }
 
+/** The keyboard model of spec §3.3, as the shell wires it (R5). Keys are written as the reader presses them. */
+const SHORTCUTS: readonly { readonly keys: string; readonly does: 'shortcuts.palette' | 'shortcuts.choose' | 'shortcuts.filter' | 'shortcuts.views' | 'shortcuts.escape' }[] = [
+  { keys: 'Ctrl+K', does: 'shortcuts.palette' },
+  { keys: 'Ctrl+O', does: 'shortcuts.choose' },
+  { keys: '/', does: 'shortcuts.filter' },
+  { keys: '[  ]', does: 'shortcuts.views' },
+  { keys: 'Esc', does: 'shortcuts.escape' },
+];
+
 export function Help() {
   const { t } = useI18n();
   const [identity, setIdentity] = useState<AppIdentityDto | null>(null);
@@ -280,6 +290,20 @@ export function Help() {
         <h2>{t('help', 'getting.heading')}</h2>
         <p>{t('help', 'getting.intro')}</p>
         <GettingStartedList />
+      </section>
+
+      <section className={styles['section']} aria-label={t('help', 'shortcuts.heading')}>
+        <h2>{t('help', 'shortcuts.heading')}</h2>
+        <DataTable
+          caption={t('help', 'shortcuts.caption')}
+          columns={[
+            { key: 'keys', header: t('help', 'shortcuts.colKeys'), cell: (row) => <kbd className={styles['mono']}>{row.keys}</kbd> },
+            { key: 'does', header: t('help', 'shortcuts.colDoes'), cell: (row) => t('help', row.does) },
+          ]}
+          rows={SHORTCUTS}
+          rowKey={(row) => row.keys}
+          density="compact"
+        />
       </section>
 
       <section className={styles['section']} aria-label={t('help', 'documents.ariaLabel')}>

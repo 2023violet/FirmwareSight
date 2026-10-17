@@ -41,6 +41,10 @@ import type { IpcOutcome } from './ipc/bridge';
 import type { ErrorEnvelopeDto, PreferencesDto } from './ipc/types';
 
 vi.mock('./ipc/bridge', () => ({
+  // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
+  getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  pinBaseline: vi.fn(),
+  unpinBaseline: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -235,7 +239,7 @@ describe('the Settings page', () => {
 
   it('shares one unit with the page that shows a table', async () => {
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Bundle & History page' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
     const switchOnHistory = await screen.findByRole('group', { name: 'Size units' });
     fireEvent.click(within(switchOnHistory).getByRole('radio', { name: 'KiB' }) as HTMLInputElement);
     await waitFor(() => expect(updateMock).toHaveBeenCalledWith('kib', 'analyze', 'system', 'system'));
@@ -249,12 +253,12 @@ describe('the Settings page', () => {
   it('names a start page chosen here and says when it takes effect', async () => {
     await openSettings();
 
-    fireEvent.click(startRadio('Bundle & History'));
+    fireEvent.click(startRadio('History'));
 
     await waitFor(() =>
       expect(updateMock).toHaveBeenCalledWith('bytes', 'history', 'system', 'system'),
     );
-    expect(startRadio('Bundle & History').checked).toBe(true);
+    expect(startRadio('History').checked).toBe(true);
     expect(
       screen.getByText(/takes effect the next time this window is opened/),
     ).toBeDefined();
@@ -316,7 +320,7 @@ describe('the Settings page', () => {
     // The question is on screen and nothing has been sent yet. It names four settings and lists the
     // theme and the language among them, because a confirmation that under-promises what it is about
     // to discard is the copy defect this round would otherwise have shipped.
-    await screen.findByRole('group', { name: 'Reset all four settings to their defaults?' });
+    await screen.findByRole('dialog', { name: 'Reset all four settings to their defaults?' });
     expect(
       screen.getByText(
         'Size units go back to bytes, the theme goes back to System, the language goes back to System, and the start page goes back to Analyze.',
@@ -336,7 +340,7 @@ describe('the Settings page', () => {
       screen.getByText('Preferences reset to this version’s defaults.'),
     ).toBeDefined();
     expect(
-      screen.queryByRole('group', { name: 'Reset all four settings to their defaults?' }),
+      screen.queryByRole('dialog', { name: 'Reset all four settings to their defaults?' }),
     ).toBeNull();
   });
 
@@ -403,7 +407,7 @@ describe('the Settings page', () => {
       '简体中文',
       'English',
       'Analyze',
-      'Bundle & History',
+      'History',
       'Reset application preferences',
     ]);
     // No control hides itself behind a pointer-only affordance, and none is a div wearing a role.

@@ -58,6 +58,7 @@ export function DataTable<T>({
   rowActionLabel,
   empty,
   rowHeader,
+  actionFirst = false,
 }: {
   readonly caption: string;
   readonly columns: readonly Column<T>[];
@@ -75,6 +76,11 @@ export function DataTable<T>({
   readonly empty?: string;
   /** The column whose cell names the row (`th scope="row"`). Defaults to the first column. */
   readonly rowHeader?: string;
+  /**
+   * Put the row action first. A wide table of ids, digests and times is wider than the minimum window, and
+   * the last column is the one that scrolls out of view (F2R-02, History).
+   */
+  readonly actionFirst?: boolean;
 }) {
   const { t } = useI18n();
   const [localSort, setLocalSort] = useState<SortState | null>(null);
@@ -118,6 +124,21 @@ export function DataTable<T>({
   };
 
   const hasAction = onRowAction !== undefined;
+  const actionCell = (row: T) =>
+    onRowAction === undefined ? null : (
+      <td className={styles['actionCell']}>
+        <button
+          type="button"
+          className={styles['rowAction']}
+          aria-label={rowActionLabel?.(row) ?? t('common', 'table.inspect')}
+          onClick={(event) => {
+            onRowAction(row, event.currentTarget);
+          }}
+        >
+          <Icon name="evidence" />
+        </button>
+      </td>
+    );
 
   return (
     <div className={styles['wrap']}>
@@ -125,6 +146,11 @@ export function DataTable<T>({
         <caption className={styles['caption']}>{caption}</caption>
         <thead>
           <tr>
+            {hasAction && actionFirst ? (
+              <th scope="col" className={styles['actionHead']}>
+                <span className={styles['spoken']}>{t('common', 'table.actions')}</span>
+              </th>
+            ) : null}
             {columns.map((column) => {
               const sorted = active?.key === column.key;
               return (
@@ -165,7 +191,7 @@ export function DataTable<T>({
                 </th>
               );
             })}
-            {hasAction ? (
+            {hasAction && !actionFirst ? (
               <th scope="col" className={styles['actionHead']}>
                 <span className={styles['spoken']}>{t('common', 'table.actions')}</span>
               </th>
@@ -182,6 +208,7 @@ export function DataTable<T>({
           ) : (
             shown.map((row) => (
               <tr key={rowKey(row)}>
+                {hasAction && actionFirst ? actionCell(row) : null}
                 {columns.map((column, index) =>
                   (rowHeader === undefined ? index === 0 : column.key === rowHeader) ? (
                     <th key={column.key} scope="row" className={cx(styles['rowHead'], column.numeric === true ? styles['num'] : undefined)}>
@@ -193,20 +220,7 @@ export function DataTable<T>({
                     </td>
                   ),
                 )}
-                {hasAction ? (
-                  <td className={styles['actionCell']}>
-                    <button
-                      type="button"
-                      className={styles['rowAction']}
-                      aria-label={rowActionLabel?.(row) ?? t('common', 'table.inspect')}
-                      onClick={(event) => {
-                        onRowAction(row, event.currentTarget);
-                      }}
-                    >
-                      <Icon name="evidence" />
-                    </button>
-                  </td>
-                ) : null}
+                {hasAction && !actionFirst ? actionCell(row) : null}
               </tr>
             ))
           )}

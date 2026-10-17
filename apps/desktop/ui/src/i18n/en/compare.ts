@@ -196,4 +196,7 @@ export const compare = {
   'export.cancelled': 'Export cancelled. No file was written.',
   'export.keptExisting': 'Kept the file that was already there. Nothing was written.',
   'export.unknownOutcome': 'The export reported an outcome this build does not know: {status}',
+  'picker.pinBase': 'Pin “Old / Base” as the project baseline',
+  'pin.errorLabel': 'Baseline pin failed',
+  'pin.errorHeading': 'The baseline was not changed',
 } as const;

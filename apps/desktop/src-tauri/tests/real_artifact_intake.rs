@@ -776,6 +776,8 @@ fn the_selection_path_adds_no_schema_migration() {
             // 0007 is M2's additive `object_contributions` table (ADR-0033); the import path writes it,
             // the selection path does not.
             "0007_object_contributions".to_owned(),
+            // 0008 is R5's baseline pin log (D3); written only by an explicit pin.
+            "0008_baseline_pins".to_owned(),
         ],
         "every migration belongs to a named stage, and none of them is the selection path's"
     );

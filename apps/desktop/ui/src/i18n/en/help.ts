@@ -58,4 +58,13 @@ export const help = {
   'documents.where.exportedHere': 'this screen, and the file you export from it',
   'documents.notCarried': 'not carried inside the installed package',
   'documents.historyNote': 'History is a page of this window, not a document: the builds, Gate runs and release records this computer stored are on the History tab, and they stay readable after the firmware files themselves have gone.',
+  'shortcuts.heading': 'Keyboard shortcuts',
+  'shortcuts.caption': 'Single keys are ignored while you type in a field or a dialog is open.',
+  'shortcuts.colKeys': 'Keys',
+  'shortcuts.colDoes': 'What it does',
+  'shortcuts.palette': 'Open the command palette: go to a page, choose firmware, compare with the pinned baseline, or switch unit, theme and language.',
+  'shortcuts.choose': 'Choose a firmware file on Analyze.',
+  'shortcuts.filter': 'Move to the filter of the table on screen.',
+  'shortcuts.views': 'Previous or next view of the page.',
+  'shortcuts.escape': 'Close the open panel, sheet or palette, and return to where you were.',
 } as const;

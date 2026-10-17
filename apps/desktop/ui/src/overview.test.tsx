@@ -337,7 +337,7 @@ describe('Overview before there is anything to overview', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Choose an artifact' }));
     expect(onOpen).toHaveBeenCalledWith('analyze');
-    fireEvent.click(screen.getByRole('button', { name: 'Open Release Gate' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open Release' }));
     expect(onOpen).toHaveBeenCalledWith('release');
   });
 });
@@ -868,7 +868,7 @@ describe('U1P-R1 the neutral states and the page around them', () => {
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });
     expect(ship.textContent).toMatch(/has not run the gate in this session/);
     expect(screen.queryByText(/Clear —/)).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Run it on Release Gate' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Run it on Release' }));
     expect(onOpen).toHaveBeenCalledWith('release');
   });
 
@@ -894,8 +894,8 @@ describe('U1P-R1 the neutral states and the page around them', () => {
     // Every action here moves the reader somewhere. None of them analyzes, gates, accepts or writes.
     fireEvent.click(within(inputs).getByRole('button', { name: 'Open Analyze' }));
     fireEvent.click(screen.getByRole('button', { name: 'Compare builds' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Bundle & History' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Open Release Gate' }));
+    fireEvent.click(screen.getByRole('button', { name: 'History' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open Release' }));
     expect(onOpen.mock.calls.map((call) => call[0])).toEqual(['analyze', 'compare', 'history', 'release']);
   });
 
@@ -912,7 +912,7 @@ describe('U1P-R1 the neutral states and the page around them', () => {
     const figures = screen.getByRole('group', { name: 'Key figures' });
     expect(precedes(ship, inputs)).toBe(true);
     expect(precedes(inputs, figures)).toBe(true);
-    fireEvent.click(screen.getByRole('button', { name: 'Choose this build on Release Gate' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose this build on Release' }));
     expect(onOpen).toHaveBeenCalledWith('release');
   });
 });
@@ -1028,7 +1028,7 @@ describe('U1P-R2 a pending selection may not wear the previous build’s facts',
 
     const analyze = screen.getByRole('button', { name: 'Analyze selected artifact' });
     expect(analyze.className).toContain('primary');
-    expect(screen.queryByRole('button', { name: 'Choose this build on Release Gate' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Choose this build on Release' })).toBeNull();
 
     fireEvent.click(analyze);
     expect(onOpen).toHaveBeenLastCalledWith('analyze');
@@ -1350,7 +1350,7 @@ describe('A0 the open findings are named by the rules the run evaluated', () => 
     }
     // The fifth is not silently dropped: it is counted and sent to the page that can open it.
     expect(within(ship).queryByText('evidence.unknown_review')).toBeNull();
-    expect(ship.textContent).toContain('1 more finding(s) on the Release Gate page.');
+    expect(ship.textContent).toContain('1 more finding(s) on the Release page.');
   });
 
   it('labels evidence with the analyzed build’s own counts and quotes no locator it cannot open', () => {
@@ -1382,7 +1382,7 @@ describe('the same overview read in Chinese', () => {
     expect(screen.getByText('还没有分析结果。选择或拖入 ELF 后，这里会显示摘要。')).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: '选择镜像文件' }));
     expect(onOpen).toHaveBeenCalledWith('analyze');
-    fireEvent.click(screen.getByRole('button', { name: '打开发布门禁' }));
+    fireEvent.click(screen.getByRole('button', { name: '打开发布' }));
     expect(onOpen).toHaveBeenCalledWith('release');
     // The ship question is asked in Chinese, and no key reached English on the way.
     expect(screen.getByText('现在可以发布吗？')).toBeDefined();

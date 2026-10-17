@@ -1,7 +1,7 @@
 import type { CatalogFor } from '../types';
 
 export const gate: CatalogFor<'gate'> = {
-  'title': '发布门禁',
+  'title': '发布',
   'subhead': '用项目策略检查一个已保存的构建。结论只代表这份策略的判断。',
   'verdict.block': '受阻 —— {count} 条规则未通过。受阻的构建无法生成发布包。',
   'verdict.review': '需要决定 —— {count} 条 finding 在等待一次明确的接受，且没有任何一项被阻断。',

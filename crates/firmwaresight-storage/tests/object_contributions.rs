@@ -130,23 +130,25 @@ fn a_build_stored_before_0007_reads_unavailable_after_the_migration() {
     {
         let mut db = Database::open(&file.0).expect("opens");
         db.import_snapshot("p", "P", &snapshot).expect("imports");
-        // Step the store back to what migration 0006 left: no object table, no 0007 record.
+        // Step the store back to what migration 0006 left: no object table, no pin log, no 0007/0008 record.
         db.connection()
             .execute_batch(
-                "DROP TABLE object_contributions;
+                "DROP TABLE baseline_pin_events;
+                 DROP TABLE object_contributions;
                  DELETE FROM schema_migrations WHERE version >= 7;",
             )
             .expect("stepped down to 6");
     }
 
-    let db = Database::open(&file.0).expect("migrates 6 -> 7");
+    let db = Database::open(&file.0).expect("migrates 6 -> 8");
     let version: i64 = db
         .connection()
         .query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
             row.get(0)
         })
         .expect("reads");
-    assert_eq!(version, 7);
+    // 0007 and then R5's 0008 (the baseline pin log) are applied in order.
+    assert_eq!(version, 8);
     assert_eq!(
         db.object_attribution(&snapshot_id).expect("reads"),
         None,

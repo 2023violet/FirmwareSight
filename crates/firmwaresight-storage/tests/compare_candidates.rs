@@ -642,6 +642,7 @@ fn compare_added_no_schema_change() {
             "0005_unknown_reasons.sql",
             "0006_release_attachments.sql",
             "0007_object_contributions.sql",
+            "0008_baseline_pins.sql",
         ],
         "every migration belongs to a named stage"
     );

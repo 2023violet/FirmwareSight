@@ -55,6 +55,8 @@ export function Analyze({
   onLastGoodChange,
   autoAnalyzeId = null,
   onAutoAnalyzeStarted,
+  chooseRequested = false,
+  onChooseStarted,
 }: {
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
@@ -69,6 +71,9 @@ export function Analyze({
   /** A selection the shell staged from a drop and wants analyzed once, as if Analyze had been pressed. */
   readonly autoAnalyzeId?: string | null;
   readonly onAutoAnalyzeStarted?: () => void;
+  /** The shell asked for the firmware chooser once (`Ctrl+O` or the command palette, R5). */
+  readonly chooseRequested?: boolean;
+  readonly onChooseStarted?: () => void;
 }) {
   const { t } = useI18n();
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
@@ -96,6 +101,15 @@ export function Analyze({
     onSelectionChange(outcome.value);
     setError(null);
   }, [onSelectionChange]);
+
+  // A chooser the shell asked for opens once, as if the reader had pressed the button.
+  useEffect(() => {
+    if (!chooseRequested) {
+      return;
+    }
+    onChooseStarted?.();
+    void chooseArtifact();
+  }, [chooseRequested, chooseArtifact, onChooseStarted]);
 
   const addMap = useCallback(async () => {
     if (selection === null) {

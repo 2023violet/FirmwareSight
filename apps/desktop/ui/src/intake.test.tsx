@@ -26,6 +26,10 @@ vi.mock('./ipc/dropEvents', () => ({
 // The Compare commands are stubbed too, and the candidate list comes back empty: the navigation test
 // opens that page, and a build history this file does not describe must not appear there either.
 vi.mock('./ipc/bridge', () => ({
+  // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
+  getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  pinBaseline: vi.fn(),
+  unpinBaseline: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -957,8 +961,8 @@ describe('P1-A0 intake screen', () => {
       'Overview',
       'Analyze',
       'Compare',
-      'Release Gate',
-      'Bundle & History',
+      'Release',
+      'History',
     ]);
     // Help is a description of the product and not a stage of the workflow, so it is listed under its
     // own heading instead of after Release, where it would read as a fifth step (prompt §14).
@@ -976,13 +980,13 @@ describe('P1-A0 intake screen', () => {
     const body = document.body.textContent ?? '';
     // `Bundle` and `Gate` left this list in U1 for a reason worth stating: they were once words for
     // stages that did not exist, and now they name shipped surfaces - the Release Bundle section and
-    // the rail's own "Release Gate" / "Bundle & History". A rail label is not an advertisement for
+    // the rail's own "Release" / "History". A rail label is not an advertisement for
     // something unbuilt. The four words below still name nothing this product has.
     for (const stage of ['Settings', 'SBOM', 'Pricing', 'Cloud']) {
       expect(body).not.toMatch(new RegExp(`\\b${stage}\\b`));
     }
     // `Gate` is Release's word and appears on no other page. U1 scopes the check to the page rather than
-    // the document, because the rail now names the stage "Release Gate" on every screen: the claim that
+    // the document, because the rail now names the stage "Release" on every screen: the claim that
     // survives is that Compare itself says nothing about gate verdicts (prompt §43).
     const page = document.querySelector('main')?.textContent ?? '';
     expect(page).not.toMatch(/\bGate\b/);

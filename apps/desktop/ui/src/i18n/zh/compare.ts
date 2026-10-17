@@ -198,4 +198,7 @@ export const compare: CatalogFor<'compare'> = {
   'export.cancelled': '已取消导出。未写入任何文件。',
   'export.keptExisting': '保留了已经存在的文件。未写入任何内容。',
   'export.unknownOutcome': '导出的结果状态是本版本无法识别的：{status}',
+  'picker.pinBase': '把“旧/基线”固定为项目基线',
+  'pin.errorLabel': '固定基线失败',
+  'pin.errorHeading': '基线未更改',
 };

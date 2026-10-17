@@ -12,6 +12,7 @@
 #![forbid(unsafe_code)]
 
 pub mod backup;
+pub mod baseline;
 pub mod compare;
 pub mod counts;
 pub mod db;
@@ -23,6 +24,8 @@ pub mod query;
 pub mod release;
 
 pub use db::{BuildSummary, Database, SCHEMA_VERSION};
+// The pinned baseline (R5 / D3): an append-only log, read back as the one build a project measures against.
+pub use baseline::BaselinePin;
 pub use error::StorageError;
 // A snapshot is taken where the store is opened, and the name a caller would look for is decided
 // here rather than guessed at by whoever has to explain the recovery path.

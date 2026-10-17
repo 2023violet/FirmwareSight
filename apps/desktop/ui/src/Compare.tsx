@@ -56,12 +56,14 @@ import {
   exportCompareJson,
   exportCompareVisual,
   listCompareCandidates,
+  pinBaseline,
   queryObjectChanges,
   querySectionChanges,
   querySymbolChanges,
   type IpcOutcome,
 } from './ipc/bridge';
 import type {
+  BaselinePinDto,
   ByteDeltaDto,
   CandidatePageDto,
   ChangeKindCountsDto,
@@ -161,6 +163,10 @@ export function Compare({
   session,
   onSessionChange,
   onGoToAnalyze,
+  pin = null,
+  onPinChange,
+  autoCompare = false,
+  onAutoCompareStarted,
 }: {
   readonly unit: SizeUnit;
   readonly onUnitChange: (unit: SizeUnit) => void;
@@ -170,9 +176,17 @@ export function Compare({
     next: ComparisonSession | ((previous: ComparisonSession) => ComparisonSession),
   ) => void;
   readonly onGoToAnalyze: () => void;
+  /** The project's pinned baseline (R5 / D3): the default base, marked wherever a build is named. */
+  readonly pin?: BaselinePinDto | null;
+  readonly onPinChange?: (pin: BaselinePinDto | null) => void;
+  /** Another page named the pair and asked for it to be compared once (D-R5-4). */
+  readonly autoCompare?: boolean;
+  readonly onAutoCompareStarted?: () => void;
 }) {
   const { t } = useI18n();
   const [candidates, setCandidates] = useState<CandidatePageDto | null>(null);
+  const [pinError, setPinError] = useState<ErrorEnvelopeDto | null>(null);
+  const [pinning, setPinning] = useState(false);
   const [candidateError, setCandidateError] = useState<ErrorEnvelopeDto | null>(null);
   // The pair and the result are the shell's, so leaving the page cannot throw them away (U1P-R3 F1).
   const { baseId, targetId, summary } = session;
@@ -283,12 +297,18 @@ export function Compare({
     }
     const preferred =
       candidates.rows.find((row) => row.snapshotId === lastAnalyzedSnapshotId) ?? mostRecent;
-    const other = candidates.rows.find((row) => row.snapshotId !== preferred.snapshotId) ?? null;
+    // The pinned baseline is the measurement reference, so it is the default base whenever it is a different
+    // build from the target (D-R5-3); otherwise the next distinct build is.
+    const pinned =
+      pin === null || pin.snapshotId === preferred.snapshotId
+        ? null
+        : (candidates.rows.find((row) => row.snapshotId === pin.snapshotId) ?? null);
+    const other = pinned ?? candidates.rows.find((row) => row.snapshotId !== preferred.snapshotId) ?? null;
     setPair({
       baseId: other === null ? null : other.snapshotId,
       targetId: preferred.snapshotId,
     });
-  }, [baseId, candidates, lastAnalyzedSnapshotId, setPair, targetId]);
+  }, [baseId, candidates, lastAnalyzedSnapshotId, pin, setPair, targetId]);
 
   /** More stored builds, appended to the list the selectors already hold. */
   const loadMore = useCallback(async () => {
@@ -339,6 +359,30 @@ export function Compare({
     }
     setError(outcome.envelope);
   }, [baseId, onSessionChange, targetId]);
+
+  // A pair another page named is compared once, as soon as both sides are named (D-R5-4).
+  useEffect(() => {
+    if (!autoCompare || baseId === null || targetId === null) {
+      return;
+    }
+    onAutoCompareStarted?.();
+    void compare();
+  }, [autoCompare, baseId, targetId, compare, onAutoCompareStarted]);
+
+  const pinBase = useCallback(async () => {
+    if (baseId === null) {
+      return;
+    }
+    setPinning(true);
+    const outcome = await pinBaseline(baseId);
+    setPinning(false);
+    if (!outcome.ok) {
+      setPinError(outcome.envelope);
+      return;
+    }
+    setPinError(null);
+    onPinChange?.(outcome.value);
+  }, [baseId, onPinChange]);
 
   const swap = useCallback(() => {
     setPair({ baseId: targetId, targetId: baseId });
@@ -522,6 +566,7 @@ export function Compare({
             <PairSide
               label={t('compare', 'picker.baseLabel')}
               rows={rows}
+              pinnedId={pin?.snapshotId ?? null}
               selected={baseId}
               lastAnalyzedSnapshotId={lastAnalyzedSnapshotId}
               unit={unit}
@@ -536,6 +581,7 @@ export function Compare({
             <PairSide
               label={t('compare', 'picker.targetLabel')}
               rows={rows}
+              pinnedId={pin?.snapshotId ?? null}
               selected={targetId}
               lastAnalyzedSnapshotId={lastAnalyzedSnapshotId}
               unit={unit}
@@ -543,6 +589,16 @@ export function Compare({
               onSelect={setTargetId}
             />
             <div className={styles['pickerActions']}>
+              {onPinChange === undefined || baseId === null || baseId === pin?.snapshotId ? null : (
+                <Button
+                  onClick={() => {
+                    void pinBase();
+                  }}
+                  disabled={pinning || comparing}
+                >
+                  {t('compare', 'picker.pinBase')}
+                </Button>
+              )}
               {candidates.nextOffset === null ? null : (
                 <Button
                   onClick={() => {
@@ -564,6 +620,10 @@ export function Compare({
               </Button>
             </div>
           </section>
+        )}
+
+        {pinError === null ? null : (
+          <ErrorPanel envelope={pinError} label={t('compare', 'pin.errorLabel')} heading={t('compare', 'pin.errorHeading')} />
         )}
 
         {samePair ? (
@@ -626,7 +686,7 @@ export function Compare({
         {summary === null ? null : (
           <>
             <SubjectBar
-              subject={pairSubject(summary)}
+              subject={pairSubject(summary, pin?.snapshotId ?? null)}
               freshness={freshness}
               actions={<SizeUnitSwitch unit={unit} onSelect={onUnitChange} />}
             />
@@ -744,11 +804,21 @@ function buildLabel(row: { readonly fileName: string; readonly sha256: string })
 }
 
 /** The pair the SubjectBar names: the comparison on screen, never the pickers' next one. */
-function pairSubject(summary: CompareSummaryDto): Subject {
+function pairSubject(summary: CompareSummaryDto, pinnedId: string | null): Subject {
   return {
     kind: 'pair',
-    base: { fileName: summary.base.fileName, sha256: summary.base.sha256, map: summary.memory.base.mapBacked },
-    target: { fileName: summary.target.fileName, sha256: summary.target.sha256, map: summary.memory.target.mapBacked },
+    base: {
+      fileName: summary.base.fileName,
+      sha256: summary.base.sha256,
+      map: summary.memory.base.mapBacked,
+      pinned: summary.base.snapshotId === pinnedId,
+    },
+    target: {
+      fileName: summary.target.fileName,
+      sha256: summary.target.sha256,
+      map: summary.memory.target.mapBacked,
+      pinned: summary.target.snapshotId === pinnedId,
+    },
   };
 }
 
@@ -756,6 +826,7 @@ function pairSubject(summary: CompareSummaryDto): Subject {
 function PairSide({
   label,
   rows,
+  pinnedId,
   selected,
   lastAnalyzedSnapshotId,
   unit,
@@ -764,6 +835,7 @@ function PairSide({
 }: {
   readonly label: string;
   readonly rows: readonly CompareCandidateDto[];
+  readonly pinnedId: string | null;
   readonly selected: string | null;
   readonly lastAnalyzedSnapshotId: string | null;
   readonly unit: SizeUnit;
@@ -783,6 +855,7 @@ function PairSide({
           importedAt: row.snapshotId === lastAnalyzedSnapshotId
             ? `${row.importedAt}${t('compare', 'picker.lastAnalyzedSuffix')}`
             : row.importedAt,
+          pinned: row.snapshotId === pinnedId,
         }))}
         value={selected}
         disabled={disabled}
