@@ -17,11 +17,17 @@ import { Icon } from './Icon';
 
 export interface SubjectBuild {
   readonly fileName: string;
-  readonly sha256: string;
+  /** `null` for a file that has been chosen but not analyzed: no hash has been computed for it yet. */
+  readonly sha256: string | null;
   /** `null` when the build has not reported whether a MAP was attached. */
   readonly map: boolean | null;
+  /** The attached MAP's file name, when the shell reported one. */
+  readonly mapFileName?: string | null;
   readonly pinned?: boolean;
 }
+
+/** Latest result, a retained earlier result, or a chosen file with no result of its own yet. */
+export type SubjectFreshness = 'latest' | 'retained' | 'pending';
 
 export type Subject =
   | { readonly kind: 'single'; readonly build: SubjectBuild }
@@ -34,7 +40,7 @@ export function SubjectBar({
 }: {
   /** `null` before anything is chosen. */
   readonly subject: Subject | null;
-  readonly freshness: 'latest' | 'retained';
+  readonly freshness: SubjectFreshness;
   readonly actions?: ReactNode;
 }) {
   const { t } = useI18n();
@@ -60,6 +66,8 @@ export function SubjectBar({
       )}
       {subject === null ? null : freshness === 'latest' ? (
         <span className={styles['chip']}>{t('common', 'subject.latest')}</span>
+      ) : freshness === 'pending' ? (
+        <span className={styles['chip']}>{t('common', 'subject.pending')}</span>
       ) : (
         <span className={cx(styles['chip'], styles['retained'])}>
           <Icon name="history" size="inline" />
@@ -75,8 +83,11 @@ function Build({ build }: { readonly build: SubjectBuild }) {
   const { t } = useI18n();
   return (
     <span className={styles['build']}>
-      <span className={styles['name']} title={`${build.fileName} · sha256 ${build.sha256}`}>
-        {build.fileName} · {build.sha256.slice(0, 12)}
+      <span
+        className={styles['name']}
+        title={build.sha256 === null ? build.fileName : `${build.fileName} · sha256 ${build.sha256}`}
+      >
+        {build.sha256 === null ? build.fileName : `${build.fileName} · ${build.sha256.slice(0, 12)}`}
       </span>
       {build.pinned === true ? (
         <span className={styles['chip']}>
@@ -92,7 +103,9 @@ function Build({ build }: { readonly build: SubjectBuild }) {
       ) : build.map ? (
         <span className={styles['chip']}>
           <Icon name="file" size="inline" />
-          {t('common', 'subject.map')}
+          {build.mapFileName === undefined || build.mapFileName === null
+            ? t('common', 'subject.map')
+            : t('common', 'subject.mapNamed', { name: build.mapFileName })}
         </span>
       ) : (
         <span className={cx(styles['chip'], styles['unknown'])}>

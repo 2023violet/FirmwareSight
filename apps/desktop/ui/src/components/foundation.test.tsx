@@ -497,8 +497,8 @@ describe('SubjectBar', () => {
     );
     const bar = screen.getByRole('region', { name: 'Subject of this page' });
     expect(within(bar).getByText('firmware.elf · 3c9daa4f7c09')).toBeTruthy();
-    expect(within(bar).getByText('MAP attached')).toBeTruthy();
-    expect(within(bar).getByText('No MAP')).toBeTruthy();
+    expect(within(bar).getByText('MAP: attached')).toBeTruthy();
+    expect(within(bar).getByText('MAP: Not provided')).toBeTruthy();
     expect(within(bar).getByText('Pinned baseline')).toBeTruthy();
     expect(within(bar).getByText('Previous result kept · current selection not analyzed')).toBeTruthy();
   });

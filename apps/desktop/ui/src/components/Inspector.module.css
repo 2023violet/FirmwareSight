@@ -16,7 +16,12 @@
 }
 
 .docked {
-  height: 100%;
+  /* The column stays in view while the page scrolls beside it: the workspace is the scroll container, so
+     the panel is as tall as the window below the product bar. */
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: calc(100vh - var(--fs-layout-topbar));
 }
 
 .sheet {

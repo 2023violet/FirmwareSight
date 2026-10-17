@@ -10,29 +10,11 @@
 
 /* The three input pills under the title. A row of chips, not a card: they state what the screen can
    prove about the inputs, and a box around them would compete with the panels below. */
-.states {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--fs-space-2);
-}
 
 /* A plain hairline separates the control row; no card, no shadow (DESIGN.md 4). */
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--fs-space-3);
-  padding-bottom: var(--fs-space-4);
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
 
 /* The chosen file is named, never located: the title attribute carries the whole name for overflow
    and still contains no directory (ADR-0025). */
-.selected {
-  color: var(--fs-color-text-primary);
-  overflow-wrap: anywhere;
-}
 
 .meta {
   margin: 0;
@@ -41,20 +23,7 @@
   line-height: var(--fs-line-height-metadata);
 }
 
-.actions {
-  display: flex;
-  gap: var(--fs-space-2);
-  margin-left: auto;
-}
 
-.exports {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--fs-space-2);
-  padding-bottom: var(--fs-space-3);
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
 
 .exports h2 {
   flex-basis: 100%;
@@ -65,13 +34,6 @@
 
 /* The preserved result is a fact about a past analysis, so it gets its own hairline note rather than a
    banner: DESIGN.md forbids decorative treatment, and the sentence has to stay readable. */
-.stale {
-  padding: var(--fs-space-2) var(--fs-space-3);
-  color: var(--fs-color-text-secondary);
-  background: var(--fs-color-bg-subtle);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-control);
-}
 
 .status {
   color: var(--fs-color-text-secondary);
@@ -80,26 +42,16 @@
 /* The result band is a band, not a card: the four figures that answer "was this worth reading, and how
    good is the evidence behind it" sit on the canvas with the hairlines the band already draws. */
 .result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
   min-width: 0;
 }
 
 /* What survives a failed attempt is still evidence, but it is not the answer to the question the reader
    just asked. The quieter surface carries that, and the sentences inside these regions still say exactly
    whose numbers they are - U1P §13D asks for secondary, not hidden. */
-.retained {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-4);
-  padding: var(--fs-space-4);
-  background: var(--fs-color-bg-subtle);
-  border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
 
-.report {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-4);
-}
 
 .footer {
   display: flex;
@@ -143,6 +95,10 @@
   padding: var(--fs-space-2) var(--fs-space-3);
   vertical-align: top;
   border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.regionTable tbody th {
+  white-space: nowrap;
 }
 
 .regionTable thead th {
@@ -204,4 +160,64 @@
 
 .regionSection {
   display: contents;
+}
+
+/* R2: the page and the Inspector side by side. The Inspector docks from 1280 px and is a sheet below. */
+.withInspector {
+  display: flex;
+  align-items: stretch;
+  min-height: 100%;
+}
+
+.withInspector > main {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+  padding-top: var(--fs-space-4);
+}
+
+.panel:focus-visible {
+  outline-offset: var(--fs-space-1);
+}
+
+.view,
+.buildFacts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+}
+
+.exportMenu {
+  position: relative;
+}
+
+.exportList {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + var(--fs-space-1));
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--fs-space-1);
+  width: calc(var(--fs-layout-nav-rail) + var(--fs-space-16));
+  padding: var(--fs-space-2);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  box-shadow: var(--fs-shadow-overlay-sm);
+}
+
+.buildLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-1) var(--fs-space-4);
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
 }

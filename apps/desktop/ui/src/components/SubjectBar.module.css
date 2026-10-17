@@ -1,12 +1,14 @@
-/* A fixed 44 px band under the product bar. It scrolls sideways rather than wrapping, so it never grows. */
+/* A 44 px band under the product bar, wrapping to a second row only when the page is too narrow. */
 
 .bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--fs-space-3);
-  height: var(--fs-layout-subject-bar);
-  padding: 0 var(--fs-space-4);
-  overflow-x: auto;
+  gap: var(--fs-space-2) var(--fs-space-3);
+  /* 44 px is the bar's height when it fits. When the Inspector narrows the page, it wraps to a second row
+     rather than scroll sideways and hide a control (R2 smoke). Chips and the build name never break. */
+  min-height: var(--fs-layout-subject-bar);
+  padding: var(--fs-space-1) var(--fs-space-4);
   white-space: nowrap;
   background: var(--fs-color-bg-surface);
   border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
@@ -23,9 +25,9 @@
 
 .build {
   display: inline-flex;
+  flex: none;
   align-items: center;
   gap: var(--fs-space-2);
-  min-width: 0;
 }
 
 .name {
@@ -35,6 +37,8 @@
 }
 
 .chip {
+  /* Chips keep their words whole; the bar scrolls sideways before anything overlaps (R2 smoke). */
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: var(--fs-space-1);
@@ -57,7 +61,9 @@
 }
 
 .actions {
+  flex: none;
   display: flex;
+  align-items: center;
   gap: var(--fs-space-2);
   margin-inline-start: auto;
 }

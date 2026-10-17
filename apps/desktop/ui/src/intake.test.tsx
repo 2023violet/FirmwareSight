@@ -287,6 +287,22 @@ async function analyze(button = 'Analyze') {
   fireEvent.click(screen.getByRole('button', { name: button }));
 }
 
+/** R2 (`06_DELIVERY/16`): export lives in the header's Export menu. Open it if needed, then name the format. */
+function exportButton(name: string): HTMLElement {
+  if (screen.queryByRole('button', { name }) === null) {
+    fireEvent.click(screen.getByRole('button', { name: 'Export' }));
+  }
+  return screen.getByRole('button', { name });
+}
+
+/** R2: Analyze shows one view at a time; open the named view tab. */
+function openView(name: string): void {
+  fireEvent.click(screen.getByRole('tab', { name }));
+}
+
+/** R2: the SubjectBar, which states whose numbers the page is showing. */
+const subjectBar = () => screen.getByRole('region', { name: 'Subject of this page' });
+
 describe('P1-A0 intake screen', () => {
   it('is titled Analyze and names no fixture', async () => {
     render(<App />);
@@ -360,10 +376,13 @@ describe('P1-A0 intake screen', () => {
 
     expect(await screen.findByText('5,432 bytes')).toBeDefined();
     expect(screen.getByText('Arm 32-bit little')).toBeDefined();
-    expect(screen.getByText('0x080003f8')).toBeDefined();
+    // The lead figure is Flash; RAM is in its reference line (R2).
     expect(screen.getByText('4,200 bytes')).toBeDefined();
-    expect(screen.getByText('1,024 bytes')).toBeDefined();
+    expect(screen.getByText(/RAM 1,024 bytes/)).toBeDefined();
     expect(screen.getByText('section:3(.data)')).toBeDefined();
+    // Identity facts moved into the Evidence view.
+    openView('Evidence');
+    expect(screen.getByText('0x080003f8')).toBeDefined();
     expect(screen.getByText('snap-deadbeef-p0-normalize-1')).toBeDefined();
   });
 
@@ -522,7 +541,10 @@ describe('P1-A0 intake screen', () => {
     await analyze();
 
     expect(await screen.findByText('Can enforce a hard budget')).toBeDefined();
-    expect(screen.getAllByText('Exact').length).toBe(2);
+    // Both budgets are exact: the lead states RAM's word in its reference, and an exact Flash figure needs
+    // no badge beside it (R2).
+    expect(screen.getByText(/RAM 1,024 bytes \(Exact\)/)).toBeDefined();
+    openView('Evidence');
     expect(screen.getByText('Git')).toBeDefined();
   });
 
@@ -551,11 +573,12 @@ describe('P1-A0 intake screen', () => {
     await analyze();
     await screen.findByText('5,432 bytes');
 
+    expect(screen.getByText('Not strong enough for a hard budget')).toBeDefined();
+    expect(screen.getByText(/Add the linker MAP to strengthen it/)).toBeDefined();
+    openView('Evidence');
     const row = screen.getByText('MAP').closest('div');
     expect(row?.textContent).toContain('not-provided');
     expect(row?.textContent).not.toContain('BLOCK');
-    expect(screen.getByText('Not strong enough for a hard budget')).toBeDefined();
-    expect(screen.getByText(/Add the linker MAP to strengthen it/)).toBeDefined();
   });
 
   it('attaches a MAP through the shell and names the file it holds', async () => {
@@ -721,14 +744,14 @@ describe('P1-A0 intake screen', () => {
     const lastGood = await screen.findByRole('region', { name: 'Last good analysis' });
     expect(within(lastGood).getByText('5,432 bytes')).toBeDefined();
     expect(within(lastGood).getByText('app.elf')).toBeDefined();
-    expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Visual report export' })).toBeNull();
   });
 
   it('exports only the successful current selection', async () => {
     await chooseArtifact();
     await analyze();
-    const exports = await screen.findByRole('region', { name: 'Visual report export' });
-    fireEvent.click(within(exports).getByRole('button', { name: 'Export SVG' }));
+    await screen.findByRole('group', { name: 'Visual report export' });
+    fireEvent.click(exportButton('Export SVG'));
     await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalledWith(
       'sel-7f3a-2',
       'snap-deadbeef-p0-normalize-1',
@@ -737,7 +760,7 @@ describe('P1-A0 intake screen', () => {
     selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
     fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
     await screen.findByText('other.elf');
-    expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Visual report export' })).toBeNull();
   });
 
   it('does not attach a late export outcome to a different successful analysis', async () => {
@@ -752,12 +775,12 @@ describe('P1-A0 intake screen', () => {
       onLastGoodChange={() => undefined}
     />;
     const mounted = render(subject('old-subject'));
-    fireEvent.click(screen.getByRole('button', { name: 'Export SVG' }));
+    fireEvent.click(exportButton('Export SVG'));
     await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalled());
     mounted.rerender(subject('new-subject'));
     await act(async () => { finish(ok({ status: 'written', fileName: 'old-subject-report.svg', format: 'svg' })); });
     expect(screen.queryByText(/old-subject-report/)).toBeNull();
-    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
+    expect((exportButton('Export SVG') as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('says nothing was written when the analysis changed while the Save dialog was open', async () => {
@@ -772,7 +795,7 @@ describe('P1-A0 intake screen', () => {
       onLastGoodChange={() => undefined}
     />;
     const mounted = render(subject('old-subject'));
-    fireEvent.click(screen.getByRole('button', { name: 'Export PNG' }));
+    fireEvent.click(exportButton('Export PNG'));
     await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalled());
     mounted.rerender(subject('new-subject'));
     await act(async () => { finish(fail({ code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null })); });
@@ -785,12 +808,12 @@ describe('P1-A0 intake screen', () => {
     await chooseArtifact();
     await analyze();
     await screen.findByText('5,432 bytes');
-    fireEvent.click(screen.getByRole('button', { name: 'Export PNG' }));
+    fireEvent.click(exportButton('Export PNG'));
     await waitFor(() => expect(exportAnalysisVisualMock).toHaveBeenCalled());
     selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
     fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
     await screen.findByText('other.elf');
-    expect(screen.queryByRole('region', { name: 'Visual report export' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Visual report export' })).toBeNull();
     await act(async () => { finish(fail({ code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null })); });
     expect(screen.getByText(/analysis changed while the Save dialog was open/)).toBeDefined();
   });
@@ -924,68 +947,73 @@ describe('P1-A0 intake screen', () => {
  * size it was written against.
  */
 describe('U1R capability strip: current attempt, not retained evidence', () => {
-  const strip = () => screen.getByRole('group', { name: 'Input capabilities' });
+  // R2 retired the strip of capability chips. The contract it carried now lives in the SubjectBar: the top
+  // of the page names the file in the row and says whether the result below is its own. The capability
+  // words themselves sit in the Evidence view of the result region, whose name says whether it is
+  // retained. Nothing at the top may borrow a retained result's facts.
 
-  /** The three words a successful analysis of the standard fixture earns. */
-  async function expectCurrentChips() {
-    const inputs = await screen.findByRole('group', { name: 'Input capabilities' });
-    expect(within(inputs).getByText('ELF supported')).toBeDefined();
-    expect(within(inputs).getByText('MAP provided')).toBeDefined();
-    expect(within(inputs).getByText('Git unknown')).toBeDefined();
-    expect(within(inputs).queryByText(/retained below/)).toBeNull();
+  /** The SubjectBar after a successful analysis of the standard fixture. */
+  async function expectCurrentSubject() {
+    const bar = await screen.findByRole('region', { name: 'Subject of this page' });
+    expect(within(bar).getByText(`app.elf · ${'b'.repeat(12)}`)).toBeDefined();
+    expect(within(bar).getByText('Latest')).toBeDefined();
+    expect(within(bar).queryByText(/Previous result kept/)).toBeNull();
   }
 
-  function expectNoBorrowedChips(inputs: HTMLElement) {
-    for (const word of ['ELF supported', 'MAP provided', 'Git unknown']) {
-      expect(within(inputs).queryByText(word)).toBeNull();
-    }
+  function expectNoBorrowedFacts(bar: HTMLElement) {
+    expect(within(bar).queryByText(/·\s[0-9a-f]{12}$/)).toBeNull();
+    expect(within(bar).queryByText('12 sections')).toBeNull();
+    expect(within(bar).queryByText('Latest')).toBeNull();
   }
 
-  it('T1 states the current capability words after a successful analysis', async () => {
+  it('T1 states the current subject after a successful analysis', async () => {
     await chooseArtifact();
     await analyze();
     await screen.findByText('5,432 bytes');
 
-    await expectCurrentChips();
-    // The header line belongs to the same attempt, so it names that artifact's figures.
-    expect(screen.getByText('12 sections')).toBeDefined();
-    expect(screen.getByText('34 symbols')).toBeDefined();
+    await expectCurrentSubject();
+    // The build line belongs to the same attempt, so it names that artifact's figures.
+    const current = screen.getByRole('region', { name: 'Analysis summary' });
+    expect(within(current).getByText('12 sections')).toBeDefined();
+    expect(within(current).getByText('34 symbols')).toBeDefined();
+    openView('Evidence');
+    expect(within(current).getByText('supported')).toBeDefined();
   });
 
-  it('T2 withholds the previous words when the selection moves without an analysis', async () => {
+  it('T2 withholds the previous facts when the selection moves without an analysis', async () => {
     await chooseArtifact();
     await analyze();
     await screen.findByText('5,432 bytes');
-    await expectCurrentChips();
+    await expectCurrentSubject();
 
     selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
     fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
-    await screen.findByText('other.elf');
+    await screen.findAllByText('other.elf');
 
-    const inputs = strip();
-    expectNoBorrowedChips(inputs);
-    expect(within(inputs).getByText('other.elf selected, not analyzed yet')).toBeDefined();
-    expect(within(inputs).getByText('Previous result retained below')).toBeDefined();
-    // Choosing is not analyzing, and the header no longer quotes the retained snapshot.
-    expect(screen.queryByText('12 sections')).toBeNull();
+    const bar = subjectBar();
+    expectNoBorrowedFacts(bar);
+    expect(within(bar).getByText('other.elf')).toBeDefined();
+    expect(within(bar).getByText('Previous result kept · current selection not analyzed')).toBeDefined();
+    // The retained figures stay, inside the region that says they are retained.
+    const retained = screen.getByRole('region', { name: 'Last good analysis' });
+    expect(within(retained).getByText('12 sections')).toBeDefined();
     expect(analyzeMock).toHaveBeenCalledTimes(1);
   });
 
-  it('T3 withholds the previous words when the current attempt fails', async () => {
+  it('T3 withholds the previous facts when the current attempt fails', async () => {
     await chooseArtifact();
     await analyze();
     await screen.findByText('5,432 bytes');
-    await expectCurrentChips();
+    await expectCurrentSubject();
 
     analyzeMock.mockResolvedValue(fail(PARSE_FAILURE));
     await analyze();
     await screen.findByRole('alert');
 
-    const inputs = strip();
-    expectNoBorrowedChips(inputs);
-    expect(within(inputs).getByText('Current analysis failed')).toBeDefined();
-    expect(within(inputs).getByText('Previous result retained below')).toBeDefined();
-    expect(screen.queryByText('12 sections')).toBeNull();
+    const bar = subjectBar();
+    expectNoBorrowedFacts(bar);
+    expect(within(bar).getByText('Previous result kept · current selection not analyzed')).toBeDefined();
+    expect(screen.getByRole('region', { name: 'Last good analysis' })).toBeDefined();
   });
 
   it('T4 keeps the retained analysis visible below, and keeps it labelled as retained', async () => {
@@ -1002,6 +1030,7 @@ describe('U1R capability strip: current attempt, not retained evidence', () => {
     expect(within(lastGood).getByText('5,432 bytes')).toBeDefined();
     expect(within(lastGood).getByText('app.elf')).toBeDefined();
     // The tables under the report are the same retained snapshot, and say so in their own name.
+    openView('Sections');
     expect(
       screen.getByRole('region', { name: 'Snapshot details of the last good analysis' }),
     ).toBeDefined();
@@ -1023,7 +1052,7 @@ describe('U1R capability strip: current attempt, not retained evidence', () => {
     expect(alert.textContent).toContain('op-1a2b');
   });
 
-  it('T6 returns the current words when a later attempt succeeds', async () => {
+  it('T6 returns the current subject when a later attempt succeeds', async () => {
     await chooseArtifact();
     await analyze();
     await screen.findByText('5,432 bytes');
@@ -1031,7 +1060,7 @@ describe('U1R capability strip: current attempt, not retained evidence', () => {
     analyzeMock.mockResolvedValue(fail(PARSE_FAILURE));
     await analyze();
     await screen.findByRole('alert');
-    expectNoBorrowedChips(strip());
+    expectNoBorrowedFacts(subjectBar());
 
     const base = summary();
     analyzeMock.mockResolvedValue(
@@ -1045,9 +1074,11 @@ describe('U1R capability strip: current attempt, not retained evidence', () => {
     await analyze();
     await screen.findByText('6,789 bytes');
 
-    await expectCurrentChips();
+    expect(within(subjectBar()).getByText(`app.elf · ${'c'.repeat(12)}`)).toBeDefined();
+    expect(within(subjectBar()).getByText('Latest')).toBeDefined();
     expect(screen.getByRole('region', { name: 'Analysis summary' })).toBeDefined();
     expect(screen.queryByRole('region', { name: 'Last good analysis' })).toBeNull();
+    openView('Sections');
     expect(screen.getByRole('region', { name: 'Snapshot details' })).toBeDefined();
     expect(screen.getByText('12 sections')).toBeDefined();
   });
@@ -1075,18 +1106,20 @@ describe('U1P page hierarchy', () => {
     expect(rail.closest('main')).toBeNull();
   });
 
-  it('puts the result figures and the analysis tables above the identity dossier', async () => {
+  it('puts the answer before the views, and keeps the identity dossier one view away', async () => {
     await chooseArtifact();
     await analyze();
 
-    const result = await screen.findByRole('region', { name: 'Analysis result' });
-    const details = screen.getByRole('region', { name: 'Snapshot details' });
-    const report = screen.getByRole('region', { name: 'Analysis summary' });
-
-    expect(precedes(result, details)).toBe(true);
-    expect(precedes(details, report)).toBe(true);
-    // The dossier is still the dossier: moving it down did not remove the facts that make an analysis
+    // R2: the lead answer, then the build line, then the views. The dossier moved into the Evidence view.
+    const lead = await screen.findByRole('region', { name: 'Flash used' });
+    const build = screen.getByRole('group', { name: 'Build identity' });
+    const views = screen.getByRole('tablist', { name: 'Analyze views' });
+    expect(precedes(lead, build)).toBe(true);
+    expect(precedes(build, views)).toBe(true);
+    // The dossier is still the dossier: moving it did not remove the facts that make an analysis
     // checkable, which is the difference between secondary and gone.
+    openView('Evidence');
+    const report = screen.getByRole('region', { name: 'Analysis summary' });
     expect(within(report).getByText('SHA-256')).toBeDefined();
     expect(within(report).getByText('Parser')).toBeDefined();
   });
@@ -1103,14 +1136,87 @@ describe('U1P page hierarchy', () => {
     // The recovery move is inside the failure, where the reader who needs it is looking (§13C), and the
     // retained result stays reachable underneath it without opening the page (§13D).
     expect(within(alert).getByRole('button', { name: 'Choose another artifact' })).toBeDefined();
-    const retained = await screen.findByRole('region', { name: 'Last good analysis result' });
+    const retained = await screen.findByRole('region', { name: 'Last good analysis' });
     expect(precedes(alert, retained)).toBe(true);
+    openView('Sections');
     expect(
       screen.getByRole('region', { name: 'Snapshot details of the last good analysis' }),
     ).toBeDefined();
   });
 });
 
+
+/**
+ * R2 (`06_DELIVERY/16`): Analyze is one page with one answer, five views and the shared Inspector.
+ *
+ * These pin the parts of the new page that no earlier test could have asked about: the lead figure is a
+ * traceable fact, the views come in the spec's order and open on Memory, export is a menu that closes the way
+ * it opened, and evidence from one snapshot never stays on screen beside another.
+ */
+describe('R2 Analyze page', () => {
+  it('answers first with Flash used, and the figure opens its evidence', async () => {
+    await chooseArtifact();
+    await analyze();
+
+    const lead = await screen.findByRole('region', { name: 'Flash used' });
+    const figure = within(lead).getByRole('button', { name: /^4,200 bytes, Observed evidence/ });
+    fireEvent.click(figure);
+
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getByText('nonvolatile_image_footprint_bytes')).toBeDefined();
+    expect(within(inspector).getByText('4200')).toBeDefined();
+    fireEvent.keyDown(within(inspector).getByRole('button', { name: 'Close evidence panel' }), { key: 'Escape' });
+    expect(screen.queryByRole('complementary', { name: 'Evidence' })).toBeNull();
+    expect(document.activeElement).toBe(figure);
+  });
+
+  it('opens on Memory and offers the five views in the spec order', async () => {
+    await chooseArtifact();
+    await analyze();
+
+    const views = await screen.findByRole('tablist', { name: 'Analyze views' });
+    expect(within(views).getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Memory',
+      'Sections',
+      'Symbols',
+      'Objects',
+      'Evidence',
+    ]);
+    expect(screen.getByRole('tab', { name: 'Memory' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('tabpanel', { name: 'Memory' })).toBeDefined();
+  });
+
+  it('keeps export in one menu that Esc closes, back on its own button', async () => {
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+
+    expect(screen.queryByRole('button', { name: 'Export PNG' })).toBeNull();
+    const toggle = screen.getByRole('button', { name: 'Export' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    const png = screen.getByRole('button', { name: 'Export PNG' });
+    fireEvent.keyDown(png, { key: 'Escape' });
+    expect(screen.queryByRole('button', { name: 'Export PNG' })).toBeNull();
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('closes the Inspector when a different snapshot takes the page', async () => {
+    await chooseArtifact();
+    await analyze();
+    fireEvent.click(await screen.findByRole('button', { name: /^4,200 bytes, Observed evidence/ }));
+    await screen.findByRole('complementary', { name: 'Evidence' });
+
+    const base = summary();
+    analyzeMock.mockResolvedValue(
+      ok(summary({ identity: { ...base.identity, snapshotId: 'snap-cafebabe-p0-normalize-1' } })),
+    );
+    await analyze();
+    await waitFor(() => expect(analyzeMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Evidence' })).toBeNull());
+  });
+});
 
 describe('M1 drag-and-drop intake', () => {
   const subscribeMock = vi.mocked(subscribeToDrops);

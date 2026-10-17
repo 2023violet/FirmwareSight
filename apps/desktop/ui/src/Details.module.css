@@ -46,26 +46,8 @@
   line-height: var(--fs-line-height-metadata);
 }
 
-.tabs {
-  display: flex;
-  gap: var(--fs-space-1);
-  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-}
 
-.tab {
-  padding: var(--fs-space-2) var(--fs-space-3);
-  border: 0;
-  border-bottom: var(--fs-focus-ring-width) solid transparent;
-  background: none;
-  color: var(--fs-color-text-secondary);
-  font: inherit;
-  cursor: pointer;
-}
 
-.tabActive {
-  color: var(--fs-color-text-primary);
-  border-bottom-color: var(--fs-color-accent-primary);
-}
 
 .filter {
   display: flex;
@@ -178,24 +160,7 @@
   color: var(--fs-color-text-secondary);
 }
 
-.inspector {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
-  min-width: var(--fs-layout-evidence-inspector-min);
-  max-width: var(--fs-layout-evidence-inspector-max);
-  padding: var(--fs-space-3);
-  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
-  border-radius: var(--fs-radius-panel);
-  background: var(--fs-color-bg-subtle);
-}
 
-.inspectorList {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  gap: var(--fs-space-2) var(--fs-space-3);
-  margin: 0;
-}
 
 /* The pair is a grouping device, not a box: making its two columns grid items of the list is what
    lines every value up on the same edge. */
@@ -227,4 +192,32 @@
   border: var(--fs-border-width-hairline) solid var(--fs-color-status-block);
   border-radius: var(--fs-radius-panel);
   background: var(--fs-color-bg-surface);
+}
+
+/* Objects | Libraries: two cuts of one view, as a segmented control (R2). */
+.cuts {
+  display: inline-flex;
+  align-self: flex-start;
+  overflow: hidden;
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.cut {
+  padding: var(--fs-space-1) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  font: inherit;
+  background: var(--fs-color-bg-surface);
+  border: 0;
+  cursor: pointer;
+}
+
+.cut + .cut {
+  border-inline-start: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.cut[aria-pressed='true'] {
+  color: var(--fs-color-text-primary);
+  font-weight: var(--fs-font-weight-semibold);
+  background: var(--fs-color-bg-subtle);
 }

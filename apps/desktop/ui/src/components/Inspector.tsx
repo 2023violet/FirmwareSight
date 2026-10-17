@@ -156,6 +156,7 @@ export function Inspector({
     [t('common', 'inspector.source'), evidence.source],
     [t('common', 'inspector.locator'), evidence.locator],
     [t('common', 'inspector.rule'), evidence.rule],
+    ...(evidence.details ?? []).map(([label, value]): [string, string] => [label, value]),
   ];
 
   const body = (

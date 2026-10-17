@@ -1,6 +1,11 @@
 /**
- * The P1 detail screen: the largest stored payload, then Sections, Symbols, Evidence and the M2
- * Objects and Libraries tables (ADR-0033), one bounded page at a time, plus the Evidence Inspector.
+ * The stored tables behind one analysis: Sections, Symbols, Evidence and the M2 Objects and Libraries
+ * tables (ADR-0033), one bounded page at a time.
+ *
+ * R2 (`06_DELIVERY/16`) moved the choice of table up to the Analyze page's own view tabs, and moved the
+ * evidence detail into the shared Inspector (ADR-0034 D2), so this component is now one view's table:
+ * the page says which, and a row's evidence goes up through `onInspect`. Objects and Libraries are two
+ * segments of one view, because they are two cuts of the same MAP rows.
  *
  * Three rules shape this component, and they are all about where a decision is made.
  *
@@ -18,11 +23,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { asEvidenceClass, type FactEvidence } from './components/FactValue';
+
 import styles from './Details.module.css';
 import { ScrollArea } from './components/Layout';
 import { RankBar } from './components/RankBar';
 import { Pager, SortHeader } from './components/Table';
-import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge } from './components/StateBadge';
 import { formatSize, formatOptional, type SizeUnit } from './format';
 import { useI18n } from './i18n';
@@ -90,13 +96,8 @@ function tagged<K extends Loaded['tab']>(
   return outcome.ok ? { ok: true, value: { tab, page: outcome.value } as Loaded } : outcome;
 }
 
-const TABS: readonly { readonly key: Tab; readonly labelKey: DetailsKey }[] = [
-  { key: 'sections', labelKey: 'details.tab.sections' },
-  { key: 'symbols', labelKey: 'details.tab.symbols' },
-  { key: 'evidence', labelKey: 'details.tab.evidence' },
-  { key: 'objects', labelKey: 'details.tab.objects' },
-  { key: 'libraries', labelKey: 'details.tab.libraries' },
-];
+/** The view the Analyze page shows; Objects covers both object tables. */
+export type DetailsView = 'sections' | 'symbols' | 'objects' | 'evidence';
 
 /** Where a freshly chosen tab starts. The object tables open ranked by Flash, largest first. */
 function initialOrder(tab: Tab): { readonly sort: AnySort; readonly direction: SortDirDto } {
@@ -118,13 +119,17 @@ const CONTRIBUTOR_LIMIT = 5;
 
 export function Details({
   snapshotId,
+  view,
   unit,
-  onUnitChange,
+  onInspect,
   stale = false,
 }: {
   readonly snapshotId: string;
+  /** The page's view. The page keys this component by it, so a new view starts with fresh state. */
+  readonly view: DetailsView;
   readonly unit: SizeUnit;
-  readonly onUnitChange: (unit: SizeUnit) => void;
+  /** A row's evidence, for the page's Inspector, with the control that asked so focus can return. */
+  readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
   /**
    * Whether these tables belong to a retained snapshot rather than to the attempt now in the row.
    *
@@ -133,8 +138,8 @@ export function Details({
    */
   readonly stale?: boolean;
 }) {
-  const [tab, setTab] = useState<Tab>('sections');
-  const [contributors, setContributors] = useState<readonly SectionRowDto[] | null>(null);
+  const [objectCut, setObjectCut] = useState<'objects' | 'libraries'>('objects');
+  const tab: Tab = view === 'objects' ? objectCut : view;
 
   // One page of state per active tab, reset when the reader changes tab: the filter that belongs to
   // the symbol table must not silently apply to the sections table.
@@ -142,12 +147,11 @@ export function Details({
   const [filter, setFilter] = useState<string | null>(null);
   const [filterDraft, setFilterDraft] = useState('');
   const [classification, setClassification] = useState<EvidenceClassDto | null>(null);
-  const [sort, setSort] = useState<AnySort>('index');
-  const [direction, setDirection] = useState<SortDirDto>('asc');
+  const [sort, setSort] = useState<AnySort>(() => initialOrder(tab).sort);
+  const [direction, setDirection] = useState<SortDirDto>(() => initialOrder(tab).direction);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [loading, setLoading] = useState(false);
-  const [inspected, setInspected] = useState<EvidenceRowDto | null>(null);
 
   /**
    * Only the newest response may paint, and each surface counts its own requests: the contributor
@@ -155,24 +159,6 @@ export function Details({
    * the other.
    */
   const pageRequest = useRef(0);
-  const contributorRequest = useRef(0);
-
-  useEffect(() => {
-    const id = ++contributorRequest.current;
-    void querySections({
-      snapshotId,
-      filter: null,
-      sort: 'fileSize',
-      direction: 'desc',
-      offset: 0,
-      limit: CONTRIBUTOR_LIMIT,
-    }).then((outcome) => {
-      if (contributorRequest.current !== id) {
-        return;
-      }
-      setContributors(outcome.ok ? outcome.value.rows : null);
-    });
-  }, [snapshotId]);
 
   useEffect(() => {
     const id = ++pageRequest.current;
@@ -251,40 +237,43 @@ export function Details({
   );
 
   const { t } = useI18n();
-  const tabId = (key: Tab) => `fs-tab-${key}`;
+
+  /** Objects and Libraries share a view; switching cut starts that table fresh, like a new view does. */
+  const chooseCut = (cut: 'objects' | 'libraries') => {
+    if (cut === objectCut) {
+      return;
+    }
+    setObjectCut(cut);
+    setOffset(0);
+    setFilter(null);
+    setFilterDraft('');
+    const order = initialOrder(cut);
+    setSort(order.sort);
+    setDirection(order.direction);
+  };
 
   return (
     <section
       className={styles['area']}
       aria-label={t('analyze', stale ? 'details.region.stale' : 'details.region.live')}
     >
-      <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
-
-      <div role="tablist" aria-label={t('analyze', 'details.tablist')} className={styles['tabs']}>
-        {TABS.map((entry) => (
-          <button
-            key={entry.key}
-            type="button"
-            role="tab"
-            id={tabId(entry.key)}
-            aria-selected={tab === entry.key}
-            className={cx(styles['tab'], tab === entry.key ? styles['tabActive'] : undefined)}
-            onClick={() => {
-              setTab(entry.key);
-              setOffset(0);
-              setFilter(null);
-              setFilterDraft('');
-              setClassification(null);
-              const order = initialOrder(entry.key);
-              setSort(order.sort);
-              setDirection(order.direction);
-              setInspected(null);
-            }}
-          >
-            {t('analyze', entry.labelKey)}
-          </button>
-        ))}
-      </div>
+      {view === 'objects' ? (
+        <div className={styles['cuts']} role="group" aria-label={t('analyze', 'details.cuts')}>
+          {(['objects', 'libraries'] as const).map((cut) => (
+            <button
+              key={cut}
+              type="button"
+              className={styles['cut']}
+              aria-pressed={objectCut === cut}
+              onClick={() => {
+                chooseCut(cut);
+              }}
+            >
+              {t('analyze', cut === 'objects' ? 'details.tab.objects' : 'details.tab.libraries')}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {loading ? (
         <p className={styles['status']} role="status" aria-live="polite">
@@ -297,11 +286,11 @@ export function Details({
       {loaded === null || loaded.tab !== tab || error !== null ? null : (loaded.tab === 'objects' ||
           loaded.tab === 'libraries') &&
         !loaded.page.available ? (
-        <div role="tabpanel" id={`fs-panel-${tab}`} aria-labelledby={tabId(tab)} tabIndex={0}>
+        <div>
           <ObjectsUnavailable reason={loaded.page.reason} mapPresent={loaded.page.mapPresent} />
         </div>
       ) : (
-        <div role="tabpanel" id={`fs-panel-${tab}`} aria-labelledby={tabId(tab)} tabIndex={0}>
+        <div>
           <FilterForm
             tab={tab}
             draft={filterDraft}
@@ -343,8 +332,7 @@ export function Details({
               sort={sort as EvidenceSortDto}
               direction={direction}
               onSort={chooseSort}
-              inspected={inspected}
-              onInspect={setInspected}
+              onInspect={onInspect}
             />
           ) : null}
           {loaded.tab === 'objects' || loaded.tab === 'libraries' ? (
@@ -368,13 +356,33 @@ export function Details({
           />
         </div>
       )}
-
-      {/* U1P §9 moved this below the table rather than above it. The ranked payload list is context that
-          explains the rows a reader is looking at, and on the reference's Analyze screen the table is the
-          first object on the page, not the second. */}
-      <Contributors rows={contributors} unit={unit} />
     </section>
   );
+}
+
+/**
+ * The largest stored sections, for Analyze's Memory view: one small page of the Sections table, ordered by
+ * what it measures, asked of the shell like every other row.
+ */
+export function LargestSections({ snapshotId, unit }: { readonly snapshotId: string; readonly unit: SizeUnit }) {
+  const [rows, setRows] = useState<readonly SectionRowDto[] | null>(null);
+  const request = useRef(0);
+  useEffect(() => {
+    const id = ++request.current;
+    void querySections({
+      snapshotId,
+      filter: null,
+      sort: 'fileSize',
+      direction: 'desc',
+      offset: 0,
+      limit: CONTRIBUTOR_LIMIT,
+    }).then((outcome) => {
+      if (request.current === id) {
+        setRows(outcome.ok ? outcome.value.rows : null);
+      }
+    });
+  }, [snapshotId]);
+  return <Contributors rows={rows} unit={unit} />;
 }
 
 function Contributors({
@@ -384,13 +392,13 @@ function Contributors({
   readonly rows: readonly SectionRowDto[] | null;
   readonly unit: SizeUnit;
 }) {
+  const { t } = useI18n();
   if (rows === null || rows.length === 0) {
     return null;
   }
   // The bar is a ratio against the largest row in this same list, so it says "half of the biggest",
   // never "half of the image". The number beside it is the fact; the bar only accelerates it, which is
   // why it carries no colour-only meaning and is hidden from the accessibility tree.
-  const { t } = useI18n();
   const largest = Math.max(...rows.map((row) => row.fileSize));
   return (
     <section className={styles['contributors']} aria-label={t('analyze', 'details.contributors.title')}>
@@ -795,21 +803,17 @@ function EvidenceTable({
   sort,
   direction,
   onSort,
-  inspected,
   onInspect,
 }: {
   readonly rows: readonly EvidenceRowDto[];
   readonly sort: EvidenceSortDto;
   readonly direction: SortDirDto;
   readonly onSort: (column: EvidenceSortDto) => void;
-  readonly inspected: EvidenceRowDto | null;
-  readonly onInspect: (row: EvidenceRowDto) => void;
+  readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
 }) {
   const { t } = useI18n();
   return (
     <>
-      {inspected === null ? null : <Inspector row={inspected} />}
-
       <ScrollArea label={t('analyze', 'details.evidence.table')}>
         <table className={styles['table']}>
           <caption className={styles['caption']}>
@@ -850,8 +854,8 @@ function EvidenceTable({
                     type="button"
                     className={styles['inspect']}
                     aria-label={t('analyze', 'details.inspectAria', { field: row.field })}
-                    onClick={() => {
-                      onInspect(row);
+                    onClick={(event) => {
+                      onInspect(evidenceOf(row, t), event.currentTarget);
                     }}
                   >
                     {t('analyze', 'details.inspect')}
@@ -885,52 +889,26 @@ const SOURCE_TYPE_CAPTIONS = new Map<string, DetailsKey>([
 ]);
 
 /**
- * The whole provenance of one fact.
+ * The whole provenance of one evidence row, in the shape the shared Inspector shows.
  *
- * A locator a reader can go back and check is the point of the evidence model, so it is shown in
- * full rather than truncated: shortening it here would defeat the reason it was stored. It is
- * painted above the table because a table taller than the window buries the answer below it.
+ * A locator a reader can go back and check is the point of the evidence model, so every field is passed
+ * in full; the Inspector wraps rather than truncates. The legacy source captions above still apply.
  */
-function Inspector({ row }: { readonly row: EvidenceRowDto }) {
-  const { t } = useI18n();
+function evidenceOf(row: EvidenceRowDto, t: ReturnType<typeof useI18n>['t']): FactEvidence {
   const sourceCaption = SOURCE_TYPE_CAPTIONS.get(row.sourceType);
-  return (
-    <section className={styles['inspector']} aria-label={t('analyze', 'details.inspector.aria')}>
-      <h2>{row.field}</h2>
-      <dl className={styles['inspectorList']}>
-        <div>
-          <dt>{t('analyze', 'details.col.classification')}</dt>
-          <dd>{row.classification}</dd>
-        </div>
-        <div>
-          <dt>{t('analyze', 'details.col.source')}</dt>
-          <dd className={sourceCaption === undefined ? styles['mono'] : undefined}>
-            {sourceCaption === undefined ? row.sourceType : t('analyze', sourceCaption)}
-          </dd>
-        </div>
-        <div>
-          <dt>{t('analyze', 'details.col.locator')}</dt>
-          <dd className={styles['mono']}>{row.sourceLocator}</dd>
-        </div>
-        <div>
-          <dt>{t('analyze', 'details.col.value')}</dt>
-          <dd className={styles['mono']}>{row.rawValue}</dd>
-        </div>
-        <div>
-          <dt>{t('analyze', 'details.col.rule')}</dt>
-          <dd className={styles['mono']}>{row.rule}</dd>
-        </div>
-        <div>
-          <dt>{t('analyze', 'details.col.confidence')}</dt>
-          <dd>{formatOptional(row.confidence)}</dd>
-        </div>
-        <div>
-          <dt>{t('analyze', 'details.inspector.evidenceId')}</dt>
-          <dd className={styles['mono']}>{row.id}</dd>
-        </div>
-      </dl>
-    </section>
-  );
+  return {
+    field: row.field,
+    value: row.rawValue,
+    classification: asEvidenceClass(row.classification),
+    source: sourceCaption === undefined ? row.sourceType : t('analyze', sourceCaption),
+    locator: row.sourceLocator,
+    rule: row.rule,
+    raw: row.rawValue,
+    details: [
+      [t('analyze', 'details.col.confidence'), formatOptional(row.confidence)],
+      [t('analyze', 'details.inspector.evidenceId'), row.id],
+    ],
+  };
 }
 
 function DetailError({ envelope }: { readonly envelope: ErrorEnvelopeDto }) {

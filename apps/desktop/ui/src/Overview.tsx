@@ -28,19 +28,27 @@
  * belongs to the earlier result is gathered under `Previous analysis`, in the region that carries its snapshot
  * identity. `Analyze.tsx` already makes exactly this separation for its own report; this page was the last one
  * that had not.
+ *
+ * R2 (`06_DELIVERY/16`, ADR-0034 D1) changes the order and the weight, not the rules: the page answers first.
+ * The ship question leads, styled as the page's one answer and carrying its one primary action; a session
+ * with nothing analyzed leads with the step that fixes that instead. The SubjectBar replaces the header's meta
+ * line as the place that names the build, and the comparison states its deltas as neutral facts (▲▼).
  */
 
 import styles from './Overview.module.css';
 import type { ReactNode } from 'react';
 
+
 import { Button, LinkButton } from './components/Button';
 import { Chip, StatusStrip } from './components/Chip';
+import { DeltaValue } from './components/DeltaValue';
+import { SubjectBar, type Subject } from './components/SubjectBar';
 import { Page } from './components/Layout';
 import { PageHeader } from './components/PageHeader';
 import { MemoryUsage } from './components/MemoryUsage';
 import { EmptyState, Band, Panel, SummaryCard } from './components/Panel';
 import { StateBadge } from './components/StateBadge';
-import { formatDelta, formatSize, truncateMiddle, type SizeUnit } from './format';
+import { formatSize, truncateMiddle, type SizeUnit } from './format';
 import { useI18n, type Translate } from './i18n';
 import type { Catalog } from './i18n/en';
 import type {
@@ -188,88 +196,96 @@ export function Overview({
   readonly unit: SizeUnit;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
-  // One derivation, three surfaces: the header, the input band and the figures all answer to the same question,
-  // and §4.I is the reason the header cannot keep naming the retained artifact whenever it is not current.
+  // One derivation, three surfaces: the subject, the input band and the figures all answer to the same
+  // question, and §4.I is the reason the top of the page cannot keep naming the retained artifact whenever it
+  // is not current.
   const { t } = useI18n();
   const pending = pendingSelectionOf(selection, analyzedSelectionId);
 
-  const meta: ReactNode[] = [];
-  if (project !== null) {
-    meta.push(<span key="project">{project.projectName}</span>);
-  }
-  if (summary !== null && pending === null) {
-    meta.push(<span key="artifact">{t('common', 'overview.metaArtifact', { name: summary.artifact.fileName })}</span>);
-    meta.push(
-      <span key="snapshot">
-        {t('common', 'overview.metaSnapshot', { id: truncateMiddle(summary.identity.snapshotId, 8) })}
-      </span>,
+  /**
+   * What the SubjectBar names. A pending selection is named by its file alone - this page has no hash for a
+   * file nobody has analyzed - and the current summary by its file and hash. Nothing is named when nothing is
+   * held, because an empty page has no subject.
+   */
+  const subject: Subject | null =
+    pending !== null
+      ? {
+          kind: 'single',
+          build: { fileName: pending.fileName, sha256: null, map: pending.mapAttached, mapFileName: pending.mapFileName },
+        }
+      : summary !== null
+        ? {
+            kind: 'single',
+            build: {
+              fileName: summary.artifact.fileName,
+              sha256: summary.artifact.sha256,
+              map: selection?.mapAttached ?? null,
+              mapFileName: selection?.mapFileName ?? null,
+            },
+          }
+        : null;
+
+  /** A session that has analyzed nothing leads with the step that fixes that; otherwise the ship answer leads. */
+  const leadWithIntake = summary === null && selection === null;
+
+  const intake =
+    summary === null ? (
+      <EmptyState
+        role="status"
+        message={t('common', 'overview.emptyMessage')}
+        nextStep={
+          <Button variant={leadWithIntake ? 'primary' : 'secondary'} onClick={() => onOpen('analyze')}>
+            {t('common', 'overview.emptyAction')}
+          </Button>
+        }
+      />
+    ) : pending !== null ? (
+      <SelectedRow selection={pending} onOpen={onOpen} />
+    ) : (
+      <InputRow summary={summary} selection={selection} onOpen={onOpen} />
     );
-  } else if (selection !== null) {
-    meta.push(
-      <span key="selected">
-        {t('common', 'overview.metaSelected', { name: selection.fileName })}
-      </span>,
-    );
-    if (summary !== null) {
-      meta.push(
-        <span key="previous">
-          {t('common', 'overview.metaPreviousAnalysis', {
-            id: truncateMiddle(summary.identity.snapshotId, 8),
-          })}
-        </span>,
-      );
-    }
-  } else {
-    meta.push(<span key="none">{t('common', 'overview.metaNone')}</span>);
-  }
-  if (gateRun !== null) {
-    meta.push(
-      <span key="gate">
-        {t('common', 'overview.metaGateRun', { id: truncateMiddle(gateRun.runId, 8) })}
-      </span>,
-    );
-  }
+
+  const readiness = (
+    <Readiness
+      gateRun={gateRun}
+      summary={summary}
+      selection={selection}
+      analyzedSelectionId={analyzedSelectionId}
+      project={project}
+      lead={!leadWithIntake}
+      onOpen={onOpen}
+    />
+  );
 
   return (
     <Page>
       <PageHeader
         title={t('common', 'overview.title')}
-        meta={meta}
+        meta={
+          gateRun === null
+            ? []
+            : [
+                <span key="gate">
+                  {t('common', 'overview.metaGateRun', { id: truncateMiddle(gateRun.runId, 8) })}
+                </span>,
+              ]
+        }
         actions={
           <>
             <Button onClick={() => onOpen('compare')}>{t('common', 'overview.compareButton')}</Button>
             <Button onClick={() => onOpen('history')}>{t('common', 'page.history')}</Button>
-            <Button variant="primary" onClick={() => onOpen('release')}>
-              {t('common', 'overview.openReleaseButton')}
-            </Button>
+            {/* Secondary on purpose: the page's one primary move is the answer's own (ADR-0034 D1). */}
+            <Button onClick={() => onOpen('release')}>{t('common', 'overview.openReleaseButton')}</Button>
           </>
         }
       />
 
-      {summary === null ? (
-        <EmptyState
-          role="status"
-          message={t('common', 'overview.emptyMessage')}
-          nextStep={
-            <Button variant="primary" onClick={() => onOpen('analyze')}>
-              {t('common', 'overview.emptyAction')}
-            </Button>
-          }
-        />
-      ) : pending !== null ? (
-        <SelectedRow selection={pending} onOpen={onOpen} />
-      ) : (
-        <InputRow summary={summary} selection={selection} onOpen={onOpen} />
+      {subject === null ? null : (
+        <SubjectBar subject={subject} freshness={pending === null ? 'latest' : 'pending'} />
       )}
 
-      <Readiness
-        gateRun={gateRun}
-        summary={summary}
-        selection={selection}
-        analyzedSelectionId={analyzedSelectionId}
-        project={project}
-        onOpen={onOpen}
-      />
+      {leadWithIntake ? intake : readiness}
+      {leadWithIntake ? readiness : intake}
 
       {summary === null || pending !== null ? null : <Facts summary={summary} unit={unit} />}
       {summary === null || pending === null ? null : (
@@ -495,7 +511,8 @@ function LatestComparison({
         {change.reason === null ? null : ` (${change.reason})`}
       </span>
     ) : (
-      <span className={styles['identity']}>{formatDelta(change.delta, unit)}</span>
+      // A change is a fact, not a judgement: ▲ or ▼ in primary text, never the status colours (ADR-0034 D1.4).
+      <DeltaValue delta={change.delta} format={(bytes) => formatSize(bytes, unit)} />
     );
   const topObject = objectChanges.available ? (objectChanges.topObjects[0] ?? null) : null;
 
@@ -521,7 +538,8 @@ function LatestComparison({
           <>
             <dt>{t('common', 'overview.compareTopObject')}</dt>
             <dd className={styles['identity']}>
-              {`${topObject.key} ${formatDelta(topObject.delta, unit)}`}
+              {topObject.key}{' '}
+              <DeltaValue delta={topObject.delta} format={(bytes) => formatSize(bytes, unit)} />
             </dd>
           </>
         )}
@@ -550,6 +568,7 @@ function Readiness({
   selection,
   analyzedSelectionId,
   project,
+  lead,
   onOpen,
 }: {
   readonly gateRun: GateRunDto | null;
@@ -557,41 +576,48 @@ function Readiness({
   readonly selection: SelectionDto | null;
   readonly analyzedSelectionId: string | null;
   readonly project: ProjectContextDto | null;
+  /** Whether this is the page's answer (R2): the lead styling, and the page's one primary action. */
+  readonly lead: boolean;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
   const { t } = useI18n();
+  const className = lead ? styles['lead'] : undefined;
   if (gateRun === null) {
     return (
       <Panel
         title={t('common', 'overview.shipTitle')}
         hint={t('common', 'overview.shipNoRunHint')}
+        className={className}
       >
-        <EmptyState
-          message={t('common', 'overview.shipNoRunMessage')}
-          nextStep={
-            <Button variant="primary" onClick={() => onOpen('release')}>
-              {t('common', 'overview.shipNoRunAction')}
-            </Button>
-          }
-        />
+        <div className={styles['verdict']}>
+          <StateBadge variant="chip" state="UNKNOWN" label={t('common', 'overview.shipNoRunLabel')} />
+          <p className={styles['verdictSentence']}>{t('common', 'overview.shipNoRunMessage')}</p>
+        </div>
+        <div className={styles['nextSteps']}>
+          <Button variant={lead ? 'primary' : 'secondary'} onClick={() => onOpen('release')}>
+            {t('common', 'overview.shipNoRunAction')}
+          </Button>
+        </div>
       </Panel>
     );
   }
 
   const scope = readinessScope(gateRun, summary, selection, analyzedSelectionId, project);
   return scope.kind === 'current'
-    ? <CurrentReadiness gateRun={gateRun} summary={summary} onOpen={onOpen} />
-    : <NotCurrentReadiness gateRun={gateRun} summary={summary} scope={scope} project={project} onOpen={onOpen} />;
+    ? <CurrentReadiness gateRun={gateRun} summary={summary} className={className} onOpen={onOpen} />
+    : <NotCurrentReadiness gateRun={gateRun} summary={summary} scope={scope} project={project} className={className} onOpen={onOpen} />;
 }
 
 /** The run's own answer, shown as the page's answer - which is only reachable when the subjects match. */
 function CurrentReadiness({
   gateRun,
   summary,
+  className,
   onOpen,
 }: {
   readonly gateRun: GateRunDto;
   readonly summary: AnalysisSummaryDto | null;
+  readonly className: string | undefined;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
   const { t } = useI18n();
@@ -601,6 +627,7 @@ function CurrentReadiness({
   return (
     <Panel
       title={t('common', 'overview.shipTitle')}
+      className={className}
       hint={
         <>
           {t('common', 'overview.latestEvidence')}{' '}
@@ -660,7 +687,7 @@ function CurrentReadiness({
         <span className={styles['nextLabel']}>{t('common', 'overview.nextSteps')}</span>
         {/* Both labels name the page rather than repeating the header's `Open Release Gate`: two buttons
             with one accessible name on one screen is a reader's question, not a reader's answer. */}
-        <Button variant="primary" onClick={() => onOpen('release')}>
+        <Button variant={className === undefined ? 'secondary' : 'primary'} onClick={() => onOpen('release')}>
           {state === 'PASS'
             ? t('common', 'overview.openRunButton')
             : t('common', 'overview.resolveButton')}
@@ -690,12 +717,14 @@ function NotCurrentReadiness({
   summary,
   scope,
   project,
+  className,
   onOpen,
 }: {
   readonly gateRun: GateRunDto;
   readonly summary: AnalysisSummaryDto | null;
   readonly scope: Exclude<ReadinessScope, { readonly kind: 'current' }>;
   readonly project: ProjectContextDto | null;
+  readonly className: string | undefined;
   readonly onOpen: (target: OverviewTarget) => void;
 }) {
   const { t } = useI18n();
@@ -704,6 +733,7 @@ function NotCurrentReadiness({
   return (
     <Panel
       title={t('common', 'overview.shipTitle')}
+      className={className}
       hint={
         <>
           {t('common', 'overview.latestEvidence')}{' '}
@@ -749,14 +779,14 @@ function NotCurrentReadiness({
             a choice about a file it was not about to choose. */}
         {scope.kind === 'selectionPending' ? (
           <>
-            <Button variant="primary" onClick={() => onOpen('analyze')}>
+            <Button variant={className === undefined ? 'secondary' : 'primary'} onClick={() => onOpen('analyze')}>
               {t('common', 'overview.analyzeSelectedButton')}
             </Button>
             <Button onClick={() => onOpen('release')}>{t('common', 'overview.viewPreviousRunButton')}</Button>
           </>
         ) : (
           <>
-            <Button variant="primary" onClick={() => onOpen('release')}>
+            <Button variant={className === undefined ? 'secondary' : 'primary'} onClick={() => onOpen('release')}>
               {t('common', 'overview.chooseBuildButton')}
             </Button>
             {summary === null ? (

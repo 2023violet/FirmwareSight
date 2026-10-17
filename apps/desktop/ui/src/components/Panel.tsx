@@ -30,7 +30,7 @@ export function Panel({
   readonly hint?: ReactNode;
   readonly labelledBy?: string;
   readonly children: ReactNode;
-  readonly className?: string;
+  readonly className?: string | undefined;
   /** Inside a `Band`: keep the content, surrender the box, because the band owns the hairlines. */
   readonly bare?: boolean;
 }) {

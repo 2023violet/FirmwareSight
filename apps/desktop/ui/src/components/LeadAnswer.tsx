@@ -36,8 +36,9 @@ export function LeadAnswer({
     <section className={styles['lead']} aria-labelledby={id}>
       <div className={styles['row']}>
         {state}
-        {figure === undefined ? null : <span className="figure">{figure}</span>}
+        {/* Sentence, then the figure it is about: "Flash used 196 bytes" (spec §6.2). */}
         <p id={id} className={styles['sentence']}>{sentence}</p>
+        {figure === undefined ? null : <span className="figure">{figure}</span>}
         {action === undefined ? null : <div className={styles['action']}>{action}</div>}
       </div>
       {reference === undefined ? null : <p className={styles['reference']}>{reference}</p>}

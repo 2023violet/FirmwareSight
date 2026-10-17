@@ -306,12 +306,13 @@ describe('the latest comparison (M1 F2)', () => {
     const onOpen = renderOverview({ comparison: latestComparison() });
     expect(screen.getByText('Latest comparison')).toBeDefined();
     expect(screen.getByText(/old\.elf .* → new\.elf/u)).toBeDefined();
-    expect(screen.getByText('+120 bytes')).toBeDefined();
+    // R2: a delta is a neutral fact - a ▲ glyph and the words, never a coloured sign (ADR-0034 D1.4).
+    expect(screen.getByText('increase of 120 bytes')).toBeDefined();
     const ram = screen.getByText('RAM change').nextElementSibling;
     expect(ram?.textContent).toContain('Unknown');
     expect(ram?.textContent).toContain('no base number is recorded');
     expect(ram?.textContent).not.toContain('0 bytes');
-    expect(screen.getByText('imu.o +40 bytes')).toBeDefined();
+    expect(screen.getByText('increase of 40 bytes').closest('dd')?.textContent).toContain('imu.o');
 
     fireEvent.click(screen.getByRole('button', { name: 'Open Compare' }));
     expect(onOpen).toHaveBeenCalledWith('compare');
@@ -463,18 +464,51 @@ describe('Overview with a real analysis and a real run', () => {
   });
 });
 
+/** R2 (`06_DELIVERY/16`): the page answers first, with one primary move. */
+describe('R2 Overview lead', () => {
+  const primaries = () =>
+    screen.getAllByRole('button').filter((button) => button.className.includes('primary'));
+
+  it('leads with the first step when nothing is analyzed, and keeps one primary action', () => {
+    renderOverview({});
+    const empty = screen.getByText(/Nothing has been analyzed yet/);
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(precedes(empty, ship)).toBe(true);
+    expect(primaries().map((button) => button.textContent)).toEqual(['Choose an artifact']);
+  });
+
+  it('leads with the ship answer once there is an analysis, and names the build in the SubjectBar', () => {
+    renderOverview({ summary: summary(), gateRun: gateRun() });
+    const bar = screen.getByRole('region', { name: 'Subject of this page' });
+    expect(bar.textContent).toContain(summary().artifact.fileName);
+    expect(bar.textContent).toContain('Latest');
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(precedes(bar, ship)).toBe(true);
+    expect(primaries()).toHaveLength(1);
+    expect(ship.contains(primaries()[0] ?? null)).toBe(true);
+  });
+
+  it('says the release check has not run, with the state word and no borrowed verdict', () => {
+    renderOverview({ summary: summary() });
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(within(ship).getByText('Not run')).toBeDefined();
+    expect(ship.querySelector('svg[data-icon="unknown"]')).not.toBeNull();
+  });
+});
+
 describe('U1P Overview hierarchy', () => {
-  it('reads inputs, then the verdict, then the figures that back it', () => {
+  it('reads the verdict first, then the inputs and the figures that back it', () => {
     renderOverview({ summary: summary(), gateRun: gateRun() });
 
     const inputs = screen.getByRole('group', { name: 'Input capabilities' });
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });
     const figures = screen.getByRole('group', { name: 'Key figures' });
 
-    // §8: the verdict is the page's one dominant element, so it sits between what went in and the
-    // numbers that support it. A KPI strip above the sentence would be a figure answering nothing.
-    expect(precedes(inputs, ship)).toBe(true);
-    expect(precedes(ship, figures)).toBe(true);
+    // §8 made the verdict the page's one dominant element; R2 (ADR-0034 D1.1) puts it first, as the page's
+    // answer, with what went in and the numbers that support it below. A KPI strip above the sentence would
+    // still be a figure answering nothing.
+    expect(precedes(ship, inputs)).toBe(true);
+    expect(precedes(inputs, figures)).toBe(true);
 
     // The capability band is three separate answers, not one merged string, and the figures band holds
     // the count words the same page used to scatter.
@@ -851,8 +885,8 @@ describe('U1P-R1 the neutral states and the page around them', () => {
     const inputs = screen.getByRole('group', { name: 'Input capabilities' });
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });
     const figures = screen.getByRole('group', { name: 'Key figures' });
-    expect(precedes(inputs, ship)).toBe(true);
-    expect(precedes(ship, figures)).toBe(true);
+    expect(precedes(ship, inputs)).toBe(true);
+    expect(precedes(inputs, figures)).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: 'Choose this build on Release Gate' }));
     expect(onOpen).toHaveBeenCalledWith('release');
   });
@@ -933,8 +967,9 @@ describe('U1P-R2 a pending selection may not wear the previous build’s facts',
     expect(previous.textContent).toContain(SNAP_B);
 
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });
-    expect(precedes(current, ship)).toBe(true);
-    expect(precedes(ship, previous)).toBe(true);
+    // R2: the answer leads, then the pending selection, then the retained result.
+    expect(precedes(ship, current)).toBe(true);
+    expect(precedes(current, previous)).toBe(true);
   });
 
   it('R2-T3 keeps a MAP chip and its explanation inside one artifact’s context', () => {

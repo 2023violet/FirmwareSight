@@ -353,6 +353,15 @@ function objectPage(overrides: Partial<ObjectPageDto> = {}): ObjectPageDto {
 }
 
 /** Drive the screen to a last-good summary, then hand control back to the test. */
+/**
+ * R2 (`06_DELIVERY/16`): Analyze opens on its Memory view and shows one view at a time. This opens the named
+ * view and returns its panel, which is named by its tab.
+ */
+async function openView(name: string): Promise<HTMLElement> {
+  fireEvent.click(await screen.findByRole('tab', { name }));
+  return screen.findByRole('tabpanel', { name });
+}
+
 async function analyzeOk(overrides: Partial<AnalysisSummaryDto> = {}) {
   selectMock.mockResolvedValue(ok(selection()));
   analyzeMock.mockResolvedValue(ok(summary(overrides)));
@@ -407,13 +416,14 @@ describe('after a summary exists', () => {
     expect(contributorRow?.textContent).toContain('Code');
     expect(contributorRow?.textContent).toContain('60 bytes');
 
-    const tabs = await screen.findByRole('tablist', { name: 'Analyze details' });
+    // R2: one tablist for the page, in the order the spec reads it; Libraries is a cut of Objects.
+    const tabs = await screen.findByRole('tablist', { name: 'Analyze views' });
     expect(within(tabs).getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Memory',
       'Sections',
       'Symbols',
-      'Evidence',
       'Objects',
-      'Libraries',
+      'Evidence',
     ]);
   });
 
@@ -421,6 +431,7 @@ describe('after a summary exists', () => {
     render(<App />);
     await analyzeOk();
 
+    await openView('Evidence');
     const capabilities = await screen.findByRole('region', { name: 'Capabilities' });
     expect(within(capabilities).getByText('Debug info')).toBeDefined();
     expect(within(capabilities).getAllByText('unavailable').length).toBeGreaterThan(0);
@@ -434,6 +445,7 @@ describe('after a summary exists', () => {
     render(<App />);
     await analyzeOk();
 
+    await openView('Evidence');
     const capabilities = await screen.findByRole('region', { name: 'Capabilities' });
     expect(within(capabilities).getByText('Object/module attribution')).toBeDefined();
     expect(capabilities.textContent).not.toContain('Object attribution');
@@ -443,7 +455,7 @@ describe('after a summary exists', () => {
     render(<App />);
     await analyzeOk();
 
-    const panel = await screen.findByRole('tabpanel', { name: 'Sections' });
+    const panel = await openView('Sections');
     expect(within(panel).getAllByText('Unknown').length).toBeGreaterThan(0);
     const textRow = within(panel)
       .getByText('.text')
@@ -511,7 +523,7 @@ describe('after a summary exists', () => {
     render(<App />);
     await analyzeOk();
 
-    const sections = await screen.findByRole('tabpanel', { name: 'Sections' });
+    const sections = await openView('Sections');
     const sectionRow = within(sections).getByText('.bss').closest('tr');
     expect(sectionRow?.textContent ?? '').toContain('Unknown');
     expect(sectionRow?.textContent ?? '').toContain(offsetReason);
@@ -552,7 +564,7 @@ describe('the bytes / KiB switch', () => {
     render(<App />);
     await analyzeOk();
 
-    const panel = await screen.findByRole('tabpanel', { name: 'Sections' });
+    const panel = await openView('Sections');
     const before = within(panel).getAllByText(/0x/).map((cell) => cell.textContent);
     expect(before.length).toBeGreaterThan(0);
 
@@ -576,7 +588,7 @@ describe('the bytes / KiB switch', () => {
 
     render(<App />);
     await analyzeOk();
-    await screen.findByRole('tabpanel', { name: 'Sections' });
+    await openView('Sections');
 
     fireEvent.click(screen.getByRole('tab', { name: 'Symbols' }));
     await screen.findByRole('tabpanel', { name: 'Symbols' });
@@ -592,11 +604,12 @@ describe('the bytes / KiB switch', () => {
     // The runtime footprint of this summary is unknown, and one symbol has no size. U1P moved the two
     // budgets out of the Memory dossier and into the result band above the tables, so the figure that
     // must never become `0 KiB` is looked for where it now lives.
-    const result = await screen.findByRole('region', { name: 'Analysis result' });
+    // R2 moved the two budgets into the lead answer: Flash is the figure, RAM is in its reference line.
+    const lead = await screen.findByRole('region', { name: 'Flash used' });
     fireEvent.click(screen.getByRole('radio', { name: 'KiB' }));
 
-    expect(within(result).getAllByText('Unknown').length).toBeGreaterThan(0);
-    expect(within(result).queryByText(/^0(\.00)? KiB$/)).toBeNull();
+    expect(lead.textContent).toContain('RAM Unknown');
+    expect(lead.textContent).not.toMatch(/RAM 0(\.00)? KiB/u);
 
     fireEvent.click(screen.getByRole('tab', { name: 'Symbols' }));
     const symbols = await screen.findByRole('tabpanel', { name: 'Symbols' });
@@ -620,7 +633,7 @@ describe('filtering, sorting and paging', () => {
   it('sends a filter to the shell instead of filtering the rows it already has', async () => {
     render(<App />);
     await analyzeOk();
-    await screen.findByRole('tabpanel', { name: 'Sections' });
+    await openView('Sections');
 
     const input = await screen.findByRole('textbox', { name: 'Filter sections by name' });
     fireEvent.change(input, { target: { value: 'ota' } });
@@ -661,7 +674,7 @@ describe('filtering, sorting and paging', () => {
   it('asks for the other direction when the same column is chosen twice', async () => {
     render(<App />);
     await analyzeOk();
-    await screen.findByRole('tabpanel', { name: 'Sections' });
+    await openView('Sections');
 
     // Re-queryed from the document each time: a page in flight replaces its own rows, and a node
     // held across that update belongs to the tree that was just removed.
@@ -672,7 +685,7 @@ describe('filtering, sorting and paging', () => {
       expect(last.direction).toBe('asc');
     });
 
-    await screen.findByRole('tabpanel', { name: 'Sections' });
+    await openView('Sections');
     fireEvent.click(screen.getByRole('button', { name: 'Sort by Name' }));
     await waitFor(() => {
       const last = sectionsMock.mock.calls.at(-1)?.[0] as SectionRequestDto;
@@ -684,6 +697,7 @@ describe('filtering, sorting and paging', () => {
     sectionsMock.mockResolvedValue(ok(sectionPage({ nextOffset: 10, rows: sectionPage().rows })));
     render(<App />);
     await analyzeOk();
+    await openView('Sections');
 
     const status = await screen.findByText(/Showing 1 to 2 of 17/);
     expect(status).toBeDefined();
@@ -763,11 +777,12 @@ describe('the evidence inspector', () => {
 
     fireEvent.click(within(panel).getByRole('button', { name: 'Inspect entry_point' }));
 
-    const inspector = await screen.findByRole('region', { name: 'Evidence detail' });
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
     expect(within(inspector).getByText('elf.file_header.e_entry')).toBeDefined();
     expect(within(inspector).getByText('elf-header/e_entry')).toBeDefined();
-    expect(within(inspector).getByText('0x080003f8')).toBeDefined();
-    expect(within(inspector).getByText('observed')).toBeDefined();
+    expect(within(inspector).getAllByText('0x080003f8').length).toBeGreaterThan(0);
+    // The shared Inspector speaks the class in Core's vocabulary, capitalized like the rest of the product.
+    expect(within(inspector).getByText('Observed')).toBeDefined();
   });
 
   it('names the legacy program-header source by what it actually observed', async () => {
@@ -783,7 +798,7 @@ describe('the evidence inspector', () => {
     const panel = await screen.findByRole('tabpanel', { name: 'Evidence' });
     fireEvent.click(within(panel).getByRole('button', { name: 'Inspect memory_basis' }));
 
-    const inspector = await screen.findByRole('region', { name: 'Evidence detail' });
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
     expect(within(inspector).getByText('ELF address + flags evidence')).toBeDefined();
     expect(within(inspector).queryByText('ElfProgramHeader')).toBeNull();
     expect(within(inspector).queryByText('elf.program-header')).toBeNull();
@@ -811,28 +826,33 @@ describe('the evidence inspector', () => {
     const panel = await screen.findByRole('tabpanel', { name: 'Evidence' });
 
     fireEvent.click(within(panel).getByRole('button', { name: 'Inspect memory_basis' }));
-    const captioned = await screen.findByRole('region', { name: 'Evidence detail' });
+    const captioned = await screen.findByRole('complementary', { name: 'Evidence' });
     expect(within(captioned).getByText('ELF address + flags evidence')).toBeDefined();
 
     fireEvent.click(within(panel).getByRole('button', { name: 'Inspect symbol_table' }));
-    const plain = await screen.findByRole('region', { name: 'Evidence detail' });
+    const plain = await screen.findByRole('complementary', { name: 'Evidence' });
     expect(within(plain).getByText('ElfSymbolTable')).toBeDefined();
   });
 
-  it('places the inspector above the table, where the click already landed', async () => {
-    // Observed in the real window: the panel sat below a table taller than the viewport, so
-    // pressing Inspect produced no visible change at the default minimum window height.
+  it('opens the inspector where the reader is, and returns them to the row', async () => {
+    // Observed in the real window: the old panel sat below a table taller than the viewport, so pressing
+    // Inspect produced no visible change. R2's Inspector is a column beside the page (a sheet when narrow)
+    // and takes focus, so the click always lands somewhere visible; Esc goes back to the row.
     render(<App />);
     await analyzeOk();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Evidence' }));
     const panel = await screen.findByRole('tabpanel', { name: 'Evidence' });
-    fireEvent.click(within(panel).getByRole('button', { name: 'Inspect entry_point' }));
+    const trigger = within(panel).getByRole('button', { name: 'Inspect entry_point' });
+    fireEvent.click(trigger);
 
-    const inspector = await screen.findByRole('region', { name: 'Evidence detail' });
-    const table = within(panel).getByRole('table');
-    const relation = inspector.compareDocumentPosition(table);
-    expect(relation & Node.DOCUMENT_POSITION_FOLLOWING).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    const close = within(inspector).getByRole('button', { name: 'Close evidence panel' });
+    expect(document.activeElement).toBe(close);
+    expect(panel.contains(inspector)).toBe(false);
+    fireEvent.keyDown(close, { key: 'Escape' });
+    expect(screen.queryByRole('complementary', { name: 'Evidence' })).toBeNull();
+    expect(document.activeElement).toBe(trigger);
   });
 
   it('keeps the Inspect action in the first column, where no wide value can push it away', async () => {
@@ -875,7 +895,7 @@ describe('the table layout contract', () => {
     // Ten columns at the minimum window, because the answer to a wide table is a scroll the table area
     // owns, not a column that goes quiet.
     fireEvent.click(screen.getByRole('tab', { name: 'Sections' }));
-    const sections = await screen.findByRole('tabpanel', { name: 'Sections' });
+    const sections = await openView('Sections');
     const headers = within(within(sections).getByRole('table')).getAllByRole('columnheader');
     // The sort arrow is part of the button's text, not part of the column's name.
     expect(
@@ -925,9 +945,14 @@ describe('objects and libraries (ADR-0033)', () => {
     render(<App />);
     await analyzeOk();
 
-    fireEvent.click(await screen.findByRole('tab', { name: 'Libraries' }));
-    await screen.findByRole('tabpanel', { name: 'Libraries' });
-    expect(objectsMock).toHaveBeenLastCalledWith(expect.objectContaining({ libraries: true }));
+    const panel = await openView('Objects');
+    const cut = within(panel).getByRole('button', { name: 'Libraries' });
+    expect(cut.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(cut);
+    await waitFor(() =>
+      expect(objectsMock).toHaveBeenLastCalledWith(expect.objectContaining({ libraries: true })),
+    );
+    expect(within(panel).getByRole('button', { name: 'Libraries' }).getAttribute('aria-pressed')).toBe('true');
   });
 
   it('says a build without a MAP has no attribution and how to get it, with no table of zeros', async () => {
@@ -994,6 +1019,7 @@ describe('the filter box', () => {
   it('offers no browser autofill for a name typed to query firmware', async () => {
     render(<App />);
     await analyzeOk();
+    await openView('Sections');
 
     const input = await screen.findByRole('textbox', { name: 'Filter sections by name' });
     expect(input.getAttribute('autocomplete')).toBe('off');
@@ -1011,11 +1037,15 @@ describe('a detail query that fails', () => {
 
     render(<App />);
     await analyzeOk();
+    await openView('Sections');
 
     const alert = await screen.findByRole('alert', { name: 'Detail query failed' });
     expect(within(alert).getByText('ERR-STORAGE-4005')).toBeDefined();
 
-    // The summary the reader already trusted is untouched: its artifact hash is still on screen.
+    // The summary the reader already trusted is untouched: the answer is still on screen, and the full
+    // artifact hash is one view away.
+    expect(screen.getByRole('region', { name: 'Flash used' })).toBeDefined();
+    await openView('Evidence');
     const artifact = await screen.findByRole('region', { name: 'Artifact' });
     expect(within(artifact).getByText('b'.repeat(64))).toBeDefined();
   });
@@ -1083,6 +1113,7 @@ describe('the same rows read in Chinese', () => {
 
     expect(await screen.findByRole('tab', { name: '节' })).toBeDefined();
     expect(screen.getByRole('tab', { name: '符号' })).toBeDefined();
+    fireEvent.click(screen.getByRole('tab', { name: '节' }));
     // The first column is the active sort, so its header carries the direction arrow beside the word.
     await screen.findByRole('columnheader', { name: /序号/ });
     expect(screen.getByRole('button', { name: '按序号排序' })).toBeDefined();

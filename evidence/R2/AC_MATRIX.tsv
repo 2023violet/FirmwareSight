@@ -1,0 +1,12 @@
+id	check	verdict	observation
+B01	Choose an ELF through the real native dialog	PASS	SubjectBar names firmware.elf, MAP: Not provided, Not analyzed yet
+B02	Attach its MAP through the native dialog	PASS	SubjectBar chip MAP: firmware.map
+B03	Analyze; the page answers first	PASS	Lead "Flash used 196 bytes"; reference RAM 44 bytes (Exact), 10 evidence records; SubjectBar firmware.elf 3c9daa4f7c09, Latest
+B04	The lead figure opens its evidence	PASS	Docked Inspector (complementary) with nonvolatile_image_footprint_bytes, Observed, map, adr-0021-dual-budget; focus on Close
+B05	Below 1280 px the Inspector is a sheet	PASS	At 1100 px the open Inspector becomes dialog aria-modal=true without closing
+B06	The five views render their tables	PASS	Sections 8 rows, Symbols 32, Objects 4 (sensors/imu.o), Evidence 10
+B07	An evidence row opens the shared Inspector	PASS	architecture: class, source, locator, rule, confidence, evidence id
+B08	Overview leads with its answer	PASS	SubjectBar, then the ship answer, exactly one primary action
+B09	Dark theme on the redesigned page	PASS	data-fs-theme dark
+B10	Owner app data untouched	PASS	23 files, identical SHA-256 before and after
+B11	Window minimum 1024x720 drag clamp	NOT_RUN	Carried from R1 A10; a programmatic resize bypasses the minimum; one human drag needed

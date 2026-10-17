@@ -116,7 +116,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 12_POST_M2_ROUTE.md
 │   ├── 13_D2C_CLOSEOUT_AND_PILOT.md
 │   ├── 14_D4_ARMCLANG_SAMPLE_REQUEST.md
-│   └── 15_R1_FOUNDATION.md
+│   ├── 15_R1_FOUNDATION.md
+│   └── 16_R2_ANALYZE_OVERVIEW.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -740,9 +741,13 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── README.md
 │   ├── M2/
 │   │   └── DESIGN_CHECKLIST.md
-│   └── R1/
+│   ├── R1/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── R1_NATIVE_SMOKE_EVIDENCE.zip
+│   │   └── README.md
+│   └── R2/
 │       ├── AC_MATRIX.tsv
-│       ├── R1_NATIVE_SMOKE_EVIDENCE.zip
+│       ├── R2_NATIVE_SMOKE_EVIDENCE.zip
 │       └── README.md
 ├── examples/
 │   ├── project-readiness/

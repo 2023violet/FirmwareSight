@@ -13,17 +13,25 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './Analyze.module.css';
 import { Button } from './components/Button';
-import { Chip } from './components/Chip';
 import { ErrorPanel } from './components/ErrorPanel';
+import { asEvidenceClass, FactValue, type FactEvidence } from './components/FactValue';
+import { Icon } from './components/Icon';
+import { Inspector } from './components/Inspector';
 import { Page } from './components/Layout';
+import { LeadAnswer } from './components/LeadAnswer';
+import { Notice } from './components/Notice';
 import { PageHeader, PageSection } from './components/PageHeader';
-import { Band, EmptyState, FactList, FactRow, Figure, Qualifier, SummaryCard } from './components/Panel';
+import { EmptyState, FactList, FactRow, Figure, Qualifier } from './components/Panel';
+import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
-import { Details } from './Details';
+import { SubjectBar, type Subject, type SubjectFreshness } from './components/SubjectBar';
+import { Tabs, tabPanelProps } from './components/Tabs';
+import { Details, LargestSections, type DetailsView } from './Details';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
 import { GettingStartedPanel } from './GettingStarted';
 import { useI18n, type Translate } from './i18n';
+import type { Catalog } from './i18n/en';
 import { analyzeSelection, attachMap, clearMap, exportAnalysisVisual, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
@@ -218,311 +226,287 @@ export function Analyze({
           : t('analyze', 'export.unknownOutcome', { status: result.value.status }));
   };
 
+  /** Which view the reader is on. It survives a new analysis; the tables inside start fresh. */
+  const [view, setView] = useState<View>('memory');
+  /** The fact in the Inspector, with the control that opened it so focus can go back there. */
+  const [inspected, setInspected] = useState<{
+    readonly evidence: FactEvidence;
+    readonly trigger: HTMLElement;
+  } | null>(null);
+  const inspect = useCallback((evidence: FactEvidence, trigger: HTMLElement) => {
+    setInspected({ evidence, trigger });
+  }, []);
+  const closeInspector = useCallback(() => {
+    setInspected(null);
+  }, []);
+  // Evidence belongs to one snapshot. A new analysis, or a retained one coming back, closes the Inspector
+  // rather than leave a fact on screen that the tables beside it no longer describe.
+  const shownSnapshot = summary?.identity.snapshotId ?? null;
+  useEffect(() => {
+    setInspected(null);
+  }, [shownSnapshot]);
+
+  /** The shell's freshness word for the SubjectBar: one place that says whose numbers these are. */
+  const freshness: SubjectFreshness =
+    summary === null ? 'latest' : error !== null || pendingSelection ? 'retained' : 'latest';
+  const stale = summary !== null && (error !== null || pendingSelection);
+
   return (
-    <Page>
-      <PageHeader
-        title={t('analyze', 'title')}
-        meta={
-          currentSummary === null
-            ? [
-                selection === null
-                  ? t('analyze', 'header.metaNone')
-                  : t('analyze', 'header.metaSelected', { name: selection.fileName }),
-              ]
-            : [
-                t('analyze', 'header.metaArtifact', { name: currentSummary.artifact.fileName }),
-                <span key="sha">sha256 {truncateMiddle(currentSummary.artifact.sha256, 6)}</span>,
-                t('analyze', 'header.metaSections', { count: currentSummary.sectionCount }),
-                t('analyze', 'header.metaSymbols', { count: currentSummary.symbolCount }),
-              ]
-        }
-        subhead={t('analyze', 'header.subhead')}
-        actions={
-          <>
-            <Button
-              disabled={analyzing}
-              onClick={() => {
-                void chooseArtifact();
-              }}
-            >
-              {t('analyze', 'intake.chooseArtifact')}
-            </Button>
-            <Button
-              variant="primary"
-              disabled={analyzing || selection === null}
-              onClick={() => {
-                void analyze();
-              }}
-            >
-              {t('analyze', 'intake.analyzeButton')}
-            </Button>
-          </>
-        }
-      />
-
-      {/* The three inputs, stated as pills rather than as rows deep in a list: what this screen can
-          actually prove about the build is the first thing a reader needs, and the words are Core's
-          capability answers mapped to the five states, not a judgement made here. They describe the
-          current attempt only — see `currentSummary`. When it has no right to speak, the strip says
-          so in neutral words and points at the retained report instead of borrowing its pills. */}
-      <div className={styles['states']} role="group" aria-label={t('analyze', 'status.capabilitiesGroup')}>
-        {currentSummary === null ? (
-          <>
-            <Chip>
-              {error !== null
-                ? t('analyze', 'status.chipFailed')
-                : selection === null
-                  ? t('analyze', 'status.chipNoArtifact')
-                  : t('analyze', 'status.chipSelected', { name: selection.fileName })}
-            </Chip>
-            {summary === null ? null : <Chip>{t('analyze', 'status.chipRetained')}</Chip>}
-          </>
-        ) : (
-          <>
-            <StateBadge
-              variant="chip"
-              state={capabilityState(currentSummary.capabilities.elf)}
-              label={t('analyze', 'status.capabilityElf', { value: currentSummary.capabilities.elf })}
-            />
-            <StateBadge
-              variant="chip"
-              state={capabilityState(currentSummary.capabilities.map)}
-              label={t('analyze', 'status.capabilityMap', { value: currentSummary.capabilities.map })}
-            />
-            <StateBadge
-              variant="chip"
-              state={capabilityState(currentSummary.capabilities.git)}
-              label={t('analyze', 'status.capabilityGit', { value: currentSummary.capabilities.git })}
-            />
-          </>
-        )}
-      </div>
-
-      <section className={styles['controls']} aria-label={t('analyze', 'intake.selectionGroup')}>
-        {selection === null ? (
-          <p className={styles['meta']}>{t('analyze', 'intake.noArtifact')}</p>
-        ) : (
-          <>
-            <p className={styles['selected']} title={selection.fileName}>
-              {selection.fileName}
-            </p>
-            <p className={styles['meta']}>
-              {selection.mapAttached
-                ? t('analyze', 'intake.mapLine', {
-                    name: selection.mapFileName ?? t('analyze', 'intake.mapAttached'),
-                  })
-                : t('analyze', 'intake.mapNotProvided')}
-            </p>
-            <div className={styles['actions']}>
+    <div className={styles['withInspector']}>
+      <Page>
+        <PageHeader
+          title={t('analyze', 'title')}
+          subhead={t('analyze', 'header.subhead')}
+          actions={
+            <>
+              {currentSummary === null ? null : (
+                <ExportMenu
+                  disabled={exporting || analyzing}
+                  onExport={(format) => {
+                    void exportVisual(format);
+                  }}
+                />
+              )}
               <Button
+                variant={selection === null ? 'primary' : 'secondary'}
                 disabled={analyzing}
                 onClick={() => {
-                  void addMap();
+                  void chooseArtifact();
                 }}
               >
-                {selection.mapAttached
-                  ? t('analyze', 'intake.replaceMap')
-                  : t('analyze', 'intake.addMap')}
+                {t('analyze', 'intake.chooseArtifact')}
               </Button>
-              {selection.mapAttached ? (
-                <Button
-                  variant="ghost"
-                  disabled={analyzing}
-                  onClick={() => {
-                    void removeMap();
-                  }}
-                >
-                  {t('analyze', 'intake.removeMap')}
-                </Button>
-              ) : null}
-            </div>
-          </>
-        )}
-      </section>
-
-      {staleExportNote ? (
-        <p className={styles['status']} role="status" aria-live="polite">
-          {t('analyze', 'export.staleNote')}
-        </p>
-      ) : null}
-      {analyzing ? (
-        // The only asynchronous fact on the screen. Without a live region it is visible to sighted
-        // users and silent for everyone else, because the button's own disabled state says nothing
-        // about when the work finished.
-        <p className={styles['status']} role="status" aria-live="polite">
-          {t('analyze', 'status.analyzing')}
-        </p>
-      ) : null}
-      {error === null ? null : (
-        <ErrorPanel
-          envelope={error}
-          label={t('analyze', 'status.errorRegion')}
-          heading={t('analyze', 'status.errorHeading')}
-          action={
-            <Button
-              variant="primary"
-              disabled={analyzing}
-              onClick={() => {
-                void chooseArtifact();
-              }}
-            >
-              {t('analyze', 'status.chooseAnother')}
-            </Button>
+              <Button
+                variant={selection === null ? 'secondary' : 'primary'}
+                disabled={analyzing || selection === null}
+                onClick={() => {
+                  void analyze();
+                }}
+              >
+                {t('analyze', 'intake.analyzeButton')}
+              </Button>
+            </>
           }
         />
-      )}
-      {summary === null && !analyzing && error === null ? (
-        <>
-          <EmptyState
-            label={t('analyze', 'status.emptyRegion')}
-            message={t('analyze', 'status.emptyMessage')}
-          />
-          {/* §13's first-use guidance, above the empty state it explains and below the controls that
-              answer it. It is a panel, not a gate: every control on this page is reachable with it
-              showing, and hiding it is one click that hides nothing else. */}
-          {gettingStartedHidden ? null : <GettingStartedPanel onDismiss={onHideGettingStarted} />}
-        </>
-      ) : null}
 
-      {/* U1P §9 and §13, in one place: the analysis comes before the dossier, and everything on screen
-          that describes a past attempt sits on a quieter surface than the failure above it. The band is
-          the four figures that answer "was this worth reading", `Details` is the actual sections and
-          symbols, and the identity dossier moves below them as the reference puts it. Under a failed
-          attempt or a selection that has not been analyzed, all three keep saying whose numbers they are
-          — the band's region name, the report's own sentence, the details' accessible name — which is
-          the U1R contract, restated in a new position rather than loosened. */}
-      {summary === null ? null : (
-        <div className={error === null && !pendingSelection ? undefined : styles['retained']}>
-          {currentSummary === null ? null : (
-            <section className={styles['exports']} aria-label={t('analyze', 'export.region')}>
-              <h2>{t('analyze', 'export.heading')}</h2>
-              <p className={styles['meta']}>{t('analyze', 'export.hint')}</p>
-              <Button disabled={exporting} onClick={() => void exportVisual('png')}>{t('analyze', 'export.png')}</Button>
-              <Button disabled={exporting} onClick={() => void exportVisual('svg')}>{t('analyze', 'export.svg')}</Button>
-              <Button disabled={exporting} onClick={() => void exportVisual('html')}>{t('analyze', 'export.html')}</Button>
-              {exporting ? <p role="status" aria-live="polite">{t('analyze', 'export.waiting')}</p> : null}
-              {exportMessage === null ? null : <p role="status" aria-live="polite">{exportMessage}</p>}
-              {exportError === null ? null : <ErrorPanel envelope={exportError} label={t('analyze', 'export.errorLabel')} heading={t('analyze', 'export.errorHeading')} />}
-            </section>
-          )}
-          <ResultBand summary={summary} stale={error !== null || pendingSelection} unit={unit} />
-          <Details
-            snapshotId={summary.identity.snapshotId}
-            unit={unit}
-            onUnitChange={onUnitChange}
-            stale={error !== null || pendingSelection}
+        <SubjectBar
+          subject={subjectOf(selection, currentSummary, summary)}
+          freshness={selection !== null && summary === null ? 'pending' : freshness}
+          actions={
+            <>
+              {selection === null ? null : (
+                <>
+                  <Button
+                    disabled={analyzing}
+                    onClick={() => {
+                      void addMap();
+                    }}
+                  >
+                    {selection.mapAttached ? t('analyze', 'intake.replaceMap') : t('analyze', 'intake.addMap')}
+                  </Button>
+                  {selection.mapAttached ? (
+                    <Button
+                      variant="ghost"
+                      disabled={analyzing}
+                      onClick={() => {
+                        void removeMap();
+                      }}
+                    >
+                      {t('analyze', 'intake.removeMap')}
+                    </Button>
+                  ) : null}
+                </>
+              )}
+              <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
+            </>
+          }
+        />
+
+        {analyzing ? (
+          // The only asynchronous fact on the screen. Without a live region it is visible to sighted
+          // users and silent for everyone else, because the button's own disabled state says nothing
+          // about when the work finished.
+          <p className={styles['status']} role="status" aria-live="polite">
+            {t('analyze', 'status.analyzing')}
+          </p>
+        ) : null}
+        {staleExportNote ? (
+          <Notice tone="stale" title={t('analyze', 'export.staleNote')} />
+        ) : null}
+        {exporting ? (
+          <p className={styles['status']} role="status" aria-live="polite">
+            {t('analyze', 'export.waiting')}
+          </p>
+        ) : null}
+        {exportMessage === null ? null : (
+          <p className={styles['status']} role="status" aria-live="polite">
+            {exportMessage}
+          </p>
+        )}
+        {exportError === null ? null : (
+          <ErrorPanel
+            envelope={exportError}
+            label={t('analyze', 'export.errorLabel')}
+            heading={t('analyze', 'export.errorHeading')}
           />
-          <Report
-            summary={summary}
-            stale={error !== null || pendingSelection}
-            candidateName={selection?.fileName ?? null}
-            pending={pendingSelection}
-            unit={unit}
+        )}
+        {error === null ? null : (
+          <ErrorPanel
+            envelope={error}
+            label={t('analyze', 'status.errorRegion')}
+            heading={t('analyze', 'status.errorHeading')}
+            action={
+              <Button
+                variant="primary"
+                disabled={analyzing}
+                onClick={() => {
+                  void chooseArtifact();
+                }}
+              >
+                {t('analyze', 'status.chooseAnother')}
+              </Button>
+            }
           />
-        </div>
-      )}
-    </Page>
+        )}
+
+        {summary === null && !analyzing && error === null ? (
+          <>
+            <EmptyState
+              label={t('analyze', 'status.emptyRegion')}
+              message={t('analyze', 'status.emptyMessage')}
+            />
+            {/* §13's first-use guidance, below the controls that answer it. It is a panel, not a gate:
+                every control on this page is reachable with it showing. */}
+            {gettingStartedHidden ? null : <GettingStartedPanel onDismiss={onHideGettingStarted} />}
+          </>
+        ) : null}
+
+        {/* Everything below describes `summary`. When that is a retained result, the stale Notice says so
+            first and the region names say it again, so a screen-reader user jumping straight to a table
+            hears whose numbers they are (the U1R contract). */}
+        {summary === null ? null : (
+          <section
+            className={styles['result']}
+            aria-label={stale ? t('analyze', 'report.groupStale') : t('analyze', 'report.groupCurrent')}
+          >
+            {stale ? (
+              <Notice tone="stale" title={t('analyze', 'status.retainedTitle')}>
+                <p role="note">{retainedSentence(summary, selection?.fileName ?? null, pendingSelection, t)}</p>
+              </Notice>
+            ) : null}
+            <AnalysisLead
+              summary={summary}
+              unit={unit}
+              inspecting={inspected?.evidence ?? null}
+              onInspect={inspect}
+            />
+            <BuildLine summary={summary} unit={unit} />
+            <Tabs
+              idBase="fs-analyze"
+              label={t('analyze', 'views.label')}
+              items={VIEWS.map((key) => ({ key, label: t('analyze', VIEW_LABEL[key]) }))}
+              current={view}
+              onSelect={setView}
+            />
+            <div {...tabPanelProps('fs-analyze', view)} className={styles['panel']}>
+              {view === 'memory' ? (
+                <MemoryView summary={summary} unit={unit} />
+              ) : view === 'evidence' ? (
+                <>
+                  <BuildFacts summary={summary} />
+                  <Details
+                    key={`${summary.identity.snapshotId}-evidence`}
+                    snapshotId={summary.identity.snapshotId}
+                    view="evidence"
+                    unit={unit}
+                    onInspect={inspect}
+                    stale={stale}
+                  />
+                  <SnapshotFooter summary={summary} />
+                </>
+              ) : (
+                <Details
+                  key={`${summary.identity.snapshotId}-${view}`}
+                  snapshotId={summary.identity.snapshotId}
+                  view={view}
+                  unit={unit}
+                  onInspect={inspect}
+                  stale={stale}
+                />
+              )}
+            </div>
+          </section>
+        )}
+      </Page>
+      <Inspector
+        evidence={inspected?.evidence ?? null}
+        returnFocus={inspected?.trigger ?? null}
+        onClose={closeInspector}
+      />
+    </div>
   );
 }
 
+/** The five views, in the order the spec reads them (ADR-0034 D2, `03_DESIGN/09` §6.2). */
+type View = 'memory' | DetailsView;
+const VIEWS: readonly View[] = ['memory', 'sections', 'symbols', 'objects', 'evidence'];
+const VIEW_LABEL: Readonly<Record<View, AnalyzeKey>> = {
+  memory: 'views.memory',
+  sections: 'details.tab.sections',
+  symbols: 'details.tab.symbols',
+  objects: 'details.tab.objects',
+  evidence: 'details.tab.evidence',
+};
+
+type AnalyzeKey = keyof Catalog['analyze'];
+
 /**
- * The result figures, stated once.
- *
- * Four facts answer "was this worth analyzing, and how good is the evidence": what the build costs in
- * flash and in RAM, whether the load evidence is strong enough to bind a limit, and how much recorded
- * evidence stands behind the screen. Each is Core's own word and number, projected into the five
- * presentation states by the same mapping the rest of the product uses; nothing here is computed.
+ * What the SubjectBar names. The current analysis when there is one; otherwise the file in the row, with no
+ * hash, because a hash this page has not computed for that file would be borrowed from another one.
  */
-function ResultBand({
-  summary,
-  stale,
-  unit,
-}: {
-  readonly summary: AnalysisSummaryDto;
-  readonly stale: boolean;
-  readonly unit: SizeUnit;
-}) {
-  const { t } = useI18n();
-  const { memory, evidenceSummary } = summary;
-  const quality = evidenceQuality(memory, t);
-  const flash = memory.nonvolatileImageFootprint;
-  const ram = memory.runtimeRamFootprint;
-
-  const budgetCell = (label: string, budget: typeof flash, rule: string) => (
-    <SummaryCard
-      label={label}
-      state={
-        <StateBadge
-          state={budgetState(budget)}
-          label={budgetWord(budget.state, t)}
-          count={budget.state === 'partial' ? budget.unattributed.length : undefined}
-          note={budget.reason ?? undefined}
-        />
-      }
-      value={<Figure>{formatSize(budget.bytes, unit)}</Figure>}
-      context={`${budget.classification} · ${rule}`}
-    />
-  );
-
-  return (
-    <section
-      className={styles['result']}
-      aria-label={
-        stale ? t('analyze', 'result.groupStale') : t('analyze', 'result.groupCurrent')
-      }
-    >
-      <Band narrow label={t('analyze', 'result.band')}>
-        {budgetCell(t('analyze', 'result.flashLabel'), flash, memory.accountingRule)}
-        {budgetCell(t('analyze', 'result.ramLabel'), ram, memory.layoutSource)}
-        <SummaryCard
-          label={t('analyze', 'result.loadEvidenceLabel')}
-          state={<StateBadge state={quality.state} label={quality.label} />}
-          context={quality.note}
-        />
-        <SummaryCard
-          label={t('analyze', 'result.evidenceRecordedLabel')}
-          value={<Figure>{String(evidenceSummary.total)}</Figure>}
-          context={t('analyze', 'result.evidenceLine', {
-            observed: evidenceSummary.observed,
-            derived: evidenceSummary.derived,
-            declared: evidenceSummary.declared,
-            unknown: evidenceSummary.unknown,
-          })}
-        />
-      </Band>
-    </section>
-  );
+function subjectOf(
+  selection: SelectionDto | null,
+  current: AnalysisSummaryDto | null,
+  retained: AnalysisSummaryDto | null,
+): Subject | null {
+  if (current !== null) {
+    return {
+      kind: 'single',
+      build: {
+        fileName: current.artifact.fileName,
+        sha256: current.artifact.sha256,
+        map: selection?.mapAttached ?? null,
+        mapFileName: selection?.mapFileName ?? null,
+      },
+    };
+  }
+  if (selection !== null) {
+    return {
+      kind: 'single',
+      build: { fileName: selection.fileName, sha256: null, map: selection.mapAttached, mapFileName: selection.mapFileName },
+    };
+  }
+  if (retained !== null) {
+    return { kind: 'single', build: { fileName: retained.artifact.fileName, sha256: retained.artifact.sha256, map: null } };
+  }
+  return null;
 }
 
 /**
- * The report, and the honesty flag that comes with it.
+ * The retained-result sentence, word for word the one the dossier used to carry.
  *
- * `stale` is set when a later analysis failed **or** when the selection has moved on without one:
- * either way the numbers below are the last ones FirmwareSight could prove, not a result for the
- * file now sitting in the row. Naming the candidate it does not describe is what keeps a preserved
- * result from being read as a fresh verdict.
+ * Two artifacts can share one leaf name, which is the case this screen exists for, so naming the candidate
+ * is skipped when the names are equal: it would otherwise read "not an analysis of firmware.elf" under
+ * "Previous analysis of firmware.elf" and say nothing.
  */
-function Report({
-  summary,
-  stale,
-  pending,
-  candidateName,
-  unit,
-}: {
-  readonly summary: AnalysisSummaryDto;
-  readonly stale: boolean;
-  readonly pending: boolean;
-  readonly candidateName: string | null;
-  readonly unit: SizeUnit;
-}) {
-  const { t } = useI18n();
-  const { artifact, memory, capabilities } = summary;
-
-  // The second half of the note. Two artifacts can share one leaf name, which is the case this
-  // screen exists for, so naming the candidate has to be skipped when the names are equal: it
-  // would otherwise read "not an analysis of firmware.elf" under "Previous analysis of
-  // firmware.elf" and say nothing.
-  const sameName = candidateName === null || candidateName === artifact.fileName;
+function retainedSentence(
+  summary: AnalysisSummaryDto,
+  candidateName: string | null,
+  pending: boolean,
+  t: Translate,
+): string {
+  const name = summary.artifact.fileName;
+  const sameName = candidateName === null || candidateName === name;
   const attribution = pending
     ? candidateName === null
       ? t('analyze', 'report.previousNotAnalyzed')
@@ -532,31 +516,143 @@ function Report({
     : sameName
       ? t('analyze', 'report.previousNoResult')
       : t('analyze', 'report.previousNotCandidate', { name: candidateName });
+  return t('analyze', 'report.previousOf', { name }) + attribution;
+}
 
+/**
+ * The page's one answer: Flash used, as a value the reader can trace, measured against RAM, the strength of
+ * the load evidence and the amount of evidence behind it. It replaces the four-card result band.
+ */
+function AnalysisLead({
+  summary,
+  unit,
+  inspecting,
+  onInspect,
+}: {
+  readonly summary: AnalysisSummaryDto;
+  readonly unit: SizeUnit;
+  readonly inspecting: FactEvidence | null;
+  readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
+}) {
+  const { t } = useI18n();
+  const { memory, evidenceSummary } = summary;
+  const flash = memory.nonvolatileImageFootprint;
+  const ram = memory.runtimeRamFootprint;
+  const quality = evidenceQuality(memory, t);
+  const evidence: FactEvidence = {
+    field: 'nonvolatile_image_footprint_bytes',
+    value: formatSize(flash.bytes, unit),
+    classification: asEvidenceClass(flash.classification),
+    source: memory.layoutSource,
+    rule: memory.accountingRule,
+    raw: flash.bytes === null ? t('analyze', 'budget.unknown') : String(flash.bytes),
+    details: [
+      [t('analyze', 'lead.accuracy'), budgetWord(flash.state, t)],
+      ...(flash.reason === null ? [] : [[t('analyze', 'lead.reason'), flash.reason] as const]),
+      ...(flash.unattributed.length === 0
+        ? []
+        : [[t('analyze', 'lead.unattributed'), flash.unattributed.join(', ')] as const]),
+    ],
+  };
   return (
-    <section
-      className={styles['report']}
-      aria-label={stale ? t('analyze', 'report.groupStale') : t('analyze', 'report.groupCurrent')}
-    >
-      {stale ? (
-        <p className={styles['stale']} role="note">
-          {t('analyze', 'report.previousOf', { name: artifact.fileName }) + attribution}
-        </p>
-      ) : null}
+    <LeadAnswer
+      sentence={t('analyze', 'lead.flash')}
+      figure={
+        <FactValue
+          evidence={evidence}
+          selected={inspecting?.field === evidence.field}
+          onInspect={onInspect}
+        />
+      }
+      state={
+        flash.state === 'exact' ? undefined : (
+          <StateBadge state={budgetState(flash)} label={budgetWord(flash.state, t)} />
+        )
+      }
+      reference={t('analyze', 'lead.reference', {
+        ram: formatSize(ram.bytes, unit),
+        ramWord: budgetWord(ram.state, t),
+        quality: quality.label,
+        count: evidenceSummary.total,
+      })}
+      note={t('analyze', 'result.evidenceLine', {
+        observed: evidenceSummary.observed,
+        derived: evidenceSummary.derived,
+        declared: evidenceSummary.declared,
+        unknown: evidenceSummary.unknown,
+      })}
+    />
+  );
+}
 
+/**
+ * Whose numbers these are, in one line under the answer: file, hash, size and format. A retained result keeps
+ * this line inside its own region, so it can never be read as the identity of the file now in the row.
+ */
+function BuildLine({ summary, unit }: { readonly summary: AnalysisSummaryDto; readonly unit: SizeUnit }) {
+  const { t } = useI18n();
+  const { artifact } = summary;
+  return (
+    <p className={styles['buildLine']} role="group" aria-label={t('analyze', 'build.line')}>
+      <span title={artifact.fileName}>{artifact.fileName}</span>
+      <span className={styles['monoSmall']} title={artifact.sha256}>
+        sha256 {truncateMiddle(artifact.sha256, 6)}
+      </span>
+      <span className={styles['monoSmall']}>{formatSize(artifact.byteSize, unit)}</span>
+      <span>{`${artifact.architecture} ${artifact.bitness}-bit ${artifact.endianness}`}</span>
+      <span>{t('analyze', 'header.metaSections', { count: summary.sectionCount })}</span>
+      <span>{t('analyze', 'header.metaSymbols', { count: summary.symbolCount })}</span>
+    </p>
+  );
+}
+
+/** Memory: the regions, how the bytes were counted, and where most of them are. */
+function MemoryView({ summary, unit }: { readonly summary: AnalysisSummaryDto; readonly unit: SizeUnit }) {
+  const { t } = useI18n();
+  const { memory } = summary;
+  const quality = evidenceQuality(memory, t);
+  return (
+    <div className={styles['view']}>
+      <RegionUsageTable regions={memory.regionUsage} />
+      <PageSection title={t('analyze', 'report.memorySection')}>
+        <FactList>
+          <FactRow term={t('analyze', 'result.loadEvidenceLabel')}>
+            <StateBadge state={quality.state} label={quality.label} />
+            <Qualifier>{quality.note}</Qualifier>
+          </FactRow>
+          <FactRow term={t('analyze', 'report.layoutSourceTerm')}>
+            {memory.layoutSource}
+            <Qualifier>{t('analyze', 'report.accountingRule', { rule: memory.accountingRule })}</Qualifier>
+          </FactRow>
+          <FactRow term={t('analyze', 'report.dualAccountedTerm')}>
+            {memory.dualAccountedSections.length === 0
+              ? t('analyze', 'report.noneValue')
+              : memory.dualAccountedSections.join(', ')}
+            <Qualifier>
+              {t('analyze', 'report.dualAccountedCount', { count: memory.dualAccountedSections.length })}
+            </Qualifier>
+          </FactRow>
+          <FactRow term={t('analyze', 'report.excludedMetadataTerm')}>
+            <Figure>{formatSize(memory.excludedMetadataBytes, unit)}</Figure>
+          </FactRow>
+        </FactList>
+      </PageSection>
+      <LargestSections snapshotId={summary.identity.snapshotId} unit={unit} />
+    </div>
+  );
+}
+
+/** Evidence › the build itself: what was read, and what this build can and cannot prove. */
+function BuildFacts({ summary }: { readonly summary: AnalysisSummaryDto }) {
+  const { t } = useI18n();
+  const { artifact, capabilities } = summary;
+  return (
+    <div className={styles['buildFacts']}>
       <PageSection title={t('analyze', 'report.artifactSection')}>
         <FactList>
-          <FactRow term={t('analyze', 'report.fileTerm')} title={artifact.fileName}>
-            {artifact.fileName}
-          </FactRow>
+          {/* File, size and format are in the build line above; the full hash is spelled out here. */}
           <FactRow term="SHA-256" title={artifact.sha256}>
             <Figure>{artifact.sha256}</Figure>
-          </FactRow>
-          <FactRow term={t('analyze', 'report.sizeTerm')}>
-            <Figure>{formatSize(artifact.byteSize, unit)}</Figure>
-          </FactRow>
-          <FactRow term={t('analyze', 'report.formatTerm')}>
-            {`${artifact.architecture} ${artifact.bitness}-bit ${artifact.endianness}`}
           </FactRow>
           <FactRow term={t('analyze', 'report.kindTerm')}>{artifact.kind}</FactRow>
           <FactRow term={t('analyze', 'report.parserTerm')}>
@@ -576,60 +672,92 @@ function Report({
           </FactRow>
         </FactList>
       </PageSection>
-
-      {/* The two budgets and the strength of the evidence behind them are stated once, in the result band
-          above the tables. What stays here is the accounting that explains those figures. */}
-      <PageSection title={t('analyze', 'report.memorySection')}>
-        <FactList>
-          <FactRow term={t('analyze', 'report.layoutSourceTerm')}>
-            {memory.layoutSource}
-            <Qualifier>{t('analyze', 'report.accountingRule', { rule: memory.accountingRule })}</Qualifier>
-          </FactRow>
-          <FactRow term={t('analyze', 'report.dualAccountedTerm')}>
-            {memory.dualAccountedSections.length === 0
-              ? t('analyze', 'report.noneValue')
-              : memory.dualAccountedSections.join(', ')}
-            <Qualifier>
-              {t('analyze', 'report.dualAccountedCount', {
-                count: memory.dualAccountedSections.length,
-              })}
-            </Qualifier>
-          </FactRow>
-          <FactRow term={t('analyze', 'report.excludedMetadataTerm')}>
-            <Figure>{formatSize(memory.excludedMetadataBytes, unit)}</Figure>
-          </FactRow>
-        </FactList>
-        <RegionUsageTable regions={memory.regionUsage} />
-      </PageSection>
-
       <PageSection title={t('analyze', 'report.capabilitiesSection')}>
         <FactList>
           <CapabilityRow term="ELF" value={capabilities.elf} />
           <CapabilityRow term={t('analyze', 'report.sectionsTerm')} value={capabilities.sections} />
           <CapabilityRow term={t('analyze', 'report.symbolsTerm')} value={capabilities.symbols} />
-          <CapabilityRow
-            term={t('analyze', 'report.debugInfoTerm')}
-            value={capabilities.debugInfo}
-          />
+          <CapabilityRow term={t('analyze', 'report.debugInfoTerm')} value={capabilities.debugInfo} />
           <CapabilityRow term="MAP" value={capabilities.map} />
           {/* L19: the scope here is one build's attribution capability, not a delta between builds. */}
-          <CapabilityRow
-            term={t('analyze', 'report.attributionTerm')}
-            value={capabilities.objectAttribution}
-          />
+          <CapabilityRow term={t('analyze', 'report.attributionTerm')} value={capabilities.objectAttribution} />
           <CapabilityRow term="Git" value={capabilities.git} />
         </FactList>
       </PageSection>
+    </div>
+  );
+}
 
-      <footer className={styles['footer']}>
-        <span className={styles['monoSmall']}>{summary.identity.snapshotId}</span>
-        <span>
-          {summary.identity.schema} · {summary.identity.schemaStability} · normalization{' '}
-          {summary.identity.normalizationVersion} · fwsight{' '}
-          {summary.identity.createdByFwsightVersion}
-        </span>
-      </footer>
-    </section>
+function SnapshotFooter({ summary }: { readonly summary: AnalysisSummaryDto }) {
+  return (
+    <footer className={styles['footer']}>
+      <span className={styles['monoSmall']}>{summary.identity.snapshotId}</span>
+      <span>
+        {summary.identity.schema} · {summary.identity.schemaStability} · normalization{' '}
+        {summary.identity.normalizationVersion} · fwsight {summary.identity.createdByFwsightVersion}
+      </span>
+    </footer>
+  );
+}
+
+/**
+ * Export, as one menu in the header (spec §6.2). A disclosure rather than a popup menu: three plain buttons
+ * that Tab reaches in order, and Esc closes it.
+ */
+function ExportMenu({
+  disabled,
+  onExport,
+}: {
+  readonly disabled: boolean;
+  readonly onExport: (format: 'png' | 'svg' | 'html') => void;
+}) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement | null>(null);
+  return (
+    <div
+      className={styles['exportMenu']}
+      role="group"
+      aria-label={t('analyze', 'export.region')}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && open) {
+          event.stopPropagation();
+          setOpen(false);
+          toggle.current?.focus();
+        }
+      }}
+    >
+      <Button
+        ref={toggle}
+        disabled={disabled}
+        ariaExpanded={open}
+        onClick={() => {
+          setOpen((now) => !now);
+        }}
+      >
+        <Icon name="export" />
+        {t('analyze', 'export.menu')}
+        <Icon name="chevronDown" />
+      </Button>
+      {open ? (
+        <div className={styles['exportList']}>
+          <p className={styles['meta']}>{t('analyze', 'export.hint')}</p>
+          {(['png', 'svg', 'html'] as const).map((format) => (
+            <Button
+              key={format}
+              variant="ghost"
+              disabled={disabled}
+              onClick={() => {
+                setOpen(false);
+                onExport(format);
+              }}
+            >
+              {t('analyze', `export.${format}`)}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

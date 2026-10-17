@@ -25,6 +25,17 @@ export interface FactEvidence {
   readonly rule?: string;
   /** The raw recorded value, when it differs from the shown one (a full hash, an unrounded byte count). */
   readonly raw?: string;
+  /** Further labelled facts the evidence carries, such as confidence or an evidence id. */
+  readonly details?: readonly (readonly [string, string])[];
+}
+
+/**
+ * Core's classification word as the four-class union. Stored words are lower-case; anything this build
+ * does not recognise is shown as Unknown rather than guessed at.
+ */
+export function asEvidenceClass(word: string): EvidenceClassDto {
+  const lower = word.toLowerCase();
+  return lower === 'observed' || lower === 'derived' || lower === 'declared' ? lower : 'unknown';
 }
 
 export function FactValue({

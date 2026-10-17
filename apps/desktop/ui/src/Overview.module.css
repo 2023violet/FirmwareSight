@@ -168,3 +168,18 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
+
+/* R2: the ship answer as the page's lead - no box, a hairline under it, the sentence at section size. */
+.lead {
+  padding: 0 0 var(--fs-space-6);
+  background: none;
+  border: 0;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: 0;
+}
+
+.lead .verdictSentence {
+  font-size: var(--fs-font-size-section);
+  line-height: var(--fs-line-height-section);
+  font-weight: var(--fs-font-weight-semibold);
+}

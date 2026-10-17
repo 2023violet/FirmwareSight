@@ -1,7 +1,9 @@
 /* One stroke width and two sizes, all from the token file (ADR-0034 D3). Fills are opt-in per glyph. */
 
 .icon {
-  display: block;
+  /* Inline, so an icon beside a word in a button or a chip stays on the word's line. */
+  display: inline-block;
+  vertical-align: middle;
   flex: none;
   fill: none;
   stroke: currentColor;
