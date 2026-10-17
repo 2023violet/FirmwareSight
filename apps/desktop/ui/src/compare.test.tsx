@@ -1473,6 +1473,35 @@ describe('R3 Compare workbench', () => {
     ).toBe('.text');
   });
 
+  it('uses a ranking pick once: returning to the view neither re-filters nor pulls focus out of the tabs', async () => {
+    // R3 review S2-1: each table mounts when its view opens, so a remembered pick used to be re-applied on
+    // every return - re-filtering the table and moving focus off the tab the reader was arrowing through.
+    await openCompare();
+    await runCompare();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show sections changes for .text' }));
+    const sections = await screen.findByRole('region', { name: 'Section Changes' });
+    await waitFor(() =>
+      expect(sectionChangesMock).toHaveBeenLastCalledWith(expect.objectContaining({ filter: '.text' })),
+    );
+    const input = within(sections).getByRole('searchbox', { name: 'Filter sections by name' });
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.click(within(sections).getByRole('button', { name: 'Apply filter' }));
+    await waitFor(() =>
+      expect(sectionChangesMock).toHaveBeenLastCalledWith(expect.objectContaining({ filter: null })),
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Summary' }));
+    const sectionsTab = screen.getByRole('tab', { name: 'Sections' });
+    sectionsTab.focus();
+    fireEvent.click(sectionsTab);
+    await screen.findByRole('region', { name: 'Section Changes' });
+    await waitFor(() =>
+      expect(sectionChangesMock).toHaveBeenLastCalledWith(expect.objectContaining({ filter: null })),
+    );
+    expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Sections' }));
+  });
+
   it('opens a change row in the Inspector with its sides, its delta and the diff handle', async () => {
     await openCompare();
     await runCompare();
@@ -1570,8 +1599,9 @@ describe('export', () => {
     await openCompare();
     await runCompare();
 
-    // R3: the five formats are one menu, a group named Export, in the page header.
-    const menu = screen.getByRole('group', { name: 'Export' });
+    // R3: the five formats are one menu in the page header, a group with its own name so it does not repeat
+    // its button's (R3 review S3).
+    const menu = screen.getByRole('group', { name: 'Comparison export' });
     expect(within(menu).getByRole('button', { name: 'Export' })).toBeDefined();
     expect(exportButton('Export JSON')).toBeDefined();
     expect(exportButton('Export HTML')).toBeDefined();
@@ -1763,7 +1793,31 @@ describe('the table layout contract', () => {
   // jsdom cannot measure a clip, so the tree is pinned and the geometry proof stays with the
   // installed run, exactly as `details.test.tsx` puts it.
   it('puts every change table inside a scroll wrapper and keeps it a table', async () => {
-    await openCompare();
+    // Attributed, so the Objects view holds a table too and the contract covers all three (R3 review S3).
+    objectChangesMock.mockResolvedValue(
+      ok({
+        rows: [
+          { changeKind: 'Changed', key: 'imu.o', archive: null, nonvolatile: change(80, 120, 40), runtimeRam: change(16, 96, 80), ambiguous: false },
+        ],
+        total: 1,
+        offset: 0,
+        limit: 100,
+        nextOffset: null,
+      }),
+    );
+    await openCompare(
+      comparison({
+        objectChanges: {
+          available: true,
+          reason: 'both builds stored object rows from a GNU ld MAP',
+          objects: { changed: 1, added: 0, removed: 0, unchanged: 0 },
+          libraries: { changed: 0, added: 0, removed: 0, unchanged: 0 },
+          topObjects: [],
+          addedObjects: [],
+          topLibraries: [],
+        },
+      }),
+    );
     await runCompare();
 
     // R3: every change table is the shared DataTable, whose wrapper owns the horizontal scroll. The contract
@@ -1771,6 +1825,7 @@ describe('the table layout contract', () => {
     for (const [tab, region] of [
       ['Sections', 'Section Changes'],
       ['Symbols', 'Symbol Changes'],
+      ['Objects', 'Changes by object and library'],
     ] as const) {
       const area = await openView(tab, region);
       const tables = await within(area).findAllByRole('table');

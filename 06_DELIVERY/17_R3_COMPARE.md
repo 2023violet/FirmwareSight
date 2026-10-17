@@ -66,6 +66,14 @@ The design sources are [03_DESIGN/09](../03_DESIGN/09_R_REDESIGN_SPEC.md) §6.3 
 | region-table disclosure "Inspect sections" | row action "Show section evidence for {region}" opening the Inspector | `intake.test.tsx` region test |
 | (none) | change-row action "Show the change detail for {name}" opening the Inspector | new R3 tests |
 
+| Compare export group "Export" (its button also "Export") | group "Comparison export" with the button "Export" (review S3) | export test |
+| zh `region.showEvidence` "查看 {name} 的 Section 证据" | "查看 {name} 的节证据" | none |
+
+Behaviour changes that are not names:
+- A change table's sort, filter, kind and page reset when its view is re-opened, and when a new comparison lands, because each table mounts with its view. Before R3 the tables stayed mounted and kept their sort across comparisons.
+- A ranking pick is applied once (review S2-1).
+- The Inspector closes when the unit changes, and when the rows of the table it came from change (filter, sort, page, Objects | Libraries).
+
 New tests:
 - `compare.test.tsx` "R3 Compare workbench" (7 tests): absent ≠ 0 on the section and symbol tables, unpaired ≠ changed, a ranking pick opening its view filtered, the change-row Inspector, the lead figure Inspector, the SubjectBar's moved and failed words, and the ERR-EXPORT-6002 rule. Two of them are mutation-proven: absent drawn as 0, and 6002 shown as an error.
 - `foundation.test.tsx`: DataTable server mode, FilterBar apply mode.
@@ -102,3 +110,20 @@ The run surfaced two defects, both fixed:
 - **Cells wrapping mid-value.** Figures no longer break across lines, and names break only between words.
 
 It also surfaced one Core observation, left unchanged: `.symtab` leads Core's runtime-size growth ranking. The QA stores the runs created are kept and listed in the evidence README.
+
+## 6. Independent review (2026-10-17)
+
+An independent review of `8f932d4` ran in its own session and worktree. Verdict: **PASS_WITH_FIXES**, with no S1 findings. `check.py` passed 20/20 and the UI tests passed 484/484.
+
+| Finding | Disposition |
+|---|---|
+| S2-1: a ranking pick was re-applied on every return to its view, and it pulled focus out of the tab list | Fixed. The table reports the pick consumed and Compare forgets it. A test covers pick, clear, leave and return: the filter is null and focus stays on the tab. The test is mutation-proven. |
+| S2-2: the region Inspector said "N bytes" and Observed for a partial region | Fixed. It uses the table's wording ("At least N bytes"), and the class is Derived (Unknown when there is no evidence). A test was added and is mutation-proven. |
+| S3: the Inspector outlived a unit change, an Objects ↔ Libraries switch, and filter, sort or page changes | Fixed (`onReadingChange`, and `unit` added to the reset). |
+| S3: tables forget their state on a tab switch; sort resets on a new comparison | Accepted, and recorded in §3. A table mounts with its view, so its reading starts clean. The one unfiltered request before a pick's filtered one is discarded by the request counter. |
+| S3: `latestQuery` was assigned during render | Fixed. The callback refs are kept current in a layout effect. |
+| S3: the layout-contract test covered only two tables | Fixed. The Objects table is covered too, using an attributed fixture. |
+| S3: duplicate name "Export" | Fixed: the group is named "Comparison export". |
+| S3: hard-coded "Unknown"; "—" in the lead's raw value | "Unknown" stays untranslated on purpose. It is the fourth evidence class, next to Observed, Derived and Declared, which ADR-0032 D5 keeps as Core's words, and Compare hard-coded it before R3 too. The catalog test's kept-vocabulary list does not yet name it. Adding it there, or moving the word into the catalog, is a follow-up for R7's i18n pass, not an R3 change. The raw value now uses "Not present" for an absent side. |
+| S3: commit `f8ed1f0` ("wip … Not for push") would enter main | Left for the Owner to decide at push time (see the push request). The branch is local and unpushed. |
+| S3: the zh label change was not in §3 | Listed. |

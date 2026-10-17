@@ -454,6 +454,35 @@ describe('P1-A0 intake screen', () => {
 
   });
 
+  it('states a partial region in the Inspector as the table does: at least, and Derived', async () => {
+    // R3 review S2-2: the Inspector said plain "160 bytes" and "Observed" for a partial region whose table
+    // cell says "At least 160 bytes". Mapped bytes are a sum of section intervals: derived, not observed.
+    const base = summary();
+    analyzeMock.mockResolvedValue(ok({
+      ...base,
+      memory: {
+        ...base.memory,
+        regionUsage: [{
+          name: 'FLASH', kind: 'nonvolatile', origin: '0x8000000', capacityBytes: '65536',
+          usedBytes: '160', remainingBytes: null, remainingReason: 'not proven',
+          usedPercent: { value: null, status: 'usage_unknown' }, state: 'partial',
+          risk: 'within-capacity', evidenceSource: 'map', evidenceId: 'ev-partial', addressKind: 'load',
+          sections: [], reasons: ['one section has no load address'],
+        }],
+      },
+    } as AnalysisSummaryDto));
+    await chooseArtifact();
+    await analyze();
+
+    const table = await screen.findByRole('table', { name: 'Memory regions' });
+    expect(within(table).getByText('At least 160 bytes')).toBeDefined();
+    fireEvent.click(within(table).getByRole('button', { name: 'Show section evidence for FLASH' }));
+    const inspector = await screen.findByRole('complementary', { name: 'Evidence' });
+    expect(within(inspector).getByText('At least 160 bytes')).toBeDefined();
+    expect(within(inspector).getByText('Derived')).toBeDefined();
+    expect(within(inspector).queryByText('Observed')).toBeNull();
+  });
+
   it('localizes Region headings in Chinese', async () => {
     const base = summary();
     const withRegions = {

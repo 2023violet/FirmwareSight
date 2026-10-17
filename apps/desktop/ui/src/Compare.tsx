@@ -448,7 +448,7 @@ export function Compare({
   const shownDiff = summary?.diffId ?? null;
   useEffect(() => {
     setInspected(null);
-  }, [shownDiff, stale, view]);
+  }, [shownDiff, stale, view, unit]);
 
   /** A ranking pick opens the table that holds the row, filtered to it (prompt §25, now across views). */
   const pickSection = useCallback((key: string) => {
@@ -686,11 +686,29 @@ export function Compare({
                     </footer>
                   </>
                 ) : view === 'sections' ? (
-                  <SectionChanges diffId={summary.diffId} unit={unit} focus={sectionFocus} onInspect={inspect} />
+                  <SectionChanges
+                    diffId={summary.diffId}
+                    unit={unit}
+                    focus={sectionFocus}
+                    onFocusConsumed={() => {
+                      setSectionFocus(null);
+                    }}
+                    onInspect={inspect}
+                    onReadingChange={closeInspector}
+                  />
                 ) : view === 'symbols' ? (
-                  <SymbolChanges diffId={summary.diffId} unit={unit} focus={symbolFocus} onInspect={inspect} />
+                  <SymbolChanges
+                    diffId={summary.diffId}
+                    unit={unit}
+                    focus={symbolFocus}
+                    onFocusConsumed={() => {
+                      setSymbolFocus(null);
+                    }}
+                    onInspect={inspect}
+                    onReadingChange={closeInspector}
+                  />
                 ) : (
-                  <ObjectChanges summary={summary} unit={unit} onInspect={inspect} />
+                  <ObjectChanges summary={summary} unit={unit} onInspect={inspect} onReadingChange={closeInspector} />
                 )}
               </div>
             </section>
@@ -824,7 +842,7 @@ function CompareLead({
     classification: 'derived',
     source: 'diff',
     rule: t('compare', 'lead.rule', { comparability: memory.comparability }),
-    raw: `${flash.base ?? '—'} → ${flash.target ?? '—'} (${flash.delta ?? '—'})`,
+    raw: `${flash.base ?? ABSENT} → ${flash.target ?? ABSENT} (${flash.delta ?? t('compare', 'lead.unknown')})`,
     details: [
       [t('compare', 'axis.old'), formatSize(flash.base, unit)],
       [t('compare', 'axis.new'), formatSize(flash.target, unit)],
@@ -1354,8 +1372,10 @@ function ChangeTable<Row, Sort extends string>({
   rowName,
   query,
   focus,
+  onFocusConsumed,
   detail,
   onInspect,
+  onReadingChange,
   before,
   extra,
 }: {
@@ -1376,8 +1396,15 @@ function ChangeTable<Row, Sort extends string>({
   readonly rowName: (row: Row) => string;
   readonly query: (request: ChangeQuery<Sort>) => Promise<IpcOutcome<ChangePage<Row>>>;
   readonly focus: Focus | null;
+  /**
+   * Called once the pick has been applied, so the page forgets it (R3 review S2-1): a table mounts each time
+   * its view opens, and a remembered pick would re-filter it and pull focus out of the tab list every time.
+   */
+  readonly onFocusConsumed: () => void;
   readonly detail: (row: Row) => FactEvidence;
   readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
+  /** Called whenever the rows on screen are about to change, so a row's detail never outlives its row. */
+  readonly onReadingChange: () => void;
   /** Content between the heading and the filters, such as the object rankings. */
   readonly before?: ReactNode;
   /** Controls beside the filter, such as Objects | Libraries. */
@@ -1420,13 +1447,22 @@ function ChangeTable<Row, Sort extends string>({
     setKind(null);
     setOffset(0);
     area.current?.focus();
+    latestFocusConsumed.current();
   }, [focus]);
 
-  // The query function is rebuilt by its parent on every render; the request is a function of the reader's
-  // choices, so only those (and the reset key) decide when to ask again.
+  // The callbacks are rebuilt by the parent on every render; the request is a function of the reader's
+  // choices, so only those (and the reset key) decide when to ask again. Kept current in a layout effect,
+  // not during render, so a render React discards can never leave a stale one behind.
   const latestQuery = useRef(query);
-  latestQuery.current = query;
+  const latestFocusConsumed = useRef(onFocusConsumed);
+  const latestReadingChange = useRef(onReadingChange);
+  useLayoutEffect(() => {
+    latestQuery.current = query;
+    latestFocusConsumed.current = onFocusConsumed;
+    latestReadingChange.current = onReadingChange;
+  });
   useEffect(() => {
+    latestReadingChange.current();
     const id = ++request.current;
     setLoading(true);
     setPage(null);
@@ -1629,12 +1665,16 @@ function SectionChanges({
   diffId,
   unit,
   focus,
+  onFocusConsumed,
   onInspect,
+  onReadingChange,
 }: {
   readonly diffId: string;
   readonly unit: SizeUnit;
   readonly focus: Focus | null;
+  readonly onFocusConsumed: () => void;
   readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
+  readonly onReadingChange: () => void;
 }) {
   const { t } = useI18n();
   const kindOf = (row: SectionChangeRowDto) => row.changeKind;
@@ -1682,6 +1722,8 @@ function SectionChanges({
       rowName={(row) => row.key}
       query={(request) => querySectionChanges({ diffId, ...request, limit: null })}
       focus={focus}
+      onFocusConsumed={onFocusConsumed}
+      onReadingChange={onReadingChange}
       detail={(row) =>
         changeDetail(
           t,
@@ -1706,12 +1748,16 @@ function SymbolChanges({
   diffId,
   unit,
   focus,
+  onFocusConsumed,
   onInspect,
+  onReadingChange,
 }: {
   readonly diffId: string;
   readonly unit: SizeUnit;
   readonly focus: Focus | null;
+  readonly onFocusConsumed: () => void;
   readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
+  readonly onReadingChange: () => void;
 }) {
   const { t } = useI18n();
   const kindOf = (row: SymbolChangeRowDto) => row.changeKind;
@@ -1768,6 +1814,8 @@ function SymbolChanges({
       rowName={(row) => row.name}
       query={(request) => querySymbolChanges({ diffId, ...request, limit: null })}
       focus={focus}
+      onFocusConsumed={onFocusConsumed}
+      onReadingChange={onReadingChange}
       detail={(row) =>
         changeDetail(
           t,
@@ -1796,10 +1844,12 @@ function ObjectChanges({
   summary,
   unit,
   onInspect,
+  onReadingChange,
 }: {
   readonly summary: CompareSummaryDto;
   readonly unit: SizeUnit;
   readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
+  readonly onReadingChange: () => void;
 }) {
   const { t } = useI18n();
   const attribution = summary.objectChanges;
@@ -1874,6 +1924,10 @@ function ObjectChanges({
       rowName={(row) => row.key}
       query={(request) => queryObjectChanges({ diffId, libraries, ...request, limit: null })}
       focus={focus !== null && (focus.libraries ?? false) === libraries ? focus : null}
+      onFocusConsumed={() => {
+        setFocus(null);
+      }}
+      onReadingChange={onReadingChange}
       detail={(row) =>
         changeDetail(
           t,

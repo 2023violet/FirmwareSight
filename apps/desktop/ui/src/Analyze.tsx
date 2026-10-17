@@ -830,8 +830,16 @@ function RegionUsageTable({
 function regionEvidence(region: MemoryRegionDto, t: Translate): FactEvidence {
   return {
     field: region.name,
-    value: region.usedBytes === null ? t('analyze', 'region.unknown') : regionBytes(region.usedBytes, t),
-    classification: region.evidenceSource === 'none' ? 'unknown' : 'observed',
+    // The same words the table's Mapped cell uses: a partial region is "at least N bytes", never plain N.
+    value:
+      region.usedBytes === null
+        ? t('analyze', 'region.unknown')
+        : region.state === 'partial'
+          ? t('analyze', 'region.atLeast', { bytes: region.usedBytes })
+          : regionBytes(region.usedBytes, t),
+    // Mapped bytes are a sum of section intervals the linker regions bound: derived from observed rows, not
+    // observed themselves (AGENTS.md §8, R3 review S2-2). No evidence at all is Unknown.
+    classification: region.evidenceSource === 'none' || region.usedBytes === null ? 'unknown' : 'derived',
     source: region.evidenceSource,
     locator: region.evidenceId,
     rule: t('analyze', 'region.origin') + ' ' + region.origin,
