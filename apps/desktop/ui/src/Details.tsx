@@ -903,7 +903,6 @@ function evidenceOf(row: EvidenceRowDto, t: ReturnType<typeof useI18n>['t']): Fa
     source: sourceCaption === undefined ? row.sourceType : t('analyze', sourceCaption),
     locator: row.sourceLocator,
     rule: row.rule,
-    raw: row.rawValue,
     details: [
       [t('analyze', 'details.col.confidence'), formatOptional(row.confidence)],
       [t('analyze', 'details.inspector.evidenceId'), row.id],

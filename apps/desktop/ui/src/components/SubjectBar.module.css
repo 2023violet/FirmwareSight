@@ -31,13 +31,17 @@
 }
 
 .name {
+  /* A long file name shortens with an ellipsis at the 1024 px minimum; the title holds the full name. */
+  max-width: 40ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-family: var(--fs-font-mono);
   font-size: var(--fs-font-size-metadata);
   font-variant-numeric: tabular-nums;
 }
 
 .chip {
-  /* Chips keep their words whole; the bar scrolls sideways before anything overlaps (R2 smoke). */
+  /* Chips keep their words on one line; the bar wraps to a second row before anything overlaps (R2). */
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -66,4 +70,11 @@
   align-items: center;
   gap: var(--fs-space-2);
   margin-inline-start: auto;
+}
+
+/* A long MAP name shortens the same way; the chip's title carries it in full. */
+.chipText {
+  max-width: 32ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -26,8 +26,11 @@ export interface SubjectBuild {
   readonly pinned?: boolean;
 }
 
-/** Latest result, a retained earlier result, or a chosen file with no result of its own yet. */
-export type SubjectFreshness = 'latest' | 'retained' | 'pending';
+/**
+ * Latest result; a retained earlier result; a chosen file with no result of its own yet; a retained result
+ * after the newest attempt failed; or a result whose selection has since gained or lost its MAP.
+ */
+export type SubjectFreshness = 'latest' | 'retained' | 'pending' | 'failed' | 'mapChanged';
 
 export type Subject =
   | { readonly kind: 'single'; readonly build: SubjectBuild }
@@ -71,7 +74,14 @@ export function SubjectBar({
       ) : (
         <span className={cx(styles['chip'], styles['retained'])}>
           <Icon name="history" size="inline" />
-          {t('common', 'subject.retained')}
+          {t(
+            'common',
+            freshness === 'failed'
+              ? 'subject.failed'
+              : freshness === 'mapChanged'
+                ? 'subject.mapChanged'
+                : 'subject.retained',
+          )}
         </span>
       )}
       {actions === undefined ? null : <div className={styles['actions']}>{actions}</div>}
@@ -101,11 +111,13 @@ function Build({ build }: { readonly build: SubjectBuild }) {
           {t('common', 'subject.mapUnknown')}
         </span>
       ) : build.map ? (
-        <span className={styles['chip']}>
+        <span className={styles['chip']} title={build.mapFileName ?? undefined}>
           <Icon name="file" size="inline" />
-          {build.mapFileName === undefined || build.mapFileName === null
-            ? t('common', 'subject.map')
-            : t('common', 'subject.mapNamed', { name: build.mapFileName })}
+          <span className={styles['chipText']}>
+            {build.mapFileName === undefined || build.mapFileName === null
+              ? t('common', 'subject.map')
+              : t('common', 'subject.mapNamed', { name: build.mapFileName })}
+          </span>
         </span>
       ) : (
         <span className={cx(styles['chip'], styles['unknown'])}>

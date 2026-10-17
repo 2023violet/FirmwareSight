@@ -747,6 +747,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── README.md
 │   └── R2/
 │       ├── AC_MATRIX.tsv
+│       ├── DESIGN_CHECKLIST.md
 │       ├── R2_NATIVE_SMOKE_EVIDENCE.zip
 │       └── README.md
 ├── examples/

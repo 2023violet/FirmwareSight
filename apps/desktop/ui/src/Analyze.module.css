@@ -205,7 +205,7 @@
   flex-direction: column;
   align-items: stretch;
   gap: var(--fs-space-1);
-  width: calc(var(--fs-layout-nav-rail) + var(--fs-space-16));
+  min-width: max-content;
   padding: var(--fs-space-2);
   background: var(--fs-color-bg-surface);
   border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);

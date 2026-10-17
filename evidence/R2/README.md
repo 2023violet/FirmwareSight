@@ -1,6 +1,6 @@
 # R2 Analyze and Overview: native smoke
 
-Plan: [06_DELIVERY/16_R2_ANALYZE_OVERVIEW.md](../../06_DELIVERY/16_R2_ANALYZE_OVERVIEW.md) §4. The run covers the final R2 code. The QA binary is a `cargo tauri build --no-bundle` with the identifier `com.firmwaresight.desktop.qa`. Its SHA-256 is `8841a07606737d2f3390197ca464e705ce6ea5f91298f1402690fef8e4cc779a`.
+Plan: [06_DELIVERY/16_R2_ANALYZE_OVERVIEW.md](../../06_DELIVERY/16_R2_ANALYZE_OVERVIEW.md) §4. The run covers the final R2 code, including the fixes from the independent review of 19bd5b9. The QA binary is a `cargo tauri build --no-bundle` with the identifier `com.firmwaresight.desktop.qa`. Its SHA-256 is `840b3811ed03d966620ac997a1a6246b2de0b2ab8e05f2bfa54e8c1bace47ebc`.
 
 **Operator.** Claude acted as an automated driver on the Owner's Windows 10 host (zh-CN, WebView2).
 - Page input went through the WebView2 DevTools protocol.
@@ -27,4 +27,4 @@ Plan: [06_DELIVERY/16_R2_ANALYZE_OVERVIEW.md](../../06_DELIVERY/16_R2_ANALYZE_OV
 - `results.tsv`;
 - the four driver scripts.
 
-The ZIP's SHA-256 is `dec4355b7e7c9ce2f6c9b2dd376ce7cb9673f3377fe5e0080013869b398c3e06`. Local paths were stripped before packing.
+The ZIP's SHA-256 is `4150605cd91073d3657001a9f4488f56d3501cfd4bbdab9c69411dcbb71d0a47`. Local paths were stripped before packing.

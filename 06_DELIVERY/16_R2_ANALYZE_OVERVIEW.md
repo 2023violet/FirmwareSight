@@ -50,10 +50,12 @@ Every honesty rule from U1P-R1/R2 (`readinessScope`, `pendingSelectionOf`, retai
 | D-R2-3 | The unit switch moves from the Details area to the SubjectBar. The global move (TopBar, Settings, palette) is R5. |
 | D-R2-4 | No new IPC, no change to Core or storage, no new i18n namespace. New keys go in `analyze` and `common`. |
 | D-R2-5 | The per-region object composition bar of the prototype needs per-region object rows that the IPC does not return. It is deferred, and the Memory view shows the largest sections instead. |
+| D-R2-6 | Accessible names that change are listed in §3, and the tests change in the same commit. |
 | D-R2-7 | A **build line** under the LeadAnswer (file · sha256 · size · format · section and symbol counts) states whose numbers these are. It sits inside the result region, so for a retained result it is named as retained along with everything else. The Evidence view's dossier keeps the full SHA-256 and the parser, entry and build ID. |
 | D-R2-8 | The SubjectBar's MAP chip reads `MAP: <file>` / `MAP: Not provided` in both pages, so the file name of an attached MAP stays on screen. |
 | D-R2-9 | Overview leads with the first step when nothing is analyzed or chosen; otherwise the ship answer leads. Header actions are secondary, so each page state has exactly one primary action. |
-| D-R2-6 | Accessible names that change are listed in §3, and the tests change in the same commit. |
+| D-R2-10 | The SubjectBar is 44 px when it fits and wraps to a second row when the page is narrowed (the docked Inspector at 1440 px, or the 1024 px minimum). A scrolling bar hid controls in the native smoke. File and MAP names shorten with an ellipsis, and the full name is in the title. This refines ADR-0034 D2's fixed 44 px; it is a minimum, not a cap. |
+| D-R2-11 | The SubjectBar's MAP word is the analysis's own (`capabilities.map`), not the selection's. When the selection gained or lost a MAP after analyzing, the bar says "MAP changed since this analysis · analyze again". A failed attempt has its own word: "Analysis failed · previous result kept" (review S2-1, S3). |
 
 ## 3. Accessible-name and structure mapping (as landed)
 
@@ -88,3 +90,24 @@ The run exposed four layout defects, and all four were fixed before the recorded
 - the lead reading sentence-first;
 - the SubjectBar wrapping beside the Inspector;
 - the full-height sticky docked Inspector.
+
+## 6. Independent review (2026-10-16)
+
+An independent review of `19bd5b9` ran in its own session and worktree. Verdict: **PASS_WITH_FIXES**, with no S1 findings. `check.py` passed 20/20 and the UI tests passed 469/469.
+
+| Finding | Disposition |
+|---|---|
+| S2-1: the MAP chip took the selection's MAP while the hash and "Latest" came from the analysis | Fixed (D-R2-11) in both pages, using shared helpers `analyzedWithMap` and `mapChangedSince` in `stateWords.ts`. Test added: analyze without a MAP, add one, and the bar keeps "MAP: Not provided" and says the MAP changed. The U1R tests now start from a selection whose MAP matches its analysis. |
+| S2-2: the Inspector stayed open when the result became retained | Fixed. It closes on a new snapshot, when the result becomes retained, and on a view switch. A test was added; it is mutation-proven, and it waits for the effect instead of racing it. |
+| S2-3: on Overview, a file that was chosen but not analyzed got "Run it on Release Gate" as its primary | Fixed. Overview leads with the intake whenever nothing is analyzed, and the button reads "Analyze selected artifact". Tests added for this state and for one primary action in the pending and not-current states. |
+| S2-4: no design checklist | Added: [evidence/R2/DESIGN_CHECKLIST.md](../evidence/R2/DESIGN_CHECKLIST.md). |
+| S3: SubjectBar height, stale comment, long names | D-R2-10. The comment is fixed, and names shorten with an ellipsis. |
+| S3: the failure was worded as "not analyzed" | Fixed: the `failed` freshness word. |
+| S3: notices used h3 under the h1 | Fixed: stale notices use `level={2}`. |
+| S3: the Memory panel contained a "Memory" region | The section is renamed "Memory accounting". The Inspector and the Evidence tab both stay named "Evidence": they have different roles (complementary/dialog versus tab), and renaming one would make it say less. |
+| S3: Export menu focus, outside close, width token | Focus returns to the Export button after a choice. Focus leaving the menu closes it. The width is `max-content`, not the rail token. |
+| S3: the Inspector showed the raw value twice for evidence rows | The raw block shows only when the raw value differs from the shown one. |
+| S3: the Inspector stayed open across a view switch | It now closes (S2-2). |
+| S3: about 15 i18n keys were unused | 35 keys were removed from both catalogs. The dynamically built `page.*`, `drop.refused.*` and `evidenceClass.*` keys were kept. |
+| S3: the retained lead was named "Flash used" | It is now "Flash used · previous analysis". |
+| S3: decision order; stale Overview comment | Both fixed. |

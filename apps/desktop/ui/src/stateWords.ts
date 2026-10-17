@@ -111,3 +111,28 @@ function verdictHead(
       return t('gate', 'verdict.pass', { count: counts.pass });
   }
 }
+
+/**
+ * Whether the analysis itself was made with a MAP, from Core's own capability word - `null` when the word does
+ * not say. R2 review S2-1: the SubjectBar must take the MAP fact from the result it is describing, not from the
+ * selection, because a MAP added or removed after analyzing changes the selection and not the result.
+ */
+export function analyzedWithMap(summary: { readonly capabilities: { readonly map: string } }): boolean | null {
+  switch (summary.capabilities.map) {
+    case 'provided':
+      return true;
+    case 'not-provided':
+      return false;
+    default:
+      return null;
+  }
+}
+
+/** The selection's MAP differs from the one the analysis was made with: the result is not the selection's yet. */
+export function mapChangedSince(
+  summary: { readonly capabilities: { readonly map: string } },
+  selection: { readonly mapAttached: boolean } | null,
+): boolean {
+  const analyzed = analyzedWithMap(summary);
+  return selection !== null && analyzed !== null && selection.mapAttached !== analyzed;
+}

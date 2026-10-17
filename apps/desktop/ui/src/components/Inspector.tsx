@@ -203,10 +203,12 @@ export function Inspector({
             ),
           )}
         </dl>
-        <div className={styles['rawBlock']}>
-          <p className={styles['field']}>{t('common', 'inspector.raw')}</p>
-          <p className={styles['raw']}>{raw}</p>
-        </div>
+        {raw === evidence.value ? null : (
+          <div className={styles['rawBlock']}>
+            <p className={styles['field']}>{t('common', 'inspector.raw')}</p>
+            <p className={styles['raw']}>{raw}</p>
+          </div>
+        )}
         <div className={styles['actions']}>
           <button
             type="button"

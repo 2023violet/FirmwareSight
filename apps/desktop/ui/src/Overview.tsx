@@ -64,6 +64,8 @@ import {
   gateStateName,
   gateVerdictSentence,
   severityState,
+  analyzedWithMap,
+  mapChangedSince,
 } from './stateWords';
 
 /** The page that can carry out a next step. Overview moves the reader; it never acts for them. */
@@ -219,14 +221,19 @@ export function Overview({
             build: {
               fileName: summary.artifact.fileName,
               sha256: summary.artifact.sha256,
-              map: selection?.mapAttached ?? null,
-              mapFileName: selection?.mapFileName ?? null,
+              // The analysis's own MAP word (R2 review S2-1); the file name only while the selection agrees.
+              map: analyzedWithMap(summary),
+              mapFileName:
+                analyzedWithMap(summary) === true && selection?.mapAttached === true ? selection.mapFileName : null,
             },
           }
         : null;
 
-  /** A session that has analyzed nothing leads with the step that fixes that; otherwise the ship answer leads. */
-  const leadWithIntake = summary === null && selection === null;
+  /**
+   * A session with no analysis leads with the step that makes one; otherwise the ship answer leads (R2 review
+   * S2-3: a chosen but unanalyzed file is still "nothing analyzed", and its next step is Analyze).
+   */
+  const leadWithIntake = summary === null;
 
   const intake =
     summary === null ? (
@@ -234,8 +241,10 @@ export function Overview({
         role="status"
         message={t('common', 'overview.emptyMessage')}
         nextStep={
-          <Button variant={leadWithIntake ? 'primary' : 'secondary'} onClick={() => onOpen('analyze')}>
-            {t('common', 'overview.emptyAction')}
+          <Button variant="primary" onClick={() => onOpen('analyze')}>
+            {selection === null
+              ? t('common', 'overview.emptyAction')
+              : t('common', 'overview.analyzeSelectedButton')}
           </Button>
         }
       />
@@ -281,7 +290,12 @@ export function Overview({
       />
 
       {subject === null ? null : (
-        <SubjectBar subject={subject} freshness={pending === null ? 'latest' : 'pending'} />
+        <SubjectBar
+          subject={subject}
+          freshness={
+            pending !== null ? 'pending' : summary !== null && mapChangedSince(summary, selection) ? 'mapChanged' : 'latest'
+          }
+        />
       )}
 
       {leadWithIntake ? intake : readiness}
@@ -365,8 +379,9 @@ function InputRow({
   // One band, three cells, hairlines between them - which is what the reference draws and what this
   // component asked for since U1. The cells stay named regions because they are three separate answers a
   // reader may want to jump between, and a band is a layout, not an excuse to flatten semantics.
-  // This band is only ever rendered when the summary describes the selection in hand, so its two facts -
-  // Core's capability and the selection's MAP attachment - are the same artifact's by construction.
+  // This band is only ever rendered when the summary describes the selection in hand. Its MAP pill is Core's
+  // word for the analysis; the selection's MAP line can differ once a MAP is added or removed after analyzing,
+  // which the SubjectBar names as "MAP changed since this analysis" (R2 review S2-1).
   // The wrapper is the U1P-R3 F2 fix and nothing else: it asks this one band to fill the line its cells wrap
   // onto, because at the frozen 1024 px width three capability cells land in a two-track row and the leftover
   // track showed the band's own background as a fourth cell that does not exist. `components/Panel` is not

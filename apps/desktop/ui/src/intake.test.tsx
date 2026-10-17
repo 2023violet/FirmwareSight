@@ -947,6 +947,12 @@ describe('P1-A0 intake screen', () => {
  * size it was written against.
  */
 describe('U1R capability strip: current attempt, not retained evidence', () => {
+  // The standard summary was made with a MAP, so the selection that produced it has one attached: a selection
+  // without it would be the "MAP changed since this analysis" case, which has its own test below.
+  beforeEach(() => {
+    selectMock.mockResolvedValue(ok(WITH_MAP));
+  });
+
   // R2 retired the strip of capability chips. The contract it carried now lives in the SubjectBar: the top
   // of the page names the file in the row and says whether the result below is its own. The capability
   // words themselves sit in the Evidence view of the result region, whose name says whether it is
@@ -1012,7 +1018,8 @@ describe('U1R capability strip: current attempt, not retained evidence', () => {
 
     const bar = subjectBar();
     expectNoBorrowedFacts(bar);
-    expect(within(bar).getByText('Previous result kept · current selection not analyzed')).toBeDefined();
+    // A failure has its own word: the newest attempt did not merely go unanalyzed (R2 review S3).
+    expect(within(bar).getByText('Analysis failed · previous result kept')).toBeDefined();
     expect(screen.getByRole('region', { name: 'Last good analysis' })).toBeDefined();
   });
 
@@ -1200,6 +1207,40 @@ describe('R2 Analyze page', () => {
     fireEvent.keyDown(png, { key: 'Escape' });
     expect(screen.queryByRole('button', { name: 'Export PNG' })).toBeNull();
     expect(document.activeElement).toBe(toggle);
+  });
+
+  it('takes the MAP word from the analysis, and says when the MAP changed after it', async () => {
+    // R2 review S2-1: analyzed without a MAP, then a MAP added. The result is still the MAP-less one.
+    analyzeMock.mockResolvedValue(ok(summaryWithoutMap()));
+    await chooseArtifact();
+    await analyze();
+    await screen.findByText('5,432 bytes');
+    expect(within(subjectBar()).getByText('MAP: Not provided')).toBeDefined();
+    expect(within(subjectBar()).getByText('Latest')).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add MAP' }));
+    await waitFor(() => expect(attachMock).toHaveBeenCalled());
+    await screen.findByRole('button', { name: 'Remove MAP' });
+    const bar = subjectBar();
+    expect(within(bar).getByText('MAP: Not provided')).toBeDefined();
+    expect(within(bar).queryByText('MAP: app.map')).toBeNull();
+    expect(within(bar).queryByText('Latest')).toBeNull();
+    expect(within(bar).getByText('MAP changed since this analysis · analyze again')).toBeDefined();
+  });
+
+  it('closes the Inspector when the result becomes retained', async () => {
+    // R2 review S2-2: choosing another file leaves the old result on screen as retained; its evidence must
+    // not stay open beside the new selection as if it were current.
+    await chooseArtifact();
+    await analyze();
+    fireEvent.click(await screen.findByRole('button', { name: /^4,200 bytes, Observed evidence/ }));
+    await screen.findByRole('complementary', { name: 'Evidence' });
+
+    selectMock.mockResolvedValue(ok(selection({ fileName: 'other.elf', selectionId: 'sel-other' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
+    await screen.findAllByText('other.elf');
+    // Closing is an effect of the new selection, committed after the render that shows its name.
+    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Evidence' })).toBeNull());
   });
 
   it('closes the Inspector when a different snapshot takes the page', async () => {

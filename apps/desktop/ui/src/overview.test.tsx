@@ -488,6 +488,31 @@ describe('R2 Overview lead', () => {
     expect(ship.contains(primaries()[0] ?? null)).toBe(true);
   });
 
+  it('leads with Analyze when a file is chosen but nothing is analyzed (R2 review S2-3)', () => {
+    renderOverview({ selection: selection({ selectionId: 'sel-new' }), analyzedSelectionId: null });
+    expect(primaries().map((button) => button.textContent)).toEqual(['Analyze selected artifact']);
+    const ship = screen.getByRole('region', { name: 'Can we ship now?' });
+    expect(ship.contains(primaries()[0] ?? null)).toBe(false);
+  });
+
+  it('keeps one primary action when the selection moved on from the analysis', () => {
+    renderOverview({
+      summary: summary(),
+      gateRun: gateRun(),
+      selection: selection({ selectionId: 'sel-new' }),
+      analyzedSelectionId: 'sel-old',
+    });
+    expect(primaries()).toHaveLength(1);
+  });
+
+  it('keeps one primary action when the run judged another build', () => {
+    renderOverview({
+      summary: summary({ identity: { ...summary().identity, snapshotId: SNAP_B } }),
+      gateRun: gateRun({ snapshotId: SNAP_A }),
+    });
+    expect(primaries()).toHaveLength(1);
+  });
+
   it('says the release check has not run, with the state word and no borrowed verdict', () => {
     renderOverview({ summary: summary() });
     const ship = screen.getByRole('region', { name: 'Can we ship now?' });

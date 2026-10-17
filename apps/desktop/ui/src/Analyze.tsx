@@ -40,7 +40,7 @@ import type {
   MemorySummaryDto,
   SelectionDto,
 } from './ipc/types';
-import { capabilityState } from './stateWords';
+import { analyzedWithMap, capabilityState, mapChangedSince } from './stateWords';
 
 export function Analyze({
   unit,
@@ -239,16 +239,26 @@ export function Analyze({
   const closeInspector = useCallback(() => {
     setInspected(null);
   }, []);
-  // Evidence belongs to one snapshot. A new analysis, or a retained one coming back, closes the Inspector
-  // rather than leave a fact on screen that the tables beside it no longer describe.
+  // Evidence belongs to one snapshot, read as current or as retained. A new analysis, a result becoming
+  // retained (another file chosen, or a failed attempt) and a change of view all close the Inspector, rather
+  // than leave a fact on screen beside tables that no longer describe it in the same terms (R2 review S2-2).
   const shownSnapshot = summary?.identity.snapshotId ?? null;
+  const shownAsRetained = summary !== null && (error !== null || pendingSelection);
   useEffect(() => {
     setInspected(null);
-  }, [shownSnapshot]);
+  }, [shownSnapshot, shownAsRetained, view]);
 
   /** The shell's freshness word for the SubjectBar: one place that says whose numbers these are. */
   const freshness: SubjectFreshness =
-    summary === null ? 'latest' : error !== null || pendingSelection ? 'retained' : 'latest';
+    summary === null
+      ? 'latest'
+      : error !== null
+        ? 'failed'
+        : pendingSelection
+          ? 'retained'
+          : mapChangedSince(summary, selection)
+            ? 'mapChanged'
+            : 'latest';
   const stale = summary !== null && (error !== null || pendingSelection);
 
   return (
@@ -331,7 +341,7 @@ export function Analyze({
           </p>
         ) : null}
         {staleExportNote ? (
-          <Notice tone="stale" title={t('analyze', 'export.staleNote')} />
+          <Notice tone="stale" level={2} title={t('analyze', 'export.staleNote')} />
         ) : null}
         {exporting ? (
           <p className={styles['status']} role="status" aria-live="polite">
@@ -390,12 +400,13 @@ export function Analyze({
             aria-label={stale ? t('analyze', 'report.groupStale') : t('analyze', 'report.groupCurrent')}
           >
             {stale ? (
-              <Notice tone="stale" title={t('analyze', 'status.retainedTitle')}>
+              <Notice tone="stale" level={2} title={t('analyze', 'status.retainedTitle')}>
                 <p role="note">{retainedSentence(summary, selection?.fileName ?? null, pendingSelection, t)}</p>
               </Notice>
             ) : null}
             <AnalysisLead
               summary={summary}
+              retained={stale}
               unit={unit}
               inspecting={inspected?.evidence ?? null}
               onInspect={inspect}
@@ -470,13 +481,15 @@ function subjectOf(
   retained: AnalysisSummaryDto | null,
 ): Subject | null {
   if (current !== null) {
+    // The MAP word is the analysis's own; the selection only lends the file name when it still agrees.
+    const withMap = analyzedWithMap(current);
     return {
       kind: 'single',
       build: {
         fileName: current.artifact.fileName,
         sha256: current.artifact.sha256,
-        map: selection?.mapAttached ?? null,
-        mapFileName: selection?.mapFileName ?? null,
+        map: withMap,
+        mapFileName: withMap === true && selection?.mapAttached === true ? selection.mapFileName : null,
       },
     };
   }
@@ -525,11 +538,14 @@ function retainedSentence(
  */
 function AnalysisLead({
   summary,
+  retained,
   unit,
   inspecting,
   onInspect,
 }: {
   readonly summary: AnalysisSummaryDto;
+  /** A retained result names itself as one, in the lead's own accessible name too (R2 review S3). */
+  readonly retained: boolean;
   readonly unit: SizeUnit;
   readonly inspecting: FactEvidence | null;
   readonly onInspect: (evidence: FactEvidence, trigger: HTMLElement) => void;
@@ -556,7 +572,7 @@ function AnalysisLead({
   };
   return (
     <LeadAnswer
-      sentence={t('analyze', 'lead.flash')}
+      sentence={t('analyze', retained ? 'lead.flashRetained' : 'lead.flash')}
       figure={
         <FactValue
           evidence={evidence}
@@ -614,7 +630,7 @@ function MemoryView({ summary, unit }: { readonly summary: AnalysisSummaryDto; r
   return (
     <div className={styles['view']}>
       <RegionUsageTable regions={memory.regionUsage} />
-      <PageSection title={t('analyze', 'report.memorySection')}>
+      <PageSection title={t('analyze', 'memory.accounting')}>
         <FactList>
           <FactRow term={t('analyze', 'result.loadEvidenceLabel')}>
             <StateBadge state={quality.state} label={quality.label} />
@@ -726,6 +742,12 @@ function ExportMenu({
           toggle.current?.focus();
         }
       }}
+      onBlur={(event) => {
+        // Tabbing or clicking away closes the menu; moving between its own buttons does not.
+        if (open && !event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setOpen(false);
+        }
+      }}
     >
       <Button
         ref={toggle}
@@ -749,6 +771,8 @@ function ExportMenu({
               disabled={disabled}
               onClick={() => {
                 setOpen(false);
+                // The chosen button is about to leave the DOM; focus goes back to the menu's own button.
+                toggle.current?.focus();
                 onExport(format);
               }}
             >
