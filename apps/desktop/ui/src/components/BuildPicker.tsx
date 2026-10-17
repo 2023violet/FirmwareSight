@@ -119,7 +119,9 @@ export function BuildPicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={`${base}-list`}
-        aria-labelledby={`${base}-label ${base}-value`}
+        // The label names the control; the chosen build is its content (WAI-ARIA select-only combobox).
+        aria-labelledby={`${base}-label`}
+        data-value={value ?? ''}
         aria-activedescendant={open ? optionId(active) : undefined}
         className={styles['button']}
         disabled={disabled || options.length === 0}
@@ -149,6 +151,7 @@ export function BuildPicker({
               key={option.id}
               id={optionId(index)}
               role="option"
+              data-value={option.id}
               aria-selected={option.id === value}
               className={cx(styles['option'], index === active ? styles['active'] : undefined)}
               onMouseDown={(event) => {

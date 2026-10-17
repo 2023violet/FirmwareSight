@@ -772,6 +772,7 @@ function PairSide({
           <span>
             {t('compare', 'picker.runtimeRamPrefix')} {budgetWords(chosen.runtimeRam.state, chosen.runtimeRam.bytes, unit)}
           </span>
+          <span className={styles['monoSmall']}>{t('compare', 'picker.importedLine', { date: chosen.importedAt })}</span>
         </p>
       )}
     </div>

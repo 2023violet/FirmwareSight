@@ -605,11 +605,51 @@ async function runCompare() {
   await screen.findByRole('region', { name: 'Build comparison' });
 }
 
-function pair(): [HTMLSelectElement, HTMLSelectElement] {
-  return [
-    screen.getByRole('combobox', { name: 'Old / Base' }) as HTMLSelectElement,
-    screen.getByRole('combobox', { name: 'New / Target' }) as HTMLSelectElement,
-  ];
+/**
+ * The two pickers (R3: BuildPicker, a select-only combobox). `value` reads the snapshot id the picker names,
+ * the way a native select's value used to.
+ */
+interface Picker {
+  readonly element: HTMLElement;
+  readonly value: string;
+}
+
+function picker(name: string): Picker {
+  const element = screen.getByRole('combobox', { name });
+  return {
+    element,
+    get value() {
+      return element.getAttribute('data-value') ?? '';
+    },
+  };
+}
+
+function pair(): [Picker, Picker] {
+  return [picker('Old / Base'), picker('New / Target')];
+}
+
+/** R3: the change tables live behind the page's view tabs. Open the view, then return the table's region. */
+async function openView(tab: 'Sections' | 'Symbols' | 'Objects', region: string): Promise<HTMLElement> {
+  fireEvent.click(screen.getByRole('tab', { name: tab }));
+  return screen.findByRole('region', { name: region });
+}
+
+/** R3: export lives in the header's Export menu. Open it if needed, then name the format. */
+function exportButton(name: string): HTMLElement {
+  if (screen.queryByRole('button', { name }) === null) {
+    fireEvent.click(screen.getByRole('button', { name: 'Export' }));
+  }
+  return screen.getByRole('button', { name });
+}
+
+/** Choose a build the way a reader does: open the list, pick the option that names it. */
+function choose(side: Picker, snapshotId: string): void {
+  fireEvent.click(side.element);
+  const option = document.querySelector(`[role="option"][data-value="${snapshotId}"]`);
+  if (option === null) {
+    throw new Error(`no option for ${snapshotId}`);
+  }
+  fireEvent.click(option);
 }
 
 function rowOf(term: string): string {
@@ -664,7 +704,8 @@ describe('the rail and the pages it lists', () => {
   it('shows the recorded facts of each side before any comparison runs', async () => {
     await openCompare();
 
-    const facts = within(screen.getByText('Old / Base').closest('div') as HTMLElement);
+    // R3: the label sits inside the BuildPicker; the facts line is its sibling in the side's wrapper.
+    const facts = within(screen.getByText('Old / Base').closest('div')?.parentElement as HTMLElement);
     expect(facts.getByText('5,432 bytes')).toBeDefined();
     expect(facts.getByText('Nonvolatile exact 4,200 bytes')).toBeDefined();
     expect(facts.getByText('Runtime RAM exact 1,024 bytes')).toBeDefined();
@@ -694,7 +735,9 @@ describe('defaults and refusals', () => {
 
     const [base, target] = pair();
     expect(base.value).toBe('snap-old');
-    expect(target.selectedOptions[0]?.textContent).toContain('last analyzed');
+    fireEvent.click(target.element);
+    const chosen = document.querySelector('[role="option"][aria-selected="true"]');
+    expect(chosen?.textContent).toContain('last analyzed');
   });
 
   it('falls back to the two most recent stored builds when nothing was analyzed', async () => {
@@ -708,7 +751,7 @@ describe('defaults and refusals', () => {
   it('refuses a pair of one build: the action locks and the screen says why', async () => {
     await openCompare();
 
-    fireEvent.change(pair()[1], { target: { value: 'snap-old' } });
+    choose(pair()[1], 'snap-old');
 
     expect((screen.getByRole('button', { name: 'Compare' }) as HTMLButtonElement).disabled).toBe(
       true,
@@ -764,11 +807,11 @@ describe('the summary and its signs', () => {
     expect(memory.textContent).toContain('Delta = target − base');
     expect(rowOf('Nonvolatile / load image')).toContain('Old 4,200 bytes');
     expect(rowOf('Nonvolatile / load image')).toContain('New 4,456 bytes');
-    expect(rowOf('Nonvolatile / load image')).toContain('Delta +256 bytes');
+    expect(rowOf('Nonvolatile / load image')).toContain('Delta ▲256 bytes');
 
     expect(rowOf('Runtime RAM')).toContain('Old 1,024 bytes');
     expect(rowOf('Runtime RAM')).toContain('New 956 bytes');
-    expect(rowOf('Runtime RAM')).toContain('Delta -68 bytes');
+    expect(rowOf('Runtime RAM')).toContain('Delta ▼68 bytes');
     expect(rowOf('Nonvolatile / load image')).toContain('6.1%');
     expect(rowOf('Runtime RAM')).toContain('-6.6%');
   });
@@ -964,7 +1007,7 @@ describe('the summary and its signs', () => {
     await openCompare(attributed);
     await runCompare();
 
-    const region = await screen.findByRole('region', { name: 'Changes by object and library' });
+    const region = await openView('Objects', 'Changes by object and library');
     expect(region.textContent).toContain('Objects: 1 changed, 1 added, 0 removed, 3 unchanged');
     await waitFor(() =>
       expect(objectChangesMock).toHaveBeenCalledWith(
@@ -980,7 +1023,7 @@ describe('the summary and its signs', () => {
     expect(added?.textContent).not.toMatch(/(^|\D)0 bytes → 56/u);
 
     // A shortlist entry filters the authoritative table through the shell.
-    fireEvent.click(within(region).getByRole('button', { name: /imu\.o/u }));
+    fireEvent.click(within(region).getByRole('button', { name: 'Show objects changes for imu.o' }));
     await waitFor(() =>
       expect(objectChangesMock).toHaveBeenLastCalledWith(expect.objectContaining({ filter: 'imu.o', libraries: false })),
     );
@@ -998,9 +1041,9 @@ describe('the summary and its signs', () => {
     // appears. Sampling here caught zero calls on a Windows runner and two on a Linux one, and the
     // delta below then charged the page's own fetches to the KiB radio. Waiting for a row that only
     // exists once the query has resolved puts the sample after the fetch; the guard proves it did.
-    const sections = await screen.findByRole('region', { name: 'Section Changes' });
+    const sections = await openView('Sections', 'Section Changes');
     await within(sections).findByText('.text');
-    const symbols = await screen.findByRole('region', { name: 'Symbol Changes' });
+    const symbols = await openView('Symbols', 'Symbol Changes');
     await within(symbols).findByText('g_threshold');
 
     const calls = compareMock.mock.calls.length;
@@ -1009,9 +1052,11 @@ describe('the summary and its signs', () => {
 
     fireEvent.click(screen.getByRole('radio', { name: 'KiB' }));
 
+    // The memory totals are on the Summary view (R3).
+    fireEvent.click(screen.getByRole('tab', { name: 'Summary' }));
     expect(rowOf('Nonvolatile / load image')).toContain('Old 4.10 KiB');
     expect(rowOf('Nonvolatile / load image')).toContain('New 4.35 KiB');
-    expect(rowOf('Nonvolatile / load image')).toContain('Delta +0.250 KiB');
+    expect(rowOf('Nonvolatile / load image')).toContain('Delta ▲0.250 KiB');
     expect(compareMock.mock.calls.length).toBe(calls);
     expect(sectionChangesMock.mock.calls.length).toBe(changeCalls);
   });
@@ -1037,7 +1082,7 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    const table = await screen.findByRole('region', { name: 'Section Changes' });
+    const table = await openView('Sections', 'Section Changes');
     const row = (await within(table).findByText('.noinit')).closest('tr') as HTMLTableRowElement;
     expect(within(row).getByText('Added')).toBeDefined();
     expect(within(row).getAllByText('Not present').length).toBe(2);
@@ -1048,7 +1093,7 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    const table = await screen.findByRole('region', { name: 'Section Changes' });
+    const table = await openView('Sections', 'Section Changes');
     const row = (await within(table).findByText('.oldboot')).closest('tr') as HTMLTableRowElement;
     expect(within(row).getByText('Removed')).toBeDefined();
     expect(within(row).getAllByText('Not present').length).toBeGreaterThan(0);
@@ -1059,7 +1104,7 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    const table = await screen.findByRole('region', { name: 'Symbol Changes' });
+    const table = await openView('Symbols', 'Symbol Changes');
     const row = (await within(table).findByText('g_threshold')).closest('tr') as HTMLTableRowElement;
     expect(row.textContent).toContain('Unknown');
     expect(row.textContent).toContain('at least one side records no size for this symbol');
@@ -1070,7 +1115,7 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    const table = await screen.findByRole('region', { name: 'Section Changes' });
+    const table = await openView('Sections', 'Section Changes');
     // Each table owns its own kind filter: the symbol table's radios must not move the sections.
     for (const [label, wanted] of [
       ['Added', 'added'],
@@ -1103,8 +1148,8 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    const table = await screen.findByRole('region', { name: 'Section Changes' });
-    const input = await within(table).findByRole('textbox', { name: 'Filter sections by name' });
+    const table = await openView('Sections', 'Section Changes');
+    const input = await within(table).findByRole('searchbox', { name: 'Filter sections by name' });
     fireEvent.change(input, { target: { value: 'boot' } });
     fireEvent.click(await within(table).findByRole('button', { name: 'Apply filter' }));
 
@@ -1139,14 +1184,13 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    const sections = await screen.findByRole('region', { name: 'Section Changes' });
-    const symbols = await screen.findByRole('region', { name: 'Symbol Changes' });
-    const sectionInput = within(sections).getByRole('textbox', { name: 'Filter sections by name' });
-    const symbolInput = within(symbols).getByRole('textbox', { name: 'Filter symbols by name' });
+    // R3: one change table is on screen at a time, so the sections pass runs in the Sections view and the
+    // symbols pass in the Symbols view.
+    const sections = await openView('Sections', 'Section Changes');
+    const sectionInput = within(sections).getByRole('searchbox', { name: 'Filter sections by name' });
     const sectionApply = within(sections).getByRole('button', { name: 'Apply filter' });
     const sectionForm = sectionInput.closest('form');
     expect(sectionForm).not.toBeNull();
-    const symbolApply = within(symbols).getByRole('button', { name: 'Apply filter' });
 
     const requested = <T extends { filter: string | null; offset: number }>(
       mock: { mock: { calls: readonly [T][] } },
@@ -1159,13 +1203,6 @@ describe('the change tables', () => {
       expect((sectionApply as HTMLButtonElement).disabled).toBe(false);
       fireEvent.click(sectionApply);
       await waitFor(() => expect(requested(sectionChangesMock, value)).toBe(true));
-      applied += 1;
-    }
-    for (const value of symbolQueries) {
-      fireEvent.change(symbolInput, { target: { value } });
-      expect((symbolApply as HTMLButtonElement).disabled).toBe(false);
-      fireEvent.click(symbolApply);
-      await waitFor(() => expect(requested(symbolChangesMock, value)).toBe(true));
       applied += 1;
     }
 
@@ -1184,6 +1221,17 @@ describe('the change tables', () => {
       bySubmit += 1;
     }
 
+    const symbols = await openView('Symbols', 'Symbol Changes');
+    const symbolInput = within(symbols).getByRole('searchbox', { name: 'Filter symbols by name' });
+    const symbolApply = within(symbols).getByRole('button', { name: 'Apply filter' });
+    for (const value of symbolQueries) {
+      fireEvent.change(symbolInput, { target: { value } });
+      expect((symbolApply as HTMLButtonElement).disabled).toBe(false);
+      fireEvent.click(symbolApply);
+      await waitFor(() => expect(requested(symbolChangesMock, value)).toBe(true));
+      applied += 1;
+    }
+
     expect([applied, bySubmit]).toEqual([30, 6]);
   });
 
@@ -1191,7 +1239,7 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    const table = await screen.findByRole('region', { name: 'Section Changes' });
+    const table = await openView('Sections', 'Section Changes');
     const nameHeader = () =>
       within(table)
         .getAllByRole('columnheader')
@@ -1199,24 +1247,24 @@ describe('the change tables', () => {
 
     // The table opens ordered by name ascending, so the first click on that column asks for the
     // other end of the same ordering rather than a different column.
-    fireEvent.click(await within(table).findByRole('button', { name: 'Sort by Name' }));
+    fireEvent.click(await within(table).findByRole('button', { name: 'Name' }));
     await waitFor(() => {
       const requests = sectionChangesMock.mock.calls.map(([request]) => request);
       expect(
         requests.some((request) => request.sort === 'key' && request.direction === 'desc'),
       ).toBe(true);
     });
-    await within(table).findByRole('button', { name: 'Sort by Name' });
+    await within(table).findByRole('button', { name: 'Name' });
     expect(nameHeader()?.getAttribute('aria-sort')).toBe('descending');
 
-    fireEvent.click(within(table).getByRole('button', { name: 'Sort by Name' }));
+    fireEvent.click(within(table).getByRole('button', { name: 'Name' }));
     await waitFor(() => {
       const requests = sectionChangesMock.mock.calls.map(([request]) => request);
       expect(
         requests.some((request) => request.sort === 'key' && request.direction === 'asc'),
       ).toBe(true);
     });
-    await within(table).findByRole('button', { name: 'Sort by Name' });
+    await within(table).findByRole('button', { name: 'Name' });
     expect(nameHeader()?.getAttribute('aria-sort')).toBe('ascending');
   });
 
@@ -1227,7 +1275,7 @@ describe('the change tables', () => {
     // The region mounts before its first page lands: the pager only renders once the shell has
     // answered, so reading it synchronously lost that race on a Windows runner. Wait for the range
     // itself - it exists only from a resolved page, and Next page is rendered beside it.
-    const table = await screen.findByRole('region', { name: 'Symbol Changes' });
+    const table = await openView('Symbols', 'Symbol Changes');
     expect(await within(table).findByText(/Showing 1 to 3 of 3 symbols/)).toBeDefined();
 
     fireEvent.click(within(table).getByRole('button', { name: 'Next page' }));
@@ -1241,7 +1289,8 @@ describe('the change tables', () => {
     await openCompare();
     await runCompare();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Sort by RAM size' }));
+    await openView('Sections', 'Section Changes');
+    fireEvent.click(await screen.findByRole('button', { name: 'RAM size' }));
     await waitFor(() => {
       const requests = sectionChangesMock.mock.calls.map(([request]) => request);
       expect(
@@ -1267,13 +1316,14 @@ describe('the ranking as a way to the full list', () => {
     expect(
       await screen.findByRole('button', { name: 'Show sections changes for .noinit' }),
     ).toBeDefined();
-    // The full tables are asked for with no kind filter, so nothing hides behind the ranking.
-    const requests = sectionChangesMock.mock.calls.map(([request]) => request);
-    expect(requests.some((request) => request.changeKind === null && request.limit === null)).toBe(
-      true,
-    );
-    expect(await screen.findByRole('region', { name: 'Section Changes' })).toBeDefined();
-    expect(screen.getByRole('region', { name: 'Symbol Changes' })).toBeDefined();
+    // The full tables are one view away, and asked for with no kind filter, so nothing hides behind the
+    // ranking.
+    expect(await openView('Sections', 'Section Changes')).toBeDefined();
+    await waitFor(() => {
+      const requests = sectionChangesMock.mock.calls.map(([request]) => request);
+      expect(requests.some((request) => request.changeKind === null && request.limit === null)).toBe(true);
+    });
+    expect(await openView('Symbols', 'Symbol Changes')).toBeDefined();
   });
 
   it('tells the reader the ranked lists are not a breakdown of the load-image delta', async () => {
@@ -1332,7 +1382,7 @@ describe('the ranking as a way to the full list', () => {
       );
     });
     expect(
-      (screen.getByRole('textbox', { name: 'Filter sections by name' }) as HTMLInputElement).value,
+      (screen.getByRole('searchbox', { name: 'Filter sections by name' }) as HTMLInputElement).value,
     ).toBe('.text');
     expect(document.activeElement?.getAttribute('aria-label')).toBe('Section Changes');
   });
@@ -1359,14 +1409,14 @@ describe('export', () => {
     await runCompare();
     const pending = deferred<ExportOutcomeDto>();
     exportVisualMock.mockReturnValueOnce(pending.promise);
-    fireEvent.click(screen.getByRole('button', { name: 'Export SVG' }));
+    fireEvent.click(exportButton('Export SVG'));
     await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
     compareMock.mockResolvedValueOnce(ok(comparison({ diffId: 'cmp-new-subject' })));
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Compare' })); });
     await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-new-subject')).toBe(true));
     await act(async () => { pending.resolve(ok({ status: 'written', fileName: 'old-comparison-report.svg', format: 'svg' })); });
     expect(screen.queryByText(/old-comparison-report/)).toBeNull();
-    expect((screen.getByRole('button', { name: 'Export SVG' }) as HTMLButtonElement).disabled).toBe(false);
+    expect((exportButton('Export SVG') as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('says nothing was written when the comparison changed while the Save dialog was open', async () => {
@@ -1374,7 +1424,7 @@ describe('export', () => {
     await runCompare();
     const pending = deferred<ExportOutcomeDto>();
     exportVisualMock.mockReturnValueOnce(pending.promise);
-    fireEvent.click(screen.getByRole('button', { name: 'Export PNG' }));
+    fireEvent.click(exportButton('Export PNG'));
     await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
     compareMock.mockResolvedValueOnce(ok(comparison({ diffId: 'cmp-moved-on' })));
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Compare' })); });
@@ -1392,17 +1442,19 @@ describe('export', () => {
     await openCompare();
     await runCompare();
 
-    const exports = screen.getByRole('region', { name: 'Export' });
-    expect(within(exports).getByRole('button', { name: 'Export JSON' })).toBeDefined();
-    expect(within(exports).getByRole('button', { name: 'Export HTML' })).toBeDefined();
-    expect(within(exports).getByRole('button', { name: 'Export PNG' })).toBeDefined();
-    expect(within(exports).getByRole('button', { name: 'Export SVG' })).toBeDefined();
-    expect(within(exports).getByRole('button', { name: 'Export print-ready HTML' })).toBeDefined();
+    // R3: the five formats are one menu, a group named Export, in the page header.
+    const menu = screen.getByRole('group', { name: 'Export' });
+    expect(within(menu).getByRole('button', { name: 'Export' })).toBeDefined();
+    expect(exportButton('Export JSON')).toBeDefined();
+    expect(exportButton('Export HTML')).toBeDefined();
+    expect(exportButton('Export PNG')).toBeDefined();
+    expect(exportButton('Export SVG')).toBeDefined();
+    expect(exportButton('Export print-ready HTML')).toBeDefined();
 
     exportVisualMock.mockResolvedValue(ok({ status: 'written', fileName: 'firmwaresight-compare.png', format: 'png' }));
-    fireEvent.click(within(exports).getByRole('button', { name: 'Export PNG' }));
+    fireEvent.click(exportButton('Export PNG'));
     await waitFor(() => expect(exportVisualMock).toHaveBeenCalledWith('cmp-7f3a-1', 'png'));
-    fireEvent.click(within(exports).getByRole('button', { name: 'Export print-ready HTML' }));
+    fireEvent.click(exportButton('Export print-ready HTML'));
     await waitFor(() => expect(exportVisualMock).toHaveBeenCalledWith('cmp-7f3a-1', 'html'));
     expect(exportHtmlMock).not.toHaveBeenCalled();
   });
@@ -1411,9 +1463,10 @@ describe('export', () => {
     await openCompare();
     await runCompare();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Export JSON' }));
+    await screen.findByRole('button', { name: 'Export' });
+    fireEvent.click(exportButton('Export JSON'));
     expect(await screen.findByText('Wrote firmwaresight-diff.json (JSON).')).toBeDefined();
-    fireEvent.click(screen.getByRole('button', { name: 'Export HTML' }));
+    fireEvent.click(exportButton('Export HTML'));
     expect(await screen.findByText('Wrote firmwaresight-diff.html (HTML).')).toBeDefined();
 
     const sent = JSON.stringify(exportJsonMock.mock.calls);
@@ -1427,7 +1480,8 @@ describe('export', () => {
     await runCompare();
     exportJsonMock.mockResolvedValue(ok({ status: 'cancelled', fileName: null, format: 'json' }));
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Export JSON' }));
+    await screen.findByRole('button', { name: 'Export' });
+    fireEvent.click(exportButton('Export JSON'));
 
     expect(await screen.findByText('Export cancelled. No file was written.')).toBeDefined();
     expect(screen.queryByRole('alert', { name: 'Export error' })).toBeNull();
@@ -1440,7 +1494,8 @@ describe('export', () => {
       ok({ status: 'kept-existing', fileName: null, format: 'html' }),
     );
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Export HTML' }));
+    await screen.findByRole('button', { name: 'Export' });
+    fireEvent.click(exportButton('Export HTML'));
 
     expect(
       await screen.findByText('Kept the file that was already there. Nothing was written.'),
@@ -1453,14 +1508,15 @@ describe('export', () => {
     await runCompare();
     exportJsonMock.mockResolvedValue(fail(WRITE_FAILED));
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Export JSON' }));
+    await screen.findByRole('button', { name: 'Export' });
+    fireEvent.click(exportButton('Export JSON'));
 
     const alert = await screen.findByRole('alert', { name: 'Export error' });
     expect(alert.textContent).toContain('ERR-EXPORT-6001');
     expect(alert.textContent).toContain('op-export-1');
     // A failed export does not invalidate the comparison, so the report is still the one it made.
     expect(screen.getByRole('region', { name: 'Build comparison' })).toBeDefined();
-    expect(within(screen.getByRole('region', { name: 'Memory comparison' })).getByText('+256 bytes')).toBeDefined();
+    expect(within(screen.getByRole('region', { name: 'Memory comparison' })).getByText('increase of 256 bytes')).toBeDefined();
   });
 
   it('offers no export before there is a comparison', async () => {
@@ -1489,7 +1545,7 @@ describe('a failed comparison', () => {
     expect(lastGood.textContent).toContain(
       'The attempt above produced no result, so nothing here was replaced.',
     );
-    expect(within(lastGood).getByText('+256 bytes')).toBeDefined();
+    expect(within(lastGood).getByText('increase of 256 bytes')).toBeDefined();
     expect(screen.queryByRole('region', { name: 'Build comparison' })).toBeNull();
   });
 
@@ -1500,7 +1556,7 @@ describe('a failed comparison', () => {
 
     // The reader repoints the base at a third build and does not press Compare again. Nothing has
     // failed here, so the only signal that the screen is showing an earlier answer is this note.
-    fireEvent.change(pair()[0], { target: { value: 'snap-third' } });
+    choose(pair()[0], 'snap-third');
 
     const lastGood = await screen.findByRole('region', { name: 'Last good comparison' });
     expect(lastGood.textContent).toContain(
@@ -1522,15 +1578,18 @@ describe('accessibility of the comparison', () => {
     expect(screen.getByLabelText('Old / Base')).toBeDefined();
     expect(screen.getByLabelText('New / Target')).toBeDefined();
     expect(screen.getByRole('group', { name: 'Size units' })).toBeDefined();
-    expect(screen.getByRole('group', { name: 'Filter sections by change kind' })).toBeDefined();
-    expect(screen.getByRole('group', { name: 'Filter symbols by change kind' })).toBeDefined();
-    expect(screen.getByRole('textbox', { name: 'Filter sections by name' })).toBeDefined();
-    expect(screen.getByRole('textbox', { name: 'Filter symbols by name' })).toBeDefined();
+    // R3: each change table's controls are in its own view.
+    const sections = await openView('Sections', 'Section Changes');
+    expect(within(sections).getByRole('group', { name: 'Filter sections by change kind' })).toBeDefined();
+    expect(within(sections).getByRole('searchbox', { name: 'Filter sections by name' })).toBeDefined();
     // The name box is a query about firmware, not a login field.
     expect(
-      (screen.getByRole('textbox', { name: 'Filter sections by name' }) as HTMLInputElement)
+      (within(sections).getByRole('searchbox', { name: 'Filter sections by name' }) as HTMLInputElement)
         .autocomplete,
     ).toBe('off');
+    const symbols = await openView('Symbols', 'Symbol Changes');
+    expect(within(symbols).getByRole('group', { name: 'Filter symbols by change kind' })).toBeDefined();
+    expect(within(symbols).getByRole('searchbox', { name: 'Filter symbols by name' })).toBeDefined();
   });
 
   it('gives the tables header semantics, not colour-only state', async () => {
@@ -1540,7 +1599,7 @@ describe('accessibility of the comparison', () => {
     // The region mounts before its first page lands: Compare.tsx clears the page on every request
     // and the table renders only from a resolved one, so reading its headers synchronously lost
     // that race on a Windows runner (Run 37128593254) the same way 055b54e closed the pager.
-    const table = await screen.findByRole('region', { name: 'Section Changes' });
+    const table = await openView('Sections', 'Section Changes');
     const headers = await within(table).findAllByRole('columnheader');
     expect(headers.length).toBeGreaterThan(8);
     const sortable = headers.filter((cell) => cell.getAttribute('aria-sort') !== null);
@@ -1579,51 +1638,60 @@ describe('the table layout contract', () => {
     await openCompare();
     await runCompare();
 
-    const tables = await screen.findAllByRole('table');
-    // The contract is universal rather than counted: a third table added later is inside a wrapper or
-    // this test fails, which is the case a fixed count would silently wave through.
-    expect(tables.length).toBeGreaterThan(0);
-    for (const table of tables) {
-      expect(table.tagName).toBe('TABLE');
-      expect(table.parentElement?.className).toContain('viewport');
+    // R3: every change table is the shared DataTable, whose wrapper owns the horizontal scroll. The contract
+    // stays universal: each view's tables are checked, not a count.
+    for (const [tab, region] of [
+      ['Sections', 'Section Changes'],
+      ['Symbols', 'Symbol Changes'],
+    ] as const) {
+      const area = await openView(tab, region);
+      const tables = await within(area).findAllByRole('table');
+      expect(tables.length).toBeGreaterThan(0);
+      for (const table of tables) {
+        expect(table.tagName).toBe('TABLE');
+        expect(table.parentElement?.className).toContain('wrap');
+      }
     }
   });
 });
 
 describe('U1P Compare hierarchy', () => {
-  it('names the pair first, then what moved, then what it cost, then the prose', async () => {
+  it('names the pair, gives the answer, then the views, with the evidence prose last in the summary', async () => {
     await openCompare();
     await runCompare();
 
+    // R3 (ADR-0034): the pickers, the pair on screen, the one answer, then the views. Inside the Summary
+    // view §10's order holds: change counts, then the flash and RAM deltas, then the shortcuts into the
+    // tables, and the evidence narrative last, because it explains a comparison instead of being one.
     const selectors = screen.getByRole('region', { name: 'Build selection' });
+    const subject = screen.getByRole('region', { name: 'Subject of this page' });
+    const lead = screen.getByRole('region', { name: 'Flash change' });
+    const views = screen.getByRole('tablist', { name: 'Compare views' });
     const moved = await screen.findByRole('region', { name: 'What moved' });
     const memory = screen.getByRole('region', { name: 'Memory comparison' });
-    const sections = screen.getByRole('region', { name: 'Section Changes' });
-    const symbols = screen.getByRole('region', { name: 'Symbol Changes' });
+    const ranking = screen.getByRole('region', { name: 'Top growth and largest additions' });
     const evidence = screen.getByRole('region', { name: 'Capability and evidence' });
-
-    // §10: the result leads the page. The reader meets the change counts before the flash and RAM
-    // deltas, those before the tables, and the evidence narrative last, because it explains a
-    // comparison instead of being one.
-    expect(precedes(selectors, moved)).toBe(true);
+    expect(precedes(selectors, subject)).toBe(true);
+    expect(precedes(subject, lead)).toBe(true);
+    expect(precedes(lead, views)).toBe(true);
+    expect(precedes(views, moved)).toBe(true);
     expect(precedes(moved, memory)).toBe(true);
-    expect(precedes(memory, sections)).toBe(true);
-    expect(precedes(sections, symbols)).toBe(true);
-    expect(precedes(symbols, evidence)).toBe(true);
+    expect(precedes(memory, ranking)).toBe(true);
+    expect(precedes(ranking, evidence)).toBe(true);
   });
 
-  it('states the pair as two labelled picks with an arrow that says nothing twice', async () => {
+  it('states the pair as two labelled picks with Swap between them', async () => {
     await openCompare();
 
     const selectors = screen.getByRole('region', { name: 'Build selection' });
     // Each side is answerable by name, which is what keeps the pair readable in the accessibility tree.
-    expect(within(selectors).getByRole('combobox', { name: 'Old / Base' })).toBeDefined();
-    expect(within(selectors).getByRole('combobox', { name: 'New / Target' })).toBeDefined();
-
-    // The arrow is decoration. Left unhidden it would be read out between two selects that already name
-    // their own direction, and §22 counts a spoken glyph that repeats a label as noise.
-    const arrow = selectors.querySelector('[aria-hidden="true"]');
-    expect(arrow?.textContent).toBe('\u2192');
+    const base = within(selectors).getByRole('combobox', { name: 'Old / Base' });
+    const target = within(selectors).getByRole('combobox', { name: 'New / Target' });
+    // R3 replaced the decorative arrow with the one control that acts on direction: Swap sits between the
+    // two sides, so the order the reader hears is base, swap, target, and nothing is said twice.
+    const swap = within(selectors).getByRole('button', { name: 'Swap' });
+    expect(precedes(base, swap)).toBe(true);
+    expect(precedes(swap, target)).toBe(true);
   });
 });
 
