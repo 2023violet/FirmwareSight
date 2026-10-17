@@ -526,3 +526,24 @@ fn zero_and_subpixel_occupancy_omit_only_the_decorative_foreground() {
         assert_eq!((decoded.width(), decoded.height()), (WIDTH, HEIGHT));
     }
 }
+
+#[test]
+fn the_print_summary_tables_are_named_and_their_headers_scoped() {
+    // R7 review S3: the report goldens hold the detailed HTML to this; the visual print HTML has no golden.
+    let snapshot = snapshot('a', "firmware.elf", 1536, Some(48));
+    let dto = analysis(&snapshot, "firmware.elf");
+    let regions = snapshot
+        .memory()
+        .expect("Core memory facts")
+        .region_usage
+        .clone();
+    let html = String::from_utf8(
+        visual::render(&VisualReport::analyze(&dto, &regions), VisualFormat::Html).expect("HTML"),
+    )
+    .expect("UTF-8 HTML");
+    let tables = html.matches("<table").count();
+    assert!(tables > 0);
+    assert_eq!(html.matches("<table><caption>").count(), tables, "{html}");
+    let headers = html.matches("<th>").count() + html.matches("<th ").count();
+    assert_eq!(html.matches("<th scope=\"").count(), headers, "{html}");
+}

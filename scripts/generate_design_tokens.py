@@ -376,7 +376,10 @@ def print_contrast(tokens: dict) -> None:
 
 
 UI_STYLES = ROOT / "apps" / "desktop" / "ui" / "src"
-BARE_Z_INDEX = re.compile(r"z-index\s*:\s*-?\d")
+# Anything but a token reference (or `auto`) is refused: a bare number, a negative one, or a `calc()`.
+# Property names are case-insensitive in CSS, and a comment may mention a number freely (R7 review S3).
+BARE_Z_INDEX = re.compile(r"z-index\s*:(?!\s*(?:var\(--fs-layer-|auto\b))", re.IGNORECASE)
+CSS_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 
 
 def bare_stacking_orders() -> list[str]:
@@ -387,7 +390,8 @@ def bare_stacking_orders() -> list[str]:
     return sorted(
         str(path.relative_to(ROOT)).replace("\\", "/")
         for path in UI_STYLES.rglob("*.css")
-        if path != TARGET and BARE_Z_INDEX.search(path.read_text(encoding="utf-8"))
+        if path != TARGET
+        and BARE_Z_INDEX.search(CSS_COMMENT.sub("", path.read_text(encoding="utf-8")))
     )
 
 

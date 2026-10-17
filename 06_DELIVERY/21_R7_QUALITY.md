@@ -81,3 +81,14 @@ The D2C human native-QA runbook ([evidence/D2C](../evidence/D2C/HUMAN_NATIVE_QA_
 
 - **`.symtab` leads the Compare section ranking on the fixture.** The section ranking sorts by the size change of every section the Core diff reports, including non-loaded ones such as `.symtab`. On `m2-objects` that puts `.symtab` first, above the sections that cost Flash. This is Core's ranking, and the UI must not re-rank it (AGENTS.md §3). Whether the ranking should weigh loaded sections first is a Core question for a later round; it is recorded here, not changed.
 - The Gate Markdown's accepted-review path is covered by a shell test, not by the native smoke, because accepting a review needs a policy that produces a REVIEW on the fixture.
+
+## 5. Independent review and dispositions
+
+The review of `6ed6652` returned PASS_WITH_FIXES with no S1 or S2 finding. It checked the token values, every `z-index`, every report `<th>` scope and caption placement, and the evidence counts by hand.
+
+| ID | Finding | Disposition |
+|---|---|---|
+| S3-1 | The bare `z-index` check was case-sensitive, matched inside comments, and let `calc(5 + 1)` through. | Fixed: case-insensitive, comments stripped first, and anything but `var(--fs-layer-*)` or `auto` is refused. Checked by planting `Z-Index: calc(5 + 1)` and reverting it. |
+| S3-2 | The z-index scan runs only after `tokens.css` matches. | Kept: a stale `tokens.css` already fails the step; the scan reports on the next run. |
+| S3-3 | The visual print HTML's tables had no test of their own. | Fixed: `the_print_summary_tables_are_named_and_their_headers_scoped`. |
+| S3-4 | The golden test counts `<th>`/`<th ` and does not check `row` against `col`. | Kept: the renderers emit no other spelling, and the reviewer checked every scope by hand. |
