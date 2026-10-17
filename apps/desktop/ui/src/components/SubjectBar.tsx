@@ -30,7 +30,23 @@ export interface SubjectBuild {
  * Latest result; a retained earlier result; a chosen file with no result of its own yet; a retained result
  * after the newest attempt failed; or a result whose selection has since gained or lost its MAP.
  */
-export type SubjectFreshness = 'latest' | 'retained' | 'pending' | 'failed' | 'mapChanged';
+export type SubjectFreshness =
+  | 'latest'
+  | 'retained'
+  | 'pending'
+  | 'failed'
+  | 'mapChanged'
+  | 'pairMoved'
+  | 'compareFailed';
+
+/** The words for every retained-result freshness, so a new one cannot be added without its sentence. */
+const RETAINED_WORD = {
+  retained: 'subject.retained',
+  failed: 'subject.failed',
+  mapChanged: 'subject.mapChanged',
+  pairMoved: 'subject.pairMoved',
+  compareFailed: 'subject.compareFailed',
+} as const;
 
 export type Subject =
   | { readonly kind: 'single'; readonly build: SubjectBuild }
@@ -74,14 +90,7 @@ export function SubjectBar({
       ) : (
         <span className={cx(styles['chip'], styles['retained'])}>
           <Icon name="history" size="inline" />
-          {t(
-            'common',
-            freshness === 'failed'
-              ? 'subject.failed'
-              : freshness === 'mapChanged'
-                ? 'subject.mapChanged'
-                : 'subject.retained',
-          )}
+          {t('common', RETAINED_WORD[freshness])}
         </span>
       )}
       {actions === undefined ? null : <div className={styles['actions']}>{actions}</div>}

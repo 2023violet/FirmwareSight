@@ -244,13 +244,6 @@
   border-color: var(--fs-color-diff-changed);
 }
 
-.deltaPositive {
-  color: var(--fs-color-diff-added);
-}
-
-.deltaNegative {
-  color: var(--fs-color-diff-removed);
-}
 
 .absent {
   color: var(--fs-color-text-secondary);
@@ -415,4 +408,55 @@
   border-top: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
   color: var(--fs-color-text-secondary);
   font-size: var(--fs-font-size-metadata);
+}
+
+/* R3: the page and the Inspector side by side; the Inspector docks from 1280 px and is a sheet below. */
+.withInspector {
+  display: flex;
+  align-items: stretch;
+  min-height: 100%;
+}
+
+.withInspector > main {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-6);
+  padding-top: var(--fs-space-4);
+}
+
+.swap {
+  display: flex;
+  align-items: center;
+}
+
+/* Objects | Libraries: two cuts of one view, as a segmented control. */
+.cuts {
+  display: inline-flex;
+  overflow: hidden;
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.cut {
+  padding: var(--fs-space-1) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  font: inherit;
+  background: var(--fs-color-bg-surface);
+  border: 0;
+  cursor: pointer;
+}
+
+.cut + .cut {
+  border-inline-start: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.cut[aria-pressed='true'] {
+  color: var(--fs-color-text-primary);
+  font-weight: var(--fs-font-weight-semibold);
+  background: var(--fs-color-bg-subtle);
 }

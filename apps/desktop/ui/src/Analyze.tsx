@@ -14,8 +14,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import styles from './Analyze.module.css';
 import { Button } from './components/Button';
 import { ErrorPanel } from './components/ErrorPanel';
+import { ExportMenu } from './components/ExportMenu';
 import { asEvidenceClass, FactValue, type FactEvidence } from './components/FactValue';
-import { Icon } from './components/Icon';
 import { Inspector } from './components/Inspector';
 import { Page } from './components/Layout';
 import { LeadAnswer } from './components/LeadAnswer';
@@ -283,6 +283,14 @@ export function Analyze({
             <>
               {currentSummary === null ? null : (
                 <ExportMenu
+                  label={t('analyze', 'export.menu')}
+                  regionLabel={t('analyze', 'export.region')}
+                  hint={t('analyze', 'export.hint')}
+                  items={[
+                    { key: 'png', label: t('analyze', 'export.png') },
+                    { key: 'svg', label: t('analyze', 'export.svg') },
+                    { key: 'html', label: t('analyze', 'export.html') },
+                  ]}
                   disabled={exporting || analyzing}
                   onExport={(format) => {
                     void exportVisual(format);
@@ -728,74 +736,6 @@ function SnapshotFooter({ summary }: { readonly summary: AnalysisSummaryDto }) {
   );
 }
 
-/**
- * Export, as one menu in the header (spec §6.2). A disclosure rather than a popup menu: three plain buttons
- * that Tab reaches in order, and Esc closes it.
- */
-function ExportMenu({
-  disabled,
-  onExport,
-}: {
-  readonly disabled: boolean;
-  readonly onExport: (format: 'png' | 'svg' | 'html') => void;
-}) {
-  const { t } = useI18n();
-  const [open, setOpen] = useState(false);
-  const toggle = useRef<HTMLButtonElement | null>(null);
-  return (
-    <div
-      className={styles['exportMenu']}
-      role="group"
-      aria-label={t('analyze', 'export.region')}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape' && open) {
-          event.stopPropagation();
-          setOpen(false);
-          toggle.current?.focus();
-        }
-      }}
-      onBlur={(event) => {
-        // Tabbing or clicking away closes the menu; moving between its own buttons does not.
-        if (open && !event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setOpen(false);
-        }
-      }}
-    >
-      <Button
-        ref={toggle}
-        disabled={disabled}
-        ariaExpanded={open}
-        onClick={() => {
-          setOpen((now) => !now);
-        }}
-      >
-        <Icon name="export" />
-        {t('analyze', 'export.menu')}
-        <Icon name="chevronDown" />
-      </Button>
-      {open ? (
-        <div className={styles['exportList']}>
-          <p className={styles['meta']}>{t('analyze', 'export.hint')}</p>
-          {(['png', 'svg', 'html'] as const).map((format) => (
-            <Button
-              key={format}
-              variant="ghost"
-              disabled={disabled}
-              onClick={() => {
-                setOpen(false);
-                // The chosen button is about to leave the DOM; focus goes back to the menu's own button.
-                toggle.current?.focus();
-                onExport(format);
-              }}
-            >
-              {t('analyze', `export.${format}`)}
-            </Button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 function RegionUsageTable({ regions }: { readonly regions: readonly MemoryRegionDto[] }) {
   const { t } = useI18n();

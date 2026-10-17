@@ -1,0 +1,29 @@
+/* The menu is an overlay, so it may carry overlay-sm; its width is its content's, not a borrowed token. */
+
+.menu {
+  position: relative;
+}
+
+.list {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + var(--fs-space-1));
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--fs-space-1);
+  min-width: max-content;
+  padding: var(--fs-space-2);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+  box-shadow: var(--fs-shadow-overlay-sm);
+}
+
+.hint {
+  max-width: 48ch;
+  color: var(--fs-color-text-secondary);
+  font-size: var(--fs-font-size-metadata);
+  line-height: var(--fs-line-height-metadata);
+}

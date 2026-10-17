@@ -180,3 +180,18 @@
   gap: var(--fs-space-2);
   margin-inline-start: auto;
 }
+
+.apply {
+  min-height: var(--fs-row-compact);
+  padding: 0 var(--fs-space-3);
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+  cursor: pointer;
+}
+
+.apply:hover {
+  background: var(--fs-color-bg-subtle);
+}

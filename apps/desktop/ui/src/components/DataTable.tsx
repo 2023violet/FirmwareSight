@@ -25,8 +25,19 @@ export interface Column<T> {
   readonly cell: (row: T) => ReactNode;
   /** Right-aligned tabular mono: sizes, counts, addresses. */
   readonly numeric?: boolean;
-  /** Present when the column can be ordered. */
+  /** Present when this table orders its own rows by the column. */
   readonly sortValue?: (row: T) => string | number;
+  /**
+   * Server mode (R3): the column can be ordered, but by the shell. The table only reports the choice
+   * through `onSort`; it never reorders rows it was handed (`04_TECH/14` §3).
+   */
+  readonly sortable?: boolean;
+  /** The direction a first click asks for. Names read A→Z; quantities read largest first. */
+  readonly firstDirection?: 'asc' | 'desc';
+}
+
+function canSort<T>(column: Column<T>): boolean {
+  return column.sortable ?? column.sortValue !== undefined;
 }
 
 export interface SortState {
@@ -46,6 +57,7 @@ export function DataTable<T>({
   onRowAction,
   rowActionLabel,
   empty,
+  rowHeader,
 }: {
   readonly caption: string;
   readonly columns: readonly Column<T>[];
@@ -61,6 +73,8 @@ export function DataTable<T>({
   readonly rowActionLabel?: (row: T) => string;
   /** Shown in place of the body when no row is left. */
   readonly empty?: string;
+  /** The column whose cell names the row (`th scope="row"`). Defaults to the first column. */
+  readonly rowHeader?: string;
 }) {
   const { t } = useI18n();
   const [localSort, setLocalSort] = useState<SortState | null>(null);
@@ -90,11 +104,12 @@ export function DataTable<T>({
     });
   }, [rows, filterText, controlled, active, columns]);
 
-  const choose = (key: string) => {
+  const choose = (column: Column<T>) => {
+    const key = column.key;
     const next: SortState =
       active?.key === key
         ? { key, direction: active.direction === 'asc' ? 'desc' : 'asc' }
-        : { key, direction: 'desc' };
+        : { key, direction: column.firstDirection ?? 'desc' };
     if (controlled) {
       onSort(next);
     } else {
@@ -118,7 +133,7 @@ export function DataTable<T>({
                   scope="col"
                   className={column.numeric === true ? styles['num'] : undefined}
                   aria-sort={
-                    column.sortValue === undefined
+                    !canSort(column)
                       ? undefined
                       : sorted
                         ? active.direction === 'asc'
@@ -127,7 +142,7 @@ export function DataTable<T>({
                         : 'none'
                   }
                 >
-                  {column.sortValue === undefined ? (
+                  {!canSort(column) ? (
                     column.header
                   ) : (
                     // The header's own words are its name: a "Sort by" label here would be read as the
@@ -136,7 +151,7 @@ export function DataTable<T>({
                       type="button"
                       className={styles['sort']}
                       onClick={() => {
-                        choose(column.key);
+                        choose(column);
                       }}
                     >
                       {column.header}
@@ -168,7 +183,7 @@ export function DataTable<T>({
             shown.map((row) => (
               <tr key={rowKey(row)}>
                 {columns.map((column, index) =>
-                  index === 0 ? (
+                  (rowHeader === undefined ? index === 0 : column.key === rowHeader) ? (
                     <th key={column.key} scope="row" className={cx(styles['rowHead'], column.numeric === true ? styles['num'] : undefined)}>
                       {column.cell(row)}
                     </th>
@@ -213,6 +228,9 @@ export function FilterBar({
   shown,
   total,
   children,
+  onApply,
+  applyLabel,
+  formLabel,
 }: {
   /** What is being filtered, already translated, e.g. "Filter sections". */
   readonly label: string;
@@ -222,11 +240,19 @@ export function FilterBar({
   readonly total?: number;
   /** Extra controls on the right, such as an Objects / Libraries switch. */
   readonly children?: ReactNode;
+  /**
+   * Apply mode (R3), for a filter the shell applies: typing edits a draft, and the filter is sent when the
+   * reader presses Enter or the Apply button - one request per decision, not one per keystroke.
+   */
+  readonly onApply?: (value: string) => void;
+  readonly applyLabel?: string;
+  /** The form's accessible name in apply mode. */
+  readonly formLabel?: string;
 }) {
   const { t } = useI18n();
   const id = useId();
-  return (
-    <div className={styles['filter']}>
+  const field = (
+    <>
       <label htmlFor={id} className={styles['filterLabel']}>
         <Icon name="filter" />
         <span className={styles['spoken']}>{label}</span>
@@ -243,6 +269,38 @@ export function FilterBar({
           onChange(event.target.value);
         }}
       />
+    </>
+  );
+  const count =
+    shown === undefined || total === undefined ? null : (
+      <span className={styles['count']} role="status">
+        {t('common', 'filter.count', { shown: String(shown), total: String(total) })}
+      </span>
+    );
+
+  if (onApply !== undefined) {
+    return (
+      <form
+        className={styles['filter']}
+        aria-label={formLabel}
+        onSubmit={(event) => {
+          event.preventDefault();
+          onApply(value);
+        }}
+      >
+        {field}
+        <button type="submit" className={styles['apply']}>
+          {applyLabel ?? t('common', 'filter.apply')}
+        </button>
+        {count}
+        {children === undefined ? null : <div className={styles['extra']}>{children}</div>}
+      </form>
+    );
+  }
+
+  return (
+    <div className={styles['filter']}>
+      {field}
       {value === '' ? null : (
         <button
           type="button"
@@ -254,11 +312,7 @@ export function FilterBar({
           {t('common', 'filter.clear')}
         </button>
       )}
-      {shown === undefined || total === undefined ? null : (
-        <span className={styles['count']} role="status">
-          {t('common', 'filter.count', { shown: String(shown), total: String(total) })}
-        </span>
-      )}
+      {count}
       {children === undefined ? null : <div className={styles['extra']}>{children}</div>}
     </div>
   );
