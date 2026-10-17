@@ -39,6 +39,7 @@ import {
   exportCompareHtml,
   exportCompareJson,
   exportReleaseBundle,
+  exportGateMarkdown,
   exportGateVisual,
   getGateRun,
   getReleaseAttachments,
@@ -82,6 +83,9 @@ vi.mock('./ipc/bridge', () => ({
   getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
   pinBaseline: vi.fn(),
   unpinBaseline: vi.fn(),
+  exportAnalysisMarkdown: vi.fn(),
+  exportCompareMarkdown: vi.fn(),
+  exportGateMarkdown: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -2443,6 +2447,17 @@ describe('R4 Release workbench', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
     fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
     await waitFor(() => expect(subjectBar().textContent).toContain('Previous run kept · current settings not judged'));
+  });
+
+  it('exports the run on screen as a Markdown reading copy (R6)', async () => {
+    vi.mocked(exportGateMarkdown).mockResolvedValue(
+      ok({ status: 'written', fileName: 'firmwaresight-gate-review.md', format: 'markdown' }),
+    );
+    await runOnFixturePair();
+    fireEvent.click(await exportItem('Export Markdown'));
+    await waitFor(() => expect(vi.mocked(exportGateMarkdown)).toHaveBeenCalledWith(gateRun().runId, 'snap-target'));
+    expect(exportGateVisualMock).not.toHaveBeenCalled();
+    expect(await screen.findByText('Wrote firmwaresight-gate-review.md.')).toBeDefined();
   });
 
   it('shows the stale note when Rust refuses a late export after the run changed (CI #123 rule)', async () => {

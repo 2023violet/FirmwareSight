@@ -333,6 +333,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── diagnostics.rs
 │       │   │   ├── drop_intake.rs
 │       │   │   ├── history_reads.rs
+│       │   │   ├── markdown_export.rs
 │       │   │   ├── object_attribution_ipc.rs
 │       │   │   ├── preferences.rs
 │       │   │   ├── project_readiness.rs

@@ -16,11 +16,12 @@
 //! manifest, and this is a reading copy.
 
 use firmwaresight_core::domain::diff::{ChangeKind, Contributor, DiffResult};
-use firmwaresight_core::domain::gate::{FindingState, GateEvaluation};
+use firmwaresight_core::domain::gate::FindingState;
 use firmwaresight_core::domain::memory::{MemoryRegionUsage, RegionUsageState};
 
 use crate::dto::AnalyzeResultDto;
-use crate::gate_render::{STATE_ORDER, verdict_sentence};
+use crate::gate::GateResultsDto;
+use crate::gate_render::{STATE_ORDER, sentence_from_words};
 use crate::render::{budget_line, safe_display_text};
 
 /// Text from an artifact or a policy, made inert for Markdown: control characters are shown escaped,
@@ -318,44 +319,65 @@ pub fn comparison(result: &DiffResult) -> String {
 }
 
 /// `fwsight gate --markdown`, and the desktop's Release export.
+///
+/// It reads the portable gate-results projection (`gate:1`), which is what both the CLI's fresh run and
+/// the desktop's stored run can produce, so the two write the same document for the same run.
 #[must_use]
-pub fn gate(evaluation: &GateEvaluation, policy_sha256: &str) -> String {
+pub fn gate(results: &GateResultsDto) -> String {
+    let ext = &results.extensions;
+    let verdict = ext.overall_effective_severity;
     let mut out = String::from("# FirmwareSight · Release Gate report\n\n");
     out.push_str(&format!(
         "**Run:** {} · **Snapshot:** {} · **Policy:** SHA-256 {}  \n**Baseline:** {}\n\n",
-        code(&evaluation.run_id),
-        code(&evaluation.snapshot_id),
-        code(policy_sha256),
-        evaluation
-            .baseline_snapshot_id
+        code(&results.run_id),
+        code(&results.snapshot_id),
+        code(&ext.policy_sha256),
+        ext.baseline_snapshot_id
             .as_deref()
             .map_or_else(|| "none (no comparison in this run)".to_owned(), code)
     ));
-    out.push_str(&format!(
-        "> **{}** — {}\n>\n> FirmwareSight policy readiness: the answer of this project's policy, not a certification and not a permission to release.\n\n",
-        evaluation.overall_effective_severity,
-        escape(&verdict_sentence(evaluation))
-    ));
-
-    let c = &evaluation.counts;
-    out.push_str("## Findings by state\n\n| BLOCK | REVIEW | UNKNOWN | PASS | N/A |\n|---:|---:|---:|---:|---:|\n");
-    out.push_str(&format!(
-        "| {} | {} | {} | {} | {} |\n",
-        c.block, c.review, c.unknown, c.pass, c.not_applicable
-    ));
-
-    for state in STATE_ORDER {
-        let findings: Vec<_> = evaluation
+    let count = |state: &str| {
+        results
             .findings
             .iter()
             .filter(|finding| finding.state == state)
+            .count()
+    };
+    let sentence = sentence_from_words(
+        verdict,
+        results
+            .findings
+            .iter()
+            .map(|finding| (finding.state, finding.effective_severity)),
+        count("PASS"),
+    );
+    out.push_str(&format!(
+        "> **{verdict}** — {}\n>\n> FirmwareSight policy readiness: the answer of this project's policy, not a certification and not a permission to release.\n\n",
+        escape(&sentence)
+    ));
+
+    out.push_str("## Findings by state\n\n| BLOCK | REVIEW | UNKNOWN | PASS | N/A |\n|---:|---:|---:|---:|---:|\n");
+    out.push_str(&format!(
+        "| {} | {} | {} | {} | {} |\n",
+        count("BLOCK"),
+        count("REVIEW"),
+        count("UNKNOWN"),
+        count("PASS"),
+        count("N/A")
+    ));
+
+    for state in STATE_ORDER {
+        let word = state.as_str();
+        let findings: Vec<_> = results
+            .findings
+            .iter()
+            .filter(|finding| finding.state == word)
             .collect();
         if findings.is_empty() {
             continue;
         }
         out.push_str(&format!(
-            "\n### **{}** ({})\n\n| Rule | Effective | Summary | Next step |\n|---|---|---|---|\n",
-            state.as_str(),
+            "\n### **{word}** ({})\n\n| Rule | Effective | Summary | Next step |\n|---|---|---|---|\n",
             findings.len()
         ));
         for finding in &findings {
@@ -367,7 +389,7 @@ pub fn gate(evaluation: &GateEvaluation, policy_sha256: &str) -> String {
             };
             out.push_str(&format!(
                 "| {} | {effective} | {} | {} |\n",
-                code(finding.rule_id.as_str()),
+                code(&finding.rule_id),
                 escape(&finding.summary),
                 finding
                     .remediation
@@ -378,13 +400,13 @@ pub fn gate(evaluation: &GateEvaluation, policy_sha256: &str) -> String {
     }
 
     out.push_str("\n## Evidence\n\n");
-    for finding in &evaluation.findings {
+    for finding in &results.findings {
         if finding.evidence_refs.is_empty() {
             continue;
         }
         out.push_str(&format!(
             "- {}: {}\n",
-            code(finding.rule_id.as_str()),
+            code(&finding.rule_id),
             finding
                 .evidence_refs
                 .iter()

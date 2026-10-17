@@ -205,4 +205,5 @@ export const release: CatalogFor<'release'> = {
   'policy.sheetTitle': '编辑项目策略',
   'accept.sheetTitle': '接受 {rule} 的复核',
   'bundle.notReadyTitle': '此处置结果不生成发布包',
+  'visualExport.markdown': '导出 Markdown',
 };

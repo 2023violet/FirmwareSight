@@ -660,7 +660,7 @@ fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
     );
 
     if let Some(path) = &args.markdown {
-        let text = markdown::gate(&evaluation, &project.policy_sha256);
+        let text = markdown::gate(&dto);
         if let Some(code) = write_markdown(path, &text, args.json, operation_id) {
             return ExitCode::from(code);
         }

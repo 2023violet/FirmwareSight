@@ -203,4 +203,5 @@ export const release = {
   'policy.sheetTitle': 'Edit project policy',
   'accept.sheetTitle': 'Accept the review of {rule}',
   'bundle.notReadyTitle': 'No bundle for this disposition',
+  'visualExport.markdown': 'Export Markdown',
 } as const;

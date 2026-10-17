@@ -77,6 +77,9 @@ const EXPORT_COMPARE_HTML = 'export_compare_html';
 const EXPORT_COMPARE_VISUAL = 'export_compare_visual';
 const EXPORT_ANALYSIS_VISUAL = 'export_analysis_visual';
 const EXPORT_GATE_VISUAL = 'export_gate_visual';
+const EXPORT_ANALYSIS_MARKDOWN = 'export_analysis_markdown';
+const EXPORT_COMPARE_MARKDOWN = 'export_compare_markdown';
+const EXPORT_GATE_MARKDOWN = 'export_gate_markdown';
 const OPEN_PROJECT_CONFIG = 'open_project_config';
 const INSPECT_PROJECT_READINESS = 'inspect_project_readiness';
 const SAVE_PROJECT_POLICY = 'save_project_policy';
@@ -261,6 +264,26 @@ export async function exportGateVisual(
   format: VisualFormatDto,
 ): Promise<IpcOutcome<ExportOutcomeDto>> {
   return await dialogCall<ExportOutcomeDto>(EXPORT_GATE_VISUAL, withDialog('saveGateVisual', { runId, snapshotId, format }));
+}
+
+/**
+ * The three Markdown reading copies (R6): a GFM report of the analysis, the comparison or the Gate run on
+ * screen, written through the shell's own Save dialog. The request names the subject by the ids the page
+ * holds and nothing else; a subject that changed while the dialog was open is refused with ERR-EXPORT-6002.
+ */
+export async function exportAnalysisMarkdown(
+  selectionId: string,
+  snapshotId: string,
+): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await dialogCall<ExportOutcomeDto>(EXPORT_ANALYSIS_MARKDOWN, withDialog('saveMarkdown', { selectionId, snapshotId }));
+}
+
+export async function exportCompareMarkdown(diffId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await dialogCall<ExportOutcomeDto>(EXPORT_COMPARE_MARKDOWN, withDialog('saveMarkdown', { diffId }));
+}
+
+export async function exportGateMarkdown(runId: string, snapshotId: string): Promise<IpcOutcome<ExportOutcomeDto>> {
+  return await dialogCall<ExportOutcomeDto>(EXPORT_GATE_MARKDOWN, withDialog('saveMarkdown', { runId, snapshotId }));
 }
 
 /**

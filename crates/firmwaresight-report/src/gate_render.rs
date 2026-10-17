@@ -11,7 +11,7 @@
 //!
 //! The Markdown form lives in `markdown.rs` (R6) and reads in the same order.
 
-use firmwaresight_core::domain::gate::{EffectiveSeverity, FindingState, GateEvaluation};
+use firmwaresight_core::domain::gate::{FindingState, GateEvaluation};
 
 use crate::gate::{AcceptedReviewsDto, GateResultsDto};
 
@@ -145,17 +145,32 @@ const INDENT: &str = "            ";
 
 /// One sentence that answers the run, counted from Core's own fields on each finding.
 pub(crate) fn verdict_sentence(evaluation: &GateEvaluation) -> String {
-    let verdict = evaluation.overall_effective_severity;
-    let carrying: Vec<_> = evaluation
-        .findings
-        .iter()
-        .filter(|finding| {
-            finding.state != FindingState::NotApplicable && finding.effective_severity == verdict
-        })
+    sentence_from_words(
+        evaluation.overall_effective_severity.as_str(),
+        evaluation
+            .findings
+            .iter()
+            .map(|finding| (finding.state.as_str(), finding.effective_severity.as_str())),
+        evaluation.counts.pass,
+    )
+}
+
+/// The same sentence over the words a stored or portable run carries (`GateResultsDto`), so the CLI,
+/// the Markdown report and the desktop's export say one thing about one run.
+///
+/// It counts the findings whose effective severity is the verdict's word, leaving N/A out, and says how
+/// many of those are UNKNOWN: Core's own fields, counted, never re-judged.
+pub(crate) fn sentence_from_words<'a>(
+    verdict: &str,
+    rows: impl Iterator<Item = (&'a str, &'a str)>,
+    pass: impl std::fmt::Display,
+) -> String {
+    let carrying: Vec<(&str, &str)> = rows
+        .filter(|(state, effective)| *state != "N/A" && *effective == verdict)
         .collect();
     let unknown = carrying
         .iter()
-        .filter(|finding| finding.state == FindingState::Unknown)
+        .filter(|(state, _)| *state == "UNKNOWN")
         .count();
     let missing = if unknown == 0 {
         String::new()
@@ -163,17 +178,16 @@ pub(crate) fn verdict_sentence(evaluation: &GateEvaluation) -> String {
         format!(", {unknown} of them because their evidence is missing")
     };
     match verdict {
-        EffectiveSeverity::Block => format!(
+        "BLOCK" => format!(
             "Blocked: {} finding(s) block this build{missing}. A blocked build cannot produce a release bundle.",
             carrying.len()
         ),
-        EffectiveSeverity::Review => format!(
+        "REVIEW" => format!(
             "Needs a decision: {} finding(s) wait on an explicit acceptance{missing}. Nothing is blocked.",
             carrying.len()
         ),
-        EffectiveSeverity::Pass => format!(
-            "Clear: {} rule(s) pass, nothing is blocked and nothing waits on a review.",
-            evaluation.counts.pass
-        ),
+        _ => {
+            format!("Clear: {pass} rule(s) pass, nothing is blocked and nothing waits on a review.")
+        }
     }
 }

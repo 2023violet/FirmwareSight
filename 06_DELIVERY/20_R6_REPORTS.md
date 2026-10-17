@@ -65,3 +65,21 @@ It is staged in three parts.
 - CLI tests (`markdown_cli.rs`): analysis and comparison Markdown, determinism, and refusing to replace an existing file.
 - Desktop: export tests for the new menu item and a native smoke run.
 - Then an independent review.
+
+## 4. Landed so far
+
+- **R6a** (`8d3c002`, `bb53f5d`) covers:
+  - `text.rs`;
+  - the gate, analysis and comparison text;
+  - `markdown.rs`;
+  - the `--markdown` flag on all three commands.
+- **R6b** covers the desktop side:
+  - `export_analysis_markdown`, `export_compare_markdown` and `export_gate_markdown` (use-case commands that write through the shell's Save dialog, with the same stale guard and replace confirmation as the other exports);
+  - an "Export Markdown" item on each page's Export menu.
+
+  `markdown::gate` takes the portable gate-results projection, so the CLI's fresh run and the desktop's stored run write the same document. The verdict sentence is one function over state and severity words (`gate_render::sentence_from_words`).
+- Tests:
+  - report crate: escaping, Markdown order, N/A without severity, determinism, the gate text;
+  - CLI: `markdown_cli.rs`, 3 tests;
+  - shell: `markdown_export.rs`, 2 tests;
+  - UI: 3 export tests (529/529).

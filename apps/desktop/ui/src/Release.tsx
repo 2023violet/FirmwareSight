@@ -60,6 +60,7 @@ import {
   attachReleaseFile,
   chooseBundleDestination,
   exportReleaseBundle,
+  exportGateMarkdown,
   exportGateVisual,
   getGateRun,
   getReleaseAttachments,
@@ -152,7 +153,7 @@ const VIEW_LABEL: Readonly<Record<View, ReleaseKey>> = {
   bundle: 'views.bundle',
 };
 
-type ExportFormat = VisualFormatDto;
+type ExportFormat = VisualFormatDto | 'markdown';
 
 /** The fact in the Inspector, with the control that opened it so focus can go back there. */
 type Inspect = (evidence: FactEvidence, trigger: HTMLElement) => void;
@@ -486,7 +487,10 @@ export function Release({
       const request = ++exportRequest.current;
       setExporting(true);
       setExportStale(false);
-      const outcome = await exportGateVisual(run.runId, run.snapshotId, format);
+      const outcome =
+        format === 'markdown'
+          ? await exportGateMarkdown(run.runId, run.snapshotId)
+          : await exportGateVisual(run.runId, run.snapshotId, format);
       const staleAnswer = !outcome.ok && outcome.envelope.code === 'ERR-EXPORT-6002';
       if (request !== exportRequest.current) {
         // The run changed while the Save dialog was open. Rust refuses that export rather than writing the
@@ -697,6 +701,7 @@ export function Release({
                   { key: 'png', label: t('release', 'visualExport.png') },
                   { key: 'svg', label: t('release', 'visualExport.svg') },
                   { key: 'html', label: t('release', 'visualExport.html') },
+                  { key: 'markdown', label: t('release', 'visualExport.markdown') },
                 ]}
                 disabled={exporting}
                 onExport={(format) => {

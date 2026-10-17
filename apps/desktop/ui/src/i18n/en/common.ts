@@ -234,4 +234,5 @@ export const common = {
   'palette.theme.dark': 'Dark',
   'palette.languageSystem': 'Follow the system language',
   'palette.pinUnknown': 'The pinned baseline could not be read. Read it again on History.',
+  'dialog.saveMarkdown': 'Save the report as Markdown',
 } as const;

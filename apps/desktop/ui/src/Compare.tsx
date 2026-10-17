@@ -54,6 +54,7 @@ import {
   compareSnapshots,
   exportCompareHtml,
   exportCompareJson,
+  exportCompareMarkdown,
   exportCompareVisual,
   listCompareCandidates,
   pinBaseline,
@@ -154,7 +155,7 @@ export type ComparisonSession = {
 
 export const EMPTY_COMPARISON: ComparisonSession = { baseId: null, targetId: null, summary: null };
 
-type ExportFormat = 'json' | 'html' | 'png' | 'svg' | 'visual-html';
+type ExportFormat = 'json' | 'html' | 'png' | 'svg' | 'visual-html' | 'markdown';
 
 export function Compare({
   unit,
@@ -441,6 +442,8 @@ export function Compare({
       setExportStale(false);
       const outcome = format === 'json'
         ? await exportCompareJson(summary.diffId)
+        : format === 'markdown'
+          ? await exportCompareMarkdown(summary.diffId)
         : format === 'html'
           ? await exportCompareHtml(summary.diffId)
           : await exportCompareVisual(summary.diffId, format === 'visual-html' ? 'html' : format);
@@ -539,6 +542,7 @@ export function Compare({
                   { key: 'png', label: t('compare', 'export.png') },
                   { key: 'svg', label: t('compare', 'export.svg') },
                   { key: 'visual-html', label: t('compare', 'export.printHtml') },
+                  { key: 'markdown', label: t('compare', 'export.markdown') },
                 ]}
                 disabled={exporting}
                 onExport={(format) => {

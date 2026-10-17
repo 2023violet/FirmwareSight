@@ -668,6 +668,39 @@ impl Session {
             .map_err(|_| visual_export_error(operation_id))
     }
 
+    /// The analysis Markdown (R6) for the selection Analyze proved, under the visual export's stale rule.
+    ///
+    /// # Errors
+    ///
+    /// `ERR-EXPORT-6002` when the selection or its analysis is no longer the one on screen.
+    pub fn render_analysis_markdown(
+        &self,
+        selection_id: &str,
+        snapshot_id: &str,
+        operation_id: &str,
+    ) -> Result<String, ErrorEnvelopeDto> {
+        if !self.analysis_export_is_current(selection_id, snapshot_id, operation_id)? {
+            return Err(export_stale(operation_id));
+        }
+        let snapshot = self
+            .held_snapshot(snapshot_id, operation_id)?
+            .ok_or_else(|| export_stale(operation_id))?;
+        let summary = firmwaresight_report::AnalyzeResultDto::from_snapshot(
+            &snapshot,
+            &service::display_name(&self.selection_path(selection_id, operation_id)?),
+        );
+        let memory = snapshot.memory().ok_or_else(|| {
+            internal_error(
+                operation_id,
+                "the sealed snapshot carries no memory footprint",
+            )
+        })?;
+        Ok(firmwaresight_report::markdown::analysis(
+            &summary,
+            &memory.region_usage,
+        ))
+    }
+
     pub fn analysis_export_is_current(
         &self,
         selection_id: &str,
@@ -1617,6 +1650,7 @@ pub fn run() {
             intake::clear_map,
             intake::analyze_selection,
             intake::export_analysis_visual,
+            intake::export_analysis_markdown,
             details::query_sections,
             details::query_symbols,
             details::query_evidence,
@@ -1629,6 +1663,7 @@ pub fn run() {
             compare::export_compare_json,
             compare::export_compare_html,
             compare::export_compare_visual,
+            compare::export_compare_markdown,
             release::open_project_config,
             release::inspect_project_readiness,
             release::save_project_policy,
@@ -1636,6 +1671,7 @@ pub fn run() {
             release::accept_review,
             release::get_gate_run,
             release::export_gate_visual,
+            release::export_gate_markdown,
             release::attach_release_file,
             release::set_release_attachment_kind,
             release::remove_release_attachment,

@@ -236,4 +236,5 @@ export const common: CatalogFor<'common'> = {
   'palette.theme.dark': '深色',
   'palette.languageSystem': '跟随系统语言',
   'palette.pinUnknown': '无法读取固定基线。请在“历史”页重新读取。',
+  'dialog.saveMarkdown': '将报告保存为 Markdown',
 };

@@ -204,3 +204,55 @@ pub(crate) async fn export_analysis_visual(
     .await
     .map_err(task_join_error)?
 }
+
+/// Export the analysis on screen as a Markdown reading copy (R6), through the shell's own Save dialog.
+#[tauri::command]
+pub(crate) async fn export_analysis_markdown(
+    app: AppHandle,
+    selection_id: String,
+    snapshot_id: String,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
+    state: State<'_, Arc<Session>>,
+) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+    let words = dialog.unwrap_or_default();
+    tauri::async_runtime::spawn_blocking(move || {
+        let text = session.render_analysis_markdown(&selection_id, &snapshot_id, &operation_id)?;
+        let format = crate::compare::ExportFormat::Markdown;
+        let picked = crate::compare::save_path(
+            &app,
+            &words,
+            "Export the analysis as Markdown",
+            format,
+            "firmwaresight-analysis.md",
+        );
+        let ensure_current = || {
+            session
+                .analysis_export_is_current(&selection_id, &snapshot_id, &operation_id)
+                .and_then(|current| {
+                    current
+                        .then_some(())
+                        .ok_or_else(|| crate::export_stale(&operation_id))
+                })
+        };
+        if picked.is_some() {
+            ensure_current()?;
+        }
+        crate::compare::write_export_checked(
+            picked,
+            &text,
+            format,
+            |path| {
+                crate::compare::confirm_replacement(
+                    &app,
+                    &words,
+                    &crate::service::display_name(path),
+                )
+            },
+            ensure_current,
+        )
+    })
+    .await
+    .map_err(task_join_error)?
+}

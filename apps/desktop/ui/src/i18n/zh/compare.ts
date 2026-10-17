@@ -204,4 +204,5 @@ export const compare: CatalogFor<'compare'> = {
   'picker.knownPinned': '自 {at} 起为固定基线 · 不在已加载的页中',
   'picker.knownCompared': '属于当前显示的对比 · 不在已加载的页中',
   'picker.knownFacts': '以文件名和摘要标识；记录的数值见“历史”页。',
+  'export.markdown': '导出 Markdown',
 };

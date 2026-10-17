@@ -818,8 +818,9 @@ fn an_unknown_disposition_of_block_never_projects_the_gap_away() {
 
 #[test]
 fn the_markdown_report_reads_in_the_report_grammar_and_never_shows_n_a_as_a_pass() {
-    let evaluation = evaluation();
-    let doc = firmwaresight_report::markdown::gate(&evaluation, POLICY_SHA);
+    let context = mixed_context();
+    let dto = GateResultsDto::from_evaluation(&context, &context.evaluate(RUN_ID), POLICY_SHA, 1);
+    let doc = firmwaresight_report::markdown::gate(&dto);
 
     let mut from = 0;
     for marker in [
@@ -848,7 +849,17 @@ fn the_markdown_report_reads_in_the_report_grammar_and_never_shows_n_a_as_a_pass
     assert!(doc.contains(&format!("`{RUN_ID}`")));
     assert_eq!(
         doc,
-        firmwaresight_report::markdown::gate(&evaluation, POLICY_SHA),
+        firmwaresight_report::markdown::gate(&dto),
         "deterministic"
+    );
+    // The text report and the Markdown report say the same sentence about the same run.
+    let text = gate_render::render_human(&context.evaluate(RUN_ID), POLICY_SHA);
+    let first = text.lines().nth(2).expect("the verdict line");
+    assert!(
+        doc.contains(first.trim_start_matches(|c: char| c == '['
+            || c.is_ascii_uppercase()
+            || c == ']'
+            || c == ' ')),
+        "{first}\n{doc}"
     );
 }

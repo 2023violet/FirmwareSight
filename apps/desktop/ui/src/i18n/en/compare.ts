@@ -202,4 +202,5 @@ export const compare = {
   'picker.knownPinned': 'Pinned baseline since {at} · not on the loaded page',
   'picker.knownCompared': 'In the comparison on screen · not on the loaded page',
   'picker.knownFacts': 'Named by file and digest; its recorded figures are on History.',
+  'export.markdown': 'Export Markdown',
 } as const;

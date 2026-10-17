@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
 import { Analyze } from './Analyze';
-import { analyzeSelection, attachMap, clearMap, exportAnalysisVisual, selectArtifact } from './ipc/bridge';
+import { analyzeSelection, attachMap, clearMap, exportAnalysisMarkdown, exportAnalysisVisual, selectArtifact } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type { AnalysisSummaryDto, ErrorEnvelopeDto, SelectionDto } from './ipc/types';
 import { render } from './test/render';
@@ -30,6 +30,9 @@ vi.mock('./ipc/bridge', () => ({
   getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
   pinBaseline: vi.fn(),
   unpinBaseline: vi.fn(),
+  exportAnalysisMarkdown: vi.fn(),
+  exportCompareMarkdown: vi.fn(),
+  exportGateMarkdown: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -796,6 +799,21 @@ describe('P1-A0 intake screen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Choose firmware artifact' }));
     await screen.findByText('other.elf');
     expect(screen.queryByRole('group', { name: 'Visual report export' })).toBeNull();
+  });
+
+  it('exports the analysis on screen as a Markdown reading copy (R6)', async () => {
+    vi.mocked(exportAnalysisMarkdown).mockResolvedValue(
+      ok({ status: 'written', fileName: 'firmwaresight-analysis.md', format: 'markdown' }),
+    );
+    await chooseArtifact();
+    await analyze();
+    await screen.findByRole('group', { name: 'Visual report export' });
+    fireEvent.click(exportButton('Export Markdown'));
+    await waitFor(() =>
+      expect(vi.mocked(exportAnalysisMarkdown)).toHaveBeenCalledWith('sel-7f3a-2', 'snap-deadbeef-p0-normalize-1'),
+    );
+    expect(exportAnalysisVisualMock).not.toHaveBeenCalled();
+    expect(await screen.findByText(/firmwaresight-analysis\.md/)).toBeDefined();
   });
 
   it('does not attach a late export outcome to a different successful analysis', async () => {

@@ -27,6 +27,7 @@ export type DialogKind =
   | 'saveGateVisual'
   | 'saveCompareJson'
   | 'saveCompareHtml'
+  | 'saveMarkdown'
   | 'savePolicy'
   | 'saveDiagnostics';
 
@@ -81,6 +82,8 @@ export function dialogWords(kind: DialogKind): DialogTextDto | undefined {
       return { ...base, ...replaceWords(t), title: t('common', 'dialog.saveCompareJson'), filter: t('common', 'dialog.filterExport') };
     case 'saveCompareHtml':
       return { ...base, ...replaceWords(t), title: t('common', 'dialog.saveCompareHtml'), filter: t('common', 'dialog.filterExport') };
+    case 'saveMarkdown':
+      return { ...base, ...replaceWords(t), title: t('common', 'dialog.saveMarkdown'), filter: t('common', 'dialog.filterReport') };
     case 'savePolicy':
       return { ...base, ...replaceWords(t, true), title: t('common', 'dialog.savePolicy') };
     case 'saveDiagnostics':

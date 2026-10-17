@@ -243,6 +243,7 @@ impl Session {
             let text = match format {
                 ExportFormat::Json => diff_render::render_json(&dto),
                 ExportFormat::Html => diff_render::render_html(&dto),
+                ExportFormat::Markdown => firmwaresight_report::markdown::comparison(result),
             };
             (text, suggested_file_name(result, format))
         })
@@ -315,6 +316,8 @@ pub(crate) fn envelope_from_diff(err: &DiffError, operation_id: &str) -> ErrorEn
 pub enum ExportFormat {
     Json,
     Html,
+    /// A GFM reading copy (R6, ADR-0034 D6): no HTML, never part of a release bundle.
+    Markdown,
 }
 
 impl ExportFormat {
@@ -323,6 +326,7 @@ impl ExportFormat {
         match self {
             Self::Json => "json",
             Self::Html => "html",
+            Self::Markdown => "md",
         }
     }
 
@@ -331,6 +335,7 @@ impl ExportFormat {
         match self {
             Self::Json => "json",
             Self::Html => "html",
+            Self::Markdown => "markdown",
         }
     }
 }
@@ -767,6 +772,32 @@ pub(crate) async fn export_compare_html(
             ExportFormat::Html,
             &words,
             "Export the build diff as HTML",
+            &operation_id,
+        )
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+/// Export the comparison as a Markdown reading copy (R6).
+#[tauri::command]
+pub(crate) async fn export_compare_markdown(
+    app: AppHandle,
+    diff_id: String,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
+    state: State<'_, Arc<Session>>,
+) -> Result<ExportOutcomeDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+    let words = dialog.unwrap_or_default();
+    tauri::async_runtime::spawn_blocking(move || {
+        export_now(
+            &app,
+            &session,
+            &diff_id,
+            ExportFormat::Markdown,
+            &words,
+            "Export the build diff as Markdown",
             &operation_id,
         )
     })

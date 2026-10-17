@@ -40,6 +40,7 @@ import {
   selectArtifact,
   getBaselinePin,
   pinBaseline,
+  exportCompareMarkdown,
 } from './ipc/bridge';
 import type { IpcOutcome } from './ipc/bridge';
 import type {
@@ -67,6 +68,9 @@ vi.mock('./ipc/bridge', () => ({
   getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
   pinBaseline: vi.fn(),
   unpinBaseline: vi.fn(),
+  exportAnalysisMarkdown: vi.fn(),
+  exportCompareMarkdown: vi.fn(),
+  exportGateMarkdown: vi.fn(),
   selectArtifact: vi.fn(),
   attachMap: vi.fn(),
   clearMap: vi.fn(),
@@ -1623,6 +1627,18 @@ describe('export', () => {
     await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-same-tick')).toBe(true));
     expect(screen.getByText(/changed while the Save dialog was open, so nothing was written/)).toBeDefined();
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('exports the comparison on screen as a Markdown reading copy (R6)', async () => {
+    vi.mocked(exportCompareMarkdown).mockResolvedValue(
+      ok({ status: 'written', fileName: 'firmwaresight-diff.md', format: 'markdown' }),
+    );
+    await openCompare();
+    await runCompare();
+    fireEvent.click(exportButton('Export Markdown'));
+    await waitFor(() => expect(vi.mocked(exportCompareMarkdown)).toHaveBeenCalledWith(comparison().diffId));
+    expect(exportJsonMock).not.toHaveBeenCalled();
+    expect(await screen.findByText(/firmwaresight-diff\.md/)).toBeDefined();
   });
 
   it('offers visual formats beside the existing portable JSON and detailed HTML exports', async () => {

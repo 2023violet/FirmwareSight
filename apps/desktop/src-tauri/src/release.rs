@@ -103,25 +103,50 @@ impl Session {
             .held_snapshot(snapshot_id, operation_id)?
             .ok_or_else(|| crate::gate_export_stale(operation_id))?;
         let analysis = AnalysisDocumentDto::from_snapshot(&snapshot, &[]);
-        let projection = GateResultsDto {
-            schema_version: firmwaresight_report::GATE_SCHEMA_VERSION,
-            run_id: run.run_id.clone(),
-            snapshot_id: run.snapshot_id.clone(),
-            findings: run.findings.iter().map(visual_finding).collect(),
-            extensions: GateExtensionsDto {
-                policy_sha256: run.policy_sha256,
-                project_config_schema_version: 0,
-                baseline_snapshot_id: run.baseline_snapshot_id,
-                overall_effective_severity: severity_word(&run.overall_effective_severity),
-                canonical_input_label: None,
-                attachments: Vec::new(),
-            },
-        };
+        let projection = gate_projection(run);
         let report = firmwaresight_report::visual::VisualReport::gate(&analysis, &projection, None);
         firmwaresight_report::visual::render(&report, crate::compare::visual_format(format))
             .map_err(|_| crate::compare::visual_export_error(operation_id))
     }
 
+    /// The Gate Markdown (R6) for the run on screen, from the same projection the visual export uses.
+    ///
+    /// # Errors
+    ///
+    /// The Gate export's stale envelope when the run is no longer the one on screen.
+    pub fn render_gate_markdown(
+        &self,
+        run_id: &str,
+        snapshot_id: &str,
+        operation_id: &str,
+    ) -> Result<String, ErrorEnvelopeDto> {
+        let run = self
+            .gate_run(run_id, operation_id)?
+            .filter(|run| run.snapshot_id == snapshot_id)
+            .ok_or_else(|| crate::gate_export_stale(operation_id))?;
+        Ok(firmwaresight_report::markdown::gate(&gate_projection(run)))
+    }
+}
+
+/// The portable projection of a stored run, shared by the visual and the Markdown exports.
+fn gate_projection(run: GateRunDto) -> GateResultsDto {
+    GateResultsDto {
+        schema_version: firmwaresight_report::GATE_SCHEMA_VERSION,
+        run_id: run.run_id.clone(),
+        snapshot_id: run.snapshot_id.clone(),
+        findings: run.findings.iter().map(visual_finding).collect(),
+        extensions: GateExtensionsDto {
+            policy_sha256: run.policy_sha256,
+            project_config_schema_version: 0,
+            baseline_snapshot_id: run.baseline_snapshot_id,
+            overall_effective_severity: severity_word(&run.overall_effective_severity),
+            canonical_input_label: None,
+            attachments: Vec::new(),
+        },
+    }
+}
+
+impl Session {
     /// Re-observe the loaded project's config and workspace without judging or persisting a Gate.
     pub fn inspect_project_readiness(
         &self,
@@ -1621,6 +1646,56 @@ pub(crate) async fn export_gate_visual(
                 crate::compare::confirm_visual_replacement(
                     &app,
                     &text,
+                    &crate::service::display_name(path),
+                )
+            },
+            ensure_current,
+        )
+    })
+    .await
+    .map_err(task_join_error)?
+}
+
+/// Export the run on screen as a Markdown reading copy (R6), through the shell's own Save dialog.
+#[tauri::command]
+pub(crate) async fn export_gate_markdown(
+    app: AppHandle,
+    run_id: String,
+    snapshot_id: String,
+    dialog: Option<crate::dialog_text::DialogTextDto>,
+    state: State<'_, Arc<Session>>,
+) -> Result<crate::ipc::ExportOutcomeDto, ErrorEnvelopeDto> {
+    let session = Arc::clone(&state);
+    let operation_id = next_operation_id();
+    let words = dialog.unwrap_or_default();
+    tauri::async_runtime::spawn_blocking(move || {
+        let text = session.render_gate_markdown(&run_id, &snapshot_id, &operation_id)?;
+        let format = crate::compare::ExportFormat::Markdown;
+        let picked = crate::compare::save_path(
+            &app,
+            &words,
+            "Export the Gate review as Markdown",
+            format,
+            "firmwaresight-gate-review.md",
+        );
+        let ensure_current = || {
+            session
+                .gate_run_is_current(&run_id, &snapshot_id, &operation_id)
+                .and_then(|current| {
+                    current
+                        .then_some(())
+                        .ok_or_else(|| crate::gate_export_stale(&operation_id))
+                })
+        };
+        ensure_current()?;
+        crate::compare::write_export_checked(
+            picked,
+            &text,
+            format,
+            |path| {
+                crate::compare::confirm_replacement(
+                    &app,
+                    &words,
                     &crate::service::display_name(path),
                 )
             },

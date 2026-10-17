@@ -33,7 +33,7 @@ import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './for
 import { GettingStartedPanel } from './GettingStarted';
 import { useI18n, type Translate } from './i18n';
 import type { Catalog } from './i18n/en';
-import { analyzeSelection, attachMap, clearMap, exportAnalysisVisual, selectArtifact } from './ipc/bridge';
+import { analyzeSelection, attachMap, clearMap, exportAnalysisMarkdown, exportAnalysisVisual, selectArtifact } from './ipc/bridge';
 import type {
   AnalysisSummaryDto,
   ErrorEnvelopeDto,
@@ -211,16 +211,15 @@ export function Analyze({
     return () => { exportRequest.current += 1; };
   }, [selection?.selectionId, currentSummary?.identity.snapshotId]);
 
-  const exportVisual = async (format: 'png' | 'svg' | 'html') => {
+  const exportVisual = async (format: 'png' | 'svg' | 'html' | 'markdown') => {
     if (currentSummary === null || selection === null || analyzing || exporting) return;
     const request = ++exportRequest.current;
     setExporting(true);
     setStaleExportNote(false);
-    const result = await exportAnalysisVisual(
-      selection.selectionId,
-      currentSummary.identity.snapshotId,
-      format,
-    );
+    const result =
+      format === 'markdown'
+        ? await exportAnalysisMarkdown(selection.selectionId, currentSummary.identity.snapshotId)
+        : await exportAnalysisVisual(selection.selectionId, currentSummary.identity.snapshotId, format);
     if (request !== exportRequest.current) {
       // The analysis on screen changed while the Save dialog was open; Rust refused to write the old one
       // (M1, AC24). Say so rather than stay silent.
@@ -305,6 +304,7 @@ export function Analyze({
                     { key: 'png', label: t('analyze', 'export.png') },
                     { key: 'svg', label: t('analyze', 'export.svg') },
                     { key: 'html', label: t('analyze', 'export.html') },
+                    { key: 'markdown', label: t('analyze', 'export.markdown') },
                   ]}
                   disabled={exporting || analyzing}
                   onExport={(format) => {

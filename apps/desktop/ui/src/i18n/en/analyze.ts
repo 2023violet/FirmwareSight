@@ -212,4 +212,5 @@ export const analyze = {
   'details.objects.nextStep': 'Analyze the build again with its GNU ld .map file attached to see which object files and libraries use the memory.',
   'details.objects.nextStepRows': 'Object rows come from the input-section lines of a GNU ld MAP (the linker’s -Map output). A MAP that lists them, for a build not stored before, gives this table.',
   'details.objects.remainder': 'Not attributed to an object: {flash} Flash and {ram} RAM (padding, linker stubs, and sections without object rows; Unknown where a total or an object figure is not exact).',
+  'export.markdown': 'Export Markdown',
 } as const;
