@@ -49,7 +49,7 @@ Durable decisions live in ADRs. This page indexes them and lists the standing Ow
 | [0031](../09_ADR/ADR-0031-developer-preview-theme.md) | Developer Preview theme: System / Light / Dark |
 | [0032](../09_ADR/ADR-0032-desktop-ui-language.md) | Desktop UI language |
 | [0033](../09_ADR/ADR-0033-object-library-attribution.md) | Object and library attribution from the GNU ld MAP (BASELINE 2026-10-15) |
-| [0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md) | Instrument Ledger: one design language for the app and every export; tokens 0.4.0 (BASELINE 2026-10-16) |
+| [0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md) | Instrument Ledger: one design language for the app and every export; tokens 0.4.0 (BASELINE 2026-10-16); A1 tokens 0.4.1 layer scale and dialog width (2026-10-17) |
 
 ## Owner decisions 2026-10-16: R-series redesign
 
@@ -62,6 +62,7 @@ The Owner redirected the next round from closeout to product building with a com
 | RD3 | Spec and prototype first (R0). R1–R7 start only after the Owner accepts the R0 prototype, each named in ACTIVE_TASK. |
 | RD4 | D3 (History baseline pin, compare from History) folds into R5. This is the written Owner exception to ADR-0024's "V1/user signal" entry condition that route §2 asks for. |
 | RD5 | Light `color.diff.removed` becomes `#C7372C` (4.56:1 on `#FBECEA`); ADR-0031 D6's contrast exemption is retired and the goldens that print it are regenerated on purpose in R1. |
+| RD6 | R7 (2026-10-17, under the Owner's standing goal to carry the plan through without interim confirmation): tokens 0.4.1 is additive (ADR-0034 A1: `layout.dialog`, `layer.*`); the scrim stays transparent. Human-only checks (window-minimum drag, NVDA/Narrator, 125%/150% DPI) stay NOT_RUN and are listed in [06_DELIVERY/21](../06_DELIVERY/21_R7_QUALITY.md) §3. |
 | RD6 | A human-readable Markdown report (Analyze, Compare, Gate) is added in R6 as candidate E1-B by Owner exception. It is a presentation format, not an interchange schema; it is not in the release bundle. Whether it may list per-object rows is settled in R6 against ADR-0033 D7 / ADR-0022 before that code lands. |
 | RD7 | 2026-10-16: the Owner accepted the R0 prototype's visual direction; ADR-0034 is BASELINE and R1 (foundation) is authorized ([06_DELIVERY/15](../06_DELIVERY/15_R1_FOUNDATION.md)). |
 

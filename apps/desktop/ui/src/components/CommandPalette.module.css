@@ -6,7 +6,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: var(--fs-layer-palette);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -17,9 +17,8 @@
 .palette {
   display: flex;
   flex-direction: column;
-  /* The token file has no dialog width; the evidence column plus the rail is a reading width built from two
-     layout tokens rather than a new number (smoke R5: the design target width filled the window). */
-  width: calc(var(--fs-layout-evidence-inspector-max) + var(--fs-layout-nav-rail));
+  /* A dialog's reading width (tokens 0.4.1, ADR-0034 A1); the design target width filled the window (smoke R5). */
+  width: var(--fs-layout-dialog);
   max-width: calc(100% - var(--fs-space-8));
   max-height: calc(100% - var(--fs-layout-topbar) * 2);
   background: var(--fs-color-bg-surface);

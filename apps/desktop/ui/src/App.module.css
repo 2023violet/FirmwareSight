@@ -43,7 +43,7 @@
 .dropTarget {
   position: sticky;
   inset-block-start: 0;
-  z-index: 1;
+  z-index: var(--fs-layer-sticky);
   padding: var(--fs-space-3) var(--fs-space-4);
   color: var(--fs-color-text-primary);
   background: var(--fs-color-bg-surface);

@@ -12,7 +12,7 @@ last_updated: "2026-10-16"
 
 ## Status
 
-**BASELINE** (2026-10-16). Proposed in R0. The Owner accepted the R0 prototype's visual direction in chat on 2026-10-16 and authorized R1, which lands D3 (tokens 0.4.0). It extends ADR-0018 and amends ADR-0031 D6 (see D3).
+**BASELINE** (2026-10-16). Proposed in R0. The Owner accepted the R0 prototype's visual direction in chat on 2026-10-16 and authorized R1, which lands D3 (tokens 0.4.0). It extends ADR-0018 and amends ADR-0031 D6 (see D3). Amendment A1 (2026-10-17, R7) adds tokens 0.4.1.
 
 ## Context
 
@@ -71,6 +71,12 @@ Exports stay light-only and deterministic and load nothing from the network. HTM
 **D6 — Markdown export.** A new human-readable Markdown report for Analyze, Compare and Gate, in GFM with no HTML. It is exported from the desktop menu and the CLI `--markdown <FILE>`, and never overwrites an existing file. It is not part of the release bundle (ADR-0028). This promotes candidate E1-B by Owner exception. It is recorded with D3 of the route.
 
 **D7 — Phases.** R0 spec and prototype → R1 foundation → R2 Analyze and Overview → R3 Compare → R4 Release → R5 History (with D3), Settings, Help and the command palette → R6 reports (after R1, in parallel) → R7 quality. Each phase needs independent review, an Owner-approved fast-forward push, and worktree cleanup.
+
+**A1 — Tokens v0.4.1 (R7 quality, 2026-10-17).** Additive only; nothing that exists moves.
+- `layout.dialog` 640: the reading width of a centred dialog. The command palette had been sized as `evidence_inspector.max + nav_rail` (644), a sum of two unrelated tokens.
+- A unitless `layer` scale for `z-index`: `sticky` 1 (sticky table headers), `sticky_above` 2 (a sticky bar above them), `popover` 5 (menus and pickers), `inspector` 10, `sheet` 20, `palette` 30. These are the values R1–R5 already used as literals; naming them makes the overlay order one decision. `generate_design_tokens.py --check` refuses a bare `z-index` number in any UI stylesheet.
+- The overlay scrim stays transparent: no scrim colour is added. The overlay shadow already lifts a sheet, and a tint would be a second way to say the same thing.
+- No colour, spacing, radius, typography, density, motion, focus or shadow value moves, and no export changes.
 
 ## Consequences
 

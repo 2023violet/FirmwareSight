@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "meta": {
     "product": "FirmwareSight",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "status": "baseline-authoritative",
     "baseline": "0.5.0",
     "governed_by": "ADR-0018, ADR-0031, ADR-0034",
@@ -77,7 +77,16 @@
     "breakpoint": {
       "rail_collapse": 1180,
       "inspector_dock": 1280
-    }
+    },
+    "dialog": 640
+  },
+  "layer": {
+    "sticky": 1,
+    "sticky_above": 2,
+    "popover": 5,
+    "inspector": 10,
+    "sheet": 20,
+    "palette": 30
   },
   "table": {
     "row": {
@@ -202,6 +211,12 @@
       "to": "0.4.0",
       "date": "2026-10-16",
       "change": "ADR-0034 (Instrument Ledger). Additive: typography.size.figure 28 / line_height.figure 36 for the one lead figure per page or report; typography.weight regular 400 / semibold 600 replacing the CSS bold keyword; layout.topbar 40, layout.subject_bar 44, layout.rail_collapsed 56; layout.breakpoint rail_collapse 1180 / inspector_dock 1280; icon.size sm 16 / md 20 and icon.stroke 1.5. One value moves: light diff.removed #C9372C -> #C7372C, 4.5592:1 on diff.removed.bg, which retires ADR-0031 D6's only contrast exemption; the two report goldens that print it are regenerated on purpose. No palette, spacing, radius, density, motion, focus or shadow value moves."
+    },
+    {
+      "from": "0.4.0",
+      "to": "0.4.1",
+      "date": "2026-10-17",
+      "change": "ADR-0034 amendment A1 (R7 quality). Additive only: layout.dialog 640 for a centred dialog such as the command palette, which had been sized from two unrelated layout tokens; and a unitless layer scale (sticky 1, sticky_above 2, popover 5, inspector 10, sheet 20, palette 30) that names the stacking order the R1-R5 components already used as literals. The overlay scrim stays transparent: no scrim colour is added. No colour, spacing, radius, typography, density, motion, focus or shadow value moves, and no export changes."
     }
   ]
 }

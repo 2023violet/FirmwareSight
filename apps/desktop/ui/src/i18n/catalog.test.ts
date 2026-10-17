@@ -94,6 +94,7 @@ describe('the two catalogs', () => {
       'Observed',
       'Derived',
       'Declared',
+      'Unknown',
       'FirmwareSight',
       'KiB',
       'settings.json',
@@ -102,7 +103,14 @@ describe('the two catalogs', () => {
       for (const [key, value] of Object.entries(en[ns])) {
         for (const word of kept) {
           if (value.includes(word)) {
-            expect(zh[ns][key as never] as string, `${ns}.${key} keeps ${word}`).toContain(word);
+            // The Unknown evidence class and the UNKNOWN state are one word in two cases; a group label
+            // may carry either, as long as it is not translated away.
+            const forms = word === 'Unknown' ? ['Unknown', 'UNKNOWN'] : [word];
+            const target = zh[ns][key as never] as string;
+            expect(
+              forms.some((form) => target.includes(form)),
+              `${ns}.${key} keeps ${word}: ${target}`,
+            ).toBe(true);
           }
         }
       }

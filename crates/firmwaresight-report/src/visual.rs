@@ -496,7 +496,7 @@ fn html(report: &VisualReport) -> String {
         report.kind
     );
     out.push_str(&summary_html(report));
-    out.push_str("<h2>Identity and evidence detail</h2><table><thead><tr><th>Identity</th><th>Value</th></tr></thead><tbody>");
+    out.push_str("<h2>Identity and evidence detail</h2><table><caption>The identities this summary is about.</caption><thead><tr><th scope=\"col\">Identity</th><th scope=\"col\">Value</th></tr></thead><tbody>");
     for (label, value) in &report.identities {
         out.push_str(&format!(
             "<tr><td>{}</td><td class=\"mono\">{}</td></tr>",
@@ -504,7 +504,7 @@ fn html(report: &VisualReport) -> String {
             escape_html(value)
         ));
     }
-    out.push_str("</tbody></table><h2>Measurements (exact bytes)</h2><table><thead><tr><th>Fact</th><th>Value</th><th>Basis</th></tr></thead><tbody>");
+    out.push_str("</tbody></table><h2>Measurements (exact bytes)</h2><table><caption>Every figure in the summary, in exact bytes, with its basis.</caption><thead><tr><th scope=\"col\">Fact</th><th scope=\"col\">Value</th><th scope=\"col\">Basis</th></tr></thead><tbody>");
     for m in &report.metrics {
         out.push_str(&format!(
             "<tr><td>{}</td><td>{}</td><td>{} / {}</td></tr>",

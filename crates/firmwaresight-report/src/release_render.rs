@@ -301,7 +301,7 @@ fn render_shipped(report: &ReleaseBundleReport<'_>, out: &mut String) {
         "<table>\n<caption>The bytes this release consists of, in the order the release fingerprint \
          lists them.</caption>\n",
     );
-    out.push_str("<thead><tr><th>Bundle path</th><th>Kind</th><th>SHA-256</th><th class=\"num\">Bytes</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">Bundle path</th><th scope=\"col\">Kind</th><th scope=\"col\">SHA-256</th><th scope=\"col\" class=\"num\">Bytes</th></tr></thead>\n<tbody>\n");
     for artifact in &report.model.artifacts {
         out.push_str(&format!(
             "<tr><td class=\"mono\">{}</td><td>{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td></tr>\n",
@@ -320,7 +320,7 @@ fn render_analysis(report: &ReleaseBundleReport<'_>, out: &mut String) {
     let analysis = report.analysis;
     out.push_str("<h2>3. Analysis summary</h2>\n");
     out.push_str("<table>\n<caption>What was read off the build, per input file.</caption>\n");
-    out.push_str("<thead><tr><th>File</th><th>Format</th><th>Entry point</th><th>Build id</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">File</th><th scope=\"col\">Format</th><th scope=\"col\">Entry point</th><th scope=\"col\">Build id</th></tr></thead>\n<tbody>\n");
     for artifact in &analysis.artifacts {
         out.push_str(&format!(
             "<tr><td class=\"mono\">{}</td><td>{} {}-bit {} &middot; <span class=\"mono\">{}</span></td><td>{}</td><td>{}</td></tr>\n",
@@ -377,7 +377,7 @@ fn render_analysis(report: &ReleaseBundleReport<'_>, out: &mut String) {
     );
     out.push_str("</tbody>\n</table>\n");
 
-    out.push_str("<h3>Coverage of this build</h3>\n<table>\n<tbody>\n");
+    out.push_str("<h3>Coverage of this build</h3>\n<table>\n<caption>What the analysis document carries, and what it could not read.</caption>\n<tbody>\n");
     row(
         out,
         "Rows carried in the analysis document",
@@ -466,7 +466,10 @@ fn growth_table(out: &mut String, noun: &str, rows: &[Contributor]) {
         ));
         return;
     }
-    out.push_str("<table>\n<thead><tr><th class=\"num\">Delta</th><th>Row</th><th class=\"num\">Bytes</th><th>Change</th></tr></thead>\n<tbody>\n");
+    out.push_str(&format!(
+        "<table>\n<caption>The {noun} rows that grew most, largest first.</caption>\n"
+    ));
+    out.push_str("<thead><tr><th scope=\"col\" class=\"num\">Delta</th><th scope=\"col\">Row</th><th scope=\"col\" class=\"num\">Bytes</th><th scope=\"col\">Change</th></tr></thead>\n<tbody>\n");
     for entry in rows {
         out.push_str(&format!(
             "<tr><td class=\"num mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td><td>{}</td></tr>\n",
@@ -493,7 +496,7 @@ fn render_gate(report: &ReleaseBundleReport<'_>, out: &mut String) {
          review.</p>\n",
         chip(report.reviews.extensions.overall_effective_severity)
     ));
-    out.push_str("<table>\n<tbody>\n");
+    out.push_str("<table>\n<caption>Which Gate run this release carries, and under which policy.</caption>\n<tbody>\n");
     mono_row(out, "Run id", &gate.run_id);
     mono_row(out, "Snapshot", &gate.snapshot_id);
     row(
@@ -525,7 +528,7 @@ fn render_gate(report: &ReleaseBundleReport<'_>, out: &mut String) {
 
     out.push_str("<h3>Findings by state</h3>\n<table>\n");
     out.push_str("<caption>Core's counts for this run, carried rather than recounted.</caption>\n");
-    out.push_str("<thead><tr><th>State</th><th class=\"num\">Count</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">State</th><th scope=\"col\" class=\"num\">Count</th></tr></thead>\n<tbody>\n");
     for state in STATE_ORDER {
         let count = match state {
             FindingState::Pass => report.gate_counts.pass,
@@ -545,7 +548,7 @@ fn render_gate(report: &ReleaseBundleReport<'_>, out: &mut String) {
     out.push_str("<caption>In the order a release owner reads them: what blocks, what needs a decision, \
                   what is unknown, what passed. Every finding of the run is listed, not a truncated top \
                   list.</caption>\n");
-    out.push_str("<thead><tr><th>Rule</th><th>State</th><th>Effective severity</th><th>Finding</th><th>Evidence</th><th>Next step</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">Rule</th><th scope=\"col\">State</th><th scope=\"col\">Effective severity</th><th scope=\"col\">Finding</th><th scope=\"col\">Evidence</th><th scope=\"col\">Next step</th></tr></thead>\n<tbody>\n");
     for state in STATE_ORDER {
         for finding in gate
             .findings
@@ -615,7 +618,7 @@ fn render_reviews(report: &ReleaseBundleReport<'_>, out: &mut String) {
         "<table>\n<caption>Who answered which finding, when, and why. An accepted review never \
                   rewrites the finding it answers: the original state stays REVIEW.</caption>\n",
     );
-    out.push_str("<thead><tr><th>Finding</th><th>Original state</th><th>Actor</th><th>Accepted at</th><th>Reason</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">Finding</th><th scope=\"col\">Original state</th><th scope=\"col\">Actor</th><th scope=\"col\">Accepted at</th><th scope=\"col\">Reason</th></tr></thead>\n<tbody>\n");
     for acceptance in &report.reviews.acceptances {
         out.push_str(&format!(
             "<tr><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td>{}</td><td class=\"mono\">{}</td><td>{}</td></tr>\n",
@@ -637,7 +640,7 @@ fn render_reviews(report: &ReleaseBundleReport<'_>, out: &mut String) {
 // --------------------------------------------------------------------------- 7. release notes
 
 fn render_notes(report: &ReleaseBundleReport<'_>, out: &mut String) {
-    out.push_str("<h2>7. Release notes</h2>\n<table>\n<tbody>\n");
+    out.push_str("<h2>7. Release notes</h2>\n<table>\n<caption>The release notes, carried byte for byte.</caption>\n<tbody>\n");
     match &report.model.release_notes {
         Some(notes) => {
             row(
@@ -686,7 +689,7 @@ fn render_integrity(report: &ReleaseBundleReport<'_>, out: &mut String) {
         "<table>\n<caption>Every file a digest can be named for here. This report is payload: it is \
          written before both index files, so it cannot print their digests, or its own.</caption>\n",
     );
-    out.push_str("<thead><tr><th>Bundle path</th><th>SHA-256</th><th class=\"num\">Bytes</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">Bundle path</th><th scope=\"col\">SHA-256</th><th scope=\"col\" class=\"num\">Bytes</th></tr></thead>\n<tbody>\n");
     for entry in report.staged {
         out.push_str(&format!(
             "<tr><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td></tr>\n",
@@ -705,7 +708,7 @@ fn render_integrity(report: &ReleaseBundleReport<'_>, out: &mut String) {
     }
     out.push_str("</tbody>\n</table>\n");
 
-    out.push_str("<h3>The self-reference rule</h3>\n<table>\n<tbody>\n");
+    out.push_str("<h3>The self-reference rule</h3>\n<table>\n<caption>What each index file covers, and why neither lists itself.</caption>\n<tbody>\n");
     row(
         out,
         format!("<span class=\"mono\">{SHA256SUMS_NAME}</span> covers"),
@@ -802,7 +805,7 @@ fn render_limits(report: &ReleaseBundleReport<'_>, out: &mut String) {
             "<table>\n<caption>Capability reporting, taken from the analysis document in this \
                       bundle.</caption>\n",
         );
-        out.push_str("<thead><tr><th>Capability</th><th>Reported</th><th>What that means for this release</th></tr></thead>\n<tbody>\n");
+        out.push_str("<thead><tr><th scope=\"col\">Capability</th><th scope=\"col\">Reported</th><th scope=\"col\">What that means for this release</th></tr></thead>\n<tbody>\n");
         for (label, value) in partial {
             out.push_str(&format!(
                 "<tr><td>{}</td><td class=\"mono\">{value}</td><td>{}</td></tr>\n",
@@ -851,7 +854,7 @@ fn render_limits(report: &ReleaseBundleReport<'_>, out: &mut String) {
                       the analysis document carries.</caption>\n",
         );
         out.push_str(
-            "<thead><tr><th>Field</th><th>Value</th><th>Rule</th></tr></thead>\n<tbody>\n",
+            "<thead><tr><th scope=\"col\">Field</th><th scope=\"col\">Value</th><th scope=\"col\">Rule</th></tr></thead>\n<tbody>\n",
         );
         for item in unknowns {
             out.push_str(&format!(
@@ -934,7 +937,7 @@ fn limit_sentence(label: &str, value: &str) -> &'static str {
 fn row(out: &mut String, label: impl Into<String>, value: impl Into<String>) {
     let label = label.into();
     out.push_str(&format!(
-        "<tr><th>{label}</th><td>{}</td></tr>\n",
+        "<tr><th scope=\"row\">{label}</th><td>{}</td></tr>\n",
         value.into()
     ));
 }

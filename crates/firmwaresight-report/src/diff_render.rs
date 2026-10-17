@@ -388,7 +388,7 @@ fn render_memory(dto: &DiffResultDto, out: &mut String) {
         escape_html(dto.memory.comparability)
     ));
     out.push_str("<table>\n<caption>Delta = target &minus; base. A dash is an absence, not a zero.</caption>\n");
-    out.push_str("<thead><tr><th>Budget</th><th class=\"num\">Base</th><th class=\"num\">Target</th><th class=\"num\">Delta</th><th>Reading</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">Budget</th><th scope=\"col\" class=\"num\">Base</th><th scope=\"col\" class=\"num\">Target</th><th scope=\"col\" class=\"num\">Delta</th><th scope=\"col\">Reading</th></tr></thead>\n<tbody>\n");
     out.push_str(&budget_row(
         "Nonvolatile / load image",
         &dto.memory.nonvolatile,
@@ -415,7 +415,7 @@ fn bytes_text(bytes: Option<u64>) -> String {
 }
 
 fn budget_row(name: &str, change: &ByteChangeDto) -> String {
-    let mut row = format!("<tr><th>{name}</th>");
+    let mut row = format!("<tr><th scope=\"row\">{name}</th>");
     row.push_str(&num_cell(change.base));
     row.push_str(&num_cell(change.target));
     row.push_str(&delta_cell(change.delta));
@@ -520,7 +520,7 @@ fn render_sections(dto: &DiffResultDto, out: &mut String) {
         return;
     }
     out.push_str("<table>\n<caption>Every changed row, not a truncated top list.</caption>\n");
-    out.push_str("<thead><tr><th>Change</th><th>Section</th><th class=\"num\">Base size</th><th class=\"num\">Target size</th><th class=\"num\">Delta</th><th>Fields</th><th>Where to check</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">Change</th><th scope=\"col\">Section</th><th scope=\"col\" class=\"num\">Base size</th><th scope=\"col\" class=\"num\">Target size</th><th scope=\"col\" class=\"num\">Delta</th><th scope=\"col\">Fields</th><th scope=\"col\">Where to check</th></tr></thead>\n<tbody>\n");
     for row in &dto.section_changes {
         out.push_str(&change_row(
             row.change,
@@ -548,7 +548,7 @@ fn render_symbols(dto: &DiffResultDto, out: &mut String) {
     out.push_str(
         "<table>\n<caption>Every changed row. Growth ranking never replaces this list.</caption>\n",
     );
-    out.push_str("<thead><tr><th>Change</th><th>Symbol</th><th class=\"num\">Base size</th><th class=\"num\">Target size</th><th class=\"num\">Delta</th><th>Fields</th><th>Where to check</th></tr></thead>\n<tbody>\n");
+    out.push_str("<thead><tr><th scope=\"col\">Change</th><th scope=\"col\">Symbol</th><th scope=\"col\" class=\"num\">Base size</th><th scope=\"col\" class=\"num\">Target size</th><th scope=\"col\" class=\"num\">Delta</th><th scope=\"col\">Fields</th><th scope=\"col\">Where to check</th></tr></thead>\n<tbody>\n");
     for row in &dto.symbol_changes {
         out.push_str(&change_row(
             row.change,

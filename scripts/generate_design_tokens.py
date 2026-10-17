@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -44,6 +45,7 @@ GROUPS = (
     ("radius", "radius", "px"),
     ("border", "border", "px"),
     ("layout", "layout", "px"),
+    ("layer", "layer", ""),
     ("table", "row", "px"),
     ("icon", "icon", "px"),
     ("motion", "motion", "ms"),
@@ -116,6 +118,10 @@ def emitted_rows(tokens: dict, theme: str) -> list[tuple[str, str, str]]:
                 else:
                     name = "--fs-focus-" + "-".join(p.replace("_", "-") for p in path[1:])
                     text = f"{value}px"
+            elif section == "layer":
+                # A stacking order is a bare integer: `z-index` takes no unit (ADR-0034 A1).
+                name = "--fs-layer-" + "-".join(p.replace("_", "-") for p in path[1:])
+                text = str(value)
             elif section == "shadow":
                 name = "--fs-shadow-" + str(path[1]).replace(".", "-")
                 text = str(value)
@@ -178,8 +184,8 @@ def render(tokens: dict, source_sha: str) -> str:
         ":root {",
     ]
     labels = {css: label.title() for (_s, css, _u), label in zip(GROUPS, (
-        "Color", "Spacing", "Radius", "Border", "Layout", "Table density", "Icon", "Motion", "Focus",
-        "Shadow",
+        "Color", "Spacing", "Radius", "Border", "Layout", "Layer", "Table density", "Icon", "Motion",
+        "Focus", "Shadow",
     ))}
     labels["font"] = TYPOGRAPHY_LABEL
 
@@ -369,6 +375,22 @@ def print_contrast(tokens: dict) -> None:
             print(f"  {theme}: {first} on {second} (floor {floor}:1) - {why}")
 
 
+UI_STYLES = ROOT / "apps" / "desktop" / "ui" / "src"
+BARE_Z_INDEX = re.compile(r"z-index\s*:\s*-?\d")
+
+
+def bare_stacking_orders() -> list[str]:
+    """Stylesheets that stack with a bare number instead of a `--fs-layer-*` token (ADR-0034 A1).
+
+    The layer scale exists so the order of overlays is one decision, not eight numbers that happen to agree.
+    """
+    return sorted(
+        str(path.relative_to(ROOT)).replace("\\", "/")
+        for path in UI_STYLES.rglob("*.css")
+        if path != TARGET and BARE_Z_INDEX.search(path.read_text(encoding="utf-8"))
+    )
+
+
 def main(argv: list[str]) -> int:
     check = "--check" in argv[1:]
     raw = SOURCE.read_bytes()
@@ -391,6 +413,13 @@ def main(argv: list[str]) -> int:
             print(
                 "tokens.css is out of date with assets/design-tokens.json.\n"
                 "Run: python scripts/generate_design_tokens.py",
+                file=sys.stderr,
+            )
+            return 1
+        bare = bare_stacking_orders()
+        if bare:
+            print(
+                "z-index must use a --fs-layer-* token (tokens 0.4.1, ADR-0034 A1): " + ", ".join(bare),
                 file=sys.stderr,
             )
             return 1

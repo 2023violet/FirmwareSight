@@ -121,7 +121,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 17_R3_COMPARE.md
 │   ├── 18_R4_RELEASE.md
 │   ├── 19_R5_HISTORY.md
-│   └── 20_R6_REPORTS.md
+│   ├── 20_R6_REPORTS.md
+│   └── 21_R7_QUALITY.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -784,9 +785,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── AC_MATRIX.tsv
 │   │   ├── R5_NATIVE_SMOKE_EVIDENCE.zip
 │   │   └── README.md
-│   └── R6/
+│   ├── R6/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── R6_NATIVE_SMOKE_EVIDENCE.zip
+│   │   └── README.md
+│   └── R7/
 │       ├── AC_MATRIX.tsv
-│       ├── R6_NATIVE_SMOKE_EVIDENCE.zip
+│       ├── DESIGN_CHECKLIST.md
+│       ├── R7_QUALITY_EVIDENCE.zip
 │       └── README.md
 ├── examples/
 │   ├── project-readiness/

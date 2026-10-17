@@ -36,6 +36,6 @@
 .viewport thead th {
   position: sticky;
   inset-block-start: 0;
-  z-index: 1;
+  z-index: var(--fs-layer-sticky);
   background: var(--fs-color-bg-canvas);
 }

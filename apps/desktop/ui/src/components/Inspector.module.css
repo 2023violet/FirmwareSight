@@ -39,7 +39,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: var(--fs-layer-inspector);
   /* No tint: the token file has no scrim colour, and the overlay shadow already lifts the sheet. The
      layer exists to catch a click outside the sheet. */
   background: transparent;

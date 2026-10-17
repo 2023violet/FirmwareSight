@@ -1,0 +1,64 @@
+id	check	verdict	observation
+R2-B01	R2 smoke on the R7 build	PASS	choose ELF through the native dialog; SubjectBar: "当前构建firmware.elfMAP：未提供尚未分析添加 MAP容量单位字节KiB"
+R2-B02	R2 smoke on the R7 build	PASS	attach MAP; SubjectBar: "当前构建firmware.elfMAP：firmware.map尚未分析更换 MAP移除 MAP容量单位字节KiB"
+R2-B03	R2 smoke on the R7 build	PASS	analyze; lead: "Flash 已用196 bytesRAM 44 bytes（精确）· 可用于硬性预算 · 10 条证据10 observed · 0 derived · 0 declared · 0 unknown" | SubjectBar: "当前构建firmware.elf · 3c9daa4f7c09MAP：firmware.map最新更换 MAP移除 MAP容量单位字节KiB"
+R2-B04	R2 smoke on the R7 build	PASS	lead figure opens the docked Inspector; focus on close; "complementary | 证据nonvolatile_image_footprint_bytes196 bytes分类Observed来源map规则adr-0021-dual-budget准确度精确原始值196复制原始值"
+R2-B05	R2 smoke on the R7 build	PASS	below 1280 the open Inspector becomes a modal sheet without closing: "dialog modal=true"
+R2-B06	R2 smoke on the R7 build	PASS	views render their tables: 节="fs-analyze-tab-sections:8rows" ; 符号="fs-analyze-tab-symbols:32rows" ; 对象="fs-analyze-tab-objects:4rows:imu" ; 证据="fs-analyze-tab-evidence:10rows"
+R2-B07	R2 smoke on the R7 build	PASS	an evidence row opens the shared Inspector ("查看 architecture"): "证据architectureArm分类Observed来源ElfFileHeader定位elf.e_machine规则object-elf/0.40置信度-证据 idev-architecture复制原始值"
+R2-B08	R2 smoke on the R7 build	PASS	Overview: subject, then the ship answer, one primary action: { "bar": "当前构建firmware.elf · 3c9daa4f7c09MAP：firmware.map最新", "shipAfterBar": true, "primaries": [ "到发布页运行" ] }
+R2-B09	R2 smoke on the R7 build	PASS	dark theme on the redesigned Analyze page: {"theme":"dark","bg":"rgb(21, 23, 27)","removed":"#f2705f"}
+R2-B10	R2 smoke on the R7 build	PASS	Owner app data unchanged: 23 files, identical hashes
+R3-C01	R3 smoke on the R7 build	PASS	compare the stored pair; lead: "Flash 变化▲64 bytes132 bytes → 196 bytes · 48.5% · RAM ▲32 bytes · 可比性 exact · 增长最大的对象 sensors/imu.o ▲36 bytes" | SubjectBar: "基线firmware.elf · 85ae4fc4e2b8MAP：已附加目标firmware.elf · 3c9daa4f7c09MAP：已附加最新容量单位字节KiB"
+R3-C02	R3 smoke on the R7 build	PASS	views render their change tables: 节="6rows" ; 符号="42rows" ; 对象="3rows:imu"
+R3-C03	R3 smoke on the R7 build	PASS	a ranking pick ("显示 .symtab 的节变化") opens the Sections view, filtered: { "tab": "节", "filter": ".symtab" }
+R3-C04	R3 smoke on the R7 build	PASS	a change row opens the docked Inspector ("查看 .symtab 的变化详情"): "complementary | 证据.symtabChanged分类Derived来源diff定位cmp-4b68-1规则变化 = 目标 − 基线，来自两个构建的已存储行文件大小432 bytes → 528 bytes · ▲96 bytes内存大小432 bytes → 528 bytes · ▲96 bytes亦有差异file_size, memory_size复制原始值"
+R3-C05	R3 smoke on the R7 build	PASS	below 1280 the open Inspector becomes a modal sheet: "dialog modal=true"
+R3-C06	R3 smoke on the R7 build	PASS	swap marks the comparison on screen as retained: "基线firmware.elf · 85ae4fc4e2b8MAP：已附加目标firmware.elf · 3c9daa4f7c09MAP：已附加已保留上一次对比 · 所选的这一对尚未对比容量单位字节KiB" | "Flash 变化 · 上一次对比▲64 bytes132 bytes → 196 bytes · 48.5% · RAM ▲32 bytes · 可比性 exact · 增长最大的对象 sensors/imu.o ▲36 bytes"
+R3-C07	R3 smoke on the R7 build	PASS	export from the menu, cancelled in the native Save dialog: "已取消导出。未写入任何文件。 | 显示节：第 1 到 1 个，共 1 个" (alerts 0)
+R3-C08	R3 smoke on the R7 build	PASS	Analyze: region evidence in the Inspector ("查看 FLASH 的节证据"), Sections on the shared table (8 rows; sortable: "序号↑|名称|文件大小|内存大小")
+R3-C09	R3 smoke on the R7 build	PASS	dark theme on Compare: {"theme":"dark","bg":"rgb(21, 23, 27)","removed":"#f2705f"}
+R3-C10	R3 smoke on the R7 build	PASS	English: lead "Flash change▲64 bytes132 bytes → 196 bytes · 48.5% · RAM ▲32 bytes · comparability exact · largest object growth sensors/imu.o ▲36 bytes" | tabs "Summary|Sections|Symbols|Objects"
+R3-C11	R3 smoke on the R7 build	PASS	Owner app data unchanged: 23 files, identical hashes
+R3-C12	R3 smoke on the R7 build	NOT_RUN	window minimum 1024x720 drag clamp (carried from R1 A10; needs a human drag)
+R4-R01	R4 smoke on the R7 build	PASS	no run: three numbered steps ("第 1 步 · 构建与基线|第 2 步 · 工程策略|第 3 步 · 发布附件"); BuildPicker chose a baseline ("snap-3c9daa4f7c09febe8e6350dded6b701ae2b95587a45db421393e42295903d9fc-p0-normalize-1-db509ef8fd7be6ceb5b0c852aa24b864312110fd9361207236d142d9f0be943e|snap-85ae4fc4e2b8d460522ede8a00db1e1ea4cb5c3e
+R4-R02	R4 smoke on the R7 build	PASS	run: lead "REVIEW需要决定 —— 2 条 finding 在等待一次明确的接受，其中 2 条是因为缺少证据。没有任何一项被阻断。00226FirmwareSight 策略就绪度：这是项目策略对该构建的回答，不是认证，也不是发布许可。" | SubjectBar "当前构建firmware.elf · 3c9daa4f7c09最新容量单位字节KiB" | focus on "门禁结论"
+R4-R03	R4 smoke on the R7 build	PASS	settings line: "运行设置构建 firmware.elf · 3c9daa4f7c09基线 firmware.elf · 85ae4fc4e2b8既定默认策略附件 0 个编辑设置运行 Gate第 1 步 · 构建与基线当前构建firmware.elf · 3c9daa4f7c09SHA-256 3c9daa4f...5903d9fc9,480 bytes非易失 196 bytes（exact） · 运行时 44 bytes（exact）保存于 2026-10-17T16:33:45Z基线（可选）firmware.elf · 85ae4fc4e2b8SHA-256 85ae4fc4
+R4-R04	R4 smoke on the R7 build	PASS	a finding's basis opens the docked Inspector ("查看 git.clean 的依据"): "complementary | 证据git.cleanUNKNOWN分类Unknown规则git.clean有效严重度REVIEW证据 1git:status原始值git:status复制原始值"
+R4-R05	R4 smoke on the R7 build	PASS	below 1280 the open Inspector becomes a modal sheet: "dialog modal=true"
+R4-R06	R4 smoke on the R7 build	PASS	Evidence view: { "record": true, "tables": 2, "h3": "必需的构建产物|内存预算|相对基线的增长|发布说明|此处置结果不生成发布包" }
+R4-R07	R4 smoke on the R7 build	PASS	Bundle view: { "prepareDisabled": true, "text": "发布包此处置结果不生成发布包没有准备任何发布包：处置结果是 REVIEW。只有 PASS 处置结果才会写出发布包，因此请先处理上面各条结论所报告的内容，接受应由署名复核人接受的部分，然后重新运行 Gate。准备发布包选择目标文件夹导出发布包“准备”之所以禁用，是因为上面的处置结果，而不是因为本页自行作出的任何决定。" }
+R4-R08	R4 smoke on the R7 build	PASS	policy editor in a Sheet: "modal=true fields=24"; after Esc: { "open": 0, "focus": "编辑策略" }
+R4-R09	R4 smoke on the R7 build	PASS	moving the baseline to none marks the run on screen as kept: "当前构建firmware.elf · 3c9daa4f7c09已保留上一次运行 · 当前设置尚未判定容量单位字节KiB"
+R4-R10	R4 smoke on the R7 build	PASS	choosing the judged baseline again reads Latest: "当前构建firmware.elf · 3c9daa4f7c09最新容量单位字节KiB"
+R4-R11	R4 smoke on the R7 build	PASS	export PNG from the header menu, cancelled in the native Save dialog: (alerts 0) "已取消导出。未写入任何文件。 | 尚未加载项目。打开项目配置后即可检查工作区。 | 此处置结果不生成发布包没有准备任何发布包：处置结果是 REVIEW。只有 PASS 处置结果才会写出发布包，因此请先处理上面各条结论所报告的内容，接受应由署名复核人接受的部分，然后重新运行 Gate。 | 没有准备任何发布包：处置结果是 REVIEW。只有 PASS 处置结果才会写出发布包，因此请先处理上面各条结论所报告的内容，接受应由署名复核人接受
+R4-R12	R4 smoke on the R7 build	PASS	dark theme on Release: {"theme":"dark","bg":"rgb(21, 23, 27)","removed":"#f2705f"}
+R4-R13	R4 smoke on the R7 build	PASS	English: lead "REVIEWNeeds a decision — 2 finding(s) wait on an explicit acceptance, 2 of them because their evidence is missing. Nothing is blocked.00226FirmwareSight policy readiness: your project policy’s answer for this build, not a certification and not a permission to release." | tabs "Finding
+R4-R14	R4 smoke on the R7 build	PASS	Owner app data unchanged: 23 files, identical hashes
+R4-R15	R4 smoke on the R7 build	NOT_RUN	window minimum 1024x720 drag clamp (carried from R1 A10; needs a human drag)
+R5-H01	R5 smoke on the R7 build	PASS	navigation names: "总览|分析|对比|发布|历史|帮助|设置"
+R5-H02	R5 smoke on the R7 build	PASS	History: pin line '"尚未固定基线。在下方固定一个构建后，对比会以它为基线。固定基线是对比时的测量参照。更换或取消固定都会留下记录，不会改动任何已存储的构建。"' | tabs "构建|Gate 运行|发布记录"
+R5-H03	R5 smoke on the R7 build	PASS	pin the base build: "固定基线 firmware.elf · 85ae4fc4e2b8 固定于 2026-10-17T16:35:22Z与当前构建对比取消固定固定基线是对比时的测量参照。更换或取消固定都会留下记录，不会改动任何已存储的构建。"
+R5-H04	R5 smoke on the R7 build	PASS	a stored row opens the Inspector, first action in the row: "complementary | 证据firmware.elf3c9daa4f7c09febe8e6350dded6b701ae2b95587a45db421393e42295903d9fc分类Observed来源FirmwareSight 存储（只读）构建编号build-snap-3c9daa4f7c09febe8e6350dded6b701ae2b95587a45db421393e42295903d9fc-p0-normalize-1-db509ef8fd7be6ceb5b
+R5-H05	R5 smoke on the R7 build	PASS	compare the pinned baseline with the current build, run once: "基线firmware.elf · 85ae4fc4e2b8固定基线MAP：已附加目标firmware.elf · 3c9daa4f7c09MAP：已附加最新容量单位字节KiB" | "Flash 变化▲64 bytes132 bytes → 196 bytes · 48.5% · RAM ▲32 bytes · 可比性 exact · 增长最大的对象 sensors/imu.o ▲36 bytes"
+R5-H06	R5 smoke on the R7 build	PASS	Ctrl+K palette: "17 options; focus=combobox"; ran Go to Settings -> "设置"
+R5-H07	R5 smoke on the R7 build	PASS	Settings reset asks in a Sheet, Esc keeps the preferences: "要把全部四项设置恢复为默认值吗？容量单位回到字节，主题回到“跟随系统”，语言回到“跟随系统”，起始页面回到“分析”。重置设置保留当前设置 | focus=重置设置"; dialogs after Esc 0
+R5-H08	R5 smoke on the R7 build	PASS	Help lists the shortcuts: "键盘快捷键在输入框中输入或有对话框打开时，单键快捷键不起作用。按键作用Ctrl+K打开命令面板：前往某页、选择固件、与固定基线对比，或切换单位、主题和语言。Ctrl+O在“分析”页选择固件文件。/跳到当前表格的筛选框。[ ]切换到本页的上一个或下一个视图。Esc关闭打开的面板、侧栏或命令面板，并回到原来的位置。"
+R5-H09	R5 smoke on the R7 build	PASS	] moves to the next view ("Gate 运行"); / focuses the filter ("search")
+R5-H10	R5 smoke on the R7 build	PASS	unpin: "尚未固定基线。在下方固定一个构建后，对比会以它为基线。固定基线是对比时的测量参照。更换或取消固定都会留下记录，不会改动任何已存储的构建。"
+R5-H11	R5 smoke on the R7 build	PASS	dark theme on History: {"theme":"dark","bg":"rgb(21, 23, 27)","removed":"#f2705f"}
+R5-H12	R5 smoke on the R7 build	PASS	English: tabs "Builds|Gate runs|Release records" | rail "Overview|Analyze|Compare|Release|History|Help|Settings"
+R5-H13	R5 smoke on the R7 build	PASS	Owner app data unchanged: 23 files, identical hashes
+R5-H14	R5 smoke on the R7 build	NOT_RUN	window minimum 1024x720 drag clamp (carried from R1 A10; needs a human drag)
+R6-M01	R6 smoke on the R7 build	PASS	Analyze > Export Markdown wrote analysis.md (1637 chars); dialog DIALOG_OK; status: "已写入 analysis.md。"
+R6-M02	R6 smoke on the R7 build	PASS	Compare > Export Markdown wrote comparison.md (2181 chars); dialog DIALOG_OK
+R6-M03	R6 smoke on the R7 build	PASS	Release > Export Markdown wrote gate.md (3639 chars); N/A rows show no severity; dialog DIALOG_OK
+R6-M04	R6 smoke on the R7 build	PASS	cancelled Markdown export writes nothing and is not an error: DIALOG_CANCELLED (alerts 0)
+R6-M05	R6 smoke on the R7 build	PASS	Owner app data unchanged: 23 files, identical hashes
+PRINT-p2-diff	p2-diff.html as an A4 page under print media	PASS	@page { size: a4; margin: 16mm; }; widest 779 px of 794; heads repeat 3/3; rows whole 96/96; captions 3; scoped th 21; scripts 0; external 0
+PRINT-release-report	release-report.html as an A4 page under print media	PASS	@page { size: a4; margin: 16mm; }; widest 779 px of 794; heads repeat 8/8; rows whole 84/84; captions 15; scoped th 74; scripts 0; external 0
+HUMAN-1	Window cannot be dragged smaller than 1024x720	NOT_RUN	needs a person at the machine; see 06_DELIVERY/21_R7_QUALITY.md section 3
+HUMAN-2	NVDA and Narrator pass over the four workspaces	NOT_RUN	needs a person at the machine; see 06_DELIVERY/21_R7_QUALITY.md section 3
+HUMAN-3	125% and 150% display scaling	NOT_RUN	needs a person at the machine; see 06_DELIVERY/21_R7_QUALITY.md section 3
+HUMAN-4	Keyboard-only pass by a person	NOT_RUN	needs a person at the machine; see 06_DELIVERY/21_R7_QUALITY.md section 3
+HUMAN-5	Drag-and-drop from Explorer	NOT_RUN	needs a person at the machine; see 06_DELIVERY/21_R7_QUALITY.md section 3

@@ -318,14 +318,14 @@ h4 {
 <table>
 <caption>Four different identities, named separately on purpose.</caption>
 <tbody>
-<tr><th>Release id</th><td><span class="mono">release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5</span></td></tr>
-<tr><th>Project release version</th><td><span class="mono">1.2.3</span> &mdash; resolved from <span class="mono">release.expected_version</span></td></tr>
-<tr><th>FirmwareSight app version</th><td><span class="mono">0.6.0</span></td></tr>
-<tr><th>Snapshot analyzed</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
-<tr><th>Analysis normalization rule</th><td><span class="mono">p0-normalize-1</span></td></tr>
-<tr><th>Workspace HEAD observed by the Release Gate</th><td><span class="mono">585dafd3eb59592563923818cdfec4e9a370a83b</span></td></tr>
-<tr><th>Workspace tag observed by the Release Gate</th><td><span class="mono">v1.2.3</span></td></tr>
-<tr><th>Workspace dirty observed by the Release Gate</th><td>false</td></tr>
+<tr><th scope="row">Release id</th><td><span class="mono">release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5</span></td></tr>
+<tr><th scope="row">Project release version</th><td><span class="mono">1.2.3</span> &mdash; resolved from <span class="mono">release.expected_version</span></td></tr>
+<tr><th scope="row">FirmwareSight app version</th><td><span class="mono">0.6.0</span></td></tr>
+<tr><th scope="row">Snapshot analyzed</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
+<tr><th scope="row">Analysis normalization rule</th><td><span class="mono">p0-normalize-1</span></td></tr>
+<tr><th scope="row">Workspace HEAD observed by the Release Gate</th><td><span class="mono">585dafd3eb59592563923818cdfec4e9a370a83b</span></td></tr>
+<tr><th scope="row">Workspace tag observed by the Release Gate</th><td><span class="mono">v1.2.3</span></td></tr>
+<tr><th scope="row">Workspace dirty observed by the Release Gate</th><td>false</td></tr>
 <tr><td colspan="2" class="meta">These Git facts describe the workspace the Release Gate ran in. They are not evidence about how the shipped bytes were compiled, and no claim of that kind is made here.</td></tr>
 </tbody>
 </table>
@@ -333,7 +333,7 @@ h4 {
 <p class="meta">2 file(s) under <span class="mono">artifacts/</span>. The baseline build is never shipped: it exists only to explain the comparison in section 4.</p>
 <table>
 <caption>The bytes this release consists of, in the order the release fingerprint lists them.</caption>
-<thead><tr><th>Bundle path</th><th>Kind</th><th>SHA-256</th><th class="num">Bytes</th></tr></thead>
+<thead><tr><th scope="col">Bundle path</th><th scope="col">Kind</th><th scope="col">SHA-256</th><th scope="col" class="num">Bytes</th></tr></thead>
 <tbody>
 <tr><td class="mono">artifacts/firmware.elf</td><td>elf</td><td class="mono">4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374</td><td class="num">17464</td></tr>
 <tr><td class="mono">artifacts/firmware.map</td><td>map</td><td class="mono">a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</td><td class="num">4664</td></tr>
@@ -342,7 +342,7 @@ h4 {
 <h2>3. Analysis summary</h2>
 <table>
 <caption>What was read off the build, per input file.</caption>
-<thead><tr><th>File</th><th>Format</th><th>Entry point</th><th>Build id</th></tr></thead>
+<thead><tr><th scope="col">File</th><th scope="col">Format</th><th scope="col">Entry point</th><th scope="col">Build id</th></tr></thead>
 <tbody>
 <tr><td class="mono">firmware.elf</td><td>Arm 32-bit little &middot; <span class="mono">elf</span></td><td><span class="mono">0x8000049</span></td><td><span class="unknown">no .note.gnu.build-id section is present</span></td></tr>
 <tr><td class="mono">firmware.map</td><td>Unknown unknown-bit unknown &middot; <span class="mono">map</span></td><td><span class="unknown">a linker MAP records addresses, not an entry point</span></td><td><span class="unknown">a linker MAP carries no build-id</span></td></tr>
@@ -352,45 +352,47 @@ h4 {
 <table>
 <caption>Absence is printed as absence. A budget that is not a number was not measured, and is never shown as zero.</caption>
 <tbody>
-<tr><th>Nonvolatile / load image</th><td>376 bytes <span class="meta">(exact)</span></td></tr>
-<tr><th>Runtime RAM</th><td>76 bytes <span class="meta">(exact)</span></td></tr>
-<tr><th>Accounting rule</th><td><span class="mono">adr-0021-dual-budget</span></td></tr>
-<tr><th>Layout source</th><td><span class="mono">map</span></td></tr>
-<tr><th>Weakest evidence basis</th><td>map-memory-configuration+elf-load</td></tr>
-<tr><th>Admissible for a hard block</th><td>true</td></tr>
-<tr><th>Device metadata held out of both budgets</th><td>4294 bytes</td></tr>
+<tr><th scope="row">Nonvolatile / load image</th><td>376 bytes <span class="meta">(exact)</span></td></tr>
+<tr><th scope="row">Runtime RAM</th><td>76 bytes <span class="meta">(exact)</span></td></tr>
+<tr><th scope="row">Accounting rule</th><td><span class="mono">adr-0021-dual-budget</span></td></tr>
+<tr><th scope="row">Layout source</th><td><span class="mono">map</span></td></tr>
+<tr><th scope="row">Weakest evidence basis</th><td>map-memory-configuration+elf-load</td></tr>
+<tr><th scope="row">Admissible for a hard block</th><td>true</td></tr>
+<tr><th scope="row">Device metadata held out of both budgets</th><td>4294 bytes</td></tr>
 </tbody>
 </table>
 <h3>Coverage of this build</h3>
 <table>
+<caption>What the analysis document carries, and what it could not read.</caption>
 <tbody>
-<tr><th>Rows carried in the analysis document</th><td>19 section(s), 52 symbol(s), 11 evidence record(s)</td></tr>
-<tr><th>ELF support</th><td><span class="mono">supported</span></td></tr>
-<tr><th>Sections</th><td><span class="mono">available</span></td></tr>
-<tr><th>Symbols</th><td><span class="mono">available</span></td></tr>
-<tr><th>Debug info</th><td><span class="mono">available</span></td></tr>
-<tr><th>MAP companion</th><td><span class="mono">provided</span></td></tr>
-<tr><th>Object attribution</th><td><span class="mono">available</span></td></tr>
-<tr><th>Git facts</th><td><span class="mono">unknown</span></td></tr>
+<tr><th scope="row">Rows carried in the analysis document</th><td>19 section(s), 52 symbol(s), 11 evidence record(s)</td></tr>
+<tr><th scope="row">ELF support</th><td><span class="mono">supported</span></td></tr>
+<tr><th scope="row">Sections</th><td><span class="mono">available</span></td></tr>
+<tr><th scope="row">Symbols</th><td><span class="mono">available</span></td></tr>
+<tr><th scope="row">Debug info</th><td><span class="mono">available</span></td></tr>
+<tr><th scope="row">MAP companion</th><td><span class="mono">provided</span></td></tr>
+<tr><th scope="row">Object attribution</th><td><span class="mono">available</span></td></tr>
+<tr><th scope="row">Git facts</th><td><span class="mono">unknown</span></td></tr>
 </tbody>
 </table>
 <h2>4. Compare summary</h2>
 <table>
 <caption>Totals moved between the two builds. The full row-by-row comparison is in <span class="mono">diff.json</span>.</caption>
 <tbody>
-<tr><th>Base (old) snapshot</th><td><span class="mono">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e</span></td></tr>
-<tr><th>Target (new) snapshot</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
-<tr><th>Nonvolatile / load image</th><td>256 bytes → 376 bytes &middot; delta +120 <span class="meta">(exact)</span></td></tr>
-<tr><th>Runtime RAM</th><td>8 bytes → 76 bytes &middot; delta +68 <span class="meta">(exact)</span></td></tr>
-<tr><th>Comparability of the pair</th><td>exact</td></tr>
-<tr><th>Rows that differ</th><td>sections: 1 added, 1 removed, 16 changed, 0 unpaired &middot; symbols: 38 added, 33 removed, 5 changed, 67 unpaired</td></tr>
-<tr><th>Identical, so left out of the tables</th><td>2 section(s), 9 symbol(s)</td></tr>
+<tr><th scope="row">Base (old) snapshot</th><td><span class="mono">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e</span></td></tr>
+<tr><th scope="row">Target (new) snapshot</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
+<tr><th scope="row">Nonvolatile / load image</th><td>256 bytes → 376 bytes &middot; delta +120 <span class="meta">(exact)</span></td></tr>
+<tr><th scope="row">Runtime RAM</th><td>8 bytes → 76 bytes &middot; delta +68 <span class="meta">(exact)</span></td></tr>
+<tr><th scope="row">Comparability of the pair</th><td>exact</td></tr>
+<tr><th scope="row">Rows that differ</th><td>sections: 1 added, 1 removed, 16 changed, 0 unpaired &middot; symbols: 38 added, 33 removed, 5 changed, 67 unpaired</td></tr>
+<tr><th scope="row">Identical, so left out of the tables</th><td>2 section(s), 9 symbol(s)</td></tr>
 </tbody>
 </table>
 <h3>Top growth, as Core ranked it</h3>
 <h4>Top section growth</h4>
 <table>
-<thead><tr><th class="num">Delta</th><th>Row</th><th class="num">Bytes</th><th>Change</th></tr></thead>
+<caption>The section rows that grew most, largest first.</caption>
+<thead><tr><th scope="col" class="num">Delta</th><th scope="col">Row</th><th scope="col" class="num">Bytes</th><th scope="col">Change</th></tr></thead>
 <tbody>
 <tr><td class="num mono">+221</td><td class="mono">.debug_loclists</td><td class="num">414</td><td>Changed</td></tr>
 <tr><td class="num mono">+112</td><td class="mono">.debug_info</td><td class="num">910</td><td>Changed</td></tr>
@@ -401,7 +403,8 @@ h4 {
 </table>
 <h4>Top symbol growth</h4>
 <table>
-<thead><tr><th class="num">Delta</th><th>Row</th><th class="num">Bytes</th><th>Change</th></tr></thead>
+<caption>The symbol rows that grew most, largest first.</caption>
+<thead><tr><th scope="col" class="num">Delta</th><th scope="col">Row</th><th scope="col" class="num">Bytes</th><th scope="col">Change</th></tr></thead>
 <tbody>
 <tr><td class="num mono">+42</td><td class="mono">mqtt_task</td><td class="num">46</td><td>Changed</td></tr>
 <tr><td class="num mono">+16</td><td class="mono">payload_extra</td><td class="num">20</td><td>Changed</td></tr>
@@ -411,20 +414,21 @@ h4 {
 <h2>5. Release Gate</h2>
 <p class="meta"><span class="chip pass">✓ <span class="state">PASS</span></span> &mdash; the disposition that made this bundle possible. A bundle is written only for a <span class="state">PASS</span> after accepted reviews; a <span class="state">REVIEW</span> or a <span class="state">BLOCK</span> produces no release, and an evidence gap never becomes a review.</p>
 <table>
+<caption>Which Gate run this release carries, and under which policy.</caption>
 <tbody>
-<tr><th>Run id</th><td><span class="mono">gate-a17e9861ce643da5e7061ac349793f80d1be87736ad52b2daf3433dc8cb8bc26</span></td></tr>
-<tr><th>Snapshot</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
-<tr><th>Baseline</th><td><span class="mono">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e</span></td></tr>
-<tr><th>Policy digest</th><td><span class="mono">b87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98</span></td></tr>
-<tr><th>Project config schema</th><td><span class="mono">1</span></td></tr>
-<tr><th>Severity before reviews</th><td><span class="chip pass">✓ <span class="state">PASS</span></span></td></tr>
-<tr><th>Severity after accepted reviews</th><td><span class="chip pass">✓ <span class="state">PASS</span></span></td></tr>
+<tr><th scope="row">Run id</th><td><span class="mono">gate-a17e9861ce643da5e7061ac349793f80d1be87736ad52b2daf3433dc8cb8bc26</span></td></tr>
+<tr><th scope="row">Snapshot</th><td><span class="mono">snap-4b4087e1407ceddcb1e1cfcd978eedbc8906cf88083ba3b4672c7c225ddd8374-p0-normalize-1-a38575cd51ec2730442a0f3b8506c99fc49eec68d4b28ecdc9dda9434709ace6</span></td></tr>
+<tr><th scope="row">Baseline</th><td><span class="mono">snap-3f615b6247179d930f59b76dcdbaea1a5eca8c835ab6d410feb20a062f33f21f-p0-normalize-1-832690060a8d25f8acacd85a62ce76bc83dfb6768e435bcc04c51f9664ed363e</span></td></tr>
+<tr><th scope="row">Policy digest</th><td><span class="mono">b87aa057854d8a0089594ad9445b0626174dc0308d636dd6d6854902ae1e5e98</span></td></tr>
+<tr><th scope="row">Project config schema</th><td><span class="mono">1</span></td></tr>
+<tr><th scope="row">Severity before reviews</th><td><span class="chip pass">✓ <span class="state">PASS</span></span></td></tr>
+<tr><th scope="row">Severity after accepted reviews</th><td><span class="chip pass">✓ <span class="state">PASS</span></span></td></tr>
 </tbody>
 </table>
 <h3>Findings by state</h3>
 <table>
 <caption>Core's counts for this run, carried rather than recounted.</caption>
-<thead><tr><th>State</th><th class="num">Count</th></tr></thead>
+<thead><tr><th scope="col">State</th><th scope="col" class="num">Count</th></tr></thead>
 <tbody>
 <tr><td><span class="chip block">✕ <span class="state">BLOCK</span></span></td><td class="num">0</td></tr>
 <tr><td><span class="chip review">▲ <span class="state">REVIEW</span></span></td><td class="num">0</td></tr>
@@ -436,7 +440,7 @@ h4 {
 <h3>All findings</h3>
 <table>
 <caption>In the order a release owner reads them: what blocks, what needs a decision, what is unknown, what passed. Every finding of the run is listed, not a truncated top list.</caption>
-<thead><tr><th>Rule</th><th>State</th><th>Effective severity</th><th>Finding</th><th>Evidence</th><th>Next step</th></tr></thead>
+<thead><tr><th scope="col">Rule</th><th scope="col">State</th><th scope="col">Effective severity</th><th scope="col">Finding</th><th scope="col">Evidence</th><th scope="col">Next step</th></tr></thead>
 <tbody>
 <tr><td class="mono">git.clean</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Workspace has no uncommitted changes at Gate evaluation time.</td><td><span class="locator">git:status</span> &middot; <span class="locator">git:head</span></td><td>none recorded</td></tr>
 <tr><td class="mono">release.version_matches_policy</td><td><span class="chip pass">✓ <span class="state">PASS</span></span></td><td><span class="meta">same as state</span></td><td>Workspace tag `v1.2.3` matches the version pattern and its version `1.2.3` is the declared release version.</td><td><span class="locator">policy:version.source</span> &middot; <span class="locator">policy:version.pattern</span> &middot; <span class="locator">git:exact-tag=v1.2.3</span> &middot; <span class="locator">policy:release.expected_version</span></td><td>none recorded</td></tr>
@@ -454,10 +458,11 @@ h4 {
 <p class="empty">No review was accepted for this run, so the disposition in section 5 is the one Core computed with nothing set aside. An empty list is a fact, not a missing export.</p>
 <h2>7. Release notes</h2>
 <table>
+<caption>The release notes, carried byte for byte.</caption>
 <tbody>
-<tr><th>Included</th><td>yes, as <span class="mono">release-notes.md</span></td></tr>
-<tr><th>SHA-256 of the shipped copy</th><td><span class="mono">d547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d</span></td></tr>
-<tr><th>Bytes</th><td>151</td></tr>
+<tr><th scope="row">Included</th><td>yes, as <span class="mono">release-notes.md</span></td></tr>
+<tr><th scope="row">SHA-256 of the shipped copy</th><td><span class="mono">d547160abce41f59ec545b2013c8f0491f1fe7061834e374e1cdf376ed78f93d</span></td></tr>
+<tr><th scope="row">Bytes</th><td>151</td></tr>
 <tr><td colspan="2" class="meta">The notes ship as their own file and are not reproduced inside this report. Markdown a reader wrote is never parsed, rewritten or embedded as raw HTML by the bundle, which is what keeps this document free of markup a note could carry.</td></tr>
 </tbody>
 </table>
@@ -465,7 +470,7 @@ h4 {
 <p class="meta">Two layers of SHA-256 lists cover this bundle. <span class="mono">SHA256SUMS</span> hashes every payload file except itself and the manifest. <span class="mono">release-manifest.json</span> hashes every file except itself, that list included.</p>
 <table>
 <caption>Every file a digest can be named for here. This report is payload: it is written before both index files, so it cannot print their digests, or its own.</caption>
-<thead><tr><th>Bundle path</th><th>SHA-256</th><th class="num">Bytes</th></tr></thead>
+<thead><tr><th scope="col">Bundle path</th><th scope="col">SHA-256</th><th scope="col" class="num">Bytes</th></tr></thead>
 <tbody>
 <tr><td class="mono">accepted-reviews.json</td><td class="mono">50afd7fab31bbd69f5fb91a5357f3128544e76696b5e3562081acd58e23e0076</td><td class="num">170</td></tr>
 <tr><td class="mono">analysis.json</td><td class="mono">1e9fde475327c80e0ab85f73893823103079c4c2a652a1c16d31798dfdd5195b</td><td class="num">26961</td></tr>
@@ -481,11 +486,12 @@ h4 {
 </table>
 <h3>The self-reference rule</h3>
 <table>
+<caption>What each index file covers, and why neither lists itself.</caption>
 <tbody>
-<tr><th><span class="mono">SHA256SUMS</span> covers</th><td>every bundle file except itself and the manifest</td></tr>
-<tr><th><span class="mono">SHA256SUMS</span> excludes</th><td><span class="mono">SHA256SUMS</span>, <span class="mono">release-manifest.json</span></td></tr>
-<tr><th><span class="mono">release-manifest.json</span> covers</th><td>every bundle file except itself, SHA256SUMS included</td></tr>
-<tr><th><span class="mono">release-manifest.json</span> excludes</th><td><span class="mono">release-manifest.json</span></td></tr>
+<tr><th scope="row"><span class="mono">SHA256SUMS</span> covers</th><td>every bundle file except itself and the manifest</td></tr>
+<tr><th scope="row"><span class="mono">SHA256SUMS</span> excludes</th><td><span class="mono">SHA256SUMS</span>, <span class="mono">release-manifest.json</span></td></tr>
+<tr><th scope="row"><span class="mono">release-manifest.json</span> covers</th><td>every bundle file except itself, SHA256SUMS included</td></tr>
+<tr><th scope="row"><span class="mono">release-manifest.json</span> excludes</th><td><span class="mono">release-manifest.json</span></td></tr>
 <tr><td colspan="2" class="meta">A file cannot contain its own cryptographic hash without a fixed-point scheme, so no self-digest is faked: <span class="mono">self_digest_written</span> is false. no file carries its own digest; SHA256SUMS hashes the payload, release-manifest.json hashes the payload plus SHA256SUMS</td></tr>
 </tbody>
 </table>
@@ -503,7 +509,7 @@ h4 {
 <p class="meta">What the inputs of this build did not allow FirmwareSight to establish. A limit is stated as a limit instead of being left as an empty cell.</p>
 <table>
 <caption>Capability reporting, taken from the analysis document in this bundle.</caption>
-<thead><tr><th>Capability</th><th>Reported</th><th>What that means for this release</th></tr></thead>
+<thead><tr><th scope="col">Capability</th><th scope="col">Reported</th><th scope="col">What that means for this release</th></tr></thead>
 <tbody>
 <tr><td>Git facts</td><td class="mono">unknown</td><td>This capability is reported at less than full coverage by the analysis document in this bundle.</td></tr>
 </tbody>

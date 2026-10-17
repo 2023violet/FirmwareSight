@@ -8,7 +8,7 @@
   position: absolute;
   inset-inline-end: 0;
   top: calc(100% + var(--fs-space-1));
-  z-index: 5;
+  z-index: var(--fs-layer-popover);
   display: flex;
   flex-direction: column;
   align-items: stretch;

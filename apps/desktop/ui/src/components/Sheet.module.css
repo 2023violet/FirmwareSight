@@ -6,7 +6,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: var(--fs-layer-sheet);
   /* No tint: the token file has no scrim colour, and the overlay shadow already lifts the sheet. */
   background: transparent;
 }

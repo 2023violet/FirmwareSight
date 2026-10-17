@@ -187,7 +187,7 @@
   inset-block-end: 0;
   /* Above the sticky table headers (`Layout.module.css` .viewport thead th, z-index 1): native QA found
      the Step 3 table header covering this button, which made the page's one action unclickable. */
-  z-index: 2;
+  z-index: var(--fs-layer-sticky-above);
   padding-bottom: var(--fs-space-4);
   background: var(--fs-color-bg-canvas);
 }

@@ -821,3 +821,32 @@ fn the_human_report_escapes_control_characters_taken_from_user_files() {
         "warning text is escaped too"
     );
 }
+
+#[test]
+fn every_report_table_is_named_and_every_header_cell_says_what_it_heads() {
+    // ADR-0034 D5 / redesign spec §6A.2: a screen reader names each table by its caption and reads each cell
+    // with its column or row header. R7 found the headers carried no `scope`; this holds both goldens to it.
+    for golden in [
+        "golden/reports/p2-diff.html",
+        "golden/reports/p4-release/release-report.html",
+    ] {
+        let html =
+            std::fs::read_to_string(repo_root().join(golden)).expect("the golden is readable");
+        let headers = html.matches("<th>").count() + html.matches("<th ").count();
+        let scoped =
+            html.matches("<th scope=\"col\"").count() + html.matches("<th scope=\"row\"").count();
+        assert!(headers > 0, "{golden} has tables");
+        assert_eq!(
+            scoped, headers,
+            "{golden}: every <th> carries scope=\"col\" or scope=\"row\""
+        );
+        for (at, _) in html.match_indices("<table") {
+            let next = &html[at..];
+            let open_end = next.find('>').expect("a closed tag") + 1;
+            assert!(
+                next[open_end..].trim_start().starts_with("<caption"),
+                "{golden}: a table at byte {at} has no caption"
+            );
+        }
+    }
+}

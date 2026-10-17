@@ -52,6 +52,7 @@ FirmwareSight 应像一台可靠的工程仪器：精确、克制、可检查、
 - 一屏一个主焦点；首屏不堆 KPI。
 - 数字、hash、版本、时间戳、路径使用 mono stack。
 - 外壳（`ADR-0034` D2，tokens 0.4.0）：TopBar 40 · Rail 224（窄于 1180 自动收为 56，读者可切换）· SubjectBar 44 · 工作区 · Inspector 340（≥1280 并排停靠，以下为模态 Sheet）。窗口最小 1024×720。
+- 叠放层级（`ADR-0034` A1，tokens 0.4.1）：`z-index` 只用 `--fs-layer-*`（sticky 1 · sticky_above 2 · popover 5 · inspector 10 · sheet 20 · palette 30），禁止裸数字；居中对话框（命令面板）宽 `layout.dialog` 640；遮罩保持透明。
 - 五条原则（`ADR-0034` D1）：每页一个答案（LeadAnswer）；任何数字可追到证据（FactValue → Inspector）；主体常驻（SubjectBar）；变化是事实不是评判（delta 中性色 + ▲▼，状态色只属于 Gate）；一件事一种做法。
 - 字重只用 `font.weight.regular` 400 / `semibold` 600；`font.size.figure` 28/36 每页只在 LeadAnswer 出现一次。
 
