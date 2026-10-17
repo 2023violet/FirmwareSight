@@ -171,6 +171,7 @@ export const compare: CatalogFor<'compare'> = {
   'lead.rule': '目标 − 基线；可比性 {comparability}',
   'lead.reason': '原因',
   'lead.comparability': '可比性 {value}',
+  'lead.topObject': '增长最大的对象 {key} {delta}',
   'lead.topSource': '增长最大的节 {key} {delta}',
   'row.inspect': '查看 {name} 的变化详情',
   'row.rule': '变化 = 目标 − 基线，来自两个构建的已存储行',

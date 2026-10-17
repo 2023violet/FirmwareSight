@@ -92,3 +92,13 @@ New tests:
 
   The run's evidence (summary, AC matrix, hashed ZIP) and the design checklist go in `evidence/R3/`.
 - Independent review in its own session and worktree, then fixes, then an Owner-approved fast-forward push, CI, and deletion of the worktree. QA stores the smoke creates are kept and listed, not deleted.
+
+## 5. Native smoke (2026-10-17)
+
+The final QA build passed 11 checks; 1 is NOT_RUN (the human drag check). See [evidence/R3](../evidence/R3/README.md) and the [design checklist](../evidence/R3/DESIGN_CHECKLIST.md).
+
+The run surfaced two defects, both fixed:
+- **The lead's largest source.** It now names the largest object growth when the MAP attributes one, and otherwise falls back to Core's section ranking.
+- **Cells wrapping mid-value.** Figures no longer break across lines, and names break only between words.
+
+It also surfaced one Core observation, left unchanged: `.symtab` leads Core's runtime-size growth ranking. The QA stores the runs created are kept and listed in the evidence README.

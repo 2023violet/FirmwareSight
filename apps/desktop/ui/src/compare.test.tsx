@@ -1007,6 +1007,8 @@ describe('the summary and its signs', () => {
     await openCompare(attributed);
     await runCompare();
 
+    // R3: with object attribution, the lead names the largest object growth rather than a section.
+    expect(screen.getByRole('region', { name: 'Flash change' }).textContent).toContain('largest object growth imu.o ▲40 bytes');
     const region = await openView('Objects', 'Changes by object and library');
     expect(region.textContent).toContain('Objects: 1 changed, 1 added, 0 removed, 3 unchanged');
     await waitFor(() =>

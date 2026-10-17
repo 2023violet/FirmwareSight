@@ -380,9 +380,12 @@
    the one F2R-01 pinned for a prose column: a column that can be squeezed to one character is the
    defect that round closed, and `ch` is the unit every other page bounds its prose with. */
 .wrap {
-  white-space: normal;
-  overflow-wrap: anywhere;
+  /* A name breaks between words, and only a name longer than the widest column breaks inside a word;
+     `anywhere` let the column shrink until ".symtab" read ".symt / ab" (R3 smoke). */
+  display: inline-block;
   min-width: 24ch;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .exports {

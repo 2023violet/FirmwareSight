@@ -97,7 +97,7 @@ export const analyze: CatalogFor<'analyze'> = {
   'region.riskWithin': '未超过容量',
   'region.riskExceeded': '已超出',
   'region.riskReview': '需复核',
-  'region.showEvidence': '查看 {name} 的 Section 证据',
+  'region.showEvidence': '查看 {name} 的节证据',
   'region.origin': '起始地址',
   'region.sectionAddress': '{kind} 地址 {address} · {bytes} 字节',
   'region.vmaLma': 'VMA {vma} · LMA {lma}',

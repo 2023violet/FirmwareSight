@@ -71,6 +71,8 @@
   font-family: var(--fs-font-mono);
   font-variant-numeric: tabular-nums;
   text-align: right;
+  /* A figure never breaks across lines ("432 / bytes"); a wide table scrolls in its wrapper instead. */
+  white-space: nowrap;
 }
 
 .table th.num,

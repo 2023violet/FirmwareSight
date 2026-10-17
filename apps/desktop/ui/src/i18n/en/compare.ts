@@ -169,6 +169,7 @@ export const compare = {
   'lead.rule': 'target − base; comparability {comparability}',
   'lead.reason': 'Reason',
   'lead.comparability': 'comparability {value}',
+  'lead.topObject': 'largest object growth {key} {delta}',
   'lead.topSource': 'largest section growth {key} {delta}',
   'row.inspect': 'Show the change detail for {name}',
   'row.rule': 'Change = target − base, from the stored rows of both builds',

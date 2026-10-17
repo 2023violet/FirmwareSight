@@ -814,7 +814,10 @@ function CompareLead({
   const { t } = useI18n();
   const { memory } = summary;
   const flash = memory.nonvolatile;
-  const top = summary.topSections[0] ?? null;
+  // The largest growth source: an object when the MAP attributes one (spec §6.3), else Core's top section.
+  // Which sections count is Core's ranking; this page does not second-guess it (D-R3-1).
+  const topObject = summary.objectChanges.available ? (summary.objectChanges.topObjects[0] ?? null) : null;
+  const topSection = summary.topSections[0] ?? null;
   const evidence: FactEvidence = {
     field: 'nonvolatile delta',
     value: deltaText(flash.delta, unit, t),
@@ -834,9 +837,11 @@ function CompareLead({
     memory.nonvolatilePercent.value ?? percentStatus(memory.nonvolatilePercent.status, t),
     `RAM ${deltaText(memory.runtimeRam.delta, unit, t)}`,
     t('compare', 'lead.comparability', { value: memory.comparability }),
-    ...(top === null || top.delta === null
-      ? []
-      : [t('compare', 'lead.topSource', { key: top.key, delta: deltaText(top.delta, unit, t) })]),
+    ...(topObject !== null && topObject.delta !== null
+      ? [t('compare', 'lead.topObject', { key: topObject.key, delta: deltaText(topObject.delta, unit, t) })]
+      : topSection === null || topSection.delta === null
+        ? []
+        : [t('compare', 'lead.topSource', { key: topSection.key, delta: deltaText(topSection.delta, unit, t) })]),
   ].join(' · ');
   return (
     <LeadAnswer

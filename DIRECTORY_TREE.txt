@@ -117,7 +117,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 13_D2C_CLOSEOUT_AND_PILOT.md
 │   ├── 14_D4_ARMCLANG_SAMPLE_REQUEST.md
 │   ├── 15_R1_FOUNDATION.md
-│   └── 16_R2_ANALYZE_OVERVIEW.md
+│   ├── 16_R2_ANALYZE_OVERVIEW.md
+│   └── 17_R3_COMPARE.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -350,6 +351,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   ├── DeltaValue.tsx
 │           │   │   ├── ErrorPanel.module.css
 │           │   │   ├── ErrorPanel.tsx
+│           │   │   ├── ExportMenu.module.css
+│           │   │   ├── ExportMenu.tsx
 │           │   │   ├── FactValue.module.css
 │           │   │   ├── FactValue.tsx
 │           │   │   ├── foundation.test.tsx
@@ -745,10 +748,15 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── AC_MATRIX.tsv
 │   │   ├── R1_NATIVE_SMOKE_EVIDENCE.zip
 │   │   └── README.md
-│   └── R2/
+│   ├── R2/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── DESIGN_CHECKLIST.md
+│   │   ├── R2_NATIVE_SMOKE_EVIDENCE.zip
+│   │   └── README.md
+│   └── R3/
 │       ├── AC_MATRIX.tsv
 │       ├── DESIGN_CHECKLIST.md
-│       ├── R2_NATIVE_SMOKE_EVIDENCE.zip
+│       ├── R3_NATIVE_SMOKE_EVIDENCE.zip
 │       └── README.md
 ├── examples/
 │   ├── project-readiness/

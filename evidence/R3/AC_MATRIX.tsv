@@ -1,0 +1,13 @@
+id	check	verdict	observation
+C01	Compare the stored pair; the page answers first	PASS	Lead "Flash change ▲64 bytes", 132 -> 196 bytes, 48.5%, RAM ▲32, comparability exact, largest object growth sensors/imu.o ▲36; SubjectBar names both builds, Latest
+C02	The three change views render	PASS	Sections 6 rows, Symbols 42, Objects 3 (sensors/imu.o)
+C03	A ranking pick opens its view, filtered	PASS	Sections tab selected, filter .symtab sent to the shell
+C04	A change row opens the Inspector	PASS	Docked complementary: kind, sides, delta, differing fields, diff handle
+C05	Below 1280 px the Inspector is a sheet	PASS	dialog aria-modal=true at 1100 px
+C06	Swap marks the comparison on screen as retained	PASS	SubjectBar "previous comparison kept"; lead named as previous comparison
+C07	Export from the menu, cancelled in the native Save dialog	PASS	"Export cancelled. No file was written." and no alert
+C08	Analyze tables on the shared DataTable	PASS	Region evidence in the Inspector; Sections 8 rows with sortable headers
+C09	Dark theme on Compare	PASS	data-fs-theme dark
+C10	English interface	PASS	Lead "Flash change"; tabs Summary, Sections, Symbols, Objects
+C11	Owner app data untouched	PASS	23 files, identical SHA-256
+C12	Window minimum 1024x720 drag clamp	NOT_RUN	Carried from R1 A10; needs one human drag
