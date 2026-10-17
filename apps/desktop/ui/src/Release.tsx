@@ -184,12 +184,16 @@ export function Release({
   const [snapshotId, setSnapshotId] = useState<string | null>(() => run?.snapshotId ?? null);
   const [baselineId, setBaselineId] = useState<string | null>(() => run?.baselineSnapshotId ?? null);
   const [draft, setDraft] = useState<ProjectPolicyDto | null>(null);
+  // The sheet and the draft are separate: closing the sheet (Esc, a click beside it) keeps every edited
+  // field, and only a save or a different project retires the draft (R4 review S2-2).
+  const [policyOpen, setPolicyOpen] = useState(false);
   const [policyError, setPolicyError] = useState<ErrorEnvelopeDto | null>(null);
   const [policyNote, setPolicyNote] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const [running, setRunning] = useState(false);
   const [restored, setRestored] = useState(false);
+  const [reloadError, setReloadError] = useState<ErrorEnvelopeDto | null>(null);
   const [view, setView] = useState<View>('findings');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [attachmentCount, setAttachmentCount] = useState<number | null>(null);
@@ -214,6 +218,10 @@ export function Release({
   const projectIdentity = project === null ? null : `${project.projectName}\u0000${project.policySha256}`;
   const projectIdentityRef = useRef(projectIdentity);
   projectIdentityRef.current = projectIdentity;
+  // A draft belongs to the project it was seeded from.
+  useEffect(() => {
+    setDraft(null);
+  }, [projectIdentity]);
 
   const refreshProjectReadiness = useCallback(async () => {
     const request = ++readinessRequest.current;
@@ -328,6 +336,7 @@ export function Release({
         onProjectChange(outcome.value);
         setPolicyNote(t('release', 'policy.saved', { file: outcome.value.configFileName }));
         setDraft(null);
+        setPolicyOpen(false);
       }
       return;
     }
@@ -411,14 +420,17 @@ export function Release({
     if (run === null) {
       return;
     }
+    setReloadError(null);
     const outcome = await getGateRun(run.runId);
     if (outcome.ok && outcome.value !== null) {
       onRunChange(outcome.value);
       setRestored(true);
       return;
     }
+    // A failed read of the stored record is not a failed Gate run: the run on screen is still the latest
+    // one, so the SubjectBar keeps its word and the error stays with the record (R4 review S3).
     if (!outcome.ok) {
-      setError(outcome.envelope);
+      setReloadError(outcome.envelope);
     }
   }, [onRunChange, run]);
 
@@ -440,6 +452,10 @@ export function Release({
   const [exporting, setExporting] = useState(false);
   const [exportNote, setExportNote] = useState<string | null>(null);
   const [exportError, setExportError] = useState<ErrorEnvelopeDto | null>(null);
+  // Its own state, which the run-change effect below does not reset: Rust's 6002 answer can land before the
+  // new run renders, and that render must not wipe the one sentence saying nothing was written (R4 review
+  // S2-3). The next export clears it.
+  const [exportStale, setExportStale] = useState(false);
   const exportRequest = useRef(0);
   const exportSubject = run === null ? null : `${run.runId}\u0000${run.snapshotId}`;
   useLayoutEffect(() => {
@@ -459,13 +475,14 @@ export function Release({
       }
       const request = ++exportRequest.current;
       setExporting(true);
+      setExportStale(false);
       const outcome = await exportGateVisual(run.runId, run.snapshotId, format);
       const staleAnswer = !outcome.ok && outcome.envelope.code === 'ERR-EXPORT-6002';
       if (request !== exportRequest.current) {
         // The run changed while the Save dialog was open. Rust refuses that export rather than writing the
         // run the reader moved away from; the screen says so. Any other late outcome belongs to the old run.
         if (staleAnswer) {
-          setExportNote(t('release', 'visualExport.staleNote'));
+          setExportStale(true);
         }
         return;
       }
@@ -474,7 +491,8 @@ export function Release({
         // Rust is the authority that the run changed, even when its answer arrives before this page has
         // rendered the change (CI #123): it is the stale note, never an error.
         setExportError(null);
-        setExportNote(t('release', 'visualExport.staleNote'));
+        setExportNote(null);
+        setExportStale(true);
         return;
       }
       if (!outcome.ok) {
@@ -504,7 +522,13 @@ export function Release({
   const effectiveBaseline = baselineId === snapshotId ? null : baselineId;
   // The settings name the next run; the SubjectBar names the run on screen. When the two part, the run on
   // screen is the previous result, kept (spec §3.1).
-  const moved = run !== null && (snapshotId !== run.snapshotId || effectiveBaseline !== run.baselineSnapshotId);
+  // A loaded policy whose canonical hash differs from the one the run was judged under also makes the run a
+  // previous answer; Rust compares the same two hashes for the run's policy label (R4 review S3).
+  const moved =
+    run !== null &&
+    (snapshotId !== run.snapshotId ||
+      effectiveBaseline !== run.baselineSnapshotId ||
+      (project !== null && project.policySha256 !== run.policySha256));
   const freshness: SubjectFreshness = run !== null && error !== null ? 'gateFailed' : moved ? 'settingsMoved' : 'latest';
 
   // Evidence belongs to one run, in one view, in one unit: a change of any of them closes the Inspector.
@@ -603,17 +627,19 @@ export function Release({
           <Button onClick={() => void open()}>{t('release', 'policy.open')}</Button>
           <Button
             ref={editPolicyButton}
-            ariaExpanded={draft !== null}
+            ariaHasPopup="dialog"
             onClick={() => {
               setPolicyError(null);
-              setDraft(seed ?? blankPolicy(project?.projectName ?? ''));
+              setInspected(null);
+              setDraft((kept) => kept ?? seed ?? blankPolicy(project?.projectName ?? ''));
+              setPolicyOpen(true);
             }}
           >
             {t('release', 'policy.edit')}
           </Button>
           {policyNote === null ? null : <span className={styles['status']}>{policyNote}</span>}
         </div>
-        {policyError === null || draft !== null ? null : (
+        {policyError === null || policyOpen ? null : (
           <ErrorPanel
             envelope={policyError}
             label={t('release', 'policy.errorLabel')}
@@ -681,6 +707,11 @@ export function Release({
             {exportNote}
           </p>
         )}
+        {exportStale ? (
+          <p className={styles['status']} role="status" aria-live="polite">
+            {t('release', 'visualExport.staleNote')}
+          </p>
+        ) : null}
         {exportError === null ? null : (
           <ErrorPanel
             envelope={exportError}
@@ -717,22 +748,14 @@ export function Release({
         )}
 
         {/* The settings that make the next run. With no run they are the page; with one they are a line that
-            opens them in place, and they stay mounted while closed so nothing typed or attached is lost. */}
-        {run === null ? (
-          <>
-            {steps}
-            <section className={cx(styles['section'], styles['runBar'])} aria-label={t('release', 'builds.run')}>
-              <div className={styles['pickerActions']}>
-                {runButton}
-                <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
-                {snapshotId === null ? (
-                  <span className={styles['hint']}>{t('release', 'runNeedsBuild')}</span>
-                ) : null}
-              </div>
-            </section>
-          </>
-        ) : (
-          <section className={styles['settings']} aria-label={t('release', 'settings.region')}>
+            opens them in place. The steps keep one position in the tree either way, so a first run or a dropped
+            one does not remount them, and nothing typed or attached - nor the focus on Attach - is lost
+            (R4 review S3). */}
+        <section
+          className={run === null ? styles['setup'] : styles['settings']}
+          aria-label={run === null ? undefined : t('release', 'settings.region')}
+        >
+          {run === null ? null : (
             <div className={styles['settingsLine']}>
               <span className={styles['axis']}>{t('release', 'settings.region')}</span>
               <span className={styles['settingsFacts']}>
@@ -754,6 +777,7 @@ export function Release({
               <span className={styles['settingsActions']}>
                 <Button
                   ariaExpanded={settingsOpen}
+                  ariaControls="fs-release-steps"
                   onClick={() => {
                     setSettingsOpen((now) => !now);
                   }}
@@ -763,11 +787,22 @@ export function Release({
                 {runButton}
               </span>
             </div>
-            <div className={styles['steps']} hidden={!settingsOpen}>
-              {steps}
-            </div>
-          </section>
-        )}
+          )}
+          <div id="fs-release-steps" className={styles['steps']} hidden={run !== null && !settingsOpen}>
+            {steps}
+          </div>
+          {run !== null ? null : (
+            <section className={cx(styles['section'], styles['runBar'])} aria-label={t('release', 'builds.run')}>
+              <div className={styles['pickerActions']}>
+                {runButton}
+                <SizeUnitSwitch unit={unit} onSelect={onUnitChange} />
+                {snapshotId === null ? (
+                  <span className={styles['hint']}>{t('release', 'runNeedsBuild')}</span>
+                ) : null}
+              </div>
+            </section>
+          )}
+        </section>
 
         {error === null ? null : (
           <ErrorPanel
@@ -788,10 +823,17 @@ export function Release({
             />
             <div {...tabPanelProps('fs-release', view)} className={styles['panel']}>
               {view === 'findings' ? (
-                <Findings run={run} onAccept={accept} onInspect={inspect} />
+                <Findings run={run} onAccept={accept} onInspect={inspect} onSheetOpen={closeInspector} />
               ) : view === 'evidence' ? (
                 <>
                   <RunRecord run={run} restored={restored} onReload={() => void reload()} />
+                  {reloadError === null ? null : (
+                    <ErrorPanel
+                      envelope={reloadError}
+                      label={t('gate', 'reload.errorLabel')}
+                      heading={t('gate', 'reload.errorHeading')}
+                    />
+                  )}
                   <Evidence run={run} unit={unit} onInspect={inspect} />
                 </>
               ) : null}
@@ -806,12 +848,12 @@ export function Release({
       </Page>
 
       <Sheet
-        open={draft !== null}
+        open={policyOpen && draft !== null}
         title={t('release', 'policy.sheetTitle')}
         closeLabel={t('release', 'policy.close')}
         returnFocus={editPolicyButton.current}
         onClose={() => {
-          setDraft(null);
+          setPolicyOpen(false);
         }}
         actions={
           <>
@@ -1076,10 +1118,12 @@ function Findings({
   run,
   onAccept,
   onInspect,
+  onSheetOpen,
 }: {
   readonly run: GateRunDto;
   readonly onAccept: (request: AcceptReviewRequestDto) => Promise<ErrorEnvelopeDto | null>;
   readonly onInspect: Inspect;
+  readonly onSheetOpen: () => void;
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState<ReadonlySet<StateName>>(
@@ -1137,6 +1181,7 @@ function Findings({
                     runId={run.runId}
                     onAccept={onAccept}
                     onInspect={onInspect}
+                    onSheetOpen={onSheetOpen}
                   />
                 ))}
               </ol>
@@ -1177,11 +1222,14 @@ function FindingRow({
   runId,
   onAccept,
   onInspect,
+  onSheetOpen,
 }: {
   readonly finding: GateFindingRowDto;
   readonly runId: string;
   readonly onAccept: (request: AcceptReviewRequestDto) => Promise<ErrorEnvelopeDto | null>;
   readonly onInspect: Inspect;
+  /** A sheet is modal; the Inspector closes first so two focus traps never compete (R4 review S3). */
+  readonly onSheetOpen: () => void;
 }) {
   const { t } = useI18n();
   const [openForm, setOpenForm] = useState(false);
@@ -1192,6 +1240,7 @@ function FindingRow({
   const basisButton = useRef<HTMLButtonElement | null>(null);
   const acceptButton = useRef<HTMLButtonElement | null>(null);
   const actorField = useRef<HTMLInputElement | null>(null);
+  const record = useRef<HTMLDivElement | null>(null);
 
   const submit = useCallback(async () => {
     setBusy(true);
@@ -1204,7 +1253,9 @@ function FindingRow({
       setError(null);
       return;
     }
+    // A refusal is shown even if the reader closed the sheet while it was in flight (R4 review S3).
     setError(failure);
+    setOpenForm(true);
   }, [actor, finding.id, onAccept, reason, runId]);
 
   return (
@@ -1223,7 +1274,7 @@ function FindingRow({
         </p>
       )}
       {finding.acceptance === null ? null : (
-        <div className={styles['accepted']} role="status">
+        <div className={styles['accepted']} role="status" ref={record} tabIndex={-1}>
           <span className={styles['axis']}>{t('release', 'accept.recordTitle')}</span>
           <dl className={styles['audit']}>
             <div>
@@ -1263,9 +1314,10 @@ function FindingRow({
         {finding.acceptable ? (
           <Button
             ref={acceptButton}
-            ariaExpanded={openForm}
+            ariaHasPopup="dialog"
             onClick={() => {
               setError(null);
+              onSheetOpen();
               setOpenForm(true);
             }}
           >
@@ -1278,6 +1330,7 @@ function FindingRow({
         title={t('release', 'accept.sheetTitle', { rule: finding.ruleId })}
         returnFocus={acceptButton.current}
         initialFocus={actorField}
+        fallbackFocus={record}
         onClose={() => {
           setOpenForm(false);
         }}

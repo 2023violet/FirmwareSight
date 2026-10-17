@@ -47,6 +47,8 @@ export const gate = {
   'readiness.gitHint': 'Git facts describe the workspace FirmwareSight read. They are not proof of how this artifact was built, and nothing here says it was built from a commit.',
   'readiness.historyStatus': 'Showing the record as history stores it.',
   'readiness.reload': 'Read the stored record',
+  'reload.errorLabel': 'Reading the stored record failed',
+  'reload.errorHeading': 'Stored record not read',
   'readiness.storedRecordNote': 'A stored record keeps findings, evidence and accepted reviews. The numbers a policy produced stay inside each finding.',
   'warnings.item': 'Warning: {warning}',
   'warnings.runList': 'Run warnings',

@@ -49,6 +49,8 @@ export const gate: CatalogFor<'gate'> = {
   'readiness.gitHint': 'Git 信息描述的是 FirmwareSight 读到的工作区，并不是这个构建产物如何产生的证据，这里也没有任何内容说它是由某个提交构建的。',
   'readiness.historyStatus': '按历史记录所保存的样子显示这条记录。',
   'readiness.reload': '读取已保存的记录',
+  'reload.errorLabel': '读取存储记录失败',
+  'reload.errorHeading': '未读取存储记录',
   'readiness.storedRecordNote': '已保存的记录保留结论、证据与已接受的复核。策略产生的那些数字仍留在每条结论内部。',
   'warnings.item': '警告：{warning}',
   'warnings.runList': '运行警告',

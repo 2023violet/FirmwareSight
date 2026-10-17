@@ -25,6 +25,8 @@ export function Button({
   ariaLabel,
   ariaPressed,
   ariaExpanded,
+  ariaHasPopup,
+  ariaControls,
   ref,
   onClick,
   children,
@@ -38,6 +40,10 @@ export function Button({
   readonly ariaPressed?: boolean;
   /** A button that opens a form or a disclosure has to say so while it is closed. */
   readonly ariaExpanded?: boolean;
+  /** A button that opens a modal dialog says so (R4 review S3). */
+  readonly ariaHasPopup?: 'dialog';
+  /** The element a disclosure button opens. */
+  readonly ariaControls?: string;
   /** React 19 takes a ref as a prop. The bundle replace confirmation focuses this control by hand. */
   readonly ref?: Ref<HTMLButtonElement>;
   readonly onClick?: () => void;
@@ -53,6 +59,8 @@ export function Button({
       aria-label={ariaLabel}
       aria-pressed={ariaPressed}
       aria-expanded={ariaExpanded}
+      aria-haspopup={ariaHasPopup}
+      aria-controls={ariaControls}
       onClick={onClick}
     >
       {children}

@@ -2363,6 +2363,84 @@ describe('R4 Release workbench', () => {
     expect(verdict.textContent).not.toContain('0 finding(s)');
   });
 
+  it('keeps the stale note when the 6002 answer lands in the same tick as the new run (R4 review S2-3)', async () => {
+    await runOnFixturePair();
+    let finishExport!: (value: Awaited<ReturnType<typeof exportGateVisual>>) => void;
+    exportGateVisualMock.mockReturnValueOnce(new Promise((resolve) => { finishExport = resolve; }));
+    fireEvent.click(await exportItem('Export PNG'));
+    await waitFor(() => expect(exportGateVisualMock).toHaveBeenCalled());
+    let finishRun!: (value: Awaited<ReturnType<typeof runReleaseGate>>) => void;
+    runGateMock.mockReturnValueOnce(new Promise((resolve) => { finishRun = resolve; }));
+    fireEvent.click(screen.getByRole('button', { name: 'Run Gate' }));
+    await act(async () => {
+      finishExport({ ok: false, envelope: { code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null } });
+      finishRun(ok(gateRun({ runId: 'gate-same-tick' })));
+    });
+    await screen.findByRole('region', { name: 'Gate verdict' });
+    expect(screen.getByText(/Gate run changed while the Save dialog was open, so nothing was written/)).toBeDefined();
+    expect(screen.queryByRole('alert', { name: 'Visual report export error' })).toBeNull();
+  });
+
+  it('returns focus to the acceptance record once the Accept button it came from is retired (R4 review S2-1)', async () => {
+    runGateMock.mockResolvedValue(ok(reviewOnlyRun()));
+    acceptMock.mockResolvedValue(
+      ok({
+        runId: reviewOnlyRun().runId,
+        findingId: 'f-growth',
+        state: 'REVIEW',
+        dispositionEffectiveSeverity: 'PASS',
+        acceptance: {
+          findingId: 'f-growth',
+          actor: 'rosa',
+          acceptedAt: '2026-09-30T08:02:00Z',
+          reason: 'the growth is the new bootloader',
+          originalState: 'REVIEW',
+        },
+      } satisfies AcceptReviewOutcomeDto),
+    );
+    await openRelease();
+    await runGate();
+    const accept = await screen.findByRole('button', { name: 'Accept review' });
+    accept.focus();
+    fireEvent.click(accept);
+    fireEvent.change(await screen.findByLabelText('Who accepts this review'), { target: { value: 'rosa' } });
+    fireEvent.change(screen.getByLabelText('Why it is acceptable'), { target: { value: 'the growth is the new bootloader' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Record acceptance' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    const record = within(findingRow('diff.growth')).getByText('rosa').closest('[role="status"]');
+    await waitFor(() => expect(document.activeElement).toBe(record));
+  });
+
+  it('keeps an edited policy draft when its Sheet is closed without saving (R4 review S2-2)', async () => {
+    await openRelease();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit policy' }));
+    fireEvent.change(await screen.findByLabelText('FLASH budget (bytes)'), { target: { value: '8192' } });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'Edit policy' }));
+    expect(((await screen.findByLabelText('FLASH budget (bytes)')) as HTMLInputElement).value).toBe('8192');
+    expect(savePolicyMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps the run Latest when only reading the stored record fails (R4 review S3)', async () => {
+    await runOnFixturePair();
+    getRunMock.mockResolvedValue(fail(STORAGE_MISS));
+    openView('Evidence');
+    fireEvent.click(screen.getByRole('button', { name: 'Read the stored record' }));
+    expect(await screen.findByRole('alert', { name: 'Reading the stored record failed' })).toBeDefined();
+    expect(subjectBar().textContent).toContain('Latest');
+    expect(screen.queryByRole('alert', { name: 'Gate run failed' })).toBeNull();
+  });
+
+  it('marks the run as kept once a loaded policy differs from the one it was judged under (R4 review S3)', async () => {
+    await runOnFixturePair();
+    expect(subjectBar().textContent).toContain('Latest');
+    openConfigMock.mockResolvedValue(ok(project({ policySha256: 'f'.repeat(64) })));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open project config' }));
+    await waitFor(() => expect(subjectBar().textContent).toContain('Previous run kept · current settings not judged'));
+  });
+
   it('shows the stale note when Rust refuses a late export after the run changed (CI #123 rule)', async () => {
     await runOnFixturePair();
     let finish!: (value: Awaited<ReturnType<typeof exportGateVisual>>) => void;

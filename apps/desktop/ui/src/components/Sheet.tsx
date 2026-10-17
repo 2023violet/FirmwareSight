@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode, type RefObject } from 'react';
+import { createPortal } from 'react-dom';
 
 import styles from './Sheet.module.css';
 
@@ -24,6 +25,7 @@ export function Sheet({
   closeLabel,
   returnFocus,
   initialFocus,
+  fallbackFocus,
   onClose,
   children,
   actions,
@@ -35,6 +37,11 @@ export function Sheet({
   /** The control that opened it; focus goes back there on close. */
   readonly returnFocus: HTMLElement | null;
   readonly initialFocus?: RefObject<HTMLElement | null>;
+  /**
+   * Where focus goes when the opener no longer exists on close - an Accept button that the acceptance it
+   * opened has just retired (R4 review S2-1). Without it focus would fall to the page body.
+   */
+  readonly fallbackFocus?: RefObject<HTMLElement | null>;
   readonly onClose: () => void;
   readonly children: ReactNode;
   /** The sheet's own buttons, kept in view at its foot. */
@@ -49,6 +56,8 @@ export function Sheet({
   trigger.current = returnFocus;
   const latestClose = useRef(onClose);
   latestClose.current = onClose;
+  const fallback = useRef(fallbackFocus);
+  fallback.current = fallbackFocus;
 
   useEffect(() => {
     if (!open) {
@@ -76,7 +85,12 @@ export function Sheet({
       // However it closed, focus returns to the opener unless the reader already moved it on purpose.
       const active = document.activeElement;
       if (active === null || active === document.body || (host !== null && host.contains(active)) || !active.isConnected) {
-        trigger.current?.focus();
+        const opener = trigger.current;
+        if (opener !== null && opener.isConnected) {
+          opener.focus();
+        } else {
+          fallback.current?.current?.focus();
+        }
       }
     };
     // `initialFocus` is a ref, read once when the sheet opens.
@@ -105,7 +119,9 @@ export function Sheet({
     }
   };
 
-  return (
+  // Rendered at the end of the document, so the dialog is not a child of whatever list or row opened it in
+  // the accessibility tree, and no ancestor's stacking context can put it under the page (R4 review S3).
+  return createPortal(
     <div
       className={styles['scrim']}
       onMouseDown={(event) => {
@@ -139,6 +155,7 @@ export function Sheet({
         <div className={styles['body']}>{children}</div>
         {actions === undefined ? null : <div className={styles['foot']}>{actions}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

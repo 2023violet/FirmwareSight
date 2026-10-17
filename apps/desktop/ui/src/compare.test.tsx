@@ -1595,6 +1595,30 @@ describe('export', () => {
     expect(screen.getByText(/changed while the Save dialog was open, so nothing was written/)).toBeDefined();
   });
 
+  it('keeps the stale note when the 6002 answer lands in the same tick as the new comparison (R4 review S2-3)', async () => {
+    await openCompare();
+    await runCompare();
+    const exported = deferred<ExportOutcomeDto>();
+    exportVisualMock.mockReturnValueOnce(exported.promise);
+    fireEvent.click(exportButton('Export PNG'));
+    await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
+    const compared = deferred<CompareSummaryDto>();
+    compareMock.mockReturnValueOnce(compared.promise);
+    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
+    // Rust's refusal is answered first, while the old comparison is still the one on screen; the new
+    // comparison renders right after, in the same act. Its layout effect must not wipe the note.
+    await act(async () => {
+      exported.resolve({
+        ok: false,
+        envelope: { code: 'ERR-EXPORT-6002', message: 'stale', operationId: 'op-s', details: null, remediation: null },
+      });
+      compared.resolve(ok(comparison({ diffId: 'cmp-same-tick' })));
+    });
+    await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-same-tick')).toBe(true));
+    expect(screen.getByText(/changed while the Save dialog was open, so nothing was written/)).toBeDefined();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
   it('offers visual formats beside the existing portable JSON and detailed HTML exports', async () => {
     await openCompare();
     await runCompare();

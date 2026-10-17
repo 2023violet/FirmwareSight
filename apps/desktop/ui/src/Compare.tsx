@@ -205,6 +205,9 @@ export function Compare({
   const [symbolFocus, setSymbolFocus] = useState<Focus | null>(null);
   const [additions, setAdditions] = useState<Additions | null>(null);
   const [exportNote, setExportNote] = useState<string | null>(null);
+  // Not reset by the comparison-change effect: a 6002 answer that lands before the new comparison renders
+  // must survive that render (R4 review S2-3). The next export clears it.
+  const [exportStale, setExportStale] = useState(false);
   const [exportError, setExportError] = useState<ErrorEnvelopeDto | null>(null);
   const [exporting, setExporting] = useState(false);
   /** The fact in the Inspector, with the control that opened it so focus can go back there. */
@@ -392,6 +395,7 @@ export function Compare({
       }
       const request = ++exportRequest.current;
       setExporting(true);
+      setExportStale(false);
       const outcome = format === 'json'
         ? await exportCompareJson(summary.diffId)
         : format === 'html'
@@ -403,7 +407,7 @@ export function Compare({
         // writing the comparison the reader moved away from (M1, AC24); the screen says so instead of
         // staying silent. Any other late outcome belongs to the old comparison and is not shown here.
         if (staleAnswer) {
-          setExportNote(t('compare', 'export.staleNote'));
+          setExportStale(true);
         }
         return;
       }
@@ -412,7 +416,8 @@ export function Compare({
         // Rust is the authority that the comparison changed, even when its answer arrives before this page
         // has rendered the change (CI #123): it is the stale note, never an error.
         setExportError(null);
-        setExportNote(t('compare', 'export.staleNote'));
+        setExportNote(null);
+        setExportStale(true);
         return;
       }
 
@@ -595,6 +600,11 @@ export function Compare({
             {exportNote}
           </p>
         )}
+        {exportStale ? (
+          <p className={styles['status']} role="status" aria-live="polite">
+            {t('compare', 'export.staleNote')}
+          </p>
+        ) : null}
         {exportError === null ? null : (
           <ErrorPanel envelope={exportError} label={t('compare', 'export.errorLabel')} heading={t('compare', 'export.errorHeading')} />
         )}

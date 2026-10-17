@@ -91,7 +91,7 @@ New tests:
   - PASS and N/A collapsed.
 - `foundation.test.tsx` "Sheet (R4)" (2 tests) and "BuildPicker none entry (R4)" (1 test).
 
-UI tests: 500/500.
+UI tests: 508/508 after the review fixes (§6).
 
 ## 4. Verification
 
@@ -121,3 +121,22 @@ UI tests: 500/500.
 The final QA build passed 14 checks; 1 is NOT_RUN (the human drag check). See [evidence/R4](../evidence/R4/README.md) and the [design checklist](../evidence/R4/DESIGN_CHECKLIST.md).
 
 The first run found one defect, now fixed: the verdict sentence's count (D-R4-10). The QA stores both runs created are kept and listed in the evidence README.
+
+## 6. Independent review (2026-10-17)
+
+An independent review of `bd0122c` returned **PASS_WITH_FIXES**, with no S1 findings. It ran the UI tests (501/501), the type check and lint, and found them clean.
+
+| Finding | Disposition |
+|---|---|
+| S2-1: after a successful acceptance, focus fell to the page body because the Accept button it would return to was gone | Fixed. `Sheet` takes a `fallbackFocus`, and the row's acceptance record (`tabIndex=-1`) receives focus. The test was mutation-checked. |
+| S2-2: Esc or a click beside the policy Sheet threw away the whole draft | Fixed. The draft survives the Sheet closing; only a save or a different project retires it. The test was mutation-checked. The scrim stays untinted because the token file has no scrim colour; recorded as a design gap for R7. |
+| S2-3: a 6002 answer landing in the same tick as the new run was wiped by the run-change layout effect | Fixed on Release **and Compare**. The stale note is its own state that the subject-change effect does not reset, as on Analyze. A same-tick test on each page was mutation-checked. |
+| S3: "Latest" ignored a changed policy | Fixed. A loaded policy whose canonical hash differs from the run's marks the run as kept; it is the same comparison Rust makes for the run's policy label. Tested. |
+| S3: a failed stored-record read was labelled as a failed Gate run | Fixed. It now has its own error ("Reading the stored record failed"), and the SubjectBar keeps Latest. Tested. |
+| S3: the steps remounted when a run appeared or was dropped | Fixed. The steps keep one tree position. |
+| S3: modal openers used `aria-expanded` | Fixed. Edit policy and Accept review use `aria-haspopup="dialog"`, and Edit settings names its target with `aria-controls`. |
+| S3: two focus traps could compete | Fixed. Opening a Sheet closes the Inspector first. |
+| S3: a refused acceptance could go unseen if its Sheet was closed in flight | Fixed. A refusal reopens the Sheet with the error. |
+| S3: the accept Sheet rendered inside the finding's list item | Fixed. `Sheet` renders through a portal at the end of the document. |
+| S3: the Sheet tests did not cover a scrim click or focus redirection | Added. |
+| S3: literal `z-index: 20` | Kept. It follows the Inspector's literal `10`; the token file has no layer scale. Recorded for R7. |

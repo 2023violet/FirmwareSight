@@ -609,6 +609,20 @@ describe('Sheet (R4)', () => {
     expect(document.activeElement).toBe(opener);
   });
 
+  it('closes on a click outside it and sends stray focus back inside', () => {
+    render(<Host initial={false} />);
+    const opener = screen.getByRole('button', { name: 'Open' });
+    fireEvent.click(opener);
+    const sheet = screen.getByRole('dialog', { name: 'Edit things' });
+    // Focus that lands outside the open sheet is sent back to its close button.
+    opener.focus();
+    expect(document.activeElement).toBe(within(sheet).getByRole('button', { name: 'Close' }));
+    // A press on the layer beside the sheet closes it.
+    const scrim = sheet.parentElement as HTMLElement;
+    fireEvent.mouseDown(scrim);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
   it('focuses the decision it asks for when given one', () => {
     render(<Host initial />);
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));

@@ -2,7 +2,7 @@
 
 Plan: [06_DELIVERY/18_R4_RELEASE.md](../../06_DELIVERY/18_R4_RELEASE.md) §4.
 
-- **Build:** the QA-identifier build (`com.firmwaresight.desktop.qa`) of the final R4 code. Binary SHA-256 `8f75166b0a67c26530244571cc8b3bedf4dd45a4646679aea2fa917bbd22e296`.
+- **Build:** the QA-identifier build (`com.firmwaresight.desktop.qa`) of the final R4 code, including the fixes from the independent review of `bd0122c`. Binary SHA-256 `a5d6922d5a486cb2b9849cd03d6e96883a6a172359d53e837344322490dc7505`.
 - **Operator:** Claude, as an automated driver on the Owner's Windows 10 host (zh-CN, WebView2).
   - Page input went through the WebView2 DevTools protocol.
   - The real native Open and Save dialogs were driven with Win32 messages, against the QA process only.
@@ -21,8 +21,9 @@ Plan: [06_DELIVERY/18_R4_RELEASE.md](../../06_DELIVERY/18_R4_RELEASE.md) §4.
 
 **QA stores.** Each run's store is kept and none is deleted (Standing Owner rule: no deletion outside an approved scope):
 - `com.firmwaresight.desktop.qa.r4-kept-025945`
-- `com.firmwaresight.desktop.qa.r4-kept-030807` (final run)
+- `com.firmwaresight.desktop.qa.r4-kept-030807`
+- `com.firmwaresight.desktop.qa.r4-kept-042351` (final run, after the review fixes)
 
 The Owner's store was only hashed (R14).
 
-**Evidence ZIP.** `R4_NATIVE_SMOKE_EVIDENCE.zip` holds ten screenshots, `results.tsv` and the four driver scripts, with no local paths. SHA-256 `f2ecaf58ac12f2d84ff83ce29c6811fbba308b4f30e364b0c514b4fb000e788f`.
+**Evidence ZIP.** `R4_NATIVE_SMOKE_EVIDENCE.zip` holds ten screenshots, `results.tsv` and the four driver scripts, with no local paths. SHA-256 `831e4b09b9b88b596414b71ec4ef9f23a1c9c4df177beb83560348d331b97d5b`.

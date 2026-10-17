@@ -420,3 +420,10 @@
   align-items: baseline;
   gap: var(--fs-space-2) var(--fs-space-4);
 }
+
+/* With no run the settings are the page: the steps and the run bar, spaced as page blocks. */
+.setup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
+}
