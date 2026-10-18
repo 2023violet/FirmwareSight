@@ -68,7 +68,7 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Analyze ELF metadata (32/64-bit, either endian); Keil/IAR compiler cohorts remain unverified.
+    /// Analyze ELF metadata (32/64-bit, either endian), with an optional GNU ld, armlink or IAR ILINK MAP.
     Analyze(AnalyzeArgs),
     /// Compare two artifacts and report what changed between them.
     Diff(DiffArgs),
@@ -121,7 +121,7 @@ struct ReleasePrepareArgs {
     #[arg(long, value_name = "FILE")]
     artifact: PathBuf,
 
-    /// Linker MAP file (GNU ld or armlink) for the shipped artifact.
+    /// Linker MAP file (GNU ld, armlink or IAR ILINK) for the shipped artifact.
     #[arg(long, value_name = "FILE")]
     map: Option<PathBuf>,
 
@@ -129,7 +129,7 @@ struct ReleasePrepareArgs {
     #[arg(long, value_name = "FILE")]
     baseline: Option<PathBuf>,
 
-    /// Linker MAP file (GNU ld or armlink) for the baseline artifact.
+    /// Linker MAP file (GNU ld, armlink or IAR ILINK) for the baseline artifact.
     #[arg(long, value_name = "FILE")]
     baseline_map: Option<PathBuf>,
 
@@ -171,7 +171,7 @@ struct AnalyzeArgs {
     /// ELF artifact to analyze.
     path: PathBuf,
 
-    /// Linker MAP file (GNU ld or armlink) for region and load-address evidence.
+    /// Linker MAP file (GNU ld, armlink or IAR ILINK) for region and load-address evidence.
     #[arg(long, value_name = "FILE")]
     map: Option<PathBuf>,
 
@@ -214,11 +214,11 @@ struct DiffArgs {
     /// The newer ELF artifact. Deltas are measured to this side.
     new: PathBuf,
 
-    /// Linker MAP file (GNU ld or armlink) for the older artifact.
+    /// Linker MAP file (GNU ld, armlink or IAR ILINK) for the older artifact.
     #[arg(long, value_name = "FILE")]
     old_map: Option<PathBuf>,
 
-    /// Linker MAP file (GNU ld or armlink) for the newer artifact.
+    /// Linker MAP file (GNU ld, armlink or IAR ILINK) for the newer artifact.
     #[arg(long, value_name = "FILE")]
     new_map: Option<PathBuf>,
 
@@ -258,7 +258,7 @@ struct GateArgs {
     #[arg(long, value_name = "FILE")]
     artifact: PathBuf,
 
-    /// Linker MAP file (GNU ld or armlink) for the shipped artifact.
+    /// Linker MAP file (GNU ld, armlink or IAR ILINK) for the shipped artifact.
     #[arg(long, value_name = "FILE")]
     map: Option<PathBuf>,
 
@@ -266,7 +266,7 @@ struct GateArgs {
     #[arg(long, value_name = "FILE")]
     baseline: Option<PathBuf>,
 
-    /// Linker MAP file (GNU ld or armlink) for the baseline artifact.
+    /// Linker MAP file (GNU ld, armlink or IAR ILINK) for the baseline artifact.
     #[arg(long, value_name = "FILE")]
     baseline_map: Option<PathBuf>,
 

@@ -10,6 +10,10 @@ last_updated: "2026-09-28"
 
 # Changelog
 
+## Unreleased
+
+- **IAR Embedded Workbench for Arm (ILINK) MAP** (ADR-0038). It adds memory regions from the `place in` ranges, MAP-backed accounting, object and library attribution, and Compare. Checked on nine real open-source builds (ILINK 7.50–9.20): Flash matches IAR's totals on all of them ([evidence/D4-IAR](evidence/D4-IAR/README.md)).
+
 ## 0.7.0 — 2026-10-18 (public release)
 
 [GitHub release v0.7.0](https://github.com/2023violet/FirmwareSight/releases/tag/v0.7.0), built from `03a6211`.

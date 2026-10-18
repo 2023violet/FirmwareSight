@@ -15,7 +15,7 @@
 
 ![FirmwareSight 分析界面：Keil MDK 构建的 CMSIS-DSP 示例，Flash 6,904 bytes，RAM 7,776 bytes](docs/images/analyze-zh.png)
 
-FirmwareSight 读取固件构建产物（ELF / AXF 及其链接器 MAP），给出可核对的内存占用、构建差异和发布结论。它提供桌面应用和命令行工具 `fwsight`，全部计算在本机完成，不联网，不上传任何文件。
+FirmwareSight 读取固件构建产物（ELF / AXF / OUT 及其链接器 MAP），给出可核对的内存占用、构建差异和发布结论。它提供桌面应用和命令行工具 `fwsight`，全部计算在本机完成，不联网，不上传任何文件。
 
 ## 目录
 
@@ -45,7 +45,7 @@ FirmwareSight 读取固件构建产物（ELF / AXF 及其链接器 MAP），给�
 |---|---|
 | GCC / Clang + GNU ld：ELF 与 `.map` | ✅ 支持，已验证 |
 | Keil MDK / Arm Compiler（armlink）：`.axf` 与 `.map` | ✅ 支持：内存区域、基于 MAP 的核算、目标文件与库归属、对比。已在 1 个合成样本和 2 个真实 µVision 工程上与 armlink 自身统计核对一致（[证据](evidence/D4-REAL/README.md)）。链接时需要 `--map --load_addr_map_info`，这是 µVision 的默认设置 |
-| IAR EWARM（ILINK）：`.out` 与 `.map` | ⏳ 尚未支持，原因是还没有可用于验证的真实样本。欢迎提供 |
+| IAR Embedded Workbench for Arm（ILINK）：`.out` 与 `.map` | ✅ 支持：内存区域（取自链接配置的 `place in` 范围）、基于 MAP 的核算、目标文件与库归属、对比。已在 9 个开源项目的真实构建（ILINK 7.50–9.20）上与 IAR 自身统计核对：Flash 全部一致（[证据](evidence/D4-IAR/README.md)） |
 | `.bin` / Intel HEX | 可作为发布字节证据附加，不解析其内容 |
 
 详见 [格式支持](04_TECH/03_FORMAT_SUPPORT.md) 与 [工具链互操作性](04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md)。
@@ -162,7 +162,7 @@ python scripts/check.py
 
 ## 参与贡献
 
-欢迎提交问题和 Pull Request，流程与要求见 [CONTRIBUTING.md](CONTRIBUTING.md)。特别欢迎提供 **IAR EWARM 的构建样本**（`.out` 与 `.map`，最好附带工程文件，且不含专有代码），这是支持 IAR 的前提。
+欢迎提交问题和 Pull Request，流程与要求见 [CONTRIBUTING.md](CONTRIBUTING.md)。特别欢迎提供更多工具链的真实构建样本（ELF 与 `.map`，最好附带工程文件，且不含专有代码），用于扩大验证范围。
 
 发现安全问题时，请按 [SECURITY.md](SECURITY.md) 私下报告，不要公开提 issue。
 

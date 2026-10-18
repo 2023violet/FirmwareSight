@@ -50,7 +50,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 
 ## Compatibility boundary
 
-GCC + GNU ld and Clang + GNU ld are verified cohorts. Keil (armlink) and IAR (ILINK) compiler output is **UNVERIFIED** as a cohort. The armlink MAP is **supported** since ADR-0036 (one synthetic same-origin sample, cross-checked, plus two real Keil projects in `evidence/D4-REAL`); the IAR MAP is **NOT_SUPPORTED / FIXTURE_BLOCKED**. See [04_TECH/39](../04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).
+GCC + GNU ld and Clang + GNU ld are verified cohorts. Keil (armlink) and IAR (ILINK) compiler output is **UNVERIFIED** as a cohort. The armlink MAP is **supported** since ADR-0036 (one synthetic same-origin sample, cross-checked, plus two real Keil projects in `evidence/D4-REAL`); the IAR ILINK MAP for Arm is **supported** since ADR-0038 (nine real open-source builds, ILINK 7.50–9.20, in `evidence/D4-IAR`; on `feature/iar-ilink-map`, not yet on `main`). See [04_TECH/39](../04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).
 
 ## Protected local state
 

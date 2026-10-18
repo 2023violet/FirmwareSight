@@ -136,7 +136,7 @@ export const common = {
   'dialog.replaceKeep': 'Keep mine',
   'memory.title': 'Memory usage',
   'memory.hint': 'Share of each linker memory region in use',
-  'memory.none': 'No memory regions yet. Add the linker MAP (GNU ld or armlink) for this build to see how full Flash and RAM are.',
+  'memory.none': 'No memory regions yet. Add the linker MAP (GNU ld, armlink or IAR ILINK) for this build to see how full Flash and RAM are.',
   'memory.unknown': 'Unknown',
   'memory.kindFlash': 'Flash',
   'memory.kindRam': 'RAM',

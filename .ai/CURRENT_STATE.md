@@ -31,7 +31,7 @@ Unknown or partial evidence stays explicit. It is never shown as zero or as proo
 
 - ELF32 and ELF64, little and big endian: parsed. Verified memory-accounting cohorts are GCC + GNU ld and Clang + GNU ld.
 - GNU ld `.map`: the only supported MAP grammar. Its input-section rows also give object and library attribution; portable JSON does not carry those rows (`ADR-0033` D7).
-- Keil (armlink) and IAR (ILINK) output: UNVERIFIED as cohorts. armlink MAP: **supported** since ADR-0036, on one synthetic same-origin sample (Arm Compiler 6.24) cross-checked against armlink's totals and GNU readelf, and on two real Keil MDK projects (ADR-0036 A1/A2, `evidence/D4-REAL`). IAR MAP: NOT_SUPPORTED / FIXTURE_BLOCKED.
+- Keil (armlink) and IAR (ILINK) output: UNVERIFIED as cohorts. armlink MAP: **supported** since ADR-0036, on one synthetic same-origin sample (Arm Compiler 6.24) cross-checked against armlink's totals and GNU readelf, and on two real Keil MDK projects (ADR-0036 A1/A2, `evidence/D4-REAL`). IAR ILINK MAP for Arm: **supported** since ADR-0038, on nine real open-source builds (ILINK 7.50–9.20) cross-checked against IAR's totals and module summary (`evidence/D4-IAR`).
 - `.bin` and Intel HEX: can be attached as release byte evidence. Content analysis is UNSUPPORTED.
 
 Details: [04_TECH/03](../04_TECH/03_FORMAT_SUPPORT.md), [04_TECH/39](../04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).

@@ -188,7 +188,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0034-instrument-ledger-design-language.md
 │   ├── ADR-0035-apache-2-open-source-license.md
 │   ├── ADR-0036-armlink-map-adapter.md
-│   └── ADR-0037-release-provenance-signing.md
+│   ├── ADR-0037-release-provenance-signing.md
+│   └── ADR-0038-iar-ilink-map-adapter.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
@@ -644,6 +645,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── lib.rs
 │   │   │   ├── map.rs
 │   │   │   ├── map_armlink.rs
+│   │   │   ├── map_iar.rs
 │   │   │   └── pipeline.rs
 │   │   ├── tests/
 │   │   │   ├── d4_armlink_fixtures.rs
@@ -778,6 +780,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── CROSSCHECK.md
 │   │   ├── CROSSCHECK_ADR-0036.md
 │   │   ├── D4_ARMLINK_NATIVE_SMOKE.zip
+│   │   └── README.md
+│   ├── D4-IAR/
+│   │   ├── CROSSCHECK.txt
+│   │   ├── D4-IAR_native_smoke.zip
 │   │   └── README.md
 │   ├── D4-REAL/
 │   │   ├── D4-REAL_native_smoke.zip
@@ -1149,6 +1155,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── test_verify_bundle_portability.py
 │   ├── check.py
 │   ├── crosscheck_d4_armlink.py
+│   ├── crosscheck_iar_samples.py
 │   ├── gen_d4_armlink_fixtures.py
 │   ├── gen_desktop_icons.py
 │   ├── gen_interop_fixtures.py

@@ -1,0 +1,138 @@
+## adamcovaklara_LSM6DSOX-SensorHub-Demo  (V8.40.2.214)
+   .out sha256 478d6c80a7367efa76ac6500c4331d21f5d3c1a42a22134d81456b16954a9f26
+   .map sha256 e33637e5b95f58e2d52446d41c50dcf2481bbc84bbf1ccca95ea4c900ae0d797
+   exit 0
+   IAR   Flash 30483  RAM 3580
+   FS    Flash 30483 bytes [observed]  RAM 3582 bytes [observed]
+   modules: 62 in IAR, 62 in FS; exact 58; RAM equal, Flash differs 4; missing 0; extra 0
+     Flash differs: main.o: IAR 7288, FS 7264 (diff 24)
+     Flash differs: stm32f4xx_hal.o: IAR 207, FS 204 (diff 3)
+     Flash differs: system_stm32f4xx.o: IAR 122, FS 120 (diff 2)
+     Flash differs: dl7M_tlf.a(xlocale_c.o): IAR 191, FS 129 (diff 62)
+
+## blues_sparrow-lora  (V9.20.2.320)
+   .out sha256 0fa055cd1eb15c5464381251b9bf8f883a745a50e71202f9a265abeb6193f7d6
+   .map sha256 a2ab085b3b0411122c95e3dd11a377209cc256cfd8cba9732245338641dc8a9b
+   exit 0
+   IAR   Flash 110247  RAM 65530
+   FS    Flash 110247 bytes [observed]  RAM 65530 bytes [observed]
+   modules: 129 in IAR, 129 in FS; exact 115; RAM equal, Flash differs 14; missing 0; extra 0
+     Flash differs: main.o: IAR 3477, FS 3472 (diff 5)
+     Flash differs: app.o: IAR 11889, FS 11888 (diff 1)
+     Flash differs: sched.o: IAR 2829, FS 2828 (diff 1)
+     Flash differs: trace.o: IAR 1564, FS 1540 (diff 24)
+     Flash differs: auth.o: IAR 700, FS 625 (diff 75)
+     Flash differs: system_stm32wlxx.o: IAR 164, FS 162 (diff 2)
+     Flash differs: stm32wlxx_hal.o: IAR 203, FS 200 (diff 3)
+     Flash differs: radio.o: IAR 4550, FS 4549 (diff 1)
+     Flash differs: stm32_seq.o: IAR 359, FS 348 (diff 11)
+     Flash differs: n_const.o: IAR 59, FS 49 (diff 10)
+     Flash differs: n_helpers.o: IAR 986, FS 878 (diff 108)
+     Flash differs: n_request.o: IAR 1612, FS 1592 (diff 20)
+     Flash differs: n_ua.o: IAR 417, FS 406 (diff 11)
+     Flash differs: dl7M_tlf.a(xlocale_c.o): IAR 116, FS 81 (diff 35)
+
+## chcbaram_arm_seminar_fw  (V8.11.2.13589)
+   .out sha256 74fdb6c48ec2875b981bbb914d594452e7f2d1a6035d1c0e57f410b5e8055843
+   .map sha256 5ff5aebbbe2dbfd7dd9030973283d32b92ca4f16800784df2048880b3c5f9e00
+   exit 0
+   IAR   Flash 31667  RAM 47945
+   FS    Flash 31667 bytes [observed]  RAM 47946 bytes [observed]
+   modules: 78 in IAR, 78 in FS; exact 72; RAM equal, Flash differs 6; missing 0; extra 0
+     Flash differs: button.o: IAR 485, FS 484 (diff 1)
+     Flash differs: buzzer.o: IAR 177, FS 176 (diff 1)
+     Flash differs: led.o: IAR 374, FS 372 (diff 2)
+     Flash differs: usbd_cdc.o: IAR 639, FS 620 (diff 19)
+     Flash differs: usbd_cdc_interface.o: IAR 859, FS 572 (diff 287)
+     Flash differs: usbd_desc.o: IAR 373, FS 368 (diff 5)
+
+## eydonmlau_LoRaWAN_AT-Module  (V8.20.1.14183)
+   .out sha256 e05b1d864c96ab82f3b3d9ccbba7be667f2b603058f91d967f58027f524b0786
+   .map sha256 d7341b938399a9ac8df8c8e7b0a2651f0d3061705664cb2157227fab97113815
+   exit 0
+   IAR   Flash 57496  RAM 8533
+   FS    Flash 57496 bytes [observed]  RAM 8536 bytes [observed]
+   modules: 97 in IAR, 97 in FS; exact 86; RAM equal, Flash differs 11; missing 0; extra 0
+     Flash differs: LoRaMac.o: IAR 7902, FS 7844 (diff 58)
+     Flash differs: LoRaMacCrypto.o: IAR 852, FS 756 (diff 96)
+     Flash differs: RegionCN470.o: IAR 2207, FS 2200 (diff 7)
+     Flash differs: at_parser.o: IAR 847, FS 836 (diff 11)
+     Flash differs: callback_handler.o: IAR 7715, FS 7676 (diff 39)
+     Flash differs: command_parse.o: IAR 923, FS 792 (diff 131)
+     Flash differs: main.o: IAR 424, FS 412 (diff 12)
+     Flash differs: sx1276.o: IAR 6114, FS 6020 (diff 94)
+     Flash differs: system_stm32l1xx.o: IAR 109, FS 108 (diff 1)
+     Flash differs: utilities.o: IAR 139, FS 138 (diff 1)
+     Flash differs: dl7M_tlf.a(xlocale_c.o): IAR 65, FS 54 (diff 11)
+
+## gym487_STM32UltrasonicRADAR  (V8.30.1.114)
+   .out sha256 f9e9f10739ddcf3a33f511f8523b4ac882e1b86261366d9096db1ba2b5c3d0ae
+   .map sha256 bfe76cfdeec0c691eee3429da3ff0d1a1fae7a0f1a615dc031347fcd3ebfbe86
+   exit 0
+   IAR   Flash 198620  RAM 14445
+   FS    Flash 198620 bytes [observed]  RAM 14448 bytes [observed]
+   modules: 50 in IAR, 50 in FS; exact 47; RAM equal, Flash differs 3; missing 0; extra 0
+     Flash differs: sd_diskio.o: IAR 233, FS 232 (diff 1)
+     Flash differs: stm32f1xx_hal.o: IAR 180, FS 168 (diff 12)
+     Flash differs: system_stm32f1xx.o: IAR 96, FS 92 (diff 4)
+
+## iliasam_STM32_DisplayLink  (V7.50.2.10312)
+   .out sha256 e0dea10afb426b73c0c1d8466f807c426cf094392b79d6cd2fdc2a46692b436d
+   .map sha256 153faf90a388d9bfabd8c8e1a450744b6d52a689b8546c785ba6a555eee11529
+   exit 0
+   IAR   Flash 356883  RAM 124699
+   FS    Flash 356883 bytes [observed]  RAM 124701 bytes [observed]
+   modules: 183 in IAR, 183 in FS; exact 173; RAM equal, Flash differs 10; missing 0; extra 0
+     Flash differs: lv_calendar.o: IAR 1297, FS 1296 (diff 1)
+     Flash differs: lv_calendar_header_arrow.o: IAR 545, FS 544 (diff 1)
+     Flash differs: lv_keyboard.o: IAR 1990, FS 1988 (diff 2)
+     Flash differs: lv_mem.o: IAR 3404, FS 2950 (diff 454)
+     Flash differs: lv_obj_style.o: IAR 5849, FS 5848 (diff 1)
+     Flash differs: lv_txt.o: IAR 2233, FS 2232 (diff 1)
+     Flash differs: ui.o: IAR 4317, FS 4316 (diff 1)
+     Flash differs: usbh_di_link.o: IAR 693, FS 692 (diff 1)
+     Flash differs: dl7M_tlf.a(localeconv.o): IAR 111, FS 108 (diff 3)
+     Flash differs: dl7M_tlf.a(setlocale.o): IAR 22, FS 20 (diff 2)
+
+## nicokorn_STM32F1XX_WS2812B  (V9.10.1.308)
+   .out sha256 adb54664de3b050cff1b0855fab9eb566ec3de4241be4912d0bd17fc2093bc85
+   .map sha256 089e5cd88b09b32078ae55f3213b889991dee6648d2d3b089d54547f7f9f3155
+   exit 0
+   IAR   Flash 5623  RAM 2324
+   FS    Flash 5623 bytes [observed]  RAM 2324 bytes [observed]
+   modules: 23 in IAR, 23 in FS; exact 21; RAM equal, Flash differs 2; missing 0; extra 0
+     Flash differs: ws2812b.o: IAR 1192, FS 1158 (diff 34)
+     Flash differs: dl7M_tlf.a(rand.o): IAR 161, FS 156 (diff 5)
+
+## nicokorn_STM32F4XX_RNDIS_DEMO  (V9.10.1.308)
+   .out sha256 8c2b9a4dcc3b16532d8b0a0e470433436844cbd70aeab33b17d917070a852f08
+   .map sha256 2e8c9135b57acbe39c0d0e5a871fbec22831cea64f7239266327f7e9697bf24a
+   exit 0
+   IAR   Flash 71098  RAM 129046
+   FS    Flash 71098 bytes [observed]  RAM 129048 bytes [observed]
+   modules: 89 in IAR, 89 in FS; exact 76; RAM equal, Flash differs 13; missing 0; extra 0
+     Flash differs: dhcpserver.o: IAR 1073, FS 1068 (diff 5)
+     Flash differs: httpserver.o: IAR 10722, FS 10716 (diff 6)
+     Flash differs: led.o: IAR 520, FS 488 (diff 32)
+     Flash differs: monitor.o: IAR 527, FS 492 (diff 35)
+     Flash differs: tcpip.o: IAR 507, FS 468 (diff 39)
+     Flash differs: usbd_desc.o: IAR 309, FS 284 (diff 25)
+     Flash differs: system_stm32f4xx.o: IAR 41, FS 40 (diff 1)
+     Flash differs: stm32f4xx_hal.o: IAR 132, FS 128 (diff 4)
+     Flash differs: port.o: IAR 535, FS 532 (diff 3)
+     Flash differs: FreeRTOS_UDP_IP.o: IAR 351, FS 344 (diff 7)
+     Flash differs: usbd_rndis.o: IAR 1694, FS 1600 (diff 94)
+     Flash differs: dl7M_tlf.a(rand.o): IAR 216, FS 172 (diff 44)
+     Flash differs: dl7M_tlf.a(xlocale_c.o): IAR 77, FS 54 (diff 23)
+
+## nicokorn_STM32H7XX_WS2812B  (V9.10.1.308)
+   .out sha256 8df990069430ab24e70462016bac2af72ce480fd2c59c6eb20867c89242e30d0
+   .map sha256 fb29b5bd310ebd69658d016c7e7241098ed74f27b3393f6ab142616b8891e1c0
+   exit 0
+   IAR   Flash 17988  RAM 1966
+   FS    Flash 17988 bytes [observed]  RAM 1968 bytes [observed]
+   modules: 24 in IAR, 24 in FS; exact 21; RAM equal, Flash differs 2; missing 0; extra 0
+     Flash differs: system_stm32h7xx.o: IAR 328, FS 320 (diff 8)
+     Flash differs: stm32h7xx_hal.o: IAR 293, FS 288 (diff 5)
+     RAM differs:   ws2812b.o: IAR (4353, 437), FS (4348, 925)
+

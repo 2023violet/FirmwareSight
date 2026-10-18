@@ -160,7 +160,7 @@ fn explicit_foreign_map_is_refused_and_elf_only_recovery_is_actionable() {
         .unwrap();
     assert!(
         String::from_utf8_lossy(&help.stdout)
-            .contains("Keil/IAR compiler cohorts remain unverified")
+            .contains("with an optional GNU ld, armlink or IAR ILINK MAP")
     );
     std::fs::remove_dir_all(scratch).unwrap();
 }

@@ -15,7 +15,7 @@
 
 ![FirmwareSight Analyze: the CMSIS-DSP example built with Keil MDK, Flash 6,904 bytes, RAM 7,776 bytes](docs/images/analyze-en.png)
 
-FirmwareSight reads a firmware build (ELF / AXF and its linker MAP) and turns it into figures you can check: memory usage, build-to-build differences, and a release verdict. It comes as a desktop app and a command-line tool, `fwsight`. Everything runs on your machine; nothing is uploaded and nothing goes over the network.
+FirmwareSight reads a firmware build (ELF / AXF / OUT and its linker MAP) and turns it into figures you can check: memory usage, build-to-build differences, and a release verdict. It comes as a desktop app and a command-line tool, `fwsight`. Everything runs on your machine; nothing is uploaded and nothing goes over the network.
 
 ## Contents
 
@@ -45,7 +45,7 @@ FirmwareSight reads a firmware build (ELF / AXF and its linker MAP) and turns it
 |---|---|
 | GCC / Clang + GNU ld: ELF and `.map` | ✅ Supported and verified |
 | Keil MDK / Arm Compiler (armlink): `.axf` and `.map` | ✅ Supported: memory regions, MAP-backed accounting, object and library attribution, Compare. Checked against armlink's own totals on one synthetic sample and two real µVision projects ([evidence](evidence/D4-REAL/README.md)). Link with `--map --load_addr_map_info`, which is the µVision default |
-| IAR EWARM (ILINK): `.out` and `.map` | ⏳ Not supported yet: no real samples are available to verify an adapter against. Contributions welcome |
+| IAR Embedded Workbench for Arm (ILINK): `.out` and `.map` | ✅ Supported: memory regions (from the linker configuration's `place in` ranges), MAP-backed accounting, object and library attribution, Compare. Checked against IAR's own totals on real builds from nine open-source projects (ILINK 7.50–9.20): Flash matches on all of them ([evidence](evidence/D4-IAR/README.md)) |
 | `.bin` / Intel HEX | Can be attached as release byte evidence; contents are not analyzed |
 
 See [format support](04_TECH/03_FORMAT_SUPPORT.md) and [toolchain interoperability](04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).
@@ -162,7 +162,7 @@ Run one group with `python scripts/check.py --only <rust|frontend|drift|deny|cor
 
 ## Contributing
 
-Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). **IAR EWARM build samples** are especially wanted (`.out` and `.map`, ideally with the project files, and free of proprietary code): they are what IAR support depends on.
+Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Real build samples from more toolchains are especially welcome (the ELF and its `.map`, ideally with the project files, and free of proprietary code): they widen what is verified.
 
 Please report security issues privately as described in [SECURITY.md](SECURITY.md), not as public issues.
 

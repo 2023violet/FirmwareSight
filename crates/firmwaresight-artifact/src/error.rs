@@ -92,8 +92,8 @@ impl ArtifactError {
                 "Choose the linker ELF output rather than a stripped or truncated copy."
             }
             Self::MapUnsupported { .. } => {
-                "Import the ELF without a MAP, or supply a GNU ld or armlink MAP; IAR and other \
-                 linker MAPs are not supported yet."
+                "Import the ELF without a MAP, or supply a GNU ld, armlink or IAR ILINK (for Arm) \
+                 MAP; other linker MAPs are not supported yet."
             }
             Self::MapParseFailed { .. } => {
                 "Regenerate the MAP with the same linker invocation; do not hand-edit it."

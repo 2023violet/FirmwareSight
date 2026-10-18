@@ -82,7 +82,7 @@ pub fn render_objects(summary: Option<&AttributionSummary>) -> String {
     );
     let Some(summary) = summary else {
         out.push_str(
-            "  unavailable: this build has no linker MAP object rows; pass --map FILE with the linker's .map (GNU ld or armlink)\n",
+            "  unavailable: this build has no linker MAP object rows; pass --map FILE with the linker's .map (GNU ld, armlink or IAR ILINK)\n",
         );
         return out;
     };
@@ -251,7 +251,7 @@ fn render_human_inner(value: &AnalyzeResultDto, regions: Option<&[MemoryRegionUs
 
     out.push_str(&heading("Limits"));
     out.push_str(&wrap(
-        "Every figure comes from the ELF and, when given, the linker MAP (GNU ld or armlink). A mapped section range is not free space, and BIN or HEX files are not analyzed.",
+        "Every figure comes from the ELF and, when given, the linker MAP (GNU ld, armlink or IAR ILINK). A mapped section range is not free space, and BIN or HEX files are not analyzed.",
         "  ",
         "  ",
     ));

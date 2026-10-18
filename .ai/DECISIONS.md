@@ -111,3 +111,9 @@ The Owner asked for three features before judging a second public release: real-
 | V7-1 | armlink on real projects: ADR-0036 A1 (compressed RW) and A2 (pairing by role). |
 | V7-2 | IAR: under Standing Owner rule 3 no adapter is built without real IAR `.out` + `.map` samples. None are on this machine or public in same-origin form, so IAR stays NOT_SUPPORTED / FIXTURE_BLOCKED until the Owner provides samples or a toolchain. |
 | V7-3 | Signing: keyless build-provenance attestations now (ADR-0037). Authenticode and Apple notarization need Owner-held certificates and accounts. |
+
+## Owner decision 2026-10-18: IAR samples from open-source projects
+
+| # | Decision |
+|---|---|
+| V7-4 | Supersedes V7-2. IAR samples may come from build outputs that open-source projects committed publicly, instead of an installed IAR toolchain. Nine same-origin `.out` + `.map` pairs from permissively licensed repositories satisfy Standing Owner rule 3 for IAR ILINK for Arm. The samples are named by repository, commit and SHA-256 and are not committed (ADR-0038, `evidence/D4-IAR`). |

@@ -138,7 +138,7 @@ export const common: CatalogFor<'common'> = {
   'dialog.replaceKeep': '保留原文件',
   'memory.title': '内存占用',
   'memory.hint': '各链接器内存区域的已用比例',
-  'memory.none': '还没有内存区域信息。添加这个构建的链接器 MAP（GNU ld 或 armlink），即可看到 Flash 和 RAM 用了多少。',
+  'memory.none': '还没有内存区域信息。添加这个构建的链接器 MAP（GNU ld、armlink 或 IAR ILINK），即可看到 Flash 和 RAM 用了多少。',
   'memory.unknown': 'Unknown',
   'memory.kindFlash': 'Flash',
   'memory.kindRam': 'RAM',

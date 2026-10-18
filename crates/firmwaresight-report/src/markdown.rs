@@ -197,7 +197,7 @@ pub fn analysis(value: &AnalyzeResultDto, regions: &[MemoryRegionUsage]) -> Stri
 
     out.push_str("\n## Limits\n\n");
     out.push_str(
-        "- Every figure comes from the ELF and, when given, the linker MAP (GNU ld or armlink).\n",
+        "- Every figure comes from the ELF and, when given, the linker MAP (GNU ld, armlink or IAR ILINK).\n",
     );
     out.push_str("- An unknown figure is written as unknown, never as 0.\n");
     out.push_str("- BIN and HEX files are not analyzed.\n");

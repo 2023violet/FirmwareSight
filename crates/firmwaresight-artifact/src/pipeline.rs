@@ -109,8 +109,14 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
             std::str::from_utf8(&candidate.bytes).map_err(|_| ArtifactError::MapUnsupported {
                 detected: "the MAP file is not UTF-8 text".to_owned(),
             })?;
-        let evidence = map::parse_any(text)?;
+        let mut evidence = map::parse_any(text)?;
         apply_map_evidence(&mut facts.sections, &evidence);
+        if evidence.adapter_id == crate::map_iar::ADAPTER_ID {
+            crate::map_iar::resolve_output_sections(
+                &mut evidence.object_contributions,
+                &facts.sections,
+            );
+        }
         map_input = Some(candidate);
         map_evidence = Some(evidence);
     } else {
@@ -573,6 +579,8 @@ fn build_evidence(
             SourceType::MapFile,
             if evidence.adapter_id == crate::map_armlink::ADAPTER_ID {
                 "map:Execution Regions"
+            } else if evidence.adapter_id == crate::map_iar::ADAPTER_ID {
+                "map:Placement Summary"
             } else {
                 "map:Memory Configuration"
             },

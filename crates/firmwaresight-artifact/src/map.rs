@@ -6,8 +6,8 @@
 //! `Memory Configuration` table, and a `load address 0x...` suffix on output sections whose
 //! load address differs from their runtime address.
 //!
-//! Adapters are split per toolchain (`04_TECH/03_FORMAT_SUPPORT.md`). An ArmClang or IAR MAP is
-//! reported as unsupported; it is never fed to this parser.
+//! Adapters are split per toolchain (`04_TECH/03_FORMAT_SUPPORT.md`). An armlink or IAR ILINK MAP goes to
+//! its own adapter (`map_armlink`, `map_iar`); it is never fed to this parser.
 
 use crate::error::ArtifactError;
 use firmwaresight_core::domain::memory::{MemoryLayout, MemoryRegion};
@@ -119,8 +119,9 @@ impl MapEvidence {
     }
 }
 
-/// Parse a MAP from whichever supported linker wrote it (ADR-0036): armlink's image map goes to the
-/// armlink adapter, GNU ld's to the GNU adapter, and anything else is refused as before.
+/// Parse a MAP from whichever supported linker wrote it (ADR-0036, ADR-0038): armlink's image map goes to
+/// the armlink adapter, IAR ILINK's placement summary to the IAR adapter, GNU ld's to the GNU adapter, and
+/// anything else is refused as before.
 ///
 /// # Errors
 ///
@@ -129,6 +130,9 @@ pub fn parse_any(text: &str) -> Result<MapEvidence, ArtifactError> {
     // GNU ld's own banner wins: a GNU map that happens to quote armlink's words is still a GNU map.
     if crate::map_armlink::detect(text) && !is_gnu_ld(text) {
         return crate::map_armlink::parse(text);
+    }
+    if crate::map_iar::mentions_iar(text) && !is_gnu_ld(text) {
+        return crate::map_iar::parse(text);
     }
     if crate::map_armlink::mentions_armlink(text) && !is_gnu_ld(text) {
         return Err(ArtifactError::MapUnsupported {

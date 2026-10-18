@@ -91,7 +91,7 @@ pub struct SideBudgetDto {
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SideEvidenceDto {
-    /// Whether a supported linker MAP (GNU ld or armlink) is stored for this build. Never inferred.
+    /// Whether a supported linker MAP (GNU ld, armlink or IAR ILINK) is stored for this build. Never inferred.
     pub map_backed: bool,
     pub layout_source: String,
     pub weakest_evidence_basis: Option<String>,
