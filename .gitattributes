@@ -54,3 +54,5 @@ golden/**   text eol=lf
 .gitignore     text eol=lf
 .gitattributes text eol=lf
 SHA256SUMS     text eol=lf
+LICENSE        text eol=lf
+NOTICE         text eol=lf

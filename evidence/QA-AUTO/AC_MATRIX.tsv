@@ -1,0 +1,15 @@
+id	check	verdict	observation
+Q1a	real Windows input, QA build	PASS	deny at the Windows overwrite prompt (PRESSED 否(N)), then cancel (DIALOG_CANCELLED): sentinel unchanged; status: "已取消导出。未写入任何文件。"
+Q1b	real Windows input, QA build	PASS	Windows prompt (PRESSED 是(Y)), app prompt Keep (PRESSED 保留原文件): sentinel unchanged; status: "保留了已经存在的文件。未写入任何内容。"
+Q1c	real Windows input, QA build	PASS	Replace (PRESSED 替换): report.html now an HTML report, no other file created or left (temp files: 0); status: "已写入 report.html（HTML）。"
+Q1d1	real Windows input, QA build	PASS	folder without write access: Windows refused it in the Save dialog (PRESSED 否(N)), then cancel (DIALOG_CANCELLED); files there: 0; status: "已取消导出。未写入任何文件。"
+Q1d2	real Windows input, QA build	PASS	read-only target (PRESSED 是(Y)): Windows refused it (PRESSED 确定), cancel (DIALOG_CANCELLED); file unchanged; status: "已取消导出。未写入任何文件。"
+Q1d3	real Windows input, QA build	PASS	target held open by another program (PRESSED 是(Y), PRESSED 替换): error panel '"导出失败发生了什么分析本身没有问题，但你要求写入的文件没能写出。代码ERR-EXPORT-6001判断依据busy.html: 拒绝访问。 (os error 5)下一步Check that the folder exists and is writable, then export again. Any file that was already there is unchanged.来自 FirmwareSight 的技术细节The export could not be written.诊断编号op-3998-18df94102e03e4fc"'; file unchanged; temp files left: 0
+Q1d4	real Windows input, QA build	PASS	retry after the file is released (PRESSED 替换): replaced; status: "已写入 busy.html（HTML）。"
+Q1e	real Windows input, QA build	PASS	retry to a writable folder: written; status: "已写入 retry.html（HTML）。"
+Q2	real Windows input, QA build	PASS	a new comparison (swapped pair; retained banner: false) completed while the replace prompt was open, then Replace (PRESSED 替换): sentinel unchanged: True; status: "保存对话框打开期间对比结果发生了变化，因此没有写入任何文件。请从当前对比重新导出。"
+Q99	real Windows input, QA build	PASS	Owner app data unchanged: 23 files, identical hashes
+Q8	real Windows input, QA build	PASS	real mouse drag of firmware.elf + firmware.map together from Explorer (from 359,197 to 1300,510): { "built": true, "map": true, "lead": true, "paths": false, "alerts": 0 }; both files unchanged: True
+Q8-owner	real Windows input, QA build	PASS	Owner app data unchanged: 23 files, identical hashes
+Q16	real 125%/150% system display scaling	NOT_RUN	changing system display settings is outside what this session may do; content scaling 1.25/1.5 passed in evidence/R7C (S01, S02)
+Q6	listening with NVDA / Narrator	NOT_RUN	no screen reader output can be observed from this session; the accessibility tree passed in evidence/R7C (S03)

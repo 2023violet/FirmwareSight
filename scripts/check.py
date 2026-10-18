@@ -376,6 +376,13 @@ def frontend_steps(gate: Gate) -> None:
         argv = pnpm + (["install", "--frozen-lockfile"] if name == "install" else [name])
         if not gate.run("frontend", name, argv, cwd=UI):
             return
+    # ADR-0035: the notices a binary release ships are regenerated from the locked Rust and npm graphs. This
+    # runs here because this is the job that has both `cargo` and the installed `node_modules`.
+    gate.run(
+        "frontend",
+        "third-party licenses",
+        [sys.executable, "scripts/gen_third_party_licenses.py", "--check"],
+    )
 
 
 def tauri_command() -> tuple[list[str], str] | None:

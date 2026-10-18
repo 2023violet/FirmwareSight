@@ -21,7 +21,7 @@ FirmwareSight is a local-first desktop app and CLI (`fwsight`) that turns a firm
 
 Nothing leaves your machine. Unknown or partial evidence stays explicit and is never shown as zero or as proof.
 
-Status: version `0.6.0`, MVP candidate, not publicly released. License: Proprietary. Live status is in [.ai/NOW.md](.ai/NOW.md).
+Status: version `0.6.0`, open source under the [Apache License 2.0](LICENSE) ([ADR-0035](09_ADR/ADR-0035-apache-2-open-source-license.md)). Release binaries are not code-signed yet; see [SECURITY.md](SECURITY.md). Live status is in [.ai/NOW.md](.ai/NOW.md).
 
 ## Supported inputs
 
@@ -80,3 +80,9 @@ Document index: [INDEX.md](INDEX.md). Contributor rules: [AGENTS.md](AGENTS.md),
 ## History
 
 The previous version of this README was a 1,288-line dated project chronicle. It is preserved unchanged at [.ai/archive/2026-10-14/ROOT_README.md](.ai/archive/2026-10-14/ROOT_README.md). Changes by version: [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+FirmwareSight is licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE). Release binaries include third-party components under their own licences, listed in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+
+Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues privately: see [SECURITY.md](SECURITY.md).

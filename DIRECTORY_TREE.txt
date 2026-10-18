@@ -185,7 +185,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0031-developer-preview-theme.md
 │   ├── ADR-0032-desktop-ui-language.md
 │   ├── ADR-0033-object-library-attribution.md
-│   └── ADR-0034-instrument-ledger-design-language.md
+│   ├── ADR-0034-instrument-ledger-design-language.md
+│   └── ADR-0035-apache-2-open-source-license.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
@@ -777,6 +778,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── AC_MATRIX.tsv
 │   │   ├── NEXT-CORE-01_EVIDENCE.zip
 │   │   └── README.md
+│   ├── QA-AUTO/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── QA_AUTO_EVIDENCE.zip
+│   │   └── README.md
 │   ├── R1/
 │   │   ├── AC_MATRIX.tsv
 │   │   ├── R1_NATIVE_SMOKE_EVIDENCE.zip
@@ -1137,6 +1142,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── gen_p0_workload.py
 │   ├── gen_p2_fixtures.py
 │   ├── gen_p5_compat_fixtures.py
+│   ├── gen_third_party_licenses.py
 │   ├── generate_baseline_artifacts.py
 │   ├── generate_design_tokens.py
 │   ├── measure_workloads.py
@@ -1265,12 +1271,17 @@ FirmwareSight_Project_Baseline_v0.6.0/
 ├── Cargo.lock
 ├── Cargo.toml
 ├── CHANGELOG.md
+├── CONTRIBUTING.md
 ├── deny.toml
 ├── DESIGN.md
 ├── DIRECTORY_TREE.txt
 ├── INDEX.md
+├── LICENSE
 ├── manifest.txt
+├── NOTICE
 ├── PRODUCT_BASELINE.md
 ├── README.md
 ├── rust-toolchain.toml
-└── SHA256SUMS
+├── SECURITY.md
+├── SHA256SUMS
+└── THIRD_PARTY_LICENSES.md

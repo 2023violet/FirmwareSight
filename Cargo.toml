@@ -15,7 +15,7 @@ version = "0.6.0"
 edition = "2024"
 rust-version = "1.98"
 publish = false
-license = "Proprietary"
+license = "Apache-2.0"
 repository = "https://github.com/2023violet/FirmwareSight"
 
 # Exact versions are owned by Cargo.lock. This table names the crate family and the

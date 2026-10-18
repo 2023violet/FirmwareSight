@@ -53,5 +53,5 @@ G0, P0, G1, P1, P2, P3, P4 PASS. G2 PASS: Product MVP engineering complete, stat
 
 ## Business and legal boundaries
 
-- License: `Proprietary` (workspace `Cargo.toml`). No open-source license is chosen.
+- License: **Apache-2.0** (ADR-0035, Owner decision 2026-10-18). `LICENSE`, `NOTICE`, `THIRD_PARTY_LICENSES.md`, `CONTRIBUTING.md`, `SECURITY.md` at the root.
 - Not authorized: public release, Developer Preview distribution, signing or notarization, updater, network features.

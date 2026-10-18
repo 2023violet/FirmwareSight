@@ -50,6 +50,7 @@ Durable decisions live in ADRs. This page indexes them and lists the standing Ow
 | [0032](../09_ADR/ADR-0032-desktop-ui-language.md) | Desktop UI language |
 | [0033](../09_ADR/ADR-0033-object-library-attribution.md) | Object and library attribution from the GNU ld MAP (BASELINE 2026-10-15) |
 | [0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md) | Instrument Ledger: one design language for the app and every export; tokens 0.4.0 (BASELINE 2026-10-16); A1 tokens 0.4.1 layer scale and dialog width (2026-10-17) |
+| [0035](../09_ADR/ADR-0035-apache-2-open-source-license.md) | FirmwareSight is open source under Apache-2.0 (BASELINE 2026-10-18) |
 
 ## Owner decisions 2026-10-16: R-series redesign
 
@@ -90,3 +91,12 @@ The Owner accepted R0–R7 as delivered ([06_DELIVERY/22](../06_DELIVERY/22_R_SE
 5. **Worktree hygiene (2026-10-14):** delete review worktrees once their verdict is signed and evidence is packed. Archive any non-Cargo content first. Never write scratch files into `target/`. No global `CARGO_TARGET_DIR`, because `scripts/verify_package_artifacts.py` reads `target/release/bundle`.
 6. **Protected checkout:** the Owner's original `main` checkout and its nine staged files stay untouched without an explicit decision.
 7. **Post-M2 route (2026-10-15):** delivery batches after M2 are named D2C, D3–D6, never M3–M6, because `V1_VALIDATION/V1_METRICS.md` owns M1–M6. The sequence and entry conditions are in [06_DELIVERY/12](../06_DELIVERY/12_POST_M2_ROUTE.md). Formal V1 is to be re-frozen to an M2-era build (option b), in its own authorized round. M2 review S2.1 (backfill of pre-0007 builds) is open.
+
+## Owner decisions 2026-10-18: open source and release direction
+
+| # | Decision |
+|---|---|
+| OS1 | **Licence: Apache-2.0** ([ADR-0035](../09_ADR/ADR-0035-apache-2-open-source-license.md)). Closes L13. |
+| OS2 | Human testing before release is not required: automated native QA driven with real Windows input stands in for it, and public users test after release. Checks automation cannot do (screen-reader listening, system DPI) are disclosed as untested, not claimed. |
+| OS3 | The route continues without lengthy deliberation: open-source readiness, automated QA, then features worth adding (first: the armlink MAP adapter, D4). Release binaries may ship unsigned with the disclosure in `SECURITY.md`. Making a release public remains one explicit confirmation per release. |
+

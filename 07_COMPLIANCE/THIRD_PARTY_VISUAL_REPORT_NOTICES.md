@@ -1,6 +1,6 @@
 # Visual report renderer dependency notices
 
-FirmwareSight remains proprietary. These notices describe third-party code only; they do not license FirmwareSight.
+FirmwareSight is licensed under Apache-2.0 (ADR-0035). These notices describe third-party code only; they do not license FirmwareSight. The full third-party list is THIRD_PARTY_LICENSES.md.
 
 ## arrayref 0.3.9
 
@@ -9,7 +9,7 @@ Registry checksum and exact dependency version are recorded in Cargo.lock.
 License: BSD-2-Clause. The text below is copied verbatim from the fetched crate LICENSE.
 The Owner NEXT-45 exception in deny.toml applies only to this package at exactly 0.3.9.
 
-Source redistribution must retain this notice; binary redistribution must include it in accompanying documentation/materials. Public distribution is not authorized by NEXT-45. This repository notice must accompany any separately authorized distribution; it does not enter the firmware Release Bundle or change its identity.
+Source redistribution must retain this notice; binary redistribution must include it in accompanying documentation/materials. Distribution is authorized under Apache-2.0 since ADR-0035; THIRD_PARTY_LICENSES.md carries this notice into binary releases. This repository notice must accompany any separately authorized distribution; it does not enter the firmware Release Bundle or change its identity.
 
 ```text
 Copyright (c) 2015 David Roundy <roundyd@physics.oregonstate.edu>

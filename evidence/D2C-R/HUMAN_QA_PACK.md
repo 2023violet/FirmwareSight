@@ -80,6 +80,8 @@ The D2C runbook asked for every theme × language × size. One of each axis valu
 
 ## 5. Pilot minimum (what must pass before any Pilot build is handed out)
 
+**2026-10-18 (Owner decision OS2):** automated native QA with real Windows input stands in for a person. Q1, Q2 and Q8 passed in [evidence/QA-AUTO](../QA-AUTO/README.md). Q16 (real system DPI) and Q6 (screen-reader listening) are not run and are disclosed as untested.
+
 From [PILOT_PROTOCOL.md](../../PILOT_VALIDATION/PILOT_PROTOCOL.md) §3. A participant's files and their trust are at stake, so data safety comes first:
 
 | Required | Why |
