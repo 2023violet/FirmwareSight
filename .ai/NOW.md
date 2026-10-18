@@ -24,8 +24,8 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
   - `fwsight diff` text now escapes control characters from user files.
   - Automated native QA of the M2 screens: 11 cases, all PASS ([evidence/D2C](../evidence/D2C/README.md)).
   - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
-- **R-series redesign:** R0–R3 are on `main` at `465fe5f` (Actions #125, 10/10). R4 Release workbench, R5 History (pinned baseline, Settings, Help, command palette), R6 reports (CLI text, HTML, SVG/PNG, new Markdown export) and R7 quality (tokens 0.4.1, report table semantics, full native regression, A4 print checks) are complete and reviewed on a local stack ending at `feature/r7-quality`; the push to `main` is waiting on the Owner. Open human items: [06_DELIVERY/21](../06_DELIVERY/21_R7_QUALITY.md) §3.
-- **Latest `main`:** `465fe5f` (Actions #125, 10/10). Read Git for anything later.
+- **R-series redesign (ADR-0034):** complete. R0–R3 reached `main` at `465fe5f` (Actions #125); R4–R7 at `e1faeff` (run `39086793226`, 10/10). The closeout adds the skip link and heading focus (Q6) and runs the window-minimum drag, a keyboard-only flow, an Explorer drop, 125%/150% content scaling and an accessibility-tree audit with real Windows input ([evidence/R7C](../evidence/R7C/README.md)). Left to a person: NVDA/Narrator listening, real system DPI.
+- **Latest `main`:** `e1faeff` (run `39086793226`, 10/10), then the closeout commit. Read Git for anything later.
 
 ## Gates
 
@@ -38,8 +38,8 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 ## Open risks (must close before the first external Developer Preview, Private Beta or RC, whichever comes first)
 
 - NEXT-44 AC24, NEXT-44 AC26, NEXT-45 AC20: rated PASS_WITH_LIMITS by the independent review of M1 and still open. Not yet observed: deny, confirm, failure and retry on a visual export; the English replace confirmation; recorded Tab order; a screen reader; 1440×900; the non-Owner profile and human operator the [deferred register](../NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md) asks for. See [evidence/M1](../evidence/M1/README.md).
-- Native drag-and-drop from Explorer: NOT_RUN (automation could not synthesize an OS drag); one human drag is needed.
-- Screen-reader check: not run; UI Automation exposure was checked.
+- Native drag-and-drop from Explorer: PASS with a real mouse drag from Explorer (R7C DND-D01, 2026-10-17).
+- Screen-reader check: listening with NVDA/Narrator not run; the accessibility tree UI Automation reads was audited on four workspaces (R7C SCALE-S03).
 - M2's desktop surfaces (Objects/Libraries tabs, Compare "By object and library", Overview "Latest comparison"): automated native QA only (D2C C2). The human pass in [the runbook](../evidence/D2C/HUMAN_NATIVE_QA_RUNBOOK.md) has not run.
 
 ## Compatibility boundary

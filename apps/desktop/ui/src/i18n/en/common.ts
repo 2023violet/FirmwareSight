@@ -1,6 +1,7 @@
 export const common = {
   'app.name': 'FirmwareSight',
   'shell.localWorkspace': 'Local workspace — nothing leaves this machine',
+  'shell.skipToMain': 'Skip to the page content',
   'nav.pages': 'Pages',
   'nav.helpAndAbout': 'Help and about',
   'nav.pageAria': '{label} page',

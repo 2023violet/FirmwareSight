@@ -267,9 +267,43 @@ export function App() {
    */
   const readerChosePage = useRef(false);
 
+  /**
+   * Spec §3.3: after the reader switches pages, focus lands on the new page's heading, so a screen reader
+   * announces where they are and Tab continues from the top of that page. Only a page the reader chose
+   * moves focus; the startup page and a drop (which keeps focus on its own notice) do not.
+   */
+  // The page the reader asked for, until it is on screen. Opening the page already showing changes nothing
+  // and must not leave a request behind for a later, unrelated page change (closeout review S2).
+  const focusHeading = useRef<Page | null>(null);
+
   const open = (target: Page) => {
     readerChosePage.current = true;
+    focusHeading.current = target === page ? null : target;
     setPage(target);
+  };
+
+  useEffect(() => {
+    const requested = focusHeading.current;
+    focusHeading.current = null;
+    if (requested !== page) {
+      return;
+    }
+    const heading = document.querySelector<HTMLElement>('main h1');
+    if (heading !== null) {
+      heading.tabIndex = -1;
+      heading.focus();
+    }
+  }, [page]);
+
+  /** The skip link (spec §3.3): past the product bar and the rail, to the page being read. */
+  const skipToMain = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    const target =
+      document.querySelector<HTMLElement>('main h1') ?? document.querySelector<HTMLElement>('main');
+    if (target !== null) {
+      target.tabIndex = -1;
+      target.focus();
+    }
   };
 
   /**
@@ -667,6 +701,9 @@ export function App() {
       platform={platformTags}
     >
       <div className={styles['app']}>
+        <a className={styles['skip']} href="#main" onClick={skipToMain}>
+          {navLabel('common', 'shell.skipToMain')}
+        </a>
         <TopBar
           project={project?.projectName ?? null}
           command={

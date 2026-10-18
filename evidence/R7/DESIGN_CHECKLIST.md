@@ -42,6 +42,6 @@ Evidence:
 | Tables have semantic headers | PASS | App: DataTable's `caption` and `th scope`. Exports: R7 added `scope` to every header cell and a caption to every table (Q4), held by a test. |
 | Esc closes overlays; focus returns | PASS | Inspector, Sheet and palette, re-run in the smoke (B04, R08, H06, H07). Their stacking order is now the `layer` scale. |
 | Exports print on A4 | PASS | `@page` A4, repeating headers, rows kept whole, nothing wider than the sheet (print checks). |
-| Window minimum 1024×720, checked by a human drag | NOT_VERIFIED | Carried from R1 A10. |
-| Screen reader pass (NVDA, Narrator) | NOT_VERIFIED | Needs a person; listed in the plan §3. |
-| 125% / 150% display scaling | NOT_VERIFIED | Needs a person; listed in the plan §3. |
+| Window minimum 1024×720, checked by a real drag | PASS | R7C OS-O01: a real mouse drag of the sizing corner stopped at 1024×720 (closeout). |
+| Screen reader pass (NVDA, Narrator) | PARTIAL | The accessibility tree passes (R7C S03); listening needs a person. |
+| 125% / 150% display scaling | PARTIAL | Content scale 1.25 and 1.5 pass at the minimum window (R7C S01, S02); real system DPI needs a person. |

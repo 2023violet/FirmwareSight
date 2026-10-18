@@ -3,6 +3,7 @@ import type { CatalogFor } from '../types';
 export const common: CatalogFor<'common'> = {
   'app.name': 'FirmwareSight',
   'shell.localWorkspace': '本机工作区 — 任何内容都不会离开这台机器',
+  'shell.skipToMain': '跳到主内容',
   'nav.pages': '页面',
   'nav.helpAndAbout': '帮助与关于',
   'nav.pageAria': '{label} 页面',

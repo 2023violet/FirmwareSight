@@ -991,7 +991,8 @@ describe('P1-A0 intake screen', () => {
       'Help',
       'Settings',
     ]);
-    expect(document.querySelectorAll('a')).toHaveLength(0);
+    // The one link is the in-page skip link (spec §3.3); nothing links to a stage.
+    expect([...document.querySelectorAll('a')].map((link) => link.getAttribute('href'))).toEqual(['#main']);
 
     fireEvent.click(within(rail).getByRole('button', { name: 'Compare page' }));
     await screen.findByRole('heading', { level: 1, name: 'Compare' });

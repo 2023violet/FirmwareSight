@@ -25,6 +25,7 @@ R7 changes no product behaviour. It closes what the earlier phases left loose, r
 | Q3 | The i18n catalog test keeps the evidence class `Unknown` (ADR-0032 D5) as it keeps `Observed`, `Derived` and `Declared`. Five Chinese strings had translated it away ("未知"); they now carry `Unknown`, as the rest of the catalog already did. `UNKNOWN`, the state, satisfies the rule for a group label. | `i18n/catalog.test.ts`, `i18n/zh/compare.ts`, `i18n/zh/history.ts` |
 | Q4 | **Report tables are fully semantic.** The A4 check (§2.2) found no `scope` on any header cell of the HTML reports, which the redesign spec §6A.2 requires, and six release-report tables with no caption. Every column header now carries `scope="col"`, every row header `scope="row"`, and every table a caption. A test holds both goldens to it. | `diff_render.rs`, `release_render.rs`, `visual.rs`; `every_report_table_is_named_and_every_header_cell_says_what_it_heads` |
 | Q5 | Goldens `p2-diff.html` and the `p4-release` set regenerated on purpose (`update_goldens.py --confirm`): only the `scope` attributes and the new captions differ, and the bundle's digest lines with them. | `golden/reports/*` |
+| Q6 | **Closeout (after the push, 2026-10-17):** the skip link and the focus-to-heading rule of spec §3.3 had never been built. The first Tab stop is now "跳到主内容 / Skip to the page content", which moves focus to the page's `h1`; choosing a page from the rail or the palette moves focus to the new page's `h1`. The native window title already followed the page (`setWindowTitle`). | `App.tsx`, `App.module.css`, `i18n/*/common.ts`; `help.test.tsx`, `intake.test.tsx` |
 
 ## 2. Verification
 
@@ -63,19 +64,19 @@ Printed to PDF, the comparison report is 16 A4 pages and the release report 11. 
 - `check.py` passes every step (§4).
 - 529 UI tests; Rust tests across the workspace; the token drift check including Q2.
 
-## 3. What only a person can check (NOT_RUN)
+## 3. Checks that once needed a person
 
-Automation cannot settle these. Each needs one person at the machine; none blocks the redesign from being used, and none is claimed as passed anywhere.
+After the push, the closeout ran each of these with real Windows input on the QA build of `main` plus Q6 (evidence: [evidence/R7C](../evidence/R7C/README.md)). What is still left to a person is stated per row.
 
-| Item | Why automation cannot | Since |
-|---|---|---|
-| Drag the window smaller than 1024×720 and see it stop | A programmatic resize bypasses the window minimum; only a real drag exercises it. The value is tied to the token file by a unit test. | R1 A10 |
-| NVDA and Narrator through Analyze, Compare, Release and History | No screen reader can be driven from this session. Landmarks, names, captions, `scope` and live regions are checked by tests and the accessibility tree. | ADR-0034 §7 |
-| 125% and 150% Windows display scaling | Changing system DPI is a system setting this session may not change. | ADR-0034 §7 |
-| A keyboard-only pass by a person | Every shortcut and focus return is driven by the smoke, but not by a person who has never seen the app. | R5 |
-| Drag-and-drop from Explorer | Automation cannot synthesize an OS drag. | M1 |
+| Item | What was run | Result | Left to a person |
+|---|---|---|---|
+| Window minimum 1024×720 | A real mouse drag of the sizing corner (`WM_NCHITTEST` = `HTBOTTOMRIGHT`), 1000×800 px inward, at 100% scale. | PASS (O01): the client stopped at exactly 1024×720. | Nothing. Closes R1 A10. |
+| Keyboard-only flow | Real key presses through the Windows input queue: Tab to the skip link, Enter, Ctrl+K, arrows, Esc, Ctrl+O and Esc on the native dialog, the palette driven to Settings. | PASS (O02–O06). | Optional: a first-time person. |
+| Drag-and-drop from Explorer | A real mouse drag of `firmware.elf` out of an Explorer window onto the app (a scratch copy, never the fixture). | PASS (D01): staged, analyzed, no alert; the source file unchanged. | Nothing. Closes the M1 NOT_RUN. |
+| 125% and 150% scaling | WebView2 content scale 1.25 and 1.5 at the 1024×720 window: seven pages each. This is narrower than real 125%/150%, where the minimum is 1024 logical px. | PASS (S01, S02): no page-level horizontal scroll and no clipped block outside a scroll region. | Real system DPI, which also scales the native dialogs and the title bar; this session does not change system settings. |
+| Screen reader | The accessibility tree Chromium hands to UI Automation, on Analyze, Compare, Release and History. | PASS (S03): every interactive element named, one `main`, navigation present, every table named by its caption. Analyze and Compare were in their empty state in that instance, so their tables were not on screen; DataTable's caption is pinned by component tests. | Listening with NVDA and Narrator: what is announced, in what order. |
 
-The D2C human native-QA runbook ([evidence/D2C](../evidence/D2C/HUMAN_NATIVE_QA_RUNBOOK.md)) is the format for these. The accepted-screenshot register (`06_UI_REFERENCE_SCREENS.md`) is replaced once a person has looked at the final build (ADR-0034 Consequences); the R7 smoke screenshots in the evidence ZIP are the candidates.
+The D2C human native-QA runbook ([evidence/D2C](../evidence/D2C/HUMAN_NATIVE_QA_RUNBOOK.md)) is the format for the two left. The accepted-screenshot register (`06_UI_REFERENCE_SCREENS.md`) is replaced once a person has looked at the final build (ADR-0034 Consequences); the screenshots in the R7 and R7C evidence ZIPs are the candidates.
 
 ## 4. Observations carried forward
 
@@ -92,3 +93,12 @@ The review of `6ed6652` returned PASS_WITH_FIXES with no S1 or S2 finding. It ch
 | S3-2 | The z-index scan runs only after `tokens.css` matches. | Kept: a stale `tokens.css` already fails the step; the scan reports on the next run. |
 | S3-3 | The visual print HTML's tables had no test of their own. | Fixed: `the_print_summary_tables_are_named_and_their_headers_scoped`. |
 | S3-4 | The golden test counts `<th>`/`<th ` and does not check `row` against `col`. | Kept: the renderers emit no other spelling, and the reviewer checked every scope by hand. |
+
+## 6. Closeout review and dispositions
+
+The review of the closeout (Q6 and §3) returned PASS_WITH_FIXES:
+
+| ID | Finding | Disposition |
+|---|---|---|
+| S2 | Opening the page already showing left the focus request set, so a later page change that was not the reader's (a drop from another page, the startup page) would have moved focus to the heading. | Fixed: the request records the page asked for, is cleared on every page change, and is not set when the page does not change. Test: `leaves no request behind when the reader opens the page already showing`. The native runs in R7C predate this fix; the fix only changes the same-page case, which they do not exercise. |
+| S3 | The R7C matrix named the scaling and accessibility-tree rows "real Windows input" without their limits. | Fixed: their check names say "not system DPI" and "not a person listening". |

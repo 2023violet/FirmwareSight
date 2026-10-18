@@ -688,3 +688,28 @@ describe('Help lists the keyboard shortcuts the shell wires (R5)', () => {
     expect(region.textContent).toContain('Open the command palette');
   });
 });
+
+describe('the shell gives keyboard and screen-reader users a way in (spec §3.3)', () => {
+  it('offers a skip link first that moves focus to the page heading', async () => {
+    render(<App />);
+    const skip = await screen.findByRole('link', { name: 'Skip to the page content' });
+    const focusable = document.querySelectorAll('a[href], button, input, select, textarea, [tabindex="0"]');
+    expect(focusable[0]).toBe(skip);
+    fireEvent.click(skip);
+    expect(document.activeElement?.tagName).toBe('H1');
+  });
+
+  it('moves focus to the new page heading when the reader opens a page', async () => {
+    await openHelp();
+    expect(document.activeElement).toBe(screen.getByRole('heading', { level: 1, name: 'Help' }));
+  });
+
+  it('leaves no request behind when the reader opens the page already showing', async () => {
+    await openHelp();
+    const settings = screen.getByRole('button', { name: 'Settings page' });
+    settings.focus();
+    // Help again: nothing changes, so focus stays where the reader put it.
+    fireEvent.click(screen.getByRole('button', { name: 'Help page' }));
+    expect(document.activeElement).toBe(settings);
+  });
+});

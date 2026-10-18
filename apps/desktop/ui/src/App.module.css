@@ -11,6 +11,31 @@
  * page's scroll; it could never be independent of it (prompt section 7A, finding U1-V1-05).
  */
 
+/* Spec §3.3: the first Tab stop. Out of sight until it has focus, then over the product bar. */
+.skip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip:focus {
+  inset-block-start: var(--fs-space-2);
+  inset-inline-start: var(--fs-space-2);
+  z-index: var(--fs-layer-palette);
+  width: auto;
+  height: auto;
+  padding: var(--fs-space-2) var(--fs-space-3);
+  overflow: visible;
+  clip-path: none;
+  color: var(--fs-color-text-primary);
+  background: var(--fs-color-bg-surface);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
 .app {
   display: flex;
   flex-direction: column;

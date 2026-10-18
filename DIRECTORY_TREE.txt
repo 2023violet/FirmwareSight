@@ -789,10 +789,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── AC_MATRIX.tsv
 │   │   ├── R6_NATIVE_SMOKE_EVIDENCE.zip
 │   │   └── README.md
-│   └── R7/
+│   ├── R7/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── DESIGN_CHECKLIST.md
+│   │   ├── R7_QUALITY_EVIDENCE.zip
+│   │   └── README.md
+│   └── R7C/
 │       ├── AC_MATRIX.tsv
-│       ├── DESIGN_CHECKLIST.md
-│       ├── R7_QUALITY_EVIDENCE.zip
+│       ├── R7C_CLOSEOUT_EVIDENCE.zip
 │       └── README.md
 ├── examples/
 │   ├── project-readiness/
