@@ -11,13 +11,12 @@ last_updated: "2026-10-18"
 # Active Task
 
 ```text
-IAR_ILINK_MAP_ADAPTER
+RELEASE_V0_8_0
 ```
 
-- **Authorized by:** the Owner in chat on 2026-10-18 ("support IAR"; take samples from open-source projects on GitHub, `.ai/DECISIONS.md` V7-4).
-- **Branch:** `feature/iar-ilink-map` from `main` `f269f27`.
-- **What it does:** the IAR ILINK MAP adapter for Arm (ADR-0038), output sections resolved by address, user-visible wording, the cross-check script and `evidence/D4-IAR`.
-- **Next:** one Owner confirmation to push; a v0.8.0 release is a separate decision.
-- **Last task:** `V07_ARMLINK_REAL_IAR_SIGNING`, released as v0.7.0 (`03a6211`); then the bilingual README (`f269f27`).
+- **Authorized by:** the Owner in chat on 2026-10-18 ("发 v0.8.0").
+- **Branch:** `release/v0.8.0` from `main` `11756f2`: version 0.8.0, goldens and the pinned release id, CHANGELOG, status.
+- **Next:** fast-forward `main`, CI 10/10, verify the attestations, publish the GitHub release v0.8.0.
+- **Last task:** `IAR_ILINK_MAP_ADAPTER` (ADR-0038), on `main` at `11756f2` (CI run `39141088031`, 10/10).
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

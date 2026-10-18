@@ -63,7 +63,7 @@ FirmwareSight 读取固件构建产物（ELF / AXF / OUT 及其链接器 MAP）�
 **校验下载。** 每个文件都附带由本仓库 CI 签发的构建来源证明（Sigstore），可以确认文件出自哪个工作流、哪个提交：
 
 ```bash
-gh attestation verify FirmwareSight-0.7.0-windows-x86_64-nsis.exe --repo 2023violet/FirmwareSight
+gh attestation verify FirmwareSight-0.8.0-windows-x86_64-nsis.exe --repo 2023violet/FirmwareSight
 ```
 
 > [!NOTE]

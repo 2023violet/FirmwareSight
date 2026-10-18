@@ -30,7 +30,7 @@ You will receive an acknowledgement, and the advisory is published together with
 Since v0.7.0, each installer and CLI archive in a release (built by CI on `main`) carries a signed **build-provenance attestation** (Sigstore, keyless; [ADR-0037](09_ADR/ADR-0037-release-provenance-signing.md)). Check that a download was built by this repository's workflow, and from which commit:
 
 ```bash
-gh attestation verify FirmwareSight-0.7.0-windows-x86_64-nsis.exe --repo 2023violet/FirmwareSight
+gh attestation verify FirmwareSight-0.8.0-windows-x86_64-nsis.exe --repo 2023violet/FirmwareSight
 ```
 
 The binaries are **not platform code-signed** (no Windows Authenticode, no Apple notarization), so Windows SmartScreen and macOS Gatekeeper will still warn. You can also check a download against the SHA-256 published with the release, or build from source (see [CONTRIBUTING.md](CONTRIBUTING.md)).

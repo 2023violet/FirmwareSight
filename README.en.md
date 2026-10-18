@@ -63,7 +63,7 @@ Download the files for your platform from [Releases](https://github.com/2023viol
 **Verify the download.** Every file carries a build-provenance attestation (Sigstore) signed by this repository's CI, which shows the workflow and commit that built it:
 
 ```bash
-gh attestation verify FirmwareSight-0.7.0-windows-x86_64-nsis.exe --repo 2023violet/FirmwareSight
+gh attestation verify FirmwareSight-0.8.0-windows-x86_64-nsis.exe --repo 2023violet/FirmwareSight
 ```
 
 > [!NOTE]
