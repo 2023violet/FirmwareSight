@@ -106,9 +106,8 @@ type Side = 'base' | 'target';
 /** A drill-down request: the row the reader chose, in the table that holds it. */
 type Focus = { readonly key: string; readonly libraries?: boolean };
 
-/** The largest additions, read back from the change tables. */
+/** The largest symbol additions, read back from the change table. Section additions are Core's, in the summary. */
 type Additions = {
-  readonly sections: readonly ContributorDto[];
   readonly symbols: readonly ContributorDto[];
 };
 
@@ -401,7 +400,6 @@ export function Compare({
     }
     const id = ++additionsRequest.current;
     const diffId = summary.diffId;
-    const sections = summary.addedSections;
     void querySymbolChanges({
       diffId,
       filter: null,
@@ -418,7 +416,7 @@ export function Compare({
         setAdditions(null);
         return;
       }
-      setAdditions({ sections, symbols: symbols.value.rows.map(symbolAddition) });
+      setAdditions({ symbols: symbols.value.rows.map(symbolAddition) });
     });
   }, [summary]);
 
@@ -1334,25 +1332,24 @@ function Ranking({
           <p className={styles['hint']}>
             {t('compare', 'ranking.additionsHint', { absent: ABSENT })}
           </p>
+          {/* Core's section additions travel with the summary, so they never wait for the symbol read. */}
+          <Contributors
+            nounKey="contributors.sections"
+            rows={summary.addedSections}
+            unit={unit}
+            emptyKey="contributors.emptySectionsAdded"
+            onPick={onPickSection}
+          />
           {additions === null ? (
             <p className={styles['status']}>{t('compare', 'ranking.readingAdded')}</p>
           ) : (
-            <>
-              <Contributors
-                nounKey="contributors.sections"
-                rows={additions.sections}
-                unit={unit}
-                emptyKey="contributors.emptySectionsAdded"
-                onPick={onPickSection}
-              />
-              <Contributors
-                nounKey="contributors.symbols"
-                rows={additions.symbols}
-                unit={unit}
-                emptyKey="contributors.emptySymbolsAdded"
-                onPick={onPickSymbol}
-              />
-            </>
+            <Contributors
+              nounKey="contributors.symbols"
+              rows={additions.symbols}
+              unit={unit}
+              emptyKey="contributors.emptySymbolsAdded"
+              onPick={onPickSymbol}
+            />
           )}
         </div>
       </div>

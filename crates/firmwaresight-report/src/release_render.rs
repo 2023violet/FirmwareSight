@@ -470,9 +470,16 @@ fn growth_table(out: &mut String, noun: &str, rows: &[Contributor]) {
         out.push_str(&format!("<h4>Top {noun} growth</h4>\n"));
     }
     if rows.is_empty() {
-        out.push_str(&format!(
-            "<p class=\"empty\">No {noun} row exists on both sides with a decidable growth.</p>\n"
-        ));
+        if noun == "section" {
+            out.push_str(
+                "<p class=\"empty\">No section that costs the device exists on both sides with a decidable \
+                 growth.</p>\n",
+            );
+        } else {
+            out.push_str(&format!(
+                "<p class=\"empty\">No {noun} row exists on both sides with a decidable growth.</p>\n"
+            ));
+        }
         return;
     }
     out.push_str(&format!(

@@ -81,5 +81,23 @@ Evidence: [evidence/NEXT-CORE-01](../evidence/NEXT-CORE-01/README.md).
 
 ## 4. Review
 
-Pending on the candidate commit.
+The independent review of candidate `20d731e` returned PASS_WITH_FIXES, with no S1 and no S2. It confirmed:
+- the admission rule is the memory-accounting predicate, and `compute()` is unchanged;
+- the one-sided and two-sided admission is correct;
+- the exclusion counts neither double-count nor miss rows;
+- the note is honest;
+- the release note is true where it appears;
+- no consumer still recommends host metadata or calls the ranking Flash.
+
+| ID | Finding | Disposition |
+|---|---|---|
+| S3-1 | T4's section-handle assertion became vacuous once additions stopped querying sections. | Fixed: T4 opens the Sections view, then asserts the handle set is exactly `['cmp-7f3a-1']`. |
+| S3-2 | The empty-state sentences ("No section was added", "No section grew…", the release report's empty sentence) contradicted the new note. | Fixed: they now name sections that cost the device, in en, zh and the release report. |
+| S3-3 | Section additions waited for the symbol query, and a failed symbol read would have hidden them. | Fixed: Core's section additions render straight from the summary; only the symbol list shows "Reading the added symbols…". The test asserts both. |
+
+After the fixes:
+- the goldens are unchanged (0 changed);
+- 535 UI tests pass;
+- the native smoke on the rebuilt binary passed 12 of 12;
+- the follow-up commit is reviewed again before any push.
 

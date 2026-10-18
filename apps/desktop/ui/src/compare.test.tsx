@@ -1369,17 +1369,19 @@ describe('the ranking as a way to the full list', () => {
     await runCompare();
 
     const ranking = await screen.findByRole('region', { name: 'Top growth and largest additions' });
-    expect(within(ranking).getByText('Reading the added rows…')).toBeDefined();
-    expect(screen.queryByRole('button', { name: 'Show sections changes for .noinit' })).toBeNull();
-    // The growth list is the summary's own answer, so it is already here.
+    expect(within(ranking).getByText('Reading the added symbols…')).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Show symbols changes for ota_resume' })).toBeNull();
+    // The growth list and Core's section additions are the summary's own answer, so they are already here
+    // and do not wait for the symbol read (NEXT-CORE-01 review S3-3).
     expect(screen.getByRole('button', { name: 'Show sections changes for .text' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Show sections changes for .noinit' })).toBeDefined();
 
     pending.resolve(ok(symbolPage(symbolRows().filter((row) => row.changeKind === 'Added'))));
 
     expect(
-      await screen.findByRole('button', { name: 'Show sections changes for .noinit' }),
+      await screen.findByRole('button', { name: 'Show symbols changes for ota_resume' }),
     ).toBeDefined();
-    expect(within(ranking).queryByText('Reading the added rows…')).toBeNull();
+    expect(within(ranking).queryByText('Reading the added symbols…')).toBeNull();
   });
 
   it("shows Core's section additions and never sorts the table into a recommendation (NEXT-CORE-01)", async () => {
@@ -2066,10 +2068,12 @@ describe('U1P-R3 the comparison survives the page it was made on', () => {
     const [afterBase, afterTarget] = pair();
     expect([afterBase.value, afterTarget.value]).toEqual(shown);
     // Every paged read still addresses the diff the reader computed - not a fresh handle, not a stale one.
-    // Section additions now travel with the summary (NEXT-CORE-01), so the section table may not have
-    // been asked yet; whatever was asked used this result's own handle.
+    // Section additions now travel with the summary (NEXT-CORE-01), so the section table is opened here to
+    // make it ask.
+    expect(await openView('Sections', 'Section Changes')).toBeDefined();
+    await waitFor(() => expect(sectionChangesMock).toHaveBeenCalled());
     const handles = new Set(sectionChangesMock.mock.calls.map(([request]) => request.diffId));
-    expect([...handles].every((handle) => handle === 'cmp-7f3a-1')).toBe(true);
+    expect([...handles]).toEqual(['cmp-7f3a-1']);
     const symbolHandles = new Set(symbolChangesMock.mock.calls.map(([request]) => request.diffId));
     expect([...symbolHandles]).toEqual(['cmp-7f3a-1']);
   });
