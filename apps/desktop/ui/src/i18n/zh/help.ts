@@ -42,7 +42,7 @@ export const help: CatalogFor<'help'> = {
   'export.errorLabel': '诊断信息导出错误',
   'export.errorHeading': '诊断文件没有被写入',
   'reads.heading': '它能读取什么',
-  'reads.artifacts': 'FirmwareSight 分析 ELF 固件镜像文件，当你在它旁边附上 GNU ld MAP 文件时也会读取它。“分析”页上的格式行（Format）写出它在你选择的那个文件里发现的架构、位宽与字节序，解析器行（Parser）写出读取它的那个解析器。不是 GNU ld 输出的 MAP 文件会被拒绝，而不是被部分采信。',
+  'reads.artifacts': 'FirmwareSight 分析 ELF 固件镜像文件，当你在它旁边附上链接器 MAP 文件（GNU ld，或 Keil MDK／Arm Compiler 的 armlink）时也会读取它。“分析”页上的格式行（Format）写出它在你选择的那个文件里发现的架构、位宽与字节序，解析器行（Parser）写出读取它的那个解析器。其他链接器（例如 IAR）输出的 MAP 文件会被拒绝，而不是被部分采信。',
   'reads.matrix': '超出这个范围的任何内容都会被报告为不支持。支持矩阵文档才是权威清单，说明声称哪些内容能工作、在哪个平台上、深入到什么程度；本屏幕不能替代它。',
   'reads.binHex': 'BIN 或 Intel HEX 文件仍然不是 FirmwareSight 读取的对象，而是一次发布要交付的东西：“发布”页会附上它，按它的名称所表明的类别记录它的大小与 SHA-256，并把这些字节带进一个经过校验的发布包中，而它的构建溯源按设计（`ADR-0030`）保持未确立。',
   'local.ariaLabel': '本地优先声明',

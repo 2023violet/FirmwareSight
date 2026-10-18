@@ -70,7 +70,7 @@ fn diff_of_two_builds_exits_zero_and_shows_old_new_and_delta() {
         "{stdout}"
     );
     assert!(
-        stdout.contains("Object / library attribution (GNU ld MAP rows)"),
+        stdout.contains("Object / library attribution (linker MAP rows)"),
         "{stdout}"
     );
     assert!(stdout.contains("Top object growth, Flash"), "{stdout}");

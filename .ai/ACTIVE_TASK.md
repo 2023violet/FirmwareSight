@@ -22,7 +22,8 @@ OSS_01_APACHE_2_OPEN_SOURCE
   - `[workspace.package] license = "Apache-2.0"`;
   - ADR-0035;
   - the automated QA for Q1, Q2 and Q8 (`evidence/QA-AUTO`).
-- **Next:** D4, the armlink MAP adapter. Then one Owner confirmation to push and publish a release.
+- **Also on this branch:** D4, the armlink MAP adapter (ADR-0036).
+- **Next:** one Owner confirmation to push and publish a release.
 - **Last task:** `CORE_SECTION_RANKING_CORRECTNESS`, on `main` at `abace77` (CI run `39104386478`, 10/10).
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

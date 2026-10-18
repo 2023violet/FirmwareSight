@@ -179,7 +179,7 @@ def build(name: str, spec: dict, tools: dict[str, str]) -> list[str]:
         [ar, "--create", "build/libdrv.lib", "build/drv/uart.o", "build/drv/spi.o"],
         [
             ld, "--cpu=Cortex-M4", "--scatter=objects.sct", "--entry=Reset_Handler", "--no_scanlib", "--remove",
-            "--map", "--symbols", "--info=sizes,totals,unused", "--list=firmware.map",
+            "--map", "--load_addr_map_info", "--symbols", "--info=sizes,totals,unused", "--list=firmware.map",
             "build/app/main.o", "build/app/sensors/imu.o", *members,
             "-o", "firmware.axf",
         ],

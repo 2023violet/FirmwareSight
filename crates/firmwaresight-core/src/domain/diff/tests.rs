@@ -1044,7 +1044,7 @@ fn a_missing_map_never_blocks_the_comparison_but_always_shows_the_downgrade() {
         .evidence_warning
         .as_ref()
         .expect("the weaker side is visible");
-    assert!(warning.contains("the base build has no stored GNU ld MAP"));
+    assert!(warning.contains("the base build has no stored linker MAP"));
     assert!(
         diff.warnings
             .iter()
@@ -1080,7 +1080,7 @@ fn both_sides_without_a_map_says_so_instead_of_naming_the_wrong_side() {
         diff.memory
             .evidence_warning
             .as_deref()
-            .is_some_and(|warning| warning.contains("neither build has a stored GNU ld MAP"))
+            .is_some_and(|warning| warning.contains("neither build has a stored linker MAP"))
     );
 }
 

@@ -25,7 +25,7 @@ last_updated: "2026-09-26"
 
 ## Disallowed by default
 
-- GPL dependency 进入 proprietary distribution（除非明确法律评估）；
+- GPL dependency 进入 Apache-2.0 发布物（ADR-0035；除非明确法律评估）；
 - unknown/custom license；
 - abandoned parser in trusted core；
 - runtime download code；

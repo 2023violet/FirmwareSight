@@ -94,7 +94,7 @@ pub(crate) async fn select_artifact(
     on_artifact_picked(&session, picked, &operation_id)
 }
 
-/// Attach a GNU ld MAP to the current selection. Resolves to `None` when the user cancels.
+/// Attach a linker MAP to the current selection. Resolves to `None` when the user cancels.
 #[tauri::command]
 pub(crate) async fn attach_map(
     app: AppHandle,

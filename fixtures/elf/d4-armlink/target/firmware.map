@@ -61,26 +61,26 @@ Memory Map of the image
 
   Load Region LR_IROM1 (Base: 0x08000000, Size: 0x000000c0, Max: 0x00010000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x000000bc, Max: 0x00010000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x000000bc, Max: 0x00010000, ABSOLUTE)
 
-    Base Addr    Size         Type   Attr      Idx    E Section Name        Object
+    Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x08000000   0x0000003a   Code   RO            2  * .text.Reset_Handler  main.o
-    0x0800003a   0x0000002c   Code   RO           11    .text.imu_read      imu.o
-    0x08000066   0x00000002   PAD
-    0x08000068   0x00000018   Code   RO           21    .text.spi_flush     libdrv.lib(spi.o)
-    0x08000080   0x0000000c   Code   RO           16    .text.uart_send     libdrv.lib(uart.o)
-    0x0800008c   0x00000030   Data   RO           13    .rodata.imu_calibration  imu.o
+    0x08000000   0x08000000   0x0000003a   Code   RO            2  * .text.Reset_Handler  main.o
+    0x0800003a   0x0800003a   0x0000002c   Code   RO           11    .text.imu_read      imu.o
+    0x08000066   0x08000066   0x00000002   PAD
+    0x08000068   0x08000068   0x00000018   Code   RO           21    .text.spi_flush     libdrv.lib(spi.o)
+    0x08000080   0x08000080   0x0000000c   Code   RO           16    .text.uart_send     libdrv.lib(uart.o)
+    0x0800008c   0x0800008c   0x00000030   Data   RO           13    .rodata.imu_calibration  imu.o
 
 
-    Execution Region RW_IRAM1 (Base: 0x20000000, Size: 0x0000002c, Max: 0x00004000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080000bc, Size: 0x0000002c, Max: 0x00004000, ABSOLUTE)
 
-    Base Addr    Size         Type   Attr      Idx    E Section Name        Object
+    Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x00000004   Data   RW            6    .data.g_threshold   main.o
-    0x20000004   0x00000020   Zero   RW           23    .bss.spi_buffer     libdrv.lib(spi.o)
-    0x20000024   0x00000004   Zero   RW           18    .bss.uart_tx        libdrv.lib(uart.o)
-    0x20000028   0x00000004   Zero   RW           26    g_samples           anon$$obj.o
+    0x20000000   0x080000bc   0x00000004   Data   RW            6    .data.g_threshold   main.o
+    0x20000004        -       0x00000020   Zero   RW           23    .bss.spi_buffer     libdrv.lib(spi.o)
+    0x20000024        -       0x00000004   Zero   RW           18    .bss.uart_tx        libdrv.lib(uart.o)
+    0x20000028        -       0x00000004   Zero   RW           26    g_samples           anon$$obj.o
 
 
 ==============================================================================

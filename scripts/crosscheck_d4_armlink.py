@@ -25,7 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SAMPLES = ROOT / "fixtures" / "elf" / "d4-armlink"
-OUT = ROOT / "evidence" / "D4" / "CROSSCHECK.md"
+OUT = ROOT / "evidence" / "D4" / "CROSSCHECK_ADR-0036.md"  # CROSSCHECK.md is the pre-adapter record that 06_DELIVERY/24 cites
 
 
 def run(cmd: list[str]) -> subprocess.CompletedProcess[str]:

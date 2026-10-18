@@ -108,7 +108,7 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
             std::str::from_utf8(&candidate.bytes).map_err(|_| ArtifactError::MapUnsupported {
                 detected: "the MAP file is not UTF-8 text".to_owned(),
             })?;
-        let evidence = map::parse(text)?;
+        let evidence = map::parse_any(text)?;
         apply_map_evidence(&mut facts.sections, &evidence);
         map_input = Some(candidate);
         map_evidence = Some(evidence);
@@ -159,7 +159,11 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
             kind: ArtifactKind::Map,
             sha256: map.sha256.clone(),
             byte_size: map.byte_size,
-            parser_id: ParserId::gnu_ld_map(),
+            parser_id: map_evidence
+                .as_ref()
+                .map_or_else(ParserId::gnu_ld_map, |evidence| {
+                    ParserId::map_adapter(evidence.adapter_id)
+                }),
             // A linker MAP names no machine, no entry point and no build-id. Claiming the ELF's
             // values here would attribute facts to a file that cannot carry them.
             architecture: Architecture::Unknown,
@@ -205,14 +209,37 @@ fn apply_map_evidence(sections: &mut [Section], evidence: &MapEvidence) {
         let Some(name) = section.name.value() else {
             continue;
         };
-        let Some(placement) = evidence.placement_for(name) else {
+        let address = section.virtual_address.value().copied();
+        let placement = match address {
+            Some(address) => evidence.placement_containing(name, address),
+            None => evidence.placement_for(name),
+        };
+        let Some(placement) = placement else {
             continue;
         };
 
-        // GNU ld prints `load address` only when it differs from the runtime address, so an
-        // absent clause legitimately means the two are equal.
-        let load_address = placement.load_address.unwrap_or(placement.address);
-        section.load_address = Fact::known(load_address);
+        // GNU ld prints `load address` only when it differs from the runtime address, so an absent clause
+        // legitimately means the two are equal. An armlink region that cannot say is unknown (ADR-0036).
+        // A section that starts inside its placement keeps its offset on the load side too.
+        if let Some(why) = placement.load_unknown {
+            section.load_address = Fact::unknown(why);
+        } else {
+            // The offset applies only to a section the placement actually holds (armlink's ZI part of a
+            // region); otherwise the placement's own load address stands, as it always did for GNU ld.
+            let offset = address
+                .filter(|a| *a >= placement.address && *a - placement.address < placement.size)
+                .map_or(0, |a| a - placement.address);
+            section.load_address = match placement
+                .load_address
+                .unwrap_or(placement.address)
+                .checked_add(offset)
+            {
+                Some(load_address) => Fact::known(load_address),
+                None => Fact::unknown(
+                    "the MAP's load address plus the section's offset does not fit in 64 bits",
+                ),
+            };
+        }
 
         // `region` means where the section lives at runtime; the load side is carried by
         // `load_address` so the accounting rule can charge both.
@@ -467,7 +494,11 @@ fn build_evidence(
             "ev-map-regions",
             EvidenceClass::Observed,
             SourceType::MapFile,
-            "map:Memory Configuration",
+            if evidence.adapter_id == crate::map_armlink::ADAPTER_ID {
+                "map:Execution Regions"
+            } else {
+                "map:Memory Configuration"
+            },
             "memory_regions",
             evidence
                 .regions
@@ -475,7 +506,7 @@ fn build_evidence(
                 .map(|r| format!("{}@{:#x}+{:#x}", r.name, r.origin, r.length))
                 .collect::<Vec<_>>()
                 .join(","),
-            map::ADAPTER_ID,
+            evidence.adapter_id,
         ));
     }
 

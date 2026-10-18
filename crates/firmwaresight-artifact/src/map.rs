@@ -21,8 +21,13 @@ pub struct MapPlacement {
     /// Runtime address.
     pub address: u64,
     pub size: u64,
-    /// Where the bytes were stored, when the line says so explicitly.
+    /// Where the bytes were stored, when the line says so explicitly. GNU ld omits it when it equals the
+    /// runtime address.
     pub load_address: Option<u64>,
+    /// Set when the MAP cannot say where the bytes were stored (ADR-0036: an armlink region without a
+    /// `Load base`, or with compressed data). The section's load address is then recorded as unknown with
+    /// this reason, never assumed equal to its runtime address.
+    pub load_unknown: Option<&'static str>,
     pub line: usize,
 }
 
@@ -96,6 +101,37 @@ impl MapEvidence {
     pub fn placement_for(&self, section_name: &str) -> Option<&MapPlacement> {
         self.placements.iter().find(|p| p.section == section_name)
     }
+
+    /// The placement for a section of this name that holds `address`. armlink names output sections
+    /// after execution regions, and one region can produce two sections of one name (RW data and ZI), so
+    /// the address chooses; a GNU placement starts exactly at its section.
+    #[must_use]
+    pub fn placement_containing(&self, section_name: &str, address: u64) -> Option<&MapPlacement> {
+        self.placements
+            .iter()
+            .filter(|p| p.section == section_name)
+            .find(|p| address >= p.address && address - p.address < p.size.max(1))
+            .or_else(|| self.placement_for(section_name))
+    }
+}
+
+/// Parse a MAP from whichever supported linker wrote it (ADR-0036): armlink's image map goes to the
+/// armlink adapter, GNU ld's to the GNU adapter, and anything else is refused as before.
+///
+/// # Errors
+///
+/// `MapUnsupported` for a foreign or unrecognized MAP; `MapParseFailed` when a supported MAP is malformed.
+pub fn parse_any(text: &str) -> Result<MapEvidence, ArtifactError> {
+    // GNU ld's own banner wins: a GNU map that happens to quote armlink's words is still a GNU map.
+    if crate::map_armlink::detect(text) && !is_gnu_ld(text) {
+        return crate::map_armlink::parse(text);
+    }
+    if crate::map_armlink::mentions_armlink(text) && !is_gnu_ld(text) {
+        return Err(ArtifactError::MapUnsupported {
+            detected: "an armlink file without an image memory map (link with --map)".to_owned(),
+        });
+    }
+    parse(text)
 }
 
 /// Decide whether this text is a MAP this adapter may parse.
@@ -363,18 +399,19 @@ fn parse_placement_line(raw: &str, line: usize) -> Result<Option<MapPlacement>, 
         address,
         size,
         load_address,
+        load_unknown: None,
         line,
     }))
 }
 
-/// An input-section row before its object is normalized.
-struct RawContribution {
-    input_section: String,
-    output_section: Option<String>,
-    address: u64,
-    size: u64,
-    object: String,
-    line: usize,
+/// An input-section row before its object is normalized (shared with the armlink adapter).
+pub(crate) struct RawContribution {
+    pub(crate) input_section: String,
+    pub(crate) output_section: Option<String>,
+    pub(crate) address: u64,
+    pub(crate) size: u64,
+    pub(crate) object: String,
+    pub(crate) line: usize,
 }
 
 /// The parts of an input-section row: its name, address, size and what it came from.
@@ -568,7 +605,7 @@ fn common_prefix(paths: &[&[String]]) -> usize {
 ///   others become `key#2`, `key#3`. A collision never borrows directories from the path, because the
 ///   only directories that tell two unrelated roots apart are the machine's (re-review S1).
 /// - A final guard reduces any key that still reads as a host path to its file name.
-fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContribution> {
+pub(crate) fn normalize_contributions(raw: Vec<RawContribution>) -> Vec<MapObjectContribution> {
     /// The shallowest directory depth that may anchor a key: `C:/Users` or `/home/alice` and deeper,
     /// never a drive root, `/` or a single top-level directory.
     const MIN_ANCHOR_DEPTH: usize = 2;

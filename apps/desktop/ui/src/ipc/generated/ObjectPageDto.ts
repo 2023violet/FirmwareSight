@@ -10,7 +10,7 @@ export type ObjectPageDto = {
  */
 available: boolean, 
 /**
- * Whether a GNU ld MAP was stored with the build; with `available: false` it decides the next step.
+ * Whether a linker MAP was stored with the build; with `available: false` it decides the next step.
  */
 mapPresent: boolean, reason: string | null, rows: Array<ObjectRowDto>, total: number, offset: number, limit: number, nextOffset: number | null, 
 /**

@@ -42,7 +42,7 @@ fn objects_lists_each_object_and_library_with_the_remainder() {
     let text = stdout(&output);
 
     assert!(
-        text.contains("Objects and libraries (GNU ld MAP rows"),
+        text.contains("Objects and libraries (linker MAP rows"),
         "{text}"
     );
     assert!(text.contains("  Objects (4)"), "{text}");
@@ -61,7 +61,7 @@ fn objects_without_a_map_says_unavailable_rather_than_printing_zeros() {
     assert_eq!(output.status.code(), Some(0));
     let text = stdout(&output);
     assert!(
-        text.contains("unavailable: this build has no GNU ld MAP object rows"),
+        text.contains("unavailable: this build has no linker MAP object rows"),
         "{text}"
     );
     assert!(!text.contains("  Objects ("), "{text}");
@@ -108,7 +108,7 @@ fn diff_text_names_object_growth_and_additions() {
     assert_eq!(output.status.code(), Some(0));
     let text = stdout(&output);
     assert!(
-        text.contains("Object / library attribution (GNU ld MAP rows)"),
+        text.contains("Object / library attribution (linker MAP rows)"),
         "{text}"
     );
     assert!(text.contains("Objects    "), "{text}");
@@ -117,4 +117,56 @@ fn diff_text_names_object_growth_and_additions() {
         .nth(1)
         .expect("the additions list is printed");
     assert!(added.contains("libdrv.a(spi.o)"), "{text}");
+}
+
+const ARM_BASE: &str = "fixtures/elf/d4-armlink/base/firmware.axf";
+const ARM_BASE_MAP: &str = "fixtures/elf/d4-armlink/base/firmware.map";
+const ARM_TARGET: &str = "fixtures/elf/d4-armlink/target/firmware.axf";
+const ARM_TARGET_MAP: &str = "fixtures/elf/d4-armlink/target/firmware.map";
+
+#[test]
+fn an_armlink_map_gives_regions_objects_and_libraries_like_a_gnu_one() {
+    // ADR-0036: the same report for a Keil / Arm Compiler build as for a GNU ld build.
+    let output = run(&["analyze", ARM_TARGET, "--map", ARM_TARGET_MAP, "--objects"]);
+    assert_eq!(output.status.code(), Some(0));
+    let text = stdout(&output);
+    assert!(
+        text.contains("nonvolatile / load image 192 bytes"),
+        "{text}"
+    );
+    assert!(
+        text.contains("ER_IROM1 (nonvolatile / load image)"),
+        "{text}"
+    );
+    assert!(text.contains("Capacity: 65536 bytes"), "{text}");
+    assert!(text.contains("libdrv.lib(spi.o)"), "{text}");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("map parsed with the armlink adapter"),
+        "{stderr}"
+    );
+
+    let diff = run(&[
+        "diff",
+        ARM_BASE,
+        ARM_TARGET,
+        "--old-map",
+        ARM_BASE_MAP,
+        "--new-map",
+        ARM_TARGET_MAP,
+    ]);
+    assert_eq!(diff.status.code(), Some(0));
+    let text = stdout(&diff);
+    assert!(
+        text.contains("108 bytes → 192 bytes delta +84 [exact]"),
+        "{text}"
+    );
+    assert!(
+        text.contains("Object / library attribution (linker MAP rows)"),
+        "{text}"
+    );
+    assert!(
+        text.contains("libdrv.lib(spi.o)"),
+        "the added library member: {text}"
+    );
 }

@@ -12,19 +12,19 @@
   "files": [
     {
       "path": "fixtures/elf/d4-armlink/base/firmware.axf",
-      "sha256": "45ac40e1b5f44892dcd7dd440151b6751f9f0ec027166241d38a10f55c7132f6",
+      "sha256": "4fc4ab39a715c4fdca1bda06c641b50a1b63f60f8229da3cd0f9a4714b2aee5f",
       "fixture": "d4-armlink-base",
       "purpose": "fixture-artifact"
     },
     {
       "path": "fixtures/elf/d4-armlink/base/firmware.map",
-      "sha256": "9d08dbd32304d463f2bffaf4557d30201ccb835c1b600f7f94a9a5e5dbaedf8d",
+      "sha256": "bcbb9e4a0deedb13f1d5979f424b7aa6643c930890a4e05661daf766240c9380",
       "fixture": "d4-armlink-base",
       "purpose": "fixture-artifact"
     },
     {
       "path": "fixtures/elf/d4-armlink/base/fixture.toml",
-      "sha256": "815f7c9db0fb7b60d31625a94c065d7ab521ed0e55d3006a7d7bc483dbd186c1",
+      "sha256": "510eeb42ce5fd44747c0e961db744fa3aa4a602361ceae3de9111479ef93ee7a",
       "fixture": "d4-armlink-base",
       "purpose": "fixture-support"
     },
@@ -60,19 +60,19 @@
     },
     {
       "path": "fixtures/elf/d4-armlink/target/firmware.axf",
-      "sha256": "bcd5f4bb5363467ee012dee562bdc5bcd4c48ae6d6ebfe3d0e7c9ac8ee350833",
+      "sha256": "d47be85d101d8da8dd4f813f59f51f420c841257164831efb835169af662c64c",
       "fixture": "d4-armlink-target",
       "purpose": "fixture-artifact"
     },
     {
       "path": "fixtures/elf/d4-armlink/target/firmware.map",
-      "sha256": "5afcd1a1a3e153e088b521370b05cee7205f7be9c0a9cc57b14c70346d1ff0ac",
+      "sha256": "a5148be228b4e40361d096c7f762fb430f83d12c1acd5cd3d7914f3d149fe04d",
       "fixture": "d4-armlink-target",
       "purpose": "fixture-artifact"
     },
     {
       "path": "fixtures/elf/d4-armlink/target/fixture.toml",
-      "sha256": "c6349be9ab63f602f0a7513c1cad61a044ac40f27bfddfc0efb5efd5bf0804e4",
+      "sha256": "479078582d5b30cb22a2e3222da0f765123ceb001e55b1943ba340513d7ac6ec",
       "fixture": "d4-armlink-target",
       "purpose": "fixture-support"
     },

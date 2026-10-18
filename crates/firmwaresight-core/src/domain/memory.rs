@@ -267,6 +267,9 @@ pub struct MemoryContribution {
     pub runtime_ram_bytes: Fact<u64>,
     pub basis: MemoryEvidenceBasis,
     pub rule: &'static str,
+    /// The section's runtime address and size, when known. Object attribution uses them to tell apart
+    /// two output sections that share a name (armlink's RW data and ZI parts of one region, ADR-0036).
+    pub runtime_span: Option<(u64, u64)>,
 }
 
 impl MemoryContribution {
@@ -670,6 +673,14 @@ fn total(contributions: &[MemoryContribution], side: ChargeSide) -> ByteTotal {
 }
 
 /// Resolve one section's charge, choosing the strongest basis the evidence supports.
+fn runtime_span(section: &Section) -> Option<(u64, u64)> {
+    section
+        .virtual_address
+        .value()
+        .copied()
+        .zip(section.memory_size.value().copied())
+}
+
 fn attribute(section: &Section, layout: &MemoryLayout) -> MemoryContribution {
     let locator = format!("elf.section_header[{}]", section.index);
 
@@ -708,6 +719,7 @@ fn attribute(section: &Section, layout: &MemoryLayout) -> MemoryContribution {
 
         return MemoryContribution {
             section_index: section.index,
+            runtime_span: runtime_span(section),
             section_locator: locator,
             section_name: section.name.clone(),
             nonvolatile_bytes: nonvolatile_from_regions(
@@ -727,6 +739,7 @@ fn attribute(section: &Section, layout: &MemoryLayout) -> MemoryContribution {
     if section.role != SectionRole::Unknown {
         return MemoryContribution {
             section_index: section.index,
+            runtime_span: runtime_span(section),
             section_locator: locator,
             section_name: section.name.clone(),
             nonvolatile_bytes: role_charge(section, ChargeSide::Nonvolatile),
@@ -747,6 +760,7 @@ fn attribute(section: &Section, layout: &MemoryLayout) -> MemoryContribution {
 
     MemoryContribution {
         section_index: section.index,
+        runtime_span: runtime_span(section),
         section_locator: locator,
         section_name: section.name.clone(),
         nonvolatile_bytes: Fact::unknown(

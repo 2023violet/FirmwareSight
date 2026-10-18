@@ -26,7 +26,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
   - Written but waiting on a person: the Pilot protocol (Owner approval), the V1 re-freeze request (not authorized), the human native-QA runbook (not run), and the ArmClang sample request (no samples yet).
 - **R-series redesign (ADR-0034):** complete. R0–R3 reached `main` at `465fe5f` (Actions #125); R4–R7 at `e1faeff` (run `39086793226`, 10/10). The closeout adds the skip link and heading focus (Q6) and runs the window-minimum drag, a keyboard-only flow, an Explorer drop, 125%/150% content scaling and an accessibility-tree audit with real Windows input ([evidence/R7C](../evidence/R7C/README.md)). Left to a person: NVDA/Narrator listening, real system DPI.
 - **D2C-R (local branch `docs/d2c-r`):** R4 decided (no silent backfill); human QA pack for the R7 build (NOT_RUN); Pilot materials for the R7 build (approved in principle, register 0); a Core section-ranking defect found and documented, not yet fixed ([06_DELIVERY/24](../06_DELIVERY/24_CORE_SECTION_RANKING_REVIEW.md)); a synthetic armlink sample cross-checked, armlink still `NOT_SUPPORTED`. See [06_DELIVERY/23](../06_DELIVERY/23_D2C_R.md).
-- **Since D2C-R:** NEXT-CORE-01 (the section ranking admits only budget sections) is on `main` at `abace77`. OSS-01 (Apache-2.0, ADR-0035; automated QA for Q1, Q2 and Q8) is on `feature/oss-apache-2.0`.
+- **Since D2C-R:** NEXT-CORE-01 (the section ranking admits only budget sections) is on `main` at `abace77`. OSS-01 (Apache-2.0, ADR-0035; automated QA for Q1, Q2 and Q8) and D4 (armlink MAP adapter, ADR-0036) are on `feature/oss-apache-2.0`.
 - **Latest `main`:** `e1faeff` (run `39086793226`, 10/10), then the closeout commit. Read Git for anything later.
 
 ## Gates
@@ -48,7 +48,7 @@ This file is overwritten, never appended. History lives in [archive/](archive/20
 
 ## Compatibility boundary
 
-GCC + GNU ld and Clang + GNU ld are verified cohorts. Keil (armlink) and IAR (ILINK) compiler output is **UNVERIFIED**. ArmLink and IAR MAP files are **NOT_SUPPORTED / FIXTURE_BLOCKED**. See [04_TECH/39](../04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).
+GCC + GNU ld and Clang + GNU ld are verified cohorts. Keil (armlink) and IAR (ILINK) compiler output is **UNVERIFIED** as a cohort. The armlink MAP is **supported** since ADR-0036 (one synthetic same-origin sample, cross-checked); the IAR MAP is **NOT_SUPPORTED / FIXTURE_BLOCKED**. See [04_TECH/39](../04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).
 
 ## Protected local state
 

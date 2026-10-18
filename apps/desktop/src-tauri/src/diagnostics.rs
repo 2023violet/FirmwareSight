@@ -58,7 +58,8 @@ const NOT_REPORTED: &str = "not_reported";
 /// The supported input cohort, stated by this build rather than inferred from what happened to parse.
 /// The Support Matrix document is the authority on what is claimed to work; this string is the same
 /// claim in payload form, and `Help.tsx` points a reader at that document rather than at this line.
-const INPUT_COHORT: &str = "ELF firmware artifacts, with an optional GNU ld MAP file beside them";
+const INPUT_COHORT: &str =
+    "ELF firmware artifacts, with an optional linker MAP file (GNU ld or armlink) beside them";
 
 /// How many codes the ring keeps. Small on purpose: this is a support hint, not a journal (§24).
 const RECENT_CODE_CAPACITY: usize = 8;

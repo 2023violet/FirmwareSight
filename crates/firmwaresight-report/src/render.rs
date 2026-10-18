@@ -78,11 +78,11 @@ pub fn render_human(value: &AnalyzeResultDto) -> String {
 #[must_use]
 pub fn render_objects(summary: Option<&AttributionSummary>) -> String {
     let mut out = crate::text::heading(
-        "Objects and libraries (GNU ld MAP rows, charged like their output section)",
+        "Objects and libraries (linker MAP rows, charged like their output section)",
     );
     let Some(summary) = summary else {
         out.push_str(
-            "  unavailable: this build has no GNU ld MAP object rows; pass --map FILE with the linker's .map\n",
+            "  unavailable: this build has no linker MAP object rows; pass --map FILE with the linker's .map (GNU ld or armlink)\n",
         );
         return out;
     };
@@ -251,7 +251,7 @@ fn render_human_inner(value: &AnalyzeResultDto, regions: Option<&[MemoryRegionUs
 
     out.push_str(&heading("Limits"));
     out.push_str(&wrap(
-        "Every figure comes from the ELF and, when given, the GNU ld MAP. A mapped section range is not free space, and BIN or HEX files are not analyzed.",
+        "Every figure comes from the ELF and, when given, the linker MAP (GNU ld or armlink). A mapped section range is not free space, and BIN or HEX files are not analyzed.",
         "  ",
         "  ",
     ));

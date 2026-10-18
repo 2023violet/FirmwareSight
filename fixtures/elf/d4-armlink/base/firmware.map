@@ -55,23 +55,23 @@ Memory Map of the image
 
   Load Region LR_IROM1 (Base: 0x08000000, Size: 0x0000006c, Max: 0x00010000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x00000068, Max: 0x00010000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00000068, Max: 0x00010000, ABSOLUTE)
 
-    Base Addr    Size         Type   Attr      Idx    E Section Name        Object
+    Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x08000000   0x00000036   Code   RO            2  * .text.Reset_Handler  main.o
-    0x08000036   0x0000001e   Code   RO           11    .text.imu_read      imu.o
-    0x08000054   0x0000000c   Code   RO           16    .text.uart_send     libdrv.lib(uart.o)
-    0x08000060   0x00000008   Data   RO           13    .rodata.cst8        imu.o
+    0x08000000   0x08000000   0x00000036   Code   RO            2  * .text.Reset_Handler  main.o
+    0x08000036   0x08000036   0x0000001e   Code   RO           11    .text.imu_read      imu.o
+    0x08000054   0x08000054   0x0000000c   Code   RO           16    .text.uart_send     libdrv.lib(uart.o)
+    0x08000060   0x08000060   0x00000008   Data   RO           13    .rodata.cst8        imu.o
 
 
-    Execution Region RW_IRAM1 (Base: 0x20000000, Size: 0x0000000c, Max: 0x00004000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08000068, Size: 0x0000000c, Max: 0x00004000, ABSOLUTE)
 
-    Base Addr    Size         Type   Attr      Idx    E Section Name        Object
+    Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x00000004   Data   RW            6    .data.g_threshold   main.o
-    0x20000004   0x00000004   Zero   RW           18    .bss.uart_tx        libdrv.lib(uart.o)
-    0x20000008   0x00000004   Zero   RW           21    g_samples           anon$$obj.o
+    0x20000000   0x08000068   0x00000004   Data   RW            6    .data.g_threshold   main.o
+    0x20000004        -       0x00000004   Zero   RW           18    .bss.uart_tx        libdrv.lib(uart.o)
+    0x20000008        -       0x00000004   Zero   RW           21    g_samples           anon$$obj.o
 
 
 ==============================================================================

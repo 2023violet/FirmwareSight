@@ -58,7 +58,7 @@ pub struct SnapshotBuilder {
     symbols: Vec<Symbol>,
     evidence: Vec<EvidenceItem>,
     capabilities: Capabilities,
-    /// ADR-0033 object rows from the GNU ld MAP; empty when the build had none.
+    /// ADR-0033 object rows from the linker MAP; empty when the build had none.
     objects: Vec<ObjectContribution>,
     created_by_fwsight_version: String,
 }
@@ -172,7 +172,7 @@ pub struct BuildSnapshot {
     symbols: Vec<Symbol>,
     evidence: Vec<EvidenceItem>,
     capabilities: Capabilities,
-    /// ADR-0033 object rows from the GNU ld MAP; empty when the build had none.
+    /// ADR-0033 object rows from the linker MAP; empty when the build had none.
     objects: Vec<ObjectContribution>,
     created_by_fwsight_version: String,
 }

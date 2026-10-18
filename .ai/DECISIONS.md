@@ -41,7 +41,7 @@ Durable decisions live in ADRs. This page indexes them and lists the standing Ow
 | [0023](../09_ADR/ADR-0023-gate-five-state-semantics.md) | Gate five-state semantics |
 | [0024](../09_ADR/ADR-0024-post-mvp-candidate-governance.md) | Post-MVP candidate governance |
 | [0025](../09_ADR/ADR-0025-conditional-pre-g1-analyze-implementation.md) | Conditional pre-G1 Analyze implementation |
-| [0026](../09_ADR/ADR-0026-open-source-mvp-first-delivery.md) | Open-source MVP-first delivery; G1 on P0 basis (license itself still Proprietary) |
+| [0026](../09_ADR/ADR-0026-open-source-mvp-first-delivery.md) | Open-source MVP-first delivery; G1 on P0 basis (license then still Proprietary; superseded by ADR-0035, Apache-2.0) |
 | [0027](../09_ADR/ADR-0027-project-policy-and-provenance-adapter.md) | Project policy and provenance adapter |
 | [0028](../09_ADR/ADR-0028-release-identity-bytes-as-evidence.md) | Release identity: the bytes are the evidence |
 | [0029](../09_ADR/ADR-0029-repository-baseline-checksums-use-git-index-blobs.md) | `SHA256SUMS` uses Git index blobs |
@@ -51,6 +51,7 @@ Durable decisions live in ADRs. This page indexes them and lists the standing Ow
 | [0033](../09_ADR/ADR-0033-object-library-attribution.md) | Object and library attribution from the GNU ld MAP (BASELINE 2026-10-15) |
 | [0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md) | Instrument Ledger: one design language for the app and every export; tokens 0.4.0 (BASELINE 2026-10-16); A1 tokens 0.4.1 layer scale and dialog width (2026-10-17) |
 | [0035](../09_ADR/ADR-0035-apache-2-open-source-license.md) | FirmwareSight is open source under Apache-2.0 (BASELINE 2026-10-18) |
+| [0036](../09_ADR/ADR-0036-armlink-map-adapter.md) | armlink (Keil MDK / Arm Compiler) MAP adapter (BASELINE 2026-10-18) |
 
 ## Owner decisions 2026-10-16: R-series redesign
 

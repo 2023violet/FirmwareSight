@@ -51,11 +51,11 @@ impl Session {
         let Some(attribution) = attribution else {
             // ADR-0033 D6: the two absences have different remedies, so they are not one sentence.
             let reason = if map_present {
-                "this build was stored with a GNU ld MAP but without object rows: the MAP lists no \
+                "this build was stored with a linker MAP but without object rows: the MAP lists no \
                  input sections, or the build was stored by a FirmwareSight version that did not keep \
                  them (analyzing the same files again reuses that stored build)"
             } else {
-                "this build was analyzed without a GNU ld MAP, and only a MAP names the object file \
+                "this build was analyzed without a linker MAP, and only a MAP names the object file \
                  behind each byte"
             };
             return Ok(ObjectPageDto {

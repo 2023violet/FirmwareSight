@@ -14,7 +14,7 @@ last_updated: "2026-10-14"
 
 FirmwareSight is a local-first desktop app and CLI (`fwsight`) that turns a firmware build into release evidence you can check:
 
-- **Analyze** an ELF, optionally with its GNU ld MAP: sections, symbols, memory regions and top contributors.
+- **Analyze** an ELF, optionally with its linker MAP (GNU ld, or armlink from Keil MDK / Arm Compiler): sections, symbols, memory regions, objects and libraries, and top contributors.
 - **Compare** two builds: a deterministic diff, with each memory delta explained and given a confidence level.
 - **Release Gate**: evaluates your project policy into PASS / REVIEW / BLOCK / UNKNOWN / N/A.
 - **Bundle**: exports a verified, portable release evidence package.
@@ -29,8 +29,9 @@ Status: version `0.6.0`, open source under the [Apache License 2.0](LICENSE) ([A
 |---|---|
 | ELF32 / ELF64, little or big endian | Parsed. Memory accounting is verified for GCC + GNU ld and Clang + GNU ld |
 | GNU ld `.map` | Supported |
-| Keil (armlink) / IAR (ILINK) output | UNVERIFIED |
-| ArmLink / IAR `.map` | Not supported |
+| Keil MDK / Arm Compiler (armlink) `.axf` | Parsed; memory accounting matches armlink's own totals on the committed sample ([ADR-0036](09_ADR/ADR-0036-armlink-map-adapter.md)) |
+| armlink `.map` (`--map`, ideally with `--load_addr_map_info`) | Supported: regions, MAP-backed accounting, object and library attribution. Verified on one synthetic Arm Compiler 6.24 sample; real-project cohort UNVERIFIED |
+| IAR (ILINK) output and `.map` | Not supported yet |
 | `.bin` / Intel HEX | Attachable as release byte evidence; content not analyzed |
 
 Details: [04_TECH/03_FORMAT_SUPPORT.md](04_TECH/03_FORMAT_SUPPORT.md), [04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md](04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).

@@ -248,7 +248,7 @@ impl DiffBudget {
 /// How strongly one side's memory numbers are evidenced, read back from stored facts.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SideEvidence {
-    /// Whether a supported GNU ld MAP is stored as an artifact of this build.
+    /// Whether a supported linker MAP is stored as an artifact of this build.
     pub map_backed: bool,
     /// The persisted layout source label, for example `map`.
     pub layout_source: String,
@@ -502,7 +502,7 @@ fn diff_symbol(symbol: &crate::domain::symbol::Symbol, ordinal: i64) -> DiffSymb
 
 /// Whether object or library attribution can be compared, and the delta when it can (ADR-0033 D8).
 ///
-/// Attribution comes from the GNU ld MAP's input-section rows, stored with each build. It is
+/// Attribution comes from the linker MAP's input-section rows, stored with each build. It is
 /// offered only when both builds carry those rows; a build without them is never treated as
 /// owning zero bytes per object. Rows are matched by key, and a row present on one side only is
 /// Added or Removed, never a change from or to zero, exactly as for sections.
@@ -545,7 +545,7 @@ impl ObjectAttribution {
             return Self {
                 available: false,
                 reason: format!(
-                    "{missing} stored object rows from a GNU ld MAP, so no object or library delta is claimable; a build without rows is not a build with zero bytes per object"
+                    "{missing} stored object rows from a linker MAP, so no object or library delta is claimable; a build without rows is not a build with zero bytes per object"
                 ),
                 objects: Vec::new(),
                 libraries: Vec::new(),
@@ -557,7 +557,7 @@ impl ObjectAttribution {
         let (libraries, unchanged_libraries) = diff_usages(&from.libraries, &to.libraries);
         Self {
             available: true,
-            reason: "both builds stored object rows from a GNU ld MAP, each charged like its output section; the per-object and per-library rows are listed by the desktop Compare view, and the CLI text report gives their counts and largest changes; this portable document carries neither (ADR-0033 D7)".to_owned(),
+            reason: "both builds stored object rows from a linker MAP, each charged like its output section; the per-object and per-library rows are listed by the desktop Compare view, and the CLI text report gives their counts and largest changes; this portable document carries neither (ADR-0033 D7)".to_owned(),
             objects,
             libraries,
             unchanged_objects,
@@ -1396,9 +1396,9 @@ fn evidence_warning(base: &SideEvidence, target: &SideEvidence) -> Option<String
         return None;
     }
     let missing = match (base.map_backed, target.map_backed) {
-        (false, false) => "neither build has a stored GNU ld MAP",
-        (false, true) => "the base build has no stored GNU ld MAP",
-        (true, false) => "the target build has no stored GNU ld MAP",
+        (false, false) => "neither build has a stored linker MAP",
+        (false, true) => "the base build has no stored linker MAP",
+        (true, false) => "the target build has no stored linker MAP",
         (true, true) => "both builds have a stored MAP",
     };
     Some(format!(

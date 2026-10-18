@@ -121,7 +121,7 @@ struct ReleasePrepareArgs {
     #[arg(long, value_name = "FILE")]
     artifact: PathBuf,
 
-    /// GNU ld MAP file for the shipped artifact.
+    /// Linker MAP file (GNU ld or armlink) for the shipped artifact.
     #[arg(long, value_name = "FILE")]
     map: Option<PathBuf>,
 
@@ -129,7 +129,7 @@ struct ReleasePrepareArgs {
     #[arg(long, value_name = "FILE")]
     baseline: Option<PathBuf>,
 
-    /// GNU ld MAP file for the baseline artifact.
+    /// Linker MAP file (GNU ld or armlink) for the baseline artifact.
     #[arg(long, value_name = "FILE")]
     baseline_map: Option<PathBuf>,
 
@@ -171,7 +171,7 @@ struct AnalyzeArgs {
     /// ELF artifact to analyze.
     path: PathBuf,
 
-    /// GNU ld MAP file for region and load-address evidence.
+    /// Linker MAP file (GNU ld or armlink) for region and load-address evidence.
     #[arg(long, value_name = "FILE")]
     map: Option<PathBuf>,
 
@@ -214,11 +214,11 @@ struct DiffArgs {
     /// The newer ELF artifact. Deltas are measured to this side.
     new: PathBuf,
 
-    /// GNU ld MAP file for the older artifact.
+    /// Linker MAP file (GNU ld or armlink) for the older artifact.
     #[arg(long, value_name = "FILE")]
     old_map: Option<PathBuf>,
 
-    /// GNU ld MAP file for the newer artifact.
+    /// Linker MAP file (GNU ld or armlink) for the newer artifact.
     #[arg(long, value_name = "FILE")]
     new_map: Option<PathBuf>,
 
@@ -258,7 +258,7 @@ struct GateArgs {
     #[arg(long, value_name = "FILE")]
     artifact: PathBuf,
 
-    /// GNU ld MAP file for the shipped artifact.
+    /// Linker MAP file (GNU ld or armlink) for the shipped artifact.
     #[arg(long, value_name = "FILE")]
     map: Option<PathBuf>,
 
@@ -266,7 +266,7 @@ struct GateArgs {
     #[arg(long, value_name = "FILE")]
     baseline: Option<PathBuf>,
 
-    /// GNU ld MAP file for the baseline artifact.
+    /// Linker MAP file (GNU ld or armlink) for the baseline artifact.
     #[arg(long, value_name = "FILE")]
     baseline_map: Option<PathBuf>,
 
@@ -1164,11 +1164,11 @@ fn write_markdown(path: &Path, text: &str, json: bool, operation_id: &str) -> Op
     None
 }
 
-fn map_state(analysis: &pipeline::Analysis) -> &'static str {
+fn map_state(analysis: &pipeline::Analysis) -> String {
     match (&analysis.map_input, &analysis.map_evidence) {
-        (Some(_), Some(_)) => "parsed with the gnu_ld adapter",
-        (Some(_), None) => "supplied but not parsed",
-        (None, _) => "not provided",
+        (Some(_), Some(evidence)) => format!("parsed with the {} adapter", evidence.adapter_id),
+        (Some(_), None) => "supplied but not parsed".to_owned(),
+        (None, _) => "not provided".to_owned(),
     }
 }
 

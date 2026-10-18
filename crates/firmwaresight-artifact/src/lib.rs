@@ -9,6 +9,7 @@ pub mod elf;
 pub mod error;
 pub mod intake;
 pub mod map;
+pub mod map_armlink;
 pub mod pipeline;
 
 pub use error::ArtifactError;

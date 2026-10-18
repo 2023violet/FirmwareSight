@@ -1497,7 +1497,7 @@ describe('M1 memory usage bars', () => {
 
   it('asks for the MAP when there are no regions', () => {
     renderOverview({ summary: withRegions([]) });
-    expect(screen.getByText(/Add the GNU ld MAP for this build/)).toBeDefined();
+    expect(screen.getByText(/Add the linker MAP \(GNU ld or armlink\) for this build/)).toBeDefined();
   });
 
   it('speaks Chinese from the same facts', () => {

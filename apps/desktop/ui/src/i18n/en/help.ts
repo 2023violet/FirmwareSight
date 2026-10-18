@@ -40,7 +40,7 @@ export const help = {
   'export.errorLabel': 'Diagnostics export error',
   'export.errorHeading': 'The diagnostics file was not written',
   'reads.heading': 'What it can read',
-  'reads.artifacts': 'FirmwareSight analyzes ELF firmware artifacts and, when one is attached, a GNU ld MAP file beside it. The Format row on Analyze names the architecture, bitness and endianness it found in the file you chose; the Parser row names the parser that read it. A MAP that is not GNU ld output is refused rather than partly believed.',
+  'reads.artifacts': 'FirmwareSight analyzes ELF firmware artifacts and, when one is attached, a linker MAP file beside it (GNU ld, or armlink from Keil MDK / Arm Compiler). The Format row on Analyze names the architecture, bitness and endianness it found in the file you chose; the Parser row names the parser that read it. A MAP from any other linker (IAR, for example) is refused rather than partly believed.',
   'reads.matrix': 'Anything outside that set is reported as unsupported. The Support Matrix document is the authoritative list of what is claimed to work, on which platform, and to what depth; this screen is not a substitute for it.',
   'reads.binHex': 'A BIN or Intel HEX file is still not something FirmwareSight reads. It is something a release ships: the Release page attaches it, records its size and SHA-256 under the kind its name states, and carries those bytes inside a verified bundle, with its build provenance left unestablished by design (`ADR-0030`).',
   'local.ariaLabel': 'Local-first statement',

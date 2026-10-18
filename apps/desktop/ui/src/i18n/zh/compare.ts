@@ -124,7 +124,7 @@ export const compare: CatalogFor<'compare'> = {
   'contributors.emptyObjectsAdded': '没有新增对象。',
   'objects.region': '按对象和库查看变化',
   'objects.heading': '按对象和库',
-  'objects.basisHint': '来自每个构建的 GNU ld MAP。每条记录都按其所在输出节的方式计费，因此这些数字与上方总量使用同样的 Flash 和 RAM 规则。填充和链接器桩代码不属于任何对象。',
+  'objects.basisHint': '来自每个构建的链接器 MAP。每条记录都按其所在输出节的方式计费，因此这些数字与上方总量使用同样的 Flash 和 RAM 规则。填充和链接器桩代码不属于任何对象。',
   'objects.tally': '{changed} 个变化，{added} 个新增，{removed} 个删除，{unchanged} 个未变',
   'objects.objectsLine': '对象：{tally}',
   'objects.librariesLine': '库：{tally}',

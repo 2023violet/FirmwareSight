@@ -122,7 +122,7 @@ export const compare = {
   'contributors.emptyObjectsAdded': 'No object was added.',
   'objects.region': 'Changes by object and library',
   'objects.heading': 'By object and library',
-  'objects.basisHint': 'From the GNU ld MAP of each build. Every row is charged like the output section it sits in, so these figures use the same Flash and RAM rules as the totals above. Padding and linker stubs belong to no object.',
+  'objects.basisHint': 'From the linker MAP of each build. Every row is charged like the output section it sits in, so these figures use the same Flash and RAM rules as the totals above. Padding and linker stubs belong to no object.',
   'objects.tally': '{changed} changed, {added} added, {removed} removed, {unchanged} unchanged',
   'objects.objectsLine': 'Objects: {tally}',
   'objects.librariesLine': 'Libraries: {tally}',

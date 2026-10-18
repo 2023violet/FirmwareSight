@@ -52,7 +52,7 @@ Wanted beyond that:
   - an RTOS;
   - multiple load regions;
   - field size.
-- **No support claim.** armlink MAP stays `NOT_SUPPORTED` until the D4 adapter, its ADR and its fixtures exist.
+- **2026-10-18:** the D4 adapter, its ADR (ADR-0036) and its fixture exist; the armlink MAP is supported. A real-project sample is still wanted for the gaps listed in ADR-0036.
 
 ## Open questions for the Owner
 

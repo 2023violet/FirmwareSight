@@ -107,7 +107,7 @@ fn a_build_without_a_map_is_not_available_rather_than_all_zero() {
     assert!(
         page.reason
             .as_deref()
-            .is_some_and(|reason| reason.contains("GNU ld MAP")),
+            .is_some_and(|reason| reason.contains("linker MAP")),
         "{:?}",
         page.reason
     );

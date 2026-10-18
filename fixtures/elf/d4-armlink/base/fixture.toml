@@ -17,5 +17,5 @@ commands = [
   """armclang.exe --target=arm-arm-none-eabi -mcpu=cortex-m4 -mthumb -Os -ffunction-sections -fdata-sections -c source/drv/uart.c -o build/drv/uart.o""",
   """armclang.exe --target=arm-arm-none-eabi -mcpu=cortex-m4 -mthumb -Os -ffunction-sections -fdata-sections -c source/drv/spi.c -o build/drv/spi.o""",
   """armar.exe --create build/libdrv.lib build/drv/uart.o build/drv/spi.o""",
-  """armlink.exe --cpu=Cortex-M4 --scatter=objects.sct --entry=Reset_Handler --no_scanlib --remove --map --symbols --info=sizes,totals,unused --list=firmware.map build/app/main.o build/app/sensors/imu.o build/libdrv.lib(uart.o) -o firmware.axf""",
+  """armlink.exe --cpu=Cortex-M4 --scatter=objects.sct --entry=Reset_Handler --no_scanlib --remove --map --load_addr_map_info --symbols --info=sizes,totals,unused --list=firmware.map build/app/main.o build/app/sensors/imu.o build/libdrv.lib(uart.o) -o firmware.axf""",
 ]

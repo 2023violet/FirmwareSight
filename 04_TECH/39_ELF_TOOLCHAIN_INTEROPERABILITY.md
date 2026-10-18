@@ -10,7 +10,7 @@ This matrix describes measured format evidence, not a vendor endorsement. A file
 | PARSED_BASIC_METADATA | `object` parses headers, entry, sections, file offsets/payload, symbols and build-id where present | Four Clang relocatable fixtures in `fixtures/elf/interop-clang`, plus existing linked ARM fixtures |
 | VERIFIED_MEMORY_ACCOUNTING | Existing Core model tested against explicit supported placement evidence | Existing ARM GCC/GNU ld and Clang/GNU ld cohorts; new relocatable fixtures do **not** establish executable accounting |
 | VERIFIED_COMPILER_COHORT | Actual toolchain output, recipe/provenance and independent inspection | GCC + GNU ld; Clang + GNU ld. Keil/armlink and IAR/ILINK: **UNVERIFIED** as a cohort. One synthetic Arm Compiler 6.24 sample reads and accounts correctly from the ELF alone ([evidence/D4](../evidence/D4/README.md)); one sample is not a cohort |
-| LINKER_MAP_SUPPORTED | Dedicated grammar supplies required fields with independently validated fixtures | GNU ld only. ArmLink: **NOT_SUPPORTED**; a synthetic same-origin sample with an independent cross-check exists (`fixtures/elf/d4-armlink`), and a real-project sample is still wanted. IAR ILINK: **NOT_SUPPORTED / FIXTURE_BLOCKED** |
+| LINKER_MAP_SUPPORTED | Dedicated grammar supplies required fields with independently validated fixtures | GNU ld; **armlink** since ADR-0036 (fixture `fixtures/elf/d4-armlink`, cross-checked against armlink `--info=totals` and GNU readelf). IAR ILINK: **NOT_SUPPORTED / FIXTURE_BLOCKED** |
 
 ## Parser facts and limits
 
@@ -29,14 +29,14 @@ Recipe: `python scripts/gen_interop_fixtures.py <new-fixture-directory> <new-ext
 
 ## MAP admission design and refusal harness
 
-The existing GNU adapter remains the only parser. Detection returns the existing typed `MapUnsupported` error for foreign banners **before** evaluating GNU markers, including mixed/concatenated text and long preambles. Supported GNU positives and frozen fixtures remain unchanged. Detection/refusal is not an ArmLink or IAR parser.
+Since ADR-0036 two adapters exist, GNU ld and armlink, chosen by `map::parse_any` from the banner; the GNU adapter's own detection still refuses armlink text. Before ADR-0036 the GNU adapter was the only parser. Detection returns the existing typed `MapUnsupported` error for foreign banners **before** evaluating GNU markers, including mixed/concatenated text and long preambles. Supported GNU positives and frozen fixtures remain unchanged. Detection/refusal is not an ArmLink or IAR parser.
 
 Required normalization facts are memory-region origin and capacity, output-section VMA/size, explicit LMA where provable, and optional object/symbol attribution. A future adapter must validate each field against an independent companion ELF or vendor inspection result. Missing fields must preserve Unknown. No public schema, domain vocabulary or memory-accounting semantic change is authorized here.
 
 | Grammar | Independent semantics | Adapter prerequisite / decision |
 |---|---|---|
 | GNU ld | `Memory Configuration`, column-zero output section, optional `load address`, input-object contributions | Existing `map.rs` retained; positive fixtures/regressions remain authoritative |
-| Arm armlink | Scatter load region contains execution regions; load and execution addresses can differ; compressed initialization prevents equating execution byte size with stored payload | Separate future grammar; pair genuine full MAP + ELF with independent load/execute inspection. **FIXTURE_BLOCKED**, no parser enabled |
+| Arm armlink | Scatter load region contains execution regions; load and execution addresses can differ; compressed initialization prevents equating execution byte size with stored payload | Separate future grammar; pair genuine full MAP + ELF with independent load/execute inspection. **FIXTURE_BLOCKED**, no parser enabled | **Since ADR-0036:** supported. Execution regions are the region table, `Load base` (from `--load_addr_map_info`) gives load addresses, a region without it that runs outside its load region is Unknown, compressed RW is Unknown, and object rows follow ADR-0033 |
 | IAR ILINK | `.icf` placement directives, sections/blocks, initialization table and potentially compressed/shared data | Separate future grammar; pair genuine full MAP + ELF, distinguish initializer ranges from runtime ranges. **FIXTURE_BLOCKED**, no parser enabled |
 
 Primary semantic references: [Arm load/execution region explanation](https://developer.arm.com/community/arm-community-blogs/b/tools-software-ides-blog/posts/building-an-elf-image-for-an-armv8-fixed-virtual-platform-2065554406), [IAR ILINK overview](https://docs.iar.com/ewarm/9.7x/en/iar-c-c---development/linking-using-ilink/linker-overview.html), [IAR MAP option](https://docs.iar.com/ewarm/10.1x/en/iar-c-c---development/linker-options/descriptions-of-linker-options/--map.html). These guide design; they do not replace fixture proof.

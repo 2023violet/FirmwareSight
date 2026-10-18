@@ -21,7 +21,13 @@ impl ParserId {
 
     #[must_use]
     pub fn gnu_ld_map() -> Self {
-        Self("map-adapter/gnu_ld".to_owned())
+        Self::map_adapter("gnu_ld")
+    }
+
+    /// The parser id of a MAP adapter (`gnu_ld`, `armlink`).
+    #[must_use]
+    pub fn map_adapter(adapter_id: &str) -> Self {
+        Self(format!("map-adapter/{adapter_id}"))
     }
 }
 

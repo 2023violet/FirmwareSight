@@ -1972,7 +1972,7 @@ function SymbolChanges({
 /**
  * ADR-0033 D8: which object files and libraries the change came from.
  *
- * Shown only when both builds stored GNU ld MAP object rows; otherwise this view says, in Core's words, why
+ * Shown only when both builds stored linker MAP object rows; otherwise this view says, in Core's words, why
  * there is no attribution (D-R3-7). The shortlist is Core's ranking and the table is the authoritative list,
  * paged by the shell like the section and symbol tables. An object present on one side only reads
  * "Not present" on the other, never 0.

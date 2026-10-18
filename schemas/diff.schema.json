@@ -195,7 +195,7 @@
       "properties": {
         "mapBacked": {
           "type": "boolean",
-          "description": "Whether a supported GNU ld MAP is stored for this build. Never inferred."
+          "description": "Whether a supported linker MAP (GNU ld or armlink) is stored for this build. Never inferred."
         },
         "layoutSource": {
           "type": "string",

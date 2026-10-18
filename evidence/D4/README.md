@@ -1,6 +1,8 @@
 # D4 preparation: a same-origin ArmClang / armlink sample
 
-Request: [06_DELIVERY/14](../../06_DELIVERY/14_D4_ARMCLANG_SAMPLE_REQUEST.md). Standing Owner rule 3 holds: **this is not a support claim.** FirmwareSight has no armlink MAP adapter, and armlink MAP files stay `NOT_SUPPORTED`.
+Request: [06_DELIVERY/14](../../06_DELIVERY/14_D4_ARMCLANG_SAMPLE_REQUEST.md).
+
+**Update 2026-10-18:** the armlink MAP adapter exists ([ADR-0036](../../09_ADR/ADR-0036-armlink-map-adapter.md)), and this sample is its fixture. The sample was regenerated with `--load_addr_map_info`. The per-layer table below describes the state **before** the adapter and is kept as recorded; ADR-0036 §Consequences gives the current support. The current cross-check, with the adapter, is [CROSSCHECK_ADR-0036.md](CROSSCHECK_ADR-0036.md); [CROSSCHECK.md](CROSSCHECK.md) is the record from before it.
 
 ## What exists now (Observed, 2026-10-17)
 
@@ -41,3 +43,18 @@ Request: [06_DELIVERY/14](../../06_DELIVERY/14_D4_ARMCLANG_SAMPLE_REQUEST.md). S
 | armlink: `NOT_SUPPORTED / FIXTURE_BLOCKED` (no sample at all) | armlink: `NOT_SUPPORTED`; one synthetic same-origin sample available with an independent cross-check. A real-project sample is still wanted for the gaps above. |
 
 D4 itself (an ADR for the armlink adapter, then the adapter and its fixtures) needs its own task named in `.ai/ACTIVE_TASK.md`.
+
+## Native desktop smoke with the adapter (2026-10-18)
+
+The QA-identifier build of `feature/oss-apache-2.0` with ADR-0036 (binary SHA-256 `d81407addc390170b6bc342945c657de2307793864ac42fb6614413e6e22a67d`). Both armlink builds go through the real Open dialogs: the `.axf`, then its armlink MAP.
+
+| Check | Verdict | Observed |
+|---|---|---|
+| A01 | PASS | Analyze an armlink build with its MAP: lead "Flash 已用192 bytesRAM 44 bytes（精确）· 可用于硬性预算 · 10 条证据10 observed · 0 derived · 0 declared · 0 unknown" / SubjectBar "当前构建firmware.axf · d |
+| A02 | PASS | region usage from the scatter file's execution region: "ER_IROM1\t非易失存储\t65536 字节\t192 字节\t精确\n未超过容量\n\tUnknown\nthe region table and section intervals do not prove contiguous allo |
+| A03 | PASS | Objects view attributes the armlink rows: "对象\n库\n按名称筛选对象\n应用筛选\n目标文件与库成员；每条 MAP 记录按其所在输出节的计费方式计入\n对象\t库\tFlash\n↓\n\tRAM\t占 Flash 比例\tMAP 行数\nimu.o\t应用\t92 bytes\t0 bytes\t47.91%\ |
+| A04 | PASS | Compare two armlink builds with MAPs: "Flash 变化▲84 bytes108 bytes → 192 bytes · 77.8% · RAM ▲32 bytes · 可比性 exact · 增长最大的对象 imu.o ▲54 bytes" |
+| A05 | PASS | Owner app data unchanged: 23 files, identical hashes |
+
+The QA store `arm-kept-*` is kept. The Owner's app data was only hashed. `D4_ARMLINK_NATIVE_SMOKE.zip` holds three screenshots, the results and the driver scripts, with no local paths. SHA-256 `bc297062a591e891f5ab253d1ac430d91457c9f44e3a7fb3d9638219af7c5349`.
+

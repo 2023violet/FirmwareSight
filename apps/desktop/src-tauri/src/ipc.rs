@@ -54,7 +54,7 @@ impl FixtureKey {
     pub const fn label(self) -> &'static str {
         match self {
             Self::P0Basic => "P0 basic (ELF only, no MAP)",
-            Self::P0DualRegion => "P0 dual region (ELF + GNU ld MAP)",
+            Self::P0DualRegion => "P0 dual region (ELF + linker MAP)",
         }
     }
 }
@@ -772,7 +772,7 @@ pub struct ObjectRowDto {
 pub struct ObjectPageDto {
     /// False when the build stored no object rows; `reason` then says why and `rows` is empty.
     pub available: bool,
-    /// Whether a GNU ld MAP was stored with the build; with `available: false` it decides the next step.
+    /// Whether a linker MAP was stored with the build; with `available: false` it decides the next step.
     pub map_present: bool,
     pub reason: Option<String>,
     pub rows: Vec<ObjectRowDto>,

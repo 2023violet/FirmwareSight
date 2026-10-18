@@ -986,7 +986,7 @@ describe('objects and libraries (ADR-0033)', () => {
     const panel = await screen.findByRole('tabpanel', { name: 'Objects' });
     expect(within(panel).getByText('Object attribution is not available for this build')).toBeDefined();
     expect(within(panel).getByText('this build stored no object rows')).toBeDefined();
-    expect(within(panel).getByText(/GNU ld \.map file/u)).toBeDefined();
+    expect(within(panel).getByText(/linker \.map file/u)).toBeDefined();
     expect(within(panel).queryByRole('table')).toBeNull();
   });
 
@@ -1008,7 +1008,7 @@ describe('objects and libraries (ADR-0033)', () => {
 
     fireEvent.click(await screen.findByRole('tab', { name: 'Objects' }));
     const panel = await screen.findByRole('tabpanel', { name: 'Objects' });
-    expect(within(panel).getByText(/input-section lines of a GNU ld MAP/u)).toBeDefined();
+    expect(within(panel).getByText(/input-section lines of a linker MAP/u)).toBeDefined();
     expect(within(panel).queryByText(/Analyze the build again/u)).toBeNull();
   });
 

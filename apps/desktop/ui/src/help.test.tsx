@@ -359,7 +359,8 @@ describe('Help bounds what it claims', () => {
     const section = await screen.findByRole('region', { name: 'What it can read' });
     const words = prose(section);
     expect(words).toContain('ELF firmware artifacts');
-    expect(words).toContain('GNU ld MAP');
+    expect(words).toContain('linker MAP');
+    expect(words).toContain('armlink');
     expect(words).toContain('refused rather than partly believed');
     expect(words).toContain('this screen is not a substitute for it');
   });
@@ -441,7 +442,7 @@ describe('Help repeats what Analyze shows on a first run', () => {
     render(<App />);
     const panel = await screen.findByRole('region', { name: 'Getting started' });
     const steps = [...panel.querySelectorAll('ol li strong')].map((item) => item.textContent);
-    expect(steps).toEqual(['Choose or drop your ELF', 'Add the GNU ld MAP (optional)', 'Press Analyze']);
+    expect(steps).toEqual(['Choose or drop your ELF', 'Add the linker MAP (optional)', 'Press Analyze']);
     expect(within(panel).queryAllByRole('term')).toHaveLength(0);
     expect(prose(panel)).toContain('explained in Help');
 

@@ -793,7 +793,7 @@ fn push_objects(out: &mut String, result: &DiffResult) {
             count(ChangeKind::Removed)
         )
     };
-    out.push_str("\nObject / library attribution (GNU ld MAP rows)\n");
+    out.push_str("\nObject / library attribution (linker MAP rows)\n");
     let unpaired = attribution
         .objects
         .iter()

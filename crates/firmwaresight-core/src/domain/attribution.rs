@@ -1,5 +1,5 @@
 //! Object and library attribution (ADR-0033): which object file or library member the image's bytes
-//! came from, as the GNU ld MAP states it.
+//! came from, as the linker MAP states it.
 //!
 //! A row is never charged by guesswork. It is charged exactly like the output section it sits under in
 //! [`MemoryFootprint`] (ADR-0021), so the per-object figures and the two budgets cannot disagree about
@@ -75,10 +75,28 @@ pub fn charge(row: &ObjectContribution, footprint: &MemoryFootprint) -> Charge {
             runtime_ram: None,
         };
     };
-    let section = footprint
+    // One name is one section for GNU ld. armlink can give two sections one name (the RW data and ZI parts
+    // of a region, ADR-0036): the row's address then chooses, and a row no candidate holds is Unknown.
+    let named: Vec<_> = footprint
         .contributions
         .iter()
-        .find(|c| c.section_name.value().map(String::as_str) == Some(output));
+        .filter(|c| c.section_name.value().map(String::as_str) == Some(output))
+        .collect();
+    let section = if named.len() > 1 {
+        let holding = named.iter().copied().find(|c| {
+            c.runtime_span
+                .is_some_and(|(start, size)| row.address >= start && row.address - start < size)
+        });
+        let Some(holding) = holding else {
+            return Charge {
+                nonvolatile: None,
+                runtime_ram: None,
+            };
+        };
+        Some(holding)
+    } else {
+        named.first().copied()
+    };
     Charge {
         nonvolatile: side(
             section.map(|c| c.nonvolatile_bytes.value().copied()),
@@ -221,7 +239,49 @@ mod tests {
             runtime_ram_bytes: ram,
             basis: MemoryEvidenceBasis::MapRegionAndElfLoad,
             rule: "test",
+            runtime_span: None,
         }
+    }
+
+    #[test]
+    fn two_output_sections_of_one_name_are_told_apart_by_the_row_address() {
+        // armlink: RW_IRAM1 is both the 4-byte RW data (Flash and RAM) and the 40-byte ZI part (RAM only).
+        let mut data = section("RW_IRAM1", Fact::known(4), Fact::known(4));
+        data.runtime_span = Some((0x2000_0000, 4));
+        let mut zi = section("RW_IRAM1", Fact::known(0), Fact::known(40));
+        zi.runtime_span = Some((0x2000_0004, 40));
+        let footprint = footprint(vec![data, zi], 4, 44);
+        let mut row = ObjectContribution {
+            object: "libdrv.lib(spi.o)".to_owned(),
+            archive: Some("libdrv.lib".to_owned()),
+            member: "spi.o".to_owned(),
+            input_section: ".bss.spi_buffer".to_owned(),
+            output_section: Some("RW_IRAM1".to_owned()),
+            address: 0x2000_0004,
+            size: 32,
+            map_line: 1,
+        };
+        let zi_charge = charge(&row, &footprint);
+        assert_eq!(
+            (zi_charge.nonvolatile, zi_charge.runtime_ram),
+            (Some(0), Some(32)),
+            "ZI costs RAM only"
+        );
+        row.address = 0x2000_0000;
+        row.size = 4;
+        let data_charge = charge(&row, &footprint);
+        assert_eq!(
+            (data_charge.nonvolatile, data_charge.runtime_ram),
+            (Some(4), Some(4)),
+            "RW data costs both"
+        );
+        row.address = 0x3000_0000;
+        let nowhere = charge(&row, &footprint);
+        assert_eq!(
+            (nowhere.nonvolatile, nowhere.runtime_ram),
+            (None, None),
+            "no candidate holds it: Unknown, not a guess"
+        );
     }
 
     fn footprint(sections: Vec<MemoryContribution>, nonvolatile: u64, ram: u64) -> MemoryFootprint {

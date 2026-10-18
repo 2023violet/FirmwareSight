@@ -10,7 +10,7 @@ last_updated: "2026-10-09"
 
 # Format Support Strategy
 
-> **Current evidence pointer — 2026-10-14 / NEXT-46:** [ELF interoperability foundation](39_ELF_TOOLCHAIN_INTEROPERABILITY.md) separates container recognition, parsed metadata, memory accounting, verified compiler cohorts and MAP support. ELF32/64 and both byte orders have Clang metadata fixtures; Keil/IAR cohorts remain UNVERIFIED and ArmLink/IAR MAP remain NOT_SUPPORTED / FIXTURE_BLOCKED. The older roadmap table below is retained as dated intent, not a current support claim.
+> **Current evidence pointer — 2026-10-14 / NEXT-46:** [ELF interoperability foundation](39_ELF_TOOLCHAIN_INTEROPERABILITY.md) separates container recognition, parsed metadata, memory accounting, verified compiler cohorts and MAP support. ELF32/64 and both byte orders have Clang metadata fixtures; Keil/IAR cohorts remain UNVERIFIED as cohorts; the armlink MAP is supported since ADR-0036 (2026-10-18); the IAR MAP remains NOT_SUPPORTED / FIXTURE_BLOCKED. The older roadmap table below is retained as dated intent, not a current support claim.
 
 ## Principle
 
@@ -41,7 +41,7 @@ last_updated: "2026-10-09"
 > **Dated 2026-10-09 (`ADR-0030`) — reads this table against the product.** The two `Basic` rows above are this
 > document's 2026-09-26 intent, kept as written. What is true and what is decided now:
 >
-> - `.bin` and Intel HEX are **not** analysis inputs. ELF remains the only analyzed artifact and GNU ld MAP the only
+> - `.bin` and Intel HEX are **not** analysis inputs. ELF remains the only analyzed artifact and GNU ld MAP (and, since ADR-0036, the armlink MAP) the only
 >   auxiliary one, so no row of `analysis.json` or Compare carries a BIN/HEX section or symbol table.
 > - The Intel HEX capability above, **"address span", is withdrawn rather than deferred.** No record walker, per-record
 >   checksum validation or addressing handling exists anywhere in the workspace, and `ADR-0030` excludes it. An
