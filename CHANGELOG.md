@@ -10,6 +10,19 @@ last_updated: "2026-09-28"
 
 # Changelog
 
+## 0.7.0 — 2026-10-18 (public release)
+
+[GitHub release v0.7.0](https://github.com/2023violet/FirmwareSight/releases/tag/v0.7.0), built from `03a6211`.
+
+- **armlink on real Keil MDK projects** (ADR-0036 A1, [evidence/D4-REAL](evidence/D4-REAL/README.md)): compressed RW data is charged to Flash at its stored size and to RAM at its MAP size. ELF-only analysis of a compressed image reports RAM as a lower bound. Zero-size library rows no longer break storing a real Keil build in the desktop app.
+- **Compare** pairs a repeated section name by role (ADR-0036 A2), so armlink's two `RW_IRAM1` sections become one Changed row.
+- **Signed build provenance** for every installer and CLI archive (ADR-0037). The files are still not platform code-signed.
+- IAR EWARM remains unsupported until real samples are available.
+
+## 0.6.0 public release — 2026-10-18
+
+[GitHub release v0.6.0](https://github.com/2023violet/FirmwareSight/releases/tag/v0.6.0), built from `3f8fa7d`: the first open-source release (Apache-2.0, ADR-0035), with the armlink MAP adapter (ADR-0036). The `0.6.0` section below is the earlier internal P0 baseline of the same version number.
+
 ## 0.6.0 — 2026-09-28
 
 `FirmwareSight_Project_Baseline_v0.6.0` — the **P0 Technical Foundation Baseline**. Promoted by the

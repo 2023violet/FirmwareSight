@@ -759,6 +759,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── storage.rs
 │       │   └── unknown_reasons.rs
 │       └── Cargo.toml
+├── docs/
+│   └── images/
+│       ├── analyze-en.png
+│       ├── analyze-zh.png
+│       ├── compare-en.png
+│       └── compare-zh.png
 ├── evidence/
 │   ├── D2C/
 │   │   ├── AC_MATRIX.tsv
@@ -1289,6 +1295,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 ├── manifest.txt
 ├── NOTICE
 ├── PRODUCT_BASELINE.md
+├── README.en.md
 ├── README.md
 ├── rust-toolchain.toml
 ├── SECURITY.md
