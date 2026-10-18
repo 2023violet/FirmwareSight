@@ -5,6 +5,7 @@ import type { DiffMemoryDto } from "./DiffMemoryDto";
 import type { DiffSideDto } from "./DiffSideDto";
 import type { DiffWarningDto } from "./DiffWarningDto";
 import type { ObjectAttributionDto } from "./ObjectAttributionDto";
+import type { SectionRankingExclusionsDto } from "./SectionRankingExclusionsDto";
 
 /**
  * The bounded answer to `compare_snapshots`. It deliberately holds no full change table: a build
@@ -16,4 +17,17 @@ export type CompareSummaryDto = {
  * Session-local handle for the computed diff. Not persisted, not portable, and not part of the
  * diff's content identity.
  */
-diffId: string, base: DiffSideDto, target: DiffSideDto, memory: DiffMemoryDto, counts: DiffCountsDto, objectChanges: ObjectAttributionDto, topSections: Array<ContributorDto>, topSymbols: Array<ContributorDto>, warnings: Array<DiffWarningDto>, };
+diffId: string, base: DiffSideDto, target: DiffSideDto, memory: DiffMemoryDto, counts: DiffCountsDto, objectChanges: ObjectAttributionDto, 
+/**
+ * Core's section growth ranking: budget sections only (NEXT-CORE-01).
+ */
+topSections: Array<ContributorDto>, topSymbols: Array<ContributorDto>, 
+/**
+ * Core's largest added sections: budget sections whose name pairs. The page shows these instead of
+ * sorting the change table itself, so host metadata and unpaired names are never recommended.
+ */
+addedSections: Array<ContributorDto>, 
+/**
+ * What the two section lists leave out, by reason. Every such row stays in the Sections table.
+ */
+sectionRankingExclusions: SectionRankingExclusionsDto, warnings: Array<DiffWarningDto>, };

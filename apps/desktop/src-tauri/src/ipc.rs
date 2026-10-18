@@ -831,9 +831,30 @@ pub struct CompareSummaryDto {
     pub memory: DiffMemoryDto,
     pub counts: DiffCountsDto,
     pub object_changes: ObjectAttributionDto,
+    /// Core's section growth ranking: budget sections only (NEXT-CORE-01).
     pub top_sections: Vec<ContributorDto>,
     pub top_symbols: Vec<ContributorDto>,
+    /// Core's largest added sections: budget sections whose name pairs. The page shows these instead of
+    /// sorting the change table itself, so host metadata and unpaired names are never recommended.
+    pub added_sections: Vec<ContributorDto>,
+    /// What the two section lists leave out, by reason. Every such row stays in the Sections table.
+    pub section_ranking_exclusions: SectionRankingExclusionsDto,
     pub warnings: Vec<DiffWarningDto>,
+}
+
+/// Counts of grown or added section rows the section lists leave out (`DiffResult::section_ranking_exclusions`).
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct SectionRankingExclusionsDto {
+    #[ts(type = "number")]
+    pub host_metadata: usize,
+    #[ts(type = "number")]
+    pub not_loaded: usize,
+    #[ts(type = "number")]
+    pub undecided: usize,
+    #[ts(type = "number")]
+    pub unpaired_additions: usize,
 }
 
 /// Which change kinds to show. Absent means all three.

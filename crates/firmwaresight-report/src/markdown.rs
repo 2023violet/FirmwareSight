@@ -305,14 +305,20 @@ pub fn comparison(result: &DiffResult) -> String {
     out.push_str("\n## Evidence\n");
     contributors(
         &mut out,
-        "Top section growth",
+        "Top growth, sections that cost the device",
         &result.top_section_growth(5),
     );
     contributors(
         &mut out,
-        "Largest added sections",
+        "Largest added sections that cost the device",
         &result.largest_added_sections(5),
     );
+    if let Some(note) = crate::diff_render::section_exclusion_note(
+        &result.section_ranking_exclusions(),
+        "the JSON or HTML export",
+    ) {
+        out.push_str(&format!("\n{}\n", escape(&note)));
+    }
     contributors(&mut out, "Top symbol growth", &result.top_symbol_growth(5));
     contributors(
         &mut out,

@@ -17,6 +17,7 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 
 use crate::domain::identity::Fact;
+use crate::domain::section::SectionRole;
 
 /// How a row appears in a diff. Rows that matched and differ in nothing verifiable are counted but
 /// never listed, so a change table holds changes.
@@ -687,6 +688,79 @@ pub struct SectionChange {
     /// `indeterminate_fields` instead of being claimed as a change.
     pub differing_fields: Vec<String>,
     pub indeterminate_fields: Vec<String>,
+}
+
+/// Whether a section row belongs in the rankings of what costs the device, and if not, why not.
+///
+/// The rule is memory accounting's own (`SectionRole::admitted_to_budget`), applied to each side that
+/// exists. A row is `Budget` only when every side it has is admitted; host metadata and unloaded
+/// sections are named as such, and anything the evidence cannot settle is `Undecided`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SectionBudgetAdmission {
+    /// Allocated and not host metadata on every side present: memory accounting charges it.
+    Budget,
+    /// Host metadata on every side present (symbol and string tables, debug, notes, attributes).
+    HostMetadata,
+    /// Not allocated and not host metadata on every side present (for example `.comment`).
+    NotLoaded,
+    /// A role word the Core does not recognize, or two sides that answer differently.
+    Undecided,
+}
+
+impl SectionBudgetAdmission {
+    fn of(side: &DiffSection) -> Self {
+        match SectionRole::from_name(&side.role) {
+            None => Self::Undecided,
+            Some(role) if role.is_device_metadata() => Self::HostMetadata,
+            Some(role) if role.admitted_to_budget(side.alloc) => Self::Budget,
+            Some(_) => Self::NotLoaded,
+        }
+    }
+}
+
+impl SectionChange {
+    /// See [`SectionBudgetAdmission`]. A section loaded in one build and not in the other has no single
+    /// meaning for its delta, so it is `Undecided` rather than ranked either way.
+    #[must_use]
+    pub fn budget_admission(&self) -> SectionBudgetAdmission {
+        match (&self.base, &self.target) {
+            (Some(base), Some(target)) => {
+                let (base, target) = (
+                    SectionBudgetAdmission::of(base),
+                    SectionBudgetAdmission::of(target),
+                );
+                if base == target {
+                    base
+                } else {
+                    SectionBudgetAdmission::Undecided
+                }
+            }
+            (Some(side), None) | (None, Some(side)) => SectionBudgetAdmission::of(side),
+            (None, None) => SectionBudgetAdmission::Undecided,
+        }
+    }
+}
+
+/// What the two section rankings leave out, and why. The rows themselves stay in the full section
+/// table; this is the note that says so, so a row missing from a ranking never reads as "it did not
+/// happen".
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct SectionRankingExclusions {
+    /// Grown or added host-metadata sections.
+    pub host_metadata: usize,
+    /// Grown or added sections that are not loaded and are not host metadata.
+    pub not_loaded: usize,
+    /// Grown or added sections whose admission the evidence cannot settle.
+    pub undecided: usize,
+    /// Added budget sections left out of the additions because their name repeats (unpaired).
+    pub unpaired_additions: usize,
+}
+
+impl SectionRankingExclusions {
+    #[must_use]
+    pub const fn total(&self) -> usize {
+        self.host_metadata + self.not_loaded + self.undecided + self.unpaired_additions
+    }
 }
 
 /// A symbol row in the diff.
@@ -1372,12 +1446,16 @@ pub struct Contributor {
 }
 
 impl DiffResult {
-    /// Largest growth among rows that exist on both sides. A row that exists on one side only is
-    /// not growth from zero, so it never appears here; it belongs in `largest_added_sections`.
+    /// Largest size growth among sections that cost the device (`SectionBudgetAdmission::Budget`) and
+    /// exist on both sides. A row on one side only is not growth from zero; it belongs in
+    /// `largest_added_sections`. The size compared is the section's size (`memory_size`): runtime size
+    /// for RAM sections, image size for code and constants. It is not a Flash figure; the footprints
+    /// answer that. Host metadata and unloaded sections are left out and counted by
+    /// `section_ranking_exclusions` (NEXT-CORE-01).
     #[must_use]
     pub fn top_section_growth(&self, limit: usize) -> Vec<Contributor> {
         growth(
-            self.section_changes.iter().filter_map(|row| {
+            self.budget_sections().filter_map(|row| {
                 growth_entry(
                     &row.key,
                     row.change,
@@ -1389,6 +1467,37 @@ impl DiffResult {
             }),
             limit,
         )
+    }
+
+    fn budget_sections(&self) -> impl Iterator<Item = &SectionChange> {
+        self.section_changes
+            .iter()
+            .filter(|row| row.budget_admission() == SectionBudgetAdmission::Budget)
+    }
+
+    /// The grown or added section rows the two section rankings leave out, by reason.
+    #[must_use]
+    pub fn section_ranking_exclusions(&self) -> SectionRankingExclusions {
+        let mut out = SectionRankingExclusions::default();
+        for row in &self.section_changes {
+            let grew =
+                row.change == ChangeKind::Changed && row.memory_size.delta.is_some_and(|d| d > 0);
+            let added = row.change == ChangeKind::Added;
+            if !grew && !added {
+                continue;
+            }
+            match row.budget_admission() {
+                SectionBudgetAdmission::Budget => {
+                    if added && row.ambiguous {
+                        out.unpaired_additions += 1;
+                    }
+                }
+                SectionBudgetAdmission::HostMetadata => out.host_metadata += 1,
+                SectionBudgetAdmission::NotLoaded => out.not_loaded += 1,
+                SectionBudgetAdmission::Undecided => out.undecided += 1,
+            }
+        }
+        out
     }
 
     #[must_use]
@@ -1449,12 +1558,14 @@ impl DiffResult {
         }
     }
 
+    /// Budget sections present only in the target, by size. A row left unpaired because its name
+    /// repeats is not an addition the evidence supports, so it is not listed (as for objects); it
+    /// stays in the full table with its note.
     #[must_use]
     pub fn largest_added_sections(&self, limit: usize) -> Vec<Contributor> {
         additions(
-            self.section_changes
-                .iter()
-                .filter(|row| row.change == ChangeKind::Added)
+            self.budget_sections()
+                .filter(|row| row.change == ChangeKind::Added && !row.ambiguous)
                 .map(|row| Contributor {
                     key: row.key.clone(),
                     change: ChangeKind::Added,

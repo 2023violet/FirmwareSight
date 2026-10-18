@@ -94,6 +94,7 @@ export type { SectionChangePageDto } from './generated/SectionChangePageDto';
 export type { SectionChangeQueryDto } from './generated/SectionChangeQueryDto';
 export type { SectionChangeRowDto } from './generated/SectionChangeRowDto';
 export type { SectionChangeSortDto } from './generated/SectionChangeSortDto';
+export type { SectionRankingExclusionsDto } from './generated/SectionRankingExclusionsDto';
 export type { SectionPageDto } from './generated/SectionPageDto';
 export type { SectionRequestDto } from './generated/SectionRequestDto';
 export type { SectionRowDto } from './generated/SectionRowDto';

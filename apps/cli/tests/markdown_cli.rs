@@ -187,3 +187,60 @@ fn two_exports_naming_one_file_are_refused_before_anything_is_written() {
     assert_eq!(analyze.status.code(), Some(6));
     assert!(!Path::new(&same).exists(), "nothing was written");
 }
+
+/// The lines of one ranked list: from its heading to the next blank line or heading.
+fn list_after<'a>(document: &'a str, heading: &str) -> Vec<&'a str> {
+    document
+        .lines()
+        .skip_while(|line| !line.contains(heading))
+        .skip(1)
+        .skip_while(|line| {
+            line.trim().is_empty()
+                || line.starts_with('|') && line.contains("---")
+                || line.starts_with('─')
+        })
+        .take_while(|line| !line.trim().is_empty() && !line.starts_with('#'))
+        .collect()
+}
+
+#[test]
+fn the_section_rankings_name_only_sections_that_cost_the_device() {
+    // NEXT-CORE-01: on m2-objects `.symtab` grows +96, more than `.text` (+64), and costs the device nothing.
+    let dir = TempDir::new();
+    let out = dir.file("ranking.md");
+    assert!(diff_markdown(&out).status.success());
+    let markdown = read(&out);
+    let ranked = list_after(&markdown, "Top growth, sections that cost the device").join("\n");
+    assert!(ranked.contains(".text"), "{markdown}");
+    assert!(
+        ranked.contains(".bss"),
+        "runtime growth is device growth too: {markdown}"
+    );
+    assert!(
+        !ranked.contains(".symtab") && !ranked.contains(".strtab"),
+        "{markdown}"
+    );
+    assert!(
+        markdown.contains("2 host-metadata"),
+        "the note says what was left out: {markdown}"
+    );
+
+    let text = run(&[
+        "diff",
+        BASE,
+        TARGET,
+        "--old-map",
+        BASE_MAP,
+        "--new-map",
+        TARGET_MAP,
+    ]);
+    let text = String::from_utf8_lossy(&text.stdout).into_owned();
+    let ranked = list_after(&text, "Top growth, sections that cost the device").join("\n");
+    assert!(ranked.contains("+64  .text"), "{text}");
+    assert!(!ranked.contains(".symtab"), "{text}");
+    assert!(
+        text.contains("Nonvolatile / load image 132 bytes → 196 bytes delta +64"),
+        "budgets unchanged: {text}"
+    );
+    assert!(text.contains("2 host-metadata"), "{text}");
+}

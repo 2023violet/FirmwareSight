@@ -82,6 +82,7 @@ import type {
   ObjectChangeRowDto,
   ObjectChangeSortDto,
   SectionChangeRowDto,
+  SectionRankingExclusionsDto,
   SectionChangeSortDto,
   SortDirDto,
   SymbolChangeRowDto,
@@ -92,8 +93,10 @@ import { cx } from './styles/classnames';
 type CompareKey = keyof Catalog['compare'];
 
 /**
- * The additions lists are one small page of the authoritative change table, ranked by the shell on
- * the same quantity the growth lists use. They are not a second copy of the diff (prompt §25).
+ * The symbol additions are one small page of the authoritative change table, ranked by the shell on
+ * the same quantity the growth lists use. They are not a second copy of the diff (prompt §25). The
+ * section additions are Core's own list (`summary.addedSections`): sorting the table would recommend
+ * host metadata and unpaired names (NEXT-CORE-01).
  */
 const ADDITION_LIMIT = 5;
 
@@ -398,37 +401,24 @@ export function Compare({
     }
     const id = ++additionsRequest.current;
     const diffId = summary.diffId;
-    void Promise.all([
-      querySectionChanges({
-        diffId,
-        filter: null,
-        changeKind: 'added',
-        sort: 'memorySize',
-        direction: 'desc',
-        offset: 0,
-        limit: ADDITION_LIMIT,
-      }),
-      querySymbolChanges({
-        diffId,
-        filter: null,
-        changeKind: 'added',
-        sort: 'size',
-        direction: 'desc',
-        offset: 0,
-        limit: ADDITION_LIMIT,
-      }),
-    ]).then(([sections, symbols]) => {
+    const sections = summary.addedSections;
+    void querySymbolChanges({
+      diffId,
+      filter: null,
+      changeKind: 'added',
+      sort: 'size',
+      direction: 'desc',
+      offset: 0,
+      limit: ADDITION_LIMIT,
+    }).then((symbols) => {
       if (additionsRequest.current !== id) {
         return;
       }
-      if (!sections.ok || !symbols.ok) {
+      if (!symbols.ok) {
         setAdditions(null);
         return;
       }
-      setAdditions({
-        sections: sections.value.rows.map(sectionAddition),
-        symbols: symbols.value.rows.map(symbolAddition),
-      });
+      setAdditions({ sections, symbols: symbols.value.rows.map(symbolAddition) });
     });
   }, [summary]);
 
@@ -1317,6 +1307,7 @@ function Ranking({
       <p className={styles['hint']}>
         {t('compare', 'ranking.basisHint')}
       </p>
+      <SectionsLeftOut counts={summary.sectionRankingExclusions} />
       <div className={styles['ranking']}>
         <div className={styles['list']}>
           <h3>{t('compare', 'ranking.growthHeading')}</h3>
@@ -1366,6 +1357,29 @@ function Ranking({
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * What Core's section lists leave out, and why (NEXT-CORE-01). Said only when something was left out, so
+ * a section missing from a list never reads as "it did not change": every such row is in the Sections
+ * view.
+ */
+function SectionsLeftOut({ counts }: { readonly counts: SectionRankingExclusionsDto }) {
+  const { t } = useI18n();
+  const total = counts.hostMetadata + counts.notLoaded + counts.undecided + counts.unpairedAdditions;
+  if (total === 0) {
+    return null;
+  }
+  return (
+    <p className={styles['hint']}>
+      {t('compare', 'ranking.sectionsLeftOut', {
+        hostMetadata: counts.hostMetadata,
+        notLoaded: counts.notLoaded,
+        undecided: counts.undecided,
+        unpaired: counts.unpairedAdditions,
+      })}
+    </p>
   );
 }
 
@@ -2218,15 +2232,6 @@ function Differs({ row }: { readonly row: SectionChangeRowDto | SymbolChangeRowD
 function Comparability({ value }: { readonly value: string }) {
   const state: StateName = value === 'exact' ? 'PASS' : value === 'partial' ? 'REVIEW' : 'UNKNOWN';
   return <StateBadge state={state} label={value} />;
-}
-
-function sectionAddition(row: SectionChangeRowDto): ContributorDto {
-  return {
-    key: row.key,
-    changeKind: row.changeKind,
-    delta: null,
-    bytes: row.memorySize.target ?? row.memorySize.base,
-  };
 }
 
 function symbolAddition(row: SymbolChangeRowDto): ContributorDto {

@@ -10,7 +10,7 @@
 //! golden in `golden/reports/` a real check instead of a fuzzy one.
 
 use firmwaresight_core::domain::diff::{
-    ByteChange, ChangeKind, Contributor, DiffResult, ObjectChange,
+    ByteChange, ChangeKind, Contributor, DiffResult, ObjectChange, SectionRankingExclusions,
 };
 
 use crate::diff::{ByteChangeDto, DiffResultDto, ObjectChangesDto};
@@ -734,14 +734,19 @@ pub fn render_human(result: &DiffResult) -> String {
 
     push_contributors(
         &mut out,
-        "Top section growth (Changed rows)",
+        "Top growth, sections that cost the device (Changed rows)",
         &result.top_section_growth(5),
     );
     push_contributors(
         &mut out,
-        "Largest added sections (absence, never 0)",
+        "Largest added sections that cost the device (absence, never 0)",
         &result.largest_added_sections(5),
     );
+    if let Some(note) =
+        section_exclusion_note(&result.section_ranking_exclusions(), "--json or --html")
+    {
+        out.push_str(&crate::text::wrap(&note, "  ", "  "));
+    }
     push_contributors(
         &mut out,
         "Top symbol growth (Changed rows)",
@@ -820,6 +825,27 @@ fn push_objects(out: &mut String, result: &DiffResult) {
         "Top library growth, Flash (Changed rows)",
         &result.top_object_growth(true, 5),
     );
+}
+
+/// What the two section rankings leave out and why, for a reader who adds them up (NEXT-CORE-01). `None`
+/// when nothing was left out. `where_full` names where every row of this comparison can be read.
+#[must_use]
+pub(crate) fn section_exclusion_note(
+    left_out: &SectionRankingExclusions,
+    where_full: &str,
+) -> Option<String> {
+    if left_out.total() == 0 {
+        return None;
+    }
+    Some(format!(
+        "Not ranked as sections that cost the device: {} host-metadata, {} not-loaded and {} undecided \
+         section(s) that grew or were added, and {} added section(s) whose name repeats. Every one is a \
+         row of the full comparison ({where_full}).",
+        left_out.host_metadata,
+        left_out.not_loaded,
+        left_out.undecided,
+        left_out.unpaired_additions
+    ))
 }
 
 fn push_contributors(out: &mut String, title: &str, rows: &[Contributor]) {

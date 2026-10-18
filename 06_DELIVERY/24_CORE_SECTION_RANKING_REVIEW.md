@@ -3,12 +3,14 @@ title: "Core Section Ranking Review"
 doc_id: "FS-DEL-024"
 product: "FirmwareSight"
 version: "0.6.0"
-status: "REVIEW_VERDICT"
+status: "REVIEW_VERDICT; OPTION_2_IMPLEMENTED"
 owner: "Engineering"
 last_updated: "2026-10-17"
 ---
 
 # Core review: `.symtab` at the top of the section growth ranking
+
+**Follow-up:** option 2 was implemented in NEXT-CORE-01 ([25](25_CORE_SECTION_RANKING_FIX.md)). Option 1 (the meaning of `memory_size` for unloaded sections) is still open. The outputs quoted below, and `evidence/D4/CROSSCHECK.md`, are from before the fix and are kept as the evidence of the defect.
 
 A read-only review requested in D2C-R §4, after R7 recorded that `.symtab` leads the Compare section ranking on `m2-objects` (`06_DELIVERY/21` §4). Nothing in the code was changed by this review.
 

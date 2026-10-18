@@ -898,6 +898,20 @@ fn summary(diff_id: &str, result: &DiffResult) -> CompareSummaryDto {
             .into_iter()
             .map(contributor)
             .collect(),
+        added_sections: result
+            .largest_added_sections(MAX_TOP_SECTIONS)
+            .into_iter()
+            .map(contributor)
+            .collect(),
+        section_ranking_exclusions: {
+            let left_out = result.section_ranking_exclusions();
+            crate::ipc::SectionRankingExclusionsDto {
+                host_metadata: left_out.host_metadata,
+                not_loaded: left_out.not_loaded,
+                undecided: left_out.undecided,
+                unpaired_additions: left_out.unpaired_additions,
+            }
+        },
         warnings: result
             .warnings
             .iter()

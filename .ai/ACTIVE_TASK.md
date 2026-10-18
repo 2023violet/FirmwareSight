@@ -11,14 +11,13 @@ last_updated: "2026-10-17"
 # Active Task
 
 ```text
-D2C_R_REAL_USE_AND_PILOT_ADMISSION
+CORE_SECTION_RANKING_CORRECTNESS
 ```
 
-- **Authorized by:** the Owner in chat on 2026-10-17 (after accepting R0–R7): documents, research and verification preparation on a separate branch. Not authorized: public release, external distribution of installers, system-setting changes, unreviewed product changes.
-- **Plan and status:** [06_DELIVERY/23_D2C_R.md](../06_DELIVERY/23_D2C_R.md).
-- **Base:** `main` `5015143`. **Branch:** `docs/d2c-r`.
-- **Waiting on the Owner:** the fast-forward of this branch (Standing Owner rule 1); final Pilot approval; naming the next task (recommended: the section-ranking fix, `06_DELIVERY/24` option 2).
-- **Waiting on a person:** the human QA pack ([evidence/D2C-R](../evidence/D2C-R/HUMAN_QA_PACK.md)), first its Pilot minimum.
-- **Last task:** `R7_QUALITY` and the R-series close ([06_DELIVERY/22](../06_DELIVERY/22_R_SERIES_FINAL_REPORT.md)).
+- **Authorized by:** the Owner's execution contract "NEXT-CORE-01" in chat on 2026-10-17: develop, test and review on a separate branch; a push to `main` needs its own Owner approval.
+- **Plan and acceptance:** [06_DELIVERY/25_CORE_SECTION_RANKING_FIX.md](../06_DELIVERY/25_CORE_SECTION_RANKING_FIX.md); source [06_DELIVERY/24](../06_DELIVERY/24_CORE_SECTION_RANKING_REVIEW.md) option 2.
+- **Base:** `main` `1a7f295`. **Branch:** `feature/core-section-ranking-correctness`.
+- **Not in this task:** the armlink MAP parser, any Section schema or migration change, Pilot distribution, V1 re-freeze, user-data cleanup, release, deleting branches.
+- **Last task:** `D2C_R_REAL_USE_AND_PILOT_ADMISSION`, on `main` at `1a7f295` (CI run `39099224047`, 10/10).
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

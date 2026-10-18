@@ -125,7 +125,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 21_R7_QUALITY.md
 │   ├── 22_R_SERIES_FINAL_REPORT.md
 │   ├── 23_D2C_R.md
-│   └── 24_CORE_SECTION_RANKING_REVIEW.md
+│   ├── 24_CORE_SECTION_RANKING_REVIEW.md
+│   └── 25_CORE_SECTION_RANKING_FIX.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -525,6 +526,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── SectionChangeRowDto.ts
 │           │   │   │   ├── SectionChangeSortDto.ts
 │           │   │   │   ├── SectionPageDto.ts
+│           │   │   │   ├── SectionRankingExclusionsDto.ts
 │           │   │   │   ├── SectionRequestDto.ts
 │           │   │   │   ├── SectionRowDto.ts
 │           │   │   │   ├── SectionSideDto.ts
@@ -771,6 +773,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   └── README.md
 │   ├── M2/
 │   │   └── DESIGN_CHECKLIST.md
+│   ├── NEXT-CORE-01/
+│   │   ├── AC_MATRIX.tsv
+│   │   ├── NEXT-CORE-01_EVIDENCE.zip
+│   │   └── README.md
 │   ├── R1/
 │   │   ├── AC_MATRIX.tsv
 │   │   ├── R1_NATIVE_SMOKE_EVIDENCE.zip

@@ -428,6 +428,9 @@ function comparison(overrides: Partial<CompareSummaryDto> = {}): CompareSummaryD
     },
     topSections: [{ key: '.text', changeKind: 'Changed', delta: 32, bytes: 92 }],
     topSymbols: [{ key: 'decode_packet', changeKind: 'Changed', delta: 128, bytes: 640 }],
+    // Core's own section additions (NEXT-CORE-01): the page shows these, never a sort of the table.
+    addedSections: [{ key: '.noinit', changeKind: 'Added', delta: null, bytes: 256 }],
+    sectionRankingExclusions: { hostMetadata: 0, notLoaded: 0, undecided: 0, unpairedAdditions: 0 },
     warnings: [],
   };
   return { ...base, ...overrides };
@@ -1356,11 +1359,11 @@ describe('the ranking as a way to the full list', () => {
 
   it('says the added rows are still being read before it names one of them', async () => {
     await openCompare();
-    // Hold the added-rows read open. The ranking region is painted from the summary and does not
+    // Hold the added-symbols read open. The ranking region is painted from the summary and does not
     // wait for it, so the screen has to say what is missing rather than show a row it never got.
-    const pending = deferred<SectionChangePageDto>();
-    sectionChangesMock.mockImplementation((request) =>
-      request.changeKind === 'added' ? pending.promise : Promise.resolve(sectionChangesAnswer(request)),
+    const pending = deferred<SymbolChangePageDto>();
+    symbolChangesMock.mockImplementation((request) =>
+      request.changeKind === 'added' ? pending.promise : Promise.resolve(symbolChangesAnswer(request)),
     );
 
     await runCompare();
@@ -1371,14 +1374,54 @@ describe('the ranking as a way to the full list', () => {
     // The growth list is the summary's own answer, so it is already here.
     expect(screen.getByRole('button', { name: 'Show sections changes for .text' })).toBeDefined();
 
-    pending.resolve(
-      ok(sectionPage(sectionRows().filter((row) => row.changeKind === 'Added'))),
-    );
+    pending.resolve(ok(symbolPage(symbolRows().filter((row) => row.changeKind === 'Added'))));
 
     expect(
       await screen.findByRole('button', { name: 'Show sections changes for .noinit' }),
     ).toBeDefined();
     expect(within(ranking).queryByText('Reading the added rows…')).toBeNull();
+  });
+
+  it("shows Core's section additions and never sorts the table into a recommendation (NEXT-CORE-01)", async () => {
+    await openCompare();
+    // The table holds a host-metadata addition larger than anything else; Core's list does not have it.
+    sectionChangesMock.mockImplementation(async (request) => {
+      const answer = sectionChangesAnswer(request);
+      if (!answer.ok || request.changeKind !== 'added') {
+        return answer;
+      }
+      const metadata = { ...answer.value.rows[0], key: '.ARM.attributes' } as SectionChangeRowDto;
+      return ok(sectionPage([metadata, ...answer.value.rows]));
+    });
+    await runCompare();
+
+    expect(
+      await screen.findByRole('button', { name: 'Show sections changes for .noinit' }),
+    ).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Show sections changes for .ARM.attributes' })).toBeNull();
+    const askedForAdded = sectionChangesMock.mock.calls.some(([request]) => request.changeKind === 'added');
+    expect(askedForAdded).toBe(false);
+  });
+
+  it('says which sections the lists leave out, and only when some are', async () => {
+    await openCompare(
+      comparison({
+        sectionRankingExclusions: { hostMetadata: 2, notLoaded: 1, undecided: 0, unpairedAdditions: 2 },
+      }),
+    );
+    await runCompare();
+    const ranking = await screen.findByRole('region', { name: 'Top growth and largest additions' });
+    const note = within(ranking).getByText(/Not ranked as sections that cost the device/);
+    expect(note.textContent).toContain('2 host-metadata, 1 not-loaded and 0 undecided');
+    expect(note.textContent).toContain('2 added section(s) whose name repeats');
+    expect(note.textContent).toContain('Sections view');
+  });
+
+  it('adds no left-out note when the lists leave nothing out', async () => {
+    await openCompare();
+    await runCompare();
+    const ranking = await screen.findByRole('region', { name: 'Top growth and largest additions' });
+    expect(within(ranking).queryByText(/Not ranked as sections that cost the device/)).toBeNull();
   });
 
   it('drills a growth entry into the section table that holds it', async () => {
@@ -1580,7 +1623,7 @@ describe('export', () => {
     await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
     compareMock.mockResolvedValueOnce(ok(comparison({ diffId: 'cmp-new-subject' })));
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Compare' })); });
-    await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-new-subject')).toBe(true));
+    await waitFor(() => expect(symbolChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-new-subject')).toBe(true));
     await act(async () => { pending.resolve(ok({ status: 'written', fileName: 'old-comparison-report.svg', format: 'svg' })); });
     expect(screen.queryByText(/old-comparison-report/)).toBeNull();
     expect((exportButton('Export SVG') as HTMLButtonElement).disabled).toBe(false);
@@ -1595,7 +1638,7 @@ describe('export', () => {
     await waitFor(() => expect(exportVisualMock).toHaveBeenCalled());
     compareMock.mockResolvedValueOnce(ok(comparison({ diffId: 'cmp-moved-on' })));
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Compare' })); });
-    await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-moved-on')).toBe(true));
+    await waitFor(() => expect(symbolChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-moved-on')).toBe(true));
     await act(async () => {
       pending.resolve({
         ok: false,
@@ -1624,7 +1667,7 @@ describe('export', () => {
       });
       compared.resolve(ok(comparison({ diffId: 'cmp-same-tick' })));
     });
-    await waitFor(() => expect(sectionChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-same-tick')).toBe(true));
+    await waitFor(() => expect(symbolChangesMock.mock.calls.some(([r]) => r.diffId === 'cmp-same-tick')).toBe(true));
     expect(screen.getByText(/changed while the Save dialog was open, so nothing was written/)).toBeDefined();
     expect(screen.queryByRole('alert')).toBeNull();
   });
@@ -2023,8 +2066,10 @@ describe('U1P-R3 the comparison survives the page it was made on', () => {
     const [afterBase, afterTarget] = pair();
     expect([afterBase.value, afterTarget.value]).toEqual(shown);
     // Every paged read still addresses the diff the reader computed - not a fresh handle, not a stale one.
+    // Section additions now travel with the summary (NEXT-CORE-01), so the section table may not have
+    // been asked yet; whatever was asked used this result's own handle.
     const handles = new Set(sectionChangesMock.mock.calls.map(([request]) => request.diffId));
-    expect([...handles]).toEqual(['cmp-7f3a-1']);
+    expect([...handles].every((handle) => handle === 'cmp-7f3a-1')).toBe(true);
     const symbolHandles = new Set(symbolChangesMock.mock.calls.map(([request]) => request.diffId));
     expect([...symbolHandles]).toEqual(['cmp-7f3a-1']);
   });

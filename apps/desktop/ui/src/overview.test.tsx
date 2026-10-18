@@ -292,6 +292,8 @@ function latestComparison(): CompareSummaryDto {
     },
     topSections: [],
     topSymbols: [],
+    addedSections: [],
+    sectionRankingExclusions: { hostMetadata: 0, notLoaded: 0, undecided: 0, unpairedAdditions: 0 },
     warnings: [],
   } as unknown as CompareSummaryDto;
 }

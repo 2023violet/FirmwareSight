@@ -1,0 +1,31 @@
+id	check	verdict	observation
+AC05-red	the new Core tests on the unchanged code	FAIL (expected)	4 of 5 new tests fail before the fix: test result: FAILED. 40 passed; 4 failed; 1 ignored; 0 measured; 125 filtered out; finished in 0.53s
+AC05-mutation	the final tests against the old ranking (admission filter and ambiguity exclusion removed, then restored)	FAIL (expected)	4 of the final ranking tests fail: a_role_word_the_core_does_not_know_is_not_guessed_into_the_budget, a_section_that_changed_admission_between_builds_is_not_ranked_either_way, host_metadata_and_unloaded_sections_never_lead_the_section_growth_ranking, the_largest_added_sections_are_budget_sections_with_a_name_that_pairs
+AC05-green	the new Core tests on the fix	PASS	cargo test -p firmwaresight-core: 170 passed, 0 failed (5 ranking tests, 1 role read-back test)
+AC01	m2-objects: budgets unchanged; .text leads; .bss listed; .symtab not ranked	PASS	Flash 132→196 (+64), RAM 12→44 (+32); ranking .text +64, .bss +32 (CLI, Markdown, desktop K01/K02)
+AC02	m2-objects: metadata growth still traceable	PASS	.symtab +96 and .strtab +27 in the Sections view (K04); the note counts 2 host-metadata sections (CLI, Markdown, desktop K03)
+AC03	d4-armlink: budgets unchanged; ER_IROM1 leads; metadata not ranked; MAP still refused	PASS	Flash 108→192 (+84), RAM 12→44 (+32); ranking ER_IROM1 +84 only (A01/A02); fwsight analyze --map: ERR-MAP-3001
+AC04	counts unchanged; unpaired RW_IRAM1 not recommended	PASS	Sections +2 -2 ~7, 4 unpaired, before and after; largest added sections: none; note: 2 added sections whose name repeats (A03); Core test asserts counts and ambiguity
+AC06	all surfaces agree	PASS	CLI text and Markdown (markdown_cli test), release report (golden), desktop ranking and Compare Markdown export (K02/K05, A02/A05); desktop section additions now Core's list (compare.test)
+AC07	goldens regenerated on purpose	PASS	only golden/reports/p4-release changed: release-report.html section ranking (.debug_loclists, .debug_info, .debug_line, .symtab out; .bss in; heading and note), its SHA256SUMS line and the manifest's two digests; p2-diff.html and every JSON golden unchanged
+AC08	gates	PASS	check.py 20/20: 1614 Rust tests, 535 UI tests, fmt, clippy, lint, typecheck, drift and deny
+SMOKE-K01	native desktop, QA build	PASS	lead: "Flash 变化▲64 bytes132 bytes → 196 bytes · 48.5% · RAM ▲32 bytes · 可比性 exact · 增长最大的对象 sensors/imu.o ▲36 bytes"
+SMOKE-K02	native desktop, QA build	PASS	section picks in the ranking: "显示 .text 的节变化 | 显示 .bss 的节变化"
+SMOKE-K03	native desktop, QA build	PASS	left-out note: "未作为占用设备的节参与排名：2 个主机元数据节、0 个未加载节、0 个无法判定的节发生了增长或新增，另有 0 个名称重复的新增节。它们都在“节”视图中。"
+SMOKE-K04	native desktop, QA build	PASS	the full Sections view still holds the metadata rows: "Changed.bss0 bytes0 bytes0 bytes无变化8 byt | Changed.data4 bytes4 bytes0 bytes无变化4 by | Changed.shstrtab69 bytes69 bytes0 bytes无 | Changed.strtab181 bytes208 bytes▲27 byte | Changed.symtab432 bytes528 bytes▲96 byte | Changed.text128 bytes192 bytes
+SMOKE-K05	native desktop, QA build	PASS	Compare > Export Markdown (DIALOG_OK): ranking agrees with the screen; note present
+SMOKE-K06	native desktop, QA build	PASS	Owner app data unchanged: 23 files, identical hashes
+SMOKE-A01-run1	native desktop, QA build	PASS	lead: "Flash 变化▲84 bytes108 bytes → 192 bytes · 77.8% · RAM ▲32 bytes · 可比性 exact · 增长最大的节 ER_IROM1 ▲84 bytes" (first run; driver check did not unescape Markdown `\_`; kept)
+SMOKE-A02-run1	native desktop, QA build	PASS	section picks in the ranking: "显示 ER_IROM1 的节变化" (first run; driver check did not unescape Markdown `\_`; kept)
+SMOKE-A03-run1	native desktop, QA build	PASS	left-out note: "未作为占用设备的节参与排名：4 个主机元数据节、0 个未加载节、0 个无法判定的节发生了增长或新增，另有 2 个名称重复的新增节。它们都在“节”视图中。" (first run; driver check did not unescape Markdown `\_`; kept)
+SMOKE-A04-run1	native desktop, QA build	PASS	the full Sections view still holds the metadata rows: "Changed.comment344 bytes348 bytes▲4 byte | Changed.debug_frame100 bytes116 bytes▲16 | Changed.note28 bytes28 bytes0 bytes无变化28 | Changed.shstrtab76 bytes76 bytes0 bytes无 | Changed.strtab308 bytes332 bytes▲24 byte | Changed.symtab240 bytes288 byt (first run; driver check did not unescape Markdown `\_`; kept)
+SMOKE-A05-run1	native desktop, QA build	FAIL	Compare > Export Markdown (DIALOG_OK): ranking agrees with the screen; note present (first run; driver check did not unescape Markdown `\_`; kept)
+SMOKE-A06-run1	native desktop, QA build	PASS	Owner app data unchanged: 23 files, identical hashes (first run; driver check did not unescape Markdown `\_`; kept)
+SMOKE-A01	native desktop, QA build	PASS	lead: "Flash 变化▲84 bytes108 bytes → 192 bytes · 77.8% · RAM ▲32 bytes · 可比性 exact · 增长最大的节 ER_IROM1 ▲84 bytes"
+SMOKE-A02	native desktop, QA build	PASS	section picks in the ranking: "显示 ER_IROM1 的节变化"
+SMOKE-A03	native desktop, QA build	PASS	left-out note: "未作为占用设备的节参与排名：4 个主机元数据节、0 个未加载节、0 个无法判定的节发生了增长或新增，另有 2 个名称重复的新增节。它们都在“节”视图中。"
+SMOKE-A04	native desktop, QA build	PASS	the full Sections view still holds the metadata rows: "Changed.comment344 bytes348 bytes▲4 byte | Changed.debug_frame100 bytes116 bytes▲16 | Changed.note28 bytes28 bytes0 bytes无变化28 | Changed.shstrtab76 bytes76 bytes0 bytes无 | Changed.strtab308 bytes332 bytes▲24 byte | Changed.symtab240 bytes288 byt
+SMOKE-A05	native desktop, QA build	PASS	Compare > Export Markdown (DIALOG_OK): ranking agrees with the screen; note present
+SMOKE-A06	native desktop, QA build	PASS	Owner app data unchanged: 23 files, identical hashes
+AC09	independent review of the final commit	PENDING	see 06_DELIVERY/25 §4
+AC10	Owner checkout, Owner app data, QA stores, branches untouched	PENDING	checked at the end, read-only

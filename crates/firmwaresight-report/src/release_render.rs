@@ -459,7 +459,16 @@ fn render_compare(report: &ReleaseBundleReport<'_>, out: &mut String) {
 }
 
 fn growth_table(out: &mut String, noun: &str, rows: &[Contributor]) {
-    out.push_str(&format!("<h4>Top {noun} growth</h4>\n"));
+    if noun == "section" {
+        // NEXT-CORE-01: Core ranks only sections memory accounting charges; say so where the list is.
+        out.push_str(
+            "<h4>Top growth, sections that cost the device</h4>\n<p class=\"meta\">Loaded sections that \
+             are not host metadata. Symbol and string tables, debug data and other unloaded sections are \
+             not ranked; every section row is in <span class=\"mono\">diff.json</span>.</p>\n",
+        );
+    } else {
+        out.push_str(&format!("<h4>Top {noun} growth</h4>\n"));
+    }
     if rows.is_empty() {
         out.push_str(&format!(
             "<p class=\"empty\">No {noun} row exists on both sides with a decidable growth.</p>\n"

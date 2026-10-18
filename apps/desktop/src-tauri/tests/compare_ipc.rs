@@ -211,11 +211,13 @@ fn a_summary_is_bounded_and_carries_no_change_table() {
     assert_eq!(
         keys,
         vec![
+            "addedSections",
             "base",
             "counts",
             "diffId",
             "memory",
             "objectChanges",
+            "sectionRankingExclusions",
             "target",
             "topSections",
             "topSymbols",
@@ -225,6 +227,16 @@ fn a_summary_is_bounded_and_carries_no_change_table() {
     );
     assert!(summary.top_sections.len() <= 5);
     assert!(summary.top_symbols.len() <= 10);
+    // NEXT-CORE-01: Core's own section additions, capped like the growth list; the left-out counts are
+    // four numbers, so the summary stays bounded.
+    assert!(summary.added_sections.len() <= 5);
+    assert!(
+        summary
+            .added_sections
+            .iter()
+            .all(|row| row.change_kind == "Added" && row.delta.is_none()),
+        "an addition is never growth from zero"
+    );
     assert_eq!(summary.base.snapshot_id, base);
     assert_eq!(summary.target.snapshot_id, target);
     assert_eq!(summary.base.file_name, "firmware.elf");

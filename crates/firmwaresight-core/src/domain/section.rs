@@ -72,6 +72,34 @@ impl SectionRole {
             Self::Debug | Self::SymbolTable | Self::StringTable | Self::Note | Self::ArmAttribute
         )
     }
+
+    /// Whether memory accounting charges a section of this role at all: it must be allocated and must
+    /// not be host metadata. This is the one admission rule; the footprint, region usage and the diff's
+    /// section rankings all ask it (NEXT-CORE-01).
+    #[must_use]
+    pub const fn admitted_to_budget(self, alloc: bool) -> bool {
+        alloc && !self.is_device_metadata()
+    }
+
+    /// The role from the word a stored section row carries, which is this enum's `Debug` name
+    /// (`"Code"`, `"SymbolTable"`, …). Any other word is `None`: an unrecognized role is not guessed.
+    #[must_use]
+    pub fn from_name(name: &str) -> Option<Self> {
+        Some(match name {
+            "Code" => Self::Code,
+            "ReadOnlyData" => Self::ReadOnlyData,
+            "InitializedData" => Self::InitializedData,
+            "UninitializedData" => Self::UninitializedData,
+            "Debug" => Self::Debug,
+            "Note" => Self::Note,
+            "SymbolTable" => Self::SymbolTable,
+            "StringTable" => Self::StringTable,
+            "ArmAttribute" => Self::ArmAttribute,
+            "Other" => Self::Other,
+            "Unknown" => Self::Unknown,
+            _ => return None,
+        })
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -154,6 +182,31 @@ mod tests {
         assert!(SectionRole::Debug.is_device_metadata());
         assert!(!SectionRole::Debug.contributes_nonvolatile_by_default());
         assert!(!SectionRole::Debug.contributes_runtime_ram_by_default());
+    }
+
+    #[test]
+    fn every_role_reads_back_from_the_word_a_stored_row_carries() {
+        for role in [
+            SectionRole::Code,
+            SectionRole::ReadOnlyData,
+            SectionRole::InitializedData,
+            SectionRole::UninitializedData,
+            SectionRole::Debug,
+            SectionRole::Note,
+            SectionRole::SymbolTable,
+            SectionRole::StringTable,
+            SectionRole::ArmAttribute,
+            SectionRole::Other,
+            SectionRole::Unknown,
+        ] {
+            assert_eq!(SectionRole::from_name(&format!("{role:?}")), Some(role));
+        }
+        assert_eq!(
+            SectionRole::from_name("code"),
+            None,
+            "the word is matched exactly"
+        );
+        assert_eq!(SectionRole::from_name(""), None);
     }
 
     #[test]

@@ -461,7 +461,7 @@ fn calculate_region_usage(
 
             for section in sections
                 .iter()
-                .filter(|section| section.flags.alloc && !section.role.is_device_metadata())
+                .filter(|section| section.role.admitted_to_budget(section.flags.alloc))
             {
                 let Some(contribution) = contributions_by_index.get(&section.index).copied() else {
                     continue;
