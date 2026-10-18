@@ -122,7 +122,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 18_R4_RELEASE.md
 │   ├── 19_R5_HISTORY.md
 │   ├── 20_R6_REPORTS.md
-│   └── 21_R7_QUALITY.md
+│   ├── 21_R7_QUALITY.md
+│   └── 22_R_SERIES_FINAL_REPORT.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
