@@ -169,4 +169,9 @@ fn an_armlink_map_gives_regions_objects_and_libraries_like_a_gnu_one() {
         text.contains("libdrv.lib(spi.o)"),
         "the added library member: {text}"
     );
+    // ADR-0036 A2: the RW data and ZI parts of RW_IRAM1 pair by role, so nothing is left unpaired.
+    assert!(
+        text.contains("Sections  +0 -0 ~9 (0 rows whose name repeats)"),
+        "{text}"
+    );
 }

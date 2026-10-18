@@ -101,3 +101,13 @@ The Owner accepted R0–R7 as delivered ([06_DELIVERY/22](../06_DELIVERY/22_R_SE
 | OS2 | Human testing before release is not required: automated native QA driven with real Windows input stands in for it, and public users test after release. Checks automation cannot do (screen-reader listening, system DPI) are disclosed as untested, not claimed. |
 | OS3 | The route continues without lengthy deliberation: open-source readiness, automated QA, then features worth adding (first: the armlink MAP adapter, D4). Release binaries may ship unsigned with the disclosure in `SECURITY.md`. Making a release public remains one explicit confirmation per release. |
 
+
+## Owner decisions 2026-10-18: second release scope
+
+The Owner asked for three features before judging a second public release: real-Keil validation of armlink with the repeated `RW_IRAM1` pairing fixed, IAR support, and code signing.
+
+| # | Decision |
+|---|---|
+| V7-1 | armlink on real projects: ADR-0036 A1 (compressed RW) and A2 (pairing by role). |
+| V7-2 | IAR: under Standing Owner rule 3 no adapter is built without real IAR `.out` + `.map` samples. None are on this machine or public in same-origin form, so IAR stays NOT_SUPPORTED / FIXTURE_BLOCKED until the Owner provides samples or a toolchain. |
+| V7-3 | Signing: keyless build-provenance attestations now (ADR-0037). Authenticode and Apple notarization need Owner-held certificates and accounts. |

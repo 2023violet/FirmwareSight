@@ -4,7 +4,7 @@ product:
   descriptor: Embedded Firmware Release Workbench
   tagline: "Know exactly what ships."
   cli: fwsight
-  baseline_version: 0.6.0
+  baseline_version: 0.7.0
   date: 2026-09-28
   status: P0_PASS_G1_PASS_ON_P0_BASIS_UNDER_ADR_0026_P1_PASS_P2_PASS_P3_PASS_P4_PASS_G2_PASS_MVP_CANDIDATE_P5_PASS_COMPLETE_V0_NON_BLOCKING
 

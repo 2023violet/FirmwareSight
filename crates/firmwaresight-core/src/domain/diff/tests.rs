@@ -1406,8 +1406,8 @@ fn a_section_that_changed_admission_between_builds_is_not_ranked_either_way() {
 
 #[test]
 fn the_largest_added_sections_are_budget_sections_with_a_name_that_pairs() {
-    // armlink names the RW data and the ZI part of one region the same, in both builds: two rows per
-    // side under one name, which the diff leaves unpaired (ambiguous) rather than pairing by position.
+    // armlink names the RW data and the ZI part of one region the same, in both builds. Since ADR-0036 A2
+    // the role tells them apart, so they pair: no unpaired rows, and the ZI growth is a real change.
     let (mut base, mut target) = metadata_outgrows_code();
     base.sections
         .push(shaped(7, "RW_IRAM1", "InitializedData", true, 4));
@@ -1429,34 +1429,47 @@ fn the_largest_added_sections_are_budget_sections_with_a_name_that_pairs() {
     assert_eq!(
         ranked_keys(&diff.largest_added_sections(10)),
         vec![".new_code".to_owned()],
-        "metadata is not a device addition, and an unpaired name is not a reliable one"
+        "metadata is not a device addition"
     );
     assert!(
-        !ranked_keys(&diff.top_section_growth(10)).contains(&"RW_IRAM1".to_owned()),
-        "an unpaired row is never turned into a change"
+        ranked_keys(&diff.top_section_growth(10)).contains(&"RW_IRAM1".to_owned()),
+        "the ZI part grew 8 -> 40 and is now a paired change"
     );
-    // The table and the counts still carry every row, with its note: nothing re-paired, nothing dropped.
-    assert_eq!(diff.counts.sections_added, 4);
-    assert_eq!(diff.counts.sections_removed, 2);
-    assert_eq!(diff.counts.sections_ambiguous, 4);
-    let unpaired: Vec<_> = diff
-        .section_changes
-        .iter()
-        .filter(|row| row.key == "RW_IRAM1")
-        .collect();
-    assert_eq!(unpaired.len(), 4);
-    assert!(
-        unpaired
-            .iter()
-            .all(|row| row.ambiguous && row.change != ChangeKind::Changed)
+    assert_eq!(diff.counts.sections_ambiguous, 0);
+    assert_eq!(
+        diff.counts.sections_added, 2,
+        ".ARM.attributes and .new_code"
     );
-
     let left_out = diff.section_ranking_exclusions();
-    assert_eq!(left_out.unpaired_additions, 2);
+    assert_eq!(left_out.unpaired_additions, 0);
     assert_eq!(
         left_out.host_metadata, 4,
         ".symtab, .strtab, .debug_frame grew; .ARM.attributes was added"
     );
-    assert_eq!(left_out.not_loaded, 1, ".comment grew");
-    assert_eq!(left_out.undecided, 0);
+}
+
+#[test]
+fn a_repeated_name_whose_roles_also_repeat_stays_unpaired() {
+    // Two sections of one name and one role on a side: nothing tells them apart, so nothing is paired by
+    // position (the rule before ADR-0036 A2, kept where it still applies).
+    let (mut base, mut target) = metadata_outgrows_code();
+    base.sections
+        .push(shaped(7, "RW_IRAM1", "InitializedData", true, 4));
+    base.sections
+        .push(shaped(8, "RW_IRAM1", "InitializedData", true, 8));
+    target
+        .sections
+        .push(shaped(7, "RW_IRAM1", "InitializedData", true, 4));
+    target
+        .sections
+        .push(shaped(8, "RW_IRAM1", "InitializedData", true, 40));
+    let diff = compare(&base, &target).expect("comparable");
+    assert_eq!(diff.counts.sections_ambiguous, 4);
+    assert!(
+        diff.section_changes
+            .iter()
+            .filter(|row| row.key == "RW_IRAM1")
+            .all(|row| row.ambiguous && row.change != ChangeKind::Changed)
+    );
+    assert_eq!(diff.section_ranking_exclusions().unpaired_additions, 2);
 }

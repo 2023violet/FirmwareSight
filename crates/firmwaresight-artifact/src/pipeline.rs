@@ -18,6 +18,7 @@ use firmwaresight_core::domain::identity::{
 };
 use firmwaresight_core::domain::memory::{MemoryEvidenceBasis, MemoryFootprint};
 use firmwaresight_core::domain::section::Section;
+use firmwaresight_core::domain::symbol::Symbol;
 
 pub const FWSIGHT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -112,6 +113,8 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
         apply_map_evidence(&mut facts.sections, &evidence);
         map_input = Some(candidate);
         map_evidence = Some(evidence);
+    } else {
+        mark_compressed_initialization_data(&mut facts.sections, &facts.symbols);
     }
     let parse_ms = parse_start.elapsed().as_millis();
 
@@ -203,9 +206,33 @@ pub fn analyze(request: &AnalysisRequest) -> Result<Analysis, ArtifactError> {
     })
 }
 
+/// armlink's decompressor in the image means some RW data is stored compressed: its ELF section holds the
+/// compressed bytes, so the section size is not its runtime size (ADR-0036 A1). Without the MAP nothing
+/// says which section or how large it runs, so every initialized writable section's runtime size is Unknown
+/// rather than reported as the stored size.
+fn mark_compressed_initialization_data(sections: &mut [Section], symbols: &[Symbol]) {
+    let decompressor = symbols.iter().any(|symbol| {
+        symbol
+            .name
+            .value()
+            .is_some_and(|name| name.starts_with("__decompress"))
+    });
+    if !decompressor {
+        return;
+    }
+    for section in sections
+        .iter_mut()
+        .filter(|s| s.flags.alloc && s.flags.write && s.has_file_payload())
+    {
+        section.memory_size = Fact::unknown(
+            "the image contains armlink's decompressor, so this RW data may be stored compressed and its runtime size is not in the ELF; analyze with the linker MAP",
+        );
+    }
+}
+
 /// Attach MAP-derived region and load-address evidence to the parsed sections.
 fn apply_map_evidence(sections: &mut [Section], evidence: &MapEvidence) {
-    for section in sections {
+    for section in sections.iter_mut() {
         let Some(name) = section.name.value() else {
             continue;
         };
@@ -249,6 +276,56 @@ fn apply_map_evidence(sections: &mut [Section], evidence: &MapEvidence) {
             .find(|r| r.contains(placement.address))
         {
             section.region = Fact::known(region.name.clone());
+        }
+    }
+
+    // ADR-0036 A1: an armlink region with compressed RW data keeps the compressed bytes in its ELF data
+    // section, so that section's size is the stored size, not the runtime size. The MAP's region Size is the
+    // runtime size; the data section is that Size less the region's other (ZI) sections.
+    for placement in evidence
+        .placements
+        .iter()
+        .filter(|p| p.runtime_size.is_some())
+    {
+        let Some(runtime) = placement.runtime_size else {
+            continue;
+        };
+        let inside = |section: &Section| {
+            section
+                .name
+                .value()
+                .is_some_and(|n| n == &placement.section)
+                && section.virtual_address.value().is_some_and(|a| {
+                    *a >= placement.address && *a - placement.address < runtime.max(1)
+                })
+        };
+        // Sizes come from user input: an overflowing sum is a malformed image, not a number.
+        let zero_init: Option<u64> = sections
+            .iter()
+            .filter(|s| inside(s) && !s.has_file_payload())
+            .filter_map(|s| s.memory_size.value().copied())
+            .try_fold(0_u64, u64::checked_add);
+        let data: Vec<usize> = (0..sections.len())
+            .filter(|&i| inside(&sections[i]) && sections[i].has_file_payload())
+            .collect();
+        if let [only] = data.as_slice() {
+            sections[*only].memory_size = match zero_init.map(|zi| runtime.checked_sub(zi)) {
+                Some(Some(bytes)) => Fact::known(bytes),
+                Some(None) => Fact::unknown(
+                    "the MAP's region size is smaller than the region's zero-initialized sections",
+                ),
+                None => Fact::unknown(
+                    "the region's zero-initialized section sizes overflow when added; the image is malformed",
+                ),
+            };
+        } else {
+            // Several data sections share one compressed region: the MAP gives only their total, so no
+            // section's runtime size is known, and the stored size must not stand in for it.
+            for &index in &data {
+                sections[index].memory_size = Fact::unknown(
+                    "armlink compressed this region and it holds several data sections; the MAP gives only the region's total runtime size",
+                );
+            }
         }
     }
 }
@@ -511,4 +588,167 @@ fn build_evidence(
     }
 
     items
+}
+
+#[cfg(test)]
+mod map_application_tests {
+    use super::*;
+    use crate::map::MapPlacement;
+    use firmwaresight_core::domain::section::{SectionFlags, SectionRole};
+
+    fn section(
+        index: usize,
+        name: &str,
+        address: u64,
+        file_size: u64,
+        memory_size: u64,
+    ) -> Section {
+        Section {
+            index,
+            name: Fact::known(name.to_owned()),
+            role: if file_size > 0 {
+                SectionRole::InitializedData
+            } else {
+                SectionRole::UninitializedData
+            },
+            flags: SectionFlags {
+                alloc: true,
+                write: true,
+                ..SectionFlags::default()
+            },
+            virtual_address: Fact::known(address),
+            load_address: Fact::unknown("not in the section header table"),
+            file_offset: Fact::unknown("test"),
+            file_size,
+            memory_size: Fact::known(memory_size),
+            region: Fact::unknown("test"),
+        }
+    }
+
+    #[test]
+    fn a_compressed_armlink_region_is_loaded_from_its_load_base_and_sized_by_the_map() {
+        // The CMSIS-DSP FIR example built by Keil MDK: RW_RAM holds 428 compressed bytes in its ELF data
+        // section and 1620 bytes of ZI; the MAP says the region is 0x1060 (4192) bytes at runtime.
+        let mut sections = vec![
+            section(2, "RW_RAM", 0x2000_0000, 0x1ac, 0x1ac),
+            section(3, "RW_RAM", 0x2000_0a0c, 0, 0x654),
+        ];
+        let evidence = MapEvidence {
+            adapter_id: crate::map_armlink::ADAPTER_ID,
+            regions: Vec::new(),
+            placements: vec![MapPlacement {
+                section: "RW_RAM".to_owned(),
+                address: 0x2000_0000,
+                size: 0x1060,
+                load_address: Some(0x194c),
+                load_unknown: None,
+                runtime_size: Some(0x1060),
+                line: 1,
+            }],
+            symbols: Vec::new(),
+            object_contributions: Vec::new(),
+            linker_bytes: Vec::new(),
+            emulation: None,
+        };
+        apply_map_evidence(&mut sections, &evidence);
+        assert_eq!(
+            sections[0].load_address,
+            Fact::known(0x194c),
+            "stored at its Load base"
+        );
+        assert_eq!(
+            sections[0].file_size, 0x1ac,
+            "Flash keeps the compressed size"
+        );
+        assert_eq!(
+            sections[0].memory_size,
+            Fact::known(0xa0c),
+            "runtime is the region less its ZI: 2572"
+        );
+        assert_eq!(
+            sections[1].memory_size,
+            Fact::known(0x654),
+            "ZI is untouched"
+        );
+    }
+
+    fn compressed_region(size: u64) -> MapEvidence {
+        MapEvidence {
+            adapter_id: crate::map_armlink::ADAPTER_ID,
+            regions: Vec::new(),
+            placements: vec![MapPlacement {
+                section: "RW_RAM".to_owned(),
+                address: 0x2000_0000,
+                size,
+                load_address: Some(0x194c),
+                load_unknown: None,
+                runtime_size: Some(size),
+                line: 1,
+            }],
+            symbols: Vec::new(),
+            object_contributions: Vec::new(),
+            linker_bytes: Vec::new(),
+            emulation: None,
+        }
+    }
+
+    #[test]
+    fn a_compressed_region_never_reports_a_stored_size_as_a_runtime_size() {
+        // Two data sections in one compressed region: only their total is known.
+        let mut sections = vec![
+            section(2, "RW_RAM", 0x2000_0000, 0x10, 0x10),
+            section(3, "RW_RAM", 0x2000_0100, 0x20, 0x20),
+        ];
+        apply_map_evidence(&mut sections, &compressed_region(0x1060));
+        assert!(sections.iter().all(|s| s.memory_size.value().is_none()));
+
+        // ZI sizes from a crafted image that overflow when added: Unknown, never a panic.
+        let mut sections = vec![
+            section(2, "RW_RAM", 0x2000_0000, 0x10, 0x10),
+            section(3, "RW_RAM", 0x2000_0100, 0, u64::MAX),
+            section(4, "RW_RAM", 0x2000_0200, 0, u64::MAX),
+        ];
+        apply_map_evidence(&mut sections, &compressed_region(0x1060));
+        assert!(sections[0].memory_size.value().is_none());
+    }
+
+    fn symbol(name: &str) -> Symbol {
+        Symbol {
+            name: Fact::known(name.to_owned()),
+            address: Fact::known(0x425),
+            size: Fact::known(0x64),
+            kind: firmwaresight_core::domain::symbol::SymbolKind::Function,
+            binding: firmwaresight_core::domain::symbol::SymbolBinding::Global,
+            section: firmwaresight_core::domain::symbol::SymbolSectionRef::Index(1),
+        }
+    }
+
+    #[test]
+    fn without_the_map_a_decompressor_makes_rw_data_runtime_size_unknown() {
+        let mut sections = vec![
+            section(2, "RW_RAM", 0x2000_0000, 0x1ac, 0x1ac),
+            section(3, "RW_RAM", 0x2000_0a0c, 0, 0x654),
+        ];
+        mark_compressed_initialization_data(&mut sections, &[symbol("main")]);
+        assert_eq!(
+            sections[0].memory_size,
+            Fact::known(0x1ac),
+            "no decompressor: unchanged"
+        );
+
+        mark_compressed_initialization_data(&mut sections, &[symbol("__decompress")]);
+        assert!(
+            sections[0].memory_size.value().is_none(),
+            "the stored size is not the runtime size"
+        );
+        assert_eq!(
+            sections[0].file_size, 0x1ac,
+            "Flash still holds the stored bytes"
+        );
+        assert_eq!(
+            sections[1].memory_size,
+            Fact::known(0x654),
+            "ZI is not compressed"
+        );
+    }
 }

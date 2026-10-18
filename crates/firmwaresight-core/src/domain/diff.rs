@@ -997,6 +997,28 @@ fn diff_sections(
             // it ambiguous would tell the reader the name repeats when it does not.
             (1, 0) => rows.push(removed_section(&base_rows[0], false)),
             _ => {
+                // ADR-0036 A2: a name can repeat because one linker region yields several sections of
+                // different kinds (armlink's RW data and ZI parts of `RW_IRAM1`). When the name and the role
+                // together are unique on each side, they identify a section as well as a unique name does.
+                if let Some(paired) = pair_by_role(base_rows, target_rows) {
+                    for row in paired {
+                        match row {
+                            RolePair::Both(base, target) => {
+                                let row = section_pair(base, target);
+                                if row.differing_fields.is_empty()
+                                    && row.indeterminate_fields.is_empty()
+                                {
+                                    unchanged += 1;
+                                } else {
+                                    rows.push(row);
+                                }
+                            }
+                            RolePair::BaseOnly(base) => rows.push(removed_section(base, false)),
+                            RolePair::TargetOnly(target) => rows.push(added_section(target, false)),
+                        }
+                    }
+                    continue;
+                }
                 for section in base_rows {
                     rows.push(removed_section(section, true));
                 }
@@ -1147,6 +1169,43 @@ fn compare_values<T: PartialEq + Copy>(
         (None, None) => {}
         _ => indeterminate.push(name.to_owned()),
     }
+}
+
+enum RolePair<'a> {
+    Both(&'a DiffSection, &'a DiffSection),
+    BaseOnly(&'a DiffSection),
+    TargetOnly(&'a DiffSection),
+}
+
+/// Pair the rows of one repeated name by role, or `None` when a role repeats on either side: then the
+/// evidence still cannot tell the rows apart, and they stay unpaired (ambiguous) as before.
+fn pair_by_role<'a>(
+    base: &'a [DiffSection],
+    target: &'a [DiffSection],
+) -> Option<Vec<RolePair<'a>>> {
+    let unique = |rows: &'a [DiffSection]| -> Option<BTreeMap<&'a str, &'a DiffSection>> {
+        let mut by_role = BTreeMap::new();
+        for row in rows {
+            if by_role.insert(row.role.as_str(), row).is_some() {
+                return None;
+            }
+        }
+        Some(by_role)
+    };
+    let (base, target) = (unique(base)?, unique(target)?);
+    let mut out = Vec::new();
+    for (role, base_row) in &base {
+        match target.get(role) {
+            Some(target_row) => out.push(RolePair::Both(base_row, target_row)),
+            None => out.push(RolePair::BaseOnly(base_row)),
+        }
+    }
+    for (role, target_row) in &target {
+        if !base.contains_key(role) {
+            out.push(RolePair::TargetOnly(target_row));
+        }
+    }
+    Some(out)
 }
 
 fn added_section(section: &DiffSection, ambiguous: bool) -> SectionChange {

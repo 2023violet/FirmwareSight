@@ -12,8 +12,10 @@
 //!   `--load_addr_map_info` adds (Keil uVision passes it by default). Without it, a region that executes
 //!   inside its load region loads where it runs; one that executes elsewhere has an **unknown** load
 //!   address, said with its reason, never guessed.
-//! - **Compressed RW data** (`COMPRESSED[...]`) is stored in Flash at a size that is not the section's,
-//!   so that region's load address is reported unknown rather than charged at the wrong size.
+//! - **Compressed RW data** (`COMPRESSED[...]`): the ELF section holds the *compressed* bytes, which is what
+//!   Flash stores, so it is charged at its file size from its `Load base`; its runtime size is the region's
+//!   `Size` from the MAP, because the ELF section size is not the decompressed size (ADR-0036 A1). Without a
+//!   `Load base` the load address stays unknown.
 //! - **Object rows** follow ADR-0033: `libx.lib(y.o)` for a library member; `PAD` and veneer rows are the
 //!   linker's own bytes and are never charged to an object.
 
@@ -122,11 +124,12 @@ pub fn parse(text: &str) -> Result<MapEvidence, ArtifactError> {
             lr.max
                 .is_some_and(|max| header.exec_base >= lr.base && header.exec_base - lr.base < max)
         });
-        let (load_address, load_unknown) = if header.compressed {
+        let runtime_size = header.compressed.then_some(header.size);
+        let (load_address, load_unknown) = if header.compressed && header.load_base.is_none() {
             (
                 None,
                 Some(
-                    "armlink compressed this region's initialization data (COMPRESSED); its stored size is not the section's size",
+                    "armlink compressed this region's initialization data and the map gives no Load base for it; link with --load_addr_map_info",
                 ),
             )
         } else if let Some(load) = header.load_base {
@@ -147,6 +150,7 @@ pub fn parse(text: &str) -> Result<MapEvidence, ArtifactError> {
             size: header.size,
             load_address,
             load_unknown,
+            runtime_size,
             line: header.line,
         });
         Ok(())
@@ -226,6 +230,15 @@ pub fn parse(text: &str) -> Result<MapEvidence, ArtifactError> {
             continue;
         };
         let output = Some(header.name.clone());
+        // armlink lists zero-size rows (the C library's `.ARM.Collect$$$$...` markers, empty sections).
+        // They cost nothing and are not contributions, as GNU ld's zero-size rows are not; their RW kind
+        // still says what the region holds.
+        if row.size == 0 {
+            if let RowKind::Section { rw, .. } = row.kind {
+                current_has_rw |= rw;
+            }
+            continue;
+        }
         match row.kind {
             RowKind::Pad => linker_bytes.push(MapLinkerBytes {
                 output_section: output,
@@ -420,6 +433,20 @@ Memory Map of the image
 ";
 
     #[test]
+    fn zero_size_rows_are_not_contributions() {
+        // A real Keil build lists the C library's `.ARM.Collect$$$$...` markers at size 0; storage refuses a
+        // zero-byte contribution, so the adapter must never produce one.
+        let with_markers = WITH_LOAD.replace(
+            "    0x08000066   0x08000066   0x00000002   PAD",
+            "    0x08000066   0x08000066   0x00000002   PAD
+    0x08000068   0x08000068   0x00000000   Code   RO         1230  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)",
+        );
+        let evidence = parse(&with_markers).expect("parses");
+        assert_eq!(evidence.object_contributions.len(), 4);
+        assert!(evidence.object_contributions.iter().all(|c| c.size > 0));
+    }
+
+    #[test]
     fn regions_placements_and_rows_come_from_the_image_map() {
         let evidence = parse(WITH_LOAD).expect("parses");
         assert_eq!(evidence.adapter_id, "armlink");
@@ -492,17 +519,30 @@ Memory Map of the image
     }
 
     #[test]
-    fn compressed_initialization_data_is_never_charged_at_the_section_size() {
+    fn compressed_initialization_data_is_charged_from_its_load_base_and_sized_by_the_map() {
         let compressed = WITH_LOAD.replace(
             "Max: 0x00004000, ABSOLUTE)",
             "Max: 0x00004000, ABSOLUTE, COMPRESSED[0x00000002])",
         );
         let evidence = parse(&compressed).expect("parses");
+        assert_eq!(evidence.placements[1].load_address, Some(0x0800_00bc));
+        assert_eq!(evidence.placements[1].load_unknown, None);
+        assert_eq!(
+            evidence.placements[1].runtime_size,
+            Some(0x2c),
+            "the region Size, not the ELF size"
+        );
+
+        let no_load = compressed.replace(
+            "Exec base: 0x20000000, Load base: 0x080000bc,",
+            "Base: 0x20000000,",
+        );
+        let evidence = parse(&no_load).expect("parses");
         assert_eq!(evidence.placements[1].load_address, None);
         assert!(
             evidence.placements[1]
                 .load_unknown
-                .is_some_and(|why| why.contains("COMPRESSED"))
+                .is_some_and(|why| why.contains("compressed"))
         );
     }
 

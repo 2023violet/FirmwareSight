@@ -87,7 +87,10 @@ const TAG: &str = "v1.2.3";
 /// `P5_VALIDATION/P5_PRODUCTIZATION_AUDIT.md`) re-issued the id for the same firmware, the same notes
 /// and the same commit. The id below is read from the golden the 0.6.0 binary wrote, not computed by
 /// hand; gate and diff identities did not move because neither input carries the app version.
-const RELEASE_ID: &str = "release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5";
+///
+/// v0.7.0 moved it again for the same reason (0.6.0's id was `release-e400a8ac…`); the value below is
+/// read from the golden the 0.7.0 build wrote.
+const RELEASE_ID: &str = "release-63f3c34ae2692c511183ed1e73999e4a8c4daff47d429c95df817979f212c3dd";
 const EXPECTED_HEAD: &str = "585dafd3eb59592563923818cdfec4e9a370a83b";
 
 fn repo_root() -> PathBuf {

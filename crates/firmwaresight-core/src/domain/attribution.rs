@@ -97,15 +97,22 @@ pub fn charge(row: &ObjectContribution, footprint: &MemoryFootprint) -> Charge {
     } else {
         named.first().copied()
     };
+    let nonvolatile = section.map(|c| c.nonvolatile_bytes.value().copied());
+    let runtime_ram = section.map(|c| c.runtime_ram_bytes.value().copied());
+    // A section charged to both budgets with two different sizes stores something other than its rows in
+    // Flash: armlink's compressed RW data (ADR-0036 A1). Each row's stored share is unknowable, so its Flash
+    // charge is Unknown; its RAM charge is still its size.
+    let stored_differently = matches!(
+        (nonvolatile, runtime_ram),
+        (Some(Some(stored)), Some(Some(runtime))) if stored > 0 && runtime > 0 && stored != runtime
+    );
     Charge {
-        nonvolatile: side(
-            section.map(|c| c.nonvolatile_bytes.value().copied()),
-            row.size,
-        ),
-        runtime_ram: side(
-            section.map(|c| c.runtime_ram_bytes.value().copied()),
-            row.size,
-        ),
+        nonvolatile: if stored_differently {
+            None
+        } else {
+            side(nonvolatile, row.size)
+        },
+        runtime_ram: side(runtime_ram, row.size),
     }
 }
 
@@ -241,6 +248,49 @@ mod tests {
             rule: "test",
             runtime_span: None,
         }
+    }
+
+    #[test]
+    fn rows_of_a_compressed_section_have_unknown_flash_and_known_ram() {
+        // armlink compressed 2572 bytes of RW data into 428 stored bytes: no row's stored share is known.
+        let footprint = footprint(
+            vec![section("RW_RAM", Fact::known(428), Fact::known(2572))],
+            428,
+            2572,
+        );
+        let row = ObjectContribution {
+            object: "arm_fir_data.o".to_owned(),
+            archive: None,
+            member: "arm_fir_data.o".to_owned(),
+            input_section: ".data".to_owned(),
+            output_section: Some("RW_RAM".to_owned()),
+            address: 0x2000_0000,
+            size: 2560,
+            map_line: 1,
+        };
+        let cost = charge(&row, &footprint);
+        assert_eq!((cost.nonvolatile, cost.runtime_ram), (None, Some(2560)));
+        // An ordinary data section stores what it runs: both charges stay the row's size.
+        let plain = footprint_plain();
+        let cost = charge(
+            &ObjectContribution {
+                output_section: Some(".data".to_owned()),
+                ..row
+            },
+            &plain,
+        );
+        assert_eq!(
+            (cost.nonvolatile, cost.runtime_ram),
+            (Some(2560), Some(2560))
+        );
+    }
+
+    fn footprint_plain() -> MemoryFootprint {
+        footprint(
+            vec![section(".data", Fact::known(4096), Fact::known(4096))],
+            4096,
+            4096,
+        )
     }
 
     #[test]

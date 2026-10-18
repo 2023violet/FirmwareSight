@@ -146,6 +146,12 @@ jobs:
     name: Package Windows
     if: github.event_name != 'pull_request'
     runs-on: windows-latest
+    # ADR-0037: a signed SLSA build-provenance attestation per distribution file, keyless through
+    # GitHub's Sigstore integration. Verify with `gh attestation verify <file> --repo <owner/repo>`.
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -168,6 +174,13 @@ jobs:
         id: dist
         shell: bash
         run: echo "prefix=$(python scripts/verify_package_artifacts.py --print-prefix)" >> "$GITHUB_OUTPUT"
+      - name: Attest build provenance (Sigstore, keyless)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            target/dist-package/*.exe
+            target/dist-package/*.zip
       - name: Upload the artifact set
         uses: actions/upload-artifact@v4
         with:
@@ -180,6 +193,12 @@ jobs:
     name: Package Ubuntu
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # ADR-0037: a signed SLSA build-provenance attestation per distribution file, keyless through
+    # GitHub's Sigstore integration. Verify with `gh attestation verify <file> --repo <owner/repo>`.
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -202,6 +221,13 @@ jobs:
         id: dist
         shell: bash
         run: echo "prefix=$(python scripts/verify_package_artifacts.py --print-prefix)" >> "$GITHUB_OUTPUT"
+      - name: Attest build provenance (Sigstore, keyless)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            target/dist-package/*.deb
+            target/dist-package/*.tar.gz
       - name: Upload the artifact set
         uses: actions/upload-artifact@v4
         with:
@@ -214,6 +240,12 @@ jobs:
     name: Package macOS
     if: github.event_name != 'pull_request'
     runs-on: macos-latest
+    # ADR-0037: a signed SLSA build-provenance attestation per distribution file, keyless through
+    # GitHub's Sigstore integration. Verify with `gh attestation verify <file> --repo <owner/repo>`.
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -237,6 +269,13 @@ jobs:
         id: dist
         shell: bash
         run: echo "prefix=$(python scripts/verify_package_artifacts.py --print-prefix)" >> "$GITHUB_OUTPUT"
+      - name: Attest build provenance (Sigstore, keyless)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            target/dist-package/*.dmg
+            target/dist-package/*.tar.gz
       - name: Upload the artifact set
         uses: actions/upload-artifact@v4
         with:

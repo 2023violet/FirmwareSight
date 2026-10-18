@@ -21,7 +21,7 @@ FirmwareSight is a local-first desktop app and CLI (`fwsight`) that turns a firm
 
 Nothing leaves your machine. Unknown or partial evidence stays explicit and is never shown as zero or as proof.
 
-Status: version `0.6.0`, open source under the [Apache License 2.0](LICENSE) ([ADR-0035](09_ADR/ADR-0035-apache-2-open-source-license.md)). Release binaries are not code-signed yet; see [SECURITY.md](SECURITY.md). Live status is in [.ai/NOW.md](.ai/NOW.md).
+Status: version `0.7.0`, open source under the [Apache License 2.0](LICENSE) ([ADR-0035](09_ADR/ADR-0035-apache-2-open-source-license.md)). Release files carry signed build provenance (Sigstore) but are not platform code-signed; see [SECURITY.md](SECURITY.md). Live status is in [.ai/NOW.md](.ai/NOW.md).
 
 ## Supported inputs
 
@@ -29,9 +29,9 @@ Status: version `0.6.0`, open source under the [Apache License 2.0](LICENSE) ([A
 |---|---|
 | ELF32 / ELF64, little or big endian | Parsed. Memory accounting is verified for GCC + GNU ld and Clang + GNU ld |
 | GNU ld `.map` | Supported |
-| Keil MDK / Arm Compiler (armlink) `.axf` | Parsed; memory accounting matches armlink's own totals on the committed sample ([ADR-0036](09_ADR/ADR-0036-armlink-map-adapter.md)) |
-| armlink `.map` (`--map`, ideally with `--load_addr_map_info`) | Supported: regions, MAP-backed accounting, object and library attribution. Verified on one synthetic Arm Compiler 6.24 sample; real-project cohort UNVERIFIED |
-| IAR (ILINK) output and `.map` | Not supported yet |
+| Keil MDK / Arm Compiler (armlink) `.axf` | Parsed; memory accounting matches armlink's own totals on the committed sample and on two real Keil MDK projects ([ADR-0036](09_ADR/ADR-0036-armlink-map-adapter.md), [evidence/D4-REAL](evidence/D4-REAL/README.md)). Compressed RW data without its MAP is reported as a lower bound |
+| armlink `.map` (`--map`, ideally with `--load_addr_map_info`) | Supported: regions, MAP-backed accounting, object and library attribution. Verified on one synthetic Arm Compiler 6.24 sample and two real µVision projects (RTX5 + microlib; CMSIS-DSP + Arm C library with compressed RW data). Compare pairs armlink's repeated region names by role |
+| IAR (ILINK) output and `.map` | Not supported yet: no real IAR samples are available to build and verify an adapter against |
 | `.bin` / Intel HEX | Attachable as release byte evidence; content not analyzed |
 
 Details: [04_TECH/03_FORMAT_SUPPORT.md](04_TECH/03_FORMAT_SUPPORT.md), [04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md](04_TECH/39_ELF_TOOLCHAIN_INTEROPERABILITY.md).

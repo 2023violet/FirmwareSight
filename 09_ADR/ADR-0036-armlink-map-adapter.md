@@ -78,3 +78,22 @@ The independent review returned PASS_WITH_FIXES with no S1. Every finding was fi
 - an object name containing a space is a known parsing limit;
 - the `p3_execution.license_gap` line in `BASELINE.yaml` records the P3 round and is history.
 
+
+## Amendment A1 (2026-10-18): compressed RW data, from real Keil projects
+
+Two real Keil MDK projects ([evidence/D4-REAL](../evidence/D4-REAL/README.md)) showed that decision 4 was wrong in both directions. The Flash total left out the compressed bytes, and RAM was the compressed size reported as exact. Decision 4 is replaced:
+
+1. **The ELF section of a compressed region holds the compressed bytes.** That is what Flash stores, so it is charged at its file size from the region's `Load base`.
+2. **The runtime size comes from the MAP.** The region's `Size` is the decompressed size (`MapPlacement::runtime_size`). The data section's runtime size is that `Size` less the region's ZI sections. If the region holds more than one data section, each one's runtime size is Unknown, because the MAP gives only their total. The value is computed from two observed numbers: the MAP's region `Size` and the ELF's ZI sizes. Alignment padding inside the region would be counted in the data section. On `dsp-fir` the result equals armlink's own `RW-data=2572`.
+3. **Rows in a compressed region:** each row's RAM is its size; its Flash is **Unknown**, because only the region's total stored size is known (`attribution::charge`).
+4. **Without a `Load base`** the compressed region's load address stays unknown, with the reason "link with --load_addr_map_info".
+5. **ELF only:** if the image contains armlink's decompressor (`__decompress*`), every initialized writable section's runtime size is Unknown, so RAM is a lower bound (derived), never exact. With a MAP, the MAP decides.
+6. **Known limits of the ELF-only rule:**
+   - a stripped armlink image has no symbols, so the decompressor cannot be seen and the stored size stays as the runtime size; analyze it with its MAP;
+   - a non-armlink image that defines a `__decompress*` symbol loses its RW runtime sizes to Unknown. This errs toward Unknown, never toward a wrong number.
+7. **Zero-size rows are not contributions.** armlink lists the C library's `.ARM.Collect$$$$...` markers at size 0. Storage refuses a zero-byte contribution, so the adapter skips them, as the GNU adapter does.
+8. **The load region's `Size` is authoritative for Flash.** armlink's "Total ROM Size" can be a few bytes smaller, because it leaves out alignment padding between execution regions (4 bytes in `rtx-blinky`).
+
+## Amendment A2 (2026-10-18): Compare pairs a repeated section name by role
+
+This closes the follow-up in §Consequences. When a section name repeats in a build, its rows are paired by role (`InitializedData`, `UninitializedData`, ...) if each role occurs at most once per side under that name. armlink's RW data and ZI parts of `RW_IRAM1` then pair as two ordinary rows. A role that repeats under one name still leaves all of that name's rows unpaired and ambiguous, as before; nothing is paired by position. The rule also applies when the name exists on one side only: rows with distinct roles are then plain additions or removals, not ambiguous ones. A section whose role changed under a repeated name shows as one removal and one addition. No GNU ld golden changed under A2. The diff schema is unchanged.

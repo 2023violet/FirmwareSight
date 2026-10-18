@@ -28,6 +28,10 @@ pub struct MapPlacement {
     /// `Load base`, or with compressed data). The section's load address is then recorded as unknown with
     /// this reason, never assumed equal to its runtime address.
     pub load_unknown: Option<&'static str>,
+    /// The region's runtime size when the ELF cannot show it: an armlink region whose RW data is
+    /// compressed keeps the *compressed* bytes in its ELF section, so its runtime size comes from the MAP's
+    /// region `Size` instead (ADR-0036 A1). `None` everywhere else.
+    pub runtime_size: Option<u64>,
     pub line: usize,
 }
 
@@ -400,6 +404,7 @@ fn parse_placement_line(raw: &str, line: usize) -> Result<Option<MapPlacement>, 
         size,
         load_address,
         load_unknown: None,
+        runtime_size: None,
         line,
     }))
 }

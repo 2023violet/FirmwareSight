@@ -980,10 +980,12 @@ fn the_relocated_golden_bundle_verifies_and_re_derives_the_release_id_it_claims(
         manifest["release"]["id"].as_str().expect("a release id"),
         "the id the bytes describe is the id the bundle claims"
     );
+    // The bundle's `analysis.json` records the FirmwareSight version, so the id moves with an intentional
+    // version change and with nothing else: 0.6.0 froze `release-e400a8ac…`, 0.7.0 is the id below.
     assert_eq!(
         verification.release_id,
-        "release-e400a8ac51a57d34e309d254536f8850044ef4dd53e26245045c24fdc86fdcc5",
-        "and that id is the one P4 froze, not one regenerated to suit this code"
+        "release-63f3c34ae2692c511183ed1e73999e4a8c4daff47d429c95df817979f212c3dd",
+        "and that id is the one the committed golden froze, not one regenerated to suit this code"
     );
     assert_eq!(
         verification.artifact_count, 2,
