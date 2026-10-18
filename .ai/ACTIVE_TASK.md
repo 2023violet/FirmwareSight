@@ -11,13 +11,14 @@ last_updated: "2026-10-17"
 # Active Task
 
 ```text
-NONE
+D2C_R_REAL_USE_AND_PILOT_ADMISSION
 ```
 
-- **Last task:** `R7_QUALITY` and its closeout. The R-series redesign (ADR-0034, R0–R7) is complete. R4–R7 reached `main` at `e1faeff` by an ordinary fast-forward on 2026-10-17 (run `39086793226`, 10/10 jobs). The closeout (Q6 and the real-input checks) follows on `docs/r-closeout`; read Git and Actions for its SHA.
-- **Final report:** [06_DELIVERY/22](../06_DELIVERY/22_R_SERIES_FINAL_REPORT.md).
-- **Left to a person:** listening with NVDA and Narrator, and real 125%/150% system scaling ([06_DELIVERY/21](../06_DELIVERY/21_R7_QUALITY.md) §3).
-- **Left to the Owner:** whether to delete the merged local branches `feature/r4-release` … `feature/r7-quality` (AGENTS.md §9), and the QA stores the smoke runs kept (listed in each `evidence/R*/README.md`).
-- With `NONE`, no new business feature starts without an Owner-named task (AGENTS.md §1).
+- **Authorized by:** the Owner in chat on 2026-10-17 (after accepting R0–R7): documents, research and verification preparation on a separate branch. Not authorized: public release, external distribution of installers, system-setting changes, unreviewed product changes.
+- **Plan and status:** [06_DELIVERY/23_D2C_R.md](../06_DELIVERY/23_D2C_R.md).
+- **Base:** `main` `5015143`. **Branch:** `docs/d2c-r`.
+- **Waiting on the Owner:** the fast-forward of this branch (Standing Owner rule 1); final Pilot approval; naming the next task (recommended: the section-ranking fix, `06_DELIVERY/24` option 2).
+- **Waiting on a person:** the human QA pack ([evidence/D2C-R](../evidence/D2C-R/HUMAN_QA_PACK.md)), first its Pilot minimum.
+- **Last task:** `R7_QUALITY` and the R-series close ([06_DELIVERY/22](../06_DELIVERY/22_R_SERIES_FINAL_REPORT.md)).
 
 The history of earlier pointers is in [archive/2026-10-14/ACTIVE_TASK.md](archive/2026-10-14/ACTIVE_TASK.md).

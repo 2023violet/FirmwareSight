@@ -67,11 +67,12 @@ The two remaining small items from the route (§3 item 6) stay out of D2C. The s
 |---|---|---|
 | C1 | Done | `02b88e1` |
 | C2 | Done with named gaps: 11 cases, all PASS; A09 failed once on a driver selector and was re-run, both results kept. Paging and in-pass `fwsight diff` text were not run (see the evidence README) | `evidence/D2C/README.md`, ZIP `5b431aed…064a` |
-| C3 | Written; **NOT_RUN** (C8) | `evidence/D2C/HUMAN_NATIVE_QA_RUNBOOK.md` |
-| C4 | Written; **awaiting Owner approval**; register at 0 | `PILOT_VALIDATION/` |
+| C3 | Written; superseded for R7 builds by the D2C-R pack, which maps H01–H14 to R7/R7C evidence; **NOT_RUN** (C8) | `evidence/D2C-R/HUMAN_QA_PACK.md` |
+| C4 | Written; revised in D2C-R for the R7 build (PT3b pinned baseline, PT4 Markdown, entry conditions); **approved in principle 2026-10-17**, final approval pending; register at 0 | `PILOT_VALIDATION/` |
 | C5 | Written; **not authorized, not executed** | `V1_VALIDATION/00_authority/V1_REFREEZE_2_REQUEST.md` |
-| C6 | Written; **awaiting samples** | `06_DELIVERY/14_D4_ARMCLANG_SAMPLE_REQUEST.md` |
-| C7–C9 | Waiting on the Owner or a human operator | — |
+| C6 | Synthetic same-origin armlink sample generated and cross-checked in D2C-R; a real-project sample still wanted | `evidence/D4/README.md` |
+| C7 | **Decided 2026-10-17** (DR1: no silent backfill) | `.ai/DECISIONS.md` |
+| C8–C9 | Waiting on a human operator / the Owner | `evidence/D2C-R/HUMAN_QA_PACK.md` |
 
 Independent review of `4cbdf74`: PASS_WITH_FINDINGS (0 S1, 4 S2, 9 S3). All four S2s and all nine S3s are fixed in `dc58c21`. The fixes:
 - C1 also escapes bidi, zero-width and backslash characters.

@@ -12,6 +12,7 @@
 
 # --- Byte-identical evidence: no conversion, on any platform -------------------------------
 *.elf    binary
+*.axf    binary
 *.bin    binary
 *.o      binary
 *.a      binary
@@ -37,6 +38,7 @@ golden/**   text eol=lf
 *.js        text eol=lf
 *.json      text eol=lf
 *.ld        text eol=lf
+*.sct       text eol=lf
 *.lock      text eol=lf
 *.md        text eol=lf
 *.npmrc     text eol=lf

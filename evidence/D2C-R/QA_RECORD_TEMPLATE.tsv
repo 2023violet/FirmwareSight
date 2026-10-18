@@ -1,0 +1,23 @@
+case	expected	actual	verdict	utc	operator_role	build_commit	installer_sha256	evidence_ref
+Q1a			NOT_RUN			5015143		
+Q1b			NOT_RUN			5015143		
+Q1c			NOT_RUN			5015143		
+Q1d			NOT_RUN			5015143		
+Q1e			NOT_RUN			5015143		
+Q2			NOT_RUN			5015143		
+Q3			NOT_RUN			5015143		
+Q4			NOT_RUN			5015143		
+Q5			NOT_RUN			5015143		
+Q6-Narrator			NOT_RUN			5015143		
+Q6-NVDA			NOT_RUN			5015143		
+Q7			NOT_RUN			5015143		
+Q8			NOT_RUN			5015143		
+Q9			NOT_RUN			5015143		
+Q10			NOT_RUN			5015143		
+Q11			NOT_RUN			5015143		
+Q12			NOT_RUN			5015143		
+Q13			NOT_RUN			5015143		
+Q14			NOT_RUN			5015143		
+Q15			NOT_RUN			5015143		
+Q16-125			NOT_RUN			5015143		
+Q16-150			NOT_RUN			5015143		

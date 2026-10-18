@@ -10,7 +10,7 @@ last_updated: "2026-10-16"
 
 # Human native-QA runbook (D2C C3 → C8)
 
-**Nothing in this file has run.** It is the script for the human pass that closes the native risks named in `.ai/NOW.md` before any external Developer Preview, Pilot handout, Private Beta or RC (`NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md`, forced deadline).
+**Nothing in this file has run.** For builds at or after `main` `5015143`, run the D2C-R pack ([evidence/D2C-R/HUMAN_QA_PACK.md](../D2C-R/HUMAN_QA_PACK.md)) instead. It maps H01–H14 to the R7 evidence, keeps only what needs a person, and uses the rules on this page. It is the script for the human pass that closes the native risks named in `.ai/NOW.md` before any external Developer Preview, Pilot handout, Private Beta or RC (`NEXT47_VALIDATION/evidence/04_NEXT47_DEFERRED_NATIVE_QA.md`, forced deadline).
 
 ## Who, where, what
 

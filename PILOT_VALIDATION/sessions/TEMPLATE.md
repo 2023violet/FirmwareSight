@@ -5,7 +5,7 @@ product: "FirmwareSight"
 version: "0.6.0"
 status: "TEMPLATE"
 owner: "Research"
-last_updated: "2026-10-16"
+last_updated: "2026-10-17"
 ---
 
 # Pilot Session — `PL-XX`
@@ -49,7 +49,12 @@ last_updated: "2026-10-16"
 | PT1 First look | | | | |
 | PT2 Growth source | | | | |
 | PT3 Two builds | | | | |
+| PT3b Reference build (pin) | | | | |
 | PT4 Hand-off | | | | |
+
+PT3b detail: pin found unprompted (YES / NO / not applicable) · where they looked first · time to first pin · next Compare opened on the pinned build (YES / NO) · unpinning understood (YES / NO / UNCLEAR).
+
+PT4 detail: format chosen (Markdown / HTML / PNG / SVG / JSON / screenshot / other) · where it would go (PR / issue / chat / mail / other) · opened before sending (YES / NO) · remarks on the Markdown, verbatim.
 
 ## Debrief
 
@@ -66,7 +71,9 @@ Keep quotes verbatim and in quotation marks. Mark anything else `MODERATOR_NOTE 
 
 | Question | YES / NO / UNCLEAR | Evidence line |
 |---|---|---|
-| Repeat comparison (D3) | | |
+| Pinned baseline found and understood (D3, shipped) | | |
+| Repeat comparison | | |
+| Markdown fitted the hand-off | | |
 | Object/library view answered the growth question | | |
 | Toolchain outside GNU ld (D4) | | |
 | Deeper evidence wanted (D5): say whether it came up unprompted during the tasks or only at debrief question 5 | | |

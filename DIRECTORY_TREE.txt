@@ -123,7 +123,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── 19_R5_HISTORY.md
 │   ├── 20_R6_REPORTS.md
 │   ├── 21_R7_QUALITY.md
-│   └── 22_R_SERIES_FINAL_REPORT.md
+│   ├── 22_R_SERIES_FINAL_REPORT.md
+│   ├── 23_D2C_R.md
+│   └── 24_CORE_SECTION_RANKING_REVIEW.md
 ├── 07_COMPLIANCE/
 │   ├── 00_COMPLIANCE_BOUNDARY.md
 │   ├── 01_SBOM_STRATEGY.md
@@ -756,6 +758,12 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── D2C_NATIVE_QA_EVIDENCE.zip
 │   │   ├── HUMAN_NATIVE_QA_RUNBOOK.md
 │   │   └── README.md
+│   ├── D2C-R/
+│   │   ├── HUMAN_QA_PACK.md
+│   │   └── QA_RECORD_TEMPLATE.tsv
+│   ├── D4/
+│   │   ├── CROSSCHECK.md
+│   │   └── README.md
 │   ├── M1/
 │   │   ├── .gitattributes
 │   │   ├── AC_MATRIX.tsv
@@ -814,6 +822,33 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── tauri-capability.baseline.json
 ├── fixtures/
 │   ├── elf/
+│   │   ├── d4-armlink/
+│   │   │   ├── base/
+│   │   │   │   ├── source/
+│   │   │   │   │   ├── app/
+│   │   │   │   │   │   ├── sensors/
+│   │   │   │   │   │   │   └── imu.c
+│   │   │   │   │   │   └── main.c
+│   │   │   │   │   └── drv/
+│   │   │   │   │       ├── spi.c
+│   │   │   │   │       └── uart.c
+│   │   │   │   ├── firmware.axf
+│   │   │   │   ├── firmware.map
+│   │   │   │   ├── fixture.toml
+│   │   │   │   └── objects.sct
+│   │   │   └── target/
+│   │   │       ├── source/
+│   │   │       │   ├── app/
+│   │   │       │   │   ├── sensors/
+│   │   │       │   │   │   └── imu.c
+│   │   │       │   │   └── main.c
+│   │   │       │   └── drv/
+│   │   │       │       ├── spi.c
+│   │   │       │       └── uart.c
+│   │   │       ├── firmware.axf
+│   │   │       ├── firmware.map
+│   │   │       ├── fixture.toml
+│   │   │       └── objects.sct
 │   │   ├── interop-clang/
 │   │   │   ├── aarch64-none-elf.o
 │   │   │   ├── aarch64_be-none-elf.o
@@ -1067,9 +1102,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 ├── PILOT_VALIDATION/
 │   ├── sessions/
 │   │   └── TEMPLATE.md
+│   ├── MODERATOR_RUN_SHEET.md
 │   ├── PILOT_PROTOCOL.md
 │   ├── PILOT_REGISTER.md
-│   └── README.md
+│   ├── README.md
+│   └── RECRUITMENT.md
 ├── POST_G2_E2E_REMEDIATION/
 │   ├── EXIT_CHECKLIST.md
 │   ├── FOCUSED_REVALIDATION_REPORT.md
@@ -1085,6 +1122,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── tests/
 │   │   └── test_verify_bundle_portability.py
 │   ├── check.py
+│   ├── crosscheck_d4_armlink.py
+│   ├── gen_d4_armlink_fixtures.py
 │   ├── gen_desktop_icons.py
 │   ├── gen_interop_fixtures.py
 │   ├── gen_m2_object_fixtures.py

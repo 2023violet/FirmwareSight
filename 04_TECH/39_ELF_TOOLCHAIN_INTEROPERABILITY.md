@@ -9,8 +9,8 @@ This matrix describes measured format evidence, not a vendor endorsement. A file
 | RECOGNIZED_CONTAINER | Magic, ELF class and byte order accepted by bounded intake | ELF32/ELF64, little/big endian |
 | PARSED_BASIC_METADATA | `object` parses headers, entry, sections, file offsets/payload, symbols and build-id where present | Four Clang relocatable fixtures in `fixtures/elf/interop-clang`, plus existing linked ARM fixtures |
 | VERIFIED_MEMORY_ACCOUNTING | Existing Core model tested against explicit supported placement evidence | Existing ARM GCC/GNU ld and Clang/GNU ld cohorts; new relocatable fixtures do **not** establish executable accounting |
-| VERIFIED_COMPILER_COHORT | Actual toolchain output, recipe/provenance and independent inspection | GCC + GNU ld; Clang + GNU ld. Keil/armlink and IAR/ILINK: **UNVERIFIED** |
-| LINKER_MAP_SUPPORTED | Dedicated grammar supplies required fields with independently validated fixtures | GNU ld only. ArmLink and IAR ILINK: **NOT_SUPPORTED / FIXTURE_BLOCKED** |
+| VERIFIED_COMPILER_COHORT | Actual toolchain output, recipe/provenance and independent inspection | GCC + GNU ld; Clang + GNU ld. Keil/armlink and IAR/ILINK: **UNVERIFIED** as a cohort. One synthetic Arm Compiler 6.24 sample reads and accounts correctly from the ELF alone ([evidence/D4](../evidence/D4/README.md)); one sample is not a cohort |
+| LINKER_MAP_SUPPORTED | Dedicated grammar supplies required fields with independently validated fixtures | GNU ld only. ArmLink: **NOT_SUPPORTED**; a synthetic same-origin sample with an independent cross-check exists (`fixtures/elf/d4-armlink`), and a real-project sample is still wanted. IAR ILINK: **NOT_SUPPORTED / FIXTURE_BLOCKED** |
 
 ## Parser facts and limits
 

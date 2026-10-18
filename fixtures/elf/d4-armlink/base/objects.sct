@@ -1,0 +1,12 @@
+; Regions of the D4 armlink sample: the same 64K Flash and 16K RAM as the M2 GNU ld fixture.
+LR_IROM1 0x08000000 0x00010000
+{
+  ER_IROM1 0x08000000 0x00010000
+  {
+    *(+RO)
+  }
+  RW_IRAM1 0x20000000 0x00004000
+  {
+    *(+RW +ZI)
+  }
+}

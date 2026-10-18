@@ -12,6 +12,8 @@ dist/
 !fixtures/elf/p2-diff/target/
 # M2 (ADR-0033) repeated the same pair naming and the same gate caught it before any push.
 !fixtures/elf/m2-objects/target/
+# The D4 armlink samples (D2C-R) use the same pair naming; the gate caught it again before any push.
+!fixtures/elf/d4-armlink/target/
 
 # Generated performance workloads are never committed.
 /fixtures/generated/

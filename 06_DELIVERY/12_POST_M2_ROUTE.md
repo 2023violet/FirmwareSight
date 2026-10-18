@@ -19,7 +19,7 @@ The route the Owner confirmed on 2026-10-15 ("确认执行") after reviewing a p
 | R1 | Delivery batches after M2 are named **D2C, D3, D4, D5, D6**, not M3–M6. `V1_VALIDATION/V1_METRICS.md` already defines metrics M1–M6, and V1's M3 (Analyze→Compare completion) would collide with a delivery batch of the same name. This is the same reason `ADR-0024` gave the post-MVP candidates their own namespace. The existing M1 and M2 batch names stay as they are; they are history. | Decided |
 | R2 | `ADR-0033` (object and library attribution) moves from PROPOSED to **BASELINE**. Its own text said it would on merge approval after independent review: three review rounds, then the push of `04d800c` (Actions #117, 10/10). | Decided |
 | R3 | Formal V1 takes **option (b)**: re-freeze the cohort build to an M2-era build, so the study measures the product being shipped. The re-freeze itself is a separate Owner-authorized round like `V1_COHORT_REFREEZE` of 2026-10-08: it moves one pointer and no metric, denominator or threshold. **Not executed here.** | Direction decided; execution needs its own authorization |
-| R4 | M2 review S2.1: should builds stored before migration 0007 gain object rows on re-import? The options are a backfill (an additive INSERT; rows stay immutable) or the current behaviour. | **Open — Owner decision** |
+| R4 | M2 review S2.1: should builds stored before migration 0007 gain object rows on re-import? The options are a backfill (an additive INSERT; rows stay immutable) or the current behaviour. | **Decided 2026-10-17: current behaviour, no silent backfill** (`.ai/DECISIONS.md` DR1). Any later re-analysis is an explicit, traceable update with its own task. |
 
 ## 2. Sequence
 
@@ -47,7 +47,7 @@ D4 may move ahead of D3 if real ArmClang samples arrive first and a user is wait
 
 ## 4. Kept out of this route
 
-- Large UI reworks, treemaps, watch mode, XLSX and DWARF ABI detail (`E3`, conditional). **Amended 2026-10-16:** the Owner redirected the next round to the R-series UI/UX redesign ([ADR-0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md), `.ai/DECISIONS.md` RD1–RD6). That redesign, D3 (folded into R5) and a Markdown report (R6) are no longer excluded; treemaps, watch mode, XLSX and DWARF ABI detail still are.
+- Large UI reworks, treemaps, watch mode, XLSX and DWARF ABI detail (`E3`, conditional). **Amended 2026-10-16:** the Owner redirected the next round to the R-series UI/UX redesign ([ADR-0034](../09_ADR/ADR-0034-instrument-ledger-design-language.md), `.ai/DECISIONS.md` RD1–RD8). That redesign, D3 (folded into R5) and a Markdown report (R6) are no longer excluded; treemaps, watch mode, XLSX and DWARF ABI detail still are.
 - IAR, until real samples and a user pull exist (`E3`).
 - CSV/Markdown export of object rows. It is a new interchange format for per-object data, which `ADR-0033` D7 sends to an `ADR-0022` decision. It is a D3 follow-up candidate, not part of D3.
 - A new acceptance framework for each small feature: batches keep the existing plan, acceptance and review pattern used in M1 and M2.
