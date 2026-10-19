@@ -15,6 +15,8 @@
 
 ![FirmwareSight Analyze: the CMSIS-DSP example built with Keil MDK, Flash 6,904 bytes, RAM 7,776 bytes](docs/images/analyze-en.png)
 
+<p align="center"><a href="https://github.com/2023violet/FirmwareSight/releases/download/v0.8.0/FirmwareSight-0.8.0-launch-film.mp4"><img src="docs/images/launch-film-poster.jpg" width="720" alt="FirmwareSight 0.8 launch film poster: a 1 MiB Flash byte map of a real IAR build, 356,883 bytes"></a><br><sub>▶ <a href="https://github.com/2023violet/FirmwareSight/releases/download/v0.8.0/FirmwareSight-0.8.0-launch-film.mp4">Watch the 30-second launch film</a> (MP4, 8.6 MB, with sound) · music and typeface credits are in the <a href="https://github.com/2023violet/FirmwareSight/releases/tag/v0.8.0">v0.8.0 release notes</a></sub></p>
+
 FirmwareSight reads a firmware build (ELF / AXF / OUT and its linker MAP) and turns it into figures you can check: memory usage, build-to-build differences, and a release verdict. It comes as a desktop app and a command-line tool, `fwsight`. Everything runs on your machine; nothing is uploaded and nothing goes over the network.
 
 ## Contents

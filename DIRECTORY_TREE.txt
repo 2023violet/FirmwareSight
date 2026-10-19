@@ -766,7 +766,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       ├── analyze-en.png
 │       ├── analyze-zh.png
 │       ├── compare-en.png
-│       └── compare-zh.png
+│       ├── compare-zh.png
+│       └── launch-film-poster.jpg
 ├── evidence/
 │   ├── D2C/
 │   │   ├── AC_MATRIX.tsv

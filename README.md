@@ -15,6 +15,8 @@
 
 ![FirmwareSight 分析界面：Keil MDK 构建的 CMSIS-DSP 示例，Flash 6,904 bytes，RAM 7,776 bytes](docs/images/analyze-zh.png)
 
+<p align="center"><a href="https://github.com/2023violet/FirmwareSight/releases/download/v0.8.0/FirmwareSight-0.8.0-launch-film.mp4"><img src="docs/images/launch-film-poster.jpg" width="720" alt="FirmwareSight 0.8 发布片海报：一个真实 IAR 构建的 1 MiB Flash 字节图，356,883 bytes"></a><br><sub>▶ <a href="https://github.com/2023violet/FirmwareSight/releases/download/v0.8.0/FirmwareSight-0.8.0-launch-film.mp4">观看 30 秒发布片</a>（MP4，8.6 MB，有声）· 配乐与字体致谢见 <a href="https://github.com/2023violet/FirmwareSight/releases/tag/v0.8.0">v0.8.0 发布说明</a></sub></p>
+
 FirmwareSight 读取固件构建产物（ELF / AXF / OUT 及其链接器 MAP），给出可核对的内存占用、构建差异和发布结论。它提供桌面应用和命令行工具 `fwsight`，全部计算在本机完成，不联网，不上传任何文件。
 
 ## 目录
