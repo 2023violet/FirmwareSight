@@ -59,13 +59,17 @@ last_updated: "2026-11-09"
 
 ## Consequences
 
-- **Analyze** gets a Composition view, the first tab:
+- **Analyze** gets a Composition view, the second tab after Memory (Memory stays the opening view):
   - a treemap with drill-down and breadcrumbs, keyboard navigation, and the Inspector for any node;
   - Flash/RAM switch.
 - **Compare** gets a growth waterfall in its Summary, with an objects/libraries switch.
-- **Exports:**
-  - the visual exports (SVG/PNG/print HTML) and the Markdown report gain a treemap scene and a waterfall scene;
-  - the CLI gains `analyze --treemap-svg` and `diff --waterfall-svg`.
+- **Exports (D7):**
+  - the analysis Markdown from the desktop gains a **Composition** section: per budget, the five largest parts at each level (regions, sections, objects) with their share of the line above;
+  - the comparison Markdown (desktop and `fwsight diff --markdown`) gains **Where the change came from**: the waterfall per budget, by object;
+  - `fwsight analyze --markdown` is unchanged, because the CLI's analysis export does not take the composition yet.
+- **Deferred:**
+  - a treemap and a waterfall scene in the SVG/PNG/print-HTML exports. They need a second layout in the report crate and would rewrite every visual golden; they get their own change;
+  - CLI flags for the composition, which come after D9 (CI integration) has landed its CLI changes, to keep the two batches apart.
 - **Colour:**
   - the treemap uses the `chart.blue` ramp by depth;
   - the waterfall uses neutral bars with ▲/▼ glyphs and text, so growth is not judged by colour (ADR-0034);

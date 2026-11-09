@@ -26,6 +26,7 @@ vi.mock('./ipc/dropEvents', () => ({
 // The Compare commands are stubbed too, and the candidate list comes back empty: the navigation test
 // opens that page, and a build history this file does not describe must not appear there either.
 vi.mock('./ipc/bridge', () => ({
+  queryComposition: vi.fn(async () => await Promise.resolve({ ok: true, value: { available: false, reason: 'not under test', side: 'flash', path: [], node: null } })),
   // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
   getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
   pinBaseline: vi.fn(),
@@ -1255,13 +1256,14 @@ describe('R2 Analyze page', () => {
     expect(document.activeElement).toBe(figure);
   });
 
-  it('opens on Memory and offers the five views in the spec order', async () => {
+  it('opens on Memory and offers the six views in the spec order (Composition since ADR-0039)', async () => {
     await chooseArtifact();
     await analyze();
 
     const views = await screen.findByRole('tablist', { name: 'Analyze views' });
     expect(within(views).getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
       'Memory',
+      'Composition',
       'Sections',
       'Symbols',
       'Objects',

@@ -72,6 +72,16 @@ fn the_analysis_markdown_names_the_build_and_refuses_a_subject_no_longer_on_scre
         .expect("renders");
     assert!(doc.starts_with("# FirmwareSight · Analysis report\n"));
     assert!(doc.contains("**Build:** firmware.elf"));
+    // ADR-0039: the export carries the composition the Analyze view shows, one table per budget
+    assert!(doc.contains("## Composition"), "{doc}");
+    assert!(
+        doc.contains("### Flash ·") && doc.contains("### RAM ·"),
+        "{doc}"
+    );
+    assert!(
+        doc.contains("| region |") || doc.contains("| section |"),
+        "{doc}"
+    );
     assert!(
         !doc.contains("fixtures") && !doc.contains(":\\"),
         "no path:\n{doc}"
@@ -104,6 +114,12 @@ fn the_comparison_markdown_comes_from_the_same_diff_the_screen_shows() {
         .expect("renders");
     assert!(doc.starts_with("# FirmwareSight · Comparison report\n"));
     assert!(doc.contains("▲64 bytes"));
+    // ADR-0039 D4: the waterfall runs from the base total to the target total
+    assert!(doc.contains("## Where the change came from"), "{doc}");
+    assert!(
+        doc.contains("| Base |") && doc.contains("| Target |"),
+        "{doc}"
+    );
     assert!(suggested.ends_with(".md"), "{suggested}");
     assert!(!doc.contains("</"), "no HTML:\n{doc}");
 }

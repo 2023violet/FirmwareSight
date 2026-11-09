@@ -40,6 +40,10 @@ import type {
   ObjectChangeQueryDto,
   ObjectPageDto,
   ObjectRequestDto,
+  CompositionDto,
+  CompositionRequestDto,
+  WaterfallDto,
+  WaterfallRequestDto,
   MainWindowPage,
   PreferencesDto,
   ProjectContextDto,
@@ -67,6 +71,8 @@ const QUERY_SECTIONS = 'query_sections';
 const QUERY_SYMBOLS = 'query_symbols';
 const QUERY_EVIDENCE = 'query_evidence';
 const QUERY_OBJECTS = 'query_objects';
+const QUERY_COMPOSITION = 'query_composition';
+const QUERY_GROWTH_WATERFALL = 'query_growth_waterfall';
 const LIST_COMPARE_CANDIDATES = 'list_compare_candidates';
 const COMPARE_SNAPSHOTS = 'compare_snapshots';
 const QUERY_SECTION_CHANGES = 'query_section_changes';
@@ -176,6 +182,16 @@ export async function queryEvidence(
 /** Ask for one bounded page of a build's objects or libraries (ADR-0033). */
 export async function queryObjects(request: ObjectRequestDto): Promise<IpcOutcome<ObjectPageDto>> {
   return await call<ObjectPageDto>(QUERY_OBJECTS, { request });
+}
+
+/** One window of a held build's composition tree (ADR-0039): the focus node, two levels, the path back. */
+export async function queryComposition(request: CompositionRequestDto): Promise<IpcOutcome<CompositionDto>> {
+  return await call<CompositionDto>(QUERY_COMPOSITION, { request });
+}
+
+/** The growth waterfall of a computed comparison (ADR-0039 D4). */
+export async function queryGrowthWaterfall(request: WaterfallRequestDto): Promise<IpcOutcome<WaterfallDto>> {
+  return await call<WaterfallDto>(QUERY_GROWTH_WATERFALL, { request });
 }
 
 /**

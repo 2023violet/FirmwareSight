@@ -1,0 +1,194 @@
+/*
+ * The composition treemap (ADR-0039). Tokens only: the cells use the chart blue ramp by depth, never as the
+ * only encoding (DESIGN.md 7) - every cell's name and bytes are in its accessible name and in the table.
+ */
+
+.area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-4);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-4);
+}
+
+.cuts {
+  display: inline-flex;
+  overflow: hidden;
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-control);
+}
+
+.cut {
+  padding: var(--fs-space-1) var(--fs-space-3);
+  color: var(--fs-color-text-secondary);
+  font: inherit;
+  background: var(--fs-color-bg-surface);
+  border: 0;
+  cursor: pointer;
+}
+
+.cut + .cut {
+  border-inline-start: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.cut[aria-pressed='true'] {
+  color: var(--fs-color-text-primary);
+  font-weight: var(--fs-font-weight-semibold);
+  background: var(--fs-color-bg-subtle);
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fs-space-1);
+  font-family: var(--fs-font-mono);
+}
+
+.crumb,
+.rowLink {
+  padding: 0;
+  color: var(--fs-color-accent-primary);
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.crumb:hover,
+.rowLink:hover {
+  text-decoration: underline;
+}
+
+.sep {
+  margin-inline: var(--fs-space-1);
+  color: var(--fs-color-text-secondary);
+}
+
+.here {
+  color: var(--fs-color-text-primary);
+  font-weight: var(--fs-font-weight-semibold);
+}
+
+.lead {
+  margin: 0;
+}
+
+.leadName {
+  font-weight: var(--fs-font-weight-semibold);
+}
+
+.mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.muted,
+.reason {
+  color: var(--fs-color-text-secondary);
+}
+
+.map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  background: var(--fs-color-chart-other);
+  border: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+  border-radius: var(--fs-radius-panel);
+}
+
+.cell {
+  position: absolute;
+  padding: 0;
+  overflow: hidden;
+  color: var(--fs-color-text-primary);
+  font: inherit;
+  text-align: left;
+  border: var(--fs-border-width-hairline) solid var(--fs-color-bg-surface);
+  cursor: pointer;
+  transition: filter var(--fs-motion-duration-micro) var(--fs-motion-ease);
+}
+
+.cell:hover {
+  filter: brightness(0.94);
+}
+
+.cell:focus-visible {
+  z-index: var(--fs-layer-sticky);
+  outline: var(--fs-focus-ring-width) solid var(--fs-color-accent-primary);
+  outline-offset: calc(-1 * var(--fs-focus-ring-width));
+}
+
+.tone1 { background: var(--fs-color-chart-blue-1); }
+.tone2 { background: var(--fs-color-chart-blue-2); }
+.tone3 { background: var(--fs-color-chart-blue-2); }
+.tone4 { background: var(--fs-color-chart-blue-1); }
+.tone5 { background: var(--fs-color-chart-blue-1); }
+.other { background: var(--fs-color-bg-subtle); }
+
+.cellText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  padding: var(--fs-space-2);
+}
+
+.cellName {
+  overflow: hidden;
+  font-family: var(--fs-font-mono);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cellBytes {
+  color: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty,
+.status {
+  margin: 0;
+  padding: var(--fs-space-4);
+  color: var(--fs-color-text-secondary);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.caption {
+  padding-bottom: var(--fs-space-2);
+  font-weight: var(--fs-font-weight-semibold);
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: var(--fs-space-1) var(--fs-space-2);
+  text-align: left;
+  border-bottom: var(--fs-border-width-hairline) solid var(--fs-color-border-default);
+}
+
+.table thead th {
+  color: var(--fs-color-text-secondary);
+  font-weight: var(--fs-font-weight-semibold);
+  background: var(--fs-color-bg-subtle);
+}
+
+.table .num {
+  text-align: right;
+}
+
+@media (forced-colors: active) {
+  .cell {
+    border-color: CanvasText;
+  }
+}

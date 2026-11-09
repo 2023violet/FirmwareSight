@@ -15,9 +15,11 @@
 //! A Markdown report is not part of a release bundle (ADR-0028): the bundle's contents are fixed by its
 //! manifest, and this is a reading copy.
 
+use firmwaresight_core::domain::composition::{CompositionNode, NodeKind, Side};
 use firmwaresight_core::domain::diff::{ChangeKind, Contributor, DiffResult};
 use firmwaresight_core::domain::gate::FindingState;
 use firmwaresight_core::domain::memory::{MemoryRegionUsage, RegionUsageState};
+use firmwaresight_core::domain::waterfall::{StepKind, growth_waterfall};
 
 use crate::dto::AnalyzeResultDto;
 use crate::gate::GateResultsDto;
@@ -96,6 +98,17 @@ fn bytes(value: Option<u64>) -> String {
 /// `fwsight analyze --markdown`, and the desktop's Analyze export.
 #[must_use]
 pub fn analysis(value: &AnalyzeResultDto, regions: &[MemoryRegionUsage]) -> String {
+    analysis_with_composition(value, regions, &[])
+}
+
+/// [`analysis`] plus a Composition section (ADR-0039) from the trees Core built, one per budget side:
+/// the largest regions, sections and objects, each with its share of the line above it.
+#[must_use]
+pub fn analysis_with_composition(
+    value: &AnalyzeResultDto,
+    regions: &[MemoryRegionUsage],
+    trees: &[&CompositionNode],
+) -> String {
     let mut out = String::from("# FirmwareSight · Analysis report\n\n");
     out.push_str(&format!(
         "**Build:** {} · SHA-256 {}\n\n",
@@ -182,6 +195,10 @@ pub fn analysis(value: &AnalyzeResultDto, regions: &[MemoryRegionUsage]) -> Stri
         out.push_str("\nA mapped section range is not free space: the region table and the section intervals do not prove contiguous allocatable space.\n");
     }
 
+    if !trees.is_empty() {
+        composition(&mut out, trees);
+    }
+
     out.push_str("\n## Capabilities\n\n| Capability | State |\n|---|---|\n");
     for (label, field) in [
         ("ELF", value.capabilities.elf),
@@ -203,6 +220,115 @@ pub fn analysis(value: &AnalyzeResultDto, regions: &[MemoryRegionUsage]) -> Stri
     out.push_str("- BIN and HEX files are not analyzed.\n");
     footer(&mut out, "analysis");
     out
+}
+
+/// How many children per level the Composition table lists.
+const COMPOSITION_TOP: usize = 5;
+
+fn composition(out: &mut String, trees: &[&CompositionNode]) {
+    out.push_str("\n## Composition\n\nThe largest parts at each level, from the ELF and the linker MAP. A share is of the line above it; a part with an unknown size is written as unknown, never as 0.\n");
+    for tree in trees {
+        out.push_str(&format!(
+            "\n### {} · {}\n\n",
+            escape(&tree.name),
+            bytes(tree.bytes)
+        ));
+        out.push_str("| Part | Kind | Bytes | Share |\n|---|---|---:|---:|\n");
+        let mut rows = 0;
+        rows_of(out, tree, 0, &mut rows);
+        if rows == 0 {
+            out.push_str("| (nothing with a known size) | | | |\n");
+        }
+    }
+}
+
+/// Regions (or sections without a region table), then sections, then objects: three levels at most.
+fn rows_of(out: &mut String, node: &CompositionNode, depth: usize, rows: &mut usize) {
+    if depth >= 3 {
+        return;
+    }
+    for child in node.children.iter().take(COMPOSITION_TOP) {
+        let share = match (child.bytes, node.bytes) {
+            (Some(part), Some(whole)) if whole > 0 => {
+                // tenths of a percent, rounded down, in integers so the text is the same on every host
+                let tenths = u128::from(part) * 1000 / u128::from(whole);
+                format!("{}.{} %", tenths / 10, tenths % 10)
+            }
+            _ => "—".to_owned(),
+        };
+        out.push_str(&format!(
+            "| {}{} | {} | {} | {share} |\n",
+            "&nbsp;&nbsp;".repeat(depth),
+            code(&child.name),
+            kind_word(child.kind),
+            bytes(child.bytes)
+        ));
+        *rows += 1;
+        if matches!(
+            child.kind,
+            NodeKind::Region | NodeKind::NoRegion | NodeKind::Section
+        ) {
+            rows_of(out, child, depth + 1, rows);
+        }
+    }
+    if node.children.len() > COMPOSITION_TOP {
+        out.push_str(&format!(
+            "| {}… {} more | | | |\n",
+            "&nbsp;&nbsp;".repeat(depth),
+            node.children.len() - COMPOSITION_TOP
+        ));
+    }
+}
+
+fn kind_word(kind: NodeKind) -> &'static str {
+    match kind {
+        NodeKind::Root => "budget",
+        NodeKind::Region => "region",
+        NodeKind::NoRegion => "no region",
+        NodeKind::Section => "section",
+        NodeKind::Object => "object",
+        NodeKind::Symbol => "symbol",
+        NodeKind::LinkerBytes => "linker bytes",
+        NodeKind::NoSymbol => "no symbol",
+        NodeKind::More => "more",
+    }
+}
+
+/// Where each budget's change came from (ADR-0039 D4), by object.
+fn waterfall_section(out: &mut String, result: &DiffResult) {
+    for (side, name) in [
+        (Side::Nonvolatile, "Nonvolatile / load image"),
+        (Side::Runtime, "Runtime RAM"),
+    ] {
+        let fall = growth_waterfall(result, side, false, 10);
+        if !fall.available {
+            continue;
+        }
+        out.push_str(&format!("\n### {name}\n\n"));
+        out.push_str("| Step | Change | Running total |\n|---|---:|---:|\n");
+        for step in &fall.steps {
+            let label = match step.kind {
+                StepKind::Start => "Base".to_owned(),
+                StepKind::End => "Target".to_owned(),
+                StepKind::Rest => format!("{} more objects", step.folded),
+                StepKind::Linker => "Linker and unattributed".to_owned(),
+                StepKind::Item => format!(
+                    "{}{}",
+                    code(&step.label),
+                    step.change.map_or(String::new(), |c| format!(
+                        " ({})",
+                        c.label().to_ascii_lowercase()
+                    ))
+                ),
+            };
+            let change = if matches!(step.kind, StepKind::Start | StepKind::End) {
+                String::new()
+            } else {
+                delta_text(step.delta)
+            };
+            out.push_str(&format!("| {label} | {change} | {} |\n", bytes(step.total)));
+        }
+    }
 }
 
 fn delta_text(delta: Option<i64>) -> String {
@@ -327,6 +453,9 @@ pub fn comparison(result: &DiffResult) -> String {
         "Largest added symbols",
         &result.largest_added_symbols(5),
     );
+
+    out.push_str("\n## Where the change came from\n");
+    waterfall_section(&mut out, result);
 
     if !result.warnings.is_empty() {
         out.push_str("\n## Warnings\n\n");

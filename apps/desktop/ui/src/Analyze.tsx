@@ -27,6 +27,7 @@ import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { SubjectBar, type Subject, type SubjectFreshness } from './components/SubjectBar';
 import { Tabs, tabPanelProps } from './components/Tabs';
+import { CompositionView } from './Composition';
 import { Details, LargestSections, type DetailsView } from './Details';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { formatOptional, formatSize, truncateMiddle, type SizeUnit } from './format';
@@ -457,6 +458,13 @@ export function Analyze({
             <div {...tabPanelProps('fs-analyze', view)} className={styles['panel']}>
               {view === 'memory' ? (
                 <MemoryView summary={summary} unit={unit} onInspect={inspect} />
+              ) : view === 'composition' ? (
+                <CompositionView
+                  key={`${summary.identity.snapshotId}-composition`}
+                  snapshotId={summary.identity.snapshotId}
+                  unit={unit}
+                  onInspect={inspect}
+                />
               ) : view === 'evidence' ? (
                 <>
                   <BuildFacts summary={summary} />
@@ -494,10 +502,11 @@ export function Analyze({
 }
 
 /** The five views, in the order the spec reads them (ADR-0034 D2, `03_DESIGN/09` §6.2). */
-type View = 'memory' | DetailsView;
-const VIEWS: readonly View[] = ['memory', 'sections', 'symbols', 'objects', 'evidence'];
+type View = 'memory' | 'composition' | DetailsView;
+const VIEWS: readonly View[] = ['memory', 'composition', 'sections', 'symbols', 'objects', 'evidence'];
 const VIEW_LABEL: Readonly<Record<View, AnalyzeKey>> = {
   memory: 'views.memory',
+  composition: 'views.composition',
   sections: 'details.tab.sections',
   symbols: 'details.tab.symbols',
   objects: 'details.tab.objects',

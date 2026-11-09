@@ -696,9 +696,23 @@ impl Session {
                 "the sealed snapshot carries no memory footprint",
             )
         })?;
-        Ok(firmwaresight_report::markdown::analysis(
+        // ADR-0039: the export carries the same composition the Analyze view shows, one tree per budget.
+        let flash = firmwaresight_core::domain::composition::build(
+            firmwaresight_core::domain::composition::Side::Nonvolatile,
+            memory,
+            snapshot.objects(),
+            snapshot.symbols(),
+        );
+        let ram = firmwaresight_core::domain::composition::build(
+            firmwaresight_core::domain::composition::Side::Runtime,
+            memory,
+            snapshot.objects(),
+            snapshot.symbols(),
+        );
+        Ok(firmwaresight_report::markdown::analysis_with_composition(
             &summary,
             &memory.region_usage,
+            &[&flash, &ram],
         ))
     }
 

@@ -45,6 +45,7 @@ import type {
 } from './ipc/types';
 
 vi.mock('./ipc/bridge', () => ({
+  queryComposition: vi.fn(async () => await Promise.resolve({ ok: true, value: { available: false, reason: 'not under test', side: 'flash', path: [], node: null } })),
   // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
   getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
   pinBaseline: vi.fn(),

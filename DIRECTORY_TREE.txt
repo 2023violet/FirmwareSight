@@ -189,7 +189,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0035-apache-2-open-source-license.md
 │   ├── ADR-0036-armlink-map-adapter.md
 │   ├── ADR-0037-release-provenance-signing.md
-│   └── ADR-0038-iar-ilink-map-adapter.md
+│   ├── ADR-0038-iar-ilink-map-adapter.md
+│   └── ADR-0039-composition-tree-and-growth-waterfall.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
@@ -318,6 +319,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── baseline.rs
 │       │   │   ├── bundle.rs
 │       │   │   ├── compare.rs
+│       │   │   ├── composition.rs
 │       │   │   ├── details.rs
 │       │   │   ├── diagnostics.rs
 │       │   │   ├── dialog_text.rs
@@ -338,6 +340,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── baseline_pin.rs
 │       │   │   ├── bundle_ipc.rs
 │       │   │   ├── compare_ipc.rs
+│       │   │   ├── composition_ipc.rs
 │       │   │   ├── desktop_parity.rs
 │       │   │   ├── diagnostics.rs
 │       │   │   ├── drop_intake.rs
@@ -447,6 +450,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── ArtifactDto.ts
 │           │   │   │   ├── BaselinePinDto.ts
 │           │   │   │   ├── BudgetDto.ts
+│           │   │   │   ├── BudgetSideDto.ts
 │           │   │   │   ├── BundleDestinationDto.ts
 │           │   │   │   ├── BundleExportDto.ts
 │           │   │   │   ├── BundleFileRowDto.ts
@@ -461,6 +465,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── CompareCandidateDto.ts
 │           │   │   │   ├── CompareRequestDto.ts
 │           │   │   │   ├── CompareSummaryDto.ts
+│           │   │   │   ├── CompositionCrumbDto.ts
+│           │   │   │   ├── CompositionDto.ts
+│           │   │   │   ├── CompositionKindDto.ts
+│           │   │   │   ├── CompositionNodeDto.ts
+│           │   │   │   ├── CompositionRequestDto.ts
 │           │   │   │   ├── ContributorDto.ts
 │           │   │   │   ├── DiagnosticsCountsDto.ts
 │           │   │   │   ├── DiagnosticsDto.ts
@@ -549,13 +558,20 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── SymbolSortDto.ts
 │           │   │   │   ├── UnknownDispositionDto.ts
 │           │   │   │   ├── UnknownPolicyDto.ts
-│           │   │   │   └── VisualFormatDto.ts
+│           │   │   │   ├── VisualFormatDto.ts
+│           │   │   │   ├── WaterfallDto.ts
+│           │   │   │   ├── WaterfallRequestDto.ts
+│           │   │   │   ├── WaterfallStepDto.ts
+│           │   │   │   └── WaterfallStepKindDto.ts
 │           │   │   ├── bridge.test.ts
 │           │   │   ├── bridge.ts
 │           │   │   ├── dialogWords.test.ts
 │           │   │   ├── dialogWords.ts
 │           │   │   ├── dropEvents.ts
 │           │   │   └── types.ts
+│           │   ├── lib/
+│           │   │   ├── squarify.test.ts
+│           │   │   └── squarify.ts
 │           │   ├── styles/
 │           │   │   ├── classnames.ts
 │           │   │   ├── global.css
@@ -571,6 +587,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── Compare.module.css
 │           │   ├── compare.test.tsx
 │           │   ├── Compare.tsx
+│           │   ├── Composition.module.css
+│           │   ├── composition.test.tsx
+│           │   ├── Composition.tsx
 │           │   ├── Details.module.css
 │           │   ├── details.test.tsx
 │           │   ├── Details.tsx
@@ -579,6 +598,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── format.ts
 │           │   ├── GettingStarted.module.css
 │           │   ├── GettingStarted.tsx
+│           │   ├── GrowthWaterfall.module.css
+│           │   ├── GrowthWaterfall.tsx
 │           │   ├── Help.module.css
 │           │   ├── help.test.tsx
 │           │   ├── Help.tsx
@@ -598,7 +619,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── Settings.tsx
 │           │   ├── stateWords.ts
 │           │   ├── theme.test.ts
-│           │   └── theme.ts
+│           │   ├── theme.ts
+│           │   └── waterfall.test.tsx
 │           ├── .npmrc
 │           ├── eslint.config.js
 │           ├── index.html
@@ -648,6 +670,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── map_iar.rs
 │   │   │   └── pipeline.rs
 │   │   ├── tests/
+│   │   │   ├── composition_conservation.rs
 │   │   │   ├── d4_armlink_fixtures.rs
 │   │   │   ├── m2_object_fixtures.rs
 │   │   │   ├── map_companion_identity.rs
@@ -659,12 +682,15 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── firmwaresight-core/
 │   │   ├── src/
 │   │   │   ├── domain/
+│   │   │   │   ├── composition/
+│   │   │   │   │   └── tests.rs
 │   │   │   │   ├── diff/
 │   │   │   │   │   └── tests.rs
 │   │   │   │   ├── artifact.rs
 │   │   │   │   ├── attribution.rs
 │   │   │   │   ├── build_snapshot.rs
 │   │   │   │   ├── capability.rs
+│   │   │   │   ├── composition.rs
 │   │   │   │   ├── diff.rs
 │   │   │   │   ├── evidence.rs
 │   │   │   │   ├── gate.rs
@@ -673,7 +699,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   │   ├── mod.rs
 │   │   │   │   ├── release.rs
 │   │   │   │   ├── section.rs
-│   │   │   │   └── symbol.rs
+│   │   │   │   ├── symbol.rs
+│   │   │   │   └── waterfall.rs
 │   │   │   ├── error.rs
 │   │   │   └── lib.rs
 │   │   └── Cargo.toml

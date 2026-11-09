@@ -10,6 +10,12 @@ last_updated: "2026-09-28"
 
 # Changelog
 
+## Unreleased
+
+- **Composition (Analyze, ADR-0039).** A treemap of where the build's bytes are: region → section → object → symbol, per budget (Flash/RAM). Click to drill in, breadcrumbs to come back, and a table listing every part with its share and evidence. The gaps are explicit (linker bytes, bytes no symbol covers), and an Unknown part is listed with its reason, never drawn as zero.
+- **Where the change came from (Compare, ADR-0039).** A growth waterfall from the base total through each object's or library's change, the folded rest and the linker's own bytes, to the target total.
+- **Markdown exports.** The analysis Markdown from the desktop gains a Composition section. The comparison Markdown, from the desktop and `fwsight diff --markdown`, gains the waterfall.
+
 ## 0.8.0 — 2026-10-18 (public release)
 
 [GitHub release v0.8.0](https://github.com/2023violet/FirmwareSight/releases/tag/v0.8.0).

@@ -46,6 +46,7 @@ import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { SubjectBar, type Subject, type SubjectFreshness } from './components/SubjectBar';
 import { Tabs, tabPanelProps } from './components/Tabs';
+import { GrowthWaterfall } from './GrowthWaterfall';
 import { evidenceBasisCaption } from './evidenceBasis';
 import { ABSENT, formatSize, truncateMiddle, type SizeUnit } from './format';
 import { useI18n, type Translate } from './i18n';
@@ -736,6 +737,7 @@ export function Compare({
                   <>
                     <WhatMoved counts={summary.counts} />
                     <MemoryComparison memory={summary.memory} unit={unit} />
+                    <GrowthWaterfall key={summary.diffId} diffId={summary.diffId} unit={unit} />
                     <Ranking
                       summary={summary}
                       additions={additions}
