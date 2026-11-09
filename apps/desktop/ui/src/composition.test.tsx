@@ -92,6 +92,23 @@ describe('CompositionView', () => {
     });
   });
 
+  it('keeps keyboard focus in the map across a drill and Backspace', async () => {
+    compositionMock.mockResolvedValueOnce({ ok: true, value: ROOT }).mockResolvedValueOnce({ ok: true, value: REGION }).mockResolvedValue({ ok: true, value: ROOT });
+    render(<CompositionView snapshotId="snap-1" unit="bytes" onInspect={vi.fn()} />);
+    fireEvent.click(await screen.findByRole('button', { name: /^Open FLASH/ }));
+    const inner = await screen.findByRole('button', { name: /\.text, 900 bytes/ });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(inner);
+    });
+    fireEvent.keyDown(inner, { key: 'Backspace' });
+    await waitFor(() => {
+      expect(compositionMock).toHaveBeenLastCalledWith({ snapshotId: 'snap-1', side: 'flash', focus: 'root' });
+    });
+    await waitFor(() => {
+      expect(document.activeElement?.getAttribute('aria-label')).toMatch(/^Open FLASH/);
+    });
+  });
+
   it('says why when the build is not held, instead of drawing an empty map', async () => {
     compositionMock.mockResolvedValue({ ok: true, value: { available: false, reason: 'analyze it again', side: 'flash', path: [], node: null } });
     render(<CompositionView snapshotId="snap-1" unit="bytes" onInspect={vi.fn()} />);

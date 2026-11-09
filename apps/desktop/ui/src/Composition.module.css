@@ -105,6 +105,9 @@
 
 .cell {
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   padding: 0;
   overflow: hidden;
   color: var(--fs-color-text-primary);

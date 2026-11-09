@@ -57,6 +57,16 @@ export function CompositionView({
   const [answer, setAnswer] = useState<CompositionDto | null>(null);
   const [error, setError] = useState<ErrorEnvelopeDto | null>(null);
   const cellRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  // A drill from a cell (or Backspace from one) removes the focused cell; once the next level has
+  // arrived, focus its first cell so the keyboard user keeps a place in the map.
+  const refocus = useRef(false);
+
+  useEffect(() => {
+    if (refocus.current && answer !== null) {
+      refocus.current = false;
+      cellRefs.current[0]?.focus();
+    }
+  }, [answer]);
 
   useEffect(() => {
     let live = true;
@@ -105,6 +115,7 @@ export function CompositionView({
   const goUp = () => {
     const path = answer?.path ?? [];
     if (path.length > 1) {
+      refocus.current = true;
       setFocus(path[path.length - 2]?.id ?? null);
     }
   };
@@ -219,6 +230,7 @@ export function CompositionView({
                     }}
                     onClick={(event) => {
                       if (drillable(c)) {
+                        refocus.current = true;
                         setFocus(c.id);
                       } else {
                         onInspect(evidence(c), event.currentTarget);
