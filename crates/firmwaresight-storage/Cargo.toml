@@ -14,7 +14,7 @@ firmwaresight-core = { workspace = true }
 # committed state is the `.sqlite` file plus whatever the log still holds. The feature is declared in
 # rusqlite's own manifest as `backup = []`, so it adds no package to this graph; `bundled` already
 # compiles the `sqlite3_backup_*` symbols it calls.
-rusqlite = { version = "0.40.2", features = ["bundled", "backup"] }
+rusqlite = { version = "0.41.0", features = ["bundled", "backup"] }
 thiserror = "2.0.21"
 tracing = "0.1.44"
 

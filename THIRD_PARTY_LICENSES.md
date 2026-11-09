@@ -180,7 +180,7 @@ Components: 377 Rust crates, 4 npm packages.
 | Rust crate `lazy_static` | 1.5.0 | MIT OR Apache-2.0 | https://github.com/rust-lang-nursery/lazy-static.rs | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-MIT](#text-9e0027807b0c) |
 | Rust crate `libc` | 0.2.189 | MIT OR Apache-2.0 | https://github.com/rust-lang/libc | [LICENSE-APACHE](#text-85ad950cce87), [LICENSE-MIT](#text-c96302294382) |
 | Rust crate `libdbus-sys` | 0.2.7 | Apache-2.0/MIT | https://github.com/diwic/dbus-rs | [LICENSE-APACHE](#text-8d2ca3a111ce), [LICENSE-MIT](#text-de3911c2d98c) |
-| Rust crate `libsqlite3-sys` | 0.38.2 | MIT | https://github.com/rusqlite/rusqlite | [LICENSE](#text-6061b8ea5b16) |
+| Rust crate `libsqlite3-sys` | 0.39.1 | MIT | https://github.com/rusqlite/rusqlite | [LICENSE](#text-6061b8ea5b16) |
 | Rust crate `linux-raw-sys` | 0.12.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | https://github.com/sunfishcode/linux-raw-sys | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-Apache-2.0_WITH_LLVM-exception](#text-2f213ec6b135), [LICENSE-MIT](#text-30fefc3a7d6a) |
 | Rust crate `litemap` | 0.8.3 | Unicode-3.0 | https://github.com/unicode-org/icu4x | [LICENSE](#text-cde87abe221f) |
 | Rust crate `lock_api` | 0.4.14 | MIT OR Apache-2.0 | https://github.com/Amanieu/parking_lot | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-MIT](#text-8d1f81ea4e87) |
@@ -244,7 +244,7 @@ Components: 377 Rust crates, 4 npm packages.
 | Rust crate `rgb` | 0.8.53 | MIT | https://github.com/kornelski/rust-rgb | [LICENSE](#text-c7d50fa44b04) |
 | Rust crate `roxmltree` | 0.20.0 | MIT OR Apache-2.0 | https://github.com/RazrFalcon/roxmltree | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-MIT](#text-92f2a160c78f) |
 | Rust crate `roxmltree` | 0.21.1 | MIT OR Apache-2.0 | https://github.com/RazrFalcon/roxmltree | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-MIT](#text-92f2a160c78f) |
-| Rust crate `rusqlite` | 0.40.2 | MIT | https://github.com/rusqlite/rusqlite | [LICENSE](#text-6061b8ea5b16) |
+| Rust crate `rusqlite` | 0.41.1 | MIT | https://github.com/rusqlite/rusqlite | [LICENSE](#text-6061b8ea5b16) |
 | Rust crate `rustc-hash` | 2.1.3 | Apache-2.0 OR MIT | https://github.com/rust-lang/rustc-hash | [LICENSE-APACHE](#text-85ad950cce87), [LICENSE-MIT](#text-30fefc3a7d6a) |
 | Rust crate `rustix` | 1.1.5 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | https://github.com/bytecodealliance/rustix | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-Apache-2.0_WITH_LLVM-exception](#text-2f213ec6b135), [LICENSE-MIT](#text-30fefc3a7d6a) |
 | Rust crate `rustix-linux-procfs` | 0.1.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | https://github.com/sunfishcode/rustix-linux-procfs | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-Apache-2.0_WITH_LLVM-exception](#text-2f213ec6b135), [LICENSE-MIT](#text-30fefc3a7d6a) |
@@ -314,7 +314,7 @@ Components: 377 Rust crates, 4 npm packages.
 | Rust crate `tiny-skia-path` | 0.12.0 | BSD-3-Clause | https://github.com/linebender/tiny-skia/tree/master/path | [LICENSE](#text-b6300e2c10f1) |
 | Rust crate `tinystr` | 0.8.4 | Unicode-3.0 | https://github.com/unicode-org/icu4x | [LICENSE](#text-cde87abe221f) |
 | Rust crate `tinyvec` | 1.13.3 | Zlib OR Apache-2.0 OR MIT | https://github.com/Lokathor/tinyvec | [LICENSE-APACHE.md](#text-283ea6cc2997), [LICENSE-MIT.md](#text-bccaa8b6c09f), [LICENSE-ZLIB.md](#text-943f36fd309f) |
-| Rust crate `tokio` | 1.53.1 | MIT | https://github.com/tokio-rs/tokio | [LICENSE](#text-3e1bef82aa0d) |
+| Rust crate `tokio` | 1.53.3 | MIT | https://github.com/tokio-rs/tokio | [LICENSE](#text-3e1bef82aa0d) |
 | Rust crate `toml` | 1.1.6+spec-1.1.0 | MIT OR Apache-2.0 | https://github.com/toml-rs/toml | [LICENSE-APACHE](#text-6dc0e068dcf3), [LICENSE-MIT](#text-4498464c2864) |
 | Rust crate `toml_datetime` | 0.6.3 | MIT OR Apache-2.0 | https://github.com/toml-rs/toml | [LICENSE-APACHE](#text-954f335b8baf), [LICENSE-MIT](#text-84e1bbfebd74) |
 | Rust crate `toml_datetime` | 1.1.1+spec-1.1.0 | MIT OR Apache-2.0 | https://github.com/toml-rs/toml | [LICENSE-APACHE](#text-6dc0e068dcf3), [LICENSE-MIT](#text-4498464c2864) |

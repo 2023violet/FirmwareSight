@@ -73,7 +73,7 @@ impl Database {
         let _ = std::fs::remove_file(&staging);
 
         self.connection()
-            .backup("main", &staging, None)
+            .backup("main", &staging, None::<fn(rusqlite::backup::Progress)>)
             .map_err(|_| StorageError::Backup {
                 detail: format!("{name} could not be written"),
             })?;
