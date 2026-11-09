@@ -83,6 +83,13 @@ fn code(raw: &str) -> String {
     format!("`{}`", shown.replace('`', "'"))
 }
 
+/// A name from the input (an object key, a symbol, a section) as inline code inside a table cell. GFM
+/// ends a cell at a `|` even inside a code span unless it is written `\|`, which the cell then renders
+/// as a plain `|`.
+fn cell_code(raw: &str) -> String {
+    code(raw).replace('|', "\\|")
+}
+
 fn footer(out: &mut String, kind: &str) {
     out.push_str("\n---\n\n");
     out.push_str(&format!(
@@ -259,7 +266,7 @@ fn rows_of(out: &mut String, node: &CompositionNode, depth: usize, rows: &mut us
         out.push_str(&format!(
             "| {}{} | {} | {} | {share} |\n",
             "&nbsp;&nbsp;".repeat(depth),
-            code(&child.name),
+            cell_code(&child.name),
             kind_word(child.kind),
             bytes(child.bytes)
         ));
@@ -314,7 +321,7 @@ fn waterfall_section(out: &mut String, result: &DiffResult) {
                 StepKind::Linker => "Linker and unattributed".to_owned(),
                 StepKind::Item => format!(
                     "{}{}",
-                    code(&step.label),
+                    cell_code(&step.label),
                     step.change.map_or(String::new(), |c| format!(
                         " ({})",
                         c.label().to_ascii_lowercase()
@@ -660,5 +667,11 @@ mod tests {
         assert_eq!(escape("<script>"), "\\<script\\>");
         assert!(!escape("line\nbreak").contains('\n'));
         assert_eq!(code("a`b"), "`a'b`");
+        // D7 review: an object key or a demangled symbol in a table cell keeps its pipe inside the cell.
+        assert_eq!(
+            cell_code("operator|(Flags, Flags)"),
+            "`operator\\|(Flags, Flags)`"
+        );
+        assert_eq!(cell_code("a\nb|c"), "`a\\u{a}b\\|c`");
     }
 }
