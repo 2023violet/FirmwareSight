@@ -1941,3 +1941,135 @@ pub struct PreferencesDto {
     pub kept_unreadable_copy: bool,
     pub file_name: String,
 }
+
+/// Which budget a composition tree or a growth waterfall is drawn for (ADR-0039).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum BudgetSideDto {
+    #[default]
+    Flash,
+    Ram,
+}
+
+/// A request for one window of a held build's composition tree.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CompositionRequestDto {
+    pub snapshot_id: String,
+    #[serde(default)]
+    pub side: BudgetSideDto,
+    /// The node to open; `null` opens the root.
+    #[serde(default)]
+    pub focus: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum CompositionKindDto {
+    Root,
+    Region,
+    NoRegion,
+    Section,
+    Object,
+    Symbol,
+    LinkerBytes,
+    NoSymbol,
+    More,
+}
+
+/// One node of a composition window. Bytes are Core's; `null` is Unknown with `reason`.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CompositionNodeDto {
+    pub id: String,
+    pub kind: CompositionKindDto,
+    pub name: String,
+    #[ts(type = "number | null")]
+    pub bytes: Option<u64>,
+    pub classification: EvidenceClassDto,
+    pub reason: Option<String>,
+    pub locator: Option<String>,
+    #[ts(type = "number | null")]
+    pub capacity: Option<u64>,
+    /// Children not sent: a `more` node's folded count, or a leaf of the window that has children.
+    pub folded: usize,
+    pub children: Vec<CompositionNodeDto>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CompositionCrumbDto {
+    pub id: String,
+    pub name: String,
+}
+
+/// A window of the composition tree: the focus node and two levels below it, plus the path to it.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct CompositionDto {
+    /// False when the build is not held in this session; `reason` then says what to do.
+    pub available: bool,
+    pub reason: Option<String>,
+    pub side: BudgetSideDto,
+    pub path: Vec<CompositionCrumbDto>,
+    pub node: Option<CompositionNodeDto>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct WaterfallRequestDto {
+    pub diff_id: String,
+    #[serde(default)]
+    pub side: BudgetSideDto,
+    /// `false` steps by object, `true` by library.
+    #[serde(default)]
+    pub libraries: bool,
+    #[serde(default)]
+    pub top_n: Option<usize>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum WaterfallStepKindDto {
+    Start,
+    Item,
+    Rest,
+    Linker,
+    End,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct WaterfallStepDto {
+    pub kind: WaterfallStepKindDto,
+    pub label: String,
+    /// `added`, `changed` or `removed` for an item step.
+    pub change: Option<String>,
+    #[ts(type = "number | null")]
+    pub delta: Option<i64>,
+    #[ts(type = "number | null")]
+    pub total: Option<u64>,
+    pub folded: usize,
+    pub reason: Option<String>,
+}
+
+/// A growth waterfall of one computed comparison (ADR-0039 D4).
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct WaterfallDto {
+    pub available: bool,
+    pub reason: Option<String>,
+    pub side: BudgetSideDto,
+    pub libraries: bool,
+    pub steps: Vec<WaterfallStepDto>,
+}

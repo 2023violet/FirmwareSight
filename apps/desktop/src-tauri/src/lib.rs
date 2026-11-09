@@ -34,6 +34,7 @@
 pub mod baseline;
 pub mod bundle;
 pub mod compare;
+pub mod composition;
 pub mod details;
 pub mod diagnostics;
 pub mod dialog_text;
@@ -1655,6 +1656,8 @@ pub fn run() {
             details::query_symbols,
             details::query_evidence,
             objects::query_objects,
+            composition::query_composition,
+            composition::query_growth_waterfall,
             compare::list_compare_candidates,
             compare::compare_snapshots,
             compare::query_section_changes,

@@ -117,3 +117,15 @@ The Owner asked for three features before judging a second public release: real-
 | # | Decision |
 |---|---|
 | V7-4 | Supersedes V7-2. IAR samples may come from build outputs that open-source projects committed publicly, instead of an installed IAR toolchain. Nine same-origin `.out` + `.map` pairs from permissively licensed repositories satisfy Standing Owner rule 3 for IAR ILINK for Arm. The samples are named by repository, commit and SHA-256 and are not committed (ADR-0038, `evidence/D4-IAR`). |
+
+## Owner decision 2026-11-09: a feature round against "too monotonous"
+
+The Owner judged the product too monotonous and approved a plan (session plan `zippy-chasing-gem`) of three batches. They come from the E3/GX candidate pool, which normally needs V1 or Pilot evidence; V1 has 0 sessions. As with RD4 and RD6, this is the Owner's written exception.
+
+| # | Decision |
+|---|---|
+| F1 | **D7 visual exploration:** a composition treemap (region → section → object → symbol) in Analyze, a growth waterfall in Compare, and SVG/PNG/Markdown exports of both (ADR-0039). |
+| F2 | **D8 trends and history:** per-region usage stored per build (migration 0009, no backfill under DR1), History trend views, Overview restored from History, and opt-in `fwsight --record` into the local store (ADR-0040, ADR-0041). Starts after D7 is merged. |
+| F3 | **D9 CI/PR integration:** `gate --junit`, `diff --summary-md`, a composite GitHub Action that verifies the release attestation, and CI recipes (ADR-0042). It may run in parallel with D7 in its own worktree. |
+| F4 | Out of this round: per-region or per-library budgets, percentage thresholds, `.su` stack evidence (D5), watch mode, DWARF, BIN/HEX content analysis, multi-project, Authenticode. |
+| F5 | Constraints unchanged: no network in the product, Core synchronous and headless, no new chart library, Unknown never drawn as zero, push only on explicit approval as an ordinary fast-forward (Standing Owner rule 1). |
