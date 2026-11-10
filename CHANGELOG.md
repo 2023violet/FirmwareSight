@@ -14,6 +14,10 @@ last_updated: "2026-09-28"
 
 - **Composition (Analyze, ADR-0039).** A treemap of where the build's bytes are: region → section → object → symbol, per budget (Flash/RAM). Click to drill in, breadcrumbs to come back, and a table listing every part with its share and evidence. The gaps are explicit (linker bytes, bytes no symbol covers), and an Unknown part is listed with its reason, never drawn as zero.
 - **Where the change came from (Compare, ADR-0039).** A growth waterfall from the base total through each object's or library's change, the folded rest and the linker's own bytes, to the target total.
+- **CI integration (ADR-0040).** Three pieces:
+  - `fwsight gate --junit FILE` writes the Gate as a JUnit suite, one test case per rule: BLOCK fails, while REVIEW and N/A are skipped with the reason.
+  - `--summary-md FILE` on `gate` and `diff` writes a short PR comment: the verdict, the Flash/RAM change and the largest object movers.
+  - A composite GitHub Action at the repository root downloads the CLI and verifies its provenance attestation before running it. It writes the job summary and can keep one PR comment up to date. Recipes for GitHub Actions and GitLab, and a pre-push hook, are in `docs/ci/`.
 - **Markdown exports.** The analysis Markdown from the desktop gains a Composition section. The comparison Markdown, from the desktop and `fwsight diff --markdown`, gains the waterfall.
 
 ## 0.8.0 — 2026-10-18 (public release)

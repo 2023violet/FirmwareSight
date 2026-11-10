@@ -1,0 +1,31 @@
+# Example: FirmwareSight in GitLab CI (merge it into your .gitlab-ci.yml).
+#
+# What it does:
+#   - runs the release Gate on the build;
+#   - shows the Gate rules as tests in the merge request (JUnit report);
+#   - keeps the Markdown summaries as job artifacts.
+#
+# Download the CLI from the GitHub release, check SHA256SUMS.txt (or `gh attestation verify`),
+# and cache it as you would any other tool. This job expects `fwsight` on PATH.
+
+firmwaresight:
+  stage: test
+  needs: ["build"]                       # your build job; artifacts build/app.elf and build/app.map
+  script:
+    - mkdir -p fwsight-out
+    - |
+      set +e
+      fwsight gate --project . --artifact build/app.elf --map build/app.map \
+        --junit fwsight-out/gate.xml --summary-md fwsight-out/gate.md
+      code=$?
+      set -e
+      # No summary when the Gate did not run (exit 2, 3 or 6); the real code still decides below.
+      if [ -f fwsight-out/gate.md ]; then cat fwsight-out/gate.md; fi
+      # 0 PASS, 4 REVIEW, 5 BLOCK; anything else is an error. Fail on BLOCK and on errors only.
+      case "$code" in 0|4) exit 0 ;; *) exit "$code" ;; esac
+  artifacts:
+    when: always
+    paths:
+      - fwsight-out/
+    reports:
+      junit: fwsight-out/gate.xml

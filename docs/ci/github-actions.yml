@@ -1,0 +1,54 @@
+# Example: FirmwareSight on every pull request (copy to .github/workflows/firmware-size.yml).
+#
+# What it does:
+#   - builds the PR and the target branch;
+#   - runs the release Gate on the PR build, using the target branch's build as the baseline;
+#   - writes the job summary, publishes the JUnit report, and keeps one comment on the PR up to date.
+#
+# Replace the two "Build" steps with your own build. The Action downloads the FirmwareSight CLI and
+# verifies its build provenance before it runs it.
+
+name: Firmware size
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write   # only for `comment: true`
+
+jobs:
+  firmwaresight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build the baseline (target branch)
+        run: |
+          git worktree add ../baseline "origin/${GITHUB_BASE_REF}"
+          make -C ../baseline            # your build; produces ../baseline/build/app.elf and app.map
+
+      - name: Build this pull request
+        run: make                        # produces build/app.elf and build/app.map
+
+      - name: FirmwareSight
+        id: fs
+        uses: 2023violet/FirmwareSight@v0.9.0
+        with:
+          version: 0.9.0
+          project: .                     # where firmwaresight.toml lives
+          artifact: build/app.elf
+          map: build/app.map
+          baseline: ../baseline/build/app.elf
+          baseline-map: ../baseline/build/app.map
+          fail-on: block                 # REVIEW is reported, but does not fail the job
+          comment: true
+
+      - name: Keep the JUnit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmwaresight-junit
+          path: ${{ steps.fs.outputs.junit }}

@@ -38,7 +38,8 @@ use firmwaresight_project::{
     prepare_with_attachments, run_id,
 };
 use firmwaresight_report::{
-    AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, markdown, render,
+    AnalyzeResultDto, DiffResultDto, GateResultsDto, diff_render, gate_render, junit, markdown,
+    render, summary,
     visual::{self, VisualFormat, VisualReport},
 };
 
@@ -246,6 +247,10 @@ struct DiffArgs {
     /// existing file. It is a reading copy and never part of a release bundle.
     #[arg(long, value_name = "FILE")]
     markdown: Option<PathBuf>,
+
+    /// A short Markdown block for a pull-request comment or a CI job summary (ADR-0040).
+    #[arg(long, value_name = "FILE")]
+    summary_md: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
@@ -292,6 +297,14 @@ struct GateArgs {
     /// existing file. It is a reading copy and never part of a release bundle.
     #[arg(long, value_name = "FILE")]
     markdown: Option<PathBuf>,
+
+    /// The Gate as a JUnit test suite, one test case per rule (ADR-0040).
+    #[arg(long, value_name = "FILE")]
+    junit: Option<PathBuf>,
+
+    /// A short Markdown block for a pull-request comment or a CI job summary (ADR-0040).
+    #[arg(long, value_name = "FILE")]
+    summary_md: Option<PathBuf>,
 }
 
 fn main() -> ExitCode {
@@ -522,6 +535,7 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
         &args.png,
         &args.report_html,
         &args.markdown,
+        &args.summary_md,
     ]) {
         return report_export_error(SAME_DESTINATION, args.json, operation_id);
     }
@@ -569,6 +583,17 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
     {
         return ExitCode::from(code);
     }
+    if let Some(path) = &args.summary_md
+        && let Some(code) = write_export(
+            path,
+            &summary::comparison(&result),
+            "summary Markdown",
+            args.json,
+            operation_id,
+        )
+    {
+        return ExitCode::from(code);
+    }
     if let Some(path) = &args.html {
         let html = diff_render::render_html(&dto);
         if std::fs::write(path, html).is_err() {
@@ -601,6 +626,9 @@ fn run_diff(args: DiffArgs, operation_id: &str) -> ExitCode {
 /// and the project-relative Release Notes file. Core decides what each of them means; this function only
 /// assembles facts and prints the answer, and it stores nothing.
 fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
+    if outputs_collide(&[&args.markdown, &args.junit, &args.summary_md]) {
+        return report_export_error(SAME_DESTINATION, args.json, operation_id);
+    }
     let project = match LoadedProject::load(&args.project) {
         Ok(loaded) => loaded,
         Err(err) => return report_config_error(&err, args.json, operation_id),
@@ -677,6 +705,22 @@ fn run_gate(args: GateArgs, operation_id: &str) -> ExitCode {
         if let Some(code) = write_markdown(path, &text, args.json, operation_id) {
             return ExitCode::from(code);
         }
+    }
+    if let Some(path) = &args.junit
+        && let Some(code) = write_export(path, &junit::gate(&dto), "JUnit", args.json, operation_id)
+    {
+        return ExitCode::from(code);
+    }
+    if let Some(path) = &args.summary_md
+        && let Some(code) = write_export(
+            path,
+            &summary::gate(&dto),
+            "summary Markdown",
+            args.json,
+            operation_id,
+        )
+    {
+        return ExitCode::from(code);
     }
 
     if args.json {
@@ -1152,6 +1196,17 @@ fn outputs_collide(paths: &[&Option<PathBuf>]) -> bool {
 /// Write one Markdown report without replacing an existing file (R6). The same refusal words and exit code
 /// as the visual exports, because one failure has one code (`ERR-EXPORT-6001`).
 fn write_markdown(path: &Path, text: &str, json: bool, operation_id: &str) -> Option<u8> {
+    write_export(path, text, "Markdown", json, operation_id)
+}
+
+/// Write one text export (Markdown, JUnit, summary) without replacing an existing file.
+fn write_export(
+    path: &Path,
+    text: &str,
+    label: &str,
+    json: bool,
+    operation_id: &str,
+) -> Option<u8> {
     if let Err(error) = visual::write_new(path, text.as_bytes()) {
         let message = match error {
             visual::VisualError::Exists => "Export destination exists; choose a new file.",
@@ -1160,7 +1215,7 @@ fn write_markdown(path: &Path, text: &str, json: bool, operation_id: &str) -> Op
         report_export_error(message, json, operation_id);
         return Some(EXIT_EXPORT);
     }
-    eprintln!("diagnostics: Markdown export written");
+    eprintln!("diagnostics: {label} export written");
     None
 }
 

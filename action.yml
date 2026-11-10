@@ -1,0 +1,216 @@
+# FirmwareSight composite GitHub Action (ADR-0040).
+#
+# What it does:
+#   - runs the release Gate (and, with a baseline, a size comparison) on a firmware build;
+#   - writes the JUnit report and the job summary, and can update one PR comment.
+#
+# Trust:
+#   - with no `fwsight-path`, it downloads the CLI from this repository's release and checks its
+#     Sigstore build provenance with `gh attestation verify` (ADR-0037) before running it;
+#   - the binary itself opens no network connection. Only these shell steps use the network,
+#     through the runner's `gh`.
+#
+# Every input reaches the scripts through `env`, never through `${{ }}` inside a script, so a value
+# cannot become shell code.
+
+name: FirmwareSight
+description: Release Gate, JUnit report and a PR size summary for an ELF/AXF firmware build. Local analysis; nothing is uploaded.
+author: FirmwareSight
+branding:
+  icon: cpu
+  color: blue
+
+inputs:
+  version:
+    description: FirmwareSight release to download, e.g. 0.9.0 (0.9.0 or later has the CI exports). Ignored when fwsight-path is set.
+    required: false
+    default: ""
+  fwsight-path:
+    description: Path to an fwsight binary you built or cached. When set, nothing is downloaded.
+    required: false
+    default: ""
+  artifact:
+    description: The firmware build to judge (ELF or AXF).
+    required: true
+  map:
+    description: Its linker MAP (GNU ld, armlink or IAR ILINK). Optional, but needed for region and object facts.
+    required: false
+    default: ""
+  baseline:
+    description: An earlier build to compare against (ELF or AXF). Optional.
+    required: false
+    default: ""
+  baseline-map:
+    description: The baseline's linker MAP. Optional.
+    required: false
+    default: ""
+  project:
+    description: Directory that holds firmwaresight.toml.
+    required: false
+    default: "."
+  fail-on:
+    description: "When the step fails: block (default), review (REVIEW or BLOCK), or never. A usage, parse or export error always fails."
+    required: false
+    default: block
+  comment:
+    description: "true to create or update one comment on the pull request (needs pull-requests: write)."
+    required: false
+    default: "false"
+  github-token:
+    description: Token for the download, the provenance check and the comment.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  verdict:
+    description: PASS, REVIEW, BLOCK, or ERROR.
+    value: ${{ steps.run.outputs.verdict }}
+  exit-code:
+    description: The fwsight gate exit code (0, 4, 5; 2, 3 or 6 on error).
+    value: ${{ steps.run.outputs.exit-code }}
+  junit:
+    description: Path of the JUnit XML report.
+    value: ${{ steps.run.outputs.junit }}
+  summary:
+    description: Path of the Markdown summary (Gate, then size change).
+    value: ${{ steps.run.outputs.summary }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get fwsight
+      id: get
+      shell: bash
+      env:
+        FS_VERSION: ${{ inputs.version }}
+        FS_PATH: ${{ inputs.fwsight-path }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -euo pipefail
+        repo="2023violet/FirmwareSight"
+        if [ -n "$FS_PATH" ]; then
+          [ -f "$FS_PATH" ] || { echo "::error::fwsight-path does not name a file"; exit 1; }
+          # A bare name would be looked up on PATH, and a binary restored from an artifact has lost its
+          # execute bit.
+          case "$FS_PATH" in */*|*\\*) ;; *) FS_PATH="./$FS_PATH" ;; esac
+          chmod +x "$FS_PATH" 2>/dev/null || true
+          echo "bin=$FS_PATH" >> "$GITHUB_OUTPUT"
+          echo "Using the caller's fwsight; nothing downloaded."
+          exit 0
+        fi
+        if ! [[ "$FS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+          echo "::error::Set 'version' to a FirmwareSight release such as 0.9.0, or set 'fwsight-path'."
+          exit 1
+        fi
+        case "$RUNNER_OS/$RUNNER_ARCH" in
+          Linux/X64)   plat="linux-x86_64";   ext="tar.gz"; exe="fwsight" ;;
+          Windows/X64) plat="windows-x86_64"; ext="zip";    exe="fwsight.exe" ;;
+          macOS/ARM64) plat="darwin-arm64";   ext="tar.gz"; exe="fwsight" ;;
+          *) echo "::error::No FirmwareSight CLI is published for $RUNNER_OS/$RUNNER_ARCH."; exit 1 ;;
+        esac
+        asset="FirmwareSight-${FS_VERSION}-${plat}-cli-fwsight.${ext}"
+        dir="$RUNNER_TEMP/firmwaresight-cli-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        mkdir -p "$dir"
+        gh release download "v${FS_VERSION}" --repo "$repo" --pattern "$asset" --dir "$dir" --clobber
+        # ADR-0037: run nothing whose build provenance does not verify against this repository.
+        gh attestation verify "$dir/$asset" --repo "$repo"
+        if [ "$ext" = "zip" ]; then
+          # Expand-Archive reads the two paths from the environment, so no path is parsed as PowerShell.
+          ZIP="$dir/$asset" DEST="$dir" pwsh -NoProfile -Command \
+            'Expand-Archive -LiteralPath $env:ZIP -DestinationPath $env:DEST -Force' \
+            || { echo "::error::Could not extract $asset"; exit 1; }
+        else
+          tar -xzf "$dir/$asset" -C "$dir"
+        fi
+        chmod +x "$dir/$exe" 2>/dev/null || true
+        echo "bin=$dir/$exe" >> "$GITHUB_OUTPUT"
+
+    - name: Run the Gate and the size comparison
+      id: run
+      shell: bash
+      env:
+        FS_BIN: ${{ steps.get.outputs.bin }}
+        FS_ARTIFACT: ${{ inputs.artifact }}
+        FS_MAP: ${{ inputs.map }}
+        FS_BASELINE: ${{ inputs.baseline }}
+        FS_BASELINE_MAP: ${{ inputs.baseline-map }}
+        FS_PROJECT: ${{ inputs.project }}
+      run: |
+        set -uo pipefail
+        out="$(mktemp -d "$RUNNER_TEMP/firmwaresight-XXXXXX")"
+        gate=(gate --project "$FS_PROJECT" --artifact "$FS_ARTIFACT")
+        [ -n "$FS_MAP" ] && gate+=(--map "$FS_MAP")
+        if [ -n "$FS_BASELINE" ]; then
+          gate+=(--baseline "$FS_BASELINE")
+          [ -n "$FS_BASELINE_MAP" ] && gate+=(--baseline-map "$FS_BASELINE_MAP")
+        fi
+        "$FS_BIN" "${gate[@]}" --junit "$out/gate.xml" --summary-md "$out/gate.md"
+        code=$?
+        case "$code" in
+          0) verdict=PASS ;; 4) verdict=REVIEW ;; 5) verdict=BLOCK ;; *) verdict=ERROR ;;
+        esac
+
+        summary="$out/summary.md"
+        if [ -f "$out/gate.md" ]; then
+          cat "$out/gate.md" > "$summary"
+        else
+          printf '<!-- firmwaresight-summary -->\n### FirmwareSight · release Gate: **ERROR**\n\nThe Gate did not run (exit %s); the job log says why.\n' "$code" > "$summary"
+        fi
+        if [ -n "$FS_BASELINE" ]; then
+          diff=(diff "$FS_BASELINE" "$FS_ARTIFACT")
+          [ -n "$FS_BASELINE_MAP" ] && diff+=(--old-map "$FS_BASELINE_MAP")
+          [ -n "$FS_MAP" ] && diff+=(--new-map "$FS_MAP")
+          if "$FS_BIN" "${diff[@]}" --summary-md "$out/size.md" > /dev/null; then
+            # One marker per comment: the size block follows the Gate block without its own.
+            { echo; tail -n +2 "$out/size.md"; } >> "$summary"
+          else
+            echo "::warning::The size comparison did not complete; the Gate result stands."
+          fi
+        fi
+        cat "$summary" >> "$GITHUB_STEP_SUMMARY"
+        {
+          echo "verdict=$verdict"
+          echo "exit-code=$code"
+          echo "junit=$out/gate.xml"
+          echo "summary=$summary"
+        } >> "$GITHUB_OUTPUT"
+        echo "FirmwareSight verdict: $verdict (exit $code)"
+
+    - name: Update the pull-request comment
+      if: inputs.comment == 'true' && github.event.pull_request
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        FS_SUMMARY: ${{ steps.run.outputs.summary }}
+        FS_PR: ${{ github.event.pull_request.number }}
+        FS_REPO: ${{ github.repository }}
+      # A comment is a convenience, never the verdict. A fork PR's token is read-only, and a caller may
+      # not have granted pull-requests: write. Either way the job summary already carries the result,
+      # so a failed comment is a warning, and the fail-on step below still decides.
+      # One comment per PR: a second invocation of this Action in the same PR updates the same comment.
+      run: |
+        set -uo pipefail
+        marker='<!-- firmwaresight-summary -->'
+        id="$(gh api --paginate "repos/$FS_REPO/issues/$FS_PR/comments" \
+          --jq ".[] | select(.user.type == \"Bot\" and (.body | startswith(\"$marker\"))) | .id" | tail -n 1)" || id=""
+        if [ -n "$id" ] && gh api --method PATCH "repos/$FS_REPO/issues/comments/$id" -F "body=@$FS_SUMMARY" > /dev/null; then
+          echo "Updated comment $id."
+        elif gh api --method POST "repos/$FS_REPO/issues/$FS_PR/comments" -F "body=@$FS_SUMMARY" > /dev/null; then
+          echo "Added a comment."
+        else
+          echo "::warning::Could not comment on the pull request (a fork PR's token is read-only, or pull-requests: write is missing). The job summary has the result."
+        fi
+
+    - name: Apply fail-on
+      shell: bash
+      env:
+        FS_FAIL_ON: ${{ inputs.fail-on }}
+        FS_VERDICT: ${{ steps.run.outputs.verdict }}
+      run: |
+        set -euo pipefail
+        case "$FS_VERDICT/$FS_FAIL_ON" in
+          ERROR/*) echo "::error::fwsight did not produce a verdict; see the step above."; exit 1 ;;
+          BLOCK/block|BLOCK/review|REVIEW/review) echo "::error::FirmwareSight Gate: $FS_VERDICT"; exit 1 ;;
+          */block|*/review|*/never) echo "FirmwareSight Gate: $FS_VERDICT (fail-on: $FS_FAIL_ON)" ;;
+          *) echo "::error::fail-on must be block, review or never"; exit 1 ;;
+        esac

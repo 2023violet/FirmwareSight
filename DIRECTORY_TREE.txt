@@ -190,7 +190,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0036-armlink-map-adapter.md
 │   ├── ADR-0037-release-provenance-signing.md
 │   ├── ADR-0038-iar-ilink-map-adapter.md
-│   └── ADR-0039-composition-tree-and-growth-waterfall.md
+│   ├── ADR-0039-composition-tree-and-growth-waterfall.md
+│   └── ADR-0040-ci-integration-junit-summary-action.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
@@ -294,6 +295,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   ├── src/
 │   │   │   └── main.rs
 │   │   ├── tests/
+│   │   │   ├── ci_cli.rs
 │   │   │   ├── diff_cli.rs
 │   │   │   ├── export_privacy.rs
 │   │   │   ├── gate_cli.rs
@@ -736,6 +738,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── dto.rs
 │   │   │   ├── gate.rs
 │   │   │   ├── gate_render.rs
+│   │   │   ├── junit.rs
 │   │   │   ├── lib.rs
 │   │   │   ├── markdown.rs
 │   │   │   ├── release.rs
@@ -743,6 +746,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── render.rs
 │   │   │   ├── schema_check.rs
 │   │   │   ├── schemas.rs
+│   │   │   ├── summary.rs
 │   │   │   ├── text.rs
 │   │   │   └── visual.rs
 │   │   ├── tests/
@@ -789,6 +793,11 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   └── unknown_reasons.rs
 │       └── Cargo.toml
 ├── docs/
+│   ├── ci/
+│   │   ├── github-actions.yml
+│   │   ├── gitlab-ci.yml
+│   │   ├── pre-push
+│   │   └── README.md
 │   └── images/
 │       ├── analyze-en.png
 │       ├── analyze-zh.png
@@ -1316,6 +1325,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   └── V1_PLAN.md
 ├── .gitattributes
 ├── .gitignore
+├── action.yml
 ├── AGENTS.md
 ├── BASELINE.yaml
 ├── Cargo.lock

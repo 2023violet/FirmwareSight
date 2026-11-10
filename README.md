@@ -118,6 +118,22 @@ ram_budget = 131072
 flash_growth_review_bytes = 2048   # 相对基线增长超过该值时，结论为 REVIEW
 ```
 
+### 在 CI 中（v0.9.0 起）
+
+仓库根目录提供一个 GitHub Action。它会下载 CLI 并先校验构建来源证明，然后运行门禁，把结论写进 Job Summary，并在 PR 里维护一条尺寸变化评论：
+
+```yaml
+- uses: 2023violet/FirmwareSight@v0.9.0
+  with:
+    version: 0.9.0
+    artifact: build/app.elf
+    map: build/app.map
+    baseline: ../baseline/build/app.elf   # 可选：目标分支的构建
+    comment: true                         # 需要 pull-requests: write
+```
+
+命令行本身新增两个导出：`gate --junit` 输出 JUnit 报告，GitHub、GitLab、Jenkins 都能直接显示；`gate` / `diff --summary-md` 输出一段简短的 PR 摘要。GitLab 配置示例和 pre-push 钩子见 [docs/ci](docs/ci/README.md)。
+
 ## 设计原则
 
 - **本地优先。** 不联网，无遥测，无自动更新。历史数据保存在本机 SQLite 中。

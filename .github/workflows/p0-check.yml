@@ -53,6 +53,44 @@ jobs:
       - name: Verification gate (fmt, clippy, test)
         run: python scripts/check.py --only rust
 
+  # ADR-0040: the repository's own composite Action, run against committed fixtures with a binary
+  # built from this commit (`fwsight-path`), so nothing is downloaded and nothing is commented.
+  # It checks the outputs a caller relies on: the verdict, the JUnit file and the summary marker.
+  action-selftest:
+    name: GitHub Action self-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build fwsight
+        run: cargo build --locked -p fwsight
+      - name: Run the Action on the P2 fixture pair
+        id: fs
+        uses: ./
+        with:
+          fwsight-path: target/debug/fwsight
+          project: fixtures/project/p4-release
+          artifact: fixtures/elf/p2-diff/target/firmware.elf
+          map: fixtures/elf/p2-diff/target/firmware.map
+          baseline: fixtures/elf/p2-diff/base/firmware.elf
+          baseline-map: fixtures/elf/p2-diff/base/firmware.map
+          fail-on: never
+      - name: Check the outputs
+        shell: bash
+        env:
+          VERDICT: ${{ steps.fs.outputs.verdict }}
+          CODE: ${{ steps.fs.outputs.exit-code }}
+          JUNIT: ${{ steps.fs.outputs.junit }}
+          SUMMARY: ${{ steps.fs.outputs.summary }}
+        run: |
+          set -euo pipefail
+          case "$VERDICT/$CODE" in PASS/0|REVIEW/4|BLOCK/5) ;; *) echo "unexpected $VERDICT/$CODE"; exit 1 ;; esac
+          test "$(grep -c '<testcase ' "$JUNIT")" -eq 10
+          grep -q "firmwaresight.verdict\" value=\"$VERDICT\"" "$JUNIT"
+          head -n 1 "$SUMMARY" | grep -qx '<!-- firmwaresight-summary -->'
+          test "$(grep -c 'firmwaresight-summary' "$SUMMARY")" -eq 1
+          grep -qF '| Flash (load image) | 256 bytes | 376 bytes | **▲120 bytes** | exact |' "$SUMMARY"
+          echo "Action self-test: $VERDICT, JUnit and summary as documented."
+
   frontend:
     name: Desktop UI (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

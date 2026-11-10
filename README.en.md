@@ -118,6 +118,22 @@ ram_budget = 131072
 flash_growth_review_bytes = 2048   # growth over the baseline beyond this gives REVIEW
 ```
 
+### In CI (from v0.9.0)
+
+The repository root is a GitHub Action. It downloads the CLI and verifies its build provenance first. Then it runs the Gate, writes the job summary and keeps one size comment on the PR up to date:
+
+```yaml
+- uses: 2023violet/FirmwareSight@v0.9.0
+  with:
+    version: 0.9.0
+    artifact: build/app.elf
+    map: build/app.map
+    baseline: ../baseline/build/app.elf   # optional: the target branch's build
+    comment: true                         # needs pull-requests: write
+```
+
+The CLI has two new exports for this: `gate --junit` writes a JUnit report that GitHub, GitLab and Jenkins can show, and `gate` / `diff --summary-md` writes a short PR summary. A GitLab recipe and a pre-push hook are in [docs/ci](docs/ci/README.md).
+
 ## Principles
 
 - **Local first.** No network access, no telemetry, no auto-update. History is kept in a local SQLite database.

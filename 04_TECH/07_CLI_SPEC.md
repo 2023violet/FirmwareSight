@@ -81,6 +81,30 @@ fwsight diff old.elf new.elf --old-map old.map --new-map new.map
   top library growth) when both sides carry rows, and one `unavailable:` line naming the side that does not.
 - Object names come from a user-supplied MAP and are terminal-escaped before printing.
 
+## CI exports (D9, `ADR-0040`)
+
+```bash
+fwsight gate --project . --artifact build/app.elf --map build/app.map --junit out/gate.xml --summary-md out/gate.md
+fwsight diff base.elf app.elf --old-map base.map --new-map app.map --summary-md out/size.md
+```
+
+- `gate --junit <FILE>` writes one JUnit `<testsuite>` with one `<testcase>` per Gate rule:
+  - a finding whose effective severity is BLOCK is a `<failure>`;
+  - one whose effective severity is REVIEW is `<skipped>` with "needs review";
+  - `N/A` is `<skipped>` with "not applicable";
+  - PASS passes.
+
+  The suite has no timestamp, no host name and no path, so the same run writes the same bytes.
+- `--summary-md <FILE>` (on `gate` and `diff`) writes a short Markdown block for a PR comment or `$GITHUB_STEP_SUMMARY`:
+  - the Gate verdict and its non-PASS findings, or the Flash/RAM change and the five largest object movers;
+  - it opens with `<!-- firmwaresight-summary -->`, so a script can update its own earlier comment.
+- Both follow the export rules above:
+  - an existing file is never replaced (exit `6`);
+  - two exports of one run that name the same file are refused before any work;
+  - stdout and `--json` are unchanged.
+- **The exit code is still the verdict.** A CI job must read the exit code, never parse the JUnit or Markdown text.
+- The composite GitHub Action at the repository root (`action.yml`) and the recipes in `docs/ci/` wrap these flags. The binary itself still opens no network connection.
+
 ## Exit codes
 
 - `0` success / gate pass

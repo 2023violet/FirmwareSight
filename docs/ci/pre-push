@@ -1,0 +1,23 @@
+#!/bin/sh
+# FirmwareSight pre-push hook: run the release Gate before every push.
+# Install: copy to .git/hooks/pre-push and make it executable (chmod +x .git/hooks/pre-push).
+#
+# Edit the two paths for your build. A BLOCK (exit 5) or an error stops the push.
+# A REVIEW (exit 4) is printed, and the push goes on. Bypass once with `git push --no-verify`.
+
+ARTIFACT="build/app.elf"
+MAP="build/app.map"
+
+if [ ! -f "$ARTIFACT" ]; then
+  echo "firmwaresight: $ARTIFACT not built; skipping the Gate." >&2
+  exit 0
+fi
+
+fwsight gate --project . --artifact "$ARTIFACT" --map "$MAP"
+code=$?
+case "$code" in
+  0) exit 0 ;;
+  4) echo "firmwaresight: REVIEW - pushing; someone still owes a decision." >&2; exit 0 ;;
+  5) echo "firmwaresight: BLOCK - push stopped." >&2; exit 1 ;;
+  *) echo "firmwaresight: the Gate did not run (exit $code) - push stopped." >&2; exit 1 ;;
+esac

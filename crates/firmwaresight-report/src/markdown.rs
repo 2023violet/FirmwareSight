@@ -69,7 +69,7 @@ fn hidden(c: char) -> bool {
 /// A value that is an identifier (a digest, an id, a locator) as inline code. Backticks inside it would
 /// end the span, so they are replaced; nothing else in a code span is interpreted, and a hidden character
 /// is shown as its code.
-fn code(raw: &str) -> String {
+pub(crate) fn code(raw: &str) -> String {
     let shown: String = raw
         .chars()
         .map(|c| {
@@ -86,7 +86,7 @@ fn code(raw: &str) -> String {
 /// A name from the input (an object key, a symbol, a section) as inline code inside a table cell. GFM
 /// ends a cell at a `|` even inside a code span unless it is written `\|`, which the cell then renders
 /// as a plain `|`.
-fn cell_code(raw: &str) -> String {
+pub(crate) fn cell_code(raw: &str) -> String {
     code(raw).replace('|', "\\|")
 }
 
@@ -338,7 +338,7 @@ fn waterfall_section(out: &mut String, result: &DiffResult) {
     }
 }
 
-fn delta_text(delta: Option<i64>) -> String {
+pub(crate) fn delta_text(delta: Option<i64>) -> String {
     match delta {
         Some(value) if value > 0 => format!("▲{value} bytes"),
         Some(value) if value < 0 => format!("▼{} bytes", value.unsigned_abs()),
@@ -347,7 +347,7 @@ fn delta_text(delta: Option<i64>) -> String {
     }
 }
 
-fn side(bytes: Option<u64>) -> String {
+pub(crate) fn side(bytes: Option<u64>) -> String {
     bytes.map_or_else(
         || "not present".to_owned(),
         |bytes| format!("{bytes} bytes"),
