@@ -305,7 +305,7 @@ fn looks_utc(stamp: &str) -> bool {
 }
 
 /// Turn a current database into the file a version 3 build left behind, by removing exactly what
-/// migrations `0004` through `0008` add. `DROP TABLE` takes its indexes and triggers with it, and the two
+/// migrations `0004` through `0009` add. `DROP TABLE` takes its indexes and triggers with it, and the two
 /// `0005` columns have to go by name because `ADD COLUMN` is not idempotent: re-running the upgrade on a
 /// file that still physically holds them would fail, which is the same reason a real v3 file never can.
 fn step_down_to_v3(db: &Database) {
@@ -318,6 +318,8 @@ fn step_down_to_v3(db: &Database) {
              DROP TABLE gate_run_attachments;
              DROP TABLE object_contributions;
              DROP TABLE baseline_pin_events;
+             DROP TABLE region_usage;
+             DROP TABLE region_usage_sets;
              DELETE FROM schema_migrations WHERE version >= 4;",
         )
         .expect("stepped down");
@@ -331,9 +333,10 @@ fn the_schema_is_at_this_builds_version_and_the_release_table_starts_empty() {
     let (db, _run) = seeded(&file, "fresh");
 
     assert_eq!(
-        SCHEMA_VERSION, 8,
+        SCHEMA_VERSION, 9,
         "P4 raised the schema to version 4, P5 to version 5, C1-U1's additive attachment table to \
-         version 6, M2's additive object table (ADR-0033) to version 7 and R5's baseline pin log to 8"
+         version 6, M2's additive object table (ADR-0033) to version 7, R5's baseline pin log to 8 and \
+         D8's region usage (ADR-0041) to 9"
     );
     assert_eq!(schema_version(&db), SCHEMA_VERSION);
     assert_eq!(count(&db, "release_records"), 0);
@@ -359,6 +362,7 @@ fn the_schema_is_at_this_builds_version_and_the_release_table_starts_empty() {
             (6, "0006_release_attachments".to_owned()),
             (7, "0007_object_contributions".to_owned()),
             (8, "0008_baseline_pins".to_owned()),
+            (9, "0009_region_usage".to_owned()),
         ],
         "each stage contributes exactly one numbered step"
     );

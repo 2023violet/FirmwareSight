@@ -66,6 +66,15 @@ export type { HistoryGateRunPageDto } from './generated/HistoryGateRunPageDto';
 export type { HistoryGateRunRowDto } from './generated/HistoryGateRunRowDto';
 export type { HistoryPageRequestDto } from './generated/HistoryPageRequestDto';
 export type { HistoryReleasePageDto } from './generated/HistoryReleasePageDto';
+// D8 History trend (ADR-0041).
+export type { HeadroomDto } from './generated/HeadroomDto';
+export type { HistoryTrendDto } from './generated/HistoryTrendDto';
+export type { HistoryTrendRequestDto } from './generated/HistoryTrendRequestDto';
+export type { ObjectTrendDto } from './generated/ObjectTrendDto';
+export type { RegionCellDto } from './generated/RegionCellDto';
+export type { RegionTrendDto } from './generated/RegionTrendDto';
+export type { TrendPointDto } from './generated/TrendPointDto';
+export type { TrendValueDto } from './generated/TrendValueDto';
 export type { HistoryReleaseRowDto } from './generated/HistoryReleaseRowDto';
 export type { GateTablesDto } from './generated/GateTablesDto';
 export type { IdentityDto } from './generated/IdentityDto';

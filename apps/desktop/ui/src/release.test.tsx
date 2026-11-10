@@ -82,6 +82,13 @@ vi.mock('./ipc/bridge', () => ({
   queryComposition: vi.fn(async () => await Promise.resolve({ ok: true, value: { available: false, reason: 'not under test', side: 'flash', path: [], node: null } })),
   // R5: the pinned baseline is read once at start; no pin unless a test says otherwise.
   getBaselinePin: vi.fn(async () => await Promise.resolve({ ok: true, value: null })),
+  // D8 (ADR-0041 D5): the newest stored build, read once at start; an empty store here.
+  queryHistoryTrend: vi.fn(async () =>
+    await Promise.resolve({
+      ok: true,
+      value: { points: [], regions: [], moversFlash: [], moversRam: [], totalBuilds: 0, limit: 1 },
+    }),
+  ),
   pinBaseline: vi.fn(),
   unpinBaseline: vi.fn(),
   exportAnalysisMarkdown: vi.fn(),

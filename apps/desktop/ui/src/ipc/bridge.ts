@@ -36,6 +36,8 @@ import type {
   HistoryGateRunPageDto,
   HistoryPageRequestDto,
   HistoryReleasePageDto,
+  HistoryTrendDto,
+  HistoryTrendRequestDto,
   ObjectChangePageDto,
   ObjectChangeQueryDto,
   ObjectPageDto,
@@ -102,6 +104,7 @@ const EXPORT_RELEASE_BUNDLE = 'export_release_bundle';
 const LIST_HISTORY_BUILDS = 'list_history_builds';
 const LIST_HISTORY_GATE_RUNS = 'list_history_gate_runs';
 const LIST_HISTORY_RELEASES = 'list_history_releases';
+const QUERY_HISTORY_TREND = 'query_history_trend';
 const GET_BASELINE_PIN = 'get_baseline_pin';
 const PIN_BASELINE = 'pin_baseline';
 const UNPIN_BASELINE = 'unpin_baseline';
@@ -586,6 +589,16 @@ export async function listHistoryReleases(
   request: HistoryPageRequestDto,
 ): Promise<IpcOutcome<HistoryReleasePageDto>> {
   return await call<HistoryReleasePageDto>(LIST_HISTORY_RELEASES, { request });
+}
+
+/**
+ * The History trend (ADR-0041): the project's newest stored builds, oldest first, with the series Core
+ * computed over them. The project and the ceiling are Rust's.
+ */
+export async function queryHistoryTrend(
+  request: HistoryTrendRequestDto,
+): Promise<IpcOutcome<HistoryTrendDto>> {
+  return await call<HistoryTrendDto>(QUERY_HISTORY_TREND, { request });
 }
 
 /**

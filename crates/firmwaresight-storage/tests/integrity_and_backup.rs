@@ -970,8 +970,8 @@ fn a_v4_store_holding_a_gate_run_gains_the_attachment_table_and_keeps_the_run_re
         "the v4 store reached this build's schema"
     );
     assert_eq!(
-        SCHEMA_VERSION, 8,
-        "C1-U1 added version 6, M2 (ADR-0033) version 7 and R5's baseline pin log (D3) version 8"
+        SCHEMA_VERSION, 9,
+        "C1-U1 added version 6, M2 (ADR-0033) version 7, R5's baseline pin log (D3) version 8 and D8's          region usage (ADR-0041) version 9"
     );
 
     let name: String = db

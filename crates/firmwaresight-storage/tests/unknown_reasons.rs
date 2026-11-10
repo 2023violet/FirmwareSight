@@ -254,9 +254,11 @@ fn the_schema_pairs_every_nullable_numeric_column_with_a_reason() {
     let db = open(&file);
 
     assert_eq!(
-        SCHEMA_VERSION, 8,
+        SCHEMA_VERSION, 9,
         "P5 raised the schema to version 5; C1-U1's additive attachment table raised it to 6 and M2's \
-         object table (ADR-0033, every numeric column NOT NULL) to 7, and R5's baseline pin log raised it to 8; neither reason column moved"
+         object table (ADR-0033, every numeric column NOT NULL) to 7, R5's baseline pin log raised it to 8, \
+         and D8's region usage (ADR-0041, its nullable byte columns paired with `reasons`) to 9; neither \
+         reason column moved"
     );
     assert_eq!(schema_version(&db), SCHEMA_VERSION);
 

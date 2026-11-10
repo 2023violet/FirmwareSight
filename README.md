@@ -134,6 +134,16 @@ flash_growth_review_bytes = 2048   # 相对基线增长超过该值时，结论�
 
 命令行本身新增两个导出：`gate --junit` 输出 JUnit 报告，GitHub、GitLab、Jenkins 都能直接显示；`gate` / `diff --summary-md` 输出一段简短的 PR 摘要。GitLab 配置示例和 pre-push 钩子见 [docs/ci](docs/ci/README.md)。
 
+### 趋势与历史（v0.9.0 起）
+
+桌面版“历史”页的第一个标签是**趋势**：每次保存的构建连成 Flash / RAM 曲线，每个链接器区域显示剩余余量，并列出变化最大的目标文件。总量为 Unknown 的构建在曲线上是缺口，不会画成 0；在此版本之前保存的构建，其区域用量显示为 Unknown。
+
+命令行也可以写入同一份本地历史（默认不写）：
+
+```bash
+fwsight analyze build/app.elf --map build/app.map --record
+```
+
 ## 设计原则
 
 - **本地优先。** 不联网，无遥测，无自动更新。历史数据保存在本机 SQLite 中。

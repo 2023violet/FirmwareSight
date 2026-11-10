@@ -361,3 +361,18 @@ pre-migration backup of a v4 store is now named `…pre-migration-v4-to-v7.sqlit
 The table is a log. The current pin is the project's newest row when that row is a `pin`. The triggers `baseline_pin_events_cannot_be_edited` and `baseline_pin_events_cannot_be_deleted` refuse an UPDATE and a DELETE, so an unpin is itself a record and "which build was the reference on that day" stays answerable.
 
 The pre-migration backup of a v4 store is now named `…pre-migration-v4-to-v8.sqlite`.
+
+## D8 region usage (2026-11-09, ADR-0041 D1)
+
+`SCHEMA_VERSION` moves 8 → 9 with one additive migration, `migrations/0009_region_usage.sql`. It creates two tables and touches nothing else. There is no backfill (DR1).
+
+| table | what it fixes |
+| --- | --- |
+| `region_usage_sets` | one row for every build imported at version 9 or later, even when it had no region table (`region_count = 0`). No row means the build was stored before version 9: Unknown, never zero |
+| `region_usage` | one row per region, in the analysis's order: `name`, `kind`, `origin`, `capacity_bytes`, `used_bytes`, `state`, `risk`, `evidence_source`, `reasons`. NULL bytes are Unknown, and `reasons` says why |
+
+Both tables refuse UPDATE and follow their build on delete. A region name is the linker's, never a host path.
+
+`Database::record_snapshot` (ADR-0042 D3) checks for a snapshot and imports it inside one `IMMEDIATE` transaction. It is the desktop's import path and `fwsight analyze --record`'s, so two writers on one file store a build once. `Database::history_trend` reads the newest stored builds, oldest first, for History · Trends.
+
+The pre-migration backup of a v4 store is now named `…pre-migration-v4-to-v9.sqlite`.

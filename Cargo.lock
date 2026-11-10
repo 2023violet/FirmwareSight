@@ -1256,6 +1256,7 @@ dependencies = [
  "firmwaresight-core",
  "firmwaresight-project",
  "firmwaresight-report",
+ "firmwaresight-storage",
  "serde_json",
  "tracing",
  "tracing-subscriber",

@@ -2073,3 +2073,128 @@ pub struct WaterfallDto {
     pub libraries: bool,
     pub steps: Vec<WaterfallStepDto>,
 }
+
+// ---------------------------------------------------------------------------------------------- D8 trends
+
+/// A request for the History trend (ADR-0041 D2). The project is Rust's, as in every History read.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HistoryTrendRequestDto {
+    /// Builds to read, newest first before they are turned oldest first. Rust clamps it.
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+/// One budget total at one build, with the change Core measured from the previous known build.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct TrendValueDto {
+    /// `exact`, `partial` or `unknown`, as stored.
+    pub state: String,
+    #[ts(type = "number | null")]
+    pub bytes: Option<u64>,
+    /// Only between two exact values (ADR-0041 D3).
+    #[ts(type = "number | null")]
+    pub delta: Option<i64>,
+}
+
+/// One stored build as a trend point.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct TrendPointDto {
+    pub build_id: String,
+    pub snapshot_id: String,
+    /// File name only.
+    pub file_name: String,
+    /// When FirmwareSight stored it, not a build time.
+    pub stored_at: String,
+    pub flash: TrendValueDto,
+    pub ram: TrendValueDto,
+    /// The newest stored Gate disposition for this build: `PASS`, `REVIEW` or `BLOCK`.
+    pub gate: Option<String>,
+    pub releases: Vec<String>,
+    pub pinned: bool,
+    /// `recorded`, `noRegionTable` or `notRecorded` (stored before region usage was kept).
+    pub regions: String,
+}
+
+/// One region at one build (ADR-0041 D3).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct RegionCellDto {
+    /// `recorded`, `absent`, `noRegionTable` or `notRecorded`.
+    pub state: String,
+    #[ts(type = "number | null")]
+    pub capacity: Option<u64>,
+    #[ts(type = "number | null")]
+    pub used: Option<u64>,
+    #[ts(type = "number | null")]
+    pub remaining: Option<u64>,
+    pub exceeded: bool,
+    /// Whether `used` is exact; a floor carries no `remaining` (ADR-0041 D3).
+    pub exact: bool,
+}
+
+/// The newest recorded headroom of a region.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HeadroomDto {
+    pub point_index: usize,
+    #[ts(type = "number")]
+    pub capacity: u64,
+    #[ts(type = "number")]
+    pub used: u64,
+    #[ts(type = "number | null")]
+    pub remaining: Option<u64>,
+    /// Remaining share of capacity in tenths of a percent, rounded down; `null` with `remaining`.
+    pub remaining_per_mille: Option<u32>,
+    pub exceeded: bool,
+    /// Whether `used` is exact. When false, `used` is a floor and no headroom is claimed.
+    pub exact: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct RegionTrendDto {
+    pub name: String,
+    /// `flash`, `ram` or `unknown`: what the region holds.
+    pub kind: String,
+    pub cells: Vec<RegionCellDto>,
+    pub latest: Option<HeadroomDto>,
+}
+
+/// One object's bytes across the points, for one budget.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct ObjectTrendDto {
+    pub object: String,
+    #[ts(type = "Array<number | null>")]
+    pub values: Vec<Option<u64>>,
+    #[ts(type = "number | null")]
+    pub first: Option<u64>,
+    #[ts(type = "number | null")]
+    pub last: Option<u64>,
+    #[ts(type = "number | null")]
+    pub delta: Option<i64>,
+}
+
+/// The History trend: points oldest first, and the series Core computed over them.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct HistoryTrendDto {
+    pub points: Vec<TrendPointDto>,
+    pub regions: Vec<RegionTrendDto>,
+    pub movers_flash: Vec<ObjectTrendDto>,
+    pub movers_ram: Vec<ObjectTrendDto>,
+    /// Complete builds the store holds in all, and the limit applied.
+    pub total_builds: usize,
+    pub limit: usize,
+}

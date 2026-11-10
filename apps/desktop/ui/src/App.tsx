@@ -61,10 +61,12 @@ import type {
   PreferencesDto,
   ProjectContextDto,
   SelectionDto,
+  TrendPointDto,
 } from './ipc/types';
 import {
   getApplicationPreferences,
   getBaselinePin,
+  queryHistoryTrend,
   resetApplicationPreferences,
   setWindowTitle,
   updateApplicationPreferences,
@@ -370,6 +372,21 @@ export function App() {
   // retry; a pin or unpin made meanwhile wins over the late answer (R5 review S2-1, S3).
   useEffect(() => {
     readPinRef.current();
+  }, []);
+
+  // ADR-0041 D5: the newest stored build, read once at start so Overview can name it after a restart. A
+  // failed read leaves it unset; Overview then shows only what this session holds, as before.
+  const [lastStored, setLastStored] = useState<TrendPointDto | null>(null);
+  useEffect(() => {
+    let live = true;
+    void queryHistoryTrend({ limit: 1 }).then((outcome) => {
+      if (live && outcome.ok) {
+        setLastStored(outcome.value.points.at(-1) ?? null);
+      }
+    });
+    return () => {
+      live = false;
+    };
   }, []);
 
   /** Open Compare on a named pair and run it once: the History rows and the palette start comparisons. */
@@ -758,6 +775,7 @@ export function App() {
               project={project}
               comparison={comparison.summary}
               unit={unit}
+              lastStored={lastStored}
               onOpen={(target) => {
                 open(target);
               }}

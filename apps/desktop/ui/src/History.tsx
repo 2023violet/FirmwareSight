@@ -37,6 +37,7 @@ import { SizeUnitSwitch } from './components/SizeUnitSwitch';
 import { StateBadge, type StateName } from './components/StateBadge';
 import { Pager } from './components/Table';
 import { Tabs, tabPanelProps } from './components/Tabs';
+import { Trends } from './Trends';
 import { formatSize, truncateMiddle, type SizeUnit } from './format';
 import { useI18n, type Translate } from './i18n';
 import {
@@ -69,8 +70,9 @@ interface PageState<T> {
  * facts about the store — a build, a Gate run, a release — and merging their rows would be the false
  * simplification §12B forbids.
  */
-type View = 'builds' | 'runs' | 'releases';
-const VIEWS: readonly View[] = ['builds', 'runs', 'releases'];
+type View = 'trends' | 'builds' | 'runs' | 'releases';
+/** Trends leads (ADR-0041 D4): the store read as a sequence, before the three lists of rows behind it. */
+const VIEWS: readonly View[] = ['trends', 'builds', 'runs', 'releases'];
 
 type Inspect = (evidence: FactEvidence, trigger: HTMLElement) => void;
 
@@ -172,7 +174,7 @@ export function History({
   readonly onCompare: (baseId: string, targetId: string) => void;
 }) {
   const { t } = useI18n();
-  const [view, setView] = useState<View>('builds');
+  const [view, setView] = useState<View>('trends');
   const [selected, setSelected] = useState<readonly CompareCandidateDto[]>([]);
   const [pinError, setPinError] = useState<ErrorEnvelopeDto | null>(null);
   const [pinBusy, setPinBusy] = useState(false);
@@ -434,7 +436,9 @@ export function History({
           onSelect={setView}
         />
         <div {...tabPanelProps('fs-history', view)} className={styles['panel']}>
-          {view === 'builds' ? (
+          {view === 'trends' ? (
+            <Trends unit={unit} onInspect={inspect} onCompare={onCompare} />
+          ) : view === 'builds' ? (
             <section className={styles['list']} aria-label={t('history', 'builds.region')}>
               <h2>{t('history', 'views.builds')}</h2>
               <FilterBar

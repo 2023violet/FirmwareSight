@@ -778,6 +778,8 @@ fn the_selection_path_adds_no_schema_migration() {
             "0007_object_contributions".to_owned(),
             // 0008 is R5's baseline pin log (D3); written only by an explicit pin.
             "0008_baseline_pins".to_owned(),
+            // D8 / ADR-0041: per-region usage for History trends.
+            "0009_region_usage".to_owned(),
         ],
         "every migration belongs to a named stage, and none of them is the selection path's"
     );

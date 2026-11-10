@@ -106,6 +106,13 @@ vi.mock('./ipc/bridge', () => ({
   listHistoryBuilds: vi.fn(),
   listHistoryGateRuns: vi.fn(),
   listHistoryReleases: vi.fn(),
+  // D8: Trends is History's first tab. These tests are about the three lists, so the trend is empty.
+  queryHistoryTrend: vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      value: { points: [], regions: [], moversFlash: [], moversRam: [], totalBuilds: 0, limit: 100 },
+    }),
+  ),
   // R5: a comparison started from History opens Compare, which reads its candidates and runs once.
   listCompareCandidates: vi.fn(),
   compareSnapshots: vi.fn(),
@@ -258,6 +265,8 @@ async function openHistory(): Promise<void> {
   render(<App />);
   fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
   await screen.findByRole('heading', { level: 1, name: 'History' });
+  // D8: History opens on Trends; these tests read the lists behind it.
+  fireEvent.click(screen.getByRole('tab', { name: 'Builds' }));
   await screen.findByText(BUILD_FILE);
 }
 
@@ -736,6 +745,7 @@ describe('History when a read has nothing to show or cannot show it', () => {
     buildsMock.mockResolvedValue(buildPage([]));
     render(<App />);
     fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
+    fireEvent.click(await screen.findByRole('tab', { name: 'Builds' }));
 
     const builds = await screen.findByRole('region', { name: 'Stored builds' });
     expect(
@@ -777,6 +787,7 @@ describe('History when a read has nothing to show or cannot show it', () => {
     buildsMock.mockReturnValue(new Promise<never>(() => undefined));
     render(<App />);
     fireEvent.click(await screen.findByRole('button', { name: 'History page' }));
+    fireEvent.click(await screen.findByRole('tab', { name: 'Builds' }));
 
     const builds = await screen.findByRole('region', { name: 'Stored builds' });
     expect(within(builds).getByRole('status').textContent).toContain('Loading builds');
@@ -800,6 +811,8 @@ describe('U1P History hierarchy', () => {
         .getAllByRole('tab')
         .map((tab) => [tab.textContent, tab.getAttribute('aria-selected')]),
     ).toEqual([
+      // D8: Trends leads; `openHistory` has already chosen Builds.
+      ['Trends', 'false'],
       ['Builds', 'true'],
       ['Gate runs', 'false'],
       ['Release records', 'false'],
@@ -873,6 +886,8 @@ describe('the same rows read in Chinese', () => {
   async function openIn(language: 'en' | 'zh-CN'): Promise<HTMLElement> {
     vi.mocked(getApplicationPreferences).mockResolvedValueOnce(preferences(language));
     view = render(<App />);
+    // D8: History opens on Trends; the rows under test are on the Builds tab.
+    fireEvent.click(await screen.findByRole('tab', { name: language === 'en' ? 'Builds' : '构建' }));
     const name = language === 'en' ? 'Stored builds' : '已保存的构建';
     const region = await screen.findByRole('region', { name });
     // The region is on screen before its rows are, and an empty table has no headers to compare. The

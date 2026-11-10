@@ -20,10 +20,12 @@ pub mod error;
 pub mod gate;
 pub mod health;
 pub mod history;
+pub mod local;
 pub mod query;
 pub mod release;
+pub mod trend;
 
-pub use db::{BuildSummary, Database, SCHEMA_VERSION};
+pub use db::{BuildSummary, Database, RecordOutcome, SCHEMA_VERSION};
 // The pinned baseline (R5 / D3): an append-only log, read back as the one build a project measures against.
 pub use baseline::BaselinePin;
 pub use error::StorageError;
@@ -62,3 +64,10 @@ pub use query::{
     SectionQuery, SectionRow, SectionSort, SortDir, SymbolQuery, SymbolRow, SymbolSort,
 };
 pub use release::{ReleaseRecordDraft, ReleaseRecordWrite, StoredReleaseRecord};
+// History trends (ADR-0041): stored builds as points; the series are decided in Core.
+pub use trend::{DEFAULT_TREND_LIMIT, MAX_TREND_LIMIT, StoredTrend, StoredTrendPoint};
+// The desktop's local store, named once so `fwsight analyze --record` writes where the desktop reads.
+pub use local::{
+    DESKTOP_APP_IDENTIFIER, LOCAL_PROJECT_ID, LOCAL_PROJECT_NAME, STORE_FILE_NAME,
+    default_store_path,
+};

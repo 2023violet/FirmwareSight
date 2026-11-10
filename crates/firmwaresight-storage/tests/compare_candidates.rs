@@ -643,6 +643,8 @@ fn compare_added_no_schema_change() {
             "0006_release_attachments.sql",
             "0007_object_contributions.sql",
             "0008_baseline_pins.sql",
+            // D8 / ADR-0041: per-region usage for History trends.
+            "0009_region_usage.sql",
         ],
         "every migration belongs to a named stage"
     );

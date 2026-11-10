@@ -205,6 +205,15 @@ struct AnalyzeArgs {
     /// existing file. It is a reading copy and never part of a release bundle.
     #[arg(long, value_name = "FILE")]
     markdown: Option<PathBuf>,
+
+    /// Also store this analysis in the local FirmwareSight store, so it appears in the desktop's History
+    /// and Trends (ADR-0042). Off by default: without it the CLI writes nothing.
+    #[arg(long)]
+    record: bool,
+
+    /// The store file `--record` writes. Defaults to the desktop's own store on this machine.
+    #[arg(long, value_name = "FILE", requires = "record")]
+    store: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
@@ -476,6 +485,15 @@ fn run_analyze(args: AnalyzeArgs, operation_id: &str) -> ExitCode {
                 if let Some(code) = write_markdown(path, &text, args.json, operation_id) {
                     return ExitCode::from(code);
                 }
+            }
+
+            // Like the exports, before stdout: a failed record leaves one document (the error) under
+            // --json, never the analysis followed by an error.
+            if args.record
+                && let Some(code) =
+                    record(&analysis, args.store.as_deref(), args.json, operation_id)
+            {
+                return ExitCode::from(code);
             }
 
             if args.json {
@@ -1191,6 +1209,77 @@ fn outputs_collide(paths: &[&Option<PathBuf>]) -> bool {
         .iter()
         .enumerate()
         .any(|(i, path)| named[i + 1..].contains(path))
+}
+
+/// `analyze --record` (ADR-0042): store the analysis in the local store the desktop reads.
+///
+/// The same project and the same call the desktop uses, so the same build is stored once whichever of
+/// the two writes it first. A failure is exit 6 with the store's own code and words.
+fn record(
+    analysis: &pipeline::Analysis,
+    store: Option<&Path>,
+    json: bool,
+    operation_id: &str,
+) -> Option<u8> {
+    let fail = |code: &str, message: String, remediation: &str| {
+        let envelope =
+            render::ErrorEnvelope::new(code, message, operation_id).with_remediation(remediation);
+        if json {
+            println!("{}", envelope.to_json());
+        }
+        eprintln!(
+            "error: {} (code {}, operation {operation_id}); {}",
+            envelope.message,
+            envelope.code,
+            envelope.remediation.as_deref().unwrap_or_default()
+        );
+        tracing::error!(operation_id, code = envelope.code, "record failed");
+        Some(EXIT_EXPORT)
+    };
+
+    let path = match store {
+        Some(path) => path.to_path_buf(),
+        None => {
+            let Some(path) = firmwaresight_storage::default_store_path() else {
+                return fail(
+                    "ERR-STORAGE-4001",
+                    "No application-data folder is set for this user, so the local store has no place."
+                        .to_owned(),
+                    "Name a store file with --store FILE.",
+                );
+            };
+            // The desktop creates this folder on first start; a CLI that runs first creates it too.
+            if let Some(parent) = path.parent()
+                && let Err(err) = std::fs::create_dir_all(parent)
+            {
+                return fail(
+                    "ERR-STORAGE-4001",
+                    format!("The local store folder could not be created: {err}"),
+                    "Name a writable store file with --store FILE.",
+                );
+            }
+            path
+        }
+    };
+
+    let outcome = firmwaresight_storage::Database::open(&path).and_then(|mut db| {
+        db.record_snapshot(
+            firmwaresight_storage::LOCAL_PROJECT_ID,
+            firmwaresight_storage::LOCAL_PROJECT_NAME,
+            &analysis.snapshot,
+        )
+    });
+    match outcome {
+        Ok(firmwaresight_storage::RecordOutcome::Stored(id)) => {
+            eprintln!("diagnostics: recorded build {id} in the local store");
+            None
+        }
+        Ok(firmwaresight_storage::RecordOutcome::AlreadyStored(id)) => {
+            eprintln!("diagnostics: build {id} was already recorded in the local store");
+            None
+        }
+        Err(err) => fail(err.stable_code(), err.to_string(), err.remediation()),
+    }
 }
 
 /// Write one Markdown report without replacing an existing file (R6). The same refusal words and exit code

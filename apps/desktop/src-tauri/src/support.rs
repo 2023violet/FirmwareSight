@@ -34,7 +34,7 @@ use firmwaresight_storage::SCHEMA_VERSION;
 /// Prompt §8 keeps this name through Commit D — renaming it would be a migration and a compatibility
 /// decision, and the wording a person reads for it is "local FirmwareSight data store", not the
 /// historical `p0` label the file carries.
-pub(crate) const STORE_FILE_NAME: &str = "firmwaresight-p0.sqlite";
+pub(crate) const STORE_FILE_NAME: &str = firmwaresight_storage::STORE_FILE_NAME;
 
 /// What the binary knows about itself, gathered where a `tauri::AppHandle` is in reach.
 ///

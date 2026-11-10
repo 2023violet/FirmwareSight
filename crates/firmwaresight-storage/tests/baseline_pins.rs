@@ -101,10 +101,10 @@ fn events(db: &Database) -> Vec<(String, Option<String>)> {
 }
 
 #[test]
-fn the_schema_reaches_version_8_with_the_pin_log() {
+fn the_schema_has_the_pin_log_from_version_8() {
     let store = TempDb::new("schema");
     let db = store.open();
-    assert_eq!(SCHEMA_VERSION, 8);
+    const { assert!(SCHEMA_VERSION >= 8, "the pin log arrived in migration 0008") };
     let count: i64 = db
         .connection()
         .query_row(

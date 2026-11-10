@@ -191,7 +191,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   ├── ADR-0037-release-provenance-signing.md
 │   ├── ADR-0038-iar-ilink-map-adapter.md
 │   ├── ADR-0039-composition-tree-and-growth-waterfall.md
-│   └── ADR-0040-ci-integration-junit-summary-action.md
+│   ├── ADR-0040-ci-integration-junit-summary-action.md
+│   ├── ADR-0041-region-usage-history-and-trends.md
+│   └── ADR-0042-cli-records-to-local-store.md
 ├── 10_AUDIT/
 │   ├── SOURCE_PROMPTS/
 │   │   ├── FirmwareSight_A0_Truthfulness_Corrective_v1.0.txt
@@ -305,6 +307,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   ├── p2_golden.rs
 │   │   │   ├── p4_golden.rs
 │   │   │   ├── project_doctor.rs
+│   │   │   ├── record_cli.rs
 │   │   │   └── release_cli.rs
 │   │   └── Cargo.toml
 │   └── desktop/
@@ -336,7 +339,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── release.rs
 │       │   │   ├── service.rs
 │       │   │   ├── startup.rs
-│       │   │   └── support.rs
+│       │   │   ├── support.rs
+│       │   │   └── trend.rs
 │       │   ├── tests/
 │       │   │   ├── analyze_details.rs
 │       │   │   ├── baseline_pin.rs
@@ -347,6 +351,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   │   ├── diagnostics.rs
 │       │   │   ├── drop_intake.rs
 │       │   │   ├── history_reads.rs
+│       │   │   ├── history_trend_ipc.rs
 │       │   │   ├── markdown_export.rs
 │       │   │   ├── object_attribution_ipc.rs
 │       │   │   ├── preferences.rs
@@ -387,6 +392,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   ├── Layout.tsx
 │           │   │   ├── LeadAnswer.module.css
 │           │   │   ├── LeadAnswer.tsx
+│           │   │   ├── LineChart.module.css
+│           │   │   ├── LineChart.tsx
 │           │   │   ├── MemoryUsage.module.css
 │           │   │   ├── MemoryUsage.tsx
 │           │   │   ├── Notice.module.css
@@ -508,11 +515,14 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── GateRunDto.ts
 │           │   │   │   ├── GateRunRequestDto.ts
 │           │   │   │   ├── GateTablesDto.ts
+│           │   │   │   ├── HeadroomDto.ts
 │           │   │   │   ├── HistoryGateRunPageDto.ts
 │           │   │   │   ├── HistoryGateRunRowDto.ts
 │           │   │   │   ├── HistoryPageRequestDto.ts
 │           │   │   │   ├── HistoryReleasePageDto.ts
 │           │   │   │   ├── HistoryReleaseRowDto.ts
+│           │   │   │   ├── HistoryTrendDto.ts
+│           │   │   │   ├── HistoryTrendRequestDto.ts
 │           │   │   │   ├── IdentityDto.ts
 │           │   │   │   ├── MainWindowPage.ts
 │           │   │   │   ├── MemoryRegionDto.ts
@@ -527,13 +537,16 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── ObjectRequestDto.ts
 │           │   │   │   ├── ObjectRowDto.ts
 │           │   │   │   ├── ObjectSortDto.ts
+│           │   │   │   ├── ObjectTrendDto.ts
 │           │   │   │   ├── PercentageChangeDto.ts
 │           │   │   │   ├── PreferenceRecoveryDto.ts
 │           │   │   │   ├── PreferencesDto.ts
 │           │   │   │   ├── ProjectContextDto.ts
 │           │   │   │   ├── ProjectPolicyDto.ts
 │           │   │   │   ├── ProjectReadinessDto.ts
+│           │   │   │   ├── RegionCellDto.ts
 │           │   │   │   ├── RegionSectionDto.ts
+│           │   │   │   ├── RegionTrendDto.ts
 │           │   │   │   ├── ReleaseAttachmentDto.ts
 │           │   │   │   ├── ReleaseAttachmentsDto.ts
 │           │   │   │   ├── SectionChangePageDto.ts
@@ -558,6 +571,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   │   ├── SymbolRowDto.ts
 │           │   │   │   ├── SymbolSideDto.ts
 │           │   │   │   ├── SymbolSortDto.ts
+│           │   │   │   ├── TrendPointDto.ts
+│           │   │   │   ├── TrendValueDto.ts
 │           │   │   │   ├── UnknownDispositionDto.ts
 │           │   │   │   ├── UnknownPolicyDto.ts
 │           │   │   │   ├── VisualFormatDto.ts
@@ -573,7 +588,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   │   └── types.ts
 │           │   ├── lib/
 │           │   │   ├── squarify.test.ts
-│           │   │   └── squarify.ts
+│           │   │   ├── squarify.ts
+│           │   │   ├── trendGeometry.test.ts
+│           │   │   └── trendGeometry.ts
 │           │   ├── styles/
 │           │   │   ├── classnames.ts
 │           │   │   ├── global.css
@@ -622,6 +639,9 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │           │   ├── stateWords.ts
 │           │   ├── theme.test.ts
 │           │   ├── theme.ts
+│           │   ├── Trends.module.css
+│           │   ├── trends.test.tsx
+│           │   ├── Trends.tsx
 │           │   └── waterfall.test.tsx
 │           ├── .npmrc
 │           ├── eslint.config.js
@@ -702,6 +722,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │   │   │   │   ├── release.rs
 │   │   │   │   ├── section.rs
 │   │   │   │   ├── symbol.rs
+│   │   │   │   ├── trend.rs
 │   │   │   │   └── waterfall.rs
 │   │   │   ├── error.rs
 │   │   │   └── lib.rs
@@ -765,7 +786,8 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── 0005_unknown_reasons.sql
 │       │   ├── 0006_release_attachments.sql
 │       │   ├── 0007_object_contributions.sql
-│       │   └── 0008_baseline_pins.sql
+│       │   ├── 0008_baseline_pins.sql
+│       │   └── 0009_region_usage.sql
 │       ├── src/
 │       │   ├── backup.rs
 │       │   ├── baseline.rs
@@ -777,8 +799,10 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── health.rs
 │       │   ├── history.rs
 │       │   ├── lib.rs
+│       │   ├── local.rs
 │       │   ├── query.rs
-│       │   └── release.rs
+│       │   ├── release.rs
+│       │   └── trend.rs
 │       ├── tests/
 │       │   ├── analyze_queries.rs
 │       │   ├── baseline_pins.rs
@@ -788,6 +812,7 @@ FirmwareSight_Project_Baseline_v0.6.0/
 │       │   ├── integrity_and_backup.rs
 │       │   ├── map_companion_persistence.rs
 │       │   ├── object_contributions.rs
+│       │   ├── region_usage_trend.rs
 │       │   ├── release_records.rs
 │       │   ├── storage.rs
 │       │   └── unknown_reasons.rs

@@ -14,4 +14,5 @@ pub mod memory;
 pub mod release;
 pub mod section;
 pub mod symbol;
+pub mod trend;
 pub mod waterfall;

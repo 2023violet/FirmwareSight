@@ -105,6 +105,20 @@ fwsight diff base.elf app.elf --old-map base.map --new-map app.map --summary-md 
 - **The exit code is still the verdict.** A CI job must read the exit code, never parse the JUnit or Markdown text.
 - The composite GitHub Action at the repository root (`action.yml`) and the recipes in `docs/ci/` wrap these flags. The binary itself still opens no network connection.
 
+## Recording to the local store (D8, `ADR-0042`)
+
+```bash
+fwsight analyze build/app.elf --map build/app.map --record
+fwsight analyze build/app.elf --map build/app.map --record --store ./history.sqlite
+```
+
+- `analyze --record` stores the analysis in the desktop's local store, so the build appears in the desktop's History and Trends. Without `--record` the CLI writes nothing, as before.
+- The default store is the desktop's own: `<data dir>/com.firmwaresight.desktop/firmwaresight-p0.sqlite`, where `<data dir>` is `%APPDATA%` on Windows, `~/Library/Application Support` on macOS, and `$XDG_DATA_HOME` or `~/.local/share` elsewhere. `--store FILE` names another file; it needs `--record`.
+- The build is filed under the desktop's local project. The same files give the same snapshot, so a build recorded twice, or by the CLI and the desktop at the same moment, is stored once.
+- stdout and `--json` do not change. stderr says `diagnostics: recorded build <id> in the local store`, or that it was already recorded.
+- A store that cannot be opened or written is exit `6` with the store's own `ERR-STORAGE-*` code. It is checked before stdout, so `--json` still prints one document.
+- An older store is migrated, with the same pre-migration backup the desktop takes; a store written by a newer version is refused.
+
 ## Exit codes
 
 - `0` success / gate pass

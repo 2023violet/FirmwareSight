@@ -3,15 +3,17 @@
 use std::path::Path;
 use std::time::Duration;
 
-use rusqlite::{Connection, OptionalExtension, params};
+use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
 
 use crate::error::StorageError;
 use firmwaresight_core::domain::build_snapshot::{BuildSnapshot, NORMALIZATION_VERSION};
 use firmwaresight_core::domain::identity::Fact;
-use firmwaresight_core::domain::memory::ByteTotal;
+use firmwaresight_core::domain::memory::{
+    ByteTotal, RegionKind, RegionUsageRisk, RegionUsageState,
+};
 
 /// The schema version this build writes.
-pub const SCHEMA_VERSION: i64 = 8;
+pub const SCHEMA_VERSION: i64 = 9;
 
 const MIGRATION_0001: &str = include_str!("../migrations/0001_initial.sql");
 const MIGRATION_0002: &str = include_str!("../migrations/0002_evidence_keyed_by_build.sql");
@@ -21,6 +23,7 @@ const MIGRATION_0005: &str = include_str!("../migrations/0005_unknown_reasons.sq
 const MIGRATION_0006: &str = include_str!("../migrations/0006_release_attachments.sql");
 const MIGRATION_0007: &str = include_str!("../migrations/0007_object_contributions.sql");
 const MIGRATION_0008: &str = include_str!("../migrations/0008_baseline_pins.sql");
+const MIGRATION_0009: &str = include_str!("../migrations/0009_region_usage.sql");
 
 /// Applied in version order, each in its own transaction, so a failed upgrade leaves the previous
 /// schema and every row in it exactly as they were.
@@ -33,6 +36,7 @@ const MIGRATIONS: &[(i64, &str, &str)] = &[
     (6, "0006_release_attachments", MIGRATION_0006),
     (7, "0007_object_contributions", MIGRATION_0007),
     (8, "0008_baseline_pins", MIGRATION_0008),
+    (9, "0009_region_usage", MIGRATION_0009),
 ];
 
 /// Everything the P0 round-trip test compares against the in-memory snapshot.
@@ -220,54 +224,56 @@ impl Database {
         project_name: &str,
         snapshot: &BuildSnapshot,
     ) -> Result<String, StorageError> {
-        let build_id = format!("build-{}", snapshot.id().as_str());
-
         let tx = self
             .conn
             .transaction()
             .map_err(|source| StorageError::Write {
                 detail: format!("begin: {source}"),
             })?;
-
-        tx.execute(
-            "INSERT OR IGNORE INTO projects (id, name) VALUES (?1, ?2)",
-            params![project_id, project_name],
-        )
-        .map_err(write_err)?;
-
-        tx.execute(
-            "INSERT INTO builds
-                 (id, project_id, snapshot_id, normalization_version, created_by_fwsight, state)
-             VALUES (?1, ?2, ?3, ?4, ?5, 'IMPORTING')",
-            params![
-                build_id,
-                project_id,
-                snapshot.id().as_str(),
-                NORMALIZATION_VERSION,
-                snapshot.created_by_fwsight_version(),
-            ],
-        )
-        .map_err(write_err)?;
-
-        write_artifacts(&tx, &build_id, snapshot)?;
-        write_sections(&tx, &build_id, snapshot)?;
-        write_symbols(&tx, &build_id, snapshot)?;
-        write_evidence(&tx, &build_id, snapshot)?;
-        write_memory(&tx, &build_id, snapshot)?;
-        write_objects(&tx, &build_id, snapshot)?;
-
-        // Last write inside the transaction: nothing can observe COMPLETE with partial content.
-        tx.execute(
-            "UPDATE builds SET state = 'COMPLETE' WHERE id = ?1",
-            params![build_id],
-        )
-        .map_err(write_err)?;
-
+        let build_id = write_build(&tx, project_id, project_name, snapshot)?;
         tx.commit().map_err(|source| StorageError::Write {
             detail: format!("commit: {source}"),
         })?;
-
         Ok(build_id)
+    }
+
+    /// Store a snapshot unless this store already holds it (ADR-0042 D3).
+    ///
+    /// The check and the import share one `IMMEDIATE` transaction, so two writers on the same file (the
+    /// desktop and `fwsight analyze --record`, say) cannot both decide the build is new and then collide
+    /// on its key. The second waits for the first (busy timeout) and then finds the build.
+    ///
+    /// # Errors
+    ///
+    /// A storage error for a failed read or write; nothing is left half written.
+    pub fn record_snapshot(
+        &mut self,
+        project_id: &str,
+        project_name: &str,
+        snapshot: &BuildSnapshot,
+    ) -> Result<RecordOutcome, StorageError> {
+        let tx = self
+            .conn
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|source| StorageError::Write {
+                detail: format!("begin: {source}"),
+            })?;
+        let existing: Option<String> = tx
+            .query_row(
+                "SELECT id FROM builds WHERE snapshot_id = ?1 ORDER BY id LIMIT 1",
+                params![snapshot.id().as_str()],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(write_err)?;
+        if let Some(build_id) = existing {
+            return Ok(RecordOutcome::AlreadyStored(build_id));
+        }
+        let build_id = write_build(&tx, project_id, project_name, snapshot)?;
+        tx.commit().map_err(|source| StorageError::Write {
+            detail: format!("commit: {source}"),
+        })?;
+        Ok(RecordOutcome::Stored(build_id))
     }
 
     pub fn summary(&self, build_id: &str) -> Result<BuildSummary, StorageError> {
@@ -350,6 +356,146 @@ impl Database {
 
 /// A SQLite failure on a write. `gate.rs` names the record it was writing through `describe_write`;
 /// this is for the begin/commit steps, where no record is at stake yet.
+/// What [`Database::record_snapshot`] did.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RecordOutcome {
+    /// The build was new and is now stored under this id.
+    Stored(String),
+    /// The store already held this snapshot, under this build id; nothing was written.
+    AlreadyStored(String),
+}
+
+impl RecordOutcome {
+    #[must_use]
+    pub fn build_id(&self) -> &str {
+        match self {
+            Self::Stored(id) | Self::AlreadyStored(id) => id,
+        }
+    }
+}
+
+/// Every row of one build, inside the caller's transaction.
+///
+/// The build row starts at IMPORTING and is only flipped to COMPLETE as the last write, so a rolled-back
+/// import cannot be observed as a finished build.
+fn write_build(
+    tx: &rusqlite::Transaction<'_>,
+    project_id: &str,
+    project_name: &str,
+    snapshot: &BuildSnapshot,
+) -> Result<String, StorageError> {
+    let build_id = format!("build-{}", snapshot.id().as_str());
+
+    tx.execute(
+        "INSERT OR IGNORE INTO projects (id, name) VALUES (?1, ?2)",
+        params![project_id, project_name],
+    )
+    .map_err(write_err)?;
+
+    tx.execute(
+        "INSERT INTO builds
+             (id, project_id, snapshot_id, normalization_version, created_by_fwsight, state)
+         VALUES (?1, ?2, ?3, ?4, ?5, 'IMPORTING')",
+        params![
+            build_id,
+            project_id,
+            snapshot.id().as_str(),
+            NORMALIZATION_VERSION,
+            snapshot.created_by_fwsight_version(),
+        ],
+    )
+    .map_err(write_err)?;
+
+    write_artifacts(tx, &build_id, snapshot)?;
+    write_sections(tx, &build_id, snapshot)?;
+    write_symbols(tx, &build_id, snapshot)?;
+    write_evidence(tx, &build_id, snapshot)?;
+    write_memory(tx, &build_id, snapshot)?;
+    write_objects(tx, &build_id, snapshot)?;
+    write_regions(tx, &build_id, snapshot)?;
+
+    // Last write inside the transaction: nothing can observe COMPLETE with partial content.
+    tx.execute(
+        "UPDATE builds SET state = 'COMPLETE' WHERE id = ?1",
+        params![build_id],
+    )
+    .map_err(write_err)?;
+    Ok(build_id)
+}
+
+/// ADR-0041 D1: the region usage the analysis computed. The set row is written even when there were no
+/// regions, so "no region table" stays apart from "stored before this version".
+fn write_regions(
+    tx: &rusqlite::Transaction<'_>,
+    build_id: &str,
+    snapshot: &BuildSnapshot,
+) -> Result<(), StorageError> {
+    let Some(memory) = snapshot.memory() else {
+        return Ok(());
+    };
+    tx.execute(
+        "INSERT INTO region_usage_sets (build_id, layout_source, region_count) VALUES (?1, ?2, ?3)",
+        params![
+            build_id,
+            memory.layout_source.as_label(),
+            memory.region_usage.len() as i64
+        ],
+    )
+    .map_err(write_err)?;
+    let mut stmt = tx
+        .prepare(
+            "INSERT INTO region_usage
+                 (build_id, ordinal, name, kind, origin, capacity_bytes, used_bytes, state, risk,
+                  evidence_source, reasons)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",
+        )
+        .map_err(write_err)?;
+    for (ordinal, region) in memory.region_usage.iter().enumerate() {
+        stmt.execute(params![
+            build_id,
+            ordinal as i64,
+            region.name,
+            region_kind_label(region.kind),
+            region.origin as i64,
+            // A value too large for SQLite's integer is not one this store can keep: Unknown, never a
+            // wrapped negative number.
+            region.capacity_bytes.and_then(|v| i64::try_from(v).ok()),
+            region.used_bytes.and_then(|v| i64::try_from(v).ok()),
+            region_state_label(region.state),
+            region_risk_label(region.risk),
+            region.evidence_source,
+            (!region.reasons.is_empty()).then(|| region.reasons.join("\n")),
+        ])
+        .map_err(write_err)?;
+    }
+    Ok(())
+}
+
+const fn region_kind_label(kind: RegionKind) -> &'static str {
+    match kind {
+        RegionKind::Nonvolatile => "nonvolatile",
+        RegionKind::VolatileRam => "volatile_ram",
+        RegionKind::Unknown => "unknown",
+    }
+}
+
+const fn region_state_label(state: RegionUsageState) -> &'static str {
+    match state {
+        RegionUsageState::Exact => "exact",
+        RegionUsageState::Partial => "partial",
+        RegionUsageState::Unknown => "unknown",
+    }
+}
+
+const fn region_risk_label(risk: RegionUsageRisk) -> &'static str {
+    match risk {
+        RegionUsageRisk::WithinCapacity => "within_capacity",
+        RegionUsageRisk::Exceeded => "exceeded",
+        RegionUsageRisk::Review => "review",
+        RegionUsageRisk::Unknown => "unknown",
+    }
+}
+
 pub(crate) fn write_err(source: rusqlite::Error) -> StorageError {
     StorageError::Write {
         detail: source.to_string(),

@@ -18,6 +18,15 @@ last_updated: "2026-09-28"
   - `fwsight gate --junit FILE` writes the Gate as a JUnit suite, one test case per rule: BLOCK fails, while REVIEW and N/A are skipped with the reason.
   - `--summary-md FILE` on `gate` and `diff` writes a short PR comment: the verdict, the Flash/RAM change and the largest object movers.
   - A composite GitHub Action at the repository root downloads the CLI and verifies its provenance attestation before running it. It writes the job summary and can keep one PR comment up to date. Recipes for GitHub Actions and GitLab, and a pre-push hook, are in `docs/ci/`.
+- **Trends (History, ADR-0041).** History opens on a new Trends tab with three views:
+  - Flash and RAM across the stored builds, with the pinned baseline and release records marked;
+  - the headroom left in each linker region;
+  - the five objects that moved most.
+
+  A build whose total is Unknown is a gap, a partial total is labelled "at least", and a build stored before this version reads as Unknown for region usage, never as zero. Select two builds to compare them.
+- **Region usage is stored (migration 0009).** Each build now keeps its per-region capacity and usage. The migration is additive with no backfill.
+- **Overview after a restart.** When nothing has been analyzed yet in this session, Overview names the most recently stored build and its last stored Gate verdict, labelled as history.
+- **`fwsight analyze --record` (ADR-0042).** Stores the analysis in the desktop's local store so it appears in History. It is opt-in, with `--store FILE` for another store. The desktop and the CLI store the same build only once, even when both write it at the same moment.
 - **Markdown exports.** The analysis Markdown from the desktop gains a Composition section. The comparison Markdown, from the desktop and `fwsight diff --markdown`, gains the waterfall.
 
 ## 0.8.0 — 2026-10-18 (public release)

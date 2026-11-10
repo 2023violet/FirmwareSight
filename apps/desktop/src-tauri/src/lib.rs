@@ -48,6 +48,7 @@ pub mod release;
 pub mod service;
 pub mod startup;
 pub mod support;
+pub mod trend;
 
 use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
@@ -82,8 +83,10 @@ const P0_PROJECT_NAME: &str = "FirmwareSight P0";
 /// analyzes files that belong to nobody but the person who chose them, and filing those under a
 /// label that says "P0" would be a claim about the data that is not true. No schema change: the
 /// same `projects.id`/`projects.name` columns, a different value.
-pub const LOCAL_PROJECT_ID: &str = "local-desktop";
-pub const LOCAL_PROJECT_NAME: &str = "Local analyses";
+// Defined once in `firmwaresight-storage`, so `fwsight analyze --record` files builds where History reads
+// them (ADR-0042 D2).
+pub const LOCAL_PROJECT_ID: &str = firmwaresight_storage::LOCAL_PROJECT_ID;
+pub const LOCAL_PROJECT_NAME: &str = firmwaresight_storage::LOCAL_PROJECT_NAME;
 
 /// A file the user chose, plus the optional MAP attached to it. Paths live here and nowhere else:
 /// the WebView sees the [`SelectionDto`] projection, which carries names only.
@@ -763,16 +766,11 @@ impl Session {
         project_name: &str,
         operation_id: &str,
     ) -> Result<(), ErrorEnvelopeDto> {
-        let db = self.lock_db(operation_id)?;
-        if db
-            .build_id_for_snapshot(analysis.snapshot.id().as_str())
-            .map_err(|err| envelope_from_storage(&err, operation_id))?
-            .is_none()
-        {
-            let mut db = db;
-            db.import_snapshot(project_id, project_name, &analysis.snapshot)
-                .map_err(|err| envelope_from_storage(&err, operation_id))?;
-        }
+        // One IMMEDIATE transaction checks and imports (ADR-0042 D3), so `fwsight analyze --record` writing
+        // the same build to the same store at the same moment cannot make this import fail.
+        self.lock_db(operation_id)?
+            .record_snapshot(project_id, project_name, &analysis.snapshot)
+            .map_err(|err| envelope_from_storage(&err, operation_id))?;
         self.lock_analyses(operation_id)?.hold(&analysis.snapshot);
         Ok(())
     }
@@ -1699,6 +1697,7 @@ pub fn run() {
             history::list_history_builds,
             history::list_history_gate_runs,
             history::list_history_releases,
+            trend::query_history_trend,
             baseline::get_baseline_pin,
             baseline::pin_baseline,
             baseline::unpin_baseline,

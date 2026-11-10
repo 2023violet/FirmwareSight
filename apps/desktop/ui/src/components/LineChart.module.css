@@ -1,0 +1,115 @@
+/*
+ * History trend charts (ADR-0041 D4). Tokens only. The line is the chart ramp's strongest blue; Unknown
+ * is a dashed neutral guide, never a point at zero; a floor (partial total) is a hollow point.
+ */
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.spark {
+  display: block;
+  width: calc(var(--fs-space-16) * 2.5);
+  height: var(--fs-space-8);
+  overflow: visible;
+}
+
+.axis {
+  stroke: var(--fs-color-border-default);
+  stroke-width: var(--fs-border-width-hairline);
+  vector-effect: non-scaling-stroke;
+}
+
+.line {
+  fill: none;
+  stroke: var(--fs-color-chart-blue-5);
+  stroke-width: var(--fs-icon-stroke);
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.gap {
+  stroke: var(--fs-color-status-unknown);
+  stroke-width: var(--fs-border-width-hairline);
+  stroke-dasharray: var(--fs-space-1) var(--fs-space-1);
+  vector-effect: non-scaling-stroke;
+}
+
+.mark {
+  stroke: var(--fs-color-text-secondary);
+  stroke-width: var(--fs-border-width-hairline);
+  stroke-dasharray: var(--fs-border-width-hairline) var(--fs-space-1);
+  vector-effect: non-scaling-stroke;
+}
+
+.markLabel {
+  fill: var(--fs-color-text-secondary);
+  font-family: var(--fs-font-mono);
+  font-size: var(--fs-font-size-metadata);
+}
+
+.capacity {
+  fill: none;
+  stroke: var(--fs-color-text-secondary);
+  stroke-width: var(--fs-border-width-hairline);
+  stroke-dasharray: var(--fs-space-2) var(--fs-space-1);
+  vector-effect: non-scaling-stroke;
+}
+
+.point {
+  fill: var(--fs-color-chart-blue-5);
+  stroke: var(--fs-color-bg-surface);
+  stroke-width: var(--fs-border-width-hairline);
+  cursor: pointer;
+  vector-effect: non-scaling-stroke;
+}
+
+.floor {
+  fill: var(--fs-color-bg-surface);
+  stroke: var(--fs-color-chart-blue-5);
+}
+
+.selected {
+  stroke: var(--fs-color-text-primary);
+  stroke-width: var(--fs-focus-ring-width);
+}
+
+.focused {
+  stroke: var(--fs-color-accent-primary);
+  stroke-width: var(--fs-focus-ring-width);
+}
+
+.sparkPoint {
+  fill: var(--fs-color-chart-blue-5);
+}
+
+@media (forced-colors: active) {
+  .line,
+  .point,
+  .sparkPoint {
+    stroke: CanvasText;
+  }
+
+  .point,
+  .sparkPoint {
+    fill: CanvasText;
+  }
+
+  .floor {
+    fill: Canvas;
+  }
+
+  .gap,
+  .mark,
+  .capacity,
+  .axis {
+    stroke: GrayText;
+  }
+
+  .markLabel {
+    fill: CanvasText;
+  }
+}

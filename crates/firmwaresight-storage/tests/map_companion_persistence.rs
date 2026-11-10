@@ -334,6 +334,8 @@ fn closing_the_identity_gap_adds_no_schema_version_and_no_migration() {
             (7, "0007_object_contributions".to_owned()),
             // 0008 is R5's baseline pin log (D3), named for the same reason.
             (8, "0008_baseline_pins".to_owned()),
+            // 0009 is D8's per-region usage (ADR-0041).
+            (9, "0009_region_usage".to_owned()),
         ],
         "every migration belongs to a named stage, and none of them is the identity closure's"
     );

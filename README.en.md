@@ -134,6 +134,16 @@ The repository root is a GitHub Action. It downloads the CLI and verifies its bu
 
 The CLI has two new exports for this: `gate --junit` writes a JUnit report that GitHub, GitLab and Jenkins can show, and `gate` / `diff --summary-md` writes a short PR summary. A GitLab recipe and a pre-push hook are in [docs/ci](docs/ci/README.md).
 
+### Trends and history (from v0.9.0)
+
+The desktop's History page opens on **Trends**: Flash and RAM drawn across every stored build, the headroom left in each linker region, and the objects that moved most. A build whose total is Unknown is a gap in the line, never a zero. Region usage of builds stored before this version reads as Unknown.
+
+The CLI can write to the same local history (it does not by default):
+
+```bash
+fwsight analyze build/app.elf --map build/app.map --record
+```
+
 ## Principles
 
 - **Local first.** No network access, no telemetry, no auto-update. History is kept in a local SQLite database.

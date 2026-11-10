@@ -58,6 +58,7 @@ import type {
   GateRunDto,
   ProjectContextDto,
   SelectionDto,
+  TrendPointDto,
 } from './ipc/types';
 import {
   capabilityState,
@@ -186,6 +187,7 @@ export function Overview({
   comparison = null,
   unit,
   onOpen,
+  lastStored = null,
 }: {
   readonly summary: AnalysisSummaryDto | null;
   readonly selection: SelectionDto | null;
@@ -197,6 +199,12 @@ export function Overview({
   readonly comparison?: CompareSummaryDto | null;
   readonly unit: SizeUnit;
   readonly onOpen: (target: OverviewTarget) => void;
+  /**
+   * The newest build in the store (ADR-0041 D5), read once at start. Shown only while this session has
+   * analyzed nothing, and labelled as history: it is a stored fact, never the build the ship question is
+   * about.
+   */
+  readonly lastStored?: TrendPointDto | null;
 }) {
   // One derivation, three surfaces: the subject, the input band and the figures all answer to the same
   // question, and §4.I is the reason the top of the page cannot keep naming the retained artifact whenever it
@@ -299,6 +307,7 @@ export function Overview({
       )}
 
       {leadWithIntake ? intake : readiness}
+      {summary === null && lastStored !== null ? <LastStored point={lastStored} unit={unit} onOpen={onOpen} /> : null}
       {leadWithIntake ? readiness : intake}
 
       {summary === null || pending !== null ? null : <Facts summary={summary} unit={unit} />}
@@ -309,6 +318,54 @@ export function Overview({
         <LatestComparison comparison={comparison} unit={unit} onOpen={onOpen} />
       )}
     </Page>
+  );
+}
+
+/**
+ * The newest stored build, after a restart (ADR-0041 D5). Every value is the stored one; nothing here feeds
+ * the ship question, which still needs an analysis in this session.
+ */
+function LastStored({
+  point,
+  unit,
+  onOpen,
+}: {
+  readonly point: TrendPointDto;
+  readonly unit: SizeUnit;
+  readonly onOpen: (target: OverviewTarget) => void;
+}) {
+  const { t } = useI18n();
+  const size = (bytes: number | null, state: string) =>
+    bytes === null
+      ? t('common', 'overview.lastStored.unknown')
+      : state === 'partial'
+        ? t('common', 'overview.lastStored.floor', { size: formatSize(bytes, unit) })
+        : formatSize(bytes, unit);
+  const gate = point.gate;
+  return (
+    <Panel
+      title={t('common', 'overview.lastStored.title')}
+      hint={<span className={styles['inputDetail']}>{t('common', 'overview.lastStored.hint')}</span>}
+    >
+      <p className={styles['inputDetail']}>
+        {t('common', 'overview.lastStored.line', {
+          file: point.fileName,
+          stored: point.storedAt,
+          flash: size(point.flash.bytes, point.flash.state),
+          ram: size(point.ram.bytes, point.ram.state),
+        })}
+      </p>
+      <p className={styles['inputDetail']}>
+        {gate === 'PASS' || gate === 'REVIEW' || gate === 'BLOCK' ? (
+          <StateBadge state={gate} label={t('common', 'overview.lastStored.gate', { verdict: gate })} />
+        ) : (
+          t('common', 'overview.lastStored.noGate')
+        )}
+      </p>
+      <div>
+        <Button onClick={() => onOpen('history')}>{t('common', 'overview.lastStored.open')}</Button>
+      </div>
+    </Panel>
   );
 }
 

@@ -344,6 +344,36 @@ describe('Overview before there is anything to overview', () => {
   });
 });
 
+describe('Overview after a restart (ADR-0041 D5)', () => {
+  const stored = {
+    buildId: 'build-9',
+    snapshotId: 'snap-9',
+    fileName: 'stored.elf',
+    storedAt: '2026-11-08T09:00:00Z',
+    flash: { state: 'exact', bytes: 2048, delta: null },
+    ram: { state: 'unknown', bytes: null, delta: null },
+    gate: 'BLOCK',
+    releases: [],
+    pinned: false,
+    regions: 'recorded',
+  };
+
+  it('names the newest stored build as history, with Unknown kept Unknown, and opens History', () => {
+    const onOpen = vi.fn<(target: OverviewTarget) => void>();
+    render(
+      <Overview summary={null} selection={null} analyzedSelectionId={null} gateRun={null} project={null} unit="bytes" onOpen={onOpen} lastStored={stored} />,
+      { language: 'en' },
+    );
+    const panel = screen.getByRole('region', { name: 'Last stored build' });
+    expect(within(panel).getByText('stored.elf · stored 2026-11-08T09:00:00Z · Flash 2,048 bytes · RAM Unknown')).toBeDefined();
+    expect(within(panel).getByText('Last stored Gate verdict: BLOCK')).toBeDefined();
+    // A stored verdict is not this session's answer: the ship question still says no run was made here.
+    expect(screen.getByText(/has not run the gate in this session/)).toBeDefined();
+    fireEvent.click(within(panel).getByRole('button', { name: 'Open History' }));
+    expect(onOpen).toHaveBeenCalledWith('history');
+  });
+});
+
 describe('Overview with a real analysis and a real run', () => {
   it('names each input capability with a word and a glyph, never colour alone', () => {
     const { container } = render(
