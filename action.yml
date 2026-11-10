@@ -136,6 +136,9 @@ runs:
         FS_BASELINE_MAP: ${{ inputs.baseline-map }}
         FS_PROJECT: ${{ inputs.project }}
       run: |
+        # GitHub runs `shell: bash` as `bash -eo pipefail`. The Gate's non-zero exit (4, 5, or an error)
+        # is an answer this step must record, not a reason to stop, so -e is turned off here.
+        set +e
         set -uo pipefail
         out="$(mktemp -d "$RUNNER_TEMP/firmwaresight-XXXXXX")"
         gate=(gate --project "$FS_PROJECT" --artifact "$FS_ARTIFACT")
